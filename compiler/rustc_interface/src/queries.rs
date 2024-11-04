@@ -3,8 +3,8 @@ use std::cell::{RefCell, RefMut};
 use std::sync::Arc;
 
 use rustc_ast as ast;
-use rustc_codegen_ssa::traits::CodegenBackend;
 use rustc_codegen_ssa::CodegenResults;
+use rustc_codegen_ssa::traits::CodegenBackend;
 use rustc_data_structures::steal::Steal;
 use rustc_data_structures::svh::Svh;
 use rustc_data_structures::sync::{OnceLock, WorkerLocal};
@@ -13,8 +13,8 @@ use rustc_middle::arena::Arena;
 use rustc_middle::dep_graph::DepGraph;
 use rustc_middle::ty::{GlobalCtxt, TyCtxt};
 use rustc_serialize::opaque::FileEncodeResult;
-use rustc_session::config::{self, OutputFilenames, OutputType};
 use rustc_session::Session;
+use rustc_session::config::{self, OutputFilenames, OutputType};
 
 use crate::errors::FailedWritingFile;
 use crate::interface::{Compiler, Result};
@@ -142,7 +142,7 @@ impl Linker {
 
         Ok(Linker {
             dep_graph: tcx.dep_graph.clone(),
-            output_filenames: tcx.output_filenames(()).clone(),
+            output_filenames: Arc::clone(tcx.output_filenames(())),
             crate_hash: if tcx.needs_crate_hash() {
                 Some(tcx.crate_hash(LOCAL_CRATE))
             } else {

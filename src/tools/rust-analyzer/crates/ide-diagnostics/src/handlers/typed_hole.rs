@@ -3,13 +3,13 @@ use hir::{
     term_search::{term_search, TermSearchConfig, TermSearchCtx},
     ClosureStyle, HirDisplay, ImportPathConfig,
 };
+use ide_db::text_edit::TextEdit;
 use ide_db::{
     assists::{Assist, AssistId, AssistKind, GroupLabel},
     label::Label,
     source_change::SourceChange,
 };
 use itertools::Itertools;
-use text_edit::TextEdit;
 
 use crate::{Diagnostic, DiagnosticCode, DiagnosticsContext};
 
@@ -400,6 +400,28 @@ fn f() {
     f()
 }"#,
             ],
+        );
+    }
+
+    #[test]
+    fn underscore_in_asm() {
+        check_diagnostics(
+            r#"
+//- minicore: asm
+fn rdtscp() -> u64 {
+    let hi: u64;
+    let lo: u64;
+    unsafe {
+        core::arch::asm!(
+            "rdtscp",
+            out("rdx") hi,
+            out("rax") lo,
+            out("rcx") _,
+            options(nomem, nostack, preserves_flags)
+        );
+    }
+    (hi << 32) | lo
+}"#,
         );
     }
 }

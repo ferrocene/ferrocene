@@ -1,7 +1,7 @@
 use rustc_data_structures::fx::FxHashSet;
 use rustc_hir as hir;
-use rustc_hir::def::DefKind;
 use rustc_hir::LangItem;
+use rustc_hir::def::DefKind;
 use rustc_index::bit_set::BitSet;
 use rustc_middle::bug;
 use rustc_middle::query::Providers;
@@ -9,8 +9,8 @@ use rustc_middle::ty::{
     self, EarlyBinder, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable, TypeVisitableExt,
     TypeVisitor, Upcast,
 };
-use rustc_span::def_id::{DefId, LocalDefId, CRATE_DEF_ID};
 use rustc_span::DUMMY_SP;
+use rustc_span::def_id::{CRATE_DEF_ID, DefId, LocalDefId};
 use rustc_trait_selection::traits;
 use tracing::{debug, instrument};
 
@@ -148,6 +148,16 @@ fn param_env(tcx: TyCtxt<'_>, def_id: DefId) -> ty::ParamEnv<'_> {
             seen: FxHashSet::default(),
             depth: ty::INNERMOST,
         });
+    }
+
+    // We extend the param-env of our item with the const conditions of the item,
+    // since we're allowed to assume `~const` bounds hold within the item itself.
+    if tcx.is_conditionally_const(def_id) {
+        predicates.extend(
+            tcx.const_conditions(def_id).instantiate_identity(tcx).into_iter().map(
+                |(trait_ref, _)| trait_ref.to_host_effect_clause(tcx, ty::BoundConstness::Maybe),
+            ),
+        );
     }
 
     let local_did = def_id.as_local();

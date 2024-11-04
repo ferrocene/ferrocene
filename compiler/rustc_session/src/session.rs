@@ -2,9 +2,9 @@ use std::any::Any;
 use std::ops::{Div, Mul};
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
+use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering::SeqCst;
-use std::sync::Arc;
 use std::{env, fmt, io};
 
 use rustc_data_structures::flock;
@@ -16,12 +16,12 @@ use rustc_data_structures::sync::{
 };
 use rustc_errors::annotate_snippet_emitter_writer::AnnotateSnippetEmitter;
 use rustc_errors::codes::*;
-use rustc_errors::emitter::{stderr_destination, DynEmitter, HumanEmitter, HumanReadableErrorType};
+use rustc_errors::emitter::{DynEmitter, HumanEmitter, HumanReadableErrorType, stderr_destination};
 use rustc_errors::json::JsonEmitter;
 use rustc_errors::registry::Registry;
 use rustc_errors::{
-    fallback_fluent_bundle, Diag, DiagCtxt, DiagCtxtHandle, DiagMessage, Diagnostic,
-    ErrorGuaranteed, FatalAbort, FluentBundle, LazyFallbackBundle, TerminalUrl,
+    Diag, DiagCtxt, DiagCtxtHandle, DiagMessage, Diagnostic, ErrorGuaranteed, FatalAbort,
+    FluentBundle, LazyFallbackBundle, TerminalUrl, fallback_fluent_bundle,
 };
 use rustc_macros::HashStable_Generic;
 pub use rustc_span::def_id::StableCrateId;
@@ -31,7 +31,8 @@ use rustc_span::{FileNameDisplayPreference, RealFileName, Span, Symbol};
 use rustc_target::asm::InlineAsmArch;
 use rustc_target::spec::{
     CodeModel, DebuginfoKind, PanicStrategy, RelocModel, RelroLevel, SanitizerSet,
-    SmallDataThresholdSupport, SplitDebuginfo, StackProtector, Target, TargetTriple, TlsModel,
+    SmallDataThresholdSupport, SplitDebuginfo, StackProtector, SymbolVisibility, Target,
+    TargetTuple, TlsModel,
 };
 
 use crate::code_stats::CodeStats;
@@ -41,7 +42,7 @@ use crate::config::{
     InstrumentCoverage, OptLevel, OutFileName, OutputType, RemapPathScopeComponents,
     SwitchWithOptPath,
 };
-use crate::parse::{add_feature_diagnostics, ParseSess};
+use crate::parse::{ParseSess, add_feature_diagnostics};
 use crate::search_paths::{PathKind, SearchPath};
 use crate::{errors, filesearch, lint};
 
@@ -450,10 +451,12 @@ impl Session {
     /// directories are also returned, for example if `--sysroot` is used but tools are missing
     /// (#125246): we also add the bin directories to the sysroot where rustc is located.
     pub fn get_tools_search_paths(&self, self_contained: bool) -> Vec<PathBuf> {
-        let bin_path = filesearch::make_target_bin_path(&self.sysroot, config::host_triple());
+        let bin_path = filesearch::make_target_bin_path(&self.sysroot, config::host_tuple());
         let fallback_sysroot_paths = filesearch::sysroot_candidates()
             .into_iter()
-            .map(|sysroot| filesearch::make_target_bin_path(&sysroot, config::host_triple()));
+            // Ignore sysroot candidate if it was the same as the sysroot path we just used.
+            .filter(|sysroot| *sysroot != self.sysroot)
+            .map(|sysroot| filesearch::make_target_bin_path(&sysroot, config::host_tuple()));
         let search_paths = std::iter::once(bin_path).chain(fallback_sysroot_paths);
 
         if self_contained {
@@ -617,12 +620,13 @@ impl Session {
         }
     }
 
-    /// Whether the default visibility of symbols should be "hidden" rather than "default".
-    pub fn default_hidden_visibility(&self) -> bool {
+    /// Returns the default symbol visibility.
+    pub fn default_visibility(&self) -> SymbolVisibility {
         self.opts
             .unstable_opts
-            .default_hidden_visibility
-            .unwrap_or(self.target.options.default_hidden_visibility)
+            .default_visibility
+            .or(self.target.options.default_visibility)
+            .unwrap_or(SymbolVisibility::Interposable)
     }
 }
 
@@ -1019,7 +1023,7 @@ pub fn build_session(
     let cap_lints_allow = sopts.lint_cap.is_some_and(|cap| cap == lint::Allow);
     let can_emit_warnings = !(warnings_allow || cap_lints_allow);
 
-    let host_triple = TargetTriple::from_triple(config::host_triple());
+    let host_triple = TargetTuple::from_tuple(config::host_tuple());
     let (host, target_warnings) = Target::search(&host_triple, &sysroot).unwrap_or_else(|e| {
         early_dcx.early_fatal(format!("Error loading host specification: {e}"))
     });
@@ -1032,7 +1036,8 @@ pub fn build_session(
         sopts.unstable_opts.translate_directionality_markers,
     );
     let source_map = rustc_span::source_map::get_source_map().unwrap();
-    let emitter = default_emitter(&sopts, registry, source_map.clone(), bundle, fallback_bundle);
+    let emitter =
+        default_emitter(&sopts, registry, Lrc::clone(&source_map), bundle, fallback_bundle);
 
     let mut dcx =
         DiagCtxt::new(emitter).with_flags(sopts.unstable_opts.dcx_flags(can_emit_warnings));
@@ -1069,13 +1074,13 @@ pub fn build_session(
     let mut psess = ParseSess::with_dcx(dcx, source_map);
     psess.assume_incomplete_release = sopts.unstable_opts.assume_incomplete_release;
 
-    let host_triple = config::host_triple();
-    let target_triple = sopts.target_triple.triple();
+    let host_triple = config::host_tuple();
+    let target_triple = sopts.target_triple.tuple();
     let host_tlib_path = Lrc::new(SearchPath::from_sysroot_and_triple(&sysroot, host_triple));
     let target_tlib_path = if host_triple == target_triple {
         // Use the same `SearchPath` if host and target triple are identical to avoid unnecessary
         // rescanning of the target lib path and an unnecessary allocation.
-        host_tlib_path.clone()
+        Lrc::clone(&host_tlib_path)
     } else {
         Lrc::new(SearchPath::from_sysroot_and_triple(&sysroot, target_triple))
     };
@@ -1330,6 +1335,15 @@ fn validate_commandline_args_with_session_available(sess: &Session) {
     if sess.opts.unstable_opts.function_return != FunctionReturn::default() {
         if sess.target.arch != "x86" && sess.target.arch != "x86_64" {
             sess.dcx().emit_err(errors::FunctionReturnRequiresX86OrX8664);
+        }
+    }
+
+    if let Some(regparm) = sess.opts.unstable_opts.regparm {
+        if regparm > 3 {
+            sess.dcx().emit_err(errors::UnsupportedRegparm { regparm });
+        }
+        if sess.target.arch != "x86" {
+            sess.dcx().emit_err(errors::UnsupportedRegparmArch);
         }
     }
 

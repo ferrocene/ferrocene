@@ -1,6 +1,6 @@
+use crate::ClippyConfiguration;
 use crate::msrvs::Msrv;
 use crate::types::{DisallowedPath, MacroMatcher, MatchLintBehaviour, PubUnderscoreFieldsBehaviour, Rename};
-use crate::ClippyConfiguration;
 use rustc_errors::Applicability;
 use rustc_session::Session;
 use rustc_span::edit_distance::edit_distance;
@@ -95,6 +95,30 @@ impl ConfError {
             ),
         }
     }
+}
+
+// Remove code tags and code behind '# 's, as they are not needed for the lint docs and --explain
+pub fn sanitize_explanation(raw_docs: &str) -> String {
+    // Remove tags and hidden code:
+    let mut explanation = String::with_capacity(128);
+    let mut in_code = false;
+    for line in raw_docs.lines().map(str::trim) {
+        if let Some(lang) = line.strip_prefix("```") {
+            let tag = lang.split_once(',').map_or(lang, |(left, _)| left);
+            if !in_code && matches!(tag, "" | "rust" | "ignore" | "should_panic" | "no_run" | "compile_fail") {
+                explanation += "```rust\n";
+            } else {
+                explanation += line;
+                explanation.push('\n');
+            }
+            in_code = !in_code;
+        } else if !(in_code && line.starts_with("# ")) {
+            explanation += line;
+            explanation.push('\n');
+        }
+    }
+
+    explanation
 }
 
 macro_rules! wrap_option {
@@ -366,7 +390,7 @@ define_Conf! {
     arithmetic_side_effects_allowed_unary: Vec<String> = <_>::default(),
     /// The maximum allowed size for arrays on the stack
     #[lints(large_const_arrays, large_stack_arrays)]
-    array_size_threshold: u64 = 512_000,
+    array_size_threshold: u64 = 16 * 1024,
     /// Suppress lints whenever the suggested change would cause breakage for other crates.
     #[lints(
         box_collection,
@@ -378,6 +402,7 @@ define_Conf! {
         rc_buffer,
         rc_mutex,
         redundant_allocation,
+        ref_option,
         single_call_fn,
         trivially_copy_pass_by_ref,
         unnecessary_box_returns,
@@ -563,6 +588,7 @@ define_Conf! {
         uninlined_format_args,
         unnecessary_lazy_evaluations,
         unnested_or_patterns,
+        unused_trait_names,
         use_self,
     )]
     msrv: Msrv = Msrv::empty(),
@@ -864,7 +890,7 @@ fn calculate_dimensions(fields: &[&str]) -> (usize, Vec<usize>) {
             cmp::max(1, terminal_width / (SEPARATOR_WIDTH + max_field_width))
         });
 
-    let rows = (fields.len() + (columns - 1)) / columns;
+    let rows = fields.len().div_ceil(columns);
 
     let column_widths = (0..columns)
         .map(|column| {

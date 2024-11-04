@@ -1,5 +1,5 @@
 use clippy_utils::diagnostics::span_lint_and_sugg;
-use clippy_utils::source::{expr_block, snippet, SpanRangeExt};
+use clippy_utils::source::{SpanRangeExt, expr_block, snippet, snippet_block_with_context};
 use clippy_utils::ty::implements_trait;
 use clippy_utils::{
     is_lint_allowed, is_unit_expr, peel_blocks, peel_hir_pat_refs, peel_middle_ty_refs, peel_n_hir_expr_refs,
@@ -8,11 +8,11 @@ use core::ops::ControlFlow;
 use rustc_arena::DroplessArena;
 use rustc_errors::Applicability;
 use rustc_hir::def::{DefKind, Res};
-use rustc_hir::intravisit::{walk_pat, Visitor};
-use rustc_hir::{Arm, Expr, ExprKind, HirId, Pat, PatKind, QPath};
+use rustc_hir::intravisit::{Visitor, walk_pat};
+use rustc_hir::{Arm, Expr, ExprKind, HirId, Node, Pat, PatKind, QPath, StmtKind};
 use rustc_lint::LateContext;
-use rustc_middle::ty::{self, AdtDef, ParamEnv, TyCtxt, TypeckResults, VariantDef};
-use rustc_span::{sym, Span};
+use rustc_middle::ty::{self, AdtDef, TyCtxt, TypeckResults, VariantDef};
+use rustc_span::{Span, sym};
 
 use super::{MATCH_BOOL, SINGLE_MATCH, SINGLE_MATCH_ELSE};
 
@@ -67,7 +67,6 @@ pub(crate) fn check<'tcx>(cx: &LateContext<'tcx>, ex: &'tcx Expr<'_>, arms: &'tc
             if v.has_enum {
                 let cx = PatCtxt {
                     tcx: cx.tcx,
-                    param_env: cx.param_env,
                     typeck,
                     arena: DroplessArena::default(),
                 };
@@ -90,6 +89,29 @@ fn report_single_pattern(cx: &LateContext<'_>, ex: &Expr<'_>, arm: &Arm<'_>, exp
     let els_str = els.map_or(String::new(), |els| {
         format!(" else {}", expr_block(cx, els, ctxt, "..", Some(expr.span), &mut app))
     });
+
+    if snippet(cx, ex.span, "..") == snippet(cx, arm.pat.span, "..") {
+        let msg = "this pattern is irrefutable, `match` is useless";
+        let (sugg, help) = if is_unit_expr(arm.body) {
+            (String::new(), "`match` expression can be removed")
+        } else {
+            let mut sugg = snippet_block_with_context(cx, arm.body.span, ctxt, "..", Some(expr.span), &mut app)
+                .0
+                .to_string();
+            if let Node::Stmt(stmt) = cx.tcx.parent_hir_node(expr.hir_id)
+                && let StmtKind::Expr(_) = stmt.kind
+                && match arm.body.kind {
+                    ExprKind::Block(block, _) => block.span.from_expansion(),
+                    _ => true,
+                }
+            {
+                sugg.push(';');
+            }
+            (sugg, "try")
+        };
+        span_lint_and_sugg(cx, lint, expr.span, msg, help, sugg.to_string(), app);
+        return;
+    }
 
     let (pat, pat_ref_count) = peel_hir_pat_refs(arm.pat);
     let (msg, sugg) = if let PatKind::Path(_) | PatKind::Lit(_) = pat.kind
@@ -162,7 +184,6 @@ impl<'tcx> Visitor<'tcx> for PatVisitor<'tcx> {
 /// The context needed to manipulate a `PatState`.
 struct PatCtxt<'tcx> {
     tcx: TyCtxt<'tcx>,
-    param_env: ParamEnv<'tcx>,
     typeck: &'tcx TypeckResults<'tcx>,
     arena: DroplessArena,
 }
@@ -311,7 +332,7 @@ impl<'a> PatState<'a> {
                 if match *cx.typeck.pat_ty(pat).peel_refs().kind() {
                     ty::Adt(adt, _) => adt.is_enum() || (adt.is_struct() && !adt.non_enum_variant().fields.is_empty()),
                     ty::Tuple(tys) => !tys.is_empty(),
-                    ty::Array(_, len) => len.try_eval_target_usize(cx.tcx, cx.param_env) != Some(1),
+                    ty::Array(_, len) => len.try_to_target_usize(cx.tcx) != Some(1),
                     ty::Slice(..) => true,
                     _ => false,
                 } =>
@@ -330,7 +351,7 @@ impl<'a> PatState<'a> {
             },
             PatKind::Slice([sub_pat], _, []) | PatKind::Slice([], _, [sub_pat])
                 if let ty::Array(_, len) = *cx.typeck.pat_ty(pat).kind()
-                    && len.try_eval_target_usize(cx.tcx, cx.param_env) == Some(1) =>
+                    && len.try_to_target_usize(cx.tcx) == Some(1) =>
             {
                 self.add_pat(cx, sub_pat)
             },

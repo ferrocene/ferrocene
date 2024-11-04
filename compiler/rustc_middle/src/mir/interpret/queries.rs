@@ -1,7 +1,7 @@
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_session::lint;
-use rustc_span::{Span, DUMMY_SP};
+use rustc_span::{DUMMY_SP, Span};
 use tracing::{debug, instrument};
 
 use super::{
@@ -116,7 +116,7 @@ impl<'tcx> TyCtxt<'tcx> {
                     // @lcnr believes that successfully evaluating even though there are
                     // used generic parameters is a bug of evaluation, so checking for it
                     // here does feel somewhat sensible.
-                    if !self.features().generic_const_exprs && ct.args.has_non_region_param() {
+                    if !self.features().generic_const_exprs() && ct.args.has_non_region_param() {
                         let def_kind = self.def_kind(instance.def_id());
                         assert!(
                             matches!(

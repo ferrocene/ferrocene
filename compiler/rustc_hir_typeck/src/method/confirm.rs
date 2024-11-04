@@ -1,8 +1,8 @@
 use std::ops::Deref;
 
 use rustc_hir as hir;
-use rustc_hir::def_id::DefId;
 use rustc_hir::GenericArg;
+use rustc_hir::def_id::DefId;
 use rustc_hir_analysis::hir_ty_lowering::generics::{
     check_generic_arg_count_for_call, lower_generic_args,
 };
@@ -20,12 +20,12 @@ use rustc_middle::ty::{
     UserType,
 };
 use rustc_middle::{bug, span_bug};
-use rustc_span::{Span, DUMMY_SP};
+use rustc_span::{DUMMY_SP, Span};
 use rustc_trait_selection::traits;
 use tracing::debug;
 
-use super::{probe, MethodCallee};
-use crate::{callee, FnCtxt};
+use super::{MethodCallee, probe};
+use crate::{FnCtxt, callee};
 
 struct ConfirmContext<'a, 'tcx> {
     fcx: &'a FnCtxt<'a, 'tcx>,
@@ -200,10 +200,8 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
                 // for two-phase borrows.
                 let mutbl = AutoBorrowMutability::new(mutbl, AllowTwoPhase::Yes);
 
-                adjustments.push(Adjustment {
-                    kind: Adjust::Borrow(AutoBorrow::Ref(region, mutbl)),
-                    target,
-                });
+                adjustments
+                    .push(Adjustment { kind: Adjust::Borrow(AutoBorrow::Ref(mutbl)), target });
 
                 if unsize {
                     let unsized_ty = if let ty::Array(elem_ty, _) = base_ty.kind() {
@@ -234,6 +232,23 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
                     kind: Adjust::Pointer(PointerCoercion::MutToConstPointer),
                     target,
                 });
+            }
+
+            Some(probe::AutorefOrPtrAdjustment::ReborrowPin(mutbl)) => {
+                let region = self.next_region_var(infer::Autoref(self.span));
+
+                target = match target.kind() {
+                    ty::Adt(pin, args) if self.tcx.is_lang_item(pin.did(), hir::LangItem::Pin) => {
+                        let inner_ty = match args[0].expect_ty().kind() {
+                            ty::Ref(_, ty, _) => *ty,
+                            _ => bug!("Expected a reference type for argument to Pin"),
+                        };
+                        Ty::new_pinned_ref(self.tcx, region, inner_ty, mutbl)
+                    }
+                    _ => bug!("Cannot adjust receiver type for reborrowing pin of {target:?}"),
+                };
+
+                adjustments.push(Adjustment { kind: Adjust::ReborrowPin(mutbl), target });
             }
             None => {}
         }
@@ -292,7 +307,7 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
                     // distinct types (e.g., if `Self` appeared as an
                     // argument type), but those cases have already
                     // been ruled out when we deemed the trait to be
-                    // "object safe".
+                    // "dyn-compatible".
                     let original_poly_trait_ref = principal.with_self_ty(this.tcx, object_ty);
                     let upcast_poly_trait_ref = this.upcast(original_poly_trait_ref, trait_def_id);
                     let upcast_trait_ref =
@@ -516,18 +531,21 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
                 self.register_predicates(obligations);
             }
             Err(terr) => {
-                // FIXME(arbitrary_self_types): We probably should limit the
-                // situations where this can occur by adding additional restrictions
-                // to the feature, like the self type can't reference method args.
-                if self.tcx.features().arbitrary_self_types {
+                if self.tcx.features().arbitrary_self_types() {
                     self.err_ctxt()
-                        .report_mismatched_types(&cause, method_self_ty, self_ty, terr)
+                        .report_mismatched_types(
+                            &cause,
+                            self.param_env,
+                            method_self_ty,
+                            self_ty,
+                            terr,
+                        )
                         .emit();
                 } else {
                     // This has/will have errored in wfcheck, which we cannot depend on from here, as typeck on functions
                     // may run before wfcheck if the function is used in const eval.
                     self.dcx().span_delayed_bug(
-                        cause.span(),
+                        cause.span,
                         format!("{self_ty} was a subtype of {method_self_ty} but now is not?"),
                     );
                 }

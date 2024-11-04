@@ -1,4 +1,5 @@
 use hir::HirId;
+use rustc_abi::Primitive::Pointer;
 use rustc_errors::codes::*;
 use rustc_errors::struct_span_code_err;
 use rustc_hir as hir;
@@ -6,7 +7,7 @@ use rustc_index::Idx;
 use rustc_middle::bug;
 use rustc_middle::ty::layout::{LayoutError, SizeSkeleton};
 use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitableExt};
-use rustc_target::abi::{Pointer, VariantIdx};
+use rustc_target::abi::VariantIdx;
 use tracing::trace;
 
 use super::FnCtxt;
@@ -95,13 +96,15 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     format!("{v} bits")
                 } else {
                     // `u128` should definitely be able to hold the size of different architectures
-                    // larger sizes should be reported as error `are too big for the current architecture`
+                    // larger sizes should be reported as error `are too big for the target architecture`
                     // otherwise we have a bug somewhere
                     bug!("{:?} overflow for u128", size)
                 }
             }
             Ok(SizeSkeleton::Generic(size)) => {
-                if let Some(size) = size.try_eval_target_usize(tcx, self.param_env) {
+                if let Some(size) =
+                    self.try_structurally_resolve_const(span, size).try_to_target_usize(tcx)
+                {
                     format!("{size} bytes")
                 } else {
                     format!("generic size {size}")

@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 use std::any::{type_name, Any};
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeSet;

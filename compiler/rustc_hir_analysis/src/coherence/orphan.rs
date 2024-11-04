@@ -7,7 +7,7 @@ use rustc_infer::infer::{InferCtxt, TyCtxtInferExt};
 use rustc_lint_defs::builtin::UNCOVERED_PARAM_IN_PROJECTION;
 use rustc_middle::ty::{
     self, Ty, TyCtxt, TypeFoldable, TypeFolder, TypeSuperFoldable, TypeSuperVisitable,
-    TypeVisitable, TypeVisitableExt, TypeVisitor,
+    TypeVisitable, TypeVisitableExt, TypeVisitor, TypingMode,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_span::def_id::{DefId, LocalDefId};
@@ -109,16 +109,16 @@ pub(crate) fn orphan_check_impl(
         //
         //     auto trait AutoTrait {}
         //
-        //     trait ObjectSafeTrait {
+        //     trait DynCompatibleTrait {
         //         fn f(&self) where Self: AutoTrait;
         //     }
         //
-        // We can allow f to be called on `dyn ObjectSafeTrait + AutoTrait`.
+        // We can allow f to be called on `dyn DynCompatibleTrait + AutoTrait`.
         //
         // If we didn't deny `impl AutoTrait for dyn Trait`, it would be unsound
-        // for the ObjectSafeTrait shown above to be object safe because someone
-        // could take some type implementing ObjectSafeTrait but not AutoTrait,
-        // unsize it to `dyn ObjectSafeTrait`, and call .f() which has no
+        // for the `DynCompatibleTrait` shown above to be dyn-compatible because someone
+        // could take some type implementing `DynCompatibleTrait` but not `AutoTrait`,
+        // unsize it to `dyn DynCompatibleTrait`, and call `.f()` which has no
         // concrete implementation (issue #50781).
         enum LocalImpl {
             Allow,
@@ -302,7 +302,7 @@ fn orphan_check<'tcx>(
     }
 
     // (1)  Instantiate all generic params with fresh inference vars.
-    let infcx = tcx.infer_ctxt().intercrate(true).build();
+    let infcx = tcx.infer_ctxt().build(TypingMode::Coherence);
     let cause = traits::ObligationCause::dummy();
     let args = infcx.fresh_args_for_item(cause.span, impl_def_id.to_def_id());
     let trait_ref = trait_ref.instantiate(tcx, args);

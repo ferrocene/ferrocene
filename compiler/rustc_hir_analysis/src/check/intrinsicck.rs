@@ -1,14 +1,14 @@
 use std::assert_matches::debug_assert_matches;
 
+use rustc_abi::FieldIdx;
 use rustc_ast::InlineAsmTemplatePiece;
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_hir::{self as hir, LangItem};
 use rustc_middle::bug;
 use rustc_middle::ty::{self, FloatTy, IntTy, Ty, TyCtxt, TypeVisitableExt, UintTy};
 use rustc_session::lint;
-use rustc_span::def_id::LocalDefId;
 use rustc_span::Symbol;
-use rustc_target::abi::FieldIdx;
+use rustc_span::def_id::LocalDefId;
 use rustc_target::asm::{
     InlineAsmReg, InlineAsmRegClass, InlineAsmRegOrRegClass, InlineAsmType, ModifierInfo,
 };
@@ -76,9 +76,7 @@ impl<'a, 'tcx> InlineAsmCtxt<'a, 'tcx> {
 
                 let (size, ty) = match elem_ty.kind() {
                     ty::Array(ty, len) => {
-                        if let Some(len) =
-                            len.try_eval_target_usize(self.tcx, self.tcx.param_env(adt.did()))
-                        {
+                        if let Some(len) = len.try_to_target_usize(self.tcx) {
                             (len, *ty)
                         } else {
                             return None;

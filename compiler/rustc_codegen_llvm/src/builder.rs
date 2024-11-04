@@ -3,11 +3,13 @@ use std::ops::Deref;
 use std::{iter, ptr};
 
 use libc::{c_char, c_uint};
+use rustc_abi as abi;
+use rustc_abi::{Align, Size, WrappingRange};
+use rustc_codegen_ssa::MemFlags;
 use rustc_codegen_ssa::common::{IntPredicate, RealPredicate, SynchronizationScope, TypeKind};
 use rustc_codegen_ssa::mir::operand::{OperandRef, OperandValue};
 use rustc_codegen_ssa::mir::place::PlaceRef;
 use rustc_codegen_ssa::traits::*;
-use rustc_codegen_ssa::MemFlags;
 use rustc_data_structures::small_c_str::SmallCStr;
 use rustc_hir::def_id::DefId;
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrs;
@@ -20,7 +22,6 @@ use rustc_sanitizers::{cfi, kcfi};
 use rustc_session::config::OptLevel;
 use rustc_span::Span;
 use rustc_target::abi::call::FnAbi;
-use rustc_target::abi::{self, Align, Size, WrappingRange};
 use rustc_target::spec::{HasTargetSpec, SanitizerSet, Target};
 use smallvec::SmallVec;
 use tracing::{debug, instrument};
@@ -56,6 +57,7 @@ const UNNAMED: *const c_char = c"".as_ptr();
 
 impl<'ll, 'tcx> BackendTypes for Builder<'_, 'll, 'tcx> {
     type Value = <CodegenCx<'ll, 'tcx> as BackendTypes>::Value;
+    type Metadata = <CodegenCx<'ll, 'tcx> as BackendTypes>::Metadata;
     type Function = <CodegenCx<'ll, 'tcx> as BackendTypes>::Function;
     type BasicBlock = <CodegenCx<'ll, 'tcx> as BackendTypes>::BasicBlock;
     type Type = <CodegenCx<'ll, 'tcx> as BackendTypes>::Type;
@@ -120,11 +122,23 @@ impl<'ll, 'tcx> Deref for Builder<'_, 'll, 'tcx> {
     }
 }
 
-macro_rules! builder_methods_for_value_instructions {
+macro_rules! math_builder_methods {
     ($($name:ident($($arg:ident),*) => $llvm_capi:ident),+ $(,)?) => {
         $(fn $name(&mut self, $($arg: &'ll Value),*) -> &'ll Value {
             unsafe {
                 llvm::$llvm_capi(self.llbuilder, $($arg,)* UNNAMED)
+            }
+        })+
+    }
+}
+
+macro_rules! set_math_builder_methods {
+    ($($name:ident($($arg:ident),*) => ($llvm_capi:ident, $llvm_set_math:ident)),+ $(,)?) => {
+        $(fn $name(&mut self, $($arg: &'ll Value),*) -> &'ll Value {
+            unsafe {
+                let instr = llvm::$llvm_capi(self.llbuilder, $($arg,)* UNNAMED);
+                llvm::$llvm_set_math(instr);
+                instr
             }
         })+
     }
@@ -225,7 +239,6 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
 
         let args = self.check_call("invoke", llty, llfn, args);
         let funclet_bundle = funclet.map(|funclet| funclet.bundle());
-        let funclet_bundle = funclet_bundle.as_ref().map(|b| &*b.raw);
         let mut bundles: SmallVec<[_; 2]> = SmallVec::new();
         if let Some(funclet_bundle) = funclet_bundle {
             bundles.push(funclet_bundle);
@@ -236,13 +249,12 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
 
         // Emit KCFI operand bundle
         let kcfi_bundle = self.kcfi_operand_bundle(fn_attrs, fn_abi, instance, llfn);
-        let kcfi_bundle = kcfi_bundle.as_ref().map(|b| &*b.raw);
-        if let Some(kcfi_bundle) = kcfi_bundle {
+        if let Some(kcfi_bundle) = kcfi_bundle.as_deref() {
             bundles.push(kcfi_bundle);
         }
 
         let invoke = unsafe {
-            llvm::LLVMRustBuildInvoke(
+            llvm::LLVMBuildInvokeWithOperandBundles(
                 self.llbuilder,
                 llty,
                 llfn,
@@ -267,7 +279,7 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
         }
     }
 
-    builder_methods_for_value_instructions! {
+    math_builder_methods! {
         add(a, b) => LLVMBuildAdd,
         fadd(a, b) => LLVMBuildFAdd,
         sub(a, b) => LLVMBuildSub,
@@ -299,84 +311,17 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
         unchecked_umul(x, y) => LLVMBuildNUWMul,
     }
 
-    fn fadd_fast(&mut self, lhs: &'ll Value, rhs: &'ll Value) -> &'ll Value {
-        unsafe {
-            let instr = llvm::LLVMBuildFAdd(self.llbuilder, lhs, rhs, UNNAMED);
-            llvm::LLVMRustSetFastMath(instr);
-            instr
-        }
-    }
-
-    fn fsub_fast(&mut self, lhs: &'ll Value, rhs: &'ll Value) -> &'ll Value {
-        unsafe {
-            let instr = llvm::LLVMBuildFSub(self.llbuilder, lhs, rhs, UNNAMED);
-            llvm::LLVMRustSetFastMath(instr);
-            instr
-        }
-    }
-
-    fn fmul_fast(&mut self, lhs: &'ll Value, rhs: &'ll Value) -> &'ll Value {
-        unsafe {
-            let instr = llvm::LLVMBuildFMul(self.llbuilder, lhs, rhs, UNNAMED);
-            llvm::LLVMRustSetFastMath(instr);
-            instr
-        }
-    }
-
-    fn fdiv_fast(&mut self, lhs: &'ll Value, rhs: &'ll Value) -> &'ll Value {
-        unsafe {
-            let instr = llvm::LLVMBuildFDiv(self.llbuilder, lhs, rhs, UNNAMED);
-            llvm::LLVMRustSetFastMath(instr);
-            instr
-        }
-    }
-
-    fn frem_fast(&mut self, lhs: &'ll Value, rhs: &'ll Value) -> &'ll Value {
-        unsafe {
-            let instr = llvm::LLVMBuildFRem(self.llbuilder, lhs, rhs, UNNAMED);
-            llvm::LLVMRustSetFastMath(instr);
-            instr
-        }
-    }
-
-    fn fadd_algebraic(&mut self, lhs: &'ll Value, rhs: &'ll Value) -> &'ll Value {
-        unsafe {
-            let instr = llvm::LLVMBuildFAdd(self.llbuilder, lhs, rhs, UNNAMED);
-            llvm::LLVMRustSetAlgebraicMath(instr);
-            instr
-        }
-    }
-
-    fn fsub_algebraic(&mut self, lhs: &'ll Value, rhs: &'ll Value) -> &'ll Value {
-        unsafe {
-            let instr = llvm::LLVMBuildFSub(self.llbuilder, lhs, rhs, UNNAMED);
-            llvm::LLVMRustSetAlgebraicMath(instr);
-            instr
-        }
-    }
-
-    fn fmul_algebraic(&mut self, lhs: &'ll Value, rhs: &'ll Value) -> &'ll Value {
-        unsafe {
-            let instr = llvm::LLVMBuildFMul(self.llbuilder, lhs, rhs, UNNAMED);
-            llvm::LLVMRustSetAlgebraicMath(instr);
-            instr
-        }
-    }
-
-    fn fdiv_algebraic(&mut self, lhs: &'ll Value, rhs: &'ll Value) -> &'ll Value {
-        unsafe {
-            let instr = llvm::LLVMBuildFDiv(self.llbuilder, lhs, rhs, UNNAMED);
-            llvm::LLVMRustSetAlgebraicMath(instr);
-            instr
-        }
-    }
-
-    fn frem_algebraic(&mut self, lhs: &'ll Value, rhs: &'ll Value) -> &'ll Value {
-        unsafe {
-            let instr = llvm::LLVMBuildFRem(self.llbuilder, lhs, rhs, UNNAMED);
-            llvm::LLVMRustSetAlgebraicMath(instr);
-            instr
-        }
+    set_math_builder_methods! {
+        fadd_fast(x, y) => (LLVMBuildFAdd, LLVMRustSetFastMath),
+        fsub_fast(x, y) => (LLVMBuildFSub, LLVMRustSetFastMath),
+        fmul_fast(x, y) => (LLVMBuildFMul, LLVMRustSetFastMath),
+        fdiv_fast(x, y) => (LLVMBuildFDiv, LLVMRustSetFastMath),
+        frem_fast(x, y) => (LLVMBuildFRem, LLVMRustSetFastMath),
+        fadd_algebraic(x, y) => (LLVMBuildFAdd, LLVMRustSetAlgebraicMath),
+        fsub_algebraic(x, y) => (LLVMBuildFSub, LLVMRustSetAlgebraicMath),
+        fmul_algebraic(x, y) => (LLVMBuildFMul, LLVMRustSetAlgebraicMath),
+        fdiv_algebraic(x, y) => (LLVMBuildFDiv, LLVMRustSetAlgebraicMath),
+        frem_algebraic(x, y) => (LLVMBuildFRem, LLVMRustSetAlgebraicMath),
     }
 
     fn checked_binop(
@@ -459,6 +404,7 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
             val
         }
     }
+
     fn to_immediate_scalar(&mut self, val: Self::Value, scalar: abi::Scalar) -> Self::Value {
         if scalar.is_bool() {
             return self.trunc(val, self.cx().type_i1());
@@ -558,12 +504,12 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
             }
 
             match scalar.primitive() {
-                abi::Int(..) => {
+                abi::Primitive::Int(..) => {
                     if !scalar.is_always_valid(bx) {
                         bx.range_metadata(load, scalar.valid_range(bx));
                     }
                 }
-                abi::Pointer(_) => {
+                abi::Primitive::Pointer(_) => {
                     if !scalar.valid_range(bx).contains(0) {
                         bx.nonnull_metadata(load);
                     }
@@ -574,7 +520,7 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
                         }
                     }
                 }
-                abi::Float(_) => {}
+                abi::Primitive::Float(_) => {}
             }
         }
 
@@ -597,13 +543,13 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
             }
             let llval = const_llval.unwrap_or_else(|| {
                 let load = self.load(llty, place.val.llval, place.val.align);
-                if let abi::Abi::Scalar(scalar) = place.layout.abi {
+                if let abi::BackendRepr::Scalar(scalar) = place.layout.backend_repr {
                     scalar_load_metadata(self, load, scalar, place.layout, Size::ZERO);
                 }
                 load
             });
             OperandValue::Immediate(self.to_immediate(llval, place.layout))
-        } else if let abi::Abi::ScalarPair(a, b) = place.layout.abi {
+        } else if let abi::BackendRepr::ScalarPair(a, b) = place.layout.backend_repr {
             let b_offset = a.size(self).align_to(b.align(self).abi);
 
             let mut load = |i, scalar: abi::Scalar, layout, align, offset| {
@@ -677,26 +623,19 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
 
         unsafe {
             let llty = self.cx.val_ty(load);
-            let v = [
-                self.cx.const_uint_big(llty, range.start),
-                self.cx.const_uint_big(llty, range.end.wrapping_add(1)),
+            let md = [
+                llvm::LLVMValueAsMetadata(self.cx.const_uint_big(llty, range.start)),
+                llvm::LLVMValueAsMetadata(self.cx.const_uint_big(llty, range.end.wrapping_add(1))),
             ];
-
-            llvm::LLVMSetMetadata(
-                load,
-                llvm::MD_range as c_uint,
-                llvm::LLVMMDNodeInContext(self.cx.llcx, v.as_ptr(), v.len() as c_uint),
-            );
+            let md = llvm::LLVMMDNodeInContext2(self.cx.llcx, md.as_ptr(), md.len());
+            self.set_metadata(load, llvm::MD_range, md);
         }
     }
 
     fn nonnull_metadata(&mut self, load: &'ll Value) {
         unsafe {
-            llvm::LLVMSetMetadata(
-                load,
-                llvm::MD_nonnull as c_uint,
-                llvm::LLVMMDNodeInContext(self.cx.llcx, ptr::null(), 0),
-            );
+            let md = llvm::LLVMMDNodeInContext2(self.cx.llcx, ptr::null(), 0);
+            self.set_metadata(load, llvm::MD_nonnull, md);
         }
     }
 
@@ -727,11 +666,11 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
                 // for performance. LLVM doesn't seem to care about this, and will happily treat
                 // `!nontemporal` stores as-if they were normal stores (for reordering optimizations
                 // etc) even on x86, despite later lowering them to MOVNT which do *not* behave like
-                // regular stores but require special fences.
-                // So we keep a list of architectures where `!nontemporal` is known to be truly just
-                // a hint, and use regular stores everywhere else.
-                // (In the future, we could alternatively ensure that an sfence gets emitted after a sequence of movnt
-                // before any kind of synchronizing operation. But it's not clear how to do that with LLVM.)
+                // regular stores but require special fences. So we keep a list of architectures
+                // where `!nontemporal` is known to be truly just a hint, and use regular stores
+                // everywhere else. (In the future, we could alternatively ensure that an sfence
+                // gets emitted after a sequence of movnt before any kind of synchronizing
+                // operation. But it's not clear how to do that with LLVM.)
                 // For more context, see <https://github.com/rust-lang/rust/issues/114582> and
                 // <https://github.com/llvm/llvm-project/issues/64521>.
                 const WELL_BEHAVED_NONTEMPORAL_ARCHS: &[&str] =
@@ -744,9 +683,9 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
                     // *always* point to a metadata value of the integer 1.
                     //
                     // [1]: https://llvm.org/docs/LangRef.html#store-instruction
-                    let one = self.cx.const_i32(1);
-                    let node = llvm::LLVMMDNodeInContext(self.cx.llcx, &one, 1);
-                    llvm::LLVMSetMetadata(store, llvm::MD_nontemporal as c_uint, node);
+                    let one = llvm::LLVMValueAsMetadata(self.cx.const_i32(1));
+                    let md = llvm::LLVMMDNodeInContext2(self.cx.llcx, &one, 1);
+                    self.set_metadata(store, llvm::MD_nontemporal, md);
                 }
             }
             store
@@ -1160,6 +1099,7 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
             (val, success)
         }
     }
+
     fn atomic_rmw(
         &mut self,
         op: rustc_codegen_ssa::common::AtomicRmwBinOp,
@@ -1210,11 +1150,8 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
 
     fn set_invariant_load(&mut self, load: &'ll Value) {
         unsafe {
-            llvm::LLVMSetMetadata(
-                load,
-                llvm::MD_invariant_load as c_uint,
-                llvm::LLVMMDNodeInContext(self.cx.llcx, ptr::null(), 0),
-            );
+            let md = llvm::LLVMMDNodeInContext2(self.cx.llcx, ptr::null(), 0);
+            self.set_metadata(load, llvm::MD_invariant_load, md);
         }
     }
 
@@ -1224,39 +1161,6 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
 
     fn lifetime_end(&mut self, ptr: &'ll Value, size: Size) {
         self.call_lifetime_intrinsic("llvm.lifetime.end.p0i8", ptr, size);
-    }
-
-    fn instrprof_increment(
-        &mut self,
-        fn_name: &'ll Value,
-        hash: &'ll Value,
-        num_counters: &'ll Value,
-        index: &'ll Value,
-    ) {
-        debug!(
-            "instrprof_increment() with args ({:?}, {:?}, {:?}, {:?})",
-            fn_name, hash, num_counters, index
-        );
-
-        let llfn = unsafe { llvm::LLVMRustGetInstrProfIncrementIntrinsic(self.cx().llmod) };
-        let llty = self.cx.type_func(
-            &[self.cx.type_ptr(), self.cx.type_i64(), self.cx.type_i32(), self.cx.type_i32()],
-            self.cx.type_void(),
-        );
-        let args = &[fn_name, hash, num_counters, index];
-        let args = self.check_call("call", llty, llfn, args);
-
-        unsafe {
-            let _ = llvm::LLVMRustBuildCall(
-                self.llbuilder,
-                llty,
-                llfn,
-                args.as_ptr() as *const &llvm::Value,
-                args.len() as c_uint,
-                [].as_ptr(),
-                0 as c_uint,
-            );
-        }
     }
 
     fn call(
@@ -1273,7 +1177,6 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
 
         let args = self.check_call("call", llty, llfn, args);
         let funclet_bundle = funclet.map(|funclet| funclet.bundle());
-        let funclet_bundle = funclet_bundle.as_ref().map(|b| &*b.raw);
         let mut bundles: SmallVec<[_; 2]> = SmallVec::new();
         if let Some(funclet_bundle) = funclet_bundle {
             bundles.push(funclet_bundle);
@@ -1284,13 +1187,12 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
 
         // Emit KCFI operand bundle
         let kcfi_bundle = self.kcfi_operand_bundle(fn_attrs, fn_abi, instance, llfn);
-        let kcfi_bundle = kcfi_bundle.as_ref().map(|b| &*b.raw);
-        if let Some(kcfi_bundle) = kcfi_bundle {
+        if let Some(kcfi_bundle) = kcfi_bundle.as_deref() {
             bundles.push(kcfi_bundle);
         }
 
         let call = unsafe {
-            llvm::LLVMRustBuildCall(
+            llvm::LLVMBuildCallWithOperandBundles(
                 self.llbuilder,
                 llty,
                 llfn,
@@ -1298,6 +1200,7 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
                 args.len() as c_uint,
                 bundles.as_ptr(),
                 bundles.len() as c_uint,
+                c"".as_ptr(),
             )
         };
         if let Some(fn_abi) = fn_abi {
@@ -1343,33 +1246,23 @@ impl<'a, 'll, 'tcx> Builder<'a, 'll, 'tcx> {
 
     fn align_metadata(&mut self, load: &'ll Value, align: Align) {
         unsafe {
-            let v = [self.cx.const_u64(align.bytes())];
-
-            llvm::LLVMSetMetadata(
-                load,
-                llvm::MD_align as c_uint,
-                llvm::LLVMMDNodeInContext(self.cx.llcx, v.as_ptr(), v.len() as c_uint),
-            );
+            let md = [llvm::LLVMValueAsMetadata(self.cx.const_u64(align.bytes()))];
+            let md = llvm::LLVMMDNodeInContext2(self.cx.llcx, md.as_ptr(), md.len());
+            self.set_metadata(load, llvm::MD_align, md);
         }
     }
 
     fn noundef_metadata(&mut self, load: &'ll Value) {
         unsafe {
-            llvm::LLVMSetMetadata(
-                load,
-                llvm::MD_noundef as c_uint,
-                llvm::LLVMMDNodeInContext(self.cx.llcx, ptr::null(), 0),
-            );
+            let md = llvm::LLVMMDNodeInContext2(self.cx.llcx, ptr::null(), 0);
+            self.set_metadata(load, llvm::MD_noundef, md);
         }
     }
 
     pub(crate) fn set_unpredictable(&mut self, inst: &'ll Value) {
         unsafe {
-            llvm::LLVMSetMetadata(
-                inst,
-                llvm::MD_unpredictable as c_uint,
-                llvm::LLVMMDNodeInContext(self.cx.llcx, ptr::null(), 0),
-            );
+            let md = llvm::LLVMMDNodeInContext2(self.cx.llcx, ptr::null(), 0);
+            self.set_metadata(inst, llvm::MD_unpredictable, md);
         }
     }
 
@@ -1613,7 +1506,6 @@ impl<'a, 'll, 'tcx> Builder<'a, 'll, 'tcx> {
 
         let args = self.check_call("callbr", llty, llfn, args);
         let funclet_bundle = funclet.map(|funclet| funclet.bundle());
-        let funclet_bundle = funclet_bundle.as_ref().map(|b| &*b.raw);
         let mut bundles: SmallVec<[_; 2]> = SmallVec::new();
         if let Some(funclet_bundle) = funclet_bundle {
             bundles.push(funclet_bundle);
@@ -1624,13 +1516,12 @@ impl<'a, 'll, 'tcx> Builder<'a, 'll, 'tcx> {
 
         // Emit KCFI operand bundle
         let kcfi_bundle = self.kcfi_operand_bundle(fn_attrs, fn_abi, instance, llfn);
-        let kcfi_bundle = kcfi_bundle.as_ref().map(|b| &*b.raw);
-        if let Some(kcfi_bundle) = kcfi_bundle {
+        if let Some(kcfi_bundle) = kcfi_bundle.as_deref() {
             bundles.push(kcfi_bundle);
         }
 
         let callbr = unsafe {
-            llvm::LLVMRustBuildCallBr(
+            llvm::LLVMBuildCallBr(
                 self.llbuilder,
                 llty,
                 llfn,
@@ -1705,7 +1596,7 @@ impl<'a, 'll, 'tcx> Builder<'a, 'll, 'tcx> {
         fn_abi: Option<&FnAbi<'tcx, Ty<'tcx>>>,
         instance: Option<Instance<'tcx>>,
         llfn: &'ll Value,
-    ) -> Option<llvm::OperandBundleDef<'ll>> {
+    ) -> Option<llvm::OperandBundleOwned<'ll>> {
         let is_indirect_call = unsafe { llvm::LLVMRustIsNonGVFunctionPointerTy(llfn) };
         let kcfi_bundle = if self.tcx.sess.is_sanitizer_kcfi_enabled()
             && let Some(fn_abi) = fn_abi
@@ -1731,11 +1622,23 @@ impl<'a, 'll, 'tcx> Builder<'a, 'll, 'tcx> {
                 kcfi::typeid_for_fnabi(self.tcx, fn_abi, options)
             };
 
-            Some(llvm::OperandBundleDef::new("kcfi", &[self.const_u32(kcfi_typeid)]))
+            Some(llvm::OperandBundleOwned::new("kcfi", &[self.const_u32(kcfi_typeid)]))
         } else {
             None
         };
         kcfi_bundle
+    }
+
+    /// Emits a call to `llvm.instrprof.increment`. Used by coverage instrumentation.
+    #[instrument(level = "debug", skip(self))]
+    pub(crate) fn instrprof_increment(
+        &mut self,
+        fn_name: &'ll Value,
+        hash: &'ll Value,
+        num_counters: &'ll Value,
+        index: &'ll Value,
+    ) {
+        self.call_intrinsic("llvm.instrprof.increment", &[fn_name, hash, num_counters, index]);
     }
 
     /// Emits a call to `llvm.instrprof.mcdc.parameters`.
@@ -1747,111 +1650,50 @@ impl<'a, 'll, 'tcx> Builder<'a, 'll, 'tcx> {
     ///
     /// [`CodeGenPGO::emitMCDCParameters`]:
     ///     https://github.com/rust-lang/llvm-project/blob/5399a24/clang/lib/CodeGen/CodeGenPGO.cpp#L1124
+    #[instrument(level = "debug", skip(self))]
     pub(crate) fn mcdc_parameters(
         &mut self,
         fn_name: &'ll Value,
         hash: &'ll Value,
-        bitmap_bytes: &'ll Value,
+        bitmap_bits: &'ll Value,
     ) {
-        debug!("mcdc_parameters() with args ({:?}, {:?}, {:?})", fn_name, hash, bitmap_bytes);
-
-        let llfn = unsafe { llvm::LLVMRustGetInstrProfMCDCParametersIntrinsic(self.cx().llmod) };
-        let llty = self.cx.type_func(
-            &[self.cx.type_ptr(), self.cx.type_i64(), self.cx.type_i32()],
-            self.cx.type_void(),
+        assert!(
+            crate::llvm_util::get_version() >= (19, 0, 0),
+            "MCDC intrinsics require LLVM 19 or later"
         );
-        let args = &[fn_name, hash, bitmap_bytes];
-        let args = self.check_call("call", llty, llfn, args);
-
-        unsafe {
-            let _ = llvm::LLVMRustBuildCall(
-                self.llbuilder,
-                llty,
-                llfn,
-                args.as_ptr() as *const &llvm::Value,
-                args.len() as c_uint,
-                [].as_ptr(),
-                0 as c_uint,
-            );
-        }
+        self.call_intrinsic("llvm.instrprof.mcdc.parameters", &[fn_name, hash, bitmap_bits]);
     }
 
+    #[instrument(level = "debug", skip(self))]
     pub(crate) fn mcdc_tvbitmap_update(
         &mut self,
         fn_name: &'ll Value,
         hash: &'ll Value,
-        bitmap_bytes: &'ll Value,
         bitmap_index: &'ll Value,
         mcdc_temp: &'ll Value,
     ) {
-        debug!(
-            "mcdc_tvbitmap_update() with args ({:?}, {:?}, {:?}, {:?}, {:?})",
-            fn_name, hash, bitmap_bytes, bitmap_index, mcdc_temp
+        assert!(
+            crate::llvm_util::get_version() >= (19, 0, 0),
+            "MCDC intrinsics require LLVM 19 or later"
         );
+        let args = &[fn_name, hash, bitmap_index, mcdc_temp];
+        self.call_intrinsic("llvm.instrprof.mcdc.tvbitmap.update", args);
+    }
 
-        let llfn =
-            unsafe { llvm::LLVMRustGetInstrProfMCDCTVBitmapUpdateIntrinsic(self.cx().llmod) };
-        let llty = self.cx.type_func(
-            &[
-                self.cx.type_ptr(),
-                self.cx.type_i64(),
-                self.cx.type_i32(),
-                self.cx.type_i32(),
-                self.cx.type_ptr(),
-            ],
-            self.cx.type_void(),
-        );
-        let args = &[fn_name, hash, bitmap_bytes, bitmap_index, mcdc_temp];
-        let args = self.check_call("call", llty, llfn, args);
-        unsafe {
-            let _ = llvm::LLVMRustBuildCall(
-                self.llbuilder,
-                llty,
-                llfn,
-                args.as_ptr() as *const &llvm::Value,
-                args.len() as c_uint,
-                [].as_ptr(),
-                0 as c_uint,
-            );
-        }
+    #[instrument(level = "debug", skip(self))]
+    pub(crate) fn mcdc_condbitmap_reset(&mut self, mcdc_temp: &'ll Value) {
         self.store(self.const_i32(0), mcdc_temp, self.tcx.data_layout.i32_align.abi);
     }
 
-    pub(crate) fn mcdc_condbitmap_update(
-        &mut self,
-        fn_name: &'ll Value,
-        hash: &'ll Value,
-        cond_loc: &'ll Value,
-        mcdc_temp: &'ll Value,
-        bool_value: &'ll Value,
-    ) {
-        debug!(
-            "mcdc_condbitmap_update() with args ({:?}, {:?}, {:?}, {:?}, {:?})",
-            fn_name, hash, cond_loc, mcdc_temp, bool_value
+    #[instrument(level = "debug", skip(self))]
+    pub(crate) fn mcdc_condbitmap_update(&mut self, cond_index: &'ll Value, mcdc_temp: &'ll Value) {
+        assert!(
+            crate::llvm_util::get_version() >= (19, 0, 0),
+            "MCDC intrinsics require LLVM 19 or later"
         );
-        let llfn = unsafe { llvm::LLVMRustGetInstrProfMCDCCondBitmapIntrinsic(self.cx().llmod) };
-        let llty = self.cx.type_func(
-            &[
-                self.cx.type_ptr(),
-                self.cx.type_i64(),
-                self.cx.type_i32(),
-                self.cx.type_ptr(),
-                self.cx.type_i1(),
-            ],
-            self.cx.type_void(),
-        );
-        let args = &[fn_name, hash, cond_loc, mcdc_temp, bool_value];
-        self.check_call("call", llty, llfn, args);
-        unsafe {
-            let _ = llvm::LLVMRustBuildCall(
-                self.llbuilder,
-                llty,
-                llfn,
-                args.as_ptr() as *const &llvm::Value,
-                args.len() as c_uint,
-                [].as_ptr(),
-                0 as c_uint,
-            );
-        }
+        let align = self.tcx.data_layout.i32_align.abi;
+        let current_tv_index = self.load(self.cx.type_i32(), mcdc_temp, align);
+        let new_tv_index = self.add(current_tv_index, cond_index);
+        self.store(new_tv_index, mcdc_temp, align);
     }
 }

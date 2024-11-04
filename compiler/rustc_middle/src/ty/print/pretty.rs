@@ -3,23 +3,23 @@ use std::fmt::{self, Write as _};
 use std::iter;
 use std::ops::{Deref, DerefMut};
 
-use rustc_apfloat::ieee::{Double, Half, Quad, Single};
 use rustc_apfloat::Float;
+use rustc_apfloat::ieee::{Double, Half, Quad, Single};
 use rustc_data_structures::fx::{FxHashMap, FxIndexMap};
 use rustc_data_structures::unord::UnordMap;
 use rustc_hir as hir;
-use rustc_hir::def::{self, CtorKind, DefKind, Namespace};
-use rustc_hir::def_id::{DefIdMap, DefIdSet, ModDefId, CRATE_DEF_ID, LOCAL_CRATE};
-use rustc_hir::definitions::{DefKey, DefPathDataName};
 use rustc_hir::LangItem;
-use rustc_macros::{extension, Lift};
-use rustc_session::cstore::{ExternCrate, ExternCrateSource};
+use rustc_hir::def::{self, CtorKind, DefKind, Namespace};
+use rustc_hir::def_id::{CRATE_DEF_ID, DefIdMap, DefIdSet, LOCAL_CRATE, ModDefId};
+use rustc_hir::definitions::{DefKey, DefPathDataName};
+use rustc_macros::{Lift, extension};
 use rustc_session::Limit;
-use rustc_span::symbol::{kw, Ident, Symbol};
+use rustc_session::cstore::{ExternCrate, ExternCrateSource};
 use rustc_span::FileNameDisplayPreference;
+use rustc_span::symbol::{Ident, Symbol, kw};
 use rustc_target::abi::Size;
 use rustc_target::spec::abi::Abi;
-use rustc_type_ir::{elaborate, Upcast as _};
+use rustc_type_ir::{Upcast as _, elaborate};
 use smallvec::SmallVec;
 
 // `pretty` is a separate module only for organization.
@@ -1208,7 +1208,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
             }
         }
 
-        if self.tcx().features().return_type_notation
+        if self.tcx().features().return_type_notation()
             && let Some(ty::ImplTraitInTraitData::Trait { fn_def_id, .. }) =
                 self.tcx().opt_rpitit_info(def_id)
             && let ty::Alias(_, alias_ty) =
@@ -1951,19 +1951,17 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
 
     fn pretty_print_bound_constness(
         &mut self,
-        trait_ref: ty::TraitRef<'tcx>,
+        constness: ty::BoundConstness,
     ) -> Result<(), PrintError> {
         define_scoped_cx!(self);
 
-        let Some(idx) = self.tcx().generics_of(trait_ref.def_id).host_effect_index else {
-            return Ok(());
-        };
-        let arg = trait_ref.args.const_at(idx);
-
-        if arg == self.tcx().consts.false_ {
-            p!("const ");
-        } else if arg != self.tcx().consts.true_ && !arg.has_infer() {
-            p!("~const ");
+        match constness {
+            ty::BoundConstness::Const => {
+                p!("const ");
+            }
+            ty::BoundConstness::Maybe => {
+                p!("~const ");
+            }
         }
         Ok(())
     }
@@ -2948,12 +2946,31 @@ impl<'tcx> ty::TraitPredicate<'tcx> {
     }
 }
 
+#[derive(Copy, Clone, TypeFoldable, TypeVisitable, Lift)]
+pub struct TraitPredPrintWithBoundConstness<'tcx>(
+    ty::TraitPredicate<'tcx>,
+    Option<ty::BoundConstness>,
+);
+
+impl<'tcx> fmt::Debug for TraitPredPrintWithBoundConstness<'tcx> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(self, f)
+    }
+}
+
 #[extension(pub trait PrintPolyTraitPredicateExt<'tcx>)]
 impl<'tcx> ty::PolyTraitPredicate<'tcx> {
     fn print_modifiers_and_trait_path(
         self,
     ) -> ty::Binder<'tcx, TraitPredPrintModifiersAndPath<'tcx>> {
         self.map_bound(TraitPredPrintModifiersAndPath)
+    }
+
+    fn print_with_bound_constness(
+        self,
+        constness: Option<ty::BoundConstness>,
+    ) -> ty::Binder<'tcx, TraitPredPrintWithBoundConstness<'tcx>> {
+        self.map_bound(|trait_pred| TraitPredPrintWithBoundConstness(trait_pred, constness))
     }
 }
 
@@ -3052,10 +3069,18 @@ define_print! {
 
     ty::TraitPredicate<'tcx> {
         p!(print(self.trait_ref.self_ty()), ": ");
-        p!(pretty_print_bound_constness(self.trait_ref));
         if let ty::PredicatePolarity::Negative = self.polarity {
             p!("!");
         }
+        p!(print(self.trait_ref.print_trait_sugared()))
+    }
+
+    ty::HostEffectPredicate<'tcx> {
+        let constness = match self.constness {
+            ty::BoundConstness::Const => { "const" }
+            ty::BoundConstness::Maybe => { "~const" }
+        };
+        p!(print(self.trait_ref.self_ty()), ": {constness} ");
         p!(print(self.trait_ref.print_trait_sugared()))
     }
 
@@ -3071,6 +3096,7 @@ define_print! {
             ty::ClauseKind::RegionOutlives(predicate) => p!(print(predicate)),
             ty::ClauseKind::TypeOutlives(predicate) => p!(print(predicate)),
             ty::ClauseKind::Projection(predicate) => p!(print(predicate)),
+            ty::ClauseKind::HostEffect(predicate) => p!(print(predicate)),
             ty::ClauseKind::ConstArgHasType(ct, ty) => {
                 p!("the constant `", print(ct), "` has type `", print(ty), "`")
             },
@@ -3088,8 +3114,8 @@ define_print! {
             }
             ty::PredicateKind::Subtype(predicate) => p!(print(predicate)),
             ty::PredicateKind::Coerce(predicate) => p!(print(predicate)),
-            ty::PredicateKind::ObjectSafe(trait_def_id) => {
-                p!("the trait `", print_def_path(trait_def_id, &[]), "` is object-safe")
+            ty::PredicateKind::DynCompatible(trait_def_id) => {
+                p!("the trait `", print_def_path(trait_def_id, &[]), "` is dyn-compatible")
             }
             ty::PredicateKind::ConstEquate(c1, c2) => {
                 p!("the constant `", print(c1), "` equals `", print(c2), "`")
@@ -3184,11 +3210,21 @@ define_print_and_forward_display! {
     }
 
     TraitPredPrintModifiersAndPath<'tcx> {
-        p!(pretty_print_bound_constness(self.0.trait_ref));
         if let ty::PredicatePolarity::Negative = self.0.polarity {
             p!("!")
         }
         p!(print(self.0.trait_ref.print_trait_sugared()));
+    }
+
+    TraitPredPrintWithBoundConstness<'tcx> {
+        p!(print(self.0.trait_ref.self_ty()), ": ");
+        if let Some(constness) = self.1 {
+            p!(pretty_print_bound_constness(constness));
+        }
+        if let ty::PredicatePolarity::Negative = self.0.polarity {
+            p!("!");
+        }
+        p!(print(self.0.trait_ref.print_trait_sugared()))
     }
 
     PrintClosureAsImpl<'tcx> {

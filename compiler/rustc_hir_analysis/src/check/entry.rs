@@ -4,11 +4,11 @@ use rustc_hir as hir;
 use rustc_hir::Node;
 use rustc_infer::infer::TyCtxtInferExt;
 use rustc_middle::span_bug;
-use rustc_middle::ty::{self, Ty, TyCtxt};
+use rustc_middle::ty::{self, Ty, TyCtxt, TypingMode};
 use rustc_session::config::EntryFnType;
-use rustc_span::def_id::{DefId, LocalDefId, CRATE_DEF_ID};
-use rustc_span::symbol::sym;
 use rustc_span::Span;
+use rustc_span::def_id::{CRATE_DEF_ID, DefId, LocalDefId};
+use rustc_span::symbol::sym;
 use rustc_target::spec::abi::Abi;
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::traits::{self, ObligationCause, ObligationCauseCode};
@@ -128,7 +128,7 @@ fn check_main_fn_ty(tcx: TyCtxt<'_>, main_def_id: DefId) {
             tcx.dcx().emit_err(errors::MainFunctionReturnTypeGeneric { span: return_ty_span });
             return;
         };
-        let infcx = tcx.infer_ctxt().build();
+        let infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
         let cause = traits::ObligationCause::new(
             return_ty_span,
             main_diagnostics_def_id,

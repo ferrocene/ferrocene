@@ -23,6 +23,7 @@
 #![feature(cfg_match)]
 #![feature(core_intrinsics)]
 #![feature(extend_one)]
+#![feature(file_buffered)]
 #![feature(hash_raw_entry)]
 #![feature(macro_metavar_expr)]
 #![feature(map_try_insert)]
@@ -32,7 +33,6 @@
 #![feature(ptr_alignment_type)]
 #![feature(rustc_attrs)]
 #![feature(rustdoc_internals)]
-#![feature(strict_provenance)]
 #![feature(test)]
 #![feature(thread_id_value)]
 #![feature(type_alias_impl_trait)]
@@ -75,6 +75,7 @@ pub mod svh;
 pub mod sync;
 pub mod tagged_ptr;
 pub mod temp_dir;
+pub mod thinvec;
 pub mod transitive_relation;
 pub mod unhash;
 pub mod unord;

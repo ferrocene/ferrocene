@@ -3,8 +3,8 @@ use rustc_hir::intravisit::{self, Visitor};
 use rustc_hir::{HirId, PatKind};
 use rustc_infer::traits::ObligationCauseCode;
 use rustc_middle::ty::{Ty, UserType};
-use rustc_span::def_id::LocalDefId;
 use rustc_span::Span;
+use rustc_span::def_id::LocalDefId;
 use tracing::debug;
 
 use crate::FnCtxt;
@@ -141,10 +141,10 @@ impl<'a, 'tcx> Visitor<'tcx> for GatherLocalsVisitor<'a, 'tcx> {
             let var_ty = self.assign(p.span, p.hir_id, None);
 
             if let Some((ty_span, hir_id)) = self.outermost_fn_param_pat {
-                if !self.fcx.tcx.features().unsized_fn_params {
+                if !self.fcx.tcx.features().unsized_fn_params() {
                     self.fcx.require_type_is_sized(
                         var_ty,
-                        p.span,
+                        ty_span,
                         // ty_span == ident.span iff this is a closure parameter with no type
                         // ascription, or if it's an implicit `self` parameter
                         ObligationCauseCode::SizedArgumentType(
@@ -158,7 +158,7 @@ impl<'a, 'tcx> Visitor<'tcx> for GatherLocalsVisitor<'a, 'tcx> {
                         ),
                     );
                 }
-            } else if !self.fcx.tcx.features().unsized_locals {
+            } else if !self.fcx.tcx.features().unsized_locals() {
                 self.fcx.require_type_is_sized(
                     var_ty,
                     p.span,

@@ -8,7 +8,6 @@ mod item;
 
 use std::borrow::Cow;
 
-use ast::TraitBoundModifiers;
 use rustc_ast::attr::AttrIdGenerator;
 use rustc_ast::ptr::P;
 use rustc_ast::token::{
@@ -18,14 +17,15 @@ use rustc_ast::tokenstream::{Spacing, TokenStream, TokenTree};
 use rustc_ast::util::classify;
 use rustc_ast::util::comments::{Comment, CommentStyle};
 use rustc_ast::{
-    self as ast, attr, AttrArgs, AttrArgsEq, BindingMode, BlockCheckMode, ByRef, DelimArgs,
-    GenericArg, GenericBound, InlineAsmOperand, InlineAsmOptions, InlineAsmRegOrRegClass,
-    InlineAsmTemplatePiece, PatKind, RangeEnd, RangeSyntax, Safety, SelfKind, Term,
+    self as ast, AttrArgs, AttrArgsEq, BindingMode, BlockCheckMode, ByRef, DelimArgs, GenericArg,
+    GenericBound, InlineAsmOperand, InlineAsmOptions, InlineAsmRegOrRegClass,
+    InlineAsmTemplatePiece, PatKind, RangeEnd, RangeSyntax, Safety, SelfKind, Term, attr,
 };
+use rustc_data_structures::sync::Lrc;
 use rustc_span::edition::Edition;
 use rustc_span::source_map::{SourceMap, Spanned};
-use rustc_span::symbol::{kw, sym, Ident, IdentPrinter, Symbol};
-use rustc_span::{BytePos, CharPos, FileName, Pos, Span, DUMMY_SP};
+use rustc_span::symbol::{Ident, IdentPrinter, Symbol, kw, sym};
+use rustc_span::{BytePos, CharPos, DUMMY_SP, FileName, Pos, Span};
 use thin_vec::ThinVec;
 
 use crate::pp::Breaks::{Consistent, Inconsistent};
@@ -106,7 +106,7 @@ fn split_block_comment_into_lines(text: &str, col: CharPos) -> Vec<String> {
 fn gather_comments(sm: &SourceMap, path: FileName, src: String) -> Vec<Comment> {
     let sm = SourceMap::new(sm.path_mapping().clone());
     let source_file = sm.new_source_file(path, src);
-    let text = (*source_file.src.as_ref().unwrap()).clone();
+    let text = Lrc::clone(&(*source_file.src.as_ref().unwrap()));
 
     let text: &str = text.as_str();
     let start_bpos = source_file.start_pos;
@@ -292,9 +292,9 @@ pub fn print_crate<'a>(
 /// - #73345: `#[allow(unused)]` must be printed rather than `# [allow(unused)]`
 ///
 fn space_between(tt1: &TokenTree, tt2: &TokenTree) -> bool {
-    use token::*;
     use Delimiter::*;
     use TokenTree::{Delimited as Del, Token as Tok};
+    use token::*;
 
     fn is_punct(tt: &TokenTree) -> bool {
         matches!(tt, TokenTree::Token(tok, _) if tok.is_punct())
@@ -628,6 +628,13 @@ pub trait PrintState<'a>: std::ops::Deref<Target = pp::Printer> + std::ops::Dere
 
     fn print_attr_item(&mut self, item: &ast::AttrItem, span: Span) {
         self.ibox(0);
+        match item.unsafety {
+            ast::Safety::Unsafe(_) => {
+                self.word("unsafe");
+                self.popen();
+            }
+            ast::Safety::Default | ast::Safety::Safe(_) => {}
+        }
         match &item.args {
             AttrArgs::Delimited(DelimArgs { dspan: _, delim, tokens }) => self.print_mac_common(
                 Some(MacHeader::Path(&item.path)),
@@ -655,6 +662,10 @@ pub trait PrintState<'a>: std::ops::Deref<Target = pp::Printer> + std::ops::Dere
                 let token_str = self.meta_item_lit_to_string(lit);
                 self.word(token_str);
             }
+        }
+        match item.unsafety {
+            ast::Safety::Unsafe(_) => self.pclose(),
+            ast::Safety::Default | ast::Safety::Safe(_) => {}
         }
         self.end();
     }
@@ -1163,6 +1174,12 @@ impl<'a> State<'a> {
                 self.print_opt_lifetime(lifetime);
                 self.print_mt(mt, false);
             }
+            ast::TyKind::PinnedRef(lifetime, mt) => {
+                self.word("&");
+                self.print_opt_lifetime(lifetime);
+                self.word("pin ");
+                self.print_mt(mt, true);
+            }
             ast::TyKind::Never => {
                 self.word("!");
             }
@@ -1173,14 +1190,6 @@ impl<'a> State<'a> {
                     self.word(",");
                 }
                 self.pclose();
-            }
-            ast::TyKind::AnonStruct(_, fields) => {
-                self.head("struct");
-                self.print_record_struct_body(fields, ty.span);
-            }
-            ast::TyKind::AnonUnion(_, fields) => {
-                self.head("union");
-                self.print_record_struct_body(fields, ty.span);
             }
             ast::TyKind::Paren(typ) => {
                 self.popen();
@@ -1261,6 +1270,27 @@ impl<'a> State<'a> {
 
     fn print_poly_trait_ref(&mut self, t: &ast::PolyTraitRef) {
         self.print_formal_generic_params(&t.bound_generic_params);
+
+        let ast::TraitBoundModifiers { constness, asyncness, polarity } = t.modifiers;
+        match constness {
+            ast::BoundConstness::Never => {}
+            ast::BoundConstness::Always(_) | ast::BoundConstness::Maybe(_) => {
+                self.word_space(constness.as_str());
+            }
+        }
+        match asyncness {
+            ast::BoundAsyncness::Normal => {}
+            ast::BoundAsyncness::Async(_) => {
+                self.word_space(asyncness.as_str());
+            }
+        }
+        match polarity {
+            ast::BoundPolarity::Positive => {}
+            ast::BoundPolarity::Negative(_) | ast::BoundPolarity::Maybe(_) => {
+                self.word(polarity.as_str());
+            }
+        }
+
         self.print_trait_ref(&t.trait_ref)
     }
 
@@ -1748,31 +1778,7 @@ impl<'a> State<'a> {
             }
 
             match bound {
-                GenericBound::Trait(
-                    tref,
-                    TraitBoundModifiers { constness, asyncness, polarity },
-                ) => {
-                    match constness {
-                        ast::BoundConstness::Never => {}
-                        ast::BoundConstness::Always(_) | ast::BoundConstness::Maybe(_) => {
-                            self.word_space(constness.as_str());
-                        }
-                    }
-
-                    match asyncness {
-                        ast::BoundAsyncness::Normal => {}
-                        ast::BoundAsyncness::Async(_) => {
-                            self.word_space(asyncness.as_str());
-                        }
-                    }
-
-                    match polarity {
-                        ast::BoundPolarity::Positive => {}
-                        ast::BoundPolarity::Negative(_) | ast::BoundPolarity::Maybe(_) => {
-                            self.word(polarity.as_str());
-                        }
-                    }
-
+                GenericBound::Trait(tref) => {
                     self.print_poly_trait_ref(tref);
                 }
                 GenericBound::Outlives(lt) => self.print_lifetime(*lt),
@@ -2006,10 +2012,10 @@ impl<'a> State<'a> {
         self.print_attribute_inline(attr, false)
     }
 
-    fn print_meta_list_item(&mut self, item: &ast::NestedMetaItem) {
+    fn print_meta_list_item(&mut self, item: &ast::MetaItemInner) {
         match item {
-            ast::NestedMetaItem::MetaItem(mi) => self.print_meta_item(mi),
-            ast::NestedMetaItem::Lit(lit) => self.print_meta_item_lit(lit),
+            ast::MetaItemInner::MetaItem(mi) => self.print_meta_item(mi),
+            ast::MetaItemInner::Lit(lit) => self.print_meta_item_lit(lit),
         }
     }
 
@@ -2054,7 +2060,7 @@ impl<'a> State<'a> {
         Self::to_string(|s| s.print_path_segment(p, false))
     }
 
-    pub(crate) fn meta_list_item_to_string(&self, li: &ast::NestedMetaItem) -> String {
+    pub(crate) fn meta_list_item_to_string(&self, li: &ast::MetaItemInner) -> String {
         Self::to_string(|s| s.print_meta_list_item(li))
     }
 

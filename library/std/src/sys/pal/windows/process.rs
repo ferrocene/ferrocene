@@ -22,8 +22,8 @@ use crate::sys::fs::{File, OpenOptions};
 use crate::sys::handle::Handle;
 use crate::sys::pipe::{self, AnonPipe};
 use crate::sys::{cvt, path, stdio};
-use crate::sys_common::process::{CommandEnv, CommandEnvs};
 use crate::sys_common::IntoInner;
+use crate::sys_common::process::{CommandEnv, CommandEnvs};
 use crate::{cmp, env, fmt, mem, ptr};
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -47,7 +47,7 @@ impl EnvKey {
     }
 }
 
-// Comparing Windows environment variable keys[1] are behaviourally the
+// Comparing Windows environment variable keys[1] are behaviorally the
 // composition of two operations[2]:
 //
 // 1. Case-fold both strings. This is done using a language-independent
@@ -253,10 +253,10 @@ impl Command {
         attribute: usize,
         value: T,
     ) {
-        self.proc_thread_attributes.insert(
-            attribute,
-            ProcThreadAttributeValue { size: mem::size_of::<T>(), data: Box::new(value) },
-        );
+        self.proc_thread_attributes.insert(attribute, ProcThreadAttributeValue {
+            size: mem::size_of::<T>(),
+            data: Box::new(value),
+        });
     }
 
     pub fn spawn(
@@ -338,8 +338,8 @@ impl Command {
 
         // If at least one of stdin, stdout or stderr are set (i.e. are non null)
         // then set the `hStd` fields in `STARTUPINFO`.
-        // Otherwise skip this and allow the OS to apply its default behaviour.
-        // This provides more consistent behaviour between Win7 and Win8+.
+        // Otherwise skip this and allow the OS to apply its default behavior.
+        // This provides more consistent behavior between Win7 and Win8+.
         let is_set = |stdio: &Handle| !stdio.as_raw_handle().is_null();
         if is_set(&stderr) || is_set(&stdout) || is_set(&stdin) {
             si.dwFlags |= c::STARTF_USESTDHANDLES;
@@ -368,10 +368,10 @@ impl Command {
                 StartupInfo: si,
                 lpAttributeList: proc_thread_attribute_list.0.as_mut_ptr() as _,
             };
-            si_ptr = core::ptr::addr_of_mut!(si_ex) as _;
+            si_ptr = (&raw mut si_ex) as _;
         } else {
             si.cb = mem::size_of::<c::STARTUPINFOW>() as u32;
-            si_ptr = core::ptr::addr_of_mut!(si) as _;
+            si_ptr = (&raw mut si) as _;
         }
 
         unsafe {
@@ -507,7 +507,7 @@ where
     Exists: FnMut(PathBuf) -> Option<Vec<u16>>,
 {
     // 1. Child paths
-    // This is for consistency with Rust's historic behaviour.
+    // This is for consistency with Rust's historic behavior.
     if let Some(paths) = child_paths {
         for path in env::split_paths(paths).filter(|p| !p.as_os_str().is_empty()) {
             if let Some(path) = exists(path) {
@@ -953,7 +953,7 @@ fn make_proc_thread_attribute_list(
     // It's theoretically possible for the attribute count to exceed a u32 value.
     // Therefore, we ensure that we don't add more attributes than the buffer was initialized for.
     for (&attribute, value) in attributes.iter().take(attribute_count as usize) {
-        let value_ptr = core::ptr::addr_of!(*value.data) as _;
+        let value_ptr = (&raw const *value.data) as _;
         cvt(unsafe {
             c::UpdateProcThreadAttribute(
                 proc_thread_attribute_list.0.as_mut_ptr() as _,

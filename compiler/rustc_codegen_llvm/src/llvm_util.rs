@@ -1,4 +1,4 @@
-use std::ffi::{c_char, c_void, CStr, CString};
+use std::ffi::{CStr, CString, c_char, c_void};
 use std::fmt::Write;
 use std::path::Path;
 use std::sync::Once;
@@ -6,21 +6,22 @@ use std::{ptr, slice, str};
 
 use libc::c_int;
 use rustc_codegen_ssa::base::wants_wasm_eh;
+use rustc_codegen_ssa::codegen_attrs::check_tied_features;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::small_c_str::SmallCStr;
 use rustc_data_structures::unord::UnordSet;
 use rustc_fs_util::path_to_c_string;
 use rustc_middle::bug;
-use rustc_session::config::{PrintKind, PrintRequest};
 use rustc_session::Session;
+use rustc_session::config::{PrintKind, PrintRequest};
 use rustc_span::symbol::Symbol;
 use rustc_target::spec::{MergeFunctions, PanicStrategy, SmallDataThresholdSupport};
 use rustc_target::target_features::{RUSTC_SPECIAL_FEATURES, RUSTC_SPECIFIC_FEATURES};
 
 use crate::back::write::create_informational_target_machine;
 use crate::errors::{
-    FixedX18InvalidArch, InvalidTargetFeaturePrefix, PossibleFeature, TargetFeatureDisableOrEnable,
-    UnknownCTargetFeature, UnknownCTargetFeaturePrefix, UnstableCTargetFeature,
+    FixedX18InvalidArch, InvalidTargetFeaturePrefix, PossibleFeature, UnknownCTargetFeature,
+    UnknownCTargetFeaturePrefix, UnstableCTargetFeature,
 };
 use crate::llvm;
 
@@ -217,10 +218,10 @@ impl<'a> IntoIterator for LLVMFeature<'a> {
 // where `{ARCH}` is the architecture name. Look for instances of `SubtargetFeature`.
 //
 // Check the current rustc fork of LLVM in the repo at https://github.com/rust-lang/llvm-project/.
-// The commit in use can be found via the `llvm-project` submodule in https://github.com/rust-lang/rust/tree/master/src
-// Though note that Rust can also be build with an external precompiled version of LLVM
-// which might lead to failures if the oldest tested / supported LLVM version
-// doesn't yet support the relevant intrinsics
+// The commit in use can be found via the `llvm-project` submodule in
+// https://github.com/rust-lang/rust/tree/master/src Though note that Rust can also be build with
+// an external precompiled version of LLVM which might lead to failures if the oldest tested /
+// supported LLVM version doesn't yet support the relevant intrinsics.
 pub(crate) fn to_llvm_features<'a>(sess: &Session, s: &'a str) -> Option<LLVMFeature<'a>> {
     let arch = if sess.target.arch == "x86_64" {
         "x86"
@@ -247,7 +248,10 @@ pub(crate) fn to_llvm_features<'a>(sess: &Session, s: &'a str) -> Option<LLVMFea
         ("aarch64", "pmuv3") => Some(LLVMFeature::new("perfmon")),
         ("aarch64", "paca") => Some(LLVMFeature::new("pauth")),
         ("aarch64", "pacg") => Some(LLVMFeature::new("pauth")),
-        ("aarch64", "sve-b16b16") => Some(LLVMFeature::new("b16b16")),
+        ("aarch64", "pauth-lr") if get_version().0 < 19 => None,
+        // Before LLVM 20 those two features were packaged together as b16b16
+        ("aarch64", "sve-b16b16") if get_version().0 < 20 => Some(LLVMFeature::new("b16b16")),
+        ("aarch64", "sme-b16b16") if get_version().0 < 20 => Some(LLVMFeature::new("b16b16")),
         ("aarch64", "flagm2") => Some(LLVMFeature::new("altnzcv")),
         // Rust ties fp and neon together.
         ("aarch64", "neon") => {
@@ -259,36 +263,21 @@ pub(crate) fn to_llvm_features<'a>(sess: &Session, s: &'a str) -> Option<LLVMFea
         ("aarch64", "fp16") => Some(LLVMFeature::new("fullfp16")),
         // Filter out features that are not supported by the current LLVM version
         ("aarch64", "fpmr") if get_version().0 != 18 => None,
-        // In LLVM 18, `unaligned-scalar-mem` was merged with `unaligned-vector-mem` into a single feature called
-        // `fast-unaligned-access`. In LLVM 19, it was split back out.
+        // In LLVM 18, `unaligned-scalar-mem` was merged with `unaligned-vector-mem` into a single
+        // feature called `fast-unaligned-access`. In LLVM 19, it was split back out.
         ("riscv32" | "riscv64", "unaligned-scalar-mem") if get_version().0 == 18 => {
             Some(LLVMFeature::new("fast-unaligned-access"))
         }
+        // Filter out features that are not supported by the current LLVM version
+        ("riscv32" | "riscv64", "zaamo") if get_version().0 < 19 => None,
+        ("riscv32" | "riscv64", "zabha") if get_version().0 < 19 => None,
+        ("riscv32" | "riscv64", "zalrsc") if get_version().0 < 19 => None,
         // Enable the evex512 target feature if an avx512 target feature is enabled.
         ("x86", s) if s.starts_with("avx512") => {
             Some(LLVMFeature::with_dependency(s, TargetFeatureFoldStrength::EnableOnly("evex512")))
         }
         (_, s) => Some(LLVMFeature::new(s)),
     }
-}
-
-/// Given a map from target_features to whether they are enabled or disabled,
-/// ensure only valid combinations are allowed.
-pub(crate) fn check_tied_features(
-    sess: &Session,
-    features: &FxHashMap<&str, bool>,
-) -> Option<&'static [&'static str]> {
-    if !features.is_empty() {
-        for tied in sess.target.tied_target_features() {
-            // Tied features must be set to the same value, or not set at all
-            let mut tied_iter = tied.iter();
-            let enabled = features.get(tied_iter.next().unwrap());
-            if tied_iter.any(|f| enabled != features.get(f)) {
-                return Some(tied);
-            }
-        }
-    }
-    None
 }
 
 /// Used to generate cfg variables and apply features
@@ -406,7 +395,8 @@ fn print_target_features(out: &mut String, sess: &Session, tm: &llvm::TargetMach
         .supported_target_features()
         .iter()
         .filter_map(|(feature, _gate, _implied)| {
-            // LLVM asserts that these are sorted. LLVM and Rust both use byte comparison for these strings.
+            // LLVM asserts that these are sorted. LLVM and Rust both use byte comparison for these
+            // strings.
             let llvm_feature = to_llvm_features(sess, *feature)?.llvm_feature_name;
             let desc =
                 match llvm_target_features.binary_search_by_key(&llvm_feature, |(f, _d)| f).ok() {
@@ -477,7 +467,7 @@ pub(crate) fn print(req: &PrintRequest, mut out: &mut String, sess: &Session) {
                     &tm,
                     cpu_cstring.as_ptr(),
                     callback,
-                    std::ptr::addr_of_mut!(out) as *mut c_void,
+                    (&raw mut out) as *mut c_void,
                 );
             }
         }
@@ -535,6 +525,11 @@ pub(crate) fn global_llvm_features(
     // -Ctarget-cpu=native
     match sess.opts.cg.target_cpu {
         Some(ref s) if s == "native" => {
+            // We have already figured out the actual CPU name with `LLVMRustGetHostCPUName` and set
+            // that for LLVM, so the features implied by that CPU name will be available everywhere.
+            // However, that is not sufficient: e.g. `skylake` alone is not sufficient to tell if
+            // some of the instructions are available or not. So we have to also explicitly ask for
+            // the exact set of features available on the host, and enable all of them.
             let features_string = unsafe {
                 let ptr = llvm::LLVMGetHostCPUFeatures();
                 let features_string = if !ptr.is_null() {
@@ -675,7 +670,7 @@ pub(crate) fn global_llvm_features(
         features.extend(feats);
 
         if diagnostics && let Some(f) = check_tied_features(sess, &featsmap) {
-            sess.dcx().emit_err(TargetFeatureDisableOrEnable {
+            sess.dcx().emit_err(rustc_codegen_ssa::errors::TargetFeatureDisableOrEnable {
                 features: f,
                 span: None,
                 missing_features: None,
@@ -703,12 +698,9 @@ fn backend_feature_name<'a>(sess: &Session, s: &'a str) -> Option<&'a str> {
     let feature = s
         .strip_prefix(&['+', '-'][..])
         .unwrap_or_else(|| sess.dcx().emit_fatal(InvalidTargetFeaturePrefix { feature: s }));
-    if s.is_empty() {
-        return None;
-    }
     // Rustc-specific feature requests like `+crt-static` or `-crt-static`
     // are not passed down to LLVM.
-    if RUSTC_SPECIFIC_FEATURES.contains(&feature) {
+    if s.is_empty() || RUSTC_SPECIFIC_FEATURES.contains(&feature) {
         return None;
     }
     Some(feature)

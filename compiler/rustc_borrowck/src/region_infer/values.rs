@@ -2,9 +2,9 @@ use std::fmt::Debug;
 use std::rc::Rc;
 
 use rustc_data_structures::fx::{FxHashSet, FxIndexSet};
+use rustc_index::Idx;
 use rustc_index::bit_set::SparseBitMatrix;
 use rustc_index::interval::{IntervalSet, SparseIntervalMatrix};
-use rustc_index::Idx;
 use rustc_middle::mir::{BasicBlock, Location};
 use rustc_middle::ty::{self, RegionVid};
 use rustc_mir_dataflow::points::{DenseLocationMap, PointIndex};
@@ -275,15 +275,16 @@ impl<N: Idx> RegionValues<N> {
     /// Each of the regions in num_region_variables will be initialized with an
     /// empty set of points and no causal information.
     pub(crate) fn new(
-        elements: &Rc<DenseLocationMap>,
+        elements: Rc<DenseLocationMap>,
         num_universal_regions: usize,
-        placeholder_indices: &Rc<PlaceholderIndices>,
+        placeholder_indices: Rc<PlaceholderIndices>,
     ) -> Self {
+        let num_points = elements.num_points();
         let num_placeholders = placeholder_indices.len();
         Self {
-            elements: elements.clone(),
-            points: SparseIntervalMatrix::new(elements.num_points()),
-            placeholder_indices: placeholder_indices.clone(),
+            elements,
+            points: SparseIntervalMatrix::new(num_points),
+            placeholder_indices,
             free_regions: SparseBitMatrix::new(num_universal_regions),
             placeholders: SparseBitMatrix::new(num_placeholders),
         }

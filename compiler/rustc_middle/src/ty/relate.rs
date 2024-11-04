@@ -1,7 +1,5 @@
 use std::iter;
 
-use rustc_hir as hir;
-use rustc_target::spec::abi;
 pub use rustc_type_ir::relate::*;
 
 use crate::ty::error::{ExpectedFound, TypeError};
@@ -121,26 +119,6 @@ impl<'tcx> Relate<TyCtxt<'tcx>> for &'tcx ty::List<ty::PolyExistentialPredicate<
     }
 }
 
-impl<'tcx> Relate<TyCtxt<'tcx>> for hir::Safety {
-    fn relate<R: TypeRelation<TyCtxt<'tcx>>>(
-        _relation: &mut R,
-        a: hir::Safety,
-        b: hir::Safety,
-    ) -> RelateResult<'tcx, hir::Safety> {
-        if a != b { Err(TypeError::SafetyMismatch(ExpectedFound::new(true, a, b))) } else { Ok(a) }
-    }
-}
-
-impl<'tcx> Relate<TyCtxt<'tcx>> for abi::Abi {
-    fn relate<R: TypeRelation<TyCtxt<'tcx>>>(
-        _relation: &mut R,
-        a: abi::Abi,
-        b: abi::Abi,
-    ) -> RelateResult<'tcx, abi::Abi> {
-        if a == b { Ok(a) } else { Err(TypeError::AbiMismatch(ExpectedFound::new(true, a, b))) }
-    }
-}
-
 impl<'tcx> Relate<TyCtxt<'tcx>> for ty::GenericArgsRef<'tcx> {
     fn relate<R: TypeRelation<TyCtxt<'tcx>>>(
         relation: &mut R,
@@ -212,15 +190,7 @@ impl<'tcx> Relate<TyCtxt<'tcx>> for ty::GenericArg<'tcx> {
             (ty::GenericArgKind::Const(a_ct), ty::GenericArgKind::Const(b_ct)) => {
                 Ok(relation.relate(a_ct, b_ct)?.into())
             }
-            (ty::GenericArgKind::Lifetime(unpacked), x) => {
-                bug!("impossible case reached: can't relate: {:?} with {:?}", unpacked, x)
-            }
-            (ty::GenericArgKind::Type(unpacked), x) => {
-                bug!("impossible case reached: can't relate: {:?} with {:?}", unpacked, x)
-            }
-            (ty::GenericArgKind::Const(unpacked), x) => {
-                bug!("impossible case reached: can't relate: {:?} with {:?}", unpacked, x)
-            }
+            _ => bug!("impossible case reached: can't relate: {a:?} with {b:?}"),
         }
     }
 }

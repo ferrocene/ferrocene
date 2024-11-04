@@ -11,10 +11,16 @@ use crate::{
         Statement,
     },
     pretty::{print_generic_args, print_path, print_type_ref},
-    type_ref::TypeRef,
 };
 
 use super::*;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(super) enum LineFormat {
+    Oneline,
+    Newline,
+    Indentation,
+}
 
 pub(super) fn print_body_hir(
     db: &dyn DefDatabase,
@@ -52,23 +58,30 @@ pub(super) fn print_body_hir(
         }
     };
 
-    let mut p = Printer { db, body, buf: header, indent_level: 0, needs_indent: false, edition };
+    let mut p = Printer {
+        db,
+        body,
+        buf: header,
+        indent_level: 0,
+        line_format: LineFormat::Newline,
+        edition,
+    };
     if let DefWithBodyId::FunctionId(it) = owner {
         p.buf.push('(');
-        let function_data = &db.function_data(it);
+        let function_data = db.function_data(it);
         let (mut params, ret_type) = (function_data.params.iter(), &function_data.ret_type);
         if let Some(self_param) = body.self_param {
             p.print_binding(self_param);
             p.buf.push_str(": ");
             if let Some(ty) = params.next() {
-                p.print_type_ref(ty);
+                p.print_type_ref(*ty, &function_data.types_map);
                 p.buf.push_str(", ");
             }
         }
         body.params.iter().zip(params).for_each(|(&param, ty)| {
             p.print_pat(param);
             p.buf.push_str(": ");
-            p.print_type_ref(ty);
+            p.print_type_ref(*ty, &function_data.types_map);
             p.buf.push_str(", ");
         });
         // remove the last ", " in param list
@@ -78,7 +91,7 @@ pub(super) fn print_body_hir(
         p.buf.push(')');
         // return type
         p.buf.push_str(" -> ");
-        p.print_type_ref(ret_type);
+        p.print_type_ref(*ret_type, &function_data.types_map);
         p.buf.push(' ');
     }
     p.print_expr(body.body_expr);
@@ -95,9 +108,35 @@ pub(super) fn print_expr_hir(
     expr: ExprId,
     edition: Edition,
 ) -> String {
-    let mut p =
-        Printer { db, body, buf: String::new(), indent_level: 0, needs_indent: false, edition };
+    let mut p = Printer {
+        db,
+        body,
+        buf: String::new(),
+        indent_level: 0,
+        line_format: LineFormat::Newline,
+        edition,
+    };
     p.print_expr(expr);
+    p.buf
+}
+
+pub(super) fn print_pat_hir(
+    db: &dyn DefDatabase,
+    body: &Body,
+    _owner: DefWithBodyId,
+    pat: PatId,
+    oneline: bool,
+    edition: Edition,
+) -> String {
+    let mut p = Printer {
+        db,
+        body,
+        buf: String::new(),
+        indent_level: 0,
+        line_format: if oneline { LineFormat::Oneline } else { LineFormat::Newline },
+        edition,
+    };
+    p.print_pat(pat);
     p.buf
 }
 
@@ -109,10 +148,10 @@ macro_rules! w {
 
 macro_rules! wln {
     ($dst:expr) => {
-        { let _ = writeln!($dst); }
+        { $dst.newline(); }
     };
     ($dst:expr, $($arg:tt)*) => {
-        { let _ = writeln!($dst, $($arg)*); }
+        { let _ = w!($dst, $($arg)*); $dst.newline(); }
     };
 }
 
@@ -121,24 +160,30 @@ struct Printer<'a> {
     body: &'a Body,
     buf: String,
     indent_level: usize,
-    needs_indent: bool,
+    line_format: LineFormat,
     edition: Edition,
 }
 
 impl Write for Printer<'_> {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         for line in s.split_inclusive('\n') {
-            if self.needs_indent {
+            if matches!(self.line_format, LineFormat::Indentation) {
                 match self.buf.chars().rev().find(|ch| *ch != ' ') {
                     Some('\n') | None => {}
                     _ => self.buf.push('\n'),
                 }
                 self.buf.push_str(&"    ".repeat(self.indent_level));
-                self.needs_indent = false;
             }
 
             self.buf.push_str(line);
-            self.needs_indent = line.ends_with('\n');
+
+            if matches!(self.line_format, LineFormat::Newline | LineFormat::Indentation) {
+                self.line_format = if line.ends_with('\n') {
+                    LineFormat::Indentation
+                } else {
+                    LineFormat::Newline
+                };
+            }
         }
 
         Ok(())
@@ -161,14 +206,28 @@ impl Printer<'_> {
         }
     }
 
+    // Add a newline if the current line is not empty.
+    // If the current line is empty, add a space instead.
+    //
+    // Do not use [`writeln!()`] or [`wln!()`] here, which will result in
+    // infinite recursive calls to this function.
     fn newline(&mut self) {
-        match self.buf.chars().rev().find_position(|ch| *ch != ' ') {
-            Some((_, '\n')) | None => {}
-            Some((idx, _)) => {
-                if idx != 0 {
-                    self.buf.drain(self.buf.len() - idx..);
+        if matches!(self.line_format, LineFormat::Oneline) {
+            match self.buf.chars().last() {
+                Some(' ') | None => {}
+                Some(_) => {
+                    w!(self, " ");
                 }
-                writeln!(self).unwrap()
+            }
+        } else {
+            match self.buf.chars().rev().find_position(|ch| *ch != ' ') {
+                Some((_, '\n')) | None => {}
+                Some((idx, _)) => {
+                    if idx != 0 {
+                        self.buf.drain(self.buf.len() - idx..);
+                    }
+                    w!(self, "\n");
+                }
             }
         }
     }
@@ -182,7 +241,7 @@ impl Printer<'_> {
             Expr::InlineAsm(_) => w!(self, "builtin#asm(_)"),
             Expr::OffsetOf(offset_of) => {
                 w!(self, "builtin#offset_of(");
-                self.print_type_ref(&offset_of.container);
+                self.print_type_ref(offset_of.container, &self.body.types);
                 let edition = self.edition;
                 w!(
                     self,
@@ -217,7 +276,7 @@ impl Printer<'_> {
                 w!(self, "loop ");
                 self.print_expr(*body);
             }
-            Expr::Call { callee, args, is_assignee_expr: _ } => {
+            Expr::Call { callee, args } => {
                 self.print_expr(*callee);
                 w!(self, "(");
                 if !args.is_empty() {
@@ -236,7 +295,7 @@ impl Printer<'_> {
                 if let Some(args) = generic_args {
                     w!(self, "::<");
                     let edition = self.edition;
-                    print_generic_args(self.db, args, self, edition).unwrap();
+                    print_generic_args(self.db, args, &self.body.types, self, edition).unwrap();
                     w!(self, ">");
                 }
                 w!(self, "(");
@@ -312,7 +371,7 @@ impl Printer<'_> {
                     self.print_expr(*expr);
                 }
             }
-            Expr::RecordLit { path, fields, spread, ellipsis, is_assignee_expr: _ } => {
+            Expr::RecordLit { path, fields, spread } => {
                 match path {
                     Some(path) => self.print_path(path),
                     None => w!(self, "�"),
@@ -331,9 +390,6 @@ impl Printer<'_> {
                         p.print_expr(*spread);
                         wln!(p);
                     }
-                    if *ellipsis {
-                        wln!(p, "..");
-                    }
                 });
                 w!(self, "}}");
             }
@@ -348,7 +404,7 @@ impl Printer<'_> {
             Expr::Cast { expr, type_ref } => {
                 self.print_expr(*expr);
                 w!(self, " as ");
-                self.print_type_ref(type_ref);
+                self.print_type_ref(*type_ref, &self.body.types);
             }
             Expr::Ref { expr, rawness, mutability } => {
                 w!(self, "&");
@@ -406,7 +462,7 @@ impl Printer<'_> {
                     w!(self, ") ");
                 }
             }
-            Expr::Index { base, index, is_assignee_expr: _ } => {
+            Expr::Index { base, index } => {
                 self.print_expr(*base);
                 w!(self, "[");
                 self.print_expr(*index);
@@ -436,18 +492,18 @@ impl Printer<'_> {
                     self.print_pat(*pat);
                     if let Some(ty) = ty {
                         w!(self, ": ");
-                        self.print_type_ref(ty);
+                        self.print_type_ref(*ty, &self.body.types);
                     }
                 }
                 w!(self, "|");
                 if let Some(ret_ty) = ret_type {
                     w!(self, " -> ");
-                    self.print_type_ref(ret_ty);
+                    self.print_type_ref(*ret_ty, &self.body.types);
                 }
                 self.whitespace();
                 self.print_expr(*body);
             }
-            Expr::Tuple { exprs, is_assignee_expr: _ } => {
+            Expr::Tuple { exprs } => {
                 w!(self, "(");
                 for expr in exprs.iter() {
                     self.print_expr(*expr);
@@ -459,7 +515,7 @@ impl Printer<'_> {
                 w!(self, "[");
                 if !matches!(arr, Array::ElementList { elements, .. } if elements.is_empty()) {
                     self.indented(|p| match arr {
-                        Array::ElementList { elements, is_assignee_expr: _ } => {
+                        Array::ElementList { elements } => {
                             for elem in elements.iter() {
                                 p.print_expr(*elem);
                                 w!(p, ", ");
@@ -490,6 +546,11 @@ impl Printer<'_> {
             }
             Expr::Const(id) => {
                 w!(self, "const {{ /* {id:?} */ }}");
+            }
+            &Expr::Assignment { target, value } => {
+                self.print_pat(target);
+                w!(self, " = ");
+                self.print_expr(value);
             }
         }
     }
@@ -539,12 +600,14 @@ impl Printer<'_> {
                 w!(self, ")");
             }
             Pat::Or(pats) => {
+                w!(self, "(");
                 for (i, pat) in pats.iter().enumerate() {
                     if i != 0 {
                         w!(self, " | ");
                     }
                     self.print_pat(*pat);
                 }
+                w!(self, ")");
             }
             Pat::Record { path, args, ellipsis } => {
                 match path {
@@ -554,12 +617,37 @@ impl Printer<'_> {
 
                 w!(self, " {{");
                 let edition = self.edition;
+                let oneline = matches!(self.line_format, LineFormat::Oneline);
                 self.indented(|p| {
-                    for arg in args.iter() {
-                        w!(p, "{}: ", arg.name.display(self.db.upcast(), edition));
-                        p.print_pat(arg.pat);
-                        wln!(p, ",");
+                    for (idx, arg) in args.iter().enumerate() {
+                        let field_name = arg.name.display(self.db.upcast(), edition).to_string();
+
+                        let mut same_name = false;
+                        if let Pat::Bind { id, subpat: None } = &self.body[arg.pat] {
+                            if let Binding { name, mode: BindingAnnotation::Unannotated, .. } =
+                                &self.body.bindings[*id]
+                            {
+                                if name.as_str() == field_name {
+                                    same_name = true;
+                                }
+                            }
+                        }
+
+                        w!(p, "{}", field_name);
+
+                        if !same_name {
+                            w!(p, ": ");
+                            p.print_pat(arg.pat);
+                        }
+
+                        // Do not print the extra comma if the line format is oneline
+                        if oneline && idx == args.len() - 1 {
+                            w!(p, " ");
+                        } else {
+                            wln!(p, ",");
+                        }
                     }
+
                     if *ellipsis {
                         wln!(p, "..");
                     }
@@ -632,6 +720,9 @@ impl Printer<'_> {
                 w!(self, "const ");
                 self.print_expr(*c);
             }
+            Pat::Expr(expr) => {
+                self.print_expr(*expr);
+            }
         }
     }
 
@@ -642,7 +733,7 @@ impl Printer<'_> {
                 self.print_pat(*pat);
                 if let Some(ty) = type_ref {
                     w!(self, ": ");
-                    self.print_type_ref(ty);
+                    self.print_type_ref(*ty, &self.body.types);
                 }
                 if let Some(init) = initializer {
                     w!(self, " = ");
@@ -661,7 +752,7 @@ impl Printer<'_> {
                 }
                 wln!(self);
             }
-            Statement::Item => (),
+            Statement::Item(_) => (),
         }
     }
 
@@ -700,14 +791,14 @@ impl Printer<'_> {
         }
     }
 
-    fn print_type_ref(&mut self, ty: &TypeRef) {
+    fn print_type_ref(&mut self, ty: TypeRefId, map: &TypesMap) {
         let edition = self.edition;
-        print_type_ref(self.db, ty, self, edition).unwrap();
+        print_type_ref(self.db, ty, map, self, edition).unwrap();
     }
 
     fn print_path(&mut self, path: &Path) {
         let edition = self.edition;
-        print_path(self.db, path, self, edition).unwrap();
+        print_path(self.db, path, &self.body.types, self, edition).unwrap();
     }
 
     fn print_binding(&mut self, id: BindingId) {

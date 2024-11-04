@@ -17,7 +17,7 @@
 //! also check out the `src/bootstrap/README.md` file for more information.
 
 use std::cell::{Cell, RefCell};
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fmt::Display;
 use std::fs::{self, File};
 use std::path::{Path, PathBuf};
@@ -35,8 +35,8 @@ use utils::helpers::hex_encode;
 
 use crate::core::builder;
 use crate::core::builder::{Builder, Kind};
-use crate::core::config::{flags, DryRun, LldMode, LlvmLibunwind, Target, TargetSelection};
-use crate::utils::exec::{command, BehaviorOnFailure, BootstrapCommand, CommandOutput, OutputMode};
+use crate::core::config::{DryRun, LldMode, LlvmLibunwind, Target, TargetSelection, flags};
+use crate::utils::exec::{BehaviorOnFailure, BootstrapCommand, CommandOutput, OutputMode, command};
 use crate::utils::helpers::{
     self, dir_is_empty, exe, libdir, mtime, output, set_file_times, symlink_dir,
 };
@@ -46,11 +46,11 @@ mod ferrocene;
 mod utils;
 
 pub use core::builder::PathSet;
-pub use core::config::flags::{Flags, Subcommand};
 pub use core::config::Config;
+pub use core::config::flags::{Flags, Subcommand};
 
 pub use utils::change_tracker::{
-    find_recent_config_change_ids, human_readable_changes, CONFIG_CHANGE_HISTORY,
+    CONFIG_CHANGE_HISTORY, find_recent_config_change_ids, human_readable_changes,
 };
 
 const LLVM_TOOLS: &[&str] = &[
@@ -314,18 +314,15 @@ impl Build {
         #[cfg(not(unix))]
         let is_sudo = false;
 
-        let omit_git_hash = config.omit_git_hash;
-        let rust_info = GitInfo::new(omit_git_hash, &src);
-        let cargo_info = GitInfo::new(omit_git_hash, &src.join("src/tools/cargo"));
-        let rust_analyzer_info = GitInfo::new(omit_git_hash, &src.join("src/tools/rust-analyzer"));
-        let clippy_info = GitInfo::new(omit_git_hash, &src.join("src/tools/clippy"));
-        let miri_info = GitInfo::new(omit_git_hash, &src.join("src/tools/miri"));
-        let rustfmt_info = GitInfo::new(omit_git_hash, &src.join("src/tools/rustfmt"));
-        let enzyme_info = GitInfo::new(omit_git_hash, &src.join("src/tools/enzyme"));
-
-        // we always try to use git for LLVM builds
-        let in_tree_llvm_info = GitInfo::new(false, &src.join("src/llvm-project"));
-        let in_tree_gcc_info = GitInfo::new(false, &src.join("src/gcc"));
+        let rust_info = config.rust_info.clone();
+        let cargo_info = config.cargo_info.clone();
+        let rust_analyzer_info = config.rust_analyzer_info.clone();
+        let clippy_info = config.clippy_info.clone();
+        let miri_info = config.miri_info.clone();
+        let rustfmt_info = config.rustfmt_info.clone();
+        let enzyme_info = config.enzyme_info.clone();
+        let in_tree_llvm_info = config.in_tree_llvm_info.clone();
+        let in_tree_gcc_info = config.in_tree_gcc_info.clone();
 
         let initial_target_libdir_str = if config.dry_run() {
             "/dummy/lib/path/to/lib/".to_string()
@@ -482,7 +479,7 @@ impl Build {
             crate::core::metadata::build(&mut build);
         }
 
-        // Make a symbolic link so we can use a consistent directory in the documentation.
+        // Create symbolic link to use host sysroot from a consistent path (e.g., in the rust-analyzer config file).
         let build_triple = build.out.join(build.build);
         t!(fs::create_dir_all(&build_triple));
         let host = build.out.join("host");
@@ -553,27 +550,32 @@ impl Build {
         }
         let output = helpers::git(Some(&self.src))
             .args(["config", "--file"])
-            .arg(self.config.src.join(".gitmodules"))
+            .arg(".gitmodules")
             .args(["--get-regexp", "path"])
             .run_capture(self)
             .stdout();
-        for line in output.lines() {
+        std::thread::scope(|s| {
             // Look for `submodule.$name.path = $path`
             // Sample output: `submodule.src/rust-installer.path src/tools/rust-installer`
-            let submodule = line.split_once(' ').unwrap().1;
-            self.update_existing_submodule(submodule);
-        }
+            for line in output.lines() {
+                let submodule = line.split_once(' ').unwrap().1;
+                let config = self.config.clone();
+                s.spawn(move || {
+                    Self::update_existing_submodule(&config, submodule);
+                });
+            }
+        });
     }
 
     /// Updates the given submodule only if it's initialized already; nothing happens otherwise.
-    pub fn update_existing_submodule(&self, submodule: &str) {
+    pub fn update_existing_submodule(config: &Config, submodule: &str) {
         // Avoid running git when there isn't a git checkout.
-        if !self.config.submodules() {
+        if !config.submodules() {
             return;
         }
 
         if GitInfo::new(false, Path::new(submodule)).is_managed_git_subrepository() {
-            self.config.update_submodule(submodule);
+            config.update_submodule(submodule);
         }
     }
 
@@ -603,15 +605,6 @@ impl Build {
                 return core::build_steps::perf::perf(&builder::Builder::new(self));
             }
             _ => (),
-        }
-
-        {
-            let builder = builder::Builder::new(self);
-            if let Some(path) = builder.paths.first() {
-                if path == Path::new("nonexistent/path/to/trigger/cargo/metadata") {
-                    return;
-                }
-            }
         }
 
         if !self.config.dry_run() {
@@ -677,28 +670,31 @@ impl Build {
         &self.config.rust_info
     }
 
-    /// Gets the space-separated set of activated features for the standard
-    /// library.
+    /// Gets the space-separated set of activated features for the standard library.
+    /// This can be configured with the `std-features` key in config.toml.
     fn std_features(&self, target: TargetSelection) -> String {
-        let mut features = " panic-unwind".to_string();
+        let mut features: BTreeSet<&str> =
+            self.config.rust_std_features.iter().map(|s| s.as_str()).collect();
 
         match self.config.llvm_libunwind(target) {
-            LlvmLibunwind::InTree => features.push_str(" llvm-libunwind"),
-            LlvmLibunwind::System => features.push_str(" system-llvm-libunwind"),
-            LlvmLibunwind::No => {}
-        }
+            LlvmLibunwind::InTree => features.insert("llvm-libunwind"),
+            LlvmLibunwind::System => features.insert("system-llvm-libunwind"),
+            LlvmLibunwind::No => false,
+        };
+
         if self.config.backtrace {
-            features.push_str(" backtrace");
+            features.insert("backtrace");
         }
         if self.config.profiler_enabled(target) {
-            features.push_str(" profiler");
+            features.insert("profiler");
         }
         // Generate memcpy, etc.  FIXME: Remove this once compiler-builtins
         // automatically detects this target.
         if target.contains("zkvm") {
-            features.push_str(" compiler-builtins-mem");
+            features.insert("compiler-builtins-mem");
         }
-        features
+
+        features.into_iter().collect::<Vec<_>>().join(" ")
     }
 
     /// Gets the space-separated set of activated features for the compiler.
@@ -1416,7 +1412,7 @@ Executed at: {executed_at}"#,
         }
 
         if target.starts_with("wasm") && target.contains("wasi") {
-            self.default_wasi_runner()
+            self.default_wasi_runner(target)
         } else {
             None
         }
@@ -1425,7 +1421,7 @@ Executed at: {executed_at}"#,
     /// When a `runner` configuration is not provided and a WASI-looking target
     /// is being tested this is consulted to prove the environment to see if
     /// there's a runtime already lying around that seems reasonable to use.
-    fn default_wasi_runner(&self) -> Option<String> {
+    fn default_wasi_runner(&self, target: TargetSelection) -> Option<String> {
         let mut finder = crate::core::sanity::Finder::new();
 
         // Look for Wasmtime, and for its default options be sure to disable
@@ -1441,6 +1437,11 @@ Executed at: {executed_at}"#,
                 // inherit the entire environment rather than just this single
                 // environment variable.
                 path.push_str(" --env RUSTC_BOOTSTRAP");
+
+                if target.contains("wasip2") {
+                    path.push_str(" --wasi inherit-network --wasi allow-ip-name-lookup");
+                }
+
                 return Some(path);
             }
         }
@@ -1613,9 +1614,11 @@ Executed at: {executed_at}"#,
     fn rust_version(&self) -> String {
         let mut version = self.rust_info().version(self, &self.version);
         if let Some(ref s) = self.config.description {
-            version.push_str(" (");
-            version.push_str(s);
-            version.push(')');
+            if !s.is_empty() {
+                version.push_str(" (");
+                version.push_str(s);
+                version.push(')');
+            }
         }
         version
     }

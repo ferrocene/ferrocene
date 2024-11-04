@@ -4,50 +4,43 @@
 //! AST visitor. Also see `rustc_session::lint::builtin`, which contains the
 //! definitions of lints that are emitted directly inside the main compiler.
 //!
-//! To add a new lint to rustc, declare it here using `declare_lint!()`.
+//! To add a new lint to rustc, declare it here using [`declare_lint!`].
 //! Then add code to emit the new lint in the appropriate circumstances.
-//! You can do that in an existing `LintPass` if it makes sense, or in a
-//! new `LintPass`, or using `Session::add_lint` elsewhere in the
-//! compiler. Only do the latter if the check can't be written cleanly as a
-//! `LintPass` (also, note that such lints will need to be defined in
-//! `rustc_session::lint::builtin`, not here).
 //!
-//! If you define a new `EarlyLintPass`, you will also need to add it to the
-//! `add_early_builtin!` or `add_early_builtin_with_new!` invocation in
-//! `lib.rs`. Use the former for unit-like structs and the latter for structs
-//! with a `pub fn new()`.
+//! If you define a new [`EarlyLintPass`], you will also need to add it to the
+//! [`crate::early_lint_methods!`] invocation in `lib.rs`.
 //!
-//! If you define a new `LateLintPass`, you will also need to add it to the
-//! `late_lint_methods!` invocation in `lib.rs`.
+//! If you define a new [`LateLintPass`], you will also need to add it to the
+//! [`crate::late_lint_methods!`] invocation in `lib.rs`.
 
 use std::fmt::Write;
 
 use ast::token::TokenKind;
+use rustc_abi::BackendRepr;
 use rustc_ast::tokenstream::{TokenStream, TokenTree};
 use rustc_ast::visit::{FnCtxt, FnKind};
 use rustc_ast::{self as ast, *};
 use rustc_ast_pretty::pprust::{self, expr_to_string};
 use rustc_errors::{Applicability, LintDiagnostic};
-use rustc_feature::{deprecated_attributes, AttributeGate, BuiltinAttribute, GateIssue, Stability};
+use rustc_feature::{AttributeGate, BuiltinAttribute, GateIssue, Stability, deprecated_attributes};
 use rustc_hir as hir;
 use rustc_hir::def::{DefKind, Res};
-use rustc_hir::def_id::{DefId, LocalDefId, CRATE_DEF_ID};
+use rustc_hir::def_id::{CRATE_DEF_ID, DefId, LocalDefId};
 use rustc_hir::intravisit::FnKind as HirFnKind;
 use rustc_hir::{Body, FnDecl, GenericParamKind, PatKind, PredicateOrigin};
 use rustc_middle::bug;
 use rustc_middle::lint::in_external_macro;
 use rustc_middle::ty::layout::LayoutOf;
 use rustc_middle::ty::print::with_no_trimmed_paths;
-use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitableExt, Upcast, VariantDef};
+use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitableExt, TypingMode, Upcast, VariantDef};
+use rustc_session::lint::FutureIncompatibilityReason;
 // hardwired lints from rustc_lint_defs
 pub use rustc_session::lint::builtin::*;
-use rustc_session::lint::FutureIncompatibilityReason;
 use rustc_session::{declare_lint, declare_lint_pass, impl_lint_pass};
 use rustc_span::edition::Edition;
 use rustc_span::source_map::Spanned;
-use rustc_span::symbol::{kw, sym, Ident, Symbol};
+use rustc_span::symbol::{Ident, Symbol, kw, sym};
 use rustc_span::{BytePos, InnerSpan, Span};
-use rustc_target::abi::Abi;
 use rustc_target::asm::InlineAsmArch;
 use rustc_trait_selection::infer::{InferCtxtExt, TyCtxtInferExt};
 use rustc_trait_selection::traits::misc::type_allowed_to_implement_copy;
@@ -68,12 +61,11 @@ use crate::lints::{
     BuiltinUnsafe, BuiltinUnstableFeatures, BuiltinUnusedDocComment, BuiltinUnusedDocCommentSub,
     BuiltinWhileTrue, InvalidAsmLabel,
 };
-use crate::nonstandard_style::{method_context, MethodLateContext};
+use crate::nonstandard_style::{MethodLateContext, method_context};
 use crate::{
-    fluent_generated as fluent, EarlyContext, EarlyLintPass, LateContext, LateLintPass, Level,
-    LintContext,
+    EarlyContext, EarlyLintPass, LateContext, LateLintPass, Level, LintContext,
+    fluent_generated as fluent,
 };
-
 declare_lint! {
     /// The `while_true` lint detects `while true { }`.
     ///
@@ -120,11 +112,10 @@ impl EarlyLintPass for WhileTrue {
                 "{}loop",
                 label.map_or_else(String::new, |label| format!("{}: ", label.ident,))
             );
-            cx.emit_span_lint(
-                WHILE_TRUE,
-                condition_span,
-                BuiltinWhileTrue { suggestion: condition_span, replace },
-            );
+            cx.emit_span_lint(WHILE_TRUE, condition_span, BuiltinWhileTrue {
+                suggestion: condition_span,
+                replace,
+            });
         }
     }
 }
@@ -242,7 +233,8 @@ declare_lint! {
     /// behavior.
     UNSAFE_CODE,
     Allow,
-    "usage of `unsafe` code and other potentially unsound constructs"
+    "usage of `unsafe` code and other potentially unsound constructs",
+    @eval_always = true
 }
 
 declare_lint_pass!(UnsafeCode => [UNSAFE_CODE]);
@@ -390,6 +382,7 @@ declare_lint! {
     report_in_external_macro
 }
 
+#[derive(Default)]
 pub struct MissingDoc;
 
 impl_lint_pass!(MissingDoc => [MISSING_DOCS]);
@@ -436,11 +429,10 @@ impl MissingDoc {
         let attrs = cx.tcx.hir().attrs(cx.tcx.local_def_id_to_hir_id(def_id));
         let has_doc = attrs.iter().any(has_doc);
         if !has_doc {
-            cx.emit_span_lint(
-                MISSING_DOCS,
-                cx.tcx.def_span(def_id),
-                BuiltinMissingDoc { article, desc },
-            );
+            cx.emit_span_lint(MISSING_DOCS, cx.tcx.def_span(def_id), BuiltinMissingDoc {
+                article,
+                desc,
+            });
         }
     }
 }
@@ -612,7 +604,7 @@ impl<'tcx> LateLintPass<'tcx> for MissingCopyImplementations {
             && cx
                 .tcx
                 .infer_ctxt()
-                .build()
+                .build(cx.typing_mode())
                 .type_implements_trait(iter_trait, [ty], cx.param_env)
                 .must_apply_modulo_regions()
         {
@@ -656,7 +648,9 @@ fn type_implements_negative_copy_modulo_regions<'tcx>(
         predicate: pred.upcast(tcx),
     };
 
-    tcx.infer_ctxt().build().predicate_must_hold_modulo_regions(&obligation)
+    tcx.infer_ctxt()
+        .build(TypingMode::non_body_analysis())
+        .predicate_must_hold_modulo_regions(&obligation)
 }
 
 declare_lint! {
@@ -721,11 +715,10 @@ impl<'tcx> LateLintPass<'tcx> for MissingDebugImplementations {
             .next()
             .is_some();
         if !has_impl {
-            cx.emit_span_lint(
-                MISSING_DEBUG_IMPLEMENTATIONS,
-                item.span,
-                BuiltinMissingDebugImpl { tcx: cx.tcx, def_id: debug },
-            );
+            cx.emit_span_lint(MISSING_DEBUG_IMPLEMENTATIONS, item.span, BuiltinMissingDebugImpl {
+                tcx: cx.tcx,
+                def_id: debug,
+            });
         }
     }
 }
@@ -822,8 +815,8 @@ pub struct DeprecatedAttr {
 
 impl_lint_pass!(DeprecatedAttr => []);
 
-impl DeprecatedAttr {
-    pub fn new() -> DeprecatedAttr {
+impl Default for DeprecatedAttr {
+    fn default() -> Self {
         DeprecatedAttr { depr_attrs: deprecated_attributes() }
     }
 }
@@ -847,24 +840,21 @@ impl EarlyLintPass for DeprecatedAttr {
                             BuiltinDeprecatedAttrLinkSuggestion::Default { suggestion: attr.span }
                         }
                     };
-                    cx.emit_span_lint(
-                        DEPRECATED,
-                        attr.span,
-                        BuiltinDeprecatedAttrLink { name, reason, link, suggestion },
-                    );
+                    cx.emit_span_lint(DEPRECATED, attr.span, BuiltinDeprecatedAttrLink {
+                        name,
+                        reason,
+                        link,
+                        suggestion,
+                    });
                 }
                 return;
             }
         }
         if attr.has_name(sym::no_start) || attr.has_name(sym::crate_id) {
-            cx.emit_span_lint(
-                DEPRECATED,
-                attr.span,
-                BuiltinDeprecatedAttrUsed {
-                    name: pprust::path_to_string(&attr.get_normal_item().path),
-                    suggestion: attr.span,
-                },
-            );
+            cx.emit_span_lint(DEPRECATED, attr.span, BuiltinDeprecatedAttrUsed {
+                name: pprust::path_to_string(&attr.get_normal_item().path),
+                suggestion: attr.span,
+            });
         }
     }
 }
@@ -899,11 +889,11 @@ fn warn_if_doc(cx: &EarlyContext<'_>, node_span: Span, node_kind: &str, attrs: &
                     BuiltinUnusedDocCommentSub::BlockHelp
                 }
             };
-            cx.emit_span_lint(
-                UNUSED_DOC_COMMENTS,
-                span,
-                BuiltinUnusedDocComment { kind: node_kind, label: node_span, sub },
-            );
+            cx.emit_span_lint(UNUSED_DOC_COMMENTS, span, BuiltinUnusedDocComment {
+                kind: node_kind,
+                label: node_span,
+                sub,
+            });
         }
     }
 }
@@ -1033,11 +1023,9 @@ impl<'tcx> LateLintPass<'tcx> for InvalidNoMangleItems {
                 match param.kind {
                     GenericParamKind::Lifetime { .. } => {}
                     GenericParamKind::Type { .. } | GenericParamKind::Const { .. } => {
-                        cx.emit_span_lint(
-                            NO_MANGLE_GENERIC_ITEMS,
-                            span,
-                            BuiltinNoMangleGeneric { suggestion: no_mangle_attr.span },
-                        );
+                        cx.emit_span_lint(NO_MANGLE_GENERIC_ITEMS, span, BuiltinNoMangleGeneric {
+                            suggestion: no_mangle_attr.span,
+                        });
                         break;
                     }
                 }
@@ -1064,11 +1052,9 @@ impl<'tcx> LateLintPass<'tcx> for InvalidNoMangleItems {
 
                     // Const items do not refer to a particular location in memory, and therefore
                     // don't have anything to attach a symbol to
-                    cx.emit_span_lint(
-                        NO_MANGLE_CONST_ITEMS,
-                        it.span,
-                        BuiltinConstNoMangle { suggestion },
-                    );
+                    cx.emit_span_lint(NO_MANGLE_CONST_ITEMS, it.span, BuiltinConstNoMangle {
+                        suggestion,
+                    });
                 }
             }
             hir::ItemKind::Impl(hir::Impl { generics, items, .. }) => {
@@ -1245,7 +1231,7 @@ impl<'tcx> LateLintPass<'tcx> for UngatedAsyncFnTrackCaller {
         def_id: LocalDefId,
     ) {
         if fn_kind.asyncness().is_async()
-            && !cx.tcx.features().async_fn_track_caller
+            && !cx.tcx.features().async_fn_track_caller()
             // Now, check if the function has the `#[track_caller]` attribute
             && let Some(attr) = cx.tcx.get_attr(def_id, sym::track_caller)
         {
@@ -1316,15 +1302,11 @@ impl UnreachablePub {
                 applicability = Applicability::MaybeIncorrect;
             }
             let def_span = cx.tcx.def_span(def_id);
-            cx.emit_span_lint(
-                UNREACHABLE_PUB,
-                def_span,
-                BuiltinUnreachablePub {
-                    what,
-                    suggestion: (vis_span, applicability),
-                    help: exportable,
-                },
-            );
+            cx.emit_span_lint(UNREACHABLE_PUB, def_span, BuiltinUnreachablePub {
+                what,
+                suggestion: (vis_span, applicability),
+                help: exportable,
+            });
         }
     }
 }
@@ -1438,7 +1420,7 @@ impl<'tcx> LateLintPass<'tcx> for TypeAliasBounds {
         // See also `tests/ui/const-generics/generic_const_exprs/type-alias-bounds.rs`.
         let ty = cx.tcx.type_of(item.owner_id).instantiate_identity();
         if ty.has_type_flags(ty::TypeFlags::HAS_CT_PROJECTION)
-            && cx.tcx.features().generic_const_exprs
+            && cx.tcx.features().generic_const_exprs()
         {
             return;
         }
@@ -1468,32 +1450,24 @@ impl<'tcx> LateLintPass<'tcx> for TypeAliasBounds {
         let enable_feat_help = cx.tcx.sess.is_nightly_build();
 
         if let [.., label_sp] = *where_spans {
-            cx.emit_span_lint(
-                TYPE_ALIAS_BOUNDS,
-                where_spans,
-                BuiltinTypeAliasBounds {
-                    in_where_clause: true,
-                    label: label_sp,
-                    enable_feat_help,
-                    suggestions: vec![(generics.where_clause_span, String::new())],
-                    preds: generics.predicates,
-                    ty: ty.take(),
-                },
-            );
+            cx.emit_span_lint(TYPE_ALIAS_BOUNDS, where_spans, BuiltinTypeAliasBounds {
+                in_where_clause: true,
+                label: label_sp,
+                enable_feat_help,
+                suggestions: vec![(generics.where_clause_span, String::new())],
+                preds: generics.predicates,
+                ty: ty.take(),
+            });
         }
         if let [.., label_sp] = *inline_spans {
-            cx.emit_span_lint(
-                TYPE_ALIAS_BOUNDS,
-                inline_spans,
-                BuiltinTypeAliasBounds {
-                    in_where_clause: false,
-                    label: label_sp,
-                    enable_feat_help,
-                    suggestions: inline_sugg,
-                    preds: generics.predicates,
-                    ty,
-                },
-            );
+            cx.emit_span_lint(TYPE_ALIAS_BOUNDS, inline_spans, BuiltinTypeAliasBounds {
+                in_where_clause: false,
+                label: label_sp,
+                enable_feat_help,
+                suggestions: inline_sugg,
+                preds: generics.predicates,
+                ty,
+            });
         }
     }
 }
@@ -1560,7 +1534,7 @@ impl<'tcx> LateLintPass<'tcx> for TrivialConstraints {
     fn check_item(&mut self, cx: &LateContext<'tcx>, item: &'tcx hir::Item<'tcx>) {
         use rustc_middle::ty::ClauseKind;
 
-        if cx.tcx.features().trivial_bounds {
+        if cx.tcx.features().trivial_bounds() {
             let predicates = cx.tcx.predicates_of(item.owner_id);
             for &(predicate, span) in predicates.predicates {
                 let predicate_kind_name = match predicate.kind().skip_binder() {
@@ -1576,14 +1550,15 @@ impl<'tcx> LateLintPass<'tcx> for TrivialConstraints {
                     // Ignore bounds that a user can't type
                     | ClauseKind::WellFormed(..)
                     // FIXME(generic_const_exprs): `ConstEvaluatable` can be written
-                    | ClauseKind::ConstEvaluatable(..)  => continue,
+                    | ClauseKind::ConstEvaluatable(..)
+                    // Users don't write this directly, only via another trait ref.
+                    | ty::ClauseKind::HostEffect(..) => continue,
                 };
                 if predicate.is_global() {
-                    cx.emit_span_lint(
-                        TRIVIAL_BOUNDS,
-                        span,
-                        BuiltinTrivialBounds { predicate_kind_name, predicate },
-                    );
+                    cx.emit_span_lint(TRIVIAL_BOUNDS, span, BuiltinTrivialBounds {
+                        predicate_kind_name,
+                        predicate,
+                    });
                 }
             }
         }
@@ -1899,11 +1874,12 @@ impl KeywordIdents {
             return;
         }
 
-        cx.emit_span_lint(
-            lint,
-            ident.span,
-            BuiltinKeywordIdents { kw: ident, next: edition, suggestion: ident.span, prefix },
-        );
+        cx.emit_span_lint(lint, ident.span, BuiltinKeywordIdents {
+            kw: ident,
+            next: edition,
+            suggestion: ident.span,
+            prefix,
+        });
     }
 }
 
@@ -1914,11 +1890,11 @@ impl EarlyLintPass for KeywordIdents {
     fn check_mac(&mut self, cx: &EarlyContext<'_>, mac: &ast::MacCall) {
         self.check_tokens(cx, &mac.args.tokens);
     }
-    fn check_ident(&mut self, cx: &EarlyContext<'_>, ident: Ident) {
+    fn check_ident(&mut self, cx: &EarlyContext<'_>, ident: &Ident) {
         if ident.name.as_str().starts_with('\'') {
             self.check_ident_token(cx, UnderMacro(false), ident.without_first_quote(), "'");
         } else {
-            self.check_ident_token(cx, UnderMacro(false), ident, "");
+            self.check_ident_token(cx, UnderMacro(false), *ident, "");
         }
     }
 }
@@ -2309,24 +2285,26 @@ declare_lint_pass!(
 impl EarlyLintPass for IncompleteInternalFeatures {
     fn check_crate(&mut self, cx: &EarlyContext<'_>, _: &ast::Crate) {
         let features = cx.builder.features();
-        features
-            .declared_lang_features
-            .iter()
-            .map(|(name, span, _)| (name, span))
-            .chain(features.declared_lib_features.iter().map(|(name, span)| (name, span)))
-            .filter(|(&name, _)| features.incomplete(name) || features.internal(name))
-            .for_each(|(&name, &span)| {
+        let lang_features =
+            features.enabled_lang_features().iter().map(|feat| (feat.gate_name, feat.attr_sp));
+        let lib_features =
+            features.enabled_lib_features().iter().map(|feat| (feat.gate_name, feat.attr_sp));
+
+        lang_features
+            .chain(lib_features)
+            .filter(|(name, _)| features.incomplete(*name) || features.internal(*name))
+            .for_each(|(name, span)| {
                 if features.incomplete(name) {
                     let note = rustc_feature::find_feature_issue(name, GateIssue::Language)
                         .map(|n| BuiltinFeatureIssueNote { n });
                     let help =
                         HAS_MIN_FEATURES.contains(&name).then_some(BuiltinIncompleteFeaturesHelp);
 
-                    cx.emit_span_lint(
-                        INCOMPLETE_FEATURES,
-                        span,
-                        BuiltinIncompleteFeatures { name, note, help },
-                    );
+                    cx.emit_span_lint(INCOMPLETE_FEATURES, span, BuiltinIncompleteFeatures {
+                        name,
+                        note,
+                        help,
+                    });
                 } else {
                     cx.emit_span_lint(INTERNAL_FEATURES, span, BuiltinInternalFeatures { name });
                 }
@@ -2490,7 +2468,9 @@ impl<'tcx> LateLintPass<'tcx> for InvalidValue {
 
             // Check if this ADT has a constrained layout (like `NonNull` and friends).
             if let Ok(layout) = cx.tcx.layout_of(cx.param_env.and(ty)) {
-                if let Abi::Scalar(scalar) | Abi::ScalarPair(scalar, _) = &layout.abi {
+                if let BackendRepr::Scalar(scalar) | BackendRepr::ScalarPair(scalar, _) =
+                    &layout.backend_repr
+                {
                     let range = scalar.valid_range(cx);
                     let msg = if !range.contains(0) {
                         "must be non-null"
@@ -2623,7 +2603,7 @@ impl<'tcx> LateLintPass<'tcx> for InvalidValue {
                     ty.tuple_fields().iter().find_map(|field| ty_find_init_error(cx, field, init))
                 }
                 Array(ty, len) => {
-                    if matches!(len.try_eval_target_usize(cx.tcx, cx.param_env), Some(v) if v > 0) {
+                    if matches!(len.try_to_target_usize(cx.tcx), Some(v) if v > 0) {
                         // Array length known at array non-empty -- recurse.
                         ty_find_init_error(cx, *ty, init)
                     } else {
@@ -2647,17 +2627,13 @@ impl<'tcx> LateLintPass<'tcx> for InvalidValue {
                     InitKind::Uninit => fluent::lint_builtin_unpermitted_type_init_uninit,
                 };
                 let sub = BuiltinUnpermittedTypeInitSub { err };
-                cx.emit_span_lint(
-                    INVALID_VALUE,
-                    expr.span,
-                    BuiltinUnpermittedTypeInit {
-                        msg,
-                        ty: conjured_ty,
-                        label: expr.span,
-                        sub,
-                        tcx: cx.tcx,
-                    },
-                );
+                cx.emit_span_lint(INVALID_VALUE, expr.span, BuiltinUnpermittedTypeInit {
+                    msg,
+                    ty: conjured_ty,
+                    label: expr.span,
+                    sub,
+                    tcx: cx.tcx,
+                });
             }
         }
     }
@@ -2683,8 +2659,8 @@ declare_lint! {
     ///
     /// ### Explanation
     ///
-    /// Dereferencing a null pointer causes [undefined behavior] even as a place expression,
-    /// like `&*(0 as *const i32)` or `addr_of!(*(0 as *const i32))`.
+    /// Dereferencing a null pointer causes [undefined behavior] if it is accessed
+    /// (loaded from or stored to).
     ///
     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
     pub DEREF_NULLPTR,
@@ -2699,14 +2675,14 @@ impl<'tcx> LateLintPass<'tcx> for DerefNullPtr {
         /// test if expression is a null ptr
         fn is_null_ptr(cx: &LateContext<'_>, expr: &hir::Expr<'_>) -> bool {
             match &expr.kind {
-                rustc_hir::ExprKind::Cast(expr, ty) => {
-                    if let rustc_hir::TyKind::Ptr(_) = ty.kind {
+                hir::ExprKind::Cast(expr, ty) => {
+                    if let hir::TyKind::Ptr(_) = ty.kind {
                         return is_zero(expr) || is_null_ptr(cx, expr);
                     }
                 }
                 // check for call to `core::ptr::null` or `core::ptr::null_mut`
-                rustc_hir::ExprKind::Call(path, _) => {
-                    if let rustc_hir::ExprKind::Path(ref qpath) = path.kind {
+                hir::ExprKind::Call(path, _) => {
+                    if let hir::ExprKind::Path(ref qpath) = path.kind {
                         if let Some(def_id) = cx.qpath_res(qpath, path.hir_id).opt_def_id() {
                             return matches!(
                                 cx.tcx.get_diagnostic_name(def_id),
@@ -2723,7 +2699,7 @@ impl<'tcx> LateLintPass<'tcx> for DerefNullPtr {
         /// test if expression is the literal `0`
         fn is_zero(expr: &hir::Expr<'_>) -> bool {
             match &expr.kind {
-                rustc_hir::ExprKind::Lit(lit) => {
+                hir::ExprKind::Lit(lit) => {
                     if let LitKind::Int(a, _) = lit.node {
                         return a == 0;
                     }
@@ -2733,13 +2709,19 @@ impl<'tcx> LateLintPass<'tcx> for DerefNullPtr {
             false
         }
 
-        if let rustc_hir::ExprKind::Unary(rustc_hir::UnOp::Deref, expr_deref) = expr.kind {
-            if is_null_ptr(cx, expr_deref) {
-                cx.emit_span_lint(
-                    DEREF_NULLPTR,
-                    expr.span,
-                    BuiltinDerefNullptr { label: expr.span },
-                );
+        if let hir::ExprKind::Unary(hir::UnOp::Deref, expr_deref) = expr.kind
+            && is_null_ptr(cx, expr_deref)
+        {
+            if let hir::Node::Expr(hir::Expr {
+                kind: hir::ExprKind::AddrOf(hir::BorrowKind::Raw, ..),
+                ..
+            }) = cx.tcx.parent_hir_node(expr.hir_id)
+            {
+                // `&raw *NULL` is ok.
+            } else {
+                cx.emit_span_lint(DEREF_NULLPTR, expr.span, BuiltinDerefNullptr {
+                    label: expr.span,
+                });
             }
         }
     }
@@ -2956,18 +2938,14 @@ impl<'tcx> LateLintPass<'tcx> for AsmLabels {
                     let span = span.unwrap_or(*template_span);
                     match label_kind {
                         AsmLabelKind::Named => {
-                            cx.emit_span_lint(
-                                NAMED_ASM_LABELS,
-                                span,
-                                InvalidAsmLabel::Named { missing_precise_span },
-                            );
+                            cx.emit_span_lint(NAMED_ASM_LABELS, span, InvalidAsmLabel::Named {
+                                missing_precise_span,
+                            });
                         }
                         AsmLabelKind::FormatArg => {
-                            cx.emit_span_lint(
-                                NAMED_ASM_LABELS,
-                                span,
-                                InvalidAsmLabel::FormatArg { missing_precise_span },
-                            );
+                            cx.emit_span_lint(NAMED_ASM_LABELS, span, InvalidAsmLabel::FormatArg {
+                                missing_precise_span,
+                            });
                         }
                         // the binary asm issue only occurs when using intel syntax on x86 targets
                         AsmLabelKind::Binary
@@ -2977,11 +2955,10 @@ impl<'tcx> LateLintPass<'tcx> for AsmLabels {
                                     Some(InlineAsmArch::X86 | InlineAsmArch::X86_64) | None
                                 ) =>
                         {
-                            cx.emit_span_lint(
-                                BINARY_ASM_LABELS,
+                            cx.emit_span_lint(BINARY_ASM_LABELS, span, InvalidAsmLabel::Binary {
+                                missing_precise_span,
                                 span,
-                                InvalidAsmLabel::Binary { missing_precise_span, span },
-                            )
+                            })
                         }
                         // No lint on anything other than x86
                         AsmLabelKind::Binary => (),

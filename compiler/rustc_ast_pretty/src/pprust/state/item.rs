@@ -1,13 +1,13 @@
 use ast::StaticItem;
 use itertools::{Itertools, Position};
 use rustc_ast as ast;
-use rustc_ast::ptr::P;
 use rustc_ast::ModKind;
+use rustc_ast::ptr::P;
 use rustc_span::symbol::Ident;
 
 use crate::pp::Breaks::Inconsistent;
 use crate::pprust::state::fixup::FixupContext;
-use crate::pprust::state::{AnnNode, PrintState, State, INDENT_UNIT};
+use crate::pprust::state::{AnnNode, INDENT_UNIT, PrintState, State};
 
 enum DelegationKind<'a> {
     Single,
@@ -38,7 +38,6 @@ impl<'a> State<'a> {
                 self.print_fn_full(sig, ident, generics, vis, *defaultness, body.as_deref(), attrs);
             }
             ast::ForeignItemKind::Static(box ast::StaticItem { ty, mutability, expr, safety }) => {
-                self.print_safety(*safety);
                 self.print_item_const(
                     ident,
                     Some(*mutability),
@@ -46,6 +45,7 @@ impl<'a> State<'a> {
                     ty,
                     expr.as_deref(),
                     vis,
+                    *safety,
                     ast::Defaultness::Final,
                 )
             }
@@ -84,10 +84,12 @@ impl<'a> State<'a> {
         ty: &ast::Ty,
         body: Option<&ast::Expr>,
         vis: &ast::Visibility,
+        safety: ast::Safety,
         defaultness: ast::Defaultness,
     ) {
         self.head("");
         self.print_visibility(vis);
+        self.print_safety(safety);
         self.print_defaultness(defaultness);
         let leading = match mutbl {
             None => "const",
@@ -181,6 +183,7 @@ impl<'a> State<'a> {
                     ty,
                     body.as_deref(),
                     &item.vis,
+                    ast::Safety::Default,
                     ast::Defaultness::Final,
                 );
             }
@@ -192,6 +195,7 @@ impl<'a> State<'a> {
                     ty,
                     expr.as_deref(),
                     &item.vis,
+                    ast::Safety::Default,
                     *defaultness,
                 );
             }
@@ -549,6 +553,7 @@ impl<'a> State<'a> {
                     ty,
                     expr.as_deref(),
                     vis,
+                    ast::Safety::Default,
                     *defaultness,
                 );
             }

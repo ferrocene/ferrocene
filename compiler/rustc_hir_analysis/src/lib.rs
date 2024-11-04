@@ -58,12 +58,10 @@ This API is completely unstable and subject to change.
 // tidy-alphabetical-start
 #![allow(internal_features)]
 #![allow(rustc::diagnostic_outside_of_impl)]
-#![allow(rustc::potential_query_instability)]
 #![allow(rustc::untranslatable_diagnostic)]
 #![doc(html_root_url = "https://doc.rust-lang.org/nightly/nightly-rustc/")]
 #![doc(rust_logo)]
 #![feature(assert_matches)]
-#![feature(control_flow_enum)]
 #![feature(if_let_guard)]
 #![feature(iter_intersperse)]
 #![feature(let_chains)]
@@ -100,8 +98,8 @@ use rustc_middle::mir::interpret::GlobalId;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_session::parse::feature_err;
-use rustc_span::symbol::sym;
 use rustc_span::Span;
+use rustc_span::symbol::sym;
 use rustc_target::spec::abi::Abi;
 use rustc_trait_selection::traits;
 
@@ -118,7 +116,7 @@ fn require_c_abi_if_c_variadic(tcx: TyCtxt<'_>, decl: &hir::FnDecl<'_>, abi: Abi
         return;
     }
 
-    let extended_abi_support = tcx.features().extended_varargs_abi_support;
+    let extended_abi_support = tcx.features().extended_varargs_abi_support();
     let conventions = match (extended_abi_support, abi.supports_varargs()) {
         // User enabled additional ABI support for varargs and function ABI matches those ones.
         (true, true) => return,
@@ -155,12 +153,6 @@ pub fn provide(providers: &mut Providers) {
 pub fn check_crate(tcx: TyCtxt<'_>) {
     let _prof_timer = tcx.sess.timer("type_check_crate");
 
-    // FIXME(effects): remove once effects is implemented in old trait solver
-    // or if the next solver is stabilized.
-    if tcx.features().effects && !tcx.next_trait_solver_globally() {
-        tcx.dcx().emit_err(errors::EffectsWithoutNextSolver);
-    }
-
     tcx.sess.time("coherence_checking", || {
         tcx.hir().par_for_each_module(|module| {
             let _ = tcx.ensure().check_mod_type_wf(module);
@@ -170,11 +162,11 @@ pub fn check_crate(tcx: TyCtxt<'_>) {
             let _ = tcx.ensure().coherent_trait(trait_def_id);
         }
         // these queries are executed for side-effects (error reporting):
-        let _ = tcx.ensure().crate_inherent_impls(());
+        let _ = tcx.ensure().crate_inherent_impls_validity_check(());
         let _ = tcx.ensure().crate_inherent_impls_overlap_check(());
     });
 
-    if tcx.features().rustc_attrs {
+    if tcx.features().rustc_attrs() {
         tcx.sess.time("outlives_dumping", || outlives::dump::inferred_outlives(tcx));
         tcx.sess.time("variance_dumping", || variance::dump::variances(tcx));
         collect::dump::opaque_hidden_types(tcx);

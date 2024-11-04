@@ -12,11 +12,11 @@ use rustc_middle::thir::visit::Visitor;
 use rustc_middle::thir::*;
 use rustc_middle::ty::print::with_no_trimmed_paths;
 use rustc_middle::ty::{self, ParamEnv, Ty, TyCtxt};
-use rustc_session::lint::builtin::{DEPRECATED_SAFE_2024, UNSAFE_OP_IN_UNSAFE_FN, UNUSED_UNSAFE};
 use rustc_session::lint::Level;
+use rustc_session::lint::builtin::{DEPRECATED_SAFE_2024, UNSAFE_OP_IN_UNSAFE_FN, UNUSED_UNSAFE};
 use rustc_span::def_id::{DefId, LocalDefId};
 use rustc_span::symbol::Symbol;
-use rustc_span::{sym, Span};
+use rustc_span::{Span, sym};
 
 use crate::build::ExprCategory;
 use crate::errors::*;
@@ -499,29 +499,22 @@ impl<'a, 'tcx> Visitor<'a, 'tcx> for UnsafetyVisitor<'a, 'tcx> {
                             .copied()
                             .filter(|feature| missing.contains(feature))
                             .collect();
-                        self.requires_unsafe(
-                            expr.span,
-                            CallToFunctionWith { function: func_did, missing, build_enabled },
-                        );
+                        self.requires_unsafe(expr.span, CallToFunctionWith {
+                            function: func_did,
+                            missing,
+                            build_enabled,
+                        });
                     }
                 }
             }
             ExprKind::RawBorrow { arg, .. } => {
                 if let ExprKind::Scope { value: arg, .. } = self.thir[arg].kind
-                // THIR desugars UNSAFE_STATIC into *UNSAFE_STATIC_REF, where
-                // UNSAFE_STATIC_REF holds the addr of the UNSAFE_STATIC, so: take two steps
                     && let ExprKind::Deref { arg } = self.thir[arg].kind
-                    // FIXME(workingjubiee): we lack a clear reason to reject ThreadLocalRef here,
-                    // but we also have no conclusive reason to allow it either!
-                    && let ExprKind::StaticRef { .. } = self.thir[arg].kind
                 {
-                    // A raw ref to a place expr, even an "unsafe static", is okay!
-                    // We short-circuit to not recursively traverse this expression.
+                    // Taking a raw ref to a deref place expr is always safe.
+                    // Make sure the expression we're deref'ing is safe, though.
+                    visit::walk_expr(self, &self.thir[arg]);
                     return;
-                    // note: const_mut_refs enables this code, and it currently remains unsafe:
-                    // static mut BYTE: u8 = 0;
-                    // static mut BYTE_PTR: *mut u8 = unsafe { addr_of_mut!(BYTE) };
-                    // static mut DEREF_BYTE_PTR: *mut u8 = unsafe { addr_of_mut!(*BYTE_PTR) };
                 }
             }
             ExprKind::Deref { arg } => {
@@ -1052,11 +1045,9 @@ pub(crate) fn check_unsafety(tcx: TyCtxt<'_>, def: LocalDefId) {
     warnings.sort_by_key(|w| w.block_span);
     for UnusedUnsafeWarning { hir_id, block_span, enclosing_unsafe } in warnings {
         let block_span = tcx.sess.source_map().guess_head_span(block_span);
-        tcx.emit_node_span_lint(
-            UNUSED_UNSAFE,
-            hir_id,
-            block_span,
-            UnusedUnsafe { span: block_span, enclosing: enclosing_unsafe },
-        );
+        tcx.emit_node_span_lint(UNUSED_UNSAFE, hir_id, block_span, UnusedUnsafe {
+            span: block_span,
+            enclosing: enclosing_unsafe,
+        });
     }
 }

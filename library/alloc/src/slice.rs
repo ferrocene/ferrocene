@@ -19,20 +19,6 @@ use core::cmp::Ordering::{self, Less};
 use core::mem::{self, MaybeUninit};
 #[cfg(not(no_global_oom_handling))]
 use core::ptr;
-#[cfg(not(no_global_oom_handling))]
-use core::slice::sort;
-
-use crate::alloc::Allocator;
-#[cfg(not(no_global_oom_handling))]
-use crate::alloc::Global;
-#[cfg(not(no_global_oom_handling))]
-use crate::borrow::ToOwned;
-use crate::boxed::Box;
-use crate::vec::Vec;
-
-#[cfg(test)]
-mod tests;
-
 #[unstable(feature = "array_chunks", issue = "74985")]
 pub use core::slice::ArrayChunks;
 #[unstable(feature = "array_chunks", issue = "74985")]
@@ -43,14 +29,8 @@ pub use core::slice::ArrayWindows;
 pub use core::slice::EscapeAscii;
 #[stable(feature = "slice_get_slice", since = "1.28.0")]
 pub use core::slice::SliceIndex;
-#[stable(feature = "from_ref", since = "1.28.0")]
-pub use core::slice::{from_mut, from_ref};
-#[unstable(feature = "slice_from_ptr_range", issue = "89792")]
-pub use core::slice::{from_mut_ptr_range, from_ptr_range};
-#[stable(feature = "rust1", since = "1.0.0")]
-pub use core::slice::{from_raw_parts, from_raw_parts_mut};
-#[unstable(feature = "slice_range", issue = "76393")]
-pub use core::slice::{range, try_range};
+#[cfg(not(no_global_oom_handling))]
+use core::slice::sort;
 #[stable(feature = "slice_group_by", since = "1.77.0")]
 pub use core::slice::{ChunkBy, ChunkByMut};
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -69,6 +49,14 @@ pub use core::slice::{RSplit, RSplitMut};
 pub use core::slice::{RSplitN, RSplitNMut, SplitN, SplitNMut};
 #[stable(feature = "split_inclusive", since = "1.51.0")]
 pub use core::slice::{SplitInclusive, SplitInclusiveMut};
+#[stable(feature = "from_ref", since = "1.28.0")]
+pub use core::slice::{from_mut, from_ref};
+#[unstable(feature = "slice_from_ptr_range", issue = "89792")]
+pub use core::slice::{from_mut_ptr_range, from_ptr_range};
+#[stable(feature = "rust1", since = "1.0.0")]
+pub use core::slice::{from_raw_parts, from_raw_parts_mut};
+#[unstable(feature = "slice_range", issue = "76393")]
+pub use core::slice::{range, try_range};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Basic slice extension methods
@@ -82,6 +70,14 @@ pub use hack::into_vec;
 // N.B., see the `hack` module in this file for more details.
 #[cfg(test)]
 pub use hack::to_vec;
+
+use crate::alloc::Allocator;
+#[cfg(not(no_global_oom_handling))]
+use crate::alloc::Global;
+#[cfg(not(no_global_oom_handling))]
+use crate::borrow::ToOwned;
+use crate::boxed::Box;
+use crate::vec::Vec;
 
 // HACK(japaric): With cfg(test) `impl [T]` is not available, these three
 // functions are actually methods that are in `impl [T]` but not in
@@ -180,10 +176,9 @@ impl<T> [T] {
     /// This sort is stable (i.e., does not reorder equal elements) and *O*(*n* \* log(*n*))
     /// worst-case.
     ///
-    /// If the implementation of [`Ord`] for `T` does not implement a [total order] the resulting
-    /// order of elements in the slice is unspecified. All original elements will remain in the
-    /// slice and any possible modifications via interior mutability are observed in the input. Same
-    /// is true if the implementation of [`Ord`] for `T` panics.
+    /// If the implementation of [`Ord`] for `T` does not implement a [total order], the function
+    /// may panic; even if the function exits normally, the resulting order of elements in the slice
+    /// is unspecified. See also the note on panicking below.
     ///
     /// When applicable, unstable sorting is preferred because it is generally faster than stable
     /// sorting and it doesn't allocate auxiliary memory. See
@@ -212,7 +207,15 @@ impl<T> [T] {
     ///
     /// # Panics
     ///
-    /// May panic if the implementation of [`Ord`] for `T` does not implement a [total order].
+    /// May panic if the implementation of [`Ord`] for `T` does not implement a [total order], or if
+    /// the [`Ord`] implementation itself panics.
+    ///
+    /// All safe functions on slices preserve the invariant that even if the function panics, all
+    /// original elements will remain in the slice and any possible modifications via interior
+    /// mutability are observed in the input. This ensures that recovery code (for instance inside
+    /// of a `Drop` or following a `catch_unwind`) will still have access to all the original
+    /// elements. For instance, if the slice belongs to a `Vec`, the `Vec::drop` method will be able
+    /// to dispose of all contained elements.
     ///
     /// # Examples
     ///
@@ -241,10 +244,9 @@ impl<T> [T] {
     /// This sort is stable (i.e., does not reorder equal elements) and *O*(*n* \* log(*n*))
     /// worst-case.
     ///
-    /// If the comparison function `compare` does not implement a [total order] the resulting order
-    /// of elements in the slice is unspecified. All original elements will remain in the slice and
-    /// any possible modifications via interior mutability are observed in the input. Same is true
-    /// if `compare` panics.
+    /// If the comparison function `compare` does not implement a [total order], the function may
+    /// panic; even if the function exits normally, the resulting order of elements in the slice is
+    /// unspecified. See also the note on panicking below.
     ///
     /// For example `|a, b| (a - b).cmp(a)` is a comparison function that is neither transitive nor
     /// reflexive nor total, `a < b < c < a` with `a = 1, b = 2, c = 3`. For more information and
@@ -263,7 +265,14 @@ impl<T> [T] {
     ///
     /// # Panics
     ///
-    /// May panic if `compare` does not implement a [total order].
+    /// May panic if `compare` does not implement a [total order], or if `compare` itself panics.
+    ///
+    /// All safe functions on slices preserve the invariant that even if the function panics, all
+    /// original elements will remain in the slice and any possible modifications via interior
+    /// mutability are observed in the input. This ensures that recovery code (for instance inside
+    /// of a `Drop` or following a `catch_unwind`) will still have access to all the original
+    /// elements. For instance, if the slice belongs to a `Vec`, the `Vec::drop` method will be able
+    /// to dispose of all contained elements.
     ///
     /// # Examples
     ///
@@ -295,10 +304,9 @@ impl<T> [T] {
     /// This sort is stable (i.e., does not reorder equal elements) and *O*(*m* \* *n* \* log(*n*))
     /// worst-case, where the key function is *O*(*m*).
     ///
-    /// If the implementation of [`Ord`] for `K` does not implement a [total order] the resulting
-    /// order of elements in the slice is unspecified. All original elements will remain in the
-    /// slice and any possible modifications via interior mutability are observed in the input. Same
-    /// is true if the implementation of [`Ord`] for `K` panics.
+    /// If the implementation of [`Ord`] for `K` does not implement a [total order], the function
+    /// may panic; even if the function exits normally, the resulting order of elements in the slice
+    /// is unspecified. See also the note on panicking below.
     ///
     /// # Current implementation
     ///
@@ -313,7 +321,15 @@ impl<T> [T] {
     ///
     /// # Panics
     ///
-    /// May panic if the implementation of [`Ord`] for `K` does not implement a [total order].
+    /// May panic if the implementation of [`Ord`] for `K` does not implement a [total order], or if
+    /// the [`Ord`] implementation or the key-function `f` panics.
+    ///
+    /// All safe functions on slices preserve the invariant that even if the function panics, all
+    /// original elements will remain in the slice and any possible modifications via interior
+    /// mutability are observed in the input. This ensures that recovery code (for instance inside
+    /// of a `Drop` or following a `catch_unwind`) will still have access to all the original
+    /// elements. For instance, if the slice belongs to a `Vec`, the `Vec::drop` method will be able
+    /// to dispose of all contained elements.
     ///
     /// # Examples
     ///
@@ -347,10 +363,9 @@ impl<T> [T] {
     /// storage to remember the results of key evaluation. The order of calls to the key function is
     /// unspecified and may change in future versions of the standard library.
     ///
-    /// If the implementation of [`Ord`] for `K` does not implement a [total order] the resulting
-    /// order of elements in the slice is unspecified. All original elements will remain in the
-    /// slice and any possible modifications via interior mutability are observed in the input. Same
-    /// is true if the implementation of [`Ord`] for `K` panics.
+    /// If the implementation of [`Ord`] for `K` does not implement a [total order], the function
+    /// may panic; even if the function exits normally, the resulting order of elements in the slice
+    /// is unspecified. See also the note on panicking below.
     ///
     /// For simple key functions (e.g., functions that are property accesses or basic operations),
     /// [`sort_by_key`](slice::sort_by_key) is likely to be faster.
@@ -369,7 +384,15 @@ impl<T> [T] {
     ///
     /// # Panics
     ///
-    /// May panic if the implementation of [`Ord`] for `K` does not implement a [total order].
+    /// May panic if the implementation of [`Ord`] for `K` does not implement a [total order], or if
+    /// the [`Ord`] implementation panics.
+    ///
+    /// All safe functions on slices preserve the invariant that even if the function panics, all
+    /// original elements will remain in the slice and any possible modifications via interior
+    /// mutability are observed in the input. This ensures that recovery code (for instance inside
+    /// of a `Drop` or following a `catch_unwind`) will still have access to all the original
+    /// elements. For instance, if the slice belongs to a `Vec`, the `Vec::drop` method will be able
+    /// to dispose of all contained elements.
     ///
     /// # Examples
     ///

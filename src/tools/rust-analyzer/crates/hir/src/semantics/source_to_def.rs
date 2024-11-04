@@ -92,31 +92,67 @@ use hir_def::{
         keys::{self, Key},
         DynMap,
     },
-    hir::{BindingId, LabelId},
+    hir::{BindingId, Expr, LabelId},
     AdtId, BlockId, ConstId, ConstParamId, DefWithBodyId, EnumId, EnumVariantId, ExternCrateId,
     FieldId, FunctionId, GenericDefId, GenericParamId, ImplId, LifetimeParamId, Lookup, MacroId,
     ModuleId, StaticId, StructId, TraitAliasId, TraitId, TypeAliasId, TypeParamId, UnionId, UseId,
     VariantId,
 };
 use hir_expand::{
-    attrs::AttrId, name::AsName, ExpansionInfo, HirFileId, HirFileIdExt, MacroCallId,
+    attrs::AttrId, name::AsName, ExpansionInfo, HirFileId, HirFileIdExt, InMacroFile, MacroCallId,
+    MacroFileIdExt,
 };
 use rustc_hash::FxHashMap;
 use smallvec::SmallVec;
-use span::{FileId, MacroFileId};
+use span::{EditionedFileId, FileId, MacroFileId};
 use stdx::impl_from;
 use syntax::{
     ast::{self, HasName},
     AstNode, AstPtr, SyntaxNode,
 };
 
-use crate::{db::HirDatabase, InFile};
+use crate::{db::HirDatabase, InFile, InlineAsmOperand, SemanticsImpl};
 
 #[derive(Default)]
 pub(super) struct SourceToDefCache {
     pub(super) dynmap_cache: FxHashMap<(ChildContainer, HirFileId), DynMap>,
-    pub(super) expansion_info_cache: FxHashMap<MacroFileId, ExpansionInfo>,
+    expansion_info_cache: FxHashMap<MacroFileId, ExpansionInfo>,
     pub(super) file_to_def_cache: FxHashMap<FileId, SmallVec<[ModuleId; 1]>>,
+    pub(super) included_file_cache: FxHashMap<EditionedFileId, Option<MacroFileId>>,
+}
+
+impl SourceToDefCache {
+    pub(super) fn get_or_insert_include_for(
+        &mut self,
+        db: &dyn HirDatabase,
+        file: EditionedFileId,
+    ) -> Option<MacroFileId> {
+        if let Some(&m) = self.included_file_cache.get(&file) {
+            return m;
+        }
+        self.included_file_cache.insert(file, None);
+        for &crate_id in db.relevant_crates(file.into()).iter() {
+            db.include_macro_invoc(crate_id).iter().for_each(|&(macro_call_id, file_id)| {
+                self.included_file_cache.insert(file_id, Some(MacroFileId { macro_call_id }));
+            });
+        }
+        self.included_file_cache.get(&file).copied().flatten()
+    }
+
+    pub(super) fn get_or_insert_expansion(
+        &mut self,
+        sema: &SemanticsImpl<'_>,
+        macro_file: MacroFileId,
+    ) -> &ExpansionInfo {
+        self.expansion_info_cache.entry(macro_file).or_insert_with(|| {
+            let exp_info = macro_file.expansion_info(sema.db.upcast());
+
+            let InMacroFile { file_id, value } = exp_info.expanded();
+            sema.cache(value, file_id.into());
+
+            exp_info
+        })
+    }
 }
 
 pub(super) struct SourceToDefCtx<'db, 'cache> {
@@ -145,9 +181,13 @@ impl SourceToDefCtx<'_, '_> {
                             .include_macro_invoc(crate_id)
                             .iter()
                             .filter(|&&(_, file_id)| file_id == file)
-                            .flat_map(|(call, _)| {
+                            .flat_map(|&(macro_call_id, file_id)| {
+                                self.cache
+                                    .included_file_cache
+                                    .insert(file_id, Some(MacroFileId { macro_call_id }));
                                 modules(
-                                    call.lookup(self.db.upcast())
+                                    macro_call_id
+                                        .lookup(self.db.upcast())
                                         .kind
                                         .file_id()
                                         .original_file(self.db.upcast())
@@ -273,6 +313,25 @@ impl SourceToDefCtx<'_, '_> {
             ast::Adt::Union(it) => self.union_to_def(InFile::new(file_id, it)).map(AdtId::UnionId),
         }
     }
+
+    pub(super) fn asm_operand_to_def(
+        &mut self,
+        src: InFile<&ast::AsmOperandNamed>,
+    ) -> Option<InlineAsmOperand> {
+        let asm = src.value.syntax().parent().and_then(ast::AsmExpr::cast)?;
+        let index = asm
+            .asm_pieces()
+            .filter_map(|it| match it {
+                ast::AsmPiece::AsmOperandNamed(it) => Some(it),
+                _ => None,
+            })
+            .position(|it| it == *src.value)?;
+        let container = self.find_pat_or_label_container(src.syntax_ref())?;
+        let (_, source_map) = self.db.body_with_source_map(container);
+        let expr = source_map.node_expr(src.with_value(&ast::Expr::AsmExpr(asm)))?.as_expr()?;
+        Some(InlineAsmOperand { owner: container, expr, index })
+    }
+
     pub(super) fn bind_pat_to_def(
         &mut self,
         src: InFile<&ast::IdentPat>,
@@ -281,7 +340,7 @@ impl SourceToDefCtx<'_, '_> {
         let (body, source_map) = self.db.body_with_source_map(container);
         let src = src.cloned().map(ast::Pat::from);
         let pat_id = source_map.node_pat(src.as_ref())?;
-        // the pattern could resolve to a constant, verify that that is not the case
+        // the pattern could resolve to a constant, verify that this is not the case
         if let crate::Pat::Bind { id, .. } = body[pat_id] {
             Some((container, id))
         } else {
@@ -304,6 +363,21 @@ impl SourceToDefCtx<'_, '_> {
         let (_body, source_map) = self.db.body_with_source_map(container);
         let label_id = source_map.node_label(src)?;
         Some((container, label_id))
+    }
+
+    pub(super) fn label_ref_to_def(
+        &mut self,
+        src: InFile<&ast::Lifetime>,
+    ) -> Option<(DefWithBodyId, LabelId)> {
+        let break_or_continue = ast::Expr::cast(src.value.syntax().parent()?)?;
+        let container = self.find_pat_or_label_container(src.syntax_ref())?;
+        let (body, source_map) = self.db.body_with_source_map(container);
+        let break_or_continue =
+            source_map.node_expr(src.with_value(&break_or_continue))?.as_expr()?;
+        let (Expr::Break { label, .. } | Expr::Continue { label }) = body[break_or_continue] else {
+            return None;
+        };
+        Some((container, label?))
     }
 
     pub(super) fn item_to_macro_call(&mut self, src: InFile<&ast::Item>) -> Option<MacroCallId> {

@@ -1,7 +1,7 @@
 use anyhow::Context;
 use camino::{Utf8Path, Utf8PathBuf};
 
-use crate::environment::{executable_extension, Environment};
+use crate::environment::{Environment, executable_extension};
 use crate::exec::cmd;
 use crate::utils::io::{copy_directory, find_file_in_dir, unpack_archive};
 
@@ -22,7 +22,7 @@ pub fn run_tests(env: &Environment) -> anyhow::Result<()> {
         assert!(extracted_path.is_dir());
         Ok(extracted_path)
     };
-    let host_triple = env.host_triple();
+    let host_triple = env.host_tuple();
     let version = find_dist_version(&dist_dir)?;
 
     // Extract rustc, libstd, cargo and src archives to create the optimized sysroot
@@ -87,7 +87,7 @@ llvm-config = "{llvm_config}"
         x_py.as_str(),
         "test",
         "--build",
-        env.host_triple(),
+        env.host_tuple(),
         "--stage",
         "0",
         "tests/assembly",
@@ -96,7 +96,6 @@ llvm-config = "{llvm_config}"
         "tests/incremental",
         "tests/mir-opt",
         "tests/pretty",
-        "tests/run-pass-valgrind",
         "tests/ui",
         "tests/crashes",
     ];

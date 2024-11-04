@@ -95,7 +95,6 @@ fn main() {
     // When statically linking `std` into `rustc_driver`, remove `-C prefer-dynamic`
     if env::var("RUSTC_LINK_STD_INTO_RUSTC_DRIVER").unwrap() == "1"
         && crate_name == Some("rustc_driver")
-        && stage != "0"
     {
         if let Some(pos) = args.iter().enumerate().position(|(i, a)| {
             a == "-C" && args.get(i + 1).map(|a| a == "prefer-dynamic").unwrap_or(false)
@@ -137,6 +136,12 @@ fn main() {
         cmd.args(lint_flags.split_whitespace());
     }
 
+    // Conditionally pass `-Zon-broken-pipe=kill` to underlying rustc. Not all binaries want
+    // `-Zon-broken-pipe=kill`, which includes cargo itself.
+    if env::var_os("FORCE_ON_BROKEN_PIPE_KILL").is_some() {
+        cmd.arg("-Z").arg("on-broken-pipe=kill");
+    }
+
     if target.is_some() {
         // The stage0 compiler has a special sysroot distinct from what we
         // actually downloaded, so we just always pass the `--sysroot` option,
@@ -170,9 +175,7 @@ fn main() {
         // Find any host flags that were passed by bootstrap.
         // The flags are stored in a RUSTC_HOST_FLAGS variable, separated by spaces.
         if let Ok(flags) = std::env::var("RUSTC_HOST_FLAGS") {
-            for flag in flags.split(' ') {
-                cmd.arg(flag);
-            }
+            cmd.args(flags.split(' '));
         }
     }
 

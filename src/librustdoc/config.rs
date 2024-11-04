@@ -5,19 +5,19 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::{fmt, io};
 
-use rustc_data_structures::fx::FxHashMap;
+use rustc_data_structures::fx::FxIndexMap;
 use rustc_errors::DiagCtxtHandle;
 use rustc_session::config::{
-    self, get_cmd_lint_options, nightly_options, parse_crate_types_from_list, parse_externs,
-    parse_target_triple, CodegenOptions, CrateType, ErrorOutputType, Externs, Input,
-    JsonUnusedExterns, UnstableOptions,
+    self, CodegenOptions, CrateType, ErrorOutputType, Externs, Input, JsonUnusedExterns,
+    UnstableOptions, get_cmd_lint_options, nightly_options, parse_crate_types_from_list,
+    parse_externs, parse_target_triple,
 };
 use rustc_session::lint::Level;
 use rustc_session::search_paths::SearchPath;
-use rustc_session::{getopts, EarlyDiagCtxt};
-use rustc_span::edition::Edition;
+use rustc_session::{EarlyDiagCtxt, getopts};
 use rustc_span::FileName;
-use rustc_target::spec::TargetTriple;
+use rustc_span::edition::Edition;
+use rustc_target::spec::TargetTuple;
 
 use crate::core::new_dcx;
 use crate::externalfiles::ExternalHtml;
@@ -96,7 +96,7 @@ pub(crate) struct Options {
     /// Unstable (`-Z`) options strings to pass to the compiler.
     pub(crate) unstable_opts_strs: Vec<String>,
     /// The target used to compile the crate against.
-    pub(crate) target: TargetTriple,
+    pub(crate) target: TargetTuple,
     /// Edition used when reading the crate. Defaults to "2015". Also used by default when
     /// compiling doctests from the crate.
     pub(crate) edition: Edition,
@@ -249,7 +249,7 @@ pub(crate) struct RenderOptions {
     pub(crate) extern_html_root_takes_precedence: bool,
     /// A map of the default settings (values are as for DOM storage API). Keys should lack the
     /// `rustdoc-` prefix.
-    pub(crate) default_settings: FxHashMap<String, String>,
+    pub(crate) default_settings: FxIndexMap<String, String>,
     /// If present, suffix added to CSS/JavaScript files when referencing them in generated pages.
     pub(crate) resource_suffix: String,
     /// Whether to create an index page in the root of the output directory. If this is true but

@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use rustc_abi::{FIRST_VARIANT, FieldIdx};
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_hir as hir;
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, Res};
@@ -17,13 +18,12 @@ use rustc_middle::ty::{
     UserType,
 };
 use rustc_middle::{bug, span_bug};
-use rustc_span::{sym, Span};
-use rustc_target::abi::{FieldIdx, FIRST_VARIANT};
+use rustc_span::{Span, sym};
 use tracing::{debug, info, instrument, trace};
 
 use crate::errors;
-use crate::thir::cx::region::Scope;
 use crate::thir::cx::Cx;
+use crate::thir::cx::region::Scope;
 use crate::thir::util::UserAnnotatedTyHelpers;
 
 impl<'tcx> Cx<'tcx> {
@@ -74,6 +74,7 @@ impl<'tcx> Cx<'tcx> {
         self.thir.exprs.push(expr)
     }
 
+    #[instrument(level = "trace", skip(self, expr, span))]
     fn apply_adjustment(
         &mut self,
         hir_expr: &'tcx hir::Expr<'tcx>,
@@ -103,15 +104,28 @@ impl<'tcx> Cx<'tcx> {
         };
 
         let kind = match adjustment.kind {
-            Adjust::Pointer(PointerCoercion::Unsize) => {
-                adjust_span(&mut expr);
-                ExprKind::PointerCoercion {
-                    cast: PointerCoercion::Unsize,
-                    source: self.thir.exprs.push(expr),
-                }
-            }
             Adjust::Pointer(cast) => {
-                ExprKind::PointerCoercion { cast, source: self.thir.exprs.push(expr) }
+                if cast == PointerCoercion::Unsize {
+                    adjust_span(&mut expr);
+                }
+
+                let is_from_as_cast = if let hir::Node::Expr(hir::Expr {
+                    kind: hir::ExprKind::Cast(..),
+                    span: cast_span,
+                    ..
+                }) = self.tcx.parent_hir_node(hir_expr.hir_id)
+                {
+                    // Use the whole span of the `x as T` expression for the coercion.
+                    span = *cast_span;
+                    true
+                } else {
+                    false
+                };
+                ExprKind::PointerCoercion {
+                    cast,
+                    source: self.thir.exprs.push(expr),
+                    is_from_as_cast,
+                }
             }
             Adjust::NeverToAny if adjustment.target.is_never() => return expr,
             Adjust::NeverToAny => ExprKind::NeverToAny { source: self.thir.exprs.push(expr) },
@@ -126,7 +140,7 @@ impl<'tcx> Cx<'tcx> {
 
                 expr = Expr {
                     temp_lifetime,
-                    ty: Ty::new_ref(self.tcx, deref.region, expr.ty, deref.mutbl),
+                    ty: Ty::new_ref(self.tcx, self.tcx.lifetimes.re_erased, expr.ty, deref.mutbl),
                     span,
                     kind: ExprKind::Borrow {
                         borrow_kind: deref.mutbl.to_borrow_kind(),
@@ -138,14 +152,75 @@ impl<'tcx> Cx<'tcx> {
 
                 self.overloaded_place(hir_expr, adjustment.target, Some(call), expr, deref.span)
             }
-            Adjust::Borrow(AutoBorrow::Ref(_, m)) => ExprKind::Borrow {
+            Adjust::Borrow(AutoBorrow::Ref(m)) => ExprKind::Borrow {
                 borrow_kind: m.to_borrow_kind(),
                 arg: self.thir.exprs.push(expr),
             },
             Adjust::Borrow(AutoBorrow::RawPtr(mutability)) => {
                 ExprKind::RawBorrow { mutability, arg: self.thir.exprs.push(expr) }
             }
-            Adjust::DynStar => ExprKind::Cast { source: self.thir.exprs.push(expr) },
+            Adjust::ReborrowPin(mutbl) => {
+                debug!("apply ReborrowPin adjustment");
+                // Rewrite `$expr` as `Pin { __pointer: &(mut)? *($expr).__pointer }`
+
+                // We'll need these types later on
+                let pin_ty_args = match expr.ty.kind() {
+                    ty::Adt(_, args) => args,
+                    _ => bug!("ReborrowPin with non-Pin type"),
+                };
+                let pin_ty = pin_ty_args.iter().next().unwrap().expect_ty();
+                let ptr_target_ty = match pin_ty.kind() {
+                    ty::Ref(_, ty, _) => *ty,
+                    _ => bug!("ReborrowPin with non-Ref type"),
+                };
+
+                // pointer = ($expr).__pointer
+                let pointer_target = ExprKind::Field {
+                    lhs: self.thir.exprs.push(expr),
+                    variant_index: FIRST_VARIANT,
+                    name: FieldIdx::from(0u32),
+                };
+                let arg = Expr { temp_lifetime, ty: pin_ty, span, kind: pointer_target };
+                let arg = self.thir.exprs.push(arg);
+
+                // arg = *pointer
+                let expr = ExprKind::Deref { arg };
+                let arg = self.thir.exprs.push(Expr {
+                    temp_lifetime,
+                    ty: ptr_target_ty,
+                    span,
+                    kind: expr,
+                });
+
+                // expr = &mut target
+                let borrow_kind = match mutbl {
+                    hir::Mutability::Mut => BorrowKind::Mut { kind: mir::MutBorrowKind::Default },
+                    hir::Mutability::Not => BorrowKind::Shared,
+                };
+                let new_pin_target =
+                    Ty::new_ref(self.tcx, self.tcx.lifetimes.re_erased, ptr_target_ty, mutbl);
+                let expr = self.thir.exprs.push(Expr {
+                    temp_lifetime,
+                    ty: new_pin_target,
+                    span,
+                    kind: ExprKind::Borrow { borrow_kind, arg },
+                });
+
+                // kind = Pin { __pointer: pointer }
+                let pin_did = self.tcx.require_lang_item(rustc_hir::LangItem::Pin, Some(span));
+                let args = self.tcx.mk_args(&[new_pin_target.into()]);
+                let kind = ExprKind::Adt(Box::new(AdtExpr {
+                    adt_def: self.tcx.adt_def(pin_did),
+                    variant_index: FIRST_VARIANT,
+                    args,
+                    fields: Box::new([FieldExpr { name: FieldIdx::from(0u32), expr }]),
+                    user_ty: None,
+                    base: None,
+                }));
+
+                debug!(?kind);
+                kind
+            }
         };
 
         Expr { temp_lifetime, ty: adjustment.target, span, kind }
@@ -174,6 +249,7 @@ impl<'tcx> Cx<'tcx> {
             ExprKind::PointerCoercion {
                 source: self.mirror_expr(source),
                 cast: PointerCoercion::ArrayToPointer,
+                is_from_as_cast: true,
             }
         } else if let hir::ExprKind::Path(ref qpath) = source.kind
             && let res = self.typeck_results().qpath_res(qpath, source.hir_id)
@@ -206,7 +282,14 @@ impl<'tcx> Cx<'tcx> {
                 .unwrap_or_else(|e| panic!("could not compute layout for {param_env_ty:?}: {e:?}"))
                 .size;
 
-            let lit = ScalarInt::try_from_uint(discr_offset as u128, size).unwrap();
+            let (lit, overflowing) = ScalarInt::truncate_from_uint(discr_offset as u128, size);
+            if overflowing {
+                // An erroneous enum with too many variants for its repr will emit E0081 and E0370
+                self.tcx.dcx().span_delayed_bug(
+                    source.span,
+                    "overflowing enum wasn't rejected by hir analysis",
+                );
+            }
             let kind = ExprKind::NonHirLiteral { lit, user_ty: None };
             let offset = self.thir.exprs.push(Expr { temp_lifetime, ty: discr_ty, span, kind });
 
@@ -597,6 +680,7 @@ impl<'tcx> Cx<'tcx> {
             }
 
             hir::ExprKind::InlineAsm(asm) => ExprKind::InlineAsm(Box::new(InlineAsmExpr {
+                asm_macro: asm.asm_macro,
                 template: asm.template,
                 operands: asm
                     .operands
@@ -624,23 +708,17 @@ impl<'tcx> Cx<'tcx> {
                             }
                         }
                         hir::InlineAsmOperand::Const { ref anon_const } => {
-                            let value = mir::Const::identity_unevaluated(
-                                tcx,
-                                anon_const.def_id.to_def_id(),
-                            )
-                            .instantiate_identity()
-                            .normalize(tcx, self.param_env);
+                            let value =
+                                mir::Const::from_unevaluated(tcx, anon_const.def_id.to_def_id())
+                                    .instantiate_identity();
                             let span = tcx.def_span(anon_const.def_id);
 
                             InlineAsmOperand::Const { value, span }
                         }
                         hir::InlineAsmOperand::SymFn { ref anon_const } => {
-                            let value = mir::Const::identity_unevaluated(
-                                tcx,
-                                anon_const.def_id.to_def_id(),
-                            )
-                            .instantiate_identity()
-                            .normalize(tcx, self.param_env);
+                            let value =
+                                mir::Const::from_unevaluated(tcx, anon_const.def_id.to_def_id())
+                                    .instantiate_identity();
                             let span = tcx.def_span(anon_const.def_id);
 
                             InlineAsmOperand::SymFn { value, span }
@@ -707,7 +785,7 @@ impl<'tcx> Cx<'tcx> {
                 if_then_scope: region::Scope {
                     id: then.hir_id.local_id,
                     data: {
-                        if expr.span.at_least_rust_2024() && tcx.features().if_let_rescope {
+                        if expr.span.at_least_rust_2024() {
                             region::ScopeData::IfThenRescope
                         } else {
                             region::ScopeData::IfThen
@@ -738,21 +816,11 @@ impl<'tcx> Cx<'tcx> {
                 });
                 ExprKind::Loop { body }
             }
-            hir::ExprKind::Field(source, ..) => {
-                let mut kind = ExprKind::Field {
-                    lhs: self.mirror_expr(source),
-                    variant_index: FIRST_VARIANT,
-                    name: self.typeck_results.field_index(expr.hir_id),
-                };
-                let nested_field_tys_and_indices =
-                    self.typeck_results.nested_field_tys_and_indices(expr.hir_id);
-                for &(ty, idx) in nested_field_tys_and_indices {
-                    let expr = Expr { temp_lifetime, ty, span: source.span, kind };
-                    let lhs = self.thir.exprs.push(expr);
-                    kind = ExprKind::Field { lhs, variant_index: FIRST_VARIANT, name: idx };
-                }
-                kind
-            }
+            hir::ExprKind::Field(source, ..) => ExprKind::Field {
+                lhs: self.mirror_expr(source),
+                variant_index: FIRST_VARIANT,
+                name: self.typeck_results.field_index(expr.hir_id),
+            },
             hir::ExprKind::Cast(source, cast_ty) => {
                 // Check for a user-given type annotation on this `cast`
                 let user_provided_types = self.typeck_results.user_provided_types();
@@ -779,6 +847,7 @@ impl<'tcx> Cx<'tcx> {
                     ExprKind::ValueTypeAscription {
                         source: cast_expr,
                         user_ty: Some(Box::new(*user_ty)),
+                        user_ty_span: cast_ty.span,
                     }
                 } else {
                     cast
@@ -790,9 +859,17 @@ impl<'tcx> Cx<'tcx> {
                 debug!("make_mirror_unadjusted: (type) user_ty={:?}", user_ty);
                 let mirrored = self.mirror_expr(source);
                 if source.is_syntactic_place_expr() {
-                    ExprKind::PlaceTypeAscription { source: mirrored, user_ty }
+                    ExprKind::PlaceTypeAscription {
+                        source: mirrored,
+                        user_ty,
+                        user_ty_span: ty.span,
+                    }
                 } else {
-                    ExprKind::ValueTypeAscription { source: mirrored, user_ty }
+                    ExprKind::ValueTypeAscription {
+                        source: mirrored,
+                        user_ty,
+                        user_ty_span: ty.span,
+                    }
                 }
             }
             hir::ExprKind::DropTemps(source) => ExprKind::Use { source: self.mirror_expr(source) },
@@ -1014,7 +1091,7 @@ impl<'tcx> Cx<'tcx> {
 
         // Reconstruct the output assuming it's a reference with the
         // same region and mutability as the receiver. This holds for
-        // `Deref(Mut)::Deref(_mut)` and `Index(Mut)::index(_mut)`.
+        // `Deref(Mut)::deref(_mut)` and `Index(Mut)::index(_mut)`.
         let ty::Ref(region, _, mutbl) = *self.thir[args[0]].ty.kind() else {
             span_bug!(span, "overloaded_place: receiver is not a reference");
         };

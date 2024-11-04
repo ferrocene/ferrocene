@@ -20,8 +20,10 @@ use smallvec::SmallVec;
 use tracing::debug;
 
 use crate::abi::{FnAbi, FnAbiLlvmExt};
+use crate::common::AsCCharPtr;
 use crate::context::CodegenCx;
 use crate::llvm::AttributePlace::Function;
+use crate::llvm::Visibility;
 use crate::type_::Type;
 use crate::value::Value;
 use crate::{attributes, llvm};
@@ -40,7 +42,7 @@ fn declare_raw_fn<'ll>(
 ) -> &'ll Value {
     debug!("declare_raw_fn(name={:?}, ty={:?})", name, ty);
     let llfn = unsafe {
-        llvm::LLVMRustGetOrInsertFunction(cx.llmod, name.as_ptr().cast(), name.len(), ty)
+        llvm::LLVMRustGetOrInsertFunction(cx.llmod, name.as_c_char_ptr(), name.len(), ty)
     };
 
     llvm::SetFunctionCallConv(llfn, callconv);
@@ -67,7 +69,7 @@ impl<'ll, 'tcx> CodegenCx<'ll, 'tcx> {
     /// return its Value instead.
     pub(crate) fn declare_global(&self, name: &str, ty: &'ll Type) -> &'ll Value {
         debug!("declare_global(name={:?})", name);
-        unsafe { llvm::LLVMRustGetOrInsertGlobal(self.llmod, name.as_ptr().cast(), name.len(), ty) }
+        unsafe { llvm::LLVMRustGetOrInsertGlobal(self.llmod, name.as_c_char_ptr(), name.len(), ty) }
     }
 
     /// Declare a C ABI function.
@@ -83,14 +85,9 @@ impl<'ll, 'tcx> CodegenCx<'ll, 'tcx> {
         unnamed: llvm::UnnamedAddr,
         fn_type: &'ll Type,
     ) -> &'ll Value {
-        // Declare C ABI functions with the visibility used by C by default.
-        let visibility = if self.tcx.sess.default_hidden_visibility() {
-            llvm::Visibility::Hidden
-        } else {
-            llvm::Visibility::Default
-        };
-
-        declare_raw_fn(self, name, llvm::CCallConv, unnamed, visibility, fn_type)
+        // Visibility should always be default for declarations, otherwise the linker may report an
+        // error.
+        declare_raw_fn(self, name, llvm::CCallConv, unnamed, Visibility::Default, fn_type)
     }
 
     /// Declare an entry Function
@@ -107,11 +104,7 @@ impl<'ll, 'tcx> CodegenCx<'ll, 'tcx> {
         unnamed: llvm::UnnamedAddr,
         fn_type: &'ll Type,
     ) -> &'ll Value {
-        let visibility = if self.tcx.sess.default_hidden_visibility() {
-            llvm::Visibility::Hidden
-        } else {
-            llvm::Visibility::Default
-        };
+        let visibility = Visibility::from_generic(self.tcx.sess.default_visibility());
         declare_raw_fn(self, name, callconv, unnamed, visibility, fn_type)
     }
 
@@ -217,7 +210,7 @@ impl<'ll, 'tcx> CodegenCx<'ll, 'tcx> {
     /// Gets declared value by name.
     pub(crate) fn get_declared_value(&self, name: &str) -> Option<&'ll Value> {
         debug!("get_declared_value(name={:?})", name);
-        unsafe { llvm::LLVMRustGetNamedValue(self.llmod, name.as_ptr().cast(), name.len()) }
+        unsafe { llvm::LLVMRustGetNamedValue(self.llmod, name.as_c_char_ptr(), name.len()) }
     }
 
     /// Gets defined or externally defined (AvailableExternally linkage) value by

@@ -9,6 +9,7 @@ use rustc_middle::ty::error::TypeError;
 use rustc_middle::ty::visit::MaxUniverse;
 use rustc_middle::ty::{
     self, AliasRelationDirection, InferConst, Term, Ty, TyCtxt, TypeVisitable, TypeVisitableExt,
+    TypingMode,
 };
 use rustc_span::Span;
 use tracing::{debug, instrument, warn};
@@ -17,7 +18,7 @@ use super::{
     PredicateEmittingRelation, Relate, RelateResult, StructurallyRelateAliases, TypeRelation,
 };
 use crate::infer::type_variable::TypeVariableValue;
-use crate::infer::{relate, InferCtxt, RegionVariableOrigin};
+use crate::infer::{InferCtxt, RegionVariableOrigin, relate};
 
 impl<'tcx> InferCtxt<'tcx> {
     /// The idea is that we should ensure that the type variable `target_vid`
@@ -50,7 +51,8 @@ impl<'tcx> InferCtxt<'tcx> {
         // Then the `generalized_ty` would be `&'?2 ?3`, where `'?2` and `?3` are fresh
         // region/type inference variables.
         //
-        // We then relate `generalized_ty <: source_ty`,adding constraints like `'x: '?2` and `?1 <: ?3`.
+        // We then relate `generalized_ty <: source_ty`, adding constraints like `'x: '?2` and
+        // `?1 <: ?3`.
         let Generalization { value_may_be_infer: generalized_ty, has_unconstrained_ty_var } = self
             .generalize(
                 relation.span(),
@@ -104,7 +106,8 @@ impl<'tcx> InferCtxt<'tcx> {
                     &ty::Alias(ty::Projection, data) => {
                         // FIXME: This does not handle subtyping correctly, we could
                         // instead create a new inference variable `?normalized_source`, emitting
-                        // `Projection(normalized_source, ?ty_normalized)` and `?normalized_source <: generalized_ty`.
+                        // `Projection(normalized_source, ?ty_normalized)` and
+                        // `?normalized_source <: generalized_ty`.
                         relation.register_predicates([ty::ProjectionPredicate {
                             projection_term: data.into(),
                             term: generalized_ty.into(),
@@ -181,7 +184,7 @@ impl<'tcx> InferCtxt<'tcx> {
     ///
     /// See `tests/ui/const-generics/occurs-check/` for more examples where this is relevant.
     #[instrument(level = "debug", skip(self, relation))]
-    pub(super) fn instantiate_const_var<R: PredicateEmittingRelation<InferCtxt<'tcx>>>(
+    pub(crate) fn instantiate_const_var<R: PredicateEmittingRelation<InferCtxt<'tcx>>>(
         &self,
         relation: &mut R,
         target_is_expected: bool,
@@ -517,7 +520,10 @@ impl<'tcx> TypeRelation<TyCtxt<'tcx>> for Generalizer<'_, 'tcx> {
                             //
                             // cc trait-system-refactor-initiative#108
                             if self.infcx.next_trait_solver()
-                                && !self.infcx.intercrate
+                                && !matches!(
+                                    self.infcx.typing_mode_unchecked(),
+                                    TypingMode::Coherence
+                                )
                                 && self.in_alias
                             {
                                 inner.type_variables().equate(vid, new_var_id);
@@ -648,7 +654,10 @@ impl<'tcx> TypeRelation<TyCtxt<'tcx>> for Generalizer<'_, 'tcx> {
                             // See the comment for type inference variables
                             // for more details.
                             if self.infcx.next_trait_solver()
-                                && !self.infcx.intercrate
+                                && !matches!(
+                                    self.infcx.typing_mode_unchecked(),
+                                    TypingMode::Coherence
+                                )
                                 && self.in_alias
                             {
                                 variable_table.union(vid, new_var_id);
@@ -658,7 +667,6 @@ impl<'tcx> TypeRelation<TyCtxt<'tcx>> for Generalizer<'_, 'tcx> {
                     }
                 }
             }
-            ty::ConstKind::Infer(InferConst::EffectVar(_)) => Ok(c),
             // FIXME: Unevaluated constants are also not rigid, so the current
             // approach of always relating them structurally is incomplete.
             //

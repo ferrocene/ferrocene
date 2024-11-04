@@ -10,7 +10,7 @@ use rustc_errors::{
 use rustc_hir::{self as hir, ExprKind, Target};
 use rustc_macros::{Diagnostic, LintDiagnostic, Subdiagnostic};
 use rustc_middle::ty::{MainDefinition, Ty};
-use rustc_span::{Span, Symbol, DUMMY_SP};
+use rustc_span::{DUMMY_SP, Span, Symbol};
 
 use crate::check_attr::ProcMacroKind;
 use crate::fluent_generated as fluent;
@@ -19,6 +19,14 @@ use crate::lang_items::Duplicate;
 #[derive(LintDiagnostic)]
 #[diag(passes_incorrect_do_not_recommend_location)]
 pub(crate) struct IncorrectDoNotRecommendLocation;
+
+#[derive(Diagnostic)]
+#[diag(passes_autodiff_attr)]
+pub(crate) struct AutoDiffAttr {
+    #[primary_span]
+    #[label]
+    pub attr_span: Span,
+}
 
 #[derive(LintDiagnostic)]
 #[diag(passes_outer_crate_level_attr)]
@@ -68,9 +76,15 @@ pub(crate) struct CoverageNotFnOrClosure {
     pub defn_span: Span,
 }
 
-#[derive(LintDiagnostic)]
-#[diag(passes_optimize_not_fn_or_closure)]
-pub(crate) struct OptimizeNotFnOrClosure;
+#[derive(Diagnostic)]
+#[diag(passes_optimize_invalid_target)]
+pub(crate) struct OptimizeInvalidTarget {
+    #[primary_span]
+    pub attr_span: Span,
+    #[label]
+    pub defn_span: Span,
+    pub on_crate: bool,
+}
 
 #[derive(Diagnostic)]
 #[diag(passes_should_be_applied_to_fn)]
@@ -310,6 +324,27 @@ pub(crate) struct DocTestUnknownSpotlight {
 }
 
 #[derive(LintDiagnostic)]
+#[diag(passes_doc_test_unknown_passes)]
+#[note]
+#[help]
+#[note(passes_no_op_note)]
+pub(crate) struct DocTestUnknownPasses {
+    pub path: String,
+    #[label]
+    pub span: Span,
+}
+
+#[derive(LintDiagnostic)]
+#[diag(passes_doc_test_unknown_plugins)]
+#[note]
+#[note(passes_no_op_note)]
+pub(crate) struct DocTestUnknownPlugins {
+    pub path: String,
+    #[label]
+    pub span: Span,
+}
+
+#[derive(LintDiagnostic)]
 #[diag(passes_doc_test_unknown_include)]
 pub(crate) struct DocTestUnknownInclude {
     pub path: String,
@@ -530,6 +565,15 @@ pub(crate) struct ReprIdent {
 pub(crate) struct ReprConflicting {
     #[primary_span]
     pub hint_spans: Vec<Span>,
+}
+
+#[derive(Diagnostic)]
+#[diag(passes_repr_align_greater_than_target_max, code = E0589)]
+#[note]
+pub(crate) struct InvalidReprAlignForTarget {
+    #[primary_span]
+    pub span: Span,
+    pub size: u64,
 }
 
 #[derive(LintDiagnostic)]
@@ -1187,27 +1231,11 @@ impl<G: EmissionGuarantee> Diagnostic<'_, G> for NakedFunctionsAsmBlock {
 }
 
 #[derive(Diagnostic)]
-#[diag(passes_naked_functions_operands, code = E0787)]
-pub(crate) struct NakedFunctionsOperands {
+#[diag(passes_naked_functions_must_naked_asm, code = E0787)]
+pub(crate) struct NakedFunctionsMustNakedAsm {
     #[primary_span]
-    pub unsupported_operands: Vec<Span>,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_naked_functions_asm_options, code = E0787)]
-pub(crate) struct NakedFunctionsAsmOptions {
-    #[primary_span]
+    #[label]
     pub span: Span,
-    pub unsupported_options: String,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_naked_functions_must_use_noreturn, code = E0787)]
-pub(crate) struct NakedFunctionsMustUseNoreturn {
-    #[primary_span]
-    pub span: Span,
-    #[suggestion(code = ", options(noreturn)", applicability = "machine-applicable")]
-    pub last_span: Span,
 }
 
 #[derive(Diagnostic)]
@@ -1337,15 +1365,11 @@ pub(crate) struct DuplicateLangItem {
 impl<G: EmissionGuarantee> Diagnostic<'_, G> for DuplicateLangItem {
     #[track_caller]
     fn into_diag(self, dcx: DiagCtxtHandle<'_>, level: Level) -> Diag<'_, G> {
-        let mut diag = Diag::new(
-            dcx,
-            level,
-            match self.duplicate {
-                Duplicate::Plain => fluent::passes_duplicate_lang_item,
-                Duplicate::Crate => fluent::passes_duplicate_lang_item_crate,
-                Duplicate::CrateDepends => fluent::passes_duplicate_lang_item_crate_depends,
-            },
-        );
+        let mut diag = Diag::new(dcx, level, match self.duplicate {
+            Duplicate::Plain => fluent::passes_duplicate_lang_item,
+            Duplicate::Crate => fluent::passes_duplicate_lang_item_crate,
+            Duplicate::CrateDepends => fluent::passes_duplicate_lang_item_crate_depends,
+        });
         diag.code(E0152);
         diag.arg("lang_item_name", self.lang_item_name);
         diag.arg("crate_name", self.crate_name);
@@ -1501,6 +1525,17 @@ pub(crate) struct CannotStabilizeDeprecated {
 }
 
 #[derive(Diagnostic)]
+#[diag(passes_unstable_attr_for_already_stable_feature)]
+pub(crate) struct UnstableAttrForAlreadyStableFeature {
+    #[primary_span]
+    #[label]
+    #[help]
+    pub span: Span,
+    #[label(passes_item)]
+    pub item_sp: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag(passes_missing_stability_attr)]
 pub(crate) struct MissingStabilityAttr<'a> {
     #[primary_span]
@@ -1548,11 +1583,19 @@ pub(crate) struct DuplicateFeatureErr {
     pub span: Span,
     pub feature: Symbol,
 }
+
 #[derive(Diagnostic)]
 #[diag(passes_missing_const_err)]
 pub(crate) struct MissingConstErr {
     #[primary_span]
     #[help]
+    pub fn_sig_span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag(passes_const_stable_not_stable)]
+pub(crate) struct ConstStableNotStable {
+    #[primary_span]
     pub fn_sig_span: Span,
     #[label]
     pub const_span: Span,

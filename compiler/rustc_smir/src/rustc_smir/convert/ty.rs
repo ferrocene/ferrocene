@@ -6,7 +6,7 @@ use stable_mir::ty::{
     AdtKind, FloatTy, GenericArgs, GenericParamDef, IntTy, Region, RigidTy, TyKind, UintTy,
 };
 
-use crate::rustc_smir::{alloc, Stable, Tables};
+use crate::rustc_smir::{Stable, Tables, alloc};
 
 impl<'tcx> Stable<'tcx> for ty::AliasTyKind {
     type T = stable_mir::ty::AliasKind;
@@ -68,7 +68,7 @@ impl<'tcx> Stable<'tcx> for ty::ExistentialTraitRef<'tcx> {
     type T = stable_mir::ty::ExistentialTraitRef;
 
     fn stable(&self, tables: &mut Tables<'_>) -> Self::T {
-        let ty::ExistentialTraitRef { def_id, args } = self;
+        let ty::ExistentialTraitRef { def_id, args, .. } = self;
         stable_mir::ty::ExistentialTraitRef {
             def_id: tables.trait_def(*def_id),
             generic_args: args.stable(tables),
@@ -95,7 +95,7 @@ impl<'tcx> Stable<'tcx> for ty::ExistentialProjection<'tcx> {
     type T = stable_mir::ty::ExistentialProjection;
 
     fn stable(&self, tables: &mut Tables<'_>) -> Self::T {
-        let ty::ExistentialProjection { def_id, args, term } = self;
+        let ty::ExistentialProjection { def_id, args, term, .. } = self;
         stable_mir::ty::ExistentialProjection {
             def_id: tables.trait_def(*def_id),
             generic_args: args.stable(tables),
@@ -119,6 +119,7 @@ impl<'tcx> Stable<'tcx> for ty::adjustment::PointerCoercion {
             }
             PointerCoercion::ArrayToPointer => stable_mir::mir::PointerCoercion::ArrayToPointer,
             PointerCoercion::Unsize => stable_mir::mir::PointerCoercion::Unsize,
+            PointerCoercion::DynStar => unreachable!("represented as `CastKind::DynStar` in smir"),
         }
     }
 }
@@ -587,7 +588,6 @@ impl<'tcx> Stable<'tcx> for ty::Generics {
                 .has_late_bound_regions
                 .as_ref()
                 .map(|late_bound_regions| late_bound_regions.stable(tables)),
-            host_effect_index: self.host_effect_index,
         }
     }
 }
@@ -602,7 +602,7 @@ impl<'tcx> Stable<'tcx> for rustc_middle::ty::GenericParamDefKind {
             ty::GenericParamDefKind::Type { has_default, synthetic } => {
                 GenericParamDefKind::Type { has_default: *has_default, synthetic: *synthetic }
             }
-            ty::GenericParamDefKind::Const { has_default, is_host_effect: _, synthetic: _ } => {
+            ty::GenericParamDefKind::Const { has_default, synthetic: _ } => {
                 GenericParamDefKind::Const { has_default: *has_default }
             }
         }
@@ -632,8 +632,8 @@ impl<'tcx> Stable<'tcx> for ty::PredicateKind<'tcx> {
             PredicateKind::Clause(clause_kind) => {
                 stable_mir::ty::PredicateKind::Clause(clause_kind.stable(tables))
             }
-            PredicateKind::ObjectSafe(did) => {
-                stable_mir::ty::PredicateKind::ObjectSafe(tables.trait_def(*did))
+            PredicateKind::DynCompatible(did) => {
+                stable_mir::ty::PredicateKind::DynCompatible(tables.trait_def(*did))
             }
             PredicateKind::Subtype(subtype_predicate) => {
                 stable_mir::ty::PredicateKind::SubType(subtype_predicate.stable(tables))
@@ -688,6 +688,9 @@ impl<'tcx> Stable<'tcx> for ty::ClauseKind<'tcx> {
             }
             ClauseKind::ConstEvaluatable(const_) => {
                 stable_mir::ty::ClauseKind::ConstEvaluatable(const_.stable(tables))
+            }
+            ClauseKind::HostEffect(..) => {
+                todo!()
             }
         }
     }
@@ -815,10 +818,12 @@ impl<'tcx> Stable<'tcx> for ty::RegionKind<'tcx> {
                 index: early_reg.index,
                 name: early_reg.name.to_string(),
             }),
-            ty::ReBound(db_index, bound_reg) => RegionKind::ReBound(
-                db_index.as_u32(),
-                BoundRegion { var: bound_reg.var.as_u32(), kind: bound_reg.kind.stable(tables) },
-            ),
+            ty::ReBound(db_index, bound_reg) => {
+                RegionKind::ReBound(db_index.as_u32(), BoundRegion {
+                    var: bound_reg.var.as_u32(),
+                    kind: bound_reg.kind.stable(tables),
+                })
+            }
             ty::ReStatic => RegionKind::ReStatic,
             ty::RePlaceholder(place_holder) => {
                 RegionKind::RePlaceholder(stable_mir::ty::Placeholder {
@@ -910,6 +915,7 @@ impl<'tcx> Stable<'tcx> for rustc_target::spec::abi::Abi {
             abi::Abi::AvrInterrupt => Abi::AvrInterrupt,
             abi::Abi::AvrNonBlockingInterrupt => Abi::AvrNonBlockingInterrupt,
             abi::Abi::CCmseNonSecureCall => Abi::CCmseNonSecureCall,
+            abi::Abi::CCmseNonSecureEntry => Abi::CCmseNonSecureEntry,
             abi::Abi::System { unwind } => Abi::System { unwind },
             abi::Abi::RustIntrinsic => Abi::RustIntrinsic,
             abi::Abi::RustCall => Abi::RustCall,

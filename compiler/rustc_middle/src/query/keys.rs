@@ -1,13 +1,13 @@
 //! Defines the set of legal keys that can be used in queries.
 
-use rustc_hir::def_id::{CrateNum, DefId, LocalDefId, LocalModDefId, ModDefId, LOCAL_CRATE};
+use rustc_hir::def_id::{CrateNum, DefId, LOCAL_CRATE, LocalDefId, LocalModDefId, ModDefId};
 use rustc_hir::hir_id::{HirId, OwnerId};
 use rustc_query_system::query::{DefIdCache, DefaultCache, SingleCache, VecCache};
 use rustc_span::symbol::{Ident, Symbol};
-use rustc_span::{Span, DUMMY_SP};
+use rustc_span::{DUMMY_SP, Span};
 use rustc_target::abi;
 
-use crate::infer::canonical::Canonical;
+use crate::infer::canonical::CanonicalQueryInput;
 use crate::ty::fast_reject::SimplifiedType;
 use crate::ty::layout::{TyAndLayout, ValidityRequirement};
 use crate::ty::{self, GenericArg, GenericArgsRef, Ty, TyCtxt};
@@ -485,7 +485,7 @@ impl Key for Option<Symbol> {
 
 /// Canonical query goals correspond to abstract trait operations that
 /// are not tied to any crate in particular.
-impl<'tcx, T: Clone> Key for Canonical<'tcx, T> {
+impl<'tcx, T: Clone> Key for CanonicalQueryInput<'tcx, T> {
     type Cache<V> = DefaultCache<Self, V>;
 
     fn default_span(&self, _tcx: TyCtxt<'_>) -> Span {

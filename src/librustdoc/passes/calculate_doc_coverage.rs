@@ -13,14 +13,14 @@ use tracing::debug;
 
 use crate::clean;
 use crate::core::DocContext;
-use crate::html::markdown::{find_testable_code, ErrorCodes};
-use crate::passes::check_doc_test_visibility::{should_have_doc_example, Tests};
+use crate::html::markdown::{ErrorCodes, find_testable_code};
 use crate::passes::Pass;
+use crate::passes::check_doc_test_visibility::{Tests, should_have_doc_example};
 use crate::visit::DocVisitor;
 
 pub(crate) const CALCULATE_DOC_COVERAGE: Pass = Pass {
     name: "calculate-doc-coverage",
-    run: calculate_doc_coverage,
+    run: Some(calculate_doc_coverage),
     description: "counts the number of items with and without documentation",
 };
 
@@ -187,7 +187,7 @@ impl<'a, 'b> CoverageCalculator<'a, 'b> {
     }
 }
 
-impl<'a, 'b> DocVisitor for CoverageCalculator<'a, 'b> {
+impl<'a, 'b> DocVisitor<'_> for CoverageCalculator<'a, 'b> {
     fn visit_item(&mut self, i: &clean::Item) {
         if !i.item_id.is_local() {
             // non-local items are skipped because they can be out of the users control,

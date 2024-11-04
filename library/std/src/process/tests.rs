@@ -96,9 +96,23 @@ fn stdout_works() {
 #[test]
 #[cfg_attr(any(windows, target_os = "vxworks"), ignore)]
 fn set_current_dir_works() {
+    // On many Unix platforms this will use the posix_spawn path.
     let mut cmd = shell_cmd();
     cmd.arg("-c").arg("pwd").current_dir("/").stdout(Stdio::piped());
     assert_eq!(run_output(cmd), "/\n");
+
+    // Also test the fork/exec path by setting a pre_exec function.
+    #[cfg(unix)]
+    {
+        use crate::os::unix::process::CommandExt;
+
+        let mut cmd = shell_cmd();
+        cmd.arg("-c").arg("pwd").current_dir("/").stdout(Stdio::piped());
+        unsafe {
+            cmd.pre_exec(|| Ok(()));
+        }
+        assert_eq!(run_output(cmd), "/\n");
+    }
 }
 
 #[test]
@@ -437,7 +451,7 @@ fn test_proc_thread_attributes() {
     use crate::mem;
     use crate::os::windows::io::AsRawHandle;
     use crate::os::windows::process::CommandExt;
-    use crate::sys::c::{CloseHandle, BOOL, HANDLE};
+    use crate::sys::c::{BOOL, CloseHandle, HANDLE};
     use crate::sys::cvt;
 
     #[repr(C)]

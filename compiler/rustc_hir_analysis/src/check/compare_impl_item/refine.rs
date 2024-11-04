@@ -1,19 +1,19 @@
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_hir as hir;
 use rustc_hir::def_id::DefId;
-use rustc_infer::infer::outlives::env::OutlivesEnvironment;
 use rustc_infer::infer::TyCtxtInferExt;
+use rustc_infer::infer::outlives::env::OutlivesEnvironment;
 use rustc_lint_defs::builtin::{REFINING_IMPL_TRAIT_INTERNAL, REFINING_IMPL_TRAIT_REACHABLE};
 use rustc_middle::span_bug;
 use rustc_middle::traits::{ObligationCause, Reveal};
 use rustc_middle::ty::{
     self, Ty, TyCtxt, TypeFoldable, TypeFolder, TypeSuperVisitable, TypeVisitable,
-    TypeVisitableExt, TypeVisitor,
+    TypeVisitableExt, TypeVisitor, TypingMode,
 };
 use rustc_span::Span;
 use rustc_trait_selection::regions::InferCtxtRegionExt;
 use rustc_trait_selection::traits::outlives_bounds::InferCtxtExt;
-use rustc_trait_selection::traits::{elaborate, normalize_param_env_or_error, ObligationCtxt};
+use rustc_trait_selection::traits::{ObligationCtxt, elaborate, normalize_param_env_or_error};
 
 /// Check that an implementation does not refine an RPITIT from a trait method signature.
 pub(super) fn check_refining_return_position_impl_trait_in_trait<'tcx>(
@@ -64,6 +64,10 @@ pub(super) fn check_refining_return_position_impl_trait_in_trait<'tcx>(
         return;
     };
 
+    if hidden_tys.items().any(|(_, &ty)| ty.skip_binder().references_error()) {
+        return;
+    }
+
     let mut collector = ImplTraitInTraitCollector { tcx, types: FxIndexSet::default() };
     trait_m_sig.visit_with(&mut collector);
 
@@ -93,9 +97,9 @@ pub(super) fn check_refining_return_position_impl_trait_in_trait<'tcx>(
         // it's a refinement to a TAIT.
         if !tcx.hir().get_if_local(impl_opaque.def_id).is_some_and(|node| {
             matches!(
-                node.expect_item().expect_opaque_ty().origin,
-                hir::OpaqueTyOrigin::AsyncFn(def_id)  | hir::OpaqueTyOrigin::FnReturn(def_id)
-                    if def_id == impl_m.def_id.expect_local()
+                node.expect_opaque_ty().origin,
+                hir::OpaqueTyOrigin::AsyncFn { parent, .. }  | hir::OpaqueTyOrigin::FnReturn { parent, .. }
+                    if parent == impl_m.def_id.expect_local()
             )
         }) {
             report_mismatched_rpitit_signature(
@@ -128,7 +132,7 @@ pub(super) fn check_refining_return_position_impl_trait_in_trait<'tcx>(
     let param_env = ty::ParamEnv::new(tcx.mk_clauses_from_iter(hybrid_preds), Reveal::UserFacing);
     let param_env = normalize_param_env_or_error(tcx, param_env, ObligationCause::dummy());
 
-    let ref infcx = tcx.infer_ctxt().build();
+    let ref infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
     let ocx = ObligationCtxt::new(infcx);
 
     // Normalize the bounds. This has two purposes:

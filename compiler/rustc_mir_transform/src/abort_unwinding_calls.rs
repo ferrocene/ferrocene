@@ -1,9 +1,9 @@
 use rustc_ast::InlineAsmOptions;
 use rustc_middle::mir::*;
 use rustc_middle::span_bug;
-use rustc_middle::ty::{self, layout, TyCtxt};
-use rustc_target::spec::abi::Abi;
+use rustc_middle::ty::{self, TyCtxt, layout};
 use rustc_target::spec::PanicStrategy;
+use rustc_target::spec::abi::Abi;
 
 /// A pass that runs which is targeted at ensuring that codegen guarantees about
 /// unwinding are upheld for compilations of panic=abort programs.
@@ -51,11 +51,20 @@ impl<'tcx> crate::MirPass<'tcx> for AbortUnwindingCalls {
         // This will filter to functions with `extern "C-unwind"` ABIs, for
         // example.
         for block in body.basic_blocks.as_mut() {
+            let Some(terminator) = &mut block.terminator else { continue };
+            let span = terminator.source_info.span;
+
+            // If we see an `UnwindResume` terminator inside a function that cannot unwind, we need
+            // to replace it with `UnwindTerminate`.
+            if let TerminatorKind::UnwindResume = &terminator.kind
+                && !body_can_unwind
+            {
+                terminator.kind = TerminatorKind::UnwindTerminate(UnwindTerminateReason::Abi);
+            }
+
             if block.is_cleanup {
                 continue;
             }
-            let Some(terminator) = &block.terminator else { continue };
-            let span = terminator.source_info.span;
 
             let call_can_unwind = match &terminator.kind {
                 TerminatorKind::Call { func, .. } => {
@@ -87,14 +96,18 @@ impl<'tcx> crate::MirPass<'tcx> for AbortUnwindingCalls {
             if !call_can_unwind {
                 // If this function call can't unwind, then there's no need for it
                 // to have a landing pad. This means that we can remove any cleanup
-                // registered for it.
+                // registered for it (and turn it into `UnwindAction::Unreachable`).
                 let cleanup = block.terminator_mut().unwind_mut().unwrap();
                 *cleanup = UnwindAction::Unreachable;
-            } else if !body_can_unwind {
+            } else if !body_can_unwind
+                && matches!(terminator.unwind(), Some(UnwindAction::Continue))
+            {
                 // Otherwise if this function can unwind, then if the outer function
                 // can also unwind there's nothing to do. If the outer function
-                // can't unwind, however, we need to change the landing pad for this
-                // function call to one that aborts.
+                // can't unwind, however, we need to ensure that any `UnwindAction::Continue`
+                // is replaced with terminate. For those with `UnwindAction::Cleanup`,
+                // cleanup will still happen, and terminate will happen afterwards handled by
+                // the `UnwindResume` -> `UnwindTerminate` terminator replacement.
                 let cleanup = block.terminator_mut().unwind_mut().unwrap();
                 *cleanup = UnwindAction::Terminate(UnwindTerminateReason::Abi);
             }

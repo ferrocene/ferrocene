@@ -625,9 +625,9 @@ class RustBuild(object):
             try:
                 # FIXME: A cheap workaround for https://github.com/rust-lang/rust/issues/125578,
                 # remove this once the issue is closed.
-                bootstrap_out = self.bootstrap_out()
-                if os.path.exists(bootstrap_out):
-                    shutil.rmtree(bootstrap_out)
+                bootstrap_build_artifacts = os.path.join(self.bootstrap_out(), "debug")
+                if os.path.exists(bootstrap_build_artifacts):
+                    shutil.rmtree(bootstrap_build_artifacts)
 
                 p.map(unpack_component, tarballs_download_info)
             finally:
@@ -1092,9 +1092,6 @@ class RustBuild(object):
             if not os.path.exists(cargo_dir):
                 eprint('ERROR: vendoring required, but .cargo/config does not exist.')
                 raise Exception("{} not found".format(cargo_dir))
-        else:
-            if os.path.exists(cargo_dir):
-                shutil.rmtree(cargo_dir)
 
 def parse_args(args):
     """Parse the command line arguments that the python script needs."""

@@ -7,17 +7,18 @@ use rustc_ast::attr::AttrIdGenerator;
 use rustc_ast::node_id::NodeId;
 use rustc_data_structures::fx::{FxHashMap, FxIndexMap, FxIndexSet};
 use rustc_data_structures::sync::{AppendOnlyVec, Lock, Lrc};
-use rustc_errors::emitter::{stderr_destination, HumanEmitter, SilentEmitter};
+use rustc_errors::emitter::{HumanEmitter, SilentEmitter, stderr_destination};
 use rustc_errors::{
-    fallback_fluent_bundle, ColorConfig, Diag, DiagCtxt, DiagCtxtHandle, DiagMessage,
-    EmissionGuarantee, MultiSpan, StashKey,
+    ColorConfig, Diag, DiagCtxt, DiagCtxtHandle, DiagMessage, EmissionGuarantee, MultiSpan,
+    StashKey, fallback_fluent_bundle,
 };
-use rustc_feature::{find_feature_issue, GateIssue, UnstableFeatures};
+use rustc_feature::{GateIssue, UnstableFeatures, find_feature_issue};
 use rustc_span::edition::Edition;
 use rustc_span::hygiene::ExpnId;
 use rustc_span::source_map::{FilePathMapping, SourceMap};
 use rustc_span::{Span, Symbol};
 
+use crate::Session;
 use crate::config::{Cfg, CheckCfg};
 use crate::errors::{
     CliFeatureDiagnosticHelp, FeatureDiagnosticForIssue, FeatureDiagnosticHelp,
@@ -25,7 +26,6 @@ use crate::errors::{
 };
 use crate::lint::builtin::UNSTABLE_SYNTAX_PRE_EXPANSION;
 use crate::lint::{BufferedEarlyLint, BuiltinLintDiag, Lint, LintId};
-use crate::Session;
 
 /// Collected spans during parsing for places where a certain feature was
 /// used and should be feature gated accordingly in `check_crate`.
@@ -66,7 +66,7 @@ impl GatedSpans {
 #[derive(Default)]
 pub struct SymbolGallery {
     /// All symbols occurred and their first occurrence span.
-    pub symbols: Lock<FxHashMap<Symbol, Span>>,
+    pub symbols: Lock<FxIndexMap<Symbol, Span>>,
 }
 
 impl SymbolGallery {
@@ -241,7 +241,7 @@ impl ParseSess {
         let sm = Lrc::new(SourceMap::new(FilePathMapping::empty()));
         let emitter = Box::new(
             HumanEmitter::new(stderr_destination(ColorConfig::Auto), fallback_bundle)
-                .sm(Some(sm.clone())),
+                .sm(Some(Lrc::clone(&sm))),
         );
         let dcx = DiagCtxt::new(emitter);
         ParseSess::with_dcx(dcx, sm)
@@ -278,7 +278,7 @@ impl ParseSess {
         let sm = Lrc::new(SourceMap::new(FilePathMapping::empty()));
         let emitter = Box::new(HumanEmitter::new(
             stderr_destination(ColorConfig::Auto),
-            fallback_bundle.clone(),
+            Lrc::clone(&fallback_bundle),
         ));
         let fatal_dcx = DiagCtxt::new(emitter);
         let dcx = DiagCtxt::new(Box::new(SilentEmitter {
@@ -297,7 +297,7 @@ impl ParseSess {
     }
 
     pub fn clone_source_map(&self) -> Lrc<SourceMap> {
-        self.source_map.clone()
+        Lrc::clone(&self.source_map)
     }
 
     pub fn buffer_lint(

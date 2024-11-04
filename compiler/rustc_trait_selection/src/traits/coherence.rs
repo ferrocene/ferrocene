@@ -11,29 +11,31 @@ use rustc_errors::{Diag, EmissionGuarantee};
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_infer::infer::{DefineOpaqueTypes, InferCtxt, TyCtxtInferExt};
+use rustc_infer::traits::PredicateObligations;
 use rustc_middle::bug;
 use rustc_middle::traits::query::NoSolution;
 use rustc_middle::traits::solve::{CandidateSource, Certainty, Goal};
 use rustc_middle::traits::specialization_graph::OverlapMode;
 use rustc_middle::ty::fast_reject::DeepRejectCtxt;
 use rustc_middle::ty::visit::{TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor};
-use rustc_middle::ty::{self, Ty, TyCtxt};
+use rustc_middle::ty::{self, Ty, TyCtxt, TypingMode};
 pub use rustc_next_trait_solver::coherence::*;
+use rustc_next_trait_solver::solve::SolverDelegateEvalExt;
 use rustc_span::symbol::sym;
-use rustc_span::{Span, DUMMY_SP};
+use rustc_span::{DUMMY_SP, Span};
 use tracing::{debug, instrument, warn};
 
 use super::ObligationCtxt;
 use crate::error_reporting::traits::suggest_new_overflow_limit;
-use crate::infer::outlives::env::OutlivesEnvironment;
 use crate::infer::InferOk;
+use crate::infer::outlives::env::OutlivesEnvironment;
 use crate::solve::inspect::{InspectGoal, ProofTreeInferCtxtExt, ProofTreeVisitor};
-use crate::solve::{deeply_normalize_for_diagnostics, inspect};
+use crate::solve::{SolverDelegate, deeply_normalize_for_diagnostics, inspect};
 use crate::traits::query::evaluate_obligation::InferCtxtExt;
 use crate::traits::select::IntercrateAmbiguityCause;
 use crate::traits::{
-    util, FulfillmentErrorCode, NormalizeExt, Obligation, ObligationCause, PredicateObligation,
-    SelectionContext, SkipLeakCheck,
+    FulfillmentErrorCode, NormalizeExt, Obligation, ObligationCause, PredicateObligation,
+    SelectionContext, SkipLeakCheck, util,
 };
 
 pub struct OverlapResult<'tcx> {
@@ -193,9 +195,8 @@ fn overlap<'tcx>(
     let infcx = tcx
         .infer_ctxt()
         .skip_leak_check(skip_leak_check.is_yes())
-        .intercrate(true)
         .with_next_trait_solver(tcx.next_trait_solver_in_coherence())
-        .build();
+        .build(TypingMode::Coherence);
     let selcx = &mut SelectionContext::new(&infcx);
     if track_ambiguity_causes.is_yes() {
         selcx.enable_tracking_intercrate_ambiguity_causes();
@@ -278,7 +279,7 @@ fn equate_impl_headers<'tcx>(
     param_env: ty::ParamEnv<'tcx>,
     impl1: &ty::ImplHeader<'tcx>,
     impl2: &ty::ImplHeader<'tcx>,
-) -> Option<Vec<PredicateObligation<'tcx>>> {
+) -> Option<PredicateObligations<'tcx>> {
     let result =
         match (impl1.trait_ref, impl2.trait_ref) {
             (Some(impl1_ref), Some(impl2_ref)) => infcx
@@ -296,6 +297,7 @@ fn equate_impl_headers<'tcx>(
 }
 
 /// The result of [fn impl_intersection_has_impossible_obligation].
+#[derive(Debug)]
 enum IntersectionHasImpossibleObligations<'tcx> {
     Yes,
     No {
@@ -326,6 +328,7 @@ enum IntersectionHasImpossibleObligations<'tcx> {
 /// of the two impls above to be empty.
 ///
 /// Importantly, this works even if there isn't a `impl !Error for MyLocalType`.
+#[instrument(level = "debug", skip(selcx), ret)]
 fn impl_intersection_has_impossible_obligation<'a, 'cx, 'tcx>(
     selcx: &mut SelectionContext<'cx, 'tcx>,
     obligations: &'a [PredicateObligation<'tcx>],
@@ -333,6 +336,16 @@ fn impl_intersection_has_impossible_obligation<'a, 'cx, 'tcx>(
     let infcx = selcx.infcx;
 
     if infcx.next_trait_solver() {
+        // A fast path optimization, try evaluating all goals with
+        // a very low recursion depth and bail if any of them don't
+        // hold.
+        if !obligations.iter().all(|o| {
+            <&SolverDelegate<'tcx>>::from(infcx)
+                .root_goal_may_hold_with_depth(8, Goal::new(infcx.tcx, o.param_env, o.predicate))
+        }) {
+            return IntersectionHasImpossibleObligations::Yes;
+        }
+
         let ocx = ObligationCtxt::new_with_diagnostics(infcx);
         ocx.register_obligations(obligations.iter().cloned());
         let errors_and_ambiguities = ocx.select_all_or_error();
@@ -346,10 +359,9 @@ fn impl_intersection_has_impossible_obligation<'a, 'cx, 'tcx>(
                 overflowing_predicates: ambiguities
                     .into_iter()
                     .filter(|error| {
-                        matches!(
-                            error.code,
-                            FulfillmentErrorCode::Ambiguity { overflow: Some(true) }
-                        )
+                        matches!(error.code, FulfillmentErrorCode::Ambiguity {
+                            overflow: Some(true)
+                        })
                     })
                     .map(|e| infcx.resolve_vars_if_possible(e.obligation.predicate))
                     .collect(),
@@ -406,7 +418,7 @@ fn impl_intersection_has_negative_obligation(
 
     // N.B. We need to unify impl headers *with* intercrate mode, even if proving negative predicates
     // do not need intercrate mode enabled.
-    let ref infcx = tcx.infer_ctxt().intercrate(true).with_next_trait_solver(true).build();
+    let ref infcx = tcx.infer_ctxt().with_next_trait_solver(true).build(TypingMode::Coherence);
     let root_universe = infcx.universe();
     assert_eq!(root_universe, ty::UniverseIndex::ROOT);
 
@@ -470,21 +482,18 @@ fn plug_infer_with_placeholders<'tcx>(
                         // Comparing against a type variable never registers hidden types anyway
                         DefineOpaqueTypes::Yes,
                         ty,
-                        Ty::new_placeholder(
-                            self.infcx.tcx,
-                            ty::Placeholder {
-                                universe: self.universe,
-                                bound: ty::BoundTy {
-                                    var: self.next_var(),
-                                    kind: ty::BoundTyKind::Anon,
-                                },
+                        Ty::new_placeholder(self.infcx.tcx, ty::Placeholder {
+                            universe: self.universe,
+                            bound: ty::BoundTy {
+                                var: self.next_var(),
+                                kind: ty::BoundTyKind::Anon,
                             },
-                        ),
+                        }),
                     )
                 else {
                     bug!("we always expect to be able to plug an infer var with placeholder")
                 };
-                assert_eq!(obligations, &[]);
+                assert_eq!(obligations.len(), 0);
             } else {
                 ty.super_visit_with(self);
             }
@@ -499,15 +508,15 @@ fn plug_infer_with_placeholders<'tcx>(
                         // registration happening anyway.
                         DefineOpaqueTypes::Yes,
                         ct,
-                        ty::Const::new_placeholder(
-                            self.infcx.tcx,
-                            ty::Placeholder { universe: self.universe, bound: self.next_var() },
-                        ),
+                        ty::Const::new_placeholder(self.infcx.tcx, ty::Placeholder {
+                            universe: self.universe,
+                            bound: self.next_var(),
+                        }),
                     )
                 else {
                     bug!("we always expect to be able to plug an infer var with placeholder")
                 };
-                assert_eq!(obligations, &[]);
+                assert_eq!(obligations.len(), 0);
             } else {
                 ct.super_visit_with(self);
             }
@@ -527,21 +536,18 @@ fn plug_infer_with_placeholders<'tcx>(
                             // Lifetimes don't contain opaque types (or any types for that matter).
                             DefineOpaqueTypes::Yes,
                             r,
-                            ty::Region::new_placeholder(
-                                self.infcx.tcx,
-                                ty::Placeholder {
-                                    universe: self.universe,
-                                    bound: ty::BoundRegion {
-                                        var: self.next_var(),
-                                        kind: ty::BoundRegionKind::BrAnon,
-                                    },
+                            ty::Region::new_placeholder(self.infcx.tcx, ty::Placeholder {
+                                universe: self.universe,
+                                bound: ty::BoundRegion {
+                                    var: self.next_var(),
+                                    kind: ty::BoundRegionKind::BrAnon,
                                 },
-                            ),
+                            }),
                         )
                     else {
                         bug!("we always expect to be able to plug an infer var with placeholder")
                     };
-                    assert_eq!(obligations, &[]);
+                    assert_eq!(obligations.len(), 0);
                 }
             }
         }
@@ -563,7 +569,9 @@ fn try_prove_negated_where_clause<'tcx>(
     // the *existence* of a negative goal, not the non-existence of a positive goal.
     // Without this, we over-eagerly register coherence ambiguity candidates when
     // impl candidates do exist.
-    let ref infcx = root_infcx.fork_with_intercrate(false);
+    // FIXME(#132279): `TypingMode::non_body_analysis` is a bit questionable here as it
+    // would cause us to reveal opaque types to leak their auto traits.
+    let ref infcx = root_infcx.fork_with_typing_mode(TypingMode::non_body_analysis());
     let ocx = ObligationCtxt::new(infcx);
     ocx.register_obligation(Obligation::new(
         infcx.tcx,
@@ -707,7 +715,10 @@ impl<'a, 'tcx> ProofTreeVisitor<'tcx> for AmbiguityCausesVisitor<'a, 'tcx> {
 
             // It is only relevant that a goal is unknowable if it would have otherwise
             // failed.
-            let non_intercrate_infcx = infcx.fork_with_intercrate(false);
+            // FIXME(#132279): Forking with `TypingMode::non_body_analysis` is a bit questionable
+            // as it would allow us to reveal opaque types, potentially causing unexpected
+            // cycles.
+            let non_intercrate_infcx = infcx.fork_with_typing_mode(TypingMode::non_body_analysis());
             if non_intercrate_infcx.predicate_may_hold(&Obligation::new(
                 infcx.tcx,
                 ObligationCause::dummy(),

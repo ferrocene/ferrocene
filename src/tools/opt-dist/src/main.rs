@@ -6,7 +6,7 @@ use utils::io;
 
 use crate::bolt::{bolt_optimize, with_bolt_instrumented};
 use crate::environment::{Environment, EnvironmentBuilder};
-use crate::exec::{cmd, Bootstrap};
+use crate::exec::{Bootstrap, cmd};
 use crate::tests::run_tests;
 use crate::timer::Timer;
 use crate::training::{
@@ -127,7 +127,7 @@ fn create_environment(args: Args) -> anyhow::Result<(Environment, Vec<String>)> 
             shared,
         } => {
             let env = EnvironmentBuilder::default()
-                .host_triple(target_triple)
+                .host_tuple(target_triple)
                 .python_binary(python)
                 .checkout_dir(checkout_dir.clone())
                 .host_llvm_dir(llvm_dir)
@@ -148,7 +148,7 @@ fn create_environment(args: Args) -> anyhow::Result<(Environment, Vec<String>)> 
 
             let checkout_dir = Utf8PathBuf::from("/checkout");
             let env = EnvironmentBuilder::default()
-                .host_triple(target_triple)
+                .host_tuple(target_triple)
                 .python_binary("python3".to_string())
                 .checkout_dir(checkout_dir.clone())
                 .host_llvm_dir(Utf8PathBuf::from("/rustroot"))
@@ -170,7 +170,7 @@ fn create_environment(args: Args) -> anyhow::Result<(Environment, Vec<String>)> 
 
             let checkout_dir: Utf8PathBuf = std::env::current_dir()?.try_into()?;
             let env = EnvironmentBuilder::default()
-                .host_triple(target_triple)
+                .host_tuple(target_triple)
                 .python_binary("python".to_string())
                 .checkout_dir(checkout_dir.clone())
                 .host_llvm_dir(checkout_dir.join("citools").join("clang-rust"))

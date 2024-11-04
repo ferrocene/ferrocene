@@ -7,7 +7,6 @@ pub(crate) fn target() -> Target {
         linker: Some("sparc-elf-gcc".into()),
         endian: Endian::Big,
         cpu: "v7".into(),
-        abi: "elf".into(),
         max_atomic_width: Some(32),
         atomic_cas: true,
         panic_strategy: PanicStrategy::Abort,
@@ -18,7 +17,7 @@ pub(crate) fn target() -> Target {
         ..Default::default()
     };
     Target {
-        data_layout: "E-m:e-p:32:32-i64:64-f128:64-n32-S64".into(),
+        data_layout: "E-m:e-p:32:32-i64:64-i128:128-f128:64-n32-S64".into(),
         llvm_target: "sparc-unknown-none-elf".into(),
         metadata: crate::spec::TargetMetadata {
             description: Some("Bare 32-bit SPARC V7+".into()),

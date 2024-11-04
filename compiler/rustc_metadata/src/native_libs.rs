@@ -1,11 +1,12 @@
 use std::ops::ControlFlow;
 use std::path::{Path, PathBuf};
 
-use rustc_ast::{NestedMetaItem, CRATE_NODE_ID};
+use rustc_ast::CRATE_NODE_ID;
 use rustc_attr as attr;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_middle::query::LocalCrate;
 use rustc_middle::ty::{List, ParamEnv, ParamEnvAnd, Ty, TyCtxt};
+use rustc_session::Session;
 use rustc_session::config::CrateType;
 use rustc_session::cstore::{
     DllCallingConvention, DllImport, ForeignModule, NativeLib, PeImportNameType,
@@ -13,11 +14,10 @@ use rustc_session::cstore::{
 use rustc_session::parse::feature_err;
 use rustc_session::search_paths::PathKind;
 use rustc_session::utils::NativeLibKind;
-use rustc_session::Session;
 use rustc_span::def_id::{DefId, LOCAL_CRATE};
-use rustc_span::symbol::{sym, Symbol};
-use rustc_target::spec::abi::Abi;
+use rustc_span::symbol::{Symbol, sym};
 use rustc_target::spec::LinkSelfContainedComponents;
+use rustc_target::spec::abi::Abi;
 
 use crate::{errors, fluent_generated};
 
@@ -265,7 +265,7 @@ impl<'tcx> Collector<'tcx> {
                                 NativeLibKind::RawDylib
                             }
                             "link-arg" => {
-                                if !features.link_arg_attribute {
+                                if !features.link_arg_attribute() {
                                     feature_err(
                                         sess,
                                         sym::link_arg_attribute,
@@ -304,12 +304,17 @@ impl<'tcx> Collector<'tcx> {
                             sess.dcx().emit_err(errors::LinkCfgForm { span: item.span() });
                             continue;
                         };
-                        let [NestedMetaItem::MetaItem(link_cfg)] = link_cfg else {
+                        let [link_cfg] = link_cfg else {
                             sess.dcx()
                                 .emit_err(errors::LinkCfgSinglePredicate { span: item.span() });
                             continue;
                         };
-                        if !features.link_cfg {
+                        let Some(link_cfg) = link_cfg.meta_item_or_bool() else {
+                            sess.dcx()
+                                .emit_err(errors::LinkCfgSinglePredicate { span: item.span() });
+                            continue;
+                        };
+                        if !features.link_cfg() {
                             feature_err(
                                 sess,
                                 sym::link_cfg,
@@ -379,7 +384,7 @@ impl<'tcx> Collector<'tcx> {
                     };
 
                     macro report_unstable_modifier($feature: ident) {
-                        if !features.$feature {
+                        if !features.$feature() {
                             // FIXME: make this translatable
                             #[expect(rustc::untranslatable_diagnostic)]
                             feature_err(

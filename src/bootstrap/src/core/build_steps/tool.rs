@@ -1,17 +1,15 @@
 use std::path::PathBuf;
 use std::{env, fs};
 
-use build_helper::git::get_closest_merge_commit;
-
 use crate::core::build_steps::compile;
 use crate::core::build_steps::toolstate::ToolState;
 use crate::core::builder;
 use crate::core::builder::{Builder, Cargo as CargoCommand, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::utils::channel::GitInfo;
-use crate::utils::exec::{command, BootstrapCommand};
-use crate::utils::helpers::{add_dylib_path, exe, git, t};
-use crate::{gha, Compiler, Kind, Mode};
+use crate::utils::exec::{BootstrapCommand, command};
+use crate::utils::helpers::{add_dylib_path, exe, t};
+use crate::{Compiler, Kind, Mode, gha};
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub enum SourceType {
@@ -209,11 +207,28 @@ pub fn prepare_tool_cargo(
     // See https://github.com/rust-lang/rust/issues/116538
     cargo.rustflag("-Zunstable-options");
 
-    // `-Zon-broken-pipe=kill` breaks cargo tests
+    // NOTE: The root cause of needing `-Zon-broken-pipe=kill` in the first place is because `rustc`
+    // and `rustdoc` doesn't gracefully handle I/O errors due to usages of raw std `println!` macros
+    // which panics upon encountering broken pipes. `-Zon-broken-pipe=kill` just papers over that
+    // and stops rustc/rustdoc ICEing on e.g. `rustc --print=sysroot | false`.
+    //
+    // cargo explicitly does not want the `-Zon-broken-pipe=kill` paper because it does actually use
+    // variants of `println!` that handles I/O errors gracefully. It's also a breaking change for a
+    // spawn process not written in Rust, especially if the language default handler is not
+    // `SIG_IGN`. Thankfully cargo tests will break if we do set the flag.
+    //
+    // For the cargo discussion, see
+    // <https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/Applying.20.60-Zon-broken-pipe.3Dkill.60.20flags.20in.20bootstrap.3F>.
+    //
+    // For the rustc discussion, see
+    // <https://rust-lang.zulipchat.com/#narrow/stream/131828-t-compiler/topic/Internal.20lint.20for.20raw.20.60print!.60.20and.20.60println!.60.3F>
+    // for proper solutions.
     if !path.ends_with("cargo") {
-        // If the output is piped to e.g. `head -n1` we want the process to be killed,
-        // rather than having an error bubble up and cause a panic.
-        cargo.rustflag("-Zon-broken-pipe=kill");
+        // Use an untracked env var `FORCE_ON_BROKEN_PIPE_KILL` here instead of `RUSTFLAGS`.
+        // `RUSTFLAGS` is tracked by cargo. Conditionally omitting `-Zon-broken-pipe=kill` from
+        // `RUSTFLAGS` causes unnecessary tool rebuilds due to cache invalidation from building e.g.
+        // cargo *without* `-Zon-broken-pipe=kill` but then rustdoc *with* `-Zon-broken-pipe=kill`.
+        cargo.env("FORCE_ON_BROKEN_PIPE_KILL", "-Zon-broken-pipe=kill");
     }
 
     cargo
@@ -348,6 +363,7 @@ bootstrap_tool!(
     CoverageDump, "src/tools/coverage-dump", "coverage-dump";
     RustcPerfWrapper, "src/tools/rustc-perf-wrapper", "rustc-perf-wrapper";
     WasmComponentLd, "src/tools/wasm-component-ld", "wasm-component-ld", is_unstable_tool = true, allow_features = "min_specialization";
+    UnicodeTableGenerator, "src/tools/unicode-table-generator", "unicode-table-generator";
 );
 
 /// These are the submodules that are required for rustbook to work due to
@@ -583,28 +599,11 @@ impl Step for Rustdoc {
             && target_compiler.stage > 0
             && builder.rust_info().is_managed_git_subrepository()
         {
-            let commit = get_closest_merge_commit(
-                Some(&builder.config.src),
-                &builder.config.git_config(),
-                &[],
-            )
-            .unwrap();
+            let files_to_track = &["src/librustdoc", "src/tools/rustdoc"];
 
-            let librustdoc_src = builder.config.src.join("src/librustdoc");
-            let rustdoc_src = builder.config.src.join("src/tools/rustdoc");
-
-            // FIXME: The change detection logic here is quite similar to `Config::download_ci_rustc_commit`.
-            // It would be better to unify them.
-            let has_changes = !git(Some(&builder.config.src))
-                .allow_failure()
-                .run_always()
-                .args(["diff-index", "--quiet", &commit])
-                .arg("--")
-                .arg(librustdoc_src)
-                .arg(rustdoc_src)
-                .run(builder);
-
-            if !has_changes {
+            // Check if unchanged
+            if builder.config.last_modified_commit(files_to_track, "download-rustc", true).is_some()
+            {
                 let precompiled_rustdoc = builder
                     .config
                     .ci_rustc_dir()
@@ -877,8 +876,11 @@ impl Step for LlvmBitcodeLinker {
     fn run(self, builder: &Builder<'_>) -> PathBuf {
         let bin_name = "llvm-bitcode-linker";
 
-        builder.ensure(compile::Std::new(self.compiler, self.compiler.host));
-        builder.ensure(compile::Rustc::new(self.compiler, self.target));
+        // If enabled, use ci-rustc and skip building the in-tree compiler.
+        if !builder.download_rustc() {
+            builder.ensure(compile::Std::new(self.compiler, self.compiler.host));
+            builder.ensure(compile::Rustc::new(self.compiler, self.target));
+        }
 
         let cargo = prepare_tool_cargo(
             builder,
@@ -1081,7 +1083,39 @@ tool_extended!((self, builder),
     Rustfmt, "src/tools/rustfmt", "rustfmt", stable=true, add_bins_to_sysroot = ["rustfmt", "cargo-fmt"];
 );
 
-impl<'a> Builder<'a> {
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct TestFloatParse {
+    pub host: TargetSelection,
+}
+
+impl Step for TestFloatParse {
+    type Output = ();
+    const ONLY_HOSTS: bool = true;
+    const DEFAULT: bool = false;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.path("src/etc/test-float-parse")
+    }
+
+    fn run(self, builder: &Builder<'_>) {
+        let bootstrap_host = builder.config.build;
+        let compiler = builder.compiler(builder.top_stage, bootstrap_host);
+
+        builder.ensure(ToolBuild {
+            compiler,
+            target: bootstrap_host,
+            tool: "test-float-parse",
+            mode: Mode::ToolStd,
+            path: "src/etc/test-float-parse",
+            source_type: SourceType::InTree,
+            extra_features: Vec::new(),
+            allow_features: "",
+            cargo_args: Vec::new(),
+        });
+    }
+}
+
+impl Builder<'_> {
     /// Gets a `BootstrapCommand` which is ready to run `tool` in `stage` built for
     /// `host`.
     pub fn tool_cmd(&self, tool: Tool) -> BootstrapCommand {

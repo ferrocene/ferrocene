@@ -11,7 +11,7 @@ impl<'tcx> MiriMachine<'tcx> {
         let place = this.allocate(val.layout, MiriMemoryKind::ExternStatic.into())?;
         this.write_immediate(*val, &place)?;
         Self::add_extern_static(this, name, place.ptr());
-        Ok(())
+        interp_ok(())
     }
 
     /// Zero-initialized pointer-sized extern statics are pretty common.
@@ -26,7 +26,7 @@ impl<'tcx> MiriMachine<'tcx> {
             let val = ImmTy::from_int(0, this.machine.layouts.usize);
             Self::alloc_extern_static(this, name, val)?;
         }
-        Ok(())
+        interp_ok(())
     }
 
     /// Extern statics that are initialized with function pointers to the symbols of the same name.
@@ -41,7 +41,7 @@ impl<'tcx> MiriMachine<'tcx> {
             let val = ImmTy::from_scalar(Scalar::from_pointer(ptr, this), layout);
             Self::alloc_extern_static(this, name, val)?;
         }
-        Ok(())
+        interp_ok(())
     }
 
     /// Sets up the "extern statics" for this machine.
@@ -63,10 +63,10 @@ impl<'tcx> MiriMachine<'tcx> {
 
         match this.tcx.sess.target.os.as_ref() {
             "linux" => {
-                Self::null_ptr_extern_statics(
-                    this,
-                    &["__cxa_thread_atexit_impl", "__clock_gettime64"],
-                )?;
+                Self::null_ptr_extern_statics(this, &[
+                    "__cxa_thread_atexit_impl",
+                    "__clock_gettime64",
+                ])?;
                 Self::weak_symbol_extern_statics(this, &["getrandom", "statx"])?;
             }
             "freebsd" => {
@@ -87,6 +87,6 @@ impl<'tcx> MiriMachine<'tcx> {
             }
             _ => {} // No "extern statics" supported on this target
         }
-        Ok(())
+        interp_ok(())
     }
 }

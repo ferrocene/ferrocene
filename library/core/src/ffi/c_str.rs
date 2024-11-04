@@ -5,7 +5,7 @@ use crate::error::Error;
 use crate::ffi::c_char;
 use crate::iter::FusedIterator;
 use crate::marker::PhantomData;
-use crate::ptr::{addr_of, NonNull};
+use crate::ptr::NonNull;
 use crate::slice::memchr;
 use crate::{fmt, intrinsics, ops, slice, str};
 
@@ -137,11 +137,11 @@ enum FromBytesWithNulErrorKind {
 
 // FIXME: const stability attributes should not be required here, I think
 impl FromBytesWithNulError {
-    #[rustc_const_stable(feature = "const_cstr_methods", since = "1.72.0")]
+    #[cfg_attr(bootstrap, rustc_const_stable(feature = "const_cstr_methods", since = "1.72.0"))]
     const fn interior_nul(pos: usize) -> FromBytesWithNulError {
         FromBytesWithNulError { kind: FromBytesWithNulErrorKind::InteriorNul(pos) }
     }
-    #[rustc_const_stable(feature = "const_cstr_methods", since = "1.72.0")]
+    #[cfg_attr(bootstrap, rustc_const_stable(feature = "const_cstr_methods", since = "1.72.0"))]
     const fn not_nul_terminated() -> FromBytesWithNulError {
         FromBytesWithNulError { kind: FromBytesWithNulErrorKind::NotNulTerminated }
     }
@@ -464,7 +464,9 @@ impl CStr {
     /// behavior when `ptr` is used inside the `unsafe` block:
     ///
     /// ```no_run
-    /// # #![allow(unused_must_use)] #![allow(temporary_cstring_as_ptr)]
+    /// # #![allow(unused_must_use)]
+    /// # #![cfg_attr(bootstrap, expect(temporary_cstring_as_ptr))]
+    /// # #![cfg_attr(not(bootstrap), expect(dangling_pointers_from_temporaries))]
     /// use std::ffi::CString;
     ///
     /// // Do not do this:
@@ -623,7 +625,7 @@ impl CStr {
     pub const fn to_bytes_with_nul(&self) -> &[u8] {
         // SAFETY: Transmuting a slice of `c_char`s to a slice of `u8`s
         // is safe on all supported targets.
-        unsafe { &*(addr_of!(self.inner) as *const [u8]) }
+        unsafe { &*((&raw const self.inner) as *const [u8]) }
     }
 
     /// Iterates over the bytes in this C string.
@@ -730,7 +732,7 @@ impl AsRef<CStr> for CStr {
 /// located within `isize::MAX` from `ptr`.
 #[inline]
 #[unstable(feature = "cstr_internals", issue = "none")]
-#[rustc_const_stable(feature = "const_cstr_from_ptr", since = "1.81.0")]
+#[cfg_attr(bootstrap, rustc_const_stable(feature = "const_cstr_from_ptr", since = "1.81.0"))]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
 const unsafe fn strlen(ptr: *const c_char) -> usize {
     const fn strlen_ct(s: *const c_char) -> usize {

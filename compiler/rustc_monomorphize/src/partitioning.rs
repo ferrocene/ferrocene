@@ -95,16 +95,16 @@
 use std::cmp;
 use std::collections::hash_map::Entry;
 use std::fs::{self, File};
-use std::io::{BufWriter, Write};
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_data_structures::sync;
 use rustc_data_structures::unord::{UnordMap, UnordSet};
+use rustc_hir::LangItem;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, DefIdSet, LOCAL_CRATE};
 use rustc_hir::definitions::DefPathDataName;
-use rustc_hir::LangItem;
 use rustc_middle::bug;
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
 use rustc_middle::middle::exported_symbols::{SymbolExportInfo, SymbolExportLevel};
@@ -116,9 +116,10 @@ use rustc_middle::ty::print::{characteristic_def_id_of_type, with_no_trimmed_pat
 use rustc_middle::ty::visit::TypeVisitableExt;
 use rustc_middle::ty::{self, InstanceKind, TyCtxt};
 use rustc_middle::util::Providers;
-use rustc_session::config::{DumpMonoStatsFormat, SwitchWithOptPath};
 use rustc_session::CodegenUnits;
+use rustc_session::config::{DumpMonoStatsFormat, SwitchWithOptPath};
 use rustc_span::symbol::Symbol;
+use rustc_target::spec::SymbolVisibility;
 use tracing::debug;
 
 use crate::collector::{self, MonoItemCollectionStrategy, UsageMap};
@@ -228,7 +229,7 @@ where
         }
 
         let characteristic_def_id = characteristic_def_id_of_mono_item(cx.tcx, mono_item);
-        let is_volatile = is_incremental_build && mono_item.is_generic_fn(cx.tcx);
+        let is_volatile = is_incremental_build && mono_item.is_generic_fn();
 
         let cgu_name = match characteristic_def_id {
             Some(def_id) => compute_codegen_unit_name(
@@ -255,8 +256,12 @@ where
         }
         let size_estimate = mono_item.size_estimate(cx.tcx);
 
-        cgu.items_mut()
-            .insert(mono_item, MonoItemData { inlined: false, linkage, visibility, size_estimate });
+        cgu.items_mut().insert(mono_item, MonoItemData {
+            inlined: false,
+            linkage,
+            visibility,
+            size_estimate,
+        });
 
         // Get all inlined items that are reachable from `mono_item` without
         // going via another root item. This includes drop-glue, functions from
@@ -817,7 +822,7 @@ fn mono_item_visibility<'tcx>(
         return Visibility::Hidden;
     }
 
-    let is_generic = instance.args.non_erasable_generics(tcx, def_id).next().is_some();
+    let is_generic = instance.args.non_erasable_generics().next().is_some();
 
     // Upstream `DefId` instances get different handling than local ones.
     let Some(def_id) = def_id.as_local() else {
@@ -900,26 +905,28 @@ fn mono_item_visibility<'tcx>(
 }
 
 fn default_visibility(tcx: TyCtxt<'_>, id: DefId, is_generic: bool) -> Visibility {
-    if !tcx.sess.default_hidden_visibility() {
+    // Fast-path to avoid expensive query call below
+    if tcx.sess.default_visibility() == SymbolVisibility::Interposable {
         return Visibility::Default;
     }
 
-    // Generic functions never have export-level C.
-    if is_generic {
-        return Visibility::Hidden;
-    }
+    let export_level = if is_generic {
+        // Generic functions never have export-level C.
+        SymbolExportLevel::Rust
+    } else {
+        match tcx.reachable_non_generics(id.krate).get(&id) {
+            Some(SymbolExportInfo { level: SymbolExportLevel::C, .. }) => SymbolExportLevel::C,
+            _ => SymbolExportLevel::Rust,
+        }
+    };
 
-    // Things with export level C don't get instantiated in
-    // downstream crates.
-    if !id.is_local() {
-        return Visibility::Hidden;
-    }
+    match export_level {
+        // C-export level items remain at `Default` to allow C code to
+        // access and interpose them.
+        SymbolExportLevel::C => Visibility::Default,
 
-    // C-export level items remain at `Default`, all other internal
-    // items become `Hidden`.
-    match tcx.reachable_non_generics(id.krate).get(&id) {
-        Some(SymbolExportInfo { level: SymbolExportLevel::C, .. }) => Visibility::Default,
-        _ => Visibility::Hidden,
+        // For all other symbols, `default_visibility` determines which visibility to use.
+        SymbolExportLevel::Rust => tcx.sess.default_visibility().into(),
     }
 }
 
@@ -1239,8 +1246,7 @@ fn dump_mono_items_stats<'tcx>(
     let ext = format.extension();
     let filename = format!("{crate_name}.mono_items.{ext}");
     let output_path = output_directory.join(&filename);
-    let file = File::create(&output_path)?;
-    let mut file = BufWriter::new(file);
+    let mut file = File::create_buffered(&output_path)?;
 
     // Gather instantiated mono items grouped by def_id
     let mut items_per_def_id: FxIndexMap<_, Vec<_>> = Default::default();

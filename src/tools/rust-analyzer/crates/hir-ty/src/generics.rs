@@ -16,12 +16,13 @@ use hir_def::{
         GenericParamDataRef, GenericParams, LifetimeParamData, TypeOrConstParamData,
         TypeParamProvenance,
     },
+    type_ref::TypesMap,
     ConstParamId, GenericDefId, GenericParamId, ItemContainerId, LifetimeParamId,
     LocalLifetimeParamId, LocalTypeOrConstParamId, Lookup, TypeOrConstParamId, TypeParamId,
 };
-use intern::Interned;
 use itertools::chain;
 use stdx::TupleExt;
+use triomphe::Arc;
 
 use crate::{db::HirDatabase, lt_to_placeholder_idx, to_placeholder_idx, Interner, Substitution};
 
@@ -34,7 +35,7 @@ pub(crate) fn generics(db: &dyn DefDatabase, def: GenericDefId) -> Generics {
 #[derive(Clone, Debug)]
 pub(crate) struct Generics {
     def: GenericDefId,
-    params: Interned<GenericParams>,
+    params: Arc<GenericParams>,
     parent_generics: Option<Box<Generics>>,
     has_trait_self_param: bool,
 }
@@ -83,6 +84,18 @@ impl Generics {
         &self,
     ) -> impl DoubleEndedIterator<Item = (GenericParamId, GenericParamDataRef<'_>)> + '_ {
         self.iter_self().chain(self.iter_parent())
+    }
+
+    pub(crate) fn iter_with_types_map(
+        &self,
+    ) -> impl Iterator<Item = ((GenericParamId, GenericParamDataRef<'_>), &TypesMap)> + '_ {
+        self.iter_self().zip(std::iter::repeat(&self.params.types_map)).chain(
+            self.iter_parent().zip(
+                self.parent_generics()
+                    .into_iter()
+                    .flat_map(|it| std::iter::repeat(&it.params.types_map)),
+            ),
+        )
     }
 
     /// Iterate over the params without parent params.
@@ -222,6 +235,23 @@ impl Generics {
                 }
             }),
         )
+    }
+}
+
+pub(crate) fn trait_self_param_idx(db: &dyn DefDatabase, def: GenericDefId) -> Option<usize> {
+    match def {
+        GenericDefId::TraitId(_) | GenericDefId::TraitAliasId(_) => {
+            let params = db.generic_params(def);
+            params.trait_self_param().map(|idx| idx.into_raw().into_u32() as usize)
+        }
+        GenericDefId::ImplId(_) => None,
+        _ => {
+            let parent_def = parent_generic_def(db, def)?;
+            let parent_params = db.generic_params(parent_def);
+            let parent_self_idx = parent_params.trait_self_param()?.into_raw().into_u32() as usize;
+            let self_params = db.generic_params(def);
+            Some(self_params.len() + parent_self_idx)
+        }
     }
 }
 

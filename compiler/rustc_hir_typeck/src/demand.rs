@@ -10,7 +10,7 @@ use rustc_middle::ty::fold::BottomUpFolder;
 use rustc_middle::ty::print::with_no_trimmed_paths;
 use rustc_middle::ty::{self, AssocItem, Ty, TypeFoldable, TypeVisitableExt};
 use rustc_span::symbol::sym;
-use rustc_span::{Span, DUMMY_SP};
+use rustc_span::{DUMMY_SP, Span};
 use rustc_trait_selection::infer::InferCtxtExt;
 use rustc_trait_selection::traits::ObligationCause;
 use tracing::instrument;
@@ -182,7 +182,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     }
 
     #[instrument(skip(self), level = "debug")]
-    pub fn demand_suptype_with_origin(
+    pub(crate) fn demand_suptype_with_origin(
         &'a self,
         cause: &ObligationCause<'tcx>,
         expected: Ty<'tcx>,
@@ -191,7 +191,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         self.at(cause, self.param_env)
             .sup(DefineOpaqueTypes::Yes, expected, actual)
             .map(|infer_ok| self.register_infer_ok_obligations(infer_ok))
-            .map_err(|e| self.err_ctxt().report_mismatched_types(cause, expected, actual, e))
+            .map_err(|e| {
+                self.err_ctxt().report_mismatched_types(cause, self.param_env, expected, actual, e)
+            })
     }
 
     pub(crate) fn demand_eqtype(&self, sp: Span, expected: Ty<'tcx>, actual: Ty<'tcx>) {
@@ -218,7 +220,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         self.at(cause, self.param_env)
             .eq(DefineOpaqueTypes::Yes, expected, actual)
             .map(|infer_ok| self.register_infer_ok_obligations(infer_ok))
-            .map_err(|e| self.err_ctxt().report_mismatched_types(cause, expected, actual, e))
+            .map_err(|e| {
+                self.err_ctxt().report_mismatched_types(cause, self.param_env, expected, actual, e)
+            })
     }
 
     pub(crate) fn demand_coerce(
@@ -247,7 +251,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     /// N.B., this code relies on `self.diverges` to be accurate. In particular, assignments to `!`
     /// will be permitted if the diverges flag is currently "always".
     #[instrument(level = "debug", skip(self, expr, expected_ty_expr, allow_two_phase))]
-    pub fn demand_coerce_diag(
+    pub(crate) fn demand_coerce_diag(
         &'a self,
         mut expr: &'tcx hir::Expr<'tcx>,
         checked_ty: Ty<'tcx>,
@@ -271,7 +275,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let expr = expr.peel_drop_temps();
         let cause = self.misc(expr.span);
         let expr_ty = self.resolve_vars_if_possible(checked_ty);
-        let mut err = self.err_ctxt().report_mismatched_types(&cause, expected, expr_ty, e);
+        let mut err =
+            self.err_ctxt().report_mismatched_types(&cause, self.param_env, expected, expr_ty, e);
 
         self.emit_coerce_suggestions(&mut err, expr, expr_ty, expected, expected_ty_expr, Some(e));
 

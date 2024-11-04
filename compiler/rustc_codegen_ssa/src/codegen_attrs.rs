@@ -1,25 +1,26 @@
-use rustc_ast::{ast, attr, MetaItemKind, NestedMetaItem};
-use rustc_attr::{list_contains_name, InlineAttr, InstructionSetAttr, OptimizeAttr};
+use rustc_ast::{MetaItemInner, MetaItemKind, ast, attr};
+use rustc_attr::{InlineAttr, InstructionSetAttr, OptimizeAttr, list_contains_name};
+use rustc_data_structures::fx::FxHashMap;
 use rustc_errors::codes::*;
-use rustc_errors::{struct_span_code_err, DiagMessage, SubdiagMessage};
+use rustc_errors::{DiagMessage, SubdiagMessage, struct_span_code_err};
 use rustc_hir as hir;
 use rustc_hir::def::DefKind;
-use rustc_hir::def_id::{DefId, LocalDefId, LOCAL_CRATE};
+use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::weak_lang_items::WEAK_LANG_ITEMS;
-use rustc_hir::{lang_items, LangItem};
+use rustc_hir::{LangItem, lang_items};
 use rustc_middle::middle::codegen_fn_attrs::{
     CodegenFnAttrFlags, CodegenFnAttrs, PatchableFunctionEntry,
 };
 use rustc_middle::mir::mono::Linkage;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{self as ty, TyCtxt};
-use rustc_session::lint;
 use rustc_session::parse::feature_err;
+use rustc_session::{Session, lint};
 use rustc_span::symbol::Ident;
-use rustc_span::{sym, Span};
-use rustc_target::spec::{abi, SanitizerSet};
+use rustc_span::{Span, sym};
+use rustc_target::spec::{SanitizerSet, abi};
 
-use crate::errors;
+use crate::errors::{self, MissingFeatures, TargetFeatureDisableOrEnable};
 use crate::target_features::{check_target_feature_trait_unsafe, from_target_feature};
 
 fn linkage_by_name(tcx: TyCtxt<'_>, def_id: LocalDefId, name: &str) -> Linkage {
@@ -136,7 +137,7 @@ fn codegen_fn_attrs(tcx: TyCtxt<'_>, did: LocalDefId) -> CodegenFnAttrs {
                 let inner = attr.meta_item_list();
                 match inner.as_deref() {
                     Some([item]) if item.has_name(sym::linker) => {
-                        if !tcx.features().used_with_arg {
+                        if !tcx.features().used_with_arg() {
                             feature_err(
                                 &tcx.sess,
                                 sym::used_with_arg,
@@ -148,7 +149,7 @@ fn codegen_fn_attrs(tcx: TyCtxt<'_>, did: LocalDefId) -> CodegenFnAttrs {
                         codegen_fn_attrs.flags |= CodegenFnAttrFlags::USED_LINKER;
                     }
                     Some([item]) if item.has_name(sym::compiler) => {
-                        if !tcx.features().used_with_arg {
+                        if !tcx.features().used_with_arg() {
                             feature_err(
                                 &tcx.sess,
                                 sym::used_with_arg,
@@ -195,24 +196,6 @@ fn codegen_fn_attrs(tcx: TyCtxt<'_>, did: LocalDefId) -> CodegenFnAttrs {
                     }
                 }
             }
-            sym::cmse_nonsecure_entry => {
-                if let Some(fn_sig) = fn_sig()
-                    && !matches!(fn_sig.skip_binder().abi(), abi::Abi::C { .. })
-                {
-                    struct_span_code_err!(
-                        tcx.dcx(),
-                        attr.span,
-                        E0776,
-                        "`#[cmse_nonsecure_entry]` requires C ABI"
-                    )
-                    .emit();
-                }
-                if !tcx.sess.target.llvm_target.contains("thumbv8m") {
-                    struct_span_code_err!(tcx.dcx(), attr.span, E0775, "`#[cmse_nonsecure_entry]` is only valid for targets with the TrustZone-M extension")
-                    .emit();
-                }
-                codegen_fn_attrs.flags |= CodegenFnAttrFlags::CMSE_NONSECURE_ENTRY
-            }
             sym::thread_local => codegen_fn_attrs.flags |= CodegenFnAttrFlags::THREAD_LOCAL,
             sym::track_caller => {
                 let is_closure = tcx.is_closure_like(did.to_def_id());
@@ -230,7 +213,7 @@ fn codegen_fn_attrs(tcx: TyCtxt<'_>, did: LocalDefId) -> CodegenFnAttrs {
                     .emit();
                 }
                 if is_closure
-                    && !tcx.features().closure_track_caller
+                    && !tcx.features().closure_track_caller()
                     && !attr.span.allows_unstable(sym::closure_track_caller)
                 {
                     feature_err(
@@ -285,7 +268,7 @@ fn codegen_fn_attrs(tcx: TyCtxt<'_>, did: LocalDefId) -> CodegenFnAttrs {
                         //
                         // This exception needs to be kept in sync with allowing
                         // `#[target_feature]` on `main` and `start`.
-                    } else if !tcx.features().target_feature_11 {
+                    } else if !tcx.features().target_feature_11() {
                         feature_err(
                             &tcx.sess,
                             sym::target_feature_11,
@@ -375,7 +358,7 @@ fn codegen_fn_attrs(tcx: TyCtxt<'_>, did: LocalDefId) -> CodegenFnAttrs {
             sym::instruction_set => {
                 codegen_fn_attrs.instruction_set =
                     attr.meta_item_list().and_then(|l| match &l[..] {
-                        [NestedMetaItem::MetaItem(set)] => {
+                        [MetaItemInner::MetaItem(set)] => {
                             let segments =
                                 set.path.segments.iter().map(|x| x.ident.name).collect::<Vec<_>>();
                             match segments.as_slice() {
@@ -601,7 +584,7 @@ fn codegen_fn_attrs(tcx: TyCtxt<'_>, did: LocalDefId) -> CodegenFnAttrs {
     // its parent function, which effectively inherits the features anyway. Boxing this closure
     // would result in this closure being compiled without the inherited target features, but this
     // is probably a poor usage of `#[inline(always)]` and easily avoided by not using the attribute.
-    if tcx.features().target_feature_11
+    if tcx.features().target_feature_11()
         && tcx.is_closure_like(did.to_def_id())
         && codegen_fn_attrs.inline != InlineAttr::Always
     {
@@ -680,7 +663,47 @@ fn codegen_fn_attrs(tcx: TyCtxt<'_>, did: LocalDefId) -> CodegenFnAttrs {
         }
     }
 
+    if let Some(features) = check_tied_features(
+        tcx.sess,
+        &codegen_fn_attrs
+            .target_features
+            .iter()
+            .map(|features| (features.name.as_str(), true))
+            .collect(),
+    ) {
+        let span = tcx
+            .get_attrs(did, sym::target_feature)
+            .next()
+            .map_or_else(|| tcx.def_span(did), |a| a.span);
+        tcx.dcx()
+            .create_err(TargetFeatureDisableOrEnable {
+                features,
+                span: Some(span),
+                missing_features: Some(MissingFeatures),
+            })
+            .emit();
+    }
+
     codegen_fn_attrs
+}
+
+/// Given a map from target_features to whether they are enabled or disabled, ensure only valid
+/// combinations are allowed.
+pub fn check_tied_features(
+    sess: &Session,
+    features: &FxHashMap<&str, bool>,
+) -> Option<&'static [&'static str]> {
+    if !features.is_empty() {
+        for tied in sess.target.tied_target_features() {
+            // Tied features must be set to the same value, or not set at all
+            let mut tied_iter = tied.iter();
+            let enabled = features.get(tied_iter.next().unwrap());
+            if tied_iter.any(|f| enabled != features.get(f)) {
+                return Some(tied);
+            }
+        }
+    }
+    None
 }
 
 /// Checks if the provided DefId is a method in a trait impl for a trait which has track_caller

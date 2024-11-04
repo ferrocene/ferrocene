@@ -5,14 +5,14 @@
 
 use std::path::PathBuf;
 
+use crate::Mode;
 use crate::core::build_steps::dist::distdir;
 use crate::core::build_steps::test;
 use crate::core::build_steps::tool::{self, SourceType, Tool};
 use crate::core::builder::{Builder, Kind, RunConfig, ShouldRun, Step};
-use crate::core::config::flags::get_completion;
 use crate::core::config::TargetSelection;
+use crate::core::config::flags::get_completion;
 use crate::utils::exec::command;
-use crate::Mode;
 
 #[derive(Debug, PartialOrd, Ord, Clone, Hash, PartialEq, Eq)]
 pub struct BuildManifest;
@@ -281,5 +281,27 @@ impl Step for GenerateCompletions {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(GenerateCompletions);
+    }
+}
+
+#[derive(Debug, PartialOrd, Ord, Clone, Hash, PartialEq, Eq)]
+pub struct UnicodeTableGenerator;
+
+impl Step for UnicodeTableGenerator {
+    type Output = ();
+    const ONLY_HOSTS: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.path("src/tools/unicode-table-generator")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(UnicodeTableGenerator);
+    }
+
+    fn run(self, builder: &Builder<'_>) {
+        let mut cmd = builder.tool_cmd(Tool::UnicodeTableGenerator);
+        cmd.arg(builder.src.join("library/core/src/unicode/unicode_data.rs"));
+        cmd.run(builder);
     }
 }

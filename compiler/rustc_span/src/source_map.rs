@@ -175,6 +175,7 @@ pub struct SourceMapInputs {
     pub file_loader: Box<dyn FileLoader + Send + Sync>,
     pub path_mapping: FilePathMapping,
     pub hash_kind: SourceFileHashAlgorithm,
+    pub checksum_hash_kind: Option<SourceFileHashAlgorithm>,
 }
 
 pub struct SourceMap {
@@ -187,6 +188,12 @@ pub struct SourceMap {
 
     /// The algorithm used for hashing the contents of each source file.
     hash_kind: SourceFileHashAlgorithm,
+
+    /// Similar to `hash_kind`, however this algorithm is used for checksums to determine if a crate is fresh.
+    /// `cargo` is the primary user of these.
+    ///
+    /// If this is equal to `hash_kind` then the checksum won't be computed twice.
+    checksum_hash_kind: Option<SourceFileHashAlgorithm>,
 }
 
 impl SourceMap {
@@ -195,17 +202,19 @@ impl SourceMap {
             file_loader: Box::new(RealFileLoader),
             path_mapping,
             hash_kind: SourceFileHashAlgorithm::Md5,
+            checksum_hash_kind: None,
         })
     }
 
     pub fn with_inputs(
-        SourceMapInputs { file_loader, path_mapping, hash_kind }: SourceMapInputs,
+        SourceMapInputs { file_loader, path_mapping, hash_kind, checksum_hash_kind }: SourceMapInputs,
     ) -> SourceMap {
         SourceMap {
             files: Default::default(),
             file_loader: IntoDynSyncSend(file_loader),
             path_mapping,
             hash_kind,
+            checksum_hash_kind,
         }
     }
 
@@ -277,8 +286,8 @@ impl SourceMap {
         });
 
         let file = Lrc::new(file);
-        files.source_files.push(file.clone());
-        files.stable_id_to_source_file.insert(file_id, file.clone());
+        files.source_files.push(Lrc::clone(&file));
+        files.stable_id_to_source_file.insert(file_id, Lrc::clone(&file));
 
         Ok(file)
     }
@@ -307,7 +316,8 @@ impl SourceMap {
         match self.source_file_by_stable_id(stable_id) {
             Some(lrc_sf) => Ok(lrc_sf),
             None => {
-                let source_file = SourceFile::new(filename, src, self.hash_kind)?;
+                let source_file =
+                    SourceFile::new(filename, src, self.hash_kind, self.checksum_hash_kind)?;
 
                 // Let's make sure the file_id we generated above actually matches
                 // the ID we generate for the SourceFile we just created.
@@ -326,6 +336,7 @@ impl SourceMap {
         &self,
         filename: FileName,
         src_hash: SourceFileHash,
+        checksum_hash: Option<SourceFileHash>,
         stable_id: StableSourceFileId,
         source_len: u32,
         cnum: CrateNum,
@@ -340,6 +351,7 @@ impl SourceMap {
             name: filename,
             src: None,
             src_hash,
+            checksum_hash,
             external_src: FreezeLock::new(ExternalSource::Foreign {
                 kind: ExternalSourceKind::AbsentOk,
                 metadata_index,
@@ -374,7 +386,7 @@ impl SourceMap {
     /// Return the SourceFile that contains the given `BytePos`
     pub fn lookup_source_file(&self, pos: BytePos) -> Lrc<SourceFile> {
         let idx = self.lookup_source_file_idx(pos);
-        (*self.files.borrow().source_files)[idx].clone()
+        Lrc::clone(&(*self.files.borrow().source_files)[idx])
     }
 
     /// Looks up source information about a `BytePos`.
@@ -456,7 +468,7 @@ impl SourceMap {
         if lo != hi {
             return true;
         }
-        let f = (*self.files.borrow().source_files)[lo].clone();
+        let f = Lrc::clone(&(*self.files.borrow().source_files)[lo]);
         let lo = f.relative_position(sp.lo());
         let hi = f.relative_position(sp.hi());
         f.lookup_line(lo) != f.lookup_line(hi)
@@ -982,7 +994,7 @@ impl SourceMap {
         let filename = self.path_mapping().map_filename_prefix(filename).0;
         for sf in self.files.borrow().source_files.iter() {
             if filename == sf.name {
-                return Some(sf.clone());
+                return Some(Lrc::clone(&sf));
             }
         }
         None
@@ -991,7 +1003,7 @@ impl SourceMap {
     /// For a global `BytePos`, computes the local offset within the containing `SourceFile`.
     pub fn lookup_byte_offset(&self, bpos: BytePos) -> SourceFileAndBytePos {
         let idx = self.lookup_source_file_idx(bpos);
-        let sf = (*self.files.borrow().source_files)[idx].clone();
+        let sf = Lrc::clone(&(*self.files.borrow().source_files)[idx]);
         let offset = bpos - sf.start_pos;
         SourceFileAndBytePos { sf, pos: offset }
     }

@@ -17,8 +17,8 @@ use core::intrinsics::abort;
 #[cfg(not(no_global_oom_handling))]
 use core::iter;
 use core::marker::{PhantomData, Unsize};
-use core::mem::{self, align_of_val_raw, ManuallyDrop};
-use core::ops::{CoerceUnsized, Deref, DerefPure, DispatchFromDyn, Receiver};
+use core::mem::{self, ManuallyDrop, align_of_val_raw};
+use core::ops::{CoerceUnsized, Deref, DerefPure, DispatchFromDyn, LegacyReceiver};
 use core::panic::{RefUnwindSafe, UnwindSafe};
 use core::pin::{Pin, PinCoerceUnsized};
 use core::ptr::{self, NonNull};
@@ -237,6 +237,7 @@ macro_rules! acquire {
 /// [rc_examples]: crate::rc#examples
 #[cfg_attr(not(test), rustc_diagnostic_item = "Arc")]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[rustc_insignificant_dtor]
 pub struct Arc<
     T: ?Sized,
     #[unstable(feature = "allocator_api", issue = "32838")] A: Allocator = Global,
@@ -318,7 +319,7 @@ pub struct Weak<
     // but it is not necessarily a valid pointer.
     // `Weak::new` sets this to `usize::MAX` so that it doesn’t need
     // to allocate space on the heap. That's not a value a real pointer
-    // will ever have because RcBox has alignment at least 2.
+    // will ever have because RcInner has alignment at least 2.
     // This is only possible when `T: Sized`; unsized `T` never dangle.
     ptr: NonNull<ArcInner<T>>,
     alloc: A,
@@ -797,13 +798,13 @@ impl<T, A: Allocator> Arc<T, A> {
         // reference into a strong reference.
         let strong = unsafe {
             let inner = init_ptr.as_ptr();
-            ptr::write(ptr::addr_of_mut!((*inner).data), data);
+            ptr::write(&raw mut (*inner).data, data);
 
             // The above write to the data field must be visible to any threads which
             // observe a non-zero strong count. Therefore we need at least "Release" ordering
             // in order to synchronize with the `compare_exchange_weak` in `Weak::upgrade`.
             //
-            // "Acquire" ordering is not required. When considering the possible behaviours
+            // "Acquire" ordering is not required. When considering the possible behaviors
             // of `data_fn` we only need to look at what it could do with a reference to a
             // non-upgradeable `Weak`:
             // - It can *clone* the `Weak`, increasing the weak reference count.
@@ -1580,10 +1581,10 @@ impl<T: ?Sized, A: Allocator> Arc<T, A> {
     pub fn as_ptr(this: &Self) -> *const T {
         let ptr: *mut ArcInner<T> = NonNull::as_ptr(this.ptr);
 
-        // SAFETY: This cannot go through Deref::deref or RcBoxPtr::inner because
+        // SAFETY: This cannot go through Deref::deref or RcInnerPtr::inner because
         // this is required to retain raw/mut provenance such that e.g. `get_mut` can
         // write through the pointer after the Rc is recovered through `from_raw`.
-        unsafe { ptr::addr_of_mut!((*ptr).data) }
+        unsafe { &raw mut (*ptr).data }
     }
 
     /// Constructs an `Arc<T, A>` from a raw pointer.
@@ -1871,15 +1872,17 @@ impl<T: ?Sized, A: Allocator> Arc<T, A> {
     // Non-inlined part of `drop`.
     #[inline(never)]
     unsafe fn drop_slow(&mut self) {
+        // Drop the weak ref collectively held by all strong references when this
+        // variable goes out of scope. This ensures that the memory is deallocated
+        // even if the destructor of `T` panics.
+        // Take a reference to `self.alloc` instead of cloning because 1. it'll last long
+        // enough, and 2. you should be able to drop `Arc`s with unclonable allocators
+        let _weak = Weak { ptr: self.ptr, alloc: &self.alloc };
+
         // Destroy the data at this time, even though we must not free the box
         // allocation itself (there might still be weak pointers lying around).
-        unsafe { ptr::drop_in_place(Self::get_mut_unchecked(self)) };
-
-        // Drop the weak ref collectively held by all strong references
-        // Take a reference to `self.alloc` instead of cloning because 1. it'll
-        // last long enough, and 2. you should be able to drop `Arc`s with
-        // unclonable allocators
-        drop(Weak { ptr: self.ptr, alloc: &self.alloc });
+        // We cannot use `get_mut_unchecked` here, because `self.alloc` is borrowed.
+        unsafe { ptr::drop_in_place(&mut (*self.ptr.as_ptr()).data) };
     }
 
     /// Returns `true` if the two `Arc`s point to the same allocation in a vein similar to
@@ -1955,8 +1958,8 @@ impl<T: ?Sized> Arc<T> {
         debug_assert_eq!(unsafe { Layout::for_value_raw(inner) }, layout);
 
         unsafe {
-            ptr::addr_of_mut!((*inner).strong).write(atomic::AtomicUsize::new(1));
-            ptr::addr_of_mut!((*inner).weak).write(atomic::AtomicUsize::new(1));
+            (&raw mut (*inner).strong).write(atomic::AtomicUsize::new(1));
+            (&raw mut (*inner).weak).write(atomic::AtomicUsize::new(1));
         }
 
         inner
@@ -1986,8 +1989,8 @@ impl<T: ?Sized, A: Allocator> Arc<T, A> {
 
             // Copy value as bytes
             ptr::copy_nonoverlapping(
-                core::ptr::addr_of!(*src) as *const u8,
-                ptr::addr_of_mut!((*ptr).data) as *mut u8,
+                (&raw const *src) as *const u8,
+                (&raw mut (*ptr).data) as *mut u8,
                 value_size,
             );
 
@@ -2022,7 +2025,7 @@ impl<T> Arc<[T]> {
         unsafe {
             let ptr = Self::allocate_for_slice(v.len());
 
-            ptr::copy_nonoverlapping(v.as_ptr(), ptr::addr_of_mut!((*ptr).data) as *mut T, v.len());
+            ptr::copy_nonoverlapping(v.as_ptr(), (&raw mut (*ptr).data) as *mut T, v.len());
 
             Self::from_ptr(ptr)
         }
@@ -2061,7 +2064,7 @@ impl<T> Arc<[T]> {
             let layout = Layout::for_value_raw(ptr);
 
             // Pointer to first element
-            let elems = ptr::addr_of_mut!((*ptr).data) as *mut T;
+            let elems = (&raw mut (*ptr).data) as *mut T;
 
             let mut guard = Guard { mem: NonNull::new_unchecked(mem), elems, layout, n_elems: 0 };
 
@@ -2188,8 +2191,8 @@ unsafe impl<T: ?Sized, A: Allocator> PinCoerceUnsized for Weak<T, A> {}
 #[unstable(feature = "deref_pure_trait", issue = "87121")]
 unsafe impl<T: ?Sized, A: Allocator> DerefPure for Arc<T, A> {}
 
-#[unstable(feature = "receiver_trait", issue = "none")]
-impl<T: ?Sized> Receiver for Arc<T> {}
+#[unstable(feature = "legacy_receiver_trait", issue = "none")]
+impl<T: ?Sized> LegacyReceiver for Arc<T> {}
 
 #[cfg(not(no_global_oom_handling))]
 impl<T: ?Sized + CloneToUninit, A: Allocator + Clone> Arc<T, A> {
@@ -2787,7 +2790,7 @@ impl<T: ?Sized, A: Allocator> Weak<T, A> {
     ///
     /// drop(strong);
     /// // But not any more. We can do weak.as_ptr(), but accessing the pointer would lead to
-    /// // undefined behaviour.
+    /// // undefined behavior.
     /// // assert_eq!("hello", unsafe { &*weak.as_ptr() });
     /// ```
     ///
@@ -2805,7 +2808,7 @@ impl<T: ?Sized, A: Allocator> Weak<T, A> {
             // SAFETY: if is_dangling returns false, then the pointer is dereferenceable.
             // The payload may be dropped at this point, and we have to maintain provenance,
             // so use raw pointer manipulation.
-            unsafe { ptr::addr_of_mut!((*ptr).data) }
+            unsafe { &raw mut (*ptr).data }
         }
     }
 
@@ -2935,7 +2938,7 @@ impl<T: ?Sized, A: Allocator> Weak<T, A> {
             // Otherwise, we're guaranteed the pointer came from a nondangling Weak.
             // SAFETY: data_offset is safe to call, as ptr references a real (potentially dropped) T.
             let offset = unsafe { data_offset(ptr) };
-            // Thus, we reverse the offset to get the whole RcBox.
+            // Thus, we reverse the offset to get the whole RcInner.
             // SAFETY: the pointer originated from a Weak, so this offset is safe.
             unsafe { ptr.byte_sub(offset) as *mut ArcInner<T> }
         };
@@ -3428,7 +3431,7 @@ impl<T: ?Sized + fmt::Debug, A: Allocator> fmt::Debug for Arc<T, A> {
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized, A: Allocator> fmt::Pointer for Arc<T, A> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Pointer::fmt(&core::ptr::addr_of!(**self), f)
+        fmt::Pointer::fmt(&(&raw const **self), f)
     }
 }
 
@@ -3446,7 +3449,16 @@ impl<T: Default> Default for Arc<T> {
     /// assert_eq!(*x, 0);
     /// ```
     fn default() -> Arc<T> {
-        Arc::new(Default::default())
+        unsafe {
+            Self::from_inner(
+                Box::leak(Box::write(Box::new_uninit(), ArcInner {
+                    strong: atomic::AtomicUsize::new(1),
+                    weak: atomic::AtomicUsize::new(1),
+                    data: T::default(),
+                }))
+                .into(),
+            )
+        }
     }
 }
 
@@ -3678,7 +3690,7 @@ impl<T, A: Allocator + Clone> From<Vec<T, A>> for Arc<[T], A> {
             let (vec_ptr, len, cap, alloc) = v.into_raw_parts_with_alloc();
 
             let rc_ptr = Self::allocate_for_slice_in(len, &alloc);
-            ptr::copy_nonoverlapping(vec_ptr, ptr::addr_of_mut!((*rc_ptr).data) as *mut T, len);
+            ptr::copy_nonoverlapping(vec_ptr, (&raw mut (*rc_ptr).data) as *mut T, len);
 
             // Create a `Vec<T, &A>` with length 0, to deallocate the buffer
             // without dropping its contents or the allocator
@@ -3860,7 +3872,7 @@ impl<T: ?Sized, A: Allocator> Unpin for Arc<T, A> {}
 /// valid instance of T, but the T is allowed to be dropped.
 unsafe fn data_offset<T: ?Sized>(ptr: *const T) -> usize {
     // Align the unsized value to the end of the ArcInner.
-    // Because RcBox is repr(C), it will always be the last field in memory.
+    // Because RcInner is repr(C), it will always be the last field in memory.
     // SAFETY: since the only unsized types possible are slices, trait objects,
     // and extern types, the input safety requirement is currently enough to
     // satisfy the requirements of align_of_val_raw; this is an implementation

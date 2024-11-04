@@ -1,20 +1,17 @@
-use std::env;
 use std::ffi::{OsStr, OsString};
 use std::io::Write;
-use std::net;
-use std::ops::Not;
-use std::ops::Range;
+use std::ops::{Not, Range};
 use std::path::PathBuf;
-use std::process;
 use std::time::Duration;
+use std::{env, net, process};
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{Context, Result, anyhow, bail};
 use path_macro::path;
 use walkdir::WalkDir;
-use xshell::{cmd, Shell};
+use xshell::{Shell, cmd};
 
-use crate::util::*;
 use crate::Command;
+use crate::util::*;
 
 /// Used for rustc syncs.
 const JOSH_FILTER: &str =

@@ -10,9 +10,13 @@ use chalk_ir::{
 use either::Either;
 use hir_def::{
     data::adt::VariantData,
-    hir::{Array, BinaryOp, BindingId, CaptureBy, Expr, ExprId, Pat, PatId, Statement, UnaryOp},
+    hir::{
+        Array, AsmOperand, BinaryOp, BindingId, CaptureBy, Expr, ExprId, ExprOrPatId, Pat, PatId,
+        Statement, UnaryOp,
+    },
     lang_item::LangItem,
-    resolver::{resolver_for_expr, ResolveValueResult, ValueNs},
+    path::Path,
+    resolver::ValueNs,
     DefWithBodyId, FieldId, HasModule, TupleFieldId, TupleId, VariantId,
 };
 use hir_expand::name::Name;
@@ -26,6 +30,7 @@ use crate::{
     db::{HirDatabase, InternedClosure},
     error_lifetime, from_chalk_trait_id, from_placeholder_idx,
     generics::Generics,
+    infer::coerce::CoerceNever,
     make_binders,
     mir::{BorrowKind, MirSpan, MutBorrowKind, ProjectionElem},
     to_chalk_trait_id,
@@ -62,7 +67,7 @@ impl InferenceContext<'_> {
         }
 
         // Deduction from where-clauses in scope, as well as fn-pointer coercion are handled here.
-        let _ = self.coerce(Some(closure_expr), closure_ty, &expected_ty);
+        let _ = self.coerce(Some(closure_expr), closure_ty, &expected_ty, CoerceNever::Yes);
 
         // Coroutines are not Fn* so return early.
         if matches!(closure_ty.kind(Interner), TyKind::Coroutine(..)) {
@@ -278,11 +283,11 @@ impl CapturedItem {
                 ProjectionElem::Deref => {}
                 ProjectionElem::Field(Either::Left(f)) => {
                     match &*f.parent.variant_data(db.upcast()) {
-                        VariantData::Record(fields) => {
+                        VariantData::Record { fields, .. } => {
                             result.push('_');
                             result.push_str(fields[f.local_id].name.as_str())
                         }
-                        VariantData::Tuple(fields) => {
+                        VariantData::Tuple { fields, .. } => {
                             let index = fields.iter().position(|it| it.0 == f.local_id);
                             if let Some(index) = index {
                                 format_to!(result, "_{index}");
@@ -320,12 +325,12 @@ impl CapturedItem {
                 ProjectionElem::Field(Either::Left(f)) => {
                     let variant_data = f.parent.variant_data(db.upcast());
                     match &*variant_data {
-                        VariantData::Record(fields) => format_to!(
+                        VariantData::Record { fields, .. } => format_to!(
                             result,
                             ".{}",
                             fields[f.local_id].name.display(db.upcast(), edition)
                         ),
-                        VariantData::Tuple(fields) => format_to!(
+                        VariantData::Tuple { fields, .. } => format_to!(
                             result,
                             ".{}",
                             fields.iter().position(|it| it.0 == f.local_id).unwrap_or_default()
@@ -378,8 +383,10 @@ impl CapturedItem {
                     }
                     let variant_data = f.parent.variant_data(db.upcast());
                     let field = match &*variant_data {
-                        VariantData::Record(fields) => fields[f.local_id].name.as_str().to_owned(),
-                        VariantData::Tuple(fields) => fields
+                        VariantData::Record { fields, .. } => {
+                            fields[f.local_id].name.as_str().to_owned()
+                        }
+                        VariantData::Tuple { fields, .. } => fields
                             .iter()
                             .position(|it| it.0 == f.local_id)
                             .unwrap_or_default()
@@ -504,18 +511,39 @@ impl InferenceContext<'_> {
         apply_adjusts_to_place(&mut self.current_capture_span_stack, r, adjustments)
     }
 
+    /// Pushes the span into `current_capture_span_stack`, *without clearing it first*.
+    fn path_place(&mut self, path: &Path, id: ExprOrPatId) -> Option<HirPlace> {
+        if path.type_anchor().is_some() {
+            return None;
+        }
+        let hygiene = self.body.expr_or_pat_path_hygiene(id);
+        let result = self
+            .resolver
+            .resolve_path_in_value_ns_fully(self.db.upcast(), path, hygiene)
+            .and_then(|result| match result {
+                ValueNs::LocalBinding(binding) => {
+                    let mir_span = match id {
+                        ExprOrPatId::ExprId(id) => MirSpan::ExprId(id),
+                        ExprOrPatId::PatId(id) => MirSpan::PatId(id),
+                    };
+                    self.current_capture_span_stack.push(mir_span);
+                    Some(HirPlace { local: binding, projections: Vec::new() })
+                }
+                _ => None,
+            });
+        result
+    }
+
     /// Changes `current_capture_span_stack` to contain the stack of spans for this expr.
     fn place_of_expr_without_adjust(&mut self, tgt_expr: ExprId) -> Option<HirPlace> {
         self.current_capture_span_stack.clear();
         match &self.body[tgt_expr] {
             Expr::Path(p) => {
-                let resolver = resolver_for_expr(self.db.upcast(), self.owner, tgt_expr);
-                if let Some(ResolveValueResult::ValueNs(ValueNs::LocalBinding(b), _)) =
-                    resolver.resolve_path_in_value_ns(self.db.upcast(), p)
-                {
-                    self.current_capture_span_stack.push(MirSpan::ExprId(tgt_expr));
-                    return Some(HirPlace { local: b, projections: vec![] });
-                }
+                let resolver_guard =
+                    self.resolver.update_to_inner_scope(self.db.upcast(), self.owner, tgt_expr);
+                let result = self.path_place(p, tgt_expr.into());
+                self.resolver.reset_to_guard(resolver_guard);
+                return result;
             }
             Expr::Field { expr, name: _ } => {
                 let mut place = self.place_of_expr(*expr)?;
@@ -583,6 +611,16 @@ impl InferenceContext<'_> {
     fn add_capture(&mut self, place: HirPlace, kind: CaptureKind) {
         if self.is_upvar(&place) {
             self.push_capture(place, kind);
+        }
+    }
+
+    fn mutate_path_pat(&mut self, path: &Path, id: PatId) {
+        if let Some(place) = self.path_place(path, id.into()) {
+            self.add_capture(
+                place,
+                CaptureKind::ByRef(BorrowKind::Mut { kind: MutBorrowKind::Default }),
+            );
+            self.current_capture_span_stack.pop(); // Remove the pattern span.
         }
     }
 
@@ -666,7 +704,21 @@ impl InferenceContext<'_> {
     fn walk_expr_without_adjust(&mut self, tgt_expr: ExprId) {
         match &self.body[tgt_expr] {
             Expr::OffsetOf(_) => (),
-            Expr::InlineAsm(e) => self.walk_expr_without_adjust(e.e),
+            Expr::InlineAsm(e) => e.operands.iter().for_each(|(_, op)| match op {
+                AsmOperand::In { expr, .. }
+                | AsmOperand::Out { expr: Some(expr), .. }
+                | AsmOperand::InOut { expr, .. } => self.walk_expr_without_adjust(*expr),
+                AsmOperand::SplitInOut { in_expr, out_expr, .. } => {
+                    self.walk_expr_without_adjust(*in_expr);
+                    if let Some(out_expr) = out_expr {
+                        self.walk_expr_without_adjust(*out_expr);
+                    }
+                }
+                AsmOperand::Out { expr: None, .. }
+                | AsmOperand::Const(_)
+                | AsmOperand::Label(_)
+                | AsmOperand::Sym(_) => (),
+            }),
             Expr::If { condition, then_branch, else_branch } => {
                 self.consume_expr(*condition);
                 self.consume_expr(*then_branch);
@@ -697,14 +749,14 @@ impl InferenceContext<'_> {
                         Statement::Expr { expr, has_semi: _ } => {
                             self.consume_expr(*expr);
                         }
-                        Statement::Item => (),
+                        Statement::Item(_) => (),
                     }
                 }
                 if let Some(tail) = tail {
                     self.consume_expr(*tail);
                 }
             }
-            Expr::Call { callee, args, is_assignee_expr: _ } => {
+            Expr::Call { callee, args } => {
                 self.consume_expr(*callee);
                 self.consume_exprs(args.iter().copied());
             }
@@ -820,7 +872,7 @@ impl InferenceContext<'_> {
                     self.consume_expr(expr);
                 }
             }
-            Expr::Index { base, index, is_assignee_expr: _ } => {
+            Expr::Index { base, index } => {
                 self.select_from_expr(*base);
                 self.consume_expr(*index);
             }
@@ -844,9 +896,29 @@ impl InferenceContext<'_> {
                 }));
                 self.current_captures = cc;
             }
-            Expr::Array(Array::ElementList { elements: exprs, is_assignee_expr: _ })
-            | Expr::Tuple { exprs, is_assignee_expr: _ } => {
+            Expr::Array(Array::ElementList { elements: exprs }) | Expr::Tuple { exprs } => {
                 self.consume_exprs(exprs.iter().copied())
+            }
+            &Expr::Assignment { target, value } => {
+                self.walk_expr(value);
+                let resolver_guard =
+                    self.resolver.update_to_inner_scope(self.db.upcast(), self.owner, tgt_expr);
+                match self.place_of_expr(value) {
+                    Some(rhs_place) => {
+                        self.inside_assignment = true;
+                        self.consume_with_pat(rhs_place, target);
+                        self.inside_assignment = false;
+                    }
+                    None => self.body.walk_pats(target, &mut |pat| match &self.body[pat] {
+                        Pat::Path(path) => self.mutate_path_pat(path, pat),
+                        &Pat::Expr(expr) => {
+                            let place = self.place_of_expr(expr);
+                            self.mutate_expr(expr, place);
+                        }
+                        _ => {}
+                    }),
+                }
+                self.resolver.reset_to_guard(resolver_guard);
             }
 
             Expr::Missing
@@ -885,6 +957,7 @@ impl InferenceContext<'_> {
             | Pat::Missing
             | Pat::Wild
             | Pat::Tuple { .. }
+            | Pat::Expr(_)
             | Pat::Or(_) => (),
             Pat::TupleStruct { .. } | Pat::Record { .. } => {
                 if let Some(variant) = self.result.variant_resolution_for_pat(p) {
@@ -1104,11 +1177,15 @@ impl InferenceContext<'_> {
                         }
                     }
                 }
-                Pat::Range { .. }
-                | Pat::Slice { .. }
-                | Pat::ConstBlock(_)
-                | Pat::Path(_)
-                | Pat::Lit(_) => self.consume_place(place),
+                Pat::Range { .. } | Pat::Slice { .. } | Pat::ConstBlock(_) | Pat::Lit(_) => {
+                    self.consume_place(place)
+                }
+                Pat::Path(path) => {
+                    if self.inside_assignment {
+                        self.mutate_path_pat(path, tgt_pat);
+                    }
+                    self.consume_place(place);
+                }
                 &Pat::Bind { id, subpat: _ } => {
                     let mode = self.result.binding_modes[tgt_pat];
                     let capture_kind = match mode {
@@ -1162,6 +1239,15 @@ impl InferenceContext<'_> {
                     self.current_capture_span_stack.pop();
                 }
                 Pat::Box { .. } => (), // not supported
+                &Pat::Expr(expr) => {
+                    self.consume_place(place);
+                    let pat_capture_span_stack = mem::take(&mut self.current_capture_span_stack);
+                    let old_inside_assignment = mem::replace(&mut self.inside_assignment, false);
+                    let lhs_place = self.place_of_expr(expr);
+                    self.mutate_expr(expr, lhs_place);
+                    self.inside_assignment = old_inside_assignment;
+                    self.current_capture_span_stack = pat_capture_span_stack;
+                }
             }
         }
         self.current_capture_span_stack

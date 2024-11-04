@@ -2,7 +2,7 @@ use std::ops::{Bound, Range};
 
 use ast::token::IdentIsRaw;
 use pm::bridge::{
-    server, DelimSpan, Diagnostic, ExpnGlobals, Group, Ident, LitKind, Literal, Punct, TokenTree,
+    DelimSpan, Diagnostic, ExpnGlobals, Group, Ident, LitKind, Literal, Punct, TokenTree, server,
 };
 use pm::{Delimiter, Level};
 use rustc_ast as ast;
@@ -18,9 +18,9 @@ use rustc_parse::parser::Parser;
 use rustc_parse::{new_parser_from_source_str, source_str_to_stream, unwrap_or_emit_fatal};
 use rustc_session::parse::ParseSess;
 use rustc_span::def_id::CrateNum;
-use rustc_span::symbol::{self, sym, Symbol};
+use rustc_span::symbol::{self, Symbol, sym};
 use rustc_span::{BytePos, FileName, Pos, SourceFile, Span};
-use smallvec::{smallvec, SmallVec};
+use smallvec::{SmallVec, smallvec};
 
 use crate::base::ExtCtxt;
 
@@ -627,8 +627,7 @@ impl server::TokenStream for Rustc<'_, '_> {
         base: Option<Self::TokenStream>,
         trees: Vec<TokenTree<Self::TokenStream, Self::Span, Self::Symbol>>,
     ) -> Self::TokenStream {
-        let mut stream =
-            if let Some(base) = base { base } else { tokenstream::TokenStream::default() };
+        let mut stream = base.unwrap_or_default();
         for tree in trees {
             for tt in (tree, &mut *self).to_internal() {
                 stream.push_tree(tt);
@@ -642,8 +641,7 @@ impl server::TokenStream for Rustc<'_, '_> {
         base: Option<Self::TokenStream>,
         streams: Vec<Self::TokenStream>,
     ) -> Self::TokenStream {
-        let mut stream =
-            if let Some(base) = base { base } else { tokenstream::TokenStream::default() };
+        let mut stream = base.unwrap_or_default();
         for s in streams {
             stream.push_stream(s);
         }

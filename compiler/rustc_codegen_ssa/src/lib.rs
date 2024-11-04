@@ -6,11 +6,12 @@
 #![doc(rust_logo)]
 #![feature(assert_matches)]
 #![feature(box_patterns)]
+#![feature(debug_closure_helpers)]
+#![feature(file_buffered)]
 #![feature(if_let_guard)]
 #![feature(let_chains)]
 #![feature(negative_impls)]
 #![feature(rustdoc_internals)]
-#![feature(strict_provenance)]
 #![feature(trait_alias)]
 #![feature(try_blocks)]
 #![warn(unreachable_pub)]
@@ -37,10 +38,10 @@ use rustc_middle::middle::exported_symbols::SymbolExportKind;
 use rustc_middle::util::Providers;
 use rustc_serialize::opaque::{FileEncoder, MemDecoder};
 use rustc_serialize::{Decodable, Decoder, Encodable, Encoder};
+use rustc_session::Session;
 use rustc_session::config::{CrateType, OutputFilenames, OutputType, RUST_CGU_EXT};
 use rustc_session::cstore::{self, CrateSource};
 use rustc_session::utils::NativeLibKind;
-use rustc_session::Session;
 use rustc_span::symbol::Symbol;
 
 pub mod assert_module_sources;
@@ -155,7 +156,7 @@ pub struct NativeLib {
     pub kind: NativeLibKind,
     pub name: Symbol,
     pub filename: Option<Symbol>,
-    pub cfg: Option<ast::MetaItem>,
+    pub cfg: Option<ast::MetaItemInner>,
     pub verbatim: bool,
     pub dll_imports: Vec<cstore::DllImport>,
 }

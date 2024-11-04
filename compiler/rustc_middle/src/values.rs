@@ -4,12 +4,12 @@ use std::ops::ControlFlow;
 
 use rustc_data_structures::fx::FxHashSet;
 use rustc_errors::codes::*;
-use rustc_errors::{pluralize, struct_span_code_err, Applicability, MultiSpan};
+use rustc_errors::{Applicability, MultiSpan, pluralize, struct_span_code_err};
 use rustc_hir as hir;
 use rustc_hir::def::{DefKind, Res};
 use rustc_middle::ty::{self, Representability, Ty, TyCtxt};
-use rustc_query_system::query::{report_cycle, CycleError};
 use rustc_query_system::Value;
+use rustc_query_system::query::{CycleError, report_cycle};
 use rustc_span::def_id::LocalDefId;
 use rustc_span::{ErrorGuaranteed, Span};
 
@@ -358,7 +358,7 @@ fn find_item_ty_spans(
     match ty.kind {
         hir::TyKind::Path(hir::QPath::Resolved(_, path)) => {
             if let Res::Def(kind, def_id) = path.res
-                && !matches!(kind, DefKind::TyAlias)
+                && matches!(kind, DefKind::Enum | DefKind::Struct | DefKind::Union)
             {
                 let check_params = def_id.as_local().map_or(true, |def_id| {
                     if def_id == needle {

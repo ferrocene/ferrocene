@@ -1,4 +1,4 @@
-use crate::spec::{cvs, PanicStrategy, RelocModel, Target, TargetOptions};
+use crate::spec::{PanicStrategy, RelocModel, Target, TargetOptions, cvs};
 
 pub(crate) fn target() -> Target {
     Target {
@@ -30,6 +30,7 @@ pub(crate) fn target() -> Target {
             atomic_cas: true,
 
             features: "+m,+c".into(),
+            llvm_abiname: "ilp32".into(),
             panic_strategy: PanicStrategy::Abort,
             relocation_model: RelocModel::Static,
             emit_debug_gdb_scripts: false,

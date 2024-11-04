@@ -19,18 +19,20 @@ use rustc_infer::infer::DefineOpaqueTypes;
 use rustc_middle::bug;
 use rustc_middle::query::LocalCrate;
 use rustc_middle::ty::print::PrintTraitRefExt as _;
-use rustc_middle::ty::{self, GenericArgsRef, ImplSubject, Ty, TyCtxt, TypeVisitableExt};
+use rustc_middle::ty::{
+    self, GenericArgsRef, ImplSubject, Ty, TyCtxt, TypeVisitableExt, TypingMode,
+};
 use rustc_session::lint::builtin::{COHERENCE_LEAK_CHECK, ORDER_DEPENDENT_TRAIT_OBJECTS};
-use rustc_span::{sym, ErrorGuaranteed, Span, DUMMY_SP};
+use rustc_span::{DUMMY_SP, ErrorGuaranteed, Span, sym};
 use specialization_graph::GraphExt;
 use tracing::{debug, instrument};
 
-use super::{util, SelectionContext};
+use super::{SelectionContext, util};
 use crate::error_reporting::traits::to_pretty_impl_header;
 use crate::errors::NegativePositiveConflict;
 use crate::infer::{InferCtxt, InferOk, TyCtxtInferExt};
 use crate::traits::select::IntercrateAmbiguityCause;
-use crate::traits::{coherence, FutureCompatOverlapErrorKind, ObligationCause, ObligationCtxt};
+use crate::traits::{FutureCompatOverlapErrorKind, ObligationCause, ObligationCtxt, coherence};
 
 /// Information pertinent to an overlapping impl error.
 #[derive(Debug)]
@@ -136,7 +138,7 @@ pub fn translate_args_with_cause<'tcx>(
 }
 
 pub(super) fn specialization_enabled_in(tcx: TyCtxt<'_>, _: LocalCrate) -> bool {
-    tcx.features().specialization || tcx.features().min_specialization
+    tcx.features().specialization() || tcx.features().min_specialization()
 }
 
 /// Is `impl1` a specialization of `impl2`?
@@ -184,7 +186,7 @@ pub(super) fn specializes(tcx: TyCtxt<'_>, (impl1_def_id, impl2_def_id): (DefId,
     let penv = tcx.param_env(impl1_def_id);
 
     // Create an infcx, taking the predicates of impl1 as assumptions:
-    let infcx = tcx.infer_ctxt().build();
+    let infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
 
     // Attempt to prove that impl2 applies, given all of the above.
     fulfill_implication(

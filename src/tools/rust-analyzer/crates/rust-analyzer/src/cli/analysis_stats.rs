@@ -6,6 +6,7 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
+use cfg::{CfgAtom, CfgDiff};
 use hir::{
     db::{DefDatabase, ExpandDatabase, HirDatabase},
     Adt, AssocItem, Crate, DefWithBody, HasSource, HirDisplay, HirFileIdExt, ImportPathConfig,
@@ -22,7 +23,7 @@ use ide::{
 };
 use ide_db::{
     base_db::{
-        salsa::{self, debug::DebugQueryTable, ParallelDatabase},
+        ra_salsa::{self, debug::DebugQueryTable, ParallelDatabase},
         SourceDatabase, SourceRootDatabase,
     },
     EditionedFileId, LineIndexDatabase, SnippetCap,
@@ -31,7 +32,7 @@ use itertools::Itertools;
 use load_cargo::{load_workspace, LoadCargoConfig, ProcMacroServerChoice};
 use oorandom::Rand32;
 use profile::{Bytes, StopWatch};
-use project_model::{CargoConfig, ProjectManifest, ProjectWorkspace, RustLibSource};
+use project_model::{CargoConfig, CfgOverrides, ProjectManifest, ProjectWorkspace, RustLibSource};
 use rayon::prelude::*;
 use rustc_hash::{FxHashMap, FxHashSet};
 use syntax::{AstNode, SyntaxNode};
@@ -46,8 +47,8 @@ use crate::cli::{
 
 /// Need to wrap Snapshot to provide `Clone` impl for `map_with`
 struct Snap<DB>(DB);
-impl<DB: ParallelDatabase> Clone for Snap<salsa::Snapshot<DB>> {
-    fn clone(&self) -> Snap<salsa::Snapshot<DB>> {
+impl<DB: ParallelDatabase> Clone for Snap<ra_salsa::Snapshot<DB>> {
+    fn clone(&self) -> Snap<ra_salsa::Snapshot<DB>> {
         Snap(self.0.snapshot())
     }
 }
@@ -64,6 +65,12 @@ impl flags::AnalysisStats {
                 true => None,
                 false => Some(RustLibSource::Discover),
             },
+            all_targets: true,
+            set_test: !self.no_test,
+            cfg_overrides: CfgOverrides {
+                global: CfgDiff::new(vec![CfgAtom::Flag(hir::sym::miri.clone())], vec![]).unwrap(),
+                selective: Default::default(),
+            },
             ..Default::default()
         };
         let no_progress = &|_| ();
@@ -77,7 +84,17 @@ impl flags::AnalysisStats {
         let metadata_time = db_load_sw.elapsed();
         let load_cargo_config = LoadCargoConfig {
             load_out_dirs_from_check: !self.disable_build_scripts,
-            with_proc_macro_server: ProcMacroServerChoice::Sysroot,
+            with_proc_macro_server: if self.disable_proc_macros {
+                ProcMacroServerChoice::None
+            } else {
+                match self.proc_macro_srv {
+                    Some(ref path) => {
+                        let path = vfs::AbsPathBuf::assert_utf8(path.to_owned());
+                        ProcMacroServerChoice::Explicit(path)
+                    }
+                    None => ProcMacroServerChoice::Sysroot,
+                }
+            },
             prefill_caches: false,
         };
 
@@ -339,6 +356,7 @@ impl flags::AnalysisStats {
                 true => None,
                 false => Some(RustLibSource::Discover),
             },
+            all_targets: true,
             ..Default::default()
         };
 

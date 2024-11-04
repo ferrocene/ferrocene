@@ -1,7 +1,11 @@
 //! Code that is useful in various codegen modules.
 
 use libc::{c_char, c_uint};
+use rustc_abi as abi;
+use rustc_abi::Primitive::Pointer;
+use rustc_abi::{AddressSpace, HasDataLayout};
 use rustc_ast::Mutability;
+use rustc_codegen_ssa::common::TypeKind;
 use rustc_codegen_ssa::traits::*;
 use rustc_data_structures::stable_hasher::{Hash128, HashStable, StableHasher};
 use rustc_hir::def_id::DefId;
@@ -9,12 +13,11 @@ use rustc_middle::bug;
 use rustc_middle::mir::interpret::{ConstAllocation, GlobalAlloc, Scalar};
 use rustc_middle::ty::TyCtxt;
 use rustc_session::cstore::DllImport;
-use rustc_target::abi::{self, AddressSpace, HasDataLayout, Pointer};
 use tracing::debug;
 
 use crate::consts::const_alloc_to_llvm;
 pub(crate) use crate::context::CodegenCx;
-use crate::llvm::{self, BasicBlock, Bool, ConstantInt, False, OperandBundleDef, True};
+use crate::llvm::{self, BasicBlock, Bool, ConstantInt, False, Metadata, True};
 use crate::type_::Type;
 use crate::value::Value;
 
@@ -60,25 +63,26 @@ use crate::value::Value;
 /// the `OperandBundleDef` value created for MSVC landing pads.
 pub(crate) struct Funclet<'ll> {
     cleanuppad: &'ll Value,
-    operand: OperandBundleDef<'ll>,
+    operand: llvm::OperandBundleOwned<'ll>,
 }
 
 impl<'ll> Funclet<'ll> {
     pub(crate) fn new(cleanuppad: &'ll Value) -> Self {
-        Funclet { cleanuppad, operand: OperandBundleDef::new("funclet", &[cleanuppad]) }
+        Funclet { cleanuppad, operand: llvm::OperandBundleOwned::new("funclet", &[cleanuppad]) }
     }
 
     pub(crate) fn cleanuppad(&self) -> &'ll Value {
         self.cleanuppad
     }
 
-    pub(crate) fn bundle(&self) -> &OperandBundleDef<'ll> {
+    pub(crate) fn bundle(&self) -> &llvm::OperandBundle<'ll> {
         &self.operand
     }
 }
 
 impl<'ll> BackendTypes for CodegenCx<'ll, '_> {
     type Value = &'ll Value;
+    type Metadata = &'ll Metadata;
     // FIXME(eddyb) replace this with a `Function` "subclass" of `Value`.
     type Function = &'ll Value;
 
@@ -126,23 +130,12 @@ impl<'ll, 'tcx> ConstCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
         unsafe { llvm::LLVMGetPoison(t) }
     }
 
-    fn const_int(&self, t: &'ll Type, i: i64) -> &'ll Value {
-        unsafe { llvm::LLVMConstInt(t, i as u64, True) }
-    }
-
-    fn const_uint(&self, t: &'ll Type, i: u64) -> &'ll Value {
-        unsafe { llvm::LLVMConstInt(t, i, False) }
-    }
-
-    fn const_uint_big(&self, t: &'ll Type, u: u128) -> &'ll Value {
-        unsafe {
-            let words = [u as u64, (u >> 64) as u64];
-            llvm::LLVMConstIntOfArbitraryPrecision(t, 2, words.as_ptr())
-        }
-    }
-
     fn const_bool(&self, val: bool) -> &'ll Value {
         self.const_uint(self.type_i1(), val as u64)
+    }
+
+    fn const_i8(&self, i: i8) -> &'ll Value {
+        self.const_int(self.type_i8(), i as i64)
     }
 
     fn const_i16(&self, i: i16) -> &'ll Value {
@@ -153,8 +146,16 @@ impl<'ll, 'tcx> ConstCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
         self.const_int(self.type_i32(), i as i64)
     }
 
-    fn const_i8(&self, i: i8) -> &'ll Value {
-        self.const_int(self.type_i8(), i as i64)
+    fn const_int(&self, t: &'ll Type, i: i64) -> &'ll Value {
+        debug_assert!(
+            self.type_kind(t) == TypeKind::Integer,
+            "only allows integer types in const_int"
+        );
+        unsafe { llvm::LLVMConstInt(t, i as u64, True) }
+    }
+
+    fn const_u8(&self, i: u8) -> &'ll Value {
+        self.const_uint(self.type_i8(), i as u64)
     }
 
     fn const_u32(&self, i: u32) -> &'ll Value {
@@ -179,8 +180,23 @@ impl<'ll, 'tcx> ConstCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
         self.const_uint(self.isize_ty, i)
     }
 
-    fn const_u8(&self, i: u8) -> &'ll Value {
-        self.const_uint(self.type_i8(), i as u64)
+    fn const_uint(&self, t: &'ll Type, i: u64) -> &'ll Value {
+        debug_assert!(
+            self.type_kind(t) == TypeKind::Integer,
+            "only allows integer types in const_uint"
+        );
+        unsafe { llvm::LLVMConstInt(t, i, False) }
+    }
+
+    fn const_uint_big(&self, t: &'ll Type, u: u128) -> &'ll Value {
+        debug_assert!(
+            self.type_kind(t) == TypeKind::Integer,
+            "only allows integer types in const_uint_big"
+        );
+        unsafe {
+            let words = [u as u64, (u >> 64) as u64];
+            llvm::LLVMConstIntOfArbitraryPrecision(t, 2, words.as_ptr())
+        }
     }
 
     fn const_real(&self, t: &'ll Type, val: f64) -> &'ll Value {
@@ -203,8 +219,8 @@ impl<'ll, 'tcx> ConstCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
                     llvm::LLVMSetInitializer(g, sc);
                     llvm::LLVMSetGlobalConstant(g, True);
                     llvm::LLVMSetUnnamedAddress(g, llvm::UnnamedAddr::Global);
-                    llvm::LLVMRustSetLinkage(g, llvm::Linkage::InternalLinkage);
                 }
+                llvm::set_linkage(g, llvm::Linkage::InternalLinkage);
                 (s.to_owned(), g)
             })
             .1;
@@ -290,10 +306,10 @@ impl<'ll, 'tcx> ConstCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
                         self.get_fn_addr(instance.polymorphize(self.tcx)),
                         self.data_layout().instruction_address_space,
                     ),
-                    GlobalAlloc::VTable(ty, trait_ref) => {
+                    GlobalAlloc::VTable(ty, dyn_ty) => {
                         let alloc = self
                             .tcx
-                            .global_alloc(self.tcx.vtable_allocation((ty, trait_ref)))
+                            .global_alloc(self.tcx.vtable_allocation((ty, dyn_ty.principal())))
                             .unwrap_memory();
                         let init = const_alloc_to_llvm(self, alloc, /*static*/ false);
                         let value = self.static_addr_of(init, alloc.inner().align, None);
@@ -375,4 +391,22 @@ pub(crate) fn get_dllimport<'tcx>(
 ) -> Option<&'tcx DllImport> {
     tcx.native_library(id)
         .and_then(|lib| lib.dll_imports.iter().find(|di| di.name.as_str() == name))
+}
+
+/// Extension trait for explicit casts to `*const c_char`.
+pub(crate) trait AsCCharPtr {
+    /// Equivalent to `self.as_ptr().cast()`, but only casts to `*const c_char`.
+    fn as_c_char_ptr(&self) -> *const c_char;
+}
+
+impl AsCCharPtr for str {
+    fn as_c_char_ptr(&self) -> *const c_char {
+        self.as_ptr().cast()
+    }
+}
+
+impl AsCCharPtr for [u8] {
+    fn as_c_char_ptr(&self) -> *const c_char {
+        self.as_ptr().cast()
+    }
 }

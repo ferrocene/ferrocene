@@ -107,9 +107,7 @@ impl<T: Sized> NonNull<T> {
     #[must_use]
     #[inline]
     pub const fn dangling() -> Self {
-        // SAFETY: mem::align_of() returns a non-zero usize which is then casted
-        // to a *mut T. Therefore, `ptr` is not null and the conditions for
-        // calling new_unchecked() are respected.
+        // SAFETY: ptr::dangling_mut() returns a non-null well-aligned pointer.
         unsafe {
             let ptr = crate::ptr::dangling_mut::<T>();
             NonNull::new_unchecked(ptr)
@@ -230,6 +228,24 @@ impl<T: ?Sized> NonNull<T> {
         }
     }
 
+    /// Converts a reference to a `NonNull` pointer.
+    #[unstable(feature = "non_null_from_ref", issue = "130823")]
+    #[rustc_const_unstable(feature = "non_null_from_ref", issue = "130823")]
+    #[inline]
+    pub const fn from_ref(r: &T) -> Self {
+        // SAFETY: A reference cannot be null.
+        unsafe { NonNull { pointer: r as *const T } }
+    }
+
+    /// Converts a mutable reference to a `NonNull` pointer.
+    #[unstable(feature = "non_null_from_ref", issue = "130823")]
+    #[rustc_const_unstable(feature = "non_null_from_ref", issue = "130823")]
+    #[inline]
+    pub const fn from_mut(r: &mut T) -> Self {
+        // SAFETY: A mutable reference cannot be null.
+        unsafe { NonNull { pointer: r as *mut T } }
+    }
+
     /// Performs the same functionality as [`std::ptr::from_raw_parts`], except that a
     /// `NonNull` pointer is returned, as opposed to a raw `*const` pointer.
     ///
@@ -265,40 +281,39 @@ impl<T: ?Sized> NonNull<T> {
     ///
     /// For more details see the equivalent method on a raw pointer, [`pointer::addr`].
     ///
-    /// This API and its claimed semantics are part of the Strict Provenance experiment,
-    /// see the [`ptr` module documentation][crate::ptr].
+    /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
     #[must_use]
     #[inline]
-    #[unstable(feature = "strict_provenance", issue = "95228")]
+    #[stable(feature = "strict_provenance", since = "CURRENT_RUSTC_VERSION")]
     pub fn addr(self) -> NonZero<usize> {
         // SAFETY: The pointer is guaranteed by the type to be non-null,
         // meaning that the address will be non-zero.
         unsafe { NonZero::new_unchecked(self.pointer.addr()) }
     }
 
-    /// Creates a new pointer with the given address.
+    /// Creates a new pointer with the given address and the [provenance][crate::ptr#provenance] of
+    /// `self`.
     ///
     /// For more details see the equivalent method on a raw pointer, [`pointer::with_addr`].
     ///
-    /// This API and its claimed semantics are part of the Strict Provenance experiment,
-    /// see the [`ptr` module documentation][crate::ptr].
+    /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
     #[must_use]
     #[inline]
-    #[unstable(feature = "strict_provenance", issue = "95228")]
+    #[stable(feature = "strict_provenance", since = "CURRENT_RUSTC_VERSION")]
     pub fn with_addr(self, addr: NonZero<usize>) -> Self {
         // SAFETY: The result of `ptr::from::with_addr` is non-null because `addr` is guaranteed to be non-zero.
         unsafe { NonNull::new_unchecked(self.pointer.with_addr(addr.get()) as *mut _) }
     }
 
-    /// Creates a new pointer by mapping `self`'s address to a new one.
+    /// Creates a new pointer by mapping `self`'s address to a new one, preserving the
+    /// [provenance][crate::ptr#provenance] of `self`.
     ///
     /// For more details see the equivalent method on a raw pointer, [`pointer::map_addr`].
     ///
-    /// This API and its claimed semantics are part of the Strict Provenance experiment,
-    /// see the [`ptr` module documentation][crate::ptr].
+    /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
     #[must_use]
     #[inline]
-    #[unstable(feature = "strict_provenance", issue = "95228")]
+    #[stable(feature = "strict_provenance", since = "CURRENT_RUSTC_VERSION")]
     pub fn map_addr(self, f: impl FnOnce(NonZero<usize>) -> NonZero<usize>) -> Self {
         self.with_addr(f(self.addr()))
     }
@@ -394,7 +409,7 @@ impl<T: ?Sized> NonNull<T> {
     ///
     /// [the module documentation]: crate::ptr#safety
     #[stable(feature = "nonnull", since = "1.25.0")]
-    #[rustc_const_unstable(feature = "const_ptr_as_ref", issue = "91822")]
+    #[rustc_const_stable(feature = "const_ptr_as_ref", since = "1.83.0")]
     #[must_use]
     #[inline(always)]
     pub const unsafe fn as_mut<'a>(&mut self) -> &'a mut T {
@@ -567,7 +582,6 @@ impl<T: ?Sized> NonNull<T> {
     #[must_use]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_allow_const_fn_unstable(set_ptr_value)]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
     pub const unsafe fn byte_add(self, count: usize) -> Self {
@@ -621,7 +635,7 @@ impl<T: ?Sized> NonNull<T> {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[rustc_allow_const_fn_unstable(unchecked_neg)]
+    #[cfg_attr(bootstrap, rustc_allow_const_fn_unstable(unchecked_neg))]
     pub const unsafe fn sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -651,7 +665,6 @@ impl<T: ?Sized> NonNull<T> {
     #[must_use]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_allow_const_fn_unstable(set_ptr_value)]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
     pub const unsafe fn byte_sub(self, count: usize) -> Self {
@@ -663,7 +676,7 @@ impl<T: ?Sized> NonNull<T> {
         unsafe { NonNull { pointer: self.pointer.byte_sub(count) } }
     }
 
-    /// Calculates the distance between two pointers. The returned value is in
+    /// Calculates the distance between two pointers within the same allocation. The returned value is in
     /// units of T: the distance in bytes divided by `mem::size_of::<T>()`.
     ///
     /// This is equivalent to `(self as isize - origin as isize) / (mem::size_of::<T>() as isize)`,
@@ -733,7 +746,6 @@ impl<T: ?Sized> NonNull<T> {
     /// *Incorrect* usage:
     ///
     /// ```rust,no_run
-    /// #![feature(strict_provenance)]
     /// use std::ptr::NonNull;
     ///
     /// let ptr1 = NonNull::new(Box::into_raw(Box::new(0u8))).unwrap();
@@ -761,7 +773,7 @@ impl<T: ?Sized> NonNull<T> {
         unsafe { self.pointer.offset_from(origin.pointer) }
     }
 
-    /// Calculates the distance between two pointers. The returned value is in
+    /// Calculates the distance between two pointers within the same allocation. The returned value is in
     /// units of **bytes**.
     ///
     /// This is purely a convenience for casting to a `u8` pointer and
@@ -781,7 +793,7 @@ impl<T: ?Sized> NonNull<T> {
 
     // N.B. `wrapping_offset``, `wrapping_add`, etc are not implemented because they can wrap to null
 
-    /// Calculates the distance between two pointers, *where it's known that
+    /// Calculates the distance between two pointers within the same allocation, *where it's known that
     /// `self` is equal to or greater than `origin`*. The returned value is in
     /// units of T: the distance in bytes is divided by `mem::size_of::<T>()`.
     ///
@@ -854,6 +866,25 @@ impl<T: ?Sized> NonNull<T> {
         unsafe { self.pointer.sub_ptr(subtracted.pointer) }
     }
 
+    /// Calculates the distance between two pointers within the same allocation, *where it's known that
+    /// `self` is equal to or greater than `origin`*. The returned value is in
+    /// units of **bytes**.
+    ///
+    /// This is purely a convenience for casting to a `u8` pointer and
+    /// using [`sub_ptr`][NonNull::sub_ptr] on it. See that method for
+    /// documentation and safety requirements.
+    ///
+    /// For non-`Sized` pointees this operation considers only the data pointers,
+    /// ignoring the metadata.
+    #[inline(always)]
+    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[unstable(feature = "ptr_sub_ptr", issue = "95892")]
+    #[rustc_const_unstable(feature = "const_ptr_sub_ptr", issue = "95892")]
+    pub const unsafe fn byte_sub_ptr<U: ?Sized>(self, origin: NonNull<U>) -> usize {
+        // SAFETY: the caller must uphold the safety contract for `byte_sub_ptr`.
+        unsafe { self.pointer.byte_sub_ptr(origin.pointer) }
+    }
+
     /// Reads the value from `self` without moving it. This leaves the
     /// memory in `self` unchanged.
     ///
@@ -924,7 +955,7 @@ impl<T: ?Sized> NonNull<T> {
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[rustc_const_unstable(feature = "const_intrinsic_copy", issue = "80697")]
+    #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
     pub const unsafe fn copy_to(self, dest: NonNull<T>, count: usize)
     where
         T: Sized,
@@ -944,7 +975,7 @@ impl<T: ?Sized> NonNull<T> {
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[rustc_const_unstable(feature = "const_intrinsic_copy", issue = "80697")]
+    #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
     pub const unsafe fn copy_to_nonoverlapping(self, dest: NonNull<T>, count: usize)
     where
         T: Sized,
@@ -964,7 +995,7 @@ impl<T: ?Sized> NonNull<T> {
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[rustc_const_unstable(feature = "const_intrinsic_copy", issue = "80697")]
+    #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
     pub const unsafe fn copy_from(self, src: NonNull<T>, count: usize)
     where
         T: Sized,
@@ -984,7 +1015,7 @@ impl<T: ?Sized> NonNull<T> {
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[rustc_const_unstable(feature = "const_intrinsic_copy", issue = "80697")]
+    #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
     pub const unsafe fn copy_from_nonoverlapping(self, src: NonNull<T>, count: usize)
     where
         T: Sized,
@@ -1014,7 +1045,7 @@ impl<T: ?Sized> NonNull<T> {
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[rustc_const_unstable(feature = "const_ptr_write", issue = "86302")]
+    #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
     pub const unsafe fn write(self, val: T)
     where
         T: Sized,
@@ -1033,7 +1064,7 @@ impl<T: ?Sized> NonNull<T> {
     #[doc(alias = "memset")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[rustc_const_unstable(feature = "const_ptr_write", issue = "86302")]
+    #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
     pub const unsafe fn write_bytes(self, val: u8, count: usize)
     where
         T: Sized,
@@ -1074,7 +1105,7 @@ impl<T: ?Sized> NonNull<T> {
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[rustc_const_unstable(feature = "const_ptr_write", issue = "86302")]
+    #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
     pub const unsafe fn write_unaligned(self, val: T)
     where
         T: Sized,
@@ -1212,7 +1243,6 @@ impl<T: ?Sized> NonNull<T> {
     ///
     /// ```
     /// #![feature(const_nonnull_new)]
-    /// #![feature(const_option)]
     /// #![feature(const_pointer_is_aligned)]
     /// use std::ptr::NonNull;
     ///
@@ -1265,7 +1295,6 @@ impl<T: ?Sized> NonNull<T> {
     ///
     /// ```
     /// #![feature(const_pointer_is_aligned)]
-    /// #![feature(const_option)]
     /// #![feature(const_nonnull_new)]
     /// use std::ptr::NonNull;
     ///
@@ -1435,7 +1464,7 @@ impl<T> NonNull<[T]> {
     /// (Note that this example artificially demonstrates a use of this method,
     /// but `let slice = NonNull::from(&x[..]);` would be a better way to write code like this.)
     #[stable(feature = "nonnull_slice_from_raw_parts", since = "1.70.0")]
-    #[rustc_const_unstable(feature = "const_slice_from_raw_parts_mut", issue = "67456")]
+    #[rustc_const_stable(feature = "const_slice_from_raw_parts_mut", since = "1.83.0")]
     #[must_use]
     #[inline]
     pub const fn slice_from_raw_parts(data: NonNull<T>, len: usize) -> Self {
@@ -1498,7 +1527,6 @@ impl<T> NonNull<[T]> {
     #[inline]
     #[must_use]
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
-    #[rustc_const_unstable(feature = "slice_ptr_get", issue = "74265")]
     pub const fn as_non_null_ptr(self) -> NonNull<T> {
         self.cast()
     }
@@ -1753,9 +1781,8 @@ impl<T: ?Sized> From<&mut T> for NonNull<T> {
     ///
     /// This conversion is safe and infallible since references cannot be null.
     #[inline]
-    fn from(reference: &mut T) -> Self {
-        // SAFETY: A mutable reference cannot be null.
-        unsafe { NonNull { pointer: reference as *mut T } }
+    fn from(r: &mut T) -> Self {
+        NonNull::from_mut(r)
     }
 }
 
@@ -1765,8 +1792,7 @@ impl<T: ?Sized> From<&T> for NonNull<T> {
     ///
     /// This conversion is safe and infallible since references cannot be null.
     #[inline]
-    fn from(reference: &T) -> Self {
-        // SAFETY: A reference cannot be null.
-        unsafe { NonNull { pointer: reference as *const T } }
+    fn from(r: &T) -> Self {
+        NonNull::from_ref(r)
     }
 }

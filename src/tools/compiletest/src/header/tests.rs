@@ -1,10 +1,13 @@
 use std::io::Read;
 use std::path::Path;
-use std::str::FromStr;
 
-use super::iter_header;
+use semver::Version;
+
+use super::{
+    EarlyProps, HeadersCache, extract_llvm_version, extract_version_range, iter_header,
+    parse_normalize_rule,
+};
 use crate::common::{Config, Debugger, Mode};
-use crate::header::{parse_normalize_rule, EarlyProps, HeadersCache};
 
 fn make_test_description<R: Read>(
     config: &Config,
@@ -70,7 +73,7 @@ struct ConfigBuilder {
     llvm_version: Option<String>,
     git_hash: bool,
     system_llvm: bool,
-    profiler_support: bool,
+    profiler_runtime: bool,
 }
 
 impl ConfigBuilder {
@@ -114,8 +117,8 @@ impl ConfigBuilder {
         self
     }
 
-    fn profiler_support(&mut self, s: bool) -> &mut Self {
-        self.profiler_support = s;
+    fn profiler_runtime(&mut self, is_available: bool) -> &mut Self {
+        self.profiler_runtime = is_available;
         self
     }
 
@@ -149,6 +152,7 @@ impl ConfigBuilder {
             "--git-repository=",
             "--nightly-branch=",
             "--git-merge-commit-email=",
+            "--minicore-path=",
         ];
         let mut args: Vec<String> = args.iter().map(ToString::to_string).collect();
 
@@ -163,8 +167,8 @@ impl ConfigBuilder {
         if self.system_llvm {
             args.push("--system-llvm".to_owned());
         }
-        if self.profiler_support {
-            args.push("--profiler-support".to_owned());
+        if self.profiler_runtime {
+            args.push("--profiler-runtime".to_owned());
         }
 
         args.push("--rustc-path".to_string());
@@ -226,10 +230,9 @@ fn revisions() {
     let config: Config = cfg().build();
 
     assert_eq!(parse_rs(&config, "//@ revisions: a b c").revisions, vec!["a", "b", "c"],);
-    assert_eq!(
-        parse_makefile(&config, "# revisions: hello there").revisions,
-        vec!["hello", "there"],
-    );
+    assert_eq!(parse_makefile(&config, "# revisions: hello there").revisions, vec![
+        "hello", "there"
+    ],);
 }
 
 #[test]
@@ -244,7 +247,8 @@ fn aux_build() {
         //@ aux-build: b.rs
         "
         )
-        .aux,
+        .aux
+        .builds,
         vec!["a.rs", "b.rs"],
     );
 }
@@ -370,12 +374,12 @@ fn sanitizers() {
 }
 
 #[test]
-fn profiler_support() {
-    let config: Config = cfg().profiler_support(false).build();
-    assert!(check_ignore(&config, "//@ needs-profiler-support"));
+fn profiler_runtime() {
+    let config: Config = cfg().profiler_runtime(false).build();
+    assert!(check_ignore(&config, "//@ needs-profiler-runtime"));
 
-    let config: Config = cfg().profiler_support(true).build();
-    assert!(!check_ignore(&config, "//@ needs-profiler-support"));
+    let config: Config = cfg().profiler_runtime(true).build();
+    assert!(!check_ignore(&config, "//@ needs-profiler-runtime"));
 }
 
 #[test]
@@ -409,22 +413,70 @@ fn channel() {
 }
 
 #[test]
-fn test_extract_version_range() {
-    use super::{extract_llvm_version, extract_version_range};
-
-    assert_eq!(extract_version_range("1.2.3 - 4.5.6", extract_llvm_version), Some((10203, 40506)));
-    assert_eq!(extract_version_range("0   - 4.5.6", extract_llvm_version), Some((0, 40506)));
-    assert_eq!(extract_version_range("1.2.3 -", extract_llvm_version), None);
-    assert_eq!(extract_version_range("1.2.3 - ", extract_llvm_version), None);
-    assert_eq!(extract_version_range("- 4.5.6", extract_llvm_version), None);
-    assert_eq!(extract_version_range("-", extract_llvm_version), None);
-    assert_eq!(extract_version_range(" - 4.5.6", extract_llvm_version), None);
-    assert_eq!(extract_version_range("   - 4.5.6", extract_llvm_version), None);
-    assert_eq!(extract_version_range("0  -", extract_llvm_version), None);
+fn test_extract_llvm_version() {
+    // Note: officially, semver *requires* that versions at the minimum have all three
+    // `major.minor.patch` numbers, though for test-writer's convenience we allow omitting the minor
+    // and patch numbers (which will be stubbed out as 0).
+    assert_eq!(extract_llvm_version("0"), Version::new(0, 0, 0));
+    assert_eq!(extract_llvm_version("0.0"), Version::new(0, 0, 0));
+    assert_eq!(extract_llvm_version("0.0.0"), Version::new(0, 0, 0));
+    assert_eq!(extract_llvm_version("1"), Version::new(1, 0, 0));
+    assert_eq!(extract_llvm_version("1.2"), Version::new(1, 2, 0));
+    assert_eq!(extract_llvm_version("1.2.3"), Version::new(1, 2, 3));
+    assert_eq!(extract_llvm_version("4.5.6git"), Version::new(4, 5, 6));
+    assert_eq!(extract_llvm_version("4.5.6-rc1"), Version::new(4, 5, 6));
+    assert_eq!(extract_llvm_version("123.456.789-rc1"), Version::new(123, 456, 789));
+    assert_eq!(extract_llvm_version("8.1.2-rust"), Version::new(8, 1, 2));
+    assert_eq!(extract_llvm_version("9.0.1-rust-1.43.0-dev"), Version::new(9, 0, 1));
+    assert_eq!(extract_llvm_version("9.3.1-rust-1.43.0-dev"), Version::new(9, 3, 1));
+    assert_eq!(extract_llvm_version("10.0.0-rust"), Version::new(10, 0, 0));
+    assert_eq!(extract_llvm_version("11.1.0"), Version::new(11, 1, 0));
+    assert_eq!(extract_llvm_version("12.0.0libcxx"), Version::new(12, 0, 0));
+    assert_eq!(extract_llvm_version("12.0.0-rc3"), Version::new(12, 0, 0));
+    assert_eq!(extract_llvm_version("13.0.0git"), Version::new(13, 0, 0));
 }
 
 #[test]
-#[should_panic(expected = "Duplicate revision: `rpass1` in line ` rpass1 rpass1`")]
+#[should_panic]
+fn test_llvm_version_invalid_components() {
+    extract_llvm_version("4.x.6");
+}
+
+#[test]
+#[should_panic]
+fn test_llvm_version_invalid_prefix() {
+    extract_llvm_version("meow4.5.6");
+}
+
+#[test]
+#[should_panic]
+fn test_llvm_version_too_many_components() {
+    extract_llvm_version("4.5.6.7");
+}
+
+#[test]
+fn test_extract_version_range() {
+    let wrapped_extract = |s: &str| Some(extract_llvm_version(s));
+
+    assert_eq!(
+        extract_version_range("1.2.3 - 4.5.6", wrapped_extract),
+        Some((Version::new(1, 2, 3), Version::new(4, 5, 6)))
+    );
+    assert_eq!(
+        extract_version_range("0   - 4.5.6", wrapped_extract),
+        Some((Version::new(0, 0, 0), Version::new(4, 5, 6)))
+    );
+    assert_eq!(extract_version_range("1.2.3 -", wrapped_extract), None);
+    assert_eq!(extract_version_range("1.2.3 - ", wrapped_extract), None);
+    assert_eq!(extract_version_range("- 4.5.6", wrapped_extract), None);
+    assert_eq!(extract_version_range("-", wrapped_extract), None);
+    assert_eq!(extract_version_range(" - 4.5.6", wrapped_extract), None);
+    assert_eq!(extract_version_range("   - 4.5.6", wrapped_extract), None);
+    assert_eq!(extract_version_range("0  -", wrapped_extract), None);
+}
+
+#[test]
+#[should_panic(expected = "duplicate revision: `rpass1` in line ` rpass1 rpass1`")]
 fn test_duplicate_revisions() {
     let config: Config = cfg().build();
     parse_rs(&config, "//@ revisions: rpass1 rpass1");
@@ -574,19 +626,15 @@ fn families() {
 }
 
 #[test]
-fn ignore_mode() {
-    for &mode in Mode::STR_VARIANTS {
-        // Indicate profiler support so that "coverage-run" tests aren't skipped.
-        let config: Config = cfg().mode(mode).profiler_support(true).build();
-        let other = if mode == "coverage-run" { "coverage-map" } else { "coverage-run" };
+fn ignore_coverage() {
+    // Indicate profiler runtime availability so that "coverage-run" tests aren't skipped.
+    let config = cfg().mode("coverage-map").profiler_runtime(true).build();
+    assert!(check_ignore(&config, "//@ ignore-coverage-map"));
+    assert!(!check_ignore(&config, "//@ ignore-coverage-run"));
 
-        assert_ne!(mode, other);
-        assert_eq!(config.mode, Mode::from_str(mode).unwrap());
-        assert_ne!(config.mode, Mode::from_str(other).unwrap());
-
-        assert!(check_ignore(&config, &format!("//@ ignore-mode-{mode}")));
-        assert!(!check_ignore(&config, &format!("//@ ignore-mode-{other}")));
-    }
+    let config = cfg().mode("coverage-run").profiler_runtime(true).build();
+    assert!(!check_ignore(&config, "//@ ignore-coverage-map"));
+    assert!(check_ignore(&config, "//@ ignore-coverage-run"));
 }
 
 #[test]
@@ -618,17 +666,6 @@ fn test_unknown_directive_check() {
         &mut poisoned,
         Path::new("a.rs"),
         include_bytes!("./test-auxillary/unknown_directive.rs"),
-    );
-    assert!(poisoned);
-}
-
-#[test]
-fn test_known_legacy_directive_check() {
-    let mut poisoned = false;
-    run_path(
-        &mut poisoned,
-        Path::new("a.rs"),
-        include_bytes!("./test-auxillary/known_legacy_directive.rs"),
     );
     assert!(poisoned);
 }

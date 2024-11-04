@@ -3,7 +3,6 @@
 #![allow(rustc::untranslatable_diagnostic)]
 #![feature(array_windows)]
 #![feature(box_patterns)]
-#![feature(control_flow_enum)]
 #![feature(if_let_guard)]
 #![feature(let_chains)]
 #![feature(never_type)]
@@ -43,7 +42,7 @@ pub use coercion::can_coerce;
 use fn_ctxt::FnCtxt;
 use rustc_data_structures::unord::UnordSet;
 use rustc_errors::codes::*;
-use rustc_errors::{pluralize, struct_span_code_err, Applicability, ErrorGuaranteed};
+use rustc_errors::{Applicability, ErrorGuaranteed, pluralize, struct_span_code_err};
 use rustc_hir as hir;
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::intravisit::Visitor;
@@ -55,8 +54,8 @@ use rustc_middle::query::Providers;
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_middle::{bug, span_bug};
 use rustc_session::config;
-use rustc_span::def_id::LocalDefId;
 use rustc_span::Span;
+use rustc_span::def_id::LocalDefId;
 use tracing::{debug, instrument};
 use typeck_root_ctxt::TypeckRootCtxt;
 
@@ -156,13 +155,13 @@ fn typeck_with_fallback<'tcx>(
             tcx.fn_sig(def_id).instantiate_identity()
         };
 
-        check_abi(tcx, id, span, fn_sig.abi());
+        check_abi(tcx, span, fn_sig.abi());
 
         // Compute the function signature from point of view of inside the fn.
         let fn_sig = tcx.liberate_late_bound_regions(def_id.to_def_id(), fn_sig);
         let fn_sig = fcx.normalize(body.value.span, fn_sig);
 
-        check_fn(&mut fcx, fn_sig, None, decl, def_id, body, tcx.features().unsized_fn_params);
+        check_fn(&mut fcx, fn_sig, None, decl, def_id, body, tcx.features().unsized_fn_params());
     } else {
         let expected_type = infer_type_if_missing(&fcx, node);
         let expected_type = expected_type.unwrap_or_else(fallback);
@@ -420,7 +419,7 @@ fn report_unexpected_variant_res(
                 }
             }
 
-            err.multipart_suggestion_verbose(descr, suggestion, Applicability::MaybeIncorrect);
+            err.multipart_suggestion_verbose(descr, suggestion, Applicability::HasPlaceholders);
             err
         }
         Res::Def(DefKind::Variant, _) if expr.is_none() => {
@@ -494,7 +493,7 @@ fn fatally_break_rust(tcx: TyCtxt<'_>, span: Span) -> ! {
         "we would appreciate a joke overview: \
          https://github.com/rust-lang/rust/issues/43162#issuecomment-320764675",
     );
-    diag.note(format!("rustc {} running on {}", tcx.sess.cfg_version, config::host_triple(),));
+    diag.note(format!("rustc {} running on {}", tcx.sess.cfg_version, config::host_tuple(),));
     if let Some((flags, excluded_cargo_defaults)) = rustc_session::utils::extra_compiler_flags() {
         diag.note(format!("compiler flags: {}", flags.join(" ")));
         if excluded_cargo_defaults {

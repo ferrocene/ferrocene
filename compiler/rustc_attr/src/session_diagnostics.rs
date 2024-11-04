@@ -6,7 +6,7 @@ use rustc_errors::{Applicability, Diag, DiagCtxtHandle, Diagnostic, EmissionGuar
 use rustc_macros::{Diagnostic, Subdiagnostic};
 use rustc_span::{Span, Symbol};
 
-use crate::{fluent_generated as fluent, UnsupportedLiteralReason};
+use crate::{UnsupportedLiteralReason, fluent_generated as fluent};
 
 #[derive(Diagnostic)]
 #[diag(attr_expected_one_cfg_pattern, code = E0536)]
@@ -203,20 +203,17 @@ pub(crate) struct UnsupportedLiteral {
 
 impl<'a, G: EmissionGuarantee> Diagnostic<'a, G> for UnsupportedLiteral {
     fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a, G> {
-        let mut diag = Diag::new(
-            dcx,
-            level,
-            match self.reason {
-                UnsupportedLiteralReason::Generic => fluent::attr_unsupported_literal_generic,
-                UnsupportedLiteralReason::CfgString => fluent::attr_unsupported_literal_cfg_string,
-                UnsupportedLiteralReason::DeprecatedString => {
-                    fluent::attr_unsupported_literal_deprecated_string
-                }
-                UnsupportedLiteralReason::DeprecatedKvPair => {
-                    fluent::attr_unsupported_literal_deprecated_kv_pair
-                }
-            },
-        );
+        let mut diag = Diag::new(dcx, level, match self.reason {
+            UnsupportedLiteralReason::Generic => fluent::attr_unsupported_literal_generic,
+            UnsupportedLiteralReason::CfgString => fluent::attr_unsupported_literal_cfg_string,
+            UnsupportedLiteralReason::CfgBoolean => fluent::attr_unsupported_literal_cfg_boolean,
+            UnsupportedLiteralReason::DeprecatedString => {
+                fluent::attr_unsupported_literal_deprecated_string
+            }
+            UnsupportedLiteralReason::DeprecatedKvPair => {
+                fluent::attr_unsupported_literal_deprecated_kv_pair
+            }
+        });
         diag.span(self.span);
         diag.code(E0565);
         if self.is_bytestr {
@@ -317,6 +314,13 @@ impl<'a> IncorrectReprFormatGenericCause<'a> {
 #[derive(Diagnostic)]
 #[diag(attr_rustc_promotable_pairing, code = E0717)]
 pub(crate) struct RustcPromotablePairing {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag(attr_rustc_const_stable_indirect_pairing)]
+pub(crate) struct RustcConstStableIndirectPairing {
     #[primary_span]
     pub span: Span,
 }

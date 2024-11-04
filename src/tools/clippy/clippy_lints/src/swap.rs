@@ -6,9 +6,9 @@ use clippy_utils::ty::is_type_diagnostic_item;
 use clippy_utils::{can_mut_borrow_both, eq_expr_value, is_in_const_context, std_or_core};
 use itertools::Itertools;
 
-use rustc_hir::intravisit::{walk_expr, Visitor};
+use rustc_data_structures::fx::FxIndexSet;
+use rustc_hir::intravisit::{Visitor, walk_expr};
 
-use crate::FxHashSet;
 use rustc_errors::Applicability;
 use rustc_hir::{BinOpKind, Block, Expr, ExprKind, LetStmt, PatKind, QPath, Stmt, StmtKind};
 use rustc_lint::{LateContext, LateLintPass, LintContext};
@@ -17,7 +17,7 @@ use rustc_middle::ty;
 use rustc_session::declare_lint_pass;
 use rustc_span::source_map::Spanned;
 use rustc_span::symbol::Ident;
-use rustc_span::{sym, Span, SyntaxContext};
+use rustc_span::{Span, SyntaxContext, sym};
 
 declare_clippy_lint! {
     /// ### What it does
@@ -332,9 +332,9 @@ struct IndexBinding<'a, 'tcx> {
     applicability: &'a mut Applicability,
 }
 
-impl<'a, 'tcx> IndexBinding<'a, 'tcx> {
+impl<'tcx> IndexBinding<'_, 'tcx> {
     fn snippet_index_bindings(&mut self, exprs: &[&'tcx Expr<'tcx>]) -> String {
-        let mut bindings = FxHashSet::default();
+        let mut bindings = FxIndexSet::default();
         for expr in exprs {
             bindings.insert(self.snippet_index_binding(expr));
         }

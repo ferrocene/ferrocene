@@ -9,14 +9,14 @@ use rustc_errors::{
 use rustc_hir::ConstContext;
 use rustc_macros::{Diagnostic, LintDiagnostic, Subdiagnostic};
 use rustc_middle::mir::interpret::{
-    CheckInAllocMsg, CtfeProvenance, ExpectedKind, InterpError, InvalidMetaKind,
+    CheckInAllocMsg, CtfeProvenance, ExpectedKind, InterpErrorKind, InvalidMetaKind,
     InvalidProgramInfo, Misalignment, Pointer, PointerKind, ResourceExhaustionInfo,
     UndefinedBehaviorInfo, UnsupportedOpInfo, ValidationErrorInfo,
 };
 use rustc_middle::ty::{self, Mutability, Ty};
-use rustc_span::Span;
-use rustc_target::abi::call::AdjustForForeignAbiError;
+use rustc_span::{Span, Symbol};
 use rustc_target::abi::WrappingRange;
+use rustc_target::abi::call::AdjustForForeignAbiError;
 
 use crate::interpret::InternKind;
 
@@ -44,11 +44,15 @@ pub(crate) struct MutablePtrInFinal {
 }
 
 #[derive(Diagnostic)]
-#[diag(const_eval_unstable_in_stable)]
-pub(crate) struct UnstableInStable {
+#[diag(const_eval_unstable_in_stable_exposed)]
+pub(crate) struct UnstableInStableExposed {
     pub gate: String,
     #[primary_span]
     pub span: Span,
+    #[help(const_eval_is_function_call)]
+    pub is_function_call: bool,
+    /// Need to duplicate the field so that fluent also provides it as a variable...
+    pub is_function_call2: bool,
     #[suggestion(
         const_eval_unstable_sugg,
         code = "#[rustc_const_unstable(feature = \"...\", issue = \"...\")]\n",
@@ -118,8 +122,36 @@ pub(crate) struct UnstableConstFn {
 }
 
 #[derive(Diagnostic)]
-#[diag(const_eval_unallowed_mutable_refs, code = E0764)]
-pub(crate) struct UnallowedMutableRefs {
+#[diag(const_eval_unstable_intrinsic)]
+#[help]
+pub(crate) struct UnstableIntrinsic {
+    #[primary_span]
+    pub span: Span,
+    pub name: Symbol,
+    pub feature: Symbol,
+}
+
+#[derive(Diagnostic)]
+#[diag(const_eval_unmarked_const_fn_exposed)]
+#[help]
+pub(crate) struct UnmarkedConstFnExposed {
+    #[primary_span]
+    pub span: Span,
+    pub def_path: String,
+}
+
+#[derive(Diagnostic)]
+#[diag(const_eval_unmarked_intrinsic_exposed)]
+#[help]
+pub(crate) struct UnmarkedIntrinsicExposed {
+    #[primary_span]
+    pub span: Span,
+    pub def_path: String,
+}
+
+#[derive(Diagnostic)]
+#[diag(const_eval_mutable_ref_escaping, code = E0764)]
+pub(crate) struct MutableRefEscaping {
     #[primary_span]
     pub span: Span,
     pub kind: ConstContext,
@@ -128,8 +160,8 @@ pub(crate) struct UnallowedMutableRefs {
 }
 
 #[derive(Diagnostic)]
-#[diag(const_eval_unallowed_mutable_raw, code = E0764)]
-pub(crate) struct UnallowedMutableRaw {
+#[diag(const_eval_mutable_raw_escaping, code = E0764)]
+pub(crate) struct MutableRawEscaping {
     #[primary_span]
     pub span: Span,
     pub kind: ConstContext,
@@ -150,6 +182,15 @@ pub(crate) struct NonConstFnCall {
     #[primary_span]
     pub span: Span,
     pub def_path_str: String,
+    pub kind: ConstContext,
+}
+
+#[derive(Diagnostic)]
+#[diag(const_eval_non_const_intrinsic)]
+pub(crate) struct NonConstIntrinsic {
+    #[primary_span]
+    pub span: Span,
+    pub name: Symbol,
     pub kind: ConstContext,
 }
 
@@ -181,8 +222,8 @@ pub(crate) struct UnallowedInlineAsm {
 }
 
 #[derive(Diagnostic)]
-#[diag(const_eval_interior_mutable_data_refer, code = E0492)]
-pub(crate) struct InteriorMutableDataRefer {
+#[diag(const_eval_interior_mutable_ref_escaping, code = E0492)]
+pub(crate) struct InteriorMutableRefEscaping {
     #[primary_span]
     #[label]
     pub span: Span,
@@ -209,6 +250,8 @@ pub struct LongRunningWarn {
     pub span: Span,
     #[help]
     pub item_span: Span,
+    // Used for evading `-Z deduplicate-diagnostics`.
+    pub force_duplicate: usize,
 }
 
 #[derive(Subdiagnostic)]
@@ -508,13 +551,10 @@ impl<'a> ReportErrorExt for UndefinedBehaviorInfo<'a> {
             }
             ShiftOverflow { intrinsic, shift_amount } => {
                 diag.arg("intrinsic", intrinsic);
-                diag.arg(
-                    "shift_amount",
-                    match shift_amount {
-                        Either::Left(v) => v.to_string(),
-                        Either::Right(v) => v.to_string(),
-                    },
-                );
+                diag.arg("shift_amount", match shift_amount {
+                    Either::Left(v) => v.to_string(),
+                    Either::Right(v) => v.to_string(),
+                });
             }
             BoundsCheckFailed { len, index } => {
                 diag.arg("len", len);
@@ -523,12 +563,9 @@ impl<'a> ReportErrorExt for UndefinedBehaviorInfo<'a> {
             UnterminatedCString(ptr) | InvalidFunctionPointer(ptr) | InvalidVTablePointer(ptr) => {
                 diag.arg("pointer", ptr);
             }
-            InvalidVTableTrait { expected_trait, vtable_trait } => {
-                diag.arg("expected_trait", expected_trait.to_string());
-                diag.arg(
-                    "vtable_trait",
-                    vtable_trait.map(|t| t.to_string()).unwrap_or_else(|| format!("<trivial>")),
-                );
+            InvalidVTableTrait { expected_dyn_type, vtable_dyn_type } => {
+                diag.arg("expected_dyn_type", expected_dyn_type.to_string());
+                diag.arg("vtable_dyn_type", vtable_dyn_type.to_string());
             }
             PointerUseAfterFree(alloc_id, msg) => {
                 diag.arg("alloc_id", alloc_id)
@@ -778,12 +815,9 @@ impl<'tcx> ReportErrorExt for ValidationErrorInfo<'tcx> {
             DanglingPtrNoProvenance { pointer, .. } => {
                 err.arg("pointer", pointer);
             }
-            InvalidMetaWrongTrait { expected_trait: ref_trait, vtable_trait } => {
-                err.arg("ref_trait", ref_trait.to_string());
-                err.arg(
-                    "vtable_trait",
-                    vtable_trait.map(|t| t.to_string()).unwrap_or_else(|| format!("<trivial>")),
-                );
+            InvalidMetaWrongTrait { vtable_dyn_type, expected_dyn_type } => {
+                err.arg("vtable_dyn_type", vtable_dyn_type.to_string());
+                err.arg("expected_dyn_type", expected_dyn_type.to_string());
             }
             NullPtr { .. }
             | ConstRefToMutable
@@ -842,23 +876,23 @@ impl ReportErrorExt for UnsupportedOpInfo {
     }
 }
 
-impl<'tcx> ReportErrorExt for InterpError<'tcx> {
+impl<'tcx> ReportErrorExt for InterpErrorKind<'tcx> {
     fn diagnostic_message(&self) -> DiagMessage {
         match self {
-            InterpError::UndefinedBehavior(ub) => ub.diagnostic_message(),
-            InterpError::Unsupported(e) => e.diagnostic_message(),
-            InterpError::InvalidProgram(e) => e.diagnostic_message(),
-            InterpError::ResourceExhaustion(e) => e.diagnostic_message(),
-            InterpError::MachineStop(e) => e.diagnostic_message(),
+            InterpErrorKind::UndefinedBehavior(ub) => ub.diagnostic_message(),
+            InterpErrorKind::Unsupported(e) => e.diagnostic_message(),
+            InterpErrorKind::InvalidProgram(e) => e.diagnostic_message(),
+            InterpErrorKind::ResourceExhaustion(e) => e.diagnostic_message(),
+            InterpErrorKind::MachineStop(e) => e.diagnostic_message(),
         }
     }
     fn add_args<G: EmissionGuarantee>(self, diag: &mut Diag<'_, G>) {
         match self {
-            InterpError::UndefinedBehavior(ub) => ub.add_args(diag),
-            InterpError::Unsupported(e) => e.add_args(diag),
-            InterpError::InvalidProgram(e) => e.add_args(diag),
-            InterpError::ResourceExhaustion(e) => e.add_args(diag),
-            InterpError::MachineStop(e) => e.add_args(&mut |name, value| {
+            InterpErrorKind::UndefinedBehavior(ub) => ub.add_args(diag),
+            InterpErrorKind::Unsupported(e) => e.add_args(diag),
+            InterpErrorKind::InvalidProgram(e) => e.add_args(diag),
+            InterpErrorKind::ResourceExhaustion(e) => e.add_args(diag),
+            InterpErrorKind::MachineStop(e) => e.add_args(&mut |name, value| {
                 diag.arg(name, value);
             }),
         }

@@ -5,19 +5,20 @@ use cfg::CfgExpr;
 use either::Either;
 use intern::{sym, Symbol};
 use mbe::{expect_fragment, DelimiterKind};
-use span::{Edition, EditionedFileId, Span, SpanAnchor, SyntaxContextId, ROOT_ERASED_FILE_AST_ID};
+use span::{Edition, EditionedFileId, Span};
 use stdx::format_to;
 use syntax::{
     format_smolstr,
     unescape::{unescape_byte, unescape_char, unescape_unicode, Mode},
 };
-use syntax_bridge::parse_to_token_tree;
+use syntax_bridge::syntax_node_to_token_tree;
 
 use crate::{
     builtin::quote::{dollar_crate, quote},
     db::ExpandDatabase,
     hygiene::{span_with_call_site_ctxt, span_with_def_site_ctxt},
     name,
+    span_map::SpanMap,
     tt::{self, DelimSpan},
     ExpandError, ExpandResult, HirFileIdExt, Lookup as _, MacroCallId,
 };
@@ -119,9 +120,8 @@ register_builtin! {
     (module_path, ModulePath) => module_path_expand,
     (assert, Assert) => assert_expand,
     (stringify, Stringify) => stringify_expand,
-    (llvm_asm, LlvmAsm) => asm_expand,
     (asm, Asm) => asm_expand,
-    (global_asm, GlobalAsm) => global_asm_expand,
+    (global_asm, GlobalAsm) => asm_expand,
     (cfg, Cfg) => cfg_expand,
     (core_panic, CorePanic) => panic_expand,
     (std_panic, StdPanic) => panic_expand,
@@ -324,38 +324,13 @@ fn asm_expand(
     tt: &tt::Subtree,
     span: Span,
 ) -> ExpandResult<tt::Subtree> {
-    // We expand all assembly snippets to `format_args!` invocations to get format syntax
-    // highlighting for them.
-    let mut literals = Vec::new();
-    for tt in tt.token_trees.chunks(2) {
-        match tt {
-            [tt::TokenTree::Leaf(tt::Leaf::Literal(lit))]
-            | [tt::TokenTree::Leaf(tt::Leaf::Literal(lit)), tt::TokenTree::Leaf(tt::Leaf::Punct(tt::Punct { char: ',', span: _, spacing: _ }))] =>
-            {
-                let dollar_krate = dollar_crate(span);
-                literals.push(quote!(span=>#dollar_krate::format_args!(#lit);));
-            }
-            _ => break,
-        }
-    }
-
+    let mut tt = tt.clone();
+    tt.delimiter.kind = tt::DelimiterKind::Parenthesis;
     let pound = mk_pound(span);
     let expanded = quote! {span =>
-        builtin #pound asm (
-            {##literals}
-        )
+        builtin #pound asm #tt
     };
     ExpandResult::ok(expanded)
-}
-
-fn global_asm_expand(
-    _db: &dyn ExpandDatabase,
-    _id: MacroCallId,
-    _tt: &tt::Subtree,
-    span: Span,
-) -> ExpandResult<tt::Subtree> {
-    // Expand to nothing (at item-level)
-    ExpandResult::ok(quote! {span =>})
 }
 
 fn cfg_expand(
@@ -509,7 +484,7 @@ fn concat_expand(
                 match it.kind {
                     tt::LitKind::Char => {
                         if let Ok(c) = unescape_char(it.symbol.as_str()) {
-                            text.extend(c.escape_default());
+                            text.push(c);
                         }
                         record_span(it.span);
                     }
@@ -517,11 +492,11 @@ fn concat_expand(
                         format_to!(text, "{}", it.symbol.as_str())
                     }
                     tt::LitKind::Str => {
-                        text.push_str(it.symbol.as_str());
+                        text.push_str(unescape_str(&it.symbol).as_str());
                         record_span(it.span);
                     }
                     tt::LitKind::StrRaw(_) => {
-                        format_to!(text, "{}", it.symbol.as_str().escape_debug());
+                        format_to!(text, "{}", it.symbol.as_str());
                         record_span(it.span);
                     }
                     tt::LitKind::Byte
@@ -765,18 +740,14 @@ fn include_expand(
             return ExpandResult::new(tt::Subtree::empty(DelimSpan { open: span, close: span }), e)
         }
     };
-    match parse_to_token_tree(
-        file_id.edition(),
-        SpanAnchor { file_id, ast_id: ROOT_ERASED_FILE_AST_ID },
-        SyntaxContextId::ROOT,
-        &db.file_text(file_id.file_id()),
-    ) {
-        Some(it) => ExpandResult::ok(it),
-        None => ExpandResult::new(
-            tt::Subtree::empty(DelimSpan { open: span, close: span }),
-            ExpandError::other(span, "failed to parse included file"),
-        ),
-    }
+    let span_map = db.real_span_map(file_id);
+    // FIXME: Parse errors
+    ExpandResult::ok(syntax_node_to_token_tree(
+        &db.parse(file_id).syntax_node(),
+        SpanMap::RealSpanMap(span_map),
+        span,
+        syntax_bridge::DocCommentDesugarMode::ProcMacro,
+    ))
 }
 
 pub fn include_input_to_file_id(
@@ -839,7 +810,7 @@ fn include_str_expand(
 
 fn get_env_inner(db: &dyn ExpandDatabase, arg_id: MacroCallId, key: &Symbol) -> Option<String> {
     let krate = db.lookup_intern_macro_call(arg_id).krate;
-    db.crate_graph()[krate].env.get(key.as_str()).map(|it| it.escape_debug().to_string())
+    db.crate_graph()[krate].env.get(key.as_str())
 }
 
 fn env_expand(

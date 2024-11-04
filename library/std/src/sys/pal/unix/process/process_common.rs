@@ -1,7 +1,7 @@
 #[cfg(all(test, not(target_os = "emscripten")))]
 mod tests;
 
-use libc::{c_char, c_int, gid_t, pid_t, uid_t, EXIT_FAILURE, EXIT_SUCCESS};
+use libc::{EXIT_FAILURE, EXIT_SUCCESS, c_char, c_int, gid_t, pid_t, uid_t};
 
 use crate::collections::BTreeMap;
 use crate::ffi::{CStr, CString, OsStr, OsString};
@@ -312,8 +312,8 @@ impl Command {
     }
 
     #[allow(dead_code)]
-    pub fn get_cwd(&self) -> &Option<CString> {
-        &self.cwd
+    pub fn get_cwd(&self) -> Option<&CStr> {
+        self.cwd.as_deref()
     }
     #[allow(dead_code)]
     pub fn get_uid(&self) -> Option<uid_t> {

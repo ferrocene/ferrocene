@@ -2,26 +2,28 @@
 #![warn(rust_2018_idioms, unused_lifetimes)]
 #![allow(unused_extern_crates)]
 
-use cargo_metadata::diagnostic::{Applicability, Diagnostic};
 use cargo_metadata::Message;
+use cargo_metadata::diagnostic::{Applicability, Diagnostic};
 use clippy_config::ClippyConfiguration;
+use clippy_lints::LintInfo;
 use clippy_lints::declared_lints::LINTS;
 use clippy_lints::deprecated_lints::{DEPRECATED, DEPRECATED_VERSION, RENAMED};
-use clippy_lints::LintInfo;
-use serde::{Deserialize, Serialize};
+use pulldown_cmark::{Options, Parser, html};
+use rinja::Template;
+use rinja::filters::Safe;
+use serde::Deserialize;
 use test_utils::IS_RUSTC_TEST_SUITE;
-use ui_test::custom_flags::rustfix::RustfixMode;
 use ui_test::custom_flags::Flag;
+use ui_test::custom_flags::rustfix::RustfixMode;
 use ui_test::spanned::Spanned;
-use ui_test::test_result::TestRun;
-use ui_test::{status_emitter, Args, CommandBuilder, Config, Match, OutputConflictHandling};
+use ui_test::{Args, CommandBuilder, Config, Match, OutputConflictHandling, status_emitter};
 
 use std::collections::{BTreeMap, HashMap};
 use std::env::{self, set_var, var_os};
 use std::ffi::{OsStr, OsString};
 use std::fmt::Write;
 use std::path::{Path, PathBuf};
-use std::sync::mpsc::{channel, Sender};
+use std::sync::mpsc::{Sender, channel};
 use std::{fs, iter, thread};
 
 // Test dependencies may need an `extern crate` here to ensure that they show up
@@ -386,6 +388,22 @@ fn ui_cargo_toml_metadata() {
     }
 }
 
+#[derive(Template)]
+#[template(path = "index_template.html")]
+struct Renderer<'a> {
+    lints: &'a Vec<LintMetadata>,
+}
+
+impl Renderer<'_> {
+    fn markdown(input: &str) -> Safe<String> {
+        let parser = Parser::new_ext(input, Options::all());
+        let mut html_output = String::new();
+        html::push_html(&mut html_output, parser);
+        // Oh deer, what a hack :O
+        Safe(html_output.replace("<table", "<table class=\"table\""))
+    }
+}
+
 #[derive(Deserialize)]
 #[serde(untagged)]
 enum DiagnosticOrMessage {
@@ -446,10 +464,14 @@ impl DiagnosticCollector {
                         .map(|((lint, reason), version)| LintMetadata::new_deprecated(lint, reason, version)),
                 )
                 .collect();
+
             metadata.sort_unstable_by(|a, b| a.id.cmp(&b.id));
 
-            let json = serde_json::to_string_pretty(&metadata).unwrap();
-            fs::write("util/gh-pages/lints.json", json).unwrap();
+            fs::write(
+                "util/gh-pages/index.html",
+                Renderer { lints: &metadata }.render().unwrap(),
+            )
+            .unwrap();
         });
 
         (Self { sender }, handle)
@@ -469,15 +491,14 @@ fn applicability_ord(applicability: &Applicability) -> u8 {
 impl Flag for DiagnosticCollector {
     fn post_test_action(
         &self,
-        _config: &ui_test::per_test_config::TestConfig<'_>,
-        _cmd: &mut std::process::Command,
+        _config: &ui_test::per_test_config::TestConfig,
         output: &std::process::Output,
-        _build_manager: &ui_test::build_manager::BuildManager<'_>,
-    ) -> Result<Vec<TestRun>, ui_test::Errored> {
+        _build_manager: &ui_test::build_manager::BuildManager,
+    ) -> Result<(), ui_test::Errored> {
         if !output.stderr.is_empty() {
             self.sender.send(output.stderr.clone()).unwrap();
         }
-        Ok(Vec::new())
+        Ok(())
     }
 
     fn clone_inner(&self) -> Box<dyn Flag> {
@@ -489,7 +510,7 @@ impl Flag for DiagnosticCollector {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug)]
 struct LintMetadata {
     id: String,
     id_location: Option<&'static str>,
@@ -559,6 +580,16 @@ impl LintMetadata {
                 ### Deprecation reason\n\n{reason}.\n",
             ),
             applicability: Applicability::Unspecified,
+        }
+    }
+
+    fn applicability_str(&self) -> &str {
+        match self.applicability {
+            Applicability::MachineApplicable => "MachineApplicable",
+            Applicability::HasPlaceholders => "HasPlaceholders",
+            Applicability::MaybeIncorrect => "MaybeIncorrect",
+            Applicability::Unspecified => "Unspecified",
+            _ => panic!("needs to update this code"),
         }
     }
 }

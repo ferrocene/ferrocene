@@ -1,7 +1,7 @@
 use std::fmt;
 
 use rustc_errors::{
-    struct_span_code_err, Diag, EmissionGuarantee, ErrorGuaranteed, FatalError, E0275,
+    Diag, E0275, EmissionGuarantee, ErrorGuaranteed, FatalError, struct_span_code_err,
 };
 use rustc_hir::def::Namespace;
 use rustc_hir::def_id::LOCAL_CRATE;
@@ -144,6 +144,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             obligation.cause.span,
             suggest_increasing_limit,
             |err| {
+                let mut long_ty_file = None;
                 self.note_obligation_cause_code(
                     obligation.cause.body_id,
                     err,
@@ -152,7 +153,17 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     obligation.cause.code(),
                     &mut vec![],
                     &mut Default::default(),
+                    &mut long_ty_file,
                 );
+                if let Some(file) = long_ty_file {
+                    err.note(format!(
+                        "the full name for the type has been written to '{}'",
+                        file.display(),
+                    ));
+                    err.note(
+                        "consider using `--verbose` to print the full type name to the console",
+                    );
+                }
             },
         );
     }

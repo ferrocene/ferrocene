@@ -4,17 +4,18 @@
 //! how the build runs.
 
 use std::cell::{Cell, RefCell};
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fmt::{self, Display};
 use std::io::IsTerminal;
-use std::path::{absolute, Path, PathBuf};
+use std::path::{Path, PathBuf, absolute};
 use std::process::Command;
 use std::str::FromStr;
 use std::sync::OnceLock;
 use std::{cmp, env, fs};
 
+use build_helper::ci::CiEnv;
 use build_helper::exit;
-use build_helper::git::{get_closest_merge_commit, output_result, GitConfig};
+use build_helper::git::{GitConfig, get_closest_merge_commit, output_result};
 use serde::{Deserialize, Deserializer};
 use serde_derive::Deserialize;
 
@@ -22,7 +23,8 @@ use crate::core::build_steps::compile::CODEGEN_BACKEND_PREFIX;
 use crate::core::build_steps::llvm;
 pub use crate::core::config::flags::Subcommand;
 use crate::core::config::flags::{Color, Flags, Warnings};
-use crate::utils::cache::{Interned, INTERNER};
+use crate::core::download::is_download_ci_available;
+use crate::utils::cache::{INTERNER, Interned};
 use crate::utils::channel::{self, GitInfo};
 use crate::utils::helpers::{self, exe, output, t};
 
@@ -222,6 +224,7 @@ pub struct Config {
     pub llvm_assertions: bool,
     pub llvm_tests: bool,
     pub llvm_enzyme: bool,
+    pub llvm_offload: bool,
     pub llvm_plugins: bool,
     pub llvm_optimize: bool,
     pub llvm_thin_lto: bool,
@@ -287,6 +290,7 @@ pub struct Config {
     pub rust_profile_generate: Option<String>,
     pub rust_lto: RustcLto,
     pub rust_validate_mir_opts: Option<u32>,
+    pub rust_std_features: BTreeSet<String>,
     pub llvm_profile_use: Option<String>,
     pub llvm_profile_generate: bool,
     pub llvm_libunwind_default: Option<LlvmLibunwind>,
@@ -343,6 +347,15 @@ pub struct Config {
     pub out: PathBuf,
     pub rust_info: channel::GitInfo,
 
+    pub cargo_info: channel::GitInfo,
+    pub rust_analyzer_info: channel::GitInfo,
+    pub clippy_info: channel::GitInfo,
+    pub miri_info: channel::GitInfo,
+    pub rustfmt_info: channel::GitInfo,
+    pub enzyme_info: channel::GitInfo,
+    pub in_tree_llvm_info: channel::GitInfo,
+    pub in_tree_gcc_info: channel::GitInfo,
+
     // These are either the stage0 downloaded binaries or the locally installed ones.
     pub initial_cargo: PathBuf,
     pub initial_rustc: PathBuf,
@@ -357,6 +370,7 @@ pub struct Config {
     /// `paths=["foo", "bar"]`.
     pub paths: Vec<PathBuf>,
 
+<<<<<<< HEAD
     // Ferrocene-specific configuration
     pub ferrocene_raw_channel: String,
     pub ferrocene_aws_profile: Option<String>,
@@ -399,6 +413,10 @@ pub enum FerroceneDocumentSignatures {
     DocsTarball {
         tarball: PathBuf,
     },
+=======
+    /// Command for visual diff display, e.g. `diff-tool --color=always`.
+    pub compiletest_diff_tool: Option<String>,
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 #[derive(Clone, Debug, Default)]
@@ -646,6 +664,9 @@ impl Target {
             || triple.contains("switch")
         {
             target.no_std = true;
+        }
+        if triple.contains("emscripten") {
+            target.runner = Some("node".into());
         }
         target
     }
@@ -935,6 +956,8 @@ define_config! {
         metrics: Option<bool> = "metrics",
         android_ndk: Option<PathBuf> = "android-ndk",
         optimized_compiler_builtins: Option<bool> = "optimized-compiler-builtins",
+        jobs: Option<u32> = "jobs",
+        compiletest_diff_tool: Option<String> = "compiletest-diff-tool",
     }
 }
 
@@ -977,6 +1000,7 @@ define_config! {
         use_libcxx: Option<bool> = "use-libcxx",
         use_linker: Option<String> = "use-linker",
         allow_old_toolchain: Option<bool> = "allow-old-toolchain",
+        offload: Option<bool> = "offload",
         polly: Option<bool> = "polly",
         clang: Option<bool> = "clang",
         enable_warnings: Option<bool> = "enable-warnings",
@@ -1040,7 +1064,7 @@ impl<'de> Deserialize<'de> for RustOptimize {
 
 struct OptimizeVisitor;
 
-impl<'de> serde::de::Visitor<'de> for OptimizeVisitor {
+impl serde::de::Visitor<'_> for OptimizeVisitor {
     type Value = RustOptimize;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -1115,7 +1139,7 @@ impl<'de> Deserialize<'de> for LldMode {
     {
         struct LldModeVisitor;
 
-        impl<'de> serde::de::Visitor<'de> for LldModeVisitor {
+        impl serde::de::Visitor<'_> for LldModeVisitor {
             type Value = LldMode;
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -1202,6 +1226,7 @@ define_config! {
         download_rustc: Option<StringOrBool> = "download-rustc",
         lto: Option<String> = "lto",
         validate_mir_opts: Option<u32> = "validate-mir-opts",
+        std_features: Option<BTreeSet<String>> = "std-features",
     }
 }
 
@@ -1349,7 +1374,6 @@ impl Config {
         config.rustc_error_format = flags.rustc_error_format;
         config.json_output = flags.json_output;
         config.on_fail = flags.on_fail;
-        config.jobs = Some(threads_from_config(flags.jobs as u32));
         config.cmd = flags.cmd;
         config.incremental = flags.incremental;
         config.dry_run = if flags.dry_run { DryRun::UserSelected } else { DryRun::Disabled };
@@ -1571,7 +1595,11 @@ impl Config {
             metrics: _,
             android_ndk,
             optimized_compiler_builtins,
+            jobs,
+            compiletest_diff_tool,
         } = toml.build.unwrap_or_default();
+
+        config.jobs = Some(threads_from_config(flags.jobs.unwrap_or(jobs.unwrap_or(0))));
 
         if let Some(file_build) = build {
             config.build = TargetSelection::from_user(&file_build);
@@ -1692,11 +1720,14 @@ impl Config {
             config.mandir = mandir.map(PathBuf::from);
         }
 
+        config.llvm_assertions =
+            toml.llvm.as_ref().map_or(false, |llvm| llvm.assertions.unwrap_or(false));
+
         // Store off these values as options because if they're not provided
         // we'll infer default values for them later
-        let mut llvm_assertions = None;
         let mut llvm_tests = None;
         let mut llvm_enzyme = None;
+        let mut llvm_offload = None;
         let mut llvm_plugins = None;
         let mut debug = None;
         let mut debug_assertions = None;
@@ -1712,6 +1743,7 @@ impl Config {
         let mut optimize = None;
         let mut omit_git_hash = None;
         let mut lld_enabled = None;
+        let mut std_features = None;
 
         let mut is_user_configured_rust_channel = false;
 
@@ -1770,12 +1802,14 @@ impl Config {
                 stack_protector,
                 strip,
                 lld_mode,
+                std_features: std_features_toml,
             } = rust;
 
             is_user_configured_rust_channel = channel.is_some();
             set(&mut config.channel, channel.clone());
 
-            config.download_rustc_commit = config.download_ci_rustc_commit(download_rustc);
+            config.download_rustc_commit =
+                config.download_ci_rustc_commit(download_rustc, config.llvm_assertions);
 
             debug = debug_toml;
             debug_assertions = debug_assertions_toml;
@@ -1789,6 +1823,7 @@ impl Config {
             debuginfo_level_tools = debuginfo_level_tools_toml;
             debuginfo_level_tests = debuginfo_level_tests_toml;
             lld_enabled = lld_enabled_toml;
+            std_features = std_features_toml;
 
             optimize = optimize_toml;
             omit_git_hash = omit_git_hash_toml;
@@ -1821,14 +1856,11 @@ impl Config {
             config.rustc_default_linker = default_linker;
             config.musl_root = musl_root.map(PathBuf::from);
             config.save_toolstates = save_toolstates.map(PathBuf::from);
-            set(
-                &mut config.deny_warnings,
-                match flags.warnings {
-                    Warnings::Deny => Some(true),
-                    Warnings::Warn => Some(false),
-                    Warnings::Default => deny_warnings,
-                },
-            );
+            set(&mut config.deny_warnings, match flags.warnings {
+                Warnings::Deny => Some(true),
+                Warnings::Warn => Some(false),
+                Warnings::Default => deny_warnings,
+            });
             set(&mut config.backtrace_on_ice, backtrace_on_ice);
             set(&mut config.rust_verify_llvm_ir, verify_llvm_ir);
             config.rust_thin_lto_import_instr_limit = thin_lto_import_instr_limit;
@@ -1875,6 +1907,19 @@ impl Config {
         config.omit_git_hash = omit_git_hash.unwrap_or(default);
         config.rust_info = GitInfo::new(config.omit_git_hash, &config.src);
 
+        config.cargo_info = GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/cargo"));
+        config.rust_analyzer_info =
+            GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/rust-analyzer"));
+        config.clippy_info =
+            GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/clippy"));
+        config.miri_info = GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/miri"));
+        config.rustfmt_info =
+            GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/rustfmt"));
+        config.enzyme_info =
+            GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/enzyme"));
+        config.in_tree_llvm_info = GitInfo::new(false, &config.src.join("src/llvm-project"));
+        config.in_tree_gcc_info = GitInfo::new(false, &config.src.join("src/gcc"));
+
         // We need to override `rust.channel` if it's manually specified when using the CI rustc.
         // This is because if the compiler uses a different channel than the one specified in config.toml,
         // tests may fail due to using a different channel than the one used by the compiler during tests.
@@ -1900,7 +1945,7 @@ impl Config {
                 optimize: optimize_toml,
                 thin_lto,
                 release_debuginfo,
-                assertions,
+                assertions: _,
                 tests,
                 enzyme,
                 plugins,
@@ -1920,6 +1965,7 @@ impl Config {
                 use_libcxx,
                 use_linker,
                 allow_old_toolchain,
+                offload,
                 polly,
                 clang,
                 enable_warnings,
@@ -1934,9 +1980,9 @@ impl Config {
                 Some(StringOrBool::Bool(false)) | None => {}
             }
             set(&mut config.ninja_in_file, ninja);
-            llvm_assertions = assertions;
             llvm_tests = tests;
             llvm_enzyme = enzyme;
+            llvm_offload = offload;
             llvm_plugins = plugins;
             set(&mut config.llvm_optimize, optimize_toml);
             set(&mut config.llvm_thin_lto, thin_lto);
@@ -1958,13 +2004,14 @@ impl Config {
             set(&mut config.llvm_use_libcxx, use_libcxx);
             config.llvm_use_linker.clone_from(&use_linker);
             config.llvm_allow_old_toolchain = allow_old_toolchain.unwrap_or(false);
+            config.llvm_offload = offload.unwrap_or(false);
             config.llvm_polly = polly.unwrap_or(false);
             config.llvm_clang = clang.unwrap_or(false);
             config.llvm_enable_warnings = enable_warnings.unwrap_or(false);
             config.llvm_build_config = build_config.clone().unwrap_or(Default::default());
 
-            let asserts = llvm_assertions.unwrap_or(false);
-            config.llvm_from_ci = config.parse_download_ci_llvm(download_ci_llvm, asserts);
+            config.llvm_from_ci =
+                config.parse_download_ci_llvm(download_ci_llvm, config.llvm_assertions);
 
             if config.llvm_from_ci {
                 let warn = |option: &str| {
@@ -2203,9 +2250,9 @@ impl Config {
         // Now that we've reached the end of our configuration, infer the
         // default values for all options that we haven't otherwise stored yet.
 
-        config.llvm_assertions = llvm_assertions.unwrap_or(false);
         config.llvm_tests = llvm_tests.unwrap_or(false);
         config.llvm_enzyme = llvm_enzyme.unwrap_or(false);
+        config.llvm_offload = llvm_offload.unwrap_or(false);
         config.llvm_plugins = llvm_plugins.unwrap_or(false);
         config.rust_optimize = optimize.unwrap_or(RustOptimize::Bool(true));
 
@@ -2246,6 +2293,9 @@ impl Config {
             );
         }
 
+        let default_std_features = BTreeSet::from([String::from("panic-unwind")]);
+        config.rust_std_features = std_features.unwrap_or(default_std_features);
+
         let default = debug == Some(true);
         config.rust_debug_assertions = debug_assertions.unwrap_or(default);
         config.rust_debug_assertions_std =
@@ -2269,6 +2319,7 @@ impl Config {
         config.rust_debuginfo_level_tests = debuginfo_level_tests.unwrap_or(DebuginfoLevel::None);
         config.optimized_compiler_builtins =
             optimized_compiler_builtins.unwrap_or(config.channel != "dev");
+        config.compiletest_diff_tool = compiletest_diff_tool;
 
         let download_rustc = config.download_rustc_commit.is_some();
         // See https://github.com/rust-lang/compiler-team/issues/326
@@ -2515,6 +2566,20 @@ impl Config {
                 Some(commit) => {
                     self.download_ci_rustc(commit);
 
+                    // CI-rustc can't be used without CI-LLVM. If `self.llvm_from_ci` is false, it means the "if-unchanged"
+                    // logic has detected some changes in the LLVM submodule (download-ci-llvm=false can't happen here as
+                    // we don't allow it while parsing the configuration).
+                    if !self.llvm_from_ci {
+                        // This happens when LLVM submodule is updated in CI, we should disable ci-rustc without an error
+                        // to not break CI. For non-CI environments, we should return an error.
+                        if CiEnv::is_ci() {
+                            println!("WARNING: LLVM submodule has changes, `download-rustc` will be disabled.");
+                            return None;
+                        } else {
+                            panic!("ERROR: LLVM submodule has changes, `download-rustc` can't be used.");
+                        }
+                    }
+
                     if let Some(config_path) = &self.config {
                         let ci_config_toml = match self.get_builder_toml("ci-rustc") {
                             Ok(ci_config_toml) => ci_config_toml,
@@ -2538,8 +2603,9 @@ impl Config {
                             ci_config_toml,
                         );
 
-                        let disable_ci_rustc_if_incompatible =
-                            env::var_os("DISABLE_CI_RUSTC_IF_INCOMPATIBLE")
+                        // Primarily used by CI runners to avoid handling download-rustc incompatible
+                        // options one by one on shell scripts.
+                        let disable_ci_rustc_if_incompatible = env::var_os("DISABLE_CI_RUSTC_IF_INCOMPATIBLE")
                             .is_some_and(|s| s == "1" || s == "true");
 
                         if disable_ci_rustc_if_incompatible && res.is_err() {
@@ -2577,7 +2643,7 @@ impl Config {
 
     /// Runs a function if verbosity is greater than 0
     pub fn verbose(&self, f: impl Fn()) {
-        if self.verbose > 0 {
+        if self.is_verbose() {
             f()
         }
     }
@@ -2830,7 +2896,15 @@ impl Config {
     }
 
     /// Returns the commit to download, or `None` if we shouldn't download CI artifacts.
-    fn download_ci_rustc_commit(&self, download_rustc: Option<StringOrBool>) -> Option<String> {
+    fn download_ci_rustc_commit(
+        &self,
+        download_rustc: Option<StringOrBool>,
+        llvm_assertions: bool,
+    ) -> Option<String> {
+        if !is_download_ci_available(&self.build.triple, llvm_assertions) {
+            return None;
+        }
+
         // If `download-rustc` is not set, default to rebuilding.
         let if_unchanged = match download_rustc {
             None | Some(StringOrBool::Bool(false)) => return None,
@@ -2841,42 +2915,47 @@ impl Config {
             }
         };
 
+        let mut files_to_track = vec!["compiler", "src/version", "src/stage0", "src/ci/channel"];
+
+        // In CI, disable ci-rustc if there are changes in the library tree. But for non-CI, ignore
+        // these changes to speed up the build process for library developers. This provides consistent
+        // functionality for library developers between `download-rustc=true` and `download-rustc="if-unchanged"`
+        // options.
+        if CiEnv::is_ci() {
+            files_to_track.push("library");
+        }
+
         // Look for a version to compare to based on the current commit.
         // Only commits merged by bors will have CI artifacts.
-        let commit = get_closest_merge_commit(Some(&self.src), &self.git_config(), &[]).unwrap();
-        if commit.is_empty() {
-            println!("ERROR: could not find commit hash for downloading rustc");
-            println!("HELP: maybe your repository history is too shallow?");
-            println!("HELP: consider disabling `download-rustc`");
-            println!("HELP: or fetch enough history to include one upstream commit");
-            crate::exit!(1);
-        }
-
-        // Warn if there were changes to the compiler or standard library since the ancestor commit.
-        let has_changes = !t!(helpers::git(Some(&self.src))
-            .args(["diff-index", "--quiet", &commit])
-            .arg("--")
-            .args([self.src.join("compiler"), self.src.join("library")])
-            .as_command_mut()
-            .status())
-        .success();
-        if has_changes {
-            if if_unchanged {
-                if self.verbose > 0 {
-                    println!(
-                        "WARNING: saw changes to compiler/ or library/ since {commit}; \
-                            ignoring `download-rustc`"
-                    );
+        let commit =
+            match self.last_modified_commit(&files_to_track, "download-rustc", if_unchanged) {
+                Some(commit) => commit,
+                None => {
+                    if if_unchanged {
+                        return None;
+                    }
+                    println!("ERROR: could not find commit hash for downloading rustc");
+                    println!("HELP: maybe your repository history is too shallow?");
+                    println!("HELP: consider disabling `download-rustc`");
+                    println!("HELP: or fetch enough history to include one upstream commit");
+                    crate::exit!(1);
                 }
-                return None;
-            }
-            println!(
-                "WARNING: `download-rustc` is enabled, but there are changes to \
-                    compiler/ or library/"
+            };
+
+        if CiEnv::is_ci() && {
+            let head_sha =
+                output(helpers::git(Some(&self.src)).arg("rev-parse").arg("HEAD").as_command_mut());
+            let head_sha = head_sha.trim();
+            commit == head_sha
+        } {
+            eprintln!("CI rustc commit matches with HEAD and we are in CI.");
+            eprintln!(
+                "`rustc.download-ci` functionality will be skipped as artifacts are not available."
             );
+            return None;
         }
 
-        Some(commit.to_string())
+        Some(commit)
     }
 
     fn parse_download_ci_llvm(
@@ -2947,19 +3026,12 @@ impl Config {
 
         // Warn if there were changes to the compiler or standard library since the ancestor commit.
         let mut git = helpers::git(Some(&self.src));
-        git.args(["diff-index", "--quiet", &commit, "--"]);
-
-        // Handle running from a directory other than the top level
-        let top_level = &self.src;
-
-        for path in modified_paths {
-            git.arg(top_level.join(path));
-        }
+        git.args(["diff-index", "--quiet", &commit, "--"]).args(modified_paths);
 
         let has_changes = !t!(git.as_command_mut().status()).success();
         if has_changes {
             if if_unchanged {
-                if self.verbose > 0 {
+                if self.is_verbose() {
                     println!(
                         "warning: saw changes to one of {modified_paths:?} since {commit}; \
                             ignoring `{option_name}`"
@@ -3046,6 +3118,7 @@ pub(crate) fn check_incompatible_options_for_ci_llvm(
         use_libcxx,
         use_linker,
         allow_old_toolchain,
+        offload,
         polly,
         clang,
         enable_warnings,
@@ -3068,6 +3141,7 @@ pub(crate) fn check_incompatible_options_for_ci_llvm(
     err!(current_llvm_config.use_libcxx, use_libcxx);
     err!(current_llvm_config.use_linker, use_linker);
     err!(current_llvm_config.allow_old_toolchain, allow_old_toolchain);
+    err!(current_llvm_config.offload, offload);
     err!(current_llvm_config.polly, polly);
     err!(current_llvm_config.clang, clang);
     err!(current_llvm_config.build_config, build_config);
@@ -3143,6 +3217,7 @@ fn check_incompatible_options_for_ci_rustc(
         description,
         incremental,
         default_linker,
+        std_features,
 
         // Rest of the options can simply be ignored.
         debug: _,
@@ -3204,6 +3279,7 @@ fn check_incompatible_options_for_ci_rustc(
     err!(current_rust_config.default_linker, default_linker);
     err!(current_rust_config.stack_protector, stack_protector);
     err!(current_rust_config.lto, lto);
+    err!(current_rust_config.std_features, std_features);
 
     warn!(current_rust_config.channel, channel);
     warn!(current_rust_config.description, description);

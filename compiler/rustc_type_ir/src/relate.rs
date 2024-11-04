@@ -9,7 +9,22 @@ use crate::fold::TypeFoldable;
 use crate::inherent::*;
 use crate::{self as ty, Interner};
 
+pub mod combine;
+pub mod solver_relating;
+
 pub type RelateResult<I, T> = Result<T, TypeError<I>>;
+
+/// Whether aliases should be related structurally or not. Used
+/// to adjust the behavior of generalization and combine.
+///
+/// This should always be `No` unless in a few special-cases when
+/// instantiating canonical responses and in the new solver. Each
+/// such case should have a comment explaining why it is used.
+#[derive(Debug, Copy, Clone)]
+pub enum StructurallyRelateAliases {
+    Yes,
+    No,
+}
 
 /// Extra information about why we ended up with a particular variance.
 /// This is only used to add more information to error messages, and
@@ -159,12 +174,17 @@ impl<I: Interner> Relate<I> for ty::FnSig<I> {
                 ExpectedFound::new(true, a, b)
             }));
         }
-        let safety = relation.relate(a.safety, b.safety)?;
-        let abi = relation.relate(a.abi, b.abi)?;
+
+        if a.safety != b.safety {
+            return Err(TypeError::SafetyMismatch(ExpectedFound::new(true, a.safety, b.safety)));
+        }
+
+        if a.abi != b.abi {
+            return Err(TypeError::AbiMismatch(ExpectedFound::new(true, a.abi, b.abi)));
+        };
 
         let a_inputs = a.inputs();
         let b_inputs = b.inputs();
-
         if a_inputs.len() != b_inputs.len() {
             return Err(TypeError::ArgCount);
         }
@@ -197,23 +217,9 @@ impl<I: Interner> Relate<I> for ty::FnSig<I> {
         Ok(ty::FnSig {
             inputs_and_output: cx.mk_type_list_from_iter(inputs_and_output)?,
             c_variadic: a.c_variadic,
-            safety,
-            abi,
+            safety: a.safety,
+            abi: a.abi,
         })
-    }
-}
-
-impl<I: Interner> Relate<I> for ty::BoundConstness {
-    fn relate<R: TypeRelation<I>>(
-        _relation: &mut R,
-        a: ty::BoundConstness,
-        b: ty::BoundConstness,
-    ) -> RelateResult<I, ty::BoundConstness> {
-        if a != b {
-            Err(TypeError::ConstnessMismatch(ExpectedFound::new(true, a, b)))
-        } else {
-            Ok(a)
-        }
     }
 }
 
@@ -239,6 +245,16 @@ impl<I: Interner> Relate<I> for ty::AliasTy<I> {
                     b.args,
                     false, // do not fetch `type_of(a_def_id)`, as it will cause a cycle
                 )?,
+                ty::Projection if relation.cx().is_impl_trait_in_trait(a.def_id) => {
+                    relate_args_with_variances(
+                        relation,
+                        a.def_id,
+                        relation.cx().variances_of(a.def_id),
+                        a.args,
+                        b.args,
+                        false, // do not fetch `type_of(a_def_id)`, as it will cause a cycle
+                    )?
+                }
                 ty::Projection | ty::Weak | ty::Inherent => {
                     relate_args_invariantly(relation, a.args, b.args)?
                 }
@@ -308,7 +324,7 @@ impl<I: Interner> Relate<I> for ty::ExistentialProjection<I> {
                 a.args,
                 b.args,
             )?;
-            Ok(ty::ExistentialProjection { def_id: a.def_id, args, term })
+            Ok(ty::ExistentialProjection::new_from_args(relation.cx(), a.def_id, args, term))
         }
     }
 }
@@ -348,7 +364,7 @@ impl<I: Interner> Relate<I> for ty::ExistentialTraitRef<I> {
             }))
         } else {
             let args = relate_args_invariantly(relation, a.args, b.args)?;
-            Ok(ty::ExistentialTraitRef { def_id: a.def_id, args })
+            Ok(ty::ExistentialTraitRef::new_from_args(relation.cx(), a.def_id, args))
         }
     }
 }
@@ -634,29 +650,18 @@ impl<I: Interner, T: Relate<I>> Relate<I> for ty::Binder<I, T> {
     }
 }
 
-impl<I: Interner> Relate<I> for ty::PredicatePolarity {
-    fn relate<R: TypeRelation<I>>(
-        _relation: &mut R,
-        a: ty::PredicatePolarity,
-        b: ty::PredicatePolarity,
-    ) -> RelateResult<I, ty::PredicatePolarity> {
-        if a != b {
-            Err(TypeError::PolarityMismatch(ExpectedFound::new(true, a, b)))
-        } else {
-            Ok(a)
-        }
-    }
-}
-
 impl<I: Interner> Relate<I> for ty::TraitPredicate<I> {
     fn relate<R: TypeRelation<I>>(
         relation: &mut R,
         a: ty::TraitPredicate<I>,
         b: ty::TraitPredicate<I>,
     ) -> RelateResult<I, ty::TraitPredicate<I>> {
-        Ok(ty::TraitPredicate {
-            trait_ref: relation.relate(a.trait_ref, b.trait_ref)?,
-            polarity: relation.relate(a.polarity, b.polarity)?,
-        })
+        let trait_ref = relation.relate(a.trait_ref, b.trait_ref)?;
+        if a.polarity != b.polarity {
+            return Err(TypeError::PolarityMismatch(ExpectedFound::new(
+                true, a.polarity, b.polarity,
+            )));
+        }
+        Ok(ty::TraitPredicate { trait_ref, polarity: a.polarity })
     }
 }

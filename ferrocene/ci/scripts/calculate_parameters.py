@@ -53,6 +53,8 @@ X86_64_LINUX_BUILD_STD_TARGETS = [
     "thumbv7em-none-eabihf",
     "armv8r-none-eabihf",
     "thumbv8m.base-none-eabi",
+    "thumbv8m.main-none-eabi",
+    "thumbv8m.main-none-eabihf",
     "wasm32-unknown-unknown",
     "armv7r-none-eabihf",
     "armebv7r-none-eabihf",

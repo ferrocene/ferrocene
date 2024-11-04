@@ -143,6 +143,18 @@ should not be used in production.
      - Bare-metal
      - \-
 
+   * - :target:`thumbv8m.main-none-eabi`
+     - ``thumbv8m.main-none-eabi``
+     - Cross-compilation
+     - Bare-metal
+     - \-
+
+   * - :target:`thumbv8m.main-none-eabihf`
+     - ``thumbv8m.main-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - \-
+
    * - :target:`armv7r-none-eabihf`
      - ``armv7r-none-eabihf``
      - Cross-compilation

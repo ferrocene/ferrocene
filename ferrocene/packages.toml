@@ -73,6 +73,8 @@ targets = [
   "thumbv7em-none-eabihf",
   "armv8r-none-eabihf",
   "thumbv8m.base-none-eabi",
+  "thumbv8m.main-none-eabi",
+  "thumbv8m.main-none-eabihf",
   "armv7r-none-eabihf",
   "armebv7r-none-eabihf",
   "wasm32-unknown-unknown",

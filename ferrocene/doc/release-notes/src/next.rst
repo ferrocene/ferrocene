@@ -25,3 +25,5 @@ shipped as a preview.
   new targets are:
 
   * :target-with-triple:`thumbv8m.base-none-eabi`
+  * :target-with-triple:`thumbv8m.main-none-eabi`
+  * :target-with-triple:`thumbv8m.main-none-eabihf`

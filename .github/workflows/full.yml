@@ -77,19 +77,26 @@ jobs:
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
       container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
-  # docs:
-  #   name: Docs
-  #   uses: ./.github/workflows/doc.yml
-  #   needs:
-  #     - container-x86_64-ubuntu-20
-  #     - build-x86_64-unknown-linux-gnu
-  #   secrets: inherit
-  #   with:
-  #     host-triple: x86_64-unknown-linux-gnu
-  #     runner: 8core-x86_64-unknown-linux-gnu
-  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-  #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+  docs:
+    name: Docs
+    uses: ./.github/workflows/doc.yml
+    needs:
+      - container-x86_64-ubuntu-20
+      - build-x86_64-unknown-linux-gnu
+      - checks
+      - test-x86_64-unknown-linux-gnu
+      # - test-aarch64-unknown-ferrocenecoretest
+      # - test-x86_64-pc-nto-qnx710
+      # - test-aarch64-unknown-nto-qnx710
+      # - test-x86_64-pc-windows-msvc
+      # - test-aarch64-apple-darwin
+    secrets: inherit
+    with:
+      host-triple: x86_64-unknown-linux-gnu
+      runner: 8core-x86_64-unknown-linux-gnu
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   # source:
   #   name: Source

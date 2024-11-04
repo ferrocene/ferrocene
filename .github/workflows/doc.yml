@@ -63,10 +63,20 @@ jobs:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
 
+      - name: Download usage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: test-outcomes
+          pattern: artifact-*-usage
+          merge-multiple: true
+
       - name: Run
         uses: ./.github/actions/run/
         with:
           container: ${{ inputs.container }}
+          configure: |
+            --set ferrocene.test-outcomes=custom
+            --set ferrocene.test-outcomes-dir=test-outcomes
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           # Run dist before test to make sure the tarballs we test are uploaded
           # to CI beforehand, for manual inspection in case of failures.

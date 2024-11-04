@@ -34,12 +34,12 @@ runs:
       run: ferrocene/ci/scripts/setup-ubuntu.sh
 
     - name: Install dependencies (Windows)
-      if: ${{ (runner.os == 'Windows') && inputs.build-dependencies == 'true' }}
+      if: ${{ (runner.os == 'Windows') && inputs.build-dependencies != 'false' }}
       shell: bash
       run: ferrocene/ci/scripts/setup-windows.sh
 
     - name: Install dependencies (macOS)
-      if: ${{ (runner.os == 'macOS') && inputs.build-dependencies == 'true' }}
+      if: ${{ (runner.os == 'macOS') && inputs.build-dependencies != 'false' }}
       shell: bash
       run: ferrocene/ci/scripts/setup-darwin.sh
 

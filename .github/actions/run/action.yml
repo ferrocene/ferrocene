@@ -20,6 +20,11 @@ runs:
         SCRIPT: ${{ inputs.script }}
       run: ferrocene/ci/run.sh
 
+    - name: Pull container
+      if: ${{ inputs.container != '' }}
+      shell: bash
+      run: docker pull --quiet ${{ inputs.container }}
+
     - name: Run in container
       if: ${{ inputs.container != '' }}
       # Workaround for https://github.com/actions/runner/issues/241

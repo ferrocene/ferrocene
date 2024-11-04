@@ -74,6 +74,8 @@ Language changes in Rust 1.82.0
 
 * `Stabilize explicit opt-in to unsafe attributes <https://github.com/rust-lang/rust/pull/128771>`_
 
+  * New section: :ref:`fls_19LnTi3WabFd`
+
 * `Document NaN bit patterns guarantees <https://github.com/rust-lang/rust/pull/129559>`_
 
   * New paragraph: :p:`fls_nuFAwLHOdQBx`

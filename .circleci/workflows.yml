@@ -634,9 +634,7 @@ jobs:
       FERROCENE_HOST: x86_64-pc-windows-msvc
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
       SCRIPT: |
-        export VIRTUAL_ENV=$HOME/.venv
-        export PATH=$HOME/.venv/Scripts:$PATH
-        $HOME/.venv/Scripts/python.exe ferrocene/ci/scripts/llvm_cache.py download
+        uv run ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
     steps:
@@ -1217,6 +1215,11 @@ commands:
             equal: [<<parameters.os>>, "darwin"]
           steps:
             - ferrocene-setup-darwin  # Darwin does not come with awscli, setup it before aws steps
+      - when:
+          condition:
+            equal: [<<parameters.os>>, "windows"]
+          steps:
+            - ferrocene-setup-windows
       - setup-venv
       - aws-oidc-auth
       - run:

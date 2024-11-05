@@ -6,8 +6,8 @@ use rustc_middle::ty::layout::{HasTyCtxt, LayoutOf, TyAndLayout};
 use rustc_middle::ty::{self, Instance, Ty, TyCtxt};
 use rustc_middle::{bug, mir, span_bug};
 use rustc_session::config::OptLevel;
-use rustc_span::{Span, DUMMY_SP};
-use rustc_target::abi::{self, FieldIdx, FIRST_VARIANT};
+use rustc_span::{DUMMY_SP, Span};
+use rustc_target::abi::{self, FIRST_VARIANT, FieldIdx};
 use tracing::{debug, instrument};
 
 use super::operand::{OperandRef, OperandValue};
@@ -15,7 +15,7 @@ use super::place::PlaceRef;
 use super::{FunctionCx, LocalRef};
 use crate::common::IntPredicate;
 use crate::traits::*;
-use crate::{base, MemFlags};
+use crate::{MemFlags, base};
 
 impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
     #[instrument(level = "trace", skip(self, bx))]
@@ -114,7 +114,8 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
 
                 let count = self
                     .monomorphize(count)
-                    .eval_target_usize(bx.cx().tcx(), ty::ParamEnv::reveal_all());
+                    .try_to_target_usize(bx.tcx())
+                    .expect("expected monomorphic const in codegen");
 
                 bx.write_operand_repeatedly(cg_elem, count, dest);
             }
@@ -803,7 +804,9 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
         if let Some(index) = place.as_local() {
             if let LocalRef::Operand(op) = self.locals[index] {
                 if let ty::Array(_, n) = op.layout.ty.kind() {
-                    let n = n.eval_target_usize(bx.cx().tcx(), ty::ParamEnv::reveal_all());
+                    let n = n
+                        .try_to_target_usize(bx.tcx())
+                        .expect("expected monomorphic const in codegen");
                     return bx.cx().const_usize(n);
                 }
             }

@@ -95,7 +95,8 @@ fn check_answer(ra_fixture: &str, check: impl FnOnce(&[u8], &MemoryMap)) {
 fn pretty_print_err(e: ConstEvalError, db: TestDB) -> String {
     let mut err = String::new();
     let span_formatter = |file, range| format!("{file:?} {range:?}");
-    let edition = db.crate_graph()[db.test_crate()].edition;
+    let edition =
+        db.crate_graph()[*db.crate_graph().crates_in_topological_order().last().unwrap()].edition;
     match e {
         ConstEvalError::MirLowerError(e) => e.pretty_print(&mut err, &db, span_formatter, edition),
         ConstEvalError::MirEvalError(e) => e.pretty_print(&mut err, &db, span_formatter, edition),
@@ -186,7 +187,13 @@ fn floating_point() {
 
 #[test]
 fn casts() {
-    check_number(r#"const GOAL: usize = 12 as *const i32 as usize"#, 12);
+    check_number(
+        r#"
+    //- minicore: sized
+    const GOAL: usize = 12 as *const i32 as usize
+        "#,
+        12,
+    );
     check_number(
         r#"
     //- minicore: coerce_unsized, index, slice
@@ -204,7 +211,7 @@ fn casts() {
         r#"
     //- minicore: coerce_unsized, index, slice
     const GOAL: i16 = {
-        let a = &mut 5;
+        let a = &mut 5_i16;
         let z = a as *mut _;
         unsafe { *z }
     };
@@ -244,7 +251,13 @@ fn casts() {
         "#,
         4,
     );
-    check_number(r#"const GOAL: i32 = -12i8 as i32"#, -12);
+    check_number(
+        r#"
+    //- minicore: sized
+    const GOAL: i32 = -12i8 as i32
+        "#,
+        -12,
+    );
 }
 
 #[test]
@@ -1544,7 +1557,7 @@ fn builtin_derive_macro() {
         Bar,
     }
     #[derive(Clone)]
-    struct X(i32, Z, i64)
+    struct X(i32, Z, i64);
     #[derive(Clone)]
     struct Y {
         field1: i32,
@@ -1562,20 +1575,20 @@ fn builtin_derive_macro() {
     );
     check_number(
         r#"
-    //- minicore: default, derive, builtin_impls
-    #[derive(Default)]
-    struct X(i32, Y, i64)
-    #[derive(Default)]
-    struct Y {
-        field1: i32,
-        field2: u8,
-    }
+//- minicore: default, derive, builtin_impls
+#[derive(Default)]
+struct X(i32, Y, i64);
+#[derive(Default)]
+struct Y {
+    field1: i32,
+    field2: u8,
+}
 
-    const GOAL: u8 = {
-        let x = X::default();
-        x.1.field2
-    };
-    "#,
+const GOAL: u8 = {
+    let x = X::default();
+    x.1.field2
+};
+"#,
         0,
     );
 }
@@ -1911,6 +1924,7 @@ fn function_pointer() {
     );
     check_number(
         r#"
+    //- minicore: sized
     fn add2(x: u8) -> u8 {
         x + 2
     }
@@ -2007,7 +2021,7 @@ fn function_traits() {
     );
     check_number(
         r#"
-    //- minicore: coerce_unsized, fn
+    //- minicore: coerce_unsized, fn, dispatch_from_dyn
     fn add2(x: u8) -> u8 {
         x + 2
     }
@@ -2062,7 +2076,7 @@ fn function_traits() {
 fn dyn_trait() {
     check_number(
         r#"
-    //- minicore: coerce_unsized, index, slice
+    //- minicore: coerce_unsized, index, slice, dispatch_from_dyn
     trait Foo {
         fn foo(&self) -> u8 { 10 }
     }
@@ -2085,7 +2099,7 @@ fn dyn_trait() {
     );
     check_number(
         r#"
-    //- minicore: coerce_unsized, index, slice
+    //- minicore: coerce_unsized, index, slice, dispatch_from_dyn
     trait Foo {
         fn foo(&self) -> i32 { 10 }
     }
@@ -2109,7 +2123,7 @@ fn dyn_trait() {
     );
     check_number(
         r#"
-    //- minicore: coerce_unsized, index, slice
+    //- minicore: coerce_unsized, index, slice, dispatch_from_dyn
     trait A {
         fn x(&self) -> i32;
     }
@@ -2422,6 +2436,7 @@ fn statics() {
 fn extern_weak_statics() {
     check_number(
         r#"
+    //- minicore: sized
     extern "C" {
         #[linkage = "extern_weak"]
         static __dso_handle: *mut u8;
@@ -2716,6 +2731,7 @@ fn const_trait_assoc() {
     );
     check_number(
         r#"
+    //- minicore: sized
     struct S<T>(*mut T);
 
     trait MySized: Sized {
@@ -2813,7 +2829,7 @@ fn type_error() {
         y.0
     };
     "#,
-        |e| matches!(e, ConstEvalError::MirLowerError(MirLowerError::TypeMismatch(_))),
+        |e| matches!(e, ConstEvalError::MirLowerError(MirLowerError::HasErrors)),
     );
 }
 
@@ -2881,7 +2897,7 @@ fn recursive_adt() {
                 {
                     const VARIANT_TAG_TREE: TagTree = TagTree::Choice(
                         &[
-                            TagTree::Leaf,
+                            TAG_TREE,
                         ],
                     );
                     VARIANT_TAG_TREE
@@ -2890,6 +2906,6 @@ fn recursive_adt() {
             TAG_TREE
         };
     "#,
-        |e| matches!(e, ConstEvalError::MirEvalError(MirEvalError::StackOverflow)),
+        |e| matches!(e, ConstEvalError::MirLowerError(MirLowerError::Loop)),
     );
 }

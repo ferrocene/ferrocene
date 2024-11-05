@@ -14,17 +14,17 @@ use std::{panic, str};
 pub(crate) use make::DocTestBuilder;
 pub(crate) use markdown::test as test_markdown;
 use rustc_ast as ast;
-use rustc_data_structures::fx::{FxHashMap, FxHashSet};
+use rustc_data_structures::fx::{FxHashMap, FxIndexMap, FxIndexSet};
 use rustc_errors::{ColorConfig, DiagCtxtHandle, ErrorGuaranteed, FatalError};
-use rustc_hir::def_id::LOCAL_CRATE;
 use rustc_hir::CRATE_HIR_ID;
+use rustc_hir::def_id::LOCAL_CRATE;
 use rustc_interface::interface;
 use rustc_session::config::{self, CrateType, ErrorOutputType, Input};
 use rustc_session::lint;
+use rustc_span::FileName;
 use rustc_span::edition::Edition;
 use rustc_span::symbol::sym;
-use rustc_span::FileName;
-use rustc_target::spec::{Target, TargetTriple};
+use rustc_target::spec::{Target, TargetTuple};
 use tempfile::{Builder as TempFileBuilder, TempDir};
 use tracing::debug;
 
@@ -186,8 +186,6 @@ pub(crate) fn run(
 
                 let mut collector = CreateRunnableDocTests::new(options, opts);
                 let hir_collector = HirCollector::new(
-                    &compiler.sess,
-                    tcx.hir(),
                     ErrorCodes::from(compiler.sess.opts.unstable_features.is_nightly_build()),
                     enable_per_target_ignores,
                     tcx,
@@ -215,12 +213,13 @@ pub(crate) fn run(
         let unused_extern_reports: Vec<_> =
             std::mem::take(&mut unused_extern_reports.lock().unwrap());
         if unused_extern_reports.len() == compiling_test_count {
-            let extern_names = externs.iter().map(|(name, _)| name).collect::<FxHashSet<&String>>();
+            let extern_names =
+                externs.iter().map(|(name, _)| name).collect::<FxIndexSet<&String>>();
             let mut unused_extern_names = unused_extern_reports
                 .iter()
-                .map(|uexts| uexts.unused_extern_names.iter().collect::<FxHashSet<&String>>())
+                .map(|uexts| uexts.unused_extern_names.iter().collect::<FxIndexSet<&String>>())
                 .fold(extern_names, |uextsa, uextsb| {
-                    uextsa.intersection(&uextsb).copied().collect::<FxHashSet<&String>>()
+                    uextsa.intersection(&uextsb).copied().collect::<FxIndexSet<&String>>()
                 })
                 .iter()
                 .map(|v| (*v).clone())
@@ -255,7 +254,7 @@ pub(crate) fn run_tests(
     rustdoc_options: &Arc<RustdocOptions>,
     unused_extern_reports: &Arc<Mutex<Vec<UnusedExterns>>>,
     mut standalone_tests: Vec<test::TestDescAndFn>,
-    mergeable_tests: FxHashMap<Edition, Vec<(DocTestBuilder, ScrapedDocTest)>>,
+    mergeable_tests: FxIndexMap<Edition, Vec<(DocTestBuilder, ScrapedDocTest)>>,
 ) {
     let mut test_args = Vec::with_capacity(rustdoc_options.test_args.len() + 1);
     test_args.insert(0, "rustdoctest".to_string());
@@ -415,10 +414,10 @@ pub(crate) struct UnusedExterns {
     unused_extern_names: Vec<String>,
 }
 
-fn add_exe_suffix(input: String, target: &TargetTriple) -> String {
+fn add_exe_suffix(input: String, target: &TargetTuple) -> String {
     let exe_suffix = match target {
-        TargetTriple::TargetTriple(_) => Target::expect_builtin(target).options.exe_suffix,
-        TargetTriple::TargetJson { contents, .. } => {
+        TargetTuple::TargetTuple(_) => Target::expect_builtin(target).options.exe_suffix,
+        TargetTuple::TargetJson { contents, .. } => {
             Target::from_json(contents.parse().unwrap()).unwrap().0.options.exe_suffix
         }
     };
@@ -514,8 +513,8 @@ fn run_test(
         compiler.arg("--emit=metadata");
     }
     compiler.arg("--target").arg(match &rustdoc_options.target {
-        TargetTriple::TargetTriple(s) => s,
-        TargetTriple::TargetJson { path_for_rustdoc, .. } => {
+        TargetTuple::TargetTuple(s) => s,
+        TargetTuple::TargetJson { path_for_rustdoc, .. } => {
             path_for_rustdoc.to_str().expect("target path must be valid unicode")
         }
     });
@@ -644,8 +643,7 @@ fn run_test(
     } else {
         cmd = Command::new(&output_file);
         if doctest.is_multiple_tests {
-            cmd.arg("*doctest-bin-path");
-            cmd.arg(&output_file);
+            cmd.env("RUSTDOC_DOCTEST_BIN_PATH", &output_file);
         }
     }
     if let Some(run_directory) = &rustdoc_options.test_run_directory {
@@ -777,7 +775,7 @@ pub(crate) trait DocTestVisitor {
 
 struct CreateRunnableDocTests {
     standalone_tests: Vec<test::TestDescAndFn>,
-    mergeable_tests: FxHashMap<Edition, Vec<(DocTestBuilder, ScrapedDocTest)>>,
+    mergeable_tests: FxIndexMap<Edition, Vec<(DocTestBuilder, ScrapedDocTest)>>,
 
     rustdoc_options: Arc<RustdocOptions>,
     opts: GlobalTestOptions,
@@ -792,7 +790,7 @@ impl CreateRunnableDocTests {
         let can_merge_doctests = rustdoc_options.edition >= Edition::Edition2024;
         CreateRunnableDocTests {
             standalone_tests: Vec::new(),
-            mergeable_tests: FxHashMap::default(),
+            mergeable_tests: FxIndexMap::default(),
             rustdoc_options: Arc::new(rustdoc_options),
             opts,
             visited_tests: FxHashMap::default(),
@@ -837,7 +835,7 @@ impl CreateRunnableDocTests {
         let is_standalone = !doctest.can_be_merged
             || scraped_test.langstr.compile_fail
             || scraped_test.langstr.test_harness
-            || scraped_test.langstr.standalone
+            || scraped_test.langstr.standalone_crate
             || self.rustdoc_options.nocapture
             || self.rustdoc_options.test_args.iter().any(|arg| arg == "--show-output");
         if is_standalone {

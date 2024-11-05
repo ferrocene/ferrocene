@@ -275,7 +275,7 @@ pub(crate) struct UnsupportedKeyValue {
 pub(crate) struct IncompleteParse<'a> {
     #[primary_span]
     pub span: Span,
-    pub token: Cow<'a, str>,
+    pub descr: String,
     #[label]
     pub label_span: Span,
     pub macro_path: &'a ast::Path,
@@ -463,6 +463,20 @@ pub(crate) struct EmptyDelegationMac {
 #[derive(Diagnostic)]
 #[diag(expand_glob_delegation_outside_impls)]
 pub(crate) struct GlobDelegationOutsideImpls {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag(expand_crate_name_in_cfg_attr)]
+pub(crate) struct CrateNameInCfgAttr {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag(expand_crate_type_in_cfg_attr)]
+pub(crate) struct CrateTypeInCfgAttr {
     #[primary_span]
     pub span: Span,
 }

@@ -8,12 +8,12 @@
 use annotate_snippets::{Renderer, Snippet};
 use rustc_data_structures::sync::Lrc;
 use rustc_error_messages::FluentArgs;
-use rustc_span::source_map::SourceMap;
 use rustc_span::SourceFile;
+use rustc_span::source_map::SourceMap;
 
 use crate::emitter::FileWithAnnotatedLines;
 use crate::snippet::Line;
-use crate::translation::{to_fluent_args, Translate};
+use crate::translation::{Translate, to_fluent_args};
 use crate::{
     CodeSuggestion, DiagInner, DiagMessage, Emitter, ErrCode, FluentBundle, LazyFallbackBundle,
     Level, MultiSpan, Style, Subdiag,
@@ -34,8 +34,8 @@ pub struct AnnotateSnippetEmitter {
 }
 
 impl Translate for AnnotateSnippetEmitter {
-    fn fluent_bundle(&self) -> Option<&Lrc<FluentBundle>> {
-        self.fluent_bundle.as_ref()
+    fn fluent_bundle(&self) -> Option<&FluentBundle> {
+        self.fluent_bundle.as_deref()
     }
 
     fn fallback_fluent_bundle(&self) -> &FluentBundle {
@@ -69,8 +69,8 @@ impl Emitter for AnnotateSnippetEmitter {
         );
     }
 
-    fn source_map(&self) -> Option<&Lrc<SourceMap>> {
-        self.source_map.as_ref()
+    fn source_map(&self) -> Option<&SourceMap> {
+        self.source_map.as_deref()
     }
 
     fn should_show_explain(&self) -> bool {
@@ -173,7 +173,7 @@ impl AnnotateSnippetEmitter {
                             source_map.ensure_source_file_source_present(&file);
                             (
                                 format!("{}", source_map.filename_for_diagnostics(&file.name)),
-                                source_string(file.clone(), &line),
+                                source_string(Lrc::clone(&file), &line),
                                 line.line_index,
                                 line.annotations,
                             )

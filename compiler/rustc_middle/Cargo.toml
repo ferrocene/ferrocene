@@ -12,6 +12,7 @@ field-offset = "0.3.5"
 gsgdt = "0.1.2"
 polonius-engine = "0.13.0"
 rustc-rayon-core = { version = "0.5.0", optional = true }
+rustc_abi = { path = "../rustc_abi" }
 rustc_apfloat = "0.2.0"
 rustc_arena = { path = "../rustc_arena" }
 rustc_ast = { path = "../rustc_ast" }
@@ -26,6 +27,7 @@ rustc_graphviz = { path = "../rustc_graphviz" }
 rustc_hir = { path = "../rustc_hir" }
 rustc_hir_pretty = { path = "../rustc_hir_pretty" }
 rustc_index = { path = "../rustc_index" }
+rustc_lint_defs = { path = "../rustc_lint_defs" }
 rustc_macros = { path = "../rustc_macros" }
 rustc_query_system = { path = "../rustc_query_system" }
 rustc_serialize = { path = "../rustc_serialize" }

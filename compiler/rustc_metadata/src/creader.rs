@@ -8,7 +8,7 @@ use std::time::Duration;
 use std::{cmp, env, iter};
 
 use proc_macro::bridge::client::ProcMacro;
-use rustc_ast::expand::allocator::{alloc_error_handler_name, global_fn_name, AllocatorKind};
+use rustc_ast::expand::allocator::{AllocatorKind, alloc_error_handler_name, global_fn_name};
 use rustc_ast::{self as ast, *};
 use rustc_data_structures::fx::FxHashSet;
 use rustc_data_structures::owned_slice::OwnedSlice;
@@ -17,7 +17,7 @@ use rustc_data_structures::sync::{self, FreezeReadGuard, FreezeWriteGuard};
 use rustc_errors::DiagCtxtHandle;
 use rustc_expand::base::SyntaxExtension;
 use rustc_fs_util::try_canonicalize;
-use rustc_hir::def_id::{CrateNum, LocalDefId, StableCrateId, LOCAL_CRATE};
+use rustc_hir::def_id::{CrateNum, LOCAL_CRATE, LocalDefId, StableCrateId};
 use rustc_hir::definitions::Definitions;
 use rustc_index::IndexVec;
 use rustc_middle::bug;
@@ -28,9 +28,9 @@ use rustc_session::lint::{self, BuiltinLintDiag};
 use rustc_session::output::validate_crate_name;
 use rustc_session::search_paths::PathKind;
 use rustc_span::edition::Edition;
-use rustc_span::symbol::{sym, Symbol};
-use rustc_span::{Span, DUMMY_SP};
-use rustc_target::spec::{PanicStrategy, Target, TargetTriple};
+use rustc_span::symbol::{Ident, Symbol, sym};
+use rustc_span::{DUMMY_SP, Span};
+use rustc_target::spec::{PanicStrategy, Target, TargetTuple};
 use tracing::{debug, info, trace};
 
 use crate::errors;
@@ -97,7 +97,7 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
 }
 
 pub enum LoadedMacro {
-    MacroDef(ast::Item, Edition),
+    MacroDef { def: MacroDef, ident: Ident, attrs: AttrVec, span: Span, edition: Edition },
     ProcMacro(SyntaxExtension),
 }
 
@@ -506,7 +506,7 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
         locator.reset();
         locator.is_proc_macro = true;
         locator.target = &self.sess.host;
-        locator.triple = TargetTriple::from_triple(config::host_triple());
+        locator.tuple = TargetTuple::from_tuple(config::host_tuple());
         locator.filesearch = self.sess.host_filesearch(path_kind);
 
         let Some(host_result) = self.load(locator)? else {
@@ -635,7 +635,7 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
         // FIXME: why is this condition necessary? It was adding in #33625 but I
         // don't know why and the original author doesn't remember ...
         let can_reuse_cratenum =
-            locator.triple == self.sess.opts.target_triple || locator.is_proc_macro;
+            locator.tuple == self.sess.opts.target_triple || locator.is_proc_macro;
         Ok(Some(if can_reuse_cratenum {
             let mut result = LoadResult::Loaded(library);
             for (cnum, data) in self.cstore.iter_crate_data() {
@@ -778,9 +778,7 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
 
     fn inject_profiler_runtime(&mut self, krate: &ast::Crate) {
         if self.sess.opts.unstable_opts.no_profiler_runtime
-            || !(self.sess.instrument_coverage()
-                || self.sess.opts.unstable_opts.profile
-                || self.sess.opts.cg.profile_generate.enabled())
+            || !(self.sess.instrument_coverage() || self.sess.opts.cg.profile_generate.enabled())
         {
             return;
         }
@@ -1063,15 +1061,12 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
                 let cnum = self.resolve_crate(name, item.span, dep_kind)?;
 
                 let path_len = definitions.def_path(def_id).data.len();
-                self.cstore.update_extern_crate(
-                    cnum,
-                    ExternCrate {
-                        src: ExternCrateSource::Extern(def_id.to_def_id()),
-                        span: item.span,
-                        path_len,
-                        dependency_of: LOCAL_CRATE,
-                    },
-                );
+                self.cstore.update_extern_crate(cnum, ExternCrate {
+                    src: ExternCrateSource::Extern(def_id.to_def_id()),
+                    span: item.span,
+                    path_len,
+                    dependency_of: LOCAL_CRATE,
+                });
                 Some(cnum)
             }
             _ => bug!(),
@@ -1081,16 +1076,13 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
     pub fn process_path_extern(&mut self, name: Symbol, span: Span) -> Option<CrateNum> {
         let cnum = self.resolve_crate(name, span, CrateDepKind::Explicit)?;
 
-        self.cstore.update_extern_crate(
-            cnum,
-            ExternCrate {
-                src: ExternCrateSource::Path,
-                span,
-                // to have the least priority in `update_extern_crate`
-                path_len: usize::MAX,
-                dependency_of: LOCAL_CRATE,
-            },
-        );
+        self.cstore.update_extern_crate(cnum, ExternCrate {
+            src: ExternCrateSource::Path,
+            span,
+            // to have the least priority in `update_extern_crate`
+            path_len: usize::MAX,
+            dependency_of: LOCAL_CRATE,
+        });
 
         Some(cnum)
     }

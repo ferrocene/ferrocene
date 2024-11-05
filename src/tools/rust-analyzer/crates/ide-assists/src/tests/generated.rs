@@ -910,6 +910,29 @@ fn qux(bar: Bar, baz: Baz) {}
 }
 
 #[test]
+fn doctest_explicit_enum_discriminant() {
+    check_doc_test(
+        "explicit_enum_discriminant",
+        r#####"
+enum TheEnum$0 {
+    Foo,
+    Bar,
+    Baz = 42,
+    Quux,
+}
+"#####,
+        r#####"
+enum TheEnum {
+    Foo = 0,
+    Bar = 1,
+    Baz = 42,
+    Quux = 43,
+}
+"#####,
+    )
+}
+
+#[test]
 fn doctest_extract_expressions_from_format_string() {
     check_doc_test(
         "extract_expressions_from_format_string",
@@ -3242,6 +3265,20 @@ fn foo() {
 }
 
 #[test]
+fn doctest_unwrap_option_return_type() {
+    check_doc_test(
+        "unwrap_option_return_type",
+        r#####"
+//- minicore: option
+fn foo() -> Option<i32>$0 { Some(42i32) }
+"#####,
+        r#####"
+fn foo() -> i32 { 42i32 }
+"#####,
+    )
+}
+
+#[test]
 fn doctest_unwrap_result_return_type() {
     check_doc_test(
         "unwrap_result_return_type",
@@ -3270,6 +3307,20 @@ fn main() {
     let foo = "Foo";
     let bar = "Bar";
 }
+"#####,
+    )
+}
+
+#[test]
+fn doctest_wrap_return_type_in_option() {
+    check_doc_test(
+        "wrap_return_type_in_option",
+        r#####"
+//- minicore: option
+fn foo() -> i32$0 { 42i32 }
+"#####,
+        r#####"
+fn foo() -> Option<i32> { Some(42i32) }
 "#####,
     )
 }

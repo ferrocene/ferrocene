@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use std::{env, fs};
 
 use rustc_fs_util::{fix_windows_verbatim_for_gcc, try_canonicalize};
-use smallvec::{smallvec, SmallVec};
+use smallvec::{SmallVec, smallvec};
 
 use crate::search_paths::{PathKind, SearchPath};
 
@@ -84,7 +84,7 @@ fn current_dll_path() -> Result<PathBuf, String> {
         loop {
             if libc::loadquery(
                 libc::L_GETINFO,
-                buffer.as_mut_ptr() as *mut i8,
+                buffer.as_mut_ptr() as *mut u8,
                 (std::mem::size_of::<libc::ld_info>() * buffer.len()) as u32,
             ) >= 0
             {
@@ -121,11 +121,11 @@ fn current_dll_path() -> Result<PathBuf, String> {
     use std::io;
     use std::os::windows::prelude::*;
 
-    use windows::core::PCWSTR;
     use windows::Win32::Foundation::HMODULE;
     use windows::Win32::System::LibraryLoader::{
-        GetModuleFileNameW, GetModuleHandleExW, GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
+        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, GetModuleFileNameW, GetModuleHandleExW,
     };
+    use windows::core::PCWSTR;
 
     let mut module = HMODULE::default();
     unsafe {
@@ -152,7 +152,7 @@ fn current_dll_path() -> Result<PathBuf, String> {
 }
 
 pub fn sysroot_candidates() -> SmallVec<[PathBuf; 2]> {
-    let target = crate::config::host_triple();
+    let target = crate::config::host_tuple();
     let mut sysroot_candidates: SmallVec<[PathBuf; 2]> =
         smallvec![get_or_default_sysroot().expect("Failed finding sysroot")];
     let path = current_dll_path().and_then(|s| try_canonicalize(s).map_err(|e| e.to_string()));
@@ -218,7 +218,7 @@ pub fn get_or_default_sysroot() -> Result<PathBuf, String> {
         ))?;
 
         // if `dir` points target's dir, move up to the sysroot
-        let mut sysroot_dir = if dir.ends_with(crate::config::host_triple()) {
+        let mut sysroot_dir = if dir.ends_with(crate::config::host_tuple()) {
             dir.parent() // chop off `$target`
                 .and_then(|p| p.parent()) // chop off `rustlib`
                 .and_then(|p| p.parent()) // chop off `lib`

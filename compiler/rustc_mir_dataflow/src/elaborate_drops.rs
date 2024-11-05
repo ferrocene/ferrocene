@@ -1,5 +1,6 @@
 use std::{fmt, iter};
 
+use rustc_abi::{FIRST_VARIANT, FieldIdx, VariantIdx};
 use rustc_hir::lang_items::LangItem;
 use rustc_index::Idx;
 use rustc_middle::mir::patch::MirPatch;
@@ -8,9 +9,8 @@ use rustc_middle::span_bug;
 use rustc_middle::traits::Reveal;
 use rustc_middle::ty::util::IntTypeExt;
 use rustc_middle::ty::{self, GenericArgsRef, Ty, TyCtxt};
-use rustc_span::source_map::Spanned;
 use rustc_span::DUMMY_SP;
-use rustc_target::abi::{FieldIdx, VariantIdx, FIRST_VARIANT};
+use rustc_span::source_map::Spanned;
 use tracing::{debug, instrument};
 
 /// The value of an inserted drop flag.
@@ -225,7 +225,7 @@ where
     // FIXME: I think we should just control the flags externally,
     // and then we do not need this machinery.
     #[instrument(level = "debug")]
-    pub fn elaborate_drop(&mut self, bb: BasicBlock) {
+    fn elaborate_drop(&mut self, bb: BasicBlock) {
         match self.elaborator.drop_style(self.path, DropFlagMode::Deep) {
             DropStyle::Dead => {
                 self.elaborator
@@ -233,15 +233,12 @@ where
                     .patch_terminator(bb, TerminatorKind::Goto { target: self.succ });
             }
             DropStyle::Static => {
-                self.elaborator.patch().patch_terminator(
-                    bb,
-                    TerminatorKind::Drop {
-                        place: self.place,
-                        target: self.succ,
-                        unwind: self.unwind.into_action(),
-                        replace: false,
-                    },
-                );
+                self.elaborator.patch().patch_terminator(bb, TerminatorKind::Drop {
+                    place: self.place,
+                    target: self.succ,
+                    unwind: self.unwind.into_action(),
+                    replace: false,
+                });
             }
             DropStyle::Conditional => {
                 let drop_bb = self.complete_drop(self.succ, self.unwind);
@@ -732,15 +729,12 @@ where
         };
         let loop_block = self.elaborator.patch().new_block(loop_block);
 
-        self.elaborator.patch().patch_terminator(
-            drop_block,
-            TerminatorKind::Drop {
-                place: tcx.mk_place_deref(ptr),
-                target: loop_block,
-                unwind: unwind.into_action(),
-                replace: false,
-            },
-        );
+        self.elaborator.patch().patch_terminator(drop_block, TerminatorKind::Drop {
+            place: tcx.mk_place_deref(ptr),
+            target: loop_block,
+            unwind: unwind.into_action(),
+            replace: false,
+        });
 
         loop_block
     }
@@ -869,7 +863,7 @@ where
             ty::Adt(def, args) => self.open_drop_for_adt(*def, args),
             ty::Dynamic(..) => self.complete_drop(self.succ, self.unwind),
             ty::Array(ety, size) => {
-                let size = size.try_eval_target_usize(self.tcx(), self.elaborator.param_env());
+                let size = size.try_to_target_usize(self.tcx());
                 self.open_drop_for_array(*ety, size)
             }
             ty::Slice(ety) => self.drop_loop_pair(*ety),

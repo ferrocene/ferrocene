@@ -1,7 +1,7 @@
 use core::assert_matches::assert_matches;
 use std::iter;
 use std::ops::Bound::{Excluded, Included, Unbounded};
-use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::SeqCst;
 
@@ -1216,7 +1216,7 @@ mod test_extract_if {
         {
             let mut it = map.extract_if(|dummy, _| dummy.query(true));
             catch_unwind(AssertUnwindSafe(|| while it.next().is_some() {})).unwrap_err();
-            // Iterator behaviour after a panic is explicitly unspecified,
+            // Iterator behavior after a panic is explicitly unspecified,
             // so this is just the current implementation:
             let result = catch_unwind(AssertUnwindSafe(|| it.next()));
             assert!(matches!(result, Ok(None)));

@@ -1,14 +1,13 @@
 use std::fmt;
 
-use rustc_ast as ast;
 use rustc_ast::util::parser::ExprPrecedence;
 use rustc_ast::{
-    Attribute, FloatTy, InlineAsmOptions, InlineAsmTemplatePiece, IntTy, Label, LitKind,
-    TraitObjectSyntax, UintTy,
+    self as ast, Attribute, FloatTy, InlineAsmOptions, InlineAsmTemplatePiece, IntTy, Label,
+    LitKind, TraitObjectSyntax, UintTy,
 };
 pub use rustc_ast::{
-    BinOp, BinOpKind, BindingMode, BorrowKind, ByRef, CaptureBy, ImplPolarity, IsAuto, Movability,
-    Mutability, UnOp,
+    BinOp, BinOpKind, BindingMode, BorrowKind, BoundConstness, BoundPolarity, ByRef, CaptureBy,
+    ImplPolarity, IsAuto, Movability, Mutability, UnOp,
 };
 use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_data_structures::sorted_map::SortedMap;
@@ -17,18 +16,18 @@ use rustc_macros::{Decodable, Encodable, HashStable_Generic};
 use rustc_span::def_id::LocalDefId;
 use rustc_span::hygiene::MacroKind;
 use rustc_span::source_map::Spanned;
-use rustc_span::symbol::{kw, sym, Ident, Symbol};
-use rustc_span::{BytePos, ErrorGuaranteed, Span, DUMMY_SP};
+use rustc_span::symbol::{Ident, Symbol, kw, sym};
+use rustc_span::{BytePos, DUMMY_SP, ErrorGuaranteed, Span};
 use rustc_target::asm::InlineAsmRegOrRegClass;
 use rustc_target::spec::abi::Abi;
 use smallvec::SmallVec;
 use tracing::debug;
 
+use crate::LangItem;
 use crate::def::{CtorKind, DefKind, Res};
 use crate::def_id::{DefId, LocalDefIdMap};
 pub(crate) use crate::hir_id::{HirId, ItemLocalId, ItemLocalMap, OwnerId};
 use crate::intravisit::FnKind;
-use crate::LangItem;
 
 #[derive(Debug, Copy, Clone, HashStable_Generic)]
 pub struct Lifetime {
@@ -503,24 +502,21 @@ pub enum GenericArgsParentheses {
     ParenSugar,
 }
 
-/// A modifier on a trait bound.
+/// The modifiers on a trait bound.
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug, HashStable_Generic)]
-pub enum TraitBoundModifier {
-    /// `Type: Trait`
-    None,
-    /// `Type: !Trait`
-    Negative,
-    /// `Type: ?Trait`
-    Maybe,
-    /// `Type: const Trait`
-    Const,
-    /// `Type: ~const Trait`
-    MaybeConst,
+pub struct TraitBoundModifiers {
+    pub constness: BoundConstness,
+    pub polarity: BoundPolarity,
+}
+
+impl TraitBoundModifiers {
+    pub const NONE: Self =
+        TraitBoundModifiers { constness: BoundConstness::Never, polarity: BoundPolarity::Positive };
 }
 
 #[derive(Clone, Copy, Debug, HashStable_Generic)]
 pub enum GenericBound<'hir> {
-    Trait(PolyTraitRef<'hir>, TraitBoundModifier),
+    Trait(PolyTraitRef<'hir>),
     Outlives(&'hir Lifetime),
     Use(&'hir [PreciseCapturingArg<'hir>], Span),
 }
@@ -528,7 +524,7 @@ pub enum GenericBound<'hir> {
 impl GenericBound<'_> {
     pub fn trait_ref(&self) -> Option<&TraitRef<'_>> {
         match self {
-            GenericBound::Trait(data, _) => Some(&data.trait_ref),
+            GenericBound::Trait(data) => Some(&data.trait_ref),
             _ => None,
         }
     }
@@ -584,7 +580,6 @@ pub enum GenericParamKind<'hir> {
         ty: &'hir Ty<'hir>,
         /// Optional default value for the const generic param
         default: Option<&'hir ConstArg<'hir>>,
-        is_host_effect: bool,
         synthetic: bool,
     },
 }
@@ -1668,10 +1663,17 @@ pub enum ArrayLen<'hir> {
 }
 
 impl ArrayLen<'_> {
-    pub fn hir_id(&self) -> HirId {
+    pub fn span(self) -> Span {
         match self {
-            ArrayLen::Infer(InferArg { hir_id, .. }) | ArrayLen::Body(ConstArg { hir_id, .. }) => {
-                *hir_id
+            ArrayLen::Infer(arg) => arg.span,
+            ArrayLen::Body(body) => body.span(),
+        }
+    }
+
+    pub fn hir_id(self) -> HirId {
+        match self {
+            ArrayLen::Infer(InferArg { hir_id, .. }) | ArrayLen::Body(&ConstArg { hir_id, .. }) => {
+                hir_id
             }
         }
     }
@@ -2589,10 +2591,10 @@ impl<'hir> Ty<'hir> {
             fn visit_ty(&mut self, t: &'v Ty<'v>) {
                 if matches!(
                     &t.kind,
-                    TyKind::Path(QPath::Resolved(
-                        _,
-                        Path { res: crate::def::Res::SelfTyAlias { .. }, .. },
-                    ))
+                    TyKind::Path(QPath::Resolved(_, Path {
+                        res: crate::def::Res::SelfTyAlias { .. },
+                        ..
+                    },))
                 ) {
                     self.0.push(t.span);
                     return;
@@ -2625,7 +2627,6 @@ impl<'hir> Ty<'hir> {
             }
             TyKind::Tup(tys) => tys.iter().any(Self::is_suggestable_infer_ty),
             TyKind::Ptr(mut_ty) | TyKind::Ref(_, mut_ty) => mut_ty.ty.is_suggestable_infer_ty(),
-            TyKind::OpaqueDef(_, generic_args, _) => are_suggestable_generic_args(generic_args),
             TyKind::Path(QPath::TypeRelative(ty, segment)) => {
                 ty.is_suggestable_infer_ty() || are_suggestable_generic_args(segment.args().args)
             }
@@ -2742,23 +2743,11 @@ pub struct BareFnTy<'hir> {
 
 #[derive(Debug, Clone, Copy, HashStable_Generic)]
 pub struct OpaqueTy<'hir> {
-    pub generics: &'hir Generics<'hir>,
+    pub hir_id: HirId,
+    pub def_id: LocalDefId,
     pub bounds: GenericBounds<'hir>,
-    pub origin: OpaqueTyOrigin,
-    /// Return-position impl traits (and async futures) must "reify" any late-bound
-    /// lifetimes that are captured from the function signature they originate from.
-    ///
-    /// This is done by generating a new early-bound lifetime parameter local to the
-    /// opaque which is instantiated in the function signature with the late-bound
-    /// lifetime.
-    ///
-    /// This mapping associated a captured lifetime (first parameter) with the new
-    /// early-bound lifetime that was generated for the opaque.
-    pub lifetime_mapping: &'hir [(&'hir Lifetime, LocalDefId)],
-    /// Whether the opaque is a return-position impl trait (or async future)
-    /// originating from a trait method. This makes it so that the opaque is
-    /// lowered as an associated type.
-    pub in_trait: bool,
+    pub origin: OpaqueTyOrigin<LocalDefId>,
+    pub span: Span,
 }
 
 #[derive(Debug, Clone, Copy, HashStable_Generic)]
@@ -2795,17 +2784,35 @@ pub struct PreciseCapturingNonLifetimeArg {
     pub res: Res,
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(HashStable_Generic, Encodable, Decodable)]
+pub enum RpitContext {
+    Trait,
+    TraitImpl,
+}
+
 /// From whence the opaque type came.
-#[derive(Copy, Clone, PartialEq, Eq, Debug, HashStable_Generic)]
-pub enum OpaqueTyOrigin {
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(HashStable_Generic, Encodable, Decodable)]
+pub enum OpaqueTyOrigin<D> {
     /// `-> impl Trait`
-    FnReturn(LocalDefId),
+    FnReturn {
+        /// The defining function.
+        parent: D,
+        // Whether this is an RPITIT (return position impl trait in trait)
+        in_trait_or_impl: Option<RpitContext>,
+    },
     /// `async fn`
-    AsyncFn(LocalDefId),
+    AsyncFn {
+        /// The defining function.
+        parent: D,
+        // Whether this is an AFIT (async fn in trait)
+        in_trait_or_impl: Option<RpitContext>,
+    },
     /// type aliases: `type Foo = impl Trait;`
     TyAlias {
         /// The type alias or associated type parent of the TAIT/ATPIT
-        parent: LocalDefId,
+        parent: D,
         /// associated types in impl blocks for traits.
         in_assoc_ty: bool,
     },
@@ -2844,19 +2851,10 @@ pub enum TyKind<'hir> {
     /// Type parameters may be stored in each `PathSegment`.
     Path(QPath<'hir>),
     /// An opaque type definition itself. This is only used for `impl Trait`.
-    ///
-    /// The generic argument list contains the lifetimes (and in the future
-    /// possibly parameters) that are actually bound on the `impl Trait`.
-    ///
-    /// The last parameter specifies whether this opaque appears in a trait definition.
-    OpaqueDef(ItemId, &'hir [GenericArg<'hir>], bool),
+    OpaqueDef(&'hir OpaqueTy<'hir>),
     /// A trait object type `Bound1 + Bound2 + Bound3`
     /// where `Bound` is a trait or a lifetime.
-    TraitObject(
-        &'hir [(PolyTraitRef<'hir>, TraitBoundModifier)],
-        &'hir Lifetime,
-        TraitObjectSyntax,
-    ),
+    TraitObject(&'hir [PolyTraitRef<'hir>], &'hir Lifetime, TraitObjectSyntax),
     /// Unused for now.
     Typeof(&'hir AnonConst),
     /// `TyKind::Infer` means the type should be inferred instead of it having been
@@ -2920,10 +2918,11 @@ impl<'hir> InlineAsmOperand<'hir> {
     }
 
     pub fn is_clobber(&self) -> bool {
-        matches!(
-            self,
-            InlineAsmOperand::Out { reg: InlineAsmRegOrRegClass::Reg(_), late: _, expr: None }
-        )
+        matches!(self, InlineAsmOperand::Out {
+            reg: InlineAsmRegOrRegClass::Reg(_),
+            late: _,
+            expr: None
+        })
     }
 }
 
@@ -3159,6 +3158,11 @@ pub struct PolyTraitRef<'hir> {
     /// The `'a` in `for<'a> Foo<&'a T>`.
     pub bound_generic_params: &'hir [GenericParam<'hir>],
 
+    /// The constness and polarity of the trait ref.
+    ///
+    /// The `async` modifier is lowered directly into a different trait for now.
+    pub modifiers: TraitBoundModifiers,
+
     /// The `Foo<&'a T>` in `for<'a> Foo<&'a T>`.
     pub trait_ref: TraitRef<'hir>,
 
@@ -3317,8 +3321,6 @@ impl<'hir> Item<'hir> {
         expect_ty_alias, (&'hir Ty<'hir>, &'hir Generics<'hir>),
             ItemKind::TyAlias(ty, generics), (ty, generics);
 
-        expect_opaque_ty, &OpaqueTy<'hir>, ItemKind::OpaqueTy(ty), ty;
-
         expect_enum, (&EnumDef<'hir>, &'hir Generics<'hir>), ItemKind::Enum(def, generics), (def, generics);
 
         expect_struct, (&VariantData<'hir>, &'hir Generics<'hir>),
@@ -3431,8 +3433,6 @@ pub enum ItemKind<'hir> {
     GlobalAsm(&'hir InlineAsm<'hir>),
     /// A type alias, e.g., `type Foo = Bar<u8>`.
     TyAlias(&'hir Ty<'hir>, &'hir Generics<'hir>),
-    /// An opaque `impl Trait` type alias, e.g., `type Foo = impl Bar;`.
-    OpaqueTy(&'hir OpaqueTy<'hir>),
     /// An enum definition, e.g., `enum Foo<A, B> {C<A>, D<B>}`.
     Enum(EnumDef<'hir>, &'hir Generics<'hir>),
     /// A struct definition, e.g., `struct Foo<A> {x: A}`.
@@ -3476,7 +3476,6 @@ impl ItemKind<'_> {
             ItemKind::Fn(_, ref generics, _)
             | ItemKind::TyAlias(_, ref generics)
             | ItemKind::Const(_, ref generics, _)
-            | ItemKind::OpaqueTy(OpaqueTy { ref generics, .. })
             | ItemKind::Enum(_, ref generics)
             | ItemKind::Struct(_, ref generics)
             | ItemKind::Union(_, ref generics)
@@ -3499,7 +3498,6 @@ impl ItemKind<'_> {
             ItemKind::ForeignMod { .. } => "extern block",
             ItemKind::GlobalAsm(..) => "global asm item",
             ItemKind::TyAlias(..) => "type alias",
-            ItemKind::OpaqueTy(..) => "opaque type",
             ItemKind::Enum(..) => "enum",
             ItemKind::Struct(..) => "struct",
             ItemKind::Union(..) => "union",
@@ -3786,6 +3784,7 @@ pub enum Node<'hir> {
     Ty(&'hir Ty<'hir>),
     AssocItemConstraint(&'hir AssocItemConstraint<'hir>),
     TraitRef(&'hir TraitRef<'hir>),
+    OpaqueTy(&'hir OpaqueTy<'hir>),
     Pat(&'hir Pat<'hir>),
     PatField(&'hir PatField<'hir>),
     Arm(&'hir Arm<'hir>),
@@ -3851,6 +3850,7 @@ impl<'hir> Node<'hir> {
             | Node::Crate(..)
             | Node::Ty(..)
             | Node::TraitRef(..)
+            | Node::OpaqueTy(..)
             | Node::Infer(..)
             | Node::WhereBoundPredicate(..)
             | Node::ArrayLenInfer(..)
@@ -4035,6 +4035,7 @@ impl<'hir> Node<'hir> {
         expect_ty,            &'hir Ty<'hir>,           Node::Ty(n),           n;
         expect_assoc_item_constraint,  &'hir AssocItemConstraint<'hir>,  Node::AssocItemConstraint(n),  n;
         expect_trait_ref,     &'hir TraitRef<'hir>,     Node::TraitRef(n),     n;
+        expect_opaque_ty,     &'hir OpaqueTy<'hir>,     Node::OpaqueTy(n),     n;
         expect_pat,           &'hir Pat<'hir>,          Node::Pat(n),          n;
         expect_pat_field,     &'hir PatField<'hir>,     Node::PatField(n),     n;
         expect_arm,           &'hir Arm<'hir>,          Node::Arm(n),          n;
@@ -4064,7 +4065,7 @@ mod size_asserts {
     static_assert_size!(ForeignItem<'_>, 88);
     static_assert_size!(ForeignItemKind<'_>, 56);
     static_assert_size!(GenericArg<'_>, 16);
-    static_assert_size!(GenericBound<'_>, 48);
+    static_assert_size!(GenericBound<'_>, 64);
     static_assert_size!(Generics<'_>, 56);
     static_assert_size!(Impl<'_>, 80);
     static_assert_size!(ImplItem<'_>, 88);

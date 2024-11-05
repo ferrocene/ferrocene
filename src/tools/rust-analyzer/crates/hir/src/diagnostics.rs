@@ -4,7 +4,9 @@
 //! This probably isn't the best way to do this -- ideally, diagnostics should
 //! be expressed in terms of hir types themselves.
 pub use hir_ty::diagnostics::{CaseType, IncorrectCase};
-use hir_ty::{db::HirDatabase, diagnostics::BodyValidationDiagnostic, InferenceDiagnostic};
+use hir_ty::{
+    db::HirDatabase, diagnostics::BodyValidationDiagnostic, CastError, InferenceDiagnostic,
+};
 
 use cfg::{CfgExpr, CfgOptions};
 use either::Either;
@@ -50,10 +52,12 @@ macro_rules! diagnostics {
 diagnostics![
     AwaitOutsideOfAsync,
     BreakOutsideOfLoop,
+    CastToUnsized,
     ExpectedFunction,
     InactiveCode,
     IncoherentImpl,
     IncorrectCase,
+    InvalidCast,
     InvalidDeriveTarget,
     MacroDefError,
     MacroError,
@@ -161,6 +165,7 @@ pub struct MacroError {
     pub precise_location: Option<TextRange>,
     pub message: String,
     pub error: bool,
+    pub kind: &'static str,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -242,7 +247,7 @@ pub struct UnresolvedAssocItem {
 
 #[derive(Debug)]
 pub struct UnresolvedIdent {
-    pub expr: InFile<AstPtr<ast::Expr>>,
+    pub expr_or_pat: InFile<AstPtr<Either<ast::Expr, ast::Pat>>>,
 }
 
 #[derive(Debug)]
@@ -253,7 +258,9 @@ pub struct PrivateField {
 
 #[derive(Debug)]
 pub struct MissingUnsafe {
-    pub expr: InFile<AstPtr<ast::Expr>>,
+    pub expr: InFile<AstPtr<Either<ast::Expr, ast::Pat>>>,
+    /// If true, the diagnostics is an `unsafe_op_in_unsafe_fn` lint instead of a hard error.
+    pub only_lint: bool,
 }
 
 #[derive(Debug)]
@@ -364,6 +371,20 @@ pub struct RemoveUnnecessaryElse {
     pub if_expr: InFile<AstPtr<ast::IfExpr>>,
 }
 
+#[derive(Debug)]
+pub struct CastToUnsized {
+    pub expr: InFile<AstPtr<ast::Expr>>,
+    pub cast_ty: Type,
+}
+
+#[derive(Debug)]
+pub struct InvalidCast {
+    pub expr: InFile<AstPtr<ast::Expr>>,
+    pub error: CastError,
+    pub expr_ty: Type,
+    pub cast_ty: Type,
+}
+
 impl AnyDiagnostic {
     pub(crate) fn body_validation_diagnostic(
         db: &dyn HirDatabase,
@@ -378,56 +399,46 @@ impl AnyDiagnostic {
                     .map(|idx| variant_data.fields()[idx].name.clone())
                     .collect();
 
-                match record {
-                    Either::Left(record_expr) => match source_map.expr_syntax(record_expr) {
-                        Ok(source_ptr) => {
-                            let root = source_ptr.file_syntax(db.upcast());
-                            if let ast::Expr::RecordExpr(record_expr) =
-                                source_ptr.value.to_node(&root)
-                            {
-                                if record_expr.record_expr_field_list().is_some() {
-                                    let field_list_parent_path =
-                                        record_expr.path().map(|path| AstPtr::new(&path));
-                                    return Some(
-                                        MissingFields {
-                                            file: source_ptr.file_id,
-                                            field_list_parent: AstPtr::new(&Either::Left(
-                                                record_expr,
-                                            )),
-                                            field_list_parent_path,
-                                            missed_fields,
-                                        }
-                                        .into(),
-                                    );
+                let record = match record {
+                    Either::Left(record_expr) => {
+                        source_map.expr_syntax(record_expr).ok()?.map(AstPtr::wrap_left)
+                    }
+                    Either::Right(record_pat) => source_map.pat_syntax(record_pat).ok()?,
+                };
+                let file = record.file_id;
+                let root = record.file_syntax(db.upcast());
+                match record.value.to_node(&root) {
+                    Either::Left(ast::Expr::RecordExpr(record_expr)) => {
+                        if record_expr.record_expr_field_list().is_some() {
+                            let field_list_parent_path =
+                                record_expr.path().map(|path| AstPtr::new(&path));
+                            return Some(
+                                MissingFields {
+                                    file,
+                                    field_list_parent: AstPtr::new(&Either::Left(record_expr)),
+                                    field_list_parent_path,
+                                    missed_fields,
                                 }
-                            }
+                                .into(),
+                            );
                         }
-                        Err(SyntheticSyntax) => (),
-                    },
-                    Either::Right(record_pat) => match source_map.pat_syntax(record_pat) {
-                        Ok(source_ptr) => {
-                            if let Some(ptr) = source_ptr.value.cast::<ast::RecordPat>() {
-                                let root = source_ptr.file_syntax(db.upcast());
-                                let record_pat = ptr.to_node(&root);
-                                if record_pat.record_pat_field_list().is_some() {
-                                    let field_list_parent_path =
-                                        record_pat.path().map(|path| AstPtr::new(&path));
-                                    return Some(
-                                        MissingFields {
-                                            file: source_ptr.file_id,
-                                            field_list_parent: AstPtr::new(&Either::Right(
-                                                record_pat,
-                                            )),
-                                            field_list_parent_path,
-                                            missed_fields,
-                                        }
-                                        .into(),
-                                    );
+                    }
+                    Either::Right(ast::Pat::RecordPat(record_pat)) => {
+                        if record_pat.record_pat_field_list().is_some() {
+                            let field_list_parent_path =
+                                record_pat.path().map(|path| AstPtr::new(&path));
+                            return Some(
+                                MissingFields {
+                                    file,
+                                    field_list_parent: AstPtr::new(&Either::Right(record_pat)),
+                                    field_list_parent_path,
+                                    missed_fields,
                                 }
-                            }
+                                .into(),
+                            );
                         }
-                        Err(SyntheticSyntax) => (),
-                    },
+                    }
+                    _ => {}
                 }
             }
             BodyValidationDiagnostic::ReplaceFilterMapNextWithFindMap { method_call_expr } => {
@@ -521,15 +532,17 @@ impl AnyDiagnostic {
         let pat_syntax = |pat| {
             source_map.pat_syntax(pat).inspect_err(|_| tracing::error!("synthetic syntax")).ok()
         };
+        let expr_or_pat_syntax = |id| match id {
+            ExprOrPatId::ExprId(expr) => expr_syntax(expr).map(|it| it.map(AstPtr::wrap_left)),
+            ExprOrPatId::PatId(pat) => pat_syntax(pat),
+        };
         Some(match d {
             &InferenceDiagnostic::NoSuchField { field: expr, private, variant } => {
                 let expr_or_pat = match expr {
                     ExprOrPatId::ExprId(expr) => {
                         source_map.field_syntax(expr).map(AstPtr::wrap_left)
                     }
-                    ExprOrPatId::PatId(pat) => {
-                        source_map.pat_field_syntax(pat).map(AstPtr::wrap_right)
-                    }
+                    ExprOrPatId::PatId(pat) => source_map.pat_field_syntax(pat),
                 };
                 NoSuchField { field: expr_or_pat, private, variant }.into()
             }
@@ -542,10 +555,7 @@ impl AnyDiagnostic {
                 PrivateField { expr, field }.into()
             }
             &InferenceDiagnostic::PrivateAssocItem { id, item } => {
-                let expr_or_pat = match id {
-                    ExprOrPatId::ExprId(expr) => expr_syntax(expr)?.map(AstPtr::wrap_left),
-                    ExprOrPatId::PatId(pat) => pat_syntax(pat)?.map(AstPtr::wrap_right),
-                };
+                let expr_or_pat = expr_or_pat_syntax(id)?;
                 let item = item.into();
                 PrivateAssocItem { expr_or_pat, item }.into()
             }
@@ -589,15 +599,12 @@ impl AnyDiagnostic {
                 .into()
             }
             &InferenceDiagnostic::UnresolvedAssocItem { id } => {
-                let expr_or_pat = match id {
-                    ExprOrPatId::ExprId(expr) => expr_syntax(expr)?.map(AstPtr::wrap_left),
-                    ExprOrPatId::PatId(pat) => pat_syntax(pat)?.map(AstPtr::wrap_right),
-                };
+                let expr_or_pat = expr_or_pat_syntax(id)?;
                 UnresolvedAssocItem { expr_or_pat }.into()
             }
-            &InferenceDiagnostic::UnresolvedIdent { expr } => {
-                let expr = expr_syntax(expr)?;
-                UnresolvedIdent { expr }.into()
+            &InferenceDiagnostic::UnresolvedIdent { id } => {
+                let expr_or_pat = expr_or_pat_syntax(id)?;
+                UnresolvedIdent { expr_or_pat }.into()
             }
             &InferenceDiagnostic::BreakOutsideOfLoop { expr, is_break, bad_value_break } => {
                 let expr = expr_syntax(expr)?;
@@ -619,6 +626,16 @@ impl AnyDiagnostic {
                     }
                 };
                 MismatchedTupleStructPatArgCount { expr_or_pat, expected, found }.into()
+            }
+            InferenceDiagnostic::CastToUnsized { expr, cast_ty } => {
+                let expr = expr_syntax(*expr)?;
+                CastToUnsized { expr, cast_ty: Type::new(db, def, cast_ty.clone()) }.into()
+            }
+            InferenceDiagnostic::InvalidCast { expr, error, expr_ty, cast_ty } => {
+                let expr = expr_syntax(*expr)?;
+                let expr_ty = Type::new(db, def, expr_ty.clone());
+                let cast_ty = Type::new(db, def, cast_ty.clone());
+                InvalidCast { expr, error: *error, expr_ty, cast_ty }.into()
             }
         })
     }

@@ -19,7 +19,7 @@ use rustc_target::spec::PanicStrategy;
 
 use crate::builder::Builder;
 use crate::context::CodegenCx;
-use crate::{gcc_util, new_context, GccContext, LockedTargetInfo, SyncContext};
+use crate::{GccContext, LockedTargetInfo, SyncContext, gcc_util, new_context};
 
 #[cfg(feature = "master")]
 pub fn visibility_to_gcc(linkage: Visibility) -> gccjit::Visibility {
@@ -128,8 +128,19 @@ pub fn compile_codegen_unit(
         // NOTE: Rust relies on LLVM doing wrapping on overflow.
         context.add_command_line_option("-fwrapv");
 
+        if let Some(model) = tcx.sess.code_model() {
+            use rustc_target::spec::CodeModel;
+
+            context.add_command_line_option(match model {
+                CodeModel::Tiny => "-mcmodel=tiny",
+                CodeModel::Small => "-mcmodel=small",
+                CodeModel::Kernel => "-mcmodel=kernel",
+                CodeModel::Medium => "-mcmodel=medium",
+                CodeModel::Large => "-mcmodel=large",
+            });
+        }
+
         if tcx.sess.relocation_model() == rustc_target::spec::RelocModel::Static {
-            context.add_command_line_option("-mcmodel=kernel");
             context.add_command_line_option("-fno-pie");
         }
 

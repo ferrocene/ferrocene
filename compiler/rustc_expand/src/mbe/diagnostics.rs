@@ -2,21 +2,20 @@ use std::borrow::Cow;
 
 use rustc_ast::token::{self, Token, TokenKind};
 use rustc_ast::tokenstream::TokenStream;
-use rustc_ast_pretty::pprust;
 use rustc_errors::{Applicability, Diag, DiagCtxtHandle, DiagMessage};
 use rustc_macros::Subdiagnostic;
-use rustc_parse::parser::{Parser, Recovery};
+use rustc_parse::parser::{Parser, Recovery, token_descr};
 use rustc_session::parse::ParseSess;
 use rustc_span::source_map::SourceMap;
 use rustc_span::symbol::Ident;
 use rustc_span::{ErrorGuaranteed, Span};
 use tracing::debug;
 
-use super::macro_rules::{parser_from_cx, NoopTracker};
-use crate::expand::{parse_ast_fragment, AstFragmentKind};
+use super::macro_rules::{NoopTracker, parser_from_cx};
+use crate::expand::{AstFragmentKind, parse_ast_fragment};
 use crate::mbe::macro_parser::ParseResult::*;
 use crate::mbe::macro_parser::{MatcherLoc, NamedParseResult, TtParser};
-use crate::mbe::macro_rules::{try_match_macro, Tracker};
+use crate::mbe::macro_rules::{Tracker, try_match_macro};
 
 pub(super) fn failed_to_match_macro(
     psess: &ParseSess,
@@ -336,17 +335,11 @@ pub(super) fn annotate_doc_comment(err: &mut Diag<'_>, sm: &SourceMap, span: Spa
 /// other tokens, this is "unexpected token...".
 pub(super) fn parse_failure_msg(tok: &Token, expected_token: Option<&Token>) -> Cow<'static, str> {
     if let Some(expected_token) = expected_token {
-        Cow::from(format!(
-            "expected `{}`, found `{}`",
-            pprust::token_to_string(expected_token),
-            pprust::token_to_string(tok),
-        ))
+        Cow::from(format!("expected {}, found {}", token_descr(expected_token), token_descr(tok)))
     } else {
         match tok.kind {
             token::Eof => Cow::from("unexpected end of macro invocation"),
-            _ => {
-                Cow::from(format!("no rules expected the token `{}`", pprust::token_to_string(tok)))
-            }
+            _ => Cow::from(format!("no rules expected {}", token_descr(tok))),
         }
     }
 }

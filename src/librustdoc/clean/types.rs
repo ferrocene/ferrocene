@@ -1,18 +1,17 @@
 use std::borrow::Cow;
-use std::cell::RefCell;
 use std::hash::Hash;
 use std::path::PathBuf;
-use std::rc::Rc;
 use std::sync::{Arc, OnceLock as OnceCell};
 use std::{fmt, iter};
 
 use arrayvec::ArrayVec;
+use rustc_abi::{ExternAbi, VariantIdx};
+use rustc_ast::MetaItemInner;
 use rustc_ast_pretty::pprust;
-use rustc_attr::{ConstStability, Deprecation, Stability, StabilityLevel, StableSince};
-use rustc_const_eval::const_eval::is_unstable_const_fn;
-use rustc_data_structures::fx::{FxHashMap, FxHashSet};
+use rustc_attr::{ConstStability, Deprecation, Stability, StableSince};
+use rustc_data_structures::fx::{FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_hir::def::{CtorKind, DefKind, Res};
-use rustc_hir::def_id::{CrateNum, DefId, LocalDefId, LOCAL_CRATE};
+use rustc_hir::def_id::{CrateNum, DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::lang_items::LangItem;
 use rustc_hir::{BodyId, Mutability};
 use rustc_hir_analysis::check::intrinsic::intrinsic_operation_unsafety;
@@ -22,14 +21,12 @@ use rustc_middle::span_bug;
 use rustc_middle::ty::fast_reject::SimplifiedType;
 use rustc_middle::ty::{self, TyCtxt, Visibility};
 use rustc_resolve::rustdoc::{
-    add_doc_fragment, attrs_to_doc_fragments, inner_docs, span_of_fragments, DocFragment,
+    DocFragment, add_doc_fragment, attrs_to_doc_fragments, inner_docs, span_of_fragments,
 };
 use rustc_session::Session;
 use rustc_span::hygiene::MacroKind;
-use rustc_span::symbol::{kw, sym, Ident, Symbol};
-use rustc_span::{FileName, Loc, DUMMY_SP};
-use rustc_target::abi::VariantIdx;
-use rustc_target::spec::abi::Abi;
+use rustc_span::symbol::{Ident, Symbol, kw, sym};
+use rustc_span::{DUMMY_SP, FileName, Loc};
 use thin_vec::ThinVec;
 use tracing::{debug, trace};
 use {rustc_ast as ast, rustc_hir as hir};
@@ -115,7 +112,7 @@ impl From<DefId> for ItemId {
 pub(crate) struct Crate {
     pub(crate) module: Item,
     /// Only here so that they can be filtered through the rustdoc passes.
-    pub(crate) external_traits: Rc<RefCell<FxHashMap<DefId, Trait>>>,
+    pub(crate) external_traits: Box<FxIndexMap<DefId, Trait>>,
 }
 
 impl Crate {
@@ -335,6 +332,8 @@ pub(crate) struct ItemInner {
     /// E.g., struct vs enum vs function.
     pub(crate) kind: ItemKind,
     pub(crate) attrs: Attributes,
+    /// The effective stability, filled out by the `propagate-stability` pass.
+    pub(crate) stability: Option<Stability>,
 }
 
 impl std::ops::Deref for Item {
@@ -383,8 +382,17 @@ fn is_field_vis_inherited(tcx: TyCtxt<'_>, def_id: DefId) -> bool {
 }
 
 impl Item {
+    /// Returns the effective stability of the item.
+    ///
+    /// This method should only be called after the `propagate-stability` pass has been run.
     pub(crate) fn stability(&self, tcx: TyCtxt<'_>) -> Option<Stability> {
-        self.def_id().and_then(|did| tcx.lookup_stability(did))
+        let stability = self.inner.stability;
+        debug_assert!(
+            stability.is_some()
+                || self.def_id().is_none_or(|did| tcx.lookup_stability(did).is_none()),
+            "missing stability for cleaned item: {self:?}",
+        );
+        stability
     }
 
     pub(crate) fn const_stability(&self, tcx: TyCtxt<'_>) -> Option<ConstStability> {
@@ -466,7 +474,7 @@ impl Item {
 
         Item {
             item_id: def_id.into(),
-            inner: Box::new(ItemInner { kind, attrs }),
+            inner: Box::new(ItemInner { kind, attrs, stability: None }),
             name,
             cfg,
             inline_stmt_id: None,
@@ -602,10 +610,7 @@ impl Item {
     }
 
     pub(crate) fn stable_since(&self, tcx: TyCtxt<'_>) -> Option<StableSince> {
-        match self.stability(tcx)?.level {
-            StabilityLevel::Stable { since, .. } => Some(since),
-            StabilityLevel::Unstable { .. } => None,
-        }
+        self.stability(tcx).and_then(|stability| stability.stable_since())
     }
 
     pub(crate) fn is_non_exhaustive(&self) -> bool {
@@ -634,12 +639,11 @@ impl Item {
             asyncness: ty::Asyncness,
         ) -> hir::FnHeader {
             let sig = tcx.fn_sig(def_id).skip_binder();
-            let constness =
-                if tcx.is_const_fn(def_id) || is_unstable_const_fn(tcx, def_id).is_some() {
-                    hir::Constness::Const
-                } else {
-                    hir::Constness::NotConst
-                };
+            let constness = if tcx.is_const_fn(def_id) {
+                hir::Constness::Const
+            } else {
+                hir::Constness::NotConst
+            };
             let asyncness = match asyncness {
                 ty::Asyncness::Yes => hir::IsAsync::Async(DUMMY_SP),
                 ty::Asyncness::No => hir::IsAsync::NotAsync,
@@ -651,15 +655,13 @@ impl Item {
                 let def_id = self.def_id().unwrap();
                 let abi = tcx.fn_sig(def_id).skip_binder().abi();
                 hir::FnHeader {
-                    safety: if abi == Abi::RustIntrinsic {
+                    safety: if abi == ExternAbi::RustIntrinsic {
                         intrinsic_operation_unsafety(tcx, def_id.expect_local())
                     } else {
                         safety
                     },
                     abi,
-                    constness: if tcx.is_const_fn(def_id)
-                        || is_unstable_const_fn(tcx, def_id).is_some()
-                    {
+                    constness: if tcx.is_const_fn(def_id) {
                         hir::Constness::Const
                     } else {
                         hir::Constness::NotConst
@@ -946,7 +948,7 @@ pub(crate) struct Module {
 }
 
 pub(crate) trait AttributesExt {
-    type AttributeIterator<'a>: Iterator<Item = ast::NestedMetaItem>
+    type AttributeIterator<'a>: Iterator<Item = ast::MetaItemInner>
     where
         Self: 'a;
     type Attributes<'a>: Iterator<Item = &'a ast::Attribute>
@@ -959,8 +961,8 @@ pub(crate) trait AttributesExt {
 
     fn cfg(&self, tcx: TyCtxt<'_>, hidden_cfg: &FxHashSet<Cfg>) -> Option<Arc<Cfg>> {
         let sess = tcx.sess;
-        let doc_cfg_active = tcx.features().doc_cfg;
-        let doc_auto_cfg_active = tcx.features().doc_auto_cfg;
+        let doc_cfg_active = tcx.features().doc_cfg();
+        let doc_auto_cfg_active = tcx.features().doc_auto_cfg();
 
         fn single<T: IntoIterator>(it: T) -> Option<T::Item> {
             let mut iter = it.into_iter();
@@ -980,7 +982,7 @@ pub(crate) trait AttributesExt {
                 .peekable();
             if doc_cfg.peek().is_some() && doc_cfg_active {
                 doc_cfg
-                    .filter_map(|attr| Cfg::parse(attr.meta_item()?).ok())
+                    .filter_map(|attr| Cfg::parse(&attr).ok())
                     .fold(Cfg::True, |cfg, new_cfg| cfg & new_cfg)
             } else if doc_auto_cfg_active {
                 // If there is no `doc(cfg())`, then we retrieve the `cfg()` attributes (because
@@ -1036,7 +1038,7 @@ pub(crate) trait AttributesExt {
                     let mut meta = attr.meta_item().unwrap().clone();
                     meta.path = ast::Path::from_ident(Ident::with_dummy_span(sym::target_feature));
 
-                    if let Ok(feat_cfg) = Cfg::parse(&meta) {
+                    if let Ok(feat_cfg) = Cfg::parse(&MetaItemInner::MetaItem(meta)) {
                         cfg &= feat_cfg;
                     }
                 }
@@ -1048,7 +1050,7 @@ pub(crate) trait AttributesExt {
 }
 
 impl AttributesExt for [ast::Attribute] {
-    type AttributeIterator<'a> = impl Iterator<Item = ast::NestedMetaItem> + 'a;
+    type AttributeIterator<'a> = impl Iterator<Item = ast::MetaItemInner> + 'a;
     type Attributes<'a> = impl Iterator<Item = &'a ast::Attribute> + 'a;
 
     fn lists(&self, name: Symbol) -> Self::AttributeIterator<'_> {
@@ -1064,10 +1066,14 @@ impl AttributesExt for [ast::Attribute] {
 }
 
 impl AttributesExt for [(Cow<'_, ast::Attribute>, Option<DefId>)] {
-    type AttributeIterator<'a> = impl Iterator<Item = ast::NestedMetaItem> + 'a
-        where Self: 'a;
-    type Attributes<'a> = impl Iterator<Item = &'a ast::Attribute> + 'a
-        where Self: 'a;
+    type AttributeIterator<'a>
+        = impl Iterator<Item = ast::MetaItemInner> + 'a
+    where
+        Self: 'a;
+    type Attributes<'a>
+        = impl Iterator<Item = &'a ast::Attribute> + 'a
+    where
+        Self: 'a;
 
     fn lists(&self, name: Symbol) -> Self::AttributeIterator<'_> {
         AttributesExt::iter(self)
@@ -1095,11 +1101,11 @@ pub(crate) trait NestedAttributesExt {
 
     /// Returns `Some(attr)` if the attribute list contains 'attr'
     /// corresponding to a specific `word`
-    fn get_word_attr(self, word: Symbol) -> Option<ast::NestedMetaItem>;
+    fn get_word_attr(self, word: Symbol) -> Option<ast::MetaItemInner>;
 }
 
-impl<I: Iterator<Item = ast::NestedMetaItem>> NestedAttributesExt for I {
-    fn get_word_attr(mut self, word: Symbol) -> Option<ast::NestedMetaItem> {
+impl<I: Iterator<Item = ast::MetaItemInner>> NestedAttributesExt for I {
+    fn get_word_attr(mut self, word: Symbol) -> Option<ast::MetaItemInner> {
         self.find(|attr| attr.is_word() && attr.has_name(word))
     }
 }
@@ -1146,7 +1152,7 @@ pub(crate) struct Attributes {
 }
 
 impl Attributes {
-    pub(crate) fn lists(&self, name: Symbol) -> impl Iterator<Item = ast::NestedMetaItem> + '_ {
+    pub(crate) fn lists(&self, name: Symbol) -> impl Iterator<Item = ast::MetaItemInner> + '_ {
         self.other_attrs.lists(name)
     }
 
@@ -1212,20 +1218,19 @@ impl Attributes {
     }
 
     pub(crate) fn get_doc_aliases(&self) -> Box<[Symbol]> {
-        let mut aliases = FxHashSet::default();
+        let mut aliases = FxIndexSet::default();
 
         for attr in self.other_attrs.lists(sym::doc).filter(|a| a.has_name(sym::alias)) {
             if let Some(values) = attr.meta_item_list() {
                 for l in values {
-                    match l.lit().unwrap().kind {
-                        ast::LitKind::Str(s, _) => {
-                            aliases.insert(s);
-                        }
-                        _ => unreachable!(),
+                    if let Some(lit) = l.lit()
+                        && let ast::LitKind::Str(s, _) = lit.kind
+                    {
+                        aliases.insert(s);
                     }
                 }
-            } else {
-                aliases.insert(attr.value_str().unwrap());
+            } else if let Some(value) = attr.value_str() {
+                aliases.insert(value);
             }
         }
         aliases.into_iter().collect::<Vec<_>>().into()
@@ -1247,7 +1252,7 @@ impl Eq for Attributes {}
 
 #[derive(Clone, PartialEq, Eq, Debug, Hash)]
 pub(crate) enum GenericBound {
-    TraitBound(PolyTrait, hir::TraitBoundModifier),
+    TraitBound(PolyTrait, hir::TraitBoundModifiers),
     Outlives(Lifetime),
     /// `use<'a, T>` precise-capturing bound syntax
     Use(Vec<Symbol>),
@@ -1255,19 +1260,22 @@ pub(crate) enum GenericBound {
 
 impl GenericBound {
     pub(crate) fn sized(cx: &mut DocContext<'_>) -> GenericBound {
-        Self::sized_with(cx, hir::TraitBoundModifier::None)
+        Self::sized_with(cx, hir::TraitBoundModifiers::NONE)
     }
 
     pub(crate) fn maybe_sized(cx: &mut DocContext<'_>) -> GenericBound {
-        Self::sized_with(cx, hir::TraitBoundModifier::Maybe)
+        Self::sized_with(cx, hir::TraitBoundModifiers {
+            polarity: hir::BoundPolarity::Maybe(DUMMY_SP),
+            constness: hir::BoundConstness::Never,
+        })
     }
 
-    fn sized_with(cx: &mut DocContext<'_>, modifier: hir::TraitBoundModifier) -> GenericBound {
+    fn sized_with(cx: &mut DocContext<'_>, modifiers: hir::TraitBoundModifiers) -> GenericBound {
         let did = cx.tcx.require_lang_item(LangItem::Sized, None);
         let empty = ty::Binder::dummy(ty::GenericArgs::empty());
         let path = clean_middle_path(cx, did, false, ThinVec::new(), empty);
         inline::record_extern_fqn(cx, did, ItemType::Trait);
-        GenericBound::TraitBound(PolyTrait { trait_: path, generic_params: Vec::new() }, modifier)
+        GenericBound::TraitBound(PolyTrait { trait_: path, generic_params: Vec::new() }, modifiers)
     }
 
     pub(crate) fn is_trait_bound(&self) -> bool {
@@ -1275,8 +1283,10 @@ impl GenericBound {
     }
 
     pub(crate) fn is_sized_bound(&self, cx: &DocContext<'_>) -> bool {
-        use rustc_hir::TraitBoundModifier as TBM;
-        if let GenericBound::TraitBound(PolyTrait { ref trait_, .. }, TBM::None) = *self
+        if let GenericBound::TraitBound(
+            PolyTrait { ref trait_, .. },
+            rustc_hir::TraitBoundModifiers::NONE,
+        ) = *self
             && Some(trait_.def_id()) == cx.tcx.lang_items().sized_trait()
         {
             return true;
@@ -1351,8 +1361,7 @@ impl GenericParamDef {
 
     pub(crate) fn is_synthetic_param(&self) -> bool {
         match self.kind {
-            GenericParamDefKind::Lifetime { .. } => false,
-            GenericParamDefKind::Const { synthetic: is_host_effect, .. } => is_host_effect,
+            GenericParamDefKind::Lifetime { .. } | GenericParamDefKind::Const { .. } => false,
             GenericParamDefKind::Type { synthetic, .. } => synthetic,
         }
     }
@@ -1439,8 +1448,8 @@ impl Trait {
     pub(crate) fn safety(&self, tcx: TyCtxt<'_>) -> hir::Safety {
         tcx.trait_def(self.def_id).safety
     }
-    pub(crate) fn is_object_safe(&self, tcx: TyCtxt<'_>) -> bool {
-        tcx.is_object_safe(self.def_id)
+    pub(crate) fn is_dyn_compatible(&self, tcx: TyCtxt<'_>) -> bool {
+        tcx.is_dyn_compatible(self.def_id)
     }
 }
 
@@ -1748,7 +1757,7 @@ pub(crate) enum PrimitiveType {
     Never,
 }
 
-type SimplifiedTypes = FxHashMap<PrimitiveType, ArrayVec<SimplifiedType, 3>>;
+type SimplifiedTypes = FxIndexMap<PrimitiveType, ArrayVec<SimplifiedType, 3>>;
 impl PrimitiveType {
     pub(crate) fn from_hir(prim: hir::PrimTy) -> PrimitiveType {
         use ast::{FloatTy, IntTy, UintTy};
@@ -1809,8 +1818,8 @@ impl PrimitiveType {
     }
 
     pub(crate) fn simplified_types() -> &'static SimplifiedTypes {
-        use ty::{FloatTy, IntTy, UintTy};
         use PrimitiveType::*;
+        use ty::{FloatTy, IntTy, UintTy};
         static CELL: OnceCell<SimplifiedTypes> = OnceCell::new();
 
         let single = |x| iter::once(x).collect();
@@ -1859,7 +1868,7 @@ impl PrimitiveType {
             .get(self)
             .into_iter()
             .flatten()
-            .flat_map(move |&simp| tcx.incoherent_impls(simp).into_iter().flatten())
+            .flat_map(move |&simp| tcx.incoherent_impls(simp).into_iter())
             .copied()
     }
 
@@ -1867,7 +1876,7 @@ impl PrimitiveType {
         Self::simplified_types()
             .values()
             .flatten()
-            .flat_map(move |&simp| tcx.incoherent_impls(simp).into_iter().flatten())
+            .flat_map(move |&simp| tcx.incoherent_impls(simp).into_iter())
             .copied()
     }
 
@@ -1916,10 +1925,10 @@ impl PrimitiveType {
     /// In particular, if a crate depends on both `std` and another crate that also defines
     /// `rustc_doc_primitive`, then it's entirely random whether `std` or the other crate is picked.
     /// (no_std crates are usually fine unless multiple dependencies define a primitive.)
-    pub(crate) fn primitive_locations(tcx: TyCtxt<'_>) -> &FxHashMap<PrimitiveType, DefId> {
-        static PRIMITIVE_LOCATIONS: OnceCell<FxHashMap<PrimitiveType, DefId>> = OnceCell::new();
+    pub(crate) fn primitive_locations(tcx: TyCtxt<'_>) -> &FxIndexMap<PrimitiveType, DefId> {
+        static PRIMITIVE_LOCATIONS: OnceCell<FxIndexMap<PrimitiveType, DefId>> = OnceCell::new();
         PRIMITIVE_LOCATIONS.get_or_init(|| {
-            let mut primitive_locations = FxHashMap::default();
+            let mut primitive_locations = FxIndexMap::default();
             // NOTE: technically this misses crates that are only passed with `--extern` and not loaded when checking the crate.
             // This is a degenerate case that I don't plan to support.
             for &crate_num in tcx.crates(()) {
@@ -2332,7 +2341,7 @@ pub(crate) struct BareFunctionDecl {
     pub(crate) safety: hir::Safety,
     pub(crate) generic_params: Vec<GenericParamDef>,
     pub(crate) decl: FnDecl,
-    pub(crate) abi: Abi,
+    pub(crate) abi: ExternAbi,
 }
 
 #[derive(Clone, Debug)]
@@ -2449,7 +2458,7 @@ pub(crate) struct Impl {
 }
 
 impl Impl {
-    pub(crate) fn provided_trait_methods(&self, tcx: TyCtxt<'_>) -> FxHashSet<Symbol> {
+    pub(crate) fn provided_trait_methods(&self, tcx: TyCtxt<'_>) -> FxIndexSet<Symbol> {
         self.trait_
             .as_ref()
             .map(|t| t.def_id())

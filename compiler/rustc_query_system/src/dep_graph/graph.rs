@@ -3,8 +3,8 @@ use std::collections::hash_map::Entry;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::marker::PhantomData;
-use std::sync::atomic::Ordering;
 use std::sync::Arc;
+use std::sync::atomic::Ordering;
 
 use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
@@ -134,7 +134,7 @@ impl<D: Deps> DepGraph<D> {
             encoder,
             record_graph,
             record_stats,
-            prev_graph.clone(),
+            Arc::clone(&prev_graph),
         );
 
         let colors = DepNodeColorMap::new(prev_graph_node_count);

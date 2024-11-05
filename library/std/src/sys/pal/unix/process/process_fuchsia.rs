@@ -2,7 +2,7 @@ use libc::{c_int, size_t};
 
 use crate::num::NonZero;
 use crate::sys::process::process_common::*;
-use crate::sys::process::zircon::{zx_handle_t, Handle};
+use crate::sys::process::zircon::{Handle, zx_handle_t};
 use crate::{fmt, io, mem, ptr};
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -178,7 +178,7 @@ impl Process {
             zx_cvt(zx_object_get_info(
                 self.handle.raw(),
                 ZX_INFO_PROCESS,
-                core::ptr::addr_of_mut!(proc_info) as *mut libc::c_void,
+                (&raw mut proc_info) as *mut libc::c_void,
                 mem::size_of::<zx_info_process_t>(),
                 &mut actual,
                 &mut avail,
@@ -215,7 +215,7 @@ impl Process {
             zx_cvt(zx_object_get_info(
                 self.handle.raw(),
                 ZX_INFO_PROCESS,
-                core::ptr::addr_of_mut!(proc_info) as *mut libc::c_void,
+                (&raw mut proc_info) as *mut libc::c_void,
                 mem::size_of::<zx_info_process_t>(),
                 &mut actual,
                 &mut avail,
@@ -273,7 +273,7 @@ impl ExitStatus {
         // We don't know what someone who calls into_raw() will do with this value, but it should
         // have the conventional Unix representation. Despite the fact that this is not
         // standardised in SuS or POSIX, all Unix systems encode the signal and exit status the
-        // same way. (Ie the WIFEXITED, WEXITSTATUS etc. macros have identical behaviour on every
+        // same way. (Ie the WIFEXITED, WEXITSTATUS etc. macros have identical behavior on every
         // Unix.)
         //
         // The caller of `std::os::unix::into_raw` is probably wanting a Unix exit status, and may

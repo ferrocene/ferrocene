@@ -8,20 +8,20 @@ use rustc_hir as hir;
 use rustc_hir::lang_items::LangItem;
 use rustc_hir_analysis::hir_ty_lowering::HirTyLowerer;
 use rustc_infer::infer::{BoundRegionConversionTime, DefineOpaqueTypes, InferOk, InferResult};
-use rustc_infer::traits::ObligationCauseCode;
+use rustc_infer::traits::{ObligationCauseCode, PredicateObligations};
 use rustc_macros::{TypeFoldable, TypeVisitable};
 use rustc_middle::span_bug;
 use rustc_middle::ty::visit::{TypeVisitable, TypeVisitableExt};
 use rustc_middle::ty::{self, GenericArgs, Ty, TyCtxt, TypeSuperVisitable, TypeVisitor};
 use rustc_span::def_id::LocalDefId;
-use rustc_span::{Span, DUMMY_SP};
+use rustc_span::{DUMMY_SP, Span};
 use rustc_target::spec::abi::Abi;
 use rustc_trait_selection::error_reporting::traits::ArgKind;
 use rustc_trait_selection::traits;
 use rustc_type_ir::ClosureKind;
 use tracing::{debug, instrument, trace};
 
-use super::{check_fn, CoroutineTypes, Expectation, FnCtxt};
+use super::{CoroutineTypes, Expectation, FnCtxt, check_fn};
 
 /// What signature do we *expect* the closure to have from context?
 #[derive(Debug, Clone, TypeFoldable, TypeVisitable)]
@@ -44,7 +44,7 @@ struct ClosureSignatures<'tcx> {
 
 impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     #[instrument(skip(self, closure), level = "debug")]
-    pub fn check_expr_closure(
+    pub(crate) fn check_expr_closure(
         &self,
         closure: &hir::Closure<'tcx>,
         expr_span: Span,
@@ -103,15 +103,12 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     None => self.next_ty_var(expr_span),
                 };
 
-                let closure_args = ty::ClosureArgs::new(
-                    tcx,
-                    ty::ClosureArgsParts {
-                        parent_args,
-                        closure_kind_ty,
-                        closure_sig_as_fn_ptr_ty: Ty::new_fn_ptr(tcx, sig),
-                        tupled_upvars_ty,
-                    },
-                );
+                let closure_args = ty::ClosureArgs::new(tcx, ty::ClosureArgsParts {
+                    parent_args,
+                    closure_kind_ty,
+                    closure_sig_as_fn_ptr_ty: Ty::new_fn_ptr(tcx, sig),
+                    tupled_upvars_ty,
+                });
 
                 (Ty::new_closure(tcx, expr_def_id.to_def_id(), closure_args.args), None)
             }
@@ -180,18 +177,15 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     _ => tcx.types.unit,
                 };
 
-                let coroutine_args = ty::CoroutineArgs::new(
-                    tcx,
-                    ty::CoroutineArgsParts {
-                        parent_args,
-                        kind_ty,
-                        resume_ty,
-                        yield_ty,
-                        return_ty: liberated_sig.output(),
-                        witness: interior,
-                        tupled_upvars_ty,
-                    },
-                );
+                let coroutine_args = ty::CoroutineArgs::new(tcx, ty::CoroutineArgsParts {
+                    parent_args,
+                    kind_ty,
+                    resume_ty,
+                    yield_ty,
+                    return_ty: liberated_sig.output(),
+                    witness: interior,
+                    tupled_upvars_ty,
+                });
 
                 (
                     Ty::new_coroutine(tcx, expr_def_id.to_def_id(), coroutine_args.args),
@@ -222,9 +216,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 };
 
                 let coroutine_captures_by_ref_ty = self.next_ty_var(expr_span);
-                let closure_args = ty::CoroutineClosureArgs::new(
-                    tcx,
-                    ty::CoroutineClosureArgsParts {
+                let closure_args =
+                    ty::CoroutineClosureArgs::new(tcx, ty::CoroutineClosureArgsParts {
                         parent_args,
                         closure_kind_ty,
                         signature_parts_ty: Ty::new_fn_ptr(
@@ -245,8 +238,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         tupled_upvars_ty,
                         coroutine_captures_by_ref_ty,
                         coroutine_witness_ty: interior,
-                    },
-                );
+                    });
 
                 let coroutine_kind_ty = match expected_kind {
                     Some(kind) => Ty::from_coroutine_closure_kind(tcx, kind),
@@ -813,7 +805,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // [c1]: https://github.com/rust-lang/rust/pull/45072#issuecomment-341089706
         // [c2]: https://github.com/rust-lang/rust/pull/45072#issuecomment-341096796
         self.commit_if_ok(|_| {
-            let mut all_obligations = vec![];
+            let mut all_obligations = PredicateObligations::new();
             let supplied_sig = self.instantiate_binder_with_fresh_vars(
                 self.tcx.def_span(expr_def_id),
                 BoundRegionConversionTime::FnCall,

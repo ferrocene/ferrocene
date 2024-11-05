@@ -163,7 +163,7 @@ use core::num::NonZero;
 use core::ptr;
 
 use super::{InPlaceDrop, InPlaceDstDataSrcBufDrop, SpecFromIter, SpecFromIterNested, Vec};
-use crate::alloc::{handle_alloc_error, Global};
+use crate::alloc::{Global, handle_alloc_error};
 
 const fn in_place_collectible<DEST, SRC>(
     step_merge: Option<NonZero<usize>>,
@@ -229,6 +229,7 @@ where
     I: Iterator<Item = T> + InPlaceCollect,
     <I as SourceIter>::Source: AsVecIntoIter,
 {
+    #[track_caller]
     default fn from_iter(iterator: I) -> Self {
         // Select the implementation in const eval to avoid codegen of the dead branch to improve compile times.
         let fun: fn(I) -> Vec<T> = const {
@@ -246,6 +247,7 @@ where
     }
 }
 
+#[track_caller]
 fn from_iter_in_place<I, T>(mut iterator: I) -> Vec<T>
 where
     I: Iterator<Item = T> + InPlaceCollect,

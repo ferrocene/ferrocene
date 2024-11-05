@@ -7,20 +7,22 @@ use std::collections::BTreeMap;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_errors::{ErrorGuaranteed, MultiSpan};
 use rustc_hir as hir;
+use rustc_hir::ItemKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::lang_items::LangItem;
-use rustc_hir::ItemKind;
 use rustc_infer::infer::outlives::env::OutlivesEnvironment;
 use rustc_infer::infer::{self, RegionResolutionError, TyCtxtInferExt};
 use rustc_infer::traits::Obligation;
 use rustc_middle::ty::adjustment::CoerceUnsizedInfo;
 use rustc_middle::ty::print::PrintTraitRefExt as _;
-use rustc_middle::ty::{self, suggest_constraining_type_params, Ty, TyCtxt, TypeVisitableExt};
-use rustc_span::{Span, DUMMY_SP};
+use rustc_middle::ty::{
+    self, Ty, TyCtxt, TypeVisitableExt, TypingMode, suggest_constraining_type_params,
+};
+use rustc_span::{DUMMY_SP, Span};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::traits::misc::{
-    type_allowed_to_implement_const_param_ty, type_allowed_to_implement_copy,
     ConstParamTyImplementationError, CopyImplementationError, InfringingFieldsReason,
+    type_allowed_to_implement_const_param_ty, type_allowed_to_implement_copy,
 };
 use rustc_trait_selection::traits::{self, ObligationCause, ObligationCtxt};
 use tracing::debug;
@@ -213,7 +215,7 @@ fn visit_implementation_of_dispatch_from_dyn(checker: &Checker<'_>) -> Result<()
 
     let param_env = tcx.param_env(impl_did);
 
-    let infcx = tcx.infer_ctxt().build();
+    let infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
     let cause = ObligationCause::misc(span, impl_did);
 
     // Later parts of the compiler rely on all DispatchFromDyn types to be ABI-compatible with raw
@@ -309,11 +311,10 @@ fn visit_implementation_of_dispatch_from_dyn(checker: &Checker<'_>) -> Result<()
                         tcx,
                         cause.clone(),
                         param_env,
-                        ty::TraitRef::new(
-                            tcx,
-                            dispatch_from_dyn_trait,
-                            [field.ty(tcx, args_a), field.ty(tcx, args_b)],
-                        ),
+                        ty::TraitRef::new(tcx, dispatch_from_dyn_trait, [
+                            field.ty(tcx, args_a),
+                            field.ty(tcx, args_b),
+                        ]),
                     ));
                 }
                 let errors = ocx.select_all_or_error();
@@ -355,7 +356,7 @@ pub(crate) fn coerce_unsized_info<'tcx>(
 
     debug!("visit_implementation_of_coerce_unsized: {:?} -> {:?} (free)", source, target);
 
-    let infcx = tcx.infer_ctxt().build();
+    let infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
     let cause = ObligationCause::misc(span, impl_did);
     let check_mutbl = |mt_a: ty::TypeAndMut<'tcx>,
                        mt_b: ty::TypeAndMut<'tcx>,
@@ -365,6 +366,7 @@ pub(crate) fn coerce_unsized_info<'tcx>(
                 .err_ctxt()
                 .report_mismatched_types(
                     &cause,
+                    param_env,
                     mk_ptr(mt_b.ty),
                     target,
                     ty::error::TypeError::Mutability,
@@ -425,7 +427,7 @@ pub(crate) fn coerce_unsized_info<'tcx>(
             // Here `U = [i32; 3]` and `V = [i32]`. At runtime,
             // when this coercion occurs, we would be changing the
             // field `ptr` from a thin pointer of type `*mut [i32;
-            // 3]` to a fat pointer of type `*mut [i32]` (with
+            // 3]` to a wide pointer of type `*mut [i32]` (with
             // extra data `3`). **The purpose of this check is to
             // make sure that we know how to do this conversion.**
             //

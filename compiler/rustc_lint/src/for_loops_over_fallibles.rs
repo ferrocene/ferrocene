@@ -4,7 +4,7 @@ use rustc_infer::infer::TyCtxtInferExt;
 use rustc_infer::traits::ObligationCause;
 use rustc_middle::ty;
 use rustc_session::{declare_lint, declare_lint_pass};
-use rustc_span::{sym, Span};
+use rustc_span::{Span, sym};
 use rustc_trait_selection::traits::ObligationCtxt;
 
 use crate::lints::{
@@ -96,11 +96,14 @@ impl<'tcx> LateLintPass<'tcx> for ForLoopsOverFallibles {
             end_span: pat.span.between(arg.span),
         };
 
-        cx.emit_span_lint(
-            FOR_LOOPS_OVER_FALLIBLES,
-            arg.span,
-            ForLoopsOverFalliblesDiag { article, ref_prefix, ty, sub, question_mark, suggestion },
-        );
+        cx.emit_span_lint(FOR_LOOPS_OVER_FALLIBLES, arg.span, ForLoopsOverFalliblesDiag {
+            article,
+            ref_prefix,
+            ty,
+            sub,
+            question_mark,
+            suggestion,
+        });
     }
 }
 
@@ -163,7 +166,7 @@ fn suggest_question_mark<'tcx>(
     }
 
     let ty = args.type_at(0);
-    let infcx = cx.tcx.infer_ctxt().build();
+    let infcx = cx.tcx.infer_ctxt().build(cx.typing_mode());
     let ocx = ObligationCtxt::new(&infcx);
 
     let body_def_id = cx.tcx.hir().body_owner_def_id(body_id);

@@ -33,10 +33,10 @@ pub enum Alignment {
     Center,
 }
 
-#[unstable(feature = "debug_closure_helpers", issue = "117729")]
-pub use self::builders::{from_fn, FromFn};
 #[stable(feature = "debug_builders", since = "1.2.0")]
 pub use self::builders::{DebugList, DebugMap, DebugSet, DebugStruct, DebugTuple};
+#[unstable(feature = "debug_closure_helpers", issue = "117729")]
+pub use self::builders::{FromFn, from_fn};
 
 /// The type returned by formatter methods.
 ///
@@ -333,7 +333,10 @@ pub struct Arguments<'a> {
 #[unstable(feature = "fmt_internals", issue = "none")]
 impl<'a> Arguments<'a> {
     #[inline]
-    #[rustc_const_unstable(feature = "const_fmt_arguments_new", issue = "none")]
+    #[cfg_attr(
+        bootstrap,
+        rustc_const_unstable(feature = "const_fmt_arguments_new", issue = "none")
+    )]
     pub const fn new_const<const N: usize>(pieces: &'a [&'static str; N]) -> Self {
         const { assert!(N <= 1) };
         Arguments { pieces, fmt: None, args: &[] }
@@ -438,6 +441,7 @@ impl<'a> Arguments<'a> {
     #[rustc_const_unstable(feature = "const_arguments_as_str", issue = "103900")]
     #[must_use]
     #[inline]
+    #[cfg_attr(not(bootstrap), rustc_const_stable_indirect)]
     pub const fn as_str(&self) -> Option<&'static str> {
         match (self.pieces, self.args) {
             ([], []) => Some(""),

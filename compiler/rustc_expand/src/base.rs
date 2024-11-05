@@ -1,5 +1,6 @@
 use std::default::Default;
 use std::iter;
+use std::path::Component::Prefix;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
@@ -15,8 +16,8 @@ use rustc_data_structures::sync::{self, Lrc};
 use rustc_errors::{DiagCtxtHandle, ErrorGuaranteed, PResult};
 use rustc_feature::Features;
 use rustc_lint_defs::{BufferedEarlyLint, RegisteredTools};
-use rustc_parse::parser::Parser;
 use rustc_parse::MACRO_ARGUMENTS;
+use rustc_parse::parser::Parser;
 use rustc_session::config::CollapseMacroDebuginfo;
 use rustc_session::parse::ParseSess;
 use rustc_session::{Limit, Session};
@@ -24,12 +25,12 @@ use rustc_span::def_id::{CrateNum, DefId, LocalDefId};
 use rustc_span::edition::Edition;
 use rustc_span::hygiene::{AstPass, ExpnData, ExpnKind, LocalExpnId, MacroKind};
 use rustc_span::source_map::SourceMap;
-use rustc_span::symbol::{kw, sym, Ident, Symbol};
-use rustc_span::{FileName, Span, DUMMY_SP};
-use smallvec::{smallvec, SmallVec};
+use rustc_span::symbol::{Ident, Symbol, kw, sym};
+use rustc_span::{DUMMY_SP, FileName, Span};
+use smallvec::{SmallVec, smallvec};
 use thin_vec::ThinVec;
 
-use crate::base::ast::NestedMetaItem;
+use crate::base::ast::MetaItemInner;
 use crate::errors;
 use crate::expand::{self, AstFragment, Invocation};
 use crate::module::DirOwnership;
@@ -783,7 +784,7 @@ impl SyntaxExtension {
 
     fn collapse_debuginfo_by_name(attr: &Attribute) -> Result<CollapseMacroDebuginfo, Span> {
         let list = attr.meta_item_list();
-        let Some([NestedMetaItem::MetaItem(item)]) = list.as_deref() else {
+        let Some([MetaItemInner::MetaItem(item)]) = list.as_deref() else {
             return Err(attr.span);
         };
         if !item.is_word() {
@@ -865,7 +866,9 @@ impl SyntaxExtension {
             })
             .unwrap_or_else(|| (None, helper_attrs));
         let stability = attr::find_stability(sess, attrs, span);
-        let const_stability = attr::find_const_stability(sess, attrs, span);
+        // We set `is_const_fn` false to avoid getting any implicit const stability.
+        let const_stability =
+            attr::find_const_stability(sess, attrs, span, /* is_const_fn */ false);
         let body_stability = attr::find_body_stability(sess, attrs);
         if let Some((_, sp)) = const_stability {
             sess.dcx().emit_err(errors::MacroConstStability {
@@ -1293,7 +1296,12 @@ pub fn resolve_path(sess: &Session, path: impl Into<PathBuf>, span: Span) -> PRe
         base_path.push(path);
         Ok(base_path)
     } else {
-        Ok(path)
+        // This ensures that Windows verbatim paths are fixed if mixed path separators are used,
+        // which can happen when `concat!` is used to join paths.
+        match path.components().next() {
+            Some(Prefix(prefix)) if prefix.kind().is_verbatim() => Ok(path.components().collect()),
+            _ => Ok(path),
+        }
     }
 }
 

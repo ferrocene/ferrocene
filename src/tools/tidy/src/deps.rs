@@ -26,6 +26,7 @@ const LICENSES: &[&str] = &[
     "BSD-2-Clause",                                        // zerocopy
     "ISC",
     "MIT / Apache-2.0",
+    "MIT AND Apache-2.0 WITH LLVM-exception AND (MIT OR Apache-2.0)", // compiler-builtins
     "MIT OR Apache-2.0 OR LGPL-2.1-or-later",              // r-efi, r-efi-alloc
     "MIT OR Apache-2.0 OR Zlib",                           // tinyvec_macros
     "MIT OR Apache-2.0",
@@ -90,6 +91,7 @@ pub(crate) const WORKSPACES: &[(&str, ExceptionList, Option<(&[&str], &[&str])>,
 const EXCEPTIONS: ExceptionList = &[
     // tidy-alphabetical-start
     ("ar_archive_writer", "Apache-2.0 WITH LLVM-exception"), // rustc
+<<<<<<< HEAD
     ("aws-config", "Apache-2.0"),                            // generate-tarball, through criticaltrust
     ("aws-credential-types", "Apache-2.0"),                  // generate-tarball, through criticaltrust
     ("aws-http", "Apache-2.0"),                              // generate-tarball, through criticaltrust
@@ -109,7 +111,12 @@ const EXCEPTIONS: ExceptionList = &[
     ("aws-smithy-types", "Apache-2.0"),                      // generate-tarball, through criticaltrust
     ("aws-smithy-xml", "Apache-2.0"),                        // generate-tarball, through criticaltrust
     ("aws-types", "Apache-2.0"),                             // generate-tarball, through criticaltrust
+=======
+    ("arrayref", "BSD-2-Clause"),                            // rustc
+    ("blake3", "CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception"),  // rustc
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     ("colored", "MPL-2.0"),                                  // rustfmt
+    ("constant_time_eq", "CC0-1.0 OR MIT-0 OR Apache-2.0"),  // rustc
     ("dissimilar", "Apache-2.0"),                            // rustdoc, rustc_lexer (few tests) via expect-test, (dev deps)
     ("fluent-langneg", "Apache-2.0"),                        // rustc (fluent translations)
     ("insta", "Apache-2.0"),                                 // generate-tarball
@@ -119,9 +126,12 @@ const EXCEPTIONS: ExceptionList = &[
     ("rustc_apfloat", "Apache-2.0 WITH LLVM-exception"),     // rustc (license is the same as LLVM uses)
     ("ryu", "Apache-2.0 OR BSL-1.0"), // BSL is not acceptble, but we use it under Apache-2.0                       // cargo/... (because of serde)
     ("self_cell", "Apache-2.0"),                             // rustc (fluent translations)
+<<<<<<< HEAD
     ("similar", "Apache-2.0"),                               // generate-tarball
     ("snap", "BSD-3-Clause"),                                // rustc
     ("subtle", "BSD-3-Clause"),                              // generate-tarball
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     ("wasi-preview1-component-adapter-provider", "Apache-2.0 WITH LLVM-exception"), // rustc
     // tidy-alphabetical-end
 ];
@@ -150,11 +160,14 @@ const EXCEPTIONS_STDARCH: ExceptionList = &[
 
 const EXCEPTIONS_CARGO: ExceptionList = &[
     // tidy-alphabetical-start
+    ("arrayref", "BSD-2-Clause"),
     ("bitmaps", "MPL-2.0+"),
+    ("blake3", "CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception"),
     ("bytesize", "Apache-2.0"),
     ("ciborium", "Apache-2.0"),
     ("ciborium-io", "Apache-2.0"),
     ("ciborium-ll", "Apache-2.0"),
+    ("constant_time_eq", "CC0-1.0 OR MIT-0 OR Apache-2.0"),
     ("dunce", "CC0-1.0 OR MIT-0 OR Apache-2.0"),
     ("encoding_rs", "(Apache-2.0 OR MIT) AND BSD-3-Clause"),
     ("fiat-crypto", "MIT OR Apache-2.0 OR BSD-1-Clause"),
@@ -180,7 +193,6 @@ const EXCEPTIONS_RUST_ANALYZER: ExceptionList = &[
     ("rustc_apfloat", "Apache-2.0 WITH LLVM-exception"),
     ("ryu", "Apache-2.0 OR BSL-1.0"), // BSL is not acceptble, but we use it under Apache-2.0
     ("scip", "Apache-2.0"),
-    ("snap", "BSD-3-Clause"),
     // tidy-alphabetical-end
 ];
 
@@ -273,15 +285,21 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "annotate-snippets",
     "anstyle",
     "ar_archive_writer",
+    "arrayref",
     "arrayvec",
     "autocfg",
     "bitflags",
+    "blake3",
     "block-buffer",
     "byteorder", // via ruzstd in object in thorin-dwp
     "cc",
     "cfg-if",
     "cfg_aliases",
+<<<<<<< HEAD
     "const-oid", // this is a false positive: it's only used by generate-tarball
+=======
+    "constant_time_eq",
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "cpufeatures",
     "crc32fast",
     "crossbeam-channel",
@@ -296,7 +314,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "datafrog",
     "deranged",
     "derive-where",
-    "derive_more",
     "derive_setters",
     "digest",
     "displaydoc",
@@ -407,7 +424,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "sharded-slab",
     "shlex",
     "smallvec",
-    "snap",
     "stable_deref_trait",
     "stacker",
     "static_assertions",
@@ -461,6 +477,9 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "winapi-x86_64-pc-windows-gnu",
     "windows",
     "windows-core",
+    "windows-implement",
+    "windows-interface",
+    "windows-result",
     "windows-sys",
     "windows-targets",
     "windows_aarch64_gnullvm",
@@ -508,7 +527,11 @@ const PERMITTED_STDLIB_DEPENDENCIES: &[&str] = &[
     "rand_core",
     "rand_xorshift",
     "rustc-demangle",
+<<<<<<< HEAD
     "ruzstd",
+=======
+    "shlex",
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "unicode-width",
     "unwinding",
     "wasi",

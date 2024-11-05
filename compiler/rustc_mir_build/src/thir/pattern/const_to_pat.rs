@@ -1,4 +1,5 @@
 use either::Either;
+use rustc_abi::{FieldIdx, VariantIdx};
 use rustc_apfloat::Float;
 use rustc_hir as hir;
 use rustc_index::Idx;
@@ -7,11 +8,10 @@ use rustc_infer::traits::Obligation;
 use rustc_middle::mir;
 use rustc_middle::mir::interpret::ErrorHandled;
 use rustc_middle::thir::{FieldPat, Pat, PatKind};
-use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitableExt, ValTree};
+use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitableExt, TypingMode, ValTree};
 use rustc_span::Span;
-use rustc_target::abi::{FieldIdx, VariantIdx};
-use rustc_trait_selection::traits::query::evaluate_obligation::InferCtxtExt;
 use rustc_trait_selection::traits::ObligationCause;
+use rustc_trait_selection::traits::query::evaluate_obligation::InferCtxtExt;
 use tracing::{debug, instrument, trace};
 
 use super::PatCtxt;
@@ -36,14 +36,15 @@ impl<'a, 'tcx> PatCtxt<'a, 'tcx> {
         id: hir::HirId,
         span: Span,
     ) -> Box<Pat<'tcx>> {
-        let infcx = self.tcx.infer_ctxt().build();
+        // FIXME(#132279): We likely want to be able to reveal the hidden types
+        // of opaques defined in this function here.
+        let infcx = self.tcx.infer_ctxt().build(TypingMode::non_body_analysis());
         let mut convert = ConstToPat::new(self, id, span, infcx);
         convert.to_pat(c, ty)
     }
 }
 
 struct ConstToPat<'tcx> {
-    id: hir::HirId,
     span: Span,
     param_env: ty::ParamEnv<'tcx>,
 
@@ -62,7 +63,6 @@ impl<'tcx> ConstToPat<'tcx> {
     ) -> Self {
         trace!(?pat_ctxt.typeck_results.hir_owner);
         ConstToPat {
-            id,
             span,
             infcx,
             param_env: pat_ctxt.param_env,
@@ -149,15 +149,7 @@ impl<'tcx> ConstToPat<'tcx> {
             tcx,
             ObligationCause::dummy(),
             self.param_env,
-            ty::TraitRef::new_from_args(
-                tcx,
-                partial_eq_trait_id,
-                tcx.with_opt_host_effect_param(
-                    tcx.hir().enclosing_body_owner(self.id),
-                    partial_eq_trait_id,
-                    [ty, ty],
-                ),
-            ),
+            ty::TraitRef::new(tcx, partial_eq_trait_id, [ty, ty]),
         );
 
         // This *could* accept a type that isn't actually `PartialEq`, because region bounds get

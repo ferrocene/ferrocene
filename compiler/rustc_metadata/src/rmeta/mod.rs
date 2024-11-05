@@ -5,7 +5,8 @@ pub(crate) use decoder::{CrateMetadata, CrateNumMap, MetadataBlob};
 use decoder::{DecodeContext, Metadata};
 use def_path_hash_map::DefPathHashMapRef;
 use encoder::EncodeContext;
-pub use encoder::{encode_metadata, rendered_const, EncodedMetadata};
+pub use encoder::{EncodedMetadata, encode_metadata, rendered_const};
+use rustc_abi::{FieldIdx, VariantIdx};
 use rustc_ast::expand::StrippedCfgItem;
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::svh::Svh;
@@ -13,8 +14,8 @@ use rustc_hir::def::{CtorKind, DefKind, DocLinkResMap};
 use rustc_hir::def_id::{CrateNum, DefId, DefIdMap, DefIndex, DefPathHash, StableCrateId};
 use rustc_hir::definitions::DefKey;
 use rustc_hir::lang_items::LangItem;
-use rustc_index::bit_set::BitSet;
 use rustc_index::IndexVec;
+use rustc_index::bit_set::BitSet;
 use rustc_macros::{
     Decodable, Encodable, MetadataDecodable, MetadataEncodable, TyDecodable, TyEncodable,
 };
@@ -37,8 +38,7 @@ use rustc_span::edition::Edition;
 use rustc_span::hygiene::{ExpnIndex, MacroKind, SyntaxContextData};
 use rustc_span::symbol::{Ident, Symbol};
 use rustc_span::{self, ExpnData, ExpnHash, ExpnId, Span};
-use rustc_target::abi::{FieldIdx, VariantIdx};
-use rustc_target::spec::{PanicStrategy, TargetTriple};
+use rustc_target::spec::{PanicStrategy, TargetTuple};
 use table::TableBuilder;
 use {rustc_ast as ast, rustc_attr as attr, rustc_hir as hir};
 
@@ -213,7 +213,7 @@ pub(crate) struct ProcMacroData {
 /// If you do modify this struct, also bump the [`METADATA_VERSION`] constant.
 #[derive(MetadataEncodable, MetadataDecodable)]
 pub(crate) struct CrateHeader {
-    pub(crate) triple: TargetTriple,
+    pub(crate) triple: TargetTuple,
     pub(crate) hash: Svh,
     pub(crate) name: Symbol,
     /// Whether this is the header for a proc-macro crate.
@@ -378,7 +378,6 @@ define_tables! {
 - defaulted:
     intrinsic: Table<DefIndex, Option<LazyValue<ty::IntrinsicDef>>>,
     is_macro_rules: Table<DefIndex, bool>,
-    is_type_alias_impl_trait: Table<DefIndex, bool>,
     type_alias_is_lazy: Table<DefIndex, bool>,
     attr_flags: Table<DefIndex, AttrFlags>,
     // The u64 is the crate-local part of the DefPathHash. All hashes in this crate have the same
@@ -392,11 +391,10 @@ define_tables! {
     inferred_outlives_of: Table<DefIndex, LazyArray<(ty::Clause<'static>, Span)>>,
     explicit_super_predicates_of: Table<DefIndex, LazyArray<(ty::Clause<'static>, Span)>>,
     explicit_implied_predicates_of: Table<DefIndex, LazyArray<(ty::Clause<'static>, Span)>>,
+    implied_const_bounds: Table<DefIndex, LazyArray<(ty::PolyTraitRef<'static>, Span)>>,
     inherent_impls: Table<DefIndex, LazyArray<DefIndex>>,
     associated_types_for_impl_traits_in_associated_fn: Table<DefIndex, LazyArray<DefId>>,
-    associated_type_for_effects: Table<DefIndex, Option<LazyValue<DefId>>>,
     opt_rpitit_info: Table<DefIndex, Option<LazyValue<ty::ImplTraitInTraitData>>>,
-    is_effects_desugaring: Table<DefIndex, bool>,
     unused_generic_params: Table<DefIndex, UnusedGenericParams>,
     // Reexported names are not associated with individual `DefId`s,
     // e.g. a glob import can introduce a lot of names, all with the same `DefId`.
@@ -436,6 +434,7 @@ define_tables! {
     thir_abstract_const: Table<DefIndex, LazyValue<ty::EarlyBinder<'static, ty::Const<'static>>>>,
     impl_parent: Table<DefIndex, RawDefId>,
     constness: Table<DefIndex, hir::Constness>,
+    const_conditions: Table<DefIndex, LazyValue<ty::ConstConditions<'static>>>,
     defaultness: Table<DefIndex, hir::Defaultness>,
     // FIXME(eddyb) perhaps compute this on the fly if cheap enough?
     coerce_unsized_info: Table<DefIndex, LazyValue<ty::adjustment::CoerceUnsizedInfo>>,
@@ -468,6 +467,7 @@ define_tables! {
     doc_link_resolutions: Table<DefIndex, LazyValue<DocLinkResMap>>,
     doc_link_traits_in_scope: Table<DefIndex, LazyArray<DefId>>,
     assumed_wf_types_for_rpitit: Table<DefIndex, LazyArray<(Ty<'static>, Span)>>,
+    opaque_ty_origin: Table<DefIndex, LazyValue<hir::OpaqueTyOrigin<DefId>>>,
 }
 
 #[derive(TyEncodable, TyDecodable)]

@@ -22,6 +22,7 @@
 //! Our current behavior is ¯\_(ツ)_/¯.
 use std::fmt;
 
+use crate::text_edit::{TextEdit, TextEditBuilder};
 use base_db::AnchoredPathBuf;
 use either::Either;
 use hir::{FieldSource, FileRange, HirFileIdExt, InFile, ModuleSource, Semantics};
@@ -32,7 +33,6 @@ use syntax::{
     utils::is_raw_identifier,
     AstNode, SyntaxKind, TextRange, T,
 };
-use text_edit::{TextEdit, TextEditBuilder};
 
 use crate::{
     defs::Definition,
@@ -200,12 +200,14 @@ impl Definition {
                         .and_then(syn_ctx_is_root)
                 }
             }
+            Definition::InlineAsmOperand(it) => name_range(it, sema).and_then(syn_ctx_is_root),
             Definition::BuiltinType(_)
             | Definition::BuiltinLifetime(_)
             | Definition::BuiltinAttr(_)
             | Definition::SelfType(_)
             | Definition::ToolModule(_)
-            | Definition::TupleField(_) => return None,
+            | Definition::TupleField(_)
+            | Definition::InlineAsmRegOrRegClass(_) => return None,
             // FIXME: This should be doable in theory
             Definition::DeriveHelper(_) => return None,
         };

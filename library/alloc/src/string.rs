@@ -43,9 +43,9 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 use core::error::Error;
+use core::iter::FusedIterator;
 #[cfg(not(no_global_oom_handling))]
 use core::iter::from_fn;
-use core::iter::FusedIterator;
 #[cfg(not(no_global_oom_handling))]
 use core::ops::Add;
 #[cfg(not(no_global_oom_handling))]
@@ -53,7 +53,7 @@ use core::ops::AddAssign;
 #[cfg(not(no_global_oom_handling))]
 use core::ops::Bound::{Excluded, Included, Unbounded};
 use core::ops::{self, Range, RangeBounds};
-use core::str::pattern::Pattern;
+use core::str::pattern::{Pattern, Utf8Pattern};
 use core::{fmt, hash, ptr, slice};
 
 #[cfg(not(no_global_oom_handling))]
@@ -62,9 +62,9 @@ use crate::alloc::Allocator;
 use crate::borrow::{Cow, ToOwned};
 use crate::boxed::Box;
 use crate::collections::TryReserveError;
-use crate::str::{self, from_utf8_unchecked_mut, Chars, Utf8Error};
+use crate::str::{self, Chars, Utf8Error, from_utf8_unchecked_mut};
 #[cfg(not(no_global_oom_handling))]
-use crate::str::{from_boxed_utf8_unchecked, FromStr};
+use crate::str::{FromStr, from_boxed_utf8_unchecked};
 use crate::vec::Vec;
 
 /// A UTF-8–encoded, growable string.
@@ -1059,7 +1059,8 @@ impl String {
     #[inline]
     #[must_use = "`self` will be dropped if the result is not used"]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub fn into_bytes(self) -> Vec<u8> {
+    #[rustc_const_unstable(feature = "const_vec_string_slice", issue = "129041")]
+    pub const fn into_bytes(self) -> Vec<u8> {
         self.vec
     }
 
@@ -1076,8 +1077,11 @@ impl String {
     #[must_use]
     #[stable(feature = "string_as_str", since = "1.7.0")]
     #[cfg_attr(not(test), rustc_diagnostic_item = "string_as_str")]
-    pub fn as_str(&self) -> &str {
-        self
+    #[rustc_const_unstable(feature = "const_vec_string_slice", issue = "129041")]
+    pub const fn as_str(&self) -> &str {
+        // SAFETY: String contents are stipulated to be valid UTF-8, invalid contents are an error
+        // at construction.
+        unsafe { str::from_utf8_unchecked(self.vec.as_slice()) }
     }
 
     /// Converts a `String` into a mutable string slice.
@@ -1096,8 +1100,11 @@ impl String {
     #[must_use]
     #[stable(feature = "string_as_str", since = "1.7.0")]
     #[cfg_attr(not(test), rustc_diagnostic_item = "string_as_mut_str")]
-    pub fn as_mut_str(&mut self) -> &mut str {
-        self
+    #[rustc_const_unstable(feature = "const_vec_string_slice", issue = "129041")]
+    pub const fn as_mut_str(&mut self) -> &mut str {
+        // SAFETY: String contents are stipulated to be valid UTF-8, invalid contents are an error
+        // at construction.
+        unsafe { str::from_utf8_unchecked_mut(self.vec.as_mut_slice()) }
     }
 
     /// Appends a given string slice onto the end of this `String`.
@@ -1168,7 +1175,8 @@ impl String {
     #[inline]
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub fn capacity(&self) -> usize {
+    #[rustc_const_unstable(feature = "const_vec_string_slice", issue = "129041")]
+    pub const fn capacity(&self) -> usize {
         self.vec.capacity()
     }
 
@@ -1431,8 +1439,9 @@ impl String {
     #[inline]
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub fn as_bytes(&self) -> &[u8] {
-        &self.vec
+    #[rustc_const_unstable(feature = "const_vec_string_slice", issue = "129041")]
+    pub const fn as_bytes(&self) -> &[u8] {
+        self.vec.as_slice()
     }
 
     /// Shortens this `String` to the specified length.
@@ -1784,7 +1793,8 @@ impl String {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub unsafe fn as_mut_vec(&mut self) -> &mut Vec<u8> {
+    #[rustc_const_unstable(feature = "const_vec_string_slice", issue = "129041")]
+    pub const unsafe fn as_mut_vec(&mut self) -> &mut Vec<u8> {
         &mut self.vec
     }
 
@@ -1805,8 +1815,9 @@ impl String {
     #[inline]
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_const_unstable(feature = "const_vec_string_slice", issue = "129041")]
     #[rustc_confusables("length", "size")]
-    pub fn len(&self) -> usize {
+    pub const fn len(&self) -> usize {
         self.vec.len()
     }
 
@@ -1824,7 +1835,8 @@ impl String {
     #[inline]
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub fn is_empty(&self) -> bool {
+    #[rustc_const_unstable(feature = "const_vec_string_slice", issue = "129041")]
+    pub const fn is_empty(&self) -> bool {
         self.len() == 0
     }
 
@@ -2087,7 +2099,31 @@ impl FromUtf8Error {
     #[cfg(not(no_global_oom_handling))]
     #[unstable(feature = "string_from_utf8_lossy_owned", issue = "129436")]
     pub fn into_utf8_lossy(self) -> String {
-        String::from_utf8_lossy_owned(self.bytes)
+        const REPLACEMENT: &str = "\u{FFFD}";
+
+        let mut res = {
+            let mut v = Vec::with_capacity(self.bytes.len());
+
+            // `Utf8Error::valid_up_to` returns the maximum index of validated
+            // UTF-8 bytes. Copy the valid bytes into the output buffer.
+            v.extend_from_slice(&self.bytes[..self.error.valid_up_to()]);
+
+            // SAFETY: This is safe because the only bytes present in the buffer
+            // were validated as UTF-8 by the call to `String::from_utf8` which
+            // produced this `FromUtf8Error`.
+            unsafe { String::from_utf8_unchecked(v) }
+        };
+
+        let iter = self.bytes[self.error.valid_up_to()..].utf8_chunks();
+
+        for chunk in iter {
+            res.push_str(chunk.valid());
+            if !chunk.invalid().is_empty() {
+                res.push_str(REPLACEMENT);
+            }
+        }
+
+        res
     }
 
     /// Returns the bytes that were attempted to convert to a `String`.
@@ -2400,6 +2436,11 @@ impl<'b> Pattern for &'b String {
     {
         self[..].strip_suffix_of(haystack)
     }
+
+    #[inline]
+    fn as_utf8_pattern(&self) -> Option<Utf8Pattern<'_>> {
+        Some(Utf8Pattern::StringPattern(self.as_bytes()))
+    }
 }
 
 macro_rules! impl_eq {
@@ -2565,7 +2606,7 @@ impl ops::Deref for String {
 
     #[inline]
     fn deref(&self) -> &str {
-        unsafe { str::from_utf8_unchecked(&self.vec) }
+        self.as_str()
     }
 }
 
@@ -2576,7 +2617,7 @@ unsafe impl ops::DerefPure for String {}
 impl ops::DerefMut for String {
     #[inline]
     fn deref_mut(&mut self) -> &mut str {
-        unsafe { str::from_utf8_unchecked_mut(&mut *self.vec) }
+        self.as_mut_str()
     }
 }
 

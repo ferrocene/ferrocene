@@ -1,22 +1,23 @@
 //! A framework that can express both [gen-kill] and generic dataflow problems.
 //!
-//! To use this framework, implement either the [`Analysis`] or the
-//! [`GenKillAnalysis`] trait. If your transfer function can be expressed with only gen/kill
-//! operations, prefer `GenKillAnalysis` since it will run faster while iterating to fixpoint. The
-//! `impls` module contains several examples of gen/kill dataflow analyses.
+//! To use this framework, implement the [`Analysis`] trait. There used to be a `GenKillAnalysis`
+//! alternative trait for gen-kill analyses that would pre-compute the transfer function for each
+//! block. It was intended as an optimization, but it ended up not being any faster than
+//! `Analysis`.
 //!
-//! Create an `Engine` for your analysis using the `into_engine` method on the `Analysis` trait,
-//! then call `iterate_to_fixpoint`. From there, you can use a `ResultsCursor` to inspect the
-//! fixpoint solution to your dataflow problem, or implement the `ResultsVisitor` interface and use
-//! `visit_results`. The following example uses the `ResultsCursor` approach.
+//! The `impls` module contains several examples of dataflow analyses.
+//!
+//! Then call `iterate_to_fixpoint` on your type that impls `Analysis` to get a `Results`. From
+//! there, you can use a `ResultsCursor` to inspect the fixpoint solution to your dataflow problem,
+//! or implement the `ResultsVisitor` interface and use `visit_results`. The following example uses
+//! the `ResultsCursor` approach.
 //!
 //! ```ignore (cross-crate-imports)
-//! use rustc_const_eval::dataflow::Analysis; // Makes `into_engine` available.
+//! use rustc_const_eval::dataflow::Analysis; // Makes `iterate_to_fixpoint` available.
 //!
 //! fn do_my_analysis(tcx: TyCtxt<'tcx>, body: &mir::Body<'tcx>) {
 //!     let analysis = MyAnalysis::new()
-//!         .into_engine(tcx, body)
-//!         .iterate_to_fixpoint()
+//!         .iterate_to_fixpoint(tcx, body, None)
 //!         .into_results_cursor(body);
 //!
 //!     // Print the dataflow state *after* each statement in the start block.
@@ -32,24 +33,30 @@
 
 use std::cmp::Ordering;
 
+use rustc_data_structures::work_queue::WorkQueue;
 use rustc_index::bit_set::{BitSet, ChunkedBitSet, HybridBitSet};
-use rustc_index::Idx;
-use rustc_middle::mir::{self, BasicBlock, CallReturnPlaces, Location, TerminatorEdges};
+use rustc_index::{Idx, IndexVec};
+use rustc_middle::bug;
+use rustc_middle::mir::{self, BasicBlock, CallReturnPlaces, Location, TerminatorEdges, traversal};
 use rustc_middle::ty::TyCtxt;
+use tracing::error;
+
+use self::results::write_graphviz_results;
+use super::fmt::DebugWithContext;
 
 mod cursor;
 mod direction;
-mod engine;
 pub mod fmt;
 pub mod graphviz;
 pub mod lattice;
+mod results;
 mod visitor;
 
 pub use self::cursor::ResultsCursor;
 pub use self::direction::{Backward, Direction, Forward};
-pub use self::engine::{Engine, Results};
 pub use self::lattice::{JoinSemiLattice, MaybeReachable};
-pub use self::visitor::{visit_results, ResultsVisitable, ResultsVisitor};
+pub use self::results::Results;
+pub use self::visitor::{ResultsVisitable, ResultsVisitor, visit_results};
 
 /// Analysis domains are all bitsets of various kinds. This trait holds
 /// operations needed by all of them.
@@ -87,11 +94,26 @@ impl<T: Idx> BitSetExt<T> for ChunkedBitSet<T> {
     }
 }
 
-/// Defines the domain of a dataflow problem.
+/// A dataflow problem with an arbitrarily complex transfer function.
 ///
-/// This trait specifies the lattice on which this analysis operates (the domain) as well as its
-/// initial value at the entry point of each basic block.
-pub trait AnalysisDomain<'tcx> {
+/// This trait specifies the lattice on which this analysis operates (the domain), its
+/// initial value at the entry point of each basic block, and various operations.
+///
+/// # Convergence
+///
+/// When implementing this trait it's possible to choose a transfer function such that the analysis
+/// does not reach fixpoint. To guarantee convergence, your transfer functions must maintain the
+/// following invariant:
+///
+/// > If the dataflow state **before** some point in the program changes to be greater
+/// than the prior state **before** that point, the dataflow state **after** that point must
+/// also change to be greater than the prior state **after** that point.
+///
+/// This invariant guarantees that the dataflow state at a given point in the program increases
+/// monotonically until fixpoint is reached. Note that this monotonicity requirement only applies
+/// to the same point in the program at different points in time. The dataflow state at a given
+/// point in the program may or may not be greater than the state at any preceding point.
+pub trait Analysis<'tcx> {
     /// The type that holds the dataflow state at any given point in the program.
     type Domain: Clone + JoinSemiLattice;
 
@@ -116,25 +138,7 @@ pub trait AnalysisDomain<'tcx> {
     // block where control flow could exit the MIR body (e.g., those terminated with `return` or
     // `resume`). It's not obvious how to handle `yield` points in coroutines, however.
     fn initialize_start_block(&self, body: &mir::Body<'tcx>, state: &mut Self::Domain);
-}
 
-/// A dataflow problem with an arbitrarily complex transfer function.
-///
-/// # Convergence
-///
-/// When implementing this trait directly (not via [`GenKillAnalysis`]), it's possible to choose a
-/// transfer function such that the analysis does not reach fixpoint. To guarantee convergence,
-/// your transfer functions must maintain the following invariant:
-///
-/// > If the dataflow state **before** some point in the program changes to be greater
-/// than the prior state **before** that point, the dataflow state **after** that point must
-/// also change to be greater than the prior state **after** that point.
-///
-/// This invariant guarantees that the dataflow state at a given point in the program increases
-/// monotonically until fixpoint is reached. Note that this monotonicity requirement only applies
-/// to the same point in the program at different points in time. The dataflow state at a given
-/// point in the program may or may not be greater than the state at any preceding point.
-pub trait Analysis<'tcx>: AnalysisDomain<'tcx> {
     /// Updates the current dataflow state with the effect of evaluating a statement.
     fn apply_statement_effect(
         &mut self,
@@ -165,10 +169,12 @@ pub trait Analysis<'tcx>: AnalysisDomain<'tcx> {
     /// initialized here.
     fn apply_terminator_effect<'mir>(
         &mut self,
-        state: &mut Self::Domain,
+        _state: &mut Self::Domain,
         terminator: &'mir mir::Terminator<'tcx>,
-        location: Location,
-    ) -> TerminatorEdges<'mir, 'tcx>;
+        _location: Location,
+    ) -> TerminatorEdges<'mir, 'tcx> {
+        terminator.edges()
+    }
 
     /// Updates the current dataflow state with an effect that occurs immediately *before* the
     /// given terminator.
@@ -193,10 +199,11 @@ pub trait Analysis<'tcx>: AnalysisDomain<'tcx> {
     /// edges.
     fn apply_call_return_effect(
         &mut self,
-        state: &mut Self::Domain,
-        block: BasicBlock,
-        return_places: CallReturnPlaces<'_, 'tcx>,
-    );
+        _state: &mut Self::Domain,
+        _block: BasicBlock,
+        _return_places: CallReturnPlaces<'_, 'tcx>,
+    ) {
+    }
 
     /// Updates the current dataflow state with the effect of taking a particular branch in a
     /// `SwitchInt` terminator.
@@ -221,185 +228,96 @@ pub trait Analysis<'tcx>: AnalysisDomain<'tcx> {
 
     /* Extension methods */
 
-    /// Creates an `Engine` to find the fixpoint for this dataflow problem.
+    /// Finds the fixpoint for this dataflow problem.
     ///
-    /// You shouldn't need to override this outside this module, since the combination of the
-    /// default impl and the one for all `A: GenKillAnalysis` will do the right thing.
-    /// Its purpose is to enable method chaining like so:
+    /// You shouldn't need to override this. Its purpose is to enable method chaining like so:
     ///
     /// ```ignore (cross-crate-imports)
     /// let results = MyAnalysis::new(tcx, body)
-    ///     .into_engine(tcx, body, def_id)
-    ///     .iterate_to_fixpoint()
+    ///     .iterate_to_fixpoint(tcx, body, None)
     ///     .into_results_cursor(body);
     /// ```
-    #[inline]
-    fn into_engine<'mir>(
-        self,
+    /// You can optionally add a `pass_name` to the graphviz output for this particular run of a
+    /// dataflow analysis. Some analyses are run multiple times in the compilation pipeline.
+    /// Without a `pass_name` to differentiates them, only the results for the latest run will be
+    /// saved.
+    fn iterate_to_fixpoint<'mir>(
+        mut self,
         tcx: TyCtxt<'tcx>,
         body: &'mir mir::Body<'tcx>,
-    ) -> Engine<'mir, 'tcx, Self>
+        pass_name: Option<&'static str>,
+    ) -> Results<'tcx, Self>
     where
         Self: Sized,
+        Self::Domain: DebugWithContext<Self>,
     {
-        Engine::new_generic(tcx, body, self)
-    }
-}
+        let mut entry_sets =
+            IndexVec::from_fn_n(|_| self.bottom_value(body), body.basic_blocks.len());
+        self.initialize_start_block(body, &mut entry_sets[mir::START_BLOCK]);
 
-/// A gen/kill dataflow problem.
-///
-/// Each method in this trait has a corresponding one in `Analysis`. However, the first two methods
-/// here only allow modification of the dataflow state via "gen" and "kill" operations. By defining
-/// transfer functions for each statement in this way, the transfer function for an entire basic
-/// block can be computed efficiently. The remaining methods match up with `Analysis` exactly.
-///
-/// `Analysis` is automatically implemented for all implementers of `GenKillAnalysis` via a blanket
-/// impl below.
-pub trait GenKillAnalysis<'tcx>: Analysis<'tcx> {
-    type Idx: Idx;
+        if Self::Direction::IS_BACKWARD && entry_sets[mir::START_BLOCK] != self.bottom_value(body) {
+            bug!("`initialize_start_block` is not yet supported for backward dataflow analyses");
+        }
 
-    fn domain_size(&self, body: &mir::Body<'tcx>) -> usize;
+        let mut dirty_queue: WorkQueue<BasicBlock> = WorkQueue::with_none(body.basic_blocks.len());
 
-    /// See `Analysis::apply_statement_effect`. Note how the second arg differs.
-    fn statement_effect(
-        &mut self,
-        trans: &mut impl GenKill<Self::Idx>,
-        statement: &mir::Statement<'tcx>,
-        location: Location,
-    );
+        if Self::Direction::IS_FORWARD {
+            for (bb, _) in traversal::reverse_postorder(body) {
+                dirty_queue.insert(bb);
+            }
+        } else {
+            // Reverse post-order on the reverse CFG may generate a better iteration order for
+            // backward dataflow analyses, but probably not enough to matter.
+            for (bb, _) in traversal::postorder(body) {
+                dirty_queue.insert(bb);
+            }
+        }
 
-    /// See `Analysis::apply_before_statement_effect`. Note how the second arg
-    /// differs.
-    fn before_statement_effect(
-        &mut self,
-        _trans: &mut impl GenKill<Self::Idx>,
-        _statement: &mir::Statement<'tcx>,
-        _location: Location,
-    ) {
-    }
+        // `state` is not actually used between iterations;
+        // this is just an optimization to avoid reallocating
+        // every iteration.
+        let mut state = self.bottom_value(body);
+        while let Some(bb) = dirty_queue.pop() {
+            let bb_data = &body[bb];
 
-    /// See `Analysis::apply_terminator_effect`.
-    fn terminator_effect<'mir>(
-        &mut self,
-        trans: &mut Self::Domain,
-        terminator: &'mir mir::Terminator<'tcx>,
-        location: Location,
-    ) -> TerminatorEdges<'mir, 'tcx>;
+            // Set the state to the entry state of the block.
+            // This is equivalent to `state = entry_sets[bb].clone()`,
+            // but it saves an allocation, thus improving compile times.
+            state.clone_from(&entry_sets[bb]);
 
-    /// See `Analysis::apply_before_terminator_effect`.
-    fn before_terminator_effect(
-        &mut self,
-        _trans: &mut Self::Domain,
-        _terminator: &mir::Terminator<'tcx>,
-        _location: Location,
-    ) {
-    }
+            // Apply the block transfer function, using the cached one if it exists.
+            let edges = Self::Direction::apply_effects_in_block(&mut self, &mut state, bb, bb_data);
 
-    /* Edge-specific effects */
+            Self::Direction::join_state_into_successors_of(
+                &mut self,
+                body,
+                &mut state,
+                bb,
+                edges,
+                |target: BasicBlock, state: &Self::Domain| {
+                    let set_changed = entry_sets[target].join(state);
+                    if set_changed {
+                        dirty_queue.insert(target);
+                    }
+                },
+            );
+        }
 
-    /// See `Analysis::apply_call_return_effect`.
-    fn call_return_effect(
-        &mut self,
-        trans: &mut Self::Domain,
-        block: BasicBlock,
-        return_places: CallReturnPlaces<'_, 'tcx>,
-    );
+        let results = Results { analysis: self, entry_sets };
 
-    /// See `Analysis::apply_switch_int_edge_effects`.
-    fn switch_int_edge_effects<G: GenKill<Self::Idx>>(
-        &mut self,
-        _block: BasicBlock,
-        _discr: &mir::Operand<'tcx>,
-        _edge_effects: &mut impl SwitchIntEdgeEffects<G>,
-    ) {
-    }
-}
-
-// Blanket impl: any impl of `GenKillAnalysis` automatically impls `Analysis`.
-impl<'tcx, A> Analysis<'tcx> for A
-where
-    A: GenKillAnalysis<'tcx>,
-    A::Domain: GenKill<A::Idx> + BitSetExt<A::Idx>,
-{
-    fn apply_statement_effect(
-        &mut self,
-        state: &mut A::Domain,
-        statement: &mir::Statement<'tcx>,
-        location: Location,
-    ) {
-        self.statement_effect(state, statement, location);
-    }
-
-    fn apply_before_statement_effect(
-        &mut self,
-        state: &mut A::Domain,
-        statement: &mir::Statement<'tcx>,
-        location: Location,
-    ) {
-        self.before_statement_effect(state, statement, location);
-    }
-
-    fn apply_terminator_effect<'mir>(
-        &mut self,
-        state: &mut A::Domain,
-        terminator: &'mir mir::Terminator<'tcx>,
-        location: Location,
-    ) -> TerminatorEdges<'mir, 'tcx> {
-        self.terminator_effect(state, terminator, location)
-    }
-
-    fn apply_before_terminator_effect(
-        &mut self,
-        state: &mut A::Domain,
-        terminator: &mir::Terminator<'tcx>,
-        location: Location,
-    ) {
-        self.before_terminator_effect(state, terminator, location);
-    }
-
-    /* Edge-specific effects */
-
-    fn apply_call_return_effect(
-        &mut self,
-        state: &mut A::Domain,
-        block: BasicBlock,
-        return_places: CallReturnPlaces<'_, 'tcx>,
-    ) {
-        self.call_return_effect(state, block, return_places);
-    }
-
-    fn apply_switch_int_edge_effects(
-        &mut self,
-        block: BasicBlock,
-        discr: &mir::Operand<'tcx>,
-        edge_effects: &mut impl SwitchIntEdgeEffects<A::Domain>,
-    ) {
-        self.switch_int_edge_effects(block, discr, edge_effects);
-    }
-
-    /* Extension methods */
-    #[inline]
-    fn into_engine<'mir>(
-        self,
-        tcx: TyCtxt<'tcx>,
-        body: &'mir mir::Body<'tcx>,
-    ) -> Engine<'mir, 'tcx, Self>
-    where
-        Self: Sized,
-    {
-        Engine::new_gen_kill(tcx, body, self)
+        if tcx.sess.opts.unstable_opts.dump_mir_dataflow {
+            let (res, results) = write_graphviz_results(tcx, body, results, pass_name);
+            if let Err(e) = res {
+                error!("Failed to write graphviz dataflow results: {}", e);
+            }
+            results
+        } else {
+            results
+        }
     }
 }
 
 /// The legal operations for a transfer function in a gen/kill problem.
-///
-/// This abstraction exists because there are two different contexts in which we call the methods in
-/// `GenKillAnalysis`. Sometimes we need to store a single transfer function that can be efficiently
-/// applied multiple times, such as when computing the cumulative transfer function for each block.
-/// These cases require a `GenKillSet`, which in turn requires two `BitSet`s of storage. Oftentimes,
-/// however, we only need to apply an effect once. In *these* cases, it is more efficient to pass the
-/// `BitSet` representing the state vector directly into the `*_effect` methods as opposed to
-/// building up a `GenKillSet` and then throwing it away.
 pub trait GenKill<T> {
     /// Inserts `elem` into the state vector.
     fn gen_(&mut self, elem: T);
@@ -419,44 +337,6 @@ pub trait GenKill<T> {
         for elem in elems {
             self.kill(elem);
         }
-    }
-}
-
-/// Stores a transfer function for a gen/kill problem.
-///
-/// Calling `gen_`/`kill` on a `GenKillSet` will "build up" a transfer function so that it can be
-/// applied multiple times efficiently. When there are multiple calls to `gen_` and/or `kill` for
-/// the same element, the most recent one takes precedence.
-#[derive(Clone)]
-pub struct GenKillSet<T> {
-    gen_: HybridBitSet<T>,
-    kill: HybridBitSet<T>,
-}
-
-impl<T: Idx> GenKillSet<T> {
-    /// Creates a new transfer function that will leave the dataflow state unchanged.
-    pub fn identity(universe: usize) -> Self {
-        GenKillSet {
-            gen_: HybridBitSet::new_empty(universe),
-            kill: HybridBitSet::new_empty(universe),
-        }
-    }
-
-    pub fn apply(&self, state: &mut impl BitSetExt<T>) {
-        state.union(&self.gen_);
-        state.subtract(&self.kill);
-    }
-}
-
-impl<T: Idx> GenKill<T> for GenKillSet<T> {
-    fn gen_(&mut self, elem: T) {
-        self.gen_.insert(elem);
-        self.kill.remove(elem);
-    }
-
-    fn kill(&mut self, elem: T) {
-        self.kill.insert(elem);
-        self.gen_.remove(elem);
     }
 }
 

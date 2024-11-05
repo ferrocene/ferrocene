@@ -5,7 +5,7 @@
 #![unstable(issue = "none", feature = "windows_c")]
 #![allow(clippy::style)]
 
-use core::ffi::{c_uint, c_ulong, c_ushort, c_void, CStr};
+use core::ffi::{CStr, c_uint, c_ulong, c_ushort, c_void};
 use core::{mem, ptr};
 
 mod windows_sys;
@@ -175,9 +175,9 @@ extern "system" {
     pub fn WakeByAddressAll(address: *const c_void);
 }
 
+// These are loaded by `load_synch_functions`.
 #[cfg(target_vendor = "win7")]
 compat_fn_optional! {
-    crate::sys::compat::load_synch_functions();
     pub fn WaitOnAddress(
         address: *const c_void,
         compareaddress: *const c_void,

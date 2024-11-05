@@ -2,11 +2,12 @@
 
 use std::cell::RefCell;
 use std::ffi::{CStr, CString};
+use std::ops::Deref;
+use std::ptr;
 use std::str::FromStr;
 use std::string::FromUtf8Error;
 
 use libc::c_uint;
-use rustc_data_structures::small_c_str::SmallCStr;
 use rustc_llvm::RustString;
 use rustc_target::abi::{Align, Size, WrappingRange};
 
@@ -17,12 +18,12 @@ pub use self::IntPredicate::*;
 pub use self::Linkage::*;
 pub use self::MetadataType::*;
 pub use self::RealPredicate::*;
+pub use self::ffi::*;
+use crate::common::AsCCharPtr;
 
 pub mod archive_ro;
 pub mod diagnostic;
 mod ffi;
-
-pub use self::ffi::*;
 
 impl LLVMRustResult {
     pub fn into_result(self) -> Result<(), ()> {
@@ -53,9 +54,9 @@ pub fn CreateAttrStringValue<'ll>(llcx: &'ll Context, attr: &str, value: &str) -
     unsafe {
         LLVMCreateStringAttribute(
             llcx,
-            attr.as_ptr().cast(),
+            attr.as_c_char_ptr(),
             attr.len().try_into().unwrap(),
-            value.as_ptr().cast(),
+            value.as_c_char_ptr(),
             value.len().try_into().unwrap(),
         )
     }
@@ -65,7 +66,7 @@ pub fn CreateAttrString<'ll>(llcx: &'ll Context, attr: &str) -> &'ll Attribute {
     unsafe {
         LLVMCreateStringAttribute(
             llcx,
-            attr.as_ptr().cast(),
+            attr.as_c_char_ptr(),
             attr.len().try_into().unwrap(),
             std::ptr::null(),
             0,
@@ -178,10 +179,10 @@ pub fn SetFunctionCallConv(fn_: &Value, cc: CallConv) {
 // function.
 // For more details on COMDAT sections see e.g., https://www.airs.com/blog/archives/52
 pub fn SetUniqueComdat(llmod: &Module, val: &Value) {
-    unsafe {
-        let name = get_value_name(val);
-        LLVMRustSetComdat(llmod, val, name.as_ptr().cast(), name.len());
-    }
+    let name_buf = get_value_name(val).to_vec();
+    let name =
+        CString::from_vec_with_nul(name_buf).or_else(|buf| CString::new(buf.into_bytes())).unwrap();
+    set_comdat(llmod, val, &name);
 }
 
 pub fn SetUnnamedAddress(global: &Value, unnamed: UnnamedAddr) {
@@ -210,15 +211,13 @@ impl MemoryEffects {
     }
 }
 
-pub fn set_section(llglobal: &Value, section_name: &str) {
-    let section_name_cstr = CString::new(section_name).expect("unexpected CString error");
+pub fn set_section(llglobal: &Value, section_name: &CStr) {
     unsafe {
-        LLVMSetSection(llglobal, section_name_cstr.as_ptr());
+        LLVMSetSection(llglobal, section_name.as_ptr());
     }
 }
 
-pub fn add_global<'a>(llmod: &'a Module, ty: &'a Type, name: &str) -> &'a Value {
-    let name_cstr = CString::new(name).expect("unexpected CString error");
+pub fn add_global<'a>(llmod: &'a Module, ty: &'a Type, name_cstr: &CStr) -> &'a Value {
     unsafe { LLVMAddGlobal(llmod, ty, name_cstr.as_ptr()) }
 }
 
@@ -234,15 +233,23 @@ pub fn set_global_constant(llglobal: &Value, is_constant: bool) {
     }
 }
 
+pub fn get_linkage(llglobal: &Value) -> Linkage {
+    unsafe { LLVMGetLinkage(llglobal) }.to_rust()
+}
+
 pub fn set_linkage(llglobal: &Value, linkage: Linkage) {
     unsafe {
-        LLVMRustSetLinkage(llglobal, linkage);
+        LLVMSetLinkage(llglobal, linkage);
     }
+}
+
+pub fn get_visibility(llglobal: &Value) -> Visibility {
+    unsafe { LLVMGetVisibility(llglobal) }.to_rust()
 }
 
 pub fn set_visibility(llglobal: &Value, visibility: Visibility) {
     unsafe {
-        LLVMRustSetVisibility(llglobal, visibility);
+        LLVMSetVisibility(llglobal, visibility);
     }
 }
 
@@ -252,9 +259,14 @@ pub fn set_alignment(llglobal: &Value, align: Align) {
     }
 }
 
-pub fn set_comdat(llmod: &Module, llglobal: &Value, name: &str) {
+/// Get the `name`d comdat from `llmod` and assign it to `llglobal`.
+///
+/// Inserts the comdat into `llmod` if it does not exist.
+/// It is an error to call this if the target does not support comdat.
+pub fn set_comdat(llmod: &Module, llglobal: &Value, name: &CStr) {
     unsafe {
-        LLVMRustSetComdat(llmod, llglobal, name.as_ptr().cast(), name.len());
+        let comdat = LLVMGetOrInsertComdat(llmod, name.as_ptr());
+        LLVMSetComdat(llglobal, comdat);
     }
 }
 
@@ -283,7 +295,7 @@ pub fn get_value_name(value: &Value) -> &[u8] {
 /// Safe wrapper for `LLVMSetValueName2` from a byte slice
 pub fn set_value_name(value: &Value, name: &[u8]) {
     unsafe {
-        let data = name.as_ptr().cast();
+        let data = name.as_c_char_ptr();
         LLVMSetValueName2(value, data, name.len());
     }
 }
@@ -320,24 +332,68 @@ pub fn last_error() -> Option<String> {
     }
 }
 
-pub struct OperandBundleDef<'a> {
-    pub raw: &'a mut ffi::OperandBundleDef<'a>,
+/// Owns an [`OperandBundle`], and will dispose of it when dropped.
+pub(crate) struct OperandBundleOwned<'a> {
+    raw: ptr::NonNull<OperandBundle<'a>>,
 }
 
-impl<'a> OperandBundleDef<'a> {
-    pub fn new(name: &str, vals: &[&'a Value]) -> Self {
-        let name = SmallCStr::new(name);
-        let def = unsafe {
-            LLVMRustBuildOperandBundleDef(name.as_ptr(), vals.as_ptr(), vals.len() as c_uint)
+impl<'a> OperandBundleOwned<'a> {
+    pub(crate) fn new(name: &str, vals: &[&'a Value]) -> Self {
+        let raw = unsafe {
+            LLVMCreateOperandBundle(
+                name.as_c_char_ptr(),
+                name.len(),
+                vals.as_ptr(),
+                vals.len() as c_uint,
+            )
         };
-        OperandBundleDef { raw: def }
+        OperandBundleOwned { raw: ptr::NonNull::new(raw).unwrap() }
     }
 }
 
-impl Drop for OperandBundleDef<'_> {
+impl Drop for OperandBundleOwned<'_> {
     fn drop(&mut self) {
         unsafe {
-            LLVMRustFreeOperandBundleDef(&mut *(self.raw as *mut _));
+            LLVMDisposeOperandBundle(self.raw);
         }
+    }
+}
+
+impl<'a> Deref for OperandBundleOwned<'a> {
+    type Target = OperandBundle<'a>;
+
+    fn deref(&self) -> &Self::Target {
+        // SAFETY: The returned reference is opaque and can only used for FFI.
+        // It is valid for as long as `&self` is.
+        unsafe { self.raw.as_ref() }
+    }
+}
+
+pub(crate) fn add_module_flag_u32(
+    module: &Module,
+    merge_behavior: ModuleFlagMergeBehavior,
+    key: &str,
+    value: u32,
+) {
+    unsafe {
+        LLVMRustAddModuleFlagU32(module, merge_behavior, key.as_c_char_ptr(), key.len(), value);
+    }
+}
+
+pub(crate) fn add_module_flag_str(
+    module: &Module,
+    merge_behavior: ModuleFlagMergeBehavior,
+    key: &str,
+    value: &str,
+) {
+    unsafe {
+        LLVMRustAddModuleFlagString(
+            module,
+            merge_behavior,
+            key.as_c_char_ptr(),
+            key.len(),
+            value.as_c_char_ptr(),
+            value.len(),
+        );
     }
 }

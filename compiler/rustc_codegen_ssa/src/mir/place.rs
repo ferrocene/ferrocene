@@ -1,10 +1,10 @@
+use rustc_abi::Primitive::{Int, Pointer};
+use rustc_abi::{Align, FieldsShape, Size, TagEncoding, Variants};
 use rustc_middle::mir::tcx::PlaceTy;
 use rustc_middle::ty::layout::{HasTyCtxt, LayoutOf, TyAndLayout};
 use rustc_middle::ty::{self, Ty};
 use rustc_middle::{bug, mir};
-use rustc_target::abi::{
-    Align, FieldsShape, Int, Pointer, Size, TagEncoding, VariantIdx, Variants,
-};
+use rustc_target::abi::VariantIdx;
 use tracing::{debug, instrument};
 
 use super::operand::OperandValue;
@@ -55,7 +55,7 @@ impl<V: CodegenObject> PlaceValue<V> {
     /// Creates a `PlaceRef` to this location with the given type.
     pub fn with_type<'tcx>(self, layout: TyAndLayout<'tcx>) -> PlaceRef<'tcx, V> {
         assert!(
-            layout.is_unsized() || layout.abi.is_uninhabited() || self.llextra.is_none(),
+            layout.is_unsized() || layout.is_uninhabited() || self.llextra.is_none(),
             "Had pointer metadata {:?} for sized type {layout:?}",
             self.llextra,
         );
@@ -239,7 +239,7 @@ impl<'a, 'tcx, V: CodegenObject> PlaceRef<'tcx, V> {
         let dl = &bx.tcx().data_layout;
         let cast_to_layout = bx.cx().layout_of(cast_to);
         let cast_to = bx.cx().immediate_backend_type(cast_to_layout);
-        if self.layout.abi.is_uninhabited() {
+        if self.layout.is_uninhabited() {
             return bx.cx().const_poison(cast_to);
         }
         let (tag_scalar, tag_encoding, tag_field) = match self.layout.variants {
@@ -358,7 +358,7 @@ impl<'a, 'tcx, V: CodegenObject> PlaceRef<'tcx, V> {
         bx: &mut Bx,
         variant_index: VariantIdx,
     ) {
-        if self.layout.for_variant(bx.cx(), variant_index).abi.is_uninhabited() {
+        if self.layout.for_variant(bx.cx(), variant_index).is_uninhabited() {
             // We play it safe by using a well-defined `abort`, but we could go for immediate UB
             // if that turns out to be helpful.
             bx.abort();
@@ -415,11 +415,10 @@ impl<'a, 'tcx, V: CodegenObject> PlaceRef<'tcx, V> {
             layout.size
         };
 
-        let llval = bx.inbounds_gep(
-            bx.cx().backend_type(self.layout),
-            self.val.llval,
-            &[bx.cx().const_usize(0), llindex],
-        );
+        let llval = bx.inbounds_gep(bx.cx().backend_type(self.layout), self.val.llval, &[
+            bx.cx().const_usize(0),
+            llindex,
+        ]);
         let align = self.val.align.restrict_for_offset(offset);
         PlaceValue::new_sized(llval, align).with_type(layout)
     }
@@ -470,10 +469,10 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             LocalRef::Operand(..) => {
                 if place_ref.is_indirect_first_projection() {
                     base = 1;
-                    let cg_base = self.codegen_consume(
-                        bx,
-                        mir::PlaceRef { projection: &place_ref.projection[..0], ..place_ref },
-                    );
+                    let cg_base = self.codegen_consume(bx, mir::PlaceRef {
+                        projection: &place_ref.projection[..0],
+                        ..place_ref
+                    });
                     cg_base.deref(bx.cx())
                 } else {
                     bug!("using operand local {:?} as place", place_ref);

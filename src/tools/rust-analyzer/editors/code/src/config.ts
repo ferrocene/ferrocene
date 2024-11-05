@@ -24,6 +24,7 @@ export class Config {
         "serverPath",
         "server",
         "files",
+        "cfg",
     ].map((opt) => `${this.rootSection}.${opt}`);
 
     private readonly requiresWindowReloadOpts = ["testExplorer"].map(
@@ -299,6 +300,7 @@ export class Config {
             engine: this.get<string>("debug.engine"),
             engineSettings: this.get<object>("debug.engineSettings") ?? {},
             openDebugPane: this.get<boolean>("debug.openDebugPane"),
+            buildBeforeRestart: this.get<boolean>("debug.buildBeforeRestart"),
             sourceFileMap: sourceFileMap,
         };
     }
@@ -327,6 +329,10 @@ export class Config {
 
     get statusBarClickAction() {
         return this.get<string>("statusBar.clickAction");
+    }
+
+    get initializeStopped() {
+        return this.get<boolean>("initializeStopped");
     }
 }
 

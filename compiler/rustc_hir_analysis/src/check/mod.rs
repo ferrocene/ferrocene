@@ -66,7 +66,6 @@ mod check;
 mod compare_impl_item;
 pub mod dropck;
 mod entry;
-mod errs;
 pub mod intrinsic;
 pub mod intrinsicck;
 mod region;
@@ -74,9 +73,10 @@ pub mod wfcheck;
 
 use std::num::NonZero;
 
-pub use check::check_abi;
+pub use check::{check_abi, check_abi_fn_ptr};
+use rustc_abi::VariantIdx;
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap};
-use rustc_errors::{pluralize, struct_span_code_err, Diag, ErrorGuaranteed};
+use rustc_errors::{Diag, ErrorGuaranteed, pluralize, struct_span_code_err};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::intravisit::Visitor;
 use rustc_index::bit_set::BitSet;
@@ -85,17 +85,16 @@ use rustc_infer::infer::{self, TyCtxtInferExt as _};
 use rustc_infer::traits::ObligationCause;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
-use rustc_middle::ty::{self, GenericArgs, GenericArgsRef, Ty, TyCtxt};
+use rustc_middle::ty::{self, GenericArgs, GenericArgsRef, Ty, TyCtxt, TypingMode};
 use rustc_middle::{bug, span_bug};
 use rustc_session::parse::feature_err;
 use rustc_span::def_id::CRATE_DEF_ID;
-use rustc_span::symbol::{kw, sym, Ident};
-use rustc_span::{BytePos, Span, Symbol, DUMMY_SP};
-use rustc_target::abi::VariantIdx;
+use rustc_span::symbol::{Ident, kw, sym};
+use rustc_span::{BytePos, DUMMY_SP, Span, Symbol};
 use rustc_target::spec::abi::Abi;
+use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::error_reporting::infer::ObligationCauseExt as _;
 use rustc_trait_selection::error_reporting::traits::suggestions::ReturnsVisitor;
-use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::traits::ObligationCtxt;
 use tracing::debug;
 
@@ -531,7 +530,7 @@ fn suggestion_signature<'tcx>(
             let ty = tcx.type_of(assoc.def_id).instantiate_identity();
             let val = tcx
                 .infer_ctxt()
-                .build()
+                .build(TypingMode::non_body_analysis())
                 .err_ctxt()
                 .ty_kind_suggestion(tcx.param_env(assoc.def_id), ty)
                 .unwrap_or_else(|| "value".to_string());
@@ -613,7 +612,7 @@ pub fn check_function_signature<'tcx>(
         match err {
             TypeError::ArgumentMutability(i)
             | TypeError::ArgumentSorts(ExpectedFound { .. }, i) => args.nth(i).unwrap(),
-            _ => cause.span(),
+            _ => cause.span,
         }
     }
 
@@ -621,7 +620,7 @@ pub fn check_function_signature<'tcx>(
 
     let param_env = ty::ParamEnv::empty();
 
-    let infcx = &tcx.infer_ctxt().build();
+    let infcx = &tcx.infer_ctxt().build(TypingMode::non_body_analysis());
     let ocx = ObligationCtxt::new_with_diagnostics(infcx);
 
     let actual_sig = tcx.fn_sig(fn_id).instantiate_identity();
@@ -647,12 +646,11 @@ pub fn check_function_signature<'tcx>(
                 &mut diag,
                 &cause,
                 None,
-                Some(infer::ValuePairs::PolySigs(ExpectedFound {
+                Some(param_env.and(infer::ValuePairs::PolySigs(ExpectedFound {
                     expected: expected_sig,
                     found: actual_sig,
-                })),
+                }))),
                 err,
-                false,
                 false,
             );
             return Err(diag.emit());

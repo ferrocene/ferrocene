@@ -2,8 +2,9 @@ use hir::def_id::{DefId, LocalDefId};
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_data_structures::sync::Lrc;
 use rustc_hir as hir;
-use rustc_middle::traits::solve::Goal;
+use rustc_middle::bug;
 use rustc_middle::traits::ObligationCause;
+use rustc_middle::traits::solve::Goal;
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
 use rustc_middle::ty::fold::BottomUpFolder;
 use rustc_middle::ty::{
@@ -13,16 +14,15 @@ use rustc_middle::ty::{
 use rustc_span::Span;
 use tracing::{debug, instrument};
 
+use super::DefineOpaqueTypes;
 use crate::errors::OpaqueHiddenTypeDiag;
 use crate::infer::{InferCtxt, InferOk};
-use crate::traits::{self, Obligation};
+use crate::traits::{self, Obligation, PredicateObligations};
 
 mod table;
 
-pub type OpaqueTypeMap<'tcx> = FxIndexMap<OpaqueTypeKey<'tcx>, OpaqueTypeDecl<'tcx>>;
-pub use table::{OpaqueTypeStorage, OpaqueTypeTable};
-
-use super::DefineOpaqueTypes;
+pub(crate) type OpaqueTypeMap<'tcx> = FxIndexMap<OpaqueTypeKey<'tcx>, OpaqueTypeDecl<'tcx>>;
+pub(crate) use table::{OpaqueTypeStorage, OpaqueTypeTable};
 
 /// Information about the opaque types whose values we
 /// are inferring in this function (these are the `impl Trait` that
@@ -47,14 +47,14 @@ impl<'tcx> InferCtxt<'tcx> {
     ) -> InferOk<'tcx, T> {
         // We handle opaque types differently in the new solver.
         if self.next_trait_solver() {
-            return InferOk { value, obligations: vec![] };
+            return InferOk { value, obligations: PredicateObligations::new() };
         }
 
         if !value.has_opaque_types() {
-            return InferOk { value, obligations: vec![] };
+            return InferOk { value, obligations: PredicateObligations::new() };
         }
 
-        let mut obligations = vec![];
+        let mut obligations = PredicateObligations::new();
         let value = value.fold_with(&mut BottomUpFolder {
             tcx: self.tcx,
             lt_op: |lt| lt,
@@ -101,7 +101,7 @@ impl<'tcx> InferCtxt<'tcx> {
         let process = |a: Ty<'tcx>, b: Ty<'tcx>| match *a.kind() {
             ty::Alias(ty::Opaque, ty::AliasTy { def_id, args, .. }) if def_id.is_local() => {
                 let def_id = def_id.expect_local();
-                if self.intercrate {
+                if let ty::TypingMode::Coherence = self.typing_mode(param_env) {
                     // See comment on `insert_hidden_type` for why this is sufficient in coherence
                     return Some(self.register_hidden_type(
                         OpaqueTypeKey { def_id, args },
@@ -149,13 +149,16 @@ impl<'tcx> InferCtxt<'tcx> {
                 }
 
                 if let ty::Alias(ty::Opaque, ty::AliasTy { def_id: b_def_id, .. }) = *b.kind() {
-                    // We could accept this, but there are various ways to handle this situation, and we don't
-                    // want to make a decision on it right now. Likely this case is so super rare anyway, that
-                    // no one encounters it in practice.
-                    // It does occur however in `fn fut() -> impl Future<Output = i32> { async { 42 } }`,
-                    // where it is of no concern, so we only check for TAITs.
+                    // We could accept this, but there are various ways to handle this situation,
+                    // and we don't want to make a decision on it right now. Likely this case is so
+                    // super rare anyway, that no one encounters it in practice. It does occur
+                    // however in `fn fut() -> impl Future<Output = i32> { async { 42 } }`, where
+                    // it is of no concern, so we only check for TAITs.
                     if self.can_define_opaque_ty(b_def_id)
-                        && self.tcx.is_type_alias_impl_trait(b_def_id)
+                        && matches!(
+                            self.tcx.opaque_ty_origin(b_def_id),
+                            hir::OpaqueTyOrigin::TyAlias { .. }
+                        )
                     {
                         self.dcx().emit_err(OpaqueHiddenTypeDiag {
                             span,
@@ -359,7 +362,15 @@ impl<'tcx> InferCtxt<'tcx> {
         // not currently sound until we have existential regions.
         concrete_ty.visit_with(&mut ConstrainOpaqueTypeRegionVisitor {
             tcx: self.tcx,
-            op: |r| self.member_constraint(opaque_type_key, span, concrete_ty, r, &choice_regions),
+            op: |r| {
+                self.member_constraint(
+                    opaque_type_key,
+                    span,
+                    concrete_ty,
+                    r,
+                    Lrc::clone(&choice_regions),
+                )
+            },
         });
     }
 }
@@ -377,9 +388,9 @@ impl<'tcx> InferCtxt<'tcx> {
 ///
 /// We ignore any type parameters because impl trait values are assumed to
 /// capture all the in-scope type parameters.
-pub struct ConstrainOpaqueTypeRegionVisitor<'tcx, OP: FnMut(ty::Region<'tcx>)> {
-    pub tcx: TyCtxt<'tcx>,
-    pub op: OP,
+struct ConstrainOpaqueTypeRegionVisitor<'tcx, OP: FnMut(ty::Region<'tcx>)> {
+    tcx: TyCtxt<'tcx>,
+    op: OP,
 }
 
 impl<'tcx, OP> TypeVisitor<TyCtxt<'tcx>> for ConstrainOpaqueTypeRegionVisitor<'tcx, OP>
@@ -421,7 +432,6 @@ where
                     upvar.visit_with(self);
                 }
 
-                // FIXME(async_closures): Is this the right signature to visit here?
                 args.as_coroutine_closure().signature_parts_ty().visit_with(self);
             }
 
@@ -451,20 +461,6 @@ where
             _ => {
                 ty.super_visit_with(self);
             }
-        }
-    }
-}
-
-pub enum UseKind {
-    DefiningUse,
-    OpaqueUse,
-}
-
-impl UseKind {
-    pub fn is_defining(self) -> bool {
-        match self {
-            UseKind::DefiningUse => true,
-            UseKind::OpaqueUse => false,
         }
     }
 }
@@ -526,28 +522,32 @@ impl<'tcx> InferCtxt<'tcx> {
         // value being folded. In simple cases like `-> impl Foo`,
         // these are the same span, but not in cases like `-> (impl
         // Foo, impl Bar)`.
-        if self.intercrate {
-            // During intercrate we do not define opaque types but instead always
-            // force ambiguity unless the hidden type is known to not implement
-            // our trait.
-            goals.push(Goal::new(self.tcx, param_env, ty::PredicateKind::Ambiguous))
-        } else {
-            let prev = self
-                .inner
-                .borrow_mut()
-                .opaque_types()
-                .register(opaque_type_key, OpaqueHiddenType { ty: hidden_ty, span });
-            if let Some(prev) = prev {
-                goals.extend(
-                    self.at(&ObligationCause::dummy_with_span(span), param_env)
-                        .eq(DefineOpaqueTypes::Yes, prev, hidden_ty)?
-                        .obligations
-                        .into_iter()
-                        // FIXME: Shuttling between obligations and goals is awkward.
-                        .map(Goal::from),
-                );
+        match self.typing_mode(param_env) {
+            ty::TypingMode::Coherence => {
+                // During intercrate we do not define opaque types but instead always
+                // force ambiguity unless the hidden type is known to not implement
+                // our trait.
+                goals.push(Goal::new(self.tcx, param_env, ty::PredicateKind::Ambiguous));
             }
-        };
+            ty::TypingMode::Analysis { .. } => {
+                let prev = self
+                    .inner
+                    .borrow_mut()
+                    .opaque_types()
+                    .register(opaque_type_key, OpaqueHiddenType { ty: hidden_ty, span });
+                if let Some(prev) = prev {
+                    goals.extend(
+                        self.at(&ObligationCause::dummy_with_span(span), param_env)
+                            .eq(DefineOpaqueTypes::Yes, prev, hidden_ty)?
+                            .obligations
+                            .into_iter()
+                            // FIXME: Shuttling between obligations and goals is awkward.
+                            .map(Goal::from),
+                    );
+                }
+            }
+            ty::TypingMode::PostAnalysis => bug!("insert hidden type post-analysis"),
+        }
 
         Ok(())
     }

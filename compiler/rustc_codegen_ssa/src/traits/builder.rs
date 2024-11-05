@@ -1,13 +1,13 @@
 use std::assert_matches::assert_matches;
 use std::ops::Deref;
 
+use rustc_abi::{Align, BackendRepr, Scalar, Size, WrappingRange};
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrs;
 use rustc_middle::ty::layout::{FnAbiOf, LayoutOf, TyAndLayout};
 use rustc_middle::ty::{Instance, Ty};
 use rustc_session::config::OptLevel;
 use rustc_span::Span;
 use rustc_target::abi::call::FnAbi;
-use rustc_target::abi::{Abi, Align, Scalar, Size, WrappingRange};
 
 use super::abi::AbiBuilderMethods;
 use super::asm::AsmBuilderMethods;
@@ -18,12 +18,12 @@ use super::intrinsic::IntrinsicCallBuilderMethods;
 use super::misc::MiscCodegenMethods;
 use super::type_::{ArgAbiBuilderMethods, BaseTypeCodegenMethods, LayoutTypeCodegenMethods};
 use super::{CodegenMethods, StaticBuilderMethods};
+use crate::MemFlags;
 use crate::common::{
     AtomicOrdering, AtomicRmwBinOp, IntPredicate, RealPredicate, SynchronizationScope, TypeKind,
 };
 use crate::mir::operand::{OperandRef, OperandValue};
 use crate::mir::place::{PlaceRef, PlaceValue};
-use crate::MemFlags;
 
 #[derive(Copy, Clone, Debug)]
 pub enum OverflowOp {
@@ -51,6 +51,7 @@ pub trait BuilderMethods<'a, 'tcx>:
     type CodegenCx: CodegenMethods<
             'tcx,
             Value = Self::Value,
+            Metadata = Self::Metadata,
             Function = Self::Function,
             BasicBlock = Self::BasicBlock,
             Type = Self::Type,
@@ -161,7 +162,7 @@ pub trait BuilderMethods<'a, 'tcx>:
 
     fn from_immediate(&mut self, val: Self::Value) -> Self::Value;
     fn to_immediate(&mut self, val: Self::Value, layout: TyAndLayout<'_>) -> Self::Value {
-        if let Abi::Scalar(scalar) = layout.abi {
+        if let BackendRepr::Scalar(scalar) = layout.backend_repr {
             self.to_immediate_scalar(val, scalar)
         } else {
             val
@@ -435,14 +436,6 @@ pub trait BuilderMethods<'a, 'tcx>:
 
     /// Called for `StorageDead`
     fn lifetime_end(&mut self, ptr: Self::Value, size: Size);
-
-    fn instrprof_increment(
-        &mut self,
-        fn_name: Self::Value,
-        hash: Self::Value,
-        num_counters: Self::Value,
-        index: Self::Value,
-    );
 
     fn call(
         &mut self,

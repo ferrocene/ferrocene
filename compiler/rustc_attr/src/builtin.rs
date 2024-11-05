@@ -4,21 +4,21 @@ use std::num::NonZero;
 
 use rustc_abi::Align;
 use rustc_ast::{
-    self as ast, attr, Attribute, LitKind, MetaItem, MetaItemKind, MetaItemLit, NestedMetaItem,
-    NodeId,
+    self as ast, Attribute, LitKind, MetaItem, MetaItemInner, MetaItemKind, MetaItemLit, NodeId,
+    attr,
 };
 use rustc_ast_pretty::pprust;
 use rustc_errors::ErrorGuaranteed;
-use rustc_feature::{find_gated_cfg, is_builtin_attr_name, Features, GatedCfg};
+use rustc_feature::{Features, GatedCfg, find_gated_cfg, is_builtin_attr_name};
 use rustc_macros::{Decodable, Encodable, HashStable_Generic};
 use rustc_session::config::ExpectedValues;
-use rustc_session::lint::builtin::UNEXPECTED_CFGS;
 use rustc_session::lint::BuiltinLintDiag;
+use rustc_session::lint::builtin::UNEXPECTED_CFGS;
 use rustc_session::parse::feature_err;
 use rustc_session::{RustcVersion, Session};
 use rustc_span::hygiene::Transparency;
-use rustc_span::symbol::{sym, Symbol};
-use rustc_span::Span;
+use rustc_span::symbol::{Symbol, kw, sym};
+use rustc_span::{DUMMY_SP, Span};
 
 use crate::fluent_generated;
 use crate::session_diagnostics::{self, IncorrectReprFormatGenericCause};
@@ -36,6 +36,7 @@ pub fn is_builtin_attr(attr: &Attribute) -> bool {
 pub(crate) enum UnsupportedLiteralReason {
     Generic,
     CfgString,
+    CfgBoolean,
     DeprecatedString,
     DeprecatedKvPair,
 }
@@ -80,6 +81,10 @@ impl Stability {
     pub fn is_stable(&self) -> bool {
         self.level.is_stable()
     }
+
+    pub fn stable_since(&self) -> Option<StableSince> {
+        self.level.stable_since()
+    }
 }
 
 /// Represents the `#[rustc_const_unstable]` and `#[rustc_const_stable]` attributes.
@@ -87,7 +92,11 @@ impl Stability {
 #[derive(HashStable_Generic)]
 pub struct ConstStability {
     pub level: StabilityLevel,
-    pub feature: Symbol,
+    /// This can be `None` for functions that do not have an explicit const feature.
+    /// We still track them for recursive const stability checks.
+    pub feature: Option<Symbol>,
+    /// This is true iff the `const_stable_indirect` attribute is present.
+    pub const_stable_indirect: bool,
     /// whether the function has a `#[rustc_promotable]` attribute
     pub promotable: bool,
 }
@@ -153,7 +162,7 @@ pub enum StabilityLevel {
 }
 
 /// Rust release in which a feature is stabilized.
-#[derive(Encodable, Decodable, PartialEq, Copy, Clone, Debug, Eq, Hash)]
+#[derive(Encodable, Decodable, PartialEq, Copy, Clone, Debug, Eq, PartialOrd, Ord, Hash)]
 #[derive(HashStable_Generic)]
 pub enum StableSince {
     Version(RustcVersion),
@@ -169,6 +178,12 @@ impl StabilityLevel {
     }
     pub fn is_stable(&self) -> bool {
         matches!(self, StabilityLevel::Stable { .. })
+    }
+    pub fn stable_since(&self) -> Option<StableSince> {
+        match *self {
+            StabilityLevel::Stable { since, .. } => Some(since),
+            StabilityLevel::Unstable { .. } => None,
+        }
     }
 }
 
@@ -257,17 +272,23 @@ pub fn find_stability(
 
 /// Collects stability info from `rustc_const_stable`/`rustc_const_unstable`/`rustc_promotable`
 /// attributes in `attrs`. Returns `None` if no stability attributes are found.
+///
+/// `is_const_fn` indicates whether this is a function marked as `const`. It will always
+/// be false for intrinsics in an `extern` block!
 pub fn find_const_stability(
     sess: &Session,
     attrs: &[Attribute],
     item_sp: Span,
+    is_const_fn: bool,
 ) -> Option<(ConstStability, Span)> {
     let mut const_stab: Option<(ConstStability, Span)> = None;
     let mut promotable = false;
+    let mut const_stable_indirect = None;
 
     for attr in attrs {
         match attr.name_or_empty() {
             sym::rustc_promotable => promotable = true,
+            sym::rustc_const_stable_indirect => const_stable_indirect = Some(attr.span),
             sym::rustc_const_unstable => {
                 if const_stab.is_some() {
                     sess.dcx()
@@ -276,8 +297,15 @@ pub fn find_const_stability(
                 }
 
                 if let Some((feature, level)) = parse_unstability(sess, attr) {
-                    const_stab =
-                        Some((ConstStability { level, feature, promotable: false }, attr.span));
+                    const_stab = Some((
+                        ConstStability {
+                            level,
+                            feature: Some(feature),
+                            const_stable_indirect: false,
+                            promotable: false,
+                        },
+                        attr.span,
+                    ));
                 }
             }
             sym::rustc_const_stable => {
@@ -287,15 +315,22 @@ pub fn find_const_stability(
                     break;
                 }
                 if let Some((feature, level)) = parse_stability(sess, attr) {
-                    const_stab =
-                        Some((ConstStability { level, feature, promotable: false }, attr.span));
+                    const_stab = Some((
+                        ConstStability {
+                            level,
+                            feature: Some(feature),
+                            const_stable_indirect: false,
+                            promotable: false,
+                        },
+                        attr.span,
+                    ));
                 }
             }
             _ => {}
         }
     }
 
-    // Merge the const-unstable info into the stability info
+    // Merge promotable and not_exposed_on_stable into stability info
     if promotable {
         match &mut const_stab {
             Some((stab, _)) => stab.promotable = promotable,
@@ -305,6 +340,46 @@ pub fn find_const_stability(
                     .emit_err(session_diagnostics::RustcPromotablePairing { span: item_sp })
             }
         }
+    }
+    if const_stable_indirect.is_some() {
+        match &mut const_stab {
+            Some((stab, _)) => {
+                if stab.is_const_unstable() {
+                    stab.const_stable_indirect = true;
+                } else {
+                    _ = sess.dcx().emit_err(session_diagnostics::RustcConstStableIndirectPairing {
+                        span: item_sp,
+                    })
+                }
+            }
+            _ => {
+                // We ignore the `#[rustc_const_stable_indirect]` here, it should be picked up by
+                // the `default_const_unstable` logic.
+            }
+        }
+    }
+    // Make sure if `const_stable_indirect` is present, that is recorded. Also make sure all `const
+    // fn` get *some* marker, since we are a staged_api crate and therefore will do recursive const
+    // stability checks for them. We need to do this because the default for whether an unmarked
+    // function enforces recursive stability differs between staged-api crates and force-unmarked
+    // crates: in force-unmarked crates, only functions *explicitly* marked `const_stable_indirect`
+    // enforce recursive stability. Therefore when `lookup_const_stability` is `None`, we have to
+    // assume the function does not have recursive stability. All functions that *do* have recursive
+    // stability must explicitly record this, and so that's what we do for all `const fn` in a
+    // staged_api crate.
+    if (is_const_fn || const_stable_indirect.is_some()) && const_stab.is_none() {
+        let c = ConstStability {
+            feature: None,
+            const_stable_indirect: const_stable_indirect.is_some(),
+            promotable: false,
+            level: StabilityLevel::Unstable {
+                reason: UnstableReason::Default,
+                issue: None,
+                is_soft: false,
+                implied_by: None,
+            },
+        };
+        const_stab = Some((c, const_stable_indirect.unwrap_or(DUMMY_SP)));
     }
 
     const_stab
@@ -523,7 +598,7 @@ pub struct Condition {
 
 /// Tests if a cfg-pattern matches the cfg set
 pub fn cfg_matches(
-    cfg: &ast::MetaItem,
+    cfg: &ast::MetaItemInner,
     sess: &Session,
     lint_node_id: NodeId,
     features: Option<&Features>,
@@ -594,22 +669,53 @@ pub fn parse_version(s: Symbol) -> Option<RustcVersion> {
 /// Evaluate a cfg-like condition (with `any` and `all`), using `eval` to
 /// evaluate individual items.
 pub fn eval_condition(
-    cfg: &ast::MetaItem,
+    cfg: &ast::MetaItemInner,
     sess: &Session,
     features: Option<&Features>,
     eval: &mut impl FnMut(Condition) -> bool,
 ) -> bool {
     let dcx = sess.dcx();
+
+    let cfg = match cfg {
+        ast::MetaItemInner::MetaItem(meta_item) => meta_item,
+        ast::MetaItemInner::Lit(MetaItemLit { kind: LitKind::Bool(b), .. }) => {
+            if let Some(features) = features {
+                // we can't use `try_gate_cfg` as symbols don't differentiate between `r#true`
+                // and `true`, and we want to keep the former working without feature gate
+                gate_cfg(
+                    &(
+                        if *b { kw::True } else { kw::False },
+                        sym::cfg_boolean_literals,
+                        |features: &Features| features.cfg_boolean_literals(),
+                    ),
+                    cfg.span(),
+                    sess,
+                    features,
+                );
+            }
+            return *b;
+        }
+        _ => {
+            dcx.emit_err(session_diagnostics::UnsupportedLiteral {
+                span: cfg.span(),
+                reason: UnsupportedLiteralReason::CfgBoolean,
+                is_bytestr: false,
+                start_point_span: sess.source_map().start_point(cfg.span()),
+            });
+            return false;
+        }
+    };
+
     match &cfg.kind {
         ast::MetaItemKind::List(mis) if cfg.name_or_empty() == sym::version => {
             try_gate_cfg(sym::version, cfg.span, sess, features);
             let (min_version, span) = match &mis[..] {
-                [NestedMetaItem::Lit(MetaItemLit { kind: LitKind::Str(sym, ..), span, .. })] => {
+                [MetaItemInner::Lit(MetaItemLit { kind: LitKind::Str(sym, ..), span, .. })] => {
                     (sym, span)
                 }
                 [
-                    NestedMetaItem::Lit(MetaItemLit { span, .. })
-                    | NestedMetaItem::MetaItem(MetaItem { span, .. }),
+                    MetaItemInner::Lit(MetaItemLit { span, .. })
+                    | MetaItemInner::MetaItem(MetaItem { span, .. }),
                 ] => {
                     dcx.emit_err(session_diagnostics::ExpectedVersionLiteral { span: *span });
                     return false;
@@ -635,7 +741,7 @@ pub fn eval_condition(
         }
         ast::MetaItemKind::List(mis) => {
             for mi in mis.iter() {
-                if !mi.is_meta_item() {
+                if mi.meta_item_or_bool().is_none() {
                     dcx.emit_err(session_diagnostics::UnsupportedLiteral {
                         span: mi.span(),
                         reason: UnsupportedLiteralReason::Generic,
@@ -653,27 +759,23 @@ pub fn eval_condition(
                     .iter()
                     // We don't use any() here, because we want to evaluate all cfg condition
                     // as eval_condition can (and does) extra checks
-                    .fold(false, |res, mi| {
-                        res | eval_condition(mi.meta_item().unwrap(), sess, features, eval)
-                    }),
+                    .fold(false, |res, mi| res | eval_condition(mi, sess, features, eval)),
                 sym::all => mis
                     .iter()
                     // We don't use all() here, because we want to evaluate all cfg condition
                     // as eval_condition can (and does) extra checks
-                    .fold(true, |res, mi| {
-                        res & eval_condition(mi.meta_item().unwrap(), sess, features, eval)
-                    }),
+                    .fold(true, |res, mi| res & eval_condition(mi, sess, features, eval)),
                 sym::not => {
                     let [mi] = mis.as_slice() else {
                         dcx.emit_err(session_diagnostics::ExpectedOneCfgPattern { span: cfg.span });
                         return false;
                     };
 
-                    !eval_condition(mi.meta_item().unwrap(), sess, features, eval)
+                    !eval_condition(mi, sess, features, eval)
                 }
                 sym::target => {
                     if let Some(features) = features
-                        && !features.cfg_target_compact
+                        && !features.cfg_target_compact()
                     {
                         feature_err(
                             sess,
@@ -685,12 +787,23 @@ pub fn eval_condition(
                     }
 
                     mis.iter().fold(true, |res, mi| {
-                        let mut mi = mi.meta_item().unwrap().clone();
+                        let Some(mut mi) = mi.meta_item().cloned() else {
+                            dcx.emit_err(session_diagnostics::CfgPredicateIdentifier {
+                                span: mi.span(),
+                            });
+                            return false;
+                        };
+
                         if let [seg, ..] = &mut mi.path.segments[..] {
                             seg.ident.name = Symbol::intern(&format!("target_{}", seg.ident.name));
                         }
 
-                        res & eval_condition(&mi, sess, features, eval)
+                        res & eval_condition(
+                            &ast::MetaItemInner::MetaItem(mi),
+                            sess,
+                            features,
+                            eval,
+                        )
                     })
                 }
                 _ => {
@@ -782,7 +895,7 @@ pub fn find_deprecation(
     attrs: &[Attribute],
 ) -> Option<(Deprecation, Span)> {
     let mut depr: Option<(Deprecation, Span)> = None;
-    let is_rustc = features.staged_api;
+    let is_rustc = features.staged_api();
 
     'outer: for attr in attrs {
         if !attr.has_name(sym::deprecated) {
@@ -830,7 +943,7 @@ pub fn find_deprecation(
 
                 for meta in list {
                     match meta {
-                        NestedMetaItem::MetaItem(mi) => match mi.name_or_empty() {
+                        MetaItemInner::MetaItem(mi) => match mi.name_or_empty() {
                             sym::since => {
                                 if !get(mi, &mut since) {
                                     continue 'outer;
@@ -842,7 +955,7 @@ pub fn find_deprecation(
                                 }
                             }
                             sym::suggestion => {
-                                if !features.deprecated_suggestion {
+                                if !features.deprecated_suggestion() {
                                     sess.dcx().emit_err(
                                         session_diagnostics::DeprecatedItemSuggestion {
                                             span: mi.span,
@@ -860,7 +973,7 @@ pub fn find_deprecation(
                                 sess.dcx().emit_err(session_diagnostics::UnknownMetaItem {
                                     span: meta.span(),
                                     item: pprust::path_to_string(&mi.path),
-                                    expected: if features.deprecated_suggestion {
+                                    expected: if features.deprecated_suggestion() {
                                         &["since", "note", "suggestion"]
                                     } else {
                                         &["since", "note"]
@@ -869,7 +982,7 @@ pub fn find_deprecation(
                                 continue 'outer;
                             }
                         },
-                        NestedMetaItem::Lit(lit) => {
+                        MetaItemInner::Lit(lit) => {
                             sess.dcx().emit_err(session_diagnostics::UnsupportedLiteral {
                                 span: lit.span,
                                 reason: UnsupportedLiteralReason::DeprecatedKvPair,
@@ -1234,7 +1347,7 @@ pub fn parse_confusables(attr: &Attribute) -> Option<Vec<Symbol>> {
     let mut candidates = Vec::new();
 
     for meta in metas {
-        let NestedMetaItem::Lit(meta_lit) = meta else {
+        let MetaItemInner::Lit(meta_lit) = meta else {
             return None;
         };
         candidates.push(meta_lit.symbol);

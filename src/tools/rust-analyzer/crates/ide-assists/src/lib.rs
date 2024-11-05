@@ -58,6 +58,8 @@
 //! See also this post:
 //! <https://rust-analyzer.github.io/blog/2020/09/28/how-to-make-a-light-bulb.html>
 
+#![cfg_attr(feature = "in-rust-tree", feature(rustc_private))]
+
 mod assist_config;
 mod assist_context;
 #[cfg(test)]
@@ -136,6 +138,7 @@ mod handlers {
     mod destructure_tuple_binding;
     mod desugar_doc_comment;
     mod expand_glob_import;
+    mod explicit_enum_discriminant;
     mod extract_expressions_from_format_string;
     mod extract_function;
     mod extract_module;
@@ -220,9 +223,9 @@ mod handlers {
     mod unnecessary_async;
     mod unqualify_method_call;
     mod unwrap_block;
-    mod unwrap_result_return_type;
+    mod unwrap_return_type;
     mod unwrap_tuple;
-    mod wrap_return_type_in_result;
+    mod wrap_return_type;
     mod wrap_unwrap_cfg_attr;
 
     pub(crate) fn all() -> &'static [Handler] {
@@ -266,6 +269,7 @@ mod handlers {
             destructure_tuple_binding::destructure_tuple_binding,
             destructure_struct_binding::destructure_struct_binding,
             expand_glob_import::expand_glob_import,
+            explicit_enum_discriminant::explicit_enum_discriminant,
             extract_expressions_from_format_string::extract_expressions_from_format_string,
             extract_struct_from_enum_variant::extract_struct_from_enum_variant,
             extract_type_alias::extract_type_alias,
@@ -297,6 +301,7 @@ mod handlers {
             inline_call::inline_into_callers,
             inline_const_as_literal::inline_const_as_literal,
             inline_local_variable::inline_local_variable,
+            inline_macro::inline_macro,
             inline_type_alias::inline_type_alias,
             inline_type_alias::inline_type_alias_uses,
             into_to_qualified_from::into_to_qualified_from,
@@ -322,6 +327,7 @@ mod handlers {
             raw_string::add_hash,
             raw_string::make_usual_string,
             raw_string::remove_hash,
+            remove_dbg::remove_dbg,
             remove_mut::remove_mut,
             remove_unused_imports::remove_unused_imports,
             remove_unused_param::remove_unused_param,
@@ -351,10 +357,10 @@ mod handlers {
             unmerge_use::unmerge_use,
             unnecessary_async::unnecessary_async,
             unwrap_block::unwrap_block,
-            unwrap_result_return_type::unwrap_result_return_type,
+            unwrap_return_type::unwrap_return_type,
             unwrap_tuple::unwrap_tuple,
             unqualify_method_call::unqualify_method_call,
-            wrap_return_type_in_result::wrap_return_type_in_result,
+            wrap_return_type::wrap_return_type,
             wrap_unwrap_cfg_attr::wrap_unwrap_cfg_attr,
 
             // These are manually sorted for better priorities. By default,
@@ -377,9 +383,6 @@ mod handlers {
             generate_getter_or_setter::generate_setter,
             generate_delegate_methods::generate_delegate_methods,
             generate_deref::generate_deref,
-            //
-            remove_dbg::remove_dbg,
-            inline_macro::inline_macro,
             // Are you sure you want to add new assist here, and not to the
             // sorted list above?
         ]

@@ -4,14 +4,14 @@ use rustc_infer::infer::region_constraints::{Constraint, RegionConstraintData};
 use rustc_middle::bug;
 use rustc_middle::ty::{self, Region, Ty};
 use rustc_span::def_id::DefId;
-use rustc_span::symbol::{kw, Symbol};
+use rustc_span::symbol::{Symbol, kw};
 use rustc_trait_selection::traits::auto_trait::{self, RegionTarget};
 use thin_vec::ThinVec;
 use tracing::{debug, instrument};
 
 use crate::clean::{
-    self, clean_generic_param_def, clean_middle_ty, clean_predicate,
-    clean_trait_ref_with_constraints, clean_ty_generics, simplify, Lifetime,
+    self, Lifetime, clean_generic_param_def, clean_middle_ty, clean_predicate,
+    clean_trait_ref_with_constraints, clean_ty_generics, simplify,
 };
 use crate::core::DocContext;
 
@@ -117,6 +117,7 @@ fn synthesize_auto_trait_impl<'tcx>(
         name: None,
         inner: Box::new(clean::ItemInner {
             attrs: Default::default(),
+            stability: None,
             kind: clean::ImplItem(Box::new(clean::Impl {
                 safety: hir::Safety::Safe,
                 generics,
@@ -155,7 +156,7 @@ fn clean_param_env<'tcx>(
         .iter()
         .inspect(|param| {
             if cfg!(debug_assertions) {
-                debug_assert!(!param.is_anonymous_lifetime() && !param.is_host_effect());
+                debug_assert!(!param.is_anonymous_lifetime());
                 if let ty::GenericParamDefKind::Type { synthetic, .. } = param.kind {
                     debug_assert!(!synthetic && param.name != kw::SelfUpper);
                 }

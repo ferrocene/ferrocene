@@ -1,5 +1,5 @@
 use core::fmt::Debug;
-use core::num::{can_not_overflow, IntErrorKind, ParseIntError, TryFromIntError};
+use core::num::{IntErrorKind, ParseIntError, TryFromIntError, can_not_overflow};
 use core::ops::{Add, Div, Mul, Rem, Sub};
 use core::str::FromStr;
 
@@ -28,6 +28,7 @@ mod dec2flt;
 mod flt2dec;
 mod int_log;
 mod int_sqrt;
+mod midpoint;
 mod ops;
 mod wrapping;
 

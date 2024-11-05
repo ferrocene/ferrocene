@@ -3,7 +3,7 @@
 //! This primitive is meant to be used to run one-time initialization. An
 //! example use case would be for initializing an FFI library.
 
-#[cfg(all(test, not(target_os = "emscripten")))]
+#[cfg(all(test, not(any(target_os = "emscripten", target_os = "wasi"))))]
 mod tests;
 
 use crate::fmt;
@@ -288,7 +288,7 @@ impl Once {
     ///
     /// If this [`Once`] has been poisoned because an initialization closure has
     /// panicked, this method will also panic. Use [`wait_force`](Self::wait_force)
-    /// if this behaviour is not desired.
+    /// if this behavior is not desired.
     #[unstable(feature = "once_wait", issue = "127527")]
     pub fn wait(&self) {
         if !self.inner.is_completed() {

@@ -1,5 +1,5 @@
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
-use rustc_span::symbol::{sym, Symbol};
+use rustc_span::symbol::{Symbol, sym};
 
 /// Features that control behaviour of rustc, rather than the codegen.
 pub const RUSTC_SPECIFIC_FEATURES: &[&str] = &["crt-static"];
@@ -167,6 +167,8 @@ const AARCH64_ALLOWED_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     ("pacg", Stable, &[]),
     // FEAT_PAN
     ("pan", Stable, &[]),
+    // FEAT_PAuth_LR
+    ("pauth-lr", Unstable(sym::aarch64_unstable_target_feature), &[]),
     // FEAT_PMUv3
     ("pmuv3", Stable, &[]),
     // FEAT_RNG
@@ -191,6 +193,8 @@ const AARCH64_ALLOWED_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     ("sm4", Stable, &["neon"]),
     // FEAT_SME
     ("sme", Unstable(sym::aarch64_unstable_target_feature), &["bf16"]),
+    // FEAT_SME_B16B16
+    ("sme-b16b16", Unstable(sym::aarch64_unstable_target_feature), &["bf16", "sme2", "sve-b16b16"]),
     // FEAT_SME_F16F16
     ("sme-f16f16", Unstable(sym::aarch64_unstable_target_feature), &["sme2"]),
     // FEAT_SME_F64F64
@@ -227,7 +231,7 @@ const AARCH64_ALLOWED_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     //
     // "For backwards compatibility, Neon and VFP are required in the latest architectures."
     ("sve", Stable, &["neon"]),
-    // FEAT_SVE_B16B16 (SVE or SME Instructions)
+    // FEAT_SVE_B16B16 (SVE or SME Z-targeting instructions)
     ("sve-b16b16", Unstable(sym::aarch64_unstable_target_feature), &["bf16"]),
     // FEAT_SVE2
     ("sve2", Stable, &["sve"]),
@@ -243,17 +247,13 @@ const AARCH64_ALLOWED_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     ("sve2p1", Unstable(sym::aarch64_unstable_target_feature), &["sve2"]),
     // FEAT_TME
     ("tme", Stable, &[]),
-    (
-        "v8.1a",
-        Unstable(sym::aarch64_ver_target_feature),
-        &["crc", "lse", "rdm", "pan", "lor", "vh"],
-    ),
+    ("v8.1a", Unstable(sym::aarch64_ver_target_feature), &[
+        "crc", "lse", "rdm", "pan", "lor", "vh",
+    ]),
     ("v8.2a", Unstable(sym::aarch64_ver_target_feature), &["v8.1a", "ras", "dpb"]),
-    (
-        "v8.3a",
-        Unstable(sym::aarch64_ver_target_feature),
-        &["v8.2a", "rcpc", "paca", "pacg", "jsconv"],
-    ),
+    ("v8.3a", Unstable(sym::aarch64_ver_target_feature), &[
+        "v8.2a", "rcpc", "paca", "pacg", "jsconv",
+    ]),
     ("v8.4a", Unstable(sym::aarch64_ver_target_feature), &["v8.3a", "dotprod", "dit", "flagm"]),
     ("v8.5a", Unstable(sym::aarch64_ver_target_feature), &["v8.4a", "ssbs", "sb", "dpb2", "bti"]),
     ("v8.6a", Unstable(sym::aarch64_ver_target_feature), &["v8.5a", "bf16", "i8mm"]),
@@ -318,7 +318,7 @@ const X86_ALLOWED_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     ("lahfsahf", Unstable(sym::lahfsahf_target_feature), &[]),
     ("lzcnt", Stable, &[]),
     ("movbe", Stable, &[]),
-    ("pclmulqdq", Stable, &[]),
+    ("pclmulqdq", Stable, &["sse2"]),
     ("popcnt", Stable, &[]),
     ("prfchw", Unstable(sym::prfchw_target_feature), &[]),
     ("rdrand", Stable, &[]),
@@ -356,11 +356,13 @@ const HEXAGON_ALLOWED_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
 const POWERPC_ALLOWED_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     // tidy-alphabetical-start
     ("altivec", Unstable(sym::powerpc_target_feature), &[]),
+    ("partword-atomics", Unstable(sym::powerpc_target_feature), &[]),
     ("power10-vector", Unstable(sym::powerpc_target_feature), &["power9-vector"]),
     ("power8-altivec", Unstable(sym::powerpc_target_feature), &["altivec"]),
     ("power8-vector", Unstable(sym::powerpc_target_feature), &["vsx", "power8-altivec"]),
     ("power9-altivec", Unstable(sym::powerpc_target_feature), &["power8-altivec"]),
     ("power9-vector", Unstable(sym::powerpc_target_feature), &["power8-vector", "power9-altivec"]),
+    ("quadword-atomics", Unstable(sym::powerpc_target_feature), &[]),
     ("vsx", Unstable(sym::powerpc_target_feature), &["altivec"]),
     // tidy-alphabetical-end
 ];
@@ -375,7 +377,7 @@ const MIPS_ALLOWED_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
 
 const RISCV_ALLOWED_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     // tidy-alphabetical-start
-    ("a", Stable, &[]),
+    ("a", Stable, &["zaamo", "zalrsc"]),
     ("c", Stable, &[]),
     ("d", Unstable(sym::riscv_target_feature), &["f"]),
     ("e", Unstable(sym::riscv_target_feature), &[]),
@@ -384,6 +386,9 @@ const RISCV_ALLOWED_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     ("relax", Unstable(sym::riscv_target_feature), &[]),
     ("unaligned-scalar-mem", Unstable(sym::riscv_target_feature), &[]),
     ("v", Unstable(sym::riscv_target_feature), &[]),
+    ("zaamo", Unstable(sym::riscv_target_feature), &[]),
+    ("zabha", Unstable(sym::riscv_target_feature), &["zaamo"]),
+    ("zalrsc", Unstable(sym::riscv_target_feature), &[]),
     ("zba", Stable, &[]),
     ("zbb", Stable, &[]),
     ("zbc", Stable, &[]),

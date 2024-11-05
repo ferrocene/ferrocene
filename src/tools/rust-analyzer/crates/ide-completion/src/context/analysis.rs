@@ -1108,7 +1108,14 @@ fn classify_name_ref(
                     },
                     None => return None,
                 } },
-                ast::ExternItemList(_) => PathKind::Item { kind: ItemListKind::ExternBlock },
+                ast::ExternItemList(it) => {
+                    let exn_blk = it.syntax().parent().and_then(ast::ExternBlock::cast);
+                    PathKind::Item {
+                        kind: ItemListKind::ExternBlock {
+                            is_unsafe: exn_blk.and_then(|it| it.unsafe_token()).is_some(),
+                        }
+                    }
+                },
                 ast::SourceFile(_) => PathKind::Item { kind: ItemListKind::SourceFile },
                 _ => return None,
             }
@@ -1132,10 +1139,18 @@ fn classify_name_ref(
             ast::PathType(it) => make_path_kind_type(it.into()),
             ast::PathExpr(it) => {
                 if let Some(p) = it.syntax().parent() {
-                    if ast::ExprStmt::can_cast(p.kind()) {
-                        if let Some(kind) = inbetween_body_and_decl_check(p) {
-                            return Some(make_res(NameRefKind::Keyword(kind)));
-                        }
+                    let p_kind = p.kind();
+                    // The syntax node of interest, for which we want to check whether
+                    // it is sandwiched between an item decl signature and its body.
+                    let probe = if ast::ExprStmt::can_cast(p_kind) {
+                        Some(p)
+                    } else if ast::StmtList::can_cast(p_kind) {
+                        Some(it.syntax().clone())
+                    } else {
+                        None
+                    };
+                    if let Some(kind) = probe.and_then(inbetween_body_and_decl_check) {
+                        return Some(make_res(NameRefKind::Keyword(kind)));
                     }
                 }
 
@@ -1199,7 +1214,13 @@ fn classify_name_ref(
                     }
                 }
             },
-            ast::RecordExpr(it) => make_path_kind_expr(it.into()),
+            ast::RecordExpr(it) => {
+                // A record expression in this position is usually a result of parsing recovery, so check that
+                if let Some(kind) = inbetween_body_and_decl_check(it.syntax().clone()) {
+                    return Some(make_res(NameRefKind::Keyword(kind)));
+                }
+                make_path_kind_expr(it.into())
+            },
             _ => return None,
         }
     };
@@ -1296,6 +1317,7 @@ fn classify_name_ref(
                         match token.kind() {
                             SyntaxKind::UNSAFE_KW => qualifier_ctx.unsafe_tok = Some(token),
                             SyntaxKind::ASYNC_KW => qualifier_ctx.async_tok = Some(token),
+                            SyntaxKind::SAFE_KW => qualifier_ctx.safe_tok = Some(token),
                             _ => {}
                         }
                     }
@@ -1416,10 +1438,23 @@ fn pattern_context_for(
         _ => (None, None),
     };
 
+    // Only suggest name in let-stmt or fn param
+    let should_suggest_name = matches!(
+            &pat,
+            ast::Pat::IdentPat(it)
+                if it.syntax()
+                .parent()
+                .map_or(false, |node| {
+                    let kind = node.kind();
+                    ast::LetStmt::can_cast(kind) || ast::Param::can_cast(kind)
+                })
+    );
+
     PatternContext {
         refutability,
         param_ctx,
         has_type_ascription,
+        should_suggest_name,
         parent_pat: pat.syntax().parent().and_then(ast::Pat::cast),
         mut_token,
         ref_token,

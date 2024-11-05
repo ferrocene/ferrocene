@@ -10,16 +10,17 @@ mod snippet;
 #[cfg(test)]
 mod tests;
 
+use ide_db::text_edit::TextEdit;
 use ide_db::{
     helpers::mod_path_to_ast,
     imports::{
         import_assets::NameToImport,
         insert_use::{self, ImportScope},
     },
-    items_locator, FilePosition, RootDatabase,
+    items_locator,
+    syntax_helpers::tree_diff::diff,
+    FilePosition, RootDatabase,
 };
-use syntax::algo;
-use text_edit::TextEdit;
 
 use crate::{
     completions::Completions,
@@ -36,6 +37,31 @@ pub use crate::{
     },
     snippet::{Snippet, SnippetScope},
 };
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct CompletionFieldsToResolve {
+    pub resolve_label_details: bool,
+    pub resolve_tags: bool,
+    pub resolve_detail: bool,
+    pub resolve_documentation: bool,
+    pub resolve_filter_text: bool,
+    pub resolve_text_edit: bool,
+    pub resolve_command: bool,
+}
+
+impl CompletionFieldsToResolve {
+    pub const fn empty() -> Self {
+        Self {
+            resolve_label_details: false,
+            resolve_tags: false,
+            resolve_detail: false,
+            resolve_documentation: false,
+            resolve_filter_text: false,
+            resolve_text_edit: false,
+            resolve_command: false,
+        }
+    }
+}
 
 //FIXME: split the following feature into fine-grained features.
 
@@ -272,6 +298,6 @@ pub fn resolve_completion_edits(
         }
     });
 
-    algo::diff(scope.as_syntax_node(), new_ast.as_syntax_node()).into_text_edit(&mut import_insert);
+    diff(scope.as_syntax_node(), new_ast.as_syntax_node()).into_text_edit(&mut import_insert);
     Some(vec![import_insert.finish()])
 }

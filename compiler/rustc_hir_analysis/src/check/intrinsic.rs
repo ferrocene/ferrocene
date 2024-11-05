@@ -2,7 +2,7 @@
 //! intrinsics that the compiler exposes.
 
 use rustc_errors::codes::*;
-use rustc_errors::{struct_span_code_err, DiagMessage};
+use rustc_errors::{DiagMessage, struct_span_code_err};
 use rustc_hir as hir;
 use rustc_middle::bug;
 use rustc_middle::traits::{ObligationCause, ObligationCauseCode};
@@ -58,15 +58,9 @@ fn equate_intrinsic_type<'tcx>(
 
     // the host effect param should be invisible as it shouldn't matter
     // whether effects is enabled for the intrinsic provider crate.
-    let consts_count = if generics.host_effect_index.is_some() {
-        own_counts.consts - 1
-    } else {
-        own_counts.consts
-    };
-
     if gen_count_ok(own_counts.lifetimes, n_lts, "lifetime")
         && gen_count_ok(own_counts.types, n_tps, "type")
-        && gen_count_ok(consts_count, n_cts, "const")
+        && gen_count_ok(own_counts.consts, n_cts, "const")
     {
         let _ = check_function_signature(
             tcx,
@@ -190,16 +184,14 @@ pub fn check_intrinsic_type(
     ]);
     let mk_va_list_ty = |mutbl| {
         tcx.lang_items().va_list().map(|did| {
-            let region = ty::Region::new_bound(
-                tcx,
-                ty::INNERMOST,
-                ty::BoundRegion { var: ty::BoundVar::ZERO, kind: ty::BrAnon },
-            );
-            let env_region = ty::Region::new_bound(
-                tcx,
-                ty::INNERMOST,
-                ty::BoundRegion { var: ty::BoundVar::from_u32(2), kind: ty::BrEnv },
-            );
+            let region = ty::Region::new_bound(tcx, ty::INNERMOST, ty::BoundRegion {
+                var: ty::BoundVar::ZERO,
+                kind: ty::BrAnon,
+            });
+            let env_region = ty::Region::new_bound(tcx, ty::INNERMOST, ty::BoundRegion {
+                var: ty::BoundVar::from_u32(2),
+                kind: ty::BrEnv,
+            });
             let va_list_ty = tcx.type_of(did).instantiate(tcx, &[region.into()]);
             (Ty::new_ref(tcx, env_region, va_list_ty, mutbl), va_list_ty)
         })
@@ -356,6 +348,19 @@ pub fn check_intrinsic_type(
             sym::fmaf32 => (0, 0, vec![tcx.types.f32, tcx.types.f32, tcx.types.f32], tcx.types.f32),
             sym::fmaf64 => (0, 0, vec![tcx.types.f64, tcx.types.f64, tcx.types.f64], tcx.types.f64),
             sym::fmaf128 => {
+                (0, 0, vec![tcx.types.f128, tcx.types.f128, tcx.types.f128], tcx.types.f128)
+            }
+
+            sym::fmuladdf16 => {
+                (0, 0, vec![tcx.types.f16, tcx.types.f16, tcx.types.f16], tcx.types.f16)
+            }
+            sym::fmuladdf32 => {
+                (0, 0, vec![tcx.types.f32, tcx.types.f32, tcx.types.f32], tcx.types.f32)
+            }
+            sym::fmuladdf64 => {
+                (0, 0, vec![tcx.types.f64, tcx.types.f64, tcx.types.f64], tcx.types.f64)
+            }
+            sym::fmuladdf128 => {
                 (0, 0, vec![tcx.types.f128, tcx.types.f128, tcx.types.f128], tcx.types.f128)
             }
 

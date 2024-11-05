@@ -15,6 +15,7 @@
 extern crate jobserver;
 #[macro_use]
 extern crate rustc_middle;
+extern crate rustc_abi;
 extern crate rustc_ast;
 extern crate rustc_codegen_ssa;
 extern crate rustc_data_structures;
@@ -38,15 +39,16 @@ use std::sync::Arc;
 
 use cranelift_codegen::isa::TargetIsa;
 use cranelift_codegen::settings::{self, Configurable};
-use rustc_codegen_ssa::traits::CodegenBackend;
 use rustc_codegen_ssa::CodegenResults;
+use rustc_codegen_ssa::back::versioned_llvm_target;
+use rustc_codegen_ssa::traits::CodegenBackend;
 use rustc_data_structures::profiling::SelfProfilerRef;
 use rustc_errors::ErrorGuaranteed;
 use rustc_metadata::EncodedMetadata;
 use rustc_middle::dep_graph::{WorkProduct, WorkProductId};
-use rustc_session::config::OutputFilenames;
 use rustc_session::Session;
-use rustc_span::{sym, Symbol};
+use rustc_session::config::OutputFilenames;
+use rustc_span::{Symbol, sym};
 
 pub use crate::config::*;
 use crate::prelude::*;
@@ -83,14 +85,15 @@ mod value_and_place;
 mod vtable;
 
 mod prelude {
+    pub(crate) use cranelift_codegen::Context;
     pub(crate) use cranelift_codegen::ir::condcodes::{FloatCC, IntCC};
     pub(crate) use cranelift_codegen::ir::function::Function;
     pub(crate) use cranelift_codegen::ir::{
-        types, AbiParam, Block, FuncRef, Inst, InstBuilder, MemFlags, Signature, SourceLoc,
-        StackSlot, StackSlotData, StackSlotKind, TrapCode, Type, Value,
+        AbiParam, Block, FuncRef, Inst, InstBuilder, MemFlags, Signature, SourceLoc, StackSlot,
+        StackSlotData, StackSlotKind, TrapCode, Type, Value, types,
     };
-    pub(crate) use cranelift_codegen::Context;
     pub(crate) use cranelift_module::{self, DataDescription, FuncId, Linkage, Module};
+    pub(crate) use rustc_abi::{BackendRepr, FIRST_VARIANT, FieldIdx, Scalar, Size, VariantIdx};
     pub(crate) use rustc_data_structures::fx::{FxHashMap, FxIndexMap};
     pub(crate) use rustc_hir::def_id::{DefId, LOCAL_CRATE};
     pub(crate) use rustc_index::Idx;
@@ -100,7 +103,6 @@ mod prelude {
         self, FloatTy, Instance, InstanceKind, IntTy, ParamEnv, Ty, TyCtxt, UintTy,
     };
     pub(crate) use rustc_span::Span;
-    pub(crate) use rustc_target::abi::{Abi, FieldIdx, Scalar, Size, VariantIdx, FIRST_VARIANT};
 
     pub(crate) use crate::abi::*;
     pub(crate) use crate::base::{codegen_operand, codegen_place};
@@ -259,7 +261,9 @@ impl CodegenBackend for CraneliftCodegenBackend {
 }
 
 fn target_triple(sess: &Session) -> target_lexicon::Triple {
-    match sess.target.llvm_target.parse() {
+    // FIXME(madsmtm): Use `sess.target.llvm_target` once target-lexicon supports unversioned macOS.
+    // See <https://github.com/bytecodealliance/target-lexicon/pull/113>
+    match versioned_llvm_target(sess).parse() {
         Ok(triple) => triple,
         Err(err) => sess.dcx().fatal(format!("target not recognized: {}", err)),
     }

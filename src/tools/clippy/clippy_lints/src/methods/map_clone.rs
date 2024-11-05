@@ -11,7 +11,7 @@ use rustc_middle::mir::Mutability;
 use rustc_middle::ty;
 use rustc_middle::ty::adjustment::Adjust;
 use rustc_span::symbol::Ident;
-use rustc_span::{sym, Span};
+use rustc_span::{Span, sym};
 
 use super::MAP_CLONE;
 
@@ -86,9 +86,8 @@ pub(super) fn check(cx: &LateContext<'_>, e: &hir::Expr<'_>, recv: &hir::Expr<'_
                                     }
                                 }
                             },
-                            hir::ExprKind::Call(call, args) => {
+                            hir::ExprKind::Call(call, [arg]) => {
                                 if let hir::ExprKind::Path(qpath) = call.kind
-                                    && let [arg] = args
                                     && ident_eq(name, arg)
                                 {
                                     handle_path(cx, call, &qpath, e, recv);

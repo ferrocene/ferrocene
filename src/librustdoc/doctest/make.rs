@@ -10,10 +10,10 @@ use rustc_errors::{ColorConfig, FatalError};
 use rustc_parse::new_parser_from_source_str;
 use rustc_parse::parser::attr::InnerAttrPolicy;
 use rustc_session::parse::ParseSess;
+use rustc_span::FileName;
 use rustc_span::edition::Edition;
 use rustc_span::source_map::SourceMap;
 use rustc_span::symbol::sym;
-use rustc_span::FileName;
 use tracing::debug;
 
 use super::GlobalTestOptions;
@@ -48,7 +48,7 @@ impl DocTestBuilder {
     ) -> Self {
         let can_merge_doctests = can_merge_doctests
             && lang_str.is_some_and(|lang_str| {
-                !lang_str.compile_fail && !lang_str.test_harness && !lang_str.standalone
+                !lang_str.compile_fail && !lang_str.test_harness && !lang_str.standalone_crate
             });
 
         let SourceInfo { crate_attrs, maybe_crate_attrs, crates, everything_else } =
@@ -252,8 +252,8 @@ fn parse_source(
     info: &mut ParseSourceInfo,
     crate_name: &Option<&str>,
 ) -> ParsingResult {
-    use rustc_errors::emitter::{Emitter, HumanEmitter};
     use rustc_errors::DiagCtxt;
+    use rustc_errors::emitter::{Emitter, HumanEmitter};
     use rustc_parse::parser::ForceCollect;
     use rustc_span::source_map::FilePathMapping;
 
@@ -289,7 +289,12 @@ fn parse_source(
     // Recurse through functions body. It is necessary because the doctest source code is
     // wrapped in a function to limit the number of AST errors. If we don't recurse into
     // functions, we would thing all top-level items (so basically nothing).
-    fn check_item(item: &ast::Item, info: &mut ParseSourceInfo, crate_name: &Option<&str>) {
+    fn check_item(
+        item: &ast::Item,
+        info: &mut ParseSourceInfo,
+        crate_name: &Option<&str>,
+        is_top_level: bool,
+    ) {
         if !info.has_global_allocator
             && item.attrs.iter().any(|attr| attr.name_or_empty() == sym::global_allocator)
         {
@@ -297,13 +302,15 @@ fn parse_source(
         }
         match item.kind {
             ast::ItemKind::Fn(ref fn_item) if !info.has_main_fn => {
-                if item.ident.name == sym::main {
+                if item.ident.name == sym::main && is_top_level {
                     info.has_main_fn = true;
                 }
                 if let Some(ref body) = fn_item.body {
                     for stmt in &body.stmts {
                         match stmt.kind {
-                            ast::StmtKind::Item(ref item) => check_item(item, info, crate_name),
+                            ast::StmtKind::Item(ref item) => {
+                                check_item(item, info, crate_name, false)
+                            }
                             ast::StmtKind::MacCall(..) => info.found_macro = true,
                             _ => {}
                         }
@@ -329,7 +336,7 @@ fn parse_source(
     loop {
         match parser.parse_item(ForceCollect::No) {
             Ok(Some(item)) => {
-                check_item(&item, info, crate_name);
+                check_item(&item, info, crate_name, true);
 
                 if info.has_main_fn && info.found_extern_crate {
                     break;
@@ -441,8 +448,8 @@ fn check_if_attr_is_complete(source: &str, edition: Edition) -> Option<AttrKind>
 
     rustc_driver::catch_fatal_errors(|| {
         rustc_span::create_session_if_not_set_then(edition, |_| {
-            use rustc_errors::emitter::HumanEmitter;
             use rustc_errors::DiagCtxt;
+            use rustc_errors::emitter::HumanEmitter;
             use rustc_span::source_map::FilePathMapping;
 
             let filename = FileName::anon_source_code(source);

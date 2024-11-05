@@ -124,6 +124,7 @@ fn after_unsafe_token() {
         r#"unsafe $0"#,
         expect![[r#"
             kw async
+            kw extern
             kw fn
             kw impl
             kw trait
@@ -313,6 +314,7 @@ impl Test for () {
             ct const CONST1: () =
             fn async fn function2()
             fn fn function1()
+            fn fn function2()
             ma makro!(…)            macro_rules! makro
             md module
             ta type Type1 =
@@ -492,5 +494,59 @@ impl B for A {
 type O = $0;
 }
 ",
+    )
+}
+
+#[test]
+fn inside_extern_blocks() {
+    // Should suggest `fn`, `static`, `unsafe`
+    check(
+        r#"extern { $0 }"#,
+        expect![[r#"
+            ma makro!(…)  macro_rules! makro
+            md module
+            kw crate::
+            kw fn
+            kw pub
+            kw pub(crate)
+            kw pub(super)
+            kw self::
+            kw static
+            kw unsafe
+        "#]],
+    );
+
+    // Should suggest `fn`, `static`, `safe`, `unsafe`
+    check(
+        r#"unsafe extern { $0 }"#,
+        expect![[r#"
+            ma makro!(…)  macro_rules! makro
+            md module
+            kw crate::
+            kw fn
+            kw pub
+            kw pub(crate)
+            kw pub(super)
+            kw safe
+            kw self::
+            kw static
+            kw unsafe
+        "#]],
+    );
+
+    check(
+        r#"unsafe extern { pub safe $0 }"#,
+        expect![[r#"
+            kw fn
+            kw static
+        "#]],
+    );
+
+    check(
+        r#"unsafe extern { pub unsafe $0 }"#,
+        expect![[r#"
+            kw fn
+            kw static
+        "#]],
     )
 }

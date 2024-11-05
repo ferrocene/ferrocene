@@ -5,6 +5,7 @@
 //! }
 //! ```
 use hir::Semantics;
+use ide_db::text_edit::TextEdit;
 use ide_db::{famous_defs::FamousDefs, RootDatabase};
 use span::EditionedFileId;
 use syntax::ast::{self, AstNode, HasName};
@@ -35,7 +36,7 @@ pub(super) fn enum_hints(
         return None;
     }
     for variant in enum_.variant_list()?.variants() {
-        variant_hints(acc, sema, &variant);
+        variant_hints(acc, sema, &enum_, &variant);
     }
     Some(())
 }
@@ -43,6 +44,7 @@ pub(super) fn enum_hints(
 fn variant_hints(
     acc: &mut Vec<InlayHint>,
     sema: &Semantics<'_, RootDatabase>,
+    enum_: &ast::Enum,
     variant: &ast::Variant,
 ) -> Option<()> {
     if variant.expr().is_some() {
@@ -64,11 +66,11 @@ fn variant_hints(
     let eq_ = if eq_token.is_none() { " =" } else { "" };
     let label = InlayHintLabel::simple(
         match d {
-            Ok(x) => {
-                if x >= 10 {
-                    format!("{eq_} {x} ({x:#X})")
+            Ok(val) => {
+                if val >= 10 {
+                    format!("{eq_} {val} ({val:#X})")
                 } else {
-                    format!("{eq_} {x}")
+                    format!("{eq_} {val}")
                 }
             }
             Err(_) => format!("{eq_} ?"),
@@ -86,10 +88,11 @@ fn variant_hints(
         },
         kind: InlayKind::Discriminant,
         label,
-        text_edit: None,
+        text_edit: d.ok().map(|val| TextEdit::insert(range.start(), format!("{eq_} {val}"))),
         position: InlayHintPosition::After,
         pad_left: false,
         pad_right: false,
+        resolve_parent: Some(enum_.syntax().text_range()),
     });
 
     Some(())

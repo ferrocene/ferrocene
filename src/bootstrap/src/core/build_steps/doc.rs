@@ -11,14 +11,14 @@ use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::{env, fs, mem};
 
+use crate::Mode;
 use crate::core::build_steps::compile;
-use crate::core::build_steps::tool::{self, prepare_tool_cargo, SourceType, Tool};
+use crate::core::build_steps::tool::{self, SourceType, Tool, prepare_tool_cargo};
 use crate::core::builder::{
-    self, crate_description, Alias, Builder, Compiler, Kind, RunConfig, ShouldRun, Step,
+    self, Alias, Builder, Compiler, Kind, RunConfig, ShouldRun, Step, crate_description,
 };
 use crate::core::config::{Config, TargetSelection};
 use crate::utils::helpers::{symlink_dir, t, up_to_date};
-use crate::Mode;
 
 macro_rules! submodule_helper {
     ($path:expr, submodule) => {
@@ -63,7 +63,7 @@ macro_rules! book {
                     src: builder.src.join($path),
                     parent: Some(self),
                     languages: $lang.into(),
-                    rustdoc: None,
+                    rustdoc_compiler: None,
                 })
             }
         }
@@ -82,7 +82,7 @@ book!(
     EditionGuide, "src/doc/edition-guide", "edition-guide", &[], submodule;
     EmbeddedBook, "src/doc/embedded-book", "embedded-book", &[], submodule;
     Nomicon, "src/doc/nomicon", "nomicon", &[], submodule;
-    RustByExample, "src/doc/rust-by-example", "rust-by-example", &["ja"], submodule;
+    RustByExample, "src/doc/rust-by-example", "rust-by-example", &["ja", "zh"], submodule;
     RustdocBook, "src/doc/rustdoc", "rustdoc", &[];
     StyleGuide, "src/doc/style-guide", "style-guide", &[];
 );
@@ -113,7 +113,7 @@ impl Step for UnstableBook {
             src: builder.md_doc_out(self.target).join("unstable-book"),
             parent: Some(self),
             languages: vec![],
-            rustdoc: None,
+            rustdoc_compiler: None,
         })
     }
 }
@@ -125,7 +125,7 @@ struct RustbookSrc<P: Step> {
     src: PathBuf,
     parent: Option<P>,
     languages: Vec<&'static str>,
-    rustdoc: Option<PathBuf>,
+    rustdoc_compiler: Option<Compiler>,
 }
 
 impl<P: Step> Step for RustbookSrc<P> {
@@ -157,7 +157,9 @@ impl<P: Step> Step for RustbookSrc<P> {
             let _ = fs::remove_dir_all(&out);
 
             let mut rustbook_cmd = builder.tool_cmd(Tool::Rustbook);
-            if let Some(mut rustdoc) = self.rustdoc {
+
+            if let Some(compiler) = self.rustdoc_compiler {
+                let mut rustdoc = builder.rustdoc(compiler);
                 rustdoc.pop();
                 let old_path = env::var_os("PATH").unwrap_or_default();
                 let new_path =
@@ -165,9 +167,17 @@ impl<P: Step> Step for RustbookSrc<P> {
                         .expect("could not add rustdoc to PATH");
 
                 rustbook_cmd.env("PATH", new_path);
+                builder.add_rustc_lib_path(compiler, &mut rustbook_cmd);
             }
 
-            rustbook_cmd.arg("build").arg(&src).arg("-d").arg(&out).run(builder);
+            rustbook_cmd
+                .arg("build")
+                .arg(&src)
+                .arg("-d")
+                .arg(&out)
+                .arg("--rust-root")
+                .arg(&builder.src)
+                .run(builder);
 
             for lang in &self.languages {
                 let out = out.join(lang);
@@ -240,7 +250,7 @@ impl Step for TheBook {
             src: absolute_path.clone(),
             parent: Some(self),
             languages: vec![],
-            rustdoc: None,
+            rustdoc_compiler: None,
         });
 
         // building older edition redirects
@@ -253,7 +263,7 @@ impl Step for TheBook {
                 // treat the other editions as not having a parent.
                 parent: Option::<Self>::None,
                 languages: vec![],
-                rustdoc: None,
+                rustdoc_compiler: None,
             });
         }
 
@@ -723,6 +733,10 @@ fn doc_std(
         .arg("--target-dir")
         .arg(&*target_dir.to_string_lossy())
         .arg("-Zskip-rustdoc-fingerprint")
+        .arg("-Zrustdoc-map")
+        .rustdocflag("--extern-html-root-url")
+        .rustdocflag("std_detect=https://docs.rs/std_detect/latest/")
+        .rustdocflag("--extern-html-root-takes-precedence")
         .rustdocflag("--resource-suffix")
         .rustdocflag(&builder.version);
     for arg in extra_args {
@@ -1066,6 +1080,13 @@ tool_doc!(
     is_library = true,
     crates = ["run_make_support"]
 );
+tool_doc!(
+    Compiletest,
+    "src/tools/compiletest",
+    rustc_tool = false,
+    is_library = true,
+    crates = ["compiletest"]
+);
 
 #[derive(Ord, PartialOrd, Debug, Clone, Hash, PartialEq, Eq)]
 pub struct ErrorIndex {
@@ -1237,7 +1258,7 @@ impl Step for RustcBook {
             src: out_base,
             parent: Some(self),
             languages: vec![],
-            rustdoc: None,
+            rustdoc_compiler: None,
         });
     }
 }
@@ -1271,16 +1292,15 @@ impl Step for Reference {
         // This is needed for generating links to the standard library using
         // the mdbook-spec plugin.
         builder.ensure(compile::Std::new(self.compiler, builder.config.build));
-        let rustdoc = builder.rustdoc(self.compiler);
 
         // Run rustbook/mdbook to generate the HTML pages.
         builder.ensure(RustbookSrc {
             target: self.target,
             name: "reference".to_owned(),
             src: builder.src.join("src/doc/reference"),
+            rustdoc_compiler: Some(self.compiler),
             parent: Some(self),
             languages: vec![],
-            rustdoc: Some(rustdoc),
         });
     }
 }

@@ -380,11 +380,12 @@ impl RustcInternal for ExistentialProjection {
     type T<'tcx> = rustc_ty::ExistentialProjection<'tcx>;
 
     fn internal<'tcx>(&self, tables: &mut Tables<'_>, tcx: TyCtxt<'tcx>) -> Self::T<'tcx> {
-        rustc_ty::ExistentialProjection {
-            def_id: self.def_id.0.internal(tables, tcx),
-            args: self.generic_args.internal(tables, tcx),
-            term: self.term.internal(tables, tcx),
-        }
+        rustc_ty::ExistentialProjection::new_from_args(
+            tcx,
+            self.def_id.0.internal(tables, tcx),
+            self.generic_args.internal(tables, tcx),
+            self.term.internal(tables, tcx),
+        )
     }
 }
 
@@ -403,10 +404,11 @@ impl RustcInternal for ExistentialTraitRef {
     type T<'tcx> = rustc_ty::ExistentialTraitRef<'tcx>;
 
     fn internal<'tcx>(&self, tables: &mut Tables<'_>, tcx: TyCtxt<'tcx>) -> Self::T<'tcx> {
-        rustc_ty::ExistentialTraitRef {
-            def_id: self.def_id.0.internal(tables, tcx),
-            args: self.generic_args.internal(tables, tcx),
-        }
+        rustc_ty::ExistentialTraitRef::new_from_args(
+            tcx,
+            self.def_id.0.internal(tables, tcx),
+            self.generic_args.internal(tables, tcx),
+        )
     }
 }
 
@@ -470,6 +472,7 @@ impl RustcInternal for Abi {
             Abi::AvrInterrupt => rustc_target::spec::abi::Abi::AvrInterrupt,
             Abi::AvrNonBlockingInterrupt => rustc_target::spec::abi::Abi::AvrNonBlockingInterrupt,
             Abi::CCmseNonSecureCall => rustc_target::spec::abi::Abi::CCmseNonSecureCall,
+            Abi::CCmseNonSecureEntry => rustc_target::spec::abi::Abi::CCmseNonSecureEntry,
             Abi::System { unwind } => rustc_target::spec::abi::Abi::System { unwind },
             Abi::RustIntrinsic => rustc_target::spec::abi::Abi::RustIntrinsic,
             Abi::RustCall => rustc_target::spec::abi::Abi::RustCall,

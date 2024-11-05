@@ -7,8 +7,8 @@ use clippy_utils::{
 use rustc_errors::Applicability;
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::{
-    is_range_literal, BinOpKind, BlockCheckMode, Expr, ExprKind, HirId, HirIdMap, ItemKind, LocalSource, Node, PatKind,
-    Stmt, StmtKind, UnsafeSource,
+    BinOpKind, BlockCheckMode, Expr, ExprKind, HirId, HirIdMap, ItemKind, LocalSource, Node, PatKind, Stmt, StmtKind,
+    UnsafeSource, is_range_literal,
 };
 use rustc_infer::infer::TyCtxtInferExt as _;
 use rustc_lint::{LateContext, LateLintPass, LintContext};
@@ -160,7 +160,7 @@ impl NoEffect {
                                 // Remove `impl Future<Output = T>` to get `T`
                                 if cx.tcx.ty_is_opaque_future(ret_ty)
                                     && let Some(true_ret_ty) =
-                                        cx.tcx.infer_ctxt().build().err_ctxt().get_impl_future_output_ty(ret_ty)
+                                        cx.tcx.infer_ctxt().build(cx.typing_mode()).err_ctxt().get_impl_future_output_ty(ret_ty)
                                 {
                                     ret_ty = true_ret_ty;
                                 }

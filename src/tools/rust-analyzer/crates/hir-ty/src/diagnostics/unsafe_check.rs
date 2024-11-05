@@ -3,8 +3,9 @@
 
 use hir_def::{
     body::Body,
-    hir::{Expr, ExprId, UnaryOp},
+    hir::{Expr, ExprId, ExprOrPatId, Pat, UnaryOp},
     resolver::{resolver_for_expr, ResolveValueResult, Resolver, ValueNs},
+    type_ref::Rawness,
     DefWithBodyId,
 };
 
@@ -12,7 +13,10 @@ use crate::{
     db::HirDatabase, utils::is_fn_unsafe_to_call, InferenceResult, Interner, TyExt, TyKind,
 };
 
-pub fn missing_unsafe(db: &dyn HirDatabase, def: DefWithBodyId) -> Vec<ExprId> {
+/// Returns `(unsafe_exprs, fn_is_unsafe)`.
+///
+/// If `fn_is_unsafe` is false, `unsafe_exprs` are hard errors. If true, they're `unsafe_op_in_unsafe_fn`.
+pub fn missing_unsafe(db: &dyn HirDatabase, def: DefWithBodyId) -> (Vec<ExprOrPatId>, bool) {
     let _p = tracing::info_span!("missing_unsafe").entered();
 
     let mut res = Vec::new();
@@ -23,23 +27,20 @@ pub fn missing_unsafe(db: &dyn HirDatabase, def: DefWithBodyId) -> Vec<ExprId> {
         | DefWithBodyId::VariantId(_)
         | DefWithBodyId::InTypeConstId(_) => false,
     };
-    if is_unsafe {
-        return res;
-    }
 
     let body = db.body(def);
     let infer = db.infer(def);
     unsafe_expressions(db, &infer, def, &body, body.body_expr, &mut |expr| {
         if !expr.inside_unsafe_block {
-            res.push(expr.expr);
+            res.push(expr.node);
         }
     });
 
-    res
+    (res, is_unsafe)
 }
 
 pub struct UnsafeExpr {
-    pub expr: ExprId,
+    pub node: ExprOrPatId,
     pub inside_unsafe_block: bool,
 }
 
@@ -74,24 +75,35 @@ fn walk_unsafe(
     inside_unsafe_block: bool,
     unsafe_expr_cb: &mut dyn FnMut(UnsafeExpr),
 ) {
+    let mut mark_unsafe_path = |path, node| {
+        let g = resolver.update_to_inner_scope(db.upcast(), def, current);
+        let hygiene = body.expr_or_pat_path_hygiene(node);
+        let value_or_partial = resolver.resolve_path_in_value_ns(db.upcast(), path, hygiene);
+        if let Some(ResolveValueResult::ValueNs(ValueNs::StaticId(id), _)) = value_or_partial {
+            let static_data = db.static_data(id);
+            if static_data.mutable || (static_data.is_extern && !static_data.has_safe_kw) {
+                unsafe_expr_cb(UnsafeExpr { node, inside_unsafe_block });
+            }
+        }
+        resolver.reset_to_guard(g);
+    };
+
     let expr = &body.exprs[current];
     match expr {
         &Expr::Call { callee, .. } => {
             if let Some(func) = infer[callee].as_fn_def(db) {
                 if is_fn_unsafe_to_call(db, func) {
-                    unsafe_expr_cb(UnsafeExpr { expr: current, inside_unsafe_block });
+                    unsafe_expr_cb(UnsafeExpr { node: current.into(), inside_unsafe_block });
                 }
             }
         }
-        Expr::Path(path) => {
-            let g = resolver.update_to_inner_scope(db.upcast(), def, current);
-            let value_or_partial = resolver.resolve_path_in_value_ns(db.upcast(), path);
-            if let Some(ResolveValueResult::ValueNs(ValueNs::StaticId(id), _)) = value_or_partial {
-                if db.static_data(id).mutable {
-                    unsafe_expr_cb(UnsafeExpr { expr: current, inside_unsafe_block });
-                }
+        Expr::Path(path) => mark_unsafe_path(path, current.into()),
+        Expr::Ref { expr, rawness: Rawness::RawPtr, mutability: _ } => {
+            if let Expr::Path(_) = body.exprs[*expr] {
+                // Do not report unsafe for `addr_of[_mut]!(EXTERN_OR_MUT_STATIC)`,
+                // see https://github.com/rust-lang/rust/pull/125834.
+                return;
             }
-            resolver.reset_to_guard(g);
         }
         Expr::MethodCall { .. } => {
             if infer
@@ -99,23 +111,30 @@ fn walk_unsafe(
                 .map(|(func, _)| is_fn_unsafe_to_call(db, func))
                 .unwrap_or(false)
             {
-                unsafe_expr_cb(UnsafeExpr { expr: current, inside_unsafe_block });
+                unsafe_expr_cb(UnsafeExpr { node: current.into(), inside_unsafe_block });
             }
         }
         Expr::UnaryOp { expr, op: UnaryOp::Deref } => {
             if let TyKind::Raw(..) = &infer[*expr].kind(Interner) {
-                unsafe_expr_cb(UnsafeExpr { expr: current, inside_unsafe_block });
+                unsafe_expr_cb(UnsafeExpr { node: current.into(), inside_unsafe_block });
             }
         }
         Expr::Unsafe { .. } => {
-            return expr.walk_child_exprs(|child| {
+            return body.walk_child_exprs(current, |child| {
                 walk_unsafe(db, infer, body, resolver, def, child, true, unsafe_expr_cb);
+            });
+        }
+        &Expr::Assignment { target, value: _ } => {
+            body.walk_pats(target, &mut |pat| {
+                if let Pat::Path(path) = &body[pat] {
+                    mark_unsafe_path(path, pat.into());
+                }
             });
         }
         _ => {}
     }
 
-    expr.walk_child_exprs(|child| {
+    body.walk_child_exprs(current, |child| {
         walk_unsafe(db, infer, body, resolver, def, child, inside_unsafe_block, unsafe_expr_cb);
     });
 }

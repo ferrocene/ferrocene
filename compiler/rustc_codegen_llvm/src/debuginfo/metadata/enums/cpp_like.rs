@@ -11,13 +11,13 @@ use rustc_middle::ty::{self, AdtDef, CoroutineArgs, CoroutineArgsExt, Ty};
 use rustc_target::abi::{Align, Endian, Size, TagEncoding, VariantIdx, Variants};
 use smallvec::smallvec;
 
-use crate::common::CodegenCx;
+use crate::common::{AsCCharPtr, CodegenCx};
 use crate::debuginfo::metadata::enums::DiscrResult;
 use crate::debuginfo::metadata::type_map::{self, Stub, UniqueTypeId};
 use crate::debuginfo::metadata::{
+    DINodeCreationResult, NO_GENERICS, NO_SCOPE_METADATA, SmallVec, UNKNOWN_LINE_NUMBER,
     build_field_di_node, file_metadata, size_and_align_of, type_di_node, unknown_file_metadata,
-    visibility_di_flags, DINodeCreationResult, SmallVec, NO_GENERICS, NO_SCOPE_METADATA,
-    UNKNOWN_LINE_NUMBER,
+    visibility_di_flags,
 };
 use crate::debuginfo::utils::DIB;
 use crate::llvm::debuginfo::{DIFile, DIFlags, DIType};
@@ -359,7 +359,7 @@ fn build_single_variant_union_fields<'ll, 'tcx>(
             llvm::LLVMRustDIBuilderCreateStaticMemberType(
                 DIB(cx),
                 enum_type_di_node,
-                TAG_FIELD_NAME.as_ptr().cast(),
+                TAG_FIELD_NAME.as_c_char_ptr(),
                 TAG_FIELD_NAME.len(),
                 unknown_file_metadata(cx),
                 UNKNOWN_LINE_NUMBER,
@@ -537,7 +537,7 @@ fn build_variant_struct_wrapper_type_di_node<'ll, 'tcx>(
                     llvm::LLVMRustDIBuilderCreateStaticMemberType(
                         DIB(cx),
                         wrapper_struct_type_di_node,
-                        name.as_ptr().cast(),
+                        name.as_c_char_ptr(),
                         name.len(),
                         unknown_file_metadata(cx),
                         UNKNOWN_LINE_NUMBER,
@@ -785,7 +785,7 @@ fn build_union_fields_for_direct_tag_enum_or_coroutine<'ll, 'tcx>(
             llvm::LLVMRustDIBuilderCreateMemberType(
                 DIB(cx),
                 enum_type_di_node,
-                field_name.as_ptr().cast(),
+                field_name.as_c_char_ptr(),
                 field_name.len(),
                 file_di_node,
                 line_number,

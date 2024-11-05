@@ -14,8 +14,8 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
-use object::read::archive::ArchiveFile;
 use object::BinaryFormat;
+use object::read::archive::ArchiveFile;
 
 use crate::core::build_steps::doc::DocumentationFormat;
 use crate::core::build_steps::tool::{self, Tool};
@@ -24,12 +24,12 @@ use crate::core::build_steps::{compile, llvm};
 use crate::core::builder::{Builder, Kind, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::utils::channel::{self, Info};
-use crate::utils::exec::{command, BootstrapCommand};
+use crate::utils::exec::{BootstrapCommand, command};
 use crate::utils::helpers::{
     exe, is_dylib, move_file, t, target_supports_cranelift_backend, timeit,
 };
 use crate::utils::tarball::{GeneratedTarball, OverlayKind, Tarball};
-use crate::{Compiler, DependencyType, Mode, LLVM_TOOLS};
+use crate::{Compiler, DependencyType, LLVM_TOOLS, Mode};
 
 pub fn pkgname(builder: &Builder<'_>, component: &str) -> String {
     format!("{}-{}", component, builder.rust_package_vers())
@@ -1605,9 +1605,15 @@ impl Step for Extended {
             prepare("cargo");
             prepare("rust-std");
             prepare("rust-analysis");
-            prepare("clippy");
-            prepare("rust-analyzer");
-            for tool in &["rust-docs", "miri", "rustc-codegen-cranelift"] {
+
+            for tool in &[
+                "clippy",
+                "rustfmt",
+                "rust-analyzer",
+                "rust-docs",
+                "miri",
+                "rustc-codegen-cranelift",
+            ] {
                 if built_tools.contains(tool) {
                     prepare(tool);
                 }
@@ -1647,6 +1653,8 @@ impl Step for Extended {
                     "rust-analyzer-preview".to_string()
                 } else if name == "clippy" {
                     "clippy-preview".to_string()
+                } else if name == "rustfmt" {
+                    "rustfmt-preview".to_string()
                 } else if name == "miri" {
                     "miri-preview".to_string()
                 } else if name == "rustc-codegen-cranelift" {
@@ -1666,7 +1674,7 @@ impl Step for Extended {
             prepare("cargo");
             prepare("rust-analysis");
             prepare("rust-std");
-            for tool in &["clippy", "rust-analyzer", "rust-docs", "miri"] {
+            for tool in &["clippy", "rustfmt", "rust-analyzer", "rust-docs", "miri"] {
                 if built_tools.contains(tool) {
                     prepare(tool);
                 }
@@ -1784,6 +1792,24 @@ impl Step for Extended {
                     .arg(etc.join("msi/remove-duplicates.xsl"))
                     .run(builder);
             }
+            if built_tools.contains("rustfmt") {
+                command(&heat)
+                    .current_dir(&exe)
+                    .arg("dir")
+                    .arg("rustfmt")
+                    .args(heat_flags)
+                    .arg("-cg")
+                    .arg("RustFmtGroup")
+                    .arg("-dr")
+                    .arg("RustFmt")
+                    .arg("-var")
+                    .arg("var.RustFmtDir")
+                    .arg("-out")
+                    .arg(exe.join("RustFmtGroup.wxs"))
+                    .arg("-t")
+                    .arg(etc.join("msi/remove-duplicates.xsl"))
+                    .run(builder);
+            }
             if built_tools.contains("miri") {
                 command(&heat)
                     .current_dir(&exe)
@@ -1855,6 +1881,9 @@ impl Step for Extended {
                 if built_tools.contains("clippy") {
                     cmd.arg("-dClippyDir=clippy");
                 }
+                if built_tools.contains("rustfmt") {
+                    cmd.arg("-dRustFmtDir=rustfmt");
+                }
                 if built_tools.contains("rust-docs") {
                     cmd.arg("-dDocsDir=rust-docs");
                 }
@@ -1880,6 +1909,9 @@ impl Step for Extended {
             candle("StdGroup.wxs".as_ref());
             if built_tools.contains("clippy") {
                 candle("ClippyGroup.wxs".as_ref());
+            }
+            if built_tools.contains("rustfmt") {
+                candle("RustFmtGroup.wxs".as_ref());
             }
             if built_tools.contains("miri") {
                 candle("MiriGroup.wxs".as_ref());
@@ -1918,6 +1950,9 @@ impl Step for Extended {
 
             if built_tools.contains("clippy") {
                 cmd.arg("ClippyGroup.wixobj");
+            }
+            if built_tools.contains("rustfmt") {
+                cmd.arg("RustFmtGroup.wixobj");
             }
             if built_tools.contains("miri") {
                 cmd.arg("MiriGroup.wixobj");
@@ -2050,7 +2085,7 @@ fn maybe_install_llvm(
         }
         !builder.config.dry_run()
     } else if let llvm::LlvmBuildStatus::AlreadyBuilt(llvm::LlvmResult { llvm_config, .. }) =
-        llvm::prebuilt_llvm_config(builder, target)
+        llvm::prebuilt_llvm_config(builder, target, true)
     {
         let mut cmd = command(llvm_config);
         cmd.arg("--libfiles");

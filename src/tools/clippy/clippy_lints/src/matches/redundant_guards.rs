@@ -10,11 +10,11 @@ use rustc_hir::def::{DefKind, Res};
 use rustc_hir::{Arm, BinOpKind, Expr, ExprKind, MatchSource, Node, PatKind, UnOp};
 use rustc_lint::LateContext;
 use rustc_span::symbol::Ident;
-use rustc_span::{sym, Span, Symbol};
+use rustc_span::{Span, Symbol, sym};
 use std::borrow::Cow;
 use std::ops::ControlFlow;
 
-use super::{pat_contains_disallowed_or, REDUNDANT_GUARDS};
+use super::{REDUNDANT_GUARDS, pat_contains_disallowed_or};
 
 pub(super) fn check<'tcx>(cx: &LateContext<'tcx>, arms: &'tcx [Arm<'tcx>], msrv: &Msrv) {
     for outer_arm in arms {
@@ -251,7 +251,7 @@ fn emit_redundant_guards<'tcx>(
 fn expr_can_be_pat(cx: &LateContext<'_>, expr: &Expr<'_>) -> bool {
     for_each_expr_without_closures(expr, |expr| {
         if match expr.kind {
-            ExprKind::ConstBlock(..) => cx.tcx.features().inline_const_pat,
+            ExprKind::ConstBlock(..) => cx.tcx.features().inline_const_pat(),
             ExprKind::Call(c, ..) if let ExprKind::Path(qpath) = c.kind => {
                 // Allow ctors
                 matches!(cx.qpath_res(&qpath, c.hir_id), Res::Def(DefKind::Ctor(..), ..))

@@ -12,10 +12,10 @@ use std::{env, fs, io, str};
 
 use build_helper::util::fail;
 
+use crate::LldMode;
 use crate::core::builder::Builder;
 use crate::core::config::{Config, TargetSelection};
 pub use crate::utils::shared_helpers::{dylib_path, dylib_path_var};
-use crate::LldMode;
 
 #[cfg(test)]
 mod tests;
@@ -46,7 +46,7 @@ macro_rules! t {
 }
 pub use t;
 
-use crate::utils::exec::{command, BootstrapCommand};
+use crate::utils::exec::{BootstrapCommand, command};
 
 pub fn exe(name: &str, target: TargetSelection) -> String {
     crate::utils::shared_helpers::exe(name, &target.triple)
@@ -286,6 +286,33 @@ pub fn output(cmd: &mut Command) -> String {
         );
     }
     String::from_utf8(output.stdout).unwrap()
+}
+
+/// Spawn a process and return a closure that will wait for the process
+/// to finish and then return its output. This allows the spawned process
+/// to do work without immediately blocking bootstrap.
+#[track_caller]
+pub fn start_process(cmd: &mut Command) -> impl FnOnce() -> String {
+    let child = match cmd.stderr(Stdio::inherit()).stdout(Stdio::piped()).spawn() {
+        Ok(child) => child,
+        Err(e) => fail(&format!("failed to execute command: {cmd:?}\nERROR: {e}")),
+    };
+
+    let command = format!("{:?}", cmd);
+
+    move || {
+        let output = child.wait_with_output().unwrap();
+
+        if !output.status.success() {
+            panic!(
+                "command did not execute successfully: {}\n\
+                 expected success, got: {}",
+                command, output.status
+            );
+        }
+
+        String::from_utf8(output.stdout).unwrap()
+    }
 }
 
 /// Returns the last-modified time for `path`, or zero if it doesn't exist.

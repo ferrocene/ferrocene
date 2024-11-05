@@ -11,10 +11,10 @@ use crate::os::unix::fs::symlink as symlink_file;
 #[cfg(unix)]
 use crate::os::unix::fs::symlink as junction_point;
 #[cfg(windows)]
-use crate::os::windows::fs::{junction_point, symlink_dir, symlink_file, OpenOptionsExt};
+use crate::os::windows::fs::{OpenOptionsExt, junction_point, symlink_dir, symlink_file};
 use crate::path::Path;
 use crate::sync::Arc;
-use crate::sys_common::io::test::{tmpdir, TempDir};
+use crate::sys_common::io::test::{TempDir, tmpdir};
 use crate::time::{Duration, Instant, SystemTime};
 use crate::{env, str, thread};
 
@@ -1732,7 +1732,7 @@ fn windows_unix_socket_exists() {
         let bytes = core::slice::from_raw_parts(bytes.as_ptr().cast::<i8>(), bytes.len());
         addr.sun_path[..bytes.len()].copy_from_slice(bytes);
         let len = mem::size_of_val(&addr) as i32;
-        let result = c::bind(socket, ptr::addr_of!(addr).cast::<c::SOCKADDR>(), len);
+        let result = c::bind(socket, (&raw const addr).cast::<c::SOCKADDR>(), len);
         c::closesocket(socket);
         assert_eq!(result, 0);
     }

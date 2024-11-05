@@ -19,8 +19,8 @@ use rustc_span::sym;
 use rustc_trait_selection::traits;
 use tracing::{debug, instrument};
 
-use crate::cfi::typeid::itanium_cxx_abi::encode::EncodeTyOptions;
 use crate::cfi::typeid::TypeIdOptions;
+use crate::cfi::typeid::itanium_cxx_abi::encode::EncodeTyOptions;
 
 /// Options for transform_ty.
 pub(crate) type TransformTyOptions = TypeIdOptions;
@@ -146,7 +146,10 @@ impl<'tcx> TypeFolder<TyCtxt<'tcx>> for TransformTy<'tcx> {
                         !is_zst
                     });
                     if let Some(field) = field {
-                        let ty0 = self.tcx.erase_regions(field.ty(self.tcx, args));
+                        let ty0 = self.tcx.normalize_erasing_regions(
+                            ty::ParamEnv::reveal_all(),
+                            field.ty(self.tcx, args),
+                        );
                         // Generalize any repr(transparent) user-defined type that is either a
                         // pointer or reference, and either references itself or any other type that
                         // contains or references itself, to avoid a reference cycle.
@@ -242,11 +245,15 @@ fn trait_object_ty<'tcx>(tcx: TyCtxt<'tcx>, poly_trait_ref: ty::PolyTraitRef<'tc
                             alias_ty.to_ty(tcx),
                         );
                         debug!("Resolved {:?} -> {resolved}", alias_ty.to_ty(tcx));
-                        ty::ExistentialPredicate::Projection(ty::ExistentialProjection {
-                            def_id: assoc_ty.def_id,
-                            args: ty::ExistentialTraitRef::erase_self_ty(tcx, super_trait_ref).args,
-                            term: resolved.into(),
-                        })
+                        ty::ExistentialPredicate::Projection(
+                            ty::ExistentialProjection::erase_self_ty(
+                                tcx,
+                                ty::ProjectionPredicate {
+                                    projection_term: alias_ty.into(),
+                                    term: resolved.into(),
+                                },
+                            ),
+                        )
                     })
                 })
         })
@@ -288,7 +295,7 @@ fn trait_object_ty<'tcx>(tcx: TyCtxt<'tcx>, poly_trait_ref: ty::PolyTraitRef<'tc
 ///   the Fn trait that defines the method (for being attached as a secondary type id).
 ///
 #[instrument(level = "trace", skip(tcx))]
-pub fn transform_instance<'tcx>(
+pub(crate) fn transform_instance<'tcx>(
     tcx: TyCtxt<'tcx>,
     mut instance: Instance<'tcx>,
     options: TransformTyOptions,
@@ -315,10 +322,11 @@ pub fn transform_instance<'tcx>(
             .lang_items()
             .drop_trait()
             .unwrap_or_else(|| bug!("typeid_for_instance: couldn't get drop_trait lang item"));
-        let predicate = ty::ExistentialPredicate::Trait(ty::ExistentialTraitRef {
+        let predicate = ty::ExistentialPredicate::Trait(ty::ExistentialTraitRef::new_from_args(
+            tcx,
             def_id,
-            args: List::empty(),
-        });
+            ty::List::empty(),
+        ));
         let predicates = tcx.mk_poly_existential_predicates(&[ty::Binder::dummy(predicate)]);
         let self_ty = Ty::new_dynamic(tcx, predicates, tcx.lifetimes.re_erased, ty::Dyn);
         instance.args = tcx.mk_args_trait(self_ty, List::empty());
@@ -472,7 +480,7 @@ fn implemented_method<'tcx>(
     } else {
         return None;
     };
-    let vtable_possible =
-        traits::is_vtable_safe_method(tcx, trait_id, trait_method) && tcx.is_object_safe(trait_id);
+    let vtable_possible = traits::is_vtable_safe_method(tcx, trait_id, trait_method)
+        && tcx.is_dyn_compatible(trait_id);
     vtable_possible.then_some((trait_ref, method_id, ancestor))
 }

@@ -1,5 +1,6 @@
 use either::Either;
 use hir::{db::ExpandDatabase, ClosureStyle, HirDisplay, HirFileIdExt, InFile, Type};
+use ide_db::text_edit::TextEdit;
 use ide_db::{famous_defs::FamousDefs, source_change::SourceChange};
 use syntax::{
     ast::{
@@ -9,7 +10,6 @@ use syntax::{
     },
     AstNode, AstPtr, TextSize,
 };
-use text_edit::TextEdit;
 
 use crate::{adjusted_display_range, fix, Assist, Diagnostic, DiagnosticCode, DiagnosticsContext};
 
@@ -130,6 +130,7 @@ fn add_missing_ok_or_some(
     if d.actual.is_unit() {
         if let Expr::BlockExpr(block) = &expr {
             if block.tail_expr().is_none() {
+                // Fix for forms like `fn foo() -> Result<(), String> {}`
                 let mut builder = TextEdit::builder();
                 let block_indent = block.indent_level();
 
@@ -153,6 +154,20 @@ fn add_missing_ok_or_some(
                     builder.finish(),
                 );
                 let name = format!("Insert {variant_name}(()) as the tail of this block");
+                acc.push(fix("insert_wrapped_unit", &name, source_change, expr_range));
+            }
+            return Some(());
+        } else if let Expr::ReturnExpr(ret_expr) = &expr {
+            // Fix for forms like `fn foo() -> Result<(), String> { return; }`
+            if ret_expr.expr().is_none() {
+                let mut builder = TextEdit::builder();
+                builder
+                    .insert(ret_expr.syntax().text_range().end(), format!(" {variant_name}(())"));
+                let source_change = SourceChange::from_text_edit(
+                    expr_ptr.file_id.original_file(ctx.sema.db),
+                    builder.finish(),
+                );
+                let name = format!("Insert {variant_name}(()) as the return value");
                 acc.push(fix("insert_wrapped_unit", &name, source_change, expr_range));
             }
             return Some(());
@@ -600,6 +615,29 @@ fn foo() -> Result<(), ()> {
     Ok(())
 }
             "#,
+        );
+    }
+
+    #[test]
+    fn test_wrapped_unit_as_return_expr() {
+        check_fix(
+            r#"
+//- minicore: result
+fn foo(b: bool) -> Result<(), String> {
+    if b {
+        return$0;
+    }
+
+    Err("oh dear".to_owned())
+}"#,
+            r#"
+fn foo(b: bool) -> Result<(), String> {
+    if b {
+        return Ok(());
+    }
+
+    Err("oh dear".to_owned())
+}"#,
         );
     }
 

@@ -17,9 +17,9 @@ use rustc_infer::infer;
 use rustc_middle::ty::{self, Const, Ty, TyCtxt, TypeVisitableExt};
 use rustc_session::Session;
 use rustc_span::symbol::Ident;
-use rustc_span::{self, sym, Span, DUMMY_SP};
-use rustc_trait_selection::error_reporting::infer::sub_relations::SubRelations;
+use rustc_span::{self, DUMMY_SP, Span, sym};
 use rustc_trait_selection::error_reporting::TypeErrCtxt;
+use rustc_trait_selection::error_reporting::infer::sub_relations::SubRelations;
 use rustc_trait_selection::traits::{ObligationCause, ObligationCauseCode, ObligationCtxt};
 
 use crate::coercion::DynamicCoerceMany;
@@ -247,12 +247,6 @@ impl<'tcx> HirTyLowerer<'tcx> for FnCtxt<'_, 'tcx> {
     fn ct_infer(&self, param: Option<&ty::GenericParamDef>, span: Span) -> Const<'tcx> {
         // FIXME ideally this shouldn't use unwrap
         match param {
-            Some(
-                param @ ty::GenericParamDef {
-                    kind: ty::GenericParamDefKind::Const { is_host_effect: true, .. },
-                    ..
-                },
-            ) => self.var_for_effect(param).as_const().unwrap(),
             Some(param) => self.var_for_def(span, param).as_const().unwrap(),
             None => self.next_const_var(span),
         }
@@ -404,7 +398,7 @@ fn default_fallback(tcx: TyCtxt<'_>) -> DivergingFallbackBehavior {
     }
 
     // `feature(never_type_fallback)`: fallback to `!` or `()` trying to not break stuff
-    if tcx.features().never_type_fallback {
+    if tcx.features().never_type_fallback() {
         return DivergingFallbackBehavior::ContextDependent;
     }
 

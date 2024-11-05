@@ -22,7 +22,6 @@ use rustc_index::{Idx, IndexVec};
 use tracing::debug;
 
 use crate::data_structures::HashMap;
-use crate::solve::SolverMode;
 
 mod global_cache;
 use global_cache::CacheData;
@@ -48,11 +47,7 @@ pub trait Cx: Copy {
     fn get_tracked<T: Debug + Clone>(self, tracked: &Self::Tracked<T>) -> T;
     fn with_cached_task<T>(self, task: impl FnOnce() -> T) -> (T, Self::DepNodeIndex);
 
-    fn with_global_cache<R>(
-        self,
-        mode: SolverMode,
-        f: impl FnOnce(&mut GlobalCache<Self>) -> R,
-    ) -> R;
+    fn with_global_cache<R>(self, f: impl FnOnce(&mut GlobalCache<Self>) -> R) -> R;
 
     fn evaluation_is_concurrent(&self) -> bool;
 }
@@ -81,7 +76,6 @@ pub trait Delegate {
     fn inspect_is_noop(inspect: &mut Self::ProofTreeBuilder) -> bool;
 
     const DIVIDE_AVAILABLE_DEPTH_ON_OVERFLOW: usize;
-    fn recursion_limit(cx: Self::Cx) -> usize;
 
     fn initial_provisional_result(
         cx: Self::Cx,
@@ -156,7 +150,7 @@ impl AvailableDepth {
     /// the remaining depth of all nested goals to prevent hangs
     /// in case there is exponential blowup.
     fn allowed_depth_for_nested<D: Delegate>(
-        cx: D::Cx,
+        root_depth: AvailableDepth,
         stack: &IndexVec<StackDepth, StackEntry<D::Cx>>,
     ) -> Option<AvailableDepth> {
         if let Some(last) = stack.raw.last() {
@@ -170,7 +164,7 @@ impl AvailableDepth {
                 AvailableDepth(last.available_depth.0 - 1)
             })
         } else {
-            Some(AvailableDepth(D::recursion_limit(cx)))
+            Some(root_depth)
         }
     }
 
@@ -359,7 +353,7 @@ struct ProvisionalCacheEntry<X: Cx> {
 }
 
 pub struct SearchGraph<D: Delegate<Cx = X>, X: Cx = <D as Delegate>::Cx> {
-    mode: SolverMode,
+    root_depth: AvailableDepth,
     /// The stack of goals currently being computed.
     ///
     /// An element is *deeper* in the stack if its index is *lower*.
@@ -374,17 +368,13 @@ pub struct SearchGraph<D: Delegate<Cx = X>, X: Cx = <D as Delegate>::Cx> {
 }
 
 impl<D: Delegate<Cx = X>, X: Cx> SearchGraph<D> {
-    pub fn new(mode: SolverMode) -> SearchGraph<D> {
+    pub fn new(root_depth: usize) -> SearchGraph<D> {
         Self {
-            mode,
+            root_depth: AvailableDepth(root_depth),
             stack: Default::default(),
             provisional_cache: Default::default(),
             _marker: PhantomData,
         }
-    }
-
-    pub fn solver_mode(&self) -> SolverMode {
-        self.mode
     }
 
     /// Lazily update the stack entry for the parent goal.
@@ -460,7 +450,8 @@ impl<D: Delegate<Cx = X>, X: Cx> SearchGraph<D> {
         inspect: &mut D::ProofTreeBuilder,
         mut evaluate_goal: impl FnMut(&mut Self, &mut D::ProofTreeBuilder) -> X::Result,
     ) -> X::Result {
-        let Some(available_depth) = AvailableDepth::allowed_depth_for_nested::<D>(cx, &self.stack)
+        let Some(available_depth) =
+            AvailableDepth::allowed_depth_for_nested::<D>(self.root_depth, &self.stack)
         else {
             return self.handle_overflow(cx, input, inspect);
         };
@@ -712,7 +703,7 @@ impl<D: Delegate<Cx = X>, X: Cx> SearchGraph<D> {
                 // current goal is already part of the same cycle. This check could be
                 // improved but seems to be good enough for now.
                 let last = self.stack.raw.last().unwrap();
-                if !last.heads.opt_lowest_cycle_head().is_some_and(|lowest| lowest <= head) {
+                if last.heads.opt_lowest_cycle_head().is_none_or(|lowest| lowest > head) {
                     continue;
                 }
             }
@@ -827,7 +818,7 @@ impl<D: Delegate<Cx = X>, X: Cx> SearchGraph<D> {
         input: X::Input,
         available_depth: AvailableDepth,
     ) -> Option<X::Result> {
-        cx.with_global_cache(self.mode, |cache| {
+        cx.with_global_cache(|cache| {
             cache
                 .get(cx, input, available_depth, |nested_goals| {
                     Self::candidate_is_applicable(
@@ -850,7 +841,7 @@ impl<D: Delegate<Cx = X>, X: Cx> SearchGraph<D> {
         input: X::Input,
         available_depth: AvailableDepth,
     ) -> Option<X::Result> {
-        cx.with_global_cache(self.mode, |cache| {
+        cx.with_global_cache(|cache| {
             let CacheData { result, additional_depth, encountered_overflow, nested_goals } = cache
                 .get(cx, input, available_depth, |nested_goals| {
                     Self::candidate_is_applicable(
@@ -1039,7 +1030,7 @@ impl<D: Delegate<Cx = X>, X: Cx> SearchGraph<D> {
     ) {
         let additional_depth = final_entry.reached_depth.as_usize() - self.stack.len();
         debug!(?final_entry, ?result, "insert global cache");
-        cx.with_global_cache(self.mode, |cache| {
+        cx.with_global_cache(|cache| {
             cache.insert(
                 cx,
                 input,

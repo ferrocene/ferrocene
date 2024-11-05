@@ -6,6 +6,7 @@ import { type CommandFactory, Ctx, fetchWorkspace } from "./ctx";
 import * as diagnostics from "./diagnostics";
 import { activateTaskProvider } from "./tasks";
 import { setContextValue } from "./util";
+import { initializeDebugSessionTrackingAndRebuild } from "./debug";
 
 const RUST_PROJECT_CONTEXT_NAME = "inRustProject";
 
@@ -102,7 +103,18 @@ async function activateServer(ctx: Ctx): Promise<RustAnalyzerExtensionApi> {
         ctx.subscriptions,
     );
 
-    await ctx.start();
+    if (ctx.config.debug.buildBeforeRestart) {
+        initializeDebugSessionTrackingAndRebuild(ctx);
+    }
+
+    if (ctx.config.initializeStopped) {
+        ctx.setServerStatus({
+            health: "stopped",
+        });
+    } else {
+        await ctx.start();
+    }
+
     return ctx;
 }
 

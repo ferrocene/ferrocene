@@ -32,7 +32,7 @@
 #![feature(restricted_std)]
 #![feature(rustc_attrs)]
 #![feature(min_specialization)]
-#![feature(strict_provenance)]
+#![feature(extend_one)]
 #![recursion_limit = "256"]
 #![allow(internal_features)]
 #![deny(ffi_unwind_calls)]
@@ -44,6 +44,7 @@ pub mod bridge;
 
 mod diagnostic;
 mod escape;
+mod to_tokens;
 
 use std::ffi::CStr;
 use std::ops::{Range, RangeBounds};
@@ -53,8 +54,10 @@ use std::{error, fmt};
 
 #[unstable(feature = "proc_macro_diagnostic", issue = "54140")]
 pub use diagnostic::{Diagnostic, Level, MultiSpan};
+#[unstable(feature = "proc_macro_totokens", issue = "130977")]
+pub use to_tokens::ToTokens;
 
-use crate::escape::{escape_bytes, EscapeOptions};
+use crate::escape::{EscapeOptions, escape_bytes};
 
 /// Determines whether proc_macro has been made accessible to the currently
 /// running program.
@@ -371,7 +374,7 @@ impl Extend<TokenStream> for TokenStream {
 /// Public implementation details for the `TokenStream` type, such as iterators.
 #[stable(feature = "proc_macro_lib2", since = "1.29.0")]
 pub mod token_stream {
-    use crate::{bridge, Group, Ident, Literal, Punct, TokenStream, TokenTree};
+    use crate::{Group, Ident, Literal, Punct, TokenStream, TokenTree, bridge};
 
     /// An iterator over `TokenStream`'s `TokenTree`s.
     /// The iteration is "shallow", e.g., the iterator doesn't recurse into delimited groups,
@@ -1166,7 +1169,7 @@ impl fmt::Debug for Ident {
     }
 }
 
-/// A literal string (`"hello"`), byte string (`b"hello"`),
+/// A literal string (`"hello"`), byte string (`b"hello"`), C string (`c"hello"`),
 /// character (`'a'`), byte character (`b'a'`), an integer or floating point number
 /// with or without a suffix (`1`, `1u8`, `2.3`, `2.3f32`).
 /// Boolean literals like `true` and `false` do not belong here, they are `Ident`s.

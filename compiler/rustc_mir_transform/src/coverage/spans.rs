@@ -8,9 +8,9 @@ use tracing::{debug, debug_span, instrument};
 
 use crate::coverage::graph::{BasicCoverageBlock, CoverageGraph};
 use crate::coverage::spans::from_mir::{
-    extract_covspans_from_mir, ExtractedCovspans, Hole, SpanFromMir,
+    ExtractedCovspans, Hole, SpanFromMir, extract_covspans_from_mir,
 };
-use crate::coverage::{mappings, ExtractedHirInfo};
+use crate::coverage::{ExtractedHirInfo, mappings};
 
 mod from_mir;
 
@@ -87,7 +87,7 @@ fn remove_unwanted_expansion_spans(covspans: &mut Vec<SpanFromMir>) {
     covspans.retain(|covspan| {
         match covspan.expn_kind {
             // Retain only the first await-related or macro-expanded covspan with this span.
-            Some(ExpnKind::Desugaring(kind)) if kind == DesugaringKind::Await => {
+            Some(ExpnKind::Desugaring(DesugaringKind::Await)) => {
                 deduplicated_spans.insert(covspan.span)
             }
             Some(ExpnKind::Macro(MacroKind::Bang, _)) => deduplicated_spans.insert(covspan.span),

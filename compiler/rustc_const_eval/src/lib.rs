@@ -10,10 +10,11 @@
 #![feature(never_type)]
 #![feature(rustdoc_internals)]
 #![feature(slice_ptr_get)]
-#![feature(strict_provenance)]
 #![feature(trait_alias)]
 #![feature(try_blocks)]
+#![feature(unqualified_local_imports)]
 #![feature(yeet_expr)]
+#![warn(unqualified_local_imports)]
 #![warn(unreachable_pub)]
 // tidy-alphabetical-end
 
@@ -25,9 +26,10 @@ pub mod util;
 
 use std::sync::atomic::AtomicBool;
 
-pub use errors::ReportErrorExt;
 use rustc_middle::ty;
 use rustc_middle::util::Providers;
+
+pub use self::errors::ReportErrorExt;
 
 rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 

@@ -21,14 +21,16 @@ pub mod span_map;
 
 mod cfg_process;
 mod fixup;
+mod prettify_macro_expansion_;
 
 use attrs::collect_attrs;
 use rustc_hash::FxHashMap;
+use stdx::TupleExt;
 use triomphe::Arc;
 
 use std::hash::Hash;
 
-use base_db::{salsa::InternValueTrivial, CrateId};
+use base_db::{ra_salsa::InternValueTrivial, CrateId};
 use either::Either;
 use span::{
     Edition, EditionedFileId, ErasedFileAstId, FileAstId, HirFileIdRepr, Span, SpanAnchor,
@@ -51,7 +53,11 @@ use crate::{
     span_map::{ExpansionSpanMap, SpanMap},
 };
 
-pub use crate::files::{AstId, ErasedAstId, FileRange, InFile, InMacroFile, InRealFile};
+pub use crate::{
+    cfg_process::check_cfg_attr_value,
+    files::{AstId, ErasedAstId, FileRange, InFile, InMacroFile, InRealFile},
+    prettify_macro_expansion_::prettify_macro_expansion,
+};
 
 pub use mbe::{DeclarativeMacro, ValueResult};
 pub use span::{HirFileId, MacroCallId, MacroFileId};
@@ -159,40 +165,73 @@ pub enum ExpandErrorKind {
 }
 
 impl ExpandError {
-    pub fn render_to_string(&self, db: &dyn ExpandDatabase) -> (String, bool) {
+    pub fn render_to_string(&self, db: &dyn ExpandDatabase) -> RenderedExpandError {
         self.inner.0.render_to_string(db)
     }
 }
 
+pub struct RenderedExpandError {
+    pub message: String,
+    pub error: bool,
+    pub kind: &'static str,
+}
+
+impl RenderedExpandError {
+    const GENERAL_KIND: &str = "macro-error";
+}
+
 impl ExpandErrorKind {
-    pub fn render_to_string(&self, db: &dyn ExpandDatabase) -> (String, bool) {
+    pub fn render_to_string(&self, db: &dyn ExpandDatabase) -> RenderedExpandError {
         match self {
-            ExpandErrorKind::ProcMacroAttrExpansionDisabled => {
-                ("procedural attribute macro expansion is disabled".to_owned(), false)
-            }
-            ExpandErrorKind::MacroDisabled => {
-                ("proc-macro is explicitly disabled".to_owned(), false)
-            }
+            ExpandErrorKind::ProcMacroAttrExpansionDisabled => RenderedExpandError {
+                message: "procedural attribute macro expansion is disabled".to_owned(),
+                error: false,
+                kind: "proc-macros-disabled",
+            },
+            ExpandErrorKind::MacroDisabled => RenderedExpandError {
+                message: "proc-macro is explicitly disabled".to_owned(),
+                error: false,
+                kind: "proc-macro-disabled",
+            },
             &ExpandErrorKind::MissingProcMacroExpander(def_crate) => {
                 match db.proc_macros().get_error_for_crate(def_crate) {
-                    Some((e, hard_err)) => (e.to_owned(), hard_err),
-                    None => (
-                        format!(
-                            "internal error: proc-macro map is missing error entry for crate {def_crate:?}"
-                        ),
-                        true,
-                    ),
+                    Some((e, hard_err)) => RenderedExpandError {
+                        message: e.to_owned(),
+                        error: hard_err,
+                        kind: RenderedExpandError::GENERAL_KIND,
+                    },
+                    None => RenderedExpandError {
+                        message: format!("internal error: proc-macro map is missing error entry for crate {def_crate:?}"),
+                        error: true,
+                        kind: RenderedExpandError::GENERAL_KIND,
+                    },
                 }
             }
-            ExpandErrorKind::MacroDefinition => {
-                ("macro definition has parse errors".to_owned(), true)
-            }
-            ExpandErrorKind::Mbe(e) => (e.to_string(), true),
-            ExpandErrorKind::RecursionOverflow => {
-                ("overflow expanding the original macro".to_owned(), true)
-            }
-            ExpandErrorKind::Other(e) => ((**e).to_owned(), true),
-            ExpandErrorKind::ProcMacroPanic(e) => (format!("proc-macro panicked: {e}"), true),
+            ExpandErrorKind::MacroDefinition => RenderedExpandError {
+                message: "macro definition has parse errors".to_owned(),
+                error: true,
+                kind: RenderedExpandError::GENERAL_KIND,
+            },
+            ExpandErrorKind::Mbe(e) => RenderedExpandError {
+                message: e.to_string(),
+                error: true,
+                kind: RenderedExpandError::GENERAL_KIND,
+            },
+            ExpandErrorKind::RecursionOverflow => RenderedExpandError {
+                message: "overflow expanding the original macro".to_owned(),
+                error: true,
+                kind: RenderedExpandError::GENERAL_KIND,
+            },
+            ExpandErrorKind::Other(e) => RenderedExpandError {
+                message: (**e).to_owned(),
+                error: true,
+                kind: RenderedExpandError::GENERAL_KIND,
+            },
+            ExpandErrorKind::ProcMacroPanic(e) => RenderedExpandError {
+                message: format!("proc-macro panicked: {e}"),
+                error: true,
+                kind: RenderedExpandError::GENERAL_KIND,
+            },
         }
     }
 }
@@ -767,14 +806,15 @@ impl ExpansionInfo {
     /// Maps the passed in file range down into a macro expansion if it is the input to a macro call.
     ///
     /// Note this does a linear search through the entire backing vector of the spanmap.
+    // FIXME: Consider adding a reverse map to ExpansionInfo to get rid of the linear search which
+    // potentially results in quadratic look ups (notably this might improve semantic highlighting perf)
     pub fn map_range_down_exact(
         &self,
         span: Span,
-    ) -> Option<InMacroFile<impl Iterator<Item = SyntaxToken> + '_>> {
-        let tokens = self
-            .exp_map
-            .ranges_with_span_exact(span)
-            .flat_map(move |range| self.expanded.value.covering_element(range).into_token());
+    ) -> Option<InMacroFile<impl Iterator<Item = (SyntaxToken, SyntaxContextId)> + '_>> {
+        let tokens = self.exp_map.ranges_with_span_exact(span).flat_map(move |(range, ctx)| {
+            self.expanded.value.covering_element(range).into_token().zip(Some(ctx))
+        });
 
         Some(InMacroFile::new(self.expanded.file_id, tokens))
     }
@@ -786,11 +826,10 @@ impl ExpansionInfo {
     pub fn map_range_down(
         &self,
         span: Span,
-    ) -> Option<InMacroFile<impl Iterator<Item = SyntaxToken> + '_>> {
-        let tokens = self
-            .exp_map
-            .ranges_with_span(span)
-            .flat_map(move |range| self.expanded.value.covering_element(range).into_token());
+    ) -> Option<InMacroFile<impl Iterator<Item = (SyntaxToken, SyntaxContextId)> + '_>> {
+        let tokens = self.exp_map.ranges_with_span(span).flat_map(move |(range, ctx)| {
+            self.expanded.value.covering_element(range).into_token().zip(Some(ctx))
+        });
 
         Some(InMacroFile::new(self.expanded.file_id, tokens))
     }
@@ -840,7 +879,8 @@ impl ExpansionInfo {
                     self.arg.file_id,
                     arg_map
                         .ranges_with_span_exact(span)
-                        .filter(|range| range.intersect(arg_range).is_some())
+                        .filter(|(range, _)| range.intersect(arg_range).is_some())
+                        .map(TupleExt::head)
                         .collect(),
                 )
             }

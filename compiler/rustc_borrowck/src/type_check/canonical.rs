@@ -5,11 +5,11 @@ use rustc_infer::infer::canonical::Canonical;
 use rustc_middle::bug;
 use rustc_middle::mir::ConstraintCategory;
 use rustc_middle::ty::{self, Ty, TyCtxt, TypeFoldable, Upcast};
-use rustc_span::def_id::DefId;
 use rustc_span::Span;
+use rustc_span::def_id::DefId;
+use rustc_trait_selection::traits::ObligationCause;
 use rustc_trait_selection::traits::query::type_op::custom::CustomTypeOp;
 use rustc_trait_selection::traits::query::type_op::{self, TypeOpOutput};
-use rustc_trait_selection::traits::ObligationCause;
 use tracing::{debug, instrument};
 
 use super::{Locations, NormalizeLocation, TypeChecker};
@@ -137,7 +137,7 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
         let _: Result<_, ErrorGuaranteed> = self.fully_perform_op(
             locations,
             category,
-            param_env.and(type_op::prove_predicate::ProvePredicate::new(predicate)),
+            param_env.and(type_op::prove_predicate::ProvePredicate { predicate }),
         );
     }
 
@@ -162,7 +162,7 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
         let result: Result<_, ErrorGuaranteed> = self.fully_perform_op(
             location.to_locations(),
             category,
-            param_env.and(type_op::normalize::Normalize::new(value)),
+            param_env.and(type_op::normalize::Normalize { value }),
         );
         result.unwrap_or(value)
     }
@@ -223,7 +223,7 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
         let _: Result<_, ErrorGuaranteed> = self.fully_perform_op(
             Locations::All(span),
             ConstraintCategory::Boring,
-            self.param_env.and(type_op::ascribe_user_type::AscribeUserType::new(mir_ty, user_ty)),
+            self.param_env.and(type_op::ascribe_user_type::AscribeUserType { mir_ty, user_ty }),
         );
     }
 

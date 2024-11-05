@@ -75,14 +75,14 @@ use core::clone::CloneToUninit;
 use crate::borrow::{Borrow, Cow};
 use crate::collections::TryReserveError;
 use crate::error::Error;
-use crate::ffi::{os_str, OsStr, OsString};
+use crate::ffi::{OsStr, OsString, os_str};
 use crate::hash::{Hash, Hasher};
 use crate::iter::FusedIterator;
 use crate::ops::{self, Deref};
 use crate::rc::Rc;
 use crate::str::FromStr;
 use crate::sync::Arc;
-use crate::sys::path::{is_sep_byte, is_verbatim_sep, parse_prefix, MAIN_SEP_STR};
+use crate::sys::path::{MAIN_SEP_STR, is_sep_byte, is_verbatim_sep, parse_prefix};
 use crate::{cmp, fmt, fs, io, sys};
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1167,7 +1167,7 @@ impl FusedIterator for Ancestors<'_> {}
 /// path.push(r"..\otherdir");
 /// path.push("system32");
 ///
-/// The behaviour of `PathBuf` may be changed to a panic on such inputs
+/// The behavior of `PathBuf` may be changed to a panic on such inputs
 /// in the future. [`Extend::extend`] should be used to add multi-part paths.
 #[cfg_attr(not(test), rustc_diagnostic_item = "PathBuf")]
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -1409,7 +1409,7 @@ impl PathBuf {
     /// (That is, it will have the same parent.)
     ///
     /// The argument is not sanitized, so can include separators. This
-    /// behaviour may be changed to a panic in the future.
+    /// behavior may be changed to a panic in the future.
     ///
     /// [`self.file_name`]: Path::file_name
     /// [`pop`]: PathBuf::pop
@@ -3144,7 +3144,7 @@ unsafe impl CloneToUninit for Path {
     #[cfg_attr(debug_assertions, track_caller)]
     unsafe fn clone_to_uninit(&self, dst: *mut Self) {
         // SAFETY: Path is just a wrapper around OsStr
-        unsafe { self.inner.clone_to_uninit(core::ptr::addr_of_mut!((*dst).inner)) }
+        unsafe { self.inner.clone_to_uninit(&raw mut (*dst).inner) }
     }
 }
 

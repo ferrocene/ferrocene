@@ -6,12 +6,11 @@ use rustc_hir::def_id::DefId;
 use rustc_middle::middle::codegen_fn_attrs::{CodegenFnAttrFlags, PatchableFunctionEntry};
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_session::config::{BranchProtection, FunctionReturn, OptLevel, PAuthKey, PacRet};
-use rustc_span::symbol::sym;
 use rustc_target::spec::{FramePointer, SanitizerSet, StackProbeType, StackProtector};
 use smallvec::SmallVec;
 
 use crate::context::CodegenCx;
-use crate::errors::{MissingFeatures, SanitizerMemtagRequiresMte, TargetFeatureDisableOrEnable};
+use crate::errors::SanitizerMemtagRequiresMte;
 use crate::llvm::AttributePlace::Function;
 use crate::llvm::{self, AllocKindFlags, Attribute, AttributeKind, AttributePlace, MemoryEffects};
 use crate::value::Value;
@@ -233,11 +232,6 @@ fn probestack_attr<'ll>(cx: &CodegenCx<'ll, '_>) -> Option<&'ll Attribute> {
         return None;
     }
 
-    // probestack doesn't play nice either with gcov profiling.
-    if cx.sess().opts.unstable_opts.profile {
-        return None;
-    }
-
     let attr_value = match cx.sess().target.stack_probes {
         StackProbeType::None => return None,
         // Request LLVM to generate the probes inline. If the given LLVM version does not support
@@ -403,8 +397,9 @@ pub(crate) fn llfn_attrs_from_instance<'ll, 'tcx>(
     if codegen_fn_attrs.flags.contains(CodegenFnAttrFlags::NAKED) {
         to_add.push(AttributeKind::Naked.create_attr(cx.llcx));
         // HACK(jubilee): "indirect branch tracking" works by attaching prologues to functions.
-        // And it is a module-level attribute, so the alternative is pulling naked functions into new LLVM modules.
-        // Otherwise LLVM's "naked" functions come with endbr prefixes per https://github.com/rust-lang/rust/issues/98768
+        // And it is a module-level attribute, so the alternative is pulling naked functions into
+        // new LLVM modules. Otherwise LLVM's "naked" functions come with endbr prefixes per
+        // https://github.com/rust-lang/rust/issues/98768
         to_add.push(AttributeKind::NoCfCheck.create_attr(cx.llcx));
         if llvm_util::get_version() < (19, 0, 0) {
             // Prior to LLVM 19, branch-target-enforcement was disabled by setting the attribute to
@@ -454,7 +449,8 @@ pub(crate) fn llfn_attrs_from_instance<'ll, 'tcx>(
             flags |= AllocKindFlags::Zeroed;
         }
         to_add.push(llvm::CreateAllocKindAttr(cx.llcx, flags));
-        // apply to return place instead of function (unlike all other attributes applied in this function)
+        // apply to return place instead of function (unlike all other attributes applied in this
+        // function)
         let no_alias = AttributeKind::NoAlias.create_attr(cx.llcx);
         attributes::apply_to_llfn(llfn, AttributePlace::ReturnValue, &[no_alias]);
     }
@@ -481,9 +477,6 @@ pub(crate) fn llfn_attrs_from_instance<'ll, 'tcx>(
         let allocated_pointer = AttributeKind::AllocatedPointer.create_attr(cx.llcx);
         attributes::apply_to_llfn(llfn, AttributePlace::Argument(0), &[allocated_pointer]);
     }
-    if codegen_fn_attrs.flags.contains(CodegenFnAttrFlags::CMSE_NONSECURE_ENTRY) {
-        to_add.push(llvm::CreateAttrString(cx.llcx, "cmse_nonsecure_entry"));
-    }
     if let Some(align) = codegen_fn_attrs.alignment {
         llvm::set_alignment(llfn, align);
     }
@@ -502,26 +495,6 @@ pub(crate) fn llfn_attrs_from_instance<'ll, 'tcx>(
 
     let function_features =
         codegen_fn_attrs.target_features.iter().map(|f| f.name.as_str()).collect::<Vec<&str>>();
-
-    if let Some(f) = llvm_util::check_tied_features(
-        cx.tcx.sess,
-        &function_features.iter().map(|f| (*f, true)).collect(),
-    ) {
-        let span = cx
-            .tcx
-            .get_attrs(instance.def_id(), sym::target_feature)
-            .next()
-            .map_or_else(|| cx.tcx.def_span(instance.def_id()), |a| a.span);
-        cx.tcx
-            .dcx()
-            .create_err(TargetFeatureDisableOrEnable {
-                features: f,
-                span: Some(span),
-                missing_features: Some(MissingFeatures),
-            })
-            .emit();
-        return;
-    }
 
     let function_features = function_features
         .iter()

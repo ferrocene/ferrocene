@@ -8,7 +8,7 @@
 //! The output types are defined in `rustc_session::config::ErrorOutputType`.
 
 use std::borrow::Cow;
-use std::cmp::{max, min, Reverse};
+use std::cmp::{Reverse, max, min};
 use std::error::Report;
 use std::io::prelude::*;
 use std::io::{self, IsTerminal};
@@ -22,7 +22,7 @@ use rustc_error_messages::{FluentArgs, SpanLabel};
 use rustc_lint_defs::pluralize;
 use rustc_span::hygiene::{ExpnKind, MacroKind};
 use rustc_span::source_map::SourceMap;
-use rustc_span::{char_width, FileLines, FileName, SourceFile, Span};
+use rustc_span::{FileLines, FileName, SourceFile, Span, char_width};
 use termcolor::{Buffer, BufferWriter, Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 use tracing::{debug, instrument, trace, warn};
 
@@ -31,7 +31,7 @@ use crate::snippet::{
     Annotation, AnnotationColumn, AnnotationType, Line, MultilineAnnotation, Style, StyledString,
 };
 use crate::styled_buffer::StyledBuffer;
-use crate::translation::{to_fluent_args, Translate};
+use crate::translation::{Translate, to_fluent_args};
 use crate::{
     CodeSuggestion, DiagCtxt, DiagInner, DiagMessage, ErrCode, FluentBundle, LazyFallbackBundle,
     Level, MultiSpan, Subdiag, SubstitutionHighlight, SuggestionStyle, TerminalUrl,
@@ -58,9 +58,9 @@ impl HumanReadableErrorType {
 struct Margin {
     /// The available whitespace in the left that can be consumed when centering.
     pub whitespace_left: usize,
-    /// The column of the beginning of left-most span.
+    /// The column of the beginning of leftmost span.
     pub span_left: usize,
-    /// The column of the end of right-most span.
+    /// The column of the end of rightmost span.
     pub span_right: usize,
     /// The beginning of the line to be displayed.
     pub computed_left: usize,
@@ -128,7 +128,7 @@ impl Margin {
         } else {
             0
         };
-        // We want to show as much as possible, max_line_len is the right-most boundary for the
+        // We want to show as much as possible, max_line_len is the rightmost boundary for the
         // relevant code.
         self.computed_right = max(max_line_len, self.computed_left);
 
@@ -205,7 +205,7 @@ pub trait Emitter: Translate {
         false
     }
 
-    fn source_map(&self) -> Option<&Lrc<SourceMap>>;
+    fn source_map(&self) -> Option<&SourceMap>;
 
     /// Formats the substitutions of the primary_span
     ///
@@ -481,8 +481,8 @@ pub trait Emitter: Translate {
 }
 
 impl Translate for HumanEmitter {
-    fn fluent_bundle(&self) -> Option<&Lrc<FluentBundle>> {
-        self.fluent_bundle.as_ref()
+    fn fluent_bundle(&self) -> Option<&FluentBundle> {
+        self.fluent_bundle.as_deref()
     }
 
     fn fallback_fluent_bundle(&self) -> &FluentBundle {
@@ -491,8 +491,8 @@ impl Translate for HumanEmitter {
 }
 
 impl Emitter for HumanEmitter {
-    fn source_map(&self) -> Option<&Lrc<SourceMap>> {
-        self.sm.as_ref()
+    fn source_map(&self) -> Option<&SourceMap> {
+        self.sm.as_deref()
     }
 
     fn emit_diagnostic(&mut self, mut diag: DiagInner) {
@@ -540,7 +540,7 @@ pub struct SilentEmitter {
 }
 
 impl Translate for SilentEmitter {
-    fn fluent_bundle(&self) -> Option<&Lrc<FluentBundle>> {
+    fn fluent_bundle(&self) -> Option<&FluentBundle> {
         None
     }
 
@@ -552,7 +552,7 @@ impl Translate for SilentEmitter {
 }
 
 impl Emitter for SilentEmitter {
-    fn source_map(&self) -> Option<&Lrc<SourceMap>> {
+    fn source_map(&self) -> Option<&SourceMap> {
         None
     }
 
@@ -685,7 +685,7 @@ impl HumanEmitter {
             buffer.puts(line_offset, code_offset, "...", Style::LineNumber);
         }
         if margin.was_cut_right(line_len) {
-            // We have stripped some code after the right-most span end, make it clear we did so.
+            // We have stripped some code after the rightmost span end, make it clear we did so.
             buffer.puts(line_offset, code_offset + taken - 3, "...", Style::LineNumber);
         }
         buffer.puts(line_offset, 0, &self.maybe_anonymized(line_index), Style::LineNumber);
@@ -1555,7 +1555,7 @@ impl HumanEmitter {
                 // Get the left-side margin to remove it
                 let mut whitespace_margin = usize::MAX;
                 for line_idx in 0..annotated_file.lines.len() {
-                    let file = annotated_file.file.clone();
+                    let file = Lrc::clone(&annotated_file.file);
                     let line = &annotated_file.lines[line_idx];
                     if let Some(source_string) =
                         line.line_index.checked_sub(1).and_then(|l| file.get_line(l))
@@ -1646,7 +1646,7 @@ impl HumanEmitter {
 
                     let depths = self.render_source_line(
                         &mut buffer,
-                        annotated_file.file.clone(),
+                        Lrc::clone(&annotated_file.file),
                         &annotated_file.lines[line_idx],
                         width_offset,
                         code_offset,
@@ -2529,7 +2529,12 @@ impl FileWithAnnotatedLines {
                 //  | |      |
                 //  | |______foo
                 //  |        baz
-                add_annotation_to_file(&mut output, file.clone(), ann.line_start, ann.as_start());
+                add_annotation_to_file(
+                    &mut output,
+                    Lrc::clone(&file),
+                    ann.line_start,
+                    ann.as_start(),
+                );
                 // 4 is the minimum vertical length of a multiline span when presented: two lines
                 // of code and two lines of underline. This is not true for the special case where
                 // the beginning doesn't have an underline, but the current logic seems to be
@@ -2545,11 +2550,11 @@ impl FileWithAnnotatedLines {
                     .unwrap_or(ann.line_start);
                 for line in ann.line_start + 1..until {
                     // Every `|` that joins the beginning of the span (`___^`) to the end (`|__^`).
-                    add_annotation_to_file(&mut output, file.clone(), line, ann.as_line());
+                    add_annotation_to_file(&mut output, Lrc::clone(&file), line, ann.as_line());
                 }
                 let line_end = ann.line_end - 1;
                 if middle < line_end {
-                    add_annotation_to_file(&mut output, file.clone(), line_end, ann.as_line());
+                    add_annotation_to_file(&mut output, Lrc::clone(&file), line_end, ann.as_line());
                 }
             } else {
                 end_ann.annotation_type = AnnotationType::Singleline;

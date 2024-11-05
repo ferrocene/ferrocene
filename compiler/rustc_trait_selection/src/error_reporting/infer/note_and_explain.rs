@@ -1,14 +1,14 @@
 use rustc_errors::Applicability::{MachineApplicable, MaybeIncorrect};
-use rustc_errors::{pluralize, Diag, MultiSpan};
+use rustc_errors::{Diag, MultiSpan, pluralize};
 use rustc_hir as hir;
 use rustc_hir::def::DefKind;
 use rustc_middle::traits::{ObligationCause, ObligationCauseCode};
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
 use rustc_middle::ty::fast_reject::DeepRejectCtxt;
 use rustc_middle::ty::print::{FmtPrinter, Printer};
-use rustc_middle::ty::{self, suggest_constraining_type_param, Ty};
+use rustc_middle::ty::{self, Ty, suggest_constraining_type_param};
 use rustc_span::def_id::DefId;
-use rustc_span::{sym, BytePos, Span, Symbol};
+use rustc_span::{BytePos, Span, Symbol, sym};
 use tracing::debug;
 
 use crate::error_reporting::TypeErrCtxt;
@@ -384,7 +384,10 @@ impl<T> Trait<T> for X {
                                     | DefKind::AssocFn
                                     | DefKind::AssocConst
                             )
-                            && tcx.is_type_alias_impl_trait(opaque_ty.def_id)
+                            && matches!(
+                                tcx.opaque_ty_origin(opaque_ty.def_id),
+                                hir::OpaqueTyOrigin::TyAlias { .. }
+                            )
                             && !tcx
                                 .opaque_types_defined_by(body_owner_def_id.expect_local())
                                 .contains(&opaque_ty.def_id.expect_local())
@@ -720,7 +723,7 @@ fn foo(&self) -> Self::T { String::new() }
         if let ty::Alias(ty::Opaque, ty::AliasTy { def_id, .. }) = *proj_ty.self_ty().kind() {
             let opaque_local_def_id = def_id.as_local();
             let opaque_hir_ty = if let Some(opaque_local_def_id) = opaque_local_def_id {
-                tcx.hir().expect_item(opaque_local_def_id).expect_opaque_ty()
+                tcx.hir().expect_opaque_ty(opaque_local_def_id)
             } else {
                 return false;
             };
@@ -894,7 +897,9 @@ fn foo(&self) -> Self::T { String::new() }
         // FIXME: we would want to call `resolve_vars_if_possible` on `ty` before suggesting.
 
         let trait_bounds = bounds.iter().filter_map(|bound| match bound {
-            hir::GenericBound::Trait(ptr, hir::TraitBoundModifier::None) => Some(ptr),
+            hir::GenericBound::Trait(ptr) if ptr.modifiers == hir::TraitBoundModifiers::NONE => {
+                Some(ptr)
+            }
             _ => None,
         });
 

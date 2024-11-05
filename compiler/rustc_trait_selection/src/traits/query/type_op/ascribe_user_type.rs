@@ -1,13 +1,13 @@
-use rustc_hir::def_id::{DefId, CRATE_DEF_ID};
+use rustc_hir::def_id::{CRATE_DEF_ID, DefId};
 use rustc_infer::traits::Obligation;
-pub use rustc_middle::traits::query::type_op::AscribeUserType;
 use rustc_middle::traits::query::NoSolution;
+pub use rustc_middle::traits::query::type_op::AscribeUserType;
 use rustc_middle::traits::{ObligationCause, ObligationCauseCode};
 use rustc_middle::ty::{self, ParamEnvAnd, Ty, TyCtxt, UserArgs, UserSelfTy, UserType};
-use rustc_span::{Span, DUMMY_SP};
+use rustc_span::{DUMMY_SP, Span};
 use tracing::{debug, instrument};
 
-use crate::infer::canonical::{Canonical, CanonicalQueryResponse};
+use crate::infer::canonical::{CanonicalQueryInput, CanonicalQueryResponse};
 use crate::traits::ObligationCtxt;
 
 impl<'tcx> super::QueryTypeOp<'tcx> for AscribeUserType<'tcx> {
@@ -22,7 +22,7 @@ impl<'tcx> super::QueryTypeOp<'tcx> for AscribeUserType<'tcx> {
 
     fn perform_query(
         tcx: TyCtxt<'tcx>,
-        canonicalized: Canonical<'tcx, ParamEnvAnd<'tcx, Self>>,
+        canonicalized: CanonicalQueryInput<'tcx, ParamEnvAnd<'tcx, Self>>,
     ) -> Result<CanonicalQueryResponse<'tcx, ()>, NoSolution> {
         tcx.type_op_ascribe_user_type(canonicalized)
     }

@@ -19,8 +19,6 @@
 #![feature(panic_unwind)]
 #![feature(staged_api)]
 #![feature(std_internals)]
-#![feature(strict_provenance)]
-#![feature(exposed_provenance)]
 #![feature(rustc_attrs)]
 #![panic_runtime]
 #![feature(panic_runtime)]
@@ -48,7 +46,7 @@ cfg_if::cfg_if! {
         target_os = "psp",
         target_os = "xous",
         target_os = "solid_asp3",
-        all(target_family = "unix", not(any(target_os = "espidf", target_os = "rtems"))),
+        all(target_family = "unix", not(any(target_os = "espidf", target_os = "rtems", target_os = "nuttx"))),
         all(target_vendor = "fortanix", target_env = "sgx"),
         target_family = "wasm",
     ))] {

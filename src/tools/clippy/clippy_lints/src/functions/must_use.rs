@@ -8,7 +8,7 @@ use rustc_infer::infer::TyCtxtInferExt;
 use rustc_lint::{LateContext, LintContext};
 use rustc_middle::lint::in_external_macro;
 use rustc_middle::ty::{self, Ty};
-use rustc_span::{sym, Span};
+use rustc_span::{Span, sym};
 
 use clippy_utils::attrs::is_proc_macro;
 use clippy_utils::diagnostics::{span_lint_and_help, span_lint_and_then};
@@ -117,7 +117,7 @@ fn check_needless_must_use(
     } else if attr.value_str().is_none() && is_must_use_ty(cx, return_ty(cx, item_id)) {
         // Ignore async functions unless Future::Output type is a must_use type
         if sig.header.is_async() {
-            let infcx = cx.tcx.infer_ctxt().build();
+            let infcx = cx.tcx.infer_ctxt().build(cx.typing_mode());
             if let Some(future_ty) = infcx.err_ctxt().get_impl_future_output_ty(return_ty(cx, item_id))
                 && !is_must_use_ty(cx, future_ty)
             {

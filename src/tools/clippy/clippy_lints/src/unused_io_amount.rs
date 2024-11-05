@@ -5,7 +5,7 @@ use hir::{ExprKind, HirId, PatKind};
 use rustc_hir as hir;
 use rustc_lint::{LateContext, LateLintPass};
 use rustc_session::declare_lint_pass;
-use rustc_span::{sym, Span};
+use rustc_span::{Span, sym};
 
 declare_clippy_lint! {
     /// ### What it does
@@ -222,7 +222,7 @@ fn unpack_call_chain<'a>(mut expr: &'a hir::Expr<'a>) -> &'a hir::Expr<'a> {
 }
 
 fn unpack_try<'a>(mut expr: &'a hir::Expr<'a>) -> &'a hir::Expr<'a> {
-    while let ExprKind::Call(func, [ref arg_0, ..]) = expr.kind
+    while let ExprKind::Call(func, [ref arg_0]) = expr.kind
         && matches!(
             func.kind,
             ExprKind::Path(hir::QPath::LangItem(hir::LangItem::TryTraitBranch, ..))
@@ -244,7 +244,7 @@ fn unpack_match<'a>(mut expr: &'a hir::Expr<'a>) -> &'a hir::Expr<'a> {
 /// waited on.  Otherwise return None.
 fn unpack_await<'a>(expr: &'a hir::Expr<'a>) -> &'a hir::Expr<'a> {
     if let ExprKind::Match(expr, _, hir::MatchSource::AwaitDesugar) = expr.kind {
-        if let ExprKind::Call(func, [ref arg_0, ..]) = expr.kind {
+        if let ExprKind::Call(func, [ref arg_0]) = expr.kind {
             if matches!(
                 func.kind,
                 ExprKind::Path(hir::QPath::LangItem(hir::LangItem::IntoFutureIntoFuture, ..))

@@ -1,6 +1,8 @@
 use std::intrinsics::transmute_unchecked;
 use std::mem::MaybeUninit;
 
+use rustc_span::ErrorGuaranteed;
+
 use crate::query::CyclePlaceholder;
 use crate::ty::adjustment::CoerceUnsizedInfo;
 use crate::ty::{self, Ty};
@@ -216,6 +218,10 @@ impl<T0, T1> EraseType for (&'_ T0, &'_ [T1]) {
     type Result = [u8; size_of::<(&'static (), &'static [()])>()];
 }
 
+impl<T0> EraseType for (&'_ T0, Result<(), ErrorGuaranteed>) {
+    type Result = [u8; size_of::<(&'static (), Result<(), ErrorGuaranteed>)>()];
+}
+
 macro_rules! trivial {
     ($($ty:ty),+ $(,)?) => {
         $(
@@ -274,6 +280,7 @@ trivial! {
     rustc_hir::IsAsync,
     rustc_hir::ItemLocalId,
     rustc_hir::LangItem,
+    rustc_hir::OpaqueTyOrigin<rustc_hir::def_id::DefId>,
     rustc_hir::OwnerId,
     rustc_hir::Upvar,
     rustc_index::bit_set::FiniteBitSet<u32>,
@@ -364,6 +371,7 @@ tcx_lifetime! {
     rustc_middle::ty::FnSig,
     rustc_middle::ty::GenericArg,
     rustc_middle::ty::GenericPredicates,
+    rustc_middle::ty::ConstConditions,
     rustc_middle::ty::inhabitedness::InhabitedPredicate,
     rustc_middle::ty::Instance,
     rustc_middle::ty::InstanceKind,

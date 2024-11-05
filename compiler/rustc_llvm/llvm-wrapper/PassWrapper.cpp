@@ -42,7 +42,6 @@
 #if LLVM_VERSION_GE(19, 0)
 #include "llvm/Support/PGOOptions.h"
 #endif
-#include "llvm/Transforms/Instrumentation/GCOVProfiler.h"
 #include "llvm/Transforms/Instrumentation/HWAddressSanitizer.h"
 #include "llvm/Transforms/Instrumentation/InstrProfiling.h"
 #include "llvm/Transforms/Instrumentation/MemorySanitizer.h"
@@ -485,6 +484,22 @@ extern "C" LLVMTargetMachineRef LLVMRustCreateTargetMachine(
   Options.EmitStackSizeSection = EmitStackSizeSection;
 
   if (ArgsCstrBuff != nullptr) {
+#if LLVM_VERSION_GE(20, 0)
+    int buffer_offset = 0;
+    assert(ArgsCstrBuff[ArgsCstrBuffLen - 1] == '\0');
+    auto Arg0 = std::string(ArgsCstrBuff);
+    buffer_offset = Arg0.size() + 1;
+    auto ArgsCppStr = std::string(ArgsCstrBuff + buffer_offset,
+                                  ArgsCstrBuffLen - buffer_offset);
+    auto i = 0;
+    while (i != std::string::npos) {
+      i = ArgsCppStr.find('\0', i + 1);
+      if (i != std::string::npos)
+        ArgsCppStr.replace(i, 1, " ");
+    }
+    Options.MCOptions.Argv0 = Arg0;
+    Options.MCOptions.CommandlineArgs = ArgsCppStr;
+#else
     int buffer_offset = 0;
     assert(ArgsCstrBuff[ArgsCstrBuffLen - 1] == '\0');
 
@@ -510,6 +525,7 @@ extern "C" LLVMTargetMachineRef LLVMRustCreateTargetMachine(
     Options.MCOptions.Argv0 = arg0;
     Options.MCOptions.CommandLineArgs =
         llvm::ArrayRef<std::string>(cmd_arg_strings, num_cmd_arg_strings);
+#endif
   }
 
   TargetMachine *TM = TheTarget->createTargetMachine(
@@ -518,10 +534,11 @@ extern "C" LLVMTargetMachineRef LLVMRustCreateTargetMachine(
 }
 
 extern "C" void LLVMRustDisposeTargetMachine(LLVMTargetMachineRef TM) {
-
+#if LLVM_VERSION_LT(20, 0)
   MCTargetOptions &MCOptions = unwrap(TM)->Options.MCOptions;
   delete[] MCOptions.Argv0;
   delete[] MCOptions.CommandLineArgs.data();
+#endif
 
   delete unwrap(TM);
 }
@@ -696,9 +713,8 @@ extern "C" LLVMRustResult LLVMRustOptimize(
     bool SLPVectorize, bool LoopVectorize, bool DisableSimplifyLibCalls,
     bool EmitLifetimeMarkers, LLVMRustSanitizerOptions *SanitizerOptions,
     const char *PGOGenPath, const char *PGOUsePath, bool InstrumentCoverage,
-    const char *InstrProfileOutput, bool InstrumentGCOV,
-    const char *PGOSampleUsePath, bool DebugInfoForProfiling,
-    void *LlvmSelfProfiler,
+    const char *InstrProfileOutput, const char *PGOSampleUsePath,
+    bool DebugInfoForProfiling, void *LlvmSelfProfiler,
     LLVMRustSelfProfileBeforePassCallback BeforePassCallback,
     LLVMRustSelfProfileAfterPassCallback AfterPassCallback,
     const char *ExtraPasses, size_t ExtraPassesLen, const char *LLVMPlugins,
@@ -714,12 +730,7 @@ extern "C" LLVMRustResult LLVMRustOptimize(
   PTO.SLPVectorization = SLPVectorize;
   PTO.MergeFunctions = MergeFunctions;
 
-  // FIXME: We may want to expose this as an option.
-  bool DebugPassManager = false;
-
   PassInstrumentationCallbacks PIC;
-  StandardInstrumentations SI(TheModule->getContext(), DebugPassManager);
-  SI.registerCallbacks(PIC);
 
   if (LlvmSelfProfiler) {
     LLVMSelfProfileInitializeCallbacks(PIC, LlvmSelfProfiler,
@@ -765,6 +776,12 @@ extern "C" LLVMRustResult LLVMRustOptimize(
   FunctionAnalysisManager FAM;
   CGSCCAnalysisManager CGAM;
   ModuleAnalysisManager MAM;
+
+  // FIXME: We may want to expose this as an option.
+  bool DebugPassManager = false;
+
+  StandardInstrumentations SI(TheModule->getContext(), DebugPassManager);
+  SI.registerCallbacks(PIC, &MAM);
 
   if (LLVMPluginsLen) {
     auto PluginsStr = StringRef(LLVMPlugins, LLVMPluginsLen);
@@ -825,13 +842,6 @@ extern "C" LLVMRustResult LLVMRustOptimize(
     PipelineStartEPCallbacks.push_back(
         [](ModulePassManager &MPM, OptimizationLevel Level) {
           MPM.addPass(createModuleToFunctionPassAdaptor(LintPass()));
-        });
-  }
-
-  if (InstrumentGCOV) {
-    PipelineStartEPCallbacks.push_back(
-        [](ModulePassManager &MPM, OptimizationLevel Level) {
-          MPM.addPass(GCOVProfilerPass(GCOVOptions::getDefault()));
         });
   }
 
@@ -1232,12 +1242,12 @@ getFirstDefinitionForLinker(const GlobalValueSummaryList &GVSummaryList) {
 // here is basically the same as before threads are spawned in the `run`
 // function of `lib/LTO/ThinLTOCodeGenerator.cpp`.
 extern "C" LLVMRustThinLTOData *
-LLVMRustCreateThinLTOData(LLVMRustThinLTOModule *modules, int num_modules,
-                          const char **preserved_symbols, int num_symbols) {
+LLVMRustCreateThinLTOData(LLVMRustThinLTOModule *modules, size_t num_modules,
+                          const char **preserved_symbols, size_t num_symbols) {
   auto Ret = std::make_unique<LLVMRustThinLTOData>();
 
   // Load each module's summary and merge it into one combined index
-  for (int i = 0; i < num_modules; i++) {
+  for (size_t i = 0; i < num_modules; i++) {
     auto module = &modules[i];
     auto buffer = StringRef(module->data, module->len);
     auto mem_buffer = MemoryBufferRef(buffer, module->identifier);
@@ -1256,7 +1266,7 @@ LLVMRustCreateThinLTOData(LLVMRustThinLTOModule *modules, int num_modules,
 
   // Convert the preserved symbols set from string to GUID, this is then needed
   // for internalization.
-  for (int i = 0; i < num_symbols; i++) {
+  for (size_t i = 0; i < num_symbols; i++) {
     auto GUID = GlobalValue::getGUID(preserved_symbols[i]);
     Ret->GUIDPreservedSymbols.insert(GUID);
   }
@@ -1540,8 +1550,10 @@ extern "C" LLVMModuleRef LLVMRustParseBitcodeForLTO(LLVMContextRef Context,
 extern "C" const char *LLVMRustGetSliceFromObjectDataByName(const char *data,
                                                             size_t len,
                                                             const char *name,
+                                                            size_t name_len,
                                                             size_t *out_len) {
   *out_len = 0;
+  auto Name = StringRef(name, name_len);
   auto Data = StringRef(data, len);
   auto Buffer = MemoryBufferRef(Data, ""); // The id is unused.
   file_magic Type = identify_magic(Buffer.getBuffer());
@@ -1552,8 +1564,8 @@ extern "C" const char *LLVMRustGetSliceFromObjectDataByName(const char *data,
     return nullptr;
   }
   for (const object::SectionRef &Sec : (*ObjFileOrError)->sections()) {
-    Expected<StringRef> Name = Sec.getName();
-    if (Name && *Name == name) {
+    Expected<StringRef> SecName = Sec.getName();
+    if (SecName && *SecName == Name) {
       Expected<StringRef> SectionOrError = Sec.getContents();
       if (!SectionOrError) {
         LLVMRustSetLastError(toString(SectionOrError.takeError()).c_str());

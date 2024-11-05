@@ -1,5 +1,5 @@
+use rustc_abi::ExternAbi;
 use rustc_span::Symbol;
-use rustc_target::spec::abi::Abi;
 
 use crate::*;
 
@@ -8,7 +8,7 @@ pub(super) trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
     fn emulate_x86_bmi_intrinsic(
         &mut self,
         link_name: Symbol,
-        abi: Abi,
+        abi: ExternAbi,
         args: &[OpTy<'tcx>],
         dest: &MPlaceTy<'tcx>,
     ) -> InterpResult<'tcx, EmulateItemResult> {
@@ -30,10 +30,11 @@ pub(super) trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
         this.expect_target_feature_for_intrinsic(link_name, target_feature)?;
 
         if is_64_bit && this.tcx.sess.target.arch != "x86_64" {
-            return Ok(EmulateItemResult::NotSupported);
+            return interp_ok(EmulateItemResult::NotSupported);
         }
 
-        let [left, right] = this.check_shim(abi, Abi::C { unwind: false }, link_name, args)?;
+        let [left, right] =
+            this.check_shim(abi, ExternAbi::C { unwind: false }, link_name, args)?;
         let left = this.read_scalar(left)?;
         let right = this.read_scalar(right)?;
 
@@ -93,7 +94,7 @@ pub(super) trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 }
                 result
             }
-            _ => return Ok(EmulateItemResult::NotSupported),
+            _ => return interp_ok(EmulateItemResult::NotSupported),
         };
 
         let result = if is_64_bit {
@@ -103,6 +104,6 @@ pub(super) trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
         };
         this.write_scalar(result, dest)?;
 
-        Ok(EmulateItemResult::NeedsReturn)
+        interp_ok(EmulateItemResult::NeedsReturn)
     }
 }

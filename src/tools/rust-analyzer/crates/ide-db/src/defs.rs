@@ -5,14 +5,17 @@
 
 // FIXME: this badly needs rename/rewrite (matklad, 2020-02-06).
 
+use crate::documentation::{Documentation, HasDocs};
+use crate::famous_defs::FamousDefs;
+use crate::RootDatabase;
 use arrayvec::ArrayVec;
 use either::Either;
 use hir::{
     Adt, AsAssocItem, AsExternAssocItem, AssocItem, AttributeTemplate, BuiltinAttr, BuiltinType,
     Const, Crate, DefWithBody, DeriveHelper, DocLinkDef, ExternAssocItem, ExternCrateDecl, Field,
-    Function, GenericParam, HasVisibility, HirDisplay, Impl, Label, Local, Macro, Module,
-    ModuleDef, Name, PathResolution, Semantics, Static, StaticLifetime, ToolModule, Trait,
-    TraitAlias, TupleField, TypeAlias, Variant, VariantDef, Visibility,
+    Function, GenericParam, HasVisibility, HirDisplay, Impl, InlineAsmOperand, Label, Local, Macro,
+    Module, ModuleDef, Name, PathResolution, Semantics, Static, StaticLifetime, Struct, ToolModule,
+    Trait, TraitAlias, TupleField, TypeAlias, Variant, VariantDef, Visibility,
 };
 use span::Edition;
 use stdx::{format_to, impl_from};
@@ -20,10 +23,6 @@ use syntax::{
     ast::{self, AstNode},
     match_ast, SyntaxKind, SyntaxNode, SyntaxToken,
 };
-
-use crate::documentation::{Documentation, HasDocs};
-use crate::famous_defs::FamousDefs;
-use crate::RootDatabase;
 
 // FIXME: a more precise name would probably be `Symbol`?
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
@@ -50,6 +49,8 @@ pub enum Definition {
     BuiltinAttr(BuiltinAttr),
     ToolModule(ToolModule),
     ExternCrateDecl(ExternCrateDecl),
+    InlineAsmRegOrRegClass(()),
+    InlineAsmOperand(InlineAsmOperand),
 }
 
 impl Definition {
@@ -83,11 +84,13 @@ impl Definition {
             Definition::Label(it) => it.module(db),
             Definition::ExternCrateDecl(it) => it.module(db),
             Definition::DeriveHelper(it) => it.derive().module(db),
+            Definition::InlineAsmOperand(it) => it.parent(db).module(db),
             Definition::BuiltinAttr(_)
             | Definition::BuiltinType(_)
             | Definition::BuiltinLifetime(_)
             | Definition::TupleField(_)
-            | Definition::ToolModule(_) => return None,
+            | Definition::ToolModule(_)
+            | Definition::InlineAsmRegOrRegClass(_) => return None,
         };
         Some(module)
     }
@@ -121,7 +124,9 @@ impl Definition {
             | Definition::Local(_)
             | Definition::GenericParam(_)
             | Definition::Label(_)
-            | Definition::DeriveHelper(_) => return None,
+            | Definition::DeriveHelper(_)
+            | Definition::InlineAsmRegOrRegClass(_)
+            | Definition::InlineAsmOperand(_) => return None,
         };
         Some(vis)
     }
@@ -150,6 +155,8 @@ impl Definition {
             Definition::ToolModule(_) => return None,  // FIXME
             Definition::DeriveHelper(it) => it.name(db),
             Definition::ExternCrateDecl(it) => return it.alias_or_name(db),
+            Definition::InlineAsmRegOrRegClass(_) => return None,
+            Definition::InlineAsmOperand(op) => return op.name(db),
         };
         Some(name)
     }
@@ -171,7 +178,19 @@ impl Definition {
             Definition::Static(it) => it.docs(db),
             Definition::Trait(it) => it.docs(db),
             Definition::TraitAlias(it) => it.docs(db),
-            Definition::TypeAlias(it) => it.docs(db),
+            Definition::TypeAlias(it) => {
+                it.docs(db).or_else(|| {
+                    // docs are missing, try to fall back to the docs of the aliased item.
+                    let adt = it.ty(db).as_adt()?;
+                    let docs = adt.docs(db)?;
+                    let docs = format!(
+                        "*This is the documentation for* `{}`\n\n{}",
+                        adt.display(db, edition),
+                        docs.as_str()
+                    );
+                    Some(Documentation::new(docs))
+                })
+            }
             Definition::BuiltinType(it) => {
                 famous_defs.and_then(|fd| {
                     // std exposes prim_{} modules with docstrings on the root to document the builtins
@@ -212,6 +231,7 @@ impl Definition {
             Definition::ToolModule(_) => None,
             Definition::DeriveHelper(_) => None,
             Definition::TupleField(_) => None,
+            Definition::InlineAsmRegOrRegClass(_) | Definition::InlineAsmOperand(_) => None,
         };
 
         docs.or_else(|| {
@@ -268,6 +288,9 @@ impl Definition {
             Definition::DeriveHelper(it) => {
                 format!("derive_helper {}", it.name(db).display(db, edition))
             }
+            // FIXME
+            Definition::InlineAsmRegOrRegClass(_) => "inline_asm_reg_or_reg_class".to_owned(),
+            Definition::InlineAsmOperand(_) => "inline_asm_reg_operand".to_owned(),
         }
     }
 }
@@ -307,6 +330,8 @@ impl IdentClass {
                         .map(IdentClass::NameClass)
                         .or_else(|| NameRefClass::classify_lifetime(sema, &lifetime).map(IdentClass::NameRefClass))
                 },
+                ast::RangePat(range_pat) => OperatorClass::classify_range_pat(sema, &range_pat).map(IdentClass::Operator),
+                ast::RangeExpr(range_expr) => OperatorClass::classify_range_expr(sema, &range_expr).map(IdentClass::Operator),
                 ast::AwaitExpr(await_expr) => OperatorClass::classify_await(sema, &await_expr).map(IdentClass::Operator),
                 ast::BinExpr(bin_expr) => OperatorClass::classify_bin(sema, &bin_expr).map(IdentClass::Operator),
                 ast::IndexExpr(index_expr) => OperatorClass::classify_index(sema, &index_expr).map(IdentClass::Operator),
@@ -360,6 +385,9 @@ impl IdentClass {
                 | OperatorClass::Index(func)
                 | OperatorClass::Try(func),
             ) => res.push(Definition::Function(func)),
+            IdentClass::Operator(OperatorClass::Range(struct0)) => {
+                res.push(Definition::Adt(Adt::Struct(struct0)))
+            }
         }
         res
     }
@@ -429,7 +457,6 @@ impl NameClass {
         let _p = tracing::info_span!("NameClass::classify").entered();
 
         let parent = name.syntax().parent()?;
-
         let definition = match_ast! {
             match parent {
                 ast::Item(it) => classify_item(sema, it)?,
@@ -440,6 +467,7 @@ impl NameClass {
                 ast::Variant(it) => Definition::Variant(sema.to_def(&it)?),
                 ast::TypeParam(it) => Definition::GenericParam(sema.to_def(&it)?.into()),
                 ast::ConstParam(it) => Definition::GenericParam(sema.to_def(&it)?.into()),
+                ast::AsmOperandNamed(it) => Definition::InlineAsmOperand(sema.to_def(&it)?),
                 _ => return None,
             }
         };
@@ -534,6 +562,7 @@ impl NameClass {
 
 #[derive(Debug)]
 pub enum OperatorClass {
+    Range(Struct),
     Await(Function),
     Prefix(Function),
     Index(Function),
@@ -542,6 +571,20 @@ pub enum OperatorClass {
 }
 
 impl OperatorClass {
+    pub fn classify_range_pat(
+        sema: &Semantics<'_, RootDatabase>,
+        range_pat: &ast::RangePat,
+    ) -> Option<OperatorClass> {
+        sema.resolve_range_pat(range_pat).map(OperatorClass::Range)
+    }
+
+    pub fn classify_range_expr(
+        sema: &Semantics<'_, RootDatabase>,
+        range_expr: &ast::RangeExpr,
+    ) -> Option<OperatorClass> {
+        sema.resolve_range_expr(range_expr).map(OperatorClass::Range)
+    }
+
     pub fn classify_await(
         sema: &Semantics<'_, RootDatabase>,
         await_expr: &ast::AwaitExpr,
@@ -699,6 +742,9 @@ impl NameRefClass {
                         NameRefClass::ExternCrateShorthand { krate, decl: extern_crate }
                     })
                 },
+                ast::AsmRegSpec(_) => {
+                    Some(NameRefClass::Definition(Definition::InlineAsmRegOrRegClass(())))
+                },
                 _ => None
             }
         }
@@ -750,6 +796,18 @@ impl_from!(
 impl From<Impl> for Definition {
     fn from(impl_: Impl) -> Self {
         Definition::SelfType(impl_)
+    }
+}
+
+impl From<InlineAsmOperand> for Definition {
+    fn from(value: InlineAsmOperand) -> Self {
+        Definition::InlineAsmOperand(value)
+    }
+}
+
+impl From<Either<PathResolution, InlineAsmOperand>> for Definition {
+    fn from(value: Either<PathResolution, InlineAsmOperand>) -> Self {
+        value.either(Definition::from, Definition::from)
     }
 }
 

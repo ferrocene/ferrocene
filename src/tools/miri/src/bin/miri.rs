@@ -11,6 +11,7 @@
 extern crate tracing;
 
 // The rustc crates we need
+extern crate rustc_abi;
 extern crate rustc_data_structures;
 extern crate rustc_driver;
 extern crate rustc_hir;
@@ -21,38 +22,33 @@ extern crate rustc_metadata;
 extern crate rustc_middle;
 extern crate rustc_session;
 extern crate rustc_span;
-extern crate rustc_target;
 
 use std::env::{self, VarError};
 use std::num::NonZero;
 use std::path::PathBuf;
 use std::str::FromStr;
 
-use tracing::debug;
-
+use miri::{BacktraceStyle, BorrowTrackerMethod, ProvenanceMode, RetagFields, ValidationMode};
+use rustc_abi::ExternAbi;
 use rustc_data_structures::sync::Lrc;
 use rustc_driver::Compilation;
 use rustc_hir::def_id::LOCAL_CRATE;
 use rustc_hir::{self as hir, Node};
 use rustc_hir_analysis::check::check_function_signature;
 use rustc_interface::interface::Config;
-use rustc_middle::{
-    middle::{
-        codegen_fn_attrs::CodegenFnAttrFlags,
-        exported_symbols::{ExportedSymbol, SymbolExportInfo, SymbolExportKind, SymbolExportLevel},
-    },
-    query::LocalCrate,
-    traits::{ObligationCause, ObligationCauseCode},
-    ty::{self, Ty, TyCtxt},
-    util::Providers,
+use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
+use rustc_middle::middle::exported_symbols::{
+    ExportedSymbol, SymbolExportInfo, SymbolExportKind, SymbolExportLevel,
 };
+use rustc_middle::query::LocalCrate;
+use rustc_middle::traits::{ObligationCause, ObligationCauseCode};
+use rustc_middle::ty::{self, Ty, TyCtxt};
+use rustc_middle::util::Providers;
 use rustc_session::config::{CrateType, EntryFnType, ErrorOutputType, OptLevel};
 use rustc_session::search_paths::PathKind;
 use rustc_session::{CtfeBacktrace, EarlyDiagCtxt};
 use rustc_span::def_id::DefId;
-use rustc_target::spec::abi::Abi;
-
-use miri::{BacktraceStyle, BorrowTrackerMethod, ProvenanceMode, RetagFields, ValidationMode};
+use tracing::debug;
 
 struct MiriCompilerCalls {
     miri_config: miri::MiriConfig,
@@ -372,7 +368,7 @@ fn entry_fn(tcx: TyCtxt<'_>) -> (DefId, EntryFnType) {
             tcx.types.isize,
             false,
             hir::Safety::Safe,
-            Abi::Rust,
+            ExternAbi::Rust,
         ));
 
         let correct_func_sig = check_function_signature(
@@ -534,8 +530,6 @@ fn main() {
         } else if arg == "-Zmiri-ignore-leaks" {
             miri_config.ignore_leaks = true;
             miri_config.collect_leak_backtraces = false;
-        } else if arg == "-Zmiri-panic-on-unsupported" {
-            miri_config.panic_on_unsupported = true;
         } else if arg == "-Zmiri-strict-provenance" {
             miri_config.provenance_mode = ProvenanceMode::Strict;
         } else if arg == "-Zmiri-permissive-provenance" {

@@ -68,15 +68,17 @@
 use rustc_data_structures::fx::FxHashSet;
 use rustc_hir as hir;
 use rustc_hir::def_id::{DefId, LocalDefId};
-use rustc_infer::infer::outlives::env::OutlivesEnvironment;
 use rustc_infer::infer::TyCtxtInferExt;
+use rustc_infer::infer::outlives::env::OutlivesEnvironment;
 use rustc_infer::traits::specialization_graph::Node;
 use rustc_middle::ty::trait_def::TraitSpecializationKind;
-use rustc_middle::ty::{self, GenericArg, GenericArgs, GenericArgsRef, TyCtxt, TypeVisitableExt};
+use rustc_middle::ty::{
+    self, GenericArg, GenericArgs, GenericArgsRef, TyCtxt, TypeVisitableExt, TypingMode,
+};
 use rustc_span::{ErrorGuaranteed, Span};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::traits::outlives_bounds::InferCtxtExt as _;
-use rustc_trait_selection::traits::{self, translate_args_with_cause, wf, ObligationCtxt};
+use rustc_trait_selection::traits::{self, ObligationCtxt, translate_args_with_cause, wf};
 use tracing::{debug, instrument};
 
 use crate::errors::GenericArgsOnOverriddenImpl;
@@ -195,7 +197,7 @@ fn get_impl_args(
     impl1_def_id: LocalDefId,
     impl2_node: Node,
 ) -> Result<(GenericArgsRef<'_>, GenericArgsRef<'_>), ErrorGuaranteed> {
-    let infcx = &tcx.infer_ctxt().build();
+    let infcx = &tcx.infer_ctxt().build(TypingMode::non_body_analysis());
     let ocx = ObligationCtxt::new_with_diagnostics(infcx);
     let param_env = tcx.param_env(impl1_def_id);
     let impl1_span = tcx.def_span(impl1_def_id);
@@ -409,7 +411,7 @@ fn check_predicates<'tcx>(
 
     // Include the well-formed predicates of the type parameters of the impl.
     for arg in tcx.impl_trait_ref(impl1_def_id).unwrap().instantiate_identity().args {
-        let infcx = &tcx.infer_ctxt().build();
+        let infcx = &tcx.infer_ctxt().build(TypingMode::non_body_analysis());
         let obligations =
             wf::obligations(infcx, tcx.param_env(impl1_def_id), impl1_def_id, 0, arg, span)
                 .unwrap();
@@ -530,6 +532,7 @@ fn trait_specialization_kind<'tcx>(
         | ty::ClauseKind::Projection(_)
         | ty::ClauseKind::ConstArgHasType(..)
         | ty::ClauseKind::WellFormed(_)
-        | ty::ClauseKind::ConstEvaluatable(..) => None,
+        | ty::ClauseKind::ConstEvaluatable(..)
+        | ty::ClauseKind::HostEffect(..) => None,
     }
 }

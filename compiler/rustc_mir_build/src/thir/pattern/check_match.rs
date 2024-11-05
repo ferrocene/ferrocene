@@ -3,7 +3,7 @@ use rustc_ast::Mutability;
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_errors::codes::*;
-use rustc_errors::{struct_span_code_err, Applicability, ErrorGuaranteed, MultiSpan};
+use rustc_errors::{Applicability, ErrorGuaranteed, MultiSpan, struct_span_code_err};
 use rustc_hir::def::*;
 use rustc_hir::def_id::LocalDefId;
 use rustc_hir::{self as hir, BindingMode, ByRef, HirId};
@@ -22,7 +22,7 @@ use rustc_session::lint::builtin::{
     BINDINGS_WITH_VARIANT_NAME, IRREFUTABLE_LET_PATTERNS, UNREACHABLE_PATTERNS,
 };
 use rustc_span::hygiene::DesugaringKind;
-use rustc_span::{sym, Span};
+use rustc_span::{Span, sym};
 use tracing::instrument;
 
 use crate::errors::*;
@@ -79,6 +79,8 @@ enum LetSource {
     IfLetGuard,
     LetElse,
     WhileLet,
+    Else,
+    ElseIfLet,
 }
 
 struct MatchVisitor<'p, 'tcx> {
@@ -129,15 +131,20 @@ impl<'p, 'tcx> Visitor<'p, 'tcx> for MatchVisitor<'p, 'tcx> {
                 // Give a specific `let_source` for the condition.
                 let let_source = match ex.span.desugaring_kind() {
                     Some(DesugaringKind::WhileLoop) => LetSource::WhileLet,
-                    _ => LetSource::IfLet,
+                    _ => match self.let_source {
+                        LetSource::Else => LetSource::ElseIfLet,
+                        _ => LetSource::IfLet,
+                    },
                 };
                 self.with_let_source(let_source, |this| this.visit_expr(&self.thir[cond]));
                 self.with_let_source(LetSource::None, |this| {
                     this.visit_expr(&this.thir[then]);
-                    if let Some(else_) = else_opt {
-                        this.visit_expr(&this.thir[else_]);
-                    }
                 });
+                if let Some(else_) = else_opt {
+                    self.with_let_source(LetSource::Else, |this| {
+                        this.visit_expr(&this.thir[else_])
+                    });
+                }
                 return;
             }
             ExprKind::Match { scrutinee, scrutinee_hir_id: _, box ref arms, match_source } => {
@@ -573,9 +580,13 @@ impl<'p, 'tcx> MatchVisitor<'p, 'tcx> {
             // and we shouldn't lint.
             // For let guards inside a match, prefixes might use bindings of the match pattern,
             // so can't always be moved out.
+            // For `else if let`, an extra indentation level would be required to move the bindings.
             // FIXME: Add checking whether the bindings are actually used in the prefix,
             // and lint if they are not.
-            if !matches!(self.let_source, LetSource::WhileLet | LetSource::IfLetGuard) {
+            if !matches!(
+                self.let_source,
+                LetSource::WhileLet | LetSource::IfLetGuard | LetSource::ElseIfLet
+            ) {
                 // Emit the lint
                 let prefix = &chain_refutabilities[..until];
                 let span_start = prefix[0].unwrap().0;
@@ -906,8 +917,8 @@ fn report_irrefutable_let_patterns(
     }
 
     match source {
-        LetSource::None | LetSource::PlainLet => bug!(),
-        LetSource::IfLet => emit_diag!(IrrefutableLetPatternsIfLet),
+        LetSource::None | LetSource::PlainLet | LetSource::Else => bug!(),
+        LetSource::IfLet | LetSource::ElseIfLet => emit_diag!(IrrefutableLetPatternsIfLet),
         LetSource::IfLetGuard => emit_diag!(IrrefutableLetPatternsIfLetGuard),
         LetSource::LetElse => emit_diag!(IrrefutableLetPatternsLetElse),
         LetSource::WhileLet => emit_diag!(IrrefutableLetPatternsWhileLet),
@@ -1126,7 +1137,7 @@ fn report_non_exhaustive_match<'p, 'tcx>(
             .map(|witness| cx.print_witness_pat(witness))
             .collect::<Vec<String>>()
             .join(" | ");
-        if witnesses.iter().all(|p| p.is_never_pattern()) && cx.tcx.features().never_patterns {
+        if witnesses.iter().all(|p| p.is_never_pattern()) && cx.tcx.features().never_patterns() {
             // Arms with a never pattern don't take a body.
             pattern
         } else {

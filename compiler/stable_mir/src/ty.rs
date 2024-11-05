@@ -4,10 +4,10 @@ use std::ops::Range;
 use serde::Serialize;
 
 use super::mir::{Body, Mutability, Safety};
-use super::{with, DefId, Error, Symbol};
+use super::{DefId, Error, Symbol, with};
 use crate::abi::{FnAbi, Layout};
 use crate::crate_def::{CrateDef, CrateDefType};
-use crate::mir::alloc::{read_target_int, read_target_uint, AllocId};
+use crate::mir::alloc::{AllocId, read_target_int, read_target_uint};
 use crate::mir::mono::StaticDef;
 use crate::target::MachineInfo;
 use crate::{Filename, Opaque};
@@ -1062,6 +1062,7 @@ pub enum Abi {
     AvrInterrupt,
     AvrNonBlockingInterrupt,
     CCmseNonSecureCall,
+    CCmseNonSecureEntry,
     System { unwind: bool },
     RustIntrinsic,
     RustCall,
@@ -1392,7 +1393,6 @@ pub struct Generics {
     pub param_def_id_to_index: Vec<(GenericDef, u32)>,
     pub has_self: bool,
     pub has_late_bound_regions: Option<Span>,
-    pub host_effect_index: Option<usize>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
@@ -1419,7 +1419,7 @@ pub struct GenericPredicates {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 pub enum PredicateKind {
     Clause(ClauseKind),
-    ObjectSafe(TraitDef),
+    DynCompatible(TraitDef),
     SubType(SubtypePredicate),
     Coerce(CoercePredicate),
     ConstEquate(TyConst, TyConst),

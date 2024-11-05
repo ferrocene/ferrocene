@@ -1,15 +1,15 @@
 use std::borrow::Cow;
 
 use rustc_data_structures::fx::FxHashSet;
-use rustc_index::bit_set::BitSet;
 use rustc_index::IndexVec;
+use rustc_index::bit_set::BitSet;
 use rustc_middle::bug;
 use rustc_middle::mir::visit::*;
 use rustc_middle::mir::*;
 use rustc_middle::ty::TyCtxt;
+use rustc_mir_dataflow::Analysis;
 use rustc_mir_dataflow::impls::MaybeStorageDead;
 use rustc_mir_dataflow::storage::always_storage_live_locals;
-use rustc_mir_dataflow::Analysis;
 use tracing::{debug, instrument};
 
 use crate::ssa::{SsaLocals, StorageLiveLocals};
@@ -126,8 +126,7 @@ fn compute_replacement<'tcx>(
     // Compute `MaybeStorageDead` dataflow to check that we only replace when the pointee is
     // definitely live.
     let mut maybe_dead = MaybeStorageDead::new(Cow::Owned(always_live_locals))
-        .into_engine(tcx, body)
-        .iterate_to_fixpoint()
+        .iterate_to_fixpoint(tcx, body, None)
         .into_results_cursor(body);
 
     // Map for each local to the pointee.
@@ -179,7 +178,7 @@ fn compute_replacement<'tcx>(
         } else {
             // This is a proper dereference. We can only allow it if `target` is live.
             maybe_dead.seek_after_primary_effect(loc);
-            let maybe_dead = maybe_dead.contains(target.local);
+            let maybe_dead = maybe_dead.get().contains(target.local);
             !maybe_dead
         }
     };

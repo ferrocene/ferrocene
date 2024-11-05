@@ -2,14 +2,14 @@
 
 use rustc_span::symbol::sym;
 
-use super::{to_nonzero, Feature};
+use super::{Feature, to_nonzero};
 
 macro_rules! declare_features {
     ($(
         $(#[doc = $doc:tt])* (accepted, $feature:ident, $ver:expr, $issue:expr),
     )+) => {
         /// Formerly unstable features that have now been accepted (stabilized).
-        pub const ACCEPTED_FEATURES: &[Feature] = &[
+        pub const ACCEPTED_LANG_FEATURES: &[Feature] = &[
             $(Feature {
                 name: sym::$feature,
                 since: $ver,
@@ -116,7 +116,7 @@ declare_features! (
     /// Allows calling constructor functions in `const fn`.
     (accepted, const_constructor, "1.40.0", Some(61456)),
     /// Allows the definition of `const extern fn` and `const unsafe extern fn`.
-    (accepted, const_extern_fn, "CURRENT_RUSTC_VERSION", Some(64926)),
+    (accepted, const_extern_fn, "1.83.0", Some(64926)),
     /// Allows basic arithmetic on floating point types in a `const fn`.
     (accepted, const_fn_floating_point_arithmetic, "1.82.0", Some(57241)),
     /// Allows using and casting function pointers in a `const fn`.
@@ -144,13 +144,15 @@ declare_features! (
     /// Allows the use of `loop` and `while` in constants.
     (accepted, const_loop, "1.46.0", Some(52000)),
     /// Allows using `&mut` in constant functions.
-    (accepted, const_mut_refs, "CURRENT_RUSTC_VERSION", Some(57349)),
+    (accepted, const_mut_refs, "1.83.0", Some(57349)),
     /// Allows panicking during const eval (producing compile-time errors).
     (accepted, const_panic, "1.57.0", Some(51999)),
     /// Allows dereferencing raw pointers during const eval.
     (accepted, const_raw_ptr_deref, "1.58.0", Some(51911)),
     /// Allows references to types with interior mutability within constants
-    (accepted, const_refs_to_cell, "CURRENT_RUSTC_VERSION", Some(80384)),
+    (accepted, const_refs_to_cell, "1.83.0", Some(80384)),
+    /// Allows creating pointers and references to `static` items in constants.
+    (accepted, const_refs_to_static, "1.83.0", Some(119618)),
     /// Allows implementing `Copy` for closures where possible (RFC 2132).
     (accepted, copy_closures, "1.26.0", Some(44490)),
     /// Allows `crate` in paths.
@@ -187,6 +189,8 @@ declare_features! (
     (accepted, exhaustive_integer_patterns, "1.33.0", Some(50907)),
     /// Allows explicit generic arguments specification with `impl Trait` present.
     (accepted, explicit_generic_args_with_impl_trait, "1.63.0", Some(83701)),
+    /// Uses 2024 rules for matching `expr` fragments in macros. Also enables `expr_2021` fragment.
+    (accepted, expr_fragment_specifier_2024, "1.83.0", Some(123742)),
     /// Allows arbitrary expressions in key-value attributes at parse time.
     (accepted, extended_key_value_attributes, "1.54.0", Some(78835)),
     /// Allows resolving absolute paths as paths from other crates.
@@ -220,6 +224,8 @@ declare_features! (
     (accepted, i128_type, "1.26.0", Some(35118)),
     /// Allows the use of `if let` expressions.
     (accepted, if_let, "1.0.0", None),
+    /// Rescoping temporaries in `if let` to align with Rust 2024.
+    (accepted, if_let_rescope, "CURRENT_RUSTC_VERSION", Some(124085)),
     /// Allows top level or-patterns (`p | q`) in `if let` and `while let`.
     (accepted, if_while_or_patterns, "1.33.0", Some(48215)),
     /// Allows lifetime elision in `impl` headers. For example:
@@ -349,6 +355,9 @@ declare_features! (
     (accepted, repr_packed, "1.33.0", Some(33158)),
     /// Allows `#[repr(transparent)]` attribute on newtype structs.
     (accepted, repr_transparent, "1.28.0", Some(43036)),
+    /// Allows enums like Result<T, E> to be used across FFI, if T's niche value can
+    /// be used to describe E or vice-versa.
+    (accepted, result_ffi_guarantees, "CURRENT_RUSTC_VERSION", Some(110503)),
     /// Allows return-position `impl Trait` in traits.
     (accepted, return_position_impl_trait_in_trait, "1.75.0", Some(91611)),
     /// Allows code like `let x: &'static u32 = &42` to work (RFC 1414).
@@ -357,6 +366,8 @@ declare_features! (
     (accepted, self_in_typedefs, "1.32.0", Some(49303)),
     /// Allows `Self` struct constructor (RFC 2302).
     (accepted, self_struct_ctor, "1.32.0", Some(51994)),
+    /// Shortern the tail expression lifetime
+    (accepted, shorter_tail_lifetimes, "CURRENT_RUSTC_VERSION", Some(123739)),
     /// Allows using subslice patterns, `[a, .., b]` and `[a, xs @ .., b]`.
     (accepted, slice_patterns, "1.42.0", Some(62254)),
     /// Allows use of `&foo[a..b]` as a slicing syntax.

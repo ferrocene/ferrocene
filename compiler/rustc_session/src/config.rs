@@ -20,13 +20,13 @@ use rustc_errors::emitter::HumanReadableErrorType;
 use rustc_errors::{ColorConfig, DiagArgValue, DiagCtxtFlags, IntoDiagArg};
 use rustc_feature::UnstableFeatures;
 use rustc_macros::{Decodable, Encodable, HashStable_Generic};
-use rustc_span::edition::{Edition, DEFAULT_EDITION, EDITION_NAME_LIST, LATEST_STABLE_EDITION};
+use rustc_span::edition::{DEFAULT_EDITION, EDITION_NAME_LIST, Edition, LATEST_STABLE_EDITION};
 use rustc_span::source_map::FilePathMapping;
 use rustc_span::{
-    sym, FileName, FileNameDisplayPreference, RealFileName, SourceFileHashAlgorithm, Symbol,
+    FileName, FileNameDisplayPreference, RealFileName, SourceFileHashAlgorithm, Symbol, sym,
 };
 use rustc_target::spec::{
-    FramePointer, LinkSelfContainedComponents, LinkerFeatures, SplitDebuginfo, Target, TargetTriple,
+    FramePointer, LinkSelfContainedComponents, LinkerFeatures, SplitDebuginfo, Target, TargetTuple,
 };
 use tracing::debug;
 
@@ -34,7 +34,7 @@ use crate::errors::FileWriteFail;
 pub use crate::options::*;
 use crate::search_paths::SearchPath;
 use crate::utils::{CanonicalizedPath, NativeLib, NativeLibKind};
-use crate::{filesearch, lint, EarlyDiagCtxt, HashStableContext, Session};
+use crate::{EarlyDiagCtxt, HashStableContext, Session, filesearch, lint};
 
 mod cfg;
 pub mod sigpipe;
@@ -813,6 +813,7 @@ pub struct PrintRequest {
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum PrintKind {
     FileNames,
+    HostTuple,
     Sysroot,
     TargetLibdir,
     CrateName,
@@ -841,6 +842,11 @@ pub struct NextSolverConfig {
     /// Whether the new trait solver should be enabled everywhere.
     /// This is only `true` if `coherence` is also enabled.
     pub globally: bool,
+}
+impl Default for NextSolverConfig {
+    fn default() -> Self {
+        NextSolverConfig { coherence: true, globally: false }
+    }
 }
 
 #[derive(Clone)]
@@ -1111,7 +1117,7 @@ bitflags::bitflags! {
     }
 }
 
-pub fn host_triple() -> &'static str {
+pub fn host_tuple() -> &'static str {
     // Get the host triple out of the build environment. This ensures that our
     // idea of the host triple is the same as for the set of libraries we've
     // actually built. We can't just take LLVM's host triple because they
@@ -1153,7 +1159,7 @@ impl Default for Options {
             output_types: OutputTypes(BTreeMap::new()),
             search_paths: vec![],
             maybe_sysroot: None,
-            target_triple: TargetTriple::from_triple(host_triple()),
+            target_triple: TargetTuple::from_tuple(host_tuple()),
             test: false,
             incremental: None,
             untracked_state_hash: Default::default(),
@@ -1241,6 +1247,10 @@ impl UnstableOptions {
                 SourceFileHashAlgorithm::Md5
             }
         })
+    }
+
+    pub fn checksum_hash_algorithm(&self) -> Option<SourceFileHashAlgorithm> {
+        self.checksum_hash_algorithm
     }
 }
 
@@ -1345,7 +1355,7 @@ pub fn build_target_config(early_dcx: &EarlyDiagCtxt, opts: &Options, sysroot: &
             // rust-lang/compiler-team#695. Warn unconditionally on usage to
             // raise awareness of the renaming. This code will be deleted in
             // October 2024.
-            if opts.target_triple.triple() == "wasm32-wasi" {
+            if opts.target_triple.tuple() == "wasm32-wasi" {
                 early_dcx.early_warn(
                     "the `wasm32-wasi` target is being renamed to \
                     `wasm32-wasip1` and the `wasm32-wasi` target will be \
@@ -1936,6 +1946,7 @@ fn collect_print_requests(
         ("crate-name", PrintKind::CrateName),
         ("deployment-target", PrintKind::DeploymentTarget),
         ("file-names", PrintKind::FileNames),
+        ("host-tuple", PrintKind::HostTuple),
         ("link-args", PrintKind::LinkArgs),
         ("native-static-libs", PrintKind::NativeStaticLibs),
         ("relocation-models", PrintKind::RelocationModels),
@@ -2021,16 +2032,16 @@ fn collect_print_requests(
     prints
 }
 
-pub fn parse_target_triple(early_dcx: &EarlyDiagCtxt, matches: &getopts::Matches) -> TargetTriple {
+pub fn parse_target_triple(early_dcx: &EarlyDiagCtxt, matches: &getopts::Matches) -> TargetTuple {
     match matches.opt_str("target") {
         Some(target) if target.ends_with(".json") => {
             let path = Path::new(&target);
-            TargetTriple::from_path(path).unwrap_or_else(|_| {
+            TargetTuple::from_path(path).unwrap_or_else(|_| {
                 early_dcx.early_fatal(format!("target file {path:?} does not exist"))
             })
         }
-        Some(target) => TargetTriple::TargetTriple(target),
-        _ => TargetTriple::from_triple(host_triple()),
+        Some(target) => TargetTuple::TargetTuple(target),
+        _ => TargetTuple::from_tuple(host_tuple()),
     }
 }
 
@@ -2444,7 +2455,7 @@ pub fn build_session_options(early_dcx: &mut EarlyDiagCtxt, matches: &getopts::M
     let output_types = parse_output_types(early_dcx, &unstable_opts, matches);
 
     let mut cg = CodegenOptions::build(early_dcx, matches);
-    let (disable_local_thinlto, mut codegen_units) = should_override_cgus_and_disable_thinlto(
+    let (disable_local_thinlto, codegen_units) = should_override_cgus_and_disable_thinlto(
         early_dcx,
         &output_types,
         matches,
@@ -2466,18 +2477,6 @@ pub fn build_session_options(early_dcx: &mut EarlyDiagCtxt, matches: &getopts::M
     let incremental = cg.incremental.as_ref().map(PathBuf::from);
 
     let assert_incr_state = parse_assert_incr_state(early_dcx, &unstable_opts.assert_incr_state);
-
-    if unstable_opts.profile && incremental.is_some() {
-        early_dcx.early_fatal("can't instrument with gcov profiling when compiling incrementally");
-    }
-    if unstable_opts.profile {
-        match codegen_units {
-            Some(1) => {}
-            None => codegen_units = Some(1),
-            Some(_) => early_dcx
-                .early_fatal("can't instrument with gcov profiling with multiple codegen units"),
-        }
-    }
 
     if cg.profile_generate.enabled() && cg.profile_use.is_some() {
         early_dcx.early_fatal("options `-C profile-generate` and `-C profile-use` are exclusive");
@@ -3004,11 +3003,12 @@ pub(crate) mod dep_tracking {
     use rustc_data_structures::stable_hasher::Hash64;
     use rustc_errors::LanguageIdentifier;
     use rustc_feature::UnstableFeatures;
-    use rustc_span::edition::Edition;
     use rustc_span::RealFileName;
+    use rustc_span::edition::Edition;
     use rustc_target::spec::{
         CodeModel, FramePointer, MergeFunctions, OnBrokenPipe, PanicStrategy, RelocModel,
-        RelroLevel, SanitizerSet, SplitDebuginfo, StackProtector, TargetTriple, TlsModel, WasmCAbi,
+        RelroLevel, SanitizerSet, SplitDebuginfo, StackProtector, SymbolVisibility, TargetTuple,
+        TlsModel, WasmCAbi,
     };
 
     use super::{
@@ -3092,7 +3092,7 @@ pub(crate) mod dep_tracking {
         SanitizerSet,
         CFGuard,
         CFProtection,
-        TargetTriple,
+        TargetTuple,
         Edition,
         LinkerPluginLto,
         ResolveDocLinks,
@@ -3101,6 +3101,7 @@ pub(crate) mod dep_tracking {
         StackProtector,
         SwitchWithOptPath,
         SymbolManglingVersion,
+        SymbolVisibility,
         RemapPathScopeComponents,
         SourceFileHashAlgorithm,
         OutFileName,

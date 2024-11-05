@@ -1,14 +1,15 @@
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_errors::ErrorGuaranteed;
+use rustc_hir::OpaqueTyOrigin;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
-use rustc_hir::OpaqueTyOrigin;
 use rustc_infer::infer::{InferCtxt, NllRegionVariableOrigin, TyCtxtInferExt as _};
 use rustc_infer::traits::{Obligation, ObligationCause};
 use rustc_macros::extension;
 use rustc_middle::ty::visit::TypeVisitableExt;
 use rustc_middle::ty::{
     self, GenericArgKind, GenericArgs, OpaqueHiddenType, OpaqueTypeKey, Ty, TyCtxt, TypeFoldable,
+    TypingMode,
 };
 use rustc_span::Span;
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
@@ -165,10 +166,10 @@ impl<'tcx> RegionInferenceContext<'tcx> {
                 // FIXME(oli-obk): collect multiple spans for better diagnostics down the road.
                 prev.span = prev.span.substitute_dummy(concrete_type.span);
             } else {
-                result.insert(
-                    opaque_type_key.def_id,
-                    OpaqueHiddenType { ty, span: concrete_type.span },
-                );
+                result.insert(opaque_type_key.def_id, OpaqueHiddenType {
+                    ty,
+                    span: concrete_type.span,
+                });
             }
 
             // Check that all opaque types have the same region parameters if they have the same
@@ -329,8 +330,8 @@ fn check_opaque_type_well_formed<'tcx>(
 ) -> Result<Ty<'tcx>, ErrorGuaranteed> {
     // Only check this for TAIT. RPIT already supports `tests/ui/impl-trait/nested-return-type2.rs`
     // on stable and we'd break that.
-    let opaque_ty_hir = tcx.hir().expect_item(def_id);
-    let OpaqueTyOrigin::TyAlias { .. } = opaque_ty_hir.expect_opaque_ty().origin else {
+    let opaque_ty_hir = tcx.hir().expect_opaque_ty(def_id);
+    let OpaqueTyOrigin::TyAlias { .. } = opaque_ty_hir.origin else {
         return Ok(definition_ty);
     };
     let param_env = tcx.param_env(def_id);
@@ -340,14 +341,13 @@ fn check_opaque_type_well_formed<'tcx>(
         parent_def_id = tcx.local_parent(parent_def_id);
     }
 
-    // FIXME(-Znext-solver): We probably should use `&[]` instead of
-    // and prepopulate this `InferCtxt` with known opaque values, rather than
-    // allowing opaque types to be defined and checking them after the fact.
+    // FIXME(#132279): This should eventually use the already defined hidden types
+    // instead. Alternatively we'll entirely remove this function given we also check
+    // the opaque in `check_opaque_meets_bounds` later.
     let infcx = tcx
         .infer_ctxt()
         .with_next_trait_solver(next_trait_solver)
-        .with_opaque_type_inference(parent_def_id)
-        .build();
+        .build(TypingMode::analysis_in_body(tcx, parent_def_id));
     let ocx = ObligationCtxt::new_with_diagnostics(&infcx);
     let identity_args = GenericArgs::identity_for_item(tcx, def_id);
 
@@ -360,6 +360,7 @@ fn check_opaque_type_well_formed<'tcx>(
                 .err_ctxt()
                 .report_mismatched_types(
                     &ObligationCause::misc(definition_span, def_id),
+                    param_env,
                     opaque_ty,
                     definition_ty,
                     err,
@@ -501,10 +502,10 @@ impl<'tcx> LazyOpaqueTyEnv<'tcx> {
         }
 
         let &Self { tcx, def_id, .. } = self;
-        let origin = tcx.opaque_type_origin(def_id);
+        let origin = tcx.local_opaque_ty_origin(def_id);
         let parent = match origin {
-            hir::OpaqueTyOrigin::FnReturn(parent)
-            | hir::OpaqueTyOrigin::AsyncFn(parent)
+            hir::OpaqueTyOrigin::FnReturn { parent, .. }
+            | hir::OpaqueTyOrigin::AsyncFn { parent, .. }
             | hir::OpaqueTyOrigin::TyAlias { parent, .. } => parent,
         };
         let param_env = tcx.param_env(parent);
@@ -516,7 +517,9 @@ impl<'tcx> LazyOpaqueTyEnv<'tcx> {
             },
         );
 
-        let infcx = tcx.infer_ctxt().build();
+        // FIXME(#132279): It feels wrong to use `non_body_analysis` here given that we're
+        // in a body here.
+        let infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
         let ocx = ObligationCtxt::new(&infcx);
 
         let wf_tys = ocx.assumed_wf_types(param_env, parent).unwrap_or_else(|_| {

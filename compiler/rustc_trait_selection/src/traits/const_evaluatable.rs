@@ -16,7 +16,7 @@ use rustc_middle::mir::interpret::ErrorHandled;
 use rustc_middle::traits::ObligationCause;
 use rustc_middle::ty::abstract_const::NotConstEvaluatable;
 use rustc_middle::ty::{self, TyCtxt, TypeVisitable, TypeVisitableExt, TypeVisitor};
-use rustc_span::{Span, DUMMY_SP};
+use rustc_span::{DUMMY_SP, Span};
 use tracing::{debug, instrument};
 
 use crate::traits::ObligationCtxt;
@@ -40,7 +40,7 @@ pub fn is_const_evaluatable<'tcx>(
         ty::ConstKind::Infer(_) => return Err(NotConstEvaluatable::MentionsInfer),
     };
 
-    if tcx.features().generic_const_exprs {
+    if tcx.features().generic_const_exprs() {
         let ct = tcx.expand_abstract_consts(unexpanded_ct);
 
         let is_anon_ct = if let ty::ConstKind::Unevaluated(uv) = ct.kind() {

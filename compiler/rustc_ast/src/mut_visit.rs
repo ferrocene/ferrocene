@@ -13,10 +13,10 @@ use std::panic;
 use rustc_data_structures::flat_map_in_place::FlatMapInPlace;
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_data_structures::sync::Lrc;
+use rustc_span::Span;
 use rustc_span::source_map::Spanned;
 use rustc_span::symbol::Ident;
-use rustc_span::Span;
-use smallvec::{smallvec, Array, SmallVec};
+use smallvec::{Array, SmallVec, smallvec};
 use thin_vec::ThinVec;
 
 use crate::ast::*;
@@ -83,7 +83,7 @@ pub trait MutVisitor: Sized {
         walk_crate(self, c)
     }
 
-    fn visit_meta_list_item(&mut self, list_item: &mut NestedMetaItem) {
+    fn visit_meta_list_item(&mut self, list_item: &mut MetaItemInner) {
         walk_meta_list_item(self, list_item);
     }
 
@@ -485,7 +485,7 @@ pub fn walk_ty<T: MutVisitor>(vis: &mut T, ty: &mut P<Ty>) {
         }
         TyKind::Slice(ty) => vis.visit_ty(ty),
         TyKind::Ptr(mt) => vis.visit_mt(mt),
-        TyKind::Ref(lt, mt) => {
+        TyKind::Ref(lt, mt) | TyKind::PinnedRef(lt, mt) => {
             visit_opt(lt, |lt| vis.visit_lifetime(lt));
             vis.visit_mt(mt);
         }
@@ -519,17 +519,13 @@ pub fn walk_ty<T: MutVisitor>(vis: &mut T, ty: &mut P<Ty>) {
             visit_vec(bounds, |bound| vis.visit_param_bound(bound, BoundKind::Impl));
         }
         TyKind::MacCall(mac) => vis.visit_mac_call(mac),
-        TyKind::AnonStruct(id, fields) | TyKind::AnonUnion(id, fields) => {
-            vis.visit_id(id);
-            fields.flat_map_in_place(|field| vis.flat_map_field_def(field));
-        }
     }
     visit_lazy_tts(vis, tokens);
     vis.visit_span(span);
 }
 
 fn walk_foreign_mod<T: MutVisitor>(vis: &mut T, foreign_mod: &mut ForeignMod) {
-    let ForeignMod { safety, abi: _, items } = foreign_mod;
+    let ForeignMod { extern_span: _, safety, abi: _, items } = foreign_mod;
     visit_safety(vis, safety);
     items.flat_map_in_place(|item| vis.flat_map_foreign_item(item));
 }
@@ -659,10 +655,10 @@ fn walk_macro_def<T: MutVisitor>(vis: &mut T, macro_def: &mut MacroDef) {
     visit_delim_args(vis, body);
 }
 
-fn walk_meta_list_item<T: MutVisitor>(vis: &mut T, li: &mut NestedMetaItem) {
+fn walk_meta_list_item<T: MutVisitor>(vis: &mut T, li: &mut MetaItemInner) {
     match li {
-        NestedMetaItem::MetaItem(mi) => vis.visit_meta_item(mi),
-        NestedMetaItem::Lit(_lit) => {}
+        MetaItemInner::MetaItem(mi) => vis.visit_meta_item(mi),
+        MetaItemInner::Lit(_lit) => {}
     }
 }
 
@@ -917,7 +913,7 @@ fn walk_fn_ret_ty<T: MutVisitor>(vis: &mut T, fn_ret_ty: &mut FnRetTy) {
 
 fn walk_param_bound<T: MutVisitor>(vis: &mut T, pb: &mut GenericBound) {
     match pb {
-        GenericBound::Trait(ty, _modifier) => vis.visit_poly_trait_ref(ty),
+        GenericBound::Trait(trait_ref) => vis.visit_poly_trait_ref(trait_ref),
         GenericBound::Outlives(lifetime) => walk_lifetime(vis, lifetime),
         GenericBound::Use(args, span) => {
             for arg in args {
@@ -1038,7 +1034,7 @@ fn walk_trait_ref<T: MutVisitor>(vis: &mut T, TraitRef { path, ref_id }: &mut Tr
 }
 
 fn walk_poly_trait_ref<T: MutVisitor>(vis: &mut T, p: &mut PolyTraitRef) {
-    let PolyTraitRef { bound_generic_params, trait_ref, span } = p;
+    let PolyTraitRef { bound_generic_params, modifiers: _, trait_ref, span } = p;
     bound_generic_params.flat_map_in_place(|param| vis.flat_map_generic_param(param));
     vis.visit_trait_ref(trait_ref);
     vis.visit_span(span);

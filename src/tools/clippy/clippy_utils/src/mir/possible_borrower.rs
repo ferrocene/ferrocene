@@ -65,7 +65,7 @@ impl<'a, 'b, 'tcx> PossibleBorrowerVisitor<'a, 'b, 'tcx> {
     }
 }
 
-impl<'a, 'b, 'tcx> mir::visit::Visitor<'tcx> for PossibleBorrowerVisitor<'a, 'b, 'tcx> {
+impl<'tcx> mir::visit::Visitor<'tcx> for PossibleBorrowerVisitor<'_, '_, 'tcx> {
     fn visit_assign(&mut self, place: &mir::Place<'tcx>, rvalue: &mir::Rvalue<'_>, _location: mir::Location) {
         let lhs = place.local;
         match rvalue {
@@ -177,17 +177,15 @@ pub struct PossibleBorrowerMap<'b, 'tcx> {
     pub bitset: (BitSet<mir::Local>, BitSet<mir::Local>),
 }
 
-impl<'a, 'b, 'tcx> PossibleBorrowerMap<'b, 'tcx> {
-    pub fn new(cx: &'a LateContext<'tcx>, mir: &'b mir::Body<'tcx>) -> Self {
+impl<'b, 'tcx> PossibleBorrowerMap<'b, 'tcx> {
+    pub fn new(cx: &LateContext<'tcx>, mir: &'b mir::Body<'tcx>) -> Self {
         let possible_origin = {
             let mut vis = PossibleOriginVisitor::new(mir);
             vis.visit_body(mir);
             vis.into_map(cx)
         };
         let maybe_storage_live_result = MaybeStorageLive::new(Cow::Owned(BitSet::new_empty(mir.local_decls.len())))
-            .into_engine(cx.tcx, mir)
-            .pass_name("redundant_clone")
-            .iterate_to_fixpoint()
+            .iterate_to_fixpoint(cx.tcx, mir, Some("redundant_clone"))
             .into_results_cursor(mir);
         let mut vis = PossibleBorrowerVisitor::new(cx, mir, possible_origin);
         vis.visit_body(mir);
@@ -213,7 +211,7 @@ impl<'a, 'b, 'tcx> PossibleBorrowerMap<'b, 'tcx> {
         self.bitset.0.clear();
         let maybe_live = &mut self.maybe_live;
         if let Some(bitset) = self.map.get(&borrowed) {
-            for b in bitset.iter().filter(move |b| maybe_live.contains(*b)) {
+            for b in bitset.iter().filter(move |b| maybe_live.get().contains(*b)) {
                 self.bitset.0.insert(b);
             }
         } else {
@@ -238,6 +236,6 @@ impl<'a, 'b, 'tcx> PossibleBorrowerMap<'b, 'tcx> {
 
     pub fn local_is_alive_at(&mut self, local: mir::Local, at: mir::Location) -> bool {
         self.maybe_live.seek_after_primary_effect(at);
-        self.maybe_live.contains(local)
+        self.maybe_live.get().contains(local)
     }
 }

@@ -16,11 +16,11 @@ use rustc_middle::bug;
 use rustc_middle::mir::visit::Visitor;
 use rustc_middle::mir::*;
 use rustc_middle::ty::TyCtxt;
+use rustc_mir_dataflow::Analysis;
 use rustc_mir_dataflow::debuginfo::debuginfo_locals;
 use rustc_mir_dataflow::impls::{
-    borrowed_locals, LivenessTransferFunction, MaybeTransitiveLiveLocals,
+    LivenessTransferFunction, MaybeTransitiveLiveLocals, borrowed_locals,
 };
-use rustc_mir_dataflow::Analysis;
 
 use crate::util::is_within_packed;
 
@@ -37,8 +37,7 @@ fn eliminate<'tcx>(tcx: TyCtxt<'tcx>, body: &mut Body<'tcx>) {
     always_live.union(&borrowed_locals);
 
     let mut live = MaybeTransitiveLiveLocals::new(&always_live)
-        .into_engine(tcx, body)
-        .iterate_to_fixpoint()
+        .iterate_to_fixpoint(tcx, body, None)
         .into_results_cursor(body);
 
     // For blocks with a call terminator, if an argument copy can be turned into a move,

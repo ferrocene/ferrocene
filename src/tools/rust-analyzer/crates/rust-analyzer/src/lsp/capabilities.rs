@@ -155,7 +155,15 @@ pub fn server_capabilities(config: &Config) -> ServerCapabilities {
             "ssr": true,
             "workspaceSymbolScopeKindFiltering": true,
         })),
-        diagnostic_provider: None,
+        diagnostic_provider: Some(lsp_types::DiagnosticServerCapabilities::Options(
+            lsp_types::DiagnosticOptions {
+                identifier: None,
+                inter_file_dependencies: true,
+                // FIXME
+                workspace_diagnostics: false,
+                work_done_progress_options: WorkDoneProgressOptions { work_done_progress: None },
+            },
+        )),
         inline_completion_provider: None,
     }
 }
@@ -210,9 +218,7 @@ impl ClientCapabilities {
                 .completion_item
                 .as_ref()?
                 .label_details_support
-                .as_ref()
-        })()
-        .is_some()
+        })() == Some(true)
     }
 
     fn completion_item(&self) -> Option<CompletionOptionsCompletionItem> {
@@ -382,6 +388,15 @@ impl ClientCapabilities {
         .unwrap_or_default()
     }
 
+    pub fn text_document_diagnostic(&self) -> bool {
+        (|| -> _ { self.0.text_document.as_ref()?.diagnostic.as_ref() })().is_some()
+    }
+
+    pub fn text_document_diagnostic_related_document_support(&self) -> bool {
+        (|| -> _ { self.0.text_document.as_ref()?.diagnostic.as_ref()?.related_document_support })()
+            == Some(true)
+    }
+
     pub fn code_action_group(&self) -> bool {
         self.experimental_bool("codeActionGroup")
     }
@@ -448,7 +463,7 @@ impl ClientCapabilities {
             .unwrap_or_default()
     }
 
-    pub fn inlay_hint_resolve_support_properties(&self) -> FxHashSet<String> {
+    pub fn inlay_hint_resolve_support_properties(&self) -> FxHashSet<&str> {
         self.0
             .text_document
             .as_ref()
@@ -457,8 +472,22 @@ impl ClientCapabilities {
             .map(|inlay_resolve| inlay_resolve.properties.iter())
             .into_iter()
             .flatten()
-            .cloned()
-            .collect::<FxHashSet<_>>()
+            .map(|s| s.as_str())
+            .collect()
+    }
+
+    pub fn completion_resolve_support_properties(&self) -> FxHashSet<&str> {
+        self.0
+            .text_document
+            .as_ref()
+            .and_then(|text| text.completion.as_ref())
+            .and_then(|completion_caps| completion_caps.completion_item.as_ref())
+            .and_then(|completion_item_caps| completion_item_caps.resolve_support.as_ref())
+            .map(|resolve_support| resolve_support.properties.iter())
+            .into_iter()
+            .flatten()
+            .map(|s| s.as_str())
+            .collect()
     }
 
     pub fn hover_markdown_support(&self) -> bool {

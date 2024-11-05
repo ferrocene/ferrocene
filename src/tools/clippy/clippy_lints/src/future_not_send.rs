@@ -8,7 +8,7 @@ use rustc_middle::ty::print::PrintTraitRefExt;
 use rustc_middle::ty::{self, AliasTy, ClauseKind, PredicateKind};
 use rustc_session::declare_lint_pass;
 use rustc_span::def_id::LocalDefId;
-use rustc_span::{sym, Span};
+use rustc_span::{Span, sym};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::traits::{self, FulfillmentError, ObligationCtxt};
 
@@ -74,7 +74,7 @@ impl<'tcx> LateLintPass<'tcx> for FutureNotSend {
             if is_future {
                 let send_trait = cx.tcx.get_diagnostic_item(sym::Send).unwrap();
                 let span = decl.output.span();
-                let infcx = cx.tcx.infer_ctxt().build();
+                let infcx = cx.tcx.infer_ctxt().build(cx.typing_mode());
                 let ocx = ObligationCtxt::new_with_diagnostics(&infcx);
                 let cause = traits::ObligationCause::misc(span, fn_def_id);
                 ocx.register_bound(cause, cx.param_env, ret_ty, send_trait);

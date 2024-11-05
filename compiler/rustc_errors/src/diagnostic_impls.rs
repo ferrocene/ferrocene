@@ -5,20 +5,20 @@ use std::num::ParseIntError;
 use std::path::{Path, PathBuf};
 use std::process::ExitStatus;
 
+use rustc_abi::TargetDataLayoutErrors;
 use rustc_ast_pretty::pprust;
 use rustc_macros::Subdiagnostic;
+use rustc_span::Span;
 use rustc_span::edition::Edition;
 use rustc_span::symbol::{Ident, MacroRulesNormalizedIdent, Symbol};
-use rustc_span::Span;
-use rustc_target::abi::TargetDataLayoutErrors;
-use rustc_target::spec::{PanicStrategy, SplitDebuginfo, StackProtector, TargetTriple};
+use rustc_target::spec::{PanicStrategy, SplitDebuginfo, StackProtector, TargetTuple};
 use rustc_type_ir::{ClosureKind, FloatTy};
 use {rustc_ast as ast, rustc_hir as hir};
 
 use crate::diagnostic::DiagLocation;
 use crate::{
-    fluent_generated as fluent, Diag, DiagArgValue, DiagCtxtHandle, Diagnostic, EmissionGuarantee,
-    ErrCode, IntoDiagArg, Level, SubdiagMessageOp, Subdiagnostic,
+    Diag, DiagArgValue, DiagCtxtHandle, Diagnostic, EmissionGuarantee, ErrCode, IntoDiagArg, Level,
+    SubdiagMessageOp, Subdiagnostic, fluent_generated as fluent,
 };
 
 pub struct DiagArgFromDisplay<'a>(pub &'a dyn fmt::Display);
@@ -89,7 +89,7 @@ into_diag_arg_using_display!(
     MacroRulesNormalizedIdent,
     ParseIntError,
     StackProtector,
-    &TargetTriple,
+    &TargetTuple,
     SplitDebuginfo,
     ExitStatus,
     ErrCode,

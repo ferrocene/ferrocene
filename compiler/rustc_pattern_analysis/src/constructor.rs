@@ -176,13 +176,13 @@
 //! we assume they never cover each other. In order to respect the invariants of
 //! [`SplitConstructorSet`], we give each `Opaque` constructor a unique id so we can recognize it.
 
-use std::cmp::{self, max, min, Ordering};
+use std::cmp::{self, Ordering, max, min};
 use std::fmt;
 use std::iter::once;
 
 use rustc_apfloat::ieee::{DoubleS, HalfS, IeeeFloat, QuadS, SingleS};
-use rustc_index::bit_set::{BitSet, GrowableBitSet};
 use rustc_index::IndexVec;
+use rustc_index::bit_set::{BitSet, GrowableBitSet};
 use smallvec::SmallVec;
 
 use self::Constructor::*;
@@ -735,10 +735,10 @@ impl<Cx: PatCx> Clone for Constructor<Cx> {
             Constructor::UnionField => Constructor::UnionField,
             Constructor::Bool(b) => Constructor::Bool(*b),
             Constructor::IntRange(range) => Constructor::IntRange(*range),
-            Constructor::F16Range(lo, hi, end) => Constructor::F16Range(lo.clone(), *hi, *end),
-            Constructor::F32Range(lo, hi, end) => Constructor::F32Range(lo.clone(), *hi, *end),
-            Constructor::F64Range(lo, hi, end) => Constructor::F64Range(lo.clone(), *hi, *end),
-            Constructor::F128Range(lo, hi, end) => Constructor::F128Range(lo.clone(), *hi, *end),
+            Constructor::F16Range(lo, hi, end) => Constructor::F16Range(*lo, *hi, *end),
+            Constructor::F32Range(lo, hi, end) => Constructor::F32Range(*lo, *hi, *end),
+            Constructor::F64Range(lo, hi, end) => Constructor::F64Range(*lo, *hi, *end),
+            Constructor::F128Range(lo, hi, end) => Constructor::F128Range(*lo, *hi, *end),
             Constructor::Str(value) => Constructor::Str(value.clone()),
             Constructor::Opaque(inner) => Constructor::Opaque(inner.clone()),
             Constructor::Or => Constructor::Or,

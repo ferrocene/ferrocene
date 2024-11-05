@@ -6,10 +6,10 @@ use rustc_hir::def::DefKind;
 use rustc_infer::infer::canonical::QueryRegionConstraints;
 use rustc_infer::infer::outlives::env::RegionBoundPairs;
 use rustc_infer::infer::region_constraints::GenericKind;
-use rustc_infer::infer::{outlives, InferCtxt};
+use rustc_infer::infer::{InferCtxt, outlives};
 use rustc_middle::mir::ConstraintCategory;
-use rustc_middle::traits::query::OutlivesBound;
 use rustc_middle::traits::ObligationCause;
+use rustc_middle::traits::query::OutlivesBound;
 use rustc_middle::ty::{self, RegionVid, Ty, TypeVisitableExt};
 use rustc_span::{ErrorGuaranteed, Span};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
@@ -18,7 +18,7 @@ use rustc_trait_selection::traits::query::type_op::{self, TypeOp};
 use tracing::{debug, instrument};
 use type_op::TypeOpOutput;
 
-use crate::type_check::{constraint_conversion, Locations, MirTypeckRegionConstraints};
+use crate::type_check::{Locations, MirTypeckRegionConstraints, constraint_conversion};
 use crate::universal_regions::UniversalRegions;
 
 #[derive(Debug)]
@@ -54,7 +54,7 @@ pub(crate) fn create<'tcx>(
     infcx: &InferCtxt<'tcx>,
     param_env: ty::ParamEnv<'tcx>,
     implicit_region_bound: ty::Region<'tcx>,
-    universal_regions: &Rc<UniversalRegions<'tcx>>,
+    universal_regions: Rc<UniversalRegions<'tcx>>,
     constraints: &mut MirTypeckRegionConstraints<'tcx>,
 ) -> CreateResult<'tcx> {
     UniversalRegionRelationsBuilder {
@@ -62,7 +62,7 @@ pub(crate) fn create<'tcx>(
         param_env,
         implicit_region_bound,
         constraints,
-        universal_regions: universal_regions.clone(),
+        universal_regions,
         region_bound_pairs: Default::default(),
         outlives: Default::default(),
         inverse_outlives: Default::default(),
@@ -280,7 +280,7 @@ impl<'tcx> UniversalRegionRelationsBuilder<'_, 'tcx> {
             }
             let TypeOpOutput { output: norm_ty, constraints: constraints_normalize, .. } = self
                 .param_env
-                .and(type_op::normalize::Normalize::new(ty))
+                .and(type_op::normalize::Normalize { value: ty })
                 .fully_perform(self.infcx, span)
                 .unwrap_or_else(|guar| TypeOpOutput {
                     output: Ty::new_error(self.infcx.tcx, guar),
@@ -318,7 +318,7 @@ impl<'tcx> UniversalRegionRelationsBuilder<'_, 'tcx> {
             for &(ty, _) in tcx.assumed_wf_types(tcx.local_parent(defining_ty_def_id)) {
                 let result: Result<_, ErrorGuaranteed> = self
                     .param_env
-                    .and(type_op::normalize::Normalize::new(ty))
+                    .and(type_op::normalize::Normalize { value: ty })
                     .fully_perform(self.infcx, span);
                 let Ok(TypeOpOutput { output: norm_ty, constraints: c, .. }) = result else {
                     continue;
@@ -373,7 +373,7 @@ impl<'tcx> UniversalRegionRelationsBuilder<'_, 'tcx> {
     ) -> Option<&'tcx QueryRegionConstraints<'tcx>> {
         let TypeOpOutput { output: bounds, constraints, .. } = self
             .param_env
-            .and(type_op::implied_outlives_bounds::ImpliedOutlivesBounds { ty })
+            .and(type_op::ImpliedOutlivesBounds { ty })
             .fully_perform(self.infcx, span)
             .map_err(|_: ErrorGuaranteed| debug!("failed to compute implied bounds {:?}", ty))
             .ok()?;

@@ -38,6 +38,7 @@ pub mod consteval;
 pub mod db;
 pub mod diagnostics;
 pub mod display;
+pub mod dyn_compatibility;
 pub mod lang_items;
 pub mod layout;
 pub mod method_resolution;
@@ -50,12 +51,9 @@ mod test_db;
 #[cfg(test)]
 mod tests;
 
-use std::{
-    collections::hash_map::Entry,
-    hash::{BuildHasherDefault, Hash},
-};
+use std::hash::Hash;
 
-use base_db::salsa::InternValueTrivial;
+use base_db::ra_salsa::InternValueTrivial;
 use chalk_ir::{
     fold::{Shift, TypeFoldable},
     interner::HasInterner,
@@ -64,10 +62,11 @@ use chalk_ir::{
 use either::Either;
 use hir_def::{hir::ExprId, type_ref::Rawness, CallableDefId, GeneralConstId, TypeOrConstParamId};
 use hir_expand::name::Name;
+use indexmap::{map::Entry, IndexMap};
 use intern::{sym, Symbol};
 use la_arena::{Arena, Idx};
 use mir::{MirEvalError, VTableMap};
-use rustc_hash::{FxHashMap, FxHashSet};
+use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
 use span::Edition;
 use syntax::ast::{make, ConstArg};
 use traits::FnTrait;
@@ -82,6 +81,7 @@ pub use autoderef::autoderef;
 pub use builder::{ParamKind, TyBuilder};
 pub use chalk_ext::*;
 pub use infer::{
+    cast::CastError,
     closure::{CaptureKind, CapturedItem},
     could_coerce, could_unify, could_unify_deeply, Adjust, Adjustment, AutoBorrow, BindingMode,
     InferenceDiagnostic, InferenceResult, OverloadedDeref, PointerCast,
@@ -197,7 +197,7 @@ pub enum MemoryMap {
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct ComplexMemoryMap {
-    memory: FxHashMap<usize, Box<[u8]>>,
+    memory: IndexMap<usize, Box<[u8]>, FxBuildHasher>,
     vtable: VTableMap,
 }
 
@@ -243,7 +243,7 @@ impl MemoryMap {
         match self {
             MemoryMap::Empty => Ok(Default::default()),
             MemoryMap::Simple(m) => transform((&0, m)).map(|(addr, val)| {
-                let mut map = FxHashMap::with_capacity_and_hasher(1, BuildHasherDefault::default());
+                let mut map = FxHashMap::with_capacity_and_hasher(1, rustc_hash::FxBuildHasher);
                 map.insert(addr, val);
                 map
             }),
@@ -377,6 +377,7 @@ pub enum FnAbi {
     AvrNonBlockingInterrupt,
     C,
     CCmseNonsecureCall,
+    CCmseNonsecureEntry,
     CDecl,
     CDeclUnwind,
     CUnwind,
@@ -434,6 +435,7 @@ impl FnAbi {
             s if *s == sym::avr_dash_interrupt => FnAbi::AvrInterrupt,
             s if *s == sym::avr_dash_non_dash_blocking_dash_interrupt => FnAbi::AvrNonBlockingInterrupt,
             s if *s == sym::C_dash_cmse_dash_nonsecure_dash_call => FnAbi::CCmseNonsecureCall,
+            s if *s == sym::C_dash_cmse_dash_nonsecure_dash_entry => FnAbi::CCmseNonsecureEntry,
             s if *s == sym::C_dash_unwind => FnAbi::CUnwind,
             s if *s == sym::C => FnAbi::C,
             s if *s == sym::cdecl_dash_unwind => FnAbi::CDeclUnwind,
@@ -477,6 +479,7 @@ impl FnAbi {
             FnAbi::AvrNonBlockingInterrupt => "avr-non-blocking-interrupt",
             FnAbi::C => "C",
             FnAbi::CCmseNonsecureCall => "C-cmse-nonsecure-call",
+            FnAbi::CCmseNonsecureEntry => "C-cmse-nonsecure-entry",
             FnAbi::CDecl => "C-decl",
             FnAbi::CDeclUnwind => "cdecl-unwind",
             FnAbi::CUnwind => "C-unwind",

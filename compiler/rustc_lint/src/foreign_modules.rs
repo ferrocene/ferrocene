@@ -1,3 +1,4 @@
+use rustc_abi::FIRST_VARIANT;
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_hir as hir;
@@ -5,12 +6,11 @@ use rustc_hir::def::DefKind;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{self, AdtDef, Instance, Ty, TyCtxt};
 use rustc_session::declare_lint;
-use rustc_span::{sym, Span, Symbol};
-use rustc_target::abi::FIRST_VARIANT;
+use rustc_span::{Span, Symbol, sym};
 use tracing::{debug, instrument};
 
 use crate::lints::{BuiltinClashingExtern, BuiltinClashingExternSub};
-use crate::{types, LintVec};
+use crate::{LintVec, types};
 
 pub(crate) fn provide(providers: &mut Providers) {
     *providers = Providers { clashing_extern_declarations, ..*providers };
@@ -217,7 +217,7 @@ fn structurally_same_type<'tcx>(
         // `extern` blocks cannot be generic, so we'll always get a layout here.
         let a_layout = tcx.layout_of(param_env.and(a)).unwrap();
         let b_layout = tcx.layout_of(param_env.and(b)).unwrap();
-        assert_eq!(a_layout.abi, b_layout.abi);
+        assert_eq!(a_layout.backend_repr, b_layout.backend_repr);
         assert_eq!(a_layout.size, b_layout.size);
         assert_eq!(a_layout.align, b_layout.align);
     }
@@ -280,7 +280,7 @@ fn structurally_same_type_impl<'tcx>(
 
         ensure_sufficient_stack(|| {
             match (a.kind(), b.kind()) {
-                (&Adt(a_def, _), &Adt(b_def, _)) => {
+                (&Adt(a_def, a_gen_args), &Adt(b_def, b_gen_args)) => {
                     // Only `repr(C)` types can be compared structurally.
                     if !(a_def.repr().c() && b_def.repr().c()) {
                         return false;
@@ -304,8 +304,8 @@ fn structurally_same_type_impl<'tcx>(
                                 seen_types,
                                 tcx,
                                 param_env,
-                                tcx.type_of(a_did).instantiate_identity(),
-                                tcx.type_of(b_did).instantiate_identity(),
+                                tcx.type_of(a_did).instantiate(tcx, a_gen_args),
+                                tcx.type_of(b_did).instantiate(tcx, b_gen_args),
                                 ckind,
                             )
                         },

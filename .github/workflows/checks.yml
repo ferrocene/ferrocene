@@ -33,7 +33,7 @@ jobs:
     environment: ${{ inputs.environment }}
     env:
       ARTIFACT: checks-${{inputs.host-triple}}
-      ARTIFACT_USAGE: checks-${{inputs.host-triple}}-usage
+      ARTIFACT_USAGE: usage-checks-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
     outputs:
       artifact-usage: ${{ env.ARTIFACT_USAGE }}

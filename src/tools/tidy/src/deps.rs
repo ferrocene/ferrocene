@@ -90,7 +90,7 @@ pub(crate) const WORKSPACES: &[(&str, ExceptionList, Option<(&[&str], &[&str])>,
 const EXCEPTIONS: ExceptionList = &[
     // tidy-alphabetical-start
     ("ar_archive_writer", "Apache-2.0 WITH LLVM-exception"), // rustc
-<<<<<<< HEAD
+    ("arrayref", "BSD-2-Clause"),                            // rustc
     ("aws-config", "Apache-2.0"),                            // generate-tarball, through criticaltrust
     ("aws-credential-types", "Apache-2.0"),                  // generate-tarball, through criticaltrust
     ("aws-http", "Apache-2.0"),                              // generate-tarball, through criticaltrust
@@ -110,10 +110,7 @@ const EXCEPTIONS: ExceptionList = &[
     ("aws-smithy-types", "Apache-2.0"),                      // generate-tarball, through criticaltrust
     ("aws-smithy-xml", "Apache-2.0"),                        // generate-tarball, through criticaltrust
     ("aws-types", "Apache-2.0"),                             // generate-tarball, through criticaltrust
-=======
-    ("arrayref", "BSD-2-Clause"),                            // rustc
     ("blake3", "CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception"),  // rustc
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     ("colored", "MPL-2.0"),                                  // rustfmt
     ("constant_time_eq", "CC0-1.0 OR MIT-0 OR Apache-2.0"),  // rustc
     ("dissimilar", "Apache-2.0"),                            // rustdoc, rustc_lexer (few tests) via expect-test, (dev deps)
@@ -292,11 +289,8 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "cc",
     "cfg-if",
     "cfg_aliases",
-<<<<<<< HEAD
     "const-oid", // this is a false positive: it's only used by generate-tarball
-=======
     "constant_time_eq",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "cpufeatures",
     "crc32fast",
     "crossbeam-channel",
@@ -525,11 +519,8 @@ const PERMITTED_STDLIB_DEPENDENCIES: &[&str] = &[
     "rand_core",
     "rand_xorshift",
     "rustc-demangle",
-<<<<<<< HEAD
     "ruzstd",
-=======
     "shlex",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "unicode-width",
     "unwinding",
     "wasi",

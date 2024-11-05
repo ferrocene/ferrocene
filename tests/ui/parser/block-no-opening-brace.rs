@@ -46,7 +46,7 @@ fn in_const_in_match() {
         //~^ ERROR expected identifier, found keyword `const`
         //~| ERROR expected one of `=>`, `if`, or `|`, found `2`
     }
-<<<<<<< HEAD
+}
 
 // ferrocene-annotations: fls_aadan19t5006
 // async Blocks
@@ -59,6 +59,3 @@ fn in_const_in_match() {
 //
 // ferrocene-annotations: fls_5jjm1kt43axd
 // While Loops
-=======
-}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

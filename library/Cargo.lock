@@ -113,10 +113,9 @@ dependencies = [
 
 [[package]]
 name = "gimli"
-<<<<<<< HEAD
-version = "0.28.1"
+version = "0.30.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4271d37baee1b8c7e4b708028c57d816cf9d2434acb33a549475f78c181f6253"
+checksum = "e2e1d97fbe9722ba9bbd0c97051c2956e726562b61f86a25a4360398a40edfc9"
 dependencies = [
  "compiler_builtins",
  "rustc-std-workspace-alloc",
@@ -126,22 +125,8 @@ dependencies = [
 [[package]]
 name = "gimli"
 version = "0.31.1"
-=======
-version = "0.29.0"
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "07e28edb80900c19c28f1072f2e8aeca7fa06b23cd4169cefe1af5aa3260783f"
-dependencies = [
- "compiler_builtins",
- "rustc-std-workspace-alloc",
- "rustc-std-workspace-core",
-]
-
-[[package]]
-name = "gimli"
-version = "0.30.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2e1d97fbe9722ba9bbd0c97051c2956e726562b61f86a25a4360398a40edfc9"
 dependencies = [
  "compiler_builtins",
  "rustc-std-workspace-alloc",
@@ -173,13 +158,7 @@ dependencies = [
 
 [[package]]
 name = "libc"
-<<<<<<< HEAD
 version = "0.2.161"
-=======
-version = "0.2.159"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "561d97a539a36e26a9a5fad1ea11a3039a67714694aaa379433e580854bc3dc5"
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 dependencies = [
  "rustc-std-workspace-core",
 ]
@@ -335,7 +314,6 @@ dependencies = [
 ]
 
 [[package]]
-<<<<<<< HEAD
 name = "ruzstd"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -345,12 +323,12 @@ dependencies = [
  "rustc-std-workspace-alloc",
  "rustc-std-workspace-core",
 ]
-=======
+
+[[package]]
 name = "shlex"
 version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 [[package]]
 name = "std"

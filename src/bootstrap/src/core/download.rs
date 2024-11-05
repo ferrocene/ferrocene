@@ -12,12 +12,8 @@ use xz2::bufread::XzDecoder;
 use crate::core::config::BUILDER_CONFIG_FILENAME;
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::utils::helpers::{check_run, exe, hex_encode, move_file, program_out_of_date};
-<<<<<<< HEAD
-use crate::{t, Config};
-=======
 use crate::{Config, t};
 
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 static SHOULD_FIX_BINS_AND_DYLIBS: OnceLock<bool> = OnceLock::new();
 
 /// `Config::try_run` wrapper for this module to avoid warnings on `try_run`, since we don't have access to a `builder` yet.

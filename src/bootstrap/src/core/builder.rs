@@ -6,7 +6,7 @@ use std::fmt::{Debug, Write};
 use std::hash::Hash;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
-use std::sync::{atomic, LazyLock};
+use std::sync::{LazyLock, atomic};
 use std::time::{Duration, Instant};
 use std::{env, fs};
 
@@ -1062,7 +1062,6 @@ impl<'a> Builder<'a> {
                 run::GenerateWindowsSys,
                 run::GenerateCompletions,
             ),
-<<<<<<< HEAD
             Kind::Sign => describe!(
                 // Qualification Documents
                 crate::ferrocene::sign::DocumentList,
@@ -1074,12 +1073,9 @@ impl<'a> Builder<'a> {
                 // QMS Documents
                 crate::ferrocene::sign::InternalProcedures,
             ),
-            Kind::Setup => describe!(setup::Profile, setup::Hook, setup::Link, setup::Vscode),
-=======
             Kind::Setup => {
                 describe!(setup::Profile, setup::Hook, setup::Link, setup::Editor)
             }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             Kind::Clean => describe!(clean::CleanAll, clean::Rustc, clean::Std),
             Kind::Vendor => describe!(vendor::Vendor),
             // special-cased in Build::build()

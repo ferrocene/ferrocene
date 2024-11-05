@@ -71,7 +71,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: test-outcomes
-          pattern: artifact-*-usage
+          pattern: usage-*
           merge-multiple: true
 
       - name: Run

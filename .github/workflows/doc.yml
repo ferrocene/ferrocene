@@ -35,7 +35,7 @@ jobs:
     runs-on: ${{ inputs.runner }}
     env:
       ARTIFACT: doc-${{inputs.host-triple}}
-      ARTIFACT_USAGE: doc-${{inputs.host-triple}}-usage
+      ARTIFACT_USAGE: usage-doc-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
@@ -67,7 +67,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: test-outcomes
-          pattern: artifact-*-usage
+          pattern: usage-*
           merge-multiple: true
 
       - name: Run

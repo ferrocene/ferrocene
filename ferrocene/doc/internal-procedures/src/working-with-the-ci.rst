@@ -135,7 +135,7 @@ To build the most common image, ``ubuntu-20``:
 .. code-block:: bash
 
    cd $FERROCENE_REPO
-   docker build -t ubuntu-20 -f ferrocene/ci/docker-images/ubuntu-20/Dockerfile .
+   docker build --tag ubuntu-20 --file ferrocene/ci/docker-images/ubuntu-20/Dockerfile .
 
 
 Reproducing CI jobs

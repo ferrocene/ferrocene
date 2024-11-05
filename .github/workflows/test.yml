@@ -70,7 +70,7 @@ jobs:
     environment: ${{ inputs.environment }}
     env:
       ARTIFACT: test-${{inputs.triple}}
-      ARTIFACT_USAGE: test-${{inputs.triple}}-usage
+      ARTIFACT_USAGE: usage-test-${{inputs.triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triple }}
     outputs:
@@ -149,7 +149,7 @@ jobs:
     environment: ${{ inputs.environment }}
     env:
       ARTIFACT: test-compiletest-${{inputs.triple}}
-      ARTIFACT_USAGE: test-compiletest-${{inputs.triple}}-usage
+      ARTIFACT_USAGE: usage-test-compiletest-${{inputs.triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triple }}
     outputs:
@@ -228,7 +228,7 @@ jobs:
     environment: ${{ inputs.environment }}
     env:
       ARTIFACT: test-library-${{inputs.triple}}
-      ARTIFACT_USAGE: test-library-${{inputs.triple}}-usage
+      ARTIFACT_USAGE: usage-test-library-${{inputs.triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triple }}
     outputs:
@@ -308,7 +308,7 @@ jobs:
     environment: ${{ inputs.environment }}
     env:
       ARTIFACT: test-library-std-${{inputs.triple}}
-      ARTIFACT_USAGE: test-library-std-${{inputs.triple}}-usage
+      ARTIFACT_USAGE: usage-test-library-std-${{inputs.triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triple }}
     outputs:

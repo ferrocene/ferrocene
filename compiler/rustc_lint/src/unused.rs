@@ -4,14 +4,14 @@ use std::ops::ControlFlow;
 use rustc_ast as ast;
 use rustc_ast::util::{classify, parser};
 use rustc_ast::{ExprKind, StmtKind};
-use rustc_errors::{pluralize, MultiSpan};
+use rustc_errors::{MultiSpan, pluralize};
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::DefId;
 use rustc_hir::{self as hir, LangItem};
 use rustc_infer::traits::util::elaborate;
-use rustc_middle::ty::{self, adjustment, Ty};
+use rustc_middle::ty::{self, Ty, adjustment};
 use rustc_session::{declare_lint, declare_lint_pass, impl_lint_pass};
-use rustc_span::symbol::{kw, sym, Symbol};
+use rustc_span::symbol::{Symbol, kw, sym};
 use rustc_span::{BytePos, Span};
 use tracing::instrument;
 
@@ -185,22 +185,18 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
         let mut op_warned = false;
 
         if let Some(must_use_op) = must_use_op {
-            cx.emit_span_lint(
-                UNUSED_MUST_USE,
-                expr.span,
-                UnusedOp {
-                    op: must_use_op,
-                    label: expr.span,
-                    suggestion: if expr_is_from_block {
-                        UnusedOpSuggestion::BlockTailExpr {
-                            before_span: expr.span.shrink_to_lo(),
-                            after_span: expr.span.shrink_to_hi(),
-                        }
-                    } else {
-                        UnusedOpSuggestion::NormalExpr { span: expr.span.shrink_to_lo() }
-                    },
+            cx.emit_span_lint(UNUSED_MUST_USE, expr.span, UnusedOp {
+                op: must_use_op,
+                label: expr.span,
+                suggestion: if expr_is_from_block {
+                    UnusedOpSuggestion::BlockTailExpr {
+                        before_span: expr.span.shrink_to_lo(),
+                        after_span: expr.span.shrink_to_hi(),
+                    }
+                } else {
+                    UnusedOpSuggestion::NormalExpr { span: expr.span.shrink_to_lo() }
                 },
-            );
+            });
             op_warned = true;
         }
 
@@ -497,39 +493,35 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
                     );
                 }
                 MustUsePath::Closure(span) => {
-                    cx.emit_span_lint(
-                        UNUSED_MUST_USE,
-                        *span,
-                        UnusedClosure { count: plural_len, pre: descr_pre, post: descr_post },
-                    );
+                    cx.emit_span_lint(UNUSED_MUST_USE, *span, UnusedClosure {
+                        count: plural_len,
+                        pre: descr_pre,
+                        post: descr_post,
+                    });
                 }
                 MustUsePath::Coroutine(span) => {
-                    cx.emit_span_lint(
-                        UNUSED_MUST_USE,
-                        *span,
-                        UnusedCoroutine { count: plural_len, pre: descr_pre, post: descr_post },
-                    );
+                    cx.emit_span_lint(UNUSED_MUST_USE, *span, UnusedCoroutine {
+                        count: plural_len,
+                        pre: descr_pre,
+                        post: descr_post,
+                    });
                 }
                 MustUsePath::Def(span, def_id, reason) => {
-                    cx.emit_span_lint(
-                        UNUSED_MUST_USE,
-                        *span,
-                        UnusedDef {
-                            pre: descr_pre,
-                            post: descr_post,
-                            cx,
-                            def_id: *def_id,
-                            note: *reason,
-                            suggestion: (!is_inner).then_some(if expr_is_from_block {
-                                UnusedDefSuggestion::BlockTailExpr {
-                                    before_span: span.shrink_to_lo(),
-                                    after_span: span.shrink_to_hi(),
-                                }
-                            } else {
-                                UnusedDefSuggestion::NormalExpr { span: span.shrink_to_lo() }
-                            }),
-                        },
-                    );
+                    cx.emit_span_lint(UNUSED_MUST_USE, *span, UnusedDef {
+                        pre: descr_pre,
+                        post: descr_post,
+                        cx,
+                        def_id: *def_id,
+                        note: *reason,
+                        suggestion: (!is_inner).then_some(if expr_is_from_block {
+                            UnusedDefSuggestion::BlockTailExpr {
+                                before_span: span.shrink_to_lo(),
+                                after_span: span.shrink_to_hi(),
+                            }
+                        } else {
+                            UnusedDefSuggestion::NormalExpr { span: span.shrink_to_lo() }
+                        }),
+                    });
                 }
             }
         }
@@ -791,7 +783,7 @@ trait UnusedDelimLint {
         // ```
         // fn f(){(print!(á
         // ```
-        use rustc_ast::visit::{walk_expr, Visitor};
+        use rustc_ast::visit::{Visitor, walk_expr};
         struct ErrExprVisitor;
         impl<'ast> Visitor<'ast> for ErrExprVisitor {
             type Result = ControlFlow<()>;
@@ -812,7 +804,15 @@ trait UnusedDelimLint {
                 .find_ancestor_inside(value.span)
                 .map(|span| (value.span.with_hi(span.lo()), value.span.with_lo(span.hi()))),
             ast::ExprKind::Paren(ref expr) => {
-                expr.span.find_ancestor_inside(value.span).map(|expr_span| {
+                // For the expr with attributes, like `let _ = (#[inline] || println!("Hello!"));`,
+                // the span should contains the attributes, or the suggestion will remove them.
+                let expr_span_with_attrs =
+                    if let Some(attr_lo) = expr.attrs.iter().map(|attr| attr.span.lo()).min() {
+                        expr.span.with_lo(attr_lo)
+                    } else {
+                        expr.span
+                    };
+                expr_span_with_attrs.find_ancestor_inside(value.span).map(|expr_span| {
                     (value.span.with_hi(expr_span.lo()), value.span.with_lo(expr_span.hi()))
                 })
             }
@@ -869,11 +869,11 @@ trait UnusedDelimLint {
                 end_replace: hi_replace,
             }
         });
-        cx.emit_span_lint(
-            self.lint(),
-            primary_span,
-            UnusedDelim { delim: Self::DELIM_STR, item: msg, suggestion },
-        );
+        cx.emit_span_lint(self.lint(), primary_span, UnusedDelim {
+            delim: Self::DELIM_STR,
+            item: msg,
+            suggestion,
+        });
     }
 
     fn check_expr(&mut self, cx: &EarlyContext<'_>, e: &ast::Expr) {
@@ -1558,11 +1558,9 @@ impl UnusedImportBraces {
                 ast::UseTreeKind::Nested { .. } => return,
             };
 
-            cx.emit_span_lint(
-                UNUSED_IMPORT_BRACES,
-                item.span,
-                UnusedImportBracesDiag { node: node_name },
-            );
+            cx.emit_span_lint(UNUSED_IMPORT_BRACES, item.span, UnusedImportBracesDiag {
+                node: node_name,
+            });
         }
     }
 }

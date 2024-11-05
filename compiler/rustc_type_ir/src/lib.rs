@@ -1,11 +1,11 @@
 // tidy-alphabetical-start
 #![allow(rustc::usage_of_ty_tykind)]
+#![allow(rustc::usage_of_type_ir_inherent)]
 #![cfg_attr(
     feature = "nightly",
     feature(associated_type_defaults, never_type, rustc_attrs, negative_impls)
 )]
 #![cfg_attr(feature = "nightly", allow(internal_features))]
-#![cfg_attr(not(bootstrap), allow(rustc::usage_of_type_ir_inherent))]
 #![warn(unreachable_pub)]
 // tidy-alphabetical-end
 
@@ -56,6 +56,12 @@ mod ty_info;
 mod ty_kind;
 mod upcast;
 
+pub use AliasTyKind::*;
+pub use DynKind::*;
+pub use InferTy::*;
+pub use RegionKind::*;
+pub use TyKind::*;
+pub use Variance::*;
 pub use binder::*;
 pub use canonical::*;
 #[cfg(feature = "nightly")]
@@ -73,12 +79,6 @@ pub use region_kind::*;
 pub use ty_info::*;
 pub use ty_kind::*;
 pub use upcast::*;
-pub use AliasTyKind::*;
-pub use DynKind::*;
-pub use InferTy::*;
-pub use RegionKind::*;
-pub use TyKind::*;
-pub use Variance::*;
 
 rustc_index::newtype_index! {
     /// A [De Bruijn index][dbi] is a standard means of representing
@@ -206,8 +206,8 @@ pub fn debug_bound_var<T: std::fmt::Write>(
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "nightly", derive(Decodable, Encodable, Hash, HashStable_NoContext))]
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "nightly", derive(Decodable, Encodable, HashStable_NoContext))]
 #[cfg_attr(feature = "nightly", rustc_pass_by_value)]
 pub enum Variance {
     Covariant,     // T<A> <: T<B> iff A <: B -- e.g., function return type

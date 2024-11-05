@@ -2,14 +2,19 @@ use std::fmt::Debug;
 use std::iter;
 
 use hir::def_id::DefId;
-use rustc_hir as hir;
+use rustc_abi::Integer::{I8, I32};
+use rustc_abi::Primitive::{self, Float, Int, Pointer};
+use rustc_abi::{
+    Abi, AbiAndPrefAlign, AddressSpace, Align, FieldsShape, HasDataLayout, LayoutCalculatorError,
+    LayoutS, Niche, ReprOptions, Scalar, Size, StructKind, TagEncoding, Variants, WrappingRange,
+};
 use rustc_index::bit_set::BitSet;
 use rustc_index::{IndexSlice, IndexVec};
 use rustc_middle::bug;
 use rustc_middle::mir::{CoroutineLayout, CoroutineSavedLocal};
 use rustc_middle::query::Providers;
 use rustc_middle::ty::layout::{
-    FloatExt, HasTyCtxt, IntegerExt, LayoutCx, LayoutError, LayoutOf, TyAndLayout, MAX_SIMD_LANES,
+    FloatExt, HasTyCtxt, IntegerExt, LayoutCx, LayoutError, LayoutOf, MAX_SIMD_LANES, TyAndLayout,
 };
 use rustc_middle::ty::print::with_no_trimmed_paths;
 use rustc_middle::ty::{
@@ -18,8 +23,9 @@ use rustc_middle::ty::{
 use rustc_session::{DataTypeKind, FieldInfo, FieldKind, SizeKind, VariantInfo};
 use rustc_span::sym;
 use rustc_span::symbol::Symbol;
-use rustc_target::abi::*;
+use rustc_target::abi::{FIRST_VARIANT, FieldIdx, Layout, VariantIdx};
 use tracing::{debug, instrument, trace};
+use {rustc_abi as abi, rustc_hir as hir};
 
 use crate::errors::{
     MultipleArrayFieldsSimdType, NonPrimitiveSimdType, OversizedSimdType, ZeroLengthSimdType,
@@ -194,23 +200,17 @@ fn layout_of_uncached<'tcx>(
         }
 
         // Basic scalars.
-        ty::Bool => tcx.mk_layout(LayoutS::scalar(
-            cx,
-            Scalar::Initialized {
-                value: Int(I8, false),
-                valid_range: WrappingRange { start: 0, end: 1 },
-            },
-        )),
-        ty::Char => tcx.mk_layout(LayoutS::scalar(
-            cx,
-            Scalar::Initialized {
-                value: Int(I32, false),
-                valid_range: WrappingRange { start: 0, end: 0x10FFFF },
-            },
-        )),
-        ty::Int(ity) => scalar(Int(Integer::from_int_ty(dl, ity), true)),
-        ty::Uint(ity) => scalar(Int(Integer::from_uint_ty(dl, ity), false)),
-        ty::Float(fty) => scalar(Float(Float::from_float_ty(fty))),
+        ty::Bool => tcx.mk_layout(LayoutS::scalar(cx, Scalar::Initialized {
+            value: Int(I8, false),
+            valid_range: WrappingRange { start: 0, end: 1 },
+        })),
+        ty::Char => tcx.mk_layout(LayoutS::scalar(cx, Scalar::Initialized {
+            value: Int(I32, false),
+            valid_range: WrappingRange { start: 0, end: 0x10FFFF },
+        })),
+        ty::Int(ity) => scalar(Int(abi::Integer::from_int_ty(dl, ity), true)),
+        ty::Uint(ity) => scalar(Int(abi::Integer::from_uint_ty(dl, ity), false)),
+        ty::Float(fty) => scalar(Float(abi::Float::from_float_ty(fty))),
         ty::FnPtr(..) => {
             let mut ptr = scalar_unit(Pointer(dl.instruction_address_space));
             ptr.valid_range_mut().start = 1;
@@ -510,13 +510,10 @@ fn layout_of_uncached<'tcx>(
                 // Non-power-of-two vectors have padding up to the next power-of-two.
                 // If we're a packed repr, remove the padding while keeping the alignment as close
                 // to a vector as possible.
-                (
-                    Abi::Aggregate { sized: true },
-                    AbiAndPrefAlign {
-                        abi: Align::max_for_offset(size),
-                        pref: dl.vector_align(size).pref,
-                    },
-                )
+                (Abi::Aggregate { sized: true }, AbiAndPrefAlign {
+                    abi: Align::max_for_offset(size),
+                    pref: dl.vector_align(size).pref,
+                })
             } else {
                 (Abi::Vector { element: e_abi, count: e_len }, dl.vector_align(size))
             };
@@ -572,7 +569,7 @@ fn layout_of_uncached<'tcx>(
             }
 
             let get_discriminant_type =
-                |min, max| Integer::repr_discr(tcx, ty, &def.repr(), min, max);
+                |min, max| abi::Integer::repr_discr(tcx, ty, &def.repr(), min, max);
 
             let discriminants_iter = || {
                 def.is_enum()
@@ -825,7 +822,7 @@ fn coroutine_layout<'tcx>(
 
     // `info.variant_fields` already accounts for the reserved variants, so no need to add them.
     let max_discr = (info.variant_fields.len() - 1) as u128;
-    let discr_int = Integer::fit_unsigned(max_discr);
+    let discr_int = abi::Integer::fit_unsigned(max_discr);
     let tag = Scalar::Initialized {
         value: Primitive::Int(discr_int, /* signed = */ false),
         valid_range: WrappingRange { start: 0, end: max_discr },
@@ -1124,13 +1121,10 @@ fn variant_info_for_adt<'tcx>(
                 })
                 .collect();
 
-            (
-                variant_infos,
-                match tag_encoding {
-                    TagEncoding::Direct => Some(tag.size(cx)),
-                    _ => None,
-                },
-            )
+            (variant_infos, match tag_encoding {
+                TagEncoding::Direct => Some(tag.size(cx)),
+                _ => None,
+            })
         }
     }
 }
@@ -1250,11 +1244,8 @@ fn variant_info_for_coroutine<'tcx>(
     let end_states: Vec<_> = end_states.collect();
     variant_infos.extend(end_states);
 
-    (
-        variant_infos,
-        match tag_encoding {
-            TagEncoding::Direct => Some(tag.size(cx)),
-            _ => None,
-        },
-    )
+    (variant_infos, match tag_encoding {
+        TagEncoding::Direct => Some(tag.size(cx)),
+        _ => None,
+    })
 }

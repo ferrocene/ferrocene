@@ -9,7 +9,7 @@
 
 use rustc_span::edition::Edition;
 
-use crate::{declare_lint, declare_lint_pass, FutureIncompatibilityReason};
+use crate::{FutureIncompatibilityReason, declare_lint, declare_lint_pass};
 
 declare_lint_pass! {
     /// Does nothing as a lint pass, but registers some `Lint`s
@@ -34,7 +34,6 @@ declare_lint_pass! {
         DEAD_CODE,
         DEPENDENCY_ON_UNIT_NEVER_TYPE_FALLBACK,
         DEPRECATED,
-        DEPRECATED_CFG_ATTR_CRATE_TYPE_NAME,
         DEPRECATED_IN_FUTURE,
         DEPRECATED_SAFE_2024,
         DEPRECATED_WHERE_CLAUSE_LOCATION,
@@ -81,6 +80,7 @@ declare_lint_pass! {
         PRIVATE_INTERFACES,
         PROC_MACRO_DERIVE_RESOLUTION_FALLBACK,
         PTR_CAST_ADD_AUTO_TO_OBJECT,
+        PTR_TO_INTEGER_TRANSMUTE_IN_CONSTS,
         PUB_USE_OF_PRIVATE_EXTERN_CRATE,
         REDUNDANT_IMPORTS,
         REDUNDANT_LIFETIMES,
@@ -92,6 +92,7 @@ declare_lint_pass! {
         RUST_2021_INCOMPATIBLE_OR_PATTERNS,
         RUST_2021_PREFIXES_INCOMPATIBLE_SYNTAX,
         RUST_2021_PRELUDE_COLLISIONS,
+        RUST_2024_GUARDED_STRING_INCOMPATIBLE_SYNTAX,
         RUST_2024_INCOMPATIBLE_PAT,
         RUST_2024_PRELUDE_COLLISIONS,
         SELF_CONSTRUCTOR_FROM_OUTER_ITEM,
@@ -99,7 +100,6 @@ declare_lint_pass! {
         SINGLE_USE_LIFETIMES,
         SOFT_UNSTABLE,
         STABLE_FEATURES,
-        STATIC_MUT_REFS,
         TEST_UNSTABLE_LINT,
         TEXT_DIRECTION_CODEPOINT_IN_COMMENT,
         TRIVIAL_CASTS,
@@ -124,6 +124,7 @@ declare_lint_pass! {
         UNSTABLE_NAME_COLLISIONS,
         UNSTABLE_SYNTAX_PRE_EXPANSION,
         UNSUPPORTED_CALLING_CONVENTIONS,
+        UNSUPPORTED_FN_PTR_CALLING_CONVENTIONS,
         UNUSED_ASSIGNMENTS,
         UNUSED_ASSOCIATED_TYPE_BOUNDS,
         UNUSED_ATTRIBUTES,
@@ -1650,7 +1651,6 @@ declare_lint! {
     /// ### Example
     ///
     /// ```rust,edition2021
-    /// #![feature(ref_pat_eat_one_layer_2024)]
     /// #![warn(rust_2024_incompatible_pat)]
     ///
     /// if let Some(&a) = &Some(&0u8) {
@@ -1671,12 +1671,10 @@ declare_lint! {
     pub RUST_2024_INCOMPATIBLE_PAT,
     Allow,
     "detects patterns whose meaning will change in Rust 2024",
-    @feature_gate = ref_pat_eat_one_layer_2024;
-    // FIXME uncomment below upon stabilization
-    /*@future_incompatible = FutureIncompatibleInfo {
+    @future_incompatible = FutureIncompatibleInfo {
         reason: FutureIncompatibilityReason::EditionSemanticsChange(Edition::Edition2024),
         reference: "123076",
-    };*/
+    };
 }
 
 declare_lint! {
@@ -1870,7 +1868,6 @@ declare_lint! {
     /// ### Example
     ///
     /// ```rust,compile_fail
-    /// # #[cfg_attr(bootstrap)] compile_error!(); // Remove this in bootstrap bump.
     /// #![deny(elided_named_lifetimes)]
     /// struct Foo;
     /// impl Foo {
@@ -1924,57 +1921,6 @@ declare_lint! {
     @future_incompatible = FutureIncompatibleInfo {
         reason: FutureIncompatibilityReason::EditionError(Edition::Edition2021),
         reference: "<https://doc.rust-lang.org/nightly/edition-guide/rust-2021/warnings-promoted-to-error.html>",
-    };
-}
-
-declare_lint! {
-    /// The `static_mut_refs` lint checks for shared or mutable references
-    /// of mutable static inside `unsafe` blocks and `unsafe` functions.
-    ///
-    /// ### Example
-    ///
-    /// ```rust,edition2021
-    /// fn main() {
-    ///     static mut X: i32 = 23;
-    ///     static mut Y: i32 = 24;
-    ///
-    ///     unsafe {
-    ///         let y = &X;
-    ///         let ref x = X;
-    ///         let (x, y) = (&X, &Y);
-    ///         foo(&X);
-    ///     }
-    /// }
-    ///
-    /// unsafe fn _foo() {
-    ///     static mut X: i32 = 23;
-    ///     static mut Y: i32 = 24;
-    ///
-    ///     let y = &X;
-    ///     let ref x = X;
-    ///     let (x, y) = (&X, &Y);
-    ///     foo(&X);
-    /// }
-    ///
-    /// fn foo<'a>(_x: &'a i32) {}
-    /// ```
-    ///
-    /// {{produces}}
-    ///
-    /// ### Explanation
-    ///
-    /// Shared or mutable references of mutable static are almost always a mistake and
-    /// can lead to undefined behavior and various other problems in your code.
-    ///
-    /// This lint is "warn" by default on editions up to 2021, in 2024 there is
-    /// a hard error instead.
-    pub STATIC_MUT_REFS,
-    Warn,
-    "shared references or mutable references of mutable static is discouraged",
-    @future_incompatible = FutureIncompatibleInfo {
-        reason: FutureIncompatibilityReason::EditionError(Edition::Edition2024),
-        reference: "issue #114447 <https://github.com/rust-lang/rust/issues/114447>",
-        explain_reason: false,
     };
 }
 
@@ -2977,16 +2923,16 @@ declare_lint! {
     /// ```rust
     /// #![feature(asm_experimental_arch, naked_functions)]
     ///
-    /// use std::arch::asm;
+    /// use std::arch::naked_asm;
     ///
     /// #[naked]
     /// pub fn default_abi() -> u32 {
-    ///     unsafe { asm!("", options(noreturn)); }
+    ///     unsafe { naked_asm!(""); }
     /// }
     ///
     /// #[naked]
     /// pub extern "Rust" fn rust_abi() -> u32 {
-    ///     unsafe { asm!("", options(noreturn)); }
+    ///     unsafe { naked_asm!(""); }
     /// }
     /// ```
     ///
@@ -3193,42 +3139,6 @@ declare_lint! {
     pub LARGE_ASSIGNMENTS,
     Warn,
     "detects large moves or copies",
-}
-
-declare_lint! {
-    /// The `deprecated_cfg_attr_crate_type_name` lint detects uses of the
-    /// `#![cfg_attr(..., crate_type = "...")]` and
-    /// `#![cfg_attr(..., crate_name = "...")]` attributes to conditionally
-    /// specify the crate type and name in the source code.
-    ///
-    /// ### Example
-    ///
-    /// ```rust,compile_fail
-    /// #![cfg_attr(debug_assertions, crate_type = "lib")]
-    /// ```
-    ///
-    /// {{produces}}
-    ///
-    ///
-    /// ### Explanation
-    ///
-    /// The `#![crate_type]` and `#![crate_name]` attributes require a hack in
-    /// the compiler to be able to change the used crate type and crate name
-    /// after macros have been expanded. Neither attribute works in combination
-    /// with Cargo as it explicitly passes `--crate-type` and `--crate-name` on
-    /// the commandline. These values must match the value used in the source
-    /// code to prevent an error.
-    ///
-    /// To fix the warning use `--crate-type` on the commandline when running
-    /// rustc instead of `#![cfg_attr(..., crate_type = "...")]` and
-    /// `--crate-name` instead of `#![cfg_attr(..., crate_name = "...")]`.
-    pub DEPRECATED_CFG_ATTR_CRATE_TYPE_NAME,
-    Deny,
-    "detects usage of `#![cfg_attr(..., crate_type/crate_name = \"...\")]`",
-    @future_incompatible = FutureIncompatibleInfo {
-        reason: FutureIncompatibilityReason::FutureReleaseErrorDontReportInDeps,
-        reference: "issue #91632 <https://github.com/rust-lang/rust/issues/91632>",
-    };
 }
 
 declare_lint! {
@@ -3923,6 +3833,50 @@ declare_lint! {
     @future_incompatible = FutureIncompatibleInfo {
         reason: FutureIncompatibilityReason::FutureReleaseErrorDontReportInDeps,
         reference: "issue #87678 <https://github.com/rust-lang/rust/issues/87678>",
+    };
+}
+
+declare_lint! {
+    /// The `unsupported_fn_ptr_calling_conventions` lint is output whenever there is a use of
+    /// a target dependent calling convention on a target that does not support this calling
+    /// convention on a function pointer.
+    ///
+    /// For example `stdcall` does not make much sense for a x86_64 or, more apparently, powerpc
+    /// code, because this calling convention was never specified for those targets.
+    ///
+    /// ### Example
+    ///
+    /// ```rust,ignore (needs specific targets)
+    /// fn stdcall_ptr(f: extern "stdcall" fn ()) {
+    ///     f()
+    /// }
+    /// ```
+    ///
+    /// This will produce:
+    ///
+    /// ```text
+    /// warning: the calling convention `"stdcall"` is not supported on this target
+    ///   --> $DIR/unsupported.rs:34:15
+    ///    |
+    /// LL | fn stdcall_ptr(f: extern "stdcall" fn()) {
+    ///    |               ^^^^^^^^^^^^^^^^^^^^^^^^
+    ///    |
+    ///    = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
+    ///    = note: for more information, see issue #130260 <https://github.com/rust-lang/rust/issues/130260>
+    ///    = note: `#[warn(unsupported_fn_ptr_calling_conventions)]` on by default
+    /// ```
+    ///
+    /// ### Explanation
+    ///
+    /// On most of the targets the behaviour of `stdcall` and similar calling conventions is not
+    /// defined at all, but was previously accepted due to a bug in the implementation of the
+    /// compiler.
+    pub UNSUPPORTED_FN_PTR_CALLING_CONVENTIONS,
+    Warn,
+    "use of unsupported calling convention for function pointer",
+    @future_incompatible = FutureIncompatibleInfo {
+        reason: FutureIncompatibilityReason::FutureReleaseErrorDontReportInDeps,
+        reference: "issue #130260 <https://github.com/rust-lang/rust/issues/130260>",
     };
 }
 
@@ -5049,4 +5003,78 @@ declare_lint! {
         reason: FutureIncompatibilityReason::FutureReleaseErrorDontReportInDeps,
         reference: "issue #124535 <https://github.com/rust-lang/rust/issues/124535>",
     };
+}
+
+declare_lint! {
+    /// The `ptr_to_integer_transmute_in_consts` lint detects pointer to integer
+    /// transmute in const functions and associated constants.
+    ///
+    /// ### Example
+    ///
+    /// ```rust
+    /// const fn foo(ptr: *const u8) -> usize {
+    ///    unsafe {
+    ///        std::mem::transmute::<*const u8, usize>(ptr)
+    ///    }
+    /// }
+    /// ```
+    ///
+    /// {{produces}}
+    ///
+    /// ### Explanation
+    ///
+    /// Transmuting pointers to integers in a `const` context is undefined behavior.
+    /// Any attempt to use the resulting integer will abort const-evaluation.
+    ///
+    /// But sometimes the compiler might not emit an error for pointer to integer transmutes
+    /// inside const functions and associated consts because they are evaluated only when referenced.
+    /// Therefore, this lint serves as an extra layer of defense to prevent any undefined behavior
+    /// from compiling without any warnings or errors.
+    ///
+    /// See [std::mem::transmute] in the reference for more details.
+    ///
+    /// [std::mem::transmute]: https://doc.rust-lang.org/std/mem/fn.transmute.html
+    pub PTR_TO_INTEGER_TRANSMUTE_IN_CONSTS,
+    Warn,
+    "detects pointer to integer transmutes in const functions and associated constants",
+}
+
+declare_lint! {
+    /// The `rust_2024_guarded_string_incompatible_syntax` lint detects `#` tokens
+    /// that will be parsed as part of a guarded string literal in Rust 2024.
+    ///
+    /// ### Example
+    ///
+    /// ```rust,edition2021,compile_fail
+    /// #![deny(rust_2024_guarded_string_incompatible_syntax)]
+    ///
+    /// macro_rules! m {
+    ///     (# $x:expr #) => ();
+    ///     (# $x:expr) => ();
+    /// }
+    ///
+    /// m!(#"hey"#);
+    /// m!(#"hello");
+    /// ```
+    ///
+    /// {{produces}}
+    ///
+    /// ### Explanation
+    ///
+    /// Prior to Rust 2024, `#"hey"#` is three tokens: the first `#`
+    /// followed by the string literal `"hey"` then the final `#`.
+    /// In Rust 2024, the whole sequence is considered a single token.
+    ///
+    /// This lint suggests to add whitespace between the leading `#`
+    /// and the string to keep them separated in Rust 2024.
+    // Allow this lint -- rustdoc doesn't yet support threading edition into this lint's parser.
+    #[allow(rustdoc::invalid_rust_codeblocks)]
+    pub RUST_2024_GUARDED_STRING_INCOMPATIBLE_SYNTAX,
+    Allow,
+    "will be parsed as a guarded string in Rust 2024",
+    @future_incompatible = FutureIncompatibleInfo {
+        reason: FutureIncompatibilityReason::EditionError(Edition::Edition2024),
+        reference: "issue #123735 <https://github.com/rust-lang/rust/issues/123735>",
+    };
+    crate_level_only
 }

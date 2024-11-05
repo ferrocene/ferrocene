@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 /// This integer is incremented with every breaking change to the API,
 /// and is returned along with the JSON blob as [`Crate::format_version`].
 /// Consuming code should assert that this value matches the format version(s) that it supports.
-pub const FORMAT_VERSION: u32 = 34;
+pub const FORMAT_VERSION: u32 = 36;
 
 /// The root of the emitted JSON blob.
 ///
@@ -296,9 +296,9 @@ pub enum AssocItemConstraintKind {
 /// Rustdoc makes no guarantees about the inner value of Id's. Applications
 /// should treat them as opaque keys to lookup items, and avoid attempting
 /// to parse them, or otherwise depend on any implementation details.
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 // FIXME(aDotInTheVoid): Consider making this non-public in rustdoc-types.
-pub struct Id(pub String);
+pub struct Id(pub u32);
 
 /// The fundamental kind of an item. Unlike [`ItemEnum`], this does not carry any aditional info.
 ///
@@ -677,7 +677,7 @@ pub struct FunctionHeader {
 /// on unwinding for more info.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Abi {
-    // We only have a concrete listing here for stable ABI's because their are so many
+    // We only have a concrete listing here for stable ABI's because there are so many
     // See rustc_ast_passes::feature_gate::PostExpansionVisitor::check_abi for the list
     /// The default ABI, but that can also be written explicitly with `extern "Rust"`.
     Rust,
@@ -1082,8 +1082,11 @@ pub struct Trait {
     pub is_auto: bool,
     /// Whether the trait is marked as `unsafe`.
     pub is_unsafe: bool,
-    /// Whether the trait is [object safe](https://doc.rust-lang.org/reference/items/traits.html#object-safety).
-    pub is_object_safe: bool,
+    // FIXME(dyn_compat_renaming): Update the URL once the Reference is updated and hits stable.
+    /// Whether the trait is [dyn compatible](https://doc.rust-lang.org/reference/items/traits.html#object-safety)[^1].
+    ///
+    /// [^1]: Formerly known as "object safe".
+    pub is_dyn_compatible: bool,
     /// Associated [`Item`]s that can/must be implemented by the `impl` blocks.
     pub items: Vec<Id>,
     /// Information about the type parameters and `where` clauses of the trait.
@@ -1168,7 +1171,7 @@ pub struct ProcMacro {
     pub kind: MacroKind,
     /// Helper attributes defined by a macro to be used inside it.
     ///
-    /// Defined only for attribute & derive macros.
+    /// Defined only for derive macros.
     ///
     /// E.g. the [`Default`] derive macro defines a `#[default]` helper attribute so that one can
     /// do:

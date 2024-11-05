@@ -1,9 +1,10 @@
 //! Tests for the tree
 #![cfg(test)]
 
-use super::*;
-use crate::borrow_tracker::tree_borrows::exhaustive::{precondition, Exhaustive};
 use std::fmt;
+
+use super::*;
+use crate::borrow_tracker::tree_borrows::exhaustive::{Exhaustive, precondition};
 
 impl Exhaustive for LocationState {
     fn exhaustive() -> Box<dyn Iterator<Item = Self>> {

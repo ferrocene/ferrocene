@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_index::bit_set::BitSet;
 use rustc_index::interval::IntervalSet;
@@ -8,13 +6,12 @@ use rustc_infer::infer::outlives::for_liveness;
 use rustc_middle::mir::{BasicBlock, Body, ConstraintCategory, Local, Location};
 use rustc_middle::traits::query::DropckOutlivesResult;
 use rustc_middle::ty::{Ty, TyCtxt, TypeVisitable, TypeVisitableExt};
+use rustc_mir_dataflow::ResultsCursor;
 use rustc_mir_dataflow::impls::MaybeInitializedPlaces;
 use rustc_mir_dataflow::move_paths::{HasMoveData, MoveData, MovePathIndex};
 use rustc_mir_dataflow::points::{DenseLocationMap, PointIndex};
-use rustc_mir_dataflow::ResultsCursor;
 use rustc_span::DUMMY_SP;
-use rustc_trait_selection::traits::query::type_op::outlives::DropckOutlives;
-use rustc_trait_selection::traits::query::type_op::{TypeOp, TypeOpOutput};
+use rustc_trait_selection::traits::query::type_op::{DropckOutlives, TypeOp, TypeOpOutput};
 use tracing::debug;
 
 use crate::location::RichLocation;
@@ -40,7 +37,7 @@ use crate::type_check::{NormalizeLocation, TypeChecker};
 pub(super) fn trace<'a, 'tcx>(
     typeck: &mut TypeChecker<'_, 'tcx>,
     body: &Body<'tcx>,
-    elements: &Rc<DenseLocationMap>,
+    elements: &DenseLocationMap,
     flow_inits: &mut ResultsCursor<'a, 'tcx, MaybeInitializedPlaces<'a, 'tcx>>,
     move_data: &MoveData<'tcx>,
     relevant_live_locals: Vec<Local>,
@@ -634,7 +631,7 @@ impl<'tcx> LivenessContext<'_, '_, '_, 'tcx> {
 
         match typeck
             .param_env
-            .and(DropckOutlives::new(dropped_ty))
+            .and(DropckOutlives { dropped_ty })
             .fully_perform(typeck.infcx, DUMMY_SP)
         {
             Ok(TypeOpOutput { output, constraints, .. }) => {

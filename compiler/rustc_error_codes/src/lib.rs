@@ -623,7 +623,7 @@ E0800: 0800,
 //  E0314, // closure outlives stack frame
 //  E0315, // cannot invoke closure outside of its lifetime
 //  E0319, // trait impls for defaulted traits allowed just for structs/enums
-//  E0372, // coherence not object safe
+//  E0372, // coherence not dyn-compatible
 //  E0385, // {} in an aliasable location
 //  E0402, // cannot use an outer type parameter in this context
 //  E0406, // merged into 420
@@ -681,3 +681,5 @@ E0800: 0800,
 //  E0723, // unstable feature in `const` context
 //  E0738, // Removed; errored on `#[track_caller] fn`s in `extern "Rust" { ... }`.
 //  E0744, // merged into E0728
+//  E0776, // Removed; cmse_nonsecure_entry is now `C-cmse-nonsecure-entry`
+//  E0796, // unused error code. We use `static_mut_refs` lint instead.

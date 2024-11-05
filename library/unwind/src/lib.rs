@@ -3,11 +3,10 @@
 #![feature(link_cfg)]
 #![feature(staged_api)]
 #![feature(strict_provenance)]
-#![cfg_attr(target_arch = "wasm64", feature(simd_wasm64))]
 #![cfg_attr(not(target_env = "msvc"), feature(libc))]
 #![cfg_attr(
     all(target_family = "wasm", not(target_os = "emscripten")),
-    feature(link_llvm_intrinsics)
+    feature(simd_wasm64, wasm_exception_handling_intrinsics)
 )]
 #![allow(internal_features)]
 
@@ -23,6 +22,7 @@ cfg_if::cfg_if! {
         target_os = "none",
         target_os = "espidf",
         target_os = "rtems",
+        target_os = "nuttx",
     ))] {
         // These "unix" family members do not have unwinder.
     } else if #[cfg(any(

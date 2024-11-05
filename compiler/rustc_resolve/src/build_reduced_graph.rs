@@ -17,24 +17,25 @@ use rustc_data_structures::sync::Lrc;
 use rustc_expand::base::ResolverExpand;
 use rustc_expand::expand::AstFragment;
 use rustc_hir::def::{self, *};
-use rustc_hir::def_id::{DefId, LocalDefId, CRATE_DEF_ID};
+use rustc_hir::def_id::{CRATE_DEF_ID, DefId, LocalDefId};
 use rustc_metadata::creader::LoadedMacro;
 use rustc_middle::metadata::ModChild;
 use rustc_middle::ty::Feed;
 use rustc_middle::{bug, ty};
-use rustc_span::hygiene::{ExpnId, LocalExpnId, MacroKind};
-use rustc_span::symbol::{kw, sym, Ident, Symbol};
 use rustc_span::Span;
+use rustc_span::hygiene::{ExpnId, LocalExpnId, MacroKind};
+use rustc_span::symbol::{Ident, Symbol, kw, sym};
 use tracing::debug;
 
+use crate::Namespace::{MacroNS, TypeNS, ValueNS};
 use crate::def_collector::collect_definitions;
 use crate::imports::{ImportData, ImportKind};
 use crate::macros::{MacroRulesBinding, MacroRulesScope, MacroRulesScopeRef};
-use crate::Namespace::{MacroNS, TypeNS, ValueNS};
 use crate::{
-    errors, BindingKey, Determinacy, ExternPreludeEntry, Finalize, MacroData, Module, ModuleKind,
+    BindingKey, Determinacy, ExternPreludeEntry, Finalize, MacroData, Module, ModuleKind,
     ModuleOrUniformRoot, NameBinding, NameBindingData, NameBindingKind, ParentScope, PathResult,
     ResolutionError, Resolver, ResolverArenas, Segment, ToNameBinding, Used, VisResolutionError,
+    errors,
 };
 
 type Res = def::Res<NodeId>;
@@ -565,13 +566,10 @@ impl<'a, 'ra, 'tcx> BuildReducedGraphVisitor<'a, 'ra, 'tcx> {
                             Some(rename) => source.ident.span.to(rename.span),
                             None => source.ident.span,
                         };
-                        self.r.report_error(
-                            span,
-                            ResolutionError::SelfImportsOnlyAllowedWithin {
-                                root: parent.is_none(),
-                                span_with_rename,
-                            },
-                        );
+                        self.r.report_error(span, ResolutionError::SelfImportsOnlyAllowedWithin {
+                            root: parent.is_none(),
+                            span_with_rename,
+                        });
 
                         // Error recovery: replace `use foo::self;` with `use foo;`
                         if let Some(parent) = module_path.pop() {
@@ -726,29 +724,6 @@ impl<'a, 'ra, 'tcx> BuildReducedGraphVisitor<'a, 'ra, 'tcx> {
         // Record field names for error reporting.
         self.insert_field_idents(def_id, fields);
         self.insert_field_visibilities_local(def_id.to_def_id(), fields);
-
-        for field in fields {
-            match &field.ty.kind {
-                ast::TyKind::AnonStruct(id, nested_fields)
-                | ast::TyKind::AnonUnion(id, nested_fields) => {
-                    let feed = self.r.feed(*id);
-                    let local_def_id = feed.key();
-                    let def_id = local_def_id.to_def_id();
-                    let def_kind = self.r.tcx.def_kind(local_def_id);
-                    let res = Res::Def(def_kind, def_id);
-                    self.build_reduced_graph_for_struct_variant(
-                        &nested_fields,
-                        Ident::empty(),
-                        feed,
-                        res,
-                        // Anonymous adts inherit visibility from their parent adts.
-                        adt_vis,
-                        field.ty.span,
-                    );
-                }
-                _ => {}
-            }
-        }
     }
 
     /// Constructs the reduced graph for one item.
@@ -1074,13 +1049,13 @@ impl<'a, 'ra, 'tcx> BuildReducedGraphVisitor<'a, 'ra, 'tcx> {
                             import_all = Some(meta.span);
                             break;
                         }
-                        MetaItemKind::List(nested_metas) => {
-                            for nested_meta in nested_metas {
-                                match nested_meta.ident() {
-                                    Some(ident) if nested_meta.is_word() => {
+                        MetaItemKind::List(meta_item_inners) => {
+                            for meta_item_inner in meta_item_inners {
+                                match meta_item_inner.ident() {
+                                    Some(ident) if meta_item_inner.is_word() => {
                                         single_imports.push(ident)
                                     }
-                                    _ => ill_formed(nested_meta.span()),
+                                    _ => ill_formed(meta_item_inner.span()),
                                 }
                             }
                         }
@@ -1200,8 +1175,10 @@ impl<'a, 'ra, 'tcx> BuildReducedGraphVisitor<'a, 'ra, 'tcx> {
         } else if attr::contains_name(&item.attrs, sym::proc_macro_attribute) {
             return Some((MacroKind::Attr, item.ident, item.span));
         } else if let Some(attr) = attr::find_by_name(&item.attrs, sym::proc_macro_derive) {
-            if let Some(nested_meta) = attr.meta_item_list().and_then(|list| list.get(0).cloned()) {
-                if let Some(ident) = nested_meta.ident() {
+            if let Some(meta_item_inner) =
+                attr.meta_item_list().and_then(|list| list.get(0).cloned())
+            {
+                if let Some(ident) = meta_item_inner.ident() {
                     return Some((MacroKind::Derive, ident, ident.span));
                 }
             }

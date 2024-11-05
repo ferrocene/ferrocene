@@ -15,12 +15,12 @@ use rustc_hir::def_id::{DefId, LocalDefId, LocalDefIdMap};
 use rustc_hir::{self as hir, HirId};
 use rustc_macros::{Decodable, Encodable, HashStable, Subdiagnostic};
 use rustc_middle::ty::print::with_no_trimmed_paths;
+use rustc_session::Session;
 use rustc_session::lint::builtin::{DEPRECATED, DEPRECATED_IN_FUTURE, SOFT_UNSTABLE};
 use rustc_session::lint::{BuiltinLintDiag, DeprecatedSinceKind, Level, Lint, LintBuffer};
 use rustc_session::parse::feature_err_issue;
-use rustc_session::Session;
-use rustc_span::symbol::{sym, Symbol};
 use rustc_span::Span;
+use rustc_span::symbol::{Symbol, sym};
 use tracing::debug;
 
 pub use self::StabilityLevel::*;
@@ -217,7 +217,7 @@ pub fn early_report_macro_deprecation(
         suggestion_span: span,
         note: depr.note,
         path,
-        since_kind: deprecated_since_kind(is_in_effect, depr.since.clone()),
+        since_kind: deprecated_since_kind(is_in_effect, depr.since),
     };
     lint_buffer.buffer_lint(deprecation_lint(is_in_effect), node_id, span, diag);
 }

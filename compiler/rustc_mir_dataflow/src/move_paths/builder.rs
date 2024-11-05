@@ -5,7 +5,7 @@ use rustc_middle::mir::tcx::{PlaceTy, RvalueInitializationState};
 use rustc_middle::mir::*;
 use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitableExt};
 use rustc_middle::{bug, span_bug};
-use smallvec::{smallvec, SmallVec};
+use smallvec::{SmallVec, smallvec};
 use tracing::debug;
 
 use super::abs_domain::Lift;
@@ -481,6 +481,7 @@ impl<'a, 'tcx, F: Fn(Ty<'tcx>) -> bool> MoveDataBuilder<'a, 'tcx, F> {
                 }
             }
             TerminatorKind::InlineAsm {
+                asm_macro: _,
                 template: _,
                 ref operands,
                 options: _,

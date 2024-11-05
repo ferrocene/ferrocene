@@ -8,10 +8,10 @@ use rustc_hir::def_id::DefIdSet;
 use rustc_middle::ty::{self, TyCtxt};
 use tracing::debug;
 
-use super::{item_ty_to_section, Context, ItemSection};
+use super::{Context, ItemSection, item_ty_to_section};
 use crate::clean;
-use crate::formats::item_type::ItemType;
 use crate::formats::Impl;
+use crate::formats::item_type::ItemType;
 use crate::html::format::Buffer;
 use crate::html::markdown::{IdMap, MarkdownWithToc};
 
@@ -315,10 +315,10 @@ fn sidebar_trait<'a>(
     );
     sidebar_assoc_items(cx, it, blocks);
 
-    if !t.is_object_safe(cx.tcx()) {
+    if !t.is_dyn_compatible(cx.tcx()) {
         blocks.push(LinkBlock::forced(
-            Link::new("object-safety", "Object Safety"),
-            "object-safety-note",
+            Link::new("dyn-compatibility", "Dyn Compatibility"),
+            "dyn-compatibility-note",
         ));
     }
 

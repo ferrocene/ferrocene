@@ -17,7 +17,7 @@ use rustc_macros::{HashStable, TyDecodable, TyEncodable};
 use rustc_query_system::ich::StableHashingContext;
 use rustc_session::DataTypeKind;
 use rustc_span::symbol::sym;
-use rustc_target::abi::{ReprOptions, VariantIdx, FIRST_VARIANT};
+use rustc_target::abi::{FIRST_VARIANT, ReprOptions, VariantIdx};
 use tracing::{debug, info, trace};
 
 use super::{
@@ -259,12 +259,8 @@ impl AdtDefData {
         kind: AdtKind,
         variants: IndexVec<VariantIdx, VariantDef>,
         repr: ReprOptions,
-        is_anonymous: bool,
     ) -> Self {
-        debug!(
-            "AdtDef::new({:?}, {:?}, {:?}, {:?}, {:?})",
-            did, kind, variants, repr, is_anonymous
-        );
+        debug!("AdtDef::new({:?}, {:?}, {:?}, {:?})", did, kind, variants, repr);
         let mut flags = AdtFlags::NO_ADT_FLAGS;
 
         if kind == AdtKind::Enum && tcx.has_attr(did, sym::non_exhaustive) {
@@ -296,9 +292,6 @@ impl AdtDefData {
         }
         if tcx.is_lang_item(did, LangItem::UnsafeCell) {
             flags |= AdtFlags::IS_UNSAFE_CELL;
-        }
-        if is_anonymous {
-            flags |= AdtFlags::IS_ANONYMOUS;
         }
 
         AdtDefData { did, variants, flags, repr }

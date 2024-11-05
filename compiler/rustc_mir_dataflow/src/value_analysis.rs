@@ -39,8 +39,8 @@ use std::ops::Range;
 use rustc_data_structures::captures::Captures;
 use rustc_data_structures::fx::{FxHashMap, FxIndexSet, StdEntry};
 use rustc_data_structures::stack::ensure_sufficient_stack;
-use rustc_index::bit_set::BitSet;
 use rustc_index::IndexVec;
+use rustc_index::bit_set::BitSet;
 use rustc_middle::bug;
 use rustc_middle::mir::tcx::PlaceTy;
 use rustc_middle::mir::visit::{MutatingUseContext, PlaceContext, Visitor};
@@ -51,7 +51,7 @@ use tracing::debug;
 
 use crate::fmt::DebugWithContext;
 use crate::lattice::{HasBottom, HasTop};
-use crate::{Analysis, AnalysisDomain, JoinSemiLattice, SwitchIntEdgeEffects};
+use crate::{Analysis, JoinSemiLattice, SwitchIntEdgeEffects};
 
 pub trait ValueAnalysis<'tcx> {
     /// For each place of interest, the analysis tracks a value of the given type.
@@ -334,7 +334,7 @@ pub trait ValueAnalysis<'tcx> {
 
 pub struct ValueAnalysisWrapper<T>(pub T);
 
-impl<'tcx, T: ValueAnalysis<'tcx>> AnalysisDomain<'tcx> for ValueAnalysisWrapper<T> {
+impl<'tcx, T: ValueAnalysis<'tcx>> Analysis<'tcx> for ValueAnalysisWrapper<T> {
     type Domain = State<T::Value>;
 
     const NAME: &'static str = T::NAME;
@@ -351,12 +351,7 @@ impl<'tcx, T: ValueAnalysis<'tcx>> AnalysisDomain<'tcx> for ValueAnalysisWrapper
             state.flood(PlaceRef { local: arg, projection: &[] }, self.0.map());
         }
     }
-}
 
-impl<'tcx, T> Analysis<'tcx> for ValueAnalysisWrapper<T>
-where
-    T: ValueAnalysis<'tcx>,
-{
     fn apply_statement_effect(
         &mut self,
         state: &mut Self::Domain,

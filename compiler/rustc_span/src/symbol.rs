@@ -11,9 +11,9 @@ use rustc_data_structures::stable_hasher::{
     HashStable, StableCompare, StableHasher, ToStableHashKey,
 };
 use rustc_data_structures::sync::Lock;
-use rustc_macros::{symbols, Decodable, Encodable, HashStable_Generic};
+use rustc_macros::{Decodable, Encodable, HashStable_Generic, symbols};
 
-use crate::{with_session_globals, Edition, Span, DUMMY_SP};
+use crate::{DUMMY_SP, Edition, Span, with_session_globals};
 
 #[cfg(test)]
 mod tests;
@@ -309,6 +309,7 @@ symbols! {
         RwLockReadGuard,
         RwLockWriteGuard,
         Saturating,
+        SeekFrom,
         Send,
         SeqCst,
         Sized,
@@ -410,6 +411,7 @@ symbols! {
         arbitrary_enum_discriminant,
         arbitrary_self_types,
         arbitrary_self_types_pointers,
+        areg,
         args,
         arith_offset,
         arm,
@@ -479,6 +481,8 @@ symbols! {
         audit_that,
         augmented_assignments,
         auto_traits,
+        autodiff,
+        autodiff_fallback,
         automatically_derived,
         avx,
         avx512_target_feature,
@@ -542,6 +546,8 @@ symbols! {
         cfg_accessible,
         cfg_attr,
         cfg_attr_multi,
+        cfg_autodiff_fallback,
+        cfg_boolean_literals,
         cfg_doctest,
         cfg_eval,
         cfg_fmt_debug,
@@ -774,6 +780,7 @@ symbols! {
         dropck_eyepatch,
         dropck_parametricity,
         dylib,
+        dyn_compatible_for_dispatch,
         dyn_metadata,
         dyn_star,
         dyn_trait,
@@ -910,6 +917,10 @@ symbols! {
         fmt_debug,
         fmul_algebraic,
         fmul_fast,
+        fmuladdf128,
+        fmuladdf16,
+        fmuladdf32,
+        fmuladdf64,
         fn_align,
         fn_delegation,
         fn_must_use,
@@ -994,6 +1005,7 @@ symbols! {
         hashset_iter_ty,
         hexagon_target_feature,
         hidden,
+        hint,
         homogeneous_aggregate,
         host,
         html_favicon_url,
@@ -1452,6 +1464,7 @@ symbols! {
         pic,
         pie,
         pin,
+        pin_ergonomics,
         platform_intrinsics,
         plugin,
         plugin_registrar,
@@ -1475,6 +1488,7 @@ symbols! {
         powif64,
         pre_dash_lto: "pre-lto",
         precise_capturing,
+        precise_capturing_in_traits,
         precise_pointer_size_matching,
         pref_align_of,
         prefetch_read_data,
@@ -1644,6 +1658,7 @@ symbols! {
         rustc_allow_incoherent_impl,
         rustc_allowed_through_unstable_modules,
         rustc_attrs,
+        rustc_autodiff,
         rustc_box,
         rustc_builtin_macro,
         rustc_capture_analysis,
@@ -2056,6 +2071,7 @@ symbols! {
         unmarked_api,
         unnamed_fields,
         unpin,
+        unqualified_local_imports,
         unreachable,
         unreachable_2015,
         unreachable_2015_macro,
@@ -2521,10 +2537,10 @@ pub mod kw {
 /// For example `sym::rustfmt` or `sym::u8`.
 pub mod sym {
     // Used from a macro in `librustc_feature/accepted.rs`
+    use super::Symbol;
     pub use super::kw::MacroRules as macro_rules;
     #[doc(inline)]
     pub use super::sym_generated::*;
-    use super::Symbol;
 
     /// Get the symbol for an integer.
     ///

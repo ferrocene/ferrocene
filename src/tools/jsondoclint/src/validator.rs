@@ -11,7 +11,7 @@ use rustdoc_json_types::{
 use serde_json::Value;
 
 use crate::item_kind::Kind;
-use crate::{json_find, Error, ErrorKind};
+use crate::{Error, ErrorKind, json_find};
 
 // This is a rustc implementation detail that we rely on here
 const LOCAL_CRATE_ID: u32 = 0;
@@ -418,7 +418,7 @@ impl<'a> Validator<'a> {
         } else if !self.missing_ids.contains(id) {
             self.missing_ids.insert(id);
 
-            let sels = json_find::find_selector(&self.krate_json, &Value::String(id.0.clone()));
+            let sels = json_find::find_selector(&self.krate_json, &Value::Number(id.0.into()));
             assert_ne!(sels.len(), 0);
 
             self.fail(id, ErrorKind::NotFound(sels))

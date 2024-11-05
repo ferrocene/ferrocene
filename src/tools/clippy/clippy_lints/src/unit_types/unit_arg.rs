@@ -1,11 +1,11 @@
 use clippy_utils::diagnostics::span_lint_and_then;
 use clippy_utils::is_from_proc_macro;
-use clippy_utils::source::{indent_of, reindent_multiline, SourceText, SpanRangeExt};
+use clippy_utils::source::{SourceText, SpanRangeExt, indent_of, reindent_multiline};
 use rustc_errors::Applicability;
 use rustc_hir::{Block, Expr, ExprKind, MatchSource, Node, StmtKind};
 use rustc_lint::LateContext;
 
-use super::{utils, UNIT_ARG};
+use super::{UNIT_ARG, utils};
 
 pub(super) fn check<'tcx>(cx: &LateContext<'tcx>, expr: &'tcx Expr<'tcx>) {
     if expr.span.from_expansion() {
@@ -25,14 +25,15 @@ pub(super) fn check<'tcx>(cx: &LateContext<'tcx>, expr: &'tcx Expr<'tcx>) {
         return;
     }
 
-    let args: Vec<_> = match expr.kind {
-        ExprKind::Call(_, args) => args.iter().collect(),
-        ExprKind::MethodCall(_, receiver, args, _) => std::iter::once(receiver).chain(args.iter()).collect(),
+    let (reciever, args) = match expr.kind {
+        ExprKind::Call(_, args) => (None, args),
+        ExprKind::MethodCall(_, receiver, args, _) => (Some(receiver), args),
         _ => return,
     };
 
-    let args_to_recover = args
+    let args_to_recover = reciever
         .into_iter()
+        .chain(args)
         .filter(|arg| {
             if cx.typeck_results().expr_ty(arg).is_unit() && !utils::is_unit_literal(arg) {
                 !matches!(

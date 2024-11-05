@@ -5,30 +5,30 @@ use std::iter;
 use std::ops::Deref;
 
 use rustc_ast::ptr::P;
-use rustc_ast::visit::{walk_ty, FnCtxt, FnKind, LifetimeCtxt, Visitor};
+use rustc_ast::visit::{FnCtxt, FnKind, LifetimeCtxt, Visitor, walk_ty};
 use rustc_ast::{
-    self as ast, AssocItemKind, Expr, ExprKind, GenericParam, GenericParamKind, Item, ItemKind,
-    MethodCall, NodeId, Path, Ty, TyKind, DUMMY_NODE_ID,
+    self as ast, AssocItemKind, DUMMY_NODE_ID, Expr, ExprKind, GenericParam, GenericParamKind,
+    Item, ItemKind, MethodCall, NodeId, Path, Ty, TyKind,
 };
 use rustc_ast_pretty::pprust::where_bound_predicate_to_string;
 use rustc_data_structures::fx::{FxHashSet, FxIndexSet};
 use rustc_errors::codes::*;
 use rustc_errors::{
-    pluralize, struct_span_code_err, Applicability, Diag, ErrorGuaranteed, MultiSpan,
-    SuggestionStyle,
+    Applicability, Diag, ErrorGuaranteed, MultiSpan, SuggestionStyle, pluralize,
+    struct_span_code_err,
 };
 use rustc_hir as hir;
 use rustc_hir::def::Namespace::{self, *};
 use rustc_hir::def::{self, CtorKind, CtorOf, DefKind};
-use rustc_hir::def_id::{DefId, CRATE_DEF_ID};
+use rustc_hir::def_id::{CRATE_DEF_ID, DefId};
 use rustc_hir::{MissingLifetimeKind, PrimTy};
 use rustc_middle::ty;
-use rustc_session::{lint, Session};
+use rustc_session::{Session, lint};
 use rustc_span::edit_distance::find_best_match_for_name;
 use rustc_span::edition::Edition;
 use rustc_span::hygiene::MacroKind;
-use rustc_span::symbol::{kw, sym, Ident, Symbol};
-use rustc_span::{Span, DUMMY_SP};
+use rustc_span::symbol::{Ident, Symbol, kw, sym};
+use rustc_span::{DUMMY_SP, Span};
 use thin_vec::ThinVec;
 use tracing::debug;
 
@@ -40,8 +40,8 @@ use crate::late::{
 };
 use crate::ty::fast_reject::SimplifiedType;
 use crate::{
-    errors, path_names_to_string, Module, ModuleKind, ModuleOrUniformRoot, PathResult, PathSource,
-    Segment,
+    Module, ModuleKind, ModuleOrUniformRoot, PathResult, PathSource, Segment, errors,
+    path_names_to_string,
 };
 
 type Res = def::Res<ast::NodeId>;
@@ -443,6 +443,7 @@ impl<'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
 
         self.suggest_bare_struct_literal(&mut err);
         self.suggest_changing_type_to_const_param(&mut err, res, source, span);
+        self.explain_functions_in_pattern(&mut err, res, source);
 
         if self.suggest_pattern_match_with_let(&mut err, source, span) {
             // Fallback label.
@@ -518,11 +519,12 @@ impl<'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                     continue;
                 };
                 for bound in bounds {
-                    let ast::GenericBound::Trait(trait_ref, ast::TraitBoundModifiers::NONE) = bound
-                    else {
+                    let ast::GenericBound::Trait(trait_ref) = bound else {
                         continue;
                     };
-                    if base_error.span == trait_ref.span {
+                    if trait_ref.modifiers == ast::TraitBoundModifiers::NONE
+                        && base_error.span == trait_ref.span
+                    {
                         err.span_suggestion_verbose(
                             constraint.ident.span.between(trait_ref.span),
                             "you might have meant to write a path instead of an associated type bound",
@@ -836,7 +838,7 @@ impl<'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                 );
                 if bounds.iter().all(|bound| match bound {
                     ast::GenericBound::Outlives(_) | ast::GenericBound::Use(..) => true,
-                    ast::GenericBound::Trait(tr, _) => tr.span == base_error.span,
+                    ast::GenericBound::Trait(tr) => tr.span == base_error.span,
                 }) {
                     let mut sugg = vec![];
                     if base_error.span != start_span {
@@ -1017,15 +1019,12 @@ impl<'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
 
         debug!("smart_resolve_path_fragment: E0424, source={:?}", source);
         err.code(E0424);
-        err.span_label(
-            span,
-            match source {
-                PathSource::Pat => {
-                    "`self` value is a keyword and may not be bound to variables or shadowed"
-                }
-                _ => "`self` value is a keyword only available in methods with a `self` parameter",
-            },
-        );
+        err.span_label(span, match source {
+            PathSource::Pat => {
+                "`self` value is a keyword and may not be bound to variables or shadowed"
+            }
+            _ => "`self` value is a keyword only available in methods with a `self` parameter",
+        });
         let is_assoc_fn = self.self_type_is_available();
         let self_from_macro = "a `self` parameter, but a macro invocation can only \
                                access identifiers it receives from parameters";
@@ -1169,6 +1168,18 @@ impl<'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
         }
     }
 
+    fn explain_functions_in_pattern(
+        &mut self,
+        err: &mut Diag<'_>,
+        res: Option<Res>,
+        source: PathSource<'_>,
+    ) {
+        let PathSource::TupleStruct(_, _) = source else { return };
+        let Some(Res::Def(DefKind::Fn, _)) = res else { return };
+        err.primary_message("expected a pattern, found a function call");
+        err.note("function calls are not allowed in patterns: <https://doc.rust-lang.org/book/ch18-00-patterns.html>");
+    }
+
     fn suggest_changing_type_to_const_param(
         &mut self,
         err: &mut Diag<'_>,
@@ -1200,7 +1211,8 @@ impl<'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
         let param = generics.params.iter().find_map(|param| {
             // Only consider type params with exactly one trait bound.
             if let [bound] = &*param.bounds
-                && let ast::GenericBound::Trait(tref, ast::TraitBoundModifiers::NONE) = bound
+                && let ast::GenericBound::Trait(tref) = bound
+                && tref.modifiers == ast::TraitBoundModifiers::NONE
                 && tref.span == span
                 && param.ident.span.eq_ctxt(span)
             {
@@ -1323,8 +1335,9 @@ impl<'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
             }
             if let (
                 [ast::PathSegment { args: None, .. }],
-                [ast::GenericBound::Trait(poly_trait_ref, ast::TraitBoundModifiers::NONE)],
+                [ast::GenericBound::Trait(poly_trait_ref)],
             ) = (&type_param_path.segments[..], &bounds[..])
+                && poly_trait_ref.modifiers == ast::TraitBoundModifiers::NONE
             {
                 if let [ast::PathSegment { ident, args: None, .. }] =
                     &poly_trait_ref.trait_ref.path.segments[..]
@@ -1828,10 +1841,12 @@ impl<'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
             // Doing analysis on local `DefId`s would cause infinite recursion.
             return;
         }
-        let Ok(impls) = self.r.tcx.inherent_impls(def_id) else { return };
         // Look at all the associated functions without receivers in the type's
         // inherent impls to look for builders that return `Self`
-        let mut items = impls
+        let mut items = self
+            .r
+            .tcx
+            .inherent_impls(def_id)
             .iter()
             .flat_map(|i| self.r.tcx.associated_items(i).in_definition_order())
             // Only assoc fn with no receivers.
@@ -2309,18 +2324,15 @@ impl<'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                     if module_def_id == def_id {
                         let path =
                             Path { span: name_binding.span, segments: path_segments, tokens: None };
-                        result = Some((
-                            module,
-                            ImportSuggestion {
-                                did: Some(def_id),
-                                descr: "module",
-                                path,
-                                accessible: true,
-                                doc_visible,
-                                note: None,
-                                via_import: false,
-                            },
-                        ));
+                        result = Some((module, ImportSuggestion {
+                            did: Some(def_id),
+                            descr: "module",
+                            path,
+                            accessible: true,
+                            doc_visible,
+                            note: None,
+                            via_import: false,
+                        }));
                     } else {
                         // add the module to the lookup
                         if seen_modules.insert(module_def_id) {
@@ -2805,7 +2817,7 @@ impl<'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                             && bounded_ty.id == binder
                         {
                             for bound in bounds {
-                                if let ast::GenericBound::Trait(poly_trait_ref, _) = bound
+                                if let ast::GenericBound::Trait(poly_trait_ref) = bound
                                     && let span = poly_trait_ref
                                         .span
                                         .with_hi(poly_trait_ref.trait_ref.path.span.lo())
@@ -3224,7 +3236,7 @@ impl<'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                             let mut lt_finder =
                                 LifetimeFinder { lifetime: lt.span, found: None, seen: vec![] };
                             for bound in arg_refs {
-                                if let ast::GenericBound::Trait(trait_ref, _) = bound {
+                                if let ast::GenericBound::Trait(trait_ref) = bound {
                                     lt_finder.visit_trait_ref(&trait_ref.trait_ref);
                                 }
                             }
@@ -3435,17 +3447,15 @@ fn mk_where_bound_predicate(
         span: DUMMY_SP,
         bound_generic_params: ThinVec::new(),
         bounded_ty: ast::ptr::P(ty.clone()),
-        bounds: vec![ast::GenericBound::Trait(
-            ast::PolyTraitRef {
-                bound_generic_params: ThinVec::new(),
-                trait_ref: ast::TraitRef {
-                    path: ast::Path { segments: modified_segments, span: DUMMY_SP, tokens: None },
-                    ref_id: DUMMY_NODE_ID,
-                },
-                span: DUMMY_SP,
+        bounds: vec![ast::GenericBound::Trait(ast::PolyTraitRef {
+            bound_generic_params: ThinVec::new(),
+            modifiers: ast::TraitBoundModifiers::NONE,
+            trait_ref: ast::TraitRef {
+                path: ast::Path { segments: modified_segments, span: DUMMY_SP, tokens: None },
+                ref_id: DUMMY_NODE_ID,
             },
-            ast::TraitBoundModifiers::NONE,
-        )],
+            span: DUMMY_SP,
+        })],
     };
 
     Some(new_where_bound_predicate)
@@ -3473,7 +3483,7 @@ struct LifetimeFinder<'ast> {
 
 impl<'ast> Visitor<'ast> for LifetimeFinder<'ast> {
     fn visit_ty(&mut self, t: &'ast Ty) {
-        if let TyKind::Ref(_, mut_ty) = &t.kind {
+        if let TyKind::Ref(_, mut_ty) | TyKind::PinnedRef(_, mut_ty) = &t.kind {
             self.seen.push(t);
             if t.span.lo() == self.lifetime.lo() {
                 self.found = Some(&mut_ty.ty);

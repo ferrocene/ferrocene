@@ -7,6 +7,14 @@ fn main() {
     test_pipe_threaded();
     test_race();
     test_pipe_array();
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "illumos",
+        target_os = "freebsd",
+        target_os = "solaris"
+    ))]
+    // `pipe2` only exists in some specific os.
+    test_pipe2();
 }
 
 fn test_pipe() {
@@ -72,6 +80,8 @@ fn test_pipe_threaded() {
     thread2.join().unwrap();
 }
 
+// FIXME(static_mut_refs): Do not allow `static_mut_refs` lint
+#[allow(static_mut_refs)]
 fn test_race() {
     static mut VAL: u8 = 0;
     let mut fds = [-1, -1];
@@ -107,4 +117,17 @@ fn test_pipe_array() {
 
     let mut fds: [i32; 2] = [0; 2];
     assert_eq!(unsafe { pipe(&mut fds) }, 0);
+}
+
+/// Test if pipe2 (including the O_NONBLOCK flag) is supported.
+#[cfg(any(
+    target_os = "linux",
+    target_os = "illumos",
+    target_os = "freebsd",
+    target_os = "solaris"
+))]
+fn test_pipe2() {
+    let mut fds = [-1, -1];
+    let res = unsafe { libc::pipe2(fds.as_mut_ptr(), libc::O_NONBLOCK) };
+    assert_eq!(res, 0);
 }

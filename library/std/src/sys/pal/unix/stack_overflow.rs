@@ -36,21 +36,20 @@ impl Drop for Handler {
     target_os = "illumos",
 ))]
 mod imp {
+    use libc::{
+        MAP_ANON, MAP_FAILED, MAP_FIXED, MAP_PRIVATE, PROT_NONE, PROT_READ, PROT_WRITE, SA_ONSTACK,
+        SA_SIGINFO, SIG_DFL, SIGBUS, SIGSEGV, SS_DISABLE, sigaction, sigaltstack, sighandler_t,
+    };
     #[cfg(not(all(target_os = "linux", target_env = "gnu")))]
     use libc::{mmap as mmap64, mprotect, munmap};
     #[cfg(all(target_os = "linux", target_env = "gnu"))]
     use libc::{mmap64, mprotect, munmap};
-    use libc::{
-        sigaction, sigaltstack, sighandler_t, MAP_ANON, MAP_FAILED, MAP_FIXED, MAP_PRIVATE,
-        PROT_NONE, PROT_READ, PROT_WRITE, SA_ONSTACK, SA_SIGINFO, SIGBUS, SIGSEGV, SIG_DFL,
-        SS_DISABLE,
-    };
 
     use super::Handler;
     use crate::cell::Cell;
     use crate::ops::Range;
-    use crate::sync::atomic::{AtomicBool, AtomicPtr, AtomicUsize, Ordering};
     use crate::sync::OnceLock;
+    use crate::sync::atomic::{AtomicBool, AtomicPtr, AtomicUsize, Ordering};
     use crate::sys::pal::unix::os;
     use crate::{io, mem, ptr, thread};
 
@@ -266,9 +265,7 @@ mod imp {
     /// Modern kernels on modern hardware can have dynamic signal stack sizes.
     #[cfg(any(target_os = "linux", target_os = "android"))]
     fn sigstack_size() -> usize {
-        // FIXME: reuse const from libc when available?
-        const AT_MINSIGSTKSZ: crate::ffi::c_ulong = 51;
-        let dynamic_sigstksz = unsafe { libc::getauxval(AT_MINSIGSTKSZ) };
+        let dynamic_sigstksz = unsafe { libc::getauxval(libc::AT_MINSIGSTKSZ) };
         // If getauxval couldn't find the entry, it returns 0,
         // so take the higher of the "constant" and auxval.
         // This transparently supports older kernels which don't provide AT_MINSIGSTKSZ
@@ -427,8 +424,8 @@ mod imp {
             match sysctlbyname.get() {
                 Some(fcn) if unsafe {
                     fcn(oid.as_ptr(),
-                        ptr::addr_of_mut!(guard).cast(),
-                        ptr::addr_of_mut!(size),
+                        (&raw mut guard).cast(),
+                        &raw mut size,
                         ptr::null_mut(),
                         0) == 0
                 } => guard,

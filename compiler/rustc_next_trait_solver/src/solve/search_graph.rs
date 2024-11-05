@@ -1,13 +1,13 @@
 use std::convert::Infallible;
 use std::marker::PhantomData;
 
+use rustc_type_ir::Interner;
 use rustc_type_ir::inherent::*;
 use rustc_type_ir::search_graph::{self, PathKind};
 use rustc_type_ir::solve::{CanonicalInput, Certainty, QueryResult};
-use rustc_type_ir::Interner;
 
 use super::inspect::ProofTreeBuilder;
-use super::{has_no_inference_or_external_constraints, FIXPOINT_STEP_LIMIT};
+use super::{FIXPOINT_STEP_LIMIT, has_no_inference_or_external_constraints};
 use crate::delegate::SolverDelegate;
 
 /// This type is never constructed. We only use it to implement `search_graph::Delegate`
@@ -40,9 +40,6 @@ where
     }
 
     const DIVIDE_AVAILABLE_DEPTH_ON_OVERFLOW: usize = 4;
-    fn recursion_limit(cx: I) -> usize {
-        cx.recursion_limit()
-    }
 
     fn initial_provisional_result(
         cx: I,
@@ -99,14 +96,19 @@ where
     }
 
     fn step_is_coinductive(cx: I, input: CanonicalInput<I>) -> bool {
-        input.value.goal.predicate.is_coinductive(cx)
+        input.canonical.value.goal.predicate.is_coinductive(cx)
     }
 }
 
 fn response_no_constraints<I: Interner>(
     cx: I,
-    goal: CanonicalInput<I>,
+    input: CanonicalInput<I>,
     certainty: Certainty,
 ) -> QueryResult<I> {
-    Ok(super::response_no_constraints_raw(cx, goal.max_universe, goal.variables, certainty))
+    Ok(super::response_no_constraints_raw(
+        cx,
+        input.canonical.max_universe,
+        input.canonical.variables,
+        certainty,
+    ))
 }

@@ -1,4 +1,4 @@
-use crate::spec::{base, Cc, LinkerFlavor, Lld, Target, TargetOptions};
+use crate::spec::{Cc, LinkerFlavor, Lld, Target, TargetOptions, base};
 
 pub(crate) fn target() -> Target {
     // In QNX, libc does not provide a compatible ABI between versions.
@@ -22,15 +22,21 @@ pub(crate) fn target() -> Target {
         // i128:128  = 128-bit-integer, minimum_alignment=128, preferred_alignment=128
         // n32:64    = 32 and 64 are native integer widths; Elements of this set are considered to support most general arithmetic operations efficiently.
         // S128      = 128 bits are the natural alignment of the stack in bits.
-        data_layout: "e-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128-Fn32".into(),
+        data_layout: "e-m:e-p270:32:32-p271:32:32-p272:64:64-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128-Fn32".into(),
         arch: "aarch64".into(),
         options: TargetOptions {
             features: "+v8a".into(),
             max_atomic_width: Some(128),
+<<<<<<< HEAD
             pre_link_args: TargetOptions::link_args(
                 LinkerFlavor::Gnu(Cc::Yes, Lld::No),
                 &["-Vgcc_ntoaarch64le_cxx", "-Wl,--fix-cortex-a53-843419"],
             ),
+=======
+            pre_link_args: TargetOptions::link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &[
+                "-Vgcc_ntoaarch64le_cxx",
+            ]),
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             env: "nto70".into(),
             ..base::nto_qnx::opts()
         },

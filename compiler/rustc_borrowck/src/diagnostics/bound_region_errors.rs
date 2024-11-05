@@ -3,29 +3,33 @@ use std::rc::Rc;
 
 use rustc_errors::Diag;
 use rustc_hir::def_id::LocalDefId;
-use rustc_infer::infer::canonical::Canonical;
+use rustc_infer::infer::canonical::CanonicalQueryInput;
 use rustc_infer::infer::region_constraints::{Constraint, RegionConstraintData};
 use rustc_infer::infer::{
     InferCtxt, RegionResolutionError, RegionVariableOrigin, SubregionOrigin, TyCtxtInferExt as _,
 };
 use rustc_infer::traits::ObligationCause;
+use rustc_infer::traits::query::{
+    CanonicalTypeOpAscribeUserTypeGoal, CanonicalTypeOpNormalizeGoal,
+    CanonicalTypeOpProvePredicateGoal,
+};
 use rustc_middle::ty::error::TypeError;
 use rustc_middle::ty::{
     self, RePlaceholder, Region, RegionVid, Ty, TyCtxt, TypeFoldable, UniverseIndex,
 };
 use rustc_span::Span;
-use rustc_trait_selection::error_reporting::infer::nice_region_error::NiceRegionError;
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
-use rustc_trait_selection::traits::query::type_op;
+use rustc_trait_selection::error_reporting::infer::nice_region_error::NiceRegionError;
 use rustc_trait_selection::traits::ObligationCtxt;
+use rustc_trait_selection::traits::query::type_op;
 use rustc_traits::{type_op_ascribe_user_type_with_span, type_op_prove_predicate_with_cause};
 use tracing::{debug, instrument};
 
+use crate::MirBorrowckCtxt;
 use crate::region_infer::values::RegionElement;
 use crate::session_diagnostics::{
     HigherRankedErrorCause, HigherRankedLifetimeError, HigherRankedSubtypeError,
 };
-use crate::MirBorrowckCtxt;
 
 #[derive(Clone)]
 pub(crate) struct UniverseInfo<'tcx>(UniverseInfoInner<'tcx>);
@@ -95,9 +99,7 @@ impl<'tcx> ToUniverseInfo<'tcx> for crate::type_check::InstantiateOpaqueType<'tc
     }
 }
 
-impl<'tcx> ToUniverseInfo<'tcx>
-    for Canonical<'tcx, ty::ParamEnvAnd<'tcx, type_op::prove_predicate::ProvePredicate<'tcx>>>
-{
+impl<'tcx> ToUniverseInfo<'tcx> for CanonicalTypeOpProvePredicateGoal<'tcx> {
     fn to_universe_info(self, base_universe: ty::UniverseIndex) -> UniverseInfo<'tcx> {
         UniverseInfo(UniverseInfoInner::TypeOp(Rc::new(PredicateQuery {
             canonical_query: self,
@@ -107,7 +109,7 @@ impl<'tcx> ToUniverseInfo<'tcx>
 }
 
 impl<'tcx, T: Copy + fmt::Display + TypeFoldable<TyCtxt<'tcx>> + 'tcx> ToUniverseInfo<'tcx>
-    for Canonical<'tcx, ty::ParamEnvAnd<'tcx, type_op::Normalize<T>>>
+    for CanonicalTypeOpNormalizeGoal<'tcx, T>
 {
     fn to_universe_info(self, base_universe: ty::UniverseIndex) -> UniverseInfo<'tcx> {
         UniverseInfo(UniverseInfoInner::TypeOp(Rc::new(NormalizeQuery {
@@ -117,9 +119,7 @@ impl<'tcx, T: Copy + fmt::Display + TypeFoldable<TyCtxt<'tcx>> + 'tcx> ToUnivers
     }
 }
 
-impl<'tcx> ToUniverseInfo<'tcx>
-    for Canonical<'tcx, ty::ParamEnvAnd<'tcx, type_op::AscribeUserType<'tcx>>>
-{
+impl<'tcx> ToUniverseInfo<'tcx> for CanonicalTypeOpAscribeUserTypeGoal<'tcx> {
     fn to_universe_info(self, base_universe: ty::UniverseIndex) -> UniverseInfo<'tcx> {
         UniverseInfo(UniverseInfoInner::TypeOp(Rc::new(AscribeUserTypeQuery {
             canonical_query: self,
@@ -128,7 +128,7 @@ impl<'tcx> ToUniverseInfo<'tcx>
     }
 }
 
-impl<'tcx, F> ToUniverseInfo<'tcx> for Canonical<'tcx, type_op::custom::CustomTypeOp<F>> {
+impl<'tcx, F> ToUniverseInfo<'tcx> for CanonicalQueryInput<'tcx, type_op::custom::CustomTypeOp<F>> {
     fn to_universe_info(self, _base_universe: ty::UniverseIndex) -> UniverseInfo<'tcx> {
         // We can't rerun custom type ops.
         UniverseInfo::other()
@@ -176,25 +176,24 @@ trait TypeOpInfo<'tcx> {
             return;
         };
 
-        let placeholder_region = ty::Region::new_placeholder(
-            tcx,
-            ty::Placeholder { universe: adjusted_universe.into(), bound: placeholder.bound },
-        );
+        let placeholder_region = ty::Region::new_placeholder(tcx, ty::Placeholder {
+            universe: adjusted_universe.into(),
+            bound: placeholder.bound,
+        });
 
-        let error_region = if let RegionElement::PlaceholderRegion(error_placeholder) =
-            error_element
-        {
-            let adjusted_universe =
-                error_placeholder.universe.as_u32().checked_sub(base_universe.as_u32());
-            adjusted_universe.map(|adjusted| {
-                ty::Region::new_placeholder(
-                    tcx,
-                    ty::Placeholder { universe: adjusted.into(), bound: error_placeholder.bound },
-                )
-            })
-        } else {
-            None
-        };
+        let error_region =
+            if let RegionElement::PlaceholderRegion(error_placeholder) = error_element {
+                let adjusted_universe =
+                    error_placeholder.universe.as_u32().checked_sub(base_universe.as_u32());
+                adjusted_universe.map(|adjusted| {
+                    ty::Region::new_placeholder(tcx, ty::Placeholder {
+                        universe: adjusted.into(),
+                        bound: error_placeholder.bound,
+                    })
+                })
+            } else {
+                None
+            };
 
         debug!(?placeholder_region);
 
@@ -212,8 +211,7 @@ trait TypeOpInfo<'tcx> {
 }
 
 struct PredicateQuery<'tcx> {
-    canonical_query:
-        Canonical<'tcx, ty::ParamEnvAnd<'tcx, type_op::prove_predicate::ProvePredicate<'tcx>>>,
+    canonical_query: CanonicalTypeOpProvePredicateGoal<'tcx>,
     base_universe: ty::UniverseIndex,
 }
 
@@ -221,7 +219,7 @@ impl<'tcx> TypeOpInfo<'tcx> for PredicateQuery<'tcx> {
     fn fallback_error(&self, tcx: TyCtxt<'tcx>, span: Span) -> Diag<'tcx> {
         tcx.dcx().create_err(HigherRankedLifetimeError {
             cause: Some(HigherRankedErrorCause::CouldNotProve {
-                predicate: self.canonical_query.value.value.predicate.to_string(),
+                predicate: self.canonical_query.canonical.value.value.predicate.to_string(),
             }),
             span,
         })
@@ -254,7 +252,7 @@ impl<'tcx> TypeOpInfo<'tcx> for PredicateQuery<'tcx> {
 }
 
 struct NormalizeQuery<'tcx, T> {
-    canonical_query: Canonical<'tcx, ty::ParamEnvAnd<'tcx, type_op::Normalize<T>>>,
+    canonical_query: CanonicalTypeOpNormalizeGoal<'tcx, T>,
     base_universe: ty::UniverseIndex,
 }
 
@@ -265,7 +263,7 @@ where
     fn fallback_error(&self, tcx: TyCtxt<'tcx>, span: Span) -> Diag<'tcx> {
         tcx.dcx().create_err(HigherRankedLifetimeError {
             cause: Some(HigherRankedErrorCause::CouldNotNormalize {
-                value: self.canonical_query.value.value.value.to_string(),
+                value: self.canonical_query.canonical.value.value.value.to_string(),
             }),
             span,
         })
@@ -307,7 +305,7 @@ where
 }
 
 struct AscribeUserTypeQuery<'tcx> {
-    canonical_query: Canonical<'tcx, ty::ParamEnvAnd<'tcx, type_op::AscribeUserType<'tcx>>>,
+    canonical_query: CanonicalTypeOpAscribeUserTypeGoal<'tcx>,
     base_universe: ty::UniverseIndex,
 }
 

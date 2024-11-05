@@ -15,14 +15,14 @@ use rustc_ast_ir::try_visit;
 use rustc_ast_ir::visit::VisitorResult;
 use rustc_infer::infer::{DefineOpaqueTypes, InferCtxt, InferOk};
 use rustc_macros::extension;
-use rustc_middle::traits::solve::{Certainty, Goal, GoalSource, NoSolution, QueryResult};
 use rustc_middle::traits::ObligationCause;
+use rustc_middle::traits::solve::{Certainty, Goal, GoalSource, NoSolution, QueryResult};
 use rustc_middle::ty::{TyCtxt, TypeFoldable};
 use rustc_middle::{bug, ty};
 use rustc_next_trait_solver::resolve::EagerResolver;
 use rustc_next_trait_solver::solve::inspect::{self, instantiate_canonical_state};
 use rustc_next_trait_solver::solve::{GenerateProofTree, MaybeCause, SolverDelegateEvalExt as _};
-use rustc_span::{Span, DUMMY_SP};
+use rustc_span::{DUMMY_SP, Span};
 use tracing::instrument;
 
 use crate::solve::delegate::SolverDelegate;
@@ -292,7 +292,8 @@ impl<'a, 'tcx> InspectGoal<'a, 'tcx> {
                         | inspect::ProbeKind::Root { .. }
                         | inspect::ProbeKind::TryNormalizeNonRigid { .. }
                         | inspect::ProbeKind::TraitCandidate { .. }
-                        | inspect::ProbeKind::OpaqueTypeStorageLookup { .. } => {
+                        | inspect::ProbeKind::OpaqueTypeStorageLookup { .. }
+                        | inspect::ProbeKind::RigidAlias { .. } => {
                             // Nested probes have to prove goals added in their parent
                             // but do not leak them, so we truncate the added goals
                             // afterwards.
@@ -316,7 +317,8 @@ impl<'a, 'tcx> InspectGoal<'a, 'tcx> {
             inspect::ProbeKind::Root { result }
             | inspect::ProbeKind::TryNormalizeNonRigid { result }
             | inspect::ProbeKind::TraitCandidate { source: _, result }
-            | inspect::ProbeKind::OpaqueTypeStorageLookup { result } => {
+            | inspect::ProbeKind::OpaqueTypeStorageLookup { result }
+            | inspect::ProbeKind::RigidAlias { result } => {
                 // We only add a candidate if `shallow_certainty` was set, which means
                 // that we ended up calling `evaluate_added_goals_and_make_canonical_response`.
                 if let Some(shallow_certainty) = shallow_certainty {

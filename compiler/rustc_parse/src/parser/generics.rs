@@ -1,10 +1,10 @@
 use ast::token::Delimiter;
 use rustc_ast::{
-    self as ast, token, AttrVec, GenericBounds, GenericParam, GenericParamKind, TyKind, WhereClause,
+    self as ast, AttrVec, GenericBounds, GenericParam, GenericParamKind, TyKind, WhereClause, token,
 };
 use rustc_errors::{Applicability, PResult};
-use rustc_span::symbol::{kw, Ident};
 use rustc_span::Span;
+use rustc_span::symbol::{Ident, kw};
 use thin_vec::ThinVec;
 
 use super::{ForceCollect, Parser, Trailing, UsePreAttrPos};
@@ -269,6 +269,13 @@ impl<'a> Parser<'a> {
     ///                  | ( < lifetimes , typaramseq ( , )? > )
     /// where   typaramseq = ( typaram ) | ( typaram , typaramseq )
     pub(super) fn parse_generics(&mut self) -> PResult<'a, ast::Generics> {
+        // invalid path separator `::` in function definition
+        // for example `fn invalid_path_separator::<T>() {}`
+        if self.eat_noexpect(&token::PathSep) {
+            self.dcx()
+                .emit_err(errors::InvalidPathSepInFnDefinition { span: self.prev_token.span });
+        }
+
         let span_lo = self.token.span;
         let (params, span) = if self.eat_lt() {
             let params = self.parse_generic_params()?;

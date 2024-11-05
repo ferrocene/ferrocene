@@ -4,8 +4,8 @@ use itertools::Itertools;
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_errors::codes::*;
 use rustc_errors::{
-    a_or_an, display_list_with_comma_and, pluralize, Applicability, Diag, ErrorGuaranteed,
-    MultiSpan, StashKey,
+    Applicability, Diag, ErrorGuaranteed, MultiSpan, StashKey, a_or_an,
+    display_list_with_comma_and, pluralize,
 };
 use rustc_hir::def::{CtorOf, DefKind, Res};
 use rustc_hir::def_id::DefId;
@@ -22,28 +22,28 @@ use rustc_middle::ty::visit::TypeVisitableExt;
 use rustc_middle::ty::{self, IsSuggestable, Ty, TyCtxt};
 use rustc_middle::{bug, span_bug};
 use rustc_session::Session;
-use rustc_span::symbol::{kw, Ident};
-use rustc_span::{sym, Span, DUMMY_SP};
+use rustc_span::symbol::{Ident, kw};
+use rustc_span::{DUMMY_SP, Span, sym};
 use rustc_trait_selection::error_reporting::infer::{FailureCode, ObligationCauseExt};
 use rustc_trait_selection::infer::InferCtxtExt;
 use rustc_trait_selection::traits::{self, ObligationCauseCode, ObligationCtxt, SelectionContext};
 use tracing::debug;
 use {rustc_ast as ast, rustc_hir as hir};
 
+use crate::Expectation::*;
+use crate::TupleArgumentsFlag::*;
 use crate::coercion::CoerceMany;
 use crate::errors::SuggestPtrNullMut;
 use crate::fn_ctxt::arg_matrix::{ArgMatrix, Compatibility, Error, ExpectedIdx, ProvidedIdx};
 use crate::fn_ctxt::infer::FnCall;
 use crate::gather_locals::Declaration;
+use crate::method::MethodCallee;
 use crate::method::probe::IsSuggestion;
 use crate::method::probe::Mode::MethodCall;
 use crate::method::probe::ProbeScope::TraitsInScope;
-use crate::method::MethodCallee;
-use crate::Expectation::*;
-use crate::TupleArgumentsFlag::*;
 use crate::{
-    errors, struct_span_code_err, BreakableCtxt, Diverges, Expectation, FnCtxt, LoweredTy, Needs,
-    TupleArgumentsFlag,
+    BreakableCtxt, Diverges, Expectation, FnCtxt, LoweredTy, Needs, TupleArgumentsFlag, errors,
+    struct_span_code_err,
 };
 
 #[derive(Clone, Copy, Default)]
@@ -658,7 +658,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 && fn_sig.inputs()[1..]
                     .iter()
                     .zip(input_types.iter())
-                    .all(|(expected, found)| self.can_coerce(*expected, *found))
+                    .all(|(expected, found)| self.may_coerce(*expected, *found))
                 && fn_sig.inputs()[1..].len() == input_types.len()
             {
                 err.span_suggestion_verbose(
@@ -722,7 +722,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
             let expectation = Expectation::rvalue_hint(self, expected_input_ty);
             let coerced_ty = expectation.only_has_type(self).unwrap_or(formal_input_ty);
-            let can_coerce = self.can_coerce(arg_ty, coerced_ty);
+            let can_coerce = self.may_coerce(arg_ty, coerced_ty);
             if !can_coerce {
                 return Compatibility::Incompatible(Some(ty::error::TypeError::Sorts(
                     ty::error::ExpectedFound::new(true, coerced_ty, arg_ty),
@@ -802,7 +802,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         provided_arg_tys.iter().map(|(ty, _)| *ty).skip(mismatch_idx + tys.len()),
                     ),
                 ) {
-                    if !self.can_coerce(provided_ty, *expected_ty) {
+                    if !self.may_coerce(provided_ty, *expected_ty) {
                         satisfied = false;
                         break;
                     }
@@ -984,7 +984,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
             self.suggest_deref_unwrap_or(
                 &mut err,
-                error_span,
                 callee_ty,
                 call_ident,
                 expected_ty,
@@ -1024,7 +1023,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 std::iter::zip(formal_and_expected_inputs.iter(), removed_arg_tys.iter()).all(
                     |((expected_ty, _), (provided_ty, _))| {
                         !provided_ty.references_error()
-                            && self.can_coerce(*provided_ty, *expected_ty)
+                            && self.may_coerce(*provided_ty, *expected_ty)
                     },
                 )
             };
@@ -1115,7 +1114,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                 None,
                                 Some(trace.values),
                                 e,
-                                false,
                                 true,
                             );
                         }
@@ -2125,7 +2123,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                     let expr_ty = self.typeck_results.borrow().expr_ty(expr);
                                     let return_ty = fn_sig.output();
                                     if !matches!(expr.kind, hir::ExprKind::Ret(..))
-                                        && self.can_coerce(expr_ty, return_ty)
+                                        && self.may_coerce(expr_ty, return_ty)
                                     {
                                         found_semi = true;
                                     }

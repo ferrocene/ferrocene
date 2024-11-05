@@ -6,7 +6,7 @@ use rustc_hir::*;
 use rustc_index::IndexVec;
 use rustc_middle::span_bug;
 use rustc_middle::ty::TyCtxt;
-use rustc_span::{Span, DUMMY_SP};
+use rustc_span::{DUMMY_SP, Span};
 use tracing::{debug, instrument};
 
 /// A visitor that walks over the HIR and collects `Node`s into a HIR map.
@@ -223,6 +223,14 @@ impl<'a, 'hir> Visitor<'hir> for NodeCollector<'a, 'hir> {
 
         self.with_parent(arm.hir_id, |this| {
             intravisit::walk_arm(this, arm);
+        });
+    }
+
+    fn visit_opaque_ty(&mut self, opaq: &'hir OpaqueTy<'hir>) {
+        self.insert(opaq.span, opaq.hir_id, Node::OpaqueTy(opaq));
+
+        self.with_parent(opaq.hir_id, |this| {
+            intravisit::walk_opaque_ty(this, opaq);
         });
     }
 

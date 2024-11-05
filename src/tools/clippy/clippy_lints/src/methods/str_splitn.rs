@@ -3,7 +3,7 @@ use clippy_utils::consts::{ConstEvalCtxt, Constant};
 use clippy_utils::diagnostics::{span_lint_and_sugg, span_lint_and_then};
 use clippy_utils::source::snippet_with_context;
 use clippy_utils::usage::local_used_after_expr;
-use clippy_utils::visitors::{for_each_expr, Descend};
+use clippy_utils::visitors::{Descend, for_each_expr};
 use clippy_utils::{is_diag_item_method, match_def_path, path_to_local_id, paths};
 use core::ops::ControlFlow;
 use rustc_errors::Applicability;
@@ -12,7 +12,7 @@ use rustc_hir::{
 };
 use rustc_lint::LateContext;
 use rustc_middle::ty;
-use rustc_span::{sym, Span, Symbol, SyntaxContext};
+use rustc_span::{Span, Symbol, SyntaxContext, sym};
 
 use super::{MANUAL_SPLIT_ONCE, NEEDLESS_SPLITN};
 
@@ -333,7 +333,7 @@ fn parse_iter_usage<'tcx>(
                     kind: ExprKind::Path(QPath::LangItem(LangItem::TryTraitBranch, ..)),
                     ..
                 },
-                _,
+                [_],
             ) => {
                 let parent_span = e.span.parent_callsite().unwrap();
                 if parent_span.ctxt() == ctxt {

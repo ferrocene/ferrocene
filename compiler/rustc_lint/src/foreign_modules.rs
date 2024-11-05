@@ -5,12 +5,12 @@ use rustc_hir::def::DefKind;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{self, AdtDef, Instance, Ty, TyCtxt};
 use rustc_session::declare_lint;
-use rustc_span::{sym, Span, Symbol};
+use rustc_span::{Span, Symbol, sym};
 use rustc_target::abi::FIRST_VARIANT;
 use tracing::{debug, instrument};
 
 use crate::lints::{BuiltinClashingExtern, BuiltinClashingExternSub};
-use crate::{types, LintVec};
+use crate::{LintVec, types};
 
 pub(crate) fn provide(providers: &mut Providers) {
     *providers = Providers { clashing_extern_declarations, ..*providers };
@@ -280,7 +280,7 @@ fn structurally_same_type_impl<'tcx>(
 
         ensure_sufficient_stack(|| {
             match (a.kind(), b.kind()) {
-                (&Adt(a_def, _), &Adt(b_def, _)) => {
+                (&Adt(a_def, a_gen_args), &Adt(b_def, b_gen_args)) => {
                     // Only `repr(C)` types can be compared structurally.
                     if !(a_def.repr().c() && b_def.repr().c()) {
                         return false;
@@ -304,8 +304,8 @@ fn structurally_same_type_impl<'tcx>(
                                 seen_types,
                                 tcx,
                                 param_env,
-                                tcx.type_of(a_did).instantiate_identity(),
-                                tcx.type_of(b_did).instantiate_identity(),
+                                tcx.type_of(a_did).instantiate(tcx, a_gen_args),
+                                tcx.type_of(b_did).instantiate(tcx, b_gen_args),
                                 ckind,
                             )
                         },

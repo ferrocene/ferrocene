@@ -26,52 +26,55 @@ pub use generics::*;
 pub use intrinsic::IntrinsicDef;
 use rustc_ast::expand::StrippedCfgItem;
 use rustc_ast::node_id::NodeMap;
-pub use rustc_ast_ir::{try_visit, Movability, Mutability};
+pub use rustc_ast_ir::{Movability, Mutability, try_visit};
 use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_data_structures::intern::Interned;
 use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
 use rustc_data_structures::steal::Steal;
 use rustc_data_structures::tagged_ptr::CopyTaggedPtr;
 use rustc_errors::{Diag, ErrorGuaranteed, StashKey};
+use rustc_hir::LangItem;
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, DocLinkResMap, LifetimeRes, Res};
 use rustc_hir::def_id::{CrateNum, DefId, DefIdMap, LocalDefId, LocalDefIdMap};
-use rustc_hir::LangItem;
 use rustc_index::IndexVec;
 use rustc_macros::{
-    extension, Decodable, Encodable, HashStable, TyDecodable, TyEncodable, TypeFoldable,
-    TypeVisitable,
+    Decodable, Encodable, HashStable, TyDecodable, TyEncodable, TypeFoldable, TypeVisitable,
+    extension,
 };
 use rustc_query_system::ich::StableHashingContext;
 use rustc_serialize::{Decodable, Encodable};
 use rustc_session::lint::LintBuffer;
 pub use rustc_session::lint::RegisteredTools;
 use rustc_span::hygiene::MacroKind;
-use rustc_span::symbol::{kw, sym, Ident, Symbol};
+use rustc_span::symbol::{Ident, Symbol, kw, sym};
 use rustc_span::{ExpnId, ExpnKind, Span};
 use rustc_target::abi::{Align, FieldIdx, Integer, IntegerType, VariantIdx};
 pub use rustc_target::abi::{ReprFlags, ReprOptions};
-pub use rustc_type_ir::relate::VarianceDiagInfo;
 pub use rustc_type_ir::ConstKind::{
     Bound as BoundCt, Error as ErrorCt, Expr as ExprCt, Infer as InferCt, Param as ParamCt,
     Placeholder as PlaceholderCt, Unevaluated, Value,
 };
+pub use rustc_type_ir::relate::VarianceDiagInfo;
 pub use rustc_type_ir::*;
 use tracing::{debug, instrument};
 pub use vtable::*;
 use {rustc_ast as ast, rustc_attr as attr, rustc_hir as hir};
 
+pub use self::AssocItemContainer::*;
+pub use self::BorrowKind::*;
+pub use self::IntVarValue::*;
 pub use self::closure::{
-    analyze_coroutine_closure_captures, is_ancestor_or_same_capture, place_to_string_for_capture,
-    BorrowKind, CaptureInfo, CapturedPlace, ClosureTypeInfo, MinCaptureInformationMap,
-    MinCaptureList, RootVariableMinCaptureList, UpvarCapture, UpvarId, UpvarPath,
-    CAPTURE_STRUCT_LOCAL,
+    BorrowKind, CAPTURE_STRUCT_LOCAL, CaptureInfo, CapturedPlace, ClosureTypeInfo,
+    MinCaptureInformationMap, MinCaptureList, RootVariableMinCaptureList, UpvarCapture, UpvarId,
+    UpvarPath, analyze_coroutine_closure_captures, is_ancestor_or_same_capture,
+    place_to_string_for_capture,
 };
 pub use self::consts::{
     Const, ConstInt, ConstKind, Expr, ExprKind, FeedConstTy, ScalarInt, UnevaluatedConst, ValTree,
 };
 pub use self::context::{
-    tls, CtxtInterners, CurrentGcx, DeducedParamAttrs, Feed, FreeRegionInfo, GlobalCtxt, Lift,
-    TyCtxt, TyCtxtFeed,
+    CtxtInterners, CurrentGcx, DeducedParamAttrs, Feed, FreeRegionInfo, GlobalCtxt, Lift, TyCtxt,
+    TyCtxtFeed, tls,
 };
 pub use self::fold::{FallibleTypeFolder, TypeFoldable, TypeFolder, TypeSuperFoldable};
 pub use self::instance::{Instance, InstanceKind, ReifyReason, ShortInstance, UnusedGenericParams};
@@ -104,9 +107,6 @@ pub use self::typeck_results::{
     TypeckResults, UserType, UserTypeAnnotationIndex,
 };
 pub use self::visit::{TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor};
-pub use self::AssocItemContainer::*;
-pub use self::BorrowKind::*;
-pub use self::IntVarValue::*;
 use crate::error::{OpaqueHiddenTypeMismatch, TypeMismatchReason};
 use crate::metadata::ModChild;
 use crate::middle::privacy::EffectiveVisibilities;
@@ -186,9 +186,9 @@ pub struct ResolverGlobalCtxt {
     pub proc_macros: Vec<LocalDefId>,
     /// Mapping from ident span to path span for paths that don't exist as written, but that
     /// exist under `std`. For example, wrote `str::from_utf8` instead of `std::str::from_utf8`.
-    pub confused_type_with_std_module: FxHashMap<Span, Span>,
-    pub doc_link_resolutions: FxHashMap<LocalDefId, DocLinkResMap>,
-    pub doc_link_traits_in_scope: FxHashMap<LocalDefId, Vec<DefId>>,
+    pub confused_type_with_std_module: FxIndexMap<Span, Span>,
+    pub doc_link_resolutions: FxIndexMap<LocalDefId, DocLinkResMap>,
+    pub doc_link_traits_in_scope: FxIndexMap<LocalDefId, Vec<DefId>>,
     pub all_macro_rules: FxHashMap<Symbol, Res<ast::NodeId>>,
     pub stripped_cfg_items: Steal<Vec<StrippedCfgItem>>,
 }
@@ -1155,8 +1155,6 @@ bitflags::bitflags! {
         const NO_VARIANT_FLAGS        = 0;
         /// Indicates whether the field list of this variant is `#[non_exhaustive]`.
         const IS_FIELD_LIST_NON_EXHAUSTIVE = 1 << 0;
-        /// Indicates whether this variant has unnamed fields.
-        const HAS_UNNAMED_FIELDS = 1 << 1;
     }
 }
 rustc_data_structures::external_bitflags_debug! { VariantFlags }
@@ -1209,21 +1207,16 @@ impl VariantDef {
         parent_did: DefId,
         recover_tainted: Option<ErrorGuaranteed>,
         is_field_list_non_exhaustive: bool,
-        has_unnamed_fields: bool,
     ) -> Self {
         debug!(
             "VariantDef::new(name = {:?}, variant_did = {:?}, ctor = {:?}, discr = {:?},
-             fields = {:?}, adt_kind = {:?}, parent_did = {:?}, has_unnamed_fields = {:?})",
-            name, variant_did, ctor, discr, fields, adt_kind, parent_did, has_unnamed_fields,
+             fields = {:?}, adt_kind = {:?}, parent_did = {:?})",
+            name, variant_did, ctor, discr, fields, adt_kind, parent_did,
         );
 
         let mut flags = VariantFlags::NO_VARIANT_FLAGS;
         if is_field_list_non_exhaustive {
             flags |= VariantFlags::IS_FIELD_LIST_NON_EXHAUSTIVE;
-        }
-
-        if has_unnamed_fields {
-            flags |= VariantFlags::HAS_UNNAMED_FIELDS;
         }
 
         VariantDef {
@@ -1241,12 +1234,6 @@ impl VariantDef {
     #[inline]
     pub fn is_field_list_non_exhaustive(&self) -> bool {
         self.flags.intersects(VariantFlags::IS_FIELD_LIST_NON_EXHAUSTIVE)
-    }
-
-    /// Does this variant contains unnamed fields
-    #[inline]
-    pub fn has_unnamed_fields(&self) -> bool {
-        self.flags.intersects(VariantFlags::HAS_UNNAMED_FIELDS)
     }
 
     /// Computes the `Ident` of this variant by looking up the `Span`
@@ -1433,11 +1420,6 @@ impl<'tcx> FieldDef {
     /// Computes the `Ident` of this variant by looking up the `Span`
     pub fn ident(&self, tcx: TyCtxt<'_>) -> Ident {
         Ident::new(self.name, tcx.def_ident_span(self.did).unwrap())
-    }
-
-    /// Returns whether the field is unnamed
-    pub fn is_unnamed(&self) -> bool {
-        self.name == rustc_span::symbol::kw::Underscore
     }
 }
 

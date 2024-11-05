@@ -8,11 +8,13 @@
 
 use std::ops::ControlFlow;
 
-use hir::def_id::DefId;
 use hir::LangItem;
+use hir::def_id::DefId;
 use rustc_data_structures::fx::{FxHashSet, FxIndexSet};
 use rustc_hir as hir;
-use rustc_infer::traits::{Obligation, ObligationCause, PolyTraitObligation, SelectionError};
+use rustc_infer::traits::{
+    Obligation, ObligationCause, PolyTraitObligation, PredicateObligations, SelectionError,
+};
 use rustc_middle::ty::fast_reject::DeepRejectCtxt;
 use rustc_middle::ty::{self, ToPolyTraitRef, Ty, TypeVisitableExt};
 use rustc_middle::{bug, span_bug};
@@ -881,9 +883,9 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                         }
 
                         if let Some(principal) = data.principal() {
-                            if !self.infcx.tcx.features().object_safe_for_dispatch {
+                            if !self.infcx.tcx.features().dyn_compatible_for_dispatch {
                                 principal.with_self_ty(self.tcx(), self_ty)
-                            } else if self.tcx().is_object_safe(principal.def_id()) {
+                            } else if self.tcx().is_dyn_compatible(principal.def_id()) {
                                 principal.with_self_ty(self.tcx(), self_ty)
                             } else {
                                 return;
@@ -963,7 +965,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 0,
                 // We're *intentionally* throwing these away,
                 // since we don't actually use them.
-                &mut vec![],
+                &mut PredicateObligations::new(),
             )
             .as_type()
             .unwrap();
@@ -1016,7 +1018,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 // #2 (region bounds).
                 let principal_def_id_a = a_data.principal_def_id();
                 let principal_def_id_b = b_data.principal_def_id();
-                if principal_def_id_a == principal_def_id_b {
+                if principal_def_id_a == principal_def_id_b || principal_def_id_b.is_none() {
                     // We may upcast to auto traits that are either explicitly listed in
                     // the object type's bounds, or implied by the principal trait ref's
                     // supertraits.

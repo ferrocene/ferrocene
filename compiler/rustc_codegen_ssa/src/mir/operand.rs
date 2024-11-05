@@ -3,18 +3,19 @@ use std::fmt;
 
 use arrayvec::ArrayVec;
 use either::Either;
+use rustc_abi as abi;
+use rustc_abi::{Abi, Align, Size};
 use rustc_middle::bug;
-use rustc_middle::mir::interpret::{alloc_range, Pointer, Scalar};
+use rustc_middle::mir::interpret::{Pointer, Scalar, alloc_range};
 use rustc_middle::mir::{self, ConstValue};
-use rustc_middle::ty::layout::{LayoutOf, TyAndLayout};
 use rustc_middle::ty::Ty;
-use rustc_target::abi::{self, Abi, Align, Size};
+use rustc_middle::ty::layout::{LayoutOf, TyAndLayout};
 use tracing::debug;
 
 use super::place::{PlaceRef, PlaceValue};
 use super::{FunctionCx, LocalRef};
 use crate::traits::*;
-use crate::{size_of_val, MemFlags};
+use crate::{MemFlags, size_of_val};
 
 /// The representation of a Rust value. The enum variant is in fact
 /// uniquely determined by the value's type, but is kept as a
@@ -41,7 +42,7 @@ pub enum OperandValue<V> {
     /// The backend value in this variant must be the *immediate* backend type,
     /// as returned by [`LayoutTypeCodegenMethods::immediate_backend_type`].
     Immediate(V),
-    /// A pair of immediate LLVM values. Used by fat pointers too.
+    /// A pair of immediate LLVM values. Used by wide pointers too.
     ///
     /// An `OperandValue` *must* be this variant for any type for which
     /// [`LayoutTypeCodegenMethods::is_backend_scalar_pair`] returns `true`.
@@ -207,7 +208,7 @@ impl<'a, 'tcx, V: CodegenObject> OperandRef<'tcx, V> {
             match alloc.0.read_scalar(
                 bx,
                 alloc_range(start, size),
-                /*read_provenance*/ matches!(s.primitive(), abi::Pointer(_)),
+                /*read_provenance*/ matches!(s.primitive(), abi::Primitive::Pointer(_)),
             ) {
                 Ok(val) => bx.scalar_to_backend(val, s, ty),
                 Err(_) => bx.const_poison(ty),

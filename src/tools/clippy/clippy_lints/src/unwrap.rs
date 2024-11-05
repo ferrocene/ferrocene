@@ -3,7 +3,7 @@ use clippy_utils::ty::is_type_diagnostic_item;
 use clippy_utils::usage::is_potentially_local_place;
 use clippy_utils::{higher, path_to_local};
 use rustc_errors::Applicability;
-use rustc_hir::intravisit::{walk_expr, walk_fn, FnKind, Visitor};
+use rustc_hir::intravisit::{FnKind, Visitor, walk_expr, walk_fn};
 use rustc_hir::{BinOpKind, Body, Expr, ExprKind, FnDecl, HirId, Node, PathSegment, UnOp};
 use rustc_hir_typeck::expr_use_visitor::{Delegate, ExprUseVisitor, PlaceWithHirId};
 use rustc_lint::{LateContext, LateLintPass};
@@ -13,7 +13,7 @@ use rustc_middle::mir::FakeReadCause;
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_session::declare_lint_pass;
 use rustc_span::def_id::LocalDefId;
-use rustc_span::{sym, Span};
+use rustc_span::{Span, sym};
 
 declare_clippy_lint! {
     /// ### What it does
@@ -153,13 +153,12 @@ fn collect_unwrap_info<'tcx>(
         }
     } else if let ExprKind::Unary(UnOp::Not, expr) = &expr.kind {
         return collect_unwrap_info(cx, if_expr, expr, branch, !invert, false);
-    } else if let ExprKind::MethodCall(method_name, receiver, args, _) = &expr.kind
+    } else if let ExprKind::MethodCall(method_name, receiver, [], _) = &expr.kind
         && let Some(local_id) = path_to_local(receiver)
         && let ty = cx.typeck_results().expr_ty(receiver)
         && let name = method_name.ident.as_str()
         && (is_relevant_option_call(cx, ty, name) || is_relevant_result_call(cx, ty, name))
     {
-        assert!(args.is_empty());
         let unwrappable = match name {
             "is_some" | "is_ok" => true,
             "is_err" | "is_none" => false,
@@ -208,7 +207,7 @@ struct MutationVisitor<'tcx> {
 /// expression: that will be where the actual method call is.
 fn is_option_as_mut_use(tcx: TyCtxt<'_>, expr_id: HirId) -> bool {
     if let Node::Expr(mutating_expr) = tcx.parent_hir_node(expr_id)
-        && let ExprKind::MethodCall(path, ..) = mutating_expr.kind
+        && let ExprKind::MethodCall(path, _, [], _) = mutating_expr.kind
     {
         path.ident.name.as_str() == "as_mut"
     } else {
@@ -235,7 +234,7 @@ impl<'tcx> Delegate<'tcx> for MutationVisitor<'tcx> {
     fn fake_read(&mut self, _: &PlaceWithHirId<'tcx>, _: FakeReadCause, _: HirId) {}
 }
 
-impl<'a, 'tcx> UnwrappableVariablesVisitor<'a, 'tcx> {
+impl<'tcx> UnwrappableVariablesVisitor<'_, 'tcx> {
     fn visit_branch(
         &mut self,
         if_expr: &'tcx Expr<'_>,
@@ -275,7 +274,7 @@ enum AsRefKind {
 /// Checks if the expression is a method call to `as_{ref,mut}` and returns the receiver of it.
 /// If it isn't, the expression itself is returned.
 fn consume_option_as_ref<'tcx>(expr: &'tcx Expr<'tcx>) -> (&'tcx Expr<'tcx>, Option<AsRefKind>) {
-    if let ExprKind::MethodCall(path, recv, ..) = expr.kind {
+    if let ExprKind::MethodCall(path, recv, [], _) = expr.kind {
         if path.ident.name == sym::as_ref {
             (recv, Some(AsRefKind::AsRef))
         } else if path.ident.name.as_str() == "as_mut" {
@@ -288,7 +287,7 @@ fn consume_option_as_ref<'tcx>(expr: &'tcx Expr<'tcx>) -> (&'tcx Expr<'tcx>, Opt
     }
 }
 
-impl<'a, 'tcx> Visitor<'tcx> for UnwrappableVariablesVisitor<'a, 'tcx> {
+impl<'tcx> Visitor<'tcx> for UnwrappableVariablesVisitor<'_, 'tcx> {
     type NestedFilter = nested_filter::OnlyBodies;
 
     fn visit_expr(&mut self, expr: &'tcx Expr<'_>) {
@@ -303,7 +302,7 @@ impl<'a, 'tcx> Visitor<'tcx> for UnwrappableVariablesVisitor<'a, 'tcx> {
                 self.visit_branch(expr, cond, else_inner, true);
             }
         } else {
-            // find `unwrap[_err]()` calls:
+            // find `unwrap[_err]()` or `expect("...")` calls:
             if let ExprKind::MethodCall(method_name, self_arg, ..) = expr.kind
                 && let (self_arg, as_ref_kind) = consume_option_as_ref(self_arg)
                 && let Some(id) = path_to_local(self_arg)

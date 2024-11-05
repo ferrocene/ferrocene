@@ -4,14 +4,14 @@ use rustc_data_structures::fx::FxHashSet;
 use rustc_hir::def_id::DefId;
 use rustc_infer::infer::canonical::query_response::make_query_region_constraints;
 use rustc_infer::infer::canonical::{
-    Canonical, CanonicalExt as _, CanonicalVarInfo, CanonicalVarValues,
+    Canonical, CanonicalExt as _, CanonicalQueryInput, CanonicalVarInfo, CanonicalVarValues,
 };
 use rustc_infer::infer::{InferCtxt, RegionVariableOrigin, TyCtxtInferExt};
 use rustc_infer::traits::solve::Goal;
 use rustc_infer::traits::{ObligationCause, Reveal};
 use rustc_middle::ty::fold::TypeFoldable;
 use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitableExt as _};
-use rustc_span::{ErrorGuaranteed, Span, DUMMY_SP};
+use rustc_span::{DUMMY_SP, ErrorGuaranteed, Span};
 use rustc_type_ir::solve::{Certainty, NoSolution, SolverMode};
 use tracing::trace;
 
@@ -36,6 +36,7 @@ impl<'tcx> Deref for SolverDelegate<'tcx> {
 }
 
 impl<'tcx> rustc_next_trait_solver::delegate::SolverDelegate for SolverDelegate<'tcx> {
+    type Infcx = InferCtxt<'tcx>;
     type Interner = TyCtxt<'tcx>;
 
     fn cx(&self) -> TyCtxt<'tcx> {
@@ -47,7 +48,7 @@ impl<'tcx> rustc_next_trait_solver::delegate::SolverDelegate for SolverDelegate<
     fn build_with_canonical<V>(
         interner: TyCtxt<'tcx>,
         solver_mode: SolverMode,
-        canonical: &Canonical<'tcx, V>,
+        canonical: &CanonicalQueryInput<'tcx, V>,
     ) -> (Self, V, CanonicalVarValues<'tcx>)
     where
         V: TypeFoldable<TyCtxt<'tcx>>,
@@ -182,10 +183,10 @@ impl<'tcx> rustc_next_trait_solver::delegate::SolverDelegate for SolverDelegate<
     }
 
     fn inject_new_hidden_type_unchecked(&self, key: ty::OpaqueTypeKey<'tcx>, hidden_ty: Ty<'tcx>) {
-        self.0.inject_new_hidden_type_unchecked(
-            key,
-            ty::OpaqueHiddenType { ty: hidden_ty, span: DUMMY_SP },
-        )
+        self.0.inject_new_hidden_type_unchecked(key, ty::OpaqueHiddenType {
+            ty: hidden_ty,
+            span: DUMMY_SP,
+        })
     }
 
     fn reset_opaque_types(&self) {
@@ -223,6 +224,8 @@ impl<'tcx> rustc_next_trait_solver::delegate::SolverDelegate for SolverDelegate<
         if eligible { Ok(Some(node_item.item.def_id)) } else { Ok(None) }
     }
 
+    // FIXME: This actually should destructure the `Result` we get from transmutability and
+    // register candidates. We probably need to register >1 since we may have an OR of ANDs.
     fn is_transmutable(
         &self,
         param_env: ty::ParamEnv<'tcx>,

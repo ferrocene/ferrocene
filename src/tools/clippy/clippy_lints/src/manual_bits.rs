@@ -1,5 +1,5 @@
-use clippy_config::msrvs::{self, Msrv};
 use clippy_config::Conf;
+use clippy_config::msrvs::{self, Msrv};
 use clippy_utils::diagnostics::span_lint_and_sugg;
 use clippy_utils::get_parent_expr;
 use clippy_utils::source::snippet_with_context;
@@ -95,7 +95,7 @@ fn get_one_size_of_ty<'tcx>(
 }
 
 fn get_size_of_ty<'tcx>(cx: &LateContext<'tcx>, expr: &'tcx Expr<'_>) -> Option<(&'tcx rustc_hir::Ty<'tcx>, Ty<'tcx>)> {
-    if let ExprKind::Call(count_func, _func_args) = expr.kind
+    if let ExprKind::Call(count_func, []) = expr.kind
         && let ExprKind::Path(ref count_func_qpath) = count_func.kind
         && let QPath::Resolved(_, count_func_path) = count_func_qpath
         && let Some(segment_zero) = count_func_path.segments.first()

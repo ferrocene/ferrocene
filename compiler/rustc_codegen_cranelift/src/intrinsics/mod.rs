@@ -19,11 +19,11 @@ mod simd;
 
 use cranelift_codegen::ir::AtomicRmwOp;
 use rustc_middle::ty;
+use rustc_middle::ty::GenericArgsRef;
 use rustc_middle::ty::layout::{HasParamEnv, ValidityRequirement};
 use rustc_middle::ty::print::{with_no_trimmed_paths, with_no_visible_paths};
-use rustc_middle::ty::GenericArgsRef;
 use rustc_span::source_map::Spanned;
-use rustc_span::symbol::{sym, Symbol};
+use rustc_span::symbol::{Symbol, sym};
 
 pub(crate) use self::llvm::codegen_llvm_intrinsic_call;
 use crate::cast::clif_intcast;
@@ -328,6 +328,9 @@ fn codegen_float_intrinsic_call<'tcx>(
         sym::fabsf64 => ("fabs", 1, fx.tcx.types.f64, types::F64),
         sym::fmaf32 => ("fmaf", 3, fx.tcx.types.f32, types::F32),
         sym::fmaf64 => ("fma", 3, fx.tcx.types.f64, types::F64),
+        // FIXME: calling `fma` from libc without FMA target feature uses expensive sofware emulation
+        sym::fmuladdf32 => ("fmaf", 3, fx.tcx.types.f32, types::F32), // TODO: use cranelift intrinsic analogous to llvm.fmuladd.f32
+        sym::fmuladdf64 => ("fma", 3, fx.tcx.types.f64, types::F64), // TODO: use cranelift intrinsic analogous to llvm.fmuladd.f64
         sym::copysignf32 => ("copysignf", 2, fx.tcx.types.f32, types::F32),
         sym::copysignf64 => ("copysign", 2, fx.tcx.types.f64, types::F64),
         sym::floorf32 => ("floorf", 1, fx.tcx.types.f32, types::F32),
@@ -381,7 +384,7 @@ fn codegen_float_intrinsic_call<'tcx>(
 
     let layout = fx.layout_of(ty);
     let res = match intrinsic {
-        sym::fmaf32 | sym::fmaf64 => {
+        sym::fmaf32 | sym::fmaf64 | sym::fmuladdf32 | sym::fmuladdf64 => {
             CValue::by_val(fx.bcx.ins().fma(args[0], args[1], args[2]), layout)
         }
         sym::copysignf32 | sym::copysignf64 => {
@@ -600,9 +603,11 @@ fn codegen_regular_intrinsic_call<'tcx>(
 
         sym::ptr_mask => {
             intrinsic_args!(fx, args => (ptr, mask); intrinsic);
+            let ptr_layout = ptr.layout();
             let ptr = ptr.load_scalar(fx);
             let mask = mask.load_scalar(fx);
-            fx.bcx.ins().band(ptr, mask);
+            let res = fx.bcx.ins().band(ptr, mask);
+            ret.write_cvalue(fx, CValue::by_val(res, ptr_layout));
         }
 
         sym::write_bytes | sym::volatile_set_memory => {

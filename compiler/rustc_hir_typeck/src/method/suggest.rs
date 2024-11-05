@@ -13,7 +13,7 @@ use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_data_structures::sorted_map::SortedMap;
 use rustc_data_structures::unord::UnordSet;
 use rustc_errors::codes::*;
-use rustc_errors::{pluralize, struct_span_code_err, Applicability, Diag, MultiSpan, StashKey};
+use rustc_errors::{Applicability, Diag, MultiSpan, StashKey, pluralize, struct_span_code_err};
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_hir::intravisit::{self, Visitor};
@@ -21,21 +21,21 @@ use rustc_hir::lang_items::LangItem;
 use rustc_hir::{self as hir, ExprKind, HirId, Node, PathSegment, QPath};
 use rustc_infer::infer::{self, RegionVariableOrigin};
 use rustc_middle::bug;
-use rustc_middle::ty::fast_reject::{simplify_type, DeepRejectCtxt, TreatParams};
+use rustc_middle::ty::fast_reject::{DeepRejectCtxt, TreatParams, simplify_type};
 use rustc_middle::ty::print::{
-    with_crate_prefix, with_forced_trimmed_paths, PrintTraitRefExt as _,
+    PrintTraitRefExt as _, with_crate_prefix, with_forced_trimmed_paths,
 };
 use rustc_middle::ty::{self, GenericArgKind, IsSuggestable, Ty, TyCtxt, TypeVisitableExt};
 use rustc_span::def_id::DefIdSet;
-use rustc_span::symbol::{kw, sym, Ident};
+use rustc_span::symbol::{Ident, kw, sym};
 use rustc_span::{
-    edit_distance, ErrorGuaranteed, ExpnKind, FileName, MacroKind, Span, Symbol, DUMMY_SP,
+    DUMMY_SP, ErrorGuaranteed, ExpnKind, FileName, MacroKind, Span, Symbol, edit_distance,
 };
 use rustc_trait_selection::error_reporting::traits::on_unimplemented::OnUnimplementedNote;
 use rustc_trait_selection::infer::InferCtxtExt;
 use rustc_trait_selection::traits::query::evaluate_obligation::InferCtxtExt as _;
 use rustc_trait_selection::traits::{
-    supertraits, FulfillmentError, Obligation, ObligationCause, ObligationCauseCode,
+    FulfillmentError, Obligation, ObligationCause, ObligationCauseCode, supertraits,
 };
 use tracing::{debug, info, instrument};
 
@@ -183,7 +183,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     }
 
     #[instrument(level = "debug", skip(self))]
-    pub fn report_method_error(
+    pub(crate) fn report_method_error(
         &self,
         call_id: HirId,
         rcvr_ty: Ty<'tcx>,
@@ -191,6 +191,14 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         expected: Expectation<'tcx>,
         trait_missing_method: bool,
     ) -> ErrorGuaranteed {
+        // NOTE: Reporting a method error should also suppress any unused trait errors,
+        // since the method error is very possibly the reason why the trait wasn't used.
+        for &import_id in
+            self.tcx.in_scope_traits(call_id).into_iter().flatten().flat_map(|c| &c.import_ids)
+        {
+            self.typeck_results.borrow_mut().used_trait_imports.insert(import_id);
+        }
+
         let (span, sugg_span, source, item_name, args) = match self.tcx.hir_node(call_id) {
             hir::Node::Expr(&hir::Expr {
                 kind: hir::ExprKind::MethodCall(segment, rcvr, args, _),
@@ -229,20 +237,18 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         }
 
         match error {
-            MethodError::NoMatch(mut no_match_data) => {
-                return self.report_no_match_method_error(
-                    span,
-                    rcvr_ty,
-                    item_name,
-                    call_id,
-                    source,
-                    args,
-                    sugg_span,
-                    &mut no_match_data,
-                    expected,
-                    trait_missing_method,
-                );
-            }
+            MethodError::NoMatch(mut no_match_data) => self.report_no_match_method_error(
+                span,
+                rcvr_ty,
+                item_name,
+                call_id,
+                source,
+                args,
+                sugg_span,
+                &mut no_match_data,
+                expected,
+                trait_missing_method,
+            ),
 
             MethodError::Ambiguity(mut sources) => {
                 let mut err = struct_span_code_err!(
@@ -263,7 +269,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     &mut sources,
                     Some(sugg_span),
                 );
-                return err.emit();
+                err.emit()
             }
 
             MethodError::PrivateMatch(kind, def_id, out_of_scope_traits) => {
@@ -284,7 +290,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     .unwrap_or_else(|| self.tcx.def_span(def_id));
                 err.span_label(sp, format!("private {kind} defined here"));
                 self.suggest_valid_traits(&mut err, item_name, out_of_scope_traits, true);
-                return err.emit();
+                err.emit()
             }
 
             MethodError::IllegalSizedBound { candidates, needs_mut, bound_span, self_expr } => {
@@ -383,8 +389,10 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         }
                     }
                 }
-                return err.emit();
+                err.emit()
             }
+
+            MethodError::ErrorReported(guar) => guar,
 
             MethodError::BadReturnType => bug!("no return type expectations but got BadReturnType"),
         }
@@ -680,7 +688,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         self.tcx
                             .inherent_impls(adt_def.did())
                             .into_iter()
-                            .flatten()
                             .any(|def_id| self.associated_value(*def_id, item_name).is_some())
                     } else {
                         false
@@ -953,7 +960,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         continue;
                     }
                     unimplemented_traits.entry(p.trait_ref.def_id).or_insert((
-                        predicate.kind().rebind(p.trait_ref),
+                        predicate.kind().rebind(p),
                         Obligation {
                             cause: cause.clone(),
                             param_env: self.param_env,
@@ -1438,7 +1445,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         .tcx
                         .inherent_impls(adt.did())
                         .into_iter()
-                        .flatten()
                         .copied()
                         .filter(|def_id| {
                             if let Some(assoc) = self.associated_value(*def_id, item_name) {
@@ -1721,20 +1727,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
         }
 
-        if item_name.name == sym::as_str && rcvr_ty.peel_refs().is_str() {
-            let msg = "remove this method call";
-            let mut fallback_span = true;
-            if let SelfSource::MethodCall(expr) = source {
-                let call_expr = self.tcx.hir().expect_expr(self.tcx.parent_hir_id(expr.hir_id));
-                if let Some(span) = call_expr.span.trim_start(expr.span) {
-                    err.span_suggestion(span, msg, "", Applicability::MachineApplicable);
-                    fallback_span = false;
-                }
-            }
-            if fallback_span {
-                err.span_label(span, msg);
-            }
-        } else if let Some(similar_candidate) = similar_candidate {
+        if let Some(similar_candidate) = similar_candidate {
             // Don't emit a suggestion if we found an actual method
             // that had unsatisfied trait bounds
             if unsatisfied_predicates.is_empty()
@@ -1913,7 +1906,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         call_args: Option<Vec<Ty<'tcx>>>,
     ) -> Option<Symbol> {
         if let ty::Adt(adt, adt_args) = rcvr_ty.kind() {
-            for inherent_impl_did in self.tcx.inherent_impls(adt.did()).into_iter().flatten() {
+            for inherent_impl_did in self.tcx.inherent_impls(adt.did()).into_iter() {
                 for inherent_method in
                     self.tcx.associated_items(inherent_impl_did).in_definition_order()
                 {
@@ -1941,7 +1934,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             && fn_sig.inputs()[1..]
                                 .iter()
                                 .zip(args.into_iter())
-                                .all(|(expected, found)| self.can_coerce(*expected, *found))
+                                .all(|(expected, found)| self.may_coerce(*expected, *found))
                             && fn_sig.inputs()[1..].len() == args.len()
                         {
                             err.span_suggestion_verbose(
@@ -2127,9 +2120,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let ty::Adt(adt_def, _) = rcvr_ty.kind() else {
             return;
         };
-        // FIXME(oli-obk): try out bubbling this error up one level and cancelling the other error in that case.
-        let Ok(impls) = self.tcx.inherent_impls(adt_def.did()) else { return };
-        let mut items = impls
+        let mut items = self
+            .tcx
+            .inherent_impls(adt_def.did())
             .iter()
             .flat_map(|i| self.tcx.associated_items(i).in_definition_order())
             // Only assoc fn with no receivers and only if
@@ -2508,7 +2501,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 .and_then(|simp| {
                     tcx.incoherent_impls(simp)
                         .into_iter()
-                        .flatten()
                         .find_map(|&id| self.associated_value(id, item_name))
                 })
                 .is_some()
@@ -4156,7 +4148,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             return false;
         };
 
-        if !self.can_coerce(output, expected) {
+        if !self.may_coerce(output, expected) {
             return false;
         }
 

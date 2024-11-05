@@ -4,8 +4,8 @@ use rustc_data_structures::fx::FxIndexSet;
 use rustc_hir::def::{DefKind, LifetimeRes, Res};
 use rustc_middle::span_bug;
 use rustc_middle::ty::ResolverAstLowering;
-use rustc_span::symbol::{kw, Ident};
 use rustc_span::Span;
+use rustc_span::symbol::{Ident, kw};
 
 use super::ResolverAstLoweringExt;
 
@@ -95,7 +95,7 @@ impl<'ast> Visitor<'ast> for LifetimeCollectVisitor<'ast> {
                 visit::walk_ty(self, t);
                 self.current_binders.pop();
             }
-            TyKind::Ref(None, _) => {
+            TyKind::Ref(None, _) | TyKind::PinnedRef(None, _) => {
                 self.record_elided_anchor(t.id, t.span);
                 visit::walk_ty(self, t);
             }

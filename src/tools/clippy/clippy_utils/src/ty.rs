@@ -12,8 +12,8 @@ use rustc_hir::def_id::DefId;
 use rustc_hir::{Expr, FnDecl, LangItem, Safety, TyKind};
 use rustc_infer::infer::TyCtxtInferExt;
 use rustc_lint::LateContext;
-use rustc_middle::mir::interpret::Scalar;
 use rustc_middle::mir::ConstValue;
+use rustc_middle::mir::interpret::Scalar;
 use rustc_middle::traits::EvaluationResult;
 use rustc_middle::ty::layout::ValidityRequirement;
 use rustc_middle::ty::{
@@ -22,7 +22,7 @@ use rustc_middle::ty::{
     TypeVisitable, TypeVisitableExt, TypeVisitor, UintTy, Upcast, VariantDef, VariantDiscr,
 };
 use rustc_span::symbol::Ident;
-use rustc_span::{sym, Span, Symbol, DUMMY_SP};
+use rustc_span::{DUMMY_SP, Span, Symbol, sym};
 use rustc_target::abi::VariantIdx;
 use rustc_trait_selection::traits::query::evaluate_obligation::InferCtxtExt as _;
 use rustc_trait_selection::traits::query::normalize::QueryNormalizeExt;
@@ -606,10 +606,13 @@ fn is_uninit_value_valid_for_ty_fallback<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'t
         ty::Tuple(types) => types.iter().all(|ty| is_uninit_value_valid_for_ty(cx, ty)),
         // Unions are always fine right now.
         // This includes MaybeUninit, the main way people use uninitialized memory.
-        // For ADTs, we could look at all fields just like for tuples, but that's potentially
-        // exponential, so let's avoid doing that for now. Code doing that is sketchy enough to
-        // just use an `#[allow()]`.
-        ty::Adt(adt, _) => adt.is_union(),
+        ty::Adt(adt, _) if adt.is_union() => true,
+        // Types (e.g. `UnsafeCell<MaybeUninit<T>>`) that recursively contain only types that can be uninit
+        // can themselves be uninit too.
+        // This purposefully ignores enums as they may have a discriminant that can't be uninit.
+        ty::Adt(adt, args) if adt.is_struct() => adt
+            .all_fields()
+            .all(|field| is_uninit_value_valid_for_ty(cx, field.ty(cx.tcx, args))),
         // For the rest, conservatively assume that they cannot be uninit.
         _ => false,
     }
@@ -1165,7 +1168,7 @@ pub fn make_normalized_projection<'tcx>(
 pub struct InteriorMut<'tcx> {
     ignored_def_ids: FxHashSet<DefId>,
     ignore_pointers: bool,
-    tys: FxHashMap<Ty<'tcx>, Option<bool>>,
+    tys: FxHashMap<Ty<'tcx>, Option<&'tcx ty::List<Ty<'tcx>>>>,
 }
 
 impl<'tcx> InteriorMut<'tcx> {
@@ -1191,25 +1194,24 @@ impl<'tcx> InteriorMut<'tcx> {
         }
     }
 
-    /// Check if given type has inner mutability such as [`std::cell::Cell`] or
-    /// [`std::cell::RefCell`] etc.
-    pub fn is_interior_mut_ty(&mut self, cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> bool {
+    /// Check if given type has interior mutability such as [`std::cell::Cell`] or
+    /// [`std::cell::RefCell`] etc. and if it does, returns a chain of types that causes
+    /// this type to be interior mutable
+    pub fn interior_mut_ty_chain(&mut self, cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> Option<&'tcx ty::List<Ty<'tcx>>> {
         match self.tys.entry(ty) {
-            Entry::Occupied(o) => return *o.get() == Some(true),
+            Entry::Occupied(o) => return *o.get(),
             // Temporarily insert a `None` to break cycles
             Entry::Vacant(v) => v.insert(None),
         };
 
-        let interior_mut = match *ty.kind() {
-            ty::RawPtr(inner_ty, _) if !self.ignore_pointers => self.is_interior_mut_ty(cx, inner_ty),
-            ty::Ref(_, inner_ty, _) | ty::Slice(inner_ty) => self.is_interior_mut_ty(cx, inner_ty),
-            ty::Array(inner_ty, size) => {
-                size.try_eval_target_usize(cx.tcx, cx.param_env)
-                    .map_or(true, |u| u != 0)
-                    && self.is_interior_mut_ty(cx, inner_ty)
+        let chain = match *ty.kind() {
+            ty::RawPtr(inner_ty, _) if !self.ignore_pointers => self.interior_mut_ty_chain(cx, inner_ty),
+            ty::Ref(_, inner_ty, _) | ty::Slice(inner_ty) => self.interior_mut_ty_chain(cx, inner_ty),
+            ty::Array(inner_ty, size) if size.try_eval_target_usize(cx.tcx, cx.param_env) != Some(0) => {
+                self.interior_mut_ty_chain(cx, inner_ty)
             },
-            ty::Tuple(fields) => fields.iter().any(|ty| self.is_interior_mut_ty(cx, ty)),
-            ty::Adt(def, _) if def.is_unsafe_cell() => true,
+            ty::Tuple(fields) => fields.iter().find_map(|ty| self.interior_mut_ty_chain(cx, ty)),
+            ty::Adt(def, _) if def.is_unsafe_cell() => Some(ty::List::empty()),
             ty::Adt(def, args) => {
                 let is_std_collection = matches!(
                     cx.tcx.get_diagnostic_name(def.did()),
@@ -1228,19 +1230,28 @@ impl<'tcx> InteriorMut<'tcx> {
 
                 if is_std_collection || def.is_box() {
                     // Include the types from std collections that are behind pointers internally
-                    args.types().any(|ty| self.is_interior_mut_ty(cx, ty))
+                    args.types().find_map(|ty| self.interior_mut_ty_chain(cx, ty))
                 } else if self.ignored_def_ids.contains(&def.did()) || def.is_phantom_data() {
-                    false
+                    None
                 } else {
                     def.all_fields()
-                        .any(|f| self.is_interior_mut_ty(cx, f.ty(cx.tcx, args)))
+                        .find_map(|f| self.interior_mut_ty_chain(cx, f.ty(cx.tcx, args)))
                 }
             },
-            _ => false,
+            _ => None,
         };
 
-        self.tys.insert(ty, Some(interior_mut));
-        interior_mut
+        chain.map(|chain| {
+            let list = cx.tcx.mk_type_list_from_iter(chain.iter().chain([ty]));
+            self.tys.insert(ty, Some(list));
+            list
+        })
+    }
+
+    /// Check if given type has interior mutability such as [`std::cell::Cell`] or
+    /// [`std::cell::RefCell`] etc.
+    pub fn is_interior_mut_ty(&mut self, cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> bool {
+        self.interior_mut_ty_chain(cx, ty).is_some()
     }
 }
 
@@ -1316,7 +1327,7 @@ pub fn deref_chain<'cx, 'tcx>(cx: &'cx LateContext<'tcx>, ty: Ty<'tcx>) -> impl 
 /// If you need this, you should wrap this call in `clippy_utils::ty::deref_chain().any(...)`.
 pub fn get_adt_inherent_method<'a>(cx: &'a LateContext<'_>, ty: Ty<'_>, method_name: Symbol) -> Option<&'a AssocItem> {
     if let Some(ty_did) = ty.ty_adt_def().map(AdtDef::did) {
-        cx.tcx.inherent_impls(ty_did).into_iter().flatten().find_map(|&did| {
+        cx.tcx.inherent_impls(ty_did).iter().find_map(|&did| {
             cx.tcx
                 .associated_items(did)
                 .filter_by_name_unhygienic(method_name)

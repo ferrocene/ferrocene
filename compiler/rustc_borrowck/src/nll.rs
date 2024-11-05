@@ -9,17 +9,17 @@ use polonius_engine::{Algorithm, Output};
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_hir::def_id::LocalDefId;
 use rustc_index::IndexSlice;
-use rustc_middle::mir::pretty::{dump_mir_with_options, PrettyPrintMirOptions};
+use rustc_middle::mir::pretty::{PrettyPrintMirOptions, dump_mir_with_options};
 use rustc_middle::mir::{
-    create_dump_file, dump_enabled, dump_mir, Body, ClosureOutlivesSubject,
-    ClosureRegionRequirements, PassWhere, Promoted,
+    Body, ClosureOutlivesSubject, ClosureRegionRequirements, PassWhere, Promoted, create_dump_file,
+    dump_enabled, dump_mir,
 };
 use rustc_middle::ty::print::with_no_trimmed_paths;
 use rustc_middle::ty::{self, OpaqueHiddenType, TyCtxt};
+use rustc_mir_dataflow::ResultsCursor;
 use rustc_mir_dataflow::impls::MaybeInitializedPlaces;
 use rustc_mir_dataflow::move_paths::MoveData;
 use rustc_mir_dataflow::points::DenseLocationMap;
-use rustc_mir_dataflow::ResultsCursor;
 use rustc_session::config::MirIncludeSpans;
 use rustc_span::symbol::sym;
 use tracing::{debug, instrument};
@@ -32,7 +32,7 @@ use crate::location::LocationTable;
 use crate::region_infer::RegionInferenceContext;
 use crate::type_check::{self, MirTypeckRegionConstraints, MirTypeckResults};
 use crate::universal_regions::UniversalRegions;
-use crate::{polonius, renumber, BorrowckInferCtxt};
+use crate::{BorrowckInferCtxt, polonius, renumber};
 
 pub type PoloniusOutput = Output<RustcFacts>;
 
@@ -42,7 +42,7 @@ pub(crate) struct NllOutput<'tcx> {
     pub regioncx: RegionInferenceContext<'tcx>,
     pub opaque_type_values: FxIndexMap<LocalDefId, OpaqueHiddenType<'tcx>>,
     pub polonius_input: Option<Box<AllFacts>>,
-    pub polonius_output: Option<Rc<PoloniusOutput>>,
+    pub polonius_output: Option<Box<PoloniusOutput>>,
     pub opt_closure_req: Option<ClosureRegionRequirements<'tcx>>,
     pub nll_errors: RegionErrors<'tcx>,
 }
@@ -98,7 +98,7 @@ pub(crate) fn compute_regions<'a, 'tcx>(
 
     let universal_regions = Rc::new(universal_regions);
 
-    let elements = &Rc::new(DenseLocationMap::new(body));
+    let elements = Rc::new(DenseLocationMap::new(body));
 
     // Run the MIR type-checker.
     let MirTypeckResults { constraints, universal_region_relations, opaque_type_values } =
@@ -107,13 +107,13 @@ pub(crate) fn compute_regions<'a, 'tcx>(
             param_env,
             body,
             promoted,
-            &universal_regions,
+            universal_regions.clone(),
             location_table,
             borrow_set,
             &mut all_facts,
             flow_inits,
             move_data,
-            elements,
+            elements.clone(),
             upvars,
         );
 
@@ -184,7 +184,7 @@ pub(crate) fn compute_regions<'a, 'tcx>(
             let algorithm = Algorithm::from_str(&algorithm).unwrap();
             debug!("compute_regions: using polonius algorithm {:?}", algorithm);
             let _prof_timer = infcx.tcx.prof.generic_activity("polonius_analysis");
-            Some(Rc::new(Output::compute(all_facts, algorithm, false)))
+            Some(Box::new(Output::compute(all_facts, algorithm, false)))
         } else {
             None
         }

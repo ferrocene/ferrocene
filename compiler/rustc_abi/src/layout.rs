@@ -11,6 +11,10 @@ use crate::{
     Variants, WrappingRange,
 };
 
+mod ty;
+
+pub use ty::{FIRST_VARIANT, FieldIdx, Layout, TyAbiInterface, TyAndLayout, VariantIdx};
+
 // A variant is absent if it's uninhabited and only has ZST fields.
 // Present uninhabited variants only require space for their fields,
 // but *not* an encoding of the discriminant (e.g., a tag value).
@@ -527,15 +531,10 @@ impl<Cx: HasDataLayout> LayoutCalculator<Cx> {
             let count =
                 (niche_variants.end().index() as u128 - niche_variants.start().index() as u128) + 1;
 
-            // Find the field with the largest niche
-            let (field_index, niche, (niche_start, niche_scalar)) = variants[largest_variant_index]
-                .iter()
-                .enumerate()
-                .filter_map(|(j, field)| Some((j, field.largest_niche?)))
-                .max_by_key(|(_, niche)| niche.available(dl))
-                .and_then(|(j, niche)| Some((j, niche, niche.reserve(dl, count)?)))?;
-            let niche_offset =
-                niche.offset + variant_layouts[largest_variant_index].fields.offset(field_index);
+            // Use the largest niche in the largest variant.
+            let niche = variant_layouts[largest_variant_index].largest_niche?;
+            let (niche_start, niche_scalar) = niche.reserve(dl, count)?;
+            let niche_offset = niche.offset;
             let niche_size = niche.value.size(dl);
             let size = variant_layouts[largest_variant_index].size.align_to(align.abi);
 
@@ -1004,8 +1003,8 @@ impl<Cx: HasDataLayout> LayoutCalculator<Cx> {
             if repr.can_randomize_type_layout() && cfg!(feature = "randomize") {
                 #[cfg(feature = "randomize")]
                 {
-                    use rand::seq::SliceRandom;
                     use rand::SeedableRng;
+                    use rand::seq::SliceRandom;
                     // `ReprOptions.field_shuffle_seed` is a deterministic seed we can use to randomize field
                     // ordering.
                     let mut rng =

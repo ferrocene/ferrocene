@@ -492,29 +492,35 @@ impl<I: Interner> AliasTerm<I> {
 
     pub fn to_term(self, interner: I) -> I::Term {
         match self.kind(interner) {
-            AliasTermKind::ProjectionTy => Ty::new_alias(
-                interner,
-                ty::AliasTyKind::Projection,
-                ty::AliasTy { def_id: self.def_id, args: self.args, _use_alias_ty_new_instead: () },
-            )
-            .into(),
-            AliasTermKind::InherentTy => Ty::new_alias(
-                interner,
-                ty::AliasTyKind::Inherent,
-                ty::AliasTy { def_id: self.def_id, args: self.args, _use_alias_ty_new_instead: () },
-            )
-            .into(),
-            AliasTermKind::OpaqueTy => Ty::new_alias(
-                interner,
-                ty::AliasTyKind::Opaque,
-                ty::AliasTy { def_id: self.def_id, args: self.args, _use_alias_ty_new_instead: () },
-            )
-            .into(),
-            AliasTermKind::WeakTy => Ty::new_alias(
-                interner,
-                ty::AliasTyKind::Weak,
-                ty::AliasTy { def_id: self.def_id, args: self.args, _use_alias_ty_new_instead: () },
-            )
+            AliasTermKind::ProjectionTy => {
+                Ty::new_alias(interner, ty::AliasTyKind::Projection, ty::AliasTy {
+                    def_id: self.def_id,
+                    args: self.args,
+                    _use_alias_ty_new_instead: (),
+                })
+                .into()
+            }
+            AliasTermKind::InherentTy => {
+                Ty::new_alias(interner, ty::AliasTyKind::Inherent, ty::AliasTy {
+                    def_id: self.def_id,
+                    args: self.args,
+                    _use_alias_ty_new_instead: (),
+                })
+                .into()
+            }
+            AliasTermKind::OpaqueTy => {
+                Ty::new_alias(interner, ty::AliasTyKind::Opaque, ty::AliasTy {
+                    def_id: self.def_id,
+                    args: self.args,
+                    _use_alias_ty_new_instead: (),
+                })
+                .into()
+            }
+            AliasTermKind::WeakTy => Ty::new_alias(interner, ty::AliasTyKind::Weak, ty::AliasTy {
+                def_id: self.def_id,
+                args: self.args,
+                _use_alias_ty_new_instead: (),
+            })
             .into(),
             AliasTermKind::UnevaluatedConst | AliasTermKind::ProjectionConst => {
                 I::Const::new_unevaluated(
@@ -662,8 +668,8 @@ impl<I: Interner> fmt::Debug for ProjectionPredicate<I> {
     }
 }
 
-/// Used by the new solver. Unlike a `ProjectionPredicate` this can only be
-/// proven by actually normalizing `alias`.
+/// Used by the new solver to normalize an alias. This always expects the `term` to
+/// be an unconstrained inference variable which is used as the output.
 #[derive_where(Clone, Copy, Hash, PartialEq, Eq; I: Interner)]
 #[derive(TypeVisitable_Generic, TypeFoldable_Generic, Lift_Generic)]
 #[cfg_attr(feature = "nightly", derive(TyDecodable, TyEncodable, HashStable_NoContext))]
@@ -747,5 +753,12 @@ impl fmt::Display for BoundConstness {
             Self::Const => f.write_str("const"),
             Self::ConstIfConst => f.write_str("~const"),
         }
+    }
+}
+
+impl<I> Lift<I> for BoundConstness {
+    type Lifted = BoundConstness;
+    fn lift_to_interner(self, _: I) -> Option<Self::Lifted> {
+        Some(self)
     }
 }

@@ -1,11 +1,14 @@
 use std::iter;
 
+use rustc_abi::Float::*;
+use rustc_abi::Primitive::{Float, Pointer};
+use rustc_abi::{Abi, AddressSpace, PointerKind, Scalar, Size};
 use rustc_hir as hir;
 use rustc_hir::lang_items::LangItem;
 use rustc_middle::bug;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::layout::{
-    fn_can_unwind, FnAbiError, HasParamEnv, HasTyCtxt, LayoutCx, LayoutOf, TyAndLayout,
+    FnAbiError, HasParamEnv, HasTyCtxt, LayoutCx, LayoutOf, TyAndLayout, fn_can_unwind,
 };
 use rustc_middle::ty::{self, InstanceKind, Ty, TyCtxt};
 use rustc_session::config::OptLevel;
@@ -14,7 +17,6 @@ use rustc_target::abi::call::{
     ArgAbi, ArgAttribute, ArgAttributes, ArgExtension, Conv, FnAbi, PassMode, Reg, RegKind,
     RiscvInterruptKind,
 };
-use rustc_target::abi::*;
 use rustc_target::spec::abi::Abi as SpecAbi;
 use tracing::debug;
 
@@ -312,6 +314,7 @@ fn conv_from_spec_abi(tcx: TyCtxt<'_>, abi: SpecAbi, c_variadic: bool) -> Conv {
         SysV64 { .. } => Conv::X86_64SysV,
         Aapcs { .. } => Conv::ArmAapcs,
         CCmseNonSecureCall => Conv::CCmseNonSecureCall,
+        CCmseNonSecureEntry => Conv::CCmseNonSecureEntry,
         PtxKernel => Conv::PtxKernel,
         Msp430Interrupt => Conv::Msp430Intr,
         X86Interrupt => Conv::X86Intr,
@@ -356,7 +359,7 @@ fn fn_abi_of_instance<'tcx>(
     )
 }
 
-// Handle safe Rust thin and fat pointers.
+// Handle safe Rust thin and wide pointers.
 fn adjust_for_rust_scalar<'tcx>(
     cx: LayoutCx<'tcx>,
     attrs: &mut ArgAttributes,
@@ -809,7 +812,7 @@ fn make_thin_self_ptr<'tcx>(
     layout: TyAndLayout<'tcx>,
 ) -> TyAndLayout<'tcx> {
     let tcx = cx.tcx();
-    let fat_pointer_ty = if layout.is_unsized() {
+    let wide_pointer_ty = if layout.is_unsized() {
         // unsized `self` is passed as a pointer to `self`
         // FIXME (mikeyhew) change this to use &own if it is ever added to the language
         Ty::new_mut_ptr(tcx, layout.ty)
@@ -819,29 +822,29 @@ fn make_thin_self_ptr<'tcx>(
             _ => bug!("receiver type has unsupported layout: {:?}", layout),
         }
 
-        // In the case of Rc<Self>, we need to explicitly pass a *mut RcBox<Self>
+        // In the case of Rc<Self>, we need to explicitly pass a *mut RcInner<Self>
         // with a Scalar (not ScalarPair) ABI. This is a hack that is understood
         // elsewhere in the compiler as a method on a `dyn Trait`.
-        // To get the type `*mut RcBox<Self>`, we just keep unwrapping newtypes until we
+        // To get the type `*mut RcInner<Self>`, we just keep unwrapping newtypes until we
         // get a built-in pointer type
-        let mut fat_pointer_layout = layout;
-        while !fat_pointer_layout.ty.is_unsafe_ptr() && !fat_pointer_layout.ty.is_ref() {
-            fat_pointer_layout = fat_pointer_layout
+        let mut wide_pointer_layout = layout;
+        while !wide_pointer_layout.ty.is_unsafe_ptr() && !wide_pointer_layout.ty.is_ref() {
+            wide_pointer_layout = wide_pointer_layout
                 .non_1zst_field(cx)
                 .expect("not exactly one non-1-ZST field in a `DispatchFromDyn` type")
                 .1
         }
 
-        fat_pointer_layout.ty
+        wide_pointer_layout.ty
     };
 
-    // we now have a type like `*mut RcBox<dyn Trait>`
+    // we now have a type like `*mut RcInner<dyn Trait>`
     // change its layout to that of `*mut ()`, a thin pointer, but keep the same type
     // this is understood as a special case elsewhere in the compiler
     let unit_ptr_ty = Ty::new_mut_ptr(tcx, tcx.types.unit);
 
     TyAndLayout {
-        ty: fat_pointer_ty,
+        ty: wide_pointer_ty,
 
         // NOTE(eddyb) using an empty `ParamEnv`, and `unwrap`-ing the `Result`
         // should always work because the type is always `*mut ()`.

@@ -1,9 +1,10 @@
 use std::cmp::max;
 
 use rustc_ast::{ast, ptr};
-use rustc_span::{source_map, Span};
+use rustc_span::{Span, source_map};
 
 use crate::macros::MacroArg;
+use crate::patterns::RangeOperand;
 use crate::utils::{mk_sp, outer_attributes};
 
 /// Spanned returns a span including attributes, if available.
@@ -179,7 +180,7 @@ impl Spanned for ast::GenericArg {
 impl Spanned for ast::GenericBound {
     fn span(&self) -> Span {
         match *self {
-            ast::GenericBound::Trait(ref ptr, _) => ptr.span,
+            ast::GenericBound::Trait(ref ptr) => ptr.span,
             ast::GenericBound::Outlives(ref l) => l.ident.span,
             ast::GenericBound::Use(_, span) => span,
         }
@@ -198,7 +199,7 @@ impl Spanned for MacroArg {
     }
 }
 
-impl Spanned for ast::NestedMetaItem {
+impl Spanned for ast::MetaItemInner {
     fn span(&self) -> Span {
         self.span()
     }
@@ -210,5 +211,11 @@ impl Spanned for ast::PreciseCapturingArg {
             ast::PreciseCapturingArg::Lifetime(lt) => lt.ident.span,
             ast::PreciseCapturingArg::Arg(path, _) => path.span,
         }
+    }
+}
+
+impl<'a> Spanned for RangeOperand<'a> {
+    fn span(&self) -> Span {
+        self.span
     }
 }

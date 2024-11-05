@@ -51,7 +51,7 @@ use std::path::PathBuf;
 use std::{cmp, fmt, iter};
 
 use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
-use rustc_errors::{pluralize, Applicability, Diag, DiagStyledString, IntoDiagArg, StringPart};
+use rustc_errors::{Applicability, Diag, DiagStyledString, IntoDiagArg, StringPart, pluralize};
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_hir::intravisit::Visitor;
@@ -61,12 +61,12 @@ use rustc_macros::extension;
 use rustc_middle::bug;
 use rustc_middle::dep_graph::DepContext;
 use rustc_middle::ty::error::{ExpectedFound, TypeError, TypeErrorToStringExt};
-use rustc_middle::ty::print::{with_forced_trimmed_paths, PrintError, PrintTraitRefExt as _};
+use rustc_middle::ty::print::{PrintError, PrintTraitRefExt as _, with_forced_trimmed_paths};
 use rustc_middle::ty::{
     self, List, Region, Ty, TyCtxt, TypeFoldable, TypeSuperVisitable, TypeVisitable,
     TypeVisitableExt,
 };
-use rustc_span::{sym, BytePos, DesugaringKind, Pos, Span};
+use rustc_span::{BytePos, DesugaringKind, Pos, Span, sym};
 use rustc_target::spec::abi;
 use tracing::{debug, instrument};
 
@@ -203,8 +203,8 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
     fn check_and_note_conflicting_crates(&self, err: &mut Diag<'_>, terr: TypeError<'tcx>) {
         use hir::def_id::CrateNum;
         use rustc_hir::definitions::DisambiguatedDefPathData;
-        use ty::print::Printer;
         use ty::GenericArg;
+        use ty::print::Printer;
 
         struct AbsolutePathPrinter<'tcx> {
             tcx: TyCtxt<'tcx>,
@@ -1127,18 +1127,14 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
     /// the message in `secondary_span` as the primary label, and apply the message that would
     /// otherwise be used for the primary label on the `secondary_span` `Span`. This applies on
     /// E0271, like `tests/ui/issues/issue-39970.stderr`.
-    #[instrument(
-        level = "debug",
-        skip(self, diag, secondary_span, swap_secondary_and_primary, prefer_label)
-    )]
+    #[instrument(level = "debug", skip(self, diag, secondary_span, prefer_label))]
     pub fn note_type_err(
         &self,
         diag: &mut Diag<'_>,
         cause: &ObligationCause<'tcx>,
-        secondary_span: Option<(Span, Cow<'static, str>)>,
+        secondary_span: Option<(Span, Cow<'static, str>, bool)>,
         mut values: Option<ValuePairs<'tcx>>,
         terr: TypeError<'tcx>,
-        swap_secondary_and_primary: bool,
         prefer_label: bool,
     ) {
         let span = cause.span();
@@ -1285,9 +1281,6 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     ValuePairs::ExistentialProjection(_) => {
                         (false, Mismatch::Fixed("existential projection"))
                     }
-                    ValuePairs::Dummy => {
-                        bug!("do not expect to report a type error from a ValuePairs::Dummy")
-                    }
                 };
                 let Some(vals) = self.values_str(values) else {
                     // Derived error. Cancel the emitter.
@@ -1307,7 +1300,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 diag.span_note(span, msg);
             }
         };
-        if let Some((sp, msg)) = secondary_span {
+        if let Some((secondary_span, secondary_msg, swap_secondary_and_primary)) = secondary_span {
             if swap_secondary_and_primary {
                 let terr = if let Some(infer::ValuePairs::Terms(ExpectedFound {
                     expected, ..
@@ -1317,11 +1310,11 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 } else {
                     terr.to_string(self.tcx)
                 };
-                label_or_note(sp, terr);
-                label_or_note(span, msg);
+                label_or_note(secondary_span, terr);
+                label_or_note(span, secondary_msg);
             } else {
                 label_or_note(span, terr.to_string(self.tcx));
-                label_or_note(sp, msg);
+                label_or_note(secondary_span, secondary_msg);
             }
         } else if let Some(values) = values
             && let Some((e, f)) = values.ty()
@@ -1791,7 +1784,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             self.type_error_additional_suggestions(&trace, terr),
         );
         let mut diag = self.dcx().create_err(failure_code);
-        self.note_type_err(&mut diag, &trace.cause, None, Some(trace.values), terr, false, false);
+        self.note_type_err(&mut diag, &trace.cause, None, Some(trace.values), terr, false);
         diag
     }
 
@@ -1852,9 +1845,6 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 }
                 let (exp, fnd) = self.cmp_fn_sig(&exp_found.expected, &exp_found.found);
                 Some((exp, fnd, None))
-            }
-            ValuePairs::Dummy => {
-                bug!("do not expect to report a type error from a ValuePairs::Dummy")
             }
         }
     }

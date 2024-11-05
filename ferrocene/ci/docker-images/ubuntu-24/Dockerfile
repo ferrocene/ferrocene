@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 # From the root of this repository, build with
-# `docker build -t ubuntu-24 -f ferrocene/ci/docker-images/ubuntu-24/Dockerfile .`
+# `docker build --tag ubuntu-24 --file ferrocene/ci/docker-images/ubuntu-24/Dockerfile .`
 
 FROM --platform=$TARGETPLATFORM ubuntu:24.04
 

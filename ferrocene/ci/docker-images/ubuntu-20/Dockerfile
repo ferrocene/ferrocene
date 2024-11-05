@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 # From the root of this repository, build with
-# `docker build -t ubuntu-20 -f ferrocene/ci/docker-images/ubuntu-20/Dockerfile .`
+# `docker build --tag ubuntu-20 --file ferrocene/ci/docker-images/ubuntu-20/Dockerfile .`
 
 # This Ubuntu 24.04 container is only used to grab a more recent QEMU, the real
 # container is below (FROM ubuntu:20.04). This is needed because the version of

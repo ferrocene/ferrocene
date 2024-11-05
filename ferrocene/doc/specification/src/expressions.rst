@@ -2864,17 +2864,10 @@ The :t:`evaluation` of an :t:`array expression` with an
 :t:`array repetition constructor` proceeds as follows:
 
 #. :dp:`fls_f3izbkm8607z`
-   If the :t:`value` of the :t:`size operand` is greater than zero, then:
-
-   #. :dp:`fls_qbyysx30pjzs`
-      If the :t:`repeat operand` denotes a :t:`constant`, the
-      :t:`repeat operand` is evaluated once and its :t:`value` is
-      :t:`passed <passing convention>` :t:`by copy` :t:`[size operand]'s`
-      :t:`value` times.
-
-   #. :dp:`fls_1m0laldldh7j`
-      Otherwise the :t:`repeat operand` is evaluated :t:`[size operand]'s`
-      :t:`value` times.
+   If the :t:`value` of the :t:`size operand` is greater than zero, then the
+   :t:`repeat operand` is evaluated once and its :t:`value` is
+   :t:`passed <passing convention>` :t:`by copy` :t:`[size operand]'s`
+   :t:`value` times.
 
 #. :dp:`fls_5cs68nm54l31`
    Otherwise the :t:`repeat operand` is evaluated once.

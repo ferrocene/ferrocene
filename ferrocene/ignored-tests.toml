@@ -73,3 +73,8 @@ reason = "The test does not pass on CI, to be revisited later. https://github.co
 tests = ["tests/debuginfo/constant-ordering-prologue.rs"]
 targets = ["aarch64-apple-darwin"]
 reason = "Remove when this PR is pulled in: https://github.com/rust-lang/rust/pull/131570"
+
+[["tests/crashes"]]
+tests = ["tests/crashes/131294.rs"]
+targets = ["aarch64-unknown-ferrocenecoretest"]
+reason = "Does not crash with this target"

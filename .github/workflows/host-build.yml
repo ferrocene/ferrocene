@@ -121,7 +121,7 @@ jobs:
       - llvm
     env:
       ARTIFACT: build-${{inputs.host-triple}}
-      ARTIFACT_USAGE: build-${{inputs.host-triple}}-usage
+      ARTIFACT_USAGE: usage-build-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
     outputs:

@@ -41,7 +41,7 @@ jobs:
     runs-on: ${{ inputs.runner }}
     env:
       ARTIFACT: targets-${{inputs.host-triple}}
-      ARTIFACT_USAGE: targets-${{inputs.host-triple}}-usage
+      ARTIFACT_USAGE: usage-targets-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
     outputs:

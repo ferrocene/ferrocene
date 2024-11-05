@@ -35,7 +35,7 @@ jobs:
     runs-on: ${{ inputs.runner }}
     env:
       ARTIFACT: source
-      ARTIFACT_USAGE: source-usage
+      ARTIFACT_USAGE: usage-source
       FERROCENE_HOST: ${{ inputs.host-triple }}
       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
       # Run dist before test to make sure the tarballs we test are uploaded

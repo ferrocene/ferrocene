@@ -7,7 +7,7 @@ use rustc_type_ir::fold::TypeFoldable;
 use rustc_type_ir::inherent::*;
 use rustc_type_ir::lang_items::TraitSolverLangItem;
 use rustc_type_ir::visit::TypeVisitableExt as _;
-use rustc_type_ir::{self as ty, elaborate, Interner, Upcast as _};
+use rustc_type_ir::{self as ty, Interner, Upcast as _, elaborate};
 use tracing::{debug, instrument};
 
 use crate::delegate::SolverDelegate;
@@ -639,8 +639,8 @@ where
             ty::Dynamic(bounds, ..) => bounds,
         };
 
-        // Do not consider built-in object impls for non-object-safe types.
-        if bounds.principal_def_id().is_some_and(|def_id| !cx.trait_is_object_safe(def_id)) {
+        // Do not consider built-in object impls for dyn-incompatible types.
+        if bounds.principal_def_id().is_some_and(|def_id| !cx.trait_is_dyn_compatible(def_id)) {
             return;
         }
 

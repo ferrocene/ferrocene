@@ -12,9 +12,9 @@ use rustc_error_messages::{DiagMessage, MultiSpan};
 use rustc_hir::def::Namespace;
 use rustc_hir::{HashStableContext, HirId, MissingLifetimeKind};
 use rustc_macros::{Decodable, Encodable, HashStable_Generic};
-use rustc_span::edition::Edition;
+pub use rustc_span::edition::Edition;
 use rustc_span::symbol::{Ident, MacroRulesNormalizedIdent};
-use rustc_span::{sym, Span, Symbol};
+use rustc_span::{Span, Symbol, sym};
 use rustc_target::spec::abi::Abi;
 use serde::{Deserialize, Serialize};
 
@@ -614,6 +614,8 @@ pub enum BuiltinLintDiag {
     ReservedPrefix(Span, String),
     /// `'r#` in edition < 2021.
     RawPrefix(Span),
+    /// `##` or `#"` is edition < 2024.
+    ReservedString(Span),
     TrailingMacro(bool, Ident),
     BreakWithLabelAndLoop(Span),
     UnicodeTextFlow(Span, String),
@@ -720,8 +722,6 @@ pub enum BuiltinLintDiag {
     UnnameableTestItems,
     DuplicateMacroAttribute,
     CfgAttrNoAttributes,
-    CrateTypeInCfgAttr,
-    CrateNameInCfgAttr,
     MissingFragmentSpecifier,
     MetaVariableStillRepeating(MacroRulesNormalizedIdent),
     MetaVariableWrongOperator,

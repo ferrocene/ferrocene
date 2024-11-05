@@ -36,7 +36,7 @@ pub trait Interner:
 {
     type DefId: DefId<Self>;
     type LocalDefId: Copy + Debug + Hash + Eq + Into<Self::DefId> + TypeFoldable<Self>;
-    type Span: Copy + Debug + Hash + Eq + TypeFoldable<Self>;
+    type Span: Span<Self>;
 
     type GenericArgs: GenericArgs<Self>;
     type GenericArgsSlice: Copy + Debug + Hash + Eq + SliceLike<Item = Self::GenericArg>;
@@ -255,7 +255,7 @@ pub trait Interner:
 
     fn trait_is_alias(self, trait_def_id: Self::DefId) -> bool;
 
-    fn trait_is_object_safe(self, trait_def_id: Self::DefId) -> bool;
+    fn trait_is_dyn_compatible(self, trait_def_id: Self::DefId) -> bool;
 
     fn trait_is_fundamental(self, def_id: Self::DefId) -> bool;
 

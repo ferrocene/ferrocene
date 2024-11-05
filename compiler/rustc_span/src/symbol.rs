@@ -11,9 +11,9 @@ use rustc_data_structures::stable_hasher::{
     HashStable, StableCompare, StableHasher, ToStableHashKey,
 };
 use rustc_data_structures::sync::Lock;
-use rustc_macros::{symbols, Decodable, Encodable, HashStable_Generic};
+use rustc_macros::{Decodable, Encodable, HashStable_Generic, symbols};
 
-use crate::{with_session_globals, Edition, Span, DUMMY_SP};
+use crate::{DUMMY_SP, Edition, Span, with_session_globals};
 
 #[cfg(test)]
 mod tests;
@@ -309,6 +309,7 @@ symbols! {
         RwLockReadGuard,
         RwLockWriteGuard,
         Saturating,
+        SeekFrom,
         Send,
         SeqCst,
         Sized,
@@ -410,6 +411,7 @@ symbols! {
         arbitrary_enum_discriminant,
         arbitrary_self_types,
         arbitrary_self_types_pointers,
+        areg,
         args,
         arith_offset,
         arm,
@@ -542,6 +544,7 @@ symbols! {
         cfg_accessible,
         cfg_attr,
         cfg_attr_multi,
+        cfg_boolean_literals,
         cfg_doctest,
         cfg_eval,
         cfg_fmt_debug,
@@ -1452,6 +1455,7 @@ symbols! {
         pic,
         pie,
         pin,
+        pin_ergonomics,
         platform_intrinsics,
         plugin,
         plugin_registrar,
@@ -2056,6 +2060,7 @@ symbols! {
         unmarked_api,
         unnamed_fields,
         unpin,
+        unqualified_local_imports,
         unreachable,
         unreachable_2015,
         unreachable_2015_macro,
@@ -2521,10 +2526,10 @@ pub mod kw {
 /// For example `sym::rustfmt` or `sym::u8`.
 pub mod sym {
     // Used from a macro in `librustc_feature/accepted.rs`
+    use super::Symbol;
     pub use super::kw::MacroRules as macro_rules;
     #[doc(inline)]
     pub use super::sym_generated::*;
-    use super::Symbol;
 
     /// Get the symbol for an integer.
     ///

@@ -637,7 +637,7 @@ impl<'a, Ty> ArgAbi<'a, Ty> {
         }
     }
 
-    /// Pass this argument indirectly, by passing a (thin or fat) pointer to the argument instead.
+    /// Pass this argument indirectly, by passing a (thin or wide) pointer to the argument instead.
     /// This is valid for both sized and unsized arguments.
     pub fn make_indirect(&mut self) {
         match self.mode {
@@ -779,6 +779,7 @@ pub enum Conv {
     // Target-specific calling conventions.
     ArmAapcs,
     CCmseNonSecureCall,
+    CCmseNonSecureEntry,
 
     Msp430Intr,
 
@@ -972,6 +973,7 @@ impl FromStr for Conv {
             "RustCold" => Ok(Conv::Rust),
             "ArmAapcs" => Ok(Conv::ArmAapcs),
             "CCmseNonSecureCall" => Ok(Conv::CCmseNonSecureCall),
+            "CCmseNonSecureEntry" => Ok(Conv::CCmseNonSecureEntry),
             "Msp430Intr" => Ok(Conv::Msp430Intr),
             "PtxKernel" => Ok(Conv::PtxKernel),
             "X86Fastcall" => Ok(Conv::X86Fastcall),

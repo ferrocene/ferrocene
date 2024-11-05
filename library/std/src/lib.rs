@@ -32,13 +32,17 @@
 //!
 //! Once you are familiar with the contents of the standard library you may
 //! begin to find the verbosity of the prose distracting. At this stage in your
-//! development you may want to press the `[-]` button near the top of the
-//! page to collapse it into a more skimmable view.
+//! development you may want to press the <code>
+//! <svg style="width:0.75rem;height:0.75rem" viewBox="0 0 12 12"
+//! stroke="currentColor" fill="none">
+//! <path d="M2,2l4,4l4,-4M2,6l4,4l4,-4"/></svg> Summary</code> button near the
+//! top of the page to collapse it into a more skimmable view.
 //!
-//! While you are looking at that `[-]` button also notice the `source`
-//! link. Rust's API documentation comes with the source code and you are
-//! encouraged to read it. The standard library source is generally high
-//! quality and a peek behind the curtains is often enlightening.
+//! While you are looking at the top of the page, also notice the
+//! <code>source</code> link. Rust's API documentation comes with the source
+//! code and you are encouraged to read it. The standard library source is
+//! generally high quality and a peek behind the curtains is
+//! often enlightening.
 //!
 //! # What is in the standard library documentation?
 //!
@@ -149,7 +153,7 @@
 //! the [`io`], [`fs`], and [`net`] modules.
 //!
 //! The [`thread`] module contains Rust's threading abstractions. [`sync`]
-//! contains further primitive shared memory types, including [`atomic`] and
+//! contains further primitive shared memory types, including [`atomic`], [`mpmc`] and
 //! [`mpsc`], which contains the channel types for message passing.
 //!
 //! # Use before and after `main()`
@@ -173,6 +177,7 @@
 //! - after-main use of thread-locals, which also affects additional features:
 //!   - [`thread::current()`]
 //!   - [`thread::scope()`]
+//!   - [`sync::mpmc`]
 //!   - [`sync::mpsc`]
 //! - before-main stdio file descriptors are not guaranteed to be open on unix platforms
 //!
@@ -198,6 +203,7 @@
 //! [`atomic`]: sync::atomic
 //! [`for`]: ../book/ch03-05-control-flow.html#looping-through-a-collection-with-for
 //! [`str`]: prim@str
+//! [`mpmc`]: sync::mpmc
 //! [`mpsc`]: sync::mpsc
 //! [`std::cmp`]: cmp
 //! [`std::slice`]: mod@slice
@@ -318,6 +324,7 @@
 //
 // Library features (core):
 // tidy-alphabetical-start
+#![feature(array_chunks)]
 #![feature(c_str_module)]
 #![feature(char_internals)]
 #![feature(clone_to_uninit)]
@@ -348,6 +355,7 @@
 #![feature(prelude_2024)]
 #![feature(ptr_as_uninit)]
 #![feature(ptr_mask)]
+#![feature(random)]
 #![feature(slice_internals)]
 #![feature(slice_ptr_get)]
 #![feature(slice_range)]
@@ -368,6 +376,7 @@
 #![feature(slice_concat_trait)]
 #![feature(thin_box)]
 #![feature(try_reserve_kind)]
+#![feature(try_with_capacity)]
 #![feature(vec_into_raw_parts)]
 // tidy-alphabetical-end
 //
@@ -493,9 +502,9 @@ pub use core::default;
 pub use core::future;
 #[stable(feature = "core_hint", since = "1.27.0")]
 pub use core::hint;
-#[stable(feature = "i128", since = "1.26.0")]
+#[stable(feature = "rust1", since = "1.0.0")]
 #[allow(deprecated, deprecated_in_future)]
-pub use core::i128;
+pub use core::i8;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[allow(deprecated, deprecated_in_future)]
 pub use core::i16;
@@ -505,9 +514,9 @@ pub use core::i32;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[allow(deprecated, deprecated_in_future)]
 pub use core::i64;
-#[stable(feature = "rust1", since = "1.0.0")]
+#[stable(feature = "i128", since = "1.26.0")]
 #[allow(deprecated, deprecated_in_future)]
-pub use core::i8;
+pub use core::i128;
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use core::intrinsics;
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -529,9 +538,9 @@ pub use core::pin;
 pub use core::ptr;
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use core::result;
-#[stable(feature = "i128", since = "1.26.0")]
+#[stable(feature = "rust1", since = "1.0.0")]
 #[allow(deprecated, deprecated_in_future)]
-pub use core::u128;
+pub use core::u8;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[allow(deprecated, deprecated_in_future)]
 pub use core::u16;
@@ -541,9 +550,9 @@ pub use core::u32;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[allow(deprecated, deprecated_in_future)]
 pub use core::u64;
-#[stable(feature = "rust1", since = "1.0.0")]
+#[stable(feature = "i128", since = "1.26.0")]
 #[allow(deprecated, deprecated_in_future)]
-pub use core::u8;
+pub use core::u128;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[allow(deprecated, deprecated_in_future)]
 pub use core::usize;
@@ -595,6 +604,8 @@ pub mod path;
 #[unstable(feature = "anonymous_pipe", issue = "127154")]
 pub mod pipe;
 pub mod process;
+#[unstable(feature = "random", issue = "130703")]
+pub mod random;
 pub mod sync;
 pub mod time;
 
@@ -649,9 +660,9 @@ pub mod arch {
     #[stable(feature = "simd_x86", since = "1.27.0")]
     pub use std_detect::is_x86_feature_detected;
     #[unstable(feature = "stdarch_mips_feature_detection", issue = "111188")]
-    pub use std_detect::{is_mips64_feature_detected, is_mips_feature_detected};
+    pub use std_detect::{is_mips_feature_detected, is_mips64_feature_detected};
     #[unstable(feature = "stdarch_powerpc_feature_detection", issue = "111191")]
-    pub use std_detect::{is_powerpc64_feature_detected, is_powerpc_feature_detected};
+    pub use std_detect::{is_powerpc_feature_detected, is_powerpc64_feature_detected};
 }
 
 // This was stabilized in the crate root so we have to keep it there.

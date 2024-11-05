@@ -1,16 +1,16 @@
-use rustc_ast::visit::{walk_list, VisitorResult};
+use rustc_ast::visit::{VisitorResult, walk_list};
 use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
 use rustc_data_structures::svh::Svh;
-use rustc_data_structures::sync::{par_for_each_in, try_par_for_each_in, DynSend, DynSync};
+use rustc_data_structures::sync::{DynSend, DynSync, par_for_each_in, try_par_for_each_in};
 use rustc_hir::def::{DefKind, Res};
-use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId, LOCAL_CRATE};
+use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId, LocalModDefId};
 use rustc_hir::definitions::{DefKey, DefPath, DefPathHash};
 use rustc_hir::intravisit::Visitor;
 use rustc_hir::*;
 use rustc_middle::hir::nested_filter;
 use rustc_span::def_id::StableCrateId;
-use rustc_span::symbol::{kw, sym, Ident, Symbol};
+use rustc_span::symbol::{Ident, Symbol, kw, sym};
 use rustc_span::{ErrorGuaranteed, Span};
 use rustc_target::spec::abi::Abi;
 use {rustc_ast as ast, rustc_hir_pretty as pprust_hir};
@@ -598,7 +598,10 @@ impl<'hir> Map<'hir> {
     /// in the HIR which is recorded by the map and is an item, either an item
     /// in a module, trait, or impl.
     pub fn get_parent_item(self, hir_id: HirId) -> OwnerId {
-        if let Some((def_id, _node)) = self.parent_owner_iter(hir_id).next() {
+        if hir_id.local_id != ItemLocalId::ZERO {
+            // If this is a child of a HIR owner, return the owner.
+            hir_id.owner
+        } else if let Some((def_id, _node)) = self.parent_owner_iter(hir_id).next() {
             def_id
         } else {
             CRATE_OWNER_ID
@@ -724,6 +727,19 @@ impl<'hir> Map<'hir> {
                 bug!(
                     "expected foreign item, found {}",
                     self.node_to_string(HirId::make_owner(id.def_id))
+                )
+            }
+        }
+    }
+
+    #[track_caller]
+    pub fn expect_opaque_ty(self, id: LocalDefId) -> &'hir OpaqueTy<'hir> {
+        match self.tcx.hir_node_by_def_id(id) {
+            Node::OpaqueTy(opaq) => opaq,
+            _ => {
+                bug!(
+                    "expected opaque type definition, found {}",
+                    self.node_to_string(self.tcx.local_def_id_to_hir_id(id))
                 )
             }
         }
@@ -920,6 +936,7 @@ impl<'hir> Map<'hir> {
             Node::Ty(ty) => ty.span,
             Node::AssocItemConstraint(constraint) => constraint.span,
             Node::TraitRef(tr) => tr.path.span,
+            Node::OpaqueTy(op) => op.span,
             Node::Pat(pat) => pat.span,
             Node::PatField(field) => field.span,
             Node::Arm(arm) => arm.span,
@@ -1001,6 +1018,10 @@ impl<'hir> Map<'hir> {
 impl<'hir> intravisit::Map<'hir> for Map<'hir> {
     fn hir_node(&self, hir_id: HirId) -> Node<'hir> {
         self.tcx.hir_node(hir_id)
+    }
+
+    fn hir_node_by_def_id(&self, def_id: LocalDefId) -> Node<'hir> {
+        self.tcx.hir_node_by_def_id(def_id)
     }
 
     fn body(&self, id: BodyId) -> &'hir Body<'hir> {
@@ -1136,13 +1157,6 @@ fn hir_id_to_string(map: Map<'_>, id: HirId) -> String {
                 ItemKind::ForeignMod { .. } => "foreign mod",
                 ItemKind::GlobalAsm(..) => "global asm",
                 ItemKind::TyAlias(..) => "ty",
-                ItemKind::OpaqueTy(opaque) => {
-                    if opaque.in_trait {
-                        "opaque type in trait"
-                    } else {
-                        "opaque type"
-                    }
-                }
                 ItemKind::Enum(..) => "enum",
                 ItemKind::Struct(..) => "struct",
                 ItemKind::Union(..) => "union",
@@ -1194,6 +1208,7 @@ fn hir_id_to_string(map: Map<'_>, id: HirId) -> String {
         Node::Ty(_) => node_str("type"),
         Node::AssocItemConstraint(_) => node_str("assoc item constraint"),
         Node::TraitRef(_) => node_str("trait ref"),
+        Node::OpaqueTy(_) => node_str("opaque type"),
         Node::Pat(_) => node_str("pat"),
         Node::PatField(_) => node_str("pattern field"),
         Node::Param(_) => node_str("param"),
@@ -1231,6 +1246,7 @@ pub(super) fn hir_module_items(tcx: TyCtxt<'_>, module_id: LocalModDefId) -> Mod
         impl_items,
         foreign_items,
         body_owners,
+        opaques,
         ..
     } = collector;
     ModuleItems {
@@ -1240,6 +1256,7 @@ pub(super) fn hir_module_items(tcx: TyCtxt<'_>, module_id: LocalModDefId) -> Mod
         impl_items: impl_items.into_boxed_slice(),
         foreign_items: foreign_items.into_boxed_slice(),
         body_owners: body_owners.into_boxed_slice(),
+        opaques: opaques.into_boxed_slice(),
     }
 }
 
@@ -1259,6 +1276,7 @@ pub(crate) fn hir_crate_items(tcx: TyCtxt<'_>, _: ()) -> ModuleItems {
         impl_items,
         foreign_items,
         body_owners,
+        opaques,
         ..
     } = collector;
 
@@ -1269,6 +1287,7 @@ pub(crate) fn hir_crate_items(tcx: TyCtxt<'_>, _: ()) -> ModuleItems {
         impl_items: impl_items.into_boxed_slice(),
         foreign_items: foreign_items.into_boxed_slice(),
         body_owners: body_owners.into_boxed_slice(),
+        opaques: opaques.into_boxed_slice(),
     }
 }
 
@@ -1283,6 +1302,7 @@ struct ItemCollector<'tcx> {
     impl_items: Vec<ImplItemId>,
     foreign_items: Vec<ForeignItemId>,
     body_owners: Vec<LocalDefId>,
+    opaques: Vec<LocalDefId>,
 }
 
 impl<'tcx> ItemCollector<'tcx> {
@@ -1296,6 +1316,7 @@ impl<'tcx> ItemCollector<'tcx> {
             impl_items: Vec::default(),
             foreign_items: Vec::default(),
             body_owners: Vec::default(),
+            opaques: Vec::default(),
         }
     }
 }
@@ -1339,6 +1360,11 @@ impl<'hir> Visitor<'hir> for ItemCollector<'hir> {
     fn visit_inline_const(&mut self, c: &'hir ConstBlock) {
         self.body_owners.push(c.def_id);
         intravisit::walk_inline_const(self, c)
+    }
+
+    fn visit_opaque_ty(&mut self, o: &'hir OpaqueTy<'hir>) {
+        self.opaques.push(o.def_id);
+        intravisit::walk_opaque_ty(self, o)
     }
 
     fn visit_expr(&mut self, ex: &'hir Expr<'hir>) {

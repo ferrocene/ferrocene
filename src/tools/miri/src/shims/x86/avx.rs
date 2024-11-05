@@ -1,14 +1,14 @@
-use rustc_apfloat::{ieee::Double, ieee::Single};
+use rustc_apfloat::ieee::{Double, Single};
 use rustc_middle::mir;
-use rustc_middle::ty::layout::LayoutOf as _;
 use rustc_middle::ty::Ty;
+use rustc_middle::ty::layout::LayoutOf as _;
 use rustc_span::Symbol;
 use rustc_target::spec::abi::Abi;
 
 use super::{
-    bin_op_simd_float_all, conditional_dot_product, convert_float_to_int, horizontal_bin_op,
-    mask_load, mask_store, round_all, test_bits_masked, test_high_bits_masked, unary_op_ps,
-    FloatBinOp, FloatUnaryOp,
+    FloatBinOp, FloatUnaryOp, bin_op_simd_float_all, conditional_dot_product, convert_float_to_int,
+    horizontal_bin_op, mask_load, mask_store, round_all, test_bits_masked, test_high_bits_masked,
+    unary_op_ps,
 };
 use crate::*;
 
@@ -348,8 +348,8 @@ pub(super) trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 // The only thing that needs to be ensured is the correct calling convention.
                 let [] = this.check_shim(abi, Abi::C { unwind: false }, link_name, args)?;
             }
-            _ => return Ok(EmulateItemResult::NotSupported),
+            _ => return interp_ok(EmulateItemResult::NotSupported),
         }
-        Ok(EmulateItemResult::NeedsReturn)
+        interp_ok(EmulateItemResult::NeedsReturn)
     }
 }

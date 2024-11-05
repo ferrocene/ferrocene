@@ -1,10 +1,9 @@
 use std::io::Read;
 use std::path::Path;
-use std::str::FromStr;
 
 use super::iter_header;
 use crate::common::{Config, Debugger, Mode};
-use crate::header::{parse_normalize_rule, EarlyProps, HeadersCache};
+use crate::header::{EarlyProps, HeadersCache, parse_normalize_rule};
 
 fn make_test_description<R: Read>(
     config: &Config,
@@ -70,7 +69,7 @@ struct ConfigBuilder {
     llvm_version: Option<String>,
     git_hash: bool,
     system_llvm: bool,
-    profiler_support: bool,
+    profiler_runtime: bool,
 }
 
 impl ConfigBuilder {
@@ -114,8 +113,8 @@ impl ConfigBuilder {
         self
     }
 
-    fn profiler_support(&mut self, s: bool) -> &mut Self {
-        self.profiler_support = s;
+    fn profiler_runtime(&mut self, is_available: bool) -> &mut Self {
+        self.profiler_runtime = is_available;
         self
     }
 
@@ -163,8 +162,8 @@ impl ConfigBuilder {
         if self.system_llvm {
             args.push("--system-llvm".to_owned());
         }
-        if self.profiler_support {
-            args.push("--profiler-support".to_owned());
+        if self.profiler_runtime {
+            args.push("--profiler-runtime".to_owned());
         }
 
         args.push("--rustc-path".to_string());
@@ -226,10 +225,9 @@ fn revisions() {
     let config: Config = cfg().build();
 
     assert_eq!(parse_rs(&config, "//@ revisions: a b c").revisions, vec!["a", "b", "c"],);
-    assert_eq!(
-        parse_makefile(&config, "# revisions: hello there").revisions,
-        vec!["hello", "there"],
-    );
+    assert_eq!(parse_makefile(&config, "# revisions: hello there").revisions, vec![
+        "hello", "there"
+    ],);
 }
 
 #[test]
@@ -370,12 +368,12 @@ fn sanitizers() {
 }
 
 #[test]
-fn profiler_support() {
-    let config: Config = cfg().profiler_support(false).build();
-    assert!(check_ignore(&config, "//@ needs-profiler-support"));
+fn profiler_runtime() {
+    let config: Config = cfg().profiler_runtime(false).build();
+    assert!(check_ignore(&config, "//@ needs-profiler-runtime"));
 
-    let config: Config = cfg().profiler_support(true).build();
-    assert!(!check_ignore(&config, "//@ needs-profiler-support"));
+    let config: Config = cfg().profiler_runtime(true).build();
+    assert!(!check_ignore(&config, "//@ needs-profiler-runtime"));
 }
 
 #[test]
@@ -574,19 +572,15 @@ fn families() {
 }
 
 #[test]
-fn ignore_mode() {
-    for &mode in Mode::STR_VARIANTS {
-        // Indicate profiler support so that "coverage-run" tests aren't skipped.
-        let config: Config = cfg().mode(mode).profiler_support(true).build();
-        let other = if mode == "coverage-run" { "coverage-map" } else { "coverage-run" };
+fn ignore_coverage() {
+    // Indicate profiler runtime availability so that "coverage-run" tests aren't skipped.
+    let config = cfg().mode("coverage-map").profiler_runtime(true).build();
+    assert!(check_ignore(&config, "//@ ignore-coverage-map"));
+    assert!(!check_ignore(&config, "//@ ignore-coverage-run"));
 
-        assert_ne!(mode, other);
-        assert_eq!(config.mode, Mode::from_str(mode).unwrap());
-        assert_ne!(config.mode, Mode::from_str(other).unwrap());
-
-        assert!(check_ignore(&config, &format!("//@ ignore-mode-{mode}")));
-        assert!(!check_ignore(&config, &format!("//@ ignore-mode-{other}")));
-    }
+    let config = cfg().mode("coverage-run").profiler_runtime(true).build();
+    assert!(!check_ignore(&config, "//@ ignore-coverage-map"));
+    assert!(check_ignore(&config, "//@ ignore-coverage-run"));
 }
 
 #[test]
@@ -618,17 +612,6 @@ fn test_unknown_directive_check() {
         &mut poisoned,
         Path::new("a.rs"),
         include_bytes!("./test-auxillary/unknown_directive.rs"),
-    );
-    assert!(poisoned);
-}
-
-#[test]
-fn test_known_legacy_directive_check() {
-    let mut poisoned = false;
-    run_path(
-        &mut poisoned,
-        Path::new("a.rs"),
-        include_bytes!("./test-auxillary/known_legacy_directive.rs"),
     );
     assert!(poisoned);
 }

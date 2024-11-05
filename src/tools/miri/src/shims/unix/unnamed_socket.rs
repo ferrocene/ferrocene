@@ -5,12 +5,15 @@
 use std::cell::{Cell, OnceCell, RefCell};
 use std::collections::VecDeque;
 use std::io;
-use std::io::{Error, ErrorKind, Read};
+use std::io::{ErrorKind, Read};
 
+use rustc_target::abi::Size;
+
+use crate::concurrency::VClock;
 use crate::shims::unix::fd::{FileDescriptionRef, WeakFileDescriptionRef};
 use crate::shims::unix::linux::epoll::{EpollReadyEvents, EvalContextExt as _};
 use crate::shims::unix::*;
-use crate::{concurrency::VClock, *};
+use crate::*;
 
 /// The maximum capacity of the socketpair buffer in bytes.
 /// This number is arbitrary as the value can always
@@ -100,7 +103,7 @@ impl FileDescription for AnonSocket {
                 epoll_ready_events.epollerr = true;
             }
         }
-        Ok(epoll_ready_events)
+        interp_ok(epoll_ready_events)
     }
 
     fn close<'tcx>(
@@ -119,21 +122,23 @@ impl FileDescription for AnonSocket {
             // Notify peer fd that close has happened, since that can unblock reads and writes.
             ecx.check_and_update_readiness(&peer_fd)?;
         }
-        Ok(Ok(()))
+        interp_ok(Ok(()))
     }
 
     fn read<'tcx>(
         &self,
         _self_ref: &FileDescriptionRef,
         _communicate_allowed: bool,
-        bytes: &mut [u8],
+        ptr: Pointer,
+        len: usize,
+        dest: &MPlaceTy<'tcx>,
         ecx: &mut MiriInterpCx<'tcx>,
-    ) -> InterpResult<'tcx, io::Result<usize>> {
-        let request_byte_size = bytes.len();
+    ) -> InterpResult<'tcx> {
+        let mut bytes = vec![0; len];
 
         // Always succeed on read size 0.
-        if request_byte_size == 0 {
-            return Ok(Ok(0));
+        if len == 0 {
+            return ecx.return_read_success(ptr, &bytes, 0, dest);
         }
 
         let Some(readbuf) = &self.readbuf else {
@@ -146,7 +151,7 @@ impl FileDescription for AnonSocket {
             if self.peer_fd().upgrade().is_none() {
                 // Socketpair with no peer and empty buffer.
                 // 0 bytes successfully read indicates end-of-file.
-                return Ok(Ok(0));
+                return ecx.return_read_success(ptr, &bytes, 0, dest);
             } else {
                 if self.is_nonblock {
                     // Non-blocking socketpair with writer and empty buffer.
@@ -154,7 +159,7 @@ impl FileDescription for AnonSocket {
                     // EAGAIN or EWOULDBLOCK can be returned for socket,
                     // POSIX.1-2001 allows either error to be returned for this case.
                     // Since there is no ErrorKind for EAGAIN, WouldBlock is used.
-                    return Ok(Err(Error::from(ErrorKind::WouldBlock)));
+                    return ecx.set_last_error_and_return(ErrorKind::WouldBlock, dest);
                 } else {
                     // Blocking socketpair with writer and empty buffer.
                     // FIXME: blocking is currently not supported
@@ -170,7 +175,7 @@ impl FileDescription for AnonSocket {
 
         // Do full read / partial read based on the space available.
         // Conveniently, `read` exists on `VecDeque` and has exactly the desired behavior.
-        let actual_read_size = readbuf.buf.read(bytes).unwrap();
+        let actual_read_size = readbuf.buf.read(&mut bytes).unwrap();
 
         // Need to drop before others can access the readbuf again.
         drop(readbuf);
@@ -186,28 +191,29 @@ impl FileDescription for AnonSocket {
             ecx.check_and_update_readiness(&peer_fd)?;
         }
 
-        return Ok(Ok(actual_read_size));
+        ecx.return_read_success(ptr, &bytes, actual_read_size, dest)
     }
 
     fn write<'tcx>(
         &self,
         _self_ref: &FileDescriptionRef,
         _communicate_allowed: bool,
-        bytes: &[u8],
+        ptr: Pointer,
+        len: usize,
+        dest: &MPlaceTy<'tcx>,
         ecx: &mut MiriInterpCx<'tcx>,
-    ) -> InterpResult<'tcx, io::Result<usize>> {
-        let write_size = bytes.len();
+    ) -> InterpResult<'tcx> {
         // Always succeed on write size 0.
         // ("If count is zero and fd refers to a file other than a regular file, the results are not specified.")
-        if write_size == 0 {
-            return Ok(Ok(0));
+        if len == 0 {
+            return ecx.return_write_success(0, dest);
         }
 
         // We are writing to our peer's readbuf.
         let Some(peer_fd) = self.peer_fd().upgrade() else {
             // If the upgrade from Weak to Rc fails, it indicates that all read ends have been
             // closed.
-            return Ok(Err(Error::from(ErrorKind::BrokenPipe)));
+            return ecx.set_last_error_and_return(ErrorKind::BrokenPipe, dest);
         };
 
         let Some(writebuf) = &peer_fd.downcast::<AnonSocket>().unwrap().readbuf else {
@@ -221,7 +227,7 @@ impl FileDescription for AnonSocket {
         if available_space == 0 {
             if self.is_nonblock {
                 // Non-blocking socketpair with a full buffer.
-                return Ok(Err(Error::from(ErrorKind::WouldBlock)));
+                return ecx.set_last_error_and_return(ErrorKind::WouldBlock, dest);
             } else {
                 // Blocking socketpair with a full buffer.
                 throw_unsup_format!("socketpair write: blocking isn't supported yet");
@@ -232,7 +238,8 @@ impl FileDescription for AnonSocket {
             writebuf.clock.join(clock);
         }
         // Do full write / partial write based on the space available.
-        let actual_write_size = write_size.min(available_space);
+        let actual_write_size = len.min(available_space);
+        let bytes = ecx.read_bytes_ptr_strip_provenance(ptr, Size::from_bytes(len))?;
         writebuf.buf.extend(&bytes[..actual_write_size]);
 
         // Need to stop accessing peer_fd so that it can be notified.
@@ -242,7 +249,7 @@ impl FileDescription for AnonSocket {
         // The kernel does this even if the fd was already readable before, so we follow suit.
         ecx.check_and_update_readiness(&peer_fd)?;
 
-        return Ok(Ok(actual_write_size));
+        ecx.return_write_success(actual_write_size, dest)
     }
 }
 
@@ -329,7 +336,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
         this.write_scalar(sv0, &sv)?;
         this.write_scalar(sv1, &sv.offset(sv.layout.size, sv.layout, this)?)?;
 
-        Ok(Scalar::from_i32(0))
+        interp_ok(Scalar::from_i32(0))
     }
 
     fn pipe2(
@@ -381,6 +388,6 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
         this.write_scalar(pipefd0, &pipefd)?;
         this.write_scalar(pipefd1, &pipefd.offset(pipefd.layout.size, pipefd.layout, this)?)?;
 
-        Ok(Scalar::from_i32(0))
+        interp_ok(Scalar::from_i32(0))
     }
 }

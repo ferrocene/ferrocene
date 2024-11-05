@@ -68,7 +68,9 @@ pub fn walk_expr<'thir, 'tcx: 'thir, V: Visitor<'thir, 'tcx>>(
         Cast { source } => visitor.visit_expr(&visitor.thir()[source]),
         Use { source } => visitor.visit_expr(&visitor.thir()[source]),
         NeverToAny { source } => visitor.visit_expr(&visitor.thir()[source]),
-        PointerCoercion { source, cast: _ } => visitor.visit_expr(&visitor.thir()[source]),
+        PointerCoercion { source, cast: _, is_from_as_cast: _ } => {
+            visitor.visit_expr(&visitor.thir()[source])
+        }
         Let { expr, ref pat } => {
             visitor.visit_expr(&visitor.thir()[expr]);
             visitor.visit_pat(pat);
@@ -129,7 +131,8 @@ pub fn walk_expr<'thir, 'tcx: 'thir, V: Visitor<'thir, 'tcx>>(
                 visitor.visit_expr(&visitor.thir()[base.base]);
             }
         }
-        PlaceTypeAscription { source, user_ty: _ } | ValueTypeAscription { source, user_ty: _ } => {
+        PlaceTypeAscription { source, user_ty: _, user_ty_span: _ }
+        | ValueTypeAscription { source, user_ty: _, user_ty_span: _ } => {
             visitor.visit_expr(&visitor.thir()[source])
         }
         Closure(box ClosureExpr {
@@ -145,7 +148,13 @@ pub fn walk_expr<'thir, 'tcx: 'thir, V: Visitor<'thir, 'tcx>>(
         NamedConst { def_id: _, args: _, user_ty: _ } => {}
         ConstParam { param: _, def_id: _ } => {}
         StaticRef { alloc_id: _, ty: _, def_id: _ } => {}
-        InlineAsm(box InlineAsmExpr { ref operands, template: _, options: _, line_spans: _ }) => {
+        InlineAsm(box InlineAsmExpr {
+            asm_macro: _,
+            ref operands,
+            template: _,
+            options: _,
+            line_spans: _,
+        }) => {
             for op in &**operands {
                 use InlineAsmOperand::*;
                 match op {

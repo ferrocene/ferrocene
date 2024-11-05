@@ -218,26 +218,26 @@ use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::{cmp, fmt};
 
-use rustc_data_structures::fx::{FxHashMap, FxHashSet};
+use rustc_data_structures::fx::{FxHashSet, FxIndexMap};
 use rustc_data_structures::memmap::Mmap;
 use rustc_data_structures::owned_slice::slice_owned;
 use rustc_data_structures::svh::Svh;
 use rustc_errors::{DiagArgValue, IntoDiagArg};
 use rustc_fs_util::try_canonicalize;
+use rustc_session::Session;
 use rustc_session::cstore::CrateSource;
 use rustc_session::filesearch::FileSearch;
 use rustc_session::search_paths::PathKind;
 use rustc_session::utils::CanonicalizedPath;
-use rustc_session::Session;
-use rustc_span::symbol::Symbol;
 use rustc_span::Span;
+use rustc_span::symbol::Symbol;
 use rustc_target::spec::{Target, TargetTriple};
 use snap::read::FrameDecoder;
 use tracing::{debug, info};
 
 use crate::creader::{Library, MetadataLoader};
 use crate::errors;
-use crate::rmeta::{rustc_version, MetadataBlob, METADATA_HEADER};
+use crate::rmeta::{METADATA_HEADER, MetadataBlob, rustc_version};
 
 #[derive(Clone)]
 pub(crate) struct CrateLocator<'a> {
@@ -385,7 +385,7 @@ impl<'a> CrateLocator<'a> {
         let dylib_suffix = &self.target.dll_suffix;
         let staticlib_suffix = &self.target.staticlib_suffix;
 
-        let mut candidates: FxHashMap<_, (FxHashMap<_, _>, FxHashMap<_, _>, FxHashMap<_, _>)> =
+        let mut candidates: FxIndexMap<_, (FxIndexMap<_, _>, FxIndexMap<_, _>, FxIndexMap<_, _>)> =
             Default::default();
 
         // First, find all possible candidate rlibs and dylibs purely based on
@@ -460,7 +460,7 @@ impl<'a> CrateLocator<'a> {
         // A Library candidate is created if the metadata for the set of
         // libraries corresponds to the crate id and hash criteria that this
         // search is being performed for.
-        let mut libraries = FxHashMap::default();
+        let mut libraries = FxIndexMap::default();
         for (_hash, (rlibs, rmetas, dylibs)) in candidates {
             if let Some((svh, lib)) = self.extract_lib(rlibs, rmetas, dylibs)? {
                 libraries.insert(svh, lib);
@@ -494,9 +494,9 @@ impl<'a> CrateLocator<'a> {
 
     fn extract_lib(
         &mut self,
-        rlibs: FxHashMap<PathBuf, PathKind>,
-        rmetas: FxHashMap<PathBuf, PathKind>,
-        dylibs: FxHashMap<PathBuf, PathKind>,
+        rlibs: FxIndexMap<PathBuf, PathKind>,
+        rmetas: FxIndexMap<PathBuf, PathKind>,
+        dylibs: FxIndexMap<PathBuf, PathKind>,
     ) -> Result<Option<(Svh, Library)>, CrateError> {
         let mut slot = None;
         // Order here matters, rmeta should come first. See comment in
@@ -534,7 +534,7 @@ impl<'a> CrateLocator<'a> {
     // The `PathBuf` in `slot` will only be used for diagnostic purposes.
     fn extract_one(
         &mut self,
-        m: FxHashMap<PathBuf, PathKind>,
+        m: FxIndexMap<PathBuf, PathKind>,
         flavor: CrateFlavor,
         slot: &mut Option<(Svh, MetadataBlob, PathBuf)>,
     ) -> Result<Option<(PathBuf, PathKind)>, CrateError> {
@@ -702,9 +702,9 @@ impl<'a> CrateLocator<'a> {
         // First, filter out all libraries that look suspicious. We only accept
         // files which actually exist that have the correct naming scheme for
         // rlibs/dylibs.
-        let mut rlibs = FxHashMap::default();
-        let mut rmetas = FxHashMap::default();
-        let mut dylibs = FxHashMap::default();
+        let mut rlibs = FxIndexMap::default();
+        let mut rmetas = FxIndexMap::default();
+        let mut dylibs = FxIndexMap::default();
         for loc in &self.exact_paths {
             if !loc.canonicalized().exists() {
                 return Err(CrateError::ExternLocationNotExist(

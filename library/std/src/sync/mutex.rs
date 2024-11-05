@@ -1,4 +1,4 @@
-#[cfg(all(test, not(target_os = "emscripten")))]
+#[cfg(all(test, not(any(target_os = "emscripten", target_os = "wasi"))))]
 mod tests;
 
 use crate::cell::UnsafeCell;
@@ -7,7 +7,7 @@ use crate::marker::PhantomData;
 use crate::mem::ManuallyDrop;
 use crate::ops::{Deref, DerefMut};
 use crate::ptr::NonNull;
-use crate::sync::{poison, LockResult, TryLockError, TryLockResult};
+use crate::sync::{LockResult, TryLockError, TryLockResult, poison};
 use crate::sys::sync as sys;
 
 /// A mutual exclusion primitive useful for protecting shared data

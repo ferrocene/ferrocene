@@ -16,6 +16,7 @@ fn main() {
     };
 }
 
+<<<<<<< HEAD
 // ferrocene-annotations: fls_lv7w7aalpwm5
 // Type Inference
 //
@@ -24,3 +25,8 @@ fn main() {
 //
 // ferrocene-annotations: fls_zjoamsr3dbqk
 // Diverging Expressions
+=======
+// issue: rust-lang/rust#130858 rust-lang/rust#125655
+static FOO: fn() -> bool = || -> bool { 1 };
+//~^ ERROR mismatched types
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

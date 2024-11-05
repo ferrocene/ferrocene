@@ -6,7 +6,7 @@ use rustc_type_ir::fast_reject::DeepRejectCtxt;
 use rustc_type_ir::inherent::*;
 use rustc_type_ir::lang_items::TraitSolverLangItem;
 use rustc_type_ir::visit::TypeVisitableExt as _;
-use rustc_type_ir::{self as ty, elaborate, Interner, TraitPredicate, Upcast as _};
+use rustc_type_ir::{self as ty, Interner, TraitPredicate, Upcast as _, elaborate};
 use tracing::{instrument, trace};
 
 use crate::delegate::SolverDelegate;
@@ -359,21 +359,18 @@ where
             )?;
         let output_is_sized_pred = tupled_inputs_and_output_and_coroutine.map_bound(
             |AsyncCallableRelevantTypes { output_coroutine_ty, .. }| {
-                ty::TraitRef::new(
-                    cx,
-                    cx.require_lang_item(TraitSolverLangItem::Sized),
-                    [output_coroutine_ty],
-                )
+                ty::TraitRef::new(cx, cx.require_lang_item(TraitSolverLangItem::Sized), [
+                    output_coroutine_ty,
+                ])
             },
         );
 
         let pred = tupled_inputs_and_output_and_coroutine
             .map_bound(|AsyncCallableRelevantTypes { tupled_inputs_ty, .. }| {
-                ty::TraitRef::new(
-                    cx,
-                    goal.predicate.def_id(),
-                    [goal.predicate.self_ty(), tupled_inputs_ty],
-                )
+                ty::TraitRef::new(cx, goal.predicate.def_id(), [
+                    goal.predicate.self_ty(),
+                    tupled_inputs_ty,
+                ])
             })
             .upcast(cx);
         // A built-in `AsyncFn` impl only holds if the output is sized.
@@ -835,8 +832,8 @@ where
         let cx = self.cx();
         let Goal { predicate: (a_ty, _), .. } = goal;
 
-        // Can only unsize to an object-safe trait.
-        if b_data.principal_def_id().is_some_and(|def_id| !cx.trait_is_object_safe(def_id)) {
+        // Can only unsize to an dyn-compatible trait.
+        if b_data.principal_def_id().is_some_and(|def_id| !cx.trait_is_dyn_compatible(def_id)) {
             return Err(NoSolution);
         }
 
@@ -898,10 +895,13 @@ where
                 source_projection.item_def_id() == target_projection.item_def_id()
                     && ecx
                         .probe(|_| ProbeKind::UpcastProjectionCompatibility)
-                        .enter(|ecx| -> Result<(), NoSolution> {
-                            ecx.eq(param_env, source_projection, target_projection)?;
-                            let _ = ecx.try_evaluate_added_goals()?;
-                            Ok(())
+                        .enter(|ecx| -> Result<_, NoSolution> {
+                            ecx.enter_forall(target_projection, |ecx, target_projection| {
+                                let source_projection =
+                                    ecx.instantiate_binder_with_infer(source_projection);
+                                ecx.eq(param_env, source_projection, target_projection)?;
+                                ecx.try_evaluate_added_goals()
+                            })
                         })
                         .is_ok()
             };
@@ -912,11 +912,14 @@ where
                     // Check that a's supertrait (upcast_principal) is compatible
                     // with the target (b_ty).
                     ty::ExistentialPredicate::Trait(target_principal) => {
-                        ecx.eq(
-                            param_env,
-                            upcast_principal.unwrap(),
-                            bound.rebind(target_principal),
-                        )?;
+                        let source_principal = upcast_principal.unwrap();
+                        let target_principal = bound.rebind(target_principal);
+                        ecx.enter_forall(target_principal, |ecx, target_principal| {
+                            let source_principal =
+                                ecx.instantiate_binder_with_infer(source_principal);
+                            ecx.eq(param_env, source_principal, target_principal)?;
+                            ecx.try_evaluate_added_goals()
+                        })?;
                     }
                     // Check that b_ty's projection is satisfied by exactly one of
                     // a_ty's projections. First, we look through the list to see if
@@ -937,7 +940,12 @@ where
                                 Certainty::AMBIGUOUS,
                             );
                         }
-                        ecx.eq(param_env, source_projection, target_projection)?;
+                        ecx.enter_forall(target_projection, |ecx, target_projection| {
+                            let source_projection =
+                                ecx.instantiate_binder_with_infer(source_projection);
+                            ecx.eq(param_env, source_projection, target_projection)?;
+                            ecx.try_evaluate_added_goals()
+                        })?;
                     }
                     // Check that b_ty's auto traits are present in a_ty's bounds.
                     ty::ExistentialPredicate::AutoTrait(def_id) => {
@@ -1027,11 +1035,9 @@ where
             GoalSource::ImplWhereBound,
             goal.with(
                 cx,
-                ty::TraitRef::new(
-                    cx,
-                    cx.require_lang_item(TraitSolverLangItem::Unsize),
-                    [a_tail_ty, b_tail_ty],
-                ),
+                ty::TraitRef::new(cx, cx.require_lang_item(TraitSolverLangItem::Unsize), [
+                    a_tail_ty, b_tail_ty,
+                ]),
             ),
         );
         self.probe_builtin_trait_candidate(BuiltinImplSource::Misc)
@@ -1069,11 +1075,9 @@ where
             GoalSource::ImplWhereBound,
             goal.with(
                 cx,
-                ty::TraitRef::new(
-                    cx,
-                    cx.require_lang_item(TraitSolverLangItem::Unsize),
-                    [a_last_ty, b_last_ty],
-                ),
+                ty::TraitRef::new(cx, cx.require_lang_item(TraitSolverLangItem::Unsize), [
+                    a_last_ty, b_last_ty,
+                ]),
             ),
         );
         self.probe_builtin_trait_candidate(BuiltinImplSource::TupleUnsizing)
@@ -1194,17 +1198,15 @@ where
         ) -> Result<Vec<ty::Binder<I, I::Ty>>, NoSolution>,
     ) -> Result<Candidate<I>, NoSolution> {
         self.probe_trait_candidate(source).enter(|ecx| {
-            ecx.add_goals(
-                GoalSource::ImplWhereBound,
-                constituent_tys(ecx, goal.predicate.self_ty())?
-                    .into_iter()
-                    .map(|ty| {
-                        ecx.enter_forall(ty, |ty| {
-                            goal.with(ecx.cx(), goal.predicate.with_self_ty(ecx.cx(), ty))
-                        })
+            let goals = constituent_tys(ecx, goal.predicate.self_ty())?
+                .into_iter()
+                .map(|ty| {
+                    ecx.enter_forall(ty, |ecx, ty| {
+                        goal.with(ecx.cx(), goal.predicate.with_self_ty(ecx.cx(), ty))
                     })
-                    .collect::<Vec<_>>(),
-            );
+                })
+                .collect::<Vec<_>>();
+            ecx.add_goals(GoalSource::ImplWhereBound, goals);
             ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
         })
     }

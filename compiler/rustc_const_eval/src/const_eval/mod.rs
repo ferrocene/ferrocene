@@ -1,13 +1,12 @@
 // Not in interpret to make sure we do not use private implementation details
 
-use rustc_middle::mir::interpret::InterpErrorInfo;
 use rustc_middle::query::{Key, TyCtxtAt};
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_middle::{bug, mir};
 use rustc_target::abi::VariantIdx;
 use tracing::instrument;
 
-use crate::interpret::{format_interp_error, InterpCx};
+use crate::interpret::InterpCx;
 
 mod dummy_machine;
 mod error;
@@ -16,12 +15,12 @@ mod fn_queries;
 mod machine;
 mod valtrees;
 
-pub use dummy_machine::*;
-pub use error::*;
-pub use eval_queries::*;
-pub use fn_queries::*;
-pub use machine::*;
-pub(crate) use valtrees::{eval_to_valtree, valtree_to_const_value};
+pub use self::dummy_machine::*;
+pub use self::error::*;
+pub use self::eval_queries::*;
+pub use self::fn_queries::*;
+pub use self::machine::*;
+pub(crate) use self::valtrees::{eval_to_valtree, valtree_to_const_value};
 
 // We forbid type-level constants that contain more than `VALTREE_MAX_NODES` nodes.
 const VALTREE_MAX_NODES: usize = 100000;
@@ -32,17 +31,6 @@ pub(crate) enum ValTreeCreationError<'tcx> {
     NonSupportedType(Ty<'tcx>),
 }
 pub(crate) type ValTreeCreationResult<'tcx> = Result<ty::ValTree<'tcx>, ValTreeCreationError<'tcx>>;
-
-impl<'tcx> From<InterpErrorInfo<'tcx>> for ValTreeCreationError<'tcx> {
-    fn from(err: InterpErrorInfo<'tcx>) -> Self {
-        ty::tls::with(|tcx| {
-            bug!(
-                "Unexpected Undefined Behavior error during valtree construction: {}",
-                format_interp_error(tcx.dcx(), err),
-            )
-        })
-    }
-}
 
 #[instrument(skip(tcx), level = "debug")]
 pub(crate) fn try_destructure_mir_constant_for_user_output<'tcx>(
@@ -60,8 +48,8 @@ pub(crate) fn try_destructure_mir_constant_for_user_output<'tcx>(
             return None;
         }
         ty::Adt(def, _) => {
-            let variant = ecx.read_discriminant(&op).ok()?;
-            let down = ecx.project_downcast(&op, variant).ok()?;
+            let variant = ecx.read_discriminant(&op).discard_err()?;
+            let down = ecx.project_downcast(&op, variant).discard_err()?;
             (def.variants()[variant].fields.len(), Some(variant), down)
         }
         ty::Tuple(args) => (args.len(), None, op),
@@ -70,7 +58,7 @@ pub(crate) fn try_destructure_mir_constant_for_user_output<'tcx>(
 
     let fields_iter = (0..field_count)
         .map(|i| {
-            let field_op = ecx.project_field(&down, i).ok()?;
+            let field_op = ecx.project_field(&down, i).discard_err()?;
             let val = op_to_const(&ecx, &field_op, /* for diagnostics */ true);
             Some((val, field_op.layout.ty))
         })

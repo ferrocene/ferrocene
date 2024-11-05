@@ -30,7 +30,7 @@ use crate::traits::util::{self, closure_trait_ref_and_return_type};
 use crate::traits::{
     ImplDerivedCause, ImplSource, ImplSourceUserDefinedData, Normalized, Obligation,
     ObligationCause, PolyTraitObligation, PredicateObligation, Selection, SelectionError,
-    SignatureMismatch, TraitNotObjectSafe, TraitObligation, Unimplemented,
+    SignatureMismatch, TraitDynIncompatible, TraitObligation, Unimplemented,
 };
 
 impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
@@ -305,15 +305,11 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             let make_transmute_obl = |src, dst| {
                 let transmute_trait = obligation.predicate.def_id();
                 let assume = obligation.predicate.skip_binder().trait_ref.args.const_at(2);
-                let trait_ref = ty::TraitRef::new(
-                    tcx,
-                    transmute_trait,
-                    [
-                        ty::GenericArg::from(dst),
-                        ty::GenericArg::from(src),
-                        ty::GenericArg::from(assume),
-                    ],
-                );
+                let trait_ref = ty::TraitRef::new(tcx, transmute_trait, [
+                    ty::GenericArg::from(dst),
+                    ty::GenericArg::from(src),
+                    ty::GenericArg::from(assume),
+                ]);
                 Obligation::with_depth(
                     tcx,
                     obligation.cause.clone(),
@@ -324,11 +320,10 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             };
 
             let make_freeze_obl = |ty| {
-                let trait_ref = ty::TraitRef::new(
-                    tcx,
-                    tcx.require_lang_item(LangItem::Freeze, None),
-                    [ty::GenericArg::from(ty)],
-                );
+                let trait_ref =
+                    ty::TraitRef::new(tcx, tcx.require_lang_item(LangItem::Freeze, None), [
+                        ty::GenericArg::from(ty),
+                    ]);
                 Obligation::with_depth(
                     tcx,
                     obligation.cause.clone(),
@@ -635,7 +630,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     obligation.cause.span,
                     "GATs in trait object shouldn't have been considered",
                 );
-                return Err(SelectionError::TraitNotObjectSafe(trait_predicate.trait_ref.def_id));
+                return Err(SelectionError::TraitDynIncompatible(trait_predicate.trait_ref.def_id));
             }
 
             // This maybe belongs in wf, but that can't (doesn't) handle
@@ -657,28 +652,20 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                             let kind = ty::BoundTyKind::Param(param.def_id, param.name);
                             let bound_var = ty::BoundVariableKind::Ty(kind);
                             bound_vars.push(bound_var);
-                            Ty::new_bound(
-                                tcx,
-                                ty::INNERMOST,
-                                ty::BoundTy {
-                                    var: ty::BoundVar::from_usize(bound_vars.len() - 1),
-                                    kind,
-                                },
-                            )
+                            Ty::new_bound(tcx, ty::INNERMOST, ty::BoundTy {
+                                var: ty::BoundVar::from_usize(bound_vars.len() - 1),
+                                kind,
+                            })
                             .into()
                         }
                         GenericParamDefKind::Lifetime => {
                             let kind = ty::BoundRegionKind::BrNamed(param.def_id, param.name);
                             let bound_var = ty::BoundVariableKind::Region(kind);
                             bound_vars.push(bound_var);
-                            ty::Region::new_bound(
-                                tcx,
-                                ty::INNERMOST,
-                                ty::BoundRegion {
-                                    var: ty::BoundVar::from_usize(bound_vars.len() - 1),
-                                    kind,
-                                },
-                            )
+                            ty::Region::new_bound(tcx, ty::INNERMOST, ty::BoundRegion {
+                                var: ty::BoundVar::from_usize(bound_vars.len() - 1),
+                                kind,
+                            })
                             .into()
                         }
                         GenericParamDefKind::Const { .. } => {
@@ -921,11 +908,10 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             ),
             ty::CoroutineClosure(_, args) => {
                 args.as_coroutine_closure().coroutine_closure_sig().map_bound(|sig| {
-                    ty::TraitRef::new(
-                        self.tcx(),
-                        obligation.predicate.def_id(),
-                        [self_ty, sig.tupled_inputs_ty],
-                    )
+                    ty::TraitRef::new(self.tcx(), obligation.predicate.def_id(), [
+                        self_ty,
+                        sig.tupled_inputs_ty,
+                    ])
                 })
             }
             _ => {
@@ -951,22 +937,20 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             ty::CoroutineClosure(_, args) => {
                 let args = args.as_coroutine_closure();
                 let trait_ref = args.coroutine_closure_sig().map_bound(|sig| {
-                    ty::TraitRef::new(
-                        self.tcx(),
-                        obligation.predicate.def_id(),
-                        [self_ty, sig.tupled_inputs_ty],
-                    )
+                    ty::TraitRef::new(self.tcx(), obligation.predicate.def_id(), [
+                        self_ty,
+                        sig.tupled_inputs_ty,
+                    ])
                 });
                 (trait_ref, args.kind_ty())
             }
             ty::FnDef(..) | ty::FnPtr(..) => {
                 let sig = self_ty.fn_sig(tcx);
                 let trait_ref = sig.map_bound(|sig| {
-                    ty::TraitRef::new(
-                        self.tcx(),
-                        obligation.predicate.def_id(),
-                        [self_ty, Ty::new_tup(tcx, sig.inputs())],
-                    )
+                    ty::TraitRef::new(self.tcx(), obligation.predicate.def_id(), [
+                        self_ty,
+                        Ty::new_tup(tcx, sig.inputs()),
+                    ])
                 });
 
                 // We must additionally check that the return type impls `Future`.
@@ -990,11 +974,10 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 let args = args.as_closure();
                 let sig = args.sig();
                 let trait_ref = sig.map_bound(|sig| {
-                    ty::TraitRef::new(
-                        self.tcx(),
-                        obligation.predicate.def_id(),
-                        [self_ty, sig.inputs()[0]],
-                    )
+                    ty::TraitRef::new(self.tcx(), obligation.predicate.def_id(), [
+                        self_ty,
+                        sig.inputs()[0],
+                    ])
                 });
 
                 // We must additionally check that the return type impls `Future`.
@@ -1204,11 +1187,11 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 ImplSource::Builtin(BuiltinImplSource::Misc, obligations)
             }
 
-            // `T` -> `Trait`
+            // `T` -> `dyn Trait`
             (_, &ty::Dynamic(data, r, ty::Dyn)) => {
                 let mut object_dids = data.auto_traits().chain(data.principal_def_id());
-                if let Some(did) = object_dids.find(|did| !tcx.is_object_safe(*did)) {
-                    return Err(TraitNotObjectSafe(did));
+                if let Some(did) = object_dids.find(|did| !tcx.is_dyn_compatible(*did)) {
+                    return Err(TraitDynIncompatible(did));
                 }
 
                 let predicate_to_obligation = |predicate| {
@@ -1310,11 +1293,10 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 // Construct the nested `TailField<T>: Unsize<TailField<U>>` predicate.
                 let tail_unsize_obligation = obligation.with(
                     tcx,
-                    ty::TraitRef::new(
-                        tcx,
-                        obligation.predicate.def_id(),
-                        [source_tail, target_tail],
-                    ),
+                    ty::TraitRef::new(tcx, obligation.predicate.def_id(), [
+                        source_tail,
+                        target_tail,
+                    ]),
                 );
                 nested.push(tail_unsize_obligation);
 

@@ -2,13 +2,13 @@ use std::cell::LazyCell;
 use std::ops::{ControlFlow, Deref};
 
 use hir::intravisit::{self, Visitor};
-use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexSet};
+use rustc_data_structures::fx::{FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_errors::codes::*;
-use rustc_errors::{pluralize, struct_span_code_err, Applicability, ErrorGuaranteed};
+use rustc_errors::{Applicability, ErrorGuaranteed, pluralize, struct_span_code_err};
+use rustc_hir::ItemKind;
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId};
 use rustc_hir::lang_items::LangItem;
-use rustc_hir::ItemKind;
 use rustc_infer::infer::outlives::env::OutlivesEnvironment;
 use rustc_infer::infer::{self, InferCtxt, TyCtxtInferExt};
 use rustc_macros::LintDiagnostic;
@@ -21,27 +21,27 @@ use rustc_middle::ty::{
 };
 use rustc_middle::{bug, span_bug};
 use rustc_session::parse::feature_err;
-use rustc_span::symbol::{sym, Ident};
-use rustc_span::{Span, DUMMY_SP};
+use rustc_span::symbol::{Ident, sym};
+use rustc_span::{DUMMY_SP, Span};
 use rustc_target::spec::abi::Abi;
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::regions::InferCtxtRegionExt;
 use rustc_trait_selection::traits::misc::{
-    type_allowed_to_implement_const_param_ty, ConstParamTyImplementationError,
+    ConstParamTyImplementationError, type_allowed_to_implement_const_param_ty,
 };
 use rustc_trait_selection::traits::outlives_bounds::InferCtxtExt as _;
 use rustc_trait_selection::traits::query::evaluate_obligation::InferCtxtExt as _;
 use rustc_trait_selection::traits::{
     self, FulfillmentError, ObligationCause, ObligationCauseCode, ObligationCtxt, WellFormedLoc,
 };
-use rustc_type_ir::solve::NoSolution;
 use rustc_type_ir::TypeFlags;
+use rustc_type_ir::solve::NoSolution;
 use tracing::{debug, instrument};
 use {rustc_ast as ast, rustc_hir as hir};
 
 use crate::autoderef::Autoderef;
 use crate::collect::CollectItemTypesVisitor;
-use crate::constrained_generic_params::{identify_constrained_generic_params, Parameter};
+use crate::constrained_generic_params::{Parameter, identify_constrained_generic_params};
 use crate::{errors, fluent_generated as fluent};
 
 pub(super) struct WfCheckingCtxt<'a, 'tcx> {
@@ -185,15 +185,16 @@ where
     }
 }
 
-fn check_well_formed(tcx: TyCtxt<'_>, def_id: hir::OwnerId) -> Result<(), ErrorGuaranteed> {
-    let node = tcx.hir_owner_node(def_id);
+fn check_well_formed(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Result<(), ErrorGuaranteed> {
+    let node = tcx.hir_node_by_def_id(def_id);
     let mut res = match node {
-        hir::OwnerNode::Crate(_) => bug!("check_well_formed cannot be applied to the crate root"),
-        hir::OwnerNode::Item(item) => check_item(tcx, item),
-        hir::OwnerNode::TraitItem(item) => check_trait_item(tcx, item),
-        hir::OwnerNode::ImplItem(item) => check_impl_item(tcx, item),
-        hir::OwnerNode::ForeignItem(item) => check_foreign_item(tcx, item),
-        hir::OwnerNode::Synthetic => unreachable!(),
+        hir::Node::Crate(_) => bug!("check_well_formed cannot be applied to the crate root"),
+        hir::Node::Item(item) => check_item(tcx, item),
+        hir::Node::TraitItem(item) => check_trait_item(tcx, item),
+        hir::Node::ImplItem(item) => check_impl_item(tcx, item),
+        hir::Node::ForeignItem(item) => check_foreign_item(tcx, item),
+        hir::Node::OpaqueTy(_) => Ok(crate::check::check::check_item_type(tcx, def_id)),
+        _ => unreachable!(),
     };
 
     if let Some(generics) = node.generics() {
@@ -201,6 +202,7 @@ fn check_well_formed(tcx: TyCtxt<'_>, def_id: hir::OwnerId) -> Result<(), ErrorG
             res = res.and(check_param_wf(tcx, param));
         }
     }
+
     res
 }
 
@@ -374,7 +376,7 @@ fn check_trait_item<'tcx>(
         hir::TraitItemKind::Type(_bounds, Some(ty)) => (None, ty.span),
         _ => (None, trait_item.span),
     };
-    check_object_unsafe_self_trait_by_name(tcx, trait_item);
+    check_dyn_incompatible_self_trait_by_name(tcx, trait_item);
     let mut res = check_associated_item(tcx, def_id, span, method_sig);
 
     if matches!(trait_item.kind, hir::TraitItemKind::Fn(..)) {
@@ -404,7 +406,7 @@ fn check_trait_item<'tcx>(
 /// ```
 fn check_gat_where_clauses(tcx: TyCtxt<'_>, trait_def_id: LocalDefId) {
     // Associates every GAT's def_id to a list of possibly missing bounds detected by this lint.
-    let mut required_bounds_by_item = FxHashMap::default();
+    let mut required_bounds_by_item = FxIndexMap::default();
     let associated_items = tcx.associated_items(trait_def_id);
 
     // Loop over all GATs together, because if this lint suggests adding a where-clause bound
@@ -430,7 +432,7 @@ fn check_gat_where_clauses(tcx: TyCtxt<'_>, trait_def_id: LocalDefId) {
             // Gather the bounds with which all other items inside of this trait constrain the GAT.
             // This is calculated by taking the intersection of the bounds that each item
             // constrains the GAT with individually.
-            let mut new_required_bounds: Option<FxHashSet<ty::Clause<'_>>> = None;
+            let mut new_required_bounds: Option<FxIndexSet<ty::Clause<'_>>> = None;
             for item in associated_items.in_definition_order() {
                 let item_def_id = item.def_id.expect_local();
                 // Skip our own GAT, since it does not constrain itself at all.
@@ -589,7 +591,7 @@ fn check_gat_where_clauses(tcx: TyCtxt<'_>, trait_def_id: LocalDefId) {
 fn augment_param_env<'tcx>(
     tcx: TyCtxt<'tcx>,
     param_env: ty::ParamEnv<'tcx>,
-    new_predicates: Option<&FxHashSet<ty::Clause<'tcx>>>,
+    new_predicates: Option<&FxIndexSet<ty::Clause<'tcx>>>,
 ) -> ty::ParamEnv<'tcx> {
     let Some(new_predicates) = new_predicates else {
         return param_env;
@@ -625,9 +627,9 @@ fn gather_gat_bounds<'tcx, T: TypeFoldable<TyCtxt<'tcx>>>(
     wf_tys: &FxIndexSet<Ty<'tcx>>,
     gat_def_id: LocalDefId,
     gat_generics: &'tcx ty::Generics,
-) -> Option<FxHashSet<ty::Clause<'tcx>>> {
+) -> Option<FxIndexSet<ty::Clause<'tcx>>> {
     // The bounds we that we would require from `to_check`
-    let mut bounds = FxHashSet::default();
+    let mut bounds = FxIndexSet::default();
 
     let (regions, types) = GATArgsCollector::visit(gat_def_id.to_def_id(), to_check);
 
@@ -664,10 +666,10 @@ fn gather_gat_bounds<'tcx, T: TypeFoldable<TyCtxt<'tcx>>>(
                 // Same for the region. In our example, 'a corresponds
                 // to the 'me parameter.
                 let region_param = gat_generics.param_at(*region_a_idx, tcx);
-                let region_param = ty::Region::new_early_param(
-                    tcx,
-                    ty::EarlyParamRegion { index: region_param.index, name: region_param.name },
-                );
+                let region_param = ty::Region::new_early_param(tcx, ty::EarlyParamRegion {
+                    index: region_param.index,
+                    name: region_param.name,
+                });
                 // The predicate we expect to see. (In our example,
                 // `Self: 'me`.)
                 bounds.insert(
@@ -693,16 +695,16 @@ fn gather_gat_bounds<'tcx, T: TypeFoldable<TyCtxt<'tcx>>>(
                 debug!("required clause: {region_a} must outlive {region_b}");
                 // Translate into the generic parameters of the GAT.
                 let region_a_param = gat_generics.param_at(*region_a_idx, tcx);
-                let region_a_param = ty::Region::new_early_param(
-                    tcx,
-                    ty::EarlyParamRegion { index: region_a_param.index, name: region_a_param.name },
-                );
+                let region_a_param = ty::Region::new_early_param(tcx, ty::EarlyParamRegion {
+                    index: region_a_param.index,
+                    name: region_a_param.name,
+                });
                 // Same for the region.
                 let region_b_param = gat_generics.param_at(*region_b_idx, tcx);
-                let region_b_param = ty::Region::new_early_param(
-                    tcx,
-                    ty::EarlyParamRegion { index: region_b_param.index, name: region_b_param.name },
-                );
+                let region_b_param = ty::Region::new_early_param(tcx, ty::EarlyParamRegion {
+                    index: region_b_param.index,
+                    name: region_b_param.name,
+                });
                 // The predicate we expect to see.
                 bounds.insert(
                     ty::ClauseKind::RegionOutlives(ty::OutlivesPredicate(
@@ -789,18 +791,18 @@ fn test_region_obligations<'tcx>(
 struct GATArgsCollector<'tcx> {
     gat: DefId,
     // Which region appears and which parameter index its instantiated with
-    regions: FxHashSet<(ty::Region<'tcx>, usize)>,
+    regions: FxIndexSet<(ty::Region<'tcx>, usize)>,
     // Which params appears and which parameter index its instantiated with
-    types: FxHashSet<(Ty<'tcx>, usize)>,
+    types: FxIndexSet<(Ty<'tcx>, usize)>,
 }
 
 impl<'tcx> GATArgsCollector<'tcx> {
     fn visit<T: TypeFoldable<TyCtxt<'tcx>>>(
         gat: DefId,
         t: T,
-    ) -> (FxHashSet<(ty::Region<'tcx>, usize)>, FxHashSet<(Ty<'tcx>, usize)>) {
+    ) -> (FxIndexSet<(ty::Region<'tcx>, usize)>, FxIndexSet<(Ty<'tcx>, usize)>) {
         let mut visitor =
-            GATArgsCollector { gat, regions: FxHashSet::default(), types: FxHashSet::default() };
+            GATArgsCollector { gat, regions: FxIndexSet::default(), types: FxIndexSet::default() };
         t.visit_with(&mut visitor);
         (visitor.regions, visitor.types)
     }
@@ -838,9 +840,10 @@ fn could_be_self(trait_def_id: LocalDefId, ty: &hir::Ty<'_>) -> bool {
     }
 }
 
-/// Detect when an object unsafe trait is referring to itself in one of its associated items.
-/// When this is done, suggest using `Self` instead.
-fn check_object_unsafe_self_trait_by_name(tcx: TyCtxt<'_>, item: &hir::TraitItem<'_>) {
+/// Detect when a dyn-incompatible trait is referring to itself in one of its associated items.
+///
+/// In such cases, suggest using `Self` instead.
+fn check_dyn_incompatible_self_trait_by_name(tcx: TyCtxt<'_>, item: &hir::TraitItem<'_>) {
     let (trait_name, trait_def_id) =
         match tcx.hir_node_by_def_id(tcx.hir().get_parent_item(item.hir_id()).def_id) {
             hir::Node::Item(item) => match item.kind {
@@ -872,7 +875,7 @@ fn check_object_unsafe_self_trait_by_name(tcx: TyCtxt<'_>, item: &hir::TraitItem
         _ => {}
     }
     if !trait_should_be_self.is_empty() {
-        if tcx.is_object_safe(trait_def_id) {
+        if tcx.is_dyn_compatible(trait_def_id) {
             return;
         }
         let sugg = trait_should_be_self.iter().map(|span| (*span, "Self".to_string())).collect();
@@ -960,13 +963,20 @@ fn check_param_wf(tcx: TyCtxt<'_>, param: &hir::GenericParam<'_>) -> Result<(), 
                         hir_ty.span,
                         "using raw pointers as const generic parameters is forbidden",
                     ),
-                    _ => tcx.dcx().struct_span_err(
-                        hir_ty.span,
-                        format!("`{}` is forbidden as the type of a const generic parameter", ty),
-                    ),
+                    _ => {
+                        // Avoid showing "{type error}" to users. See #118179.
+                        ty.error_reported()?;
+
+                        tcx.dcx().struct_span_err(
+                            hir_ty.span,
+                            format!(
+                                "`{ty}` is forbidden as the type of a const generic parameter",
+                            ),
+                        )
+                    }
                 };
 
-                diag.note("the only supported types are integers, `bool` and `char`");
+                diag.note("the only supported types are integers, `bool`, and `char`");
 
                 let cause = ObligationCause::misc(hir_ty.span, param.def_id);
                 let adt_const_params_feature_string =
@@ -2164,10 +2174,14 @@ impl<'tcx> WfCheckingCtxt<'_, 'tcx> {
 
 fn check_mod_type_wf(tcx: TyCtxt<'_>, module: LocalModDefId) -> Result<(), ErrorGuaranteed> {
     let items = tcx.hir_module_items(module);
-    let mut res = items.par_items(|item| tcx.ensure().check_well_formed(item.owner_id));
-    res = res.and(items.par_impl_items(|item| tcx.ensure().check_well_formed(item.owner_id)));
-    res = res.and(items.par_trait_items(|item| tcx.ensure().check_well_formed(item.owner_id)));
-    res = res.and(items.par_foreign_items(|item| tcx.ensure().check_well_formed(item.owner_id)));
+    let mut res = items.par_items(|item| tcx.ensure().check_well_formed(item.owner_id.def_id));
+    res =
+        res.and(items.par_impl_items(|item| tcx.ensure().check_well_formed(item.owner_id.def_id)));
+    res =
+        res.and(items.par_trait_items(|item| tcx.ensure().check_well_formed(item.owner_id.def_id)));
+    res = res
+        .and(items.par_foreign_items(|item| tcx.ensure().check_well_formed(item.owner_id.def_id)));
+    res = res.and(items.par_opaques(|item| tcx.ensure().check_well_formed(item)));
     if module == LocalModDefId::CRATE_DEF_ID {
         super::entry::check_for_entry_fn(tcx);
     }

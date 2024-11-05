@@ -4,7 +4,7 @@ pub(crate) mod query_context;
 #[cfg(test)]
 mod tests;
 
-use crate::layout::{self, dfa, Byte, Def, Dfa, Nfa, Ref, Tree, Uninhabited};
+use crate::layout::{self, Byte, Def, Dfa, Nfa, Ref, Tree, Uninhabited, dfa};
 use crate::maybe_transmutable::query_context::QueryContext;
 use crate::{Answer, Condition, Map, Reason};
 
@@ -40,7 +40,7 @@ mod rustc {
         /// This method begins by converting `src` and `dst` from `Ty`s to `Tree`s,
         /// then computes an answer using those trees.
         #[instrument(level = "debug", skip(self), fields(src = ?self.src, dst = ?self.dst))]
-        pub fn answer(self) -> Answer<<TyCtxt<'tcx> as QueryContext>::Ref> {
+        pub(crate) fn answer(self) -> Answer<<TyCtxt<'tcx> as QueryContext>::Ref> {
             let Self { src, dst, assume, context } = self;
 
             let layout_cx = LayoutCx::new(context, ParamEnv::reveal_all());

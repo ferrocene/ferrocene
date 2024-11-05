@@ -9,8 +9,8 @@
 use std::borrow::Cow;
 use std::collections::HashSet;
 use std::ffi::OsStr;
-use std::io::prelude::*;
 use std::io::BufReader;
+use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
 use std::{env, fs, str};
@@ -22,7 +22,7 @@ use crate::core::build_steps::tool::SourceType;
 use crate::core::build_steps::{dist, llvm};
 use crate::core::builder;
 use crate::core::builder::{
-    crate_description, Builder, Cargo, Kind, PathSet, RunConfig, ShouldRun, Step, TaskPath,
+    Builder, Cargo, Kind, PathSet, RunConfig, ShouldRun, Step, TaskPath, crate_description,
 };
 use crate::core::config::{DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection};
 use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
@@ -30,7 +30,7 @@ use crate::utils::exec::command;
 use crate::utils::helpers::{
     self, exe, get_clang_cl_resource_dir, is_debug_info, is_dylib, symlink_dir, t, up_to_date,
 };
-use crate::{CLang, Compiler, DependencyType, GitRepo, Mode, LLVM_TOOLS};
+use crate::{CLang, Compiler, DependencyType, GitRepo, LLVM_TOOLS, Mode};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Std {
@@ -1061,9 +1061,24 @@ pub fn rustc_cargo(
 
     cargo.rustdocflag("-Zcrate-attr=warn(rust_2018_idioms)");
 
-    // If the rustc output is piped to e.g. `head -n1` we want the process to be
-    // killed, rather than having an error bubble up and cause a panic.
+    // If the rustc output is piped to e.g. `head -n1` we want the process to be killed, rather than
+    // having an error bubble up and cause a panic.
+    //
+    // FIXME(jieyouxu): this flag is load-bearing for rustc to not ICE on broken pipes, because
+    // rustc internally sometimes uses std `println!` -- but std `println!` by default will panic on
+    // broken pipes, and uncaught panics will manifest as an ICE. The compiler *should* handle this
+    // properly, but this flag is set in the meantime to paper over the I/O errors.
+    //
+    // See <https://github.com/rust-lang/rust/issues/131059> for details.
+    //
+    // Also see the discussion for properly handling I/O errors related to broken pipes, i.e. safe
+    // variants of `println!` in
+    // <https://rust-lang.zulipchat.com/#narrow/stream/131828-t-compiler/topic/Internal.20lint.20for.20raw.20.60print!.60.20and.20.60println!.60.3F>.
     cargo.rustflag("-Zon-broken-pipe=kill");
+
+    if builder.config.llvm_enzyme {
+        cargo.rustflag("-l").rustflag("Enzyme-19");
+    }
 
     // We currently don't support cross-crate LTO in stage0. This also isn't hugely necessary
     // and may just be a time sink.
@@ -1209,7 +1224,8 @@ pub fn rustc_cargo_env(
     // busting caches (e.g. like #71152).
     if builder.config.llvm_enabled(target) {
         let building_is_expensive =
-            crate::core::build_steps::llvm::prebuilt_llvm_config(builder, target).should_build();
+            crate::core::build_steps::llvm::prebuilt_llvm_config(builder, target, false)
+                .should_build();
         // `top_stage == stage` might be false for `check --stage 1`, if we are building the stage 1 compiler
         let can_skip_build = builder.kind == Kind::Check && builder.top_stage == stage;
         let should_skip_build = building_is_expensive && can_skip_build;
@@ -1926,8 +1942,24 @@ impl Step for Assemble {
         let src_libdir = builder.sysroot_libdir(build_compiler, host);
         for f in builder.read_dir(&src_libdir) {
             let filename = f.file_name().into_string().unwrap();
-            if (is_dylib(&filename) || is_debug_info(&filename)) && !proc_macros.contains(&filename)
+
+            let is_proc_macro = proc_macros.contains(&filename);
+            let is_dylib_or_debug = is_dylib(&filename) || is_debug_info(&filename);
+
+            // If we link statically to stdlib, do not copy the libstd dynamic library file
+            // FIXME: Also do this for Windows once incremental post-optimization stage0 tests
+            // work without std.dll (see https://github.com/rust-lang/rust/pull/131188).
+            let can_be_rustc_dynamic_dep = if builder
+                .link_std_into_rustc_driver(target_compiler.host)
+                && !target_compiler.host.is_windows()
             {
+                let is_std = filename.starts_with("std-") || filename.starts_with("libstd-");
+                !is_std
+            } else {
+                true
+            };
+
+            if is_dylib_or_debug && can_be_rustc_dynamic_dep && !is_proc_macro {
                 builder.copy_link(&f.path(), &rustc_libdir.join(&filename));
             }
         }

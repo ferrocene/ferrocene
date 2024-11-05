@@ -2,12 +2,14 @@
 //! [`rustc_middle::ty`] form.
 
 use rustc_data_structures::fx::FxIndexMap;
-use rustc_hir::def::DefKind;
 use rustc_hir::LangItem;
+use rustc_hir::def::DefKind;
 use rustc_middle::ty::fold::FnMutDelegate;
 use rustc_middle::ty::{self, Ty, TyCtxt, Upcast};
-use rustc_span::def_id::DefId;
 use rustc_span::Span;
+use rustc_span::def_id::DefId;
+
+use crate::hir_ty_lowering::OnlySelfBounds;
 
 /// Collects together a list of type bounds. These lists of bounds occur in many places
 /// in Rust's syntax:
@@ -50,6 +52,7 @@ impl<'tcx> Bounds<'tcx> {
         span: Span,
         polarity: ty::PredicatePolarity,
         constness: ty::BoundConstness,
+        only_self_bounds: OnlySelfBounds,
     ) {
         let clause = (
             bound_trait_ref
@@ -66,7 +69,10 @@ impl<'tcx> Bounds<'tcx> {
             self.clauses.push(clause);
         }
 
-        if !tcx.features().effects {
+        // FIXME(effects): Lift this out of `push_trait_bound`, and move it somewhere else.
+        // Perhaps moving this into `lower_poly_trait_ref`, just like we lower associated
+        // type bounds.
+        if !tcx.features().effects || only_self_bounds.0 {
             return;
         }
         // For `T: ~const Tr` or `T: const Tr`, we need to add an additional bound on the
@@ -85,12 +91,46 @@ impl<'tcx> Bounds<'tcx> {
                 }
                 tcx.consts.true_
             }
+            (DefKind::Trait, ty::BoundConstness::ConstIfConst) => {
+                // we are in a trait, where `bound_trait_ref` could be:
+                // (1) a super trait `trait Foo: ~const Bar`.
+                //     - This generates `<Self as Foo>::Effects: TyCompat<<Self as Bar>::Effects>`
+                //
+                // (2) a where clause `where for<..> Something: ~const Bar`.
+                //     - This generates `for<..> <Self as Foo>::Effects: TyCompat<<Something as Bar>::Effects>`
+                let Some(own_fx) = tcx.associated_type_for_effects(defining_def_id) else {
+                    tcx.dcx().span_delayed_bug(span, "should not have allowed `~const` on a trait that doesn't have `#[const_trait]`");
+                    return;
+                };
+                let own_fx_ty = Ty::new_projection(
+                    tcx,
+                    own_fx,
+                    ty::GenericArgs::identity_for_item(tcx, own_fx),
+                );
+                let Some(their_fx) = tcx.associated_type_for_effects(bound_trait_ref.def_id())
+                else {
+                    tcx.dcx().span_delayed_bug(span, "`~const` on trait without Effects assoc");
+                    return;
+                };
+                let their_fx_ty =
+                    Ty::new_projection(tcx, their_fx, bound_trait_ref.skip_binder().args);
+                let compat = tcx.require_lang_item(LangItem::EffectsTyCompat, Some(span));
+                let clause = bound_trait_ref
+                    .map_bound(|_| {
+                        let trait_ref = ty::TraitRef::new(tcx, compat, [own_fx_ty, their_fx_ty]);
+                        ty::ClauseKind::Trait(ty::TraitPredicate {
+                            trait_ref,
+                            polarity: ty::PredicatePolarity::Positive,
+                        })
+                    })
+                    .upcast(tcx);
 
-            (
-                DefKind::Trait | DefKind::Impl { of_trait: true },
-                ty::BoundConstness::ConstIfConst,
-            ) => {
-                // this is either a where clause on an impl/trait header or on a trait.
+                self.clauses.push((clause, span));
+                return;
+            }
+
+            (DefKind::Impl { of_trait: true }, ty::BoundConstness::ConstIfConst) => {
+                // this is a where clause on an impl header.
                 // push `<T as Tr>::Effects` into the set for the `Min` bound.
                 let Some(assoc) = tcx.associated_type_for_effects(bound_trait_ref.def_id()) else {
                     tcx.dcx().span_delayed_bug(span, "`~const` on trait without Effects assoc");
@@ -106,14 +146,11 @@ impl<'tcx> Bounds<'tcx> {
                 // This should work for any bound variables as long as they don't have any
                 // bounds e.g. `for<T: Trait>`.
                 // FIXME(effects) reconsider this approach to allow compatibility with `for<T: Tr>`
-                let ty = tcx.replace_bound_vars_uncached(
-                    ty,
-                    FnMutDelegate {
-                        regions: &mut |_| tcx.lifetimes.re_static,
-                        types: &mut |_| tcx.types.unit,
-                        consts: &mut |_| unimplemented!("`~const` does not support const binders"),
-                    },
-                );
+                let ty = tcx.replace_bound_vars_uncached(ty, FnMutDelegate {
+                    regions: &mut |_| tcx.lifetimes.re_static,
+                    types: &mut |_| tcx.types.unit,
+                    consts: &mut |_| unimplemented!("`~const` does not support const binders"),
+                });
 
                 self.effects_min_tys.insert(ty, span);
                 return;
@@ -146,11 +183,11 @@ impl<'tcx> Bounds<'tcx> {
         };
         let self_ty = Ty::new_projection(tcx, assoc, bound_trait_ref.skip_binder().args);
         // make `<T as Tr>::Effects: Compat<runtime>`
-        let new_trait_ref = ty::TraitRef::new(
-            tcx,
-            tcx.require_lang_item(LangItem::EffectsCompat, Some(span)),
-            [ty::GenericArg::from(self_ty), compat_val.into()],
-        );
+        let new_trait_ref =
+            ty::TraitRef::new(tcx, tcx.require_lang_item(LangItem::EffectsCompat, Some(span)), [
+                ty::GenericArg::from(self_ty),
+                compat_val.into(),
+            ]);
         self.clauses.push((bound_trait_ref.rebind(new_trait_ref).upcast(tcx), span));
     }
 

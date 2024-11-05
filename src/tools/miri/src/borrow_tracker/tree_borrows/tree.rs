@@ -12,18 +12,17 @@
 
 use std::{fmt, mem};
 
-use smallvec::SmallVec;
-
 use rustc_data_structures::fx::FxHashSet;
 use rustc_span::Span;
 use rustc_target::abi::Size;
+use smallvec::SmallVec;
 
-use crate::borrow_tracker::tree_borrows::{
-    diagnostics::{self, NodeDebugInfo, TbError, TransitionError},
-    perms::PermTransition,
-    unimap::{UniEntry, UniIndex, UniKeyMap, UniValMap},
-    Permission,
+use crate::borrow_tracker::tree_borrows::Permission;
+use crate::borrow_tracker::tree_borrows::diagnostics::{
+    self, NodeDebugInfo, TbError, TransitionError,
 };
+use crate::borrow_tracker::tree_borrows::perms::PermTransition;
+use crate::borrow_tracker::tree_borrows::unimap::{UniEntry, UniIndex, UniKeyMap, UniValMap};
 use crate::borrow_tracker::{GlobalState, ProtectorKind};
 use crate::*;
 
@@ -587,16 +586,13 @@ impl Tree {
             let mut debug_info = NodeDebugInfo::new(root_tag, root_default_perm, span);
             // name the root so that all allocations contain one named pointer
             debug_info.add_name("root of the allocation");
-            nodes.insert(
-                root_idx,
-                Node {
-                    tag: root_tag,
-                    parent: None,
-                    children: SmallVec::default(),
-                    default_initial_perm: root_default_perm,
-                    debug_info,
-                },
-            );
+            nodes.insert(root_idx, Node {
+                tag: root_tag,
+                parent: None,
+                children: SmallVec::default(),
+                default_initial_perm: root_default_perm,
+                debug_info,
+            });
             nodes
         };
         let rperms = {
@@ -626,16 +622,13 @@ impl<'tcx> Tree {
         let idx = self.tag_mapping.insert(new_tag);
         let parent_idx = self.tag_mapping.get(&parent_tag).unwrap();
         // Create the node
-        self.nodes.insert(
-            idx,
-            Node {
-                tag: new_tag,
-                parent: Some(parent_idx),
-                children: SmallVec::default(),
-                default_initial_perm,
-                debug_info: NodeDebugInfo::new(new_tag, default_initial_perm, span),
-            },
-        );
+        self.nodes.insert(idx, Node {
+            tag: new_tag,
+            parent: Some(parent_idx),
+            children: SmallVec::default(),
+            default_initial_perm,
+            debug_info: NodeDebugInfo::new(new_tag, default_initial_perm, span),
+        });
         // Register new_tag as a child of parent_tag
         self.nodes.get_mut(parent_idx).unwrap().children.push(idx);
         // Initialize perms
@@ -644,7 +637,7 @@ impl<'tcx> Tree {
         {
             perms.insert(idx, perm);
         }
-        Ok(())
+        interp_ok(())
     }
 
     /// Deallocation requires
@@ -695,7 +688,7 @@ impl<'tcx> Tree {
                     },
                 )?;
         }
-        Ok(())
+        interp_ok(())
     }
 
     /// Map the per-node and per-location `LocationState::perform_access`
@@ -834,7 +827,7 @@ impl<'tcx> Tree {
                 }
             }
         }
-        Ok(())
+        interp_ok(())
     }
 }
 
@@ -866,14 +859,15 @@ impl Tree {
     ) -> Option<UniIndex> {
         let node = self.nodes.get(idx).unwrap();
 
+        let [child_idx] = node.children[..] else { return None };
+
         // We never want to replace the root node, as it is also kept in `root_ptr_tags`.
-        if node.children.len() != 1 || live.contains(&node.tag) || node.parent.is_none() {
+        if live.contains(&node.tag) || node.parent.is_none() {
             return None;
         }
         // Since protected nodes are never GC'd (see `borrow_tracker::FrameExtra::visit_provenance`),
         // we know that `node` is not protected because otherwise `live` would
         // have contained `node.tag`.
-        let child_idx = node.children[0];
         let child = self.nodes.get(child_idx).unwrap();
         // Check that for that one child, `can_be_replaced_by_child` holds for the permission
         // on all locations.

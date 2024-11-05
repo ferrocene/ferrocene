@@ -20,4 +20,10 @@ New experimental features
 Experimental features are not qualified for safety critical use, and are
 shipped as a preview.
 
-There have been no new experimental features since last release.
+* Experimental support has been added for multiple cross-compilation targets.
+  Note that experimental targets are not qualified for safety critical use. The
+  new targets are:
+
+  * :target-with-triple:`thumbv8m.base-none-eabi`
+  * :target-with-triple:`thumbv8m.main-none-eabi`
+  * :target-with-triple:`thumbv8m.main-none-eabihf`

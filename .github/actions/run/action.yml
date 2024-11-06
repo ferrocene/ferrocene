@@ -46,7 +46,6 @@ runs:
           --interactive \
           --tty \
           --env RUST_BACKTRACE="full" \
-          --env TERM="xterm-256color" \
           --env CI \
           --env SCRIPT \
           --env FERROCENE_HOST \

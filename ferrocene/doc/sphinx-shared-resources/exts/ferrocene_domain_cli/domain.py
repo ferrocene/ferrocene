@@ -1,19 +1,14 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-
-from dataclasses import dataclass
-import re
-import string
-
 from docutils import nodes
-from docutils.parsers.rst import directives
-
 from sphinx import addnodes
 from sphinx.directives import SphinxDirective, ObjectDescription
 from sphinx.domains import Domain, ObjType
 from sphinx.roles import XRefRole
+import re
 import sphinx
+import string
 
 
 PROGRAM_STORAGE = "ferrocene_domain_cli:program"
@@ -23,30 +18,40 @@ class ProgramDirective(SphinxDirective):
     has_content = True
     required_arguments = 1
     final_argument_whitespace = True
-    option_spec = {"no_traceability_matrix": directives.flag}
 
     def run(self):
-        # if there already is program data in storage, a ProgramDirective is
-        # within a ProgramDirective, which isn't supported
         if PROGRAM_STORAGE in self.env.temp_data:
             warn("cli:program inside cli:program isn't supported", self.get_location())
             return []
+        self.env.temp_data[PROGRAM_STORAGE] = self.arguments[0]
 
-        # store arguments, so they can be accessed by child `OptionDirective`s
-        self.env.temp_data[PROGRAM_STORAGE] = ProgramStorage(
-            self.arguments[0],
-            "no_traceability_matrix" in self.options,
-        )
-
-        # parse and process content of `ProgramDirective`` (one or more `OptionDirective`s)
         node = nodes.container()
         self.state.nested_parse(self.content, self.content_offset, node)
 
-        # clear program storage
         del self.env.temp_data[PROGRAM_STORAGE]
-
         return [node]
 
+class SubcommandDirective(ObjectDescription):
+    has_content = True
+    required_arguments = 1
+    final_argument_whitespace = True
+
+    def handle_signature(self, sig, signode):
+        signode += addnodes.desc_name("", sig)
+
+    def add_target_and_index(self, name_cls, sig, signode):
+        if PROGRAM_STORAGE not in self.env.temp_data:
+            warn("cli:subcommand outside cli:program isn't supported", self.get_location())
+            program = "PLACEHOLDER"
+        else:
+            program = self.env.temp_data[PROGRAM_STORAGE]
+
+        subcommand = Subcommand(self.env.docname, program, sig)
+
+        signode["ids"].append(subcommand.id())
+
+        domain = self.env.get_domain("cli")
+        domain.add_subcommand(subcommand)
 
 class OptionDirective(ObjectDescription):
     has_content = True
@@ -59,16 +64,11 @@ class OptionDirective(ObjectDescription):
     def add_target_and_index(self, name_cls, sig, signode):
         if PROGRAM_STORAGE not in self.env.temp_data:
             warn("cli:option outside cli:program isn't supported", self.get_location())
-            program_storage = ProgramStorage("PLACEHOLDER", False)
+            program = "PLACEHOLDER"
         else:
-            program_storage: ProgramStorage = self.env.temp_data[PROGRAM_STORAGE]
+            program = self.env.temp_data[PROGRAM_STORAGE]
 
-        option = Option(
-            self.env.docname,
-            program_storage.program_name,
-            sig,
-            program_storage.no_traceability_matrix,
-        )
+        option = Option(self.env.docname, program, sig)
 
         signode["ids"].append(option.id())
 
@@ -82,11 +82,10 @@ ALLOWED_CHARS_IN_OPTION_ID = string.ascii_letters + string.digits + "_"
 
 
 class Option:
-    def __init__(self, document, program, option, no_traceability_matrix):
+    def __init__(self, document, program, option):
         self.document = document
         self.program = program
         self.option = option
-        self.no_traceability_matrix = no_traceability_matrix
 
     def id(self):
         option = (
@@ -105,6 +104,28 @@ class Option:
         return f"um_{self.program}_{option}"
 
 
+class Subcommand:
+    has_content = True
+    required_arguments = 1
+    final_argument_whitespace = True
+
+    def __init__(self, document, program, subcommand):
+        self.document = document
+        self.program = program
+        self.subcommand = subcommand
+
+    def id(self):
+        subcommand = (
+            ARGUMENT_PLACEHOLDER_RE.sub("_", self.subcommand)
+            .replace("=", "")
+            .replace("-", "_")
+            .replace(" ", "_")
+            .strip("_")
+        )
+        subcommand = MULTIPLE_UNDERSCORES_RE.sub("_", subcommand)
+
+        return f"um_{self.program}_{subcommand}"
+
 class CliDomain(Domain):
     name = "cli"
     labels = "Command-line interface"
@@ -113,14 +134,22 @@ class CliDomain(Domain):
     }
     directives = {
         "program": ProgramDirective,
+        "subcommand": SubcommandDirective,
         "option": OptionDirective,
     }
     object_types = {
         "option": ObjType("CLI option", "option"),
+        "subcommand": ObjType("CLI Subcommand", "subcommand")
     }
-    initial_data = {"options": {}}
+    initial_data = {"options": {}, "subcommands": {}}
     # Bump whenever the format of the data changes!
-    data_version = 1
+    data_version = 2
+
+    def add_subcommand(self, subcommand):
+        self.data["subcommands"][f"{subcommand.program} {subcommand.subcommand}"] = subcommand
+
+    def get_subcommands(self):
+        return self.data["subcommands"]
 
     def add_option(self, option):
         self.data["options"][f"{option.program} {option.option}"] = option
@@ -135,21 +164,35 @@ class CliDomain(Domain):
             if item.document != docname
         }
 
+        self.data["subcommands"] = {
+            key: item
+            for key, item in self.data["subcommands"].items()
+            if item.document != docname
+        }
+
     def merge_domaindata(self, docnames, otherdata):
         for key, option in otherdata["options"].items():
             if option.document in docnames:
                 self.data["options"][key] = option
 
-    def resolve_xref(self, env, fromdocname, builder, type, target, node, contnode):
-        if type != "option":
-            raise RuntimeError(f"unsupported xref type {type}")
+        for key, subcommand in otherdata["subcommands"].items():
+            if subcommand.document in docnames:
+                self.data["subcommands"][key] = subcommand
 
-        if target not in self.data["options"]:
+    def resolve_xref(self, env, fromdocname, builder, type, target, node, contnode):
+        if target not in self.data["options"] or target not in self.data["subcommands"]:
             return
-        option = self.data["options"][target]
+
+        match type:
+            case "options":
+                item = self.data["options"][target]
+            case "subcommands":
+                item = self.data["subcommands"][target]
+            case _:
+                raise RuntimeError(f"unsupported xref type {type}")
 
         return sphinx.util.nodes.make_refnode(
-            builder, fromdocname, option.document, option.id(), contnode
+            builder, fromdocname, item.document, item.id(), contnode
         )
 
     def get_objects(self):
@@ -171,9 +214,3 @@ def warn(message, location):
 
 def setup(app):
     app.add_domain(CliDomain)
-
-
-@dataclass
-class ProgramStorage:
-    program_name: str
-    no_traceability_matrix: bool

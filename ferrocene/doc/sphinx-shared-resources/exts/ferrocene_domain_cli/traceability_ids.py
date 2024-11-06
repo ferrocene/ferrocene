@@ -12,9 +12,6 @@ def write_traceability_ids(app):
 
     options_by_document = defaultdict(list)
     for option in env.get_domain("cli").get_options().values():
-        if option.no_traceability_matrix:
-            continue
-
         options_by_document[option.document].append(
             {
                 "id": option.id(),
@@ -28,9 +25,25 @@ def write_traceability_ids(app):
     if not options_by_document:
         return
 
+    subcommands_by_document = defaultdict(list)
+    for subcommand in env.get_domain("cli").get_subcommands().values():
+        subcommands_by_document[subcommand.document].append(
+            {
+                "id": subcommand.id(),
+                "program": subcommand.program,
+                "subcommand": subcommand.subcommand,
+                "link": app.builder.get_target_uri(subcommand.document) + "#" + subcommand.id(),
+            }
+        )
+
+        if not subcommands_by_document:
+            return
+
     documents = []
     for docname, title in env.titles.items():
         if docname not in options_by_document:
+            continue
+        if docname not in subcommands_by_document:
             continue
 
         documents.append(
@@ -38,6 +51,7 @@ def write_traceability_ids(app):
                 "title": title.astext(),
                 "link": app.builder.get_target_uri(docname),
                 "options": options_by_document[docname],
+                "subcommands": subcommands_by_document[docname],
                 "informational": False,
             }
         )

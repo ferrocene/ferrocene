@@ -1,5 +1,6 @@
 //@ check-pass
 //@ compile-flags: --print file-names
+//@ normalize-stdout-test: ".exe" -> ""
 
 fn main() {}
 

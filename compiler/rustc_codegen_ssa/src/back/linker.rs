@@ -1,9 +1,8 @@
 use std::ffi::{OsStr, OsString};
 use std::fs::{self, File};
 use std::io::prelude::*;
-use std::io::{self, BufWriter};
 use std::path::{Path, PathBuf};
-use std::{env, iter, mem, str};
+use std::{env, io, iter, mem, str};
 
 use cc::windows_registry;
 use rustc_hir::def_id::{CrateNum, LOCAL_CRATE};
@@ -15,8 +14,8 @@ use rustc_middle::middle::dependency_format::Linkage;
 use rustc_middle::middle::exported_symbols;
 use rustc_middle::middle::exported_symbols::{ExportedSymbol, SymbolExportInfo, SymbolExportKind};
 use rustc_middle::ty::TyCtxt;
-use rustc_session::config::{self, CrateType, DebugInfo, LinkerPluginLto, Lto, OptLevel, Strip};
 use rustc_session::Session;
+use rustc_session::config::{self, CrateType, DebugInfo, LinkerPluginLto, Lto, OptLevel, Strip};
 use rustc_span::symbol::sym;
 use rustc_target::spec::{Cc, LinkOutputKind, LinkerFlavor, Lld};
 use tracing::{debug, warn};
@@ -276,7 +275,12 @@ pub(crate) trait Linker {
     fn is_cc(&self) -> bool {
         false
     }
-    fn set_output_kind(&mut self, output_kind: LinkOutputKind, out_filename: &Path);
+    fn set_output_kind(
+        &mut self,
+        output_kind: LinkOutputKind,
+        crate_type: CrateType,
+        out_filename: &Path,
+    );
     fn link_dylib_by_name(&mut self, _name: &str, _verbatim: bool, _as_needed: bool) {
         bug!("dylib linked with unsupported linker")
     }
@@ -397,14 +401,16 @@ impl<'a> GccLinker<'a> {
         ]);
     }
 
-    fn build_dylib(&mut self, out_filename: &Path) {
+    fn build_dylib(&mut self, crate_type: CrateType, out_filename: &Path) {
         // On mac we need to tell the linker to let this library be rpathed
         if self.sess.target.is_like_osx {
-            if !self.is_ld {
+            if self.is_cc() {
+                // `-dynamiclib` makes `cc` pass `-dylib` to the linker.
                 self.cc_arg("-dynamiclib");
+            } else {
+                self.link_arg("-dylib");
+                // Clang also sets `-dynamic`, but that's implied by `-dylib`, so unnecessary.
             }
-
-            self.link_arg("-dylib");
 
             // Note that the `osx_rpath_install_name` option here is a hack
             // purely to support bootstrap right now, we should get a more
@@ -428,7 +434,7 @@ impl<'a> GccLinker<'a> {
                     let mut out_implib = OsString::from("--out-implib=");
                     out_implib.push(out_filename.with_file_name(implib_name));
                     self.link_arg(out_implib);
-                } else {
+                } else if crate_type == CrateType::Dylib {
                     // When dylibs are linked by a full path this value will get into `DT_NEEDED`
                     // instead of the full path, so the library can be later found in some other
                     // location than that specific path.
@@ -475,7 +481,12 @@ impl<'a> Linker for GccLinker<'a> {
         !self.is_ld
     }
 
-    fn set_output_kind(&mut self, output_kind: LinkOutputKind, out_filename: &Path) {
+    fn set_output_kind(
+        &mut self,
+        output_kind: LinkOutputKind,
+        crate_type: CrateType,
+        out_filename: &Path,
+    ) {
         match output_kind {
             LinkOutputKind::DynamicNoPicExe => {
                 if !self.is_ld && self.is_gnu {
@@ -510,10 +521,10 @@ impl<'a> Linker for GccLinker<'a> {
                     self.link_args(&["-static", "-pie", "--no-dynamic-linker", "-z", "text"]);
                 }
             }
-            LinkOutputKind::DynamicDylib => self.build_dylib(out_filename),
+            LinkOutputKind::DynamicDylib => self.build_dylib(crate_type, out_filename),
             LinkOutputKind::StaticDylib => {
                 self.link_or_cc_arg("-static");
-                self.build_dylib(out_filename);
+                self.build_dylib(crate_type, out_filename);
             }
             LinkOutputKind::WasiReactorExe => {
                 self.link_args(&["--entry", "_initialize"]);
@@ -754,7 +765,7 @@ impl<'a> Linker for GccLinker<'a> {
         if self.sess.target.is_like_osx {
             // Write a plain, newline-separated list of symbols
             let res: io::Result<()> = try {
-                let mut f = BufWriter::new(File::create(&path)?);
+                let mut f = File::create_buffered(&path)?;
                 for sym in symbols {
                     debug!("  _{sym}");
                     writeln!(f, "_{sym}")?;
@@ -765,7 +776,7 @@ impl<'a> Linker for GccLinker<'a> {
             }
         } else if is_windows {
             let res: io::Result<()> = try {
-                let mut f = BufWriter::new(File::create(&path)?);
+                let mut f = File::create_buffered(&path)?;
 
                 // .def file similar to MSVC one but without LIBRARY section
                 // because LD doesn't like when it's empty
@@ -781,7 +792,7 @@ impl<'a> Linker for GccLinker<'a> {
         } else {
             // Write an LD version script
             let res: io::Result<()> = try {
-                let mut f = BufWriter::new(File::create(&path)?);
+                let mut f = File::create_buffered(&path)?;
                 writeln!(f, "{{")?;
                 if !symbols.is_empty() {
                     writeln!(f, "  global:")?;
@@ -867,7 +878,12 @@ impl<'a> Linker for MsvcLinker<'a> {
         &mut self.cmd
     }
 
-    fn set_output_kind(&mut self, output_kind: LinkOutputKind, out_filename: &Path) {
+    fn set_output_kind(
+        &mut self,
+        output_kind: LinkOutputKind,
+        _crate_type: CrateType,
+        out_filename: &Path,
+    ) {
         match output_kind {
             LinkOutputKind::DynamicNoPicExe
             | LinkOutputKind::DynamicPicExe
@@ -1059,7 +1075,7 @@ impl<'a> Linker for MsvcLinker<'a> {
 
         let path = tmpdir.join("lib.def");
         let res: io::Result<()> = try {
-            let mut f = BufWriter::new(File::create(&path)?);
+            let mut f = File::create_buffered(&path)?;
 
             // Start off with the standard module name header and then go
             // straight to exports.
@@ -1125,7 +1141,13 @@ impl<'a> Linker for EmLinker<'a> {
         true
     }
 
-    fn set_output_kind(&mut self, _output_kind: LinkOutputKind, _out_filename: &Path) {}
+    fn set_output_kind(
+        &mut self,
+        _output_kind: LinkOutputKind,
+        _crate_type: CrateType,
+        _out_filename: &Path,
+    ) {
+    }
 
     fn link_dylib_by_name(&mut self, name: &str, _verbatim: bool, _as_needed: bool) {
         // Emscripten always links statically
@@ -1274,7 +1296,12 @@ impl<'a> Linker for WasmLd<'a> {
         &mut self.cmd
     }
 
-    fn set_output_kind(&mut self, output_kind: LinkOutputKind, _out_filename: &Path) {
+    fn set_output_kind(
+        &mut self,
+        output_kind: LinkOutputKind,
+        _crate_type: CrateType,
+        _out_filename: &Path,
+    ) {
         match output_kind {
             LinkOutputKind::DynamicNoPicExe
             | LinkOutputKind::DynamicPicExe
@@ -1423,7 +1450,13 @@ impl<'a> Linker for L4Bender<'a> {
         &mut self.cmd
     }
 
-    fn set_output_kind(&mut self, _output_kind: LinkOutputKind, _out_filename: &Path) {}
+    fn set_output_kind(
+        &mut self,
+        _output_kind: LinkOutputKind,
+        _crate_type: CrateType,
+        _out_filename: &Path,
+    ) {
+    }
 
     fn link_staticlib_by_name(&mut self, name: &str, _verbatim: bool, whole_archive: bool) {
         self.hint_static();
@@ -1569,7 +1602,12 @@ impl<'a> Linker for AixLinker<'a> {
         &mut self.cmd
     }
 
-    fn set_output_kind(&mut self, output_kind: LinkOutputKind, out_filename: &Path) {
+    fn set_output_kind(
+        &mut self,
+        output_kind: LinkOutputKind,
+        _crate_type: CrateType,
+        out_filename: &Path,
+    ) {
         match output_kind {
             LinkOutputKind::DynamicDylib => {
                 self.hint_dynamic();
@@ -1648,7 +1686,7 @@ impl<'a> Linker for AixLinker<'a> {
     fn export_symbols(&mut self, tmpdir: &Path, _crate_type: CrateType, symbols: &[String]) {
         let path = tmpdir.join("list.exp");
         let res: io::Result<()> = try {
-            let mut f = BufWriter::new(File::create(&path)?);
+            let mut f = File::create_buffered(&path)?;
             // FIXME: use llvm-nm to generate export list.
             for symbol in symbols {
                 debug!("  _{symbol}");
@@ -1776,7 +1814,13 @@ impl<'a> Linker for PtxLinker<'a> {
         &mut self.cmd
     }
 
-    fn set_output_kind(&mut self, _output_kind: LinkOutputKind, _out_filename: &Path) {}
+    fn set_output_kind(
+        &mut self,
+        _output_kind: LinkOutputKind,
+        _crate_type: CrateType,
+        _out_filename: &Path,
+    ) {
+    }
 
     fn link_staticlib_by_name(&mut self, _name: &str, _verbatim: bool, _whole_archive: bool) {
         panic!("staticlibs not supported")
@@ -1842,7 +1886,13 @@ impl<'a> Linker for LlbcLinker<'a> {
         &mut self.cmd
     }
 
-    fn set_output_kind(&mut self, _output_kind: LinkOutputKind, _out_filename: &Path) {}
+    fn set_output_kind(
+        &mut self,
+        _output_kind: LinkOutputKind,
+        _crate_type: CrateType,
+        _out_filename: &Path,
+    ) {
+    }
 
     fn link_staticlib_by_name(&mut self, _name: &str, _verbatim: bool, _whole_archive: bool) {
         panic!("staticlibs not supported")
@@ -1913,7 +1963,13 @@ impl<'a> Linker for BpfLinker<'a> {
         &mut self.cmd
     }
 
-    fn set_output_kind(&mut self, _output_kind: LinkOutputKind, _out_filename: &Path) {}
+    fn set_output_kind(
+        &mut self,
+        _output_kind: LinkOutputKind,
+        _crate_type: CrateType,
+        _out_filename: &Path,
+    ) {
+    }
 
     fn link_staticlib_by_name(&mut self, _name: &str, _verbatim: bool, _whole_archive: bool) {
         panic!("staticlibs not supported")
@@ -1961,7 +2017,7 @@ impl<'a> Linker for BpfLinker<'a> {
     fn export_symbols(&mut self, tmpdir: &Path, _crate_type: CrateType, symbols: &[String]) {
         let path = tmpdir.join("symbols");
         let res: io::Result<()> = try {
-            let mut f = BufWriter::new(File::create(&path)?);
+            let mut f = File::create_buffered(&path)?;
             for sym in symbols {
                 writeln!(f, "{sym}")?;
             }

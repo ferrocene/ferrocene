@@ -2,9 +2,10 @@
 
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_hir::LangItem;
-use rustc_index::bit_set::BitSet;
 use rustc_index::IndexVec;
-use rustc_infer::traits::Reveal;
+use rustc_index::bit_set::BitSet;
+use rustc_infer::infer::TyCtxtInferExt;
+use rustc_infer::traits::{Obligation, ObligationCause, Reveal};
 use rustc_middle::mir::coverage::CoverageKind;
 use rustc_middle::mir::visit::{NonUseContext, PlaceContext, Visitor};
 use rustc_middle::mir::*;
@@ -14,8 +15,10 @@ use rustc_middle::ty::{
     Variance,
 };
 use rustc_middle::{bug, span_bug};
-use rustc_target::abi::{Size, FIRST_VARIANT};
+use rustc_target::abi::{FIRST_VARIANT, Size};
 use rustc_target::spec::abi::Abi;
+use rustc_trait_selection::traits::ObligationCtxt;
+use rustc_type_ir::Upcast;
 
 use crate::util::{is_within_packed, relate_types};
 
@@ -586,6 +589,22 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
 
         crate::util::relate_types(self.tcx, self.param_env, variance, src, dest)
     }
+
+    /// Check that the given predicate definitely holds in the param-env of this MIR body.
+    fn predicate_must_hold_modulo_regions(
+        &self,
+        pred: impl Upcast<TyCtxt<'tcx>, ty::Predicate<'tcx>>,
+    ) -> bool {
+        let infcx = self.tcx.infer_ctxt().build();
+        let ocx = ObligationCtxt::new(&infcx);
+        ocx.register_obligation(Obligation::new(
+            self.tcx,
+            ObligationCause::dummy(),
+            self.param_env,
+            pred,
+        ));
+        ocx.select_all_or_error().is_empty()
+    }
 }
 
 impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
@@ -1128,12 +1147,9 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
             Rvalue::Cast(kind, operand, target_type) => {
                 let op_ty = operand.ty(self.body, self.tcx);
                 match kind {
-                    CastKind::DynStar => {
-                        // FIXME(dyn-star): make sure nothing needs to be done here.
-                    }
                     // FIXME: Add Checks for these
                     CastKind::PointerWithExposedProvenance | CastKind::PointerExposeProvenance => {}
-                    CastKind::PointerCoercion(PointerCoercion::ReifyFnPointer) => {
+                    CastKind::PointerCoercion(PointerCoercion::ReifyFnPointer, _) => {
                         // FIXME: check signature compatibility.
                         check_kinds!(
                             op_ty,
@@ -1146,7 +1162,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                             ty::FnPtr(..)
                         );
                     }
-                    CastKind::PointerCoercion(PointerCoercion::UnsafeFnPointer) => {
+                    CastKind::PointerCoercion(PointerCoercion::UnsafeFnPointer, _) => {
                         // FIXME: check safety and signature compatibility.
                         check_kinds!(
                             op_ty,
@@ -1159,7 +1175,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                             ty::FnPtr(..)
                         );
                     }
-                    CastKind::PointerCoercion(PointerCoercion::ClosureFnPointer(..)) => {
+                    CastKind::PointerCoercion(PointerCoercion::ClosureFnPointer(..), _) => {
                         // FIXME: check safety, captures, and signature compatibility.
                         check_kinds!(
                             op_ty,
@@ -1172,7 +1188,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                             ty::FnPtr(..)
                         );
                     }
-                    CastKind::PointerCoercion(PointerCoercion::MutToConstPointer) => {
+                    CastKind::PointerCoercion(PointerCoercion::MutToConstPointer, _) => {
                         // FIXME: check same pointee?
                         check_kinds!(
                             op_ty,
@@ -1188,7 +1204,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                             self.fail(location, format!("After borrowck, MIR disallows {kind:?}"));
                         }
                     }
-                    CastKind::PointerCoercion(PointerCoercion::ArrayToPointer) => {
+                    CastKind::PointerCoercion(PointerCoercion::ArrayToPointer, _) => {
                         // FIXME: Check pointee types
                         check_kinds!(
                             op_ty,
@@ -1204,9 +1220,22 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                             self.fail(location, format!("After borrowck, MIR disallows {kind:?}"));
                         }
                     }
-                    CastKind::PointerCoercion(PointerCoercion::Unsize) => {
-                        // This is used for all `CoerceUnsized` types,
-                        // not just pointers/references, so is hard to check.
+                    CastKind::PointerCoercion(PointerCoercion::Unsize, _) => {
+                        // Pointers being unsize coerced should at least implement
+                        // `CoerceUnsized`.
+                        if !self.predicate_must_hold_modulo_regions(ty::TraitRef::new(
+                            self.tcx,
+                            self.tcx.require_lang_item(
+                                LangItem::CoerceUnsized,
+                                Some(self.body.source_info(location).span),
+                            ),
+                            [op_ty, *target_type],
+                        )) {
+                            self.fail(location, format!("Unsize coercion, but `{op_ty}` isn't coercible to `{target_type}`"));
+                        }
+                    }
+                    CastKind::PointerCoercion(PointerCoercion::DynStar, _) => {
+                        // FIXME(dyn-star): make sure nothing needs to be done here.
                     }
                     CastKind::IntToInt | CastKind::IntToFloat => {
                         let input_valid = op_ty.is_integral() || op_ty.is_char() || op_ty.is_bool();

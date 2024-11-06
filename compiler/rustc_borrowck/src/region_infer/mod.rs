@@ -23,6 +23,7 @@ use rustc_mir_dataflow::points::DenseLocationMap;
 use rustc_span::Span;
 use tracing::{debug, instrument, trace};
 
+use crate::BorrowckInferCtxt;
 use crate::constraints::graph::{self, NormalConstraintGraph, RegionGraph};
 use crate::constraints::{ConstraintSccIndex, OutlivesConstraint, OutlivesConstraintSet};
 use crate::dataflow::BorrowIndex;
@@ -33,10 +34,9 @@ use crate::region_infer::reverse_sccs::ReverseSccGraph;
 use crate::region_infer::values::{
     LivenessValues, PlaceholderIndices, RegionElement, RegionValues, ToElementIndex,
 };
-use crate::type_check::free_region_relations::UniversalRegionRelations;
 use crate::type_check::Locations;
+use crate::type_check::free_region_relations::UniversalRegionRelations;
 use crate::universal_regions::UniversalRegions;
-use crate::BorrowckInferCtxt;
 
 mod dump_mir;
 mod graphviz;
@@ -407,7 +407,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         universe_causes: FxIndexMap<ty::UniverseIndex, UniverseInfo<'tcx>>,
         type_tests: Vec<TypeTest<'tcx>>,
         liveness_constraints: LivenessValues,
-        elements: &Rc<DenseLocationMap>,
+        elements: Rc<DenseLocationMap>,
     ) -> Self {
         debug!("universal_regions: {:#?}", universal_regions);
         debug!("outlives constraints: {:#?}", outlives_constraints);
@@ -430,7 +430,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         }
 
         let mut scc_values =
-            RegionValues::new(elements, universal_regions.len(), &placeholder_indices);
+            RegionValues::new(elements, universal_regions.len(), placeholder_indices);
 
         for region in liveness_constraints.regions() {
             let scc = constraint_sccs.scc(region);
@@ -637,7 +637,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         &mut self,
         infcx: &InferCtxt<'tcx>,
         body: &Body<'tcx>,
-        polonius_output: Option<Rc<PoloniusOutput>>,
+        polonius_output: Option<Box<PoloniusOutput>>,
     ) -> (Option<ClosureRegionRequirements<'tcx>>, RegionErrors<'tcx>) {
         let mir_def_id = body.source.def_id();
         self.propagate_constraints();
@@ -663,7 +663,9 @@ impl<'tcx> RegionInferenceContext<'tcx> {
             self.check_polonius_subset_errors(
                 outlives_requirements.as_mut(),
                 &mut errors_buffer,
-                polonius_output.expect("Polonius output is unavailable despite `-Z polonius`"),
+                polonius_output
+                    .as_ref()
+                    .expect("Polonius output is unavailable despite `-Z polonius`"),
             );
         } else {
             self.check_universal_regions(outlives_requirements.as_mut(), &mut errors_buffer);
@@ -1411,7 +1413,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         &self,
         mut propagated_outlives_requirements: Option<&mut Vec<ClosureOutlivesRequirement<'tcx>>>,
         errors_buffer: &mut RegionErrors<'tcx>,
-        polonius_output: Rc<PoloniusOutput>,
+        polonius_output: &PoloniusOutput,
     ) {
         debug!(
             "check_polonius_subset_errors: {} subset_errors",

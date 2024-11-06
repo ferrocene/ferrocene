@@ -1,17 +1,18 @@
 //! Codegen of a single function
 
-use cranelift_codegen::ir::UserFuncName;
 use cranelift_codegen::CodegenError;
+use cranelift_codegen::ir::UserFuncName;
 use cranelift_frontend::{FunctionBuilder, FunctionBuilderContext};
 use cranelift_module::ModuleError;
 use rustc_ast::InlineAsmOptions;
 use rustc_codegen_ssa::base::is_call_from_compiler_builtins_to_upstream_monomorphization;
 use rustc_index::IndexVec;
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
+use rustc_middle::mir::InlineAsmMacro;
+use rustc_middle::ty::TypeVisitableExt;
 use rustc_middle::ty::adjustment::PointerCoercion;
 use rustc_middle::ty::layout::FnAbiOf;
 use rustc_middle::ty::print::with_no_trimmed_paths;
-use rustc_middle::ty::TypeVisitableExt;
 
 use crate::constant::ConstantCx;
 use crate::debuginfo::{FunctionDebugContext, TypeDebugContext};
@@ -57,6 +58,7 @@ pub(crate) fn codegen_fn<'tcx>(
 
         match &mir.basic_blocks[START_BLOCK].terminator().kind {
             TerminatorKind::InlineAsm {
+                asm_macro: InlineAsmMacro::NakedAsm,
                 template,
                 operands,
                 options,
@@ -498,6 +500,7 @@ fn codegen_fn_body(fx: &mut FunctionCx<'_, '_, '_>, start_block: Block) {
                 "tail calls are not yet supported in `rustc_codegen_cranelift` backend"
             ),
             TerminatorKind::InlineAsm {
+                asm_macro: _,
                 template,
                 operands,
                 options,
@@ -652,7 +655,7 @@ fn codegen_stmt<'tcx>(
                     lval.write_cvalue(fx, res);
                 }
                 Rvalue::Cast(
-                    CastKind::PointerCoercion(PointerCoercion::ReifyFnPointer),
+                    CastKind::PointerCoercion(PointerCoercion::ReifyFnPointer, _),
                     ref operand,
                     to_ty,
                 ) => {
@@ -677,7 +680,7 @@ fn codegen_stmt<'tcx>(
                     }
                 }
                 Rvalue::Cast(
-                    CastKind::PointerCoercion(PointerCoercion::UnsafeFnPointer),
+                    CastKind::PointerCoercion(PointerCoercion::UnsafeFnPointer, _),
                     ref operand,
                     to_ty,
                 ) => {
@@ -688,6 +691,7 @@ fn codegen_stmt<'tcx>(
                 Rvalue::Cast(
                     CastKind::PointerCoercion(
                         PointerCoercion::MutToConstPointer | PointerCoercion::ArrayToPointer,
+                        _,
                     ),
                     ..,
                 ) => {
@@ -712,17 +716,17 @@ fn codegen_stmt<'tcx>(
                     let from_ty = operand.layout().ty;
                     let to_ty = fx.monomorphize(to_ty);
 
-                    fn is_fat_ptr<'tcx>(fx: &FunctionCx<'_, '_, 'tcx>, ty: Ty<'tcx>) -> bool {
+                    fn is_wide_ptr<'tcx>(fx: &FunctionCx<'_, '_, 'tcx>, ty: Ty<'tcx>) -> bool {
                         ty.builtin_deref(true)
                             .is_some_and(|pointee_ty| has_ptr_meta(fx.tcx, pointee_ty))
                     }
 
-                    if is_fat_ptr(fx, from_ty) {
-                        if is_fat_ptr(fx, to_ty) {
-                            // fat-ptr -> fat-ptr
+                    if is_wide_ptr(fx, from_ty) {
+                        if is_wide_ptr(fx, to_ty) {
+                            // wide-ptr -> wide-ptr
                             lval.write_cvalue(fx, operand.cast_pointer_to(dest_layout));
                         } else {
-                            // fat-ptr -> thin-ptr
+                            // wide-ptr -> thin-ptr
                             let (ptr, _extra) = operand.load_scalar_pair(fx);
                             lval.write_cvalue(fx, CValue::by_val(ptr, dest_layout))
                         }
@@ -741,7 +745,7 @@ fn codegen_stmt<'tcx>(
                     }
                 }
                 Rvalue::Cast(
-                    CastKind::PointerCoercion(PointerCoercion::ClosureFnPointer(_)),
+                    CastKind::PointerCoercion(PointerCoercion::ClosureFnPointer(_), _),
                     ref operand,
                     _to_ty,
                 ) => {
@@ -763,14 +767,18 @@ fn codegen_stmt<'tcx>(
                     }
                 }
                 Rvalue::Cast(
-                    CastKind::PointerCoercion(PointerCoercion::Unsize),
+                    CastKind::PointerCoercion(PointerCoercion::Unsize, _),
                     ref operand,
                     _to_ty,
                 ) => {
                     let operand = codegen_operand(fx, operand);
                     crate::unsize::coerce_unsized_into(fx, operand, lval);
                 }
-                Rvalue::Cast(CastKind::DynStar, ref operand, _) => {
+                Rvalue::Cast(
+                    CastKind::PointerCoercion(PointerCoercion::DynStar, _),
+                    ref operand,
+                    _,
+                ) => {
                     let operand = codegen_operand(fx, operand);
                     crate::unsize::coerce_dyn_star(fx, operand, lval);
                 }
@@ -785,8 +793,10 @@ fn codegen_stmt<'tcx>(
                 }
                 Rvalue::Repeat(ref operand, times) => {
                     let operand = codegen_operand(fx, operand);
-                    let times =
-                        fx.monomorphize(times).eval_target_usize(fx.tcx, ParamEnv::reveal_all());
+                    let times = fx
+                        .monomorphize(times)
+                        .try_to_target_usize(fx.tcx)
+                        .expect("expected monomorphic const in codegen");
                     if operand.layout().size.bytes() == 0 {
                         // Do nothing for ZST's
                     } else if fx.clif_type(operand.layout().ty) == Some(types::I8) {
@@ -944,7 +954,10 @@ fn codegen_stmt<'tcx>(
 fn codegen_array_len<'tcx>(fx: &mut FunctionCx<'_, '_, 'tcx>, place: CPlace<'tcx>) -> Value {
     match *place.layout().ty.kind() {
         ty::Array(_elem_ty, len) => {
-            let len = fx.monomorphize(len).eval_target_usize(fx.tcx, ParamEnv::reveal_all()) as i64;
+            let len = fx
+                .monomorphize(len)
+                .try_to_target_usize(fx.tcx)
+                .expect("expected monomorphic const in codegen") as i64;
             fx.bcx.ins().iconst(fx.pointer_type, len)
         }
         ty::Slice(_elem_ty) => place.to_ptr_unsized().1,

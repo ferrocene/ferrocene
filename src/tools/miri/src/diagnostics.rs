@@ -2,7 +2,7 @@ use std::fmt::{self, Write};
 use std::num::NonZero;
 
 use rustc_errors::{Diag, DiagMessage, Level};
-use rustc_span::{SpanData, Symbol, DUMMY_SP};
+use rustc_span::{DUMMY_SP, SpanData, Symbol};
 use rustc_target::abi::{Align, Size};
 
 use crate::borrow_tracker::stacked_borrows::diagnostics::TagHistory;
@@ -223,7 +223,7 @@ pub fn report_error<'tcx>(
         let info = info.downcast_ref::<TerminationInfo>().expect("invalid MachineStop payload");
         use TerminationInfo::*;
         let title = match info {
-            Exit { code, leak_check } => return Some((*code, *leak_check)),
+            &Exit { code, leak_check } => return Some((code, leak_check)),
             Abort(_) => Some("abnormal termination"),
             UnsupportedInIsolation(_) | Int2PtrWithStrictProvenance | UnsupportedForeignItem(_) =>
                 Some("unsupported operation"),

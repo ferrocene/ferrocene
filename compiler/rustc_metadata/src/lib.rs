@@ -1,13 +1,12 @@
 // tidy-alphabetical-start
 #![allow(internal_features)]
-#![allow(rustc::potential_query_instability)]
 #![doc(html_root_url = "https://doc.rust-lang.org/nightly/nightly-rustc/")]
 #![doc(rust_logo)]
-#![feature(control_flow_enum)]
 #![feature(coroutines)]
 #![feature(decl_macro)]
 #![feature(error_iter)]
 #![feature(extract_if)]
+#![feature(file_buffered)]
 #![feature(if_let_guard)]
 #![feature(iter_from_coroutine)]
 #![feature(let_chains)]
@@ -34,12 +33,12 @@ pub mod errors;
 pub mod fs;
 pub mod locator;
 
-pub use creader::{load_symbol_from_dylib, DylibError};
-pub use fs::{emit_wrapper_file, METADATA_FILENAME};
+pub use creader::{DylibError, load_symbol_from_dylib};
+pub use fs::{METADATA_FILENAME, emit_wrapper_file};
 pub use native_libs::{
     find_native_static_library, try_find_native_dynamic_library, try_find_native_static_library,
     walk_native_lib_search_dirs,
 };
-pub use rmeta::{encode_metadata, rendered_const, EncodedMetadata, METADATA_HEADER};
+pub use rmeta::{EncodedMetadata, METADATA_HEADER, encode_metadata, rendered_const};
 
 rustc_fluent_macro::fluent_messages! { "../messages.ftl" }

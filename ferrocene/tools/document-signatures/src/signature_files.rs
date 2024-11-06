@@ -11,7 +11,7 @@ use std::io::{BufWriter, Seek, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-use anyhow::{bail, Context, Error};
+use anyhow::{Context, Error, bail};
 use tempfile::NamedTempFile;
 use uuid::Uuid;
 

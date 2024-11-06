@@ -1,14 +1,14 @@
 use libc::c_uint;
 use rustc_ast::expand::allocator::{
-    alloc_error_handler_name, default_fn_name, global_fn_name, AllocatorKind, AllocatorTy,
-    ALLOCATOR_METHODS, NO_ALLOC_SHIM_IS_UNSTABLE,
+    ALLOCATOR_METHODS, AllocatorKind, AllocatorTy, NO_ALLOC_SHIM_IS_UNSTABLE,
+    alloc_error_handler_name, default_fn_name, global_fn_name,
 };
 use rustc_middle::bug;
 use rustc_middle::ty::TyCtxt;
 use rustc_session::config::{DebugInfo, OomStrategy};
 
 use crate::llvm::{self, Context, False, Module, True, Type};
-use crate::{attributes, debuginfo, ModuleLlvm};
+use crate::{ModuleLlvm, attributes, debuginfo};
 
 pub(crate) unsafe fn codegen(
     tcx: TyCtxt<'_>,
@@ -77,18 +77,20 @@ pub(crate) unsafe fn codegen(
         // __rust_alloc_error_handler_should_panic
         let name = OomStrategy::SYMBOL;
         let ll_g = llvm::LLVMRustGetOrInsertGlobal(llmod, name.as_ptr().cast(), name.len(), i8);
-        if tcx.sess.default_hidden_visibility() {
-            llvm::LLVMRustSetVisibility(ll_g, llvm::Visibility::Hidden);
-        }
+        llvm::LLVMRustSetVisibility(
+            ll_g,
+            llvm::Visibility::from_generic(tcx.sess.default_visibility()),
+        );
         let val = tcx.sess.opts.unstable_opts.oom.should_panic();
         let llval = llvm::LLVMConstInt(i8, val as u64, False);
         llvm::LLVMSetInitializer(ll_g, llval);
 
         let name = NO_ALLOC_SHIM_IS_UNSTABLE;
         let ll_g = llvm::LLVMRustGetOrInsertGlobal(llmod, name.as_ptr().cast(), name.len(), i8);
-        if tcx.sess.default_hidden_visibility() {
-            llvm::LLVMRustSetVisibility(ll_g, llvm::Visibility::Hidden);
-        }
+        llvm::LLVMRustSetVisibility(
+            ll_g,
+            llvm::Visibility::from_generic(tcx.sess.default_visibility()),
+        );
         let llval = llvm::LLVMConstInt(i8, 0, False);
         llvm::LLVMSetInitializer(ll_g, llval);
     }
@@ -132,9 +134,11 @@ fn create_wrapper_function(
             None
         };
 
-        if tcx.sess.default_hidden_visibility() {
-            llvm::LLVMRustSetVisibility(llfn, llvm::Visibility::Hidden);
-        }
+        llvm::LLVMRustSetVisibility(
+            llfn,
+            llvm::Visibility::from_generic(tcx.sess.default_visibility()),
+        );
+
         if tcx.sess.must_emit_unwind_tables() {
             let uwtable =
                 attributes::uwtable_attr(llcx, tcx.sess.opts.unstable_opts.use_sync_unwind);

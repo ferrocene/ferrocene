@@ -3,6 +3,7 @@
 #![feature(box_patterns)]
 #![feature(const_type_name)]
 #![feature(cow_is_borrowed)]
+#![feature(file_buffered)]
 #![feature(if_let_guard)]
 #![feature(impl_trait_in_assoc_type)]
 #![feature(let_chains)]
@@ -26,14 +27,14 @@ use rustc_hir::def_id::LocalDefId;
 use rustc_index::IndexVec;
 use rustc_middle::mir::{
     AnalysisPhase, Body, CallSource, ClearCrossCrate, ConstOperand, ConstQualifs, LocalDecl,
-    MirPhase, Operand, Place, ProjectionElem, Promoted, RuntimePhase, Rvalue, SourceInfo,
-    Statement, StatementKind, TerminatorKind, START_BLOCK,
+    MirPhase, Operand, Place, ProjectionElem, Promoted, RuntimePhase, Rvalue, START_BLOCK,
+    SourceInfo, Statement, StatementKind, TerminatorKind,
 };
 use rustc_middle::ty::{self, TyCtxt, TypeVisitableExt};
 use rustc_middle::util::Providers;
 use rustc_middle::{bug, query, span_bug};
 use rustc_span::source_map::Spanned;
-use rustc_span::{sym, DUMMY_SP};
+use rustc_span::{DUMMY_SP, sym};
 use rustc_trait_selection::traits;
 use tracing::{debug, trace};
 
@@ -50,6 +51,7 @@ mod add_subtyping_projections;
 mod check_alignment;
 mod check_const_item_mutation;
 mod check_packed_ref;
+mod check_undefined_transmutes;
 // This pass is public to allow external drivers to perform MIR cleanup
 pub mod cleanup_post_borrowck;
 mod copy_prop;
@@ -297,6 +299,7 @@ fn mir_built(tcx: TyCtxt<'_>, def: LocalDefId) -> &Steal<Body<'_>> {
             &Lint(check_packed_ref::CheckPackedRef),
             &Lint(check_const_item_mutation::CheckConstItemMutation),
             &Lint(function_item_references::FunctionItemReferences),
+            &Lint(check_undefined_transmutes::CheckUndefinedTransmutes),
             // What we need to do constant evaluation.
             &simplify::SimplifyCfg::Initial,
             &Lint(sanity_check::SanityCheck),

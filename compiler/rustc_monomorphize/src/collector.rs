@@ -119,8 +119,8 @@
 //!
 //! #### Unsizing Casts
 //! A subtle way of introducing use edges is by casting to a trait object.
-//! Since the resulting fat-pointer contains a reference to a vtable, we need to
-//! instantiate all object-safe methods of the trait, as we need to store
+//! Since the resulting wide-pointer contains a reference to a vtable, we need to
+//! instantiate all dyn-compatible methods of the trait, as we need to store
 //! pointers to these functions even if they never get called anywhere. This can
 //! be seen as a special case of taking a function reference.
 //!
@@ -210,7 +210,7 @@ mod move_check;
 use std::path::PathBuf;
 
 use move_check::MoveCheckState;
-use rustc_data_structures::sync::{par_for_each_in, LRef, MTLock};
+use rustc_data_structures::sync::{LRef, MTLock, par_for_each_in};
 use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_hir as hir;
 use rustc_hir::def::DefKind;
@@ -220,7 +220,7 @@ use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
 use rustc_middle::mir::interpret::{AllocId, ErrorHandled, GlobalAlloc, Scalar};
 use rustc_middle::mir::mono::{InstantiationMode, MonoItem};
 use rustc_middle::mir::visit::Visitor as MirVisitor;
-use rustc_middle::mir::{self, traversal, Location, MentionedItem};
+use rustc_middle::mir::{self, Location, MentionedItem, traversal};
 use rustc_middle::query::TyCtxtAt;
 use rustc_middle::ty::adjustment::{CustomCoerceUnsized, PointerCoercion};
 use rustc_middle::ty::layout::ValidityRequirement;
@@ -231,11 +231,11 @@ use rustc_middle::ty::{
 };
 use rustc_middle::util::Providers;
 use rustc_middle::{bug, span_bug};
-use rustc_session::config::EntryFnType;
 use rustc_session::Limit;
-use rustc_span::source_map::{dummy_spanned, respan, Spanned};
-use rustc_span::symbol::{sym, Ident};
-use rustc_span::{Span, DUMMY_SP};
+use rustc_session::config::EntryFnType;
+use rustc_span::source_map::{Spanned, dummy_spanned, respan};
+use rustc_span::symbol::{Ident, sym};
+use rustc_span::{DUMMY_SP, Span};
 use rustc_target::abi::Size;
 use tracing::{debug, instrument, trace};
 
@@ -661,15 +661,15 @@ impl<'a, 'tcx> MirVisitor<'tcx> for MirUsedCollector<'a, 'tcx> {
         let span = self.body.source_info(location).span;
 
         match *rvalue {
-            // When doing an cast from a regular pointer to a fat pointer, we
+            // When doing an cast from a regular pointer to a wide pointer, we
             // have to instantiate all methods of the trait being cast to, so we
             // can build the appropriate vtable.
             mir::Rvalue::Cast(
-                mir::CastKind::PointerCoercion(PointerCoercion::Unsize),
+                mir::CastKind::PointerCoercion(PointerCoercion::Unsize, _)
+                | mir::CastKind::PointerCoercion(PointerCoercion::DynStar, _),
                 ref operand,
                 target_ty,
-            )
-            | mir::Rvalue::Cast(mir::CastKind::DynStar, ref operand, target_ty) => {
+            ) => {
                 let source_ty = operand.ty(self.body, self.tcx);
                 // *Before* monomorphizing, record that we already handled this mention.
                 self.used_mentioned_items
@@ -694,7 +694,7 @@ impl<'a, 'tcx> MirVisitor<'tcx> for MirUsedCollector<'a, 'tcx> {
                 }
             }
             mir::Rvalue::Cast(
-                mir::CastKind::PointerCoercion(PointerCoercion::ReifyFnPointer),
+                mir::CastKind::PointerCoercion(PointerCoercion::ReifyFnPointer, _),
                 ref operand,
                 _,
             ) => {
@@ -705,7 +705,7 @@ impl<'a, 'tcx> MirVisitor<'tcx> for MirUsedCollector<'a, 'tcx> {
                 visit_fn_use(self.tcx, fn_ty, false, span, self.used_items);
             }
             mir::Rvalue::Cast(
-                mir::CastKind::PointerCoercion(PointerCoercion::ClosureFnPointer(_)),
+                mir::CastKind::PointerCoercion(PointerCoercion::ClosureFnPointer(_), _),
                 ref operand,
                 _,
             ) => {
@@ -985,7 +985,7 @@ fn should_codegen_locally<'tcx>(tcx: TyCtxtAt<'tcx>, instance: Instance<'tcx>) -
 /// ```
 ///
 /// Then the output of this function would be (SomeStruct, SomeTrait) since for
-/// constructing the `target` fat-pointer we need the vtable for that pair.
+/// constructing the `target` wide-pointer we need the vtable for that pair.
 ///
 /// Things can get more complicated though because there's also the case where
 /// the unsized type occurs as a field:
@@ -999,7 +999,7 @@ fn should_codegen_locally<'tcx>(tcx: TyCtxtAt<'tcx>, instance: Instance<'tcx>) -
 /// ```
 ///
 /// In this case, if `T` is sized, `&ComplexStruct<T>` is a thin pointer. If `T`
-/// is unsized, `&SomeStruct` is a fat pointer, and the vtable it points to is
+/// is unsized, `&SomeStruct` is a wide pointer, and the vtable it points to is
 /// for the pair of `T` (which is a trait) and the concrete type that `T` was
 /// originally coerced from:
 ///
@@ -1175,15 +1175,15 @@ fn collect_alloc<'tcx>(tcx: TyCtxt<'tcx>, alloc_id: AllocId, output: &mut MonoIt
                 output.push(create_fn_mono_item(tcx, instance, DUMMY_SP));
             }
         }
-        GlobalAlloc::VTable(ty, trait_ref) => {
-            let alloc_id = tcx.vtable_allocation((ty, trait_ref));
+        GlobalAlloc::VTable(ty, dyn_ty) => {
+            let alloc_id = tcx.vtable_allocation((ty, dyn_ty.principal()));
             collect_alloc(tcx, alloc_id, output)
         }
     }
 }
 
 fn assoc_fn_of_type<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId, fn_ident: Ident) -> Option<DefId> {
-    for impl_def_id in tcx.inherent_impls(def_id).ok()? {
+    for impl_def_id in tcx.inherent_impls(def_id) {
         if let Some(new) = tcx.associated_items(impl_def_id).find_by_name_and_kind(
             tcx,
             fn_ident,

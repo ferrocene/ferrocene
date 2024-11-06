@@ -9,7 +9,7 @@ use crate::core::build_steps::compile::run_cargo;
 use crate::core::build_steps::tool::SourceType;
 use crate::core::config::TargetSelection;
 use crate::utils::tarball::Tarball;
-use crate::{t, Compiler, Mode};
+use crate::{Compiler, Mode, t};
 
 const OXIDOS_CRATES: &[&str] = &[
     // List of OxidOS crates to prebuild. Their dependencies will be built and included in the

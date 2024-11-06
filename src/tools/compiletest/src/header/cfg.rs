@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use crate::common::{CompareMode, Config, Debugger, Mode};
+use crate::common::{CompareMode, Config, Debugger};
 use crate::header::IgnoreDecision;
 
 const EXTRA_ARCHS: &[&str] = &["spirv"];
@@ -217,13 +217,10 @@ pub(super) fn parse_cfg_name_directive<'a>(
     }
     // Coverage tests run the same test file in multiple modes.
     // If a particular test should not be run in one of the modes, ignore it
-    // with "ignore-mode-coverage-map" or "ignore-mode-coverage-run".
+    // with "ignore-coverage-map" or "ignore-coverage-run".
     condition! {
-        name: format!("mode-{}", config.mode.to_str()),
-        allowed_names: ContainsPrefixed {
-            prefix: "mode-",
-            inner: Mode::STR_VARIANTS,
-        },
+        name: config.mode.to_str(),
+        allowed_names: ["coverage-map", "coverage-run"],
         message: "when the test mode is {name}",
     }
 

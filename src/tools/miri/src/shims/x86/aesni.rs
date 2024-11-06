@@ -1,5 +1,5 @@
-use rustc_middle::ty::layout::LayoutOf as _;
 use rustc_middle::ty::Ty;
+use rustc_middle::ty::layout::LayoutOf as _;
 use rustc_span::Symbol;
 use rustc_target::spec::abi::Abi;
 
@@ -123,9 +123,9 @@ pub(super) trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
             }
             // TODO: Implement the `llvm.x86.aesni.aeskeygenassist` when possible
             // with an external crate.
-            _ => return Ok(EmulateItemResult::NotSupported),
+            _ => return interp_ok(EmulateItemResult::NotSupported),
         }
-        Ok(EmulateItemResult::NeedsReturn)
+        interp_ok(EmulateItemResult::NeedsReturn)
     }
 }
 
@@ -162,5 +162,5 @@ fn aes_round<'tcx>(
         this.write_scalar(Scalar::from_u128(res), &dest)?;
     }
 
-    Ok(())
+    interp_ok(())
 }

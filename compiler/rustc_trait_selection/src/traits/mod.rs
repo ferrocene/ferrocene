@@ -5,11 +5,11 @@
 pub mod auto_trait;
 pub(crate) mod coherence;
 pub mod const_evaluatable;
+mod dyn_compatibility;
 mod engine;
 mod fulfill;
 pub mod misc;
 pub mod normalize;
-mod object_safety;
 pub mod outlives_bounds;
 pub mod project;
 pub mod query;
@@ -35,21 +35,21 @@ use rustc_middle::ty::visit::{TypeVisitable, TypeVisitableExt};
 use rustc_middle::ty::{
     self, GenericArgs, GenericArgsRef, Ty, TyCtxt, TypeFolder, TypeSuperVisitable, Upcast,
 };
-use rustc_span::def_id::DefId;
 use rustc_span::Span;
+use rustc_span::def_id::DefId;
 use tracing::{debug, instrument};
 
 pub use self::coherence::{
-    add_placeholder_note, orphan_check_trait_ref, overlapping_impls, InCrate, IsFirstInputType,
-    OrphanCheckErr, OrphanCheckMode, OverlapResult, UncoveredTyParams,
+    InCrate, IsFirstInputType, OrphanCheckErr, OrphanCheckMode, OverlapResult, UncoveredTyParams,
+    add_placeholder_note, orphan_check_trait_ref, overlapping_impls,
+};
+pub use self::dyn_compatibility::{
+    DynCompatibilityViolation, dyn_compatibility_violations_for_assoc_item,
+    hir_ty_lowering_dyn_compatibility_violations, is_vtable_safe_method,
 };
 pub use self::engine::{ObligationCtxt, TraitEngineExt};
 pub use self::fulfill::{FulfillmentContext, OldSolverError, PendingPredicateObligation};
 pub use self::normalize::NormalizeExt;
-pub use self::object_safety::{
-    hir_ty_lowering_object_safety_violations, is_vtable_safe_method,
-    object_safety_violations_for_assoc_item, ObjectSafetyViolation,
-};
 pub use self::project::{normalize_inherent_projection, normalize_projection_ty};
 pub use self::select::{
     EvaluationCache, EvaluationResult, IntercrateAmbiguityCause, OverflowError, SelectionCache,
@@ -59,13 +59,13 @@ pub use self::specialize::specialization_graph::{
     FutureCompatOverlapError, FutureCompatOverlapErrorKind,
 };
 pub use self::specialize::{
-    specialization_graph, translate_args, translate_args_with_cause, OverlapError,
+    OverlapError, specialization_graph, translate_args, translate_args_with_cause,
 };
 pub use self::structural_normalize::StructurallyNormalizeExt;
 pub use self::util::{
-    elaborate, expand_trait_aliases, impl_item_is_final, supertraits,
+    BoundVarReplacer, PlaceholderReplacer, TraitAliasExpander, TraitAliasExpansionInfo, elaborate,
+    expand_trait_aliases, impl_item_is_final, supertraits,
     transitive_bounds_that_define_assoc_item, upcast_choices, with_replaced_escaping_bound_vars,
-    BoundVarReplacer, PlaceholderReplacer, TraitAliasExpander, TraitAliasExpansionInfo,
 };
 use crate::error_reporting::InferCtxtErrorExt;
 use crate::infer::outlives::env::OutlivesEnvironment;
@@ -593,7 +593,7 @@ fn is_impossible_associated_item(
 }
 
 pub fn provide(providers: &mut Providers) {
-    object_safety::provide(providers);
+    dyn_compatibility::provide(providers);
     vtable::provide(providers);
     *providers = Providers {
         specialization_graph_of: specialize::specialization_graph_provider,

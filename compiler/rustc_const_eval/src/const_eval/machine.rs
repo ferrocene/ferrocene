@@ -6,14 +6,14 @@ use std::ops::ControlFlow;
 use rustc_ast::Mutability;
 use rustc_data_structures::fx::{FxHashMap, FxIndexMap, IndexEntry};
 use rustc_hir::def_id::{DefId, LocalDefId};
-use rustc_hir::{self as hir, LangItem, CRATE_HIR_ID};
+use rustc_hir::{self as hir, CRATE_HIR_ID, LangItem};
 use rustc_middle::mir::AssertMessage;
 use rustc_middle::query::TyCtxtAt;
 use rustc_middle::ty::layout::{FnAbiOf, TyAndLayout};
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_middle::{bug, mir};
-use rustc_span::symbol::{sym, Symbol};
 use rustc_span::Span;
+use rustc_span::symbol::{Symbol, sym};
 use rustc_target::abi::{Align, Size};
 use rustc_target::spec::abi::Abi as CallAbi;
 use tracing::debug;
@@ -22,10 +22,10 @@ use super::error::*;
 use crate::errors::{LongRunning, LongRunningWarn};
 use crate::fluent_generated as fluent;
 use crate::interpret::{
-    self, compile_time_machine, err_ub, throw_exhaust, throw_inval, throw_ub_custom, throw_unsup,
-    throw_unsup_format, AllocId, AllocRange, ConstAllocation, CtfeProvenance, FnArg, Frame,
-    GlobalAlloc, ImmTy, InterpCx, InterpResult, MPlaceTy, OpTy, Pointer, PointerArithmetic,
-    RangeSet, Scalar, StackPopCleanup,
+    self, AllocId, AllocRange, ConstAllocation, CtfeProvenance, FnArg, Frame, GlobalAlloc, ImmTy,
+    InterpCx, InterpResult, MPlaceTy, OpTy, Pointer, PointerArithmetic, RangeSet, Scalar,
+    StackPopCleanup, compile_time_machine, interp_ok, throw_exhaust, throw_inval, throw_ub,
+    throw_ub_custom, throw_unsup, throw_unsup_format,
 };
 
 /// When hitting this many interpreted terminators we emit a deny by default lint
@@ -203,8 +203,8 @@ impl<'tcx> CompileTimeInterpCx<'tcx> {
         let topmost = span.ctxt().outer_expn().expansion_cause().unwrap_or(span);
         let caller = self.tcx.sess.source_map().lookup_char_pos(topmost.lo());
 
-        use rustc_session::config::RemapPathScopeComponents;
         use rustc_session::RemapFileNameExt;
+        use rustc_session::config::RemapPathScopeComponents;
         (
             Symbol::intern(
                 &caller
@@ -247,7 +247,7 @@ impl<'tcx> CompileTimeInterpCx<'tcx> {
             let msg = Symbol::intern(self.read_str(&msg_place)?);
             let span = self.find_closest_untracked_caller_location();
             let (file, line, col) = self.location_triple_for_span(span);
-            return Err(ConstEvalErrKind::Panic { msg, file, line, col }.into());
+            return Err(ConstEvalErrKind::Panic { msg, file, line, col }).into();
         } else if self.tcx.is_lang_item(def_id, LangItem::PanicFmt) {
             // For panic_fmt, call const_panic_fmt instead.
             let const_def_id = self.tcx.require_lang_item(LangItem::ConstPanicFmt, None);
@@ -259,16 +259,16 @@ impl<'tcx> CompileTimeInterpCx<'tcx> {
                 self.cur_span(),
             );
 
-            return Ok(Some(new_instance));
+            return interp_ok(Some(new_instance));
         } else if self.tcx.is_lang_item(def_id, LangItem::AlignOffset) {
             let args = self.copy_fn_args(args);
             // For align_offset, we replace the function call if the pointer has no address.
             match self.align_offset(instance, &args, dest, ret)? {
-                ControlFlow::Continue(()) => return Ok(Some(instance)),
-                ControlFlow::Break(()) => return Ok(None),
+                ControlFlow::Continue(()) => return interp_ok(Some(instance)),
+                ControlFlow::Break(()) => return interp_ok(None),
             }
         }
-        Ok(Some(instance))
+        interp_ok(Some(instance))
     }
 
     /// `align_offset(ptr, target_align)` needs special handling in const eval, because the pointer
@@ -323,25 +323,25 @@ impl<'tcx> CompileTimeInterpCx<'tcx> {
                         dest,
                         StackPopCleanup::Goto { ret, unwind: mir::UnwindAction::Unreachable },
                     )?;
-                    Ok(ControlFlow::Break(()))
+                    interp_ok(ControlFlow::Break(()))
                 } else {
                     // Not alignable in const, return `usize::MAX`.
                     let usize_max = Scalar::from_target_usize(self.target_usize_max(), self);
                     self.write_scalar(usize_max, dest)?;
                     self.return_to_block(ret)?;
-                    Ok(ControlFlow::Break(()))
+                    interp_ok(ControlFlow::Break(()))
                 }
             }
             Err(_addr) => {
                 // The pointer has an address, continue with function call.
-                Ok(ControlFlow::Continue(()))
+                interp_ok(ControlFlow::Continue(()))
             }
         }
     }
 
     /// See documentation on the `ptr_guaranteed_cmp` intrinsic.
     fn guaranteed_cmp(&mut self, a: Scalar, b: Scalar) -> InterpResult<'tcx, u8> {
-        Ok(match (a, b) {
+        interp_ok(match (a, b) {
             // Comparisons between integers are always known.
             (Scalar::Int { .. }, Scalar::Int { .. }) => {
                 if a == b {
@@ -403,8 +403,8 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
         instance: ty::InstanceKind<'tcx>,
     ) -> InterpResult<'tcx, &'tcx mir::Body<'tcx>> {
         match instance {
-            ty::InstanceKind::Item(def) => Ok(ecx.tcx.mir_for_ctfe(def)),
-            _ => Ok(ecx.tcx.instance_mir(instance)),
+            ty::InstanceKind::Item(def) => interp_ok(ecx.tcx.mir_for_ctfe(def)),
+            _ => interp_ok(ecx.tcx.instance_mir(instance)),
         }
     }
 
@@ -422,7 +422,7 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
         // Replace some functions.
         let Some(instance) = ecx.hook_special_const_fn(orig_instance, args, dest, ret)? else {
             // Call has already been handled.
-            return Ok(None);
+            return interp_ok(None);
         };
 
         // Only check non-glue functions
@@ -444,14 +444,14 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
         // This is a const fn. Call it.
         // In case of replacement, we return the *original* instance to make backtraces work out
         // (and we hope this does not confuse the FnAbi checks too much).
-        Ok(Some((ecx.load_mir(instance.def, None)?, orig_instance)))
+        interp_ok(Some((ecx.load_mir(instance.def, None)?, orig_instance)))
     }
 
     fn panic_nounwind(ecx: &mut InterpCx<'tcx, Self>, msg: &str) -> InterpResult<'tcx> {
         let msg = Symbol::intern(msg);
         let span = ecx.find_closest_untracked_caller_location();
         let (file, line, col) = ecx.location_triple_for_span(span);
-        Err(ConstEvalErrKind::Panic { msg, file, line, col }.into())
+        Err(ConstEvalErrKind::Panic { msg, file, line, col }).into()
     }
 
     fn call_intrinsic(
@@ -464,7 +464,7 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
     ) -> InterpResult<'tcx, Option<ty::Instance<'tcx>>> {
         // Shared intrinsics.
         if ecx.eval_intrinsic(instance, args, dest, target)? {
-            return Ok(None);
+            return interp_ok(None);
         }
         let intrinsic_name = ecx.tcx.item_name(instance.def_id());
 
@@ -541,7 +541,7 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
                         "intrinsic `{intrinsic_name}` is not supported at compile-time"
                     );
                 }
-                return Ok(Some(ty::Instance {
+                return interp_ok(Some(ty::Instance {
                     def: ty::InstanceKind::Item(instance.def_id()),
                     args: instance.args,
                 }));
@@ -550,7 +550,7 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
 
         // Intrinsic is done, jump to next block.
         ecx.return_to_block(target)?;
-        Ok(None)
+        interp_ok(None)
     }
 
     fn assert_panic(
@@ -581,7 +581,7 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
                 }
             }
         };
-        Err(ConstEvalErrKind::AssertFailure(err).into())
+        Err(ConstEvalErrKind::AssertFailure(err)).into()
     }
 
     fn binary_ptr_op(
@@ -641,11 +641,18 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
                 // current number of evaluated terminators is a power of 2. The latter gives us a cheap
                 // way to implement exponential backoff.
                 let span = ecx.cur_span();
-                ecx.tcx.dcx().emit_warn(LongRunningWarn { span, item_span: ecx.tcx.span });
+                // We store a unique number in `force_duplicate` to evade `-Z deduplicate-diagnostics`.
+                // `new_steps` is guaranteed to be unique because `ecx.machine.num_evaluated_steps` is
+                // always increasing.
+                ecx.tcx.dcx().emit_warn(LongRunningWarn {
+                    span,
+                    item_span: ecx.tcx.span,
+                    force_duplicate: new_steps,
+                });
             }
         }
 
-        Ok(())
+        interp_ok(())
     }
 
     #[inline(always)]
@@ -663,7 +670,7 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
         if !ecx.recursion_limit.value_within_limit(ecx.stack().len() + 1) {
             throw_exhaust!(StackFrameLimitReached)
         } else {
-            Ok(frame)
+            interp_ok(frame)
         }
     }
 
@@ -693,22 +700,22 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
         if is_write {
             // Write access. These are never allowed, but we give a targeted error message.
             match alloc.mutability {
-                Mutability::Not => Err(err_ub!(WriteToReadOnly(alloc_id)).into()),
-                Mutability::Mut => Err(ConstEvalErrKind::ModifiedGlobal.into()),
+                Mutability::Not => throw_ub!(WriteToReadOnly(alloc_id)),
+                Mutability::Mut => Err(ConstEvalErrKind::ModifiedGlobal).into(),
             }
         } else {
             // Read access. These are usually allowed, with some exceptions.
             if machine.can_access_mut_global == CanAccessMutGlobal::Yes {
                 // Machine configuration allows us read from anything (e.g., `static` initializer).
-                Ok(())
+                interp_ok(())
             } else if alloc.mutability == Mutability::Mut {
                 // Machine configuration does not allow us to read statics (e.g., `const`
                 // initializer).
-                Err(ConstEvalErrKind::ConstAccessesMutGlobal.into())
+                Err(ConstEvalErrKind::ConstAccessesMutGlobal).into()
             } else {
                 // Immutable global, this read is fine.
                 assert_eq!(alloc.mutability, Mutability::Not);
-                Ok(())
+                interp_ok(())
             }
         }
     }
@@ -741,9 +748,9 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
                 // even when there is interior mutability.)
                 place.map_provenance(CtfeProvenance::as_shared_ref)
             };
-            Ok(ImmTy::from_immediate(new_place.to_ref(ecx), val.layout))
+            interp_ok(ImmTy::from_immediate(new_place.to_ref(ecx), val.layout))
         } else {
-            Ok(val.clone())
+            interp_ok(val.clone())
         }
     }
 
@@ -756,20 +763,20 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
     ) -> InterpResult<'tcx> {
         if range.size == Size::ZERO {
             // Nothing to check.
-            return Ok(());
+            return interp_ok(());
         }
         // Reject writes through immutable pointers.
         if immutable {
-            return Err(ConstEvalErrKind::WriteThroughImmutablePointer.into());
+            return Err(ConstEvalErrKind::WriteThroughImmutablePointer).into();
         }
         // Everything else is fine.
-        Ok(())
+        interp_ok(())
     }
 
     fn before_alloc_read(ecx: &InterpCx<'tcx, Self>, alloc_id: AllocId) -> InterpResult<'tcx> {
         // Check if this is the currently evaluated static.
         if Some(alloc_id) == ecx.machine.static_root_ids.map(|(id, _)| id) {
-            return Err(ConstEvalErrKind::RecursiveStatic.into());
+            return Err(ConstEvalErrKind::RecursiveStatic).into();
         }
         // If this is another static, make sure we fire off the query to detect cycles.
         // But only do that when checks for static recursion are enabled.
@@ -781,7 +788,7 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
                 ecx.ctfe_query(|tcx| tcx.eval_static_initializer(def_id))?;
             }
         }
-        Ok(())
+        interp_ok(())
     }
 
     fn cached_union_data_range<'e>(

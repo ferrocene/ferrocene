@@ -9,7 +9,7 @@ use std::os::unix::fs::symlink as symlink_file;
 use std::os::windows::fs::symlink_file;
 use std::path::Path;
 
-use anyhow::{format_err, Context, Result};
+use anyhow::{Context, Result, format_err};
 use walkdir::WalkDir;
 
 /// Converts a `&Path` to a UTF-8 `&str`.

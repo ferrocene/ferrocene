@@ -1,4 +1,4 @@
-use std::any::{type_name, Any};
+use std::any::{Any, type_name};
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeSet;
 use std::ffi::{OsStr, OsString};
@@ -6,12 +6,13 @@ use std::fmt::{Debug, Write};
 use std::hash::Hash;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
-use std::sync::{atomic, LazyLock};
+use std::sync::{LazyLock, atomic};
 use std::time::{Duration, Instant};
 use std::{env, fs};
 
 use clap::ValueEnum;
 
+pub use crate::Compiler;
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::build_steps::{
     check, clean, clippy, compile, dist, doc, gcc, llvm, run, setup, test, vendor,
@@ -19,14 +20,13 @@ use crate::core::build_steps::{
 use crate::core::config::flags::{Color, Subcommand};
 use crate::core::config::{DryRun, SplitDebuginfo, TargetSelection};
 use crate::utils::cache::Cache;
-use crate::utils::exec::{command, BootstrapCommand};
+use crate::utils::exec::{BootstrapCommand, command};
 use crate::utils::helpers::{
-    self, add_dylib_path, add_link_lib_path, check_cfg_arg, exe, libdir, linker_args, linker_flags,
-    t, LldThreads,
+    self, LldThreads, add_dylib_path, add_link_lib_path, check_cfg_arg, exe, libdir, linker_args,
+    linker_flags, t,
 };
-pub use crate::Compiler;
 use crate::{
-    prepare_behaviour_dump_dir, Build, CLang, Crate, DocTests, GitRepo, Mode, EXTRA_CHECK_CFGS,
+    Build, CLang, Crate, DocTests, EXTRA_CHECK_CFGS, GitRepo, Mode, prepare_behaviour_dump_dir,
 };
 
 #[cfg(test)]
@@ -317,33 +317,29 @@ const PATH_REMAP: &[(&str, &[&str])] = &[
     // actual path is `proc-macro-srv-cli`
     ("rust-analyzer-proc-macro-srv", &["src/tools/rust-analyzer/crates/proc-macro-srv-cli"]),
     // Make `x test tests` function the same as `x t tests/*`
-    (
-        "tests",
-        &[
-            // tidy-alphabetical-start
-            "tests/assembly",
-            "tests/codegen",
-            "tests/codegen-units",
-            "tests/coverage",
-            "tests/coverage-run-rustdoc",
-            "tests/crashes",
-            "tests/debuginfo",
-            "tests/incremental",
-            "tests/mir-opt",
-            "tests/pretty",
-            "tests/run-make",
-            "tests/run-pass-valgrind",
-            "tests/rustdoc",
-            "tests/rustdoc-gui",
-            "tests/rustdoc-js",
-            "tests/rustdoc-js-std",
-            "tests/rustdoc-json",
-            "tests/rustdoc-ui",
-            "tests/ui",
-            "tests/ui-fulldeps",
-            // tidy-alphabetical-end
-        ],
-    ),
+    ("tests", &[
+        // tidy-alphabetical-start
+        "tests/assembly",
+        "tests/codegen",
+        "tests/codegen-units",
+        "tests/coverage",
+        "tests/coverage-run-rustdoc",
+        "tests/crashes",
+        "tests/debuginfo",
+        "tests/incremental",
+        "tests/mir-opt",
+        "tests/pretty",
+        "tests/run-make",
+        "tests/rustdoc",
+        "tests/rustdoc-gui",
+        "tests/rustdoc-js",
+        "tests/rustdoc-js-std",
+        "tests/rustdoc-json",
+        "tests/rustdoc-ui",
+        "tests/ui",
+        "tests/ui-fulldeps",
+        // tidy-alphabetical-end
+    ]),
 ];
 
 fn remap_paths(paths: &mut Vec<PathBuf>) {
@@ -420,6 +416,15 @@ impl StepDescription {
             .iter()
             .map(|desc| (desc.should_run)(ShouldRun::new(builder, desc.kind)))
             .collect::<Vec<_>>();
+
+        if builder.download_rustc() && (builder.kind == Kind::Dist || builder.kind == Kind::Install)
+        {
+            eprintln!(
+                "ERROR: '{}' subcommand is incompatible with `rust.download-rustc`.",
+                builder.kind.as_str()
+            );
+            crate::exit!(1);
+        }
 
         // sanity checks on rules
         for (desc, should_run) in v.iter().zip(&should_runs) {
@@ -869,7 +874,6 @@ impl<'a> Builder<'a> {
                 test::Tidy,
                 test::Ui,
                 test::Crashes,
-                test::RunPassValgrind,
                 test::Coverage,
                 test::CoverageMap,
                 test::CoverageRun,
@@ -977,6 +981,7 @@ impl<'a> Builder<'a> {
                 doc::Releases,
                 doc::RunMakeSupport,
                 doc::BuildHelper,
+                doc::Compiletest,
             ),
             Kind::Dist => describe!(
                 dist::Docs,
@@ -1068,7 +1073,9 @@ impl<'a> Builder<'a> {
                 // QMS Documents
                 crate::ferrocene::sign::InternalProcedures,
             ),
-            Kind::Setup => describe!(setup::Profile, setup::Hook, setup::Link, setup::Vscode),
+            Kind::Setup => {
+                describe!(setup::Profile, setup::Hook, setup::Link, setup::Editor)
+            }
             Kind::Clean => describe!(clean::CleanAll, clean::Rustc, clean::Std),
             Kind::Vendor => describe!(vendor::Vendor),
             // special-cased in Build::build()
@@ -1606,7 +1613,9 @@ impl<'a> Builder<'a> {
             // rustc_llvm. But if LLVM is stale, that'll be a tiny amount
             // of work comparatively, and we'd likely need to rebuild it anyway,
             // so that's okay.
-            if crate::core::build_steps::llvm::prebuilt_llvm_config(self, target).should_build() {
+            if crate::core::build_steps::llvm::prebuilt_llvm_config(self, target, false)
+                .should_build()
+            {
                 cargo.env("RUST_CHECK", "1");
             }
         }
@@ -1631,8 +1640,8 @@ impl<'a> Builder<'a> {
         let libdir = self.rustc_libdir(compiler);
 
         let sysroot_str = sysroot.as_os_str().to_str().expect("sysroot should be UTF-8");
-        if !matches!(self.config.dry_run, DryRun::SelfCheck) {
-            self.verbose_than(0, || println!("using sysroot {sysroot_str}"));
+        if self.is_verbose() && !matches!(self.config.dry_run, DryRun::SelfCheck) {
+            println!("using sysroot {sysroot_str}");
         }
 
         let mut rustflags = Rustflags::new(target);
@@ -1656,12 +1665,6 @@ impl<'a> Builder<'a> {
             // so it has no way of knowing the sysroot.
             rustflags.arg("--sysroot");
             rustflags.arg(sysroot_str);
-        }
-
-        // https://rust-lang.zulipchat.com/#narrow/stream/182449-t-compiler.2Fhelp/topic/.E2.9C.94.20link.20new.20library.20into.20stage1.2Frustc
-        if self.config.llvm_enzyme {
-            rustflags.arg("-l");
-            rustflags.arg("Enzyme-19");
         }
 
         let use_new_symbol_mangling = match self.config.rust_new_symbol_mangling {
@@ -1762,10 +1765,24 @@ impl<'a> Builder<'a> {
         match mode {
             Mode::Std | Mode::ToolBootstrap | Mode::ToolStd | Mode::ToolCustom { .. } => {}
             Mode::Rustc | Mode::Codegen | Mode::ToolRustc => {
-                // Build proc macros both for the host and the target
+                // Build proc macros both for the host and the target unless proc-macros are not
+                // supported by the target.
                 if target != compiler.host && cmd_kind != Kind::Check {
-                    cargo.arg("-Zdual-proc-macros");
-                    rustflags.arg("-Zdual-proc-macros");
+                    let error = command(self.rustc(compiler))
+                        .arg("--target")
+                        .arg(target.rustc_target_arg())
+                        .arg("--print=file-names")
+                        .arg("--crate-type=proc-macro")
+                        .arg("-")
+                        .run_capture(self)
+                        .stderr();
+                    let not_supported = error
+                        .lines()
+                        .any(|line| line.contains("unsupported crate type `proc-macro`"));
+                    if !not_supported {
+                        cargo.arg("-Zdual-proc-macros");
+                        rustflags.arg("-Zdual-proc-macros");
+                    }
                 }
             }
         }
@@ -2091,6 +2108,11 @@ impl<'a> Builder<'a> {
 
         if self.config.backtrace_on_ice {
             cargo.env("RUSTC_BACKTRACE_ON_ICE", "1");
+        }
+
+        if self.is_verbose() {
+            // This provides very useful logs especially when debugging build cache-related stuff.
+            cargo.env("CARGO_LOG", "cargo::core::compiler::fingerprint=info");
         }
 
         cargo.env("RUSTC_VERBOSE", self.verbosity.to_string());

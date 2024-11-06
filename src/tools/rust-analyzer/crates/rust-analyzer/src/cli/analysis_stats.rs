@@ -64,6 +64,8 @@ impl flags::AnalysisStats {
                 true => None,
                 false => Some(RustLibSource::Discover),
             },
+            all_targets: true,
+            set_test: true,
             ..Default::default()
         };
         let no_progress = &|_| ();
@@ -77,7 +79,17 @@ impl flags::AnalysisStats {
         let metadata_time = db_load_sw.elapsed();
         let load_cargo_config = LoadCargoConfig {
             load_out_dirs_from_check: !self.disable_build_scripts,
-            with_proc_macro_server: ProcMacroServerChoice::Sysroot,
+            with_proc_macro_server: if self.disable_proc_macros {
+                ProcMacroServerChoice::None
+            } else {
+                match self.proc_macro_srv {
+                    Some(ref path) => {
+                        let path = vfs::AbsPathBuf::assert_utf8(path.to_owned());
+                        ProcMacroServerChoice::Explicit(path)
+                    }
+                    None => ProcMacroServerChoice::Sysroot,
+                }
+            },
             prefill_caches: false,
         };
 
@@ -339,6 +351,7 @@ impl flags::AnalysisStats {
                 true => None,
                 false => Some(RustLibSource::Discover),
             },
+            all_targets: true,
             ..Default::default()
         };
 

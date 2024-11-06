@@ -1,10 +1,10 @@
 use std::iter;
 use std::path::PathBuf;
 
-use rustc_ast::{AttrArgs, AttrArgsEq, AttrKind, Attribute, MetaItem, NestedMetaItem};
+use rustc_ast::{AttrArgs, AttrArgsEq, AttrKind, Attribute, MetaItemInner};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_errors::codes::*;
-use rustc_errors::{struct_span_code_err, ErrorGuaranteed};
+use rustc_errors::{ErrorGuaranteed, struct_span_code_err};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_macros::LintDiagnostic;
 use rustc_middle::bug;
@@ -12,8 +12,8 @@ use rustc_middle::ty::print::PrintTraitRefExt as _;
 use rustc_middle::ty::{self, GenericArgsRef, GenericParamDefKind, TyCtxt};
 use rustc_parse_format::{ParseMode, Parser, Piece, Position};
 use rustc_session::lint::builtin::UNKNOWN_OR_MALFORMED_DIAGNOSTIC_ATTRIBUTES;
-use rustc_span::symbol::{kw, sym, Symbol};
 use rustc_span::Span;
+use rustc_span::symbol::{Symbol, kw, sym};
 use tracing::{debug, info};
 use {rustc_attr as attr, rustc_hir as hir};
 
@@ -282,7 +282,7 @@ pub struct OnUnimplementedFormatString {
 
 #[derive(Debug)]
 pub struct OnUnimplementedDirective {
-    pub condition: Option<MetaItem>,
+    pub condition: Option<MetaItemInner>,
     pub subcommands: Vec<OnUnimplementedDirective>,
     pub message: Option<OnUnimplementedFormatString>,
     pub label: Option<OnUnimplementedFormatString>,
@@ -389,7 +389,7 @@ impl<'tcx> OnUnimplementedDirective {
     fn parse(
         tcx: TyCtxt<'tcx>,
         item_def_id: DefId,
-        items: &[NestedMetaItem],
+        items: &[MetaItemInner],
         span: Span,
         is_root: bool,
         is_diagnostic_namespace_variant: bool,
@@ -414,7 +414,7 @@ impl<'tcx> OnUnimplementedDirective {
             let cond = item_iter
                 .next()
                 .ok_or_else(|| tcx.dcx().emit_err(EmptyOnClauseInOnUnimplemented { span }))?
-                .meta_item()
+                .meta_item_or_bool()
                 .ok_or_else(|| tcx.dcx().emit_err(InvalidOnClauseInOnUnimplemented { span }))?;
             attr::eval_condition(cond, &tcx.sess, Some(tcx.features()), &mut |cfg| {
                 if let Some(value) = cfg.value
@@ -558,8 +558,8 @@ impl<'tcx> OnUnimplementedDirective {
                         IgnoredDiagnosticOption::maybe_emit_warning(
                             tcx,
                             item_def_id,
-                            directive.condition.as_ref().map(|i| i.span),
-                            aggr.condition.as_ref().map(|i| i.span),
+                            directive.condition.as_ref().map(|i| i.span()),
+                            aggr.condition.as_ref().map(|i| i.span()),
                             "condition",
                         );
                         IgnoredDiagnosticOption::maybe_emit_warning(

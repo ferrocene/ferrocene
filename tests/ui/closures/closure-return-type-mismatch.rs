@@ -16,6 +16,10 @@ fn main() {
     };
 }
 
+// issue: rust-lang/rust#130858 rust-lang/rust#125655
+static FOO: fn() -> bool = || -> bool { 1 };
+//~^ ERROR mismatched types
+
 // ferrocene-annotations: fls_lv7w7aalpwm5
 // Type Inference
 //

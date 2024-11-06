@@ -1,4 +1,4 @@
-use std::ffi::{c_char, c_void, CStr, CString};
+use std::ffi::{CStr, CString, c_char, c_void};
 use std::fmt::Write;
 use std::path::Path;
 use std::sync::Once;
@@ -11,8 +11,8 @@ use rustc_data_structures::small_c_str::SmallCStr;
 use rustc_data_structures::unord::UnordSet;
 use rustc_fs_util::path_to_c_string;
 use rustc_middle::bug;
-use rustc_session::config::{PrintKind, PrintRequest};
 use rustc_session::Session;
+use rustc_session::config::{PrintKind, PrintRequest};
 use rustc_span::symbol::Symbol;
 use rustc_target::spec::{MergeFunctions, PanicStrategy, SmallDataThresholdSupport};
 use rustc_target::target_features::{RUSTC_SPECIAL_FEATURES, RUSTC_SPECIFIC_FEATURES};
@@ -217,10 +217,10 @@ impl<'a> IntoIterator for LLVMFeature<'a> {
 // where `{ARCH}` is the architecture name. Look for instances of `SubtargetFeature`.
 //
 // Check the current rustc fork of LLVM in the repo at https://github.com/rust-lang/llvm-project/.
-// The commit in use can be found via the `llvm-project` submodule in https://github.com/rust-lang/rust/tree/master/src
-// Though note that Rust can also be build with an external precompiled version of LLVM
-// which might lead to failures if the oldest tested / supported LLVM version
-// doesn't yet support the relevant intrinsics
+// The commit in use can be found via the `llvm-project` submodule in
+// https://github.com/rust-lang/rust/tree/master/src Though note that Rust can also be build with
+// an external precompiled version of LLVM which might lead to failures if the oldest tested /
+// supported LLVM version doesn't yet support the relevant intrinsics.
 pub(crate) fn to_llvm_features<'a>(sess: &Session, s: &'a str) -> Option<LLVMFeature<'a>> {
     let arch = if sess.target.arch == "x86_64" {
         "x86"
@@ -259,11 +259,15 @@ pub(crate) fn to_llvm_features<'a>(sess: &Session, s: &'a str) -> Option<LLVMFea
         ("aarch64", "fp16") => Some(LLVMFeature::new("fullfp16")),
         // Filter out features that are not supported by the current LLVM version
         ("aarch64", "fpmr") if get_version().0 != 18 => None,
-        // In LLVM 18, `unaligned-scalar-mem` was merged with `unaligned-vector-mem` into a single feature called
-        // `fast-unaligned-access`. In LLVM 19, it was split back out.
+        // In LLVM 18, `unaligned-scalar-mem` was merged with `unaligned-vector-mem` into a single
+        // feature called `fast-unaligned-access`. In LLVM 19, it was split back out.
         ("riscv32" | "riscv64", "unaligned-scalar-mem") if get_version().0 == 18 => {
             Some(LLVMFeature::new("fast-unaligned-access"))
         }
+        // Filter out features that are not supported by the current LLVM version
+        ("riscv32" | "riscv64", "zaamo") if get_version().0 < 19 => None,
+        ("riscv32" | "riscv64", "zabha") if get_version().0 < 19 => None,
+        ("riscv32" | "riscv64", "zalrsc") if get_version().0 < 19 => None,
         // Enable the evex512 target feature if an avx512 target feature is enabled.
         ("x86", s) if s.starts_with("avx512") => {
             Some(LLVMFeature::with_dependency(s, TargetFeatureFoldStrength::EnableOnly("evex512")))
@@ -406,7 +410,8 @@ fn print_target_features(out: &mut String, sess: &Session, tm: &llvm::TargetMach
         .supported_target_features()
         .iter()
         .filter_map(|(feature, _gate, _implied)| {
-            // LLVM asserts that these are sorted. LLVM and Rust both use byte comparison for these strings.
+            // LLVM asserts that these are sorted. LLVM and Rust both use byte comparison for these
+            // strings.
             let llvm_feature = to_llvm_features(sess, *feature)?.llvm_feature_name;
             let desc =
                 match llvm_target_features.binary_search_by_key(&llvm_feature, |(f, _d)| f).ok() {
@@ -477,7 +482,7 @@ pub(crate) fn print(req: &PrintRequest, mut out: &mut String, sess: &Session) {
                     &tm,
                     cpu_cstring.as_ptr(),
                     callback,
-                    std::ptr::addr_of_mut!(out) as *mut c_void,
+                    (&raw mut out) as *mut c_void,
                 );
             }
         }
@@ -535,6 +540,11 @@ pub(crate) fn global_llvm_features(
     // -Ctarget-cpu=native
     match sess.opts.cg.target_cpu {
         Some(ref s) if s == "native" => {
+            // We have already figured out the actual CPU name with `LLVMRustGetHostCPUName` and set
+            // that for LLVM, so the features implied by that CPU name will be available everywhere.
+            // However, that is not sufficient: e.g. `skylake` alone is not sufficient to tell if
+            // some of the instructions are available or not. So we have to also explicitly ask for
+            // the exact set of features available on the host, and enable all of them.
             let features_string = unsafe {
                 let ptr = llvm::LLVMGetHostCPUFeatures();
                 let features_string = if !ptr.is_null() {

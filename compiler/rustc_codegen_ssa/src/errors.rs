@@ -10,8 +10,8 @@ use rustc_errors::{
     Diag, DiagArgValue, DiagCtxtHandle, Diagnostic, EmissionGuarantee, IntoDiagArg, Level,
 };
 use rustc_macros::Diagnostic;
-use rustc_middle::ty::layout::LayoutError;
 use rustc_middle::ty::Ty;
+use rustc_middle::ty::layout::LayoutError;
 use rustc_span::{Span, Symbol};
 use rustc_type_ir::FloatTy;
 
@@ -916,8 +916,8 @@ pub enum InvalidMonomorphization<'tcx> {
         ret_ty: Ty<'tcx>,
     },
 
-    #[diag(codegen_ssa_invalid_monomorphization_cast_fat_pointer, code = E0511)]
-    CastFatPointer {
+    #[diag(codegen_ssa_invalid_monomorphization_cast_wide_pointer, code = E0511)]
+    CastWidePointer {
         #[primary_span]
         span: Span,
         name: Symbol,

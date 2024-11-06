@@ -18,9 +18,9 @@ use rustc_hir::{
     HirId, LifetimeParamKind, Node, PatKind, PreciseCapturingArg, RangeEnd, Term,
     TraitBoundModifier,
 };
-use rustc_span::source_map::SourceMap;
-use rustc_span::symbol::{kw, Ident, Symbol};
 use rustc_span::FileName;
+use rustc_span::source_map::SourceMap;
+use rustc_span::symbol::{Ident, Symbol, kw};
 use rustc_target::spec::abi::Abi;
 use {rustc_ast as ast, rustc_hir as hir};
 
@@ -96,6 +96,7 @@ impl<'a> State<'a> {
             Node::Ty(a) => self.print_type(a),
             Node::AssocItemConstraint(a) => self.print_assoc_item_constraint(a),
             Node::TraitRef(a) => self.print_trait_ref(a),
+            Node::OpaqueTy(o) => self.print_opaque_ty(o),
             Node::Pat(a) => self.print_pat(a),
             Node::PatField(a) => self.print_patfield(a),
             Node::Arm(a) => self.print_arm(a),
@@ -568,11 +569,6 @@ impl<'a> State<'a> {
                     state.print_type(ty);
                 });
             }
-            hir::ItemKind::OpaqueTy(opaque_ty) => {
-                self.print_item_type(item, opaque_ty.generics, |state| {
-                    state.print_bounds("= impl", opaque_ty.bounds)
-                });
-            }
             hir::ItemKind::Enum(ref enum_definition, params) => {
                 self.print_enum_def(enum_definition, params, item.ident.name, item.span);
             }
@@ -663,6 +659,15 @@ impl<'a> State<'a> {
 
     fn print_trait_ref(&mut self, t: &hir::TraitRef<'_>) {
         self.print_path(t.path, false);
+    }
+
+    fn print_opaque_ty(&mut self, o: &hir::OpaqueTy<'_>) {
+        self.head("opaque");
+        self.print_generic_params(o.generics.params);
+        self.print_where_clause(o.generics);
+        self.word("{");
+        self.print_bounds("impl", o.bounds);
+        self.word("}");
     }
 
     fn print_formal_generic_params(&mut self, generic_params: &[hir::GenericParam<'_>]) {
@@ -2026,13 +2031,10 @@ impl<'a> State<'a> {
         let generic_params = generic_params
             .iter()
             .filter(|p| {
-                matches!(
-                    p,
-                    GenericParam {
-                        kind: GenericParamKind::Lifetime { kind: LifetimeParamKind::Explicit },
-                        ..
-                    }
-                )
+                matches!(p, GenericParam {
+                    kind: GenericParamKind::Lifetime { kind: LifetimeParamKind::Explicit },
+                    ..
+                })
             })
             .collect::<Vec<_>>();
 

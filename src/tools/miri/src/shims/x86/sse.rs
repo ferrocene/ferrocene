@@ -3,8 +3,8 @@ use rustc_span::Symbol;
 use rustc_target::spec::abi::Abi;
 
 use super::{
-    bin_op_simd_float_all, bin_op_simd_float_first, unary_op_ps, unary_op_ss, FloatBinOp,
-    FloatUnaryOp,
+    FloatBinOp, FloatUnaryOp, bin_op_simd_float_all, bin_op_simd_float_first, unary_op_ps,
+    unary_op_ss,
 };
 use crate::*;
 
@@ -201,8 +201,8 @@ pub(super) trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                     this.copy_op(&this.project_index(&left, i)?, &this.project_index(&dest, i)?)?;
                 }
             }
-            _ => return Ok(EmulateItemResult::NotSupported),
+            _ => return interp_ok(EmulateItemResult::NotSupported),
         }
-        Ok(EmulateItemResult::NeedsReturn)
+        interp_ok(EmulateItemResult::NeedsReturn)
     }
 }

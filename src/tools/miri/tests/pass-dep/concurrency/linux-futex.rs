@@ -1,10 +1,12 @@
 //@only-target: linux
 //@compile-flags: -Zmiri-disable-isolation
 
+// FIXME(static_mut_refs): Do not allow `static_mut_refs` lint
+#![allow(static_mut_refs)]
+
 use std::mem::MaybeUninit;
 use std::ptr::{self, addr_of};
-use std::sync::atomic::AtomicI32;
-use std::sync::atomic::Ordering;
+use std::sync::atomic::{AtomicI32, Ordering};
 use std::thread;
 use std::time::{Duration, Instant};
 

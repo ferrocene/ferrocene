@@ -30,7 +30,7 @@ use rustc_errors::{
 };
 use rustc_hir as hir;
 use rustc_hir::def::DefKind;
-use rustc_hir::def_id::{CrateNum, DefId, LocalDefId, LOCAL_CRATE};
+use rustc_hir::def_id::{CrateNum, DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::definitions::Definitions;
 use rustc_hir::intravisit::Visitor;
 use rustc_hir::lang_items::LangItem;
@@ -45,18 +45,18 @@ use rustc_session::config::CrateType;
 use rustc_session::cstore::{CrateStoreDyn, Untracked};
 use rustc_session::lint::Lint;
 use rustc_session::{Limit, MetadataKind, Session};
-use rustc_span::def_id::{DefPathHash, StableCrateId, CRATE_DEF_ID};
-use rustc_span::symbol::{kw, sym, Ident, Symbol};
-use rustc_span::{Span, DUMMY_SP};
+use rustc_span::def_id::{CRATE_DEF_ID, DefPathHash, StableCrateId};
+use rustc_span::symbol::{Ident, Symbol, kw, sym};
+use rustc_span::{DUMMY_SP, Span};
 use rustc_target::abi::{FieldIdx, Layout, LayoutS, TargetDataLayout, VariantIdx};
 use rustc_target::spec::abi;
+use rustc_type_ir::TyKind::*;
 use rustc_type_ir::fold::TypeFoldable;
 use rustc_type_ir::lang_items::TraitSolverLangItem;
 pub use rustc_type_ir::lift::Lift;
 use rustc_type_ir::solve::SolverMode;
-use rustc_type_ir::TyKind::*;
-use rustc_type_ir::{search_graph, CollectAndApply, Interner, TypeFlags, WithCachedTypeInfo};
-use tracing::{debug, instrument};
+use rustc_type_ir::{CollectAndApply, Interner, TypeFlags, WithCachedTypeInfo, search_graph};
+use tracing::{debug, trace};
 
 use crate::arena::Arena;
 use crate::dep_graph::{DepGraph, DepKindStruct};
@@ -527,8 +527,8 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         self.trait_is_alias(trait_def_id)
     }
 
-    fn trait_is_object_safe(self, trait_def_id: DefId) -> bool {
-        self.is_object_safe(trait_def_id)
+    fn trait_is_dyn_compatible(self, trait_def_id: DefId) -> bool {
+        self.is_dyn_compatible(trait_def_id)
     }
 
     fn trait_is_fundamental(self, def_id: DefId) -> bool {
@@ -622,11 +622,13 @@ bidirectional_lang_item_map! {
     Destruct,
     DiscriminantKind,
     DynMetadata,
+    EffectsCompat,
     EffectsIntersection,
     EffectsIntersectionOutput,
     EffectsMaybe,
     EffectsNoRuntime,
     EffectsRuntime,
+    EffectsTyCompat,
     Fn,
     FnMut,
     FnOnce,
@@ -693,6 +695,12 @@ impl<'tcx> rustc_type_ir::inherent::Features<TyCtxt<'tcx>> for &'tcx rustc_featu
 
     fn associated_const_equality(self) -> bool {
         self.associated_const_equality
+    }
+}
+
+impl<'tcx> rustc_type_ir::inherent::Span<TyCtxt<'tcx>> for Span {
+    fn dummy() -> Self {
+        DUMMY_SP
     }
 }
 
@@ -1015,10 +1023,10 @@ impl<'tcx> CommonLifetimes<'tcx> {
             .map(|i| {
                 (0..NUM_PREINTERNED_RE_LATE_BOUNDS_V)
                     .map(|v| {
-                        mk(ty::ReBound(
-                            ty::DebruijnIndex::from(i),
-                            ty::BoundRegion { var: ty::BoundVar::from(v), kind: ty::BrAnon },
-                        ))
+                        mk(ty::ReBound(ty::DebruijnIndex::from(i), ty::BoundRegion {
+                            var: ty::BoundVar::from(v),
+                            kind: ty::BrAnon,
+                        }))
                     })
                     .collect()
             })
@@ -1449,9 +1457,8 @@ impl<'tcx> TyCtxt<'tcx> {
             debug!("layout_scalar_valid_range: attr={:?}", attr);
             if let Some(
                 &[
-                    ast::NestedMetaItem::Lit(ast::MetaItemLit {
-                        kind: ast::LitKind::Int(a, _),
-                        ..
+                    ast::MetaItemInner::Lit(ast::MetaItemLit {
+                        kind: ast::LitKind::Int(a, _), ..
                     }),
                 ],
             ) = attr.meta_item_list().as_deref()
@@ -2071,9 +2078,11 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 
     /// Returns the origin of the opaque type `def_id`.
-    #[instrument(skip(self), level = "trace", ret)]
+    #[track_caller]
     pub fn opaque_type_origin(self, def_id: LocalDefId) -> hir::OpaqueTyOrigin {
-        self.hir().expect_item(def_id).expect_opaque_ty().origin
+        let origin = self.hir().expect_opaque_ty(def_id).origin;
+        trace!("opaque_type_origin({def_id:?}) => {origin:?}");
+        origin
     }
 }
 
@@ -2992,7 +3001,7 @@ impl<'tcx> TyCtxt<'tcx> {
 
     pub fn named_bound_var(self, id: HirId) -> Option<resolve_bound_vars::ResolvedArg> {
         debug!(?id, "named_region");
-        self.named_variable_map(id.owner).and_then(|map| map.get(&id.local_id).cloned())
+        self.named_variable_map(id.owner).get(&id.local_id).cloned()
     }
 
     pub fn is_late_bound(self, id: HirId) -> bool {
@@ -3001,12 +3010,9 @@ impl<'tcx> TyCtxt<'tcx> {
 
     pub fn late_bound_vars(self, id: HirId) -> &'tcx List<ty::BoundVariableKind> {
         self.mk_bound_variable_kinds(
-            &self
-                .late_bound_vars_map(id.owner)
-                .and_then(|map| map.get(&id.local_id).cloned())
-                .unwrap_or_else(|| {
-                    bug!("No bound vars found for {}", self.hir().node_to_string(id))
-                }),
+            &self.late_bound_vars_map(id.owner).get(&id.local_id).cloned().unwrap_or_else(|| {
+                bug!("No bound vars found for {}", self.hir().node_to_string(id))
+            }),
         )
     }
 
@@ -3029,8 +3035,7 @@ impl<'tcx> TyCtxt<'tcx> {
 
         loop {
             let parent = self.local_parent(opaque_lifetime_param_def_id);
-            let hir::OpaqueTy { lifetime_mapping, .. } =
-                self.hir_node_by_def_id(parent).expect_item().expect_opaque_ty();
+            let hir::OpaqueTy { lifetime_mapping, .. } = self.hir().expect_opaque_ty(parent);
 
             let Some((lifetime, _)) = lifetime_mapping
                 .iter()
@@ -3052,15 +3057,12 @@ impl<'tcx> TyCtxt<'tcx> {
                     }
 
                     let generics = self.generics_of(new_parent);
-                    return ty::Region::new_early_param(
-                        self,
-                        ty::EarlyParamRegion {
-                            index: generics
-                                .param_def_id_to_index(self, ebv.to_def_id())
-                                .expect("early-bound var should be present in fn generics"),
-                            name: self.item_name(ebv.to_def_id()),
-                        },
-                    );
+                    return ty::Region::new_early_param(self, ty::EarlyParamRegion {
+                        index: generics
+                            .param_def_id_to_index(self, ebv.to_def_id())
+                            .expect("early-bound var should be present in fn generics"),
+                        name: self.item_name(ebv.to_def_id()),
+                    });
                 }
                 Some(resolve_bound_vars::ResolvedArg::LateBound(_, _, lbv)) => {
                     let new_parent = self.local_parent(lbv);

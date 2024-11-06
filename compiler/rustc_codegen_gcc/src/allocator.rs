@@ -2,8 +2,8 @@
 use gccjit::FnAttribute;
 use gccjit::{Context, FunctionType, GlobalKind, ToRValue, Type};
 use rustc_ast::expand::allocator::{
-    alloc_error_handler_name, default_fn_name, global_fn_name, AllocatorKind, AllocatorTy,
-    ALLOCATOR_METHODS, NO_ALLOC_SHIM_IS_UNSTABLE,
+    ALLOCATOR_METHODS, AllocatorKind, AllocatorTy, NO_ALLOC_SHIM_IS_UNSTABLE,
+    alloc_error_handler_name, default_fn_name, global_fn_name,
 };
 use rustc_middle::bug;
 use rustc_middle::ty::TyCtxt;
@@ -104,10 +104,17 @@ fn create_wrapper_function(
         false,
     );
 
-    if tcx.sess.default_hidden_visibility() {
-        #[cfg(feature = "master")]
-        func.add_attribute(FnAttribute::Visibility(gccjit::Visibility::Hidden));
+    #[cfg(feature = "master")]
+    match tcx.sess.default_visibility() {
+        rustc_target::spec::SymbolVisibility::Hidden => {
+            func.add_attribute(FnAttribute::Visibility(gccjit::Visibility::Hidden))
+        }
+        rustc_target::spec::SymbolVisibility::Protected => {
+            func.add_attribute(FnAttribute::Visibility(gccjit::Visibility::Protected))
+        }
+        rustc_target::spec::SymbolVisibility::Interposable => {}
     }
+
     if tcx.sess.must_emit_unwind_tables() {
         // TODO(antoyo): emit unwind tables.
     }

@@ -18,8 +18,8 @@ use tracing::{debug, debug_span, instrument};
 use super::project::{self, ProjectAndUnifyResult};
 use super::select::SelectionContext;
 use super::{
-    const_evaluatable, wf, EvaluationResult, FulfillmentError, FulfillmentErrorCode,
-    PredicateObligation, ScrubbedTraitError, Unimplemented,
+    EvaluationResult, FulfillmentError, FulfillmentErrorCode, PredicateObligation,
+    ScrubbedTraitError, Unimplemented, const_evaluatable, wf,
 };
 use crate::error_reporting::InferCtxtErrorExt;
 use crate::infer::{InferCtxt, TyOrConstInferVar};
@@ -363,7 +363,7 @@ impl<'a, 'tcx> ObligationProcessor for FulfillProcessor<'a, 'tcx> {
                 | ty::PredicateKind::Clause(ty::ClauseKind::TypeOutlives(_))
                 | ty::PredicateKind::Clause(ty::ClauseKind::ConstArgHasType(..))
                 | ty::PredicateKind::Clause(ty::ClauseKind::WellFormed(_))
-                | ty::PredicateKind::ObjectSafe(_)
+                | ty::PredicateKind::DynCompatible(_)
                 | ty::PredicateKind::Subtype(_)
                 | ty::PredicateKind::Coerce(_)
                 | ty::PredicateKind::Clause(ty::ClauseKind::ConstEvaluatable(..))
@@ -418,8 +418,8 @@ impl<'a, 'tcx> ObligationProcessor for FulfillProcessor<'a, 'tcx> {
                     )
                 }
 
-                ty::PredicateKind::ObjectSafe(trait_def_id) => {
-                    if !self.selcx.tcx().is_object_safe(trait_def_id) {
+                ty::PredicateKind::DynCompatible(trait_def_id) => {
+                    if !self.selcx.tcx().is_dyn_compatible(trait_def_id) {
                         ProcessResult::Error(FulfillmentErrorCode::Select(Unimplemented))
                     } else {
                         ProcessResult::Changed(vec![])

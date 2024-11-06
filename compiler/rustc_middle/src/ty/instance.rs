@@ -12,12 +12,12 @@ use rustc_index::bit_set::FiniteBitSet;
 use rustc_macros::{Decodable, Encodable, HashStable, Lift, TyDecodable, TyEncodable};
 use rustc_middle::ty::normalize_erasing_regions::NormalizationError;
 use rustc_span::def_id::LOCAL_CRATE;
-use rustc_span::{Span, Symbol, DUMMY_SP};
+use rustc_span::{DUMMY_SP, Span, Symbol};
 use tracing::{debug, instrument};
 
 use crate::error;
 use crate::middle::codegen_fn_attrs::CodegenFnAttrFlags;
-use crate::ty::print::{shrunk_instance_name, FmtPrinter, Printer};
+use crate::ty::print::{FmtPrinter, Printer, shrunk_instance_name};
 use crate::ty::{
     self, EarlyBinder, GenericArgs, GenericArgsRef, Ty, TyCtxt, TypeFoldable, TypeSuperFoldable,
     TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor,
@@ -50,7 +50,7 @@ pub enum ReifyReason {
     /// * A vtable entry is directly converted to a function call (e.g. creating a fn ptr from a
     ///   method on a `dyn` object).
     /// * A function with `#[track_caller]` is converted to a function pointer
-    /// * If KCFI is enabled, creating a function pointer from a method on an object-safe trait.
+    /// * If KCFI is enabled, creating a function pointer from a method on a dyn-compatible trait.
     /// This includes the case of converting `::call`-like methods on closure-likes to function
     /// pointers.
     FnPtr,

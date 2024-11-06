@@ -48,6 +48,14 @@ enum GoalEvaluationKind {
     Nested,
 }
 
+/// Whether evaluating this goal ended up changing the
+/// inference state.
+#[derive(PartialEq, Eq, Debug, Hash, Clone, Copy)]
+pub enum HasChanged {
+    Yes,
+    No,
+}
+
 // FIXME(trait-system-refactor-initiative#117): we don't detect whether a response
 // ended up pulling down any universes.
 fn has_no_inference_or_external_constraints<I: Interner>(
@@ -111,8 +119,8 @@ where
         }
     }
 
-    fn compute_object_safe_goal(&mut self, trait_def_id: I::DefId) -> QueryResult<I> {
-        if self.cx().trait_is_object_safe(trait_def_id) {
+    fn compute_dyn_compatible_goal(&mut self, trait_def_id: I::DefId) -> QueryResult<I> {
+        if self.cx().trait_is_dyn_compatible(trait_def_id) {
             self.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
         } else {
             Err(NoSolution)

@@ -15,7 +15,7 @@ use crate::clean;
 use crate::clean::utils::inherits_doc_hidden;
 use crate::clean::*;
 use crate::core::DocContext;
-use crate::html::markdown::{find_testable_code, ErrorCodes, Ignore, LangString, MdRelLine};
+use crate::html::markdown::{ErrorCodes, Ignore, LangString, MdRelLine, find_testable_code};
 use crate::visit::DocVisitor;
 
 pub(crate) const CHECK_DOC_TEST_VISIBILITY: Pass = Pass {
@@ -34,7 +34,7 @@ pub(crate) fn check_doc_test_visibility(krate: Crate, cx: &mut DocContext<'_>) -
     krate
 }
 
-impl<'a, 'tcx> DocVisitor for DocTestVisibilityLinter<'a, 'tcx> {
+impl<'a, 'tcx> DocVisitor<'_> for DocTestVisibilityLinter<'a, 'tcx> {
     fn visit_item(&mut self, item: &Item) {
         look_for_tests(self.cx, &item.doc_value(), item);
 

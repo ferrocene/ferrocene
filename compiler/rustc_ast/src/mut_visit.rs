@@ -13,10 +13,10 @@ use std::panic;
 use rustc_data_structures::flat_map_in_place::FlatMapInPlace;
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_data_structures::sync::Lrc;
+use rustc_span::Span;
 use rustc_span::source_map::Spanned;
 use rustc_span::symbol::Ident;
-use rustc_span::Span;
-use smallvec::{smallvec, Array, SmallVec};
+use smallvec::{Array, SmallVec, smallvec};
 use thin_vec::ThinVec;
 
 use crate::ast::*;
@@ -83,7 +83,7 @@ pub trait MutVisitor: Sized {
         walk_crate(self, c)
     }
 
-    fn visit_meta_list_item(&mut self, list_item: &mut NestedMetaItem) {
+    fn visit_meta_list_item(&mut self, list_item: &mut MetaItemInner) {
         walk_meta_list_item(self, list_item);
     }
 
@@ -659,10 +659,10 @@ fn walk_macro_def<T: MutVisitor>(vis: &mut T, macro_def: &mut MacroDef) {
     visit_delim_args(vis, body);
 }
 
-fn walk_meta_list_item<T: MutVisitor>(vis: &mut T, li: &mut NestedMetaItem) {
+fn walk_meta_list_item<T: MutVisitor>(vis: &mut T, li: &mut MetaItemInner) {
     match li {
-        NestedMetaItem::MetaItem(mi) => vis.visit_meta_item(mi),
-        NestedMetaItem::Lit(_lit) => {}
+        MetaItemInner::MetaItem(mi) => vis.visit_meta_item(mi),
+        MetaItemInner::Lit(_lit) => {}
     }
 }
 

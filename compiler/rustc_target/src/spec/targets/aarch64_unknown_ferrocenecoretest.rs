@@ -7,7 +7,7 @@
 //! THIS IS TEMPORARY. We implemented this solution as we needed to run bare-metal tests for
 //! qualification, but we're planning a cleaner implementation to upstream.
 
-use crate::spec::{cvs, Cc, LinkerFlavor, Lld, Target, TargetOptions};
+use crate::spec::{Cc, LinkerFlavor, Lld, Target, TargetOptions, cvs};
 
 pub(crate) fn target() -> Target {
     let mut target = super::aarch64_unknown_none::target();
@@ -27,10 +27,9 @@ pub(crate) fn target() -> Target {
     //
     // NB: You have to pass Lld::No here; both ::No and ::Yes variants are added
     // to the options list by this function.
-    target.pre_link_args = TargetOptions::link_args(
-        LinkerFlavor::Gnu(Cc::Yes, Lld::No),
-        &["-Wl,--fix-cortex-a53-843419"],
-    );
+    target.pre_link_args = TargetOptions::link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &[
+        "-Wl,--fix-cortex-a53-843419",
+    ]);
     // This setting causes `-B path/to/gcc-ld` to be added to the linker args.
     // This means that that the `ld.lld` wrapper for `rust-lld` appears in the
     // path that `cc` uses to find `ld.lld` (also the path used for `cpp` and

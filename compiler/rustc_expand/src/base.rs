@@ -15,8 +15,8 @@ use rustc_data_structures::sync::{self, Lrc};
 use rustc_errors::{DiagCtxtHandle, ErrorGuaranteed, PResult};
 use rustc_feature::Features;
 use rustc_lint_defs::{BufferedEarlyLint, RegisteredTools};
-use rustc_parse::parser::Parser;
 use rustc_parse::MACRO_ARGUMENTS;
+use rustc_parse::parser::Parser;
 use rustc_session::config::CollapseMacroDebuginfo;
 use rustc_session::parse::ParseSess;
 use rustc_session::{Limit, Session};
@@ -24,12 +24,12 @@ use rustc_span::def_id::{CrateNum, DefId, LocalDefId};
 use rustc_span::edition::Edition;
 use rustc_span::hygiene::{AstPass, ExpnData, ExpnKind, LocalExpnId, MacroKind};
 use rustc_span::source_map::SourceMap;
-use rustc_span::symbol::{kw, sym, Ident, Symbol};
-use rustc_span::{FileName, Span, DUMMY_SP};
-use smallvec::{smallvec, SmallVec};
+use rustc_span::symbol::{Ident, Symbol, kw, sym};
+use rustc_span::{DUMMY_SP, FileName, Span};
+use smallvec::{SmallVec, smallvec};
 use thin_vec::ThinVec;
 
-use crate::base::ast::NestedMetaItem;
+use crate::base::ast::MetaItemInner;
 use crate::errors;
 use crate::expand::{self, AstFragment, Invocation};
 use crate::module::DirOwnership;
@@ -783,7 +783,7 @@ impl SyntaxExtension {
 
     fn collapse_debuginfo_by_name(attr: &Attribute) -> Result<CollapseMacroDebuginfo, Span> {
         let list = attr.meta_item_list();
-        let Some([NestedMetaItem::MetaItem(item)]) = list.as_deref() else {
+        let Some([MetaItemInner::MetaItem(item)]) = list.as_deref() else {
             return Err(attr.span);
         };
         if !item.is_word() {

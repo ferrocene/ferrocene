@@ -9,8 +9,8 @@ use rustc_data_structures::fx::{FxHashMap, FxIndexMap};
 use rustc_llvm::RustString;
 use rustc_middle::bug;
 use rustc_middle::mir::coverage::CoverageKind;
-use rustc_middle::ty::layout::HasTyCtxt;
 use rustc_middle::ty::Instance;
+use rustc_middle::ty::layout::HasTyCtxt;
 use rustc_target::abi::{Align, Size};
 use tracing::{debug, instrument};
 
@@ -48,11 +48,10 @@ impl<'ll, 'tcx> CrateCoverageContext<'ll, 'tcx> {
         self.function_coverage_map.replace(FxIndexMap::default())
     }
 
-    /// LLVM use a temp value to record evaluated mcdc test vector of each decision, which is called condition bitmap.
-    /// In order to handle nested decisions, several condition bitmaps can be
-    /// allocated for a function body.
-    /// These values are named `mcdc.addr.{i}` and are a 32-bit integers.
-    /// They respectively hold the condition bitmaps for decisions with a depth of `i`.
+    /// LLVM use a temp value to record evaluated mcdc test vector of each decision, which is
+    /// called condition bitmap. In order to handle nested decisions, several condition bitmaps can
+    /// be allocated for a function body. These values are named `mcdc.addr.{i}` and are a 32-bit
+    /// integers. They respectively hold the condition bitmaps for decisions with a depth of `i`.
     fn try_get_mcdc_condition_bitmap(
         &self,
         instance: &Instance<'tcx>,
@@ -99,14 +98,14 @@ impl<'tcx> CoverageInfoBuilderMethods<'tcx> for Builder<'_, '_, 'tcx> {
         };
 
         // If there are no MC/DC bitmaps to set up, return immediately.
-        if function_coverage_info.mcdc_bitmap_bytes == 0 {
+        if function_coverage_info.mcdc_bitmap_bits == 0 {
             return;
         }
 
         let fn_name = self.get_pgo_func_name_var(instance);
         let hash = self.const_u64(function_coverage_info.function_source_hash);
-        let bitmap_bytes = self.const_u32(function_coverage_info.mcdc_bitmap_bytes);
-        self.mcdc_parameters(fn_name, hash, bitmap_bytes);
+        let bitmap_bits = self.const_u32(function_coverage_info.mcdc_bitmap_bits as u32);
+        self.mcdc_parameters(fn_name, hash, bitmap_bits);
 
         // Create pointers named `mcdc.addr.{i}` to stack-allocated condition bitmaps.
         let mut cond_bitmaps = vec![];
@@ -157,8 +156,8 @@ impl<'tcx> CoverageInfoBuilderMethods<'tcx> for Builder<'_, '_, 'tcx> {
             ),
             CoverageKind::CounterIncrement { id } => {
                 func_coverage.mark_counter_id_seen(id);
-                // We need to explicitly drop the `RefMut` before calling into `instrprof_increment`,
-                // as that needs an exclusive borrow.
+                // We need to explicitly drop the `RefMut` before calling into
+                // `instrprof_increment`, as that needs an exclusive borrow.
                 drop(coverage_map);
 
                 // The number of counters passed to `llvm.instrprof.increment` might
@@ -186,35 +185,28 @@ impl<'tcx> CoverageInfoBuilderMethods<'tcx> for Builder<'_, '_, 'tcx> {
             CoverageKind::ExpressionUsed { id } => {
                 func_coverage.mark_expression_id_seen(id);
             }
-            CoverageKind::CondBitmapUpdate { id, value, decision_depth } => {
+            CoverageKind::CondBitmapUpdate { index, decision_depth } => {
                 drop(coverage_map);
-                assert_ne!(
-                    id.as_u32(),
-                    0,
-                    "ConditionId of evaluated conditions should never be zero"
-                );
                 let cond_bitmap = coverage_context
                     .try_get_mcdc_condition_bitmap(&instance, decision_depth)
                     .expect("mcdc cond bitmap should have been allocated for updating");
-                let cond_loc = bx.const_i32(id.as_u32() as i32 - 1);
-                let bool_value = bx.const_bool(value);
-                let fn_name = bx.get_pgo_func_name_var(instance);
-                let hash = bx.const_u64(function_coverage_info.function_source_hash);
-                bx.mcdc_condbitmap_update(fn_name, hash, cond_loc, cond_bitmap, bool_value);
+                let cond_index = bx.const_i32(index as i32);
+                bx.mcdc_condbitmap_update(cond_index, cond_bitmap);
             }
             CoverageKind::TestVectorBitmapUpdate { bitmap_idx, decision_depth } => {
                 drop(coverage_map);
                 let cond_bitmap = coverage_context
                                     .try_get_mcdc_condition_bitmap(&instance, decision_depth)
                                     .expect("mcdc cond bitmap should have been allocated for merging into the global bitmap");
-                let bitmap_bytes = function_coverage_info.mcdc_bitmap_bytes;
-                assert!(bitmap_idx < bitmap_bytes, "bitmap index of the decision out of range");
+                assert!(
+                    bitmap_idx as usize <= function_coverage_info.mcdc_bitmap_bits,
+                    "bitmap index of the decision out of range"
+                );
 
                 let fn_name = bx.get_pgo_func_name_var(instance);
                 let hash = bx.const_u64(function_coverage_info.function_source_hash);
-                let bitmap_bytes = bx.const_u32(bitmap_bytes);
                 let bitmap_index = bx.const_u32(bitmap_idx);
-                bx.mcdc_tvbitmap_update(fn_name, hash, bitmap_bytes, bitmap_index, cond_bitmap);
+                bx.mcdc_tvbitmap_update(fn_name, hash, bitmap_index, cond_bitmap);
             }
         }
     }

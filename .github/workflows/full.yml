@@ -256,39 +256,39 @@ jobs:
       build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
 
 
-  build-aarch64-apple-darwin:
-    name: Build (aarch64-apple-darwin)
-    uses: ./.github/workflows/host-build.yml
-    secrets: inherit
-    with:
-      host-triple: aarch64-apple-darwin
-      runner: macos-14-xlarge
+  # build-aarch64-apple-darwin:
+  #   name: Build (aarch64-apple-darwin)
+  #   uses: ./.github/workflows/host-build.yml
+  #   secrets: inherit
+  #   with:
+  #     host-triple: aarch64-apple-darwin
+  #     runner: macos-14-xlarge
 
-  dist-aarch64-apple-darwin:
-    name: Dist (aarch64-apple-darwin)
-    uses: ./.github/workflows/host-dist.yml
-    needs:
-      - build-aarch64-apple-darwin
-    secrets: inherit
-    with:
-      host-triple: aarch64-apple-darwin
-      runner: macos-14-xlarge
-      build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
-      build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}
+  # dist-aarch64-apple-darwin:
+  #   name: Dist (aarch64-apple-darwin)
+  #   uses: ./.github/workflows/host-dist.yml
+  #   needs:
+  #     - build-aarch64-apple-darwin
+  #   secrets: inherit
+  #   with:
+  #     host-triple: aarch64-apple-darwin
+  #     runner: macos-14-xlarge
+  #     build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}
 
-  test-aarch64-apple-darwin:
-    name: Test (aarch64-apple-darwin)
-    uses: ./.github/workflows/test.yml
-    needs:
-      - build-aarch64-apple-darwin
-      # - targets
-    secrets: inherit
-    with:
-      triple: aarch64-apple-darwin
-      host-triple: aarch64-apple-darwin
-      runner: macos-14-xlarge
-      build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
-      build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}
+  # test-aarch64-apple-darwin:
+  #   name: Test (aarch64-apple-darwin)
+  #   uses: ./.github/workflows/test.yml
+  #   needs:
+  #     - build-aarch64-apple-darwin
+  #     # - targets
+  #   secrets: inherit
+  #   with:
+  #     triple: aarch64-apple-darwin
+  #     host-triple: aarch64-apple-darwin
+  #     runner: macos-14-xlarge
+  #     build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}
   
   # traceability-matrix:
   #   name: Tracability Matrix

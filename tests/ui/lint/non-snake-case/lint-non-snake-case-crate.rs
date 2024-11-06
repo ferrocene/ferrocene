@@ -22,6 +22,11 @@
 //@[rlib_] compile-flags: --crate-type=rlib
 //@[staticlib_] compile-flags: --crate-type=staticlib
 
+// These are not supported on this special target
+//@[proc_macro_] ignore-aarch64-unknown-ferrocenecoretest
+//@[dylib_] ignore-aarch64-unknown-ferrocenecoretest
+//@[cdylib_] ignore-aarch64-unknown-ferrocenecoretest
+
 #![crate_name = "NonSnakeCase"]
 //[cdylib_,dylib_,lib_,proc_macro_,rlib_,staticlib_]~^ ERROR crate `NonSnakeCase` should have a snake case name
 #![deny(non_snake_case)]

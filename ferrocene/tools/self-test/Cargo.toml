@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 tempfile = "3.3"
-thiserror = "1"
+thiserror = "2"
 
 [dev-dependencies]
 insta = "1.31"

@@ -10,6 +10,7 @@ use rustc_infer::infer::DefineOpaqueTypes;
 use rustc_middle::mir::interpret::ErrorHandled;
 use rustc_middle::ty::{Region, RegionVid};
 use tracing::debug;
+use ty::TypingMode;
 
 use super::*;
 use crate::errors::UnableToConstructConstantValue;
@@ -79,7 +80,7 @@ impl<'tcx> AutoTraitFinder<'tcx> {
 
         let trait_ref = ty::TraitRef::new(tcx, trait_did, [ty]);
 
-        let infcx = tcx.infer_ctxt().build();
+        let infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
         let mut selcx = SelectionContext::new(&infcx);
         for polarity in [ty::PredicatePolarity::Positive, ty::PredicatePolarity::Negative] {
             let result = selcx.select(&Obligation::new(
@@ -99,7 +100,7 @@ impl<'tcx> AutoTraitFinder<'tcx> {
             }
         }
 
-        let infcx = tcx.infer_ctxt().build();
+        let infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
         let mut fresh_preds = FxIndexSet::default();
 
         // Due to the way projections are handled by SelectionContext, we need to run
@@ -806,7 +807,8 @@ impl<'tcx> AutoTraitFinder<'tcx> {
                 | ty::PredicateKind::Subtype(..)
                 // FIXME(generic_const_exprs): you can absolutely add this as a where clauses
                 | ty::PredicateKind::Clause(ty::ClauseKind::ConstEvaluatable(..))
-                | ty::PredicateKind::Coerce(..) => {}
+                | ty::PredicateKind::Coerce(..)
+                | ty::PredicateKind::Clause(ty::ClauseKind::HostEffect(..)) => {}
                 ty::PredicateKind::Ambiguous => return false,
             };
         }

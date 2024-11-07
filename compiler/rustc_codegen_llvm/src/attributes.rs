@@ -6,12 +6,11 @@ use rustc_hir::def_id::DefId;
 use rustc_middle::middle::codegen_fn_attrs::{CodegenFnAttrFlags, PatchableFunctionEntry};
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_session::config::{BranchProtection, FunctionReturn, OptLevel, PAuthKey, PacRet};
-use rustc_span::symbol::sym;
 use rustc_target::spec::{FramePointer, SanitizerSet, StackProbeType, StackProtector};
 use smallvec::SmallVec;
 
 use crate::context::CodegenCx;
-use crate::errors::{MissingFeatures, SanitizerMemtagRequiresMte, TargetFeatureDisableOrEnable};
+use crate::errors::SanitizerMemtagRequiresMte;
 use crate::llvm::AttributePlace::Function;
 use crate::llvm::{self, AllocKindFlags, Attribute, AttributeKind, AttributePlace, MemoryEffects};
 use crate::value::Value;
@@ -230,11 +229,6 @@ fn probestack_attr<'ll>(cx: &CodegenCx<'ll, '_>) -> Option<&'ll Attribute> {
 
     // probestack doesn't play nice either with `-C profile-generate`.
     if cx.sess().opts.cg.profile_generate.enabled() {
-        return None;
-    }
-
-    // probestack doesn't play nice either with gcov profiling.
-    if cx.sess().opts.unstable_opts.profile {
         return None;
     }
 
@@ -501,26 +495,6 @@ pub(crate) fn llfn_attrs_from_instance<'ll, 'tcx>(
 
     let function_features =
         codegen_fn_attrs.target_features.iter().map(|f| f.name.as_str()).collect::<Vec<&str>>();
-
-    if let Some(f) = llvm_util::check_tied_features(
-        cx.tcx.sess,
-        &function_features.iter().map(|f| (*f, true)).collect(),
-    ) {
-        let span = cx
-            .tcx
-            .get_attrs(instance.def_id(), sym::target_feature)
-            .next()
-            .map_or_else(|| cx.tcx.def_span(instance.def_id()), |a| a.span);
-        cx.tcx
-            .dcx()
-            .create_err(TargetFeatureDisableOrEnable {
-                features: f,
-                span: Some(span),
-                missing_features: Some(MissingFeatures),
-            })
-            .emit();
-        return;
-    }
 
     let function_features = function_features
         .iter()

@@ -1,23 +1,23 @@
+use rustc_abi::{ExternAbi, Size};
 use rustc_ast::ast::Mutability;
 use rustc_middle::ty::layout::LayoutOf as _;
 use rustc_middle::ty::{self, Instance, Ty};
 use rustc_span::{BytePos, Loc, Symbol, hygiene};
-use rustc_target::abi::Size;
-use rustc_target::spec::abi::Abi;
 
+use crate::helpers::check_min_arg_count;
 use crate::*;
 
 impl<'tcx> EvalContextExt<'tcx> for crate::MiriInterpCx<'tcx> {}
 pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
     fn handle_miri_backtrace_size(
         &mut self,
-        abi: Abi,
+        abi: ExternAbi,
         link_name: Symbol,
         args: &[OpTy<'tcx>],
         dest: &MPlaceTy<'tcx>,
     ) -> InterpResult<'tcx> {
         let this = self.eval_context_mut();
-        let [flags] = this.check_shim(abi, Abi::Rust, link_name, args)?;
+        let [flags] = this.check_shim(abi, ExternAbi::Rust, link_name, args)?;
 
         let flags = this.read_scalar(flags)?.to_u64()?;
         if flags != 0 {
@@ -31,7 +31,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
 
     fn handle_miri_get_backtrace(
         &mut self,
-        abi: Abi,
+        abi: ExternAbi,
         link_name: Symbol,
         args: &[OpTy<'tcx>],
         dest: &MPlaceTy<'tcx>,
@@ -39,11 +39,8 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
         let this = self.eval_context_mut();
         let tcx = this.tcx;
 
-        let flags = if let Some(flags_op) = args.first() {
-            this.read_scalar(flags_op)?.to_u64()?
-        } else {
-            throw_ub_format!("expected at least 1 argument")
-        };
+        let [flags] = check_min_arg_count("miri_get_backtrace", args)?;
+        let flags = this.read_scalar(flags)?.to_u64()?;
 
         let mut data = Vec::new();
         for frame in this.active_thread_stack().iter().rev() {
@@ -75,7 +72,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
             // storage for pointers is allocated by miri
             // deallocating the slice is undefined behavior with a custom global allocator
             0 => {
-                let [_flags] = this.check_shim(abi, Abi::Rust, link_name, args)?;
+                let [_flags] = this.check_shim(abi, ExternAbi::Rust, link_name, args)?;
 
                 let alloc = this.allocate(array_layout, MiriMemoryKind::Rust.into())?;
 
@@ -90,7 +87,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
             }
             // storage for pointers is allocated by the caller
             1 => {
-                let [_flags, buf] = this.check_shim(abi, Abi::Rust, link_name, args)?;
+                let [_flags, buf] = this.check_shim(abi, ExternAbi::Rust, link_name, args)?;
 
                 let buf_place = this.deref_pointer(buf)?;
 
@@ -140,13 +137,13 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
 
     fn handle_miri_resolve_frame(
         &mut self,
-        abi: Abi,
+        abi: ExternAbi,
         link_name: Symbol,
         args: &[OpTy<'tcx>],
         dest: &MPlaceTy<'tcx>,
     ) -> InterpResult<'tcx> {
         let this = self.eval_context_mut();
-        let [ptr, flags] = this.check_shim(abi, Abi::Rust, link_name, args)?;
+        let [ptr, flags] = this.check_shim(abi, ExternAbi::Rust, link_name, args)?;
 
         let flags = this.read_scalar(flags)?.to_u64()?;
 
@@ -218,14 +215,14 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
 
     fn handle_miri_resolve_frame_names(
         &mut self,
-        abi: Abi,
+        abi: ExternAbi,
         link_name: Symbol,
         args: &[OpTy<'tcx>],
     ) -> InterpResult<'tcx> {
         let this = self.eval_context_mut();
 
         let [ptr, flags, name_ptr, filename_ptr] =
-            this.check_shim(abi, Abi::Rust, link_name, args)?;
+            this.check_shim(abi, ExternAbi::Rust, link_name, args)?;
 
         let flags = this.read_scalar(flags)?.to_u64()?;
         if flags != 0 {

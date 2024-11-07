@@ -2,6 +2,7 @@
 //!
 //! [rustc dev guide]: https://rustc-dev-guide.rust-lang.org/traits/resolution.html#selection
 
+use std::assert_matches::assert_matches;
 use std::cell::{Cell, RefCell};
 use std::fmt::{self, Display};
 use std::ops::ControlFlow;
@@ -18,7 +19,7 @@ use rustc_infer::infer::BoundRegionConversionTime::{self, HigherRankedType};
 use rustc_infer::infer::DefineOpaqueTypes;
 use rustc_infer::infer::at::ToTrace;
 use rustc_infer::infer::relate::TypeRelation;
-use rustc_infer::traits::TraitObligation;
+use rustc_infer::traits::{PredicateObligations, TraitObligation};
 use rustc_middle::bug;
 use rustc_middle::dep_graph::{DepNodeIndex, dep_kinds};
 use rustc_middle::mir::interpret::ErrorHandled;
@@ -28,7 +29,7 @@ use rustc_middle::ty::error::TypeErrorToStringExt;
 use rustc_middle::ty::print::{PrintTraitRefExt as _, with_no_trimmed_paths};
 use rustc_middle::ty::{
     self, GenericArgsRef, PolyProjectionPredicate, Ty, TyCtxt, TypeFoldable, TypeVisitableExt,
-    Upcast,
+    TypingMode, Upcast,
 };
 use rustc_span::Symbol;
 use rustc_span::symbol::sym;
@@ -49,7 +50,7 @@ use crate::infer::{InferCtxt, InferOk, TypeFreshener};
 use crate::solve::InferCtxtSelectExt as _;
 use crate::traits::normalize::{normalize_with_depth, normalize_with_depth_to};
 use crate::traits::project::{ProjectAndUnifyResult, ProjectionCacheKeyExt};
-use crate::traits::{ProjectionCacheKey, Unimplemented};
+use crate::traits::{ProjectionCacheKey, Unimplemented, effects};
 
 mod _match;
 mod candidate_assembly;
@@ -222,7 +223,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
     /// Enables tracking of intercrate ambiguity causes. See
     /// the documentation of [`Self::intercrate_ambiguity_causes`] for more.
     pub fn enable_tracking_intercrate_ambiguity_causes(&mut self) {
-        assert!(self.is_intercrate());
+        assert_matches!(self.infcx.typing_mode_unchecked(), TypingMode::Coherence);
         assert!(self.intercrate_ambiguity_causes.is_none());
         self.intercrate_ambiguity_causes = Some(FxIndexSet::default());
         debug!("selcx: enable_tracking_intercrate_ambiguity_causes");
@@ -234,16 +235,12 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
     pub fn take_intercrate_ambiguity_causes(
         &mut self,
     ) -> FxIndexSet<IntercrateAmbiguityCause<'tcx>> {
-        assert!(self.is_intercrate());
+        assert_matches!(self.infcx.typing_mode_unchecked(), TypingMode::Coherence);
         self.intercrate_ambiguity_causes.take().unwrap_or_default()
     }
 
     pub fn tcx(&self) -> TyCtxt<'tcx> {
         self.infcx.tcx
-    }
-
-    pub fn is_intercrate(&self) -> bool {
-        self.infcx.intercrate
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -645,6 +642,21 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     self.evaluate_trait_predicate_recursively(previous_stack, obligation)
                 }
 
+                ty::PredicateKind::Clause(ty::ClauseKind::HostEffect(data)) => {
+                    self.infcx.enter_forall(bound_predicate.rebind(data), |data| {
+                        match effects::evaluate_host_effect_obligation(
+                            self,
+                            &obligation.with(self.tcx(), data),
+                        ) {
+                            Ok(nested) => {
+                                self.evaluate_predicates_recursively(previous_stack, nested)
+                            }
+                            Err(effects::EvaluationFailure::Ambiguous) => Ok(EvaluatedToAmbig),
+                            Err(effects::EvaluationFailure::NoSolution) => Ok(EvaluatedToErr),
+                        }
+                    })
+                }
+
                 ty::PredicateKind::Subtype(p) => {
                     let p = bound_predicate.rebind(p);
                     // Does this code ever run?
@@ -865,7 +877,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 ty::PredicateKind::ConstEquate(c1, c2) => {
                     let tcx = self.tcx();
                     assert!(
-                        tcx.features().generic_const_exprs,
+                        tcx.features().generic_const_exprs(),
                         "`ConstEquate` without a feature gate: {c1:?} {c2:?}",
                     );
 
@@ -1014,7 +1026,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         previous_stack: TraitObligationStackList<'o, 'tcx>,
         mut obligation: PolyTraitObligation<'tcx>,
     ) -> Result<EvaluationResult, OverflowError> {
-        if !self.is_intercrate()
+        if !matches!(self.infcx.typing_mode(obligation.param_env), TypingMode::Coherence)
             && obligation.is_global()
             && obligation.param_env.caller_bounds().iter().all(|bound| bound.has_param())
         {
@@ -1067,7 +1079,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 && fresh_trait_pred.has_aliases()
                 && fresh_trait_pred.is_global()
             {
-                let mut nested_obligations = Vec::new();
+                let mut nested_obligations = PredicateObligations::new();
                 let predicate = normalize_with_depth_to(
                     this,
                     param_env,
@@ -1297,14 +1309,6 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         param_env: ty::ParamEnv<'tcx>,
         trait_pred: ty::PolyTraitPredicate<'tcx>,
     ) -> Option<EvaluationResult> {
-        // Neither the global nor local cache is aware of intercrate
-        // mode, so don't do any caching. In particular, we might
-        // re-use the same `InferCtxt` with both an intercrate
-        // and non-intercrate `SelectionContext`
-        if self.is_intercrate() {
-            return None;
-        }
-
         let tcx = self.tcx();
         if self.can_use_global_caches(param_env) {
             if let Some(res) = tcx.evaluation_cache.get(&(param_env, trait_pred), tcx) {
@@ -1324,14 +1328,6 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         // Avoid caching results that depend on more than just the trait-ref
         // - the stack can create recursion.
         if result.is_stack_dependent() {
-            return;
-        }
-
-        // Neither the global nor local cache is aware of intercrate
-        // mode, so don't do any caching. In particular, we might
-        // re-use the same `InferCtxt` with both an intercrate
-        // and non-intercrate `SelectionContext`
-        if self.is_intercrate() {
             return;
         }
 
@@ -1461,13 +1457,14 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
     }
 
     fn is_knowable<'o>(&mut self, stack: &TraitObligationStack<'o, 'tcx>) -> Result<(), Conflict> {
-        debug!("is_knowable(intercrate={:?})", self.is_intercrate());
-
-        if !self.is_intercrate() {
-            return Ok(());
+        let obligation = &stack.obligation;
+        match self.infcx.typing_mode(obligation.param_env) {
+            TypingMode::Coherence => {}
+            TypingMode::Analysis { .. } | TypingMode::PostAnalysis => return Ok(()),
         }
 
-        let obligation = &stack.obligation;
+        debug!("is_knowable()");
+
         let predicate = self.infcx.resolve_vars_if_possible(obligation.predicate);
 
         // Okay to skip binder because of the nature of the
@@ -1487,25 +1484,24 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             return false;
         }
 
-        // Avoid using the global cache during coherence and just rely
-        // on the local cache. This effectively disables caching
-        // during coherence. It is really just a simplification to
-        // avoid us having to fear that coherence results "pollute"
-        // the master cache. Since coherence executes pretty quickly,
-        // it's not worth going to more trouble to increase the
-        // hit-rate, I don't think.
-        if self.is_intercrate() {
-            return false;
+        match self.infcx.typing_mode(param_env) {
+            // Avoid using the global cache during coherence and just rely
+            // on the local cache. It is really just a simplification to
+            // avoid us having to fear that coherence results "pollute"
+            // the master cache. Since coherence executes pretty quickly,
+            // it's not worth going to more trouble to increase the
+            // hit-rate, I don't think.
+            TypingMode::Coherence => false,
+            // Avoid using the global cache when we're defining opaque types
+            // as their hidden type may impact the result of candidate selection.
+            TypingMode::Analysis { defining_opaque_types } => defining_opaque_types.is_empty(),
+            // The global cache is only used if there are no opaque types in
+            // the defining scope or we're outside of analysis.
+            //
+            // FIXME(#132279): This is still incorrect as we treat opaque types
+            // and default associated items differently between these two modes.
+            TypingMode::PostAnalysis => true,
         }
-
-        // Avoid using the global cache when we're defining opaque types
-        // as their hidden type may impact the result of candidate selection.
-        if !self.infcx.defining_opaque_types().is_empty() {
-            return false;
-        }
-
-        // Otherwise, we can use the global cache.
-        true
     }
 
     fn check_candidate_cache(
@@ -1513,13 +1509,6 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         param_env: ty::ParamEnv<'tcx>,
         cache_fresh_trait_pred: ty::PolyTraitPredicate<'tcx>,
     ) -> Option<SelectionResult<'tcx, SelectionCandidate<'tcx>>> {
-        // Neither the global nor local cache is aware of intercrate
-        // mode, so don't do any caching. In particular, we might
-        // re-use the same `InferCtxt` with both an intercrate
-        // and non-intercrate `SelectionContext`
-        if self.is_intercrate() {
-            return None;
-        }
         let tcx = self.tcx();
         let pred = cache_fresh_trait_pred.skip_binder();
 
@@ -1551,13 +1540,6 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         &self,
         result: &SelectionResult<'tcx, SelectionCandidate<'tcx>>,
     ) -> bool {
-        // Neither the global nor local cache is aware of intercrate
-        // mode, so don't do any caching. In particular, we might
-        // re-use the same `InferCtxt` with both an intercrate
-        // and non-intercrate `SelectionContext`
-        if self.is_intercrate() {
-            return false;
-        }
         match result {
             Ok(Some(SelectionCandidate::ParamCandidate(trait_ref))) => !trait_ref.has_infer(),
             _ => true,
@@ -1715,7 +1697,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
     ) -> ProjectionMatchesProjection {
         debug_assert_eq!(obligation.predicate.def_id, env_predicate.projection_def_id());
 
-        let mut nested_obligations = Vec::new();
+        let mut nested_obligations = PredicateObligations::new();
         let infer_predicate = self.infcx.instantiate_binder_with_fresh_vars(
             obligation.cause.span,
             BoundRegionConversionTime::HigherRankedType,
@@ -1821,8 +1803,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             |cand: ty::PolyTraitPredicate<'tcx>| cand.is_global() && !cand.has_bound_vars();
 
         // (*) Prefer `BuiltinCandidate { has_nested: false }`, `PointeeCandidate`,
-        // `DiscriminantKindCandidate`, `ConstDestructCandidate`
-        // to anything else.
+        // or `DiscriminantKindCandidate` to anything else.
         //
         // This is a fix for #53123 and prevents winnowing from accidentally extending the
         // lifetime of a variable.
@@ -1831,12 +1812,8 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             (TransmutabilityCandidate, _) | (_, TransmutabilityCandidate) => DropVictim::No,
 
             // (*)
-            (BuiltinCandidate { has_nested: false } | ConstDestructCandidate(_), _) => {
-                DropVictim::Yes
-            }
-            (_, BuiltinCandidate { has_nested: false } | ConstDestructCandidate(_)) => {
-                DropVictim::No
-            }
+            (BuiltinCandidate { has_nested: false }, _) => DropVictim::Yes,
+            (_, BuiltinCandidate { has_nested: false }) => DropVictim::No,
 
             (ParamCandidate(other), ParamCandidate(victim)) => {
                 let same_except_bound_vars = other.skip_binder().trait_ref
@@ -1853,11 +1830,6 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
                 } else {
                     DropVictim::No
                 }
-            }
-
-            // Drop otherwise equivalent non-const fn pointer candidates
-            (FnPointerCandidate { .. }, FnPointerCandidate { fn_host_effect }) => {
-                DropVictim::drop_if(*fn_host_effect == self.tcx().consts.true_)
             }
 
             (
@@ -2204,7 +2176,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
                 match self.tcx().coroutine_movability(coroutine_def_id) {
                     hir::Movability::Static => None,
                     hir::Movability::Movable => {
-                        if self.tcx().features().coroutine_clone {
+                        if self.tcx().features().coroutine_clone() {
                             let resolved_upvars =
                                 self.infcx.shallow_resolve(args.as_coroutine().tupled_upvars_ty());
                             let resolved_witness =
@@ -2410,7 +2382,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         recursion_depth: usize,
         trait_def_id: DefId,
         types: ty::Binder<'tcx, Vec<Ty<'tcx>>>,
-    ) -> Vec<PredicateObligation<'tcx>> {
+    ) -> PredicateObligations<'tcx> {
         // Because the types were potentially derived from
         // higher-ranked obligations they may reference late-bound
         // regions. For example, `for<'a> Foo<&'a i32> : Copy` would
@@ -2536,7 +2508,9 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             })?;
         nested_obligations.extend(obligations);
 
-        if !self.is_intercrate() && impl_trait_header.polarity == ty::ImplPolarity::Reservation {
+        if impl_trait_header.polarity == ty::ImplPolarity::Reservation
+            && !matches!(self.infcx.typing_mode(obligation.param_env), TypingMode::Coherence)
+        {
             debug!("reservation impls only apply in intercrate mode");
             return Err(());
         }
@@ -2552,9 +2526,9 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         b_data: &'tcx ty::List<ty::PolyExistentialPredicate<'tcx>>,
         a_region: ty::Region<'tcx>,
         b_region: ty::Region<'tcx>,
-    ) -> SelectionResult<'tcx, Vec<PredicateObligation<'tcx>>> {
+    ) -> SelectionResult<'tcx, PredicateObligations<'tcx>> {
         let tcx = self.tcx();
-        let mut nested = vec![];
+        let mut nested = PredicateObligations::new();
 
         // We may upcast to auto traits that are either explicitly listed in
         // the object type's bounds, or implied by the principal trait ref's
@@ -2705,7 +2679,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         &mut self,
         obligation: &PolyTraitObligation<'tcx>,
         where_clause_trait_ref: ty::PolyTraitRef<'tcx>,
-    ) -> Result<Vec<PredicateObligation<'tcx>>, ()> {
+    ) -> Result<PredicateObligations<'tcx>, ()> {
         self.match_poly_trait_ref(obligation, where_clause_trait_ref)
     }
 
@@ -2716,7 +2690,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         &mut self,
         obligation: &PolyTraitObligation<'tcx>,
         poly_trait_ref: ty::PolyTraitRef<'tcx>,
-    ) -> Result<Vec<PredicateObligation<'tcx>>, ()> {
+    ) -> Result<PredicateObligations<'tcx>, ()> {
         let predicate = self.infcx.enter_forall_and_leak_universe(obligation.predicate);
         let trait_ref = self.infcx.instantiate_binder_with_fresh_vars(
             obligation.cause.span,
@@ -2766,7 +2740,6 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         &mut self,
         self_ty: Ty<'tcx>,
         fn_trait_def_id: DefId,
-        fn_host_effect: ty::Const<'tcx>,
     ) -> ty::PolyTraitRef<'tcx> {
         let ty::Closure(_, args) = *self_ty.kind() else {
             bug!("expected closure, found {self_ty}");
@@ -2779,7 +2752,6 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             self_ty,
             closure_sig,
             util::TupleArgumentsFlag::No,
-            fn_host_effect,
         )
         .map_bound(|(trait_ref, _)| trait_ref)
     }
@@ -2797,7 +2769,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         def_id: DefId,              // of impl or trait
         args: GenericArgsRef<'tcx>, // for impl or trait
         parent_trait_pred: ty::Binder<'tcx, ty::TraitPredicate<'tcx>>,
-    ) -> Vec<PredicateObligation<'tcx>> {
+    ) -> PredicateObligations<'tcx> {
         let tcx = self.tcx();
 
         // To allow for one-pass evaluation of the nested obligation,
@@ -2817,7 +2789,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         let predicates = tcx.predicates_of(def_id);
         assert_eq!(predicates.parent, None);
         let predicates = predicates.instantiate_own(tcx, args);
-        let mut obligations = Vec::with_capacity(predicates.len());
+        let mut obligations = PredicateObligations::with_capacity(predicates.len());
         for (index, (predicate, span)) in predicates.into_iter().enumerate() {
             let cause = if tcx.is_lang_item(parent_trait_pred.def_id(), LangItem::CoerceUnsized) {
                 cause.clone()

@@ -810,7 +810,7 @@ fn test_unstable_options_tracking_hash() {
     tracked!(mir_opt_level, Some(4));
     tracked!(move_size_limit, Some(4096));
     tracked!(mutable_noalias, false);
-    tracked!(next_solver, Some(NextSolverConfig { coherence: true, globally: false }));
+    tracked!(next_solver, NextSolverConfig { coherence: true, globally: true });
     tracked!(no_generate_arange_section, true);
     tracked!(no_jump_tables, true);
     tracked!(no_link, true);
@@ -832,10 +832,9 @@ fn test_unstable_options_tracking_hash() {
     tracked!(polonius, Polonius::Legacy);
     tracked!(precise_enum_drop_elaboration, false);
     tracked!(print_fuel, Some("abc".to_string()));
-    tracked!(profile, true);
-    tracked!(profile_emit, Some(PathBuf::from("abc")));
     tracked!(profile_sample_use, Some(PathBuf::from("abc")));
     tracked!(profiler_runtime, "abc".to_string());
+    tracked!(regparm, Some(3));
     tracked!(relax_elf_relocations, Some(true));
     tracked!(remap_cwd_prefix, Some(PathBuf::from("abc")));
     tracked!(sanitizer, SanitizerSet::ADDRESS);

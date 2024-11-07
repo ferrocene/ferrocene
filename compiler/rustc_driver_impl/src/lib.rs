@@ -33,6 +33,7 @@ use std::time::{Instant, SystemTime};
 use std::{env, str};
 
 use rustc_ast as ast;
+use rustc_codegen_ssa::back::apple;
 use rustc_codegen_ssa::traits::CodegenBackend;
 use rustc_codegen_ssa::{CodegenErrors, CodegenResults};
 use rustc_data_structures::profiling::{
@@ -61,7 +62,7 @@ use rustc_session::{EarlyDiagCtxt, Session, config, filesearch};
 use rustc_span::FileName;
 use rustc_span::source_map::FileLoader;
 use rustc_target::json::ToJson;
-use rustc_target::spec::{Target, TargetTriple};
+use rustc_target::spec::{Target, TargetTuple};
 use time::OffsetDateTime;
 use tracing::trace;
 
@@ -730,6 +731,7 @@ fn print_crate_info(
                 targets.sort_unstable();
                 println_info!("{}", targets.join("\n"));
             }
+            HostTuple => println_info!("{}", rustc_session::config::host_tuple()),
             Sysroot => println_info!("{}", sess.sysroot.display()),
             TargetLibdir => println_info!("{}", sess.target_tlib_path.dir.display()),
             TargetSpec => {
@@ -738,7 +740,7 @@ fn print_crate_info(
             AllTargetSpecs => {
                 let mut targets = BTreeMap::new();
                 for name in rustc_target::spec::TARGETS {
-                    let triple = TargetTriple::from_triple(name);
+                    let triple = TargetTuple::from_tuple(name);
                     let target = Target::expect_builtin(&triple);
                     targets.insert(name, target.to_json());
                 }
@@ -855,12 +857,11 @@ fn print_crate_info(
                 }
             }
             DeploymentTarget => {
-                use rustc_target::spec::current_apple_deployment_target;
-
                 if sess.target.is_like_osx {
-                    let (major, minor, patch) = current_apple_deployment_target(&sess.target);
-                    let patch = if patch != 0 { format!(".{patch}") } else { String::new() };
-                    println_info!("deployment_target={major}.{minor}{patch}")
+                    println_info!(
+                        "deployment_target={}",
+                        apple::pretty_version(apple::deployment_target(sess))
+                    )
                 } else {
                     #[allow(rustc::diagnostic_outside_of_impl)]
                     sess.dcx().fatal("only Apple targets currently support deployment version info")
@@ -918,7 +919,7 @@ pub fn version_at_macro_invocation(
         safe_println!("binary: {binary}");
         safe_println!("commit-hash: {commit_hash}");
         safe_println!("commit-date: {commit_date}");
-        safe_println!("host: {}", config::host_triple());
+        safe_println!("host: {}", config::host_tuple());
         safe_println!("release: {release}");
 
         let debug_flags = matches.opt_strs("Z");
@@ -1395,7 +1396,7 @@ pub fn install_ice_hook(
     }
 
     let using_internal_features = Arc::new(std::sync::atomic::AtomicBool::default());
-    let using_internal_features_hook = using_internal_features.clone();
+    let using_internal_features_hook = Arc::clone(&using_internal_features);
     panic::update_hook(Box::new(
         move |default_hook: &(dyn Fn(&PanicHookInfo<'_>) + Send + Sync + 'static),
               info: &PanicHookInfo<'_>| {
@@ -1495,7 +1496,7 @@ fn report_ice(
     }
 
     let version = util::version_str!().unwrap_or("unknown_version");
-    let triple = config::host_triple();
+    let tuple = config::host_tuple();
 
     static FIRST_PANIC: AtomicBool = AtomicBool::new(true);
 
@@ -1505,7 +1506,7 @@ fn report_ice(
             Ok(mut file) => {
                 dcx.emit_note(session_diagnostics::IcePath { path: path.clone() });
                 if FIRST_PANIC.swap(false, Ordering::SeqCst) {
-                    let _ = write!(file, "\n\nrustc version: {version}\nplatform: {triple}");
+                    let _ = write!(file, "\n\nrustc version: {version}\nplatform: {tuple}");
                 }
                 Some(file)
             }
@@ -1518,12 +1519,12 @@ fn report_ice(
                         .map(PathBuf::from)
                         .map(|env_var| session_diagnostics::IcePathErrorEnv { env_var }),
                 });
-                dcx.emit_note(session_diagnostics::IceVersion { version, triple });
+                dcx.emit_note(session_diagnostics::IceVersion { version, triple: tuple });
                 None
             }
         }
     } else {
-        dcx.emit_note(session_diagnostics::IceVersion { version, triple });
+        dcx.emit_note(session_diagnostics::IceVersion { version, triple: tuple });
         None
     };
 

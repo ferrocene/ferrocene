@@ -7,7 +7,7 @@ use rustc_ast::expand::allocator::{ALLOCATOR_METHODS, AllocatorKind, global_fn_n
 use rustc_attr as attr;
 use rustc_data_structures::fx::{FxHashMap, FxIndexSet};
 use rustc_data_structures::profiling::{get_resident_set_size, print_time_passes_entry};
-use rustc_data_structures::sync::par_map;
+use rustc_data_structures::sync::{Lrc, par_map};
 use rustc_data_structures::unord::UnordMap;
 use rustc_hir::def_id::{DefId, LOCAL_CRATE};
 use rustc_hir::lang_items::LangItem;
@@ -21,7 +21,7 @@ use rustc_middle::mir::BinOp;
 use rustc_middle::mir::mono::{CodegenUnit, CodegenUnitNameBuilder, MonoItem};
 use rustc_middle::query::Providers;
 use rustc_middle::ty::layout::{HasTyCtxt, LayoutOf, TyAndLayout};
-use rustc_middle::ty::{self, Instance, Ty, TyCtxt};
+use rustc_middle::ty::{self, Instance, Ty, TyCtxt, TypingMode};
 use rustc_session::Session;
 use rustc_session::config::{self, CrateType, EntryFnType, OptLevel, OutputType};
 use rustc_span::symbol::sym;
@@ -119,7 +119,7 @@ pub fn validate_trivial_unsize<'tcx>(
 ) -> bool {
     match (source_data.principal(), target_data.principal()) {
         (Some(hr_source_principal), Some(hr_target_principal)) => {
-            let infcx = tcx.infer_ctxt().build();
+            let infcx = tcx.infer_ctxt().build(TypingMode::PostAnalysis);
             let universe = infcx.universe();
             let ocx = ObligationCtxt::new(&infcx);
             infcx.enter_forall(hr_target_principal, |target_principal| {
@@ -147,7 +147,7 @@ pub fn validate_trivial_unsize<'tcx>(
                 infcx.leak_check(universe, None).is_ok()
             })
         }
-        (None, None) => true,
+        (_, None) => true,
         _ => false,
     }
 }
@@ -175,7 +175,8 @@ fn unsized_info<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
         {
             let old_info =
                 old_info.expect("unsized_info: missing old info for trait upcasting coercion");
-            if data_a.principal_def_id() == data_b.principal_def_id() {
+            let b_principal_def_id = data_b.principal_def_id();
+            if data_a.principal_def_id() == b_principal_def_id || b_principal_def_id.is_none() {
                 // Codegen takes advantage of the additional assumption, where if the
                 // principal trait def id of what's being casted doesn't change,
                 // then we don't need to adjust the vtable at all. This
@@ -887,7 +888,7 @@ impl CrateInfo {
         // below.
         //
         // In order to get this left-to-right dependency ordering, we use the reverse
-        // postorder of all crates putting the leaves at the right-most positions.
+        // postorder of all crates putting the leaves at the rightmost positions.
         let mut compiler_builtins = None;
         let mut used_crates: Vec<_> = tcx
             .postorder_cnums(())
@@ -922,7 +923,7 @@ impl CrateInfo {
             crate_name: UnordMap::with_capacity(n_crates),
             used_crates,
             used_crate_source: UnordMap::with_capacity(n_crates),
-            dependency_formats: tcx.dependency_formats(()).clone(),
+            dependency_formats: Lrc::clone(tcx.dependency_formats(())),
             windows_subsystem,
             natvis_debugger_visualizers: Default::default(),
         };
@@ -935,7 +936,7 @@ impl CrateInfo {
             info.crate_name.insert(cnum, tcx.crate_name(cnum));
 
             let used_crate_source = tcx.used_crate_source(cnum);
-            info.used_crate_source.insert(cnum, used_crate_source.clone());
+            info.used_crate_source.insert(cnum, Lrc::clone(used_crate_source));
             if tcx.is_profiler_runtime(cnum) {
                 info.profiler_runtime = Some(cnum);
             }

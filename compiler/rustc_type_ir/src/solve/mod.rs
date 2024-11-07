@@ -58,20 +58,8 @@ pub enum Reveal {
     All,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum SolverMode {
-    /// Ordinary trait solving, using everywhere except for coherence.
-    Normal,
-    /// Trait solving during coherence. There are a few notable differences
-    /// between coherence and ordinary trait solving.
-    ///
-    /// Most importantly, trait solving during coherence must not be incomplete,
-    /// i.e. return `Err(NoSolution)` for goals for which a solution exists.
-    /// This means that we must not make any guesses or arbitrary choices.
-    Coherence,
-}
-
-pub type CanonicalInput<I, T = <I as Interner>::Predicate> = Canonical<I, QueryInput<I, T>>;
+pub type CanonicalInput<I, T = <I as Interner>::Predicate> =
+    ty::CanonicalQueryInput<I, QueryInput<I, T>>;
 pub type CanonicalResponse<I> = Canonical<I, Response<I>>;
 /// The result of evaluating a canonical query.
 ///
@@ -130,6 +118,10 @@ pub enum GoalSource {
     ImplWhereBound,
     /// Instantiating a higher-ranked goal and re-proving it.
     InstantiateHigherRanked,
+    /// Predicate required for an alias projection to be well-formed.
+    /// This is used in two places: projecting to an opaque whose hidden type
+    /// is already registered in the opaque type storage, and for rigid projections.
+    AliasWellFormed,
 }
 
 #[derive_where(Clone; I: Interner, Goal<I, P>: Clone)]

@@ -2,6 +2,12 @@ codegen_ssa_L4Bender_exporting_symbols_unimplemented = exporting symbols not imp
 
 codegen_ssa_add_native_library = failed to add native library {$library_path}: {$error}
 
+codegen_ssa_apple_deployment_target_invalid =
+    failed to parse deployment target specified in {$env_var}: {$error}
+
+codegen_ssa_apple_deployment_target_too_low =
+    deployment target in {$env_var} was set to {$version}, but the minimum supported by `rustc` is {$os_min}
+
 codegen_ssa_apple_sdk_error_sdk_path = failed to get {$sdk_name} SDK path: {$error}
 
 codegen_ssa_archive_build_failure = failed to build archive at `{$path}`: {$error}
@@ -183,6 +189,8 @@ codegen_ssa_metadata_object_file_write = error writing metadata object file: {$e
 
 codegen_ssa_missing_cpp_build_tool_component = or a necessary component may be missing from the "C++ build tools" workload
 
+codegen_ssa_missing_features = add the missing features in a `target_feature` attribute
+
 codegen_ssa_missing_memory_ordering = Atomic intrinsic missing memory ordering
 
 codegen_ssa_missing_query_depgraph =
@@ -237,6 +245,9 @@ codegen_ssa_stripping_debug_info_failed = stripping debug info with `{$util}` fa
     .note = {$output}
 
 codegen_ssa_symbol_file_write_failure = failed to write symbols file: {$error}
+
+codegen_ssa_target_feature_disable_or_enable =
+    the target features {$features} must all be either enabled or disabled together
 
 codegen_ssa_target_feature_safe_trait = `#[target_feature(..)]` cannot be applied to safe trait method
     .label = cannot be applied to safe trait method

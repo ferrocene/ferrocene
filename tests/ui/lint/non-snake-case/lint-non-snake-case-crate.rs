@@ -10,10 +10,17 @@
 
 // But should fire on non-binary crates.
 
-//@[cdylib_] ignore-musl (dylibs are not supported)
-//@[dylib_] ignore-musl (dylibs are not supported)
-//@[dylib_] ignore-wasm (dylib is not supported)
-//@[proc_macro_] ignore-wasm (dylib is not supported)
+// FIXME(#132309): dylib crate type is not supported on wasm; we need a proper
+// supports-crate-type directive. Also, needs-dynamic-linking should rule out
+// musl since it supports neither dylibs nor cdylibs.
+//@[dylib_] ignore-wasm
+//@[dylib_] ignore-musl
+//@[cdylib_] ignore-musl
+
+//@[dylib_] needs-dynamic-linking
+//@[cdylib_] needs-dynamic-linking
+//@[proc_macro_] force-host
+//@[proc_macro_] no-prefer-dynamic
 
 //@[cdylib_] compile-flags: --crate-type=cdylib
 //@[dylib_] compile-flags: --crate-type=dylib
@@ -22,10 +29,16 @@
 //@[rlib_] compile-flags: --crate-type=rlib
 //@[staticlib_] compile-flags: --crate-type=staticlib
 
+<<<<<<< HEAD
 // These are not supported on this special target
 //@[proc_macro_] ignore-aarch64-unknown-ferrocenecoretest
 //@[dylib_] ignore-aarch64-unknown-ferrocenecoretest
 //@[cdylib_] ignore-aarch64-unknown-ferrocenecoretest
+=======
+// The compiler may emit a warning that causes stderr output
+// that contains a warning this test does not wish to check.
+//@[proc_macro_] needs-unwind
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 #![crate_name = "NonSnakeCase"]
 //[cdylib_,dylib_,lib_,proc_macro_,rlib_,staticlib_]~^ ERROR crate `NonSnakeCase` should have a snake case name

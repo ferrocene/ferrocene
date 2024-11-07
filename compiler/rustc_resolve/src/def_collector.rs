@@ -105,22 +105,6 @@ impl<'a, 'ra, 'tcx> DefCollector<'a, 'ra, 'tcx> {
             let name = field.ident.map_or_else(|| sym::integer(index(self)), |ident| ident.name);
             let def = self.create_def(field.id, name, DefKind::Field, field.span);
             self.with_parent(def, |this| visit::walk_field_def(this, field));
-            self.visit_anon_adt(&field.ty);
-        }
-    }
-
-    fn visit_anon_adt(&mut self, ty: &'a Ty) {
-        let def_kind = match &ty.kind {
-            TyKind::AnonStruct(..) => DefKind::Struct,
-            TyKind::AnonUnion(..) => DefKind::Union,
-            _ => return,
-        };
-        match &ty.kind {
-            TyKind::AnonStruct(node_id, _) | TyKind::AnonUnion(node_id, _) => {
-                let def_id = self.create_def(*node_id, kw::Empty, def_kind, ty.span);
-                self.with_parent(def_id, |this| visit::walk_ty(this, ty));
-            }
-            _ => {}
         }
     }
 
@@ -215,8 +199,10 @@ impl<'a, 'ra, 'tcx> visit::Visitor<'a> for DefCollector<'a, 'ra, 'tcx> {
             },
             ItemKind::Const(..) => DefKind::Const,
             ItemKind::Fn(..) | ItemKind::Delegation(..) => DefKind::Fn,
-            ItemKind::MacroDef(..) => {
-                let macro_data = self.resolver.compile_macro(i, self.resolver.tcx.sess.edition());
+            ItemKind::MacroDef(def) => {
+                let edition = self.resolver.tcx.sess.edition();
+                let macro_data =
+                    self.resolver.compile_macro(def, i.ident, &i.attrs, i.span, i.id, edition);
                 let macro_kind = macro_data.ext.macro_kind();
                 opt_macro_data = Some(macro_data);
                 DefKind::Macro(macro_kind)
@@ -476,8 +462,6 @@ impl<'a, 'ra, 'tcx> visit::Visitor<'a> for DefCollector<'a, 'ra, 'tcx> {
     fn visit_ty(&mut self, ty: &'a Ty) {
         match &ty.kind {
             TyKind::MacCall(..) => self.visit_macro_invoc(ty.id),
-            // Anonymous structs or unions are visited later after defined.
-            TyKind::AnonStruct(..) | TyKind::AnonUnion(..) => {}
             TyKind::ImplTrait(id, _) => {
                 // HACK: pprust breaks strings with newlines when the type
                 // gets too long. We don't want these to show up in compiler

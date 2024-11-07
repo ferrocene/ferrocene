@@ -82,7 +82,7 @@ book!(
     EditionGuide, "src/doc/edition-guide", "edition-guide", &[], submodule;
     EmbeddedBook, "src/doc/embedded-book", "embedded-book", &[], submodule;
     Nomicon, "src/doc/nomicon", "nomicon", &[], submodule;
-    RustByExample, "src/doc/rust-by-example", "rust-by-example", &["ja"], submodule;
+    RustByExample, "src/doc/rust-by-example", "rust-by-example", &["ja", "zh"], submodule;
     RustdocBook, "src/doc/rustdoc", "rustdoc", &[];
     StyleGuide, "src/doc/style-guide", "style-guide", &[];
 );
@@ -170,7 +170,14 @@ impl<P: Step> Step for RustbookSrc<P> {
                 builder.add_rustc_lib_path(compiler, &mut rustbook_cmd);
             }
 
-            rustbook_cmd.arg("build").arg(&src).arg("-d").arg(&out).run(builder);
+            rustbook_cmd
+                .arg("build")
+                .arg(&src)
+                .arg("-d")
+                .arg(&out)
+                .arg("--rust-root")
+                .arg(&builder.src)
+                .run(builder);
 
             for lang in &self.languages {
                 let out = out.join(lang);
@@ -726,6 +733,10 @@ fn doc_std(
         .arg("--target-dir")
         .arg(&*target_dir.to_string_lossy())
         .arg("-Zskip-rustdoc-fingerprint")
+        .arg("-Zrustdoc-map")
+        .rustdocflag("--extern-html-root-url")
+        .rustdocflag("std_detect=https://docs.rs/std_detect/latest/")
+        .rustdocflag("--extern-html-root-takes-precedence")
         .rustdocflag("--resource-suffix")
         .rustdocflag(&builder.version);
     for arg in extra_args {

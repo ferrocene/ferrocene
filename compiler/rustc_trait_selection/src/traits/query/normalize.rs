@@ -4,11 +4,12 @@
 
 use rustc_data_structures::sso::SsoHashMap;
 use rustc_data_structures::stack::ensure_sufficient_stack;
+use rustc_infer::traits::PredicateObligations;
 use rustc_macros::extension;
 pub use rustc_middle::traits::query::NormalizationResult;
 use rustc_middle::ty::fold::{FallibleTypeFolder, TypeFoldable, TypeSuperFoldable};
 use rustc_middle::ty::visit::{TypeSuperVisitable, TypeVisitable, TypeVisitableExt};
-use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitor};
+use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitor, TypingMode};
 use rustc_span::DUMMY_SP;
 use tracing::{debug, info, instrument};
 
@@ -20,8 +21,7 @@ use crate::infer::canonical::OriginalQueryValues;
 use crate::infer::{InferCtxt, InferOk};
 use crate::traits::normalize::needs_normalization;
 use crate::traits::{
-    BoundVarReplacer, Normalized, ObligationCause, PlaceholderReplacer, PredicateObligation,
-    Reveal, ScrubbedTraitError,
+    BoundVarReplacer, Normalized, ObligationCause, PlaceholderReplacer, ScrubbedTraitError,
 };
 
 #[extension(pub trait QueryNormalizeExt<'tcx>)]
@@ -80,22 +80,24 @@ impl<'a, 'tcx> At<'a, 'tcx> {
             match crate::solve::deeply_normalize_with_skipped_universes::<_, ScrubbedTraitError<'tcx>>(
                 self, value, universes,
             ) {
-                Ok(value) => return Ok(Normalized { value, obligations: vec![] }),
+                Ok(value) => {
+                    return Ok(Normalized { value, obligations: PredicateObligations::new() });
+                }
                 Err(_errors) => {
                     return Err(NoSolution);
                 }
             }
         }
 
-        if !needs_normalization(&value, self.param_env.reveal()) {
-            return Ok(Normalized { value, obligations: vec![] });
+        if !needs_normalization(self.infcx, self.param_env, &value) {
+            return Ok(Normalized { value, obligations: PredicateObligations::new() });
         }
 
         let mut normalizer = QueryNormalizer {
             infcx: self.infcx,
             cause: self.cause,
             param_env: self.param_env,
-            obligations: vec![],
+            obligations: PredicateObligations::new(),
             cache: SsoHashMap::new(),
             anon_depth: 0,
             universes,
@@ -164,7 +166,7 @@ struct QueryNormalizer<'a, 'tcx> {
     infcx: &'a InferCtxt<'tcx>,
     cause: &'a ObligationCause<'tcx>,
     param_env: ty::ParamEnv<'tcx>,
-    obligations: Vec<PredicateObligation<'tcx>>,
+    obligations: PredicateObligations<'tcx>,
     cache: SsoHashMap<Ty<'tcx>, Ty<'tcx>>,
     anon_depth: usize,
     universes: Vec<Option<ty::UniverseIndex>>,
@@ -189,7 +191,7 @@ impl<'a, 'tcx> FallibleTypeFolder<TyCtxt<'tcx>> for QueryNormalizer<'a, 'tcx> {
 
     #[instrument(level = "debug", skip(self))]
     fn try_fold_ty(&mut self, ty: Ty<'tcx>) -> Result<Ty<'tcx>, Self::Error> {
-        if !needs_normalization(&ty, self.param_env.reveal()) {
+        if !needs_normalization(self.infcx, self.param_env, &ty) {
             return Ok(ty);
         }
 
@@ -213,10 +215,12 @@ impl<'a, 'tcx> FallibleTypeFolder<TyCtxt<'tcx>> for QueryNormalizer<'a, 'tcx> {
         let res = match kind {
             ty::Opaque => {
                 // Only normalize `impl Trait` outside of type inference, usually in codegen.
-                match self.param_env.reveal() {
-                    Reveal::UserFacing => ty.try_super_fold_with(self)?,
+                match self.infcx.typing_mode(self.param_env) {
+                    TypingMode::Coherence | TypingMode::Analysis { defining_opaque_types: _ } => {
+                        ty.try_super_fold_with(self)?
+                    }
 
-                    Reveal::All => {
+                    TypingMode::PostAnalysis => {
                         let args = data.args.try_fold_with(self)?;
                         let recursion_limit = self.cx().recursion_limit();
 
@@ -330,7 +334,7 @@ impl<'a, 'tcx> FallibleTypeFolder<TyCtxt<'tcx>> for QueryNormalizer<'a, 'tcx> {
         &mut self,
         constant: ty::Const<'tcx>,
     ) -> Result<ty::Const<'tcx>, Self::Error> {
-        if !needs_normalization(&constant, self.param_env.reveal()) {
+        if !needs_normalization(self.infcx, self.param_env, &constant) {
             return Ok(constant);
         }
 
@@ -338,7 +342,7 @@ impl<'a, 'tcx> FallibleTypeFolder<TyCtxt<'tcx>> for QueryNormalizer<'a, 'tcx> {
             self.infcx,
             &mut self.universes,
             constant,
-            |constant| constant.normalize(self.infcx.tcx, self.param_env),
+            |constant| constant.normalize_internal(self.infcx.tcx, self.param_env),
         );
         debug!(?constant, ?self.param_env);
         constant.try_super_fold_with(self)
@@ -349,7 +353,7 @@ impl<'a, 'tcx> FallibleTypeFolder<TyCtxt<'tcx>> for QueryNormalizer<'a, 'tcx> {
         &mut self,
         p: ty::Predicate<'tcx>,
     ) -> Result<ty::Predicate<'tcx>, Self::Error> {
-        if p.allow_normalization() && needs_normalization(&p, self.param_env.reveal()) {
+        if p.allow_normalization() && needs_normalization(self.infcx, self.param_env, &p) {
             p.try_super_fold_with(self)
         } else {
             Ok(p)

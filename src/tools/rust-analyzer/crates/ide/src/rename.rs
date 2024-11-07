@@ -15,7 +15,7 @@ use itertools::Itertools;
 use stdx::{always, never};
 use syntax::{ast, AstNode, SyntaxKind, SyntaxNode, TextRange, TextSize};
 
-use text_edit::TextEdit;
+use ide_db::text_edit::TextEdit;
 
 use crate::{FilePosition, RangeInfo, SourceChange};
 
@@ -421,28 +421,37 @@ fn text_edit_from_self_param(self_param: &ast::SelfParam, new_name: &str) -> Opt
         None
     }
 
-    let impl_def = self_param.syntax().ancestors().find_map(ast::Impl::cast)?;
-    let type_name = target_type_name(&impl_def)?;
+    match self_param.syntax().ancestors().find_map(ast::Impl::cast) {
+        Some(impl_def) => {
+            let type_name = target_type_name(&impl_def)?;
 
-    let mut replacement_text = String::from(new_name);
-    replacement_text.push_str(": ");
-    match (self_param.amp_token(), self_param.mut_token()) {
-        (Some(_), None) => replacement_text.push('&'),
-        (Some(_), Some(_)) => replacement_text.push_str("&mut "),
-        (_, _) => (),
-    };
-    replacement_text.push_str(type_name.as_str());
+            let mut replacement_text = String::from(new_name);
+            replacement_text.push_str(": ");
+            match (self_param.amp_token(), self_param.mut_token()) {
+                (Some(_), None) => replacement_text.push('&'),
+                (Some(_), Some(_)) => replacement_text.push_str("&mut "),
+                (_, _) => (),
+            };
+            replacement_text.push_str(type_name.as_str());
 
-    Some(TextEdit::replace(self_param.syntax().text_range(), replacement_text))
+            Some(TextEdit::replace(self_param.syntax().text_range(), replacement_text))
+        }
+        None => {
+            cov_mark::hit!(rename_self_outside_of_methods);
+            let mut replacement_text = String::from(new_name);
+            replacement_text.push_str(": _");
+            Some(TextEdit::replace(self_param.syntax().text_range(), replacement_text))
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use expect_test::{expect, Expect};
     use ide_db::source_change::SourceChange;
+    use ide_db::text_edit::TextEdit;
     use stdx::trim_indent;
     use test_utils::assert_eq_text;
-    use text_edit::TextEdit;
 
     use crate::fixture;
 
@@ -1972,6 +1981,26 @@ impl Foo {
     fn f(foo: Foo) -> i32 {
         foo.i
     }
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn test_self_outside_of_methods() {
+        cov_mark::check!(rename_self_outside_of_methods);
+        check(
+            "foo",
+            r#"
+fn f($0self) -> i32 {
+    use self as _;
+    self.i
+}
+"#,
+            r#"
+fn f(foo: _) -> i32 {
+    use self as _;
+    foo.i
 }
 "#,
         );

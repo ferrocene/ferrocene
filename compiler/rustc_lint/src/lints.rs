@@ -1137,16 +1137,19 @@ pub(crate) struct IgnoredUnlessCrateSpecified<'a> {
     pub name: Symbol,
 }
 
-// methods.rs
+// dangling.rs
 #[derive(LintDiagnostic)]
-#[diag(lint_cstring_ptr)]
+#[diag(lint_dangling_pointers_from_temporaries)]
 #[note]
 #[help]
-pub(crate) struct CStringPtr {
-    #[label(lint_as_ptr_label)]
-    pub as_ptr: Span,
-    #[label(lint_unwrap_label)]
-    pub unwrap: Span,
+// FIXME: put #[primary_span] on `ptr_span` once it does not cause conflicts
+pub(crate) struct DanglingPointersFromTemporaries<'tcx> {
+    pub callee: Symbol,
+    pub ty: Ty<'tcx>,
+    #[label(lint_label_ptr)]
+    pub ptr_span: Span,
+    #[label(lint_label_temporary)]
+    pub temporary_span: Span,
 }
 
 // multiple_supertrait_upcastable.rs
@@ -1430,8 +1433,6 @@ impl<'a> LintDiagnostic<'a, ()> for NonLocalDefinitionsDiag {
                         );
                     }
                 }
-
-                diag.note(fluent::lint_non_local_definitions_deprecation);
             }
             NonLocalDefinitionsDiag::MacroRules {
                 depth,
@@ -1452,7 +1453,6 @@ impl<'a> LintDiagnostic<'a, ()> for NonLocalDefinitionsDiag {
                 }
 
                 diag.note(fluent::lint_non_local);
-                diag.note(fluent::lint_non_local_definitions_deprecation);
 
                 if let Some(cargo_update) = cargo_update {
                     diag.subdiagnostic(cargo_update);
@@ -2738,11 +2738,9 @@ pub(crate) struct PatternsInFnsWithoutBodySub {
 
 #[derive(LintDiagnostic)]
 #[diag(lint_extern_without_abi)]
-#[help]
 pub(crate) struct MissingAbi {
-    #[label]
+    #[suggestion(code = "extern \"{default_abi}\"", applicability = "machine-applicable")]
     pub span: Span,
-
     pub default_abi: &'static str,
 }
 

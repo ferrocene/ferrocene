@@ -1,6 +1,7 @@
 use std::iter;
 use std::ops::ControlFlow;
 
+use rustc_abi::{BackendRepr, TagEncoding, Variants, WrappingRange};
 use rustc_data_structures::fx::FxHashSet;
 use rustc_errors::DiagMessage;
 use rustc_hir::{Expr, ExprKind};
@@ -13,10 +14,11 @@ use rustc_session::{declare_lint, declare_lint_pass, impl_lint_pass};
 use rustc_span::def_id::LocalDefId;
 use rustc_span::symbol::sym;
 use rustc_span::{Span, Symbol, source_map};
-use rustc_target::abi::{Abi, TagEncoding, Variants, WrappingRange};
 use rustc_target::spec::abi::Abi as SpecAbi;
 use tracing::debug;
 use {rustc_ast as ast, rustc_hir as hir};
+
+mod improper_ctypes;
 
 use crate::lints::{
     AmbiguousWidePointerComparisons, AmbiguousWidePointerComparisonsAddrMetadataSuggestion,
@@ -165,7 +167,7 @@ declare_lint! {
     "detects ambiguous wide pointer comparisons"
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub(crate) struct TypeLimits {
     /// Id of the last visited negated expression
     negated_expr_id: Option<hir::HirId>,
@@ -202,7 +204,10 @@ fn lint_nan<'tcx>(
                     return false;
                 };
 
-                matches!(cx.tcx.get_diagnostic_name(def_id), Some(sym::f32_nan | sym::f64_nan))
+                matches!(
+                    cx.tcx.get_diagnostic_name(def_id),
+                    Some(sym::f16_nan | sym::f32_nan | sym::f64_nan | sym::f128_nan)
+                )
             }
             _ => false,
         }
@@ -728,7 +733,6 @@ fn is_niche_optimization_candidate<'tcx>(
 /// can, return the type that `ty` can be safely converted to, otherwise return `None`.
 /// Currently restricted to function pointers, boxes, references, `core::num::NonZero`,
 /// `core::ptr::NonNull`, and `#[repr(transparent)]` newtypes.
-/// FIXME: This duplicates code in codegen.
 pub(crate) fn repr_nullable_ptr<'tcx>(
     tcx: TyCtxt<'tcx>,
     param_env: ty::ParamEnv<'tcx>,
@@ -741,10 +745,6 @@ pub(crate) fn repr_nullable_ptr<'tcx>(
             [var_one, var_two] => match (&var_one.fields.raw[..], &var_two.fields.raw[..]) {
                 ([], [field]) | ([field], []) => field.ty(tcx, args),
                 ([field1], [field2]) => {
-                    if !tcx.features().result_ffi_guarantees {
-                        return None;
-                    }
-
                     let ty1 = field1.ty(tcx, args);
                     let ty2 = field2.ty(tcx, args);
 
@@ -779,8 +779,8 @@ pub(crate) fn repr_nullable_ptr<'tcx>(
             bug!("should be able to compute the layout of non-polymorphic type");
         }
 
-        let field_ty_abi = &field_ty_layout.ok()?.abi;
-        if let Abi::Scalar(field_ty_scalar) = field_ty_abi {
+        let field_ty_abi = &field_ty_layout.ok()?.backend_repr;
+        if let BackendRepr::Scalar(field_ty_scalar) = field_ty_abi {
             match field_ty_scalar.valid_range(&tcx) {
                 WrappingRange { start: 0, end }
                     if end == field_ty_scalar.size(&tcx).unsigned_int_max() - 1 =>
@@ -983,15 +983,6 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                             // Empty enums are okay... although sort of useless.
                             return FfiSafe;
                         }
-
-                        if def.is_variant_list_non_exhaustive() && !def.did().is_local() {
-                            return FfiUnsafe {
-                                ty,
-                                reason: fluent::lint_improper_ctypes_non_exhaustive,
-                                help: None,
-                            };
-                        }
-
                         // Check for a repr() attribute to specify the size of the
                         // discriminant.
                         if !def.repr().c() && !def.repr().transparent() && def.repr().int.is_none()
@@ -1010,21 +1001,23 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                             };
                         }
 
+                        use improper_ctypes::{
+                            check_non_exhaustive_variant, non_local_and_non_exhaustive,
+                        };
+
+                        let non_local_def = non_local_and_non_exhaustive(def);
                         // Check the contained variants.
-                        for variant in def.variants() {
-                            let is_non_exhaustive = variant.is_field_list_non_exhaustive();
-                            if is_non_exhaustive && !variant.def_id.is_local() {
-                                return FfiUnsafe {
-                                    ty,
-                                    reason: fluent::lint_improper_ctypes_non_exhaustive_variant,
-                                    help: None,
-                                };
-                            }
+                        let ret = def.variants().iter().try_for_each(|variant| {
+                            check_non_exhaustive_variant(non_local_def, variant)
+                                .map_break(|reason| FfiUnsafe { ty, reason, help: None })?;
 
                             match self.check_variant_for_ffi(acc, ty, def, variant, args) {
-                                FfiSafe => (),
-                                r => return r,
+                                FfiSafe => ControlFlow::Continue(()),
+                                r => ControlFlow::Break(r),
                             }
+                        });
+                        if let ControlFlow::Break(result) = ret {
+                            return result;
                         }
 
                         FfiSafe

@@ -1,12 +1,11 @@
 use std::ops::Deref;
 
 use rustc_type_ir::fold::TypeFoldable;
-use rustc_type_ir::solve::{Certainty, Goal, NoSolution, SolverMode};
+use rustc_type_ir::solve::{Certainty, Goal, NoSolution};
 use rustc_type_ir::{self as ty, InferCtxtLike, Interner};
 
-pub trait SolverDelegate:
-    Deref<Target: InferCtxtLike<Interner = <Self as SolverDelegate>::Interner>> + Sized
-{
+pub trait SolverDelegate: Deref<Target = <Self as SolverDelegate>::Infcx> + Sized {
+    type Infcx: InferCtxtLike<Interner = <Self as SolverDelegate>::Interner>;
     type Interner: Interner;
     fn cx(&self) -> Self::Interner {
         (**self).cx()
@@ -16,8 +15,7 @@ pub trait SolverDelegate:
 
     fn build_with_canonical<V>(
         cx: Self::Interner,
-        solver_mode: SolverMode,
-        canonical: &ty::Canonical<Self::Interner, V>,
+        canonical: &ty::CanonicalQueryInput<Self::Interner, V>,
     ) -> (Self, V, ty::CanonicalVarValues<Self::Interner>)
     where
         V: TypeFoldable<Self::Interner>;
@@ -94,7 +92,6 @@ pub trait SolverDelegate:
 
     fn fetch_eligible_assoc_item(
         &self,
-        param_env: <Self::Interner as Interner>::ParamEnv,
         goal_trait_ref: ty::TraitRef<Self::Interner>,
         trait_assoc_def_id: <Self::Interner as Interner>::DefId,
         impl_def_id: <Self::Interner as Interner>::DefId,

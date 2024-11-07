@@ -9,6 +9,7 @@
 use std::cell::Cell;
 use std::vec;
 
+use rustc_abi::ExternAbi;
 use rustc_ast::util::parser::{self, AssocOp, Fixity};
 use rustc_ast_pretty::pp::Breaks::{Consistent, Inconsistent};
 use rustc_ast_pretty::pp::{self, Breaks};
@@ -16,12 +17,10 @@ use rustc_ast_pretty::pprust::{Comments, PrintState};
 use rustc_hir::{
     BindingMode, ByRef, ConstArgKind, GenericArg, GenericBound, GenericParam, GenericParamKind,
     HirId, LifetimeParamKind, Node, PatKind, PreciseCapturingArg, RangeEnd, Term,
-    TraitBoundModifier,
 };
 use rustc_span::FileName;
 use rustc_span::source_map::SourceMap;
 use rustc_span::symbol::{Ident, Symbol, kw};
-use rustc_target::spec::abi::Abi;
 use {rustc_ast as ast, rustc_hir as hir};
 
 pub fn id_to_string(map: &dyn rustc_hir::intravisit::Map<'_>, hir_id: HirId) -> String {
@@ -301,15 +300,12 @@ impl<'a> State<'a> {
                     self.word_space("dyn");
                 }
                 let mut first = true;
-                for (bound, modifier) in bounds {
+                for bound in bounds {
                     if first {
                         first = false;
                     } else {
                         self.nbsp();
                         self.word_space("+");
-                    }
-                    if *modifier == TraitBoundModifier::Maybe {
-                        self.word("?");
                     }
                     self.print_poly_trait_ref(bound);
                 }
@@ -663,8 +659,6 @@ impl<'a> State<'a> {
 
     fn print_opaque_ty(&mut self, o: &hir::OpaqueTy<'_>) {
         self.head("opaque");
-        self.print_generic_params(o.generics.params);
-        self.print_where_clause(o.generics);
         self.word("{");
         self.print_bounds("impl", o.bounds);
         self.word("}");
@@ -679,6 +673,17 @@ impl<'a> State<'a> {
     }
 
     fn print_poly_trait_ref(&mut self, t: &hir::PolyTraitRef<'_>) {
+        let hir::TraitBoundModifiers { constness, polarity } = t.modifiers;
+        match constness {
+            hir::BoundConstness::Never => {}
+            hir::BoundConstness::Always(_) => self.word("const"),
+            hir::BoundConstness::Maybe(_) => self.word("~const"),
+        }
+        match polarity {
+            hir::BoundPolarity::Positive => {}
+            hir::BoundPolarity::Negative(_) => self.word("!"),
+            hir::BoundPolarity::Maybe(_) => self.word("?"),
+        }
         self.print_formal_generic_params(t.bound_generic_params);
         self.print_trait_ref(&t.trait_ref);
     }
@@ -2077,10 +2082,7 @@ impl<'a> State<'a> {
             }
 
             match bound {
-                GenericBound::Trait(tref, modifier) => {
-                    if modifier == &TraitBoundModifier::Maybe {
-                        self.word("?");
-                    }
+                GenericBound::Trait(tref) => {
                     self.print_poly_trait_ref(tref);
                 }
                 GenericBound::Outlives(lt) => {
@@ -2130,7 +2132,7 @@ impl<'a> State<'a> {
                     self.print_type(default);
                 }
             }
-            GenericParamKind::Const { ty, ref default, is_host_effect: _, synthetic: _ } => {
+            GenericParamKind::Const { ty, ref default, synthetic: _ } => {
                 self.word_space(":");
                 self.print_type(ty);
                 if let Some(default) = default {
@@ -2238,7 +2240,7 @@ impl<'a> State<'a> {
 
     fn print_ty_fn(
         &mut self,
-        abi: Abi,
+        abi: ExternAbi,
         safety: hir::Safety,
         decl: &hir::FnDecl<'_>,
         name: Option<Symbol>,
@@ -2274,7 +2276,7 @@ impl<'a> State<'a> {
 
         self.print_safety(header.safety);
 
-        if header.abi != Abi::Rust {
+        if header.abi != ExternAbi::Rust {
             self.word_nbsp("extern");
             self.word_nbsp(header.abi.to_string());
         }

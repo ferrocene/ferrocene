@@ -1,6 +1,7 @@
 //! Global machine state as well as implementation of the interpreter engine
 //! `Machine` trait.
 
+use std::any::Any;
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::collections::hash_map::Entry;
@@ -9,6 +10,7 @@ use std::{fmt, process};
 
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
+use rustc_abi::{Align, ExternAbi, Size};
 use rustc_attr::InlineAttr;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 #[allow(unused)]
@@ -20,8 +22,6 @@ use rustc_middle::ty::{self, Instance, Ty, TyCtxt};
 use rustc_session::config::InliningThreshold;
 use rustc_span::def_id::{CrateNum, DefId};
 use rustc_span::{Span, SpanData, Symbol};
-use rustc_target::abi::{Align, Size};
-use rustc_target::spec::abi::Abi;
 
 use crate::concurrency::cpu_affinity::{self, CpuAffinityMask};
 use crate::concurrency::data_race::{self, NaReadType, NaWriteType};
@@ -321,7 +321,7 @@ impl ProvenanceExtra {
 }
 
 /// Extra per-allocation data
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct AllocExtra<'tcx> {
     /// Global state of the borrow tracker, if enabled.
     pub borrow_tracker: Option<borrow_tracker::AllocState>,
@@ -336,11 +336,24 @@ pub struct AllocExtra<'tcx> {
     /// if this allocation is leakable. The backtrace is not
     /// pruned yet; that should be done before printing it.
     pub backtrace: Option<Vec<FrameInfo<'tcx>>>,
+    /// Synchronization primitives like to attach extra data to particular addresses. We store that
+    /// inside the relevant allocation, to ensure that everything is removed when the allocation is
+    /// freed.
+    /// This maps offsets to synchronization-primitive-specific data.
+    pub sync: FxHashMap<Size, Box<dyn Any>>,
+}
+
+// We need a `Clone` impl because the machine passes `Allocation` through `Cow`...
+// but that should never end up actually cloning our `AllocExtra`.
+impl<'tcx> Clone for AllocExtra<'tcx> {
+    fn clone(&self) -> Self {
+        panic!("our allocations should never be cloned");
+    }
 }
 
 impl VisitProvenance for AllocExtra<'_> {
     fn visit_provenance(&self, visit: &mut VisitWith<'_>) {
-        let AllocExtra { borrow_tracker, data_race, weak_memory, backtrace: _ } = self;
+        let AllocExtra { borrow_tracker, data_race, weak_memory, backtrace: _, sync: _ } = self;
 
         borrow_tracker.visit_provenance(visit);
         data_race.visit_provenance(visit);
@@ -495,11 +508,6 @@ pub struct MiriMachine<'tcx> {
     /// Cache of `Instance` exported under the given `Symbol` name.
     /// `None` means no `Instance` exported under the given name is found.
     pub(crate) exported_symbols_cache: FxHashMap<Symbol, Option<Instance<'tcx>>>,
-
-    /// Whether to raise a panic in the context of the evaluated process when unsupported
-    /// functionality is encountered. If `false`, an error is propagated in the Miri application context
-    /// instead (default behavior)
-    pub(crate) panic_on_unsupported: bool,
 
     /// Equivalent setting as RUST_BACKTRACE on encountering an error.
     pub(crate) backtrace_style: BacktraceStyle,
@@ -667,7 +675,6 @@ impl<'tcx> MiriMachine<'tcx> {
             profiler,
             string_cache: Default::default(),
             exported_symbols_cache: FxHashMap::default(),
-            panic_on_unsupported: config.panic_on_unsupported,
             backtrace_style: config.backtrace_style,
             local_crates,
             extern_statics: FxHashMap::default(),
@@ -684,7 +691,7 @@ impl<'tcx> MiriMachine<'tcx> {
             clock: Clock::new(config.isolated_op == IsolatedOp::Allow),
             #[cfg(unix)]
             native_lib: config.native_lib.as_ref().map(|lib_file_path| {
-                let target_triple = tcx.sess.opts.target_triple.triple();
+                let target_triple = tcx.sess.opts.target_triple.tuple();
                 // Check if host target == the session target.
                 if env!("TARGET") != target_triple {
                     panic!(
@@ -807,7 +814,6 @@ impl VisitProvenance for MiriMachine<'_> {
             profiler: _,
             string_cache: _,
             exported_symbols_cache: _,
-            panic_on_unsupported: _,
             backtrace_style: _,
             local_crates: _,
             rng: _,
@@ -999,7 +1005,7 @@ impl<'tcx> Machine<'tcx> for MiriMachine<'tcx> {
     fn find_mir_or_eval_fn(
         ecx: &mut MiriInterpCx<'tcx>,
         instance: ty::Instance<'tcx>,
-        abi: Abi,
+        abi: ExternAbi,
         args: &[FnArg<'tcx, Provenance>],
         dest: &MPlaceTy<'tcx>,
         ret: Option<mir::BasicBlock>,
@@ -1026,7 +1032,7 @@ impl<'tcx> Machine<'tcx> for MiriMachine<'tcx> {
     fn call_extra_fn(
         ecx: &mut MiriInterpCx<'tcx>,
         fn_val: DynSym,
-        abi: Abi,
+        abi: ExternAbi,
         args: &[FnArg<'tcx, Provenance>],
         dest: &MPlaceTy<'tcx>,
         ret: Option<mir::BasicBlock>,
@@ -1068,7 +1074,7 @@ impl<'tcx> Machine<'tcx> for MiriMachine<'tcx> {
         // Call the lang item.
         let panic = ecx.tcx.lang_items().get(reason.lang_item()).unwrap();
         let panic = ty::Instance::mono(ecx.tcx.tcx, panic);
-        ecx.call_function(panic, Abi::Rust, &[], None, StackPopCleanup::Goto {
+        ecx.call_function(panic, ExternAbi::Rust, &[], None, StackPopCleanup::Goto {
             ret: None,
             unwind: mir::UnwindAction::Unreachable,
         })?;
@@ -1186,7 +1192,13 @@ impl<'tcx> Machine<'tcx> for MiriMachine<'tcx> {
                 .insert(id, (ecx.machine.current_span(), None));
         }
 
-        interp_ok(AllocExtra { borrow_tracker, data_race, weak_memory, backtrace })
+        interp_ok(AllocExtra {
+            borrow_tracker,
+            data_race,
+            weak_memory,
+            backtrace,
+            sync: FxHashMap::default(),
+        })
     }
 
     fn adjust_alloc_root_pointer(

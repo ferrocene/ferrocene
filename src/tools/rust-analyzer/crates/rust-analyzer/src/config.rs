@@ -12,10 +12,11 @@ use std::{
 use cfg::{CfgAtom, CfgDiff};
 use hir::Symbol;
 use ide::{
-    AssistConfig, CallableSnippets, CompletionConfig, CompletionFieldsToResolve, DiagnosticsConfig,
-    ExprFillDefaultMode, GenericParameterHints, HighlightConfig, HighlightRelatedConfig,
-    HoverConfig, HoverDocFormat, InlayFieldsToResolve, InlayHintsConfig, JoinLinesConfig,
-    MemoryLayoutHoverConfig, MemoryLayoutHoverRenderKind, Snippet, SnippetScope, SourceRootId,
+    AssistConfig, CallHierarchyConfig, CallableSnippets, CompletionConfig,
+    CompletionFieldsToResolve, DiagnosticsConfig, ExprFillDefaultMode, GenericParameterHints,
+    HighlightConfig, HighlightRelatedConfig, HoverConfig, HoverDocFormat, InlayFieldsToResolve,
+    InlayHintsConfig, JoinLinesConfig, MemoryLayoutHoverConfig, MemoryLayoutHoverRenderKind,
+    Snippet, SnippetScope, SourceRootId,
 };
 use ide_db::{
     imports::insert_use::{ImportGranularity, InsertUseConfig, PrefixKind},
@@ -262,7 +263,7 @@ config_data! {
         /// Exclude imports from find-all-references.
         references_excludeImports: bool = false,
 
-        /// Exclude tests from find-all-references.
+        /// Exclude tests from find-all-references and call-hierarchy.
         references_excludeTests: bool = false,
 
         /// Inject additional highlighting into doc comments.
@@ -726,7 +727,7 @@ enum RatomlFile {
     Crate(LocalConfigInput),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Config {
     /// Projects that have a Cargo.toml or a rust-project.json in a
     /// parent directory, so we can discover them by walking the
@@ -762,6 +763,26 @@ pub struct Config {
     validation_errors: ConfigErrors,
 
     detached_files: Vec<AbsPathBuf>,
+}
+
+impl fmt::Debug for Config {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Config")
+            .field("discovered_projects_from_filesystem", &self.discovered_projects_from_filesystem)
+            .field("discovered_projects_from_command", &self.discovered_projects_from_command)
+            .field("workspace_roots", &self.workspace_roots)
+            .field("caps", &self.caps)
+            .field("root_path", &self.root_path)
+            .field("snippets", &self.snippets)
+            .field("visual_studio_code_version", &self.visual_studio_code_version)
+            .field("client_config", &self.client_config)
+            .field("user_config", &self.user_config)
+            .field("ratoml_file", &self.ratoml_file)
+            .field("source_root_parent_map", &self.source_root_parent_map)
+            .field("validation_errors", &self.validation_errors)
+            .field("detached_files", &self.detached_files)
+            .finish()
+    }
 }
 
 // Delegate capability fetching methods
@@ -1390,6 +1411,10 @@ impl Config {
             term_search_fuel: self.assist_termSearch_fuel(source_root).to_owned() as u64,
             term_search_borrowck: self.assist_termSearch_borrowcheck(source_root).to_owned(),
         }
+    }
+
+    pub fn call_hierarchy(&self) -> CallHierarchyConfig {
+        CallHierarchyConfig { exclude_tests: self.references_excludeTests().to_owned() }
     }
 
     pub fn completion(&self, source_root: Option<SourceRootId>) -> CompletionConfig {

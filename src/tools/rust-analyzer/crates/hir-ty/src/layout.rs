@@ -2,11 +2,11 @@
 
 use std::fmt;
 
-use base_db::salsa::Cycle;
+use base_db::ra_salsa::Cycle;
 use chalk_ir::{AdtId, FloatTy, IntTy, TyKind, UintTy};
 use hir_def::{
     layout::{
-        Abi, FieldsShape, Float, Integer, LayoutCalculator, LayoutCalculatorError, LayoutS,
+        BackendRepr, FieldsShape, Float, Integer, LayoutCalculator, LayoutCalculatorError, LayoutData,
         Primitive, ReprOptions, Scalar, Size, StructKind, TargetDataLayout, WrappingRange,
     },
     LocalFieldId, StructId,
@@ -66,22 +66,21 @@ impl rustc_index::Idx for RustcFieldIdx {
     }
 }
 
-pub type Layout = LayoutS<RustcFieldIdx, RustcEnumVariantIdx>;
+pub type Layout = LayoutData<RustcFieldIdx, RustcEnumVariantIdx>;
 pub type TagEncoding = hir_def::layout::TagEncoding<RustcEnumVariantIdx>;
 pub type Variants = hir_def::layout::Variants<RustcFieldIdx, RustcEnumVariantIdx>;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum LayoutError {
-    EmptyUnion,
+    // FIXME: Remove more variants once they get added to LayoutCalculatorError
+    BadCalc(LayoutCalculatorError<()>),
     HasErrorConst,
     HasErrorType,
     HasPlaceholder,
     InvalidSimdType,
     NotImplemented,
     RecursiveTypeWithoutIndirection,
-    SizeOverflow,
     TargetLayoutNotAvailable,
-    UnexpectedUnsized,
     Unknown,
     UserReprTooSmall,
 }
@@ -90,7 +89,7 @@ impl std::error::Error for LayoutError {}
 impl fmt::Display for LayoutError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            LayoutError::EmptyUnion => write!(f, "type is an union with no fields"),
+            LayoutError::BadCalc(err) => err.fallback_fmt(f),
             LayoutError::HasErrorConst => write!(f, "type contains an unevaluatable const"),
             LayoutError::HasErrorType => write!(f, "type contains an error"),
             LayoutError::HasPlaceholder => write!(f, "type contains placeholders"),
@@ -99,11 +98,7 @@ impl fmt::Display for LayoutError {
             LayoutError::RecursiveTypeWithoutIndirection => {
                 write!(f, "recursive type without indirection")
             }
-            LayoutError::SizeOverflow => write!(f, "size overflow"),
             LayoutError::TargetLayoutNotAvailable => write!(f, "target layout not available"),
-            LayoutError::UnexpectedUnsized => {
-                write!(f, "an unsized type was found where a sized type was expected")
-            }
             LayoutError::Unknown => write!(f, "unknown"),
             LayoutError::UserReprTooSmall => {
                 write!(f, "the `#[repr]` hint is too small to hold the discriminants of the enum")
@@ -114,11 +109,7 @@ impl fmt::Display for LayoutError {
 
 impl<F> From<LayoutCalculatorError<F>> for LayoutError {
     fn from(err: LayoutCalculatorError<F>) -> Self {
-        match err {
-            LayoutCalculatorError::EmptyUnion => LayoutError::EmptyUnion,
-            LayoutCalculatorError::UnexpectedUnsized(_) => LayoutError::UnexpectedUnsized,
-            LayoutCalculatorError::SizeOverflow => LayoutError::SizeOverflow,
-        }
+        LayoutError::BadCalc(err.without_payload())
     }
 }
 
@@ -177,12 +168,15 @@ fn layout_of_simd_ty(
 
     // Compute the ABI of the element type:
     let e_ly = db.layout_of_ty(e_ty, env)?;
-    let Abi::Scalar(e_abi) = e_ly.abi else {
+    let BackendRepr::Scalar(e_abi) = e_ly.backend_repr else {
         return Err(LayoutError::Unknown);
     };
 
     // Compute the size and alignment of the vector:
-    let size = e_ly.size.checked_mul(e_len, dl).ok_or(LayoutError::SizeOverflow)?;
+    let size = e_ly
+        .size
+        .checked_mul(e_len, dl)
+        .ok_or(LayoutError::BadCalc(LayoutCalculatorError::SizeOverflow))?;
     let align = dl.vector_align(size);
     let size = size.align_to(align.abi);
 
@@ -196,7 +190,7 @@ fn layout_of_simd_ty(
     Ok(Arc::new(Layout {
         variants: Variants::Single { index: struct_variant_idx() },
         fields,
-        abi: Abi::Vector { element: e_abi, count: e_len },
+        backend_repr: BackendRepr::Vector { element: e_abi, count: e_len },
         largest_niche: e_ly.largest_niche,
         size,
         align,
@@ -295,12 +289,15 @@ pub fn layout_of_ty_query(
         TyKind::Array(element, count) => {
             let count = try_const_usize(db, count).ok_or(LayoutError::HasErrorConst)? as u64;
             let element = db.layout_of_ty(element.clone(), trait_env)?;
-            let size = element.size.checked_mul(count, dl).ok_or(LayoutError::SizeOverflow)?;
+            let size = element
+                .size
+                .checked_mul(count, dl)
+                .ok_or(LayoutError::BadCalc(LayoutCalculatorError::SizeOverflow))?;
 
-            let abi = if count != 0 && matches!(element.abi, Abi::Uninhabited) {
-                Abi::Uninhabited
+            let backend_repr = if count != 0 && matches!(element.backend_repr, BackendRepr::Uninhabited) {
+                BackendRepr::Uninhabited
             } else {
-                Abi::Aggregate { sized: true }
+                BackendRepr::Memory { sized: true }
             };
 
             let largest_niche = if count != 0 { element.largest_niche } else { None };
@@ -308,7 +305,7 @@ pub fn layout_of_ty_query(
             Layout {
                 variants: Variants::Single { index: struct_variant_idx() },
                 fields: FieldsShape::Array { stride: element.size, count },
-                abi,
+                backend_repr,
                 largest_niche,
                 align: element.align,
                 size,
@@ -321,7 +318,7 @@ pub fn layout_of_ty_query(
             Layout {
                 variants: Variants::Single { index: struct_variant_idx() },
                 fields: FieldsShape::Array { stride: element.size, count: 0 },
-                abi: Abi::Aggregate { sized: false },
+                backend_repr: BackendRepr::Memory { sized: false },
                 largest_niche: None,
                 align: element.align,
                 size: Size::ZERO,
@@ -332,7 +329,7 @@ pub fn layout_of_ty_query(
         TyKind::Str => Layout {
             variants: Variants::Single { index: struct_variant_idx() },
             fields: FieldsShape::Array { stride: Size::from_bytes(1), count: 0 },
-            abi: Abi::Aggregate { sized: false },
+            backend_repr: BackendRepr::Memory { sized: false },
             largest_niche: None,
             align: dl.i8_align,
             size: Size::ZERO,
@@ -382,8 +379,8 @@ pub fn layout_of_ty_query(
         TyKind::Never => cx.calc.layout_of_never_type(),
         TyKind::Dyn(_) | TyKind::Foreign(_) => {
             let mut unit = layout_of_unit(&cx)?;
-            match &mut unit.abi {
-                Abi::Aggregate { sized } => *sized = false,
+            match &mut unit.backend_repr {
+                BackendRepr::Memory { sized } => *sized = false,
                 _ => return Err(LayoutError::Unknown),
             }
             unit

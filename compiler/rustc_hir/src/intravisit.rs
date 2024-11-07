@@ -896,16 +896,15 @@ pub fn walk_ty<'v, V: Visitor<'v>>(visitor: &mut V, typ: &'v Ty<'v>) -> V::Resul
         TyKind::Path(ref qpath) => {
             try_visit!(visitor.visit_qpath(qpath, typ.hir_id, typ.span));
         }
-        TyKind::OpaqueDef(opaque, lifetimes) => {
+        TyKind::OpaqueDef(opaque) => {
             try_visit!(visitor.visit_opaque_ty(opaque));
-            walk_list!(visitor, visit_generic_arg, lifetimes);
         }
         TyKind::Array(ref ty, ref length) => {
             try_visit!(visitor.visit_ty(ty));
             try_visit!(visitor.visit_array_length(length));
         }
         TyKind::TraitObject(bounds, ref lifetime, _syntax) => {
-            for (bound, _modifier) in bounds {
+            for bound in bounds {
                 try_visit!(visitor.visit_poly_trait_ref(bound));
             }
             try_visit!(visitor.visit_lifetime(lifetime));
@@ -935,7 +934,7 @@ pub fn walk_generic_param<'v, V: Visitor<'v>>(
     match param.kind {
         GenericParamKind::Lifetime { .. } => {}
         GenericParamKind::Type { ref default, .. } => visit_opt!(visitor, visit_ty, default),
-        GenericParamKind::Const { ref ty, ref default, is_host_effect: _, synthetic: _ } => {
+        GenericParamKind::Const { ref ty, ref default, synthetic: _ } => {
             try_visit!(visitor.visit_ty(ty));
             if let Some(ref default) = default {
                 try_visit!(visitor.visit_const_param_default(param.hir_id, default));
@@ -1160,7 +1159,7 @@ pub fn walk_param_bound<'v, V: Visitor<'v>>(
     bound: &'v GenericBound<'v>,
 ) -> V::Result {
     match *bound {
-        GenericBound::Trait(ref typ, _modifier) => visitor.visit_poly_trait_ref(typ),
+        GenericBound::Trait(ref typ) => visitor.visit_poly_trait_ref(typ),
         GenericBound::Outlives(ref lifetime) => visitor.visit_lifetime(lifetime),
         GenericBound::Use(args, _) => {
             walk_list!(visitor, visit_precise_capturing_arg, args);
@@ -1188,10 +1187,8 @@ pub fn walk_poly_trait_ref<'v, V: Visitor<'v>>(
 }
 
 pub fn walk_opaque_ty<'v, V: Visitor<'v>>(visitor: &mut V, opaque: &'v OpaqueTy<'v>) -> V::Result {
-    let &OpaqueTy { hir_id, def_id: _, generics, bounds, origin: _, lifetime_mapping: _, span: _ } =
-        opaque;
+    let &OpaqueTy { hir_id, def_id: _, bounds, origin: _, span: _ } = opaque;
     try_visit!(visitor.visit_id(hir_id));
-    try_visit!(walk_generics(visitor, generics));
     walk_list!(visitor, visit_param_bound, bounds);
     V::Result::output()
 }

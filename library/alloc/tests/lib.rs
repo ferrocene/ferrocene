@@ -4,10 +4,7 @@
 #![feature(assert_matches)]
 #![feature(btree_extract_if)]
 #![feature(cow_is_borrowed)]
-#![feature(const_cow_is_borrowed)]
 #![feature(const_heap)]
-#![cfg_attr(bootstrap, feature(const_mut_refs))]
-#![feature(const_ptr_write)]
 #![feature(const_try)]
 #![feature(core_intrinsics)]
 #![feature(extract_if)]
@@ -35,11 +32,13 @@
 #![feature(panic_update_hook)]
 #![feature(pointer_is_aligned_to)]
 #![feature(thin_box)]
-#![feature(strict_provenance)]
+#![cfg_attr(bootstrap, feature(strict_provenance))]
+#![cfg_attr(not(bootstrap), feature(strict_provenance_lints))]
 #![feature(drain_keep_rest)]
 #![feature(local_waker)]
 #![feature(vec_pop_if)]
 #![feature(unique_rc_arc)]
+#![feature(macro_metavar_expr_concat)]
 #![allow(internal_features)]
 #![deny(fuzzy_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
@@ -59,6 +58,7 @@ mod heap;
 mod linked_list;
 mod rc;
 mod slice;
+mod sort;
 mod str;
 mod string;
 mod task;

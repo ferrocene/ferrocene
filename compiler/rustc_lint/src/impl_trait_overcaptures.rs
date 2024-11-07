@@ -15,7 +15,7 @@ use rustc_middle::ty::relate::{
     Relate, RelateResult, TypeRelation, structurally_relate_consts, structurally_relate_tys,
 };
 use rustc_middle::ty::{
-    self, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor,
+    self, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor, TypingMode,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_session::lint::FutureIncompatibilityReason;
@@ -184,7 +184,7 @@ fn check_fn(tcx: TyCtxt<'_>, parent_def_id: LocalDefId) {
         }),
         outlives_env: LazyCell::new(|| {
             let param_env = tcx.param_env(parent_def_id);
-            let infcx = tcx.infer_ctxt().build();
+            let infcx = tcx.infer_ctxt().build(TypingMode::from_param_env(param_env));
             let ocx = ObligationCtxt::new(&infcx);
             let assumed_wf_tys = ocx.assumed_wf_types(param_env, parent_def_id).unwrap_or_default();
             let implied_bounds =
@@ -263,8 +263,8 @@ where
             && parent == self.parent_def_id
         {
             let opaque_span = self.tcx.def_span(opaque_def_id);
-            let new_capture_rules =
-                opaque_span.at_least_rust_2024() || self.tcx.features().lifetime_capture_rules_2024;
+            let new_capture_rules = opaque_span.at_least_rust_2024()
+                || self.tcx.features().lifetime_capture_rules_2024();
             if !new_capture_rules
                 && !opaque.bounds.iter().any(|bound| matches!(bound, hir::GenericBound::Use(..)))
             {

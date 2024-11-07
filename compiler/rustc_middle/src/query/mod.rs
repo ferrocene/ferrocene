@@ -29,6 +29,7 @@ use rustc_hir::def_id::{
 use rustc_hir::lang_items::{LangItem, LanguageItems};
 use rustc_hir::{Crate, ItemLocalId, ItemLocalMap, TraitCandidate};
 use rustc_index::IndexVec;
+use rustc_lint_defs::LintId;
 use rustc_macros::rustc_queries;
 use rustc_query_system::ich::StableHashingContext;
 use rustc_query_system::query::{QueryCache, QueryMode, QueryState, try_get_cached};
@@ -65,10 +66,11 @@ use crate::query::plumbing::{
     CyclePlaceholder, DynamicQuery, query_ensure, query_ensure_error_guaranteed, query_get_at,
 };
 use crate::traits::query::{
-    CanonicalAliasGoal, CanonicalPredicateGoal, CanonicalTyGoal,
-    CanonicalTypeOpAscribeUserTypeGoal, CanonicalTypeOpNormalizeGoal,
-    CanonicalTypeOpProvePredicateGoal, DropckConstraint, DropckOutlivesResult,
-    MethodAutoderefStepsResult, NoSolution, NormalizationResult, OutlivesBound,
+    CanonicalAliasGoal, CanonicalDropckOutlivesGoal, CanonicalImpliedOutlivesBoundsGoal,
+    CanonicalPredicateGoal, CanonicalTyGoal, CanonicalTypeOpAscribeUserTypeGoal,
+    CanonicalTypeOpNormalizeGoal, CanonicalTypeOpProvePredicateGoal, DropckConstraint,
+    DropckOutlivesResult, MethodAutoderefStepsResult, NoSolution, NormalizationResult,
+    OutlivesBound,
 };
 use crate::traits::{
     CodegenObligationError, DynCompatibilityViolation, EvaluationResult, ImplSource,
@@ -258,11 +260,10 @@ rustc_queries! {
         separate_provide_extern
     }
 
-    query is_type_alias_impl_trait(key: DefId) -> bool
+    query opaque_ty_origin(key: DefId) -> hir::OpaqueTyOrigin<DefId>
     {
-        desc { "determine whether the opaque is a type-alias impl trait" }
+        desc { "determine where the opaque originates from" }
         separate_provide_extern
-        feedable
     }
 
     query unsizing_params_for_adt(key: DefId) -> &'tcx rustc_index::bit_set::BitSet<u32>
@@ -421,6 +422,11 @@ rustc_queries! {
         desc { "computing `#[expect]`ed lints in this crate" }
     }
 
+    query lints_that_dont_need_to_run(_: ()) -> &'tcx FxIndexSet<LintId> {
+        arena_cache
+        desc { "Computing all lints that are explicitly enabled or with a default level greater than Allow" }
+    }
+
     query expn_that_defined(key: DefId) -> rustc_span::ExpnId {
         desc { |tcx| "getting the expansion that defined `{}`", tcx.def_path_str(key) }
         separate_provide_extern
@@ -569,6 +575,7 @@ rustc_queries! {
     /// either `#[coverage(on)]` or no coverage attribute was found.
     query coverage_attr_on(key: LocalDefId) -> bool {
         desc { |tcx| "checking for `#[coverage(..)]` on `{}`", tcx.def_path_str(key) }
+        feedable
     }
 
     /// Summarizes coverage IDs inserted by the `InstrumentCoverage` MIR pass
@@ -681,6 +688,24 @@ rustc_queries! {
         }
     }
 
+    query const_conditions(
+        key: DefId
+    ) -> ty::ConstConditions<'tcx> {
+        desc { |tcx| "computing the conditions for `{}` to be considered const",
+            tcx.def_path_str(key)
+        }
+        separate_provide_extern
+    }
+
+    query implied_const_bounds(
+        key: DefId
+    ) -> ty::EarlyBinder<'tcx, &'tcx [(ty::PolyTraitRef<'tcx>, Span)]> {
+        desc { |tcx| "computing the implied `~const` bounds for `{}`",
+            tcx.def_path_str(key)
+        }
+        separate_provide_extern
+    }
+
     /// To avoid cycles within the predicates of a single item we compute
     /// per-type-parameter predicates for resolving `T::AssocTy`.
     query type_param_predicates(
@@ -721,12 +746,11 @@ rustc_queries! {
         desc { |tcx| "computing drop-check constraints for `{}`", tcx.def_path_str(key) }
     }
 
-    /// Returns `true` if this is a const fn, use the `is_const_fn` to know whether your crate
-    /// actually sees it as const fn (e.g., the const-fn-ness might be unstable and you might
-    /// not have the feature gate active).
+    /// Returns `true` if this is a const fn / const impl.
     ///
     /// **Do not call this function manually.** It is only meant to cache the base data for the
-    /// `is_const_fn` function. Consider using `is_const_fn` or `is_const_fn_raw` instead.
+    /// higher-level functions. Consider using `is_const_fn` or `is_const_trait_impl` instead.
+    /// Also note that neither of them takes into account feature gates and stability.
     query constness(key: DefId) -> hir::Constness {
         desc { |tcx| "checking if item is const: `{}`", tcx.def_path_str(key) }
         separate_provide_extern
@@ -849,12 +873,6 @@ rustc_queries! {
     query associated_types_for_impl_traits_in_associated_fn(fn_def_id: DefId) -> &'tcx [DefId] {
         desc { |tcx| "creating associated items for opaque types returned by `{}`", tcx.def_path_str(fn_def_id) }
         cache_on_disk_if { fn_def_id.is_local() }
-        separate_provide_extern
-    }
-
-    query associated_type_for_effects(def_id: DefId) -> Option<DefId> {
-        desc { |tcx| "creating associated items for effects in `{}`", tcx.def_path_str(def_id) }
-        cache_on_disk_if { def_id.is_local() }
         separate_provide_extern
     }
 
@@ -1762,6 +1780,23 @@ rustc_queries! {
         -> &'tcx SortedMap<ItemLocalId, Vec<ty::BoundVariableKind>> {
         desc { |tcx| "looking up late bound vars inside `{}`", tcx.def_path_str(owner_id) }
     }
+    /// For an opaque type, return the list of (captured lifetime, inner generic param).
+    /// ```ignore (illustrative)
+    /// fn foo<'a: 'a, 'b, T>(&'b u8) -> impl Into<Self> + 'b { ... }
+    /// ```
+    ///
+    /// We would return `[('a, '_a), ('b, '_b)]`, with `'a` early-bound and `'b` late-bound.
+    ///
+    /// After hir_ty_lowering, we get:
+    /// ```ignore (pseudo-code)
+    /// opaque foo::<'a>::opaque<'_a, '_b>: Into<Foo<'_a>> + '_b;
+    ///                          ^^^^^^^^ inner generic params
+    /// fn foo<'a>: for<'b> fn(&'b u8) -> foo::<'a>::opaque::<'a, 'b>
+    ///                                                       ^^^^^^ captured lifetimes
+    /// ```
+    query opaque_captured_lifetimes(def_id: LocalDefId) -> &'tcx [(ResolvedArg, LocalDefId)] {
+        desc { |tcx| "listing captured lifetimes for opaque `{}`", tcx.def_path_str(def_id) }
+    }
 
     /// Computes the visibility of the provided `def_id`.
     ///
@@ -2010,7 +2045,7 @@ rustc_queries! {
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, NormalizationResult<'tcx>>>,
         NoSolution,
     > {
-        desc { "normalizing `{}`", goal.value.value }
+        desc { "normalizing `{}`", goal.canonical.value.value }
     }
 
     /// <div class="warning">
@@ -2024,7 +2059,7 @@ rustc_queries! {
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, NormalizationResult<'tcx>>>,
         NoSolution,
     > {
-        desc { "normalizing `{}`", goal.value.value }
+        desc { "normalizing `{}`", goal.canonical.value.value }
     }
 
     /// <div class="warning">
@@ -2038,7 +2073,7 @@ rustc_queries! {
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, NormalizationResult<'tcx>>>,
         NoSolution,
     > {
-        desc { "normalizing `{}`", goal.value.value }
+        desc { "normalizing `{}`", goal.canonical.value.value }
     }
 
     /// Do not call this query directly: invoke `try_normalize_erasing_regions` instead.
@@ -2049,32 +2084,32 @@ rustc_queries! {
     }
 
     query implied_outlives_bounds_compat(
-        goal: CanonicalTyGoal<'tcx>
+        goal: CanonicalImpliedOutlivesBoundsGoal<'tcx>
     ) -> Result<
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, Vec<OutlivesBound<'tcx>>>>,
         NoSolution,
     > {
-        desc { "computing implied outlives bounds for `{}`", goal.value.value }
+        desc { "computing implied outlives bounds for `{}`", goal.canonical.value.value.ty }
     }
 
     query implied_outlives_bounds(
-        goal: CanonicalTyGoal<'tcx>
+        goal: CanonicalImpliedOutlivesBoundsGoal<'tcx>
     ) -> Result<
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, Vec<OutlivesBound<'tcx>>>>,
         NoSolution,
     > {
-        desc { "computing implied outlives bounds v2 for `{}`", goal.value.value }
+        desc { "computing implied outlives bounds v2 for `{}`", goal.canonical.value.value.ty }
     }
 
     /// Do not call this query directly:
     /// invoke `DropckOutlives::new(dropped_ty)).fully_perform(typeck.infcx)` instead.
     query dropck_outlives(
-        goal: CanonicalTyGoal<'tcx>
+        goal: CanonicalDropckOutlivesGoal<'tcx>
     ) -> Result<
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, DropckOutlivesResult<'tcx>>>,
         NoSolution,
     > {
-        desc { "computing dropck types for `{}`", goal.value.value }
+        desc { "computing dropck types for `{}`", goal.canonical.value.value.dropped_ty }
     }
 
     /// Do not call this query directly: invoke `infcx.predicate_may_hold()` or
@@ -2082,7 +2117,7 @@ rustc_queries! {
     query evaluate_obligation(
         goal: CanonicalPredicateGoal<'tcx>
     ) -> Result<EvaluationResult, OverflowError> {
-        desc { "evaluating trait selection obligation `{}`", goal.value.value }
+        desc { "evaluating trait selection obligation `{}`", goal.canonical.value.value }
     }
 
     /// Do not call this query directly: part of the `Eq` type-op
@@ -2092,7 +2127,7 @@ rustc_queries! {
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, ()>>,
         NoSolution,
     > {
-        desc { "evaluating `type_op_ascribe_user_type` `{:?}`", goal.value.value }
+        desc { "evaluating `type_op_ascribe_user_type` `{:?}`", goal.canonical.value.value }
     }
 
     /// Do not call this query directly: part of the `ProvePredicate` type-op
@@ -2102,7 +2137,7 @@ rustc_queries! {
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, ()>>,
         NoSolution,
     > {
-        desc { "evaluating `type_op_prove_predicate` `{:?}`", goal.value.value }
+        desc { "evaluating `type_op_prove_predicate` `{:?}`", goal.canonical.value.value }
     }
 
     /// Do not call this query directly: part of the `Normalize` type-op
@@ -2112,7 +2147,7 @@ rustc_queries! {
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, Ty<'tcx>>>,
         NoSolution,
     > {
-        desc { "normalizing `{}`", goal.value.value.value }
+        desc { "normalizing `{}`", goal.canonical.value.value.value }
     }
 
     /// Do not call this query directly: part of the `Normalize` type-op
@@ -2122,7 +2157,7 @@ rustc_queries! {
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, ty::Clause<'tcx>>>,
         NoSolution,
     > {
-        desc { "normalizing `{:?}`", goal.value.value.value }
+        desc { "normalizing `{:?}`", goal.canonical.value.value.value }
     }
 
     /// Do not call this query directly: part of the `Normalize` type-op
@@ -2132,7 +2167,7 @@ rustc_queries! {
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, ty::PolyFnSig<'tcx>>>,
         NoSolution,
     > {
-        desc { "normalizing `{:?}`", goal.value.value.value }
+        desc { "normalizing `{:?}`", goal.canonical.value.value.value }
     }
 
     /// Do not call this query directly: part of the `Normalize` type-op
@@ -2142,7 +2177,7 @@ rustc_queries! {
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, ty::FnSig<'tcx>>>,
         NoSolution,
     > {
-        desc { "normalizing `{:?}`", goal.value.value.value }
+        desc { "normalizing `{:?}`", goal.canonical.value.value.value }
     }
 
     query instantiate_and_check_impossible_predicates(key: (DefId, GenericArgsRef<'tcx>)) -> bool {
@@ -2163,7 +2198,7 @@ rustc_queries! {
     query method_autoderef_steps(
         goal: CanonicalTyGoal<'tcx>
     ) -> MethodAutoderefStepsResult<'tcx> {
-        desc { "computing autoderef types for `{}`", goal.value.value }
+        desc { "computing autoderef types for `{}`", goal.canonical.value.value }
     }
 
     query supported_target_features(_: CrateNum) -> &'tcx UnordMap<String, Option<Symbol>> {

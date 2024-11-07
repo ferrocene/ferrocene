@@ -30,7 +30,7 @@ use rustc_middle::ty::{Instance, ParamEnv, Ty, TyCtxt};
 use rustc_span::Span;
 use rustc_span::def_id::DefId;
 use rustc_target::abi::call::FnAbi;
-use rustc_target::spec::{HasTargetSpec, HasWasmCAbiOpt, Target, WasmCAbi};
+use rustc_target::spec::{HasTargetSpec, HasWasmCAbiOpt, HasX86AbiOpt, Target, WasmCAbi, X86Abi};
 
 use crate::common::{SignType, TypeReflection, type_is_pointer};
 use crate::context::CodegenCx;
@@ -1016,11 +1016,11 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
             OperandValue::Ref(place.val)
         } else if place.layout.is_gcc_immediate() {
             let load = self.load(place.layout.gcc_type(self), place.val.llval, place.val.align);
-            if let abi::Abi::Scalar(ref scalar) = place.layout.abi {
+            if let abi::BackendRepr::Scalar(ref scalar) = place.layout.backend_repr {
                 scalar_load_metadata(self, load, scalar);
             }
             OperandValue::Immediate(self.to_immediate(load, place.layout))
-        } else if let abi::Abi::ScalarPair(ref a, ref b) = place.layout.abi {
+        } else if let abi::BackendRepr::ScalarPair(ref a, ref b) = place.layout.backend_repr {
             let b_offset = a.size(self).align_to(b.align(self).abi);
 
             let mut load = |i, scalar: &abi::Scalar, align| {
@@ -1725,16 +1725,6 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
     fn fptosi_sat(&mut self, val: RValue<'gcc>, dest_ty: Type<'gcc>) -> RValue<'gcc> {
         self.fptoint_sat(true, val, dest_ty)
     }
-
-    fn instrprof_increment(
-        &mut self,
-        _fn_name: RValue<'gcc>,
-        _hash: RValue<'gcc>,
-        _num_counters: RValue<'gcc>,
-        _index: RValue<'gcc>,
-    ) {
-        unimplemented!();
-    }
 }
 
 impl<'a, 'gcc, 'tcx> Builder<'a, 'gcc, 'tcx> {
@@ -2344,6 +2334,12 @@ impl<'tcx> HasTargetSpec for Builder<'_, '_, 'tcx> {
 impl<'tcx> HasWasmCAbiOpt for Builder<'_, '_, 'tcx> {
     fn wasm_c_abi_opt(&self) -> WasmCAbi {
         self.cx.wasm_c_abi_opt()
+    }
+}
+
+impl<'tcx> HasX86AbiOpt for Builder<'_, '_, 'tcx> {
+    fn x86_abi_opt(&self) -> X86Abi {
+        self.cx.x86_abi_opt()
     }
 }
 

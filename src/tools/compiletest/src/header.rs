@@ -6,14 +6,17 @@ use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use semver::Version;
 use tracing::*;
 
 use crate::common::{Config, Debugger, FailMode, Mode, PassMode};
+use crate::debuggers::{extract_cdb_version, extract_gdb_version};
+use crate::header::auxiliary::{AuxProps, parse_and_update_aux};
 use crate::header::cfg::{MatchOutcome, parse_cfg_name_directive};
 use crate::header::needs::CachedNeedsConditions;
 use crate::util::static_regex;
-use crate::{extract_cdb_version, extract_gdb_version};
 
+pub(crate) mod auxiliary;
 mod cfg;
 mod needs;
 #[cfg(test)]
@@ -33,9 +36,10 @@ impl HeadersCache {
 /// the test.
 #[derive(Default)]
 pub struct EarlyProps {
-    pub aux: Vec<String>,
-    pub aux_bin: Vec<String>,
-    pub aux_crate: Vec<(String, String)>,
+    /// Auxiliary crates that should be built and made available to this test.
+    /// Included in [`EarlyProps`] so that the indicated files can participate
+    /// in up-to-date checking. Building happens via [`TestProps::aux`] instead.
+    pub(crate) aux: AuxProps,
     pub revisions: Vec<String>,
 }
 
@@ -54,23 +58,9 @@ impl EarlyProps {
             &mut poisoned,
             testfile,
             rdr,
-            &mut |HeaderLine { directive: ln, .. }| {
-                config.push_name_value_directive(ln, directives::AUX_BUILD, &mut props.aux, |r| {
-                    r.trim().to_string()
-                });
-                config.push_name_value_directive(
-                    ln,
-                    directives::AUX_BIN,
-                    &mut props.aux_bin,
-                    |r| r.trim().to_string(),
-                );
-                config.push_name_value_directive(
-                    ln,
-                    directives::AUX_CRATE,
-                    &mut props.aux_crate,
-                    Config::parse_aux_crate,
-                );
-                config.parse_and_update_revisions(ln, &mut props.revisions);
+            &mut |DirectiveLine { raw_directive: ln, .. }| {
+                parse_and_update_aux(config, ln, &mut props.aux);
+                config.parse_and_update_revisions(testfile, ln, &mut props.revisions);
             },
         );
 
@@ -98,18 +88,8 @@ pub struct TestProps {
     // If present, the name of a file that this test should match when
     // pretty-printed
     pub pp_exact: Option<PathBuf>,
-    // Other crates that should be compiled (typically from the same
-    // directory as the test, but for backwards compatibility reasons
-    // we also check the auxiliary directory)
-    pub aux_builds: Vec<String>,
-    // Auxiliary crates that should be compiled as `#![crate_type = "bin"]`.
-    pub aux_bins: Vec<String>,
-    // Similar to `aux_builds`, but a list of NAME=somelib.rs of dependencies
-    // to build and pass with the `--extern` flag.
-    pub aux_crates: Vec<(String, String)>,
-    /// Similar to `aux_builds`, but also passes the resulting dylib path to
-    /// `-Zcodegen-backend`.
-    pub aux_codegen_backend: Option<String>,
+    /// Auxiliary crates that should be built and made available to this test.
+    pub(crate) aux: AuxProps,
     // Environment settings to use for compiling
     pub rustc_env: Vec<(String, String)>,
     // Environment variables to unset prior to compiling.
@@ -218,6 +198,9 @@ pub struct TestProps {
     pub no_auto_check_cfg: bool,
     /// Run tests which require enzyme being build
     pub has_enzyme: bool,
+    /// Build and use `minicore` as `core` stub for `no_core` tests in cross-compilation scenarios
+    /// that don't otherwise want/need `-Z build-std`.
+    pub add_core_stubs: bool,
 }
 
 mod directives {
@@ -263,6 +246,7 @@ mod directives {
     pub const LLVM_COV_FLAGS: &'static str = "llvm-cov-flags";
     pub const FILECHECK_FLAGS: &'static str = "filecheck-flags";
     pub const NO_AUTO_CHECK_CFG: &'static str = "no-auto-check-cfg";
+    pub const ADD_CORE_STUBS: &'static str = "add-core-stubs";
     // This isn't a real directive, just one that is probably mistyped often
     pub const INCORRECT_COMPILER_FLAGS: &'static str = "compiler-flags";
 }
@@ -276,10 +260,7 @@ impl TestProps {
             run_flags: vec![],
             doc_flags: vec![],
             pp_exact: None,
-            aux_builds: vec![],
-            aux_bins: vec![],
-            aux_crates: vec![],
-            aux_codegen_backend: None,
+            aux: Default::default(),
             revisions: vec![],
             rustc_env: vec![
                 ("RUSTC_ICE".to_string(), "0".to_string()),
@@ -323,6 +304,7 @@ impl TestProps {
             filecheck_flags: vec![],
             no_auto_check_cfg: false,
             has_enzyme: false,
+            add_core_stubs: false,
         }
     }
 
@@ -368,8 +350,8 @@ impl TestProps {
                 &mut poisoned,
                 testfile,
                 file,
-                &mut |HeaderLine { header_revision, directive: ln, .. }| {
-                    if header_revision.is_some() && header_revision != test_revision {
+                &mut |directive @ DirectiveLine { raw_directive: ln, .. }| {
+                    if !directive.applies_to_test_revision(test_revision) {
                         return;
                     }
 
@@ -415,7 +397,7 @@ impl TestProps {
                         has_edition = true;
                     }
 
-                    config.parse_and_update_revisions(ln, &mut self.revisions);
+                    config.parse_and_update_revisions(testfile, ln, &mut self.revisions);
 
                     if let Some(flags) = config.parse_name_value_directive(ln, RUN_FLAGS) {
                         self.run_flags.extend(split_flags(&flags));
@@ -454,21 +436,10 @@ impl TestProps {
                         PRETTY_COMPARE_ONLY,
                         &mut self.pretty_compare_only,
                     );
-                    config.push_name_value_directive(ln, AUX_BUILD, &mut self.aux_builds, |r| {
-                        r.trim().to_string()
-                    });
-                    config.push_name_value_directive(ln, AUX_BIN, &mut self.aux_bins, |r| {
-                        r.trim().to_string()
-                    });
-                    config.push_name_value_directive(
-                        ln,
-                        AUX_CRATE,
-                        &mut self.aux_crates,
-                        Config::parse_aux_crate,
-                    );
-                    if let Some(r) = config.parse_name_value_directive(ln, AUX_CODEGEN_BACKEND) {
-                        self.aux_codegen_backend = Some(r.trim().to_owned());
-                    }
+
+                    // Call a helper method to deal with aux-related directives.
+                    parse_and_update_aux(config, ln, &mut self.aux);
+
                     config.push_name_value_directive(
                         ln,
                         EXEC_ENV,
@@ -598,6 +569,8 @@ impl TestProps {
                     }
 
                     config.set_name_directive(ln, NO_AUTO_CHECK_CFG, &mut self.no_auto_check_cfg);
+
+                    self.update_add_core_stubs(ln, config);
                 },
             );
 
@@ -711,37 +684,65 @@ impl TestProps {
     pub fn local_pass_mode(&self) -> Option<PassMode> {
         self.pass_mode
     }
+
+    pub fn update_add_core_stubs(&mut self, ln: &str, config: &Config) {
+        let add_core_stubs = config.parse_name_directive(ln, directives::ADD_CORE_STUBS);
+        if add_core_stubs {
+            if !matches!(config.mode, Mode::Ui | Mode::Codegen | Mode::Assembly) {
+                panic!(
+                    "`add-core-stubs` is currently only supported for ui, codegen and assembly test modes"
+                );
+            }
+
+            // FIXME(jieyouxu): this check is currently order-dependent, but we should probably
+            // collect all directives in one go then perform a validation pass after that.
+            if self.local_pass_mode().is_some_and(|pm| pm == PassMode::Run) {
+                // `minicore` can only be used with non-run modes, because it's `core` prelude stubs
+                // and can't run.
+                panic!("`add-core-stubs` cannot be used to run the test binary");
+            }
+
+            self.add_core_stubs = add_core_stubs;
+        }
+    }
 }
 
-/// Extract an `(Option<line_revision>, directive)` directive from a line if comment is present.
-///
-/// See [`HeaderLine`] for a diagram.
-pub fn line_directive<'line>(
+/// If the given line begins with the appropriate comment prefix for a directive,
+/// returns a struct containing various parts of the directive.
+fn line_directive<'line>(
+    line_number: usize,
     comment: &str,
     original_line: &'line str,
-) -> Option<(Option<&'line str>, &'line str)> {
+) -> Option<DirectiveLine<'line>> {
     // Ignore lines that don't start with the comment prefix.
     let after_comment = original_line.trim_start().strip_prefix(comment)?.trim_start();
 
+    let revision;
+    let raw_directive;
+
     if let Some(after_open_bracket) = after_comment.strip_prefix('[') {
         // A comment like `//@[foo]` only applies to revision `foo`.
-        let Some((line_revision, directive)) = after_open_bracket.split_once(']') else {
+        let Some((line_revision, after_close_bracket)) = after_open_bracket.split_once(']') else {
             panic!(
                 "malformed condition directive: expected `{comment}[foo]`, found `{original_line}`"
             )
         };
 
-        Some((Some(line_revision), directive.trim_start()))
+        revision = Some(line_revision);
+        raw_directive = after_close_bracket.trim_start();
     } else {
-        Some((None, after_comment))
-    }
+        revision = None;
+        raw_directive = after_comment;
+    };
+
+    Some(DirectiveLine { line_number, revision, raw_directive })
 }
 
-// To prevent duplicating the list of commmands between `compiletest`,`htmldocck` and `jsondocck`,
+// To prevent duplicating the list of directives between `compiletest`,`htmldocck` and `jsondocck`,
 // we put it into a common file which is included in rust code and parsed here.
 // FIXME: This setup is temporary until we figure out how to improve this situation.
 //        See <https://github.com/rust-lang/rust/issues/125813#issuecomment-2141953780>.
-include!("command-list.rs");
+include!("directive-list.rs");
 
 const KNOWN_HTMLDOCCK_DIRECTIVE_NAMES: &[&str] = &[
     "count",
@@ -765,32 +766,37 @@ const KNOWN_HTMLDOCCK_DIRECTIVE_NAMES: &[&str] = &[
 const KNOWN_JSONDOCCK_DIRECTIVE_NAMES: &[&str] =
     &["count", "!count", "has", "!has", "is", "!is", "ismany", "!ismany", "set", "!set"];
 
-/// The broken-down contents of a line containing a test header directive,
+/// The (partly) broken-down contents of a line containing a test directive,
 /// which [`iter_header`] passes to its callback function.
 ///
 /// For example:
 ///
 /// ```text
 /// //@ compile-flags: -O
-///     ^^^^^^^^^^^^^^^^^ directive
-/// ^^^^^^^^^^^^^^^^^^^^^ original_line
+///     ^^^^^^^^^^^^^^^^^ raw_directive
 ///
 /// //@ [foo] compile-flags: -O
-///      ^^^                    header_revision
-///           ^^^^^^^^^^^^^^^^^ directive
-/// ^^^^^^^^^^^^^^^^^^^^^^^^^^^ original_line
+///      ^^^                    revision
+///           ^^^^^^^^^^^^^^^^^ raw_directive
 /// ```
-struct HeaderLine<'ln> {
+struct DirectiveLine<'ln> {
     line_number: usize,
-    /// Raw line from the test file, including comment prefix and any revision.
-    original_line: &'ln str,
-    /// Some header directives start with a revision name in square brackets
+    /// Some test directives start with a revision name in square brackets
     /// (e.g. `[foo]`), and only apply to that revision of the test.
     /// If present, this field contains the revision name (e.g. `foo`).
-    header_revision: Option<&'ln str>,
-    /// The main part of the header directive, after removing the comment prefix
+    revision: Option<&'ln str>,
+    /// The main part of the directive, after removing the comment prefix
     /// and the optional revision specifier.
-    directive: &'ln str,
+    ///
+    /// This is "raw" because the directive's name and colon-separated value
+    /// (if present) have not yet been extracted or checked.
+    raw_directive: &'ln str,
+}
+
+impl<'ln> DirectiveLine<'ln> {
+    fn applies_to_test_revision(&self, test_revision: Option<&str>) -> bool {
+        self.revision.is_none() || self.revision == test_revision
+    }
 }
 
 pub(crate) struct CheckDirectiveResult<'ln> {
@@ -838,7 +844,7 @@ fn iter_header(
     poisoned: &mut bool,
     testfile: &Path,
     rdr: impl Read,
-    it: &mut dyn FnMut(HeaderLine<'_>),
+    it: &mut dyn FnMut(DirectiveLine<'_>),
 ) {
     if testfile.is_dir() {
         return;
@@ -858,8 +864,8 @@ fn iter_header(
             "ignore-cross-compile",
         ];
         // Process the extra implied directives, with a dummy line number of 0.
-        for directive in extra_directives {
-            it(HeaderLine { line_number: 0, original_line: "", header_revision: None, directive });
+        for raw_directive in extra_directives {
+            it(DirectiveLine { line_number: 0, revision: None, raw_directive });
         }
     }
 
@@ -876,11 +882,6 @@ fn iter_header(
         if rdr.read_line(&mut ln).unwrap() == 0 {
             break;
         }
-
-        // Assume that any directives will be found before the first
-        // module or function. This doesn't seem to be an optimization
-        // with a warm page cache. Maybe with a cold one.
-        let original_line = &ln;
         let ln = ln.trim();
 
         // Assume that any directives will be found before the first module or function. This
@@ -891,24 +892,21 @@ fn iter_header(
             return;
         }
 
-        let Some((header_revision, non_revisioned_directive_line)) = line_directive(comment, ln)
-        else {
+        let Some(directive_line) = line_directive(line_number, comment, ln) else {
             continue;
         };
 
         // Perform unknown directive check on Rust files.
         if testfile.extension().map(|e| e == "rs").unwrap_or(false) {
-            let directive_ln = non_revisioned_directive_line.trim();
-
             let CheckDirectiveResult { is_known_directive, trailing_directive } =
-                check_directive(directive_ln, mode, ln);
+                check_directive(directive_line.raw_directive, mode, ln);
 
             if !is_known_directive {
                 *poisoned = true;
 
                 eprintln!(
                     "error: detected unknown compiletest test directive `{}` in {}:{}",
-                    directive_ln,
+                    directive_line.raw_directive,
                     testfile.display(),
                     line_number,
                 );
@@ -932,30 +930,26 @@ fn iter_header(
             }
         }
 
-        it(HeaderLine {
-            line_number,
-            original_line,
-            header_revision,
-            directive: non_revisioned_directive_line,
-        });
+        it(directive_line);
     }
 }
 
 impl Config {
-    fn parse_aux_crate(r: String) -> (String, String) {
-        let mut parts = r.trim().splitn(2, '=');
-        (
-            parts.next().expect("missing aux-crate name (e.g. log=log.rs)").to_string(),
-            parts.next().expect("missing aux-crate value (e.g. log=log.rs)").to_string(),
-        )
-    }
-
-    fn parse_and_update_revisions(&self, line: &str, existing: &mut Vec<String>) {
+    fn parse_and_update_revisions(&self, testfile: &Path, line: &str, existing: &mut Vec<String>) {
         if let Some(raw) = self.parse_name_value_directive(line, "revisions") {
+            if self.mode == Mode::RunMake {
+                panic!("`run-make` tests do not support revisions: {}", testfile.display());
+            }
+
             let mut duplicates: HashSet<_> = existing.iter().cloned().collect();
             for revision in raw.split_whitespace().map(|r| r.to_string()) {
                 if !duplicates.insert(revision.clone()) {
-                    panic!("Duplicate revision: `{}` in line `{}`", revision, raw);
+                    panic!(
+                        "duplicate revision: `{}` in line `{}`: {}",
+                        revision,
+                        raw,
+                        testfile.display()
+                    );
                 }
                 existing.push(revision);
             }
@@ -1148,26 +1142,39 @@ fn parse_normalize_rule(header: &str) -> Option<(String, String)> {
     Some((regex, replacement))
 }
 
-pub fn extract_llvm_version(version: &str) -> Option<u32> {
-    let pat = |c: char| !c.is_ascii_digit() && c != '.';
-    let version_without_suffix = match version.find(pat) {
-        Some(pos) => &version[..pos],
+/// Given an llvm version string that looks like `1.2.3-rc1`, extract as semver. Note that this
+/// accepts more than just strict `semver` syntax (as in `major.minor.patch`); this permits omitting
+/// minor and patch version components so users can write e.g. `//@ min-llvm-version: 19` instead of
+/// having to write `//@ min-llvm-version: 19.0.0`.
+///
+/// Currently panics if the input string is malformed, though we really should not use panic as an
+/// error handling strategy.
+///
+/// FIXME(jieyouxu): improve error handling
+pub fn extract_llvm_version(version: &str) -> Version {
+    // The version substring we're interested in usually looks like the `1.2.3`, without any of the
+    // fancy suffix like `-rc1` or `meow`.
+    let version = version.trim();
+    let uninterested = |c: char| !c.is_ascii_digit() && c != '.';
+    let version_without_suffix = match version.split_once(uninterested) {
+        Some((prefix, _suffix)) => prefix,
         None => version,
     };
-    let components: Vec<u32> = version_without_suffix
+
+    let components: Vec<u64> = version_without_suffix
         .split('.')
-        .map(|s| s.parse().expect("Malformed version component"))
+        .map(|s| s.parse().expect("llvm version component should consist of only digits"))
         .collect();
-    let version = match *components {
-        [a] => a * 10_000,
-        [a, b] => a * 10_000 + b * 100,
-        [a, b, c] => a * 10_000 + b * 100 + c,
-        _ => panic!("Malformed version"),
-    };
-    Some(version)
+
+    match &components[..] {
+        [major] => Version::new(*major, 0, 0),
+        [major, minor] => Version::new(*major, *minor, 0),
+        [major, minor, patch] => Version::new(*major, *minor, *patch),
+        _ => panic!("malformed llvm version string, expected only 1-3 components: {version}"),
+    }
 }
 
-pub fn extract_llvm_version_from_binary(binary_path: &str) -> Option<u32> {
+pub fn extract_llvm_version_from_binary(binary_path: &str) -> Option<Version> {
     let output = Command::new(binary_path).arg("--version").output().ok()?;
     if !output.status.success() {
         return None;
@@ -1175,7 +1182,7 @@ pub fn extract_llvm_version_from_binary(binary_path: &str) -> Option<u32> {
     let version = String::from_utf8(output.stdout).ok()?;
     for line in version.lines() {
         if let Some(version) = line.split("LLVM version ").nth(1) {
-            return extract_llvm_version(version);
+            return Some(extract_llvm_version(version));
         }
     }
     None
@@ -1282,15 +1289,17 @@ pub fn llvm_has_libzstd(config: &Config) -> bool {
     false
 }
 
-/// Takes a directive of the form `"<version1> [- <version2>]"`,
-/// returns the numeric representation of `<version1>` and `<version2>` as
-/// tuple: `(<version1> as u32, <version2> as u32)`.
+/// Takes a directive of the form `"<version1> [- <version2>]"`, returns the numeric representation
+/// of `<version1>` and `<version2>` as tuple: `(<version1>, <version2>)`.
 ///
-/// If the `<version2>` part is omitted, the second component of the tuple
-/// is the same as `<version1>`.
-fn extract_version_range<F>(line: &str, parse: F) -> Option<(u32, u32)>
+/// If the `<version2>` part is omitted, the second component of the tuple is the same as
+/// `<version1>`.
+fn extract_version_range<'a, F, VersionTy: Clone>(
+    line: &'a str,
+    parse: F,
+) -> Option<(VersionTy, VersionTy)>
 where
-    F: Fn(&str) -> Option<u32>,
+    F: Fn(&'a str) -> Option<VersionTy>,
 {
     let mut splits = line.splitn(2, "- ").map(str::trim);
     let min = splits.next().unwrap();
@@ -1308,7 +1317,7 @@ where
     let max = match max {
         Some("") => return None,
         Some(max) => parse(max)?,
-        _ => min,
+        _ => min.clone(),
     };
 
     Some((min, max))
@@ -1329,14 +1338,15 @@ pub fn make_test_description<R: Read>(
 
     let mut local_poisoned = false;
 
+    // Scan through the test file to handle `ignore-*`, `only-*`, and `needs-*` directives.
     iter_header(
         config.mode,
         &config.suite,
         &mut local_poisoned,
         path,
         src,
-        &mut |HeaderLine { header_revision, original_line, directive: ln, line_number }| {
-            if header_revision.is_some() && header_revision != test_revision {
+        &mut |directive @ DirectiveLine { line_number, raw_directive: ln, .. }| {
+            if !directive.applies_to_test_revision(test_revision) {
                 return;
             }
 
@@ -1360,17 +1370,7 @@ pub fn make_test_description<R: Read>(
                 };
             }
 
-            if let Some((_, post)) = original_line.trim_start().split_once("//") {
-                let post = post.trim_start();
-                if post.starts_with("ignore-tidy") {
-                    // Not handled by compiletest.
-                } else {
-                    decision!(cfg::handle_ignore(config, ln));
-                }
-            } else {
-                decision!(cfg::handle_ignore(config, ln));
-            }
-
+            decision!(cfg::handle_ignore(config, ln));
             decision!(cfg::handle_only(config, ln));
             decision!(needs::handle_needs(&cache.needs, config, ln));
             decision!(ignore_llvm(config, ln));
@@ -1533,43 +1533,55 @@ fn ignore_llvm(config: &Config, line: &str) -> IgnoreDecision {
             };
         }
     }
-    if let Some(actual_version) = config.llvm_version {
-        if let Some(rest) = line.strip_prefix("min-llvm-version:").map(str::trim) {
-            let min_version = extract_llvm_version(rest).unwrap();
-            // Ignore if actual version is smaller the minimum required
-            // version
-            if actual_version < min_version {
+    if let Some(actual_version) = &config.llvm_version {
+        // Note that these `min` versions will check for not just major versions.
+
+        if let Some(version_string) = config.parse_name_value_directive(line, "min-llvm-version") {
+            let min_version = extract_llvm_version(&version_string);
+            // Ignore if actual version is smaller than the minimum required version.
+            if *actual_version < min_version {
                 return IgnoreDecision::Ignore {
-                    reason: format!("ignored when the LLVM version is older than {rest}"),
+                    reason: format!(
+                        "ignored when the LLVM version {actual_version} is older than {min_version}"
+                    ),
                 };
             }
-        } else if let Some(rest) = line.strip_prefix("min-system-llvm-version:").map(str::trim) {
-            let min_version = extract_llvm_version(rest).unwrap();
+        } else if let Some(version_string) =
+            config.parse_name_value_directive(line, "min-system-llvm-version")
+        {
+            let min_version = extract_llvm_version(&version_string);
             // Ignore if using system LLVM and actual version
             // is smaller the minimum required version
-            if config.system_llvm && actual_version < min_version {
+            if config.system_llvm && *actual_version < min_version {
                 return IgnoreDecision::Ignore {
-                    reason: format!("ignored when the system LLVM version is older than {rest}"),
+                    reason: format!(
+                        "ignored when the system LLVM version {actual_version} is older than {min_version}"
+                    ),
                 };
             }
-        } else if let Some(rest) = line.strip_prefix("ignore-llvm-version:").map(str::trim) {
+        } else if let Some(version_range) =
+            config.parse_name_value_directive(line, "ignore-llvm-version")
+        {
             // Syntax is: "ignore-llvm-version: <version1> [- <version2>]"
             let (v_min, v_max) =
-                extract_version_range(rest, extract_llvm_version).unwrap_or_else(|| {
-                    panic!("couldn't parse version range: {:?}", rest);
-                });
+                extract_version_range(&version_range, |s| Some(extract_llvm_version(s)))
+                    .unwrap_or_else(|| {
+                        panic!("couldn't parse version range: \"{version_range}\"");
+                    });
             if v_max < v_min {
-                panic!("Malformed LLVM version range: max < min")
+                panic!("malformed LLVM version range where {v_max} < {v_min}")
             }
             // Ignore if version lies inside of range.
-            if actual_version >= v_min && actual_version <= v_max {
+            if *actual_version >= v_min && *actual_version <= v_max {
                 if v_min == v_max {
                     return IgnoreDecision::Ignore {
-                        reason: format!("ignored when the LLVM version is {rest}"),
+                        reason: format!("ignored when the LLVM version is {actual_version}"),
                     };
                 } else {
                     return IgnoreDecision::Ignore {
-                        reason: format!("ignored when the LLVM version is between {rest}"),
+                        reason: format!(
+                            "ignored when the LLVM version is between {v_min} and {v_max}"
+                        ),
                     };
                 }
             }

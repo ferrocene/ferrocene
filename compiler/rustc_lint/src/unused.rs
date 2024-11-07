@@ -346,7 +346,7 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
                         None
                     }
                 }
-                ty::Array(ty, len) => match len.try_eval_target_usize(cx.tcx, cx.param_env) {
+                ty::Array(ty, len) => match len.try_to_target_usize(cx.tcx) {
                     // If the array is empty we don't lint, to avoid false positives
                     Some(0) | None => None,
                     // If the array is definitely non-empty, we can do `#[must_use]` checking.
@@ -804,7 +804,15 @@ trait UnusedDelimLint {
                 .find_ancestor_inside(value.span)
                 .map(|span| (value.span.with_hi(span.lo()), value.span.with_lo(span.hi()))),
             ast::ExprKind::Paren(ref expr) => {
-                expr.span.find_ancestor_inside(value.span).map(|expr_span| {
+                // For the expr with attributes, like `let _ = (#[inline] || println!("Hello!"));`,
+                // the span should contains the attributes, or the suggestion will remove them.
+                let expr_span_with_attrs =
+                    if let Some(attr_lo) = expr.attrs.iter().map(|attr| attr.span.lo()).min() {
+                        expr.span.with_lo(attr_lo)
+                    } else {
+                        expr.span
+                    };
+                expr_span_with_attrs.find_ancestor_inside(value.span).map(|expr_span| {
                     (value.span.with_hi(expr_span.lo()), value.span.with_lo(expr_span.hi()))
                 })
             }
@@ -1017,8 +1025,8 @@ pub(crate) struct UnusedParens {
     parens_in_cast_in_lt: Vec<ast::NodeId>,
 }
 
-impl UnusedParens {
-    pub(crate) fn new() -> Self {
+impl Default for UnusedParens {
+    fn default() -> Self {
         Self { with_self_ty_parens: false, parens_in_cast_in_lt: Vec::new() }
     }
 }
@@ -1602,7 +1610,7 @@ impl<'tcx> LateLintPass<'tcx> for UnusedAllocation {
         }
 
         for adj in cx.typeck_results().expr_adjustments(e) {
-            if let adjustment::Adjust::Borrow(adjustment::AutoBorrow::Ref(_, m)) = adj.kind {
+            if let adjustment::Adjust::Borrow(adjustment::AutoBorrow::Ref(m)) = adj.kind {
                 match m {
                     adjustment::AutoBorrowMutability::Not => {
                         cx.emit_span_lint(UNUSED_ALLOCATION, e.span, UnusedAllocationDiag);

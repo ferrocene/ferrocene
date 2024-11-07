@@ -1,8 +1,11 @@
+use std::ffi::CStr;
+
 use itertools::Itertools as _;
 use rustc_codegen_ssa::traits::{BaseTypeCodegenMethods, ConstCodegenMethods};
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_index::IndexVec;
+use rustc_middle::mir::coverage::MappingKind;
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_middle::{bug, mir};
 use rustc_span::Symbol;
@@ -10,33 +13,24 @@ use rustc_span::def_id::DefIdSet;
 use tracing::debug;
 
 use crate::common::CodegenCx;
-use crate::coverageinfo::ffi::CounterMappingRegion;
+use crate::coverageinfo::ffi;
 use crate::coverageinfo::map_data::{FunctionCoverage, FunctionCoverageCollector};
 use crate::{coverageinfo, llvm};
 
-/// Generates and exports the Coverage Map.
+/// Generates and exports the coverage map, which is embedded in special
+/// linker sections in the final binary.
 ///
-/// Rust Coverage Map generation supports LLVM Coverage Mapping Format versions
-/// 6 and 7 (encoded as 5 and 6 respectively), as described at
-/// [LLVM Code Coverage Mapping Format](https://github.com/rust-lang/llvm-project/blob/rustc/18.0-2024-02-13/llvm/docs/CoverageMappingFormat.rst).
-/// These versions are supported by the LLVM coverage tools (`llvm-profdata` and `llvm-cov`)
-/// distributed in the `llvm-tools-preview` rustup component.
-///
-/// Consequently, Rust's bundled version of Clang also generates Coverage Maps compliant with
-/// the same version. Clang's implementation of Coverage Map generation was referenced when
-/// implementing this Rust version, and though the format documentation is very explicit and
-/// detailed, some undocumented details in Clang's implementation (that may or may not be important)
-/// were also replicated for Rust's Coverage Map.
+/// Those sections are then read and understood by LLVM's `llvm-cov` tool,
+/// which is distributed in the `llvm-tools` rustup component.
 pub(crate) fn finalize(cx: &CodegenCx<'_, '_>) {
     let tcx = cx.tcx;
 
     // Ensure that LLVM is using a version of the coverage mapping format that
     // agrees with our Rust-side code. Expected versions (encoded as n-1) are:
-    // - `CovMapVersion::Version6` (5) used by LLVM 13-17
-    // - `CovMapVersion::Version7` (6) used by LLVM 18
+    // - `CovMapVersion::Version7` (6) used by LLVM 18-19
     let covmap_version = {
         let llvm_covmap_version = coverageinfo::mapping_version();
-        let expected_versions = 5..=6;
+        let expected_versions = 6..=6;
         assert!(
             expected_versions.contains(&llvm_covmap_version),
             "Coverage mapping version exposed by `llvm-wrapper` is out of sync; \
@@ -141,7 +135,7 @@ pub(crate) fn finalize(cx: &CodegenCx<'_, '_>) {
             .collect::<Vec<_>>();
         let initializer = cx.const_array(cx.type_ptr(), &name_globals);
 
-        let array = llvm::add_global(cx.llmod, cx.val_ty(initializer), "__llvm_coverage_names");
+        let array = llvm::add_global(cx.llmod, cx.val_ty(initializer), c"__llvm_coverage_names");
         llvm::set_global_constant(array, true);
         llvm::set_linkage(array, llvm::Linkage::InternalLinkage);
         llvm::set_initializer(array, initializer);
@@ -244,7 +238,10 @@ fn encode_mappings_for_function(
     let expressions = function_coverage.counter_expressions().collect::<Vec<_>>();
 
     let mut virtual_file_mapping = VirtualFileMapping::default();
-    let mut mapping_regions = Vec::with_capacity(counter_regions.len());
+    let mut code_regions = vec![];
+    let mut branch_regions = vec![];
+    let mut mcdc_branch_regions = vec![];
+    let mut mcdc_decision_regions = vec![];
 
     // Group mappings into runs with the same filename, preserving the order
     // yielded by `FunctionCoverage`.
@@ -264,11 +261,36 @@ fn encode_mappings_for_function(
         // form suitable for FFI.
         for (mapping_kind, region) in counter_regions_for_file {
             debug!("Adding counter {mapping_kind:?} to map for {region:?}");
-            mapping_regions.push(CounterMappingRegion::from_mapping(
-                &mapping_kind,
-                local_file_id.as_u32(),
-                region,
-            ));
+            let span = ffi::CoverageSpan::from_source_region(local_file_id.as_u32(), region);
+            match mapping_kind {
+                MappingKind::Code(term) => {
+                    code_regions
+                        .push(ffi::CodeRegion { span, counter: ffi::Counter::from_term(term) });
+                }
+                MappingKind::Branch { true_term, false_term } => {
+                    branch_regions.push(ffi::BranchRegion {
+                        span,
+                        true_counter: ffi::Counter::from_term(true_term),
+                        false_counter: ffi::Counter::from_term(false_term),
+                    });
+                }
+                MappingKind::MCDCBranch { true_term, false_term, mcdc_params } => {
+                    mcdc_branch_regions.push(ffi::MCDCBranchRegion {
+                        span,
+                        true_counter: ffi::Counter::from_term(true_term),
+                        false_counter: ffi::Counter::from_term(false_term),
+                        mcdc_branch_params: ffi::mcdc::BranchParameters::from(mcdc_params),
+                    });
+                }
+                MappingKind::MCDCDecision(mcdc_decision_params) => {
+                    mcdc_decision_regions.push(ffi::MCDCDecisionRegion {
+                        span,
+                        mcdc_decision_params: ffi::mcdc::DecisionParameters::from(
+                            mcdc_decision_params,
+                        ),
+                    });
+                }
+            }
         }
     }
 
@@ -277,7 +299,10 @@ fn encode_mappings_for_function(
         coverageinfo::write_mapping_to_buffer(
             virtual_file_mapping.into_vec(),
             expressions,
-            mapping_regions,
+            &code_regions,
+            &branch_regions,
+            &mcdc_branch_regions,
+            &mcdc_decision_regions,
             buffer,
         );
     })
@@ -314,7 +339,7 @@ fn generate_coverage_map<'ll>(
 /// specific, well-known section and name.
 fn save_function_record(
     cx: &CodegenCx<'_, '_>,
-    covfun_section_name: &str,
+    covfun_section_name: &CStr,
     mangled_function_name: &str,
     source_hash: u64,
     filenames_ref: u64,

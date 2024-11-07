@@ -340,7 +340,9 @@ impl<'ra, 'tcx> ResolverExpand for Resolver<'ra, 'tcx> {
 
     fn record_macro_rule_usage(&mut self, id: NodeId, rule_i: usize) {
         let did = self.local_def_id(id);
-        self.unused_macro_rules.remove(&(did, rule_i));
+        if let Some(rules) = self.unused_macro_rules.get_mut(&did) {
+            rules.remove(&rule_i);
+        }
     }
 
     fn check_unused_macros(&mut self) {
@@ -352,18 +354,24 @@ impl<'ra, 'tcx> ResolverExpand for Resolver<'ra, 'tcx> {
                 BuiltinLintDiag::UnusedMacroDefinition(ident.name),
             );
         }
-        for (&(def_id, arm_i), &(ident, rule_span)) in self.unused_macro_rules.iter() {
-            if self.unused_macros.contains_key(&def_id) {
-                // We already lint the entire macro as unused
-                continue;
+
+        for (&def_id, unused_arms) in self.unused_macro_rules.iter() {
+            let mut unused_arms = unused_arms.iter().collect::<Vec<_>>();
+            unused_arms.sort_by_key(|&(&arm_i, _)| arm_i);
+
+            for (&arm_i, &(ident, rule_span)) in unused_arms {
+                if self.unused_macros.contains_key(&def_id) {
+                    // We already lint the entire macro as unused
+                    continue;
+                }
+                let node_id = self.def_id_to_node_id[def_id];
+                self.lint_buffer.buffer_lint(
+                    UNUSED_MACRO_RULES,
+                    node_id,
+                    rule_span,
+                    BuiltinLintDiag::MacroRuleNeverUsed(arm_i, ident.name),
+                );
             }
-            let node_id = self.def_id_to_node_id[def_id];
-            self.lint_buffer.buffer_lint(
-                UNUSED_MACRO_RULES,
-                node_id,
-                rule_span,
-                BuiltinLintDiag::MacroRuleNeverUsed(arm_i, ident.name),
-            );
         }
     }
 
@@ -653,7 +661,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         }
 
         // We are trying to avoid reporting this error if other related errors were reported.
-        if res != Res::Err && inner_attr && !self.tcx.features().custom_inner_attributes {
+        if res != Res::Err && inner_attr && !self.tcx.features().custom_inner_attributes() {
             let is_macro = match res {
                 Res::Def(..) => true,
                 Res::NonMacroAttr(..) => false,
@@ -682,7 +690,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             && namespace.ident.name == sym::diagnostic
             && !(attribute.ident.name == sym::on_unimplemented
                 || (attribute.ident.name == sym::do_not_recommend
-                    && self.tcx.features().do_not_recommend))
+                    && self.tcx.features().do_not_recommend()))
         {
             let distance =
                 edit_distance(attribute.ident.name.as_str(), sym::on_unimplemented.as_str(), 5);
@@ -999,10 +1007,8 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             {
                 let feature = stability.feature;
 
-                let is_allowed = |feature| {
-                    self.tcx.features().declared_features.contains(&feature)
-                        || span.allows_unstable(feature)
-                };
+                let is_allowed =
+                    |feature| self.tcx.features().enabled(feature) || span.allows_unstable(feature);
                 let allowed_by_implication = implied_by.is_some_and(|feature| is_allowed(feature));
                 if !is_allowed(feature) && !allowed_by_implication {
                     let lint_buffer = &mut self.lint_buffer;

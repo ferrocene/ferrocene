@@ -39,6 +39,14 @@ where
         self.def_id()
     }
 
+    fn consider_additional_alias_assumptions(
+        _ecx: &mut EvalCtxt<'_, D>,
+        _goal: Goal<I, Self>,
+        _alias_ty: ty::AliasTy<I>,
+    ) -> Vec<Candidate<I>> {
+        vec![]
+    }
+
     fn consider_impl_candidate(
         ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, TraitPredicate<I>>,
@@ -108,7 +116,6 @@ where
         ecx: &mut EvalCtxt<'_, D>,
         _guar: I::ErrorGuaranteed,
     ) -> Result<Candidate<I>, NoSolution> {
-        // FIXME: don't need to enter a probe here.
         ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc)
             .enter(|ecx| ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes))
     }
@@ -463,7 +470,6 @@ where
         // Async coroutine unconditionally implement `Future`
         // Technically, we need to check that the future output type is Sized,
         // but that's already proven by the coroutine being WF.
-        // FIXME: use `consider_implied`
         ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc)
             .enter(|ecx| ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes))
     }
@@ -489,7 +495,6 @@ where
         // Gen coroutines unconditionally implement `Iterator`
         // Technically, we need to check that the iterator output type is Sized,
         // but that's already proven by the coroutines being WF.
-        // FIXME: use `consider_implied`
         ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc)
             .enter(|ecx| ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes))
     }
@@ -512,8 +517,7 @@ where
             return Err(NoSolution);
         }
 
-        // Gen coroutines unconditionally implement `FusedIterator`
-        // FIXME: use `consider_implied`
+        // Gen coroutines unconditionally implement `FusedIterator`.
         ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc)
             .enter(|ecx| ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes))
     }
@@ -539,7 +543,6 @@ where
         // Gen coroutines unconditionally implement `Iterator`
         // Technically, we need to check that the iterator output type is Sized,
         // but that's already proven by the coroutines being WF.
-        // FIXME: use `consider_implied`
         ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc)
             .enter(|ecx| ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes))
     }
@@ -610,7 +613,7 @@ where
             return Err(NoSolution);
         }
 
-        // FIXME(-Znext-solver): Implement this when we get const working in the new solver
+        // FIXME(effects): Implement this when we get const working in the new solver
 
         // `Destruct` is automatically implemented for every type in
         // non-const environments.
@@ -631,14 +634,17 @@ where
             return Err(NoSolution);
         }
 
-        // FIXME: This actually should destructure the `Result` we get from transmutability and
-        // register candidates. We probably need to register >1 since we may have an OR of ANDs.
         ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc).enter(|ecx| {
+            let assume = ecx.structurally_normalize_const(
+                goal.param_env,
+                goal.predicate.trait_ref.args.const_at(2),
+            )?;
+
             let certainty = ecx.is_transmutable(
                 goal.param_env,
                 goal.predicate.trait_ref.args.type_at(0),
                 goal.predicate.trait_ref.args.type_at(1),
-                goal.predicate.trait_ref.args.const_at(2),
+                assume,
             )?;
             ecx.evaluate_added_goals_and_make_canonical_response(certainty)
         })
@@ -721,47 +727,6 @@ where
             }
         })
     }
-
-    fn consider_builtin_effects_intersection_candidate(
-        ecx: &mut EvalCtxt<'_, D>,
-        goal: Goal<I, Self>,
-    ) -> Result<Candidate<I>, NoSolution> {
-        if goal.predicate.polarity != ty::PredicatePolarity::Positive {
-            return Err(NoSolution);
-        }
-
-        let ty::Tuple(types) = goal.predicate.self_ty().kind() else {
-            return Err(NoSolution);
-        };
-
-        let cx = ecx.cx();
-        let maybe_count = types
-            .iter()
-            .filter_map(|ty| ty::EffectKind::try_from_ty(cx, ty))
-            .filter(|&ty| ty == ty::EffectKind::Maybe)
-            .count();
-
-        // Don't do concrete type check unless there are more than one type that will influence the result.
-        // This would allow `(Maybe, T): Min` pass even if we know nothing about `T`.
-        if types.len() - maybe_count > 1 {
-            let mut min = ty::EffectKind::Maybe;
-
-            for ty in types.iter() {
-                let Some(kind) = ty::EffectKind::try_from_ty(ecx.cx(), ty) else {
-                    return Err(NoSolution);
-                };
-
-                let Some(result) = ty::EffectKind::intersection(min, kind) else {
-                    return Err(NoSolution);
-                };
-
-                min = result;
-            }
-        }
-
-        ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc)
-            .enter(|ecx| ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes))
-    }
 }
 
 impl<D, I> EvalCtxt<'_, D>
@@ -792,7 +757,8 @@ where
         let mut responses = vec![];
         // If the principal def ids match (or are both none), then we're not doing
         // trait upcasting. We're just removing auto traits (or shortening the lifetime).
-        if a_data.principal_def_id() == b_data.principal_def_id() {
+        let b_principal_def_id = b_data.principal_def_id();
+        if a_data.principal_def_id() == b_principal_def_id || b_principal_def_id.is_none() {
             responses.extend(self.consider_builtin_upcast_to_principal(
                 goal,
                 CandidateSource::BuiltinImpl(BuiltinImplSource::Misc),

@@ -357,7 +357,7 @@ fn check_final_expr<'tcx>(
 
             let replacement = if let Some(inner_expr) = inner {
                 // if desugar of `do yeet`, don't lint
-                if let ExprKind::Call(path_expr, _) = inner_expr.kind
+                if let ExprKind::Call(path_expr, [_]) = inner_expr.kind
                     && let ExprKind::Path(QPath::LangItem(LangItem::TryTraitFromYeet, ..)) = path_expr.kind
                 {
                     return;
@@ -407,7 +407,7 @@ fn check_final_expr<'tcx>(
                 }
             }
 
-            if ret_span.from_expansion() {
+            if ret_span.from_expansion() || is_from_proc_macro(cx, expr) {
                 return;
             }
 

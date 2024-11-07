@@ -138,6 +138,16 @@ pub(crate) unsafe fn create_module<'ll>(
         }
     }
 
+    if llvm_version < (20, 0, 0) {
+        if sess.target.arch == "aarch64" || sess.target.arch.starts_with("arm64") {
+            // LLVM 20 defines three additional address spaces for alternate
+            // pointer kinds used in Windows.
+            // See https://github.com/llvm/llvm-project/pull/111879
+            target_data_layout =
+                target_data_layout.replace("-p270:32:32-p271:32:32-p272:64:64", "");
+        }
+    }
+
     // Ensure the data-layout values hardcoded remain the defaults.
     {
         let tm = crate::back::write::create_informational_target_machine(tcx.sess, false);
@@ -884,6 +894,11 @@ impl<'ll> CodegenCx<'ll, '_> {
         ifn!("llvm.fma.f64", fn(t_f64, t_f64, t_f64) -> t_f64);
         ifn!("llvm.fma.f128", fn(t_f128, t_f128, t_f128) -> t_f128);
 
+        ifn!("llvm.fmuladd.f16", fn(t_f16, t_f16, t_f16) -> t_f16);
+        ifn!("llvm.fmuladd.f32", fn(t_f32, t_f32, t_f32) -> t_f32);
+        ifn!("llvm.fmuladd.f64", fn(t_f64, t_f64, t_f64) -> t_f64);
+        ifn!("llvm.fmuladd.f128", fn(t_f128, t_f128, t_f128) -> t_f128);
+
         ifn!("llvm.fabs.f16", fn(t_f16) -> t_f16);
         ifn!("llvm.fabs.f32", fn(t_f32) -> t_f32);
         ifn!("llvm.fabs.f64", fn(t_f64) -> t_f64);
@@ -1084,6 +1099,10 @@ impl<'ll> CodegenCx<'ll, '_> {
 
         if self.sess().instrument_coverage() {
             ifn!("llvm.instrprof.increment", fn(ptr, t_i64, t_i32, t_i32) -> void);
+            if crate::llvm_util::get_version() >= (19, 0, 0) {
+                ifn!("llvm.instrprof.mcdc.parameters", fn(ptr, t_i64, t_i32) -> void);
+                ifn!("llvm.instrprof.mcdc.tvbitmap.update", fn(ptr, t_i64, t_i32, ptr) -> void);
+            }
         }
 
         ifn!("llvm.type.test", fn(ptr, t_metadata) -> i1);

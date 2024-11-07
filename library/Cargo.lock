@@ -61,9 +61,9 @@ dependencies = [
 
 [[package]]
 name = "compiler_builtins"
-version = "0.1.133"
+version = "0.1.134"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab10bf45b2ed1b4f4c25401527a61684142c042b3c86ace7da7ea6881e26741b"
+checksum = "2f743e6f7410a78c261505c729f389583de40eec62332cc8cdf2c8b9bf73049a"
 dependencies = [
  "cc",
  "rustc-std-workspace-core",
@@ -159,6 +159,11 @@ dependencies = [
 [[package]]
 name = "libc"
 version = "0.2.161"
+<<<<<<< HEAD
+=======
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8e9489c2807c139ffd9c1794f4af0ebe86a828db53ecdc7fea2111d0fed085d1"
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 dependencies = [
  "rustc-std-workspace-core",
 ]
@@ -349,7 +354,6 @@ dependencies = [
  "object",
  "panic_abort",
  "panic_unwind",
- "profiler_builtins",
  "r-efi",
  "r-efi-alloc",
  "rand",
@@ -378,6 +382,7 @@ name = "sysroot"
 version = "0.0.0"
 dependencies = [
  "proc_macro",
+ "profiler_builtins",
  "std",
  "test",
 ]
@@ -416,12 +421,12 @@ dependencies = [
 
 [[package]]
 name = "unwinding"
-version = "0.2.2"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc55842d0db6329a669d55a623c674b02d677b16bfb2d24857d4089d41eba882"
+checksum = "637d511437df708cee34bdec7ba2f1548d256b7acf3ff20e0a1c559f9bf3a987"
 dependencies = [
  "compiler_builtins",
- "gimli 0.30.0",
+ "gimli 0.31.1",
  "rustc-std-workspace-core",
 ]
 

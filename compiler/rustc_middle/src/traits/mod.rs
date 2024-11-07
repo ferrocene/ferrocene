@@ -25,6 +25,7 @@ use rustc_span::{DUMMY_SP, Span};
 // FIXME: Remove this import and import via `solve::`
 pub use rustc_type_ir::solve::{BuiltinImplSource, Reveal};
 use smallvec::{SmallVec, smallvec};
+use thin_vec::ThinVec;
 
 pub use self::select::{EvaluationCache, EvaluationResult, OverflowError, SelectionCache};
 use crate::mir::ConstraintCategory;
@@ -89,16 +90,6 @@ impl<'tcx> ObligationCause<'tcx> {
     #[inline(always)]
     pub fn dummy_with_span(span: Span) -> ObligationCause<'tcx> {
         ObligationCause { span, body_id: CRATE_DEF_ID, code: Default::default() }
-    }
-
-    pub fn span(&self) -> Span {
-        match *self.code() {
-            ObligationCauseCode::MatchExpressionArm(box MatchExpressionArmCause {
-                arm_span,
-                ..
-            }) => arm_span,
-            _ => self.span,
-        }
     }
 
     #[inline]
@@ -516,10 +507,17 @@ pub struct MatchExpressionArmCause<'tcx> {
     pub prior_arm_block_id: Option<HirId>,
     pub prior_arm_ty: Ty<'tcx>,
     pub prior_arm_span: Span,
+    /// Span of the scrutinee of the match (the matched value).
     pub scrut_span: Span,
+    /// Source of the match, i.e. `match` or a desugaring.
     pub source: hir::MatchSource,
+    /// Span of the *whole* match expr.
+    pub expr_span: Span,
+    /// Spans of the previous arms except for those that diverge (i.e. evaluate to `!`).
+    ///
+    /// These are used for pointing out errors that may affect several arms.
     pub prior_non_diverging_arms: Vec<Span>,
-    // Is the expectation of this match expression an RPIT?
+    /// Is the expectation of this match expression an RPIT?
     pub tail_defines_return_position_impl_trait: Option<LocalDefId>,
 }
 
@@ -625,14 +623,14 @@ pub enum ImplSource<'tcx, N> {
     /// for some type parameter. The `Vec<N>` represents the
     /// obligations incurred from normalizing the where-clause (if
     /// any).
-    Param(Vec<N>),
+    Param(ThinVec<N>),
 
     /// Successful resolution for a builtin impl.
-    Builtin(BuiltinImplSource, Vec<N>),
+    Builtin(BuiltinImplSource, ThinVec<N>),
 }
 
 impl<'tcx, N> ImplSource<'tcx, N> {
-    pub fn nested_obligations(self) -> Vec<N> {
+    pub fn nested_obligations(self) -> ThinVec<N> {
         match self {
             ImplSource::UserDefined(i) => i.nested,
             ImplSource::Param(n) | ImplSource::Builtin(_, n) => n,
@@ -686,7 +684,7 @@ impl<'tcx, N> ImplSource<'tcx, N> {
 pub struct ImplSourceUserDefinedData<'tcx, N> {
     pub impl_def_id: DefId,
     pub args: GenericArgsRef<'tcx>,
-    pub nested: Vec<N>,
+    pub nested: ThinVec<N>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, HashStable, PartialOrd, Ord)]

@@ -2,6 +2,7 @@ use std::fmt::Write;
 use std::iter;
 use std::ops::Range;
 
+use rustc_abi::Integer;
 use rustc_data_structures::base_n::ToBaseN;
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::intern::Interned;
@@ -17,7 +18,6 @@ use rustc_middle::ty::{
     TyCtxt, TypeVisitable, TypeVisitableExt, UintTy,
 };
 use rustc_span::symbol::kw;
-use rustc_target::abi::Integer;
 use rustc_target::spec::abi::Abi;
 
 pub(super) fn mangle<'tcx>(
@@ -555,7 +555,6 @@ impl<'tcx> Printer<'tcx> for SymbolMangler<'tcx> {
 
     fn print_const(&mut self, ct: ty::Const<'tcx>) -> Result<(), PrintError> {
         // We only mangle a typed value if the const can be evaluated.
-        let ct = ct.normalize(self.tcx, ty::ParamEnv::reveal_all());
         let (ct_ty, valtree) = match ct.kind() {
             ty::ConstKind::Value(ty, val) => (ty, val),
 
@@ -592,7 +591,9 @@ impl<'tcx> Printer<'tcx> for SymbolMangler<'tcx> {
             ty::Uint(_) | ty::Int(_) | ty::Bool | ty::Char => {
                 ct_ty.print(self)?;
 
-                let mut bits = ct.eval_bits(self.tcx, ty::ParamEnv::reveal_all());
+                let mut bits = ct
+                    .try_to_bits(self.tcx, ty::ParamEnv::reveal_all())
+                    .expect("expected const to be monomorphic");
 
                 // Negative integer values are mangled using `n` as a "sign prefix".
                 if let ty::Int(ity) = ct_ty.kind() {

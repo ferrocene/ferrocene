@@ -4,6 +4,7 @@
 
 use std::fmt::Debug;
 
+use rustc_abi::{BackendRepr, FieldIdx, HasDataLayout, Size, TargetDataLayout, VariantIdx};
 use rustc_const_eval::const_eval::DummyMachine;
 use rustc_const_eval::interpret::{
     ImmTy, InterpCx, InterpResult, Projectable, Scalar, format_interp_error, interp_ok,
@@ -19,7 +20,6 @@ use rustc_middle::mir::*;
 use rustc_middle::ty::layout::{LayoutError, LayoutOf, LayoutOfHelpers, TyAndLayout};
 use rustc_middle::ty::{self, ConstInt, ParamEnv, ScalarInt, Ty, TyCtxt, TypeVisitableExt};
 use rustc_span::Span;
-use rustc_target::abi::{Abi, FieldIdx, HasDataLayout, Size, TargetDataLayout, VariantIdx};
 use tracing::{debug, instrument, trace};
 
 use crate::errors::{AssertLint, AssertLintKind};
@@ -232,7 +232,7 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
         F: FnOnce(&mut Self) -> InterpResult<'tcx, T>,
     {
         f(self)
-            .map_err(|err| {
+            .map_err_info(|err| {
                 trace!("InterpCx operation failed: {:?}", err);
                 // Some errors shouldn't come up because creating them causes
                 // an allocation, which we should avoid. When that happens,
@@ -557,7 +557,7 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
                 let right = self.use_ecx(|this| this.ecx.read_immediate(&right))?;
 
                 let val = self.use_ecx(|this| this.ecx.binary_op(bin_op, &left, &right))?;
-                if matches!(val.layout.abi, Abi::ScalarPair(..)) {
+                if matches!(val.layout.backend_repr, BackendRepr::ScalarPair(..)) {
                     // FIXME `Value` should properly support pairs in `Immediate`... but currently
                     // it does not.
                     let (val, overflow) = val.to_pair(&self.ecx);
@@ -602,7 +602,7 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
             Len(place) => {
                 let len = if let ty::Array(_, n) = place.ty(self.local_decls(), self.tcx).ty.kind()
                 {
-                    n.try_eval_target_usize(self.tcx, self.param_env)?
+                    n.try_to_target_usize(self.tcx)?
                 } else {
                     match self.get_const(place)? {
                         Value::Immediate(src) => src.len(&self.ecx).discard_err()?,
@@ -651,9 +651,9 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
                     let to = self.ecx.layout_of(to).ok()?;
                     // `offset` for immediates only supports scalar/scalar-pair ABIs,
                     // so bail out if the target is not one.
-                    match (value.layout.abi, to.abi) {
-                        (Abi::Scalar(..), Abi::Scalar(..)) => {}
-                        (Abi::ScalarPair(..), Abi::ScalarPair(..)) => {}
+                    match (value.layout.backend_repr, to.backend_repr) {
+                        (BackendRepr::Scalar(..), BackendRepr::Scalar(..)) => {}
+                        (BackendRepr::ScalarPair(..), BackendRepr::ScalarPair(..)) => {}
                         _ => return None,
                     }
 

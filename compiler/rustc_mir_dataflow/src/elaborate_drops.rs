@@ -1,5 +1,6 @@
 use std::{fmt, iter};
 
+use rustc_abi::{FIRST_VARIANT, FieldIdx, VariantIdx};
 use rustc_hir::lang_items::LangItem;
 use rustc_index::Idx;
 use rustc_middle::mir::patch::MirPatch;
@@ -10,7 +11,6 @@ use rustc_middle::ty::util::IntTypeExt;
 use rustc_middle::ty::{self, GenericArgsRef, Ty, TyCtxt};
 use rustc_span::DUMMY_SP;
 use rustc_span::source_map::Spanned;
-use rustc_target::abi::{FIRST_VARIANT, FieldIdx, VariantIdx};
 use tracing::{debug, instrument};
 
 /// The value of an inserted drop flag.
@@ -863,7 +863,7 @@ where
             ty::Adt(def, args) => self.open_drop_for_adt(*def, args),
             ty::Dynamic(..) => self.complete_drop(self.succ, self.unwind),
             ty::Array(ety, size) => {
-                let size = size.try_eval_target_usize(self.tcx(), self.elaborator.param_env());
+                let size = size.try_to_target_usize(self.tcx());
                 self.open_drop_for_array(*ety, size)
             }
             ty::Slice(ety) => self.drop_loop_pair(*ety),

@@ -284,7 +284,7 @@ pub fn suggest_new_region_bound(
         }
         match fn_return.kind {
             // FIXME(precise_captures): Suggest adding to `use<...>` list instead.
-            TyKind::OpaqueDef(opaque, _) => {
+            TyKind::OpaqueDef(opaque) => {
                 // Get the identity type for this RPIT
                 let did = opaque.def_id.to_def_id();
                 let ty = Ty::new_opaque(tcx, did, ty::GenericArgs::identity_for_item(tcx, did));
@@ -599,7 +599,7 @@ impl<'a, 'tcx> Visitor<'tcx> for HirTraitObjectVisitor<'a> {
             _,
         ) = t.kind
         {
-            for (ptr, _) in poly_trait_refs {
+            for ptr in poly_trait_refs {
                 if Some(self.1) == ptr.trait_ref.trait_def_id() {
                     self.0.push(ptr.span);
                 }

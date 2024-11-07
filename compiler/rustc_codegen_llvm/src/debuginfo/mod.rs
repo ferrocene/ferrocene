@@ -31,7 +31,7 @@ use self::namespace::mangled_name_of_instance;
 use self::utils::{DIB, create_DIArray, is_node_local_to_unit};
 use crate::abi::FnAbi;
 use crate::builder::Builder;
-use crate::common::CodegenCx;
+use crate::common::{AsCCharPtr, CodegenCx};
 use crate::llvm;
 use crate::llvm::debuginfo::{
     DIArray, DIBuilder, DIFile, DIFlags, DILexicalBlock, DILocation, DISPFlags, DIScope, DIType,
@@ -55,7 +55,6 @@ const DW_TAG_arg_variable: c_uint = 0x101;
 
 /// A context object for maintaining all state needed by the debuginfo module.
 pub(crate) struct CodegenUnitDebugContext<'ll, 'tcx> {
-    llcontext: &'ll llvm::Context,
     llmod: &'ll llvm::Module,
     builder: &'ll mut DIBuilder<'ll>,
     created_files: RefCell<UnordMap<Option<(StableSourceFileId, SourceFileHash)>, &'ll DIFile>>,
@@ -78,9 +77,7 @@ impl<'ll, 'tcx> CodegenUnitDebugContext<'ll, 'tcx> {
         debug!("CodegenUnitDebugContext::new");
         let builder = unsafe { llvm::LLVMRustDIBuilderCreate(llmod) };
         // DIBuilder inherits context from the module, so we'd better use the same one
-        let llcontext = unsafe { llvm::LLVMGetModuleContext(llmod) };
         CodegenUnitDebugContext {
-            llcontext,
             llmod,
             builder,
             created_files: Default::default(),
@@ -91,45 +88,39 @@ impl<'ll, 'tcx> CodegenUnitDebugContext<'ll, 'tcx> {
     }
 
     pub(crate) fn finalize(&self, sess: &Session) {
-        unsafe {
-            llvm::LLVMRustDIBuilderFinalize(self.builder);
-
-            if !sess.target.is_like_msvc {
-                // Debuginfo generation in LLVM by default uses a higher
-                // version of dwarf than macOS currently understands. We can
-                // instruct LLVM to emit an older version of dwarf, however,
-                // for macOS to understand. For more info see #11352
-                // This can be overridden using --llvm-opts -dwarf-version,N.
-                // Android has the same issue (#22398)
-                let dwarf_version = sess
-                    .opts
-                    .unstable_opts
-                    .dwarf_version
-                    .unwrap_or(sess.target.default_dwarf_version);
-                llvm::LLVMRustAddModuleFlagU32(
-                    self.llmod,
-                    llvm::LLVMModFlagBehavior::Warning,
-                    c"Dwarf Version".as_ptr(),
-                    dwarf_version,
-                );
-            } else {
-                // Indicate that we want CodeView debug information on MSVC
-                llvm::LLVMRustAddModuleFlagU32(
-                    self.llmod,
-                    llvm::LLVMModFlagBehavior::Warning,
-                    c"CodeView".as_ptr(),
-                    1,
-                )
-            }
-
-            // Prevent bitcode readers from deleting the debug info.
-            llvm::LLVMRustAddModuleFlagU32(
+        unsafe { llvm::LLVMRustDIBuilderFinalize(self.builder) };
+        if !sess.target.is_like_msvc {
+            // Debuginfo generation in LLVM by default uses a higher
+            // version of dwarf than macOS currently understands. We can
+            // instruct LLVM to emit an older version of dwarf, however,
+            // for macOS to understand. For more info see #11352
+            // This can be overridden using --llvm-opts -dwarf-version,N.
+            // Android has the same issue (#22398)
+            let dwarf_version =
+                sess.opts.unstable_opts.dwarf_version.unwrap_or(sess.target.default_dwarf_version);
+            llvm::add_module_flag_u32(
                 self.llmod,
-                llvm::LLVMModFlagBehavior::Warning,
-                c"Debug Info Version".as_ptr(),
-                llvm::LLVMRustDebugMetadataVersion(),
+                llvm::ModuleFlagMergeBehavior::Warning,
+                "Dwarf Version",
+                dwarf_version,
+            );
+        } else {
+            // Indicate that we want CodeView debug information on MSVC
+            llvm::add_module_flag_u32(
+                self.llmod,
+                llvm::ModuleFlagMergeBehavior::Warning,
+                "CodeView",
+                1,
             );
         }
+
+        // Prevent bitcode readers from deleting the debug info.
+        llvm::add_module_flag_u32(
+            self.llmod,
+            llvm::ModuleFlagMergeBehavior::Warning,
+            "Debug Info Version",
+            unsafe { llvm::LLVMRustDebugMetadataVersion() },
+        );
     }
 }
 
@@ -350,7 +341,6 @@ impl<'ll, 'tcx> DebugInfoCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
         type_names::push_generic_params(
             tcx,
             tcx.normalize_erasing_regions(ty::ParamEnv::reveal_all(), args),
-            enclosing_fn_def_id,
             &mut name,
         );
 
@@ -365,7 +355,7 @@ impl<'ll, 'tcx> DebugInfoCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
 
         let mut flags = DIFlags::FlagPrototyped;
 
-        if fn_abi.ret.layout.abi.is_uninhabited() {
+        if fn_abi.ret.layout.is_uninhabited() {
             flags |= DIFlags::FlagNoReturn;
         }
 
@@ -390,9 +380,9 @@ impl<'ll, 'tcx> DebugInfoCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
             llvm::LLVMRustDIBuilderCreateMethod(
                 DIB(self),
                 containing_scope,
-                name.as_ptr().cast(),
+                name.as_c_char_ptr(),
                 name.len(),
-                linkage_name.as_ptr().cast(),
+                linkage_name.as_c_char_ptr(),
                 linkage_name.len(),
                 file_metadata,
                 loc.line,
@@ -407,9 +397,9 @@ impl<'ll, 'tcx> DebugInfoCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
             llvm::LLVMRustDIBuilderCreateFunction(
                 DIB(self),
                 containing_scope,
-                name.as_ptr().cast(),
+                name.as_c_char_ptr(),
                 name.len(),
-                linkage_name.as_ptr().cast(),
+                linkage_name.as_c_char_ptr(),
                 linkage_name.len(),
                 file_metadata,
                 loc.line,
@@ -495,7 +485,7 @@ impl<'ll, 'tcx> DebugInfoCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
                                 Some(llvm::LLVMRustDIBuilderCreateTemplateTypeParameter(
                                     DIB(cx),
                                     None,
-                                    name.as_ptr().cast(),
+                                    name.as_c_char_ptr(),
                                     name.len(),
                                     actual_type_metadata,
                                 ))
@@ -636,7 +626,7 @@ impl<'ll, 'tcx> DebugInfoCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
                 DIB(self),
                 dwarf_tag,
                 scope_metadata,
-                name.as_ptr().cast(),
+                name.as_c_char_ptr(),
                 name.len(),
                 file_metadata,
                 loc.line,

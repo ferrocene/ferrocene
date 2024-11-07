@@ -66,6 +66,9 @@ fn get_simple_intrinsic<'gcc, 'tcx>(
         sym::log2f64 => "log2",
         sym::fmaf32 => "fmaf",
         sym::fmaf64 => "fma",
+        // FIXME: calling `fma` from libc without FMA target feature uses expensive sofware emulation
+        sym::fmuladdf32 => "fmaf", // TODO: use gcc intrinsic analogous to llvm.fmuladd.f32
+        sym::fmuladdf64 => "fma",  // TODO: use gcc intrinsic analogous to llvm.fmuladd.f64
         sym::fabsf32 => "fabsf",
         sym::fabsf64 => "fabs",
         sym::minnumf32 => "fminf",
@@ -291,13 +294,13 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
             }
 
             sym::raw_eq => {
-                use rustc_target::abi::Abi::*;
+                use rustc_abi::BackendRepr::*;
                 let tp_ty = fn_args.type_at(0);
                 let layout = self.layout_of(tp_ty).layout;
-                let _use_integer_compare = match layout.abi() {
+                let _use_integer_compare = match layout.backend_repr() {
                     Scalar(_) | ScalarPair(_, _) => true,
                     Uninhabited | Vector { .. } => false,
-                    Aggregate { .. } => {
+                    Memory { .. } => {
                         // For rusty ABIs, small aggregates are actually passed
                         // as `RegKind::Integer` (see `FnAbi::adjust_for_abi`),
                         // so we re-use that same threshold here.

@@ -40,6 +40,7 @@ use std::sync::Arc;
 use cranelift_codegen::isa::TargetIsa;
 use cranelift_codegen::settings::{self, Configurable};
 use rustc_codegen_ssa::CodegenResults;
+use rustc_codegen_ssa::back::versioned_llvm_target;
 use rustc_codegen_ssa::traits::CodegenBackend;
 use rustc_data_structures::profiling::SelfProfilerRef;
 use rustc_errors::ErrorGuaranteed;
@@ -92,6 +93,7 @@ mod prelude {
         StackSlotData, StackSlotKind, TrapCode, Type, Value, types,
     };
     pub(crate) use cranelift_module::{self, DataDescription, FuncId, Linkage, Module};
+    pub(crate) use rustc_abi::{BackendRepr, FIRST_VARIANT, FieldIdx, Scalar, Size, VariantIdx};
     pub(crate) use rustc_data_structures::fx::{FxHashMap, FxIndexMap};
     pub(crate) use rustc_hir::def_id::{DefId, LOCAL_CRATE};
     pub(crate) use rustc_index::Idx;
@@ -101,7 +103,6 @@ mod prelude {
         self, FloatTy, Instance, InstanceKind, IntTy, ParamEnv, Ty, TyCtxt, UintTy,
     };
     pub(crate) use rustc_span::Span;
-    pub(crate) use rustc_target::abi::{Abi, FIRST_VARIANT, FieldIdx, Scalar, Size, VariantIdx};
 
     pub(crate) use crate::abi::*;
     pub(crate) use crate::base::{codegen_operand, codegen_place};
@@ -260,7 +261,9 @@ impl CodegenBackend for CraneliftCodegenBackend {
 }
 
 fn target_triple(sess: &Session) -> target_lexicon::Triple {
-    match sess.target.llvm_target.parse() {
+    // FIXME(madsmtm): Use `sess.target.llvm_target` once target-lexicon supports unversioned macOS.
+    // See <https://github.com/bytecodealliance/target-lexicon/pull/113>
+    match versioned_llvm_target(sess).parse() {
         Ok(triple) => triple,
         Err(err) => sess.dcx().fatal(format!("target not recognized: {}", err)),
     }

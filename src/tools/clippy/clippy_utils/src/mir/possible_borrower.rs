@@ -185,9 +185,7 @@ impl<'b, 'tcx> PossibleBorrowerMap<'b, 'tcx> {
             vis.into_map(cx)
         };
         let maybe_storage_live_result = MaybeStorageLive::new(Cow::Owned(BitSet::new_empty(mir.local_decls.len())))
-            .into_engine(cx.tcx, mir)
-            .pass_name("redundant_clone")
-            .iterate_to_fixpoint()
+            .iterate_to_fixpoint(cx.tcx, mir, Some("redundant_clone"))
             .into_results_cursor(mir);
         let mut vis = PossibleBorrowerVisitor::new(cx, mir, possible_origin);
         vis.visit_body(mir);
@@ -213,7 +211,7 @@ impl<'b, 'tcx> PossibleBorrowerMap<'b, 'tcx> {
         self.bitset.0.clear();
         let maybe_live = &mut self.maybe_live;
         if let Some(bitset) = self.map.get(&borrowed) {
-            for b in bitset.iter().filter(move |b| maybe_live.contains(*b)) {
+            for b in bitset.iter().filter(move |b| maybe_live.get().contains(*b)) {
                 self.bitset.0.insert(b);
             }
         } else {
@@ -238,6 +236,6 @@ impl<'b, 'tcx> PossibleBorrowerMap<'b, 'tcx> {
 
     pub fn local_is_alive_at(&mut self, local: mir::Local, at: mir::Location) -> bool {
         self.maybe_live.seek_after_primary_effect(at);
-        self.maybe_live.contains(local)
+        self.maybe_live.get().contains(local)
     }
 }

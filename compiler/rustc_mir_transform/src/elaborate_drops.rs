@@ -58,25 +58,20 @@ impl<'tcx> crate::MirPass<'tcx> for ElaborateDrops {
         let param_env = tcx.param_env_reveal_all_normalized(def_id);
         // For types that do not need dropping, the behaviour is trivial. So we only need to track
         // init/uninit for types that do need dropping.
-        let move_data =
-            MoveData::gather_moves(body, tcx, param_env, |ty| ty.needs_drop(tcx, param_env));
+        let move_data = MoveData::gather_moves(body, tcx, |ty| ty.needs_drop(tcx, param_env));
         let elaborate_patch = {
             let env = MoveDataParamEnv { move_data, param_env };
 
             let mut inits = MaybeInitializedPlaces::new(tcx, body, &env.move_data)
                 .skipping_unreachable_unwind()
-                .into_engine(tcx, body)
-                .pass_name("elaborate_drops")
-                .iterate_to_fixpoint()
+                .iterate_to_fixpoint(tcx, body, Some("elaborate_drops"))
                 .into_results_cursor(body);
             let dead_unwinds = compute_dead_unwinds(body, &mut inits);
 
             let uninits = MaybeUninitializedPlaces::new(tcx, body, &env.move_data)
                 .mark_inactive_variants_as_uninit()
                 .skipping_unreachable_unwind(dead_unwinds)
-                .into_engine(tcx, body)
-                .pass_name("elaborate_drops")
-                .iterate_to_fixpoint()
+                .iterate_to_fixpoint(tcx, body, Some("elaborate_drops"))
                 .into_results_cursor(body);
 
             let drop_flags = IndexVec::from_elem(None, &env.move_data.move_paths);
@@ -133,7 +128,7 @@ impl InitializationData<'_, '_> {
     }
 
     fn maybe_live_dead(&self, path: MovePathIndex) -> (bool, bool) {
-        (self.inits.contains(path), self.uninits.contains(path))
+        (self.inits.get().contains(path), self.uninits.get().contains(path))
     }
 }
 

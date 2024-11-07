@@ -295,7 +295,11 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         let mut err = match origin {
             infer::Subtype(box trace) => {
                 let terr = TypeError::RegionsDoesNotOutlive(sup, sub);
-                let mut err = self.report_and_explain_type_error(trace, terr);
+                let mut err = self.report_and_explain_type_error(
+                    trace,
+                    self.tcx.param_env(generic_param_scope),
+                    terr,
+                );
                 match (*sub, *sup) {
                     (ty::RePlaceholder(_), ty::RePlaceholder(_)) => {}
                     (ty::RePlaceholder(_), _) => {
@@ -646,7 +650,11 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             }
             infer::Subtype(box trace) => {
                 let terr = TypeError::RegionsPlaceholderMismatch;
-                return self.report_and_explain_type_error(trace, terr);
+                return self.report_and_explain_type_error(
+                    trace,
+                    self.tcx.param_env(generic_param_scope),
+                    terr,
+                );
             }
             _ => {
                 return self.report_concrete_failure(
@@ -852,22 +860,6 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             fn visit_lifetime(&mut self, lt: &'hir hir::Lifetime) {
                 if lt.res == self.needle {
                     self.add_lt_suggs.push(lt.suggestion(self.new_lt));
-                }
-            }
-
-            fn visit_ty(&mut self, ty: &'hir hir::Ty<'hir>) {
-                let hir::TyKind::OpaqueDef(opaque_ty, _) = ty.kind else {
-                    return hir::intravisit::walk_ty(self, ty);
-                };
-                if let Some(&(_, b)) =
-                    opaque_ty.lifetime_mapping.iter().find(|&(a, _)| a.res == self.needle)
-                {
-                    let prev_needle =
-                        std::mem::replace(&mut self.needle, hir::LifetimeName::Param(b));
-                    for bound in opaque_ty.bounds {
-                        self.visit_param_bound(bound);
-                    }
-                    self.needle = prev_needle;
                 }
             }
         }

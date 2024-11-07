@@ -64,7 +64,7 @@ use fetch_crates::CrateInfo;
 use hir::{sym, ChangeWithProcMacros};
 use ide_db::{
     base_db::{
-        salsa::{self, ParallelDatabase},
+        ra_salsa::{self, ParallelDatabase},
         CrateOrigin, CrateWorkspaceData, Env, FileLoader, FileSet, SourceDatabase,
         SourceRootDatabase, VfsPath,
     },
@@ -79,7 +79,7 @@ use crate::navigation_target::ToNav;
 
 pub use crate::{
     annotations::{Annotation, AnnotationConfig, AnnotationKind, AnnotationLocation},
-    call_hierarchy::CallItem,
+    call_hierarchy::{CallHierarchyConfig, CallItem},
     expand_macro::ExpandedMacro,
     file_structure::{StructureNode, StructureNodeKind},
     folding_ranges::{Fold, FoldKind},
@@ -122,6 +122,7 @@ pub use ide_completion::{
     CallableSnippets, CompletionConfig, CompletionFieldsToResolve, CompletionItem,
     CompletionItemKind, CompletionRelevance, Snippet, SnippetScope,
 };
+pub use ide_db::text_edit::{Indel, TextEdit};
 pub use ide_db::{
     base_db::{Cancelled, CrateGraph, CrateId, FileChange, SourceRoot, SourceRootId},
     documentation::Documentation,
@@ -139,7 +140,6 @@ pub use ide_diagnostics::{
 pub use ide_ssr::SsrError;
 pub use span::Edition;
 pub use syntax::{TextRange, TextSize};
-pub use text_edit::{Indel, TextEdit};
 
 pub type Cancellable<T> = Result<T, Cancelled>;
 
@@ -218,7 +218,7 @@ impl Default for AnalysisHost {
 /// `Analysis` are canceled (most method return `Err(Canceled)`).
 #[derive(Debug)]
 pub struct Analysis {
-    db: salsa::Snapshot<RootDatabase>,
+    db: ra_salsa::Snapshot<RootDatabase>,
 }
 
 // As a general design guideline, `Analysis` API are intended to be independent
@@ -564,13 +564,21 @@ impl Analysis {
     }
 
     /// Computes incoming calls for the given file position.
-    pub fn incoming_calls(&self, position: FilePosition) -> Cancellable<Option<Vec<CallItem>>> {
-        self.with_db(|db| call_hierarchy::incoming_calls(db, position))
+    pub fn incoming_calls(
+        &self,
+        config: CallHierarchyConfig,
+        position: FilePosition,
+    ) -> Cancellable<Option<Vec<CallItem>>> {
+        self.with_db(|db| call_hierarchy::incoming_calls(db, config, position))
     }
 
     /// Computes outgoing calls for the given file position.
-    pub fn outgoing_calls(&self, position: FilePosition) -> Cancellable<Option<Vec<CallItem>>> {
-        self.with_db(|db| call_hierarchy::outgoing_calls(db, position))
+    pub fn outgoing_calls(
+        &self,
+        config: CallHierarchyConfig,
+        position: FilePosition,
+    ) -> Cancellable<Option<Vec<CallItem>>> {
+        self.with_db(|db| call_hierarchy::outgoing_calls(db, config, position))
     }
 
     /// Returns a `mod name;` declaration which created the current module.

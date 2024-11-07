@@ -9,7 +9,8 @@ use rustc_infer::traits::util::PredicateSet;
 use rustc_middle::bug;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{
-    self, GenericArgs, GenericParamDefKind, Ty, TyCtxt, TypeVisitableExt, Upcast, VtblEntry,
+    self, GenericArgs, GenericParamDefKind, Ty, TyCtxt, TypeVisitableExt, TypingMode, Upcast,
+    VtblEntry,
 };
 use rustc_span::{DUMMY_SP, Span, sym};
 use smallvec::{SmallVec, smallvec};
@@ -154,18 +155,17 @@ fn prepare_vtable_segments_inner<'tcx, T>(
 
         // emit innermost item, move to next sibling and stop there if possible, otherwise jump to outer level.
         while let Some((inner_most_trait_ref, emit_vptr, mut siblings)) = stack.pop() {
+            let has_entries =
+                has_own_existential_vtable_entries(tcx, inner_most_trait_ref.def_id());
+
             segment_visitor(VtblSegment::TraitOwnEntries {
                 trait_ref: inner_most_trait_ref,
-                emit_vptr: emit_vptr && !tcx.sess.opts.unstable_opts.no_trait_vptr,
+                emit_vptr: emit_vptr && has_entries && !tcx.sess.opts.unstable_opts.no_trait_vptr,
             })?;
 
             // If we've emitted (fed to `segment_visitor`) a trait that has methods present in the vtable,
             // we'll need to emit vptrs from now on.
-            if !emit_vptr_on_new_entry
-                && has_own_existential_vtable_entries(tcx, inner_most_trait_ref.def_id())
-            {
-                emit_vptr_on_new_entry = true;
-            }
+            emit_vptr_on_new_entry |= has_entries;
 
             if let Some(next_inner_most_trait_ref) =
                 siblings.find(|&sibling| visited.insert(sibling.upcast(tcx)))
@@ -440,7 +440,7 @@ fn trait_refs_are_compatible<'tcx>(
         return false;
     }
 
-    let infcx = tcx.infer_ctxt().build();
+    let infcx = tcx.infer_ctxt().build(TypingMode::PostAnalysis);
     let param_env = ty::ParamEnv::reveal_all();
     let ocx = ObligationCtxt::new(&infcx);
     let hr_source_principal =

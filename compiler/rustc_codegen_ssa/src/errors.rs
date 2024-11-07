@@ -2,6 +2,7 @@
 
 use std::borrow::Cow;
 use std::io::Error;
+use std::num::ParseIntError;
 use std::path::{Path, PathBuf};
 use std::process::ExitStatus;
 
@@ -9,7 +10,7 @@ use rustc_errors::codes::*;
 use rustc_errors::{
     Diag, DiagArgValue, DiagCtxtHandle, Diagnostic, EmissionGuarantee, IntoDiagArg, Level,
 };
-use rustc_macros::Diagnostic;
+use rustc_macros::{Diagnostic, Subdiagnostic};
 use rustc_middle::ty::Ty;
 use rustc_middle::ty::layout::LayoutError;
 use rustc_span::{Span, Symbol};
@@ -540,6 +541,14 @@ pub(crate) struct UnsupportedArch<'a> {
 }
 
 #[derive(Diagnostic)]
+pub(crate) enum AppleDeploymentTarget {
+    #[diag(codegen_ssa_apple_deployment_target_invalid)]
+    Invalid { env_var: &'static str, error: ParseIntError },
+    #[diag(codegen_ssa_apple_deployment_target_too_low)]
+    TooLow { env_var: &'static str, version: String, os_min: String },
+}
+
+#[derive(Diagnostic)]
 pub(crate) enum AppleSdkRootError<'a> {
     #[diag(codegen_ssa_apple_sdk_error_sdk_path)]
     SdkPath { sdk_name: &'a str, error: Error },
@@ -1067,4 +1076,28 @@ pub struct CompilerBuiltinsCannotCall {
 pub(crate) struct ErrorCreatingImportLibrary<'a> {
     pub lib_name: &'a str,
     pub error: String,
+}
+
+pub struct TargetFeatureDisableOrEnable<'a> {
+    pub features: &'a [&'a str],
+    pub span: Option<Span>,
+    pub missing_features: Option<MissingFeatures>,
+}
+
+#[derive(Subdiagnostic)]
+#[help(codegen_ssa_missing_features)]
+pub struct MissingFeatures;
+
+impl<G: EmissionGuarantee> Diagnostic<'_, G> for TargetFeatureDisableOrEnable<'_> {
+    fn into_diag(self, dcx: DiagCtxtHandle<'_>, level: Level) -> Diag<'_, G> {
+        let mut diag = Diag::new(dcx, level, fluent::codegen_ssa_target_feature_disable_or_enable);
+        if let Some(span) = self.span {
+            diag.span(span);
+        };
+        if let Some(missing_features) = self.missing_features {
+            diag.subdiagnostic(missing_features);
+        }
+        diag.arg("features", self.features.join(", "));
+        diag
+    }
 }

@@ -1,6 +1,7 @@
 use std::sync::atomic::Ordering::Relaxed;
 
 use either::{Left, Right};
+use rustc_abi::{self as abi, BackendRepr};
 use rustc_hir::def::DefKind;
 use rustc_middle::bug;
 use rustc_middle::mir::interpret::{AllocId, ErrorHandled, InterpErrorInfo};
@@ -12,13 +13,12 @@ use rustc_middle::ty::print::with_no_trimmed_paths;
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_span::def_id::LocalDefId;
 use rustc_span::{DUMMY_SP, Span};
-use rustc_target::abi::{self, Abi};
 use tracing::{debug, instrument, trace};
 
 use super::{CanAccessMutGlobal, CompileTimeInterpCx, CompileTimeMachine};
 use crate::const_eval::CheckAlignment;
 use crate::interpret::{
-    CtfeValidationMode, GlobalId, Immediate, InternKind, InternResult, InterpCx, InterpError,
+    CtfeValidationMode, GlobalId, Immediate, InternKind, InternResult, InterpCx, InterpErrorKind,
     InterpResult, MPlaceTy, MemoryKind, OpTy, RefTracking, StackPopCleanup, create_static_alloc,
     eval_nullary_intrinsic, intern_const_alloc_recursive, interp_ok, throw_exhaust,
 };
@@ -174,8 +174,8 @@ pub(super) fn op_to_const<'tcx>(
     // type (it's used throughout the compiler and having it work just on literals is not enough)
     // and we want it to be fast (i.e., don't go to an `Allocation` and reconstruct the `Scalar`
     // from its byte-serialized form).
-    let force_as_immediate = match op.layout.abi {
-        Abi::Scalar(abi::Scalar::Initialized { .. }) => true,
+    let force_as_immediate = match op.layout.backend_repr {
+        BackendRepr::Scalar(abi::Scalar::Initialized { .. }) => true,
         // We don't *force* `ConstValue::Slice` for `ScalarPair`. This has the advantage that if the
         // input `op` is a place, then turning it into a `ConstValue` and back into a `OpTy` will
         // not have to generate any duplicate allocations (we preserve the original `AllocId` in
@@ -463,7 +463,7 @@ fn report_validation_error<'tcx>(
     error: InterpErrorInfo<'tcx>,
     alloc_id: AllocId,
 ) -> ErrorHandled {
-    if !matches!(error.kind(), InterpError::UndefinedBehavior(_)) {
+    if !matches!(error.kind(), InterpErrorKind::UndefinedBehavior(_)) {
         // Some other error happened during validation, e.g. an unsupported operation.
         return report_eval_error(ecx, cid, error);
     }

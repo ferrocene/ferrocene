@@ -12,9 +12,9 @@
 
 use std::{fmt, mem};
 
+use rustc_abi::Size;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_span::Span;
-use rustc_target::abi::Size;
 use smallvec::SmallVec;
 
 use crate::borrow_tracker::tree_borrows::Permission;
@@ -674,7 +674,7 @@ impl<'tcx> Tree {
                             Ok(())
                         }
                     },
-                    |args: ErrHandlerArgs<'_, TransitionError>| -> InterpError<'tcx> {
+                    |args: ErrHandlerArgs<'_, TransitionError>| -> InterpErrorKind<'tcx> {
                         let ErrHandlerArgs { error_kind, conflicting_info, accessed_info } = args;
                         TbError {
                             conflicting_info,
@@ -772,7 +772,7 @@ impl<'tcx> Tree {
         let err_handler = |perms_range: Range<u64>,
                            access_cause: diagnostics::AccessCause,
                            args: ErrHandlerArgs<'_, TransitionError>|
-         -> InterpError<'tcx> {
+         -> InterpErrorKind<'tcx> {
             let ErrHandlerArgs { error_kind, conflicting_info, accessed_info } = args;
             TbError {
                 conflicting_info,

@@ -1,9 +1,9 @@
 use std::fmt::{self, Write};
 use std::num::NonZero;
 
+use rustc_abi::{Align, Size};
 use rustc_errors::{Diag, DiagMessage, Level};
 use rustc_span::{DUMMY_SP, SpanData, Symbol};
-use rustc_target::abi::{Align, Size};
 
 use crate::borrow_tracker::stacked_borrows::diagnostics::TagHistory;
 use crate::borrow_tracker::tree_borrows::diagnostics as tree_diagnostics;
@@ -214,7 +214,7 @@ pub fn report_error<'tcx>(
     ecx: &InterpCx<'tcx, MiriMachine<'tcx>>,
     e: InterpErrorInfo<'tcx>,
 ) -> Option<(i64, bool)> {
-    use InterpError::*;
+    use InterpErrorKind::*;
     use UndefinedBehaviorInfo::*;
 
     let mut msg = vec![];
@@ -473,14 +473,14 @@ pub fn report_leaks<'tcx>(
     leaks: Vec<(AllocId, MemoryKind, Allocation<Provenance, AllocExtra<'tcx>, MiriAllocBytes>)>,
 ) {
     let mut any_pruned = false;
-    for (id, kind, mut alloc) in leaks {
+    for (id, kind, alloc) in leaks {
         let mut title = format!(
             "memory leaked: {id:?} ({}, size: {:?}, align: {:?})",
             kind,
             alloc.size().bytes(),
             alloc.align.bytes()
         );
-        let Some(backtrace) = alloc.extra.backtrace.take() else {
+        let Some(backtrace) = alloc.extra.backtrace else {
             ecx.tcx.dcx().err(title);
             continue;
         };

@@ -40,7 +40,7 @@ use rustc_target::spec::crt_objects::CrtObjects;
 use rustc_target::spec::{
     Cc, LinkOutputKind, LinkSelfContainedComponents, LinkSelfContainedDefault, LinkerFeatures,
     LinkerFlavor, LinkerFlavorCli, Lld, PanicStrategy, RelocModel, RelroLevel, SanitizerSet,
-    SplitDebuginfo, current_apple_deployment_target,
+    SplitDebuginfo,
 };
 use tempfile::Builder as TempFileBuilder;
 use tracing::{debug, info, warn};
@@ -50,6 +50,7 @@ use super::command::Command;
 use super::linker::{self, Linker};
 use super::metadata::{MetadataPosition, create_wrapper_file};
 use super::rpath::{self, RPathConfig};
+use super::{apple, versioned_llvm_target};
 use crate::{
     CodegenResults, CompiledModule, CrateInfo, NativeLib, common, errors,
     looks_like_rust_object_file,
@@ -996,7 +997,7 @@ fn link_natively(
                     {
                         let is_vs_installed = windows_registry::find_vs_version().is_ok();
                         let has_linker = windows_registry::find_tool(
-                            sess.opts.target_triple.triple(),
+                            sess.opts.target_triple.tuple(),
                             "link.exe",
                         )
                         .is_some();
@@ -1322,10 +1323,8 @@ fn link_sanitizer_runtime(
         } else {
             let default_sysroot =
                 filesearch::get_or_default_sysroot().expect("Failed finding sysroot");
-            let default_tlib = filesearch::make_target_lib_path(
-                &default_sysroot,
-                sess.opts.target_triple.triple(),
-            );
+            let default_tlib =
+                filesearch::make_target_lib_path(&default_sysroot, sess.opts.target_triple.tuple());
             default_tlib
         }
     }
@@ -2447,7 +2446,7 @@ fn add_order_independent_options(
     if flavor == LinkerFlavor::Llbc {
         cmd.link_args(&[
             "--target",
-            sess.target.llvm_target.as_ref(),
+            &versioned_llvm_target(sess),
             "--target-cpu",
             &codegen_results.crate_info.target_cpu,
         ]);
@@ -3039,7 +3038,7 @@ fn add_apple_link_args(cmd: &mut dyn Linker, sess: &Session, flavor: LinkerFlavo
             _ => bug!("invalid OS/ABI combination for Apple target: {target_os}, {target_abi}"),
         };
 
-        let (major, minor, patch) = current_apple_deployment_target(&sess.target);
+        let (major, minor, patch) = apple::deployment_target(sess);
         let min_version = format!("{major}.{minor}.{patch}");
 
         // The SDK version is used at runtime when compiling with a newer SDK / version of Xcode:
@@ -3109,7 +3108,7 @@ fn add_apple_link_args(cmd: &mut dyn Linker, sess: &Session, flavor: LinkerFlavo
 
             // The presence of `-mmacosx-version-min` makes CC default to
             // macOS, and it sets the deployment target.
-            let (major, minor, patch) = current_apple_deployment_target(&sess.target);
+            let (major, minor, patch) = apple::deployment_target(sess);
             // Intentionally pass this as a single argument, Clang doesn't
             // seem to like it otherwise.
             cmd.cc_arg(&format!("-mmacosx-version-min={major}.{minor}.{patch}"));
@@ -3119,7 +3118,7 @@ fn add_apple_link_args(cmd: &mut dyn Linker, sess: &Session, flavor: LinkerFlavo
             //
             // We avoid `-m32`/`-m64`, as this is already encoded by `-arch`.
         } else {
-            cmd.cc_args(&["-target", &sess.target.llvm_target]);
+            cmd.cc_args(&["-target", &versioned_llvm_target(sess)]);
         }
     }
 }
@@ -3345,7 +3344,7 @@ fn add_lld_args(
         // targeting a different linker flavor on macOS, and that's also always
         // the case when targeting WASM.
         if sess.target.linker_flavor != sess.host.linker_flavor {
-            cmd.cc_arg(format!("--target={}", sess.target.llvm_target));
+            cmd.cc_arg(format!("--target={}", versioned_llvm_target(sess)));
         }
     }
 }

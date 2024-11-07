@@ -15,7 +15,6 @@ use std::path::{Path, PathBuf};
 use std::process::Stdio;
 use std::{env, fs, str};
 
-use build_helper::git::get_closest_merge_commit;
 use serde_derive::Deserialize;
 
 use crate::core::build_steps::tool::SourceType;
@@ -28,7 +27,7 @@ use crate::core::config::{DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelecti
 use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
 use crate::utils::exec::command;
 use crate::utils::helpers::{
-    self, exe, get_clang_cl_resource_dir, is_debug_info, is_dylib, symlink_dir, t, up_to_date,
+    exe, get_clang_cl_resource_dir, is_debug_info, is_dylib, symlink_dir, t, up_to_date,
 };
 use crate::{CLang, Compiler, DependencyType, GitRepo, LLVM_TOOLS, Mode};
 
@@ -126,23 +125,9 @@ impl Step for Std {
         // Force compilation of the standard library from source if the `library` is modified. This allows
         // library team to compile the standard library without needing to compile the compiler with
         // the `rust.download-rustc=true` option.
-        let force_recompile =
-            if builder.rust_info().is_managed_git_subrepository() && builder.download_rustc() {
-                let closest_merge_commit =
-                    get_closest_merge_commit(Some(&builder.src), &builder.config.git_config(), &[])
-                        .unwrap();
-
-                // Check if `library` has changes (returns false otherwise)
-                !t!(helpers::git(Some(&builder.src))
-                    .args(["diff-index", "--quiet", &closest_merge_commit])
-                    .arg("--")
-                    .arg(builder.src.join("library"))
-                    .as_command_mut()
-                    .status())
-                .success()
-            } else {
-                false
-            };
+        let force_recompile = builder.rust_info().is_managed_git_subrepository()
+            && builder.download_rustc()
+            && builder.config.last_modified_commit(&["library"], "download-rustc", true).is_none();
 
         run.builder.ensure(Std {
             compiler: run.builder.compiler(run.builder.top_stage, run.build_triple()),
@@ -169,7 +154,6 @@ impl Step for Std {
             // NOTE: the beta compiler may generate different artifacts than the downloaded compiler, so
             // its artifacts can't be reused.
             && compiler.stage != 0
-            // This check is specific to testing std itself; see `test::Std` for more details.
             && !self.force_recompile
         {
             let sysroot = builder.ensure(Sysroot { compiler, force_recompile: false });
@@ -1078,6 +1062,14 @@ pub fn rustc_cargo(
 
     if builder.config.llvm_enzyme {
         cargo.rustflag("-l").rustflag("Enzyme-19");
+    }
+
+    // Building with protected visibility reduces the number of dynamic relocations needed, giving
+    // us a faster startup time. However GNU ld < 2.40 will error if we try to link a shared object
+    // with direct references to protected symbols, so for now we only use protected symbols if
+    // linking with LLD is enabled.
+    if builder.build.config.lld_mode.is_used() {
+        cargo.rustflag("-Zdefault-visibility=protected");
     }
 
     // We currently don't support cross-crate LTO in stage0. This also isn't hugely necessary

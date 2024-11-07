@@ -19,13 +19,10 @@ pub(super) struct RemoveUninitDrops;
 impl<'tcx> crate::MirPass<'tcx> for RemoveUninitDrops {
     fn run_pass(&self, tcx: TyCtxt<'tcx>, body: &mut Body<'tcx>) {
         let param_env = tcx.param_env(body.source.def_id());
-        let move_data =
-            MoveData::gather_moves(body, tcx, param_env, |ty| ty.needs_drop(tcx, param_env));
+        let move_data = MoveData::gather_moves(body, tcx, |ty| ty.needs_drop(tcx, param_env));
 
         let mut maybe_inits = MaybeInitializedPlaces::new(tcx, body, &move_data)
-            .into_engine(tcx, body)
-            .pass_name("remove_uninit_drops")
-            .iterate_to_fixpoint()
+            .iterate_to_fixpoint(tcx, body, Some("remove_uninit_drops"))
             .into_results_cursor(body);
 
         let mut to_remove = vec![];

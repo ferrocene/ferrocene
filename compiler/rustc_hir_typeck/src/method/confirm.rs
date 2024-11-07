@@ -200,10 +200,8 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
                 // for two-phase borrows.
                 let mutbl = AutoBorrowMutability::new(mutbl, AllowTwoPhase::Yes);
 
-                adjustments.push(Adjustment {
-                    kind: Adjust::Borrow(AutoBorrow::Ref(region, mutbl)),
-                    target,
-                });
+                adjustments
+                    .push(Adjustment { kind: Adjust::Borrow(AutoBorrow::Ref(mutbl)), target });
 
                 if unsize {
                     let unsized_ty = if let ty::Array(elem_ty, _) = base_ty.kind() {
@@ -250,7 +248,7 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
                     _ => bug!("Cannot adjust receiver type for reborrowing pin of {target:?}"),
                 };
 
-                adjustments.push(Adjustment { kind: Adjust::ReborrowPin(region, mutbl), target });
+                adjustments.push(Adjustment { kind: Adjust::ReborrowPin(mutbl), target });
             }
             None => {}
         }
@@ -533,18 +531,21 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
                 self.register_predicates(obligations);
             }
             Err(terr) => {
-                // FIXME(arbitrary_self_types): We probably should limit the
-                // situations where this can occur by adding additional restrictions
-                // to the feature, like the self type can't reference method args.
-                if self.tcx.features().arbitrary_self_types {
+                if self.tcx.features().arbitrary_self_types() {
                     self.err_ctxt()
-                        .report_mismatched_types(&cause, method_self_ty, self_ty, terr)
+                        .report_mismatched_types(
+                            &cause,
+                            self.param_env,
+                            method_self_ty,
+                            self_ty,
+                            terr,
+                        )
                         .emit();
                 } else {
                     // This has/will have errored in wfcheck, which we cannot depend on from here, as typeck on functions
                     // may run before wfcheck if the function is used in const eval.
                     self.dcx().span_delayed_bug(
-                        cause.span(),
+                        cause.span,
                         format!("{self_ty} was a subtype of {method_self_ty} but now is not?"),
                     );
                 }

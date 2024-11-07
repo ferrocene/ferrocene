@@ -23,7 +23,8 @@ use crate::{
     discover::{DiscoverArgument, DiscoverCommand, DiscoverProjectMessage},
     flycheck::{self, FlycheckMessage},
     global_state::{
-        file_id_to_url, url_to_file_id, FetchWorkspaceRequest, FetchWorkspaceResponse, GlobalState,
+        file_id_to_url, url_to_file_id, FetchBuildDataResponse, FetchWorkspaceRequest,
+        FetchWorkspaceResponse, GlobalState,
     },
     hack_recover_crate_name,
     handlers::dispatch::{NotificationDispatcher, RequestDispatcher},
@@ -416,6 +417,8 @@ impl GlobalState {
                 }
             }
 
+            let supports_diagnostic_pull_model = self.config.text_document_diagnostic();
+
             let client_refresh = became_quiescent || state_changed;
             if client_refresh {
                 // Refresh semantic tokens if the client supports it.
@@ -433,11 +436,21 @@ impl GlobalState {
                 if self.config.inlay_hints_refresh() {
                     self.send_request::<lsp_types::request::InlayHintRefreshRequest>((), |_, _| ());
                 }
+
+                if supports_diagnostic_pull_model {
+                    self.send_request::<lsp_types::request::WorkspaceDiagnosticRefresh>(
+                        (),
+                        |_, _| (),
+                    );
+                }
             }
 
             let project_or_mem_docs_changed =
                 became_quiescent || state_changed || memdocs_added_or_removed;
-            if project_or_mem_docs_changed && self.config.publish_diagnostics(None) {
+            if project_or_mem_docs_changed
+                && !supports_diagnostic_pull_model
+                && self.config.publish_diagnostics(None)
+            {
                 self.update_diagnostics();
             }
             if project_or_mem_docs_changed && self.config.test_explorer() {
@@ -738,8 +751,10 @@ impl GlobalState {
                 let (state, msg) = match progress {
                     BuildDataProgress::Begin => (Some(Progress::Begin), None),
                     BuildDataProgress::Report(msg) => (Some(Progress::Report), Some(msg)),
-                    BuildDataProgress::End(build_data_result) => {
-                        self.fetch_build_data_queue.op_completed(build_data_result);
+                    BuildDataProgress::End((workspaces, build_scripts)) => {
+                        let resp = FetchBuildDataResponse { workspaces, build_scripts };
+                        self.fetch_build_data_queue.op_completed(resp);
+
                         if let Err(e) = self.fetch_build_data_error() {
                             error!("FetchBuildDataError: {e}");
                         }
@@ -1077,6 +1092,23 @@ impl GlobalState {
             .on_latency_sensitive::<NO_RETRY, lsp_request::SemanticTokensRangeRequest>(handlers::handle_semantic_tokens_range)
             // FIXME: Some of these NO_RETRY could be retries if the file they are interested didn't change.
             // All other request handlers
+            .on_with::<lsp_request::DocumentDiagnosticRequest>(handlers::handle_document_diagnostics, || lsp_types::DocumentDiagnosticReportResult::Report(
+                lsp_types::DocumentDiagnosticReport::Full(
+                    lsp_types::RelatedFullDocumentDiagnosticReport {
+                        related_documents: None,
+                        full_document_diagnostic_report: lsp_types::FullDocumentDiagnosticReport {
+                            result_id: None,
+                            items: vec![],
+                        },
+                    },
+                ),
+            ), || lsp_server::ResponseError {
+                code: lsp_server::ErrorCode::ServerCancelled as i32,
+                message: "server cancelled the request".to_owned(),
+                data: serde_json::to_value(lsp_types::DiagnosticServerCancellationData {
+                    retrigger_request: true
+                }).ok(),
+            })
             .on::<RETRY, lsp_request::DocumentSymbolRequest>(handlers::handle_document_symbol)
             .on::<RETRY, lsp_request::FoldingRangeRequest>(handlers::handle_folding_range)
             .on::<NO_RETRY, lsp_request::SignatureHelpRequest>(handlers::handle_signature_help)

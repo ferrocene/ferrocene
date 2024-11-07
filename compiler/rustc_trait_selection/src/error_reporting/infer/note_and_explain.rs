@@ -384,7 +384,10 @@ impl<T> Trait<T> for X {
                                     | DefKind::AssocFn
                                     | DefKind::AssocConst
                             )
-                            && tcx.is_type_alias_impl_trait(opaque_ty.def_id)
+                            && matches!(
+                                tcx.opaque_ty_origin(opaque_ty.def_id),
+                                hir::OpaqueTyOrigin::TyAlias { .. }
+                            )
                             && !tcx
                                 .opaque_types_defined_by(body_owner_def_id.expect_local())
                                 .contains(&opaque_ty.def_id.expect_local())
@@ -894,7 +897,9 @@ fn foo(&self) -> Self::T { String::new() }
         // FIXME: we would want to call `resolve_vars_if_possible` on `ty` before suggesting.
 
         let trait_bounds = bounds.iter().filter_map(|bound| match bound {
-            hir::GenericBound::Trait(ptr, hir::TraitBoundModifier::None) => Some(ptr),
+            hir::GenericBound::Trait(ptr) if ptr.modifiers == hir::TraitBoundModifiers::NONE => {
+                Some(ptr)
+            }
             _ => None,
         });
 

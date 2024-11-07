@@ -38,7 +38,7 @@ cfg_if::cfg_if! {
     }
 }
 
-/// Map a Result<T, WinError> to io::Result<T>.
+/// Map a [`Result<T, WinError>`] to [`io::Result<T>`](crate::io::Result<T>).
 trait IoResult<T> {
     fn io_result(self) -> crate::io::Result<T>;
 }
@@ -346,7 +346,6 @@ pub fn abort_internal() -> ! {
     }
 }
 
-// miri is sensitive to changes here so check that miri is happy if touching this
 #[cfg(miri)]
 pub fn abort_internal() -> ! {
     crate::intrinsics::abort();

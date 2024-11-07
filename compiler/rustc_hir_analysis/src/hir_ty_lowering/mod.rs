@@ -20,6 +20,7 @@ pub mod errors;
 pub mod generics;
 mod lint;
 
+use std::assert_matches::assert_matches;
 use std::slice;
 
 use rustc_ast::TraitObjectSyntax;
@@ -39,7 +40,7 @@ use rustc_middle::mir::interpret::{LitToConstError, LitToConstInput};
 use rustc_middle::ty::print::PrintPolyTraitRefExt as _;
 use rustc_middle::ty::{
     self, Const, GenericArgKind, GenericArgsRef, GenericParamDefKind, ParamEnv, Ty, TyCtxt,
-    TypeVisitableExt,
+    TypeVisitableExt, TypingMode,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_session::lint::builtin::AMBIGUOUS_ASSOCIATED_ITEMS;
@@ -53,6 +54,7 @@ use rustc_trait_selection::traits::{self, ObligationCtxt};
 use tracing::{debug, debug_span, instrument};
 
 use crate::bounds::Bounds;
+use crate::check::check_abi_fn_ptr;
 use crate::errors::{AmbiguousLifetimeBound, BadReturnTypeNotation, WildPatTy};
 use crate::hir_ty_lowering::errors::{GenericsArgsErrExtend, prohibit_assoc_item_constraint};
 use crate::hir_ty_lowering::generics::{check_generic_arg_count, lower_generic_args};
@@ -64,9 +66,6 @@ use crate::require_c_abi_if_c_variadic;
 pub struct GenericPathSegment(pub DefId, pub usize);
 
 #[derive(Copy, Clone, Debug)]
-pub struct OnlySelfBounds(pub bool);
-
-#[derive(Copy, Clone, Debug)]
 pub enum PredicateFilter {
     /// All predicates may be implied by the trait.
     All,
@@ -75,13 +74,20 @@ pub enum PredicateFilter {
     SelfOnly,
 
     /// Only traits that reference `Self: ..` and define an associated type
-    /// with the given ident are implied by the trait.
-    SelfThatDefines(Ident),
+    /// with the given ident are implied by the trait. This mode exists to
+    /// side-step query cycles when lowering associated types.
+    SelfTraitThatDefines(Ident),
 
     /// Only traits that reference `Self: ..` and their associated type bounds.
     /// For example, given `Self: Tr<A: B>`, this would expand to `Self: Tr`
     /// and `<Self as Tr>::A: B`.
     SelfAndAssociatedTypeBounds,
+
+    /// Filter only the `~const` bounds, which are lowered into `HostEffect` clauses.
+    ConstIfConst,
+
+    /// Filter only the `~const` bounds which are *also* in the supertrait position.
+    SelfConstIfConst,
 }
 
 #[derive(Debug)]
@@ -289,13 +295,23 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         lifetime: &hir::Lifetime,
         reason: RegionInferReason<'_>,
     ) -> ty::Region<'tcx> {
+        if let Some(resolved) = self.tcx().named_bound_var(lifetime.hir_id) {
+            self.lower_resolved_lifetime(resolved)
+        } else {
+            self.re_infer(lifetime.ident.span, reason)
+        }
+    }
+
+    /// Lower a lifetime from the HIR to our internal notion of a lifetime called a *region*.
+    #[instrument(level = "debug", skip(self), ret)]
+    pub fn lower_resolved_lifetime(&self, resolved: rbv::ResolvedArg) -> ty::Region<'tcx> {
         let tcx = self.tcx();
         let lifetime_name = |def_id| tcx.hir().name(tcx.local_def_id_to_hir_id(def_id));
 
-        match tcx.named_bound_var(lifetime.hir_id) {
-            Some(rbv::ResolvedArg::StaticLifetime) => tcx.lifetimes.re_static,
+        match resolved {
+            rbv::ResolvedArg::StaticLifetime => tcx.lifetimes.re_static,
 
-            Some(rbv::ResolvedArg::LateBound(debruijn, index, def_id)) => {
+            rbv::ResolvedArg::LateBound(debruijn, index, def_id) => {
                 let name = lifetime_name(def_id);
                 let br = ty::BoundRegion {
                     var: ty::BoundVar::from_u32(index),
@@ -304,7 +320,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 ty::Region::new_bound(tcx, debruijn, br)
             }
 
-            Some(rbv::ResolvedArg::EarlyBound(def_id)) => {
+            rbv::ResolvedArg::EarlyBound(def_id) => {
                 let name = tcx.hir().ty_param_name(def_id);
                 let item_def_id = tcx.hir().ty_param_owner(def_id);
                 let generics = tcx.generics_of(item_def_id);
@@ -312,7 +328,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 ty::Region::new_early_param(tcx, ty::EarlyParamRegion { index, name })
             }
 
-            Some(rbv::ResolvedArg::Free(scope, id)) => {
+            rbv::ResolvedArg::Free(scope, id) => {
                 let name = lifetime_name(id);
                 ty::Region::new_late_param(
                     tcx,
@@ -323,9 +339,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 // (*) -- not late-bound, won't change
             }
 
-            Some(rbv::ResolvedArg::Error(guar)) => ty::Region::new_error(tcx, guar),
-
-            None => self.re_infer(lifetime.ident.span, reason),
+            rbv::ResolvedArg::Error(guar) => ty::Region::new_error(tcx, guar),
         }
     }
 
@@ -335,14 +349,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         def_id: DefId,
         item_segment: &hir::PathSegment<'tcx>,
     ) -> GenericArgsRef<'tcx> {
-        let (args, _) = self.lower_generic_args_of_path(
-            span,
-            def_id,
-            &[],
-            item_segment,
-            None,
-            ty::BoundConstness::NotConst,
-        );
+        let (args, _) = self.lower_generic_args_of_path(span, def_id, &[], item_segment, None);
         if let Some(c) = item_segment.args().constraints.first() {
             prohibit_assoc_item_constraint(self, c, Some((def_id, item_segment, span)));
         }
@@ -391,7 +398,6 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         parent_args: &[ty::GenericArg<'tcx>],
         segment: &hir::PathSegment<'tcx>,
         self_ty: Option<Ty<'tcx>>,
-        constness: ty::BoundConstness,
     ) -> (GenericArgsRef<'tcx>, GenericArgCountResult) {
         // If the type is parameterized by this region, then replace this
         // region with the current anon region binding (in other words,
@@ -414,7 +420,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             assert!(self_ty.is_none());
         }
 
-        let mut arg_count = check_generic_arg_count(
+        let arg_count = check_generic_arg_count(
             self,
             def_id,
             segment,
@@ -572,16 +578,6 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 }
             }
         }
-        if let ty::BoundConstness::Const | ty::BoundConstness::ConstIfConst = constness
-            && generics.has_self
-            && !tcx.is_const_trait(def_id)
-        {
-            let reported = self.dcx().emit_err(crate::errors::ConstBoundForNonConstTrait {
-                span,
-                modifier: constness.as_str(),
-            });
-            arg_count.correct = Err(GenericArgCountMismatch { reported, invalid_args: vec![] });
-        }
 
         let mut args_ctx = GenericArgsCtxt {
             lowerer: self,
@@ -613,14 +609,8 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         parent_args: GenericArgsRef<'tcx>,
     ) -> GenericArgsRef<'tcx> {
         debug!(?span, ?item_def_id, ?item_segment);
-        let (args, _) = self.lower_generic_args_of_path(
-            span,
-            item_def_id,
-            parent_args,
-            item_segment,
-            None,
-            ty::BoundConstness::NotConst,
-        );
+        let (args, _) =
+            self.lower_generic_args_of_path(span, item_def_id, parent_args, item_segment, None);
         if let Some(c) = item_segment.args().constraints.first() {
             prohibit_assoc_item_constraint(self, c, Some((item_def_id, item_segment, span)));
         }
@@ -646,7 +636,6 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             self_ty,
             trait_ref.path.segments.last().unwrap(),
             true,
-            ty::BoundConstness::NotConst,
         )
     }
 
@@ -678,11 +667,11 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         &self,
         trait_ref: &hir::TraitRef<'tcx>,
         span: Span,
-        constness: ty::BoundConstness,
-        polarity: ty::PredicatePolarity,
+        constness: hir::BoundConstness,
+        polarity: hir::BoundPolarity,
         self_ty: Ty<'tcx>,
         bounds: &mut Bounds<'tcx>,
-        only_self_bounds: OnlySelfBounds,
+        predicate_filter: PredicateFilter,
     ) -> GenericArgCountResult {
         let trait_def_id = trait_ref.trait_def_id().unwrap_or_else(|| FatalError.raise());
         let trait_segment = trait_ref.path.segments.last().unwrap();
@@ -699,7 +688,6 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             &[],
             trait_segment,
             Some(self_ty),
-            constness,
         );
 
         let tcx = self.tcx();
@@ -711,16 +699,87 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             bound_vars,
         );
 
-        debug!(?poly_trait_ref);
-        bounds.push_trait_bound(
-            tcx,
-            self.item_def_id().to_def_id(),
-            poly_trait_ref,
-            span,
-            polarity,
-            constness,
-            only_self_bounds,
-        );
+        let polarity = match polarity {
+            rustc_ast::BoundPolarity::Positive => ty::PredicatePolarity::Positive,
+            rustc_ast::BoundPolarity::Negative(_) => ty::PredicatePolarity::Negative,
+            rustc_ast::BoundPolarity::Maybe(_) => {
+                // Validate associated type at least. We may want to reject these
+                // outright in the future...
+                for constraint in trait_segment.args().constraints {
+                    let _ = self.lower_assoc_item_constraint(
+                        trait_ref.hir_ref_id,
+                        poly_trait_ref,
+                        constraint,
+                        &mut Default::default(),
+                        &mut Default::default(),
+                        constraint.span,
+                        predicate_filter,
+                    );
+                }
+                return arg_count;
+            }
+        };
+
+        if let hir::BoundConstness::Always(span) | hir::BoundConstness::Maybe(span) = constness
+            && !self.tcx().is_const_trait(trait_def_id)
+        {
+            self.dcx().emit_err(crate::errors::ConstBoundForNonConstTrait {
+                span,
+                modifier: constness.as_str(),
+            });
+        }
+
+        match predicate_filter {
+            // This is only concerned with trait predicates.
+            PredicateFilter::SelfTraitThatDefines(..) => {
+                bounds.push_trait_bound(tcx, poly_trait_ref, span, polarity);
+            }
+            PredicateFilter::All
+            | PredicateFilter::SelfOnly
+            | PredicateFilter::SelfAndAssociatedTypeBounds => {
+                debug!(?poly_trait_ref);
+                bounds.push_trait_bound(tcx, poly_trait_ref, span, polarity);
+
+                match constness {
+                    hir::BoundConstness::Always(span) => {
+                        if polarity == ty::PredicatePolarity::Positive {
+                            bounds.push_const_bound(
+                                tcx,
+                                poly_trait_ref,
+                                ty::BoundConstness::Const,
+                                span,
+                            );
+                        }
+                    }
+                    hir::BoundConstness::Maybe(_) => {
+                        // We don't emit a const bound here, since that would mean that we
+                        // unconditionally need to prove a `HostEffect` predicate, even when
+                        // the predicates are being instantiated in a non-const context. This
+                        // is instead handled in the `const_conditions` query.
+                    }
+                    hir::BoundConstness::Never => {}
+                }
+            }
+            // On the flip side, when filtering `ConstIfConst` bounds, we only need to convert
+            // `~const` bounds. All other predicates are handled in their respective queries.
+            //
+            // Note that like `PredicateFilter::SelfOnly`, we don't need to do any filtering
+            // here because we only call this on self bounds, and deal with the recursive case
+            // in `lower_assoc_item_constraint`.
+            PredicateFilter::ConstIfConst | PredicateFilter::SelfConstIfConst => match constness {
+                hir::BoundConstness::Maybe(span) => {
+                    if polarity == ty::PredicatePolarity::Positive {
+                        bounds.push_const_bound(
+                            tcx,
+                            poly_trait_ref,
+                            ty::BoundConstness::Maybe,
+                            span,
+                        );
+                    }
+                }
+                hir::BoundConstness::Always(_) | hir::BoundConstness::Never => {}
+            },
+        }
 
         let mut dup_constraints = FxIndexMap::default();
         for constraint in trait_segment.args().constraints {
@@ -728,11 +787,11 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             // since we should have emitted an error for them earlier, and they
             // would not be well-formed!
             if polarity != ty::PredicatePolarity::Positive {
-                assert!(
-                    self.dcx().has_errors().is_some(),
+                self.dcx().span_delayed_bug(
+                    constraint.span,
                     "negative trait bounds should not have assoc item constraints",
                 );
-                continue;
+                break;
             }
 
             // Specify type to assert that error was already reported in `Err` case.
@@ -743,7 +802,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 bounds,
                 &mut dup_constraints,
                 constraint.span,
-                only_self_bounds,
+                predicate_filter,
             );
             // Okay to ignore `Err` because of `ErrorGuaranteed` (see above).
         }
@@ -761,19 +820,11 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         self_ty: Ty<'tcx>,
         trait_segment: &hir::PathSegment<'tcx>,
         is_impl: bool,
-        // FIXME(effects): Move all host param things in HIR ty lowering to AST lowering.
-        constness: ty::BoundConstness,
     ) -> ty::TraitRef<'tcx> {
         self.complain_about_internal_fn_trait(span, trait_def_id, trait_segment, is_impl);
 
-        let (generic_args, _) = self.lower_generic_args_of_path(
-            span,
-            trait_def_id,
-            &[],
-            trait_segment,
-            Some(self_ty),
-            constness,
-        );
+        let (generic_args, _) =
+            self.lower_generic_args_of_path(span, trait_def_id, &[], trait_segment, Some(self_ty));
         if let Some(c) = trait_segment.args().constraints.first() {
             prohibit_assoc_item_constraint(self, c, Some((trait_def_id, trait_segment, span)));
         }
@@ -1190,15 +1241,6 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     err.emit()
                 } else if let Err(reported) = qself_ty.error_reported() {
                     reported
-                } else if let ty::Alias(ty::Opaque, alias_ty) = qself_ty.kind() {
-                    // `<impl Trait as OtherTrait>::Assoc` makes no sense.
-                    struct_span_code_err!(
-                        self.dcx(),
-                        tcx.def_span(alias_ty.def_id),
-                        E0667,
-                        "`impl Trait` is not allowed in path parameters"
-                    )
-                    .emit() // Already reported in an earlier stage.
                 } else {
                     self.maybe_report_similar_assoc_fn(span, qself_ty, qself)?;
 
@@ -1267,7 +1309,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         // selection during HIR ty lowering instead of in the trait solver), IATs can lead to cycle
         // errors (#108491) which mask the feature-gate error, needlessly confusing users
         // who use IATs by accident (#113265).
-        if !tcx.features().inherent_associated_types {
+        if !tcx.features().inherent_associated_types() {
             return Ok(None);
         }
 
@@ -1296,7 +1338,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             Some(infcx) => infcx,
             None => {
                 assert!(!self_ty.has_infer());
-                infcx_ = tcx.infer_ctxt().ignoring_regions().build();
+                infcx_ = tcx.infer_ctxt().ignoring_regions().build(TypingMode::non_body_analysis());
                 &infcx_
             }
         };
@@ -1488,7 +1530,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             infcx
         } else {
             assert!(!qself_ty.has_infer());
-            infcx_ = tcx.infer_ctxt().build();
+            infcx_ = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
             &infcx_
         };
 
@@ -1541,7 +1583,6 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         item_def_id: DefId,
         trait_segment: &hir::PathSegment<'tcx>,
         item_segment: &hir::PathSegment<'tcx>,
-        constness: ty::BoundConstness,
     ) -> Ty<'tcx> {
         let tcx = self.tcx();
 
@@ -1554,7 +1595,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         debug!(?self_ty);
 
         let trait_ref =
-            self.lower_mono_trait_ref(span, trait_def_id, self_ty, trait_segment, false, constness);
+            self.lower_mono_trait_ref(span, trait_def_id, self_ty, trait_segment, false);
         debug!(?trait_ref);
 
         let item_args =
@@ -1795,7 +1836,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         match path.res {
             Res::Def(DefKind::OpaqueTy, did) => {
                 // Check for desugared `impl Trait`.
-                assert!(tcx.is_type_alias_impl_trait(did));
+                assert_matches!(tcx.opaque_ty_origin(did), hir::OpaqueTyOrigin::TyAlias { .. });
                 let item_segment = path.segments.split_last().unwrap();
                 let _ = self
                     .prohibit_generic_args(item_segment.1.iter(), GenericsArgsErrExtend::OpaqueTy);
@@ -1917,7 +1958,6 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     def_id,
                     &path.segments[path.segments.len() - 2],
                     path.segments.last().unwrap(),
-                    ty::BoundConstness::NotConst,
                 )
             }
             Res::PrimTy(prim_ty) => {
@@ -2063,13 +2103,18 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 )
             }
             hir::TyKind::TraitObject(bounds, lifetime, repr) => {
-                self.prohibit_or_lint_bare_trait_object_ty(hir_ty);
-
-                let repr = match repr {
-                    TraitObjectSyntax::Dyn | TraitObjectSyntax::None => ty::Dyn,
-                    TraitObjectSyntax::DynStar => ty::DynStar,
-                };
-                self.lower_trait_object_ty(hir_ty.span, hir_ty.hir_id, bounds, lifetime, repr)
+                if let Some(guar) = self.prohibit_or_lint_bare_trait_object_ty(hir_ty) {
+                    // Don't continue with type analysis if the `dyn` keyword is missing
+                    // It generates confusing errors, especially if the user meant to use another
+                    // keyword like `impl`
+                    Ty::new_error(tcx, guar)
+                } else {
+                    let repr = match repr {
+                        TraitObjectSyntax::Dyn | TraitObjectSyntax::None => ty::Dyn,
+                        TraitObjectSyntax::DynStar => ty::DynStar,
+                    };
+                    self.lower_trait_object_ty(hir_ty.span, hir_ty.hir_id, bounds, lifetime, repr)
+                }
             }
             // If we encounter a fully qualified path with RTN generics, then it must have
             // *not* gone through `lower_ty_maybe_return_type_notation`, and therefore
@@ -2087,13 +2132,11 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 let opt_self_ty = maybe_qself.as_ref().map(|qself| self.lower_ty(qself));
                 self.lower_path(opt_self_ty, path, hir_ty.hir_id, false)
             }
-            &hir::TyKind::OpaqueDef(opaque_ty, lifetimes) => {
-                let local_def_id = opaque_ty.def_id;
-
+            &hir::TyKind::OpaqueDef(opaque_ty) => {
                 // If this is an RPITIT and we are using the new RPITIT lowering scheme, we
                 // generate the def_id of an associated type for the trait and return as
                 // type a projection.
-                match opaque_ty.origin {
+                let in_trait = match opaque_ty.origin {
                     hir::OpaqueTyOrigin::FnReturn {
                         in_trait_or_impl: Some(hir::RpitContext::Trait),
                         ..
@@ -2101,11 +2144,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     | hir::OpaqueTyOrigin::AsyncFn {
                         in_trait_or_impl: Some(hir::RpitContext::Trait),
                         ..
-                    } => self.lower_opaque_ty(
-                        tcx.associated_type_for_impl_trait_in_trait(local_def_id).to_def_id(),
-                        lifetimes,
-                        true,
-                    ),
+                    } => true,
                     hir::OpaqueTyOrigin::FnReturn {
                         in_trait_or_impl: None | Some(hir::RpitContext::TraitImpl),
                         ..
@@ -2114,10 +2153,10 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                         in_trait_or_impl: None | Some(hir::RpitContext::TraitImpl),
                         ..
                     }
-                    | hir::OpaqueTyOrigin::TyAlias { .. } => {
-                        self.lower_opaque_ty(local_def_id.to_def_id(), lifetimes, false)
-                    }
-                }
+                    | hir::OpaqueTyOrigin::TyAlias { .. } => false,
+                };
+
+                self.lower_opaque_ty(opaque_ty.def_id, in_trait)
             }
             // If we encounter a type relative path with RTN generics, then it must have
             // *not* gone through `lower_ty_maybe_return_type_notation`, and therefore
@@ -2145,7 +2184,6 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     &[],
                     &hir::PathSegment::invalid(),
                     None,
-                    ty::BoundConstness::NotConst,
                 );
                 tcx.at(span).type_of(def_id).instantiate(tcx, args)
             }
@@ -2258,40 +2296,34 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
     }
 
     /// Lower an opaque type (i.e., an existential impl-Trait type) from the HIR.
-    #[instrument(level = "debug", skip_all, ret)]
-    fn lower_opaque_ty(
-        &self,
-        def_id: DefId,
-        lifetimes: &[hir::GenericArg<'_>],
-        in_trait: bool,
-    ) -> Ty<'tcx> {
-        debug!(?def_id, ?lifetimes);
+    #[instrument(level = "debug", skip(self), ret)]
+    fn lower_opaque_ty(&self, def_id: LocalDefId, in_trait: bool) -> Ty<'tcx> {
         let tcx = self.tcx();
+
+        let lifetimes = tcx.opaque_captured_lifetimes(def_id);
+        debug!(?lifetimes);
+
+        // If this is an RPITIT and we are using the new RPITIT lowering scheme, we
+        // generate the def_id of an associated type for the trait and return as
+        // type a projection.
+        let def_id = if in_trait {
+            tcx.associated_type_for_impl_trait_in_trait(def_id).to_def_id()
+        } else {
+            def_id.to_def_id()
+        };
 
         let generics = tcx.generics_of(def_id);
         debug!(?generics);
 
+        // We use `generics.count() - lifetimes.len()` here instead of `generics.parent_count`
+        // since return-position impl trait in trait squashes all of the generics from its source fn
+        // into its own generics, so the opaque's "own" params isn't always just lifetimes.
+        let offset = generics.count() - lifetimes.len();
+
         let args = ty::GenericArgs::for_item(tcx, def_id, |param, _| {
-            // We use `generics.count() - lifetimes.len()` here instead of `generics.parent_count`
-            // since return-position impl trait in trait squashes all of the generics from its source fn
-            // into its own generics, so the opaque's "own" params isn't always just lifetimes.
-            if let Some(i) = (param.index as usize).checked_sub(generics.count() - lifetimes.len())
-            {
-                // Resolve our own lifetime parameters.
-                let GenericParamDefKind::Lifetime { .. } = param.kind else {
-                    span_bug!(
-                        tcx.def_span(param.def_id),
-                        "only expected lifetime for opaque's own generics, got {:?}",
-                        param
-                    );
-                };
-                let hir::GenericArg::Lifetime(lifetime) = &lifetimes[i] else {
-                    bug!(
-                        "expected lifetime argument for param {param:?}, found {:?}",
-                        &lifetimes[i]
-                    )
-                };
-                self.lower_lifetime(lifetime, RegionInferReason::Param(&param)).into()
+            if let Some(i) = (param.index as usize).checked_sub(offset) {
+                let (lifetime, _) = lifetimes[i];
+                self.lower_resolved_lifetime(lifetime).into()
             } else {
                 tcx.mk_param_from_def(param)
             }
@@ -2336,6 +2368,12 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
 
         let fn_ty = tcx.mk_fn_sig(input_tys, output_ty, decl.c_variadic, safety, abi);
         let bare_fn_ty = ty::Binder::bind_with_vars(fn_ty, bound_vars);
+
+        if let hir::Node::Ty(hir::Ty { kind: hir::TyKind::BareFn(bare_fn_ty), span, .. }) =
+            tcx.hir_node(hir_id)
+        {
+            check_abi_fn_ptr(tcx, hir_id, *span, bare_fn_ty.abi);
+        }
 
         // reject function types that violate cmse ABI requirements
         cmse::validate_cmse_abi(self.tcx(), self.dcx(), hir_id, abi, bare_fn_ty);

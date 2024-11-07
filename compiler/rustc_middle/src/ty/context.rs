@@ -12,6 +12,7 @@ use std::marker::PhantomData;
 use std::ops::{Bound, Deref};
 use std::{fmt, iter, mem};
 
+use rustc_abi::{FieldIdx, Layout, LayoutData, TargetDataLayout, VariantIdx};
 use rustc_ast::{self as ast, attr};
 use rustc_data_structures::defer;
 use rustc_data_structures::fingerprint::Fingerprint;
@@ -48,15 +49,13 @@ use rustc_session::{Limit, MetadataKind, Session};
 use rustc_span::def_id::{CRATE_DEF_ID, DefPathHash, StableCrateId};
 use rustc_span::symbol::{Ident, Symbol, kw, sym};
 use rustc_span::{DUMMY_SP, Span};
-use rustc_target::abi::{FieldIdx, Layout, LayoutS, TargetDataLayout, VariantIdx};
 use rustc_target::spec::abi;
 use rustc_type_ir::TyKind::*;
 use rustc_type_ir::fold::TypeFoldable;
 use rustc_type_ir::lang_items::TraitSolverLangItem;
 pub use rustc_type_ir::lift::Lift;
-use rustc_type_ir::solve::SolverMode;
 use rustc_type_ir::{CollectAndApply, Interner, TypeFlags, WithCachedTypeInfo, search_graph};
-use tracing::{debug, trace};
+use tracing::{debug, instrument};
 
 use crate::arena::Arena;
 use crate::dep_graph::{DepGraph, DepKindStruct};
@@ -77,11 +76,11 @@ use crate::traits::solve::{
 };
 use crate::ty::predicate::ExistentialPredicateStableCmpExt as _;
 use crate::ty::{
-    self, AdtDef, AdtDefData, AdtKind, Binder, Clause, Clauses, Const, GenericArg, GenericArgs,
-    GenericArgsRef, GenericParamDefKind, ImplPolarity, List, ListWithCachedTypeInfo, ParamConst,
-    ParamTy, Pattern, PatternKind, PolyExistentialPredicate, PolyFnSig, Predicate, PredicateKind,
-    PredicatePolarity, Region, RegionKind, ReprOptions, TraitObjectVisitor, Ty, TyKind, TyVid,
-    Visibility,
+    self, AdtDef, AdtDefData, AdtKind, Binder, BoundConstness, Clause, Clauses, Const, GenericArg,
+    GenericArgs, GenericArgsRef, GenericParamDefKind, ImplPolarity, List, ListWithCachedTypeInfo,
+    ParamConst, ParamTy, Pattern, PatternKind, PolyExistentialPredicate, PolyFnSig, Predicate,
+    PredicateKind, PredicatePolarity, Region, RegionKind, ReprOptions, TraitObjectVisitor, Ty,
+    TyKind, TyVid, Visibility,
 };
 
 #[allow(rustc::usage_of_ty_tykind)]
@@ -170,15 +169,8 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         tracked.get(self)
     }
 
-    fn with_global_cache<R>(
-        self,
-        mode: SolverMode,
-        f: impl FnOnce(&mut search_graph::GlobalCache<Self>) -> R,
-    ) -> R {
-        match mode {
-            SolverMode::Normal => f(&mut *self.new_solver_evaluation_cache.lock()),
-            SolverMode::Coherence => f(&mut *self.new_solver_coherence_evaluation_cache.lock()),
-        }
+    fn with_global_cache<R>(self, f: impl FnOnce(&mut search_graph::GlobalCache<Self>) -> R) -> R {
+        f(&mut *self.new_solver_evaluation_cache.lock())
     }
 
     fn evaluation_is_concurrent(&self) -> bool {
@@ -279,6 +271,26 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         self.debug_assert_args_compatible(def_id, args);
     }
 
+    /// Assert that the args from an `ExistentialTraitRef` or `ExistentialProjection`
+    /// are compatible with the `DefId`. Since we're missing a `Self` type, stick on
+    /// a dummy self type and forward to `debug_assert_args_compatible`.
+    fn debug_assert_existential_args_compatible(
+        self,
+        def_id: Self::DefId,
+        args: Self::GenericArgs,
+    ) {
+        // FIXME: We could perhaps add a `skip: usize` to `debug_assert_args_compatible`
+        // to avoid needing to reintern the set of args...
+        if cfg!(debug_assertions) {
+            self.debug_assert_args_compatible(
+                def_id,
+                self.mk_args_from_iter(
+                    [self.types.trait_object_dummy_self.into()].into_iter().chain(args.iter()),
+                ),
+            );
+        }
+    }
+
     fn mk_type_list_from_iter<I, T>(self, args: I) -> T::Output
     where
         I: Iterator<Item = T>,
@@ -361,6 +373,28 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         def_id: DefId,
     ) -> ty::EarlyBinder<'tcx, impl IntoIterator<Item = (ty::Clause<'tcx>, Span)>> {
         self.explicit_implied_predicates_of(def_id).map_bound(|preds| preds.into_iter().copied())
+    }
+
+    fn is_const_impl(self, def_id: DefId) -> bool {
+        self.is_conditionally_const(def_id)
+    }
+
+    fn const_conditions(
+        self,
+        def_id: DefId,
+    ) -> ty::EarlyBinder<'tcx, impl IntoIterator<Item = ty::Binder<'tcx, ty::TraitRef<'tcx>>>> {
+        ty::EarlyBinder::bind(
+            self.const_conditions(def_id).instantiate_identity(self).into_iter().map(|(c, _)| c),
+        )
+    }
+
+    fn implied_const_bounds(
+        self,
+        def_id: DefId,
+    ) -> ty::EarlyBinder<'tcx, impl IntoIterator<Item = ty::Binder<'tcx, ty::TraitRef<'tcx>>>> {
+        ty::EarlyBinder::bind(
+            self.implied_const_bounds(def_id).iter_identity_copied().map(|(c, _)| c),
+        )
     }
 
     fn has_target_features(self, def_id: DefId) -> bool {
@@ -539,6 +573,10 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         self.trait_def(trait_def_id).implement_via_object
     }
 
+    fn is_impl_trait_in_trait(self, def_id: DefId) -> bool {
+        self.is_impl_trait_in_trait(def_id)
+    }
+
     fn delay_bug(self, msg: impl ToString) -> ErrorGuaranteed {
         self.dcx().span_delayed_bug(DUMMY_SP, msg.to_string())
     }
@@ -583,6 +621,10 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
     ) -> ty::Binder<'tcx, T> {
         self.anonymize_bound_vars(binder)
     }
+
+    fn opaque_types_defined_by(self, defining_anchor: LocalDefId) -> Self::DefiningOpaqueTypes {
+        self.opaque_types_defined_by(defining_anchor)
+    }
 }
 
 macro_rules! bidirectional_lang_item_map {
@@ -622,13 +664,6 @@ bidirectional_lang_item_map! {
     Destruct,
     DiscriminantKind,
     DynMetadata,
-    EffectsCompat,
-    EffectsIntersection,
-    EffectsIntersectionOutput,
-    EffectsMaybe,
-    EffectsNoRuntime,
-    EffectsRuntime,
-    EffectsTyCompat,
     Fn,
     FnMut,
     FnOnce,
@@ -686,15 +721,15 @@ impl<'tcx> rustc_type_ir::inherent::Safety<TyCtxt<'tcx>> for hir::Safety {
 
 impl<'tcx> rustc_type_ir::inherent::Features<TyCtxt<'tcx>> for &'tcx rustc_feature::Features {
     fn generic_const_exprs(self) -> bool {
-        self.generic_const_exprs
+        self.generic_const_exprs()
     }
 
     fn coroutine_clone(self) -> bool {
-        self.coroutine_clone
+        self.coroutine_clone()
     }
 
     fn associated_const_equality(self) -> bool {
-        self.associated_const_equality
+        self.associated_const_equality()
     }
 }
 
@@ -727,7 +762,7 @@ pub struct CtxtInterners<'tcx> {
     pat: InternedSet<'tcx, PatternKind<'tcx>>,
     const_allocation: InternedSet<'tcx, Allocation>,
     bound_variable_kinds: InternedSet<'tcx, List<ty::BoundVariableKind>>,
-    layout: InternedSet<'tcx, LayoutS<FieldIdx, VariantIdx>>,
+    layout: InternedSet<'tcx, LayoutData<FieldIdx, VariantIdx>>,
     adt_def: InternedSet<'tcx, AdtDefData>,
     external_constraints: InternedSet<'tcx, ExternalConstraintsData<TyCtxt<'tcx>>>,
     predefined_opaques_in_body: InternedSet<'tcx, PredefinedOpaquesData<TyCtxt<'tcx>>>,
@@ -1295,7 +1330,6 @@ pub struct GlobalCtxt<'tcx> {
 
     /// Caches the results of goal evaluation in the new solver.
     pub new_solver_evaluation_cache: Lock<search_graph::GlobalCache<TyCtxt<'tcx>>>,
-    pub new_solver_coherence_evaluation_cache: Lock<search_graph::GlobalCache<TyCtxt<'tcx>>>,
 
     pub canonical_param_env_cache: CanonicalParamEnvCache<'tcx>,
 
@@ -1425,16 +1459,8 @@ impl<'tcx> TyCtxt<'tcx> {
         kind: AdtKind,
         variants: IndexVec<VariantIdx, ty::VariantDef>,
         repr: ReprOptions,
-        is_anonymous: bool,
     ) -> ty::AdtDef<'tcx> {
-        self.mk_adt_def_from_data(ty::AdtDefData::new(
-            self,
-            did,
-            kind,
-            variants,
-            repr,
-            is_anonymous,
-        ))
+        self.mk_adt_def_from_data(ty::AdtDefData::new(self, did, kind, variants, repr))
     }
 
     /// Allocates a read-only byte or string literal for `mir::interpret`.
@@ -1530,7 +1556,6 @@ impl<'tcx> TyCtxt<'tcx> {
             selection_cache: Default::default(),
             evaluation_cache: Default::default(),
             new_solver_evaluation_cache: Default::default(),
-            new_solver_coherence_evaluation_cache: Default::default(),
             canonical_param_env_cache: Default::default(),
             data_layout,
             alloc_map: Lock::new(interpret::AllocMap::new()),
@@ -2078,11 +2103,9 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 
     /// Returns the origin of the opaque type `def_id`.
-    #[track_caller]
-    pub fn opaque_type_origin(self, def_id: LocalDefId) -> hir::OpaqueTyOrigin {
-        let origin = self.hir().expect_opaque_ty(def_id).origin;
-        trace!("opaque_type_origin({def_id:?}) => {origin:?}");
-        origin
+    #[instrument(skip(self), level = "trace", ret)]
+    pub fn local_opaque_ty_origin(self, def_id: LocalDefId) -> hir::OpaqueTyOrigin<LocalDefId> {
+        self.hir().expect_opaque_ty(def_id).origin
     }
 }
 
@@ -2180,7 +2203,7 @@ macro_rules! nop_slice_lift {
 nop_slice_lift! {ty::ValTree<'a> => ty::ValTree<'tcx>}
 
 TrivialLiftImpls! {
-    ImplPolarity, PredicatePolarity, Promoted
+    ImplPolarity, PredicatePolarity, Promoted, BoundConstness,
 }
 
 macro_rules! sty_debug_print {
@@ -2438,7 +2461,7 @@ direct_interners! {
     region: pub(crate) intern_region(RegionKind<'tcx>): Region -> Region<'tcx>,
     pat: pub mk_pat(PatternKind<'tcx>): Pattern -> Pattern<'tcx>,
     const_allocation: pub mk_const_alloc(Allocation): ConstAllocation -> ConstAllocation<'tcx>,
-    layout: pub mk_layout(LayoutS<FieldIdx, VariantIdx>): Layout -> Layout<'tcx>,
+    layout: pub mk_layout(LayoutData<FieldIdx, VariantIdx>): Layout -> Layout<'tcx>,
     adt_def: pub mk_adt_def_from_data(AdtDefData): AdtDef -> AdtDef<'tcx>,
     external_constraints: pub mk_external_constraints(ExternalConstraintsData<TyCtxt<'tcx>>):
         ExternalConstraints -> ExternalConstraints<'tcx>,
@@ -3035,7 +3058,7 @@ impl<'tcx> TyCtxt<'tcx> {
 
         loop {
             let parent = self.local_parent(opaque_lifetime_param_def_id);
-            let hir::OpaqueTy { lifetime_mapping, .. } = self.hir().expect_opaque_ty(parent);
+            let lifetime_mapping = self.opaque_captured_lifetimes(parent);
 
             let Some((lifetime, _)) = lifetime_mapping
                 .iter()
@@ -3044,8 +3067,8 @@ impl<'tcx> TyCtxt<'tcx> {
                 bug!("duplicated lifetime param should be present");
             };
 
-            match self.named_bound_var(lifetime.hir_id) {
-                Some(resolve_bound_vars::ResolvedArg::EarlyBound(ebv)) => {
+            match *lifetime {
+                resolve_bound_vars::ResolvedArg::EarlyBound(ebv) => {
                     let new_parent = self.local_parent(ebv);
 
                     // If we map to another opaque, then it should be a parent
@@ -3064,7 +3087,7 @@ impl<'tcx> TyCtxt<'tcx> {
                         name: self.item_name(ebv.to_def_id()),
                     });
                 }
-                Some(resolve_bound_vars::ResolvedArg::LateBound(_, _, lbv)) => {
+                resolve_bound_vars::ResolvedArg::LateBound(_, _, lbv) => {
                     let new_parent = self.local_parent(lbv);
                     return ty::Region::new_late_param(
                         self,
@@ -3075,13 +3098,13 @@ impl<'tcx> TyCtxt<'tcx> {
                         ),
                     );
                 }
-                Some(resolve_bound_vars::ResolvedArg::Error(guar)) => {
+                resolve_bound_vars::ResolvedArg::Error(guar) => {
                     return ty::Region::new_error(self, guar);
                 }
                 _ => {
                     return ty::Region::new_error_with_message(
                         self,
-                        lifetime.ident.span,
+                        self.def_span(opaque_lifetime_param_def_id),
                         "cannot resolve lifetime",
                     );
                 }
@@ -3089,38 +3112,24 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
-    /// Whether the `def_id` counts as const fn in the current crate, considering all active
-    /// feature gates
-    pub fn is_const_fn(self, def_id: DefId) -> bool {
-        if self.is_const_fn_raw(def_id) {
-            match self.lookup_const_stability(def_id) {
-                Some(stability) if stability.is_const_unstable() => {
-                    // has a `rustc_const_unstable` attribute, check whether the user enabled the
-                    // corresponding feature gate.
-                    self.features().declared(stability.feature)
-                }
-                // functions without const stability are either stable user written
-                // const fn or the user is using feature gates and we thus don't
-                // care what they do
-                _ => true,
+    /// Whether `def_id` is a stable const fn (i.e., doesn't need any feature gates to be called).
+    ///
+    /// When this is `false`, the function may still be callable as a `const fn` due to features
+    /// being enabled!
+    pub fn is_stable_const_fn(self, def_id: DefId) -> bool {
+        self.is_const_fn(def_id)
+            && match self.lookup_const_stability(def_id) {
+                None => true, // a fn in a non-staged_api crate
+                Some(stability) if stability.is_const_stable() => true,
+                _ => false,
             }
-        } else {
-            false
-        }
     }
 
+    // FIXME(effects): Please remove this. It's a footgun.
     /// Whether the trait impl is marked const. This does not consider stability or feature gates.
-    pub fn is_const_trait_impl_raw(self, def_id: DefId) -> bool {
-        let Some(local_def_id) = def_id.as_local() else { return false };
-        let node = self.hir_node_by_def_id(local_def_id);
-
-        matches!(
-            node,
-            hir::Node::Item(hir::Item {
-                kind: hir::ItemKind::Impl(hir::Impl { constness, .. }),
-                ..
-            }) if matches!(constness, hir::Constness::Const)
-        )
+    pub fn is_const_trait_impl(self, def_id: DefId) -> bool {
+        self.def_kind(def_id) == DefKind::Impl { of_trait: true }
+            && self.constness(def_id) == hir::Constness::Const
     }
 
     pub fn intrinsic(self, def_id: impl IntoQueryParam<DefId> + Copy) -> Option<ty::IntrinsicDef> {
@@ -3132,11 +3141,11 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 
     pub fn next_trait_solver_globally(self) -> bool {
-        self.sess.opts.unstable_opts.next_solver.map_or(false, |c| c.globally)
+        self.sess.opts.unstable_opts.next_solver.globally
     }
 
     pub fn next_trait_solver_in_coherence(self) -> bool {
-        self.sess.opts.unstable_opts.next_solver.map_or(false, |c| c.coherence)
+        self.sess.opts.unstable_opts.next_solver.coherence
     }
 
     pub fn is_impl_trait_in_trait(self, def_id: DefId) -> bool {

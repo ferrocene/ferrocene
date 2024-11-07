@@ -40,6 +40,7 @@ pub type AliasTy<'tcx> = ir::AliasTy<TyCtxt<'tcx>>;
 pub type FnSig<'tcx> = ir::FnSig<TyCtxt<'tcx>>;
 pub type Binder<'tcx, T> = ir::Binder<TyCtxt<'tcx>, T>;
 pub type EarlyBinder<'tcx, T> = ir::EarlyBinder<TyCtxt<'tcx>, T>;
+pub type TypingMode<'tcx> = ir::TypingMode<TyCtxt<'tcx>>;
 
 pub trait Article {
     fn article(&self) -> &'static str;
@@ -750,7 +751,7 @@ impl<'tcx> Ty<'tcx> {
 
     #[inline]
     pub fn new_diverging_default(tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
-        if tcx.features().never_type_fallback { tcx.types.never } else { tcx.types.unit }
+        if tcx.features().never_type_fallback() { tcx.types.never } else { tcx.types.unit }
     }
 
     // lang and diagnostic tys
@@ -1117,7 +1118,12 @@ impl<'tcx> Ty<'tcx> {
         // The way we evaluate the `N` in `[T; N]` here only works since we use
         // `simd_size_and_type` post-monomorphization. It will probably start to ICE
         // if we use it in generic code. See the `simd-array-trait` ui test.
-        (f0_len.eval_target_usize(tcx, ParamEnv::empty()), *f0_elem_ty)
+        (
+            f0_len
+                .try_to_target_usize(tcx)
+                .expect("expected SIMD field to have definite array size"),
+            *f0_elem_ty,
+        )
     }
 
     #[inline]
@@ -1348,6 +1354,7 @@ impl<'tcx> Ty<'tcx> {
         }
     }
 
+    #[tracing::instrument(level = "trace", skip(tcx))]
     pub fn fn_sig(self, tcx: TyCtxt<'tcx>) -> PolyFnSig<'tcx> {
         match self.kind() {
             FnDef(def_id, args) => tcx.fn_sig(*def_id).instantiate(tcx, args),

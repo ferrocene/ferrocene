@@ -22,12 +22,12 @@ macro path_std($($x:tt)*) {
 
 pub(crate) mod bounds;
 pub(crate) mod clone;
+pub(crate) mod coerce_pointee;
 pub(crate) mod debug;
 pub(crate) mod decodable;
 pub(crate) mod default;
 pub(crate) mod encodable;
 pub(crate) mod hash;
-pub(crate) mod smart_ptr;
 
 #[path = "cmp/eq.rs"]
 pub(crate) mod eq;
@@ -124,8 +124,6 @@ fn assert_ty_bounds(
     span: Span,
     assert_path: &[Symbol],
 ) {
-    // Deny anonymous structs or unions to avoid weird errors.
-    assert!(!ty.kind.is_anon_adt(), "Anonymous structs or unions cannot be type parameters");
     // Generate statement `let _: assert_path<ty>;`.
     let span = cx.with_def_site_ctxt(span);
     let assert_path = cx.path_all(span, true, cx.std_path(assert_path), vec![GenericArg::Type(ty)]);

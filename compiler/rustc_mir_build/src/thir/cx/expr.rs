@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use rustc_abi::{FIRST_VARIANT, FieldIdx};
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_hir as hir;
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, Res};
@@ -18,7 +19,6 @@ use rustc_middle::ty::{
 };
 use rustc_middle::{bug, span_bug};
 use rustc_span::{Span, sym};
-use rustc_target::abi::{FIRST_VARIANT, FieldIdx};
 use tracing::{debug, info, instrument, trace};
 
 use crate::errors;
@@ -140,7 +140,7 @@ impl<'tcx> Cx<'tcx> {
 
                 expr = Expr {
                     temp_lifetime,
-                    ty: Ty::new_ref(self.tcx, deref.region, expr.ty, deref.mutbl),
+                    ty: Ty::new_ref(self.tcx, self.tcx.lifetimes.re_erased, expr.ty, deref.mutbl),
                     span,
                     kind: ExprKind::Borrow {
                         borrow_kind: deref.mutbl.to_borrow_kind(),
@@ -152,14 +152,14 @@ impl<'tcx> Cx<'tcx> {
 
                 self.overloaded_place(hir_expr, adjustment.target, Some(call), expr, deref.span)
             }
-            Adjust::Borrow(AutoBorrow::Ref(_, m)) => ExprKind::Borrow {
+            Adjust::Borrow(AutoBorrow::Ref(m)) => ExprKind::Borrow {
                 borrow_kind: m.to_borrow_kind(),
                 arg: self.thir.exprs.push(expr),
             },
             Adjust::Borrow(AutoBorrow::RawPtr(mutability)) => {
                 ExprKind::RawBorrow { mutability, arg: self.thir.exprs.push(expr) }
             }
-            Adjust::ReborrowPin(region, mutbl) => {
+            Adjust::ReborrowPin(mutbl) => {
                 debug!("apply ReborrowPin adjustment");
                 // Rewrite `$expr` as `Pin { __pointer: &(mut)? *($expr).__pointer }`
 
@@ -197,7 +197,8 @@ impl<'tcx> Cx<'tcx> {
                     hir::Mutability::Mut => BorrowKind::Mut { kind: mir::MutBorrowKind::Default },
                     hir::Mutability::Not => BorrowKind::Shared,
                 };
-                let new_pin_target = Ty::new_ref(self.tcx, region, ptr_target_ty, mutbl);
+                let new_pin_target =
+                    Ty::new_ref(self.tcx, self.tcx.lifetimes.re_erased, ptr_target_ty, mutbl);
                 let expr = self.thir.exprs.push(Expr {
                     temp_lifetime,
                     ty: new_pin_target,
@@ -281,7 +282,14 @@ impl<'tcx> Cx<'tcx> {
                 .unwrap_or_else(|e| panic!("could not compute layout for {param_env_ty:?}: {e:?}"))
                 .size;
 
-            let lit = ScalarInt::try_from_uint(discr_offset as u128, size).unwrap();
+            let (lit, overflowing) = ScalarInt::truncate_from_uint(discr_offset as u128, size);
+            if overflowing {
+                // An erroneous enum with too many variants for its repr will emit E0081 and E0370
+                self.tcx.dcx().span_delayed_bug(
+                    source.span,
+                    "overflowing enum wasn't rejected by hir analysis",
+                );
+            }
             let kind = ExprKind::NonHirLiteral { lit, user_ty: None };
             let offset = self.thir.exprs.push(Expr { temp_lifetime, ty: discr_ty, span, kind });
 
@@ -777,7 +785,7 @@ impl<'tcx> Cx<'tcx> {
                 if_then_scope: region::Scope {
                     id: then.hir_id.local_id,
                     data: {
-                        if expr.span.at_least_rust_2024() && tcx.features().if_let_rescope {
+                        if expr.span.at_least_rust_2024() {
                             region::ScopeData::IfThenRescope
                         } else {
                             region::ScopeData::IfThen
@@ -808,21 +816,11 @@ impl<'tcx> Cx<'tcx> {
                 });
                 ExprKind::Loop { body }
             }
-            hir::ExprKind::Field(source, ..) => {
-                let mut kind = ExprKind::Field {
-                    lhs: self.mirror_expr(source),
-                    variant_index: FIRST_VARIANT,
-                    name: self.typeck_results.field_index(expr.hir_id),
-                };
-                let nested_field_tys_and_indices =
-                    self.typeck_results.nested_field_tys_and_indices(expr.hir_id);
-                for &(ty, idx) in nested_field_tys_and_indices {
-                    let expr = Expr { temp_lifetime, ty, span: source.span, kind };
-                    let lhs = self.thir.exprs.push(expr);
-                    kind = ExprKind::Field { lhs, variant_index: FIRST_VARIANT, name: idx };
-                }
-                kind
-            }
+            hir::ExprKind::Field(source, ..) => ExprKind::Field {
+                lhs: self.mirror_expr(source),
+                variant_index: FIRST_VARIANT,
+                name: self.typeck_results.field_index(expr.hir_id),
+            },
             hir::ExprKind::Cast(source, cast_ty) => {
                 // Check for a user-given type annotation on this `cast`
                 let user_provided_types = self.typeck_results.user_provided_types();

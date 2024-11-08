@@ -4,23 +4,17 @@
 
 set -xeuo pipefail
 
-if command -v uv &> /dev/null; then
-    echo "uv was already installed, skipping"
-    exit 0
+curl -LsSf https://astral.sh/uv/0.5.0/install.sh | sh
+
+export PATH="$HOME/.local/bin:$PATH"
+
+set +e
+if [ ! -z ${BASH_ENV+x} ]; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> $BASH_ENV
 fi
+set -e
 
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-source $HOME/.cargo/env
-echo "source $HOME/.cargo/env" >> $BASH_ENV
-
-uv venv ~/.venv
-if [[ "${OSTYPE}" = "msys" ]]; then
-    source ~/.venv/Scripts/activate
-    echo "source $HOME/.venv/Scripts/activate" >> $BASH_ENV
-else
-    source ~/.venv/bin/activate
-    echo "source $HOME/.venv/bin/activate" >> $BASH_ENV
-fi
-
+uv python install 3.12
+uv python pin 3.12
+uv venv
 uv pip sync requirements.txt

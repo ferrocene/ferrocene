@@ -232,3 +232,9 @@ path = "requirements.txt"
 precedence = "override"
 SPDX-FileCopyrightText = "The Ferrocene Developers"
 SPDX-License-Identifier = "MIT OR Apache-2.0"
+
+[[annotations]]
+path = ".python-version"
+precedence = "override"
+SPDX-FileCopyrightText = "The Ferrocene Developers"
+SPDX-License-Identifier = "MIT OR Apache-2.0"

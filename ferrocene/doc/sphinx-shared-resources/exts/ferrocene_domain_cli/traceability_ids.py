@@ -10,6 +10,7 @@ import sphinx
 def write_traceability_ids(app):
     env = app.env
 
+    # Options.
     options_by_document = defaultdict(list)
     for option in env.get_domain("cli").get_options().values():
         if option.no_traceability_matrix:
@@ -24,11 +25,28 @@ def write_traceability_ids(app):
             }
         )
 
-    # Do not emit the traceability IDs if no option was defined.
-    if not options_by_document:
+    # Subcommands.
+    subcommands_by_document = defaultdict(list)
+    for subcommand in env.get_domain("cli").get_subcommands().values():
+        if subcommand.no_traceability_matrix:
+            continue
+
+        subcommands_by_document[subcommand.document].append(
+            {
+                "id": subcommand.id(),
+                "program": subcommand.program,
+                "option": subcommand.subcommand,
+                "link": app.builder.get_target_uri(subcommand.document) + "#" + subcommand.id(),
+            }
+        )
+
+    # Do not emit the traceability IDs if no option or subcommand was defined.
+    if not options_by_document and not subcommands_by_document:
         return
 
+    # Prepare the list of documents, adding options, subcommands separately.
     documents = []
+    # Options.
     for docname, title in env.titles.items():
         if docname not in options_by_document:
             continue
@@ -38,6 +56,19 @@ def write_traceability_ids(app):
                 "title": title.astext(),
                 "link": app.builder.get_target_uri(docname),
                 "options": options_by_document[docname],
+                "informational": False,
+            }
+        )
+    # Subcommands.
+    for docname, title in env.titles.items():
+        if docname not in subcommands_by_document:
+            continue
+
+        documents.append(
+            {
+                "title": title.astext(),
+                "link": app.builder.get_target_uri(docname),
+                "subcommands": subcommands_by_document[docname],
                 "informational": False,
             }
         )

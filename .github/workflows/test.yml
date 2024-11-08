@@ -131,7 +131,7 @@ jobs:
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.qnx-version != '' && 'export RUST_TEST_THREADS=1' || '' }}
-            ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test) --ferrocene-test-one-crate-per-cargo-call
+            uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Output container logs
         if: ${{ inputs.emulator-container != '' && (success() || failure()) }}
@@ -210,7 +210,7 @@ jobs:
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.qnx-version != '' && 'export RUST_TEST_THREADS=1' || '' }}
-            ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:compiletest) --ferrocene-test-one-crate-per-cargo-call
+            uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:compiletest) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Output container logs
         if: ${{ inputs.emulator-container != '' && (success() || failure()) }}
@@ -289,7 +289,7 @@ jobs:
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.qnx-version != '' && 'export RUST_TEST_THREADS=1' || '' }}
-            ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library) --ferrocene-test-one-crate-per-cargo-call
+            uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Output container logs
         if: ${{ inputs.emulator-container != '' && (success() || failure()) }}
@@ -369,7 +369,7 @@ jobs:
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.qnx-version != '' && 'export RUST_TEST_THREADS=1' || '' }}
-            ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call
+            uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Output container logs
         if: ${{ inputs.emulator-container != '' && (success() || failure()) }}

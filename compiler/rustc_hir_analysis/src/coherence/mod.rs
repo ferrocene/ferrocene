@@ -53,7 +53,7 @@ fn enforce_trait_manually_implementable(
 ) -> Result<(), ErrorGuaranteed> {
     let impl_header_span = tcx.def_span(impl_def_id);
 
-    if tcx.is_lang_item(trait_def_id, LangItem::Freeze) && !tcx.features().freeze_impls {
+    if tcx.is_lang_item(trait_def_id, LangItem::Freeze) && !tcx.features().freeze_impls() {
         feature_err(
             &tcx.sess,
             sym::freeze_impls,
@@ -86,8 +86,8 @@ fn enforce_trait_manually_implementable(
 
     if let ty::trait_def::TraitSpecializationKind::AlwaysApplicable = trait_def.specialization_kind
     {
-        if !tcx.features().specialization
-            && !tcx.features().min_specialization
+        if !tcx.features().specialization()
+            && !tcx.features().min_specialization()
             && !impl_header_span.allows_unstable(sym::specialization)
             && !impl_header_span.allows_unstable(sym::min_specialization)
         {
@@ -199,7 +199,7 @@ fn check_object_overlap<'tcx>(
         for component_def_id in component_def_ids {
             if !tcx.is_dyn_compatible(component_def_id) {
                 // FIXME(dyn_compat_renaming): Rename test and update comment.
-                // Without the 'object_safe_for_dispatch' feature this is an error
+                // Without the 'dyn_compatible_for_dispatch' feature this is an error
                 // which will be reported by wfcheck. Ignore it here.
                 // This is tested by `coherence-impl-trait-for-trait-object-safe.rs`.
                 // With the feature enabled, the trait is not implemented automatically,

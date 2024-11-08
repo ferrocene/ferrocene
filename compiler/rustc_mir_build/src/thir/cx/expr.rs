@@ -281,7 +281,14 @@ impl<'tcx> Cx<'tcx> {
                 .unwrap_or_else(|e| panic!("could not compute layout for {param_env_ty:?}: {e:?}"))
                 .size;
 
-            let lit = ScalarInt::try_from_uint(discr_offset as u128, size).unwrap();
+            let (lit, overflowing) = ScalarInt::truncate_from_uint(discr_offset as u128, size);
+            if overflowing {
+                // An erroneous enum with too many variants for its repr will emit E0081 and E0370
+                self.tcx.dcx().span_delayed_bug(
+                    source.span,
+                    "overflowing enum wasn't rejected by hir analysis",
+                );
+            }
             let kind = ExprKind::NonHirLiteral { lit, user_ty: None };
             let offset = self.thir.exprs.push(Expr { temp_lifetime, ty: discr_ty, span, kind });
 
@@ -777,7 +784,7 @@ impl<'tcx> Cx<'tcx> {
                 if_then_scope: region::Scope {
                     id: then.hir_id.local_id,
                     data: {
-                        if expr.span.at_least_rust_2024() && tcx.features().if_let_rescope {
+                        if expr.span.at_least_rust_2024() && tcx.features().if_let_rescope() {
                             region::ScopeData::IfThenRescope
                         } else {
                             region::ScopeData::IfThen
@@ -808,21 +815,11 @@ impl<'tcx> Cx<'tcx> {
                 });
                 ExprKind::Loop { body }
             }
-            hir::ExprKind::Field(source, ..) => {
-                let mut kind = ExprKind::Field {
-                    lhs: self.mirror_expr(source),
-                    variant_index: FIRST_VARIANT,
-                    name: self.typeck_results.field_index(expr.hir_id),
-                };
-                let nested_field_tys_and_indices =
-                    self.typeck_results.nested_field_tys_and_indices(expr.hir_id);
-                for &(ty, idx) in nested_field_tys_and_indices {
-                    let expr = Expr { temp_lifetime, ty, span: source.span, kind };
-                    let lhs = self.thir.exprs.push(expr);
-                    kind = ExprKind::Field { lhs, variant_index: FIRST_VARIANT, name: idx };
-                }
-                kind
-            }
+            hir::ExprKind::Field(source, ..) => ExprKind::Field {
+                lhs: self.mirror_expr(source),
+                variant_index: FIRST_VARIANT,
+                name: self.typeck_results.field_index(expr.hir_id),
+            },
             hir::ExprKind::Cast(source, cast_ty) => {
                 // Check for a user-given type annotation on this `cast`
                 let user_provided_types = self.typeck_results.user_provided_types();

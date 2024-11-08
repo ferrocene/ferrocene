@@ -399,13 +399,13 @@ impl clean::GenericBound {
     ) -> impl Display + 'a + Captures<'tcx> {
         display_fn(move |f| match self {
             clean::GenericBound::Outlives(lt) => write!(f, "{}", lt.print()),
-            clean::GenericBound::TraitBound(ty, modifier) => {
-                f.write_str(match modifier {
-                    hir::TraitBoundModifier::None => "",
-                    hir::TraitBoundModifier::Maybe => "?",
-                    hir::TraitBoundModifier::Negative => "!",
-                    // `const` and `~const` trait bounds are experimental; don't render them.
-                    hir::TraitBoundModifier::Const | hir::TraitBoundModifier::MaybeConst => "",
+            clean::GenericBound::TraitBound(ty, modifiers) => {
+                // `const` and `~const` trait bounds are experimental; don't render them.
+                let hir::TraitBoundModifiers { polarity, constness: _ } = modifiers;
+                f.write_str(match polarity {
+                    hir::BoundPolarity::Positive => "",
+                    hir::BoundPolarity::Maybe(_) => "?",
+                    hir::BoundPolarity::Negative(_) => "!",
                 })?;
                 ty.print(cx).fmt(f)
             }
@@ -1367,6 +1367,24 @@ impl clean::Impl {
             if !bare_fn.decl.output.is_unit() {
                 write!(f, " -> ")?;
                 fmt_type(&bare_fn.decl.output, f, use_absolute, cx)?;
+            }
+        } else if let clean::Type::Path { path } = type_
+            && let Some(generics) = path.generics()
+            && generics.len() == 1
+            && self.kind.is_fake_variadic()
+        {
+            let ty = generics[0];
+            let wrapper = anchor(path.def_id(), path.last(), cx);
+            if f.alternate() {
+                write!(f, "{wrapper:#}&lt;")?;
+            } else {
+                write!(f, "{wrapper}<")?;
+            }
+            self.print_type(ty, f, use_absolute, cx)?;
+            if f.alternate() {
+                write!(f, "&gt;")?;
+            } else {
+                write!(f, ">")?;
             }
         } else {
             fmt_type(&type_, f, use_absolute, cx)?;

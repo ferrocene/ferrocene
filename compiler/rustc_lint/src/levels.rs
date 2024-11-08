@@ -493,7 +493,10 @@ impl<'s, P: LintLevelsProvider> LintLevelsBuilder<'s, P> {
         //
         // This means that this only errors if we're truly lowering the lint
         // level from forbid.
-        if self.lint_added_lints && level != Level::Forbid && old_level == Level::Forbid {
+        if self.lint_added_lints && level == Level::Deny && old_level == Level::Forbid {
+            // Having a deny inside a forbid is fine and is ignored, so we skip this check.
+            return;
+        } else if self.lint_added_lints && level != Level::Forbid && old_level == Level::Forbid {
             // Backwards compatibility check:
             //
             // We used to not consider `forbid(lint_group)`
@@ -855,7 +858,7 @@ impl<'s, P: LintLevelsProvider> LintLevelsBuilder<'s, P> {
     #[track_caller]
     fn check_gated_lint(&self, lint_id: LintId, span: Span, lint_from_cli: bool) -> bool {
         let feature = if let Some(feature) = lint_id.lint.feature_gate
-            && !self.features.active(feature)
+            && !self.features.enabled(feature)
         {
             // Lint is behind a feature that is not enabled; eventually return false.
             feature

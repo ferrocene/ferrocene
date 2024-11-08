@@ -644,7 +644,7 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
                 debug!(?bounds, ?lifetime, "TraitObject");
                 let scope = Scope::TraitRefBoundary { s: self.scope };
                 self.with(scope, |this| {
-                    for (bound, _) in bounds {
+                    for bound in bounds {
                         this.visit_poly_trait_ref_inner(
                             bound,
                             NonLifetimeBinderAllowed::Deny("trait object types"),
@@ -1161,7 +1161,7 @@ impl<'a, 'tcx> BoundVarContext<'a, 'tcx> {
                         && let Some(param) = generics.params.iter().find(|p| p.def_id == param_id)
                         && param.is_elided_lifetime()
                         && !self.tcx.asyncness(lifetime_ref.hir_id.owner.def_id).is_async()
-                        && !self.tcx.features().anonymous_lifetime_in_impl_trait
+                        && !self.tcx.features().anonymous_lifetime_in_impl_trait()
                     {
                         let mut diag: rustc_errors::Diag<'_> = rustc_session::parse::feature_err(
                             &self.tcx.sess,
@@ -1918,7 +1918,7 @@ impl<'a, 'tcx> BoundVarContext<'a, 'tcx> {
                                 return None;
                             }
                             predicate.bounds.iter().find_map(|bound| {
-                                let hir::GenericBound::Trait(trait_, _) = bound else {
+                                let hir::GenericBound::Trait(trait_) = bound else {
                                     return None;
                                 };
                                 BoundVarContext::supertrait_hrtb_vars(
@@ -2239,7 +2239,7 @@ fn deny_non_region_late_bound(
             format!("late-bound {what} parameter not allowed on {where_}"),
         );
 
-        let guar = diag.emit_unless(!tcx.features().non_lifetime_binders || !first);
+        let guar = diag.emit_unless(!tcx.features().non_lifetime_binders() || !first);
 
         first = false;
         *arg = ResolvedArg::Error(guar);

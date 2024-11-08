@@ -369,6 +369,7 @@ pub struct Config {
     /// `paths=["foo", "bar"]`.
     pub paths: Vec<PathBuf>,
 
+<<<<<<< HEAD
     // Ferrocene-specific configuration
     pub ferrocene_raw_channel: String,
     pub ferrocene_aws_profile: Option<String>,
@@ -411,6 +412,10 @@ pub enum FerroceneDocumentSignatures {
     DocsTarball {
         tarball: PathBuf,
     },
+=======
+    /// Command for visual diff display, e.g. `diff-tool --color=always`.
+    pub compiletest_diff_tool: Option<String>,
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 #[derive(Clone, Debug, Default)]
@@ -658,6 +663,9 @@ impl Target {
             || triple.contains("switch")
         {
             target.no_std = true;
+        }
+        if triple.contains("emscripten") {
+            target.runner = Some("node".into());
         }
         target
     }
@@ -947,6 +955,8 @@ define_config! {
         metrics: Option<bool> = "metrics",
         android_ndk: Option<PathBuf> = "android-ndk",
         optimized_compiler_builtins: Option<bool> = "optimized-compiler-builtins",
+        jobs: Option<u32> = "jobs",
+        compiletest_diff_tool: Option<String> = "compiletest-diff-tool",
     }
 }
 
@@ -1052,7 +1062,7 @@ impl<'de> Deserialize<'de> for RustOptimize {
 
 struct OptimizeVisitor;
 
-impl<'de> serde::de::Visitor<'de> for OptimizeVisitor {
+impl serde::de::Visitor<'_> for OptimizeVisitor {
     type Value = RustOptimize;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -1127,7 +1137,7 @@ impl<'de> Deserialize<'de> for LldMode {
     {
         struct LldModeVisitor;
 
-        impl<'de> serde::de::Visitor<'de> for LldModeVisitor {
+        impl serde::de::Visitor<'_> for LldModeVisitor {
             type Value = LldMode;
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -1362,7 +1372,6 @@ impl Config {
         config.rustc_error_format = flags.rustc_error_format;
         config.json_output = flags.json_output;
         config.on_fail = flags.on_fail;
-        config.jobs = Some(threads_from_config(flags.jobs as u32));
         config.cmd = flags.cmd;
         config.incremental = flags.incremental;
         config.dry_run = if flags.dry_run { DryRun::UserSelected } else { DryRun::Disabled };
@@ -1584,7 +1593,11 @@ impl Config {
             metrics: _,
             android_ndk,
             optimized_compiler_builtins,
+            jobs,
+            compiletest_diff_tool,
         } = toml.build.unwrap_or_default();
+
+        config.jobs = Some(threads_from_config(flags.jobs.unwrap_or(jobs.unwrap_or(0))));
 
         if let Some(file_build) = build {
             config.build = TargetSelection::from_user(&file_build);
@@ -2299,6 +2312,7 @@ impl Config {
         config.rust_debuginfo_level_tests = debuginfo_level_tests.unwrap_or(DebuginfoLevel::None);
         config.optimized_compiler_builtins =
             optimized_compiler_builtins.unwrap_or(config.channel != "dev");
+        config.compiletest_diff_tool = compiletest_diff_tool;
 
         let download_rustc = config.download_rustc_commit.is_some();
         // See https://github.com/rust-lang/compiler-team/issues/326
@@ -2894,20 +2908,25 @@ impl Config {
             }
         };
 
+        let files_to_track =
+            &["compiler", "library", "src/version", "src/stage0", "src/ci/channel"];
+
         // Look for a version to compare to based on the current commit.
         // Only commits merged by bors will have CI artifacts.
-        let commit = get_closest_merge_commit(Some(&self.src), &self.git_config(), &[
-            self.src.join("compiler"),
-            self.src.join("library"),
-        ])
-        .unwrap();
-        if commit.is_empty() {
-            println!("ERROR: could not find commit hash for downloading rustc");
-            println!("HELP: maybe your repository history is too shallow?");
-            println!("HELP: consider disabling `download-rustc`");
-            println!("HELP: or fetch enough history to include one upstream commit");
-            crate::exit!(1);
-        }
+        let commit = match self.last_modified_commit(files_to_track, "download-rustc", if_unchanged)
+        {
+            Some(commit) => commit,
+            None => {
+                if if_unchanged {
+                    return None;
+                }
+                println!("ERROR: could not find commit hash for downloading rustc");
+                println!("HELP: maybe your repository history is too shallow?");
+                println!("HELP: consider disabling `download-rustc`");
+                println!("HELP: or fetch enough history to include one upstream commit");
+                crate::exit!(1);
+            }
+        };
 
         if CiEnv::is_ci() && {
             let head_sha =
@@ -2922,31 +2941,7 @@ impl Config {
             return None;
         }
 
-        // Warn if there were changes to the compiler or standard library since the ancestor commit.
-        let has_changes = !t!(helpers::git(Some(&self.src))
-            .args(["diff-index", "--quiet", &commit])
-            .arg("--")
-            .args([self.src.join("compiler"), self.src.join("library")])
-            .as_command_mut()
-            .status())
-        .success();
-        if has_changes {
-            if if_unchanged {
-                if self.is_verbose() {
-                    println!(
-                        "WARNING: saw changes to compiler/ or library/ since {commit}; \
-                            ignoring `download-rustc`"
-                    );
-                }
-                return None;
-            }
-            println!(
-                "WARNING: `download-rustc` is enabled, but there are changes to \
-                    compiler/ or library/"
-            );
-        }
-
-        Some(commit.to_string())
+        Some(commit)
     }
 
     fn parse_download_ci_llvm(

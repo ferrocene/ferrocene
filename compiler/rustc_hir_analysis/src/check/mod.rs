@@ -73,7 +73,7 @@ pub mod wfcheck;
 
 use std::num::NonZero;
 
-pub use check::check_abi;
+pub use check::{check_abi, check_abi_fn_ptr};
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap};
 use rustc_errors::{Diag, ErrorGuaranteed, pluralize, struct_span_code_err};
 use rustc_hir::def_id::{DefId, LocalDefId};
@@ -646,12 +646,11 @@ pub fn check_function_signature<'tcx>(
                 &mut diag,
                 &cause,
                 None,
-                Some(infer::ValuePairs::PolySigs(ExpectedFound {
+                Some(param_env.and(infer::ValuePairs::PolySigs(ExpectedFound {
                     expected: expected_sig,
                     found: actual_sig,
-                })),
+                }))),
                 err,
-                false,
                 false,
             );
             return Err(diag.emit());

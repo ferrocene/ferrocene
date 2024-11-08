@@ -454,6 +454,8 @@ impl Session {
         let bin_path = filesearch::make_target_bin_path(&self.sysroot, config::host_triple());
         let fallback_sysroot_paths = filesearch::sysroot_candidates()
             .into_iter()
+            // Ignore sysroot candidate if it was the same as the sysroot path we just used.
+            .filter(|sysroot| *sysroot != self.sysroot)
             .map(|sysroot| filesearch::make_target_bin_path(&sysroot, config::host_triple()));
         let search_paths = std::iter::once(bin_path).chain(fallback_sysroot_paths);
 
@@ -1332,6 +1334,15 @@ fn validate_commandline_args_with_session_available(sess: &Session) {
     if sess.opts.unstable_opts.function_return != FunctionReturn::default() {
         if sess.target.arch != "x86" && sess.target.arch != "x86_64" {
             sess.dcx().emit_err(errors::FunctionReturnRequiresX86OrX8664);
+        }
+    }
+
+    if let Some(regparm) = sess.opts.unstable_opts.regparm {
+        if regparm > 3 {
+            sess.dcx().emit_err(errors::UnsupportedRegparm { regparm });
+        }
+        if sess.target.arch != "x86" {
+            sess.dcx().emit_err(errors::UnsupportedRegparmArch);
         }
     }
 

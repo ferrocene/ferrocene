@@ -8,7 +8,9 @@ use rustc_hir::Node;
 use rustc_hir::def::{CtorKind, DefKind};
 use rustc_infer::infer::{RegionVariableOrigin, TyCtxtInferExt};
 use rustc_infer::traits::Obligation;
-use rustc_lint_defs::builtin::REPR_TRANSPARENT_EXTERNAL_PRIVATE_FIELDS;
+use rustc_lint_defs::builtin::{
+    REPR_TRANSPARENT_EXTERNAL_PRIVATE_FIELDS, UNSUPPORTED_FN_PTR_CALLING_CONVENTIONS,
+};
 use rustc_middle::middle::resolve_bound_vars::ResolvedArg;
 use rustc_middle::middle::stability::EvalResult;
 use rustc_middle::span_bug;
@@ -20,7 +22,7 @@ use rustc_middle::ty::{
     AdtDef, GenericArgKind, ParamEnv, RegionKind, TypeSuperVisitable, TypeVisitable,
     TypeVisitableExt,
 };
-use rustc_session::lint::builtin::{UNINHABITED_STATIC, UNSUPPORTED_CALLING_CONVENTIONS};
+use rustc_session::lint::builtin::UNINHABITED_STATIC;
 use rustc_target::abi::FieldIdx;
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::error_reporting::traits::on_unimplemented::OnUnimplementedDirective;
@@ -34,34 +36,25 @@ use super::compare_impl_item::{check_type_bounds, compare_impl_method, compare_i
 use super::*;
 use crate::check::intrinsicck::InlineAsmCtxt;
 
-pub fn check_abi(tcx: TyCtxt<'_>, hir_id: hir::HirId, span: Span, abi: Abi) {
-    match tcx.sess.target.is_abi_supported(abi) {
-        Some(true) => (),
-        Some(false) => {
-            struct_span_code_err!(
-                tcx.dcx(),
-                span,
-                E0570,
-                "`{abi}` is not a supported ABI for the current target",
-            )
-            .emit();
-        }
-        None => {
-            tcx.node_span_lint(UNSUPPORTED_CALLING_CONVENTIONS, hir_id, span, |lint| {
-                lint.primary_message("use of calling convention not supported on this target");
-            });
-        }
-    }
-
-    // This ABI is only allowed on function pointers
-    if abi == Abi::CCmseNonSecureCall {
+pub fn check_abi(tcx: TyCtxt<'_>, span: Span, abi: Abi) {
+    if !tcx.sess.target.is_abi_supported(abi) {
         struct_span_code_err!(
             tcx.dcx(),
             span,
-            E0781,
-            "the `\"C-cmse-nonsecure-call\"` ABI is only allowed on function pointers"
+            E0570,
+            "`{abi}` is not a supported ABI for the current target",
         )
         .emit();
+    }
+}
+
+pub fn check_abi_fn_ptr(tcx: TyCtxt<'_>, hir_id: hir::HirId, span: Span, abi: Abi) {
+    if !tcx.sess.target.is_abi_supported(abi) {
+        tcx.node_span_lint(UNSUPPORTED_FN_PTR_CALLING_CONVENTIONS, hir_id, span, |lint| {
+            lint.primary_message(format!(
+                "the calling convention {abi} is not supported on this target"
+            ));
+        });
     }
 }
 
@@ -76,7 +69,6 @@ fn check_struct(tcx: TyCtxt<'_>, def_id: LocalDefId) {
 
     check_transparent(tcx, def);
     check_packed(tcx, span, def);
-    check_unnamed_fields(tcx, def);
 }
 
 fn check_union(tcx: TyCtxt<'_>, def_id: LocalDefId) {
@@ -86,61 +78,6 @@ fn check_union(tcx: TyCtxt<'_>, def_id: LocalDefId) {
     check_transparent(tcx, def);
     check_union_fields(tcx, span, def_id);
     check_packed(tcx, span, def);
-    check_unnamed_fields(tcx, def);
-}
-
-/// Check the representation of adts with unnamed fields.
-fn check_unnamed_fields(tcx: TyCtxt<'_>, def: ty::AdtDef<'_>) {
-    if def.is_enum() {
-        return;
-    }
-    let variant = def.non_enum_variant();
-    if !variant.has_unnamed_fields() {
-        return;
-    }
-    if !def.is_anonymous() {
-        let adt_kind = def.descr();
-        let span = tcx.def_span(def.did());
-        let unnamed_fields = variant
-            .fields
-            .iter()
-            .filter(|f| f.is_unnamed())
-            .map(|f| {
-                let span = tcx.def_span(f.did);
-                errors::UnnamedFieldsReprFieldDefined { span }
-            })
-            .collect::<Vec<_>>();
-        debug_assert_ne!(unnamed_fields.len(), 0, "expect unnamed fields in this adt");
-        let adt_name = tcx.item_name(def.did());
-        if !def.repr().c() {
-            tcx.dcx().emit_err(errors::UnnamedFieldsRepr::MissingReprC {
-                span,
-                adt_kind,
-                adt_name,
-                unnamed_fields,
-                sugg_span: span.shrink_to_lo(),
-            });
-        }
-    }
-    for field in variant.fields.iter().filter(|f| f.is_unnamed()) {
-        let field_ty = tcx.type_of(field.did).instantiate_identity();
-        if let Some(adt) = field_ty.ty_adt_def()
-            && !adt.is_enum()
-        {
-            if !adt.is_anonymous() && !adt.repr().c() {
-                let field_ty_span = tcx.def_span(adt.did());
-                tcx.dcx().emit_err(errors::UnnamedFieldsRepr::FieldMissingReprC {
-                    span: tcx.def_span(field.did),
-                    field_ty_span,
-                    field_ty,
-                    field_adt_kind: adt.descr(),
-                    sugg_span: field_ty_span.shrink_to_lo(),
-                });
-            }
-        } else {
-            tcx.dcx().emit_err(errors::InvalidUnnamedFieldTy { span: tcx.def_span(field.did) });
-        }
-    }
 }
 
 /// Check that the fields of the `union` do not need dropping.
@@ -589,15 +526,22 @@ fn check_opaque_precise_captures<'tcx>(tcx: TyCtxt<'tcx>, opaque_def_id: LocalDe
                                 param_span: tcx.def_span(def_id),
                             });
                         } else {
-                            // If the `use_span` is actually just the param itself, then we must
-                            // have not duplicated the lifetime but captured the original.
-                            // The "effective" `use_span` will be the span of the opaque itself,
-                            // and the param span will be the def span of the param.
-                            tcx.dcx().emit_err(errors::LifetimeNotCaptured {
-                                opaque_span,
-                                use_span: opaque_span,
-                                param_span: use_span,
-                            });
+                            if tcx.def_kind(tcx.parent(param.def_id)) == DefKind::Trait {
+                                tcx.dcx().emit_err(errors::LifetimeImplicitlyCaptured {
+                                    opaque_span,
+                                    param_span: tcx.def_span(param.def_id),
+                                });
+                            } else {
+                                // If the `use_span` is actually just the param itself, then we must
+                                // have not duplicated the lifetime but captured the original.
+                                // The "effective" `use_span` will be the span of the opaque itself,
+                                // and the param span will be the def span of the param.
+                                tcx.dcx().emit_err(errors::LifetimeNotCaptured {
+                                    opaque_span,
+                                    use_span: opaque_span,
+                                    param_span: use_span,
+                                });
+                            }
                         }
                         continue;
                     }
@@ -750,7 +694,7 @@ pub(crate) fn check_item_type(tcx: TyCtxt<'_>, def_id: LocalDefId) {
             let hir::ItemKind::ForeignMod { abi, items } = it.kind else {
                 return;
             };
-            check_abi(tcx, it.hir_id(), it.span, abi);
+            check_abi(tcx, it.span, abi);
 
             match abi {
                 Abi::RustIntrinsic => {
@@ -1082,7 +1026,11 @@ fn check_simd(tcx: TyCtxt<'_>, sp: Span, def_id: LocalDefId) {
             return;
         }
 
-        if let Some(len) = len_const.try_eval_target_usize(tcx, tcx.param_env(def.did())) {
+        // FIXME(repr_simd): This check is nice, but perhaps unnecessary due to the fact
+        // we do not expect users to implement their own `repr(simd)` types. If they could,
+        // this check is easily side-steppable by hiding the const behind normalization.
+        // The consequence is that the error is, in general, only observable post-mono.
+        if let Some(len) = len_const.try_to_target_usize(tcx) {
             if len == 0 {
                 struct_span_code_err!(tcx.dcx(), sp, E0075, "SIMD vector cannot be empty").emit();
                 return;
@@ -1218,7 +1166,7 @@ pub(super) fn check_transparent<'tcx>(tcx: TyCtxt<'tcx>, adt: ty::AdtDef<'tcx>) 
         return;
     }
 
-    if adt.is_union() && !tcx.features().transparent_unions {
+    if adt.is_union() && !tcx.features().transparent_unions() {
         feature_err(
             &tcx.sess,
             sym::transparent_unions,
@@ -1353,7 +1301,7 @@ fn check_enum(tcx: TyCtxt<'_>, def_id: LocalDefId) {
 
     let repr_type_ty = def.repr().discr_type().to_ty(tcx);
     if repr_type_ty == tcx.types.i128 || repr_type_ty == tcx.types.u128 {
-        if !tcx.features().repr128 {
+        if !tcx.features().repr128() {
             feature_err(
                 &tcx.sess,
                 sym::repr128,

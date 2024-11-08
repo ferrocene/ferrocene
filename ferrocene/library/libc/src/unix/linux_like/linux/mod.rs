@@ -880,6 +880,15 @@ s! {
         pub salt: [::c_uchar; TLS_CIPHER_CHACHA20_POLY1305_SALT_SIZE],
         pub rec_seq: [::c_uchar; TLS_CIPHER_CHACHA20_POLY1305_REC_SEQ_SIZE],
     }
+
+    // #include <linux/eventpoll.h>
+
+    pub struct epoll_params {
+        pub busy_poll_usecs: u32,
+        pub busy_poll_budget: u16,
+        pub prefer_busy_poll: u8,
+        pub __pad: u8, // Must be zero
+    }
 }
 
 s_no_extra_traits! {
@@ -2031,9 +2040,9 @@ pub const POSIX_MADV_WILLNEED: ::c_int = 3;
 pub const POSIX_SPAWN_USEVFORK: ::c_int = 64;
 pub const POSIX_SPAWN_SETSID: ::c_int = 128;
 
-pub const S_IEXEC: mode_t = 64;
-pub const S_IWRITE: mode_t = 128;
-pub const S_IREAD: mode_t = 256;
+pub const S_IEXEC: mode_t = 0o0100;
+pub const S_IWRITE: mode_t = 0o0200;
+pub const S_IREAD: mode_t = 0o0400;
 
 pub const F_LOCK: ::c_int = 1;
 pub const F_TEST: ::c_int = 3;
@@ -2139,6 +2148,7 @@ pub const IFLA_INFO_SLAVE_KIND: ::c_ushort = 4;
 pub const IFLA_INFO_SLAVE_DATA: ::c_ushort = 5;
 
 // linux/if_tun.h
+/* TUNSETIFF ifr flags */
 pub const IFF_TUN: ::c_int = 0x0001;
 pub const IFF_TAP: ::c_int = 0x0002;
 pub const IFF_NAPI: ::c_int = 0x0010;
@@ -4935,6 +4945,10 @@ pub const SCHED_FLAG_ALL: ::c_int = SCHED_FLAG_RESET_ON_FORK
     | SCHED_FLAG_DL_OVERRUN
     | SCHED_FLAG_KEEP_ALL
     | SCHED_FLAG_UTIL_CLAMP;
+
+// ioctl_eventpoll: added in Linux 6.9
+pub const EPIOCSPARAMS: ::Ioctl = 0x40088a01;
+pub const EPIOCGPARAMS: ::Ioctl = 0x80088a02;
 
 f! {
     pub fn NLA_ALIGN(len: ::c_int) -> ::c_int {

@@ -677,6 +677,14 @@ dd dl {
     margin: 1em;
 }
 
+div.code-block-caption {
+    text-align: center;
+}
+
+span.caption-text {
+    font-size: smaller;
+}
+
 /***************
  *   Figures   *
  ***************/

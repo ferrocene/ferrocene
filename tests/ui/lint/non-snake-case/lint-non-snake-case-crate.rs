@@ -22,16 +22,13 @@
 //@[rlib_] compile-flags: --crate-type=rlib
 //@[staticlib_] compile-flags: --crate-type=staticlib
 
-<<<<<<< HEAD
-// These are not supported on this special target
-//@[proc_macro_] ignore-aarch64-unknown-ferrocenecoretest
-//@[dylib_] ignore-aarch64-unknown-ferrocenecoretest
-//@[cdylib_] ignore-aarch64-unknown-ferrocenecoretest
-=======
 // The compiler may emit a warning that causes stderr output
 // that contains a warning this test does not wish to check.
 //@[proc_macro_] needs-unwind
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// These crate types are not supported on this special Ferrocene target
+//@[dylib_] ignore-aarch64-unknown-ferrocenecoretest
+//@[cdylib_] ignore-aarch64-unknown-ferrocenecoretest
 
 #![crate_name = "NonSnakeCase"]
 //[cdylib_,dylib_,lib_,proc_macro_,rlib_,staticlib_]~^ ERROR crate `NonSnakeCase` should have a snake case name

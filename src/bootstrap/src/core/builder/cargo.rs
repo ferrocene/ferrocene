@@ -22,7 +22,7 @@ use crate::{
 /// `rustc_parse::parser::Parser`. See `rustc_builtin_macros::cmdline_attrs::inject` for more
 /// information.
 #[derive(Debug, Clone)]
-struct Rustflags(String, TargetSelection);
+pub struct Rustflags(String, TargetSelection);
 
 impl Rustflags {
     fn new(target: TargetSelection) -> Rustflags {
@@ -95,6 +95,13 @@ pub struct Cargo {
     rustdocflags: Rustflags,
     hostflags: HostFlags,
     allow_features: String,
+}
+
+// Ferrocene addition
+impl AsMut<BootstrapCommand> for Cargo {
+    fn as_mut(&mut self) -> &mut BootstrapCommand {
+        &mut self.command
+    }
 }
 
 impl Cargo {
@@ -438,7 +445,9 @@ impl Builder<'_> {
     /// scoped by `mode`'s output directory, it will pass the `--target` flag for the specified
     /// `target`, and will be executing the Cargo command `cmd`. `cmd` can be `miri-cmd` for
     /// commands to be run with Miri.
-    fn cargo(
+    ///
+    /// Ferrocene note: made this pub so that it can be accessed from "ferrocene" module
+    pub(crate) fn cargo(
         &self,
         compiler: Compiler,
         mode: Mode,
@@ -555,7 +564,8 @@ impl Builder<'_> {
                 setting
             }
             None => {
-                if mode == Mode::Std {
+                // Second condition is specific to Ferrocene
+                if mode == Mode::Std && !self.config.cmd.coverage() {
                     // The standard library defaults to the legacy scheme
                     false
                 } else {
@@ -663,6 +673,8 @@ impl Builder<'_> {
                     }
                 }
             }
+            // for Ferrocene
+            Mode::ToolCustom { .. } => {}
         }
 
         // This tells Cargo (and in turn, rustc) to output more complete
@@ -699,6 +711,8 @@ impl Builder<'_> {
                     .to_string()
             }
             Mode::Std | Mode::Rustc | Mode::Codegen | Mode::ToolRustc => String::new(),
+            // for Ferrocene
+            Mode::ToolCustom { .. } => String::new(),
         };
 
         cargo.arg("-j").arg(self.jobs().to_string());
@@ -825,6 +839,8 @@ impl Builder<'_> {
             Mode::ToolBootstrap | Mode::ToolStd | Mode::ToolRustc => {
                 self.config.rust_debuginfo_level_tools
             }
+            // for Ferrocene
+            Mode::ToolCustom { .. } => self.config.rust_debuginfo_level_tools,
         };
         cargo.env(profile_var("DEBUG"), debuginfo_level.to_string());
         if let Some(opt_level) = &self.config.rust_optimize.get_opt_level() {
@@ -887,7 +903,8 @@ impl Builder<'_> {
         if self.config.rust_remap_debuginfo {
             let mut env_var = OsString::new();
             if self.config.vendor {
-                let vendor = self.build.src.join("vendor");
+                // Ferrocene: "rust" dir added to path
+                let vendor = self.build.src.join("vendor").join("rust");
                 env_var.push(vendor);
                 env_var.push("=/rust/deps");
             } else {
@@ -1205,6 +1222,10 @@ impl Builder<'_> {
             // `cfg` option for rustc, `features` option for cargo, for conditional compilation
             rustflags.arg("--cfg=parallel_compiler");
             rustdocflags.arg("--cfg=parallel_compiler");
+        }
+
+        if target.contains("ferrocenecoretest") {
+            rustflags.arg("-Zpanic-abort-tests");
         }
 
         Cargo {

@@ -369,7 +369,9 @@ pub struct Config {
     /// `paths=["foo", "bar"]`.
     pub paths: Vec<PathBuf>,
 
-<<<<<<< HEAD
+    /// Command for visual diff display, e.g. `diff-tool --color=always`.
+    pub compiletest_diff_tool: Option<String>,
+
     // Ferrocene-specific configuration
     pub ferrocene_raw_channel: String,
     pub ferrocene_aws_profile: Option<String>,
@@ -412,10 +414,6 @@ pub enum FerroceneDocumentSignatures {
     DocsTarball {
         tarball: PathBuf,
     },
-=======
-    /// Command for visual diff display, e.g. `diff-tool --color=always`.
-    pub compiletest_diff_tool: Option<String>,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 #[derive(Clone, Debug, Default)]

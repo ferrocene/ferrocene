@@ -25,3 +25,6 @@ fn main() {
 
     llvm_dis().arg("test.bc").run();
 }
+
+// ferrocene-annotations: um_rustc_C_link_arg
+// ferrocene-annotations: um_rustc_C_linker

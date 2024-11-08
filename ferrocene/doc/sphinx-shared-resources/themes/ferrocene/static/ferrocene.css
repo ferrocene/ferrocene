@@ -673,6 +673,10 @@ dl dd > p:last-child {
     margin-bottom: 0;
 }
 
+dd dl {
+    margin: 1em;
+}
+
 /***************
  *   Figures   *
  ***************/

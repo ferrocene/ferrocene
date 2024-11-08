@@ -48,6 +48,27 @@ class ProgramDirective(SphinxDirective):
 
         return [node]
 
+class SubcommandDirective(ObjectDescription):
+    has_content = True
+    required_arguments = 1
+    final_argument_whitespace = True
+
+    def handle_signature(self, sig, signode):
+        signode += addnodes.desc_name("", sig)
+
+    def add_target_and_index(self, name_cls, sig, signode):
+        if PROGRAM_STORAGE not in self.env.temp_data:
+            warn("cli:subcommand outside cli:program isn't supported", self.get_location())
+            program = "PLACEHOLDER"
+        else:
+            program = self.env.temp_data[PROGRAM_STORAGE]
+
+        subcommand = Subcommand(self.env.docname, program, sig)
+
+        signode["ids"].append(subcommand.id())
+
+        domain = self.env.get_domain("cli")
+        domain.add_subcommand(subcommand)
 
 class OptionDirective(ObjectDescription):
     has_content = True
@@ -105,6 +126,27 @@ class Option:
 
         return f"um_{self.program}_{option}"
 
+class Subcommand:
+    has_content = True
+    required_arguments = 1
+    final_argument_whitespace = True
+
+    def __init__(self, document, program, subcommand):
+        self.document = document
+        self.program = program
+        self.subcommand = subcommand
+
+    def id(self):
+        subcommand = (
+            ARGUMENT_PLACEHOLDER_RE.sub("_", self.subcommand)
+            .replace("=", "")
+            .replace("-", "_")
+            .replace(" ", "_")
+            .strip("_")
+        )
+        subcommand = MULTIPLE_UNDERSCORES_RE.sub("_", subcommand)
+
+        return f"um_{self.program}_{subcommand}"
 
 class CliDomain(Domain):
     name = "cli"
@@ -114,14 +156,22 @@ class CliDomain(Domain):
     }
     directives = {
         "program": ProgramDirective,
+        "subcommand": SubcommandDirective,
         "option": OptionDirective,
     }
     object_types = {
         "option": ObjType("CLI option", "option"),
+        "subcommand": ObjType("CLI Subcommand", "subcommand")
     }
-    initial_data = {"options": {}}
+    initial_data = {"options": {}, "subcommands": {}}
     # Bump whenever the format of the data changes!
-    data_version = 1
+    data_version = 2
+
+    def add_subcommand(self, subcommand):
+        self.data["subcommands"][f"{subcommand.program} {subcommand.subcommand}"] = subcommand
+
+    def get_subcommands(self):
+        return self.data["subcommands"]
 
     def add_option(self, option):
         self.data["options"][f"{option.program} {option.option}"] = option
@@ -135,22 +185,34 @@ class CliDomain(Domain):
             for key, item in self.data["options"].items()
             if item.document != docname
         }
+        self.data["subcommands"] = {
+            key: item
+            for key, item in self.data["subcommands"].items()
+            if item.document != docname
+        }
 
     def merge_domaindata(self, docnames, otherdata):
         for key, option in otherdata["options"].items():
             if option.document in docnames:
                 self.data["options"][key] = option
+        for key, subcommand in otherdata["subcommands"].items():
+            if subcommand.document in docnames:
+                self.data["subcommands"][key] = subcommand
 
     def resolve_xref(self, env, fromdocname, builder, type, target, node, contnode):
-        if type != "option":
-            raise RuntimeError(f"unsupported xref type {type}")
-
-        if target not in self.data["options"]:
+        if target not in self.data["options"] or target not in self.data["subcommands"]:
             return
-        option = self.data["options"][target]
+
+        match type:
+            case "options":
+                item = self.data["options"][target]
+            case "subcommands":
+                item = self.data["subcommands"][target]
+            case _:
+                raise RuntimeError(f"unsupported xref type {type}")
 
         return sphinx.util.nodes.make_refnode(
-            builder, fromdocname, option.document, option.id(), contnode
+            builder, fromdocname, item.document, item.id(), contnode
         )
 
     def get_objects(self):

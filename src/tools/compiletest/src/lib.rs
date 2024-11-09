@@ -692,24 +692,25 @@ fn collect_tests_from_dir(
     relative_dir_path: &Path,
 ) -> io::Result<()> {
     find_tests_in_dir(
-        config.clone(),
+        cx.config.clone(),
         dir,
         relative_dir_path,
-        found_paths,
-        modified_tests,
-        &mut |paths| {
+        &cx.modified_tests,
+        &mut |paths, rel_test_path| {
             // If we find a test foo/bar.rs, we have to build the
             // output directory `$build/foo` so we can write
             // `$build/foo/bar` into it. We do this *now* in this
             // sequential loop because otherwise, if we do it in the
             // tests themselves, they race for the privilege of
             // creating the directories and sometimes fail randomly.
-            let build_dir = output_relative_path(&config, &paths.relative_dir);
+            let build_dir = output_relative_path(&cx.config, &paths.relative_dir);
             if !build_dir.exists() {
                 fs::create_dir_all(&build_dir).unwrap();
             }
-
-            tests.extend(make_test(config.clone(), cache, paths, inputs, poisoned))
+            if let Some(rel_test_path) = rel_test_path {
+                collector.found_path_stems.insert(rel_test_path);
+            }
+            make_test(cx, collector, &paths);
         },
     )
 }
@@ -718,9 +719,8 @@ fn find_tests_in_dir(
     config: Arc<Config>,
     dir: &Path,
     relative_dir_path: &Path,
-    found_paths: &mut HashSet<PathBuf>,
     modified_tests: &Vec<PathBuf>,
-    on_test_found: &mut dyn FnMut(&TestPaths),
+    on_test_found: &mut dyn FnMut(&TestPaths, Option<PathBuf>),
 ) -> io::Result<()> {
     // Ignore directories that contain a file named `compiletest-ignore-dir`.
     if dir.join("compiletest-ignore-dir").exists() {
@@ -729,7 +729,7 @@ fn find_tests_in_dir(
 
     // For run-make tests, a "test file" is actually a directory that contains
     // an `rmake.rs` or `Makefile`"
-    if cx.config.mode == Mode::RunMake {
+    if config.mode == Mode::RunMake {
         if dir.join("Makefile").exists() && dir.join("rmake.rs").exists() {
             return Err(io::Error::other(
                 "run-make tests cannot have both `Makefile` and `rmake.rs`",
@@ -741,28 +741,12 @@ fn find_tests_in_dir(
                 file: dir.to_path_buf(),
                 relative_dir: relative_dir_path.parent().unwrap().to_path_buf(),
             };
-<<<<<<< HEAD
-            on_test_found(&paths);
-=======
-            make_test(cx, collector, &paths);
+            on_test_found(&paths, None);
             // This directory is a test, so don't try to find other tests inside it.
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             return Ok(());
         }
     }
 
-<<<<<<< HEAD
-=======
-    // If we find a test foo/bar.rs, we have to build the
-    // output directory `$build/foo` so we can write
-    // `$build/foo/bar` into it. We do this *now* in this
-    // sequential loop because otherwise, if we do it in the
-    // tests themselves, they race for the privilege of
-    // creating the directories and sometimes fail randomly.
-    let build_dir = output_relative_path(&cx.config, relative_dir_path);
-    fs::create_dir_all(&build_dir).unwrap();
-
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     // Add each `.rs` file as a test, and recurse further on any
     // subdirectories we find, except for `auxiliary` directories.
     // FIXME: this walks full tests tree, even if we have something to ignore
@@ -772,41 +756,28 @@ fn find_tests_in_dir(
         let file_path = file.path();
         let file_name = file.file_name();
 
-        if is_test(&file_name)
-            && (!cx.config.only_modified || cx.modified_tests.contains(&file_path))
-        {
+        if is_test(&file_name) && (!config.only_modified || modified_tests.contains(&file_path)) {
             // We found a test file, so create the corresponding libtest structures.
             debug!("found test file: {:?}", file_path.display());
 
             // Record the stem of the test file, to check for overlaps later.
             let rel_test_path = relative_dir_path.join(file_path.file_stem().unwrap());
-            collector.found_path_stems.insert(rel_test_path);
-
             let paths =
                 TestPaths { file: file_path, relative_dir: relative_dir_path.to_path_buf() };
-<<<<<<< HEAD
 
-            on_test_found(&paths);
-=======
-            make_test(cx, collector, &paths);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+            on_test_found(&paths, Some(rel_test_path));
         } else if file_path.is_dir() {
             // Recurse to find more tests in a subdirectory.
             let relative_file_path = relative_dir_path.join(file.file_name());
             if &file_name != "auxiliary" {
                 debug!("found directory: {:?}", file_path.display());
-<<<<<<< HEAD
                 find_tests_in_dir(
                     config.clone(),
                     &file_path,
                     &relative_file_path,
-                    found_paths,
                     modified_tests,
                     on_test_found,
                 )?;
-=======
-                collect_tests_from_dir(cx, collector, &file_path, &relative_file_path)?;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             }
         } else {
             debug!("found other file/directory: {:?}", file_path.display());

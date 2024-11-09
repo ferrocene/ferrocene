@@ -1,6 +1,5 @@
 #![deny(warnings)]
 
-extern crate cc;
 extern crate ctest2 as ctest;
 
 use std::fs::File;
@@ -887,8 +886,6 @@ fn test_solarish(target: &str) {
         "stdlib.h",
         "string.h",
         "sys/auxv.h",
-        "sys/epoll.h",
-        "sys/eventfd.h",
         "sys/file.h",
         "sys/filio.h",
         "sys/ioctl.h",
@@ -926,6 +923,19 @@ fn test_solarish(target: &str) {
         "utime.h",
         "utmpx.h",
         "wchar.h",
+    }
+
+    if is_illumos {
+        headers! { cfg:
+            "sys/epoll.h",
+            "sys/eventfd.h",
+        }
+    }
+
+    if is_solaris {
+        headers! { cfg:
+            "sys/lgrp_user_impl.h",
+        }
     }
 
     cfg.skip_type(move |ty| match ty {
@@ -977,7 +987,7 @@ fn test_solarish(target: &str) {
         // EPOLLEXCLUSIVE is a relatively recent addition to the epoll interface and may not be
         // defined on older systems.  It is, however, safe to use on systems which do not
         // explicitly support it. (A no-op is an acceptable implementation of EPOLLEXCLUSIVE.)
-        "EPOLLEXCLUSIVE" => true,
+        "EPOLLEXCLUSIVE" if is_illumos => true,
 
         _ => false,
     });
@@ -1069,7 +1079,7 @@ fn test_solarish(target: &str) {
             // These functions may return int or void depending on the exact
             // configuration of the compilation environment, but the return
             // value is not useful (always 0) so we can ignore it:
-            "setservent" | "endservent" if is_illumos => true,
+            "setservent" | "endservent" => true,
 
             // Following illumos#3729, getifaddrs was changed to a
             // redefine_extname symbol in order to preserve compatibility.
@@ -2754,6 +2764,13 @@ fn test_freebsd(target: &str) {
             _ => false,
         }
     });
+    if target.contains("arm") {
+        cfg.skip_roundtrip(move |s| match s {
+            // Can't return an array from a C function.
+            "__gregset_t" => true,
+            _ => false,
+        });
+    }
 
     cfg.generate("../src/lib.rs", "main.rs");
 }
@@ -3865,6 +3882,9 @@ fn test_linux(target: &str) {
             // kernel so we can drop this and test the type once this new version is used in CI.
             "sched_attr" => true,
 
+            // FIXME: Requires >= 6.9 kernel headers.
+            "epoll_params" => true,
+
             _ => false,
         }
     });
@@ -4306,6 +4326,10 @@ fn test_linux(target: &str) {
             | "SCHED_FLAG_KEEP_ALL"
             | "SCHED_FLAG_UTIL_CLAMP"
             | "SCHED_FLAG_ALL" if musl => true, // Needs more recent linux headers.
+
+            // FIXME: Requires >= 6.9 kernel headers.
+            "EPIOCSPARAMS"
+            | "EPIOCGPARAMS" => true,
 
             _ => false,
         }

@@ -1,3 +1,11 @@
+FD_CLOFORK
+F_DUP2FD_CLOEXEC
+F_DUP2FD_CLOFORK
+F_DUP3FD
+F_DUPFD_CLOFORK
+MSG_CMSG_CLOEXEC
+MSG_CMSG_CLOFORK
+O_CLOFORK
 O_RSYNC
 POLLRDHUP
 POSIX_FADV_DONTNEED
@@ -12,3 +20,4 @@ pthread_attr_get_np
 pthread_attr_getstackaddr
 pthread_attr_setstack
 ptsname_r
+syncfs

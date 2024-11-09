@@ -189,10 +189,6 @@ ISTRIP
 IXANY
 IXOFF
 IXON
-LOCK_EX
-LOCK_NB
-LOCK_SH
-LOCK_UN
 LOG_ALERT
 LOG_AUTH
 LOG_CONS
@@ -680,8 +676,8 @@ printf
 protoent
 pselect
 pthread_attr_destroy
-pthread_attr_init
 pthread_attr_getstacksize
+pthread_attr_init
 pthread_attr_setdetachstate
 pthread_attr_setstacksize
 pthread_attr_t

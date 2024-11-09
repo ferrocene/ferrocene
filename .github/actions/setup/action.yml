@@ -36,8 +36,4 @@ runs:
     - name: Setup uv, Python, and venv
       if: ${{ inputs.setup-venv != 'false' }}
       shell: bash
-      run: |
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        uv python install 3.12
-        uv venv
-        uv pip sync requirements.txt
+      run: ferrocene/ci/scripts/setup-venv.sh

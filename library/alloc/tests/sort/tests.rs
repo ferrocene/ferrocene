@@ -588,6 +588,11 @@ fn panic_retain_orig_set<T: Ord + Clone, S: Sort>(
     type_from_fn: impl Fn(&T) -> i32,
     pattern_fn: fn(usize) -> Vec<i32>,
 ) {
+    // Ferrocene addition: test only applicable for panic=unwind targets
+    if cfg!(panic = "abort") {
+        return;
+    }
+
     let mut test_data: Vec<T> = pattern_fn(len).into_iter().map(type_into_fn).collect();
 
     let sum_before: i64 = test_data.iter().map(|x| type_from_fn(x) as i64).sum();
@@ -624,6 +629,11 @@ fn panic_retain_orig_set<T: Ord + Clone, S: Sort>(
 gen_sort_test_fns_with_default_patterns_3_ty!(panic_retain_orig_set, panic_retain_orig_set, []);
 
 fn panic_observable_is_less<S: Sort>(len: usize, pattern_fn: fn(usize) -> Vec<i32>) {
+    // Ferrocene addition: test only applicable for panic=unwind targets
+    if cfg!(panic = "abort") {
+        return;
+    }
+
     // This test, tests that every is_less is actually observable. Ie. this can go wrong if a hole
     // is created using temporary memory and, the whole is used as comparison but not copied back.
     // This property must also hold if the user provided comparison panics.
@@ -752,6 +762,11 @@ fn violate_ord_retain_orig_set<T: Ord, S: Sort>(
     type_from_fn: impl Fn(&T) -> i32,
     pattern_fn: fn(usize) -> Vec<i32>,
 ) {
+    // Ferrocene addition: test only applicable for panic=unwind targets
+    if cfg!(panic = "abort") {
+        return;
+    }
+
     // A user may implement Ord incorrectly for a type or violate it by calling sort_by with a
     // comparison function that violates Ord with the orderings it returns. Even under such
     // circumstances the input must retain its original set of elements.

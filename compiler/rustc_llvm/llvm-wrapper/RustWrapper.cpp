@@ -1531,32 +1531,6 @@ extern "C" LLVMValueRef LLVMRustBuildCall(LLVMBuilderRef B, LLVMTypeRef Ty,
                                     ArrayRef<OperandBundleDef>(OpBundles)));
 }
 
-extern "C" LLVMValueRef
-LLVMRustGetInstrProfIncrementIntrinsic(LLVMModuleRef M) {
-  return wrap(llvm::Intrinsic::getDeclaration(
-      unwrap(M), llvm::Intrinsic::instrprof_increment));
-}
-
-extern "C" LLVMValueRef
-LLVMRustGetInstrProfMCDCParametersIntrinsic(LLVMModuleRef M) {
-#if LLVM_VERSION_GE(19, 0)
-  return wrap(llvm::Intrinsic::getDeclaration(
-      unwrap(M), llvm::Intrinsic::instrprof_mcdc_parameters));
-#else
-  report_fatal_error("LLVM 19.0 is required for mcdc intrinsic functions");
-#endif
-}
-
-extern "C" LLVMValueRef
-LLVMRustGetInstrProfMCDCTVBitmapUpdateIntrinsic(LLVMModuleRef M) {
-#if LLVM_VERSION_GE(19, 0)
-  return wrap(llvm::Intrinsic::getDeclaration(
-      unwrap(M), llvm::Intrinsic::instrprof_mcdc_tvbitmap_update));
-#else
-  report_fatal_error("LLVM 19.0 is required for mcdc intrinsic functions");
-#endif
-}
-
 extern "C" LLVMValueRef LLVMRustBuildMemCpy(LLVMBuilderRef B, LLVMValueRef Dst,
                                             unsigned DstAlign, LLVMValueRef Src,
                                             unsigned SrcAlign,
@@ -1643,16 +1617,6 @@ extern "C" void LLVMRustPositionBuilderAtStart(LLVMBuilderRef B,
                                                LLVMBasicBlockRef BB) {
   auto Point = unwrap(BB)->getFirstInsertionPt();
   unwrap(B)->SetInsertPoint(unwrap(BB), Point);
-}
-
-extern "C" void LLVMRustSetComdat(LLVMModuleRef M, LLVMValueRef V,
-                                  const char *Name, size_t NameLen) {
-  Triple TargetTriple = Triple(unwrap(M)->getTargetTriple());
-  GlobalObject *GV = unwrap<GlobalObject>(V);
-  if (TargetTriple.supportsCOMDAT()) {
-    StringRef NameRef(Name, NameLen);
-    GV->setComdat(unwrap(M)->getOrInsertComdat(NameRef));
-  }
 }
 
 enum class LLVMRustLinkage {

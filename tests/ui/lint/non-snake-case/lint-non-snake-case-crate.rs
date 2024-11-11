@@ -22,8 +22,11 @@
 //@[rlib_] compile-flags: --crate-type=rlib
 //@[staticlib_] compile-flags: --crate-type=staticlib
 
-// These are not supported on this special target
-//@[proc_macro_] ignore-aarch64-unknown-ferrocenecoretest
+// The compiler may emit a warning that causes stderr output
+// that contains a warning this test does not wish to check.
+//@[proc_macro_] needs-unwind
+
+// These crate types are not supported on this special Ferrocene target
 //@[dylib_] ignore-aarch64-unknown-ferrocenecoretest
 //@[cdylib_] ignore-aarch64-unknown-ferrocenecoretest
 

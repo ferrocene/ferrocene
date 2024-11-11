@@ -1,12 +1,8 @@
-//! "Object safety" refers to the ability for a trait to be converted
-//! to an object. In general, traits may only be converted to an
-//! object if all of their methods meet certain criteria. In particular,
-//! they must:
+//! "Dyn-compatibility"[^1] refers to the ability for a trait to be converted
+//! to a trait object. In general, traits may only be converted to a trait
+//! object if certain criteria are met.
 //!
-//!   - have a suitable receiver from which we can extract a vtable and coerce to a "thin" version
-//!     that doesn't contain the vtable;
-//!   - not reference the erased type `Self` except for in this receiver;
-//!   - not have generic type parameters.
+//! [^1]: Formerly known as "object safety".
 
 use std::iter;
 use std::ops::ControlFlow;
@@ -129,7 +125,7 @@ fn sized_trait_bound_spans<'tcx>(
     bounds: hir::GenericBounds<'tcx>,
 ) -> impl 'tcx + Iterator<Item = Span> {
     bounds.iter().filter_map(move |b| match b {
-        hir::GenericBound::Trait(trait_ref, hir::TraitBoundModifier::None)
+        hir::GenericBound::Trait(trait_ref)
             if trait_has_sized_self(
                 tcx,
                 trait_ref.trait_ref.trait_def_id().unwrap_or_else(|| FatalError.raise()),
@@ -249,6 +245,7 @@ fn predicate_references_self<'tcx>(
         | ty::ClauseKind::RegionOutlives(..)
         // FIXME(generic_const_exprs): this can mention `Self`
         | ty::ClauseKind::ConstEvaluatable(..)
+        | ty::ClauseKind::HostEffect(..)
          => None,
     }
 }
@@ -258,7 +255,7 @@ fn super_predicates_have_non_lifetime_binders(
     trait_def_id: DefId,
 ) -> SmallVec<[Span; 1]> {
     // If non_lifetime_binders is disabled, then exit early
-    if !tcx.features().non_lifetime_binders {
+    if !tcx.features().non_lifetime_binders() {
         return SmallVec::new();
     }
     tcx.explicit_super_predicates_of(trait_def_id)
@@ -288,7 +285,8 @@ fn generics_require_sized_self(tcx: TyCtxt<'_>, def_id: DefId) -> bool {
         | ty::ClauseKind::Projection(_)
         | ty::ClauseKind::ConstArgHasType(_, _)
         | ty::ClauseKind::WellFormed(_)
-        | ty::ClauseKind::ConstEvaluatable(_) => false,
+        | ty::ClauseKind::ConstEvaluatable(_)
+        | ty::ClauseKind::HostEffect(..) => false,
     })
 }
 
@@ -331,7 +329,7 @@ pub fn dyn_compatibility_violations_for_assoc_item(
             .collect(),
         // Associated types can only be dyn-compatible if they have `Self: Sized` bounds.
         ty::AssocKind::Type => {
-            if !tcx.features().generic_associated_types_extended
+            if !tcx.features().generic_associated_types_extended()
                 && !tcx.generics_of(item.def_id).is_own_empty()
                 && !item.is_impl_trait_in_trait()
             {
@@ -506,8 +504,8 @@ fn virtual_call_violations_for_method<'tcx>(
 
 /// This code checks that `receiver_is_dispatchable` is correctly implemented.
 ///
-/// This check is outlined from the object safety check to avoid cycles with
-/// layout computation, which relies on knowing whether methods are object safe.
+/// This check is outlined from the dyn-compatibility check to avoid cycles with
+/// layout computation, which relies on knowing whether methods are dyn-compatible.
 fn check_receiver_correct<'tcx>(tcx: TyCtxt<'tcx>, trait_def_id: DefId, method: ty::AssocItem) {
     if !is_vtable_safe_method(tcx, trait_def_id, method) {
         return;
@@ -643,8 +641,8 @@ fn object_ty_for_trait<'tcx>(
 /// contained by the trait object, because the object that needs to be coerced is behind
 /// a pointer.
 ///
-/// In practice, we cannot use `dyn Trait` explicitly in the obligation because it would result
-/// in a new check that `Trait` is object safe, creating a cycle (until object_safe_for_dispatch
+/// In practice, we cannot use `dyn Trait` explicitly in the obligation because it would result in
+/// a new check that `Trait` is dyn-compatible, creating a cycle (until dyn_compatible_for_dispatch
 /// is stabilized, see tracking issue <https://github.com/rust-lang/rust/issues/43561>).
 /// Instead, we fudge a little by introducing a new type parameter `U` such that
 /// `Self: Unsize<U>` and `U: Trait + ?Sized`, and use `U` in place of `dyn Trait`.
@@ -678,7 +676,7 @@ fn receiver_is_dispatchable<'tcx>(
 
     // the type `U` in the query
     // use a bogus type parameter to mimic a forall(U) query using u32::MAX for now.
-    // FIXME(mikeyhew) this is a total hack. Once object_safe_for_dispatch is stabilized, we can
+    // FIXME(mikeyhew) this is a total hack. Once dyn_compatible_for_dispatch is stabilized, we can
     // replace this with `dyn Trait`
     let unsized_self_ty: Ty<'tcx> =
         Ty::new_param(tcx, u32::MAX, Symbol::intern("RustaceansAreAwesome"));
@@ -865,7 +863,7 @@ impl<'tcx> TypeVisitor<TyCtxt<'tcx>> for IllegalSelfTypeVisitor<'tcx> {
     }
 
     fn visit_const(&mut self, ct: ty::Const<'tcx>) -> Self::Result {
-        // Constants can only influence object safety if they are generic and reference `Self`.
+        // Constants can only influence dyn-compatibility if they are generic and reference `Self`.
         // This is only possible for unevaluated constants, so we walk these here.
         self.tcx.expand_abstract_consts(ct).super_visit_with(self)
     }

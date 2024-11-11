@@ -275,6 +275,8 @@ provide! { tcx, def_id, other, cdata,
     impl_parent => { table }
     defaultness => { table_direct }
     constness => { table_direct }
+    const_conditions => { table }
+    implied_const_bounds => { table_defaulted_array }
     coerce_unsized_info => {
         Ok(cdata
             .root
@@ -330,7 +332,6 @@ provide! { tcx, def_id, other, cdata,
             .process_decoded(tcx, || panic!("{def_id:?} does not have trait_impl_trait_tys")))
     }
 
-    associated_type_for_effects => { table }
     associated_types_for_impl_traits_in_associated_fn => { table_defaulted_array }
 
     visibility => { cdata.get_visibility(def_id.index) }
@@ -437,9 +438,6 @@ provide! { tcx, def_id, other, cdata,
 
 pub(in crate::rmeta) fn provide(providers: &mut Providers) {
     provide_cstore_hooks(providers);
-    // FIXME(#44234) - almost all of these queries have no sub-queries and
-    // therefore no actual inputs, they're just reading tables calculated in
-    // resolve! Does this work? Unsure! That's what the issue is about
     providers.queries = rustc_middle::query::Providers {
         allocator_kind: |tcx, ()| CStore::from_tcx(tcx).allocator_kind(),
         alloc_error_handler_kind: |tcx, ()| CStore::from_tcx(tcx).alloc_error_handler_kind(),

@@ -182,9 +182,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.92"
+version = "1.0.93"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74f37166d7d48a0284b99dd824694c26119c700b53bf0d1540cdb147dbdaaf13"
+checksum = "4c95c10ba0b00a02636238b814946408b1322d5ac4760326e6fb8ec956d85775"
 dependencies = [
  "backtrace",
 ]
@@ -871,9 +871,9 @@ version = "0.1.0"
 
 [[package]]
 name = "cc"
-version = "1.1.34"
+version = "1.1.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67b9470d453346108f93a59222a9a1a5724db32d0a4727b7ab7ace4b4d822dc9"
+checksum = "baee610e9452a8f6f0a1b6194ec09ff9e2d85dea54432acdae41aa0761c95d70"
 dependencies = [
  "shlex",
 ]
@@ -996,7 +996,7 @@ checksum = "1462739cb27611015575c0c11df5df7601141071f07518d56fcc1be504cbec97"
 
 [[package]]
 name = "clippy"
-version = "0.1.83"
+version = "0.1.84"
 dependencies = [
  "anstream",
  "cargo_metadata",
@@ -1009,8 +1009,10 @@ dependencies = [
  "if_chain",
  "itertools",
  "parking_lot",
+ "pulldown-cmark 0.11.3",
  "quote",
  "regex",
+ "rinja",
  "rustc_tools_util",
  "serde",
  "serde_json",
@@ -1025,7 +1027,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_config"
-version = "0.1.83"
+version = "0.1.84"
 dependencies = [
  "itertools",
  "serde",
@@ -1041,20 +1043,19 @@ dependencies = [
  "clap",
  "indoc",
  "itertools",
- "opener 0.6.1",
+ "opener",
  "shell-escape",
  "walkdir",
 ]
 
 [[package]]
 name = "clippy_lints"
-version = "0.1.83"
+version = "0.1.84"
 dependencies = [
  "arrayvec",
  "cargo_metadata",
  "clippy_config",
  "clippy_utils",
- "declare_clippy_lint",
  "itertools",
  "quine-mc_cluskey",
  "regex",
@@ -1072,7 +1073,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_utils"
-version = "0.1.83"
+version = "0.1.84"
 dependencies = [
  "arrayvec",
  "clippy_config",
@@ -1363,9 +1364,9 @@ dependencies = [
 
 [[package]]
 name = "curl-sys"
-version = "0.4.77+curl-8.10.1"
+version = "0.4.78+curl-8.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f469e8a5991f277a208224f6c7ad72ecb5f986e36d09ae1f2c1bb9259478a480"
+checksum = "8eec768341c5c7789611ae51cf6c459099f22e64a5d5d0ce4892434e33821eaf"
 dependencies = [
  "cc",
  "libc",
@@ -1432,15 +1433,6 @@ dependencies = [
  "libc",
  "libdbus-sys",
  "winapi",
-]
-
-[[package]]
-name = "declare_clippy_lint"
-version = "0.1.83"
-dependencies = [
- "itertools",
- "quote",
- "syn 2.0.87",
 ]
 
 [[package]]
@@ -1786,9 +1778,9 @@ checksum = "2acce4a10f12dc2fb14a218589d4f1f62ef011b2d0cc4b3cb1bba8e94da14649"
 
 [[package]]
 name = "fastrand"
-version = "2.1.1"
+version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8c02a5121d4ea3eb16a80748c74f5549a5665e4c21333c6098f283870fbdea6"
+checksum = "486f806e73c5707928240ddc295403b1b93c96a02038563881c4a2fd84b81ac4"
 
 [[package]]
 name = "ferrocene-self-test"
@@ -2168,11 +2160,12 @@ dependencies = [
 
 [[package]]
 name = "handlebars"
-version = "5.1.2"
+version = "6.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d08485b96a0e6393e9e4d1b8d48cf74ad6c063cd905eb33f42c1ce3f0377539b"
+checksum = "fd4ccde012831f9a071a637b0d4e31df31c0f6c525784b35ae76a9ac6bc1e315"
 dependencies = [
  "log",
+ "num-order",
  "pest",
  "pest_derive",
  "serde",
@@ -2758,7 +2751,7 @@ dependencies = [
  "anyhow",
  "clap",
  "fs-err",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "rustdoc-json-types",
  "serde",
  "serde_json",
@@ -2801,9 +2794,9 @@ checksum = "baff4b617f7df3d896f97fe922b64817f6cd9a756bb81d40f8883f2f66dcb401"
 
 [[package]]
 name = "libc"
-version = "0.2.161"
+version = "0.2.162"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e9489c2807c139ffd9c1794f4af0ebe86a828db53ecdc7fea2111d0fed085d1"
+checksum = "18d287de67fe55fd7e1581fe933d965a5a9477b38e949cfa9f8574ef01506398"
 
 [[package]]
 name = "libdbus-sys"
@@ -2997,9 +2990,9 @@ dependencies = [
 
 [[package]]
 name = "mdbook"
-version = "0.4.40"
+version = "0.4.42"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b45a38e19bd200220ef07c892b0157ad3d2365e5b5a267ca01ad12182491eea5"
+checksum = "7624879735513024d323e7267a0b3a7176aceb0db537939beb4ee31d9e8945e3"
 dependencies = [
  "ammonia",
  "anyhow",
@@ -3012,7 +3005,7 @@ dependencies = [
  "log",
  "memchr",
  "once_cell",
- "opener 0.7.2",
+ "opener",
  "pulldown-cmark 0.10.3",
  "regex",
  "serde",
@@ -3276,6 +3269,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "num-modular"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "17bb261bf36fa7d83f4c294f834e91256769097b3cb505d44831e0a179ac647f"
+
+[[package]]
+name = "num-order"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "537b596b97c40fcf8056d153049eb22f481c17ebce72a513ec9286e4986d1bb6"
+dependencies = [
+ "num-modular",
+]
+
+[[package]]
 name = "num-rational"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3358,17 +3366,6 @@ name = "once_cell"
 version = "1.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775"
-
-[[package]]
-name = "opener"
-version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c62dcb6174f9cb326eac248f07e955d5d559c272730b6c03e396b443b562788"
-dependencies = [
- "bstr",
- "normpath",
- "winapi",
-]
 
 [[package]]
 name = "opener"
@@ -3803,6 +3800,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "679341d22c78c6c649893cbd6c3278dcbe9fc4faa62fea3a9296ae2b50c14625"
 dependencies = [
  "bitflags 2.6.0",
+ "getopts",
  "memchr",
  "pulldown-cmark-escape 0.11.0",
  "unicase",
@@ -4494,7 +4492,7 @@ dependencies = [
  "memmap2",
  "parking_lot",
  "portable-atomic",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "rustc-rayon",
  "rustc-stable-hash",
  "rustc_arena",
@@ -4819,6 +4817,7 @@ dependencies = [
  "rustc_target",
  "rustc_type_ir",
  "smallvec",
+ "thin-vec",
  "tracing",
 ]
 
@@ -5150,7 +5149,7 @@ dependencies = [
  "thin-vec",
  "tracing",
  "unicode-normalization",
- "unicode-width 0.1.14",
+ "unicode-width 0.2.0",
 ]
 
 [[package]]
@@ -5190,7 +5189,7 @@ dependencies = [
 name = "rustc_pattern_analysis"
 version = "0.0.0"
 dependencies = [
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "rustc_apfloat",
  "rustc_arena",
  "rustc_data_structures",
@@ -5384,7 +5383,7 @@ dependencies = [
  "sha1",
  "sha2",
  "tracing",
- "unicode-width 0.1.14",
+ "unicode-width 0.2.0",
 ]
 
 [[package]]
@@ -5423,9 +5422,9 @@ dependencies = [
 
 [[package]]
 name = "rustc_tools_util"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ba09476327c4b70ccefb6180f046ef588c26a24cf5d269a9feba316eb4f029f"
+checksum = "3316159ab19e19d1065ecc49278e87f767a9dae9fae80348d2b4d4fa4ae02d4d"
 
 [[package]]
 name = "rustc_trait_selection"
@@ -5452,6 +5451,7 @@ dependencies = [
  "rustc_transmute",
  "rustc_type_ir",
  "smallvec",
+ "thin-vec",
  "tracing",
 ]
 
@@ -5523,6 +5523,7 @@ dependencies = [
  "rustc_span",
  "rustc_type_ir_macros",
  "smallvec",
+ "thin-vec",
  "tracing",
 ]
 
@@ -5561,6 +5562,7 @@ dependencies = [
  "rustdoc-json-types",
  "serde",
  "serde_json",
+ "sha2",
  "smallvec",
  "tempfile",
  "threadpool",
@@ -5585,7 +5587,7 @@ name = "rustdoc-json-types"
 version = "0.1.0"
 dependencies = [
  "bincode",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "serde",
  "serde_json",
 ]
@@ -6224,9 +6226,9 @@ dependencies = [
 
 [[package]]
 name = "tempfile"
-version = "3.13.0"
+version = "3.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0f2c9fc62d0beef6951ccffd757e241266a2c833136efbe35af6cd2567dca5b"
+checksum = "28cce251fcbc87fac86a866eeb0d6c2d536fc16d06f184bb61aeae11aa4cee0c"
 dependencies = [
  "cfg-if",
  "fastrand",
@@ -6364,7 +6366,7 @@ dependencies = [
  "ignore",
  "miropt-test-tools",
  "regex",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "semver",
  "similar",
  "termcolor",
@@ -6433,9 +6435,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.41.0"
+version = "1.41.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "145f3413504347a2be84393cc8a7d2fb4d863b375909ea59f2158261aa258bbb"
+checksum = "22cfb5bee7a6a52939ca9224d6ac897bb669134078daa8735560897f69de4d33"
 dependencies = [
  "backtrace",
  "bytes",
@@ -6777,13 +6779,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7e51b68083f157f853b6379db119d1c1be0e6e4dec98101079dec41f6f5cf6df"
 
 [[package]]
-name = "unicode-bdd"
-version = "0.1.0"
-dependencies = [
- "ucd-parse",
-]
-
-[[package]]
 name = "unicode-ident"
 version = "1.0.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6825,6 +6820,13 @@ name = "unicode-segmentation"
 version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f6ccf251212114b54433ec949fd6a7841275f9ada20dddd2f29e9ceea4501493"
+
+[[package]]
+name = "unicode-table-generator"
+version = "0.1.0"
+dependencies = [
+ "ucd-parse",
+]
 
 [[package]]
 name = "unicode-width"

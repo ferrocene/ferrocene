@@ -1698,7 +1698,11 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
         builder.ensure(TestHelpers { target: compiler.host });
 
         // ensure that `libproc_macro` is available on the host.
-        builder.ensure(compile::Std::new(compiler, compiler.host));
+        if suite == "mir-opt" {
+            builder.ensure(compile::Std::new_for_mir_opt_tests(compiler, compiler.host));
+        } else {
+            builder.ensure(compile::Std::new(compiler, compiler.host));
+        }
 
         // As well as the target
         if suite != "mir-opt" {
@@ -1731,13 +1735,15 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
             } else {
                 // We need to properly build cargo using the suitable stage compiler.
 
-                // HACK: currently tool stages are off-by-one compared to compiler stages, i.e. if
-                // you give `tool::Cargo` a stage 1 rustc, it will cause stage 2 rustc to be built
-                // and produce a cargo built with stage 2 rustc. To fix this, we need to chop off
-                // the compiler stage by 1 to align with expected `./x test run-make --stage N`
-                // behavior, i.e. we need to pass `N - 1` compiler stage to cargo. See also Miri
-                // which does a similar hack.
-                let compiler = builder.compiler(builder.top_stage - 1, compiler.host);
+                let compiler = builder.download_rustc().then_some(compiler).unwrap_or_else(||
+                    // HACK: currently tool stages are off-by-one compared to compiler stages, i.e. if
+                    // you give `tool::Cargo` a stage 1 rustc, it will cause stage 2 rustc to be built
+                    // and produce a cargo built with stage 2 rustc. To fix this, we need to chop off
+                    // the compiler stage by 1 to align with expected `./x test run-make --stage N`
+                    // behavior, i.e. we need to pass `N - 1` compiler stage to cargo. See also Miri
+                    // which does a similar hack.
+                    builder.compiler(builder.top_stage - 1, compiler.host));
+
                 builder.ensure(tool::Cargo { compiler, target: compiler.host })
             };
 
@@ -1830,6 +1836,9 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
         }
         if builder.config.cmd.only_modified() {
             cmd.arg("--only-modified");
+        }
+        if let Some(compiletest_diff_tool) = &builder.config.compiletest_diff_tool {
+            cmd.arg("--compiletest-diff-tool").arg(compiletest_diff_tool);
         }
 
         let mut flags = if is_rustdoc { Vec::new() } else { vec!["-Crpath".to_string()] };
@@ -3603,9 +3612,7 @@ impl Step for TestFloatParse {
         let path = self.path.to_str().unwrap();
         let crate_name = self.path.components().last().unwrap().as_os_str().to_str().unwrap();
 
-        if !builder.download_rustc() {
-            builder.ensure(compile::Std::new(compiler, self.host));
-        }
+        builder.ensure(tool::TestFloatParse { host: self.host });
 
         // Run any unit tests in the crate
         let cargo_test = tool::prepare_tool_cargo(

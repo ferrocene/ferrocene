@@ -30,7 +30,6 @@ run-make/ferrocene/compiler-arguments/upper_c_rpath/upper_c_rpath/Makefile
 run-make/ferrocene/compiler-arguments/upper_c_rpath/upper_c_rpath_link_arg/Makefile
 run-make/fix-cortex-a53-843419/Makefile
 run-make/incr-add-rust-src-component/Makefile
-run-make/issue-84395-lto-embed-bitcode/Makefile
 run-make/jobserver-error/Makefile
 run-make/libs-through-symlinks/Makefile
 run-make/split-debuginfo/Makefile

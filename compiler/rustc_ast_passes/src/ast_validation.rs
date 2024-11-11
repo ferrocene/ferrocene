@@ -244,18 +244,14 @@ impl<'a> AstValidator<'a> {
                     }
                 }
             }
-            TyKind::AnonStruct(_, ref fields) | TyKind::AnonUnion(_, ref fields) => {
-                walk_list!(self, visit_struct_field_def, fields)
-            }
             _ => visit::walk_ty(self, t),
         }
     }
 
     fn visit_struct_field_def(&mut self, field: &'a FieldDef) {
-        if let Some(ident) = field.ident
+        if let Some(ref ident) = field.ident
             && ident.name == kw::Underscore
         {
-            self.check_unnamed_field_ty(&field.ty, ident.span);
             self.visit_vis(&field.vis);
             self.visit_ident(ident);
             self.visit_ty_common(&field.ty);
@@ -294,45 +290,13 @@ impl<'a> AstValidator<'a> {
         }
     }
 
-    fn check_unnamed_field_ty(&self, ty: &Ty, span: Span) {
-        if matches!(
-            &ty.kind,
-            // We already checked for `kw::Underscore` before calling this function,
-            // so skip the check
-            TyKind::AnonStruct(..) | TyKind::AnonUnion(..)
-            // If the anonymous field contains a Path as type, we can't determine
-            // if the path is a valid struct or union, so skip the check
-            | TyKind::Path(..)
-        ) {
-            return;
-        }
-        self.dcx().emit_err(errors::InvalidUnnamedFieldTy { span, ty_span: ty.span });
-    }
-
-    fn deny_anon_struct_or_union(&self, ty: &Ty) {
-        let struct_or_union = match &ty.kind {
-            TyKind::AnonStruct(..) => "struct",
-            TyKind::AnonUnion(..) => "union",
-            _ => return,
-        };
-        self.dcx().emit_err(errors::AnonStructOrUnionNotAllowed { struct_or_union, span: ty.span });
-    }
-
-    fn deny_unnamed_field(&self, field: &FieldDef) {
-        if let Some(ident) = field.ident
-            && ident.name == kw::Underscore
-        {
-            self.dcx()
-                .emit_err(errors::InvalidUnnamedField { span: field.span, ident_span: ident.span });
-        }
-    }
-
     fn check_trait_fn_not_const(&self, constness: Const, parent: &TraitOrTraitImpl) {
         let Const::Yes(span) = constness else {
             return;
         };
 
-        let make_impl_const_sugg = if self.features.const_trait_impl
+        let const_trait_impl = self.features.const_trait_impl();
+        let make_impl_const_sugg = if const_trait_impl
             && let TraitOrTraitImpl::TraitImpl {
                 constness: Const::No,
                 polarity: ImplPolarity::Positive,
@@ -345,13 +309,12 @@ impl<'a> AstValidator<'a> {
             None
         };
 
-        let make_trait_const_sugg = if self.features.const_trait_impl
-            && let TraitOrTraitImpl::Trait { span, constness: None } = parent
-        {
-            Some(span.shrink_to_lo())
-        } else {
-            None
-        };
+        let make_trait_const_sugg =
+            if const_trait_impl && let TraitOrTraitImpl::Trait { span, constness: None } = parent {
+                Some(span.shrink_to_lo())
+            } else {
+                None
+            };
 
         let parent_constness = parent.constness();
         self.dcx().emit_err(errors::TraitFnConst {
@@ -561,21 +524,24 @@ impl<'a> AstValidator<'a> {
         // Deconstruct to ensure exhaustiveness
         FnHeader { safety: _, coroutine_kind, constness, ext }: FnHeader,
     ) {
-        let report_err = |span| {
-            self.dcx()
-                .emit_err(errors::FnQualifierInExtern { span, block: self.current_extern_span() });
+        let report_err = |span, kw| {
+            self.dcx().emit_err(errors::FnQualifierInExtern {
+                span,
+                kw,
+                block: self.current_extern_span(),
+            });
         };
         match coroutine_kind {
-            Some(knd) => report_err(knd.span()),
+            Some(kind) => report_err(kind.span(), kind.as_str()),
             None => (),
         }
         match constness {
-            Const::Yes(span) => report_err(span),
+            Const::Yes(span) => report_err(span, "const"),
             Const::No => (),
         }
         match ext {
             Extern::None => (),
-            Extern::Implicit(span) | Extern::Explicit(_, span) => report_err(span),
+            Extern::Implicit(span) | Extern::Explicit(_, span) => report_err(span, "extern"),
         }
     }
 
@@ -890,13 +856,7 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
 
     fn visit_ty(&mut self, ty: &'a Ty) {
         self.visit_ty_common(ty);
-        self.deny_anon_struct_or_union(ty);
         self.walk_ty(ty)
-    }
-
-    fn visit_field_def(&mut self, field: &'a FieldDef) {
-        self.deny_unnamed_field(field);
-        visit::walk_field_def(self, field)
     }
 
     fn visit_item(&mut self, item: &'a Item) {
@@ -939,7 +899,7 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
                     }
 
                     this.visit_vis(&item.vis);
-                    this.visit_ident(item.ident);
+                    this.visit_ident(&item.ident);
                     let disallowed = matches!(constness, Const::No)
                         .then(|| TildeConstReason::TraitImpl { span: item.span });
                     this.with_tilde_const(disallowed, |this| this.visit_generics(generics));
@@ -993,7 +953,7 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
                     }
 
                     this.visit_vis(&item.vis);
-                    this.visit_ident(item.ident);
+                    this.visit_ident(&item.ident);
                     this.with_tilde_const(
                         Some(TildeConstReason::Impl { span: item.span }),
                         |this| this.visit_generics(generics),
@@ -1031,7 +991,7 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
                 }
 
                 self.visit_vis(&item.vis);
-                self.visit_ident(item.ident);
+                self.visit_ident(&item.ident);
                 let kind =
                     FnKind::Fn(FnCtxt::Free, item.ident, sig, &item.vis, generics, body.as_deref());
                 self.visit_fn(kind, item.span, item.id);
@@ -1098,7 +1058,7 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
                     // Equivalent of `visit::walk_item` for `ItemKind::Trait` that inserts a bound
                     // context for the supertraits.
                     this.visit_vis(&item.vis);
-                    this.visit_ident(item.ident);
+                    this.visit_ident(&item.ident);
                     let disallowed = is_const_trait
                         .is_none()
                         .then(|| TildeConstReason::Trait { span: item.span });
@@ -1125,7 +1085,7 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
             ItemKind::Struct(vdata, generics) => match vdata {
                 VariantData::Struct { fields, .. } => {
                     self.visit_vis(&item.vis);
-                    self.visit_ident(item.ident);
+                    self.visit_ident(&item.ident);
                     self.visit_generics(generics);
                     // Permit `Anon{Struct,Union}` as field type.
                     walk_list!(self, visit_struct_field_def, fields);
@@ -1141,7 +1101,7 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
                 match vdata {
                     VariantData::Struct { fields, .. } => {
                         self.visit_vis(&item.vis);
-                        self.visit_ident(item.ident);
+                        self.visit_ident(&item.ident);
                         self.visit_generics(generics);
                         // Permit `Anon{Struct,Union}` as field type.
                         walk_list!(self, visit_struct_field_def, fields);
@@ -1185,7 +1145,7 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
                 }
                 self.check_type_no_bounds(bounds, "this context");
 
-                if self.features.lazy_type_alias {
+                if self.features.lazy_type_alias() {
                     if let Err(err) = self.check_type_alias_where_clause_location(ty_alias) {
                         self.dcx().emit_err(err);
                     }
@@ -1303,7 +1263,7 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
                     if !bound_pred.bound_generic_params.is_empty() {
                         for bound in &bound_pred.bounds {
                             match bound {
-                                GenericBound::Trait(t, _) => {
+                                GenericBound::Trait(t) => {
                                     if !t.bound_generic_params.is_empty() {
                                         self.dcx()
                                             .emit_err(errors::NestedLifetimes { span: t.span });
@@ -1323,10 +1283,10 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
 
     fn visit_param_bound(&mut self, bound: &'a GenericBound, ctxt: BoundKind) {
         match bound {
-            GenericBound::Trait(trait_ref, modifiers) => {
-                match (ctxt, modifiers.constness, modifiers.polarity) {
+            GenericBound::Trait(trait_ref) => {
+                match (ctxt, trait_ref.modifiers.constness, trait_ref.modifiers.polarity) {
                     (BoundKind::SuperTraits, BoundConstness::Never, BoundPolarity::Maybe(_))
-                        if !self.features.more_maybe_bounds =>
+                        if !self.features.more_maybe_bounds() =>
                     {
                         self.sess
                             .create_feature_err(
@@ -1339,7 +1299,7 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
                             .emit();
                     }
                     (BoundKind::TraitObject, BoundConstness::Never, BoundPolarity::Maybe(_))
-                        if !self.features.more_maybe_bounds =>
+                        if !self.features.more_maybe_bounds() =>
                     {
                         self.sess
                             .create_feature_err(
@@ -1364,7 +1324,7 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
                 }
 
                 // Negative trait bounds are not allowed to have associated constraints
-                if let BoundPolarity::Negative(_) = modifiers.polarity
+                if let BoundPolarity::Negative(_) = trait_ref.modifiers.polarity
                     && let Some(segment) = trait_ref.trait_ref.path.segments.last()
                 {
                     match segment.args.as_deref() {
@@ -1561,7 +1521,7 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
                     || matches!(sig.header.constness, Const::Yes(_)) =>
             {
                 self.visit_vis(&item.vis);
-                self.visit_ident(item.ident);
+                self.visit_ident(&item.ident);
                 let kind = FnKind::Fn(
                     FnCtxt::Assoc(ctxt),
                     item.ident,
@@ -1712,7 +1672,9 @@ fn deny_equality_constraints(
             }),
         ) {
             for bound in bounds {
-                if let GenericBound::Trait(poly, TraitBoundModifiers::NONE) = bound {
+                if let GenericBound::Trait(poly) = bound
+                    && poly.modifiers == TraitBoundModifiers::NONE
+                {
                     if full_path.segments[..full_path.segments.len() - 1]
                         .iter()
                         .map(|segment| segment.ident.name)
@@ -1740,7 +1702,9 @@ fn deny_equality_constraints(
             ) {
                 if ident == potential_param.ident {
                     for bound in bounds {
-                        if let ast::GenericBound::Trait(poly, TraitBoundModifiers::NONE) = bound {
+                        if let ast::GenericBound::Trait(poly) = bound
+                            && poly.modifiers == TraitBoundModifiers::NONE
+                        {
                             suggest(poly, potential_assoc, predicate);
                         }
                     }

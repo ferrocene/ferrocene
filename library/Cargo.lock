@@ -9,7 +9,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dfbe277e56a376000877090da837660b4427aad530e3028d44e0bffe4f89a1c1"
 dependencies = [
  "compiler_builtins",
- "gimli 0.31.1",
+ "gimli",
  "rustc-std-workspace-alloc",
  "rustc-std-workspace-core",
 ]
@@ -61,9 +61,9 @@ dependencies = [
 
 [[package]]
 name = "compiler_builtins"
-version = "0.1.133"
+version = "0.1.134"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab10bf45b2ed1b4f4c25401527a61684142c042b3c86ace7da7ea6881e26741b"
+checksum = "2f743e6f7410a78c261505c729f389583de40eec62332cc8cdf2c8b9bf73049a"
 dependencies = [
  "cc",
  "rustc-std-workspace-core",
@@ -109,17 +109,6 @@ dependencies = [
  "rustc-std-workspace-core",
  "rustc-std-workspace-std",
  "unicode-width",
-]
-
-[[package]]
-name = "gimli"
-version = "0.30.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2e1d97fbe9722ba9bbd0c97051c2956e726562b61f86a25a4360398a40edfc9"
-dependencies = [
- "compiler_builtins",
- "rustc-std-workspace-alloc",
- "rustc-std-workspace-core",
 ]
 
 [[package]]
@@ -349,7 +338,6 @@ dependencies = [
  "object",
  "panic_abort",
  "panic_unwind",
- "profiler_builtins",
  "r-efi",
  "r-efi-alloc",
  "rand",
@@ -378,6 +366,7 @@ name = "sysroot"
 version = "0.0.0"
 dependencies = [
  "proc_macro",
+ "profiler_builtins",
  "std",
  "test",
 ]
@@ -416,12 +405,12 @@ dependencies = [
 
 [[package]]
 name = "unwinding"
-version = "0.2.2"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc55842d0db6329a669d55a623c674b02d677b16bfb2d24857d4089d41eba882"
+checksum = "637d511437df708cee34bdec7ba2f1548d256b7acf3ff20e0a1c559f9bf3a987"
 dependencies = [
  "compiler_builtins",
- "gimli 0.30.0",
+ "gimli",
  "rustc-std-workspace-core",
 ]
 

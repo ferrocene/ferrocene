@@ -724,29 +724,6 @@ impl<'a, 'ra, 'tcx> BuildReducedGraphVisitor<'a, 'ra, 'tcx> {
         // Record field names for error reporting.
         self.insert_field_idents(def_id, fields);
         self.insert_field_visibilities_local(def_id.to_def_id(), fields);
-
-        for field in fields {
-            match &field.ty.kind {
-                ast::TyKind::AnonStruct(id, nested_fields)
-                | ast::TyKind::AnonUnion(id, nested_fields) => {
-                    let feed = self.r.feed(*id);
-                    let local_def_id = feed.key();
-                    let def_id = local_def_id.to_def_id();
-                    let def_kind = self.r.tcx.def_kind(local_def_id);
-                    let res = Res::Def(def_kind, def_id);
-                    self.build_reduced_graph_for_struct_variant(
-                        &nested_fields,
-                        Ident::empty(),
-                        feed,
-                        res,
-                        // Anonymous adts inherit visibility from their parent adts.
-                        adt_vis,
-                        field.ty.span,
-                    );
-                }
-                _ => {}
-            }
-        }
     }
 
     /// Constructs the reduced graph for one item.
@@ -1216,7 +1193,11 @@ impl<'a, 'ra, 'tcx> BuildReducedGraphVisitor<'a, 'ra, 'tcx> {
         if !ident.as_str().starts_with('_') {
             self.r.unused_macros.insert(def_id, (node_id, ident));
             for (rule_i, rule_span) in &self.r.macro_map[&def_id.to_def_id()].rule_spans {
-                self.r.unused_macro_rules.insert((def_id, *rule_i), (ident, *rule_span));
+                self.r
+                    .unused_macro_rules
+                    .entry(def_id)
+                    .or_default()
+                    .insert(*rule_i, (ident, *rule_span));
             }
         }
     }
@@ -1340,7 +1321,7 @@ impl<'a, 'ra, 'tcx> Visitor<'a> for BuildReducedGraphVisitor<'a, 'ra, 'tcx> {
                         // Visit attributes after items for backward compatibility.
                         // This way they can use `macro_rules` defined later.
                         self.visit_vis(&item.vis);
-                        self.visit_ident(item.ident);
+                        self.visit_ident(&item.ident);
                         item.kind.walk(item, AssocCtxt::Trait, self);
                         visit::walk_list!(self, visit_attribute, &item.attrs);
                     }

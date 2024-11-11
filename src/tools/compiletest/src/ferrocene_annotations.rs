@@ -67,9 +67,8 @@ impl Collector {
             self.config.clone(),
             &src_base,
             &PathBuf::new(),
-            &mut Default::default(),
             &Vec::new(),
-            &mut |test| {
+            &mut |test, _| {
                 if let Some(t) = self.collect_test(test) {
                     self.tests.push(t);
                 }

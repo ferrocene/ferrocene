@@ -16,7 +16,7 @@ use rustc_middle::mir::visit::Visitor;
 use rustc_middle::mir::*;
 use rustc_middle::span_bug;
 use rustc_middle::ty::adjustment::PointerCoercion;
-use rustc_middle::ty::{self, Instance, InstanceKind, Ty, TypeVisitableExt};
+use rustc_middle::ty::{self, Instance, InstanceKind, Ty, TypeVisitableExt, TypingMode};
 use rustc_mir_dataflow::Analysis;
 use rustc_mir_dataflow::impls::MaybeStorageLive;
 use rustc_mir_dataflow::storage::always_storage_live_locals;
@@ -64,8 +64,7 @@ impl<'mir, 'tcx> Qualifs<'mir, 'tcx> {
             let ConstCx { tcx, body, .. } = *ccx;
 
             FlowSensitiveAnalysis::new(NeedsDrop, ccx)
-                .into_engine(tcx, body)
-                .iterate_to_fixpoint()
+                .iterate_to_fixpoint(tcx, body, None)
                 .into_results_cursor(body)
         });
 
@@ -94,8 +93,7 @@ impl<'mir, 'tcx> Qualifs<'mir, 'tcx> {
             let ConstCx { tcx, body, .. } = *ccx;
 
             FlowSensitiveAnalysis::new(NeedsNonConstDrop, ccx)
-                .into_engine(tcx, body)
-                .iterate_to_fixpoint()
+                .iterate_to_fixpoint(tcx, body, None)
                 .into_results_cursor(body)
         });
 
@@ -124,8 +122,7 @@ impl<'mir, 'tcx> Qualifs<'mir, 'tcx> {
             let ConstCx { tcx, body, .. } = *ccx;
 
             FlowSensitiveAnalysis::new(HasMutInterior, ccx)
-                .into_engine(tcx, body)
-                .iterate_to_fixpoint()
+                .iterate_to_fixpoint(tcx, body, None)
                 .into_results_cursor(body)
         });
 
@@ -240,8 +237,7 @@ impl<'mir, 'tcx> Checker<'mir, 'tcx> {
                 let always_live_locals = &always_storage_live_locals(&ccx.body);
                 let mut maybe_storage_live =
                     MaybeStorageLive::new(Cow::Borrowed(always_live_locals))
-                        .into_engine(ccx.tcx, &ccx.body)
-                        .iterate_to_fixpoint()
+                        .iterate_to_fixpoint(ccx.tcx, &ccx.body, None)
                         .into_results_cursor(&ccx.body);
 
                 // And then check all `Return` in the MIR, and if a local is "maybe live" at a
@@ -593,7 +589,7 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                 // Typeck only does a "non-const" check since it operates on HIR and cannot distinguish
                 // which path expressions are getting called on and which path expressions are only used
                 // as function pointers. This is required for correctness.
-                let infcx = tcx.infer_ctxt().build();
+                let infcx = tcx.infer_ctxt().build(TypingMode::from_param_env(param_env));
                 let ocx = ObligationCtxt::new_with_diagnostics(&infcx);
 
                 let predicates = tcx.predicates_of(callee).instantiate(tcx, fn_args);
@@ -616,14 +612,16 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
 
                 let mut is_trait = false;
                 // Attempting to call a trait method?
-                if tcx.trait_of_item(callee).is_some() {
+                if let Some(trait_did) = tcx.trait_of_item(callee) {
                     trace!("attempting to call a trait method");
+
+                    let trait_is_const = tcx.is_const_trait(trait_did);
                     // trait method calls are only permitted when `effects` is enabled.
-                    // we don't error, since that is handled by typeck. We try to resolve
-                    // the trait into the concrete method, and uses that for const stability
-                    // checks.
+                    // typeck ensures the conditions for calling a const trait method are met,
+                    // so we only error if the trait isn't const. We try to resolve the trait
+                    // into the concrete method, and uses that for const stability checks.
                     // FIXME(effects) we might consider moving const stability checks to typeck as well.
-                    if tcx.features().effects() {
+                    if tcx.features().effects() && trait_is_const {
                         // This skips the check below that ensures we only call `const fn`.
                         is_trait = true;
 
@@ -638,17 +636,24 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                             callee = def;
                         }
                     } else {
+                        // if the trait is const but the user has not enabled the feature(s),
+                        // suggest them.
+                        let feature = if trait_is_const {
+                            Some(if tcx.features().const_trait_impl() {
+                                sym::effects
+                            } else {
+                                sym::const_trait_impl
+                            })
+                        } else {
+                            None
+                        };
                         self.check_op(ops::FnCallNonConst {
                             caller,
                             callee,
                             args: fn_args,
                             span: *fn_span,
                             call_source,
-                            feature: Some(if tcx.features().const_trait_impl() {
-                                sym::effects
-                            } else {
-                                sym::const_trait_impl
-                            }),
+                            feature,
                         });
                         // If we allowed this, we're in miri-unleashed mode, so we might
                         // as well skip the remaining checks.

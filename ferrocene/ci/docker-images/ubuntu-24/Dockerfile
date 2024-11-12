@@ -103,7 +103,7 @@ USER ci
 WORKDIR /home/ci
 
 # We prefer uv over other solutions, it's in Rust and fast
-ENV PATH="/home/ci/.venv/bin:/home/ci/.cargo/bin:$PATH"
+ENV PATH="/home/ci/.venv/bin:/home/ci/.cargo/bin:/home/ci/.local/bin:$PATH"
 # Setup the venv
 COPY requirements.txt /tmp/requirements.txt
 RUN <<-EOF

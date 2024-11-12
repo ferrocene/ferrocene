@@ -58,7 +58,7 @@ RUN <<-EOF
     # Needed to support the QEMU copied over from Ubuntu 24.04 (see above).
     # Replace this with qemu-user-static once we're not on Ubuntu 20.04.
     apt-install binfmt-support
-    
+
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
         # Needed for aarch64-unknown-linux-gnu cross-compilation
         apt-install \
@@ -74,7 +74,7 @@ RUN <<-EOF
             binutils-x86-64-linux-gnu \
             libc6-dev-amd64-cross
     fi
-    
+
     # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
     apt-install gcc-arm-none-eabi
 
@@ -82,7 +82,7 @@ RUN <<-EOF
     apt-install clang
     # Needed to install AWS CLI during the build:
     apt-install unzip
-    
+
     # Needed to install git during the build:
     apt-install \
         dh-autoreconf \
@@ -246,7 +246,7 @@ USER ci
 WORKDIR /home/ci
 
 # We prefer uv over other solutions, it's in Rust and fast
-ENV PATH="/home/ci/.venv/bin:/home/ci/.cargo/bin:$PATH"
+ENV PATH="/home/ci/.venv/bin:/home/ci/.cargo/bin:/home/ci/.local/bin:$PATH"
 # Setup the venv
 COPY requirements.txt /tmp/requirements.txt
 RUN <<-EOF

@@ -18,6 +18,7 @@ impl std::fmt::Display for AnnotatedFile {
         match &self.source {
             AnnotationSource::TestItself => write!(f, "{}", self.test.display()),
             AnnotationSource::Makefile => write!(f, "{} (from its Makefile)", self.test.display()),
+            AnnotationSource::Rmake => write!(f, "{} (from its rmake.rs)", self.test.display()),
             AnnotationSource::ParentDirectory { .. } => {
                 write!(f, "{} (from its parent directory)", self.test.display())
             }
@@ -47,6 +48,7 @@ pub(crate) enum AnnotationSource {
     TestItself,
     ParentDirectory { bulk_file: PathBuf },
     Makefile,
+    Rmake,
 }
 
 #[derive(Debug)]
@@ -156,6 +158,8 @@ impl Annotations {
                     AnnotationSource::ParentDirectory { bulk_file: shrink_path(&annotation.file) }
                 } else if annotation.file == file.file.join("Makefile") {
                     AnnotationSource::Makefile
+                } else if annotation.file == file.file.join("rmake.rs") {
+                    AnnotationSource::Rmake
                 } else {
                     anyhow::bail!(
                         "bug: annotation {annotation:?} doesn't come from the file itself, \

@@ -218,6 +218,8 @@
     {% when AnnotationSource::TestItself %}
     {% when AnnotationSource::Makefile %}
     (annotated in its <a href="{{ urls.src }}/{{ file.test.display() }}/Makefile">Makefile</a>)
+    {% when AnnotationSource::Rmake %}
+    (annotated in its <a href="{{ urls.src }}/{{ file.test.display() }}/rmake.rs">rmake.rs</a>)
     {% when AnnotationSource::ParentDirectory with { bulk_file } %}
     (annotated in its <a href="{{ urls.src }}/{{ bulk_file.display() }}">parent directory</a>)
 {% endmatch %}

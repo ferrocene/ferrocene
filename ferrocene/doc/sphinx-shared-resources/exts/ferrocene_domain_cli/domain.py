@@ -59,11 +59,16 @@ class SubcommandDirective(ObjectDescription):
     def add_target_and_index(self, name_cls, sig, signode):
         if PROGRAM_STORAGE not in self.env.temp_data:
             warn("cli:subcommand outside cli:program isn't supported", self.get_location())
-            program = "PLACEHOLDER"
+            program_storage = ProgramStorage("PLACEHOLDER", False)
         else:
-            program = self.env.temp_data[PROGRAM_STORAGE]
+            program_storage: ProgramStorage = self.env.temp_data[PROGRAM_STORAGE]
 
-        subcommand = Subcommand(self.env.docname, program, sig)
+        subcommand = Subcommand(
+            self.env.docname,
+            program_storage,
+            sig,
+            program_storage.no_traceability_matrix
+        )
 
         signode["ids"].append(subcommand.id())
 
@@ -131,10 +136,11 @@ class Subcommand:
     required_arguments = 1
     final_argument_whitespace = True
 
-    def __init__(self, document, program, subcommand):
+    def __init__(self, document, program, subcommand, no_traceability_matrix):
         self.document = document
         self.program = program
         self.subcommand = subcommand
+        self.no_traceability_matrix = no_traceability_matrix
 
     def id(self):
         subcommand = (

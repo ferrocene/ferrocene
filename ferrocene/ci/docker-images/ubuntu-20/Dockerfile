@@ -246,12 +246,6 @@ USER ci
 WORKDIR /home/ci
 
 # We prefer uv over other solutions, it's in Rust and fast
-ENV PATH="/home/ci/.venv/bin:/home/ci/.cargo/bin:$PATH"
-# Setup the venv
-COPY requirements.txt /tmp/requirements.txt
-RUN <<-EOF
-    set -xe
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-    uv venv
-    uv pip sync /tmp/requirements.txt
-EOF
+ENV PATH="/home/ci/.venv/bin:/home/ci/.local/bin:$PATH"
+RUN curl -LsSf https://astral.sh/uv/0.5.0/install.sh | sh
+

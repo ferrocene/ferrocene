@@ -111,12 +111,13 @@ jobs:
       - aws-oidc-auth
       - ferrocene-checkout:
           llvm-subset: true
+      - setup-venv
       - run:
           name: Check whether git conflict markers are present
           command: ferrocene/ci/scripts/detect-conflict-markers.py
       - run:
           name: Perform licensing checks
-          command: reuse --include-submodules lint
+          command: uv run reuse --include-submodules lint
       - ferrocene-ci
 
   # Container dedicated to running ad-hoc tests that don't depend on an
@@ -133,9 +134,10 @@ jobs:
       - aws-oidc-auth
       - ferrocene-checkout:
           llvm-subset: true
+      - setup-venv
       - run:
           name: Perform licensing checks
-          command: reuse --include-submodules lint
+          command: uv run reuse --include-submodules lint
       - ferrocene-ci
 
   # x86_64-unknown-linux-gnu jobs
@@ -330,6 +332,7 @@ jobs:
           steps:
             - aws-oidc-auth
             - ferrocene-checkout
+            - setup-venv
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps
@@ -344,6 +347,7 @@ jobs:
     steps:
       - ferrocene-git-shallow-clone:
           depth: 1
+      - setup-venv
       - aws-oidc-auth
       - setup-qnx-toolchain: {}
       - run:
@@ -420,6 +424,7 @@ jobs:
           steps:
             - aws-oidc-auth
             - ferrocene-checkout
+            - setup-venv
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps
@@ -468,6 +473,7 @@ jobs:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--self-test >>
     steps:
+      - setup-venv
       - aws-oidc-auth
       - ferrocene-git-shallow-clone:
           depth: 1
@@ -559,6 +565,7 @@ jobs:
       - ferrocene-git-shallow-clone:
           depth: 1
       - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
+      - setup-venv
       - aws-oidc-auth
       - run:
           name: Download dist artifacts and run the self-test tool
@@ -1047,13 +1054,12 @@ commands:
             equal: [<<parameters.os>>, "darwin"]
           steps:
             - ferrocene-setup-darwin
-            - setup-venv
       - when:
           condition:
             equal: [<<parameters.os>>, "windows"]
           steps:
             - ferrocene-setup-windows
-            - setup-venv
+      - setup-venv
       - aws-oidc-auth
       - ferrocene-ci
       # Persist the build artifacts so following jobs don't have to start from
@@ -1089,13 +1095,12 @@ commands:
             equal: [<<parameters.os>>, "darwin"]
           steps:
             - ferrocene-setup-darwin
-            - setup-venv
       - when:
           condition:
             equal: [<<parameters.os>>, "windows"]
           steps:
             - ferrocene-setup-windows
-            - setup-venv
+      - setup-venv
       - aws-oidc-auth
       - when:
           condition:  <<parameters.restore-from-job>>
@@ -1126,6 +1131,7 @@ commands:
             equal: [<<parameters.os>>, "darwin"]
           steps:
             - ferrocene-setup-darwin  # Darwin does not come with awscli, setup it before aws steps
+      - setup-venv
       - aws-oidc-auth
       - run:
           name: Restore files from the << parameters.restore-from-job >> job

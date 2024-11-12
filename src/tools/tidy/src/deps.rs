@@ -118,7 +118,6 @@ const EXCEPTIONS: ExceptionList = &[
     ("dissimilar", "Apache-2.0"),                            // rustdoc, rustc_lexer (few tests) via expect-test, (dev deps)
     ("fluent-langneg", "Apache-2.0"),                        // rustc (fluent translations)
     ("insta", "Apache-2.0"),                                 // generate-tarball
-    ("instant", "BSD-3-Clause"),                             // rustc_driver/tracing-subscriber/parking_lot
     ("mdbook", "MPL-2.0"),                                   // mdbook
     ("option-ext", "MPL-2.0"),                               // cargo-miri (via `directories`)
     ("rustc_apfloat", "Apache-2.0 WITH LLVM-exception"),     // rustc (license is the same as LLVM uses)

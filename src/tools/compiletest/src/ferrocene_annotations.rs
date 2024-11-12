@@ -116,9 +116,7 @@ impl Collector {
     fn collect_annotations(&self, path: &Path, contents: &str) -> Vec<Annotation> {
         let mut found = Vec::new();
         for line in contents.lines() {
-            let prefix = if path.file_name() == Some(OsStr::new("Makefile"))
-                || path.file_name() == Some(OsStr::new("rmake.rs"))
-            {
+            let prefix = if path.file_name() == Some(OsStr::new("Makefile")) {
                 "# "
             } else if path.extension() == Some(OsStr::new("rs"))
                 || path.file_name() == Some(OsStr::new(BULK_ANNOTATIONS_FILE_NAME))

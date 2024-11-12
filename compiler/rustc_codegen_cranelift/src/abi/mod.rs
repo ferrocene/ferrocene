@@ -10,6 +10,7 @@ use std::mem;
 use cranelift_codegen::ir::{ArgumentPurpose, SigRef};
 use cranelift_codegen::isa::CallConv;
 use cranelift_module::ModuleError;
+use rustc_abi::ExternAbi;
 use rustc_codegen_ssa::base::is_call_from_compiler_builtins_to_upstream_monomorphization;
 use rustc_codegen_ssa::errors::CompilerBuiltinsCannotCall;
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
@@ -18,8 +19,7 @@ use rustc_middle::ty::layout::FnAbiOf;
 use rustc_middle::ty::print::with_no_trimmed_paths;
 use rustc_session::Session;
 use rustc_span::source_map::Spanned;
-use rustc_target::abi::call::{Conv, FnAbi, PassMode};
-use rustc_target::spec::abi::Abi;
+use rustc_target::callconv::{Conv, FnAbi, PassMode};
 
 use self::pass_mode::*;
 pub(crate) use self::returning::codegen_return;
@@ -193,7 +193,7 @@ fn make_local_place<'tcx>(
         );
     }
     let place = if is_ssa {
-        if let rustc_target::abi::Abi::ScalarPair(_, _) = layout.abi {
+        if let BackendRepr::ScalarPair(_, _) = layout.backend_repr {
             CPlace::new_var_pair(fx, local, layout)
         } else {
             CPlace::new_var(fx, local, layout)
@@ -389,7 +389,7 @@ pub(crate) fn codegen_terminator_call<'tcx>(
                 let callee = with_no_trimmed_paths!(fx.tcx.def_path_str(def_id));
                 fx.tcx.dcx().emit_err(CompilerBuiltinsCannotCall { caller, callee });
             } else {
-                fx.bcx.ins().trap(TrapCode::User(0));
+                fx.bcx.ins().trap(TrapCode::user(2).unwrap());
                 return;
             }
         }
@@ -443,7 +443,7 @@ pub(crate) fn codegen_terminator_call<'tcx>(
         RevealAllLayoutCx(fx.tcx).fn_abi_of_fn_ptr(fn_sig, extra_args)
     };
 
-    let is_cold = if fn_sig.abi() == Abi::RustCold {
+    let is_cold = if fn_sig.abi() == ExternAbi::RustCold {
         true
     } else {
         instance.is_some_and(|inst| {
@@ -458,7 +458,7 @@ pub(crate) fn codegen_terminator_call<'tcx>(
     }
 
     // Unpack arguments tuple for closures
-    let mut args = if fn_sig.abi() == Abi::RustCall {
+    let mut args = if fn_sig.abi() == ExternAbi::RustCall {
         let (self_arg, pack_arg) = match args {
             [pack_arg] => (None, codegen_call_argument_operand(fx, &pack_arg.node)),
             [self_arg, pack_arg] => (
@@ -562,6 +562,11 @@ pub(crate) fn codegen_terminator_call<'tcx>(
             adjust_call_for_c_variadic(fx, &fn_abi, source_info, func_ref, &mut call_args);
         }
 
+        if fx.clif_comments.enabled() {
+            let nop_inst = fx.bcx.ins().nop();
+            with_no_trimmed_paths!(fx.add_comment(nop_inst, format!("abi: {:?}", fn_abi)));
+        }
+
         match func_ref {
             CallTarget::Direct(func_ref) => fx.bcx.ins().call(func_ref, &call_args),
             CallTarget::Indirect(sig, func_ptr) => {
@@ -574,7 +579,7 @@ pub(crate) fn codegen_terminator_call<'tcx>(
         let ret_block = fx.get_block(dest);
         fx.bcx.ins().jump(ret_block, &[]);
     } else {
-        fx.bcx.ins().trap(TrapCode::UnreachableCodeReached);
+        fx.bcx.ins().trap(TrapCode::user(1 /* unreachable */).unwrap());
     }
 
     fn adjust_call_for_c_variadic<'tcx>(

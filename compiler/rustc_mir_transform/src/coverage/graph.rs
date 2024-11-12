@@ -1,10 +1,11 @@
 use std::cmp::Ordering;
 use std::collections::VecDeque;
 use std::ops::{Index, IndexMut};
+use std::{iter, mem, slice};
 
 use rustc_data_structures::captures::Captures;
 use rustc_data_structures::fx::FxHashSet;
-use rustc_data_structures::graph::dominators::{self, Dominators};
+use rustc_data_structures::graph::dominators::Dominators;
 use rustc_data_structures::graph::{self, DirectedGraph, StartNode};
 use rustc_index::IndexVec;
 use rustc_index::bit_set::BitSet;
@@ -20,11 +21,17 @@ pub(crate) struct CoverageGraph {
     bb_to_bcb: IndexVec<BasicBlock, Option<BasicCoverageBlock>>,
     pub(crate) successors: IndexVec<BasicCoverageBlock, Vec<BasicCoverageBlock>>,
     pub(crate) predecessors: IndexVec<BasicCoverageBlock, Vec<BasicCoverageBlock>>,
+
     dominators: Option<Dominators<BasicCoverageBlock>>,
     /// Allows nodes to be compared in some total order such that _if_
     /// `a` dominates `b`, then `a < b`. If neither node dominates the other,
     /// their relative order is consistent but arbitrary.
     dominator_order_rank: IndexVec<BasicCoverageBlock, u32>,
+    /// A loop header is a node that dominates one or more of its predecessors.
+    is_loop_header: BitSet<BasicCoverageBlock>,
+    /// For each node, the loop header node of its nearest enclosing loop.
+    /// This forms a linked list that can be traversed to find all enclosing loops.
+    enclosing_loop_header: IndexVec<BasicCoverageBlock, Option<BasicCoverageBlock>>,
 }
 
 impl CoverageGraph {
@@ -66,17 +73,38 @@ impl CoverageGraph {
             predecessors,
             dominators: None,
             dominator_order_rank: IndexVec::from_elem_n(0, num_nodes),
+            is_loop_header: BitSet::new_empty(num_nodes),
+            enclosing_loop_header: IndexVec::from_elem_n(None, num_nodes),
         };
         assert_eq!(num_nodes, this.num_nodes());
 
-        this.dominators = Some(dominators::dominators(&this));
+        // Set the dominators first, because later init steps rely on them.
+        this.dominators = Some(graph::dominators::dominators(&this));
 
-        // The dominator rank of each node is just its index in a reverse-postorder traversal.
-        let reverse_post_order = graph::iterate::reverse_post_order(&this, this.start_node());
+        // Iterate over all nodes, such that dominating nodes are visited before
+        // the nodes they dominate. Either preorder or reverse postorder is fine.
+        let dominator_order = graph::iterate::reverse_post_order(&this, this.start_node());
         // The coverage graph is created by traversal, so all nodes are reachable.
-        assert_eq!(reverse_post_order.len(), this.num_nodes());
-        for (rank, bcb) in (0u32..).zip(reverse_post_order) {
+        assert_eq!(dominator_order.len(), this.num_nodes());
+        for (rank, bcb) in (0u32..).zip(dominator_order) {
+            // The dominator rank of each node is its index in a dominator-order traversal.
             this.dominator_order_rank[bcb] = rank;
+
+            // A node is a loop header if it dominates any of its predecessors.
+            if this.reloop_predecessors(bcb).next().is_some() {
+                this.is_loop_header.insert(bcb);
+            }
+
+            // If the immediate dominator is a loop header, that's our enclosing loop.
+            // Otherwise, inherit the immediate dominator's enclosing loop.
+            // (Dominator order ensures that we already processed the dominator.)
+            if let Some(dom) = this.dominators().immediate_dominator(bcb) {
+                this.enclosing_loop_header[bcb] = this
+                    .is_loop_header
+                    .contains(dom)
+                    .then_some(dom)
+                    .or_else(|| this.enclosing_loop_header[dom]);
+            }
         }
 
         // The coverage graph's entry-point node (bcb0) always starts with bb0,
@@ -99,10 +127,10 @@ impl CoverageGraph {
         let mut bcbs = IndexVec::<BasicCoverageBlock, _>::with_capacity(num_basic_blocks);
         let mut bb_to_bcb = IndexVec::from_elem_n(None, num_basic_blocks);
 
-        let mut add_basic_coverage_block = |basic_blocks: &mut Vec<BasicBlock>| {
+        let mut flush_chain_into_new_bcb = |current_chain: &mut Vec<BasicBlock>| {
             // Take the accumulated list of blocks, leaving the vector empty
             // to be used by subsequent BCBs.
-            let basic_blocks = std::mem::take(basic_blocks);
+            let basic_blocks = mem::take(current_chain);
 
             let bcb = bcbs.next_index();
             for &bb in basic_blocks.iter() {
@@ -113,48 +141,41 @@ impl CoverageGraph {
                 bcb_filtered_successors(mir_body[bb].terminator()).is_out_summable()
             });
             let bcb_data = BasicCoverageBlockData { basic_blocks, is_out_summable };
-            debug!("adding bcb{}: {:?}", bcb.index(), bcb_data);
+            debug!("adding {bcb:?}: {bcb_data:?}");
             bcbs.push(bcb_data);
         };
 
-        // Walk the MIR CFG using a Preorder traversal, which starts from `START_BLOCK` and follows
-        // each block terminator's `successors()`. Coverage spans must map to actual source code,
-        // so compiler generated blocks and paths can be ignored. To that end, the CFG traversal
-        // intentionally omits unwind paths.
-        // FIXME(#78544): MIR InstrumentCoverage: Improve coverage of `#[should_panic]` tests and
-        // `catch_unwind()` handlers.
+        // Traverse the MIR control-flow graph, accumulating chains of blocks
+        // that can be combined into a single node in the coverage graph.
+        // A depth-first search ensures that if two nodes can be chained
+        // together, they will be adjacent in the traversal order.
 
         // Accumulates a chain of blocks that will be combined into one BCB.
-        let mut basic_blocks = Vec::new();
+        let mut current_chain = vec![];
 
-        let filtered_successors = |bb| bcb_filtered_successors(mir_body[bb].terminator());
-        for bb in short_circuit_preorder(mir_body, filtered_successors)
+        let subgraph = CoverageRelevantSubgraph::new(&mir_body.basic_blocks);
+        for bb in graph::depth_first_search(subgraph, mir::START_BLOCK)
             .filter(|&bb| mir_body[bb].terminator().kind != TerminatorKind::Unreachable)
         {
-            // If the previous block can't be chained into `bb`, flush the accumulated
-            // blocks into a new BCB, then start building the next chain.
-            if let Some(&prev) = basic_blocks.last()
-                && (!filtered_successors(prev).is_chainable() || {
-                    // If `bb` has multiple predecessor blocks, or `prev` isn't
-                    // one of its predecessors, we can't chain and must flush.
-                    let predecessors = &mir_body.basic_blocks.predecessors()[bb];
-                    predecessors.len() > 1 || !predecessors.contains(&prev)
-                })
-            {
-                debug!(
-                    terminator_kind = ?mir_body[prev].terminator().kind,
-                    predecessors = ?&mir_body.basic_blocks.predecessors()[bb],
-                    "can't chain from {prev:?} to {bb:?}"
-                );
-                add_basic_coverage_block(&mut basic_blocks);
+            if let Some(&prev) = current_chain.last() {
+                // Adding a block to a non-empty chain is allowed if the
+                // previous block permits chaining, and the current block has
+                // `prev` as its sole predecessor.
+                let can_chain = subgraph.coverage_successors(prev).is_out_chainable()
+                    && mir_body.basic_blocks.predecessors()[bb].as_slice() == &[prev];
+                if !can_chain {
+                    // The current block can't be added to the existing chain, so
+                    // flush that chain into a new BCB, and start a new chain.
+                    flush_chain_into_new_bcb(&mut current_chain);
+                }
             }
 
-            basic_blocks.push(bb);
+            current_chain.push(bb);
         }
 
-        if !basic_blocks.is_empty() {
+        if !current_chain.is_empty() {
             debug!("flushing accumulated blocks into one last BCB");
-            add_basic_coverage_block(&mut basic_blocks);
+            flush_chain_into_new_bcb(&mut current_chain);
         }
 
         (bcbs, bb_to_bcb)
@@ -173,8 +194,13 @@ impl CoverageGraph {
     }
 
     #[inline(always)]
+    fn dominators(&self) -> &Dominators<BasicCoverageBlock> {
+        self.dominators.as_ref().unwrap()
+    }
+
+    #[inline(always)]
     pub(crate) fn dominates(&self, dom: BasicCoverageBlock, node: BasicCoverageBlock) -> bool {
-        self.dominators.as_ref().unwrap().dominates(dom, node)
+        self.dominators().dominates(dom, node)
     }
 
     #[inline(always)]
@@ -213,6 +239,36 @@ impl CoverageGraph {
         } else {
             None
         }
+    }
+
+    /// For each loop that contains the given node, yields the "loop header"
+    /// node representing that loop, from innermost to outermost. If the given
+    /// node is itself a loop header, it is yielded first.
+    pub(crate) fn loop_headers_containing(
+        &self,
+        bcb: BasicCoverageBlock,
+    ) -> impl Iterator<Item = BasicCoverageBlock> + Captures<'_> {
+        let self_if_loop_header = self.is_loop_header.contains(bcb).then_some(bcb).into_iter();
+
+        let mut curr = Some(bcb);
+        let strictly_enclosing = iter::from_fn(move || {
+            let enclosing = self.enclosing_loop_header[curr?];
+            curr = enclosing;
+            enclosing
+        });
+
+        self_if_loop_header.chain(strictly_enclosing)
+    }
+
+    /// For the given node, yields the subset of its predecessor nodes that
+    /// it dominates. If that subset is non-empty, the node is a "loop header",
+    /// and each of those predecessors represents an in-edge that jumps back to
+    /// the top of its loop.
+    pub(crate) fn reloop_predecessors(
+        &self,
+        to_bcb: BasicCoverageBlock,
+    ) -> impl Iterator<Item = BasicCoverageBlock> + Captures<'_> {
+        self.predecessors[to_bcb].iter().copied().filter(move |&pred| self.dominates(to_bcb, pred))
     }
 }
 
@@ -326,34 +382,28 @@ impl BasicCoverageBlockData {
 /// indicates whether that block can potentially be combined into the same BCB
 /// as its sole successor.
 #[derive(Clone, Copy, Debug)]
-enum CoverageSuccessors<'a> {
-    /// The terminator has exactly one straight-line successor, so its block can
-    /// potentially be combined into the same BCB as that successor.
-    Chainable(BasicBlock),
-    /// The block cannot be combined into the same BCB as its successor(s).
-    NotChainable(&'a [BasicBlock]),
-    /// Yield terminators are not chainable, and their execution count can also
-    /// differ from the execution count of their out-edge.
-    Yield(BasicBlock),
+struct CoverageSuccessors<'a> {
+    /// Coverage-relevant successors of the corresponding terminator.
+    /// There might be 0, 1, or multiple targets.
+    targets: &'a [BasicBlock],
+    /// `Yield` terminators are not chainable, because their sole out-edge is
+    /// only followed if/when the generator is resumed after the yield.
+    is_yield: bool,
 }
 
 impl CoverageSuccessors<'_> {
-    fn is_chainable(&self) -> bool {
-        match self {
-            Self::Chainable(_) => true,
-            Self::NotChainable(_) => false,
-            Self::Yield(_) => false,
-        }
+    /// If `false`, this terminator cannot be chained into another block when
+    /// building the coverage graph.
+    fn is_out_chainable(&self) -> bool {
+        // If a terminator is out-summable and has exactly one out-edge, then
+        // it is eligible to be chained into its successor block.
+        self.is_out_summable() && self.targets.len() == 1
     }
 
     /// Returns true if the terminator itself is assumed to have the same
     /// execution count as the sum of its out-edges (assuming no panics).
     fn is_out_summable(&self) -> bool {
-        match self {
-            Self::Chainable(_) => true,
-            Self::NotChainable(_) => true,
-            Self::Yield(_) => false,
-        }
+        !self.is_yield && !self.targets.is_empty()
     }
 }
 
@@ -362,12 +412,7 @@ impl IntoIterator for CoverageSuccessors<'_> {
     type IntoIter = impl DoubleEndedIterator<Item = Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
-        match self {
-            Self::Chainable(bb) | Self::Yield(bb) => {
-                Some(bb).into_iter().chain((&[]).iter().copied())
-            }
-            Self::NotChainable(bbs) => None.into_iter().chain(bbs.iter().copied()),
-        }
+        self.targets.iter().copied()
     }
 }
 
@@ -377,14 +422,17 @@ impl IntoIterator for CoverageSuccessors<'_> {
 // `catch_unwind()` handlers.
 fn bcb_filtered_successors<'a, 'tcx>(terminator: &'a Terminator<'tcx>) -> CoverageSuccessors<'a> {
     use TerminatorKind::*;
-    match terminator.kind {
+    let mut is_yield = false;
+    let targets = match &terminator.kind {
         // A switch terminator can have many coverage-relevant successors.
-        // (If there is exactly one successor, we still treat it as not chainable.)
-        SwitchInt { ref targets, .. } => CoverageSuccessors::NotChainable(targets.all_targets()),
+        SwitchInt { targets, .. } => targets.all_targets(),
 
         // A yield terminator has exactly 1 successor, but should not be chained,
         // because its resume edge has a different execution count.
-        Yield { resume, .. } => CoverageSuccessors::Yield(resume),
+        Yield { resume, .. } => {
+            is_yield = true;
+            slice::from_ref(resume)
+        }
 
         // These terminators have exactly one coverage-relevant successor,
         // and can be chained into it.
@@ -392,24 +440,15 @@ fn bcb_filtered_successors<'a, 'tcx>(terminator: &'a Terminator<'tcx>) -> Covera
         | Drop { target, .. }
         | FalseEdge { real_target: target, .. }
         | FalseUnwind { real_target: target, .. }
-        | Goto { target } => CoverageSuccessors::Chainable(target),
+        | Goto { target } => slice::from_ref(target),
 
         // A call terminator can normally be chained, except when it has no
         // successor because it is known to diverge.
-        Call { target: maybe_target, .. } => match maybe_target {
-            Some(target) => CoverageSuccessors::Chainable(target),
-            None => CoverageSuccessors::NotChainable(&[]),
-        },
+        Call { target: maybe_target, .. } => maybe_target.as_slice(),
 
         // An inline asm terminator can normally be chained, except when it
         // diverges or uses asm goto.
-        InlineAsm { ref targets, .. } => {
-            if let [target] = targets[..] {
-                CoverageSuccessors::Chainable(target)
-            } else {
-                CoverageSuccessors::NotChainable(targets)
-            }
-        }
+        InlineAsm { targets, .. } => &targets,
 
         // These terminators have no coverage-relevant successors.
         CoroutineDrop
@@ -417,8 +456,10 @@ fn bcb_filtered_successors<'a, 'tcx>(terminator: &'a Terminator<'tcx>) -> Covera
         | TailCall { .. }
         | Unreachable
         | UnwindResume
-        | UnwindTerminate(_) => CoverageSuccessors::NotChainable(&[]),
-    }
+        | UnwindTerminate(_) => &[],
+    };
+
+    CoverageSuccessors { targets, is_yield }
 }
 
 /// Maintains separate worklists for each loop in the BasicCoverageBlock CFG, plus one for the
@@ -439,15 +480,12 @@ struct TraversalContext {
 pub(crate) struct TraverseCoverageGraphWithLoops<'a> {
     basic_coverage_blocks: &'a CoverageGraph,
 
-    backedges: IndexVec<BasicCoverageBlock, Vec<BasicCoverageBlock>>,
     context_stack: Vec<TraversalContext>,
     visited: BitSet<BasicCoverageBlock>,
 }
 
 impl<'a> TraverseCoverageGraphWithLoops<'a> {
     pub(crate) fn new(basic_coverage_blocks: &'a CoverageGraph) -> Self {
-        let backedges = find_loop_backedges(basic_coverage_blocks);
-
         let worklist = VecDeque::from([basic_coverage_blocks.start_node()]);
         let context_stack = vec![TraversalContext { loop_header: None, worklist }];
 
@@ -456,17 +494,7 @@ impl<'a> TraverseCoverageGraphWithLoops<'a> {
         // of the stack as loops are entered, and popped off of the stack when a loop's worklist is
         // exhausted.
         let visited = BitSet::new_empty(basic_coverage_blocks.num_nodes());
-        Self { basic_coverage_blocks, backedges, context_stack, visited }
-    }
-
-    /// For each loop on the loop context stack (top-down), yields a list of BCBs
-    /// within that loop that have an outgoing edge back to the loop header.
-    pub(crate) fn reloop_bcbs_per_loop(&self) -> impl Iterator<Item = &[BasicCoverageBlock]> {
-        self.context_stack
-            .iter()
-            .rev()
-            .filter_map(|context| context.loop_header)
-            .map(|header_bcb| self.backedges[header_bcb].as_slice())
+        Self { basic_coverage_blocks, context_stack, visited }
     }
 
     pub(crate) fn next(&mut self) -> Option<BasicCoverageBlock> {
@@ -488,7 +516,7 @@ impl<'a> TraverseCoverageGraphWithLoops<'a> {
             }
             debug!("Visiting {bcb:?}");
 
-            if self.backedges[bcb].len() > 0 {
+            if self.basic_coverage_blocks.is_loop_header.contains(bcb) {
                 debug!("{bcb:?} is a loop header! Start a new TraversalContext...");
                 self.context_stack
                     .push(TraversalContext { loop_header: Some(bcb), worklist: VecDeque::new() });
@@ -566,51 +594,31 @@ impl<'a> TraverseCoverageGraphWithLoops<'a> {
     }
 }
 
-fn find_loop_backedges(
-    basic_coverage_blocks: &CoverageGraph,
-) -> IndexVec<BasicCoverageBlock, Vec<BasicCoverageBlock>> {
-    let num_bcbs = basic_coverage_blocks.num_nodes();
-    let mut backedges = IndexVec::from_elem_n(Vec::<BasicCoverageBlock>::new(), num_bcbs);
-
-    // Identify loops by their backedges.
-    for (bcb, _) in basic_coverage_blocks.iter_enumerated() {
-        for &successor in &basic_coverage_blocks.successors[bcb] {
-            if basic_coverage_blocks.dominates(successor, bcb) {
-                let loop_header = successor;
-                let backedge_from_bcb = bcb;
-                debug!(
-                    "Found BCB backedge: {:?} -> loop_header: {:?}",
-                    backedge_from_bcb, loop_header
-                );
-                backedges[loop_header].push(backedge_from_bcb);
-            }
-        }
-    }
-    backedges
+/// Wrapper around a [`mir::BasicBlocks`] graph that restricts each node's
+/// successors to only the ones considered "relevant" when building a coverage
+/// graph.
+#[derive(Clone, Copy)]
+struct CoverageRelevantSubgraph<'a, 'tcx> {
+    basic_blocks: &'a mir::BasicBlocks<'tcx>,
 }
+impl<'a, 'tcx> CoverageRelevantSubgraph<'a, 'tcx> {
+    fn new(basic_blocks: &'a mir::BasicBlocks<'tcx>) -> Self {
+        Self { basic_blocks }
+    }
 
-fn short_circuit_preorder<'a, 'tcx, F, Iter>(
-    body: &'a mir::Body<'tcx>,
-    filtered_successors: F,
-) -> impl Iterator<Item = BasicBlock> + Captures<'a> + Captures<'tcx>
-where
-    F: Fn(BasicBlock) -> Iter,
-    Iter: IntoIterator<Item = BasicBlock>,
-{
-    let mut visited = BitSet::new_empty(body.basic_blocks.len());
-    let mut worklist = vec![mir::START_BLOCK];
+    fn coverage_successors(&self, bb: BasicBlock) -> CoverageSuccessors<'_> {
+        bcb_filtered_successors(self.basic_blocks[bb].terminator())
+    }
+}
+impl<'a, 'tcx> graph::DirectedGraph for CoverageRelevantSubgraph<'a, 'tcx> {
+    type Node = BasicBlock;
 
-    std::iter::from_fn(move || {
-        while let Some(bb) = worklist.pop() {
-            if !visited.insert(bb) {
-                continue;
-            }
-
-            worklist.extend(filtered_successors(bb));
-
-            return Some(bb);
-        }
-
-        None
-    })
+    fn num_nodes(&self) -> usize {
+        self.basic_blocks.num_nodes()
+    }
+}
+impl<'a, 'tcx> graph::Successors for CoverageRelevantSubgraph<'a, 'tcx> {
+    fn successors(&self, bb: Self::Node) -> impl Iterator<Item = Self::Node> {
+        self.coverage_successors(bb).into_iter()
+    }
 }

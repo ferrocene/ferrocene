@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use rustc_abi::{FIRST_VARIANT, FieldIdx};
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_hir as hir;
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, Res};
@@ -18,7 +19,6 @@ use rustc_middle::ty::{
 };
 use rustc_middle::{bug, span_bug};
 use rustc_span::{Span, sym};
-use rustc_target::abi::{FIRST_VARIANT, FieldIdx};
 use tracing::{debug, info, instrument, trace};
 
 use crate::errors;
@@ -136,11 +136,13 @@ impl<'tcx> Cx<'tcx> {
             Adjust::Deref(Some(deref)) => {
                 // We don't need to do call adjust_span here since
                 // deref coercions always start with a built-in deref.
-                let call = deref.method_call(self.tcx(), expr.ty);
+                let call_def_id = deref.method_call(self.tcx());
+                let overloaded_callee =
+                    Ty::new_fn_def(self.tcx(), call_def_id, self.tcx().mk_args(&[expr.ty.into()]));
 
                 expr = Expr {
                     temp_lifetime,
-                    ty: Ty::new_ref(self.tcx, deref.region, expr.ty, deref.mutbl),
+                    ty: Ty::new_ref(self.tcx, self.tcx.lifetimes.re_erased, expr.ty, deref.mutbl),
                     span,
                     kind: ExprKind::Borrow {
                         borrow_kind: deref.mutbl.to_borrow_kind(),
@@ -150,16 +152,22 @@ impl<'tcx> Cx<'tcx> {
 
                 let expr = Box::new([self.thir.exprs.push(expr)]);
 
-                self.overloaded_place(hir_expr, adjustment.target, Some(call), expr, deref.span)
+                self.overloaded_place(
+                    hir_expr,
+                    adjustment.target,
+                    Some(overloaded_callee),
+                    expr,
+                    deref.span,
+                )
             }
-            Adjust::Borrow(AutoBorrow::Ref(_, m)) => ExprKind::Borrow {
+            Adjust::Borrow(AutoBorrow::Ref(m)) => ExprKind::Borrow {
                 borrow_kind: m.to_borrow_kind(),
                 arg: self.thir.exprs.push(expr),
             },
             Adjust::Borrow(AutoBorrow::RawPtr(mutability)) => {
                 ExprKind::RawBorrow { mutability, arg: self.thir.exprs.push(expr) }
             }
-            Adjust::ReborrowPin(region, mutbl) => {
+            Adjust::ReborrowPin(mutbl) => {
                 debug!("apply ReborrowPin adjustment");
                 // Rewrite `$expr` as `Pin { __pointer: &(mut)? *($expr).__pointer }`
 
@@ -197,7 +205,8 @@ impl<'tcx> Cx<'tcx> {
                     hir::Mutability::Mut => BorrowKind::Mut { kind: mir::MutBorrowKind::Default },
                     hir::Mutability::Not => BorrowKind::Shared,
                 };
-                let new_pin_target = Ty::new_ref(self.tcx, region, ptr_target_ty, mutbl);
+                let new_pin_target =
+                    Ty::new_ref(self.tcx, self.tcx.lifetimes.re_erased, ptr_target_ty, mutbl);
                 let expr = self.thir.exprs.push(Expr {
                     temp_lifetime,
                     ty: new_pin_target,
@@ -784,7 +793,7 @@ impl<'tcx> Cx<'tcx> {
                 if_then_scope: region::Scope {
                     id: then.hir_id.local_id,
                     data: {
-                        if expr.span.at_least_rust_2024() && tcx.features().if_let_rescope() {
+                        if expr.span.at_least_rust_2024() {
                             region::ScopeData::IfThenRescope
                         } else {
                             region::ScopeData::IfThen
@@ -1184,11 +1193,11 @@ impl<'tcx> Cx<'tcx> {
             ty::UpvarCapture::ByValue => captured_place_expr,
             ty::UpvarCapture::ByRef(upvar_borrow) => {
                 let borrow_kind = match upvar_borrow {
-                    ty::BorrowKind::ImmBorrow => BorrowKind::Shared,
-                    ty::BorrowKind::UniqueImmBorrow => {
+                    ty::BorrowKind::Immutable => BorrowKind::Shared,
+                    ty::BorrowKind::UniqueImmutable => {
                         BorrowKind::Mut { kind: mir::MutBorrowKind::ClosureCapture }
                     }
-                    ty::BorrowKind::MutBorrow => {
+                    ty::BorrowKind::Mutable => {
                         BorrowKind::Mut { kind: mir::MutBorrowKind::Default }
                     }
                 };

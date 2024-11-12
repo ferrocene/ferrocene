@@ -59,11 +59,11 @@ impl<'a, 'tcx> NiceRegionError<'a, 'tcx> {
                     let simple_ident = param.param.pat.simple_ident();
 
                     let (has_impl_path, impl_path) = match ctxt.assoc_item.container {
-                        AssocItemContainer::TraitContainer => {
+                        AssocItemContainer::Trait => {
                             let id = ctxt.assoc_item.container_id(tcx);
                             (true, tcx.def_path_str(id))
                         }
-                        AssocItemContainer::ImplContainer => (false, String::new()),
+                        AssocItemContainer::Impl => (false, String::new()),
                     };
 
                     let mut err = self.tcx().dcx().create_err(ButCallingIntroduces {
@@ -284,7 +284,7 @@ pub fn suggest_new_region_bound(
         }
         match fn_return.kind {
             // FIXME(precise_captures): Suggest adding to `use<...>` list instead.
-            TyKind::OpaqueDef(opaque, _) => {
+            TyKind::OpaqueDef(opaque) => {
                 // Get the identity type for this RPIT
                 let did = opaque.def_id.to_def_id();
                 let ty = Ty::new_opaque(tcx, did, ty::GenericArgs::identity_for_item(tcx, did));

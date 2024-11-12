@@ -312,7 +312,7 @@ fn exported_symbols_provider_local(
 
             match *mono_item {
                 MonoItem::Fn(Instance { def: InstanceKind::Item(def), args }) => {
-                    if args.non_erasable_generics(tcx, def).next().is_some() {
+                    if args.non_erasable_generics().next().is_some() {
                         let symbol = ExportedSymbol::Generic(def, args);
                         symbols.push((symbol, SymbolExportInfo {
                             level: SymbolExportLevel::Rust,
@@ -321,12 +321,9 @@ fn exported_symbols_provider_local(
                         }));
                     }
                 }
-                MonoItem::Fn(Instance { def: InstanceKind::DropGlue(def_id, Some(ty)), args }) => {
+                MonoItem::Fn(Instance { def: InstanceKind::DropGlue(_, Some(ty)), args }) => {
                     // A little sanity-check
-                    assert_eq!(
-                        args.non_erasable_generics(tcx, def_id).next(),
-                        Some(GenericArgKind::Type(ty))
-                    );
+                    assert_eq!(args.non_erasable_generics().next(), Some(GenericArgKind::Type(ty)));
                     symbols.push((ExportedSymbol::DropGlue(ty), SymbolExportInfo {
                         level: SymbolExportLevel::Rust,
                         kind: SymbolExportKind::Text,
@@ -334,14 +331,11 @@ fn exported_symbols_provider_local(
                     }));
                 }
                 MonoItem::Fn(Instance {
-                    def: InstanceKind::AsyncDropGlueCtorShim(def_id, Some(ty)),
+                    def: InstanceKind::AsyncDropGlueCtorShim(_, Some(ty)),
                     args,
                 }) => {
                     // A little sanity-check
-                    assert_eq!(
-                        args.non_erasable_generics(tcx, def_id).next(),
-                        Some(GenericArgKind::Type(ty))
-                    );
+                    assert_eq!(args.non_erasable_generics().next(), Some(GenericArgKind::Type(ty)));
                     symbols.push((ExportedSymbol::AsyncDropGlueCtorShim(ty), SymbolExportInfo {
                         level: SymbolExportLevel::Rust,
                         kind: SymbolExportKind::Text,
@@ -554,7 +548,7 @@ pub(crate) fn linking_symbol_name_for_instance_in_crate<'tcx>(
     symbol: ExportedSymbol<'tcx>,
     instantiating_crate: CrateNum,
 ) -> String {
-    use rustc_target::abi::call::Conv;
+    use rustc_target::callconv::Conv;
 
     let mut undecorated = symbol_name_for_instance_in_crate(tcx, symbol, instantiating_crate);
 

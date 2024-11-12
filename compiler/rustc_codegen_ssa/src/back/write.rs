@@ -90,7 +90,6 @@ pub struct ModuleConfig {
     pub pgo_sample_use: Option<PathBuf>,
     pub debug_info_for_profiling: bool,
     pub instrument_coverage: bool,
-    pub instrument_gcov: bool,
 
     pub sanitizer: SanitizerSet,
     pub sanitizer_recover: SanitizerSet,
@@ -123,12 +122,7 @@ pub struct ModuleConfig {
 }
 
 impl ModuleConfig {
-    fn new(
-        kind: ModuleKind,
-        tcx: TyCtxt<'_>,
-        no_builtins: bool,
-        is_compiler_builtins: bool,
-    ) -> ModuleConfig {
+    fn new(kind: ModuleKind, tcx: TyCtxt<'_>, no_builtins: bool) -> ModuleConfig {
         // If it's a regular module, use `$regular`, otherwise use `$other`.
         // `$regular` and `$other` are evaluated lazily.
         macro_rules! if_regular {
@@ -189,13 +183,6 @@ impl ModuleConfig {
             pgo_sample_use: if_regular!(sess.opts.unstable_opts.profile_sample_use.clone(), None),
             debug_info_for_profiling: sess.opts.unstable_opts.debug_info_for_profiling,
             instrument_coverage: if_regular!(sess.instrument_coverage(), false),
-            instrument_gcov: if_regular!(
-                // compiler_builtins overrides the codegen-units settings,
-                // which is incompatible with -Zprofile which requires that
-                // only a single codegen unit is used per crate.
-                sess.opts.unstable_opts.profile && !is_compiler_builtins,
-                false
-            ),
 
             sanitizer: if_regular!(sess.opts.unstable_opts.sanitizer, SanitizerSet::empty()),
             sanitizer_dataflow_abilist: if_regular!(
@@ -358,6 +345,8 @@ pub struct CodegenContext<B: WriteBackendMethods> {
     pub is_pe_coff: bool,
     pub target_can_use_split_dwarf: bool,
     pub target_arch: String,
+    pub target_is_like_osx: bool,
+    pub target_is_like_aix: bool,
     pub split_debuginfo: rustc_target::spec::SplitDebuginfo,
     pub split_dwarf_kind: rustc_session::config::SplitDwarfKind,
 
@@ -473,16 +462,12 @@ pub(crate) fn start_async_codegen<B: ExtraBackendMethods>(
 
     let crate_attrs = tcx.hir().attrs(rustc_hir::CRATE_HIR_ID);
     let no_builtins = attr::contains_name(crate_attrs, sym::no_builtins);
-    let is_compiler_builtins = attr::contains_name(crate_attrs, sym::compiler_builtins);
 
     let crate_info = CrateInfo::new(tcx, target_cpu);
 
-    let regular_config =
-        ModuleConfig::new(ModuleKind::Regular, tcx, no_builtins, is_compiler_builtins);
-    let metadata_config =
-        ModuleConfig::new(ModuleKind::Metadata, tcx, no_builtins, is_compiler_builtins);
-    let allocator_config =
-        ModuleConfig::new(ModuleKind::Allocator, tcx, no_builtins, is_compiler_builtins);
+    let regular_config = ModuleConfig::new(ModuleKind::Regular, tcx, no_builtins);
+    let metadata_config = ModuleConfig::new(ModuleKind::Metadata, tcx, no_builtins);
+    let allocator_config = ModuleConfig::new(ModuleKind::Allocator, tcx, no_builtins);
 
     let (shared_emitter, shared_emitter_main) = SharedEmitter::new();
     let (codegen_worker_send, codegen_worker_receive) = channel();
@@ -514,7 +499,7 @@ pub(crate) fn start_async_codegen<B: ExtraBackendMethods>(
             future: Some(coordinator_thread),
             phantom: PhantomData,
         },
-        output_filenames: tcx.output_filenames(()).clone(),
+        output_filenames: Arc::clone(tcx.output_filenames(())),
     }
 }
 
@@ -1203,7 +1188,7 @@ fn start_executing_work<B: ExtraBackendMethods>(
         coordinator_send,
         expanded_args: tcx.sess.expanded_args.clone(),
         diag_emitter: shared_emitter.clone(),
-        output_filenames: tcx.output_filenames(()).clone(),
+        output_filenames: Arc::clone(tcx.output_filenames(())),
         regular_module_config: regular_config,
         metadata_module_config: metadata_config,
         allocator_module_config: allocator_config,
@@ -1212,6 +1197,8 @@ fn start_executing_work<B: ExtraBackendMethods>(
         is_pe_coff: tcx.sess.target.is_like_windows,
         target_can_use_split_dwarf: tcx.sess.target_can_use_split_dwarf(),
         target_arch: tcx.sess.target.arch.to_string(),
+        target_is_like_osx: tcx.sess.target.is_like_osx,
+        target_is_like_aix: tcx.sess.target.is_like_aix,
         split_debuginfo: tcx.sess.split_debuginfo(),
         split_dwarf_kind: tcx.sess.opts.unstable_opts.split_dwarf_kind,
         parallel: backend.supports_parallel() && !sess.opts.unstable_opts.no_parallel_backend,

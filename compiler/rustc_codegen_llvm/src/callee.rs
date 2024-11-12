@@ -44,6 +44,22 @@ pub(crate) fn get_fn<'ll, 'tcx>(cx: &CodegenCx<'ll, 'tcx>, instance: Instance<'t
         let llfn = if tcx.sess.target.arch == "x86"
             && let Some(dllimport) = crate::common::get_dllimport(tcx, instance_def_id, sym)
         {
+            // When calling functions in generated import libraries, MSVC needs
+            // the fully decorated name (as would have been in the declaring
+            // object file), but MinGW wants the name as exported (as would be
+            // in the def file) which may be missing decorations.
+            let mingw_gnu_toolchain = common::is_mingw_gnu_toolchain(&tcx.sess.target);
+            let llfn = cx.declare_fn(
+                &common::i686_decorated_name(
+                    dllimport,
+                    mingw_gnu_toolchain,
+                    true,
+                    !mingw_gnu_toolchain,
+                ),
+                fn_abi,
+                Some(instance),
+            );
+
             // Fix for https://github.com/rust-lang/rust/issues/104453
             // On x86 Windows, LLVM uses 'L' as the prefix for any private
             // global symbols, so when we create an undecorated function symbol
@@ -55,15 +71,6 @@ pub(crate) fn get_fn<'ll, 'tcx>(cx: &CodegenCx<'ll, 'tcx>, instance: Instance<'t
             // LLVM will prefix the name with `__imp_`. Ideally, we'd like the
             // existing logic below to set the Storage Class, but it has an
             // exemption for MinGW for backwards compatibility.
-            let llfn = cx.declare_fn(
-                &common::i686_decorated_name(
-                    dllimport,
-                    common::is_mingw_gnu_toolchain(&tcx.sess.target),
-                    true,
-                ),
-                fn_abi,
-                Some(instance),
-            );
             unsafe {
                 llvm::LLVMSetDLLStorageClass(llfn, llvm::DLLStorageClass::DllImport);
             }
@@ -95,11 +102,10 @@ pub(crate) fn get_fn<'ll, 'tcx>(cx: &CodegenCx<'ll, 'tcx>, instance: Instance<'t
         // whether we are sharing generics or not. The important thing here is
         // that the visibility we apply to the declaration is the same one that
         // has been applied to the definition (wherever that definition may be).
-        unsafe {
-            llvm::LLVMRustSetLinkage(llfn, llvm::Linkage::ExternalLinkage);
 
-            let is_generic =
-                instance.args.non_erasable_generics(tcx, instance.def_id()).next().is_some();
+        llvm::set_linkage(llfn, llvm::Linkage::ExternalLinkage);
+        unsafe {
+            let is_generic = instance.args.non_erasable_generics().next().is_some();
 
             let is_hidden = if is_generic {
                 // This is a monomorphization of a generic function.
@@ -136,7 +142,7 @@ pub(crate) fn get_fn<'ll, 'tcx>(cx: &CodegenCx<'ll, 'tcx>, instance: Instance<'t
                         || !cx.tcx.is_reachable_non_generic(instance_def_id))
             };
             if is_hidden {
-                llvm::LLVMRustSetVisibility(llfn, llvm::Visibility::Hidden);
+                llvm::set_visibility(llfn, llvm::Visibility::Hidden);
             }
 
             // MinGW: For backward compatibility we rely on the linker to decide whether it

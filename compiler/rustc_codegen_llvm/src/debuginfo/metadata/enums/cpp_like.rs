@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use libc::c_uint;
+use rustc_abi::{Align, Endian, Size, TagEncoding, VariantIdx, Variants};
 use rustc_codegen_ssa::debuginfo::type_names::compute_debuginfo_type_name;
 use rustc_codegen_ssa::debuginfo::{tag_base_type, wants_c_like_enum_debuginfo};
 use rustc_codegen_ssa::traits::ConstCodegenMethods;
@@ -8,10 +9,9 @@ use rustc_index::IndexVec;
 use rustc_middle::bug;
 use rustc_middle::ty::layout::{LayoutOf, TyAndLayout};
 use rustc_middle::ty::{self, AdtDef, CoroutineArgs, CoroutineArgsExt, Ty};
-use rustc_target::abi::{Align, Endian, Size, TagEncoding, VariantIdx, Variants};
 use smallvec::smallvec;
 
-use crate::common::CodegenCx;
+use crate::common::{AsCCharPtr, CodegenCx};
 use crate::debuginfo::metadata::enums::DiscrResult;
 use crate::debuginfo::metadata::type_map::{self, Stub, UniqueTypeId};
 use crate::debuginfo::metadata::{
@@ -359,7 +359,7 @@ fn build_single_variant_union_fields<'ll, 'tcx>(
             llvm::LLVMRustDIBuilderCreateStaticMemberType(
                 DIB(cx),
                 enum_type_di_node,
-                TAG_FIELD_NAME.as_ptr().cast(),
+                TAG_FIELD_NAME.as_c_char_ptr(),
                 TAG_FIELD_NAME.len(),
                 unknown_file_metadata(cx),
                 UNKNOWN_LINE_NUMBER,
@@ -537,7 +537,7 @@ fn build_variant_struct_wrapper_type_di_node<'ll, 'tcx>(
                     llvm::LLVMRustDIBuilderCreateStaticMemberType(
                         DIB(cx),
                         wrapper_struct_type_di_node,
-                        name.as_ptr().cast(),
+                        name.as_c_char_ptr(),
                         name.len(),
                         unknown_file_metadata(cx),
                         UNKNOWN_LINE_NUMBER,
@@ -785,7 +785,7 @@ fn build_union_fields_for_direct_tag_enum_or_coroutine<'ll, 'tcx>(
             llvm::LLVMRustDIBuilderCreateMemberType(
                 DIB(cx),
                 enum_type_di_node,
-                field_name.as_ptr().cast(),
+                field_name.as_c_char_ptr(),
                 field_name.len(),
                 file_di_node,
                 line_number,

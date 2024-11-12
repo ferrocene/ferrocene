@@ -102,7 +102,7 @@ where
 fn optgroups() -> getopts::Options {
     let mut opts = getopts::Options::new();
     for group in rustc_optgroups() {
-        (group.apply)(&mut opts);
+        group.apply(&mut opts);
     }
     return opts;
 }
@@ -764,7 +764,7 @@ fn test_unstable_options_tracking_hash() {
         branch_protection,
         Some(BranchProtection {
             bti: true,
-            pac_ret: Some(PacRet { leaf: true, key: PAuthKey::B })
+            pac_ret: Some(PacRet { leaf: true, pc: true, key: PAuthKey::B })
         })
     );
     tracked!(codegen_backend, Some("abc".to_string()));
@@ -832,8 +832,6 @@ fn test_unstable_options_tracking_hash() {
     tracked!(polonius, Polonius::Legacy);
     tracked!(precise_enum_drop_elaboration, false);
     tracked!(print_fuel, Some("abc".to_string()));
-    tracked!(profile, true);
-    tracked!(profile_emit, Some(PathBuf::from("abc")));
     tracked!(profile_sample_use, Some(PathBuf::from("abc")));
     tracked!(profiler_runtime, "abc".to_string());
     tracked!(regparm, Some(3));

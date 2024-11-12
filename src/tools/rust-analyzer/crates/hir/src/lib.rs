@@ -34,7 +34,10 @@ pub mod term_search;
 
 mod display;
 
-use std::{mem::discriminant, ops::ControlFlow};
+use std::{
+    mem::discriminant,
+    ops::{ControlFlow, Not},
+};
 
 use arrayvec::ArrayVec;
 use base_db::{CrateDisplayName, CrateId, CrateOrigin};
@@ -58,7 +61,8 @@ use hir_def::{
     TypeOrConstParamId, TypeParamId, UnionId,
 };
 use hir_expand::{
-    attrs::collect_attrs, proc_macro::ProcMacroKind, AstId, MacroCallKind, ValueResult,
+    attrs::collect_attrs, proc_macro::ProcMacroKind, AstId, MacroCallKind, RenderedExpandError,
+    ValueResult,
 };
 use hir_ty::{
     all_super_traits, autoderef, check_orphan_rules,
@@ -838,7 +842,7 @@ fn macro_call_diagnostics(
         let file_id = loc.kind.file_id();
         let node =
             InFile::new(file_id, db.ast_id_map(file_id).get_erased(loc.kind.erased_ast_id()));
-        let (message, error) = err.render_to_string(db.upcast());
+        let RenderedExpandError { message, error, kind } = err.render_to_string(db.upcast());
         let precise_location = if err.span().anchor.file_id == file_id {
             Some(
                 err.span().range
@@ -850,7 +854,7 @@ fn macro_call_diagnostics(
         } else {
             None
         };
-        acc.push(MacroError { node, precise_location, message, error }.into());
+        acc.push(MacroError { node, precise_location, message, error, kind }.into());
     }
 
     if !parse_errors.is_empty() {
@@ -916,13 +920,14 @@ fn emit_def_diagnostic_(
 
         DefDiagnosticKind::MacroError { ast, path, err } => {
             let item = ast.to_ptr(db.upcast());
-            let (message, error) = err.render_to_string(db.upcast());
+            let RenderedExpandError { message, error, kind } = err.render_to_string(db.upcast());
             acc.push(
                 MacroError {
                     node: InFile::new(ast.file_id, item.syntax_node_ptr()),
                     precise_location: None,
                     message: format!("{}: {message}", path.display(db.upcast(), edition)),
                     error,
+                    kind,
                 }
                 .into(),
             )
@@ -1811,7 +1816,8 @@ impl DefWithBody {
                     InactiveCode { node: *node, cfg: cfg.clone(), opts: opts.clone() }.into()
                 }
                 BodyDiagnostic::MacroError { node, err } => {
-                    let (message, error) = err.render_to_string(db.upcast());
+                    let RenderedExpandError { message, error, kind } =
+                        err.render_to_string(db.upcast());
 
                     let precise_location = if err.span().anchor.file_id == node.file_id {
                         Some(
@@ -1829,6 +1835,7 @@ impl DefWithBody {
                         precise_location,
                         message,
                         error,
+                        kind,
                     }
                     .into()
                 }
@@ -1885,7 +1892,7 @@ impl DefWithBody {
 
         let (unafe_exprs, only_lint) = hir_ty::diagnostics::missing_unsafe(db, self.into());
         for expr in unafe_exprs {
-            match source_map.expr_syntax(expr) {
+            match source_map.expr_or_pat_syntax(expr) {
                 Ok(expr) => acc.push(MissingUnsafe { expr, only_lint }.into()),
                 Err(SyntheticSyntax) => {
                     // FIXME: Here and elsewhere in this file, the `expr` was
@@ -2299,22 +2306,15 @@ impl Function {
         self,
         db: &dyn HirDatabase,
         span_formatter: impl Fn(FileId, TextRange) -> String,
-    ) -> String {
+    ) -> Result<String, ConstEvalError> {
         let krate = HasModule::krate(&self.id, db.upcast());
         let edition = db.crate_graph()[krate].edition;
-        let body = match db.monomorphized_mir_body(
+        let body = db.monomorphized_mir_body(
             self.id.into(),
             Substitution::empty(Interner),
             db.trait_environment(self.id.into()),
-        ) {
-            Ok(body) => body,
-            Err(e) => {
-                let mut r = String::new();
-                _ = e.pretty_print(&mut r, db, &span_formatter, edition);
-                return r;
-            }
-        };
-        let (result, output) = interpret_mir(db, body, false, None);
+        )?;
+        let (result, output) = interpret_mir(db, body, false, None)?;
         let mut text = match result {
             Ok(_) => "pass".to_owned(),
             Err(e) => {
@@ -2333,7 +2333,7 @@ impl Function {
             text += "\n--------- stderr ---------\n";
             text += &stderr;
         }
-        text
+        Ok(text)
     }
 }
 
@@ -2420,8 +2420,8 @@ impl SelfParam {
         func_data
             .params
             .first()
-            .map(|param| match &**param {
-                TypeRef::Reference(.., mutability) => match mutability {
+            .map(|&param| match &func_data.types_map[param] {
+                TypeRef::Reference(ref_) => match ref_.mutability {
                     hir_def::type_ref::Mutability::Shared => Access::Shared,
                     hir_def::type_ref::Mutability::Mut => Access::Exclusive,
                 },
@@ -2556,9 +2556,9 @@ impl Const {
     /// Evaluate the constant and return the result as a string.
     ///
     /// This function is intended for IDE assistance, different from [`Const::render_eval`].
-    pub fn eval(self, db: &dyn HirDatabase, edition: Edition) -> Result<String, ConstEvalError> {
+    pub fn eval(self, db: &dyn HirDatabase) -> Result<String, ConstEvalError> {
         let c = db.const_eval(self.id.into(), Substitution::empty(Interner), None)?;
-        Ok(format!("{}", c.display(db, edition)))
+        Ok(format!("{}", c.display(db, self.krate(db).edition(db))))
     }
 
     /// Evaluate the constant and return the result as a string, with more detailed information.
@@ -2593,7 +2593,7 @@ impl Const {
                 }
             }
         }
-        if let Ok(s) = mir::render_const_using_debug_impl(db, self.id, &c) {
+        if let Ok(s) = mir::render_const_using_debug_impl(db, self.id.into(), &c) {
             Ok(s)
         } else {
             Ok(format!("{}", c.display(db, edition)))
@@ -2631,6 +2631,53 @@ impl Static {
 
     pub fn ty(self, db: &dyn HirDatabase) -> Type {
         Type::from_value_def(db, self.id)
+    }
+
+    /// Evaluate the static and return the result as a string.
+    ///
+    /// This function is intended for IDE assistance, different from [`Static::render_eval`].
+    pub fn eval(self, db: &dyn HirDatabase) -> Result<String, ConstEvalError> {
+        let c = db.const_eval(self.id.into(), Substitution::empty(Interner), None)?;
+        Ok(format!("{}", c.display(db, self.krate(db).edition(db))))
+    }
+
+    /// Evaluate the static and return the result as a string, with more detailed information.
+    ///
+    /// This function is intended for user-facing display.
+    pub fn render_eval(
+        self,
+        db: &dyn HirDatabase,
+        edition: Edition,
+    ) -> Result<String, ConstEvalError> {
+        let c = db.const_eval(self.id.into(), Substitution::empty(Interner), None)?;
+        let data = &c.data(Interner);
+        if let TyKind::Scalar(s) = data.ty.kind(Interner) {
+            if matches!(s, Scalar::Int(_) | Scalar::Uint(_)) {
+                if let hir_ty::ConstValue::Concrete(c) = &data.value {
+                    if let hir_ty::ConstScalar::Bytes(b, _) = &c.interned {
+                        let value = u128::from_le_bytes(mir::pad16(b, false));
+                        let value_signed =
+                            i128::from_le_bytes(mir::pad16(b, matches!(s, Scalar::Int(_))));
+                        let mut result = if let Scalar::Int(_) = s {
+                            value_signed.to_string()
+                        } else {
+                            value.to_string()
+                        };
+                        if value >= 10 {
+                            format_to!(result, " ({value:#X})");
+                            return Ok(result);
+                        } else {
+                            return Ok(result);
+                        }
+                    }
+                }
+            }
+        }
+        if let Ok(s) = mir::render_const_using_debug_impl(db, self.id.into(), &c) {
+            Ok(s)
+        } else {
+            Ok(format!("{}", c.display(db, edition)))
+        }
     }
 }
 
@@ -2693,6 +2740,18 @@ impl Trait {
         hir_ty::dyn_compatibility::dyn_compatibility(db, self.id)
     }
 
+    pub fn dyn_compatibility_all_violations(
+        &self,
+        db: &dyn HirDatabase,
+    ) -> Option<Vec<DynCompatibilityViolation>> {
+        let mut violations = vec![];
+        hir_ty::dyn_compatibility::dyn_compatibility_with_callback(db, self.id, &mut |violation| {
+            violations.push(violation);
+            ControlFlow::Continue(())
+        });
+        violations.is_empty().not().then_some(violations)
+    }
+
     fn all_macro_calls(&self, db: &dyn HirDatabase) -> Box<[(AstId<ast::Item>, MacroCallId)]> {
         db.trait_data(self.id)
             .macro_calls
@@ -2745,10 +2804,6 @@ impl TypeAlias {
 
     pub fn module(self, db: &dyn HirDatabase) -> Module {
         Module { id: self.id.module(db.upcast()) }
-    }
-
-    pub fn type_ref(self, db: &dyn HirDatabase) -> Option<TypeRef> {
-        db.type_alias_data(self.id).type_ref.as_deref().cloned()
     }
 
     pub fn ty(self, db: &dyn HirDatabase) -> Type {
@@ -3481,7 +3536,7 @@ impl Local {
                     LocalSource {
                         local: self,
                         source: src.map(|ast| match ast.to_node(&root) {
-                            ast::Pat::IdentPat(it) => Either::Left(it),
+                            Either::Right(ast::Pat::IdentPat(it)) => Either::Left(it),
                             _ => unreachable!("local with non ident-pattern"),
                         }),
                     }
@@ -3510,7 +3565,7 @@ impl Local {
                     LocalSource {
                         local: self,
                         source: src.map(|ast| match ast.to_node(&root) {
-                            ast::Pat::IdentPat(it) => Either::Left(it),
+                            Either::Right(ast::Pat::IdentPat(it)) => Either::Left(it),
                             _ => unreachable!("local with non ident-pattern"),
                         }),
                     }
@@ -4235,10 +4290,7 @@ impl CaptureUsages {
                 }
                 mir::MirSpan::PatId(pat) => {
                     if let Ok(pat) = source_map.pat_syntax(pat) {
-                        result.push(CaptureUsageSource {
-                            is_ref,
-                            source: pat.map(AstPtr::wrap_right),
-                        });
+                        result.push(CaptureUsageSource { is_ref, source: pat });
                     }
                 }
                 mir::MirSpan::BindingId(binding) => result.extend(
@@ -4246,10 +4298,7 @@ impl CaptureUsages {
                         .patterns_for_binding(binding)
                         .iter()
                         .filter_map(|&pat| source_map.pat_syntax(pat).ok())
-                        .map(|pat| CaptureUsageSource {
-                            is_ref,
-                            source: pat.map(AstPtr::wrap_right),
-                        }),
+                        .map(|pat| CaptureUsageSource { is_ref, source: pat }),
                 ),
                 mir::MirSpan::SelfParam | mir::MirSpan::Unknown => {
                     unreachable!("invalid capture usage span")

@@ -149,10 +149,6 @@ hir_analysis_drop_impl_reservation = reservation `Drop` impls are not supported
 hir_analysis_duplicate_precise_capture = cannot capture parameter `{$name}` twice
     .label = parameter captured again here
 
-hir_analysis_effects_without_next_solver = using `#![feature(effects)]` without enabling next trait solver globally
-    .note = the next trait solver must be enabled globally for the effects feature to work correctly
-    .help = use `-Znext-solver` to enable
-
 hir_analysis_empty_specialization = specialization impl does not specialize any associated items
     .note = impl is a specialization of this impl
 
@@ -238,6 +234,12 @@ hir_analysis_inherent_ty_outside_relevant = cannot define inherent `impl` for a 
     .help = consider moving this inherent impl into the crate defining the type if possible
     .span_help = alternatively add `#[rustc_allow_incoherent_impl]` to the relevant impl items
 
+hir_analysis_invalid_generic_receiver_ty = invalid generic `self` parameter type: `{$receiver_ty}`
+    .note = type of `self` must not be a method generic parameter type
+
+hir_analysis_invalid_generic_receiver_ty_help =
+    use a concrete type such as `self`, `&self`, `&mut self`, `self: Box<Self>`, `self: Rc<Self>`, `self: Arc<Self>`, or `self: Pin<P>` (where P is one of the previous types except `Self`)
+
 hir_analysis_invalid_receiver_ty = invalid `self` parameter type: `{$receiver_ty}`
     .note = type of `self` must be `Self` or a type that dereferences to it
 
@@ -309,8 +311,8 @@ hir_analysis_missing_trait_item_suggestion = implement the missing item: `{$snip
 
 hir_analysis_missing_trait_item_unstable = not all trait items implemented, missing: `{$missing_item_name}`
     .note = default implementation of `{$missing_item_name}` is unstable
-    .some_note = use of unstable library feature '{$feature}': {$reason}
-    .none_note = use of unstable library feature '{$feature}'
+    .some_note = use of unstable library feature `{$feature}`: {$reason}
+    .none_note = use of unstable library feature `{$feature}`
 
 hir_analysis_missing_type_params =
     the type {$parameterCount ->

@@ -9,6 +9,7 @@ use std::slice::from_ref;
 use hir::Expr;
 use hir::def::DefKind;
 use hir::pat_util::EnumerateAndAdjustIterator as _;
+use rustc_abi::{FIRST_VARIANT, FieldIdx, VariantIdx};
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_hir as hir;
 use rustc_hir::def::{CtorOf, Res};
@@ -20,14 +21,12 @@ use rustc_middle::hir::place::ProjectionKind;
 pub use rustc_middle::hir::place::{Place, PlaceBase, PlaceWithHirId, Projection};
 use rustc_middle::mir::FakeReadCause;
 use rustc_middle::ty::{
-    self, AdtKind, Ty, TyCtxt, TypeFoldable, TypeVisitableExt as _, adjustment,
+    self, AdtKind, BorrowKind, Ty, TyCtxt, TypeFoldable, TypeVisitableExt as _, adjustment,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_span::{ErrorGuaranteed, Span};
-use rustc_target::abi::{FIRST_VARIANT, FieldIdx, VariantIdx};
 use rustc_trait_selection::infer::InferCtxtExt;
 use tracing::{debug, trace};
-use ty::BorrowKind::ImmBorrow;
 
 use crate::fn_ctxt::FnCtxt;
 
@@ -63,7 +62,7 @@ pub trait Delegate<'tcx> {
     fn copy(&mut self, place_with_id: &PlaceWithHirId<'tcx>, diag_expr_id: HirId) {
         // In most cases, copying data from `x` is equivalent to doing `*&x`, so by default
         // we treat a copy of `x` as a borrow of `x`.
-        self.borrow(place_with_id, diag_expr_id, ty::BorrowKind::ImmBorrow)
+        self.borrow(place_with_id, diag_expr_id, ty::BorrowKind::Immutable)
     }
 
     /// The path at `assignee_place` is being assigned to.
@@ -387,7 +386,7 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
             }
 
             hir::ExprKind::Let(hir::LetExpr { pat, init, .. }) => {
-                self.walk_local(init, pat, None, || self.borrow_expr(init, ty::ImmBorrow))?;
+                self.walk_local(init, pat, None, || self.borrow_expr(init, BorrowKind::Immutable))?;
             }
 
             hir::ExprKind::Match(discr, arms, _) => {
@@ -626,7 +625,7 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
         }
 
         if needs_to_be_read {
-            self.borrow_expr(discr, ty::ImmBorrow)?;
+            self.borrow_expr(discr, BorrowKind::Immutable)?;
         } else {
             let closure_def_id = match discr_place.place.base {
                 PlaceBase::Upvar(upvar_id) => Some(upvar_id.closure_expr_id),
@@ -781,12 +780,12 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                     self.walk_autoref(expr, &place_with_id, autoref);
                 }
 
-                adjustment::Adjust::ReborrowPin(_, mutbl) => {
+                adjustment::Adjust::ReborrowPin(mutbl) => {
                     // Reborrowing a Pin is like a combinations of a deref and a borrow, so we do
                     // both.
                     let bk = match mutbl {
-                        ty::Mutability::Not => ty::BorrowKind::ImmBorrow,
-                        ty::Mutability::Mut => ty::BorrowKind::MutBorrow,
+                        ty::Mutability::Not => ty::BorrowKind::Immutable,
+                        ty::Mutability::Mut => ty::BorrowKind::Mutable,
                     };
                     self.delegate.borrow_mut().borrow(&place_with_id, place_with_id.hir_id, bk);
                 }
@@ -804,7 +803,7 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
         &self,
         expr: &hir::Expr<'_>,
         base_place: &PlaceWithHirId<'tcx>,
-        autoref: &adjustment::AutoBorrow<'tcx>,
+        autoref: &adjustment::AutoBorrow,
     ) {
         debug!(
             "walk_autoref(expr.hir_id={} base_place={:?} autoref={:?})",
@@ -812,7 +811,7 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
         );
 
         match *autoref {
-            adjustment::AutoBorrow::Ref(_, m) => {
+            adjustment::AutoBorrow::Ref(m) => {
                 self.delegate.borrow_mut().borrow(
                     base_place,
                     base_place.hir_id,
@@ -909,7 +908,11 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                     // binding when lowering pattern guards to ensure that the guard does not
                     // modify the scrutinee.
                     if has_guard {
-                        self.delegate.borrow_mut().borrow(place, discr_place.hir_id, ImmBorrow);
+                        self.delegate.borrow_mut().borrow(
+                            place,
+                            discr_place.hir_id,
+                            BorrowKind::Immutable,
+                        );
                     }
 
                     // It is also a borrow or copy/move of the value being matched.
@@ -1283,7 +1286,12 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
             adjustment::Adjust::Deref(overloaded) => {
                 // Equivalent to *expr or something similar.
                 let base = if let Some(deref) = overloaded {
-                    let ref_ty = Ty::new_ref(self.cx.tcx(), deref.region, target, deref.mutbl);
+                    let ref_ty = Ty::new_ref(
+                        self.cx.tcx(),
+                        self.cx.tcx().lifetimes.re_erased,
+                        target,
+                        deref.mutbl,
+                    );
                     self.cat_rvalue(expr.hir_id, ref_ty)
                 } else {
                     previous()?

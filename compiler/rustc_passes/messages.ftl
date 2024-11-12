@@ -622,6 +622,10 @@ passes_remove_fields =
 passes_repr_align_function =
     `repr(align)` attributes on functions are unstable
 
+passes_repr_align_greater_than_target_max =
+    alignment must not be greater than `isize::MAX` bytes
+    .note = `isize::MAX` is {$size} for the current target
+
 passes_repr_conflicting =
     conflicting representation hints
 
@@ -674,10 +678,6 @@ passes_rustc_lint_opt_ty =
 passes_rustc_pub_transparent =
     attribute should be applied to `#[repr(transparent)]` types
     .label = not a `#[repr(transparent)]` type
-
-passes_rustc_safe_intrinsic =
-    attribute should be applied to intrinsic functions
-    .label = not an intrinsic function
 
 passes_rustc_std_internal_symbol =
     attribute should be applied to functions or statics

@@ -80,10 +80,6 @@ struct AstValidator<'a> {
 
     disallow_tilde_const: Option<TildeConstReason>,
 
-    /// Used to ban `impl Trait` in path projections like `<impl Iterator>::Item`
-    /// or `Foo::Bar<impl Trait>`
-    is_impl_trait_banned: bool,
-
     /// Used to ban explicit safety on foreign items when the extern block is not marked as unsafe.
     extern_mod_safety: Option<Safety>,
 
@@ -121,12 +117,6 @@ impl<'a> AstValidator<'a> {
         let old = mem::replace(&mut self.extern_mod_safety, Some(extern_mod_safety));
         f(self);
         self.extern_mod_safety = old;
-    }
-
-    fn with_banned_impl_trait(&mut self, f: impl FnOnce(&mut Self)) {
-        let old = mem::replace(&mut self.is_impl_trait_banned, true);
-        f(self);
-        self.is_impl_trait_banned = old;
     }
 
     fn with_tilde_const(
@@ -213,37 +203,6 @@ impl<'a> AstValidator<'a> {
                 .with_tilde_const(Some(TildeConstReason::TraitObject), |this| {
                     visit::walk_ty(this, t)
                 }),
-            TyKind::Path(qself, path) => {
-                // We allow these:
-                //  - `Option<impl Trait>`
-                //  - `option::Option<impl Trait>`
-                //  - `option::Option<T>::Foo<impl Trait>`
-                //
-                // But not these:
-                //  - `<impl Trait>::Foo`
-                //  - `option::Option<impl Trait>::Foo`.
-                //
-                // To implement this, we disallow `impl Trait` from `qself`
-                // (for cases like `<impl Trait>::Foo>`)
-                // but we allow `impl Trait` in `GenericArgs`
-                // iff there are no more PathSegments.
-                if let Some(qself) = qself {
-                    // `impl Trait` in `qself` is always illegal
-                    self.with_banned_impl_trait(|this| this.visit_ty(&qself.ty));
-                }
-
-                // Note that there should be a call to visit_path here,
-                // so if any logic is added to process `Path`s a call to it should be
-                // added both in visit_path and here. This code mirrors visit::walk_path.
-                for (i, segment) in path.segments.iter().enumerate() {
-                    // Allow `impl Trait` iff we're on the final path segment
-                    if i == path.segments.len() - 1 {
-                        self.visit_path_segment(segment);
-                    } else {
-                        self.with_banned_impl_trait(|this| this.visit_path_segment(segment));
-                    }
-                }
-            }
             _ => visit::walk_ty(self, t),
         }
     }
@@ -718,9 +677,8 @@ impl<'a> AstValidator<'a> {
                 Self::check_decl_no_pat(&bfty.decl, |span, _, _| {
                     self.dcx().emit_err(errors::PatternFnPointer { span });
                 });
-                if let Extern::Implicit(_) = bfty.ext {
-                    let sig_span = self.sess.source_map().next_point(ty.span.shrink_to_lo());
-                    self.maybe_lint_missing_abi(sig_span, ty.id);
+                if let Extern::Implicit(extern_span) = bfty.ext {
+                    self.maybe_lint_missing_abi(extern_span, ty.id);
                 }
             }
             TyKind::TraitObject(bounds, ..) => {
@@ -737,10 +695,6 @@ impl<'a> AstValidator<'a> {
                 }
             }
             TyKind::ImplTrait(_, bounds) => {
-                if self.is_impl_trait_banned {
-                    self.dcx().emit_err(errors::ImplTraitPath { span: ty.span });
-                }
-
                 if let Some(outer_impl_trait_sp) = self.outer_impl_trait {
                     self.dcx().emit_err(errors::NestedImplTrait {
                         span: ty.span,
@@ -998,7 +952,7 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
                 walk_list!(self, visit_attribute, &item.attrs);
                 return; // Avoid visiting again.
             }
-            ItemKind::ForeignMod(ForeignMod { abi, safety, .. }) => {
+            ItemKind::ForeignMod(ForeignMod { extern_span, abi, safety, .. }) => {
                 self.with_in_extern_mod(*safety, |this| {
                     let old_item = mem::replace(&mut this.extern_mod, Some(item.span));
                     this.visibility_not_permitted(
@@ -1022,7 +976,7 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
                     }
 
                     if abi.is_none() {
-                        this.maybe_lint_missing_abi(item.span, item.id);
+                        this.maybe_lint_missing_abi(*extern_span, item.id);
                     }
                     visit::walk_item(this, item);
                     this.extern_mod = old_item;
@@ -1395,13 +1349,13 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
         if let FnKind::Fn(
             _,
             _,
-            FnSig { span: sig_span, header: FnHeader { ext: Extern::Implicit(_), .. }, .. },
+            FnSig { header: FnHeader { ext: Extern::Implicit(extern_span), .. }, .. },
             _,
             _,
             _,
         ) = fk
         {
-            self.maybe_lint_missing_abi(*sig_span, id);
+            self.maybe_lint_missing_abi(*extern_span, id);
         }
 
         // Functions without bodies cannot have patterns.
@@ -1729,7 +1683,6 @@ pub fn check_crate(
         has_proc_macro_decls: false,
         outer_impl_trait: None,
         disallow_tilde_const: Some(TildeConstReason::Item),
-        is_impl_trait_banned: false,
         extern_mod_safety: None,
         lint_buffer: lints,
     };

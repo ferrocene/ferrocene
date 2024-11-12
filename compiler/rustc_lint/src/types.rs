@@ -1,6 +1,7 @@
 use std::iter;
 use std::ops::ControlFlow;
 
+use rustc_abi::{BackendRepr, ExternAbi, TagEncoding, Variants, WrappingRange};
 use rustc_data_structures::fx::FxHashSet;
 use rustc_errors::DiagMessage;
 use rustc_hir::{Expr, ExprKind};
@@ -13,8 +14,6 @@ use rustc_session::{declare_lint, declare_lint_pass, impl_lint_pass};
 use rustc_span::def_id::LocalDefId;
 use rustc_span::symbol::sym;
 use rustc_span::{Span, Symbol, source_map};
-use rustc_target::abi::{Abi, TagEncoding, Variants, WrappingRange};
-use rustc_target::spec::abi::Abi as SpecAbi;
 use tracing::debug;
 use {rustc_ast as ast, rustc_hir as hir};
 
@@ -167,7 +166,7 @@ declare_lint! {
     "detects ambiguous wide pointer comparisons"
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub(crate) struct TypeLimits {
     /// Id of the last visited negated expression
     negated_expr_id: Option<hir::HirId>,
@@ -204,7 +203,10 @@ fn lint_nan<'tcx>(
                     return false;
                 };
 
-                matches!(cx.tcx.get_diagnostic_name(def_id), Some(sym::f32_nan | sym::f64_nan))
+                matches!(
+                    cx.tcx.get_diagnostic_name(def_id),
+                    Some(sym::f16_nan | sym::f32_nan | sym::f64_nan | sym::f128_nan)
+                )
             }
             _ => false,
         }
@@ -776,8 +778,8 @@ pub(crate) fn repr_nullable_ptr<'tcx>(
             bug!("should be able to compute the layout of non-polymorphic type");
         }
 
-        let field_ty_abi = &field_ty_layout.ok()?.abi;
-        if let Abi::Scalar(field_ty_scalar) = field_ty_abi {
+        let field_ty_abi = &field_ty_layout.ok()?.backend_repr;
+        if let BackendRepr::Scalar(field_ty_scalar) = field_ty_abi {
             match field_ty_scalar.valid_range(&tcx) {
                 WrappingRange { start: 0, end }
                     if end == field_ty_scalar.size(&tcx).unsigned_int_max() - 1 =>
@@ -1291,10 +1293,10 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         self.check_type_for_ffi_and_report_errors(span, ty, true, false);
     }
 
-    fn is_internal_abi(&self, abi: SpecAbi) -> bool {
+    fn is_internal_abi(&self, abi: ExternAbi) -> bool {
         matches!(
             abi,
-            SpecAbi::Rust | SpecAbi::RustCall | SpecAbi::RustCold | SpecAbi::RustIntrinsic
+            ExternAbi::Rust | ExternAbi::RustCall | ExternAbi::RustCold | ExternAbi::RustIntrinsic
         )
     }
 

@@ -1,28 +1,38 @@
 #include "LLVMWrapper.h"
+
+#include "llvm-c/Core.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/Statistic.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/BinaryFormat/Magic.h"
 #include "llvm/Bitcode/BitcodeWriter.h"
+#include "llvm/IR/DIBuilder.h"
 #include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/IR/DiagnosticHandler.h"
 #include "llvm/IR/DiagnosticInfo.h"
 #include "llvm/IR/DiagnosticPrinter.h"
 #include "llvm/IR/GlobalVariable.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/InlineAsm.h"
 #include "llvm/IR/Instructions.h"
-#include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/IntrinsicsARM.h"
+#include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/LLVMRemarkStreamer.h"
 #include "llvm/IR/Mangler.h"
+#include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
-#include "llvm/Object/Archive.h"
 #include "llvm/Object/COFFImportFile.h"
-#include "llvm/Object/ObjectFile.h"
-#include "llvm/Pass.h"
 #include "llvm/Remarks/RemarkFormat.h"
 #include "llvm/Remarks/RemarkSerializer.h"
 #include "llvm/Remarks/RemarkStreamer.h"
+#include "llvm/Support/Compression.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/JSON.h"
 #include "llvm/Support/ModRef.h"
 #include "llvm/Support/Signals.h"
+#include "llvm/Support/Timer.h"
 #include "llvm/Support/ToolOutputFile.h"
-
 #include <iostream>
 
 // for raw `write` in the bad-alloc handler
@@ -140,26 +150,14 @@ extern "C" void LLVMRustSetNormalizedTarget(LLVMModuleRef M,
   unwrap(M)->setTargetTriple(Triple::normalize(Triple));
 }
 
-extern "C" const char *LLVMRustPrintPassTimings(size_t *Len) {
-  std::string buf;
-  auto SS = raw_string_ostream(buf);
-  TimerGroup::printAll(SS);
-  SS.flush();
-  *Len = buf.length();
-  char *CStr = (char *)malloc(*Len);
-  memcpy(CStr, buf.c_str(), *Len);
-  return CStr;
+extern "C" void LLVMRustPrintPassTimings(RustStringRef OutBuf) {
+  auto OS = RawRustStringOstream(OutBuf);
+  TimerGroup::printAll(OS);
 }
 
-extern "C" const char *LLVMRustPrintStatistics(size_t *Len) {
-  std::string buf;
-  auto SS = raw_string_ostream(buf);
-  llvm::PrintStatistics(SS);
-  SS.flush();
-  *Len = buf.length();
-  char *CStr = (char *)malloc(*Len);
-  memcpy(CStr, buf.c_str(), *Len);
-  return CStr;
+extern "C" void LLVMRustPrintStatistics(RustStringRef OutBuf) {
+  auto OS = RawRustStringOstream(OutBuf);
+  llvm::PrintStatistics(OS);
 }
 
 extern "C" LLVMValueRef LLVMRustGetNamedValue(LLVMModuleRef M, const char *Name,
@@ -228,94 +226,140 @@ extern "C" LLVMValueRef LLVMRustInsertPrivateGlobal(LLVMModuleRef M,
                                  GlobalValue::PrivateLinkage, nullptr));
 }
 
-static Attribute::AttrKind fromRust(LLVMRustAttribute Kind) {
+// Must match the layout of `rustc_codegen_llvm::llvm::ffi::AttributeKind`.
+enum class LLVMRustAttributeKind {
+  AlwaysInline = 0,
+  ByVal = 1,
+  Cold = 2,
+  InlineHint = 3,
+  MinSize = 4,
+  Naked = 5,
+  NoAlias = 6,
+  NoCapture = 7,
+  NoInline = 8,
+  NonNull = 9,
+  NoRedZone = 10,
+  NoReturn = 11,
+  NoUnwind = 12,
+  OptimizeForSize = 13,
+  ReadOnly = 14,
+  SExt = 15,
+  StructRet = 16,
+  UWTable = 17,
+  ZExt = 18,
+  InReg = 19,
+  SanitizeThread = 20,
+  SanitizeAddress = 21,
+  SanitizeMemory = 22,
+  NonLazyBind = 23,
+  OptimizeNone = 24,
+  ReadNone = 26,
+  SanitizeHWAddress = 28,
+  WillReturn = 29,
+  StackProtectReq = 30,
+  StackProtectStrong = 31,
+  StackProtect = 32,
+  NoUndef = 33,
+  SanitizeMemTag = 34,
+  NoCfCheck = 35,
+  ShadowCallStack = 36,
+  AllocSize = 37,
+  AllocatedPointer = 38,
+  AllocAlign = 39,
+  SanitizeSafeStack = 40,
+  FnRetThunkExtern = 41,
+  Writable = 42,
+  DeadOnUnwind = 43,
+};
+
+static Attribute::AttrKind fromRust(LLVMRustAttributeKind Kind) {
   switch (Kind) {
-  case AlwaysInline:
+  case LLVMRustAttributeKind::AlwaysInline:
     return Attribute::AlwaysInline;
-  case ByVal:
+  case LLVMRustAttributeKind::ByVal:
     return Attribute::ByVal;
-  case Cold:
+  case LLVMRustAttributeKind::Cold:
     return Attribute::Cold;
-  case InlineHint:
+  case LLVMRustAttributeKind::InlineHint:
     return Attribute::InlineHint;
-  case MinSize:
+  case LLVMRustAttributeKind::MinSize:
     return Attribute::MinSize;
-  case Naked:
+  case LLVMRustAttributeKind::Naked:
     return Attribute::Naked;
-  case NoAlias:
+  case LLVMRustAttributeKind::NoAlias:
     return Attribute::NoAlias;
-  case NoCapture:
+  case LLVMRustAttributeKind::NoCapture:
     return Attribute::NoCapture;
-  case NoCfCheck:
+  case LLVMRustAttributeKind::NoCfCheck:
     return Attribute::NoCfCheck;
-  case NoInline:
+  case LLVMRustAttributeKind::NoInline:
     return Attribute::NoInline;
-  case NonNull:
+  case LLVMRustAttributeKind::NonNull:
     return Attribute::NonNull;
-  case NoRedZone:
+  case LLVMRustAttributeKind::NoRedZone:
     return Attribute::NoRedZone;
-  case NoReturn:
+  case LLVMRustAttributeKind::NoReturn:
     return Attribute::NoReturn;
-  case NoUnwind:
+  case LLVMRustAttributeKind::NoUnwind:
     return Attribute::NoUnwind;
-  case OptimizeForSize:
+  case LLVMRustAttributeKind::OptimizeForSize:
     return Attribute::OptimizeForSize;
-  case ReadOnly:
+  case LLVMRustAttributeKind::ReadOnly:
     return Attribute::ReadOnly;
-  case SExt:
+  case LLVMRustAttributeKind::SExt:
     return Attribute::SExt;
-  case StructRet:
+  case LLVMRustAttributeKind::StructRet:
     return Attribute::StructRet;
-  case UWTable:
+  case LLVMRustAttributeKind::UWTable:
     return Attribute::UWTable;
-  case ZExt:
+  case LLVMRustAttributeKind::ZExt:
     return Attribute::ZExt;
-  case InReg:
+  case LLVMRustAttributeKind::InReg:
     return Attribute::InReg;
-  case SanitizeThread:
+  case LLVMRustAttributeKind::SanitizeThread:
     return Attribute::SanitizeThread;
-  case SanitizeAddress:
+  case LLVMRustAttributeKind::SanitizeAddress:
     return Attribute::SanitizeAddress;
-  case SanitizeMemory:
+  case LLVMRustAttributeKind::SanitizeMemory:
     return Attribute::SanitizeMemory;
-  case NonLazyBind:
+  case LLVMRustAttributeKind::NonLazyBind:
     return Attribute::NonLazyBind;
-  case OptimizeNone:
+  case LLVMRustAttributeKind::OptimizeNone:
     return Attribute::OptimizeNone;
-  case ReadNone:
+  case LLVMRustAttributeKind::ReadNone:
     return Attribute::ReadNone;
-  case SanitizeHWAddress:
+  case LLVMRustAttributeKind::SanitizeHWAddress:
     return Attribute::SanitizeHWAddress;
-  case WillReturn:
+  case LLVMRustAttributeKind::WillReturn:
     return Attribute::WillReturn;
-  case StackProtectReq:
+  case LLVMRustAttributeKind::StackProtectReq:
     return Attribute::StackProtectReq;
-  case StackProtectStrong:
+  case LLVMRustAttributeKind::StackProtectStrong:
     return Attribute::StackProtectStrong;
-  case StackProtect:
+  case LLVMRustAttributeKind::StackProtect:
     return Attribute::StackProtect;
-  case NoUndef:
+  case LLVMRustAttributeKind::NoUndef:
     return Attribute::NoUndef;
-  case SanitizeMemTag:
+  case LLVMRustAttributeKind::SanitizeMemTag:
     return Attribute::SanitizeMemTag;
-  case ShadowCallStack:
+  case LLVMRustAttributeKind::ShadowCallStack:
     return Attribute::ShadowCallStack;
-  case AllocSize:
+  case LLVMRustAttributeKind::AllocSize:
     return Attribute::AllocSize;
-  case AllocatedPointer:
+  case LLVMRustAttributeKind::AllocatedPointer:
     return Attribute::AllocatedPointer;
-  case AllocAlign:
+  case LLVMRustAttributeKind::AllocAlign:
     return Attribute::AllocAlign;
-  case SanitizeSafeStack:
+  case LLVMRustAttributeKind::SanitizeSafeStack:
     return Attribute::SafeStack;
-  case FnRetThunkExtern:
+  case LLVMRustAttributeKind::FnRetThunkExtern:
     return Attribute::FnRetThunkExtern;
-  case Writable:
+  case LLVMRustAttributeKind::Writable:
     return Attribute::Writable;
-  case DeadOnUnwind:
+  case LLVMRustAttributeKind::DeadOnUnwind:
     return Attribute::DeadOnUnwind;
   }
-  report_fatal_error("bad AttributeKind");
+  report_fatal_error("bad LLVMRustAttributeKind");
 }
 
 template <typename T>
@@ -345,7 +389,7 @@ extern "C" void LLVMRustAddCallSiteAttributes(LLVMValueRef Instr,
 }
 
 extern "C" LLVMAttributeRef
-LLVMRustCreateAttrNoValue(LLVMContextRef C, LLVMRustAttribute RustAttr) {
+LLVMRustCreateAttrNoValue(LLVMContextRef C, LLVMRustAttributeKind RustAttr) {
   return wrap(Attribute::get(*unwrap(C), fromRust(RustAttr)));
 }
 
@@ -853,23 +897,61 @@ extern "C" uint32_t LLVMRustVersionMinor() { return LLVM_VERSION_MINOR; }
 
 extern "C" uint32_t LLVMRustVersionMajor() { return LLVM_VERSION_MAJOR; }
 
-extern "C" void LLVMRustAddModuleFlagU32(LLVMModuleRef M,
-                                         Module::ModFlagBehavior MergeBehavior,
-                                         const char *Name, uint32_t Value) {
-  unwrap(M)->addModuleFlag(MergeBehavior, Name, Value);
+// FFI equivalent of LLVM's `llvm::Module::ModFlagBehavior`.
+// Must match the layout of
+// `rustc_codegen_llvm::llvm::ffi::ModuleFlagMergeBehavior`.
+//
+// There is a stable LLVM-C version of this enum (`LLVMModuleFlagBehavior`),
+// but as of LLVM 19 it does not support all of the enum values in the unstable
+// C++ API.
+enum class LLVMRustModuleFlagMergeBehavior {
+  Error = 1,
+  Warning = 2,
+  Require = 3,
+  Override = 4,
+  Append = 5,
+  AppendUnique = 6,
+  Max = 7,
+  Min = 8,
+};
+
+static Module::ModFlagBehavior
+fromRust(LLVMRustModuleFlagMergeBehavior Behavior) {
+  switch (Behavior) {
+  case LLVMRustModuleFlagMergeBehavior::Error:
+    return Module::ModFlagBehavior::Error;
+  case LLVMRustModuleFlagMergeBehavior::Warning:
+    return Module::ModFlagBehavior::Warning;
+  case LLVMRustModuleFlagMergeBehavior::Require:
+    return Module::ModFlagBehavior::Require;
+  case LLVMRustModuleFlagMergeBehavior::Override:
+    return Module::ModFlagBehavior::Override;
+  case LLVMRustModuleFlagMergeBehavior::Append:
+    return Module::ModFlagBehavior::Append;
+  case LLVMRustModuleFlagMergeBehavior::AppendUnique:
+    return Module::ModFlagBehavior::AppendUnique;
+  case LLVMRustModuleFlagMergeBehavior::Max:
+    return Module::ModFlagBehavior::Max;
+  case LLVMRustModuleFlagMergeBehavior::Min:
+    return Module::ModFlagBehavior::Min;
+  }
+  report_fatal_error("bad LLVMRustModuleFlagMergeBehavior");
+}
+
+extern "C" void
+LLVMRustAddModuleFlagU32(LLVMModuleRef M,
+                         LLVMRustModuleFlagMergeBehavior MergeBehavior,
+                         const char *Name, size_t NameLen, uint32_t Value) {
+  unwrap(M)->addModuleFlag(fromRust(MergeBehavior), StringRef(Name, NameLen),
+                           Value);
 }
 
 extern "C" void LLVMRustAddModuleFlagString(
-    LLVMModuleRef M, Module::ModFlagBehavior MergeBehavior, const char *Name,
-    const char *Value, size_t ValueLen) {
+    LLVMModuleRef M, LLVMRustModuleFlagMergeBehavior MergeBehavior,
+    const char *Name, size_t NameLen, const char *Value, size_t ValueLen) {
   unwrap(M)->addModuleFlag(
-      MergeBehavior, Name,
+      fromRust(MergeBehavior), StringRef(Name, NameLen),
       MDString::get(unwrap(M)->getContext(), StringRef(Value, ValueLen)));
-}
-
-extern "C" bool LLVMRustHasModuleFlag(LLVMModuleRef M, const char *Name,
-                                      size_t Len) {
-  return unwrap(M)->getModuleFlag(StringRef(Name, Len)) != nullptr;
 }
 
 extern "C" void LLVMRustGlobalAddMetadata(LLVMValueRef Global, unsigned Kind,
@@ -1223,6 +1305,14 @@ LLVMRustDIBuilderCreateDebugLocation(unsigned Line, unsigned Column,
   return wrap(Loc);
 }
 
+extern "C" LLVMMetadataRef
+LLVMRustDILocationCloneWithBaseDiscriminator(LLVMMetadataRef Location,
+                                             unsigned BD) {
+  DILocation *Loc = unwrapDIPtr<DILocation>(Location);
+  auto NewLoc = Loc->cloneWithBaseDiscriminator(BD);
+  return wrap(NewLoc.has_value() ? NewLoc.value() : nullptr);
+}
+
 extern "C" uint64_t LLVMRustDIBuilderCreateOpDeref() {
   return dwarf::DW_OP_deref;
 }
@@ -1231,7 +1321,7 @@ extern "C" uint64_t LLVMRustDIBuilderCreateOpPlusUconst() {
   return dwarf::DW_OP_plus_uconst;
 }
 
-extern "C" int64_t LLVMRustDIBuilderCreateOpLLVMFragment() {
+extern "C" uint64_t LLVMRustDIBuilderCreateOpLLVMFragment() {
   return dwarf::DW_OP_LLVM_fragment;
 }
 
@@ -1484,8 +1574,8 @@ LLVMRustUnpackSMDiagnostic(LLVMSMDiagnosticRef DRef, RustStringRef MessageOut,
   const SourceMgr &LSM = *D.getSourceMgr();
   const MemoryBuffer *LBuf =
       LSM.getMemoryBuffer(LSM.FindBufferContainingLoc(D.getLoc()));
-  LLVMRustStringWriteImpl(BufferOut, LBuf->getBufferStart(),
-                          LBuf->getBufferSize());
+  auto BufferOS = RawRustStringOstream(BufferOut);
+  BufferOS << LBuf->getBuffer();
 
   *LocOut = D.getLoc().getPointer() - LBuf->getBufferStart();
 
@@ -1497,38 +1587,6 @@ LLVMRustUnpackSMDiagnostic(LLVMSMDiagnosticRef DRef, RustStringRef MessageOut,
   }
 
   return true;
-}
-
-extern "C" OperandBundleDef *LLVMRustBuildOperandBundleDef(const char *Name,
-                                                           LLVMValueRef *Inputs,
-                                                           unsigned NumInputs) {
-  return new OperandBundleDef(Name,
-                              ArrayRef<Value *>(unwrap(Inputs), NumInputs));
-}
-
-extern "C" void LLVMRustFreeOperandBundleDef(OperandBundleDef *Bundle) {
-  delete Bundle;
-}
-
-// OpBundlesIndirect is an array of pointers (*not* a pointer to an array).
-extern "C" LLVMValueRef LLVMRustBuildCall(LLVMBuilderRef B, LLVMTypeRef Ty,
-                                          LLVMValueRef Fn, LLVMValueRef *Args,
-                                          unsigned NumArgs,
-                                          OperandBundleDef **OpBundlesIndirect,
-                                          unsigned NumOpBundles) {
-  Value *Callee = unwrap(Fn);
-  FunctionType *FTy = unwrap<FunctionType>(Ty);
-
-  // FIXME: Is there a way around this?
-  SmallVector<OperandBundleDef> OpBundles;
-  OpBundles.reserve(NumOpBundles);
-  for (unsigned i = 0; i < NumOpBundles; ++i) {
-    OpBundles.push_back(*OpBundlesIndirect[i]);
-  }
-
-  return wrap(unwrap(B)->CreateCall(FTy, Callee,
-                                    ArrayRef<Value *>(unwrap(Args), NumArgs),
-                                    ArrayRef<OperandBundleDef>(OpBundles)));
 }
 
 extern "C" LLVMValueRef LLVMRustBuildMemCpy(LLVMBuilderRef B, LLVMValueRef Dst,
@@ -1558,37 +1616,18 @@ extern "C" LLVMValueRef LLVMRustBuildMemSet(LLVMBuilderRef B, LLVMValueRef Dst,
                                       MaybeAlign(DstAlign), IsVolatile));
 }
 
-// OpBundlesIndirect is an array of pointers (*not* a pointer to an array).
+// Polyfill for `LLVMBuildCallBr`, which was added in LLVM 19.
+// <https://github.com/llvm/llvm-project/commit/584253c4e2f788f870488fc32193b52d67ddaccc>
+// FIXME: Remove when Rust's minimum supported LLVM version reaches 19.
+#if LLVM_VERSION_LT(19, 0)
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(OperandBundleDef, LLVMOperandBundleRef)
+
 extern "C" LLVMValueRef
-LLVMRustBuildInvoke(LLVMBuilderRef B, LLVMTypeRef Ty, LLVMValueRef Fn,
-                    LLVMValueRef *Args, unsigned NumArgs,
-                    LLVMBasicBlockRef Then, LLVMBasicBlockRef Catch,
-                    OperandBundleDef **OpBundlesIndirect, unsigned NumOpBundles,
-                    const char *Name) {
-  Value *Callee = unwrap(Fn);
-  FunctionType *FTy = unwrap<FunctionType>(Ty);
-
-  // FIXME: Is there a way around this?
-  SmallVector<OperandBundleDef> OpBundles;
-  OpBundles.reserve(NumOpBundles);
-  for (unsigned i = 0; i < NumOpBundles; ++i) {
-    OpBundles.push_back(*OpBundlesIndirect[i]);
-  }
-
-  return wrap(unwrap(B)->CreateInvoke(FTy, Callee, unwrap(Then), unwrap(Catch),
-                                      ArrayRef<Value *>(unwrap(Args), NumArgs),
-                                      ArrayRef<OperandBundleDef>(OpBundles),
-                                      Name));
-}
-
-// OpBundlesIndirect is an array of pointers (*not* a pointer to an array).
-extern "C" LLVMValueRef
-LLVMRustBuildCallBr(LLVMBuilderRef B, LLVMTypeRef Ty, LLVMValueRef Fn,
-                    LLVMBasicBlockRef DefaultDest,
-                    LLVMBasicBlockRef *IndirectDests, unsigned NumIndirectDests,
-                    LLVMValueRef *Args, unsigned NumArgs,
-                    OperandBundleDef **OpBundlesIndirect, unsigned NumOpBundles,
-                    const char *Name) {
+LLVMBuildCallBr(LLVMBuilderRef B, LLVMTypeRef Ty, LLVMValueRef Fn,
+                LLVMBasicBlockRef DefaultDest, LLVMBasicBlockRef *IndirectDests,
+                unsigned NumIndirectDests, LLVMValueRef *Args, unsigned NumArgs,
+                LLVMOperandBundleRef *Bundles, unsigned NumBundles,
+                const char *Name) {
   Value *Callee = unwrap(Fn);
   FunctionType *FTy = unwrap<FunctionType>(Ty);
 
@@ -1601,9 +1640,9 @@ LLVMRustBuildCallBr(LLVMBuilderRef B, LLVMTypeRef Ty, LLVMValueRef Fn,
 
   // FIXME: Is there a way around this?
   SmallVector<OperandBundleDef> OpBundles;
-  OpBundles.reserve(NumOpBundles);
-  for (unsigned i = 0; i < NumOpBundles; ++i) {
-    OpBundles.push_back(*OpBundlesIndirect[i]);
+  OpBundles.reserve(NumBundles);
+  for (unsigned i = 0; i < NumBundles; ++i) {
+    OpBundles.push_back(*unwrap(Bundles[i]));
   }
 
   return wrap(
@@ -1612,91 +1651,12 @@ LLVMRustBuildCallBr(LLVMBuilderRef B, LLVMTypeRef Ty, LLVMValueRef Fn,
                               ArrayRef<Value *>(unwrap(Args), NumArgs),
                               ArrayRef<OperandBundleDef>(OpBundles), Name));
 }
+#endif
 
 extern "C" void LLVMRustPositionBuilderAtStart(LLVMBuilderRef B,
                                                LLVMBasicBlockRef BB) {
   auto Point = unwrap(BB)->getFirstInsertionPt();
   unwrap(B)->SetInsertPoint(unwrap(BB), Point);
-}
-
-enum class LLVMRustLinkage {
-  ExternalLinkage = 0,
-  AvailableExternallyLinkage = 1,
-  LinkOnceAnyLinkage = 2,
-  LinkOnceODRLinkage = 3,
-  WeakAnyLinkage = 4,
-  WeakODRLinkage = 5,
-  AppendingLinkage = 6,
-  InternalLinkage = 7,
-  PrivateLinkage = 8,
-  ExternalWeakLinkage = 9,
-  CommonLinkage = 10,
-};
-
-static LLVMRustLinkage toRust(LLVMLinkage Linkage) {
-  switch (Linkage) {
-  case LLVMExternalLinkage:
-    return LLVMRustLinkage::ExternalLinkage;
-  case LLVMAvailableExternallyLinkage:
-    return LLVMRustLinkage::AvailableExternallyLinkage;
-  case LLVMLinkOnceAnyLinkage:
-    return LLVMRustLinkage::LinkOnceAnyLinkage;
-  case LLVMLinkOnceODRLinkage:
-    return LLVMRustLinkage::LinkOnceODRLinkage;
-  case LLVMWeakAnyLinkage:
-    return LLVMRustLinkage::WeakAnyLinkage;
-  case LLVMWeakODRLinkage:
-    return LLVMRustLinkage::WeakODRLinkage;
-  case LLVMAppendingLinkage:
-    return LLVMRustLinkage::AppendingLinkage;
-  case LLVMInternalLinkage:
-    return LLVMRustLinkage::InternalLinkage;
-  case LLVMPrivateLinkage:
-    return LLVMRustLinkage::PrivateLinkage;
-  case LLVMExternalWeakLinkage:
-    return LLVMRustLinkage::ExternalWeakLinkage;
-  case LLVMCommonLinkage:
-    return LLVMRustLinkage::CommonLinkage;
-  default:
-    report_fatal_error("Invalid LLVMRustLinkage value!");
-  }
-}
-
-static LLVMLinkage fromRust(LLVMRustLinkage Linkage) {
-  switch (Linkage) {
-  case LLVMRustLinkage::ExternalLinkage:
-    return LLVMExternalLinkage;
-  case LLVMRustLinkage::AvailableExternallyLinkage:
-    return LLVMAvailableExternallyLinkage;
-  case LLVMRustLinkage::LinkOnceAnyLinkage:
-    return LLVMLinkOnceAnyLinkage;
-  case LLVMRustLinkage::LinkOnceODRLinkage:
-    return LLVMLinkOnceODRLinkage;
-  case LLVMRustLinkage::WeakAnyLinkage:
-    return LLVMWeakAnyLinkage;
-  case LLVMRustLinkage::WeakODRLinkage:
-    return LLVMWeakODRLinkage;
-  case LLVMRustLinkage::AppendingLinkage:
-    return LLVMAppendingLinkage;
-  case LLVMRustLinkage::InternalLinkage:
-    return LLVMInternalLinkage;
-  case LLVMRustLinkage::PrivateLinkage:
-    return LLVMPrivateLinkage;
-  case LLVMRustLinkage::ExternalWeakLinkage:
-    return LLVMExternalWeakLinkage;
-  case LLVMRustLinkage::CommonLinkage:
-    return LLVMCommonLinkage;
-  }
-  report_fatal_error("Invalid LLVMRustLinkage value!");
-}
-
-extern "C" LLVMRustLinkage LLVMRustGetLinkage(LLVMValueRef V) {
-  return toRust(LLVMGetLinkage(V));
-}
-
-extern "C" void LLVMRustSetLinkage(LLVMValueRef V,
-                                   LLVMRustLinkage RustLinkage) {
-  LLVMSetLinkage(V, fromRust(RustLinkage));
 }
 
 extern "C" bool LLVMRustConstIntGetZExtValue(LLVMValueRef CV, uint64_t *value) {
@@ -1724,45 +1684,6 @@ extern "C" bool LLVMRustConstInt128Get(LLVMValueRef CV, bool sext,
   *low = AP.getLoBits(64).getZExtValue();
   *high = AP.getHiBits(64).getZExtValue();
   return true;
-}
-
-enum class LLVMRustVisibility {
-  Default = 0,
-  Hidden = 1,
-  Protected = 2,
-};
-
-static LLVMRustVisibility toRust(LLVMVisibility Vis) {
-  switch (Vis) {
-  case LLVMDefaultVisibility:
-    return LLVMRustVisibility::Default;
-  case LLVMHiddenVisibility:
-    return LLVMRustVisibility::Hidden;
-  case LLVMProtectedVisibility:
-    return LLVMRustVisibility::Protected;
-  }
-  report_fatal_error("Invalid LLVMRustVisibility value!");
-}
-
-static LLVMVisibility fromRust(LLVMRustVisibility Vis) {
-  switch (Vis) {
-  case LLVMRustVisibility::Default:
-    return LLVMDefaultVisibility;
-  case LLVMRustVisibility::Hidden:
-    return LLVMHiddenVisibility;
-  case LLVMRustVisibility::Protected:
-    return LLVMProtectedVisibility;
-  }
-  report_fatal_error("Invalid LLVMRustVisibility value!");
-}
-
-extern "C" LLVMRustVisibility LLVMRustGetVisibility(LLVMValueRef V) {
-  return toRust(LLVMGetVisibility(V));
-}
-
-extern "C" void LLVMRustSetVisibility(LLVMValueRef V,
-                                      LLVMRustVisibility RustVisibility) {
-  LLVMSetVisibility(V, fromRust(RustVisibility));
 }
 
 extern "C" void LLVMRustSetDSOLocal(LLVMValueRef Global, bool is_dso_local) {

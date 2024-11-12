@@ -11,7 +11,7 @@ use ide_db::{
     defs::{Definition, IdentClass, NameRefClass, OperatorClass},
     famous_defs::FamousDefs,
     helpers::pick_best_token,
-    FileRange, FxIndexSet, RootDatabase,
+    FileRange, FxIndexSet, Ranker, RootDatabase,
 };
 use itertools::{multizip, Itertools};
 use span::Edition;
@@ -158,7 +158,7 @@ fn hover_offset(
     if let Some(doc_comment) = token_as_doc_comment(&original_token) {
         cov_mark::hit!(no_highlight_on_comment_hover);
         return doc_comment.get_definition_with_descend_at(sema, offset, |def, node, range| {
-            let res = hover_for_definition(sema, file_id, def, &node, None, config, edition);
+            let res = hover_for_definition(sema, file_id, def, &node, None, false, config, edition);
             Some(RangeInfo::new(range, res))
         });
     }
@@ -172,6 +172,7 @@ fn hover_offset(
             Definition::from(resolution?),
             &original_token.parent()?,
             None,
+            false,
             config,
             edition,
         );
@@ -182,27 +183,13 @@ fn hover_offset(
     // equivalency is more important
     let mut descended = sema.descend_into_macros(original_token.clone());
 
-    let kind = original_token.kind();
-    let text = original_token.text();
-    let ident_kind = kind.is_any_identifier();
+    let ranker = Ranker::from_token(&original_token);
 
-    descended.sort_by_cached_key(|tok| {
-        let tok_kind = tok.kind();
-
-        let exact_same_kind = tok_kind == kind;
-        let both_idents = exact_same_kind || (tok_kind.is_any_identifier() && ident_kind);
-        let same_text = tok.text() == text;
-        // anything that mapped into a token tree has likely no semantic information
-        let no_tt_parent = tok.parent().map_or(false, |it| it.kind() != TOKEN_TREE);
-        !((both_idents as usize)
-            | ((exact_same_kind as usize) << 1)
-            | ((same_text as usize) << 2)
-            | ((no_tt_parent as usize) << 3))
-    });
+    descended.sort_by_cached_key(|tok| !ranker.rank_token(tok));
 
     let mut res = vec![];
     for token in descended {
-        let is_same_kind = token.kind() == kind;
+        let is_same_kind = token.kind() == ranker.kind;
         let lint_hover = (|| {
             // FIXME: Definition should include known lints and the like instead of having this special case here
             let attr = token.parent_ancestors().find_map(ast::Attr::cast)?;
@@ -232,6 +219,7 @@ fn hover_offset(
                                     break 'a vec![(
                                         Definition::Macro(macro_),
                                         sema.resolve_macro_call_arm(&macro_call),
+                                        false,
                                         node,
                                     )];
                                 }
@@ -248,19 +236,34 @@ fn hover_offset(
                             decl,
                             ..
                         }) => {
-                            vec![(Definition::ExternCrateDecl(decl), None, node)]
+                            vec![(Definition::ExternCrateDecl(decl), None, false, node)]
                         }
 
                         class => {
-                            multizip((class.definitions(), iter::repeat(None), iter::repeat(node)))
-                                .collect::<Vec<_>>()
+                            let is_def = matches!(class, IdentClass::NameClass(_));
+                            multizip((
+                                class.definitions(),
+                                iter::repeat(None),
+                                iter::repeat(is_def),
+                                iter::repeat(node),
+                            ))
+                            .collect::<Vec<_>>()
                         }
                     }
                 }
                 .into_iter()
-                .unique_by(|&(def, _, _)| def)
-                .map(|(def, macro_arm, node)| {
-                    hover_for_definition(sema, file_id, def, &node, macro_arm, config, edition)
+                .unique_by(|&(def, _, _, _)| def)
+                .map(|(def, macro_arm, hovered_definition, node)| {
+                    hover_for_definition(
+                        sema,
+                        file_id,
+                        def,
+                        &node,
+                        macro_arm,
+                        hovered_definition,
+                        config,
+                        edition,
+                    )
                 })
                 .collect::<Vec<_>>(),
             )
@@ -380,6 +383,7 @@ pub(crate) fn hover_for_definition(
     def: Definition,
     scope_node: &SyntaxNode,
     macro_arm: Option<u32>,
+    hovered_definition: bool,
     config: &HoverConfig,
     edition: Edition,
 ) -> HoverResult {
@@ -411,6 +415,7 @@ pub(crate) fn hover_for_definition(
         famous_defs.as_ref(),
         &notable_traits,
         macro_arm,
+        hovered_definition,
         config,
         edition,
     );

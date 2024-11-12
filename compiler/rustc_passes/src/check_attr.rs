@@ -25,7 +25,7 @@ use rustc_middle::middle::resolve_bound_vars::ObjectLifetimeDefault;
 use rustc_middle::query::Providers;
 use rustc_middle::traits::ObligationCause;
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
-use rustc_middle::ty::{self, TyCtxt};
+use rustc_middle::ty::{self, TyCtxt, TypingMode};
 use rustc_middle::{bug, span_bug};
 use rustc_session::lint::builtin::{
     CONFLICTING_REPR_HINTS, INVALID_DOC_ATTRIBUTES, INVALID_MACRO_EXPORT_ARGUMENTS,
@@ -34,6 +34,7 @@ use rustc_session::lint::builtin::{
 use rustc_session::parse::feature_err;
 use rustc_span::symbol::{Symbol, kw, sym};
 use rustc_span::{BytePos, DUMMY_SP, Span};
+use rustc_target::abi::Size;
 use rustc_target::spec::abi::Abi;
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::infer::{TyCtxtInferExt, ValuePairs};
@@ -209,9 +210,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 | [sym::rustc_promotable, ..] => self.check_stability_promotable(attr, target),
                 [sym::link_ordinal, ..] => self.check_link_ordinal(attr, span, target),
                 [sym::rustc_confusables, ..] => self.check_confusables(attr, target),
-                [sym::rustc_safe_intrinsic, ..] => {
-                    self.check_rustc_safe_intrinsic(hir_id, attr, span, target)
-                }
                 [sym::cold, ..] => self.check_cold(hir_id, attr, span, target),
                 [sym::link, ..] => self.check_link(hir_id, attr, span, target),
                 [sym::link_name, ..] => self.check_link_name(hir_id, attr, span, target),
@@ -262,7 +260,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | sym::cfg_attr
                     // need to be fixed
                     | sym::cfi_encoding // FIXME(cfi_encoding)
-                    | sym::pointee // FIXME(derive_smart_pointer)
+                    | sym::pointee // FIXME(derive_coerce_pointee)
                     | sym::omit_gdb_pretty_printer_section // FIXME(omit_gdb_pretty_printer_section)
                     | sym::used // handled elsewhere to restrict to static items
                     | sym::repr // handled elsewhere to restrict to type decls items
@@ -1785,7 +1783,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         | Target::Union
                         | Target::Enum
                         | Target::Fn
-                        | Target::Method(_) => continue,
+                        | Target::Method(_) => {}
                         _ => {
                             self.dcx().emit_err(
                                 errors::AttrApplication::StructEnumFunctionMethodUnion {
@@ -1795,6 +1793,8 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                             );
                         }
                     }
+
+                    self.check_align_value(hint);
                 }
                 sym::packed => {
                     if target != Target::Struct && target != Target::Union {
@@ -1889,6 +1889,45 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 hint_spans.collect::<Vec<Span>>(),
                 errors::ReprConflictingLint,
             );
+        }
+    }
+
+    fn check_align_value(&self, item: &MetaItemInner) {
+        match item.singleton_lit_list() {
+            Some((
+                _,
+                MetaItemLit {
+                    kind: ast::LitKind::Int(literal, ast::LitIntType::Unsuffixed), ..
+                },
+            )) => {
+                let val = literal.get() as u64;
+                if val > 2_u64.pow(29) {
+                    // for values greater than 2^29, a different error will be emitted, make sure that happens
+                    self.dcx().span_delayed_bug(
+                        item.span(),
+                        "alignment greater than 2^29 should be errored on elsewhere",
+                    );
+                } else {
+                    // only do this check when <= 2^29 to prevent duplicate errors:
+                    // alignment greater than 2^29 not supported
+                    // alignment is too large for the current target
+
+                    let max =
+                        Size::from_bits(self.tcx.sess.target.pointer_width).signed_int_max() as u64;
+                    if val > max {
+                        self.dcx().emit_err(errors::InvalidReprAlignForTarget {
+                            span: item.span(),
+                            size: max,
+                        });
+                    }
+                }
+            }
+
+            // if the attribute is malformed, singleton_lit_list may not be of the expected type or may be None
+            // but an error will have already been emitted, so this code should just skip such attributes
+            Some((_, _)) | None => {
+                self.dcx().span_delayed_bug(item.span(), "malformed repr(align(N))");
+            }
         }
     }
 
@@ -2011,25 +2050,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     .emit_err(errors::RustcAllowConstFnUnstable { attr_span: attr.span, span });
             }
         }
-    }
-
-    fn check_rustc_safe_intrinsic(
-        &self,
-        hir_id: HirId,
-        attr: &Attribute,
-        span: Span,
-        target: Target,
-    ) {
-        if let Target::ForeignFn = target
-            && let hir::Node::Item(Item {
-                kind: ItemKind::ForeignMod { abi: Abi::RustIntrinsic, .. },
-                ..
-            }) = self.tcx.parent_hir_node(hir_id)
-        {
-            return;
-        }
-
-        self.dcx().emit_err(errors::RustcSafeIntrinsic { attr_span: attr.span, span });
     }
 
     fn check_rustc_std_internal_symbol(&self, attr: &Attribute, span: Span, target: Target) {
@@ -2225,7 +2245,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         let def_id = hir_id.expect_owner().def_id;
         let param_env = ty::ParamEnv::empty();
 
-        let infcx = tcx.infer_ctxt().build();
+        let infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
         let ocx = ObligationCtxt::new_with_diagnostics(&infcx);
 
         let span = tcx.def_span(def_id);

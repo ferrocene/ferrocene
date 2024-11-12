@@ -17,7 +17,7 @@ use rustc_middle::ty::fold::BottomUpFolder;
 use rustc_middle::ty::util::ExplicitSelf;
 use rustc_middle::ty::{
     self, GenericArgs, GenericParamDefKind, Ty, TyCtxt, TypeFoldable, TypeFolder,
-    TypeSuperFoldable, TypeVisitableExt, Upcast,
+    TypeSuperFoldable, TypeVisitableExt, TypingMode, Upcast,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_span::Span;
@@ -205,7 +205,6 @@ fn compare_method_predicate_entailment<'tcx>(
         trait_m_predicates.instantiate_own(tcx, trait_to_impl_args).map(|(predicate, _)| predicate),
     );
 
-    // FIXME(effects): This should be replaced with a more dedicated method.
     let is_conditionally_const = tcx.is_conditionally_const(impl_def_id);
     if is_conditionally_const {
         // Augment the hybrid param-env with the const conditions
@@ -218,7 +217,7 @@ fn compare_method_predicate_entailment<'tcx>(
                     tcx.const_conditions(trait_m.def_id).instantiate_own(tcx, trait_to_impl_args),
                 )
                 .map(|(trait_ref, _)| {
-                    trait_ref.to_host_effect_clause(tcx, ty::HostPolarity::Maybe)
+                    trait_ref.to_host_effect_clause(tcx, ty::BoundConstness::Maybe)
                 }),
         );
     }
@@ -228,7 +227,7 @@ fn compare_method_predicate_entailment<'tcx>(
     let param_env = traits::normalize_param_env_or_error(tcx, param_env, normalize_cause);
     debug!(caller_bounds=?param_env.caller_bounds());
 
-    let infcx = &tcx.infer_ctxt().build();
+    let infcx = &tcx.infer_ctxt().build(TypingMode::non_body_analysis());
     let ocx = ObligationCtxt::new_with_diagnostics(infcx);
 
     // Create obligations for each predicate declared by the impl
@@ -272,7 +271,7 @@ fn compare_method_predicate_entailment<'tcx>(
                 tcx,
                 cause,
                 param_env,
-                const_condition.to_host_effect_clause(tcx, ty::HostPolarity::Maybe),
+                const_condition.to_host_effect_clause(tcx, ty::BoundConstness::Maybe),
             ));
         }
     }
@@ -516,7 +515,7 @@ pub(super) fn collect_return_position_impl_trait_in_trait_tys<'tcx>(
         ObligationCause::misc(tcx.def_span(impl_m_def_id), impl_m_def_id),
     );
 
-    let infcx = &tcx.infer_ctxt().build();
+    let infcx = &tcx.infer_ctxt().build(TypingMode::non_body_analysis());
     let ocx = ObligationCtxt::new_with_diagnostics(infcx);
 
     // Normalize the impl signature with fresh variables for lifetime inference.
@@ -611,7 +610,7 @@ pub(super) fn collect_return_position_impl_trait_in_trait_tys<'tcx>(
         Err(terr) => {
             let mut diag = struct_span_code_err!(
                 tcx.dcx(),
-                cause.span(),
+                cause.span,
                 E0053,
                 "method `{}` has an incompatible return type for trait",
                 trait_m.name
@@ -1169,7 +1168,7 @@ fn extract_spans_for_error_reporting<'tcx>(
         TypeError::ArgumentMutability(i) | TypeError::ArgumentSorts(ExpectedFound { .. }, i) => {
             (impl_args.nth(i).unwrap(), trait_args.and_then(|mut args| args.nth(i)))
         }
-        _ => (cause.span(), tcx.hir().span_if_local(trait_m.def_id)),
+        _ => (cause.span, tcx.hir().span_if_local(trait_m.def_id)),
     }
 }
 
@@ -1190,13 +1189,13 @@ fn compare_self_type<'tcx>(
 
     let self_string = |method: ty::AssocItem| {
         let untransformed_self_ty = match method.container {
-            ty::ImplContainer => impl_trait_ref.self_ty(),
-            ty::TraitContainer => tcx.types.self_param,
+            ty::AssocItemContainer::Impl => impl_trait_ref.self_ty(),
+            ty::AssocItemContainer::Trait => tcx.types.self_param,
         };
         let self_arg_ty = tcx.fn_sig(method.def_id).instantiate_identity().input(0);
         let param_env = ty::ParamEnv::reveal_all();
 
-        let infcx = tcx.infer_ctxt().build();
+        let infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
         let self_arg_ty = tcx.liberate_late_bound_regions(method.def_id, self_arg_ty);
         let can_eq_self = |ty| infcx.can_eq(param_env, untransformed_self_ty, ty);
         match ExplicitSelf::determine(self_arg_ty, can_eq_self) {
@@ -1801,7 +1800,7 @@ fn compare_const_predicate_entailment<'tcx>(
         ObligationCause::misc(impl_ct_span, impl_ct_def_id),
     );
 
-    let infcx = tcx.infer_ctxt().build();
+    let infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
     let ocx = ObligationCtxt::new_with_diagnostics(&infcx);
 
     let impl_ct_own_bounds = impl_ct_predicates.instantiate_own_identity();
@@ -1942,7 +1941,7 @@ fn compare_type_predicate_entailment<'tcx>(
                     tcx.const_conditions(trait_ty.def_id).instantiate_own(tcx, trait_to_impl_args),
                 )
                 .map(|(trait_ref, _)| {
-                    trait_ref.to_host_effect_clause(tcx, ty::HostPolarity::Maybe)
+                    trait_ref.to_host_effect_clause(tcx, ty::BoundConstness::Maybe)
                 }),
         );
     }
@@ -1951,7 +1950,7 @@ fn compare_type_predicate_entailment<'tcx>(
     let param_env = traits::normalize_param_env_or_error(tcx, param_env, normalize_cause);
     debug!(caller_bounds=?param_env.caller_bounds());
 
-    let infcx = tcx.infer_ctxt().build();
+    let infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
     let ocx = ObligationCtxt::new_with_diagnostics(&infcx);
 
     for (predicate, span) in impl_ty_own_bounds {
@@ -1985,7 +1984,7 @@ fn compare_type_predicate_entailment<'tcx>(
                 tcx,
                 cause,
                 param_env,
-                const_condition.to_host_effect_clause(tcx, ty::HostPolarity::Maybe),
+                const_condition.to_host_effect_clause(tcx, ty::BoundConstness::Maybe),
             ));
         }
     }
@@ -2036,13 +2035,13 @@ pub(super) fn check_type_bounds<'tcx>(
     let impl_ty_args = GenericArgs::identity_for_item(tcx, impl_ty.def_id);
     let rebased_args = impl_ty_args.rebase_onto(tcx, container_id, impl_trait_ref.args);
 
-    let infcx = tcx.infer_ctxt().build();
+    let infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
     let ocx = ObligationCtxt::new_with_diagnostics(&infcx);
 
     // A synthetic impl Trait for RPITIT desugaring or assoc type for effects desugaring has no HIR,
     // which we currently use to get the span for an impl's associated type. Instead, for these,
     // use the def_span for the synthesized  associated type.
-    let impl_ty_span = if impl_ty.is_impl_trait_in_trait() || impl_ty.is_effects_desugaring {
+    let impl_ty_span = if impl_ty.is_impl_trait_in_trait() {
         tcx.def_span(impl_ty_def_id)
     } else {
         match tcx.hir_node_by_def_id(impl_ty_def_id) {
@@ -2091,7 +2090,7 @@ pub(super) fn check_type_bounds<'tcx>(
                         tcx,
                         mk_cause(span),
                         param_env,
-                        c.to_host_effect_clause(tcx, ty::HostPolarity::Maybe),
+                        c.to_host_effect_clause(tcx, ty::BoundConstness::Maybe),
                     )
                 }),
         );
@@ -2225,10 +2224,8 @@ fn param_env_with_gat_bounds<'tcx>(
 
     for impl_ty in impl_tys_to_install {
         let trait_ty = match impl_ty.container {
-            ty::AssocItemContainer::TraitContainer => impl_ty,
-            ty::AssocItemContainer::ImplContainer => {
-                tcx.associated_item(impl_ty.trait_item_def_id.unwrap())
-            }
+            ty::AssocItemContainer::Trait => impl_ty,
+            ty::AssocItemContainer::Impl => tcx.associated_item(impl_ty.trait_item_def_id.unwrap()),
         };
 
         let mut bound_vars: smallvec::SmallVec<[ty::BoundVariableKind; 8]> =
@@ -2247,7 +2244,7 @@ fn param_env_with_gat_bounds<'tcx>(
                     .into()
                 }
                 GenericParamDefKind::Lifetime => {
-                    let kind = ty::BoundRegionKind::BrNamed(param.def_id, param.name);
+                    let kind = ty::BoundRegionKind::Named(param.def_id, param.name);
                     let bound_var = ty::BoundVariableKind::Region(kind);
                     bound_vars.push(bound_var);
                     ty::Region::new_bound(tcx, ty::INNERMOST, ty::BoundRegion {

@@ -521,7 +521,7 @@ impl chalk_solve::RustIrDatabase<Interner> for ChalkContext<'_> {
     }
 }
 
-impl<'a> ChalkContext<'a> {
+impl ChalkContext<'_> {
     fn edition(&self) -> Edition {
         self.db.crate_graph()[self.krate].edition
     }
@@ -615,8 +615,9 @@ pub(crate) fn associated_ty_data_query(
     let type_alias_data = db.type_alias_data(type_alias);
     let generic_params = generics(db.upcast(), type_alias.into());
     let resolver = hir_def::resolver::HasResolver::resolver(type_alias, db.upcast());
-    let ctx = crate::TyLoweringContext::new(db, &resolver, type_alias.into())
-        .with_type_param_mode(crate::lower::ParamLoweringMode::Variable);
+    let mut ctx =
+        crate::TyLoweringContext::new(db, &resolver, &type_alias_data.types_map, type_alias.into())
+            .with_type_param_mode(crate::lower::ParamLoweringMode::Variable);
 
     let trait_subst = TyBuilder::subst_for_def(db, trait_, None)
         .fill_with_bound_vars(crate::DebruijnIndex::INNERMOST, generic_params.len_self())
@@ -626,14 +627,16 @@ pub(crate) fn associated_ty_data_query(
         .build();
     let self_ty = TyKind::Alias(AliasTy::Projection(pro_ty)).intern(Interner);
 
-    let mut bounds: Vec<_> = type_alias_data
-        .bounds
-        .iter()
-        .flat_map(|bound| ctx.lower_type_bound(bound, self_ty.clone(), false))
-        .filter_map(|pred| generic_predicate_to_inline_bound(db, &pred, &self_ty))
-        .collect();
+    let mut bounds = Vec::new();
+    for bound in &type_alias_data.bounds {
+        ctx.lower_type_bound(bound, self_ty.clone(), false).for_each(|pred| {
+            if let Some(pred) = generic_predicate_to_inline_bound(db, &pred, &self_ty) {
+                bounds.push(pred);
+            }
+        });
+    }
 
-    if !ctx.unsized_types.borrow().contains(&self_ty) {
+    if !ctx.unsized_types.contains(&self_ty) {
         let sized_trait = db
             .lang_item(resolver.krate(), LangItem::Sized)
             .and_then(|lang_item| lang_item.as_trait().map(to_chalk_trait_id));

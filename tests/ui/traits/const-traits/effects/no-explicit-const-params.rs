@@ -1,4 +1,4 @@
-#![feature(const_trait_impl, effects)] //~ WARN the feature `effects` is incomplete
+#![feature(const_trait_impl)]
 
 const fn foo() {}
 
@@ -23,4 +23,5 @@ const FOO: () = {
     //~^ ERROR: function takes 0 generic arguments but 1 generic argument was supplied
     <() as Bar<false>>::bar();
     //~^ ERROR: trait takes 0 generic arguments but 1 generic argument was supplied
+    //~| ERROR the trait bound `(): const Bar` is not satisfied
 };

@@ -1345,11 +1345,13 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
             // See `tests/ui/moves/needs-clone-through-deref.rs`
             return false;
         }
-        // We don't want to suggest `.clone()` in a move closure, since the value has already been captured.
+        // We don't want to suggest `.clone()` in a move closure, since the value has already been
+        // captured.
         if self.in_move_closure(expr) {
             return false;
         }
-        // We also don't want to suggest cloning a closure itself, since the value has already been captured.
+        // We also don't want to suggest cloning a closure itself, since the value has already been
+        // captured.
         if let hir::ExprKind::Closure(_) = expr.kind {
             return false;
         }
@@ -1381,7 +1383,8 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
                 }
             }
         }
-        // Cloning the raw pointer doesn't make sense in some cases and would cause a type mismatch error. (see #126863)
+        // Cloning the raw pointer doesn't make sense in some cases and would cause a type mismatch
+        // error. (see #126863)
         if inner_expr.span.lo() != expr.span.lo() && !is_raw_ptr {
             // Remove "(*" or "(&"
             sugg.push((expr.span.with_hi(inner_expr.span.lo()), String::new()));
@@ -1489,6 +1492,7 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
             &borrow_msg,
             &value_msg,
         );
+        self.note_due_to_edition_2024_opaque_capture_rules(borrow, &mut err);
 
         borrow_spans.var_path_only_subdiag(&mut err, crate::InitializationRequiringAction::Borrow);
 
@@ -1524,7 +1528,6 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
                 matches!(
                     adj.kind,
                     ty::adjustment::Adjust::Borrow(ty::adjustment::AutoBorrow::Ref(
-                        _,
                         ty::adjustment::AutoBorrowMutability::Not
                             | ty::adjustment::AutoBorrowMutability::Mut {
                                 allow_two_phase_borrow: ty::adjustment::AllowTwoPhase::No
@@ -1553,14 +1556,17 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
         let use_spans = self.move_spans(place.as_ref(), location);
         let span = use_spans.var_or_use();
 
-        // If the attempted use is in a closure then we do not care about the path span of the place we are currently trying to use
-        // we call `var_span_label` on `borrow_spans` to annotate if the existing borrow was in a closure
+        // If the attempted use is in a closure then we do not care about the path span of the
+        // place we are currently trying to use we call `var_span_label` on `borrow_spans` to
+        // annotate if the existing borrow was in a closure.
         let mut err = self.cannot_use_when_mutably_borrowed(
             span,
             &self.describe_any_place(place.as_ref()),
             borrow_span,
             &self.describe_any_place(borrow.borrowed_place.as_ref()),
         );
+        self.note_due_to_edition_2024_opaque_capture_rules(borrow, &mut err);
+
         borrow_spans.var_subdiag(&mut err, Some(borrow.kind), |kind, var_span| {
             use crate::session_diagnostics::CaptureVarCause::*;
             let place = &borrow.borrowed_place;
@@ -1820,6 +1826,7 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
                 unreachable!()
             }
         };
+        self.note_due_to_edition_2024_opaque_capture_rules(issued_borrow, &mut err);
 
         if issued_spans == borrow_spans {
             borrow_spans.var_subdiag(&mut err, Some(gen_borrow_kind), |kind, var_span| {
@@ -2477,7 +2484,8 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
                 if let hir::ExprKind::Closure(closure) = ex.kind
                     && ex.span.contains(self.borrow_span)
                     // To support cases like `|| { v.call(|this| v.get()) }`
-                    // FIXME: actually support such cases (need to figure out how to move from the capture place to original local)
+                    // FIXME: actually support such cases (need to figure out how to move from the
+                    // capture place to original local).
                     && self.res.as_ref().map_or(true, |(prev_res, _)| prev_res.span.contains(ex.span))
                 {
                     self.res = Some((ex, closure));
@@ -2730,7 +2738,7 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
     /// cannot borrow `a.u` (via `a.u.z.c`) as immutable because it is also borrowed as
     /// mutable (via `a.u.s.b`) [E0502]
     /// ```
-    pub(crate) fn describe_place_for_conflicting_borrow(
+    fn describe_place_for_conflicting_borrow(
         &self,
         first_borrowed_place: Place<'tcx>,
         second_borrowed_place: Place<'tcx>,
@@ -2860,7 +2868,7 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
 
         debug!(?place_desc, ?explanation);
 
-        let err = match (place_desc, explanation) {
+        let mut err = match (place_desc, explanation) {
             // If the outlives constraint comes from inside the closure,
             // for example:
             //
@@ -2939,6 +2947,7 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
                 explanation,
             ),
         };
+        self.note_due_to_edition_2024_opaque_capture_rules(borrow, &mut err);
 
         self.buffer_error(err);
     }
@@ -3184,8 +3193,9 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
                 /// misleading users in cases like `tests/ui/nll/borrowed-temporary-error.rs`.
                 /// We could expand the analysis to suggest hoising all of the relevant parts of
                 /// the users' code to make the code compile, but that could be too much.
-                /// We found the `prop_expr` by the way to check whether the expression is a `FormatArguments`,
-                /// which is a special case since it's generated by the compiler.
+                /// We found the `prop_expr` by the way to check whether the expression is a
+                /// `FormatArguments`, which is a special case since it's generated by the
+                /// compiler.
                 struct NestedStatementVisitor<'tcx> {
                     span: Span,
                     current: usize,
@@ -3416,7 +3426,8 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
         let (sugg_span, suggestion) = match tcx.sess.source_map().span_to_snippet(args_span) {
             Ok(string) => {
                 let coro_prefix = if string.starts_with("async") {
-                    // `async` is 5 chars long. Not using `.len()` to avoid the cast from `usize` to `u32`
+                    // `async` is 5 chars long. Not using `.len()` to avoid the cast from `usize`
+                    // to `u32`.
                     Some(5)
                 } else if string.starts_with("gen") {
                     // `gen` is 3 chars long
@@ -3614,10 +3625,9 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
             let stmt_kind =
                 self.body[location.block].statements.get(location.statement_index).map(|s| &s.kind);
             if let Some(StatementKind::StorageDead(..)) = stmt_kind {
-                // this analysis only tries to find moves explicitly
-                // written by the user, so we ignore the move-outs
-                // created by `StorageDead` and at the beginning
-                // of a function.
+                // This analysis only tries to find moves explicitly written by the user, so we
+                // ignore the move-outs created by `StorageDead` and at the beginning of a
+                // function.
             } else {
                 // If we are found a use of a.b.c which was in error, then we want to look for
                 // moves not only of a.b.c but also a.b and a.
@@ -3702,13 +3712,12 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
             }
         }
         if (is_argument || !reached_start) && result.is_empty() {
-            /* Process back edges (moves in future loop iterations) only if
-               the move path is definitely initialized upon loop entry,
-               to avoid spurious "in previous iteration" errors.
-               During DFS, if there's a path from the error back to the start
-               of the function with no intervening init or move, then the
-               move path may be uninitialized at loop entry.
-            */
+            // Process back edges (moves in future loop iterations) only if
+            // the move path is definitely initialized upon loop entry,
+            // to avoid spurious "in previous iteration" errors.
+            // During DFS, if there's a path from the error back to the start
+            // of the function with no intervening init or move, then the
+            // move path may be uninitialized at loop entry.
             while let Some(location) = back_edge_stack.pop() {
                 if dfs_iter(&mut result, location, true) {
                     continue;
@@ -3777,6 +3786,7 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
         }
 
         let mut err = self.cannot_assign_to_borrowed(span, loan_span, &descr_place);
+        self.note_due_to_edition_2024_opaque_capture_rules(loan, &mut err);
 
         loan_spans.var_subdiag(&mut err, Some(loan.kind), |kind, var_span| {
             use crate::session_diagnostics::CaptureVarCause::*;

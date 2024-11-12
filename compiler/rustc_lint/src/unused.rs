@@ -1025,8 +1025,8 @@ pub(crate) struct UnusedParens {
     parens_in_cast_in_lt: Vec<ast::NodeId>,
 }
 
-impl UnusedParens {
-    pub(crate) fn new() -> Self {
+impl Default for UnusedParens {
+    fn default() -> Self {
         Self { with_self_ty_parens: false, parens_in_cast_in_lt: Vec::new() }
     }
 }
@@ -1610,7 +1610,7 @@ impl<'tcx> LateLintPass<'tcx> for UnusedAllocation {
         }
 
         for adj in cx.typeck_results().expr_adjustments(e) {
-            if let adjustment::Adjust::Borrow(adjustment::AutoBorrow::Ref(_, m)) = adj.kind {
+            if let adjustment::Adjust::Borrow(adjustment::AutoBorrow::Ref(m)) = adj.kind {
                 match m {
                     adjustment::AutoBorrowMutability::Not => {
                         cx.emit_span_lint(UNUSED_ALLOCATION, e.span, UnusedAllocationDiag);

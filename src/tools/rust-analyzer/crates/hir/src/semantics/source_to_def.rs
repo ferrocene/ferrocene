@@ -87,7 +87,6 @@
 
 use either::Either;
 use hir_def::{
-    child_by_source::ChildBySource,
     dyn_map::{
         keys::{self, Key},
         DynMap,
@@ -111,7 +110,10 @@ use syntax::{
     AstNode, AstPtr, SyntaxNode,
 };
 
-use crate::{db::HirDatabase, InFile, InlineAsmOperand, SemanticsImpl};
+use crate::{
+    db::HirDatabase, semantics::child_by_source::ChildBySource, InFile, InlineAsmOperand,
+    SemanticsImpl,
+};
 
 #[derive(Default)]
 pub(super) struct SourceToDefCache {
@@ -328,7 +330,7 @@ impl SourceToDefCtx<'_, '_> {
             .position(|it| it == *src.value)?;
         let container = self.find_pat_or_label_container(src.syntax_ref())?;
         let (_, source_map) = self.db.body_with_source_map(container);
-        let expr = source_map.node_expr(src.with_value(&ast::Expr::AsmExpr(asm)))?;
+        let expr = source_map.node_expr(src.with_value(&ast::Expr::AsmExpr(asm)))?.as_expr()?;
         Some(InlineAsmOperand { owner: container, expr, index })
     }
 
@@ -372,7 +374,8 @@ impl SourceToDefCtx<'_, '_> {
         let break_or_continue = ast::Expr::cast(src.value.syntax().parent()?)?;
         let container = self.find_pat_or_label_container(src.syntax_ref())?;
         let (body, source_map) = self.db.body_with_source_map(container);
-        let break_or_continue = source_map.node_expr(src.with_value(&break_or_continue))?;
+        let break_or_continue =
+            source_map.node_expr(src.with_value(&break_or_continue))?.as_expr()?;
         let (Expr::Break { label, .. } | Expr::Continue { label }) = body[break_or_continue] else {
             return None;
         };

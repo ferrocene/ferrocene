@@ -1,4 +1,4 @@
-use std::{iter, slice};
+use std::iter;
 
 use rustc_ast::util::parser::PREC_UNAMBIGUOUS;
 use rustc_errors::{Applicability, Diag, ErrorGuaranteed, StashKey};
@@ -16,7 +16,6 @@ use rustc_middle::{bug, span_bug};
 use rustc_span::Span;
 use rustc_span::def_id::LocalDefId;
 use rustc_span::symbol::{Ident, sym};
-use rustc_target::spec::abi;
 use rustc_trait_selection::error_reporting::traits::DefIdOrName;
 use rustc_trait_selection::infer::InferCtxtExt as _;
 use rustc_trait_selection::traits::query::evaluate_obligation::InferCtxtExt as _;
@@ -300,14 +299,14 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 Ident::with_dummy_span(method_name),
                 trait_def_id,
                 adjusted_ty,
-                opt_input_type.as_ref().map(slice::from_ref),
+                opt_input_type,
             ) {
                 let method = self.register_infer_ok_obligations(ok);
                 let mut autoref = None;
                 if borrow {
                     // Check for &self vs &mut self in the method signature. Since this is either
                     // the Fn or FnMut trait, it should be one of those.
-                    let ty::Ref(region, _, mutbl) = method.sig.inputs()[0].kind() else {
+                    let ty::Ref(_, _, mutbl) = method.sig.inputs()[0].kind() else {
                         bug!("Expected `FnMut`/`Fn` to take receiver by-ref/by-mut")
                     };
 
@@ -317,7 +316,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     let mutbl = AutoBorrowMutability::new(*mutbl, AllowTwoPhase::No);
 
                     autoref = Some(Adjustment {
-                        kind: Adjust::Borrow(AutoBorrow::Ref(*region, mutbl)),
+                        kind: Adjust::Borrow(AutoBorrow::Ref(mutbl)),
                         target: method.sig.inputs()[0],
                     });
                 }
@@ -461,7 +460,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 }
                 (fn_sig, Some(def_id))
             }
-            // FIXME(effects): these arms should error because we can't enforce them
+            // FIXME(const_trait_impl): these arms should error because we can't enforce them
             ty::FnPtr(sig_tys, hdr) => (sig_tys.with(hdr), None),
             _ => {
                 for arg in arg_exprs {
@@ -509,7 +508,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             def_id,
         );
 
-        if fn_sig.abi == abi::Abi::RustCall {
+        if fn_sig.abi == rustc_abi::ExternAbi::RustCall {
             let sp = arg_exprs.last().map_or(call_expr.span, |expr| expr.span);
             if let Some(ty) = fn_sig.inputs().last().copied() {
                 self.register_bound(
@@ -843,27 +842,32 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         callee_did: DefId,
         callee_args: GenericArgsRef<'tcx>,
     ) {
-        // FIXME(effects): We should be enforcing these effects unconditionally.
+        // FIXME(const_trait_impl): We should be enforcing these effects unconditionally.
         // This can be done as soon as we convert the standard library back to
         // using const traits, since if we were to enforce these conditions now,
         // we'd fail on basically every builtin trait call (i.e. `1 + 2`).
-        if !self.tcx.features().effects() {
+        if !self.tcx.features().const_trait_impl() {
+            return;
+        }
+
+        // If we have `rustc_do_not_const_check`, do not check `~const` bounds.
+        if self.tcx.has_attr(self.body_id, sym::rustc_do_not_const_check) {
             return;
         }
 
         let host = match self.tcx.hir().body_const_context(self.body_id) {
             Some(hir::ConstContext::Const { .. } | hir::ConstContext::Static(_)) => {
-                ty::HostPolarity::Const
+                ty::BoundConstness::Const
             }
-            Some(hir::ConstContext::ConstFn) => ty::HostPolarity::Maybe,
+            Some(hir::ConstContext::ConstFn) => ty::BoundConstness::Maybe,
             None => return,
         };
 
-        // FIXME(effects): Should this be `is_const_fn_raw`? It depends on if we move
+        // FIXME(const_trait_impl): Should this be `is_const_fn_raw`? It depends on if we move
         // const stability checking here too, I guess.
         if self.tcx.is_conditionally_const(callee_did) {
             let q = self.tcx.const_conditions(callee_did);
-            // FIXME(effects): Use this span with a better cause code.
+            // FIXME(const_trait_impl): Use this span with a better cause code.
             for (cond, _) in q.instantiate(self.tcx, callee_args) {
                 self.register_predicate(Obligation::new(
                     self.tcx,
@@ -873,7 +877,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 ));
             }
         } else {
-            // FIXME(effects): This should eventually be caught here.
+            // FIXME(const_trait_impl): This should eventually be caught here.
             // For now, though, we defer some const checking to MIR.
         }
     }

@@ -203,13 +203,13 @@ lint_confusable_identifier_pair = found both `{$existing_sym}` and `{$sym}` as i
     .current_use = this identifier can be confused with `{$existing_sym}`
     .other_use = other identifier used here
 
-lint_cstring_ptr = getting the inner pointer of a temporary `CString`
-    .as_ptr_label = this pointer will be invalid
-    .unwrap_label = this `CString` is deallocated at the end of the statement, bind it to a variable to extend its lifetime
-    .note = pointers do not have a lifetime; when calling `as_ptr` the `CString` will be deallocated at the end of the statement because nothing is referencing it as far as the type system is concerned
-    .help = for more information, see https://doc.rust-lang.org/reference/destructors.html
-
 lint_custom_inner_attribute_unstable = custom inner attributes are unstable
+
+lint_dangling_pointers_from_temporaries = a dangling pointer will be produced because the temporary `{$ty}` will be dropped
+    .label_ptr = this pointer will immediately be invalid
+    .label_temporary = this `{$ty}` is deallocated at the end of the statement, bind it to a variable to extend its lifetime
+    .note = pointers do not have a lifetime; when calling `{$callee}` the `{$ty}` will be deallocated at the end of the statement because nothing is referencing it as far as the type system is concerned
+    .help = for more information, see <https://doc.rust-lang.org/reference/destructors.html>
 
 lint_default_hash_types = prefer `{$preferred}` over `{$used}`, it has better performance
     .note = a `use rustc_data_structures::fx::{$preferred}` may be necessary
@@ -268,7 +268,7 @@ lint_extern_crate_not_idiomatic = `extern crate` is not idiomatic in the new edi
 
 lint_extern_without_abi = extern declarations without an explicit ABI are deprecated
     .label = ABI should be specified here
-    .help = the default ABI is {$default_abi}
+    .suggestion = explicitly specify the {$default_abi} ABI
 
 lint_for_loops_over_fallibles =
     for loop over {$article} `{$ref_prefix}{$ty}`. This is more readably written as an `if let` statement

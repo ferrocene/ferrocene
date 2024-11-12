@@ -20,7 +20,7 @@ use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefIdMap;
 use rustc_session::Session;
 use rustc_span::{FileNameDisplayPreference, SourceFileHash, StableSourceFileId};
-use rustc_target::abi::call::FnAbi;
+use rustc_target::callconv::FnAbi;
 
 pub(crate) use self::emit::{DebugReloc, DebugRelocName};
 pub(crate) use self::types::TypeDebugContext;
@@ -101,6 +101,7 @@ impl DebugContext {
             None => (tcx.crate_name(LOCAL_CRATE).to_string(), None),
         };
 
+        let file_has_md5 = file_info.is_some();
         let mut line_program = LineProgram::new(
             encoding,
             LineEncoding::default(),
@@ -108,7 +109,7 @@ impl DebugContext {
             LineString::new(name.as_bytes(), encoding, &mut dwarf.line_strings),
             file_info,
         );
-        line_program.file_has_md5 = file_info.is_some();
+        line_program.file_has_md5 = file_has_md5;
 
         dwarf.unit.line_program = line_program;
 
@@ -210,7 +211,6 @@ impl DebugContext {
         type_names::push_generic_params(
             tcx,
             tcx.normalize_erasing_regions(ty::ParamEnv::reveal_all(), args),
-            enclosing_fn_def_id,
             &mut name,
         );
 

@@ -26,7 +26,11 @@ const LICENSES: &[&str] = &[
     "BSD-2-Clause",                                        // zerocopy
     "ISC",
     "MIT / Apache-2.0",
+<<<<<<< HEAD
     "MIT AND (MIT OR Apache-2.0)",                         // libm
+=======
+    "MIT AND Apache-2.0 WITH LLVM-exception AND (MIT OR Apache-2.0)", // compiler-builtins
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "MIT OR Apache-2.0 OR LGPL-2.1-or-later",              // r-efi, r-efi-alloc
     "MIT OR Apache-2.0 OR Zlib",                           // tinyvec_macros
     "MIT OR Apache-2.0",
@@ -68,9 +72,6 @@ pub(crate) const WORKSPACES: &[(&str, ExceptionList, Option<(&[&str], &[&str])>,
     ),
     // tidy-alphabetical-start
     ("compiler/rustc_codegen_gcc", EXCEPTIONS_GCC, None, &[]),
-    //("library/backtrace", &[], None), // FIXME uncomment once rust-lang/backtrace#562 has been synced back to the rust repo
-    //("library/portable-simd", &[], None), // FIXME uncomment once rust-lang/portable-simd#363 has been synced back to the rust repo
-    //("library/stdarch", EXCEPTIONS_STDARCH, None), // FIXME uncomment once rust-lang/stdarch#1462 has been synced back to the rust repo
     ("src/bootstrap", EXCEPTIONS_BOOTSTRAP, None, &[]),
     ("src/ci/docker/host-x86_64/test-various/uefi_qemu_test", EXCEPTIONS_UEFI_QEMU_TEST, None, &[]),
     ("src/etc/test-float-parse", EXCEPTIONS, None, &[]),
@@ -124,9 +125,12 @@ const EXCEPTIONS: ExceptionList = &[
     ("rustc_apfloat", "Apache-2.0 WITH LLVM-exception"),     // rustc (license is the same as LLVM uses)
     ("ryu", "Apache-2.0 OR BSL-1.0"), // BSL is not acceptble, but we use it under Apache-2.0                       // cargo/... (because of serde)
     ("self_cell", "Apache-2.0"),                             // rustc (fluent translations)
+<<<<<<< HEAD
     ("similar", "Apache-2.0"),                               // generate-tarball
     ("snap", "BSD-3-Clause"),                                // rustc
     ("subtle", "BSD-3-Clause"),                              // generate-tarball
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     ("wasi-preview1-component-adapter-provider", "Apache-2.0 WITH LLVM-exception"), // rustc
     // tidy-alphabetical-end
 ];
@@ -141,17 +145,6 @@ const EXCEPTIONS_STDLIB: ExceptionList = &[
     ("fortanix-sgx-abi", "MPL-2.0"), // libstd but only for `sgx` target. FIXME: this dependency violates the documentation comment above.
     // tidy-alphabetical-end
 ];
-
-// FIXME uncomment once rust-lang/stdarch#1462 lands
-/*
-const EXCEPTIONS_STDARCH: ExceptionList = &[
-    // tidy-alphabetical-start
-    ("ryu", "Apache-2.0 OR BSL-1.0"), // BSL is not acceptble, but we use it under Apache-2.0
-    ("wasmparser", "Apache-2.0 WITH LLVM-exception"),
-    ("wasmprinter", "Apache-2.0 WITH LLVM-exception"),
-    // tidy-alphabetical-end
-];
-*/
 
 const EXCEPTIONS_CARGO: ExceptionList = &[
     // tidy-alphabetical-start
@@ -188,7 +181,6 @@ const EXCEPTIONS_RUST_ANALYZER: ExceptionList = &[
     ("rustc_apfloat", "Apache-2.0 WITH LLVM-exception"),
     ("ryu", "Apache-2.0 OR BSL-1.0"), // BSL is not acceptble, but we use it under Apache-2.0
     ("scip", "Apache-2.0"),
-    ("snap", "BSD-3-Clause"),
     // tidy-alphabetical-end
 ];
 
@@ -230,7 +222,7 @@ const EXCEPTIONS_CRANELIFT: ExceptionList = &[
     ("cranelift-module", "Apache-2.0 WITH LLVM-exception"),
     ("cranelift-native", "Apache-2.0 WITH LLVM-exception"),
     ("cranelift-object", "Apache-2.0 WITH LLVM-exception"),
-    ("mach", "BSD-2-Clause"),
+    ("mach2", "BSD-2-Clause OR MIT OR Apache-2.0"),
     ("regalloc2", "Apache-2.0 WITH LLVM-exception"),
     ("target-lexicon", "Apache-2.0 WITH LLVM-exception"),
     ("wasmtime-jit-icache-coherence", "Apache-2.0 WITH LLVM-exception"),
@@ -418,7 +410,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "sharded-slab",
     "shlex",
     "smallvec",
-    "snap",
     "stable_deref_trait",
     "stacker",
     "static_assertions",
@@ -570,7 +561,7 @@ const PERMITTED_CRANELIFT_DEPENDENCIES: &[&str] = &[
     "libc",
     "libloading",
     "log",
-    "mach",
+    "mach2",
     "memchr",
     "object",
     "once_cell",
@@ -587,9 +578,6 @@ const PERMITTED_CRANELIFT_DEPENDENCIES: &[&str] = &[
     "unicode-ident",
     "version_check",
     "wasmtime-jit-icache-coherence",
-    "winapi",
-    "winapi-i686-pc-windows-gnu",
-    "winapi-x86_64-pc-windows-gnu",
     "windows-sys",
     "windows-targets",
     "windows_aarch64_gnullvm",

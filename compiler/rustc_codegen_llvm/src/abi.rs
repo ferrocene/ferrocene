@@ -2,6 +2,7 @@ use std::cmp;
 
 use libc::c_uint;
 use rustc_abi as abi;
+pub(crate) use rustc_abi::ExternAbi;
 use rustc_abi::Primitive::Int;
 use rustc_abi::{HasDataLayout, Size};
 use rustc_codegen_ssa::MemFlags;
@@ -13,9 +14,8 @@ use rustc_middle::ty::layout::LayoutOf;
 pub(crate) use rustc_middle::ty::layout::{WIDE_PTR_ADDR, WIDE_PTR_EXTRA};
 use rustc_middle::{bug, ty};
 use rustc_session::config;
-pub(crate) use rustc_target::abi::call::*;
+pub(crate) use rustc_target::callconv::*;
 use rustc_target::spec::SanitizerSet;
-pub(crate) use rustc_target::spec::abi::Abi;
 use smallvec::SmallVec;
 
 use crate::attributes::llfn_attrs_from_instance;
@@ -415,7 +415,7 @@ impl<'ll, 'tcx> FnAbiLlvmExt<'ll, 'tcx> for FnAbi<'tcx, Ty<'tcx>> {
         instance: Option<ty::Instance<'tcx>>,
     ) {
         let mut func_attrs = SmallVec::<[_; 3]>::new();
-        if self.ret.layout.abi.is_uninhabited() {
+        if self.ret.layout.is_uninhabited() {
             func_attrs.push(llvm::AttributeKind::NoReturn.create_attr(cx.llcx));
         }
         if !self.can_unwind {
@@ -436,7 +436,7 @@ impl<'ll, 'tcx> FnAbiLlvmExt<'ll, 'tcx> for FnAbi<'tcx, Ty<'tcx>> {
             i - 1
         };
 
-        let apply_range_attr = |idx: AttributePlace, scalar: rustc_target::abi::Scalar| {
+        let apply_range_attr = |idx: AttributePlace, scalar: rustc_abi::Scalar| {
             if cx.sess().opts.optimize != config::OptLevel::No
                 && llvm_util::get_version() >= (19, 0, 0)
                 && matches!(scalar.primitive(), Int(..))
@@ -458,7 +458,7 @@ impl<'ll, 'tcx> FnAbiLlvmExt<'ll, 'tcx> for FnAbi<'tcx, Ty<'tcx>> {
         match &self.ret.mode {
             PassMode::Direct(attrs) => {
                 attrs.apply_attrs_to_llfn(llvm::AttributePlace::ReturnValue, cx, llfn);
-                if let abi::Abi::Scalar(scalar) = self.ret.layout.abi {
+                if let abi::BackendRepr::Scalar(scalar) = self.ret.layout.backend_repr {
                     apply_range_attr(llvm::AttributePlace::ReturnValue, scalar);
                 }
             }
@@ -495,7 +495,7 @@ impl<'ll, 'tcx> FnAbiLlvmExt<'ll, 'tcx> for FnAbi<'tcx, Ty<'tcx>> {
                 }
                 PassMode::Direct(attrs) => {
                     let i = apply(attrs);
-                    if let abi::Abi::Scalar(scalar) = arg.layout.abi {
+                    if let abi::BackendRepr::Scalar(scalar) = arg.layout.backend_repr {
                         apply_range_attr(llvm::AttributePlace::Argument(i), scalar);
                     }
                 }
@@ -510,7 +510,9 @@ impl<'ll, 'tcx> FnAbiLlvmExt<'ll, 'tcx> for FnAbi<'tcx, Ty<'tcx>> {
                 PassMode::Pair(a, b) => {
                     let i = apply(a);
                     let ii = apply(b);
-                    if let abi::Abi::ScalarPair(scalar_a, scalar_b) = arg.layout.abi {
+                    if let abi::BackendRepr::ScalarPair(scalar_a, scalar_b) =
+                        arg.layout.backend_repr
+                    {
                         apply_range_attr(llvm::AttributePlace::Argument(i), scalar_a);
                         apply_range_attr(llvm::AttributePlace::Argument(ii), scalar_b);
                     }
@@ -532,7 +534,7 @@ impl<'ll, 'tcx> FnAbiLlvmExt<'ll, 'tcx> for FnAbi<'tcx, Ty<'tcx>> {
 
     fn apply_attrs_callsite(&self, bx: &mut Builder<'_, 'll, 'tcx>, callsite: &'ll Value) {
         let mut func_attrs = SmallVec::<[_; 2]>::new();
-        if self.ret.layout.abi.is_uninhabited() {
+        if self.ret.layout.is_uninhabited() {
             func_attrs.push(llvm::AttributeKind::NoReturn.create_attr(bx.cx.llcx));
         }
         if !self.can_unwind {
@@ -570,7 +572,7 @@ impl<'ll, 'tcx> FnAbiLlvmExt<'ll, 'tcx> for FnAbi<'tcx, Ty<'tcx>> {
         }
         if bx.cx.sess().opts.optimize != config::OptLevel::No
                 && llvm_util::get_version() < (19, 0, 0)
-                && let abi::Abi::Scalar(scalar) = self.ret.layout.abi
+                && let abi::BackendRepr::Scalar(scalar) = self.ret.layout.backend_repr
                 && matches!(scalar.primitive(), Int(..))
                 // If the value is a boolean, the range is 0..2 and that ultimately
                 // become 0..0 when the type becomes i1, which would be rejected

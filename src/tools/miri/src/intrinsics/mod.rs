@@ -4,11 +4,11 @@ mod atomic;
 mod simd;
 
 use rand::Rng;
+use rustc_abi::Size;
 use rustc_apfloat::{Float, Round};
 use rustc_middle::mir;
 use rustc_middle::ty::{self, FloatTy};
 use rustc_span::{Symbol, sym};
-use rustc_target::abi::Size;
 
 use self::atomic::EvalContextExt as _;
 use self::helpers::{ToHost, ToSoft, check_arg_count};
@@ -145,6 +145,21 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 this.write_scalar(Scalar::from_bool(branch), dest)?;
             }
 
+            "floorf16" | "ceilf16" | "truncf16" | "roundf16" | "rintf16" => {
+                let [f] = check_arg_count(args)?;
+                let f = this.read_scalar(f)?.to_f16()?;
+                let mode = match intrinsic_name {
+                    "floorf16" => Round::TowardNegative,
+                    "ceilf16" => Round::TowardPositive,
+                    "truncf16" => Round::TowardZero,
+                    "roundf16" => Round::NearestTiesToAway,
+                    "rintf16" => Round::NearestTiesToEven,
+                    _ => bug!(),
+                };
+                let res = f.round_to_integral(mode).value;
+                let res = this.adjust_nan(res, &[f]);
+                this.write_scalar(res, dest)?;
+            }
             "floorf32" | "ceilf32" | "truncf32" | "roundf32" | "rintf32" => {
                 let [f] = check_arg_count(args)?;
                 let f = this.read_scalar(f)?.to_f32()?;
@@ -169,6 +184,21 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                     "truncf64" => Round::TowardZero,
                     "roundf64" => Round::NearestTiesToAway,
                     "rintf64" => Round::NearestTiesToEven,
+                    _ => bug!(),
+                };
+                let res = f.round_to_integral(mode).value;
+                let res = this.adjust_nan(res, &[f]);
+                this.write_scalar(res, dest)?;
+            }
+            "floorf128" | "ceilf128" | "truncf128" | "roundf128" | "rintf128" => {
+                let [f] = check_arg_count(args)?;
+                let f = this.read_scalar(f)?.to_f128()?;
+                let mode = match intrinsic_name {
+                    "floorf128" => Round::TowardNegative,
+                    "ceilf128" => Round::TowardPositive,
+                    "truncf128" => Round::TowardZero,
+                    "roundf128" => Round::NearestTiesToAway,
+                    "rintf128" => Round::NearestTiesToEven,
                     _ => bug!(),
                 };
                 let res = f.round_to_integral(mode).value;

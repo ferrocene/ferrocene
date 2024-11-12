@@ -1,9 +1,13 @@
 use std::io::Read;
 use std::path::Path;
 
-use super::iter_header;
+use semver::Version;
+
+use super::{
+    EarlyProps, HeadersCache, extract_llvm_version, extract_version_range, iter_header,
+    parse_normalize_rule,
+};
 use crate::common::{Config, Debugger, Mode};
-use crate::header::{EarlyProps, HeadersCache, parse_normalize_rule};
 
 fn make_test_description<R: Read>(
     config: &Config,
@@ -70,6 +74,8 @@ struct ConfigBuilder {
     git_hash: bool,
     system_llvm: bool,
     profiler_runtime: bool,
+    rustc_debug_assertions: bool,
+    std_debug_assertions: bool,
 }
 
 impl ConfigBuilder {
@@ -118,6 +124,16 @@ impl ConfigBuilder {
         self
     }
 
+    fn rustc_debug_assertions(&mut self, is_enabled: bool) -> &mut Self {
+        self.rustc_debug_assertions = is_enabled;
+        self
+    }
+
+    fn std_debug_assertions(&mut self, is_enabled: bool) -> &mut Self {
+        self.std_debug_assertions = is_enabled;
+        self
+    }
+
     fn build(&mut self) -> Config {
         let args = &[
             "compiletest",
@@ -148,6 +164,7 @@ impl ConfigBuilder {
             "--git-repository=",
             "--nightly-branch=",
             "--git-merge-commit-email=",
+            "--minicore-path=",
         ];
         let mut args: Vec<String> = args.iter().map(ToString::to_string).collect();
 
@@ -164,6 +181,12 @@ impl ConfigBuilder {
         }
         if self.profiler_runtime {
             args.push("--profiler-runtime".to_owned());
+        }
+        if self.rustc_debug_assertions {
+            args.push("--with-rustc-debug-assertions".to_owned());
+        }
+        if self.std_debug_assertions {
+            args.push("--with-std-debug-assertions".to_owned());
         }
 
         args.push("--rustc-path".to_string());
@@ -310,6 +333,32 @@ fn only_target() {
 }
 
 #[test]
+fn rustc_debug_assertions() {
+    let config: Config = cfg().rustc_debug_assertions(false).build();
+
+    assert!(check_ignore(&config, "//@ needs-rustc-debug-assertions"));
+    assert!(!check_ignore(&config, "//@ ignore-rustc-debug-assertions"));
+
+    let config: Config = cfg().rustc_debug_assertions(true).build();
+
+    assert!(!check_ignore(&config, "//@ needs-rustc-debug-assertions"));
+    assert!(check_ignore(&config, "//@ ignore-rustc-debug-assertions"));
+}
+
+#[test]
+fn std_debug_assertions() {
+    let config: Config = cfg().std_debug_assertions(false).build();
+
+    assert!(check_ignore(&config, "//@ needs-std-debug-assertions"));
+    assert!(!check_ignore(&config, "//@ ignore-std-debug-assertions"));
+
+    let config: Config = cfg().std_debug_assertions(true).build();
+
+    assert!(!check_ignore(&config, "//@ needs-std-debug-assertions"));
+    assert!(check_ignore(&config, "//@ ignore-std-debug-assertions"));
+}
+
+#[test]
 fn stage() {
     let config: Config = cfg().stage_id("stage1-x86_64-unknown-linux-gnu").build();
 
@@ -408,18 +457,66 @@ fn channel() {
 }
 
 #[test]
-fn test_extract_version_range() {
-    use super::{extract_llvm_version, extract_version_range};
+fn test_extract_llvm_version() {
+    // Note: officially, semver *requires* that versions at the minimum have all three
+    // `major.minor.patch` numbers, though for test-writer's convenience we allow omitting the minor
+    // and patch numbers (which will be stubbed out as 0).
+    assert_eq!(extract_llvm_version("0"), Version::new(0, 0, 0));
+    assert_eq!(extract_llvm_version("0.0"), Version::new(0, 0, 0));
+    assert_eq!(extract_llvm_version("0.0.0"), Version::new(0, 0, 0));
+    assert_eq!(extract_llvm_version("1"), Version::new(1, 0, 0));
+    assert_eq!(extract_llvm_version("1.2"), Version::new(1, 2, 0));
+    assert_eq!(extract_llvm_version("1.2.3"), Version::new(1, 2, 3));
+    assert_eq!(extract_llvm_version("4.5.6git"), Version::new(4, 5, 6));
+    assert_eq!(extract_llvm_version("4.5.6-rc1"), Version::new(4, 5, 6));
+    assert_eq!(extract_llvm_version("123.456.789-rc1"), Version::new(123, 456, 789));
+    assert_eq!(extract_llvm_version("8.1.2-rust"), Version::new(8, 1, 2));
+    assert_eq!(extract_llvm_version("9.0.1-rust-1.43.0-dev"), Version::new(9, 0, 1));
+    assert_eq!(extract_llvm_version("9.3.1-rust-1.43.0-dev"), Version::new(9, 3, 1));
+    assert_eq!(extract_llvm_version("10.0.0-rust"), Version::new(10, 0, 0));
+    assert_eq!(extract_llvm_version("11.1.0"), Version::new(11, 1, 0));
+    assert_eq!(extract_llvm_version("12.0.0libcxx"), Version::new(12, 0, 0));
+    assert_eq!(extract_llvm_version("12.0.0-rc3"), Version::new(12, 0, 0));
+    assert_eq!(extract_llvm_version("13.0.0git"), Version::new(13, 0, 0));
+}
 
-    assert_eq!(extract_version_range("1.2.3 - 4.5.6", extract_llvm_version), Some((10203, 40506)));
-    assert_eq!(extract_version_range("0   - 4.5.6", extract_llvm_version), Some((0, 40506)));
-    assert_eq!(extract_version_range("1.2.3 -", extract_llvm_version), None);
-    assert_eq!(extract_version_range("1.2.3 - ", extract_llvm_version), None);
-    assert_eq!(extract_version_range("- 4.5.6", extract_llvm_version), None);
-    assert_eq!(extract_version_range("-", extract_llvm_version), None);
-    assert_eq!(extract_version_range(" - 4.5.6", extract_llvm_version), None);
-    assert_eq!(extract_version_range("   - 4.5.6", extract_llvm_version), None);
-    assert_eq!(extract_version_range("0  -", extract_llvm_version), None);
+#[test]
+#[should_panic]
+fn test_llvm_version_invalid_components() {
+    extract_llvm_version("4.x.6");
+}
+
+#[test]
+#[should_panic]
+fn test_llvm_version_invalid_prefix() {
+    extract_llvm_version("meow4.5.6");
+}
+
+#[test]
+#[should_panic]
+fn test_llvm_version_too_many_components() {
+    extract_llvm_version("4.5.6.7");
+}
+
+#[test]
+fn test_extract_version_range() {
+    let wrapped_extract = |s: &str| Some(extract_llvm_version(s));
+
+    assert_eq!(
+        extract_version_range("1.2.3 - 4.5.6", wrapped_extract),
+        Some((Version::new(1, 2, 3), Version::new(4, 5, 6)))
+    );
+    assert_eq!(
+        extract_version_range("0   - 4.5.6", wrapped_extract),
+        Some((Version::new(0, 0, 0), Version::new(4, 5, 6)))
+    );
+    assert_eq!(extract_version_range("1.2.3 -", wrapped_extract), None);
+    assert_eq!(extract_version_range("1.2.3 - ", wrapped_extract), None);
+    assert_eq!(extract_version_range("- 4.5.6", wrapped_extract), None);
+    assert_eq!(extract_version_range("-", wrapped_extract), None);
+    assert_eq!(extract_version_range(" - 4.5.6", wrapped_extract), None);
+    assert_eq!(extract_version_range("   - 4.5.6", wrapped_extract), None);
+    assert_eq!(extract_version_range("0  -", wrapped_extract), None);
 }
 
 #[test]
@@ -530,10 +627,6 @@ fn wasm_special() {
         ("wasm32-unknown-emscripten", "emscripten", true),
         ("wasm32-unknown-emscripten", "wasm32", true),
         ("wasm32-unknown-emscripten", "wasm32-bare", false),
-        ("wasm32-wasi", "emscripten", false),
-        ("wasm32-wasi", "wasm32", true),
-        ("wasm32-wasi", "wasm32-bare", false),
-        ("wasm32-wasi", "wasi", true),
         ("wasm32-wasip1", "emscripten", false),
         ("wasm32-wasip1", "wasm32", true),
         ("wasm32-wasip1", "wasm32-bare", false),

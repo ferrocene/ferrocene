@@ -71,7 +71,7 @@ pub enum InstanceKind<'tcx> {
     /// - coroutines
     Item(DefId),
 
-    /// An intrinsic `fn` item (with `"rust-intrinsic"` or `"platform-intrinsic"` ABI).
+    /// An intrinsic `fn` item (with `"rust-intrinsic"` ABI).
     ///
     /// Alongside `Virtual`, this is the only `InstanceKind` that does not have its own callable MIR.
     /// Instead, codegen and const eval "magically" evaluate calls to intrinsics purely in the
@@ -204,7 +204,7 @@ impl<'tcx> Instance<'tcx> {
         }
 
         // If this a non-generic instance, it cannot be a shared monomorphization.
-        self.args.non_erasable_generics(tcx, self.def_id()).next()?;
+        self.args.non_erasable_generics().next()?;
 
         // compiler_builtins cannot use upstream monomorphizations.
         if tcx.is_compiler_builtins(LOCAL_CRATE) {
@@ -690,7 +690,7 @@ impl<'tcx> Instance<'tcx> {
                         && !matches!(
                             tcx.opt_associated_item(def),
                             Some(ty::AssocItem {
-                                container: ty::AssocItemContainer::TraitContainer,
+                                container: ty::AssocItemContainer::Trait,
                                 ..
                             })
                         )

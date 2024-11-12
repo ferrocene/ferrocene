@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use rustc_target::abi::Size;
+use rustc_abi::Size;
 
 use crate::concurrency::init_once::InitOnceStatus;
 use crate::*;
@@ -202,7 +202,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 Scalar::from_i32(1), // retval_succ
                 Scalar::from_i32(0), // retval_timeout
                 dest.clone(),
-                this.eval_windows("c", "ERROR_TIMEOUT"),
+                this.eval_windows("c", "ERROR_TIMEOUT"), // errno_timeout
             );
         }
 

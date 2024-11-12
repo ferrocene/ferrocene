@@ -1096,6 +1096,10 @@ impl<'test> TestCx<'test> {
         self.config.target.contains("vxworks") && !self.is_vxworks_pure_static()
     }
 
+    fn has_aux_dir(&self) -> bool {
+        !self.props.aux.builds.is_empty() || !self.props.aux.crates.is_empty()
+    }
+
     fn aux_output_dir(&self) -> PathBuf {
         let aux_dir = self.aux_output_dir_name();
 
@@ -1146,14 +1150,20 @@ impl<'test> TestCx<'test> {
         }
     }
 
-    /// `root_testpaths` refers to the path of the original test.
-    /// the auxiliary and the test with an aux-build have the same `root_testpaths`.
+    /// `root_testpaths` refers to the path of the original test. the auxiliary and the test with an
+    /// aux-build have the same `root_testpaths`.
     fn compose_and_run_compiler(
         &self,
         mut rustc: Command,
         input: Option<String>,
         root_testpaths: &TestPaths,
     ) -> ProcRes {
+        if self.props.add_core_stubs {
+            let minicore_path = self.build_minicore();
+            rustc.arg("--extern");
+            rustc.arg(&format!("minicore={}", minicore_path.to_str().unwrap()));
+        }
+
         let aux_dir = self.aux_output_dir();
         self.build_all_auxiliary(root_testpaths, &aux_dir, &mut rustc);
 
@@ -1165,6 +1175,37 @@ impl<'test> TestCx<'test> {
             Some(aux_dir.to_str().unwrap()),
             input,
         )
+    }
+
+    /// Builds `minicore`. Returns the path to the minicore rlib within the base test output
+    /// directory.
+    fn build_minicore(&self) -> PathBuf {
+        let output_file_path = self.output_base_dir().join("libminicore.rlib");
+        let mut rustc = self.make_compile_args(
+            &self.config.minicore_path,
+            TargetLocation::ThisFile(output_file_path.clone()),
+            Emit::None,
+            AllowUnused::Yes,
+            LinkToAux::No,
+            vec![],
+        );
+
+        rustc.args(&["--crate-type", "rlib"]);
+        rustc.arg("-Cpanic=abort");
+
+        let res =
+            self.compose_and_run(rustc, self.config.compile_lib_path.to_str().unwrap(), None, None);
+        if !res.status.success() {
+            self.fatal_proc_rec(
+                &format!(
+                    "auxiliary build of {:?} failed to compile: ",
+                    self.config.minicore_path.display()
+                ),
+                &res,
+            );
+        }
+
+        output_file_path
     }
 
     /// Builds an aux dependency.
@@ -1649,10 +1690,23 @@ impl<'test> TestCx<'test> {
         }
 
         if let LinkToAux::Yes = link_to_aux {
-            rustc.arg("-L").arg(self.aux_output_dir_name());
+            // if we pass an `-L` argument to a directory that doesn't exist,
+            // macOS ld emits warnings which disrupt the .stderr files
+            if self.has_aux_dir() {
+                rustc.arg("-L").arg(self.aux_output_dir_name());
+            }
         }
 
         rustc.args(&self.props.compile_flags);
+
+        // FIXME(jieyouxu): we should report a fatal error or warning if user wrote `-Cpanic=` with
+        // something that's not `abort`, however, by moving this last we should override previous
+        // `-Cpanic=`s
+        //
+        // `minicore` requires `#![no_std]` and `#![no_core]`, which means no unwinding panics.
+        if self.props.add_core_stubs {
+            rustc.arg("-Cpanic=abort");
+        }
 
         rustc
     }
@@ -1771,7 +1825,7 @@ impl<'test> TestCx<'test> {
 
     /// Gets the absolute path to the directory where all output for the given
     /// test/revision should reside.
-    /// E.g., `/path/to/build/host-triple/test/ui/relative/testname.revision.mode/`.
+    /// E.g., `/path/to/build/host-tuple/test/ui/relative/testname.revision.mode/`.
     fn output_base_dir(&self) -> PathBuf {
         output_base_dir(self.config, self.testpaths, self.safe_revision())
     }
@@ -1831,34 +1885,6 @@ impl<'test> TestCx<'test> {
             input_file,
             TargetLocation::ThisFile(output_path.clone()),
             Emit::LlvmIr,
-            AllowUnused::No,
-            LinkToAux::Yes,
-            Vec::new(),
-        );
-
-        let proc_res = self.compose_and_run_compiler(rustc, None, self.testpaths);
-        (proc_res, output_path)
-    }
-
-    fn compile_test_and_save_assembly(&self) -> (ProcRes, PathBuf) {
-        // This works with both `--emit asm` (as default output name for the assembly)
-        // and `ptx-linker` because the latter can write output at requested location.
-        let output_path = self.output_base_name().with_extension("s");
-        let input_file = &self.testpaths.file;
-
-        // Use the `//@ assembly-output:` directive to determine how to emit assembly.
-        let emit = match self.props.assembly_output.as_deref() {
-            Some("emit-asm") => Emit::Asm,
-            Some("bpf-linker") => Emit::LinkArgsAsm,
-            Some("ptx-linker") => Emit::None, // No extra flags needed.
-            Some(other) => self.fatal(&format!("unknown 'assembly-output' directive: {other}")),
-            None => self.fatal("missing 'assembly-output' directive"),
-        };
-
-        let rustc = self.make_compile_args(
-            input_file,
-            TargetLocation::ThisFile(output_path.clone()),
-            emit,
             AllowUnused::No,
             LinkToAux::Yes,
             Vec::new(),

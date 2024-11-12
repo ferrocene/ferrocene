@@ -155,7 +155,15 @@ pub fn server_capabilities(config: &Config) -> ServerCapabilities {
             "ssr": true,
             "workspaceSymbolScopeKindFiltering": true,
         })),
-        diagnostic_provider: None,
+        diagnostic_provider: Some(lsp_types::DiagnosticServerCapabilities::Options(
+            lsp_types::DiagnosticOptions {
+                identifier: None,
+                inter_file_dependencies: true,
+                // FIXME
+                workspace_diagnostics: false,
+                work_done_progress_options: WorkDoneProgressOptions { work_done_progress: None },
+            },
+        )),
         inline_completion_provider: None,
     }
 }
@@ -210,9 +218,7 @@ impl ClientCapabilities {
                 .completion_item
                 .as_ref()?
                 .label_details_support
-                .as_ref()
-        })()
-        .is_some()
+        })() == Some(true)
     }
 
     fn completion_item(&self) -> Option<CompletionOptionsCompletionItem> {
@@ -382,6 +388,15 @@ impl ClientCapabilities {
         .unwrap_or_default()
     }
 
+    pub fn text_document_diagnostic(&self) -> bool {
+        (|| -> _ { self.0.text_document.as_ref()?.diagnostic.as_ref() })().is_some()
+    }
+
+    pub fn text_document_diagnostic_related_document_support(&self) -> bool {
+        (|| -> _ { self.0.text_document.as_ref()?.diagnostic.as_ref()?.related_document_support })()
+            == Some(true)
+    }
+
     pub fn code_action_group(&self) -> bool {
         self.experimental_bool("codeActionGroup")
     }
@@ -445,6 +460,11 @@ impl ClientCapabilities {
 
     pub fn inlay_hints_refresh(&self) -> bool {
         (|| -> _ { self.0.workspace.as_ref()?.inlay_hint.as_ref()?.refresh_support })()
+            .unwrap_or_default()
+    }
+
+    pub fn diagnostics_refresh(&self) -> bool {
+        (|| -> _ { self.0.workspace.as_ref()?.diagnostic.as_ref()?.refresh_support })()
             .unwrap_or_default()
     }
 

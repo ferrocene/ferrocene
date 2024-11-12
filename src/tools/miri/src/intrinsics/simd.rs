@@ -1,9 +1,10 @@
 use either::Either;
+use rustc_abi::{Endian, HasDataLayout};
 use rustc_apfloat::{Float, Round};
+use rustc_middle::ty::FloatTy;
 use rustc_middle::ty::layout::LayoutOf;
-use rustc_middle::{mir, ty, ty::FloatTy};
+use rustc_middle::{mir, ty};
 use rustc_span::{Symbol, sym};
-use rustc_target::abi::{Endian, HasDataLayout};
 
 use crate::helpers::{ToHost, ToSoft, bool_to_simd_element, check_arg_count, simd_element_to_bool};
 use crate::*;
@@ -630,12 +631,8 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 let (right, right_len) = this.project_to_simd(right)?;
                 let (dest, dest_len) = this.project_to_simd(dest)?;
 
-                let index = generic_args[2]
-                    .expect_const()
-                    .try_to_valtree()
-                    .unwrap()
-                    .0
-                    .unwrap_branch();
+                let index =
+                    generic_args[2].expect_const().try_to_valtree().unwrap().0.unwrap_branch();
                 let index_len = index.len();
 
                 assert_eq!(left_len, right_len);

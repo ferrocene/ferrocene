@@ -567,6 +567,15 @@ pub(crate) struct ReprConflicting {
     pub hint_spans: Vec<Span>,
 }
 
+#[derive(Diagnostic)]
+#[diag(passes_repr_align_greater_than_target_max, code = E0589)]
+#[note]
+pub(crate) struct InvalidReprAlignForTarget {
+    #[primary_span]
+    pub span: Span,
+    pub size: u64,
+}
+
 #[derive(LintDiagnostic)]
 #[diag(passes_repr_conflicting, code = E0566)]
 pub(crate) struct ReprConflictingLint;
@@ -626,15 +635,6 @@ pub(crate) struct DebugVisualizerUnreadable<'a> {
 #[derive(Diagnostic)]
 #[diag(passes_rustc_allow_const_fn_unstable)]
 pub(crate) struct RustcAllowConstFnUnstable {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_rustc_safe_intrinsic)]
-pub(crate) struct RustcSafeIntrinsic {
     #[primary_span]
     pub attr_span: Span,
     #[label]

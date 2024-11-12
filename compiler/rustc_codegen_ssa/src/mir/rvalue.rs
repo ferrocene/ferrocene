@@ -1,13 +1,13 @@
 use std::assert_matches::assert_matches;
 
 use arrayvec::ArrayVec;
+use rustc_abi::{self as abi, FIRST_VARIANT, FieldIdx};
 use rustc_middle::ty::adjustment::PointerCoercion;
 use rustc_middle::ty::layout::{HasTyCtxt, LayoutOf, TyAndLayout};
 use rustc_middle::ty::{self, Instance, Ty, TyCtxt};
 use rustc_middle::{bug, mir, span_bug};
 use rustc_session::config::OptLevel;
 use rustc_span::{DUMMY_SP, Span};
-use rustc_target::abi::{self, FIRST_VARIANT, FieldIdx};
 use tracing::{debug, instrument};
 
 use super::operand::{OperandRef, OperandValue};
@@ -203,10 +203,10 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
     ) -> Option<OperandValue<Bx::Value>> {
         // Check for transmutes that are always UB.
         if operand.layout.size != cast.size
-            || operand.layout.abi.is_uninhabited()
-            || cast.abi.is_uninhabited()
+            || operand.layout.is_uninhabited()
+            || cast.is_uninhabited()
         {
-            if !operand.layout.abi.is_uninhabited() {
+            if !operand.layout.is_uninhabited() {
                 // Since this is known statically and the input could have existed
                 // without already having hit UB, might as well trap for it.
                 bx.abort();
@@ -555,7 +555,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
 
                         assert!(bx.cx().is_backend_immediate(cast));
                         let to_backend_ty = bx.cx().immediate_backend_type(cast);
-                        if operand.layout.abi.is_uninhabited() {
+                        if operand.layout.is_uninhabited() {
                             let val = OperandValue::Immediate(bx.cx().const_poison(to_backend_ty));
                             return OperandRef { val, layout: cast };
                         }
@@ -1136,17 +1136,17 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             OperandValueKind::ZeroSized
         } else if self.cx.is_backend_immediate(layout) {
             assert!(!self.cx.is_backend_scalar_pair(layout));
-            OperandValueKind::Immediate(match layout.abi {
-                abi::Abi::Scalar(s) => s,
-                abi::Abi::Vector { element, .. } => element,
+            OperandValueKind::Immediate(match layout.backend_repr {
+                abi::BackendRepr::Scalar(s) => s,
+                abi::BackendRepr::Vector { element, .. } => element,
                 x => span_bug!(self.mir.span, "Couldn't translate {x:?} as backend immediate"),
             })
         } else if self.cx.is_backend_scalar_pair(layout) {
-            let abi::Abi::ScalarPair(s1, s2) = layout.abi else {
+            let abi::BackendRepr::ScalarPair(s1, s2) = layout.backend_repr else {
                 span_bug!(
                     self.mir.span,
                     "Couldn't translate {:?} as backend scalar pair",
-                    layout.abi,
+                    layout.backend_repr,
                 );
             };
             OperandValueKind::Pair(s1, s2)

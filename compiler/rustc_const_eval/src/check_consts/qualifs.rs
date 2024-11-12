@@ -114,11 +114,11 @@ impl Qualif for HasMutInterior {
             ty::TraitRef::new(cx.tcx, freeze_def_id, [ty::GenericArg::from(ty)]),
         );
 
-        let infcx = cx
-            .tcx
-            .infer_ctxt()
-            .with_opaque_type_inference(cx.body.source.def_id().expect_local())
-            .build();
+        // FIXME(#132279): This should eventually use the already defined hidden types.
+        let infcx = cx.tcx.infer_ctxt().build(ty::TypingMode::analysis_in_body(
+            cx.tcx,
+            cx.body.source.def_id().expect_local(),
+        ));
         let ocx = ObligationCtxt::new(&infcx);
         ocx.register_obligation(obligation);
         let errors = ocx.select_all_or_error();
@@ -192,7 +192,7 @@ impl Qualif for NeedsNonConstDrop {
             return false;
         }
 
-        // FIXME(effects): Reimplement const drop checking.
+        // FIXME(const_trait_impl): Reimplement const drop checking.
         NeedsDrop::in_any_value_of_ty(cx, ty)
     }
 

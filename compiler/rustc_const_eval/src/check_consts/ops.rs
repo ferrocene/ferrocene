@@ -1,6 +1,5 @@
 //! Concrete error types for all operations which may be invalid in a certain const context.
 
-use hir::def_id::LocalDefId;
 use hir::{ConstContext, LangItem};
 use rustc_errors::Diag;
 use rustc_errors::codes::*;
@@ -74,7 +73,6 @@ impl<'tcx> NonConstOp<'tcx> for FnCallIndirect {
 /// A function call where the callee is not marked as `const`.
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct FnCallNonConst<'tcx> {
-    pub caller: LocalDefId,
     pub callee: DefId,
     pub args: GenericArgsRef<'tcx>,
     pub span: Span,
@@ -87,8 +85,9 @@ impl<'tcx> NonConstOp<'tcx> for FnCallNonConst<'tcx> {
     #[allow(rustc::diagnostic_outside_of_impl)]
     #[allow(rustc::untranslatable_diagnostic)]
     fn build_error(&self, ccx: &ConstCx<'_, 'tcx>, _: Span) -> Diag<'tcx> {
-        let FnCallNonConst { caller, callee, args, span, call_source, feature } = *self;
-        let ConstCx { tcx, param_env, body, .. } = *ccx;
+        let FnCallNonConst { callee, args, span, call_source, feature } = *self;
+        let ConstCx { tcx, param_env, .. } = *ccx;
+        let caller = ccx.def_id();
 
         let diag_trait = |err, self_ty: Ty<'_>, trait_id| {
             let trait_ref = TraitRef::from_method(tcx, trait_id, args);
@@ -116,12 +115,12 @@ impl<'tcx> NonConstOp<'tcx> for FnCallNonConst<'tcx> {
                     let obligation =
                         Obligation::new(tcx, ObligationCause::dummy(), param_env, trait_ref);
 
-                    let infcx = tcx.infer_ctxt().build();
+                    let infcx = tcx.infer_ctxt().build(ccx.body.typing_mode(tcx));
                     let mut selcx = SelectionContext::new(&infcx);
                     let implsrc = selcx.select(&obligation);
 
                     if let Ok(Some(ImplSource::UserDefined(data))) = implsrc {
-                        // FIXME(effects) revisit this
+                        // FIXME(const_trait_impl) revisit this
                         if !tcx.is_const_trait_impl(data.impl_def_id) {
                             let span = tcx.def_span(data.impl_def_id);
                             err.subdiagnostic(errors::NonConstImplNote { span });
@@ -289,7 +288,7 @@ impl<'tcx> NonConstOp<'tcx> for FnCallNonConst<'tcx> {
         if let Some(feature) = feature {
             ccx.tcx.disabled_nightly_features(
                 &mut err,
-                body.source.def_id().as_local().map(|local| ccx.tcx.local_def_id_to_hir_id(local)),
+                Some(ccx.tcx.local_def_id_to_hir_id(caller)),
                 [(String::new(), feature)],
             );
         }
@@ -355,14 +354,14 @@ impl<'tcx> NonConstOp<'tcx> for IntrinsicNonConst {
 pub(crate) struct IntrinsicUnstable {
     pub name: Symbol,
     pub feature: Symbol,
-    pub const_stable_indirect: bool,
+    pub const_stable: bool,
 }
 
 impl<'tcx> NonConstOp<'tcx> for IntrinsicUnstable {
     fn status_in_item(&self, _ccx: &ConstCx<'_, 'tcx>) -> Status {
         Status::Unstable {
             gate: self.feature,
-            safe_to_expose_on_stable: self.const_stable_indirect,
+            safe_to_expose_on_stable: self.const_stable,
             // We do *not* want to suggest to mark the intrinsic as `const_stable_indirect`,
             // that's not a trivial change!
             is_function_call: false,

@@ -1,5 +1,6 @@
 use std::fmt;
 
+use rustc_abi::ExternAbi;
 use rustc_ast::util::parser::ExprPrecedence;
 use rustc_ast::{
     self as ast, Attribute, FloatTy, InlineAsmOptions, InlineAsmTemplatePiece, IntTy, Label,
@@ -19,7 +20,6 @@ use rustc_span::source_map::Spanned;
 use rustc_span::symbol::{Ident, Symbol, kw, sym};
 use rustc_span::{BytePos, DUMMY_SP, ErrorGuaranteed, Span};
 use rustc_target::asm::InlineAsmRegOrRegClass;
-use rustc_target::spec::abi::Abi;
 use smallvec::SmallVec;
 use tracing::debug;
 
@@ -2627,7 +2627,6 @@ impl<'hir> Ty<'hir> {
             }
             TyKind::Tup(tys) => tys.iter().any(Self::is_suggestable_infer_ty),
             TyKind::Ptr(mut_ty) | TyKind::Ref(_, mut_ty) => mut_ty.ty.is_suggestable_infer_ty(),
-            TyKind::OpaqueDef(_, generic_args) => are_suggestable_generic_args(generic_args),
             TyKind::Path(QPath::TypeRelative(ty, segment)) => {
                 ty.is_suggestable_infer_ty() || are_suggestable_generic_args(segment.args().args)
             }
@@ -2736,7 +2735,7 @@ impl PrimTy {
 #[derive(Debug, Clone, Copy, HashStable_Generic)]
 pub struct BareFnTy<'hir> {
     pub safety: Safety,
-    pub abi: Abi,
+    pub abi: ExternAbi,
     pub generic_params: &'hir [GenericParam<'hir>],
     pub decl: &'hir FnDecl<'hir>,
     pub param_names: &'hir [Ident],
@@ -2746,19 +2745,8 @@ pub struct BareFnTy<'hir> {
 pub struct OpaqueTy<'hir> {
     pub hir_id: HirId,
     pub def_id: LocalDefId,
-    pub generics: &'hir Generics<'hir>,
     pub bounds: GenericBounds<'hir>,
-    pub origin: OpaqueTyOrigin,
-    /// Return-position impl traits (and async futures) must "reify" any late-bound
-    /// lifetimes that are captured from the function signature they originate from.
-    ///
-    /// This is done by generating a new early-bound lifetime parameter local to the
-    /// opaque which is instantiated in the function signature with the late-bound
-    /// lifetime.
-    ///
-    /// This mapping associated a captured lifetime (first parameter) with the new
-    /// early-bound lifetime that was generated for the opaque.
-    pub lifetime_mapping: &'hir [(&'hir Lifetime, LocalDefId)],
+    pub origin: OpaqueTyOrigin<LocalDefId>,
     pub span: Span,
 }
 
@@ -2796,33 +2784,35 @@ pub struct PreciseCapturingNonLifetimeArg {
     pub res: Res,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug, HashStable_Generic)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(HashStable_Generic, Encodable, Decodable)]
 pub enum RpitContext {
     Trait,
     TraitImpl,
 }
 
 /// From whence the opaque type came.
-#[derive(Copy, Clone, PartialEq, Eq, Debug, HashStable_Generic)]
-pub enum OpaqueTyOrigin {
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(HashStable_Generic, Encodable, Decodable)]
+pub enum OpaqueTyOrigin<D> {
     /// `-> impl Trait`
     FnReturn {
         /// The defining function.
-        parent: LocalDefId,
+        parent: D,
         // Whether this is an RPITIT (return position impl trait in trait)
         in_trait_or_impl: Option<RpitContext>,
     },
     /// `async fn`
     AsyncFn {
         /// The defining function.
-        parent: LocalDefId,
+        parent: D,
         // Whether this is an AFIT (async fn in trait)
         in_trait_or_impl: Option<RpitContext>,
     },
     /// type aliases: `type Foo = impl Trait;`
     TyAlias {
         /// The type alias or associated type parent of the TAIT/ATPIT
-        parent: LocalDefId,
+        parent: D,
         /// associated types in impl blocks for traits.
         in_assoc_ty: bool,
     },
@@ -2861,12 +2851,7 @@ pub enum TyKind<'hir> {
     /// Type parameters may be stored in each `PathSegment`.
     Path(QPath<'hir>),
     /// An opaque type definition itself. This is only used for `impl Trait`.
-    ///
-    /// The generic argument list contains the lifetimes (and in the future
-    /// possibly parameters) that are actually bound on the `impl Trait`.
-    ///
-    /// The last parameter specifies whether this opaque appears in a trait definition.
-    OpaqueDef(&'hir OpaqueTy<'hir>, &'hir [GenericArg<'hir>]),
+    OpaqueDef(&'hir OpaqueTy<'hir>),
     /// A trait object type `Bound1 + Bound2 + Bound3`
     /// where `Bound` is a trait or a lifetime.
     TraitObject(&'hir [PolyTraitRef<'hir>], &'hir Lifetime, TraitObjectSyntax),
@@ -3328,7 +3313,7 @@ impl<'hir> Item<'hir> {
 
         expect_mod, &'hir Mod<'hir>, ItemKind::Mod(m), m;
 
-        expect_foreign_mod, (Abi, &'hir [ForeignItemRef]),
+        expect_foreign_mod, (ExternAbi, &'hir [ForeignItemRef]),
             ItemKind::ForeignMod { abi, items }, (*abi, items);
 
         expect_global_asm, &'hir InlineAsm<'hir>, ItemKind::GlobalAsm(asm), asm;
@@ -3401,7 +3386,7 @@ pub struct FnHeader {
     pub safety: Safety,
     pub constness: Constness,
     pub asyncness: IsAsync,
-    pub abi: Abi,
+    pub abi: ExternAbi,
 }
 
 impl FnHeader {
@@ -3443,7 +3428,7 @@ pub enum ItemKind<'hir> {
     /// A module.
     Mod(&'hir Mod<'hir>),
     /// An external module, e.g. `extern { .. }`.
-    ForeignMod { abi: Abi, items: &'hir [ForeignItemRef] },
+    ForeignMod { abi: ExternAbi, items: &'hir [ForeignItemRef] },
     /// Module-level inline assembly (from `global_asm!`).
     GlobalAsm(&'hir InlineAsm<'hir>),
     /// A type alias, e.g., `type Foo = Bar<u8>`.
@@ -3991,7 +3976,6 @@ impl<'hir> Node<'hir> {
             | Node::TraitItem(TraitItem { generics, .. })
             | Node::ImplItem(ImplItem { generics, .. }) => Some(generics),
             Node::Item(item) => item.kind.generics(),
-            Node::OpaqueTy(opaque) => Some(opaque.generics),
             _ => None,
         }
     }

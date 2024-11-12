@@ -50,6 +50,7 @@ use std::ops::ControlFlow;
 use std::path::PathBuf;
 use std::{cmp, fmt, iter};
 
+use rustc_abi::ExternAbi;
 use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_errors::{Applicability, Diag, DiagStyledString, IntoDiagArg, StringPart, pluralize};
 use rustc_hir::def::DefKind;
@@ -67,7 +68,6 @@ use rustc_middle::ty::{
     TypeVisitableExt,
 };
 use rustc_span::{BytePos, DesugaringKind, Pos, Span, sym};
-use rustc_target::spec::abi;
 use tracing::{debug, instrument};
 
 use crate::error_reporting::TypeErrCtxt;
@@ -392,7 +392,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                         Some(ty) if expected == ty => {
                             let source_map = self.tcx.sess.source_map();
                             err.span_suggestion(
-                                source_map.end_point(cause.span()),
+                                source_map.end_point(cause.span),
                                 "try removing this `?`",
                                 "",
                                 Applicability::MachineApplicable,
@@ -412,6 +412,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 source,
                 ref prior_non_diverging_arms,
                 scrut_span,
+                expr_span,
                 ..
             }) => match source {
                 hir::MatchSource::TryDesugar(scrut_hir_id) => {
@@ -430,7 +431,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                             Some(ty) if expected == ty => {
                                 let source_map = self.tcx.sess.source_map();
                                 err.span_suggestion(
-                                    source_map.end_point(cause.span()),
+                                    source_map.end_point(cause.span),
                                     "try removing this `?`",
                                     "",
                                     Applicability::MachineApplicable,
@@ -460,12 +461,12 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                             format!("this and all prior arms are found to be of type `{t}`"),
                         );
                     }
-                    let outer = if any_multiline_arm || !source_map.is_multiline(cause.span) {
+                    let outer = if any_multiline_arm || !source_map.is_multiline(expr_span) {
                         // Cover just `match` and the scrutinee expression, not
                         // the entire match body, to reduce diagram noise.
-                        cause.span.shrink_to_lo().to(scrut_span)
+                        expr_span.shrink_to_lo().to(scrut_span)
                     } else {
-                        cause.span
+                        expr_span
                     };
                     let msg = "`match` arms have incompatible types";
                     err.span_label(outer, msg);
@@ -685,10 +686,10 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
 
         // unsafe extern "C" for<'a> fn(&'a T) -> &'a T
         //        ^^^^^^^^^^
-        if sig1.abi != abi::Abi::Rust {
+        if sig1.abi != ExternAbi::Rust {
             values.0.push(format!("extern {} ", sig1.abi), sig1.abi != sig2.abi);
         }
-        if sig2.abi != abi::Abi::Rust {
+        if sig2.abi != ExternAbi::Rust {
             values.1.push(format!("extern {} ", sig2.abi), sig1.abi != sig2.abi);
         }
 
@@ -762,6 +763,67 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             (values.1).0.extend(x2.0);
         }
 
+        values
+    }
+
+    pub fn cmp_traits(
+        &self,
+        def_id1: DefId,
+        args1: &[ty::GenericArg<'tcx>],
+        def_id2: DefId,
+        args2: &[ty::GenericArg<'tcx>],
+    ) -> (DiagStyledString, DiagStyledString) {
+        let mut values = (DiagStyledString::new(), DiagStyledString::new());
+
+        if def_id1 != def_id2 {
+            values.0.push_highlighted(self.tcx.def_path_str(def_id1).as_str());
+            values.1.push_highlighted(self.tcx.def_path_str(def_id2).as_str());
+        } else {
+            values.0.push_normal(self.tcx.item_name(def_id1).as_str());
+            values.1.push_normal(self.tcx.item_name(def_id2).as_str());
+        }
+
+        if args1.len() != args2.len() {
+            let (pre, post) = if args1.len() > 0 { ("<", ">") } else { ("", "") };
+            values.0.push_normal(format!(
+                "{pre}{}{post}",
+                args1.iter().map(|a| a.to_string()).collect::<Vec<_>>().join(", ")
+            ));
+            let (pre, post) = if args2.len() > 0 { ("<", ">") } else { ("", "") };
+            values.1.push_normal(format!(
+                "{pre}{}{post}",
+                args2.iter().map(|a| a.to_string()).collect::<Vec<_>>().join(", ")
+            ));
+            return values;
+        }
+
+        if args1.len() > 0 {
+            values.0.push_normal("<");
+            values.1.push_normal("<");
+        }
+        for (i, (a, b)) in std::iter::zip(args1, args2).enumerate() {
+            let a_str = a.to_string();
+            let b_str = b.to_string();
+            if let (Some(a), Some(b)) = (a.as_type(), b.as_type()) {
+                let (a, b) = self.cmp(a, b);
+                values.0.0.extend(a.0);
+                values.1.0.extend(b.0);
+            } else if a_str != b_str {
+                values.0.push_highlighted(a_str);
+                values.1.push_highlighted(b_str);
+            } else {
+                values.0.push_normal(a_str);
+                values.1.push_normal(b_str);
+            }
+            if i + 1 < args1.len() {
+                values.0.push_normal(", ");
+                values.1.push_normal(", ");
+            }
+        }
+        if args1.len() > 0 {
+            values.0.push_normal(">");
+            values.1.push_normal(">");
+        }
         values
     }
 
@@ -1148,7 +1210,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         terr: TypeError<'tcx>,
         prefer_label: bool,
     ) {
-        let span = cause.span();
+        let span = cause.span;
 
         // For some types of errors, expected-found does not make
         // sense, so just ignore the values we were given.
@@ -1642,7 +1704,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         terr: TypeError<'tcx>,
     ) -> Vec<TypeErrorAdditionalDiags> {
         let mut suggestions = Vec::new();
-        let span = trace.cause.span();
+        let span = trace.cause.span;
         let values = self.resolve_vars_if_possible(trace.values);
         if let Some((expected, found)) = values.ty() {
             match (expected.kind(), found.kind()) {
@@ -1792,7 +1854,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
     ) -> Diag<'a> {
         debug!("report_and_explain_type_error(trace={:?}, terr={:?})", trace, terr);
 
-        let span = trace.cause.span();
+        let span = trace.cause.span;
         let failure_code = trace.cause.as_failure_code_diag(
             terr,
             span,

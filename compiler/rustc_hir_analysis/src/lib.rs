@@ -91,6 +91,7 @@ mod impl_wf_check;
 mod outlives;
 mod variance;
 
+use rustc_abi::ExternAbi;
 use rustc_hir as hir;
 use rustc_hir::def::DefKind;
 use rustc_middle::middle;
@@ -100,19 +101,23 @@ use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_session::parse::feature_err;
 use rustc_span::Span;
 use rustc_span::symbol::sym;
-use rustc_target::spec::abi::Abi;
 use rustc_trait_selection::traits;
 
 rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 
-fn require_c_abi_if_c_variadic(tcx: TyCtxt<'_>, decl: &hir::FnDecl<'_>, abi: Abi, span: Span) {
+fn require_c_abi_if_c_variadic(
+    tcx: TyCtxt<'_>,
+    decl: &hir::FnDecl<'_>,
+    abi: ExternAbi,
+    span: Span,
+) {
     const CONVENTIONS_UNSTABLE: &str =
         "`C`, `cdecl`, `system`, `aapcs`, `win64`, `sysv64` or `efiapi`";
     const CONVENTIONS_STABLE: &str = "`C` or `cdecl`";
     const UNSTABLE_EXPLAIN: &str =
         "using calling conventions other than `C` or `cdecl` for varargs functions is unstable";
 
-    if !decl.c_variadic || matches!(abi, Abi::C { .. } | Abi::Cdecl { .. }) {
+    if !decl.c_variadic || matches!(abi, ExternAbi::C { .. } | ExternAbi::Cdecl { .. }) {
         return;
     }
 
@@ -152,12 +157,6 @@ pub fn provide(providers: &mut Providers) {
 
 pub fn check_crate(tcx: TyCtxt<'_>) {
     let _prof_timer = tcx.sess.timer("type_check_crate");
-
-    // FIXME(effects): remove once effects is implemented in old trait solver
-    // or if the next solver is stabilized.
-    if tcx.features().effects() && !tcx.next_trait_solver_globally() {
-        tcx.dcx().emit_err(errors::EffectsWithoutNextSolver);
-    }
 
     tcx.sess.time("coherence_checking", || {
         tcx.hir().par_for_each_module(|module| {

@@ -275,7 +275,7 @@ add --enable-extended
 #
 # NOTE: If you add a new tool here, make sure to also change
 # `ferrocene/packages.toml` to include it in new releases.
-add --tools=rustdoc,cargo,llvm-tools,rustfmt,rust-analyzer,clippy
+add --tools=rust-dev,rustdoc,cargo,llvm-tools,rustfmt,rust-analyzer,clippy
 
 # Build and enable the profiler runtime.
 #

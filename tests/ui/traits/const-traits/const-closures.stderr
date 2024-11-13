@@ -1,56 +1,56 @@
 error: `~const` can only be applied to `#[const_trait]` traits
-  --> $DIR/const-closures.rs:8:19
+  --> $DIR/const-closures.rs:8:12
    |
 LL |         F: ~const FnOnce() -> u8,
-   |                   ^^^^^^^^^^^^^^
+   |            ^^^^^^
 
 error: `~const` can only be applied to `#[const_trait]` traits
-  --> $DIR/const-closures.rs:9:19
+  --> $DIR/const-closures.rs:9:12
    |
 LL |         F: ~const FnMut() -> u8,
-   |                   ^^^^^^^^^^^^^
+   |            ^^^^^^
 
 error: `~const` can only be applied to `#[const_trait]` traits
-  --> $DIR/const-closures.rs:10:19
+  --> $DIR/const-closures.rs:10:12
    |
 LL |         F: ~const Fn() -> u8,
-   |                   ^^^^^^^^^^
+   |            ^^^^^^
 
 error: `~const` can only be applied to `#[const_trait]` traits
-  --> $DIR/const-closures.rs:8:19
+  --> $DIR/const-closures.rs:8:12
    |
 LL |         F: ~const FnOnce() -> u8,
-   |                   ^^^^^^^^^^^^^^
+   |            ^^^^^^
    |
    = note: duplicate diagnostic emitted due to `-Z deduplicate-diagnostics=no`
 
 error: `~const` can only be applied to `#[const_trait]` traits
-  --> $DIR/const-closures.rs:9:19
+  --> $DIR/const-closures.rs:9:12
    |
 LL |         F: ~const FnMut() -> u8,
-   |                   ^^^^^^^^^^^^^
+   |            ^^^^^^
    |
    = note: duplicate diagnostic emitted due to `-Z deduplicate-diagnostics=no`
 
 error: `~const` can only be applied to `#[const_trait]` traits
-  --> $DIR/const-closures.rs:10:19
+  --> $DIR/const-closures.rs:10:12
    |
 LL |         F: ~const Fn() -> u8,
-   |                   ^^^^^^^^^^
+   |            ^^^^^^
    |
    = note: duplicate diagnostic emitted due to `-Z deduplicate-diagnostics=no`
 
 error: `~const` can only be applied to `#[const_trait]` traits
-  --> $DIR/const-closures.rs:23:27
+  --> $DIR/const-closures.rs:23:20
    |
 LL | const fn answer<F: ~const Fn() -> u8>(f: &F) -> u8 {
-   |                           ^^^^^^^^^^
+   |                    ^^^^^^
 
 error: `~const` can only be applied to `#[const_trait]` traits
-  --> $DIR/const-closures.rs:23:27
+  --> $DIR/const-closures.rs:23:20
    |
 LL | const fn answer<F: ~const Fn() -> u8>(f: &F) -> u8 {
-   |                           ^^^^^^^^^^
+   |                    ^^^^^^
    |
    = note: duplicate diagnostic emitted due to `-Z deduplicate-diagnostics=no`
 
@@ -65,10 +65,6 @@ help: consider further restricting this bound
    |
 LL | const fn answer<F: ~const Fn() -> u8 + ~const Fn()>(f: &F) -> u8 {
    |                                      +++++++++++++
-help: add `#![feature(effects)]` to the crate attributes to enable
-   |
-LL + #![feature(effects)]
-   |
 
 error[E0015]: cannot call non-const closure in constant functions
   --> $DIR/const-closures.rs:24:11
@@ -81,10 +77,6 @@ help: consider further restricting this bound
    |
 LL | const fn answer<F: ~const Fn() -> u8 + ~const Fn()>(f: &F) -> u8 {
    |                                      +++++++++++++
-help: add `#![feature(effects)]` to the crate attributes to enable
-   |
-LL + #![feature(effects)]
-   |
 
 error[E0015]: cannot call non-const closure in constant functions
   --> $DIR/const-closures.rs:12:5
@@ -97,10 +89,6 @@ help: consider further restricting this bound
    |
 LL |         F: ~const FnOnce() -> u8 + ~const Fn(),
    |                                  +++++++++++++
-help: add `#![feature(effects)]` to the crate attributes to enable
-   |
-LL + #![feature(effects)]
-   |
 
 error: aborting due to 11 previous errors
 

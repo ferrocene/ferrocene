@@ -12,7 +12,7 @@ use std::marker::PhantomData;
 use std::ops::{Bound, Deref};
 use std::{fmt, iter, mem};
 
-use rustc_abi::{FieldIdx, Layout, LayoutS, TargetDataLayout, VariantIdx};
+use rustc_abi::{FieldIdx, Layout, LayoutData, TargetDataLayout, VariantIdx};
 use rustc_ast::{self as ast, attr};
 use rustc_data_structures::defer;
 use rustc_data_structures::fingerprint::Fingerprint;
@@ -54,7 +54,6 @@ use rustc_type_ir::TyKind::*;
 use rustc_type_ir::fold::TypeFoldable;
 use rustc_type_ir::lang_items::TraitSolverLangItem;
 pub use rustc_type_ir::lift::Lift;
-use rustc_type_ir::solve::SolverMode;
 use rustc_type_ir::{CollectAndApply, Interner, TypeFlags, WithCachedTypeInfo, search_graph};
 use tracing::{debug, trace};
 
@@ -77,8 +76,8 @@ use crate::traits::solve::{
 };
 use crate::ty::predicate::ExistentialPredicateStableCmpExt as _;
 use crate::ty::{
-    self, AdtDef, AdtDefData, AdtKind, Binder, Clause, Clauses, Const, GenericArg, GenericArgs,
-    GenericArgsRef, GenericParamDefKind, HostPolarity, ImplPolarity, List, ListWithCachedTypeInfo,
+    self, AdtDef, AdtDefData, AdtKind, Binder, BoundConstness, Clause, Clauses, Const, GenericArg,
+    GenericArgs, GenericArgsRef, GenericParamDefKind, ImplPolarity, List, ListWithCachedTypeInfo,
     ParamConst, ParamTy, Pattern, PatternKind, PolyExistentialPredicate, PolyFnSig, Predicate,
     PredicateKind, PredicatePolarity, Region, RegionKind, ReprOptions, TraitObjectVisitor, Ty,
     TyKind, TyVid, Visibility,
@@ -170,15 +169,8 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         tracked.get(self)
     }
 
-    fn with_global_cache<R>(
-        self,
-        mode: SolverMode,
-        f: impl FnOnce(&mut search_graph::GlobalCache<Self>) -> R,
-    ) -> R {
-        match mode {
-            SolverMode::Normal => f(&mut *self.new_solver_evaluation_cache.lock()),
-            SolverMode::Coherence => f(&mut *self.new_solver_coherence_evaluation_cache.lock()),
-        }
+    fn with_global_cache<R>(self, f: impl FnOnce(&mut search_graph::GlobalCache<Self>) -> R) -> R {
+        f(&mut *self.new_solver_evaluation_cache.lock())
     }
 
     fn evaluation_is_concurrent(&self) -> bool {
@@ -629,6 +621,10 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
     ) -> ty::Binder<'tcx, T> {
         self.anonymize_bound_vars(binder)
     }
+
+    fn opaque_types_defined_by(self, defining_anchor: LocalDefId) -> Self::DefiningOpaqueTypes {
+        self.opaque_types_defined_by(defining_anchor)
+    }
 }
 
 macro_rules! bidirectional_lang_item_map {
@@ -766,7 +762,7 @@ pub struct CtxtInterners<'tcx> {
     pat: InternedSet<'tcx, PatternKind<'tcx>>,
     const_allocation: InternedSet<'tcx, Allocation>,
     bound_variable_kinds: InternedSet<'tcx, List<ty::BoundVariableKind>>,
-    layout: InternedSet<'tcx, LayoutS<FieldIdx, VariantIdx>>,
+    layout: InternedSet<'tcx, LayoutData<FieldIdx, VariantIdx>>,
     adt_def: InternedSet<'tcx, AdtDefData>,
     external_constraints: InternedSet<'tcx, ExternalConstraintsData<TyCtxt<'tcx>>>,
     predefined_opaques_in_body: InternedSet<'tcx, PredefinedOpaquesData<TyCtxt<'tcx>>>,
@@ -1334,7 +1330,6 @@ pub struct GlobalCtxt<'tcx> {
 
     /// Caches the results of goal evaluation in the new solver.
     pub new_solver_evaluation_cache: Lock<search_graph::GlobalCache<TyCtxt<'tcx>>>,
-    pub new_solver_coherence_evaluation_cache: Lock<search_graph::GlobalCache<TyCtxt<'tcx>>>,
 
     pub canonical_param_env_cache: CanonicalParamEnvCache<'tcx>,
 
@@ -1561,7 +1556,6 @@ impl<'tcx> TyCtxt<'tcx> {
             selection_cache: Default::default(),
             evaluation_cache: Default::default(),
             new_solver_evaluation_cache: Default::default(),
-            new_solver_coherence_evaluation_cache: Default::default(),
             canonical_param_env_cache: Default::default(),
             data_layout,
             alloc_map: Lock::new(interpret::AllocMap::new()),
@@ -2211,7 +2205,7 @@ macro_rules! nop_slice_lift {
 nop_slice_lift! {ty::ValTree<'a> => ty::ValTree<'tcx>}
 
 TrivialLiftImpls! {
-    ImplPolarity, PredicatePolarity, Promoted, HostPolarity,
+    ImplPolarity, PredicatePolarity, Promoted, BoundConstness,
 }
 
 macro_rules! sty_debug_print {
@@ -2469,7 +2463,7 @@ direct_interners! {
     region: pub(crate) intern_region(RegionKind<'tcx>): Region -> Region<'tcx>,
     pat: pub mk_pat(PatternKind<'tcx>): Pattern -> Pattern<'tcx>,
     const_allocation: pub mk_const_alloc(Allocation): ConstAllocation -> ConstAllocation<'tcx>,
-    layout: pub mk_layout(LayoutS<FieldIdx, VariantIdx>): Layout -> Layout<'tcx>,
+    layout: pub mk_layout(LayoutData<FieldIdx, VariantIdx>): Layout -> Layout<'tcx>,
     adt_def: pub mk_adt_def_from_data(AdtDefData): AdtDef -> AdtDef<'tcx>,
     external_constraints: pub mk_external_constraints(ExternalConstraintsData<TyCtxt<'tcx>>):
         ExternalConstraints -> ExternalConstraints<'tcx>,
@@ -3066,7 +3060,7 @@ impl<'tcx> TyCtxt<'tcx> {
 
         loop {
             let parent = self.local_parent(opaque_lifetime_param_def_id);
-            let hir::OpaqueTy { lifetime_mapping, .. } = self.hir().expect_opaque_ty(parent);
+            let lifetime_mapping = self.opaque_captured_lifetimes(parent);
 
             let Some((lifetime, _)) = lifetime_mapping
                 .iter()
@@ -3075,8 +3069,8 @@ impl<'tcx> TyCtxt<'tcx> {
                 bug!("duplicated lifetime param should be present");
             };
 
-            match self.named_bound_var(lifetime.hir_id) {
-                Some(resolve_bound_vars::ResolvedArg::EarlyBound(ebv)) => {
+            match *lifetime {
+                resolve_bound_vars::ResolvedArg::EarlyBound(ebv) => {
                     let new_parent = self.local_parent(ebv);
 
                     // If we map to another opaque, then it should be a parent
@@ -3095,7 +3089,7 @@ impl<'tcx> TyCtxt<'tcx> {
                         name: self.item_name(ebv.to_def_id()),
                     });
                 }
-                Some(resolve_bound_vars::ResolvedArg::LateBound(_, _, lbv)) => {
+                resolve_bound_vars::ResolvedArg::LateBound(_, _, lbv) => {
                     let new_parent = self.local_parent(lbv);
                     return ty::Region::new_late_param(
                         self,
@@ -3106,13 +3100,13 @@ impl<'tcx> TyCtxt<'tcx> {
                         ),
                     );
                 }
-                Some(resolve_bound_vars::ResolvedArg::Error(guar)) => {
+                resolve_bound_vars::ResolvedArg::Error(guar) => {
                     return ty::Region::new_error(self, guar);
                 }
                 _ => {
                     return ty::Region::new_error_with_message(
                         self,
-                        lifetime.ident.span,
+                        self.def_span(opaque_lifetime_param_def_id),
                         "cannot resolve lifetime",
                     );
                 }

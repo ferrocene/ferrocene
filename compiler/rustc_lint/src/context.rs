@@ -1,18 +1,7 @@
-//! Implementation of lint checking.
+//! Basic types for managing and implementing lints.
 //!
-//! The lint checking is mostly consolidated into one pass which runs
-//! after all other analyses. Throughout compilation, lint warnings
-//! can be added via the `add_lint` method on the Session structure. This
-//! requires a span and an ID of the node that the lint is being added to. The
-//! lint isn't actually emitted at that time because it is unknown what the
-//! actual lint level at that location is.
-//!
-//! To actually emit lint warnings/errors, a separate pass is used.
-//! A context keeps track of the current state of all lint levels.
-//! Upon entering a node of the ast which can modify the lint settings, the
-//! previous lint state is pushed onto a stack and the ast is then recursed
-//! upon. As the ast is traversed, this keeps track of the current lint level
-//! for all lint attributes.
+//! See <https://rustc-dev-guide.rust-lang.org/diagnostics.html> for an
+//! overview of how lints are implemented.
 
 use std::cell::Cell;
 use std::{iter, slice};
@@ -22,15 +11,15 @@ use rustc_data_structures::sync;
 use rustc_data_structures::unord::UnordMap;
 use rustc_errors::{Diag, LintDiagnostic, MultiSpan};
 use rustc_feature::Features;
-use rustc_hir as hir;
 use rustc_hir::def::Res;
 use rustc_hir::def_id::{CrateNum, DefId};
 use rustc_hir::definitions::{DefPathData, DisambiguatedDefPathData};
+use rustc_infer::traits::Reveal;
 use rustc_middle::bug;
 use rustc_middle::middle::privacy::EffectiveVisibilities;
 use rustc_middle::ty::layout::{LayoutError, LayoutOfHelpers, TyAndLayout};
 use rustc_middle::ty::print::{PrintError, PrintTraitRefExt as _, Printer, with_no_trimmed_paths};
-use rustc_middle::ty::{self, GenericArg, RegisteredTools, Ty, TyCtxt};
+use rustc_middle::ty::{self, GenericArg, RegisteredTools, Ty, TyCtxt, TypingMode};
 use rustc_session::lint::{
     BuiltinLintDiag, FutureIncompatibleInfo, Level, Lint, LintBuffer, LintExpectationId, LintId,
 };
@@ -38,8 +27,8 @@ use rustc_session::{LintStoreMarker, Session};
 use rustc_span::Span;
 use rustc_span::edit_distance::find_best_match_for_names;
 use rustc_span::symbol::{Ident, Symbol, sym};
-use rustc_target::abi;
 use tracing::debug;
+use {rustc_abi as abi, rustc_hir as hir};
 
 use self::TargetLint::*;
 use crate::levels::LintLevelsBuilder;
@@ -52,9 +41,6 @@ type LateLintPassFactory =
     dyn for<'tcx> Fn(TyCtxt<'tcx>) -> LateLintPassObject<'tcx> + sync::DynSend + sync::DynSync;
 
 /// Information about the registered lints.
-///
-/// This is basically the subset of `Context` that we can
-/// build early in the compile pipeline.
 pub struct LintStore {
     /// Registered lints.
     lints: Vec<&'static Lint>,
@@ -713,6 +699,15 @@ impl LintContext for EarlyContext<'_> {
 }
 
 impl<'tcx> LateContext<'tcx> {
+    /// The typing mode of the currently visited node. Use this when
+    /// building a new `InferCtxt`.
+    pub fn typing_mode(&self) -> TypingMode<'tcx> {
+        debug_assert_eq!(self.param_env.reveal(), Reveal::UserFacing);
+        // FIXME(#132279): In case we're in a body, we should use a typing
+        // mode which reveals the opaque types defined by that body.
+        TypingMode::non_body_analysis()
+    }
+
     /// Gets the type-checking results for the current body,
     /// or `None` if outside a body.
     pub fn maybe_typeck_results(&self) -> Option<&'tcx ty::TypeckResults<'tcx>> {

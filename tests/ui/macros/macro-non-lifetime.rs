@@ -4,7 +4,7 @@ macro_rules! m { ($x:lifetime) => { } }
 
 fn main() {
     m!(a);
-    //~^ ERROR no rules expected the token `a`
+    //~^ ERROR no rules expected `a`
 }
 
 // ferrocene-annotations: fls_xa7lp0zg1ol2

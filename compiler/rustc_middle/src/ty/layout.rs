@@ -4,8 +4,9 @@ use std::{cmp, fmt};
 
 use rustc_abi::Primitive::{self, Float, Int, Pointer};
 use rustc_abi::{
-    Abi, AddressSpace, Align, FieldsShape, HasDataLayout, Integer, LayoutCalculator, LayoutS,
-    PointeeInfo, PointerKind, ReprOptions, Scalar, Size, TagEncoding, TargetDataLayout, Variants,
+    AddressSpace, Align, BackendRepr, FieldsShape, HasDataLayout, Integer, LayoutCalculator,
+    LayoutData, PointeeInfo, PointerKind, ReprOptions, Scalar, Size, TagEncoding, TargetDataLayout,
+    Variants,
 };
 use rustc_error_messages::DiagMessage;
 use rustc_errors::{
@@ -346,7 +347,7 @@ impl<'tcx> SizeSkeleton<'tcx> {
         // First try computing a static layout.
         let err = match tcx.layout_of(param_env.and(ty)) {
             Ok(layout) => {
-                if layout.abi.is_sized() {
+                if layout.is_sized() {
                     return Ok(SizeSkeleton::Known(layout.size, Some(layout.align.abi)));
                 } else {
                     // Just to be safe, don't claim a known layout for unsized types.
@@ -751,13 +752,13 @@ where
                     ty::Adt(def, _) => def.variant(variant_index).fields.len(),
                     _ => bug!("`ty_and_layout_for_variant` on unexpected type {}", this.ty),
                 };
-                tcx.mk_layout(LayoutS {
+                tcx.mk_layout(LayoutData {
                     variants: Variants::Single { index: variant_index },
                     fields: match NonZero::new(fields) {
                         Some(fields) => FieldsShape::Union(fields),
                         None => FieldsShape::Arbitrary { offsets: IndexVec::new(), memory_index: IndexVec::new() },
                     },
-                    abi: Abi::Uninhabited,
+                    backend_repr: BackendRepr::Uninhabited,
                     largest_niche: None,
                     align: tcx.data_layout.i8_align,
                     size: Size::ZERO,
@@ -788,7 +789,7 @@ where
             let tcx = cx.tcx();
             let tag_layout = |tag: Scalar| -> TyAndLayout<'tcx> {
                 TyAndLayout {
-                    layout: tcx.mk_layout(LayoutS::scalar(cx, tag)),
+                    layout: tcx.mk_layout(LayoutData::scalar(cx, tag)),
                     ty: tag.primitive().to_ty(tcx),
                 }
             };

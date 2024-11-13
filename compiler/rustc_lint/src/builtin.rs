@@ -4,25 +4,19 @@
 //! AST visitor. Also see `rustc_session::lint::builtin`, which contains the
 //! definitions of lints that are emitted directly inside the main compiler.
 //!
-//! To add a new lint to rustc, declare it here using `declare_lint!()`.
+//! To add a new lint to rustc, declare it here using [`declare_lint!`].
 //! Then add code to emit the new lint in the appropriate circumstances.
-//! You can do that in an existing `LintPass` if it makes sense, or in a
-//! new `LintPass`, or using `Session::add_lint` elsewhere in the
-//! compiler. Only do the latter if the check can't be written cleanly as a
-//! `LintPass` (also, note that such lints will need to be defined in
-//! `rustc_session::lint::builtin`, not here).
 //!
-//! If you define a new `EarlyLintPass`, you will also need to add it to the
-//! `add_early_builtin!` or `add_early_builtin_with_new!` invocation in
-//! `lib.rs`. Use the former for unit-like structs and the latter for structs
-//! with a `pub fn new()`.
+//! If you define a new [`EarlyLintPass`], you will also need to add it to the
+//! [`crate::early_lint_methods!`] invocation in `lib.rs`.
 //!
-//! If you define a new `LateLintPass`, you will also need to add it to the
-//! `late_lint_methods!` invocation in `lib.rs`.
+//! If you define a new [`LateLintPass`], you will also need to add it to the
+//! [`crate::late_lint_methods!`] invocation in `lib.rs`.
 
 use std::fmt::Write;
 
 use ast::token::TokenKind;
+use rustc_abi::BackendRepr;
 use rustc_ast::tokenstream::{TokenStream, TokenTree};
 use rustc_ast::visit::{FnCtxt, FnKind};
 use rustc_ast::{self as ast, *};
@@ -38,7 +32,7 @@ use rustc_middle::bug;
 use rustc_middle::lint::in_external_macro;
 use rustc_middle::ty::layout::LayoutOf;
 use rustc_middle::ty::print::with_no_trimmed_paths;
-use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitableExt, Upcast, VariantDef};
+use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitableExt, TypingMode, Upcast, VariantDef};
 use rustc_session::lint::FutureIncompatibilityReason;
 // hardwired lints from rustc_lint_defs
 pub use rustc_session::lint::builtin::*;
@@ -47,7 +41,6 @@ use rustc_span::edition::Edition;
 use rustc_span::source_map::Spanned;
 use rustc_span::symbol::{Ident, Symbol, kw, sym};
 use rustc_span::{BytePos, InnerSpan, Span};
-use rustc_target::abi::Abi;
 use rustc_target::asm::InlineAsmArch;
 use rustc_trait_selection::infer::{InferCtxtExt, TyCtxtInferExt};
 use rustc_trait_selection::traits::misc::type_allowed_to_implement_copy;
@@ -73,7 +66,6 @@ use crate::{
     EarlyContext, EarlyLintPass, LateContext, LateLintPass, Level, LintContext,
     fluent_generated as fluent,
 };
-
 declare_lint! {
     /// The `while_true` lint detects `while true { }`.
     ///
@@ -241,7 +233,8 @@ declare_lint! {
     /// behavior.
     UNSAFE_CODE,
     Allow,
-    "usage of `unsafe` code and other potentially unsound constructs"
+    "usage of `unsafe` code and other potentially unsound constructs",
+    @eval_always = true
 }
 
 declare_lint_pass!(UnsafeCode => [UNSAFE_CODE]);
@@ -389,6 +382,7 @@ declare_lint! {
     report_in_external_macro
 }
 
+#[derive(Default)]
 pub struct MissingDoc;
 
 impl_lint_pass!(MissingDoc => [MISSING_DOCS]);
@@ -610,7 +604,7 @@ impl<'tcx> LateLintPass<'tcx> for MissingCopyImplementations {
             && cx
                 .tcx
                 .infer_ctxt()
-                .build()
+                .build(cx.typing_mode())
                 .type_implements_trait(iter_trait, [ty], cx.param_env)
                 .must_apply_modulo_regions()
         {
@@ -654,7 +648,9 @@ fn type_implements_negative_copy_modulo_regions<'tcx>(
         predicate: pred.upcast(tcx),
     };
 
-    tcx.infer_ctxt().build().predicate_must_hold_modulo_regions(&obligation)
+    tcx.infer_ctxt()
+        .build(TypingMode::non_body_analysis())
+        .predicate_must_hold_modulo_regions(&obligation)
 }
 
 declare_lint! {
@@ -819,8 +815,8 @@ pub struct DeprecatedAttr {
 
 impl_lint_pass!(DeprecatedAttr => []);
 
-impl DeprecatedAttr {
-    pub fn new() -> DeprecatedAttr {
+impl Default for DeprecatedAttr {
+    fn default() -> Self {
         DeprecatedAttr { depr_attrs: deprecated_attributes() }
     }
 }
@@ -2289,13 +2285,15 @@ declare_lint_pass!(
 impl EarlyLintPass for IncompleteInternalFeatures {
     fn check_crate(&mut self, cx: &EarlyContext<'_>, _: &ast::Crate) {
         let features = cx.builder.features();
-        features
-            .enabled_lang_features()
-            .iter()
-            .map(|(name, span, _)| (name, span))
-            .chain(features.enabled_lib_features().iter().map(|(name, span)| (name, span)))
-            .filter(|(&name, _)| features.incomplete(name) || features.internal(name))
-            .for_each(|(&name, &span)| {
+        let lang_features =
+            features.enabled_lang_features().iter().map(|feat| (feat.gate_name, feat.attr_sp));
+        let lib_features =
+            features.enabled_lib_features().iter().map(|feat| (feat.gate_name, feat.attr_sp));
+
+        lang_features
+            .chain(lib_features)
+            .filter(|(name, _)| features.incomplete(*name) || features.internal(*name))
+            .for_each(|(name, span)| {
                 if features.incomplete(name) {
                     let note = rustc_feature::find_feature_issue(name, GateIssue::Language)
                         .map(|n| BuiltinFeatureIssueNote { n });
@@ -2470,7 +2468,9 @@ impl<'tcx> LateLintPass<'tcx> for InvalidValue {
 
             // Check if this ADT has a constrained layout (like `NonNull` and friends).
             if let Ok(layout) = cx.tcx.layout_of(cx.param_env.and(ty)) {
-                if let Abi::Scalar(scalar) | Abi::ScalarPair(scalar, _) = &layout.abi {
+                if let BackendRepr::Scalar(scalar) | BackendRepr::ScalarPair(scalar, _) =
+                    &layout.backend_repr
+                {
                     let range = scalar.valid_range(cx);
                     let msg = if !range.contains(0) {
                         "must be non-null"

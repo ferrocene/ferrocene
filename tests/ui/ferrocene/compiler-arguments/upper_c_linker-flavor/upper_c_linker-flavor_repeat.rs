@@ -1,6 +1,5 @@
 //@ build-pass
 //@ compile-flags: -Clinker-flavor=gcc -Clinker-flavor=gcc
-//@ ignore-windows: gcc is not supported in this platform
 
 fn main() {}
 

@@ -78,3 +78,63 @@ reason = "Remove when this PR is pulled in: https://github.com/rust-lang/rust/pu
 tests = ["tests/crashes/131294.rs"]
 targets = ["aarch64-unknown-ferrocenecoretest"]
 reason = "Does not crash with this target"
+
+[["tests/run-make"]]
+tests = [
+    "tests/run-make/cat-and-grep-sanity-check",
+    "tests/run-make/ferrocene/compiler-arguments/out-dir",
+    "tests/run-make/ferrocene/compiler-arguments/upper-l/upper-l",
+    "tests/run-make/ferrocene/compiler-arguments/upper-l/upper-l_all",
+    "tests/run-make/ferrocene/compiler-arguments/upper-l/upper-l_crate",
+    "tests/run-make/ferrocene/compiler-arguments/upper-l/upper-l_native",
+    "tests/run-make/ferrocene/compiler-arguments/upper-l/upper-l_dependency",
+    "tests/run-make/ferrocene/compiler-arguments/upper_c_debuginfo/upper_c_debuginfo_multiple",
+    "tests/run-make/ferrocene/compiler-arguments/upper_c_extra-filename/upper_c_extra-filename",
+    "tests/run-make/ferrocene/compiler-arguments/upper_c_extra-filename/upper_c_extra-filename_mir",
+    "tests/run-make/ferrocene/compiler-arguments/upper_c_metadata/upper_c_metadata",
+    "tests/run-make/ferrocene/compiler-arguments/upper_c_no-vectorize-loops/upper_c_no-vectorize-loops_no-space",
+    "tests/run-make/ferrocene/compiler-arguments/upper_c_relocation-model/upper_c_relocation-model_default",
+    "tests/run-make/ferrocene/compiler-arguments/upper_c_relocation-model/upper_c_relocation-model_pie",
+    "tests/run-make/ferrocene/compiler-arguments/upper_c_relocation-model/upper_c_relocation-model_pic",
+    "tests/run-make/ferrocene/compiler-arguments/upper_c_relocation-model/upper_c_relocation-model_static",
+    "tests/run-make/ferrocene/compiler-arguments/upper_c_rpath/upper_c_rpath",
+    "tests/run-make/ferrocene/compiler-arguments/upper_c_rpath/upper_c_rpath_link_arg",
+]
+targets = ["x86_64-pc-windows-msvc"]
+reason = "Windows make support is very poor, these tests should be converted to rmake.rs tests"
+
+[["tests/run-make"]]
+tests = [
+    "tests/run-make/pdb-buildinfo-cl-cmd",
+    "tests/run-make/pdb-sobjname",
+]
+targets = ["x86_64-pc-windows-msvc"]
+reason = "Not compatible with the Windows verison the Ferrocene CI uses"
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/ferrocene/compiler-arguments/color/color_always.rs",
+    "tests/ui/ferrocene/compiler-arguments/json/json_diagnostic-rendered-ansi.rs",
+]
+targets = ["x86_64-pc-windows-msvc"]
+reason = "Windows has different line endings and escape codes"
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_eq.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_repeat.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_space-eq.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_linker/upper_c_linker_eq-invalid.rs",
+]
+targets = ["x86_64-pc-windows-msvc"]
+reason = "We do not support GCC on Windows"
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_eq.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_repeat.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_space-eq.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_linker/upper_c_linker_eq-invalid.rs",
+]
+targets = ["x86_64-pc-windows-msvc"]
+reason = "gcc is not supported in this platform"

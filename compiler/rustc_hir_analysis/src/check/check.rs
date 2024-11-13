@@ -1,6 +1,7 @@
 use std::cell::LazyCell;
 use std::ops::ControlFlow;
 
+use rustc_abi::FieldIdx;
 use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_errors::MultiSpan;
 use rustc_errors::codes::*;
@@ -23,13 +24,13 @@ use rustc_middle::ty::{
     TypeVisitableExt,
 };
 use rustc_session::lint::builtin::UNINHABITED_STATIC;
-use rustc_target::abi::FieldIdx;
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::error_reporting::traits::on_unimplemented::OnUnimplementedDirective;
 use rustc_trait_selection::traits;
 use rustc_trait_selection::traits::outlives_bounds::InferCtxtExt as _;
 use rustc_type_ir::fold::TypeFoldable;
 use tracing::{debug, instrument};
+use ty::TypingMode;
 use {rustc_attr as attr, rustc_hir as hir};
 
 use super::compare_impl_item::{check_type_bounds, compare_impl_method, compare_impl_ty};
@@ -172,7 +173,7 @@ fn check_static_inhabited(tcx: TyCtxt<'_>, def_id: LocalDefId) {
             return;
         }
     };
-    if layout.abi.is_uninhabited() {
+    if layout.is_uninhabited() {
         tcx.node_span_lint(
             UNINHABITED_STATIC,
             tcx.local_def_id_to_hir_id(def_id),
@@ -276,7 +277,8 @@ fn check_opaque_meets_bounds<'tcx>(
     };
     let param_env = tcx.param_env(defining_use_anchor);
 
-    let infcx = tcx.infer_ctxt().with_opaque_type_inference(defining_use_anchor).build();
+    // FIXME(#132279): This should eventually use the already defined hidden types.
+    let infcx = tcx.infer_ctxt().build(TypingMode::analysis_in_body(tcx, defining_use_anchor));
     let ocx = ObligationCtxt::new_with_diagnostics(&infcx);
 
     let args = match *origin {
@@ -1675,8 +1677,8 @@ pub(super) fn check_coroutine_obligations(
         // typeck writeback gives us predicates with their regions erased.
         // As borrowck already has checked lifetimes, we do not need to do it again.
         .ignoring_regions()
-        .with_opaque_type_inference(def_id)
-        .build();
+        // FIXME(#132279): This should eventually use the already defined hidden types.
+        .build(TypingMode::analysis_in_body(tcx, def_id));
 
     let ocx = ObligationCtxt::new_with_diagnostics(&infcx);
     for (predicate, cause) in &typeck_results.coroutine_stalled_predicates {

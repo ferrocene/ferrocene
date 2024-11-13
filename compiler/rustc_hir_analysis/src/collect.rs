@@ -34,7 +34,7 @@ use rustc_infer::traits::ObligationCause;
 use rustc_middle::hir::nested_filter;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::util::{Discr, IntTypeExt};
-use rustc_middle::ty::{self, AdtKind, Const, IsSuggestable, Ty, TyCtxt};
+use rustc_middle::ty::{self, AdtKind, Const, IsSuggestable, Ty, TyCtxt, TypingMode};
 use rustc_middle::{bug, span_bug};
 use rustc_span::symbol::{Ident, Symbol, kw, sym};
 use rustc_span::{DUMMY_SP, Span};
@@ -1302,7 +1302,7 @@ fn trait_def(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::TraitDef {
     }
 }
 
-#[instrument(level = "debug", skip(tcx))]
+#[instrument(level = "debug", skip(tcx), ret)]
 fn fn_sig(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::EarlyBinder<'_, ty::PolyFnSig<'_>> {
     use rustc_hir::Node::*;
     use rustc_hir::*;
@@ -1438,9 +1438,11 @@ fn infer_return_ty_for_fn_sig<'tcx>(
                     Applicability::MachineApplicable,
                 );
                 recovered_ret_ty = Some(suggestable_ret_ty);
-            } else if let Some(sugg) =
-                suggest_impl_trait(&tcx.infer_ctxt().build(), tcx.param_env(def_id), ret_ty)
-            {
+            } else if let Some(sugg) = suggest_impl_trait(
+                &tcx.infer_ctxt().build(TypingMode::non_body_analysis()),
+                tcx.param_env(def_id),
+                ret_ty,
+            ) {
                 diag.span_suggestion(
                     ty.span,
                     "replace with an appropriate return type",

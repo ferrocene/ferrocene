@@ -9,7 +9,7 @@
 - [ ] REQ_THXJWWD: The tool should be executed on any of the host platforms listed in Compilation targets overview.
 - [ ] REQ_67EQEVF: The tool should only execute with success if it was distributed with the same Ferrocene toolchain that it is checking.
 - [ ] REQ_P2OXII1: The tool should be executed on the command line.
-- [ ] REQ_9A6740M: The tool accepts no command line arguments, and quits with a fail exit status when they are present.
+- [x] REQ_9A6740M: The tool accepts no command line arguments, and quits with a fail exit status when they are present.
 - [ ] REQ_42QU5MK: The tool displays the checks it performs, and quits with a fail exit status when any of the checks fails.
 
 ## Checks for executables

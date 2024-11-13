@@ -9,7 +9,7 @@ if command -v uv &> /dev/null; then
     exit 0
 fi
 
-curl -LsSf https://astral.sh/uv/install.sh | sh
+curl -LsSf https://astral.sh/uv/0.4.3/install.sh | sh
 
 source $HOME/.cargo/env
 echo "source $HOME/.cargo/env" >> $BASH_ENV

@@ -108,7 +108,7 @@ ENV PATH="/home/ci/.venv/bin:/home/ci/.cargo/bin:$PATH"
 COPY requirements.txt /tmp/requirements.txt
 RUN <<-EOF
     set -xe
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+    curl -LsSf https://astral.sh/uv/0.4.3/install.sh | sh
     uv venv
     uv pip sync /tmp/requirements.txt
 EOF

@@ -3,7 +3,6 @@
 //
 //@ build-fail
 //@ compile-flags: -Clinker=invalid
-//@ ignore-windows: The output on this platform differs
 
 fn main() {}
 

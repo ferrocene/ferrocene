@@ -65,7 +65,7 @@ class SubcommandDirective(ObjectDescription):
 
         subcommand = Subcommand(
             self.env.docname,
-            program_storage,
+            program_storage.program_name,
             sig,
             program_storage.no_traceability_matrix
         )
@@ -109,9 +109,9 @@ ALLOWED_CHARS_IN_OPTION_ID = string.ascii_letters + string.digits + "_"
 
 
 class Option:
-    def __init__(self, document, program, option, no_traceability_matrix):
+    def __init__(self, document, program_name, option, no_traceability_matrix):
         self.document = document
-        self.program = program
+        self.program = program_name
         self.option = option
         self.no_traceability_matrix = no_traceability_matrix
 
@@ -136,9 +136,9 @@ class Subcommand:
     required_arguments = 1
     final_argument_whitespace = True
 
-    def __init__(self, document, program, subcommand, no_traceability_matrix):
+    def __init__(self, document, program_name, subcommand, no_traceability_matrix):
         self.document = document
-        self.program = program
+        self.program = program_name
         self.subcommand = subcommand
         self.no_traceability_matrix = no_traceability_matrix
 

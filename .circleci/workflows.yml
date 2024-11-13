@@ -473,10 +473,10 @@ jobs:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--self-test >>
     steps:
-      - setup-venv
-      - aws-oidc-auth
       - ferrocene-git-shallow-clone:
           depth: 1
+      - setup-venv
+      - aws-oidc-auth
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh

@@ -1788,6 +1788,7 @@ name = "ferrocene-self-test"
 version = "0.0.0"
 dependencies = [
  "insta",
+ "needy",
  "tempfile",
  "thiserror 2.0.0",
 ]
@@ -3141,6 +3142,12 @@ dependencies = [
 [[package]]
 name = "miropt-test-tools"
 version = "0.1.0"
+
+[[package]]
+name = "needy"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "990c7fa8906eb6ff1308770530df8167d0d31bf3f9b67316bf9f82dcfeeb46b2"
 
 [[package]]
 name = "new_debug_unreachable"

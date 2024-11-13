@@ -11,3 +11,4 @@ thiserror = "2"
 
 [dev-dependencies]
 insta = "1.31"
+needy = "0.1"

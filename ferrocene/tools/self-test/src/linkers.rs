@@ -455,6 +455,7 @@ pub(crate) fn report_linker_flags(reporter: &dyn Reporter, targets: &[Target]) {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(not(target_os = "windows"))]
     use std::ffi::OsString;
 
     use super::*;

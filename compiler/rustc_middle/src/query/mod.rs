@@ -29,6 +29,7 @@ use rustc_hir::def_id::{
 use rustc_hir::lang_items::{LangItem, LanguageItems};
 use rustc_hir::{Crate, ItemLocalId, ItemLocalMap, TraitCandidate};
 use rustc_index::IndexVec;
+use rustc_lint_defs::LintId;
 use rustc_macros::rustc_queries;
 use rustc_query_system::ich::StableHashingContext;
 use rustc_query_system::query::{QueryCache, QueryMode, QueryState, try_get_cached};
@@ -420,6 +421,11 @@ rustc_queries! {
     query lint_expectations(_: ()) -> &'tcx Vec<(LintExpectationId, LintExpectation)> {
         arena_cache
         desc { "computing `#[expect]`ed lints in this crate" }
+    }
+
+    query lints_that_dont_need_to_run(_: ()) -> &'tcx FxIndexSet<LintId> {
+        arena_cache
+        desc { "Computing all lints that are explicitly enabled or with a default level greater than Allow" }
     }
 
     query expn_that_defined(key: DefId) -> rustc_span::ExpnId {
@@ -1774,6 +1780,23 @@ rustc_queries! {
     query late_bound_vars_map(owner_id: hir::OwnerId)
         -> &'tcx SortedMap<ItemLocalId, Vec<ty::BoundVariableKind>> {
         desc { |tcx| "looking up late bound vars inside `{}`", tcx.def_path_str(owner_id) }
+    }
+    /// For an opaque type, return the list of (captured lifetime, inner generic param).
+    /// ```ignore (illustrative)
+    /// fn foo<'a: 'a, 'b, T>(&'b u8) -> impl Into<Self> + 'b { ... }
+    /// ```
+    ///
+    /// We would return `[('a, '_a), ('b, '_b)]`, with `'a` early-bound and `'b` late-bound.
+    ///
+    /// After hir_ty_lowering, we get:
+    /// ```ignore (pseudo-code)
+    /// opaque foo::<'a>::opaque<'_a, '_b>: Into<Foo<'_a>> + '_b;
+    ///                          ^^^^^^^^ inner generic params
+    /// fn foo<'a>: for<'b> fn(&'b u8) -> foo::<'a>::opaque::<'a, 'b>
+    ///                                                       ^^^^^^ captured lifetimes
+    /// ```
+    query opaque_captured_lifetimes(def_id: LocalDefId) -> &'tcx [(ResolvedArg, LocalDefId)] {
+        desc { |tcx| "listing captured lifetimes for opaque `{}`", tcx.def_path_str(def_id) }
     }
 
     /// Computes the visibility of the provided `def_id`.

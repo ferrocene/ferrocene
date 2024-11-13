@@ -70,37 +70,39 @@ Using the Python virtual environment
    You do not need to install Python, or modify your system Python.
 
 
-Ferrocene uses ``uv`` to manage Python and dependencies. There are a number of
-ways to install `listed in the repository <https://github.com/astral-sh/uv>`_,
-but we recommend the ``curl`` (Linux, MacOS) or ``powershell`` (Windows)
-methods:
+Ferrocene uses ``uv`` to manage Python and dependencies. ``uv`` is similar to ``rustup``, ``rvm``,
+``nvm``, or ``rbenv``. It provides a way for a project (Ferrocene) to depend on a specific version
+of Python and dependencies, creating a consistent development environment across any operating
+system or distribution it supports.
+
+This is particularly useful on platforms like :ref:`aarch64-apple-darwin` or
+:ref:`x86_64-pc-windows-msvc`, which do not always include modern versions of Python.
+
+You can install it using the same script our CI runners use:
+
+.. code-block:: bash
+   
+   ./ferrocene/ci/scripts/setup-venv.sh
+
+This script installs an appropriate version of ``uv``, uses it to install an appropriate version
+of Python, pins the Python version to your Ferrocene checkout, then creates a virtual environment
+and installs the prerequisites.
+
+If you find your virtual environment out of date, you either run the ``setup-venv.sh`` script
+again, or run the following:
 
 .. code-block:: bash
 
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-
-.. code-block:: powershell
-
-   powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
-
-Follow the onscreen instructions post-install to ensure ``uv`` is present on your
-``$PATH``.
-
-Set up the virtual environment:
-
-.. code-block:: bash
-
-   uv python install 3.12
-   uv venv
    uv pip sync requirements.txt
 
-You can then source the virtual enviroment each time you wish to use it:
+Using ``uv`` you can source the virtual environment each time you wish to use it:
 
 .. code-block:: bash
 
    source .venv/bin/activate
 
-If you infrequently use Python scripts, or want to use them in a oneshot command:
+If you infrequently use Python scripts, or want to use them in a oneshot command, you can skip
+activating the virtual environment entirely:
 
 .. code-block:: bash
 
@@ -111,6 +113,15 @@ For example, to run our licensing checks you can run:
 .. code-block:: bash
    
    uv run reuse --include-submodules lint
+
+Or, to run the ``split-tasks.py`` script for debugging:
+
+.. code-block:: bash
+   
+   uv run ferrocene/ci/split-tasks.py test
+
+In CI workflows you should always use ``uv run`` for calling Python. In the case of ``make.py`` it
+is not required as the script has been carefully written to work with most Python versions.
 
 
 Using the CI ``config.toml``

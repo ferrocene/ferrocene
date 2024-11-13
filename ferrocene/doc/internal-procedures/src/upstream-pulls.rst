@@ -38,7 +38,7 @@ Start by checking out the PR. The name of the branch is
 Fix conflict
 ^^^^^^^^^^^^
 
-To find the conflicting files run following command::
+To find the conflicting files locally, run the following command::
 
   ferrocene/ci/scripts/detect-conflict-markers.py
 
@@ -54,6 +54,9 @@ For general conflicts, the output will look similar to this::
 Fix the conflict manually and stage the changed files::
 
   git add <FILE_1> <FILE_2> # stages file(s)
+
+If code needs to be added or modified for Ferrocene needs, leave a comment
+to track the change easily.
 
 Deletion conflict
 """""""""""""""""
@@ -74,14 +77,75 @@ changed the file for is preserved. For example if we changed a bootstrap file,
 we need to port this change to another file. Usually this change needs to
 happen in the same PR.
 
-Some changes might be deferred to a follow-up PR. For example, if the deleted
-file was a test case used in the traceability matrix, we may
-need to find a new test case and finding it can be deferred.
+In the majority of cases, the deleted file is a test which is renamed or moved. In that case, the annotations must be transferred to the moved or renamed test. 
+If the test with annotations was just deleted, it is necessary to go to the traceability-matrix and see whether the behavior is still covered by another test.
+That is, the tag is still listed in another test.
+
+As an example, upstream deleted the file `tests/ui/consts/miri_unleashed/mutable_references_err.rs`:
+
+.. code-block:: rust
+
+   <<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
+  // ... 
+  // ferrocene-annotations: fls_qztk0bkju9u
+  // Borrow Expression
+  // ...
+
+Please make sure that the fls annotation still exists:
+
+.. figure:: figures/traceability-matrix.png
+
+   fls_qztk0bkju9u is still present in 83 tests
+
+If an annotation is lost, another test that covers that behavior should be found.
+This can be done in a subsequent PR.
+
+
+Unknown conflicts and new errors
+"""""""""""""""""""""""""""""""" 
+
+When an error previously unknown appears, such as a library not being found,
+try to isolate the faulty process that triggered it with `ferrocene/ci/split-tasks.py`. 
+The list of possible jobs can be found in `.circleci/workflow.yml`.
+
+Then check upstream for related fixes. If the failure was solved later, close the current PR
+and pull a new one, including the fix.
+
+Blessing
+""""""""
+
+Sometimes, the output of `stderr` has changed upstream.
+
+Run ``x test tests/<path-to-failing-tests-folder> --bless``
+
+Monitor CI
+^^^^^^^^^^
+
+If CI is failing, bors will wait for the whole run before reporting on GitHub, which could take a few hours.
+For this reason, do not hesitate to monitor CI, so that you could manually cancel the job early, so as to free CI for other PRs.
+
+CI shows at what stage the failure happened and how it is affecting the build.
+
+.. figure:: figures/ci-failure.png
+
+   Failure on Github
+
+.. figure:: figures/ci-failure-2.png
+
+   Failure on CircleCi
+
+Ignored tests
+^^^^^^^^^^^^^
+
+Ferrocene keeps a `file for ignored tests <https://github.com/ferrocene/ferrocene/blob/main/ferrocene/ignored-tests.toml>`_, and the reason.
+
 
 Commit and push
 ^^^^^^^^^^^^^^^
 
-After having fixed the conflicts, commit your changes, push them to the branch,
+After having fixed the conflicts, verify with ``./x test tidy``.
+
+Commit your changes, push them to the branch,
 and ask for a code review from another member of the team.
 
 Tidy check failures
@@ -90,6 +154,7 @@ Tidy check failures
 License failures
 ^^^^^^^^^^^^^^^^
 
+You can run ``./x test tidy`` locally to check for licence validity.
 If you encounter failures about ``invalid license`` from ``tidy check`` like the following, you must manually
 `add the license in tidy's deps.rs <https://github.com/ferrocene/ferrocene/blob/main/src/tools/tidy/src/deps.rs>`_.
 
@@ -103,3 +168,9 @@ If you encounter failures about ``invalid license`` from ``tidy check`` like the
    some tidy checks failed
 
 Then you can just commit and push the ``deps.rs`` changes.
+
+Trigger an upstream pull
+------------------------
+
+When we are delayed, it is recommended to make a manual pull from Github Actions. Choose the job `Automatic upstream pull` > `Run workflow`, 
+and set a max number of PRs to be included (upper limit, 150). Please be aware that the more PRs are pulled, the more conflicts; so this is a judgement call.

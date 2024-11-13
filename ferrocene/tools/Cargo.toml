@@ -1,0 +1,8 @@
+[workspace]
+resolver = "2"
+members = [
+    "document-signatures/",
+    "generate-tarball/",
+    "self-test/",
+    "traceability-matrix/",
+]

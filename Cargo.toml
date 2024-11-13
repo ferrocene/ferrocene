@@ -1,11 +1,6 @@
 [workspace]
 resolver = "1"
 members = [
-  "ferrocene/tools/traceability-matrix/",
-  "ferrocene/tools/self-test/",
-  "ferrocene/tools/document-signatures/",
-  "ferrocene/tools/generate-tarball/",
-
   "compiler/rustc",
   "src/build_helper",
   "src/etc/test-float-parse",

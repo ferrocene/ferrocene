@@ -71,11 +71,11 @@ def conflict_markers_in_file(file):
             yield CustomDeleteMarker(file=file)
 
 
-def main(directory):
+def main(directory, fetch):
     found_conflicts = False
     for file in files_with_possible_conflict_markers(directory):
         for conflict in conflict_markers_in_file(file):
-            print(conflict.repr())
+            print(conflict.repr(fetch))
             found_conflicts = True
 
     if found_conflicts:
@@ -88,9 +88,12 @@ class ConflictMarker:
     start_line: int
     end_line: int
 
-    def repr(self):
-        return f"{self.file}: conflict between lines {self.start_line} " \
-               f"and {self.end_line}"
+    def repr(self, fetch):
+        if fetch:
+            return f"{self.file}:{self.start_line}"
+        else:
+            return f"{self.file}: conflict between lines {self.start_line} " \
+                   f"and {self.end_line}"
 
 
 @dataclass
@@ -104,6 +107,7 @@ class CustomDeleteMarker:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("directory", default=".", nargs="?")
+    parser.add_argument("--fetch", action="store_true")
     args = parser.parse_args()
 
-    main(args.directory)
+    main(args.directory, args.fetch)

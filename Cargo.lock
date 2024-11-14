@@ -741,9 +741,9 @@ dependencies = [
 
 [[package]]
 name = "bstr"
-version = "1.10.0"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "40723b8fb387abc38f4f4a37c09073622e41dd12327033091ef8950659e6dc0c"
+checksum = "1a68f1f47cdf0ec8ee4b941b2eee2a80cb796db73118c0dd09ac63fbe405be22"
 dependencies = [
  "memchr",
  "regex-automata 0.4.9",
@@ -936,9 +936,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.20"
+version = "4.5.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b97f376d85a664d5837dbae44bf546e6477a679ff6610010f17276f686d867e8"
+checksum = "fb3b4b9e5a7c7514dfa52869339ee98b3156b0bfb4e8a77c4ff4babb64b1604f"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -956,9 +956,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.5.20"
+version = "4.5.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19bc80abd44e4bed93ca373a0704ccbd1b710dc5749406201bb018272808dc54"
+checksum = "b17a95aa67cc7b5ebd32aa5370189aa0d79069ef1c64ce893bd30fb24bff20ec"
 dependencies = [
  "anstream",
  "anstyle",
@@ -969,9 +969,9 @@ dependencies = [
 
 [[package]]
 name = "clap_complete"
-version = "4.5.37"
+version = "4.5.38"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11611dca53440593f38e6b25ec629de50b14cdfa63adc0fb856115a2c6d97595"
+checksum = "d9647a559c112175f17cf724dc72d3645680a883c58481332779192b0d8e7a01"
 dependencies = [
  "clap",
 ]
@@ -990,9 +990,9 @@ dependencies = [
 
 [[package]]
 name = "clap_lex"
-version = "0.7.2"
+version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1462739cb27611015575c0c11df5df7601141071f07518d56fcc1be504cbec97"
+checksum = "afb84c814227b90d6895e01398aee0d8033c00e7466aca416fb6a8e0eb19d8a7"
 
 [[package]]
 name = "clippy"
@@ -4173,9 +4173,11 @@ dependencies = [
  "rand",
  "rand_xoshiro",
  "rustc_data_structures",
+ "rustc_feature",
  "rustc_index",
  "rustc_macros",
  "rustc_serialize",
+ "rustc_span",
  "tracing",
 ]
 
@@ -4313,6 +4315,7 @@ dependencies = [
  "either",
  "itertools",
  "polonius-engine",
+ "rustc_abi",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -4326,7 +4329,6 @@ dependencies = [
  "rustc_mir_dataflow",
  "rustc_session",
  "rustc_span",
- "rustc_target",
  "rustc_trait_selection",
  "rustc_traits",
  "smallvec",
@@ -4673,6 +4675,7 @@ name = "rustc_hir"
 version = "0.0.0"
 dependencies = [
  "odht",
+ "rustc_abi",
  "rustc_arena",
  "rustc_ast",
  "rustc_data_structures",
@@ -4718,11 +4721,11 @@ dependencies = [
 name = "rustc_hir_pretty"
 version = "0.0.0"
 dependencies = [
+ "rustc_abi",
  "rustc_ast",
  "rustc_ast_pretty",
  "rustc_hir",
  "rustc_span",
- "rustc_target",
 ]
 
 [[package]]
@@ -4907,6 +4910,7 @@ dependencies = [
 name = "rustc_lint_defs"
 version = "0.0.0"
 dependencies = [
+ "rustc_abi",
  "rustc_ast",
  "rustc_data_structures",
  "rustc_error_messages",
@@ -4914,7 +4918,6 @@ dependencies = [
  "rustc_macros",
  "rustc_serialize",
  "rustc_span",
- "rustc_target",
  "serde",
 ]
 
@@ -4973,7 +4976,6 @@ dependencies = [
  "rustc_span",
  "rustc_target",
  "rustc_type_ir",
- "snap",
  "tempfile",
  "tracing",
 ]
@@ -5023,6 +5025,7 @@ version = "0.0.0"
 dependencies = [
  "either",
  "itertools",
+ "rustc_abi",
  "rustc_apfloat",
  "rustc_arena",
  "rustc_ast",
@@ -5038,7 +5041,6 @@ dependencies = [
  "rustc_pattern_analysis",
  "rustc_session",
  "rustc_span",
- "rustc_target",
  "rustc_trait_selection",
  "tracing",
 ]
@@ -5060,7 +5062,6 @@ dependencies = [
  "rustc_macros",
  "rustc_middle",
  "rustc_span",
- "rustc_target",
  "smallvec",
  "tracing",
 ]
@@ -5099,6 +5100,7 @@ dependencies = [
 name = "rustc_monomorphize"
 version = "0.0.0"
 dependencies = [
+ "rustc_abi",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -5203,7 +5205,6 @@ dependencies = [
  "rustc_middle",
  "rustc_session",
  "rustc_span",
- "rustc_target",
  "smallvec",
  "tracing",
  "tracing-subscriber",
@@ -5303,6 +5304,7 @@ name = "rustc_sanitizers"
 version = "0.0.0"
 dependencies = [
  "bitflags 2.6.0",
+ "rustc_abi",
  "rustc_data_structures",
  "rustc_hir",
  "rustc_middle",
@@ -5402,7 +5404,6 @@ dependencies = [
  "rustc_middle",
  "rustc_session",
  "rustc_span",
- "rustc_target",
  "tracing",
 ]
 
@@ -5435,6 +5436,7 @@ name = "rustc_trait_selection"
 version = "0.0.0"
 dependencies = [
  "itertools",
+ "rustc_abi",
  "rustc_ast",
  "rustc_ast_ir",
  "rustc_attr",
@@ -5451,7 +5453,6 @@ dependencies = [
  "rustc_serialize",
  "rustc_session",
  "rustc_span",
- "rustc_target",
  "rustc_transmute",
  "rustc_type_ir",
  "smallvec",
@@ -5966,12 +5967,6 @@ name = "smallvec"
 version = "1.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
-
-[[package]]
-name = "snap"
-version = "1.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b6b67fb9a61334225b5b790716f609cd58395f895b3fe8b328786812a40bc3b"
 
 [[package]]
 name = "socket2"

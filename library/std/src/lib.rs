@@ -328,6 +328,7 @@
 // Library features (core):
 // tidy-alphabetical-start
 #![feature(array_chunks)]
+#![feature(build_hasher_default_const_new)]
 #![feature(c_str_module)]
 #![feature(char_internals)]
 #![feature(clone_to_uninit)]
@@ -415,7 +416,6 @@
 // Only for const-ness:
 // tidy-alphabetical-start
 #![feature(const_collections_with_hasher)]
-#![feature(const_hash)]
 #![feature(thread_local_internals)]
 // tidy-alphabetical-end
 //
@@ -481,7 +481,7 @@ pub mod prelude;
 
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use core::any;
-#[stable(feature = "core_array", since = "1.36.0")]
+#[stable(feature = "core_array", since = "1.35.0")]
 pub use core::array;
 #[unstable(feature = "async_iterator", issue = "79024")]
 pub use core::async_iter;

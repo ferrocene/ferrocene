@@ -20,6 +20,7 @@ pub mod errors;
 pub mod generics;
 mod lint;
 
+use std::assert_matches::assert_matches;
 use std::slice;
 
 use rustc_ast::TraitObjectSyntax;
@@ -46,7 +47,6 @@ use rustc_session::lint::builtin::AMBIGUOUS_ASSOCIATED_ITEMS;
 use rustc_span::edit_distance::find_best_match_for_name;
 use rustc_span::symbol::{Ident, Symbol, kw};
 use rustc_span::{DUMMY_SP, Span};
-use rustc_target::spec::abi;
 use rustc_trait_selection::infer::InferCtxtExt;
 use rustc_trait_selection::traits::wf::object_region_bounds;
 use rustc_trait_selection::traits::{self, ObligationCtxt};
@@ -75,7 +75,7 @@ pub enum PredicateFilter {
     /// Only traits that reference `Self: ..` and define an associated type
     /// with the given ident are implied by the trait. This mode exists to
     /// side-step query cycles when lowering associated types.
-    SelfThatDefines(Ident),
+    SelfTraitThatDefines(Ident),
 
     /// Only traits that reference `Self: ..` and their associated type bounds.
     /// For example, given `Self: Tr<A: B>`, this would expand to `Self: Tr`
@@ -562,7 +562,6 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                         if let Err(guar) = ty.error_reported() {
                             return ty::Const::new_error(tcx, guar).into();
                         }
-                        // FIXME(effects) see if we should special case effect params here
                         if !infer_args && has_default {
                             tcx.const_param_default(param.def_id)
                                 .instantiate(tcx, preceding_args)
@@ -667,7 +666,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         trait_ref: &hir::TraitRef<'tcx>,
         span: Span,
         constness: hir::BoundConstness,
-        polarity: ty::PredicatePolarity,
+        polarity: hir::BoundPolarity,
         self_ty: Ty<'tcx>,
         bounds: &mut Bounds<'tcx>,
         predicate_filter: PredicateFilter,
@@ -689,15 +688,6 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             Some(self_ty),
         );
 
-        if let hir::BoundConstness::Always(span) | hir::BoundConstness::Maybe(span) = constness
-            && !self.tcx().is_const_trait(trait_def_id)
-        {
-            self.dcx().emit_err(crate::errors::ConstBoundForNonConstTrait {
-                span,
-                modifier: constness.as_str(),
-            });
-        }
-
         let tcx = self.tcx();
         let bound_vars = tcx.late_bound_vars(trait_ref.hir_ref_id);
         debug!(?bound_vars);
@@ -707,10 +697,43 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             bound_vars,
         );
 
+        let polarity = match polarity {
+            rustc_ast::BoundPolarity::Positive => ty::PredicatePolarity::Positive,
+            rustc_ast::BoundPolarity::Negative(_) => ty::PredicatePolarity::Negative,
+            rustc_ast::BoundPolarity::Maybe(_) => {
+                // Validate associated type at least. We may want to reject these
+                // outright in the future...
+                for constraint in trait_segment.args().constraints {
+                    let _ = self.lower_assoc_item_constraint(
+                        trait_ref.hir_ref_id,
+                        poly_trait_ref,
+                        constraint,
+                        &mut Default::default(),
+                        &mut Default::default(),
+                        constraint.span,
+                        predicate_filter,
+                    );
+                }
+                return arg_count;
+            }
+        };
+
+        if let hir::BoundConstness::Always(span) | hir::BoundConstness::Maybe(span) = constness
+            && !self.tcx().is_const_trait(trait_def_id)
+        {
+            self.dcx().emit_err(crate::errors::ConstBoundForNonConstTrait {
+                span,
+                modifier: constness.as_str(),
+            });
+        }
+
         match predicate_filter {
+            // This is only concerned with trait predicates.
+            PredicateFilter::SelfTraitThatDefines(..) => {
+                bounds.push_trait_bound(tcx, poly_trait_ref, span, polarity);
+            }
             PredicateFilter::All
             | PredicateFilter::SelfOnly
-            | PredicateFilter::SelfThatDefines(..)
             | PredicateFilter::SelfAndAssociatedTypeBounds => {
                 debug!(?poly_trait_ref);
                 bounds.push_trait_bound(tcx, poly_trait_ref, span, polarity);
@@ -762,11 +785,11 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             // since we should have emitted an error for them earlier, and they
             // would not be well-formed!
             if polarity != ty::PredicatePolarity::Positive {
-                assert!(
-                    self.dcx().has_errors().is_some(),
+                self.dcx().span_delayed_bug(
+                    constraint.span,
                     "negative trait bounds should not have assoc item constraints",
                 );
-                continue;
+                break;
             }
 
             // Specify type to assert that error was already reported in `Err` case.
@@ -1811,7 +1834,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         match path.res {
             Res::Def(DefKind::OpaqueTy, did) => {
                 // Check for desugared `impl Trait`.
-                assert!(tcx.is_type_alias_impl_trait(did));
+                assert_matches!(tcx.opaque_ty_origin(did), hir::OpaqueTyOrigin::TyAlias { .. });
                 let item_segment = path.segments.split_last().unwrap();
                 let _ = self
                     .prohibit_generic_args(item_segment.1.iter(), GenericsArgsErrExtend::OpaqueTy);
@@ -2328,7 +2351,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         &self,
         hir_id: HirId,
         safety: hir::Safety,
-        abi: abi::Abi,
+        abi: rustc_abi::ExternAbi,
         decl: &hir::FnDecl<'tcx>,
         generics: Option<&hir::Generics<'_>>,
         hir_ty: Option<&hir::Ty<'_>>,

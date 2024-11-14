@@ -1,5 +1,6 @@
 use std::fmt;
 
+use rustc_abi::ExternAbi;
 use rustc_ast::util::parser::ExprPrecedence;
 use rustc_ast::{
     self as ast, Attribute, FloatTy, InlineAsmOptions, InlineAsmTemplatePiece, IntTy, Label,
@@ -19,7 +20,6 @@ use rustc_span::source_map::Spanned;
 use rustc_span::symbol::{Ident, Symbol, kw, sym};
 use rustc_span::{BytePos, DUMMY_SP, ErrorGuaranteed, Span};
 use rustc_target::asm::InlineAsmRegOrRegClass;
-use rustc_target::spec::abi::Abi;
 use smallvec::SmallVec;
 use tracing::debug;
 
@@ -2735,7 +2735,7 @@ impl PrimTy {
 #[derive(Debug, Clone, Copy, HashStable_Generic)]
 pub struct BareFnTy<'hir> {
     pub safety: Safety,
-    pub abi: Abi,
+    pub abi: ExternAbi,
     pub generic_params: &'hir [GenericParam<'hir>],
     pub decl: &'hir FnDecl<'hir>,
     pub param_names: &'hir [Ident],
@@ -2746,7 +2746,7 @@ pub struct OpaqueTy<'hir> {
     pub hir_id: HirId,
     pub def_id: LocalDefId,
     pub bounds: GenericBounds<'hir>,
-    pub origin: OpaqueTyOrigin,
+    pub origin: OpaqueTyOrigin<LocalDefId>,
     pub span: Span,
 }
 
@@ -2784,33 +2784,35 @@ pub struct PreciseCapturingNonLifetimeArg {
     pub res: Res,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug, HashStable_Generic)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(HashStable_Generic, Encodable, Decodable)]
 pub enum RpitContext {
     Trait,
     TraitImpl,
 }
 
 /// From whence the opaque type came.
-#[derive(Copy, Clone, PartialEq, Eq, Debug, HashStable_Generic)]
-pub enum OpaqueTyOrigin {
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(HashStable_Generic, Encodable, Decodable)]
+pub enum OpaqueTyOrigin<D> {
     /// `-> impl Trait`
     FnReturn {
         /// The defining function.
-        parent: LocalDefId,
+        parent: D,
         // Whether this is an RPITIT (return position impl trait in trait)
         in_trait_or_impl: Option<RpitContext>,
     },
     /// `async fn`
     AsyncFn {
         /// The defining function.
-        parent: LocalDefId,
+        parent: D,
         // Whether this is an AFIT (async fn in trait)
         in_trait_or_impl: Option<RpitContext>,
     },
     /// type aliases: `type Foo = impl Trait;`
     TyAlias {
         /// The type alias or associated type parent of the TAIT/ATPIT
-        parent: LocalDefId,
+        parent: D,
         /// associated types in impl blocks for traits.
         in_assoc_ty: bool,
     },
@@ -3311,7 +3313,7 @@ impl<'hir> Item<'hir> {
 
         expect_mod, &'hir Mod<'hir>, ItemKind::Mod(m), m;
 
-        expect_foreign_mod, (Abi, &'hir [ForeignItemRef]),
+        expect_foreign_mod, (ExternAbi, &'hir [ForeignItemRef]),
             ItemKind::ForeignMod { abi, items }, (*abi, items);
 
         expect_global_asm, &'hir InlineAsm<'hir>, ItemKind::GlobalAsm(asm), asm;
@@ -3384,7 +3386,7 @@ pub struct FnHeader {
     pub safety: Safety,
     pub constness: Constness,
     pub asyncness: IsAsync,
-    pub abi: Abi,
+    pub abi: ExternAbi,
 }
 
 impl FnHeader {
@@ -3426,7 +3428,7 @@ pub enum ItemKind<'hir> {
     /// A module.
     Mod(&'hir Mod<'hir>),
     /// An external module, e.g. `extern { .. }`.
-    ForeignMod { abi: Abi, items: &'hir [ForeignItemRef] },
+    ForeignMod { abi: ExternAbi, items: &'hir [ForeignItemRef] },
     /// Module-level inline assembly (from `global_asm!`).
     GlobalAsm(&'hir InlineAsm<'hir>),
     /// A type alias, e.g., `type Foo = Bar<u8>`.

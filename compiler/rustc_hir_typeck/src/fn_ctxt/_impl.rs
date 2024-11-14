@@ -1,6 +1,7 @@
 use std::collections::hash_map::Entry;
 use std::slice;
 
+use rustc_abi::FieldIdx;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_errors::{Applicability, Diag, ErrorGuaranteed, MultiSpan, StashKey};
 use rustc_hir as hir;
@@ -32,7 +33,6 @@ use rustc_span::Span;
 use rustc_span::def_id::LocalDefId;
 use rustc_span::hygiene::DesugaringKind;
 use rustc_span::symbol::kw;
-use rustc_target::abi::FieldIdx;
 use rustc_trait_selection::error_reporting::infer::need_type_info::TypeAnnotationNeeded;
 use rustc_trait_selection::traits::{
     self, NormalizeExt, ObligationCauseCode, StructurallyNormalizeExt,
@@ -264,7 +264,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         let autoborrow_mut = adj.iter().any(|adj| {
             matches!(adj, &Adjustment {
-                kind: Adjust::Borrow(AutoBorrow::Ref(_, AutoBorrowMutability::Mut { .. })),
+                kind: Adjust::Borrow(AutoBorrow::Ref(AutoBorrowMutability::Mut { .. })),
                 ..
             })
         });

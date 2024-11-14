@@ -14,7 +14,7 @@ use rustc_span::{RealFileName, SourceFileHashAlgorithm};
 use rustc_target::spec::{
     CodeModel, FramePointer, LinkerFlavorCli, MergeFunctions, OnBrokenPipe, PanicStrategy,
     RelocModel, RelroLevel, SanitizerSet, SplitDebuginfo, StackProtector, SymbolVisibility,
-    TargetTriple, TlsModel, WasmCAbi,
+    TargetTuple, TlsModel, WasmCAbi,
 };
 
 use crate::config::*;
@@ -146,7 +146,7 @@ top_level_options!(
         libs: Vec<NativeLib> [TRACKED],
         maybe_sysroot: Option<PathBuf> [UNTRACKED],
 
-        target_triple: TargetTriple [TRACKED],
+        target_triple: TargetTuple [TRACKED],
 
         /// Effective logical environment used by `env!`/`option_env!` macros
         logical_env: FxIndexMap<String, String> [TRACKED],
@@ -1585,7 +1585,7 @@ options! {
     link_dead_code: Option<bool> = (None, parse_opt_bool, [TRACKED],
         "keep dead code at link time (useful for code coverage) (default: no)"),
     link_self_contained: LinkSelfContained = (LinkSelfContained::default(), parse_link_self_contained, [UNTRACKED],
-        "control whether to link Rust provided C objects/libraries or rely
+        "control whether to link Rust provided C objects/libraries or rely \
         on a C toolchain or linker installed in the system"),
     linker: Option<PathBuf> = (None, parse_opt_pathbuf, [UNTRACKED],
         "system linker to link outputs with"),
@@ -1985,13 +1985,8 @@ options! {
     proc_macro_execution_strategy: ProcMacroExecutionStrategy = (ProcMacroExecutionStrategy::SameThread,
         parse_proc_macro_execution_strategy, [UNTRACKED],
         "how to run proc-macro code (default: same-thread)"),
-    profile: bool = (false, parse_bool, [TRACKED],
-        "insert profiling code (default: no)"),
     profile_closures: bool = (false, parse_no_flag, [UNTRACKED],
         "profile size of closures"),
-    profile_emit: Option<PathBuf> = (None, parse_opt_pathbuf, [TRACKED],
-        "file path to emit profiling data at runtime when using 'profile' \
-        (default based on relative source path)"),
     profile_sample_use: Option<PathBuf> = (None, parse_opt_pathbuf, [TRACKED],
         "use the given `.prof` file for sampled profile-guided optimization (also known as AutoFDO)"),
     profiler_runtime: String = (String::from("profiler_builtins"), parse_string, [TRACKED],

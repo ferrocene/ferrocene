@@ -770,7 +770,7 @@ impl MetadataBlob {
                         root.stable_crate_id
                     )?;
                     writeln!(out, "proc_macro {:?}", root.proc_macro_data.is_some())?;
-                    writeln!(out, "triple {}", root.header.triple.triple())?;
+                    writeln!(out, "triple {}", root.header.triple.tuple())?;
                     writeln!(out, "edition {}", root.edition)?;
                     writeln!(out, "symbol_mangling_version {:?}", root.symbol_mangling_version)?;
                     writeln!(
@@ -1317,9 +1317,7 @@ impl<'a> CrateMetadataRef<'a> {
     }
 
     fn get_associated_item(self, id: DefIndex, sess: &'a Session) -> ty::AssocItem {
-        let name = if self.root.tables.opt_rpitit_info.get(self, id).is_some()
-            || self.root.tables.is_effects_desugaring.get(self, id)
-        {
+        let name = if self.root.tables.opt_rpitit_info.get(self, id).is_some() {
             kw::Empty
         } else {
             self.item_name(id)
@@ -1342,7 +1340,6 @@ impl<'a> CrateMetadataRef<'a> {
             container,
             fn_has_self_parameter: has_self,
             opt_rpitit_info,
-            is_effects_desugaring: self.root.tables.is_effects_desugaring.get(self, id),
         }
     }
 

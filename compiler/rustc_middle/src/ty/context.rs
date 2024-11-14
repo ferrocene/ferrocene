@@ -12,7 +12,7 @@ use std::marker::PhantomData;
 use std::ops::{Bound, Deref};
 use std::{fmt, iter, mem};
 
-use rustc_abi::{FieldIdx, Layout, LayoutData, TargetDataLayout, VariantIdx};
+use rustc_abi::{ExternAbi, FieldIdx, Layout, LayoutData, TargetDataLayout, VariantIdx};
 use rustc_ast::{self as ast, attr};
 use rustc_data_structures::defer;
 use rustc_data_structures::fingerprint::Fingerprint;
@@ -49,13 +49,12 @@ use rustc_session::{Limit, MetadataKind, Session};
 use rustc_span::def_id::{CRATE_DEF_ID, DefPathHash, StableCrateId};
 use rustc_span::symbol::{Ident, Symbol, kw, sym};
 use rustc_span::{DUMMY_SP, Span};
-use rustc_target::spec::abi;
 use rustc_type_ir::TyKind::*;
 use rustc_type_ir::fold::TypeFoldable;
 use rustc_type_ir::lang_items::TraitSolverLangItem;
 pub use rustc_type_ir::lift::Lift;
 use rustc_type_ir::{CollectAndApply, Interner, TypeFlags, WithCachedTypeInfo, search_graph};
-use tracing::{debug, trace};
+use tracing::{debug, instrument};
 
 use crate::arena::Arena;
 use crate::dep_graph::{DepGraph, DepKindStruct};
@@ -136,7 +135,7 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
     type AllocId = crate::mir::interpret::AllocId;
     type Pat = Pattern<'tcx>;
     type Safety = hir::Safety;
-    type Abi = abi::Abi;
+    type Abi = ExternAbi;
     type Const = ty::Const<'tcx>;
     type PlaceholderConst = ty::PlaceholderConst;
 
@@ -695,13 +694,13 @@ impl<'tcx> rustc_type_ir::inherent::DefId<TyCtxt<'tcx>> for DefId {
     }
 }
 
-impl<'tcx> rustc_type_ir::inherent::Abi<TyCtxt<'tcx>> for abi::Abi {
+impl<'tcx> rustc_type_ir::inherent::Abi<TyCtxt<'tcx>> for ExternAbi {
     fn rust() -> Self {
-        abi::Abi::Rust
+        ExternAbi::Rust
     }
 
     fn is_rust(self) -> bool {
-        matches!(self, abi::Abi::Rust)
+        matches!(self, ExternAbi::Rust)
     }
 }
 
@@ -2103,11 +2102,9 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 
     /// Returns the origin of the opaque type `def_id`.
-    #[track_caller]
-    pub fn opaque_type_origin(self, def_id: LocalDefId) -> hir::OpaqueTyOrigin {
-        let origin = self.hir().expect_opaque_ty(def_id).origin;
-        trace!("opaque_type_origin({def_id:?}) => {origin:?}");
-        origin
+    #[instrument(skip(self), level = "trace", ret)]
+    pub fn local_opaque_ty_origin(self, def_id: LocalDefId) -> hir::OpaqueTyOrigin<LocalDefId> {
+        self.hir().expect_opaque_ty(def_id).origin
     }
 }
 
@@ -2559,7 +2556,7 @@ impl<'tcx> TyCtxt<'tcx> {
                 ty::Tuple(params) => *params,
                 _ => bug!(),
             };
-            self.mk_fn_sig(params, s.output(), s.c_variadic, safety, abi::Abi::Rust)
+            self.mk_fn_sig(params, s.output(), s.c_variadic, safety, ExternAbi::Rust)
         })
     }
 
@@ -2821,7 +2818,7 @@ impl<'tcx> TyCtxt<'tcx> {
         output: I::Item,
         c_variadic: bool,
         safety: hir::Safety,
-        abi: abi::Abi,
+        abi: ExternAbi,
     ) -> T::Output
     where
         I: IntoIterator<Item = T>,
@@ -3127,7 +3124,6 @@ impl<'tcx> TyCtxt<'tcx> {
             }
     }
 
-    // FIXME(effects): Please remove this. It's a footgun.
     /// Whether the trait impl is marked const. This does not consider stability or feature gates.
     pub fn is_const_trait_impl(self, def_id: DefId) -> bool {
         self.def_kind(def_id) == DefKind::Impl { of_trait: true }

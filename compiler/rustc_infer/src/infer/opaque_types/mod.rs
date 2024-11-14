@@ -155,7 +155,10 @@ impl<'tcx> InferCtxt<'tcx> {
                     // however in `fn fut() -> impl Future<Output = i32> { async { 42 } }`, where
                     // it is of no concern, so we only check for TAITs.
                     if self.can_define_opaque_ty(b_def_id)
-                        && self.tcx.is_type_alias_impl_trait(b_def_id)
+                        && matches!(
+                            self.tcx.opaque_ty_origin(b_def_id),
+                            hir::OpaqueTyOrigin::TyAlias { .. }
+                        )
                     {
                         self.dcx().emit_err(OpaqueHiddenTypeDiag {
                             span,
@@ -429,7 +432,6 @@ where
                     upvar.visit_with(self);
                 }
 
-                // FIXME(async_closures): Is this the right signature to visit here?
                 args.as_coroutine_closure().signature_parts_ty().visit_with(self);
             }
 

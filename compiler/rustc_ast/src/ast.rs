@@ -414,6 +414,12 @@ pub struct WhereClause {
     pub span: Span,
 }
 
+impl WhereClause {
+    pub fn is_empty(&self) -> bool {
+        !self.has_where_token && self.predicates.is_empty()
+    }
+}
+
 impl Default for WhereClause {
     fn default() -> WhereClause {
         WhereClause { has_where_token: false, predicates: ThinVec::new(), span: DUMMY_SP }
@@ -2810,6 +2816,8 @@ pub struct ModSpans {
 /// E.g., `extern { .. }` or `extern "C" { .. }`.
 #[derive(Clone, Encodable, Decodable, Debug)]
 pub struct ForeignMod {
+    /// Span of the `extern` keyword.
+    pub extern_span: Span,
     /// `unsafe` keyword accepted syntactically for macro DSLs, but not
     /// semantically by Rust.
     pub safety: Safety,

@@ -2,6 +2,7 @@ use std::cell::{OnceCell, RefCell};
 use std::ffi::{CStr, CString};
 
 use libc::c_uint;
+use rustc_abi::Size;
 use rustc_codegen_ssa::traits::{
     BuilderMethods, ConstCodegenMethods, CoverageInfoBuilderMethods, MiscCodegenMethods,
 };
@@ -10,7 +11,6 @@ use rustc_llvm::RustString;
 use rustc_middle::mir::coverage::CoverageKind;
 use rustc_middle::ty::Instance;
 use rustc_middle::ty::layout::HasTyCtxt;
-use rustc_target::abi::Size;
 use tracing::{debug, instrument};
 
 use crate::builder::Builder;
@@ -152,7 +152,12 @@ impl<'tcx> CoverageInfoBuilderMethods<'tcx> for Builder<'_, '_, 'tcx> {
             return;
         };
 
-        let mut coverage_map = bx.coverage_cx().function_coverage_map.borrow_mut();
+        // FIXME(#132395): Unwrapping `coverage_cx` here has led to ICEs in the
+        // wild, so keep this early-return until we understand why.
+        let mut coverage_map = match bx.coverage_cx {
+            Some(ref cx) => cx.function_coverage_map.borrow_mut(),
+            None => return,
+        };
         let func_coverage = coverage_map
             .entry(instance)
             .or_insert_with(|| FunctionCoverageCollector::new(instance, function_coverage_info));

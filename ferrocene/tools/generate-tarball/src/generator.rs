@@ -98,7 +98,6 @@ impl Generator {
             rel_manifest_dir: _,
             success_message: _,
             legacy_manifest_dirs: _,
-            non_installed_overlay: _,
             bulk_dirs: _,
             component_name: _,
             //
@@ -108,6 +107,7 @@ impl Generator {
             output_dir,
             compression_profile,
             compression_formats,
+            non_installed_overlay,
             override_file_mtime,
             ferrocene_commit_sha,
             ferrocene_signing_kms_key_arn,
@@ -125,6 +125,11 @@ impl Generator {
 
         // copy over the image to the working directory
         copy_recursive(image_dir.as_ref(), &package_dir)?;
+
+        // Copy the overlay.
+        if !non_installed_overlay.is_empty() {
+            copy_recursive(non_installed_overlay.as_ref(), &package_dir)?;
+        }
 
         if let Some(key_arn) = ferrocene_signing_kms_key_arn {
             let Some(commit_sha) = ferrocene_commit_sha else {

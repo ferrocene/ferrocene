@@ -24,6 +24,7 @@ pub use assoc::*;
 pub use generic_args::{GenericArgKind, TermKind, *};
 pub use generics::*;
 pub use intrinsic::IntrinsicDef;
+use rustc_abi::{Align, FieldIdx, Integer, IntegerType, ReprFlags, ReprOptions, VariantIdx};
 use rustc_ast::expand::StrippedCfgItem;
 use rustc_ast::node_id::NodeMap;
 pub use rustc_ast_ir::{Movability, Mutability, try_visit};
@@ -48,8 +49,6 @@ pub use rustc_session::lint::RegisteredTools;
 use rustc_span::hygiene::MacroKind;
 use rustc_span::symbol::{Ident, Symbol, kw, sym};
 use rustc_span::{ExpnId, ExpnKind, Span};
-use rustc_target::abi::{Align, FieldIdx, Integer, IntegerType, VariantIdx};
-pub use rustc_target::abi::{ReprFlags, ReprOptions};
 pub use rustc_type_ir::ConstKind::{
     Bound as BoundCt, Error as ErrorCt, Expr as ExprCt, Infer as InferCt, Param as ParamCt,
     Placeholder as PlaceholderCt, Unevaluated, Value,
@@ -1622,16 +1621,6 @@ impl<'tcx> TyCtxt<'tcx> {
             self.associated_item(def_id).opt_rpitit_info
         } else {
             None
-        }
-    }
-
-    /// Whether the `def_id` is an associated type that was desugared from a
-    /// `#[const_trait]` or `impl_const`.
-    pub fn is_effects_desugared_assoc_ty(self, def_id: DefId) -> bool {
-        if let DefKind::AssocTy = self.def_kind(def_id) {
-            self.associated_item(def_id).is_effects_desugaring
-        } else {
-            false
         }
     }
 

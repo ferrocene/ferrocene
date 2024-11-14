@@ -131,7 +131,6 @@ impl<T: Sized> NonNull<T> {
     #[inline]
     #[must_use]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
-    #[rustc_const_unstable(feature = "ptr_as_uninit", issue = "75402")]
     pub const unsafe fn as_uninit_ref<'a>(self) -> &'a MaybeUninit<T> {
         // SAFETY: the caller must guarantee that `self` meets all the
         // requirements for a reference.
@@ -155,7 +154,6 @@ impl<T: Sized> NonNull<T> {
     #[inline]
     #[must_use]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
-    #[rustc_const_unstable(feature = "ptr_as_uninit", issue = "75402")]
     pub const unsafe fn as_uninit_mut<'a>(self) -> &'a mut MaybeUninit<T> {
         // SAFETY: the caller must guarantee that `self` meets all the
         // requirements for a reference.
@@ -230,7 +228,6 @@ impl<T: ?Sized> NonNull<T> {
 
     /// Converts a reference to a `NonNull` pointer.
     #[unstable(feature = "non_null_from_ref", issue = "130823")]
-    #[rustc_const_unstable(feature = "non_null_from_ref", issue = "130823")]
     #[inline]
     pub const fn from_ref(r: &T) -> Self {
         // SAFETY: A reference cannot be null.
@@ -239,7 +236,6 @@ impl<T: ?Sized> NonNull<T> {
 
     /// Converts a mutable reference to a `NonNull` pointer.
     #[unstable(feature = "non_null_from_ref", issue = "130823")]
-    #[rustc_const_unstable(feature = "non_null_from_ref", issue = "130823")]
     #[inline]
     pub const fn from_mut(r: &mut T) -> Self {
         // SAFETY: A mutable reference cannot be null.
@@ -253,7 +249,6 @@ impl<T: ?Sized> NonNull<T> {
     ///
     /// [`std::ptr::from_raw_parts`]: crate::ptr::from_raw_parts
     #[unstable(feature = "ptr_metadata", issue = "81513")]
-    #[rustc_const_unstable(feature = "ptr_metadata", issue = "81513")]
     #[inline]
     pub const fn from_raw_parts(
         data_pointer: NonNull<()>,
@@ -269,7 +264,6 @@ impl<T: ?Sized> NonNull<T> {
     ///
     /// The pointer can be later reconstructed with [`NonNull::from_raw_parts`].
     #[unstable(feature = "ptr_metadata", issue = "81513")]
-    #[rustc_const_unstable(feature = "ptr_metadata", issue = "81513")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
@@ -635,7 +629,7 @@ impl<T: ?Sized> NonNull<T> {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
-    #[rustc_allow_const_fn_unstable(unchecked_neg)]
+    #[cfg_attr(bootstrap, rustc_allow_const_fn_unstable(unchecked_neg))]
     pub const unsafe fn sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -676,7 +670,7 @@ impl<T: ?Sized> NonNull<T> {
         unsafe { NonNull { pointer: self.pointer.byte_sub(count) } }
     }
 
-    /// Calculates the distance between two pointers. The returned value is in
+    /// Calculates the distance between two pointers within the same allocation. The returned value is in
     /// units of T: the distance in bytes divided by `mem::size_of::<T>()`.
     ///
     /// This is equivalent to `(self as isize - origin as isize) / (mem::size_of::<T>() as isize)`,
@@ -773,7 +767,7 @@ impl<T: ?Sized> NonNull<T> {
         unsafe { self.pointer.offset_from(origin.pointer) }
     }
 
-    /// Calculates the distance between two pointers. The returned value is in
+    /// Calculates the distance between two pointers within the same allocation. The returned value is in
     /// units of **bytes**.
     ///
     /// This is purely a convenience for casting to a `u8` pointer and
@@ -793,7 +787,7 @@ impl<T: ?Sized> NonNull<T> {
 
     // N.B. `wrapping_offset``, `wrapping_add`, etc are not implemented because they can wrap to null
 
-    /// Calculates the distance between two pointers, *where it's known that
+    /// Calculates the distance between two pointers within the same allocation, *where it's known that
     /// `self` is equal to or greater than `origin`*. The returned value is in
     /// units of T: the distance in bytes is divided by `mem::size_of::<T>()`.
     ///
@@ -864,6 +858,25 @@ impl<T: ?Sized> NonNull<T> {
     {
         // SAFETY: the caller must uphold the safety contract for `sub_ptr`.
         unsafe { self.pointer.sub_ptr(subtracted.pointer) }
+    }
+
+    /// Calculates the distance between two pointers within the same allocation, *where it's known that
+    /// `self` is equal to or greater than `origin`*. The returned value is in
+    /// units of **bytes**.
+    ///
+    /// This is purely a convenience for casting to a `u8` pointer and
+    /// using [`sub_ptr`][NonNull::sub_ptr] on it. See that method for
+    /// documentation and safety requirements.
+    ///
+    /// For non-`Sized` pointees this operation considers only the data pointers,
+    /// ignoring the metadata.
+    #[inline(always)]
+    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[unstable(feature = "ptr_sub_ptr", issue = "95892")]
+    #[rustc_const_unstable(feature = "const_ptr_sub_ptr", issue = "95892")]
+    pub const unsafe fn byte_sub_ptr<U: ?Sized>(self, origin: NonNull<U>) -> usize {
+        // SAFETY: the caller must uphold the safety contract for `byte_sub_ptr`.
+        unsafe { self.pointer.byte_sub_ptr(origin.pointer) }
     }
 
     /// Reads the value from `self` without moving it. This leaves the
@@ -1526,7 +1539,6 @@ impl<T> NonNull<[T]> {
     #[inline]
     #[must_use]
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
-    #[rustc_const_unstable(feature = "slice_ptr_get", issue = "74265")]
     #[rustc_never_returns_null_ptr]
     pub const fn as_mut_ptr(self) -> *mut T {
         self.as_non_null_ptr().as_ptr()
@@ -1572,7 +1584,6 @@ impl<T> NonNull<[T]> {
     #[inline]
     #[must_use]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
-    #[rustc_const_unstable(feature = "ptr_as_uninit", issue = "75402")]
     pub const unsafe fn as_uninit_slice<'a>(self) -> &'a [MaybeUninit<T>] {
         // SAFETY: the caller must uphold the safety contract for `as_uninit_slice`.
         unsafe { slice::from_raw_parts(self.cast().as_ptr(), self.len()) }
@@ -1637,7 +1648,6 @@ impl<T> NonNull<[T]> {
     #[inline]
     #[must_use]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
-    #[rustc_const_unstable(feature = "ptr_as_uninit", issue = "75402")]
     pub const unsafe fn as_uninit_slice_mut<'a>(self) -> &'a mut [MaybeUninit<T>] {
         // SAFETY: the caller must uphold the safety contract for `as_uninit_slice_mut`.
         unsafe { slice::from_raw_parts_mut(self.cast().as_ptr(), self.len()) }

@@ -240,7 +240,6 @@ impl<T: ?Sized> *const T {
     ///
     /// The pointer can be later reconstructed with [`from_raw_parts`].
     #[unstable(feature = "ptr_metadata", issue = "81513")]
-    #[rustc_const_unstable(feature = "ptr_metadata", issue = "81513")]
     #[inline]
     pub const fn to_raw_parts(self) -> (*const (), <T as super::Pointee>::Metadata) {
         (self.cast(), metadata(self))
@@ -316,7 +315,6 @@ impl<T: ?Sized> *const T {
     /// ```
     // FIXME: mention it in the docs for `as_ref` and `as_uninit_ref` once stabilized.
     #[unstable(feature = "ptr_as_ref_unchecked", issue = "122034")]
-    #[rustc_const_unstable(feature = "ptr_as_ref_unchecked", issue = "122034")]
     #[inline]
     #[must_use]
     pub const unsafe fn as_ref_unchecked<'a>(self) -> &'a T {
@@ -582,7 +580,7 @@ impl<T: ?Sized> *const T {
         intrinsics::ptr_mask(self.cast::<()>(), mask).with_metadata_of(self)
     }
 
-    /// Calculates the distance between two pointers. The returned value is in
+    /// Calculates the distance between two pointers within the same allocation. The returned value is in
     /// units of T: the distance in bytes divided by `mem::size_of::<T>()`.
     ///
     /// This is equivalent to `(self as isize - origin as isize) / (mem::size_of::<T>() as isize)`,
@@ -677,7 +675,7 @@ impl<T: ?Sized> *const T {
         unsafe { intrinsics::ptr_offset_from(self, origin) }
     }
 
-    /// Calculates the distance between two pointers. The returned value is in
+    /// Calculates the distance between two pointers within the same allocation. The returned value is in
     /// units of **bytes**.
     ///
     /// This is purely a convenience for casting to a `u8` pointer and
@@ -695,7 +693,7 @@ impl<T: ?Sized> *const T {
         unsafe { self.cast::<u8>().offset_from(origin.cast::<u8>()) }
     }
 
-    /// Calculates the distance between two pointers, *where it's known that
+    /// Calculates the distance between two pointers within the same allocation, *where it's known that
     /// `self` is equal to or greater than `origin`*. The returned value is in
     /// units of T: the distance in bytes is divided by `mem::size_of::<T>()`.
     ///
@@ -788,6 +786,25 @@ impl<T: ?Sized> *const T {
         assert!(0 < pointee_size && pointee_size <= isize::MAX as usize);
         // SAFETY: the caller must uphold the safety contract for `ptr_offset_from_unsigned`.
         unsafe { intrinsics::ptr_offset_from_unsigned(self, origin) }
+    }
+
+    /// Calculates the distance between two pointers within the same allocation, *where it's known that
+    /// `self` is equal to or greater than `origin`*. The returned value is in
+    /// units of **bytes**.
+    ///
+    /// This is purely a convenience for casting to a `u8` pointer and
+    /// using [`sub_ptr`][pointer::sub_ptr] on it. See that method for
+    /// documentation and safety requirements.
+    ///
+    /// For non-`Sized` pointees this operation considers only the data pointers,
+    /// ignoring the metadata.
+    #[unstable(feature = "ptr_sub_ptr", issue = "95892")]
+    #[rustc_const_unstable(feature = "const_ptr_sub_ptr", issue = "95892")]
+    #[inline]
+    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    pub const unsafe fn byte_sub_ptr<U: ?Sized>(self, origin: *const U) -> usize {
+        // SAFETY: the caller must uphold the safety contract for `sub_ptr`.
+        unsafe { self.cast::<u8>().sub_ptr(origin.cast::<u8>()) }
     }
 
     /// Returns whether two pointers are guaranteed to be equal.
@@ -1005,7 +1022,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[rustc_allow_const_fn_unstable(unchecked_neg)]
+    #[cfg_attr(bootstrap, rustc_allow_const_fn_unstable(unchecked_neg))]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const unsafe fn sub(self, count: usize) -> Self
@@ -1695,7 +1712,6 @@ impl<T> *const [T] {
     /// ```
     #[inline]
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
-    #[rustc_const_unstable(feature = "slice_ptr_get", issue = "74265")]
     pub const fn as_ptr(self) -> *const T {
         self as *const T
     }
@@ -1795,7 +1811,6 @@ impl<T, const N: usize> *const [T; N] {
     /// ```
     #[inline]
     #[unstable(feature = "array_ptr_get", issue = "119834")]
-    #[rustc_const_unstable(feature = "array_ptr_get", issue = "119834")]
     pub const fn as_ptr(self) -> *const T {
         self as *const T
     }
@@ -1813,7 +1828,6 @@ impl<T, const N: usize> *const [T; N] {
     /// ```
     #[inline]
     #[unstable(feature = "array_ptr_get", issue = "119834")]
-    #[rustc_const_unstable(feature = "array_ptr_get", issue = "119834")]
     pub const fn as_slice(self) -> *const [T] {
         self
     }

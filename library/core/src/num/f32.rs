@@ -14,6 +14,7 @@
 use crate::convert::FloatToInt;
 #[cfg(not(test))]
 use crate::intrinsics;
+use crate::macros::const_assert;
 use crate::mem;
 use crate::num::FpCategory;
 
@@ -748,7 +749,6 @@ impl f32 {
     /// [`MAX`]: Self::MAX
     #[inline]
     #[unstable(feature = "float_next_up_down", issue = "91399")]
-    #[rustc_const_unstable(feature = "float_next_up_down", issue = "91399")]
     pub const fn next_up(self) -> Self {
         // Some targets violate Rust's assumption of IEEE semantics, e.g. by flushing
         // denormals to zero. This is in general unsound and unsupported, but here
@@ -797,7 +797,6 @@ impl f32 {
     /// [`MAX`]: Self::MAX
     #[inline]
     #[unstable(feature = "float_next_up_down", issue = "91399")]
-    #[rustc_const_unstable(feature = "float_next_up_down", issue = "91399")]
     pub const fn next_down(self) -> Self {
         // Some targets violate Rust's assumption of IEEE semantics, e.g. by flushing
         // denormals to zero. This is in general unsound and unsupported, but here
@@ -1409,16 +1408,14 @@ impl f32 {
     #[rustc_const_unstable(feature = "const_float_methods", issue = "130843")]
     #[inline]
     pub const fn clamp(mut self, min: f32, max: f32) -> f32 {
-        const fn assert_at_const(min: f32, max: f32) {
-            // Note that we cannot format in constant expressions.
-            assert!(min <= max, "min > max, or either was NaN");
-        }
-        #[inline] // inline to avoid codegen regression
-        fn assert_at_rt(min: f32, max: f32) {
-            assert!(min <= max, "min > max, or either was NaN. min = {min:?}, max = {max:?}");
-        }
-        // FIXME(const-hack): We would prefer to have streamlined panics when formatters become const-friendly.
-        intrinsics::const_eval_select((min, max), assert_at_const, assert_at_rt);
+        const_assert!(
+            min <= max,
+            "min > max, or either was NaN",
+            "min > max, or either was NaN. min = {min:?}, max = {max:?}",
+            min: f32,
+            max: f32,
+        );
+
         if self < min {
             self = min;
         }

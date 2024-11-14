@@ -110,26 +110,40 @@ impl_zeroable_primitive!(
 pub struct NonZero<T: ZeroablePrimitive>(T::NonZeroInner);
 
 macro_rules! impl_nonzero_fmt {
-    ($Trait:ident) => {
-        #[stable(feature = "nonzero", since = "1.28.0")]
-        impl<T> fmt::$Trait for NonZero<T>
-        where
-            T: ZeroablePrimitive + fmt::$Trait,
-        {
-            #[inline]
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                self.get().fmt(f)
+    ($(#[$Attribute:meta] $Trait:ident)*) => {
+        $(
+            #[$Attribute]
+            impl<T> fmt::$Trait for NonZero<T>
+            where
+                T: ZeroablePrimitive + fmt::$Trait,
+            {
+                #[inline]
+                fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                    self.get().fmt(f)
+                }
             }
-        }
+        )*
     };
 }
 
-impl_nonzero_fmt!(Debug);
-impl_nonzero_fmt!(Display);
-impl_nonzero_fmt!(Binary);
-impl_nonzero_fmt!(Octal);
-impl_nonzero_fmt!(LowerHex);
-impl_nonzero_fmt!(UpperHex);
+impl_nonzero_fmt! {
+    #[stable(feature = "nonzero", since = "1.28.0")]
+    Debug
+    #[stable(feature = "nonzero", since = "1.28.0")]
+    Display
+    #[stable(feature = "nonzero", since = "1.28.0")]
+    Binary
+    #[stable(feature = "nonzero", since = "1.28.0")]
+    Octal
+    #[stable(feature = "nonzero", since = "1.28.0")]
+    LowerHex
+    #[stable(feature = "nonzero", since = "1.28.0")]
+    UpperHex
+    #[stable(feature = "nonzero_fmt_exp", since = "CURRENT_RUSTC_VERSION")]
+    LowerExp
+    #[stable(feature = "nonzero_fmt_exp", since = "CURRENT_RUSTC_VERSION")]
+    UpperExp
+}
 
 macro_rules! impl_nonzero_auto_trait {
     (unsafe $Trait:ident) => {
@@ -458,7 +472,15 @@ macro_rules! nonzero_integer {
         reversed = $reversed:literal,
         leading_zeros_test = $leading_zeros_test:expr,
     ) => {
-        /// An integer that is known not to equal zero.
+        #[doc = sign_dependent_expr!{
+            $signedness ?
+            if signed {
+                concat!("An [`", stringify!($Int), "`] that is known not to equal zero.")
+            }
+            if unsigned {
+                concat!("A [`", stringify!($Int), "`] that is known not to equal zero.")
+            }
+        }]
         ///
         /// This enables some memory layout optimization.
         #[doc = concat!("For example, `Option<", stringify!($Ty), ">` is the same size as `", stringify!($Int), "`:")]
@@ -1474,8 +1496,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         /// # }
         /// ```
         #[unstable(feature = "num_midpoint", issue = "110840")]
-        #[rustc_const_unstable(feature = "const_num_midpoint", issue = "110840")]
-        #[rustc_allow_const_fn_unstable(const_num_midpoint)]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]

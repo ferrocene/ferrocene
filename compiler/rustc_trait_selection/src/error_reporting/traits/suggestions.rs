@@ -6,6 +6,7 @@ use std::iter;
 use std::path::PathBuf;
 
 use itertools::{EitherOrBoth, Itertools};
+use rustc_abi::ExternAbi;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_errors::codes::*;
@@ -38,7 +39,6 @@ use rustc_middle::{bug, span_bug};
 use rustc_span::def_id::LocalDefId;
 use rustc_span::symbol::{Ident, Symbol, kw, sym};
 use rustc_span::{BytePos, DUMMY_SP, DesugaringKind, ExpnKind, MacroKind, Span};
-use rustc_target::spec::abi;
 use tracing::{debug, instrument};
 
 use super::{
@@ -1916,7 +1916,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                         infcx.next_ty_var(DUMMY_SP),
                         false,
                         hir::Safety::Safe,
-                        abi::Abi::Rust,
+                        ExternAbi::Rust,
                     )
                 }
                 _ => infcx.tcx.mk_fn_sig(
@@ -1924,7 +1924,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     infcx.next_ty_var(DUMMY_SP),
                     false,
                     hir::Safety::Safe,
-                    abi::Abi::Rust,
+                    ExternAbi::Rust,
                 ),
             };
 
@@ -3563,17 +3563,34 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 )]);
             }
             ObligationCauseCode::OpaqueReturnType(expr_info) => {
-                if let Some((expr_ty, hir_id)) = expr_info {
-                    let expr_ty = self.tcx.short_ty_string(expr_ty, long_ty_file);
-                    let expr = self.infcx.tcx.hir().expect_expr(hir_id);
-                    err.span_label(
-                        expr.span,
-                        with_forced_trimmed_paths!(format!(
-                            "return type was inferred to be `{expr_ty}` here",
-                        )),
-                    );
-                    suggest_remove_deref(err, &expr);
-                }
+                let (expr_ty, expr) = if let Some((expr_ty, hir_id)) = expr_info {
+                    let expr_ty = tcx.short_ty_string(expr_ty, long_ty_file);
+                    let expr = tcx.hir().expect_expr(hir_id);
+                    (expr_ty, expr)
+                } else if let Some(body_id) = tcx.hir_node_by_def_id(body_id).body_id()
+                    && let body = tcx.hir().body(body_id)
+                    && let hir::ExprKind::Block(block, _) = body.value.kind
+                    && let Some(expr) = block.expr
+                    && let Some(expr_ty) = self
+                        .typeck_results
+                        .as_ref()
+                        .and_then(|typeck| typeck.node_type_opt(expr.hir_id))
+                    && let Some(pred) = predicate.as_clause()
+                    && let ty::ClauseKind::Trait(pred) = pred.kind().skip_binder()
+                    && self.can_eq(param_env, pred.self_ty(), expr_ty)
+                {
+                    let expr_ty = tcx.short_ty_string(expr_ty, long_ty_file);
+                    (expr_ty, expr)
+                } else {
+                    return;
+                };
+                err.span_label(
+                    expr.span,
+                    with_forced_trimmed_paths!(format!(
+                        "return type was inferred to be `{expr_ty}` here",
+                    )),
+                );
+                suggest_remove_deref(err, &expr);
             }
         }
     }
@@ -3680,6 +3697,9 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         err: &mut Diag<'_>,
         trait_pred: ty::PolyTraitPredicate<'tcx>,
     ) {
+        if trait_pred.polarity() == ty::PredicatePolarity::Negative {
+            return;
+        }
         let Some(diagnostic_name) = self.tcx.get_diagnostic_name(trait_pred.def_id()) else {
             return;
         };
@@ -3731,7 +3751,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     trait_pred.skip_binder().self_ty(),
                     diagnostic_name,
                 ),
-                // FIXME(effects, const_trait_impl) derive_const as suggestion?
+                // FIXME(const_trait_impl) derive_const as suggestion?
                 format!("#[derive({diagnostic_name})]\n"),
                 Applicability::MaybeIncorrect,
             );
@@ -3976,7 +3996,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             && let [self_ty, found_ty] = trait_ref.args.as_slice()
             && let Some(fn_ty) = self_ty.as_type().filter(|ty| ty.is_fn())
             && let fn_sig @ ty::FnSig {
-                abi: abi::Abi::Rust,
+                abi: ExternAbi::Rust,
                 c_variadic: false,
                 safety: hir::Safety::Safe,
                 ..
@@ -5222,12 +5242,6 @@ fn point_at_assoc_type_restriction<G: EmissionGuarantee>(
     let ty::ClauseKind::Projection(proj) = clause else {
         return;
     };
-    // avoid ICEing since effects desugared associated types don't have names.
-    // this path should only be hit for `~const` on invalid places, so they
-    // will have an informative error already.
-    if tcx.is_effects_desugared_assoc_ty(proj.projection_term.def_id) {
-        return;
-    }
     let name = tcx.item_name(proj.projection_term.def_id);
     let mut predicates = generics.predicates.iter().peekable();
     let mut prev: Option<&hir::WhereBoundPredicate<'_>> = None;

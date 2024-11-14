@@ -17,7 +17,7 @@ use rustc_middle::mir::{
 };
 use rustc_middle::traits::{BuiltinImplSource, ImplSource, ObligationCause};
 use rustc_middle::ty::adjustment::PointerCoercion;
-use rustc_middle::ty::{self, GenericArgKind, TraitRef, Ty, TyCtxt, TypingMode};
+use rustc_middle::ty::{self, GenericArgKind, TraitRef, Ty, TyCtxt};
 use rustc_span::Span;
 use rustc_span::symbol::sym;
 use rustc_trait_selection::traits::{ObligationCtxt, SelectionContext};
@@ -404,7 +404,7 @@ fn is_stable_const_fn(tcx: TyCtxt<'_>, def_id: DefId, msrv: &Msrv) -> bool {
 }
 
 fn is_ty_const_destruct<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>, body: &Body<'tcx>) -> bool {
-    // FIXME(effects, fee1-dead) revert to const destruct once it works again
+    // FIXME(const_trait_impl, fee1-dead) revert to const destruct once it works again
     #[expect(unused)]
     fn is_ty_const_destruct_unused<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>, body: &Body<'tcx>) -> bool {
         // Avoid selecting for simple cases, such as builtin types.
@@ -412,7 +412,7 @@ fn is_ty_const_destruct<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>, body: &Body<'tcx>
             return true;
         }
 
-        // FIXME(effects) constness
+        // FIXME(const_trait_impl) constness
         let obligation = Obligation::new(
             tcx,
             ObligationCause::dummy_with_span(body.span),
@@ -420,7 +420,7 @@ fn is_ty_const_destruct<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>, body: &Body<'tcx>
             TraitRef::new(tcx, tcx.require_lang_item(LangItem::Destruct, Some(body.span)), [ty]),
         );
 
-        let infcx = tcx.infer_ctxt().build(TypingMode::from_param_env(obligation.param_env));
+        let infcx = tcx.infer_ctxt().build(body.typing_mode(tcx));
         let mut selcx = SelectionContext::new(&infcx);
         let Some(impl_src) = selcx.select(&obligation).ok().flatten() else {
             return false;

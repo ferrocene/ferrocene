@@ -11,18 +11,18 @@ use rustc_hir::def_id::DefId;
 use rustc_hir::{self as hir, LangItem};
 use rustc_index::bit_set::BitSet;
 use rustc_infer::infer::TyCtxtInferExt;
-use rustc_infer::traits::ObligationCause;
 use rustc_middle::mir::visit::Visitor;
 use rustc_middle::mir::*;
 use rustc_middle::span_bug;
 use rustc_middle::ty::adjustment::PointerCoercion;
-use rustc_middle::ty::{self, Instance, InstanceKind, Ty, TypeVisitableExt, TypingMode};
+use rustc_middle::ty::{self, Instance, InstanceKind, Ty, TypeVisitableExt};
 use rustc_mir_dataflow::Analysis;
 use rustc_mir_dataflow::impls::MaybeStorageLive;
 use rustc_mir_dataflow::storage::always_storage_live_locals;
-use rustc_span::{DUMMY_SP, Span, Symbol, sym};
-use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
-use rustc_trait_selection::traits::{self, ObligationCauseCode, ObligationCtxt};
+use rustc_span::{Span, Symbol, sym};
+use rustc_trait_selection::traits::{
+    Obligation, ObligationCause, ObligationCauseCode, ObligationCtxt,
+};
 use tracing::{debug, instrument, trace};
 
 use super::ops::{self, NonConstOp, Status};
@@ -360,6 +360,68 @@ impl<'mir, 'tcx> Checker<'mir, 'tcx> {
         // end of evaluation.
         !is_transient
     }
+
+    fn revalidate_conditional_constness(
+        &mut self,
+        callee: DefId,
+        callee_args: ty::GenericArgsRef<'tcx>,
+        call_source: CallSource,
+        call_span: Span,
+    ) {
+        let tcx = self.tcx;
+        if !tcx.is_conditionally_const(callee) {
+            return;
+        }
+
+        let const_conditions = tcx.const_conditions(callee).instantiate(tcx, callee_args);
+        // If there are any const conditions on this fn and `const_trait_impl`
+        // is not enabled, simply bail. We shouldn't be able to call conditionally
+        // const functions on stable.
+        if !const_conditions.is_empty() && !tcx.features().const_trait_impl() {
+            self.check_op(ops::FnCallNonConst {
+                callee,
+                args: callee_args,
+                span: call_span,
+                call_source,
+                feature: Some(sym::const_trait_impl),
+            });
+            return;
+        }
+
+        let infcx = tcx.infer_ctxt().build(self.body.typing_mode(tcx));
+        let ocx = ObligationCtxt::new_with_diagnostics(&infcx);
+
+        let body_id = self.body.source.def_id().expect_local();
+        let host_polarity = match self.const_kind() {
+            hir::ConstContext::ConstFn => ty::BoundConstness::Maybe,
+            hir::ConstContext::Static(_) | hir::ConstContext::Const { .. } => {
+                ty::BoundConstness::Const
+            }
+        };
+        let const_conditions = ocx.normalize(
+            &ObligationCause::misc(call_span, body_id),
+            self.param_env,
+            const_conditions,
+        );
+        ocx.register_obligations(const_conditions.into_iter().map(|(trait_ref, span)| {
+            Obligation::new(
+                tcx,
+                ObligationCause::new(
+                    call_span,
+                    body_id,
+                    ObligationCauseCode::WhereClause(callee, span),
+                ),
+                self.param_env,
+                trait_ref.to_host_effect_clause(tcx, host_polarity),
+            )
+        }));
+
+        let errors = ocx.select_all_or_error();
+        if !errors.is_empty() {
+            tcx.dcx()
+                .span_delayed_bug(call_span, "this should have reported a ~const error in HIR");
+        }
+    }
 }
 
 impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
@@ -566,7 +628,6 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                 };
 
                 let ConstCx { tcx, body, param_env, .. } = *self.ccx;
-                let caller = self.def_id();
 
                 let fn_ty = func.ty(body, tcx);
 
@@ -584,31 +645,7 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                     }
                 };
 
-                // Check that all trait bounds that are marked as `~const` can be satisfied.
-                //
-                // Typeck only does a "non-const" check since it operates on HIR and cannot distinguish
-                // which path expressions are getting called on and which path expressions are only used
-                // as function pointers. This is required for correctness.
-                let infcx = tcx.infer_ctxt().build(TypingMode::from_param_env(param_env));
-                let ocx = ObligationCtxt::new_with_diagnostics(&infcx);
-
-                let predicates = tcx.predicates_of(callee).instantiate(tcx, fn_args);
-                let cause = ObligationCause::new(
-                    terminator.source_info.span,
-                    self.body.source.def_id().expect_local(),
-                    ObligationCauseCode::WhereClause(callee, DUMMY_SP),
-                );
-                let normalized_predicates = ocx.normalize(&cause, param_env, predicates);
-                ocx.register_obligations(traits::predicates_for_generics(
-                    |_, _| cause.clone(),
-                    self.param_env,
-                    normalized_predicates,
-                ));
-
-                let errors = ocx.select_all_or_error();
-                if !errors.is_empty() {
-                    infcx.err_ctxt().report_fulfillment_errors(errors);
-                }
+                self.revalidate_conditional_constness(callee, fn_args, call_source, *fn_span);
 
                 let mut is_trait = false;
                 // Attempting to call a trait method?
@@ -620,8 +657,9 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                     // typeck ensures the conditions for calling a const trait method are met,
                     // so we only error if the trait isn't const. We try to resolve the trait
                     // into the concrete method, and uses that for const stability checks.
-                    // FIXME(effects) we might consider moving const stability checks to typeck as well.
-                    if tcx.features().effects() && trait_is_const {
+                    // FIXME(const_trait_impl) we might consider moving const stability checks
+                    // to typeck as well.
+                    if tcx.features().const_trait_impl() && trait_is_const {
                         // This skips the check below that ensures we only call `const fn`.
                         is_trait = true;
 
@@ -648,7 +686,6 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                             None
                         };
                         self.check_op(ops::FnCallNonConst {
-                            caller,
                             callee,
                             args: fn_args,
                             span: *fn_span,
@@ -738,7 +775,6 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                 // Trait functions are not `const fn` so we have to skip them here.
                 if !tcx.is_const_fn(callee) && !is_trait {
                     self.check_op(ops::FnCallNonConst {
-                        caller,
                         callee,
                         args: fn_args,
                         span: *fn_span,

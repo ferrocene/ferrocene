@@ -43,7 +43,7 @@ fn associated_type_bounds<'tcx>(
     match filter {
         PredicateFilter::All
         | PredicateFilter::SelfOnly
-        | PredicateFilter::SelfThatDefines(_)
+        | PredicateFilter::SelfTraitThatDefines(_)
         | PredicateFilter::SelfAndAssociatedTypeBounds => {
             icx.lowerer().add_sized_bound(&mut bounds, item_ty, hir_bounds, None, span);
         }
@@ -122,7 +122,7 @@ fn remap_gat_vars_and_recurse_into_nested_projections<'tcx>(
                     PredicateFilter::SelfOnly => {
                         return None;
                     }
-                    PredicateFilter::SelfThatDefines(_)
+                    PredicateFilter::SelfTraitThatDefines(_)
                     | PredicateFilter::SelfConstIfConst
                     | PredicateFilter::SelfAndAssociatedTypeBounds
                     | PredicateFilter::ConstIfConst => {
@@ -329,7 +329,7 @@ fn opaque_type_bounds<'tcx>(
         match filter {
             PredicateFilter::All
             | PredicateFilter::SelfOnly
-            | PredicateFilter::SelfThatDefines(_)
+            | PredicateFilter::SelfTraitThatDefines(_)
             | PredicateFilter::SelfAndAssociatedTypeBounds => {
                 // Associated types are implicitly sized unless a `?Sized` bound is found
                 icx.lowerer().add_sized_bound(&mut bounds, item_ty, hir_bounds, None, span);
@@ -379,9 +379,6 @@ pub(super) fn explicit_item_bounds_with_filter(
     }
 
     let bounds = match tcx.hir_node_by_def_id(def_id) {
-        _ if tcx.is_effects_desugared_assoc_ty(def_id.to_def_id()) => {
-            associated_type_bounds(tcx, def_id, &[], tcx.def_span(def_id), filter)
-        }
         hir::Node::TraitItem(hir::TraitItem {
             kind: hir::TraitItemKind::Type(bounds, _),
             span,

@@ -225,7 +225,6 @@ impl<T: ?Sized> *mut T {
     ///
     /// The pointer can be later reconstructed with [`from_raw_parts_mut`].
     #[unstable(feature = "ptr_metadata", issue = "81513")]
-    #[rustc_const_unstable(feature = "ptr_metadata", issue = "81513")]
     #[inline]
     pub const fn to_raw_parts(self) -> (*mut (), <T as super::Pointee>::Metadata) {
         (self.cast(), super::metadata(self))
@@ -306,7 +305,6 @@ impl<T: ?Sized> *mut T {
     /// ```
     // FIXME: mention it in the docs for `as_ref` and `as_uninit_ref` once stabilized.
     #[unstable(feature = "ptr_as_ref_unchecked", issue = "122034")]
-    #[rustc_const_unstable(feature = "ptr_as_ref_unchecked", issue = "122034")]
     #[inline]
     #[must_use]
     pub const unsafe fn as_ref_unchecked<'a>(self) -> &'a T {
@@ -659,7 +657,6 @@ impl<T: ?Sized> *mut T {
     /// ```
     // FIXME: mention it in the docs for `as_mut` and `as_uninit_mut` once stabilized.
     #[unstable(feature = "ptr_as_ref_unchecked", issue = "122034")]
-    #[rustc_const_unstable(feature = "ptr_as_ref_unchecked", issue = "122034")]
     #[inline]
     #[must_use]
     pub const unsafe fn as_mut_unchecked<'a>(self) -> &'a mut T {
@@ -746,7 +743,7 @@ impl<T: ?Sized> *mut T {
         (self as *const T).guaranteed_ne(other as _)
     }
 
-    /// Calculates the distance between two pointers. The returned value is in
+    /// Calculates the distance between two pointers within the same allocation. The returned value is in
     /// units of T: the distance in bytes divided by `mem::size_of::<T>()`.
     ///
     /// This is equivalent to `(self as isize - origin as isize) / (mem::size_of::<T>() as isize)`,
@@ -839,7 +836,7 @@ impl<T: ?Sized> *mut T {
         unsafe { (self as *const T).offset_from(origin) }
     }
 
-    /// Calculates the distance between two pointers. The returned value is in
+    /// Calculates the distance between two pointers within the same allocation. The returned value is in
     /// units of **bytes**.
     ///
     /// This is purely a convenience for casting to a `u8` pointer and
@@ -857,7 +854,7 @@ impl<T: ?Sized> *mut T {
         unsafe { self.cast::<u8>().offset_from(origin.cast::<u8>()) }
     }
 
-    /// Calculates the distance between two pointers, *where it's known that
+    /// Calculates the distance between two pointers within the same allocation, *where it's known that
     /// `self` is equal to or greater than `origin`*. The returned value is in
     /// units of T: the distance in bytes is divided by `mem::size_of::<T>()`.
     ///
@@ -928,6 +925,25 @@ impl<T: ?Sized> *mut T {
     {
         // SAFETY: the caller must uphold the safety contract for `sub_ptr`.
         unsafe { (self as *const T).sub_ptr(origin) }
+    }
+
+    /// Calculates the distance between two pointers within the same allocation, *where it's known that
+    /// `self` is equal to or greater than `origin`*. The returned value is in
+    /// units of **bytes**.
+    ///
+    /// This is purely a convenience for casting to a `u8` pointer and
+    /// using [`sub_ptr`][pointer::sub_ptr] on it. See that method for
+    /// documentation and safety requirements.
+    ///
+    /// For non-`Sized` pointees this operation considers only the data pointers,
+    /// ignoring the metadata.
+    #[unstable(feature = "ptr_sub_ptr", issue = "95892")]
+    #[rustc_const_unstable(feature = "const_ptr_sub_ptr", issue = "95892")]
+    #[inline]
+    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    pub const unsafe fn byte_sub_ptr<U: ?Sized>(self, origin: *mut U) -> usize {
+        // SAFETY: the caller must uphold the safety contract for `byte_sub_ptr`.
+        unsafe { (self as *const T).byte_sub_ptr(origin) }
     }
 
     /// Adds an unsigned offset to a pointer.
@@ -1085,7 +1101,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[rustc_allow_const_fn_unstable(unchecked_neg)]
+    #[cfg_attr(bootstrap, rustc_allow_const_fn_unstable(unchecked_neg))]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const unsafe fn sub(self, count: usize) -> Self
@@ -2040,7 +2056,6 @@ impl<T> *mut [T] {
     /// ```
     #[inline(always)]
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
-    #[rustc_const_unstable(feature = "slice_ptr_get", issue = "74265")]
     pub const fn as_mut_ptr(self) -> *mut T {
         self as *mut T
     }
@@ -2196,7 +2211,6 @@ impl<T, const N: usize> *mut [T; N] {
     /// ```
     #[inline]
     #[unstable(feature = "array_ptr_get", issue = "119834")]
-    #[rustc_const_unstable(feature = "array_ptr_get", issue = "119834")]
     pub const fn as_mut_ptr(self) -> *mut T {
         self as *mut T
     }
@@ -2217,7 +2231,6 @@ impl<T, const N: usize> *mut [T; N] {
     /// ```
     #[inline]
     #[unstable(feature = "array_ptr_get", issue = "119834")]
-    #[rustc_const_unstable(feature = "array_ptr_get", issue = "119834")]
     pub const fn as_mut_slice(self) -> *mut [T] {
         self
     }

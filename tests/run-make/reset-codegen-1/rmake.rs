@@ -40,3 +40,5 @@ fn main() {
     assert!(Path::new("multi-output.s").is_file());
     assert!(Path::new("multi-output.o").is_file());
 }
+
+// ferrocene-annotations: um_rustc_C_codegen_units

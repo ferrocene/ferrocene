@@ -10,3 +10,5 @@
 //@ run-pass
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_C_link_args

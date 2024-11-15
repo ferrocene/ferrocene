@@ -1844,6 +1844,16 @@ rustc_queries! {
         desc { |tcx| "computing crate imported by `{}`", tcx.def_path_str(def_id) }
     }
 
+    /// Gets the number of definitions in a foreign crate.
+    ///
+    /// This allows external tools to iterate over all definitions in a foreign crate.
+    ///
+    /// This should never be used for the local crate, instead use `iter_local_def_id`.
+    query num_extern_def_ids(_: CrateNum) -> usize {
+        desc { "fetching the number of definitions in a crate" }
+        separate_provide_extern
+    }
+
     query lib_features(_: CrateNum) -> &'tcx LibFeatures {
         desc { "calculating the lib features defined in a crate" }
         separate_provide_extern
@@ -2200,10 +2210,11 @@ rustc_queries! {
         desc { "computing autoderef types for `{}`", goal.canonical.value.value }
     }
 
-    query supported_target_features(_: CrateNum) -> &'tcx UnordMap<String, Option<Symbol>> {
+    /// Returns the Rust target features for the current target. These are not always the same as LLVM target features!
+    query rust_target_features(_: CrateNum) -> &'tcx UnordMap<String, rustc_target::target_features::Stability> {
         arena_cache
         eval_always
-        desc { "looking up supported target features" }
+        desc { "looking up Rust target features" }
     }
 
     query implied_target_features(feature: Symbol) -> &'tcx Vec<Symbol> {

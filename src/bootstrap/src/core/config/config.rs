@@ -263,8 +263,10 @@ pub struct Config {
     pub rust_optimize: RustOptimize,
     pub rust_codegen_units: Option<u32>,
     pub rust_codegen_units_std: Option<u32>,
-    pub rust_debug_assertions: bool,
-    pub rust_debug_assertions_std: bool,
+
+    pub rustc_debug_assertions: bool,
+    pub std_debug_assertions: bool,
+
     pub rust_overflow_checks: bool,
     pub rust_overflow_checks_std: bool,
     pub rust_debug_logging: bool,
@@ -1174,9 +1176,9 @@ define_config! {
         debug: Option<bool> = "debug",
         codegen_units: Option<u32> = "codegen-units",
         codegen_units_std: Option<u32> = "codegen-units-std",
-        debug_assertions: Option<bool> = "debug-assertions",
+        rustc_debug_assertions: Option<bool> = "debug-assertions",
         randomize_layout: Option<bool> = "randomize-layout",
-        debug_assertions_std: Option<bool> = "debug-assertions-std",
+        std_debug_assertions: Option<bool> = "debug-assertions-std",
         overflow_checks: Option<bool> = "overflow-checks",
         overflow_checks_std: Option<bool> = "overflow-checks-std",
         debug_logging: Option<bool> = "debug-logging",
@@ -1728,8 +1730,8 @@ impl Config {
         let mut llvm_offload = None;
         let mut llvm_plugins = None;
         let mut debug = None;
-        let mut debug_assertions = None;
-        let mut debug_assertions_std = None;
+        let mut rustc_debug_assertions = None;
+        let mut std_debug_assertions = None;
         let mut overflow_checks = None;
         let mut overflow_checks_std = None;
         let mut debug_logging = None;
@@ -1739,9 +1741,25 @@ impl Config {
         let mut debuginfo_level_tools = None;
         let mut debuginfo_level_tests = None;
         let mut optimize = None;
-        let mut omit_git_hash = None;
         let mut lld_enabled = None;
         let mut std_features = None;
+
+        let default = config.channel == "dev";
+        config.omit_git_hash = toml.rust.as_ref().and_then(|r| r.omit_git_hash).unwrap_or(default);
+
+        config.rust_info = GitInfo::new(config.omit_git_hash, &config.src);
+        config.cargo_info = GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/cargo"));
+        config.rust_analyzer_info =
+            GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/rust-analyzer"));
+        config.clippy_info =
+            GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/clippy"));
+        config.miri_info = GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/miri"));
+        config.rustfmt_info =
+            GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/rustfmt"));
+        config.enzyme_info =
+            GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/enzyme"));
+        config.in_tree_llvm_info = GitInfo::new(false, &config.src.join("src/llvm-project"));
+        config.in_tree_gcc_info = GitInfo::new(false, &config.src.join("src/gcc"));
 
         let mut is_user_configured_rust_channel = false;
 
@@ -1751,8 +1769,8 @@ impl Config {
                 debug: debug_toml,
                 codegen_units,
                 codegen_units_std,
-                debug_assertions: debug_assertions_toml,
-                debug_assertions_std: debug_assertions_std_toml,
+                rustc_debug_assertions: rustc_debug_assertions_toml,
+                std_debug_assertions: std_debug_assertions_toml,
                 overflow_checks: overflow_checks_toml,
                 overflow_checks_std: overflow_checks_std_toml,
                 debug_logging: debug_logging_toml,
@@ -1773,7 +1791,7 @@ impl Config {
                 verbose_tests,
                 optimize_tests,
                 codegen_tests,
-                omit_git_hash: omit_git_hash_toml,
+                omit_git_hash: _, // already handled above
                 dist_src,
                 save_toolstates,
                 codegen_backends,
@@ -1810,8 +1828,8 @@ impl Config {
                 config.download_ci_rustc_commit(download_rustc, config.llvm_assertions);
 
             debug = debug_toml;
-            debug_assertions = debug_assertions_toml;
-            debug_assertions_std = debug_assertions_std_toml;
+            rustc_debug_assertions = rustc_debug_assertions_toml;
+            std_debug_assertions = std_debug_assertions_toml;
             overflow_checks = overflow_checks_toml;
             overflow_checks_std = overflow_checks_std_toml;
             debug_logging = debug_logging_toml;
@@ -1824,7 +1842,6 @@ impl Config {
             std_features = std_features_toml;
 
             optimize = optimize_toml;
-            omit_git_hash = omit_git_hash_toml;
             config.rust_new_symbol_mangling = new_symbol_mangling;
             set(&mut config.rust_optimize_tests, optimize_tests);
             set(&mut config.codegen_tests, codegen_tests);
@@ -1899,24 +1916,6 @@ impl Config {
         }
 
         config.reproducible_artifacts = flags.reproducible_artifact;
-
-        // rust_info must be set before is_ci_llvm_available() is called.
-        let default = config.channel == "dev";
-        config.omit_git_hash = omit_git_hash.unwrap_or(default);
-        config.rust_info = GitInfo::new(config.omit_git_hash, &config.src);
-
-        config.cargo_info = GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/cargo"));
-        config.rust_analyzer_info =
-            GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/rust-analyzer"));
-        config.clippy_info =
-            GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/clippy"));
-        config.miri_info = GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/miri"));
-        config.rustfmt_info =
-            GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/rustfmt"));
-        config.enzyme_info =
-            GitInfo::new(config.omit_git_hash, &config.src.join("src/tools/enzyme"));
-        config.in_tree_llvm_info = GitInfo::new(false, &config.src.join("src/llvm-project"));
-        config.in_tree_gcc_info = GitInfo::new(false, &config.src.join("src/gcc"));
 
         // We need to override `rust.channel` if it's manually specified when using the CI rustc.
         // This is because if the compiler uses a different channel than the one specified in config.toml,
@@ -2295,14 +2294,13 @@ impl Config {
         config.rust_std_features = std_features.unwrap_or(default_std_features);
 
         let default = debug == Some(true);
-        config.rust_debug_assertions = debug_assertions.unwrap_or(default);
-        config.rust_debug_assertions_std =
-            debug_assertions_std.unwrap_or(config.rust_debug_assertions);
+        config.rustc_debug_assertions = rustc_debug_assertions.unwrap_or(default);
+        config.std_debug_assertions = std_debug_assertions.unwrap_or(config.rustc_debug_assertions);
         config.rust_overflow_checks = overflow_checks.unwrap_or(default);
         config.rust_overflow_checks_std =
             overflow_checks_std.unwrap_or(config.rust_overflow_checks);
 
-        config.rust_debug_logging = debug_logging.unwrap_or(config.rust_debug_assertions);
+        config.rust_debug_logging = debug_logging.unwrap_or(config.rustc_debug_assertions);
 
         let with_defaults = |debuginfo_level_specific: Option<_>| {
             debuginfo_level_specific.or(debuginfo_level).unwrap_or(if debug == Some(true) {
@@ -2905,9 +2903,19 @@ impl Config {
 
         // If `download-rustc` is not set, default to rebuilding.
         let if_unchanged = match download_rustc {
-            None | Some(StringOrBool::Bool(false)) => return None,
+            None => self.rust_info.is_managed_git_subrepository(),
+            Some(StringOrBool::Bool(false)) => return None,
             Some(StringOrBool::Bool(true)) => false,
-            Some(StringOrBool::String(s)) if s == "if-unchanged" => true,
+            Some(StringOrBool::String(s)) if s == "if-unchanged" => {
+                if !self.rust_info.is_managed_git_subrepository() {
+                    println!(
+                        "ERROR: `download-rustc=if-unchanged` is only compatible with Git managed sources."
+                    );
+                    crate::exit!(1);
+                }
+
+                true
+            }
             Some(StringOrBool::String(other)) => {
                 panic!("unrecognized option for download-rustc: {other}")
             }
@@ -2934,7 +2942,7 @@ impl Config {
                     }
                     println!("ERROR: could not find commit hash for downloading rustc");
                     println!("HELP: maybe your repository history is too shallow?");
-                    println!("HELP: consider disabling `download-rustc`");
+                    println!("HELP: consider setting `rust.download-rustc=false` in config.toml");
                     println!("HELP: or fetch enough history to include one upstream commit");
                     crate::exit!(1);
                 }
@@ -3221,8 +3229,8 @@ fn check_incompatible_options_for_ci_rustc(
         debug: _,
         codegen_units: _,
         codegen_units_std: _,
-        debug_assertions: _,
-        debug_assertions_std: _,
+        rustc_debug_assertions: _,
+        std_debug_assertions: _,
         overflow_checks: _,
         overflow_checks_std: _,
         debuginfo_level: _,

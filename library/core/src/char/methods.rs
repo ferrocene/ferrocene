@@ -1,7 +1,7 @@
 //! impl char {}
 
 use super::*;
-use crate::macros::const_panic;
+use crate::panic::const_panic;
 use crate::slice;
 use crate::str::from_utf8_unchecked_mut;
 use crate::unicode::printable::is_printable;
@@ -320,7 +320,7 @@ impl char {
     /// '1'.is_digit(37);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_const_unstable(feature = "const_char_is_digit", issue = "132241")]
+    #[rustc_const_unstable(feature = "const_char_classify", issue = "132241")]
     #[inline]
     pub const fn is_digit(self, radix: u32) -> bool {
         self.to_digit(radix).is_some()
@@ -711,7 +711,7 @@ impl char {
     /// '𝕊'.encode_utf16(&mut b);
     /// ```
     #[stable(feature = "unicode_encode_char", since = "1.15.0")]
-    #[rustc_const_unstable(feature = "const_char_encode_utf16", issue = "130660")]
+    #[rustc_const_stable(feature = "const_char_encode_utf16", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
     pub const fn encode_utf16(self, dst: &mut [u16]) -> &mut [u16] {
         encode_utf16_raw(self as u32, dst)
@@ -856,8 +856,9 @@ impl char {
     /// ```
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_const_unstable(feature = "const_char_classify", issue = "132241")]
     #[inline]
-    pub fn is_whitespace(self) -> bool {
+    pub const fn is_whitespace(self) -> bool {
         match self {
             ' ' | '\x09'..='\x0d' => true,
             c => c > '\x7f' && unicode::White_Space(c),
@@ -1819,7 +1820,10 @@ pub const fn encode_utf8_raw(code: u32, dst: &mut [u8]) -> &mut [u8] {
 /// Panics if the buffer is not large enough.
 /// A buffer of length 2 is large enough to encode any `char`.
 #[unstable(feature = "char_internals", reason = "exposed only for libstd", issue = "none")]
-#[rustc_const_unstable(feature = "const_char_encode_utf16", issue = "130660")]
+#[cfg_attr(
+    bootstrap,
+    rustc_const_stable(feature = "const_char_encode_utf16", since = "CURRENT_RUSTC_VERSION")
+)]
 #[doc(hidden)]
 #[inline]
 pub const fn encode_utf16_raw(mut code: u32, dst: &mut [u16]) -> &mut [u16] {

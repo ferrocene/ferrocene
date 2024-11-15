@@ -6,7 +6,9 @@ use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexMap};
 use rustc_data_structures::sync::Lrc;
 use rustc_data_structures::unord::UnordSet;
 use rustc_errors::codes::*;
-use rustc_errors::emitter::{DynEmitter, HumanEmitter, stderr_destination};
+use rustc_errors::emitter::{
+    DynEmitter, HumanEmitter, HumanReadableErrorType, OutputTheme, stderr_destination,
+};
 use rustc_errors::json::JsonEmitter;
 use rustc_errors::{ErrorGuaranteed, TerminalUrl};
 use rustc_feature::UnstableFeatures;
@@ -121,6 +123,13 @@ impl<'tcx> DocContext<'tcx> {
             _ => None,
         }
     }
+
+    /// Returns `true` if the JSON output format is enabled for generating the crate content.
+    ///
+    /// If another option like `--show-coverage` is enabled, it will return `false`.
+    pub(crate) fn is_json_output(&self) -> bool {
+        self.output_format.is_json() && !self.show_coverage
+    }
 }
 
 /// Creates a new `DiagCtxt` that can be used to emit warnings and errors.
@@ -147,6 +156,11 @@ pub(crate) fn new_dcx(
                     .teach(unstable_opts.teach)
                     .diagnostic_width(diagnostic_width)
                     .track_diagnostics(unstable_opts.track_diagnostics)
+                    .theme(if let HumanReadableErrorType::Unicode = kind {
+                        OutputTheme::Unicode
+                    } else {
+                        OutputTheme::Ascii
+                    })
                     .ui_testing(unstable_opts.ui_testing),
             )
         }

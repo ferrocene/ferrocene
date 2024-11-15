@@ -381,8 +381,9 @@ impl chalk_solve::RustIrDatabase<Interner> for ChalkContext<'_> {
         TyKind::Error.intern(Interner)
     }
 
+    // object safety was renamed to dyn-compatibility but still remains here in chalk.
+    // This will be removed since we are going to migrate to next-gen trait solver.
     fn is_object_safe(&self, trait_id: chalk_ir::TraitId<Interner>) -> bool {
-        // FIXME: When cargo is updated, change to dyn_compatibility
         let trait_ = from_chalk_trait_id(trait_id);
         crate::dyn_compatibility::dyn_compatibility(self.db, trait_).is_none()
     }
@@ -615,7 +616,7 @@ pub(crate) fn associated_ty_data_query(
     let type_alias_data = db.type_alias_data(type_alias);
     let generic_params = generics(db.upcast(), type_alias.into());
     let resolver = hir_def::resolver::HasResolver::resolver(type_alias, db.upcast());
-    let ctx =
+    let mut ctx =
         crate::TyLoweringContext::new(db, &resolver, &type_alias_data.types_map, type_alias.into())
             .with_type_param_mode(crate::lower::ParamLoweringMode::Variable);
 
@@ -627,14 +628,16 @@ pub(crate) fn associated_ty_data_query(
         .build();
     let self_ty = TyKind::Alias(AliasTy::Projection(pro_ty)).intern(Interner);
 
-    let mut bounds: Vec<_> = type_alias_data
-        .bounds
-        .iter()
-        .flat_map(|bound| ctx.lower_type_bound(bound, self_ty.clone(), false))
-        .filter_map(|pred| generic_predicate_to_inline_bound(db, &pred, &self_ty))
-        .collect();
+    let mut bounds = Vec::new();
+    for bound in &type_alias_data.bounds {
+        ctx.lower_type_bound(bound, self_ty.clone(), false).for_each(|pred| {
+            if let Some(pred) = generic_predicate_to_inline_bound(db, &pred, &self_ty) {
+                bounds.push(pred);
+            }
+        });
+    }
 
-    if !ctx.unsized_types.borrow().contains(&self_ty) {
+    if !ctx.unsized_types.contains(&self_ty) {
         let sized_trait = db
             .lang_item(resolver.krate(), LangItem::Sized)
             .and_then(|lang_item| lang_item.as_trait().map(to_chalk_trait_id));

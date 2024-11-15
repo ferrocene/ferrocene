@@ -1038,7 +1038,7 @@ macro_rules! tool_doc {
 // NOTE: make sure to register these in `Builder::get_step_description`.
 tool_doc!(
     BuildHelper,
-    "src/tools/build_helper",
+    "src/build_helper",
     rustc_tool = false,
     is_library = true,
     crates = ["build_helper"]

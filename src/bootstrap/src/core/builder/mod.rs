@@ -850,6 +850,7 @@ impl<'a> Builder<'a> {
                 clippy::RustInstaller,
                 clippy::TestFloatParse,
                 clippy::Tidy,
+                clippy::CI,
             ),
             Kind::Check | Kind::Fix => describe!(
                 check::Std,
@@ -1229,6 +1230,11 @@ impl<'a> Builder<'a> {
 
     pub fn sysroot(&self, compiler: Compiler) -> PathBuf {
         self.ensure(compile::Sysroot::new(compiler))
+    }
+
+    /// Returns the bindir for a compiler's sysroot.
+    pub fn sysroot_target_bindir(&self, compiler: Compiler, target: TargetSelection) -> PathBuf {
+        self.sysroot_target_libdir(compiler, target).parent().unwrap().join("bin")
     }
 
     /// Returns the libdir where the standard library and other artifacts are

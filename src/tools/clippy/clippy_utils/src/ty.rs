@@ -19,7 +19,7 @@ use rustc_middle::ty::layout::ValidityRequirement;
 use rustc_middle::ty::{
     self, AdtDef, AliasTy, AssocItem, AssocKind, Binder, BoundRegion, FnSig, GenericArg, GenericArgKind,
     GenericArgsRef, GenericParamDefKind, IntTy, ParamEnv, Region, RegionKind, TraitRef, Ty, TyCtxt, TypeSuperVisitable,
-    TypeVisitable, TypeVisitableExt, TypeVisitor, UintTy, Upcast, VariantDef, VariantDiscr, TypingMode,
+    TypeVisitable, TypeVisitableExt, TypeVisitor, TypingMode, UintTy, Upcast, VariantDef, VariantDiscr,
 };
 use rustc_span::symbol::Ident;
 use rustc_span::{DUMMY_SP, Span, Symbol, sym};
@@ -45,7 +45,7 @@ pub fn is_copy<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> bool {
 pub fn has_debug_impl<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> bool {
     cx.tcx
         .get_diagnostic_item(sym::Debug)
-        .map_or(false, |debug| implements_trait(cx, ty, debug, &[]))
+        .is_some_and(|debug| implements_trait(cx, ty, debug, &[]))
 }
 
 /// Checks whether a type can be partially moved.
@@ -274,11 +274,7 @@ pub fn implements_trait_with_env_from_iter<'tcx>(
         .map(|arg| arg.into().unwrap_or_else(|| infcx.next_ty_var(DUMMY_SP).into()))
         .collect::<Vec<_>>();
 
-    let trait_ref = TraitRef::new(
-        tcx,
-        trait_id,
-        [GenericArg::from(ty)].into_iter().chain(args),
-    );
+    let trait_ref = TraitRef::new(tcx, trait_id, [GenericArg::from(ty)].into_iter().chain(args));
 
     debug_assert_matches!(
         tcx.def_kind(trait_id),
@@ -491,7 +487,7 @@ pub fn needs_ordered_drop<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> bool {
             .tcx
             .lang_items()
             .drop_trait()
-            .map_or(false, |id| implements_trait(cx, ty, id, &[]))
+            .is_some_and(|id| implements_trait(cx, ty, id, &[]))
         {
             // This type doesn't implement drop, so no side effects here.
             // Check if any component type has any.
@@ -722,7 +718,7 @@ pub fn ty_sig<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> Option<ExprFnSig<'t
                 {
                     let output = bounds
                         .projection_bounds()
-                        .find(|p| lang_items.fn_once_output().map_or(false, |id| id == p.item_def_id()))
+                        .find(|p| lang_items.fn_once_output().is_some_and(|id| id == p.item_def_id()))
                         .map(|p| p.map_bound(|p| p.term.expect_type()));
                     Some(ExprFnSig::Trait(bound.map_bound(|b| b.args.type_at(0)), output, None))
                 },
@@ -757,7 +753,7 @@ fn sig_from_bounds<'tcx>(
                     && p.self_ty() == ty =>
             {
                 let i = pred.kind().rebind(p.trait_ref.args.type_at(1));
-                if inputs.map_or(false, |inputs| i != inputs) {
+                if inputs.is_some_and(|inputs| i != inputs) {
                     // Multiple different fn trait impls. Is this even allowed?
                     return None;
                 }
@@ -798,7 +794,7 @@ fn sig_for_projection<'tcx>(cx: &LateContext<'tcx>, ty: AliasTy<'tcx>) -> Option
             {
                 let i = pred.kind().rebind(p.trait_ref.args.type_at(1));
 
-                if inputs.map_or(false, |inputs| inputs != i) {
+                if inputs.is_some_and(|inputs| inputs != i) {
                     // Multiple different fn trait impls. Is this even allowed?
                     return None;
                 }
@@ -975,9 +971,7 @@ pub fn approx_ty_size<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> u64 {
     match (cx.layout_of(ty).map(|layout| layout.size.bytes()), ty.kind()) {
         (Ok(size), _) => size,
         (Err(_), ty::Tuple(list)) => list.iter().map(|t| approx_ty_size(cx, t)).sum(),
-        (Err(_), ty::Array(t, n)) => {
-            n.try_to_target_usize(cx.tcx).unwrap_or_default() * approx_ty_size(cx, *t)
-        },
+        (Err(_), ty::Array(t, n)) => n.try_to_target_usize(cx.tcx).unwrap_or_default() * approx_ty_size(cx, *t),
         (Err(_), ty::Adt(def, subst)) if def.is_struct() => def
             .variants()
             .iter()
@@ -1284,7 +1278,12 @@ pub fn make_normalized_projection_with_regions<'tcx>(
 
 pub fn normalize_with_regions<'tcx>(tcx: TyCtxt<'tcx>, param_env: ParamEnv<'tcx>, ty: Ty<'tcx>) -> Ty<'tcx> {
     let cause = ObligationCause::dummy();
-    match tcx.infer_ctxt().build(TypingMode::from_param_env(param_env)).at(&cause, param_env).query_normalize(ty) {
+    match tcx
+        .infer_ctxt()
+        .build(TypingMode::from_param_env(param_env))
+        .at(&cause, param_env)
+        .query_normalize(ty)
+    {
         Ok(ty) => ty.value,
         Err(_) => ty,
     }
@@ -1292,7 +1291,7 @@ pub fn normalize_with_regions<'tcx>(tcx: TyCtxt<'tcx>, param_env: ParamEnv<'tcx>
 
 /// Checks if the type is `core::mem::ManuallyDrop<_>`
 pub fn is_manually_drop(ty: Ty<'_>) -> bool {
-    ty.ty_adt_def().map_or(false, AdtDef::is_manually_drop)
+    ty.ty_adt_def().is_some_and(AdtDef::is_manually_drop)
 }
 
 /// Returns the deref chain of a type, starting with the type itself.

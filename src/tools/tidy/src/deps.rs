@@ -26,7 +26,11 @@ const LICENSES: &[&str] = &[
     "BSD-2-Clause",                                        // zerocopy
     "ISC",
     "MIT / Apache-2.0",
+<<<<<<< HEAD
     "MIT AND (MIT OR Apache-2.0)",                         // libm
+=======
+    "MIT AND (MIT OR Apache-2.0)",
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "MIT AND Apache-2.0 WITH LLVM-exception AND (MIT OR Apache-2.0)", // compiler-builtins
     "MIT OR Apache-2.0 OR LGPL-2.1-or-later",              // r-efi, r-efi-alloc
     "MIT OR Apache-2.0 OR Zlib",                           // tinyvec_macros
@@ -115,7 +119,12 @@ const EXCEPTIONS: ExceptionList = &[
     ("constant_time_eq", "CC0-1.0 OR MIT-0 OR Apache-2.0"),  // rustc
     ("dissimilar", "Apache-2.0"),                            // rustdoc, rustc_lexer (few tests) via expect-test, (dev deps)
     ("fluent-langneg", "Apache-2.0"),                        // rustc (fluent translations)
+<<<<<<< HEAD
     ("insta", "Apache-2.0"),                                 // generate-tarball
+=======
+    ("foldhash", "Zlib"),                                    // rustc
+    ("instant", "BSD-3-Clause"),                             // rustc_driver/tracing-subscriber/parking_lot
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     ("mdbook", "MPL-2.0"),                                   // mdbook
     ("option-ext", "MPL-2.0"),                               // cargo-miri (via `directories`)
     ("rustc_apfloat", "Apache-2.0 WITH LLVM-exception"),     // rustc (license is the same as LLVM uses)
@@ -309,7 +318,11 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "fluent-langneg",
     "fluent-syntax",
     "fnv",
+<<<<<<< HEAD
     "foldhash", // dependency of `hashbrown`
+=======
+    "foldhash",
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "generic-array",
     "getopts",
     "getrandom",

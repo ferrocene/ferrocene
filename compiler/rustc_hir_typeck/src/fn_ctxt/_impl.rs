@@ -254,10 +254,32 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         }
 
         for a in &adj {
-            if let Adjust::NeverToAny = a.kind {
-                if a.target.is_ty_var() {
-                    self.diverging_type_vars.borrow_mut().insert(a.target);
-                    debug!("apply_adjustments: adding `{:?}` as diverging type var", a.target);
+            match a.kind {
+                Adjust::NeverToAny => {
+                    if a.target.is_ty_var() {
+                        self.diverging_type_vars.borrow_mut().insert(a.target);
+                        debug!("apply_adjustments: adding `{:?}` as diverging type var", a.target);
+                    }
+                }
+                Adjust::Deref(Some(overloaded_deref)) => {
+                    self.enforce_context_effects(
+                        expr.span,
+                        overloaded_deref.method_call(self.tcx),
+                        self.tcx.mk_args(&[a.target.into()]),
+                    );
+                }
+                Adjust::Deref(None) => {
+                    // FIXME(effects): We *could* enforce `&T: ~const Deref` here.
+                }
+                Adjust::Pointer(_pointer_coercion) => {
+                    // FIXME(effects): We should probably enforce these.
+                }
+                Adjust::ReborrowPin(_mutability) => {
+                    // FIXME(effects): We could enforce these; they correspond to
+                    // `&mut T: DerefMut` tho, so it's kinda moot.
+                }
+                Adjust::Borrow(_) => {
+                    // No effects to enforce here.
                 }
             }
         }
@@ -1025,7 +1047,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 let container_id = assoc_item.container_id(tcx);
                 debug!(?def_id, ?container, ?container_id);
                 match container {
-                    ty::TraitContainer => {
+                    ty::AssocItemContainer::Trait => {
                         if let Err(e) = callee::check_legal_trait_for_method_call(
                             tcx,
                             path_span,
@@ -1037,7 +1059,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             self.set_tainted_by_errors(e);
                         }
                     }
-                    ty::ImplContainer => {
+                    ty::AssocItemContainer::Impl => {
                         if segments.len() == 1 {
                             // `<T>::assoc` will end up here, and so
                             // can `T::assoc`. If this came from an
@@ -1284,30 +1306,16 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             rustc_hir_analysis::hir_ty_lowering::RegionInferReason::Param(param),
                         )
                         .into(),
-                    GenericParamDefKind::Type { has_default, .. } => {
-                        if !infer_args && has_default {
-                            // If we have a default, then it doesn't matter that we're not
-                            // inferring the type arguments: we provide the default where any
-                            // is missing.
-                            tcx.type_of(param.def_id).instantiate(tcx, preceding_args).into()
-                        } else {
-                            // If no type arguments were provided, we have to infer them.
-                            // This case also occurs as a result of some malformed input, e.g.
-                            // a lifetime argument being given instead of a type parameter.
-                            // Using inference instead of `Error` gives better error messages.
-                            self.fcx.var_for_def(self.span, param)
+                    GenericParamDefKind::Type { .. } | GenericParamDefKind::Const { .. } => {
+                        if !infer_args && let Some(default) = param.default_value(tcx) {
+                            // If we have a default, then it doesn't matter that we're not inferring
+                            // the type/const arguments: We provide the default where any is missing.
+                            return default.instantiate(tcx, preceding_args);
                         }
-                    }
-                    GenericParamDefKind::Const { has_default, .. } => {
-                        if has_default {
-                            if !infer_args {
-                                return tcx
-                                    .const_param_default(param.def_id)
-                                    .instantiate(tcx, preceding_args)
-                                    .into();
-                            }
-                        }
-
+                        // If no type/const arguments were provided, we have to infer them.
+                        // This case also occurs as a result of some malformed input, e.g.,
+                        // a lifetime argument being given instead of a type/const parameter.
+                        // Using inference instead of `Error` gives better error messages.
                         self.fcx.var_for_def(self.span, param)
                     }
                 }
@@ -1469,7 +1477,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 }
             }
         } else if self.tcx.features().generic_const_exprs() {
-            ct.normalize_internal(self.tcx, self.param_env)
+            rustc_trait_selection::traits::evaluate_const(&self.infcx, ct, self.param_env)
         } else {
             ct
         }

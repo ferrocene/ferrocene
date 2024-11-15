@@ -849,9 +849,9 @@ impl Builder<'_> {
         cargo.env(
             profile_var("DEBUG_ASSERTIONS"),
             if mode == Mode::Std {
-                self.config.rust_debug_assertions_std.to_string()
+                self.config.std_debug_assertions.to_string()
             } else {
-                self.config.rust_debug_assertions.to_string()
+                self.config.rustc_debug_assertions.to_string()
             },
         );
         cargo.env(
@@ -1215,6 +1215,7 @@ impl Builder<'_> {
             rustflags.arg("-Zinline-mir-preserve-debug");
         }
 
+<<<<<<< HEAD
         if self.config.rustc_parallel
             && matches!(mode, Mode::ToolRustc | Mode::Rustc | Mode::Codegen)
         {
@@ -1228,6 +1229,8 @@ impl Builder<'_> {
             rustflags.arg("-Zpanic-abort-tests");
         }
 
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         Cargo {
             command: cargo,
             compiler,

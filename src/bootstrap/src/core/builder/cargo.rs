@@ -1215,22 +1215,10 @@ impl Builder<'_> {
             rustflags.arg("-Zinline-mir-preserve-debug");
         }
 
-<<<<<<< HEAD
-        if self.config.rustc_parallel
-            && matches!(mode, Mode::ToolRustc | Mode::Rustc | Mode::Codegen)
-        {
-            // keep in sync with `bootstrap/lib.rs:Build::rustc_features`
-            // `cfg` option for rustc, `features` option for cargo, for conditional compilation
-            rustflags.arg("--cfg=parallel_compiler");
-            rustdocflags.arg("--cfg=parallel_compiler");
-        }
-
         if target.contains("ferrocenecoretest") {
             rustflags.arg("-Zpanic-abort-tests");
         }
 
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         Cargo {
             command: cargo,
             compiler,

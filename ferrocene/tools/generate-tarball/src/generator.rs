@@ -90,6 +90,8 @@ pub struct Generator {
 impl Generator {
     /// Generates the actual installer tarball
     pub fn run(self) -> Result<()> {
+        eprintln!("{:#?}", self);
+
         let Self {
             // These arguments are emitted by the build step but they serve no purpose
             // for our tarball creation, so ignore them here as rejecting them will fail

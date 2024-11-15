@@ -435,6 +435,8 @@ impl<'a> Tarball<'a> {
             cmd.args(["--override-file-mtime", timestamp.trim()]);
         }
 
+        eprintln!("Command args: {:#?}", cmd.get_args().collect::<Vec<_>>());
+
         cmd.run(self.builder);
 
         // Ensure there are no symbolic links in the tarball. In particular,

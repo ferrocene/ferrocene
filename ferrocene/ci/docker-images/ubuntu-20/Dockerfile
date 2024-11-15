@@ -53,12 +53,13 @@ RUN <<-EOF
         zlib1g-dev \
         moreutils \
         zstd \
-        sudo
+        sudo \
+        pkg-config
 
     # Needed to support the QEMU copied over from Ubuntu 24.04 (see above).
     # Replace this with qemu-user-static once we're not on Ubuntu 20.04.
     apt-install binfmt-support
-    
+
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
         # Needed for aarch64-unknown-linux-gnu cross-compilation
         apt-install \
@@ -74,7 +75,7 @@ RUN <<-EOF
             binutils-x86-64-linux-gnu \
             libc6-dev-amd64-cross
     fi
-    
+
     # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
     apt-install gcc-arm-none-eabi
 
@@ -82,7 +83,7 @@ RUN <<-EOF
     apt-install clang
     # Needed to install AWS CLI during the build:
     apt-install unzip
-    
+
     # Needed to install git during the build:
     apt-install \
         dh-autoreconf \

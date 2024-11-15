@@ -43,7 +43,6 @@ use crate::utils::helpers::{self, exe, output, t};
 pub(crate) const RUSTC_IF_UNCHANGED_ALLOWED_PATHS: &[&str] = &[
     ":!src/tools",
     ":!tests",
-    ":!triagebot.toml",
 ];
 
 macro_rules! check_ci_llvm {

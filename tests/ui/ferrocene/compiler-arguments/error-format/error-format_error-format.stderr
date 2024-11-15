@@ -1,2 +1,2 @@
-error: argument for `--error-format` must be `human`, `json` or `short` (instead was `--error-format`)
+error: argument for `--error-format` must be `human`, `human-annotate-rs`, `human-unicode`, `json`, `pretty-json` or `short` (instead was `--error-format`)
 

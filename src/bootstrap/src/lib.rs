@@ -1562,6 +1562,7 @@ Executed at: {executed_at}"#,
         let count = extract_beta_rev_from_file(self.src.join("version")).unwrap_or_else(|| {
             let branch = &self.config.stage0_metadata.config.nightly_branch;
 
+            helpers::git(Some(&self.src)).arg("fetch").arg("origin").run_always().run(self);
             helpers::git(Some(&self.src))
                 .arg("branch")
                 .arg("--track")

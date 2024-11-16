@@ -56,6 +56,8 @@ KEEP_LLVM_BINARIES=[
     "llvm-dwp",
     # Needed to build LLD
     "llvm-tblgen",
+    # Needed to strip debug info in aarch64-darwin
+    "llvm-install-name-tool",
 ]
 
 def arguments():
@@ -67,7 +69,7 @@ def arguments():
 
     prepare_parser = subparsers.add_parser("prepare", help="Build and cache LLVM")
     prepare_parser.add_argument("--url", help="Manually set the output `tar.zst` location")
-    
+
     download_parser = subparsers.add_parser("download", help="Download the existing LLVM cache")
     download_parser.add_argument("--url", help="Manually set the input `tar.zst` location")
 
@@ -126,7 +128,7 @@ def prepare_llvm_build(ferrocene_host):
     Build LLVM and generate a tarball we can cache with all the build artifacts.
     """
     build_cmd = [sys.executable, "x.py", "build", "src/llvm-project"]
-    try: 
+    try:
         parallelism = os.environ["LLVM_BUILD_PARALLELISM"];
         if parallelism:
             build_cmd += ["-j", parallelism]
@@ -149,7 +151,7 @@ def prepare_llvm_build(ferrocene_host):
         # can still detect the existing build.
         os.makedirs(f"build/{ferrocene_host}/llvm/build")
         os.symlink(f"../bin", f"build/{ferrocene_host}/llvm/build/bin")
-    
+
     # The LLVM distribution as of 2021-08-23 contains more than 1GB of
     # binaries, but we only need a small subset of them. This "deletes" the
     # binaries we don't need to avoid caching them.
@@ -206,7 +208,7 @@ def get_llvm_cache_hash():
         "ferrocene/ci/configure.sh",
         "src/version",
     ];
-    
+
     ls_files_cmd = ["git", "ls-files", "src/bootstrap", "ferrocene/ci/docker-images"]
     ls_files = subprocess.run(ls_files_cmd, check=True, capture_output=True, text=True)
     files += ls_files.stdout.split()

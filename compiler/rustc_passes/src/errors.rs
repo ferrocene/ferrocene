@@ -245,6 +245,13 @@ pub(crate) struct DocKeywordOnlyImpl {
 }
 
 #[derive(Diagnostic)]
+#[diag(passes_doc_search_unbox_invalid)]
+pub(crate) struct DocSearchUnboxInvalid {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag(passes_doc_inline_conflict)]
 #[help]
 pub(crate) struct DocKeywordConflict {
@@ -635,15 +642,6 @@ pub(crate) struct DebugVisualizerUnreadable<'a> {
 #[derive(Diagnostic)]
 #[diag(passes_rustc_allow_const_fn_unstable)]
 pub(crate) struct RustcAllowConstFnUnstable {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_rustc_safe_intrinsic)]
-pub(crate) struct RustcSafeIntrinsic {
     #[primary_span]
     pub attr_span: Span,
     #[label]

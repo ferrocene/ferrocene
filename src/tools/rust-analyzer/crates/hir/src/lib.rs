@@ -34,7 +34,10 @@ pub mod term_search;
 
 mod display;
 
-use std::{mem::discriminant, ops::ControlFlow};
+use std::{
+    mem::discriminant,
+    ops::{ControlFlow, Not},
+};
 
 use arrayvec::ArrayVec;
 use base_db::{CrateDisplayName, CrateId, CrateOrigin};
@@ -65,7 +68,7 @@ use hir_ty::{
     all_super_traits, autoderef, check_orphan_rules,
     consteval::{try_const_usize, unknown_const_as_generic, ConstExt},
     diagnostics::BodyValidationDiagnostic,
-    error_lifetime, known_const_to_ast,
+    direct_super_traits, error_lifetime, known_const_to_ast,
     layout::{Layout as TyLayout, RustcEnumVariantIdx, RustcFieldIdx, TagEncoding},
     method_resolution,
     mir::{interpret_mir, MutBorrowKind},
@@ -2243,35 +2246,33 @@ impl Function {
 
     /// Does this function have `#[test]` attribute?
     pub fn is_test(self, db: &dyn HirDatabase) -> bool {
-        db.function_data(self.id).attrs.is_test()
+        db.attrs(self.id.into()).is_test()
     }
 
     /// is this a `fn main` or a function with an `export_name` of `main`?
     pub fn is_main(self, db: &dyn HirDatabase) -> bool {
-        let data = db.function_data(self.id);
-        data.attrs.export_name() == Some(&sym::main)
-            || self.module(db).is_crate_root() && data.name == sym::main
+        db.attrs(self.id.into()).export_name() == Some(&sym::main)
+            || self.module(db).is_crate_root() && db.function_data(self.id).name == sym::main
     }
 
     /// Is this a function with an `export_name` of `main`?
     pub fn exported_main(self, db: &dyn HirDatabase) -> bool {
-        let data = db.function_data(self.id);
-        data.attrs.export_name() == Some(&sym::main)
+        db.attrs(self.id.into()).export_name() == Some(&sym::main)
     }
 
     /// Does this function have the ignore attribute?
     pub fn is_ignore(self, db: &dyn HirDatabase) -> bool {
-        db.function_data(self.id).attrs.is_ignore()
+        db.attrs(self.id.into()).is_ignore()
     }
 
     /// Does this function have `#[bench]` attribute?
     pub fn is_bench(self, db: &dyn HirDatabase) -> bool {
-        db.function_data(self.id).attrs.is_bench()
+        db.attrs(self.id.into()).is_bench()
     }
 
     /// Is this function marked as unstable with `#[feature]` attribute?
     pub fn is_unstable(self, db: &dyn HirDatabase) -> bool {
-        db.function_data(self.id).attrs.is_unstable()
+        db.attrs(self.id.into()).is_unstable()
     }
 
     pub fn is_unsafe_to_call(self, db: &dyn HirDatabase) -> bool {
@@ -2286,8 +2287,7 @@ impl Function {
     }
 
     pub fn as_proc_macro(self, db: &dyn HirDatabase) -> Option<Macro> {
-        let function_data = db.function_data(self.id);
-        let attrs = &function_data.attrs;
+        let attrs = db.attrs(self.id.into());
         // FIXME: Store this in FunctionData flags?
         if !(attrs.is_proc_macro()
             || attrs.is_proc_macro_attribute()
@@ -2303,22 +2303,15 @@ impl Function {
         self,
         db: &dyn HirDatabase,
         span_formatter: impl Fn(FileId, TextRange) -> String,
-    ) -> String {
+    ) -> Result<String, ConstEvalError> {
         let krate = HasModule::krate(&self.id, db.upcast());
         let edition = db.crate_graph()[krate].edition;
-        let body = match db.monomorphized_mir_body(
+        let body = db.monomorphized_mir_body(
             self.id.into(),
             Substitution::empty(Interner),
             db.trait_environment(self.id.into()),
-        ) {
-            Ok(body) => body,
-            Err(e) => {
-                let mut r = String::new();
-                _ = e.pretty_print(&mut r, db, &span_formatter, edition);
-                return r;
-            }
-        };
-        let (result, output) = interpret_mir(db, body, false, None);
+        )?;
+        let (result, output) = interpret_mir(db, body, false, None)?;
         let mut text = match result {
             Ok(_) => "pass".to_owned(),
             Err(e) => {
@@ -2337,7 +2330,7 @@ impl Function {
             text += "\n--------- stderr ---------\n";
             text += &stderr;
         }
-        text
+        Ok(text)
     }
 }
 
@@ -2560,9 +2553,9 @@ impl Const {
     /// Evaluate the constant and return the result as a string.
     ///
     /// This function is intended for IDE assistance, different from [`Const::render_eval`].
-    pub fn eval(self, db: &dyn HirDatabase, edition: Edition) -> Result<String, ConstEvalError> {
+    pub fn eval(self, db: &dyn HirDatabase) -> Result<String, ConstEvalError> {
         let c = db.const_eval(self.id.into(), Substitution::empty(Interner), None)?;
-        Ok(format!("{}", c.display(db, edition)))
+        Ok(format!("{}", c.display(db, self.krate(db).edition(db))))
     }
 
     /// Evaluate the constant and return the result as a string, with more detailed information.
@@ -2597,7 +2590,7 @@ impl Const {
                 }
             }
         }
-        if let Ok(s) = mir::render_const_using_debug_impl(db, self.id, &c) {
+        if let Ok(s) = mir::render_const_using_debug_impl(db, self.id.into(), &c) {
             Ok(s)
         } else {
             Ok(format!("{}", c.display(db, edition)))
@@ -2636,6 +2629,53 @@ impl Static {
     pub fn ty(self, db: &dyn HirDatabase) -> Type {
         Type::from_value_def(db, self.id)
     }
+
+    /// Evaluate the static and return the result as a string.
+    ///
+    /// This function is intended for IDE assistance, different from [`Static::render_eval`].
+    pub fn eval(self, db: &dyn HirDatabase) -> Result<String, ConstEvalError> {
+        let c = db.const_eval(self.id.into(), Substitution::empty(Interner), None)?;
+        Ok(format!("{}", c.display(db, self.krate(db).edition(db))))
+    }
+
+    /// Evaluate the static and return the result as a string, with more detailed information.
+    ///
+    /// This function is intended for user-facing display.
+    pub fn render_eval(
+        self,
+        db: &dyn HirDatabase,
+        edition: Edition,
+    ) -> Result<String, ConstEvalError> {
+        let c = db.const_eval(self.id.into(), Substitution::empty(Interner), None)?;
+        let data = &c.data(Interner);
+        if let TyKind::Scalar(s) = data.ty.kind(Interner) {
+            if matches!(s, Scalar::Int(_) | Scalar::Uint(_)) {
+                if let hir_ty::ConstValue::Concrete(c) = &data.value {
+                    if let hir_ty::ConstScalar::Bytes(b, _) = &c.interned {
+                        let value = u128::from_le_bytes(mir::pad16(b, false));
+                        let value_signed =
+                            i128::from_le_bytes(mir::pad16(b, matches!(s, Scalar::Int(_))));
+                        let mut result = if let Scalar::Int(_) = s {
+                            value_signed.to_string()
+                        } else {
+                            value.to_string()
+                        };
+                        if value >= 10 {
+                            format_to!(result, " ({value:#X})");
+                            return Ok(result);
+                        } else {
+                            return Ok(result);
+                        }
+                    }
+                }
+            }
+        }
+        if let Ok(s) = mir::render_const_using_debug_impl(db, self.id.into(), &c) {
+            Ok(s)
+        } else {
+            Ok(format!("{}", c.display(db, edition)))
+        }
+    }
 }
 
 impl HasVisibility for Static {
@@ -2664,13 +2704,22 @@ impl Trait {
         db.trait_data(self.id).name.clone()
     }
 
+    pub fn direct_supertraits(self, db: &dyn HirDatabase) -> Vec<Trait> {
+        let traits = direct_super_traits(db.upcast(), self.into());
+        traits.iter().map(|tr| Trait::from(*tr)).collect()
+    }
+
+    pub fn all_supertraits(self, db: &dyn HirDatabase) -> Vec<Trait> {
+        let traits = all_super_traits(db.upcast(), self.into());
+        traits.iter().map(|tr| Trait::from(*tr)).collect()
+    }
+
     pub fn items(self, db: &dyn HirDatabase) -> Vec<AssocItem> {
         db.trait_data(self.id).items.iter().map(|(_name, it)| (*it).into()).collect()
     }
 
     pub fn items_with_supertraits(self, db: &dyn HirDatabase) -> Vec<AssocItem> {
-        let traits = all_super_traits(db.upcast(), self.into());
-        traits.iter().flat_map(|tr| Trait::from(*tr).items(db)).collect()
+        self.all_supertraits(db).into_iter().flat_map(|tr| tr.items(db)).collect()
     }
 
     pub fn is_auto(self, db: &dyn HirDatabase) -> bool {
@@ -2695,6 +2744,18 @@ impl Trait {
 
     pub fn dyn_compatibility(&self, db: &dyn HirDatabase) -> Option<DynCompatibilityViolation> {
         hir_ty::dyn_compatibility::dyn_compatibility(db, self.id)
+    }
+
+    pub fn dyn_compatibility_all_violations(
+        &self,
+        db: &dyn HirDatabase,
+    ) -> Option<Vec<DynCompatibilityViolation>> {
+        let mut violations = vec![];
+        hir_ty::dyn_compatibility::dyn_compatibility_with_callback(db, self.id, &mut |violation| {
+            violations.push(violation);
+            ControlFlow::Continue(())
+        });
+        violations.is_empty().not().then_some(violations)
     }
 
     fn all_macro_calls(&self, db: &dyn HirDatabase) -> Box<[(AstId<ast::Item>, MacroCallId)]> {

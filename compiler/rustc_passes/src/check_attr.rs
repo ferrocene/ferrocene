@@ -16,8 +16,8 @@ use rustc_feature::{AttributeDuplicates, AttributeType, BUILTIN_ATTRIBUTE_MAP, B
 use rustc_hir::def_id::LocalModDefId;
 use rustc_hir::intravisit::{self, Visitor};
 use rustc_hir::{
-    self as hir, self, CRATE_HIR_ID, CRATE_OWNER_ID, FnSig, ForeignItem, HirId, Item, ItemKind,
-    MethodKind, Safety, Target, TraitItem,
+    self as hir, self, AssocItemKind, CRATE_HIR_ID, CRATE_OWNER_ID, FnSig, ForeignItem, HirId,
+    Item, ItemKind, MethodKind, Safety, Target, TraitItem,
 };
 use rustc_macros::LintDiagnostic;
 use rustc_middle::hir::nested_filter;
@@ -210,9 +210,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 | [sym::rustc_promotable, ..] => self.check_stability_promotable(attr, target),
                 [sym::link_ordinal, ..] => self.check_link_ordinal(attr, span, target),
                 [sym::rustc_confusables, ..] => self.check_confusables(attr, target),
-                [sym::rustc_safe_intrinsic, ..] => {
-                    self.check_rustc_safe_intrinsic(hir_id, attr, span, target)
-                }
                 [sym::cold, ..] => self.check_cold(hir_id, attr, span, target),
                 [sym::link, ..] => self.check_link(hir_id, attr, span, target),
                 [sym::link_name, ..] => self.check_link_name(hir_id, attr, span, target),
@@ -940,6 +937,23 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         }
     }
 
+    fn check_doc_search_unbox(&self, meta: &MetaItemInner, hir_id: HirId) {
+        let hir::Node::Item(item) = self.tcx.hir_node(hir_id) else {
+            self.dcx().emit_err(errors::DocSearchUnboxInvalid { span: meta.span() });
+            return;
+        };
+        match item.kind {
+            ItemKind::Enum(_, generics) | ItemKind::Struct(_, generics)
+                if generics.params.len() != 0 => {}
+            ItemKind::Trait(_, _, generics, _, items)
+                if generics.params.len() != 0
+                    || items.iter().any(|item| matches!(item.kind, AssocItemKind::Type)) => {}
+            _ => {
+                self.dcx().emit_err(errors::DocSearchUnboxInvalid { span: meta.span() });
+            }
+        }
+    }
+
     /// Checks `#[doc(inline)]`/`#[doc(no_inline)]` attributes.
     ///
     /// A doc inlining attribute is invalid if it is applied to a non-`use` item, or
@@ -1149,6 +1163,12 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         sym::fake_variadic => {
                             if self.check_attr_not_crate_level(meta, hir_id, "fake_variadic") {
                                 self.check_doc_fake_variadic(meta, hir_id);
+                            }
+                        }
+
+                        sym::search_unbox => {
+                            if self.check_attr_not_crate_level(meta, hir_id, "fake_variadic") {
+                                self.check_doc_search_unbox(meta, hir_id);
                             }
                         }
 
@@ -2053,25 +2073,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     .emit_err(errors::RustcAllowConstFnUnstable { attr_span: attr.span, span });
             }
         }
-    }
-
-    fn check_rustc_safe_intrinsic(
-        &self,
-        hir_id: HirId,
-        attr: &Attribute,
-        span: Span,
-        target: Target,
-    ) {
-        if let Target::ForeignFn = target
-            && let hir::Node::Item(Item {
-                kind: ItemKind::ForeignMod { abi: Abi::RustIntrinsic, .. },
-                ..
-            }) = self.tcx.parent_hir_node(hir_id)
-        {
-            return;
-        }
-
-        self.dcx().emit_err(errors::RustcSafeIntrinsic { attr_span: attr.span, span });
     }
 
     fn check_rustc_std_internal_symbol(&self, attr: &Attribute, span: Span, target: Target) {

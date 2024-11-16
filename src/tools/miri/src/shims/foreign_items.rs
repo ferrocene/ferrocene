@@ -21,7 +21,7 @@ use crate::*;
 #[derive(Debug, Copy, Clone)]
 pub struct DynSym(Symbol);
 
-#[allow(clippy::should_implement_trait)]
+#[expect(clippy::should_implement_trait)]
 impl DynSym {
     pub fn from_str(name: &str) -> Self {
         DynSym(Symbol::intern(name))
@@ -300,7 +300,7 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 let id = this.read_scalar(id)?.to_u64()?;
                 let show_unnamed = this.read_scalar(show_unnamed)?.to_bool()?;
                 if let Some(id) = std::num::NonZero::new(id).map(AllocId)
-                    && this.get_alloc_info(id).2 == AllocKind::LiveData
+                    && this.get_alloc_info(id).kind == AllocKind::LiveData
                 {
                     this.print_borrow_state(id, show_unnamed)?;
                 } else {
@@ -409,7 +409,7 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                     );
                 }
                 if let Ok((alloc_id, offset, ..)) = this.ptr_try_get_alloc_id(ptr, 0) {
-                    let (_size, alloc_align, _kind) = this.get_alloc_info(alloc_id);
+                    let alloc_align = this.get_alloc_info(alloc_id).align;
                     // If the newly promised alignment is bigger than the native alignment of this
                     // allocation, and bigger than the previously promised alignment, then set it.
                     if align > alloc_align
@@ -648,7 +648,7 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 let val = this.read_scalar(val)?.to_i32()?;
                 let num = this.read_target_usize(num)?;
                 // The docs say val is "interpreted as unsigned char".
-                #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
+                #[expect(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
                 let val = val as u8;
 
                 // C requires that this must always be a valid pointer (C18 §7.1.4).
@@ -661,7 +661,7 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                     .position(|&c| c == val)
                 {
                     let idx = u64::try_from(idx).unwrap();
-                    #[allow(clippy::arithmetic_side_effects)] // idx < num, so this never wraps
+                    #[expect(clippy::arithmetic_side_effects)] // idx < num, so this never wraps
                     let new_ptr = ptr.wrapping_offset(Size::from_bytes(num - idx - 1), this);
                     this.write_pointer(new_ptr, dest)?;
                 } else {
@@ -675,7 +675,7 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 let val = this.read_scalar(val)?.to_i32()?;
                 let num = this.read_target_usize(num)?;
                 // The docs say val is "interpreted as unsigned char".
-                #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
+                #[expect(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
                 let val = val as u8;
 
                 // C requires that this must always be a valid pointer (C18 §7.1.4).

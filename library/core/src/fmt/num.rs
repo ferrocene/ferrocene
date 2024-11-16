@@ -65,11 +65,11 @@ unsafe trait GenericRadix: Sized {
         if is_nonnegative {
             // Accumulate each digit of the number from the least significant
             // to the most significant figure.
-            for byte in buf.iter_mut().rev() {
+            loop {
                 let n = x % base; // Get the current place value.
                 x = x / base; // Deaccumulate the number.
-                byte.write(Self::digit(n.to_u8())); // Store the digit in the buffer.
                 curr -= 1;
+                buf[curr].write(Self::digit(n.to_u8())); // Store the digit in the buffer.
                 if x == zero {
                     // No more digits left to accumulate.
                     break;
@@ -77,18 +77,21 @@ unsafe trait GenericRadix: Sized {
             }
         } else {
             // Do the same as above, but accounting for two's complement.
-            for byte in buf.iter_mut().rev() {
+            loop {
                 let n = zero - (x % base); // Get the current place value.
                 x = x / base; // Deaccumulate the number.
-                byte.write(Self::digit(n.to_u8())); // Store the digit in the buffer.
                 curr -= 1;
+                buf[curr].write(Self::digit(n.to_u8())); // Store the digit in the buffer.
                 if x == zero {
                     // No more digits left to accumulate.
                     break;
                 };
             }
         }
-        let buf = &buf[curr..];
+        // SAFETY: `curr` is initialized to `buf.len()` and is only decremented, so it can't overflow. It is
+        // decremented exactly once for each digit. Since u128 is the widest fixed width integer format supported,
+        // the maximum number of digits (bits) is 128 for base-2, so `curr` won't underflow as well.
+        let buf = unsafe { buf.get_unchecked(curr..) };
         // SAFETY: The only chars in `buf` are created by `Self::digit` which are assumed to be
         // valid UTF-8
         let buf = unsafe {

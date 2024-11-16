@@ -22,9 +22,9 @@ use rustc_data_structures::profiling::SelfProfilerRef;
 use rustc_data_structures::sharded::{IntoPointer, ShardedHashMap};
 use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
 use rustc_data_structures::steal::Steal;
-use rustc_data_structures::sync::{self, FreezeReadGuard, Lock, Lrc, RwLock, WorkerLocal};
-#[cfg(parallel_compiler)]
-use rustc_data_structures::sync::{DynSend, DynSync};
+use rustc_data_structures::sync::{
+    self, DynSend, DynSync, FreezeReadGuard, Lock, Lrc, RwLock, WorkerLocal,
+};
 use rustc_data_structures::unord::UnordSet;
 use rustc_errors::{
     Applicability, Diag, DiagCtxtHandle, ErrorGuaranteed, LintDiagnostic, MultiSpan,
@@ -1059,7 +1059,7 @@ impl<'tcx> CommonLifetimes<'tcx> {
                     .map(|v| {
                         mk(ty::ReBound(ty::DebruijnIndex::from(i), ty::BoundRegion {
                             var: ty::BoundVar::from(v),
-                            kind: ty::BrAnon,
+                            kind: ty::BoundRegionKind::Anon,
                         }))
                     })
                     .collect()
@@ -1259,9 +1259,7 @@ pub struct TyCtxt<'tcx> {
 }
 
 // Explicitly implement `DynSync` and `DynSend` for `TyCtxt` to short circuit trait resolution.
-#[cfg(parallel_compiler)]
 unsafe impl DynSend for TyCtxt<'_> {}
-#[cfg(parallel_compiler)]
 unsafe impl DynSync for TyCtxt<'_> {}
 fn _assert_tcx_fields() {
     sync::assert_dyn_sync::<&'_ GlobalCtxt<'_>>();
@@ -1383,9 +1381,7 @@ pub struct CurrentGcx {
     value: Lrc<RwLock<Option<*const ()>>>,
 }
 
-#[cfg(parallel_compiler)]
 unsafe impl DynSend for CurrentGcx {}
-#[cfg(parallel_compiler)]
 unsafe impl DynSync for CurrentGcx {}
 
 impl CurrentGcx {
@@ -1982,7 +1978,10 @@ impl<'tcx> TyCtxt<'tcx> {
                 region = self.map_opaque_lifetime_to_parent_lifetime(def_id);
                 continue;
             }
-            break (scope, ty::BrNamed(def_id.into(), self.item_name(def_id.into())));
+            break (
+                scope,
+                ty::BoundRegionKind::Named(def_id.into(), self.item_name(def_id.into())),
+            );
         };
 
         let is_impl_item = match self.hir_node_by_def_id(suitable_region_binding_scope) {
@@ -3091,7 +3090,7 @@ impl<'tcx> TyCtxt<'tcx> {
                     return ty::Region::new_late_param(
                         self,
                         new_parent.to_def_id(),
-                        ty::BoundRegionKind::BrNamed(
+                        ty::BoundRegionKind::Named(
                             lbv.to_def_id(),
                             self.item_name(lbv.to_def_id()),
                         ),

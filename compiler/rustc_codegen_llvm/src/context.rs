@@ -154,6 +154,11 @@ pub(crate) unsafe fn create_module<'ll>(
             // See https://github.com/llvm/llvm-project/pull/106951
             target_data_layout = target_data_layout.replace("-i128:128", "");
         }
+        if sess.target.arch.starts_with("mips64") {
+            // LLVM 20 updates the mips64 layout to correctly align 128 bit integers to 128 bit.
+            // See https://github.com/llvm/llvm-project/pull/112084
+            target_data_layout = target_data_layout.replace("-i128:128", "");
+        }
     }
 
     // Ensure the data-layout values hardcoded remain the defaults.
@@ -269,8 +274,12 @@ pub(crate) unsafe fn create_module<'ll>(
         }
     }
 
-    // Control Flow Guard is currently only supported by the MSVC linker on Windows.
-    if sess.target.is_like_msvc {
+    // Control Flow Guard is currently only supported by MSVC and LLVM on Windows.
+    if sess.target.is_like_msvc
+        || (sess.target.options.os == "windows"
+            && sess.target.options.env == "gnu"
+            && sess.target.options.abi == "llvm")
+    {
         match sess.opts.cg.control_flow_guard {
             CFGuard::Disabled => {}
             CFGuard::NoChecks => {
@@ -308,7 +317,13 @@ pub(crate) unsafe fn create_module<'ll>(
                 "sign-return-address",
                 pac_ret.is_some().into(),
             );
-            let pac_opts = pac_ret.unwrap_or(PacRet { leaf: false, key: PAuthKey::A });
+            let pac_opts = pac_ret.unwrap_or(PacRet { leaf: false, pc: false, key: PAuthKey::A });
+            llvm::add_module_flag_u32(
+                llmod,
+                llvm::ModuleFlagMergeBehavior::Min,
+                "branch-protection-pauth-lr",
+                pac_opts.pc.into(),
+            );
             llvm::add_module_flag_u32(
                 llmod,
                 llvm::ModuleFlagMergeBehavior::Min,

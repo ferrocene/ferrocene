@@ -100,9 +100,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         ty: Ty<'tcx>,
         span: Span,
         unsatisfied_predicates: &Vec<(
-            ty::Predicate<'_>,
-            Option<ty::Predicate<'_>>,
-            Option<ObligationCause<'_>>,
+            ty::Predicate<'tcx>,
+            Option<ty::Predicate<'tcx>>,
+            Option<ObligationCause<'tcx>>,
         )>,
     ) -> bool {
         fn predicate_bounds_generic_param<'tcx>(
@@ -131,15 +131,17 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
         }
 
-        fn is_iterator_predicate(predicate: ty::Predicate<'_>, tcx: TyCtxt<'_>) -> bool {
+        let is_iterator_predicate = |predicate: ty::Predicate<'tcx>| -> bool {
             if let ty::PredicateKind::Clause(ty::ClauseKind::Trait(trait_pred)) =
                 predicate.kind().as_ref().skip_binder()
             {
-                tcx.is_diagnostic_item(sym::Iterator, trait_pred.trait_ref.def_id)
+                self.tcx.is_diagnostic_item(sym::Iterator, trait_pred.trait_ref.def_id)
+                    // ignore unsatisfied predicates generated from trying to auto-ref ty (#127511)
+                    && trait_pred.trait_ref.self_ty() == ty
             } else {
                 false
             }
-        }
+        };
 
         // Does the `ty` implement `IntoIterator`?
         let Some(into_iterator_trait) = self.tcx.get_diagnostic_item(sym::IntoIterator) else {
@@ -164,7 +166,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         generics,
                         generic_param,
                         self.tcx,
-                    ) && is_iterator_predicate(unsatisfied.0, self.tcx)
+                    ) && is_iterator_predicate(unsatisfied.0)
                     {
                         return true;
                     }
@@ -172,7 +174,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
             ty::Slice(..) | ty::Adt(..) | ty::Alias(ty::Opaque, _) => {
                 for unsatisfied in unsatisfied_predicates.iter() {
-                    if is_iterator_predicate(unsatisfied.0, self.tcx) {
+                    if is_iterator_predicate(unsatisfied.0) {
                         return true;
                     }
                 }
@@ -3872,22 +3874,52 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                 param.name.ident(),
                             ));
                             let bounds_span = hir_generics.bounds_span_for_suggestions(def_id);
+                            let mut applicability = Applicability::MaybeIncorrect;
+                            // Format the path of each suggested candidate, providing placeholders
+                            // for any generic arguments without defaults.
+                            let candidate_strs: Vec<_> = candidates
+                                .iter()
+                                .map(|cand| {
+                                    let cand_path = self.tcx.def_path_str(cand.def_id);
+                                    let cand_params = &self.tcx.generics_of(cand.def_id).own_params;
+                                    let cand_args: String = cand_params
+                                        .iter()
+                                        .skip(1)
+                                        .filter_map(|param| match param.kind {
+                                            ty::GenericParamDefKind::Type {
+                                                has_default: true,
+                                                ..
+                                            }
+                                            | ty::GenericParamDefKind::Const {
+                                                has_default: true,
+                                                ..
+                                            } => None,
+                                            _ => Some(param.name.as_str()),
+                                        })
+                                        .intersperse(", ")
+                                        .collect();
+                                    if cand_args.is_empty() {
+                                        cand_path
+                                    } else {
+                                        applicability = Applicability::HasPlaceholders;
+                                        format!("{cand_path}</* {cand_args} */>")
+                                    }
+                                })
+                                .collect();
+
                             if rcvr_ty.is_ref()
                                 && param.is_impl_trait()
                                 && let Some((bounds_span, _)) = bounds_span
                             {
                                 err.multipart_suggestions(
                                     msg,
-                                    candidates.iter().map(|t| {
+                                    candidate_strs.iter().map(|cand| {
                                         vec![
                                             (param.span.shrink_to_lo(), "(".to_string()),
-                                            (
-                                                bounds_span,
-                                                format!(" + {})", self.tcx.def_path_str(t.def_id)),
-                                            ),
+                                            (bounds_span, format!(" + {cand})")),
                                         ]
                                     }),
-                                    Applicability::MaybeIncorrect,
+                                    applicability,
                                 );
                                 return;
                             }
@@ -3903,16 +3935,12 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                     (param.span.shrink_to_hi(), Introducer::Colon, None)
                                 };
 
-                            let all_suggs = candidates.iter().map(|cand| {
-                                let suggestion = format!(
-                                    "{} {}",
-                                    match introducer {
-                                        Introducer::Plus => " +",
-                                        Introducer::Colon => ":",
-                                        Introducer::Nothing => "",
-                                    },
-                                    self.tcx.def_path_str(cand.def_id)
-                                );
+                            let all_suggs = candidate_strs.iter().map(|cand| {
+                                let suggestion = format!("{} {cand}", match introducer {
+                                    Introducer::Plus => " +",
+                                    Introducer::Colon => ":",
+                                    Introducer::Nothing => "",
+                                },);
 
                                 let mut suggs = vec![];
 
@@ -3926,11 +3954,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                 suggs
                             });
 
-                            err.multipart_suggestions(
-                                msg,
-                                all_suggs,
-                                Applicability::MaybeIncorrect,
-                            );
+                            err.multipart_suggestions(msg, all_suggs, applicability);
 
                             return;
                         }

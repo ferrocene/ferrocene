@@ -2953,6 +2953,22 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 // We hold the `DefId` of the item introducing the obligation, but displaying it
                 // doesn't add user usable information. It always point at an associated item.
             }
+            ObligationCauseCode::OpaqueTypeBound(span, definition_def_id) => {
+                err.span_note(span, "required by a bound in an opaque type");
+                if let Some(definition_def_id) = definition_def_id
+                    // If there are any stalled coroutine obligations, then this
+                    // error may be due to that, and not because the body has more
+                    // where-clauses.
+                    && self.tcx.typeck(definition_def_id).coroutine_stalled_predicates.is_empty()
+                {
+                    // FIXME(compiler-errors): We could probably point to something
+                    // specific here if we tried hard enough...
+                    err.span_note(
+                        tcx.def_span(definition_def_id),
+                        "this definition site has more where clauses than the opaque type",
+                    );
+                }
+            }
             ObligationCauseCode::Coercion { source, target } => {
                 let source =
                     tcx.short_ty_string(self.resolve_vars_if_possible(source), long_ty_file);
@@ -4449,6 +4465,41 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             } else {
                 err.span_help(span, msg);
             }
+        }
+    }
+
+    /// If the type failed selection but the trait is implemented for `(T,)`, suggest that the user
+    /// creates a unary tuple
+    ///
+    /// This is a common gotcha when using libraries that emulate variadic functions with traits for tuples.
+    pub(super) fn suggest_tuple_wrapping(
+        &self,
+        err: &mut Diag<'_>,
+        root_obligation: &PredicateObligation<'tcx>,
+        obligation: &PredicateObligation<'tcx>,
+    ) {
+        let ObligationCauseCode::FunctionArg { arg_hir_id, .. } = obligation.cause.code() else {
+            return;
+        };
+
+        let Some(root_pred) = root_obligation.predicate.as_trait_clause() else { return };
+
+        let trait_ref = root_pred.map_bound(|root_pred| {
+            root_pred
+                .trait_ref
+                .with_self_ty(self.tcx, Ty::new_tup(self.tcx, &[root_pred.trait_ref.self_ty()]))
+        });
+
+        let obligation =
+            Obligation::new(self.tcx, obligation.cause.clone(), obligation.param_env, trait_ref);
+
+        if self.predicate_must_hold_modulo_regions(&obligation) {
+            let arg_span = self.tcx.hir().span(*arg_hir_id);
+            err.multipart_suggestion_verbose(
+                format!("use a unary tuple instead"),
+                vec![(arg_span.shrink_to_lo(), "(".into()), (arg_span.shrink_to_hi(), ",)".into())],
+                Applicability::MaybeIncorrect,
+            );
         }
     }
 

@@ -35,7 +35,7 @@ Ubuntu 20.04 and up:
 .. code-block:: bash
 
    apt install docker.io docker-buildx
-   
+
 On some distributions, you may need to start the service with
 ``systemctl enable --now docker``. If you just installed ``docker-buildx``,
 restart the Docker service.
@@ -109,7 +109,7 @@ If you infrequently use Python scripts, or want to use them in a oneshot command
 For example, to run our licensing checks you can run:
 
 .. code-block:: bash
-   
+
    uv run reuse --include-submodules lint
 
 
@@ -121,7 +121,7 @@ then run the ``configure.sh``:
 
 .. code-block:: bash
 
-   CI=true FERROCENE_HOST=aarch64-unknown-linux-gnu ./ferrocene/ci/configure.sh 
+   CI=true FERROCENE_HOST=aarch64-unknown-linux-gnu ./ferrocene/ci/configure.sh
 
 
 Using the CI Docker images
@@ -144,7 +144,7 @@ Reproducing CI jobs
 Most CI jobs are formatted similar to this:
 
 .. code-block:: YAML
-   
+
   x86_64-linux-dist-targets:
     executor: docker-ubuntu-20
     resource_class: large # 4-core
@@ -175,11 +175,6 @@ For Linux jobs, enter the Docker container specified by the ``executor`` line:
       --mount "type=bind,src=$(pwd),dst=/ferrocene" \
       ubuntu-20 bash
 
-.. note::
-
-   If you wish to preserve your ``build/`` artifacts, it may make sense to
-   re-clone the Ferrocene repository inside the container.
-
 Inside the container, run ``./x clean`` then run the lines of the ``SCRIPT``
 of the job:
 
@@ -188,6 +183,41 @@ of the job:
    ./x clean
    ./x --stage 2 dist rust-std
 
+Preserving build artifacts
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you wish to preserve your ``build/`` artifacts, it may make sense to
+re-clone the Ferrocene repository inside the container or mount a dedicated
+directory for ``/ferrocene/build``:
+
+.. code-block:: bash
+
+   docker run --rm --tty --interactive --workdir /ferrocene \
+      --mount "type=bind,src=$(pwd),dst=/ferrocene" \
+      --mount "type=bind,src=$(pwd)/container-build,dst=/ferrocene/build" \
+      ubuntu-20 bash
+
+Note that you will need to create the `container-build` directory in the host
+system beforehand.
+
+Sharing miscelaneous directories with the container
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you need to share any extra directories from the host with the container you
+can use a similar strategy as the one used to mount the ferrocene repository.
+
+For example, if you want to share the host `~/.aws` directory configuration so
+you can authenticate in the container, run:
+
+.. code-block:: bash
+
+   docker run --rm --tty --interactive --workdir /ferrocene \
+      --mount "type=bind,src=$(pwd),dst=/ferrocene" \
+      --mount "type=bind,src=$HOME/.aws,dst=/home/ci/.aws" \
+      ubuntu-20 bash
+
+Remember that any directories mounted with the `bind` type must exist in the
+host system beforehand.
 
 Making changes to the CI
 ------------------------

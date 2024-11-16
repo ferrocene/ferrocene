@@ -1560,6 +1560,16 @@ Executed at: {executed_at}"#,
         // If available, we read the beta revision from that file.
         // This only happens when building from a source tarball when Git should not be used.
         let count = extract_beta_rev_from_file(self.src.join("version")).unwrap_or_else(|| {
+            let branch = &self.config.stage0_metadata.config.nightly_branch;
+
+            helpers::git(Some(&self.src))
+                .arg("branch")
+                .arg("--track")
+                .arg(&branch)
+                .arg(format!("origin/{branch}"))
+                .run_always()
+                .run(self);
+
             eprintln!(
                 "BRANCHES:\n{}",
                 helpers::git(Some(&self.src)).arg("branch").run_always().run_capture(self).stdout()
@@ -1571,10 +1581,7 @@ Executed at: {executed_at}"#,
                 .arg("rev-list")
                 .arg("--count")
                 .arg("--merges")
-                .arg(format!(
-                    "refs/remotes/origin/{}..HEAD",
-                    self.config.stage0_metadata.config.nightly_branch
-                ))
+                .arg(format!("refs/remotes/origin/{branch}..HEAD",))
                 .run_always()
                 .run_capture(self)
                 .stdout()

@@ -156,6 +156,8 @@ impl CommitHashOf {
 mod tests {
     use std::ffi::OsString;
 
+    use needy::requirements;
+
     use super::*;
     use crate::error::CommandErrorKind;
     use crate::test_utils::{CliVersionContent, TestUtils};
@@ -165,6 +167,7 @@ mod tests {
     #[cfg(windows)]
     const RUSTC_EXECUTABLE: &str = "rustc.exe";
 
+    #[requirements(REQ_N1VBW46)]
     #[test]
     fn test_check_binary_missing_file() {
         let utils = TestUtils::new();
@@ -172,6 +175,7 @@ mod tests {
         assert_not_found(utils);
     }
 
+    #[requirements(REQ_N1VBW46)]
     #[test]
     fn test_check_optional_binary_missing_file() {
         let utils = TestUtils::new();
@@ -182,12 +186,14 @@ mod tests {
         utils.assert_report_skipped("optional binary rustc (not present)");
     }
 
+    #[requirements(REQ_N1VBW46)]
     #[test]
     fn test_check_binary_missing_file_and_parent_directory() {
         let utils = TestUtils::new();
         assert_not_found(utils);
     }
 
+    #[requirements(REQ_R2UQ8D3)]
     #[test]
     fn test_check_binary_file_is_a_directory() {
         let utils = TestUtils::new();
@@ -195,6 +201,7 @@ mod tests {
         assert_not_found(utils);
     }
 
+    #[requirements(REQ_NUP1G0D)]
     #[test]
     #[cfg(not(windows))] // Windows does permissions differently
     fn test_check_binary_no_access_to_parent_directory() {
@@ -217,6 +224,7 @@ mod tests {
         }
     }
 
+    #[requirements(REQ_6OAFM70)]
     #[test]
     fn test_check_binary_cant_invoke_executable() {
         let utils = TestUtils::new();
@@ -243,6 +251,7 @@ mod tests {
         }
     }
 
+    #[requirements(REQ_6OAFM70)]
     #[test]
     fn test_check_failing_binary() {
         let utils = TestUtils::new();
@@ -266,6 +275,7 @@ mod tests {
         }
     }
 
+    #[requirements(REQ_ABPRHHQ)]
     #[test]
     fn test_check_binary_with_invalid_output() {
         let utils = TestUtils::new();
@@ -284,6 +294,7 @@ mod tests {
         }
     }
 
+    #[requirements(REQ_SL5USTK)]
     #[test]
     fn test_check_binary_wrong_release() {
         test_wrong_version_data(
@@ -294,6 +305,7 @@ mod tests {
         );
     }
 
+    #[requirements(REQ_SL5USTK)]
     #[test]
     fn test_check_binary_wrong_host() {
         test_wrong_version_data(
@@ -304,6 +316,7 @@ mod tests {
         );
     }
 
+    #[requirements(REQ_SL5USTK)]
     #[test]
     fn test_check_binary_wrong_commit_hash() {
         test_wrong_version_data(
@@ -335,6 +348,7 @@ mod tests {
         }
     }
 
+    #[requirements(REQ_NUP1G0D)]
     #[test]
     #[cfg(not(windows))] // Windows does permissions differently
     fn test_check_binary_wrong_permissions() {
@@ -377,6 +391,7 @@ mod tests {
         }
     }
 
+    #[requirements(REQ_NUP1G0D)]
     #[cfg(not(windows))] // Windows does permissions differently
     #[test]
     fn test_check_binary_good_permissions() {

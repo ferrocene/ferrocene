@@ -7,7 +7,7 @@
 
 - [ ] REQ_LSGKACM: The tool is used to ensure that the Ferrocene toolchain is installed correctly.
 - [ ] REQ_THXJWWD: The tool should be executed on any of the host platforms listed in Compilation targets overview.
-- [ ] REQ_67EQEVF: The tool should only execute with success if it was distributed with the same Ferrocene toolchain that it is checking.
+- [x] REQ_67EQEVF: The tool should only execute with success if it was distributed with the same Ferrocene toolchain that it is checking.
 - [ ] REQ_P2OXII1: The tool should be executed on the command line.
 - [x] REQ_9A6740M: The tool accepts no command line arguments, and quits with a fail exit status when they are present.
 - [ ] REQ_42QU5MK: The tool displays the checks it performs, and quits with a fail exit status when any of the checks fails.
@@ -15,13 +15,13 @@
 ## Checks for executables
 
 - [ ] REQ_0OAUY3U: These executables should be checked: rustc, rustdoc, cargo (if installed)
-    - [ ] REQ_N1VBW46: The executable should exist in the bin directory, relative to the root of the installation.
-    - [ ] REQ_R2UQ8D3: The executable should be a regular file.
-    - [ ] REQ_NUP1G0D: The executable should have read and execute permissions set for all users.
+    - [x] REQ_N1VBW46: The executable should exist in the bin directory, relative to the root of the installation.
+    - [x] REQ_R2UQ8D3: The executable should be a regular file.
+    - [x] REQ_NUP1G0D: The executable should have read and execute permissions set for all users.
     - [ ] REQ_GVLWOTQ: Check the behavior of --verbose --version command-line options.
-        - [ ] REQ_6OAFM70: The executable should exit successfully.
-        - [ ] REQ_ABPRHHQ: The output of the executable should be UTF-8 text.
-        - [ ] REQ_SL5USTK: The output of the executable should have at least 3 key-value pairs, with these 3 keys: host, commit-hash, and release [...]
+        - [x] REQ_6OAFM70: The executable should exit successfully.
+        - [x] REQ_ABPRHHQ: The output of the executable should be UTF-8 text.
+        - [x] REQ_SL5USTK: The output of the executable should have at least 3 key-value pairs, with these 3 keys: host, commit-hash, and release [...]
 
 ## Checks for targets
 
@@ -67,3 +67,7 @@
 - [ ] Make NOTEs into requirements, e.g. "The following checks apply to these Host platforms: x86-64 Linux (glibc), Armv8-A Linux (glibc)"
 - [ ] "Test" General requirements with a test that just contains a comment that explains why the requirement is covered?
 - [ ] Only use "target" or "platform", but do not use it interchangeably
+- [ ] Are we allowed to have tests that are not traced to any requirement?
+- [ ] What about "negative tests", tests that test the opposite of a requirement does not work?
+- [ ] Permission tests for windows
+- [ ] Should the requirements macro go before or after the test macro? Before or after the cfg(windows) macro?

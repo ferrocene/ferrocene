@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
 > [!WARNING]
 > This file just acts as a todo-list while tracing the requirements. It should be rmeoved before merging to main.
 

@@ -120,7 +120,7 @@ Or, to run the ``split-tasks.py`` script for debugging:
    
    uv run ferrocene/ci/split-tasks.py test
 
-In CI workflows you should always use ``uv run`` for calling Python. In the case of ``make.py`` it
+In CI workflows you should always use ``uv run`` for calling Python. In the case of ``x.py`` it
 is not required as the script has been carefully written to work with most Python versions.
 
 

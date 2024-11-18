@@ -99,7 +99,7 @@ impl Generator {
             success_message: _,
             legacy_manifest_dirs: _,
             bulk_dirs: _,
-            component_name: _,
+            component_name,
             //
             package_name,
             image_dir,
@@ -127,8 +127,12 @@ impl Generator {
         copy_recursive(image_dir.as_ref(), &package_dir)?;
 
         // Copy the overlay.
-        if !non_installed_overlay.is_empty() {
-            copy_recursive(non_installed_overlay.as_ref(), &package_dir)?;
+        // We only preserve the `non_installed_overlay` on the `rust-dev` component.
+        // The `builder-config` file present is required for the `download-ci-llvm` flag.
+        if component_name == "rust-dev" {
+            if !non_installed_overlay.is_empty() {
+                copy_recursive(non_installed_overlay.as_ref(), &package_dir)?;
+            }
         }
 
         if let Some(key_arn) = ferrocene_signing_kms_key_arn {

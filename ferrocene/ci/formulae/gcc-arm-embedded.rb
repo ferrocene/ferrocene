@@ -1,6 +1,8 @@
 # FIXME: We introduced this on 2024-11-18 when ARM's gcc-arm-embedded 13.3.rel1 package broke.
 # It's very likely it's fixed by now. Look at the history of https://github.com/Homebrew/homebrew-cask/blob/master/Casks/g/gcc-arm-embedded.rb
 # to find out.
+# SPDX-License-Identifier: BSD-2-Clause
+# SPDX-FileCopyrightText: Paul Hinze & Contributors
 
 cask "gcc-arm-embedded" do
     # Exists as a cask because it is impractical as a formula:

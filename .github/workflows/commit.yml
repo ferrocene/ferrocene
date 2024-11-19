@@ -48,6 +48,26 @@ jobs:
       - name: Check available space
         run: df -h
 
+      - name: Delete unused files
+        run: sudo rm -rf \
+              /opt/google/chrome \
+              /opt/microsoft/msedge \
+              /opt/microsoft/powershell \
+              /opt/pipx \
+              /opt/ghc \
+              /usr/lib/mono \
+              /usr/local/julia* \
+              /usr/local/lib/android \
+              /usr/local/lib/node_modules \
+              /usr/local/share/chromium \
+              /usr/local/share/powershell \
+              /usr/share/dotnet \
+              /usr/share/swift \
+              ~/.dotnet 
+      
+      - name: Check available space post deletion
+        run: df -h
+
       # We deliberately avoid using docker containers as that would require either adding
       # a couple minutes to the build, or doing auth/trust related things that would impact
       # the experience for new contributors. (eg. not being able to run external contributor tests)

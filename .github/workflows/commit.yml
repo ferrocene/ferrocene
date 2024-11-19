@@ -40,7 +40,7 @@ jobs:
       - name: Perform licensing checks
         run: uv run reuse --include-submodules lint
 
-      - name: Install (minimal) build dependencies
+      - name: Setup Ubuntu
         run: sudo ferrocene/ci/scripts/setup-ubuntu.sh
         env:
           INSTALL_LLVM: 1

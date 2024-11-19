@@ -45,25 +45,8 @@ jobs:
         with:
           fetch-depth: 0  # Fetch all the history
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
-            python3-requests ninja-build
-
-      # We had the following on gha:
-      # > You are running out of disk space. The runner will stop working when the machine runs out of disk space. Free space left: 0 MB
-      # Prune more if this happens again... there is plenty of unused things in the image.
-      - name: Free disk space
-        run: |
-          echo "Disk space before cleanup:"
-          df --human-readable
-          sudo rm -rf /usr/local/.ghcup
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo rm -rf /usr/local/lib/android/sdk
-          sudo rm -rf /opt/ghcup
-          echo "Disk space after cleanup:"
-          df --human-readable
+      - name: Setup Ubuntu
+        run: sudo ferrocene/ci/scripts/setup-ubuntu.sh
 
       - name: Configure git authorship information
         run: |

@@ -10,6 +10,7 @@ apt install -y \
     git \
     build-essential \
     ninja-build \
+    python3-requests \
     zlib1g-dev
 
 if [[ ! -z "${INSTALL_LLVM}" ]]; then
@@ -18,4 +19,14 @@ if [[ ! -z "${INSTALL_LLVM}" ]]; then
         llvm-18-dev
 else
     echo 'Not installing LLVM, $INSTALL_LLVM is unset.'
+fi
+
+# Removing unused files to free some disk space (to avoid disk getting full)
+if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    df --human-readable
+    sudo rm -rf /usr/local/.ghcup
+    sudo rm -rf /opt/hostedtoolcache/CodeQL
+    sudo rm -rf /usr/local/lib/android
+    sudo rm -rf /opt/ghcup
+    df --human-readable
 fi

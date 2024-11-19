@@ -7,8 +7,8 @@ set -xeo pipefail
 echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 apt install -y \
-    git \
     build-essential \
+    git \
     ninja-build \
     python3-requests \
     zlib1g-dev

@@ -42,8 +42,6 @@ jobs:
 
       - name: Install (minimal) build dependencies
         run: sudo ferrocene/ci/scripts/setup-ubuntu.sh
-        env:
-          INSTALL_LLVM: 1
 
       # We deliberately avoid using docker containers as that would require either adding
       # a couple minutes to the build, or doing auth/trust related things that would impact

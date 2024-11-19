@@ -11,11 +11,3 @@ apt install -y \
     build-essential \
     ninja-build \
     zlib1g-dev
-
-if [[ ! -z "${INSTALL_LLVM}" ]]; then
-    apt install -y \
-        llvm-18-tools \
-        llvm-18-dev
-else
-    echo 'Not installing LLVM, $INSTALL_LLVM is unset.'
-fi

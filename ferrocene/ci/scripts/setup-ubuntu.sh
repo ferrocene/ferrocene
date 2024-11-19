@@ -9,4 +9,5 @@ echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 apt install -y wajig
 
 wajig sizes | tail --lines 30
-du --human-readable / | sort --human-numeric-sort
+du --human-readable / | sort --human-numeric-sort | tail --lines 100
+

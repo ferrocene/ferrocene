@@ -57,7 +57,7 @@ cd "$(git rev-parse --show-toplevel)"
 
 # Safety check to avoid messing with uncommitted changes.
 # Submodules are updated before that, as submodules needing an update should
-# not block merging chnages from upstream.
+# not block merging changes from upstream.
 git submodule update --init
 if ! git diff-index --quiet HEAD; then
     echo "pull-upstream: the current branch contains uncommitted changes!"
@@ -139,7 +139,7 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
     #  -Subproject commit 694a579566a9a1482b20aff8a68f0e4edd99bd28
     # ++Subproject commit 0000000000000000000000000000000000000000
     #
-    # To solve that, when a submodule gets in an unmerged state, the confict is
+    # To solve that, when a submodule gets in an unmerged state, the conflict is
     # fixed automatically by resetting the submodule to upstream's commit.
     all_submodules="$(git config --file .gitmodules --get-regexp 'submodule\..+\.path' | awk '{print($2)}')"
     for changed_file in $(git status --porcelain=v1 | sed -n 's/^UU //p'); do

@@ -40,33 +40,24 @@ jobs:
       - name: Perform licensing checks
         run: uv run reuse --include-submodules lint
 
+      - name: Free disk space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h
+          sudo rm -rf /usr/local/.ghcup
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/lib/android/sdk
+          sudo rm -rf /opt/ghcup
+          echo "Disk space after cleanup:"
+          df -h      
+          sudo apt-get clean
+          echo "Disk space after apt-get clean"
+          df -h      
+
       - name: Install (minimal) build dependencies
         run: sudo ferrocene/ci/scripts/setup-ubuntu.sh
         env:
           INSTALL_LLVM: 1
-
-      - name: Check available space
-        run: df -h
-
-      - name: Delete unused files
-        run: sudo rm -rf \
-              /opt/google/chrome \
-              /opt/microsoft/msedge \
-              /opt/microsoft/powershell \
-              /opt/pipx \
-              /opt/ghc \
-              /usr/lib/mono \
-              /usr/local/julia* \
-              /usr/local/lib/android \
-              /usr/local/lib/node_modules \
-              /usr/local/share/chromium \
-              /usr/local/share/powershell \
-              /usr/share/dotnet \
-              /usr/share/swift \
-              ~/.dotnet 
-      
-      - name: Check available space post deletion
-        run: df -h
 
       # We deliberately avoid using docker containers as that would require either adding
       # a couple minutes to the build, or doing auth/trust related things that would impact

@@ -723,6 +723,7 @@ fn collect_tests_from_dir(
     )
 }
 
+// Added to allow reuse by custom Ferrocene code
 fn find_tests_in_dir(
     config: Arc<Config>,
     dir: &Path,

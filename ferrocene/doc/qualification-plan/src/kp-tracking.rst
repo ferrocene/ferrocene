@@ -55,6 +55,8 @@ Each KP file has the following format:
 
 * ``Mitigation``: A textual description of methods for fixing detected occurences of a KP in code.
 
+In addition, the field ``Affected branches`` is available in the KP Manual. This field shows which branches the KP impacts.
+
 The following screenshot shows the contents of a KP.
 
 .. figure:: figures/kp-example.png

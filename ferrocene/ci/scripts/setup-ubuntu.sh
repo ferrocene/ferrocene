@@ -19,3 +19,5 @@ if [[ ! -z "${INSTALL_LLVM}" ]]; then
 else
     echo 'Not installing LLVM, $INSTALL_LLVM is unset.'
 fi
+
+docker images

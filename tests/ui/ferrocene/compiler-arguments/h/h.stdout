@@ -2,6 +2,10 @@ Usage: rustc [OPTIONS] INPUT
 
 Options:
     -h, --help          Display this message
+        --cfg SPEC      Configure the compilation environment.
+                        SPEC supports the syntax `NAME[="VALUE"]`.
+        --check-cfg SPEC
+                        Provide list of expected cfgs for checking
     -L [KIND=]PATH      Add a directory to the library search path. The
                         optional KIND can be one of dependency, crate, native,
                         framework, or all (the default).
@@ -25,6 +29,7 @@ Options:
         --emit [asm|llvm-bc|llvm-ir|obj|metadata|link|dep-info|mir]
                         Comma separated list of types of output for the
                         compiler to emit
+        --print [crate-name|file-names|sysroot|target-libdir|cfg|check-cfg|calling-conventions|target-list|target-cpus|target-features|relocation-models|code-models|tls-models|target-spec-json|all-target-specs-json|native-static-libs|stack-protector-strategies|link-args|deployment-target]
                         Compiler information to print on stdout
     -g                  Equivalent to -C debuginfo=2
     -O                  Equivalent to -C opt-level=2
@@ -52,3 +57,4 @@ Additional help:
     -W help             Print 'lint' options and default settings
     -Z help             Print unstable compiler options
     --help -v           Print the full set of options rustc accepts
+

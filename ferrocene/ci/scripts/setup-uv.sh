@@ -9,6 +9,12 @@ curl -LsSf https://astral.sh/uv/0.5.0/install.sh | sh
 export PATH="$HOME/.local/bin:$PATH"
 
 set +e
+if [ ! -z ${GITHUB_PATH+x} ]; then
+    echo "$HOME/.local/bin" >> $GITHUB_PATH
+fi
+set -e
+
+set +e
 if [ ! -z ${BASH_ENV+x} ]; then
     echo 'export PATH="$HOME/.local/bin:$PATH"' >> $BASH_ENV
 fi

@@ -45,8 +45,11 @@ jobs:
         with:
           fetch-depth: 0  # Fetch all the history
 
+      - name: Print .gitmodules
+        run: cat .gitmodules
+
       - name: Setup Ubuntu
-        run: sudo ferrocene/ci/scripts/setup-ubuntu.sh
+        run: ferrocene/ci/scripts/setup-ubuntu.sh
 
       - name: Configure git authorship information
         run: |
@@ -78,6 +81,9 @@ jobs:
 
       - name: Clone a subset of the LLVM submodule rather than the whole thing
         run: ferrocene/ci/scripts/clone-llvm-subset.sh
+
+      - name: Print .gitmodules
+        run: cat .gitmodules
 
       - name: Run the pull-upstream automation
         run: python3 ferrocene/tools/pull-upstream/automation.py ${{ matrix.branch }} ${{ steps.create_branch.outputs.name || 'main' }}

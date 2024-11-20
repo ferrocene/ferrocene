@@ -38,7 +38,7 @@ class ProgramDirective(SphinxDirective):
             "no_traceability_matrix" in self.options,
         )
 
-        # parse and process content of `ProgramDirective`` 
+        # parse and process content of `ProgramDirective``
         # (one or more `OptionDirective`s)
         node = nodes.container()
         self.state.nested_parse(self.content, self.content_offset, node)

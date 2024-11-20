@@ -30,6 +30,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
+
+      - name: Unshallow the clone if on the beta channel
+        run: ferrocene/ci/scripts/unshallow-on-beta.sh
+
       - name: Setup
         uses: ./.github/actions/setup/
         with:

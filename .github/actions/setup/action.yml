@@ -31,7 +31,7 @@ runs:
     - name: Install dependencies (Ubuntu)
       if: ${{ contains(runner.name, 'ubuntu') && inputs.build-dependencies != 'false' }}
       shell: bash
-      run: sudo ferrocene/ci/scripts/setup-ubuntu.sh
+      run: ferrocene/ci/scripts/setup-ubuntu.sh
 
     - name: Setup uv, Python, and venv
       if: ${{ inputs.setup-venv != 'false' }}

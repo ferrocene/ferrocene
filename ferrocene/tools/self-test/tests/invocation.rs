@@ -3,6 +3,9 @@
 
 use std::process::Command;
 
+use needy::requirements;
+
+#[requirements(REQ_9A6740M)]
 #[test]
 fn invoke_with_args() {
     let exe = env!("CARGO_BIN_EXE_ferrocene-self-test");

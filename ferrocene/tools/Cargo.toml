@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+[workspace]
+resolver = "2"
+members = [
+    "document-signatures/",
+    "generate-tarball/",
+    "self-test/",
+    "traceability-matrix/",
+]

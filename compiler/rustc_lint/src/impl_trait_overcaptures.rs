@@ -15,7 +15,7 @@ use rustc_middle::ty::relate::{
     Relate, RelateResult, TypeRelation, structurally_relate_consts, structurally_relate_tys,
 };
 use rustc_middle::ty::{
-    self, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor, TypingMode,
+    self, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_session::lint::FutureIncompatibilityReason;
@@ -186,8 +186,8 @@ fn check_fn(tcx: TyCtxt<'_>, parent_def_id: LocalDefId) {
             functional_variances.variances
         }),
         outlives_env: LazyCell::new(|| {
-            let param_env = tcx.param_env(parent_def_id);
-            let infcx = tcx.infer_ctxt().build(TypingMode::from_param_env(param_env));
+            let typing_env = ty::TypingEnv::non_body_analysis(tcx, parent_def_id);
+            let (infcx, param_env) = tcx.infer_ctxt().build_with_typing_env(typing_env);
             let ocx = ObligationCtxt::new(&infcx);
             let assumed_wf_tys = ocx.assumed_wf_types(param_env, parent_def_id).unwrap_or_default();
             let implied_bounds =
@@ -262,7 +262,11 @@ where
             // If it's owned by this function
             && let opaque =
                 self.tcx.hir_node_by_def_id(opaque_def_id).expect_opaque_ty()
-            && let hir::OpaqueTyOrigin::FnReturn { parent, .. } = opaque.origin
+            // We want to recurse into RPITs and async fns, even though the latter
+            // doesn't overcapture on its own, it may mention additional RPITs
+            // in its bounds.
+            && let hir::OpaqueTyOrigin::FnReturn { parent, .. }
+                | hir::OpaqueTyOrigin::AsyncFn { parent, .. } = opaque.origin
             && parent == self.parent_def_id
         {
             let opaque_span = self.tcx.def_span(opaque_def_id);

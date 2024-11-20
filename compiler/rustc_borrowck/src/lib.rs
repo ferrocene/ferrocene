@@ -36,13 +36,13 @@ use rustc_middle::mir::*;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{self, ParamEnv, RegionVid, TyCtxt, TypingMode};
 use rustc_middle::{bug, span_bug};
-use rustc_mir_dataflow::Analysis;
 use rustc_mir_dataflow::impls::{
     EverInitializedPlaces, MaybeInitializedPlaces, MaybeUninitializedPlaces,
 };
 use rustc_mir_dataflow::move_paths::{
     InitIndex, InitLocation, LookupResult, MoveData, MoveOutIndex, MovePathIndex,
 };
+use rustc_mir_dataflow::{Analysis, EntrySets, Results, ResultsVisitor, visit_results};
 use rustc_session::lint::builtin::UNUSED_MUT;
 use rustc_span::{Span, Symbol};
 use smallvec::SmallVec;
@@ -50,7 +50,7 @@ use tracing::{debug, instrument};
 
 use crate::borrow_set::{BorrowData, BorrowSet};
 use crate::consumers::{BodyWithBorrowckFacts, ConsumerOptions};
-use crate::dataflow::{BorrowIndex, BorrowckDomain, BorrowckResults, Borrows};
+use crate::dataflow::{BorrowIndex, Borrowck, BorrowckDomain, Borrows};
 use crate::diagnostics::{AccessKind, IllegalMoveOriginKind, MoveError, RegionName};
 use crate::location::LocationTable;
 use crate::nll::PoloniusOutput;
@@ -140,7 +140,6 @@ fn do_mir_borrowck<'tcx>(
 ) -> (BorrowCheckResult<'tcx>, Option<Box<BodyWithBorrowckFacts<'tcx>>>) {
     let def = input_body.source.def_id().expect_local();
     let infcx = BorrowckInferCtxt::new(tcx, def);
-    let param_env = tcx.param_env(def);
 
     let mut local_names = IndexVec::from_elem(None, &input_body.local_decls);
     for var_debug_info in &input_body.var_debug_info {
@@ -175,8 +174,7 @@ fn do_mir_borrowck<'tcx>(
     // will have a lifetime tied to the inference context.
     let mut body_owned = input_body.clone();
     let mut promoted = input_promoted.to_owned();
-    let free_regions =
-        nll::replace_regions_in_mir(&infcx, param_env, &mut body_owned, &mut promoted);
+    let free_regions = nll::replace_regions_in_mir(&infcx, &mut body_owned, &mut promoted);
     let body = &body_owned; // no further changes
 
     // FIXME(-Znext-solver): A bit dubious that we're only registering
@@ -192,7 +190,7 @@ fn do_mir_borrowck<'tcx>(
         .iter_enumerated()
         .map(|(idx, body)| (idx, MoveData::gather_moves(body, tcx, |_| true)));
 
-    let mut flow_inits = MaybeInitializedPlaces::new(tcx, body, &move_data)
+    let flow_inits = MaybeInitializedPlaces::new(tcx, body, &move_data)
         .iterate_to_fixpoint(tcx, body, Some("borrowck"))
         .into_results_cursor(body);
 
@@ -213,11 +211,9 @@ fn do_mir_borrowck<'tcx>(
         body,
         &promoted,
         &location_table,
-        param_env,
-        &mut flow_inits,
+        flow_inits,
         &move_data,
         &borrow_set,
-        tcx.closure_captures(def),
         consumer_options,
     );
 
@@ -228,27 +224,6 @@ fn do_mir_borrowck<'tcx>(
     // We also have a `#[rustc_regions]` annotation that causes us to dump
     // information.
     nll::dump_annotation(&infcx, body, &regioncx, &opt_closure_req, &opaque_type_values, diags);
-
-    // The various `flow_*` structures can be large. We drop `flow_inits` here
-    // so it doesn't overlap with the others below. This reduces peak memory
-    // usage significantly on some benchmarks.
-    drop(flow_inits);
-
-    let flow_borrows = Borrows::new(tcx, body, &regioncx, &borrow_set).iterate_to_fixpoint(
-        tcx,
-        body,
-        Some("borrowck"),
-    );
-    let flow_uninits = MaybeUninitializedPlaces::new(tcx, body, &move_data).iterate_to_fixpoint(
-        tcx,
-        body,
-        Some("borrowck"),
-    );
-    let flow_ever_inits = EverInitializedPlaces::new(body, &move_data).iterate_to_fixpoint(
-        tcx,
-        body,
-        Some("borrowck"),
-    );
 
     let movable_coroutine =
         // The first argument is the coroutine type passed by value
@@ -268,7 +243,6 @@ fn do_mir_borrowck<'tcx>(
         let promoted_body = &promoted[idx];
         let mut promoted_mbcx = MirBorrowckCtxt {
             infcx: &infcx,
-            param_env,
             body: promoted_body,
             move_data: &move_data,
             location_table: &location_table, // no need to create a real one for the promoted, it is not used
@@ -308,7 +282,6 @@ fn do_mir_borrowck<'tcx>(
 
     let mut mbcx = MirBorrowckCtxt {
         infcx: &infcx,
-        param_env,
         body,
         move_data: &move_data,
         location_table: &location_table,
@@ -334,16 +307,11 @@ fn do_mir_borrowck<'tcx>(
     // Compute and report region errors, if any.
     mbcx.report_region_errors(nll_errors);
 
-    let mut results = BorrowckResults {
-        ever_inits: flow_ever_inits,
-        uninits: flow_uninits,
-        borrows: flow_borrows,
-    };
-
-    rustc_mir_dataflow::visit_results(
+    let mut flow_results = get_flow_results(tcx, body, &move_data, &borrow_set, &regioncx);
+    visit_results(
         body,
         traversal::reverse_postorder(body).map(|(bb, _)| bb),
-        &mut results,
+        &mut flow_results,
         &mut mbcx,
     );
 
@@ -426,15 +394,58 @@ fn do_mir_borrowck<'tcx>(
     (result, body_with_facts)
 }
 
+fn get_flow_results<'a, 'tcx>(
+    tcx: TyCtxt<'tcx>,
+    body: &'a Body<'tcx>,
+    move_data: &'a MoveData<'tcx>,
+    borrow_set: &'a BorrowSet<'tcx>,
+    regioncx: &RegionInferenceContext<'tcx>,
+) -> Results<'tcx, Borrowck<'a, 'tcx>> {
+    // We compute these three analyses individually, but them combine them into
+    // a single results so that `mbcx` can visit them all together.
+    let borrows = Borrows::new(tcx, body, regioncx, borrow_set).iterate_to_fixpoint(
+        tcx,
+        body,
+        Some("borrowck"),
+    );
+    let uninits = MaybeUninitializedPlaces::new(tcx, body, move_data).iterate_to_fixpoint(
+        tcx,
+        body,
+        Some("borrowck"),
+    );
+    let ever_inits = EverInitializedPlaces::new(body, move_data).iterate_to_fixpoint(
+        tcx,
+        body,
+        Some("borrowck"),
+    );
+
+    let analysis = Borrowck {
+        borrows: borrows.analysis,
+        uninits: uninits.analysis,
+        ever_inits: ever_inits.analysis,
+    };
+
+    assert_eq!(borrows.entry_sets.len(), uninits.entry_sets.len());
+    assert_eq!(borrows.entry_sets.len(), ever_inits.entry_sets.len());
+    let entry_sets: EntrySets<'_, Borrowck<'_, '_>> =
+        itertools::izip!(borrows.entry_sets, uninits.entry_sets, ever_inits.entry_sets)
+            .map(|(borrows, uninits, ever_inits)| BorrowckDomain { borrows, uninits, ever_inits })
+            .collect();
+
+    Results { analysis, entry_sets }
+}
+
 pub(crate) struct BorrowckInferCtxt<'tcx> {
     pub(crate) infcx: InferCtxt<'tcx>,
     pub(crate) reg_var_to_origin: RefCell<FxIndexMap<ty::RegionVid, RegionCtxt>>,
+    pub(crate) param_env: ParamEnv<'tcx>,
 }
 
 impl<'tcx> BorrowckInferCtxt<'tcx> {
     pub(crate) fn new(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> Self {
         let infcx = tcx.infer_ctxt().build(TypingMode::analysis_in_body(tcx, def_id));
-        BorrowckInferCtxt { infcx, reg_var_to_origin: RefCell::new(Default::default()) }
+        let param_env = tcx.param_env(def_id);
+        BorrowckInferCtxt { infcx, reg_var_to_origin: RefCell::new(Default::default()), param_env }
     }
 
     pub(crate) fn next_region_var<F>(
@@ -513,7 +524,6 @@ impl<'tcx> Deref for BorrowckInferCtxt<'tcx> {
 
 struct MirBorrowckCtxt<'a, 'infcx, 'tcx> {
     infcx: &'infcx BorrowckInferCtxt<'tcx>,
-    param_env: ParamEnv<'tcx>,
     body: &'a Body<'tcx>,
     move_data: &'a MoveData<'tcx>,
 
@@ -588,14 +598,10 @@ struct MirBorrowckCtxt<'a, 'infcx, 'tcx> {
 // 2. loans made in overlapping scopes do not conflict
 // 3. assignments do not affect things loaned out as immutable
 // 4. moves do not affect things loaned out in any way
-impl<'a, 'tcx, R> rustc_mir_dataflow::ResultsVisitor<'a, 'tcx, R>
-    for MirBorrowckCtxt<'a, '_, 'tcx>
-{
-    type Domain = BorrowckDomain<'a, 'tcx>;
-
+impl<'a, 'tcx> ResultsVisitor<'a, 'tcx, Borrowck<'a, 'tcx>> for MirBorrowckCtxt<'a, '_, 'tcx> {
     fn visit_statement_before_primary_effect(
         &mut self,
-        _results: &mut R,
+        _results: &mut Results<'tcx, Borrowck<'a, 'tcx>>,
         state: &BorrowckDomain<'a, 'tcx>,
         stmt: &'a Statement<'tcx>,
         location: Location,
@@ -667,7 +673,7 @@ impl<'a, 'tcx, R> rustc_mir_dataflow::ResultsVisitor<'a, 'tcx, R>
 
     fn visit_terminator_before_primary_effect(
         &mut self,
-        _results: &mut R,
+        _results: &mut Results<'tcx, Borrowck<'a, 'tcx>>,
         state: &BorrowckDomain<'a, 'tcx>,
         term: &'a Terminator<'tcx>,
         loc: Location,
@@ -780,7 +786,7 @@ impl<'a, 'tcx, R> rustc_mir_dataflow::ResultsVisitor<'a, 'tcx, R>
 
     fn visit_terminator_after_primary_effect(
         &mut self,
-        _results: &mut R,
+        _results: &mut Results<'tcx, Borrowck<'a, 'tcx>>,
         state: &BorrowckDomain<'a, 'tcx>,
         term: &'a Terminator<'tcx>,
         loc: Location,

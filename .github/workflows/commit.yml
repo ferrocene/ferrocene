@@ -41,7 +41,7 @@ jobs:
         run: uv run reuse --include-submodules lint
 
       - name: Setup Ubuntu
-        run: sudo ferrocene/ci/scripts/setup-ubuntu.sh
+        run: ferrocene/ci/scripts/setup-ubuntu.sh
         env:
           INSTALL_LLVM: 1
 

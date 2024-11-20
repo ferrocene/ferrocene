@@ -55,10 +55,17 @@ fi
 # Move to the root of the repository to avoid the script from misbehaving.
 cd "$(git rev-parse --show-toplevel)"
 
+echo "before git submodule update --init"
+cat .gitmodules
+
 # Safety check to avoid messing with uncommitted changes.
 # Submodules are updated before that, as submodules needing an update should
 # not block merging changes from upstream.
 git submodule update --init
+
+echo "after git submodule update --init"
+cat .gitmodules
+
 if ! git diff-index --quiet HEAD; then
     echo "pull-upstream: the current branch contains uncommitted changes!"
     echo "pull-upstream: make sure all changes are committed before running this script."

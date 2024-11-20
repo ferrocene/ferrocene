@@ -48,6 +48,9 @@ jobs:
       - name: Print .gitmodules
         run: cat .gitmodules
 
+      - name: Print .git/config
+        run: cat .git/config
+
       - name: Setup Ubuntu
         run: ferrocene/ci/scripts/setup-ubuntu.sh
 
@@ -84,6 +87,9 @@ jobs:
 
       - name: Print .gitmodules
         run: cat .gitmodules
+
+      - name: Print .git/config
+        run: cat .git/config
 
       - name: Run the pull-upstream automation
         run: python3 ferrocene/tools/pull-upstream/automation.py ${{ matrix.branch }} ${{ steps.create_branch.outputs.name || 'main' }}

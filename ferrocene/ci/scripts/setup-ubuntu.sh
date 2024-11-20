@@ -8,10 +8,7 @@ echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selecti
 
 sudo apt install -y \
     build-essential \
-    git \
-    ninja-build \
-    python3-requests \
-    zlib1g-dev
+    ninja-build
 
 if [[ ! -z "${INSTALL_LLVM}" ]]; then
     sudo apt install -y \

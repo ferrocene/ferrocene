@@ -35,8 +35,8 @@ use utils::helpers::hex_encode;
 
 use crate::core::builder;
 use crate::core::builder::{Builder, Kind};
-use crate::core::config::{flags, DryRun, LldMode, LlvmLibunwind, Target, TargetSelection};
-use crate::utils::exec::{command, BehaviorOnFailure, BootstrapCommand, CommandOutput, OutputMode};
+use crate::core::config::{DryRun, LldMode, LlvmLibunwind, Target, TargetSelection, flags};
+use crate::utils::exec::{BehaviorOnFailure, BootstrapCommand, CommandOutput, OutputMode, command};
 use crate::utils::helpers::{
     self, dir_is_empty, exe, libdir, mtime, output, set_file_times, symlink_dir,
 };
@@ -46,11 +46,11 @@ mod ferrocene;
 mod utils;
 
 pub use core::builder::PathSet;
-pub use core::config::flags::{Flags, Subcommand};
 pub use core::config::Config;
+pub use core::config::flags::{Flags, Subcommand};
 
 pub use utils::change_tracker::{
-    find_recent_config_change_ids, human_readable_changes, CONFIG_CHANGE_HISTORY,
+    CONFIG_CHANGE_HISTORY, find_recent_config_change_ids, human_readable_changes,
 };
 
 const LLVM_TOOLS: &[&str] = &[
@@ -734,11 +734,7 @@ impl Build {
     /// Component directory that Cargo will produce output into (e.g.
     /// release/debug)
     fn cargo_dir(&self) -> &'static str {
-        if self.config.rust_optimize.is_release() {
-            "release"
-        } else {
-            "debug"
-        }
+        if self.config.rust_optimize.is_release() { "release" } else { "debug" }
     }
 
     fn tools_dir(&self, compiler: Compiler) -> PathBuf {
@@ -1560,29 +1556,6 @@ Executed at: {executed_at}"#,
         // If available, we read the beta revision from that file.
         // This only happens when building from a source tarball when Git should not be used.
         let count = extract_beta_rev_from_file(self.src.join("version")).unwrap_or_else(|| {
-            let branch = &self.config.stage0_metadata.config.nightly_branch;
-
-            helpers::git(Some(&self.src))
-                .allow_failure()
-                .arg("fetch")
-                .arg("origin")
-                .arg("--no-recurse-submodules")
-                .arg(branch)
-                .run_always()
-                .run(self);
-            helpers::git(Some(&self.src))
-                .allow_failure()
-                .arg("branch")
-                .arg("--track")
-                .arg(&branch)
-                .arg(format!("origin/{branch}"))
-                .run_always()
-                .run(self);
-
-            eprintln!(
-                "BRANCHES:\n{}",
-                helpers::git(Some(&self.src)).arg("branch").run_always().run_capture(self).stdout()
-            );
             // Figure out how many merge commits happened since we branched off master.
             // That's our beta number!
             // (Note that we use a `..` range, not the `...` symmetric difference.)
@@ -1590,7 +1563,10 @@ Executed at: {executed_at}"#,
                 .arg("rev-list")
                 .arg("--count")
                 .arg("--merges")
-                .arg(format!("refs/remotes/origin/{branch}..HEAD"))
+                .arg(format!(
+                    "refs/remotes/origin/{}..HEAD",
+                    self.config.stage0_metadata.config.nightly_branch
+                ))
                 .run_always()
                 .run_capture(self)
                 .stdout()
@@ -1903,11 +1879,7 @@ Executed at: {executed_at}"#,
         use std::os::unix::fs::symlink as symlink_file;
         #[cfg(windows)]
         use std::os::windows::fs::symlink_file;
-        if !self.config.dry_run() {
-            symlink_file(src.as_ref(), link.as_ref())
-        } else {
-            Ok(())
-        }
+        if !self.config.dry_run() { symlink_file(src.as_ref(), link.as_ref()) } else { Ok(()) }
     }
 
     /// Returns if config.ninja is enabled, and checks for ninja existence,

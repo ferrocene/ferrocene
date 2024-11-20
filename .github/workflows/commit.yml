@@ -28,6 +28,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Unshallow the clone if on the beta channel
+        run: ferrocene/ci/scripts/unshallow-on-beta.sh
+
       - name: Setup
         uses: ./.github/actions/setup/
         with:

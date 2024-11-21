@@ -31,12 +31,6 @@ jobs:
         with:
           fetch-depth: 0  # Fetch all the history
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
-            python3-requests
-
       - name: Configure git authorship information
         run: |
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"

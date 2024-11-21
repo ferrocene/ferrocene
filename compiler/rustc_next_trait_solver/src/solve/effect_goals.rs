@@ -84,12 +84,9 @@ where
         let cx = ecx.cx();
         let mut candidates = vec![];
 
-        // FIXME(const_trait_impl): We elaborate here because the implied const bounds
-        // aren't necessarily elaborated. We probably should prefix this query
-        // with `explicit_`...
         for clause in elaborate::elaborate(
             cx,
-            cx.implied_const_bounds(alias_ty.def_id)
+            cx.explicit_implied_const_bounds(alias_ty.def_id)
                 .iter_instantiated(cx, alias_ty.args)
                 .map(|trait_ref| trait_ref.to_host_effect_clause(cx, goal.predicate.constness)),
         ) {
@@ -208,13 +205,6 @@ where
         _goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         Err(NoSolution)
-    }
-
-    fn consider_builtin_pointer_like_candidate(
-        _ecx: &mut EvalCtxt<'_, D>,
-        _goal: Goal<I, Self>,
-    ) -> Result<Candidate<I>, NoSolution> {
-        unreachable!("PointerLike is not const")
     }
 
     fn consider_builtin_fn_ptr_trait_candidate(

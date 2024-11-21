@@ -12,6 +12,7 @@ use cargo_metadata::{Metadata, Package, PackageId};
 #[rustfmt::skip]
 const LICENSES: &[&str] = &[
     // tidy-alphabetical-start
+    "(MIT OR Apache-2.0) AND Unicode-3.0",                 // unicode_ident (v1.0.14+)
     "(MIT OR Apache-2.0) AND Unicode-DFS-2016",            // unicode_ident
     "0BSD OR MIT OR Apache-2.0",                           // adler license
     "0BSD",

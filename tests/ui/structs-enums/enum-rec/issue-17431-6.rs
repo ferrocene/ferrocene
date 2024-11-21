@@ -1,5 +1,3 @@
-//@ ignore-apple: cycle error does not appear on apple
-
 use std::cell::UnsafeCell;
 
 enum Foo { X(UnsafeCell<Option<Foo>>) }

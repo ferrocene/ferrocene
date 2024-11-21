@@ -272,7 +272,7 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
                 || !ty.is_inhabited_from(
                     cx.tcx,
                     cx.tcx.parent_module(expr.hir_id).to_def_id(),
-                    cx.param_env,
+                    cx.typing_env(),
                 )
             {
                 return Some(MustUsePath::Suppressed);
@@ -556,7 +556,7 @@ impl<'tcx> LateLintPass<'tcx> for PathStatements {
         if let hir::StmtKind::Semi(expr) = s.kind {
             if let hir::ExprKind::Path(_) = expr.kind {
                 let ty = cx.typeck_results().expr_ty(expr);
-                if ty.needs_drop(cx.tcx, cx.param_env) {
+                if ty.needs_drop(cx.tcx, cx.typing_env()) {
                     let sub = if let Ok(snippet) = cx.sess().source_map().span_to_snippet(expr.span)
                     {
                         PathStatementDropSub::Suggestion { span: s.span, snippet }
@@ -584,6 +584,7 @@ enum UnusedDelimsCtx {
     MatchScrutineeExpr,
     ReturnValue,
     BlockRetValue,
+    BreakValue,
     LetScrutineeExpr,
     ArrayLenExpr,
     AnonConst,
@@ -605,6 +606,7 @@ impl From<UnusedDelimsCtx> for &'static str {
             UnusedDelimsCtx::MatchScrutineeExpr => "`match` scrutinee expression",
             UnusedDelimsCtx::ReturnValue => "`return` value",
             UnusedDelimsCtx::BlockRetValue => "block return value",
+            UnusedDelimsCtx::BreakValue => "`break` value",
             UnusedDelimsCtx::LetScrutineeExpr => "`let` scrutinee expression",
             UnusedDelimsCtx::ArrayLenExpr | UnusedDelimsCtx::AnonConst => "const expression",
             UnusedDelimsCtx::MatchArmExpr => "match arm expression",
@@ -913,6 +915,10 @@ trait UnusedDelimLint {
                 (value, UnusedDelimsCtx::ReturnValue, false, Some(left), None, true)
             }
 
+            Break(_, Some(ref value)) => {
+                (value, UnusedDelimsCtx::BreakValue, false, None, None, true)
+            }
+
             Index(_, ref value, _) => (value, UnusedDelimsCtx::IndexExpr, false, None, None, false),
 
             Assign(_, ref value, _) | AssignOp(.., ref value) => {
@@ -1063,6 +1069,9 @@ impl UnusedDelimLint for UnusedParens {
                                 _,
                                 _,
                             ) if node.is_lazy()))
+                    && !((ctx == UnusedDelimsCtx::ReturnValue
+                        || ctx == UnusedDelimsCtx::BreakValue)
+                        && matches!(inner.kind, ast::ExprKind::Assign(_, _, _)))
                 {
                     self.emit_unused_delims_expr(cx, value, ctx, left_pos, right_pos, is_kw)
                 }

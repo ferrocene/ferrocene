@@ -30,7 +30,7 @@ use rustc_errors::{
     Applicability, Diag, DiagCtxtHandle, ErrorGuaranteed, LintDiagnostic, MultiSpan,
 };
 use rustc_hir as hir;
-use rustc_hir::def::DefKind;
+use rustc_hir::def::{CtorKind, DefKind};
 use rustc_hir::def_id::{CrateNum, DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::definitions::Definitions;
 use rustc_hir::intravisit::Visitor;
@@ -230,7 +230,9 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
             DefKind::OpaqueTy => ty::AliasTermKind::OpaqueTy,
             DefKind::TyAlias => ty::AliasTermKind::WeakTy,
             DefKind::AssocConst => ty::AliasTermKind::ProjectionConst,
-            DefKind::AnonConst => ty::AliasTermKind::UnevaluatedConst,
+            DefKind::AnonConst | DefKind::Const | DefKind::Ctor(_, CtorKind::Const) => {
+                ty::AliasTermKind::UnevaluatedConst
+            }
             kind => bug!("unexpected DefKind in AliasTy: {kind:?}"),
         }
     }
@@ -374,7 +376,11 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         self.explicit_implied_predicates_of(def_id).map_bound(|preds| preds.into_iter().copied())
     }
 
-    fn is_const_impl(self, def_id: DefId) -> bool {
+    fn impl_is_const(self, def_id: DefId) -> bool {
+        self.is_conditionally_const(def_id)
+    }
+
+    fn fn_is_const(self, def_id: DefId) -> bool {
         self.is_conditionally_const(def_id)
     }
 
@@ -596,8 +602,16 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         self.coroutine_is_async_gen(coroutine_def_id)
     }
 
-    fn layout_is_pointer_like(self, param_env: ty::ParamEnv<'tcx>, ty: Ty<'tcx>) -> bool {
-        self.layout_of(self.erase_regions(param_env.and(ty)))
+    // We don't use `TypingEnv` here as it's only defined in `rustc_middle` and
+    // `rustc_next_trait_solver` shouldn't have to know about it.
+    fn layout_is_pointer_like(
+        self,
+        typing_mode: ty::TypingMode<'tcx>,
+        param_env: ty::ParamEnv<'tcx>,
+        ty: Ty<'tcx>,
+    ) -> bool {
+        let typing_env = ty::TypingEnv { typing_mode, param_env };
+        self.layout_of(self.erase_regions(typing_env).as_query_input(self.erase_regions(ty)))
             .is_ok_and(|layout| layout.layout.is_pointer_like(&self.data_layout))
     }
 

@@ -28,7 +28,7 @@ permissions:
 jobs:
   run:
     name: ${{ matrix.branch }}
-    runs-on: ubuntu-latest
+    runs-on: 8core-x86_64-unknown-linux-gnu
     environment: automations
 
     strategy:

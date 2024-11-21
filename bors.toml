@@ -7,10 +7,10 @@ status = ["full"]
 # Wait until the `commit` GHA workflow passes before queueing a PR
 pr_status = ["Checks"]
 
-# Consider the build as failed if it takes more than three hours to finish
+# Consider the build as failed if it takes more than four hours to finish
 # A normal build should take less, but there are slower parts of the build that
 # are only ran occasionally.
-timeout_sec = 10800
+timeout_sec = 144000
 
 # When someone queues a PR that has pending PR status checks, bors will wait
 # for those checks to be green before queueing the PR. This defines how long

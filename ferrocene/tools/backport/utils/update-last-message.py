@@ -32,7 +32,8 @@ def amend_commit_message(new_message):
 
 def main(pr_number):
     current_message = get_current_commit_message()
-    fixed_message = current_message + f"\n{TRAILER_NAME}: {os.environ.get("GITHUB_REPOSITORY", "")}#{pr_number}\n"
+    repo = os.environ.get("GITHUB_REPOSITORY", "")
+    fixed_message = current_message + f"\n{TRAILER_NAME}: {repo}#{pr_number}\n"
     amend_commit_message(fixed_message)
 
 

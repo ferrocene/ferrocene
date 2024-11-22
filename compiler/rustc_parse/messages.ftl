@@ -77,6 +77,8 @@ parse_box_syntax_removed_suggestion = use `Box::new()` instead
 
 parse_cannot_be_raw_ident = `{$ident}` cannot be a raw identifier
 
+parse_cannot_be_raw_lifetime = `{$ident}` cannot be a raw lifetime
+
 parse_catch_after_try = keyword `catch` cannot follow a `try` block
     .help = try using `match` on the result of the `try` block instead
 
@@ -421,6 +423,9 @@ parse_invalid_meta_item = expected unsuffixed literal, found `{$token}`
     .quote_ident_sugg = surround the identifier with quotation marks to make it into a string literal
 
 parse_invalid_offset_of = offset_of expects dot-separated field and variant names
+
+parse_invalid_path_sep_in_fn_definition = invalid path separator in function definition
+    .suggestion = remove invalid path separator
 
 parse_invalid_unicode_escape = invalid unicode character escape
     .label = invalid escape

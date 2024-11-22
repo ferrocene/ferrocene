@@ -3007,8 +3007,7 @@ impl Step for RemoteCopyLibs {
         // Push all our dylibs to the emulator
         for f in t!(builder.sysroot_target_libdir(compiler, target).read_dir()) {
             let f = t!(f);
-            let name = f.file_name().into_string().unwrap();
-            if helpers::is_dylib(&name) {
+            if helpers::is_dylib(&f.path()) {
                 command(&tool).arg("push").arg(f.path()).run(builder);
             }
         }

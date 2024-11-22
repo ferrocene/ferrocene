@@ -4654,6 +4654,8 @@ version = "0.0.0"
 dependencies = [
  "rustc_data_structures",
  "rustc_span",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -4957,6 +4959,7 @@ name = "rustc_metadata"
 version = "0.0.0"
 dependencies = [
  "bitflags 2.6.0",
+ "libc",
  "libloading",
  "odht",
  "rustc_abi",

@@ -115,7 +115,7 @@ jobs:
         run: ferrocene/ci/scripts/clone-llvm-subset.sh
 
       - name: Run the pull-upstream automation
-        run: python3 ferrocene/tools/pull-upstream/automation.py ${{ matrix.branch }} ${{ steps.create_branch.outputs.name || 'main' }}
+        run: python3 ferrocene/tools/pull-upstream/automation.py ${{ matrix.branch }} ${{ steps.create_branch.outputs.name || 'beta' }}
         env:
           GITHUB_TOKEN: "${{ steps.auth.outputs.token }}"
           MAX_MERGES_PER_PR: "${{ github.event_name == 'workflow_dispatch' && inputs.max_merges_per_pr || 30 }}"

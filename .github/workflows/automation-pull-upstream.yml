@@ -16,6 +16,18 @@ on:
         type: number
         default: 30
         required: true
+      beta:
+        description: Pull from upstream's beta branch
+        type: boolean
+        default: true
+      master:
+        description: Pull from upstream's master branch
+        type: boolean
+        default: true
+      stable:
+        description: Pull from upstream's stable branch
+        type: boolean
+        default: true
 
 permissions:
   pull-requests: write
@@ -26,18 +38,41 @@ permissions:
   contents: read
 
 jobs:
+  define-matrix:
+    runs-on: ubuntu-latest
+
+    outputs:
+      branches: ${{ steps.define-branches.outputs.branches }}
+
+    steps:
+      - name: Define branches
+        id: define-branches
+        run: |
+          inputs='${{ toJson(github.event.inputs) }}'
+          branches=("master" "beta" "stable")
+          selected_branches=()
+
+          for branch in "${branches[@]}"; do
+            value=$(echo $inputs | jq -r ".$branch")
+            if [[ "$value" == "true" ]]; then
+              selected_branches+=("\"$branch\"")
+            fi
+          done
+
+          selected_branches=$(echo "${selected_branches[*]}" | tr ' ' ',' )
+
+          echo "branches=[$selected_branches]" >> "$GITHUB_OUTPUT"
+
   run:
     name: ${{ matrix.branch }}
+    needs: [define-matrix]
     runs-on: ubuntu-latest
     environment: automations
 
     strategy:
       fail-fast: false
       matrix:
-        branch:
-          - master # be sure to change the name in ferrocene/tools/pull-upstream/pull.sh if this changes
-          - beta
-          - stable
+        branch: ${{ fromJSON(needs.define-matrix.outputs.branches) }}
 
     steps:
       - name: Checkout the Ferrocene repository

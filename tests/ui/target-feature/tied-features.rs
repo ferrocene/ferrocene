@@ -3,7 +3,7 @@
 #![feature(no_core, lang_items)]
 #![no_core]
 
-#[lang="sized"]
+#[lang = "sized"]
 trait Sized {}
 
 pub fn main() {
@@ -30,14 +30,11 @@ unsafe fn bar() {}
 #[target_feature(enable = "pacg")]
 unsafe fn baz() {}
 
-<<<<<<< HEAD
-
-// ferrocene-annotations: fls_spdmit5fy7el
-// Attribute target_feature
-=======
 // Confirm that functions which do not end up collected for monomorphisation will still error.
 
 #[target_feature(enable = "paca")]
 //~^ ERROR must all be either enabled or disabled together
 unsafe fn unused() {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

@@ -355,11 +355,7 @@ mod defaults {
 mod dist {
     use pretty_assertions::assert_eq;
 
-<<<<<<< HEAD
-    use super::{Config, first, run_build, second};
-=======
-    use super::{Config, TEST_TRIPLE_1, TEST_TRIPLE_2, TEST_TRIPLE_3, first, run_build};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    use super::{Config, TEST_TRIPLE_1, TEST_TRIPLE_2, TEST_TRIPLE_3, first, run_build, second};
     use crate::core::builder::*;
     use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
 

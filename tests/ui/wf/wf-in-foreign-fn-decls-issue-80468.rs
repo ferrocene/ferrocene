@@ -14,7 +14,6 @@ impl Trait for Ref {} //~ ERROR:  implicit elided lifetime not allowed here
 
 extern "C" {
     pub fn repro(_: Wrapper<Ref>);
-    //~^ ERROR the trait bound `Ref<'_>: Trait` is not satisfied
 }
 
 // ferrocene-annotations: fls_ujig607lmwbm

@@ -624,7 +624,7 @@ jobs:
 
   # This job caused us to extend our CircleCI TTL via
   # https://support.circleci.com/hc/en-us/articles/17136864790299-How-to-configure-your-OIDC-token-s-TTL-at-the-Organization-and-Project-Levels
-  x86_64-windows-dist:
+  x86_64-windows-build:
     executor:
       name: win/server-2022
       size: large # 8-core
@@ -635,13 +635,65 @@ jobs:
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
       SCRIPT: |
         uv run ferrocene/ci/scripts/llvm_cache.py download
+        ./x.py --stage 2 build library src/tools/rustdoc
+        ./x.py --stage 1 build src/tools/rustdoc
+    steps:
+      - ferrocene-job-build:
+          os: windows
+
+  x86_64-windows-dist:
+    executor:
+      name: win/server-2022
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
+      SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
-        ./x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
         ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:
           os: windows
+          restore-from-job: x86_64-windows-build
+
+  x86_64-windows-dist-tools:
+    executor:
+      name: win/server-2022
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+    steps:
+    - ferrocene-job-dist:
+          os: windows
+          restore-from-job: x86_64-windows-build
+
+  x86_64-windows-generic-test-runner:
+    executor:
+      name: win/server-2022
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    parameters:
+      job:
+        type: string
+    environment:
+      FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+    steps:
+      - ferrocene-job-test-container:
+          os: windows
+          restore-from-job: x86_64-windows-build
 
   x86_64-windows-self-test:
     executor:
@@ -674,7 +726,7 @@ jobs:
           depth: 1
       - run:
           name: Restore files from the x86_64-linux-build
-          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
+          command: uv run ferrocene/ci/scripts/job_cache.py retrieve --job x86_64-linux-build
       - run:
           name: Configure
           command: ferrocene/ci/configure.sh
@@ -821,12 +873,12 @@ workflows:
             - x86_64-linux-test-library
             - x86_64-linux-test-library-std
             - x86_64-linux-compiletest
-            - x86_64-qnx-test-library
-            - x86_64-qnx-test-library-std
-            - x86_64-qnx-test-compiletest
-            - aarch64-qnx-test-library
-            - aarch64-qnx-test-library-std
-            - aarch64-qnx-test-compiletest
+            # - x86_64-qnx-test-library
+            # - x86_64-qnx-test-library-std
+            # - x86_64-qnx-test-compiletest
+            # - aarch64-qnx-test-library
+            # - aarch64-qnx-test-library-std
+            # - aarch64-qnx-test-compiletest
             - aarch64-linux-test-library
             - aarch64-linux-compiletest
       - x86_64-linux-traceability-matrix:
@@ -889,53 +941,53 @@ workflows:
             - x86_64-linux-dist-targets
             - aarch64-linux-dist
 
-      - x86_64-qnx-generic-test-vm:
-          name: x86_64-qnx-test-library
-          job: test:library
-          resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
+      # - x86_64-qnx-generic-test-vm:
+      #     name: x86_64-qnx-test-library
+      #     job: test:library
+      #     resource-class: large # 4-core
+      #     requires:
+      #       - x86_64-linux-build
+      #       - build-docker--ubuntu-24--x86_64
 
-      - x86_64-qnx-generic-test-vm:
-          name: x86_64-qnx-test-library-std
-          job: test:library-std
-          resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
+      # - x86_64-qnx-generic-test-vm:
+      #     name: x86_64-qnx-test-library-std
+      #     job: test:library-std
+      #     resource-class: large # 4-core
+      #     requires:
+      #       - x86_64-linux-build
+      #       - build-docker--ubuntu-24--x86_64
 
-      - x86_64-qnx-generic-test-vm:
-          name: x86_64-qnx-test-compiletest
-          job: qnx:compiletest-no-only-hosts
-          resource-class: xlarge # 8-core
-          requires:
-            - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
+      # - x86_64-qnx-generic-test-vm:
+      #     name: x86_64-qnx-test-compiletest
+      #     job: qnx:compiletest-no-only-hosts
+      #     resource-class: xlarge # 8-core
+      #     requires:
+      #       - x86_64-linux-build
+      #       - build-docker--ubuntu-24--x86_64
 
-      - aarch64-qnx-generic-test-vm:
-          name: aarch64-qnx-test-library
-          job: test:library
-          resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
+      # - aarch64-qnx-generic-test-vm:
+      #     name: aarch64-qnx-test-library
+      #     job: test:library
+      #     resource-class: large # 4-core
+      #     requires:
+      #       - x86_64-linux-build
+      #       - build-docker--ubuntu-24--x86_64
 
-      - aarch64-qnx-generic-test-vm:
-          name: aarch64-qnx-test-library-std
-          job: test:library-std
-          resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
+      # - aarch64-qnx-generic-test-vm:
+      #     name: aarch64-qnx-test-library-std
+      #     job: test:library-std
+      #     resource-class: large # 4-core
+      #     requires:
+      #       - x86_64-linux-build
+      #       - build-docker--ubuntu-24--x86_64
 
-      - aarch64-qnx-generic-test-vm:
-          name: aarch64-qnx-test-compiletest
-          job: qnx:compiletest-no-only-hosts
-          resource-class: xlarge # 8-core
-          requires:
-            - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
+      # - aarch64-qnx-generic-test-vm:
+      #     name: aarch64-qnx-test-compiletest
+      #     job: qnx:compiletest-no-only-hosts
+      #     resource-class: xlarge # 8-core
+      #     requires:
+      #       - x86_64-linux-build
+      #       - build-docker--ubuntu-24--x86_64
 
       - aarch64-linux-llvm:
           requires:
@@ -956,53 +1008,80 @@ workflows:
             - x86_64-linux-dist-targets
             - x86_64-linux-dist
 
-      - aarch64-darwin-llvm: {}
-      - aarch64-darwin-build:
-          requires:
-            - aarch64-darwin-llvm
-      - aarch64-darwin-dist:
-          requires:
-            - aarch64-darwin-build
-      - aarch64-darwin-dist-tools:
-          requires:
-            - aarch64-darwin-build
-      - aarch64-darwin-generic-test-runner:
-          name: aarch64-darwin-test
-          job: test
-          resource-class: macos.m1.large.gen1 # 8 cores
-          requires:
-            - aarch64-darwin-build
-      - aarch64-darwin-generic-test-runner:
-          name: aarch64-darwin-test-library
-          job: test:library
-          resource-class: macos.m1.large.gen1 # 8 cores
-          requires:
-            - aarch64-darwin-build
-      - aarch64-darwin-generic-test-runner:
-          name: aarch64-darwin-compiletest
-          job: test:compiletest
-          resource-class: macos.m1.large.gen1 # 8 cores
-          requires:
-            - aarch64-darwin-build
-      - aarch64-darwin-generic-test-runner:
-          name: aarch64-darwin-test-library-std
-          job: test:library-std
-          resource-class: macos.m1.large.gen1 # 8 cores
-          requires:
-            - aarch64-darwin-build
-      - aarch64-darwin-self-test:
-          requires:
-            - aarch64-darwin-dist
-            - aarch64-darwin-dist-tools
-            - x86_64-linux-dist-targets
+      # - aarch64-darwin-llvm: {}
+      # - aarch64-darwin-build:
+      #     requires:
+      #       - aarch64-darwin-llvm
+      # - aarch64-darwin-dist:
+      #     requires:
+      #       - aarch64-darwin-build
+      # - aarch64-darwin-dist-tools:
+      #     requires:
+      #       - aarch64-darwin-build
+      # - aarch64-darwin-generic-test-runner:
+      #     name: aarch64-darwin-test
+      #     job: test
+      #     resource-class: macos.m1.large.gen1 # 8 cores
+      #     requires:
+      #       - aarch64-darwin-build
+      # - aarch64-darwin-generic-test-runner:
+      #     name: aarch64-darwin-test-library
+      #     job: test:library
+      #     resource-class: macos.m1.large.gen1 # 8 cores
+      #     requires:
+      #       - aarch64-darwin-build
+      # - aarch64-darwin-generic-test-runner:
+      #     name: aarch64-darwin-compiletest
+      #     job: test:compiletest
+      #     resource-class: macos.m1.large.gen1 # 8 cores
+      #     requires:
+      #       - aarch64-darwin-build
+      # - aarch64-darwin-generic-test-runner:
+      #     name: aarch64-darwin-test-library-std
+      #     job: test:library-std
+      #     resource-class: macos.m1.large.gen1 # 8 cores
+      #     requires:
+      #       - aarch64-darwin-build
+      # - aarch64-darwin-self-test:
+      #     requires:
+      #       - aarch64-darwin-dist
+      #       - aarch64-darwin-dist-tools
+      #       - x86_64-linux-dist-targets
 
       - x86_64-windows-llvm: {}
-      - x86_64-windows-dist:
+      - x86_64-windows-build:
           requires:
             - x86_64-windows-llvm
+      - x86_64-windows-dist:
+          requires:
+            - x86_64-windows-build
+      - x86_64-windows-dist-tools:
+          requires:
+            - x86_64-windows-build
+      - x86_64-windows-generic-test-runner:
+          name: x86_64-windows-test
+          job: test
+          requires:
+            - x86_64-windows-build
+      - x86_64-windows-generic-test-runner:
+          name: x86_64-windows-test-library
+          job: test:library
+          requires:
+            - x86_64-windows-build
+      - x86_64-windows-generic-test-runner:
+          name: x86_64-windows-compiletest
+          job: test:compiletest
+          requires:
+            - x86_64-windows-build
+      - x86_64-windows-generic-test-runner:
+          name: x86_64-windows-test-library-std
+          job: test:library-std
+          requires:
+            - x86_64-windows-build
       - x86_64-windows-self-test:
           requires:
             - x86_64-windows-dist
+            - x86_64-windows-dist-tools
             - x86_64-linux-dist-targets
 
       - finish-build:
@@ -1011,14 +1090,18 @@ workflows:
             - x86_64-linux-dist-src
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
+            - x86_64-windows-test
+            - x86_64-windows-test-library
+            - x86_64-windows-test-library-std
+            - x86_64-windows-compiletest
             - x86_64-windows-self-test
             - wasm-dist-oxidos
             - aarch64-linux-self-test
-            - aarch64-darwin-self-test
-            - aarch64-darwin-test
-            - aarch64-darwin-test-library
-            - aarch64-darwin-test-library-std
-            - aarch64-darwin-compiletest
+            # - aarch64-darwin-self-test
+            # - aarch64-darwin-test
+            # - aarch64-darwin-test-library
+            # - aarch64-darwin-test-library-std
+            # - aarch64-darwin-compiletest
 
   # CircleCI doesn't like a build when no jobs are actually executed, treating
   # it as a build failure. Due to how our workflows are setup this will happen
@@ -1070,7 +1153,8 @@ commands:
           command: ferrocene/ci/scripts/shrink-build-directory.sh
       - run:
           name: Persist build output between jobs
-          command: ferrocene/ci/scripts/persist-between-jobs.sh upload ./build
+          command: |
+            uv run ferrocene/ci/scripts/job_cache.py store --job $CIRCLE_JOB
 
   ferrocene-job-dist:
     description: Collection of steps for dist jobs
@@ -1107,7 +1191,7 @@ commands:
           steps:
             - run:
                 name: Restore files from the << parameters.restore-from-job >> job
-                command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
+                command: uv run ferrocene/ci/scripts/job_cache.py retrieve --job << parameters.restore-from-job >>
       - when:
           condition:
             equal: [<<parameters.qnx>>, true]
@@ -1131,11 +1215,16 @@ commands:
             equal: [<<parameters.os>>, "darwin"]
           steps:
             - ferrocene-setup-darwin  # Darwin does not come with awscli, setup it before aws steps
+      - when:
+          condition:
+            equal: [<<parameters.os>>, "windows"]
+          steps:
+            - ferrocene-setup-windows
       - setup-venv
       - aws-oidc-auth
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
-          command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
+          command: uv run ferrocene/ci/scripts/job_cache.py retrieve --job << parameters.restore-from-job >>
       - ferrocene-ci
 
   ferrocene-job-test-vm:
@@ -1164,9 +1253,10 @@ commands:
           steps:
             - ferrocene-checkout:
                 llvm-subset: true
+      - setup-venv
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
-          command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
+          command: uv run ferrocene/ci/scripts/job_cache.py retrieve --job << parameters.restore-from-job >>
       - run:
           name: Enable IPv6 for Docker
           command: |

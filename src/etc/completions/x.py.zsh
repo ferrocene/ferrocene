@@ -629,10 +629,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in config.toml]:section.option=value:' \
-<<<<<<< HEAD
 '--bless[update all files of failing tests]' \
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -805,7 +802,6 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in config.toml]:section.option=value:' \
-<<<<<<< HEAD
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -848,8 +844,6 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in config.toml]:section.option=value:' \
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \

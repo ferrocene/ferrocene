@@ -118,18 +118,6 @@ should not be used in production.
      - Kind
      - Standard library
      - Notes
-
-   * - :target:`thumbv7em-none-eabi`
-     - ``thumbv7em-none-eabi``
-     - Cross-compilation
-     - Bare-metal
-     - \-
-
-   * - :target:`thumbv7em-none-eabihf`
-     - ``thumbv7em-none-eabihf``
-     - Cross-compilation
-     - Bare-metal
-     - \-
   
    * - :target:`armv8r-none-eabihf`
      - ``armv8r-none-eabihf``
@@ -163,6 +151,24 @@ should not be used in production.
 
    * - :target:`armebv7r-none-eabihf`
      - ``armebv7r-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - \-
+
+   * - :target:`thumbv7em-none-eabi`
+     - ``thumbv7em-none-eabi``
+     - Cross-compilation
+     - Bare-metal
+     - \-
+
+   * - :target:`thumbv7em-none-eabihf`
+     - ``thumbv7em-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - \-
+
+   * - :target:`thumbv6m-none-eabi`
+     - ``thumbv6m-none-eabi``
      - Cross-compilation
      - Bare-metal
      - \-

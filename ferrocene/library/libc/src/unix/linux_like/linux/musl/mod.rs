@@ -19,7 +19,9 @@ pub type shmatt_t = ::c_ulong;
 pub type msgqnum_t = ::c_ulong;
 pub type msglen_t = ::c_ulong;
 pub type fsblkcnt_t = ::c_ulonglong;
+pub type fsblkcnt64_t = ::c_ulonglong;
 pub type fsfilcnt_t = ::c_ulonglong;
+pub type fsfilcnt64_t = ::c_ulonglong;
 pub type rlim_t = ::c_ulonglong;
 
 cfg_if! {
@@ -58,65 +60,61 @@ impl siginfo_t {
     }
 }
 
-cfg_if! {
-    if #[cfg(libc_union)] {
-        // Internal, for casts to access union fields
-        #[repr(C)]
-        struct sifields_sigchld {
-            si_pid: ::pid_t,
-            si_uid: ::uid_t,
-            si_status: ::c_int,
-            si_utime: ::c_long,
-            si_stime: ::c_long,
-        }
-        impl ::Copy for sifields_sigchld {}
-        impl ::Clone for sifields_sigchld {
-            fn clone(&self) -> sifields_sigchld {
-                *self
-            }
-        }
+// Internal, for casts to access union fields
+#[repr(C)]
+struct sifields_sigchld {
+    si_pid: ::pid_t,
+    si_uid: ::uid_t,
+    si_status: ::c_int,
+    si_utime: ::c_long,
+    si_stime: ::c_long,
+}
+impl ::Copy for sifields_sigchld {}
+impl ::Clone for sifields_sigchld {
+    fn clone(&self) -> sifields_sigchld {
+        *self
+    }
+}
 
-        // Internal, for casts to access union fields
-        #[repr(C)]
-        union sifields {
-            _align_pointer: *mut ::c_void,
-            sigchld: sifields_sigchld,
-        }
+// Internal, for casts to access union fields
+#[repr(C)]
+union sifields {
+    _align_pointer: *mut ::c_void,
+    sigchld: sifields_sigchld,
+}
 
-        // Internal, for casts to access union fields. Note that some variants
-        // of sifields start with a pointer, which makes the alignment of
-        // sifields vary on 32-bit and 64-bit architectures.
-        #[repr(C)]
-        struct siginfo_f {
-            _siginfo_base: [::c_int; 3],
-            sifields: sifields,
-        }
+// Internal, for casts to access union fields. Note that some variants
+// of sifields start with a pointer, which makes the alignment of
+// sifields vary on 32-bit and 64-bit architectures.
+#[repr(C)]
+struct siginfo_f {
+    _siginfo_base: [::c_int; 3],
+    sifields: sifields,
+}
 
-        impl siginfo_t {
-            unsafe fn sifields(&self) -> &sifields {
-                &(*(self as *const siginfo_t as *const siginfo_f)).sifields
-            }
+impl siginfo_t {
+    unsafe fn sifields(&self) -> &sifields {
+        &(*(self as *const siginfo_t as *const siginfo_f)).sifields
+    }
 
-            pub unsafe fn si_pid(&self) -> ::pid_t {
-                self.sifields().sigchld.si_pid
-            }
+    pub unsafe fn si_pid(&self) -> ::pid_t {
+        self.sifields().sigchld.si_pid
+    }
 
-            pub unsafe fn si_uid(&self) -> ::uid_t {
-                self.sifields().sigchld.si_uid
-            }
+    pub unsafe fn si_uid(&self) -> ::uid_t {
+        self.sifields().sigchld.si_uid
+    }
 
-            pub unsafe fn si_status(&self) -> ::c_int {
-                self.sifields().sigchld.si_status
-            }
+    pub unsafe fn si_status(&self) -> ::c_int {
+        self.sifields().sigchld.si_status
+    }
 
-            pub unsafe fn si_utime(&self) -> ::c_long {
-                self.sifields().sigchld.si_utime
-            }
+    pub unsafe fn si_utime(&self) -> ::c_long {
+        self.sifields().sigchld.si_utime
+    }
 
-            pub unsafe fn si_stime(&self) -> ::c_long {
-                self.sifields().sigchld.si_stime
-            }
-        }
+    pub unsafe fn si_stime(&self) -> ::c_long {
+        self.sifields().sigchld.si_stime
     }
 }
 
@@ -145,7 +143,28 @@ s! {
         pub sa_sigaction: ::sighandler_t,
         pub sa_mask: ::sigset_t,
         pub sa_flags: ::c_int,
-        pub sa_restorer: ::Option<extern fn()>,
+        pub sa_restorer: ::Option<extern "C" fn()>,
+    }
+
+    // `mips*` targets swap the `s_errno` and `s_code` fields otherwise this struct is
+    // target-agnostic (see https://www.openwall.com/lists/musl/2016/01/27/1/2)
+    //
+    // FIXME(union): C implementation uses unions
+    pub struct siginfo_t {
+        pub si_signo: ::c_int,
+        #[cfg(not(target_arch = "mips"))]
+        pub si_errno: ::c_int,
+        pub si_code: ::c_int,
+        #[cfg(target_arch = "mips")]
+        pub si_errno: ::c_int,
+        #[doc(hidden)]
+        #[deprecated(
+            since = "0.2.54",
+            note = "Please leave a comment on https://github.com/rust-lang/libc/pull/1316 \
+                  if you're using this field"
+        )]
+        pub _pad: [::c_int; 29],
+        _align: [usize; 0],
     }
 
     pub struct statvfs {
@@ -160,12 +179,32 @@ s! {
         #[cfg(target_endian = "little")]
         pub f_fsid: ::c_ulong,
         #[cfg(target_pointer_width = "32")]
-        __f_unused: ::c_int,
+        __pad: ::c_int,
         #[cfg(target_endian = "big")]
         pub f_fsid: ::c_ulong,
         pub f_flag: ::c_ulong,
         pub f_namemax: ::c_ulong,
-        __f_spare: [::c_int; 6],
+        __f_reserved: [::c_int; 6],
+    }
+
+    pub struct statvfs64 {
+        pub f_bsize: ::c_ulong,
+        pub f_frsize: ::c_ulong,
+        pub f_blocks: ::fsblkcnt64_t,
+        pub f_bfree: ::fsblkcnt64_t,
+        pub f_bavail: ::fsblkcnt64_t,
+        pub f_files: ::fsfilcnt64_t,
+        pub f_ffree: ::fsfilcnt64_t,
+        pub f_favail: ::fsfilcnt64_t,
+        #[cfg(target_endian = "little")]
+        pub f_fsid: ::c_ulong,
+        #[cfg(target_pointer_width = "32")]
+        __pad: ::c_int,
+        #[cfg(target_endian = "big")]
+        pub f_fsid: ::c_ulong,
+        pub f_flag: ::c_ulong,
+        pub f_namemax: ::c_ulong,
+        __f_reserved: [::c_int; 6],
     }
 
     pub struct termios {
@@ -315,6 +354,7 @@ s! {
         pub chunk_size: ::__u32,
         pub headroom: ::__u32,
         pub flags: ::__u32,
+        pub tx_metadata_len: ::__u32,
     }
 
     pub struct xdp_umem_reg_v1 {
@@ -359,14 +399,16 @@ s! {
         pub tcpi_backoff: u8,
         pub tcpi_options: u8,
         /*
-         * FIXME(musl): when musl headers are more up to date
+         * FIXME(musl): enable on all targets once musl headers are more up to date
+         */
         /// This contains the bitfields `tcpi_snd_wscale` and `tcpi_rcv_wscale`.
         /// Each is 4 bits.
+        #[cfg(target_arch = "loongarch64")]
         pub tcpi_snd_rcv_wscale: u8,
         /// This contains the bitfields `tcpi_delivery_rate_app_limited` (1 bit) and
         /// `tcpi_fastopen_client_fail` (2 bits).
+        #[cfg(target_arch = "loongarch64")]
         pub tcpi_delivery_fastopen_bitfields: u8,
-        */
         pub tcpi_rto: u32,
         pub tcpi_ato: u32,
         pub tcpi_snd_mss: u32,
@@ -411,9 +453,45 @@ s! {
         pub tcpi_bytes_retrans: u64,
         pub tcpi_dsack_dups: u32,
         pub tcpi_reord_seen: u32,
-        // FIXME(musl): to uncomment once CI musl is updated
-        //pub tcpi_rcv_ooopack: u32,
-        //pub tcpi_snd_wnd: u32,
+        // FIXME(musl): enable on all targets once CI musl is updated
+        #[cfg(target_arch = "loongarch64")]
+        pub tcpi_rcv_ooopack: u32,
+        #[cfg(target_arch = "loongarch64")]
+        pub tcpi_snd_wnd: u32,
+    }
+
+    // MIPS implementation is special (see mips arch folders)
+    #[cfg(not(target_arch = "mips"))]
+    pub struct statfs {
+        pub f_type: ::c_ulong,
+        pub f_bsize: ::c_ulong,
+        pub f_blocks: ::fsblkcnt_t,
+        pub f_bfree: ::fsblkcnt_t,
+        pub f_bavail: ::fsblkcnt_t,
+        pub f_files: ::fsfilcnt_t,
+        pub f_ffree: ::fsfilcnt_t,
+        pub f_fsid: ::fsid_t,
+        pub f_namelen: ::c_ulong,
+        pub f_frsize: ::c_ulong,
+        pub f_flags: ::c_ulong,
+        pub f_spare: [::c_ulong; 4],
+    }
+
+    // MIPS implementation is special (see mips arch folders)
+    #[cfg(not(target_arch = "mips"))]
+    pub struct statfs64 {
+        pub f_type: ::c_ulong,
+        pub f_bsize: ::c_ulong,
+        pub f_blocks: ::fsblkcnt64_t,
+        pub f_bfree: ::fsblkcnt64_t,
+        pub f_bavail: ::fsblkcnt64_t,
+        pub f_files: ::fsfilcnt64_t,
+        pub f_ffree: ::fsfilcnt64_t,
+        pub f_fsid: ::fsid_t,
+        pub f_namelen: ::c_ulong,
+        pub f_frsize: ::c_ulong,
+        pub f_flags: ::c_ulong,
+        pub f_spare: [::c_ulong; 4],
     }
 }
 
@@ -453,7 +531,16 @@ s_no_extra_traits! {
         pub ut_exit: __exit_status,
 
         #[cfg(target_env = "musl")]
+        #[cfg(not(target_arch = "loongarch64"))]
         pub ut_session: ::c_long,
+
+        #[cfg(target_env = "musl")]
+        #[cfg(target_arch = "loongarch64")]
+        pub ut_session: ::c_int,
+
+        #[cfg(target_env = "musl")]
+        #[cfg(target_arch = "loongarch64")]
+        __ut_pad2: ::c_int,
 
         #[cfg(target_env = "ohos")]
         #[cfg(target_endian = "little")]
@@ -496,7 +583,7 @@ cfg_if! {
                         .__reserved
                         .iter()
                         .zip(other.__reserved.iter())
-                        .all(|(a,b)| a == b)
+                        .all(|(a, b)| a == b)
             }
         }
 
@@ -716,7 +803,10 @@ pub const __SIZEOF_PTHREAD_MUTEXATTR_T: usize = 4;
 pub const __SIZEOF_PTHREAD_RWLOCKATTR_T: usize = 8;
 pub const __SIZEOF_PTHREAD_BARRIERATTR_T: usize = 4;
 
+#[cfg(not(target_arch = "loongarch64"))]
 pub const CPU_SETSIZE: ::c_int = 128;
+#[cfg(target_arch = "loongarch64")]
+pub const CPU_SETSIZE: ::c_int = 1024;
 
 pub const PTRACE_TRACEME: ::c_int = 0;
 pub const PTRACE_PEEKTEXT: ::c_int = 1;
@@ -899,6 +989,9 @@ pub const XSK_UNALIGNED_BUF_ADDR_MASK: ::c_ulonglong = (1 << XSK_UNALIGNED_BUF_O
 
 pub const XDP_PKT_CONTD: ::__u32 = 1 << 0;
 
+pub const _CS_V6_ENV: ::c_int = 1148;
+pub const _CS_V7_ENV: ::c_int = 1149;
+
 cfg_if! {
     if #[cfg(target_arch = "s390x")] {
         pub const POSIX_FADV_DONTNEED: ::c_int = 6;
@@ -994,6 +1087,13 @@ extern "C" {
         actions: *mut ::posix_spawn_file_actions_t,
         fd: ::c_int,
     ) -> ::c_int;
+
+    pub fn getutxent() -> *mut utmpx;
+    pub fn getutxid(ut: *const utmpx) -> *mut utmpx;
+    pub fn getutxline(ut: *const utmpx) -> *mut utmpx;
+    pub fn pututxline(ut: *const utmpx) -> *mut utmpx;
+    pub fn setutxent();
+    pub fn endutxent();
 }
 
 // Alias <foo> to <foo>64 to mimic glibc's LFS64 support
@@ -1001,22 +1101,27 @@ mod lfs64;
 pub use self::lfs64::*;
 
 cfg_if! {
-    if #[cfg(any(target_arch = "x86_64",
-                 target_arch = "aarch64",
-                 target_arch = "mips64",
-                 target_arch = "powerpc64",
-                 target_arch = "s390x",
-                 target_arch = "riscv64",
-                 target_arch = "loongarch64"))] {
+    if #[cfg(any(
+        target_arch = "x86_64",
+        target_arch = "aarch64",
+        target_arch = "mips64",
+        target_arch = "powerpc64",
+        target_arch = "s390x",
+        target_arch = "riscv64",
+        target_arch = "loongarch64"
+    ))] {
         mod b64;
         pub use self::b64::*;
-    } else if #[cfg(any(target_arch = "x86",
-                        target_arch = "mips",
-                        target_arch = "powerpc",
-                        target_arch = "hexagon",
-                        target_arch = "riscv32",
-                        target_arch = "arm"))] {
+    } else if #[cfg(any(
+        target_arch = "x86",
+        target_arch = "mips",
+        target_arch = "powerpc",
+        target_arch = "hexagon",
+        target_arch = "riscv32",
+        target_arch = "arm"
+    ))] {
         mod b32;
         pub use self::b32::*;
-    } else { }
+    } else {
+    }
 }

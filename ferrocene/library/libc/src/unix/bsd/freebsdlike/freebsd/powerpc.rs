@@ -7,38 +7,34 @@ pub type time_t = i64;
 pub type suseconds_t = i32;
 pub type register_t = i32;
 
-cfg_if! {
-    if #[cfg(libc_align)] {
-        s_no_extra_traits! {
-            #[repr(align(16))]
-            pub struct mcontext_t {
-                pub mc_vers: ::c_int,
-                pub mc_flags: ::c_int,
-                pub mc_onstack: ::c_int,
-                pub mc_len: ::c_int,
-                pub mc_avec: [u64; 64],
-                pub mc_av: [u32; 2],
-                pub mc_frame: [::register_t; 42],
-                pub mc_fpreg: [u64; 33],
-                pub mc_vsxfpreg: [u64; 32],
-            }
-        }
+s_no_extra_traits! {
+    #[repr(align(16))]
+    pub struct mcontext_t {
+        pub mc_vers: ::c_int,
+        pub mc_flags: ::c_int,
+        pub mc_onstack: ::c_int,
+        pub mc_len: ::c_int,
+        pub mc_avec: [u64; 64],
+        pub mc_av: [u32; 2],
+        pub mc_frame: [::register_t; 42],
+        pub mc_fpreg: [u64; 33],
+        pub mc_vsxfpreg: [u64; 32],
     }
 }
 
 cfg_if! {
-    if #[cfg(all(libc_align, feature = "extra_traits"))] {
+    if #[cfg(feature = "extra_traits")] {
         impl PartialEq for mcontext_t {
             fn eq(&self, other: &mcontext_t) -> bool {
-                self.mc_vers == other.mc_vers &&
-                self.mc_flags == other.mc_flags &&
-                self.mc_onstack == other.mc_onstack &&
-                self.mc_len == other.mc_len &&
-                self.mc_avec == other.mc_avec &&
-                self.mc_av == other.mc_av &&
-                self.mc_frame == other.mc_frame &&
-                self.mc_fpreg == other.mc_fpreg &&
-                self.mc_vsxfpreg == other.mc_vsxfpreg
+                self.mc_vers == other.mc_vers
+                    && self.mc_flags == other.mc_flags
+                    && self.mc_onstack == other.mc_onstack
+                    && self.mc_len == other.mc_len
+                    && self.mc_avec == other.mc_avec
+                    && self.mc_av == other.mc_av
+                    && self.mc_frame == other.mc_frame
+                    && self.mc_fpreg == other.mc_fpreg
+                    && self.mc_vsxfpreg == other.mc_vsxfpreg
             }
         }
         impl Eq for mcontext_t {}
@@ -73,16 +69,7 @@ cfg_if! {
     }
 }
 
-// should be pub(crate), but that requires Rust 1.18.0
-cfg_if! {
-    if #[cfg(libc_const_size_of)] {
-        #[doc(hidden)]
-        pub const _ALIGNBYTES: usize = ::mem::size_of::<::c_int>() - 1;
-    } else {
-        #[doc(hidden)]
-        pub const _ALIGNBYTES: usize = 4 - 1;
-    }
-}
+pub(crate) const _ALIGNBYTES: usize = ::mem::size_of::<::c_int>() - 1;
 
 pub const BIOCSRTIMEOUT: ::c_ulong = 0x8010426d;
 pub const BIOCGRTIMEOUT: ::c_ulong = 0x4010426e;

@@ -16,7 +16,7 @@ s! {
         #[cfg(target_arch = "sparc64")]
         __reserved0: ::c_int,
         pub sa_flags: ::c_int,
-        pub sa_restorer: ::Option<extern fn()>,
+        pub sa_restorer: ::Option<extern "C" fn()>,
     }
 
     pub struct statfs {
@@ -57,8 +57,8 @@ s! {
         pub si_code: ::c_int,
         #[doc(hidden)]
         #[deprecated(
-            since="0.2.54",
-            note="Please leave a comment on \
+            since = "0.2.54",
+            note = "Please leave a comment on \
                   https://github.com/rust-lang/libc/pull/1316 if you're using \
                   this field"
         )]
@@ -69,7 +69,7 @@ s! {
     pub struct stack_t {
         pub ss_sp: *mut ::c_void,
         pub ss_flags: ::c_int,
-        pub ss_size: ::size_t
+        pub ss_size: ::size_t,
     }
 
     pub struct stat {
@@ -148,7 +148,7 @@ s! {
         #[cfg(target_pointer_width = "32")]
         __size: [u32; 8],
         #[cfg(target_pointer_width = "64")]
-        __size: [u64; 7]
+        __size: [u64; 7],
     }
 
     pub struct _libc_fpxreg {
@@ -244,7 +244,7 @@ s! {
         pub __seq: ::c_ushort,
         __pad2: ::c_ushort,
         __unused1: u64,
-        __unused2: u64
+        __unused2: u64,
     }
 
     pub struct shmid_ds {
@@ -257,7 +257,7 @@ s! {
         pub shm_lpid: ::pid_t,
         pub shm_nattch: ::shmatt_t,
         __unused4: u64,
-        __unused5: u64
+        __unused5: u64,
     }
 
     pub struct ptrace_rseq_configuration {
@@ -266,6 +266,21 @@ s! {
         pub signature: ::__u32,
         pub flags: ::__u32,
         pub pad: ::__u32,
+    }
+
+    #[repr(align(8))]
+    pub struct clone_args {
+        pub flags: ::c_ulonglong,
+        pub pidfd: ::c_ulonglong,
+        pub child_tid: ::c_ulonglong,
+        pub parent_tid: ::c_ulonglong,
+        pub exit_signal: ::c_ulonglong,
+        pub stack: ::c_ulonglong,
+        pub stack_size: ::c_ulonglong,
+        pub tls: ::c_ulonglong,
+        pub set_tid: ::c_ulonglong,
+        pub set_tid_size: ::c_ulonglong,
+        pub cgroup: ::c_ulonglong,
     }
 }
 
@@ -297,6 +312,12 @@ s_no_extra_traits! {
         //
         // __ssp: [::c_ulonglong; 4],
     }
+
+    #[allow(missing_debug_implementations)]
+    #[repr(align(16))]
+    pub struct max_align_t {
+        priv_: [f64; 4],
+    }
 }
 
 cfg_if! {
@@ -313,10 +334,10 @@ cfg_if! {
                     && self.mxcr_mask == other.mxcr_mask
                     && self.st_space == other.st_space
                     && self
-                    .xmm_space
-                    .iter()
-                    .zip(other.xmm_space.iter())
-                    .all(|(a,b)| a == b)
+                        .xmm_space
+                        .iter()
+                        .zip(other.xmm_space.iter())
+                        .all(|(a, b)| a == b)
                 // Ignore padding field
             }
         }
@@ -334,8 +355,8 @@ cfg_if! {
                     .field("mxcsr", &self.mxcsr)
                     .field("mxcr_mask", &self.mxcr_mask)
                     .field("st_space", &self.st_space)
-                // FIXME: .field("xmm_space", &self.xmm_space)
-                // Ignore padding field
+                    // FIXME: .field("xmm_space", &self.xmm_space)
+                    // Ignore padding field
                     .finish()
             }
         }
@@ -376,7 +397,7 @@ cfg_if! {
                     .field("uc_stack", &self.uc_stack)
                     .field("uc_mcontext", &self.uc_mcontext)
                     .field("uc_sigmask", &self.uc_sigmask)
-                // Ignore __private field
+                    // Ignore __private field
                     .finish()
             }
         }
@@ -811,12 +832,5 @@ cfg_if! {
     } else {
         mod not_x32;
         pub use self::not_x32::*;
-    }
-}
-
-cfg_if! {
-    if #[cfg(libc_align)] {
-        mod align;
-        pub use self::align::*;
     }
 }

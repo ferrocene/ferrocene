@@ -3,6 +3,8 @@
 //! More functions and definitions can be found in the more specific modules
 //! according to the platform in question.
 
+use c_void;
+
 // PUB_TYPE
 
 pub type c_schar = i8;
@@ -253,7 +255,7 @@ s! {
 
     pub struct sigval {
         // Actually a union of an int and a void*
-        pub sival_ptr: *mut ::c_void
+        pub sival_ptr: *mut ::c_void,
     }
 
     // <sys/time.h>
@@ -307,7 +309,7 @@ s! {
         pub sa_sigaction: ::sighandler_t,
         pub sa_mask: ::sigset_t,
         pub sa_flags: ::c_int,
-        pub sa_restorer: ::Option<extern fn()>,
+        pub sa_restorer: ::Option<extern "C" fn()>,
     }
 
     pub struct termios {
@@ -376,11 +378,11 @@ s! {
         pub sll_hatype: ::c_ushort,
         pub sll_pkttype: ::c_uchar,
         pub sll_halen: ::c_uchar,
-        pub sll_addr: [::c_uchar; 8]
+        pub sll_addr: [::c_uchar; 8],
     }
 
     pub struct fd_set {
-        fds_bits: [::c_ulong; FD_SETSIZE / ULONG_SIZE],
+        fds_bits: [::c_ulong; FD_SETSIZE as usize / ULONG_SIZE],
     }
 
     pub struct tm {
@@ -469,7 +471,7 @@ s! {
         pub ifa_addr: *mut ::sockaddr,
         pub ifa_netmask: *mut ::sockaddr,
         pub ifa_ifu: *mut ::sockaddr, // FIXME This should be a union
-        pub ifa_data: *mut ::c_void
+        pub ifa_data: *mut ::c_void,
     }
 
     pub struct passwd {
@@ -561,11 +563,9 @@ s! {
     }
 
     pub struct cpu_set_t {
-        #[cfg(all(target_pointer_width = "32",
-                  not(target_arch = "x86_64")))]
+        #[cfg(all(target_pointer_width = "32", not(target_arch = "x86_64")))]
         bits: [u32; 32],
-        #[cfg(not(all(target_pointer_width = "32",
-                      not(target_arch = "x86_64"))))]
+        #[cfg(not(all(target_pointer_width = "32", not(target_arch = "x86_64"))))]
         bits: [u64; 16],
     }
 
@@ -697,7 +697,7 @@ s! {
         pub direction: ::__u16,
         pub trigger: ff_trigger,
         pub replay: ff_replay,
-        // FIXME this is actually a union
+        // FIXME(1.0): this is actually a union
         #[cfg(target_pointer_width = "64")]
         pub u: [u64; 4],
         #[cfg(target_pointer_width = "32")]
@@ -783,11 +783,11 @@ s! {
     pub struct stack_t {
         pub ss_sp: *mut ::c_void,
         pub ss_flags: ::c_int,
-        pub ss_size: ::size_t
+        pub ss_size: ::size_t,
     }
 
     pub struct pthread_attr_t {
-        __size: [u64; 7]
+        __size: [u64; 7],
     }
 
     pub struct sigset_t {
@@ -882,6 +882,29 @@ s! {
         pub ipi6_addr: ::in6_addr,
         pub ipi6_ifindex: ::c_uint,
     }
+
+    #[cfg_attr(
+        any(target_pointer_width = "32", target_arch = "x86_64"),
+        repr(align(4))
+    )]
+    #[cfg_attr(
+        not(any(target_pointer_width = "32", target_arch = "x86_64")),
+        repr(align(8))
+    )]
+    pub struct pthread_mutexattr_t {
+        size: [u8; ::__SIZEOF_PTHREAD_MUTEXATTR_T],
+    }
+
+    #[cfg_attr(target_pointer_width = "32", repr(align(4)))]
+    #[cfg_attr(target_pointer_width = "64", repr(align(8)))]
+    pub struct pthread_rwlockattr_t {
+        size: [u8; ::__SIZEOF_PTHREAD_RWLOCKATTR_T],
+    }
+
+    #[repr(align(4))]
+    pub struct pthread_condattr_t {
+        size: [u8; ::__SIZEOF_PTHREAD_CONDATTR_T],
+    }
 }
 
 s_no_extra_traits! {
@@ -904,7 +927,7 @@ s_no_extra_traits! {
 
     pub struct sockaddr_un {
         pub sun_family: sa_family_t,
-        pub sun_path: [::c_char; 108]
+        pub sun_path: [::c_char; 108],
     }
 
     pub struct sockaddr_storage {
@@ -919,7 +942,7 @@ s_no_extra_traits! {
         pub release: [::c_char; 65],
         pub version: [::c_char; 65],
         pub machine: [::c_char; 65],
-        pub domainname: [::c_char; 65]
+        pub domainname: [::c_char; 65],
     }
 
     pub struct dirent {
@@ -968,7 +991,7 @@ s_no_extra_traits! {
         pub nl_family: ::sa_family_t,
         nl_pad: ::c_ushort,
         pub nl_pid: u32,
-        pub nl_groups: u32
+        pub nl_groups: u32,
     }
 
     pub struct sigevent {
@@ -977,7 +1000,51 @@ s_no_extra_traits! {
         pub sigev_notify: ::c_int,
         pub sigev_notify_function: fn(::sigval),
         pub sigev_notify_attributes: *mut pthread_attr_t,
-        pub __pad: [::c_char; 56 - 3 * 8 /* 8 == sizeof(long) */],
+        pub __pad: [::c_char; 56 - 3 * 8],
+    }
+
+    #[cfg_attr(
+        all(
+            target_pointer_width = "32",
+            any(target_arch = "arm", target_arch = "x86_64")
+        ),
+        repr(align(4))
+    )]
+    #[cfg_attr(
+        any(
+            target_pointer_width = "64",
+            not(any(target_arch = "arm", target_arch = "x86_64"))
+        ),
+        repr(align(8))
+    )]
+    pub struct pthread_mutex_t {
+        size: [u8; ::__SIZEOF_PTHREAD_MUTEX_T],
+    }
+
+    #[cfg_attr(
+        all(
+            target_pointer_width = "32",
+            any(target_arch = "arm", target_arch = "x86_64")
+        ),
+        repr(align(4))
+    )]
+    #[cfg_attr(
+        any(
+            target_pointer_width = "64",
+            not(any(target_arch = "arm", target_arch = "x86_64"))
+        ),
+        repr(align(8))
+    )]
+    pub struct pthread_rwlock_t {
+        size: [u8; ::__SIZEOF_PTHREAD_RWLOCK_T],
+    }
+
+    #[cfg_attr(target_pointer_width = "32", repr(align(4)))]
+    #[cfg_attr(target_pointer_width = "64", repr(align(8)))]
+    #[cfg_attr(target_arch = "x86", repr(align(4)))]
+    #[cfg_attr(not(target_arch = "x86"), repr(align(8)))]
+    pub struct pthread_cond_t {
+        size: [u8; ::__SIZEOF_PTHREAD_COND_T],
     }
 }
 
@@ -1002,7 +1069,7 @@ cfg_if! {
                         .__reserved
                         .iter()
                         .zip(other.__reserved.iter())
-                        .all(|(a,b)| a == b)
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for sysinfo {}
@@ -1049,10 +1116,10 @@ cfg_if! {
             fn eq(&self, other: &sockaddr_un) -> bool {
                 self.sun_family == other.sun_family
                     && self
-                    .sun_path
-                    .iter()
-                    .zip(other.sun_path.iter())
-                    .all(|(a,b)| a == b)
+                        .sun_path
+                        .iter()
+                        .zip(other.sun_path.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for sockaddr_un {}
@@ -1076,10 +1143,10 @@ cfg_if! {
                 self.ss_family == other.ss_family
                     && self.__ss_align == other.__ss_align
                     && self
-                    .__ss_pad2
-                    .iter()
-                    .zip(other.__ss_pad2.iter())
-                    .all(|(a, b)| a == b)
+                        .__ss_pad2
+                        .iter()
+                        .zip(other.__ss_pad2.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for sockaddr_storage {}
@@ -1105,27 +1172,27 @@ cfg_if! {
                 self.sysname
                     .iter()
                     .zip(other.sysname.iter())
-                    .all(|(a,b)| a == b)
+                    .all(|(a, b)| a == b)
                     && self
-                    .nodename
-                    .iter()
-                    .zip(other.nodename.iter())
-                    .all(|(a,b)| a == b)
+                        .nodename
+                        .iter()
+                        .zip(other.nodename.iter())
+                        .all(|(a, b)| a == b)
                     && self
-                    .release
-                    .iter()
-                    .zip(other.release.iter())
-                    .all(|(a,b)| a == b)
+                        .release
+                        .iter()
+                        .zip(other.release.iter())
+                        .all(|(a, b)| a == b)
                     && self
-                    .version
-                    .iter()
-                    .zip(other.version.iter())
-                    .all(|(a,b)| a == b)
+                        .version
+                        .iter()
+                        .zip(other.version.iter())
+                        .all(|(a, b)| a == b)
                     && self
-                    .machine
-                    .iter()
-                    .zip(other.machine.iter())
-                    .all(|(a,b)| a == b)
+                        .machine
+                        .iter()
+                        .zip(other.machine.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for utsname {}
@@ -1157,10 +1224,10 @@ cfg_if! {
                     && self.d_reclen == other.d_reclen
                     && self.d_type == other.d_type
                     && self
-                    .d_name
-                    .iter()
-                    .zip(other.d_name.iter())
-                    .all(|(a,b)| a == b)
+                        .d_name
+                        .iter()
+                        .zip(other.d_name.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for dirent {}
@@ -1192,10 +1259,10 @@ cfg_if! {
                     && self.d_reclen == other.d_reclen
                     && self.d_type == other.d_type
                     && self
-                    .d_name
-                    .iter()
-                    .zip(other.d_name.iter())
-                    .all(|(a,b)| a == b)
+                        .d_name
+                        .iter()
+                        .zip(other.d_name.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for dirent64 {}
@@ -1222,10 +1289,10 @@ cfg_if! {
 
         impl PartialEq for mq_attr {
             fn eq(&self, other: &mq_attr) -> bool {
-                self.mq_flags == other.mq_flags &&
-                self.mq_maxmsg == other.mq_maxmsg &&
-                self.mq_msgsize == other.mq_msgsize &&
-                self.mq_curmsgs == other.mq_curmsgs
+                self.mq_flags == other.mq_flags
+                    && self.mq_maxmsg == other.mq_maxmsg
+                    && self.mq_msgsize == other.mq_msgsize
+                    && self.mq_curmsgs == other.mq_curmsgs
             }
         }
         impl Eq for mq_attr {}
@@ -1250,9 +1317,9 @@ cfg_if! {
 
         impl PartialEq for sockaddr_nl {
             fn eq(&self, other: &sockaddr_nl) -> bool {
-                self.nl_family == other.nl_family &&
-                self.nl_pid == other.nl_pid &&
-                self.nl_groups == other.nl_groups
+                self.nl_family == other.nl_family
+                    && self.nl_pid == other.nl_pid
+                    && self.nl_groups == other.nl_groups
             }
         }
         impl Eq for sockaddr_nl {}
@@ -1278,10 +1345,8 @@ cfg_if! {
                 self.sigev_value == other.sigev_value
                     && self.sigev_signo == other.sigev_signo
                     && self.sigev_notify == other.sigev_notify
-                    && self.sigev_notify_function
-                        == other.sigev_notify_function
-                    && self.sigev_notify_attributes
-                        == other.sigev_notify_attributes
+                    && self.sigev_notify_function == other.sigev_notify_function
+                    && self.sigev_notify_attributes == other.sigev_notify_attributes
             }
         }
         impl Eq for sigevent {}
@@ -1292,8 +1357,7 @@ cfg_if! {
                     .field("sigev_signo", &self.sigev_signo)
                     .field("sigev_notify", &self.sigev_notify)
                     .field("sigev_notify_function", &self.sigev_notify_function)
-                    .field("sigev_notify_attributes",
-                           &self.sigev_notify_attributes)
+                    .field("sigev_notify_attributes", &self.sigev_notify_attributes)
                     .finish()
             }
         }
@@ -1304,6 +1368,63 @@ cfg_if! {
                 self.sigev_notify.hash(state);
                 self.sigev_notify_function.hash(state);
                 self.sigev_notify_attributes.hash(state);
+            }
+        }
+
+        impl PartialEq for pthread_cond_t {
+            fn eq(&self, other: &pthread_cond_t) -> bool {
+                self.size.iter().zip(other.size.iter()).all(|(a, b)| a == b)
+            }
+        }
+        impl Eq for pthread_cond_t {}
+        impl ::fmt::Debug for pthread_cond_t {
+            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
+                f.debug_struct("pthread_cond_t")
+                    // FIXME: .field("size", &self.size)
+                    .finish()
+            }
+        }
+        impl ::hash::Hash for pthread_cond_t {
+            fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
+                self.size.hash(state);
+            }
+        }
+
+        impl PartialEq for pthread_mutex_t {
+            fn eq(&self, other: &pthread_mutex_t) -> bool {
+                self.size.iter().zip(other.size.iter()).all(|(a, b)| a == b)
+            }
+        }
+        impl Eq for pthread_mutex_t {}
+        impl ::fmt::Debug for pthread_mutex_t {
+            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
+                f.debug_struct("pthread_mutex_t")
+                    // FIXME: .field("size", &self.size)
+                    .finish()
+            }
+        }
+        impl ::hash::Hash for pthread_mutex_t {
+            fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
+                self.size.hash(state);
+            }
+        }
+
+        impl PartialEq for pthread_rwlock_t {
+            fn eq(&self, other: &pthread_rwlock_t) -> bool {
+                self.size.iter().zip(other.size.iter()).all(|(a, b)| a == b)
+            }
+        }
+        impl Eq for pthread_rwlock_t {}
+        impl ::fmt::Debug for pthread_rwlock_t {
+            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
+                f.debug_struct("pthread_rwlock_t")
+                    // FIXME: .field("size", &self.size)
+                    .finish()
+            }
+        }
+        impl ::hash::Hash for pthread_rwlock_t {
+            fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
+                self.size.hash(state);
             }
         }
     }
@@ -2315,17 +2436,15 @@ pub const RTLD_NOW: ::c_int = 0x2;
 
 pub const TCP_MD5SIG: ::c_int = 14;
 
-align_const! {
-    pub const PTHREAD_MUTEX_INITIALIZER: pthread_mutex_t = pthread_mutex_t {
-        size: [0; __SIZEOF_PTHREAD_MUTEX_T],
-    };
-    pub const PTHREAD_COND_INITIALIZER: pthread_cond_t = pthread_cond_t {
-        size: [0; __SIZEOF_PTHREAD_COND_T],
-    };
-    pub const PTHREAD_RWLOCK_INITIALIZER: pthread_rwlock_t = pthread_rwlock_t {
-        size: [0; __SIZEOF_PTHREAD_RWLOCK_T],
-    };
-}
+pub const PTHREAD_MUTEX_INITIALIZER: pthread_mutex_t = pthread_mutex_t {
+    size: [0; __SIZEOF_PTHREAD_MUTEX_T],
+};
+pub const PTHREAD_COND_INITIALIZER: pthread_cond_t = pthread_cond_t {
+    size: [0; __SIZEOF_PTHREAD_COND_T],
+};
+pub const PTHREAD_RWLOCK_INITIALIZER: pthread_rwlock_t = pthread_rwlock_t {
+    size: [0; __SIZEOF_PTHREAD_RWLOCK_T],
+};
 pub const PTHREAD_MUTEX_NORMAL: ::c_int = 0;
 pub const PTHREAD_MUTEX_RECURSIVE: ::c_int = 1;
 pub const PTHREAD_MUTEX_ERRORCHECK: ::c_int = 2;
@@ -3255,20 +3374,20 @@ f! {
         let fd = fd as usize;
         let size = ::mem::size_of_val(&(*set).fds_bits[0]) * 8;
         (*set).fds_bits[fd / size] &= !(1 << (fd % size));
-        return
+        return;
     }
 
     pub fn FD_ISSET(fd: ::c_int, set: *const fd_set) -> bool {
         let fd = fd as usize;
         let size = ::mem::size_of_val(&(*set).fds_bits[0]) * 8;
-        return ((*set).fds_bits[fd / size] & (1 << (fd % size))) != 0
+        return ((*set).fds_bits[fd / size] & (1 << (fd % size))) != 0;
     }
 
     pub fn FD_SET(fd: ::c_int, set: *mut fd_set) -> () {
         let fd = fd as usize;
         let size = ::mem::size_of_val(&(*set).fds_bits[0]) * 8;
         (*set).fds_bits[fd / size] |= 1 << (fd % size);
-        return
+        return;
     }
 
     pub fn FD_ZERO(set: *mut fd_set) -> () {
@@ -3284,16 +3403,14 @@ f! {
     }
 
     pub fn CPU_SET(cpu: usize, cpuset: &mut cpu_set_t) -> () {
-        let size_in_bits
-            = 8 * ::mem::size_of_val(&cpuset.bits[0]); // 32, 64 etc
+        let size_in_bits = 8 * ::mem::size_of_val(&cpuset.bits[0]); // 32, 64 etc
         let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
         cpuset.bits[idx] |= 1 << offset;
         ()
     }
 
     pub fn CPU_CLR(cpu: usize, cpuset: &mut cpu_set_t) -> () {
-        let size_in_bits
-            = 8 * ::mem::size_of_val(&cpuset.bits[0]); // 32, 64 etc
+        let size_in_bits = 8 * ::mem::size_of_val(&cpuset.bits[0]); // 32, 64 etc
         let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
         cpuset.bits[idx] &= !(1 << offset);
         ()
@@ -3327,13 +3444,10 @@ f! {
         cmsg.offset(1) as *mut c_uchar
     }
 
-    pub fn CMSG_NXTHDR(mhdr: *const msghdr, cmsg: *const cmsghdr)
-        -> *mut cmsghdr
-    {
+    pub fn CMSG_NXTHDR(mhdr: *const msghdr, cmsg: *const cmsghdr) -> *mut cmsghdr {
         if ((*cmsg).cmsg_len as ::size_t) < ::mem::size_of::<cmsghdr>() {
             0 as *mut cmsghdr
-        } else if __CMSG_NEXT(cmsg).add(::mem::size_of::<cmsghdr>())
-            >= __MHDR_END(mhdr) {
+        } else if __CMSG_NEXT(cmsg).add(::mem::size_of::<cmsghdr>()) >= __MHDR_END(mhdr) {
             0 as *mut cmsghdr
         } else {
             __CMSG_NEXT(cmsg).cast()
@@ -3349,13 +3463,11 @@ f! {
     }
 
     pub {const} fn CMSG_ALIGN(len: ::size_t) -> ::size_t {
-        (len + ::mem::size_of::<::size_t>() - 1)
-            & !(::mem::size_of::<::size_t>() - 1)
+        (len + ::mem::size_of::<::size_t>() - 1) & !(::mem::size_of::<::size_t>() - 1)
     }
 
     pub {const} fn CMSG_SPACE(len: ::c_uint) -> ::c_uint {
-        (CMSG_ALIGN(len as ::size_t) + CMSG_ALIGN(::mem::size_of::<cmsghdr>()))
-            as ::c_uint
+        (CMSG_ALIGN(len as ::size_t) + CMSG_ALIGN(::mem::size_of::<cmsghdr>())) as ::c_uint
     }
 
     pub {const} fn CMSG_LEN(len: ::c_uint) -> ::c_uint {
@@ -3675,9 +3787,12 @@ extern "C" {
     pub fn close(fd: ::c_int) -> ::c_int;
     pub fn dup(fd: ::c_int) -> ::c_int;
     pub fn dup2(src: ::c_int, dst: ::c_int) -> ::c_int;
+
     pub fn execl(path: *const c_char, arg0: *const c_char, ...) -> ::c_int;
     pub fn execle(path: *const ::c_char, arg0: *const ::c_char, ...) -> ::c_int;
     pub fn execlp(file: *const ::c_char, arg0: *const ::c_char, ...) -> ::c_int;
+
+    // DIFF(main): changed to `*const *mut` in e77f551de9
     pub fn execv(prog: *const c_char, argv: *const *const c_char) -> ::c_int;
     pub fn execve(
         prog: *const c_char,
@@ -3685,6 +3800,7 @@ extern "C" {
         envp: *const *const c_char,
     ) -> ::c_int;
     pub fn execvp(c: *const c_char, argv: *const *const c_char) -> ::c_int;
+
     pub fn fork() -> pid_t;
     pub fn fpathconf(filedes: ::c_int, name: ::c_int) -> c_long;
     pub fn getcwd(buf: *mut c_char, size: ::size_t) -> *mut c_char;
@@ -4024,6 +4140,8 @@ extern "C" {
         termp: *const termios,
         winp: *const ::winsize,
     ) -> ::c_int;
+
+    // DIFF(main): changed to `*const *mut` in e77f551de9
     pub fn execvpe(
         file: *const ::c_char,
         argv: *const *const ::c_char,
@@ -4359,36 +4477,5 @@ cfg_if! {
         pub use self::riscv64::*;
     } else {
         // Unknown target_arch
-    }
-}
-
-cfg_if! {
-    if #[cfg(libc_align)] {
-        #[macro_use]
-        mod align;
-    } else {
-        #[macro_use]
-        mod no_align;
-    }
-}
-expand_align!();
-
-cfg_if! {
-    if #[cfg(libc_core_cvoid)] {
-        pub use ::ffi::c_void;
-    } else {
-        // Use repr(u8) as LLVM expects `void*` to be the same as `i8*` to help
-        // enable more optimization opportunities around it recognizing things
-        // like malloc/free.
-        #[repr(u8)]
-        #[allow(missing_copy_implementations)]
-        #[allow(missing_debug_implementations)]
-        pub enum c_void {
-            // Two dummy variants so the #[repr] attribute can be used.
-            #[doc(hidden)]
-            __variant1,
-            #[doc(hidden)]
-            __variant2,
-        }
     }
 }

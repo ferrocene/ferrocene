@@ -56,7 +56,7 @@ s! {
     pub struct stack_t {
         pub ss_sp: *mut ::c_void,
         pub ss_flags: ::c_int,
-        pub ss_size: ::size_t
+        pub ss_size: ::size_t,
     }
 
     pub struct __fsid_t {
@@ -251,7 +251,7 @@ s! {
         pub wd: ::c_int,
         pub mask: u32,
         pub cookie: u32,
-        pub len: u32
+        pub len: u32,
     }
 
     pub struct sock_extended_err {
@@ -281,7 +281,7 @@ s! {
         pub svm_reserved1: ::c_ushort,
         pub svm_port: ::c_uint,
         pub svm_cid: ::c_uint,
-        pub svm_zero: [u8; 4]
+        pub svm_zero: [u8; 4],
     }
 
     // linux/elf.h
@@ -468,7 +468,7 @@ s! {
         pub direction: ::__u16,
         pub trigger: ff_trigger,
         pub replay: ff_replay,
-        // FIXME this is actually a union
+        // FIXME(1.0): this is actually a union
         #[cfg(target_pointer_width = "64")]
         pub u: [u64; 4],
         #[cfg(target_pointer_width = "32")]
@@ -511,11 +511,10 @@ s! {
     }
 
     pub struct in6_ifreq {
-       pub ifr6_addr: ::in6_addr,
-       pub ifr6_prefixlen: u32,
-       pub ifr6_ifindex: ::c_int,
-   }
-
+        pub ifr6_addr: ::in6_addr,
+        pub ifr6_prefixlen: u32,
+        pub ifr6_ifindex: ::c_int,
+    }
 }
 
 s_no_extra_traits! {
@@ -523,7 +522,7 @@ s_no_extra_traits! {
         pub nl_family: ::sa_family_t,
         nl_pad: ::c_ushort,
         pub nl_pid: u32,
-        pub nl_groups: u32
+        pub nl_groups: u32,
     }
 
     pub struct dirent {
@@ -609,10 +608,9 @@ s_no_extra_traits! {
     pub struct prop_info {
         __name: [::c_char; 32],
         __serial: ::c_uint,
-        __value: [[::c_char; 4]; 23],
+        __value: [::c_char; 92],
     }
 
-    #[cfg(libc_union)]
     pub union __c_anonymous_ifr_ifru {
         pub ifru_addr: ::sockaddr,
         pub ifru_dstaddr: ::sockaddr,
@@ -632,13 +630,9 @@ s_no_extra_traits! {
     pub struct ifreq {
         /// interface name, e.g. "en0"
         pub ifr_name: [::c_char; ::IFNAMSIZ],
-        #[cfg(libc_union)]
         pub ifr_ifru: __c_anonymous_ifr_ifru,
-        #[cfg(not(libc_union))]
-        pub ifr_ifru: ::sockaddr,
     }
 
-    #[cfg(libc_union)]
     pub union __c_anonymous_ifc_ifcu {
         pub ifcu_buf: *mut ::c_char,
         pub ifcu_req: *mut ::ifreq,
@@ -648,22 +642,18 @@ s_no_extra_traits! {
     configuration for machine (useful for programs which must know all
     networks accessible).  */
     pub struct ifconf {
-        pub ifc_len: ::c_int,       /* Size of buffer.  */
-        #[cfg(libc_union)]
+        pub ifc_len: ::c_int, /* Size of buffer.  */
         pub ifc_ifcu: __c_anonymous_ifc_ifcu,
-        #[cfg(not(libc_union))]
-        pub ifc_ifcu: *mut ::ifreq,
     }
-
 }
 
 cfg_if! {
     if #[cfg(feature = "extra_traits")] {
         impl PartialEq for sockaddr_nl {
             fn eq(&self, other: &sockaddr_nl) -> bool {
-                self.nl_family == other.nl_family &&
-                    self.nl_pid == other.nl_pid &&
-                    self.nl_groups == other.nl_groups
+                self.nl_family == other.nl_family
+                    && self.nl_pid == other.nl_pid
+                    && self.nl_groups == other.nl_groups
             }
         }
         impl Eq for sockaddr_nl {}
@@ -691,10 +681,10 @@ cfg_if! {
                     && self.d_reclen == other.d_reclen
                     && self.d_type == other.d_type
                     && self
-                    .d_name
-                    .iter()
-                    .zip(other.d_name.iter())
-                    .all(|(a,b)| a == b)
+                        .d_name
+                        .iter()
+                        .zip(other.d_name.iter())
+                        .all(|(a, b)| a == b)
             }
         }
 
@@ -707,7 +697,7 @@ cfg_if! {
                     .field("d_off", &self.d_off)
                     .field("d_reclen", &self.d_reclen)
                     .field("d_type", &self.d_type)
-                // FIXME: .field("d_name", &self.d_name)
+                    // FIXME: .field("d_name", &self.d_name)
                     .finish()
             }
         }
@@ -729,10 +719,10 @@ cfg_if! {
                     && self.d_reclen == other.d_reclen
                     && self.d_type == other.d_type
                     && self
-                    .d_name
-                    .iter()
-                    .zip(other.d_name.iter())
-                    .all(|(a,b)| a == b)
+                        .d_name
+                        .iter()
+                        .zip(other.d_name.iter())
+                        .all(|(a, b)| a == b)
             }
         }
 
@@ -745,7 +735,7 @@ cfg_if! {
                     .field("d_off", &self.d_off)
                     .field("d_reclen", &self.d_reclen)
                     .field("d_type", &self.d_type)
-                // FIXME: .field("d_name", &self.d_name)
+                    // FIXME: .field("d_name", &self.d_name)
                     .finish()
             }
         }
@@ -778,8 +768,8 @@ cfg_if! {
                     .field("si_signo", &self.si_signo)
                     .field("si_errno", &self.si_errno)
                     .field("si_code", &self.si_code)
-                // Ignore _pad
-                // Ignore _align
+                    // Ignore _pad
+                    // Ignore _align
                     .finish()
             }
         }
@@ -798,15 +788,15 @@ cfg_if! {
             fn eq(&self, other: &lastlog) -> bool {
                 self.ll_time == other.ll_time
                     && self
-                    .ll_line
-                    .iter()
-                    .zip(other.ll_line.iter())
-                    .all(|(a,b)| a == b)
+                        .ll_line
+                        .iter()
+                        .zip(other.ll_line.iter())
+                        .all(|(a, b)| a == b)
                     && self
-                    .ll_host
-                    .iter()
-                    .zip(other.ll_host.iter())
-                    .all(|(a,b)| a == b)
+                        .ll_host
+                        .iter()
+                        .zip(other.ll_host.iter())
+                        .all(|(a, b)| a == b)
             }
         }
 
@@ -817,7 +807,7 @@ cfg_if! {
                 f.debug_struct("lastlog")
                     .field("ll_time", &self.ll_time)
                     .field("ll_line", &self.ll_line)
-                // FIXME: .field("ll_host", &self.ll_host)
+                    // FIXME: .field("ll_host", &self.ll_host)
                     .finish()
             }
         }
@@ -835,21 +825,21 @@ cfg_if! {
                 self.ut_type == other.ut_type
                     && self.ut_pid == other.ut_pid
                     && self
-                    .ut_line
-                    .iter()
-                    .zip(other.ut_line.iter())
-                    .all(|(a,b)| a == b)
+                        .ut_line
+                        .iter()
+                        .zip(other.ut_line.iter())
+                        .all(|(a, b)| a == b)
                     && self.ut_id == other.ut_id
                     && self
-                    .ut_user
-                    .iter()
-                    .zip(other.ut_user.iter())
-                    .all(|(a,b)| a == b)
+                        .ut_user
+                        .iter()
+                        .zip(other.ut_user.iter())
+                        .all(|(a, b)| a == b)
                     && self
-                    .ut_host
-                    .iter()
-                    .zip(other.ut_host.iter())
-                    .all(|(a,b)| a == b)
+                        .ut_host
+                        .iter()
+                        .zip(other.ut_host.iter())
+                        .all(|(a, b)| a == b)
                     && self.ut_exit == other.ut_exit
                     && self.ut_session == other.ut_session
                     && self.ut_tv == other.ut_tv
@@ -868,7 +858,7 @@ cfg_if! {
                     .field("ut_line", &self.ut_line)
                     .field("ut_id", &self.ut_id)
                     .field("ut_user", &self.ut_user)
-                // FIXME: .field("ut_host", &self.ut_host)
+                    // FIXME: .field("ut_host", &self.ut_host)
                     .field("ut_exit", &self.ut_exit)
                     .field("ut_session", &self.ut_session)
                     .field("ut_tv", &self.ut_tv)
@@ -898,18 +888,18 @@ cfg_if! {
             fn eq(&self, other: &sockaddr_alg) -> bool {
                 self.salg_family == other.salg_family
                     && self
-                    .salg_type
-                    .iter()
-                    .zip(other.salg_type.iter())
-                    .all(|(a, b)| a == b)
+                        .salg_type
+                        .iter()
+                        .zip(other.salg_type.iter())
+                        .all(|(a, b)| a == b)
                     && self.salg_feat == other.salg_feat
                     && self.salg_mask == other.salg_mask
                     && self
-                    .salg_name
-                    .iter()
-                    .zip(other.salg_name.iter())
-                    .all(|(a, b)| a == b)
-           }
+                        .salg_name
+                        .iter()
+                        .zip(other.salg_name.iter())
+                        .all(|(a, b)| a == b)
+            }
         }
 
         impl Eq for sockaddr_alg {}
@@ -941,7 +931,7 @@ cfg_if! {
                 self.id == other.id
                     && self.name[..] == other.name[..]
                     && self.ff_effects_max == other.ff_effects_max
-           }
+            }
         }
         impl Eq for uinput_setup {}
 
@@ -965,14 +955,14 @@ cfg_if! {
 
         impl PartialEq for uinput_user_dev {
             fn eq(&self, other: &uinput_user_dev) -> bool {
-                 self.name[..] == other.name[..]
+                self.name[..] == other.name[..]
                     && self.id == other.id
                     && self.ff_effects_max == other.ff_effects_max
                     && self.absmax[..] == other.absmax[..]
                     && self.absmin[..] == other.absmin[..]
                     && self.absfuzz[..] == other.absfuzz[..]
                     && self.absflat[..] == other.absflat[..]
-           }
+            }
         }
         impl Eq for uinput_user_dev {}
 
@@ -1002,7 +992,6 @@ cfg_if! {
             }
         }
 
-        #[cfg(libc_union)]
         impl ::fmt::Debug for __c_anonymous_ifr_ifru {
             fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
                 f.debug_struct("ifr_ifru")
@@ -1031,7 +1020,6 @@ cfg_if! {
             }
         }
 
-        #[cfg(libc_union)]
         impl ::fmt::Debug for __c_anonymous_ifc_ifcu {
             fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
                 f.debug_struct("ifr_ifru")
@@ -1052,12 +1040,7 @@ cfg_if! {
         #[allow(deprecated)]
         impl af_alg_iv {
             fn as_slice(&self) -> &[u8] {
-                unsafe {
-                    ::core::slice::from_raw_parts(
-                        self.iv.as_ptr(),
-                        self.ivlen as usize
-                    )
-                }
+                unsafe { ::core::slice::from_raw_parts(self.iv.as_ptr(), self.ivlen as usize) }
             }
         }
 
@@ -1065,7 +1048,7 @@ cfg_if! {
         impl PartialEq for af_alg_iv {
             fn eq(&self, other: &af_alg_iv) -> bool {
                 *self.as_slice() == *other.as_slice()
-           }
+            }
         }
 
         #[allow(deprecated)]
@@ -1089,9 +1072,9 @@ cfg_if! {
 
         impl PartialEq for prop_info {
             fn eq(&self, other: &prop_info) -> bool {
-                self.__name == other.__name &&
-                    self.__serial == other.__serial &&
-                    self.__value == other.__value
+                self.__name == other.__name
+                    && self.__serial == other.__serial
+                    && self.__value == other.__value
             }
         }
         impl Eq for prop_info {}
@@ -1733,18 +1716,22 @@ pub const TIOCCONS: ::c_int = 0x541D;
 pub const TIOCSBRK: ::c_int = 0x5427;
 pub const TIOCCBRK: ::c_int = 0x5428;
 cfg_if! {
-    if #[cfg(any(target_arch = "x86",
-                 target_arch = "x86_64",
-                 target_arch = "arm",
-                 target_arch = "aarch64",
-                 target_arch = "riscv64",
-                 target_arch = "s390x"))] {
+    if #[cfg(any(
+        target_arch = "x86",
+        target_arch = "x86_64",
+        target_arch = "arm",
+        target_arch = "aarch64",
+        target_arch = "riscv64",
+        target_arch = "s390x"
+    ))] {
         pub const FICLONE: ::c_int = 0x40049409;
         pub const FICLONERANGE: ::c_int = 0x4020940D;
-    } else if #[cfg(any(target_arch = "mips",
-                        target_arch = "mips64",
-                        target_arch = "powerpc",
-                        target_arch = "powerpc64"))] {
+    } else if #[cfg(any(
+        target_arch = "mips",
+        target_arch = "mips64",
+        target_arch = "powerpc",
+        target_arch = "powerpc64"
+    ))] {
         pub const FICLONE: ::c_int = 0x80049409;
         pub const FICLONERANGE: ::c_int = 0x8020940D;
     }
@@ -1946,7 +1933,11 @@ cfg_if! {
         pub const FS_IOC32_SETFLAGS: ::c_int = 0x40046602;
         pub const FS_IOC32_GETVERSION: ::c_int = 0x80047601;
         pub const FS_IOC32_SETVERSION: ::c_int = 0x40047602;
-    } else if #[cfg(any(target_arch = "x86_64", target_arch = "riscv64", target_arch = "aarch64"))] {
+    } else if #[cfg(any(
+        target_arch = "x86_64",
+        target_arch = "riscv64",
+        target_arch = "aarch64"
+    ))] {
         pub const FS_IOC_GETFLAGS: ::c_int = 0x80086601;
         pub const FS_IOC_SETFLAGS: ::c_int = 0x40086602;
         pub const FS_IOC_GETVERSION: ::c_int = 0x80087601;
@@ -2359,9 +2350,11 @@ pub const NF_INET_FORWARD: ::c_int = 2;
 pub const NF_INET_LOCAL_OUT: ::c_int = 3;
 pub const NF_INET_POST_ROUTING: ::c_int = 4;
 pub const NF_INET_NUMHOOKS: ::c_int = 5;
+pub const NF_INET_INGRESS: ::c_int = NF_INET_NUMHOOKS;
 
 pub const NF_NETDEV_INGRESS: ::c_int = 0;
-pub const NF_NETDEV_NUMHOOKS: ::c_int = 1;
+pub const NF_NETDEV_EGRESS: ::c_int = 1;
+pub const NF_NETDEV_NUMHOOKS: ::c_int = 2;
 
 pub const NFPROTO_UNSPEC: ::c_int = 0;
 pub const NFPROTO_INET: ::c_int = 1;
@@ -2373,6 +2366,31 @@ pub const NFPROTO_IPV6: ::c_int = 10;
 pub const NFPROTO_DECNET: ::c_int = 12;
 pub const NFPROTO_NUMPROTO: ::c_int = 13;
 
+// linux/netfilter_arp.h
+pub const NF_ARP: ::c_int = 0;
+pub const NF_ARP_IN: ::c_int = 0;
+pub const NF_ARP_OUT: ::c_int = 1;
+pub const NF_ARP_FORWARD: ::c_int = 2;
+pub const NF_ARP_NUMHOOKS: ::c_int = 3;
+
+// linux/netfilter_bridge.h
+pub const NF_BR_PRE_ROUTING: ::c_int = 0;
+pub const NF_BR_LOCAL_IN: ::c_int = 1;
+pub const NF_BR_FORWARD: ::c_int = 2;
+pub const NF_BR_LOCAL_OUT: ::c_int = 3;
+pub const NF_BR_POST_ROUTING: ::c_int = 4;
+pub const NF_BR_BROUTING: ::c_int = 5;
+pub const NF_BR_NUMHOOKS: ::c_int = 6;
+
+pub const NF_BR_PRI_FIRST: ::c_int = ::INT_MIN;
+pub const NF_BR_PRI_NAT_DST_BRIDGED: ::c_int = -300;
+pub const NF_BR_PRI_FILTER_BRIDGED: ::c_int = -200;
+pub const NF_BR_PRI_BRNF: ::c_int = 0;
+pub const NF_BR_PRI_NAT_DST_OTHER: ::c_int = 100;
+pub const NF_BR_PRI_FILTER_OTHER: ::c_int = 200;
+pub const NF_BR_PRI_NAT_SRC: ::c_int = 300;
+pub const NF_BR_PRI_LAST: ::c_int = ::INT_MAX;
+
 // linux/netfilter_ipv4.h
 pub const NF_IP_PRE_ROUTING: ::c_int = 0;
 pub const NF_IP_LOCAL_IN: ::c_int = 1;
@@ -2382,6 +2400,7 @@ pub const NF_IP_POST_ROUTING: ::c_int = 4;
 pub const NF_IP_NUMHOOKS: ::c_int = 5;
 
 pub const NF_IP_PRI_FIRST: ::c_int = ::INT_MIN;
+pub const NF_IP_PRI_RAW_BEFORE_DEFRAG: ::c_int = -450;
 pub const NF_IP_PRI_CONNTRACK_DEFRAG: ::c_int = -400;
 pub const NF_IP_PRI_RAW: ::c_int = -300;
 pub const NF_IP_PRI_SELINUX_FIRST: ::c_int = -225;
@@ -2405,6 +2424,7 @@ pub const NF_IP6_POST_ROUTING: ::c_int = 4;
 pub const NF_IP6_NUMHOOKS: ::c_int = 5;
 
 pub const NF_IP6_PRI_FIRST: ::c_int = ::INT_MIN;
+pub const NF_IP6_PRI_RAW_BEFORE_DEFRAG: ::c_int = -450;
 pub const NF_IP6_PRI_CONNTRACK_DEFRAG: ::c_int = -400;
 pub const NF_IP6_PRI_RAW: ::c_int = -300;
 pub const NF_IP6_PRI_SELINUX_FIRST: ::c_int = -225;
@@ -3585,13 +3605,9 @@ cfg_if! {
 }
 
 f! {
-    pub fn CMSG_NXTHDR(mhdr: *const msghdr,
-                       cmsg: *const cmsghdr) -> *mut cmsghdr {
-        let next = (cmsg as usize
-                    + super::CMSG_ALIGN((*cmsg).cmsg_len as usize))
-            as *mut cmsghdr;
-        let max = (*mhdr).msg_control as usize
-            + (*mhdr).msg_controllen as usize;
+    pub fn CMSG_NXTHDR(mhdr: *const msghdr, cmsg: *const cmsghdr) -> *mut cmsghdr {
+        let next = (cmsg as usize + super::CMSG_ALIGN((*cmsg).cmsg_len as usize)) as *mut cmsghdr;
+        let max = (*mhdr).msg_control as usize + (*mhdr).msg_controllen as usize;
         if (next.offset(1)) as usize > max {
             0 as *mut cmsghdr
         } else {
@@ -3612,16 +3628,14 @@ f! {
     }
 
     pub fn CPU_SET(cpu: usize, cpuset: &mut cpu_set_t) -> () {
-        let size_in_bits
-            = 8 * ::mem::size_of_val(&cpuset.__bits[0]); // 32, 64 etc
+        let size_in_bits = 8 * ::mem::size_of_val(&cpuset.__bits[0]); // 32, 64 etc
         let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
         cpuset.__bits[idx] |= 1 << offset;
         ()
     }
 
     pub fn CPU_CLR(cpu: usize, cpuset: &mut cpu_set_t) -> () {
-        let size_in_bits
-            = 8 * ::mem::size_of_val(&cpuset.__bits[0]); // 32, 64 etc
+        let size_in_bits = 8 * ::mem::size_of_val(&cpuset.__bits[0]); // 32, 64 etc
         let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
         cpuset.__bits[idx] &= !(1 << offset);
         ()
@@ -3638,7 +3652,7 @@ f! {
         let size_of_mask = ::mem::size_of_val(&cpuset.__bits[0]);
         for i in cpuset.__bits[..(size / size_of_mask)].iter() {
             s += i.count_ones();
-        };
+        }
         s as ::c_int
     }
 
@@ -3657,7 +3671,7 @@ f! {
         ((dev & 0xff) | ((dev >> 12) & 0xfff00)) as ::c_int
     }
     pub fn NLA_ALIGN(len: ::c_int) -> ::c_int {
-        return ((len) + NLA_ALIGNTO - 1) & !(NLA_ALIGNTO - 1)
+        return ((len) + NLA_ALIGNTO - 1) & !(NLA_ALIGNTO - 1);
     }
 
     pub fn SO_EE_OFFENDER(ee: *const ::sock_extended_err) -> *mut ::sockaddr {
@@ -3671,10 +3685,12 @@ safe_f! {
         let mi = mi as ::dev_t;
         ((ma & 0xfff) << 8) | (mi & 0xff) | ((mi & 0xfff00) << 12)
     }
-
 }
 
 extern "C" {
+    pub fn setgrent();
+    pub fn endgrent();
+    pub fn getgrent() -> *mut ::group;
     pub fn getrlimit64(resource: ::c_int, rlim: *mut rlimit64) -> ::c_int;
     pub fn setrlimit64(resource: ::c_int, rlim: *const rlimit64) -> ::c_int;
     pub fn getrlimit(resource: ::c_int, rlim: *mut ::rlimit) -> ::c_int;
@@ -4147,6 +4163,15 @@ extern "C" {
     pub fn fgets_unlocked(buf: *mut ::c_char, size: ::c_int, stream: *mut ::FILE) -> *mut ::c_char;
 
     pub fn klogctl(syslog_type: ::c_int, bufp: *mut ::c_char, len: ::c_int) -> ::c_int;
+
+    pub fn memfd_create(name: *const ::c_char, flags: ::c_uint) -> ::c_int;
+    pub fn renameat2(
+        olddirfd: ::c_int,
+        oldpath: *const ::c_char,
+        newdirfd: ::c_int,
+        newpath: *const ::c_char,
+        flags: ::c_uint,
+    ) -> ::c_int;
 }
 
 cfg_if! {
@@ -4187,64 +4212,60 @@ impl siginfo_t {
     }
 }
 
-cfg_if! {
-    if #[cfg(libc_union)] {
-        // Internal, for casts to access union fields
-        #[repr(C)]
-        struct sifields_sigchld {
-            si_pid: ::pid_t,
-            si_uid: ::uid_t,
-            si_status: ::c_int,
-            si_utime: ::c_long,
-            si_stime: ::c_long,
-        }
-        impl ::Copy for sifields_sigchld {}
-        impl ::Clone for sifields_sigchld {
-            fn clone(&self) -> sifields_sigchld {
-                *self
-            }
-        }
+// Internal, for casts to access union fields
+#[repr(C)]
+struct sifields_sigchld {
+    si_pid: ::pid_t,
+    si_uid: ::uid_t,
+    si_status: ::c_int,
+    si_utime: ::c_long,
+    si_stime: ::c_long,
+}
+impl ::Copy for sifields_sigchld {}
+impl ::Clone for sifields_sigchld {
+    fn clone(&self) -> sifields_sigchld {
+        *self
+    }
+}
 
-        // Internal, for casts to access union fields
-        #[repr(C)]
-        union sifields {
-            _align_pointer: *mut ::c_void,
-            sigchld: sifields_sigchld,
-        }
+// Internal, for casts to access union fields
+#[repr(C)]
+union sifields {
+    _align_pointer: *mut ::c_void,
+    sigchld: sifields_sigchld,
+}
 
-        // Internal, for casts to access union fields. Note that some variants
-        // of sifields start with a pointer, which makes the alignment of
-        // sifields vary on 32-bit and 64-bit architectures.
-        #[repr(C)]
-        struct siginfo_f {
-            _siginfo_base: [::c_int; 3],
-            sifields: sifields,
-        }
+// Internal, for casts to access union fields. Note that some variants
+// of sifields start with a pointer, which makes the alignment of
+// sifields vary on 32-bit and 64-bit architectures.
+#[repr(C)]
+struct siginfo_f {
+    _siginfo_base: [::c_int; 3],
+    sifields: sifields,
+}
 
-        impl siginfo_t {
-            unsafe fn sifields(&self) -> &sifields {
-                &(*(self as *const siginfo_t as *const siginfo_f)).sifields
-            }
+impl siginfo_t {
+    unsafe fn sifields(&self) -> &sifields {
+        &(*(self as *const siginfo_t as *const siginfo_f)).sifields
+    }
 
-            pub unsafe fn si_pid(&self) -> ::pid_t {
-                self.sifields().sigchld.si_pid
-            }
+    pub unsafe fn si_pid(&self) -> ::pid_t {
+        self.sifields().sigchld.si_pid
+    }
 
-            pub unsafe fn si_uid(&self) -> ::uid_t {
-                self.sifields().sigchld.si_uid
-            }
+    pub unsafe fn si_uid(&self) -> ::uid_t {
+        self.sifields().sigchld.si_uid
+    }
 
-            pub unsafe fn si_status(&self) -> ::c_int {
-                self.sifields().sigchld.si_status
-            }
+    pub unsafe fn si_status(&self) -> ::c_int {
+        self.sifields().sigchld.si_status
+    }
 
-            pub unsafe fn si_utime(&self) -> ::c_long {
-                self.sifields().sigchld.si_utime
-            }
+    pub unsafe fn si_utime(&self) -> ::c_long {
+        self.sifields().sigchld.si_utime
+    }
 
-            pub unsafe fn si_stime(&self) -> ::c_long {
-                self.sifields().sigchld.si_stime
-            }
-        }
+    pub unsafe fn si_stime(&self) -> ::c_long {
+        self.sifields().sigchld.si_stime
     }
 }

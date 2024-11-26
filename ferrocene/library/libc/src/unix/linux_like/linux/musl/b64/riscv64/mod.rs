@@ -5,16 +5,10 @@ pub type wchar_t = ::c_int;
 
 pub type nlink_t = ::c_uint;
 pub type blksize_t = ::c_int;
-pub type fsblkcnt64_t = ::c_ulong;
-pub type fsfilcnt64_t = ::c_ulong;
 pub type __u64 = ::c_ulonglong;
 pub type __s64 = ::c_longlong;
 
 s! {
-    pub struct pthread_attr_t {
-        __size: [::c_ulong; 7],
-    }
-
     pub struct stat {
         pub st_dev: ::dev_t,
         pub st_ino: ::ino_t,
@@ -59,94 +53,6 @@ s! {
         __unused: [::c_int; 2],
     }
 
-    pub struct statfs {
-        pub f_type: ::c_long,
-        pub f_bsize: ::c_long,
-        pub f_blocks: ::fsblkcnt_t,
-        pub f_bfree: ::fsblkcnt_t,
-        pub f_bavail: ::fsblkcnt_t,
-        pub f_files: ::fsfilcnt_t,
-        pub f_ffree: ::fsfilcnt_t,
-        pub f_fsid: ::fsid_t,
-        pub f_namelen: ::c_long,
-        pub f_frsize: ::c_long,
-        pub f_flags: ::c_long,
-        pub f_spare: [::c_long; 4],
-    }
-
-    pub struct statfs64 {
-        pub f_type: ::c_long,
-        pub f_bsize: ::c_long,
-        pub f_blocks: ::fsblkcnt64_t,
-        pub f_bfree: ::fsblkcnt64_t,
-        pub f_bavail: ::fsblkcnt64_t,
-        pub f_files: ::fsfilcnt64_t,
-        pub f_ffree: ::fsfilcnt64_t,
-        pub f_fsid: ::fsid_t,
-        pub f_namelen: ::c_long,
-        pub f_frsize: ::c_long,
-        pub f_flags: ::c_long,
-        pub f_spare: [::c_long; 4],
-    }
-
-    pub struct statvfs {
-        pub f_bsize: ::c_ulong,
-        pub f_frsize: ::c_ulong,
-        pub f_blocks: ::fsblkcnt_t,
-        pub f_bfree: ::fsblkcnt_t,
-        pub f_bavail: ::fsblkcnt_t,
-        pub f_files: ::fsfilcnt_t,
-        pub f_ffree: ::fsfilcnt_t,
-        pub f_favail: ::fsfilcnt_t,
-        pub f_fsid: ::c_ulong,
-        pub f_flag: ::c_ulong,
-        pub f_namemax: ::c_ulong,
-        pub __f_spare: [::c_int; 6],
-    }
-
-    pub struct statvfs64 {
-        pub f_bsize: ::c_ulong,
-        pub f_frsize: ::c_ulong,
-        pub f_blocks: ::fsblkcnt64_t,
-        pub f_bfree: ::fsblkcnt64_t,
-        pub f_bavail: ::fsblkcnt64_t,
-        pub f_files: ::fsfilcnt64_t,
-        pub f_ffree: ::fsfilcnt64_t,
-        pub f_favail: ::fsfilcnt64_t,
-        pub f_fsid: ::c_ulong,
-        pub f_flag: ::c_ulong,
-        pub f_namemax: ::c_ulong,
-        pub __f_spare: [::c_int; 6],
-    }
-
-    pub struct siginfo_t {
-        pub si_signo: ::c_int,
-        pub si_errno: ::c_int,
-        pub si_code: ::c_int,
-        #[doc(hidden)]
-        #[deprecated(
-            since="0.2.54",
-            note="Please leave a comment on \
-                  https://github.com/rust-lang/libc/pull/1316 if you're using \
-                  this field"
-        )]
-        pub _pad: [::c_int; 29],
-        _align: [u64; 0],
-    }
-
-    pub struct stack_t {
-        pub ss_sp: *mut ::c_void,
-        pub ss_flags: ::c_int,
-        pub ss_size: ::size_t,
-    }
-
-    pub struct sigaction {
-        pub sa_sigaction: ::sighandler_t,
-        pub sa_mask: ::sigset_t,
-        pub sa_flags: ::c_int,
-        pub sa_restorer: ::Option<unsafe extern "C" fn()>,
-    }
-
     pub struct ipc_perm {
         pub __key: ::key_t,
         pub uid: ::uid_t,
@@ -161,17 +67,64 @@ s! {
         __unused2: ::c_ulong,
     }
 
-    pub struct shmid_ds {
-        pub shm_perm: ::ipc_perm,
-        pub shm_segsz: ::size_t,
-        pub shm_atime: ::time_t,
-        pub shm_dtime: ::time_t,
-        pub shm_ctime: ::time_t,
-        pub shm_cpid: ::pid_t,
-        pub shm_lpid: ::pid_t,
-        pub shm_nattch: ::shmatt_t,
-        __unused5: ::c_ulong,
-        __unused6: ::c_ulong,
+    #[repr(align(8))]
+    pub struct clone_args {
+        pub flags: ::c_ulonglong,
+        pub pidfd: ::c_ulonglong,
+        pub child_tid: ::c_ulonglong,
+        pub parent_tid: ::c_ulonglong,
+        pub exit_signal: ::c_ulonglong,
+        pub stack: ::c_ulonglong,
+        pub stack_size: ::c_ulonglong,
+        pub tls: ::c_ulonglong,
+        pub set_tid: ::c_ulonglong,
+        pub set_tid_size: ::c_ulonglong,
+        pub cgroup: ::c_ulonglong,
+    }
+}
+
+s_no_extra_traits! {
+    #[allow(missing_debug_implementations)]
+    pub struct ucontext_t {
+        pub __uc_flags: ::c_ulong,
+        pub uc_link: *mut ucontext_t,
+        pub uc_stack: ::stack_t,
+        pub uc_sigmask: ::sigset_t,
+        pub uc_mcontext: mcontext_t,
+    }
+
+    #[allow(missing_debug_implementations)]
+    #[repr(align(16))]
+    pub struct mcontext_t {
+        pub __gregs: [::c_ulong; 32],
+        pub __fpregs: __riscv_mc_fp_state,
+    }
+
+    #[allow(missing_debug_implementations)]
+    pub union __riscv_mc_fp_state {
+        pub __f: __riscv_mc_f_ext_state,
+        pub __d: __riscv_mc_d_ext_state,
+        pub __q: __riscv_mc_q_ext_state,
+    }
+
+    #[allow(missing_debug_implementations)]
+    pub struct __riscv_mc_f_ext_state {
+        pub __f: [::c_uint; 32],
+        pub __fcsr: ::c_uint,
+    }
+
+    #[allow(missing_debug_implementations)]
+    pub struct __riscv_mc_d_ext_state {
+        pub __f: [::c_ulonglong; 32],
+        pub __fcsr: ::c_uint,
+    }
+
+    #[allow(missing_debug_implementations)]
+    #[repr(align(16))]
+    pub struct __riscv_mc_q_ext_state {
+        pub __f: [::c_ulonglong; 64],
+        pub __fcsr: ::c_uint,
+        pub __glibc_reserved: [::c_uint; 3],
     }
 }
 
@@ -450,6 +403,8 @@ pub const SYS_pkey_mprotect: ::c_long = 288;
 pub const SYS_pkey_alloc: ::c_long = 289;
 pub const SYS_pkey_free: ::c_long = 290;
 pub const SYS_statx: ::c_long = 291;
+pub const SYS_io_pgetevents: ::c_long = 292;
+pub const SYS_rseq: ::c_long = 293;
 pub const SYS_pidfd_send_signal: ::c_long = 424;
 pub const SYS_io_uring_setup: ::c_long = 425;
 pub const SYS_io_uring_enter: ::c_long = 426;
@@ -718,10 +673,3 @@ pub const REG_S1: usize = 9;
 pub const REG_A0: usize = 10;
 pub const REG_S2: usize = 18;
 pub const REG_NARGS: usize = 8;
-
-cfg_if! {
-    if #[cfg(libc_align)] {
-        mod align;
-        pub use self::align::*;
-    }
-}

@@ -3,6 +3,8 @@
 //! More functions and definitions can be found in the more specific modules
 //! according to the platform in question.
 
+use c_void;
+
 pub type c_schar = i8;
 pub type c_uchar = u8;
 pub type c_short = i16;
@@ -29,7 +31,11 @@ pub type sighandler_t = ::size_t;
 pub type cc_t = ::c_uchar;
 
 cfg_if! {
-    if #[cfg(any(target_os = "espidf", target_os = "horizon", target_os = "vita"))] {
+    if #[cfg(any(
+        target_os = "espidf",
+        target_os = "horizon",
+        target_os = "vita"
+    ))] {
         pub type uid_t = ::c_ushort;
         pub type gid_t = ::c_ushort;
     } else if #[cfg(target_os = "nto")] {
@@ -171,7 +177,7 @@ s! {
 
     pub struct sigval {
         // Actually a union of an int and a void*
-        pub sival_ptr: *mut ::c_void
+        pub sival_ptr: *mut ::c_void,
     }
 
     // <sys/time.h>
@@ -200,6 +206,11 @@ s! {
         pub p_aliases: *mut *mut ::c_char,
         pub p_proto: ::c_int,
     }
+
+    #[repr(align(4))]
+    pub struct in6_addr {
+        pub s6_addr: [u8; 16],
+    }
 }
 
 pub const INT_MIN: c_int = -2147483648;
@@ -208,6 +219,7 @@ pub const INT_MAX: c_int = 2147483647;
 pub const SIG_DFL: sighandler_t = 0 as sighandler_t;
 pub const SIG_IGN: sighandler_t = 1 as sighandler_t;
 pub const SIG_ERR: sighandler_t = !0 as sighandler_t;
+
 cfg_if! {
     if #[cfg(not(target_os = "nto"))] {
         pub const DT_UNKNOWN: u8 = 0;
@@ -227,8 +239,7 @@ cfg_if! {
 }
 
 cfg_if! {
-    if #[cfg(not(target_os = "nto"))]
-    {
+    if #[cfg(not(target_os = "nto"))] {
         pub const USRQUOTA: ::c_int = 0;
         pub const GRPQUOTA: ::c_int = 1;
     }
@@ -240,8 +251,11 @@ pub const S_ISGID: ::mode_t = 0o2000;
 pub const S_ISVTX: ::mode_t = 0o1000;
 
 cfg_if! {
-    if #[cfg(not(any(target_os = "haiku", target_os = "illumos",
-                     target_os = "solaris")))] {
+    if #[cfg(not(any(
+        target_os = "haiku",
+        target_os = "illumos",
+        target_os = "solaris"
+    )))] {
         pub const IF_NAMESIZE: ::size_t = 16;
         pub const IFNAMSIZ: ::size_t = IF_NAMESIZE;
     }
@@ -287,8 +301,7 @@ pub const LOG_PRIMASK: ::c_int = 7;
 pub const LOG_FACMASK: ::c_int = 0x3f8;
 
 cfg_if! {
-    if #[cfg(not(target_os = "nto"))]
-    {
+    if #[cfg(not(target_os = "nto"))] {
         pub const PRIO_MIN: ::c_int = -20;
         pub const PRIO_MAX: ::c_int = 20;
     }
@@ -305,6 +318,14 @@ pub const INADDR_ANY: in_addr_t = 0;
 pub const INADDR_BROADCAST: in_addr_t = 4294967295;
 pub const INADDR_NONE: in_addr_t = 4294967295;
 
+pub const IN6ADDR_LOOPBACK_INIT: in6_addr = in6_addr {
+    s6_addr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+};
+
+pub const IN6ADDR_ANY_INIT: in6_addr = in6_addr {
+    s6_addr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+};
+
 pub const ARPOP_REQUEST: u16 = 1;
 pub const ARPOP_REPLY: u16 = 2;
 
@@ -317,10 +338,7 @@ pub const FNM_PERIOD: c_int = 1 << 2;
 pub const FNM_NOMATCH: c_int = 1;
 
 cfg_if! {
-    if #[cfg(any(
-        target_os = "illumos",
-        target_os = "solaris",
-    ))] {
+    if #[cfg(any(target_os = "illumos", target_os = "solaris",))] {
         pub const FNM_CASEFOLD: c_int = 1 << 3;
     } else {
         pub const FNM_CASEFOLD: c_int = 1 << 4;
@@ -348,7 +366,11 @@ extern "C" {
 }
 
 cfg_if! {
-    if #[cfg(any(target_os = "l4re", target_os = "espidf", target_os = "nuttx"))] {
+    if #[cfg(any(
+        target_os = "l4re",
+        target_os = "espidf",
+        target_os = "nuttx"
+    ))] {
         // required libraries are linked externally for these platforms:
         // * L4Re
         // * ESP-IDF
@@ -356,95 +378,158 @@ cfg_if! {
     } else if #[cfg(feature = "std")] {
         // cargo build, don't pull in anything extra as the std dep
         // already pulls in all libs.
-    } else if #[cfg(all(target_os = "linux",
-                        any(target_env = "gnu", target_env = "uclibc"),
-                        feature = "rustc-dep-of-std"))] {
-        #[link(name = "util", kind = "static", modifiers = "-bundle",
-            cfg(target_feature = "crt-static"))]
-        #[link(name = "rt", kind = "static", modifiers = "-bundle",
-            cfg(target_feature = "crt-static"))]
-        #[link(name = "pthread", kind = "static", modifiers = "-bundle",
-            cfg(target_feature = "crt-static"))]
-        #[link(name = "m", kind = "static", modifiers = "-bundle",
-            cfg(target_feature = "crt-static"))]
-        #[link(name = "dl", kind = "static", modifiers = "-bundle",
-            cfg(target_feature = "crt-static"))]
-        #[link(name = "c", kind = "static", modifiers = "-bundle",
-            cfg(target_feature = "crt-static"))]
-        #[link(name = "gcc_eh", kind = "static", modifiers = "-bundle",
-            cfg(target_feature = "crt-static"))]
-        #[link(name = "gcc", kind = "static", modifiers = "-bundle",
-            cfg(target_feature = "crt-static"))]
-        #[link(name = "c", kind = "static", modifiers = "-bundle",
-            cfg(target_feature = "crt-static"))]
+    } else if #[cfg(all(
+        target_os = "linux",
+        any(target_env = "gnu", target_env = "uclibc"),
+        feature = "rustc-dep-of-std"
+    ))] {
+        #[link(
+            name = "util",
+            kind = "static",
+            modifiers = "-bundle",
+            cfg(target_feature = "crt-static")
+        )]
+        #[link(
+            name = "rt",
+            kind = "static",
+            modifiers = "-bundle",
+            cfg(target_feature = "crt-static")
+        )]
+        #[link(
+            name = "pthread",
+            kind = "static",
+            modifiers = "-bundle",
+            cfg(target_feature = "crt-static")
+        )]
+        #[link(
+            name = "m",
+            kind = "static",
+            modifiers = "-bundle",
+            cfg(target_feature = "crt-static")
+        )]
+        #[link(
+            name = "dl",
+            kind = "static",
+            modifiers = "-bundle",
+            cfg(target_feature = "crt-static")
+        )]
+        #[link(
+            name = "c",
+            kind = "static",
+            modifiers = "-bundle",
+            cfg(target_feature = "crt-static")
+        )]
+        #[link(
+            name = "gcc_eh",
+            kind = "static",
+            modifiers = "-bundle",
+            cfg(target_feature = "crt-static")
+        )]
+        #[link(
+            name = "gcc",
+            kind = "static",
+            modifiers = "-bundle",
+            cfg(target_feature = "crt-static")
+        )]
+        #[link(
+            name = "c",
+            kind = "static",
+            modifiers = "-bundle",
+            cfg(target_feature = "crt-static")
+        )]
         #[link(name = "util", cfg(not(target_feature = "crt-static")))]
         #[link(name = "rt", cfg(not(target_feature = "crt-static")))]
         #[link(name = "pthread", cfg(not(target_feature = "crt-static")))]
         #[link(name = "m", cfg(not(target_feature = "crt-static")))]
         #[link(name = "dl", cfg(not(target_feature = "crt-static")))]
         #[link(name = "c", cfg(not(target_feature = "crt-static")))]
-        extern {}
+        extern "C" {}
     } else if #[cfg(any(target_env = "musl", target_env = "ohos"))] {
-        #[cfg_attr(feature = "rustc-dep-of-std",
-                   link(name = "c", kind = "static", modifiers = "-bundle",
-                        cfg(target_feature = "crt-static")))]
-        #[cfg_attr(feature = "rustc-dep-of-std",
-                   link(name = "c", cfg(not(target_feature = "crt-static"))))]
-        extern {}
+        #[cfg_attr(
+            feature = "rustc-dep-of-std",
+            link(
+                name = "c",
+                kind = "static",
+                modifiers = "-bundle",
+                cfg(target_feature = "crt-static")
+            )
+        )]
+        #[cfg_attr(
+            feature = "rustc-dep-of-std",
+            link(name = "c", cfg(not(target_feature = "crt-static")))
+        )]
+        extern "C" {}
     } else if #[cfg(target_os = "emscripten")] {
         // Don't pass -lc to Emscripten, it breaks. See:
         // https://github.com/emscripten-core/emscripten/issues/22758
     } else if #[cfg(all(target_os = "android", feature = "rustc-dep-of-std"))] {
-        #[link(name = "c", kind = "static", modifiers = "-bundle",
-            cfg(target_feature = "crt-static"))]
-        #[link(name = "m", kind = "static", modifiers = "-bundle",
-            cfg(target_feature = "crt-static"))]
+        #[link(
+            name = "c",
+            kind = "static",
+            modifiers = "-bundle",
+            cfg(target_feature = "crt-static")
+        )]
+        #[link(
+            name = "m",
+            kind = "static",
+            modifiers = "-bundle",
+            cfg(target_feature = "crt-static")
+        )]
         #[link(name = "m", cfg(not(target_feature = "crt-static")))]
         #[link(name = "c", cfg(not(target_feature = "crt-static")))]
-        extern {}
-    } else if #[cfg(any(target_os = "macos",
-                        target_os = "ios",
-                        target_os = "tvos",
-                        target_os = "watchos",
-                        target_os = "visionos",
-                        target_os = "android",
-                        target_os = "openbsd",
-                        target_os = "nto",
-                    ))] {
+        extern "C" {}
+    } else if #[cfg(any(
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "tvos",
+        target_os = "watchos",
+        target_os = "visionos",
+        target_os = "android",
+        target_os = "openbsd",
+        target_os = "nto",
+    ))] {
         #[link(name = "c")]
         #[link(name = "m")]
-        extern {}
+        extern "C" {}
     } else if #[cfg(target_os = "haiku")] {
         #[link(name = "root")]
         #[link(name = "network")]
-        extern {}
+        extern "C" {}
     } else if #[cfg(target_env = "newlib")] {
         #[link(name = "c")]
         #[link(name = "m")]
-        extern {}
+        extern "C" {}
     } else if #[cfg(target_env = "illumos")] {
         #[link(name = "c")]
         #[link(name = "m")]
-        extern {}
+        extern "C" {}
     } else if #[cfg(target_os = "redox")] {
-        #[cfg_attr(feature = "rustc-dep-of-std",
-                   link(name = "c", kind = "static", modifiers = "-bundle",
-                        cfg(target_feature = "crt-static")))]
-        #[cfg_attr(feature = "rustc-dep-of-std",
-                   link(name = "c", cfg(not(target_feature = "crt-static"))))]
-        extern {}
+        #[cfg_attr(
+            feature = "rustc-dep-of-std",
+            link(
+                name = "c",
+                kind = "static",
+                modifiers = "-bundle",
+                cfg(target_feature = "crt-static")
+            )
+        )]
+        #[cfg_attr(
+            feature = "rustc-dep-of-std",
+            link(name = "c", cfg(not(target_feature = "crt-static")))
+        )]
+        extern "C" {}
     } else if #[cfg(target_os = "aix")] {
         #[link(name = "c")]
         #[link(name = "m")]
         #[link(name = "bsd")]
         #[link(name = "pthread")]
-        extern {}
+        extern "C" {}
     } else {
         #[link(name = "c")]
         #[link(name = "m")]
         #[link(name = "rt")]
         #[link(name = "pthread")]
-        extern {}
+        extern "C" {}
     }
 }
 
@@ -626,21 +711,13 @@ extern "C" {
     pub fn getchar_unlocked() -> ::c_int;
     pub fn putchar_unlocked(c: ::c_int) -> ::c_int;
 
-    #[cfg(not(all(
-        libc_cfg_target_vendor,
-        target_arch = "powerpc",
-        target_vendor = "nintendo"
-    )))]
+    #[cfg(not(all(target_arch = "powerpc", target_vendor = "nintendo")))]
     #[cfg_attr(target_os = "netbsd", link_name = "__socket30")]
     #[cfg_attr(target_os = "illumos", link_name = "__xnet_socket")]
     #[cfg_attr(target_os = "solaris", link_name = "__xnet7_socket")]
     #[cfg_attr(target_os = "espidf", link_name = "lwip_socket")]
     pub fn socket(domain: ::c_int, ty: ::c_int, protocol: ::c_int) -> ::c_int;
-    #[cfg(not(all(
-        libc_cfg_target_vendor,
-        target_arch = "powerpc",
-        target_vendor = "nintendo"
-    )))]
+    #[cfg(not(all(target_arch = "powerpc", target_vendor = "nintendo")))]
     #[cfg_attr(
         all(target_os = "macos", target_arch = "x86"),
         link_name = "connect$UNIX2003"
@@ -657,22 +734,14 @@ extern "C" {
     )]
     #[cfg_attr(target_os = "espidf", link_name = "lwip_listen")]
     pub fn listen(socket: ::c_int, backlog: ::c_int) -> ::c_int;
-    #[cfg(not(all(
-        libc_cfg_target_vendor,
-        target_arch = "powerpc",
-        target_vendor = "nintendo"
-    )))]
+    #[cfg(not(all(target_arch = "powerpc", target_vendor = "nintendo")))]
     #[cfg_attr(
         all(target_os = "macos", target_arch = "x86"),
         link_name = "accept$UNIX2003"
     )]
     #[cfg_attr(target_os = "espidf", link_name = "lwip_accept")]
     pub fn accept(socket: ::c_int, address: *mut sockaddr, address_len: *mut socklen_t) -> ::c_int;
-    #[cfg(not(all(
-        libc_cfg_target_vendor,
-        target_arch = "powerpc",
-        target_vendor = "nintendo"
-    )))]
+    #[cfg(not(all(target_arch = "powerpc", target_vendor = "nintendo")))]
     #[cfg_attr(
         all(target_os = "macos", target_arch = "x86"),
         link_name = "getpeername$UNIX2003"
@@ -683,11 +752,7 @@ extern "C" {
         address: *mut sockaddr,
         address_len: *mut socklen_t,
     ) -> ::c_int;
-    #[cfg(not(all(
-        libc_cfg_target_vendor,
-        target_arch = "powerpc",
-        target_vendor = "nintendo"
-    )))]
+    #[cfg(not(all(target_arch = "powerpc", target_vendor = "nintendo")))]
     #[cfg_attr(
         all(target_os = "macos", target_arch = "x86"),
         link_name = "getsockname$UNIX2003"
@@ -720,11 +785,7 @@ extern "C" {
         protocol: ::c_int,
         socket_vector: *mut ::c_int,
     ) -> ::c_int;
-    #[cfg(not(all(
-        libc_cfg_target_vendor,
-        target_arch = "powerpc",
-        target_vendor = "nintendo"
-    )))]
+    #[cfg(not(all(target_arch = "powerpc", target_vendor = "nintendo")))]
     #[cfg_attr(
         all(target_os = "macos", target_arch = "x86"),
         link_name = "sendto$UNIX2003"
@@ -909,9 +970,12 @@ extern "C" {
     pub fn close(fd: ::c_int) -> ::c_int;
     pub fn dup(fd: ::c_int) -> ::c_int;
     pub fn dup2(src: ::c_int, dst: ::c_int) -> ::c_int;
+
     pub fn execl(path: *const c_char, arg0: *const c_char, ...) -> ::c_int;
     pub fn execle(path: *const ::c_char, arg0: *const ::c_char, ...) -> ::c_int;
     pub fn execlp(file: *const ::c_char, arg0: *const ::c_char, ...) -> ::c_int;
+
+    // DIFF(main): changed to `*const *mut` in e77f551de9
     pub fn execv(prog: *const c_char, argv: *const *const c_char) -> ::c_int;
     pub fn execve(
         prog: *const c_char,
@@ -919,6 +983,7 @@ extern "C" {
         envp: *const *const c_char,
     ) -> ::c_int;
     pub fn execvp(c: *const c_char, argv: *const *const c_char) -> ::c_int;
+
     pub fn fork() -> pid_t;
     pub fn fpathconf(filedes: ::c_int, name: ::c_int) -> c_long;
     pub fn getcwd(buf: *mut c_char, size: ::size_t) -> *mut c_char;
@@ -945,6 +1010,7 @@ extern "C" {
     pub fn pathconf(path: *const c_char, name: ::c_int) -> c_long;
     pub fn pipe(fds: *mut ::c_int) -> ::c_int;
     pub fn posix_memalign(memptr: *mut *mut ::c_void, align: ::size_t, size: ::size_t) -> ::c_int;
+    pub fn aligned_alloc(alignment: ::size_t, size: ::size_t) -> *mut ::c_void;
     #[cfg_attr(
         all(target_os = "macos", target_arch = "x86"),
         link_name = "read$UNIX2003"
@@ -1234,11 +1300,7 @@ extern "C" {
     pub fn dlsym(handle: *mut ::c_void, symbol: *const ::c_char) -> *mut ::c_void;
     pub fn dlclose(handle: *mut ::c_void) -> ::c_int;
 
-    #[cfg(not(all(
-        libc_cfg_target_vendor,
-        target_arch = "powerpc",
-        target_vendor = "nintendo"
-    )))]
+    #[cfg(not(all(target_arch = "powerpc", target_vendor = "nintendo")))]
     #[cfg_attr(
         any(target_os = "illumos", target_os = "solaris"),
         link_name = "__xnet_getaddrinfo"
@@ -1250,11 +1312,7 @@ extern "C" {
         hints: *const addrinfo,
         res: *mut *mut addrinfo,
     ) -> ::c_int;
-    #[cfg(not(all(
-        libc_cfg_target_vendor,
-        target_arch = "powerpc",
-        target_vendor = "nintendo"
-    )))]
+    #[cfg(not(all(target_arch = "powerpc", target_vendor = "nintendo")))]
     #[cfg_attr(target_os = "espidf", link_name = "lwip_freeaddrinfo")]
     pub fn freeaddrinfo(res: *mut addrinfo);
     pub fn hstrerror(errcode: ::c_int) -> *const ::c_char;
@@ -1459,12 +1517,31 @@ extern "C" {
 
 }
 
+safe_f! {
+    // It seems htonl, etc are macros on macOS. So we have to reimplement them. So let's
+    // reimplement them for all UNIX platforms
+    pub {const} fn htonl(hostlong: u32) -> u32 {
+        u32::to_be(hostlong)
+    }
+    pub {const} fn htons(hostshort: u16) -> u16 {
+        u16::to_be(hostshort)
+    }
+    pub {const} fn ntohl(netlong: u32) -> u32 {
+        u32::from_be(netlong)
+    }
+    pub {const} fn ntohs(netshort: u16) -> u16 {
+        u16::from_be(netshort)
+    }
+}
+
 cfg_if! {
-    if #[cfg(not(any(target_os = "emscripten",
-                     target_os = "android",
-                     target_os = "haiku",
-                     target_os = "nto",
-                     target_os = "solaris")))] {
+    if #[cfg(not(any(
+        target_os = "emscripten",
+        target_os = "android",
+        target_os = "haiku",
+        target_os = "nto",
+        target_os = "solaris"
+    )))] {
         extern "C" {
             pub fn adjtime(delta: *const timeval, olddelta: *mut timeval) -> ::c_int;
         }
@@ -1476,11 +1553,26 @@ cfg_if! {
 }
 
 cfg_if! {
-    if #[cfg(not(any(target_os = "emscripten",
-                     target_os = "android",
-                     target_os = "nto")))] {
+    if #[cfg(not(any(
+        target_os = "emscripten",
+        target_os = "android",
+        target_os = "nto"
+    )))] {
         extern "C" {
             pub fn stpncpy(dst: *mut c_char, src: *const c_char, n: size_t) -> *mut c_char;
+        }
+    }
+}
+
+cfg_if! {
+    if #[cfg(not(target_os = "android"))] {
+        extern "C" {
+            #[cfg_attr(
+                all(target_os = "macos", target_arch = "x86"),
+                link_name = "confstr$UNIX2003"
+            )]
+            #[cfg_attr(target_os = "solaris", link_name = "__confstr_xpg7")]
+            pub fn confstr(name: ::c_int, buf: *mut ::c_char, len: ::size_t) -> ::size_t;
         }
     }
 }
@@ -1504,35 +1596,43 @@ cfg_if! {
 cfg_if! {
     if #[cfg(not(any(target_env = "uclibc", target_os = "nto")))] {
         extern "C" {
-            pub fn open_wmemstream(
-                ptr: *mut *mut wchar_t,
-                sizeloc: *mut size_t,
-            ) -> *mut FILE;
+            pub fn open_wmemstream(ptr: *mut *mut wchar_t, sizeloc: *mut size_t) -> *mut FILE;
         }
     }
 }
 
 cfg_if! {
     if #[cfg(not(target_os = "redox"))] {
-        extern {
+        extern "C" {
             pub fn getsid(pid: pid_t) -> pid_t;
-            #[cfg_attr(all(target_os = "macos", target_arch = "x86"),
-                       link_name = "pause$UNIX2003")]
+            #[cfg_attr(
+                all(target_os = "macos", target_arch = "x86"),
+                link_name = "pause$UNIX2003"
+            )]
             pub fn pause() -> ::c_int;
 
-            pub fn mkdirat(dirfd: ::c_int, pathname: *const ::c_char,
-                          mode: ::mode_t) -> ::c_int;
-            pub fn openat(dirfd: ::c_int, pathname: *const ::c_char,
-                          flags: ::c_int, ...) -> ::c_int;
+            pub fn mkdirat(dirfd: ::c_int, pathname: *const ::c_char, mode: ::mode_t) -> ::c_int;
+            pub fn openat(
+                dirfd: ::c_int,
+                pathname: *const ::c_char,
+                flags: ::c_int,
+                ...
+            ) -> ::c_int;
 
-            #[cfg_attr(all(target_os = "macos", target_arch = "x86_64"),
-                       link_name = "fdopendir$INODE64")]
-            #[cfg_attr(all(target_os = "macos", target_arch = "x86"),
-                       link_name = "fdopendir$INODE64$UNIX2003")]
+            #[cfg_attr(
+                all(target_os = "macos", target_arch = "x86_64"),
+                link_name = "fdopendir$INODE64"
+            )]
+            #[cfg_attr(
+                all(target_os = "macos", target_arch = "x86"),
+                link_name = "fdopendir$INODE64$UNIX2003"
+            )]
             pub fn fdopendir(fd: ::c_int) -> *mut ::DIR;
 
-            #[cfg_attr(all(target_os = "macos", not(target_arch = "aarch64")),
-                       link_name = "readdir_r$INODE64")]
+            #[cfg_attr(
+                all(target_os = "macos", not(target_arch = "aarch64")),
+                link_name = "readdir_r$INODE64"
+            )]
             #[cfg_attr(target_os = "netbsd", link_name = "__readdir_r30")]
             #[cfg_attr(
                 all(target_os = "freebsd", any(freebsd11, freebsd10)),
@@ -1545,19 +1645,24 @@ cfg_if! {
             /// https://illumos.org/man/3lib/libc
             /// https://docs.oracle.com/cd/E36784_01/html/E36873/libc-3lib.html
             /// https://www.unix.com/man-page/opensolaris/3LIB/libc/
-            pub fn readdir_r(dirp: *mut ::DIR, entry: *mut ::dirent,
-                             result: *mut *mut ::dirent) -> ::c_int;
+            pub fn readdir_r(
+                dirp: *mut ::DIR,
+                entry: *mut ::dirent,
+                result: *mut *mut ::dirent,
+            ) -> ::c_int;
         }
     }
 }
 
 cfg_if! {
     if #[cfg(target_os = "nto")] {
-        extern {
-            pub fn readlinkat(dirfd: ::c_int,
+        extern "C" {
+            pub fn readlinkat(
+                dirfd: ::c_int,
                 pathname: *const ::c_char,
                 buf: *mut ::c_char,
-                bufsiz: ::size_t) -> ::c_int;
+                bufsiz: ::size_t,
+            ) -> ::c_int;
             pub fn readlink(path: *const c_char, buf: *mut c_char, bufsz: ::size_t) -> ::c_int;
             pub fn pselect(
                 nfds: ::c_int,
@@ -1570,15 +1675,17 @@ cfg_if! {
             pub fn sigaction(
                 signum: ::c_int,
                 act: *const sigaction,
-                oldact: *mut sigaction
+                oldact: *mut sigaction,
             ) -> ::c_int;
         }
     } else {
-        extern {
-            pub fn readlinkat(dirfd: ::c_int,
+        extern "C" {
+            pub fn readlinkat(
+                dirfd: ::c_int,
                 pathname: *const ::c_char,
                 buf: *mut ::c_char,
-                bufsiz: ::size_t) -> ::ssize_t;
+                bufsiz: ::size_t,
+            ) -> ::ssize_t;
             pub fn fmemopen(buf: *mut c_void, size: size_t, mode: *const c_char) -> *mut FILE;
             pub fn open_memstream(ptr: *mut *mut c_char, sizeloc: *mut size_t) -> *mut FILE;
             pub fn atexit(cb: extern "C" fn()) -> c_int;
@@ -1586,7 +1693,7 @@ cfg_if! {
             pub fn sigaction(
                 signum: ::c_int,
                 act: *const sigaction,
-                oldact: *mut sigaction
+                oldact: *mut sigaction,
             ) -> ::c_int;
             pub fn readlink(path: *const c_char, buf: *mut c_char, bufsz: ::size_t) -> ::ssize_t;
             #[cfg_attr(
@@ -1611,16 +1718,16 @@ cfg_if! {
 }
 
 cfg_if! {
-   if #[cfg(not(any(target_os = "solaris",
-                    target_os = "illumos",
-                    target_os = "nto",
-                )))] {
-        extern {
+    if #[cfg(not(any(
+        target_os = "solaris",
+        target_os = "illumos",
+        target_os = "nto",
+    )))] {
+        extern "C" {
             pub fn cfmakeraw(termios: *mut ::termios);
-            pub fn cfsetspeed(termios: *mut ::termios,
-                              speed: ::speed_t) -> ::c_int;
+            pub fn cfsetspeed(termios: *mut ::termios, speed: ::speed_t) -> ::c_int;
         }
-   }
+    }
 }
 
 extern "C" {
@@ -1631,25 +1738,28 @@ cfg_if! {
     if #[cfg(target_env = "newlib")] {
         mod newlib;
         pub use self::newlib::*;
-    } else if #[cfg(any(target_os = "linux",
-                        target_os = "l4re",
-                        target_os = "android",
-                        target_os = "emscripten"))] {
+    } else if #[cfg(any(
+        target_os = "linux",
+        target_os = "l4re",
+        target_os = "android",
+        target_os = "emscripten"
+    ))] {
         mod linux_like;
         pub use self::linux_like::*;
-    } else if #[cfg(any(target_os = "macos",
-                        target_os = "ios",
-                        target_os = "tvos",
-                        target_os = "watchos",
-                        target_os = "visionos",
-                        target_os = "freebsd",
-                        target_os = "dragonfly",
-                        target_os = "openbsd",
-                        target_os = "netbsd"))] {
+    } else if #[cfg(any(
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "tvos",
+        target_os = "watchos",
+        target_os = "visionos",
+        target_os = "freebsd",
+        target_os = "dragonfly",
+        target_os = "openbsd",
+        target_os = "netbsd"
+    ))] {
         mod bsd;
         pub use self::bsd::*;
-    } else if #[cfg(any(target_os = "solaris",
-                        target_os = "illumos"))] {
+    } else if #[cfg(any(target_os = "solaris", target_os = "illumos"))] {
         mod solarish;
         pub use self::solarish::*;
     } else if #[cfg(target_os = "haiku")] {
@@ -1672,35 +1782,5 @@ cfg_if! {
         pub use self::nuttx::*;
     } else {
         // Unknown target_os
-    }
-}
-
-cfg_if! {
-    if #[cfg(libc_core_cvoid)] {
-        pub use ::ffi::c_void;
-    } else {
-        // Use repr(u8) as LLVM expects `void*` to be the same as `i8*` to help
-        // enable more optimization opportunities around it recognizing things
-        // like malloc/free.
-        #[repr(u8)]
-        #[allow(missing_copy_implementations)]
-        #[allow(missing_debug_implementations)]
-        pub enum c_void {
-            // Two dummy variants so the #[repr] attribute can be used.
-            #[doc(hidden)]
-            __variant1,
-            #[doc(hidden)]
-            __variant2,
-        }
-    }
-}
-
-cfg_if! {
-    if #[cfg(libc_align)] {
-        mod align;
-        pub use self::align::*;
-    } else {
-        mod no_align;
-        pub use self::no_align::*;
     }
 }

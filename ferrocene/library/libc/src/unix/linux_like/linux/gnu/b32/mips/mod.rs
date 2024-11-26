@@ -37,7 +37,8 @@ s! {
         pub f_fsid: ::fsid_t,
 
         pub f_namelen: ::c_long,
-        f_spare: [::c_long; 6],
+        pub f_flags: ::c_long,
+        f_spare: [::c_long; 5],
     }
 
     pub struct statfs64 {
@@ -75,7 +76,7 @@ s! {
         pub sa_flags: ::c_int,
         pub sa_sigaction: ::sighandler_t,
         pub sa_mask: ::sigset_t,
-        pub sa_restorer: ::Option<extern fn()>,
+        pub sa_restorer: ::Option<extern "C" fn()>,
         _resv: [::c_int; 1],
     }
 
@@ -102,7 +103,7 @@ s! {
         pub __seq: ::c_ushort,
         __pad1: ::c_ushort,
         __unused1: ::c_ulong,
-        __unused2: ::c_ulong
+        __unused2: ::c_ulong,
     }
 
     pub struct shmid_ds {
@@ -115,7 +116,7 @@ s! {
         pub shm_lpid: ::pid_t,
         pub shm_nattch: ::shmatt_t,
         __unused4: ::c_ulong,
-        __unused5: ::c_ulong
+        __unused5: ::c_ulong,
     }
 
     pub struct msqid_ds {
@@ -152,6 +153,14 @@ s! {
         pub l_sysid: ::c_long,
         pub l_pid: ::pid_t,
         pad: [::c_long; 4],
+    }
+}
+
+s_no_extra_traits! {
+    #[allow(missing_debug_implementations)]
+    #[repr(align(8))]
+    pub struct max_align_t {
+        priv_: [f32; 4],
     }
 }
 
@@ -810,10 +819,3 @@ pub const B3500000: ::speed_t = 0o010016;
 pub const B4000000: ::speed_t = 0o010017;
 
 pub const EHWPOISON: ::c_int = 168;
-
-cfg_if! {
-    if #[cfg(libc_align)] {
-        mod align;
-        pub use self::align::*;
-    }
-}

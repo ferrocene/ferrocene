@@ -63,7 +63,7 @@ s! {
         pub mode: ::mode_t,
         pub __seq: ::c_int,
         __unused1: ::c_long,
-        __unused2: ::c_long
+        __unused2: ::c_long,
     }
 
     pub struct shmid_ds {
@@ -120,14 +120,6 @@ s! {
         pub f_spare: [::c_ulong; 5],
     }
 
-    pub struct siginfo_t {
-        pub si_signo: ::c_int,
-        pub si_code: ::c_int,
-        pub si_errno: ::c_int,
-        pub _pad: [::c_int; 29],
-        _align: [usize; 0],
-    }
-
     pub struct statfs64 {
         pub f_type: ::c_ulong,
         pub f_bsize: ::c_ulong,
@@ -142,24 +134,13 @@ s! {
         pub f_flags: ::c_ulong,
         pub f_spare: [::c_ulong; 5],
     }
+}
 
-    pub struct statvfs64 {
-        pub f_bsize: ::c_ulong,
-        pub f_frsize: ::c_ulong,
-        pub f_blocks: u64,
-        pub f_bfree: u64,
-        pub f_bavail: u64,
-        pub f_files: u64,
-        pub f_ffree: u64,
-        pub f_favail: u64,
-        #[cfg(target_endian = "little")]
-        pub f_fsid: ::c_ulong,
-        __f_unused: ::c_int,
-        #[cfg(target_endian = "big")]
-        pub f_fsid: ::c_ulong,
-        pub f_flag: ::c_ulong,
-        pub f_namemax: ::c_ulong,
-        __f_spare: [::c_int; 6],
+s_no_extra_traits! {
+    #[allow(missing_debug_implementations)]
+    #[repr(align(8))]
+    pub struct max_align_t {
+        priv_: [f32; 4],
     }
 }
 
@@ -779,10 +760,3 @@ pub const SYS_memfd_secret: ::c_long = 4000 + 447;
 pub const SYS_process_mrelease: ::c_long = 4000 + 448;
 pub const SYS_futex_waitv: ::c_long = 4000 + 449;
 pub const SYS_set_mempolicy_home_node: ::c_long = 4000 + 450;
-
-cfg_if! {
-    if #[cfg(libc_align)] {
-        mod align;
-        pub use self::align::*;
-    }
-}

@@ -34,7 +34,7 @@ s! {
         pub f_flag: ::c_ulong,
         pub f_namemax: ::c_ulong,
         pub f_fstr: [::c_char; 32],
-        pub f_filler: [::c_ulong; 16]
+        pub f_filler: [::c_ulong; 16],
     }
 
     pub struct pthread_rwlock_t {
@@ -199,7 +199,6 @@ s_no_extra_traits! {
         pub __pad: [::c_int; 3],
     }
 
-    #[cfg(libc_union)]
     pub union _kernel_simple_lock {
         pub _slock: ::c_long,
         // Should be pointer to 'lock_data_instrumented'
@@ -207,14 +206,28 @@ s_no_extra_traits! {
     }
 
     pub struct fileops_t {
-        pub fo_rw: extern fn(file: *mut file, rw: ::uio_rw, io: *mut ::c_void, ext: ::c_long,
-                             secattr: *mut ::c_void) -> ::c_int,
-        pub fo_ioctl: extern fn(file: *mut file, a: ::c_long, b: ::caddr_t, c: ::c_long,
-                                d: ::c_long) -> ::c_int,
-        pub fo_select: extern fn(file: *mut file, a: ::c_int, b: *mut ::c_ushort,
-                                 c: extern fn()) -> ::c_int,
-        pub fo_close: extern fn(file: *mut file) -> ::c_int,
-        pub fo_fstat: extern fn(file: *mut file, sstat: *mut ::stat) -> ::c_int,
+        pub fo_rw: extern "C" fn(
+            file: *mut file,
+            rw: ::uio_rw,
+            io: *mut ::c_void,
+            ext: ::c_long,
+            secattr: *mut ::c_void,
+        ) -> ::c_int,
+        pub fo_ioctl: extern "C" fn(
+            file: *mut file,
+            a: ::c_long,
+            b: ::caddr_t,
+            c: ::c_long,
+            d: ::c_long,
+        ) -> ::c_int,
+        pub fo_select: extern "C" fn(
+            file: *mut file,
+            a: ::c_int,
+            b: *mut ::c_ushort,
+            c: extern "C" fn(),
+        ) -> ::c_int,
+        pub fo_close: extern "C" fn(file: *mut file) -> ::c_int,
+        pub fo_fstat: extern "C" fn(file: *mut file, sstat: *mut ::stat) -> ::c_int,
     }
 
     pub struct file {
@@ -228,9 +241,7 @@ s_no_extra_traits! {
         pub f_dir_off: ::c_long,
         // Should be pointer to 'cred'
         pub f_cred: *mut ::c_void,
-        #[cfg(libc_union)]
         pub f_lock: _kernel_simple_lock,
-        #[cfg(libc_union)]
         pub f_offset_lock: _kernel_simple_lock,
         pub f_vinfo: ::caddr_t,
         pub f_ops: *mut fileops_t,
@@ -239,7 +250,6 @@ s_no_extra_traits! {
         pub f_fdata: [::c_char; 160],
     }
 
-    #[cfg(libc_union)]
     pub union __ld_info_file {
         pub _ldinfo_fd: ::c_int,
         pub _ldinfo_fp: *mut file,
@@ -249,7 +259,6 @@ s_no_extra_traits! {
     pub struct ld_info {
         pub ldinfo_next: ::c_uint,
         pub ldinfo_flags: ::c_uint,
-        #[cfg(libc_union)]
         pub _file: __ld_info_file,
         pub ldinfo_textorg: *mut ::c_void,
         pub ldinfo_textsize: ::c_ulong,
@@ -258,7 +267,6 @@ s_no_extra_traits! {
         pub ldinfo_filename: [::c_char; 2],
     }
 
-    #[cfg(libc_union)]
     pub union __pollfd_ext_u {
         pub addr: *mut ::c_void,
         pub data32: u32,
@@ -269,7 +277,6 @@ s_no_extra_traits! {
         pub fd: ::c_int,
         pub events: ::c_ushort,
         pub revents: ::c_ushort,
-        #[cfg(libc_union)]
         pub data: __pollfd_ext_u,
     }
 }
@@ -300,10 +307,6 @@ cfg_if! {
     if #[cfg(feature = "extra_traits")] {
         impl PartialEq for siginfo_t {
             fn eq(&self, other: &siginfo_t) -> bool {
-                #[cfg(libc_union)]
-                let value_eq = self.si_value == other.si_value;
-                #[cfg(not(libc_union))]
-                let value_eq = true;
                 self.si_signo == other.si_signo
                     && self.si_errno == other.si_errno
                     && self.si_code == other.si_code
@@ -313,25 +316,24 @@ cfg_if! {
                     && self.si_addr == other.si_addr
                     && self.si_band == other.si_band
                     && self.__si_flags == other.__si_flags
-                    && value_eq
+                    && self.si_value == other.si_value
             }
         }
         impl Eq for siginfo_t {}
         impl ::fmt::Debug for siginfo_t {
-            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
-                let mut struct_formatter = f.debug_struct("siginfo_t");
-                struct_formatter.field("si_signo", &self.si_signo);
-                struct_formatter.field("si_errno", &self.si_errno);
-                struct_formatter.field("si_code", &self.si_code);
-                struct_formatter.field("si_pid", &self.si_pid);
-                struct_formatter.field("si_uid", &self.si_uid);
-                struct_formatter.field("si_status", &self.si_status);
-                struct_formatter.field("si_addr", &self.si_addr);
-                struct_formatter.field("si_band", &self.si_band);
-                #[cfg(libc_union)]
-                struct_formatter.field("si_value", &self.si_value);
-                struct_formatter.field("__si_flags", &self.__si_flags);
-                struct_formatter.finish()
+            fn fmt(&self, f: &mut ::fmt::Formatter<'_>) -> ::fmt::Result {
+                f.debug_struct("siginfo_t")
+                    .field("si_signo", &self.si_signo)
+                    .field("si_errno", &self.si_errno)
+                    .field("si_code", &self.si_code)
+                    .field("si_pid", &self.si_pid)
+                    .field("si_uid", &self.si_uid)
+                    .field("si_status", &self.si_status)
+                    .field("si_addr", &self.si_addr)
+                    .field("si_band", &self.si_band)
+                    .field("si_value", &self.si_value)
+                    .field("__si_flags", &self.__si_flags)
+                    .finish()
             }
         }
         impl ::hash::Hash for siginfo_t {
@@ -344,33 +346,25 @@ cfg_if! {
                 self.si_status.hash(state);
                 self.si_addr.hash(state);
                 self.si_band.hash(state);
-                #[cfg(libc_union)]
                 self.si_value.hash(state);
                 self.__si_flags.hash(state);
             }
         }
 
-        #[cfg(libc_union)]
         impl PartialEq for _kernel_simple_lock {
             fn eq(&self, other: &_kernel_simple_lock) -> bool {
-                unsafe {
-                    self._slock == other._slock
-                        && self._slockp == other._slockp
-                }
+                unsafe { self._slock == other._slock && self._slockp == other._slockp }
             }
         }
-        #[cfg(libc_union)]
         impl Eq for _kernel_simple_lock {}
-        #[cfg(libc_union)]
         impl ::fmt::Debug for _kernel_simple_lock {
-            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
+            fn fmt(&self, f: &mut ::fmt::Formatter<'_>) -> ::fmt::Result {
                 f.debug_struct("_kernel_simple_lock")
                     .field("_slock", unsafe { &self._slock })
                     .field("_slockp", unsafe { &self._slockp })
                     .finish()
             }
         }
-        #[cfg(libc_union)]
         impl ::hash::Hash for _kernel_simple_lock {
             fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
                 unsafe {
@@ -391,14 +385,14 @@ cfg_if! {
         }
         impl Eq for fileops_t {}
         impl ::fmt::Debug for fileops_t {
-            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
-                let mut struct_formatter = f.debug_struct("fileops_t");
-                struct_formatter.field("fo_rw", &self.fo_rw);
-                struct_formatter.field("fo_ioctl", &self.fo_ioctl);
-                struct_formatter.field("fo_select", &self.fo_select);
-                struct_formatter.field("fo_close", &self.fo_close);
-                struct_formatter.field("fo_fstat", &self.fo_fstat);
-                struct_formatter.finish()
+            fn fmt(&self, f: &mut ::fmt::Formatter<'_>) -> ::fmt::Result {
+                f.debug_struct("fileops_t")
+                    .field("fo_rw", &self.fo_rw)
+                    .field("fo_ioctl", &self.fo_ioctl)
+                    .field("fo_select", &self.fo_select)
+                    .field("fo_close", &self.fo_close)
+                    .field("fo_fstat", &self.fo_fstat)
+                    .finish()
             }
         }
         impl ::hash::Hash for fileops_t {
@@ -413,11 +407,6 @@ cfg_if! {
 
         impl PartialEq for file {
             fn eq(&self, other: &file) -> bool {
-                #[cfg(libc_union)]
-                let lock_eq = self.f_lock == other.f_lock
-                    && self.f_offset_lock == other.f_offset_lock;
-                #[cfg(not(libc_union))]
-                let lock_eq = true;
                 self.f_flag == other.f_flag
                     && self.f_count == other.f_count
                     && self.f_options == other.f_options
@@ -431,31 +420,30 @@ cfg_if! {
                     && self.f_parentp == other.f_parentp
                     && self.f_fnamep == other.f_fnamep
                     && self.f_fdata == other.f_fdata
-                    && lock_eq
+                    && self.f_lock == other.f_lock
+                    && self.f_offset_lock == other.f_offset_lock
             }
         }
         impl Eq for file {}
         impl ::fmt::Debug for file {
-            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
-                let mut struct_formatter = f.debug_struct("file");
-                struct_formatter.field("f_flag", &self.f_flag);
-                struct_formatter.field("f_count", &self.f_count);
-                struct_formatter.field("f_options", &self.f_options);
-                struct_formatter.field("f_type", &self.f_type);
-                struct_formatter.field("f_data", &self.f_data);
-                struct_formatter.field("f_offset", &self.f_offset);
-                struct_formatter.field("f_dir_off", &self.f_dir_off);
-                struct_formatter.field("f_cred", &self.f_cred);
-                #[cfg(libc_union)]
-                struct_formatter.field("f_lock", &self.f_lock);
-                #[cfg(libc_union)]
-                struct_formatter.field("f_offset_lock", &self.f_offset_lock);
-                struct_formatter.field("f_vinfo", &self.f_vinfo);
-                struct_formatter.field("f_ops", &self.f_ops);
-                struct_formatter.field("f_parentp", &self.f_parentp);
-                struct_formatter.field("f_fnamep", &self.f_fnamep);
-                struct_formatter.field("f_fdata", &self.f_fdata);
-                struct_formatter.finish()
+            fn fmt(&self, f: &mut ::fmt::Formatter<'_>) -> ::fmt::Result {
+                f.debug_struct("file")
+                    .field("f_flag", &self.f_flag)
+                    .field("f_count", &self.f_count)
+                    .field("f_options", &self.f_options)
+                    .field("f_type", &self.f_type)
+                    .field("f_data", &self.f_data)
+                    .field("f_offset", &self.f_offset)
+                    .field("f_dir_off", &self.f_dir_off)
+                    .field("f_cred", &self.f_cred)
+                    .field("f_lock", &self.f_lock)
+                    .field("f_offset_lock", &self.f_offset_lock)
+                    .field("f_vinfo", &self.f_vinfo)
+                    .field("f_ops", &self.f_ops)
+                    .field("f_parentp", &self.f_parentp)
+                    .field("f_fnamep", &self.f_fnamep)
+                    .field("f_fdata", &self.f_fdata)
+                    .finish()
             }
         }
         impl ::hash::Hash for file {
@@ -468,9 +456,7 @@ cfg_if! {
                 self.f_offset.hash(state);
                 self.f_dir_off.hash(state);
                 self.f_cred.hash(state);
-                #[cfg(libc_union)]
                 self.f_lock.hash(state);
-                #[cfg(libc_union)]
                 self.f_offset_lock.hash(state);
                 self.f_vinfo.hash(state);
                 self.f_ops.hash(state);
@@ -480,7 +466,6 @@ cfg_if! {
             }
         }
 
-        #[cfg(libc_union)]
         impl PartialEq for __ld_info_file {
             fn eq(&self, other: &__ld_info_file) -> bool {
                 unsafe {
@@ -490,11 +475,9 @@ cfg_if! {
                 }
             }
         }
-        #[cfg(libc_union)]
         impl Eq for __ld_info_file {}
-        #[cfg(libc_union)]
         impl ::fmt::Debug for __ld_info_file {
-            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
+            fn fmt(&self, f: &mut ::fmt::Formatter<'_>) -> ::fmt::Result {
                 f.debug_struct("__ld_info_file")
                     .field("_ldinfo_fd", unsafe { &self._ldinfo_fd })
                     .field("_ldinfo_fp", unsafe { &self._ldinfo_fp })
@@ -502,7 +485,6 @@ cfg_if! {
                     .finish()
             }
         }
-        #[cfg(libc_union)]
         impl ::hash::Hash for __ld_info_file {
             fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
                 unsafe {
@@ -515,10 +497,6 @@ cfg_if! {
 
         impl PartialEq for ld_info {
             fn eq(&self, other: &ld_info) -> bool {
-                #[cfg(libc_union)]
-                let file_eq = self._file == other._file;
-                #[cfg(not(libc_union))]
-                let file_eq = true;
                 self.ldinfo_next == other.ldinfo_next
                     && self.ldinfo_flags == other.ldinfo_flags
                     && self.ldinfo_textorg == other.ldinfo_textorg
@@ -526,23 +504,22 @@ cfg_if! {
                     && self.ldinfo_dataorg == other.ldinfo_dataorg
                     && self.ldinfo_datasize == other.ldinfo_datasize
                     && self.ldinfo_filename == other.ldinfo_filename
-                    && file_eq
+                    && self._file == other._file
             }
         }
         impl Eq for ld_info {}
         impl ::fmt::Debug for ld_info {
-            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
-                let mut struct_formatter = f.debug_struct("ld_info");
-                struct_formatter.field("ldinfo_next", &self.ldinfo_next);
-                struct_formatter.field("ldinfo_flags", &self.ldinfo_flags);
-                struct_formatter.field("ldinfo_textorg", &self.ldinfo_textorg);
-                struct_formatter.field("ldinfo_textsize", &self.ldinfo_textsize);
-                struct_formatter.field("ldinfo_dataorg", &self.ldinfo_dataorg);
-                struct_formatter.field("ldinfo_datasize", &self.ldinfo_datasize);
-                struct_formatter.field("ldinfo_filename", &self.ldinfo_filename);
-                #[cfg(libc_union)]
-                struct_formatter.field("_file", &self._file);
-                struct_formatter.finish()
+            fn fmt(&self, f: &mut ::fmt::Formatter<'_>) -> ::fmt::Result {
+                f.debug_struct("ld_info")
+                    .field("ldinfo_next", &self.ldinfo_next)
+                    .field("ldinfo_flags", &self.ldinfo_flags)
+                    .field("ldinfo_textorg", &self.ldinfo_textorg)
+                    .field("ldinfo_textsize", &self.ldinfo_textsize)
+                    .field("ldinfo_dataorg", &self.ldinfo_dataorg)
+                    .field("ldinfo_datasize", &self.ldinfo_datasize)
+                    .field("ldinfo_filename", &self.ldinfo_filename)
+                    .field("_file", &self._file)
+                    .finish()
             }
         }
         impl ::hash::Hash for ld_info {
@@ -554,12 +531,10 @@ cfg_if! {
                 self.ldinfo_dataorg.hash(state);
                 self.ldinfo_datasize.hash(state);
                 self.ldinfo_filename.hash(state);
-                #[cfg(libc_union)]
                 self._file.hash(state);
             }
         }
 
-        #[cfg(libc_union)]
         impl PartialEq for __pollfd_ext_u {
             fn eq(&self, other: &__pollfd_ext_u) -> bool {
                 unsafe {
@@ -569,11 +544,9 @@ cfg_if! {
                 }
             }
         }
-        #[cfg(libc_union)]
         impl Eq for __pollfd_ext_u {}
-        #[cfg(libc_union)]
         impl ::fmt::Debug for __pollfd_ext_u {
-            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
+            fn fmt(&self, f: &mut ::fmt::Formatter<'_>) -> ::fmt::Result {
                 f.debug_struct("__pollfd_ext_u")
                     .field("addr", unsafe { &self.addr })
                     .field("data32", unsafe { &self.data32 })
@@ -581,7 +554,6 @@ cfg_if! {
                     .finish()
             }
         }
-        #[cfg(libc_union)]
         impl ::hash::Hash for __pollfd_ext_u {
             fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
                 unsafe {
@@ -594,26 +566,21 @@ cfg_if! {
 
         impl PartialEq for pollfd_ext {
             fn eq(&self, other: &pollfd_ext) -> bool {
-                #[cfg(libc_union)]
-                let data_eq = self.data == other.data;
-                #[cfg(not(libc_union))]
-                let data_eq = true;
                 self.fd == other.fd
                     && self.events == other.events
                     && self.revents == other.revents
-                    && data_eq
+                    && self.data == other.data
             }
         }
         impl Eq for pollfd_ext {}
         impl ::fmt::Debug for pollfd_ext {
-            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
-                let mut struct_formatter = f.debug_struct("pollfd_ext");
-                struct_formatter.field("fd", &self.fd);
-                struct_formatter.field("events", &self.events);
-                struct_formatter.field("revents", &self.revents);
-                #[cfg(libc_union)]
-                struct_formatter.field("data", &self.data);
-                struct_formatter.finish()
+            fn fmt(&self, f: &mut ::fmt::Formatter<'_>) -> ::fmt::Result {
+                f.debug_struct("pollfd_ext")
+                    .field("fd", &self.fd)
+                    .field("events", &self.events)
+                    .field("revents", &self.revents)
+                    .field("data", &self.data)
+                    .finish()
             }
         }
         impl ::hash::Hash for pollfd_ext {
@@ -621,7 +588,6 @@ cfg_if! {
                 self.fd.hash(state);
                 self.events.hash(state);
                 self.revents.hash(state);
-                #[cfg(libc_union)]
                 self.data.hash(state);
             }
         }

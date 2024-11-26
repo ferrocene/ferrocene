@@ -9,13 +9,14 @@ pub type sigset_t = ::c_ulong;
 pub type socklen_t = i32;
 pub type time64_t = i64;
 pub type __u64 = ::c_ulonglong;
+pub type __s64 = ::c_longlong;
 
 s! {
     pub struct sigaction {
         pub sa_sigaction: ::sighandler_t,
         pub sa_mask: ::sigset_t,
         pub sa_flags: ::c_int,
-        pub sa_restorer: ::Option<extern fn()>,
+        pub sa_restorer: ::Option<extern "C" fn()>,
     }
 
     pub struct rlimit64 {
@@ -105,9 +106,13 @@ s! {
         pub sched_priority: i32,
     }
 
-    pub struct pthread_mutex_t { value: ::c_int }
+    pub struct pthread_mutex_t {
+        value: ::c_int,
+    }
 
-    pub struct pthread_cond_t { value: ::c_int }
+    pub struct pthread_cond_t {
+        value: ::c_int,
+    }
 
     pub struct pthread_rwlock_t {
         lock: pthread_mutex_t,
@@ -172,7 +177,7 @@ s! {
 
 s_no_extra_traits! {
     pub struct sigset64_t {
-        __bits: [::c_ulong; 2]
+        __bits: [::c_ulong; 2],
     }
 }
 

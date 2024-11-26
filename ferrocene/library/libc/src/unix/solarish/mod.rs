@@ -106,7 +106,7 @@ s! {
         pub sin_family: sa_family_t,
         pub sin_port: ::in_port_t,
         pub sin_addr: ::in_addr,
-        pub sin_zero: [::c_char; 8]
+        pub sin_zero: [::c_char; 8],
     }
 
     pub struct sockaddr_in6 {
@@ -115,7 +115,7 @@ s! {
         pub sin6_flowinfo: u32,
         pub sin6_addr: ::in6_addr,
         pub sin6_scope_id: u32,
-        pub __sin6_src_id: u32
+        pub __sin6_src_id: u32,
     }
 
     pub struct in_pktinfo {
@@ -138,7 +138,7 @@ s! {
         pub pw_comment: *mut ::c_char,
         pub pw_gecos: *mut ::c_char,
         pub pw_dir: *mut ::c_char,
-        pub pw_shell: *mut ::c_char
+        pub pw_shell: *mut ::c_char,
     }
 
     pub struct ifaddrs {
@@ -148,7 +148,7 @@ s! {
         pub ifa_addr: *mut ::sockaddr,
         pub ifa_netmask: *mut ::sockaddr,
         pub ifa_dstaddr: *mut ::sockaddr,
-        pub ifa_data: *mut ::c_void
+        pub ifa_data: *mut ::c_void,
     }
 
     pub struct itimerspec {
@@ -165,10 +165,10 @@ s! {
         pub tm_year: ::c_int,
         pub tm_wday: ::c_int,
         pub tm_yday: ::c_int,
-        pub tm_isdst: ::c_int
+        pub tm_isdst: ::c_int,
     }
 
-     pub struct msghdr {
+    pub struct msghdr {
         pub msg_name: *mut ::c_void,
         pub msg_namelen: ::socklen_t,
         pub msg_iov: *mut ::iovec,
@@ -185,7 +185,7 @@ s! {
     }
 
     pub struct pthread_attr_t {
-        __pthread_attrp: *mut ::c_void
+        __pthread_attrp: *mut ::c_void,
     }
 
     pub struct pthread_mutex_t {
@@ -195,18 +195,18 @@ s! {
         __pthread_mutex_type: u16,
         __pthread_mutex_magic: u16,
         __pthread_mutex_lock: u64,
-        __pthread_mutex_data: u64
+        __pthread_mutex_data: u64,
     }
 
     pub struct pthread_mutexattr_t {
-        __pthread_mutexattrp: *mut ::c_void
+        __pthread_mutexattrp: *mut ::c_void,
     }
 
     pub struct pthread_cond_t {
         __pthread_cond_flag: [u8; 4],
         __pthread_cond_type: u16,
         __pthread_cond_magic: u16,
-        __pthread_cond_data: u64
+        __pthread_cond_data: u64,
     }
 
     pub struct pthread_condattr_t {
@@ -219,7 +219,7 @@ s! {
         __pthread_rwlock_magic: u16,
         __pthread_rwlock_mutex: ::pthread_mutex_t,
         __pthread_rwlock_readercv: ::pthread_cond_t,
-        __pthread_rwlock_writercv: ::pthread_cond_t
+        __pthread_rwlock_writercv: ::pthread_cond_t,
     }
 
     pub struct pthread_rwlockattr_t {
@@ -230,12 +230,12 @@ s! {
         pub d_ino: ::ino_t,
         pub d_off: ::off_t,
         pub d_reclen: u16,
-        pub d_name: [::c_char; 3]
+        pub d_name: [::c_char; 3],
     }
 
     pub struct glob_t {
         pub gl_pathc: ::size_t,
-        pub gl_pathv:  *mut *mut ::c_char,
+        pub gl_pathv: *mut *mut ::c_char,
         pub gl_offs: ::size_t,
         __unused1: *mut ::c_void,
         __unused2: ::c_int,
@@ -299,7 +299,7 @@ s! {
         pub f_basetype: [::c_char; 16],
         pub f_flag: ::c_ulong,
         pub f_namemax: ::c_ulong,
-        pub f_fstr: [::c_char; 32]
+        pub f_fstr: [::c_char; 32],
     }
 
     pub struct sendfilevec_t {
@@ -311,7 +311,7 @@ s! {
 
     pub struct sched_param {
         pub sched_priority: ::c_int,
-        sched_pad: [::c_int; 8]
+        sched_pad: [::c_int; 8],
     }
 
     pub struct Dl_info {
@@ -338,7 +338,7 @@ s! {
         pub st_ctime_nsec: ::c_long,
         pub st_blksize: ::blksize_t,
         pub st_blocks: ::blkcnt_t,
-        __unused: [::c_char; 16]
+        __unused: [::c_char; 16],
     }
 
     pub struct termios {
@@ -346,7 +346,7 @@ s! {
         pub c_oflag: ::tcflag_t,
         pub c_cflag: ::tcflag_t,
         pub c_lflag: ::tcflag_t,
-        pub c_cc: [::cc_t; ::NCCS]
+        pub c_cc: [::cc_t; ::NCCS],
     }
 
     pub struct lconv {
@@ -381,7 +381,7 @@ s! {
         pub sem_type: u16,
         pub sem_magic: u16,
         pub sem_pad1: [u64; 3],
-        pub sem_pad2: [u64; 2]
+        pub sem_pad2: [u64; 2],
     }
 
     pub struct flock {
@@ -391,7 +391,7 @@ s! {
         pub l_len: ::off_t,
         pub l_sysid: ::c_int,
         pub l_pid: ::pid_t,
-        pub l_pad: [::c_long; 4]
+        pub l_pad: [::c_long; 4],
     }
 
     pub struct if_nameindex {
@@ -404,7 +404,7 @@ s! {
         pub mq_maxmsg: ::c_long,
         pub mq_msgsize: ::c_long,
         pub mq_curmsgs: ::c_long,
-        _pad: [::c_int; 12]
+        _pad: [::c_int; 12],
     }
 
     pub struct port_event {
@@ -418,6 +418,11 @@ s! {
     pub struct port_notify {
         pub portnfy_port: ::c_int,
         pub portnfy_user: *mut ::c_void,
+    }
+
+    pub struct aio_result_t {
+        pub aio_return: ::ssize_t,
+        pub aio_errno: ::c_int,
     }
 
     pub struct exit_status {
@@ -495,7 +500,7 @@ s! {
 s_no_extra_traits! {
     pub struct sockaddr_un {
         pub sun_family: sa_family_t,
-        pub sun_path: [c_char; 108]
+        pub sun_path: [c_char; 108],
     }
 
     pub struct utsname {
@@ -508,9 +513,9 @@ s_no_extra_traits! {
 
     pub struct fd_set {
         #[cfg(target_pointer_width = "64")]
-        fds_bits: [i64; FD_SETSIZE / 64],
+        fds_bits: [i64; FD_SETSIZE as usize / 64],
         #[cfg(target_pointer_width = "32")]
-        fds_bits: [i32; FD_SETSIZE / 32],
+        fds_bits: [i32; FD_SETSIZE as usize / 32],
     }
 
     pub struct sockaddr_storage {
@@ -520,7 +525,7 @@ s_no_extra_traits! {
         __ss_pad2: [u8; 240],
     }
 
-    #[cfg_attr(all(target_pointer_width = "64", libc_align), repr(align(8)))]
+    #[cfg_attr(target_pointer_width = "64", repr(align(8)))]
     pub struct siginfo_t {
         pub si_signo: ::c_int,
         pub si_code: ::c_int,
@@ -550,15 +555,13 @@ s_no_extra_traits! {
         __sigev_pad2: ::c_int,
     }
 
-    #[cfg(libc_union)]
-    #[cfg_attr(libc_align, repr(align(16)))]
+    #[repr(align(16))]
     pub union pad128_t {
         // pub _q in this structure would be a "long double", of 16 bytes
         pub _l: [i32; 4],
     }
 
-    #[cfg(libc_union)]
-    #[cfg_attr(libc_align, repr(align(16)))]
+    #[repr(align(16))]
     pub union upad128_t {
         // pub _q in this structure would be a "long double", of 16 bytes
         pub _l: [u32; 4],
@@ -571,10 +574,10 @@ cfg_if! {
             fn eq(&self, other: &sockaddr_un) -> bool {
                 self.sun_family == other.sun_family
                     && self
-                    .sun_path
-                    .iter()
-                    .zip(other.sun_path.iter())
-                    .all(|(a, b)| a == b)
+                        .sun_path
+                        .iter()
+                        .zip(other.sun_path.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for sockaddr_un {}
@@ -600,25 +603,25 @@ cfg_if! {
                     .zip(other.sysname.iter())
                     .all(|(a, b)| a == b)
                     && self
-                    .nodename
-                    .iter()
-                    .zip(other.nodename.iter())
-                    .all(|(a, b)| a == b)
+                        .nodename
+                        .iter()
+                        .zip(other.nodename.iter())
+                        .all(|(a, b)| a == b)
                     && self
-                    .release
-                    .iter()
-                    .zip(other.release.iter())
-                    .all(|(a, b)| a == b)
+                        .release
+                        .iter()
+                        .zip(other.release.iter())
+                        .all(|(a, b)| a == b)
                     && self
-                    .version
-                    .iter()
-                    .zip(other.version.iter())
-                    .all(|(a, b)| a == b)
+                        .version
+                        .iter()
+                        .zip(other.version.iter())
+                        .all(|(a, b)| a == b)
                     && self
-                    .machine
-                    .iter()
-                    .zip(other.machine.iter())
-                    .all(|(a, b)| a == b)
+                        .machine
+                        .iter()
+                        .zip(other.machine.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for utsname {}
@@ -671,10 +674,10 @@ cfg_if! {
                     && self.__ss_pad1 == other.__ss_pad1
                     && self.__ss_align == other.__ss_align
                     && self
-                    .__ss_pad2
-                    .iter()
-                    .zip(other.__ss_pad2.iter())
-                    .all(|(a, b)| a == b)
+                        .__ss_pad2
+                        .iter()
+                        .zip(other.__ss_pad2.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for sockaddr_storage {}
@@ -731,15 +734,16 @@ cfg_if! {
             fn eq(&self, other: &siginfo_t) -> bool {
                 if self.si_signo == other.si_signo
                     && self.si_code == other.si_code
-                    && self.si_errno == other.si_errno {
-                        // FIXME: The `si_pad` field in the 64-bit version of the struct is ignored
-                        // (for now) when doing comparisons.
+                    && self.si_errno == other.si_errno
+                {
+                    // FIXME: The `si_pad` field in the 64-bit version of the struct is ignored
+                    // (for now) when doing comparisons.
 
-                        let field_count = self.data_field_count();
-                        self.__data_pad[..field_count]
-                            .iter()
-                            .zip(other.__data_pad[..field_count].iter())
-                            .all(|(a, b)| a == b)
+                    let field_count = self.data_field_count();
+                    self.__data_pad[..field_count]
+                        .iter()
+                        .zip(other.__data_pad[..field_count].iter())
+                        .all(|(a, b)| a == b)
                 } else {
                     false
                 }
@@ -779,10 +783,10 @@ cfg_if! {
                     && self.sdl_alen == other.sdl_alen
                     && self.sdl_slen == other.sdl_slen
                     && self
-                    .sdl_data
-                    .iter()
-                    .zip(other.sdl_data.iter())
-                    .all(|(a,b)| a == b)
+                        .sdl_data
+                        .iter()
+                        .zip(other.sdl_data.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for sockaddr_dl {}
@@ -817,8 +821,7 @@ cfg_if! {
                     && self.sigev_signo == other.sigev_signo
                     && self.sigev_value == other.sigev_value
                     && self.ss_sp == other.ss_sp
-                    && self.sigev_notify_attributes
-                        == other.sigev_notify_attributes
+                    && self.sigev_notify_attributes == other.sigev_notify_attributes
             }
         }
         impl Eq for sigevent {}
@@ -829,8 +832,7 @@ cfg_if! {
                     .field("sigev_signo", &self.sigev_signo)
                     .field("sigev_value", &self.sigev_value)
                     .field("ss_sp", &self.ss_sp)
-                    .field("sigev_notify_attributes",
-                           &self.sigev_notify_attributes)
+                    .field("sigev_notify_attributes", &self.sigev_notify_attributes)
                     .finish()
             }
         }
@@ -844,65 +846,57 @@ cfg_if! {
             }
         }
 
-        #[cfg(libc_union)]
         impl PartialEq for pad128_t {
             fn eq(&self, other: &pad128_t) -> bool {
                 unsafe {
-                // FIXME: self._q == other._q ||
+                    // FIXME: self._q == other._q ||
                     self._l == other._l
                 }
             }
         }
-        #[cfg(libc_union)]
         impl Eq for pad128_t {}
-        #[cfg(libc_union)]
         impl ::fmt::Debug for pad128_t {
             fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
                 unsafe {
-                f.debug_struct("pad128_t")
-                    // FIXME: .field("_q", &{self._q})
-                    .field("_l", &{self._l})
-                    .finish()
+                    f.debug_struct("pad128_t")
+                        // FIXME: .field("_q", &{self._q})
+                        .field("_l", &{ self._l })
+                        .finish()
                 }
             }
         }
-        #[cfg(libc_union)]
         impl ::hash::Hash for pad128_t {
             fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
                 unsafe {
-                // FIXME: state.write_i64(self._q as i64);
-                self._l.hash(state);
+                    // FIXME: state.write_i64(self._q as i64);
+                    self._l.hash(state);
                 }
             }
         }
-        #[cfg(libc_union)]
         impl PartialEq for upad128_t {
             fn eq(&self, other: &upad128_t) -> bool {
                 unsafe {
-                // FIXME: self._q == other._q ||
+                    // FIXME: self._q == other._q ||
                     self._l == other._l
                 }
             }
         }
-        #[cfg(libc_union)]
         impl Eq for upad128_t {}
-        #[cfg(libc_union)]
         impl ::fmt::Debug for upad128_t {
             fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
                 unsafe {
-                f.debug_struct("upad128_t")
-                    // FIXME: .field("_q", &{self._q})
-                    .field("_l", &{self._l})
-                    .finish()
+                    f.debug_struct("upad128_t")
+                        // FIXME: .field("_q", &{self._q})
+                        .field("_l", &{ self._l })
+                        .finish()
                 }
             }
         }
-        #[cfg(libc_union)]
         impl ::hash::Hash for upad128_t {
             fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
                 unsafe {
-                // FIXME: state.write_i64(self._q as i64);
-                self._l.hash(state);
+                    // FIXME: state.write_i64(self._q as i64);
+                    self._l.hash(state);
                 }
             }
         }
@@ -1133,9 +1127,19 @@ pub const SIG_BLOCK: ::c_int = 1;
 pub const SIG_UNBLOCK: ::c_int = 2;
 pub const SIG_SETMASK: ::c_int = 3;
 
+pub const AIO_CANCELED: ::c_int = 0;
+pub const AIO_ALLDONE: ::c_int = 1;
+pub const AIO_NOTCANCELED: ::c_int = 2;
+pub const LIO_NOP: ::c_int = 0;
+pub const LIO_READ: ::c_int = 1;
+pub const LIO_WRITE: ::c_int = 2;
+pub const LIO_NOWAIT: ::c_int = 0;
+pub const LIO_WAIT: ::c_int = 1;
+
 pub const SIGEV_NONE: ::c_int = 1;
 pub const SIGEV_SIGNAL: ::c_int = 2;
 pub const SIGEV_THREAD: ::c_int = 3;
+pub const SIGEV_PORT: ::c_int = 4;
 
 pub const CLD_EXITED: ::c_int = 1;
 pub const CLD_KILLED: ::c_int = 2;
@@ -1866,6 +1870,8 @@ pub const _PC_FILESIZEBITS: ::c_int = 67;
 pub const _PC_XATTR_ENABLED: ::c_int = 100;
 pub const _PC_XATTR_EXISTS: ::c_int = 101;
 
+pub const _POSIX_VDISABLE: ::cc_t = 0;
+
 pub const _SC_ARG_MAX: ::c_int = 1;
 pub const _SC_CHILD_MAX: ::c_int = 2;
 pub const _SC_CLK_TCK: ::c_int = 3;
@@ -2484,47 +2490,43 @@ f! {
         }
     }
 
-    pub fn CMSG_NXTHDR(mhdr: *const ::msghdr, cmsg: *const ::cmsghdr)
-        -> *mut ::cmsghdr
-    {
+    pub fn CMSG_NXTHDR(mhdr: *const ::msghdr, cmsg: *const ::cmsghdr) -> *mut ::cmsghdr {
         if cmsg.is_null() {
             return ::CMSG_FIRSTHDR(mhdr);
         };
-        let next = _CMSG_HDR_ALIGN(cmsg as usize + (*cmsg).cmsg_len as usize
-            + ::mem::size_of::<::cmsghdr>());
-        let max = (*mhdr).msg_control as usize
-            + (*mhdr).msg_controllen as usize;
+        let next = _CMSG_HDR_ALIGN(
+            cmsg as usize + (*cmsg).cmsg_len as usize + ::mem::size_of::<::cmsghdr>(),
+        );
+        let max = (*mhdr).msg_control as usize + (*mhdr).msg_controllen as usize;
         if next > max {
             0 as *mut ::cmsghdr
         } else {
-            _CMSG_HDR_ALIGN(cmsg as usize + (*cmsg).cmsg_len as usize)
-                as *mut ::cmsghdr
+            _CMSG_HDR_ALIGN(cmsg as usize + (*cmsg).cmsg_len as usize) as *mut ::cmsghdr
         }
     }
 
     pub {const} fn CMSG_SPACE(length: ::c_uint) -> ::c_uint {
-        _CMSG_HDR_ALIGN(::mem::size_of::<::cmsghdr>() as usize
-            + length as usize) as ::c_uint
+        _CMSG_HDR_ALIGN(::mem::size_of::<::cmsghdr>() as usize + length as usize) as ::c_uint
     }
 
     pub fn FD_CLR(fd: ::c_int, set: *mut fd_set) -> () {
         let bits = ::mem::size_of_val(&(*set).fds_bits[0]) * 8;
         let fd = fd as usize;
         (*set).fds_bits[fd / bits] &= !(1 << (fd % bits));
-        return
+        return;
     }
 
     pub fn FD_ISSET(fd: ::c_int, set: *const fd_set) -> bool {
         let bits = ::mem::size_of_val(&(*set).fds_bits[0]) * 8;
         let fd = fd as usize;
-        return ((*set).fds_bits[fd / bits] & (1 << (fd % bits))) != 0
+        return ((*set).fds_bits[fd / bits] & (1 << (fd % bits))) != 0;
     }
 
     pub fn FD_SET(fd: ::c_int, set: *mut fd_set) -> () {
         let bits = ::mem::size_of_val(&(*set).fds_bits[0]) * 8;
         let fd = fd as usize;
         (*set).fds_bits[fd / bits] |= 1 << (fd % bits);
-        return
+        return;
     }
 
     pub fn FD_ZERO(set: *mut fd_set) -> () {
@@ -3045,9 +3047,37 @@ extern "C" {
 
     pub fn sync();
 
+    pub fn aio_cancel(fd: ::c_int, aiocbp: *mut aiocb) -> ::c_int;
+    pub fn aio_error(aiocbp: *const aiocb) -> ::c_int;
+    pub fn aio_fsync(op: ::c_int, aiocbp: *mut aiocb) -> ::c_int;
+    pub fn aio_read(aiocbp: *mut aiocb) -> ::c_int;
+    pub fn aio_return(aiocbp: *mut aiocb) -> ::ssize_t;
+    pub fn aio_suspend(
+        aiocb_list: *const *const aiocb,
+        nitems: ::c_int,
+        timeout: *const ::timespec,
+    ) -> ::c_int;
+    pub fn aio_waitn(
+        aiocb_list: *mut *mut aiocb,
+        nent: ::c_uint,
+        nwait: *mut ::c_uint,
+        timeout: *const ::timespec,
+    ) -> ::c_int;
+    pub fn aio_write(aiocbp: *mut aiocb) -> ::c_int;
+    pub fn lio_listio(
+        mode: ::c_int,
+        aiocb_list: *const *mut aiocb,
+        nitems: ::c_int,
+        sevp: *mut sigevent,
+    ) -> ::c_int;
+
     pub fn __major(version: ::c_int, devnum: ::dev_t) -> ::major_t;
     pub fn __minor(version: ::c_int, devnum: ::dev_t) -> ::minor_t;
     pub fn __makedev(version: ::c_int, majdev: ::major_t, mindev: ::minor_t) -> ::dev_t;
+
+    pub fn arc4random() -> u32;
+    pub fn arc4random_buf(buf: *mut ::c_void, nbytes: ::size_t);
+    pub fn arc4random_uniform(upper_bound: u32) -> u32;
 }
 
 #[link(name = "sendfile")]

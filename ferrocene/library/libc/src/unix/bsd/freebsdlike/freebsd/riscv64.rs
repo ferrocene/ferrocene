@@ -21,10 +21,10 @@ s_no_extra_traits! {
     }
 
     pub struct fpregs {
-        pub fp_x: [[::register_t; 2]; 32],
-        pub fp_fcsr: ::register_t,
+        pub fp_x: [[u64; 2]; 32],
+        pub fp_fcsr: u64,
         pub fp_flags: ::c_int,
-        pub fp_pad: ::c_int,
+        pub pad: ::c_int,
     }
 
     pub struct mcontext_t {
@@ -36,30 +36,19 @@ s_no_extra_traits! {
     }
 }
 
-// should be pub(crate), but that requires Rust 1.18.0
-cfg_if! {
-    if #[cfg(libc_const_size_of)] {
-        #[doc(hidden)]
-        pub const _ALIGNBYTES: usize = ::mem::size_of::<::c_longlong>() - 1;
-    } else {
-        #[doc(hidden)]
-        pub const _ALIGNBYTES: usize = 8 - 1;
-    }
-}
-
 cfg_if! {
     if #[cfg(feature = "extra_traits")] {
         impl PartialEq for gpregs {
             fn eq(&self, other: &gpregs) -> bool {
-                self.gp_ra == other.gp_ra &&
-                self.gp_sp == other.gp_sp &&
-                self.gp_gp == other.gp_gp &&
-                self.gp_tp == other.gp_tp &&
-                self.gp_t.iter().zip(other.gp_t.iter()).all(|(a, b)| a == b) &&
-                self.gp_s.iter().zip(other.gp_s.iter()).all(|(a, b)| a == b) &&
-                self.gp_a.iter().zip(other.gp_a.iter()).all(|(a, b)| a == b) &&
-                self.gp_sepc == other.gp_sepc &&
-                self.gp_sstatus == other.gp_sstatus
+                self.gp_ra == other.gp_ra
+                    && self.gp_sp == other.gp_sp
+                    && self.gp_gp == other.gp_gp
+                    && self.gp_tp == other.gp_tp
+                    && self.gp_t.iter().zip(other.gp_t.iter()).all(|(a, b)| a == b)
+                    && self.gp_s.iter().zip(other.gp_s.iter()).all(|(a, b)| a == b)
+                    && self.gp_a.iter().zip(other.gp_a.iter()).all(|(a, b)| a == b)
+                    && self.gp_sepc == other.gp_sepc
+                    && self.gp_sstatus == other.gp_sstatus
             }
         }
         impl Eq for gpregs {}
@@ -93,10 +82,10 @@ cfg_if! {
         }
         impl PartialEq for fpregs {
             fn eq(&self, other: &fpregs) -> bool {
-                self.fp_x == other.fp_x &&
-                self.fp_fcsr == other.fp_fcsr &&
-                self.fp_flags == other.fp_flags &&
-                self.fp_pad == other.fp_pad
+                self.fp_x == other.fp_x
+                    && self.fp_fcsr == other.fp_fcsr
+                    && self.fp_flags == other.fp_flags
+                    && self.pad == other.pad
             }
         }
         impl Eq for fpregs {}
@@ -106,7 +95,7 @@ cfg_if! {
                     .field("fp_x", &self.fp_x)
                     .field("fp_fcsr", &self.fp_fcsr)
                     .field("fp_flags", &self.fp_flags)
-                    .field("fp_pad", &self.fp_pad)
+                    .field("pad", &self.pad)
                     .finish()
             }
         }
@@ -115,16 +104,20 @@ cfg_if! {
                 self.fp_x.hash(state);
                 self.fp_fcsr.hash(state);
                 self.fp_flags.hash(state);
-                self.fp_pad.hash(state);
+                self.pad.hash(state);
             }
         }
         impl PartialEq for mcontext_t {
             fn eq(&self, other: &mcontext_t) -> bool {
-                self.mc_gpregs == other.mc_gpregs &&
-                self.mc_fpregs == other.mc_fpregs &&
-                self.mc_flags == other.mc_flags &&
-                self.mc_pad == other.mc_pad &&
-                self.mc_spare.iter().zip(other.mc_spare.iter()).all(|(a, b)| a == b)
+                self.mc_gpregs == other.mc_gpregs
+                    && self.mc_fpregs == other.mc_fpregs
+                    && self.mc_flags == other.mc_flags
+                    && self.mc_pad == other.mc_pad
+                    && self
+                        .mc_spare
+                        .iter()
+                        .zip(other.mc_spare.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for mcontext_t {}
@@ -150,6 +143,8 @@ cfg_if! {
         }
     }
 }
+
+pub(crate) const _ALIGNBYTES: usize = ::mem::size_of::<::c_longlong>() - 1;
 
 pub const BIOCSRTIMEOUT: ::c_ulong = 0x8010426d;
 pub const BIOCGRTIMEOUT: ::c_ulong = 0x4010426e;

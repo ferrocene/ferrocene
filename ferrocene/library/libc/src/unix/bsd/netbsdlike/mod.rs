@@ -369,6 +369,7 @@ pub const POSIX_MADV_SEQUENTIAL: ::c_int = 2;
 pub const POSIX_MADV_WILLNEED: ::c_int = 3;
 pub const POSIX_MADV_DONTNEED: ::c_int = 4;
 
+// DIFF(main): changed to `c_short` in f62eb023ab
 pub const POSIX_SPAWN_RESETIDS: ::c_int = 0x01;
 pub const POSIX_SPAWN_SETPGROUP: ::c_int = 0x02;
 pub const POSIX_SPAWN_SETSCHEDPARAM: ::c_int = 0x04;
@@ -754,11 +755,14 @@ extern "C" {
     pub fn shmat(shmid: ::c_int, shmaddr: *const ::c_void, shmflg: ::c_int) -> *mut ::c_void;
     pub fn shmdt(shmaddr: *const ::c_void) -> ::c_int;
     pub fn shmctl(shmid: ::c_int, cmd: ::c_int, buf: *mut ::shmid_ds) -> ::c_int;
+
+    // DIFF(main): changed to `*const *mut` in e77f551de9
     pub fn execvpe(
         file: *const ::c_char,
         argv: *const *const ::c_char,
         envp: *const *const ::c_char,
     ) -> ::c_int;
+
     pub fn waitid(
         idtype: idtype_t,
         id: ::id_t,

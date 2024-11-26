@@ -34,10 +34,7 @@ s! {
     #[repr(align(8))]
     pub struct mcontext_t {
         pub cpu: x86_64_cpu_registers,
-        #[cfg(libc_union)]
         pub fpu: x86_64_fpu_registers,
-        #[cfg(not(libc_union))]
-        __reserved: [u8; 1024],
     }
 
     pub struct stack_t {
@@ -55,7 +52,7 @@ s! {
         pub fpu_op: u32,
         pub fpu_ds: u32,
         pub st_regs: [u8; 80],
-   }
+    }
 
     pub struct fxsave_area_64 {
         pub fpu_control_word: u16,
@@ -80,7 +77,6 @@ s! {
 }
 
 s_no_extra_traits! {
-    #[cfg(libc_union)]
     pub union x86_64_fpu_registers {
         pub fsave_area: fsave_area_64,
         pub fxsave_area: fxsave_area_64,
@@ -91,10 +87,8 @@ s_no_extra_traits! {
 
 cfg_if! {
     if #[cfg(feature = "extra_traits")] {
-        #[cfg(libc_union)]
         impl Eq for x86_64_fpu_registers {}
 
-        #[cfg(libc_union)]
         impl PartialEq for x86_64_fpu_registers {
             fn eq(&self, other: &x86_64_fpu_registers) -> bool {
                 unsafe {
@@ -105,7 +99,6 @@ cfg_if! {
             }
         }
 
-        #[cfg(libc_union)]
         impl ::fmt::Debug for x86_64_fpu_registers {
             fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
                 unsafe {
@@ -118,7 +111,6 @@ cfg_if! {
             }
         }
 
-        #[cfg(libc_union)]
         impl ::hash::Hash for x86_64_fpu_registers {
             fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
                 unsafe {

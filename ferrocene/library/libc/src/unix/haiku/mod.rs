@@ -220,7 +220,7 @@ s! {
         pub c_oflag: ::tcflag_t,
         pub c_cflag: ::tcflag_t,
         pub c_lflag: ::tcflag_t,
-        pub c_line:  ::c_char,
+        pub c_line: ::c_char,
         pub c_ispeed: ::speed_t,
         pub c_ospeed: ::speed_t,
         pub c_cc: [::cc_t; ::NCCS],
@@ -290,7 +290,7 @@ s! {
     pub struct pthread_rwlock_t {
         flags: u32,
         owner: i32,
-        lock_sem: i32,      // this is actually a union
+        lock_sem: i32, // this is actually a union
         lock_count: i32,
         reader_count: i32,
         writer_count: i32,
@@ -458,7 +458,7 @@ s_no_extra_traits! {
     pub struct sockaddr_un {
         pub sun_len: u8,
         pub sun_family: sa_family_t,
-        pub sun_path: [::c_char; 126]
+        pub sun_path: [::c_char; 126],
     }
     pub struct sockaddr_storage {
         pub ss_len: u8,
@@ -506,7 +506,11 @@ cfg_if! {
                     && self.ut_pid == other.ut_pid
                     && self.ut_user == other.ut_user
                     && self.ut_line == other.ut_line
-                    && self.ut_host.iter().zip(other.ut_host.iter()).all(|(a,b)| a == b)
+                    && self
+                        .ut_host
+                        .iter()
+                        .zip(other.ut_host.iter())
+                        .all(|(a, b)| a == b)
                     && self.__ut_reserved == other.__ut_reserved
             }
         }
@@ -545,10 +549,10 @@ cfg_if! {
                 self.sun_len == other.sun_len
                     && self.sun_family == other.sun_family
                     && self
-                    .sun_path
-                    .iter()
-                    .zip(other.sun_path.iter())
-                    .all(|(a,b)| a == b)
+                        .sun_path
+                        .iter()
+                        .zip(other.sun_path.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for sockaddr_un {}
@@ -574,16 +578,16 @@ cfg_if! {
                 self.ss_len == other.ss_len
                     && self.ss_family == other.ss_family
                     && self
-                    .__ss_pad1
-                    .iter()
-                    .zip(other.__ss_pad1.iter())
-                    .all(|(a, b)| a == b)
+                        .__ss_pad1
+                        .iter()
+                        .zip(other.__ss_pad1.iter())
+                        .all(|(a, b)| a == b)
                     && self.__ss_pad2 == other.__ss_pad2
                     && self
-                    .__ss_pad3
-                    .iter()
-                    .zip(other.__ss_pad3.iter())
-                    .all(|(a, b)| a == b)
+                        .__ss_pad3
+                        .iter()
+                        .zip(other.__ss_pad3.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for sockaddr_storage {}
@@ -616,10 +620,10 @@ cfg_if! {
                     && self.d_pino == other.d_pino
                     && self.d_reclen == other.d_reclen
                     && self
-                    .d_name
-                    .iter()
-                    .zip(other.d_name.iter())
-                    .all(|(a,b)| a == b)
+                        .d_name
+                        .iter()
+                        .zip(other.d_name.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for dirent {}
@@ -651,8 +655,7 @@ cfg_if! {
                 self.sigev_notify == other.sigev_notify
                     && self.sigev_signo == other.sigev_signo
                     && self.sigev_value == other.sigev_value
-                    && self.sigev_notify_attributes
-                        == other.sigev_notify_attributes
+                    && self.sigev_notify_attributes == other.sigev_notify_attributes
             }
         }
         impl Eq for sigevent {}
@@ -662,8 +665,7 @@ cfg_if! {
                     .field("sigev_notify", &self.sigev_notify)
                     .field("sigev_signo", &self.sigev_signo)
                     .field("sigev_value", &self.sigev_value)
-                    .field("sigev_notify_attributes",
-                           &self.sigev_notify_attributes)
+                    .field("sigev_notify_attributes", &self.sigev_notify_attributes)
                     .finish()
             }
         }
@@ -1100,6 +1102,7 @@ pub const SA_ONESHOT: ::c_int = SA_RESETHAND;
 pub const SS_ONSTACK: ::c_int = 0x1;
 pub const SS_DISABLE: ::c_int = 0x2;
 
+// DIFF(main): changed to `c_int` in 500365e1
 pub const FD_SETSIZE: usize = 1024;
 
 pub const RTLD_LOCAL: ::c_int = 0x0;
@@ -1550,6 +1553,7 @@ pub const LOG_PERROR: ::c_int = 32 << 12;
 pub const LOG_NOWAIT: ::c_int = 64 << 12;
 
 // spawn.h
+// DIFF(main): changed to `c_short` in f62eb023ab
 pub const POSIX_SPAWN_RESETIDS: ::c_int = 0x01;
 pub const POSIX_SPAWN_SETPGROUP: ::c_int = 0x02;
 pub const POSIX_SPAWN_SETSIGDEF: ::c_int = 0x10;
@@ -1572,33 +1576,29 @@ f! {
     }
 
     pub fn CMSG_DATA(cmsg: *const ::cmsghdr) -> *mut ::c_uchar {
-        (cmsg as *mut ::c_uchar)
-            .offset(CMSG_ALIGN(::mem::size_of::<::cmsghdr>()) as isize)
+        (cmsg as *mut ::c_uchar).offset(CMSG_ALIGN(::mem::size_of::<::cmsghdr>()) as isize)
     }
 
     pub {const} fn CMSG_SPACE(length: ::c_uint) -> ::c_uint {
-        (CMSG_ALIGN(length as usize) + CMSG_ALIGN(::mem::size_of::<cmsghdr>()))
-            as ::c_uint
+        (CMSG_ALIGN(length as usize) + CMSG_ALIGN(::mem::size_of::<cmsghdr>())) as ::c_uint
     }
 
     pub {const} fn CMSG_LEN(length: ::c_uint) -> ::c_uint {
         CMSG_ALIGN(::mem::size_of::<cmsghdr>()) as ::c_uint + length
     }
 
-    pub fn CMSG_NXTHDR(mhdr: *const msghdr,
-                       cmsg: *const cmsghdr) -> *mut cmsghdr {
+    pub fn CMSG_NXTHDR(mhdr: *const msghdr, cmsg: *const cmsghdr) -> *mut cmsghdr {
         if cmsg.is_null() {
             return ::CMSG_FIRSTHDR(mhdr);
         };
-        let next = cmsg as usize + CMSG_ALIGN((*cmsg).cmsg_len as usize)
+        let next = cmsg as usize
+            + CMSG_ALIGN((*cmsg).cmsg_len as usize)
             + CMSG_ALIGN(::mem::size_of::<::cmsghdr>());
-        let max = (*mhdr).msg_control as usize
-            + (*mhdr).msg_controllen as usize;
+        let max = (*mhdr).msg_control as usize + (*mhdr).msg_controllen as usize;
         if next > max {
             0 as *mut ::cmsghdr
         } else {
-            (cmsg as usize + CMSG_ALIGN((*cmsg).cmsg_len as usize))
-                as *mut ::cmsghdr
+            (cmsg as usize + CMSG_ALIGN((*cmsg).cmsg_len as usize)) as *mut ::cmsghdr
         }
     }
 
@@ -1606,20 +1606,20 @@ f! {
         let fd = fd as usize;
         let size = ::mem::size_of_val(&(*set).fds_bits[0]) * 8;
         (*set).fds_bits[fd / size] &= !(1 << (fd % size));
-        return
+        return;
     }
 
     pub fn FD_ISSET(fd: ::c_int, set: *const fd_set) -> bool {
         let fd = fd as usize;
         let size = ::mem::size_of_val(&(*set).fds_bits[0]) * 8;
-        return ((*set).fds_bits[fd / size] & (1 << (fd % size))) != 0
+        return ((*set).fds_bits[fd / size] & (1 << (fd % size))) != 0;
     }
 
     pub fn FD_SET(fd: ::c_int, set: *mut fd_set) -> () {
         let fd = fd as usize;
         let size = ::mem::size_of_val(&(*set).fds_bits[0]) * 8;
         (*set).fds_bits[fd / size] |= 1 << (fd % size);
-        return
+        return;
     }
 
     pub fn FD_ZERO(set: *mut fd_set) -> () {
@@ -1840,11 +1840,14 @@ extern "C" {
 
     pub fn sendmsg(fd: ::c_int, msg: *const ::msghdr, flags: ::c_int) -> ::ssize_t;
     pub fn recvmsg(fd: ::c_int, msg: *mut ::msghdr, flags: ::c_int) -> ::ssize_t;
+
+    // DIFF(main): changed to `*const *mut` in e77f551de9
     pub fn execvpe(
         file: *const ::c_char,
         argv: *const *const ::c_char,
         environment: *const *const ::c_char,
     ) -> ::c_int;
+
     pub fn getgrgid_r(
         gid: ::gid_t,
         grp: *mut ::group,

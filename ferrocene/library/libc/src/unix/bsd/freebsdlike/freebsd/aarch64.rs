@@ -34,27 +34,18 @@ s_no_extra_traits! {
     }
 }
 
-// should be pub(crate), but that requires Rust 1.18.0
-cfg_if! {
-    if #[cfg(libc_const_size_of)] {
-        #[doc(hidden)]
-        pub const _ALIGNBYTES: usize = ::mem::size_of::<::c_longlong>() - 1;
-    } else {
-        #[doc(hidden)]
-        pub const _ALIGNBYTES: usize = 8 - 1;
-    }
-}
+pub(crate) const _ALIGNBYTES: usize = ::mem::size_of::<::c_longlong>() - 1;
 
 cfg_if! {
     if #[cfg(feature = "extra_traits")] {
         impl PartialEq for gpregs {
             fn eq(&self, other: &gpregs) -> bool {
-                self.gp_x.iter().zip(other.gp_x.iter()).all(|(a, b)| a == b) &&
-                self.gp_lr == other.gp_lr &&
-                self.gp_sp == other.gp_sp &&
-                self.gp_elr == other.gp_elr &&
-                self.gp_spsr == other.gp_spsr &&
-                self.gp_pad == other.gp_pad
+                self.gp_x.iter().zip(other.gp_x.iter()).all(|(a, b)| a == b)
+                    && self.gp_lr == other.gp_lr
+                    && self.gp_sp == other.gp_sp
+                    && self.gp_elr == other.gp_elr
+                    && self.gp_spsr == other.gp_spsr
+                    && self.gp_pad == other.gp_pad
             }
         }
         impl Eq for gpregs {}
@@ -82,11 +73,11 @@ cfg_if! {
         }
         impl PartialEq for fpregs {
             fn eq(&self, other: &fpregs) -> bool {
-                self.fp_q == other.fp_q &&
-                self.fp_sr == other.fp_sr &&
-                self.fp_cr == other.fp_cr &&
-                self.fp_flags == other.fp_flags &&
-                self.fp_pad == other.fp_pad
+                self.fp_q == other.fp_q
+                    && self.fp_sr == other.fp_sr
+                    && self.fp_cr == other.fp_cr
+                    && self.fp_flags == other.fp_flags
+                    && self.fp_pad == other.fp_pad
             }
         }
         impl Eq for fpregs {}
@@ -112,11 +103,15 @@ cfg_if! {
         }
         impl PartialEq for mcontext_t {
             fn eq(&self, other: &mcontext_t) -> bool {
-                self.mc_gpregs == other.mc_gpregs &&
-                self.mc_fpregs == other.mc_fpregs &&
-                self.mc_flags == other.mc_flags &&
-                self.mc_pad == other.mc_pad &&
-                self.mc_spare.iter().zip(other.mc_spare.iter()).all(|(a, b)| a == b)
+                self.mc_gpregs == other.mc_gpregs
+                    && self.mc_fpregs == other.mc_fpregs
+                    && self.mc_flags == other.mc_flags
+                    && self.mc_pad == other.mc_pad
+                    && self
+                        .mc_spare
+                        .iter()
+                        .zip(other.mc_spare.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for mcontext_t {}

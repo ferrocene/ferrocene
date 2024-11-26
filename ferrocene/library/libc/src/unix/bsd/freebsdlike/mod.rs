@@ -107,11 +107,11 @@ s! {
     }
 
     pub struct glob_t {
-        pub gl_pathc:  ::size_t,
+        pub gl_pathc: ::size_t,
         pub gl_matchc: ::size_t,
-        pub gl_offs:   ::size_t,
-        pub gl_flags:  ::c_int,
-        pub gl_pathv:  *mut *mut ::c_char,
+        pub gl_offs: ::size_t,
+        pub gl_flags: ::c_int,
+        pub gl_pathv: *mut *mut ::c_char,
         __unused3: *mut ::c_void,
         __unused4: *mut ::c_void,
         __unused5: *mut ::c_void,
@@ -284,7 +284,7 @@ s! {
 
     pub struct accept_filter_arg {
         pub af_name: [::c_char; 16],
-        af_arg: [[::c_char; 10]; 24],
+        af_arg: [::c_char; 240],
     }
 
     pub struct ptrace_io_desc {
@@ -401,10 +401,10 @@ cfg_if! {
                     && self.__ss_pad1 == other.__ss_pad1
                     && self.__ss_align == other.__ss_align
                     && self
-                    .__ss_pad2
-                    .iter()
-                    .zip(other.__ss_pad2.iter())
-                    .all(|(a, b)| a == b)
+                        .__ss_pad2
+                        .iter()
+                        .zip(other.__ss_pad2.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for sockaddr_storage {}
@@ -432,15 +432,7 @@ cfg_if! {
 }
 
 // Non-public helper constant
-cfg_if! {
-    if #[cfg(all(not(libc_const_size_of), target_pointer_width = "32"))] {
-        const SIZEOF_LONG: usize = 4;
-    } else if #[cfg(all(not(libc_const_size_of), target_pointer_width = "64"))] {
-        const SIZEOF_LONG: usize = 8;
-    } else if #[cfg(libc_const_size_of)] {
-        const SIZEOF_LONG: usize = ::mem::size_of::<::c_long>();
-    }
-}
+const SIZEOF_LONG: usize = ::mem::size_of::<::c_long>();
 
 #[deprecated(
     since = "0.2.64",
@@ -1538,11 +1530,14 @@ extern "C" {
     pub fn duplocale(base: ::locale_t) -> ::locale_t;
     pub fn endutxent();
     pub fn fchflags(fd: ::c_int, flags: ::c_ulong) -> ::c_int;
+
+    // DIFF(main): changed to `*const *mut` in e77f551de9
     pub fn fexecve(
         fd: ::c_int,
         argv: *const *const ::c_char,
         envp: *const *const ::c_char,
     ) -> ::c_int;
+
     pub fn futimens(fd: ::c_int, times: *const ::timespec) -> ::c_int;
     pub fn getdomainname(name: *mut ::c_char, len: ::c_int) -> ::c_int;
     pub fn getgrent_r(

@@ -49,7 +49,7 @@ s! {
     pub struct stack_t {
         pub ss_sp: *mut ::c_void,
         pub ss_flags: ::c_int,
-        pub ss_size: ::size_t
+        pub ss_size: ::size_t,
     }
 
     pub struct ipc_perm {
@@ -61,7 +61,7 @@ s! {
         pub mode: ::mode_t,
         pub __seq: ::c_int,
         __unused1: ::c_long,
-        __unused2: ::c_long
+        __unused2: ::c_long,
     }
 
     pub struct shmid_ds {
@@ -95,60 +95,6 @@ s! {
         pub msg_lrpid: ::pid_t,
         __pad1: ::c_ulong,
         __pad2: ::c_ulong,
-    }
-
-    pub struct statfs {
-        pub f_type: ::c_ulong,
-        pub f_bsize: ::c_ulong,
-        pub f_blocks: ::fsblkcnt_t,
-        pub f_bfree: ::fsblkcnt_t,
-        pub f_bavail: ::fsblkcnt_t,
-        pub f_files: ::fsfilcnt_t,
-        pub f_ffree: ::fsfilcnt_t,
-        pub f_fsid: ::fsid_t,
-        pub f_namelen: ::c_ulong,
-        pub f_frsize: ::c_ulong,
-        pub f_flags: ::c_ulong,
-        pub f_spare: [::c_ulong; 4],
-    }
-
-    pub struct siginfo_t {
-        pub si_signo: ::c_int,
-        pub si_errno: ::c_int,
-        pub si_code: ::c_int,
-        pub _pad: [::c_int; 29],
-        _align: [usize; 0],
-    }
-
-    pub struct statfs64 {
-        pub f_type: ::c_ulong,
-        pub f_bsize: ::c_ulong,
-        pub f_blocks: ::fsblkcnt_t,
-        pub f_bfree: ::fsblkcnt_t,
-        pub f_bavail: ::fsblkcnt_t,
-        pub f_files: ::fsfilcnt_t,
-        pub f_ffree: ::fsfilcnt_t,
-        pub f_fsid: ::fsid_t,
-        pub f_namelen: ::c_ulong,
-        pub f_frsize: ::c_ulong,
-        pub f_flags: ::c_ulong,
-        pub f_spare: [::c_ulong; 4],
-    }
-
-    pub struct statvfs64 {
-        pub f_bsize: ::c_ulong,
-        pub f_frsize: ::c_ulong,
-        pub f_blocks: u64,
-        pub f_bfree: u64,
-        pub f_bavail: u64,
-        pub f_files: u64,
-        pub f_ffree: u64,
-        pub f_favail: u64,
-        pub f_fsid: ::c_ulong,
-        __f_unused: ::c_int,
-        pub f_flag: ::c_ulong,
-        pub f_namemax: ::c_ulong,
-        __f_spare: [::c_int; 6],
     }
 
     pub struct mcontext_t {
@@ -185,6 +131,12 @@ s_no_extra_traits! {
         pub uc_mcontext: mcontext_t,
         pub uc_sigmask: ::sigset_t,
         pub uc_regspace: [::c_ulonglong; 64],
+    }
+
+    #[allow(missing_debug_implementations)]
+    #[repr(align(8))]
+    pub struct max_align_t {
+        priv_: (i64, i64),
     }
 }
 
@@ -844,11 +796,4 @@ pub const SYS_mseal: ::c_long = 462;
 
 extern "C" {
     pub fn getrandom(buf: *mut ::c_void, buflen: ::size_t, flags: ::c_uint) -> ::ssize_t;
-}
-
-cfg_if! {
-    if #[cfg(libc_align)] {
-        mod align;
-        pub use self::align::*;
-    }
 }

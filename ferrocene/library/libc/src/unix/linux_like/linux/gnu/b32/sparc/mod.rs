@@ -8,7 +8,7 @@ s! {
         pub sa_sigaction: ::sighandler_t,
         pub sa_mask: ::sigset_t,
         pub sa_flags: ::c_int,
-        pub sa_restorer: ::Option<extern fn()>,
+        pub sa_restorer: ::Option<extern "C" fn()>,
     }
 
     pub struct statfs {
@@ -49,34 +49,13 @@ s! {
         pub l_start: ::off64_t,
         pub l_len: ::off64_t,
         pub l_pid: ::pid_t,
-        __reserved:  ::c_short,
+        __reserved: ::c_short,
     }
 
     pub struct stack_t {
         pub ss_sp: *mut ::c_void,
         pub ss_flags: ::c_int,
-        pub ss_size: ::size_t
-    }
-
-    pub struct stat {
-        pub st_dev: ::dev_t,
-        pub st_ino: ::ino64_t,
-        pub st_mode: ::mode_t,
-        pub st_nlink: ::nlink_t,
-        pub st_uid: ::uid_t,
-        pub st_gid: ::gid_t,
-        pub st_rdev: ::dev_t,
-        __pad2: ::c_ushort,
-        pub st_size: ::off64_t,
-        pub st_blksize: ::blksize_t,
-        pub st_blocks: ::blkcnt64_t,
-        pub st_atime: ::time_t,
-        pub st_atime_nsec: ::c_long,
-        pub st_mtime: ::time_t,
-        pub st_mtime_nsec: ::c_long,
-        pub st_ctime: ::time_t,
-        pub st_ctime_nsec: ::c_long,
-        __unused: [::c_long; 2],
+        pub ss_size: ::size_t,
     }
 
     pub struct stat64 {
@@ -113,21 +92,6 @@ s! {
         pub f_frsize: ::__fsword_t,
         pub f_flags: ::__fsword_t,
         pub f_spare: [::__fsword_t; 4],
-    }
-
-    pub struct statvfs {
-        pub f_bsize: ::c_ulong,
-        pub f_frsize: ::c_ulong,
-        pub f_blocks: ::fsblkcnt_t,
-        pub f_bfree: ::fsblkcnt_t,
-        pub f_bavail: ::fsblkcnt_t,
-        pub f_files: ::fsfilcnt_t,
-        pub f_ffree: ::fsfilcnt_t,
-        pub f_favail: ::fsfilcnt_t,
-        pub f_fsid: ::c_ulong,
-        pub f_flag: ::c_ulong,
-        pub f_namemax: ::c_ulong,
-        __f_spare: [::c_int; 6],
     }
 
     pub struct statvfs64 {
@@ -190,6 +154,14 @@ s! {
         pub msg_lrpid: ::pid_t,
         __glibc_reserved1: ::c_ulong,
         __glibc_reserved2: ::c_ulong,
+    }
+}
+
+s_no_extra_traits! {
+    #[allow(missing_debug_implementations)]
+    #[repr(align(8))]
+    pub struct max_align_t {
+        priv_: [i64; 3],
     }
 }
 
@@ -848,10 +820,3 @@ pub const SYS_memfd_secret: ::c_long = 447;
 pub const SYS_process_mrelease: ::c_long = 448;
 pub const SYS_futex_waitv: ::c_long = 449;
 pub const SYS_set_mempolicy_home_node: ::c_long = 450;
-
-cfg_if! {
-    if #[cfg(libc_align)] {
-        mod align;
-        pub use self::align::*;
-    }
-}

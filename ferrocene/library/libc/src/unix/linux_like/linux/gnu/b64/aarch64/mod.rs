@@ -15,7 +15,7 @@ s! {
         #[cfg(target_arch = "sparc64")]
         __reserved0: ::c_int,
         pub sa_flags: ::c_int,
-        pub sa_restorer: ::Option<extern fn()>,
+        pub sa_restorer: ::Option<extern "C" fn()>,
     }
 
     pub struct statfs {
@@ -140,7 +140,7 @@ s! {
     }
 
     pub struct pthread_attr_t {
-        __size: [usize; 8]
+        __size: [usize; 8],
     }
 
     pub struct user_regs_struct {
@@ -160,7 +160,7 @@ s! {
         pub __seq: ::c_ushort,
         __pad1: ::c_ushort,
         __unused1: ::c_ulong,
-        __unused2: ::c_ulong
+        __unused2: ::c_ulong,
     }
 
     pub struct shmid_ds {
@@ -173,7 +173,7 @@ s! {
         pub shm_lpid: ::pid_t,
         pub shm_nattch: ::shmatt_t,
         __unused4: ::c_ulong,
-        __unused5: ::c_ulong
+        __unused5: ::c_ulong,
     }
 
     pub struct siginfo_t {
@@ -182,8 +182,8 @@ s! {
         pub si_code: ::c_int,
         #[doc(hidden)]
         #[deprecated(
-            since="0.2.54",
-            note="Please leave a comment on \
+            since = "0.2.54",
+            note = "Please leave a comment on \
                   https://github.com/rust-lang/libc/pull/1316 if you're using \
                   this field"
         )]
@@ -194,9 +194,55 @@ s! {
     pub struct stack_t {
         pub ss_sp: *mut ::c_void,
         pub ss_flags: ::c_int,
-        pub ss_size: ::size_t
+        pub ss_size: ::size_t,
     }
 
+    pub struct ucontext_t {
+        pub uc_flags: ::c_ulong,
+        pub uc_link: *mut ucontext_t,
+        pub uc_stack: ::stack_t,
+        pub uc_sigmask: ::sigset_t,
+        pub uc_mcontext: mcontext_t,
+    }
+
+    #[repr(align(16))]
+    pub struct mcontext_t {
+        pub fault_address: ::c_ulonglong,
+        pub regs: [::c_ulonglong; 31],
+        pub sp: ::c_ulonglong,
+        pub pc: ::c_ulonglong,
+        pub pstate: ::c_ulonglong,
+        __reserved: [u64; 512],
+    }
+
+    pub struct user_fpsimd_struct {
+        pub vregs: [::__uint128_t; 32],
+        pub fpsr: ::c_uint,
+        pub fpcr: ::c_uint,
+    }
+
+    #[repr(align(8))]
+    pub struct clone_args {
+        pub flags: ::c_ulonglong,
+        pub pidfd: ::c_ulonglong,
+        pub child_tid: ::c_ulonglong,
+        pub parent_tid: ::c_ulonglong,
+        pub exit_signal: ::c_ulonglong,
+        pub stack: ::c_ulonglong,
+        pub stack_size: ::c_ulonglong,
+        pub tls: ::c_ulonglong,
+        pub set_tid: ::c_ulonglong,
+        pub set_tid_size: ::c_ulonglong,
+        pub cgroup: ::c_ulonglong,
+    }
+}
+
+s_no_extra_traits! {
+    #[allow(missing_debug_implementations)]
+    #[repr(align(16))]
+    pub struct max_align_t {
+        priv_: [f32; 8],
+    }
 }
 
 pub const VEOF: usize = 4;
@@ -906,6 +952,11 @@ extern "C" {
         newp: *mut ::c_void,
         newlen: ::size_t,
     ) -> ::c_int;
+
+    pub fn getcontext(ucp: *mut ucontext_t) -> ::c_int;
+    pub fn setcontext(ucp: *const ucontext_t) -> ::c_int;
+    pub fn makecontext(ucp: *mut ucontext_t, func: extern "C" fn(), argc: ::c_int, ...);
+    pub fn swapcontext(uocp: *mut ucontext_t, ucp: *const ucontext_t) -> ::c_int;
 }
 
 cfg_if! {
@@ -915,24 +966,5 @@ cfg_if! {
     } else {
         mod lp64;
         pub use self::lp64::*;
-    }
-}
-
-cfg_if! {
-    if #[cfg(libc_align)] {
-        mod align;
-        pub use self::align::*;
-    }
-
-
-}
-
-cfg_if! {
-    if #[cfg(libc_int128)] {
-        mod int128;
-        pub use self::int128::*;
-    } else if #[cfg(libc_align)] {
-        mod fallback;
-        pub use self::fallback::*;
     }
 }

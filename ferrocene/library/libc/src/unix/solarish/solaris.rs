@@ -1,10 +1,7 @@
-use exit_status;
-use NET_MAC_AWARE;
-use NET_MAC_AWARE_INHERIT;
-use PRIV_AWARE_RESET;
-use PRIV_DEBUG;
-use PRIV_PFEXEC;
-use PRIV_XPOLICY;
+use {
+    exit_status, NET_MAC_AWARE, NET_MAC_AWARE_INHERIT, PRIV_AWARE_RESET, PRIV_DEBUG, PRIV_PFEXEC,
+    PRIV_XPOLICY,
+};
 
 pub type door_attr_t = ::c_uint;
 pub type door_id_t = ::c_ulonglong;
@@ -20,6 +17,21 @@ e! {
 }
 
 s! {
+    pub struct aiocb {
+        pub aio_fildes: ::c_int,
+        pub aio_buf: *mut ::c_void,
+        pub aio_nbytes: ::size_t,
+        pub aio_offset: ::off_t,
+        pub aio_reqprio: ::c_int,
+        pub aio_sigevent: ::sigevent,
+        pub aio_lio_opcode: ::c_int,
+        pub aio_resultp: ::aio_result_t,
+        pub aio_state: ::c_char,
+        pub aio_returned: ::c_char,
+        pub aio__pad1: [::c_char; 2],
+        pub aio_flags: ::c_int,
+    }
+
     pub struct shmid_ds {
         pub shm_perm: ::ipc_perm,
         pub shm_segsz: ::size_t,
@@ -49,7 +61,7 @@ s_no_extra_traits! {
     #[cfg_attr(feature = "extra_traits", allow(missing_debug_implementations))]
     pub struct door_desc_t__d_data__d_desc {
         pub d_descriptor: ::c_int,
-        pub d_id: ::door_id_t
+        pub d_id: ::door_id_t,
     }
 
     #[cfg_attr(feature = "extra_traits", allow(missing_debug_implementations))]
@@ -87,7 +99,6 @@ s_no_extra_traits! {
         pub ut_syslen: ::c_short,
         pub ut_host: [::c_char; 257],
     }
-
 }
 
 cfg_if! {
@@ -105,10 +116,10 @@ cfg_if! {
                     && self.ut_syslen == other.ut_syslen
                     && self.pad == other.pad
                     && self
-                    .ut_host
-                    .iter()
-                    .zip(other.ut_host.iter())
-                    .all(|(a,b)| a == b)
+                        .ut_host
+                        .iter()
+                        .zip(other.ut_host.iter())
+                        .all(|(a, b)| a == b)
             }
         }
 
@@ -192,6 +203,7 @@ pub const PRIV_USER: ::c_uint = PRIV_DEBUG
     | PRIV_PROC_TPD_RESET;
 
 extern "C" {
+    // DIFF(main): changed to `*const *mut` in e77f551de9
     pub fn fexecve(
         fd: ::c_int,
         argv: *const *const ::c_char,

@@ -81,7 +81,7 @@ s! {
     }
 
     pub struct pthread_attr_t {
-        __size: [u32; 9]
+        __size: [u32; 9],
     }
 
     pub struct sigaction {
@@ -131,7 +131,7 @@ s! {
         pub __seq: ::c_ushort,
         __pad1: ::c_ushort,
         __unused1: ::c_ulong,
-        __unused2: ::c_ulong
+        __unused2: ::c_ulong,
     }
 
     pub struct shmid_ds {
@@ -144,7 +144,7 @@ s! {
         pub shm_lpid: ::pid_t,
         pub shm_nattch: ::shmatt_t,
         __unused4: ::c_ulong,
-        __unused5: ::c_ulong
+        __unused5: ::c_ulong,
     }
 
     pub struct msqid_ds {
@@ -253,6 +253,16 @@ s! {
         pub freehigh: ::c_ulong,
         pub mem_unit: ::c_uint,
         pub _f: [::c_char; 8],
+    }
+
+    // FIXME(1.0): this is actually a union
+    #[cfg_attr(target_pointer_width = "32", repr(align(4)))]
+    #[cfg_attr(target_pointer_width = "64", repr(align(8)))]
+    pub struct sem_t {
+        #[cfg(target_pointer_width = "32")]
+        __size: [::c_char; 16],
+        #[cfg(target_pointer_width = "64")]
+        __size: [::c_char; 32],
     }
 }
 
@@ -679,14 +689,4 @@ extern "C" {
         cpusetsize: ::size_t,
         cpuset: *const ::cpu_set_t,
     ) -> ::c_int;
-}
-
-cfg_if! {
-    if #[cfg(libc_align)] {
-        mod align;
-        pub use self::align::*;
-    } else {
-        mod no_align;
-        pub use self::no_align::*;
-    }
 }

@@ -62,8 +62,7 @@ s! {
         pub ai_protocol: ::c_int,
         pub ai_addrlen: socklen_t,
 
-        #[cfg(any(target_os = "linux",
-                  target_os = "emscripten"))]
+        #[cfg(any(target_os = "linux", target_os = "emscripten"))]
         pub ai_addr: *mut ::sockaddr,
 
         pub ai_canonname: *mut c_char,
@@ -81,11 +80,11 @@ s! {
         pub sll_hatype: ::c_ushort,
         pub sll_pkttype: ::c_uchar,
         pub sll_halen: ::c_uchar,
-        pub sll_addr: [::c_uchar; 8]
+        pub sll_addr: [::c_uchar; 8],
     }
 
     pub struct fd_set {
-        fds_bits: [::c_ulong; FD_SETSIZE / ULONG_SIZE],
+        fds_bits: [::c_ulong; FD_SETSIZE as usize / ULONG_SIZE],
     }
 
     pub struct tm {
@@ -161,7 +160,7 @@ s! {
         pub ifa_addr: *mut ::sockaddr,
         pub ifa_netmask: *mut ::sockaddr,
         pub ifa_ifu: *mut ::sockaddr, // FIXME This should be a union
-        pub ifa_data: *mut ::c_void
+        pub ifa_data: *mut ::c_void,
     }
 
     pub struct in6_rtmsg {
@@ -206,15 +205,57 @@ s! {
     }
 }
 
+cfg_if! {
+    if #[cfg(any(target_env = "gnu", target_os = "android"))] {
+        s! {
+            pub struct statx {
+                pub stx_mask: ::__u32,
+                pub stx_blksize: ::__u32,
+                pub stx_attributes: ::__u64,
+                pub stx_nlink: ::__u32,
+                pub stx_uid: ::__u32,
+                pub stx_gid: ::__u32,
+                pub stx_mode: ::__u16,
+                __statx_pad1: [::__u16; 1],
+                pub stx_ino: ::__u64,
+                pub stx_size: ::__u64,
+                pub stx_blocks: ::__u64,
+                pub stx_attributes_mask: ::__u64,
+                pub stx_atime: statx_timestamp,
+                pub stx_btime: statx_timestamp,
+                pub stx_ctime: statx_timestamp,
+                pub stx_mtime: statx_timestamp,
+                pub stx_rdev_major: ::__u32,
+                pub stx_rdev_minor: ::__u32,
+                pub stx_dev_major: ::__u32,
+                pub stx_dev_minor: ::__u32,
+                pub stx_mnt_id: ::__u64,
+                pub stx_dio_mem_align: ::__u32,
+                pub stx_dio_offset_align: ::__u32,
+                __statx_pad3: [::__u64; 12],
+            }
+
+            pub struct statx_timestamp {
+                pub tv_sec: ::__s64,
+                pub tv_nsec: ::__u32,
+                __statx_timestamp_pad1: [::__s32; 1],
+            }
+        }
+    }
+}
+
 s_no_extra_traits! {
     #[cfg_attr(
         any(
             all(
                 target_arch = "x86",
                 not(target_env = "musl"),
-                not(target_os = "android")),
-            target_arch = "x86_64"),
-        repr(packed))]
+                not(target_os = "android")
+            ),
+            target_arch = "x86_64"
+        ),
+        repr(packed)
+    )]
     pub struct epoll_event {
         pub events: u32,
         pub u64: u64,
@@ -222,7 +263,7 @@ s_no_extra_traits! {
 
     pub struct sockaddr_un {
         pub sun_family: sa_family_t,
-        pub sun_path: [::c_char; 108]
+        pub sun_path: [::c_char; 108],
     }
 
     pub struct sockaddr_storage {
@@ -240,7 +281,7 @@ s_no_extra_traits! {
         pub release: [::c_char; 65],
         pub version: [::c_char; 65],
         pub machine: [::c_char; 65],
-        pub domainname: [::c_char; 65]
+        pub domainname: [::c_char; 65],
     }
 
     pub struct sigevent {
@@ -253,7 +294,7 @@ s_no_extra_traits! {
         #[cfg(target_pointer_width = "64")]
         __unused1: [::c_int; 11],
         #[cfg(target_pointer_width = "32")]
-        __unused1: [::c_int; 12]
+        __unused1: [::c_int; 12],
     }
 }
 
@@ -261,8 +302,7 @@ cfg_if! {
     if #[cfg(feature = "extra_traits")] {
         impl PartialEq for epoll_event {
             fn eq(&self, other: &epoll_event) -> bool {
-                self.events == other.events
-                    && self.u64 == other.u64
+                self.events == other.events && self.u64 == other.u64
             }
         }
         impl Eq for epoll_event {}
@@ -289,10 +329,10 @@ cfg_if! {
             fn eq(&self, other: &sockaddr_un) -> bool {
                 self.sun_family == other.sun_family
                     && self
-                    .sun_path
-                    .iter()
-                    .zip(other.sun_path.iter())
-                    .all(|(a, b)| a == b)
+                        .sun_path
+                        .iter()
+                        .zip(other.sun_path.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for sockaddr_un {}
@@ -300,7 +340,7 @@ cfg_if! {
             fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
                 f.debug_struct("sockaddr_un")
                     .field("sun_family", &self.sun_family)
-                // FIXME: .field("sun_path", &self.sun_path)
+                    // FIXME: .field("sun_path", &self.sun_path)
                     .finish()
             }
         }
@@ -315,10 +355,10 @@ cfg_if! {
             fn eq(&self, other: &sockaddr_storage) -> bool {
                 self.ss_family == other.ss_family
                     && self
-                    .__ss_pad2
-                    .iter()
-                    .zip(other.__ss_pad2.iter())
-                    .all(|(a, b)| a == b)
+                        .__ss_pad2
+                        .iter()
+                        .zip(other.__ss_pad2.iter())
+                        .all(|(a, b)| a == b)
             }
         }
 
@@ -329,7 +369,7 @@ cfg_if! {
                 f.debug_struct("sockaddr_storage")
                     .field("ss_family", &self.ss_family)
                     .field("__ss_align", &self.__ss_align)
-                // FIXME: .field("__ss_pad2", &self.__ss_pad2)
+                    // FIXME: .field("__ss_pad2", &self.__ss_pad2)
                     .finish()
             }
         }
@@ -348,30 +388,30 @@ cfg_if! {
                     .zip(other.sysname.iter())
                     .all(|(a, b)| a == b)
                     && self
-                    .nodename
-                    .iter()
-                    .zip(other.nodename.iter())
-                    .all(|(a, b)| a == b)
+                        .nodename
+                        .iter()
+                        .zip(other.nodename.iter())
+                        .all(|(a, b)| a == b)
                     && self
-                    .release
-                    .iter()
-                    .zip(other.release.iter())
-                    .all(|(a, b)| a == b)
+                        .release
+                        .iter()
+                        .zip(other.release.iter())
+                        .all(|(a, b)| a == b)
                     && self
-                    .version
-                    .iter()
-                    .zip(other.version.iter())
-                    .all(|(a, b)| a == b)
+                        .version
+                        .iter()
+                        .zip(other.version.iter())
+                        .all(|(a, b)| a == b)
                     && self
-                    .machine
-                    .iter()
-                    .zip(other.machine.iter())
-                    .all(|(a, b)| a == b)
+                        .machine
+                        .iter()
+                        .zip(other.machine.iter())
+                        .all(|(a, b)| a == b)
                     && self
-                    .domainname
-                    .iter()
-                    .zip(other.domainname.iter())
-                    .all(|(a, b)| a == b)
+                        .domainname
+                        .iter()
+                        .zip(other.domainname.iter())
+                        .all(|(a, b)| a == b)
             }
         }
 
@@ -380,12 +420,12 @@ cfg_if! {
         impl ::fmt::Debug for utsname {
             fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
                 f.debug_struct("utsname")
-                // FIXME: .field("sysname", &self.sysname)
-                // FIXME: .field("nodename", &self.nodename)
-                // FIXME: .field("release", &self.release)
-                // FIXME: .field("version", &self.version)
-                // FIXME: .field("machine", &self.machine)
-                // FIXME: .field("domainname", &self.domainname)
+                    // FIXME: .field("sysname", &self.sysname)
+                    // FIXME: .field("nodename", &self.nodename)
+                    // FIXME: .field("release", &self.release)
+                    // FIXME: .field("version", &self.version)
+                    // FIXME: .field("machine", &self.machine)
+                    // FIXME: .field("domainname", &self.domainname)
                     .finish()
             }
         }
@@ -406,8 +446,7 @@ cfg_if! {
                 self.sigev_value == other.sigev_value
                     && self.sigev_signo == other.sigev_signo
                     && self.sigev_notify == other.sigev_notify
-                    && self.sigev_notify_thread_id
-                        == other.sigev_notify_thread_id
+                    && self.sigev_notify_thread_id == other.sigev_notify_thread_id
             }
         }
         impl Eq for sigevent {}
@@ -417,8 +456,7 @@ cfg_if! {
                     .field("sigev_value", &self.sigev_value)
                     .field("sigev_signo", &self.sigev_signo)
                     .field("sigev_notify", &self.sigev_notify)
-                    .field("sigev_notify_thread_id",
-                           &self.sigev_notify_thread_id)
+                    .field("sigev_notify_thread_id", &self.sigev_notify_thread_id)
                     .finish()
             }
         }
@@ -1006,11 +1044,10 @@ pub const TCP_QUICKACK: ::c_int = 12;
 pub const TCP_CONGESTION: ::c_int = 13;
 pub const TCP_MD5SIG: ::c_int = 14;
 cfg_if! {
-    if #[cfg(all(target_os = "linux", any(
-            target_env = "gnu",
-            target_env = "musl",
-            target_env = "ohos"
-        )))] {
+    if #[cfg(all(
+        target_os = "linux",
+        any(target_env = "gnu", target_env = "musl", target_env = "ohos")
+    ))] {
         // WARN: deprecated
         pub const TCP_COOKIE_TRANSACTIONS: ::c_int = 15;
     }
@@ -1531,6 +1568,41 @@ cfg_if! {
     }
 }
 
+cfg_if! {
+    if #[cfg(any(target_env = "gnu", target_os = "android"))] {
+        pub const AT_STATX_SYNC_TYPE: ::c_int = 0x6000;
+        pub const AT_STATX_SYNC_AS_STAT: ::c_int = 0x0000;
+        pub const AT_STATX_FORCE_SYNC: ::c_int = 0x2000;
+        pub const AT_STATX_DONT_SYNC: ::c_int = 0x4000;
+        pub const STATX_TYPE: ::c_uint = 0x0001;
+        pub const STATX_MODE: ::c_uint = 0x0002;
+        pub const STATX_NLINK: ::c_uint = 0x0004;
+        pub const STATX_UID: ::c_uint = 0x0008;
+        pub const STATX_GID: ::c_uint = 0x0010;
+        pub const STATX_ATIME: ::c_uint = 0x0020;
+        pub const STATX_MTIME: ::c_uint = 0x0040;
+        pub const STATX_CTIME: ::c_uint = 0x0080;
+        pub const STATX_INO: ::c_uint = 0x0100;
+        pub const STATX_SIZE: ::c_uint = 0x0200;
+        pub const STATX_BLOCKS: ::c_uint = 0x0400;
+        pub const STATX_BASIC_STATS: ::c_uint = 0x07ff;
+        pub const STATX_BTIME: ::c_uint = 0x0800;
+        pub const STATX_ALL: ::c_uint = 0x0fff;
+        pub const STATX_MNT_ID: ::c_uint = 0x1000;
+        pub const STATX_DIOALIGN: ::c_uint = 0x2000;
+        pub const STATX__RESERVED: ::c_int = 0x80000000;
+        pub const STATX_ATTR_COMPRESSED: ::c_int = 0x0004;
+        pub const STATX_ATTR_IMMUTABLE: ::c_int = 0x0010;
+        pub const STATX_ATTR_APPEND: ::c_int = 0x0020;
+        pub const STATX_ATTR_NODUMP: ::c_int = 0x0040;
+        pub const STATX_ATTR_ENCRYPTED: ::c_int = 0x0800;
+        pub const STATX_ATTR_AUTOMOUNT: ::c_int = 0x1000;
+        pub const STATX_ATTR_MOUNT_ROOT: ::c_int = 0x2000;
+        pub const STATX_ATTR_VERITY: ::c_int = 0x100000;
+        pub const STATX_ATTR_DAX: ::c_int = 0x200000;
+    }
+}
+
 const_fn! {
     {const} fn CMSG_ALIGN(len: usize) -> usize {
         len + ::mem::size_of::<usize>() - 1 & !(::mem::size_of::<usize>() - 1)
@@ -1551,8 +1623,7 @@ f! {
     }
 
     pub {const} fn CMSG_SPACE(length: ::c_uint) -> ::c_uint {
-        (CMSG_ALIGN(length as usize) + CMSG_ALIGN(::mem::size_of::<cmsghdr>()))
-            as ::c_uint
+        (CMSG_ALIGN(length as usize) + CMSG_ALIGN(::mem::size_of::<cmsghdr>())) as ::c_uint
     }
 
     pub {const} fn CMSG_LEN(length: ::c_uint) -> ::c_uint {
@@ -1563,20 +1634,20 @@ f! {
         let fd = fd as usize;
         let size = ::mem::size_of_val(&(*set).fds_bits[0]) * 8;
         (*set).fds_bits[fd / size] &= !(1 << (fd % size));
-        return
+        return;
     }
 
     pub fn FD_ISSET(fd: ::c_int, set: *const fd_set) -> bool {
         let fd = fd as usize;
         let size = ::mem::size_of_val(&(*set).fds_bits[0]) * 8;
-        return ((*set).fds_bits[fd / size] & (1 << (fd % size))) != 0
+        return ((*set).fds_bits[fd / size] & (1 << (fd % size))) != 0;
     }
 
     pub fn FD_SET(fd: ::c_int, set: *mut fd_set) -> () {
         let fd = fd as usize;
         let size = ::mem::size_of_val(&(*set).fds_bits[0]) * 8;
         (*set).fds_bits[fd / size] |= 1 << (fd % size);
-        return
+        return;
     }
 
     pub fn FD_ZERO(set: *mut fd_set) -> () {
@@ -1657,10 +1728,11 @@ safe_f! {
 
     #[allow(ellipsis_inclusive_range_patterns)]
     pub {const} fn KERNEL_VERSION(a: u32, b: u32, c: u32) -> u32 {
-        ((a << 16) + (b << 8)) + match c {
-            0 ... 255 => c,
-            _ => 255,
-        }
+        ((a << 16) + (b << 8))
+            + match c {
+                0...255 => c,
+                _ => 255,
+            }
     }
 }
 
@@ -1753,6 +1825,8 @@ extern "C" {
         rusage: *mut ::rusage,
     ) -> ::pid_t;
     pub fn login_tty(fd: ::c_int) -> ::c_int;
+
+    // DIFF(main): changed to `*const *mut` in e77f551de9
     pub fn execvpe(
         file: *const ::c_char,
         argv: *const *const ::c_char,
@@ -1763,6 +1837,7 @@ extern "C" {
         argv: *const *const ::c_char,
         envp: *const *const ::c_char,
     ) -> ::c_int;
+
     pub fn getifaddrs(ifap: *mut *mut ::ifaddrs) -> ::c_int;
     pub fn freeifaddrs(ifa: *mut ::ifaddrs);
     pub fn bind(socket: ::c_int, address: *const ::sockaddr, address_len: ::socklen_t) -> ::c_int;
@@ -1790,6 +1865,9 @@ extern "C" {
         locale: ::locale_t,
     ) -> ::size_t;
     pub fn strptime(s: *const ::c_char, format: *const ::c_char, tm: *mut ::tm) -> *mut ::c_char;
+
+    pub fn mkostemp(template: *mut ::c_char, flags: ::c_int) -> ::c_int;
+    pub fn mkostemps(template: *mut ::c_char, suffixlen: ::c_int, flags: ::c_int) -> ::c_int;
 }
 
 // LFS64 extensions
@@ -1834,7 +1912,7 @@ cfg_if! {
                 fd: ::c_int,
                 buf: *mut ::c_void,
                 count: ::size_t,
-                offset: off64_t
+                offset: off64_t,
             ) -> ::ssize_t;
             pub fn pwrite64(
                 fd: ::c_int,
@@ -1855,7 +1933,11 @@ cfg_if! {
 }
 
 cfg_if! {
-    if #[cfg(not(any(target_env = "uclibc", target_env = "musl", target_os = "emscripten")))] {
+    if #[cfg(not(any(
+        target_env = "uclibc",
+        target_env = "musl",
+        target_os = "emscripten"
+    )))] {
         extern "C" {
             pub fn preadv64(
                 fd: ::c_int,
@@ -1890,6 +1972,21 @@ cfg_if! {
                 name: *mut ::c_char,
                 termp: *const termios,
                 winp: *const ::winsize,
+            ) -> ::c_int;
+        }
+    }
+}
+
+// The statx syscall, available on some libcs.
+cfg_if! {
+    if #[cfg(any(target_env = "gnu", target_os = "android"))] {
+        extern "C" {
+            pub fn statx(
+                dirfd: ::c_int,
+                pathname: *const ::c_char,
+                flags: ::c_int,
+                mask: ::c_uint,
+                statxbuf: *mut statx,
             ) -> ::c_int;
         }
     }

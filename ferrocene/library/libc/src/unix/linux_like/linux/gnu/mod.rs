@@ -16,39 +16,6 @@ cfg_if! {
 }
 
 s! {
-    pub struct statx {
-        pub stx_mask: u32,
-        pub stx_blksize: u32,
-        pub stx_attributes: u64,
-        pub stx_nlink: u32,
-        pub stx_uid: u32,
-        pub stx_gid: u32,
-        pub stx_mode: u16,
-        __statx_pad1: [u16; 1],
-        pub stx_ino: u64,
-        pub stx_size: u64,
-        pub stx_blocks: u64,
-        pub stx_attributes_mask: u64,
-        pub stx_atime: ::statx_timestamp,
-        pub stx_btime: ::statx_timestamp,
-        pub stx_ctime: ::statx_timestamp,
-        pub stx_mtime: ::statx_timestamp,
-        pub stx_rdev_major: u32,
-        pub stx_rdev_minor: u32,
-        pub stx_dev_major: u32,
-        pub stx_dev_minor: u32,
-        pub stx_mnt_id: u64,
-        pub stx_dio_mem_align: u32,
-        pub stx_dio_offset_align: u32,
-        __statx_pad3: [u64; 12],
-    }
-
-    pub struct statx_timestamp {
-        pub tv_sec: i64,
-        pub tv_nsec: u32,
-        pub __statx_timestamp_pad1: [i32; 1],
-    }
-
     pub struct aiocb {
         pub aio_fildes: ::c_int,
         pub aio_lio_opcode: ::c_int,
@@ -64,7 +31,7 @@ s! {
         pub aio_offset: off_t,
         #[cfg(all(not(target_arch = "x86_64"), target_pointer_width = "32"))]
         __unused1: [::c_char; 4],
-        __glibc_reserved: [::c_char; 32]
+        __glibc_reserved: [::c_char; 32],
     }
 
     pub struct __exit_status {
@@ -119,7 +86,8 @@ s! {
             target_arch = "mips",
             target_arch = "mips32r6",
             target_arch = "mips64",
-            target_arch = "mips64r6")))]
+            target_arch = "mips64r6"
+        )))]
         pub c_ispeed: ::speed_t,
         #[cfg(not(any(
             target_arch = "sparc",
@@ -127,7 +95,8 @@ s! {
             target_arch = "mips",
             target_arch = "mips32r6",
             target_arch = "mips64",
-            target_arch = "mips64r6")))]
+            target_arch = "mips64r6"
+        )))]
         pub c_ospeed: ::speed_t,
     }
 
@@ -353,7 +322,6 @@ s! {
         pub arch: ::__u32,
         pub instruction_pointer: ::__u64,
         pub stack_pointer: ::__u64,
-        #[cfg(libc_union)]
         pub u: __c_anonymous_ptrace_syscall_info_data,
     }
 
@@ -400,6 +368,7 @@ s! {
         pub chunk_size: ::__u32,
         pub headroom: ::__u32,
         pub flags: ::__u32,
+        pub tx_metadata_len: ::__u32,
     }
 
     pub struct xdp_umem_reg_v1 {
@@ -503,6 +472,16 @@ s! {
         pub error: ::__s32,
         pub error_count: ::__u32,
     }
+
+    // FIXME(1.0) this is actually a union
+    #[cfg_attr(target_pointer_width = "32", repr(align(4)))]
+    #[cfg_attr(target_pointer_width = "64", repr(align(8)))]
+    pub struct sem_t {
+        #[cfg(target_pointer_width = "32")]
+        __size: [::c_char; 16],
+        #[cfg(target_pointer_width = "64")]
+        __size: [::c_char; 32],
+    }
 }
 
 impl siginfo_t {
@@ -531,77 +510,73 @@ impl siginfo_t {
     }
 }
 
-cfg_if! {
-    if #[cfg(libc_union)] {
-        // Internal, for casts to access union fields
-        #[repr(C)]
-        struct sifields_sigchld {
-            si_pid: ::pid_t,
-            si_uid: ::uid_t,
-            si_status: ::c_int,
-            si_utime: ::c_long,
-            si_stime: ::c_long,
-        }
-        impl ::Copy for sifields_sigchld {}
-        impl ::Clone for sifields_sigchld {
-            fn clone(&self) -> sifields_sigchld {
-                *self
-            }
-        }
+// Internal, for casts to access union fields
+#[repr(C)]
+struct sifields_sigchld {
+    si_pid: ::pid_t,
+    si_uid: ::uid_t,
+    si_status: ::c_int,
+    si_utime: ::c_long,
+    si_stime: ::c_long,
+}
+impl ::Copy for sifields_sigchld {}
+impl ::Clone for sifields_sigchld {
+    fn clone(&self) -> sifields_sigchld {
+        *self
+    }
+}
 
-        // Internal, for casts to access union fields
-        #[repr(C)]
-        union sifields {
-            _align_pointer: *mut ::c_void,
-            sigchld: sifields_sigchld,
-        }
+// Internal, for casts to access union fields
+#[repr(C)]
+union sifields {
+    _align_pointer: *mut ::c_void,
+    sigchld: sifields_sigchld,
+}
 
-        // Internal, for casts to access union fields. Note that some variants
-        // of sifields start with a pointer, which makes the alignment of
-        // sifields vary on 32-bit and 64-bit architectures.
-        #[repr(C)]
-        struct siginfo_f {
-            _siginfo_base: [::c_int; 3],
-            sifields: sifields,
-        }
+// Internal, for casts to access union fields. Note that some variants
+// of sifields start with a pointer, which makes the alignment of
+// sifields vary on 32-bit and 64-bit architectures.
+#[repr(C)]
+struct siginfo_f {
+    _siginfo_base: [::c_int; 3],
+    sifields: sifields,
+}
 
-        impl siginfo_t {
-            unsafe fn sifields(&self) -> &sifields {
-                &(*(self as *const siginfo_t as *const siginfo_f)).sifields
-            }
+impl siginfo_t {
+    unsafe fn sifields(&self) -> &sifields {
+        &(*(self as *const siginfo_t as *const siginfo_f)).sifields
+    }
 
-            pub unsafe fn si_pid(&self) -> ::pid_t {
-                self.sifields().sigchld.si_pid
-            }
+    pub unsafe fn si_pid(&self) -> ::pid_t {
+        self.sifields().sigchld.si_pid
+    }
 
-            pub unsafe fn si_uid(&self) -> ::uid_t {
-                self.sifields().sigchld.si_uid
-            }
+    pub unsafe fn si_uid(&self) -> ::uid_t {
+        self.sifields().sigchld.si_uid
+    }
 
-            pub unsafe fn si_status(&self) -> ::c_int {
-                self.sifields().sigchld.si_status
-            }
+    pub unsafe fn si_status(&self) -> ::c_int {
+        self.sifields().sigchld.si_status
+    }
 
-            pub unsafe fn si_utime(&self) -> ::c_long {
-                self.sifields().sigchld.si_utime
-            }
+    pub unsafe fn si_utime(&self) -> ::c_long {
+        self.sifields().sigchld.si_utime
+    }
 
-            pub unsafe fn si_stime(&self) -> ::c_long {
-                self.sifields().sigchld.si_stime
-            }
-        }
+    pub unsafe fn si_stime(&self) -> ::c_long {
+        self.sifields().sigchld.si_stime
+    }
+}
 
-        pub union __c_anonymous_ptrace_syscall_info_data {
-            pub entry: __c_anonymous_ptrace_syscall_info_entry,
-            pub exit: __c_anonymous_ptrace_syscall_info_exit,
-            pub seccomp: __c_anonymous_ptrace_syscall_info_seccomp,
-        }
-        impl ::Copy for __c_anonymous_ptrace_syscall_info_data {}
-        impl ::Clone for __c_anonymous_ptrace_syscall_info_data {
-            fn clone(&self) -> __c_anonymous_ptrace_syscall_info_data {
-                *self
-            }
-        }
+pub union __c_anonymous_ptrace_syscall_info_data {
+    pub entry: __c_anonymous_ptrace_syscall_info_entry,
+    pub exit: __c_anonymous_ptrace_syscall_info_exit,
+    pub seccomp: __c_anonymous_ptrace_syscall_info_seccomp,
+}
+impl ::Copy for __c_anonymous_ptrace_syscall_info_data {}
+impl ::Clone for __c_anonymous_ptrace_syscall_info_data {
+    fn clone(&self) -> __c_anonymous_ptrace_syscall_info_data {
+        *self
     }
 }
 
@@ -616,30 +591,34 @@ s_no_extra_traits! {
         pub ut_host: [::c_char; __UT_HOSTSIZE],
         pub ut_exit: __exit_status,
 
-        #[cfg(any(target_arch = "aarch64",
-                  target_arch = "s390x",
-                  target_arch = "loongarch64",
-                  all(target_pointer_width = "32",
-                      not(target_arch = "x86_64"))))]
+        #[cfg(any(
+            target_arch = "aarch64",
+            target_arch = "s390x",
+            target_arch = "loongarch64",
+            all(target_pointer_width = "32", not(target_arch = "x86_64"))
+        ))]
         pub ut_session: ::c_long,
-        #[cfg(any(target_arch = "aarch64",
-                  target_arch = "s390x",
-                  target_arch = "loongarch64",
-                  all(target_pointer_width = "32",
-                      not(target_arch = "x86_64"))))]
+        #[cfg(any(
+            target_arch = "aarch64",
+            target_arch = "s390x",
+            target_arch = "loongarch64",
+            all(target_pointer_width = "32", not(target_arch = "x86_64"))
+        ))]
         pub ut_tv: ::timeval,
 
-        #[cfg(not(any(target_arch = "aarch64",
-                      target_arch = "s390x",
-                      target_arch = "loongarch64",
-                      all(target_pointer_width = "32",
-                          not(target_arch = "x86_64")))))]
+        #[cfg(not(any(
+            target_arch = "aarch64",
+            target_arch = "s390x",
+            target_arch = "loongarch64",
+            all(target_pointer_width = "32", not(target_arch = "x86_64"))
+        )))]
         pub ut_session: i32,
-        #[cfg(not(any(target_arch = "aarch64",
-                      target_arch = "s390x",
-                      target_arch = "loongarch64",
-                      all(target_pointer_width = "32",
-                          not(target_arch = "x86_64")))))]
+        #[cfg(not(any(
+            target_arch = "aarch64",
+            target_arch = "s390x",
+            target_arch = "loongarch64",
+            all(target_pointer_width = "32", not(target_arch = "x86_64"))
+        )))]
         pub ut_tv: __timeval,
 
         pub ut_addr_v6: [i32; 4],
@@ -657,10 +636,10 @@ cfg_if! {
                     && self.ut_id == other.ut_id
                     && self.ut_user == other.ut_user
                     && self
-                    .ut_host
-                    .iter()
-                    .zip(other.ut_host.iter())
-                    .all(|(a,b)| a == b)
+                        .ut_host
+                        .iter()
+                        .zip(other.ut_host.iter())
+                        .all(|(a, b)| a == b)
                     && self.ut_exit == other.ut_exit
                     && self.ut_session == other.ut_session
                     && self.ut_tv == other.ut_tv
@@ -679,7 +658,7 @@ cfg_if! {
                     .field("ut_line", &self.ut_line)
                     .field("ut_id", &self.ut_id)
                     .field("ut_user", &self.ut_user)
-                // FIXME: .field("ut_host", &self.ut_host)
+                    // FIXME: .field("ut_host", &self.ut_host)
                     .field("ut_exit", &self.ut_exit)
                     .field("ut_session", &self.ut_session)
                     .field("ut_tv", &self.ut_tv)
@@ -705,40 +684,36 @@ cfg_if! {
             }
         }
 
-        #[cfg(libc_union)]
         impl PartialEq for __c_anonymous_ptrace_syscall_info_data {
             fn eq(&self, other: &__c_anonymous_ptrace_syscall_info_data) -> bool {
                 unsafe {
-                self.entry == other.entry ||
-                    self.exit == other.exit ||
-                    self.seccomp == other.seccomp
+                    self.entry == other.entry
+                        || self.exit == other.exit
+                        || self.seccomp == other.seccomp
                 }
             }
         }
 
-        #[cfg(libc_union)]
         impl Eq for __c_anonymous_ptrace_syscall_info_data {}
 
-        #[cfg(libc_union)]
         impl ::fmt::Debug for __c_anonymous_ptrace_syscall_info_data {
             fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
                 unsafe {
-                f.debug_struct("__c_anonymous_ptrace_syscall_info_data")
-                    .field("entry", &self.entry)
-                    .field("exit", &self.exit)
-                    .field("seccomp", &self.seccomp)
-                    .finish()
+                    f.debug_struct("__c_anonymous_ptrace_syscall_info_data")
+                        .field("entry", &self.entry)
+                        .field("exit", &self.exit)
+                        .field("seccomp", &self.seccomp)
+                        .finish()
                 }
             }
         }
 
-        #[cfg(libc_union)]
         impl ::hash::Hash for __c_anonymous_ptrace_syscall_info_data {
             fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
                 unsafe {
-                self.entry.hash(state);
-                self.exit.hash(state);
-                self.seccomp.hash(state);
+                    self.entry.hash(state);
+                    self.exit.hash(state);
+                    self.seccomp.hash(state);
                 }
             }
         }
@@ -886,7 +861,8 @@ pub const FILENAME_MAX: ::c_uint = 4096;
 pub const POSIX_MADV_DONTNEED: ::c_int = 4;
 pub const _CS_GNU_LIBC_VERSION: ::c_int = 2;
 pub const _CS_GNU_LIBPTHREAD_VERSION: ::c_int = 3;
-pub const _CS_PATH: ::c_int = 0;
+pub const _CS_V6_ENV: ::c_int = 1148;
+pub const _CS_V7_ENV: ::c_int = 1149;
 pub const _SC_EQUIV_CLASS_MAX: ::c_int = 41;
 pub const _SC_CHARCLASS_NAME_MAX: ::c_int = 45;
 pub const _SC_PII: ::c_int = 53;
@@ -1107,6 +1083,7 @@ pub const ELFOSABI_ARM_AEABI: u8 = 64;
 
 // linux/sched.h
 pub const CLONE_NEWTIME: ::c_int = 0x80;
+// DIFF(main): changed to `c_ulonglong` in e9abac9ac2
 pub const CLONE_CLEAR_SIGHAND: ::c_int = 0x100000000;
 pub const CLONE_INTO_CGROUP: ::c_int = 0x200000000;
 
@@ -1124,10 +1101,12 @@ pub const KEYCTL_SUPPORTS_DECRYPT: u32 = 0x02;
 pub const KEYCTL_SUPPORTS_SIGN: u32 = 0x04;
 pub const KEYCTL_SUPPORTS_VERIFY: u32 = 0x08;
 cfg_if! {
-    if #[cfg(not(any(target_arch = "mips",
-                     target_arch = "mips32r6",
-                     target_arch = "mips64",
-                     target_arch = "mips64r6")))] {
+    if #[cfg(not(any(
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6"
+    )))] {
         pub const KEYCTL_MOVE: u32 = 30;
         pub const KEYCTL_CAPABILITIES: u32 = 31;
 
@@ -1156,37 +1135,6 @@ pub const M_CHECK_ACTION: ::c_int = -5;
 pub const M_PERTURB: ::c_int = -6;
 pub const M_ARENA_TEST: ::c_int = -7;
 pub const M_ARENA_MAX: ::c_int = -8;
-
-pub const AT_STATX_SYNC_TYPE: ::c_int = 0x6000;
-pub const AT_STATX_SYNC_AS_STAT: ::c_int = 0x0000;
-pub const AT_STATX_FORCE_SYNC: ::c_int = 0x2000;
-pub const AT_STATX_DONT_SYNC: ::c_int = 0x4000;
-pub const STATX_TYPE: ::c_uint = 0x0001;
-pub const STATX_MODE: ::c_uint = 0x0002;
-pub const STATX_NLINK: ::c_uint = 0x0004;
-pub const STATX_UID: ::c_uint = 0x0008;
-pub const STATX_GID: ::c_uint = 0x0010;
-pub const STATX_ATIME: ::c_uint = 0x0020;
-pub const STATX_MTIME: ::c_uint = 0x0040;
-pub const STATX_CTIME: ::c_uint = 0x0080;
-pub const STATX_INO: ::c_uint = 0x0100;
-pub const STATX_SIZE: ::c_uint = 0x0200;
-pub const STATX_BLOCKS: ::c_uint = 0x0400;
-pub const STATX_BASIC_STATS: ::c_uint = 0x07ff;
-pub const STATX_BTIME: ::c_uint = 0x0800;
-pub const STATX_MNT_ID: ::c_uint = 0x1000;
-pub const STATX_DIOALIGN: ::c_uint = 0x2000;
-pub const STATX_ALL: ::c_uint = 0x0fff;
-pub const STATX__RESERVED: ::c_int = 0x80000000;
-pub const STATX_ATTR_COMPRESSED: ::c_int = 0x0004;
-pub const STATX_ATTR_IMMUTABLE: ::c_int = 0x0010;
-pub const STATX_ATTR_APPEND: ::c_int = 0x0020;
-pub const STATX_ATTR_NODUMP: ::c_int = 0x0040;
-pub const STATX_ATTR_ENCRYPTED: ::c_int = 0x0800;
-pub const STATX_ATTR_AUTOMOUNT: ::c_int = 0x1000;
-pub const STATX_ATTR_MOUNT_ROOT: ::c_int = 0x2000;
-pub const STATX_ATTR_VERITY: ::c_int = 0x00100000;
-pub const STATX_ATTR_DAX: ::c_int = 0x00200000;
 
 pub const SOMAXCONN: ::c_int = 4096;
 
@@ -1281,10 +1229,7 @@ cfg_if! {
         target_arch = "riscv32"
     ))] {
         pub const PTHREAD_STACK_MIN: ::size_t = 16384;
-    } else if #[cfg(any(
-               target_arch = "sparc",
-               target_arch = "sparc64"
-           ))] {
+    } else if #[cfg(any(target_arch = "sparc", target_arch = "sparc64"))] {
         pub const PTHREAD_STACK_MIN: ::size_t = 0x6000;
     } else {
         pub const PTHREAD_STACK_MIN: ::size_t = 131072;
@@ -1299,21 +1244,25 @@ pub const REG_ESIZE: ::c_int = 15;
 pub const REG_ERPAREN: ::c_int = 16;
 
 cfg_if! {
-    if #[cfg(any(target_arch = "x86",
-                 target_arch = "x86_64",
-                 target_arch = "arm",
-                 target_arch = "aarch64",
-                 target_arch = "loongarch64",
-                 target_arch = "riscv64",
-                 target_arch = "s390x"))] {
+    if #[cfg(any(
+        target_arch = "x86",
+        target_arch = "x86_64",
+        target_arch = "arm",
+        target_arch = "aarch64",
+        target_arch = "loongarch64",
+        target_arch = "riscv64",
+        target_arch = "s390x"
+    ))] {
         pub const TUNSETCARRIER: ::Ioctl = 0x400454e2;
         pub const TUNGETDEVNETNS: ::Ioctl = 0x54e3;
-    } else if #[cfg(any(target_arch = "mips",
-                        target_arch = "mips64",
-                        target_arch = "powerpc",
-                        target_arch = "powerpc64",
-                        target_arch = "sparc",
-                        target_arch = "sparc64"))] {
+    } else if #[cfg(any(
+        target_arch = "mips",
+        target_arch = "mips64",
+        target_arch = "powerpc",
+        target_arch = "powerpc64",
+        target_arch = "sparc",
+        target_arch = "sparc64"
+    ))] {
         pub const TUNSETCARRIER: ::Ioctl = 0x800454e2;
         pub const TUNGETDEVNETNS: ::Ioctl = 0x200054e3;
     } else {
@@ -1392,13 +1341,6 @@ extern "C" {
     pub fn getpt() -> ::c_int;
     pub fn mallopt(param: ::c_int, value: ::c_int) -> ::c_int;
     pub fn gettimeofday(tp: *mut ::timeval, tz: *mut ::timezone) -> ::c_int;
-    pub fn statx(
-        dirfd: ::c_int,
-        pathname: *const c_char,
-        flags: ::c_int,
-        mask: ::c_uint,
-        statxbuf: *mut statx,
-    ) -> ::c_int;
     pub fn getentropy(buf: *mut ::c_void, buflen: ::size_t) -> ::c_int;
     pub fn getrandom(buf: *mut ::c_void, buflen: ::size_t, flags: ::c_uint) -> ::ssize_t;
     pub fn getauxval(type_: ::c_ulong) -> ::c_ulong;
@@ -1490,6 +1432,7 @@ extern "C" {
     pub fn pthread_sigqueue(thread: ::pthread_t, sig: ::c_int, value: ::sigval) -> ::c_int;
     pub fn mallinfo() -> ::mallinfo;
     pub fn mallinfo2() -> ::mallinfo2;
+    pub fn malloc_stats();
     pub fn malloc_info(options: ::c_int, stream: *mut ::FILE) -> ::c_int;
     pub fn malloc_usable_size(ptr: *mut ::c_void) -> ::size_t;
     pub fn getpwent_r(
@@ -1533,7 +1476,6 @@ extern "C" {
     pub fn asctime_r(tm: *const ::tm, buf: *mut ::c_char) -> *mut ::c_char;
     pub fn ctime_r(timep: *const time_t, buf: *mut ::c_char) -> *mut ::c_char;
 
-    pub fn confstr(name: ::c_int, buf: *mut ::c_char, len: ::size_t) -> ::size_t;
     pub fn dirname(path: *mut ::c_char) -> *mut ::c_char;
     /// POSIX version of `basename(3)`, defined in `libgen.h`.
     #[link_name = "__xpg_basename"]
@@ -1606,39 +1548,33 @@ extern "C" {
 }
 
 cfg_if! {
-    if #[cfg(any(target_arch = "x86",
-                 target_arch = "arm",
-                 target_arch = "m68k",
-                 target_arch = "csky",
-                 target_arch = "mips",
-                 target_arch = "mips32r6",
-                 target_arch = "powerpc",
-                 target_arch = "sparc",
-                 target_arch = "riscv32"))] {
+    if #[cfg(any(
+        target_arch = "x86",
+        target_arch = "arm",
+        target_arch = "m68k",
+        target_arch = "csky",
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "powerpc",
+        target_arch = "sparc",
+        target_arch = "riscv32"
+    ))] {
         mod b32;
         pub use self::b32::*;
-    } else if #[cfg(any(target_arch = "x86_64",
-                        target_arch = "aarch64",
-                        target_arch = "powerpc64",
-                        target_arch = "mips64",
-                        target_arch = "mips64r6",
-                        target_arch = "s390x",
-                        target_arch = "sparc64",
-                        target_arch = "riscv64",
-                        target_arch = "loongarch64"))] {
+    } else if #[cfg(any(
+        target_arch = "x86_64",
+        target_arch = "aarch64",
+        target_arch = "powerpc64",
+        target_arch = "mips64",
+        target_arch = "mips64r6",
+        target_arch = "s390x",
+        target_arch = "sparc64",
+        target_arch = "riscv64",
+        target_arch = "loongarch64"
+    ))] {
         mod b64;
         pub use self::b64::*;
     } else {
         // Unknown target_arch
-    }
-}
-
-cfg_if! {
-    if #[cfg(libc_align)] {
-        mod align;
-        pub use self::align::*;
-    } else {
-        mod no_align;
-        pub use self::no_align::*;
     }
 }

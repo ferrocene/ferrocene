@@ -52,12 +52,18 @@ s! {
 s_no_extra_traits! {
     pub struct pthread_attr_t {
         __sig: c_long,
-        __opaque: [::c_char; 36]
+        __opaque: [::c_char; 36],
     }
 
     pub struct pthread_once_t {
         __sig: c_long,
         __opaque: [::c_char; ::__PTHREAD_ONCE_SIZE__],
+    }
+
+    #[allow(missing_debug_implementations)]
+    #[repr(align(16))]
+    pub struct max_align_t {
+        priv_: [f64; 2],
     }
 }
 
@@ -66,10 +72,11 @@ cfg_if! {
         impl PartialEq for pthread_attr_t {
             fn eq(&self, other: &pthread_attr_t) -> bool {
                 self.__sig == other.__sig
-                    && self.__opaque
-                    .iter()
-                    .zip(other.__opaque.iter())
-                    .all(|(a,b)| a == b)
+                    && self
+                        .__opaque
+                        .iter()
+                        .zip(other.__opaque.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for pthread_attr_t {}
@@ -77,7 +84,7 @@ cfg_if! {
             fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
                 f.debug_struct("pthread_attr_t")
                     .field("__sig", &self.__sig)
-                // FIXME: .field("__opaque", &self.__opaque)
+                    // FIXME: .field("__opaque", &self.__opaque)
                     .finish()
             }
         }
@@ -90,10 +97,11 @@ cfg_if! {
         impl PartialEq for pthread_once_t {
             fn eq(&self, other: &pthread_once_t) -> bool {
                 self.__sig == other.__sig
-                    && self.__opaque
-                    .iter()
-                    .zip(other.__opaque.iter())
-                    .all(|(a,b)| a == b)
+                    && self
+                        .__opaque
+                        .iter()
+                        .zip(other.__opaque.iter())
+                        .all(|(a, b)| a == b)
             }
         }
         impl Eq for pthread_once_t {}
@@ -144,11 +152,4 @@ extern "C" {
         path2: *const ::c_char,
         options: ::c_ulong,
     ) -> ::c_int;
-}
-
-cfg_if! {
-    if #[cfg(libc_align)] {
-        mod align;
-        pub use self::align::*;
-    }
 }

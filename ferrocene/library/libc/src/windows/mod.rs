@@ -1,5 +1,7 @@
 //! Windows CRT definitions
 
+use c_void;
+
 pub type c_schar = i8;
 pub type c_uchar = u8;
 pub type c_short = i16;
@@ -254,6 +256,8 @@ pub const SIG_GET: ::sighandler_t = 2;
 pub const SIG_SGE: ::sighandler_t = 3;
 pub const SIG_ACK: ::sighandler_t = 4;
 
+// DIFF(main): removed in 458c58f409
+// FIXME(msrv): done by `std` starting in 1.79.0
 // inline comment below appeases style checker
 #[cfg(all(target_env = "msvc", feature = "rustc-dep-of-std"))] // " if "
 #[link(name = "msvcrt", cfg(not(target_feature = "crt-static")))]
@@ -454,6 +458,7 @@ extern "C" {
     #[link_name = "_wexeclpe"]
     pub fn wexeclpe(path: *const wchar_t, arg0: *const wchar_t, ...) -> intptr_t;
     #[link_name = "_execv"]
+    // DIFF(main): changed to `intptr_t` in e77f551de9
     pub fn execv(prog: *const c_char, argv: *const *const c_char) -> ::intptr_t;
     #[link_name = "_execve"]
     pub fn execve(
@@ -469,6 +474,7 @@ extern "C" {
         argv: *const *const c_char,
         envp: *const *const c_char,
     ) -> ::c_int;
+
     #[link_name = "_wexecv"]
     pub fn wexecv(prog: *const wchar_t, argv: *const *const wchar_t) -> ::intptr_t;
     #[link_name = "_wexecve"]
@@ -518,6 +524,9 @@ extern "C" {
     pub fn aligned_malloc(size: size_t, alignment: size_t) -> *mut c_void;
     #[link_name = "_aligned_free"]
     pub fn aligned_free(ptr: *mut ::c_void);
+    #[link_name = "_aligned_realloc"]
+    pub fn aligned_realloc(memblock: *mut ::c_void, size: size_t, alignment: size_t)
+        -> *mut c_void;
     #[link_name = "_putenv"]
     pub fn putenv(envstring: *const ::c_char) -> ::c_int;
     #[link_name = "_wputenv"]
@@ -566,26 +575,6 @@ extern "system" {
         optlen: ::c_int,
     ) -> ::c_int;
     pub fn socket(af: ::c_int, socket_type: ::c_int, protocol: ::c_int) -> SOCKET;
-}
-
-cfg_if! {
-    if #[cfg(libc_core_cvoid)] {
-        pub use ::ffi::c_void;
-    } else {
-        // Use repr(u8) as LLVM expects `void*` to be the same as `i8*` to help
-        // enable more optimization opportunities around it recognizing things
-        // like malloc/free.
-        #[repr(u8)]
-        #[allow(missing_copy_implementations)]
-        #[allow(missing_debug_implementations)]
-        pub enum c_void {
-            // Two dummy variants so the #[repr] attribute can be used.
-            #[doc(hidden)]
-            __variant1,
-            #[doc(hidden)]
-            __variant2,
-        }
-    }
 }
 
 cfg_if! {

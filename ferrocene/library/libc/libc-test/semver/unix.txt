@@ -453,6 +453,7 @@ accept
 access
 addrinfo
 alarm
+aligned_alloc
 atexit
 atof
 atoi
@@ -492,6 +493,7 @@ clockid_t
 close
 closedir
 closelog
+confstr
 connect
 creat
 dev_t
@@ -587,6 +589,8 @@ grantpt
 group
 hostent
 hstrerror
+htonl
+htons
 if_indextoname
 if_nametoindex
 in6_addr
@@ -657,6 +661,8 @@ munmap
 nanosleep
 nfds_t
 nlink_t
+ntohl
+ntohs
 off_t
 open
 opendir

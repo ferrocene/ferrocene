@@ -28,6 +28,7 @@ if [ "$TOOLCHAIN" = "nightly" ] ; then
     rustup component add rust-src
 fi
 
+# Run the tests for a specific target
 test_target() {
     target="${1}"
     no_dist="${2:-0}"
@@ -68,7 +69,30 @@ test_target() {
     # Test again without default features, i.e. without "std"
     $cmd --no-default-features
     $cmd --no-default-features --features extra_traits
+
+    # For tier 2 freebsd targets, check with the different versions we support
+    # if on nightly or stable
+    case "$rust-$target" in
+        stable-x86_64-*freebsd*) do_freebsd_checks=1 ;;
+        nightly-i686*freebsd*) do_freebsd_checks=1 ;;
+    esac
+    
+    if [ -n "${do_freebsd_checks:-}" ]; then
+        for version in $freebsd_versions; do
+            export RUST_LIBC_UNSTABLE_FREEBSD_VERSION="$version"
+            $cmd
+            $cmd --no-default-features
+        done
+    fi
 }
+
+freebsd_versions="\
+11 \
+12 \
+13 \
+14 \
+15 \
+"
 
 rust_linux_targets="\
 aarch64-linux-android \
@@ -96,6 +120,8 @@ sparc64-unknown-linux-gnu \
 sparcv9-sun-solaris \
 wasm32-unknown-emscripten \
 wasm32-unknown-unknown \
+wasm32-wasip1 \
+wasm32-wasip2 \
 x86_64-linux-android \
 x86_64-unknown-freebsd \
 x86_64-unknown-linux-gnu \
@@ -231,15 +257,30 @@ else
     no_dist_targets=""
 fi
 
+case "$rust" in
+    "stable") supports_wasi_pn=1 ;;
+    "beta") supports_wasi_pn=1 ;;
+    "nightly") supports_wasi_pn=1 ;;
+    *) supports_wasi_pn=0 ;;
+esac
+
 for target in $targets; do
     if echo "$target" | grep -q "$filter"; then
         if [ "$os" = "windows" ]; then
             TARGET="$target" ./ci/install-rust.sh
-            test_target "$target"
-        else
-            test_target "$target"
         fi
 
+        # `wasm32-wasip1` was renamed from `wasm32-wasi`
+        if [ "$target" = "wasm32-wasip1" ] && [ "$supports_wasi_pn" = "0" ]; then
+            target="wasm32-wasi"
+        fi
+
+        # `wasm32-wasip2` only exists in recent versions of Rust
+        if [ "$target" = "wasm32-wasip2" ] && [ "$supports_wasi_pn" = "0" ]; then
+            continue
+        fi
+            
+        test_target "$target"
         test_run=1
     fi
 done
@@ -248,11 +289,9 @@ for target in ${no_dist_targets:-}; do
     if echo "$target" | grep -q "$filter"; then
         if [ "$os" = "windows" ]; then
             TARGET="$target" ./ci/install-rust.sh
-            test_target "$target" 1
-        else
-            test_target "$target" 1
         fi
 
+        test_target "$target" 1
         test_run=1
     fi
 done

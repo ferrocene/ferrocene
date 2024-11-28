@@ -4,7 +4,7 @@
 
 pub mod tls;
 
-use std::assert_matches::assert_matches;
+use std::assert_matches::{assert_matches, debug_assert_matches};
 use std::borrow::Borrow;
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
@@ -377,10 +377,17 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
     }
 
     fn impl_is_const(self, def_id: DefId) -> bool {
+        debug_assert_matches!(self.def_kind(def_id), DefKind::Impl { of_trait: true });
         self.is_conditionally_const(def_id)
     }
 
     fn fn_is_const(self, def_id: DefId) -> bool {
+        debug_assert_matches!(self.def_kind(def_id), DefKind::Fn | DefKind::AssocFn);
+        self.is_conditionally_const(def_id)
+    }
+
+    fn alias_has_const_conditions(self, def_id: DefId) -> bool {
+        debug_assert_matches!(self.def_kind(def_id), DefKind::AssocTy | DefKind::OpaqueTy);
         self.is_conditionally_const(def_id)
     }
 
@@ -663,6 +670,7 @@ bidirectional_lang_item_map! {
     CoroutineYield,
     Destruct,
     DiscriminantKind,
+    Drop,
     DynMetadata,
     Fn,
     FnMut,
@@ -1318,12 +1326,12 @@ pub struct GlobalCtxt<'tcx> {
 
     /// Caches the results of trait selection. This cache is used
     /// for things that do not have to do with the parameters in scope.
-    pub selection_cache: traits::SelectionCache<'tcx>,
+    pub selection_cache: traits::SelectionCache<'tcx, ty::TypingEnv<'tcx>>,
 
     /// Caches the results of trait evaluation. This cache is used
     /// for things that do not have to do with the parameters in scope.
     /// Merge this with `selection_cache`?
-    pub evaluation_cache: traits::EvaluationCache<'tcx>,
+    pub evaluation_cache: traits::EvaluationCache<'tcx, ty::TypingEnv<'tcx>>,
 
     /// Caches the results of goal evaluation in the new solver.
     pub new_solver_evaluation_cache: Lock<search_graph::GlobalCache<TyCtxt<'tcx>>>,

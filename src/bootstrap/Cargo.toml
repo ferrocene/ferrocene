@@ -37,7 +37,11 @@ test = false
 # Most of the time updating these dependencies requires modifications to the
 # bootstrap codebase(e.g., https://github.com/rust-lang/rust/issues/124565);
 # otherwise, some targets will fail. That's why these dependencies are explicitly pinned.
-cc = "=1.1.22"
+
+# Ferrocene annotation:
+# downgraded from 1.2 to avoid error:
+# unknown target `aarch64-unknown-ferrocenecoretest`
+cc = "=1.1.31"
 cmake = "=0.1.48"
 
 build_helper = { path = "../build_helper" }

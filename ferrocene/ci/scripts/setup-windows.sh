@@ -35,6 +35,8 @@ else
     echo "Windows Defender Realtime Protection already disabled"
 fi
 
+export PreferredToolArchitecture="x64"
+
 # Use `cmake.portable` to ensure it is added to path and because the virtual package
 # was previously broken intermittently.
 choco install -y cmake.portable ninja zstandard gcc-arm-embedded llvm

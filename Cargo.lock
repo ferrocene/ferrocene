@@ -4789,7 +4789,6 @@ dependencies = [
 name = "rustc_index"
 version = "0.0.0"
 dependencies = [
- "arrayvec",
  "rustc_index_macros",
  "rustc_macros",
  "rustc_serialize",
@@ -5106,6 +5105,7 @@ name = "rustc_monomorphize"
 version = "0.0.0"
 dependencies = [
  "rustc_abi",
+ "rustc_attr",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",

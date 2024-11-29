@@ -49,19 +49,26 @@ jobs:
         id: define-branches
         run: |
           inputs='${{ toJson(github.event.inputs) }}'
+          length=$(echo $inputs |  jq 'length')
+
           branches=("master" "beta" "stable")
           selected_branches=()
 
-          for branch in "${branches[@]}"; do
-            value=$(echo $inputs | jq -r ".$branch")
-            if [[ "$value" == "true" ]]; then
-              selected_branches+=("\"$branch\"")
-            fi
-          done
+          # If inputs is empty, this was scheduled
+          if [[ $length == 0 ]]; then
+            # Trigger pulls for all branches
+            selected_branches=${branches[@]}
+          else
+            for branch in "${branches[@]}"; do
+              value=$(echo $inputs | jq -r ".$branch")
+              if [[ "$value" == "true" ]]; then
+                  selected_branches+=($branch)
+              fi
+            done
+          fi
 
-          selected_branches=$(echo "${selected_branches[*]}" | tr ' ' ',' )
-
-          echo "branches=[$selected_branches]" >> "$GITHUB_OUTPUT"
+          json_branches=$(jq -c -n '$ARGS.positional' --args -- ${selected_branches[@]})
+          echo "branches=$json_branches" >> "$GITHUB_OUTPUT"
 
   run:
     name: ${{ matrix.branch }}

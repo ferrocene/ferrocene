@@ -1,11 +1,6 @@
-<<<<<<< HEAD
-#![cfg_attr(feature = "core", no_std)]
-#![cfg_attr(not(feature = "core"), feature(no_core), no_core)]
-=======
 // tidy-alphabetical-start
 #![allow(internal_features)]
 #![feature(no_core)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(profiler_runtime)]
 #![feature(staged_api)]
 // tidy-alphabetical-end

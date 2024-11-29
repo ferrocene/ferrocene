@@ -153,7 +153,7 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
     # have our own crates with our own dependencies in the workspace.
     # Automatically resolve any conflict involving Cargo.lock to prefer our own
     # copy of the lockfile rather than upstream's.
-    for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}" "library/"; do
+    for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}" "library/" "library/profiler_builtins/"; do
         lock="${prefix}Cargo.lock"
         if git status --porcelain=v1 | grep "^UU ${lock}$" >/dev/null; then
             echo "pull-upstream: automatically resolving conflict for ${lock}..."

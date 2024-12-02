@@ -455,8 +455,6 @@ pub(crate) fn report_linker_flags(reporter: &dyn Reporter, targets: &[Target]) {
 
 #[cfg(test)]
 mod tests {
-    use std::ffi::OsString;
-
     use super::*;
     use crate::error::FindBinaryInPathError;
     use crate::test_utils::TestUtils;
@@ -566,7 +564,7 @@ mod tests {
         let temp_dir = tempfile::tempdir().expect("making temp dir");
         // make a fake linker
         let args_path = make_fake_linker(temp_dir.path()).unwrap();
-        let args: &[OsString] = &["-arg1".into(), "-arg2".into(), "-arg3".into()];
+        let args: &[std::ffi::OsString] = &["-arg1".into(), "-arg2".into(), "-arg3".into()];
         let lld_path = temp_dir.path().join("ld.lld");
 
         // Run the fake linker

@@ -266,12 +266,11 @@ else
     can_invoke_bootstrap=false
 fi
 
-if [[ "${can_invoke_bootstrap}" = "true" ]]; then
-    # We expose additional commands for `x.py` which affects the completions file generation,
-    # so we just run the command to regenerate those in case they need updating as this usually
-    # does not need manual intervention.
-    echo "pull-upstream: checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated..."
-    ./x.py run generate-completions >/dev/null
+# We expose additional commands for `x.py` which affects the completions file generation,
+# so we just run the command to regenerate those in case they need updating as this usually
+# does not need manual intervention.
+echo "pull-upstream: checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated..."
+if ./x.py run generate-completions >/dev/null; then
     if git status --porcelain=v1 | grep "^ M ${GENERATED_COMPLETIONS_DIR}" >/dev/null; then
         git add "${GENERATED_COMPLETIONS_DIR}"
         git commit -m "update ${GENERATED_COMPLETIONS_DIR}"

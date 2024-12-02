@@ -157,12 +157,19 @@ if [[ is_internal && "${FERROCENE_BUILD_HOST:-}" = "x86_64-pc-windows-msvc" ]]; 
     add --set target.aarch64-unknown-none.cc=clang
     add --set target.aarch64-unknown-none.cxx=clang
     add --set target.aarch64-unknown-none.ar=llvm-ar
+
+    add --set target.thumbv6m-none-eabi.cc=clang
+    add --set target.thumbv6m-none-eabi.cxx=clang
+    add --set target.thumbv6m-none-eabi.ar=llvm-ar
+
     add --set target.thumbv7em-none-eabi.cc=clang
     add --set target.thumbv7em-none-eabi.cxx=clang
     add --set target.thumbv7em-none-eabi.ar=llvm-ar
+
     add --set target.thumbv7em-none-eabihf.cc=clang
     add --set target.thumbv7em-none-eabihf.cxx=clang
     add --set target.thumbv7em-none-eabihf.ar=llvm-ar
+
     add --set target.wasm32-unknown-unknown.cc=clang
     add --set target.wasm32-unknown-unknown.cxx=clang
     add --set target.wasm32-unknown-unknown.ar=lld-ar

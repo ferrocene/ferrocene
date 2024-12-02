@@ -152,7 +152,7 @@ class Subcommand:
         )
         subcommand = MULTIPLE_UNDERSCORES_RE.sub("_", subcommand)
 
-        return f"um_{self.program}_{subcommand}"
+        return f"um_{self.program}_subcommand_{subcommand}"
 
 class CliDomain(Domain):
     name = "cli"

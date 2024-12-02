@@ -117,12 +117,7 @@ impl<'a> State<'a> {
             Node::Ctor(..) => panic!("cannot print isolated Ctor"),
             Node::LetStmt(a) => self.print_local_decl(a),
             Node::Crate(..) => panic!("cannot print Crate"),
-            Node::WhereBoundPredicate(pred) => {
-                self.print_formal_generic_params(pred.bound_generic_params);
-                self.print_type(pred.bounded_ty);
-                self.print_bounds(":", pred.bounds);
-            }
-            Node::ArrayLenInfer(_) => self.word("_"),
+            Node::WherePredicate(pred) => self.print_where_predicate(pred),
             Node::Synthetic => unreachable!(),
             Node::Err(_) => self.word("/*ERROR*/"),
         }
@@ -319,7 +314,7 @@ impl<'a> State<'a> {
                 self.word("[");
                 self.print_type(ty);
                 self.word("; ");
-                self.print_array_length(length);
+                self.print_const_arg(length);
                 self.word("]");
             }
             hir::TyKind::Typeof(ref e) => {
@@ -990,13 +985,6 @@ impl<'a> State<'a> {
         self.print_else(elseopt)
     }
 
-    fn print_array_length(&mut self, len: &hir::ArrayLen<'_>) {
-        match len {
-            hir::ArrayLen::Infer(..) => self.word("_"),
-            hir::ArrayLen::Body(ct) => self.print_const_arg(ct),
-        }
-    }
-
     fn print_anon_const(&mut self, constant: &hir::AnonConst) {
         self.ann.nested(self, Nested::Body(constant.body))
     }
@@ -1005,6 +993,7 @@ impl<'a> State<'a> {
         match &const_arg.kind {
             ConstArgKind::Path(qpath) => self.print_qpath(qpath, true),
             ConstArgKind::Anon(anon) => self.print_anon_const(anon),
+            ConstArgKind::Infer(..) => self.word("_"),
         }
     }
 
@@ -1012,10 +1001,6 @@ impl<'a> State<'a> {
         self.popen();
         self.commasep_exprs(Inconsistent, args);
         self.pclose()
-    }
-
-    fn print_expr_maybe_paren(&mut self, expr: &hir::Expr<'_>, prec: i8) {
-        self.print_expr_cond_paren(expr, expr.precedence().order() < prec)
     }
 
     /// Prints an expr using syntax that's acceptable in a condition position, such as the `cond` in
@@ -1049,7 +1034,7 @@ impl<'a> State<'a> {
         }
         self.space();
         self.word_space("=");
-        let npals = || parser::needs_par_as_let_scrutinee(init.precedence().order());
+        let npals = || parser::needs_par_as_let_scrutinee(init.precedence());
         self.print_expr_cond_paren(init, Self::cond_needs_par(init) || npals())
     }
 
@@ -1081,12 +1066,12 @@ impl<'a> State<'a> {
         self.end()
     }
 
-    fn print_expr_repeat(&mut self, element: &hir::Expr<'_>, count: &hir::ArrayLen<'_>) {
+    fn print_expr_repeat(&mut self, element: &hir::Expr<'_>, count: &hir::ConstArg<'_>) {
         self.ibox(INDENT_UNIT);
         self.word("[");
         self.print_expr(element);
         self.word_space(";");
-        self.print_array_length(count);
+        self.print_const_arg(count);
         self.word("]");
         self.end()
     }
@@ -1145,7 +1130,7 @@ impl<'a> State<'a> {
             _ => parser::PREC_UNAMBIGUOUS,
         };
 
-        self.print_expr_maybe_paren(func, prec);
+        self.print_expr_cond_paren(func, func.precedence() < prec);
         self.print_call_post(args)
     }
 
@@ -1156,7 +1141,7 @@ impl<'a> State<'a> {
         args: &[hir::Expr<'_>],
     ) {
         let base_args = args;
-        self.print_expr_maybe_paren(receiver, parser::PREC_UNAMBIGUOUS);
+        self.print_expr_cond_paren(receiver, receiver.precedence() < parser::PREC_UNAMBIGUOUS);
         self.word(".");
         self.print_ident(segment.ident);
 
@@ -1192,15 +1177,15 @@ impl<'a> State<'a> {
             _ => left_prec,
         };
 
-        self.print_expr_maybe_paren(lhs, left_prec);
+        self.print_expr_cond_paren(lhs, lhs.precedence() < left_prec);
         self.space();
         self.word_space(op.node.as_str());
-        self.print_expr_maybe_paren(rhs, right_prec)
+        self.print_expr_cond_paren(rhs, rhs.precedence() < right_prec)
     }
 
     fn print_expr_unary(&mut self, op: hir::UnOp, expr: &hir::Expr<'_>) {
         self.word(op.as_str());
-        self.print_expr_maybe_paren(expr, parser::PREC_PREFIX)
+        self.print_expr_cond_paren(expr, expr.precedence() < parser::PREC_PREFIX)
     }
 
     fn print_expr_addr_of(
@@ -1217,7 +1202,7 @@ impl<'a> State<'a> {
                 self.print_mutability(mutability, true);
             }
         }
-        self.print_expr_maybe_paren(expr, parser::PREC_PREFIX)
+        self.print_expr_cond_paren(expr, expr.precedence() < parser::PREC_PREFIX)
     }
 
     fn print_literal(&mut self, lit: &hir::Lit) {
@@ -1356,7 +1341,7 @@ impl<'a> State<'a> {
             }
             hir::ExprKind::Cast(expr, ty) => {
                 let prec = AssocOp::As.precedence() as i8;
-                self.print_expr_maybe_paren(expr, prec);
+                self.print_expr_cond_paren(expr, expr.precedence() < prec);
                 self.space();
                 self.word_space("as");
                 self.print_type(ty);
@@ -1458,26 +1443,26 @@ impl<'a> State<'a> {
             }
             hir::ExprKind::Assign(lhs, rhs, _) => {
                 let prec = AssocOp::Assign.precedence() as i8;
-                self.print_expr_maybe_paren(lhs, prec + 1);
+                self.print_expr_cond_paren(lhs, lhs.precedence() <= prec);
                 self.space();
                 self.word_space("=");
-                self.print_expr_maybe_paren(rhs, prec);
+                self.print_expr_cond_paren(rhs, rhs.precedence() < prec);
             }
             hir::ExprKind::AssignOp(op, lhs, rhs) => {
                 let prec = AssocOp::Assign.precedence() as i8;
-                self.print_expr_maybe_paren(lhs, prec + 1);
+                self.print_expr_cond_paren(lhs, lhs.precedence() <= prec);
                 self.space();
                 self.word(op.node.as_str());
                 self.word_space("=");
-                self.print_expr_maybe_paren(rhs, prec);
+                self.print_expr_cond_paren(rhs, rhs.precedence() < prec);
             }
             hir::ExprKind::Field(expr, ident) => {
-                self.print_expr_maybe_paren(expr, parser::PREC_UNAMBIGUOUS);
+                self.print_expr_cond_paren(expr, expr.precedence() < parser::PREC_UNAMBIGUOUS);
                 self.word(".");
                 self.print_ident(ident);
             }
             hir::ExprKind::Index(expr, index, _) => {
-                self.print_expr_maybe_paren(expr, parser::PREC_UNAMBIGUOUS);
+                self.print_expr_cond_paren(expr, expr.precedence() < parser::PREC_UNAMBIGUOUS);
                 self.word("[");
                 self.print_expr(index);
                 self.word("]");
@@ -1491,7 +1476,7 @@ impl<'a> State<'a> {
                 }
                 if let Some(expr) = opt_expr {
                     self.space();
-                    self.print_expr_maybe_paren(expr, parser::PREC_JUMP);
+                    self.print_expr_cond_paren(expr, expr.precedence() < parser::PREC_JUMP);
                 }
             }
             hir::ExprKind::Continue(destination) => {
@@ -1505,13 +1490,13 @@ impl<'a> State<'a> {
                 self.word("return");
                 if let Some(expr) = result {
                     self.word(" ");
-                    self.print_expr_maybe_paren(expr, parser::PREC_JUMP);
+                    self.print_expr_cond_paren(expr, expr.precedence() < parser::PREC_JUMP);
                 }
             }
             hir::ExprKind::Become(result) => {
                 self.word("become");
                 self.word(" ");
-                self.print_expr_maybe_paren(result, parser::PREC_JUMP);
+                self.print_expr_cond_paren(result, result.precedence() < parser::PREC_JUMP);
             }
             hir::ExprKind::InlineAsm(asm) => {
                 self.word("asm!");
@@ -1536,7 +1521,7 @@ impl<'a> State<'a> {
             }
             hir::ExprKind::Yield(expr, _) => {
                 self.word_space("yield");
-                self.print_expr_maybe_paren(expr, parser::PREC_JUMP);
+                self.print_expr_cond_paren(expr, expr.precedence() < parser::PREC_JUMP);
             }
             hir::ExprKind::Err(_) => {
                 self.popen();
@@ -2160,47 +2145,50 @@ impl<'a> State<'a> {
             if i != 0 {
                 self.word_space(",");
             }
+            self.print_where_predicate(predicate);
+        }
+    }
 
-            match *predicate {
-                hir::WherePredicate::BoundPredicate(hir::WhereBoundPredicate {
-                    bound_generic_params,
-                    bounded_ty,
-                    bounds,
-                    ..
-                }) => {
-                    self.print_formal_generic_params(bound_generic_params);
-                    self.print_type(bounded_ty);
-                    self.print_bounds(":", bounds);
-                }
-                hir::WherePredicate::RegionPredicate(hir::WhereRegionPredicate {
-                    lifetime,
-                    bounds,
-                    ..
-                }) => {
-                    self.print_lifetime(lifetime);
-                    self.word(":");
+    fn print_where_predicate(&mut self, predicate: &hir::WherePredicate<'_>) {
+        match *predicate.kind {
+            hir::WherePredicateKind::BoundPredicate(hir::WhereBoundPredicate {
+                bound_generic_params,
+                bounded_ty,
+                bounds,
+                ..
+            }) => {
+                self.print_formal_generic_params(bound_generic_params);
+                self.print_type(bounded_ty);
+                self.print_bounds(":", bounds);
+            }
+            hir::WherePredicateKind::RegionPredicate(hir::WhereRegionPredicate {
+                lifetime,
+                bounds,
+                ..
+            }) => {
+                self.print_lifetime(lifetime);
+                self.word(":");
 
-                    for (i, bound) in bounds.iter().enumerate() {
-                        match bound {
-                            GenericBound::Outlives(lt) => {
-                                self.print_lifetime(lt);
-                            }
-                            _ => panic!("unexpected bound on lifetime param: {bound:?}"),
+                for (i, bound) in bounds.iter().enumerate() {
+                    match bound {
+                        GenericBound::Outlives(lt) => {
+                            self.print_lifetime(lt);
                         }
+                        _ => panic!("unexpected bound on lifetime param: {bound:?}"),
+                    }
 
-                        if i != 0 {
-                            self.word(":");
-                        }
+                    if i != 0 {
+                        self.word(":");
                     }
                 }
-                hir::WherePredicate::EqPredicate(hir::WhereEqPredicate {
-                    lhs_ty, rhs_ty, ..
-                }) => {
-                    self.print_type(lhs_ty);
-                    self.space();
-                    self.word_space("=");
-                    self.print_type(rhs_ty);
-                }
+            }
+            hir::WherePredicateKind::EqPredicate(hir::WhereEqPredicate {
+                lhs_ty, rhs_ty, ..
+            }) => {
+                self.print_type(lhs_ty);
+                self.space();
+                self.word_space("=");
+                self.print_type(rhs_ty);
             }
         }
     }

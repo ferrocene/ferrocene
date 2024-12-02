@@ -1,7 +1,7 @@
 use std::fmt;
 
 use rustc_abi::ExternAbi;
-use rustc_ast::util::parser::ExprPrecedence;
+use rustc_ast::util::parser::{AssocOp, PREC_CLOSURE, PREC_JUMP, PREC_PREFIX, PREC_UNAMBIGUOUS};
 use rustc_ast::{
     self as ast, Attribute, FloatTy, InlineAsmOptions, InlineAsmTemplatePiece, IntTy, Label,
     LitKind, TraitObjectSyntax, UintTy,
@@ -261,8 +261,6 @@ pub struct ConstArg<'hir> {
     #[stable_hasher(ignore)]
     pub hir_id: HirId,
     pub kind: ConstArgKind<'hir>,
-    /// Indicates whether this comes from a `~const` desugaring.
-    pub is_desugared_from_effects: bool,
 }
 
 impl<'hir> ConstArg<'hir> {
@@ -277,6 +275,7 @@ impl<'hir> ConstArg<'hir> {
         match self.kind {
             ConstArgKind::Path(path) => path.span(),
             ConstArgKind::Anon(anon) => anon.span,
+            ConstArgKind::Infer(span) => span,
         }
     }
 }
@@ -291,6 +290,11 @@ pub enum ConstArgKind<'hir> {
     /// However, in the future, we'll be using it for all of those.
     Path(QPath<'hir>),
     Anon(&'hir AnonConst),
+    /// **Note:** Not all inferred consts are represented as
+    /// `ConstArgKind::Infer`. In cases where it is ambiguous whether
+    /// a generic arg is a type or a const, inference variables are
+    /// represented as `GenericArg::Infer` instead.
+    Infer(Span),
 }
 
 #[derive(Clone, Copy, Debug, HashStable_Generic)]
@@ -310,6 +314,10 @@ pub enum GenericArg<'hir> {
     Lifetime(&'hir Lifetime),
     Type(&'hir Ty<'hir>),
     Const(&'hir ConstArg<'hir>),
+    /// **Note:** Inference variables are only represented as
+    /// `GenericArg::Infer` in cases where it is ambiguous whether
+    /// a generic arg is a type or a const. Otherwise, inference variables
+    /// are represented as `TyKind::Infer` or `ConstArgKind::Infer`.
     Infer(InferArg),
 }
 
@@ -462,14 +470,7 @@ impl<'hir> GenericArgs<'hir> {
     /// This function returns the number of type and const generic params.
     /// It should only be used for diagnostics.
     pub fn num_generic_params(&self) -> usize {
-        self.args
-            .iter()
-            .filter(|arg| match arg {
-                GenericArg::Lifetime(_)
-                | GenericArg::Const(ConstArg { is_desugared_from_effects: true, .. }) => false,
-                _ => true,
-            })
-            .count()
+        self.args.iter().filter(|arg| !matches!(arg, GenericArg::Lifetime(_))).count()
     }
 
     /// The span encompassing the arguments and constraints[^1] inside the surrounding brackets.
@@ -690,8 +691,8 @@ impl<'hir> Generics<'hir> {
         if self.has_where_clause_predicates {
             self.predicates
                 .iter()
-                .rfind(|&p| p.in_where_clause())
-                .map_or(end, |p| p.span())
+                .rfind(|&p| p.kind.in_where_clause())
+                .map_or(end, |p| p.span)
                 .shrink_to_hi()
                 .to(end)
         } else {
@@ -714,8 +715,10 @@ impl<'hir> Generics<'hir> {
         &self,
         param_def_id: LocalDefId,
     ) -> impl Iterator<Item = &WhereBoundPredicate<'hir>> {
-        self.predicates.iter().filter_map(move |pred| match pred {
-            WherePredicate::BoundPredicate(bp) if bp.is_param_bound(param_def_id.to_def_id()) => {
+        self.predicates.iter().filter_map(move |pred| match pred.kind {
+            WherePredicateKind::BoundPredicate(bp)
+                if bp.is_param_bound(param_def_id.to_def_id()) =>
+            {
                 Some(bp)
             }
             _ => None,
@@ -726,8 +729,8 @@ impl<'hir> Generics<'hir> {
         &self,
         param_def_id: LocalDefId,
     ) -> impl Iterator<Item = &WhereRegionPredicate<'_>> {
-        self.predicates.iter().filter_map(move |pred| match pred {
-            WherePredicate::RegionPredicate(rp) if rp.is_param_bound(param_def_id) => Some(rp),
+        self.predicates.iter().filter_map(move |pred| match pred.kind {
+            WherePredicateKind::RegionPredicate(rp) if rp.is_param_bound(param_def_id) => Some(rp),
             _ => None,
         })
     }
@@ -779,9 +782,9 @@ impl<'hir> Generics<'hir> {
 
     pub fn span_for_predicate_removal(&self, pos: usize) -> Span {
         let predicate = &self.predicates[pos];
-        let span = predicate.span();
+        let span = predicate.span;
 
-        if !predicate.in_where_clause() {
+        if !predicate.kind.in_where_clause() {
             // <T: ?Sized, U>
             //   ^^^^^^^^
             return span;
@@ -790,19 +793,19 @@ impl<'hir> Generics<'hir> {
         // We need to find out which comma to remove.
         if pos < self.predicates.len() - 1 {
             let next_pred = &self.predicates[pos + 1];
-            if next_pred.in_where_clause() {
+            if next_pred.kind.in_where_clause() {
                 // where T: ?Sized, Foo: Bar,
                 //       ^^^^^^^^^^^
-                return span.until(next_pred.span());
+                return span.until(next_pred.span);
             }
         }
 
         if pos > 0 {
             let prev_pred = &self.predicates[pos - 1];
-            if prev_pred.in_where_clause() {
+            if prev_pred.kind.in_where_clause() {
                 // where Foo: Bar, T: ?Sized,
                 //               ^^^^^^^^^^^
-                return prev_pred.span().shrink_to_hi().to(span);
+                return prev_pred.span.shrink_to_hi().to(span);
             }
         }
 
@@ -814,7 +817,7 @@ impl<'hir> Generics<'hir> {
 
     pub fn span_for_bound_removal(&self, predicate_pos: usize, bound_pos: usize) -> Span {
         let predicate = &self.predicates[predicate_pos];
-        let bounds = predicate.bounds();
+        let bounds = predicate.kind.bounds();
 
         if bounds.len() == 1 {
             return self.span_for_predicate_removal(predicate_pos);
@@ -841,7 +844,15 @@ impl<'hir> Generics<'hir> {
 
 /// A single predicate in a where-clause.
 #[derive(Debug, Clone, Copy, HashStable_Generic)]
-pub enum WherePredicate<'hir> {
+pub struct WherePredicate<'hir> {
+    pub hir_id: HirId,
+    pub span: Span,
+    pub kind: &'hir WherePredicateKind<'hir>,
+}
+
+/// The kind of a single predicate in a where-clause.
+#[derive(Debug, Clone, Copy, HashStable_Generic)]
+pub enum WherePredicateKind<'hir> {
     /// A type bound (e.g., `for<'c> Foo: Send + Clone + 'c`).
     BoundPredicate(WhereBoundPredicate<'hir>),
     /// A lifetime predicate (e.g., `'a: 'b + 'c`).
@@ -850,28 +861,20 @@ pub enum WherePredicate<'hir> {
     EqPredicate(WhereEqPredicate<'hir>),
 }
 
-impl<'hir> WherePredicate<'hir> {
-    pub fn span(&self) -> Span {
-        match self {
-            WherePredicate::BoundPredicate(p) => p.span,
-            WherePredicate::RegionPredicate(p) => p.span,
-            WherePredicate::EqPredicate(p) => p.span,
-        }
-    }
-
+impl<'hir> WherePredicateKind<'hir> {
     pub fn in_where_clause(&self) -> bool {
         match self {
-            WherePredicate::BoundPredicate(p) => p.origin == PredicateOrigin::WhereClause,
-            WherePredicate::RegionPredicate(p) => p.in_where_clause,
-            WherePredicate::EqPredicate(_) => false,
+            WherePredicateKind::BoundPredicate(p) => p.origin == PredicateOrigin::WhereClause,
+            WherePredicateKind::RegionPredicate(p) => p.in_where_clause,
+            WherePredicateKind::EqPredicate(_) => false,
         }
     }
 
     pub fn bounds(&self) -> GenericBounds<'hir> {
         match self {
-            WherePredicate::BoundPredicate(p) => p.bounds,
-            WherePredicate::RegionPredicate(p) => p.bounds,
-            WherePredicate::EqPredicate(_) => &[],
+            WherePredicateKind::BoundPredicate(p) => p.bounds,
+            WherePredicateKind::RegionPredicate(p) => p.bounds,
+            WherePredicateKind::EqPredicate(_) => &[],
         }
     }
 }
@@ -886,8 +889,6 @@ pub enum PredicateOrigin {
 /// A type bound (e.g., `for<'c> Foo: Send + Clone + 'c`).
 #[derive(Debug, Clone, Copy, HashStable_Generic)]
 pub struct WhereBoundPredicate<'hir> {
-    pub hir_id: HirId,
-    pub span: Span,
     /// Origin of the predicate.
     pub origin: PredicateOrigin,
     /// Any generics from a `for` binding.
@@ -908,7 +909,6 @@ impl<'hir> WhereBoundPredicate<'hir> {
 /// A lifetime predicate (e.g., `'a: 'b + 'c`).
 #[derive(Debug, Clone, Copy, HashStable_Generic)]
 pub struct WhereRegionPredicate<'hir> {
-    pub span: Span,
     pub in_where_clause: bool,
     pub lifetime: &'hir Lifetime,
     pub bounds: GenericBounds<'hir>,
@@ -924,7 +924,6 @@ impl<'hir> WhereRegionPredicate<'hir> {
 /// An equality predicate (e.g., `T = int`); currently unsupported.
 #[derive(Debug, Clone, Copy, HashStable_Generic)]
 pub struct WhereEqPredicate<'hir> {
-    pub span: Span,
     pub lhs_ty: &'hir Ty<'hir>,
     pub rhs_ty: &'hir Ty<'hir>,
 }
@@ -1656,29 +1655,6 @@ impl fmt::Display for ConstContext {
 /// A literal.
 pub type Lit = Spanned<LitKind>;
 
-#[derive(Copy, Clone, Debug, HashStable_Generic)]
-pub enum ArrayLen<'hir> {
-    Infer(InferArg),
-    Body(&'hir ConstArg<'hir>),
-}
-
-impl ArrayLen<'_> {
-    pub fn span(self) -> Span {
-        match self {
-            ArrayLen::Infer(arg) => arg.span,
-            ArrayLen::Body(body) => body.span(),
-        }
-    }
-
-    pub fn hir_id(self) -> HirId {
-        match self {
-            ArrayLen::Infer(InferArg { hir_id, .. }) | ArrayLen::Body(&ConstArg { hir_id, .. }) => {
-                hir_id
-            }
-        }
-    }
-}
-
 /// A constant (expression) that's not an item or associated item,
 /// but needs its own `DefId` for type-checking, const-eval, etc.
 /// These are usually found nested inside types (e.g., array lengths)
@@ -1719,41 +1695,54 @@ pub struct Expr<'hir> {
 }
 
 impl Expr<'_> {
-    pub fn precedence(&self) -> ExprPrecedence {
+    pub fn precedence(&self) -> i8 {
         match self.kind {
-            ExprKind::ConstBlock(_) => ExprPrecedence::ConstBlock,
-            ExprKind::Array(_) => ExprPrecedence::Array,
-            ExprKind::Call(..) => ExprPrecedence::Call,
-            ExprKind::MethodCall(..) => ExprPrecedence::MethodCall,
-            ExprKind::Tup(_) => ExprPrecedence::Tup,
-            ExprKind::Binary(op, ..) => ExprPrecedence::Binary(op.node),
-            ExprKind::Unary(..) => ExprPrecedence::Unary,
-            ExprKind::Lit(_) => ExprPrecedence::Lit,
-            ExprKind::Cast(..) => ExprPrecedence::Cast,
+            ExprKind::Closure { .. } => PREC_CLOSURE,
+
+            ExprKind::Break(..)
+            | ExprKind::Continue(..)
+            | ExprKind::Ret(..)
+            | ExprKind::Yield(..)
+            | ExprKind::Become(..) => PREC_JUMP,
+
+            // Binop-like expr kinds, handled by `AssocOp`.
+            ExprKind::Binary(op, ..) => AssocOp::from_ast_binop(op.node).precedence() as i8,
+            ExprKind::Cast(..) => AssocOp::As.precedence() as i8,
+
+            ExprKind::Assign(..) |
+            ExprKind::AssignOp(..) => AssocOp::Assign.precedence() as i8,
+
+            // Unary, prefix
+            ExprKind::AddrOf(..)
+            // Here `let pats = expr` has `let pats =` as a "unary" prefix of `expr`.
+            // However, this is not exactly right. When `let _ = a` is the LHS of a binop we
+            // need parens sometimes. E.g. we can print `(let _ = a) && b` as `let _ = a && b`
+            // but we need to print `(let _ = a) < b` as-is with parens.
+            | ExprKind::Let(..)
+            | ExprKind::Unary(..) => PREC_PREFIX,
+
+            // Never need parens
+            ExprKind::Array(_)
+            | ExprKind::Block(..)
+            | ExprKind::Call(..)
+            | ExprKind::ConstBlock(_)
+            | ExprKind::Field(..)
+            | ExprKind::If(..)
+            | ExprKind::Index(..)
+            | ExprKind::InlineAsm(..)
+            | ExprKind::Lit(_)
+            | ExprKind::Loop(..)
+            | ExprKind::Match(..)
+            | ExprKind::MethodCall(..)
+            | ExprKind::OffsetOf(..)
+            | ExprKind::Path(..)
+            | ExprKind::Repeat(..)
+            | ExprKind::Struct(..)
+            | ExprKind::Tup(_)
+            | ExprKind::Type(..)
+            | ExprKind::Err(_) => PREC_UNAMBIGUOUS,
+
             ExprKind::DropTemps(ref expr, ..) => expr.precedence(),
-            ExprKind::If(..) => ExprPrecedence::If,
-            ExprKind::Let(..) => ExprPrecedence::Let,
-            ExprKind::Loop(..) => ExprPrecedence::Loop,
-            ExprKind::Match(..) => ExprPrecedence::Match,
-            ExprKind::Closure { .. } => ExprPrecedence::Closure,
-            ExprKind::Block(..) => ExprPrecedence::Block,
-            ExprKind::Assign(..) => ExprPrecedence::Assign,
-            ExprKind::AssignOp(..) => ExprPrecedence::AssignOp,
-            ExprKind::Field(..) => ExprPrecedence::Field,
-            ExprKind::Index(..) => ExprPrecedence::Index,
-            ExprKind::Path(..) => ExprPrecedence::Path,
-            ExprKind::AddrOf(..) => ExprPrecedence::AddrOf,
-            ExprKind::Break(..) => ExprPrecedence::Break,
-            ExprKind::Continue(..) => ExprPrecedence::Continue,
-            ExprKind::Ret(..) => ExprPrecedence::Ret,
-            ExprKind::Become(..) => ExprPrecedence::Become,
-            ExprKind::Struct(..) => ExprPrecedence::Struct,
-            ExprKind::Repeat(..) => ExprPrecedence::Repeat,
-            ExprKind::Yield(..) => ExprPrecedence::Yield,
-            ExprKind::Type(..) | ExprKind::InlineAsm(..) | ExprKind::OffsetOf(..) => {
-                ExprPrecedence::Mac
-            }
-            ExprKind::Err(_) => ExprPrecedence::Err,
         }
     }
 
@@ -2113,7 +2102,7 @@ pub enum ExprKind<'hir> {
     ///
     /// E.g., `[1; 5]`. The first expression is the element
     /// to be repeated; the second is the number of times to repeat it.
-    Repeat(&'hir Expr<'hir>, ArrayLen<'hir>),
+    Repeat(&'hir Expr<'hir>, &'hir ConstArg<'hir>),
 
     /// A suspension point for coroutines (i.e., `yield <expr>`).
     Yield(&'hir Expr<'hir>, YieldSource),
@@ -2623,7 +2612,7 @@ impl<'hir> Ty<'hir> {
             TyKind::Infer => true,
             TyKind::Slice(ty) => ty.is_suggestable_infer_ty(),
             TyKind::Array(ty, length) => {
-                ty.is_suggestable_infer_ty() || matches!(length, ArrayLen::Infer(..))
+                ty.is_suggestable_infer_ty() || matches!(length.kind, ConstArgKind::Infer(..))
             }
             TyKind::Tup(tys) => tys.iter().any(Self::is_suggestable_infer_ty),
             TyKind::Ptr(mut_ty) | TyKind::Ref(_, mut_ty) => mut_ty.ty.is_suggestable_infer_ty(),
@@ -2832,7 +2821,7 @@ pub enum TyKind<'hir> {
     /// A variable length slice (i.e., `[T]`).
     Slice(&'hir Ty<'hir>),
     /// A fixed length array (i.e., `[T; n]`).
-    Array(&'hir Ty<'hir>, ArrayLen<'hir>),
+    Array(&'hir Ty<'hir>, &'hir ConstArg<'hir>),
     /// A raw pointer (i.e., `*const T` or `*mut T`).
     Ptr(MutTy<'hir>),
     /// A reference (i.e., `&'a T` or `&'a mut T`).
@@ -2859,6 +2848,11 @@ pub enum TyKind<'hir> {
     Typeof(&'hir AnonConst),
     /// `TyKind::Infer` means the type should be inferred instead of it having been
     /// specified. This can appear anywhere in a type.
+    ///
+    /// **Note:** Not all inferred types are represented as
+    /// `TyKind::Infer`. In cases where it is ambiguous whether
+    /// a generic arg is a type or a const, inference variables are
+    /// represented as `GenericArg::Infer` instead.
     Infer,
     /// Placeholder for a type that has failed to be defined.
     Err(rustc_span::ErrorGuaranteed),
@@ -3798,9 +3792,7 @@ pub enum Node<'hir> {
     GenericParam(&'hir GenericParam<'hir>),
     Crate(&'hir Mod<'hir>),
     Infer(&'hir InferArg),
-    WhereBoundPredicate(&'hir WhereBoundPredicate<'hir>),
-    // FIXME: Merge into `Node::Infer`.
-    ArrayLenInfer(&'hir InferArg),
+    WherePredicate(&'hir WherePredicate<'hir>),
     PreciseCapturingNonLifetimeArg(&'hir PreciseCapturingNonLifetimeArg),
     // Created by query feeding
     Synthetic,
@@ -3853,8 +3845,7 @@ impl<'hir> Node<'hir> {
             | Node::TraitRef(..)
             | Node::OpaqueTy(..)
             | Node::Infer(..)
-            | Node::WhereBoundPredicate(..)
-            | Node::ArrayLenInfer(..)
+            | Node::WherePredicate(..)
             | Node::Synthetic
             | Node::Err(..) => None,
         }

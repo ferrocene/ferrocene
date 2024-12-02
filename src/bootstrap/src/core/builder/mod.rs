@@ -263,11 +263,11 @@ impl PathSet {
 
     // internal use only
     fn check(p: &TaskPath, needle: &Path, module: Kind) -> bool {
-        if let Some(p_kind) = &p.kind {
-            p.path.ends_with(needle) && *p_kind == module
-        } else {
-            p.path.ends_with(needle)
-        }
+        let check_path = || {
+            // This order is important for retro-compatibility, as `starts_with` was introduced later.
+            p.path.ends_with(needle) || p.path.starts_with(needle)
+        };
+        if let Some(p_kind) = &p.kind { check_path() && *p_kind == module } else { check_path() }
     }
 
     /// Return all `TaskPath`s in `Self` that contain any of the `needles`, removing the
@@ -931,6 +931,7 @@ impl<'a> Builder<'a> {
                 test::HtmlCheck,
                 test::RustInstaller,
                 test::TestFloatParse,
+                test::CollectLicenseMetadata,
                 // Run bootstrap close to the end as it's unlikely to fail
                 test::Bootstrap,
                 // Run run-make last, since these won't pass without make on Windows
@@ -1331,7 +1332,7 @@ impl<'a> Builder<'a> {
     pub fn sysroot_libdir_relative(&self, compiler: Compiler) -> &Path {
         match self.config.libdir_relative() {
             Some(relative_libdir) if compiler.stage >= 1 => relative_libdir,
-            _ if compiler.stage == 0 => &self.build.initial_libdir,
+            _ if compiler.stage == 0 => &self.build.initial_relative_libdir,
             _ => Path::new("lib"),
         }
     }
@@ -1592,15 +1593,19 @@ impl<'a> Builder<'a> {
     pub(crate) fn maybe_open_in_browser<S: Step>(&self, path: impl AsRef<Path>) {
         if self.was_invoked_explicitly::<S>(Kind::Doc) {
             self.open_in_browser(path);
+        } else {
+            self.info(&format!("Doc path: {}", path.as_ref().display()));
         }
     }
 
     pub(crate) fn open_in_browser(&self, path: impl AsRef<Path>) {
+        let path = path.as_ref();
+
         if self.config.dry_run() || !self.config.cmd.open() {
+            self.info(&format!("Doc path: {}", path.display()));
             return;
         }
 
-        let path = path.as_ref();
         self.info(&format!("Opening doc {}", path.display()));
         if let Err(err) = opener::open(path) {
             self.info(&format!("{err}\n"));

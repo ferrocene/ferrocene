@@ -24,8 +24,8 @@ shipped as a preview.
   Note that experimental targets are not qualified for safety critical use. The
   new targets are:
 
+  * :target-with-triple:`thumbv6m-none-eabi`
   * :target-with-triple:`thumbv8m.base-none-eabi`
   * :target-with-triple:`thumbv8m.main-none-eabi`
   * :target-with-triple:`thumbv8m.main-none-eabihf`
-  * :target-with-triple:`thumbv6m-none-eabi`
   * :target-with-triple:`riscv64gc-unknown-linux-gnu`

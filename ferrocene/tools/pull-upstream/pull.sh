@@ -257,15 +257,6 @@ for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
     fi
 done
 
-# Check whether we can compile bootstrap successfully, which will be used to
-# gate on the next few steps.
-echo "pull-upstream: checking whether bootstrap can be invoked safely..."
-if ./x.py --help > /dev/null; then
-    can_invoke_bootstrap=true
-else
-    can_invoke_bootstrap=false
-fi
-
 # We expose additional commands for `x.py` which affects the completions file generation,
 # so we just run the command to regenerate those in case they need updating as this usually
 # does not need manual intervention.

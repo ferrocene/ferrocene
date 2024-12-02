@@ -39,6 +39,8 @@ jobs:
       artifact-usage: ${{ env.ARTIFACT_USAGE }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - name: Setup
         uses: ./.github/actions/setup/
         with:

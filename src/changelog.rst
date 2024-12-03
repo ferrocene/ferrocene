@@ -88,6 +88,10 @@ Language changes in Rust 1.82.0
 
 * `Stabilize floating-point arithmetic in \`const fn\` <https://github.com/rust-lang/rust/pull/128596>`_
 
+  * New paragraph: :p:`fls_lSxXWxJn0vMO`
+
+  * Removed paragraph: :p:`fls_9mrrosm8jnn7`
+
 * `Stabilize explicit opt-in to unsafe attributes <https://github.com/rust-lang/rust/pull/128771>`_
 
   * New section: :ref:`fls_19LnTi3WabFd`

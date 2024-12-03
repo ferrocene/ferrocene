@@ -280,11 +280,6 @@ explicitly invokes an :t:`associated trait function` or uses
 :t:`[arithmetic operator]s` of non-builtin :t:`[type]s` that invoke
 :std:`core::ops` :t:`[trait]s`.
 
-:dp:`fls_9mrrosm8jnn7`
-An :t:`arithmetic expression` that operates with :t:`[floating-point value]s` is
-not considered a :t:`constant expression` when it appears inside the
-:t:`function body` of a :t:`constant function`.
-
 :dp:`fls_fmqar6o1bwqk`
 It is a static error if the :t:`size operand` of an
 :t:`array repetition constructor` or an :t:`array type` depends on
@@ -937,6 +932,11 @@ Operator Expressions
 
 :dp:`fls_ursc5ynymoy`
 An :t:`operator expression` is an :t:`expression` that involves an operator.
+
+.. rubric:: Dynamic Semantics
+
+:dp:`fls_lSxXWxJn0vMO`
+An :t:`operator expression` that operates with :t:`[floating-point value]s` run as a :t:`constant expression` is allowed to yield different :t:`[value]s` compared to when run as a non-:t:`constant expression`.
 
 .. _fls_qztk0bkju9u:
 

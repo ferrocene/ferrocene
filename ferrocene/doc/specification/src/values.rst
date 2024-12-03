@@ -140,7 +140,7 @@ Statics
 .. syntax::
 
    StaticDeclaration ::=
-       $$static$$ $$mut$$? Name TypeAscription StaticInitializer? $$;$$
+       ItemSafety? $$static$$ $$mut$$? Name TypeAscription StaticInitializer? $$;$$
 
    StaticInitializer ::=
        $$=$$ Expression
@@ -162,6 +162,9 @@ The :t:`type specification` of a :t:`static` shall have ``'static``
 :dp:`fls_b6ods85htuyn`
 The :t:`type` of a :t:`static` shall implement the :std:`core::marker::Sized`
 :t:`trait`.
+
+:dp:`fls_WRpcVF1fLEpr`
+A :t:`static` shall only be subject to an :s:`ItemSafety` if it is an :t:`external static` in an :t:`unsafe external block`.
 
 :dp:`fls_doi4z6u55bi7`
 A :t:`mutable static` is a :t:`static` with :t:`keyword` ``mut`` whose

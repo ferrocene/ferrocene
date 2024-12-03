@@ -16,7 +16,7 @@ Functions
        FunctionQualifierList $$fn$$ Name GenericParameterList? $$($$ FunctionParameterList? $$)$$ ReturnType? WhereClause? (FunctionBody | ;)
 
    FunctionQualifierList ::=
-       $$const$$? $$async$$? $$unsafe$$? AbiSpecification?
+       $$const$$? $$async$$? ItemSafety? AbiSpecification?
 
    FunctionParameterList ::=
        (FunctionParameter ($$,$$ FunctionParameter)* $$,$$?)
@@ -171,7 +171,10 @@ is equivalent to :t:`function`
    }
 
 :dp:`fls_7ucwmzqtittv`
-An :t:`unsafe function` is a :t:`function` subject to :t:`keyword` ``unsafe``.
+An :t:`unsafe function` is a :t:`function` subject to an :s:`ItemSafety` with :t:`keyword` ``unsafe``.
+
+:dp:`fls_8ltVLtAfvy0m`
+A :t:`function` shall only be subject to an :s:`ItemSafety` with :t:`keyword` ``safe`` if it is an :t:`external function` in an :t:`unsafe external block`.
 
 :dp:`fls_5hn8fkf7rcvz`
 The invocation of an :t:`unsafe function` shall require :t:`unsafe context`.

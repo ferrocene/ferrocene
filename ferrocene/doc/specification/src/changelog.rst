@@ -46,6 +46,12 @@ Language changes in Rust 1.82.0
 
 * `Stabilize opaque type precise capturing (RFC 3617) <https://github.com/rust-lang/rust/pull/127672>`_
 
+  * Changed syntax: :s:`ImplTraitTypeSpecification`, :s:`ImplTraitTypeSpecificationOneBound`
+
+  * New syntax: :s:`UseCaptures`, :s:`UseCapturesGenericArgs`, , :s:`UseCapturesGenericArg`
+
+  * New paragraphs: :p:`fls_69hqMjvNno9u`, :p:`fls_OnyR0Wsfk7KI`, :p:`fls_KgH6c5cC4S0G`, :p:`fls_iT9WCNfUZQnC`
+
 * `Stabilize \`&raw const\` and \`&raw mut\` operators (RFC 2582) <https://github.com/rust-lang/rust/pull/127679>`_
 
   * New section: :ref:`fls_vXGuvRWOLbEE`

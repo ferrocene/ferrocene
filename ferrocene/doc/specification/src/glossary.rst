@@ -7555,6 +7555,17 @@ unsuffixed integer
 An :dt:`unsuffixed integer` is an :t:`integer literal` without an
 :t:`integer suffix`.
 
+.. _fls_Z8qvOkP4Zfj5:
+
+use capture
+^^^^^^^^^^^
+
+:dp:`fls_eZyPXG27Zwcg`
+An :dt:`use capture` is a :t:`generic parameter` referenced via keyword $$use$$ within an :t:`anonymous return type`.
+
+:dp:`fls_Z8qvOkP4Zfj5`
+See :s:`UseCaptures`.
+
 .. _fls_fow1bnvduafi:
 
 use import

@@ -200,19 +200,47 @@ def update_subtree(repo_root, subtree):
 
         print(f"updating subtree {subtree.path}")
         commit_before = resolve_commit("HEAD")
-        run(
-            [
-                "git",
-                "subtree",
-                "merge",
-                "--prefix",
-                subtree.path,
-                latest_commit,
-                "-m",
-                message,
-            ],
-            cwd=repo_root,
-        )
+        try:
+            run(
+                [
+                    "git",
+                    "subtree",
+                    "merge",
+                    "--prefix",
+                    subtree.path,
+                    latest_commit,
+                    "-m",
+                    message,
+                ],
+                cwd=repo_root,
+            )
+        except subprocess.CalledProcessError:
+            print("pull-subtrees: there are unresolved merge conflicts")
+            print("pull-subtrees: comitting with merge conflicts markers in the source")
+
+            # handle deleted files
+            git_status = run_capture(["git", "status", "--porcelain=v1"])
+            for line in git_status.splitlines():
+                path = None
+                who = None
+                if line.startswith("DU"):
+                    line.split(' ', 1)[1].strip()
+                    who = 'in Ferrocene'
+                elif line.startswith("UD"):
+                    path = line.split(' ', 1)[1].strip()
+                    who = 'upstream'
+                if path:
+                    header = "<<<PULL-UPSTREAM>>> file deleted " + who + "; move the Ferrocene annotations if any, and delete this file"
+                    with open(path, 'r') as original:
+                        data = original.read()
+                    with open(path, 'w') as modified:
+                        modified.write(header + '\n' + data)
+
+            run(["git", "add", "."], cwd=subtree.path)
+
+            git_env = os.environ.copy()
+            git_env["GIT_EDITOR"] = "true"
+            run(["git", "merge", "--continue"], env=git_env)
 
         # Mark the update as not being executed (returning None) when no commit
         # was created by the subtree pull. Otherwise the PR automation will try

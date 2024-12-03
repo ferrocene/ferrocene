@@ -124,14 +124,14 @@ should not be used in production.
      - Full
      - \-
 
-   * - :target:`armv7r-none-eabihf`
-     - ``armv7r-none-eabihf``
+   * - :target:`armebv7r-none-eabihf`
+     - ``armebv7r-none-eabihf``
      - Cross-compilation
      - Bare-metal
      - \-
 
-   * - :target:`armebv7r-none-eabihf`
-     - ``armebv7r-none-eabihf``
+   * - :target:`armv7r-none-eabihf`
+     - ``armv7r-none-eabihf``
      - Cross-compilation
      - Bare-metal
      - \-

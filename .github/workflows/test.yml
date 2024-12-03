@@ -81,8 +81,6 @@ jobs:
         uses: ./.github/actions/setup/
         with:
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}      
-      - name: Enable KVM
-        uses: ./.github/actions/enable-kvm/
 
       - name: Azure CLI Login
         uses: azure/login@v2
@@ -162,8 +160,6 @@ jobs:
         uses: ./.github/actions/setup/
         with:
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
-      - name: Enable KVM
-        uses: ./.github/actions/enable-kvm/
 
       - name: Azure CLI Login
         uses: azure/login@v2
@@ -243,8 +239,6 @@ jobs:
         uses: ./.github/actions/setup/
         with:
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
-      - name: Enable KVM
-        uses: ./.github/actions/enable-kvm/
 
       - name: Azure CLI Login
         uses: azure/login@v2
@@ -325,8 +319,6 @@ jobs:
         uses: ./.github/actions/setup/
         with:
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
-      - name: Enable KVM
-        uses: ./.github/actions/enable-kvm/
         
       - name: Azure CLI Login
         uses: azure/login@v2

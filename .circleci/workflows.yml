@@ -634,7 +634,8 @@ jobs:
       FERROCENE_HOST: x86_64-pc-windows-msvc
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
       SCRIPT: |
-        uv run ferrocene/ci/scripts/llvm_cache.py download
+        echo 'PreferredToolArchitecture="x64"' > .env
+        uv run --env-file .env ferrocene/ci/scripts/llvm_cache.py download
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
         ./x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
@@ -1272,7 +1273,7 @@ commands:
       - run:
           name: Setup Darwin environment
           command: ferrocene/ci/scripts/setup-darwin.sh
-          
+
 
   ferrocene-setup-windows:
     description: Prepare the Windows environment

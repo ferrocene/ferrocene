@@ -67,18 +67,19 @@ subset = "default"
 
 [groups.cross-compilation]
 targets = [
-  "aarch64-unknown-none",
   "aarch64-unknown-linux-gnu",
+  "aarch64-unknown-none",
+  "armebv7r-none-eabihf",
+  "armv7r-none-eabihf",
+  "armv8r-none-eabihf",
+  "riscv64gc-unknown-linux-gnu",
+  "thumbv6m-none-eabi",
   "thumbv7em-none-eabi",
   "thumbv7em-none-eabihf",
-  "armv8r-none-eabihf",
   "thumbv8m.base-none-eabi",
   "thumbv8m.main-none-eabi",
   "thumbv8m.main-none-eabihf",
-  "armv7r-none-eabihf",
-  "armebv7r-none-eabihf",
   "wasm32-unknown-unknown",
-  "riscv64gc-unknown-linux-gnu",
 ]
 
 [[groups.cross-compilation.packages]]

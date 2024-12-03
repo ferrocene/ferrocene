@@ -44,6 +44,7 @@ QNX_TARGETS = [
 
 GENERIC_BUILD_STD_TARGETS = [
     "aarch64-unknown-none",
+    "thumbv6m-none-eabi",
     "thumbv7em-none-eabi",
     "thumbv7em-none-eabihf",
     "armv8r-none-eabihf",

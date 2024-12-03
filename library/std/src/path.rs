@@ -1158,6 +1158,7 @@ impl FusedIterator for Ancestors<'_> {}
 /// Note that `PathBuf` does not always sanitize arguments, for example
 /// [`push`] allows paths built from strings which include separators:
 ///
+/// ```
 /// use std::path::PathBuf;
 ///
 /// let mut path = PathBuf::new();
@@ -1166,6 +1167,7 @@ impl FusedIterator for Ancestors<'_> {}
 /// path.push("windows");
 /// path.push(r"..\otherdir");
 /// path.push("system32");
+/// ```
 ///
 /// The behavior of `PathBuf` may be changed to a panic on such inputs
 /// in the future. [`Extend::extend`] should be used to add multi-part paths.
@@ -1762,7 +1764,7 @@ impl From<&Path> for Box<Path> {
     }
 }
 
-#[stable(feature = "box_from_mut_slice", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "box_from_mut_slice", since = "1.84.0")]
 impl From<&mut Path> for Box<Path> {
     /// Creates a boxed [`Path`] from a reference.
     ///
@@ -2000,7 +2002,7 @@ impl From<&Path> for Arc<Path> {
     }
 }
 
-#[stable(feature = "shared_from_mut_slice", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "shared_from_mut_slice", since = "1.84.0")]
 impl From<&mut Path> for Arc<Path> {
     /// Converts a [`Path`] into an [`Arc`] by copying the [`Path`] data into a new [`Arc`] buffer.
     #[inline]
@@ -2030,7 +2032,7 @@ impl From<&Path> for Rc<Path> {
     }
 }
 
-#[stable(feature = "shared_from_mut_slice", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "shared_from_mut_slice", since = "1.84.0")]
 impl From<&mut Path> for Rc<Path> {
     /// Converts a [`Path`] into an [`Rc`] by copying the [`Path`] data into a new [`Rc`] buffer.
     #[inline]
@@ -2504,6 +2506,7 @@ impl Path {
     /// assert_eq!(path.strip_prefix("/test/haha/foo.txt/"), Ok(Path::new("")));
     ///
     /// assert!(path.strip_prefix("test").is_err());
+    /// assert!(path.strip_prefix("/te").is_err());
     /// assert!(path.strip_prefix("/haha").is_err());
     ///
     /// let prefix = PathBuf::from("/test/");
@@ -3580,7 +3583,7 @@ impl Error for StripPrefixError {
 pub fn absolute<P: AsRef<Path>>(path: P) -> io::Result<PathBuf> {
     let path = path.as_ref();
     if path.as_os_str().is_empty() {
-        Err(io::const_io_error!(io::ErrorKind::InvalidInput, "cannot make an empty path absolute",))
+        Err(io::const_error!(io::ErrorKind::InvalidInput, "cannot make an empty path absolute",))
     } else {
         sys::path::absolute(path)
     }

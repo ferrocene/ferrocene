@@ -1208,7 +1208,7 @@ impl Options {
 
     /// Returns `true` if there will be an output file generated.
     pub fn will_create_output_file(&self) -> bool {
-        !self.unstable_opts.parse_only && // The file is just being parsed
+        !self.unstable_opts.parse_crate_root_only && // The file is just being parsed
             self.unstable_opts.ls.is_empty() // The file is just being queried
     }
 
@@ -1864,7 +1864,7 @@ fn parse_output_types(
     matches: &getopts::Matches,
 ) -> OutputTypes {
     let mut output_types = BTreeMap::new();
-    if !unstable_opts.parse_only {
+    if !unstable_opts.parse_crate_root_only {
         for list in matches.opt_strs("emit") {
             for output_type in list.split(',') {
                 let (shorthand, path) = split_out_file_name(output_type);
@@ -2354,14 +2354,6 @@ pub fn build_session_options(early_dcx: &mut EarlyDiagCtxt, matches: &getopts::M
 
     if unstable_opts.threads == parse::MAX_THREADS_CAP {
         early_dcx.early_warn(format!("number of threads was capped at {}", parse::MAX_THREADS_CAP));
-    }
-
-    let fuel = unstable_opts.fuel.is_some() || unstable_opts.print_fuel.is_some();
-    if fuel && unstable_opts.threads > 1 {
-        early_dcx.early_fatal("optimization fuel is incompatible with multiple threads");
-    }
-    if fuel && cg.incremental.is_some() {
-        early_dcx.early_fatal("optimization fuel is incompatible with incremental compilation");
     }
 
     let incremental = cg.incremental.as_ref().map(PathBuf::from);

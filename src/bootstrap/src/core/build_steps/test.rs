@@ -264,12 +264,16 @@ pub struct Cargo {
     host: TargetSelection,
 }
 
+impl Cargo {
+    const CRATE_PATH: &str = "src/tools/cargo";
+}
+
 impl Step for Cargo {
     type Output = ();
     const ONLY_HOSTS: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.path("src/tools/cargo")
+        run.path(Self::CRATE_PATH)
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -287,7 +291,7 @@ impl Step for Cargo {
             Mode::ToolRustc,
             self.host,
             Kind::Test,
-            "src/tools/cargo",
+            Self::CRATE_PATH,
             SourceType::Submodule,
             &[],
         );
@@ -302,6 +306,10 @@ impl Step for Cargo {
         // those features won't be able to land.
         cargo.env("CARGO_TEST_DISABLE_NIGHTLY", "1");
         cargo.env("PATH", path_for_cargo(builder, compiler));
+        // Cargo's test suite uses `CARGO_RUSTC_CURRENT_DIR` to determine the path that `file!` is
+        // relative to. Cargo no longer sets this env var, so we have to do that. This has to be the
+        // same value as `-Zroot-dir`.
+        cargo.env("CARGO_RUSTC_CURRENT_DIR", builder.src.display().to_string());
 
         #[cfg(feature = "build-metrics")]
         builder.metrics.begin_test_suite(
@@ -1065,7 +1073,7 @@ impl Step for Tidy {
         if builder.config.channel == "dev" || builder.config.channel == "nightly" {
             builder.info("fmt check");
             if builder.initial_rustfmt().is_none() {
-                let inferred_rustfmt_dir = builder.initial_rustc.parent().unwrap();
+                let inferred_rustfmt_dir = builder.initial_sysroot.join("bin");
                 eprintln!(
                     "\
 ERROR: no `rustfmt` binary found in {PATH}
@@ -3527,7 +3535,6 @@ impl Step for CodegenCranelift {
             // FIXME remove once vendoring is handled
             .arg("--skip-test")
             .arg("testsuite.extended_sysroot");
-        cargo.args(builder.config.test_args());
 
         cargo.into_cmd().run(builder);
     }
@@ -3722,14 +3729,42 @@ impl Step for TestFloatParse {
             &[],
         );
 
-        cargo_run.arg("--");
-        if builder.config.args().is_empty() {
-            // By default, exclude tests that take longer than ~1m.
-            cargo_run.arg("--skip-huge");
-        } else {
-            cargo_run.args(builder.config.args());
+        if !matches!(env::var("FLOAT_PARSE_TESTS_NO_SKIP_HUGE").as_deref(), Ok("1") | Ok("true")) {
+            cargo_run.args(["--", "--skip-huge"]);
         }
 
         cargo_run.into_cmd().run(builder);
+    }
+}
+
+#[derive(Debug, PartialOrd, Ord, Clone, Hash, PartialEq, Eq)]
+pub struct CollectLicenseMetadata;
+
+impl Step for CollectLicenseMetadata {
+    type Output = PathBuf;
+    const ONLY_HOSTS: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.path("src/tools/collect-license-metadata")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(CollectLicenseMetadata);
+    }
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        let Some(reuse) = &builder.config.reuse else {
+            panic!("REUSE is required to collect the license metadata");
+        };
+
+        let dest = builder.src.join("license-metadata.json");
+
+        let mut cmd = builder.tool_cmd(Tool::CollectLicenseMetadata);
+        cmd.env("REUSE_EXE", reuse);
+        cmd.env("DEST", &dest);
+        cmd.env("ONLY_CHECK", "1");
+        cmd.run(builder);
+
+        dest
     }
 }

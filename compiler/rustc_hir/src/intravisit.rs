@@ -343,9 +343,6 @@ pub trait Visitor<'v>: Sized {
     fn visit_pat_field(&mut self, f: &'v PatField<'v>) -> Self::Result {
         walk_pat_field(self, f)
     }
-    fn visit_array_length(&mut self, len: &'v ArrayLen<'v>) -> Self::Result {
-        walk_array_len(self, len)
-    }
     fn visit_anon_const(&mut self, c: &'v AnonConst) -> Self::Result {
         walk_anon_const(self, c)
     }
@@ -710,14 +707,6 @@ pub fn walk_pat_field<'v, V: Visitor<'v>>(visitor: &mut V, field: &'v PatField<'
     visitor.visit_pat(field.pat)
 }
 
-pub fn walk_array_len<'v, V: Visitor<'v>>(visitor: &mut V, len: &'v ArrayLen<'v>) -> V::Result {
-    match len {
-        // FIXME: Use `visit_infer` here.
-        ArrayLen::Infer(InferArg { hir_id, span: _ }) => visitor.visit_id(*hir_id),
-        ArrayLen::Body(c) => visitor.visit_const_arg(c),
-    }
-}
-
 pub fn walk_anon_const<'v, V: Visitor<'v>>(visitor: &mut V, constant: &'v AnonConst) -> V::Result {
     try_visit!(visitor.visit_id(constant.hir_id));
     visitor.visit_nested_body(constant.body)
@@ -739,6 +728,7 @@ pub fn walk_const_arg<'v, V: Visitor<'v>>(
     match &const_arg.kind {
         ConstArgKind::Path(qpath) => visitor.visit_qpath(qpath, const_arg.hir_id, qpath.span()),
         ConstArgKind::Anon(anon) => visitor.visit_anon_const(*anon),
+        ConstArgKind::Infer(..) => V::Result::output(),
     }
 }
 
@@ -753,7 +743,7 @@ pub fn walk_expr<'v, V: Visitor<'v>>(visitor: &mut V, expression: &'v Expr<'v>) 
         }
         ExprKind::Repeat(ref element, ref count) => {
             try_visit!(visitor.visit_expr(element));
-            try_visit!(visitor.visit_array_length(count));
+            try_visit!(visitor.visit_const_arg(count));
         }
         ExprKind::Struct(ref qpath, fields, ref optional_base) => {
             try_visit!(visitor.visit_qpath(qpath, expression.hir_id, expression.span));
@@ -901,7 +891,7 @@ pub fn walk_ty<'v, V: Visitor<'v>>(visitor: &mut V, typ: &'v Ty<'v>) -> V::Resul
         }
         TyKind::Array(ref ty, ref length) => {
             try_visit!(visitor.visit_ty(ty));
-            try_visit!(visitor.visit_array_length(length));
+            try_visit!(visitor.visit_const_arg(length));
         }
         TyKind::TraitObject(bounds, ref lifetime, _syntax) => {
             for bound in bounds {
@@ -961,30 +951,28 @@ pub fn walk_where_predicate<'v, V: Visitor<'v>>(
     visitor: &mut V,
     predicate: &'v WherePredicate<'v>,
 ) -> V::Result {
-    match *predicate {
-        WherePredicate::BoundPredicate(WhereBoundPredicate {
-            hir_id,
+    let &WherePredicate { hir_id, kind, span: _ } = predicate;
+    try_visit!(visitor.visit_id(hir_id));
+    match *kind {
+        WherePredicateKind::BoundPredicate(WhereBoundPredicate {
             ref bounded_ty,
             bounds,
             bound_generic_params,
             origin: _,
-            span: _,
         }) => {
-            try_visit!(visitor.visit_id(hir_id));
             try_visit!(visitor.visit_ty(bounded_ty));
             walk_list!(visitor, visit_param_bound, bounds);
             walk_list!(visitor, visit_generic_param, bound_generic_params);
         }
-        WherePredicate::RegionPredicate(WhereRegionPredicate {
+        WherePredicateKind::RegionPredicate(WhereRegionPredicate {
             ref lifetime,
             bounds,
-            span: _,
             in_where_clause: _,
         }) => {
             try_visit!(visitor.visit_lifetime(lifetime));
             walk_list!(visitor, visit_param_bound, bounds);
         }
-        WherePredicate::EqPredicate(WhereEqPredicate { ref lhs_ty, ref rhs_ty, span: _ }) => {
+        WherePredicateKind::EqPredicate(WhereEqPredicate { ref lhs_ty, ref rhs_ty }) => {
             try_visit!(visitor.visit_ty(lhs_ty));
             try_visit!(visitor.visit_ty(rhs_ty));
         }

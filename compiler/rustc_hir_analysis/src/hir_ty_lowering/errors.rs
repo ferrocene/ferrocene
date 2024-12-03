@@ -714,20 +714,20 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
     /// reasonable suggestion on how to write it. For the case of multiple associated types in the
     /// same trait bound have the same name (as they come from different supertraits), we instead
     /// emit a generic note suggesting using a `where` clause to constraint instead.
-    pub(crate) fn complain_about_missing_assoc_tys(
+    pub(crate) fn check_for_required_assoc_tys(
         &self,
         associated_types: FxIndexMap<Span, FxIndexSet<DefId>>,
         potential_assoc_types: Vec<usize>,
         trait_bounds: &[hir::PolyTraitRef<'_>],
-    ) {
+    ) -> Result<(), ErrorGuaranteed> {
         if associated_types.values().all(|v| v.is_empty()) {
-            return;
+            return Ok(());
         }
 
         let tcx = self.tcx();
         // FIXME: Marked `mut` so that we can replace the spans further below with a more
         // appropriate one, but this should be handled earlier in the span assignment.
-        let mut associated_types: FxIndexMap<Span, Vec<_>> = associated_types
+        let associated_types: FxIndexMap<Span, Vec<_>> = associated_types
             .into_iter()
             .map(|(span, def_ids)| {
                 (span, def_ids.into_iter().map(|did| tcx.associated_item(did)).collect())
@@ -739,7 +739,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         // Account for things like `dyn Foo + 'a`, like in tests `issue-22434.rs` and
         // `issue-22560.rs`.
         let mut trait_bound_spans: Vec<Span> = vec![];
-        let mut dyn_compatibility_violations = false;
+        let mut dyn_compatibility_violations = Ok(());
         for (span, items) in &associated_types {
             if !items.is_empty() {
                 trait_bound_spans.push(*span);
@@ -752,13 +752,20 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 let violations =
                     dyn_compatibility_violations_for_assoc_item(tcx, trait_def_id, *assoc_item);
                 if !violations.is_empty() {
-                    report_dyn_incompatibility(tcx, *span, None, trait_def_id, &violations).emit();
-                    dyn_compatibility_violations = true;
+                    dyn_compatibility_violations = Err(report_dyn_incompatibility(
+                        tcx,
+                        *span,
+                        None,
+                        trait_def_id,
+                        &violations,
+                    )
+                    .emit());
                 }
             }
         }
-        if dyn_compatibility_violations {
-            return;
+
+        if let Err(guar) = dyn_compatibility_violations {
+            return Err(guar);
         }
 
         // related to issue #91997, turbofishes added only when in an expr or pat
@@ -769,39 +776,6 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 hir::Node::Expr(_) | hir::Node::Pat(_) => true,
                 _ => false,
             };
-            match bound.trait_ref.path.segments {
-                // FIXME: `trait_ref.path.span` can point to a full path with multiple
-                // segments, even though `trait_ref.path.segments` is of length `1`. Work
-                // around that bug here, even though it should be fixed elsewhere.
-                // This would otherwise cause an invalid suggestion. For an example, look at
-                // `tests/ui/issues/issue-28344.rs` where instead of the following:
-                //
-                //   error[E0191]: the value of the associated type `Output`
-                //                 (from trait `std::ops::BitXor`) must be specified
-                //   --> $DIR/issue-28344.rs:4:17
-                //    |
-                // LL |     let x: u8 = BitXor::bitor(0 as u8, 0 as u8);
-                //    |                 ^^^^^^ help: specify the associated type:
-                //    |                              `BitXor<Output = Type>`
-                //
-                // we would output:
-                //
-                //   error[E0191]: the value of the associated type `Output`
-                //                 (from trait `std::ops::BitXor`) must be specified
-                //   --> $DIR/issue-28344.rs:4:17
-                //    |
-                // LL |     let x: u8 = BitXor::bitor(0 as u8, 0 as u8);
-                //    |                 ^^^^^^^^^^^^^ help: specify the associated type:
-                //    |                                     `BitXor::bitor<Output = Type>`
-                [segment] if segment.args.is_none() => {
-                    trait_bound_spans = vec![segment.ident.span];
-                    associated_types = associated_types
-                        .into_values()
-                        .map(|items| (segment.ident.span, items))
-                        .collect();
-                }
-                _ => {}
-            }
         }
 
         // We get all the associated items that _are_ set,
@@ -998,7 +972,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             }
         }
 
-        err.emit();
+        Err(err.emit())
     }
 
     /// On ambiguous associated type, look for an associated function whose name matches the

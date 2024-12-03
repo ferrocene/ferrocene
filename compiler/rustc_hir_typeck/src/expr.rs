@@ -19,7 +19,7 @@ use rustc_hir::def_id::DefId;
 use rustc_hir::intravisit::Visitor;
 use rustc_hir::lang_items::LangItem;
 use rustc_hir::{ExprKind, HirId, QPath};
-use rustc_hir_analysis::hir_ty_lowering::HirTyLowerer as _;
+use rustc_hir_analysis::hir_ty_lowering::{FeedConstTy, HirTyLowerer as _};
 use rustc_infer::infer;
 use rustc_infer::infer::{DefineOpaqueTypes, InferOk};
 use rustc_infer::traits::ObligationCause;
@@ -68,7 +68,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         // While we don't allow *arbitrary* coercions here, we *do* allow
         // coercions from ! to `expected`.
-        if ty.is_never() && self.expr_guaranteed_to_constitute_read_for_never(expr) {
+        if self.try_structurally_resolve_type(expr.span, ty).is_never()
+            && self.expr_guaranteed_to_constitute_read_for_never(expr)
+        {
             if let Some(_) = self.typeck_results.borrow().adjustments().get(expr.hir_id) {
                 let reported = self.dcx().span_delayed_bug(
                     expr.span,
@@ -274,7 +276,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // unless it's a place expression that isn't being read from, in which case
         // diverging would be unsound since we may never actually read the `!`.
         // e.g. `let _ = *never_ptr;` with `never_ptr: *const !`.
-        if ty.is_never() && self.expr_guaranteed_to_constitute_read_for_never(expr) {
+        if self.try_structurally_resolve_type(expr.span, ty).is_never()
+            && self.expr_guaranteed_to_constitute_read_for_never(expr)
+        {
             self.diverges.set(self.diverges.get() | Diverges::always(expr.span));
         }
 
@@ -420,8 +424,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             | hir::Node::GenericParam(_)
             | hir::Node::Crate(_)
             | hir::Node::Infer(_)
-            | hir::Node::WhereBoundPredicate(_)
-            | hir::Node::ArrayLenInfer(_)
+            | hir::Node::WherePredicate(_)
             | hir::Node::PreciseCapturingNonLifetimeArg(_)
             | hir::Node::OpaqueTy(_) => {
                 unreachable!("no sub-expr expected for {parent_node:?}")
@@ -1669,9 +1672,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         else {
             return;
         };
-        if let hir::TyKind::Array(_, length) = ty.peel_refs().kind
-            && let hir::ArrayLen::Body(ct) = length
-        {
+        if let hir::TyKind::Array(_, ct) = ty.peel_refs().kind {
             let span = ct.span();
             self.dcx().try_steal_modify_and_emit_err(
                 span,
@@ -1709,13 +1710,16 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     fn check_expr_repeat(
         &self,
         element: &'tcx hir::Expr<'tcx>,
-        count: &'tcx hir::ArrayLen<'tcx>,
+        count: &'tcx hir::ConstArg<'tcx>,
         expected: Expectation<'tcx>,
         expr: &'tcx hir::Expr<'tcx>,
     ) -> Ty<'tcx> {
         let tcx = self.tcx;
         let count_span = count.span();
-        let count = self.try_structurally_resolve_const(count_span, self.lower_array_length(count));
+        let count = self.try_structurally_resolve_const(
+            count_span,
+            self.normalize(count_span, self.lower_const_arg(count, FeedConstTy::No)),
+        );
 
         if let Some(count) = count.try_to_target_usize(tcx) {
             self.suggest_array_len(expr, count);

@@ -1,7 +1,0 @@
-<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
-thread 'main' panicked at $DIR/runtime-switch.rs:27:5:
-explicit panic
-stack backtrace:
-   0: std::panicking::begin_panic::<&str>
-   1: runtime_switch::main
-note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.

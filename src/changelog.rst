@@ -48,7 +48,7 @@ Language changes in Rust 1.82.0
 
   * Changed syntax: :s:`ImplTraitTypeSpecification`, :s:`ImplTraitTypeSpecificationOneBound`
 
-  * New syntax: :s:`UseCaptures`, :s:`UseCapturesGenericArgs`, , :s:`UseCapturesGenericArg`
+  * New syntax: :s:`UseCaptures`, :s:`UseCapturesGenericArgs`, :s:`UseCapturesGenericArg`
 
   * New paragraphs: :p:`fls_69hqMjvNno9u`, :p:`fls_OnyR0Wsfk7KI`, :p:`fls_KgH6c5cC4S0G`, :p:`fls_iT9WCNfUZQnC`
 
@@ -59,6 +59,16 @@ Language changes in Rust 1.82.0
   * New paragraphs: :p:`fls_K7SbApHPmwjM`
 
 * `Stabilize unsafe extern blocks (RFC 3484) <https://github.com/rust-lang/rust/pull/127921>`_
+
+  * New syntax: :s:`ItemSafety`
+
+  * Changed syntax: :s:`WeakKeyword`, :s:`FunctionQualifierList`, :s:`StaticDeclaration`
+
+  * New paragraphs: :p:`fls_8ltVLtAfvy0m`, :p:`fls_WRpcVF1fLEpr`, :p:`fls_8ltVLtAfvy0m`
+
+  * Changed paragraphs: :p:`fls_g0JEluWqBpNc`, :p:`fls_7ucwmzqtittv`, :p:`fls_4dje9t5y2dia`, :p:`fls_l88r9fj82650`, :p:`fls_fo9with6xumo`
+
+  * Removed paragraph :p:`fls_iaimuqcclstl`
 
 * `Stabilize nested field access in \`offset_of!\` <https://github.com/rust-lang/rust/pull/128284>`_
 

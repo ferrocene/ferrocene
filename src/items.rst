@@ -36,6 +36,10 @@ Items
        MacroRulesDeclaration
      | TerminatedMacroInvocation
 
+   ItemSafety ::=
+       $$unsafe$$
+     | $$safe$$
+
 .. rubric:: Legality Rules
 
 :dp:`fls_s3b1cba9lfj5`

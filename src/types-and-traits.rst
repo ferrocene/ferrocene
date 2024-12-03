@@ -1113,10 +1113,20 @@ Impl Trait Types
 .. syntax::
 
    ImplTraitTypeSpecification ::=
-       $$impl$$ TypeBoundList
+       $$impl$$ UseCaptures? TypeBoundList
 
    ImplTraitTypeSpecificationOneBound ::=
-       $$impl$$ TraitBound
+       $$impl$$ UseCaptures? TraitBound
+
+   UseCaptures ::=
+        $$<$$ UseCapturesGenericArgs? $$>$$
+
+   UseCapturesGenericArgs ::=
+       UseCapturesGenericArg ($$,$$ UseCapturesGenericArg)* $$,$$?
+
+   UseCapturesGenericArg ::=
+       Lifetime
+     | Identifier
 
 .. rubric:: Legality Rules
 
@@ -1145,6 +1155,18 @@ of the :t:`return type`'s :t:`function` and its parent :t:`trait` or
 
 :dp:`fls_ECjhEI7eCwAj`
 An :t:`impl trait type` shall not contain :t:`[opt-out trait bound]s`.
+
+:dp:`fls_69hqMjvNno9u`
+An :t:`use capture` is a :t:`generic parameter` referenced via keyword ``use`` within an :t:`anonymous return type`.
+
+:dp:`fls_OnyR0Wsfk7KI`
+:t:`[use capture]s` shall only be used within :t:`[anonymous return type]s`.
+
+:dp:`fls_KgH6c5cC4S0G`
+An :t:`anonymous return type` that does not specify a list of :t:`[use capture]s` implicitly :t:`[use capture]s` all :t:`[type parameter]s` and :t:`[constant parameter]s` that are in :t:`scope`.
+
+:dp:`fls_iT9WCNfUZQnC`
+An :t:`anonymous return type` behaves as if it contained all its :t:`[use capture]s`.
 
 .. rubric:: Examples
 
@@ -2309,7 +2331,7 @@ any resulting :t:`type` information via :t:`type unification`.
 :dp:`fls_v5dWGuBKvQSJ`
 When an :t:`associated type` ``<Type as Trait>::Assoc`` is referenced within a
 :t:`type inference root` (either explicitly within the source code, or via the
-inferece rules below), an :t:`obligation` requiring that ``Type`` implements
+inference rules below), an :t:`obligation` requiring that ``Type`` implements
 ``Trait`` is introduced.
 
 :dp:`fls_SZgixDCAx6PQ`

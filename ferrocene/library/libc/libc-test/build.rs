@@ -7,6 +7,10 @@ use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::{Path, PathBuf};
 use std::{env, io};
 
+fn src_hotfix_dir() -> PathBuf {
+    Path::new(&env::var_os("OUT_DIR").unwrap()).join("src-hotfix")
+}
+
 fn do_cc() {
     let target = env::var("TARGET").unwrap();
     if cfg!(unix) {
@@ -67,15 +71,7 @@ fn do_ctest() {
 
 fn ctest_cfg() -> ctest::TestGenerator {
     let mut cfg = ctest::TestGenerator::new();
-    let libc_cfgs = [
-        "libc_priv_mod_use",
-        "libc_union",
-        "libc_const_size_of",
-        "libc_align",
-        "libc_core_cvoid",
-        "libc_packedN",
-        "libc_thread_local",
-    ];
+    let libc_cfgs = ["libc_thread_local"];
     for f in &libc_cfgs {
         cfg.cfg(f, None);
     }
@@ -158,9 +154,35 @@ fn main() {
     // Avoid unnecessary re-building.
     println!("cargo:rerun-if-changed=build.rs");
 
+    let hotfix_dir = src_hotfix_dir();
+    if std::fs::exists(&hotfix_dir).unwrap() {
+        std::fs::remove_dir_all(&hotfix_dir).unwrap();
+    }
+
+    // FIXME(ctest): ctest2 cannot parse `crate::` in paths, so replace them with `::`
+    let re = regex::bytes::Regex::new(r"(?-u:\b)crate::").unwrap();
+    copy_dir_hotfix(Path::new("../src"), &hotfix_dir, &re, b"::");
+
     do_cc();
     do_ctest();
     do_semver();
+}
+
+fn copy_dir_hotfix(src: &Path, dst: &Path, regex: &regex::bytes::Regex, replace: &[u8]) {
+    std::fs::create_dir(&dst).unwrap();
+    for entry in src.read_dir().unwrap() {
+        let entry = entry.unwrap();
+        let src_path = entry.path();
+        let dst_path = dst.join(entry.file_name());
+        if entry.file_type().unwrap().is_dir() {
+            copy_dir_hotfix(&src_path, &dst_path, regex, replace);
+        } else {
+            // Replace "crate::" with "::"
+            let src_data = std::fs::read(&src_path).unwrap();
+            let dst_data = regex.replace_all(&src_data, b"::");
+            std::fs::write(&dst_path, &dst_data).unwrap();
+        }
+    }
 }
 
 macro_rules! headers {
@@ -229,6 +251,7 @@ fn test_apple(target: &str) {
         "net/if.h",
         "net/if_arp.h",
         "net/if_dl.h",
+        "net/if_mib.h",
         "net/if_utun.h",
         "net/if_var.h",
         "net/ndrv.h",
@@ -239,6 +262,7 @@ fn test_apple(target: &str) {
         "netinet/ip.h",
         "netinet/tcp.h",
         "netinet/udp.h",
+        "netinet6/in6_var.h",
         "os/clock.h",
         "os/lock.h",
         "os/signpost.h",
@@ -335,6 +359,9 @@ fn test_apple(target: &str) {
             // FIXME: Requires the macOS 14.4 SDK.
             "os_sync_wake_by_address_flags_t" | "os_sync_wait_on_address_flags_t" => true,
 
+            // FIXME: "'__uint128' undeclared" in C
+            "__uint128" => true,
+
             _ => false,
         }
     });
@@ -406,6 +433,7 @@ fn test_apple(target: &str) {
             // MAXPATHLEN is too big for auto-derive traits on arrays.
             ("vnode_info_path", "vip_path") => true,
             ("ifreq", "ifr_ifru") => true,
+            ("in6_ifreq", "ifr_ifru") => true,
             ("ifkpi", "ifk_data") => true,
             ("ifconf", "ifc_ifcu") => true,
             // FIXME: this field has been incorporated into a resized `rmx_filler` array.
@@ -466,7 +494,7 @@ fn test_apple(target: &str) {
         "uuid_t" | "vol_capabilities_set_t" => true,
         _ => false,
     });
-    cfg.generate("../src/lib.rs", "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 }
 
 fn test_openbsd(target: &str) {
@@ -583,6 +611,10 @@ fn test_openbsd(target: &str) {
             // Good chance it's going to be wrong depending on the host release
             "KERN_MAXID" | "NET_RT_MAXID" => true,
             "EV_SYSFLAGS" => true,
+
+            // Removed in OpenBSD 7.7 (unused since 1991)
+            "ATF_COM" | "ATF_PERM" | "ATF_PUBL" | "ATF_USETRAILERS" => true,
+
             _ => false,
         }
     });
@@ -649,7 +681,7 @@ fn test_openbsd(target: &str) {
         }
     });
 
-    cfg.generate("../src/lib.rs", "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 }
 
 fn test_windows(target: &str) {
@@ -778,7 +810,7 @@ fn test_windows(target: &str) {
         }
     });
 
-    cfg.generate("../src/lib.rs", "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 }
 
 fn test_redox(target: &str) {
@@ -828,7 +860,7 @@ fn test_redox(target: &str) {
         "wchar.h",
     }
 
-    cfg.generate("../src/lib.rs", "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 }
 
 fn test_solarish(target: &str) {
@@ -847,6 +879,7 @@ fn test_solarish(target: &str) {
 
     headers! {
         cfg:
+        "aio.h",
         "ctype.h",
         "dirent.h",
         "dlfcn.h",
@@ -1009,6 +1042,11 @@ fn test_solarish(target: &str) {
         }
     });
 
+    cfg.skip_field_type(move |struct_, field| {
+        // aio_buf is "volatile void*"
+        struct_ == "aiocb" && field == "aio_buf"
+    });
+
     cfg.skip_field(move |s, field| {
         match s {
             // C99 sizing on this is tough
@@ -1064,6 +1102,9 @@ fn test_solarish(target: &str) {
             // const-ness issues
             "execv" | "execve" | "execvp" | "settimeofday" | "sethostname" => true,
 
+            // FIXME(1.0): https://github.com/rust-lang/libc/issues/1272
+            "fexecve" => true,
+
             // Solaris-different
             "getpwent_r" | "getgrent_r" | "updwtmpx" if is_illumos => true,
             "madvise" | "mprotect" if is_illumos => true,
@@ -1087,11 +1128,17 @@ fn test_solarish(target: &str) {
             // excluded from the tests.
             "getifaddrs" if is_illumos => true,
 
+            // FIXME: Our API is unsound. The Rust API allows aliasing
+            // pointers, but the C API requires pointers not to alias.
+            // We should probably be at least using `&`/`&mut` here, see:
+            // https://github.com/gnzlbg/ctest/issues/68
+            "lio_listio" => true,
+
             _ => false,
         }
     });
 
-    cfg.generate("../src/lib.rs", "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 }
 
 fn test_netbsd(target: &str) {
@@ -1306,7 +1353,7 @@ fn test_netbsd(target: &str) {
         }
     });
 
-    cfg.generate("../src/lib.rs", "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 }
 
 fn test_dragonflybsd(target: &str) {
@@ -1532,7 +1579,7 @@ fn test_dragonflybsd(target: &str) {
         (struct_ == "sigevent" && field == "sigev_notify_thread_id")
     });
 
-    cfg.generate("../src/lib.rs", "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 }
 
 fn test_wasi(target: &str) {
@@ -1639,7 +1686,7 @@ fn test_wasi(target: &str) {
     // doesn't support sizeof.
     cfg.skip_field(|s, field| s == "dirent" && field == "d_name");
 
-    cfg.generate("../src/lib.rs", "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 }
 
 fn test_android(target: &str) {
@@ -1779,6 +1826,8 @@ fn test_android(target: &str) {
                 "linux/netfilter/nfnetlink_log.h",
                 "linux/netfilter/nfnetlink_queue.h",
                 "linux/netfilter/nf_tables.h",
+                "linux/netfilter_arp.h",
+                "linux/netfilter_bridge.h",
                 "linux/netfilter_ipv4.h",
                 "linux/netfilter_ipv6.h",
                 "linux/netfilter_ipv6/ip6_tables.h",
@@ -1848,9 +1897,14 @@ fn test_android(target: &str) {
 
             // These are tested in the `linux_elf.rs` file.
             "Elf64_Phdr" | "Elf32_Phdr" => true,
+
             // These are intended to be opaque
             "posix_spawn_file_actions_t" => true,
             "posix_spawnattr_t" => true,
+
+            // FIXME: "'__uint128' undeclared" in C
+            "__uint128" => true,
+
             _ => false,
         }
     });
@@ -2056,7 +2110,7 @@ fn test_android(target: &str) {
             "__system_property_wait" => true,
 
             // Added in API level 30, but tests use level 28.
-            "mlock2" => true,
+            "memfd_create" | "mlock2" | "renameat2" | "statx" | "statx_timestamp" => true,
 
             // Added in glibc 2.25.
             "getentropy" => true,
@@ -2071,6 +2125,18 @@ fn test_android(target: &str) {
             "pthread_attr_getinheritsched" | "pthread_attr_setinheritsched" => true,
             // Added in API level 28, but some tests use level 24.
             "fread_unlocked" | "fwrite_unlocked" | "fgets_unlocked" | "fflush_unlocked" => true,
+
+            // Added in API level 28, but some tests use level 24.
+            "aligned_alloc" => true,
+
+            // Added in API level 26, but some tests use level 24.
+            "getgrent" => true,
+
+            // Added in API level 26, but some tests use level 24.
+            "setgrent" => true,
+
+            // Added in API level 26, but some tests use level 24.
+            "endgrent" => true,
 
             // FIXME: bad function pointers:
             "isalnum" | "isalpha" | "iscntrl" | "isdigit" | "isgraph" | "islower" | "isprint"
@@ -2113,7 +2179,7 @@ fn test_android(target: &str) {
         }
     });
 
-    cfg.generate("../src/lib.rs", "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 
     test_linux_like_apis(target);
 }
@@ -2437,7 +2503,7 @@ fn test_freebsd(target: &str) {
                 true
             }
 
-            // Added in in FreeBSD 13.0 (r367776 and r367287)
+            // Added in FreeBSD 13.0 (r367776 and r367287)
             "SCM_CREDS2" | "LOCAL_CREDS_PERSISTENT" if Some(13) > freebsd_ver => true,
 
             // Added in FreeBSD 14
@@ -2567,11 +2633,21 @@ fn test_freebsd(target: &str) {
                 true
             }
 
+            // Added in FreeBSD 14.1
+            "KCMP_FILE" | "KCMP_FILEOBJ" | "KCMP_FILES" | "KCMP_SIGHAND" | "KCMP_VM"
+                if Some(14) > freebsd_ver =>
+            {
+                true
+            }
+
             // FIXME: Removed in FreeBSD 15:
             "LOCAL_CONNWAIT" if freebsd_ver >= Some(15) => true,
 
             // FIXME: The values has been changed in FreeBSD 15:
             "CLOCK_BOOTTIME" if Some(15) <= freebsd_ver => true,
+
+            // Added in FreeBSD 14.0
+            "TCP_FUNCTION_ALIAS" if Some(14) > freebsd_ver => true,
 
             _ => false,
         }
@@ -2684,6 +2760,9 @@ fn test_freebsd(target: &str) {
                 true
             }
 
+            // Those are introduced in FreeBSD 14.1.
+            "kcmp" => true,
+
             _ => false,
         }
     });
@@ -2772,7 +2851,7 @@ fn test_freebsd(target: &str) {
         });
     }
 
-    cfg.generate("../src/lib.rs", "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 }
 
 fn test_emscripten(target: &str) {
@@ -2782,7 +2861,6 @@ fn test_emscripten(target: &str) {
     cfg.define("_GNU_SOURCE", None); // FIXME: ??
 
     headers! { cfg:
-               "aio.h",
                "ctype.h",
                "dirent.h",
                "dlfcn.h",
@@ -2823,32 +2901,21 @@ fn test_emscripten(target: &str) {
                "stdio.h",
                "stdlib.h",
                "string.h",
-               "sys/epoll.h",
-               "sys/eventfd.h",
                "sys/file.h",
                "sys/ioctl.h",
                "sys/ipc.h",
                "sys/mman.h",
                "sys/mount.h",
                "sys/msg.h",
-               "sys/personality.h",
-               "sys/prctl.h",
-               "sys/ptrace.h",
-               "sys/quota.h",
-               "sys/reboot.h",
                "sys/resource.h",
                "sys/sem.h",
                "sys/shm.h",
-               "sys/signalfd.h",
                "sys/socket.h",
                "sys/stat.h",
                "sys/statvfs.h",
-               "sys/swap.h",
                "sys/syscall.h",
-               "sys/sysctl.h",
                "sys/sysinfo.h",
                "sys/time.h",
-               "sys/timerfd.h",
                "sys/times.h",
                "sys/types.h",
                "sys/uio.h",
@@ -2874,9 +2941,7 @@ fn test_emscripten(target: &str) {
             // Just pass all these through, no need for a "struct" prefix
             "FILE" | "fd_set" | "Dl_info" | "DIR" => ty.to_string(),
 
-            "os_unfair_lock" => "struct os_unfair_lock_s".to_string(),
-
-            // LFS64 types have been removed in Emscripten 3.1.44+
+            // LFS64 types have been removed in Emscripten 3.1.44
             // https://github.com/emscripten-core/emscripten/pull/19812
             "off64_t" => "off_t".to_string(),
 
@@ -2900,7 +2965,7 @@ fn test_emscripten(target: &str) {
             s if s.ends_with("_nsec") && struct_.starts_with("stat") => {
                 s.replace("e_nsec", ".tv_nsec")
             }
-            // FIXME: appears that `epoll_event.data` is an union
+            // Rust struct uses raw u64, rather than union
             "u64" if struct_ == "epoll_event" => "data.u64".to_string(),
             s => s.to_string(),
         }
@@ -2912,10 +2977,11 @@ fn test_emscripten(target: &str) {
             // FIXME: is this necessary?
             "sighandler_t" => true,
 
-            // FIXME: The size has been changed due to musl's time64
-            "time_t" => true,
+            // No epoll support
+            // https://github.com/emscripten-core/emscripten/issues/5033
+            ty if ty.starts_with("epoll") => true,
 
-            // LFS64 types have been removed in Emscripten 3.1.44+
+            // LFS64 types have been removed in Emscripten 3.1.44
             // https://github.com/emscripten-core/emscripten/pull/19812
             t => t.ends_with("64") || t.ends_with("64_t"),
         }
@@ -2924,29 +2990,19 @@ fn test_emscripten(target: &str) {
     cfg.skip_struct(move |ty| {
         match ty {
             // This is actually a union, not a struct
-            // FIXME: is this necessary?
             "sigval" => true,
-
-            // FIXME: It was removed in
-            // emscripten-core/emscripten@953e414
-            "pthread_mutexattr_t" => true,
 
             // FIXME: Investigate why the test fails.
             // Skip for now to unblock CI.
             "pthread_condattr_t" => true,
+            "pthread_mutexattr_t" => true,
 
-            // FIXME: The size has been changed when upgraded to musl 1.2.2
-            "pthread_mutex_t" => true,
+            // No epoll support
+            // https://github.com/emscripten-core/emscripten/issues/5033
+            ty if ty.starts_with("epoll") => true,
+            ty if ty.starts_with("signalfd") => true,
 
-            // FIXME: Lowered from 16 to 8 bytes in
-            // llvm/llvm-project@d1a96e9
-            "max_align_t" => true,
-
-            // FIXME: The size has been changed due to time64
-            "utimbuf" | "timeval" | "timespec" | "rusage" | "itimerval" | "sched_param"
-            | "stat" | "stat64" | "shmid_ds" | "msqid_ds" => true,
-
-            // LFS64 types have been removed in Emscripten 3.1.44+
+            // LFS64 types have been removed in Emscripten 3.1.44
             // https://github.com/emscripten-core/emscripten/pull/19812
             ty => ty.ends_with("64") || ty.ends_with("64_t"),
         }
@@ -2955,11 +3011,8 @@ fn test_emscripten(target: &str) {
     cfg.skip_fn(move |name| {
         match name {
             // Emscripten does not support fork/exec/wait or any kind of multi-process support
-            // https://github.com/emscripten-core/emscripten/blob/3.1.30/tools/system_libs.py#L973
+            // https://github.com/emscripten-core/emscripten/blob/3.1.68/tools/system_libs.py#L1100
             "execv" | "execve" | "execvp" | "execvpe" | "fexecve" | "wait4" => true,
-
-            // FIXME: Remove after emscripten-core/emscripten#18492 is released (> 3.1.30).
-            "clearenv" => true,
 
             _ => false,
         }
@@ -2974,23 +3027,35 @@ fn test_emscripten(target: &str) {
             // FIXME: emscripten uses different constants to constructs these
             n if n.contains("__SIZEOF_PTHREAD") => true,
 
-            // FIXME: `SYS_gettid` was removed in
-            // emscripten-core/emscripten@6d6474e
+            // No epoll support
+            // https://github.com/emscripten-core/emscripten/issues/5033
+            n if n.starts_with("EPOLL") => true,
+
+            // No ptrace.h
+            // https://github.com/emscripten-core/emscripten/pull/17704
+            n if n.starts_with("PTRACE_") => true,
+
+            // No quota.h
+            // https://github.com/emscripten-core/emscripten/pull/17704
+            n if n.starts_with("QIF_") => true,
+            "USRQUOTA" | "GRPQUOTA" | "Q_GETFMT" | "Q_GETINFO" | "Q_SETINFO" | "Q_SYNC"
+            | "Q_QUOTAON" | "Q_QUOTAOFF" | "Q_GETQUOTA" | "Q_SETQUOTA" => true,
+
+            // `SYS_gettid` was removed in Emscripten v1.39.9
+            // https://github.com/emscripten-core/emscripten/pull/10439
             "SYS_gettid" => true,
 
-            // FIXME: These values have been changed
-            | "POSIX_MADV_DONTNEED" // to 4
-            | "RLIMIT_NLIMITS" // to 16
-            | "RLIM_NLIMITS" // to 16
-            | "IPPROTO_MAX" // to 263
-            | "F_GETLK" // to 5
-            | "F_SETLK" // to 6
-            | "F_SETLKW" // to 7
-            | "O_TMPFILE" // to 65
-            | "SIG_IGN" // -1
-                => true,
+            // No personality.h
+            // https://github.com/emscripten-core/emscripten/pull/17704
+            "ADDR_NO_RANDOMIZE" | "MMAP_PAGE_ZERO" | "ADDR_COMPAT_LAYOUT" | "READ_IMPLIES_EXEC"
+            | "ADDR_LIMIT_32BIT" | "SHORT_INODE" | "WHOLE_SECONDS" | "STICKY_TIMEOUTS"
+            | "ADDR_LIMIT_3GB" => true,
 
-            // LFS64 types have been removed in Emscripten 3.1.44+
+            // `SIG_IGN` has been changed to -2 since 1 is a valid function address
+            // https://github.com/emscripten-core/emscripten/pull/14883
+            "SIG_IGN" => true,
+
+            // LFS64 types have been removed in Emscripten 3.1.44
             // https://github.com/emscripten-core/emscripten/pull/19812
             n if n.starts_with("RLIM64") => true,
 
@@ -3000,38 +3065,19 @@ fn test_emscripten(target: &str) {
 
     cfg.skip_field_type(move |struct_, field| {
         // This is a weird union, don't check the type.
-        // FIXME: is this necessary?
         (struct_ == "ifaddrs" && field == "ifa_ifu") ||
         // sighandler_t type is super weird
-        // FIXME: is this necessary?
         (struct_ == "sigaction" && field == "sa_sigaction") ||
         // sigval is actually a union, but we pretend it's a struct
-        // FIXME: is this necessary?
-        (struct_ == "sigevent" && field == "sigev_value") ||
-        // aio_buf is "volatile void*" and Rust doesn't understand volatile
-        // FIXME: is this necessary?
-        (struct_ == "aiocb" && field == "aio_buf")
+        (struct_ == "sigevent" && field == "sigev_value")
     });
 
     cfg.skip_field(move |struct_, field| {
         // this is actually a union on linux, so we can't represent it well and
         // just insert some padding.
-        // FIXME: is this necessary?
         (struct_ == "siginfo_t" && field == "_pad") ||
         // musl names this __dummy1 but it's still there
-        // FIXME: is this necessary?
         (struct_ == "glob_t" && field == "gl_flags") ||
-        // musl seems to define this as an *anonymous* bitfield
-        // FIXME: is this necessary?
-        (struct_ == "statvfs" && field == "__f_unused") ||
-        // sigev_notify_thread_id is actually part of a sigev_un union
-        (struct_ == "sigevent" && field == "sigev_notify_thread_id") ||
-        // signalfd had SIGSYS fields added in Linux 4.18, but no libc release has them yet.
-        (struct_ == "signalfd_siginfo" && (field == "ssi_addr_lsb" ||
-                                           field == "_pad2" ||
-                                           field == "ssi_syscall" ||
-                                           field == "ssi_call_addr" ||
-                                           field == "ssi_arch")) ||
         // FIXME: After musl 1.1.24, it have only one field `sched_priority`,
         // while other fields become reserved.
         (struct_ == "sched_param" && [
@@ -3042,8 +3088,7 @@ fn test_emscripten(target: &str) {
         ].contains(&field))
     });
 
-    // FIXME: test linux like
-    cfg.generate("../src/lib.rs", "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 }
 
 fn test_neutrino(target: &str) {
@@ -3296,7 +3341,7 @@ fn test_neutrino(target: &str) {
 
     cfg.skip_static(move |name| (name == "__dso_handle"));
 
-    cfg.generate("../src/lib.rs", "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 }
 
 fn test_vxworks(target: &str) {
@@ -3404,7 +3449,7 @@ fn test_vxworks(target: &str) {
         _ => false,
     });
 
-    cfg.generate("../src/lib.rs", "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 }
 
 fn test_linux(target: &str) {
@@ -3563,14 +3608,12 @@ fn test_linux(target: &str) {
     // Include linux headers at the end:
     headers! {
         cfg:
-        [loongarch64]: "asm/hwcap.h",
-        [riscv64]: "asm/hwcap.h",
+        [loongarch64 || riscv64]: "asm/hwcap.h",
         "asm/mman.h",
         [gnu]: "linux/aio_abi.h",
         "linux/can.h",
         "linux/can/raw.h",
-        // FIXME: requires kernel headers >= 5.4.1.
-        [!musl]: "linux/can/j1939.h",
+        "linux/can/j1939.h",
         "linux/dccp.h",
         "linux/errqueue.h",
         "linux/falloc.h",
@@ -3595,20 +3638,22 @@ fn test_linux(target: &str) {
         "linux/mempolicy.h",
         "linux/mman.h",
         "linux/module.h",
-        // FIXME: requires kernel headers >= 5.1.
-        [!musl]: "linux/mount.h",
+        "linux/mount.h",
         "linux/net_tstamp.h",
         "linux/netfilter/nfnetlink.h",
         "linux/netfilter/nfnetlink_log.h",
         "linux/netfilter/nfnetlink_queue.h",
         "linux/netfilter/nf_tables.h",
+        "linux/netfilter_arp.h",
+        "linux/netfilter_bridge.h",
         "linux/netfilter_ipv4.h",
         "linux/netfilter_ipv6.h",
         "linux/netfilter_ipv6/ip6_tables.h",
         "linux/netlink.h",
-        // FIXME: requires Linux >= 5.6:
-        [!musl]: "linux/openat2.h",
-        [!musl]: "linux/ptrace.h",
+        "linux/openat2.h",
+        // FIXME: some items require Linux >= 5.6:
+        "linux/ptp_clock.h",
+        "linux/ptrace.h",
         "linux/quota.h",
         "linux/random.h",
         "linux/reboot.h",
@@ -3626,7 +3671,7 @@ fn test_linux(target: &str) {
         "sys/fanotify.h",
         // <sys/auxv.h> is not present on uclibc
         [!uclibc]: "sys/auxv.h",
-        [gnu]: "linux/close_range.h",
+        [gnu || musl]: "linux/close_range.h",
     }
 
     // note: aio.h must be included before sys/mount.h
@@ -3689,6 +3734,14 @@ fn test_linux(target: &str) {
     });
 
     cfg.skip_type(move |ty| {
+        // FIXME: very recent additions to musl, not yet released.
+        // also apparently some glibc versions
+        if ty == "Elf32_Relr" || ty == "Elf64_Relr" {
+            return true;
+        }
+        if sparc64 && (ty == "Elf32_Rela" || ty == "Elf64_Rela") {
+            return true;
+        }
         match ty {
             // FIXME: `sighandler_t` type is incorrect, see:
             // https://github.com/rust-lang/libc/issues/1359
@@ -3709,10 +3762,8 @@ fn test_linux(target: &str) {
             // specific type.
             "Ioctl" => true,
 
-            // FIXME: requires >= 5.4.1 kernel headers
-            "pgn_t" if musl => true,
-            "priority_t" if musl => true,
-            "name_t" if musl => true,
+            // FIXME: "'__uint128' undeclared" in C
+            "__uint128" => true,
 
             t => {
                 if musl {
@@ -3729,20 +3780,9 @@ fn test_linux(target: &str) {
         if ty.starts_with("__c_anonymous_") {
             return true;
         }
-        // FIXME: musl CI has old headers
-        if musl && ty.starts_with("uinput_") {
-            return true;
-        }
-        if musl && ty == "seccomp_notif" {
-            return true;
-        }
-        if musl && ty == "seccomp_notif_addfd" {
-            return true;
-        }
-        if musl && ty == "seccomp_notif_resp" {
-            return true;
-        }
-        if musl && ty == "seccomp_notif_sizes" {
+
+        // FIXME: CI has old headers
+        if ty == "ptp_sys_offset_extended" {
             return true;
         }
 
@@ -3750,17 +3790,19 @@ fn test_linux(target: &str) {
         if musl && (ty.ends_with("64") || ty.ends_with("64_t")) {
             return true;
         }
+
         // FIXME: sparc64 CI has old headers
         if sparc64 && (ty == "uinput_ff_erase" || ty == "uinput_abs_setup") {
             return true;
         }
-        // FIXME(https://github.com/rust-lang/libc/issues/1558): passing by
-        // value corrupts the value for reasons not understood.
+
+        // FIXME(#1558): passing by value corrupts the value for reasons not understood.
         if (gnu && sparc64) && (ty == "ip_mreqn" || ty == "hwtstamp_config") {
             return true;
         }
-        // FIXME(https://github.com/rust-lang/rust/issues/43894): pass by value for structs that are not an even 32/64 bits on
-        // big-endian systems corrupts the value for unknown reasons.
+
+        // FIXME(rust-lang/rust#43894): pass by value for structs that are not an even 32/64 bits
+        // on big-endian systems corrupts the value for unknown reasons.
         if (sparc64 || ppc || ppc64 || s390x)
             && (ty == "sockaddr_pkt"
                 || ty == "tpacket_auxdata"
@@ -3771,6 +3813,7 @@ fn test_linux(target: &str) {
         {
             return true;
         }
+
         // FIXME: musl doesn't compile with `struct fanout_args` for unknown reasons.
         if musl && ty == "fanout_args" {
             return true;
@@ -3820,12 +3863,6 @@ fn test_linux(target: &str) {
             // Might differ between kernel versions
             "open_how" => true,
 
-            // FIXME: requires >= 5.4.1 kernel headers
-            "j1939_filter" if musl => true,
-
-            // FIXME: requires >= 5.4 kernel headers
-            "sockaddr_can" if musl => true,
-
             "sctp_initmsg" | "sctp_sndrcvinfo" | "sctp_sndinfo" | "sctp_rcvinfo"
             | "sctp_nxtinfo" | "sctp_prinfo" | "sctp_authinfo" => true,
 
@@ -3858,11 +3895,24 @@ fn test_linux(target: &str) {
 
             // FIXME: Requires >= 5.4 kernel headers.
             // Everything that uses install-musl.sh has 4.19 kernel headers.
-            "xdp_umem_reg" | "xdp_ring_offset" | "xdp_mmap_offsets" if musl => true,
+            "xdp_ring_offset" | "xdp_mmap_offsets" if musl => true,
+
+            // FIXME: Requires >= 6.8 kernel headers.
+            // A field was added in 6.8.
+            // https://github.com/torvalds/linux/commit/341ac980eab90ac1f6c22ee9f9da83ed9604d899
+            // The previous version of the struct was removed in 6.11 due to a bug.
+            // https://github.com/torvalds/linux/commit/32654bbd6313b4cfc82297e6634fa9725c3c900f
+            "xdp_umem_reg" => true,
 
             // FIXME: Requires >= 5.9 kernel headers.
             // Everything that uses install-musl.sh has 4.19 kernel headers.
             "xdp_statistics" if musl => true,
+
+            // FIXME: Requires >= 6.8 kernel headers.
+            "xsk_tx_metadata"
+            | "__c_anonymous_xsk_tx_metadata_union"
+            | "xsk_tx_metadata_request"
+            | "xsk_tx_metadata_completion" => true,
 
             // A new field was added in kernel 5.4, this is the old version for backwards compatibility.
             // https://github.com/torvalds/linux/commit/77cd0d7b3f257fd0e3096b4fdcff1a7d38e99e10
@@ -3938,6 +3988,23 @@ fn test_linux(target: &str) {
             {
                 return true;
             }
+            // FIXME: Requires >= 4.20 kernel headers
+            if name == "PTP_SYS_OFFSET_EXTENDED" {
+                return true;
+            }
+            // FIXME: Requires >= 5.4 kernel headers
+            if name == "PTP_CLOCK_GETCAPS2"
+                || name == "PTP_ENABLE_PPS2" 
+                || name == "PTP_EXTTS_REQUEST2"
+                || name == "PTP_PEROUT_REQUEST2"
+                || name == "PTP_PIN_GETFUNC2"
+                || name == "PTP_PIN_SETFUNC2"
+                || name == "PTP_SYS_OFFSET2"
+                || name == "PTP_SYS_OFFSET_PRECISE2"
+                || name == "PTP_SYS_OFFSET_EXTENDED2"
+            {
+                return true;
+            }
             // FIXME: Requires >= 5.4.1 kernel headers
             if name.starts_with("J1939")
                 || name.starts_with("RTEXT_FILTER_")
@@ -3961,7 +4028,7 @@ fn test_linux(target: &str) {
                 return true;
             }
             // FIXME: Requires >= 6.3 kernel headers
-            if name == "MFD_NOEXEC_SEAL" || name == "MFD_EXEC" {
+            if loongarch64 && (name == "MFD_NOEXEC_SEAL" || name == "MFD_EXEC") {
                 return true;
             }
         }
@@ -4051,7 +4118,7 @@ fn test_linux(target: &str) {
                 if sparc64 => true,
 
             // FIXME: Not currently available in headers on ARM and musl.
-            "NETLINK_GET_STRICT_CHK" if arm || musl => true,
+            "NETLINK_GET_STRICT_CHK" if arm => true,
 
             // kernel constants not available in uclibc 1.0.34
             | "EXTPROC"
@@ -4120,55 +4187,16 @@ fn test_linux(target: &str) {
             | "MINSIGSTKSZ"
                 if gnu => true,
 
-            // FIXME: Linux >= 5.16 changed its value:
+            // FIXME: Linux >= 5.16:
             // https://github.com/torvalds/linux/commit/42df6e1d221dddc0f2acf2be37e68d553ad65f96
-            "NF_NETDEV_NUMHOOKS" => true,
-
-            // FIXME: requires Linux >= 5.6:
-            | "RESOLVE_BENEATH"
-            | "RESOLVE_CACHED"
-            | "RESOLVE_IN_ROOT"
-            | "RESOLVE_NO_MAGICLINKS"
-            | "RESOLVE_NO_SYMLINKS"
-            | "RESOLVE_NO_XDEV" if musl => true,
-
-            // FIXME: requires Linux >= 5.4:
-            | "CAN_J1939"
-            | "CAN_NPROTO" if musl => true,
-
-            // FIXME: requires Linux >= 5.6
-            "GRND_INSECURE" if musl => true,
-
-            // FIXME: requires Linux >= 5.7:
-            "MREMAP_DONTUNMAP" if musl => true,
+            "NF_NETDEV_EGRESS" if sparc64 => true,
+            // value changed
+            "NF_NETDEV_NUMHOOKS" if sparc64 => true,
 
             // FIXME: requires Linux >= v5.8
-            "IF_LINK_MODE_TESTING" if musl || sparc64 => true,
+            "IF_LINK_MODE_TESTING" if sparc64 => true,
 
-            // FIXME: Requires more recent kernel headers (5.9 / 5.11):
-            | "CLOSE_RANGE_UNSHARE"
-            | "CLOSE_RANGE_CLOEXEC" if musl => true,
-
-            // FIXME: requires Linux >= 5.12:
-            "MPOL_F_NUMA_BALANCING" if musl => true,
-
-            // FIXME: Requires more recent kernel headers
-            | "NFNL_SUBSYS_COUNT" // bumped in v5.14
-            | "NFNL_SUBSYS_HOOK" // v5.14+
-            | "NFULA_VLAN" // v5.4+
-            | "NFULA_L2HDR" // v5.4+
-            | "NFULA_VLAN_PROTO" // v5.4+
-            | "NFULA_VLAN_TCI" // v5.4+
-            | "NFULA_VLAN_UNSPEC" // v5.4+
-            | "RTNLGRP_NEXTHOP" // linux v5.3+
-            | "RTNLGRP_BRVLAN" // linux v5.6+
-            if musl => true,
-
-            | "MADV_COLD"
-            | "MADV_PAGEOUT"
-            | "MADV_POPULATE_READ"
-            | "MADV_POPULATE_WRITE"
-            if musl => true,
+            // DIFF(main): fixed in 1.0 with e9abac9ac2
             "CLONE_CLEAR_SIGHAND" | "CLONE_INTO_CGROUP" => true,
 
             // kernel 6.1 minimum
@@ -4187,9 +4215,6 @@ fn test_linux(target: &str) {
             | "MADV_DONTNEED_LOCKED"     // linux v5.18+
                 => true,
             "SCTP_FUTURE_ASSOC" | "SCTP_CURRENT_ASSOC" | "SCTP_ALL_ASSOC" | "SCTP_PEER_ADDR_THLDS_V2" => true, // linux 5.5+
-
-            // FIXME: Requires more recent kernel headers
-            "HWTSTAMP_TX_ONESTEP_P2P" if musl => true, // linux v5.6+
 
             // kernel 6.5 minimum
             "MOVE_MOUNT_BENEATH" => true,
@@ -4212,10 +4237,8 @@ fn test_linux(target: &str) {
             | "FAN_INFO"                          // linux v5.16+
                 => true,
 
-            // FIXME: Requires linux 5.15+
-            "FAN_REPORT_PIDFD" if musl => true,
-
-            // FIXME: Requires linux 5.9+
+            // musl doesn't use <linux/fanotify.h> in <sys/fanotify.h>
+            "FAN_REPORT_PIDFD"
             | "FAN_REPORT_DIR_FID"
             | "FAN_REPORT_NAME"
             | "FAN_REPORT_DFID_NAME"
@@ -4229,58 +4252,26 @@ fn test_linux(target: &str) {
             // FIXME: Requires linux 6.5
             "NFT_MSG_MAX" => true,
 
-            // FIXME: Requires >= 5.1 kernel headers.
-            // Everything that uses install-musl.sh has 4.19 kernel headers.
-            "TLS_1_3_VERSION"
-            | "TLS_1_3_VERSION_MAJOR"
-            | "TLS_1_3_VERSION_MINOR"
-            | "TLS_CIPHER_AES_GCM_256"
-            | "TLS_CIPHER_AES_GCM_256_IV_SIZE"
-            | "TLS_CIPHER_AES_GCM_256_KEY_SIZE"
-            | "TLS_CIPHER_AES_GCM_256_SALT_SIZE"
-            | "TLS_CIPHER_AES_GCM_256_TAG_SIZE"
-            | "TLS_CIPHER_AES_GCM_256_REC_SEQ_SIZE"
-                if (aarch64 || arm || i686 || s390x || x86_64) && musl =>
-            {
-                true
-            }
-
-            // FIXME: Requires >= 5.11 kernel headers.
-            // Everything that uses install-musl.sh has 4.19 kernel headers.
-            "TLS_CIPHER_CHACHA20_POLY1305"
-            | "TLS_CIPHER_CHACHA20_POLY1305_IV_SIZE"
-            | "TLS_CIPHER_CHACHA20_POLY1305_KEY_SIZE"
-            | "TLS_CIPHER_CHACHA20_POLY1305_SALT_SIZE"
-            | "TLS_CIPHER_CHACHA20_POLY1305_TAG_SIZE"
-            | "TLS_CIPHER_CHACHA20_POLY1305_REC_SEQ_SIZE"
-                if (aarch64 || arm || i686 || s390x || x86_64) && musl =>
-            {
-                true
-            }
-
-            // FIXME: Requires >= 5.3 kernel headers.
-            // Everything that uses install-musl.sh has 4.19 kernel headers.
-            "XDP_OPTIONS_ZEROCOPY" | "XDP_OPTIONS"
-                if musl =>
-            {
-                true
-            }
-
-            // FIXME: Requires >= 5.4 kernel headers.
-            // Everything that uses install-musl.sh has 4.19 kernel headers.
-            "XSK_UNALIGNED_BUF_OFFSET_SHIFT"
-            | "XSK_UNALIGNED_BUF_ADDR_MASK"
-            | "XDP_UMEM_UNALIGNED_CHUNK_FLAG"
-            | "XDP_RING_NEED_WAKEUP"
-            | "XDP_USE_NEED_WAKEUP"
-                if musl =>
-            {
-                true
-            }
-
             // FIXME: Requires >= 6.6 kernel headers.
             "XDP_USE_SG"
             | "XDP_PKT_CONTD"
+                =>
+            {
+                true
+            }
+
+            // FIXME: Requires >= 6.8 kernel headers.
+            "XDP_UMEM_TX_SW_CSUM"
+            | "XDP_TXMD_FLAGS_TIMESTAMP"
+            | "XDP_TXMD_FLAGS_CHECKSUM"
+            | "XDP_TX_METADATA"
+                =>
+            {
+                true
+            }
+
+            // FIXME: Requires >= 6.11 kernel headers.
+            "XDP_UMEM_TX_METADATA_LEN"
                 =>
             {
                 true
@@ -4318,14 +4309,6 @@ fn test_linux(target: &str) {
             | "PF_NO_SETAFFINITY"
             | "PF_MCE_EARLY"
             | "PF_MEMALLOC_PIN" => true,
-
-            "SCHED_FLAG_KEEP_POLICY"
-            | "SCHED_FLAG_KEEP_PARAMS"
-            | "SCHED_FLAG_UTIL_CLAMP_MIN"
-            | "SCHED_FLAG_UTIL_CLAMP_MAX"
-            | "SCHED_FLAG_KEEP_ALL"
-            | "SCHED_FLAG_UTIL_CLAMP"
-            | "SCHED_FLAG_ALL" if musl => true, // Needs more recent linux headers.
 
             // FIXME: Requires >= 6.9 kernel headers.
             "EPIOCSPARAMS"
@@ -4461,7 +4444,15 @@ fn test_linux(target: &str) {
         // `__exit_status` type is a patch which is absent in musl
         (struct_ == "utmpx" && field == "ut_exit" && musl) ||
         // `can_addr` is an anonymous union
-        (struct_ == "sockaddr_can" && field == "can_addr")
+        (struct_ == "sockaddr_can" && field == "can_addr") ||
+        // `anonymous_1` is an anonymous union
+        (struct_ == "ptp_perout_request" && field == "anonymous_1") ||
+        // `anonymous_2` is an anonymous union
+        (struct_ == "ptp_perout_request" && field == "anonymous_2") ||
+        // FIXME(linux): `adjust_phase` requires >= 5.7 kernel headers
+        // FIXME(linux): `max_phase_adj` requires >= 5.19 kernel headers
+        // the rsv field shrunk when those fields got added, so is omitted too
+        (struct_ == "ptp_clock_caps" && (loongarch64 || sparc64) && (["adjust_phase", "max_phase_adj", "rsv"].contains(&field)))
     });
 
     cfg.volatile_item(|i| {
@@ -4526,14 +4517,27 @@ fn test_linux(target: &str) {
         (struct_ == "iw_encode_ext" && field == "key") ||
         // the `tcpi_snd_rcv_wscale` map two bitfield fields stored in a u8
         (struct_ == "tcp_info" && field == "tcpi_snd_rcv_wscale") ||
-        // the `tcpi_delivery_rate_app_limited` field is a bitfield on musl
-        (musl && struct_ == "tcp_info" && field == "tcpi_delivery_rate_app_limited") ||
-        // the `tcpi_fast_open_client_fail` field is a bitfield on musl
-        (musl && struct_ == "tcp_info" && field == "tcpi_fast_open_client_fail") ||
+        // the `tcpi_delivery_fastopen_bitfields` map two bitfield fields stored in a u8
+        (musl && struct_ == "tcp_info" && field == "tcpi_delivery_fastopen_bitfields") ||
         // either fsid_t or int[2] type
         (struct_ == "fanotify_event_info_fid" && field == "fsid") ||
         // `handle` is a VLA
-        (struct_ == "fanotify_event_info_fid" && field == "handle")
+        (struct_ == "fanotify_event_info_fid" && field == "handle") ||
+        // `anonymous_1` is an anonymous union
+        (struct_ == "ptp_perout_request" && field == "anonymous_1") ||
+        // `anonymous_2` is an anonymous union
+        (struct_ == "ptp_perout_request" && field == "anonymous_2") ||
+        // FIXME(linux): `adjust_phase` requires >= 5.7 kernel headers
+        // FIXME(linux): `max_phase_adj` requires >= 5.19 kernel headers
+        // the rsv field shrunk when those fields got added, so is omitted too
+        (struct_ == "ptp_clock_caps" && (loongarch64 || sparc64) && (["adjust_phase", "max_phase_adj", "rsv"].contains(&field))) ||
+        // invalid application of 'sizeof' to incomplete type 'long unsigned int[]'
+        (musl && struct_ == "mcontext_t" && field == "__extcontext" && loongarch64) ||
+        // FIXME(#4121): a new field was added from `f_spare`
+        (struct_ == "statvfs" && field == "__f_spare") ||
+        (struct_ == "statvfs64" && field == "__f_spare") ||
+        // the `xsk_tx_metadata_union` field is an anonymous union
+        (struct_ == "xsk_tx_metadata" && field == "xsk_tx_metadata_union")
     });
 
     cfg.skip_roundtrip(move |s| match s {
@@ -4566,11 +4570,11 @@ fn test_linux(target: &str) {
             true
         }
 
-        // The `inotify_event` and `cmsghdr` types contain Flexible Array Member fields (the
-        // `name` and `data` fields respectively) which have unspecified calling convention.
-        // The roundtripping tests deliberately pass the structs by value to check "by value"
-        // layout consistency, but this would be UB for the these types.
+        // The following types contain Flexible Array Member fields which have unspecified calling
+        // convention. The roundtripping tests deliberately pass the structs by value to check "by
+        // value" layout consistency, but this would be UB for the these types.
         "inotify_event" => true,
+        "fanotify_event_info_fid" => true,
         "cmsghdr" => true,
 
         // FIXME: the call ABI of max_align_t is incorrect on these platforms:
@@ -4579,7 +4583,7 @@ fn test_linux(target: &str) {
         _ => false,
     });
 
-    cfg.generate("../src/lib.rs", "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 
     test_linux_like_apis(target);
 }
@@ -4606,7 +4610,7 @@ fn test_linux_like_apis(target: &str) {
         })
         .skip_const(|_| true)
         .skip_struct(|_| true);
-        cfg.generate("../src/lib.rs", "linux_strerror_r.rs");
+        cfg.generate(src_hotfix_dir().join("lib.rs"), "linux_strerror_r.rs");
     }
 
     if linux || android || emscripten {
@@ -4636,7 +4640,7 @@ fn test_linux_like_apis(target: &str) {
                 t => t.to_string(),
             });
 
-        cfg.generate("../src/lib.rs", "linux_fcntl.rs");
+        cfg.generate(src_hotfix_dir().join("lib.rs"), "linux_fcntl.rs");
     }
 
     if linux || android {
@@ -4660,7 +4664,7 @@ fn test_linux_like_apis(target: &str) {
                 t if is_union => format!("union {}", t),
                 t => t.to_string(),
             });
-        cfg.generate("../src/lib.rs", "linux_termios.rs");
+        cfg.generate(src_hotfix_dir().join("lib.rs"), "linux_termios.rs");
     }
 
     if linux || android {
@@ -4688,7 +4692,7 @@ fn test_linux_like_apis(target: &str) {
                 t if is_union => format!("union {}", t),
                 t => t.to_string(),
             });
-        cfg.generate("../src/lib.rs", "linux_ipv6.rs");
+        cfg.generate(src_hotfix_dir().join("lib.rs"), "linux_ipv6.rs");
     }
 
     if linux || android {
@@ -4710,7 +4714,7 @@ fn test_linux_like_apis(target: &str) {
                 "Elf64_Phdr" | "Elf32_Phdr" => false,
                 _ => true,
             });
-        cfg.generate("../src/lib.rs", "linux_elf.rs");
+        cfg.generate(src_hotfix_dir().join("lib.rs"), "linux_elf.rs");
     }
 
     if linux || android {
@@ -4725,14 +4729,21 @@ fn test_linux_like_apis(target: &str) {
             })
             .skip_struct(|_| true)
             .skip_type(|_| true);
-        cfg.generate("../src/lib.rs", "linux_if_arp.rs");
+        cfg.generate(src_hotfix_dir().join("lib.rs"), "linux_if_arp.rs");
     }
 }
 
 fn which_freebsd() -> Option<i32> {
+    if let Ok(version) = env::var("RUST_LIBC_UNSTABLE_FREEBSD_VERSION") {
+        let vers = version.parse().unwrap();
+        println!("cargo:warning=setting FreeBSD version to {vers}");
+        return Some(vers);
+    }
+
     let output = std::process::Command::new("freebsd-version")
         .output()
         .ok()?;
+
     if !output.status.success() {
         return None;
     }
@@ -5083,5 +5094,5 @@ fn test_haiku(target: &str) {
             s => s.to_string(),
         }
     });
-    cfg.generate("../src/lib.rs", "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 }

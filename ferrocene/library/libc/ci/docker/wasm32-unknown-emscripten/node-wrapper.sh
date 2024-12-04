@@ -1,11 +1,11 @@
 #!/bin/sh
 
-set -e
+set -eux
 
-me=$1
+me="$1"
 shift
-dir=$(dirname $me)
-file=$(basename $me)
+dir=$(dirname "$me")
+file=$(basename "$me")
 
-cd $dir
-exec node $file "$@"
+cd "$dir"
+exec node "$file" "$@"

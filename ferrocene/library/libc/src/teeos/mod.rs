@@ -8,7 +8,7 @@
 // only supported on Rust > 1.59, so we can directly reexport c_void from core.
 pub use core::ffi::c_void;
 
-use Option;
+use crate::prelude::*;
 
 pub type c_schar = i8;
 
@@ -48,7 +48,7 @@ pub type ssize_t = isize;
 
 pub type pid_t = c_int;
 
-// aarch64 specifc
+// aarch64 specific
 pub type c_char = u8;
 
 pub type wchar_t = u32;
@@ -61,9 +61,9 @@ pub type c_ulong = u64;
 pub struct _CLongDouble(pub u128);
 
 // long double in C means A float point value, which has 128bit length.
-// but some bit maybe not used, so the really length of long double could be 80(x86) or 128(power pc/IEEE)
+// but some bit maybe not used, so the real length of long double could be 80(x86) or 128(power pc/IEEE)
 // this is different from f128(not stable and not included default) in Rust, so we use u128 for FFI(Rust to C).
-// this is unstable and will couse to memfault/data abort.
+// this is unstable and will cause to memfault/data abort.
 pub type c_longdouble = _CLongDouble;
 
 pub type pthread_t = c_ulong;
@@ -1109,8 +1109,8 @@ extern "C" {
     pub fn pthread_cond_timedwait(
         cond: *mut pthread_cond_t,
         lock: *mut pthread_mutex_t,
-        abstime: *const ::timespec,
-    ) -> ::c_int;
+        abstime: *const timespec,
+    ) -> c_int;
 
     pub fn pthread_mutexattr_setrobust(attr: *mut pthread_mutexattr_t, robustness: c_int) -> c_int;
 

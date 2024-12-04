@@ -2693,16 +2693,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d75a2a4b1b190afb6f5425f10f6a8f959d2ea0b9c2b1d79553551850539e4674"
 
 [[package]]
-name = "jemalloc-sys"
-version = "0.5.4+5.3.0-patched"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac6c1946e1cea1788cbfde01c993b52a10e2da07f4bac608228d1bed20bfebf2"
-dependencies = [
- "cc",
- "libc",
-]
-
-[[package]]
 name = "jobserver"
 version = "0.1.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3120,7 +3110,6 @@ dependencies = [
  "ctrlc",
  "directories",
  "getrandom",
- "jemalloc-sys",
  "libc",
  "libffi",
  "libloading",
@@ -3130,6 +3119,7 @@ dependencies = [
  "rustc_version",
  "smallvec",
  "tempfile",
+ "tikv-jemalloc-sys",
  "ui_test",
  "windows-sys 0.52.0",
 ]
@@ -4114,12 +4104,12 @@ checksum = "c7fb8039b3032c191086b10f11f319a6e99e1e82889c5cc6046f515c9db1d497"
 name = "rustc-main"
 version = "0.0.0"
 dependencies = [
- "jemalloc-sys",
  "rustc_codegen_ssa",
  "rustc_driver",
  "rustc_driver_impl",
  "rustc_smir",
  "stable_mir",
+ "tikv-jemalloc-sys",
 ]
 
 [[package]]
@@ -6373,6 +6363,16 @@ name = "tier-check"
 version = "0.1.0"
 
 [[package]]
+name = "tikv-jemalloc-sys"
+version = "0.6.0+5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cd3c60906412afa9c2b5b5a48ca6a5abe5736aec9eb48ad05037a677e52e4e2d"
+dependencies = [
+ "cc",
+ "libc",
+]
+
+[[package]]
 name = "time"
 version = "0.3.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7039,17 +7039,20 @@ checksum = "6ee99da9c5ba11bd675621338ef6fa52296b76b83305e9b6e5c77d4c286d6d49"
 
 [[package]]
 name = "wasm-component-ld"
-version = "0.5.10"
+version = "0.5.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d4aa6bd7fbe7cffbed29fe3e236fda74419def1bdef6f80f989ec51137edf44"
+checksum = "a2b05c3820968b335f10e703218459e4fd2cc91fdfc8f7936a993f1aacaa0938"
 dependencies = [
  "anyhow",
  "clap",
  "lexopt",
+ "libc",
  "tempfile",
  "wasi-preview1-component-adapter-provider",
  "wasmparser 0.219.1",
  "wat",
+ "windows-sys 0.59.0",
+ "winsplit",
  "wit-component",
  "wit-parser",
 ]
@@ -7461,6 +7464,12 @@ checksum = "f593a95398737aeed53e489c785df13f3618e41dbcd6718c6addbf1395aa6876"
 dependencies = [
  "memchr",
 ]
+
+[[package]]
+name = "winsplit"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ab703352da6a72f35c39a533526393725640575bb211f61987a2748323ad956"
 
 [[package]]
 name = "wit-component"

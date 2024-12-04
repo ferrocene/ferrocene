@@ -394,6 +394,8 @@ declare_features! (
     (unstable, async_fn_track_caller, "1.73.0", Some(110011)),
     /// Allows `for await` loops.
     (unstable, async_for_loop, "1.77.0", Some(118898)),
+    /// Allows `async` trait bound modifier.
+    (unstable, async_trait_bounds, "CURRENT_RUSTC_VERSION", Some(62290)),
     /// Allows using C-variadics.
     (unstable, c_variadic, "1.34.0", Some(44930)),
     /// Allows the use of `#[cfg(<true/false>)]`.
@@ -497,8 +499,6 @@ declare_features! (
     (unstable, gen_blocks, "1.75.0", Some(117078)),
     /// Infer generic args for both consts and types.
     (unstable, generic_arg_infer, "1.55.0", Some(85077)),
-    /// An extension to the `generic_associated_types` feature, allowing incomplete features.
-    (incomplete, generic_associated_types_extended, "1.61.0", Some(95451)),
     /// Allows non-trivial generic constants which have to have wfness manually propagated to callers
     (incomplete, generic_const_exprs, "1.56.0", Some(76560)),
     /// Allows generic parameters and where-clauses on free & associated const items.

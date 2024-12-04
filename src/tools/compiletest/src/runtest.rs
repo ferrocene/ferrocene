@@ -350,10 +350,13 @@ impl<'test> TestCx<'test> {
             }
         } else {
             if proc_res.status.success() {
-                self.fatal_proc_rec(
-                    &format!("{} test compiled successfully!", self.config.mode)[..],
-                    proc_res,
-                );
+                {
+                    self.error(&format!("{} test did not emit an error", self.config.mode));
+                    if self.config.mode == crate::common::Mode::Ui {
+                        println!("note: by default, ui tests are expected not to compile");
+                    }
+                    proc_res.fatal(None, || ());
+                };
             }
 
             if !self.props.dont_check_failure_status {
@@ -2541,13 +2544,10 @@ impl<'test> TestCx<'test> {
             return 0;
         }
 
-        // If `compare-output-lines-by-subset` is not explicitly enabled then
-        // auto-enable it when a `runner` is in use since wrapper tools might
-        // provide extra output on failure, for example a WebAssembly runtime
-        // might print the stack trace of an `unreachable` instruction by
-        // default.
-        let compare_output_by_lines =
-            self.props.compare_output_lines_by_subset || self.config.runner.is_some();
+        // Wrapper tools set by `runner` might provide extra output on failure,
+        // for example a WebAssembly runtime might print the stack trace of an
+        // `unreachable` instruction by default.
+        let compare_output_by_lines = self.config.runner.is_some();
 
         let tmp;
         let (expected, actual): (&str, &str) = if compare_output_by_lines {

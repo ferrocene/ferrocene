@@ -17,8 +17,11 @@ const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "check-run-results",
     "check-stdout",
     "check-test-line-numbers-match",
+<<<<<<< HEAD
     "compare-output-lines-by-subset",
     "compile-args",
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "compile-flags",
     "doc-flags",
     "dont-check-compiler-stderr",
@@ -156,6 +159,7 @@ const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "needs-sanitizer-thread",
     "needs-std-debug-assertions",
     "needs-symlink",
+    "needs-target-has-atomic",
     "needs-threads",
     "needs-unwind",
     "needs-wasmtime",

@@ -7,9 +7,8 @@ fn main() {
     //~^ WARN denote infinite loops with
 
     [(); { for _ in 0usize.. {}; 0}];
-    //~^ ERROR `for` is not allowed in a `const`
-    //~| ERROR cannot convert
-    //~| ERROR cannot call
+    //~^ ERROR cannot use `for`
+    //~| ERROR cannot use `for`
 }
 
 // ferrocene-annotations: fls_dw33yt5g6m0k

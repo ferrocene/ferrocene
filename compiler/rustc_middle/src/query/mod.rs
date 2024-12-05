@@ -958,11 +958,6 @@ rustc_queries! {
         desc { |tcx| "checking for unstable API usage in {}", describe_as_module(key, tcx) }
     }
 
-    /// Checks the const bodies in the module for illegal operations (e.g. `if` or `loop`).
-    query check_mod_const_bodies(key: LocalModDefId) {
-        desc { |tcx| "checking consts in {}", describe_as_module(key, tcx) }
-    }
-
     /// Checks the loops in the module.
     query check_mod_loops(key: LocalModDefId) {
         desc { |tcx| "checking loops in {}", describe_as_module(key, tcx) }
@@ -1086,6 +1081,8 @@ rustc_queries! {
     }
 
     /// Computes the tag (if any) for a given type and variant.
+    /// `None` means that the variant doesn't need a tag (because it is niched).
+    /// Will panic for uninhabited variants.
     query tag_for_variant(
         key: (Ty<'tcx>, abi::VariantIdx)
     ) -> Option<ty::ScalarInt> {

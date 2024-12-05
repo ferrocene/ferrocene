@@ -28,6 +28,10 @@ Language changes in Rust 1.82.0
 
 * `Patterns matching empty types can now be omitted in common cases <https://github.com/rust-lang/rust/pull/122792>`_
 
+  * New section: :ref:`fls_mcxF9y5u66sZ`
+
+  * Changed paragraphs: :p:`fls_9fjspnefoyvz`, :p:`fls_uq7ftuuq1sig`, :p:`fls_cfoy86mkmqa4`, :p:`fls_rnppz6y5z8pi`, :p:`fls_x0bmzl1315gq`, :p:`fls_MK83WE0iDqNf`
+
 * `Enforce supertrait outlives obligations when using trait impls <https://github.com/rust-lang/rust/pull/124336>`_
 
   * No change: the concrete type inference resolution is not part of the FLS

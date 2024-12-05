@@ -1,5 +1,4 @@
 ---
-
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
@@ -22,12 +21,12 @@
   repo: ferrocene/specification
   ref: main
 
-- path: ferrocene/library/libc
-  repo: rust-lang/libc
-  ref: libc-0.2
-  after:
-    # cargo update -p libc --manifest-path=library/Cargo.toml
-    - update-cargo-lock libc library
+# - path: ferrocene/library/libc
+#   repo: rust-lang/libc
+#   ref: libc-0.2
+#   after:
+#     # cargo update -p libc --manifest-path=library/Cargo.toml
+#     - update-cargo-lock libc library
 
 - path: ferrocene/library/backtrace-rs
   repo: rust-lang/backtrace-rs

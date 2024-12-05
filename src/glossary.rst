@@ -7685,6 +7685,30 @@ visibility modifier
 A :dt:`visibility modifier` sets the :t:`visibility` of the :t:`name` of an
 :t:`item`.
 
+.. _fls_dLlUt8PrXAls:
+
+visible emptiness
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_shXDYqnUy2Pb`
+:dt:`Visible emptiness <visible emptiness>` is a property of :t:`[type]s` and :t:`[enum variant]s` that have no :t:`[value]s` that are fully observable.
+
+.. _fls_EnT5zRuwviWM:
+
+visible empty enum variant
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_MQiPWNwdk95I`
+A :dt:`visible empty enum variant` is an :t:`enum variant` subject to :t:`visible emptiness`.
+
+.. _fls_HYWQ0lJS3TET:
+
+visible empty type
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_OLVD0u9w68Gl`
+A :dt:`visible empty type` is a :t:`type` subject to :t:`visible emptiness`.
+
 .. _fls_iplp3gvfbcpw:
 
 weak keyword

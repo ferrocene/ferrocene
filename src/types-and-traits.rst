@@ -2204,6 +2204,53 @@ be modified through :t:`[immutable reference]s`.
 A :t:`type` is subject to :t:`interior mutability` when it contains a
 :std:`core::cell::UnsafeCell`.
 
+.. _fls_mcxF9y5u66sZ:
+
+Visible Emptiness
+~~~~~~~~~~~~~~~~~
+
+.. rubric:: Legality Rules
+
+:dp:`fls_SD4yUEQ9hHa3`
+:t:`Visible emptiness <visible emptiness>` is a property of :t:`[type]s` and :t:`[enum variant]s` that have no :t:`[value]s` that are fully observable.
+
+:dp:`fls_GeoneCP5TYwf`
+A :t:`visible empty type` is a :t:`type` subject to :t:`visible emptiness`.
+
+:dp:`fls_A2W4v53ihTGx`
+A :t:`visible empty enum variant` is an :t:`enum variant` subject to :t:`visible emptiness`.
+
+:dp:`fls_AXOtKdSQR4AF`
+A :t:`type` is subject to :t:`visible emptiness` as follows:
+
+* :dp:`fls_ZfnYORORz40y`
+  The :t:`type` is the :t:`never type`.
+
+* :dp:`fls_TE2GBnZX2YFW`
+  The :t:`type` is a :t:`zero-variant enum type`.
+
+* :dp:`fls_GNFzLMH8RBUC`
+  The :t:`type` is an :t:`enum type` not subject to :t:`attribute` :c:`non_exhaustive` where all :t:`[enum variant]s` are subject to :t:`visible emptiness`.
+
+* :dp:`fls_fSNrRsgzLd0E`
+  The :t:`type` is a :t:`struct type` not subject to :t:`attribute` :c:`non_exhaustive` with at least one :t:`visible <visibility>` :t:`field` whose :t:`type` is subject to :t:`visible emptiness`.
+
+* :dp:`fls_R65LmGTvSlIm`
+  The :t:`type` is a :t:`tuple type` with at least one of the contained :t:`[type]s` is subject to :t:`visible emptiness`.
+
+* :dp:`fls_yiPv3wKYkSRl`
+  The :t:`type` is an :t:`array type` with a non-zero :t:`size operand` and an :t:`element type` that is subject to :t:`visible emptiness`.
+
+
+:dp:`fls_S9QL6yVF5LFI`
+A :t:`enum variant` is subject to :t:`visible emptiness` as follows:
+
+* :dp:`fls_xegU2TFXypcu`
+  The respective :t:`enum type` is not subject to :t:`attribute` :c:`non_exhaustive`.
+
+* :dp:`fls_2CWUWbYT9KcT`
+  The :t:`type` of at least one of the :t:`enum variant`'s visible <visibility> :t:`[field]s` is subject to :t:`visible emptiness`.
+
 .. _fls_lv7w7aalpwm5:
 
 Type Inference

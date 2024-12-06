@@ -5,6 +5,7 @@ members = [
   "ferrocene/tools/self-test/",
   "ferrocene/tools/document-signatures/",
   "ferrocene/tools/generate-tarball/",
+  "ferrocene/tools/nuttx-test-helper",
 
   "compiler/rustc",
   "src/etc/test-float-parse",

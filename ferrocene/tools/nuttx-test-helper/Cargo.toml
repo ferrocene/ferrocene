@@ -1,0 +1,3 @@
+[package]
+name = "nuttx-test-helper"
+edition = "2021"

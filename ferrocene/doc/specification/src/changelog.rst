@@ -30,6 +30,9 @@ Language changes in Rust 1.83.0
   * No change: this previous restriction is not specified in the FLS
 
 * `Implement raw lifetimes and labels (\`'r#ident\`). <https://github.com/rust-lang/rust/pull/126452>`_
+
+  * Changed syntax: :s:`Lifetime`
+
 * `Define behavior when atomic and non-atomic reads race. <https://github.com/rust-lang/rust/pull/128778>`_
 * `Non-exhaustive structs may now be empty. <https://github.com/rust-lang/rust/pull/128934>`_
 * `Disallow implicit coercions from places of type \`!\` <https://github.com/rust-lang/rust/pull/129392>`_

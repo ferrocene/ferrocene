@@ -38,6 +38,11 @@ Language changes in Rust 1.83.0
   * No change: Already covered by the definition of :t:`data race`.
 
 * `Non-exhaustive structs may now be empty. <https://github.com/rust-lang/rust/pull/128934>`_
+
+  * Removed paragraph: :p:`fls_2CWUWbYT9KcT`
+
+  * Changed paragraph: :p:`fls_fSNrRsgzLd0E`, :p:`fls_S9QL6yVF5LFI`
+
 * `Disallow implicit coercions from places of type \`!\` <https://github.com/rust-lang/rust/pull/129392>`_
 * `\`const extern\` functions can now be defined for other calling conventions. <https://github.com/rust-lang/rust/pull/129753>`_
 * `Stabilize \`expr_2021\` macro fragment specifier in all editions. <https://github.com/rust-lang/rust/pull/129972>`_

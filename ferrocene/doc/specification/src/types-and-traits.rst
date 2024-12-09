@@ -2233,7 +2233,7 @@ A :t:`type` is subject to :t:`visible emptiness` as follows:
   The :t:`type` is an :t:`enum type` not subject to :t:`attribute` :c:`non_exhaustive` where all :t:`[enum variant]s` are subject to :t:`visible emptiness`.
 
 * :dp:`fls_fSNrRsgzLd0E`
-  The :t:`type` is a :t:`struct type` not subject to :t:`attribute` :c:`non_exhaustive` with at least one :t:`visible <visibility>` :t:`field` whose :t:`type` is subject to :t:`visible emptiness`.
+  The :t:`type` is a :t:`struct type` with at least one :t:`visible <visibility>` :t:`field` whose :t:`type` is subject to :t:`visible emptiness`.
 
 * :dp:`fls_R65LmGTvSlIm`
   The :t:`type` is a :t:`tuple type` with at least one of the contained :t:`[type]s` is subject to :t:`visible emptiness`.
@@ -2241,15 +2241,8 @@ A :t:`type` is subject to :t:`visible emptiness` as follows:
 * :dp:`fls_yiPv3wKYkSRl`
   The :t:`type` is an :t:`array type` with a non-zero :t:`size operand` and an :t:`element type` that is subject to :t:`visible emptiness`.
 
-
 :dp:`fls_S9QL6yVF5LFI`
-A :t:`enum variant` is subject to :t:`visible emptiness` as follows:
-
-* :dp:`fls_xegU2TFXypcu`
-  The respective :t:`enum type` is not subject to :t:`attribute` :c:`non_exhaustive`.
-
-* :dp:`fls_2CWUWbYT9KcT`
-  The :t:`type` of at least one of the :t:`enum variant`'s visible <visibility> :t:`[field]s` is subject to :t:`visible emptiness`.
+A :t:`enum variant` is subject to :t:`visible emptiness` when the :t:`type` of at least one of the :t:`enum variant`'s :t:`visible <visibility>` :t:`[field]s` is subject to :t:`visible emptiness`.
 
 .. _fls_lv7w7aalpwm5:
 

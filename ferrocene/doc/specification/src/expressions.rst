@@ -194,8 +194,7 @@ involve :t:`[type]s` that require :t:`destruction`:
   :t:`[Constant parameter]s`,
 
 * :dp:`fls_to4e7imq2c0w`
-  :t:`[Dereference expression]s` when the :t:`operand` is not of a
-  :t:`raw pointer type`,
+  :t:`[Dereference expression]s`,
 
 * :dp:`fls_krtbrpwf3mh0`
   :t:`[Expression statement]s`,
@@ -211,8 +210,7 @@ involve :t:`[type]s` that require :t:`destruction`:
   :t:`[If let expression]s`,
 
 * :dp:`fls_6g7c1kjrmfnr`
-  :t:`[Immutable borrow expression]s` where the borrowed :t:`type` is not
-  subject to :t:`interior mutability`.
+  :t:`[Immutable borrow expression]s`.
 
 * :dp:`fls_rpapnm3afan8`
   :t:`[Index expression]s`,
@@ -251,8 +249,7 @@ involve :t:`[type]s` that require :t:`destruction`:
   :t:`[Range expression]s`,
 
 * :dp:`fls_hkbwa8xx2fwx`
-  :t:`[Shared borrow]s` that do not involve :t:`[type]s` with
-  :t:`interior mutability`,
+  :t:`[Borrow]s`,
 
 * :dp:`fls_fobs8ebt7dhc`
   :t:`[Struct expression]s`,

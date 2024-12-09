@@ -27,7 +27,7 @@ Language changes in Rust 1.83.0
 
 * `Allow creating references to statics in \`const\` initializers. <https://github.com/rust-lang/rust/pull/129759>`_
 
-  * No change: this previous restriction is not specified in the FLS
+  * No change: This previous restriction is not specified in the FLS
 
 * `Implement raw lifetimes and labels (\`'r#ident\`). <https://github.com/rust-lang/rust/pull/126452>`_
 
@@ -45,9 +45,12 @@ Language changes in Rust 1.83.0
 
 * `Disallow implicit coercions from places of type \`!\` <https://github.com/rust-lang/rust/pull/129392>`_
 
-  * No change: the FLS does not specify type inference to such a degree
+  * No change: The FLS does not specify type inference to such a degree
 
 * `\`const extern\` functions can now be defined for other calling conventions. <https://github.com/rust-lang/rust/pull/129753>`_
+
+  * No change: This previous restriction is not specified in the FLS
+
 * `Stabilize \`expr_2021\` macro fragment specifier in all editions. <https://github.com/rust-lang/rust/pull/129972>`_
 * `The \`non_local_definitions\` lint now fires on less code and warns by default. <https://github.com/rust-lang/rust/pull/127117>`_
 

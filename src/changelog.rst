@@ -52,6 +52,11 @@ Language changes in Rust 1.83.0
   * No change: This previous restriction is not specified in the FLS
 
 * `Stabilize \`expr_2021\` macro fragment specifier in all editions. <https://github.com/rust-lang/rust/pull/129972>`_
+
+  * Changed syntax: :s:`MacroFragmentSpecifier`
+
+  * Changed paragraphs: :p:`fls_k00bck2k8tde`, :p:`fls_PxR9vNHsaFnI`
+
 * `The \`non_local_definitions\` lint now fires on less code and warns by default. <https://github.com/rust-lang/rust/pull/127117>`_
 
 Language changes in Rust 1.82.0

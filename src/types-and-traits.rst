@@ -2997,7 +2997,7 @@ Lifetimes
 .. syntax::
 
    Lifetime ::=
-       $$'$$ NonKeywordIdentifier
+       $$'$$ (NonKeywordIdentifier | RawIdentifierKeyword)
 
    AttributedLifetime ::=
        OuterAttributeOrDoc* Lifetime

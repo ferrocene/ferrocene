@@ -59,6 +59,8 @@ Language changes in Rust 1.83.0
 
 * `The \`non_local_definitions\` lint now fires on less code and warns by default. <https://github.com/rust-lang/rust/pull/127117>`_
 
+  * No change: Lints are not part of the FLS
+
 Language changes in Rust 1.82.0
 -------------------------------
 

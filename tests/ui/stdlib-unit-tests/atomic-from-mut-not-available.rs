@@ -25,3 +25,6 @@ fn main() {
     //[alignment_mismatch]~^ ERROR no function or associated item named `from_mut` found for struct `AtomicU64`
     //[alignment_matches]~^^ ERROR use of unstable library feature `atomic_from_mut`
 }
+
+// ferrocene-annotations: fls_vyc9vcuamlph
+// Atomics

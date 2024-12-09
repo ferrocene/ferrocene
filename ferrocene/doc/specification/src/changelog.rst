@@ -26,6 +26,9 @@ Language changes in Rust 1.83.0
   * Changed paragraphs: :p:`fls_to4e7imq2c0w`, :p:`fls_6g7c1kjrmfnr`, :p:`fls_hkbwa8xx2fwx`
 
 * `Allow creating references to statics in \`const\` initializers. <https://github.com/rust-lang/rust/pull/129759>`_
+
+  * No change: this previous restriction is not specified in the FLS
+
 * `Implement raw lifetimes and labels (\`'r#ident\`). <https://github.com/rust-lang/rust/pull/126452>`_
 * `Define behavior when atomic and non-atomic reads race. <https://github.com/rust-lang/rust/pull/128778>`_
 * `Non-exhaustive structs may now be empty. <https://github.com/rust-lang/rust/pull/128934>`_

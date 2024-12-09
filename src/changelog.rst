@@ -18,6 +18,18 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.83.0
+-------------------------------
+
+* `Stabilize \`&mut\`, \`*mut\`, \`&Cell\`, and \`*const Cell\` in const. <https://github.com/rust-lang/rust/pull/129195>`_
+* `Allow creating references to statics in \`const\` initializers. <https://github.com/rust-lang/rust/pull/129759>`_
+* `Implement raw lifetimes and labels (\`'r#ident\`). <https://github.com/rust-lang/rust/pull/126452>`_
+* `Define behavior when atomic and non-atomic reads race. <https://github.com/rust-lang/rust/pull/128778>`_
+* `Non-exhaustive structs may now be empty. <https://github.com/rust-lang/rust/pull/128934>`_
+* `Disallow implicit coercions from places of type \`!\` <https://github.com/rust-lang/rust/pull/129392>`_
+* `\`const extern\` functions can now be defined for other calling conventions. <https://github.com/rust-lang/rust/pull/129753>`_
+* `Stabilize \`expr_2021\` macro fragment specifier in all editions. <https://github.com/rust-lang/rust/pull/129972>`_
+* `The \`non_local_definitions\` lint now fires on less code and warns by default. <https://github.com/rust-lang/rust/pull/127117>`_
 
 Language changes in Rust 1.82.0
 -------------------------------

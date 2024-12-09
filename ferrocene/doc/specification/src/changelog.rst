@@ -44,6 +44,9 @@ Language changes in Rust 1.83.0
   * Changed paragraph: :p:`fls_fSNrRsgzLd0E`, :p:`fls_S9QL6yVF5LFI`
 
 * `Disallow implicit coercions from places of type \`!\` <https://github.com/rust-lang/rust/pull/129392>`_
+
+  * No change: the FLS does not specify type inference to such a degree
+
 * `\`const extern\` functions can now be defined for other calling conventions. <https://github.com/rust-lang/rust/pull/129753>`_
 * `Stabilize \`expr_2021\` macro fragment specifier in all editions. <https://github.com/rust-lang/rust/pull/129972>`_
 * `The \`non_local_definitions\` lint now fires on less code and warns by default. <https://github.com/rust-lang/rust/pull/127117>`_

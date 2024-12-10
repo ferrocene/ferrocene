@@ -119,6 +119,7 @@ Metavariables
    MacroFragmentSpecifier ::=
        $$block$$
      | $$expr$$
+     | $$expr_2021$$
      | $$ident$$
      | $$item$$
      | $$lifetime$$
@@ -158,7 +159,7 @@ a :t:`metavariable`.
 :dt:`[fragment specifier restriction]s` on the :t:`[token]s` that follow them:
 
 * :dp:`fls_PxR9vNHsaFnI`
-  ``expr`` shall only be followed by ``=>``, ``,``, or ``;``.
+  ``expr`` and ``expr_2021`` shall only be followed by ``=>``, ``,``, or ``;``.
 
 * :dp:`fls_ePyoTeJJ11N0`
   ``pat`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``if``, or
@@ -840,7 +841,7 @@ A :t:`metavariable` in a :t:`macro matcher` is matched against a sequence of
   :t:`Fragment specifier` **block** requires a :t:`block expression`.
 
 * :dp:`fls_k00bck2k8tde`
-  :t:`Fragment specifier` **expr** requires an :t:`expression`.
+  :t:`Fragment specifier` **expr** and **expr_2021** requires an :t:`expression` that is not an :t:`underscore expression` or :t:`const block expression`.
 
 * :dp:`fls_pf0qrz5nadl2`
   :t:`Fragment specifier` **ident** requires a :t:`pure identifier`.

@@ -1535,6 +1535,7 @@ Weak Keywords
        $$macro_rules$$
      | $$'static$$
      | $$union$$
+     | $$safe$$
 
 .. rubric:: Legality Rules
 
@@ -1553,4 +1554,7 @@ Word ``'static`` acts as a :t:`keyword` only when used in the context of a
 :dp:`fls_r9fhuiq1ys1p`
 Word ``union`` acts as a :t:`keyword` only when used in the context of a
 :s:`UnionDeclaration`.
+
+:dp:`fls_g0JEluWqBpNc`
+Word ``safe`` acts as a :t:`keyword` only when used as a qualifier of :s:`Function` or :s:`Static` in the context of a :s:`ExternalBlock`.
 

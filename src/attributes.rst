@@ -157,6 +157,7 @@ Built-in Attributes
      | TestContent
      | TrackCallerContent
      | TypeLengthLimitContent
+     | UnsafeContent
      | UsedContent
      | WindowsSubsystemContent
 
@@ -225,6 +226,9 @@ The following :t:`[built-in attribute]s` are :dt:`[diagnostics attribute]s`:
 
 * :dp:`fls_NrTL2FruARAv`
   :t:`Attribute` ``expect``.
+
+* :dp:`fls_4d2ArC50kNWL`
+  :t:`Attribute` ``unsafe``.
 
 :dp:`fls_3fxhz0olhbcy`
 The following :t:`[built-in attribute]s` are :dt:`[documentation attribute]s`:
@@ -1357,6 +1361,45 @@ related :t:`type`.
        first_field: i16,
        second_field: i8
    }
+
+.. _fls_19LnTi3WabFd:
+
+Attribute ``unsafe``
+^^^^^^^^^^^^^^^^^^^^
+
+.. rubric:: Syntax
+
+.. syntax::
+
+   UnsafeContent ::=
+       $$unsafe$$ $$($$ BuiltinAttributeContent $$)$$
+
+.. rubric:: Legality Rules
+
+:dp:`fls_5pjo3nGOxbVw`
+:t:`Attribute` :c:`unsafe` shall apply to what the contained :t:`attribute` applies to.
+
+:dp:`fls_gpxlWbQUNsj8`
+:t:`Attribute` :c:`unsafe` behaves like the contained :t:`attribute`.
+
+:dp:`fls_PhrfxSBvXTPV`
+The contained :t:`attribute` shall be one of:
+
+* :dp:`fls_pCSew95bKJJ5`
+  :t:`attribute` :c:`no_mangle`,
+
+  :dp:`fls_NRLgmOXxuljQ`
+  :t:`attribute` :c:`export_name`, or
+
+  :dp:`fls_ykpxNByUDyHG`
+  :t:`attribute` :c:`link_section`,
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   #[unsafe(no_mangle)]
+   pub fn clear_name() {}
 
 .. _fls_7skf24auayqy:
 

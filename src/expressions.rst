@@ -2218,7 +2218,7 @@ A :t:`type cast expression` with the following characteristics performs a
 
 * :dp:`fls_bhw2j9wjpf2x`
   An :t:`operand` of a :t:`function pointer type` and a target :t:`integer type`
-  perform :t:`function-pointer-to-address` cast. A
+  perform :t:`function-pointer-to-address cast`. A
   :dt:`function-pointer-to-address cast` produces an integer that represents the
   machine address of the referenced :t:`function`. If the :t:`integer type` is
   smaller than the size of the :t:`function pointer type`, the address is

@@ -73,7 +73,7 @@ of the assignment statement.
 
 :dp:`fls_jmcjboopvytb`
 Variable ``c`` starts off initialized, but is later uninitialized by virtue of a
-transfer by move.
+transfer :t:`by move`.
 
 .. code-block:: rust
 
@@ -400,7 +400,7 @@ An :t:`uninitialized` :t:`variable` is not :t:`dropped`.
 
 #. :dp:`fls_gjn2jnsal9gs`
    Otherwise, if the :t:`drop type` is a :t:`closure type`, then all
-   :t:`[capture target]s` whose :t:`capture mode` is :t:`by move mode` are
+   :t:`[capture target]s` whose :t:`capture mode` is :t:`by move` are
    :t:`dropped` in unspecified order.
 
 #. :dp:`fls_ol2w2292frfi`
@@ -660,7 +660,7 @@ has an extended :t:`drop scope` is extended to the :t:`drop scope` of the
 .. rubric:: Examples
 
 :dp:`fls_29y59x8bmw75`
-See :p:`15.6.1. <fls_u2mzjgiwbkz0>` for the declaration of ``PrintOnDrop``.
+See :ref:`fls_u2mzjgiwbkz0` for the declaration of ``PrintOnDrop``.
 
 :dp:`fls_subo2w7ln43q`
 The drop scope of the temporary created for expression ``AtomicI32::new(42)`` is
@@ -715,7 +715,7 @@ When multiple :t:`[drop scope]s` are left at once, the :t:`[value]s` are
 .. rubric:: Examples
 
 :dp:`fls_oe8l81y0wnao`
-See :p:`15.6.1. <fls_u2mzjgiwbkz0>` for the declaration of ``PrintOnDrop``.
+See :ref:`fls_u2mzjgiwbkz0` for the declaration of ``PrintOnDrop``.
 
 :dp:`fls_4sgca9wcl8h0`
 The drop order of the following variables is ``b``, ``c``, ``a``. Dropping

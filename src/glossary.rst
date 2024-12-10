@@ -105,8 +105,7 @@ adjusted call operand
 ^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_mchqbc64iu0u`
-An :dt:`adjusted call operand` is a :t:`call operand` with possible
-:t:`auto-dereferencing` adjustments.
+An :dt:`adjusted call operand` is a :t:`call operand` adjusted with inserted :t:`[borrow expression]s` and :t:`[dereference expression]s`.
 
 .. _fls_j775guurkgo4:
 
@@ -6806,7 +6805,7 @@ trivial predicate
 
 :dp:`fls_db5njwrjolhs`
 A :dt:`trivial predicate` is a :t:`where clause predicate` that does not use
-the :t:`[generic parameter]s` or :t:`[higher-ranked lifetime]s` of the related
+the :t:`[generic parameter]s` or :t:`[higher-ranked trait bound]s` of the related
 :t:`construct`.
 
 .. _fls_si70t19ox07e:
@@ -7442,6 +7441,14 @@ unsafe context
 :dp:`fls_qn1s845ejbu0`
 An :dt:`unsafe context` is either an :t:`unsafe block` or an
 :t:`unsafe function`.
+
+.. _fls_pre02nas9dad:
+
+unsafe external block
+^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_pkfgas34msas`
+An :dt:`unsafe external block` is an :t:`external block` subject to keyword ``unsafe``.
 
 .. _fls_ua64pv82skaw:
 

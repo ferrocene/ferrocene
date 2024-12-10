@@ -402,7 +402,7 @@ then the :t:`path segment` shall be the last :t:`path segment` of the
 .. rubric:: Examples
 
 :dp:`fls_cul31g1kkz5c`
-The following is a simple path. See :p:`14.2. <fls_q13sty1g9jtn>` for the
+The following is a simple path. See :ref:`fls_jdknpu3kf865` for the
 declaration of ``crate_visible_function``.
 
 .. code-block:: rust
@@ -1138,7 +1138,7 @@ the :t:`visibility` of the :t:`name` is the most permissive one.
 .. rubric:: Examples
 
 :dp:`fls_5dlnffim6fso`
-The following is a glob import. See :p:`14.2. <fls_q13sty1g9jtn>`
+The following is a glob import. See :ref:`fls_jdknpu3kf865`
 for the declaration of modules and functions. The imported functions
 are ``create_visible_function``, ``outer_module_visible_function``,
 ``visible_function``.

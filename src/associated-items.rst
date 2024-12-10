@@ -63,7 +63,7 @@ or :c:`Self` and ``'lifetime`` is the :t:`lifetime parameter`, when
 
 * :dp:`fls_6Z05BK2JSzpP`
   The corresponding :t:`lifetime argument` in the use is not the ``'static``
-  :t:`lifetime` and has either an explicit :t:`bound` or an :t:`implicit bound`
+  :t:`lifetime` and has either an explicit :t:`bound` or an :t:`implied bound`
   that constrains the :t:`type parameter`, and
 
 * :dp:`fls_AtItgS1UvwiX`

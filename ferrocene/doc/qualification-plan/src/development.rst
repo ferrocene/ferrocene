@@ -184,7 +184,7 @@ If the workflow fails, the current PR is moved back to :ref:`dev-phase-review`.
 Integrating Upstream Changes
 ----------------------------
 
-Every day, the Ferrocene CI infrastructure detects changes made in the
+Every weekday, the Ferrocene CI infrastructure detects changes made in the
 upstream GitHub repository, then checks whether the changes would produce a
 merge conflict if merged into the Ferrocene ``main`` branch. If no issues are
 found, the Ferrocene CI infrastructure creates a PR with those changes. The goal

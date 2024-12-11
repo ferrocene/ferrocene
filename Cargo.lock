@@ -4066,7 +4066,7 @@ dependencies = [
  "regex",
  "serde_json",
  "similar",
- "wasmparser 0.216.0",
+ "wasmparser 0.219.1",
 ]
 
 [[package]]
@@ -4408,6 +4408,7 @@ dependencies = [
  "rustc_abi",
  "rustc_arena",
  "rustc_ast",
+ "rustc_ast_pretty",
  "rustc_attr",
  "rustc_data_structures",
  "rustc_errors",
@@ -4433,7 +4434,7 @@ dependencies = [
  "thin-vec",
  "thorin-dwp",
  "tracing",
- "wasm-encoder 0.216.0",
+ "wasm-encoder 0.219.1",
  "windows",
 ]
 
@@ -7084,15 +7085,6 @@ dependencies = [
 
 [[package]]
 name = "wasm-encoder"
-version = "0.216.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04c23aebea22c8a75833ae08ed31ccc020835b12a41999e58c31464271b94a88"
-dependencies = [
- "leb128",
-]
-
-[[package]]
-name = "wasm-encoder"
 version = "0.219.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "29cbbd772edcb8e7d524a82ee8cef8dd046fc14033796a754c3ad246d019fa54"
@@ -7125,16 +7117,6 @@ dependencies = [
  "spdx",
  "wasm-encoder 0.219.1",
  "wasmparser 0.219.1",
-]
-
-[[package]]
-name = "wasmparser"
-version = "0.216.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bcdee6bea3619d311fb4b299721e89a986c3470f804b6d534340e412589028e3"
-dependencies = [
- "bitflags",
- "indexmap",
 ]
 
 [[package]]

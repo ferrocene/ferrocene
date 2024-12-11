@@ -190,8 +190,8 @@ pub fn parse_config(args: Vec<String>) -> Config {
     let (argv0, args_) = args.split_first().unwrap();
     if args.len() == 1 || args[1] == "-h" || args[1] == "--help" {
         let message = format!("Usage: {} [OPTIONS] [TESTNAME...]", argv0);
-        println!("{}", opts.usage(&message));
-        println!();
+        eprintln!("{}", opts.usage(&message));
+        eprintln!();
         panic!()
     }
 
@@ -202,8 +202,8 @@ pub fn parse_config(args: Vec<String>) -> Config {
 
     if matches.opt_present("h") || matches.opt_present("help") {
         let message = format!("Usage: {} [OPTIONS]  [TESTNAME...]", argv0);
-        println!("{}", opts.usage(&message));
-        println!();
+        eprintln!("{}", opts.usage(&message));
+        eprintln!();
         panic!()
     }
 
@@ -510,7 +510,7 @@ pub fn run_tests(config: Arc<Config>) {
             // easy to miss which tests failed, and as such fail to reproduce
             // the failure locally.
 
-            println!(
+            eprintln!(
                 "Some tests failed in compiletest suite={}{} mode={} host={} target={}",
                 config.suite,
                 config

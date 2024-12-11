@@ -379,6 +379,11 @@ Floating Point Types
 :dp:`fls_yqflrq9s6p6n`
 :t:`Type` :c:`f64` is equivalent to the IEEE 754-2008 binary64 :t:`type`.
 
+.. rubric:: Dynamic Semantics
+
+:dp:`fls_nuFAwLHOdQBx`
+Operations on values of :t:`floating point types` may not preserve the sign bit in case of the value being a IEEE floating-point ``NaN``.
+
 .. _fls_3qnpv2z7yjil:
 
 Integer Types
@@ -1108,10 +1113,20 @@ Impl Trait Types
 .. syntax::
 
    ImplTraitTypeSpecification ::=
-       $$impl$$ TypeBoundList
+       $$impl$$ UseCaptures? TypeBoundList
 
    ImplTraitTypeSpecificationOneBound ::=
-       $$impl$$ TraitBound
+       $$impl$$ UseCaptures? TraitBound
+
+   UseCaptures ::=
+        $$<$$ UseCapturesGenericArgs? $$>$$
+
+   UseCapturesGenericArgs ::=
+       UseCapturesGenericArg ($$,$$ UseCapturesGenericArg)* $$,$$?
+
+   UseCapturesGenericArg ::=
+       Lifetime
+     | Identifier
 
 .. rubric:: Legality Rules
 
@@ -1140,6 +1155,18 @@ of the :t:`return type`'s :t:`function` and its parent :t:`trait` or
 
 :dp:`fls_ECjhEI7eCwAj`
 An :t:`impl trait type` shall not contain :t:`[opt-out trait bound]s`.
+
+:dp:`fls_69hqMjvNno9u`
+An :t:`use capture` is a :t:`generic parameter` referenced via keyword ``use`` within an :t:`anonymous return type`.
+
+:dp:`fls_OnyR0Wsfk7KI`
+:t:`[use capture]s` shall only be used within :t:`[anonymous return type]s`.
+
+:dp:`fls_KgH6c5cC4S0G`
+An :t:`anonymous return type` that does not specify a list of :t:`[use capture]s` implicitly :t:`[use capture]s` all :t:`[type parameter]s` and :t:`[constant parameter]s` that are in :t:`scope`.
+
+:dp:`fls_iT9WCNfUZQnC`
+An :t:`anonymous return type` behaves as if it contained all its :t:`[use capture]s`.
 
 .. rubric:: Examples
 
@@ -2177,6 +2204,46 @@ be modified through :t:`[immutable reference]s`.
 A :t:`type` is subject to :t:`interior mutability` when it contains a
 :std:`core::cell::UnsafeCell`.
 
+.. _fls_mcxF9y5u66sZ:
+
+Visible Emptiness
+~~~~~~~~~~~~~~~~~
+
+.. rubric:: Legality Rules
+
+:dp:`fls_SD4yUEQ9hHa3`
+:t:`Visible emptiness <visible emptiness>` is a property of :t:`[type]s` and :t:`[enum variant]s` that have no :t:`[value]s` that are fully observable.
+
+:dp:`fls_GeoneCP5TYwf`
+A :t:`visible empty type` is a :t:`type` subject to :t:`visible emptiness`.
+
+:dp:`fls_A2W4v53ihTGx`
+A :t:`visible empty enum variant` is an :t:`enum variant` subject to :t:`visible emptiness`.
+
+:dp:`fls_AXOtKdSQR4AF`
+A :t:`type` is subject to :t:`visible emptiness` as follows:
+
+* :dp:`fls_ZfnYORORz40y`
+  The :t:`type` is the :t:`never type`.
+
+* :dp:`fls_TE2GBnZX2YFW`
+  The :t:`type` is a :t:`zero-variant enum type`.
+
+* :dp:`fls_GNFzLMH8RBUC`
+  The :t:`type` is an :t:`enum type` not subject to :t:`attribute` :c:`non_exhaustive` where all :t:`[enum variant]s` are subject to :t:`visible emptiness`.
+
+* :dp:`fls_fSNrRsgzLd0E`
+  The :t:`type` is a :t:`struct type` with at least one :t:`visible <visibility>` :t:`field` whose :t:`type` is subject to :t:`visible emptiness`.
+
+* :dp:`fls_R65LmGTvSlIm`
+  The :t:`type` is a :t:`tuple type` with at least one of the contained :t:`[type]s` is subject to :t:`visible emptiness`.
+
+* :dp:`fls_yiPv3wKYkSRl`
+  The :t:`type` is an :t:`array type` with a non-zero :t:`size operand` and an :t:`element type` that is subject to :t:`visible emptiness`.
+
+:dp:`fls_S9QL6yVF5LFI`
+A :t:`enum variant` is subject to :t:`visible emptiness` when the :t:`type` of at least one of the :t:`enum variant`'s :t:`visible <visibility>` :t:`[field]s` is subject to :t:`visible emptiness`.
+
 .. _fls_lv7w7aalpwm5:
 
 Type Inference
@@ -2304,7 +2371,7 @@ any resulting :t:`type` information via :t:`type unification`.
 :dp:`fls_v5dWGuBKvQSJ`
 When an :t:`associated type` ``<Type as Trait>::Assoc`` is referenced within a
 :t:`type inference root` (either explicitly within the source code, or via the
-inferece rules below), an :t:`obligation` requiring that ``Type`` implements
+inference rules below), an :t:`obligation` requiring that ``Type`` implements
 ``Trait`` is introduced.
 
 :dp:`fls_SZgixDCAx6PQ`
@@ -2839,7 +2906,7 @@ Trait and Lifetime Bounds
        $$($$ TraitBound $$)$$
 
    TraitBound ::=
-       $$?$$? ForGenericParameterList? TypePath
+       ($$?$$ | ForGenericParameterList)? TypePath
 
    ForGenericParameterList ::=
        $$for$$ GenericParameterList
@@ -2923,7 +2990,7 @@ Lifetimes
 .. syntax::
 
    Lifetime ::=
-       $$'$$ NonKeywordIdentifier
+       $$'$$ (NonKeywordIdentifier | RawIdentifierKeyword)
 
    AttributedLifetime ::=
        OuterAttributeOrDoc* Lifetime

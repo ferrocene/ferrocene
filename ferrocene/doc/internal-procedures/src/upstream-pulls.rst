@@ -30,10 +30,10 @@ Checkout PR
 ^^^^^^^^^^^
 
 Start by checking out the PR. The name of the branch is
-`automation/pull-upstream/<ID>`, e.g. `automation/pull-upstream/dfvjj2s4`::
+`automation/pull-upstream-master/<ID>`, e.g. `automation/pull-upstream-master/dfvjj2s4`::
 
     git fetch
-    git switch automation/pull-upstream/<ID>
+    git switch automation/pull-upstream-master/<ID>
 
 Fix conflict
 ^^^^^^^^^^^^
@@ -77,7 +77,7 @@ changed the file for is preserved. For example if we changed a bootstrap file,
 we need to port this change to another file. Usually this change needs to
 happen in the same PR.
 
-In the majority of cases, the deleted file is a test which is renamed or moved. In that case, the annotations must be transferred to the moved or renamed test. 
+In the majority of cases, the deleted file is a test which is renamed or moved. In that case, the annotations must be transferred to the moved or renamed test.
 If the test with annotations was just deleted, it is necessary to go to the traceability-matrix and see whether the behavior is still covered by another test.
 That is, the tag is still listed in another test.
 
@@ -86,7 +86,7 @@ As an example, upstream deleted the file `tests/ui/consts/miri_unleashed/mutable
 .. code-block:: rust
 
    <<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
-  // ... 
+  // ...
   // ferrocene-annotations: fls_qztk0bkju9u
   // Borrow Expression
   // ...
@@ -102,10 +102,10 @@ This can be done in a subsequent PR.
 
 
 Unknown conflicts and new errors
-"""""""""""""""""""""""""""""""" 
+""""""""""""""""""""""""""""""""
 
 When an error previously unknown appears, such as a library not being found,
-try to isolate the faulty process that triggered it with `ferrocene/ci/split-tasks.py`. 
+try to isolate the faulty process that triggered it with `ferrocene/ci/split-tasks.py`.
 The list of possible jobs can be found in `.circleci/workflow.yml`.
 
 Then check upstream for related fixes. If the failure was solved later, close the current PR
@@ -172,5 +172,5 @@ Then you can just commit and push the ``deps.rs`` changes.
 Trigger an upstream pull
 ------------------------
 
-When we are delayed, it is recommended to make a manual pull from Github Actions. Choose the job `Automatic upstream pull` > `Run workflow`, 
+When we are delayed, it is recommended to make a manual pull from Github Actions. Choose the job `Automatic upstream pull` > `Run workflow`,
 and set a max number of PRs to be included (upper limit, 150). Please be aware that the more PRs are pulled, the more conflicts; so this is a judgement call.

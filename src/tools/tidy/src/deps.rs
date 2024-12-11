@@ -12,13 +12,8 @@ use cargo_metadata::{Metadata, Package, PackageId};
 #[rustfmt::skip]
 const LICENSES: &[&str] = &[
     // tidy-alphabetical-start
-<<<<<<< HEAD
-    "(MIT OR Apache-2.0) AND Unicode-3.0",                 // unicode_ident (v1.0.14+)
-    "(MIT OR Apache-2.0) AND Unicode-DFS-2016",            // unicode_ident
-=======
     "(MIT OR Apache-2.0) AND Unicode-3.0",                 // unicode_ident (1.0.14)
     "(MIT OR Apache-2.0) AND Unicode-DFS-2016",            // unicode_ident (1.0.12)
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "0BSD OR MIT OR Apache-2.0",                           // adler license
     "0BSD",
     "Apache-2.0 / MIT",
@@ -122,10 +117,7 @@ const EXCEPTIONS: ExceptionList = &[
     ("dissimilar", "Apache-2.0"),                            // rustdoc, rustc_lexer (few tests) via expect-test, (dev deps)
     ("fluent-langneg", "Apache-2.0"),                        // rustc (fluent translations)
     ("foldhash", "Zlib"),                                    // rustc
-<<<<<<< HEAD
     ("insta", "Apache-2.0"),                                 // generate-tarball
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     ("mdbook", "MPL-2.0"),                                   // mdbook
     ("option-ext", "MPL-2.0"),                               // cargo-miri (via `directories`)
     ("rustc_apfloat", "Apache-2.0 WITH LLVM-exception"),     // rustc (license is the same as LLVM uses)

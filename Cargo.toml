@@ -1,5 +1,5 @@
 [workspace]
-resolver = "1"
+resolver = "2"
 members = [
 # tidy-alphabetical-start
   "compiler/rustc",

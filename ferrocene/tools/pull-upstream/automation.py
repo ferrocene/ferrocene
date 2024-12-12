@@ -48,7 +48,7 @@ class PullUpstreamPR(AutomatedPR):
             return AutomationResult.FAILURE
 
     def automation_name(self):
-        return "pull-upstream"
+        return f"pull-upstream-{self._upstream_branch}"
 
     def pr_title(self):
         return f"Automated pull from upstream `{self._upstream_branch}`"

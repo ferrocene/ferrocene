@@ -351,7 +351,7 @@ class PullSubtreePR(AutomatedPR):
         return self.into
 
     def automation_name(self):
-        return "pull-subtrees"
+        return f"pull-subtree-{self.subtree}"
 
     def pr_title(self):
         if len(self.subtree.into) > 1:
@@ -470,4 +470,3 @@ if __name__ == "__main__":
 
     if not (args.subtree is not None and did_use_subtree_arg):
         print(f"warning: --subtree={args.subtree} did not match any subtree in the configuration")
-

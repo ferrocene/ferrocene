@@ -77,7 +77,7 @@ impl Config {
         if self.dry_run() && !cmd.run_always {
             return true;
         }
-        self.verbose(|| eprintln!("running: {cmd:?}"));
+        self.verbose(|| println!("running: {cmd:?}"));
         check_run(cmd, self.is_verbose())
     }
 
@@ -144,7 +144,7 @@ impl Config {
     /// Please see <https://nixos.org/patchelf.html> for more information
     fn fix_bin_or_dylib(&self, fname: &Path) {
         assert_eq!(SHOULD_FIX_BINS_AND_DYLIBS.get(), Some(&true));
-        eprintln!("attempting to patch {}", fname.display());
+        println!("attempting to patch {}", fname.display());
 
         // Only build `.nix-deps` once.
         static NIX_DEPS_DIR: OnceLock<PathBuf> = OnceLock::new();
@@ -205,12 +205,17 @@ impl Config {
         let _ = try_run(self, patchelf.arg(fname));
     }
 
+<<<<<<< HEAD
     pub fn download_file(&self, url: &str, dest_path: &Path, help_on_error: &str) {
         self.verbose(|| eprintln!("download {url}"));
         if self.dry_run() {
             return;
         }
 
+=======
+    fn download_file(&self, url: &str, dest_path: &Path, help_on_error: &str) {
+        self.verbose(|| println!("download {url}"));
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         // Use a temporary file in case we crash while downloading, to avoid a corrupt download in cache/.
         let tempfile = self.tempdir().join(dest_path.file_name().unwrap());
         // While bootstrap itself only supports http and https downloads, downstream forks might
@@ -231,7 +236,7 @@ impl Config {
     }
 
     fn download_http_with_retries(&self, tempfile: &Path, url: &str, help_on_error: &str) {
-        eprintln!("downloading {url}");
+        println!("downloading {url}");
         // Try curl. If that fails and we are on windows, fallback to PowerShell.
         // options should be kept in sync with
         // src/bootstrap/src/core/download.rs
@@ -357,7 +362,7 @@ impl Config {
 
             let dst_path = dst.join(short_path);
             self.verbose(|| {
-                eprintln!("extracting {} to {}", original_path.display(), dst.display())
+                println!("extracting {} to {}", original_path.display(), dst.display())
             });
             if !t!(member.unpack_in(dst)) {
                 panic!("path traversal attack ??");
@@ -381,7 +386,7 @@ impl Config {
     pub fn verify(&self, path: &Path, expected: &str) -> bool {
         use sha2::Digest;
 
-        self.verbose(|| eprintln!("verifying {}", path.display()));
+        self.verbose(|| println!("verifying {}", path.display()));
 
         if self.dry_run() {
             return true;
@@ -407,7 +412,7 @@ impl Config {
         let verified = checksum == expected;
 
         if !verified {
-            eprintln!(
+            println!(
                 "invalid checksum: \n\
                 found:    {checksum}\n\
                 expected: {expected}",
@@ -437,7 +442,7 @@ enum DownloadSource {
 /// Functions that are only ever called once, but named for clarify and to avoid thousand-line functions.
 impl Config {
     pub(crate) fn download_clippy(&self) -> PathBuf {
-        self.verbose(|| eprintln!("downloading stage0 clippy artifacts"));
+        self.verbose(|| println!("downloading stage0 clippy artifacts"));
 
         let date = &self.stage0_metadata.compiler.date;
         let version = &self.stage0_metadata.compiler.version;
@@ -534,7 +539,7 @@ impl Config {
     }
 
     pub(crate) fn download_ci_rustc(&self, commit: &str) {
-        self.verbose(|| eprintln!("using downloaded stage2 artifacts from CI (commit {commit})"));
+        self.verbose(|| println!("using downloaded stage2 artifacts from CI (commit {commit})"));
 
         let version = self.artifact_version_part(commit);
         // download-rustc doesn't need its own cargo, it can just use beta's. But it does need the
@@ -555,7 +560,7 @@ impl Config {
 
     #[cfg(not(feature = "bootstrap-self-test"))]
     pub(crate) fn download_beta_toolchain(&self) {
-        self.verbose(|| eprintln!("downloading stage0 beta artifacts"));
+        self.verbose(|| println!("downloading stage0 beta artifacts"));
 
         let date = &self.stage0_metadata.compiler.date;
         let version = &self.stage0_metadata.compiler.version;
@@ -693,7 +698,7 @@ impl Config {
                     return;
                 } else {
                     self.verbose(|| {
-                        eprintln!(
+                        println!(
                             "ignoring cached file {} due to failed verification",
                             tarball.display()
                         )
@@ -792,10 +797,10 @@ download-rustc = false
                     t!(check_incompatible_options_for_ci_llvm(current_config_toml, ci_config_toml));
                 }
                 Err(e) if e.to_string().contains("unknown field") => {
-                    eprintln!(
+                    println!(
                         "WARNING: CI LLVM has some fields that are no longer supported in bootstrap; download-ci-llvm will be disabled."
                     );
-                    eprintln!("HELP: Consider rebasing to a newer commit if available.");
+                    println!("HELP: Consider rebasing to a newer commit if available.");
                 }
                 Err(e) => {
                     eprintln!("ERROR: Failed to parse CI LLVM config.toml: {e}");

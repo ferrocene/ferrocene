@@ -238,4 +238,6 @@ const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     // Used by the tidy check `unknown_revision`.
     "unused-revision-names",
     // tidy-alphabetical-end
+    // ferrocene additions
+    "ferrocene-execute-in-temp",
 ];

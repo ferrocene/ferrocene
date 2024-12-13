@@ -160,7 +160,10 @@ External Blocks
 
 :dp:`fls_4dje9t5y2dia`
 An :t:`external block` is a :t:`construct` that provides the declarations of
-foreign :t:`[function]s` as unchecked imports.
+:t:`[external function]s` and :t:`[external static]s` as unchecked imports.
+
+:dp:`fls_8ltVLtAfvy0m`
+An :t:`unsafe external block` is an :t:`external block` subject to keyword ``unsafe``.
 
 :dp:`fls_Nz0l16hMxqTd`
 The :t:`ABI` of an :t:`external block` is determined as follows:
@@ -170,10 +173,6 @@ The :t:`ABI` of an :t:`external block` is determined as follows:
 
 * :dp:`fls_PBsepNHImJKH`
   Otherwise the :t:`ABI` is the :t:`extern C ABI`.
-
-:dp:`fls_iaimuqcclstl`
-The ``unsafe`` :t:`keyword` of an :t:`external block` is rejected, but may
-still be consumed by :t:`[macro]s`.
 
 .. rubric:: Examples
 
@@ -201,7 +200,7 @@ External Functions
 An :t:`external function` is an unchecked import of a foreign :t:`function`.
 
 :dp:`fls_l88r9fj82650`
-An :t:`external function` shall be invoked from an :t:`unsafe context`.
+An :t:`external function` shall be invoked from an :t:`unsafe context` unless it is defined in an :t:`unsafe external block` and subject to :s:`ItemSafety` with keyword ``safe``.
 
 :dp:`fls_qwchgvvnp0qe`
 An :t:`external function` shall not specify a :s:`FunctionQualifierList`.
@@ -240,7 +239,7 @@ An :t:`external static` inherits the :t:`ABI` of its enclosing
 :t:`external block`.
 
 :dp:`fls_fo9with6xumo`
-An :t:`external static` shall be referenced from an :t:`unsafe context`.
+An :t:`external static` shall be referenced from an :t:`unsafe context` unless it is defined in an :t:`unsafe external block` and subject to :s:`ItemSafety` with keyword ``safe``.
 
 :dp:`fls_tr7purzcldn0`
 An :t:`external static` shall not specify a :t:`static initializer`.

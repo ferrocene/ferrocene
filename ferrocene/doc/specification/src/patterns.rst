@@ -90,12 +90,11 @@ Refutability
 match all possible values of a :t:`type`.
 
 :dp:`fls_9fjspnefoyvz`
-An :t:`irrefutable pattern` is a :t:`pattern` that always matches the :t:`value`
-it is being matched against.
+An :t:`irrefutable pattern` is a :t:`pattern` that always matches any :t:`value` of its :t:`type`.
 
 :dp:`fls_uq7ftuuq1sig`
 A :t:`refutable pattern` is a :t:`pattern` that has a possibility of not
-matching the :t:`value` it is being matched against.
+matching a :t:`value` of its :t:`type`
 
 :dp:`fls_mnbyt7jfYAZ9`
 A :t:`pattern` that is not an :t:`irrefutable pattern` is a
@@ -385,12 +384,10 @@ to an :t:`associated constant`.
 A :t:`path pattern` is an :t:`irrefutable pattern` when it refers to:
 
 * :dp:`fls_cfoy86mkmqa4`
-  A :t:`constant` whose :t:`type` is an :t:`irrefutable pattern`, or
+  An :t:`irrefutable constant`,
 
 * :dp:`fls_rnppz6y5z8pi`
-  An :t:`enum variant` of an :t:`enum type` with a single :t:`enum variant`
-  where the :t:`[type]s` of all :t:`[field]s` are :t:`[irrefutable pattern]s`,
-  or
+  An :t:`enum variant` of an :t:`enum type` with zero or more :t:`[visible empty enum variant]s` and one non-:t:`visible empty enum variant` where the :t:`[type]s` of all :t:`[field]s` are not subject to :t:`visible emptiness`
 
 * :dp:`fls_ag6m4mvpturw`
   A :t:`struct` where the :t:`[type]s` of all :t:`[field]s` are
@@ -570,7 +567,7 @@ A :t:`reference pattern` is a :t:`pattern` that dereferences a :t:`pointer` that
 is being matched.
 
 :dp:`fls_x0bmzl1315gq`
-A :t:`reference pattern` is an :t:`irrefutable pattern`.
+A :t:`reference pattern` is an :t:`irrefutable pattern` when its nested :t:`pattern` itself is an :t:`irrefutable pattern`.
 
 :dp:`fls_fedo8zhgpla5`
 The :t:`type` of a :t:`reference pattern` is determined as follows:
@@ -756,7 +753,7 @@ A :t:`struct pattern` is an :t:`irrefutable pattern` if
     A :t:`struct type` or a :t:`union type`, or
 
   * :dp:`fls_MK83WE0iDqNf`
-    An :t:`enum variant` of an :t:`enum` with a single :t:`enum variant`.
+    An :t:`enum variant` of an :t:`enum type` with zero or more :t:`[visible empty enum variant]s` and one non-:t:`visible empty enum variant` where the :t:`[type]s` of all :t:`[field]s` are not subject to :t:`visible emptiness`.
 
 .. _fls_nruvg0es3kx7:
 

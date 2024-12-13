@@ -1,5 +1,6 @@
 //@ check-pass
 //@ compile-flags: -o=foo
+//@ ferrocene-execute-in-temp
 
 fn main() {}
 

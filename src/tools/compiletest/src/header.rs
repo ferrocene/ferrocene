@@ -199,6 +199,8 @@ pub struct TestProps {
     /// Build and use `minicore` as `core` stub for `no_core` tests in cross-compilation scenarios
     /// that don't otherwise want/need `-Z build-std`.
     pub add_core_stubs: bool,
+    // Flag to execute the test within a temporary directory
+    pub ferrocene_execute_in_temp: bool,
 }
 
 mod directives {
@@ -247,6 +249,9 @@ mod directives {
     pub const ADD_CORE_STUBS: &'static str = "add-core-stubs";
     // This isn't a real directive, just one that is probably mistyped often
     pub const INCORRECT_COMPILER_FLAGS: &'static str = "compiler-flags";
+
+    // FERROCENE ADDITIONS:
+    pub const FERROCENE_EXECUTE_IN_TEMP: &'static str = "ferrocene-execute-in-temp";
 }
 
 impl TestProps {
@@ -302,6 +307,7 @@ impl TestProps {
             no_auto_check_cfg: false,
             has_enzyme: false,
             add_core_stubs: false,
+            ferrocene_execute_in_temp: false,
         }
     }
 
@@ -567,6 +573,12 @@ impl TestProps {
                     config.set_name_directive(ln, NO_AUTO_CHECK_CFG, &mut self.no_auto_check_cfg);
 
                     self.update_add_core_stubs(ln, config);
+
+                    config.set_name_directive(
+                        ln,
+                        FERROCENE_EXECUTE_IN_TEMP,
+                        &mut self.ferrocene_execute_in_temp,
+                    );
                 },
             );
 

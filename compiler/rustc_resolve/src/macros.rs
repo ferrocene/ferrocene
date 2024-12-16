@@ -7,7 +7,7 @@ use std::mem;
 use rustc_ast::expand::StrippedCfgItem;
 use rustc_ast::{self as ast, Crate, Inline, ItemKind, ModKind, NodeId, attr};
 use rustc_ast_pretty::pprust;
-use rustc_attr::StabilityLevel;
+use rustc_attr::{AttributeExt, StabilityLevel};
 use rustc_data_structures::intern::Interned;
 use rustc_data_structures::sync::Lrc;
 use rustc_errors::{Applicability, StashKey};
@@ -166,7 +166,7 @@ fn soft_custom_inner_attributes_gate(path: &ast::Path, invoc: &Invocation) -> bo
         [seg1, seg2] if seg1.ident.name == sym::rustfmt && seg2.ident.name == sym::skip => {
             if let InvocationKind::Attr { item, .. } = &invoc.kind {
                 if let Annotatable::Item(item) = item {
-                    if let ItemKind::Mod(_, ModKind::Loaded(_, Inline::No, _)) = item.kind {
+                    if let ItemKind::Mod(_, ModKind::Loaded(_, Inline::No, _, _)) = item.kind {
                         return true;
                     }
                 }
@@ -1126,7 +1126,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         &mut self,
         macro_def: &ast::MacroDef,
         ident: Ident,
-        attrs: &[ast::Attribute],
+        attrs: &[impl AttributeExt],
         span: Span,
         node_id: NodeId,
         edition: Edition,

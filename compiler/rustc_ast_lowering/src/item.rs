@@ -176,7 +176,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         id: NodeId,
         hir_id: hir::HirId,
         ident: &mut Ident,
-        attrs: &'hir [Attribute],
+        attrs: &'hir [hir::Attribute],
         vis_span: Span,
         i: &ItemKind,
     ) -> hir::ItemKind<'hir> {
@@ -238,7 +238,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 })
             }
             ItemKind::Mod(_, mod_kind) => match mod_kind {
-                ModKind::Loaded(items, _, spans) => {
+                ModKind::Loaded(items, _, spans, _) => {
                     hir::ItemKind::Mod(self.lower_mod(items, spans))
                 }
                 ModKind::Unloaded => panic!("`mod` items should have been loaded by now"),
@@ -467,7 +467,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         id: NodeId,
         vis_span: Span,
         ident: &mut Ident,
-        attrs: &'hir [Attribute],
+        attrs: &'hir [hir::Attribute],
     ) -> hir::ItemKind<'hir> {
         let path = &tree.prefix;
         let segments = prefix.segments.iter().chain(path.segments.iter()).cloned().collect();
@@ -1392,7 +1392,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         }
     }
 
-    pub(super) fn lower_safety(&mut self, s: Safety, default: hir::Safety) -> hir::Safety {
+    pub(super) fn lower_safety(&self, s: Safety, default: hir::Safety) -> hir::Safety {
         match s {
             Safety::Unsafe(_) => hir::Safety::Unsafe,
             Safety::Default => default,

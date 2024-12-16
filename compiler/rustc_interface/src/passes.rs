@@ -76,6 +76,7 @@ fn pre_expansion_lint<'a>(
         || {
             rustc_lint::check_ast_node(
                 sess,
+                None,
                 features,
                 true,
                 lint_store,
@@ -310,6 +311,7 @@ fn early_lint_checks(tcx: TyCtxt<'_>, (): ()) {
     let lint_store = unerased_lint_store(tcx.sess);
     rustc_lint::check_ast_node(
         sess,
+        Some(tcx),
         tcx.features(),
         false,
         lint_store,
@@ -1123,6 +1125,18 @@ pub(crate) fn start_codegen<'tcx>(
         if let Err(error) = rustc_mir_transform::dump_mir::emit_mir(tcx) {
             tcx.dcx().emit_fatal(errors::CantEmitMIR { error });
         }
+    }
+
+    // This must run after monomorphization so that all generic types
+    // have been instantiated.
+    if tcx.sess.opts.unstable_opts.print_type_sizes {
+        tcx.sess.code_stats.print_type_sizes();
+    }
+
+    if tcx.sess.opts.unstable_opts.print_vtable_sizes {
+        let crate_name = tcx.crate_name(LOCAL_CRATE);
+
+        tcx.sess.code_stats.print_vtable_sizes(crate_name);
     }
 
     codegen

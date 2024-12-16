@@ -13,7 +13,7 @@ use std::ops::{Bound, Deref};
 use std::{fmt, iter, mem};
 
 use rustc_abi::{ExternAbi, FieldIdx, Layout, LayoutData, TargetDataLayout, VariantIdx};
-use rustc_ast::{self as ast, attr};
+use rustc_ast as ast;
 use rustc_data_structures::defer;
 use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_data_structures::fx::FxHashMap;
@@ -29,13 +29,12 @@ use rustc_data_structures::unord::UnordSet;
 use rustc_errors::{
     Applicability, Diag, DiagCtxtHandle, ErrorGuaranteed, LintDiagnostic, MultiSpan,
 };
-use rustc_hir as hir;
 use rustc_hir::def::{CtorKind, DefKind};
 use rustc_hir::def_id::{CrateNum, DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::definitions::Definitions;
 use rustc_hir::intravisit::Visitor;
 use rustc_hir::lang_items::LangItem;
-use rustc_hir::{HirId, Node, TraitCandidate};
+use rustc_hir::{self as hir, Attribute, HirId, Node, TraitCandidate};
 use rustc_index::IndexVec;
 use rustc_macros::{HashStable, TyDecodable, TyEncodable};
 use rustc_query_system::cache::WithDepNode;
@@ -586,7 +585,7 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
     }
 
     fn trait_is_unsafe(self, trait_def_id: Self::DefId) -> bool {
-        self.trait_def(trait_def_id).safety == hir::Safety::Unsafe
+        self.trait_def(trait_def_id).safety.is_unsafe()
     }
 
     fn is_impl_trait_in_trait(self, def_id: DefId) -> bool {
@@ -722,7 +721,7 @@ impl<'tcx> rustc_type_ir::inherent::Safety<TyCtxt<'tcx>> for hir::Safety {
     }
 
     fn is_safe(self) -> bool {
-        matches!(self, hir::Safety::Safe)
+        self.is_safe()
     }
 
     fn prefix_str(self) -> &'static str {
@@ -2521,7 +2520,7 @@ impl<'tcx> TyCtxt<'tcx> {
     /// that is, a `fn` type that is equivalent in every way for being
     /// unsafe.
     pub fn safe_to_unsafe_fn_ty(self, sig: PolyFnSig<'tcx>) -> Ty<'tcx> {
-        assert_eq!(sig.safety(), hir::Safety::Safe);
+        assert!(sig.safety().is_safe());
         Ty::new_fn_ptr(self, sig.map_bound(|sig| ty::FnSig { safety: hir::Safety::Unsafe, ..sig }))
     }
 
@@ -3141,7 +3140,7 @@ impl<'tcx> TyCtxt<'tcx> {
     /// Whether the trait impl is marked const. This does not consider stability or feature gates.
     pub fn is_const_trait_impl(self, def_id: DefId) -> bool {
         self.def_kind(def_id) == DefKind::Impl { of_trait: true }
-            && self.constness(def_id) == hir::Constness::Const
+            && self.impl_trait_header(def_id).unwrap().constness == hir::Constness::Const
     }
 
     pub fn intrinsic(self, def_id: impl IntoQueryParam<DefId> + Copy) -> Option<ty::IntrinsicDef> {
@@ -3239,12 +3238,16 @@ pub fn provide(providers: &mut Providers) {
     providers.extern_mod_stmt_cnum =
         |tcx, id| tcx.resolutions(()).extern_crate_map.get(&id).cloned();
     providers.is_panic_runtime =
-        |tcx, LocalCrate| attr::contains_name(tcx.hir().krate_attrs(), sym::panic_runtime);
+        |tcx, LocalCrate| contains_name(tcx.hir().krate_attrs(), sym::panic_runtime);
     providers.is_compiler_builtins =
-        |tcx, LocalCrate| attr::contains_name(tcx.hir().krate_attrs(), sym::compiler_builtins);
+        |tcx, LocalCrate| contains_name(tcx.hir().krate_attrs(), sym::compiler_builtins);
     providers.has_panic_handler = |tcx, LocalCrate| {
         // We want to check if the panic handler was defined in this crate
         tcx.lang_items().panic_impl().is_some_and(|did| did.is_local())
     };
     providers.source_span = |tcx, def_id| tcx.untracked.source_span.get(def_id).unwrap_or(DUMMY_SP);
+}
+
+pub fn contains_name(attrs: &[Attribute], name: Symbol) -> bool {
+    attrs.iter().any(|x| x.has_name(name))
 }

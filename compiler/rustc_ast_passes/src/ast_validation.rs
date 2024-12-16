@@ -342,7 +342,7 @@ impl<'a> AstValidator<'a> {
                     sym::forbid,
                     sym::warn,
                 ];
-                !arr.contains(&attr.name_or_empty()) && rustc_attr::is_builtin_attr(attr)
+                !arr.contains(&attr.name_or_empty()) && rustc_attr::is_builtin_attr(*attr)
             })
             .for_each(|attr| {
                 if attr.is_doc_comment() {
@@ -1029,7 +1029,7 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
                     self.dcx().emit_err(errors::UnsafeItem { span, kind: "module" });
                 }
                 // Ensure that `path` attributes on modules are recorded as used (cf. issue #35584).
-                if !matches!(mod_kind, ModKind::Loaded(_, Inline::Yes, _))
+                if !matches!(mod_kind, ModKind::Loaded(_, Inline::Yes, _, _))
                     && !attr::contains_name(&item.attrs, sym::path)
                 {
                     self.check_mod_file_item_asciionly(item.ident);

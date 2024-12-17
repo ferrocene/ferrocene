@@ -3,9 +3,7 @@ error[E0765]: unterminated double quote string
    |
 LL |                   """;
    |  ___________________^
-LL | | }
-LL | |
-LL | | // ferrocene-annotations: fls_boyhlu5srp6u
+...  |
 LL | | // String Literals
    | |__________________^
 

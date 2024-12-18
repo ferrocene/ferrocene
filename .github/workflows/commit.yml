@@ -41,6 +41,7 @@ jobs:
 
       - name: Check whether git conflict markers are present
         run: uv run ferrocene/ci/scripts/detect-conflict-markers.py
+
       - name: Perform licensing checks
         run: uv run reuse --include-submodules lint
 

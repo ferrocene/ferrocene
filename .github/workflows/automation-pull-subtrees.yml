@@ -75,6 +75,6 @@ jobs:
         run: git submodule update --init --depth=1 --jobs=$(nproc)
 
       - name: Run the manage-subtrees automation
-        run: python3 ferrocene/tools/pull-subtrees/pull.py --automation --target ${{ matrix.branch }}
+        run: ferrocene/tools/pull-subtrees/pull.py --automation
         env:
           GITHUB_TOKEN: "${{ steps.auth.outputs.token }}"

@@ -4,7 +4,7 @@
 Handling Backports
 ==================
 
-All development of Ferrocene happens in the ``main`` branch, but occasionally
+Most development of Ferrocene happens in the ``main`` branch, but occasionally
 we have to backport PRs from ``main`` or from upstream ``rust-lang/rust`` into a release branch.
 This usually happens when preparing the documentation for an upcoming release, or when a bug fix
 also affects a supported release.

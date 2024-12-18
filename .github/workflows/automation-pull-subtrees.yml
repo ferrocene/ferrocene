@@ -32,14 +32,6 @@ jobs:
           fetch-depth: 0  # Fetch all the history
           ref: ${{ matrix.branch }}
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
-            python3-requests \
-            python3-yaml \
-            python3-jwt
-
       - name: Configure git authorship information
         run: |
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"

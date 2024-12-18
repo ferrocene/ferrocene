@@ -21,15 +21,9 @@ permissions:
 
 jobs:
   run:
-    name: ${{ matrix.branch }}
+    name: main
     runs-on: ubuntu-24.04
     environment: automations
-
-    strategy:
-      fail-fast: false
-      matrix:
-        branch:
-          - main
 
     steps:
       - name: Checkout the Ferrocene repository

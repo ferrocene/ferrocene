@@ -33,7 +33,7 @@ class BackportAllPR(AutomatedPR):
         # temporary branch. If we were to delete the temporary branch to create
         # a new one from scratch, it would fail as git prevents deleting the
         # current branch. To handle that, if we're already in the temporary
-        # branch we just reset to the base we want.
+        # branch, we just reset to the base we want.
         if current_branch == TEMP_BRANCH:
             self.cmd(["git", "reset", "--hard", base_branch])
         else:

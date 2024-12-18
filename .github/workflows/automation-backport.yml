@@ -45,7 +45,7 @@ jobs:
       # accidental infinte loops. Still, that's not acceptable for us, as we
       # need to run CI on commits produced by this automation.
       #
-      # To work around both problems we're using a fresh token from an ad-hoc
+      # To work around both problems, we use a fresh token from an ad-hoc
       # GitHub App with access to push content to this repo.
       - name: Authenticate with GitHub to create branches
         id: auth # The script sets the output `token`

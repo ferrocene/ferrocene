@@ -8,7 +8,7 @@ IFS=$'\n\t'
 # Ensure we're in the repository root regardless of the current directory.
 cd "$(dirname "$0")/../.."
 
-# std tests spawn whoami for simple process testing, make sure the command can succesfully run
+# std tests spawn whoami for simple process testing, so make sure the command can succesfully run
 if ! whoami >/dev/null; then
   echo "error: the whoami command failed, you probably need to create a user with uid $(id -u) and gid $(id -g)"
   exit 1

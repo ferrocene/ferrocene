@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 # This script downloads the publish-release binary, prebuilt by CI. Since the
-# binary is stored in a different AWS account this script also assumes the role
+# binary is stored in a different AWS account, this script also assumes the role
 # to be able to download it.
 #
 # This script then executes the binary with the provided arguments.

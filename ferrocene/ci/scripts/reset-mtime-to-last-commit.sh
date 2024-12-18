@@ -12,7 +12,7 @@
 # transferred from the old job. This results in Cargo thinking the `build`
 # directory is outdated, leading to a rebuild of everything.
 #
-# To avoid the problem this script sets the mtime of all the files tracked by
+# To avoid the problem, this script sets the mtime of all the files tracked by
 # git to a consistent timestamp in the past, namely the commit time. The commit
 # time will always be lower than the creation time of the `build` directory,
 # fixing the problem of Cargo rebuilding too much stuff.

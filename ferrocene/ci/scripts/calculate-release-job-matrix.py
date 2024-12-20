@@ -13,7 +13,6 @@
 #
 
 from dataclasses import dataclass, field
-import base64
 import boto3
 import botocore
 import collections

@@ -351,7 +351,7 @@ class PullSubtreePR(AutomatedPR):
         return self.into
 
     def automation_name(self):
-        return f"pull-subtree-{self.subtree}"
+        return f"pull-subtree"
 
     def pr_title(self):
         if len(self.subtree.into) > 1:

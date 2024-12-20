@@ -284,7 +284,7 @@ def run():
         elif event_name == "schedule":
             manual = False
         else:
-            raise RuntimeError(f"unsupported event name: {ctx.event_name}")
+            raise RuntimeError(f"unsupported event name: {event_name}")
         ctx = Context(
             repo=os.environ["GITHUB_REPOSITORY"],
             manual=manual,

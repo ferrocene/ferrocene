@@ -270,7 +270,7 @@ def reject_if_not_a_bors_commit(ctx, commit):
             "if you want to release your development branch, run a try build "
             "and release the try build's commit hash"
         )
-        exit(1)
+        sys.exit(1)
 
 
 def run():
@@ -336,7 +336,7 @@ def note(message):
 def error(message, exit=True):
     print(f"error: {message}", file=sys.stderr)
     if exit:
-        exit(1)
+        sys.exit(1)
 
 
 @dataclass

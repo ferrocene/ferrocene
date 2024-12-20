@@ -2,11 +2,7 @@ error[E0765]: unterminated double quote string
   --> $DIR/unbalanced-doublequote.rs:5:5
    |
 LL | /     "
-LL | | }
-LL | |
-LL | | // ferrocene-annotations: fls_hucd52suu6it
 ...  |
-LL | | // ferrocene-annotations: fls_boyhlu5srp6u
 LL | | // String Literals
    | |__________________^
 

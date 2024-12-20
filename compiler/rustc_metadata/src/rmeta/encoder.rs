@@ -4,7 +4,7 @@ use std::fs::File;
 use std::io::{Read, Seek, Write};
 use std::path::{Path, PathBuf};
 
-use rustc_ast::Attribute;
+use rustc_ast::attr::AttributeExt;
 use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_data_structures::memmap::{Mmap, MmapMut};
 use rustc_data_structures::sync::{Lrc, join, par_for_each_in};
@@ -814,7 +814,7 @@ struct AnalyzeAttrState<'a> {
 /// visibility: this is a piece of data that can be computed once per defid, and not once per
 /// attribute. Some attributes would only be usable downstream if they are public.
 #[inline]
-fn analyze_attr(attr: &Attribute, state: &mut AnalyzeAttrState<'_>) -> bool {
+fn analyze_attr(attr: &impl AttributeExt, state: &mut AnalyzeAttrState<'_>) -> bool {
     let mut should_encode = false;
     if !rustc_feature::encode_cross_crate(attr.name_or_empty()) {
         // Attributes not marked encode-cross-crate don't need to be encoded for downstream crates.
@@ -1264,12 +1264,7 @@ fn should_encode_fn_sig(def_kind: DefKind) -> bool {
 
 fn should_encode_constness(def_kind: DefKind) -> bool {
     match def_kind {
-        DefKind::Fn
-        | DefKind::AssocFn
-        | DefKind::Closure
-        | DefKind::Impl { of_trait: true }
-        | DefKind::Variant
-        | DefKind::Ctor(..) => true,
+        DefKind::Fn | DefKind::AssocFn | DefKind::Closure | DefKind::Ctor(_, CtorKind::Fn) => true,
 
         DefKind::Struct
         | DefKind::Union
@@ -1281,7 +1276,7 @@ fn should_encode_constness(def_kind: DefKind) -> bool {
         | DefKind::Static { .. }
         | DefKind::TyAlias
         | DefKind::OpaqueTy
-        | DefKind::Impl { of_trait: false }
+        | DefKind::Impl { .. }
         | DefKind::ForeignTy
         | DefKind::ConstParam
         | DefKind::InlineConst
@@ -1296,6 +1291,8 @@ fn should_encode_constness(def_kind: DefKind) -> bool {
         | DefKind::LifetimeParam
         | DefKind::GlobalAsm
         | DefKind::ExternCrate
+        | DefKind::Ctor(_, CtorKind::Const)
+        | DefKind::Variant
         | DefKind::SyntheticCoroutineBody => false,
     }
 }
@@ -1357,7 +1354,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             .hir()
             .attrs(tcx.local_def_id_to_hir_id(def_id))
             .iter()
-            .filter(|attr| analyze_attr(attr, &mut state));
+            .filter(|attr| analyze_attr(*attr, &mut state));
 
         record_array!(self.tables.attributes[def_id.to_def_id()] <- attr_iter);
 
@@ -2164,10 +2161,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
     fn encode_dylib_dependency_formats(&mut self) -> LazyArray<Option<LinkagePreference>> {
         empty_proc_macro!(self);
         let formats = self.tcx.dependency_formats(());
-        for (ty, arr) in formats.iter() {
-            if *ty != CrateType::Dylib {
-                continue;
-            }
+        if let Some(arr) = formats.get(&CrateType::Dylib) {
             return self.lazy_array(arr.iter().map(|slot| match *slot {
                 Linkage::NotLinked | Linkage::IncludedFromDylib => None,
 

@@ -1369,9 +1369,6 @@ commands:
             - run:
                 name: Set PATH to include QNX710 tools
                 command: echo 'source $(pwd)/qnx710-472/qnxsdp-env.sh' >> "$BASH_ENV"
-      - run:
-          name: Test qcc
-          command: qcc -v || true
 
   aws-oidc-auth:
     description: Authenticate with AWS using OIDC

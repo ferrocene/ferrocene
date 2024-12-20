@@ -35,13 +35,6 @@ ECR_REGION = "us-east-1"
 # How long should it take before an image is rebuilt.
 REBUILD_IMAGES_OLDER_THAN_DAYS = 7
 
-# QNX targets only work on x86_64 Windows, x86_64 Linux, and x86_64 Mac
-# They must be excluded on, for example, aarch64 Mac
-QNX_TARGETS = [
-    "aarch64-unknown-nto-qnx710",
-    "x86_64-pc-nto-qnx710",
-]
-
 GENERIC_BUILD_STD_TARGETS = [
     "aarch64-unknown-none",
     "thumbv6m-none-eabi",
@@ -64,7 +57,7 @@ X86_64_LINUX_BUILD_STD_TARGETS = [
 ]
 # x86_64-unknown-linux-gnu builds our generic cross compilation targets
 # for us and is special cased somewhat. (This is used in `calculate_targets()`)
-X86_64_LINUX_BUILD_STD_TARGETS_ALL = X86_64_LINUX_BUILD_STD_TARGETS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
+X86_64_LINUX_BUILD_STD_TARGETS_ALL = X86_64_LINUX_BUILD_STD_TARGETS + GENERIC_BUILD_STD_TARGETS
 X86_64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS_ALL
 AARCH64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS  + GENERIC_BUILD_STD_TARGETS
 
@@ -75,7 +68,7 @@ AARCH64_MAC_SELF_TEST_TARGETS = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_
 
 # Tagets only built (and tested!) on Windows
 X86_64_WINDOWS_BUILD_HOSTS = ["x86_64-pc-windows-msvc"]
-X86_64_WINDOWS_SELF_TEST_TARGETS = X86_64_WINDOWS_BUILD_HOSTS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
+X86_64_WINDOWS_SELF_TEST_TARGETS = X86_64_WINDOWS_BUILD_HOSTS + GENERIC_BUILD_STD_TARGETS
 
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)

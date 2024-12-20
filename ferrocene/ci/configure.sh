@@ -175,21 +175,6 @@ if [[ is_internal && "${FERROCENE_BUILD_HOST:-}" = "x86_64-pc-windows-msvc" ]]; 
     add --set target.wasm32-unknown-unknown.ar=lld-ar
 fi
 
-if [[ is_internal ]]; then
-    # QNX toolchains aren't automatically inferred, set them explicitly.
-    #
-    # Assumes `qnxsdp-env.sh` has been sourced or the binaries are otherwise
-    # already on path
-    add --set target.aarch64-unknown-nto-qnx710.cc=qcc
-    add --set target.aarch64-unknown-nto-qnx710.cxx=q++
-    add --set target.aarch64-unknown-nto-qnx710.ar=ntoaarch64-ar
-    add --set target.aarch64-unknown-nto-qnx710.profiler=false # Build failures were noted if this is enabled.
-    add --set target.x86_64-pc-nto-qnx710.cc=qcc
-    add --set target.x86_64-pc-nto-qnx710.cxx=q++
-    add --set target.x86_64-pc-nto-qnx710.ar=ntox86_64-ar
-    add --set target.x86_64-pc-nto-qnx710.profiler=false # Build failures were noted if this is enabled.
-fi
-
 # Set the host platform to build. The environment variable is set from the CI
 # configuration (see the .circleci directory).
 #

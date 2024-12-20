@@ -1982,6 +1982,15 @@ impl Step for Assemble {
                     &self_contained_lld_dir.join(exe(name, target_compiler.host)),
                 );
             }
+
+            let qcc_wrapper_exe = builder.ensure(crate::core::build_steps::tool::QccWrapper {
+                compiler: build_compiler,
+                target: target_compiler.host,
+            });
+            builder.copy_link(
+                &qcc_wrapper_exe,
+                &libdir_bin.join(exe("qcc-wrapper", target_compiler.host)),
+            );
         }
 
         if builder.config.llvm_enabled(target_compiler.host) && builder.config.llvm_tools_enabled {

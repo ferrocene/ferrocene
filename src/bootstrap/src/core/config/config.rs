@@ -2531,21 +2531,12 @@ impl Config {
     /// Return the version it would have used for the given commit.
     pub(crate) fn artifact_version_part(&self, commit: &str) -> String {
         let (channel, version) = if self.rust_info.is_managed_git_subrepository() {
-<<<<<<< HEAD
             let channel = self
-                .read_file_by_commit(&PathBuf::from("ferrocene/ci/channel"), commit)
+                .read_file_by_commit(Path::new("ferrocene/ci/channel"), commit)
                 .trim()
                 .to_owned();
-            let version = self
-                .read_file_by_commit(&PathBuf::from("ferrocene/version"), commit)
-                .trim()
-                .to_owned();
-=======
-            let channel =
-                self.read_file_by_commit(Path::new("src/ci/channel"), commit).trim().to_owned();
             let version =
-                self.read_file_by_commit(Path::new("src/version"), commit).trim().to_owned();
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+                self.read_file_by_commit(Path::new("ferrocene/version"), commit).trim().to_owned();
             (channel, version)
         } else {
             let channel = fs::read_to_string(self.src.join("ferrocene/ci/channel"));

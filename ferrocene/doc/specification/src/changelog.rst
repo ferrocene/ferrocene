@@ -110,7 +110,7 @@ Language changes in Rust 1.82.0
 
   * Changed syntax: :s:`WeakKeyword`, :s:`FunctionQualifierList`, :s:`StaticDeclaration`
 
-  * New paragraphs: :p:`fls_8ltVLtAfvy0m`, :p:`fls_WRpcVF1fLEpr`, :p:`fls_8ltVLtAfvy0m`
+  * New paragraphs: :p:`fls_8ltVLtAfvy0m`, :p:`fls_WRpcVF1fLEpr`, :p:`fls_nUADhgcfvvGC`
 
   * Changed paragraphs: :p:`fls_g0JEluWqBpNc`, :p:`fls_7ucwmzqtittv`, :p:`fls_4dje9t5y2dia`, :p:`fls_l88r9fj82650`, :p:`fls_fo9with6xumo`
 

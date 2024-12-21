@@ -173,7 +173,7 @@ is equivalent to :t:`function`
 :dp:`fls_7ucwmzqtittv`
 An :t:`unsafe function` is a :t:`function` subject to an :s:`ItemSafety` with :t:`keyword` ``unsafe``.
 
-:dp:`fls_8ltVLtAfvy0m`
+:dp:`fls_nUADhgcfvvGC`
 A :t:`function` shall only be subject to an :s:`ItemSafety` with :t:`keyword` ``safe`` if it is an :t:`external function` in an :t:`unsafe external block`.
 
 :dp:`fls_5hn8fkf7rcvz`

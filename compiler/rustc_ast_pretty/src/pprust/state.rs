@@ -24,8 +24,8 @@ use rustc_ast::{
 use rustc_data_structures::sync::Lrc;
 use rustc_span::edition::Edition;
 use rustc_span::source_map::{SourceMap, Spanned};
-use rustc_span::symbol::{Ident, IdentPrinter, Symbol, kw, sym};
-use rustc_span::{BytePos, CharPos, DUMMY_SP, FileName, Pos, Span};
+use rustc_span::symbol::IdentPrinter;
+use rustc_span::{BytePos, CharPos, DUMMY_SP, FileName, Ident, Pos, Span, Symbol, kw, sym};
 use thin_vec::ThinVec;
 
 use crate::pp::Breaks::{Consistent, Inconsistent};
@@ -725,7 +725,7 @@ pub trait PrintState<'a>: std::ops::Deref<Target = pp::Printer> + std::ops::Dere
     // E.g. we have seen cases where a proc macro can handle `a :: b` but not
     // `a::b`. See #117433 for some examples.
     fn print_tts(&mut self, tts: &TokenStream, convert_dollar_crate: bool) {
-        let mut iter = tts.trees().peekable();
+        let mut iter = tts.iter().peekable();
         while let Some(tt) = iter.next() {
             let spacing = self.print_tt(tt, convert_dollar_crate);
             if let Some(next) = iter.peek() {
@@ -1654,11 +1654,14 @@ impl<'a> State<'a> {
                     },
                     |f| f.pat.span,
                 );
-                if *etc == ast::PatFieldsRest::Rest {
+                if let ast::PatFieldsRest::Rest | ast::PatFieldsRest::Recovered(_) = etc {
                     if !fields.is_empty() {
                         self.word_space(",");
                     }
                     self.word("..");
+                    if let ast::PatFieldsRest::Recovered(_) = etc {
+                        self.word("/* recovered parse error */");
+                    }
                 }
                 if !empty {
                     self.space();

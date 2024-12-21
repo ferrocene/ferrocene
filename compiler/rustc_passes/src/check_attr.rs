@@ -30,8 +30,7 @@ use rustc_session::lint::builtin::{
     UNKNOWN_OR_MALFORMED_DIAGNOSTIC_ATTRIBUTES, UNUSED_ATTRIBUTES,
 };
 use rustc_session::parse::feature_err;
-use rustc_span::symbol::{Symbol, kw, sym};
-use rustc_span::{BytePos, DUMMY_SP, Span};
+use rustc_span::{BytePos, DUMMY_SP, Span, Symbol, kw, sym};
 use rustc_target::abi::Size;
 use rustc_target::spec::abi::Abi;
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
@@ -116,7 +115,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         for attr in attrs {
             match attr.path().as_slice() {
                 [sym::diagnostic, sym::do_not_recommend, ..] => {
-                    self.check_do_not_recommend(attr.span, hir_id, target)
+                    self.check_do_not_recommend(attr.span, hir_id, target, attr, item)
                 }
                 [sym::diagnostic, sym::on_unimplemented, ..] => {
                     self.check_diagnostic_on_unimplemented(attr.span, hir_id, target)
@@ -187,6 +186,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 [sym::rustc_coinductive, ..]
                 | [sym::rustc_must_implement_one_of, ..]
                 | [sym::rustc_deny_explicit_impl, ..]
+                | [sym::rustc_do_not_implement_via_object, ..]
                 | [sym::const_trait, ..] => self.check_must_be_applied_to_trait(attr, span, target),
                 [sym::collapse_debuginfo, ..] => self.check_collapse_debuginfo(attr, span, target),
                 [sym::must_not_suspend, ..] => self.check_must_not_suspend(attr, span, target),
@@ -349,13 +349,34 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
     }
 
     /// Checks if `#[diagnostic::do_not_recommend]` is applied on a trait impl.
-    fn check_do_not_recommend(&self, attr_span: Span, hir_id: HirId, target: Target) {
-        if !matches!(target, Target::Impl) {
+    fn check_do_not_recommend(
+        &self,
+        attr_span: Span,
+        hir_id: HirId,
+        target: Target,
+        attr: &Attribute,
+        item: Option<ItemLike<'_>>,
+    ) {
+        if !matches!(target, Target::Impl)
+            || matches!(
+                item,
+                Some(ItemLike::Item(hir::Item {  kind: hir::ItemKind::Impl(_impl),.. }))
+                    if _impl.of_trait.is_none()
+            )
+        {
             self.tcx.emit_node_span_lint(
                 UNKNOWN_OR_MALFORMED_DIAGNOSTIC_ATTRIBUTES,
                 hir_id,
                 attr_span,
                 errors::IncorrectDoNotRecommendLocation,
+            );
+        }
+        if !attr.is_word() {
+            self.tcx.emit_node_span_lint(
+                UNKNOWN_OR_MALFORMED_DIAGNOSTIC_ATTRIBUTES,
+                hir_id,
+                attr_span,
+                errors::DoNotRecommendDoesNotExpectArgs,
             );
         }
     }
@@ -912,6 +933,13 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
     }
 
     fn check_doc_keyword(&self, meta: &MetaItemInner, hir_id: HirId) {
+        fn is_doc_keyword(s: Symbol) -> bool {
+            // FIXME: Once rustdoc can handle URL conflicts on case insensitive file systems, we
+            // can remove the `SelfTy` case here, remove `sym::SelfTy`, and update the
+            // `#[doc(keyword = "SelfTy")` attribute in `library/std/src/keyword_docs.rs`.
+            s <= kw::Union || s == sym::SelfTy
+        }
+
         let doc_keyword = meta.value_str().unwrap_or(kw::Empty);
         if doc_keyword == kw::Empty {
             self.doc_attr_str_error(meta, "keyword");
@@ -933,10 +961,10 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 return;
             }
         }
-        if !rustc_lexer::is_ident(doc_keyword.as_str()) {
-            self.dcx().emit_err(errors::DocKeywordInvalidIdent {
+        if !is_doc_keyword(doc_keyword) {
+            self.dcx().emit_err(errors::DocKeywordNotKeyword {
                 span: meta.name_value_literal_span().unwrap_or_else(|| meta.span()),
-                doc_keyword,
+                keyword: doc_keyword,
             });
         }
     }

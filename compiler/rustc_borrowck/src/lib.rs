@@ -141,6 +141,9 @@ fn do_mir_borrowck<'tcx>(
 ) -> (BorrowCheckResult<'tcx>, Option<Box<BodyWithBorrowckFacts<'tcx>>>) {
     let def = input_body.source.def_id().expect_local();
     let infcx = BorrowckInferCtxt::new(tcx, def);
+    if let Some(e) = input_body.tainted_by_errors {
+        infcx.set_tainted_by_errors(e);
+    }
 
     let mut local_names = IndexVec::from_elem(None, &input_body.local_decls);
     for var_debug_info in &input_body.var_debug_info {
@@ -160,13 +163,6 @@ fn do_mir_borrowck<'tcx>(
                 local_names[local] = Some(var_debug_info.name);
             }
         }
-    }
-
-    let diags = &mut diags::BorrowckDiags::new();
-
-    // Gather the upvars of a closure, if any.
-    if let Some(e) = input_body.tainted_by_errors {
-        infcx.set_tainted_by_errors(e);
     }
 
     // Replace all regions with fresh inference variables. This
@@ -224,6 +220,7 @@ fn do_mir_borrowck<'tcx>(
 
     // We also have a `#[rustc_regions]` annotation that causes us to dump
     // information.
+    let diags = &mut diags::BorrowckDiags::new();
     nll::dump_annotation(&infcx, body, &regioncx, &opt_closure_req, &opaque_type_values, diags);
 
     let movable_coroutine =
@@ -337,35 +334,7 @@ fn do_mir_borrowck<'tcx>(
     mbcx.gather_used_muts(temporary_used_locals, unused_mut_locals);
 
     debug!("mbcx.used_mut: {:?}", mbcx.used_mut);
-    let used_mut = std::mem::take(&mut mbcx.used_mut);
-    for local in mbcx.body.mut_vars_and_args_iter().filter(|local| !used_mut.contains(local)) {
-        let local_decl = &mbcx.body.local_decls[local];
-        let lint_root = match &mbcx.body.source_scopes[local_decl.source_info.scope].local_data {
-            ClearCrossCrate::Set(data) => data.lint_root,
-            _ => continue,
-        };
-
-        // Skip over locals that begin with an underscore or have no name
-        match mbcx.local_names[local] {
-            Some(name) => {
-                if name.as_str().starts_with('_') {
-                    continue;
-                }
-            }
-            None => continue,
-        }
-
-        let span = local_decl.source_info.span;
-        if span.desugaring_kind().is_some() {
-            // If the `mut` arises as part of a desugaring, we should ignore it.
-            continue;
-        }
-
-        let mut_span = tcx.sess.source_map().span_until_non_whitespace(span);
-
-        tcx.emit_node_span_lint(UNUSED_MUT, lint_root, span, VarNeedNotMut { span: mut_span })
-    }
-
+    mbcx.lint_unused_mut();
     let tainted_by_errors = mbcx.emit_errors();
 
     let result = BorrowCheckResult {
@@ -2392,6 +2361,38 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, '_, 'tcx> {
     fn dominators(&self) -> &Dominators<BasicBlock> {
         // `BasicBlocks` computes dominators on-demand and caches them.
         self.body.basic_blocks.dominators()
+    }
+
+    fn lint_unused_mut(&self) {
+        let tcx = self.infcx.tcx;
+        let body = self.body;
+        for local in body.mut_vars_and_args_iter().filter(|local| !self.used_mut.contains(local)) {
+            let local_decl = &body.local_decls[local];
+            let lint_root = match &body.source_scopes[local_decl.source_info.scope].local_data {
+                ClearCrossCrate::Set(data) => data.lint_root,
+                _ => continue,
+            };
+
+            // Skip over locals that begin with an underscore or have no name
+            match self.local_names[local] {
+                Some(name) => {
+                    if name.as_str().starts_with('_') {
+                        continue;
+                    }
+                }
+                None => continue,
+            }
+
+            let span = local_decl.source_info.span;
+            if span.desugaring_kind().is_some() {
+                // If the `mut` arises as part of a desugaring, we should ignore it.
+                continue;
+            }
+
+            let mut_span = tcx.sess.source_map().span_until_non_whitespace(span);
+
+            tcx.emit_node_span_lint(UNUSED_MUT, lint_root, span, VarNeedNotMut { span: mut_span })
+        }
     }
 }
 

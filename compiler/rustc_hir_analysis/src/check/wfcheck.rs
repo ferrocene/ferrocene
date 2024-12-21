@@ -23,8 +23,7 @@ use rustc_middle::ty::{
 };
 use rustc_middle::{bug, span_bug};
 use rustc_session::parse::feature_err;
-use rustc_span::symbol::{Ident, sym};
-use rustc_span::{DUMMY_SP, Span};
+use rustc_span::{DUMMY_SP, Ident, Span, sym};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::regions::InferCtxtRegionExt;
 use rustc_trait_selection::traits::misc::{
@@ -2340,8 +2339,11 @@ fn lint_redundant_lifetimes<'tcx>(
     );
     // If we are in a function, add its late-bound lifetimes too.
     if matches!(def_kind, DefKind::Fn | DefKind::AssocFn) {
-        for var in tcx.fn_sig(owner_id).instantiate_identity().bound_vars() {
+        for (idx, var) in
+            tcx.fn_sig(owner_id).instantiate_identity().bound_vars().iter().enumerate()
+        {
             let ty::BoundVariableKind::Region(kind) = var else { continue };
+            let kind = ty::LateParamRegionKind::from_bound(ty::BoundVar::from_usize(idx), kind);
             lifetimes.push(ty::Region::new_late_param(tcx, owner_id.to_def_id(), kind));
         }
     }

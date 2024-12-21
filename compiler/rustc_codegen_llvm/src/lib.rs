@@ -17,6 +17,7 @@
 #![feature(iter_intersperse)]
 #![feature(let_chains)]
 #![feature(rustdoc_internals)]
+#![feature(try_blocks)]
 #![warn(unreachable_pub)]
 // tidy-alphabetical-end
 
@@ -43,7 +44,7 @@ use rustc_middle::ty::TyCtxt;
 use rustc_middle::util::Providers;
 use rustc_session::Session;
 use rustc_session::config::{OptLevel, OutputFilenames, PrintKind, PrintRequest};
-use rustc_span::symbol::Symbol;
+use rustc_span::Symbol;
 
 mod back {
     pub(crate) mod archive;

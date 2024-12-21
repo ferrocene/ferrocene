@@ -3,8 +3,7 @@
 use std::path::PathBuf;
 
 use rustc_data_structures::fx::FxHashSet;
-use rustc_span::Span;
-use rustc_span::symbol::{Symbol, sym};
+use rustc_span::{Span, Symbol, sym};
 
 use super::{Feature, to_nonzero};
 
@@ -448,9 +447,6 @@ declare_features! (
     (unstable, coroutine_clone, "1.65.0", Some(95360)),
     /// Allows defining coroutines.
     (unstable, coroutines, "1.21.0", Some(43122)),
-    /// Allows function attribute `#[coverage(on/off)]`, to control coverage
-    /// instrumentation of that function.
-    (unstable, coverage_attribute, "1.74.0", Some(84605)),
     /// Allows non-builtin attributes in inner attribute position.
     (unstable, custom_inner_attributes, "1.30.0", Some(54726)),
     /// Allows custom test frameworks with `#![test_runner]` and `#[test_case]`.
@@ -466,8 +462,6 @@ declare_features! (
     (unstable, deprecated_suggestion, "1.61.0", Some(94785)),
     /// Allows deref patterns.
     (incomplete, deref_patterns, "1.79.0", Some(87121)),
-    /// Controls errors in trait implementations.
-    (unstable, do_not_recommend, "1.67.0", Some(51992)),
     /// Tells rustdoc to automatically generate `#[doc(cfg(...))]`.
     (unstable, doc_auto_cfg, "1.58.0", Some(43781)),
     /// Allows `#[doc(cfg(...))]`.

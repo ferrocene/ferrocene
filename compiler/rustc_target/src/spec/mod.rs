@@ -46,7 +46,7 @@ use rustc_data_structures::fx::FxHashSet;
 use rustc_fs_util::try_canonicalize;
 use rustc_macros::{Decodable, Encodable, HashStable_Generic};
 use rustc_serialize::{Decodable, Decoder, Encodable, Encoder};
-use rustc_span::symbol::{Symbol, kw, sym};
+use rustc_span::{Symbol, kw, sym};
 use serde_json::Value;
 use tracing::debug;
 
@@ -3169,7 +3169,7 @@ impl Target {
                 // Note that the `lp64e` is still unstable as it's not (yet) part of the ELF psABI.
                 check_matches!(
                     &*self.llvm_abiname,
-                    "lp64" | "lp64f" | "lp64d" | "lp64q" | "lp64e",
+                    "lp64" | "lp64f" | "lp64d" | "lp64e",
                     "invalid RISC-V ABI name"
                 );
             }

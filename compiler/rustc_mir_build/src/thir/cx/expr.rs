@@ -25,6 +25,14 @@ use crate::thir::cx::Cx;
 use crate::thir::util::UserAnnotatedTyHelpers;
 
 impl<'tcx> Cx<'tcx> {
+    /// Create a THIR expression for the given HIR expression. This expands all
+    /// adjustments and directly adds the type information from the
+    /// `typeck_results`. See the [dev-guide] for more details.
+    ///
+    /// (The term "mirror" in this case does not refer to "flipped" or
+    /// "reversed".)
+    ///
+    /// [dev-guide]: https://rustc-dev-guide.rust-lang.org/thir.html
     pub(crate) fn mirror_expr(&mut self, expr: &'tcx hir::Expr<'tcx>) -> ExprId {
         // `mirror_expr` is recursing very deep. Make sure the stack doesn't overflow.
         ensure_sufficient_stack(|| self.mirror_expr_inner(expr))
@@ -37,7 +45,7 @@ impl<'tcx> Cx<'tcx> {
     #[instrument(level = "trace", skip(self, hir_expr))]
     pub(super) fn mirror_expr_inner(&mut self, hir_expr: &'tcx hir::Expr<'tcx>) -> ExprId {
         let expr_scope =
-            region::Scope { id: hir_expr.hir_id.local_id, data: region::ScopeData::Node };
+            region::Scope { local_id: hir_expr.hir_id.local_id, data: region::ScopeData::Node };
 
         trace!(?hir_expr.hir_id, ?hir_expr.span);
 
@@ -806,14 +814,20 @@ impl<'tcx> Cx<'tcx> {
             hir::ExprKind::Become(call) => ExprKind::Become { value: self.mirror_expr(call) },
             hir::ExprKind::Break(dest, ref value) => match dest.target_id {
                 Ok(target_id) => ExprKind::Break {
-                    label: region::Scope { id: target_id.local_id, data: region::ScopeData::Node },
+                    label: region::Scope {
+                        local_id: target_id.local_id,
+                        data: region::ScopeData::Node,
+                    },
                     value: value.map(|value| self.mirror_expr(value)),
                 },
                 Err(err) => bug!("invalid loop id for break: {}", err),
             },
             hir::ExprKind::Continue(dest) => match dest.target_id {
                 Ok(loop_id) => ExprKind::Continue {
-                    label: region::Scope { id: loop_id.local_id, data: region::ScopeData::Node },
+                    label: region::Scope {
+                        local_id: loop_id.local_id,
+                        data: region::ScopeData::Node,
+                    },
                 },
                 Err(err) => bug!("invalid loop id for continue: {}", err),
             },
@@ -823,7 +837,7 @@ impl<'tcx> Cx<'tcx> {
             },
             hir::ExprKind::If(cond, then, else_opt) => ExprKind::If {
                 if_then_scope: region::Scope {
-                    id: then.hir_id.local_id,
+                    local_id: then.hir_id.local_id,
                     data: {
                         if expr.span.at_least_rust_2024() {
                             region::ScopeData::IfThenRescope
@@ -1013,7 +1027,7 @@ impl<'tcx> Cx<'tcx> {
             guard: arm.guard.as_ref().map(|g| self.mirror_expr(g)),
             body: self.mirror_expr(arm.body),
             lint_level: LintLevel::Explicit(arm.hir_id),
-            scope: region::Scope { id: arm.hir_id.local_id, data: region::ScopeData::Node },
+            scope: region::Scope { local_id: arm.hir_id.local_id, data: region::ScopeData::Node },
             span: arm.span,
         };
         self.thir.arms.push(arm)
@@ -1189,7 +1203,7 @@ impl<'tcx> Cx<'tcx> {
             .temporary_scope(self.region_scope_tree, closure_expr.hir_id.local_id);
         let var_ty = place.base_ty;
 
-        // The result of capture analysis in `rustc_hir_analysis/check/upvar.rs`represents a captured path
+        // The result of capture analysis in `rustc_hir_typeck/src/upvar.rs` represents a captured path
         // as it's seen for use within the closure and not at the time of closure creation.
         //
         // That is we see expect to see it start from a captured upvar and not something that is local

@@ -1,7 +1,7 @@
 use std::any::Any;
 use std::mem;
 
-use rustc_attr::Deprecation;
+use rustc_attr_parsing::Deprecation;
 use rustc_data_structures::sync::Lrc;
 use rustc_hir::def::{CtorKind, DefKind, Res};
 use rustc_hir::def_id::{CrateNum, DefId, DefIdMap, LOCAL_CRATE};
@@ -17,9 +17,8 @@ use rustc_middle::ty::{self, TyCtxt};
 use rustc_middle::util::Providers;
 use rustc_session::cstore::{CrateStore, ExternCrate};
 use rustc_session::{Session, StableCrateId};
-use rustc_span::Span;
 use rustc_span::hygiene::ExpnId;
-use rustc_span::symbol::{Symbol, kw};
+use rustc_span::{Span, Symbol, kw};
 
 use super::{Decodable, DecodeContext, DecodeIterator};
 use crate::creader::{CStore, LoadedMacro};

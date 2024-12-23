@@ -1,5 +1,5 @@
+use rustc_ast::attr::AttributeExt;
 use rustc_ast_pretty::pprust;
-use rustc_attr::AttributeExt;
 use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_errors::{Diag, LintDiagnostic, MultiSpan};
 use rustc_feature::{Features, GateIssue};
@@ -20,8 +20,7 @@ use rustc_session::lint::builtin::{
     UNFULFILLED_LINT_EXPECTATIONS, UNKNOWN_LINTS, UNUSED_ATTRIBUTES,
 };
 use rustc_session::lint::{Level, Lint, LintExpectationId, LintId};
-use rustc_span::symbol::{Symbol, sym};
-use rustc_span::{DUMMY_SP, Span};
+use rustc_span::{DUMMY_SP, Span, Symbol, sym};
 use tracing::{debug, instrument};
 use {rustc_ast as ast, rustc_hir as hir};
 
@@ -915,7 +914,7 @@ impl<'s, P: LintLevelsProvider> LintLevelsBuilder<'s, P> {
 
                 let src = LintLevelSource::Node { name, span: sp, reason };
                 for &id in ids {
-                    if self.check_gated_lint(id, attr.span(), false) {
+                    if self.check_gated_lint(id, sp, false) {
                         self.insert_spec(id, (level, src));
                     }
                 }

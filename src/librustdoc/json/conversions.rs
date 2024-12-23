@@ -6,7 +6,7 @@
 
 use rustc_abi::ExternAbi;
 use rustc_ast::ast;
-use rustc_attr::DeprecatedSince;
+use rustc_attr_parsing::DeprecatedSince;
 use rustc_hir::def::{CtorKind, DefKind};
 use rustc_hir::def_id::DefId;
 use rustc_metadata::rendered_const;
@@ -215,8 +215,8 @@ where
     }
 }
 
-pub(crate) fn from_deprecation(deprecation: rustc_attr::Deprecation) -> Deprecation {
-    let rustc_attr::Deprecation { since, note, suggestion: _ } = deprecation;
+pub(crate) fn from_deprecation(deprecation: rustc_attr_parsing::Deprecation) -> Deprecation {
+    let rustc_attr_parsing::Deprecation { since, note, suggestion: _ } = deprecation;
     let since = match since {
         DeprecatedSince::RustcVersion(version) => Some(version.to_string()),
         DeprecatedSince::Future => Some("TBD".to_owned()),
@@ -319,7 +319,9 @@ fn from_clean_item(item: clean::Item, renderer: &JsonRenderer<'_>) -> ItemEnum {
         TraitItem(t) => ItemEnum::Trait((*t).into_json(renderer)),
         TraitAliasItem(t) => ItemEnum::TraitAlias(t.into_json(renderer)),
         MethodItem(m, _) => ItemEnum::Function(from_function(m, true, header.unwrap(), renderer)),
-        TyMethodItem(m) => ItemEnum::Function(from_function(m, false, header.unwrap(), renderer)),
+        RequiredMethodItem(m) => {
+            ItemEnum::Function(from_function(m, false, header.unwrap(), renderer))
+        }
         ImplItem(i) => ItemEnum::Impl((*i).into_json(renderer)),
         StaticItem(s) => ItemEnum::Static(convert_static(s, rustc_hir::Safety::Safe, renderer)),
         ForeignStaticItem(s, safety) => ItemEnum::Static(convert_static(s, safety, renderer)),
@@ -339,15 +341,15 @@ fn from_clean_item(item: clean::Item, renderer: &JsonRenderer<'_>) -> ItemEnum {
             })
         }
         // FIXME(generic_const_items): Add support for generic associated consts.
-        TyAssocConstItem(_generics, ty) => {
+        RequiredAssocConstItem(_generics, ty) => {
             ItemEnum::AssocConst { type_: (*ty).into_json(renderer), value: None }
         }
         // FIXME(generic_const_items): Add support for generic associated consts.
-        AssocConstItem(ci) => ItemEnum::AssocConst {
+        ProvidedAssocConstItem(ci) | ImplAssocConstItem(ci) => ItemEnum::AssocConst {
             type_: ci.type_.into_json(renderer),
             value: Some(ci.kind.expr(renderer.tcx)),
         },
-        TyAssocTypeItem(g, b) => ItemEnum::AssocType {
+        RequiredAssocTypeItem(g, b) => ItemEnum::AssocType {
             generics: g.into_json(renderer),
             bounds: b.into_json(renderer),
             type_: None,

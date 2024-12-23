@@ -1,5 +1,6 @@
+use rustc_ast::attr::list_contains_name;
 use rustc_ast::{MetaItemInner, attr};
-use rustc_attr::{InlineAttr, InstructionSetAttr, OptimizeAttr, list_contains_name};
+use rustc_attr_parsing::{InlineAttr, InstructionSetAttr, OptimizeAttr};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_errors::codes::*;
 use rustc_errors::{DiagMessage, SubdiagMessage, struct_span_code_err};
@@ -15,8 +16,7 @@ use rustc_middle::query::Providers;
 use rustc_middle::ty::{self as ty, TyCtxt};
 use rustc_session::parse::feature_err;
 use rustc_session::{Session, lint};
-use rustc_span::symbol::Ident;
-use rustc_span::{Span, sym};
+use rustc_span::{Ident, Span, sym};
 use rustc_target::spec::{SanitizerSet, abi};
 
 use crate::errors;
@@ -425,7 +425,7 @@ fn codegen_fn_attrs(tcx: TyCtxt<'_>, did: LocalDefId) -> CodegenFnAttrs {
                     && let [item] = items.as_slice()
                     && let Some((sym::align, literal)) = item.singleton_lit_list()
                 {
-                    rustc_attr::parse_alignment(&literal.kind)
+                    rustc_attr_parsing::parse_alignment(&literal.kind)
                         .map_err(|msg| {
                             struct_span_code_err!(
                                 tcx.dcx(),

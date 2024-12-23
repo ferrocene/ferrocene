@@ -25,8 +25,7 @@ use rustc_span::def_id::{DefId, LocalDefId};
 use rustc_span::edit_distance::{
     edit_distance_with_substrings, find_best_match_for_name_with_substrings,
 };
-use rustc_span::symbol::{Ident, sym};
-use rustc_span::{DUMMY_SP, Span, Symbol};
+use rustc_span::{DUMMY_SP, Ident, Span, Symbol, sym};
 use rustc_trait_selection::error_reporting::infer::need_type_info::TypeAnnotationNeeded;
 use rustc_trait_selection::infer::InferCtxtExt as _;
 use rustc_trait_selection::traits::query::CanonicalTyGoal;
@@ -1230,23 +1229,16 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
                 if let Some(by_value_pick) = by_value_pick {
                     if let Ok(by_value_pick) = by_value_pick.as_ref() {
                         if by_value_pick.kind == PickKind::InherentImplPick {
-                            if let Err(e) = self.check_for_shadowed_autorefd_method(
-                                by_value_pick,
-                                step,
-                                self_ty,
-                                hir::Mutability::Not,
-                                track_unstable_candidates,
-                            ) {
-                                return Some(Err(e));
-                            }
-                            if let Err(e) = self.check_for_shadowed_autorefd_method(
-                                by_value_pick,
-                                step,
-                                self_ty,
-                                hir::Mutability::Mut,
-                                track_unstable_candidates,
-                            ) {
-                                return Some(Err(e));
+                            for mutbl in [hir::Mutability::Not, hir::Mutability::Mut] {
+                                if let Err(e) = self.check_for_shadowed_autorefd_method(
+                                    by_value_pick,
+                                    step,
+                                    self_ty,
+                                    mutbl,
+                                    track_unstable_candidates,
+                                ) {
+                                    return Some(Err(e));
+                                }
                             }
                         }
                     }

@@ -59,8 +59,7 @@ use rustc_middle::ty::error::TypeError;
 use rustc_middle::ty::visit::TypeVisitableExt;
 use rustc_middle::ty::{self, GenericArgsRef, Ty, TyCtxt};
 use rustc_session::parse::feature_err;
-use rustc_span::symbol::sym;
-use rustc_span::{BytePos, DUMMY_SP, DesugaringKind, Span};
+use rustc_span::{BytePos, DUMMY_SP, DesugaringKind, Span, sym};
 use rustc_trait_selection::infer::InferCtxtExt as _;
 use rustc_trait_selection::traits::query::evaluate_obligation::InferCtxtExt;
 use rustc_trait_selection::traits::{
@@ -1313,43 +1312,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     return Ok(target);
                 }
                 Err(e) => first_error = Some(e),
-            }
-        }
-
-        // Then try to coerce the previous expressions to the type of the new one.
-        // This requires ensuring there are no coercions applied to *any* of the
-        // previous expressions, other than noop reborrows (ignoring lifetimes).
-        for expr in exprs {
-            let expr = expr.as_coercion_site();
-            let noop = match self.typeck_results.borrow().expr_adjustments(expr) {
-                &[
-                    Adjustment { kind: Adjust::Deref(_), .. },
-                    Adjustment { kind: Adjust::Borrow(AutoBorrow::Ref(mutbl_adj)), .. },
-                ] => {
-                    match *self.node_ty(expr.hir_id).kind() {
-                        ty::Ref(_, _, mt_orig) => {
-                            let mutbl_adj: hir::Mutability = mutbl_adj.into();
-                            // Reborrow that we can safely ignore, because
-                            // the next adjustment can only be a Deref
-                            // which will be merged into it.
-                            mutbl_adj == mt_orig
-                        }
-                        _ => false,
-                    }
-                }
-                &[Adjustment { kind: Adjust::NeverToAny, .. }] | &[] => true,
-                _ => false,
-            };
-
-            if !noop {
-                debug!(
-                    "coercion::try_find_coercion_lub: older expression {:?} had adjustments, requiring LUB",
-                    expr,
-                );
-
-                return Err(self
-                    .commit_if_ok(|_| self.at(cause, self.param_env).lub(prev_ty, new_ty))
-                    .unwrap_err());
             }
         }
 

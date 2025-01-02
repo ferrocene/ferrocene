@@ -2,9 +2,10 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 # If you edit this, also run:
-#    uv pip compile requirements.in -o requirements.txt
-#    uv pip install -r requirements.txt
+#    uv pip compile requirements.in --output-file requirements.txt
+#    uv pip sync requirements.txt
 boto3
 reuse>=4.0,<5.0
 pyyaml
 zstandard
+requests

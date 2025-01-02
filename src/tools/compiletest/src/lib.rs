@@ -563,6 +563,7 @@ pub fn test_opts(config: &Config) -> test::TestOpts {
     }
 
     test::TestOpts {
+        only_should_panic: false,
         exclude_should_panic: false,
         filters: config.filters.clone(),
         filter_exact: config.filter_exact,

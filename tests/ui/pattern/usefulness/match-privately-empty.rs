@@ -17,3 +17,6 @@ fn main() {
         Some(private::Private { misc: false, .. }) => {}
     }
 }
+
+// ferrocene-annotations: fls_mcxf9y5u66sz
+// Visible Emptiness

@@ -209,6 +209,7 @@ jobs:
         ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:
+          qnx: true
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-src:
@@ -348,9 +349,62 @@ jobs:
           depth: 1
       - setup-venv
       - aws-oidc-auth
+      - setup-qnx-toolchain: {}
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
+
+  x86_64-qnx-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: x86_64-pc-nto-qnx710
+      SCRIPT: |
+        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.11:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-venv
+      - setup-qnx-toolchain:
+          source-env-script: false
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
+
+  aarch64-qnx-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-nto-qnx710
+      SCRIPT: |
+        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-venv
+      - setup-qnx-toolchain:
+          source-env-script: false
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh"
 
   # aarch64-unknown-linux-gnu jobs
 
@@ -604,6 +658,7 @@ jobs:
       - aws-oidc-auth
       - ferrocene-setup-windows
       - setup-venv
+      - setup-qnx-toolchain: {}
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
@@ -766,6 +821,12 @@ workflows:
             - x86_64-linux-test-library
             - x86_64-linux-test-library-std
             - x86_64-linux-compiletest
+            - x86_64-qnx-test-library
+            - x86_64-qnx-test-library-std
+            - x86_64-qnx-test-compiletest
+            - aarch64-qnx-test-library
+            - aarch64-qnx-test-library-std
+            - aarch64-qnx-test-compiletest
             - aarch64-linux-test-library
             - aarch64-linux-compiletest
       - x86_64-linux-traceability-matrix:
@@ -827,6 +888,54 @@ workflows:
             - x86_64-linux-dist-tools
             - x86_64-linux-dist-targets
             - aarch64-linux-dist
+
+      - x86_64-qnx-generic-test-vm:
+          name: x86_64-qnx-test-library
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
+
+      - x86_64-qnx-generic-test-vm:
+          name: x86_64-qnx-test-library-std
+          job: test:library-std
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
+
+      - x86_64-qnx-generic-test-vm:
+          name: x86_64-qnx-test-compiletest
+          job: qnx:compiletest-no-only-hosts
+          resource-class: xlarge # 8-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
+
+      - aarch64-qnx-generic-test-vm:
+          name: aarch64-qnx-test-library
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
+
+      - aarch64-qnx-generic-test-vm:
+          name: aarch64-qnx-test-library-std
+          job: test:library-std
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
+
+      - aarch64-qnx-generic-test-vm:
+          name: aarch64-qnx-test-compiletest
+          job: qnx:compiletest-no-only-hosts
+          resource-class: xlarge # 8-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
 
       - aarch64-linux-llvm:
           requires:
@@ -975,6 +1084,9 @@ commands:
       llvm-subset:
         type: boolean
         default: true
+      qnx:
+        type: boolean
+        default: false
     steps:
       - ferrocene-checkout:
           llvm-subset: << parameters.llvm-subset >>
@@ -996,6 +1108,11 @@ commands:
             - run:
                 name: Restore files from the << parameters.restore-from-job >> job
                 command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
+      - when:
+          condition:
+            equal: [<<parameters.qnx>>, true]
+          steps:
+            - setup-qnx-toolchain: {}
       - ferrocene-ci
 
   ferrocene-job-test-container:
@@ -1232,6 +1349,28 @@ commands:
       - store_artifacts:
           path: /tmp/metrics
           destination: metrics
+
+  setup-qnx-toolchain:
+    description: Setup QNX Toolchain
+    parameters:
+      source-env-script:
+        type: boolean
+        default: true
+    steps:
+      - run:
+          name: Fetch QNX710 toolchain
+          # On Windows, the virtualenv detection seems to struggle at times.
+          command: |
+            uv run ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx710-472-deployment.tar.zst .
+      - when:
+          condition: << parameters.source-env-script >>
+          steps:
+            - run:
+                name: Set PATH to include QNX710 tools
+                command: echo 'source $(pwd)/qnx710-472/qnxsdp-env.sh' >> "$BASH_ENV"
+      - run:
+          name: Test qcc
+          command: qcc -v || true
 
   aws-oidc-auth:
     description: Authenticate with AWS using OIDC

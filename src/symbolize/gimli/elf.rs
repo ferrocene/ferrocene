@@ -9,9 +9,9 @@ use super::{gimli, Context, Endian, EndianSlice, Mapping, Stash, Vec};
 use alloc::sync::Arc;
 use core::convert::{TryFrom, TryInto};
 use core::str;
-use object::elf::{
-    ELFCOMPRESS_ZLIB, ELFCOMPRESS_ZSTD, ELF_NOTE_GNU, NT_GNU_BUILD_ID, SHF_COMPRESSED,
-};
+#[cfg(feature = "ruzstd")]
+use object::elf::ELFCOMPRESS_ZSTD;
+use object::elf::{ELFCOMPRESS_ZLIB, ELF_NOTE_GNU, NT_GNU_BUILD_ID, SHF_COMPRESSED};
 use object::read::elf::{CompressionHeader, FileHeader, SectionHeader, SectionTable, Sym};
 use object::read::StringTable;
 use object::{BigEndian, Bytes, NativeEndian};
@@ -231,6 +231,7 @@ impl<'a> Object<'a> {
                     decompress_zlib(data.0, buf)?;
                     return Some(buf);
                 }
+                #[cfg(feature = "ruzstd")]
                 ELFCOMPRESS_ZSTD => {
                     let size = usize::try_from(header.ch_size(self.endian)).ok()?;
                     let buf = stash.allocate(size);
@@ -357,6 +358,7 @@ fn decompress_zlib(input: &[u8], output: &mut [u8]) -> Option<()> {
     }
 }
 
+#[cfg(feature = "ruzstd")]
 fn decompress_zstd(mut input: &[u8], mut output: &mut [u8]) -> Option<()> {
     use ruzstd::frame::ReadFrameHeaderError;
     use ruzstd::frame_decoder::FrameDecoderError;

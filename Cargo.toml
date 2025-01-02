@@ -43,7 +43,7 @@ windows-targets = "0.52.6"
 
 [target.'cfg(not(all(windows, target_env = "msvc", not(target_vendor = "uwp"))))'.dependencies]
 miniz_oxide = { version = "0.8", default-features = false }
-ruzstd = { version = "0.7.2", default-features = false }
+ruzstd = { version = "0.7.3", default-features = false, optional = true }
 addr2line = { version = "0.24.0", default-features = false }
 libc = { version = "0.2.156", default-features = false }
 
@@ -64,6 +64,8 @@ default = ["std"]
 std = []
 
 serialize-serde = ["serde"]
+
+ruzstd = ["dep:ruzstd"]
 
 #=======================================
 # Deprecated/internal features

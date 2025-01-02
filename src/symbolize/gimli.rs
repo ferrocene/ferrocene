@@ -363,6 +363,8 @@ impl Cache {
         // never happen, and symbolicating backtraces would be ssssllllooooowwww.
         static mut MAPPINGS_CACHE: Option<Cache> = None;
 
+        // FIXME: https://github.com/rust-lang/backtrace-rs/issues/678
+        #[allow(static_mut_refs)]
         f(MAPPINGS_CACHE.get_or_insert_with(Cache::new))
     }
 

@@ -1159,12 +1159,12 @@ commands:
         default: true
     steps:
       - aws-oidc-auth
-      - setup-venv
       - when:
           condition: << parameters.checkout-source >>
           steps:
             - ferrocene-checkout:
                 llvm-subset: true
+      - setup-venv
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>

@@ -74,3 +74,6 @@ fn nonempty<const N: usize>(arrayN_of_empty: [!; N]) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_mcxf9y5u66sz
+// Visible Emptiness

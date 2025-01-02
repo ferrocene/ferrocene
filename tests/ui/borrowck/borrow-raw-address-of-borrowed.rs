@@ -18,3 +18,6 @@ fn address_of_mutably_borrowed() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_vxguvrwolbee
+// Raw Borrow Expression

@@ -678,3 +678,6 @@ fn diagnostics_subtlety(x: NeverBundle) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_mcxf9y5u66sz
+// Visible Emptiness

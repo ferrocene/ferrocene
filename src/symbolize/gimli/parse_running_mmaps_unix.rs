@@ -2,10 +2,12 @@
 // in `mod libs_dl_iterate_phdr` (e.g. linux, freebsd, ...); it may be more
 // general purpose, but it hasn't been tested elsewhere.
 
+use super::mystd::ffi::OsString;
 use super::mystd::fs::File;
 use super::mystd::io::Read;
-use super::mystd::str::FromStr;
-use super::{OsString, String, Vec};
+use alloc::string::String;
+use alloc::vec::Vec;
+use core::str::FromStr;
 
 #[derive(PartialEq, Eq, Debug)]
 pub(super) struct MapsEntry {

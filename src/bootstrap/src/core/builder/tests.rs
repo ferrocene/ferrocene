@@ -631,8 +631,12 @@ mod dist {
             run: None,
             only_modified: false,
             extra_checks: None,
+<<<<<<< HEAD
             coverage: false,
             ferrocene_test_one_crate_per_cargo_call: false,
+=======
+            no_capture: false,
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         };
 
         let build = Build::new(config);
@@ -704,8 +708,12 @@ mod dist {
             run: None,
             only_modified: false,
             extra_checks: None,
+<<<<<<< HEAD
             coverage: false,
             ferrocene_test_one_crate_per_cargo_call: false,
+=======
+            no_capture: false,
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         };
         // Make sure rustfmt binary not being found isn't an error.
         config.channel = "beta".to_string();

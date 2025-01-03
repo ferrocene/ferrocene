@@ -3311,7 +3311,11 @@ _x.py() {
             return 0
             ;;
         x.py__test)
+<<<<<<< HEAD
             opts="-v -i -j -h --no-fail-fast --test-args --compiletest-rustc-args --no-doc --doc --bless --extra-checks --force-rerun --only-modified --compare-mode --pass --run --rustfix-coverage --coverage --ferrocene-test-one-crate-per-cargo-call --verbose --incremental --config --build-dir --build --host --target --exclude --skip --include-default-paths --rustc-error-format --on-fail --dry-run --dump-bootstrap-shims --stage --keep-stage --keep-stage-std --src --jobs --warnings --error-format --json-output --color --bypass-bootstrap-lock --rust-profile-generate --rust-profile-use --llvm-profile-use --llvm-profile-generate --enable-bolt-settings --skip-stage0-validation --reproducible-artifact --set --help [PATHS]... [ARGS]..."
+=======
+            opts="-v -i -j -h --no-fail-fast --test-args --compiletest-rustc-args --no-doc --doc --bless --extra-checks --force-rerun --only-modified --compare-mode --pass --run --rustfix-coverage --no-capture --verbose --incremental --config --build-dir --build --host --target --exclude --skip --include-default-paths --rustc-error-format --on-fail --dry-run --dump-bootstrap-shims --stage --keep-stage --keep-stage-std --src --jobs --warnings --error-format --json-output --color --bypass-bootstrap-lock --rust-profile-generate --rust-profile-use --llvm-profile-use --llvm-profile-generate --enable-bolt-settings --skip-stage0-validation --reproducible-artifact --set --help [PATHS]... [ARGS]..."
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0

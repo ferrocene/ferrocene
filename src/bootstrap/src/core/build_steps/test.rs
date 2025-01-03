@@ -1719,7 +1719,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
 
         // ensure that `libproc_macro` is available on the host.
         if suite == "mir-opt" {
-            builder.ensure(compile::Std::new_for_mir_opt_tests(compiler, compiler.host));
+            builder.ensure(compile::Std::new(compiler, compiler.host).is_for_mir_opt_tests(true));
         } else {
             builder.ensure(compile::Std::new(compiler, compiler.host));
         }
@@ -1732,7 +1732,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
         let mut cmd = builder.tool_cmd(Tool::Compiletest);
 
         if suite == "mir-opt" {
-            builder.ensure(compile::Std::new_for_mir_opt_tests(compiler, target));
+            builder.ensure(compile::Std::new(compiler, target).is_for_mir_opt_tests(true));
         } else {
             builder.ensure(compile::Std::new(compiler, target));
         }
@@ -1828,6 +1828,10 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
 
         if builder.config.cmd.force_rerun() {
             cmd.arg("--force-rerun");
+        }
+
+        if builder.config.cmd.no_capture() {
+            cmd.arg("--no-capture");
         }
 
         let compare_mode =
@@ -2762,7 +2766,7 @@ impl Step for Crate {
         }
         // Prepare sysroot
         // See [field@compile::Std::force_recompile].
-        builder.ensure(compile::Std::force_recompile(compiler, compiler.host));
+        builder.ensure(compile::Std::new(compiler, compiler.host).force_recompile(true));
 
         // If we're not doing a full bootstrap but we're testing a stage2
         // version of libstd, then what we're actually testing is the libstd
@@ -2806,7 +2810,7 @@ impl Step for Crate {
         } else {
             // Also prepare a sysroot for the target.
             if builder.config.build != target {
-                builder.ensure(compile::Std::force_recompile(compiler, target));
+                builder.ensure(compile::Std::new(compiler, target).force_recompile(true));
                 builder.ensure(RemoteCopyLibs { compiler, target });
             }
 
@@ -3629,10 +3633,10 @@ impl Step for CodegenGCC {
         let compiler = self.compiler;
         let target = self.target;
 
-        builder.ensure(compile::Std::new_with_extra_rust_args(compiler, target, &[
-            "-Csymbol-mangling-version=v0",
-            "-Cpanic=abort",
-        ]));
+        builder.ensure(
+            compile::Std::new(compiler, target)
+                .extra_rust_args(&["-Csymbol-mangling-version=v0", "-Cpanic=abort"]),
+        );
 
         // If we're not doing a full bootstrap but we're testing a stage2
         // version of libstd, then what we're actually testing is the libstd

@@ -22,6 +22,8 @@ chardet==5.2.0
     #   python-debian
 charset-normalizer==3.4.0
     # via requests
+docker==7.1.0
+    # via -r requirements.in
 idna==3.10
     # via requests
 jinja2==3.1.4
@@ -41,7 +43,9 @@ python-debian==0.1.49
 pyyaml==6.0.1
     # via -r requirements.in
 requests==2.32.3
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   docker
 reuse==4.0.3
     # via -r requirements.in
 s3transfer==0.10.1
@@ -53,6 +57,7 @@ tomlkit==0.13.0
 urllib3==2.2.1
     # via
     #   botocore
+    #   docker
     #   requests
 zstandard==0.22.0
     # via -r requirements.in

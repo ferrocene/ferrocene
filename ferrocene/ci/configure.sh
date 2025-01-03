@@ -50,6 +50,12 @@ is_internal() {
     fi
 }
 
+if [[ is_internal ]]; then
+    echo "note: Using internal Ferrocene team settings"
+    echo "If you don't have access to that infrastructure, you can invoke the script"
+    echo "with the OUTSIDE_FERROUS=1 environment variable."
+fi
+
 ##################################################################
 #                                                                #
 #   Configuration items not affecting the resulting toolchain.   #

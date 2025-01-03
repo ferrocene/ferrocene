@@ -162,20 +162,17 @@ jobs:
       matrix:
         include:
           - target: aarch64-apple-ios
-            sdk: iphoneos
           - target: x86_64-apple-ios
-            sdk: iphonesimulator
+          - target: aarch64-apple-ios-macabi
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
       - run: rustup target add ${{ matrix.target }}
-      - run: |
-          export RUSTFLAGS=-Dwarnings
-          export SDK_PATH=`xcrun --show-sdk-path --sdk ${{ matrix.sdk }}`
-          export RUSTFLAGS="-C link-arg=-isysroot -C link-arg=$SDK_PATH"
-          cargo test --no-run --target ${{ matrix.target }}
-        name: Build tests
+      - name: Run tests
+        run: cargo test ${{ contains(matrix.target, 'macabi') && '' || '--no-run' }} --target ${{ matrix.target }}
+        env:
+          RUSTFLAGS: -Dwarnings
 
   docker:
     name: Docker

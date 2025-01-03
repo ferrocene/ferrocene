@@ -22,7 +22,9 @@ jobs:
     name: Check binary size
     strategy:
       matrix:
-        platform: [ubuntu-latest, windows-latest]
+        # FIXME(jubilee): the immutable upload needs us to disambiguate things
+        # platform: [ubuntu-latest, windows-latest]
+        platform: [ubuntu-latest]
     runs-on: ${{ matrix.platform }}
     permissions:
       contents: read

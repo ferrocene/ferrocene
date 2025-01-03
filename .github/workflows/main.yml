@@ -16,12 +16,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-20.04
-            rust: stable
-          - os: ubuntu-20.04
-            rust: beta
-          - os: ubuntu-20.04
-            rust: nightly
           - os: ubuntu-24.04
             rust: stable
           - os: ubuntu-24.04
@@ -185,7 +179,7 @@ jobs:
 
   docker:
     name: Docker
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -219,7 +213,7 @@ jobs:
 
   rustfmt:
     name: Rustfmt
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -230,7 +224,7 @@ jobs:
 
   build:
     name: Build Targets
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         target:
@@ -258,7 +252,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-24.04
           - os: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -270,7 +264,7 @@ jobs:
 
   miri:
     name: Miri
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:

@@ -89,37 +89,6 @@ orbs:
   win: circleci/windows@5.0
 
 jobs:
-  # Container dedicated to running quick checks for each commit pushed in open
-  # PRs and personal branches. The job must balance providing quick feedback
-  # and providing useful feedback, focusing on catching the most common errors
-  # as soon as possible.
-  #
-  # It's fine if this job only runs a small subset of the test suite: the full
-  # test suite for all the supported targets will be run when bors tries to
-  # merge the PR anyway.
-  commit-checks:
-    executor: docker-x86_64-ubuntu-24
-    resource_class: large # 4-core
-    environment:
-      FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-18
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      SCRIPT: |
-        ./x.py test tidy
-        ./x.py check library compiler/rustc
-        ./x.py run ferrocene/tools/traceability-matrix
-    steps:
-      - aws-oidc-auth
-      - ferrocene-checkout:
-          llvm-subset: true
-      - setup-venv
-      - run:
-          name: Check whether git conflict markers are present
-          command: ferrocene/ci/scripts/detect-conflict-markers.py
-      - run:
-          name: Perform licensing checks
-          command: uv run reuse --include-submodules lint
-      - ferrocene-ci
-
   # Container dedicated to running ad-hoc tests that don't depend on an
   # individual target. If you have a test you don't know where to run it, this
   # is the place for it.
@@ -226,17 +195,7 @@ jobs:
           # code into the tarball we ship to customers.
           llvm-subset: false
 
-  wasm-dist-oxidos:
-    executor: docker-x86_64-ubuntu-20
-    resource_class: large # 4-core
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: wasm32-unknown-unknown
-      SCRIPT: |
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:oxidos)
-    steps:
-      - ferrocene-job-dist:
-          restore-from-job: x86_64-linux-build
+
 
   x86_64-linux-generic-test-container:
     executor: docker-x86_64-ubuntu-20
@@ -254,28 +213,6 @@ jobs:
     steps:
       - ferrocene-job-test-container:
           restore-from-job: x86_64-linux-build
-
-  aarch64-linux-generic-test-vm:
-    executor: linux-vm
-    parameters:
-      job:
-        type: string
-      resource-class:
-        type: string
-    resource_class: << parameters.resource-class >>
-    environment:
-      FERROCENE_HOST: ""
-      FERROCENE_TARGETS: aarch64-unknown-ferrocenecoretest
-      # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-      SCRIPT: |
-        TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
-
-    steps:
-      - ferrocene-job-test-vm:
-          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          restore-from-job: x86_64-linux-build
-          emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
 
   x86_64-linux-traceability-matrix:
     executor: docker-x86_64-ubuntu-20
@@ -380,31 +317,6 @@ jobs:
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
 
-  aarch64-qnx-generic-test-vm:
-    executor: linux-vm
-    parameters:
-      job:
-        type: string
-      resource-class:
-        type: string
-    resource_class: << parameters.resource-class >>
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-nto-qnx710
-      SCRIPT: |
-        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
-    steps:
-      - aws-oidc-auth
-      - ferrocene-checkout
-      - setup-venv
-      - setup-qnx-toolchain:
-          source-env-script: false
-      - ferrocene-job-test-vm:
-          checkout-source: false
-          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
-          restore-from-job: x86_64-linux-build
-          emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh"
 
   # aarch64-unknown-linux-gnu jobs
 
@@ -663,43 +575,57 @@ jobs:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
-  finish-build:
-    executor: docker-x86_64-ubuntu-20
-    resource_class: small # 1-core
+  # Test VMs
+
+  aarch64-linux-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: ""
+      FERROCENE_TARGETS: aarch64-unknown-ferrocenecoretest
+      # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+      SCRIPT: |
+        TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+
+    steps:
+      - ferrocene-job-test-vm:
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
+
+  aarch64-qnx-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-nto-qnx710
+      SCRIPT: |
+        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
     steps:
       - aws-oidc-auth
-      - ferrocene-git-shallow-clone:
-          depth: 1
-      - run:
-          name: Restore files from the x86_64-linux-build
-          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
-      - run:
-          name: Configure
-          command: ferrocene/ci/configure.sh
-      - run:
-          name: Checkout the submodules
-          command: ferrocene/ci/scripts/checkout-submodules.sh
-      - run:
-          name: Generate build metadata
-          command: ./x.py dist ferrocene-build-metadata
-      - run:
-          name: Upload metadata files to S3
-          command: ferrocene/ci/scripts/upload-dist-artifacts.sh
+      - ferrocene-checkout
+      - setup-venv
+      - setup-qnx-toolchain:
+          source-env-script: false
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh"
 
-  # Simple job used to run "something" when no other jobs are supposed to be
-  # run. See the `skip` workflow for more information.
-  skip:
-    executor: docker-x86_64-ubuntu-20
-    resource_class: small # 1-core
-    steps:
-      - run:
-          name: This is a workaround for CircleCI always wanting at least a job per commit.
-          command: "true"
-      - run:
-          name: This job does nothing!
-          command: "true"
+  # Docker jobs
 
   # Job to build and upload a Docker image defined ferrocene/ci/docker-images.
   # If the image exists in the remote storage and is up to date, the job will
@@ -773,6 +699,57 @@ jobs:
       - run:
           name: Empty step to make sure the job always has steps
           command: echo
+
+  # Misc jobs   
+  wasm-dist-oxidos:
+    executor: docker-x86_64-ubuntu-20
+    resource_class: large # 4-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: wasm32-unknown-unknown
+      SCRIPT: |
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:oxidos)
+    steps:
+      - ferrocene-job-dist:
+          restore-from-job: x86_64-linux-build
+
+  finish-build:
+    executor: docker-x86_64-ubuntu-20
+    resource_class: small # 1-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+    steps:
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - run:
+          name: Restore files from the x86_64-linux-build
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
+      - run:
+          name: Configure
+          command: ferrocene/ci/configure.sh
+      - run:
+          name: Checkout the submodules
+          command: ferrocene/ci/scripts/checkout-submodules.sh
+      - run:
+          name: Generate build metadata
+          command: ./x.py dist ferrocene-build-metadata
+      - run:
+          name: Upload metadata files to S3
+          command: ferrocene/ci/scripts/upload-dist-artifacts.sh
+
+  # Simple job used to run "something" when no other jobs are supposed to be
+  # run. See the `skip` workflow for more information.
+  skip:
+    executor: docker-x86_64-ubuntu-20
+    resource_class: small # 1-core
+    steps:
+      - run:
+          name: This is a workaround for CircleCI always wanting at least a job per commit.
+          command: "true"
+      - run:
+          name: This job does nothing!
+          command: "true"
 
 workflows:
   version: 2

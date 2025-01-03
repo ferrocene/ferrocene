@@ -54,7 +54,7 @@ features = ['read_core', 'elf', 'macho', 'pe', 'xcoff', 'unaligned', 'archive']
 
 [dev-dependencies]
 dylib-dep = { path = "crates/dylib-dep" }
-libloading = "0.7"
+libloading = "0.8"
 
 [features]
 # By default libstd support is enabled.

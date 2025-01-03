@@ -182,6 +182,7 @@ mod uw {
             not(all(target_os = "freebsd", target_arch = "arm")),
             not(all(target_os = "linux", target_arch = "arm")),
             not(all(target_os = "horizon", target_arch = "arm")),
+            not(all(target_os = "rtems", target_arch = "arm")),
             not(all(target_os = "vita", target_arch = "arm")),
         ))] {
             extern "C" {

@@ -36,7 +36,8 @@ addr2line = { version = "0.24.0", optional = true, default-features = false }
 libc = { version = "0.2.156", default-features = false }
 
 [target.'cfg(not(all(windows, target_env = "msvc")))'.dependencies]
-libc = { version = "0.2.169", default-features = false, features = [
+# Ferrocene change: this needs to match our subtree version (see ferrocene/library/libc/Cargo.toml)
+libc = { version = "=0.2.167", default-features = false, features = [
     'rustc-dep-of-std',
 ], public = true }
 

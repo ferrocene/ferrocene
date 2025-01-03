@@ -1,6 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
+
+# /// script
+# requires-python = ">= 3.12"
+# dependencies = ["docker ~= 7.1"]
+# ///
 
 import argparse
 import logging
@@ -50,7 +55,7 @@ def repo_for_image(image):
 def ensure_built(platform, image, pull=False):
     docker_client = build_docker_client()
     sought_address = uri(platform, image)
-    
+
     match platform:
         case "x86_64":
             docker_platform = "linux/amd64"
@@ -58,7 +63,7 @@ def ensure_built(platform, image, pull=False):
             docker_platform = "linux/arm64/v8"
         case _:
             raise ScriptError("Unknown platform (try x86_64 or aarch64)")
-    
+
     logging.info(f"Ensuring {sought_address} is built")
     remote_image = False
     try:
@@ -159,7 +164,7 @@ def main():
             print("Unknown command, see --help")
             exit(1)
 
-    
+
 
 class ScriptError(RuntimeError):
     pass

@@ -46,7 +46,7 @@ impl<T, const N: usize> Lru<T, N> {
         let len_to_init = self.len + 1;
         let mut last = MaybeUninit::new(value);
         for elem in self.arr[0..len_to_init].iter_mut() {
-            last = mem::replace(elem, last);
+            mem::swap(elem, &mut last);
         }
         self.len = len_to_init;
 
@@ -63,7 +63,7 @@ impl<T, const N: usize> Lru<T, N> {
         // so it is permissible to allow the len invariant to decay, as we always restore it
         let mut last = mem::replace(elem, MaybeUninit::uninit());
         for elem in self.arr[0..=idx].iter_mut() {
-            last = mem::replace(elem, last);
+            mem::swap(elem, &mut last);
         }
         self.arr
             .first_mut()

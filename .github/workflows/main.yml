@@ -256,7 +256,7 @@ jobs:
         with:
           submodules: true
       - name: Install Rust
-        run: rustup update 1.73.0 --no-self-update && rustup default 1.73.0
+        run: rustup update 1.79.0 --no-self-update && rustup default 1.79.0
       - run: cargo build
 
   miri:

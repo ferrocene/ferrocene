@@ -11,8 +11,9 @@ brew install --quiet awscli cmake ninja zstd llvm tidy-html5
 brew install --quiet azure-cli azcopy
 
 # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
-# The pipe is to avoid a `Warning:` which becomes a Github Actions annotation, brew does not provide a way to skip it.
-brew install --quiet gcc-arm-embedded  2> >(sed -e "s/Warning: macOS's Gatekeeper has been disabled for this Cask//g")
+# This one is squelched otherwise it emits a warning annotation on GHA
+# Using `... 2> >(sed -e "s/Warning://g")` was attempted but it did not resolve it.
+brew install --quiet gcc-arm-embedded  &> /dev/null
 
 # There are a number of reports of very slow uploads in Mac VMs due to TSO, disable it.
 # https://github.com/aws/aws-sdk/issues/469

@@ -92,5 +92,5 @@ jobs:
         id: artifact
         with:
           name: ${{ env.ARTIFACT }}
-          path: build/host/doc/qualification/traceability-matrix.html
+          path: build/x86_64-unknown-linux-gnu/doc/qualification/traceability-matrix.html
           retention-days: 1

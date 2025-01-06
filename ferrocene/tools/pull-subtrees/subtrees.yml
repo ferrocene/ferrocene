@@ -7,7 +7,7 @@
 #
 # Each list item represents a subtree managed by this tool. Each subtree
 # requires the path in this repository, the name of the repository to pull, and
-# the name of the branch to pull from.
+# what to pull (either `latest-tag` or `branch:$name`).
 #
 # Once you add the subtree definition here, merge the change in the main
 # repository and run the automation to perform the initial subtree pull.
@@ -19,14 +19,15 @@
 
 - path: ferrocene/doc/specification
   repo: ferrocene/specification
-  ref: main
-# - path: ferrocene/library/libc
-#   repo: rust-lang/libc
-#   ref: libc-0.2
-#   after:
-#     # cargo update -p libc --manifest-path=library/Cargo.toml
-#     - update-cargo-lock libc library
+  pull: branch:main
 
-# - path: ferrocene/library/backtrace-rs
-#   repo: rust-lang/backtrace-rs
-#   ref: master
+- path: ferrocene/library/libc
+  repo: rust-lang/libc
+  pull: latest-tag
+  after:
+    # cargo update -p libc --manifest-path=library/Cargo.toml
+    - update-cargo-lock libc library
+
+- path: ferrocene/library/backtrace-rs
+  repo: rust-lang/backtrace-rs
+  pull: latest-tag

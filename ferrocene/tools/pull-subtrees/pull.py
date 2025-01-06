@@ -30,10 +30,20 @@ from pr_links import PRLinker
 
 
 @dataclass
+class PullLatestTag:
+    pass
+
+
+@dataclass
+class PullBranch:
+    name: str
+
+
+@dataclass
 class Subtree:
     path: Path
     repo: str
-    ref: str
+    pull: PullLatestTag | PullBranch
     into: List[str]
     after: List[str]
 
@@ -48,9 +58,18 @@ def parse_configuration(path):
         try:
             path = item["path"]
             repo = item["repo"]
-            ref = item["ref"]
+            raw_pull = item["pull"]
         except KeyError as e:
             print(f"error: missing required key in config item: {e}")
+            poisoned = True
+            continue
+
+        if raw_pull == "latest-tag":
+            pull = PullLatestTag()
+        elif raw_pull.startswith("branch:"):
+            pull = PullBranch(name=raw_pull.removeprefix("branch:"))
+        else:
+            print(f"error: invalid pull key: {raw_pull}")
             poisoned = True
             continue
 
@@ -68,7 +87,7 @@ def parse_configuration(path):
         except KeyError:
             into = ["main"]
 
-        found.append(Subtree(Path(path), repo, ref, into, actions))
+        found.append(Subtree(Path(path), repo, pull, into, actions))
 
     if poisoned:
         exit(1)
@@ -84,7 +103,48 @@ def resolve_commit(ref):
 
 
 def fetch_latest_commit(subtree):
-    print(f"fetching latest commit from {subtree.repo} {subtree.ref}")
+    if isinstance(subtree.pull, PullLatestTag):
+        print(f"fetching latest tag from {subtree.repo}")
+        tags = run_capture(
+            [
+                "git",
+                # To authenticate requests, GitHub Actions sets the Authorization
+                # header to its own token in the HTTP extra headers:
+                "-c",
+                "http.https://github.com.extraheader=",
+                # List tags in the remote:
+                "ls-remote",
+                "--tags",
+                # Sort tags by the inverse (`-`) refname using version sorting:
+                "--sort=-version:refname",
+                f"https://github.com/{subtree.repo}",
+            ]
+        )
+        # Go through the tag to find the latest one:
+        for tag in tags.split("\n"):
+            commit, name = tag.split("\t")
+
+            # Check whether this tag is a tag of the main project or an unrelated tag in the
+            # repository. We do this by ensuring the tag starts with a digit or with "v" followed by
+            # a digit. This excludes the `backtrace-sys-0.NN.NN` tags present in the backtrace repo.
+            if not name.startswith("refs/tags/"):
+                continue
+            name = name.removeprefix("refs/tags/")
+            if name[0] == "v":
+                name = name[1:]
+            if not name[0].isdigit():
+                continue
+
+            ref = commit
+            break
+        else:
+            raise RuntimeError(f"no suitable tags found in {subtree.repo}")
+    elif isinstance(subtree.pull, PullBranch):
+        ref = subtree.pull.name
+    else:
+        raise RuntimeError(f"unknown subtree.pull: {subtree.pull}")
+
+    print(f"fetching ref {ref} from {subtree.repo}")
     run(
         [
             "git",
@@ -95,7 +155,7 @@ def fetch_latest_commit(subtree):
             # Fetch the latest commit in the subtree's ref
             "fetch",
             f"https://github.com/{subtree.repo}",
-            subtree.ref,
+            ref,
         ]
     )
     return resolve_commit("FETCH_HEAD")

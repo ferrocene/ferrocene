@@ -397,7 +397,9 @@ pub enum Subcommand {
         /// enable this to generate a Rustfix coverage file, which is saved in
         /// `/<build_base>/rustfix_missing_coverage.txt`
         rustfix_coverage: bool,
-<<<<<<< HEAD
+        #[arg(long)]
+        /// don't capture stdout/stderr of tests
+        no_capture: bool,
         /// generate coverage for tests
         #[arg(long)]
         coverage: bool,
@@ -405,11 +407,6 @@ pub enum Subcommand {
         /// documents to ensure there is enough granularity for the test outcomes report.
         #[arg(long)]
         ferrocene_test_one_crate_per_cargo_call: bool,
-=======
-        #[arg(long)]
-        /// don't capture stdout/stderr of tests
-        no_capture: bool,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     },
     /// Build and run some test suites *in Miri*
     Miri {

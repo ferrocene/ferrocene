@@ -416,25 +416,7 @@ target | std | host | notes
 [`xtensa-esp32s2-espidf`](platform-support/esp-idf.md) | ✓ |  | Xtensa ESP32-S2
 [`xtensa-esp32s2-none-elf`](platform-support/xtensa.md) | * |  | Xtensa ESP32-S2
 [`xtensa-esp32s3-espidf`](platform-support/esp-idf.md) | ✓ |  | Xtensa ESP32-S3
-<<<<<<< HEAD
-[`thumbv6m-nuttx-eabi`](platform-support/nuttx.md) | * |  | ARMv6M with NuttX
-[`thumbv7m-nuttx-eabi`](platform-support/nuttx.md) | * |  | ARMv7M with NuttX
-[`thumbv7em-nuttx-eabi`](platform-support/nuttx.md) | * |  | ARMv7EM with NuttX
-[`thumbv7em-nuttx-eabihf`](platform-support/nuttx.md) | * |  | ARMv7EM with NuttX, hardfloat
-[`thumbv8m.base-nuttx-eabi`](platform-support/nuttx.md) | * |  | ARMv8M Baseline with NuttX
-[`thumbv8m.main-nuttx-eabi`](platform-support/nuttx.md) | * |  | ARMv8M Mainline with NuttX
-[`thumbv8m.main-nuttx-eabihf`](platform-support/nuttx.md) | * |  | ARMv8M Mainline with NuttX, hardfloat
-[`riscv32imc-unknown-nuttx-elf`](platform-support/nuttx.md) | * |  | RISC-V 32bit with NuttX
-[`riscv32imac-unknown-nuttx-elf`](platform-support/nuttx.md) | * |  | RISC-V 32bit with NuttX
-[`riscv32imafc-unknown-nuttx-elf`](platform-support/nuttx.md) | * |  | RISC-V 32bit with NuttX
-[`riscv64imac-unknown-nuttx-elf`](platform-support/nuttx.md) | * |  | RISC-V 64bit with NuttX
-[`riscv64gc-unknown-nuttx-elf`](platform-support/nuttx.md) | * |  | RISC-V 64bit with NuttX
-[`riscv32e-unknown-none-elf`](platform-support/riscv32e-unknown-none-elf.md) | * |  | Bare RISC-V (RV32E ISA)
-[`riscv32em-unknown-none-elf`](platform-support/riscv32e-unknown-none-elf.md) | * |  | Bare RISC-V (RV32EM ISA)
-[`riscv32emc-unknown-none-elf`](platform-support/riscv32e-unknown-none-elf.md) | * |  | Bare RISC-V (RV32EMC ISA)
-`aarch64-unknown-ferrocenecoretest` | ✓ | ✓ | Internal target for tests
-=======
 [`xtensa-esp32s3-none-elf`](platform-support/xtensa.md) | * |  | Xtensa ESP32-S3
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+`aarch64-unknown-ferrocenecoretest` | ✓ | ✓ | Internal target for tests
 
 [runs on NVIDIA GPUs]: https://github.com/japaric-archived/nvptx#targets

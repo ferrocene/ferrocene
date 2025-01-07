@@ -74,6 +74,7 @@ complete -c x -n "__fish_x_needs_command" -a "setup" -d 'Set up the environment 
 complete -c x -n "__fish_x_needs_command" -a "suggest" -d 'Suggest a subset of tests to run, based on modified files'
 complete -c x -n "__fish_x_needs_command" -a "vendor" -d 'Vendor dependencies'
 complete -c x -n "__fish_x_needs_command" -a "perf" -d 'Perform profiling and benchmarking of the compiler using the `rustc-perf-wrapper` tool'
+complete -c x -n "__fish_x_needs_command" -a "sign" -d 'Sign Ferrocene qualification documents'
 complete -c x -n "__fish_x_using_subcommand build" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand build" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand build" -l build -d 'build target of the stage0 compiler' -r -f
@@ -272,6 +273,9 @@ complete -c x -n "__fish_x_using_subcommand doc" -l llvm-profile-use -d 'use PGO
 complete -c x -n "__fish_x_using_subcommand doc" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand doc" -l set -d 'override options in config.toml' -r -f
 complete -c x -n "__fish_x_using_subcommand doc" -l open -d 'open the docs in a browser'
+complete -c x -n "__fish_x_using_subcommand doc" -l serve -d 'start a live-relodaing web server'
+complete -c x -n "__fish_x_using_subcommand doc" -l fresh -d 'ignore caches when building the documentation'
+complete -c x -n "__fish_x_using_subcommand doc" -l debug-sphinx -d 'allow easier debugging of Sphinx extensions'
 complete -c x -n "__fish_x_using_subcommand doc" -l json -d 'render the documentation in JSON format in addition to the usual HTML format'
 complete -c x -n "__fish_x_using_subcommand doc" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand doc" -s i -l incremental -d 'use incremental compilation'
@@ -320,6 +324,8 @@ complete -c x -n "__fish_x_using_subcommand test" -l force-rerun -d 'rerun tests
 complete -c x -n "__fish_x_using_subcommand test" -l only-modified -d 'only run tests that result has been changed'
 complete -c x -n "__fish_x_using_subcommand test" -l rustfix-coverage -d 'enable this to generate a Rustfix coverage file, which is saved in `/<build_base>/rustfix_missing_coverage.txt`'
 complete -c x -n "__fish_x_using_subcommand test" -l no-capture -d 'don\'t capture stdout/stderr of tests'
+complete -c x -n "__fish_x_using_subcommand test" -l coverage -d 'generate coverage for tests'
+complete -c x -n "__fish_x_using_subcommand test" -l ferrocene-test-one-crate-per-cargo-call -d 'Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification documents to ensure there is enough granularity for the test outcomes report'
 complete -c x -n "__fish_x_using_subcommand test" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand test" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand test" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -525,6 +531,7 @@ complete -c x -n "__fish_x_using_subcommand run" -l rust-profile-use -d 'use PGO
 complete -c x -n "__fish_x_using_subcommand run" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand run" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand run" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand run" -l bless -d 'update all files of failing tests'
 complete -c x -n "__fish_x_using_subcommand run" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand run" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand run" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -671,3 +678,36 @@ complete -c x -n "__fish_x_using_subcommand perf" -l llvm-profile-generate -d 'g
 complete -c x -n "__fish_x_using_subcommand perf" -l enable-bolt-settings -d 'Enable BOLT link flags'
 complete -c x -n "__fish_x_using_subcommand perf" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x -n "__fish_x_using_subcommand perf" -s h -l help -d 'Print help (see more with \'--help\')'
+complete -c x -n "__fish_x_using_subcommand sign" -l config -d 'TOML configuration file for build' -r -F
+complete -c x -n "__fish_x_using_subcommand sign" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand sign" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand sign" -l host -d 'host targets to build' -r -f
+complete -c x -n "__fish_x_using_subcommand sign" -l target -d 'target targets to build' -r -f
+complete -c x -n "__fish_x_using_subcommand sign" -l exclude -d 'build paths to exclude' -r -F
+complete -c x -n "__fish_x_using_subcommand sign" -l skip -d 'build paths to skip' -r -F
+complete -c x -n "__fish_x_using_subcommand sign" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand sign" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
+complete -c x -n "__fish_x_using_subcommand sign" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
+complete -c x -n "__fish_x_using_subcommand sign" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
+complete -c x -n "__fish_x_using_subcommand sign" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
+complete -c x -n "__fish_x_using_subcommand sign" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand sign" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
+complete -c x -n "__fish_x_using_subcommand sign" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x -n "__fish_x_using_subcommand sign" -l error-format -d 'rustc error format' -r -f
+complete -c x -n "__fish_x_using_subcommand sign" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x -n "__fish_x_using_subcommand sign" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
+complete -c x -n "__fish_x_using_subcommand sign" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
+complete -c x -n "__fish_x_using_subcommand sign" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
+complete -c x -n "__fish_x_using_subcommand sign" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
+complete -c x -n "__fish_x_using_subcommand sign" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand sign" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
+complete -c x -n "__fish_x_using_subcommand sign" -s i -l incremental -d 'use incremental compilation'
+complete -c x -n "__fish_x_using_subcommand sign" -l include-default-paths -d 'include default paths in addition to the provided ones'
+complete -c x -n "__fish_x_using_subcommand sign" -l dry-run -d 'dry run; don\'t build anything'
+complete -c x -n "__fish_x_using_subcommand sign" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
+complete -c x -n "__fish_x_using_subcommand sign" -l json-output -d 'use message-format=json'
+complete -c x -n "__fish_x_using_subcommand sign" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
+complete -c x -n "__fish_x_using_subcommand sign" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
+complete -c x -n "__fish_x_using_subcommand sign" -l enable-bolt-settings -d 'Enable BOLT link flags'
+complete -c x -n "__fish_x_using_subcommand sign" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
+complete -c x -n "__fish_x_using_subcommand sign" -s h -l help -d 'Print help (see more with \'--help\')'

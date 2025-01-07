@@ -10,7 +10,7 @@
 import os
 import subprocess
 import tempfile
-import tomli
+import tomllib
 
 
 ARTIFACTS_PREFIX = "s3://ferrocene-ci-artifacts/ferrocene/dist"
@@ -74,7 +74,7 @@ def generate_redirect(output, src, dest):
 
 def get_docs_tarballs():
     with open("ferrocene/packages.toml", "rb") as f:
-        packages = tomli.load(f)
+        packages = tomllib.load(f)
 
     commit_hash = cmd("git", "rev-parse", "--short=9", "HEAD", stdout=True).strip()
 

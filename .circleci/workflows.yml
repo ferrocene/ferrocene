@@ -1164,6 +1164,7 @@ commands:
           steps:
             - ferrocene-checkout:
                 llvm-subset: true
+      - setup-venv
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
@@ -1199,7 +1200,7 @@ commands:
                 command: |
                   docker run \
                     --rm \
-                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER']))") \
+                    $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER']))") \
                     -e SCRIPT="<< parameters.emulator-script >> prepare" \
                     -e REMOTE_TEST_SERVER_STAGE=2 \
                     --workdir /home/ci/project \
@@ -1220,7 +1221,7 @@ commands:
                 command: |
                   docker run \
                     --rm \
-                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
+                    $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
                     --workdir /home/ci/project \
                     --volume $(pwd):/home/ci/project \
                     --volume /tmp/emulator:/tmp/emulator \
@@ -1236,7 +1237,7 @@ commands:
           wrapper: |
             docker run \
               --rm \
-              $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
+              $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
               --workdir /home/ci/project \
               --volume $(pwd):/home/ci/project \
               --volume /tmp/emulator:/tmp/emulator \
@@ -1334,7 +1335,7 @@ commands:
           when: always
           command: |
             mkdir -p /tmp/metrics
-            ferrocene/ci/scripts/generate-resources-usage-report.py build/metrics.json > /tmp/metrics/report.html
+            uv run ferrocene/ci/scripts/generate-resources-usage-report.py build/metrics.json > /tmp/metrics/report.html
             cp build/metrics.json /tmp/metrics/raw.json
 
       - run:

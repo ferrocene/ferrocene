@@ -43,10 +43,7 @@ windows-targets = "0.52.6"
 
 [target.'cfg(not(all(windows, target_env = "msvc", not(target_vendor = "uwp"))))'.dependencies]
 miniz_oxide = { version = "0.8", default-features = false }
-<<<<<<< HEAD
-=======
 ruzstd = { version = "0.7.3", default-features = false, optional = true }
->>>>>>> f8cc6ac9acc4e663ecd96f9bcf1ff4542636d1b9
 addr2line = { version = "0.24.0", default-features = false }
 libc = { version = "0.2.156", default-features = false }
 

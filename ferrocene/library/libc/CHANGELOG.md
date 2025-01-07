@@ -1,6 +1,50 @@
 # Changelog
 
 ## [Unreleased]
+## [0.2.169](https://github.com/rust-lang/libc/compare/0.2.168...0.2.169) - 2024-12-18
+
+### Added
+
+- FreeBSD: add more socket TCP stack constants <https://github.com/rust-lang/libc/pull/4193>
+- Fuchsia: add a `sockaddr_vm` definition <https://github.com/rust-lang/libc/pull/4194>
+
+### Fixed
+
+**Breaking**: [rust-lang/rust#132975](https://github.com/rust-lang/rust/pull/132975) corrected the signedness of `core::ffi::c_char` on various Tier 2 and Tier 3 platforms (mostly Arm and RISC-V) to match Clang. This release contains the corresponding changes to `libc`, including the following specific pull requests:
+
+- ESP-IDF: Replace arch-conditional `c_char` with a reexport <https://github.com/rust-lang/libc/pull/4195>
+- Fix `c_char` on various targets <https://github.com/rust-lang/libc/pull/4199>
+- Mirror `c_char` configuration from `rust-lang/rust` <https://github.com/rust-lang/libc/pull/4198>
+
+### Cleanup
+
+- Do not re-export `c_void` in target-specific code <https://github.com/rust-lang/libc/pull/4200>
+
+## [0.2.168](https://github.com/rust-lang/libc/compare/0.2.167...0.2.168) - 2024-12-09
+
+### Added
+
+- Linux: Add new process flags ([#4174](https://github.com/rust-lang/libc/pull/4174))
+- Linux: Make `IFA_*` constants available on all Linux targets <https://github.com/rust-lang/libc/pull/4185>
+- Linux: add `MAP_DROPPABLE` <https://github.com/rust-lang/libc/pull/4173>
+- Solaris, Illumos: add `SIGRTMIN` and `SIGRTMAX` <https://github.com/rust-lang/libc/pull/4171>
+- Unix, Linux: adding POSIX `memccpy` and `mempcpy` GNU extension <https://github.com/rust-lang/libc/pull/4186.
+
+### Deprecated
+
+- FreeBSD: Deprecate the CAP_UNUSED* and CAP_ALL* constants ([#4183](https://github.com/rust-lang/libc/pull/4183))
+
+### Fixed
+
+- Make the `Debug` implementation for unions opaque ([#4176](https://github.com/rust-lang/libc/pull/4176))
+
+### Other
+
+- Allow the `unpredictable_function_pointer_comparisons` lint where needed <https://github.com/rust-lang/libc/pull/4177>
+- CI: Upload artifacts created by libc-test <https://github.com/rust-lang/libc/pull/4180>
+- CI: Use workflow commands to group output by target <https://github.com/rust-lang/libc/pull/4179>
+- CI: add caching <https://github.com/rust-lang/libc/pull/4183>
+
 ## [0.2.167](https://github.com/rust-lang/libc/compare/0.2.166...0.2.167) - 2024-11-28
 
 ### Added

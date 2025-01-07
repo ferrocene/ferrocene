@@ -357,6 +357,14 @@ s! {
         pub sin6_scope_id: u32,
     }
 
+    pub struct sockaddr_vm {
+        pub svm_family: sa_family_t,
+        pub svm_reserved1: c_ushort,
+        pub svm_port: crate::in_port_t,
+        pub svm_cid: c_uint,
+        pub svm_zero: [u8; 4],
+    }
+
     pub struct addrinfo {
         pub ai_flags: c_int,
         pub ai_family: c_int,
@@ -1340,6 +1348,8 @@ cfg_if! {
             }
         }
 
+        // FIXME(msrv): suggested method was added in 1.85
+        #[allow(unpredictable_function_pointer_comparisons)]
         impl PartialEq for sigevent {
             fn eq(&self, other: &sigevent) -> bool {
                 self.sigev_value == other.sigev_value

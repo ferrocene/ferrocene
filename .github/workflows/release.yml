@@ -50,8 +50,8 @@ jobs:
       - name: Checkout the source code
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y python3-requests python3-boto3
+      - name: Setup uv
+        run: ferrocene/ci/scripts/setup-uv.sh
 
       - name: Load AWS credentials into the environment
         run: ferrocene/ci/scripts/assume-aws-oidc-role.sh

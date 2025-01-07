@@ -52,7 +52,10 @@ cfg_if::cfg_if! {
     }
 }
 
+mod lru;
 mod stash;
+
+use lru::Lru;
 
 const MAPPINGS_CACHE_SIZE: usize = 4;
 
@@ -263,7 +266,7 @@ struct Cache {
     ///
     /// Note that this is basically an LRU cache and we'll be shifting things
     /// around in here as we symbolize addresses.
-    mappings: Vec<(usize, Mapping)>,
+    mappings: Lru<(usize, Mapping), MAPPINGS_CACHE_SIZE>,
 }
 
 struct Library {
@@ -344,7 +347,7 @@ pub unsafe fn clear_symbol_cache() {
 impl Cache {
     fn new() -> Cache {
         Cache {
-            mappings: Vec::with_capacity(MAPPINGS_CACHE_SIZE),
+            mappings: Lru::default(),
             libraries: native_libraries(),
         }
     }
@@ -363,6 +366,8 @@ impl Cache {
         // never happen, and symbolicating backtraces would be ssssllllooooowwww.
         static mut MAPPINGS_CACHE: Option<Cache> = None;
 
+        // FIXME: https://github.com/rust-lang/backtrace-rs/issues/678
+        #[allow(static_mut_refs)]
         f(MAPPINGS_CACHE.get_or_insert_with(Cache::new))
     }
 
@@ -401,31 +406,18 @@ impl Cache {
     }
 
     fn mapping_for_lib<'a>(&'a mut self, lib: usize) -> Option<(&'a mut Context<'a>, &'a Stash)> {
-        let idx = self.mappings.iter().position(|(idx, _)| *idx == lib);
+        let cache_idx = self.mappings.iter().position(|(lib_id, _)| *lib_id == lib);
 
-        // Invariant: after this conditional completes without early returning
-        // from an error, the cache entry for this path is at index 0.
-
-        if let Some(idx) = idx {
-            // When the mapping is already in the cache, move it to the front.
-            if idx != 0 {
-                let entry = self.mappings.remove(idx);
-                self.mappings.insert(0, entry);
-            }
+        let cache_entry = if let Some(idx) = cache_idx {
+            self.mappings.move_to_front(idx)
         } else {
-            // When the mapping is not in the cache, create a new mapping,
-            // insert it into the front of the cache, and evict the oldest cache
-            // entry if necessary.
-            let mapping = create_mapping(&self.libraries[lib])?;
+            // When the mapping is not in the cache, create a new mapping and insert it,
+            // which will also evict the oldest entry.
+            create_mapping(&self.libraries[lib])
+                .and_then(|mapping| self.mappings.push_front((lib, mapping)))
+        };
 
-            if self.mappings.len() == MAPPINGS_CACHE_SIZE {
-                self.mappings.pop();
-            }
-
-            self.mappings.insert(0, (lib, mapping));
-        }
-
-        let mapping = &mut self.mappings[0].1;
+        let (_, mapping) = cache_entry?;
         let cx: &'a mut Context<'static> = &mut mapping.cx;
         let stash: &'a Stash = &mapping.stash;
         // don't leak the `'static` lifetime, make sure it's scoped to just

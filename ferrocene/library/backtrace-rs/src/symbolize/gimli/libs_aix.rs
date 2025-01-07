@@ -1,11 +1,13 @@
-use super::mystd::borrow::ToOwned;
 use super::mystd::env;
-use super::mystd::ffi::{CStr, OsStr};
+use super::mystd::ffi::OsStr;
 use super::mystd::io::Error;
 use super::mystd::os::unix::prelude::*;
 use super::xcoff;
-use super::{Library, LibrarySegment, Vec};
+use super::{Library, LibrarySegment};
+use alloc::borrow::ToOwned;
 use alloc::vec;
+use alloc::vec::Vec;
+use core::ffi::CStr;
 use core::mem;
 
 const EXE_IMAGE_BASE: u64 = 0x100000000;

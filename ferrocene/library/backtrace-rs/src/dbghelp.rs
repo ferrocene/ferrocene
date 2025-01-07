@@ -111,6 +111,8 @@ macro_rules! dbghelp {
         #[allow(dead_code)]
         impl Init {
             $(pub fn $name(&self) -> $name {
+                // FIXME: https://github.com/rust-lang/backtrace-rs/issues/678
+                #[allow(static_mut_refs)]
                 unsafe {
                     DBGHELP.$name().unwrap()
                 }
@@ -318,24 +320,26 @@ pub fn init() -> Result<Init, ()> {
         // functions in it, and that's detailed more below. We only do this
         // once, though, so we've got a global boolean indicating whether we're
         // done yet or not.
+        // FIXME: https://github.com/rust-lang/backtrace-rs/issues/678
+        #[allow(static_mut_refs)]
         DBGHELP.ensure_open()?;
 
         static mut INITIALIZED: bool = false;
         if !INITIALIZED {
-            set_optional_options();
+            set_optional_options(ret.dbghelp());
             INITIALIZED = true;
         }
         Ok(ret)
     }
 }
-fn set_optional_options() -> Option<()> {
+unsafe fn set_optional_options(dbghelp: *mut Dbghelp) -> Option<()> {
     unsafe {
-        let orig = DBGHELP.SymGetOptions()?();
+        let orig = (*dbghelp).SymGetOptions()?();
 
         // Ensure that the `SYMOPT_DEFERRED_LOADS` flag is set, because
         // according to MSVC's own docs about this: "This is the fastest, most
         // efficient way to use the symbol handler.", so let's do that!
-        DBGHELP.SymSetOptions()?(orig | SYMOPT_DEFERRED_LOADS);
+        (*dbghelp).SymSetOptions()?(orig | SYMOPT_DEFERRED_LOADS);
 
         // Actually initialize symbols with MSVC. Note that this can fail, but we
         // ignore it. There's not a ton of prior art for this per se, but LLVM
@@ -349,7 +353,7 @@ fn set_optional_options() -> Option<()> {
         // the time, but now that it's using this crate it means that someone will
         // get to initialization first and the other will pick up that
         // initialization.
-        DBGHELP.SymInitializeW()?(GetCurrentProcess(), ptr::null_mut(), TRUE);
+        (*dbghelp).SymInitializeW()?(GetCurrentProcess(), ptr::null_mut(), TRUE);
 
         // The default search path for dbghelp will only look in the current working
         // directory and (possibly) `_NT_SYMBOL_PATH` and `_NT_ALT_SYMBOL_PATH`.
@@ -363,7 +367,7 @@ fn set_optional_options() -> Option<()> {
         search_path_buf.resize(1024, 0);
 
         // Prefill the buffer with the current search path.
-        if DBGHELP.SymGetSearchPathW()?(
+        if (*dbghelp).SymGetSearchPathW()?(
             GetCurrentProcess(),
             search_path_buf.as_mut_ptr(),
             search_path_buf.len() as _,
@@ -383,7 +387,7 @@ fn set_optional_options() -> Option<()> {
         let mut search_path = SearchPath::new(search_path_buf);
 
         // Update the search path to include the directory of the executable and each DLL.
-        DBGHELP.EnumerateLoadedModulesW64()?(
+        (*dbghelp).EnumerateLoadedModulesW64()?(
             GetCurrentProcess(),
             Some(enum_loaded_modules_callback),
             ((&mut search_path) as *mut SearchPath) as *mut c_void,
@@ -392,7 +396,7 @@ fn set_optional_options() -> Option<()> {
         let new_search_path = search_path.finalize();
 
         // Set the new search path.
-        DBGHELP.SymSetSearchPathW()?(GetCurrentProcess(), new_search_path.as_ptr());
+        (*dbghelp).SymSetSearchPathW()?(GetCurrentProcess(), new_search_path.as_ptr());
     }
     Some(())
 }

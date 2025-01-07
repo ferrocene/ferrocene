@@ -1,17 +1,19 @@
 #![allow(clippy::useless_conversion)]
 
-use super::mystd::ffi::{OsStr, OsString};
+use super::mystd::ffi::OsStr;
 use super::mystd::fs;
-use super::mystd::os::unix::ffi::{OsStrExt, OsStringExt};
+use super::mystd::os::unix::ffi::OsStrExt;
 use super::mystd::path::{Path, PathBuf};
 use super::Either;
-use super::{gimli, Context, Endian, EndianSlice, Mapping, Stash, Vec};
+use super::{gimli, Context, Endian, EndianSlice, Mapping, Stash};
+use alloc::string::String;
 use alloc::sync::Arc;
+use alloc::vec::Vec;
 use core::convert::{TryFrom, TryInto};
 use core::str;
-use object::elf::{
-    ELFCOMPRESS_ZLIB, ELFCOMPRESS_ZSTD, ELF_NOTE_GNU, NT_GNU_BUILD_ID, SHF_COMPRESSED,
-};
+#[cfg(feature = "ruzstd")]
+use object::elf::ELFCOMPRESS_ZSTD;
+use object::elf::{ELFCOMPRESS_ZLIB, ELF_NOTE_GNU, NT_GNU_BUILD_ID, SHF_COMPRESSED};
 use object::read::elf::{CompressionHeader, FileHeader, SectionHeader, SectionTable, Sym};
 use object::read::StringTable;
 use object::{BigEndian, Bytes, NativeEndian};
@@ -231,6 +233,7 @@ impl<'a> Object<'a> {
                     decompress_zlib(data.0, buf)?;
                     return Some(buf);
                 }
+                #[cfg(feature = "ruzstd")]
                 ELFCOMPRESS_ZSTD => {
                     let size = usize::try_from(header.ch_size(self.endian)).ok()?;
                     let buf = stash.allocate(size);
@@ -357,6 +360,7 @@ fn decompress_zlib(input: &[u8], output: &mut [u8]) -> Option<()> {
     }
 }
 
+#[cfg(feature = "ruzstd")]
 fn decompress_zstd(mut input: &[u8], mut output: &mut [u8]) -> Option<()> {
     use ruzstd::frame::ReadFrameHeaderError;
     use ruzstd::frame_decoder::FrameDecoderError;
@@ -391,7 +395,7 @@ fn decompress_zstd(mut input: &[u8], mut output: &mut [u8]) -> Option<()> {
     Some(())
 }
 
-const DEBUG_PATH: &[u8] = b"/usr/lib/debug";
+const DEBUG_PATH: &str = "/usr/lib/debug";
 
 fn debug_path_exists() -> bool {
     cfg_if::cfg_if! {
@@ -401,7 +405,7 @@ fn debug_path_exists() -> bool {
 
             let mut exists = DEBUG_PATH_EXISTS.load(Ordering::Relaxed);
             if exists == 0 {
-                exists = if Path::new(OsStr::from_bytes(DEBUG_PATH)).is_dir() {
+                exists = if Path::new(DEBUG_PATH).is_dir() {
                     1
                 } else {
                     2
@@ -420,8 +424,8 @@ fn debug_path_exists() -> bool {
 /// The format of build id paths is documented at:
 /// https://sourceware.org/gdb/onlinedocs/gdb/Separate-Debug-Files.html
 fn locate_build_id(build_id: &[u8]) -> Option<PathBuf> {
-    const BUILD_ID_PATH: &[u8] = b"/usr/lib/debug/.build-id/";
-    const BUILD_ID_SUFFIX: &[u8] = b".debug";
+    const BUILD_ID_PATH: &str = "/usr/lib/debug/.build-id/";
+    const BUILD_ID_SUFFIX: &str = ".debug";
 
     if build_id.len() < 2 {
         return None;
@@ -432,25 +436,17 @@ fn locate_build_id(build_id: &[u8]) -> Option<PathBuf> {
     }
 
     let mut path =
-        Vec::with_capacity(BUILD_ID_PATH.len() + BUILD_ID_SUFFIX.len() + build_id.len() * 2 + 1);
-    path.extend(BUILD_ID_PATH);
-    path.push(hex(build_id[0] >> 4));
-    path.push(hex(build_id[0] & 0xf));
-    path.push(b'/');
+        String::with_capacity(BUILD_ID_PATH.len() + BUILD_ID_SUFFIX.len() + build_id.len() * 2 + 1);
+    path.push_str(BUILD_ID_PATH);
+    path.push(char::from_digit((build_id[0] >> 4) as u32, 16)?);
+    path.push(char::from_digit((build_id[0] & 0xf) as u32, 16)?);
+    path.push('/');
     for byte in &build_id[1..] {
-        path.push(hex(byte >> 4));
-        path.push(hex(byte & 0xf));
+        path.push(char::from_digit((byte >> 4) as u32, 16)?);
+        path.push(char::from_digit((byte & 0xf) as u32, 16)?);
     }
-    path.extend(BUILD_ID_SUFFIX);
-    Some(PathBuf::from(OsString::from_vec(path)))
-}
-
-fn hex(byte: u8) -> u8 {
-    if byte < 10 {
-        b'0' + byte
-    } else {
-        b'a' + byte - 10
-    }
+    path.push_str(BUILD_ID_SUFFIX);
+    Some(PathBuf::from(path))
 }
 
 /// Locate a file specified in a `.gnu_debuglink` section.
@@ -467,9 +463,8 @@ fn hex(byte: u8) -> u8 {
 fn locate_debuglink(path: &Path, filename: &[u8]) -> Option<PathBuf> {
     let path = fs::canonicalize(path).ok()?;
     let parent = path.parent()?;
-    let mut f = PathBuf::from(OsString::with_capacity(
-        DEBUG_PATH.len() + parent.as_os_str().len() + filename.len() + 2,
-    ));
+    let mut f =
+        PathBuf::with_capacity(DEBUG_PATH.len() + parent.as_os_str().len() + filename.len() + 2);
     let filename = Path::new(OsStr::from_bytes(filename));
 
     // Try "/parent/filename" if it differs from "path"
@@ -480,9 +475,7 @@ fn locate_debuglink(path: &Path, filename: &[u8]) -> Option<PathBuf> {
     }
 
     // Try "/parent/.debug/filename"
-    let mut s = OsString::from(f);
-    s.clear();
-    f = PathBuf::from(s);
+    f.clear();
     f.push(parent);
     f.push(".debug");
     f.push(filename);
@@ -492,10 +485,8 @@ fn locate_debuglink(path: &Path, filename: &[u8]) -> Option<PathBuf> {
 
     if debug_path_exists() {
         // Try "/usr/lib/debug/parent/filename"
-        let mut s = OsString::from(f);
-        s.clear();
-        f = PathBuf::from(s);
-        f.push(OsStr::from_bytes(DEBUG_PATH));
+        f.clear();
+        f.push(DEBUG_PATH);
         f.push(parent.strip_prefix("/").unwrap());
         f.push(filename);
         if f.is_file() {

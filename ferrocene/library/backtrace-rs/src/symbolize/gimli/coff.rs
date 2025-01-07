@@ -1,5 +1,7 @@
-use super::{gimli, Context, Endian, EndianSlice, Mapping, Path, Stash, Vec};
+use super::mystd::path::Path;
+use super::{gimli, Context, Endian, EndianSlice, Mapping, Stash};
 use alloc::sync::Arc;
+use alloc::vec::Vec;
 use core::convert::TryFrom;
 use object::pe::{ImageDosHeader, ImageSymbol};
 use object::read::coff::ImageSymbol as _;

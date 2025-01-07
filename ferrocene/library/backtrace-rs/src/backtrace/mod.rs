@@ -174,7 +174,7 @@ cfg_if::cfg_if! {
         any(
             all(
                 unix,
-                not(any(target_os = "emscripten", target_os = "rtems")),
+                not(target_os = "emscripten"),
                 not(all(target_os = "ios", target_arch = "arm")),
             ),
             all(

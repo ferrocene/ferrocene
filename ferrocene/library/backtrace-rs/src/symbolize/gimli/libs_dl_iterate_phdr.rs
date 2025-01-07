@@ -2,11 +2,13 @@
 // and typically implement an API called `dl_iterate_phdr` to load
 // native libraries.
 
-use super::mystd::borrow::ToOwned;
 use super::mystd::env;
-use super::mystd::ffi::{CStr, OsStr};
+use super::mystd::ffi::{OsStr, OsString};
 use super::mystd::os::unix::prelude::*;
-use super::{parse_running_mmaps, Library, LibrarySegment, OsString, Vec};
+use super::{parse_running_mmaps, Library, LibrarySegment};
+use alloc::borrow::ToOwned;
+use alloc::vec::Vec;
+use core::ffi::CStr;
 use core::slice;
 
 struct CallbackData {

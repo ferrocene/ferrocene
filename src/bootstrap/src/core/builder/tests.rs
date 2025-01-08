@@ -762,6 +762,7 @@ mod dist {
             run: None,
             only_modified: false,
             extra_checks: None,
+            no_capture: false,
             coverage: true,
             ferrocene_test_one_crate_per_cargo_call: false,
         };

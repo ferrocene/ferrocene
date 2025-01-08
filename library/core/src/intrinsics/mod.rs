@@ -68,6 +68,7 @@ use crate::marker::{DiscriminantKind, Tuple};
 use crate::mem::SizedTypeProperties;
 use crate::{ptr, ub_checks};
 
+pub mod fallback;
 pub mod mir;
 pub mod simd;
 
@@ -3305,6 +3306,34 @@ pub const fn mul_with_overflow<T: Copy>(_x: T, _y: T) -> (T, bool) {
     unimplemented!()
 }
 
+/// Performs full-width multiplication and addition with a carry:
+/// `multiplier * multiplicand + addend + carry`.
+///
+/// This is possible without any overflow.  For `uN`:
+///    MAX * MAX + MAX + MAX
+/// => (2ⁿ-1) × (2ⁿ-1) + (2ⁿ-1) + (2ⁿ-1)
+/// => (2²ⁿ - 2ⁿ⁺¹ + 1) + (2ⁿ⁺¹ - 2)
+/// => 2²ⁿ - 1
+///
+/// For `iN`, the upper bound is MIN * MIN + MAX + MAX => 2²ⁿ⁻² + 2ⁿ - 2,
+/// and the lower bound is MAX * MIN + MIN + MIN => -2²ⁿ⁻² - 2ⁿ + 2ⁿ⁺¹.
+///
+/// This currently supports unsigned integers *only*, no signed ones.
+/// The stabilized versions of this intrinsic are available on integers.
+#[unstable(feature = "core_intrinsics", issue = "none")]
+#[rustc_const_unstable(feature = "const_carrying_mul_add", issue = "85532")]
+#[rustc_nounwind]
+#[cfg_attr(not(bootstrap), rustc_intrinsic)]
+#[cfg_attr(not(bootstrap), miri::intrinsic_fallback_is_spec)]
+pub const fn carrying_mul_add<T: ~const fallback::CarryingMulAdd<Unsigned = U>, U>(
+    multiplier: T,
+    multiplicand: T,
+    addend: T,
+    carry: T,
+) -> (U, T) {
+    multiplier.carrying_mul_add(multiplicand, addend, carry)
+}
+
 /// Performs an exact division, resulting in undefined behavior where
 /// `x % y != 0` or `y == 0` or `x == T::MIN && y == -1`
 ///
@@ -3795,7 +3824,7 @@ where
 /// See [`const_eval_select()`] for the rules and requirements around that intrinsic.
 pub(crate) macro const_eval_select {
     (
-        @capture { $($arg:ident : $ty:ty = $val:expr),* $(,)? } $( -> $ret:ty )? :
+        @capture$([$($binders:tt)*])? { $($arg:ident : $ty:ty = $val:expr),* $(,)? } $( -> $ret:ty )? :
         if const
             $(#[$compiletime_attr:meta])* $compiletime:block
         else
@@ -3803,7 +3832,7 @@ pub(crate) macro const_eval_select {
     ) => {
         // Use the `noinline` arm, after adding explicit `inline` attributes
         $crate::intrinsics::const_eval_select!(
-            @capture { $($arg : $ty = $val),* } $(-> $ret)? :
+            @capture$([$($binders)*])? { $($arg : $ty = $val),* } $(-> $ret)? :
             #[noinline]
             if const
                 #[inline] // prevent codegen on this function
@@ -3817,7 +3846,7 @@ pub(crate) macro const_eval_select {
     },
     // With a leading #[noinline], we don't add inline attributes
     (
-        @capture { $($arg:ident : $ty:ty = $val:expr),* $(,)? } $( -> $ret:ty )? :
+        @capture$([$($binders:tt)*])? { $($arg:ident : $ty:ty = $val:expr),* $(,)? } $( -> $ret:ty )? :
         #[noinline]
         if const
             $(#[$compiletime_attr:meta])* $compiletime:block
@@ -3825,12 +3854,12 @@ pub(crate) macro const_eval_select {
             $(#[$runtime_attr:meta])* $runtime:block
     ) => {{
         $(#[$runtime_attr])*
-        fn runtime($($arg: $ty),*) $( -> $ret )? {
+        fn runtime$(<$($binders)*>)?($($arg: $ty),*) $( -> $ret )? {
             $runtime
         }
 
         $(#[$compiletime_attr])*
-        const fn compiletime($($arg: $ty),*) $( -> $ret )? {
+        const fn compiletime$(<$($binders)*>)?($($arg: $ty),*) $( -> $ret )? {
             // Don't warn if one of the arguments is unused.
             $(let _ = $arg;)*
 
@@ -3842,14 +3871,14 @@ pub(crate) macro const_eval_select {
     // We support leaving away the `val` expressions for *all* arguments
     // (but not for *some* arguments, that's too tricky).
     (
-        @capture { $($arg:ident : $ty:ty),* $(,)? } $( -> $ret:ty )? :
+        @capture$([$($binders:tt)*])? { $($arg:ident : $ty:ty),* $(,)? } $( -> $ret:ty )? :
         if const
             $(#[$compiletime_attr:meta])* $compiletime:block
         else
             $(#[$runtime_attr:meta])* $runtime:block
     ) => {
         $crate::intrinsics::const_eval_select!(
-            @capture { $($arg : $ty = $arg),* } $(-> $ret)? :
+            @capture$([$($binders)*])? { $($arg : $ty = $arg),* } $(-> $ret)? :
             if const
                 $(#[$compiletime_attr])* $compiletime
             else
@@ -4364,13 +4393,11 @@ pub const unsafe fn copy_nonoverlapping<T>(src: *const T, dst: *mut T, count: us
 ///
 /// Behavior is undefined if any of the following conditions are violated:
 ///
-/// * `src` must be [valid] for reads of `count * size_of::<T>()` bytes, and must remain valid even
-///   when `dst` is written for `count * size_of::<T>()` bytes. (This means if the memory ranges
-///   overlap, the two pointers must not be subject to aliasing restrictions relative to each
-///   other.)
+/// * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.
 ///
 /// * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes, and must remain valid even
-///   when `src` is read for `count * size_of::<T>()` bytes.
+///   when `src` is read for `count * size_of::<T>()` bytes. (This means if the memory ranges
+///   overlap, the `dst` pointer must not be invalidated by `src` reads.)
 ///
 /// * Both `src` and `dst` must be properly aligned.
 ///

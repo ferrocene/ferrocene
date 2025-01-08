@@ -40,9 +40,9 @@ jobs:
           build-dependencies: 'false'
 
       - name: Check whether git conflict markers are present
-        run: uv run ferrocene/ci/scripts/detect-conflict-markers.py
+        run: ferrocene/ci/scripts/detect-conflict-markers.py
       - name: Check whether any of our Cargo patches are unused
-        run: uv run ferrocene/ci/scripts/detect-unused-cargo-patches.py
+        run: ferrocene/ci/scripts/detect-unused-cargo-patches.py
       - name: Perform licensing checks
         run: uv run reuse --include-submodules lint
 

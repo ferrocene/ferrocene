@@ -913,7 +913,7 @@ impl<T> [T] {
     /// assert!(v == ["a", "b", "e", "d", "c"]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_const_unstable(feature = "const_swap", issue = "83163")]
+    #[rustc_const_stable(feature = "const_swap", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
     #[track_caller]
     pub const fn swap(&mut self, a: usize, b: usize) {
@@ -4821,7 +4821,8 @@ impl<T, const N: usize> [[T; N]] {
     /// assert_eq!(array, [[6, 7, 8], [9, 10, 11], [12, 13, 14]]);
     /// ```
     #[stable(feature = "slice_flatten", since = "1.80.0")]
-    pub fn as_flattened_mut(&mut self) -> &mut [T] {
+    #[rustc_const_unstable(feature = "const_slice_flatten", issue = "95629")]
+    pub const fn as_flattened_mut(&mut self) -> &mut [T] {
         let len = if T::IS_ZST {
             self.len().checked_mul(N).expect("slice len overflow")
         } else {

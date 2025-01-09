@@ -29,9 +29,21 @@ class PRLinker:
     def link(self, repo, number):
         if type(number) == str and "#" in number:
             number = int(number.rsplit("#", 1)[1])
+        url = f"https://{DOMAIN_WITHOUT_BACKLINKS}/{repo}/issues/{number}"
 
-        details = self._get(f"https://api.github.com/repos/{repo}/issues/{number}")
-        return f"`{number}`: [{details['title']}](https://{DOMAIN_WITHOUT_BACKLINKS}/{repo}/issues/{number})"
+        try:
+            details = self._get(f"https://api.github.com/repos/{repo}/issues/{number}")
+        except requests.exceptions.HTTPError as e:
+            # In rare cases it happens that PRs upstream get deleted by GitHub itself due to being
+            # created by spam accounts. Avoid crashing the script in those cases.
+            #
+            # This happened in https://github.com/rust-lang/rust/pull/134884 for example.
+            if e.response.status_code == 404:
+                return f"`{number}`: [*!!! Could not retrieve the PR name !!!*]({url})"
+            else:
+                raise e
+
+        return f"`{number}`: [{details['title']}]({url})"
 
     def _get(self, url):
         resp = self.client.get(url)

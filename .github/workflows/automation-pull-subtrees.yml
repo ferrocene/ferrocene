@@ -38,13 +38,8 @@ jobs:
           fetch-depth: 0  # Fetch all the history
           ref: ${{ matrix.branch }}
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
-            python3-requests \
-            python3-yaml \
-            python3-jwt
+      - name: Setup uv
+        run: ferrocene/ci/scripts/setup-uv.sh
 
       - name: Configure git authorship information
         run: |
@@ -75,6 +70,6 @@ jobs:
         run: git submodule update --init --depth=1 --jobs=$(nproc)
 
       - name: Run the manage-subtrees automation
-        run: python3 ferrocene/tools/pull-subtrees/pull.py --automation --target ${{ matrix.branch }}
+        run: ferrocene/tools/pull-subtrees/pull.py --automation --target ${{ matrix.branch }}
         env:
           GITHUB_TOKEN: "${{ steps.auth.outputs.token }}"

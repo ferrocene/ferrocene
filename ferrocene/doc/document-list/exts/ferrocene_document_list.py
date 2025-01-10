@@ -31,3 +31,9 @@ class DocumentId(SphinxRole):
 
 def setup(app):
     app.add_role('document-id', DocumentId())
+
+    return {
+        "version": "0",
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }

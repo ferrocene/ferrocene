@@ -4,6 +4,9 @@ version = "0.0.0"
 requires-python = ">=3.10"
 dependencies = ["sphinx", "sphinx-needs", "tomli"]
 
+[project.entry-points."sphinx.builders"]
+ferrocene-intersphinx = "ferrocene_intersphinx_builder"
+
 [tool.hatch.build]
 only-include = ["src"]
 sources = ["src"]

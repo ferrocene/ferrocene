@@ -418,5 +418,7 @@ target | std | host | notes
 [`xtensa-esp32s3-espidf`](platform-support/esp-idf.md) | ✓ |  | Xtensa ESP32-S3
 [`xtensa-esp32s3-none-elf`](platform-support/xtensa.md) | * |  | Xtensa ESP32-S3
 `aarch64-unknown-ferrocenecoretest` | ✓ | ✓ | Internal target for tests
+`thumbv7em-ferrocenecoretest-eabi` | ✓ | ✓ | Internal target for tests
+`thumbv7em-ferrocenecoretest-eabihf` | ✓ | ✓ | Internal target for tests
 
 [runs on NVIDIA GPUs]: https://github.com/japaric-archived/nvptx#targets

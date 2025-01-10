@@ -31,6 +31,9 @@ jobs:
         with:
           fetch-depth: 0  # Fetch all the history
 
+      - name: Setup uv
+        run: ferrocene/ci/scripts/setup-uv.sh
+
       - name: Configure git authorship information
         run: |
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"

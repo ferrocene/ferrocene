@@ -1,0 +1,13 @@
+[project]
+name = "ferrocene-docs"
+version = "0.0.0"
+requires-python = ">= 3.10"
+dependencies = [
+    "sphinx",
+    "sphinx-autobuild",
+    "sphinx-needs",
+    "tomli",
+    "myst_parser",
+    "pyyaml",
+    "semver",
+]

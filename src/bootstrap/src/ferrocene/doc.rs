@@ -78,40 +78,39 @@ impl Step for SphinxVirtualEnv {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let venv = builder.out.join(self.target.triple).join("ferrocene").join("sphinx-venv");
-        let shared_resources =
-            builder.src.join("ferrocene").join("doc").join("sphinx-shared-resources");
-        let requirements = shared_resources.join("requirements.txt");
-        let installed_requirements = venv.join("installed-requirements.txt");
+        let uv_project = builder.src.join("ferrocene").join("doc");
 
-        // Avoid rebuilding the venv if it's up to date.
-        if installed_requirements.is_file() {
-            if builder.read(&requirements) == builder.read(&installed_requirements) {
-                return VirtualEnv { path: venv };
-            }
+        let uv = builder.config.uv.as_ref().expect("uv is required for Sphinx docs");
+        let python = builder.config.python.as_ref().expect("python is required for Sphinx docs");
+
+        // Before the switch to uv, we were tracking which dependencies were installed using a text
+        // file stored inside of the environment. Remove the file if present, so that checking out
+        // an older commit of Ferrocene with the same build directory will cause the old code to
+        // re-create the virtual environment.
+        let old_installed_reqs = venv.join("installed-requirements.txt");
+        if old_installed_reqs.is_file() {
+            builder.remove(&old_installed_reqs);
         }
 
-        if venv.is_dir() {
-            builder.remove_dir(&venv);
-        }
-        builder.info("Installing dependencies for building Sphinx documentation");
-        BootstrapCommand::new(
-            builder
-                .config
-                .python
-                .as_ref()
-                .expect("Python is required to build Sphinx documentation"),
-        )
-        .args(&["-m", "venv"])
-        .arg(&venv)
-        .run(builder);
-        let venv = VirtualEnv { path: venv };
-        BootstrapCommand::from(venv.cmd("pip"))
-            .args(&["install", "--require-hashes", "-r"])
-            .arg(&requirements)
+        // Installing with uv (especially in the noop variant) is so fast that we can do it every
+        // time without checking whether we already installed stuff.
+        builder.info("Updating the Sphinx virtual environment");
+        BootstrapCommand::new(&uv)
+            .arg("sync")
+            .arg("--project")
+            .arg(&uv_project)
+            // Strictly use the lockfile of the project, and don't try to update it.
+            .arg("--locked")
+            // Do not use any Python installation managed by uv. Instead, rely on the Python being
+            // passed to bootstrap.
+            .arg("--python")
+            .arg(&python)
+            .arg("--python-preference=only-system")
+            // Use our own custom path for the virtual environment.
+            .env("UV_PROJECT_ENVIRONMENT", &venv)
             .run(builder);
-        builder.copy_link(&requirements, &installed_requirements);
 
-        venv
+        VirtualEnv { path: venv }
     }
 }
 

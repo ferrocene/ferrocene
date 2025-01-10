@@ -359,6 +359,7 @@ pub struct Config {
     pub gdb: Option<PathBuf>,
     pub lldb: Option<PathBuf>,
     pub python: Option<PathBuf>,
+    pub uv: Option<PathBuf>,
     pub reuse: Option<PathBuf>,
     pub cargo_native_static: bool,
     pub configure_args: Vec<String>,
@@ -951,6 +952,7 @@ define_config! {
         nodejs: Option<String> = "nodejs",
         npm: Option<String> = "npm",
         python: Option<String> = "python",
+        uv: Option<String> = "uv",
         reuse: Option<String> = "reuse",
         locked_deps: Option<bool> = "locked-deps",
         vendor: Option<bool> = "vendor",
@@ -1617,6 +1619,7 @@ impl Config {
             nodejs,
             npm,
             python,
+            uv,
             reuse,
             locked_deps,
             vendor,
@@ -1727,6 +1730,7 @@ impl Config {
         config.gdb = gdb.map(PathBuf::from);
         config.lldb = lldb.map(PathBuf::from);
         config.python = python.map(PathBuf::from);
+        config.uv = uv.map(PathBuf::from);
         config.reuse = reuse.map(PathBuf::from);
         config.submodules = submodules;
         config.android_ndk = android_ndk;

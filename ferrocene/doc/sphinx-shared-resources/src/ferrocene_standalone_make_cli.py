@@ -10,11 +10,10 @@
 from pathlib import Path
 import argparse
 import subprocess
-import venv
 import sys
 
 
-def build_docs(root, env, builder, clear, serve, debug):
+def build_docs(root, builder, clear, serve, debug):
     dest = root / "build"
 
     args = ["-b", builder, "-d", dest / "doctrees"]
@@ -43,7 +42,7 @@ def build_docs(root, env, builder, clear, serve, debug):
     try:
         subprocess.run(
             [
-                env.bin("sphinx-autobuild" if serve else "sphinx-build"),
+                "sphinx-autobuild" if serve else "sphinx-build",
                 *args,
                 root / "src",
                 dest / builder,
@@ -111,38 +110,6 @@ def current_git_commit(root):
         return
 
 
-class VirtualEnv:
-    def __init__(self, root, path):
-        self.path = path
-        self.requirements = root / "shared" / "requirements.txt"
-        self.installed_requirements = path / "installed-requirements.txt"
-
-        if not self.up_to_date():
-            self.create()
-
-    def bin(self, name):
-        if sys.platform == "win32":
-            return self.path / "scripts" / name
-        else:
-            return self.path / "bin" / name
-
-    def up_to_date(self):
-        if self.installed_requirements.exists():
-            expected = self.requirements.read_bytes()
-            installed = self.installed_requirements.read_bytes()
-            if expected == installed:
-                return True
-        return False
-
-    def create(self):
-        venv.EnvBuilder(clear=True, symlinks=True, with_pip=True).create(self.path)
-        subprocess.run(
-            [self.bin("pip"), "install", "-r", self.requirements, "--require-hashes"],
-            check=True,
-        )
-        self.installed_requirements.write_bytes(self.requirements.read_bytes())
-
-
 def main(root):
     root = Path(root)
 
@@ -170,9 +137,8 @@ def main(root):
     )
     args = parser.parse_args()
 
-    env = VirtualEnv(root, root / ".venv")
     rendered = build_docs(
-        root, env, "xml" if args.xml else "html", args.clear, args.serve, args.debug
+        root, "xml" if args.xml else "html", args.clear, args.serve, args.debug
     )
 
     if args.check_links:

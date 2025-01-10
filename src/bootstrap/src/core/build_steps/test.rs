@@ -3441,6 +3441,11 @@ impl Step for TestHelpers {
         let target = if self.target.contains("-ferrocenecoretest") {
             let sub = target.triple.replace("ferrocenecoretest", "none");
 
+            // override the default arm-none-eabi-gcc header files
+            if target.starts_with("thumbv") {
+                cfg.include(Path::new("/tmp/ferrocene").join(target.triple).join("include"));
+            }
+
             TargetSelection::from_user(&sub)
         } else {
             target

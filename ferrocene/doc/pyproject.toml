@@ -5,9 +5,17 @@ requires-python = ">= 3.10"
 dependencies = [
     "sphinx",
     "sphinx-autobuild",
-    "sphinx-needs",
     "tomli",
     "myst_parser",
     "pyyaml",
     "semver",
+
+    # Internal dependencies:
+    "ferrocene-sphinx-shared-resources",
 ]
+
+[tool.uv.sources]
+ferrocene-sphinx-shared-resources = { workspace = true }
+
+[tool.uv.workspace]
+members = ["sphinx-shared-resources/"]

@@ -238,9 +238,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             .arg(format!(
                 "rust_version={}",
                 fs::read_to_string(&builder.src.join("src").join("version")).unwrap().trim(),
-            ))
-            // Load extensions from the shared resources as well:
-            .env("PYTHONPATH", relative_path(&src, &shared_resources.join("exts")));
+            ));
 
         if builder.config.cmd.fresh() {
             // The `-E` flag forces Sphinx to ignore any saved environment and build everything

@@ -1,6 +1,12 @@
 version = 1
 requires-python = ">=3.10"
 
+[manifest]
+members = [
+    "ferrocene-docs",
+    "ferrocene-sphinx-shared-resources",
+]
+
 [[package]]
 name = "alabaster"
 version = "1.0.0"
@@ -157,22 +163,39 @@ name = "ferrocene-docs"
 version = "0.0.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "ferrocene-sphinx-shared-resources" },
     { name = "myst-parser" },
     { name = "pyyaml" },
     { name = "semver" },
     { name = "sphinx" },
     { name = "sphinx-autobuild" },
+    { name = "tomli" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "ferrocene-sphinx-shared-resources", editable = "sphinx-shared-resources" },
+    { name = "myst-parser" },
+    { name = "pyyaml" },
+    { name = "semver" },
+    { name = "sphinx" },
+    { name = "sphinx-autobuild" },
+    { name = "tomli" },
+]
+
+[[package]]
+name = "ferrocene-sphinx-shared-resources"
+version = "0.0.0"
+source = { editable = "sphinx-shared-resources" }
+dependencies = [
+    { name = "sphinx" },
     { name = "sphinx-needs" },
     { name = "tomli" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "myst-parser" },
-    { name = "pyyaml" },
-    { name = "semver" },
     { name = "sphinx" },
-    { name = "sphinx-autobuild" },
     { name = "sphinx-needs" },
     { name = "tomli" },
 ]

@@ -1,12 +1,19 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
+
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["utils", "boto3", "pyyaml"]
+#
+# [tool.uv.sources]
+# utils = { path = "utils", editable = true }
+# ///
 
 # Dynamically calculate the value of the parameters defined in `workflows.yml`
 # based on the rest of the source code and the current environment. The script
 # tries to find a value for all the defined parameters automatically, and exits
 # with an error if it can't calculate the value of one parameter.
-
 
 import boto3
 import datetime
@@ -18,7 +25,7 @@ import sys
 import urllib.parse
 import yaml
 from typing import Callable
-import llvm_cache
+from utils import llvm_cache
 
 
 # Path of the YAML file to extract the needed parameters from.
@@ -183,7 +190,7 @@ def calculate_targets(host_plus_stage: str):
             raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
     elif stage == "self-test":
         if host == "aarch64-unknown-linux-gnu":
-            targets = AARCH64_LINUX_SELF_TEST_TARGETS    
+            targets = AARCH64_LINUX_SELF_TEST_TARGETS
         elif host == "x86_64-unknown-linux-gnu":
             targets = X86_64_LINUX_SELF_TEST_TARGETS
         elif host == "aarch64-apple-darwin":

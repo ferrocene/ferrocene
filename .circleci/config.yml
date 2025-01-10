@@ -68,7 +68,7 @@ jobs:
       - run:
           name: Calculate the parameters for the workflow
           command: |
-            uv run ferrocene/ci/scripts/calculate_parameters.py > /tmp/continue-parameters.json
+            ferrocene/ci/scripts/calculate_parameters.py > /tmp/continue-parameters.json
             cat /tmp/continue-parameters.json
 
       - continuation/continue:

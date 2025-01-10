@@ -1,6 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
+
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["boto3", "requests"]
+# ///
 
 # This script is responsible for calculating the list of release jobs we should
 # start, as part of the .github/workflows/release.yml GitHub Actions workflow.

@@ -1,23 +1,24 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["utils"]
+#
+# [tool.uv.sources]
+# utils = { path = "utils", editable = true }
+# ///
+
 import argparse
 import subprocess
-import hashlib
 import os
-import io
 import shutil
 import pathlib
-import tarfile
 import sys
-import shlex
-import cache
+from utils import cache, llvm_cache
 import logging
-import urllib.parse
 
-CACHE_BUCKET="ferrocene-ci-caches"
-CACHE_PREFIX="prebuilt-llvm"
 
 # Note that this *ignores* symlinks. If you need a binary that's actually a
 # symlink please add to the list the binary the symlink points *to*.
@@ -59,6 +60,7 @@ KEEP_LLVM_BINARIES=[
     # Needed to strip debug info in aarch64-darwin
     "llvm-install-name-tool",
 ]
+
 
 def arguments():
     parser = argparse.ArgumentParser(
@@ -108,19 +110,19 @@ def main():
 
 def subcommand_download(ferrocene_host, url):
     if url == None:
-        url = get_s3_url(ferrocene_host).geturl()
+        url = llvm_cache.get_s3_url(ferrocene_host).geturl()
 
     cache.retrieve(url, ".")
 
 def subcommand_prepare(ferrocene_host, url):
     if url == None:
-        url = get_s3_url(ferrocene_host).geturl()
+        url = llvm_cache.get_s3_url(ferrocene_host).geturl()
 
     tarball = prepare_llvm_build(ferrocene_host)
     cache.store(url, tarball)
 
 def subcommand_s3_url(ferrocene_host):
-    s3_url = get_s3_url(ferrocene_host)
+    s3_url = llvm_cache.get_s3_url(ferrocene_host)
     print(s3_url.geturl())
 
 def prepare_llvm_build(ferrocene_host):
@@ -188,47 +190,6 @@ def prepare_llvm_build(ferrocene_host):
             """)
 
     return f"build/{ferrocene_host}/llvm"
-
-def get_s3_url(ferrocene_host):
-    cache_hash = get_llvm_cache_hash()
-    cache_file = f"{CACHE_PREFIX}/{ferrocene_host}-{cache_hash}.tar.zst"
-    s3_url = f"s3://{CACHE_BUCKET}/{cache_file}"
-    return urllib.parse.urlparse(s3_url)
-
-def get_llvm_cache_hash():
-    """
-    Calculate a hash of the LLVM source code and all the files that could impact
-    the LLVM build. This will be used as the cache key to avoid rebuilding LLVM
-    from scratch every time.
-    """
-    m = hashlib.sha256()
-
-    files = [
-        "ferrocene/ci/scripts/llvm_cache.py", # __file__ is an absolute path
-        "ferrocene/ci/configure.sh",
-        "src/version",
-    ];
-
-    ls_files_cmd = ["git", "ls-files", "src/bootstrap", "ferrocene/ci/docker-images"]
-    ls_files = subprocess.run(ls_files_cmd, check=True, capture_output=True, text=True)
-    files += ls_files.stdout.split()
-
-    files.sort()
-    for file in files:
-        # hashlib.file_digest added in 3.11
-        f = open(file, mode="rb")
-        buf = f.read()
-        shasum = hashlib.sha256(buf)
-        m.update(str.encode(shasum.hexdigest()))
-
-    # Hashing all of the LLVM source code takes time. Instead we can simply get
-    # the hash of the tree from git, saving time and achieving the same effect.
-    ls_tree_cmd = ["git", "ls-tree", "HEAD", "src/llvm-project"]
-    ls_tree = subprocess.run(ls_tree_cmd, check=True, capture_output=True, text=True)
-    ls_tree_shasum = ls_tree.stdout.split()[2];
-    m.update(str.encode(ls_tree_shasum))
-
-    return m.hexdigest()
 
 
 if __name__ == "__main__":

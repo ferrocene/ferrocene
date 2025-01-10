@@ -1,7 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+# /// script
+# requires-python = ">=3.12"
+# dependencies = []
+# ///
 
 import os
 import subprocess

@@ -32,6 +32,9 @@ jobs:
           fetch-depth: 0 # need whole history, in case the merge-commit is not the mirrored-commit
           path: ${{ env.ORIGIN_REPO_PATH }}
 
+      - name: Setup uv
+        run: ferrocene/ci/scripts/setup-uv.sh
+
       - name: Authenticate with GitHub
         run: ferrocene/ci/scripts/github_app_auth.py
         env:

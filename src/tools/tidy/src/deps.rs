@@ -1,13 +1,8 @@
 //! Checks the licenses of third-party dependencies.
 
-<<<<<<< HEAD
 use std::collections::{HashMap, HashSet};
-use std::fs::read_dir;
-=======
-use std::collections::HashSet;
 use std::fs::{File, read_dir};
 use std::io::Write;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use std::path::Path;
 
 use build_helper::ci::CiEnv;

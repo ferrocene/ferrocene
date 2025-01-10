@@ -211,6 +211,8 @@ pub fn use_host_linker(target: TargetSelection) -> bool {
         || target.contains("fortanix")
         || target.contains("fuchsia")
         || target.contains("bpf")
+        // ferrocene addition: use the default linker (LLD) not the config.toml `cc` override
+        || (target.starts_with("thumbv") && target.contains("-ferrocenecoretest-"))
         || target.contains("switch"))
 }
 

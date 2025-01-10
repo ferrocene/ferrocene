@@ -84,7 +84,7 @@ def inject_intersphinx_mappings(app, config):
 def setup(app):
     # Automatically enable the sphinx.ext.intersphinx extension without
     # requiring users to configure it in their conf.py.
-    sphinx.ext.intersphinx.setup(app)
+    app.setup_extension("sphinx.ext.intersphinx")
 
     app.add_builder(IntersphinxBuilder)
 

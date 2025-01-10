@@ -78,7 +78,7 @@ def configure_sphinx_needs(app, config):
 
 
 def setup(app):
-    sphinx_needs.setup(app)
+    app.setup_extension("sphinx_needs")
 
     app.add_config_value("ferrocene_external_needs", None, "env", str)
     app.connect("config-inited", configure_sphinx_needs, priority=100)

@@ -7,6 +7,9 @@ dependencies = ["sphinx", "sphinx-needs", "tomli"]
 [project.entry-points."sphinx.builders"]
 ferrocene-intersphinx = "ferrocene_intersphinx_builder"
 
+[project.entry-points."sphinx.html_themes"]
+ferrocene = "ferrocene_theme"
+
 [tool.hatch.build]
 only-include = ["src"]
 sources = ["src"]

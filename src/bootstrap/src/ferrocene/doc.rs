@@ -154,8 +154,6 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
                     format!("{}-doctrees-objectsinv", self.name)
                 }
             });
-        let shared_resources =
-            builder.src.join("ferrocene").join("doc").join("sphinx-shared-resources");
         let substitutions =
             builder.src.join("ferrocene").join("doc").join("sphinx-substitutions.toml");
         let target_names = builder.src.join("ferrocene").join("doc").join("target-names.toml");
@@ -204,12 +202,6 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             // Store doctrees outside the output directory:
             .arg("-d")
             .arg(relative_path(&src, &doctrees))
-            // Load the theme from the Sphinx shared resources:
-            .arg("-D")
-            .arg(path_define(
-                "html_theme_path",
-                &relative_path(&src, &shared_resources.join("themes")),
-            ))
             // Include the breadcrumbs
             .arg("-D")
             .arg(path_define(

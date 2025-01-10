@@ -19,10 +19,12 @@
 
 //@[dylib] ignore-musl (dylibs are not supported)
 //@[dylib] ignore-wasm (dylibs are not supported)
+//@[dylib] ignore-aarch64-unknown-ferrocenecoretest (dylibs are not supported)
 //@[dylib] compile-flags: --crate-type=dylib
 //@[dylib] check-pass
 
 //@[cdylib] ignore-musl (cdylibs are not supported)
+//@[cdylib] ignore-aarch64-unknown-ferrocenecoretest (cdylibs are not supported)
 //@[cdylib] compile-flags: --crate-type=cdylib
 //@[cdylib] check-pass
 
@@ -30,6 +32,7 @@
 //@[bin] check-pass
 
 //@[proc_dash_macro] ignore-wasm (proc-macro is not supported)
+//@[proc_dash_macro] ignore-aarch64-unknown-ferrocenecoretest (proc-macro is not supported)
 //@[proc_dash_macro] compile-flags: --crate-type=proc-macro
 //@[proc_dash_macro] check-pass
 
@@ -40,8 +43,13 @@
 
 //@[multivalue_combined] ignore-musl (dylibs are not supported)
 //@[multivalue_combined] ignore-wasm (dylibs are not supported)
+//@[multivalue_combined] ignore-aarch64-unknown-ferrocenecoretest (dylibs are not supported)
 //@[multivalue_combined] compile-flags: --crate-type=lib,rlib,staticlib --crate-type=dylib
 //@[multivalue_combined] check-pass
+
+//@ revisions: multivalue_combined_ferrocene
+//@[multivalue_combined_ferrocene] compile-flags: --crate-type=lib,rlib --crate-type=staticlib
+//@[multivalue_combined_ferrocene] check-pass
 
 // `proc-macro` is accepted, but `proc_macro` is not.
 //@ revisions: proc_underscore_macro
@@ -59,3 +67,5 @@
 //@[unknown] error-pattern: "unknown crate type: `🤡`"
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_crate_type

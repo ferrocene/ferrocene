@@ -14,6 +14,10 @@
 //@ ignore-fuchsia Backtrace not symbolized, trace different line alignment
 //@ ignore-aarch64-unknown-ferrocenecoretest - backtraces not supported on the target
 
+// FIXME(#117097): backtrace (possibly unwinding mechanism) seems to be different on at least
+// `i686-mingw` (32-bit windows-gnu)? cc #128911.
+//@ ignore-windows-gnu
+
 use std::env;
 
 #[path = "backtrace-debuginfo-aux.rs"] mod aux;

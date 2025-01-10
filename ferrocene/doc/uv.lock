@@ -175,12 +175,12 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "ferrocene-sphinx-shared-resources", editable = "sphinx-shared-resources" },
-    { name = "myst-parser" },
-    { name = "pyyaml" },
-    { name = "semver" },
-    { name = "sphinx" },
-    { name = "sphinx-autobuild" },
-    { name = "tomli" },
+    { name = "myst-parser", specifier = "~=4.0" },
+    { name = "pyyaml", specifier = "~=6.0" },
+    { name = "semver", specifier = "~=3.0" },
+    { name = "sphinx", specifier = "~=8.0" },
+    { name = "sphinx-autobuild", specifier = ">=0" },
+    { name = "tomli", specifier = "~=2.2" },
 ]
 
 [[package]]

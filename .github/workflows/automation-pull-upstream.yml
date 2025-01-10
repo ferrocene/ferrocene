@@ -90,6 +90,9 @@ jobs:
       - name: Setup Ubuntu
         run: ferrocene/ci/scripts/setup-ubuntu.sh
 
+      - name: Setup uv
+        run: ferrocene/ci/scripts/setup-uv.sh
+
       - name: Configure git authorship information
         run: |
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"

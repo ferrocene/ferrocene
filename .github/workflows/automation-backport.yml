@@ -58,7 +58,7 @@ jobs:
           APP_PRIVATE_KEY: "${{ secrets.AUTOMATIONS_APP_PRIVATE_KEY }}"
 
       - name: Run the backport automation
-        run: python3 ferrocene/tools/backport/all.py
+        run: ferrocene/tools/backport/all.py
         env:
           GITHUB_TOKEN: "${{ steps.auth.outputs.token }}"
           PYTHONUNBUFFERED: "true"

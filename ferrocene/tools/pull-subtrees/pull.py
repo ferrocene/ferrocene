@@ -4,7 +4,7 @@
 
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["requests", "yaml", "pyjwt[crypto]"]
+# dependencies = ["requests", "pyyaml", "pyjwt[crypto]"]
 # ///
 
 # Script to automatically pull new changes from all subtrees. The list of

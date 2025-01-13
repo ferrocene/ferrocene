@@ -30,6 +30,14 @@ reason = "QEMU user space emulation behaves differently when spawning processes 
 
 [["tests/ui"]]
 tests = [
+    "tests/ui/process/no-stdio.rs",
+    "tests/ui/process/nofile-limit.rs",
+]
+targets = ["thumbv7em-ferrocenecoretest-eabi", "thumbv7em-ferrocenecoretest-eabihf"]
+reason = "QEMU user space emulation behaves differently when spawning processes fails"
+
+[["tests/ui"]]
+tests = [
     "tests/ui/hygiene/panic-location.rs",
     "tests/ui/intrinsics/const-eval-select-backtrace-std.rs",
     "tests/ui/intrinsics/const-eval-select-backtrace.rs",

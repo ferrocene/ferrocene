@@ -95,6 +95,8 @@ const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "ignore-std-debug-assertions",
     "ignore-test",
     "ignore-thumb",
+    "ignore-thumbv7em-ferrocenecoretest-eabi",
+    "ignore-thumbv7em-ferrocenecoretest-eabihf",
     "ignore-thumbv8m.base-none-eabi",
     "ignore-thumbv8m.main-none-eabi",
     "ignore-tvos",

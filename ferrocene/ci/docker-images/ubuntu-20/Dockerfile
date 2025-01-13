@@ -126,8 +126,11 @@ ENV PATH "/opt/riscv-toolchain/bin:$PATH"
 # qemu-user-static.
 COPY --from=noble /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
 COPY --from=noble /usr/libexec/qemu-binfmt/aarch64-binfmt-P /usr/libexec/qemu-binfmt/aarch64-binfmt-P
-# This was removed in 24.04 and is a copy of the 23.04 file.
+COPY --from=noble /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
+COPY --from=noble /usr/libexec/qemu-binfmt/arm-binfmt-P /usr/libexec/qemu-binfmt/arm-binfmt-P
+# This was removed in 24.04 and is a copy of the 22.04 file.
 COPY ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-aarch64 /usr/share/binfmts/qemu-aarch64
+COPY ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-arm /usr/share/binfmts/qemu-arm
 
 # We need a newer Python than what's included in Ubuntu 20.04, so we have to
 # build it from source. Python 3.12.x has been chosen as it's the same minor

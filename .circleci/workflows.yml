@@ -291,6 +291,34 @@ jobs:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
+  thumbv7em-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      target:
+        type: string
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: << parameters.target >>
+      SCRIPT: |
+        QEMU_CPU=cortex-m4 TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-venv
+      - setup-secret-sauce:
+          target: << parameters.target >>
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "ARM_TARGET=<< parameters.target >> ./ferrocene/ci/scripts/emulated-arm-test-runner.sh"
+
   x86_64-qnx-generic-test-vm:
     executor: linux-vm
     parameters:
@@ -890,6 +918,42 @@ workflows:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
 
+      - thumbv7em-generic-test-vm:
+          name: thumbv7em-eabihf-test-library
+          target: thumbv7em-ferrocenecoretest-eabihf
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
+
+      - thumbv7em-generic-test-vm:
+          name: thumbv7em-eabi-test-library
+          target: thumbv7em-ferrocenecoretest-eabi
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
+
+      - thumbv7em-generic-test-vm:
+          name: thumbv7em-eabihf-test-compiletest
+          target: thumbv7em-ferrocenecoretest-eabihf
+          job: qnx:compiletest-no-only-hosts
+          resource-class: xlarge # 8-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
+
+      - thumbv7em-generic-test-vm:
+          name: thumbv7em-eabi-test-compiletest
+          target: thumbv7em-ferrocenecoretest-eabi
+          job: qnx:compiletest-no-only-hosts
+          resource-class: xlarge # 8-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
+
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-library
           job: test:library
@@ -1183,6 +1247,7 @@ commands:
                     --workdir /home/ci/project \
                     --volume $(pwd):/home/ci/project \
                     --volume /tmp/emulator:/tmp/emulator \
+                    --volume /tmp/ferrocene:/tmp/ferrocene \
                     --user $(id -u):$(id -g) \
                     --network host \
                     --privileged \
@@ -1202,6 +1267,7 @@ commands:
                     --workdir /home/ci/project \
                     --volume $(pwd):/home/ci/project \
                     --volume /tmp/emulator:/tmp/emulator \
+                    --volume /tmp/ferrocene:/tmp/ferrocene \
                     --user $(id -u):$(id -g) \
                     --network host \
                     --privileged \
@@ -1218,6 +1284,7 @@ commands:
               --workdir /home/ci/project \
               --volume $(pwd):/home/ci/project \
               --volume /tmp/emulator:/tmp/emulator \
+              --volume /tmp/ferrocene:/tmp/ferrocene \
               --user $(id -u):$(id -g) \
               --network host \
               --interactive \
@@ -1327,6 +1394,19 @@ commands:
       - store_artifacts:
           path: /tmp/metrics
           destination: metrics
+
+  setup-secret-sauce:
+    description: Setup secret sauce
+    parameters:
+      target:
+        type: string
+    steps:
+      - run:
+          name: Fetch secret sauce
+          command: |
+            mkdir -p /tmp/ferrocene/<< parameters.target >>
+            aws s3 cp s3://ferrocene-ci-mirrors/coretest-secret-sauce/20250116/b9e7699/<< parameters.target >>.tar.gz /tmp/ferrocene/
+            tar xf /tmp/ferrocene/<< parameters.target >>.tar.gz --directory=/tmp/ferrocene/<< parameters.target >>
 
   setup-qnx-toolchain:
     description: Setup QNX Toolchain

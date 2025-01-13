@@ -15,9 +15,9 @@ use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
+use crate::ferrocene::uv_command;
 use crate::t;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
-use crate::ferrocene::uv_command;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct Docs {

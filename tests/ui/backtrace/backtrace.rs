@@ -6,6 +6,8 @@
 //@ ignore-msvc see #62897 and `backtrace-debuginfo.rs` test
 //@ ignore-fuchsia Backtraces not symbolized
 //@ ignore-aarch64-unknown-ferrocenecoretest - backtraces not supported on the target
+//@ ignore-thumbv7em-ferrocenecoretest-eabi - backtraces not supported on the target
+//@ ignore-thumbv7em-ferrocenecoretest-eabihf - backtraces not supported on the target
 //@ compile-flags:-g
 //@ compile-flags:-Cstrip=none
 

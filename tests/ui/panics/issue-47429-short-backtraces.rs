@@ -21,6 +21,8 @@
 //@ ignore-emscripten no panic or subprocess support
 //@ ignore-sgx no subprocess support
 //@ ignore-fuchsia Backtraces not symbolized
+//@ ignore-thumbv7em-ferrocenecoretest-eabi no backtrace support
+//@ ignore-thumbv7em-ferrocenecoretest-eabihf no backtrace support
 
 fn main() {
     panic!()

@@ -22,6 +22,8 @@
 //@ ignore-sgx no subprocess support
 //@ ignore-fuchsia Backtrace not symbolized
 //@ ignore-aarch64-unknown-ferrocenecoretest - backtraces not supported on the target
+//@ ignore-thumbv7em-ferrocenecoretest-eabi - backtraces not supported on the target
+//@ ignore-thumbv7em-ferrocenecoretest-eabihf - backtraces not supported on the target
 
 #![feature(panic_backtrace_config)]
 

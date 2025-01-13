@@ -229,6 +229,12 @@ SPDX-FileCopyrightText = "Colin Watson"
 SPDX-License-Identifier = "GPL-3.0-or-later"
 
 [[annotations]]
+path = "ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-arm"
+precedence = "override"
+SPDX-FileCopyrightText = "Colin Watson"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
 path = "requirements.txt"
 precedence = "override"
 SPDX-FileCopyrightText = "The Ferrocene Developers"

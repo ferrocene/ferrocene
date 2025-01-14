@@ -90,6 +90,33 @@ if [[ "${upstream_commit}" = "FETCH_HEAD" ]]; then
     fi
 fi
 
+# Upstream is slowly trying to migrate away from submodules in favor of subtrees. Whenever they do
+# that, in the same PR they remove the submodule and then create the subtree.
+#
+# This causes problems whenever the branch containing the subtree is checked out in a working
+# directory containing the submodule. Submodules "hide" from git's view the files they contain, and
+# when they are removed they stop hiding those, resulting in those files being untracked.
+#
+# When git tries to add the subtree files in the working directory, it will see the submodule files
+# as untracked, and exit with an error to avoid having to overwrite the files, crashing the script.
+#
+# To avoid the problem, this snippet below `rm -rf`s every directory that is a submodule in the
+# current branch but is not a submodule upstream. This correctly solves the problem whenever
+# upstream converts a submodule to a subtree. It also has the side effect of removing the local
+# contents of the submodules added in Ferrocene (not the submodules themselves), but that doesn't
+# cause any problem (the Ferrocene submodules are then re-fetched later).
+get_submodules() {
+    ref="$1"
+    git config --file <(git show "${ref}:.gitmodules") --get-regexp path | awk '{print($2)}'
+}
+new_submodules="$(get_submodules "${upstream_commit}")"
+for submodule in $(get_submodules "${current_branch}"); do
+    if ! grep --quiet "^${submodule}\$" <(echo "${new_submodules}"); then
+        echo "submodule ${submodule} is not present upstream, removing its contents"
+        rm -rf "${submodule}"
+    fi
+done
+
 git checkout -b "${TEMP_BRANCH}" "${upstream_commit}"
 
 # Delete all the files excluded from the pull. Those files are marked with the

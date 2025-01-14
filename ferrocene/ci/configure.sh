@@ -191,7 +191,10 @@ if [[ is_internal ]]; then
 
     # these default to `cc` but require cross compilation
     add --set target.thumbv7em-ferrocenecoretest-eabi.cc=arm-none-eabi-gcc
+    add --set target.thumbv7em-ferrocenecoretest-eabi.profiler=false # no profiling support
+
     add --set target.thumbv7em-ferrocenecoretest-eabihf.cc=arm-none-eabi-gcc
+    add --set target.thumbv7em-ferrocenecoretest-eabihf.profiler=false # no profiling support
 fi
 
 # Set the host platform to build. The environment variable is set from the CI

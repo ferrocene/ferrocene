@@ -1,0 +1,44 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+:upcoming-release:
+
+Ferrocene 25.02.0
+=================
+
+Ferrocene 25.02.0 is the fith major release of Ferrocene.
+
+The highlights of this release are the inclusion of Rust 1.83.0, as well as several new experimental targets.
+
+New features
+------------
+
+Updated the Rust version to include changes in Rust 1.82.0 and 1.83.0.
+
+New experimental features
+-------------------------
+
+Experimental features are not qualified for safety critical use, and are
+shipped as a preview.
+
+* Experimental support has been added for multiple cross-compilation targets.
+  Note that experimental targets are not qualified for safety critical use. The
+  new targets are:
+
+  * :target-with-triple:`thumbv6m-none-eabi`
+  * :target-with-triple:`thumbv8m.base-none-eabi`
+  * :target-with-triple:`thumbv8m.main-none-eabi`
+  * :target-with-triple:`thumbv8m.main-none-eabihf`
+  * :target-with-triple:`riscv64gc-unknown-linux-gnu`
+
+Rust changes
+------------
+
+This release includes the following changes introduced by the upstream Rust
+project. Note that this changelog is maintained by upstream. The target support
+changes described here describe Rust's support levels, and have no correlation
+to the targets and platforms supported by Ferrocene.
+
+.. rust-changelog::
+   :from: 1.82.0
+   :to: 1.83.0

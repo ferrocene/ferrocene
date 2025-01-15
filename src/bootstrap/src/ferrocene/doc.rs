@@ -765,12 +765,6 @@ sphinx_books! [
         src: "ferrocene/doc/internal-procedures",
         dest: "qualification/internal-procedures",
     },
-    {
-        ty: Requirements,
-        name: "requirements",
-        src: "ferrocene/doc/requirements",
-        dest: "requirements",
-    },
 ];
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]

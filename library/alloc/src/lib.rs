@@ -91,7 +91,6 @@
 //
 // Library features:
 // tidy-alphabetical-start
-#![cfg_attr(bootstrap, feature(async_closure))]
 #![cfg_attr(test, feature(str_as_str))]
 #![feature(alloc_layout_extra)]
 #![feature(allocator_api)]
@@ -168,6 +167,7 @@
 #![feature(dropck_eyepatch)]
 #![feature(fundamental)]
 #![feature(hashmap_internals)]
+#![feature(intrinsics)]
 #![feature(lang_items)]
 #![feature(min_specialization)]
 #![feature(multiple_supertrait_upcastable)]

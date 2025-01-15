@@ -1183,7 +1183,7 @@ impl<'de> Deserialize<'de> for LldMode {
                 match v {
                     "external" => Ok(LldMode::External),
                     "self-contained" => Ok(LldMode::SelfContained),
-                    _ => Err(E::custom("unknown mode {v}")),
+                    _ => Err(E::custom(format!("unknown mode {v}"))),
                 }
             }
         }

@@ -1221,10 +1221,7 @@ impl Builder<'_> {
             // so that it'll be available when downstream consumers of std try to use it.
             rustflags.arg("-Zinline-mir-preserve-debug");
 
-            // FIXME: always pass this after the next `#[cfg(bootstrap)]` update.
-            if compiler.stage != 0 {
-                rustflags.arg("-Zmir_strip_debuginfo=locals-in-tiny-functions");
-            }
+            rustflags.arg("-Zmir_strip_debuginfo=locals-in-tiny-functions");
         }
 
         if target.contains("ferrocenecoretest") {

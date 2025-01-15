@@ -634,7 +634,7 @@ impl<'hir> Map<'hir> {
         for (hir_id, node) in self.parent_iter(hir_id) {
             if let Node::Item(Item {
                 kind:
-                    ItemKind::Fn(..)
+                    ItemKind::Fn { .. }
                     | ItemKind::Const(..)
                     | ItemKind::Static(..)
                     | ItemKind::Mod(..)
@@ -823,7 +823,7 @@ impl<'hir> Map<'hir> {
 
         let span = match self.tcx.hir_node(hir_id) {
             // Function-like.
-            Node::Item(Item { kind: ItemKind::Fn(sig, ..), span: outer_span, .. })
+            Node::Item(Item { kind: ItemKind::Fn { sig, .. }, span: outer_span, .. })
             | Node::TraitItem(TraitItem {
                 kind: TraitItemKind::Fn(sig, ..),
                 span: outer_span,
@@ -938,6 +938,7 @@ impl<'hir> Map<'hir> {
             Node::OpaqueTy(op) => op.span,
             Node::Pat(pat) => pat.span,
             Node::PatField(field) => field.span,
+            Node::PatExpr(lit) => lit.span,
             Node::Arm(arm) => arm.span,
             Node::Block(block) => block.span,
             Node::Ctor(..) => self.span_with_body(self.tcx.parent_hir_id(hir_id)),
@@ -1149,7 +1150,7 @@ fn hir_id_to_string(map: Map<'_>, id: HirId) -> String {
                 ItemKind::Use(..) => "use",
                 ItemKind::Static(..) => "static",
                 ItemKind::Const(..) => "const",
-                ItemKind::Fn(..) => "fn",
+                ItemKind::Fn { .. } => "fn",
                 ItemKind::Macro(..) => "macro",
                 ItemKind::Mod(..) => "mod",
                 ItemKind::ForeignMod { .. } => "foreign mod",
@@ -1209,6 +1210,7 @@ fn hir_id_to_string(map: Map<'_>, id: HirId) -> String {
         Node::OpaqueTy(_) => node_str("opaque type"),
         Node::Pat(_) => node_str("pat"),
         Node::PatField(_) => node_str("pattern field"),
+        Node::PatExpr(_) => node_str("pattern literal"),
         Node::Param(_) => node_str("param"),
         Node::Arm(_) => node_str("arm"),
         Node::Block(_) => node_str("block"),

@@ -57,7 +57,7 @@ use crate::middle::resolve_bound_vars::{ObjectLifetimeDefault, ResolveBoundVars,
 use crate::middle::stability::{self, DeprecationEntry};
 use crate::mir::interpret::{
     EvalStaticInitializerRawResult, EvalToAllocationRawResult, EvalToConstValueResult,
-    EvalToValTreeResult, GlobalId, LitToConstError, LitToConstInput,
+    EvalToValTreeResult, GlobalId, LitToConstInput,
 };
 use crate::mir::mono::{CodegenUnit, CollectionMode, MonoItem};
 use crate::query::erase::{Erase, erase, restore};
@@ -1100,9 +1100,6 @@ rustc_queries! {
         desc { |tcx| "type-checking `{}`", tcx.def_path_str(key) }
         cache_on_disk_if(tcx) { !tcx.is_typeck_child(key.to_def_id()) }
     }
-    query diagnostic_only_typeck(key: LocalDefId) -> &'tcx ty::TypeckResults<'tcx> {
-        desc { |tcx| "type-checking `{}`", tcx.def_path_str(key) }
-    }
 
     query used_trait_imports(key: LocalDefId) -> &'tcx UnordSet<LocalDefId> {
         desc { |tcx| "finding used_trait_imports `{}`", tcx.def_path_str(key) }
@@ -1271,7 +1268,7 @@ rustc_queries! {
     // FIXME get rid of this with valtrees
     query lit_to_const(
         key: LitToConstInput<'tcx>
-    ) -> Result<ty::Const<'tcx>, LitToConstError> {
+    ) -> ty::Const<'tcx> {
         desc { "converting literal to const" }
     }
 
@@ -1716,6 +1713,11 @@ rustc_queries! {
 
     query check_well_formed(key: LocalDefId) -> Result<(), ErrorGuaranteed> {
         desc { |tcx| "checking that `{}` is well-formed", tcx.def_path_str(key) }
+        ensure_forwards_result_if_red
+    }
+
+    query enforce_impl_non_lifetime_params_are_constrained(key: LocalDefId) -> Result<(), ErrorGuaranteed> {
+        desc { |tcx| "checking that `{}`'s generics are constrained by the impl header", tcx.def_path_str(key) }
         ensure_forwards_result_if_red
     }
 
@@ -2355,7 +2357,7 @@ rustc_queries! {
     }
 
     /// Returns the Rust target features for the current target. These are not always the same as LLVM target features!
-    query rust_target_features(_: CrateNum) -> &'tcx UnordMap<String, rustc_target::target_features::StabilityComputed> {
+    query rust_target_features(_: CrateNum) -> &'tcx UnordMap<String, rustc_target::target_features::Stability> {
         arena_cache
         eval_always
         desc { "looking up Rust target features" }

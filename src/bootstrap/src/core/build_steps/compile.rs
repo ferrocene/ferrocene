@@ -94,7 +94,7 @@ impl Step for Std {
     const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.crate_or_deps("sysroot").path("library")
+        run.crate_or_deps("sysroot").path("library").alias("core")
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -1215,6 +1215,15 @@ pub fn rustc_cargo_env(
             rustc_llvm_env(builder, cargo, target)
         }
     }
+
+    // Build jemalloc on AArch64 with support for page sizes up to 64K
+    // See: https://github.com/rust-lang/rust/pull/135081
+    if builder.config.jemalloc
+        && target.starts_with("aarch64")
+        && env::var_os("JEMALLOC_SYS_WITH_LG_PAGE").is_none()
+    {
+        cargo.env("JEMALLOC_SYS_WITH_LG_PAGE", "16");
+    }
 }
 
 /// Pass down configuration from the LLVM build into the build of
@@ -1672,10 +1681,10 @@ impl Step for Sysroot {
             ];
             let ci_rustc_dir = builder.config.ci_rustc_dir();
             builder.cp_link_filtered(&ci_rustc_dir, &sysroot, &|path| {
-                if path.extension().map_or(true, |ext| !filtered_extensions.contains(&ext)) {
+                if path.extension().is_none_or(|ext| !filtered_extensions.contains(&ext)) {
                     return true;
                 }
-                if !path.parent().map_or(true, |p| p.ends_with(&suffix)) {
+                if !path.parent().is_none_or(|p| p.ends_with(&suffix)) {
                     return true;
                 }
                 if !filtered_files.iter().all(|f| f != path.file_name().unwrap()) {

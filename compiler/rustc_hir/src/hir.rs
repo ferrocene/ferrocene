@@ -7,7 +7,7 @@ use rustc_ast::token::CommentKind;
 use rustc_ast::util::parser::{AssocOp, ExprPrecedence};
 use rustc_ast::{
     self as ast, AttrId, AttrStyle, DelimArgs, FloatTy, InlineAsmOptions, InlineAsmTemplatePiece,
-    IntTy, Label, LitKind, MetaItemInner, MetaItemLit, TraitObjectSyntax, UintTy,
+    IntTy, Label, LitIntType, LitKind, MetaItemInner, MetaItemLit, TraitObjectSyntax, UintTy,
 };
 pub use rustc_ast::{
     BinOp, BinOpKind, BindingMode, BorrowKind, BoundConstness, BoundPolarity, ByRef, CaptureBy,
@@ -52,6 +52,13 @@ pub enum ParamName {
     /// Some user-given name like `T` or `'x`.
     Plain(Ident),
 
+    /// Indicates an illegal name was given and an error has been
+    /// reported (so we should squelch other derived errors).
+    ///
+    /// Occurs when, e.g., `'_` is used in the wrong place, or a
+    /// lifetime name is duplicated.
+    Error(Ident),
+
     /// Synthetic name generated when user elided a lifetime in an impl header.
     ///
     /// E.g., the lifetimes in cases like these:
@@ -67,18 +74,13 @@ pub enum ParamName {
     /// where `'f` is something like `Fresh(0)`. The indices are
     /// unique per impl, but not necessarily continuous.
     Fresh,
-
-    /// Indicates an illegal name was given and an error has been
-    /// reported (so we should squelch other derived errors). Occurs
-    /// when, e.g., `'_` is used in the wrong place.
-    Error,
 }
 
 impl ParamName {
     pub fn ident(&self) -> Ident {
         match *self {
-            ParamName::Plain(ident) => ident,
-            ParamName::Fresh | ParamName::Error => Ident::with_dummy_span(kw::UnderscoreLifetime),
+            ParamName::Plain(ident) | ParamName::Error(ident) => ident,
+            ParamName::Fresh => Ident::with_dummy_span(kw::UnderscoreLifetime),
         }
     }
 }
@@ -1384,8 +1386,8 @@ impl<'hir> Pat<'hir> {
 
         use PatKind::*;
         match self.kind {
-            Wild | Never | Lit(_) | Range(..) | Binding(.., None) | Path(_) | Err(_) => true,
-            Box(s) | Deref(s) | Ref(s, _) | Binding(.., Some(s)) => s.walk_short_(it),
+            Wild | Never | Expr(_) | Range(..) | Binding(.., None) | Path(_) | Err(_) => true,
+            Box(s) | Deref(s) | Ref(s, _) | Binding(.., Some(s)) | Guard(s, _) => s.walk_short_(it),
             Struct(_, fields, _) => fields.iter().all(|field| field.pat.walk_short_(it)),
             TupleStruct(_, s, _) | Tuple(s, _) | Or(s) => s.iter().all(|p| p.walk_short_(it)),
             Slice(before, slice, after) => {
@@ -1411,8 +1413,8 @@ impl<'hir> Pat<'hir> {
 
         use PatKind::*;
         match self.kind {
-            Wild | Never | Lit(_) | Range(..) | Binding(.., None) | Path(_) | Err(_) => {}
-            Box(s) | Deref(s) | Ref(s, _) | Binding(.., Some(s)) => s.walk_(it),
+            Wild | Never | Expr(_) | Range(..) | Binding(.., None) | Path(_) | Err(_) => {}
+            Box(s) | Deref(s) | Ref(s, _) | Binding(.., Some(s)) | Guard(s, _) => s.walk_(it),
             Struct(_, fields, _) => fields.iter().for_each(|field| field.pat.walk_(it)),
             TupleStruct(_, s, _) | Tuple(s, _) | Or(s) => s.iter().for_each(|p| p.walk_(it)),
             Slice(before, slice, after) => {
@@ -1518,6 +1520,26 @@ impl fmt::Debug for DotDotPos {
 }
 
 #[derive(Debug, Clone, Copy, HashStable_Generic)]
+pub struct PatExpr<'hir> {
+    pub hir_id: HirId,
+    pub span: Span,
+    pub kind: PatExprKind<'hir>,
+}
+
+#[derive(Debug, Clone, Copy, HashStable_Generic)]
+pub enum PatExprKind<'hir> {
+    Lit {
+        lit: &'hir Lit,
+        // FIXME: move this into `Lit` and handle negated literal expressions
+        // once instead of matching on unop neg expressions everywhere.
+        negated: bool,
+    },
+    ConstBlock(ConstBlock),
+    /// A path pattern for a unit struct/variant or a (maybe-associated) constant.
+    Path(QPath<'hir>),
+}
+
+#[derive(Debug, Clone, Copy, HashStable_Generic)]
 pub enum PatKind<'hir> {
     /// Represents a wildcard pattern (i.e., `_`).
     Wild,
@@ -1561,11 +1583,14 @@ pub enum PatKind<'hir> {
     /// A reference pattern (e.g., `&mut (a, b)`).
     Ref(&'hir Pat<'hir>, Mutability),
 
-    /// A literal.
-    Lit(&'hir Expr<'hir>),
+    /// A literal, const block or path.
+    Expr(&'hir PatExpr<'hir>),
+
+    /// A guard pattern (e.g., `x if guard(x)`).
+    Guard(&'hir Pat<'hir>, &'hir Expr<'hir>),
 
     /// A range pattern (e.g., `1..=2` or `1..2`).
-    Range(Option<&'hir Expr<'hir>>, Option<&'hir Expr<'hir>>, RangeEnd),
+    Range(Option<&'hir PatExpr<'hir>>, Option<&'hir PatExpr<'hir>>, RangeEnd),
 
     /// A slice pattern, `[before_0, ..., before_n, (slice, after_0, ..., after_n)?]`.
     ///
@@ -2067,6 +2092,18 @@ impl Expr<'_> {
             | ExprKind::DropTemps(..)
             | ExprKind::Err(_) => false,
         }
+    }
+
+    /// Check if expression is an integer literal that can be used
+    /// where `usize` is expected.
+    pub fn is_size_lit(&self) -> bool {
+        matches!(
+            self.kind,
+            ExprKind::Lit(Lit {
+                node: LitKind::Int(_, LitIntType::Unsuffixed | LitIntType::Unsigned(UintTy::Usize)),
+                ..
+            })
+        )
     }
 
     /// If `Self.kind` is `ExprKind::DropTemps(expr)`, drill down until we get a non-`DropTemps`
@@ -3385,7 +3422,7 @@ impl<'hir> FnRetTy<'hir> {
         }
     }
 
-    pub fn get_infer_ret_ty(&self) -> Option<&'hir Ty<'hir>> {
+    pub fn is_suggestable_infer_ty(&self) -> Option<&'hir Ty<'hir>> {
         if let Self::Return(ty) = self {
             if ty.is_suggestable_infer_ty() {
                 return Some(*ty);
@@ -3638,7 +3675,7 @@ impl<'hir> Item<'hir> {
             ItemKind::Const(ty, generics, body), (ty, generics, *body);
 
         expect_fn, (&FnSig<'hir>, &'hir Generics<'hir>, BodyId),
-            ItemKind::Fn(sig, generics, body), (sig, generics, *body);
+            ItemKind::Fn { sig, generics, body, .. }, (sig, generics, *body);
 
         expect_macro, (&ast::MacroDef, MacroKind), ItemKind::Macro(def, mk), (def, *mk);
 
@@ -3766,7 +3803,15 @@ pub enum ItemKind<'hir> {
     /// A `const` item.
     Const(&'hir Ty<'hir>, &'hir Generics<'hir>, BodyId),
     /// A function declaration.
-    Fn(FnSig<'hir>, &'hir Generics<'hir>, BodyId),
+    Fn {
+        sig: FnSig<'hir>,
+        generics: &'hir Generics<'hir>,
+        body: BodyId,
+        /// Whether this function actually has a body.
+        /// For functions without a body, `body` is synthesized (to avoid ICEs all over the
+        /// compiler), but that code should never be translated.
+        has_body: bool,
+    },
     /// A MBE macro definition (`macro_rules!` or `macro`).
     Macro(&'hir ast::MacroDef, MacroKind),
     /// A module.
@@ -3817,7 +3862,7 @@ pub struct Impl<'hir> {
 impl ItemKind<'_> {
     pub fn generics(&self) -> Option<&Generics<'_>> {
         Some(match *self {
-            ItemKind::Fn(_, ref generics, _)
+            ItemKind::Fn { ref generics, .. }
             | ItemKind::TyAlias(_, ref generics)
             | ItemKind::Const(_, ref generics, _)
             | ItemKind::Enum(_, ref generics)
@@ -3836,7 +3881,7 @@ impl ItemKind<'_> {
             ItemKind::Use(..) => "`use` import",
             ItemKind::Static(..) => "static item",
             ItemKind::Const(..) => "constant item",
-            ItemKind::Fn(..) => "function",
+            ItemKind::Fn { .. } => "function",
             ItemKind::Macro(..) => "macro",
             ItemKind::Mod(..) => "module",
             ItemKind::ForeignMod { .. } => "extern block",
@@ -4002,7 +4047,7 @@ impl<'hir> OwnerNode<'hir> {
         match self {
             OwnerNode::TraitItem(TraitItem { kind: TraitItemKind::Fn(fn_sig, _), .. })
             | OwnerNode::ImplItem(ImplItem { kind: ImplItemKind::Fn(fn_sig, _), .. })
-            | OwnerNode::Item(Item { kind: ItemKind::Fn(fn_sig, _, _), .. })
+            | OwnerNode::Item(Item { kind: ItemKind::Fn { sig: fn_sig, .. }, .. })
             | OwnerNode::ForeignItem(ForeignItem {
                 kind: ForeignItemKind::Fn(fn_sig, _, _), ..
             }) => Some(fn_sig),
@@ -4014,7 +4059,7 @@ impl<'hir> OwnerNode<'hir> {
         match self {
             OwnerNode::TraitItem(TraitItem { kind: TraitItemKind::Fn(fn_sig, _), .. })
             | OwnerNode::ImplItem(ImplItem { kind: ImplItemKind::Fn(fn_sig, _), .. })
-            | OwnerNode::Item(Item { kind: ItemKind::Fn(fn_sig, _, _), .. })
+            | OwnerNode::Item(Item { kind: ItemKind::Fn { sig: fn_sig, .. }, .. })
             | OwnerNode::ForeignItem(ForeignItem {
                 kind: ForeignItemKind::Fn(fn_sig, _, _), ..
             }) => Some(fn_sig.decl),
@@ -4028,7 +4073,7 @@ impl<'hir> OwnerNode<'hir> {
                 kind:
                     ItemKind::Static(_, _, body)
                     | ItemKind::Const(_, _, body)
-                    | ItemKind::Fn(_, _, body),
+                    | ItemKind::Fn { body, .. },
                 ..
             })
             | OwnerNode::TraitItem(TraitItem {
@@ -4131,6 +4176,10 @@ pub enum Node<'hir> {
     OpaqueTy(&'hir OpaqueTy<'hir>),
     Pat(&'hir Pat<'hir>),
     PatField(&'hir PatField<'hir>),
+    /// Needed as its own node with its own HirId for tracking
+    /// the unadjusted type of literals within patterns
+    /// (e.g. byte str literals not being of slice type).
+    PatExpr(&'hir PatExpr<'hir>),
     Arm(&'hir Arm<'hir>),
     Block(&'hir Block<'hir>),
     LetStmt(&'hir LetStmt<'hir>),
@@ -4187,6 +4236,7 @@ impl<'hir> Node<'hir> {
             | Node::Block(..)
             | Node::Ctor(..)
             | Node::Pat(..)
+            | Node::PatExpr(..)
             | Node::Arm(..)
             | Node::LetStmt(..)
             | Node::Crate(..)
@@ -4204,7 +4254,7 @@ impl<'hir> Node<'hir> {
         match self {
             Node::TraitItem(TraitItem { kind: TraitItemKind::Fn(fn_sig, _), .. })
             | Node::ImplItem(ImplItem { kind: ImplItemKind::Fn(fn_sig, _), .. })
-            | Node::Item(Item { kind: ItemKind::Fn(fn_sig, _, _), .. })
+            | Node::Item(Item { kind: ItemKind::Fn { sig: fn_sig, .. }, .. })
             | Node::ForeignItem(ForeignItem { kind: ForeignItemKind::Fn(fn_sig, _, _), .. }) => {
                 Some(fn_sig.decl)
             }
@@ -4234,7 +4284,7 @@ impl<'hir> Node<'hir> {
         match self {
             Node::TraitItem(TraitItem { kind: TraitItemKind::Fn(fn_sig, _), .. })
             | Node::ImplItem(ImplItem { kind: ImplItemKind::Fn(fn_sig, _), .. })
-            | Node::Item(Item { kind: ItemKind::Fn(fn_sig, _, _), .. })
+            | Node::Item(Item { kind: ItemKind::Fn { sig: fn_sig, .. }, .. })
             | Node::ForeignItem(ForeignItem { kind: ForeignItemKind::Fn(fn_sig, _, _), .. }) => {
                 Some(fn_sig)
             }
@@ -4279,7 +4329,7 @@ impl<'hir> Node<'hir> {
             Node::Item(Item {
                 owner_id,
                 kind:
-                    ItemKind::Const(_, _, body) | ItemKind::Static(.., body) | ItemKind::Fn(.., body),
+                    ItemKind::Const(_, _, body) | ItemKind::Static(.., body) | ItemKind::Fn { body, .. },
                 ..
             })
             | Node::TraitItem(TraitItem {
@@ -4336,7 +4386,7 @@ impl<'hir> Node<'hir> {
     pub fn fn_kind(self) -> Option<FnKind<'hir>> {
         match self {
             Node::Item(i) => match i.kind {
-                ItemKind::Fn(ref sig, ref generics, _) => {
+                ItemKind::Fn { sig, generics, .. } => {
                     Some(FnKind::ItemFn(i.ident, generics, sig.header))
                 }
                 _ => None,

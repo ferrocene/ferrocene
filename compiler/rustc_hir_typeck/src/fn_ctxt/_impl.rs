@@ -384,7 +384,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         code: traits::ObligationCauseCode<'tcx>,
         def_id: DefId,
     ) {
-        self.register_bound(ty, def_id, traits::ObligationCause::new(span, self.body_id, code));
+        self.register_bound(ty, def_id, self.cause(span, code));
     }
 
     pub(crate) fn require_type_is_sized(
@@ -410,12 +410,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         }
     }
 
-    pub(crate) fn require_type_has_static_alignment(
-        &self,
-        ty: Ty<'tcx>,
-        span: Span,
-        code: traits::ObligationCauseCode<'tcx>,
-    ) {
+    pub(crate) fn require_type_has_static_alignment(&self, ty: Ty<'tcx>, span: Span) {
         if !ty.references_error() {
             let tail = self.tcx.struct_tail_raw(
                 ty,
@@ -434,7 +429,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             } else {
                 // We can't be sure, let's required full `Sized`.
                 let lang_item = self.tcx.require_lang_item(LangItem::Sized, None);
-                self.require_type_meets(ty, span, code, lang_item);
+                self.require_type_meets(ty, span, ObligationCauseCode::Misc, lang_item);
             }
         }
     }
@@ -572,7 +567,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         code: traits::ObligationCauseCode<'tcx>,
     ) {
         // WF obligations never themselves fail, so no real need to give a detailed cause:
-        let cause = traits::ObligationCause::new(span, self.body_id, code);
+        let cause = self.cause(span, code);
         self.register_predicate(traits::Obligation::new(
             self.tcx,
             cause,
@@ -582,11 +577,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     }
 
     /// Registers obligations that all `args` are well-formed.
-    pub(crate) fn add_wf_bounds(&self, args: GenericArgsRef<'tcx>, expr: &hir::Expr<'_>) {
+    pub(crate) fn add_wf_bounds(&self, args: GenericArgsRef<'tcx>, span: Span) {
         for arg in args.iter().filter(|arg| {
             matches!(arg.unpack(), GenericArgKind::Type(..) | GenericArgKind::Const(..))
         }) {
-            self.register_wf_obligation(arg, expr.span, ObligationCauseCode::WellFormed(None));
+            self.register_wf_obligation(arg, span, ObligationCauseCode::WellFormed(None));
         }
     }
 
@@ -896,7 +891,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         self.tcx.hir().get_fn_id_for_return_block(blk_id).and_then(|item_id| {
             match self.tcx.hir_node(item_id) {
                 Node::Item(&hir::Item {
-                    kind: hir::ItemKind::Fn(ref sig, ..), owner_id, ..
+                    kind: hir::ItemKind::Fn { sig, .. }, owner_id, ..
                 }) => Some((owner_id.def_id, sig.decl)),
                 Node::TraitItem(&hir::TraitItem {
                     kind: hir::TraitItemKind::Fn(ref sig, ..),
@@ -925,7 +920,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         )) => {
                             let (sig, owner_id) = match self.tcx.parent_hir_node(hir_id) {
                                 Node::Item(&hir::Item {
-                                    kind: hir::ItemKind::Fn(ref sig, ..),
+                                    kind: hir::ItemKind::Fn { ref sig, .. },
                                     owner_id,
                                     ..
                                 }) => (sig, owner_id),
@@ -1044,6 +1039,15 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 def_id,
                 span,
             ),
+            Res::Err => {
+                return (
+                    Ty::new_error(
+                        tcx,
+                        tcx.dcx().span_delayed_bug(span, "could not resolve path {:?}"),
+                    ),
+                    res,
+                );
+            }
             _ => bug!("instantiate_value_path on {:?}", res),
         };
 
@@ -1426,9 +1430,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let bounds = self.instantiate_bounds(span, def_id, args);
 
         for obligation in traits::predicates_for_generics(
-            |idx, predicate_span| {
-                traits::ObligationCause::new(span, self.body_id, code(idx, predicate_span))
-            },
+            |idx, predicate_span| self.cause(span, code(idx, predicate_span)),
             param_env,
             bounds,
         ) {
@@ -1561,7 +1563,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         query_result: &Canonical<'tcx, QueryResponse<'tcx, Ty<'tcx>>>,
     ) -> InferResult<'tcx, Ty<'tcx>> {
         self.instantiate_query_response_and_region_obligations(
-            &traits::ObligationCause::misc(span, self.body_id),
+            &self.misc(span),
             self.param_env,
             original_values,
             query_result,

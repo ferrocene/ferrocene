@@ -570,6 +570,7 @@ symbols! {
         cfg_autodiff_fallback,
         cfg_boolean_literals,
         cfg_doctest,
+        cfg_emscripten_wasm_eh,
         cfg_eval,
         cfg_fmt_debug,
         cfg_hide,
@@ -823,6 +824,7 @@ symbols! {
         emit_enum_variant_arg,
         emit_struct,
         emit_struct_field,
+        emscripten_wasm_eh,
         enable,
         encode,
         end,
@@ -1696,7 +1698,6 @@ symbols! {
         rustc_as_ptr,
         rustc_attrs,
         rustc_autodiff,
-        rustc_box,
         rustc_builtin_macro,
         rustc_capture_analysis,
         rustc_clean,
@@ -2238,6 +2239,10 @@ symbols! {
         zmm_reg,
     }
 }
+
+/// Symbols for crates that are part of the stable standard library: `std`, `core`, `alloc`, and
+/// `proc_macro`.
+pub const STDLIB_STABLE_CRATES: &[Symbol] = &[sym::std, sym::core, sym::alloc, sym::proc_macro];
 
 #[derive(Copy, Clone, Eq, HashStable_Generic, Encodable, Decodable)]
 pub struct Ident {

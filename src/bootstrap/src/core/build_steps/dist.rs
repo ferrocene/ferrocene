@@ -47,7 +47,7 @@ fn should_build_extended_tool(builder: &Builder<'_>, tool: &str) -> bool {
     if !builder.config.extended {
         return false;
     }
-    builder.config.tools.as_ref().map_or(true, |tools| tools.contains(tool))
+    builder.config.tools.as_ref().is_none_or(|tools| tools.contains(tool))
 }
 
 #[derive(Debug, PartialOrd, Ord, Clone, Hash, PartialEq, Eq)]
@@ -415,7 +415,7 @@ impl Step for Rustc {
                 .config
                 .tools
                 .as_ref()
-                .map_or(true, |tools| tools.iter().any(|tool| tool == "rustdoc"))
+                .is_none_or(|tools| tools.iter().any(|tool| tool == "rustdoc"))
             {
                 let rustdoc = builder.rustdoc(compiler);
                 builder.install(&rustdoc, &image.join("bin"), 0o755);
@@ -1159,7 +1159,7 @@ impl Step for Rls {
         let compiler = self.compiler;
         let target = self.target;
 
-        let rls = builder.ensure(tool::Rls { compiler, target, extra_features: Vec::new() });
+        let rls = builder.ensure(tool::Rls { compiler, target });
 
         let mut tarball = Tarball::new(builder, "rls", &target.triple);
         tarball.set_overlay(OverlayKind::Rls);
@@ -1246,9 +1246,8 @@ impl Step for Clippy {
         // Prepare the image directory
         // We expect clippy to build, because we've exited this step above if tool
         // state for clippy isn't testing.
-        let clippy = builder.ensure(tool::Clippy { compiler, target, extra_features: Vec::new() });
-        let cargoclippy =
-            builder.ensure(tool::CargoClippy { compiler, target, extra_features: Vec::new() });
+        let clippy = builder.ensure(tool::Clippy { compiler, target });
+        let cargoclippy = builder.ensure(tool::CargoClippy { compiler, target });
 
         let mut tarball = Tarball::new(builder, "clippy", &target.triple);
         tarball.set_overlay(OverlayKind::Clippy);
@@ -1301,9 +1300,8 @@ impl Step for Miri {
         let compiler = self.compiler;
         let target = self.target;
 
-        let miri = builder.ensure(tool::Miri { compiler, target, extra_features: Vec::new() });
-        let cargomiri =
-            builder.ensure(tool::CargoMiri { compiler, target, extra_features: Vec::new() });
+        let miri = builder.ensure(tool::Miri { compiler, target });
+        let cargomiri = builder.ensure(tool::CargoMiri { compiler, target });
 
         let mut tarball = Tarball::new(builder, "miri", &target.triple);
         tarball.set_overlay(OverlayKind::Miri);
@@ -1434,10 +1432,8 @@ impl Step for Rustfmt {
         let compiler = self.compiler;
         let target = self.target;
 
-        let rustfmt =
-            builder.ensure(tool::Rustfmt { compiler, target, extra_features: Vec::new() });
-        let cargofmt =
-            builder.ensure(tool::Cargofmt { compiler, target, extra_features: Vec::new() });
+        let rustfmt = builder.ensure(tool::Rustfmt { compiler, target });
+        let cargofmt = builder.ensure(tool::Cargofmt { compiler, target });
         let mut tarball = Tarball::new(builder, "rustfmt", &target.triple);
         tarball.set_overlay(OverlayKind::Rustfmt);
         tarball.is_preview(true);
@@ -1610,15 +1606,9 @@ impl Step for Extended {
             prepare("cargo");
             prepare("rust-std");
             prepare("rust-analysis");
-
-            for tool in &[
-                "clippy",
-                "rustfmt",
-                "rust-analyzer",
-                "rust-docs",
-                "miri",
-                "rustc-codegen-cranelift",
-            ] {
+            prepare("clippy");
+            prepare("rust-analyzer");
+            for tool in &["rust-docs", "miri", "rustc-codegen-cranelift"] {
                 if built_tools.contains(tool) {
                     prepare(tool);
                 }
@@ -1658,8 +1648,6 @@ impl Step for Extended {
                     "rust-analyzer-preview".to_string()
                 } else if name == "clippy" {
                     "clippy-preview".to_string()
-                } else if name == "rustfmt" {
-                    "rustfmt-preview".to_string()
                 } else if name == "miri" {
                     "miri-preview".to_string()
                 } else if name == "rustc-codegen-cranelift" {
@@ -1679,7 +1667,7 @@ impl Step for Extended {
             prepare("cargo");
             prepare("rust-analysis");
             prepare("rust-std");
-            for tool in &["clippy", "rustfmt", "rust-analyzer", "rust-docs", "miri"] {
+            for tool in &["clippy", "rust-analyzer", "rust-docs", "miri"] {
                 if built_tools.contains(tool) {
                     prepare(tool);
                 }
@@ -1797,24 +1785,6 @@ impl Step for Extended {
                     .arg(etc.join("msi/remove-duplicates.xsl"))
                     .run(builder);
             }
-            if built_tools.contains("rustfmt") {
-                command(&heat)
-                    .current_dir(&exe)
-                    .arg("dir")
-                    .arg("rustfmt")
-                    .args(heat_flags)
-                    .arg("-cg")
-                    .arg("RustFmtGroup")
-                    .arg("-dr")
-                    .arg("RustFmt")
-                    .arg("-var")
-                    .arg("var.RustFmtDir")
-                    .arg("-out")
-                    .arg(exe.join("RustFmtGroup.wxs"))
-                    .arg("-t")
-                    .arg(etc.join("msi/remove-duplicates.xsl"))
-                    .run(builder);
-            }
             if built_tools.contains("miri") {
                 command(&heat)
                     .current_dir(&exe)
@@ -1886,9 +1856,6 @@ impl Step for Extended {
                 if built_tools.contains("clippy") {
                     cmd.arg("-dClippyDir=clippy");
                 }
-                if built_tools.contains("rustfmt") {
-                    cmd.arg("-dRustFmtDir=rustfmt");
-                }
                 if built_tools.contains("rust-docs") {
                     cmd.arg("-dDocsDir=rust-docs");
                 }
@@ -1914,9 +1881,6 @@ impl Step for Extended {
             candle("StdGroup.wxs".as_ref());
             if built_tools.contains("clippy") {
                 candle("ClippyGroup.wxs".as_ref());
-            }
-            if built_tools.contains("rustfmt") {
-                candle("RustFmtGroup.wxs".as_ref());
             }
             if built_tools.contains("miri") {
                 candle("MiriGroup.wxs".as_ref());
@@ -1955,9 +1919,6 @@ impl Step for Extended {
 
             if built_tools.contains("clippy") {
                 cmd.arg("ClippyGroup.wixobj");
-            }
-            if built_tools.contains("rustfmt") {
-                cmd.arg("RustFmtGroup.wixobj");
             }
             if built_tools.contains("miri") {
                 cmd.arg("MiriGroup.wixobj");

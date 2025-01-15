@@ -99,7 +99,7 @@ pub enum ModuleFlagMergeBehavior {
 /// LLVM CallingConv::ID. Should we wrap this?
 ///
 /// See <https://github.com/llvm/llvm-project/blob/main/llvm/include/llvm/IR/CallingConv.h>
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug, TryFromU32)]
 #[repr(C)]
 pub enum CallConv {
     CCallConv = 0,
@@ -2008,6 +2008,12 @@ unsafe extern "C" {
         AlignInBits: u32,
     ) -> &'a DIDerivedType;
 
+    pub fn LLVMRustDIBuilderCreateQualifiedType<'a>(
+        Builder: &DIBuilder<'a>,
+        Tag: c_uint,
+        Type: &'a DIType,
+    ) -> &'a DIDerivedType;
+
     pub fn LLVMRustDIBuilderCreateLexicalBlock<'a>(
         Builder: &DIBuilder<'a>,
         Scope: &'a DIScope,
@@ -2171,9 +2177,6 @@ unsafe extern "C" {
         Location: &'a DILocation,
         BD: c_uint,
     ) -> Option<&'a DILocation>;
-    pub fn LLVMRustDIBuilderCreateOpDeref() -> u64;
-    pub fn LLVMRustDIBuilderCreateOpPlusUconst() -> u64;
-    pub fn LLVMRustDIBuilderCreateOpLLVMFragment() -> u64;
 
     pub fn LLVMRustWriteTypeToString(Type: &Type, s: &RustString);
     pub fn LLVMRustWriteValueToString(value_ref: &Value, s: &RustString);
@@ -2371,7 +2374,7 @@ unsafe extern "C" {
         Data: &ThinLTOData,
         Module: &Module,
         Target: &TargetMachine,
-    ) -> bool;
+    );
     pub fn LLVMRustPrepareThinLTOResolveWeak(Data: &ThinLTOData, Module: &Module) -> bool;
     pub fn LLVMRustPrepareThinLTOInternalize(Data: &ThinLTOData, Module: &Module) -> bool;
     pub fn LLVMRustPrepareThinLTOImport(

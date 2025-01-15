@@ -195,9 +195,9 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "sphinx" },
-    { name = "sphinx-needs" },
-    { name = "tomli" },
+    { name = "sphinx", specifier = "~=8.0" },
+    { name = "sphinx-needs", specifier = "~=4.2" },
+    { name = "tomli", specifier = "~=2.2" },
 ]
 
 [[package]]

@@ -61,7 +61,6 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume:  ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-          role-session-name: FerroceneFull${{ github.run_id }}
 
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/

@@ -36,6 +36,9 @@ EXCEPTIONS = {
     "<<<<<<< HEAD //~ ERROR encountered diff marker",
     # Introduced in https://github.com/rust-lang/rust/pull/116712.
     ">>>>>>> 7a4f13c blah blah blah",
+    # Example inside rust-dev-guide subtree
+    "<<<<<<< HEAD\n Original code",
+    ">>>>>>> 8fbf656... Commit fixes 12345",
 }
 
 
@@ -94,8 +97,10 @@ class ConflictMarker:
     end_line: int
 
     def repr(self):
-        return f"{self.file}: conflict between lines {self.start_line} " \
-               f"and {self.end_line}"
+        return (
+            f"{self.file}: conflict between lines {self.start_line} "
+            f"and {self.end_line}"
+        )
 
 
 @dataclass

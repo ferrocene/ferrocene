@@ -105,12 +105,8 @@
     - [x86_64-unknown-linux-none.md](platform-support/x86_64-unknown-linux-none.md)
     - [x86_64-unknown-none](platform-support/x86_64-unknown-none.md)
     - [xtensa-\*-none-elf](platform-support/xtensa.md)
-<<<<<<< HEAD
-    - [*-nuttx-\*](platform-support/nuttx.md)
-    - [i386-lynx-lynxos178](platform-support/i386-lynx-lynxos178.md)
-=======
     - [\*-nuttx-\*](platform-support/nuttx.md)
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    - [i386-lynx-lynxos178](platform-support/i386-lynx-lynxos178.md)
 - [Targets](targets/index.md)
     - [Built-in Targets](targets/built-in.md)
     - [Custom Targets](targets/custom.md)

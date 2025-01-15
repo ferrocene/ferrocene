@@ -37,7 +37,6 @@ EXCEPTIONS = {
     # Introduced in https://github.com/rust-lang/rust/pull/116712.
     ">>>>>>> 7a4f13c blah blah blah",
     # Example inside rust-dev-guide subtree
-    "<<<<<<< HEAD\n Original code",
     ">>>>>>> 8fbf656... Commit fixes 12345",
 }
 

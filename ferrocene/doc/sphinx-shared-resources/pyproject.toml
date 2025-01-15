@@ -5,7 +5,11 @@
 name = "ferrocene-sphinx-shared-resources"
 version = "0.0.0"
 requires-python = ">=3.10"
-dependencies = ["sphinx", "sphinx-needs", "tomli"]
+dependencies = [
+    "sphinx ~= 8.0",
+    "sphinx-needs ~= 4.2",
+    "tomli ~= 2.2",
+]
 
 [project.entry-points."sphinx.builders"]
 ferrocene-intersphinx = "ferrocene_intersphinx_builder"

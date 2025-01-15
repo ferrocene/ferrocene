@@ -15,6 +15,7 @@ from dataclasses import dataclass
 import os
 import sys
 import generate_pr_body
+import tempfile
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "common"))
 
@@ -25,6 +26,11 @@ class PullUpstreamPR(AutomatedPR):
     def __init__(self, upstream_branch, base_branch):
         self._upstream_branch = upstream_branch
         self._base_branch = base_branch
+
+        # The pull.sh script records warnings that should be displayed to the user. They will be
+        # stored by the script in this file, which we can then read.
+        self._warnings_file = tempfile.NamedTemporaryFile(mode="w", delete_on_close=False)
+
         super().__init__()
 
     def run(self):
@@ -37,6 +43,10 @@ class PullUpstreamPR(AutomatedPR):
                 self._upstream_branch,
                 self._base_branch,
             ],
+            env={
+                **os.environ,
+                "PULL_WARNINGS_FILE": self._warnings_file.name,
+            },
             check=False,
         )
         if res.returncode == 0:
@@ -57,14 +67,20 @@ class PullUpstreamPR(AutomatedPR):
         return {"automation", "backport:never"}
 
     def pr_body(self, branch_name):
-        changes = generate_pr_body.render_changes(
-            self.origin, self.base_branch(), branch_name
-        )
-        return f"""
-This PR pulls the following changes from the upstream repository:
+        message = ""
 
-{changes}
-"""
+        warnings = self._warnings_file.read().strip().split("\n")
+        if warnings:
+            message += ":warning: The automation reported these warnings: :warning:\n\n"
+            for warning in warnings:
+                message += f"* {warning}"
+            message += "\n"
+
+        message += "This PR pulls the following changes from the upstream repository:\n\n"
+        message += generate_pr_body.render_changes(
+            self.origin, self.base_branch(), branch_name, warnings
+        )
+        return message
 
     def error_issue_title(self):
         return f"Failed to pull from upstream `{self._upstream_branch}`"

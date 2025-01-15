@@ -38,9 +38,13 @@ complete -c x.py -n "__fish_x.py_needs_command" -l keep-stage -d 'stage(s) to ke
 complete -c x.py -n "__fish_x.py_needs_command" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_needs_command" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_needs_command" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_needs_command" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_needs_command" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_needs_command" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_needs_command" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_needs_command" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_needs_command" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_needs_command" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_needs_command" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -89,9 +93,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand build" -l keep-stage -d 'stage
 complete -c x.py -n "__fish_x.py_using_subcommand build" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand build" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand build" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand build" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand build" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand build" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand build" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand build" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand build" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand build" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand build" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -122,9 +130,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand check" -l keep-stage -d 'stage
 complete -c x.py -n "__fish_x.py_using_subcommand check" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand check" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand check" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand check" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand check" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand check" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand check" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand check" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand check" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand check" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand check" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -160,9 +172,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l keep-stage -d 'stag
 complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand clippy" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -196,9 +212,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand fix" -l keep-stage -d 'stage(s
 complete -c x.py -n "__fish_x.py_using_subcommand fix" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand fix" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand fix" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand fix" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand fix" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand fix" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand fix" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand fix" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand fix" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand fix" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand fix" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -229,9 +249,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l keep-stage -d 'stage(s
 complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand fmt" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -264,9 +288,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand doc" -l keep-stage -d 'stage(s
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand doc" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand doc" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand doc" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand doc" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -308,9 +336,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand test" -l keep-stage -d 'stage(
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand test" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand test" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand test" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand test" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand test" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -352,9 +384,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand miri" -l keep-stage -d 'stage(
 complete -c x.py -n "__fish_x.py_using_subcommand miri" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand miri" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand miri" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand miri" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand miri" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand miri" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand miri" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand miri" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand miri" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand miri" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand miri" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -389,9 +425,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand bench" -l keep-stage -d 'stage
 complete -c x.py -n "__fish_x.py_using_subcommand bench" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand bench" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand bench" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand bench" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand bench" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand bench" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand bench" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand bench" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand bench" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand bench" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand bench" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -422,9 +462,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand clean" -l keep-stage -d 'stage
 complete -c x.py -n "__fish_x.py_using_subcommand clean" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand clean" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand clean" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand clean" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand clean" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand clean" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand clean" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand clean" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand clean" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand clean" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand clean" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -456,9 +500,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand dist" -l keep-stage -d 'stage(
 complete -c x.py -n "__fish_x.py_using_subcommand dist" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand dist" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand dist" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand dist" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand dist" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand dist" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand dist" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand dist" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand dist" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand dist" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand dist" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -489,9 +537,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand install" -l keep-stage -d 'sta
 complete -c x.py -n "__fish_x.py_using_subcommand install" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand install" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand install" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand install" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand install" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand install" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand install" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand install" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand install" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand install" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand install" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -523,9 +575,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand run" -l keep-stage -d 'stage(s
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand run" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand run" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand run" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand run" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand run" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -557,9 +613,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand setup" -l keep-stage -d 'stage
 complete -c x.py -n "__fish_x.py_using_subcommand setup" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand setup" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand setup" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand setup" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand setup" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand setup" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand setup" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand setup" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand setup" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand setup" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand setup" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -590,9 +650,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l keep-stage -d 'sta
 complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand suggest" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -625,9 +689,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l keep-stage -d 'stag
 complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand vendor" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -659,9 +727,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand perf" -l keep-stage -d 'stage(
 complete -c x.py -n "__fish_x.py_using_subcommand perf" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand perf" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand perf" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand perf" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand perf" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand perf" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand perf" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand perf" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand perf" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand perf" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand perf" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -692,9 +764,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand sign" -l keep-stage -d 'stage(
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand sign" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand sign" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
+warn\t''
+default\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand sign" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand sign" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
+never\t''
+auto\t''"
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F

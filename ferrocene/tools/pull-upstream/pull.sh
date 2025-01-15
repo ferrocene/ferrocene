@@ -36,6 +36,21 @@ excluded_files() {
         | uniq
 }
 
+automation_warning() {
+    message="$@"
+
+    echo
+    echo '/!\' "Automation warning:" '/!\'
+    echo "${message}"
+    echo
+
+    # When running as part of the automation, the warnings are stored in a file instead of being
+    # printed to stdout. That way the automation can include them in the PR body.
+    if [[ -n "${PULL_WARNINGS_FILE+x}" ]]; then
+        echo "${message}" >> "${PULL_WARNING_FILE}"
+    fi
+}
+
 if [[ $# -lt 1 ]] || [[ $# -gt 3 ]]; then
     echo "usage: $0 <upstream-branch> [base-branch] [upstream-commit]"
     exit 1
@@ -85,8 +100,9 @@ if [[ "${upstream_commit}" = "FETCH_HEAD" ]]; then
         # we revert the commit back to FETCH_HEAD.
         upstream_commit="FETCH_HEAD"
     elif [[ "${upstream_commit}" != "${fetch_head}" ]]; then
-        echo "pull-upstream: pulling at most ${MAX_MERGES_PER_PR}, even though more commits are available"
         partial_pull=yes
+
+        automation_warning "Only the first ${MAX_MERGES_PER_PR} commits are included in this pull. You should run the automation again after this PR is merged."
     fi
 fi
 
@@ -209,10 +225,7 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
         echo "pull-upstream: resolve the conflicts manually and then run \`git merge --continue\`."
         exit 1
     else
-        echo
-        echo "pull-upstream: there are unresolved merge conflicts"
-        echo "pull-upstream: committing with merge conflict markers in the source"
-        echo
+        automation_warning "There are merge conflicts in this PR. Merge conflict markers have been committed."
 
         # We do a `git submodule update` ahead of time to ensure the wrong
         # submodule commits are not accidentally added.
@@ -294,7 +307,7 @@ if ./x.py run generate-completions >/dev/null; then
         git commit -m "update ${GENERATED_COMPLETIONS_DIR}"
     fi
 else
-    echo "pull-upstream: skipped checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated, due to bootstrap not compiling"
+    automation_warning "The automation couldn't regenerate the x.py completions. Please run \`./x run generate-completions\` after fixing the merge conflicts."
 fi
 
 git branch -D "${TEMP_BRANCH}"

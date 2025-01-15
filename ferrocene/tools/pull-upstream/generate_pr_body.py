@@ -96,14 +96,6 @@ def render_changes(origin, base_branch, new_branch):
         if last not in commits:
             return "**Nothing**"
 
-    merge_message = commits[last].message
-    if merge_message == "pull new changes from upstream (partial)":
-        partial_pull = True
-    elif merge_message == "pull new changes from upstream":
-        partial_pull = False
-    else:
-        raise RuntimeError(f"unsupported merge commit message: {merge_message}")
-
     # Parse the commit graph and generate the list of changes
     changes = ""
     cursor = commits[last].merge
@@ -126,11 +118,6 @@ def render_changes(origin, base_branch, new_branch):
                 if rollup_pr is None:
                     break
                 changes += f"  * {linker.link(UPSTREAM_REPO, rollup_pr)}\n"
-
-    if partial_pull:
-        changes += "\n"
-        changes += ":warning: Not all changes were pulled, as there were too many "
-        changes += "PRs to pull. Run the automation again to pull the rest.\n"
 
     return changes
 

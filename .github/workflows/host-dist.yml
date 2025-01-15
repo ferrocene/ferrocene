@@ -52,6 +52,7 @@ jobs:
       ARTIFACT_USAGE: usage-dist-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
+      AWS_DEFAULT_REGION: eu-central-1
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
       artifact-usage: ${{ env.ARTIFACT }}-usage
@@ -113,6 +114,7 @@ jobs:
       ARTIFACT_USAGE: usage-tools-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
+      AWS_DEFAULT_REGION: eu-central-1
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
       artifact-usage: ${{ env.ARTIFACT_USAGE }}

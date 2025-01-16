@@ -623,7 +623,7 @@ A :t:`byte string literal` is a :t:`literal` that consists of multiple
 :s:`[AsciiCharacter]s`.
 
 :dp:`fls_Xd6LnfzMb7t7`
-The character sequence 0x0D 0xCA (carriage return, new line) is replaced by 0xCA
+The character sequence 0x0D 0x0A (carriage return, new line) is replaced by 0x0A
 (new line) inside of a :t:`byte string literal`.
 
 .. _fls_msbaxfC09VkK:
@@ -723,7 +723,7 @@ A :t:`c string literal` is a :t:`literal` that consists of multiple characters
 with an implicit 0x00 byte appended to it.
 
 :dp:`fls_XJprzaEn82Xs`
-The character sequence 0x0D 0xCA (carriage return, new line) is replaced by 0xCA
+The character sequence 0x0D 0x0A (carriage return, new line) is replaced by 0x0A
 (new line) inside of a :t:`c string literal`.
 
 .. _fls_p090c5oTnElW:
@@ -1158,7 +1158,7 @@ String Literals
 A :t:`string literal` is a :t:`literal` that consists of multiple characters.
 
 :dp:`fls_NyiCpU2tzJlQ`
-The character sequence 0x0D 0xCA (carriage return, new line) is replaced by 0xCA
+The character sequence 0x0D 0x0A (carriage return, new line) is replaced by 0x0A
 (new line) inside of a :t:`string literal`.
 
 .. _fls_hucd52suu6it:
@@ -1535,6 +1535,7 @@ Weak Keywords
        $$macro_rules$$
      | $$'static$$
      | $$union$$
+     | $$safe$$
 
 .. rubric:: Legality Rules
 
@@ -1553,4 +1554,7 @@ Word ``'static`` acts as a :t:`keyword` only when used in the context of a
 :dp:`fls_r9fhuiq1ys1p`
 Word ``union`` acts as a :t:`keyword` only when used in the context of a
 :s:`UnionDeclaration`.
+
+:dp:`fls_g0JEluWqBpNc`
+Word ``safe`` acts as a :t:`keyword` only when used as a qualifier of :s:`Function` or :s:`Static` in the context of a :s:`ExternalBlock`.
 

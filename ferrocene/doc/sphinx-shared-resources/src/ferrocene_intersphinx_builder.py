@@ -1,24 +1,14 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-# This module adds some helpers needed to integrate Ferrocene's build system
-# with InterSphinx. More specifically, the extension:
-#
-# - Defines the "ferrocene-intersphinx" Sphinx builder, which only produces the
-#   objects.inv file required by InterSphinx. This is used to gather all the
-#   inventories for all of our documentation before actually building anything,
-#   as we have circular references between documents.
-#
-# - Defines the "ferrocene_intersphinx_mappings" configuration, which this
-#   extension deserializes from JSON and then adds to the intersphinx_mapping
-#   configuration. This is needed because the format of intersphinx_mapping is
-#   too complex to be provided with the -D flag.
+# This extension adds the "ferrocene-intersphinx" Sphinx builder, which only produces the
+# objects.inv file required by intersphinx. This is used by our build system to gather all the
+# inventories for all of our documentation before actually building anything, as we have circular
+# references between documents.
 
 from sphinx.builders import Builder
 from sphinx.builders.html import StandaloneHTMLBuilder
-import json
 import sphinx
-import sphinx.ext.intersphinx
 
 
 class IntersphinxBuilder(Builder):
@@ -72,21 +62,11 @@ class IntersphinxBuilder(Builder):
         return self.standalone_html_builder.get_target_uri(docname, typ)
 
 
-def inject_intersphinx_mappings(app, config):
-    if config.ferrocene_intersphinx_mappings is not None:
-        for inventory in json.loads(config.ferrocene_intersphinx_mappings):
-            config.intersphinx_mapping[inventory["name"]] = (
-                inventory["html_root"],
-                inventory["inventory"],
-            )
-
-
 def setup(app):
-    # Automatically enable the sphinx.ext.intersphinx extension without
-    # requiring users to configure it in their conf.py.
-    sphinx.ext.intersphinx.setup(app)
-
     app.add_builder(IntersphinxBuilder)
 
-    app.add_config_value("ferrocene_intersphinx_mappings", None, "env", [str])
-    app.connect("config-inited", inject_intersphinx_mappings, priority=1)
+    return {
+        "version": "0",
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }

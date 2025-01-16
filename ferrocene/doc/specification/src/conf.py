@@ -7,7 +7,7 @@ import os
 import sys
 
 sys.path.append(os.path.abspath("../exts"))
-sys.path.append(os.path.abspath("../shared/exts"))
+#sys.path.append(os.path.abspath("../shared/exts"))
 
 
 # -- Project information -----------------------------------------------------
@@ -46,7 +46,7 @@ ferrocene_id = "FLS"
 #
 
 html_theme = "ferrocene"
-html_theme_path = ["../shared/themes"]
+#html_theme_path = ["../shared/themes"]
 
 html_theme_options = {
     "license": "MIT or Apache 2.0",

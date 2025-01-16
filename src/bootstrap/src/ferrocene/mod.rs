@@ -19,6 +19,7 @@ use std::process::Command;
 use crate::builder::Builder;
 use crate::core::config::{Config, TargetSelection};
 use crate::t;
+use crate::utils::exec::BootstrapCommand;
 
 /// Helper function used to download files from S3. This is used to be able to download artifacts
 /// from our buckets for download-ci-llvm and download-rustc.
@@ -129,4 +130,29 @@ fn ferrocene_channel(builder: &Builder<'_>, ferrocene_version: &str) -> String {
             "error: unsupported channel configuration: rust '{rust}' and ferrocene '{ferrocene}'"
         ),
     }
+}
+
+fn uv_command(builder: &Builder<'_>) -> BootstrapCommand {
+    let uv = builder.config.uv.as_ref().expect("uv is required");
+    let python = builder.config.python.as_ref().expect("python is required");
+
+    let mut command = BootstrapCommand::new(&uv);
+
+    // Prevent uv from managing its own Python version. Instead, let's be consistent with the rest
+    // of bootstrap and use the explicit `build.python` in `config.toml` (or the default one).
+    command
+        .env("UV_PYTHON", &python)
+        .env("UV_PYTHON_PREFERENCE", "only-system")
+        .env("UV_PYTHON_DOWNLOADS", "never");
+
+    // Handle vendored dependencies.
+    if builder.config.vendor {
+        command
+            .env("UV_OFFLINE", "1")
+            // uv doesn't have a native way to vendor dependencies. To work around that, our vendor
+            // command populates the uv cache, and we reuse it here.
+            .env("UV_CACHE_DIR", builder.src.join("vendor").join("uv"));
+    }
+
+    command
 }

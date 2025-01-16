@@ -14,6 +14,9 @@ installed:
 
 * ``Python 3``, needed for the entry point of Rust’s build system.
 
+* ``uv``, to manage the environment used to build the documentation. `Installation
+  instructions. <https://docs.astral.sh/uv/getting-started/installation/>`_
+
 * ``AWS CLI v2``, version **2.9.0 or greater**, needed to interact with our AWS
   account. Note that most Linux distributions only include version 1 of the AWS
   CLI, while we explicitly require version 2.

@@ -15,6 +15,7 @@ use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
+use crate::ferrocene::uv_command;
 use crate::t;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
 
@@ -125,6 +126,7 @@ impl Step for SourceTarball {
             "src/tools/rust-analyzer/Cargo.toml",
             "src/tools/rustc-perf/site/Cargo.toml",
         ];
+        const UV_PROJECTS: &[&str] = &["ferrocene/doc"];
 
         let mut subsetter = Subsetter::new(builder, "ferrocene-src", "");
 
@@ -162,6 +164,29 @@ impl Step for SourceTarball {
             let config = crate::output(&mut vendor);
             builder.create_dir(&dest_dir.join(".cargo"));
             builder.create(&dest_dir.join(".cargo").join("config.toml"), &config);
+        }
+
+        // Vendor Python dependencies through uv
+        //
+        // uv doesn't currently have a command to create a vendor directory. Instead, it has a cache
+        // directory it pulls dependencies from. We can thus vendor the cache directory, and install
+        // the project in a throwaway virtual environment.
+        let uv_cache_dir = dest_dir.join("vendor").join("uv");
+        for project in UV_PROJECTS {
+            let venv = builder.tempdir().join("vendor-venvs");
+            if venv.exists() {
+                builder.remove_dir(&venv);
+            }
+
+            builder.info(&format!("vendoring uv project {project}"));
+            uv_command(builder)
+                .arg("sync")
+                .arg("--locked")
+                .arg("--project")
+                .arg(builder.src.join(project))
+                .env("UV_CACHE_DIR", &uv_cache_dir)
+                .env("UV_PROJECT_ENVIRONMENT", venv)
+                .run(&builder);
         }
 
         drop(generic_tarball);

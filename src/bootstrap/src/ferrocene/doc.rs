@@ -10,6 +10,7 @@ use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
+use crate::ferrocene::uv_command;
 use crate::utils::exec::BootstrapCommand;
 
 pub(crate) trait IsSphinxBook {
@@ -78,40 +79,31 @@ impl Step for SphinxVirtualEnv {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let venv = builder.out.join(self.target.triple).join("ferrocene").join("sphinx-venv");
-        let shared_resources =
-            builder.src.join("ferrocene").join("doc").join("sphinx-shared-resources");
-        let requirements = shared_resources.join("requirements.txt");
-        let installed_requirements = venv.join("installed-requirements.txt");
+        let uv_project = builder.src.join("ferrocene").join("doc");
 
-        // Avoid rebuilding the venv if it's up to date.
-        if installed_requirements.is_file() {
-            if builder.read(&requirements) == builder.read(&installed_requirements) {
-                return VirtualEnv { path: venv };
-            }
+        // Before the switch to uv, we were tracking which dependencies were installed using a text
+        // file stored inside of the environment. Remove the file if present, so that checking out
+        // an older commit of Ferrocene with the same build directory will cause the old code to
+        // re-create the virtual environment.
+        let old_installed_reqs = venv.join("installed-requirements.txt");
+        if old_installed_reqs.is_file() {
+            builder.remove(&old_installed_reqs);
         }
 
-        if venv.is_dir() {
-            builder.remove_dir(&venv);
-        }
-        builder.info("Installing dependencies for building Sphinx documentation");
-        BootstrapCommand::new(
-            builder
-                .config
-                .python
-                .as_ref()
-                .expect("Python is required to build Sphinx documentation"),
-        )
-        .args(&["-m", "venv"])
-        .arg(&venv)
-        .run(builder);
-        let venv = VirtualEnv { path: venv };
-        BootstrapCommand::from(venv.cmd("pip"))
-            .args(&["install", "--require-hashes", "-r"])
-            .arg(&requirements)
+        // Installing with uv (especially in the noop variant) is so fast that we can do it every
+        // time without checking whether we already installed stuff.
+        builder.info("Updating the Sphinx virtual environment");
+        uv_command(builder)
+            .arg("sync")
+            .arg("--project")
+            .arg(&uv_project)
+            // Strictly use the lockfile of the project, and don't try to update it.
+            .arg("--locked")
+            // Use our own custom path for the virtual environment.
+            .env("UV_PROJECT_ENVIRONMENT", &venv)
             .run(builder);
-        builder.copy_link(&requirements, &installed_requirements);
 
-        venv
+        VirtualEnv { path: venv }
     }
 }
 
@@ -162,8 +154,6 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
                     format!("{}-doctrees-objectsinv", self.name)
                 }
             });
-        let shared_resources =
-            builder.src.join("ferrocene").join("doc").join("sphinx-shared-resources");
         let substitutions =
             builder.src.join("ferrocene").join("doc").join("sphinx-substitutions.toml");
         let target_names = builder.src.join("ferrocene").join("doc").join("target-names.toml");
@@ -212,12 +202,6 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             // Store doctrees outside the output directory:
             .arg("-d")
             .arg(relative_path(&src, &doctrees))
-            // Load the theme from the Sphinx shared resources:
-            .arg("-D")
-            .arg(path_define(
-                "html_theme_path",
-                &relative_path(&src, &shared_resources.join("themes")),
-            ))
             // Include the breadcrumbs
             .arg("-D")
             .arg(path_define(
@@ -246,9 +230,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             .arg(format!(
                 "rust_version={}",
                 fs::read_to_string(&builder.src.join("src").join("version")).unwrap().trim(),
-            ))
-            // Load extensions from the shared resources as well:
-            .env("PYTHONPATH", relative_path(&src, &shared_resources.join("exts")));
+            ));
 
         if builder.config.cmd.fresh() {
             // The `-E` flag forces Sphinx to ignore any saved environment and build everything

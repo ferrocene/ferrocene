@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+[project]
+name = "ferrocene-docs"
+version = "0.0.0"
+requires-python = ">= 3.10"
+dependencies = [
+    "sphinx ~= 8.0",
+    "sphinx-autobuild >= 0", # Doesn't use semver
+    "tomli ~= 2.2",
+    "myst_parser ~= 4.0",
+    "pyyaml ~= 6.0",
+    "semver ~= 3.0",
+
+    # Internal dependencies:
+    "ferrocene-sphinx-shared-resources",
+]
+
+[tool.uv.sources]
+ferrocene-sphinx-shared-resources = { workspace = true }
+
+[tool.uv.workspace]
+members = ["sphinx-shared-resources/"]

@@ -199,6 +199,13 @@ than building it.
         .map(|p| cmd_finder.must_have(p))
         .or_else(|| cmd_finder.maybe_have("reuse"));
 
+    build.config.uv = build
+        .config
+        .uv
+        .take()
+        .map(|c| cmd_finder.must_have(c))
+        .or_else(|| cmd_finder.maybe_have("uv"));
+
     let stage0_supported_target_list: HashSet<String> = crate::utils::helpers::output(
         command(&build.config.initial_rustc).args(["--print", "target-list"]).as_command_mut(),
     )

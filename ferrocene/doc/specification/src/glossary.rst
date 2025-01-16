@@ -5357,6 +5357,17 @@ an included :t:`range expression high bound`.
 :dp:`fls_krei7lc6lo8q`
 See :s:`RangeToInclusiveExpression`.
 
+.. _fls_YLhE2qpzYXRK:
+
+raw borrow expression
+^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_Fe39wLb0vvEg`
+A :dt:`raw borrow expression` is an :t:`expression` that creates a :t:`raw pointer` to the memory location of its :t:`operand` without incurring a :t:`borrow`.
+
+:dp:`fls_I71jq8BGyLqi`
+See :s:`RawBorrowExpression`.
+
 .. _fls_ipeh92kh17ze:
 
 raw byte string literal
@@ -7544,6 +7555,17 @@ unsuffixed integer
 An :dt:`unsuffixed integer` is an :t:`integer literal` without an
 :t:`integer suffix`.
 
+.. _fls_Z8qvOkP4Zfj5:
+
+use capture
+^^^^^^^^^^^
+
+:dp:`fls_eZyPXG27Zwcg`
+An :dt:`use capture` is a :t:`generic parameter` referenced via keyword $$use$$ within an :t:`anonymous return type`.
+
+:dp:`fls_Z8qvOkP4Zfj5`
+See :s:`UseCaptures`.
+
 .. _fls_fow1bnvduafi:
 
 use import
@@ -7662,6 +7684,30 @@ visibility modifier
 :dp:`fls_ze7befho4jhs`
 A :dt:`visibility modifier` sets the :t:`visibility` of the :t:`name` of an
 :t:`item`.
+
+.. _fls_dLlUt8PrXAls:
+
+visible emptiness
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_shXDYqnUy2Pb`
+:dt:`Visible emptiness <visible emptiness>` is a property of :t:`[type]s` and :t:`[enum variant]s` that have no :t:`[value]s` that are fully observable.
+
+.. _fls_EnT5zRuwviWM:
+
+visible empty enum variant
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_MQiPWNwdk95I`
+A :dt:`visible empty enum variant` is an :t:`enum variant` subject to :t:`visible emptiness`.
+
+.. _fls_HYWQ0lJS3TET:
+
+visible empty type
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_OLVD0u9w68Gl`
+A :dt:`visible empty type` is a :t:`type` subject to :t:`visible emptiness`.
 
 .. _fls_iplp3gvfbcpw:
 

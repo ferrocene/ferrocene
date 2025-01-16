@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+# Add a "merged-in:1.NN" label to all PRs, to glance in which release the PR was merged.
+
+---
+
+name: merged-in labels
+run-name: "Set merge-in label for PR #${{ github.event.pull_request.number }}"
+on:
+  pull_request_target:
+    types: [closed]
+
+jobs:
+  add-label:
+    name: Add label
+    runs-on: ubuntu-latest
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Clone the source code
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        run: ferrocene/ci/scripts/setup-uv.sh
+
+      - name: Add the label
+        run: "ferrocene/ci/scripts/add-merged-in-label.py ${{ github.event.pull_request.number }}"

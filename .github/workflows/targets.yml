@@ -44,7 +44,7 @@ jobs:
       ARTIFACT_USAGE: usage-targets-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
-      AWS_DEFAULT_REGION: eu-central-1
+      AWS_REGION: us-east-1
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
       artifact-usage: ${{ env.ARTIFACT_USAGE }}
@@ -64,6 +64,12 @@ jobs:
       - name: Authenicate docker with Azure
         if: ${{ (runner.os == 'Linux') }}
         run: az acr login --name ferrocenecr
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+
 
       - name: Download QNX
         id: qnx

@@ -1,6 +1,14 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
+
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["automations-common"]
+#
+# [tool.uv.sources]
+# automations-common = { path = "../automations-common", editable = true }
+# ///
 
 # Script to automatically create pull requests for pulling from upstream, and
 # to open issues if the pulling fails due to a merge conflict. The script is
@@ -10,16 +18,13 @@
 # - `GITHUB_TOKEN`: API token with access to the repo contents, issues and RPs
 # - `GITHUB_REPOSITORY`: name of the GitHub repository to run this script on
 
-from typing import Optional
+from automations_common import AutomatedPR, AutomationResult
 from dataclasses import dataclass
+from typing import Optional
+import generate_pr_body
 import os
 import sys
-import generate_pr_body
 import tempfile
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "common"))
-
-from automated_prs import AutomatedPR, AutomationResult
 
 
 class PullUpstreamPR(AutomatedPR):

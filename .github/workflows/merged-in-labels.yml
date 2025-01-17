@@ -27,3 +27,5 @@ jobs:
 
       - name: Add the label
         run: "ferrocene/ci/scripts/add-merged-in-label.py ${{ github.event.pull_request.number }}"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

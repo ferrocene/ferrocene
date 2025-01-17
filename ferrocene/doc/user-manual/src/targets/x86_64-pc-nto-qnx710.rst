@@ -16,7 +16,7 @@ x86-64 processors.
 
     Currently, Ferrocene only qualifies cross compilation to this target from
     :ref:`x86_64-unknown-linux-gnu`. Cross-compilation from 
-    :ref:`x86_64-pc-windows-msvc` is experimental and cross-compilation from
+    :ref:`x86_64-pc-windows-msvc` is untested and cross-compilation from
     :ref:`aarch64-apple-darwin` is unsupported.
 
 Prerequisites

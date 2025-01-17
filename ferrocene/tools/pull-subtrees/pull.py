@@ -457,7 +457,7 @@ until the merge conflict is fixed locally.
 To fix the conflict, create a new branch and execute the following command:
 
 ```
-ferrocene/tools/pull-subtrees/pull.py --target {self.into}
+ferrocene/tools/pull-subtrees/pull.py {self.subtree.repo}
 ```
 
 The command will try pull the latest changes from the repository into the \
@@ -503,34 +503,32 @@ def run_capture(*args, **kwargs):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--target", help="branch this pull is targeting", default=None)
-    parser.add_argument("--subtree", help="subtree to pull", default=None)
-    parser.add_argument(
-        "--automation", action="store_true", help="automatically create PRs"
-    )
+    exclusive = parser.add_mutually_exclusive_group()
+    exclusive.add_argument("--automation-for-branch", help="run the automation for the provided branch")
+    exclusive.add_argument("subtree_repo", help="the subtree to pull", default=None, nargs="?")
     args = parser.parse_args()
-
-    if args.target is None:
-        print("note: --target flag omitted, assuming --target=main")
-        args.target = "main"
 
     config_file = Path(__file__).parent / "subtrees.yml"
     repo_root = retrieve_git_repo_root()
 
-    did_use_subtree_arg = False
-
-    for subtree in parse_configuration(config_file):
-        if args.target not in subtree.into:
-            continue
-        if args.subtree is not None:
-            if args.subtree == subtree.repo:
-                did_use_subtree_arg = True
-            else:
+    subtrees = parse_configuration(config_file)
+    if args.automation_for_branch is not None:
+        # args.automation_for_branch contains the target branch.
+        for subtree in subtrees:
+            if args.automation_for_branch not in subtree.into:
                 continue
-        if args.automation:
-            PullSubtreePR(subtree, args.target).create()
-        else:
+            PullSubtreePR(subtree, args.automation_for_branch).create()
+    # We can use an `elif` here because automation_for_branch and subtree_repo are mutually exclusive
+    elif args.subtree_repo is not None:
+        subtree = None
+        for candidate in subtrees:
+            if args.subtree_repo == candidate.repo:
+                subtree = candidate
+                break
+        if subtree is None:
+            print(f"error: no subtree for repository {args.subtree_repo}")
+            exit(1)
+        update_subtree(repo_root, subtree)
+    else:
+        for subtree in subtrees:
             update_subtree(repo_root, subtree)
-
-    if not (args.subtree is not None and did_use_subtree_arg):
-        print(f"warning: --subtree={args.subtree} did not match any subtree in the configuration")

@@ -56,7 +56,9 @@ runs:
           --env LLVM_BUILD_PARALLELISM \
           --env TEST_DEVICE_ADDR \
           --env RUST_CONFIGURE_ARGS \
-          --env AWS_REGION \
+          --env ACTIONS_ID_TOKEN_REQUEST_TOKEN \
+          --env ACTIONS_ID_TOKEN_REQUEST_URL \
+          --env AWS_ROLE_ARN \
           --workdir /home/ci/project \
           --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
           --user $(id -u):$(id -g) \

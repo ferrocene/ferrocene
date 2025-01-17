@@ -45,6 +45,7 @@ jobs:
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
       AWS_REGION: us-east-1
+      AWS_ROLE_ARN: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
       artifact-usage: ${{ env.ARTIFACT_USAGE }}
@@ -64,11 +65,6 @@ jobs:
       - name: Authenicate docker with Azure
         if: ${{ (runner.os == 'Linux') }}
         run: az acr login --name ferrocenecr
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: us-east-1
-          role-to-assume:  ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
 
       - name: Download QNX
         id: qnx
@@ -88,8 +84,11 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
+            ./ferrocene/ci/scripts/assume-aws-oidc-role.sh
+          
             export QNX_LICENSE_FILE="${{ steps.qnx.outputs.directory }}/license/licenses"
             source ${{ steps.qnx.outputs.directory }}/qnxsdp-env.sh
+            
             ./x.py --stage 2 dist rust-std
 
       - uses: actions/upload-artifact@v4

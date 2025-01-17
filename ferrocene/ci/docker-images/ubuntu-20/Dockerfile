@@ -53,7 +53,8 @@ RUN <<-EOF
         zlib1g-dev \
         moreutils \
         zstd \
-        sudo
+        sudo \
+        jq
 
     # Needed to support the QEMU copied over from Ubuntu 24.04 (see above).
     # Replace this with qemu-user-static once we're not on Ubuntu 20.04.

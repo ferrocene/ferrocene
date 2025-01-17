@@ -4,7 +4,10 @@
 
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["requests", "pyyaml", "pyjwt[crypto]"]
+# dependencies = ["pyyaml ~= 6.0", "automations-common"]
+#
+# [tool.uv.sources]
+# automations-common = { path = "../automations-common", editable = true }
 # ///
 
 # Script to automatically pull new changes from all subtrees. The list of
@@ -18,6 +21,7 @@
 # - `GITHUB_TOKEN`: API token with access to the repo contents, issues and RPs
 # - `GITHUB_REPOSITORY`: name of the GitHub repository to run this script on
 
+from automations_common import AutomatedPR, AutomationResult, PRLinker
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
@@ -27,11 +31,6 @@ import os
 import subprocess
 import sys
 import yaml
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "common"))
-
-from automated_prs import AutomatedPR, AutomationResult
-from pr_links import PRLinker
 
 
 @dataclass

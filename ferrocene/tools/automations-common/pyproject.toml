@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+[project]
+name = "automations-common"
+version = "0.0.0"
+requires-python = ">=3.12"
+dependencies = [
+    "requests ~= 2.32",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

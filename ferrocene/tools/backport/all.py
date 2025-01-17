@@ -1,14 +1,20 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
+
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["requests ~= 2.32", "automations-common"]
+#
+# [tool.uv.sources]
+# automations-common = { path = "../automations-common", editable = true }
+# ///
 
 import os
 import requests
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "common"))
-
-from automated_prs import AutomatedPR, AutomationResult, ORIGIN
+from automations_common import AutomatedPR, AutomationResult
 
 
 TEMP_BRANCH = "backport-temp--do-not-use-for-real-code"
@@ -27,7 +33,7 @@ class BackportAllPR(AutomatedPR):
             return AutomationResult.NO_CHANGES
 
         current_branch = self.cmd_capture(["git", "branch", "--show-current"])
-        base_branch = f"{ORIGIN}/{self.__target}"
+        base_branch = f"{self.origin}/{self.__target}"
 
         # When a backport failure happens, the script leaves git in the
         # temporary branch. If we were to delete the temporary branch to create

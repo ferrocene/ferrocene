@@ -1,20 +1,25 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
+
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["automations-common"]
+#
+# [tool.uv.sources]
+# automations-common = { path = "../automations-common", editable = true }
+# ///
 
 # Helper script to generate the pull request body for a PR pulling the latest
 # changes from upstream. It's automatically invoked by automation.py, and can
 # be invoked manually if the pull is performed manually (on merge conflicts).
 
+from automations_common import PRLinker
 from dataclasses import dataclass
 from typing import Optional
 import os
 import subprocess
 import sys
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "common"))
-
-from pr_links import PRLinker
 
 UPSTREAM_REPO = "rust-lang/rust"
 

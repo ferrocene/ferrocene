@@ -5,7 +5,7 @@
 name = "utils"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = ["boto3", "pyyaml", "zstandard"]
+dependencies = ["boto3 ~= 1.36", "pyyaml ~= 6.0", "zstandard ~= 0.23"]
 
 [build-system]
 requires = ["hatchling"]

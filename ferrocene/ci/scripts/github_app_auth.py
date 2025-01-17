@@ -4,7 +4,7 @@
 
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["pyjwt[crypto]", "requests"]
+# dependencies = ["pyjwt[crypto] ~= 2.10", "requests ~= 2.32"]
 # ///
 
 import argparse

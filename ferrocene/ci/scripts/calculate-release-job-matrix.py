@@ -4,7 +4,7 @@
 
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["boto3", "requests"]
+# dependencies = ["boto3 ~= 1.36", "requests ~= 2.32"]
 # ///
 
 # This script is responsible for calculating the list of release jobs we should

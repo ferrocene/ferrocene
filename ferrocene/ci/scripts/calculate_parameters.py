@@ -4,7 +4,7 @@
 
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["utils", "boto3", "pyyaml"]
+# dependencies = ["utils", "boto3 ~= 1.36", "pyyaml ~= 6.0"]
 #
 # [tool.uv.sources]
 # utils = { path = "utils", editable = true }

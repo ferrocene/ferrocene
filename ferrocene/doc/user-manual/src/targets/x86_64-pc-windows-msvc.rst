@@ -8,7 +8,7 @@
 
 .. warning::
    
-   Experimental targets cannot be used in safety-critical contexts, and there is
+   Untested targets cannot be used in safety-critical contexts, and there is
    no guarantee that the Ferrocene test suite is successfully executed on the
    target. They are provided as a preview, with limited support available. They
    should not be used in production.

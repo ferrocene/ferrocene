@@ -5,7 +5,7 @@ Compilation targets overview
 ============================
 
 Ferrocene has support for multiple compilation targets and host platforms.
-Targets are categorized as either "supported" or "experimental" depending on
+Targets are categorized as either "supported" or "untested" depending on
 the level of support. This page lists the current support status for all
 targets, and individual pages with more details are provided for supported
 targets.
@@ -113,11 +113,10 @@ Quality managed targets are not qualified, but can usually be qualified on reque
      - Full
      - \-
 
-
-Experimental targets
+Untested targets
 --------------------
 
-Experimental targets cannot be used in safety-critical contexts, and there is
+Untested targets cannot be used in safety-critical contexts, and there is
 no guarantee that the Ferrocene test suite is successfully executed on the
 target. They are provided as a preview, with limited support available. They
 should not be used in production.

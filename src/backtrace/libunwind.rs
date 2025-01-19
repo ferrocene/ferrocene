@@ -184,6 +184,7 @@ mod uw {
             not(all(target_os = "horizon", target_arch = "arm")),
             not(all(target_os = "rtems", target_arch = "arm")),
             not(all(target_os = "vita", target_arch = "arm")),
+            not(all(target_os = "nuttx", target_arch = "arm")),
         ))] {
             extern "C" {
                 pub fn _Unwind_GetIP(ctx: *mut _Unwind_Context) -> libc::uintptr_t;

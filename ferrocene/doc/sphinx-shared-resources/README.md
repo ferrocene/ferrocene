@@ -1,17 +1,21 @@
 <!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
 <!-- SPDX-FileCopyrightText: The Ferrocene Developers -->
 
-# Ferrocene's shared Sphinx resources
+# Sphinx shared resources
 
-This package contains the shared Sphinx resources we rely on for Ferrocene's Sphinx documentation
-websites, rather than duplicating them into each site.
+This directory contains Sphinx extensions that are used across multiple documents, including our
+documentation theme. Keep in mind that making a change here will propagate it across all documents,
+so be mindful of side effects. There is no need to bump version numbers when making changes meant to
+be applied in the monorepo.
 
-🚨 **The contents of this repository are strictly meant for Ferrocene use** 🚨
+## External repositories relying on the shared resources
 
-While this package is public and released under an open source license, breaking changes will
-regularly happen, we will provide no support, and third-party pull requests likely won't be
-accepted.
+Some external repositories, like `ferrocene/specification` or `ferrocene/problems`, rely on the
+shared resources for their documentation purposes. To enable them to access the resources without
+cloning the whole repository, the contents of this directory [are published on PyPI][pypi].
 
-The contents of this package are primarily licensed under either the MIT or Apache 2.0 licenses, at
-your option. The package also contains files released under different licenses: check the header at
-the top of each file, or use [REUSE](https://reuse.software/) to obtain a licensing summary.
+Publishing on new versions is done automatically by CI *only* when the version number in
+`pyproject.toml` is updated. Bump the version number when you want to make the new changes available
+to external repositories.
+
+[pypi]: https://pypi.org/project/ferrocene-sphinx-shared-resources/

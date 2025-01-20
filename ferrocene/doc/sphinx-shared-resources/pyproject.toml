@@ -16,7 +16,7 @@ version = "0.0.2"
 
 description = "Internal resources used for Ferrocene's Sphinx documentation"
 license = "MIT OR Apache-2.0"
-readme = "README.md"
+readme = "PYPI-README.md"
 
 [project.entry-points."sphinx.builders"]
 ferrocene-intersphinx = "ferrocene_intersphinx_builder"

@@ -13,6 +13,10 @@ import subprocess
 import sys
 
 
+# Automatically watch the following extra directories when --serve is used.
+EXTRA_WATCH_DIRS = ["exts", "themes"]
+
+
 def build_docs(root, builder, clear, serve, debug):
     dest = root / "build"
 
@@ -30,7 +34,10 @@ def build_docs(root, builder, clear, serve, debug):
     if clear:
         args.append("-E")
     if serve:
-        args += ["--watch", root / "exts", "--watch", root / "themes"]
+        for extra_watch_dir in EXTRA_WATCH_DIRS:
+            extra_watch_dir = root / extra_watch_dir
+            if extra_watch_dir.exists():
+                args += ["--watch", extra_watch_dir]
     else:
         # Error out at the *end* of the build if there are warnings:
         args += ["-W", "--keep-going"]

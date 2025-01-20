@@ -185,7 +185,7 @@ requires-dist = [
 
 [[package]]
 name = "ferrocene-sphinx-shared-resources"
-version = "0.0.0"
+version = "0.0.2"
 source = { editable = "sphinx-shared-resources" }
 dependencies = [
     { name = "sphinx" },

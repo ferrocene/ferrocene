@@ -3,13 +3,16 @@
 
 [project]
 name = "ferrocene-sphinx-shared-resources"
-version = "0.0.2"
 requires-python = ">=3.10"
 dependencies = [
     "sphinx ~= 8.0",
     "sphinx-needs ~= 4.2",
     "tomli ~= 2.2",
 ]
+
+# Increase the version number to publish a new release to PyPI.
+# Note that you'll also have to run `uv lock` in `ferrocene/doc`, otherwise CI will fail.
+version = "0.0.2"
 
 description = "Internal resources used for Ferrocene's Sphinx documentation"
 license = "MIT OR Apache-2.0"

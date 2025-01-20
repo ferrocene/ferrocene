@@ -1289,7 +1289,10 @@ impl Step for CrtBeginEnd {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(CrtBeginEnd { target: run.target });
+        // matches guard/logic in `copy_self_contained_objects`
+        if run.target.contains("musl") && !run.target.contains("unixkraft") {
+            run.builder.ensure(CrtBeginEnd { target: run.target });
+        }
     }
 
     /// Build crtbegin.o/crtend.o for musl target.

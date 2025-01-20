@@ -3,7 +3,6 @@
 
 [project]
 name = "ferrocene-sphinx-shared-resources"
-version = "0.0.0"
 requires-python = ">=3.10"
 dependencies = [
     "sphinx ~= 8.0",
@@ -11,14 +10,22 @@ dependencies = [
     "tomli ~= 2.2",
 ]
 
+# Increase the version number to publish a new release to PyPI.
+# Note that you'll also have to run `uv lock` in `ferrocene/doc`, otherwise CI will fail.
+version = "0.0.2"
+
+description = "Internal resources used for Ferrocene's Sphinx documentation"
+license = "MIT OR Apache-2.0"
+readme = "PYPI-README.md"
+
 [project.entry-points."sphinx.builders"]
 ferrocene-intersphinx = "ferrocene_intersphinx_builder"
 
 [project.entry-points."sphinx.html_themes"]
 ferrocene = "ferrocene_theme"
 
-[tool.hatch.build]
-only-include = ["src"]
+[tool.hatch.build.targets.wheel]
+include = ["src"]
 sources = ["src"]
 
 [build-system]

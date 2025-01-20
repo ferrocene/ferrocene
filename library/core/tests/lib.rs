@@ -189,3 +189,10 @@ pub(crate) fn test_rng() -> rand_xorshift::XorShiftRng {
     let seed: [u8; 16] = seed_vec.as_slice().try_into().unwrap();
     rand::SeedableRng::from_seed(seed)
 }
+
+//ferrocene addition
+#[test]
+#[cfg(ferrocenecoretest_secretsauce)]
+fn check_that_qemu_cpu_was_set() {
+    assert_eq!(Ok("cortex-m4"), std::env::var("QEMU_CPU").as_deref());
+}

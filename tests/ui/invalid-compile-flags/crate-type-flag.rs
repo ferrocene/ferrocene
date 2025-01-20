@@ -20,6 +20,8 @@
 //@[dylib] ignore-musl (dylibs are not supported)
 //@[dylib] ignore-wasm (dylibs are not supported)
 //@[dylib] ignore-aarch64-unknown-ferrocenecoretest (dylibs are not supported)
+//@[dylib] ignore-thumbv7em-ferrocenecoretest-eabi (dylibs are not supported)
+//@[dylib] ignore-thumbv7em-ferrocenecoretest-eabihf (dylibs are not supported)
 //@[dylib] compile-flags: --crate-type=dylib
 //@[dylib] check-pass
 
@@ -33,6 +35,8 @@
 
 //@[proc_dash_macro] ignore-wasm (proc-macro is not supported)
 //@[proc_dash_macro] ignore-aarch64-unknown-ferrocenecoretest (proc-macro is not supported)
+//@[proc_dash_macro] ignore-thumbv7em-ferrocenecoretest-eabi (proc-macro is not supported)
+//@[proc_dash_macro] ignore-thumbv7em-ferrocenecoretest-eabihf (proc-macro is not supported)
 //@[proc_dash_macro] compile-flags: --crate-type=proc-macro
 //@[proc_dash_macro] check-pass
 
@@ -44,6 +48,8 @@
 //@[multivalue_combined] ignore-musl (dylibs are not supported)
 //@[multivalue_combined] ignore-wasm (dylibs are not supported)
 //@[multivalue_combined] ignore-aarch64-unknown-ferrocenecoretest (dylibs are not supported)
+//@[multivalue_combined] ignore-thumbv7em-ferrocenecoretest-eabi (dylibs are not supported)
+//@[multivalue_combined] ignore-thumbv7em-ferrocenecoretest-eabihf (dylibs are not supported)
 //@[multivalue_combined] compile-flags: --crate-type=lib,rlib,staticlib --crate-type=dylib
 //@[multivalue_combined] check-pass
 

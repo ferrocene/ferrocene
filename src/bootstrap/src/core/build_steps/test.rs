@@ -2878,7 +2878,12 @@ impl Step for Crate {
 
         run_cargo_test(
             cargo,
-            if target.contains("ferrocenecoretest") { &["--test-threads", "1"] } else { &[] },
+            // ferrocene addition: no parallelism on some targets
+            if target.contains("ferrocenecoretest") && !target.starts_with("thumbv") {
+                &["--test-threads", "1"]
+            } else {
+                &[]
+            },
             &self.crates,
             &self.crates[0],
             &*crate_description(&self.crates),
@@ -3443,12 +3448,14 @@ impl Step for TestHelpers {
         // build script context (rust-lang/cc-rs#1225). map `ferrocenecoretest` targets back to the
         // targets they are test doubles for, and pass that triple to `cc`
         let target = if self.target.contains("-ferrocenecoretest") {
-            assert_eq!(
-                "aarch64-unknown-ferrocenecoretest", &*target.triple,
-                "expand this bootstrap logic to support the new target"
-            );
+            let sub = target.triple.replace("ferrocenecoretest", "none");
 
-            TargetSelection::from_user("aarch64-unknown-none")
+            // override the default arm-none-eabi-gcc header files
+            if target.starts_with("thumbv") {
+                cfg.include(Path::new("/tmp/ferrocene").join(target.triple).join("include"));
+            }
+
+            TargetSelection::from_user(&sub)
         } else {
             target
         };

@@ -9,6 +9,8 @@
 //@ normalize-stdout: "x86_64-pc-nto-qnx710" -> "$$TARGET"
 //@ normalize-stdout: "aarch64-unknown-linux-gnu" -> "$$TARGET"
 //@ normalize-stdout: "aarch64-unknown-ferrocenecoretest" -> "$$TARGET"
+//@ normalize-stdout: "thumbv7em-ferrocenecoretest-eabihf" -> "$$TARGET"
+//@ normalize-stdout: "thumbv7em-ferrocenecoretest-eabi" -> "$$TARGET"
 //@ normalize-stdout: "aarch64-apple-darwin" -> "$$TARGET"
 //@ normalize-stdout: "aarch64-unknown-nto-qnx710" -> "$$TARGET"
 

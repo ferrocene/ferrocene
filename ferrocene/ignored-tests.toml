@@ -22,6 +22,12 @@ reason = "QEMU user space emulation doesn't support most sanitizers"
 tests = [
     "tests/ui/process/no-stdio.rs",
     "tests/ui/process/nofile-limit.rs",
+]
+targets = ["aarch64-unknown-ferrocenecoretest", "thumbv7em-ferrocenecoretest-eabi", "thumbv7em-ferrocenecoretest-eabihf"]
+reason = "QEMU user space emulation behaves differently when spawning processes fails"
+
+[["tests/ui"]]
+tests = [
     "tests/ui/process/process-spawn-nonexistent.rs",
     "tests/ui/wait-forked-but-failed-child.rs",
 ]
@@ -34,20 +40,53 @@ tests = [
     "tests/ui/intrinsics/const-eval-select-backtrace-std.rs",
     "tests/ui/intrinsics/const-eval-select-backtrace.rs",
     "tests/ui/lto/issue-105637.rs",
-    "tests/ui/macros/rfc-2011-nicer-assert-messages/assert-with-custom-errors-does-not-create-unnecessary-code.rs",
-    "tests/ui/panics/location-detail-panic-no-location-info.rs",
     "tests/ui/panics/fmt-only-once.rs",
-    "tests/ui/panics/location-detail-panic-no-file.rs",
-    "tests/ui/panics/location-detail-unwrap-no-file.rs",
-    "tests/ui/panics/location-detail-panic-no-line.rs",
-    "tests/ui/panics/issue-47429-short-backtraces.rs",
     "tests/ui/panics/location-detail-panic-no-column.rs",
-    "tests/ui/panics/issue-47429-short-backtraces.rs",
-    "tests/ui/macros/rfc-2011-nicer-assert-messages/feature-gate-generic_assert.rs",
+    "tests/ui/panics/location-detail-panic-no-file.rs",
+    "tests/ui/panics/location-detail-panic-no-line.rs",
+    "tests/ui/panics/location-detail-panic-no-location-info.rs",
+    "tests/ui/panics/location-detail-unwrap-no-file.rs",
     "tests/ui/process/println-with-broken-pipe.rs",
+]
+targets = ["aarch64-unknown-ferrocenecoretest", "thumbv7em-ferrocenecoretest-eabi", "thumbv7em-ferrocenecoretest-eabihf"]
+reason = "QEMU user space emulation outputs an extra message when an abort happens"
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/macros/rfc-2011-nicer-assert-messages/assert-with-custom-errors-does-not-create-unnecessary-code.rs",
+    "tests/ui/macros/rfc-2011-nicer-assert-messages/feature-gate-generic_assert.rs",
+    "tests/ui/panics/issue-47429-short-backtraces.rs",
+    "tests/ui/panics/issue-47429-short-backtraces.rs",
 ]
 targets = ["aarch64-unknown-ferrocenecoretest"]
 reason = "QEMU user space emulation outputs an extra message when an abort happens"
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/extern/extern-types-field-offset.rs",
+    "tests/ui/extern/extern-types-size_of_val.rs",
+    "tests/ui/macros/assert-long-condition.rs",
+    "tests/ui/panics/panic-in-message-fmt.rs",
+    "tests/ui/test-attrs/test-panic-abort-nocapture.rs",
+    "tests/ui/test-attrs/test-panic-abort.rs",
+]
+targets = ["thumbv7em-ferrocenecoretest-eabi", "thumbv7em-ferrocenecoretest-eabihf"]
+reason = "QEMU user space emulation outputs an extra message when an abort happens"
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/allocator/no_std-alloc-error-handler-custom.rs",
+    "tests/ui/allocator/no_std-alloc-error-handler-default.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_repeat.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_repeat-diff.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_eq.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_space-eq.rs",
+    "tests/ui/macros/rfc-2011-nicer-assert-messages/assert-with-custom-errors-does-not-create-unnecessary-code.rs",
+    "tests/ui/macros/rfc-2011-nicer-assert-messages/feature-gate-generic_assert.rs",
+    "tests/ui/structs-enums/multiple-reprs.rs",
+]
+targets = ["thumbv7em-ferrocenecoretest-eabi", "thumbv7em-ferrocenecoretest-eabihf"]
+reason = "to be addressed in a follow-up PR "
 
 [["tests/incremental"]]
 tests = ["tests/incremental/issue-80691-bad-eval-cache.rs"]

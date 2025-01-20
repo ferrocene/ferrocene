@@ -139,12 +139,8 @@ pub fn find_target(build: &Build, target: TargetSelection) {
     // targets they are test doubles for, and temporarily pass that triple to `cc` to determine
     // the C compiler
     let ferrocenecoretest_compiler = if target.triple.contains("-ferrocenecoretest") {
-        assert_eq!(
-            "aarch64-unknown-ferrocenecoretest", &*target.triple,
-            "expand this bootstrap logic to support the new target"
-        );
-
-        cfg.target("aarch64-unknown-none");
+        let sub = target.triple.replace("ferrocenecoretest", "none");
+        cfg.target(&sub);
         let compiler = cfg.get_compiler();
 
         cfg.target(&target.triple);

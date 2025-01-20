@@ -188,6 +188,13 @@ if [[ is_internal ]]; then
     add --set target.x86_64-pc-nto-qnx710.cxx=q++
     add --set target.x86_64-pc-nto-qnx710.ar=ntox86_64-ar
     add --set target.x86_64-pc-nto-qnx710.profiler=false # Build failures were noted if this is enabled.
+
+    # these default to `cc` but require cross compilation
+    add --set target.thumbv7em-ferrocenecoretest-eabi.cc=arm-none-eabi-gcc
+    add --set target.thumbv7em-ferrocenecoretest-eabi.profiler=false # no profiling support
+
+    add --set target.thumbv7em-ferrocenecoretest-eabihf.cc=arm-none-eabi-gcc
+    add --set target.thumbv7em-ferrocenecoretest-eabihf.profiler=false # no profiling support
 fi
 
 # Set the host platform to build. The environment variable is set from the CI

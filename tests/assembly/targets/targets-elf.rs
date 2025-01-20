@@ -675,6 +675,12 @@
 //@ revisions: aarch64_unknown_ferrocenecoretest
 //@ [aarch64_unknown_ferrocenecoretest] compile-flags: --target aarch64-unknown-ferrocenecoretest
 //@ [aarch64_unknown_ferrocenecoretest] needs-llvm-components: aarch64
+//@ revisions: thumbv7em_ferrocenecoretest_eabi
+//@ [thumbv7em_ferrocenecoretest_eabi] compile-flags: --target thumbv7em-ferrocenecoretest-eabi
+//@ [thumbv7em_ferrocenecoretest_eabi] needs-llvm-components: arm
+//@ revisions: thumbv7em_ferrocenecoretest_eabihf
+//@ [thumbv7em_ferrocenecoretest_eabihf] compile-flags: --target thumbv7em-ferrocenecoretest-eabihf
+//@ [thumbv7em_ferrocenecoretest_eabihf] needs-llvm-components: arm
 
 // Sanity-check that each target can produce assembly code.
 

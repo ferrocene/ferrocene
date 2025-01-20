@@ -49,7 +49,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - name: Downlaod packages built by the previous step
+      - name: Download packages built by the previous step
         uses: actions/download-artifact@v4
         with:
           name: python-packages

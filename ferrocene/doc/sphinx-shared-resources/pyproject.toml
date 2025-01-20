@@ -3,13 +3,17 @@
 
 [project]
 name = "ferrocene-sphinx-shared-resources"
-version = "0.0.0"
+version = "0.0.1"
 requires-python = ">=3.10"
 dependencies = [
     "sphinx ~= 8.0",
     "sphinx-needs ~= 4.2",
     "tomli ~= 2.2",
 ]
+
+description = "Internal resources used for Ferrocene's Sphinx documentation"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
 
 [project.entry-points."sphinx.builders"]
 ferrocene-intersphinx = "ferrocene_intersphinx_builder"

@@ -1,0 +1,68 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+# This workflow attempts to publish ferrocene/doc/sphinx-shared-resources to PyPI every time a PR is
+# merged into the main branch. In practice it will only publish when the package's version number
+# changes, as the publishing is configured to ignore existing releases.
+
+---
+
+name: Publish ferrocene-sphinx-shared-resources
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build packages
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Download the source code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Build the Python package
+        run: |
+          cd ferrocene/doc/sphinx-shared-resources
+          uv build
+
+      - name: Upload packages as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-packages
+          path: ferrocene/doc/sphinx-shared-resources/dist
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  publish:
+    name: Publish packages to PyPI
+    needs: [build]
+    runs-on: ubuntu-24.04
+
+    environment: publish-pypi-packages
+    permissions:
+      id-token: write
+    steps:
+      - name: Downlaod packages built by the previous step
+        uses: actions/download-artifact@v4
+        with:
+          name: python-packages
+          path: dist
+
+      - name: Publish the packages to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          # Don't error out if the release was already published. Trying to publish an existing
+          # release *will* happen, as we attempt to release every merged PR, not only when the
+          # version number was bumped.
+          #
+          # This setting will result in a warning being displayed when a release with the same
+          # version number already exists, but without failing the build (and making the job red).
+          skip-existing: true

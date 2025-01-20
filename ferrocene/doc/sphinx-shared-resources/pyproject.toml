@@ -3,7 +3,7 @@
 
 [project]
 name = "ferrocene-sphinx-shared-resources"
-version = "0.0.1"
+version = "0.0.2"
 requires-python = ">=3.10"
 dependencies = [
     "sphinx ~= 8.0",
@@ -21,8 +21,8 @@ ferrocene-intersphinx = "ferrocene_intersphinx_builder"
 [project.entry-points."sphinx.html_themes"]
 ferrocene = "ferrocene_theme"
 
-[tool.hatch.build]
-only-include = ["src"]
+[tool.hatch.build.targets.wheel]
+include = ["src"]
 sources = ["src"]
 
 [build-system]

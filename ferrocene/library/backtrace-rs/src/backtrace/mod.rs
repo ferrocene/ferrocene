@@ -176,7 +176,7 @@ cfg_if::cfg_if! {
                 unix,
                 not(target_os = "emscripten"),
                 // ferrocene addition: no backtrace support
-                not(ferrocenecoretest),
+                not(ferrocenecoretest_secretsauce),
                 not(all(target_os = "ios", target_arch = "arm")),
             ),
             all(

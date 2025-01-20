@@ -38,7 +38,7 @@ cfg_if::cfg_if! {
             not(target_os = "rtems"),
             not(target_os = "nuttx"),
             // ferrocene addition
-            not(ferrocenecoretest),
+            not(ferrocenecoretest_secretsauce),
         ),
         all(target_vendor = "fortanix", target_env = "sgx"),
     ))] {

@@ -590,6 +590,17 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, car
     cargo.rustdocflag(&html_root);
 
     cargo.rustdocflag("-Zcrate-attr=warn(rust_2018_idioms)");
+
+    // ferrocene addition: `cfg` used to adapt libstd to our "secret sauce" libc
+    if target.contains("ferrocenecoretest") {
+        match &*target.triple {
+            "aarch64-unknown-ferrocenecoretest" => {}
+            "thumbv7em-ferrocenecoretest-eabi" | "thumbv7em-ferrocenecoretest-eabihf" => {
+                cargo.rustflag("--cfg=ferrocenecoretest_secretsauce");
+            }
+            _ => unimplemented!("extend this `match`"),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

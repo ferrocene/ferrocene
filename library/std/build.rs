@@ -184,24 +184,4 @@ fn main() {
     if has_reliable_f128_math {
         println!("cargo:rustc-cfg=reliable_f128_math");
     }
-
-    // ferrocene addition
-    ferrocenecoretest();
-}
-
-// ferrocene addition
-fn ferrocenecoretest() {
-    let target = env::var("TARGET").expect("Cargo did not set the TARGET env var");
-
-    if !target.contains("-ferrocenecoretest") {
-        return;
-    }
-
-    match target.as_str() {
-        "aarch64-unknown-ferrocenecoretest" => {}
-        "thumbv7em-ferrocenecoretest-eabi" | "thumbv7em-ferrocenecoretest-eabihf" => {
-            println!("cargo::rustc-cfg=ferrocenecoretest")
-        }
-        _ => unimplemented!("extend this `match`"),
-    };
 }

@@ -192,7 +192,7 @@ pub(crate) fn test_rng() -> rand_xorshift::XorShiftRng {
 
 //ferrocene addition
 #[test]
-#[cfg(ferrocenecoretest)]
+#[cfg(ferrocenecoretest_secretsauce)]
 fn check_that_qemu_cpu_was_set() {
     assert_eq!(Ok("cortex-m4"), std::env::var("QEMU_CPU").as_deref());
 }

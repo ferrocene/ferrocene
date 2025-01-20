@@ -51,7 +51,7 @@ cfg_if::cfg_if! {
             target_os = "rtems",
             target_os = "nuttx",
             // ferrocene addition
-            ferrocenecoretest,
+            ferrocenecoretest_secretsauce,
         ))),
         all(target_vendor = "fortanix", target_env = "sgx"),
         target_family = "wasm",

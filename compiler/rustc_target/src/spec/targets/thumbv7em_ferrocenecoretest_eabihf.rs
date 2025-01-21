@@ -11,8 +11,9 @@ pub(crate) fn target() -> Target {
     target.env = "musl".into();
     target.has_thread_local = true;
 
-    let path = "/tmp/ferrocene/thumbv7em-ferrocenecoretest-eabihf";
-    target.add_pre_link_args(LinkerFlavor::Gnu(Cc::No, Lld::No), &["-L", path]);
+    let crt_path = "/tmp/ferrocene/thumbv7em-ferrocenecoretest-eabihf/crt1.o";
+    let library_path = crt_path.rsplit_once('/').unwrap().0;
+    target.add_pre_link_args(LinkerFlavor::Gnu(Cc::No, Lld::No), &[crt_path, "-L", library_path]);
 
     target
 }

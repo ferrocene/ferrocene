@@ -1,5 +1,12 @@
+//@ revisions: gcc lld
+//
+//@ [gcc] compile-flags: -Clinker-flavor=gcc
+//@ [gcc] ignore-thumb
+//
+//@ [lld] compile-flags: -Clinker=rust-lld -Clinker-flavor=ld.lld
+//@ [lld] only-thumb
+//
 //@ build-pass
-//@ compile-flags: -Clinker-flavor=gcc
 
 fn main() {}
 

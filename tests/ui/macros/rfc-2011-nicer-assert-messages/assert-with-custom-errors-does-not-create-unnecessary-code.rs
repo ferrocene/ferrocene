@@ -1,4 +1,5 @@
-//@ compile-flags: --test
+// ferrocene addition: support panic=abort targets; upstreamed in rust-lang/rust#135823
+//@ compile-flags: --test -Zpanic_abort_tests
 //@ run-pass
 
 #![feature(core_intrinsics, generic_assert)]

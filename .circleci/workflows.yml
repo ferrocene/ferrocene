@@ -1405,7 +1405,7 @@ commands:
           name: Fetch secret sauce
           command: |
             mkdir -p /tmp/ferrocene/<< parameters.target >>
-            aws s3 cp s3://ferrocene-ci-mirrors/coretest-secret-sauce/20250116/b9e7699/<< parameters.target >>.tar.gz /tmp/ferrocene/
+            aws s3 cp s3://ferrocene-ci-mirrors/coretest-secret-sauce/20250121/1671dac/<< parameters.target >>.tar.gz /tmp/ferrocene/
             tar xf /tmp/ferrocene/<< parameters.target >>.tar.gz --directory=/tmp/ferrocene/<< parameters.target >>
 
   setup-qnx-toolchain:

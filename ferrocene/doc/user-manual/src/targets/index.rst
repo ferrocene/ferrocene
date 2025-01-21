@@ -47,24 +47,23 @@ qualified upon request.
      - Standard library
      - Notes
 
-   * - :ref:`x86_64-unknown-linux-gnu`
-     - ``x86_64-unknown-linux-gnu``
-     - Host platform
-     - Full
-     - \-
-
    * - :ref:`aarch64-unknown-none`
      - ``aarch64-unknown-none``
      - Cross-compilation
      - Bare-metal
      - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
-
    * - :ref:`aarch64-unknown-nto-qnx710`
      - ``aarch64-unknown-nto-qnx710``
      - Cross-compilation
      - Full
      - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
+
+   * - :ref:`x86_64-unknown-linux-gnu`
+     - ``x86_64-unknown-linux-gnu``
+     - Host platform
+     - Full
+     - \-
 
    * - :ref:`x86_64-pc-nto-qnx710`
      - ``x86_64-pc-nto-qnx710``
@@ -118,6 +117,43 @@ should not be used in production.
      - Kind
      - Standard library
      - Notes
+  
+   * - :target:`aarch64-unknown-linux-gnu`
+     - ``aarch64-unknown-linux-gnu``
+     - Host platform
+     - Full
+     - \-
+
+   * - :target:`armebv7r-none-eabihf`
+     - ``armebv7r-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - \-
+
+   * - :target:`armv7r-none-eabihf`
+     - ``armv7r-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - \-
+
+   * - :target:`armv8r-none-eabihf`
+     - ``armv8r-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - \-
+
+   * - :target:`riscv64gc-unknown-linux-gnu`
+     - ``riscv64gc-unknown-linux-gnu``
+     - Cross-compilation
+     - Full
+     - Available as a cross-compile target on :target:`aarch64-unknown-linux-gnu` and :ref:`x86_64-unknown-linux-gnu`.
+
+
+   * - :target:`thumbv6m-none-eabi`
+     - ``thumbv6m-none-eabi``
+     - Cross-compilation
+     - Bare-metal
+     - \-
 
    * - :target:`thumbv7em-none-eabi`
      - ``thumbv7em-none-eabi``
@@ -127,12 +163,6 @@ should not be used in production.
 
    * - :target:`thumbv7em-none-eabihf`
      - ``thumbv7em-none-eabihf``
-     - Cross-compilation
-     - Bare-metal
-     - \-
-  
-   * - :target:`armv8r-none-eabihf`
-     - ``armv8r-none-eabihf``
      - Cross-compilation
      - Bare-metal
      - \-
@@ -155,18 +185,6 @@ should not be used in production.
      - Bare-metal
      - \-
 
-   * - :target:`armv7r-none-eabihf`
-     - ``armv7r-none-eabihf``
-     - Cross-compilation
-     - Bare-metal
-     - \-
-
-   * - :target:`armebv7r-none-eabihf`
-     - ``armebv7r-none-eabihf``
-     - Cross-compilation
-     - Bare-metal
-     - \-
-
    * - :target:`wasm32-unknown-unknown`
      - ``wasm32-unknown-unknown``
      - Cross-compilation
@@ -184,18 +202,6 @@ should not be used in production.
      - Host platform
      - Full
      - \-
-
-   * - :target:`aarch64-unknown-linux-gnu`
-     - ``aarch64-unknown-linux-gnu``
-     - Host platform
-     - Full
-     - \-
-
-   * - :target:`riscv64gc-unknown-linux-gnu`
-     - ``riscv64gc-unknown-linux-gnu``
-     - Cross-compilation
-     - Full
-     - Available as a cross-compile target on :target:`aarch64-unknown-linux-gnu` and :ref:`x86_64-unknown-linux-gnu`.
 
 
 If your project needs support for one of these targets, please reach out to the

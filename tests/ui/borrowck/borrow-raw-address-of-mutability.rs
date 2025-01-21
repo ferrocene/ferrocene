@@ -38,3 +38,6 @@ fn mutable_address_of_fn_closure_move() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_vxguvrwolbee
+// Raw Borrow Expression

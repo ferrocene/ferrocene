@@ -1295,11 +1295,20 @@ impl Step for CrtBeginEnd {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(CrtBeginEnd { target: run.target });
+        // ferrocene addition: only build this for MUSL; upstreamed in rust-lang/rust#135836
+        if run.target.needs_crt_begin_end() {
+            run.builder.ensure(CrtBeginEnd { target: run.target });
+        }
     }
 
     /// Build crtbegin.o/crtend.o for musl target.
     fn run(self, builder: &Builder<'_>) -> Self::Output {
+        assert!(
+            self.target.needs_crt_begin_end(),
+            "tried to build crtbegin.o and crtend.o for the wrong target ({})",
+            self.target
+        );
+
         builder.require_submodule(
             "src/llvm-project",
             Some("The LLVM sources are required for the CRT from `compiler-rt`."),

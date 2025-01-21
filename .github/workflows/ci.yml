@@ -23,26 +23,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # Some Ferrocene builders require the use of Python 3.9. Use that on CI
-      # to make sure there are no surprises when we import into Ferrocene.
-      - uses: actions/setup-python@v3
-        with:
-          python-version: "3.9.x"
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
 
       - name: Build documentation and check links
         run: ./make.py --check-links
 
-      - name: Install Python dependencies
-        run: python3 -m pip install reuse black flake8
-
       - name: Verify licensing metadata
-        run: reuse lint
+        run: uvx reuse lint
 
       - name: Verify Python code formatting
-        run: black . --check --diff --color
+        run: uvx black . --check --diff --color
 
       - name: Lint Python code with flake8
-        run: flake8 . --exclude .venv
+        run: uvx flake8 . --exclude .venv
 
       - name: Publish to GitHub Pages
         uses: ferrous-systems/shared-github-actions/github-pages@main

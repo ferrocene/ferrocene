@@ -75,8 +75,6 @@ reason = "QEMU user space emulation outputs an extra message when an abort happe
 
 [["tests/ui"]]
 tests = [
-    "tests/ui/allocator/no_std-alloc-error-handler-custom.rs",
-    "tests/ui/allocator/no_std-alloc-error-handler-default.rs",
     "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_repeat.rs",
     "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_repeat-diff.rs",
     "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_eq.rs",

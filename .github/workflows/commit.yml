@@ -49,7 +49,7 @@ jobs:
         run: ferrocene/ci/scripts/fix-stage0-branch.py --check
 
       - name: Perform licensing checks
-        run: uv run reuse --include-submodules lint
+        run: uvx reuse --include-submodules lint
 
       - name: Setup Ubuntu
         run: ferrocene/ci/scripts/setup-ubuntu.sh

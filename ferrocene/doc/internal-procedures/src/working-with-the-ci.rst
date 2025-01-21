@@ -112,7 +112,7 @@ For example, to run our licensing checks you can run:
 
 .. code-block:: bash
 
-   uv run reuse --include-submodules lint
+   uvx reuse --include-submodules lint
 
 Or, to run the ``split-tasks.py`` script for debugging:
 

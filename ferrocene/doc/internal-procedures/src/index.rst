@@ -16,6 +16,7 @@ based on software engineering best practices.
    onboarding
    setup-local-env
    working-with-the-ci
+   testing-other-targets
    upstream-pulls
    subtree-pulls
    known-problems

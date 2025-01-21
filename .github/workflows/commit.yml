@@ -44,7 +44,7 @@ jobs:
       - name: Check whether any of our Cargo patches are unused
         run: ferrocene/ci/scripts/detect-unused-cargo-patches.py
       - name: Perform licensing checks
-        run: uv run reuse --include-submodules lint
+        run: uvx reuse --include-submodules lint
 
       - name: Setup Ubuntu
         run: ferrocene/ci/scripts/setup-ubuntu.sh

@@ -106,7 +106,7 @@ jobs:
       - setup-venv
       - run:
           name: Perform licensing checks
-          command: uv run reuse --include-submodules lint
+          command: uvx reuse --include-submodules lint
       - ferrocene-ci
 
   # x86_64-unknown-linux-gnu jobs

@@ -73,16 +73,6 @@ tests = [
 targets = ["thumbv7em-ferrocenecoretest-eabi", "thumbv7em-ferrocenecoretest-eabihf"]
 reason = "QEMU user space emulation outputs an extra message when an abort happens"
 
-[["tests/ui"]]
-tests = [
-    "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_repeat.rs",
-    "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_repeat-diff.rs",
-    "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_eq.rs",
-    "tests/ui/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor_space-eq.rs",
-]
-targets = ["thumbv7em-ferrocenecoretest-eabi", "thumbv7em-ferrocenecoretest-eabihf"]
-reason = "to be addressed in a follow-up PR "
-
 [["tests/incremental"]]
 tests = ["tests/incremental/issue-80691-bad-eval-cache.rs"]
 targets = ["aarch64-unknown-ferrocenecoretest"]

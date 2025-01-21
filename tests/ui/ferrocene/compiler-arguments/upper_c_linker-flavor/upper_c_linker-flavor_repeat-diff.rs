@@ -1,5 +1,6 @@
 //@ build-pass
 //@ only-linux
+//@ ignore-thumb ferrocenecoretest register as "linux" but do not use gcc as a linker
 //@ compile-flags: -Clinker-flavor=msvc -Clinker-flavor=gcc
 
 // When repeated, the last one overrides the previous.

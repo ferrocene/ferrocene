@@ -1656,6 +1656,7 @@ supported_targets! {
     ("loongarch64-unknown-linux-gnu", loongarch64_unknown_linux_gnu),
     ("loongarch64-unknown-linux-musl", loongarch64_unknown_linux_musl),
     ("m68k-unknown-linux-gnu", m68k_unknown_linux_gnu),
+    ("m68k-unknown-none-elf", m68k_unknown_none_elf),
     ("csky-unknown-linux-gnuabiv2", csky_unknown_linux_gnuabiv2),
     ("csky-unknown-linux-gnuabiv2hf", csky_unknown_linux_gnuabiv2hf),
     ("mips-unknown-linux-gnu", mips_unknown_linux_gnu),
@@ -1811,9 +1812,11 @@ supported_targets! {
     ("aarch64-unknown-illumos", aarch64_unknown_illumos),
 
     ("x86_64-pc-windows-gnu", x86_64_pc_windows_gnu),
+    ("x86_64-uwp-windows-gnu", x86_64_uwp_windows_gnu),
+    ("x86_64-win7-windows-gnu", x86_64_win7_windows_gnu),
     ("i686-pc-windows-gnu", i686_pc_windows_gnu),
     ("i686-uwp-windows-gnu", i686_uwp_windows_gnu),
-    ("x86_64-uwp-windows-gnu", x86_64_uwp_windows_gnu),
+    ("i686-win7-windows-gnu", i686_win7_windows_gnu),
 
     ("aarch64-pc-windows-gnullvm", aarch64_pc_windows_gnullvm),
     ("i686-pc-windows-gnullvm", i686_pc_windows_gnullvm),
@@ -1926,6 +1929,8 @@ supported_targets! {
     ("mipsel-sony-psp", mipsel_sony_psp),
     ("mipsel-sony-psx", mipsel_sony_psx),
     ("mipsel-unknown-none", mipsel_unknown_none),
+    ("mips-mti-none-elf", mips_mti_none_elf),
+    ("mipsel-mti-none-elf", mipsel_mti_none_elf),
     ("thumbv4t-none-eabi", thumbv4t_none_eabi),
     ("armv4t-none-eabi", armv4t_none_eabi),
     ("thumbv5te-none-eabi", thumbv5te_none_eabi),
@@ -2656,10 +2661,6 @@ impl TargetOptions {
     pub(crate) fn has_feature(&self, search_feature: &str) -> bool {
         self.features.split(',').any(|f| f.strip_prefix('+').is_some_and(|f| f == search_feature))
     }
-
-    pub(crate) fn has_neg_feature(&self, search_feature: &str) -> bool {
-        self.features.split(',').any(|f| f.strip_prefix('-').is_some_and(|f| f == search_feature))
-    }
 }
 
 impl Default for TargetOptions {
@@ -2819,12 +2820,17 @@ impl Target {
             Abi::EfiApi if self.arch == "x86_64" => Abi::Win64 { unwind: false },
             Abi::EfiApi => Abi::C { unwind: false },
 
-            // See commentary in `is_abi_supported`.
-            Abi::Stdcall { .. } | Abi::Thiscall { .. } if self.arch == "x86" => abi,
-            Abi::Stdcall { unwind } | Abi::Thiscall { unwind } => Abi::C { unwind },
-            Abi::Fastcall { .. } if self.arch == "x86" => abi,
+            // See commentary in `is_abi_supported`: we map these ABIs to "C" when they do not make sense.
+            Abi::Stdcall { .. } | Abi::Thiscall { .. } | Abi::Fastcall { .. }
+                if self.arch == "x86" =>
+            {
+                abi
+            }
             Abi::Vectorcall { .. } if ["x86", "x86_64"].contains(&&self.arch[..]) => abi,
-            Abi::Fastcall { unwind } | Abi::Vectorcall { unwind } => Abi::C { unwind },
+            Abi::Stdcall { unwind }
+            | Abi::Thiscall { unwind }
+            | Abi::Fastcall { unwind }
+            | Abi::Vectorcall { unwind } => Abi::C { unwind },
 
             // The Windows x64 calling convention we use for `extern "Rust"`
             // <https://learn.microsoft.com/en-us/cpp/build/x64-software-conventions#register-volatility-and-preservation>
@@ -2859,6 +2865,7 @@ impl Target {
             }
             Win64 { .. } | SysV64 { .. } => self.arch == "x86_64",
             PtxKernel => self.arch == "nvptx64",
+            GpuKernel => ["amdgpu", "nvptx64"].contains(&&self.arch[..]),
             Msp430Interrupt => self.arch == "msp430",
             RiscvInterruptM | RiscvInterruptS => ["riscv32", "riscv64"].contains(&&self.arch[..]),
             AvrInterrupt | AvrNonBlockingInterrupt => self.arch == "avr",
@@ -3206,7 +3213,8 @@ impl Target {
                 check_matches!(
                     &*self.llvm_abiname,
                     "ilp32" | "ilp32f" | "ilp32d" | "ilp32e",
-                    "invalid RISC-V ABI name"
+                    "invalid RISC-V ABI name: {}",
+                    self.llvm_abiname,
                 );
             }
             "riscv64" => {
@@ -3214,7 +3222,8 @@ impl Target {
                 check_matches!(
                     &*self.llvm_abiname,
                     "lp64" | "lp64f" | "lp64d" | "lp64e",
-                    "invalid RISC-V ABI name"
+                    "invalid RISC-V ABI name: {}",
+                    self.llvm_abiname,
                 );
             }
             "arm" => {
@@ -3245,6 +3254,26 @@ impl Target {
                 } else {
                     return Err(format!(
                         "target feature `{feat}` is invalid, must start with `+` or `-`"
+                    ));
+                }
+            }
+            // Check that we don't mis-set any of the ABI-relevant features.
+            let abi_feature_constraints = self.abi_required_features();
+            for feat in abi_feature_constraints.required {
+                // The feature might be enabled by default so we can't *require* it to show up.
+                // But it must not be *disabled*.
+                if features_disabled.contains(feat) {
+                    return Err(format!(
+                        "target feature `{feat}` is required by the ABI but gets disabled in target spec"
+                    ));
+                }
+            }
+            for feat in abi_feature_constraints.incompatible {
+                // The feature might be disabled by default so we can't *require* it to show up.
+                // But it must not be *enabled*.
+                if features_enabled.contains(feat) {
+                    return Err(format!(
+                        "target feature `{feat}` is incompatible with the ABI but gets enabled in target spec"
                     ));
                 }
             }

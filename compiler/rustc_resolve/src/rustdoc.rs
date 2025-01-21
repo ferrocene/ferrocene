@@ -347,13 +347,10 @@ pub fn strip_generics_from_path(path_str: &str) -> Result<Box<str>, MalformedGen
 
 /// Returns whether the first doc-comment is an inner attribute.
 ///
-//// If there are no doc-comments, return true.
+/// If there are no doc-comments, return true.
 /// FIXME(#78591): Support both inner and outer attributes on the same item.
 pub fn inner_docs(attrs: &[impl AttributeExt]) -> bool {
-    attrs
-        .iter()
-        .find(|a| a.doc_str().is_some())
-        .map_or(true, |a| a.style() == ast::AttrStyle::Inner)
+    attrs.iter().find(|a| a.doc_str().is_some()).is_none_or(|a| a.style() == ast::AttrStyle::Inner)
 }
 
 /// Has `#[rustc_doc_primitive]` or `#[doc(keyword)]`.

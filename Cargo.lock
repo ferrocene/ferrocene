@@ -185,9 +185,6 @@ name = "anyhow"
 version = "1.0.95"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "34ac096ce696dc2fcabef30516bb13c0a68a11d30131d3df6f04711467681b04"
-dependencies = [
- "backtrace",
-]
 
 [[package]]
 name = "ar_archive_writer"
@@ -879,9 +876,9 @@ version = "0.1.0"
 
 [[package]]
 name = "cc"
-version = "1.2.6"
+version = "1.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d6dbb628b8f8555f86d0323c2eb39e3ec81901f4b83e091db8a6a76d316a333"
+checksum = "a012a0df96dd6d06ba9a1b29d6402d1a5d77c6befd2566afdc26e10603dc93d7"
 dependencies = [
  "shlex",
 ]
@@ -1004,7 +1001,7 @@ checksum = "f46ad14479a25103f283c0f10005961cf086d8dc42205bb44c46ac563475dca6"
 
 [[package]]
 name = "clippy"
-version = "0.1.85"
+version = "0.1.86"
 dependencies = [
  "anstream",
  "cargo_metadata 0.18.1",
@@ -1035,7 +1032,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_config"
-version = "0.1.85"
+version = "0.1.86"
 dependencies = [
  "clippy_utils",
  "itertools",
@@ -1060,7 +1057,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_lints"
-version = "0.1.85"
+version = "0.1.86"
 dependencies = [
  "arrayvec",
  "cargo_metadata 0.18.1",
@@ -1083,7 +1080,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_utils"
-version = "0.1.85"
+version = "0.1.86"
 dependencies = [
  "arrayvec",
  "itertools",
@@ -4393,6 +4390,7 @@ name = "rustc_codegen_llvm"
 version = "0.0.0"
 dependencies = [
  "bitflags",
+ "gimli 0.30.0",
  "itertools",
  "libc",
  "measureme",
@@ -5011,7 +5009,6 @@ name = "rustc_middle"
 version = "0.0.0"
 dependencies = [
  "bitflags",
- "derive-where",
  "either",
  "field-offset",
  "gsgdt",
@@ -5055,6 +5052,7 @@ dependencies = [
  "rustc_apfloat",
  "rustc_arena",
  "rustc_ast",
+ "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -5154,6 +5152,7 @@ dependencies = [
  "rustc_serialize",
  "rustc_type_ir",
  "rustc_type_ir_macros",
+ "smallvec",
  "tracing",
 ]
 

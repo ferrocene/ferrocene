@@ -207,7 +207,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             self.register_wf_obligation(
                 fn_input_ty.into(),
                 arg_expr.span,
-                ObligationCauseCode::Misc,
+                ObligationCauseCode::WellFormed(None),
             );
         }
 
@@ -1210,7 +1210,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             // - foo((), "current", 42u32, "next")
                             // + foo((), 42u32)
                             {
-                                prev_extra_idx.map_or(true, |prev_extra_idx| {
+                                prev_extra_idx.is_none_or(|prev_extra_idx| {
                                     prev_extra_idx + 1 == arg_idx.index()
                                 })
                             }
@@ -2041,7 +2041,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     fn parent_item_span(&self, id: HirId) -> Option<Span> {
         let node = self.tcx.hir_node_by_def_id(self.tcx.hir().get_parent_item(id).def_id);
         match node {
-            Node::Item(&hir::Item { kind: hir::ItemKind::Fn(_, _, body_id), .. })
+            Node::Item(&hir::Item { kind: hir::ItemKind::Fn { body: body_id, .. }, .. })
             | Node::ImplItem(&hir::ImplItem { kind: hir::ImplItemKind::Fn(_, body_id), .. }) => {
                 let body = self.tcx.hir().body(body_id);
                 if let ExprKind::Block(block, _) = &body.value.kind {
@@ -2189,7 +2189,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                 }
                             }
                             hir::Node::Item(item) => {
-                                if let hir::ItemKind::Fn(..) = item.kind {
+                                if let hir::ItemKind::Fn { .. } = item.kind {
                                     break;
                                 }
                             }
@@ -2460,16 +2460,13 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             spans.push_span_label(
                                 param.span,
                                 format!(
-                                    "{} {} to match the {} type of this parameter",
+                                    "{} need{} to match the {} type of this parameter",
                                     display_list_with_comma_and(&other_param_matched_names),
-                                    format!(
-                                        "need{}",
-                                        pluralize!(if other_param_matched_names.len() == 1 {
-                                            0
-                                        } else {
-                                            1
-                                        })
-                                    ),
+                                    pluralize!(if other_param_matched_names.len() == 1 {
+                                        0
+                                    } else {
+                                        1
+                                    }),
                                     matched_ty,
                                 ),
                             );

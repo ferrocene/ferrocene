@@ -52,8 +52,8 @@ use rustc_metadata::locator;
 use rustc_middle::ty::TyCtxt;
 use rustc_parse::{new_parser_from_file, new_parser_from_source_str, unwrap_or_emit_fatal};
 use rustc_session::config::{
-    CG_OPTIONS, ErrorOutputType, Input, OutFileName, OutputType, UnstableOptions, Z_OPTIONS,
-    nightly_options,
+    CG_OPTIONS, ErrorOutputType, Input, OptionDesc, OutFileName, OutputType, UnstableOptions,
+    Z_OPTIONS, nightly_options, parse_target_triple,
 };
 use rustc_session::getopts::{self, Matches};
 use rustc_session::lint::{Lint, LintId};
@@ -916,13 +916,7 @@ pub fn version_at_macro_invocation(
         safe_println!("host: {}", config::host_tuple());
         safe_println!("release: {release}");
 
-        let debug_flags = matches.opt_strs("Z");
-        let backend_name = debug_flags.iter().find_map(|x| x.strip_prefix("codegen-backend="));
-        let opts = config::Options::default();
-        let sysroot = filesearch::materialize_sysroot(opts.maybe_sysroot.clone());
-        let target = config::build_target_config(early_dcx, &opts, &sysroot);
-
-        get_codegen_backend(early_dcx, &sysroot, backend_name, &target).print_version();
+        get_backend_from_raw_matches(early_dcx, matches).print_version();
     }
 }
 
@@ -1124,26 +1118,31 @@ pub fn describe_flag_categories(early_dcx: &EarlyDiagCtxt, matches: &Matches) ->
         return true;
     }
 
-    if cg_flags.iter().any(|x| *x == "no-stack-check") {
-        early_dcx.early_warn("the `-Cno-stack-check` flag is deprecated and does nothing");
-    }
-
-    if cg_flags.iter().any(|x| x.starts_with("inline-threshold")) {
-        early_dcx.early_warn("the `-Cinline-threshold` flag is deprecated and does nothing (consider using `-Cllvm-args=--inline-threshold=...`)");
-    }
-
     if cg_flags.iter().any(|x| *x == "passes=list") {
-        let backend_name = debug_flags.iter().find_map(|x| x.strip_prefix("codegen-backend="));
-
-        let opts = config::Options::default();
-        let sysroot = filesearch::materialize_sysroot(opts.maybe_sysroot.clone());
-        let target = config::build_target_config(early_dcx, &opts, &sysroot);
-
-        get_codegen_backend(early_dcx, &sysroot, backend_name, &target).print_passes();
+        get_backend_from_raw_matches(early_dcx, matches).print_passes();
         return true;
     }
 
     false
+}
+
+/// Get the codegen backend based on the raw [`Matches`].
+///
+/// `rustc -vV` and `rustc -Cpasses=list` need to get the codegen backend before we have parsed all
+/// arguments and created a [`Session`]. This function reads `-Zcodegen-backend`, `--target` and
+/// `--sysroot` without validating any other arguments and loads the codegen backend based on these
+/// arguments.
+fn get_backend_from_raw_matches(
+    early_dcx: &EarlyDiagCtxt,
+    matches: &Matches,
+) -> Box<dyn CodegenBackend> {
+    let debug_flags = matches.opt_strs("Z");
+    let backend_name = debug_flags.iter().find_map(|x| x.strip_prefix("codegen-backend="));
+    let target = parse_target_triple(early_dcx, matches);
+    let sysroot = filesearch::materialize_sysroot(matches.opt_str("sysroot").map(PathBuf::from));
+    let target = config::build_target_config(early_dcx, &target, &sysroot);
+
+    get_codegen_backend(early_dcx, &sysroot, backend_name, &target)
 }
 
 fn describe_debug_flags() {
@@ -1156,18 +1155,16 @@ fn describe_codegen_flags() {
     print_flag_list("-C", config::CG_OPTIONS);
 }
 
-fn print_flag_list<T>(
-    cmdline_opt: &str,
-    flag_list: &[(&'static str, T, &'static str, &'static str)],
-) {
-    let max_len = flag_list.iter().map(|&(name, _, _, _)| name.chars().count()).max().unwrap_or(0);
+fn print_flag_list<T>(cmdline_opt: &str, flag_list: &[OptionDesc<T>]) {
+    let max_len =
+        flag_list.iter().map(|opt_desc| opt_desc.name().chars().count()).max().unwrap_or(0);
 
-    for &(name, _, _, desc) in flag_list {
+    for opt_desc in flag_list {
         safe_println!(
             "    {} {:>width$}=val -- {}",
             cmdline_opt,
-            name.replace('_', "-"),
-            desc,
+            opt_desc.name().replace('_', "-"),
+            opt_desc.desc(),
             width = max_len
         );
     }
@@ -1201,15 +1198,6 @@ fn print_flag_list<T>(
 /// be public when using rustc as a library, see
 /// <https://github.com/rust-lang/rust/commit/2b4c33817a5aaecabf4c6598d41e190080ec119e>
 pub fn handle_options(early_dcx: &EarlyDiagCtxt, args: &[String]) -> Option<getopts::Matches> {
-    if args.is_empty() {
-        // user did not write `-v` nor `-Z unstable-options`, so do not
-        // include that extra information.
-        let nightly_build =
-            rustc_feature::UnstableFeatures::from_environment(None).is_nightly_build();
-        usage(false, false, nightly_build);
-        return None;
-    }
-
     // Parse with *all* options defined in the compiler, we don't worry about
     // option stability here we just want to parse as much as possible.
     let mut options = getopts::Options::new();
@@ -1221,8 +1209,8 @@ pub fn handle_options(early_dcx: &EarlyDiagCtxt, args: &[String]) -> Option<geto
         let msg: Option<String> = match e {
             getopts::Fail::UnrecognizedOption(ref opt) => CG_OPTIONS
                 .iter()
-                .map(|&(name, ..)| ('C', name))
-                .chain(Z_OPTIONS.iter().map(|&(name, ..)| ('Z', name)))
+                .map(|opt_desc| ('C', opt_desc.name()))
+                .chain(Z_OPTIONS.iter().map(|opt_desc| ('Z', opt_desc.name())))
                 .find(|&(_, name)| *opt == name.replace('_', "-"))
                 .map(|(flag, _)| format!("{e}. Did you mean `-{flag} {opt}`?")),
             getopts::Fail::ArgumentMissing(ref opt) => {
@@ -1255,7 +1243,7 @@ pub fn handle_options(early_dcx: &EarlyDiagCtxt, args: &[String]) -> Option<geto
     //   (unstable option being used on stable)
     nightly_options::check_nightly_options(early_dcx, &matches, &config::rustc_optgroups());
 
-    if matches.opt_present("h") || matches.opt_present("help") {
+    if args.is_empty() || matches.opt_present("h") || matches.opt_present("help") {
         // Only show unstable options in --help if we accept unstable options.
         let unstable_enabled = nightly_options::is_unstable_enabled(&matches);
         let nightly_build = nightly_options::match_is_nightly_build(&matches);

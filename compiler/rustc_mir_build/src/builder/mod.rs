@@ -26,7 +26,6 @@ use rustc_middle::ty::{self, ScalarInt, Ty, TyCtxt, TypeVisitableExt, TypingMode
 use rustc_middle::{bug, span_bug};
 use rustc_span::{Span, Symbol, sym};
 
-use super::lints;
 use crate::builder::expr::as_place::PlaceBuilder;
 use crate::builder::scope::DropKind;
 
@@ -47,7 +46,7 @@ pub(crate) fn closure_saved_names_of_captured_variables<'tcx>(
 }
 
 /// Construct the MIR for a given `DefId`.
-pub(crate) fn mir_build<'tcx>(tcx: TyCtxtAt<'tcx>, def: LocalDefId) -> Body<'tcx> {
+pub(crate) fn build_mir<'tcx>(tcx: TyCtxtAt<'tcx>, def: LocalDefId) -> Body<'tcx> {
     let tcx = tcx.tcx;
     tcx.ensure_with_value().thir_abstract_const(def);
     if let Err(e) = tcx.check_match(def) {
@@ -78,8 +77,6 @@ pub(crate) fn mir_build<'tcx>(tcx: TyCtxtAt<'tcx>, def: LocalDefId) -> Body<'tcx
             build_mir(&thir.borrow())
         }
     };
-
-    lints::check(tcx, &body);
 
     // The borrow checker will replace all the regions here with its own
     // inference variables. There's no point having non-erased regions here.
@@ -1005,11 +1002,25 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
         if let Some(source_scope) = scope {
             self.source_scope = source_scope;
         }
+
         if self.tcx.intrinsic(self.def_id).is_some_and(|i| i.must_be_overridden) {
             let source_info = self.source_info(rustc_span::DUMMY_SP);
             self.cfg.terminate(block, source_info, TerminatorKind::Unreachable);
             self.cfg.start_new_block().unit()
         } else {
+            // Ensure we don't silently codegen functions with fake bodies.
+            match self.tcx.hir_node(self.hir_id) {
+                hir::Node::Item(hir::Item {
+                    kind: hir::ItemKind::Fn { has_body: false, .. },
+                    ..
+                }) => {
+                    self.tcx.dcx().span_delayed_bug(
+                        expr_span,
+                        format!("fn item without body has reached MIR building: {:?}", self.def_id),
+                    );
+                }
+                _ => {}
+            }
             self.expr_into_dest(Place::return_place(), block, expr_id)
         }
     }

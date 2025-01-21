@@ -950,42 +950,48 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                 //
                 // NOTE: This should be kept in sync with the similar code in
                 // `rustc_ty_utils::instance::resolve_associated_item()`.
-                let node_item = specialization_graph::assoc_def(
+                match specialization_graph::assoc_def(
                     selcx.tcx(),
                     impl_data.impl_def_id,
                     obligation.predicate.def_id,
-                )
-                .map_err(|ErrorGuaranteed { .. }| ())?;
-
-                if node_item.is_final() {
-                    // Non-specializable items are always projectable.
-                    true
-                } else {
-                    // Only reveal a specializable default if we're past type-checking
-                    // and the obligation is monomorphic, otherwise passes such as
-                    // transmute checking and polymorphic MIR optimizations could
-                    // get a result which isn't correct for all monomorphizations.
-                    match selcx.infcx.typing_mode() {
-                        TypingMode::Coherence
-                        | TypingMode::Analysis { .. }
-                        | TypingMode::PostBorrowckAnalysis { .. } => {
-                            debug!(
-                                assoc_ty = ?selcx.tcx().def_path_str(node_item.item.def_id),
-                                ?obligation.predicate,
-                                "assemble_candidates_from_impls: not eligible due to default",
-                            );
-                            false
-                        }
-                        TypingMode::PostAnalysis => {
-                            // NOTE(eddyb) inference variables can resolve to parameters, so
-                            // assume `poly_trait_ref` isn't monomorphic, if it contains any.
-                            let poly_trait_ref = selcx.infcx.resolve_vars_if_possible(trait_ref);
-                            !poly_trait_ref.still_further_specializable()
+                ) {
+                    Ok(node_item) => {
+                        if node_item.is_final() {
+                            // Non-specializable items are always projectable.
+                            true
+                        } else {
+                            // Only reveal a specializable default if we're past type-checking
+                            // and the obligation is monomorphic, otherwise passes such as
+                            // transmute checking and polymorphic MIR optimizations could
+                            // get a result which isn't correct for all monomorphizations.
+                            match selcx.infcx.typing_mode() {
+                                TypingMode::Coherence
+                                | TypingMode::Analysis { .. }
+                                | TypingMode::PostBorrowckAnalysis { .. } => {
+                                    debug!(
+                                        assoc_ty = ?selcx.tcx().def_path_str(node_item.item.def_id),
+                                        ?obligation.predicate,
+                                        "not eligible due to default",
+                                    );
+                                    false
+                                }
+                                TypingMode::PostAnalysis => {
+                                    // NOTE(eddyb) inference variables can resolve to parameters, so
+                                    // assume `poly_trait_ref` isn't monomorphic, if it contains any.
+                                    let poly_trait_ref =
+                                        selcx.infcx.resolve_vars_if_possible(trait_ref);
+                                    !poly_trait_ref.still_further_specializable()
+                                }
+                            }
                         }
                     }
+                    // Always project `ErrorGuaranteed`, since this will just help
+                    // us propagate `TyKind::Error` around which suppresses ICEs
+                    // and spurious, unrelated inference errors.
+                    Err(ErrorGuaranteed { .. }) => true,
                 }
             }
-            ImplSource::Builtin(BuiltinImplSource::Misc, _) => {
+            ImplSource::Builtin(BuiltinImplSource::Misc | BuiltinImplSource::Trivial, _) => {
                 // While a builtin impl may be known to exist, the associated type may not yet
                 // be known. Any type with multiple potential associated types is therefore
                 // not eligible.
@@ -1142,7 +1148,9 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                         // If returned by `struct_tail` this is the empty tuple.
                         | ty::Tuple(..)
                         // Integers and floats are always Sized, and so have unit type metadata.
-                        | ty::Infer(ty::InferTy::IntVar(_) | ty::InferTy::FloatVar(..)) => true,
+                        | ty::Infer(ty::InferTy::IntVar(_) | ty::InferTy::FloatVar(..))
+                        // This happens if we reach the recursion limit when finding the struct tail.
+                        | ty::Error(..) => true,
 
                         // We normalize from `Wrapper<Tail>::Metadata` to `Tail::Metadata` if able.
                         // Otherwise, type parameters, opaques, and unnormalized projections have
@@ -1173,8 +1181,7 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                         | ty::Alias(..)
                         | ty::Bound(..)
                         | ty::Placeholder(..)
-                        | ty::Infer(..)
-                        | ty::Error(_) => {
+                        | ty::Infer(..) => {
                             if tail.has_infer_types() {
                                 candidate_set.mark_ambiguous();
                             }
@@ -1289,7 +1296,7 @@ fn confirm_select_candidate<'cx, 'tcx>(
 ) -> Progress<'tcx> {
     match impl_source {
         ImplSource::UserDefined(data) => confirm_impl_candidate(selcx, obligation, data),
-        ImplSource::Builtin(BuiltinImplSource::Misc, data) => {
+        ImplSource::Builtin(BuiltinImplSource::Misc | BuiltinImplSource::Trivial, data) => {
             let tcx = selcx.tcx();
             let trait_def_id = obligation.predicate.trait_def_id(tcx);
             if tcx.is_lang_item(trait_def_id, LangItem::Coroutine) {
@@ -2014,7 +2021,6 @@ fn confirm_impl_candidate<'cx, 'tcx>(
         Ok(assoc_ty) => assoc_ty,
         Err(guar) => return Progress::error(tcx, guar),
     };
-
     if !assoc_ty.item.defaultness(tcx).has_value() {
         // This means that the impl is missing a definition for the
         // associated type. This error will be reported by the type

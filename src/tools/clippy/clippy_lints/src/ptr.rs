@@ -189,7 +189,7 @@ impl<'tcx> LateLintPass<'tcx> for Ptr {
         let mut parents = hir.parent_iter(body.value.hir_id);
         let (item_id, sig, is_trait_item) = match parents.next() {
             Some((_, Node::Item(i))) => {
-                if let ItemKind::Fn(sig, ..) = &i.kind {
+                if let ItemKind::Fn { sig, .. } = &i.kind {
                     (i.owner_id, sig, false)
                 } else {
                     return;
@@ -541,7 +541,7 @@ fn check_mut_from_ref<'tcx>(cx: &LateContext<'tcx>, sig: &FnSig<'_>, body: Optio
             .collect();
         if let Some(args) = args
             && !args.is_empty()
-            && body.is_none_or(|body| sig.header.safety.is_unsafe() || contains_unsafe_block(cx, body.value))
+            && body.is_none_or(|body| sig.header.is_unsafe() || contains_unsafe_block(cx, body.value))
         {
             span_lint_and_then(
                 cx,

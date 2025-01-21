@@ -31,6 +31,22 @@ shipped as a preview.
   * :target-with-triple:`thumbv8m.main-none-eabihf`
   * :target-with-triple:`riscv64gc-unknown-linux-gnu`
 
+Fixed known problems
+--------------------
+
+* `KP-R98117 <https://problems.ferrocene.dev/KP-R98117.html>`_: Static where clause accepted due to incorrect type bound
+* `KP-R102048 <https://problems.ferrocene.dev/KP-R102048.html>`_: Missing error on overlapping implementation with higher-ranked trait bounds and associated types
+* `KP-R107887 <https://problems.ferrocene.dev/KP-R107887.html>`_: The compiler may incorrectly accept overlapping implementations involving trait object trait implementations
+* `KP-R114582 <https://problems.ferrocene.dev/KP-R114582.html>`_: The `_mm_stream_*` operations may be reordered
+* `KP-R118813 <https://problems.ferrocene.dev/KP-R118813.html>`_: Miscompilation of `__extendhfsf2` intrinsic when linking library dependent on `libgcc`
+* `KP-R124364 <https://problems.ferrocene.dev/KP-R124364.html>`_: Miscompilation due to differing floating point behavior at runtime and compile time
+* `KP-R126079 <https://problems.ferrocene.dev/KP-R126079.html>`_: The compiler fails to check object-safety for associated types in method signatures
+* `KP-R128243 <https://problems.ferrocene.dev/KP-R128243.html>`_: Miscompilation when branching on floating-point value comparisons
+* `KP-R129005 <https://problems.ferrocene.dev/KP-R129005.html>`_: Implied bounds are not correctly checked in functions involving projections when type casting
+* `KP-R130347 <https://problems.ferrocene.dev/KP-R130347.html>`_: Lifetimes within projections of super traits in trait objects are not checked
+* `KP-R130528 <https://problems.ferrocene.dev/KP-R130528.html>`_: Function parameter patterns do not check for unsafe contexts
+* `KP-R131195 <https://problems.ferrocene.dev/KP-R131195.html>`_: Optimization generates incorrect code involving `!` operator on non-bool primitives
+
 Rust changes
 ------------
 

@@ -21,6 +21,7 @@ installed:
   account. Note that most Linux distributions only include version 1 of the AWS
   CLI, while we explicitly require version 2.
 
+
 Configuring git
 ---------------
 

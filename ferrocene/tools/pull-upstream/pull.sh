@@ -47,7 +47,7 @@ automation_warning() {
     # When running as part of the automation, the warnings are stored in a file instead of being
     # printed to stdout. That way the automation can include them in the PR body.
     if [[ -n "${PULL_WARNINGS_FILE+x}" ]]; then
-        echo "${message}" >> "${PULL_WARNING_FILE}"
+        echo "${message}" >> "${PULL_WARNINGS_FILE}"
     fi
 }
 

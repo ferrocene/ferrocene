@@ -31,6 +31,7 @@ cfg_if::cfg_if! {
         target_os = "psp",
         target_os = "xous",
         target_os = "solid_asp3",
+<<<<<<< HEAD
         all(
             target_family = "unix",
             not(target_os = "espidf"),
@@ -40,6 +41,9 @@ cfg_if::cfg_if! {
             // ferrocene addition
             not(ferrocenecoretest_secretsauce),
         ),
+=======
+        all(target_family = "unix", not(target_os = "espidf"), not(target_os = "l4re"), not(target_os = "nuttx")),
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         all(target_vendor = "fortanix", target_env = "sgx"),
     ))] {
         mod gcc;

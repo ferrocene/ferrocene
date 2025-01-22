@@ -22,7 +22,6 @@ use rustc_hir::{ExprKind, HirId, QPath};
 use rustc_hir_analysis::hir_ty_lowering::{FeedConstTy, HirTyLowerer as _};
 use rustc_infer::infer;
 use rustc_infer::infer::{DefineOpaqueTypes, InferOk};
-use rustc_infer::traits::ObligationCause;
 use rustc_infer::traits::query::NoSolution;
 use rustc_middle::ty::adjustment::{Adjust, Adjustment, AllowTwoPhase};
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
@@ -1128,7 +1127,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let encl_item_id = self.tcx.hir().get_parent_item(expr.hir_id);
 
         if let hir::Node::Item(hir::Item {
-            kind: hir::ItemKind::Fn(..), span: encl_fn_span, ..
+            kind: hir::ItemKind::Fn { .. },
+            span: encl_fn_span,
+            ..
         })
         | hir::Node::TraitItem(hir::TraitItem {
             kind: hir::TraitItemKind::Fn(_, hir::TraitFn::Provided(_)),
@@ -1174,9 +1175,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         for err in errors {
             let cause = &mut err.obligation.cause;
             if let ObligationCauseCode::OpaqueReturnType(None) = cause.code() {
-                let new_cause = ObligationCause::new(
+                let new_cause = self.cause(
                     cause.span,
-                    cause.body_id,
                     ObligationCauseCode::OpaqueReturnType(Some((return_expr_ty, hir_id))),
                 );
                 *cause = new_cause;
@@ -1773,12 +1773,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let parent_node = self.tcx.hir().parent_iter(expr.hir_id).find(|(_, node)| {
             !matches!(node, hir::Node::Expr(hir::Expr { kind: hir::ExprKind::AddrOf(..), .. }))
         });
-        let Some((
-            _,
-            hir::Node::LetStmt(hir::LetStmt { ty: Some(ty), .. })
-            | hir::Node::Item(hir::Item { kind: hir::ItemKind::Const(ty, _, _), .. }),
-        )) = parent_node
-        else {
+        let Some((_, hir::Node::LetStmt(hir::LetStmt { ty: Some(ty), .. }))) = parent_node else {
             return;
         };
         if let hir::TyKind::Array(_, ct) = ty.peel_refs().kind {
@@ -1909,21 +1904,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         };
 
         let lang_item = self.tcx.require_lang_item(LangItem::Copy, None);
-        let code = traits::ObligationCauseCode::RepeatElementCopy {
-            is_constable,
-            elt_type: element_ty,
-            elt_span: element.span,
-            elt_stmt_span: self
-                .tcx
-                .hir()
-                .parent_iter(element.hir_id)
-                .find_map(|(_, node)| match node {
-                    hir::Node::Item(it) => Some(it.span),
-                    hir::Node::Stmt(stmt) => Some(stmt.span),
-                    _ => None,
-                })
-                .expect("array repeat expressions must be inside an item or statement"),
-        };
+        let code =
+            traits::ObligationCauseCode::RepeatElementCopy { is_constable, elt_span: element.span };
         self.require_type_meets(element_ty, element.span, code, lang_item);
     }
 
@@ -3856,7 +3838,15 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
                     // Enums are anyway always sized. But just to safeguard against future
                     // language extensions, let's double-check.
-                    self.require_type_is_sized(field_ty, expr.span, ObligationCauseCode::Misc);
+                    self.require_type_is_sized(
+                        field_ty,
+                        expr.span,
+                        ObligationCauseCode::FieldSized {
+                            adt_kind: AdtKind::Enum,
+                            span: self.tcx.def_span(field.did),
+                            last: false,
+                        },
+                    );
 
                     if field.vis.is_accessible_from(sub_def_scope, self.tcx) {
                         self.tcx.check_stability(field.did, Some(expr.hir_id), expr.span, None);
@@ -3884,11 +3874,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         let field_ty = self.field_ty(expr.span, field, args);
 
                         if self.tcx.features().offset_of_slice() {
-                            self.require_type_has_static_alignment(
-                                field_ty,
-                                expr.span,
-                                ObligationCauseCode::Misc,
-                            );
+                            self.require_type_has_static_alignment(field_ty, expr.span);
                         } else {
                             self.require_type_is_sized(
                                 field_ty,
@@ -3917,11 +3903,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     {
                         if let Some(&field_ty) = tys.get(index) {
                             if self.tcx.features().offset_of_slice() {
-                                self.require_type_has_static_alignment(
-                                    field_ty,
-                                    expr.span,
-                                    ObligationCauseCode::Misc,
-                                );
+                                self.require_type_has_static_alignment(field_ty, expr.span);
                             } else {
                                 self.require_type_is_sized(
                                     field_ty,

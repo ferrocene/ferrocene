@@ -18,7 +18,7 @@ const LICENSES: &[&str] = &[
     // tidy-alphabetical-start
     "(MIT OR Apache-2.0) AND Unicode-3.0",                 // unicode_ident (1.0.14)
     "(MIT OR Apache-2.0) AND Unicode-DFS-2016",            // unicode_ident (1.0.12)
-    "0BSD OR MIT OR Apache-2.0",                           // adler license
+    "0BSD OR MIT OR Apache-2.0",                           // adler2 license
     "0BSD",
     "Apache-2.0 / MIT",
     "Apache-2.0 OR ISC OR MIT",
@@ -239,7 +239,7 @@ const EXCEPTIONS_BOOTSTRAP: ExceptionList = &[
 ];
 
 const EXCEPTIONS_UEFI_QEMU_TEST: ExceptionList = &[
-    ("r-efi", "MIT OR Apache-2.0 OR LGPL-2.1-or-later"), // LGPL is not acceptible, but we use it under MIT OR Apache-2.0
+    ("r-efi", "MIT OR Apache-2.0 OR LGPL-2.1-or-later"), // LGPL is not acceptable, but we use it under MIT OR Apache-2.0
 ];
 
 /// Placeholder for non-standard license file.

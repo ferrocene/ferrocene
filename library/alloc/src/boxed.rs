@@ -233,6 +233,27 @@ pub struct Box<
     #[unstable(feature = "allocator_api", issue = "32838")] A: Allocator = Global,
 >(Unique<T>, A);
 
+/// Constructs a `Box<T>` by calling the `exchange_malloc` lang item and moving the argument into
+/// the newly allocated memory. This is an intrinsic to avoid unnecessary copies.
+///
+/// This is the surface syntax for `box <expr>` expressions.
+#[cfg(not(bootstrap))]
+#[rustc_intrinsic]
+#[rustc_intrinsic_must_be_overridden]
+#[unstable(feature = "liballoc_internals", issue = "none")]
+pub fn box_new<T>(_x: T) -> Box<T> {
+    unreachable!()
+}
+
+/// Transition function for the next bootstrap bump.
+#[cfg(bootstrap)]
+#[unstable(feature = "liballoc_internals", issue = "none")]
+#[inline(always)]
+pub fn box_new<T>(x: T) -> Box<T> {
+    #[rustc_box]
+    Box::new(x)
+}
+
 impl<T> Box<T> {
     /// Allocates memory on the heap and then places `x` into it.
     ///
@@ -250,8 +271,7 @@ impl<T> Box<T> {
     #[rustc_diagnostic_item = "box_new"]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub fn new(x: T) -> Self {
-        #[rustc_box]
-        Box::new(x)
+        return box_new(x);
     }
 
     /// Constructs a new box with uninitialized contents.
@@ -1045,6 +1065,8 @@ impl<T: ?Sized> Box<T> {
     /// memory problems. For example, a double-free may occur if the
     /// function is called twice on the same raw pointer.
     ///
+    /// The raw pointer must point to a block of memory allocated by the global allocator.
+    ///
     /// The safety conditions are described in the [memory layout] section.
     ///
     /// # Examples
@@ -1148,6 +1170,7 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     /// memory problems. For example, a double-free may occur if the
     /// function is called twice on the same raw pointer.
     ///
+    /// The raw pointer must point to a block of memory allocated by `alloc`
     ///
     /// # Examples
     ///

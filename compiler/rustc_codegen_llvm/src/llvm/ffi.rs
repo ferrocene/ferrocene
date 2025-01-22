@@ -99,7 +99,7 @@ pub enum ModuleFlagMergeBehavior {
 /// LLVM CallingConv::ID. Should we wrap this?
 ///
 /// See <https://github.com/llvm/llvm-project/blob/main/llvm/include/llvm/IR/CallingConv.h>
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug, TryFromU32)]
 #[repr(C)]
 pub enum CallConv {
     CCallConv = 0,
@@ -2006,6 +2006,12 @@ unsafe extern "C" {
         Flags: DIFlags,
         val: Option<&'a Value>,
         AlignInBits: u32,
+    ) -> &'a DIDerivedType;
+
+    pub fn LLVMRustDIBuilderCreateQualifiedType<'a>(
+        Builder: &DIBuilder<'a>,
+        Tag: c_uint,
+        Type: &'a DIType,
     ) -> &'a DIDerivedType;
 
     pub fn LLVMRustDIBuilderCreateLexicalBlock<'a>(

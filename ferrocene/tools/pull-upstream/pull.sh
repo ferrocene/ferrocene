@@ -307,7 +307,7 @@ if ./x.py run generate-completions >/dev/null; then
         git commit -m "update ${GENERATED_COMPLETIONS_DIR}"
     fi
 else
-    automation_warning "The automation couldn't regenerate the x.py completions. Please run \`./x run generate-completions\` after fixing the merge conflicts."
+    automation_warning "Couldn't regenerate the \`x.py\` completions. Please run \`./x run generate-completions\` after fixing the merge conflicts."
 fi
 
 git branch -D "${TEMP_BRANCH}"

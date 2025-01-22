@@ -77,9 +77,9 @@ class PullUpstreamPR(AutomatedPR):
 
         warnings = self._warnings_file.read().strip().split("\n")
         if warnings:
-            message += ":warning: The automation reported these warnings: :warning:\n\n"
+            message += ":warning: **The automation reported these warnings:** :warning:\n\n"
             for warning in warnings:
-                message += f"* {warning}"
+                message += f"* {warning}\n"
             message += "\n"
 
         message += "This PR pulls the following changes from the upstream repository:\n\n"

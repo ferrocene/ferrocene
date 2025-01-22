@@ -102,7 +102,7 @@ if [[ "${upstream_commit}" = "FETCH_HEAD" ]]; then
     elif [[ "${upstream_commit}" != "${fetch_head}" ]]; then
         partial_pull=yes
 
-        automation_warning "Only the first ${MAX_MERGES_PER_PR} commits are included in this pull. You should run the automation again after this PR is merged."
+        automation_warning "Only the first ${MAX_MERGES_PER_PR} PRs are included in this pull. You should run the automation again after this PR is merged."
     fi
 fi
 
@@ -307,7 +307,7 @@ if ./x.py run generate-completions >/dev/null; then
         git commit -m "update ${GENERATED_COMPLETIONS_DIR}"
     fi
 else
-    automation_warning "The automation couldn't regenerate the x.py completions. Please run \`./x run generate-completions\` after fixing the merge conflicts."
+    automation_warning "Couldn't regenerate the \`x.py\` completions. Please run \`./x run generate-completions\` after fixing the merge conflicts."
 fi
 
 git branch -D "${TEMP_BRANCH}"

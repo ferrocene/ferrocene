@@ -33,8 +33,9 @@ class PullUpstreamPR(AutomatedPR):
         self._base_branch = base_branch
 
         # The pull.sh script records warnings that should be displayed to the user. They will be
-        # stored by the script in this file, which we can then read.
-        self._warnings_file = tempfile.NamedTemporaryFile(mode="w", delete_on_close=False)
+        # stored by the script in this file, which we can then read. The file is open in read mode
+        # since the writing will be done by push.sh.
+        self._warnings_file = tempfile.NamedTemporaryFile(mode="r", delete_on_close=False)
 
         super().__init__()
 
@@ -82,9 +83,7 @@ class PullUpstreamPR(AutomatedPR):
             message += "\n"
 
         message += "This PR pulls the following changes from the upstream repository:\n\n"
-        message += generate_pr_body.render_changes(
-            self.origin, self.base_branch(), branch_name, warnings
-        )
+        message += generate_pr_body.render_changes(self.origin, self.base_branch(), branch_name)
         return message
 
     def error_issue_title(self):

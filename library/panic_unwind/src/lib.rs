@@ -46,6 +46,7 @@ cfg_if::cfg_if! {
         target_os = "psp",
         target_os = "xous",
         target_os = "solid_asp3",
+<<<<<<< HEAD
         all(target_family = "unix", not(any(
             target_os = "espidf",
             target_os = "rtems",
@@ -53,6 +54,9 @@ cfg_if::cfg_if! {
             // ferrocene addition
             ferrocenecoretest_secretsauce,
         ))),
+=======
+        all(target_family = "unix", not(any(target_os = "espidf", target_os = "nuttx"))),
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         all(target_vendor = "fortanix", target_env = "sgx"),
         target_family = "wasm",
     ))] {

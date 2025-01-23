@@ -32,9 +32,9 @@ customer portal account), or can be downloaded along with the Ferrocene release
 Consulting Known Problems
 -------------------------
 
-Whenever a noticeable defect is discovered in Ferrocene, a new known problem is
-recorded in the :doc:`/known-problems`. Customers are alerted of new known
-problems via email.
+Whenever a noticeable defect is discovered in Ferrocene, it is analyzed and
+recorded into a database. The :doc:`known-problems` page describes how to access
+the database and how to keep up with newly discovered problems.
 
 .. _customer portal: https://customers.ferrocene.dev
 .. _docs.ferrocene.dev: https://docs.ferrocene.dev

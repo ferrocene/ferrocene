@@ -9,8 +9,6 @@
 //! Note that all dbghelp support is loaded dynamically, see `src/dbghelp.rs`
 //! for more information about that.
 
-#![allow(bad_style)]
-
 use super::super::{dbghelp, windows_sys::*};
 use core::ffi::c_void;
 use core::mem;
@@ -119,6 +117,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
     // Attempt to use `StackWalkEx` if we can, but fall back to `StackWalk64`
     // since it's in theory supported on more systems.
     match (*dbghelp.dbghelp()).StackWalkEx() {
+        #[allow(non_snake_case)]
         Some(StackWalkEx) => {
             let mut inner: STACKFRAME_EX = mem::zeroed();
             inner.StackFrameSize = mem::size_of::<STACKFRAME_EX>() as u32;

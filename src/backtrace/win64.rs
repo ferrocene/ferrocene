@@ -6,8 +6,6 @@
 //! We still report inlined frames during symbolization by consulting the appropriate
 //! `dbghelp` functions.
 
-#![allow(bad_style)]
-
 use super::super::windows_sys::*;
 use core::ffi::c_void;
 

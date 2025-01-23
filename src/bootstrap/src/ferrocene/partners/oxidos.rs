@@ -8,6 +8,7 @@ use crate::builder::{Builder, Kind, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::compile::run_cargo;
 use crate::core::build_steps::tool::SourceType;
 use crate::core::config::TargetSelection;
+use crate::utils::build_stamp::BuildStamp;
 use crate::utils::tarball::Tarball;
 use crate::{Compiler, Mode, t};
 
@@ -177,7 +178,7 @@ impl Step for BuildOxidOS {
         }
 
         let stamp =
-            builder.cargo_out(compiler, mode, target).join(format!(".{}.stamp", self.name()));
+            BuildStamp::new(&builder.cargo_out(compiler, mode, target)).with_prefix(self.name());
         run_cargo(builder, cargo, Vec::new(), &stamp, Vec::new(), false, false);
 
         builder.cargo_out(compiler, mode, target)

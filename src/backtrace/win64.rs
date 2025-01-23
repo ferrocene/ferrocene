@@ -91,6 +91,10 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
         // The base address of the module containing the function will be stored here
         // when RtlLookupFunctionEntry returns successfully.
         let mut base = 0;
+        // We use the `RtlLookupFunctionEntry` function in kernel32 which allows
+        // us to backtrace through JIT frames.
+        // Note that `RtlLookupFunctionEntry` only works for in-process backtraces,
+        // but that's all we support anyway, so it all lines up well.
         let fn_entry = RtlLookupFunctionEntry(ip, &mut base, ptr::null_mut());
         if fn_entry.is_null() {
             // No function entry could be found - this may indicate a corrupt

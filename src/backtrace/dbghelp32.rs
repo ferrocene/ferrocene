@@ -111,14 +111,6 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
         Err(()) => return, // oh well...
     };
 
-    // On x86_64 and ARM64 we opt to not use the default `Sym*` functions from
-    // dbghelp for getting the function table and module base. Instead we use
-    // the `RtlLookupFunctionEntry` function in kernel32 which will account for
-    // JIT compiler frames as well. These should be equivalent, but using
-    // `Rtl*` allows us to backtrace through JIT frames.
-    //
-    // Note that `RtlLookupFunctionEntry` only works for in-process backtraces,
-    // but that's all we support anyway, so it all lines up well.
     let function_table_access = dbghelp.SymFunctionTableAccess64();
     let get_module_base = dbghelp.SymGetModuleBase64();
 

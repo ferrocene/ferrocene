@@ -42,12 +42,7 @@ pub unsafe fn banana() -> u32 {
 // COMPAT-SAME: "target-features"="+x87,+sse2,+avx,+avx2,{{.*}}"
 // INCOMPAT-SAME: "target-features"="+x87,+sse2,-avx2,-avx,+avx,{{.*}}"
 // CHECK: attributes [[BANANAATTRS]]
-<<<<<<< HEAD
-// COMPAT-SAME: "target-features"="+avx,+avx2,{{.*}}"
-// INCOMPAT-SAME: "target-features"="-avx2,-avx"
-
-// ferrocene-annotations: um_rustc_C_opt_level
-=======
 // COMPAT-SAME: "target-features"="+x87,+sse2,+avx,+avx2,{{.*}}"
 // INCOMPAT-SAME: "target-features"="+x87,+sse2,-avx2,-avx"
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// ferrocene-annotations: um_rustc_C_opt_level

@@ -24,12 +24,9 @@ use crate::core::builder::{
     Builder, Cargo, Kind, PathSet, RunConfig, ShouldRun, Step, TaskPath, crate_description,
 };
 use crate::core::config::{DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection};
-<<<<<<< HEAD
 use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
-=======
 use crate::utils::build_stamp;
 use crate::utils::build_stamp::BuildStamp;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::utils::exec::command;
 use crate::utils::helpers::{
     exe, get_clang_cl_resource_dir, is_debug_info, is_dylib, symlink_dir, t, up_to_date,

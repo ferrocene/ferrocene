@@ -19,62 +19,80 @@ setup inside a Linux based environment.
 Host Setup
 ----------
 
-Unless otherwise noted, all bare-metal targets are tested in QEMU on a Linux host.
+Unless otherwise noted, all bare-metal targets are tested via QEMU on a Linux host.
 On macOS, a tool like Lima or Docker must be used. On Windows, WSL2 must be used.
-
-Please refer to the relevant per-host setup instructions below.
 
 :ref:`x86_64-unknown-linux-gnu`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You need to have all the normal prerequisites for testing Rust installed, as well as a few extras:
+You need to have all the normal prerequisites from :doc:`internal-procedures:setup-local-env`
+installed, as well as a few extras:
 
 .. code-block:: bash
 
-   sudo apt install awscli ninja-build bzip2 cmake gcc g++ qemu-user-static binfmt-support
+   sudo apt install qemu-user-static binfmt-support
 
 
 :ref:`aarch64-apple-darwin`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You need to use Lima. It's recommended to use the 'default' template and modify it as shown below.
+Install Lima, if you don't have it:
 
-.. note::
+.. code-block:: bash
 
-   The guest needs to have at more than the default of 4GiB of memory to not trigger the OOM
-   killer during build. 8GiB is recommended.
+    brew install lima
 
-Here is an sample config for your ``~/.lima/default/lima.yaml``:
+You can create a guest with the following:
 
 .. code-block:: yaml
 
-    minimumLimaVersion: "1.0.0"
-    images:
-    - location: "https://cloud-images.ubuntu.com/releases/24.10/release-20241212/ubuntu-24.10-server-cloudimg-arm64.img"
-      arch: "aarch64"
-      digest: "sha256:fb39312ffd2b47b97eaef6ff197912eaa3e0a215eb3eecfbf2a24acd96ee1125"
-    - location: "https://cloud-images.ubuntu.com/releases/24.10/release/ubuntu-24.10-server-cloudimg-arm64.img"
-      arch: "aarch64"
-    mounts:
-    - location: "~"
-    - location: "/tmp/lima"
-      writable: true
-    ssh:
-      forwardAgent: true
-    cpus: 8
-    memory: "8GiB"
-    mountTypesUnsupported: ["9p"]
+    cat <<- EOF | limactl create --name=ferrocene
+        minimumLimaVersion: "1.0.0"
+        images:
+        - location: "https://cloud-images.ubuntu.com/releases/24.10/release-20241212/ubuntu-24.10-server-cloudimg-arm64.img"
+          arch: "aarch64"
+          digest: "sha256:fb39312ffd2b47b97eaef6ff197912eaa3e0a215eb3eecfbf2a24acd96ee1125"
+        - location: "https://cloud-images.ubuntu.com/releases/24.10/release/ubuntu-24.10-server-cloudimg-arm64.img"
+          arch: "aarch64"
+        mounts:
+        - location: "~"
+        - location: "/tmp/lima"
+        writable: true
+        ssh:
+        forwardAgent: true
+        cpus: 8
+        memory: "8GiB"
+        mountTypesUnsupported: ["9p"]
+    EOF
 
-If you changed your configuration, make sure to restart the environment with ``limactl stop default`` then ``limactl start default``.
+Start the guest:
 
-Enter the shell with ``limactl shell default``.
+.. code-block:: bash
+    
+    limactl start ferrocene
+
+
+Shell into the guest:
+
+.. code-block:: bash
+    
+    limactl shell ferrocene
+
+You can also point `Visual Studio Code <https://code.visualstudio.com/docs/remote/ssh>`_ at it
+using `these steps <https://github.com/lima-vm/lima/discussions/1890#discussioncomment-7221563>`.
+
 
 :ref:`x86_64-pc-windows-msvc`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You need to use WSL2. It's recommended to use the latest stable Ubuntu.
+Setup WSL2, if you don't have it:
 
-Here is a sample configuration for your ``/etc/wsl.conf`` (in the guest):
+.. code-block:: bash
+
+    wsl --install --distribution Ubuntu-24.10
+
+Ensure `nestedVirtualization` is set in the guest ``/etc/wsl.conf``, here is an example
+configuration:
 
 .. code-block::
 
@@ -89,21 +107,26 @@ Here is a sample configuration for your ``/etc/wsl.conf`` (in the guest):
     
 If you changed your configuration, make sure to restart the environment with ``wsl --shutdown``.
 
-Enter the shell with ``wsl``, or `point Visual Studio Code <https://code.visualstudio.com/docs/remote/wsl-tutorial>`_ at it.
+Shell into the guest:
+
+.. code-block:: bash
+    
+    wsl
+    
+You can also point `Visual Studio Code <https://code.visualstudio.com/docs/remote/wsl-tutorial>`_ at it.
 
 Target Procedures
 -----------------
 
-In general, bare-metal targets follow a similar strategy: Use `binfmt_misc` to run the
-test target binaries.
+Currently bare metal targets have a similar procedure for testing.
 
 :ref:`aarch64-unknown-none`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. Note::
     
-    In a ``aarch64-unknown-linux-gnu`` environment you may simply skip to the final step,
-    no QEMU is needed.
+    In a :target:`aarch64-unknown-linux-gnu` environment (such as a Lima guest on :ref:`aarch64-apple-darwin`)
+    you may simply skip to the final step, running the tests, as no QEMU is needed.
 
 Install the necessary packages:
 
@@ -162,7 +185,9 @@ Then make sure it's imported:
     
    sudo update-binfmts --import qemu-arm
 
-Currently, this target uses our *secret sauce*. Eventually this will be an open source component of Ferrocene, but for now, it's our little bit of arcane magic.
+.. note::
+    
+    Currently, this target uses our *secret sauce*. Eventually this will be an open source component of Ferrocene, but for now, it's our little bit of arcane magic.
 
 First, set the target:
 

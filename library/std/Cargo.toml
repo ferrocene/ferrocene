@@ -90,7 +90,6 @@ backtrace = [
     'addr2line/rustc-dep-of-std',
     'object/rustc-dep-of-std',
     'miniz_oxide/rustc-dep-of-std',
-    'ruzstd/rustc-dep-of-std',
 ]
 
 panic-unwind = ["panic_unwind"]

@@ -77,11 +77,6 @@ impl MyContext {
     }
 }
 
-#[cfg(any(
-    target_arch = "x86_64",
-    target_arch = "aarch64",
-    target_arch = "arm64ec"
-))]
 #[inline(always)]
 pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
     use core::ptr;

@@ -386,6 +386,7 @@ impl<'gcc, 'tcx> CodegenCx<'gcc, 'tcx> {
 impl<'gcc, 'tcx> BackendTypes for CodegenCx<'gcc, 'tcx> {
     type Value = RValue<'gcc>;
     type Metadata = RValue<'gcc>;
+    // TODO(antoyo): change to Function<'gcc>.
     type Function = RValue<'gcc>;
 
     type BasicBlock = Block<'gcc>;
@@ -512,7 +513,6 @@ impl<'gcc, 'tcx> MiscCodegenMethods<'tcx> for CodegenCx<'gcc, 'tcx> {
         } else {
             // If the symbol already exists, it is an error: for example, the user wrote
             // #[no_mangle] extern "C" fn main(..) {..}
-            // instead of #[start]
             None
         }
     }

@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 // ferrocene addition: support panic=abort targets; upstreamed in rust-lang/rust#135823
+=======
+// -Zpanic_abort_tests makes this test work on panic=abort targets and
+// it's a no-op on panic=unwind targets
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 //@ compile-flags: --test -Zpanic_abort_tests
 // ignore-tidy-linelength
 //@ run-pass

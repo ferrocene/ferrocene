@@ -247,7 +247,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     self.check_coroutine(attr, target);
                 }
                 [sym::linkage, ..] => self.check_linkage(attr, span, target),
-                [sym::rustc_pub_transparent, ..] => self.check_rustc_pub_transparent( attr.span, span, attrs),
+                [sym::rustc_pub_transparent, ..] => self.check_rustc_pub_transparent(attr.span, span, attrs),
                 [
                     // ok
                     sym::allow
@@ -275,7 +275,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | sym::lang
                     | sym::needs_allocator
                     | sym::default_lib_allocator
-                    | sym::start
                     | sym::custom_mir,
                     ..
                 ] => {}
@@ -332,6 +331,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
 
         self.check_repr(attrs, span, target, item, hir_id);
         self.check_used(attrs, target, span);
+        self.check_rustc_force_inline(hir_id, attrs, span, target);
     }
 
     fn inline_attr_str_error_with_macro_def(&self, hir_id: HirId, attr: &Attribute, sym: &str) {
@@ -1646,7 +1646,8 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         };
 
         let Some(ItemLike::Item(Item {
-            kind: ItemKind::Fn(FnSig { decl, .. }, generics, _), ..
+            kind: ItemKind::Fn { sig: FnSig { decl, .. }, generics, .. },
+            ..
         })) = item
         else {
             bug!("should be a function item");
@@ -2479,6 +2480,45 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         }
     }
 
+    fn check_rustc_force_inline(
+        &self,
+        hir_id: HirId,
+        attrs: &[Attribute],
+        span: Span,
+        target: Target,
+    ) {
+        let force_inline_attr = attrs.iter().find(|attr| attr.has_name(sym::rustc_force_inline));
+        match (target, force_inline_attr) {
+            (Target::Closure, None) => {
+                let is_coro = matches!(
+                    self.tcx.hir().expect_expr(hir_id).kind,
+                    hir::ExprKind::Closure(hir::Closure {
+                        kind: hir::ClosureKind::Coroutine(..)
+                            | hir::ClosureKind::CoroutineClosure(..),
+                        ..
+                    })
+                );
+                let parent_did = self.tcx.hir().get_parent_item(hir_id).to_def_id();
+                let parent_span = self.tcx.def_span(parent_did);
+                let parent_force_inline_attr =
+                    self.tcx.get_attr(parent_did, sym::rustc_force_inline);
+                if let Some(attr) = parent_force_inline_attr
+                    && is_coro
+                {
+                    self.dcx().emit_err(errors::RustcForceInlineCoro {
+                        attr_span: attr.span,
+                        span: parent_span,
+                    });
+                }
+            }
+            (Target::Fn, _) => (),
+            (_, Some(attr)) => {
+                self.dcx().emit_err(errors::RustcForceInline { attr_span: attr.span, span });
+            }
+            (_, None) => (),
+        }
+    }
+
     /// Checks if `#[autodiff]` is applied to an item other than a function item.
     fn check_autodiff(&self, _hir_id: HirId, _attr: &Attribute, span: Span, target: Target) {
         debug!("check_autodiff");
@@ -2614,7 +2654,6 @@ fn check_invalid_crate_level_attr(tcx: TyCtxt<'_>, attrs: &[Attribute]) {
         sym::repr,
         sym::path,
         sym::automatically_derived,
-        sym::start,
         sym::rustc_main,
         sym::derive,
         sym::test,

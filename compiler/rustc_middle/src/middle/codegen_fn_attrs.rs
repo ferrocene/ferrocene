@@ -28,7 +28,10 @@ pub struct CodegenFnAttrs {
     pub link_ordinal: Option<u16>,
     /// The `#[target_feature(enable = "...")]` attribute and the enabled
     /// features (only enabled features are supported right now).
+    /// Implied target features have already been applied.
     pub target_features: Vec<TargetFeature>,
+    /// Whether the function was declared safe, but has target features
+    pub safe_target_features: bool,
     /// The `#[linkage = "..."]` attribute on Rust-defined items and the value we found.
     pub linkage: Option<Linkage>,
     /// The `#[linkage = "..."]` attribute on foreign items and the value we found.
@@ -149,6 +152,7 @@ impl CodegenFnAttrs {
             link_name: None,
             link_ordinal: None,
             target_features: vec![],
+            safe_target_features: false,
             linkage: None,
             import_linkage: None,
             link_section: None,

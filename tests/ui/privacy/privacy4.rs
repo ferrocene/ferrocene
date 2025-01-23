@@ -1,4 +1,4 @@
-#![feature(lang_items, start, no_core)]
+#![feature(lang_items, no_core)]
 #![no_core] // makes debugging this test *a lot* easier (during resolve)
 
 #[lang = "sized"] pub trait Sized {}
@@ -22,7 +22,11 @@ fn test2() {
     gpriv();
 }
 
+<<<<<<< HEAD
 #[start] fn main(_: isize, _: *const *const u8) -> isize { 3 }
 
 // ferrocene-annotations: fls_9gprp17h6t1q
 // Use Imports
+=======
+fn main() {}
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

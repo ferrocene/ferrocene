@@ -3,9 +3,9 @@ use std::{env, mem, ops::Not};
 
 use either::Either;
 use hir::{
-    db::ExpandDatabase, Adt, AsAssocItem, AsExternAssocItem, AssocItemContainer, CaptureKind,
+    db::ExpandDatabase, Adt, AsAssocItem, AsExternAssocItem, CaptureKind,
     DynCompatibilityViolation, HasCrate, HasSource, HirDisplay, Layout, LayoutError,
-    MethodViolationCode, Name, Semantics, Trait, Type, TypeInfo,
+    MethodViolationCode, Name, Semantics, Symbol, Trait, Type, TypeInfo, VariantDef,
 };
 use ide_db::{
     base_db::SourceDatabase,
@@ -27,7 +27,7 @@ use syntax::{algo, ast, match_ast, AstNode, AstToken, Direction, SyntaxToken, T}
 
 use crate::{
     doc_links::{remove_links, rewrite_links},
-    hover::{notable_traits, walk_and_push_ty},
+    hover::{notable_traits, walk_and_push_ty, SubstTyLen},
     interpret::render_const_eval_error,
     HoverAction, HoverConfig, HoverResult, Markup, MemoryLayoutHoverConfig,
     MemoryLayoutHoverRenderKind,
@@ -274,7 +274,7 @@ pub(super) fn keyword(
     let markup = process_markup(
         sema.db,
         Definition::Module(doc_owner),
-        &markup(Some(docs.into()), description, None, None),
+        &markup(Some(docs.into()), description, None, None, String::new()),
         config,
     );
     Some(HoverResult { markup, actions })
@@ -336,8 +336,8 @@ pub(super) fn try_for_lint(attr: &ast::Attr, token: &SyntaxToken) -> Option<Hove
                 .and_then(|t| algo::non_trivia_sibling(t, Direction::Prev))
                 .filter(|t| t.kind() == T![:])
                 .and_then(|t| algo::non_trivia_sibling(t, Direction::Prev))
-                .map_or(false, |t| {
-                    t.kind() == T![ident] && t.into_token().map_or(false, |t| t.text() == "clippy")
+                .is_some_and(|t| {
+                    t.kind() == T![ident] && t.into_token().is_some_and(|t| t.text() == "clippy")
                 });
             if is_clippy {
                 (true, CLIPPY_LINTS)
@@ -376,12 +376,66 @@ pub(super) fn process_markup(
     Markup::from(markup)
 }
 
-fn definition_owner_name(db: &RootDatabase, def: &Definition, edition: Edition) -> Option<String> {
+fn definition_owner_name(db: &RootDatabase, def: Definition, edition: Edition) -> Option<String> {
     match def {
-        Definition::Field(f) => Some(f.parent_def(db).name(db)),
-        Definition::Local(l) => l.parent(db).name(db),
+        Definition::Field(f) => {
+            let parent = f.parent_def(db);
+            let parent_name = parent.name(db);
+            let parent_name = parent_name.display(db, edition).to_string();
+            return match parent {
+                VariantDef::Variant(variant) => {
+                    let enum_name = variant.parent_enum(db).name(db);
+                    Some(format!("{}::{parent_name}", enum_name.display(db, edition)))
+                }
+                _ => Some(parent_name),
+            };
+        }
         Definition::Variant(e) => Some(e.parent_enum(db).name(db)),
+        Definition::GenericParam(generic_param) => match generic_param.parent() {
+            hir::GenericDef::Adt(it) => Some(it.name(db)),
+            hir::GenericDef::Trait(it) => Some(it.name(db)),
+            hir::GenericDef::TraitAlias(it) => Some(it.name(db)),
+            hir::GenericDef::TypeAlias(it) => Some(it.name(db)),
 
+            hir::GenericDef::Impl(i) => i.self_ty(db).as_adt().map(|adt| adt.name(db)),
+            hir::GenericDef::Function(it) => {
+                let container = it.as_assoc_item(db).and_then(|assoc| match assoc.container(db) {
+                    hir::AssocItemContainer::Trait(t) => Some(t.name(db)),
+                    hir::AssocItemContainer::Impl(i) => {
+                        i.self_ty(db).as_adt().map(|adt| adt.name(db))
+                    }
+                });
+                match container {
+                    Some(name) => {
+                        return Some(format!(
+                            "{}::{}",
+                            name.display(db, edition),
+                            it.name(db).display(db, edition)
+                        ))
+                    }
+                    None => Some(it.name(db)),
+                }
+            }
+            hir::GenericDef::Const(it) => {
+                let container = it.as_assoc_item(db).and_then(|assoc| match assoc.container(db) {
+                    hir::AssocItemContainer::Trait(t) => Some(t.name(db)),
+                    hir::AssocItemContainer::Impl(i) => {
+                        i.self_ty(db).as_adt().map(|adt| adt.name(db))
+                    }
+                });
+                match container {
+                    Some(name) => {
+                        return Some(format!(
+                            "{}::{}",
+                            name.display(db, edition),
+                            it.name(db)?.display(db, edition)
+                        ))
+                    }
+                    None => it.name(db),
+                }
+            }
+        },
+        Definition::DeriveHelper(derive_helper) => Some(derive_helper.derive().name(db)),
         d => {
             if let Some(assoc_item) = d.as_assoc_item(db) {
                 match assoc_item.container(db) {
@@ -421,10 +475,11 @@ pub(super) fn definition(
     notable_traits: &[(Trait, Vec<(Option<Type>, Name)>)],
     macro_arm: Option<u32>,
     hovered_definition: bool,
+    subst_types: Option<&Vec<(Symbol, Type)>>,
     config: &HoverConfig,
     edition: Edition,
 ) -> Markup {
-    let mod_path = definition_mod_path(db, &def, edition);
+    let mod_path = definition_path(db, &def, edition);
     let label = match def {
         Definition::Trait(trait_) => {
             trait_.display_limited(db, config.max_trait_assoc_items_count, edition).to_string()
@@ -582,11 +637,20 @@ pub(super) fn definition(
         _ => None,
     };
 
+    let variance_info = || match def {
+        Definition::GenericParam(it) => it.variance(db).as_ref().map(ToString::to_string),
+        _ => None,
+    };
+
     let mut extra = String::new();
     if hovered_definition {
         if let Some(notable_traits) = render_notable_trait(db, notable_traits, edition) {
             extra.push_str("\n___\n");
             extra.push_str(&notable_traits);
+        }
+        if let Some(variance_info) = variance_info() {
+            extra.push_str("\n___\n");
+            extra.push_str(&variance_info);
         }
         if let Some(layout_info) = layout_info() {
             extra.push_str("\n___\n");
@@ -604,7 +668,38 @@ pub(super) fn definition(
         desc.push_str(&value);
     }
 
-    markup(docs.map(Into::into), desc, extra.is_empty().not().then_some(extra), mod_path)
+    let subst_types = match config.max_subst_ty_len {
+        SubstTyLen::Hide => String::new(),
+        SubstTyLen::LimitTo(_) | SubstTyLen::Unlimited => {
+            let limit = if let SubstTyLen::LimitTo(limit) = config.max_subst_ty_len {
+                Some(limit)
+            } else {
+                None
+            };
+            subst_types
+                .map(|subst_type| {
+                    subst_type
+                        .iter()
+                        .filter(|(_, ty)| !ty.is_unknown())
+                        .format_with(", ", |(name, ty), fmt| {
+                            fmt(&format_args!(
+                                "`{name}` = `{}`",
+                                ty.display_truncated(db, limit, edition)
+                            ))
+                        })
+                        .to_string()
+                })
+                .unwrap_or_default()
+        }
+    };
+
+    markup(
+        docs.map(Into::into),
+        desc,
+        extra.is_empty().not().then_some(extra),
+        mod_path,
+        subst_types,
+    )
 }
 
 pub(super) fn literal(
@@ -663,10 +758,22 @@ pub(super) fn literal(
     let mut s = format!("```rust\n{ty}\n```\n___\n\n");
     match value {
         Ok(value) => {
+            let backtick_len = value.chars().filter(|c| *c == '`').count();
+            let spaces_len = value.chars().filter(|c| *c == ' ').count();
+            let backticks = "`".repeat(backtick_len + 1);
+            let space_char = if spaces_len == value.len() { "" } else { " " };
+
             if let Some(newline) = value.find('\n') {
-                format_to!(s, "value of literal (truncated up to newline): {}", &value[..newline])
+                format_to!(
+                    s,
+                    "value of literal (truncated up to newline): {backticks}{space_char}{}{space_char}{backticks}",
+                    &value[..newline]
+                )
             } else {
-                format_to!(s, "value of literal: {value}")
+                format_to!(
+                    s,
+                    "value of literal: {backticks}{space_char}{value}{space_char}{backticks}"
+                )
             }
         }
         Err(error) => format_to!(s, "invalid literal: {error}"),
@@ -831,12 +938,11 @@ fn closure_ty(
     } else {
         String::new()
     };
-    let mut markup = format!("```rust\n{}", c.display_with_id(sema.db, edition));
+    let mut markup = format!("```rust\n{}\n```", c.display_with_impl(sema.db, edition));
 
     if let Some(trait_) = c.fn_trait(sema.db).get_id(sema.db, original.krate(sema.db).into()) {
         push_new_def(hir::Trait::from(trait_).into())
     }
-    format_to!(markup, "\n{}\n```", c.display_with_impl(sema.db, edition),);
     if let Some(layout) =
         render_memory_layout(config.memory_layout, || original.layout(sema.db), |_| None, |_| None)
     {
@@ -852,19 +958,22 @@ fn closure_ty(
     Some(res)
 }
 
-fn definition_mod_path(db: &RootDatabase, def: &Definition, edition: Edition) -> Option<String> {
-    if matches!(def, Definition::GenericParam(_) | Definition::Local(_) | Definition::Label(_)) {
+fn definition_path(db: &RootDatabase, &def: &Definition, edition: Edition) -> Option<String> {
+    if matches!(
+        def,
+        Definition::TupleField(_)
+            | Definition::Label(_)
+            | Definition::Local(_)
+            | Definition::BuiltinAttr(_)
+            | Definition::BuiltinLifetime(_)
+            | Definition::BuiltinType(_)
+            | Definition::InlineAsmRegOrRegClass(_)
+            | Definition::InlineAsmOperand(_)
+    ) {
         return None;
     }
-    let container: Option<Definition> =
-        def.as_assoc_item(db).and_then(|assoc| match assoc.container(db) {
-            AssocItemContainer::Trait(trait_) => Some(trait_.into()),
-            AssocItemContainer::Impl(impl_) => impl_.self_ty(db).as_adt().map(|adt| adt.into()),
-        });
-    container
-        .unwrap_or(*def)
-        .module(db)
-        .map(|module| path(db, module, definition_owner_name(db, def, edition), edition))
+    let rendered_parent = definition_owner_name(db, def, edition);
+    def.module(db).map(|module| path(db, module, rendered_parent, edition))
 }
 
 fn markup(
@@ -872,6 +981,7 @@ fn markup(
     rust: String,
     extra: Option<String>,
     mod_path: Option<String>,
+    subst_types: String,
 ) -> Markup {
     let mut buf = String::new();
 
@@ -884,6 +994,10 @@ fn markup(
 
     if let Some(extra) = extra {
         buf.push_str(&extra);
+    }
+
+    if !subst_types.is_empty() {
+        format_to!(buf, "\n___\n{subst_types}");
     }
 
     if let Some(doc) = docs {
@@ -901,7 +1015,7 @@ fn find_std_module(
     let std_crate = famous_defs.std()?;
     let std_root_module = std_crate.root_module();
     std_root_module.children(db).find(|module| {
-        module.name(db).map_or(false, |module| module.display(db, edition).to_string() == name)
+        module.name(db).is_some_and(|module| module.display(db, edition).to_string() == name)
     })
 }
 

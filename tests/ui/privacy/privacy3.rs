@@ -1,6 +1,6 @@
 //@ compile-flags: -Zdeduplicate-diagnostics=yes
 
-#![feature(start, no_core)]
+#![feature( no_core)]
 #![no_core] // makes debugging this test *a lot* easier (during resolve)
 
 // Test to make sure that private items imported through globs remain private
@@ -26,7 +26,11 @@ fn test1() {
     gpriv();
 }
 
+<<<<<<< HEAD
 #[start] fn main(_: isize, _: *const *const u8) -> isize { 3 }
 
 // ferrocene-annotations: fls_9gprp17h6t1q
 // Use Imports
+=======
+fn main() {}
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

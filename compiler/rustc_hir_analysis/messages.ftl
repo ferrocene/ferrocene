@@ -135,7 +135,7 @@ hir_analysis_dispatch_from_dyn_multi = implementing the `DispatchFromDyn` trait 
 
 hir_analysis_dispatch_from_dyn_repr = structs implementing `DispatchFromDyn` may not have `#[repr(packed)]` or `#[repr(C)]`
 
-hir_analysis_dispatch_from_dyn_zst = the trait `DispatchFromDyn` may only be implemented for structs containing the field being coerced, ZST fields with 1 byte alignment, and nothing else
+hir_analysis_dispatch_from_dyn_zst = the trait `DispatchFromDyn` may only be implemented for structs containing the field being coerced, ZST fields with 1 byte alignment that don't mention type/const generics, and nothing else
     .note = extra field `{$name}` of type `{$ty}` is not allowed
 
 hir_analysis_drop_impl_negative = negative `Drop` impls are not supported
@@ -488,21 +488,6 @@ hir_analysis_simd_ffi_highly_experimental = use of SIMD type{$snip} in FFI is hi
 
 hir_analysis_specialization_trait = implementing `rustc_specialization_trait` traits is unstable
     .help = add `#![feature(min_specialization)]` to the crate attributes to enable
-
-hir_analysis_start_function_parameters = `#[start]` function is not allowed to have type parameters
-    .label = `#[start]` function cannot have type parameters
-
-hir_analysis_start_function_where = `#[start]` function is not allowed to have a `where` clause
-    .label = `#[start]` function cannot have a `where` clause
-
-hir_analysis_start_not_async = `#[start]` function is not allowed to be `async`
-    .label = `#[start]` is not allowed to be `async`
-
-hir_analysis_start_not_target_feature = `#[start]` function is not allowed to have `#[target_feature]`
-    .label = `#[start]` function is not allowed to have `#[target_feature]`
-
-hir_analysis_start_not_track_caller = `#[start]` function is not allowed to be `#[track_caller]`
-    .label = `#[start]` function is not allowed to be `#[track_caller]`
 
 hir_analysis_static_specialize = cannot specialize on `'static` lifetime
 

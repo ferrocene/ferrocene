@@ -9,7 +9,12 @@ use crate::RustcVersion;
 /// `since` field of the `#[stable]` attribute.
 ///
 /// For more, see [this pull request](https://github.com/rust-lang/rust/pull/100591).
-pub const VERSION_PLACEHOLDER: &str = "CURRENT_RUSTC_VERSION";
+pub const VERSION_PLACEHOLDER: &str = concat!("CURRENT_RUSTC_VERSIO", "N");
+// Note that the `concat!` macro above prevents `src/tools/replace-version-placeholder` from
+// replacing the constant with the current version. Hardcoding the tool to skip this file doesn't
+// work as the file can (and at some point will) be moved around.
+//
+// Turning the `concat!` macro into a string literal will make Pietro cry. That'd be sad :(
 
 /// Represents the following attributes:
 ///
@@ -96,6 +101,16 @@ impl PartialConstStability {
     }
 }
 
+#[derive(Encodable, Decodable, PartialEq, Copy, Clone, Debug, Eq, Hash)]
+#[derive(HashStable_Generic)]
+pub enum AllowedThroughUnstableModules {
+    /// This does not get a deprecation warning. We still generally would prefer people to use the
+    /// fully stable path, and a warning will likely be emitted in the future.
+    WithoutDeprecation,
+    /// Emit the given deprecation warning.
+    WithDeprecation(Symbol),
+}
+
 /// The available stability levels.
 #[derive(Encodable, Decodable, PartialEq, Copy, Clone, Debug, Eq, Hash)]
 #[derive(HashStable_Generic)]
@@ -132,9 +147,8 @@ pub enum StabilityLevel {
     Stable {
         /// Rust release which stabilized this feature.
         since: StableSince,
-        /// Is this item allowed to be referred to on stable, despite being contained in unstable
-        /// modules?
-        allowed_through_unstable_modules: bool,
+        /// This is `Some` if this item allowed to be referred to on stable via unstable modules.
+        allowed_through_unstable_modules: Option<AllowedThroughUnstableModules>,
     },
 }
 

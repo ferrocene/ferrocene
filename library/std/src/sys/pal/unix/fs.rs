@@ -8,16 +8,11 @@ mod tests;
 use libc::c_char;
 #[cfg(any(
     all(target_os = "linux", not(target_env = "musl")),
-    target_os = "emscripten",
     target_os = "android",
     target_os = "hurd"
 ))]
 use libc::dirfd;
-#[cfg(any(
-    all(target_os = "linux", not(target_env = "musl")),
-    target_os = "emscripten",
-    target_os = "hurd"
-))]
+#[cfg(any(all(target_os = "linux", not(target_env = "musl")), target_os = "hurd"))]
 use libc::fstatat64;
 #[cfg(any(
     target_os = "android",
@@ -34,7 +29,6 @@ use libc::readdir as readdir64;
 #[cfg(not(any(
     target_os = "android",
     target_os = "linux",
-    target_os = "emscripten",
     target_os = "solaris",
     target_os = "illumos",
     target_os = "l4re",
@@ -48,7 +42,7 @@ use libc::readdir as readdir64;
 use libc::readdir_r as readdir64_r;
 #[cfg(any(all(target_os = "linux", not(target_env = "musl")), target_os = "hurd"))]
 use libc::readdir64;
-#[cfg(any(target_os = "emscripten", target_os = "l4re"))]
+#[cfg(target_os = "l4re")]
 use libc::readdir64_r;
 use libc::{c_int, mode_t};
 #[cfg(target_os = "android")]
@@ -58,7 +52,6 @@ use libc::{
 };
 #[cfg(not(any(
     all(target_os = "linux", not(target_env = "musl")),
-    target_os = "emscripten",
     target_os = "l4re",
     target_os = "android",
     target_os = "hurd",
@@ -69,7 +62,6 @@ use libc::{
 };
 #[cfg(any(
     all(target_os = "linux", not(target_env = "musl")),
-    target_os = "emscripten",
     target_os = "l4re",
     target_os = "hurd"
 ))]
@@ -717,7 +709,7 @@ impl Iterator for ReadDir {
                 // thread safety for readdir() as long an individual DIR* is not accessed
                 // concurrently, which is sufficient for Rust.
                 super::os::set_errno(0);
-                let entry_ptr = readdir64(self.inner.dirp.0);
+                let entry_ptr: *const dirent64 = readdir64(self.inner.dirp.0);
                 if entry_ptr.is_null() {
                     // We either encountered an error, or reached the end. Either way,
                     // the next call to next() should return None.
@@ -743,29 +735,19 @@ impl Iterator for ReadDir {
                 // contents were "simply" partially initialized data.
                 //
                 // Like for uninitialized contents, converting entry_ptr to `&dirent64`
-                // would not be legal. However, unique to dirent64 is that we don't even
-                // get to use `&raw const (*entry_ptr).d_name` because that operation
-                // requires the full extent of *entry_ptr to be in bounds of the same
-                // allocation, which is not necessarily the case here.
-                //
-                // Instead we must access fields individually through their offsets.
-                macro_rules! offset_ptr {
-                    ($entry_ptr:expr, $field:ident) => {{
-                        const OFFSET: isize = mem::offset_of!(dirent64, $field) as isize;
-                        if true {
-                            // Cast to the same type determined by the else branch.
-                            $entry_ptr.byte_offset(OFFSET).cast::<_>()
-                        } else {
-                            #[allow(deref_nullptr)]
-                            {
-                                &raw const (*ptr::null::<dirent64>()).$field
-                            }
-                        }
-                    }};
+                // would not be legal. However, we can use `&raw const (*entry_ptr).d_name`
+                // to refer the fields individually, because that operation is equivalent
+                // to `byte_offset` and thus does not require the full extent of `*entry_ptr`
+                // to be in bounds of the same allocation, only the offset of the field
+                // being referenced.
+                macro_rules! entry_field_ptr {
+                    ($field:ident) => {
+                        &raw const (*entry_ptr).$field
+                    };
                 }
 
                 // d_name is guaranteed to be null-terminated.
-                let name = CStr::from_ptr(offset_ptr!(entry_ptr, d_name).cast());
+                let name = CStr::from_ptr(entry_field_ptr!(d_name).cast());
                 let name_bytes = name.to_bytes();
                 if name_bytes == b"." || name_bytes == b".." {
                     continue;
@@ -773,14 +755,14 @@ impl Iterator for ReadDir {
 
                 #[cfg(not(target_os = "vita"))]
                 let entry = dirent64_min {
-                    d_ino: *offset_ptr!(entry_ptr, d_ino) as u64,
+                    d_ino: *entry_field_ptr!(d_ino) as u64,
                     #[cfg(not(any(
                         target_os = "solaris",
                         target_os = "illumos",
                         target_os = "aix",
                         target_os = "nto",
                     )))]
-                    d_type: *offset_ptr!(entry_ptr, d_type) as u8,
+                    d_type: *entry_field_ptr!(d_type) as u8,
                 };
 
                 #[cfg(target_os = "vita")]
@@ -899,7 +881,6 @@ impl DirEntry {
     #[cfg(all(
         any(
             all(target_os = "linux", not(target_env = "musl")),
-            target_os = "emscripten",
             target_os = "android",
             target_os = "hurd"
         ),
@@ -928,7 +909,6 @@ impl DirEntry {
     #[cfg(any(
         not(any(
             all(target_os = "linux", not(target_env = "musl")),
-            target_os = "emscripten",
             target_os = "android",
             target_os = "hurd",
         )),

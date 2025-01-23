@@ -502,11 +502,6 @@ passes_multiple_rustc_main =
     .first = first `#[rustc_main]` function
     .additional = additional `#[rustc_main]` function
 
-passes_multiple_start_functions =
-    multiple `start` functions
-    .label = multiple `start` functions
-    .previous = previous `#[start]` function here
-
 passes_must_not_suspend =
     `must_not_suspend` attribute should be applied to a struct, enum, union, or trait
     .label = is not a struct, enum, union, or trait
@@ -656,6 +651,14 @@ passes_rustc_allow_const_fn_unstable =
 passes_rustc_dirty_clean =
     attribute requires -Z query-dep-graph to be enabled
 
+passes_rustc_force_inline =
+    attribute should be applied to a function
+    .label = not a function definition
+
+passes_rustc_force_inline_coro =
+    attribute cannot be applied to a `async`, `gen` or `async gen` function
+    .label = `async`, `gen` or `async gen` function
+
 passes_rustc_layout_scalar_valid_range_arg =
     expected exactly one integer literal argument
 
@@ -790,6 +793,9 @@ passes_unused_assign = value assigned to `{$name}` is never read
 
 passes_unused_assign_passed = value passed to `{$name}` is never read
     .help = maybe it is overwritten before being read?
+
+passes_unused_assign_suggestion =
+    you might have meant to mutate the pointed at value being passed in, instead of changing the reference in the local binding
 
 passes_unused_capture_maybe_capture_ref = value captured by `{$name}` is never read
     .help = did you mean to capture by reference instead?

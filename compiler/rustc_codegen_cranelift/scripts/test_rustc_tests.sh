@@ -128,7 +128,11 @@ rm tests/ui/abi/large-byval-align.rs # exceeds implementation limit of Cranelift
 # should work when using ./x.py test the way it is intended
 # ============================================================
 rm -r tests/run-make/remap-path-prefix-dwarf # requires llvm-dwarfdump
+rm -r tests/run-make/strip # same
 rm -r tests/run-make/compiler-builtins # Expects lib/rustlib/src/rust to contains the standard library source
+rm -r tests/run-make/missing-unstable-trait-bound # This disables support for unstable features, but running cg_clif needs some unstable features
+rm -r tests/run-make/const-trait-stable-toolchain # same
+rm -r tests/run-make/incr-add-rust-src-component
 
 # genuine bugs
 # ============
@@ -172,12 +176,11 @@ diff --git a/src/tools/run-make-support/src/rustdoc.rs b/src/tools/run-make-supp
 index 9607ff02f96..b7d97caf9a2 100644
 --- a/src/tools/run-make-support/src/external_deps/rustdoc.rs
 +++ b/src/tools/run-make-support/src/external_deps/rustdoc.rs
-@@ -34,8 +34,6 @@ pub fn bare() -> Self {
+@@ -34,7 +34,6 @@ pub fn bare() -> Self {
      #[track_caller]
      pub fn new() -> Self {
          let mut cmd = setup_common();
--        let target_rpath_dir = env_var_os("TARGET_RPATH_DIR");
--        cmd.arg(format!("-L{}", target_rpath_dir.to_string_lossy()));
+-        cmd.arg("-L").arg(env_var_os("TARGET_RPATH_DIR"));
          Self { cmd }
      }
 
@@ -196,5 +199,5 @@ index e7ae773ffa1d3..04bc2d7787da7 100644
 EOF
 
 echo "[TEST] rustc test suite"
-COMPILETEST_FORCE_STAGE0=1 ./x.py test --stage 0 --test-args=--nocapture tests/{codegen-units,run-make,ui,incremental}
+COMPILETEST_FORCE_STAGE0=1 ./x.py test --stage 0 --test-args=--no-capture tests/{codegen-units,run-make,ui,incremental}
 popd

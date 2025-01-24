@@ -73,7 +73,11 @@ cd "$(git rev-parse --show-toplevel)"
 # Safety check to avoid messing with uncommitted changes.
 # Submodules are updated before that, as submodules needing an update should
 # not block merging changes from upstream.
+#
+# The update-index command ensures diff-index doesn't spuriously fail.
+# https://stackoverflow.com/questions/3878624#comment108071431_3879077
 git submodule update --init
+git update-index --refresh
 if ! git diff-index --quiet HEAD; then
     echo "pull-upstream: the current branch contains uncommitted changes!"
     echo "pull-upstream: make sure all changes are committed before running this script."

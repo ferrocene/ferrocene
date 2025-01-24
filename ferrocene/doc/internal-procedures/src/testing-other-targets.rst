@@ -189,7 +189,7 @@ Then make sure it's imported:
     
     Currently, this target uses our *secret sauce*. Eventually this will be an open source component of Ferrocene, but for now, it's our little bit of arcane magic.
 
-First, set the target:
+Now set the target:
 
 .. code-block:: bash
 

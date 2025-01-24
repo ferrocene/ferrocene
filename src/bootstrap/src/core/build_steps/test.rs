@@ -2184,6 +2184,9 @@ Please disable assertions with `rust.debug-assertions = false`.
         for flag in targetflags {
             cmd.arg("--target-rustcflags").arg(flag);
         }
+        if target.is_synthetic() {
+            cmd.arg("--target-rustcflags").arg("-Zunstable-options");
+        }
 
         cmd.arg("--python").arg(
             builder.config.python.as_ref().expect("python is required for running rustdoc tests"),

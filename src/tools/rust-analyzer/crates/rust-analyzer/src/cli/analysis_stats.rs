@@ -66,10 +66,6 @@ impl flags::AnalysisStats {
                 true => None,
                 false => Some(RustLibSource::Discover),
             },
-            sysroot_query_metadata: match self.no_query_sysroot_metadata {
-                true => project_model::SysrootQueryMetadata::None,
-                false => project_model::SysrootQueryMetadata::CargoMetadata,
-            },
             all_targets: true,
             set_test: !self.no_test,
             cfg_overrides: CfgOverrides {
@@ -1055,6 +1051,7 @@ impl flags::AnalysisStats {
                 &InlayHintsConfig {
                     render_colons: false,
                     type_hints: true,
+                    sized_bound: false,
                     discriminant_hints: ide::DiscriminantHints::Always,
                     parameter_hints: true,
                     generic_parameter_hints: ide::GenericParameterHints {

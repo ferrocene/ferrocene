@@ -520,7 +520,7 @@ impl Subdiagnostic for AddLifetimeParamsSuggestion<'_> {
             let is_impl = matches!(&node, hir::Node::ImplItem(_));
             let (generics, parent_generics) = match node {
                 hir::Node::Item(&hir::Item {
-                    kind: hir::ItemKind::Fn(_, ref generics, ..),
+                    kind: hir::ItemKind::Fn { ref generics, .. },
                     ..
                 })
                 | hir::Node::TraitItem(&hir::TraitItem { ref generics, .. })
@@ -1695,13 +1695,6 @@ pub enum ObligationCauseFailureCode {
         #[primary_span]
         span: Span,
     },
-    #[diag(trait_selection_oc_fn_start_correct_type, code = E0308)]
-    FnStartCorrectType {
-        #[primary_span]
-        span: Span,
-        #[subdiagnostic]
-        subdiags: Vec<TypeErrorAdditionalDiags>,
-    },
     #[diag(trait_selection_oc_fn_lang_correct_type, code = E0308)]
     FnLangCorrectType {
         #[primary_span]
@@ -1729,8 +1722,15 @@ pub enum ObligationCauseFailureCode {
         #[primary_span]
         span: Span,
     },
-    #[diag(trait_selection_oc_cant_coerce, code = E0308)]
-    CantCoerce {
+    #[diag(trait_selection_oc_cant_coerce_force_inline, code = E0308)]
+    CantCoerceForceInline {
+        #[primary_span]
+        span: Span,
+        #[subdiagnostic]
+        subdiags: Vec<TypeErrorAdditionalDiags>,
+    },
+    #[diag(trait_selection_oc_cant_coerce_intrinsic, code = E0308)]
+    CantCoerceIntrinsic {
         #[primary_span]
         span: Span,
         #[subdiagnostic]

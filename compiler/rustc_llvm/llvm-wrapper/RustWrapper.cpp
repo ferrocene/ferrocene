@@ -1,6 +1,8 @@
 #include "LLVMWrapper.h"
 
+#include "llvm-c/Analysis.h"
 #include "llvm-c/Core.h"
+#include "llvm-c/DebugInfo.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/Statistic.h"
@@ -52,6 +54,10 @@
 using namespace llvm;
 using namespace llvm::sys;
 using namespace llvm::object;
+
+// This opcode is an LLVM detail that could hypothetically change (?), so
+// verify that the hard-coded value in `dwarf_const.rs` still agrees with LLVM.
+static_assert(dwarf::DW_OP_LLVM_fragment == 0x1000);
 
 // LLVMAtomicOrdering is already an enum - don't create another
 // one.
@@ -163,6 +169,30 @@ extern "C" void LLVMRustPrintStatistics(RustStringRef OutBuf) {
 extern "C" LLVMValueRef LLVMRustGetNamedValue(LLVMModuleRef M, const char *Name,
                                               size_t NameLen) {
   return wrap(unwrap(M)->getNamedValue(StringRef(Name, NameLen)));
+}
+
+enum class LLVMRustVerifierFailureAction {
+  AbortProcessAction = 0,
+  PrintMessageAction = 1,
+  ReturnStatusAction = 2,
+};
+
+static LLVMVerifierFailureAction
+fromRust(LLVMRustVerifierFailureAction Action) {
+  switch (Action) {
+  case LLVMRustVerifierFailureAction::AbortProcessAction:
+    return LLVMAbortProcessAction;
+  case LLVMRustVerifierFailureAction::PrintMessageAction:
+    return LLVMPrintMessageAction;
+  case LLVMRustVerifierFailureAction::ReturnStatusAction:
+    return LLVMReturnStatusAction;
+  }
+  report_fatal_error("Invalid LLVMVerifierFailureAction value!");
+}
+
+extern "C" LLVMBool
+LLVMRustVerifyFunction(LLVMValueRef Fn, LLVMRustVerifierFailureAction Action) {
+  return LLVMVerifyFunction(Fn, fromRust(Action));
 }
 
 enum class LLVMRustTailCallKind {
@@ -386,6 +416,17 @@ extern "C" void LLVMRustAddCallSiteAttributes(LLVMValueRef Instr,
                                               size_t AttrsLen) {
   CallBase *Call = unwrap<CallBase>(Instr);
   AddAttributes(Call, Index, Attrs, AttrsLen);
+}
+
+extern "C" LLVMValueRef LLVMRustGetTerminator(LLVMBasicBlockRef BB) {
+  Instruction *ret = unwrap(BB)->getTerminator();
+  return wrap(ret);
+}
+
+extern "C" void LLVMRustEraseInstFromParent(LLVMValueRef Instr) {
+  if (auto I = dyn_cast<Instruction>(unwrap<Value>(Instr))) {
+    I->eraseFromParent();
+  }
 }
 
 extern "C" LLVMAttributeRef
@@ -636,120 +677,73 @@ template <typename DIT> DIT *unwrapDIPtr(LLVMMetadataRef Ref) {
 #define DIArray DINodeArray
 #define unwrapDI unwrapDIPtr
 
-// These values **must** match debuginfo::DIFlags! They also *happen*
-// to match LLVM, but that isn't required as we do giant sets of
-// matching below. The value shouldn't be directly passed to LLVM.
-enum class LLVMRustDIFlags : uint32_t {
-  FlagZero = 0,
-  FlagPrivate = 1,
-  FlagProtected = 2,
-  FlagPublic = 3,
-  FlagFwdDecl = (1 << 2),
-  FlagAppleBlock = (1 << 3),
-  FlagBlockByrefStruct = (1 << 4),
-  FlagVirtual = (1 << 5),
-  FlagArtificial = (1 << 6),
-  FlagExplicit = (1 << 7),
-  FlagPrototyped = (1 << 8),
-  FlagObjcClassComplete = (1 << 9),
-  FlagObjectPointer = (1 << 10),
-  FlagVector = (1 << 11),
-  FlagStaticMember = (1 << 12),
-  FlagLValueReference = (1 << 13),
-  FlagRValueReference = (1 << 14),
-  FlagExternalTypeRef = (1 << 15),
-  FlagIntroducedVirtual = (1 << 18),
-  FlagBitField = (1 << 19),
-  FlagNoReturn = (1 << 20),
-  // Do not add values that are not supported by the minimum LLVM
-  // version we support! see llvm/include/llvm/IR/DebugInfoFlags.def
-};
+// FIXME(Zalathar): This is a temporary typedef to avoid churning dozens of
+// bindings that are going to be deleted and replaced with their LLVM-C
+// equivalents, as part of #134009. After that happens, the remaining bindings
+// can be adjusted to use `LLVMDIFlags` instead of relying on this typedef.
+typedef LLVMDIFlags LLVMRustDIFlags;
 
-inline LLVMRustDIFlags operator&(LLVMRustDIFlags A, LLVMRustDIFlags B) {
-  return static_cast<LLVMRustDIFlags>(static_cast<uint32_t>(A) &
-                                      static_cast<uint32_t>(B));
-}
+// Statically assert that `LLVMDIFlags` (C) and `DIFlags` (C++) have the same
+// layout, at least for the flags we know about. This isn't guaranteed, but is
+// likely to remain true, and as long as it is true it makes conversions easy.
+#define ASSERT_DIFLAG_VALUE(FLAG, VALUE)                                       \
+  static_assert((LLVMDI##FLAG == (VALUE)) && (DINode::DIFlags::FLAG == (VALUE)))
+ASSERT_DIFLAG_VALUE(FlagZero, 0);
+ASSERT_DIFLAG_VALUE(FlagPrivate, 1);
+ASSERT_DIFLAG_VALUE(FlagProtected, 2);
+ASSERT_DIFLAG_VALUE(FlagPublic, 3);
+// Bit (1 << 1) is part of the private/protected/public values above.
+ASSERT_DIFLAG_VALUE(FlagFwdDecl, 1 << 2);
+ASSERT_DIFLAG_VALUE(FlagAppleBlock, 1 << 3);
+ASSERT_DIFLAG_VALUE(FlagReservedBit4, 1 << 4);
+ASSERT_DIFLAG_VALUE(FlagVirtual, 1 << 5);
+ASSERT_DIFLAG_VALUE(FlagArtificial, 1 << 6);
+ASSERT_DIFLAG_VALUE(FlagExplicit, 1 << 7);
+ASSERT_DIFLAG_VALUE(FlagPrototyped, 1 << 8);
+ASSERT_DIFLAG_VALUE(FlagObjcClassComplete, 1 << 9);
+ASSERT_DIFLAG_VALUE(FlagObjectPointer, 1 << 10);
+ASSERT_DIFLAG_VALUE(FlagVector, 1 << 11);
+ASSERT_DIFLAG_VALUE(FlagStaticMember, 1 << 12);
+ASSERT_DIFLAG_VALUE(FlagLValueReference, 1 << 13);
+ASSERT_DIFLAG_VALUE(FlagRValueReference, 1 << 14);
+// Bit (1 << 15) has been recycled, but the C API value hasn't been renamed.
+static_assert((LLVMDIFlagReserved == (1 << 15)) &&
+              (DINode::DIFlags::FlagExportSymbols == (1 << 15)));
+ASSERT_DIFLAG_VALUE(FlagSingleInheritance, 1 << 16);
+ASSERT_DIFLAG_VALUE(FlagMultipleInheritance, 2 << 16);
+ASSERT_DIFLAG_VALUE(FlagVirtualInheritance, 3 << 16);
+// Bit (1 << 17) is part of the inheritance values above.
+ASSERT_DIFLAG_VALUE(FlagIntroducedVirtual, 1 << 18);
+ASSERT_DIFLAG_VALUE(FlagBitField, 1 << 19);
+ASSERT_DIFLAG_VALUE(FlagNoReturn, 1 << 20);
+// Bit (1 << 21) is unused, but was `LLVMDIFlagMainSubprogram`.
+ASSERT_DIFLAG_VALUE(FlagTypePassByValue, 1 << 22);
+ASSERT_DIFLAG_VALUE(FlagTypePassByReference, 1 << 23);
+ASSERT_DIFLAG_VALUE(FlagEnumClass, 1 << 24);
+ASSERT_DIFLAG_VALUE(FlagThunk, 1 << 25);
+ASSERT_DIFLAG_VALUE(FlagNonTrivial, 1 << 26);
+ASSERT_DIFLAG_VALUE(FlagBigEndian, 1 << 27);
+ASSERT_DIFLAG_VALUE(FlagLittleEndian, 1 << 28);
+ASSERT_DIFLAG_VALUE(FlagIndirectVirtualBase, (1 << 2) | (1 << 5));
+#undef ASSERT_DIFLAG_VALUE
 
-inline LLVMRustDIFlags operator|(LLVMRustDIFlags A, LLVMRustDIFlags B) {
-  return static_cast<LLVMRustDIFlags>(static_cast<uint32_t>(A) |
-                                      static_cast<uint32_t>(B));
-}
-
-inline LLVMRustDIFlags &operator|=(LLVMRustDIFlags &A, LLVMRustDIFlags B) {
-  return A = A | B;
-}
-
-inline bool isSet(LLVMRustDIFlags F) { return F != LLVMRustDIFlags::FlagZero; }
-
-inline LLVMRustDIFlags visibility(LLVMRustDIFlags F) {
-  return static_cast<LLVMRustDIFlags>(static_cast<uint32_t>(F) & 0x3);
-}
-
-static DINode::DIFlags fromRust(LLVMRustDIFlags Flags) {
-  DINode::DIFlags Result = DINode::DIFlags::FlagZero;
-
-  switch (visibility(Flags)) {
-  case LLVMRustDIFlags::FlagPrivate:
-    Result |= DINode::DIFlags::FlagPrivate;
-    break;
-  case LLVMRustDIFlags::FlagProtected:
-    Result |= DINode::DIFlags::FlagProtected;
-    break;
-  case LLVMRustDIFlags::FlagPublic:
-    Result |= DINode::DIFlags::FlagPublic;
-    break;
-  default:
-    // The rest are handled below
-    break;
+// There are two potential ways to convert `LLVMDIFlags` to `DIFlags`:
+// - Check and copy every individual bit/subvalue from input to output.
+// - Statically assert that both have the same layout, and cast.
+// As long as the static assertions succeed, a cast is easier and faster.
+// In the (hopefully) unlikely event that the assertions do fail someday, and
+// LLVM doesn't expose its own conversion function, we'll have to switch over
+// to copying each bit/subvalue.
+static DINode::DIFlags fromRust(LLVMDIFlags Flags) {
+  // Check that all set bits are covered by the static assertions above.
+  const unsigned UNKNOWN_BITS = (1 << 31) | (1 << 30) | (1 << 29) | (1 << 21);
+  if (Flags & UNKNOWN_BITS) {
+    report_fatal_error("bad LLVMDIFlags");
   }
 
-  if (isSet(Flags & LLVMRustDIFlags::FlagFwdDecl)) {
-    Result |= DINode::DIFlags::FlagFwdDecl;
-  }
-  if (isSet(Flags & LLVMRustDIFlags::FlagAppleBlock)) {
-    Result |= DINode::DIFlags::FlagAppleBlock;
-  }
-  if (isSet(Flags & LLVMRustDIFlags::FlagVirtual)) {
-    Result |= DINode::DIFlags::FlagVirtual;
-  }
-  if (isSet(Flags & LLVMRustDIFlags::FlagArtificial)) {
-    Result |= DINode::DIFlags::FlagArtificial;
-  }
-  if (isSet(Flags & LLVMRustDIFlags::FlagExplicit)) {
-    Result |= DINode::DIFlags::FlagExplicit;
-  }
-  if (isSet(Flags & LLVMRustDIFlags::FlagPrototyped)) {
-    Result |= DINode::DIFlags::FlagPrototyped;
-  }
-  if (isSet(Flags & LLVMRustDIFlags::FlagObjcClassComplete)) {
-    Result |= DINode::DIFlags::FlagObjcClassComplete;
-  }
-  if (isSet(Flags & LLVMRustDIFlags::FlagObjectPointer)) {
-    Result |= DINode::DIFlags::FlagObjectPointer;
-  }
-  if (isSet(Flags & LLVMRustDIFlags::FlagVector)) {
-    Result |= DINode::DIFlags::FlagVector;
-  }
-  if (isSet(Flags & LLVMRustDIFlags::FlagStaticMember)) {
-    Result |= DINode::DIFlags::FlagStaticMember;
-  }
-  if (isSet(Flags & LLVMRustDIFlags::FlagLValueReference)) {
-    Result |= DINode::DIFlags::FlagLValueReference;
-  }
-  if (isSet(Flags & LLVMRustDIFlags::FlagRValueReference)) {
-    Result |= DINode::DIFlags::FlagRValueReference;
-  }
-  if (isSet(Flags & LLVMRustDIFlags::FlagIntroducedVirtual)) {
-    Result |= DINode::DIFlags::FlagIntroducedVirtual;
-  }
-  if (isSet(Flags & LLVMRustDIFlags::FlagBitField)) {
-    Result |= DINode::DIFlags::FlagBitField;
-  }
-  if (isSet(Flags & LLVMRustDIFlags::FlagNoReturn)) {
-    Result |= DINode::DIFlags::FlagNoReturn;
-  }
-
-  return Result;
+  // As long as the static assertions are satisfied and no unknown bits are
+  // present, we can convert from `LLVMDIFlags` to `DIFlags` with a cast.
+  return static_cast<DINode::DIFlags>(Flags);
 }
 
 // These values **must** match debuginfo::DISPFlags! They also *happen*
@@ -954,6 +948,47 @@ extern "C" void LLVMRustAddModuleFlagString(
       MDString::get(unwrap(M)->getContext(), StringRef(Value, ValueLen)));
 }
 
+extern "C" LLVMValueRef LLVMRustGetLastInstruction(LLVMBasicBlockRef BB) {
+  auto Point = unwrap(BB)->rbegin();
+  if (Point != unwrap(BB)->rend())
+    return wrap(&*Point);
+  return nullptr;
+}
+
+extern "C" void LLVMRustEraseInstBefore(LLVMBasicBlockRef bb, LLVMValueRef I) {
+  auto &BB = *unwrap(bb);
+  auto &Inst = *unwrap<Instruction>(I);
+  auto It = BB.begin();
+  while (&*It != &Inst)
+    ++It;
+  // Make sure we found the Instruction.
+  assert(It != BB.end());
+  // We don't want to erase the instruction itself.
+  It--;
+  // Delete in rev order to ensure no dangling references.
+  while (It != BB.begin()) {
+    auto Prev = std::prev(It);
+    It->eraseFromParent();
+    It = Prev;
+  }
+  It->eraseFromParent();
+}
+
+extern "C" bool LLVMRustHasMetadata(LLVMValueRef inst, unsigned kindID) {
+  if (auto *I = dyn_cast<Instruction>(unwrap<Value>(inst))) {
+    return I->hasMetadata(kindID);
+  }
+  return false;
+}
+
+extern "C" LLVMMetadataRef LLVMRustDIGetInstMetadata(LLVMValueRef x) {
+  if (auto *I = dyn_cast<Instruction>(unwrap<Value>(x))) {
+    auto *MD = I->getDebugLoc().getAsMDNode();
+    return wrap(MD);
+  }
+  return nullptr;
+}
+
 extern "C" void LLVMRustGlobalAddMetadata(LLVMValueRef Global, unsigned Kind,
                                           LLVMMetadataRef MD) {
   unwrap<GlobalObject>(Global)->addMetadata(Kind, *unwrap<MDNode>(MD));
@@ -1141,6 +1176,13 @@ extern "C" LLVMMetadataRef LLVMRustDIBuilderCreateStaticMemberType(
 }
 
 extern "C" LLVMMetadataRef
+LLVMRustDIBuilderCreateQualifiedType(LLVMDIBuilderRef Builder, unsigned Tag,
+                                     LLVMMetadataRef Type) {
+  return wrap(
+      unwrap(Builder)->createQualifiedType(Tag, unwrapDI<DIType>(Type)));
+}
+
+extern "C" LLVMMetadataRef
 LLVMRustDIBuilderCreateLexicalBlock(LLVMRustDIBuilderRef Builder,
                                     LLVMMetadataRef Scope, LLVMMetadataRef File,
                                     unsigned Line, unsigned Col) {
@@ -1311,18 +1353,6 @@ LLVMRustDILocationCloneWithBaseDiscriminator(LLVMMetadataRef Location,
   DILocation *Loc = unwrapDIPtr<DILocation>(Location);
   auto NewLoc = Loc->cloneWithBaseDiscriminator(BD);
   return wrap(NewLoc.has_value() ? NewLoc.value() : nullptr);
-}
-
-extern "C" uint64_t LLVMRustDIBuilderCreateOpDeref() {
-  return dwarf::DW_OP_deref;
-}
-
-extern "C" uint64_t LLVMRustDIBuilderCreateOpPlusUconst() {
-  return dwarf::DW_OP_plus_uconst;
-}
-
-extern "C" uint64_t LLVMRustDIBuilderCreateOpLLVMFragment() {
-  return dwarf::DW_OP_LLVM_fragment;
 }
 
 extern "C" void LLVMRustWriteTypeToString(LLVMTypeRef Ty, RustStringRef Str) {

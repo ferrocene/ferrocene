@@ -601,7 +601,7 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
                     self.call_expr.hir_id,
                     idx,
                 );
-                traits::ObligationCause::new(self.span, self.body_id, code)
+                self.cause(self.span, code)
             },
             self.param_env,
             method_predicates,
@@ -611,7 +611,7 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
 
         // this is a projection from a trait reference, so we have to
         // make sure that the trait reference inputs are well-formed.
-        self.add_wf_bounds(all_args, self.call_expr);
+        self.add_wf_bounds(all_args, self.call_expr.span);
 
         // the function type must also be well-formed (this is not
         // implied by the args being well-formed because of inherent

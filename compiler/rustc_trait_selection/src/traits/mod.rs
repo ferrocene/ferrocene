@@ -66,9 +66,9 @@ pub use self::specialize::{
 };
 pub use self::structural_normalize::StructurallyNormalizeExt;
 pub use self::util::{
-    BoundVarReplacer, PlaceholderReplacer, TraitAliasExpander, TraitAliasExpansionInfo, elaborate,
-    expand_trait_aliases, impl_item_is_final, supertraits,
-    transitive_bounds_that_define_assoc_item, upcast_choices, with_replaced_escaping_bound_vars,
+    BoundVarReplacer, PlaceholderReplacer, elaborate, expand_trait_aliases, impl_item_is_final,
+    supertrait_def_ids, supertraits, transitive_bounds_that_define_assoc_item, upcast_choices,
+    with_replaced_escaping_bound_vars,
 };
 use crate::error_reporting::InferCtxtErrorExt;
 use crate::infer::outlives::env::OutlivesEnvironment;
@@ -714,9 +714,18 @@ pub fn impossible_predicates<'tcx>(tcx: TyCtxt<'tcx>, predicates: Vec<ty::Clause
     }
     let errors = ocx.select_all_or_error();
 
-    let result = !errors.is_empty();
-    debug!("impossible_predicates = {:?}", result);
-    result
+    if !errors.is_empty() {
+        return true;
+    }
+
+    // Leak check for any higher-ranked trait mismatches.
+    // We only need to do this in the old solver, since the new solver already
+    // leak-checks.
+    if !infcx.next_trait_solver() && infcx.leak_check(ty::UniverseIndex::ROOT, None).is_err() {
+        return true;
+    }
+
+    false
 }
 
 fn instantiate_and_check_impossible_predicates<'tcx>(

@@ -12,16 +12,6 @@ use rustc_span::{Span, Symbol};
 use crate::fluent_generated as fluent;
 
 #[derive(LintDiagnostic)]
-#[diag(mir_build_unconditional_recursion)]
-#[help]
-pub(crate) struct UnconditionalRecursion {
-    #[label]
-    pub(crate) span: Span,
-    #[label(mir_build_unconditional_recursion_call_site_label)]
-    pub(crate) call_sites: Vec<Span>,
-}
-
-#[derive(LintDiagnostic)]
 #[diag(mir_build_call_to_deprecated_safe_fn_requires_unsafe)]
 pub(crate) struct CallToDeprecatedSafeFnRequiresUnsafe {
     #[label]
@@ -1065,25 +1055,6 @@ pub(crate) enum MiscPatternSuggestion {
         #[primary_span]
         start_span: Span,
     },
-}
-
-#[derive(Diagnostic)]
-#[diag(mir_build_rustc_box_attribute_error)]
-pub(crate) struct RustcBoxAttributeError {
-    #[primary_span]
-    pub(crate) span: Span,
-    #[subdiagnostic]
-    pub(crate) reason: RustcBoxAttrReason,
-}
-
-#[derive(Subdiagnostic)]
-pub(crate) enum RustcBoxAttrReason {
-    #[note(mir_build_attributes)]
-    Attributes,
-    #[note(mir_build_not_box)]
-    NotBoxNew,
-    #[note(mir_build_missing_box)]
-    MissingBox,
 }
 
 #[derive(LintDiagnostic)]

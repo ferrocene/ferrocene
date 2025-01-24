@@ -37,6 +37,7 @@
 //@[proc_dash_macro] ignore-aarch64-unknown-ferrocenecoretest (proc-macro is not supported)
 //@[proc_dash_macro] ignore-thumbv7em-ferrocenecoretest-eabi (proc-macro is not supported)
 //@[proc_dash_macro] ignore-thumbv7em-ferrocenecoretest-eabihf (proc-macro is not supported)
+//@[proc_dash_macro] needs-unwind (panic=abort causes warning to be emitted)
 //@[proc_dash_macro] compile-flags: --crate-type=proc-macro
 //@[proc_dash_macro] check-pass
 

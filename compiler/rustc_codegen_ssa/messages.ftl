@@ -67,7 +67,7 @@ codegen_ssa_failed_to_write = failed to write {$path}: {$error}
 codegen_ssa_field_associated_value_expected = associated value expected for `{$name}`
 
 codegen_ssa_forbidden_target_feature_attr =
-    target feature `{$feature}` cannot be toggled with `#[target_feature]`: {$reason}
+    target feature `{$feature}` cannot be enabled with `#[target_feature]`: {$reason}
 
 codegen_ssa_ignoring_emit_path = ignoring emit path because multiple .{$extension} files were produced
 
@@ -211,7 +211,7 @@ codegen_ssa_msvc_missing_linker = the msvc targets depend on the msvc linker but
 codegen_ssa_multiple_external_func_decl = multiple declarations of external function `{$function}` from library `{$library_name}` have different calling conventions
 
 codegen_ssa_multiple_main_functions = entry symbol `main` declared multiple times
-    .help = did you use `#[no_mangle]` on `fn main`? Use `#[start]` instead
+    .help = did you use `#[no_mangle]` on `fn main`? Use `#![no_main]` to suppress the usual Rust-generated entry point
 
 codegen_ssa_no_field = no field `{$name}`
 

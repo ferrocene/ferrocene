@@ -651,8 +651,15 @@ fn opts() -> Vec<RustcOptGroup> {
             "",
             "add arguments to be used when compiling doctests",
         ),
+        opt(
+            Unstable,
+            FlagMulti,
+            "",
+            "disable-minification",
+            "disable the minification of CSS/JS files (perma-unstable, do not use with cached files)",
+            "",
+        ),
         // deprecated / removed options
-        opt(Unstable, FlagMulti, "", "disable-minification", "removed", ""),
         opt(
             Stable,
             Multi,
@@ -865,11 +872,11 @@ fn main_args(
         }
 
         let krate = rustc_interface::passes::parse(sess);
-        if sess.dcx().has_errors().is_some() {
-            sess.dcx().fatal("Compilation failed, aborting rustdoc");
-        }
-
         rustc_interface::create_and_enter_global_ctxt(compiler, krate, |tcx| {
+            if sess.dcx().has_errors().is_some() {
+                sess.dcx().fatal("Compilation failed, aborting rustdoc");
+            }
+
             let (krate, render_opts, mut cache) = sess.time("run_global_ctxt", || {
                 core::run_global_ctxt(tcx, show_coverage, render_options, output_format)
             });

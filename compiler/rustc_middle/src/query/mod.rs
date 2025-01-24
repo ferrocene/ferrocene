@@ -57,7 +57,7 @@ use crate::middle::resolve_bound_vars::{ObjectLifetimeDefault, ResolveBoundVars,
 use crate::middle::stability::{self, DeprecationEntry};
 use crate::mir::interpret::{
     EvalStaticInitializerRawResult, EvalToAllocationRawResult, EvalToConstValueResult,
-    EvalToValTreeResult, GlobalId, LitToConstError, LitToConstInput,
+    EvalToValTreeResult, GlobalId, LitToConstInput,
 };
 use crate::mir::mono::{CodegenUnit, CollectionMode, MonoItem};
 use crate::query::erase::{Erase, erase, restore};
@@ -297,7 +297,7 @@ rustc_queries! {
         separate_provide_extern
     }
 
-    query unsizing_params_for_adt(key: DefId) -> &'tcx rustc_index::bit_set::BitSet<u32>
+    query unsizing_params_for_adt(key: DefId) -> &'tcx rustc_index::bit_set::DenseBitSet<u32>
     {
         arena_cache
         desc { |tcx|
@@ -494,7 +494,7 @@ rustc_queries! {
     }
 
     /// Set of param indexes for type params that are in the type's representation
-    query params_in_repr(key: DefId) -> &'tcx rustc_index::bit_set::BitSet<u32> {
+    query params_in_repr(key: DefId) -> &'tcx rustc_index::bit_set::DenseBitSet<u32> {
         desc { "finding type parameters in the representation" }
         arena_cache
         no_hash
@@ -1100,9 +1100,6 @@ rustc_queries! {
         desc { |tcx| "type-checking `{}`", tcx.def_path_str(key) }
         cache_on_disk_if(tcx) { !tcx.is_typeck_child(key.to_def_id()) }
     }
-    query diagnostic_only_typeck(key: LocalDefId) -> &'tcx ty::TypeckResults<'tcx> {
-        desc { |tcx| "type-checking `{}`", tcx.def_path_str(key) }
-    }
 
     query used_trait_imports(key: LocalDefId) -> &'tcx UnordSet<LocalDefId> {
         desc { |tcx| "finding used_trait_imports `{}`", tcx.def_path_str(key) }
@@ -1167,8 +1164,7 @@ rustc_queries! {
     }
 
     /// Check whether the function has any recursion that could cause the inliner to trigger
-    /// a cycle. Returns the call stack causing the cycle. The call stack does not contain the
-    /// current function, just all intermediate functions.
+    /// a cycle.
     query mir_callgraph_reachable(key: (ty::Instance<'tcx>, LocalDefId)) -> bool {
         fatal_cycle
         desc { |tcx|
@@ -1246,6 +1242,7 @@ rustc_queries! {
             "simplifying constant for the type system `{}`",
             key.value.display(tcx)
         }
+        depth_limit
         cache_on_disk_if { true }
     }
 
@@ -1271,7 +1268,7 @@ rustc_queries! {
     // FIXME get rid of this with valtrees
     query lit_to_const(
         key: LitToConstInput<'tcx>
-    ) -> Result<ty::Const<'tcx>, LitToConstError> {
+    ) -> ty::Const<'tcx> {
         desc { "converting literal to const" }
     }
 
@@ -1719,6 +1716,11 @@ rustc_queries! {
         ensure_forwards_result_if_red
     }
 
+    query enforce_impl_non_lifetime_params_are_constrained(key: LocalDefId) -> Result<(), ErrorGuaranteed> {
+        desc { |tcx| "checking that `{}`'s generics are constrained by the impl header", tcx.def_path_str(key) }
+        ensure_forwards_result_if_red
+    }
+
     // The `DefId`s of all non-generic functions and statics in the given crate
     // that can be reached from outside the crate.
     //
@@ -2126,6 +2128,8 @@ rustc_queries! {
         eval_always
         desc { "calculating the stability index for the local crate" }
     }
+    /// All available crates in the graph, including those that should not be user-facing
+    /// (such as private crates).
     query crates(_: ()) -> &'tcx [CrateNum] {
         eval_always
         desc { "fetching all foreign CrateNum instances" }
@@ -2355,7 +2359,7 @@ rustc_queries! {
     }
 
     /// Returns the Rust target features for the current target. These are not always the same as LLVM target features!
-    query rust_target_features(_: CrateNum) -> &'tcx UnordMap<String, rustc_target::target_features::StabilityComputed> {
+    query rust_target_features(_: CrateNum) -> &'tcx UnordMap<String, rustc_target::target_features::Stability> {
         arena_cache
         eval_always
         desc { "looking up Rust target features" }

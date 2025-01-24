@@ -12,7 +12,7 @@ use rustc_hir::*;
 use rustc_hir_pretty as pprust_hir;
 use rustc_middle::hir::nested_filter;
 use rustc_span::def_id::StableCrateId;
-use rustc_span::{ErrorGuaranteed, Ident, Span, Symbol, kw, sym};
+use rustc_span::{ErrorGuaranteed, Ident, Span, Symbol, kw, sym, with_metavar_spans};
 
 use crate::hir::ModuleItems;
 use crate::middle::debugger_visualizer::DebuggerVisualizerFile;
@@ -634,7 +634,7 @@ impl<'hir> Map<'hir> {
         for (hir_id, node) in self.parent_iter(hir_id) {
             if let Node::Item(Item {
                 kind:
-                    ItemKind::Fn(..)
+                    ItemKind::Fn { .. }
                     | ItemKind::Const(..)
                     | ItemKind::Static(..)
                     | ItemKind::Mod(..)
@@ -823,7 +823,7 @@ impl<'hir> Map<'hir> {
 
         let span = match self.tcx.hir_node(hir_id) {
             // Function-like.
-            Node::Item(Item { kind: ItemKind::Fn(sig, ..), span: outer_span, .. })
+            Node::Item(Item { kind: ItemKind::Fn { sig, .. }, span: outer_span, .. })
             | Node::TraitItem(TraitItem {
                 kind: TraitItemKind::Fn(sig, ..),
                 span: outer_span,
@@ -938,6 +938,7 @@ impl<'hir> Map<'hir> {
             Node::OpaqueTy(op) => op.span,
             Node::Pat(pat) => pat.span,
             Node::PatField(field) => field.span,
+            Node::PatExpr(lit) => lit.span,
             Node::Arm(arm) => arm.span,
             Node::Block(block) => block.span,
             Node::Ctor(..) => self.span_with_body(self.tcx.parent_hir_id(hir_id)),
@@ -1116,6 +1117,9 @@ pub(super) fn crate_hash(tcx: TyCtxt<'_>, _: LocalCrate) -> Svh {
         // the fly in the resolver, storing only their accumulated hash in `ResolverGlobalCtxt`,
         // and combining it with other hashes here.
         resolutions.visibilities_for_hashing.hash_stable(&mut hcx, &mut stable_hasher);
+        with_metavar_spans(|mspans| {
+            mspans.freeze_and_get_read_spans().hash_stable(&mut hcx, &mut stable_hasher);
+        });
         stable_hasher.finish()
     });
 
@@ -1149,7 +1153,7 @@ fn hir_id_to_string(map: Map<'_>, id: HirId) -> String {
                 ItemKind::Use(..) => "use",
                 ItemKind::Static(..) => "static",
                 ItemKind::Const(..) => "const",
-                ItemKind::Fn(..) => "fn",
+                ItemKind::Fn { .. } => "fn",
                 ItemKind::Macro(..) => "macro",
                 ItemKind::Mod(..) => "mod",
                 ItemKind::ForeignMod { .. } => "foreign mod",
@@ -1209,6 +1213,7 @@ fn hir_id_to_string(map: Map<'_>, id: HirId) -> String {
         Node::OpaqueTy(_) => node_str("opaque type"),
         Node::Pat(_) => node_str("pat"),
         Node::PatField(_) => node_str("pattern field"),
+        Node::PatExpr(_) => node_str("pattern literal"),
         Node::Param(_) => node_str("param"),
         Node::Arm(_) => node_str("arm"),
         Node::Block(_) => node_str("block"),
@@ -1244,6 +1249,7 @@ pub(super) fn hir_module_items(tcx: TyCtxt<'_>, module_id: LocalModDefId) -> Mod
         foreign_items,
         body_owners,
         opaques,
+        nested_bodies,
         ..
     } = collector;
     ModuleItems {
@@ -1254,6 +1260,7 @@ pub(super) fn hir_module_items(tcx: TyCtxt<'_>, module_id: LocalModDefId) -> Mod
         foreign_items: foreign_items.into_boxed_slice(),
         body_owners: body_owners.into_boxed_slice(),
         opaques: opaques.into_boxed_slice(),
+        nested_bodies: nested_bodies.into_boxed_slice(),
     }
 }
 
@@ -1274,6 +1281,7 @@ pub(crate) fn hir_crate_items(tcx: TyCtxt<'_>, _: ()) -> ModuleItems {
         foreign_items,
         body_owners,
         opaques,
+        nested_bodies,
         ..
     } = collector;
 
@@ -1285,6 +1293,7 @@ pub(crate) fn hir_crate_items(tcx: TyCtxt<'_>, _: ()) -> ModuleItems {
         foreign_items: foreign_items.into_boxed_slice(),
         body_owners: body_owners.into_boxed_slice(),
         opaques: opaques.into_boxed_slice(),
+        nested_bodies: nested_bodies.into_boxed_slice(),
     }
 }
 
@@ -1300,6 +1309,7 @@ struct ItemCollector<'tcx> {
     foreign_items: Vec<ForeignItemId>,
     body_owners: Vec<LocalDefId>,
     opaques: Vec<LocalDefId>,
+    nested_bodies: Vec<LocalDefId>,
 }
 
 impl<'tcx> ItemCollector<'tcx> {
@@ -1314,6 +1324,7 @@ impl<'tcx> ItemCollector<'tcx> {
             foreign_items: Vec::default(),
             body_owners: Vec::default(),
             opaques: Vec::default(),
+            nested_bodies: Vec::default(),
         }
     }
 }
@@ -1356,6 +1367,7 @@ impl<'hir> Visitor<'hir> for ItemCollector<'hir> {
 
     fn visit_inline_const(&mut self, c: &'hir ConstBlock) {
         self.body_owners.push(c.def_id);
+        self.nested_bodies.push(c.def_id);
         intravisit::walk_inline_const(self, c)
     }
 
@@ -1367,6 +1379,7 @@ impl<'hir> Visitor<'hir> for ItemCollector<'hir> {
     fn visit_expr(&mut self, ex: &'hir Expr<'hir>) {
         if let ExprKind::Closure(closure) = ex.kind {
             self.body_owners.push(closure.def_id);
+            self.nested_bodies.push(closure.def_id);
         }
         intravisit::walk_expr(self, ex)
     }

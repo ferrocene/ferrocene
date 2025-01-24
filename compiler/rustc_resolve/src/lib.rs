@@ -920,10 +920,13 @@ impl<'ra> NameBindingData<'ra> {
     }
 
     fn is_importable(&self) -> bool {
-        !matches!(
-            self.res(),
-            Res::Def(DefKind::AssocConst | DefKind::AssocFn | DefKind::AssocTy, _)
-        )
+        !matches!(self.res(), Res::Def(DefKind::AssocTy, _))
+    }
+
+    // FIXME(import_trait_associated_functions): associate `const` or `fn` are not importable unless
+    // the feature `import_trait_associated_functions` is enable
+    fn is_assoc_const_or_fn(&self) -> bool {
+        matches!(self.res(), Res::Def(DefKind::AssocConst | DefKind::AssocFn, _))
     }
 
     fn macro_kind(&self) -> Option<MacroKind> {
@@ -1239,7 +1242,7 @@ impl<'ra> ResolverArenas<'ra> {
             no_implicit_prelude,
         ))));
         let def_id = module.opt_def_id();
-        if def_id.map_or(true, |def_id| def_id.is_local()) {
+        if def_id.is_none_or(|def_id| def_id.is_local()) {
             self.local_modules.borrow_mut().push(module);
         }
         if let Some(def_id) = def_id {

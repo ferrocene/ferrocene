@@ -99,7 +99,7 @@ declare_lint! {
     /// To fix this, remove the `use<'a>`, since the lifetime is already captured
     /// since it is in scope.
     pub IMPL_TRAIT_REDUNDANT_CAPTURES,
-    Warn,
+    Allow,
     "redundant precise-capturing `use<...>` syntax on an `impl Trait`",
 }
 
@@ -112,7 +112,7 @@ declare_lint_pass!(
 impl<'tcx> LateLintPass<'tcx> for ImplTraitOvercaptures {
     fn check_item(&mut self, cx: &LateContext<'tcx>, it: &'tcx hir::Item<'tcx>) {
         match &it.kind {
-            hir::ItemKind::Fn(..) => check_fn(cx.tcx, it.owner_id.def_id),
+            hir::ItemKind::Fn { .. } => check_fn(cx.tcx, it.owner_id.def_id),
             _ => {}
         }
     }

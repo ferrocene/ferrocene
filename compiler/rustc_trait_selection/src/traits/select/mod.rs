@@ -32,6 +32,7 @@ use rustc_middle::ty::{
     TypingMode, Upcast,
 };
 use rustc_span::{Symbol, sym};
+use rustc_type_ir::elaborate;
 use tracing::{debug, instrument, trace};
 
 use self::EvaluationResult::*;
@@ -1895,6 +1896,18 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             Some(None) => {}
             None => return None,
         }
+        // Same for upcasting.
+        let upcast_bound = candidates
+            .iter()
+            .filter_map(|c| {
+                if let TraitUpcastingUnsizeCandidate(i) = c.candidate { Some(i) } else { None }
+            })
+            .try_reduce(|c1, c2| if has_non_region_infer { None } else { Some(c1.min(c2)) });
+        match upcast_bound {
+            Some(Some(index)) => return Some(TraitUpcastingUnsizeCandidate(index)),
+            Some(None) => {}
+            None => return None,
+        }
 
         // Finally, handle overlapping user-written impls.
         let impls = candidates.iter().filter_map(|c| {
@@ -2519,7 +2532,8 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         let a_auto_traits: FxIndexSet<DefId> = a_data
             .auto_traits()
             .chain(a_data.principal_def_id().into_iter().flat_map(|principal_def_id| {
-                tcx.supertrait_def_ids(principal_def_id).filter(|def_id| tcx.trait_is_auto(*def_id))
+                elaborate::supertrait_def_ids(tcx, principal_def_id)
+                    .filter(|def_id| tcx.trait_is_auto(*def_id))
             }))
             .collect();
 

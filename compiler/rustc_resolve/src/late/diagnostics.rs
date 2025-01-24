@@ -1130,7 +1130,9 @@ impl<'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
         let None = following_seg else { return };
         for rib in self.ribs[ValueNS].iter().rev() {
             for (def_id, spans) in &rib.patterns_with_skipped_bindings {
-                if let Some(fields) = self.r.field_idents(*def_id) {
+                if let DefKind::Struct | DefKind::Variant = self.r.tcx.def_kind(*def_id)
+                    && let Some(fields) = self.r.field_idents(*def_id)
+                {
                     for field in fields {
                         if field.name == segment.ident.name {
                             if spans.iter().all(|(_, had_error)| had_error.is_err()) {
@@ -1694,7 +1696,7 @@ impl<'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
             ) => {
                 // Don't suggest macro if it's unstable.
                 let suggestable = def_id.is_local()
-                    || self.r.tcx.lookup_stability(def_id).map_or(true, |s| s.is_stable());
+                    || self.r.tcx.lookup_stability(def_id).is_none_or(|s| s.is_stable());
 
                 err.span_label(span, fallback_label.to_string());
 
@@ -2133,7 +2135,7 @@ impl<'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                                 .r
                                 .delegation_fn_sigs
                                 .get(&self.r.local_def_id(assoc_item.id))
-                                .map_or(false, |sig| sig.has_self) =>
+                                .is_some_and(|sig| sig.has_self) =>
                         {
                             AssocSuggestion::MethodWithSelf { called }
                         }
@@ -2164,7 +2166,7 @@ impl<'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                                     .r
                                     .delegation_fn_sigs
                                     .get(&def_id)
-                                    .map_or(false, |sig| sig.has_self),
+                                    .is_some_and(|sig| sig.has_self),
                                 None => self
                                     .r
                                     .tcx
@@ -3155,7 +3157,7 @@ impl<'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
             }
         }
 
-        #[cfg_attr(not(bootstrap), allow(rustc::symbol_intern_string_literal))]
+        #[allow(rustc::symbol_intern_string_literal)]
         let existing_name = match &in_scope_lifetimes[..] {
             [] => Symbol::intern("'a"),
             [(existing, _)] => existing.name,

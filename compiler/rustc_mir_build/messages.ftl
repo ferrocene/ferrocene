@@ -287,11 +287,6 @@ mir_build_privately_uninhabited = pattern `{$witness_1}` is currently uninhabite
 
 mir_build_rust_2024_incompatible_pat = this pattern relies on behavior which may change in edition 2024
 
-mir_build_rustc_box_attribute_error = `#[rustc_box]` attribute used incorrectly
-    .attributes = no other attributes may be applied
-    .not_box = `#[rustc_box]` may only be applied to a `Box::new()` call
-    .missing_box = `#[rustc_box]` requires the `owned_box` lang item
-
 mir_build_static_in_pattern = statics cannot be referenced in patterns
     .label = can't be used in patterns
 mir_build_static_in_pattern_def = `static` defined here
@@ -328,12 +323,6 @@ mir_build_type_not_structural_def = `{$ty}` must be annotated with `#[derive(Par
 mir_build_type_not_structural_more_info = see https://doc.rust-lang.org/stable/std/marker/trait.StructuralPartialEq.html for details
 mir_build_type_not_structural_tip =
     the `PartialEq` trait must be derived, manual `impl`s are not sufficient; see https://doc.rust-lang.org/stable/std/marker/trait.StructuralPartialEq.html for details
-
-mir_build_unconditional_recursion = function cannot return without recursing
-    .label = cannot return without recursing
-    .help = a `loop` may express intention better if this is on purpose
-
-mir_build_unconditional_recursion_call_site_label = recursive call site
 
 mir_build_union_field_requires_unsafe =
     access to union field is unsafe and requires unsafe block

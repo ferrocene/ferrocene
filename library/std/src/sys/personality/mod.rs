@@ -35,7 +35,6 @@ cfg_if::cfg_if! {
             target_family = "unix",
             not(target_os = "espidf"),
             not(target_os = "l4re"),
-            not(target_os = "rtems"),
             not(target_os = "nuttx"),
             // ferrocene addition
             not(ferrocenecoretest_secretsauce),

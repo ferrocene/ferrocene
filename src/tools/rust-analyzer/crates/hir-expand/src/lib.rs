@@ -70,12 +70,17 @@ pub mod tt {
     pub type Delimiter = ::tt::Delimiter<Span>;
     pub type DelimSpan = ::tt::DelimSpan<Span>;
     pub type Subtree = ::tt::Subtree<Span>;
-    pub type SubtreeBuilder = ::tt::SubtreeBuilder<Span>;
     pub type Leaf = ::tt::Leaf<Span>;
     pub type Literal = ::tt::Literal<Span>;
     pub type Punct = ::tt::Punct<Span>;
     pub type Ident = ::tt::Ident<Span>;
     pub type TokenTree = ::tt::TokenTree<Span>;
+    pub type TopSubtree = ::tt::TopSubtree<Span>;
+    pub type TopSubtreeBuilder = ::tt::TopSubtreeBuilder<Span>;
+    pub type TokenTreesView<'a> = ::tt::TokenTreesView<'a, Span>;
+    pub type SubtreeView<'a> = ::tt::SubtreeView<'a, Span>;
+    pub type TtElement<'a> = ::tt::iter::TtElement<'a, Span>;
+    pub type TtIter<'a> = ::tt::iter::TtIter<'a, Span>;
 }
 
 #[macro_export]
@@ -183,6 +188,8 @@ impl fmt::Display for RenderedExpandError {
 
 impl RenderedExpandError {
     const GENERAL_KIND: &str = "macro-error";
+    const DISABLED: &str = "proc-macro-disabled";
+    const ATTR_EXP_DISABLED: &str = "attribute-expansion-disabled";
 }
 
 impl ExpandErrorKind {
@@ -191,12 +198,12 @@ impl ExpandErrorKind {
             ExpandErrorKind::ProcMacroAttrExpansionDisabled => RenderedExpandError {
                 message: "procedural attribute macro expansion is disabled".to_owned(),
                 error: false,
-                kind: "proc-macros-disabled",
+                kind: RenderedExpandError::ATTR_EXP_DISABLED,
             },
             ExpandErrorKind::MacroDisabled => RenderedExpandError {
                 message: "proc-macro is explicitly disabled".to_owned(),
                 error: false,
-                kind: "proc-macro-disabled",
+                kind: RenderedExpandError::DISABLED,
             },
             &ExpandErrorKind::MissingProcMacroExpander(def_crate) => {
                 match db.proc_macros().get_error_for_crate(def_crate) {
@@ -284,7 +291,7 @@ impl MacroDefKind {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct EagerCallInfo {
     /// The expanded argument of the eager macro.
-    arg: Arc<tt::Subtree>,
+    arg: Arc<tt::TopSubtree>,
     /// Call id of the eager macro's input file (this is the macro file for its fully expanded input).
     arg_id: MacroCallId,
     error: Option<ExpandError>,
@@ -320,7 +327,7 @@ pub enum MacroCallKind {
         ast_id: AstId<ast::Item>,
         // FIXME: This shouldn't be here, we can derive this from `invoc_attr_index`
         // but we need to fix the `cfg_attr` handling first.
-        attr_args: Option<Arc<tt::Subtree>>,
+        attr_args: Option<Arc<tt::TopSubtree>>,
         /// Syntactical index of the invoking `#[attribute]`.
         ///
         /// Outer attributes are counted first, then inner attributes. This does not support
@@ -1044,7 +1051,7 @@ impl ExpandTo {
         if parent.kind() == MACRO_EXPR
             && parent
                 .parent()
-                .map_or(false, |p| matches!(p.kind(), EXPR_STMT | STMT_LIST | MACRO_STMTS))
+                .is_some_and(|p| matches!(p.kind(), EXPR_STMT | STMT_LIST | MACRO_STMTS))
         {
             return ExpandTo::Statements;
         }

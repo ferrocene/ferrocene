@@ -293,7 +293,7 @@ fn check_item<'tcx>(tcx: TyCtxt<'tcx>, item: &'tcx hir::Item<'tcx>) -> Result<()
             }
             res
         }
-        hir::ItemKind::Fn(ref sig, ..) => {
+        hir::ItemKind::Fn { sig, .. } => {
             check_item_fn(tcx, def_id, item.ident, item.span, sig.decl)
         }
         hir::ItemKind::Static(ty, ..) => {
@@ -1120,7 +1120,7 @@ fn check_type_defn<'tcx>(
                     } else {
                         // Evaluate the constant proactively, to emit an error if the constant has
                         // an unconditional error. We only do so if the const has no type params.
-                        let _ = tcx.const_eval_poly(def_id.into());
+                        let _ = tcx.const_eval_poly(def_id);
                     }
                 }
                 let field_id = field.did.expect_local();
@@ -2007,7 +2007,10 @@ fn check_variances_for_type_defn<'tcx>(
         }
 
         match hir_param.name {
-            hir::ParamName::Error => {}
+            hir::ParamName::Error(_) => {
+                // Don't report a bivariance error for a lifetime that isn't
+                // even valid to name.
+            }
             _ => {
                 let has_explicit_bounds = explicitly_bounded_params.contains(&parameter);
                 report_bivariance(tcx, hir_param, has_explicit_bounds, item);

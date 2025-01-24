@@ -342,6 +342,9 @@ pub trait Visitor<'v>: Sized {
     fn visit_pat_field(&mut self, f: &'v PatField<'v>) -> Self::Result {
         walk_pat_field(self, f)
     }
+    fn visit_pat_expr(&mut self, expr: &'v PatExpr<'v>) -> Self::Result {
+        walk_pat_expr(self, expr)
+    }
     fn visit_anon_const(&mut self, c: &'v AnonConst) -> Self::Result {
         walk_anon_const(self, c)
     }
@@ -509,7 +512,7 @@ pub fn walk_item<'v, V: Visitor<'v>>(visitor: &mut V, item: &'v Item<'v>) -> V::
             try_visit!(visitor.visit_generics(generics));
             try_visit!(visitor.visit_nested_body(body));
         }
-        ItemKind::Fn(ref sig, ref generics, body_id) => {
+        ItemKind::Fn { sig, generics, body: body_id, .. } => {
             try_visit!(visitor.visit_id(item.hir_id()));
             try_visit!(visitor.visit_fn(
                 FnKind::ItemFn(item.ident, generics, sig.header),
@@ -685,16 +688,20 @@ pub fn walk_pat<'v, V: Visitor<'v>>(visitor: &mut V, pattern: &'v Pat<'v>) -> V:
             try_visit!(visitor.visit_ident(ident));
             visit_opt!(visitor, visit_pat, optional_subpattern);
         }
-        PatKind::Lit(ref expression) => try_visit!(visitor.visit_expr(expression)),
+        PatKind::Expr(ref expression) => try_visit!(visitor.visit_pat_expr(expression)),
         PatKind::Range(ref lower_bound, ref upper_bound, _) => {
-            visit_opt!(visitor, visit_expr, lower_bound);
-            visit_opt!(visitor, visit_expr, upper_bound);
+            visit_opt!(visitor, visit_pat_expr, lower_bound);
+            visit_opt!(visitor, visit_pat_expr, upper_bound);
         }
         PatKind::Never | PatKind::Wild | PatKind::Err(_) => (),
         PatKind::Slice(prepatterns, ref slice_pattern, postpatterns) => {
             walk_list!(visitor, visit_pat, prepatterns);
             visit_opt!(visitor, visit_pat, slice_pattern);
             walk_list!(visitor, visit_pat, postpatterns);
+        }
+        PatKind::Guard(subpat, condition) => {
+            try_visit!(visitor.visit_pat(subpat));
+            try_visit!(visitor.visit_expr(condition));
         }
     }
     V::Result::output()
@@ -704,6 +711,15 @@ pub fn walk_pat_field<'v, V: Visitor<'v>>(visitor: &mut V, field: &'v PatField<'
     try_visit!(visitor.visit_id(field.hir_id));
     try_visit!(visitor.visit_ident(field.ident));
     visitor.visit_pat(field.pat)
+}
+
+pub fn walk_pat_expr<'v, V: Visitor<'v>>(visitor: &mut V, expr: &'v PatExpr<'v>) -> V::Result {
+    try_visit!(visitor.visit_id(expr.hir_id));
+    match &expr.kind {
+        PatExprKind::Lit { .. } => V::Result::output(),
+        PatExprKind::ConstBlock(c) => visitor.visit_inline_const(c),
+        PatExprKind::Path(qpath) => visitor.visit_qpath(qpath, expr.hir_id, expr.span),
+    }
 }
 
 pub fn walk_anon_const<'v, V: Visitor<'v>>(visitor: &mut V, constant: &'v AnonConst) -> V::Result {
@@ -928,8 +944,8 @@ pub fn walk_generic_param<'v, V: Visitor<'v>>(
 ) -> V::Result {
     try_visit!(visitor.visit_id(param.hir_id));
     match param.name {
-        ParamName::Plain(ident) => try_visit!(visitor.visit_ident(ident)),
-        ParamName::Error | ParamName::Fresh => {}
+        ParamName::Plain(ident) | ParamName::Error(ident) => try_visit!(visitor.visit_ident(ident)),
+        ParamName::Fresh => {}
     }
     match param.kind {
         GenericParamKind::Lifetime { .. } => {}

@@ -307,7 +307,7 @@ fn hl_exit_points(
         let range = match &expr {
             ast::Expr::TryExpr(try_) => try_.question_mark_token().map(|token| token.text_range()),
             ast::Expr::MethodCallExpr(_) | ast::Expr::CallExpr(_) | ast::Expr::MacroExpr(_)
-                if sema.type_of_expr(&expr).map_or(false, |ty| ty.original.is_never()) =>
+                if sema.type_of_expr(&expr).is_some_and(|ty| ty.original.is_never()) =>
             {
                 Some(expr.syntax().text_range())
             }
@@ -684,12 +684,15 @@ mod tests {
     };
 
     #[track_caller]
-    fn check(ra_fixture: &str) {
+    fn check(#[rust_analyzer::rust_fixture] ra_fixture: &str) {
         check_with_config(ra_fixture, ENABLED_CONFIG);
     }
 
     #[track_caller]
-    fn check_with_config(ra_fixture: &str, config: HighlightRelatedConfig) {
+    fn check_with_config(
+        #[rust_analyzer::rust_fixture] ra_fixture: &str,
+        config: HighlightRelatedConfig,
+    ) {
         let (analysis, pos, annotations) = fixture::annotations(ra_fixture);
 
         let hls = analysis.highlight_related(config, pos).unwrap().unwrap_or_default();

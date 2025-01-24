@@ -39,10 +39,10 @@ pub unsafe fn banana() -> u32 {
 }
 
 // CHECK: attributes [[APPLEATTRS]]
-// COMPAT-SAME: "target-features"="+avx,+avx2,{{.*}}"
-// INCOMPAT-SAME: "target-features"="-avx2,-avx,+avx,{{.*}}"
+// COMPAT-SAME: "target-features"="+x87,+sse2,+avx,+avx2,{{.*}}"
+// INCOMPAT-SAME: "target-features"="+x87,+sse2,-avx2,-avx,+avx,{{.*}}"
 // CHECK: attributes [[BANANAATTRS]]
-// COMPAT-SAME: "target-features"="+avx,+avx2,{{.*}}"
-// INCOMPAT-SAME: "target-features"="-avx2,-avx"
+// COMPAT-SAME: "target-features"="+x87,+sse2,+avx,+avx2,{{.*}}"
+// INCOMPAT-SAME: "target-features"="+x87,+sse2,-avx2,-avx"
 
 // ferrocene-annotations: um_rustc_C_opt_level

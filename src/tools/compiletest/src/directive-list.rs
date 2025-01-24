@@ -179,6 +179,7 @@ const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "only-beta",
     "only-bpf",
     "only-cdb",
+    "only-dist",
     "only-gnu",
     "only-i686-pc-windows-gnu",
     "only-i686-pc-windows-msvc",

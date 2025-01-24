@@ -1,6 +1,3 @@
-[submodule "ferrocene/doc/specification/shared"]
-    path = ferrocene/doc/specification/shared
-    url = https://github.com/ferrocene/sphinx-shared-resources.git
 [submodule "ferrocene/tools/flip-link"]
 	path = ferrocene/tools/flip-link
 	url = https://github.com/knurling-rs/flip-link

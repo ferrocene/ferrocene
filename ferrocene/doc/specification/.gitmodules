@@ -1,6 +1,0 @@
-# SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText: The Ferrocene Developers
-
-[submodule "shared"]
-	path = shared
-	url = https://github.com/ferrocene/sphinx-shared-resources

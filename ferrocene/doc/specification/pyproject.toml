@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+[project]
+name = "fls"
+version = "0.0.0"
+
+requires-python = ">= 3.10"
+dependencies = [
+    "sphinx ~= 8.0",
+    "sphinx-autobuild >= 0", # Doesn't use semver.
+    "ferrocene-sphinx-shared-resources >= 0",
+]

@@ -2533,14 +2533,9 @@ impl Step for CrateLibrustc {
 /// Given a `cargo test` subcommand, add the appropriate flags and run it.
 ///
 /// Returns whether the test succeeded.
-<<<<<<< HEAD
-#[allow(clippy::too_many_arguments)] // FIXME: reduce the number of args and remove this.
+// ferrocene change: changed privacy to pub(crate)
 pub(crate) fn run_cargo_test<'a>(
-    cargo: impl Into<BootstrapCommand>,
-=======
-fn run_cargo_test<'a>(
     cargo: builder::Cargo,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     libtest_args: &[&str],
     crates: &[String],
     primary_crate: &str,

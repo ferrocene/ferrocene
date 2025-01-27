@@ -20,13 +20,10 @@
 //@ ignore-wasm no backtrace support
 //@ ignore-emscripten no panic support
 //@ ignore-fuchsia Backtrace not symbolized
-<<<<<<< HEAD
 //@ ignore-aarch64-unknown-ferrocenecoretest - backtraces not supported on the target
 //@ ignore-thumbv7em-ferrocenecoretest-eabi - backtraces not supported on the target
 //@ ignore-thumbv7em-ferrocenecoretest-eabihf - backtraces not supported on the target
-=======
 //@ needs-subprocess
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 #![feature(panic_backtrace_config)]
 

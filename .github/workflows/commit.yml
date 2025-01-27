@@ -39,6 +39,9 @@ jobs:
           # We call this later with `INSTALL_LLVM` and `SKIP_UPGRADE` set for speed
           build-dependencies: 'false'
 
+      - name: Check whether all of our Python scripts use uv
+        run: ferrocene/ci/scripts/require-uv-shebang.py
+
       - name: Check whether git conflict markers are present
         run: ferrocene/ci/scripts/detect-conflict-markers.py
 

@@ -103,7 +103,7 @@ jobs:
       - aws-oidc-auth
       - ferrocene-checkout:
           llvm-subset: true
-      - setup-venv
+      - setup-uv
       - run:
           name: Perform licensing checks
           command: uvx reuse --include-submodules lint
@@ -269,7 +269,7 @@ jobs:
           steps:
             - aws-oidc-auth
             - ferrocene-checkout
-            - setup-venv
+            - setup-uv
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps
@@ -284,7 +284,7 @@ jobs:
     steps:
       - ferrocene-git-shallow-clone:
           depth: 1
-      - setup-venv
+      - setup-uv
       - aws-oidc-auth
       - setup-qnx-toolchain: {}
       - run:
@@ -335,7 +335,7 @@ jobs:
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
-      - setup-venv
+      - setup-uv
       - setup-qnx-toolchain:
           source-env-script: false
       - ferrocene-job-test-vm:
@@ -364,7 +364,7 @@ jobs:
           steps:
             - aws-oidc-auth
             - ferrocene-checkout
-            - setup-venv
+            - setup-uv
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps
@@ -415,7 +415,7 @@ jobs:
     steps:
       - ferrocene-git-shallow-clone:
           depth: 1
-      - setup-venv
+      - setup-uv
       - aws-oidc-auth
       - run:
           name: Download dist artifacts and run the self-test tool
@@ -441,7 +441,7 @@ jobs:
           steps:
             - ferrocene-checkout
             - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
-            - setup-venv
+            - setup-uv
             - aws-oidc-auth
             - ferrocene-ci
       - run:
@@ -505,7 +505,7 @@ jobs:
       - ferrocene-git-shallow-clone:
           depth: 1
       - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
-      - setup-venv
+      - setup-uv
       - aws-oidc-auth
       - run:
           name: Download dist artifacts and run the self-test tool
@@ -556,7 +556,7 @@ jobs:
             - aws-oidc-auth
             - ferrocene-checkout
             - ferrocene-setup-windows
-            - setup-venv
+            - setup-uv
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps
@@ -597,7 +597,7 @@ jobs:
           depth: 1
       - aws-oidc-auth
       - ferrocene-setup-windows
-      - setup-venv
+      - setup-uv
       - setup-qnx-toolchain: {}
       - run:
           name: Download dist artifacts and run the self-test tool
@@ -643,7 +643,7 @@ jobs:
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
-      - setup-venv
+      - setup-uv
       - setup-qnx-toolchain:
           source-env-script: false
       - ferrocene-job-test-vm:
@@ -728,7 +728,7 @@ jobs:
           name: Empty step to make sure the job always has steps
           command: echo
 
-  # Misc jobs   
+  # Misc jobs
   wasm-dist-oxidos:
     executor: docker-x86_64-ubuntu-20
     resource_class: large # 4-core
@@ -1100,7 +1100,7 @@ commands:
             equal: [<<parameters.os>>, "windows"]
           steps:
             - ferrocene-setup-windows
-      - setup-venv
+      - setup-uv
       - aws-oidc-auth
       - ferrocene-ci
       # Persist the build artifacts so following jobs don't have to start from
@@ -1141,7 +1141,7 @@ commands:
             equal: [<<parameters.os>>, "windows"]
           steps:
             - ferrocene-setup-windows
-      - setup-venv
+      - setup-uv
       - aws-oidc-auth
       - when:
           condition:  <<parameters.restore-from-job>>
@@ -1172,7 +1172,7 @@ commands:
             equal: [<<parameters.os>>, "darwin"]
           steps:
             - ferrocene-setup-darwin  # Darwin does not come with awscli, setup it before aws steps
-      - setup-venv
+      - setup-uv
       - aws-oidc-auth
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
@@ -1205,7 +1205,7 @@ commands:
           steps:
             - ferrocene-checkout:
                 llvm-subset: true
-      - setup-venv
+      - setup-uv
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
@@ -1327,12 +1327,12 @@ commands:
           command: ferrocene/ci/scripts/setup-windows.sh
 
   # This task can be skipped inside docker containers, it's mainly intended for Mac/Windows hosts.
-  setup-venv:
-    description: Setup uv and the Python venv
+  setup-uv:
+    description: Setup uv
     steps:
       - run:
-          name: Setup uv and the Python venv
-          command: ferrocene/ci/scripts/setup-venv.sh
+          name: Setup uv
+          command: ferrocene/ci/scripts/setup-uv.sh
 
   ferrocene-checkout:
     description: Checkout the Ferrocene source code

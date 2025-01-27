@@ -5,10 +5,10 @@ Compilation targets overview
 ============================
 
 Ferrocene has support for multiple compilation targets and host platforms.
-Targets are categorized as either "supported" or "untested" depending on
-the level of support. This page lists the current support status for all
-targets, and individual pages with more details are provided for supported
-targets.
+Targets are categorized as either "qualified", "quality managed", "untested",
+or "experimental" depending on the level of support. This page lists the
+current support status for all targets, and individual pages with more details
+are provided for supported targets, as well as some other targets.
 
 There are two kinds of targets available:
 
@@ -207,15 +207,25 @@ Experimental Targets
 
 Experimental targets cannot be used in safety-critical contexts, the Ferrocene test suite
 was not executed on the target. No support is available for these targets, artifacts are
-provided as-is and the targets be removed from future versions without notice.
+provided as-is and the targets be could removed from future versions without notice.
 
 For any of the following reasons, the target is experimental:
 
 * The target is deprecated and no longer produced.
 * The target has an unstable API.
+* The target is a proof of concept.
 
 If your project needs support for one of these targets, consider reaching out the Ferrocene
 support team to discuss custom support contracts.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Target
+     - Triple
+     - Kind
+     - Standard library
+     - Notes
 
    * - :target:`wasm32-unknown-unknown`
      - ``wasm32-unknown-unknown``

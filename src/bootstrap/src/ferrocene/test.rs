@@ -148,7 +148,6 @@ impl Step for GenerateTarball {
             &[],
             "generate-tarball",
             "generate-tarball",
-            compiler,
             self.target,
             builder,
         );

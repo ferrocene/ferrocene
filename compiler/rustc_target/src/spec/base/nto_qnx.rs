@@ -66,21 +66,30 @@ pub(crate) fn x86_64() -> Target {
 }
 
 pub(crate) fn pre_link_args(api_var: ApiVariant, arch: Arch) -> LinkArgs {
-    let (qcc_arg, arch_lib_dir) = match arch {
-        Arch::Aarch64 => ("-Vgcc_ntoaarch64le_cxx", "aarch64le"),
-        Arch::I586 => {
-            ("-Vgcc_ntox86_cxx", "notSupportedByQnx_compiler/rustc_target/src/spec/base/nto_qnx.rs")
-        }
-        Arch::X86_64 => ("-Vgcc_ntox86_64_cxx", "x86_64"),
+    let (qcc_arg, arch_lib_dir): (&[_], _) = match arch {
+        Arch::Aarch64 => (
+            &[
+                "-Vgcc_ntoaarch64le_cxx",
+                "-Wl,--fix-cortex-a53-843419", // ferrocene addition
+            ],
+            "aarch64le",
+        ),
+        Arch::I586 => (
+            &["-Vgcc_ntox86_cxx"],
+            "notSupportedByQnx_compiler/rustc_target/src/spec/base/nto_qnx.rs",
+        ),
+        Arch::X86_64 => (&["-Vgcc_ntox86_64_cxx"], "x86_64"),
     };
     match api_var {
         ApiVariant::Default => {
-            TargetOptions::link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &[qcc_arg])
+            TargetOptions::link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), qcc_arg)
         }
-        ApiVariant::IoSock => TargetOptions::link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &[
-            qcc_arg,
-            get_iosock_param(arch_lib_dir),
-        ]),
+        ApiVariant::IoSock => {
+            let mut qcc_arg = qcc_arg.to_vec();
+            qcc_arg.push(get_iosock_param(arch_lib_dir));
+
+            TargetOptions::link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &qcc_arg)
+        }
     }
 }
 

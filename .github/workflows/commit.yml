@@ -43,6 +43,8 @@ jobs:
         run: ferrocene/ci/scripts/detect-conflict-markers.py
       - name: Check whether any of our Cargo patches are unused
         run: ferrocene/ci/scripts/detect-unused-cargo-patches.py
+      - name: Check whether all of our Python scripts use uv
+        run: ferrocene/ci/scripts/require-uv-shebang.py
       - name: Perform licensing checks
         run: uvx reuse --include-submodules lint
 

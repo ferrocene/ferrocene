@@ -61,67 +61,67 @@ WSL2 from an administrator Powershell if you haven't done so already, then setup
 
 From there, follow the Linux instructions above.
 
+Using Python scripts and tools
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Using the Python virtual environment
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Ferrocene uses ``uv`` to manage Python and its dependencies. ``uv`` can be
+considered as a mix of ``rustup`` and ``cargo`` for Python, and all of our
+Python usage depends on it.
 
-.. note:
+`Installation instructions are available in the uv documentation
+<https://docs.astral.sh/uv/getting-started/installation/>`_. You don't need to
+install a recent Python separately, as ``uv`` manages its own installations of
+Python.
 
-   You do not need to install Python, or modify your system Python.
+Thanks to ``uv``, you can just invoke any script to execute it, without worrying
+about dependencies::
 
+   ferrocene/ci/scripts/detect-conflict-markers.py
 
-Ferrocene uses ``uv`` to manage Python and dependencies. ``uv`` is similar to ``rustup``, ``rvm``,
-``nvm``, or ``rbenv``. It provides a way for a project (Ferrocene) to depend on a specific version
-of Python and dependencies, creating a consistent development environment across any operating
-system or distribution it supports.
+For that to work, all of our Python scripts meant to be executed by CI must have
+the following shebang:
 
-This is particularly useful on platforms like :ref:`aarch64-apple-darwin` or
-:ref:`x86_64-pc-windows-msvc`, which do not always include modern versions of Python.
+.. code-block:: python
 
-You can install it using the same script our CI runners use:
+   #!/usr/bin/env -S uv run
 
-.. code-block:: bash
-   
-   ./ferrocene/ci/scripts/setup-venv.sh
+This will instruct the OS to invoke the script using ``uv``, which will make
+sure the correct Python version is used. It's also possible to use ``uv``'s
+`script support <https://docs.astral.sh/uv/guides/scripts/>`_ to install
+(isolated) dependencies whenever the script is executed, by adding the following
+comment at the top of the Python file:
 
-This script installs an appropriate version of ``uv``, uses it to install an appropriate version
-of Python, pins the Python version to your Ferrocene checkout, then creates a virtual environment
-and installs the prerequisites.
+.. code-block:: python
 
-If you find your virtual environment out of date, you either run the ``setup-venv.sh`` script
-again, or run the following:
+    # /// script
+    # requires-python = ">= 3.12"
+    # dependencies = ["requests ~= 2.32"]
+    # ///
 
-.. code-block:: bash
+When multiple scripts need to share code, please `setup a library project
+<https://docs.astral.sh/uv/concepts/projects/init/#libraries>`_ (with its own
+dependencies in the library's ``pyproject.toml``) and depend on it from the script:
 
-   uv pip sync requirements.txt
+.. code-block:: python
 
-Using ``uv`` you can source the virtual environment each time you wish to use it:
+    # /// script
+    # requires-python = ">= 3.12"
+    # dependencies = ["local-package"]
+    #
+    # [tool.uv.sources]
+    # local-package = { path = "relative/path/to/the/project", editable = true }
+    # ///
 
-.. code-block:: bash
+.. note::
 
-   source .venv/bin/activate
+   When depending on local libraries, the name of the library must appear *both*
+   in the ``dependencies`` list and in the ``[tool.uv.sources]`` table. Make
+   sure to enable editable support in local libraries.
 
-If you infrequently use Python scripts, or want to use them in a oneshot command, you can skip
-activating the virtual environment entirely:
+To run standalone tools written in Python (like REUSE), you can use ``uvx`` to
+download and execute them::
 
-.. code-block:: bash
-
-   uv run $COMMAND
-
-For example, to run our licensing checks you can run:
-
-.. code-block:: bash
-
-   uvx reuse --include-submodules lint
-
-Or, to run the ``split-tasks.py`` script for debugging:
-
-.. code-block:: bash
-   
-   uv run ferrocene/ci/split-tasks.py test
-
-In CI workflows you should always use ``uv run`` for calling Python. In the case of ``x.py`` it
-is not required as the script has been carefully written to work with most Python versions.
+   uvx reuse lint
 
 
 Using the CI ``config.toml``

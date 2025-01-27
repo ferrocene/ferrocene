@@ -66,6 +66,7 @@ fi
 # the duration of each step of the build. This is then used by scripts and
 # tools to analyze how time is spent on CI.
 add --set build.metrics
+add --set build.print-step-timings
 
 # Prevent `./x.py` from managing submodules, as those are cloned and managed
 # already by scripts in the CI configuration.

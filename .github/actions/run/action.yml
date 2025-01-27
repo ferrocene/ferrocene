@@ -49,6 +49,7 @@ runs:
           --tty \
           --env RUST_BACKTRACE="full" \
           --env CI \
+          --env GITHUB_ACTIONS \
           --env SCRIPT \
           --env FERROCENE_HOST \
           --env FERROCENE_TARGETS \

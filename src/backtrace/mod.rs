@@ -193,9 +193,9 @@ cfg_if::cfg_if! {
                 use self::win64::trace as trace_imp;
                 pub(crate) use self::win64::Frame as FrameImp;
             } else if #[cfg(any(target_arch = "x86", target_arch = "arm"))] {
-                mod dbghelp32;
-                use self::dbghelp32::trace as trace_imp;
-                pub(crate) use self::dbghelp32::Frame as FrameImp;
+                mod win32;
+                use self::win32::trace as trace_imp;
+                pub(crate) use self::win32::Frame as FrameImp;
             }
         }
     } else {

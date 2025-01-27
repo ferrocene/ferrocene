@@ -43,7 +43,7 @@ jobs:
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
-      runner: 8core-x86_64-unknown-linux-gnu
+      runner: 16core-x86_64-unknown-linux-gnu
       container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   dist-x86_64-unknown-linux-gnu:

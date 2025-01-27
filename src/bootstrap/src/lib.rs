@@ -622,12 +622,9 @@ impl Build {
                 }
             }
 
-<<<<<<< HEAD
-=======
             #[cfg(feature = "tracing")]
             let _actual_run_span =
                 span!(tracing::Level::DEBUG, "(2) executing actual run").entered();
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             self.config.dry_run = DryRun::Disabled;
             let builder = builder::Builder::new(self);
             builder.execute_cli();

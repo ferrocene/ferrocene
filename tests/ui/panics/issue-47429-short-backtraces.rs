@@ -20,12 +20,9 @@
 //@ ignore-wasm no panic support
 //@ ignore-emscripten no panic support
 //@ ignore-fuchsia Backtraces not symbolized
-<<<<<<< HEAD
 //@ ignore-thumbv7em-ferrocenecoretest-eabi no backtrace support
 //@ ignore-thumbv7em-ferrocenecoretest-eabihf no backtrace support
-=======
 //@ needs-subprocess
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 fn main() {
     panic!()

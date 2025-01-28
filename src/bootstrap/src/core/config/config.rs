@@ -620,6 +620,19 @@ impl TargetSelection {
         self.contains("musl") && !self.contains("unikraft")
     }
 
+    // ferrocene addition
+    pub fn needs_secret_sauce(&self) -> bool {
+        if !self.contains("ferrocenecoretest") {
+            return false;
+        }
+
+        match &*self.triple {
+            "aarch64-unknown-ferrocenecoretest" => false,
+            "thumbv7em-ferrocenecoretest-eabi" | "thumbv7em-ferrocenecoretest-eabihf" => true,
+            _ => todo!("expand this `match`"),
+        }
+    }
+
     /// Path to the file defining the custom target, if any.
     pub fn filepath(&self) -> Option<&Path> {
         self.file.as_ref().map(Path::new)

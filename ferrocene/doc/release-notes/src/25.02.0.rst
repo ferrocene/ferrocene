@@ -6,12 +6,19 @@ Ferrocene 25.02.0
 
 Ferrocene 25.02.0 is the fifth major release of Ferrocene.
 
-The highlights of this release are the inclusion of Rust 1.83.0, as well as several new experimental targets.
+The highlights of this release are the inclusion of Rust 1.83.0, as well as several new 
+experimental targets.
 
 New features
 ------------
 
-Updated the Rust version to include changes in Rust 1.82.0 and 1.83.0.
+* Updated the Rust version to include changes in Rust 1.82.0 and 1.83.0.
+* Quality Managed support has been added for a new target. Quality Managed targets are not 
+  qualified for safety critical use, but are otherwise fully tested and supported. The new
+  target is:
+
+  * :target-with-triple:`aarch64-apple-darwin`
+
 
 New experimental features
 -------------------------

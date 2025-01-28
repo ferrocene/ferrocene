@@ -22,6 +22,7 @@ use crate::core::builder::{
 use crate::core::config::TargetSelection;
 use crate::core::config::flags::{Subcommand, get_completion};
 use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
+use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::utils::build_stamp::{self, BuildStamp};
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::utils::helpers::{
@@ -3389,8 +3390,9 @@ impl Step for TestHelpers {
             let sub = target.triple.replace("ferrocenecoretest", "none");
 
             // override the default arm-none-eabi-gcc header files
-            if target.starts_with("thumbv") {
-                cfg.include(Path::new("/tmp/ferrocene").join(target.triple).join("include"));
+            if target.needs_secret_sauce() {
+                let dir = builder.ensure(SecretSauceArtifacts { target });
+                cfg.include(dir.join("include"));
             }
 
             TargetSelection::from_user(&sub)

@@ -101,6 +101,18 @@ Quality managed targets are not qualified, but can usually be qualified on reque
      - Full
      - \-
 
+   * - :ref:`thumbv7em-none-eabi`
+     - ``thumbv7em-none-eabi``
+     - Cross-compilation
+     - Bare-metal
+     - \-
+
+   * - :ref:`thumbv7em-none-eabihf`
+     - ``thumbv7em-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - \-
+
 Experimental targets
 --------------------
 
@@ -151,18 +163,6 @@ should not be used in production.
 
    * - :target:`thumbv6m-none-eabi`
      - ``thumbv6m-none-eabi``
-     - Cross-compilation
-     - Bare-metal
-     - \-
-
-   * - :target:`thumbv7em-none-eabi`
-     - ``thumbv7em-none-eabi``
-     - Cross-compilation
-     - Bare-metal
-     - \-
-
-   * - :target:`thumbv7em-none-eabihf`
-     - ``thumbv7em-none-eabihf``
      - Cross-compilation
      - Bare-metal
      - \-

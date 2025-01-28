@@ -9,8 +9,7 @@
 //@ compile-flags:-g -Copt-level=0 -Cllvm-args=-enable-tail-merge=0
 //@ compile-flags:-Cforce-frame-pointers=yes
 //@ compile-flags:-Cstrip=none
-//@ ignore-wasm32 spawning processes is not supported
-//@ ignore-sgx no processes
+//@ needs-subprocess
 //@ ignore-fuchsia Backtrace not symbolized, trace different line alignment
 //@ ignore-aarch64-unknown-ferrocenecoretest - backtraces not supported on the target
 

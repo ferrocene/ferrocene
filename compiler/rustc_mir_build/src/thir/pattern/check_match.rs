@@ -25,7 +25,7 @@ use rustc_session::lint::builtin::{
 };
 use rustc_span::edit_distance::find_best_match_for_name;
 use rustc_span::hygiene::DesugaringKind;
-use rustc_span::{Span, sym};
+use rustc_span::{Ident, Span, sym};
 use rustc_trait_selection::infer::InferCtxtExt;
 use tracing::instrument;
 
@@ -795,12 +795,16 @@ fn check_borrow_conflicts_in_at_patterns<'tcx>(cx: &MatchVisitor<'_, 'tcx>, pat:
                 }
             });
             if !conflicts_ref.is_empty() {
+                let mut path = None;
+                let ty = cx.tcx.short_ty_string(ty, &mut path);
                 sess.dcx().emit_err(BorrowOfMovedValue {
                     binding_span: pat.span,
                     conflicts_ref,
-                    name,
+                    name: Ident::new(name, pat.span),
                     ty,
                     suggest_borrowing: Some(pat.span.shrink_to_lo()),
+                    has_path: path.is_some(),
+                    path: path.map(|p| p.display().to_string()).unwrap_or_default(),
                 });
             }
             return;
@@ -904,7 +908,7 @@ fn check_for_bindings_named_same_as_variants(
                     None
                 },
                 ty_path,
-                name,
+                name: Ident::new(name, pat.span),
             },
         )
     }

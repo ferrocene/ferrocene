@@ -4430,6 +4430,7 @@ dependencies = [
  "ar_archive_writer",
  "arrayvec",
  "bitflags",
+ "bstr",
  "cc",
  "either",
  "itertools",
@@ -5153,7 +5154,6 @@ dependencies = [
  "rustc_serialize",
  "rustc_type_ir",
  "rustc_type_ir_macros",
- "smallvec",
  "tracing",
 ]
 

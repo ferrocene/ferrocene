@@ -1,8 +1,7 @@
 //@ run-pass
 //@ ignore-android FIXME #17520
-//@ ignore-wasm32 spawning processes is not supported
+//@ needs-subprocess
 //@ ignore-openbsd no support for libbacktrace without filename
-//@ ignore-sgx no processes
 //@ ignore-fuchsia Backtraces not symbolized
 //@ ignore-aarch64-unknown-ferrocenecoretest - backtraces not supported on the target
 //@ ignore-thumbv7em-ferrocenecoretest-eabi - backtraces not supported on the target

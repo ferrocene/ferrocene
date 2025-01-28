@@ -409,7 +409,6 @@ ui/closure_context/issue-26046-fn-once.rs
 ui/closure_context/issue-42065.rs
 ui/closures/2229_closure_analysis/issue-118144.rs
 ui/closures/2229_closure_analysis/issue-87378.rs
-ui/closures/2229_closure_analysis/issue-87987.rs
 ui/closures/2229_closure_analysis/issue-88118-2.rs
 ui/closures/2229_closure_analysis/issue-88476.rs
 ui/closures/2229_closure_analysis/issue-89606.rs
@@ -1386,7 +1385,6 @@ ui/issue-18502.rs
 ui/issue-24106.rs
 ui/issue-76387-llvm-miscompile.rs
 ui/issues-71798.rs
-ui/issues/auxiliary/issue-111011.rs
 ui/issues/auxiliary/issue-11224.rs
 ui/issues/auxiliary/issue-11508.rs
 ui/issues/auxiliary/issue-11529.rs
@@ -2204,7 +2202,6 @@ ui/issues/issue-3895.rs
 ui/issues/issue-38954.rs
 ui/issues/issue-38987.rs
 ui/issues/issue-39089.rs
-ui/issues/issue-39175.rs
 ui/issues/issue-39211.rs
 ui/issues/issue-39367.rs
 ui/issues/issue-39548.rs
@@ -3857,7 +3854,6 @@ ui/suggestions/issue-106443-sugg-clone-for-arg.rs
 ui/suggestions/issue-106443-sugg-clone-for-bound.rs
 ui/suggestions/issue-107860.rs
 ui/suggestions/issue-108470.rs
-ui/suggestions/issue-109195.rs
 ui/suggestions/issue-109291.rs
 ui/suggestions/issue-109396.rs
 ui/suggestions/issue-109436.rs

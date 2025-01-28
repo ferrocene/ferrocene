@@ -42,7 +42,6 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { triple: "thumbv8m.base-none-eabi", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "thumbv8m.main-none-eabi", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "thumbv8m.main-none-eabihf", std: false, linker: Linker::BundledLld },
-    TargetSpec { triple: "x86_64-apple-darwin", std: true, linker: Linker::BundledLld },
     TargetSpec { triple: "x86_64-pc-nto-qnx710", std: true, linker: Linker::BundledLld },
     TargetSpec { triple: "x86_64-pc-windows-msvc", std: true, linker: Linker::BundledLld },
     #[cfg(target_arch = "aarch64")]

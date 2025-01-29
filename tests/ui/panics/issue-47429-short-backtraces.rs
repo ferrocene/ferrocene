@@ -17,12 +17,12 @@
 //@ ignore-msvc see #62897 and `backtrace-debuginfo.rs` test
 //@ ignore-android FIXME #17520
 //@ ignore-openbsd no support for libbacktrace without filename
-//@ ignore-wasm no panic or subprocess support
-//@ ignore-emscripten no panic or subprocess support
-//@ ignore-sgx no subprocess support
+//@ ignore-wasm no panic support
+//@ ignore-emscripten no panic support
 //@ ignore-fuchsia Backtraces not symbolized
 //@ ignore-thumbv7em-ferrocenecoretest-eabi no backtrace support
 //@ ignore-thumbv7em-ferrocenecoretest-eabihf no backtrace support
+//@ needs-subprocess
 
 fn main() {
     panic!()

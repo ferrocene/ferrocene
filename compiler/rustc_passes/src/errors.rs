@@ -802,6 +802,8 @@ pub(crate) enum UnusedNote {
     NoLints { name: Symbol },
     #[note(passes_unused_default_method_body_const_note)]
     DefaultMethodBodyConst,
+    #[note(passes_unused_linker_warnings_note)]
+    LinkerWarningsBinaryCrateOnly,
 }
 
 #[derive(LintDiagnostic)]
@@ -1789,7 +1791,7 @@ pub(crate) struct UnusedAssign {
 pub(crate) struct UnusedAssignSuggestion {
     pub pre: &'static str,
     #[suggestion_part(code = "{pre}mut ")]
-    pub ty_span: Span,
+    pub ty_span: Option<Span>,
     #[suggestion_part(code = "")]
     pub ty_ref_span: Span,
     #[suggestion_part(code = "*")]

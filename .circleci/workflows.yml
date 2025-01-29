@@ -728,7 +728,7 @@ jobs:
           name: Empty step to make sure the job always has steps
           command: echo
 
-  # Misc jobs   
+  # Misc jobs
   wasm-dist-oxidos:
     executor: docker-x86_64-ubuntu-20
     resource_class: large # 4-core
@@ -883,9 +883,9 @@ workflows:
           requires:
             - x86_64-linux-build
 
-      - wasm-dist-oxidos:
-          requires:
-            - x86_64-linux-build
+      # - wasm-dist-oxidos:
+      #     requires:
+      #       - x86_64-linux-build
 
       - x86_64-linux-self-test:
           requires:
@@ -1053,7 +1053,7 @@ workflows:
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
             - x86_64-windows-self-test
-            - wasm-dist-oxidos
+            # - wasm-dist-oxidos
             - aarch64-linux-self-test
             - aarch64-darwin-self-test
             - aarch64-darwin-test

@@ -1,10 +1,10 @@
-error[E0433]: failed to resolve: you might be missing crate `some_crate`
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `some_crate`
   --> $DIR/edition_2015-without-extern-crate.rs:6:7
    |
 LL |     ::some_crate::hello();
-   |       ^^^^^^^^^^ you might be missing crate `some_crate`
+   |       ^^^^^^^^^^ use of unresolved module or unlinked crate `some_crate`
    |
-help: consider importing the `some_crate` crate
+help: you might be missing a crate named `some_crate`, add it to your project and import it in your code
    |
 LL + extern crate some_crate;
    |

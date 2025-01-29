@@ -4,8 +4,8 @@
   fn bar() -> bool {
       let mut _0: bool;
   
-+     coverage body span: $DIR/instrument_coverage.rs:20:18: 22:2 (#0)
-+     coverage Code(Counter(0)) => $DIR/instrument_coverage.rs:20:1: 22:2 (#0);
++     coverage body span: $DIR/instrument_coverage.rs:30:18: 32:2 (#0)
++     coverage Code(Counter(0)) => $DIR/instrument_coverage.rs:30:1: 32:2 (#0);
 + 
       bb0: {
 +         Coverage::CounterIncrement(0);

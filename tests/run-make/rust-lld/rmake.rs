@@ -60,7 +60,7 @@ fn main() {
 }
 
 fn find_lld_version_in_logs(stderr: String) -> bool {
-    let lld_version_re =
-        Regex::new(r"^warning: linker std(out|err): LLD [0-9]+\.[0-9]+\.[0-9]+").unwrap();
-    stderr.lines().any(|line| lld_version_re.is_match(line.trim()))
+    // FERROCENE CHANGE: Revert this
+    let lld_version_re = Regex::new(r"LLD [0-9]+\.[0-9]+\.[0-9]+").unwrap();
+    stderr.lines().map(|l| l.trim_start()).any(|line| lld_version_re.is_match(line.trim()))
 }

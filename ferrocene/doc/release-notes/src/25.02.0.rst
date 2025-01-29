@@ -7,7 +7,7 @@ Ferrocene 25.02.0
 Ferrocene 25.02.0 is the fifth major release of Ferrocene.
 
 The highlights of this release are the inclusion of Rust 1.83.0, as well as several new 
-experimental targets.
+experimental targets and a new Quality Managed target.
 
 New features
 ------------

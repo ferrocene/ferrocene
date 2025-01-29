@@ -19,8 +19,8 @@ Classifying and describing a problem
 
 When describing a new issue, the first step is to check if the issue applies to
 one of our supported targets.
-If that is not the case, we can discard it and record it in the `ignored-issues.yml` list with the
-target as its ignore reason as it won't be relevant to our customers.
+If that is not the case, we can discard it and record it in the `ignored-issues.yml` list.
+The target becomes the ignore reason.
 
 If it does apply, copy the `template.md` into the src folder, rename it to `KP-R<ISSUE-NUMBER>.md`
 and fill out the sections appropriately.

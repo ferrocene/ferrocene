@@ -11,7 +11,7 @@ Code is "well formatted" if it complies with the :ref:`Configuration`.
 ``rustfmt <file>...``
 ---------------------
 
-To format one or more files, just pass the paths to ``rusfmt``. This will
+To format one or more files, just pass the paths to ``rustfmt``. This will
 format the files and all of their child modules.
 
 ``rustfmt --check <file>...``

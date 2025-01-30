@@ -28,4 +28,3 @@ run-make/ferrocene/compiler-arguments/upper_c_rpath/upper_c_rpath_link_arg/Makef
 run-make/fix-cortex-a53-843419/Makefile
 run-make/split-debuginfo/Makefile
 run-make/symbol-mangling-hashed/Makefile
-run-make/translation/Makefile

@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 // Check that cross-crate inlined items are inlined in all compilation units
 // that refer to them, and not in any other compilation units.
 // Note that we have to pass `-C codegen-units=6` because up to two CGUs may be

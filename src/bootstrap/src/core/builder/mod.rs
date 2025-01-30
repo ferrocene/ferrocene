@@ -11,7 +11,7 @@ use std::{env, fs};
 
 use clap::ValueEnum;
 
-pub use self::cargo::Cargo;
+pub use self::cargo::{Cargo, cargo_profile_var};
 pub use crate::Compiler;
 // Ferrocene: this will conflict because we do not include "install" module,
 // for we have our own named `crate::ferrocene::install`.

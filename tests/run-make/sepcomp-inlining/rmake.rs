@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 // Test that #[inline] functions still get inlined across compilation unit
 // boundaries. Compilation should produce three IR files, but only the two
 // compilation units that have a usage of the #[inline] function should

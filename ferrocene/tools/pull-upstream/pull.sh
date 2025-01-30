@@ -280,6 +280,15 @@ else
     echo "pull-upstream: skipped checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated, due to bootstrap not compiling"
 fi
 
+# Some parts of src/stage0 need to be updated when we branch off from main to a release branch.
+# Running the fixup script here ensures the fix is always applied.
+echo "pull-upstream: trying to fix src/stage0"
+ferrocene/ci/scripts/fix-stage0-branch.py
+if git status --porcelain=v1 | grep "^ M src/stage0$" >/dev/null; then
+    git add src/stage0
+    git commit -m "update src/stage0"
+fi
+
 git branch -D "${TEMP_BRANCH}"
 
 echo

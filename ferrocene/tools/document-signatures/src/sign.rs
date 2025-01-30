@@ -7,7 +7,7 @@ use std::process::Command;
 use anyhow::{Context, Error};
 use tempfile::NamedTempFile;
 
-use crate::CliOptions;
+use crate::Env;
 use crate::config::Config;
 use crate::cosign_bundle::RawCosignBundle;
 use crate::pinned::Pinned;
@@ -16,11 +16,11 @@ use crate::signature_files::SignatureFiles;
 pub(crate) fn sign(
     source_dir: &Path,
     output_dir: &Path,
-    options: &CliOptions,
+    env: &Env,
 ) -> Result<(), Error> {
     let config = Config::load(source_dir)?;
     let pinned = Pinned::generate(output_dir)?;
-    let mut signature_files = SignatureFiles::load(source_dir, options)?;
+    let mut signature_files = SignatureFiles::load(source_dir, env)?;
 
     let regenerate_pinned = if let Some(existing_raw) = signature_files.read("pinned.toml")? {
         // The raw contents of pinned.toml are not reproducible, since they intentionally contain
@@ -44,7 +44,7 @@ pub(crate) fn sign(
 
     let bundle_temp = NamedTempFile::new()?;
     let pinned_temp = signature_files.on_disk_as_tempfile("pinned.toml")?.unwrap();
-    let status = Command::new(&options.cosign_binary)
+    let status = Command::new(&env.cosign_binary)
         .arg("sign-blob")
         .arg(pinned_temp.path())
         .arg("--bundle")

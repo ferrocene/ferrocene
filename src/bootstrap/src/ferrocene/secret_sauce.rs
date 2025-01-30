@@ -4,8 +4,8 @@ use crate::TargetSelection;
 use crate::core::builder::{Builder, ShouldRun, Step};
 use crate::core::config::FerroceneSecretSauce;
 
-static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-mirrors/coretest-secret-sauce/try/20250128";
-const COMMIT: &str = "30d40de";
+static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-mirrors/coretest-secret-sauce/20250130";
+const COMMIT: &str = "bacd53d";
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct SecretSauceArtifacts {

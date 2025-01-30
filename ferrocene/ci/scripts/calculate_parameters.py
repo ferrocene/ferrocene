@@ -102,8 +102,6 @@ def calculate_docker_image_tag(platform_plus_image: str):
     for root, _, files in os.walk(path):
         for file in files:
             all_files.append(os.path.join(root, file))
-    # The docker files depend on `requirements.txt` for their venv.
-    all_files.append("requirements.txt")
 
     # This is done in two steps to guarantee a stable sorting for the files,
     # otherwise inconsistencies in the filesystem could result in different

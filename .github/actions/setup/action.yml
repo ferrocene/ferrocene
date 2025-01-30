@@ -5,8 +5,8 @@ inputs:
     description: If a a minimal subset of the llvm-project monorepo should be cloned
     required: false
     default: 'false'
-  setup-venv:
-    description: If the venv should be set up
+  setup-uv:
+    description: If uv should be set up
     required: false
     default: 'true'
   build-dependencies:
@@ -33,7 +33,7 @@ runs:
       shell: bash
       run: ferrocene/ci/scripts/setup-ubuntu.sh
 
-    - name: Setup uv, Python, and venv
-      if: ${{ inputs.setup-venv != 'false' }}
+    - name: Setup uv
+      if: ${{ inputs.setup-uv != 'false' }}
       shell: bash
-      run: ferrocene/ci/scripts/setup-venv.sh
+      run: ferrocene/ci/scripts/setup-uv.sh

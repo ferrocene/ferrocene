@@ -62,8 +62,8 @@ jobs:
             git checkout -b "${CIRCLE_BRANCH}" "${CIRCLE_SHA1}"
 
       - run:
-          name: Setup uv and the Python venv
-          command: ferrocene/ci/scripts/setup-venv.sh
+          name: Setup uv
+          command: ferrocene/ci/scripts/setup-uv.sh
 
       - run:
           name: Calculate the parameters for the workflow

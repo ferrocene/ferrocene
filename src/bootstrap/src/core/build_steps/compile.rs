@@ -611,8 +611,9 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, car
     // ferrocene addition: `cfg` used to adapt libstd to our "secret sauce" libc
     if target.contains("ferrocenecoretest") {
         match &*target.triple {
-            "aarch64-unknown-ferrocenecoretest" => {}
-            "thumbv7em-ferrocenecoretest-eabi" | "thumbv7em-ferrocenecoretest-eabihf" => {
+            "aarch64-unknown-ferrocenecoretest"
+            | "thumbv7em-ferrocenecoretest-eabi"
+            | "thumbv7em-ferrocenecoretest-eabihf" => {
                 cargo.rustflag("--cfg=ferrocenecoretest_secretsauce");
             }
             _ => unimplemented!("extend this `match`"),

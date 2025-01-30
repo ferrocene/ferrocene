@@ -20,10 +20,10 @@ Rust, as well as the following:
   CLI, while we explicitly require version 2.
 
 
-:ref:`x86_64-unknown-linux-gnu`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:target-with-triple:`x86_64-unknown-linux-gnu`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-On Ubuntu 24.10, the following commands can be used:
+On Ubuntu 24.10, install the software requirements by running:
 
 .. code-block:: bash
 
@@ -35,8 +35,7 @@ On Ubuntu 24.10, the following commands can be used:
    On versions earlier than Ubuntu 24.10 the ``awscli`` package is not newer than
    2.9.0, and should not be used.
 
-On other distributions, you will likely need to adapt the command for the
-relevant package manager and any modified package names.
+To install the requirements on other distributions, adapt the command for the relevant package manager and any modified package names.
 
 For example, on Arch Linux ``awscli`` can be obtained from the
 `AUR <https://aur.archlinux.org/packages/aws-cli-v2>`_, and the remaining packages
@@ -46,11 +45,11 @@ from the official repositories:
 
    sudo pacman -S ninja bzip2 cmake gcc uv
 
-:ref:`aarch64-apple-darwin`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:target-with-triple:`aarch64-apple-darwin`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you don't already have XCode set up, get the XCode command line tools as
-guided in :doc:`user-manual:targets/aarch64-apple-darwin`, then use
+described in :doc:`user-manual:targets/aarch64-apple-darwin`, then use
 `Homebrew <https://brew.sh/>`_ to install the remaining dependencies.
 
 
@@ -67,8 +66,8 @@ Then use Homebrew to install the remaining packages:
    brew install ninja bzip2 cmake awscli uv
 
 
-:ref:`x86_64-pc-windows-msvc`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:target-with-triple:`x86_64-pc-windows-msvc`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. note::
 

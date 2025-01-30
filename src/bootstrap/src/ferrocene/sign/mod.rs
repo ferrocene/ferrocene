@@ -10,6 +10,7 @@ pub(crate) mod signature_files;
 
 use std::path::{Path, PathBuf};
 
+use crate::Subcommand;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::Tool;
 use crate::core::config::{self, TargetSelection};
@@ -35,11 +36,18 @@ impl<S: Step<Output = PathBuf> + IsSphinxBook> Step for SignDocument<S> {
     fn run(self, builder: &Builder<'_>) {
         error_when_signatures_are_ignored(builder, "sign a document");
 
+        let force_args: &[&str] = match builder.config.cmd {
+            Subcommand::Sign { force: true, .. } => &["--force"],
+            Subcommand::Sign { force: false, .. } => &[],
+            _ => panic!("only the sign command supports signing documents"),
+        };
+
         let document = builder.ensure(self.document);
         document_signatures_cmd::<S>(builder)
             .arg("sign")
             .arg(builder.src.join(S::SOURCE))
             .arg(&document)
+            .args(force_args)
             .run(builder);
     }
 }
@@ -54,11 +62,11 @@ macro_rules! documents {
 
             impl Step for $name {
                 type Output = ();
-                const DEFAULT: bool = false;
+                const DEFAULT: bool = true;
                 const ONLY_HOSTS: bool = true;
 
                 fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-                    crate::ferrocene::doc::$name::should_run(run)
+                    run.path(crate::ferrocene::doc::$name::SOURCE)
                 }
 
                 fn make_run(run: RunConfig<'_>) {

@@ -36,6 +36,10 @@ impl<'env> SignatureFiles<'env> {
         Ok(Self { signature_toml, signature_toml_path, env: options })
     }
 
+    pub(crate) fn file_exists(&self, name: &str) -> bool {
+        self.signature_toml.files.contains_key(name)
+    }
+
     pub(crate) fn read(&self, name: &str) -> Result<Option<Vec<u8>>, Error> {
         // Treat files not mentioned in `signature.toml` as missing.
         let Some(uuid) = self.signature_toml.files.get(name) else {

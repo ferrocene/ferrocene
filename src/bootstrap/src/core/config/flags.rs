@@ -501,7 +501,11 @@ Arguments:
     Perf {},
     /// Sign Ferrocene qualification documents
     #[clap(long_about = "\n")]
-    Sign,
+    Sign {
+        /// Force re-signing the document even if its latest version is signed
+        #[arg(long)]
+        force: bool,
+    },
 }
 
 impl Subcommand {

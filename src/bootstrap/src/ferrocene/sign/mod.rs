@@ -62,11 +62,11 @@ macro_rules! documents {
 
             impl Step for $name {
                 type Output = ();
-                const DEFAULT: bool = false;
+                const DEFAULT: bool = true;
                 const ONLY_HOSTS: bool = true;
 
                 fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-                    crate::ferrocene::doc::$name::should_run(run)
+                    run.path(crate::ferrocene::doc::$name::SOURCE)
                 }
 
                 fn make_run(run: RunConfig<'_>) {

@@ -9,10 +9,29 @@ mod signature_files;
 mod verify;
 
 use std::env::VarError;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::str::FromStr;
 
 use anyhow::{Context, Error};
+use clap::{Parser, Subcommand};
+
+#[derive(Parser)]
+struct Cli {
+    #[command(subcommand)]
+    cmd: CliCommand,
+}
+
+#[derive(Subcommand)]
+enum CliCommand {
+    Sign {
+        source_dir: PathBuf,
+        output_dir: PathBuf,
+    },
+    Verify {
+        source_dir: PathBuf,
+        output_dir: PathBuf,
+    },
+}
 
 // \u{2d} replaces "-" to avoid REUSE mistakenly detecting these lines as a license.
 const TOML_HEADER_COMMENTS: &str = "\
@@ -22,33 +41,28 @@ const TOML_HEADER_COMMENTS: &str = "\
 ";
 
 fn main() -> Result<(), Error> {
-    let args = std::env::args().skip(1).collect::<Vec<_>>();
-    if args.len() != 3 {
-        eprintln!("required arguments: sign|verify <source-dir> <output-dir>");
-        std::process::exit(1);
-    }
-    let mode = &args[0];
-    let source_dir = Path::new(&args[1]);
-    let output_dir = Path::new(&args[2]);
+    let cli = Cli::parse();
+    let env = Env::load()?;
 
-    let options = CliOptions::load()?;
-
-    match &mode[..] {
-        "sign" => sign::sign(&source_dir, &output_dir, &options)?,
-        "verify" => verify::verify(&source_dir, &output_dir, &options)?,
-        other => anyhow::bail!("unknown mode: {other}"),
+    match cli.cmd {
+        CliCommand::Sign { source_dir, output_dir } => {
+            sign::sign(&source_dir, &output_dir, &env)?;
+        }
+        CliCommand::Verify { source_dir, output_dir } => {
+            verify::verify(&source_dir, &output_dir, &env)?;
+        }
     }
 
     Ok(())
 }
 
-struct CliOptions {
+struct Env {
     cosign_binary: PathBuf,
     s3_bucket: Option<String>,
     s3_cache_dir: PathBuf,
 }
 
-impl CliOptions {
+impl Env {
     fn load() -> Result<Self, Error> {
         Ok(Self {
             cosign_binary: env("COSIGN_BINARY")?,

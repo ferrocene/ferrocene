@@ -2819,12 +2819,7 @@ impl Step for Crate {
 
         run_cargo_test(
             cargo,
-            // ferrocene addition: no parallelism on some targets
-            if target.contains("ferrocenecoretest") && !target.starts_with("thumbv") {
-                &["--test-threads", "1"]
-            } else {
-                &[]
-            },
+            &[],
             &self.crates,
             &self.crates[0],
             &*crate_description(&self.crates),

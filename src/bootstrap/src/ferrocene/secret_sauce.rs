@@ -9,7 +9,7 @@ static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-mirrors/coretest-secret-sauce"
 // for `bors try`
 // static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-mirrors/coretest-secret-sauce/try";
 
-const DATE_COMMIT: &str = "20250130/bacd53d";
+const DATE_COMMIT: &str = "20250131/bd027d5";
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct SecretSauceArtifacts {

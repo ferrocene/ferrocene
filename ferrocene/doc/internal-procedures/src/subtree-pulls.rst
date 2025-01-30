@@ -80,7 +80,7 @@ until all succeed or the first one fails.
 
 You can also pass the name of a repository to only pull that specific repo::
 
-  ferrocene/tools/pull-subtrees/pull.py <SUBTREE_REPO>
+   ferrocene/tools/pull-subtrees/pull.py <SUBTREE_REPO>
 
 Note that `<SUBTREE_REPO>` must be the repository of the subtree and not its path.
 

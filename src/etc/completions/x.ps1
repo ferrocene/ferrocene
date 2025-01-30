@@ -824,6 +824,7 @@ Register-ArgumentCompleter -Native -CommandName 'x' -ScriptBlock {
             [CompletionResult]::new('--llvm-profile-use', '--llvm-profile-use', [CompletionResultType]::ParameterName, 'use PGO profile for LLVM build')
             [CompletionResult]::new('--reproducible-artifact', '--reproducible-artifact', [CompletionResultType]::ParameterName, 'Additional reproducible artifacts that should be added to the reproducible artifacts archive')
             [CompletionResult]::new('--set', '--set', [CompletionResultType]::ParameterName, 'override options in config.toml')
+            [CompletionResult]::new('--force', '--force', [CompletionResultType]::ParameterName, 'Force re-signing the document even if its latest version is signed')
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
             [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
             [CompletionResult]::new('-i', '-i', [CompletionResultType]::ParameterName, 'use incremental compilation')

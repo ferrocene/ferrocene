@@ -845,6 +845,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in config.toml]:section.option=value:' \
+'--force[Force re-signing the document even if its latest version is signed]' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \

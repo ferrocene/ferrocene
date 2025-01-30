@@ -1239,7 +1239,7 @@ impl<'a> Builder<'a> {
             ),
             Subcommand::Vendor { .. } => (Kind::Vendor, &paths[..]),
             Subcommand::Perf { .. } => (Kind::Perf, &paths[..]),
-            Subcommand::Sign => (Kind::Sign, &paths[..]), // for Ferrocene
+            Subcommand::Sign { .. } => (Kind::Sign, &paths[..]), // for Ferrocene
         };
 
         Self::new_internal(build, kind, paths.to_owned())

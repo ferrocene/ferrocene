@@ -16,6 +16,7 @@ use crate::signature_files::SignatureFiles;
 pub(crate) fn sign(
     source_dir: &Path,
     output_dir: &Path,
+    force: bool,
     env: &Env,
 ) -> Result<(), Error> {
     let config = Config::load(source_dir)?;
@@ -33,6 +34,25 @@ pub(crate) fn sign(
     } else {
         true
     };
+
+    // Avoid signing again if the signatures are up to date.
+    //
+    // Unfortunately this is not a perfect implementation: if there are multiple roles that have to
+    // sign the document, and only one role signed it so far, they will have to sign again. This is
+    // because we don't know who is signing the document until after the signature is done, and we
+    // cannot distinguish the person who signed from who didn't yet.
+    let all_signatures_present = config
+        .roles
+        .keys()
+        .all(|role| signature_files.file_exists(&format!("{role}.cosign-bundle")));
+    if !force && !regenerate_pinned && all_signatures_present {
+        eprintln!();
+        eprintln!("The current version of this document has been signed already by all parties.");
+        eprintln!("The existing signatures will be reused!");
+        eprintln!("Pass --force to regenerate the signatures anyway.");
+        eprintln!();
+        return Ok(());
+    }
 
     if regenerate_pinned {
         let mut contents = Vec::new();

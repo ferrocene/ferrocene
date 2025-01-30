@@ -776,6 +776,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand sign" -l rust-profile-use -d '
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l set -d 'override options in config.toml' -r -f
+complete -c x.py -n "__fish_x.py_using_subcommand sign" -l force -d 'Force re-signing the document even if its latest version is signed'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -s i -l incremental -d 'use incremental compilation'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l include-default-paths -d 'include default paths in addition to the provided ones'

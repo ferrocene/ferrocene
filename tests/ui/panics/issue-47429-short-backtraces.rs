@@ -20,6 +20,7 @@
 //@ ignore-wasm no panic support
 //@ ignore-emscripten no panic support
 //@ ignore-fuchsia Backtraces not symbolized
+//@ ignore-aarch64-unknown-ferrocenecoretest no backtrace support
 //@ ignore-thumbv7em-ferrocenecoretest-eabi no backtrace support
 //@ ignore-thumbv7em-ferrocenecoretest-eabihf no backtrace support
 //@ needs-subprocess

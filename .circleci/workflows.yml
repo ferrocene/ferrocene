@@ -309,7 +309,7 @@ jobs:
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
-      - setup-venv
+      - setup-uv
       - setup-secret-sauce:
           target: << parameters.target >>
       - ferrocene-job-test-vm:

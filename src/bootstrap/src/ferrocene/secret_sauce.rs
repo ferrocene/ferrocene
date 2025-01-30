@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use crate::TargetSelection;
 use crate::core::builder::{Builder, ShouldRun, Step};
+use crate::core::config::FerroceneSecretSauce;
 
 static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-mirrors/coretest-secret-sauce/try/20250128";
 const COMMIT: &str = "30d40de";
@@ -19,15 +20,21 @@ impl Step for SecretSauceArtifacts {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        download_and_extract_secret_sauce(builder, &self.target)
+        if builder.config.dry_run() {
+            return PathBuf::new();
+        }
+
+        if let FerroceneSecretSauce::Local(secret_sauce_dir) =
+            &builder.config.ferrocene_secret_sauce
+        {
+            secret_sauce_dir.join(&self.target)
+        } else {
+            download_and_extract_secret_sauce(builder, &self.target)
+        }
     }
 }
 
 fn download_and_extract_secret_sauce(builder: &Builder<'_>, target: &TargetSelection) -> PathBuf {
-    if builder.config.dry_run() {
-        return PathBuf::new();
-    }
-
     let base = builder.out.join("cache").join("ferrocene").join("secret-sauce");
     let extracted_dir = base.join("extracted").join(target);
     let tarballs_dir = base.join("tarballs").join(COMMIT);

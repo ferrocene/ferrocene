@@ -26,6 +26,8 @@ enum CliCommand {
     Sign {
         source_dir: PathBuf,
         output_dir: PathBuf,
+        #[arg(long)]
+        force: bool,
     },
     Verify {
         source_dir: PathBuf,
@@ -45,8 +47,8 @@ fn main() -> Result<(), Error> {
     let env = Env::load()?;
 
     match cli.cmd {
-        CliCommand::Sign { source_dir, output_dir } => {
-            sign::sign(&source_dir, &output_dir, &env)?;
+        CliCommand::Sign { source_dir, output_dir, force } => {
+            sign::sign(&source_dir, &output_dir, force, &env)?;
         }
         CliCommand::Verify { source_dir, output_dir } => {
             verify::verify(&source_dir, &output_dir, &env)?;

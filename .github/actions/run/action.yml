@@ -16,6 +16,11 @@ runs:
     - name: Run
       if: ${{ inputs.container == '' }}
       shell: bash
+      run: ferrocene/ci/scripts/setup-ubuntu.sh
+
+    - name: Run
+      if: ${{ inputs.container == '' }}
+      shell: bash
       env:
         SCRIPT: ${{ inputs.script }}
       run: ferrocene/ci/run.sh

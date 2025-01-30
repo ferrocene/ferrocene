@@ -7,12 +7,10 @@ Setting up a local development environment
 Required software
 -----------------
 
-To develop Ferrocene locally, you’ll need to have the following software
-installed:
+To develop Ferrocene locally, you’ll need to have the software required to build
+Rust, as well as the following:
 
 * ``git``, as the version control system used by Ferrocene.
-
-* ``Python 3``, needed for the entry point of Rust’s build system.
 
 * ``uv``, to manage the environment used to build the documentation. `Installation
   instructions. <https://docs.astral.sh/uv/getting-started/installation/>`_
@@ -20,6 +18,71 @@ installed:
 * ``AWS CLI v2``, version **2.9.0 or greater**, needed to interact with our AWS
   account. Note that most Linux distributions only include version 1 of the AWS
   CLI, while we explicitly require version 2.
+
+
+:target-with-triple:`x86_64-unknown-linux-gnu`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+On Ubuntu 24.10, install the software requirements by running:
+
+.. code-block:: bash
+
+   sudo apt install ninja-build bzip2 cmake gcc g++ awscli
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+
+.. note::
+
+   On versions earlier than Ubuntu 24.10 the ``awscli`` package is not newer than
+   2.9.0, and should not be used.
+
+To install the requirements on other distributions, adapt the command for the relevant package manager and any modified package names.
+
+For example, on Arch Linux ``awscli`` can be obtained from the
+`AUR <https://aur.archlinux.org/packages/aws-cli-v2>`_, and the remaining packages
+from the official repositories:
+
+.. code-block:: bash
+
+   sudo pacman -S ninja bzip2 cmake gcc uv
+
+:target-with-triple:`aarch64-apple-darwin`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you don't already have XCode set up, get the XCode command line tools as
+described in :doc:`user-manual:targets/aarch64-apple-darwin`, then use
+`Homebrew <https://brew.sh/>`_ to install the remaining dependencies.
+
+
+To install Homebrew:
+
+.. code-block:: bash
+
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+Then use Homebrew to install the remaining packages:
+
+.. code-block:: bash
+
+   brew install ninja bzip2 cmake awscli uv
+
+
+:target-with-triple:`x86_64-pc-windows-msvc`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. note::
+
+   Ferrocene development is only supported on Windows 11 Pro with 
+   `"Developer Mode" <https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development#activate-developer-mode>`_
+   enabled.
+
+If you don't already have Visual Studio installed, get the build tools as guided
+in :doc:`user-manual:targets/x86_64-pc-windows-msvc`, then use ``winget`` to
+install the remaining dependencies:
+
+.. code-block:: bash
+
+   winget install astral-sh.uv Kitware.CMake Ninja-build.Ninja Amazon.AWSCLI
+
 
 Configuring git
 ---------------

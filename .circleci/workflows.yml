@@ -603,7 +603,7 @@ jobs:
 
   # Test VMs
 
-  aarch64-linux-generic-test-vm:
+  aarch64-none-generic-test-vm:
     executor: linux-vm
     parameters:
       job:
@@ -612,14 +612,16 @@ jobs:
         type: string
     resource_class: << parameters.resource-class >>
     environment:
-      FERROCENE_HOST: ""
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-ferrocenecoretest
-      # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
       SCRIPT: |
-        TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
-
+        QEMU_CPU=cortex-a53 TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
     steps:
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-venv
       - ferrocene-job-test-vm:
+          checkout-source: false
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
@@ -830,8 +832,8 @@ workflows:
             - aarch64-qnx-test-library
             - aarch64-qnx-test-library-std
             - aarch64-qnx-test-compiletest
-            - aarch64-linux-test-library
-            - aarch64-linux-compiletest
+            - aarch64-none-test-library
+            - aarch64-none-compiletest
       - x86_64-linux-traceability-matrix:
           requires: *test-outcomes-dependencies
       - x86_64-linux-dist:
@@ -868,14 +870,14 @@ workflows:
           requires:
             - x86_64-linux-build
 
-      - aarch64-linux-generic-test-vm:
-          name: aarch64-linux-compiletest
-          job: test:compiletest
+      - aarch64-none-generic-test-vm:
+          name: aarch64-none-compiletest
+          job: qnx:compiletest-no-only-hosts
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
-      - aarch64-linux-generic-test-vm:
-          name: aarch64-linux-test-library
+      - aarch64-none-generic-test-vm:
+          name: aarch64-none-test-library
           job: test:library
           resource-class: large # 4-core
           requires:

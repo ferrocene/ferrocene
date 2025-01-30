@@ -186,6 +186,7 @@ After, you can run the tests:
 
 .. code-block:: bash
 
+    export QEMU_LD_PREFIX="/usr/aarch64-linux-gnu"
     ./x test --stage 1 --target aarch64-unknown-ferrocenecoretest library/core
 
 :target:`thumbv7em-none-eabihf` & :target:`thumbv7em-none-eabi`

@@ -7,17 +7,13 @@ use std::process::Command;
 
 use anyhow::{Context, Error, anyhow};
 
-use crate::CliOptions;
+use crate::Env;
 use crate::config::Config;
 use crate::pinned::Pinned;
 use crate::signature_files::SignatureFiles;
 
-pub(crate) fn verify(
-    source_dir: &Path,
-    output_dir: &Path,
-    options: &CliOptions,
-) -> Result<(), Error> {
-    let signature_files = SignatureFiles::load(source_dir, options)?;
+pub(crate) fn verify(source_dir: &Path, output_dir: &Path, env: &Env) -> Result<(), Error> {
+    let signature_files = SignatureFiles::load(source_dir, env)?;
 
     let pinned_toml = if let Some(mut file) = signature_files.on_disk_as_tempfile("pinned.toml")? {
         let mut contents = Vec::new();
@@ -52,7 +48,7 @@ pub(crate) fn verify(
             .ok_or_else(|| anyhow!("missing signature file for role {role_name}"))?;
 
         eprintln!("checking role {role_name}");
-        let status = Command::new(&options.cosign_binary)
+        let status = Command::new(&env.cosign_binary)
             .arg("verify-blob")
             .arg(pinned_toml.path())
             .arg("--bundle")

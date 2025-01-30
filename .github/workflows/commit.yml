@@ -45,6 +45,9 @@ jobs:
       - name: Check whether any of our Cargo patches are unused
         run: ferrocene/ci/scripts/detect-unused-cargo-patches.py
 
+      - name: Check whether src/stage0 is up to date
+        run: ferrocene/ci/scripts/fix-stage0-branch.py --check
+
       - name: Perform licensing checks
         run: uv run reuse --include-submodules lint
 

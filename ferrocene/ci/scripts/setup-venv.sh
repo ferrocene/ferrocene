@@ -8,4 +8,4 @@ scripts_dir="$(dirname $(readlink -f "$0"))"
 source "${scripts_dir}/setup-uv.sh"
 
 uv venv
-uv pip sync requirements.txt
+uv pip sync requirements.txt --quiet

@@ -50,6 +50,12 @@ is_internal() {
     fi
 }
 
+if [[ is_internal ]]; then
+    echo "note: Using internal Ferrocene team settings"
+    echo "If you don't have access to that infrastructure, you can invoke the script"
+    echo "with the OUTSIDE_FERROUS=1 environment variable."
+fi
+
 ##################################################################
 #                                                                #
 #   Configuration items not affecting the resulting toolchain.   #
@@ -60,6 +66,7 @@ is_internal() {
 # the duration of each step of the build. This is then used by scripts and
 # tools to analyze how time is spent on CI.
 add --set build.metrics
+add --set build.print-step-timings
 
 # Prevent `./x.py` from managing submodules, as those are cloned and managed
 # already by scripts in the CI configuration.

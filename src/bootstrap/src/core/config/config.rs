@@ -406,6 +406,7 @@ pub struct Config {
     pub ferrocene_tarball_signing_kms_key_arn: Option<String>,
     pub ferrocene_document_signatures: FerroceneDocumentSignatures,
     pub ferrocene_technical_report_url: Option<String>,
+    pub ferrocene_secret_sauce: FerroceneSecretSauce,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -439,6 +440,13 @@ pub enum FerroceneDocumentSignatures {
     DocsTarball {
         tarball: PathBuf,
     },
+}
+
+#[derive(Debug, Clone, Default)]
+pub enum FerroceneSecretSauce {
+    #[default]
+    Download,
+    Local(PathBuf),
 }
 
 #[derive(Clone, Debug, Default)]
@@ -1318,6 +1326,7 @@ define_config! {
         document_signatures_s3_bucket: Option<String> = "document-signatures-s3-bucket",
         document_signatures_tarball: Option<PathBuf> = "document-signatures-tarball",
         technical_report_url: Option<String> = "technical-report-url",
+        secret_sauce_dir: Option<PathBuf> = "secret-sauce-dir",
     }
 }
 
@@ -2340,6 +2349,12 @@ impl Config {
                 ),
                 (Some(value), None) => panic!("invalid value for ferrocene.test-outcomes: {value}"),
             };
+
+            config.ferrocene_secret_sauce = if let Some(path) = f.secret_sauce_dir {
+                FerroceneSecretSauce::Local(path)
+            } else {
+                FerroceneSecretSauce::Download
+            }
         }
 
         if config.llvm_from_ci {

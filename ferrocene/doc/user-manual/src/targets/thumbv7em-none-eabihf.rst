@@ -4,12 +4,29 @@
 .. _thumbv7em-none-eabihf:
 
 :target:`thumbv7em-none-eabihf`
-==============================
+===============================
 
-The ``thumbv7em-none-eabihf`` Ferrocene target provides support for
-bare-metal ARMv7E-M processors using the
-`T32 ISA <https://developer.arm.com/Architectures/T32%20Instruction%20Set%20Architecture>`_
-with hard floating point.
+.. note::
+   
+   For this target, each CPU must be tested separately. Currently, only support
+   for the Cortex-M4F CPU is Quality Managed.
+   
+   Other CPUs can become Quality Managed upon request within a short time frame.
+   Please contact Ferrocene support to make a request. 
+
+
+The ``thumbv7em-none-eabi`` Ferrocene target provides support for
+bare-metal ARMv7E-M processors with the 
+`T32 ISA <https://developer.arm.com/Architectures/T32%20Instruction%20Set%20Architecture>`_,
+using the *hard-float ABI*.
+
+On this target, functions accepting ``f32`` or ``f64`` will have those
+arguments passed via FPU registers. For more information on the
+differences between the *hard-float* and *soft-float* ABIs, see the
+`rustc book <https://doc.rust-lang.org/nightly/rustc/platform-support/arm-none-eabi.html#instruction-sets>`_.
+
+For the *soft-float* ABI, :ref:`thumbv7em-none-eabi` is also available.
+
 
 Prerequisites
 -------------

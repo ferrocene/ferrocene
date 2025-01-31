@@ -4,8 +4,12 @@ use crate::TargetSelection;
 use crate::core::builder::{Builder, ShouldRun, Step};
 use crate::core::config::FerroceneSecretSauce;
 
-static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-mirrors/coretest-secret-sauce/20250130";
-const COMMIT: &str = "bacd53d";
+// for `bors merge`
+static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-mirrors/coretest-secret-sauce";
+// for `bors try`
+// static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-mirrors/coretest-secret-sauce/try";
+
+const DATE_COMMIT: &str = "20250130/bacd53d";
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct SecretSauceArtifacts {
@@ -47,16 +51,16 @@ fn download_and_extract_secret_sauce(builder: &Builder<'_>, target: &TargetSelec
 
     if !tarball_file.exists() {
         builder.info(&format!("Downloading secret-sauce for target {target}"));
-        let url = format!("{DOWNLOAD_PREFIX}/{COMMIT}/{tarball_filename}");
+        let url = format!("{DOWNLOAD_PREFIX}/{DATE_COMMIT}/{tarball_filename}");
         builder.create_dir(&tarballs_dir);
         builder.config.download_file(&url, &tarball_file, "Could not download secret-sauce.");
     }
 
-    if !commit_file.exists() || builder.read(&commit_file) != COMMIT {
+    if !commit_file.exists() || builder.read(&commit_file) != commit {
         builder.info(&format!("Extracting secret-sauce for target {target}"));
         builder.create_dir(&extracted_dir);
         builder.config.unpack(&tarball_file, &extracted_dir, "");
-        std::fs::write(&commit_file, COMMIT.as_bytes()).unwrap();
+        std::fs::write(&commit_file, commit.as_bytes()).unwrap();
     }
 
     extracted_dir

@@ -101,6 +101,18 @@ Quality managed targets are not qualified, but can usually be qualified on reque
      - Full
      - \-
 
+   * - :ref:`thumbv7em-none-eabi`
+     - ``thumbv7em-none-eabi``
+     - Cross-compilation
+     - Bare-metal
+     - Only the Cortex-M4 CPU, other CPUs supported upon request.
+
+   * - :ref:`thumbv7em-none-eabihf`
+     - ``thumbv7em-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - Only the Cortex-M4F CPU, other CPUs supported upon request.
+
 Experimental targets
 --------------------
 
@@ -148,21 +160,8 @@ should not be used in production.
      - Full
      - Available as a cross-compile target on :target:`aarch64-unknown-linux-gnu` and :ref:`x86_64-unknown-linux-gnu`.
 
-
    * - :target:`thumbv6m-none-eabi`
      - ``thumbv6m-none-eabi``
-     - Cross-compilation
-     - Bare-metal
-     - \-
-
-   * - :target:`thumbv7em-none-eabi`
-     - ``thumbv7em-none-eabi``
-     - Cross-compilation
-     - Bare-metal
-     - \-
-
-   * - :target:`thumbv7em-none-eabihf`
-     - ``thumbv7em-none-eabihf``
      - Cross-compilation
      - Bare-metal
      - \-

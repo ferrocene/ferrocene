@@ -25,6 +25,7 @@ use crate::core::builder::{
 };
 use crate::core::config::{DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection};
 use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
+use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::utils::build_stamp;
 use crate::utils::build_stamp::BuildStamp;
 use crate::utils::exec::command;
@@ -397,6 +398,20 @@ fn copy_self_contained_objects(
             let target = libdir_self_contained.join(obj);
             builder.copy_link(&src, &target);
             target_deps.push((target, DependencyType::TargetSelfContained));
+        }
+    } else if target.needs_secret_sauce() {
+        // ferrocene addition
+        let srcdir = builder.ensure(SecretSauceArtifacts { target });
+
+        for &obj in &["libc.a", "crt1.o"] {
+            copy_and_stamp(
+                builder,
+                &libdir_self_contained,
+                &srcdir,
+                obj,
+                &mut target_deps,
+                DependencyType::TargetSelfContained,
+            );
         }
     }
 

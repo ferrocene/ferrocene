@@ -310,8 +310,6 @@ jobs:
       - aws-oidc-auth
       - ferrocene-checkout
       - setup-venv
-      - setup-secret-sauce:
-          target: << parameters.target >>
       - ferrocene-job-test-vm:
           checkout-source: false
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
@@ -1247,7 +1245,7 @@ commands:
                     --workdir /home/ci/project \
                     --volume $(pwd):/home/ci/project \
                     --volume /tmp/emulator:/tmp/emulator \
-                    --volume /tmp/ferrocene:/tmp/ferrocene \
+                    --volume /tmp/awsjwt:/tmp/awsjwt \
                     --user $(id -u):$(id -g) \
                     --network host \
                     --privileged \
@@ -1267,7 +1265,7 @@ commands:
                     --workdir /home/ci/project \
                     --volume $(pwd):/home/ci/project \
                     --volume /tmp/emulator:/tmp/emulator \
-                    --volume /tmp/ferrocene:/tmp/ferrocene \
+                    --volume /tmp/awsjwt:/tmp/awsjwt \
                     --user $(id -u):$(id -g) \
                     --network host \
                     --privileged \
@@ -1394,19 +1392,6 @@ commands:
       - store_artifacts:
           path: /tmp/metrics
           destination: metrics
-
-  setup-secret-sauce:
-    description: Setup secret sauce
-    parameters:
-      target:
-        type: string
-    steps:
-      - run:
-          name: Fetch secret sauce
-          command: |
-            mkdir -p /tmp/ferrocene/<< parameters.target >>
-            aws s3 cp s3://ferrocene-ci-mirrors/coretest-secret-sauce/20250121/1671dac/<< parameters.target >>.tar.gz /tmp/ferrocene/
-            tar xf /tmp/ferrocene/<< parameters.target >>.tar.gz --directory=/tmp/ferrocene/<< parameters.target >>
 
   setup-qnx-toolchain:
     description: Setup QNX Toolchain

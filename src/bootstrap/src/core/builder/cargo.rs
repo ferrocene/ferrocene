@@ -88,12 +88,14 @@ impl HostFlags {
 #[derive(Debug)]
 pub struct Cargo {
     command: BootstrapCommand,
+    args: Vec<OsString>,
     compiler: Compiler,
     target: TargetSelection,
     rustflags: Rustflags,
     rustdocflags: Rustflags,
     hostflags: HostFlags,
     allow_features: String,
+    release_build: bool,
 }
 
 // Ferrocene addition
@@ -128,6 +130,10 @@ impl Cargo {
         cargo
     }
 
+    pub fn release_build(&mut self, release_build: bool) {
+        self.release_build = release_build;
+    }
+
     pub fn compiler(&self) -> Compiler {
         self.compiler
     }
@@ -160,7 +166,7 @@ impl Cargo {
     }
 
     pub fn arg(&mut self, arg: impl AsRef<OsStr>) -> &mut Cargo {
-        self.command.arg(arg.as_ref());
+        self.args.push(arg.as_ref().into());
         self
     }
 
@@ -349,6 +355,12 @@ impl Cargo {
 
 impl From<Cargo> for BootstrapCommand {
     fn from(mut cargo: Cargo) -> BootstrapCommand {
+        if cargo.release_build {
+            cargo.args.insert(0, "--release".into());
+        }
+
+        cargo.command.args(cargo.args);
+
         let rustflags = &cargo.rustflags.0;
         if !rustflags.is_empty() {
             cargo.command.env("RUSTFLAGS", rustflags);
@@ -367,6 +379,7 @@ impl From<Cargo> for BootstrapCommand {
         if !cargo.allow_features.is_empty() {
             cargo.command.env("RUSTC_ALLOW_FEATURES", cargo.allow_features);
         }
+
         cargo.command
     }
 }
@@ -434,13 +447,6 @@ impl Builder<'_> {
             cargo.arg("--target").arg(target.rustc_target_arg());
         } else {
             assert_eq!(target, compiler.host);
-        }
-
-        if self.config.rust_optimize.is_release() &&
-        // cargo bench/install do not accept `--release` and miri doesn't want it
-        !matches!(cmd_kind, Kind::Bench | Kind::Install | Kind::Miri | Kind::MiriSetup | Kind::MiriTest)
-        {
-            cargo.arg("--release");
         }
 
         // Remove make-related flags to ensure Cargo can correctly set things up
@@ -1235,18 +1241,26 @@ impl Builder<'_> {
             rustflags.arg("-Zmir_strip_debuginfo=locals-in-tiny-functions");
         }
 
+<<<<<<< HEAD
         if target.contains("ferrocenecoretest") {
             rustflags.arg("-Zpanic-abort-tests");
         }
+=======
+        let release_build = self.config.rust_optimize.is_release() &&
+            // cargo bench/install do not accept `--release` and miri doesn't want it
+            !matches!(cmd_kind, Kind::Bench | Kind::Install | Kind::Miri | Kind::MiriSetup | Kind::MiriTest);
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
         Cargo {
             command: cargo,
+            args: vec![],
             compiler,
             target,
             rustflags,
             rustdocflags,
             hostflags,
             allow_features,
+            release_build,
         }
     }
 }

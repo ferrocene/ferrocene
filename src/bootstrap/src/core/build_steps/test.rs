@@ -87,6 +87,7 @@ impl Step for CrateBootstrap {
             SourceType::InTree,
             &[],
         );
+
         let crate_name = path.rsplit_once('/').unwrap().1;
         run_cargo_test(cargo, &[], &[], crate_name, crate_name, bootstrap_host, builder);
     }
@@ -3169,6 +3170,8 @@ impl Step for Bootstrap {
             SourceType::InTree,
             &[],
         );
+
+        cargo.release_build(false);
 
         cargo
             .rustflag("-Cdebuginfo=2")

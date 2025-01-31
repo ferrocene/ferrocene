@@ -2,66 +2,42 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-set -euo pipefail
-IFS=$'\n\t'
+emulatordir=/tmp/emulator
 
-UBUNTU_RELEASE="22.04.1"
-UBUNTU_ARCH="arm64"
-UBUNTU_SHA256="b2259205f2e94971e9e146ad1e30925d05d05e6575685cc0125b83746105ec45"
-
-rootfs="/tmp/emulator/rootfs"
+AARCH64_TARGET=aarch64-unknown-ferrocenecoretest
 
 cmd_prepare() {
+    if ! [[ -d "${emulatordir}" ]]; then
+        echo "error: directory ${emulatordir} does not exist"
+        echo
+        exit 1
+    fi
+
     if ! command -v qemu-aarch64-static >/dev/null 2>&1; then
         echo "error: missing qemu-aarch64-static binary"
         echo "help: on Ubuntu, install the qemu-user-static package"
         exit 1
     fi
+
     if ! command -v update-binfmts >/dev/null 2>&1; then
         echo "error: missing update-binfmts binary"
         echo "help: on Ubuntu, install the binfmt-support package"
         exit 1
     fi
 
-    rm -rf "${rootfs}"
-    mkdir -p "${rootfs}"
-
-    echo "===> downloading and extracting Ubuntu ${UBUNTU_RELEASE} base image"
-    curl -L https://cdimage.ubuntu.com/ubuntu-base/releases/${UBUNTU_RELEASE}/release/ubuntu-base-${UBUNTU_RELEASE}-base-arm64.tar.gz -o /tmp/emulator-ubuntu-base.tar.gz
-    echo "${UBUNTU_SHA256}  /tmp/emulator-ubuntu-base.tar.gz" | sha256sum -c
-    tar xzf /tmp/emulator-ubuntu-base.tar.gz -C "${rootfs}"
-
-    echo "===> configuring networking in the rootfs"
-    echo "127.0.0.1 localhost" > "${rootfs}/etc/hosts"
-
-    echo "===> copying qemu-aarch64-static in the rootfs"
-    cp "$(command -v qemu-aarch64-static)" "${rootfs}/usr/bin"
-
-    echo "===> building and copying remote-test-server into the rootfs"
+    echo "===> building remote-test-server"
     stage="${REMOTE_TEST_SERVER_STAGE-0}"
-    ./x build src/tools/remote-test-server --target aarch64-unknown-linux-gnu --stage "${stage}"
-    cp "build/x86_64-unknown-linux-gnu/stage${stage}-tools/aarch64-unknown-linux-gnu/release/remote-test-server" "${rootfs}/usr/bin"
+    ./x build src/tools/remote-test-server --target $AARCH64_TARGET --stage "${stage}"
+    cp "build/host/stage${stage}-tools/${AARCH64_TARGET}/release/remote-test-server" $emulatordir
 }
 
 cmd_run() {
-    if ! [[ -d "${rootfs}" ]]; then
+    if ! [[ -f $emulatordir/remote-test-server ]]; then
         echo "error: preparation is needed before running the emulator; run:"
         echo
         echo "    $0 prepare"
         echo
         exit 1
-    fi
-
-    echo "Starting the emulator, this will call sudo under the hood."
-    echo "To configure a separate terminal to use the emulator to run tests, run on it:"
-    echo
-    echo "    export TEST_DEVICE_ADDR=127.0.0.1:12345"
-    echo
-
-    if ! [[ -e "${rootfs}/dev/stdout" ]]; then
-        echo "===> mounting /dev into the rootfs"
-        sudo mount -o bind /dev "${rootfs}/dev"
-        trap cleanup_mount EXIT # Ensure the mount will be removed at exit
     fi
 
     # While on normal Ubuntu installations this command is executed at boot, on
@@ -74,17 +50,8 @@ cmd_run() {
     sudo update-binfmts --import
     sudo update-binfmts --enable qemu-aarch64
 
-    # We pass --sequential because we've seen deadlocks when running UI tests
-    # without that flag. Test execution will be slower, but at least it won't
-    # lock CI up.
-    echo "===> starting remote-test-server"
-    sudo chroot "${rootfs}" /usr/bin/qemu-aarch64-static /usr/bin/remote-test-server -v --bind 127.0.0.1:12345 --sequential
-}
-
-cleanup_mount() {
-    echo
-    echo "===> unmounting /dev from the rootfs"
-    sudo umount "${rootfs}/dev"
+    export QEMU_CPU=cortex-a53
+    qemu-aarch64-static $emulatordir/remote-test-server -v --bind 127.0.0.1:12345
 }
 
 if [[ $# -eq 1 ]] && [[ "$1" = "prepare" ]]; then

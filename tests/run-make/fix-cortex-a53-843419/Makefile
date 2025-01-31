@@ -12,8 +12,9 @@ RUSTC_FLAGS = --target $(TARGET) --print link-args -C panic=abort
 
 # this target directly uses LLD as the linker; the others use GCC
 # the GCC targets need -nostartfiles (or equivalent) because our program is basically a startup object
-ifeq ($(TARGET),aarch64-unknown-none)
-  RUSTC_FLAGS += -C link-arg="link.x"
+# the ferrocenecoretest target uses self-contained startup objects that need to be disabled for this test
+ifeq ($(TARGET),aarch64-unknown-ferrocenecoretest)
+  RUSTC_FLAGS += -C link-arg="link.x" -C link-self-contained=no
 else
 ifeq ($(TARGET),aarch64-unknown-nto-qnx710)
   RUSTC_FLAGS += -C link-arg="-Wl,-Tlink.x" -C link-arg="-nostartup"

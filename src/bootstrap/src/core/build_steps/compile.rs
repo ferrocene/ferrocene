@@ -25,6 +25,7 @@ use crate::core::builder::{
 };
 use crate::core::config::{DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection};
 use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
+use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::utils::build_stamp;
 use crate::utils::build_stamp::BuildStamp;
 use crate::utils::exec::command;
@@ -398,6 +399,20 @@ fn copy_self_contained_objects(
             builder.copy_link(&src, &target);
             target_deps.push((target, DependencyType::TargetSelfContained));
         }
+    } else if target.needs_secret_sauce() {
+        // ferrocene addition
+        let srcdir = builder.ensure(SecretSauceArtifacts { target });
+
+        for &obj in &["libc.a", "crt1.o"] {
+            copy_and_stamp(
+                builder,
+                &libdir_self_contained,
+                &srcdir,
+                obj,
+                &mut target_deps,
+                DependencyType::TargetSelfContained,
+            );
+        }
     }
 
     target_deps
@@ -596,8 +611,9 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, car
     // ferrocene addition: `cfg` used to adapt libstd to our "secret sauce" libc
     if target.contains("ferrocenecoretest") {
         match &*target.triple {
-            "aarch64-unknown-ferrocenecoretest" => {}
-            "thumbv7em-ferrocenecoretest-eabi" | "thumbv7em-ferrocenecoretest-eabihf" => {
+            "aarch64-unknown-ferrocenecoretest"
+            | "thumbv7em-ferrocenecoretest-eabi"
+            | "thumbv7em-ferrocenecoretest-eabihf" => {
                 cargo.rustflag("--cfg=ferrocenecoretest_secretsauce");
             }
             _ => unimplemented!("extend this `match`"),

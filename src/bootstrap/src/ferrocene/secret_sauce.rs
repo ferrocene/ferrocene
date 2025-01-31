@@ -24,20 +24,22 @@ impl Step for SecretSauceArtifacts {
             return PathBuf::new();
         }
 
-        if let FerroceneSecretSauce::Local(secret_sauce_dir) =
-            &builder.config.ferrocene_secret_sauce
-        {
-            secret_sauce_dir.join(&self.target)
-        } else {
-            download_and_extract_secret_sauce(builder, &self.target)
+        match &builder.config.ferrocene_secret_sauce {
+            FerroceneSecretSauce::Local(secret_sauce_dir) => secret_sauce_dir.join(&self.target),
+            FerroceneSecretSauce::Download => {
+                download_and_extract_secret_sauce(builder, &self.target)
+            }
         }
     }
 }
 
 fn download_and_extract_secret_sauce(builder: &Builder<'_>, target: &TargetSelection) -> PathBuf {
+    let commit =
+        DATE_COMMIT.split_once('/').expect("DATE_COMMIT must have the form {date}/{commit_hash}").1;
+
     let base = builder.out.join("cache").join("ferrocene").join("secret-sauce");
     let extracted_dir = base.join("extracted").join(target);
-    let tarballs_dir = base.join("tarballs").join(COMMIT);
+    let tarballs_dir = base.join("tarballs").join(commit);
 
     let commit_file = extracted_dir.join(".secret-sauce-commit");
     let tarball_filename = format!("{target}.tar.xz");

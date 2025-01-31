@@ -283,7 +283,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         match self.mode {
             SphinxMode::Html => {
                 intersphinx_ensure_steps(builder, self.target);
-                add_external_sphinx_needs_argument(&self, builder, &src, &mut cmd);
+                //add_external_sphinx_needs_argument(&self, builder, &src, &mut cmd);
 
                 builder.info(&format!("Building {}", P::SOURCE));
 
@@ -297,7 +297,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             }
             SphinxMode::XmlDoctrees => {
                 intersphinx_ensure_steps(builder, self.target);
-                add_external_sphinx_needs_argument(&self, builder, &src, &mut cmd);
+                //add_external_sphinx_needs_argument(&self, builder, &src, &mut cmd);
 
                 builder.info(&format!("Building XML doctrees of {}", P::SOURCE));
                 cmd.args(&["-b", "xml"]);
@@ -442,6 +442,7 @@ fn add_intersphinx_arguments<P: Step + IsSphinxBook>(
     cmd.arg("-D").arg(format!("ferrocene_intersphinx_mappings={serialized}"));
 }
 
+#[allow(unused)]
 fn add_external_sphinx_needs_argument<P: Step + IsSphinxBook>(
     book: &SphinxBook<P>,
     builder: &Builder<'_>,

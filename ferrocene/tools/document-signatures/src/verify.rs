@@ -27,6 +27,7 @@ pub(crate) fn verify(
         let expected = Pinned::generate(output_dir)?;
 
         if existing != expected {
+            eprintln!("Not correct: {}", output_dir.display());
             if existing.document_id != expected.document_id {
                 eprintln!("existing document id: {}", existing.document_id);
                 eprintln!("expected document id: {}", expected.document_id);
@@ -36,6 +37,8 @@ pub(crate) fn verify(
                 eprintln!("expected tarball sha256: {}", expected.tarball_sha256);
             }
             anyhow::bail!("pinned documentation file outdated");
+        } else {
+            eprintln!("Correct: {}", output_dir.display());
         }
 
         file

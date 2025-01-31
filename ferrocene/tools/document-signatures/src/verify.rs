@@ -23,7 +23,7 @@ pub(crate) fn verify(source_dir: &Path, output_dir: &Path, env: &Env) -> Result<
         let expected = Pinned::generate(output_dir)?;
 
         if existing != expected {
-            eprintln!("Not correct: {}", output_dir.display());
+            eprintln!("Signature incorrect: {}", output_dir.display());
             if existing.document_id != expected.document_id {
                 eprintln!("existing document id: {}", existing.document_id);
                 eprintln!("expected document id: {}", expected.document_id);
@@ -34,7 +34,7 @@ pub(crate) fn verify(source_dir: &Path, output_dir: &Path, env: &Env) -> Result<
             }
             anyhow::bail!("pinned documentation file outdated");
         } else {
-            eprintln!("Correct: {}", output_dir.display());
+            eprintln!("Signature correct: {}", output_dir.display());
         }
 
         file

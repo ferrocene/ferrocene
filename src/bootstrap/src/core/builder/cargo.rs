@@ -1241,15 +1241,13 @@ impl Builder<'_> {
             rustflags.arg("-Zmir_strip_debuginfo=locals-in-tiny-functions");
         }
 
-<<<<<<< HEAD
         if target.contains("ferrocenecoretest") {
             rustflags.arg("-Zpanic-abort-tests");
         }
-=======
+
         let release_build = self.config.rust_optimize.is_release() &&
             // cargo bench/install do not accept `--release` and miri doesn't want it
             !matches!(cmd_kind, Kind::Bench | Kind::Install | Kind::Miri | Kind::MiriSetup | Kind::MiriTest);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
         Cargo {
             command: cargo,

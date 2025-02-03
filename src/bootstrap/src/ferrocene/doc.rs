@@ -18,34 +18,21 @@ pub(crate) trait IsSphinxBook {
     const DEST: &'static str;
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
-struct BreadcrumbsAssets {
-    target: TargetSelection,
-    dest: Option<PathBuf>,
-}
+fn copy_breadcrumbs_assets(builder: &Builder<'_>, dest: &Path) {
+    let src = builder
+        .src
+        .join("ferrocene")
+        .join("doc")
+        .join("breadcrumbs")
+        .join("ferrocene-breadcrumbs.css");
+    let dest = dest.join("ferrocene-breadcrumbs.css");
 
-impl Step for BreadcrumbsAssets {
-    type Output = ();
-    const DEFAULT: bool = false;
-
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
-
-    fn run(self, builder: &Builder<'_>) -> Self::Output {
-        let src = builder.src.join("ferrocene/doc/breadcrumbs/ferrocene-breadcrumbs.css");
-        let dest = self
-            .dest
-            .unwrap_or_else(|| builder.doc_out(self.target))
-            .join("ferrocene-breadcrumbs.css");
-
-        if let Some(parent) = dest.parent() {
-            if !parent.is_dir() {
-                builder.create_dir(parent);
-            }
+    if let Some(parent) = dest.parent() {
+        if !parent.is_dir() {
+            builder.create_dir(parent);
         }
-        builder.copy_link(&src, &dest);
     }
+    builder.copy_link(&src, &dest);
 }
 
 #[derive(Clone)]
@@ -171,8 +158,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         }
 
         if let SphinxMode::Html = self.mode {
-            builder
-                .ensure(BreadcrumbsAssets { target: self.target, dest: Some(out.join("_static")) });
+            copy_breadcrumbs_assets(builder, &out.join("_static"));
         }
         let venv = builder.ensure(SphinxVirtualEnv { target: self.target });
 
@@ -208,8 +194,6 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
                 "html_theme_options.include_in_header",
                 &relative_path(&src, &breadcrumbs.join("sphinx-template.html")),
             ))
-            .arg("-D")
-            .arg(format!("html_css_files=ferrocene-breadcrumbs.css"))
             .arg("-A")
             .arg(format!("ferrocene_breadcrumbs_index={path_to_root}/index.html"))
             .arg("-D")
@@ -217,6 +201,11 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
                 "rustfmt_version={}",
                 builder.crates.get("rustfmt-nightly").unwrap().version,
             ))
+            // Include the CSS for the breadcrumbs. Note that the path here is relative to the
+            // _static directory in the rendered output. The directive works only because before
+            // invoking Sphinx we copy the CSS file into _static manually.
+            .arg("-D")
+            .arg("html_css_files=ferrocene-breadcrumbs.css")
             // Provide the correct substitutions:
             .arg("-D")
             .arg(path_define("ferrocene_substitutions_path", &relative_path(&src, &substitutions)))
@@ -852,7 +841,7 @@ impl Step for Index {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        builder.ensure(BreadcrumbsAssets { target: self.target, dest: None });
+        copy_breadcrumbs_assets(builder, &builder.doc_out(self.target));
         builder.cp_link_r(
             &builder.src.join("ferrocene").join("doc").join("index"),
             &builder.out.join(self.target.triple).join("doc"),

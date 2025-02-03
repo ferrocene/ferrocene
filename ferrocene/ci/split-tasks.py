@@ -126,7 +126,12 @@ JOBS_DEFINITION: JobsDefinition = {
         # them in a separate job to reduce the CI wall clock time. Note that
         # stdlib tests are run in a separate job, as those require IPv6 and
         # thus can't be executed in containers due to CircleCI limitations.
-        "library": ["library/core", "library/alloc", "library/test"],
+        "library": [
+            "library/core", # doc tests (tests/examples in doc comments)
+            "library/coretests", # unit tests (`#[test]` functions)
+            "library/alloc",
+            "library/test",
+        ],
 
         # The standard library tests require IPv6, which is not available in
         # containers. Run them separately in a VM.

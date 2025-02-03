@@ -1,4 +1,4 @@
-use crate::spec::{Cc, LinkerFlavor, Lld, Target, TargetMetadata, cvs};
+use crate::spec::{LinkSelfContainedDefault, Target, TargetMetadata, crt_objects, cvs};
 
 pub(crate) fn target() -> Target {
     let mut target = super::thumbv7em_none_eabi::target();
@@ -11,9 +11,9 @@ pub(crate) fn target() -> Target {
     target.env = "musl".into();
     target.has_thread_local = true;
 
-    let crt_path = "/tmp/ferrocene/thumbv7em-ferrocenecoretest-eabi/crt1.o";
-    let library_path = crt_path.rsplit_once('/').unwrap().0;
-    target.add_pre_link_args(LinkerFlavor::Gnu(Cc::No, Lld::No), &[crt_path, "-L", library_path]);
+    // crt and libc are self-contained
+    target.pre_link_objects_self_contained = crt_objects::all("crt1.o");
+    target.link_self_contained = LinkSelfContainedDefault::True;
 
     target
 }

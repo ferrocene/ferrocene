@@ -773,7 +773,6 @@ trait Merge {
 impl Merge for TomlConfig {
     fn merge(
         &mut self,
-<<<<<<< HEAD
         TomlConfig {
             build,
             install,
@@ -782,12 +781,9 @@ impl Merge for TomlConfig {
             dist,
             target,
             ferrocene,
-            profile: _,
+            profile,
             change_id,
         }: Self,
-=======
-        TomlConfig { build, install, llvm, rust, dist, target, profile, change_id }: Self,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         replace: ReplaceOpt,
     ) {
         fn do_merge<T: Merge>(x: &mut Option<T>, y: Option<T>, replace: ReplaceOpt) {

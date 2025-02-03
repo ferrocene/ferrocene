@@ -19,9 +19,7 @@
 //@ ignore-openbsd no support for libbacktrace without filename
 //@ ignore-wasm no backtrace support
 //@ ignore-fuchsia Backtrace not symbolized
-//@ ignore-aarch64-unknown-ferrocenecoretest - backtraces not supported on the target
-//@ ignore-thumbv7em-ferrocenecoretest-eabi - backtraces not supported on the target
-//@ ignore-thumbv7em-ferrocenecoretest-eabihf - backtraces not supported on the target
+//@ ignore-ferrocenecoretest - backtraces not supported on the target
 //@ needs-subprocess
 
 #![feature(panic_backtrace_config)]

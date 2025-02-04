@@ -49,5 +49,5 @@ jobs:
           path: ${{ steps.prepare.outputs.dir }}
 
       - name: Deploy GitHub Pages
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4
         id: deployment

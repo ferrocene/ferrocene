@@ -291,32 +291,6 @@ jobs:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
-  thumbv7em-generic-test-vm:
-    executor: linux-vm
-    parameters:
-      target:
-        type: string
-      job:
-        type: string
-      resource-class:
-        type: string
-    resource_class: << parameters.resource-class >>
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: << parameters.target >>
-      SCRIPT: |
-        QEMU_CPU=cortex-m4 TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
-    steps:
-      - aws-oidc-auth
-      - ferrocene-checkout
-      - setup-venv
-      - ferrocene-job-test-vm:
-          checkout-source: false
-          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          restore-from-job: x86_64-linux-build
-          emulator-script: "ARM_TARGET=<< parameters.target >> ./ferrocene/ci/scripts/emulated-arm-test-runner.sh"
-
   x86_64-qnx-generic-test-vm:
     executor: linux-vm
     parameters:
@@ -603,9 +577,15 @@ jobs:
 
   # Test VMs
 
-  aarch64-none-generic-test-vm:
+  ferrocenecoretest-generic-test:
     executor: linux-vm
     parameters:
+      qemu-arch:
+        type: string
+      qemu-cpu:
+        type: string
+      target:
+        type: string
       job:
         type: string
       resource-class:
@@ -613,19 +593,36 @@ jobs:
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-ferrocenecoretest
+      FERROCENE_TARGETS: << parameters.target >>
       SCRIPT: |
-        QEMU_CPU=cortex-a53 TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+        sudo update-binfmts --import && sudo update-binfmts --enable << parameters.qemu-arch >> && QEMU_CPU=<< parameters.qemu-cpu >> ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
       - setup-venv
-      - ferrocene-job-test-vm:
-          checkout-source: false
-          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          restore-from-job: x86_64-linux-build
-          emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
+      - run:
+          name: Restore files from the x86_64-linux-build job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
+      - run:
+          name: Pull the Docker image used for CI
+          command: |
+            aws ecr get-login-password --region us-east-1 \
+              | docker login -u AWS --password-stdin << pipeline.parameters.docker-repository-url--ci-docker-images >>
+            docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      - ferrocene-ci:
+          wrapper: |
+            docker run \
+              --rm \
+              $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
+              --workdir /home/ci/project \
+              --volume $(pwd):/home/ci/project \
+              --volume /tmp/awsjwt:/tmp/awsjwt \
+              --user $(id -u):$(id -g) \
+              --network host \
+              --privileged \
+              --interactive \
+              --tty \
+              << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >> \
 
   aarch64-qnx-generic-test-vm:
     executor: linux-vm
@@ -870,14 +867,20 @@ workflows:
           requires:
             - x86_64-linux-build
 
-      - aarch64-none-generic-test-vm:
+      - ferrocenecoretest-generic-test:
           name: aarch64-none-compiletest
+          target: aarch64-unknown-ferrocenecoretest
+          qemu-arch: qemu-aarch64
+          qemu-cpu: cortex-a53
           job: qnx:compiletest-no-only-hosts
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
-      - aarch64-none-generic-test-vm:
+      - ferrocenecoretest-generic-test:
           name: aarch64-none-test-library
+          target: aarch64-unknown-ferrocenecoretest
+          qemu-arch: qemu-aarch64
+          qemu-cpu: cortex-a53
           job: test:library
           resource-class: large # 4-core
           requires:
@@ -918,41 +921,45 @@ workflows:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
 
-      - thumbv7em-generic-test-vm:
+      - ferrocenecoretest-generic-test:
           name: thumbv7em-eabihf-test-library
           target: thumbv7em-ferrocenecoretest-eabihf
+          qemu-arch: qemu-arm
+          qemu-cpu: cortex-m4
           job: test:library
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
-      - thumbv7em-generic-test-vm:
+      - ferrocenecoretest-generic-test:
           name: thumbv7em-eabi-test-library
           target: thumbv7em-ferrocenecoretest-eabi
+          qemu-arch: qemu-arm
+          qemu-cpu: cortex-m4
           job: test:library
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
-      - thumbv7em-generic-test-vm:
+      - ferrocenecoretest-generic-test:
           name: thumbv7em-eabihf-test-compiletest
           target: thumbv7em-ferrocenecoretest-eabihf
+          qemu-arch: qemu-arm
+          qemu-cpu: cortex-m4
           job: qnx:compiletest-no-only-hosts
           resource-class: xlarge # 8-core
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
-      - thumbv7em-generic-test-vm:
+      - ferrocenecoretest-generic-test:
           name: thumbv7em-eabi-test-compiletest
           target: thumbv7em-ferrocenecoretest-eabi
+          qemu-arch: qemu-arm
+          qemu-cpu: cortex-m4
           job: qnx:compiletest-no-only-hosts
           resource-class: xlarge # 8-core
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-library

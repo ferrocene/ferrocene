@@ -68,7 +68,7 @@ runs:
           --env AWS_EC2_METADATA_DISABLED \
           --workdir /home/ci/project \
           --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
-          ${{ inputs.aws == 'true' && '--mount "type=bind,src=/tmp/awsjwt,dest=/tmp/awsjwt' || '' }} \
+          ${{ inputs.aws == 'true' && '--mount "type=bind,src=/tmp/awsjwt,dest=/tmp/awsjwt"' || '' }} \
           --user $(id -u):$(id -g) \
           --network host \
           ${{ inputs.container }} \

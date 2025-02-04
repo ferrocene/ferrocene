@@ -67,6 +67,15 @@ else
     upstream_commit="FETCH_HEAD"  # Latest commit in the branch we pull.
 fi
 
+# Ensure we are using an up to date nightly toolchain during the execution of this script. This is
+# because some Cargo invocations might touch `Cargo.toml` files relying on unstable features, which
+# won't work on the stable toolchain.
+#
+# We also tell rustup to try and update the nightly toolchain to ensure the behavior of the script
+# is consistent even if you run the script in a machine with an out of date nightly.
+rustup toolchain install nightly
+export RUSTUP_TOOLCHAIN=nightly
+
 # Move to the root of the repository to avoid the script from misbehaving.
 cd "$(git rev-parse --show-toplevel)"
 
@@ -209,7 +218,7 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
             # Invoking any Cargo command touching the lockfile will cause the
             # lockfile to be updated. "cargo metadata" is one of the fastest ones.
             # The bootstrap flag is needed as the workspace uses unstable features.
-            if ! RUSTC_BOOTSTRAP=1 cargo metadata --format-version=1 "--manifest-path=${prefix}Cargo.toml" >/dev/null; then
+            if ! cargo metadata --format-version=1 "--manifest-path=${prefix}Cargo.toml" >/dev/null; then
                 echo "pull-upstream: failed to invoke cargo to update ${lock}, skipping it"
                 continue
             fi
@@ -283,7 +292,7 @@ for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
     lock="${prefix}Cargo.lock"
     manifest="${prefix}Cargo.toml"
     echo "pull-upstream: checking whether ${lock} needs to be updated..."
-    if ! RUSTC_BOOTSTRAP=1 cargo metadata --format-version=1 "--manifest-path=${manifest}" >/dev/null; then
+    if ! cargo metadata --format-version=1 "--manifest-path=${manifest}" >/dev/null; then
         echo "pull-upstream: failed to invoke cargo to update ${lock}, skipping it"
         continue
     fi
@@ -293,7 +302,7 @@ for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
     fi
     if [ "${upstream_branch}" == "master" ]; then
         echo "pull-upstream: ensure ${lock} has latest semver-compatible crates"
-        RUSTC_BOOTSTRAP=1 cargo update --manifest-path "${manifest}"
+        cargo update --manifest-path "${manifest}"
         if git status --porcelain=v1 | grep "^ M ${lock}$" >/dev/null; then
             git add "${lock}"
             git commit -m "update ${lock} to latest semver-compatible crates"

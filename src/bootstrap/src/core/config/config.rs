@@ -630,7 +630,6 @@ impl TargetSelection {
         self.contains("musl") && !self.contains("unikraft")
     }
 
-<<<<<<< HEAD
     // ferrocene addition
     pub fn needs_secret_sauce(&self) -> bool {
         if !self.contains("ferrocenecoretest") {
@@ -644,8 +643,6 @@ impl TargetSelection {
         }
     }
 
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     /// Path to the file defining the custom target, if any.
     pub fn filepath(&self) -> Option<&Path> {
         self.file.as_ref().map(Path::new)
@@ -776,7 +773,6 @@ trait Merge {
 impl Merge for TomlConfig {
     fn merge(
         &mut self,
-<<<<<<< HEAD
         TomlConfig {
             build,
             install,
@@ -785,12 +781,9 @@ impl Merge for TomlConfig {
             dist,
             target,
             ferrocene,
-            profile: _,
+            profile,
             change_id,
         }: Self,
-=======
-        TomlConfig { build, install, llvm, rust, dist, target, profile, change_id }: Self,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         replace: ReplaceOpt,
     ) {
         fn do_merge<T: Merge>(x: &mut Option<T>, y: Option<T>, replace: ReplaceOpt) {

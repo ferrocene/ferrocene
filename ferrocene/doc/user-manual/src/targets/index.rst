@@ -207,7 +207,7 @@ Experimental Targets
 
 Experimental targets cannot be used in safety-critical contexts, the Ferrocene test suite
 was not executed on the target. No support is available for these targets, artifacts are
-provided as-is and the targets be could removed from future versions without notice.
+provided as-is and the targets could be removed from future versions without notice.
 
 For any of the following reasons, the target is experimental:
 

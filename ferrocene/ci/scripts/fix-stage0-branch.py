@@ -68,6 +68,8 @@ def check():
 
     if current != expected:
         print(f"error: {BRANCH_KEY} is '{current}' but must be '{expected}' in {STAGE0_PATH}")
+        print("note: the pull from upstream automation is supposed to fix this, you should check")
+        print("      why it didn't update the key in the pull from beta.")
         exit(1)
 
 

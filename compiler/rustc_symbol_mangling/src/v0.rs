@@ -72,7 +72,7 @@ pub(super) fn mangle<'tcx>(
 
 pub(super) fn mangle_typeid_for_trait_ref<'tcx>(
     tcx: TyCtxt<'tcx>,
-    trait_ref: ty::PolyExistentialTraitRef<'tcx>,
+    trait_ref: ty::ExistentialTraitRef<'tcx>,
 ) -> String {
     // FIXME(flip1995): See comment in `mangle_typeid_for_fnabi`.
     let mut cx = SymbolMangler {
@@ -84,7 +84,7 @@ pub(super) fn mangle_typeid_for_trait_ref<'tcx>(
         binders: vec![],
         out: String::new(),
     };
-    cx.print_def_path(trait_ref.def_id(), &[]).unwrap();
+    cx.print_def_path(trait_ref.def_id, &[]).unwrap();
     std::mem::take(&mut cx.out)
 }
 
@@ -649,7 +649,8 @@ impl<'tcx> Printer<'tcx> for SymbolMangler<'tcx> {
                 // HACK(jaic1): hide the `str` type behind a reference
                 // for the following transformation from valtree to raw bytes
                 let ref_ty = Ty::new_imm_ref(tcx, tcx.lifetimes.re_static, ct_ty);
-                let slice = valtree.try_to_raw_bytes(tcx, ref_ty).unwrap_or_else(|| {
+                let cv = ty::Value { ty: ref_ty, valtree };
+                let slice = cv.try_to_raw_bytes(tcx).unwrap_or_else(|| {
                     bug!("expected to get raw bytes from valtree {:?} for type {:}", valtree, ct_ty)
                 });
                 let s = std::str::from_utf8(slice).expect("non utf8 str from MIR interpreter");

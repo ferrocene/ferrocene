@@ -949,6 +949,7 @@ impl<'a> Builder<'a> {
                 check::Bootstrap,
                 check::RunMakeSupport,
                 check::Compiletest,
+                check::FeaturesStatusDump,
             ),
             Kind::Test => describe!(
                 crate::ferrocene::test::TraceabilityMatrixTool,
@@ -1146,6 +1147,7 @@ impl<'a> Builder<'a> {
                 run::GenerateWindowsSys,
                 run::GenerateCompletions,
                 run::UnicodeTableGenerator,
+                run::FeaturesStatusDump,
             ),
             Kind::Sign => describe!(
                 // Qualification Documents

@@ -328,16 +328,20 @@ fn check_item<'tcx>(tcx: TyCtxt<'tcx>, item: &'tcx hir::Item<'tcx>) -> Result<()
         hir::ItemKind::TraitAlias(..) => check_trait(tcx, item),
         // `ForeignItem`s are handled separately.
         hir::ItemKind::ForeignMod { .. } => Ok(()),
-        hir::ItemKind::TyAlias(hir_ty, hir_generics) => {
-            if tcx.type_alias_is_lazy(item.owner_id) {
-                // Bounds of lazy type aliases and of eager ones that contain opaque types are respected.
-                // E.g: `type X = impl Trait;`, `type X = (impl Trait, Y);`.
-                let res = check_item_type(tcx, def_id, hir_ty.span, UnsizedHandling::Allow);
-                check_variances_for_type_defn(tcx, item, hir_generics);
-                res
-            } else {
+        hir::ItemKind::TyAlias(hir_ty, hir_generics) if tcx.type_alias_is_lazy(item.owner_id) => {
+            let res = enter_wf_checking_ctxt(tcx, item.span, def_id, |wfcx| {
+                let ty = tcx.type_of(def_id).instantiate_identity();
+                let item_ty = wfcx.normalize(hir_ty.span, Some(WellFormedLoc::Ty(def_id)), ty);
+                wfcx.register_wf_obligation(
+                    hir_ty.span,
+                    Some(WellFormedLoc::Ty(def_id)),
+                    item_ty.into(),
+                );
+                check_where_clauses(wfcx, item.span, def_id);
                 Ok(())
-            }
+            });
+            check_variances_for_type_defn(tcx, item, hir_generics);
+            res
         }
         _ => Ok(()),
     };
@@ -1046,7 +1050,7 @@ fn check_associated_item(
 
         // Avoid bogus "type annotations needed `Foo: Bar`" errors on `impl Bar for Foo` in case
         // other `Foo` impls are incoherent.
-        tcx.ensure()
+        tcx.ensure_ok()
             .coherent_trait(tcx.parent(item.trait_item_def_id.unwrap_or(item_id.into())))?;
 
         let self_ty = match item.container {
@@ -1276,7 +1280,6 @@ fn check_item_fn(
 
 enum UnsizedHandling {
     Forbid,
-    Allow,
     AllowIfForeignTail,
 }
 
@@ -1294,7 +1297,6 @@ fn check_item_type(
 
         let forbid_unsized = match unsized_handling {
             UnsizedHandling::Forbid => true,
-            UnsizedHandling::Allow => false,
             UnsizedHandling::AllowIfForeignTail => {
                 let tail =
                     tcx.struct_tail_for_codegen(item_ty, wfcx.infcx.typing_env(wfcx.param_env));
@@ -1354,7 +1356,7 @@ fn check_impl<'tcx>(
                 let trait_ref = tcx.impl_trait_ref(item.owner_id).unwrap().instantiate_identity();
                 // Avoid bogus "type annotations needed `Foo: Bar`" errors on `impl Bar for Foo` in case
                 // other `Foo` impls are incoherent.
-                tcx.ensure().coherent_trait(trait_ref.def_id)?;
+                tcx.ensure_ok().coherent_trait(trait_ref.def_id)?;
                 let trait_span = hir_trait_ref.path.span;
                 let trait_ref = wfcx.normalize(
                     trait_span,
@@ -2267,14 +2269,14 @@ impl<'tcx> WfCheckingCtxt<'_, 'tcx> {
 
 fn check_mod_type_wf(tcx: TyCtxt<'_>, module: LocalModDefId) -> Result<(), ErrorGuaranteed> {
     let items = tcx.hir_module_items(module);
-    let mut res = items.par_items(|item| tcx.ensure().check_well_formed(item.owner_id.def_id));
-    res =
-        res.and(items.par_impl_items(|item| tcx.ensure().check_well_formed(item.owner_id.def_id)));
-    res =
-        res.and(items.par_trait_items(|item| tcx.ensure().check_well_formed(item.owner_id.def_id)));
-    res = res
-        .and(items.par_foreign_items(|item| tcx.ensure().check_well_formed(item.owner_id.def_id)));
-    res = res.and(items.par_opaques(|item| tcx.ensure().check_well_formed(item)));
+    let res = items
+        .par_items(|item| tcx.ensure_ok().check_well_formed(item.owner_id.def_id))
+        .and(items.par_impl_items(|item| tcx.ensure_ok().check_well_formed(item.owner_id.def_id)))
+        .and(items.par_trait_items(|item| tcx.ensure_ok().check_well_formed(item.owner_id.def_id)))
+        .and(
+            items.par_foreign_items(|item| tcx.ensure_ok().check_well_formed(item.owner_id.def_id)),
+        )
+        .and(items.par_opaques(|item| tcx.ensure_ok().check_well_formed(item)));
     if module == LocalModDefId::CRATE_DEF_ID {
         super::entry::check_for_entry_fn(tcx);
     }

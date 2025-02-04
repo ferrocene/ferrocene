@@ -1295,7 +1295,10 @@ impl Step for CrtBeginEnd {
     }
 
     fn make_run(run: RunConfig<'_>) {
+<<<<<<< HEAD
         // ferrocene addition: only build this for MUSL; upstreamed in rust-lang/rust#135836
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         if run.target.needs_crt_begin_end() {
             run.builder.ensure(CrtBeginEnd { target: run.target });
         }

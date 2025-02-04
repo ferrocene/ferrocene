@@ -9,6 +9,8 @@ inputs:
     description: Args to pass to the configure script
   test-device-addr:
     description: The test device address to use
+  aws:
+    description: If the AWS authentication should be passed through (containers only) 
 
 runs:
   using: "composite"
@@ -60,8 +62,13 @@ runs:
           --env ACTIONS_ID_TOKEN_REQUEST_TOKEN \
           --env ACTIONS_ID_TOKEN_REQUEST_URL \
           --env AWS_ROLE_ARN \
+          --env AWS_DEFAULT_REGION \
+          --env AWS_ROLE_SESSION_NAME \
+          --env AWS_WEB_IDENTITY_TOKEN_FILE \
+          --env AWS_EC2_METADATA_DISABLED \
           --workdir /home/ci/project \
           --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+          ${{ inputs.aws == 'true' && '--mount "type=bind,src=/tmp/awsjwt,dest=/tmp/awsjwt' || '' }} \
           --user $(id -u):$(id -g) \
           --network host \
           ${{ inputs.container }} \

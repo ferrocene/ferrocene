@@ -237,7 +237,8 @@ support team to discuss custom support contracts.
      - ``x86_64-apple-darwin``
      - Cross-compilation
      - Full
-     - Available as a cross-compile target on :ref:`aarch64-apple-darwin`.
+     - Apple is no longer producing x86 machines.
+
 
 Unsupported targets
 -------------------

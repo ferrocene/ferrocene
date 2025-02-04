@@ -32,7 +32,7 @@ Publishing a manual release
 Our release tooling also allows to manually start the release process. This can
 be useful to start releases that are not on a schedule, to restart a scheduled
 release that failed, or for testing (in the ``dev`` environment). Only starting
-the release is manual, all the actual steps are fully automated.
+the release is manual, meaning all the rest of steps are fully automated.
 
 To manually start a release, go to the `release workflow page`_ and click the
 "Run workflow" button. You need to input the git reference you want to release
@@ -54,14 +54,14 @@ performs, and to treat the git reference as verbatim instead of trying to
 resolve it. The latter option is useful if you need to release a commit which
 is not present in the ``ferrocene/ferrocene`` repository.
 
-Once you click the green "Run workflow" button a new job will be queued.
+Once you click the green "Run workflow" button, a new job will be queued.
 
-If the release targets the prod environment an approval from a release manager
+If the release targets the prod environment, an approval from a release manager
 will be required. The release manager will need to approve the release in the
 GitHub UI before the release can proceed. Once it's done, the release process
 will start automatically.
 
-If there is a service outage preventing you from manually starting a release
+If there is a service outage preventing you from manually starting a release,
 follow the instructions in :doc:`internal-procedures:release/during-outages`.
 
 Channel names

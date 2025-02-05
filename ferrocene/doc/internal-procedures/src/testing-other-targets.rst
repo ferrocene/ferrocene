@@ -189,7 +189,7 @@ After, you can run the tests:
 .. code-block:: bash
 
     export QEMU_LD_PREFIX="/usr/aarch64-linux-gnu"
-    ./x test --stage 1 --target aarch64-unknown-ferrocenecoretest library/core
+    ./x test --stage 1 --target aarch64-unknown-ferrocenecoretest library/coretests
 
 :target-with-triple:`thumbv7em-none-eabihf` & :target-with-triple:`thumbv7em-none-eabi`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -251,4 +251,4 @@ You can now run the tests:
 .. code-block:: bash
 
     export QEMU_CPU=cortex-m4
-    ./x test --stage 1 --target $TARGET library/core
+    ./x test --stage 1 --target $TARGET library/coretests

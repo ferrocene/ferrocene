@@ -146,7 +146,7 @@ Currently bare metal targets have a similar procedure for testing.
     In a :target:`aarch64-unknown-linux-gnu` environment -- such as a guest on
     :target:`aarch64-apple-darwin` or :target:`x86_64-pc-windows-msvc` -- you **must** skip to the final step, running the tests using::
     
-        ./x test --stage 1 --target aarch64-unknown-ferrocenecoretest library/core
+        ./x test --stage 1 --target aarch64-unknown-ferrocenecoretest library/coretests
 
     Incorrectly configuring your :target:`aarch64-unknown-linux-gnu` environment using the other steps 
     will damage to the environment and result in "Too many levels of symbolic links" errors.
@@ -188,7 +188,6 @@ After, you can run the tests:
 
 .. code-block:: bash
 
-    export QEMU_LD_PREFIX="/usr/aarch64-linux-gnu"
     ./x test --stage 1 --target aarch64-unknown-ferrocenecoretest library/coretests
 
 :target-with-triple:`thumbv7em-none-eabihf` & :target-with-triple:`thumbv7em-none-eabi`

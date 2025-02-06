@@ -781,7 +781,7 @@ impl Merge for TomlConfig {
             dist,
             target,
             ferrocene,
-            profile: _,
+            profile,
             change_id,
         }: Self,
         replace: ReplaceOpt,
@@ -795,7 +795,10 @@ impl Merge for TomlConfig {
                 }
             }
         }
+
         self.change_id.inner.merge(change_id.inner, replace);
+        self.profile.merge(profile, replace);
+
         do_merge(&mut self.build, build, replace);
         do_merge(&mut self.install, install, replace);
         do_merge(&mut self.llvm, llvm, replace);
@@ -1606,6 +1609,10 @@ impl Config {
             let build = toml.build.get_or_insert_with(Default::default);
             build.rustc = build.rustc.take().or(std::env::var_os("RUSTC").map(|p| p.into()));
             build.cargo = build.cargo.take().or(std::env::var_os("CARGO").map(|p| p.into()));
+        }
+
+        if GitInfo::new(false, &config.src).is_from_tarball() && toml.profile.is_none() {
+            toml.profile = Some("dist".into());
         }
 
         if let Some(include) = &toml.profile {

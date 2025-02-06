@@ -316,6 +316,7 @@ language_item_table! {
     PanicAsyncFnResumedPanic, sym::panic_const_async_fn_resumed_panic, panic_const_async_fn_resumed_panic, Target::Fn, GenericRequirement::None;
     PanicAsyncGenFnResumedPanic, sym::panic_const_async_gen_fn_resumed_panic, panic_const_async_gen_fn_resumed_panic, Target::Fn, GenericRequirement::None;
     PanicGenFnNonePanic, sym::panic_const_gen_fn_none_panic, panic_const_gen_fn_none_panic, Target::Fn, GenericRequirement::None;
+    PanicNullPointerDereference, sym::panic_null_pointer_dereference, panic_null_pointer_dereference, Target::Fn, GenericRequirement::None;
     /// libstd panic entry point. Necessary for const eval to be able to catch it
     BeginPanic,              sym::begin_panic,         begin_panic_fn,             Target::Fn,             GenericRequirement::None;
 
@@ -414,6 +415,11 @@ language_item_table! {
     Range,                   sym::Range,               range_struct,               Target::Struct,         GenericRequirement::None;
     RangeToInclusive,        sym::RangeToInclusive,    range_to_inclusive_struct,  Target::Struct,         GenericRequirement::None;
     RangeTo,                 sym::RangeTo,             range_to_struct,            Target::Struct,         GenericRequirement::None;
+
+    // `new_range` types that are `Copy + IntoIterator`
+    RangeFromCopy,           sym::RangeFromCopy,       range_from_copy_struct,     Target::Struct,         GenericRequirement::None;
+    RangeCopy,               sym::RangeCopy,           range_copy_struct,          Target::Struct,         GenericRequirement::None;
+    RangeInclusiveCopy,      sym::RangeInclusiveCopy,  range_inclusive_copy_struct, Target::Struct,         GenericRequirement::None;
 
     String,                  sym::String,              string,                     Target::Struct,         GenericRequirement::None;
     CStr,                    sym::CStr,                c_str,                      Target::Struct,         GenericRequirement::None;

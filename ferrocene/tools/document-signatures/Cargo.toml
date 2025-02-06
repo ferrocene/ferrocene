@@ -9,6 +9,7 @@ edition = "2021"
 anyhow = "1.0.65"
 asn1-rs = "0.5.1"
 base64 = "0.21.0"
+clap = { version = "4.5.27", features = ["derive"] }
 getrandom = { version = "0.2.10", features = ["std"] }
 hex = "0.4.2"
 serde = { version = "1.0.147", features = ["derive"] }

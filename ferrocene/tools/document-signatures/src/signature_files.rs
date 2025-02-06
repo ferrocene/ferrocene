@@ -15,16 +15,16 @@ use anyhow::{Context, Error, bail};
 use tempfile::NamedTempFile;
 use uuid::Uuid;
 
-use crate::{CliOptions, TOML_HEADER_COMMENTS};
+use crate::{Env, TOML_HEADER_COMMENTS};
 
-pub(crate) struct SignatureFiles<'opts> {
+pub(crate) struct SignatureFiles<'env> {
     signature_toml: Signature,
     signature_toml_path: PathBuf,
-    options: &'opts CliOptions,
+    env: &'env Env,
 }
 
-impl<'opts> SignatureFiles<'opts> {
-    pub(crate) fn load(document: &Path, options: &'opts CliOptions) -> Result<Self, Error> {
+impl<'env> SignatureFiles<'env> {
+    pub(crate) fn load(document: &Path, options: &'env Env) -> Result<Self, Error> {
         let signature_toml_path = document.join("signature").join("signature.toml");
 
         let signature_toml = if signature_toml_path.exists() {
@@ -33,7 +33,11 @@ impl<'opts> SignatureFiles<'opts> {
             Signature { files: BTreeMap::new() }
         };
 
-        Ok(Self { signature_toml, signature_toml_path, options })
+        Ok(Self { signature_toml, signature_toml_path, env: options })
+    }
+
+    pub(crate) fn file_exists(&self, name: &str) -> bool {
+        self.signature_toml.files.contains_key(name)
     }
 
     pub(crate) fn read(&self, name: &str) -> Result<Option<Vec<u8>>, Error> {
@@ -43,7 +47,7 @@ impl<'opts> SignatureFiles<'opts> {
         };
 
         Ok(Some(
-            std::fs::read(self.options.s3_cache_dir.join(uuid.to_string()))
+            std::fs::read(self.env.s3_cache_dir.join(uuid.to_string()))
                 // Assume that if a file is in `signature.toml` it must exist in S3.
                 .context("this is a bootstrap bug (file is supposed to be cached)")
                 .with_context(|| {
@@ -63,7 +67,7 @@ impl<'opts> SignatureFiles<'opts> {
             return Ok(None);
         };
 
-        let mut cache = File::open(self.options.s3_cache_dir.join(uuid.to_string()))
+        let mut cache = File::open(self.env.s3_cache_dir.join(uuid.to_string()))
             .context("this is a bootstrap bug (the file is supposed to be cached)")
             .with_context(|| {
                 format!("failed to retrieve signature file {name} (with UUID {uuid})")
@@ -77,7 +81,7 @@ impl<'opts> SignatureFiles<'opts> {
     }
 
     pub(crate) fn write(&mut self, name: &str, contents: &[u8]) -> Result<(), Error> {
-        let Some(s3_bucket) = &self.options.s3_bucket else {
+        let Some(s3_bucket) = &self.env.s3_bucket else {
             panic!("uploading signatures is only supported with the s3 backend");
         };
         let uuid = Uuid::new_v4();
@@ -103,7 +107,7 @@ impl<'opts> SignatureFiles<'opts> {
 
         // Then we write the file in the local cache, to avoid having bootstrap read it from S3
         // the next time it's invoked.
-        std::fs::write(self.options.s3_cache_dir.join(uuid.to_string()), contents)?;
+        std::fs::write(self.env.s3_cache_dir.join(uuid.to_string()), contents)?;
 
         // And finally we update `signature.toml` to record the UUID of the file.
         self.signature_toml.files.insert(name.into(), uuid);

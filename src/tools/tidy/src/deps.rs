@@ -477,6 +477,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "windows_x86_64_gnu",
     "windows_x86_64_gnullvm",
     "windows_x86_64_msvc",
+    "wit-bindgen-rt",
     "writeable",
     "yoke",
     "yoke-derive",

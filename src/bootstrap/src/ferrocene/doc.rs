@@ -141,10 +141,10 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
                     format!("{}-doctrees-objectsinv", self.name)
                 }
             });
-        let substitutions =
-            builder.src.join("ferrocene").join("doc").join("sphinx-substitutions.toml");
-        let target_names = builder.src.join("ferrocene").join("doc").join("target-names.toml");
-        let breadcrumbs = builder.src.join("ferrocene").join("doc").join("breadcrumbs");
+        let ferrocene_doc = builder.src.join("ferrocene").join("doc");
+        let substitutions = ferrocene_doc.join("sphinx-substitutions.toml");
+        let target_names = ferrocene_doc.join("target-names.toml");
+        let breadcrumbs = ferrocene_doc.join("breadcrumbs");
 
         // In some cases we have to perform a fresh build to guarantee deterministic output (for
         // example to generate signatures). We want to purge the old build artifacts only when

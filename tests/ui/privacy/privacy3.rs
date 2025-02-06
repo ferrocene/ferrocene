@@ -11,12 +11,15 @@ mod bar {
 
     mod glob {
         fn gpriv() {}
+    //~^ ERROR requires `sized` lang_item
     }
 }
 
 pub fn foo() {}
+//~^ ERROR requires `sized` lang_item
 
 fn test1() {
+    //~^ ERROR requires `sized` lang_item
     use bar::gpriv;
     //~^ ERROR unresolved import `bar::gpriv` [E0432]
     //~| no `gpriv` in `bar`
@@ -27,6 +30,10 @@ fn test1() {
 }
 
 fn main() {}
+<<<<<<< HEAD
 
 // ferrocene-annotations: fls_9gprp17h6t1q
 // Use Imports
+=======
+//~^ ERROR requires `sized` lang_item
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

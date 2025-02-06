@@ -189,35 +189,27 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             .arg("-d")
             .arg(relative_path(&src, &doctrees))
             // Include the breadcrumbs
-            .arg("-D")
             .arg(path_define(
                 "html_theme_options.include_in_header",
                 &relative_path(&src, &breadcrumbs.join("sphinx-template.html")),
             ))
-            .arg("-A")
-            .arg(format!("ferrocene_breadcrumbs_index={path_to_root}/index.html"))
-            .arg("-D")
+            .arg(format!("-Aferrocene_breadcrumbs_index={path_to_root}/index.html"))
             .arg(format!(
-                "rustfmt_version={}",
+                "-Drustfmt_version={}",
                 builder.crates.get("rustfmt-nightly").unwrap().version,
             ))
             // Include the CSS for the breadcrumbs. Note that the path here is relative to the
             // _static directory in the rendered output. The directive works only because before
             // invoking Sphinx we copy the CSS file into _static manually.
-            .arg("-D")
-            .arg("html_css_files=ferrocene-breadcrumbs.css")
+            .arg("-Dhtml_css_files=ferrocene-breadcrumbs.css")
             // Provide the correct substitutions:
-            .arg("-D")
             .arg(path_define("ferrocene_substitutions_path", &relative_path(&src, &substitutions)))
             // Provide the correct target names:
-            .arg("-D")
             .arg(path_define("ferrocene_target_names_path", &relative_path(&src, &target_names)))
             // Toolchain versions
-            .arg("-D")
-            .arg(format!("ferrocene_version={ferrocene_version}"))
-            .arg("-D")
+            .arg(format!("-Dferrocene_version={ferrocene_version}"))
             .arg(format!(
-                "rust_version={}",
+                "-Drust_version={}",
                 fs::read_to_string(&builder.src.join("src").join("version")).unwrap().trim(),
             ));
 
@@ -232,7 +224,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         }
 
         if self.require_relnotes {
-            cmd.arg("-D").arg(path_define(
+            cmd.arg(path_define(
                 "rust_release_notes",
                 &relative_path(&src, &builder.src.join("RELEASES.md")),
             ));
@@ -314,15 +306,15 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             (_, SignatureStatus::Present) => {
                 let private_signature_files_dir = builder.ensure(CacheSignatureFiles::<P>::new());
 
-                cmd.args(["-D", "ferrocene_signature=present"]);
+                cmd.arg("-Dferrocene_signature=present");
                 // Provide the directory containing the cached private signature files:
-                cmd.arg("-D").arg(path_define(
+                cmd.arg(path_define(
                     "ferrocene_private_signature_files_dir",
                     &relative_path(&src, &private_signature_files_dir),
                 ));
             }
             (_, SignatureStatus::Missing) => {
-                cmd.args(["-D", "ferrocene_signature=missing"]);
+                cmd.arg("-Dferrocene_signature=missing");
             }
         }
 
@@ -410,7 +402,7 @@ fn add_intersphinx_arguments<P: Step + IsSphinxBook>(
     // configuration key we can set, that accepts the JSON representation of the mappings. The
     // extension then takes care of registering the mappings with InterSphinx.
     let serialized = serde_json::to_string(&inventories).unwrap();
-    cmd.arg("-D").arg(format!("ferrocene_intersphinx_mappings={serialized}"));
+    cmd.arg(format!("-Dferrocene_intersphinx_mappings={serialized}"));
 }
 
 fn add_external_sphinx_needs_argument<P: Step + IsSphinxBook>(
@@ -476,11 +468,12 @@ fn add_external_sphinx_needs_argument<P: Step + IsSphinxBook>(
     }
 
     let serialized = serde_json::to_string(&needs).unwrap();
-    cmd.arg("-D").arg(format!("ferrocene_external_needs={serialized}"));
+    cmd.arg(format!("-Dferrocene_external_needs={serialized}"));
 }
 
 fn path_define(key: &str, value: &Path) -> OsString {
     let mut string = OsString::new();
+    string.push("-D");
     string.push(key);
     string.push("=");
     string.push(value);

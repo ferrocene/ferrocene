@@ -188,20 +188,6 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             // Store doctrees outside the output directory:
             .arg("-d")
             .arg(relative_path(&src, &doctrees))
-            // Include the breadcrumbs
-            .arg(path_define(
-                "html_theme_options.include_in_header",
-                &relative_path(&src, &breadcrumbs.join("sphinx-template.html")),
-            ))
-            .arg(format!("-Aferrocene_breadcrumbs_index={path_to_root}/index.html"))
-            .arg(format!(
-                "-Drustfmt_version={}",
-                builder.crates.get("rustfmt-nightly").unwrap().version,
-            ))
-            // Include the CSS for the breadcrumbs. Note that the path here is relative to the
-            // _static directory in the rendered output. The directive works only because before
-            // invoking Sphinx we copy the CSS file into _static manually.
-            .arg("-Dhtml_css_files=ferrocene-breadcrumbs.css")
             // Provide the correct substitutions:
             .arg(path_define("ferrocene_substitutions_path", &relative_path(&src, &substitutions)))
             // Provide the correct target names:
@@ -211,7 +197,23 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             .arg(format!(
                 "-Drust_version={}",
                 fs::read_to_string(&builder.src.join("src").join("version")).unwrap().trim(),
+            ))
+            .arg(format!(
+                "-Drustfmt_version={}",
+                builder.crates.get("rustfmt-nightly").unwrap().version,
             ));
+
+        // Include the breadcrumbs
+        cmd.arg(path_define(
+            "html_theme_options.include_in_header",
+            &relative_path(&src, &breadcrumbs.join("sphinx-template.html")),
+        ));
+        // Point the breadcrumbs to the root of the documentation.
+        cmd.arg(format!("-Aferrocene_breadcrumbs_index={path_to_root}/index.html"));
+        // Include the CSS for the breadcrumbs. Note that the path here is relative to the
+        // _static directory in the rendered output. The directive works only because before
+        // invoking Sphinx we copy the CSS file into _static manually.
+        cmd.arg("-Dhtml_css_files=ferrocene-breadcrumbs.css");
 
         if builder.config.cmd.fresh() {
             // The `-E` flag forces Sphinx to ignore any saved environment and build everything

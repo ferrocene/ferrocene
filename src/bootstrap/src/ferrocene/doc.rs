@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use std::collections::HashMap;
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::path::{Path, PathBuf, absolute};
 
@@ -145,6 +145,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         let substitutions = ferrocene_doc.join("sphinx-substitutions.toml");
         let target_names = ferrocene_doc.join("target-names.toml");
         let breadcrumbs = ferrocene_doc.join("breadcrumbs");
+        let public_docs_warning = ferrocene_doc.join("public-docs-warning");
 
         // In some cases we have to perform a fresh build to guarantee deterministic output (for
         // example to generate signatures). We want to purge the old build artifacts only when
@@ -177,6 +178,9 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             fs::read_to_string(&builder.src.join("ferrocene").join("version")).unwrap();
         let ferrocene_version = ferrocene_version.trim();
 
+        let mut include_in_header = Vec::new();
+        let mut css_files = Vec::new();
+
         // Note that we must pass all paths to Sphinx relative to the directory containing conf.py.
         // Absolute paths break our reproducibility, and paths relative from other directories
         // don't really work with Sphinx, as it treats all paths as relative from the directory
@@ -203,17 +207,20 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
                 builder.crates.get("rustfmt-nightly").unwrap().version,
             ));
 
-        // Include the breadcrumbs
+        // Include the public-docs warning message.
+        css_files.push(format!("{path_to_root}/../public-docs-warning.css"));
+        include_in_header.push(relative_path(&src, &public_docs_warning.join("header.html")));
+
+        // Include the breadcrumbs in the generated documentation.
+        css_files.push("ferrocene-breadcrumbs.css".into());
+        include_in_header.push(relative_path(&src, &breadcrumbs.join("sphinx-template.html")));
+        cmd.arg(format!("-Aferrocene_breadcrumbs_index={path_to_root}/index.html"));
+
+        cmd.arg(path_define("html_css_files", comma_separated_paths(&css_files)));
         cmd.arg(path_define(
             "html_theme_options.include_in_header",
-            &relative_path(&src, &breadcrumbs.join("sphinx-template.html")),
+            comma_separated_paths(&include_in_header),
         ));
-        // Point the breadcrumbs to the root of the documentation.
-        cmd.arg(format!("-Aferrocene_breadcrumbs_index={path_to_root}/index.html"));
-        // Include the CSS for the breadcrumbs. Note that the path here is relative to the
-        // _static directory in the rendered output. The directive works only because before
-        // invoking Sphinx we copy the CSS file into _static manually.
-        cmd.arg("-Dhtml_css_files=ferrocene-breadcrumbs.css");
 
         if builder.config.cmd.fresh() {
             // The `-E` flag forces Sphinx to ignore any saved environment and build everything
@@ -473,13 +480,24 @@ fn add_external_sphinx_needs_argument<P: Step + IsSphinxBook>(
     cmd.arg(format!("-Dferrocene_external_needs={serialized}"));
 }
 
-fn path_define(key: &str, value: &Path) -> OsString {
+fn path_define(key: &str, value: impl AsRef<OsStr>) -> OsString {
     let mut string = OsString::new();
     string.push("-D");
     string.push(key);
     string.push("=");
-    string.push(value);
+    string.push(value.as_ref());
     string
+}
+
+fn comma_separated_paths(paths: &[impl AsRef<Path>]) -> OsString {
+    let mut output = OsString::new();
+    for (idx, path) in paths.iter().enumerate() {
+        if idx != 0 {
+            output.push(",");
+        }
+        output.push(path.as_ref());
+    }
+    output
 }
 
 struct InterSphinxConfig {

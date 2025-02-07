@@ -854,11 +854,36 @@ impl Step for Index {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        copy_breadcrumbs_assets(builder, &builder.doc_out(self.target));
-        builder.cp_link_r(
-            &builder.src.join("ferrocene").join("doc").join("index"),
-            &builder.out.join(self.target.triple).join("doc"),
-        );
+        const PDW_PLACEHOLDER: &str = "<!-- FERROCENE-INCLUDE-PUBLIC-DOCS-WARNING -->";
+
+        let doc = builder.src.join("ferrocene").join("doc");
+        let index_dir = doc.join("index");
+        let pdw_dir = doc.join("public-docs-warning");
+        let out = builder.doc_out(self.target);
+
+        if builder.config.dry_run() {
+            return;
+        }
+        builder.create_dir(&out);
+
+        let mut template = builder.read(&index_dir.join("index.html"));
+
+        // We need to include the public-docs warning into index.html. Ideally we would use a
+        // template engine to support includes, but that'd add a big dependency to bootstrap.
+        //
+        // For the time being, replacing a pre-defined placeholder works well enough, and doesn't
+        // slow down bootstrap. If more complex templating needs are required please switch to a
+        // proper template engine.
+        let pdw_template = builder.read(&pdw_dir.join("header.html"));
+        if !template.contains(PDW_PLACEHOLDER) {
+            panic!("the index doesn't require the public-docs warning");
+        }
+        template = template.replace(PDW_PLACEHOLDER, &pdw_template);
+
+        std::fs::write(out.join("index.html"), &template).expect("failed to write index.html");
+
+        copy_breadcrumbs_assets(builder, &out);
+        builder.cp_link_r(&index_dir.join("index-assets"), &out.join("index-assets"));
     }
 }
 

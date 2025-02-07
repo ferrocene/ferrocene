@@ -78,6 +78,7 @@ jobs:
         run: ferrocene/ci/scripts/assume-aws-oidc-role.sh
         env:
           AWS_ROLE_ARN: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          AWS_DEFAULT_REGION: us-east-1
 
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
@@ -140,6 +141,7 @@ jobs:
         run: ferrocene/ci/scripts/assume-aws-oidc-role.sh
         env:
           AWS_ROLE_ARN: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          AWS_DEFAULT_REGION: us-east-1
 
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/

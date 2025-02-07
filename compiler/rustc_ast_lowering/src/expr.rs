@@ -1,11 +1,11 @@
 use std::assert_matches::assert_matches;
 use std::ops::ControlFlow;
+use std::sync::Arc;
 
 use rustc_ast::ptr::P as AstP;
 use rustc_ast::*;
 use rustc_ast_pretty::pprust::expr_to_string;
 use rustc_data_structures::stack::ensure_sufficient_stack;
-use rustc_data_structures::sync::Lrc;
 use rustc_hir as hir;
 use rustc_hir::HirId;
 use rustc_hir::def::{DefKind, Res};
@@ -147,7 +147,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 ExprKind::IncludedBytes(bytes) => {
                     let lit = self.arena.alloc(respan(
                         self.lower_span(e.span),
-                        LitKind::ByteStr(Lrc::clone(bytes), StrStyle::Cooked),
+                        LitKind::ByteStr(Arc::clone(bytes), StrStyle::Cooked),
                     ));
                     hir::ExprKind::Lit(lit)
                 }
@@ -311,8 +311,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     hir::ExprKind::Continue(self.lower_jump_destination(e.id, *opt_label))
                 }
                 ExprKind::Ret(e) => {
-                    let e = e.as_ref().map(|x| self.lower_expr(x));
-                    hir::ExprKind::Ret(e)
+                    let expr = e.as_ref().map(|x| self.lower_expr(x));
+                    self.checked_return(expr)
                 }
                 ExprKind::Yeet(sub_expr) => self.lower_expr_yeet(e.span, sub_expr.as_deref()),
                 ExprKind::Become(sub_expr) => {
@@ -377,6 +377,32 @@ impl<'hir> LoweringContext<'_, 'hir> {
 
             hir::Expr { hir_id: expr_hir_id, kind, span: self.lower_span(e.span) }
         })
+    }
+
+    /// Create an `ExprKind::Ret` that is preceded by a call to check contract ensures clause.
+    fn checked_return(&mut self, opt_expr: Option<&'hir hir::Expr<'hir>>) -> hir::ExprKind<'hir> {
+        let checked_ret = if let Some(Some((span, fresh_ident))) =
+            self.contract.as_ref().map(|c| c.ensures.as_ref().map(|e| (e.expr.span, e.fresh_ident)))
+        {
+            let expr = opt_expr.unwrap_or_else(|| self.expr_unit(span));
+            Some(self.inject_ensures_check(expr, span, fresh_ident.0, fresh_ident.2))
+        } else {
+            opt_expr
+        };
+        hir::ExprKind::Ret(checked_ret)
+    }
+
+    /// Wraps an expression with a call to the ensures check before it gets returned.
+    pub(crate) fn inject_ensures_check(
+        &mut self,
+        expr: &'hir hir::Expr<'hir>,
+        span: Span,
+        check_ident: Ident,
+        check_hir_id: HirId,
+    ) -> &'hir hir::Expr<'hir> {
+        let checker_fn = self.expr_ident(span, check_ident, check_hir_id);
+        let span = self.mark_span_with_reason(DesugaringKind::Contract, span, None);
+        self.expr_call(span, checker_fn, std::slice::from_ref(expr))
     }
 
     pub(crate) fn lower_const_block(&mut self, c: &AnonConst) -> hir::ConstBlock {
@@ -599,7 +625,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     this.mark_span_with_reason(
                         DesugaringKind::TryBlock,
                         expr.span,
-                        Some(Lrc::clone(&this.allow_try_trait)),
+                        Some(Arc::clone(&this.allow_try_trait)),
                     ),
                     expr,
                 )
@@ -607,7 +633,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 let try_span = this.mark_span_with_reason(
                     DesugaringKind::TryBlock,
                     this.tcx.sess.source_map().end_point(body.span),
-                    Some(Lrc::clone(&this.allow_try_trait)),
+                    Some(Arc::clone(&this.allow_try_trait)),
                 );
 
                 (try_span, this.expr_unit(try_span))
@@ -716,7 +742,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 let unstable_span = self.mark_span_with_reason(
                     DesugaringKind::Async,
                     self.lower_span(span),
-                    Some(Lrc::clone(&self.allow_gen_future)),
+                    Some(Arc::clone(&self.allow_gen_future)),
                 );
                 let resume_ty =
                     self.make_lang_item_qpath(hir::LangItem::ResumeTy, unstable_span, None);
@@ -800,7 +826,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
             let unstable_span = self.mark_span_with_reason(
                 DesugaringKind::Async,
                 span,
-                Some(Lrc::clone(&self.allow_gen_future)),
+                Some(Arc::clone(&self.allow_gen_future)),
             );
             self.lower_attrs(inner_hir_id, &[Attribute {
                 kind: AttrKind::Normal(ptr::P(NormalAttr::from_ident(Ident::new(
@@ -876,13 +902,13 @@ impl<'hir> LoweringContext<'_, 'hir> {
 
         let features = match await_kind {
             FutureKind::Future => None,
-            FutureKind::AsyncIterator => Some(Lrc::clone(&self.allow_for_await)),
+            FutureKind::AsyncIterator => Some(Arc::clone(&self.allow_for_await)),
         };
         let span = self.mark_span_with_reason(DesugaringKind::Await, await_kw_span, features);
         let gen_future_span = self.mark_span_with_reason(
             DesugaringKind::Await,
             full_span,
-            Some(Lrc::clone(&self.allow_gen_future)),
+            Some(Arc::clone(&self.allow_gen_future)),
         );
         let expr_hir_id = expr.hir_id;
 
@@ -1926,13 +1952,13 @@ impl<'hir> LoweringContext<'_, 'hir> {
         let unstable_span = self.mark_span_with_reason(
             DesugaringKind::QuestionMark,
             span,
-            Some(Lrc::clone(&self.allow_try_trait)),
+            Some(Arc::clone(&self.allow_try_trait)),
         );
         let try_span = self.tcx.sess.source_map().end_point(span);
         let try_span = self.mark_span_with_reason(
             DesugaringKind::QuestionMark,
             try_span,
-            Some(Lrc::clone(&self.allow_try_trait)),
+            Some(Arc::clone(&self.allow_try_trait)),
         );
 
         // `Try::branch(<expr>)`
@@ -1991,7 +2017,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     ),
                 ))
             } else {
-                self.arena.alloc(self.expr(try_span, hir::ExprKind::Ret(Some(from_residual_expr))))
+                let ret_expr = self.checked_return(Some(from_residual_expr));
+                self.arena.alloc(self.expr(try_span, ret_expr))
             };
             self.lower_attrs(ret_expr.hir_id, &attrs);
 
@@ -2026,7 +2053,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         let unstable_span = self.mark_span_with_reason(
             DesugaringKind::YeetExpr,
             span,
-            Some(Lrc::clone(&self.allow_try_trait)),
+            Some(Arc::clone(&self.allow_try_trait)),
         );
 
         let from_yeet_expr = self.wrap_in_try_constructor(
@@ -2040,7 +2067,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
             let target_id = Ok(catch_id);
             hir::ExprKind::Break(hir::Destination { label: None, target_id }, Some(from_yeet_expr))
         } else {
-            hir::ExprKind::Ret(Some(from_yeet_expr))
+            self.checked_return(Some(from_yeet_expr))
         }
     }
 

@@ -18,6 +18,7 @@
 //@ ignore-android FIXME #17520
 //@ ignore-openbsd no support for libbacktrace without filename
 //@ ignore-fuchsia Backtraces not symbolized
+//@ ignore-aarch64-unknown-ferrocenecoretest no backtrace support
 //@ ignore-thumbv7em-ferrocenecoretest-eabi no backtrace support
 //@ ignore-thumbv7em-ferrocenecoretest-eabihf no backtrace support
 //@ needs-subprocess

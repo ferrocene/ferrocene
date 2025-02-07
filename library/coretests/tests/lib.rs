@@ -198,5 +198,12 @@ pub(crate) fn test_rng() -> rand_xorshift::XorShiftRng {
 #[test]
 #[cfg(ferrocenecoretest_secretsauce)]
 fn check_that_qemu_cpu_was_set() {
-    assert_eq!(Ok("cortex-m4"), std::env::var("QEMU_CPU").as_deref());
+    let qemu_cpu = std::env::var("QEMU_CPU").expect("QEMU_CPU env var was not set");
+    if cfg!(target_arch = "aarch64") {
+        assert_eq!("cortex-a53", qemu_cpu);
+    } else if cfg!(target_arch = "arm") {
+        assert_eq!("cortex-m4", qemu_cpu);
+    } else {
+        panic!("extend this logic")
+    }
 }

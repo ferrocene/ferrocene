@@ -13,6 +13,7 @@
 # small internal thing to help our developers view the current state of things.
 
 import os
+import shutil
 import subprocess
 import tempfile
 import tomllib
@@ -57,6 +58,12 @@ def run(branch, *, redirect_from_index=False):
         output,
         f"{branch}/traceability-matrix-x86_64-unknown-linux-gnu.html",
         f"/{branch}/qualification/traceability-matrix.html",
+    )
+
+    # Manually include the CSS file causing the public-docs warning to be shown.
+    shutil.copyfile(
+        "ferrocene/doc/public-docs-warning/public-docs-warning.css",
+        f"{output}/{branch}/public-docs-warning.css",
     )
 
     if redirect_from_index:

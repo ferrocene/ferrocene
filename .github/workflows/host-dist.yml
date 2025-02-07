@@ -150,6 +150,7 @@ jobs:
       - name: Run
         uses: ./.github/actions/run/
         with:
+          aws: true
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |

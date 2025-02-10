@@ -2,7 +2,7 @@
 /* SPDX-FileCopyrightText: The Ferrocene Developers */
 
 :root {
-    --header-bar-1-height: 2.5rem;
+    --header-bar-2-height: 2.5rem;
 }
 
 .ferrocene-public-docs-warning {
@@ -11,15 +11,15 @@
     display: block !important;
 
     position: fixed;
-    top: var(--header-bar-1-offset);
+    top: var(--header-bar-2-offset);
     left: 0;
     right: 0;
-    height: var(--header-bar-1-height);
+    height: var(--header-bar-2-height);
     z-index: 1000;
 }
 
 .ferrocene-public-docs-warning-wrapper {
-    height: var(--header-bar-1-height);
+    height: var(--header-bar-2-height);
     width: 100%;
     padding: 0.5rem 1rem;
 
@@ -37,7 +37,7 @@
 
 @media (max-width: 65rem) {
     :root {
-        --header-bar-1-height: 5rem;
+        --header-bar-2-height: 5rem;
     }
 
     .ferrocene-public-docs-warning-wrapper {

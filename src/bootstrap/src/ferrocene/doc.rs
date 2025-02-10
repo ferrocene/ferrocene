@@ -207,14 +207,14 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
                 builder.crates.get("rustfmt-nightly").unwrap().version,
             ));
 
-        // Include the public-docs warning message.
-        css_files.push(format!("{path_to_root}/../public-docs-warning.css"));
-        include_in_header.push(relative_path(&src, &public_docs_warning.join("header.html")));
-
         // Include the breadcrumbs in the generated documentation.
         css_files.push("ferrocene-breadcrumbs.css".into());
         include_in_header.push(relative_path(&src, &breadcrumbs.join("sphinx-template.html")));
         cmd.arg(format!("-Aferrocene_breadcrumbs_index={path_to_root}/index.html"));
+
+        // Include the public-docs warning message.
+        css_files.push(format!("{path_to_root}/../public-docs-warning.css"));
+        include_in_header.push(relative_path(&src, &public_docs_warning.join("header.html")));
 
         cmd.arg(path_define("html_css_files", comma_separated_paths(&css_files)));
         cmd.arg(path_define(

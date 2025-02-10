@@ -2,13 +2,13 @@
 /* SPDX-FileCopyrightText: The Ferrocene Developers */
 
 :root {
-    --header-bar-2-height: 2.5rem;
+    --header-bar-1-height: 2.5rem;
 }
 
 div.breadcrumbs {
-    height: var(--header-bar-2-height);
+    height: var(--header-bar-1-height);
     position: fixed;
-    top: var(--header-bar-2-offset);
+    top: var(--header-bar-1-offset);
     left: 0;
     right: 0;
     z-index: 100;

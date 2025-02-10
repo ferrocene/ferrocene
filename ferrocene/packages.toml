@@ -79,7 +79,7 @@ targets = [
   "thumbv8m.base-none-eabi",
   "thumbv8m.main-none-eabi",
   "thumbv8m.main-none-eabihf",
-  "wasm32-unknown-unknown",
+  # "wasm32-unknown-unknown",
 ]
 
 [[groups.cross-compilation.packages]]
@@ -96,12 +96,12 @@ targets = [
 name = "rust-std"
 subset = "qnx"
 
-[groups.oxidos]
-targets = ["wasm32-unknown-unknown"]
+# [groups.oxidos]
+# targets = ["wasm32-unknown-unknown"]
 
-[[groups.oxidos.packages]]
-name = "oxidos"
-subset = "oxidos"
+# [[groups.oxidos.packages]]
+# name = "oxidos"
+# subset = "oxidos"
 
 [groups.any-platform]
 targets = ["*"]

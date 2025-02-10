@@ -184,12 +184,6 @@ should not be used in production.
      - Bare-metal
      - \-
 
-   * - :target:`wasm32-unknown-unknown`
-     - ``wasm32-unknown-unknown``
-     - Cross-compilation
-     - Full
-     - The full standard library is available, but unsupported functions in ``std`` will panic.
-
    * - :target:`x86_64-apple-darwin`
      - ``x86_64-apple-darwin``
      - Cross-compilation

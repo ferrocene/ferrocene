@@ -18,3 +18,13 @@ New features
 
   * :target-with-triple:`thumbv7em-none-eabi`
   * :target-with-triple:`thumbv7em-none-eabihf`
+
+Removed experimental features
+-----------------------------
+
+Experimental features are not qualified for safety critical use, and are
+shipped as a preview. In some circumstances, these features are removed.
+
+* Experimental support has been removed for the following platforms:
+
+  * WASM bare-metal (``wasm32-unknown-unknown``)

@@ -25,9 +25,10 @@
 
     display: flex;
     align-items: center;
-     justify-content: space-between;
+    justify-content: space-between;
 
     background: #f2bd0d;
+    font-size: 0.9em;
 }
 
 .ferrocene-public-docs-warning-wrapper a {

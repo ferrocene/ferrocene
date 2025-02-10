@@ -74,11 +74,6 @@ jobs:
       - name: Authenicate docker with Azure
         if: ${{ (runner.os == 'Linux') }}
         run: az acr login --name ferrocenecr
-      - name: Load AWS credentials into the environment
-        run: ferrocene/ci/scripts/assume-aws-oidc-role.sh
-        env:
-          AWS_ROLE_ARN: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-          AWS_DEFAULT_REGION: us-east-1
 
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
@@ -90,10 +85,10 @@ jobs:
         uses: ./.github/actions/run/
         with:
           container: ${{ inputs.container }}
-          aws: true
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ./x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
+            ./ferrocene/ci/scripts/assume-aws-oidc-role.sh
+            uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
 
       - uses: actions/upload-artifact@v4
         id: artifact
@@ -137,11 +132,6 @@ jobs:
       - name: Authenicate docker with Azure
         if: ${{ (runner.os == 'Linux') }}
         run: az acr login --name ferrocenecr
-      - name: Load AWS credentials into the environment
-        run: ferrocene/ci/scripts/assume-aws-oidc-role.sh
-        env:
-          AWS_ROLE_ARN: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-          AWS_DEFAULT_REGION: us-east-1
 
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
@@ -152,10 +142,10 @@ jobs:
       - name: Run
         uses: ./.github/actions/run/
         with:
-          aws: true
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
+            ./ferrocene/ci/scripts/assume-aws-oidc-role.sh
             uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
 
       - uses: actions/upload-artifact@v4

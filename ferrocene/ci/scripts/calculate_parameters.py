@@ -170,35 +170,35 @@ def calculate_targets(host_plus_stage: str):
     """
     host, stage = host_plus_stage.split("--", 1)
 
-    # The CI does not run Python 3.10 and thus `match` statements don't exist yet
-    # in this universe.
     if stage == "build":
-        if host == "aarch64-unknown-linux-gnu":
-            targets = AARCH64_LINUX_BUILD_HOSTS
-        elif host == "x86_64-unknown-linux-gnu":
-            targets = X86_64_LINUX_BUILD_HOSTS
-        elif host == "aarch64-apple-darwin":
-            targets = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS # We don't currently produce x86_64 Apple host tools, but we will one day
-        elif host == "x86_64-pc-windows-msvc":
-            targets = X86_64_WINDOWS_BUILD_HOSTS
-        else:
-            raise Exception(f"Host {host} not supported at this time, please add support")
+        match host:
+            case "aarch64-unknown-linux-gnu":
+                targets = AARCH64_LINUX_BUILD_HOSTS
+            case "x86_64-unknown-linux-gnu":
+                targets = X86_64_LINUX_BUILD_HOSTS
+            case "aarch64-apple-darwin":
+                targets = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS # We don't currently produce x86_64 Apple host tools, but we will one day
+            case "x86_64-pc-windows-msvc":
+                targets = X86_64_WINDOWS_BUILD_HOSTS
+            case _:
+                raise Exception(f"Host {host} not supported at this time, please add support")
     elif stage == "std":
         if host == "x86_64-unknown-linux-gnu":
             targets = X86_64_LINUX_BUILD_STD_TARGETS_ALL
         else:
             raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
     elif stage == "self-test":
-        if host == "aarch64-unknown-linux-gnu":
-            targets = AARCH64_LINUX_SELF_TEST_TARGETS
-        elif host == "x86_64-unknown-linux-gnu":
-            targets = X86_64_LINUX_SELF_TEST_TARGETS
-        elif host == "aarch64-apple-darwin":
-            targets = AARCH64_MAC_SELF_TEST_TARGETS
-        elif host == "x86_64-pc-windows-msvc":
-            targets = X86_64_WINDOWS_SELF_TEST_TARGETS
-        else:
-            raise Exception(f"Host {host} not supported at this time, please add support")
+        match host:
+            case "aarch64-unknown-linux-gnu":
+                targets = AARCH64_LINUX_SELF_TEST_TARGETS
+            case "x86_64-unknown-linux-gnu":
+                targets = X86_64_LINUX_SELF_TEST_TARGETS
+            case "aarch64-apple-darwin":
+                targets = AARCH64_MAC_SELF_TEST_TARGETS
+            case "x86_64-pc-windows-msvc":
+                targets = X86_64_WINDOWS_SELF_TEST_TARGETS
+            case _:
+                raise Exception(f"Host {host} not supported at this time, please add support")
     else:
         raise Exception(f"Stage {stage} not known, please add support")
 

@@ -3,7 +3,7 @@ artifacts_server=s3://ferrocene-ci-artifacts/ferrocene/dist
 artifacts_with_llvm_assertions_server=s3://ferrocene-ci-artifacts/ferrocene/dist
 git_merge_commit_email=87868125+bors-ferrocene\[bot\]@users.noreply.github.com
 git_repository=ferrocene/ferrocene
-nightly_branch=main
+nightly_branch=release/1.85
 
 # The configuration above this comment is editable, and can be changed
 # by forks of the repository if they have alternate values.

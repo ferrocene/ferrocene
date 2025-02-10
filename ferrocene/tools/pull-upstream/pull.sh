@@ -310,6 +310,15 @@ else
     automation_warning "Couldn't regenerate the \`x.py\` completions. Please run \`./x run generate-completions\` after fixing the merge conflicts."
 fi
 
+# Some parts of src/stage0 need to be updated when we branch off from main to a release branch.
+# Running the fixup script here ensures the fix is always applied.
+echo "pull-upstream: trying to fix src/stage0"
+ferrocene/ci/scripts/fix-stage0-branch.py
+if git status --porcelain=v1 | grep "^ M src/stage0$" >/dev/null; then
+    git add src/stage0
+    git commit -m "update src/stage0"
+fi
+
 git branch -D "${TEMP_BRANCH}"
 
 echo

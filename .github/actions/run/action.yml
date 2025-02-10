@@ -9,8 +9,6 @@ inputs:
     description: Args to pass to the configure script
   test-device-addr:
     description: The test device address to use
-  aws:
-    description: If the AWS authentication should be passed through (containers only) 
 
 runs:
   using: "composite"
@@ -37,6 +35,8 @@ runs:
           ./ferrocene/ci/scripts/setup-venv.sh
           ${{ inputs.script }}
         RUST_CONFIGURE_ARGS: ${{ inputs.configure }}
+        AWS_ROLE_ARN: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+        AWS_DEFAULT_REGION: us-east-1
       # Due to a GHA limitation, `TEST_DEVICE_ADDR` is always set, but sometimes empty.
       # Detect if it's empty and unset it.
       run: |
@@ -68,7 +68,6 @@ runs:
           --env AWS_EC2_METADATA_DISABLED \
           --workdir /home/ci/project \
           --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
-          ${{ inputs.aws == 'true' && '--mount "type=bind,src=/tmp/awsjwt,dst=/tmp/awsjwt"' || '' }} \
           --user $(id -u):$(id -g) \
           --network host \
           ${{ inputs.container }} \

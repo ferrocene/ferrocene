@@ -9,6 +9,7 @@ from . import (
     sphinx_needs_support,
     substitutions,
     target,
+    upcoming,
 )
 import string
 
@@ -21,6 +22,7 @@ def setup(app):
     target.setup(app)
     intersphinx_support.setup(app)
     sphinx_needs_support.setup(app)
+    upcoming.setup(app)
 
     app.connect("config-inited", validate_config)
     app.connect("config-inited", inject_version)

@@ -165,6 +165,33 @@ the triple:
 The human-readable names are stored in ``ferrocene/doc/target-names.toml``, and
 referring to a target not defined in that file will emit a warning.
 
+Marking changes as upcoming
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When we add documentation about an upcoming feature to our documentation, the
+documentation will be immediately available on our `public documentation
+<https://public-docs.ferrocene.dev>`_. In those cases, you should mark those
+changes as "upcoming" by adding a note in the paragraph describing them:
+
+.. code-block:: rst
+
+   :upcoming:`25.02`
+
+The upcoming block must contain the version number in which the feature will be
+available. The badge will be shown in any branch not belonging to a specific
+release (like nightly or rolling) and in all releases with a version lower than
+the one you defined. It will automatically disappear from that version onwards.
+
+.. note::
+
+   You can include the ``:upcoming:`` role in page or section titles as well.
+   Doing so will result in the badge being displayed along the title:
+
+   .. code-block:: rst
+
+      New exciting feature :upcoming:`25.02`
+      ======================================
+
 .. _document-id:
 
 Document ID

@@ -46,8 +46,9 @@ class MarkPageAsUpcoming(SphinxTransform):
         # converts the node structure into plain text. To ensure the title is
         # formatted correctly, we add extra markup hidden with CSS that will be
         # displayed only in the HTML title.
-        title_node += span_with_class(" (", "hidden")
-        title_node += span_with_class("upcoming", "relnotes-upcoming-badge")
+        title_node += nodes.Text(" ")
+        title_node += span_with_class("(", "hidden")
+        title_node += span_with_class("upcoming", "badge-yellow")
         title_node += span_with_class(")", "hidden")
 
     def add_caution_after(self, after_node):

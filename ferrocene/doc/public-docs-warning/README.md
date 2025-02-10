@@ -1,3 +1,6 @@
+<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
+<!-- SPDX-FileCopyrightText: The Ferrocene Developers -->
+
 # public-docs warning
 
 This directory contains the implementation of the warning banner we show in

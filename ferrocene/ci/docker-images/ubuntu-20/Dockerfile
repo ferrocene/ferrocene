@@ -54,6 +54,7 @@ RUN <<-EOF
         moreutils \
         zstd \
         sudo \
+        less \
         jq
 
     # Needed to support the QEMU copied over from Ubuntu 24.04 (see above).

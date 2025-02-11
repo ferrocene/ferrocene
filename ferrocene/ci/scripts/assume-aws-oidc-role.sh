@@ -17,7 +17,11 @@ set -euo pipefail
 IFS=$'\n\t'
 
 set_env() {
-    echo "$1=$2" >> "${GITHUB_ENV}"
+    set +u
+    if [[ -z "${GITHUB_ENV}" ]]; then
+        echo "$1=$2" >> "${GITHUB_ENV}"
+    fi
+    set -u
     export "$1=$2"
 }
 

@@ -27,4 +27,4 @@ shipped as a preview. In some circumstances, these features are removed.
 
 * Experimental support has been removed for the following platforms:
 
-  * :target-with-triple:`wasm-unknown-unknown`
+  * :target-with-triple:`wasm32-unknown-unknown`

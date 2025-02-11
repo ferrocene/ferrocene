@@ -9,6 +9,10 @@ inputs:
     description: Args to pass to the configure script
   test-device-addr:
     description: The test device address to use
+  aws-role-arn:
+    description: The ARN of the AWS role to assume
+  aws-region:
+    description: The region of the AWS role to assume
 
 runs:
   using: "composite"
@@ -35,8 +39,8 @@ runs:
           ./ferrocene/ci/scripts/setup-venv.sh
           ${{ inputs.script }}
         RUST_CONFIGURE_ARGS: ${{ inputs.configure }}
-        AWS_ROLE_ARN: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-        AWS_DEFAULT_REGION: us-east-1
+        AWS_ROLE_ARN: ${{ inputs.aws-role-arn }}
+        AWS_DEFAULT_REGION: ${{ inputs.aws-region }}
       # Due to a GHA limitation, `TEST_DEVICE_ADDR` is always set, but sometimes empty.
       # Detect if it's empty and unset it.
       run: |

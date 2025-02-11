@@ -11,7 +11,8 @@ from pathlib import Path
 import argparse
 import subprocess
 import sys
-
+import os
+import shutil
 
 # Automatically watch the following extra directories when --serve is used.
 EXTRA_WATCH_DIRS = ["exts", "themes"]
@@ -32,6 +33,9 @@ def build_docs(root, builder, clear, serve, debug):
         # Enable parallel builds:
         args += ["-j", "auto"]
     if clear:
+        html_path = Path(f"{dest}/html")
+        if os.path.exists():
+            shutil.rmtree(html_path)
         args.append("-E")
     if serve:
         for extra_watch_dir in EXTRA_WATCH_DIRS:

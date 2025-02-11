@@ -99,3 +99,14 @@ Finally, you need to send another PR targeting the ``release/1.NN`` branch,
 changing ``ferrocene/ci/channel`` back to ``beta`` and incrementing the point
 release version in ``ferrocene/version`` by 1. Note that you might need to
 remove some digital signatures when you increment the version number.
+
+Remove upcoming notes in the ``main`` branch
+--------------------------------------------
+
+After publishing the stable release, send a PR to the ``main`` branch to:
+
+* Remove the ``:upcoming-release:`` role at the top of the release notes page
+  for this release.
+
+* Remove all mentions of ``:upcoming:`YY.MM``` in the documentation, where
+  ``YY.MM`` is the current version number.

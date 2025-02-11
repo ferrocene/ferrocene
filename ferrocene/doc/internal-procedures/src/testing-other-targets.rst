@@ -188,6 +188,7 @@ After, you can run the tests:
 
 .. code-block:: bash
 
+    export QEMU_CPU=cortex-a53
     ./x test --stage 1 --target aarch64-unknown-ferrocenecoretest library/coretests
 
 :target-with-triple:`thumbv7em-none-eabihf` & :target-with-triple:`thumbv7em-none-eabi`

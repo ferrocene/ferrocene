@@ -28,4 +28,4 @@ shipped as a preview. In some circumstances, these features are removed.
 
 * Experimental support has been removed for the following platforms:
 
-  * x86-64 macOS (``x86_64-apple-darwin``)
+  * :target-with-triple:`x86_64-apple-darwin`

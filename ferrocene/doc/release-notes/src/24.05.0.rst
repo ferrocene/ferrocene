@@ -31,7 +31,7 @@ shipped as a preview.
 
   * :target-with-triple:`thumbv7em-none-eabi`
   * :target-with-triple:`thumbv7em-none-eabihf`
-  * WASM bare-metal (wasm32-unknown-unknown)
+  * :target-with-triple:`wasm32-unknown-unknown`
 
 * The self-testing tool now checks the correct behavior of *linker drivers*,
   according to the new requirements for linkers. Note that the self-testing

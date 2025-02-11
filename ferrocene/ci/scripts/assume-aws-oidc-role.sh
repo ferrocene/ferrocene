@@ -18,7 +18,7 @@ IFS=$'\n\t'
 
 set_env() {
     set +u
-    if [[ -z "${GITHUB_ENV}" ]]; then
+    if [ ! -z "${GITHUB_ENV}" ]; then
         echo "$1=$2" >> "${GITHUB_ENV}"
     fi
     set -u

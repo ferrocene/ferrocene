@@ -75,10 +75,10 @@ class PullUpstreamPR(AutomatedPR):
     def pr_body(self, branch_name):
         message = ""
 
-        warnings = self._warnings_file.read().strip().split("\n")
-        if warnings:
+        raw_warnings = self._warnings_file.read().strip()
+        if raw_warnings:
             message += ":warning: **The automation reported these warnings:** :warning:\n\n"
-            for warning in warnings:
+            for warning in raw_warnings.split("\n"):
                 message += f"* {warning}\n"
             message += "\n"
 

@@ -36,6 +36,7 @@ RUN <<-EOF
         cmake \
         python-is-python3 \
         pipx \
+        less\
         jq
 
     # On x86_64, gcc-multilib lets us compile to aarch64

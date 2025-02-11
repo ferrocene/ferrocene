@@ -5,7 +5,7 @@
 //@ ignore-emscripten globals are used instead of thread locals
 //@ ignore-android does not use #[thread_local]
 //@ ignore-nto does not use #[thread_local]
-//@ ignore-aarch64-unknown-ferrocenecoretest no support for thread locals
+//@ ignore-ferrocenecoretest no support for thread locals
 
 #![crate_type = "lib"]
 

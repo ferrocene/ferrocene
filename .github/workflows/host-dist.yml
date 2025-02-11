@@ -85,6 +85,8 @@ jobs:
         uses: ./.github/actions/run/
         with:
           container: ${{ inputs.container }}
+          aws-role-arn: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          aws-region: us-east-1
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
             ./ferrocene/ci/scripts/assume-aws-oidc-role.sh
@@ -143,6 +145,8 @@ jobs:
         uses: ./.github/actions/run/
         with:
           container: ${{ inputs.container }}
+          aws-role-arn: ${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          aws-region: us-east-1
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
             ./ferrocene/ci/scripts/assume-aws-oidc-role.sh

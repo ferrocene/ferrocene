@@ -87,8 +87,8 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ./ferrocene/ci/scripts/assume-aws-oidc-role.sh
-            echo "Token file is ${AWS_WEB_IDENTITY_TOKEN_FILE}"
+            curl -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com" | jq -r '.value' > /tmp/awsjwt
+            chmod 0400 /tmp/awsjwt
             export AWS_WEB_IDENTITY_TOKEN_FILE="/tmp/awsjwt"
             export AWS_ROLE_SESSION_NAME="github-actions"
             export AWS_DEFAULT_REGION="us-east-1"
@@ -150,8 +150,8 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ./ferrocene/ci/scripts/assume-aws-oidc-role.sh
-            echo "Token file is ${AWS_WEB_IDENTITY_TOKEN_FILE}"
+            curl -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com" | jq -r '.value' > /tmp/awsjwt
+            chmod 0400 /tmp/awsjwt
             export AWS_WEB_IDENTITY_TOKEN_FILE="/tmp/awsjwt"
             export AWS_ROLE_SESSION_NAME="github-actions"
             export AWS_DEFAULT_REGION="us-east-1"

@@ -827,7 +827,9 @@ fn run_required_analyses(tcx: TyCtxt<'_>) {
     if tcx.sess.opts.unstable_opts.input_stats {
         rustc_passes::input_stats::print_hir_stats(tcx);
     }
-    #[cfg(debug_assertions)]
+    // When using rustdoc's "jump to def" feature, it enters this code and `check_crate`
+    // is not defined. So we need to cfg it out.
+    #[cfg(all(not(doc), debug_assertions))]
     rustc_passes::hir_id_validator::check_crate(tcx);
     let sess = tcx.sess;
     sess.time("misc_checking_1", || {
@@ -908,6 +910,11 @@ fn run_required_analyses(tcx: TyCtxt<'_>) {
                 tcx.ensure_ok().mir_coroutine_witnesses(def_id);
                 tcx.ensure_ok().check_coroutine_obligations(
                     tcx.typeck_root_def_id(def_id.to_def_id()).expect_local(),
+                );
+                // Eagerly check the unsubstituted layout for cycles.
+                tcx.ensure_ok().layout_of(
+                    ty::TypingEnv::post_analysis(tcx, def_id.to_def_id())
+                        .as_query_input(tcx.type_of(def_id).instantiate_identity()),
                 );
             }
         });

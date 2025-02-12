@@ -9,7 +9,7 @@
 //!
 //! ## Adding a new cfg
 //!
-//! Adding a new feature requires two new symbols one for the cfg it-self
+//! Adding a new feature requires two new symbols one for the cfg itself
 //! and the second one for the unstable feature gate, those are defined in
 //! `rustc_span::symbol`.
 //!
@@ -427,7 +427,7 @@ impl CheckCfg {
                     Some(values_target_os),
                     Some(values_target_pointer_width),
                     Some(values_target_vendor),
-                ] = self.expecteds.get_many_mut(VALUES)
+                ] = self.expecteds.get_disjoint_mut(VALUES)
                 else {
                     panic!("unable to get all the check-cfg values buckets");
                 };

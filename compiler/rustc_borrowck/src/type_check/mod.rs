@@ -411,10 +411,10 @@ impl<'a, 'b, 'tcx> Visitor<'tcx> for TypeVerifier<'a, 'b, 'tcx> {
                 } else {
                     self.typeck.ascribe_user_type(
                         constant.const_.ty(),
-                        ty::UserType::new(ty::UserTypeKind::TypeOf(uv.def, UserArgs {
-                            args: uv.args,
-                            user_self_ty: None,
-                        })),
+                        ty::UserType::new(ty::UserTypeKind::TypeOf(
+                            uv.def,
+                            UserArgs { args: uv.args, user_self_ty: None },
+                        )),
                         locations.span(self.typeck.body),
                     );
                 }
@@ -1116,7 +1116,7 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                     ConstraintCategory::Boring,
                 );
 
-                let sig = self.normalize(unnormalized_sig, term_location);
+                let sig = self.deeply_normalize(unnormalized_sig, term_location);
                 // HACK(#114936): `WF(sig)` does not imply `WF(normalized(sig))`
                 // with built-in `Fn` implementations, since the impl may not be
                 // well-formed itself.
@@ -1642,10 +1642,11 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
             }
 
             &Rvalue::NullaryOp(NullOp::SizeOf | NullOp::AlignOf, ty) => {
-                let trait_ref =
-                    ty::TraitRef::new(tcx, tcx.require_lang_item(LangItem::Sized, Some(span)), [
-                        ty,
-                    ]);
+                let trait_ref = ty::TraitRef::new(
+                    tcx,
+                    tcx.require_lang_item(LangItem::Sized, Some(span)),
+                    [ty],
+                );
 
                 self.prove_trait_ref(
                     trait_ref,
@@ -1659,10 +1660,11 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
             Rvalue::ShallowInitBox(operand, ty) => {
                 self.check_operand(operand, location);
 
-                let trait_ref =
-                    ty::TraitRef::new(tcx, tcx.require_lang_item(LangItem::Sized, Some(span)), [
-                        *ty,
-                    ]);
+                let trait_ref = ty::TraitRef::new(
+                    tcx,
+                    tcx.require_lang_item(LangItem::Sized, Some(span)),
+                    [*ty],
+                );
 
                 self.prove_trait_ref(
                     trait_ref,

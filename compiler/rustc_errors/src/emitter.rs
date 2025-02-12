@@ -1765,7 +1765,7 @@ impl HumanEmitter {
 
                 let column_width = if let Some(width) = self.diagnostic_width {
                     width.saturating_sub(code_offset)
-                } else if self.ui_testing {
+                } else if self.ui_testing || cfg!(miri) {
                     DEFAULT_COLUMN_WIDTH
                 } else {
                     termize::dimensions()
@@ -1982,7 +1982,7 @@ impl HumanEmitter {
         {
             debug!(?complete, ?parts, ?highlights);
 
-            let has_deletion = parts.iter().any(|p| p.is_deletion(sm));
+            let has_deletion = parts.iter().any(|p| p.is_deletion(sm) || p.is_replacement(sm));
             let is_multiline = complete.lines().count() > 1;
 
             if i == 0 {

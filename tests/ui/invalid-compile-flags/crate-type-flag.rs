@@ -17,6 +17,7 @@
 //@[staticlib] compile-flags: --crate-type=staticlib
 //@[staticlib] check-pass
 
+<<<<<<< HEAD
 //@[dylib] ignore-musl (dylibs are not supported)
 //@[dylib] ignore-wasm (dylibs are not supported)
 //@[dylib] ignore-ferrocenecoretest (dylibs are not supported)
@@ -25,6 +26,14 @@
 
 //@[cdylib] ignore-musl (cdylibs are not supported)
 //@[cdylib] ignore-ferrocenecoretest (cdylibs are not supported)
+=======
+//@[dylib] ignore-musl (dylib is supported, but musl libc is statically linked by default)
+//@[dylib] ignore-wasm (dylib is not supported)
+//@[dylib] compile-flags: --crate-type=dylib
+//@[dylib] check-pass
+
+//@[cdylib] ignore-musl (cdylib is supported, but musl libc is statically linked by default)
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 //@[cdylib] compile-flags: --crate-type=cdylib
 //@[cdylib] check-pass
 
@@ -42,10 +51,14 @@
 //@[multivalue] compile-flags: --crate-type=lib,rlib,staticlib
 //@[multivalue] check-pass
 
+<<<<<<< HEAD
 //@[multivalue_combined] ignore-musl (dylibs are not supported)
 //@[multivalue_combined] ignore-wasm (dylibs are not supported)
 //@[multivalue_combined] ignore-ferrocenecoretest (covered in `multivalue_combined_ferrocene`)
 //@[multivalue_combined] compile-flags: --crate-type=lib,rlib,staticlib --crate-type=dylib
+=======
+//@[multivalue_combined] compile-flags: --crate-type=lib,rlib --crate-type=staticlib
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 //@[multivalue_combined] check-pass
 
 //@ revisions: multivalue_combined_ferrocene

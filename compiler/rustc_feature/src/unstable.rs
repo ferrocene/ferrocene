@@ -104,7 +104,7 @@ macro_rules! declare_features {
     )+) => {
         /// Unstable language features that are being implemented or being
         /// considered for acceptance (stabilization) or removal.
-        pub const UNSTABLE_LANG_FEATURES: &[Feature] = &[
+        pub static UNSTABLE_LANG_FEATURES: &[Feature] = &[
             $(Feature {
                 name: sym::$feature,
                 since: $ver,
@@ -487,6 +487,9 @@ declare_features! (
     (unstable, exhaustive_patterns, "1.13.0", Some(51085)),
     /// Allows explicit tail calls via `become` expression.
     (incomplete, explicit_tail_calls, "1.72.0", Some(112788)),
+    /// Allows using `efiapi`, `sysv64` and `win64` as calling convention
+    /// for functions with varargs.
+    (unstable, extended_varargs_abi_support, "1.65.0", Some(100189)),
     /// Allows defining `extern type`s.
     (unstable, extern_types, "1.23.0", Some(43467)),
     /// Allow using 128-bit (quad precision) floating point numbers.
@@ -513,6 +516,8 @@ declare_features! (
     (incomplete, generic_const_exprs, "1.56.0", Some(76560)),
     /// Allows generic parameters and where-clauses on free & associated const items.
     (incomplete, generic_const_items, "1.73.0", Some(113521)),
+    /// Allows any generic constants being used as pattern type range ends
+    (incomplete, generic_pattern_types, "CURRENT_RUSTC_VERSION", Some(136574)),
     /// Allows registering static items globally, possibly across crates, to iterate over at runtime.
     (unstable, global_registration, "1.80.0", Some(125119)),
     /// Allows using guards in patterns.
@@ -634,9 +639,6 @@ declare_features! (
     (unstable, thread_local, "1.0.0", Some(29594)),
     /// Allows defining `trait X = A + B;` alias items.
     (unstable, trait_alias, "1.24.0", Some(41517)),
-    /// Allows dyn upcasting trait objects via supertraits.
-    /// Dyn upcasting is casting, e.g., `dyn Foo -> dyn Bar` where `Foo: Bar`.
-    (unstable, trait_upcasting, "1.56.0", Some(65991)),
     /// Allows for transmuting between arrays with sizes that contain generic consts.
     (unstable, transmute_generic_consts, "1.70.0", Some(109929)),
     /// Allows #[repr(transparent)] on unions (RFC 2645).

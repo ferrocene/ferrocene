@@ -11,7 +11,7 @@ use core::mem;
 
 const EXE_IMAGE_BASE: u64 = 0x100000000;
 
-extern "C" {
+unsafe extern "C" {
     #[link_name = "_Errno"]
     fn errno_location() -> *mut c_int;
 }

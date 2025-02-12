@@ -170,7 +170,7 @@ mod uw {
     pub type _Unwind_Trace_Fn =
         extern "C" fn(ctx: *mut _Unwind_Context, arg: *mut c_void) -> _Unwind_Reason_Code;
 
-    extern "C" {
+    unsafe extern "C" {
         pub fn _Unwind_Backtrace(
             trace: _Unwind_Trace_Fn,
             trace_argument: *mut c_void,
@@ -188,7 +188,7 @@ mod uw {
             not(all(target_os = "vita", target_arch = "arm")),
             not(all(target_os = "nuttx", target_arch = "arm")),
         ))] {
-            extern "C" {
+            unsafe extern "C" {
                 pub fn _Unwind_GetIP(ctx: *mut _Unwind_Context) -> libc::uintptr_t;
                 pub fn _Unwind_FindEnclosingFunction(pc: *mut c_void) -> *mut c_void;
 
@@ -208,7 +208,7 @@ mod uw {
             // instead of relying on _Unwind_GetCFA.
             #[cfg(all(target_os = "linux", target_arch = "s390x"))]
             pub unsafe fn get_sp(ctx: *mut _Unwind_Context) -> libc::uintptr_t {
-                extern "C" {
+                unsafe extern "C" {
                     pub fn _Unwind_GetGR(ctx: *mut _Unwind_Context, index: libc::c_int) -> libc::uintptr_t;
                 }
                 unsafe { _Unwind_GetGR(ctx, 15) }
@@ -248,7 +248,7 @@ mod uw {
             }
 
             type _Unwind_Word = libc::c_uint;
-            extern "C" {
+            unsafe extern "C" {
                 fn _Unwind_VRS_Get(
                     ctx: *mut _Unwind_Context,
                     klass: _Unwind_VRS_RegClass,

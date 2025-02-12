@@ -3,7 +3,7 @@ use core::mem::{size_of, transmute};
 use core::slice::from_raw_parts;
 use libc::c_char;
 
-extern "C" {
+unsafe extern "C" {
     // dl_iterate_phdr takes a callback that will receive a dl_phdr_info pointer
     // for every DSO that has been linked into the process. dl_iterate_phdr also
     // ensures that the dynamic linker is locked from start to finish of the

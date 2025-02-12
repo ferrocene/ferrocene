@@ -50,16 +50,13 @@ is_internal() {
     fi
 }
 
+add --set profile=ferrocene-ci
+
 ##################################################################
 #                                                                #
 #   Configuration items not affecting the resulting toolchain.   #
 #                                                                #
 ##################################################################
-
-# Enable the generation of build metrics, which provide extra information on
-# the duration of each step of the build. This is then used by scripts and
-# tools to analyze how time is spent on CI.
-add --set build.metrics
 
 # Prevent `./x.py` from managing submodules, as those are cloned and managed
 # already by scripts in the CI configuration.
@@ -71,50 +68,6 @@ add --disable-manage-submodules
 #   its functionality, reliability or security.                              #
 #                                                                            #
 ##############################################################################
-
-# Statically link Cargo's native dependencies.
-#
-# If this configuration is missing the resulting `cargo` binary will be
-# different, and might require native dependencies to be installed on the
-# user's systems.
-add --enable-cargo-native-static
-
-# Statically link libstdc++ in the resulting LLVM.
-#
-# If this confiugration is missing the resulting LLVM will be different, and
-# might require libstdc++ to be installed on the user's system.
-add --enable-llvm-static-stdcpp
-
-# Produce XZ-compressed tarballs when building dist artifacts.
-#
-# If this configuration is missing or set to a different value the resulting
-# dist tarballs will be compressed with a different algorithm.
-add --dist-compression-formats=xz
-
-# Increase the compression ratio when building dist artifacts.
-#
-# If this configuration is missing or set to a different value, a different
-# compression ration will be used when creating tarballs.
-add --set dist.compression-profile=balanced
-
-# Remap debuginfo to `/rustc/{commit-sha}`.
-#
-# If this configuration is missing, the directory structure of the build
-# machine will leak into the resulting binaries, preventing reproducibility.
-add --set rust.remap-debuginfo
-
-# Include the lines table in the standard library's debuginfo.
-#
-# If this configuration is missing backtraces will not include file and line
-# information for the standard library, making it harder for end users to debug
-# the cause of a panic.
-add --debuginfo-level-std=1
-
-# Disable debug logging in the compiler, shrinking the binary size.
-#
-# If this configuration is missing all debug logging will be included in the
-# compiler, which can then be shown with the RUSTC_LOG environment variable.
-add --set rust.debug-logging=false
 
 # Switches the compiler from the system allocator to jemalloc. Jemalloc is more
 # performant compared to the system allocator for the compiler workloads,
@@ -128,13 +81,6 @@ add --set rust.debug-logging=false
 if [[ "${FERROCENE_HOST}" != "x86_64-pc-windows-msvc" ]]; then
     add --set rust.jemalloc
 fi
-
-# Adds a custom string to the output of `rustc --version` to properly mark this
-# is not the upstream compiler.
-#
-# If this configuration is missing or changed the output of `rustc --version`
-# will change accordingly.
-add --release-description="Ferrocene by Ferrous Systems"
 
 ##############################################################################
 #                                                                            #
@@ -183,7 +129,6 @@ if [[ is_internal ]]; then
     add --set target.aarch64-unknown-nto-qnx710.cc=qcc
     add --set target.aarch64-unknown-nto-qnx710.cxx=q++
     add --set target.aarch64-unknown-nto-qnx710.ar=ntoaarch64-ar
-    add --set target.aarch64-unknown-nto-qnx710.profiler=false # Build failures were noted if this is enabled.
     add --set target.x86_64-pc-nto-qnx710.cc=qcc
     add --set target.x86_64-pc-nto-qnx710.cxx=q++
     add --set target.x86_64-pc-nto-qnx710.ar=ntox86_64-ar
@@ -191,13 +136,8 @@ if [[ is_internal ]]; then
 
     # these default to `cc` but require cross compilation
     add --set target.aarch64-unknown-ferrocenecoretest.cc=aarch64-linux-gnu-gcc
-    add --set target.aarch64-unknown-ferrocenecoretest.profiler=false # no profiling support
-
     add --set target.thumbv7em-ferrocenecoretest-eabi.cc=arm-none-eabi-gcc
-    add --set target.thumbv7em-ferrocenecoretest-eabi.profiler=false # no profiling support
-
     add --set target.thumbv7em-ferrocenecoretest-eabihf.cc=arm-none-eabi-gcc
-    add --set target.thumbv7em-ferrocenecoretest-eabihf.profiler=false # no profiling support
 fi
 
 # Set the host platform to build. The environment variable is set from the CI
@@ -236,81 +176,6 @@ fi
 # dependencies rather than the pinned ones. Never remove this flag.
 add --enable-locked-deps
 
-# Use a single codegen unit when compiling the standard library.
-#
-# Rust upstream had issues in the past [1] when compiling the standard library
-# with more than 1 codegen unit. Compiling with more codegen units also
-# prevents some optimizations. Never remove this flag due to the risk of the
-# standard library failing to build correctly.
-#
-# [1] https://github.com/rust-lang/rust/issues/83600
-add --set rust.codegen-units-std=1
-
-# Enable LLVM assertions in the resulting compiler.
-#
-# If this configuration is missing LLVM assertions will be disabled, which
-# could result in compiler bugs or miscompilations not being detected. Never
-# remove this flag.
-add --enable-llvm-assertions
-
-# Enable debug assertions in the resulting compiler.
-#
-# If this configuration is missing Rust's debug assertions will be disabled,
-# which could result in compiler bugs or miscompilations not being detected.
-# Never remove this flag.
-add --enable-debug-assertions
-
-# Enable LLVM IR verification. Verification has a small compiler performance
-# hit, but has a chance of catching compiler bugs.
-#
-# If this configuration is missing LLVM IR verification will be disabled.
-# Never remove this flag.
-add --set rust.verify-llvm-ir
-
-# Enable support for LLVM sanitizers inside the compiler.
-#
-# If this configuration is missing it won't be possible to use sanitizers.
-add --enable-sanitizers
-
-# Enable only the LLVM codegen backend, preventing other codegen backends from
-# being built and shipped.
-#
-# If this configuration is missing we'll build all codegen backends built by upstream,
-# which in the future *might* include GCC.
-add --codegen-backends=llvm
-
-# Enable the extended build, which produces dist artifacts for tools in
-# addition to just the compiler and the documentation.
-#
-# If this configuration is missing, the full distribution won't be built.
-add --enable-extended
-
-# Choose which tools must be built and distributed.
-#
-# If this configuration is missing or changed, the wrong set of tools will be
-# built, and the build could fail if some tool is not tested and fails.
-#
-# NOTE: If you add a new tool here, make sure to also change
-# `ferrocene/packages.toml` to include it in new releases.
-add --tools=rustdoc,cargo,llvm-tools,rustfmt,rust-analyzer,clippy
-
-# Build and enable the profiler runtime.
-#
-# If this configuration is missing, profile guided optimizations and code
-# coverage will not be supported by the resulting compiler.
-add --enable-profiler
-
-# Disable the profiler runtime for WASM. The profiler runtime depends on libc,
-# which is not available on WASM bare metal.
-#
-# If this configuration is missing, building the WASM target will fail.
-add --set target.wasm32-unknown-unknown.profiler=false
-
-# Build and include LLD in the resulting compiler package.
-#
-# If this configuration is missing or changed, LLD will not be included.
-add --enable-lld
-
 # Set the release channel for this branch. The channel is read from the
 # `src/ci/channel` file to easily allow tools and automations to know and
 # update the current channel.
@@ -324,12 +189,6 @@ add "--release-channel=${release_channel}"
 # `ferrocene/ci/channel` file to easily allow tools and automations to know and
 # update the current channel.
 add --set "ferrocene.channel=$(cat ferrocene/ci/channel)"
-
-# Run the traceability matrix tool in CI mode, producing the correct links.
-#
-# If this configuration is missing the traceability matrix might not be
-# properly enforced.
-add --set ferrocene.traceability-matrix-mode=ci
 
 # Sign packages generated by CI with the packages key.
 #

@@ -59,17 +59,17 @@ qualified upon request.
      - Full
      - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
-   * - :ref:`thumbv7em-none-eabi`
-     - ``thumbv7em-none-eabi``
+   * - :ref:`thumbv7em.m4-none-eabi`
+     - ``thumbv7em.m4-none-eabi``
      - Cross-compilation
      - Bare-metal
-     - Only the Cortex-M4 CPU, other CPUs supported upon request.
+     - Support for Cortex-M4 CPUs.
 
-   * - :ref:`thumbv7em-none-eabihf`
-     - ``thumbv7em-none-eabihf``
+   * - :ref:`thumbv7em.m4f-none-eabihf`
+     - ``thumbv7em.m4f-none-eabihf``
      - Cross-compilation
      - Bare-metal
-     - Only the Cortex-M4F CPU, other CPUs supported upon request.
+     - Support for Cortex-M4F CPUs.
 
    * - :ref:`x86_64-unknown-linux-gnu`
      - ``x86_64-unknown-linux-gnu``
@@ -166,6 +166,18 @@ should not be used in production.
      - Cross-compilation
      - Bare-metal
      - \-
+
+   * - :target:`thumbv7em-none-eabi`
+     - ``thumbv7em-none-eabi``
+     - Cross-compilation
+     - Bare-metal
+     - Baseline target, specific CPUs are qualified upon request.
+
+   * - :target:`thumbv7em-none-eabihf`
+     - ``thumbv7em-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - Baseline target, specific CPUs are qualified upon request.
 
    * - :target:`thumbv8m.base-none-eabi`
      - ``thumbv8m.base-none-eabi``

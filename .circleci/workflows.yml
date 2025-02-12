@@ -291,6 +291,32 @@ jobs:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
+  thumbv7em.m4-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      target:
+        type: string
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: << parameters.target >>
+      SCRIPT: |
+        QEMU_CPU=cortex-m4 TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-venv
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "ARM_TARGET=<< parameters.target >> ./ferrocene/ci/scripts/emulated-arm-test-runner.sh"
+
   x86_64-qnx-generic-test-vm:
     executor: linux-vm
     parameters:
@@ -831,10 +857,10 @@ workflows:
             - aarch64-qnx-test-compiletest
             - aarch64-none-test-library
             - aarch64-none-compiletest
-            - thumbv7em-eabihf-test-library
-            - thumbv7em-eabihf-test-compiletest
-            - thumbv7em-eabi-test-library
-            - thumbv7em-eabi-test-compiletest
+            - thumbv7em.m4f-eabihf-test-library
+            - thumbv7em.m4f-eabihf-test-compiletest
+            - thumbv7em.m4-eabi-test-library
+            - thumbv7em.m4-eabi-test-compiletest
       - x86_64-linux-traceability-matrix:
           requires: *test-outcomes-dependencies
       - x86_64-linux-dist:
@@ -926,8 +952,8 @@ workflows:
             - build-docker--ubuntu-24--x86_64
 
       - ferrocenecoretest-generic-test:
-          name: thumbv7em-eabihf-test-library
-          target: thumbv7em-ferrocenecoretest-eabihf
+          name: thumbv7em.m4f-eabihf-test-library
+          target: thumbv7em.m4f-ferrocenecoretest-eabihf
           qemu-arch: qemu-arm
           qemu-cpu: cortex-m4
           job: test:library
@@ -936,8 +962,8 @@ workflows:
             - x86_64-linux-build
 
       - ferrocenecoretest-generic-test:
-          name: thumbv7em-eabi-test-library
-          target: thumbv7em-ferrocenecoretest-eabi
+          name: thumbv7em.m4-eabi-test-library
+          target: thumbv7em.m4-ferrocenecoretest-eabi
           qemu-arch: qemu-arm
           qemu-cpu: cortex-m4
           job: test:library
@@ -946,8 +972,8 @@ workflows:
             - x86_64-linux-build
 
       - ferrocenecoretest-generic-test:
-          name: thumbv7em-eabihf-test-compiletest
-          target: thumbv7em-ferrocenecoretest-eabihf
+          name: thumbv7em.m4f-eabihf-test-compiletest
+          target: thumbv7em.m4f-ferrocenecoretest-eabihf
           qemu-arch: qemu-arm
           qemu-cpu: cortex-m4
           job: qnx:compiletest-no-only-hosts
@@ -956,8 +982,8 @@ workflows:
             - x86_64-linux-build
 
       - ferrocenecoretest-generic-test:
-          name: thumbv7em-eabi-test-compiletest
-          target: thumbv7em-ferrocenecoretest-eabi
+          name: thumbv7em.m4-eabi-test-compiletest
+          target: thumbv7em.m4-ferrocenecoretest-eabi
           qemu-arch: qemu-arm
           qemu-cpu: cortex-m4
           job: qnx:compiletest-no-only-hosts

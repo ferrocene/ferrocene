@@ -226,9 +226,9 @@ Now set the target:
 
 .. code-block:: bash
 
-    export TARGET="thumbv7em-ferrocenecoretest-eabihf"
+    export TARGET="thumbv7em.m4f-ferrocenecoretest-eabihf"
     # or 
-    export TARGET="thumbv7em-ferrocenecoretest-eabi"
+    export TARGET="thumbv7em.m4-ferrocenecoretest-eabi"
 
 In order to test this target, the build process will acquire a copy of our *secret sauce* from AWS. Ensure you're authenticated, following the section in
 :doc:`internal-procedures:setup-local-env` if your environment is not yet set up.
@@ -237,11 +237,11 @@ Ensure the following is in your ``config.toml``:
 
 .. code-block:: toml
 
-    [target.thumbv7em-ferrocenecoretest-eabi]
+    [target.thumbv7em.m4-ferrocenecoretest-eabi]
     cc = 'arm-none-eabi-gcc'
     profiler = false
 
-    [target.thumbv7em-ferrocenecoretest-eabihf]
+    [target.thumbv7em.m4f-ferrocenecoretest-eabihf]
     cc = 'arm-none-eabi-gcc'
     profiler = false
 

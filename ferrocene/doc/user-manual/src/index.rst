@@ -30,8 +30,8 @@ Ferrocene User Manual
    :caption: Compilation targets
 
    targets/index
-   targets/thumbv7em-none-eabi
-   targets/thumbv7em-none-eabihf
+   targets/thumbv7em.m4-none-eabi
+   targets/thumbv7em.m4f-none-eabihf
    targets/aarch64-unknown-none
    targets/aarch64-unknown-nto-qnx710
    targets/aarch64-apple-darwin

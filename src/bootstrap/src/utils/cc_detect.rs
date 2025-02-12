@@ -135,12 +135,23 @@ pub fn find_target(build: &Build, target: TargetSelection) {
     }
 
     // Ferrocene annotation: cc 1.32.0 and newer does not support custom targets outside of
-    // build script context (rust-lang/cc-rs#1225). map `ferrocenecoretest` targets back to the
+    // build script context (rust-lang/cc-rs#1225).
+    // map specific replacements to a generic target to temporarily pass to `cc` to determine the C
+    // compiler
+    let mut compiler_triple = target.triple.to_string();
+    let replacements = [
+        ("-ferrocenecoretest-", "-none-"),
+        ("thumbv7em.m4-", "thumbv7em-"),
+        ("thumbv7em.m4f-", "thumbv7em-"),
+    ];
+    for (candidate, replacement) in replacements {
+        compiler_triple = compiler_triple.replace(candidate, replacement);
+    }
+    // map `ferrocenecoretest` targets back to the
     // targets they are test doubles for, and temporarily pass that triple to `cc` to determine
     // the C compiler
-    let ferrocenecoretest_compiler = if target.triple.contains("-ferrocenecoretest") {
-        let sub = target.triple.replace("ferrocenecoretest", "none");
-        cfg.target(&sub);
+    let temporarily_replacement_compiler = if *compiler_triple != *target.triple {
+        cfg.target(&compiler_triple);
         let compiler = cfg.get_compiler();
 
         cfg.target(&target.triple);
@@ -149,7 +160,7 @@ pub fn find_target(build: &Build, target: TargetSelection) {
     } else {
         None
     };
-    let compiler = ferrocenecoretest_compiler.clone().unwrap_or_else(|| cfg.get_compiler());
+    let compiler = temporarily_replacement_compiler.clone().unwrap_or_else(|| cfg.get_compiler());
     let ar = if let ar @ Some(..) = config.and_then(|c| c.ar.clone()) {
         ar
     } else {
@@ -175,9 +186,9 @@ pub fn find_target(build: &Build, target: TargetSelection) {
     };
 
     // for VxWorks, record CXX compiler which will be used in lib.rs:linker()
-    // Ferrocene annotation: see annotation above `ferrocenecoretest_compiler` definition
-    if cxx_configured || target.contains("vxworks") || ferrocenecoretest_compiler.is_some() {
-        let compiler = ferrocenecoretest_compiler.clone().unwrap_or_else(|| cfg.get_compiler());
+    // Ferrocene annotation: see annotation above `temporarily_replacement_compiler` definition
+    if cxx_configured || target.contains("vxworks") || temporarily_replacement_compiler.is_some() {
+        let compiler = temporarily_replacement_compiler.clone().unwrap_or_else(|| cfg.get_compiler());
         build.cxx.borrow_mut().insert(target, compiler);
     }
 

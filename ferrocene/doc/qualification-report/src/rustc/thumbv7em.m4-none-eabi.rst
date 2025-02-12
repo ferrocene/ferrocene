@@ -3,6 +3,6 @@
 
 .. render-outcomes-template:: templates/tests.jinja2
    :host: x86_64-unknown-linux-gnu
-   :target: thumbv7em-none-eabi
-   :bare_metal_test_target: thumbv7em-ferrocenecoretest-eabi
+   :target: thumbv7em.m4-none-eabi
+   :bare_metal_test_target: thumbv7em.m4-ferrocenecoretest-eabi
    :upcoming: 25.02

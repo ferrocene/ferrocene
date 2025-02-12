@@ -1,14 +1,14 @@
 use std::{fmt, ptr};
 
 use libc::{c_char, c_uint};
-use rustc_abi::{AddressSpace, Align, Integer, Size};
+use rustc_abi::{AddressSpace, Align, Integer, Reg, Size};
 use rustc_codegen_ssa::common::TypeKind;
 use rustc_codegen_ssa::traits::*;
 use rustc_data_structures::small_c_str::SmallCStr;
 use rustc_middle::bug;
 use rustc_middle::ty::layout::TyAndLayout;
 use rustc_middle::ty::{self, Ty};
-use rustc_target::callconv::{CastTarget, FnAbi, Reg};
+use rustc_target::callconv::{CastTarget, FnAbi};
 
 use crate::abi::{FnAbiLlvmExt, LlvmType};
 use crate::context::{CodegenCx, SimpleCx};
@@ -237,11 +237,11 @@ impl<'ll, 'tcx> BaseTypeCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
 
 impl Type {
     /// Creates an integer type with the given number of bits, e.g., i24
-    pub fn ix_llcx(llcx: &llvm::Context, num_bits: u64) -> &Type {
+    pub(crate) fn ix_llcx(llcx: &llvm::Context, num_bits: u64) -> &Type {
         unsafe { llvm::LLVMIntTypeInContext(llcx, num_bits as c_uint) }
     }
 
-    pub fn ptr_llcx(llcx: &llvm::Context) -> &Type {
+    pub(crate) fn ptr_llcx(llcx: &llvm::Context) -> &Type {
         unsafe { llvm::LLVMPointerTypeInContext(llcx, AddressSpace::DATA.0) }
     }
 }

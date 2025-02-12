@@ -45,8 +45,13 @@ ferrocene/ci/configure.sh
 #   inside the sources directory.
 export CARGO_HOME="$(pwd)/build/cargo-home"
 
-echo "Running:"
-echo "${SCRIPT}"
+declare -a SCRIPTS=(
+     "./x.py test tidy"
+     "./x.py check library compiler/rustc"
+     "./x.py run ferrocene/tools/traceability-matrix")
 
-# Give control to the actual CI script. $SCRIPT
-exec bash -euo pipefail -c "${SCRIPT}"
+for script in ${SCRIPTS[@]}; do
+  echo "Running $script"
+  # Give control to the actual CI script. $SCRIPT
+  exec bash -euo pipefail -c "${script}"
+done

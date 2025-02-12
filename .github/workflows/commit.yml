@@ -64,10 +64,6 @@ jobs:
         env:
           FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-18
           FERROCENE_HOST: x86_64-unknown-linux-gnu
-          SCRIPT: |
-            ./x.py test tidy
-            ./x.py check library compiler/rustc
-            ./x.py run ferrocene/tools/traceability-matrix
           # Commit checks cannot authenticate with our AWS environment. Disable the parts of CI that
           # rely on that (for example including document signatures).
           OUTSIDE_FERROUS: 1

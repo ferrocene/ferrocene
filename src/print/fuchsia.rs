@@ -148,7 +148,7 @@ impl<'a> NoteIter<'a> {
     // can be anything but the range must be valid for this to be safe.
     unsafe fn new(base: *const u8, size: usize) -> Self {
         NoteIter {
-            base: from_raw_parts(base, size),
+            base: unsafe { from_raw_parts(base, size) },
             error: false,
         }
     }

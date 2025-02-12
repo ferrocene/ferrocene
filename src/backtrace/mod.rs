@@ -63,7 +63,7 @@ pub fn trace<F: FnMut(&Frame) -> bool>(cb: F) {
 ///
 /// See information on `trace` for caveats on `cb` panicking.
 pub unsafe fn trace_unsynchronized<F: FnMut(&Frame) -> bool>(mut cb: F) {
-    trace_imp(&mut cb)
+    unsafe { trace_imp(&mut cb) }
 }
 
 /// A trait representing one frame of a backtrace, yielded to the `trace`

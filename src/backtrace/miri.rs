@@ -56,7 +56,10 @@ impl Frame {
     }
 }
 
-pub fn trace<F: FnMut(&super::Frame) -> bool>(cb: F) {
+// SAFETY: This function is safe to call. It is only marked as `unsafe` to
+// avoid having to allow `unused_unsafe` since other implementations are
+// unsafe.
+pub unsafe fn trace<F: FnMut(&super::Frame) -> bool>(cb: F) {
     // SAFETY: Miri guarantees that the backtrace API functions
     // can be called from any thread.
     unsafe { trace_unsynchronized(cb) };
@@ -97,13 +100,15 @@ pub fn resolve_addr(ptr: *mut c_void) -> Frame {
 }
 
 unsafe fn trace_unsynchronized<F: FnMut(&super::Frame) -> bool>(mut cb: F) {
-    let len = miri_backtrace_size(0);
+    let len = unsafe { miri_backtrace_size(0) };
 
     let mut frames = Vec::with_capacity(len);
 
-    miri_get_backtrace(1, frames.as_mut_ptr());
+    unsafe {
+        miri_get_backtrace(1, frames.as_mut_ptr());
 
-    frames.set_len(len);
+        frames.set_len(len);
+    }
 
     for ptr in frames.iter() {
         let frame = resolve_addr((*ptr).cast::<c_void>());

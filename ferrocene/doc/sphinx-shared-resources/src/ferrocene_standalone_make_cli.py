@@ -10,7 +10,6 @@
 from pathlib import Path
 import argparse
 import subprocess
-import sys
 import os
 import shutil
 
@@ -20,6 +19,7 @@ EXTRA_WATCH_DIRS = ["exts", "themes"]
 
 def build_docs(root, builder, clear, serve, debug):
     dest = root / "build"
+    output_dir = dest / builder
 
     args = ["-b", builder, "-d", dest / "doctrees"]
     if debug:
@@ -33,9 +33,9 @@ def build_docs(root, builder, clear, serve, debug):
         # Enable parallel builds:
         args += ["-j", "auto"]
     if clear:
-        html_path = Path(f"{dest}/html")
         if os.path.exists():
-            shutil.rmtree(html_path)
+            shutil.rmtree(Path(output_dir))
+        # Using a fresh environment
         args.append("-E")
     if serve:
         for extra_watch_dir in EXTRA_WATCH_DIRS:
@@ -56,7 +56,7 @@ def build_docs(root, builder, clear, serve, debug):
                 "sphinx-autobuild" if serve else "sphinx-build",
                 *args,
                 root / "src",
-                dest / builder,
+                output_dir,
             ],
             check=True,
         )

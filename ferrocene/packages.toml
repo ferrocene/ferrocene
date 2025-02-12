@@ -96,12 +96,12 @@ targets = [
 name = "rust-std"
 subset = "qnx"
 
-[groups.oxidos]
-targets = ["wasm32-unknown-unknown"]
-
-[[groups.oxidos.packages]]
-name = "oxidos"
-subset = "oxidos"
+#[groups.oxidos]
+#targets = ["wasm32-unknown-unknown"]
+#
+#[[groups.oxidos.packages]]
+#name = "oxidos"
+#subset = "oxidos"
 
 [groups.any-platform]
 targets = ["*"]

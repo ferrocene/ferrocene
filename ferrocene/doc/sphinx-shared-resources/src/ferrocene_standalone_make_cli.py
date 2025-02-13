@@ -10,7 +10,6 @@
 from pathlib import Path
 import argparse
 import subprocess
-import os
 import shutil
 
 # Automatically watch the following extra directories when --serve is used.

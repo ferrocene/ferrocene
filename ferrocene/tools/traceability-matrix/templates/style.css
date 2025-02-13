@@ -125,6 +125,10 @@ div.section-title h2 {
     margin: 0;
 }
 
+div.section-title button {
+    margin-left: 0.5em;
+}
+
 /* Circle "icon" */
 
 div.circle {

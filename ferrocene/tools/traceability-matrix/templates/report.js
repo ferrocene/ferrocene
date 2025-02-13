@@ -34,3 +34,13 @@ document.querySelectorAll(".copiable").forEach(elem => {
 
     }).bind(elem));
 });
+
+function detailsButton(selector, setOpenTo) {
+    document.querySelectorAll(selector).forEach(button => {
+        button.addEventListener("click", event => {
+            document.querySelectorAll("details").forEach(details => details.open = setOpenTo);
+        });
+    });
+}
+detailsButton(".expand-all", true);
+detailsButton(".collapse-all", false);

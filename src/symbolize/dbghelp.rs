@@ -266,7 +266,13 @@ unsafe fn do_resolve(
     }
     let name = ptr::addr_of!(name_buffer[..name_len]);
 
-    let mut line = unsafe { mem::zeroed::<IMAGEHLP_LINEW64>() };
+    let mut line = IMAGEHLP_LINEW64 {
+        SizeOfStruct: 0,
+        Key: core::ptr::null_mut(),
+        LineNumber: 0,
+        FileName: core::ptr::null_mut(),
+        Address: 0,
+    };
     line.SizeOfStruct = mem::size_of::<IMAGEHLP_LINEW64>() as u32;
 
     let mut filename = None;

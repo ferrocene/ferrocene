@@ -1,9 +1,14 @@
 /* SPDX-License-Identifier: MIT OR Apache-2.0 */
 /* SPDX-FileCopyrightText: The Ferrocene Developers */
 
+:root {
+    --header-height: 3.5em;
+}
+
 body {
     font-family: sans-serif;
     margin: 1em;
+    background: #fff;
 }
 
 a {
@@ -16,7 +21,11 @@ header {
     color: #fff;
     background: #194e80;
     margin: -1em -1em 1em -1em;
-    padding: 1em;
+    padding: 0 1em;
+    height: var(--header-height);
+
+    position: sticky;
+    top: 0;
 
     display: flex;
     align-items: center;
@@ -97,6 +106,27 @@ table details summary {
 
 table details ul {
     margin-top: 0.3em;
+}
+
+/* Section titles */
+
+div.section-title {
+    display: flex;
+    align-items: center;
+
+    position: sticky;
+    top: var(--header-height);
+
+    padding: 1em 0;
+    background: #fff;
+}
+
+div.section-title h2 {
+    margin: 0;
+}
+
+div.section-title button {
+    margin-left: 0.5em;
 }
 
 /* Circle "icon" */

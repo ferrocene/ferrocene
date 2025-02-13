@@ -245,6 +245,7 @@ pub struct CONTEXT {
     pub SegSs: u32,
     pub ExtendedRegisters: [u8; 512],
 }
+
 pub type CONTEXT_FLAGS = u32;
 pub const CP_UTF8: u32 = 65001u32;
 pub type CREATE_TOOLHELP_SNAPSHOT_FLAGS = u32;
@@ -662,3 +663,6 @@ pub struct XSAVE_FORMAT {
     pub XmmRegisters: [M128A; 8],
     pub Reserved4: [u8; 224],
 }
+
+#[cfg(target_arch = "arm")]
+include!("./windows_sys_arm32_shim.rs");

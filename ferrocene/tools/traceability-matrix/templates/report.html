@@ -69,7 +69,7 @@
         </table>
 
         {% if !matrix.unknown_annotations.is_empty() %}
-            <h2>Unknown annotations</h2>
+            {% call section_title("Unknown annotations") %}
             <table>
                 <thead>
                     <tr>
@@ -91,7 +91,7 @@
         {% endif %}
 
         {% for analysis in matrix.analyses_by_kind() %}
-            <h2>All {{ analysis.kind.plural }}</h2>
+            {% call section_title("All ".to_string() + analysis.kind.plural) %}
             {% if analysis.informational_count() > 0 %}
                 <p>{{ analysis.informational_count() }} informational {{ analysis.kind.plural }} are not included in this table.</p>
             {% endif %}
@@ -126,7 +126,7 @@
         {% endfor %}
 
         {% if !ignored_tests.is_empty() %}
-            <h2>Ignored tests</h2>
+            {% call section_title("Ignored tests") %}
             <p>
                 These tests contain annotations linking them to one or more
                 elements in this traceability matrix, but are never executed by
@@ -187,6 +187,12 @@
         </td>
     </tr>
     {% endif %}
+{%- endmacro -%}
+
+{%- macro section_title(title) -%}
+<div class="section-title">
+    <h2>{{ title }}</h2>
+</div>
 {%- endmacro -%}
 
 {%- macro page_link(page) -%}

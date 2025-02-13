@@ -756,9 +756,15 @@ jobs:
       - run:
           name: Checkout the submodules
           command: ferrocene/ci/scripts/checkout-submodules.sh
+      # The verification has to happen before we upload the build metadata, as the release process
+      # understands build metadata being present as "this commit can be released".
+      - run:
+          name: Verify that all of the expected artifacts were uploaded
+          command: ferrocene/ci/scripts/validate-packages-toml.py ${CIRCLE_SHA1}
       - run:
           name: Generate build metadata
           command: ./x.py dist ferrocene-build-metadata
+      # From this point onwards, the commit can be released by the release process.
       - run:
           name: Upload metadata files to S3
           command: ferrocene/ci/scripts/upload-dist-artifacts.sh

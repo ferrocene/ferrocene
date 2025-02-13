@@ -33,8 +33,8 @@ def build_docs(root, builder, clear, serve, debug):
         # Enable parallel builds:
         args += ["-j", "auto"]
     if clear:
-        if os.path.exists():
-            shutil.rmtree(Path(output_dir))
+        if output_dir.exists():
+            shutil.rmtree(output_dir)
         # Using a fresh environment
         args.append("-E")
     if serve:

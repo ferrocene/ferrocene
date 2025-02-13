@@ -24,6 +24,7 @@ unsafe fn add_loaded_images(ret: &mut Vec<Library>) {
             return;
         }
 
+        // huge struct, probably should avoid manually initializing it even if we can
         let mut me = MaybeUninit::<MODULEENTRY32W>::zeroed().assume_init();
         me.dwSize = mem::size_of_val(&me) as u32;
         if Module32FirstW(snap, &mut me) == TRUE {

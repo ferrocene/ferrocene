@@ -80,6 +80,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
     use core::ptr;
 
     // Capture the initial context to start walking from.
+    // FIXME: shouldn't this have a Default impl?
     let mut context = unsafe { core::mem::zeroed::<MyContext>() };
     unsafe { RtlCaptureContext(&mut context.0) };
 

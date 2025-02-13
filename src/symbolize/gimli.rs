@@ -439,6 +439,7 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
         // Extend the lifetime of `sym` to `'static` since we are unfortunately
         // required to here, but it's only ever going out as a reference so no
         // reference to it should be persisted beyond this frame anyway.
+        // SAFETY: praying the above is correct
         let sym = unsafe { mem::transmute::<Symbol<'_>, Symbol<'static>>(sym) };
         (cb)(&super::Symbol { inner: sym });
     };

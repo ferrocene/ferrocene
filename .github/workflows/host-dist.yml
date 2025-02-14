@@ -101,6 +101,7 @@ jobs:
             export AWS_ROLE_SESSION_NAME="github-actions"
             export AWS_DEFAULT_REGION="us-east-1"
             export AWS_ROLE_ARN="${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}"
+            aws sts get-caller-identity
             uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
 
       - uses: actions/upload-artifact@v4

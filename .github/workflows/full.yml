@@ -26,14 +26,14 @@ jobs:
       architecture: x86_64
       runner: ubuntu-24.04
 
-  # container-x86_64-ubuntu-24:
-  #   name: Container (x86_64, ubuntu-24)
-  #   uses: ./.github/workflows/container.yml
-  #   secrets: inherit
-  #   with:
-  #     name: ubuntu-24
-  #     architecture: x86_64
-  #     runner: ubuntu-24.04
+  container-x86_64-ubuntu-24:
+    name: Container (x86_64, ubuntu-24)
+    uses: ./.github/workflows/container.yml
+    secrets: inherit
+    with:
+      name: ubuntu-24
+      architecture: x86_64
+      runner: ubuntu-24.04
 
   build-x86_64-unknown-linux-gnu:
     name: Build (x86_64-unknown-linux-gnu)
@@ -125,100 +125,144 @@ jobs:
   #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
   #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
-  # targets:
-  #   name: Build additional targets
-  #   uses: ./.github/workflows/targets.yml
-  #   needs:
-  #     - container-x86_64-ubuntu-20
-  #     - build-x86_64-unknown-linux-gnu
-  #   secrets: inherit
-  #   with:
-  #     host-triple: x86_64-unknown-linux-gnu
-  #     # Do not try to break this up into multiple lines. YAML is not your friend.
-  #     triples: "aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf,aarch64-unknown-nto-qnx710,x86_64-pc-nto-qnx710"
-  #     runner: 8core-x86_64-unknown-linux-gnu
-  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-  #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+  targets:
+    name: Build additional targets
+    uses: ./.github/workflows/targets.yml
+    needs:
+      - container-x86_64-ubuntu-20
+      - build-x86_64-unknown-linux-gnu
+    secrets: inherit
+    with:
+      host-triple: x86_64-unknown-linux-gnu
+      # Do not try to break this up into multiple lines. YAML is not your friend.
+      triples: "aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf,aarch64-unknown-nto-qnx710,x86_64-pc-nto-qnx710"
+      runner: 8core-x86_64-unknown-linux-gnu
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
-  # test-aarch64-unknown-ferrocenecoretest:
-  #   name: Test (aarch64-unknown-ferrocenecoretest by x86_64-unknown-linux-gnu)
-  #   uses: ./.github/workflows/test.yml
-  #   needs:
-  #     - container-x86_64-ubuntu-20
-  #     - build-x86_64-unknown-linux-gnu
-  #     - targets
-  #   secrets: inherit
-  #   with:
-  #     test-host-tools: false
-  #     test-std: false
-  #     triple: aarch64-unknown-ferrocenecoretest
-  #     # In the old CircleCI jobs, we did not pass this...
-  #     # When this is enabled, we experienced test failures where it was
-  #     # trying to test the x86_64 artifacts in CI
-  #     host-triple: "" # x86_64-unknown-linux-gnu
-  #     runner: 8core-x86_64-unknown-linux-gnu
-  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-  #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
-  #     test-device-addr: "127.0.0.1:12345"
-  #     emulator-container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
-  #     emulator-prepare-command: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh prepare
-  #     emulator-start-command: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
+  test-aarch64-unknown-none:
+    name: Test (aarch64-unknown-none by x86_64-unknown-linux-gnu)
+    uses: ./.github/workflows/test.yml
+    needs:
+      - container-x86_64-ubuntu-20
+      - build-x86_64-unknown-linux-gnu
+      - targets
+    secrets: inherit
+    with:
+      test-host-tools: false
+      test-std: false
+      triple: aarch64-unknown-ferrocenecoretest
+      # In the old CircleCI jobs, we did not pass this...
+      # When this is enabled, we experienced test failures where it was
+      # trying to test the x86_64 artifacts in CI
+      host-triple: "" # x86_64-unknown-linux-gnu
+      runner: 8core-x86_64-unknown-linux-gnu
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+      qemu-arch: qemu-aarch64
+      qemu-cpu: cortex-a53
 
-  # test-x86_64-pc-nto-qnx710:
-  #   name: Test (x86_64-pc-nto-qnx710 by x86_64-unknown-linux-gnu)
-  #   uses: ./.github/workflows/test.yml
-  #   needs:
-  #     - container-x86_64-ubuntu-20
-  #     - container-x86_64-ubuntu-24
-  #     - build-x86_64-unknown-linux-gnu
-  #     - targets
-  #   secrets: inherit
-  #   with:
-  #     test-host-tools: false
-  #     test-std: true
-  #     triple: x86_64-pc-nto-qnx710
-  #     # In the old CircleCI jobs, we did not pass this...
-  #     # When this is enabled, we experienced test failures where it was
-  #     # trying to test the x86_64 artifacts in CI
-  #     host-triple: "" # x86_64-unknown-linux-gnu
-  #     runner: 8core-x86_64-unknown-linux-gnu
-  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-  #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
-  #     test-device-addr: "172.31.1.11:12345"
-  #     emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
-  #     emulator-prepare-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh prepare
-  #     emulator-start-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh
-  #     qnx-version: "7.1.0-472"
+  test-thumbv7em-none-eabi:
+    name: Test (thumbv7em-none-eabi by x86_64-unknown-linux-gnu)
+    uses: ./.github/workflows/test.yml
+    needs:
+      - container-x86_64-ubuntu-20
+      - build-x86_64-unknown-linux-gnu
+      - targets
+    secrets: inherit
+    with:
+      test-host-tools: false
+      test-std: false
+      triple: thumbv7em-ferrocenecoretest-eabi
+      # In the old CircleCI jobs, we did not pass this...
+      # When this is enabled, we experienced test failures where it was
+      # trying to test the x86_64 artifacts in CI
+      host-triple: "" # x86_64-unknown-linux-gnu
+      runner: 8core-x86_64-unknown-linux-gnu
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+      qemu-arch: qemu-arm
+      qemu-cpu: cortex-m4
 
-  # test-aarch64-unknown-nto-qnx710:
-  #   name: Test (aarch64-unknown-nto-qnx710 by x86_64-unknown-linux-gnu)
-  #   uses: ./.github/workflows/test.yml
-  #   needs:
-  #     - container-x86_64-ubuntu-20
-  #     - container-x86_64-ubuntu-24
-  #     - build-x86_64-unknown-linux-gnu
-  #     - targets
-  #   secrets: inherit
-  #   with:
-  #     test-host-tools: false
-  #     test-std: true
-  #     triple: aarch64-unknown-nto-qnx710
-  #     # In the old CircleCI jobs, we did not pass this...
-  #     # When this is enabled, we experienced test failures where it was
-  #     # trying to test the x86_64 artifacts in CI
-  #     host-triple: "" # x86_64-unknown-linux-gnu
-  #     runner: 8core-x86_64-unknown-linux-gnu
-  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-  #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
-  #     test-device-addr: "172.31.1.105:12345"
-  #     emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
-  #     emulator-prepare-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh prepare
-  #     emulator-start-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh
-  #     qnx-version: "7.1.0-472"
+  test-thumbv7em-none-eabihf:
+    name: Test (thumbv7em-none-eabihf by x86_64-unknown-linux-gnu)
+    uses: ./.github/workflows/test.yml
+    needs:
+      - container-x86_64-ubuntu-20
+      - build-x86_64-unknown-linux-gnu
+      - targets
+    secrets: inherit
+    with:
+      test-host-tools: false
+      test-std: false
+      triple: thumbv7em-ferrocenecoretest-eabihf
+      # In the old CircleCI jobs, we did not pass this...
+      # When this is enabled, we experienced test failures where it was
+      # trying to test the x86_64 artifacts in CI
+      host-triple: "" # x86_64-unknown-linux-gnu
+      runner: 8core-x86_64-unknown-linux-gnu
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+      qemu-arch: qemu-arm
+      qemu-cpu: cortex-m4
+
+  test-x86_64-pc-nto-qnx710:
+    name: Test (x86_64-pc-nto-qnx710 by x86_64-unknown-linux-gnu)
+    uses: ./.github/workflows/test-remote.yml
+    needs:
+      - container-x86_64-ubuntu-20
+      - container-x86_64-ubuntu-24
+      - build-x86_64-unknown-linux-gnu
+      - targets
+    secrets: inherit
+    with:
+      test-host-tools: false
+      test-std: true
+      triple: x86_64-pc-nto-qnx710
+      # In the old CircleCI jobs, we did not pass this...
+      # When this is enabled, we experienced test failures where it was
+      # trying to test the x86_64 artifacts in CI
+      host-triple: "" # x86_64-unknown-linux-gnu
+      runner: 8core-x86_64-unknown-linux-gnu
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+      test-device-addr: "172.31.1.11:12345"
+      emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
+      emulator-prepare-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh prepare
+      emulator-start-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh
+      qnx-version: "7.1.0-472"
+
+  test-aarch64-unknown-nto-qnx710:
+    name: Test (aarch64-unknown-nto-qnx710 by x86_64-unknown-linux-gnu)
+    uses: ./.github/workflows/test-remote.yml
+    needs:
+      - container-x86_64-ubuntu-20
+      - container-x86_64-ubuntu-24
+      - build-x86_64-unknown-linux-gnu
+      - targets
+    secrets: inherit
+    with:
+      test-host-tools: false
+      test-std: true
+      triple: aarch64-unknown-nto-qnx710
+      # In the old CircleCI jobs, we did not pass this...
+      # When this is enabled, we experienced test failures where it was
+      # trying to test the x86_64 artifacts in CI
+      host-triple: "" # x86_64-unknown-linux-gnu
+      runner: 8core-x86_64-unknown-linux-gnu
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+      test-device-addr: "172.31.1.105:12345"
+      emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
+      emulator-prepare-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh prepare
+      emulator-start-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh
+      qnx-version: "7.1.0-472"
 
   # build-x86_64-pc-windows-msvc:
   #   name: Build (x86_64-pc-windows-msvc)

@@ -18,7 +18,7 @@ import sys
 CHECK_PATHS = ["ferrocene", ".circleci", ".github"]
 EXCLUDE_PATHS = ["ferrocene/library/libc"]
 
-UV_SHEBANG = b"#!/usr/bin/env -S uv"
+UV_SHEBANG = b"#!/usr/bin/env -S uv run"
 
 
 def main():

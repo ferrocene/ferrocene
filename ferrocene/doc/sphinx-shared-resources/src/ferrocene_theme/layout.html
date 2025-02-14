@@ -10,9 +10,14 @@
 {% endblock %}
 
 {% block content %}
-{% if theme_include_in_header %}
-    {% include theme_include_in_header %}
-{% endif %}
+
+{% for to_include in theme_include_in_header.split(",") %}
+    {# The default value of include_in_header is "", avoid importing an empty string #}
+    {% if to_include %}
+        {% include to_include %}
+    {% endif %}
+{% endfor %}
+
 <div class="wrapper">
     <div class="sidebar">
         <header>

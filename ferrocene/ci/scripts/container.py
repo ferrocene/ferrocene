@@ -29,8 +29,6 @@ def digest(image):
     for root, _, files in os.walk(path):
         for file in files:
             all_files.append(os.path.join(root, file))
-    # The docker files depend on `requirements.txt` for their venv.
-    all_files.append("requirements.txt")
     # This file
     all_files.append(__file__)
 

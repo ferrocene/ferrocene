@@ -11,11 +11,12 @@ import sphinx
 
 
 class OutcomesPageNode(nodes.Element):
-    def __init__(self, host, target, tested_target):
+    def __init__(self, host, target, tested_target, upcoming):
         super().__init__()
         self["host"] = host
         self["target"] = target
         self["tested_target"] = tested_target
+        self["upcoming"] = upcoming
 
 
 class RenderOutcomesTemplate(SphinxDirective):
@@ -23,6 +24,7 @@ class RenderOutcomesTemplate(SphinxDirective):
     option_spec = {
         "host": docutils.parsers.rst.directives.unchanged_required,
         "target": docutils.parsers.rst.directives.unchanged_required,
+        "upcoming": docutils.parsers.rst.directives.unchanged,
         "bare_metal_test_target": docutils.parsers.rst.directives.unchanged,
         "remote_testing": docutils.parsers.rst.directives.flag,
     }
@@ -38,6 +40,7 @@ class RenderOutcomesTemplate(SphinxDirective):
             self.options["host"],
             self.options["target"],
             tested_target,
+            self.options["upcoming"] if "upcoming" in self.options else None,
         )
         content_node = render_template(
             self,
@@ -45,6 +48,7 @@ class RenderOutcomesTemplate(SphinxDirective):
             {
                 "host": self.options["host"],
                 "target": self.options["target"],
+                "upcoming": self.options["upcoming"] if "upcoming" in self.options else None,
                 "bare_metal_test_target": self.options.get("bare_metal_test_target"),
                 "remote_testing": "remote_testing" in self.options,
                 # Can be None if test outcomes were not injected.

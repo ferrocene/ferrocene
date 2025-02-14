@@ -78,7 +78,7 @@ qualification.
 {% endmacro %}
 
 {{ "=" * 256 }} {# Sphinx requires the line to be at least as long as the title #}
-:target:`{{ target }}`
+:target:`{{ target }}` {% if upcoming %} :upcoming:`{{ upcoming }}` {% endif %}
 {{ "=" * 256 }} {# Sphinx requires the line to be at least as long as the title #}
 
 This page outlines the testing of Ferrocene |ferrocene_version| (based on Rust

@@ -638,8 +638,8 @@ impl TargetSelection {
 
         match &*self.triple {
             "aarch64-unknown-ferrocenecoretest"
-            | "thumbv7em-ferrocenecoretest-eabi"
-            | "thumbv7em-ferrocenecoretest-eabihf" => true,
+            | "thumbv7em.m4-ferrocenecoretest-eabi"
+            | "thumbv7em.m4f-ferrocenecoretest-eabihf" => true,
             _ => todo!("expand this `match`"),
         }
     }

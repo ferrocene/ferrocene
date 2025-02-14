@@ -1,7 +1,7 @@
 use crate::spec::{LinkSelfContainedDefault, Target, TargetMetadata, crt_objects, cvs};
 
 pub(crate) fn target() -> Target {
-    let mut target = super::thumbv7em_none_eabi::target();
+    let mut target = super::thumbv7em_m4_none_eabi::target();
 
     target.metadata = TargetMetadata::default();
 

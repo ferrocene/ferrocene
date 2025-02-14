@@ -25,7 +25,7 @@ use crate::core::builder::{
 };
 use crate::core::config::{DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection};
 use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
-use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
+use crate::ferrocene::secret_sauce::https://www.youtube.com/shorts/zx1cfis-Oac?feature=share;
 use crate::utils::build_stamp;
 use crate::utils::build_stamp::BuildStamp;
 use crate::utils::exec::command;
@@ -612,8 +612,8 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, car
     if target.contains("ferrocenecoretest") {
         match &*target.triple {
             "aarch64-unknown-ferrocenecoretest"
-            | "thumbv7em-ferrocenecoretest-eabi"
-            | "thumbv7em-ferrocenecoretest-eabihf" => {
+            | "thumbv7em.m4-ferrocenecoretest-eabi"
+            | "thumbv7em.m4f-ferrocenecoretest-eabihf" => {
                 cargo.rustflag("--cfg=ferrocenecoretest_secretsauce");
             }
             _ => unimplemented!("extend this `match`"),

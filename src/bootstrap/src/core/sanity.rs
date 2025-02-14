@@ -40,8 +40,10 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "aarch64-unknown-nto-qnx800",
     // ferrocene additions
     "aarch64-unknown-ferrocenecoretest",
-    "thumbv7em-ferrocenecoretest-eabi",
-    "thumbv7em-ferrocenecoretest-eabihf",
+    "thumbv7em.m4-none-eabi",
+    "thumbv7em.m4f-none-eabihf",
+    "thumbv7em.m4-ferrocenecoretest-eabi",
+    "thumbv7em.m4f-ferrocenecoretest-eabihf",
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM

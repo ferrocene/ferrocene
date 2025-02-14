@@ -162,13 +162,13 @@ if [[ is_internal && "${FERROCENE_BUILD_HOST:-}" = "x86_64-pc-windows-msvc" ]]; 
     add --set target.thumbv6m-none-eabi.cxx=clang
     add --set target.thumbv6m-none-eabi.ar=llvm-ar
 
-    add --set target.thumbv7em-none-eabi.cc=clang
-    add --set target.thumbv7em-none-eabi.cxx=clang
-    add --set target.thumbv7em-none-eabi.ar=llvm-ar
+    add --set target.thumbv7em.m4-none-eabi.cc=clang
+    add --set target.thumbv7em.m4-none-eabi.cxx=clang
+    add --set target.thumbv7em.m4-none-eabi.ar=llvm-ar
 
-    add --set target.thumbv7em-none-eabihf.cc=clang
-    add --set target.thumbv7em-none-eabihf.cxx=clang
-    add --set target.thumbv7em-none-eabihf.ar=llvm-ar
+    add --set target.thumbv7em.m4f-none-eabihf.cc=clang
+    add --set target.thumbv7em.m4f-none-eabihf.cxx=clang
+    add --set target.thumbv7em.m4f-none-eabihf.ar=llvm-ar
 
     add --set target.wasm32-unknown-unknown.cc=clang
     add --set target.wasm32-unknown-unknown.cxx=clang
@@ -193,11 +193,11 @@ if [[ is_internal ]]; then
     add --set target.aarch64-unknown-ferrocenecoretest.cc=aarch64-linux-gnu-gcc
     add --set target.aarch64-unknown-ferrocenecoretest.profiler=false # no profiling support
 
-    add --set target.thumbv7em-ferrocenecoretest-eabi.cc=arm-none-eabi-gcc
-    add --set target.thumbv7em-ferrocenecoretest-eabi.profiler=false # no profiling support
+    add --set target.thumbv7em.m4-ferrocenecoretest-eabi.cc=arm-none-eabi-gcc
+    add --set target.thumbv7em.m4-ferrocenecoretest-eabi.profiler=false # no profiling support
 
-    add --set target.thumbv7em-ferrocenecoretest-eabihf.cc=arm-none-eabi-gcc
-    add --set target.thumbv7em-ferrocenecoretest-eabihf.profiler=false # no profiling support
+    add --set target.thumbv7em.m4f-ferrocenecoretest-eabihf.cc=arm-none-eabi-gcc
+    add --set target.thumbv7em.m4f-ferrocenecoretest-eabihf.profiler=false # no profiling support
 fi
 
 # Set the host platform to build. The environment variable is set from the CI

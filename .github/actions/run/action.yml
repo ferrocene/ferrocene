@@ -32,7 +32,7 @@ runs:
       env:
         TEST_DEVICE_ADDR: ${{ inputs.test-device-addr }}
         SCRIPT: |
-          ./ferrocene/ci/scripts/setup-venv.sh
+          ./ferrocene/ci/scripts/setup-uv.sh
           ${{ inputs.script }}
         RUST_CONFIGURE_ARGS: ${{ inputs.configure }}
       # Due to a GHA limitation, `TEST_DEVICE_ADDR` is always set, but sometimes empty.

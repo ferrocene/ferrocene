@@ -60,9 +60,11 @@ runs:
           --env ACTIONS_ID_TOKEN_REQUEST_TOKEN \
           --env ACTIONS_ID_TOKEN_REQUEST_URL \
           --env AWS_ROLE_ARN \
-          --env AWS_DEFAULT_REGION \
+          --env AWS_REGION \
+          --env AWS_ACCESS_KEY_ID \
+          --env AWS_SESSION_TOKEN \
           --env AWS_ROLE_SESSION_NAME \
-          --env AWS_WEB_IDENTITY_TOKEN_FILE \
+          --env AWS_SECRET_ACCESS_KEY \
           --env AWS_EC2_METADATA_DISABLED \
           --workdir /home/ci/project \
           --mount "type=bind,src=$(pwd),dst=/home/ci/project" \

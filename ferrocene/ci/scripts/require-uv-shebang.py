@@ -18,7 +18,7 @@ import sys
 CHECK_PATHS = ["ferrocene", ".circleci", ".github"]
 EXCLUDE_PATHS = ["ferrocene/library/libc"]
 
-UV_SHEBANG = b"#!/usr/bin/env -S uv"
+UV_SHEBANG = b"#!/usr/bin/env -S uv run"
 
 
 def main():
@@ -51,7 +51,7 @@ def main():
 
         contents = open(file, "rb").read()
         has_shebang = contents.startswith(b"#!")
-        has_uv_shebang = contents.startswith(UV_SHEBANG)
+        has_uv_shebang = contents.startswith(UV_SHEBANG + b"\n")
         is_executable = os.access(file, os.X_OK)
 
         if has_uv_shebang and is_executable:

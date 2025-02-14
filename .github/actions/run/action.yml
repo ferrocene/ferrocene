@@ -66,6 +66,7 @@ runs:
           --env AWS_ROLE_SESSION_NAME \
           --env AWS_SECRET_ACCESS_KEY \
           --env AWS_EC2_METADATA_DISABLED \
+          --env QEMU_CPU \
           --workdir /home/ci/project \
           --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
           --user $(id -u):$(id -g) \

@@ -1,5 +1,5 @@
-name: Test
-run-name: Test (${{inputs.host-triple}})
+name: Remote Test
+run-name: Remote Test (${{inputs.host-triple}})
 
 on:
   workflow_call:
@@ -9,7 +9,7 @@ on:
         description: The Rust triple of the host platform
       triple:
         type: string
-        description: The target triple to test
+        description: The target triple to test on
       test-host-tools:
         type: boolean
         default: true
@@ -30,12 +30,22 @@ on:
       container:
         type: string
         description: The container URI to run the build in, if any (Linux only)
-      qemu-arch:
+      emulator-container:
         type: string
-        description: The QEMU architecture to enable using binfmt, if any (Linux only)/
-      qemu-cpu:
+        description: The container URI to run the build in, if any (Linux only)
+      emulator-prepare-command:
         type: string
-        description: The QEMU_CPU to set during the run, if any (Linux only)
+        description: The command to prepare the emulator
+      emulator-start-command:
+        type: string
+        description: The command to start the emulator
+      test-device-addr:
+        type: string
+        description: The test device address used by the emulator script
+      qnx-version:
+        type: string
+        default: ""
+        description: The QNX version (if any) and BuildID (eg '7.1.0-472' for 7.1.0 BuildID 472)
       environment:
         type: string
     outputs:
@@ -82,22 +92,50 @@ jobs:
         if: ${{ (runner.os == 'Linux') }}
         run: az acr login --name ferrocenecr
 
+      - name: Download QNX
+        if: ${{ inputs.qnx-version != '' }}
+        id: qnx
+        uses: ./.github/actions/qnx/
+        with:
+          version: ${{ inputs.qnx-version }}
+
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
 
+      - name: Start emulator
+        id: start-emulator
+        uses: ./.github/actions/start-emulator/
+        if: ${{ inputs.emulator-start-command != '' }}
+        with:
+          container-prepare: ${{ inputs.container }}
+          container-run: ${{ inputs.emulator-container }}
+          command-prepare: |
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ inputs.emulator-prepare-command }}
+          command-start: |
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ inputs.emulator-start-command }}
+
       - name: Run
         uses: ./.github/actions/run/
         with:
+          test-device-addr: ${{ inputs.test-device-addr }}
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ inputs.qemu-arch != '' && 'sudo update-binfmts --import' || '' }}
-            ${{ inputs.qemu-arch != '' && format('sudo update-binfmts --enable {0}', inputs.qemu-arch) || '' }}
-            ${{ inputs.qemu-cpu != '' && format('export QEMU_CPU="{0}"', inputs.qemu-cpu) }}
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ inputs.qnx-version != '' && 'export RUST_TEST_THREADS=1' || '' }}
             uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test) --ferrocene-test-one-crate-per-cargo-call
+
+      - name: Output container logs
+        if: ${{ inputs.emulator-container != '' && (success() || failure()) }}
+        run: docker logs ${{ steps.start-emulator.outputs.container }}
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/
@@ -139,13 +177,44 @@ jobs:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
 
+      - name: Download QNX
+        if: ${{ inputs.qnx-version != '' }}
+        id: qnx
+        uses: ./.github/actions/qnx/
+        with:
+          version: ${{ inputs.qnx-version }}
+      
+      - name: Start emulator
+        id: start-emulator
+        uses: ./.github/actions/start-emulator/
+        if: ${{ inputs.emulator-start-command != '' }}
+        with:
+          container-prepare: ${{ inputs.container }}
+          container-run: ${{ inputs.emulator-container }}
+          command-prepare: |
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ inputs.emulator-prepare-command }}
+          command-start: |
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ inputs.emulator-start-command }}
+
       - name: Run
         uses: ./.github/actions/run/
         with:
+          test-device-addr: ${{ inputs.test-device-addr }}
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ inputs.qnx-version != '' && 'export RUST_TEST_THREADS=1' || '' }}
             uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:compiletest) --ferrocene-test-one-crate-per-cargo-call
+
+      - name: Output container logs
+        if: ${{ inputs.emulator-container != '' && (success() || failure()) }}
+        run: docker logs ${{ steps.start-emulator.outputs.container }}
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/
@@ -187,13 +256,44 @@ jobs:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
 
+      - name: Download QNX
+        if: ${{ inputs.qnx-version != '' }}
+        id: qnx
+        uses: ./.github/actions/qnx/
+        with:
+          version: ${{ inputs.qnx-version }}
+
+      - name: Start emulator
+        id: start-emulator
+        uses: ./.github/actions/start-emulator/
+        if: ${{ inputs.emulator-start-command != '' }}
+        with:
+          container-prepare: ${{ inputs.container }}
+          container-run: ${{ inputs.emulator-container }}
+          command-prepare: |
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ inputs.emulator-prepare-command }}
+          command-start: |
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ inputs.emulator-start-command }}
+
       - name: Run
         uses: ./.github/actions/run/
         with:
+          test-device-addr: ${{ inputs.test-device-addr }}
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ inputs.qnx-version != '' && 'export RUST_TEST_THREADS=1' || '' }}
             uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library) --ferrocene-test-one-crate-per-cargo-call
+
+      - name: Output container logs
+        if: ${{ inputs.emulator-container != '' && (success() || failure()) }}
+        run: docker logs ${{ steps.start-emulator.outputs.container }}
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/
@@ -236,13 +336,44 @@ jobs:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
 
+      - name: Download QNX
+        if: ${{ inputs.qnx-version != '' }}
+        id: qnx
+        uses: ./.github/actions/qnx/
+        with:
+          version: ${{ inputs.qnx-version }}
+
+      - name: Start emulator
+        id: start-emulator
+        uses: ./.github/actions/start-emulator/
+        if: ${{ inputs.emulator-start-command != '' }}
+        with:
+          container-prepare: ${{ inputs.container }}
+          container-run: ${{ inputs.emulator-container }}
+          command-prepare: |
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ inputs.emulator-prepare-command }}
+          command-start: |
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ inputs.emulator-start-command }}
+
       - name: Run
         uses: ./.github/actions/run/
         with:
+          test-device-addr: ${{ inputs.test-device-addr }}
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ inputs.qnx-version != '' && 'export RUST_TEST_THREADS=1' || '' }}
             uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call
+
+      - name: Output container logs
+        if: ${{ inputs.emulator-container != '' && (success() || failure()) }}
+        run: docker logs ${{ steps.start-emulator.outputs.container }}
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/

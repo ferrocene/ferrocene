@@ -75,6 +75,12 @@ jobs:
         if: ${{ (runner.os == 'Linux') }}
         run: az acr login --name ferrocenecr
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
         with:
@@ -87,21 +93,6 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            curl -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com" | jq -r '.value' > /tmp/awsjwt
-            chmod 0400 /tmp/awsjwt
-
-            set +e
-            echo "jwt header:"
-            cat /tmp/awsjwt | cut -d '.' -f 1 | base64 -d | jq .
-            echo "jwt body:"
-            cat /tmp/awsjwt | cut -d '.' -f 2 | base64 -d | jq .
-            set -e
-
-            export AWS_WEB_IDENTITY_TOKEN_FILE="/tmp/awsjwt"
-            export AWS_ROLE_SESSION_NAME="github-actions"
-            export AWS_DEFAULT_REGION="us-east-1"
-            export AWS_ROLE_ARN="${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}"
-            aws sts get-caller-identity
             uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
 
       - uses: actions/upload-artifact@v4
@@ -147,6 +138,12 @@ jobs:
         if: ${{ (runner.os == 'Linux') }}
         run: az acr login --name ferrocenecr
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
         with:
@@ -159,12 +156,6 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            curl -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com" | jq -r '.value' > /tmp/awsjwt
-            chmod 0400 /tmp/awsjwt
-            export AWS_WEB_IDENTITY_TOKEN_FILE="/tmp/awsjwt"
-            export AWS_ROLE_SESSION_NAME="github-actions"
-            export AWS_DEFAULT_REGION="us-east-1"
-            export AWS_ROLE_ARN="${{ (github.ref == 'refs/heads/staging') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}"
             uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
 
       - uses: actions/upload-artifact@v4

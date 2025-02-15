@@ -59,6 +59,18 @@ qualified upon request.
      - Full
      - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
+   * - :ref:`thumbv7em-none-eabi`
+     - ``thumbv7em-none-eabi``
+     - Cross-compilation
+     - Bare-metal
+     - Only the Cortex-M4 CPU, other CPUs supported upon request.
+
+   * - :ref:`thumbv7em-none-eabihf`
+     - ``thumbv7em-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - Only the Cortex-M4F CPU, other CPUs supported upon request.
+
    * - :ref:`x86_64-unknown-linux-gnu`
      - ``x86_64-unknown-linux-gnu``
      - Host platform
@@ -101,17 +113,6 @@ Quality managed targets are not qualified, but can usually be qualified on reque
      - Full
      - \-
 
-   * - :ref:`thumbv7em-none-eabi`
-     - ``thumbv7em-none-eabi``
-     - Cross-compilation
-     - Bare-metal
-     - Only the Cortex-M4 CPU, other CPUs supported upon request.
-
-   * - :ref:`thumbv7em-none-eabihf`
-     - ``thumbv7em-none-eabihf``
-     - Cross-compilation
-     - Bare-metal
-     - Only the Cortex-M4F CPU, other CPUs supported upon request.
 
 Experimental targets
 --------------------

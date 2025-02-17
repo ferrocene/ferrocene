@@ -756,11 +756,6 @@ jobs:
       - run:
           name: Checkout the submodules
           command: ferrocene/ci/scripts/checkout-submodules.sh
-      # The verification has to happen before we upload the build metadata, as the release process
-      # understands build metadata being present as "this commit can be released".
-      - run:
-          name: Verify that all of the expected artifacts were uploaded
-          command: ferrocene/ci/scripts/validate-packages-toml.py ${CIRCLE_SHA1}
       - run:
           name: Generate build metadata
           command: ./x.py dist ferrocene-build-metadata
@@ -768,6 +763,15 @@ jobs:
       - run:
           name: Upload metadata files to S3
           command: ferrocene/ci/scripts/upload-dist-artifacts.sh
+      # Unfortunately the validation script for packages.toml has to be executed after the build
+      # metadata has been uploaded, as it needs to retrieve some of it from S3.
+      #
+      # In theory this means a release could be published even when this step failed to execute. In
+      # practice it's not a problem, as the failures detected by this script also result in errors
+      # during the release process.
+      - run:
+          name: Verify that all of the expected artifacts were uploaded
+          command: ferrocene/ci/scripts/validate-packages-toml.py ${CIRCLE_SHA1}
 
   # Simple job used to run "something" when no other jobs are supposed to be
   # run. See the `skip` workflow for more information.

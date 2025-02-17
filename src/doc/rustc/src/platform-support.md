@@ -431,7 +431,7 @@ target | std | host | notes
 [`xtensa-esp32s2-none-elf`](platform-support/xtensa.md) | * |  | Xtensa ESP32-S2
 [`xtensa-esp32s3-espidf`](platform-support/esp-idf.md) | ✓ |  | Xtensa ESP32-S3
 [`xtensa-esp32s3-none-elf`](platform-support/xtensa.md) | * |  | Xtensa ESP32-S3
-[`i386-lynx-lynxos178`](platform-support/i386-lynx-lynxos178.md) | * |  | 32-bit LynxOS-178 (2022.07)
+[`i386-lynx-lynxos178`](platform-support/i386-lynx-lynxos178.md) | * |  | 32-bit x86 LynxOS-178 (2022.07)
 `aarch64-unknown-ferrocenecoretest` | ✓ | ✓ | Internal target for tests
 `thumbv7em-ferrocenecoretest-eabi` | ✓ | ✓ | Internal target for tests
 `thumbv7em-ferrocenecoretest-eabihf` | ✓ | ✓ | Internal target for tests

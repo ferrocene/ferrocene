@@ -63,13 +63,13 @@ qualified upon request.
      - ``thumbv7em-none-eabi``
      - Cross-compilation
      - Bare-metal
-     - Only the Cortex-M4 CPU, other CPUs supported upon request.
+     - \-
 
    * - :ref:`thumbv7em-none-eabihf`
      - ``thumbv7em-none-eabihf``
      - Cross-compilation
      - Bare-metal
-     - Only the Cortex-M4F CPU, other CPUs supported upon request.
+     - \-
 
    * - :ref:`x86_64-unknown-linux-gnu`
      - ``x86_64-unknown-linux-gnu``

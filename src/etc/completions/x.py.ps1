@@ -74,12 +74,8 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('setup', 'setup', [CompletionResultType]::ParameterValue, 'Set up the environment for development')
             [CompletionResult]::new('suggest', 'suggest', [CompletionResultType]::ParameterValue, 'Suggest a subset of tests to run, based on modified files')
             [CompletionResult]::new('vendor', 'vendor', [CompletionResultType]::ParameterValue, 'Vendor dependencies')
-<<<<<<< HEAD
-            [CompletionResult]::new('perf', 'perf', [CompletionResultType]::ParameterValue, 'Perform profiling and benchmarking of the compiler using the `rustc-perf-wrapper` tool')
-            [CompletionResult]::new('sign', 'sign', [CompletionResultType]::ParameterValue, 'Sign Ferrocene qualification documents')
-=======
             [CompletionResult]::new('perf', 'perf', [CompletionResultType]::ParameterValue, 'Perform profiling and benchmarking of the compiler using `rustc-perf`')
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+            [CompletionResult]::new('sign', 'sign', [CompletionResultType]::ParameterValue, 'Sign Ferrocene qualification documents')
             break
         }
         'x.py;build' {

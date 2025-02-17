@@ -66,12 +66,8 @@ cfg_if::cfg_if! {
     } else {
         #[link(name = "unwind", kind = "static", modifiers = "-bundle", cfg(target_feature = "crt-static"))]
         #[link(name = "gcc_s", cfg(not(target_feature = "crt-static")))]
-<<<<<<< HEAD
         #[cfg(not(ferrocenecoretest_secretsauce))] // ferrocene addition: don't link to libgcc_s
-        extern "C" {}
-=======
         unsafe extern "C" {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 }
 

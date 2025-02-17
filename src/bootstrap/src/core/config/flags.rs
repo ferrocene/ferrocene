@@ -501,12 +501,8 @@ Arguments:
         #[arg(long)]
         versioned_dirs: bool,
     },
-<<<<<<< HEAD
-    /// Perform profiling and benchmarking of the compiler using the
-    /// `rustc-perf-wrapper` tool.
-    ///
-    /// You need to pass arguments after `--`, e.g.`x perf -- cachegrind`.
-    Perf {},
+    /// Perform profiling and benchmarking of the compiler using `rustc-perf`.
+    Perf(PerfArgs),
     /// Sign Ferrocene qualification documents
     #[clap(long_about = "\n")]
     Sign {
@@ -514,10 +510,6 @@ Arguments:
         #[arg(long)]
         force: bool,
     },
-=======
-    /// Perform profiling and benchmarking of the compiler using `rustc-perf`.
-    Perf(PerfArgs),
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 impl Subcommand {

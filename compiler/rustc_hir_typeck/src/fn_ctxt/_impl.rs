@@ -290,10 +290,13 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         }
 
         let autoborrow_mut = adj.iter().any(|adj| {
-            matches!(adj, &Adjustment {
-                kind: Adjust::Borrow(AutoBorrow::Ref(AutoBorrowMutability::Mut { .. })),
-                ..
-            })
+            matches!(
+                adj,
+                &Adjustment {
+                    kind: Adjust::Borrow(AutoBorrow::Ref(AutoBorrowMutability::Mut { .. })),
+                    ..
+                }
+            )
         });
 
         match self.typeck_results.borrow_mut().adjustments_mut().entry(expr.hir_id) {
@@ -972,11 +975,16 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let mut sp = MultiSpan::from_span(path_segment.ident.span);
         sp.push_span_label(
             path_segment.ident.span,
-            format!("this call modifies {} in-place", match rcvr.kind {
-                ExprKind::Path(QPath::Resolved(None, hir::Path { segments: [segment], .. })) =>
-                    format!("`{}`", segment.ident),
-                _ => "its receiver".to_string(),
-            }),
+            format!(
+                "this call modifies {} in-place",
+                match rcvr.kind {
+                    ExprKind::Path(QPath::Resolved(
+                        None,
+                        hir::Path { segments: [segment], .. },
+                    )) => format!("`{}`", segment.ident),
+                    _ => "its receiver".to_string(),
+                }
+            ),
         );
 
         let modifies_rcvr_note =
@@ -1035,12 +1043,17 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         let mut user_self_ty = None;
         let mut is_alias_variant_ctor = false;
+        let mut err_extend = GenericsArgsErrExtend::None;
         match res {
             Res::Def(DefKind::Ctor(CtorOf::Variant, _), _) if let Some(self_ty) = self_ty => {
                 let adt_def = self_ty.normalized.ty_adt_def().unwrap();
                 user_self_ty =
                     Some(UserSelfTy { impl_def_id: adt_def.did(), self_ty: self_ty.raw });
                 is_alias_variant_ctor = true;
+                err_extend = GenericsArgsErrExtend::DefVariant(segments);
+            }
+            Res::Def(DefKind::Ctor(CtorOf::Variant, _), _) => {
+                err_extend = GenericsArgsErrExtend::DefVariant(segments);
             }
             Res::Def(DefKind::AssocFn | DefKind::AssocConst, def_id) => {
                 let assoc_item = tcx.associated_item(def_id);
@@ -1087,7 +1100,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             segments.iter().enumerate().filter_map(|(index, seg)| {
                 if !indices.contains(&index) || is_alias_variant_ctor { Some(seg) } else { None }
             }),
-            GenericsArgsErrExtend::None,
+            err_extend,
         );
 
         if let Res::Local(hid) = res {

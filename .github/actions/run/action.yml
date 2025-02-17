@@ -47,6 +47,7 @@ runs:
           --init \
           --interactive \
           --tty \
+          --privileged \
           --env RUST_BACKTRACE="full" \
           --env CI \
           --env GITHUB_ACTIONS \

@@ -5,4 +5,4 @@
    :host: x86_64-unknown-linux-gnu
    :target: thumbv7em-none-eabi
    :bare_metal_test_target: thumbv7em-ferrocenecoretest-eabi
-   :upcoming: 25.02
+   :upcoming: 25.05

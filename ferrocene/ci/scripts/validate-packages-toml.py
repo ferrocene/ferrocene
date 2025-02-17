@@ -4,7 +4,7 @@
 
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["boto3 ~= 1.36", "requests ~= 2.32"]
+# dependencies = ["boto3 ~= 1.36"]
 # ///
 
 # This script ensures that all of the tarballs referenced by packages.toml are uploaded, and that
@@ -15,12 +15,14 @@ import boto3
 import fnmatch
 import io
 import os
-import requests
+import subprocess
+import sys
 import tomllib
 
 
 S3_BUCKET = "ferrocene-ci-artifacts"
 S3_PREFIX = "ferrocene/dist"
+GIT_REMOTE = "origin"
 
 SUPPORTED_MANIFEST_VERSION = 2
 TARBALL_COMPRESSION = ["xz"]
@@ -38,9 +40,6 @@ IGNORE_PATTERNS = [
 
 
 s3 = boto3.client("s3")
-
-github = requests.Session()
-github.headers["Authorization"] = f"Bearer {os.environ["GITHUB_TOKEN"]}"
 
 
 def get_version_string(commit):
@@ -140,12 +139,21 @@ def s3_file_content(bucket, key):
 
 
 def git_file_content(commit, path):
-    repo = os.environ["GITHUB_REPOSITORY"]
-    url = f"https://api.github.com/repos/{repo}/contents/{path}?ref={commit}"
+    exists = subprocess.run(["git", "cat-file", "-e", commit])
+    if exists.returncode != 0:
+        print(
+            f"note: commit {commit} is not present locally, fetching it...",
+            file=sys.stderr,
+        )
+        subprocess.run(["git", "fetch", GIT_REMOTE, commit], check=True)
 
-    resp = github.get(url, headers={"Accept": "application/vnd.github.raw+json"})
-    resp.raise_for_status()
-    return resp.text
+    content = subprocess.run(
+        ["git", "show", f"{commit}:{path}"],
+        check=True,
+        text=True,
+        capture_output=True,
+    )
+    return content.stdout
 
 
 if __name__ == "__main__":

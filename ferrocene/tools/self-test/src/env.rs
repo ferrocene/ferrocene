@@ -68,9 +68,12 @@ mod tests {
         let err = Env::new(None, false, false).unwrap_err();
 
         // Assert
-        assert!(matches!(err, Error::CCompilerNotFound {
-            error: crate::error::FindBinaryInPathError::NoEnvironmentVariable,
-        }));
+        assert!(matches!(
+            err,
+            Error::CCompilerNotFound {
+                error: crate::error::FindBinaryInPathError::NoEnvironmentVariable,
+            }
+        ));
     }
 
     #[test]

@@ -3,16 +3,17 @@
 
 .. _thumbv7em-none-eabihf:
 
-:target:`thumbv7em-none-eabihf`
-===============================
+:target:`thumbv7em-none-eabihf` :upcoming:`25.05`
+=================================================
 
 .. note::
    
-   For this target, each CPU must be tested separately. Currently, only support
-   for the Cortex-M4F CPU is Quality Managed.
-   
-   Other CPUs can become Quality Managed upon request within a short time frame.
-   Please contact Ferrocene support to make a request. 
+   Currently the baseline target is qualified, without any specific
+   ``-Ctarget-cpu`` or ``-Ctarget-feature`` flags mentioned in `the rustc book
+   <https://doc.rust-lang.org/nightly/rustc/platform-support/thumbv7em-none-eabi.html#target-cpu-and-target-feature-options>`_.
+
+   Please contact support if your use case demands fully optimized builds for
+   a specific CPU configuration.
 
 
 The ``thumbv7em-none-eabi`` Ferrocene target provides support for

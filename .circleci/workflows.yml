@@ -841,6 +841,10 @@ workflows:
             - aarch64-qnx-test-compiletest
             - aarch64-none-test-library
             - aarch64-none-compiletest
+            - thumbv7em-eabihf-test-library
+            - thumbv7em-eabihf-test-compiletest
+            - thumbv7em-eabi-test-library
+            - thumbv7em-eabi-test-compiletest
       - x86_64-linux-traceability-matrix:
           requires: *test-outcomes-dependencies
       - x86_64-linux-dist:

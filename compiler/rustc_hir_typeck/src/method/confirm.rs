@@ -347,9 +347,17 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
         // yield an object-type (e.g., `&Object` or `Box<Object>`
         // etc).
 
-        // FIXME: this feels, like, super dubious
-        self.fcx
-            .autoderef(self.span, self_ty)
+        let mut autoderef = self.fcx.autoderef(self.span, self_ty);
+
+        // We don't need to gate this behind arbitrary self types
+        // per se, but it does make things a bit more gated.
+        if self.tcx.features().arbitrary_self_types()
+            || self.tcx.features().arbitrary_self_types_pointers()
+        {
+            autoderef = autoderef.use_receiver_trait();
+        }
+
+        autoderef
             .include_raw_pointers()
             .find_map(|(ty, _)| match ty.kind() {
                 ty::Dynamic(data, ..) => Some(closure(
@@ -673,17 +681,23 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
             traits::upcast_choices(self.tcx, source_trait_ref, target_trait_def_id);
 
         // must be exactly one trait ref or we'd get an ambig error etc
-        let [upcast_trait_ref] = upcast_trait_refs.as_slice() else {
-            span_bug!(
+        if let &[upcast_trait_ref] = upcast_trait_refs.as_slice() {
+            upcast_trait_ref
+        } else {
+            self.dcx().span_delayed_bug(
                 self.span,
-                "cannot uniquely upcast `{:?}` to `{:?}`: `{:?}`",
-                source_trait_ref,
-                target_trait_def_id,
-                upcast_trait_refs
-            )
-        };
+                format!(
+                    "cannot uniquely upcast `{:?}` to `{:?}`: `{:?}`",
+                    source_trait_ref, target_trait_def_id, upcast_trait_refs
+                ),
+            );
 
-        *upcast_trait_ref
+            ty::Binder::dummy(ty::TraitRef::new_from_args(
+                self.tcx,
+                target_trait_def_id,
+                ty::GenericArgs::extend_with_error(self.tcx, target_trait_def_id, &[]),
+            ))
+        }
     }
 
     fn instantiate_binder_with_fresh_vars<T>(&self, value: ty::Binder<'tcx, T>) -> T

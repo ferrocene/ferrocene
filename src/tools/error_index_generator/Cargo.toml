@@ -4,7 +4,9 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-mdbook = { version = "0.4", default-features = false, features = ["search"] }
+# Ferrocene note: version pinned to avoid a panic
+# https://github.com/rust-lang/rust/issues/137052
+mdbook = { version = "=0.4.43", default-features = false, features = ["search"] }
 
 [[bin]]
 name = "error_index_generator"

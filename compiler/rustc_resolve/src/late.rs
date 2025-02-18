@@ -923,6 +923,21 @@ impl<'ra: 'ast, 'ast, 'tcx> Visitor<'ast> for LateResolutionVisitor<'_, 'ast, 'r
         self.diag_metadata.current_trait_object = prev;
         self.diag_metadata.current_type_path = prev_ty;
     }
+
+    fn visit_ty_pat(&mut self, t: &'ast TyPat) -> Self::Result {
+        match &t.kind {
+            TyPatKind::Range(start, end, _) => {
+                if let Some(start) = start {
+                    self.resolve_anon_const(start, AnonConstKind::ConstArg(IsRepeatExpr::No));
+                }
+                if let Some(end) = end {
+                    self.resolve_anon_const(end, AnonConstKind::ConstArg(IsRepeatExpr::No));
+                }
+            }
+            TyPatKind::Err(_) => {}
+        }
+    }
+
     fn visit_poly_trait_ref(&mut self, tref: &'ast PolyTraitRef) {
         let span = tref.span.shrink_to_lo().to(tref.trait_ref.path.span.shrink_to_lo());
         self.with_generic_param_rib(
@@ -1823,9 +1838,11 @@ impl<'a, 'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                             && Some(true) == self.diag_metadata.in_non_gat_assoc_type
                             && let crate::ModuleKind::Def(DefKind::Trait, trait_id, _) = module.kind
                         {
-                            if def_id_matches_path(self.r.tcx, trait_id, &[
-                                "core", "iter", "traits", "iterator", "Iterator",
-                            ]) {
+                            if def_id_matches_path(
+                                self.r.tcx,
+                                trait_id,
+                                &["core", "iter", "traits", "iterator", "Iterator"],
+                            ) {
                                 self.r.dcx().emit_err(errors::LendingIteratorReportError {
                                     lifetime: lifetime.ident.span,
                                     ty: ty.span,
@@ -3425,11 +3442,14 @@ impl<'a, 'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
 
         match seen_trait_items.entry(id_in_trait) {
             Entry::Occupied(entry) => {
-                self.report_error(span, ResolutionError::TraitImplDuplicate {
-                    name: ident,
-                    old_span: *entry.get(),
-                    trait_item_span: binding.span,
-                });
+                self.report_error(
+                    span,
+                    ResolutionError::TraitImplDuplicate {
+                        name: ident,
+                        old_span: *entry.get(),
+                        trait_item_span: binding.span,
+                    },
+                );
                 return;
             }
             Entry::Vacant(entry) => {
@@ -3460,13 +3480,16 @@ impl<'a, 'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
             }
         };
         let trait_path = path_names_to_string(path);
-        self.report_error(span, ResolutionError::TraitImplMismatch {
-            name: ident,
-            kind,
-            code,
-            trait_path,
-            trait_item_span: binding.span,
-        });
+        self.report_error(
+            span,
+            ResolutionError::TraitImplMismatch {
+                name: ident,
+                kind,
+                code,
+                trait_path,
+                trait_item_span: binding.span,
+            },
+        );
     }
 
     fn resolve_const_body(&mut self, expr: &'ast Expr, item: Option<(Ident, ConstantItemKind)>) {
@@ -3845,10 +3868,13 @@ impl<'a, 'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                         .patterns_with_skipped_bindings
                         .entry(def_id)
                         .or_default()
-                        .push((pat.span, match rest {
-                            ast::PatFieldsRest::Recovered(guar) => Err(*guar),
-                            _ => Ok(()),
-                        }));
+                        .push((
+                            pat.span,
+                            match rest {
+                                ast::PatFieldsRest::Recovered(guar) => Err(*guar),
+                                _ => Ok(()),
+                            },
+                        ));
                 }
             }
             ast::PatFieldsRest::None => {}
@@ -4485,12 +4511,15 @@ impl<'a, 'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 segment_name,
                 error_implied_by_parse_error: _,
             } => {
-                return Err(respan(span, ResolutionError::FailedToResolve {
-                    segment: Some(segment_name),
-                    label,
-                    suggestion,
-                    module,
-                }));
+                return Err(respan(
+                    span,
+                    ResolutionError::FailedToResolve {
+                        segment: Some(segment_name),
+                        label,
+                        suggestion,
+                        module,
+                    },
+                ));
             }
             PathResult::Module(..) | PathResult::Failed { .. } => return Ok(None),
             PathResult::Indeterminate => bug!("indeterminate path result in resolve_qpath"),

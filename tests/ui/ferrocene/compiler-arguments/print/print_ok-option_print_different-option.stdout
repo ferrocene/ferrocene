@@ -109,7 +109,6 @@ i686-unknown-linux-gnu
 i686-unknown-linux-musl
 i686-unknown-netbsd
 i686-unknown-openbsd
-i686-unknown-redox
 i686-unknown-uefi
 i686-uwp-windows-gnu
 i686-uwp-windows-msvc

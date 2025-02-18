@@ -5,10 +5,10 @@
       let mut _0: bool;
   
 +     coverage body span: $DIR/instrument_coverage.rs:30:18: 32:2 (#0)
-+     coverage Code(Counter(0)) => $DIR/instrument_coverage.rs:30:1: 32:2 (#0);
++     coverage Code { bcb: bcb0 } => $DIR/instrument_coverage.rs:30:1: 32:2 (#0);
 + 
       bb0: {
-+         Coverage::CounterIncrement(0);
++         Coverage::VirtualCounter(bcb0);
           _0 = const true;
           return;
       }

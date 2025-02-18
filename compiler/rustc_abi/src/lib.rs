@@ -52,23 +52,17 @@ use bitflags::bitflags;
 use rustc_data_structures::stable_hasher::StableOrd;
 use rustc_index::{Idx, IndexSlice, IndexVec};
 #[cfg(feature = "nightly")]
-use rustc_macros::HashStable_Generic;
-#[cfg(feature = "nightly")]
-use rustc_macros::{Decodable_Generic, Encodable_Generic};
+use rustc_macros::{Decodable_Generic, Encodable_Generic, HashStable_Generic};
 
 mod callconv;
 mod layout;
 #[cfg(test)]
 mod tests;
 
-#[cfg(feature = "nightly")]
 mod extern_abi;
 
 pub use callconv::{Heterogeneous, HomogeneousAggregate, Reg, RegKind};
-#[cfg(feature = "nightly")]
-pub use extern_abi::{
-    AbiDisabled, AbiUnsupported, ExternAbi, all_names, enabled_names, is_enabled, is_stable, lookup,
-};
+pub use extern_abi::{ExternAbi, all_names};
 #[cfg(feature = "nightly")]
 pub use layout::{FIRST_VARIANT, FieldIdx, Layout, TyAbiInterface, TyAndLayout, VariantIdx};
 pub use layout::{LayoutCalculator, LayoutCalculatorError};
@@ -1184,10 +1178,13 @@ impl Scalar {
     #[inline]
     pub fn is_bool(&self) -> bool {
         use Integer::*;
-        matches!(self, Scalar::Initialized {
-            value: Primitive::Int(I8, false),
-            valid_range: WrappingRange { start: 0, end: 1 }
-        })
+        matches!(
+            self,
+            Scalar::Initialized {
+                value: Primitive::Int(I8, false),
+                valid_range: WrappingRange { start: 0, end: 1 }
+            }
+        )
     }
 
     /// Get the primitive representation of this type, ignoring the valid range and whether the

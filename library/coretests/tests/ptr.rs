@@ -42,11 +42,11 @@ fn test() {
         let mut v1 = vec![0u16, 0u16, 0u16];
 
         copy(v0.as_ptr().offset(1), v1.as_mut_ptr().offset(1), 1);
-        assert!((v1[0] == 0u16 && v1[1] == 32001u16 && v1[2] == 0u16));
+        assert!(v1[0] == 0u16 && v1[1] == 32001u16 && v1[2] == 0u16);
         copy(v0.as_ptr().offset(2), v1.as_mut_ptr(), 1);
-        assert!((v1[0] == 32002u16 && v1[1] == 32001u16 && v1[2] == 0u16));
+        assert!(v1[0] == 32002u16 && v1[1] == 32001u16 && v1[2] == 0u16);
         copy(v0.as_ptr(), v1.as_mut_ptr().offset(2), 1);
-        assert!((v1[0] == 32002u16 && v1[1] == 32001u16 && v1[2] == 32000u16));
+        assert!(v1[0] == 32002u16 && v1[1] == 32001u16 && v1[2] == 32000u16);
     }
 }
 
@@ -97,7 +97,7 @@ fn test_is_null() {
     let nmi: *mut dyn ToString = null_mut::<isize>();
     assert!(nmi.is_null());
 
-    extern "C" {
+    unsafe extern "C" {
         type Extern;
     }
     let ec: *const Extern = null::<Extern>();
@@ -308,7 +308,7 @@ fn test_const_nonnull_new() {
 pub fn test_variadic_fnptr() {
     use core::ffi;
     use core::hash::{Hash, SipHasher};
-    extern "C" {
+    unsafe extern "C" {
         // This needs to use the correct function signature even though it isn't called as some
         // codegen backends make it UB to declare a function with multiple conflicting signatures
         // (like LLVM) while others straight up return an error (like Cranelift).
@@ -506,7 +506,7 @@ fn offset_from() {
 fn ptr_metadata() {
     struct Unit;
     struct Pair<A, B: ?Sized>(A, B);
-    extern "C" {
+    unsafe extern "C" {
         type Extern;
     }
     let () = metadata(&());

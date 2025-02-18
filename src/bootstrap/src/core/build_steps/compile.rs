@@ -193,7 +193,7 @@ impl Step for Std {
         // The LLD wrappers and `rust-lld` are self-contained linking components that can be
         // necessary to link the stdlib on some targets. We'll also need to copy these binaries to
         // the `stage0-sysroot` to ensure the linker is found when bootstrapping on such a target.
-        if compiler.stage == 0 && compiler.host == builder.config.build {
+        if compiler.stage == 0 && builder.is_builder_target(&compiler.host) {
             // We want to copy the host `bin` folder within the `rustlib` folder in the sysroot.
             let src_sysroot_bin = builder
                 .rustc_snapshot_sysroot()
@@ -466,8 +466,49 @@ fn compiler_rt_for_profiler(builder: &Builder<'_>) -> PathBuf {
 /// Configure cargo to compile the standard library, adding appropriate env vars
 /// and such.
 pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, cargo: &mut Cargo) {
-    if let Some(target) = env::var_os("MACOSX_STD_DEPLOYMENT_TARGET") {
-        cargo.env("MACOSX_DEPLOYMENT_TARGET", target);
+    // rustc already ensures that it builds with the minimum deployment
+    // target, so ideally we shouldn't need to do anything here.
+    //
+    // However, `cc` currently defaults to a higher version for backwards
+    // compatibility, which means that compiler-rt, which is built via
+    // compiler-builtins' build script, gets built with a higher deployment
+    // target. This in turn causes warnings while linking, and is generally
+    // a compatibility hazard.
+    //
+    // So, at least until https://github.com/rust-lang/cc-rs/issues/1171, or
+    // perhaps https://github.com/rust-lang/cargo/issues/13115 is resolved, we
+    // explicitly set the deployment target environment variables to avoid
+    // this issue.
+    //
+    // This place also serves as an extension point if we ever wanted to raise
+    // rustc's default deployment target while keeping the prebuilt `std` at
+    // a lower version, so it's kinda nice to have in any case.
+    if target.contains("apple") && !builder.config.dry_run() {
+        // Query rustc for the deployment target, and the associated env var.
+        // The env var is one of the standard `*_DEPLOYMENT_TARGET` vars, i.e.
+        // `MACOSX_DEPLOYMENT_TARGET`, `IPHONEOS_DEPLOYMENT_TARGET`, etc.
+        let mut cmd = command(builder.rustc(cargo.compiler()));
+        cmd.arg("--target").arg(target.rustc_target_arg());
+        cmd.arg("--print=deployment-target");
+        let output = cmd.run_capture_stdout(builder).stdout();
+
+        let (env_var, value) = output.split_once('=').unwrap();
+        // Unconditionally set the env var (if it was set in the environment
+        // already, rustc should've picked that up).
+        cargo.env(env_var.trim(), value.trim());
+
+        // Allow CI to override the deployment target for `std` on macOS.
+        //
+        // This is useful because we might want the host tooling LLVM, `rustc`
+        // and Cargo to have a different deployment target than `std` itself
+        // (currently, these two versions are the same, but in the past, we
+        // supported macOS 10.7 for user code and macOS 10.8 in host tooling).
+        //
+        // It is not necessary on the other platforms, since only macOS has
+        // support for host tooling.
+        if let Some(target) = env::var_os("MACOSX_STD_DEPLOYMENT_TARGET") {
+            cargo.env("MACOSX_DEPLOYMENT_TARGET", target);
+        }
     }
 
     // Paths needed by `library/profiler_builtins/build.rs`.
@@ -1084,12 +1125,12 @@ pub fn rustc_cargo(
     // <https://rust-lang.zulipchat.com/#narrow/stream/131828-t-compiler/topic/Internal.20lint.20for.20raw.20.60print!.60.20and.20.60println!.60.3F>.
     cargo.rustflag("-Zon-broken-pipe=kill");
 
-    // We temporarily disable linking here as part of some refactoring.
-    // This way, people can manually use -Z llvm-plugins and -C passes=enzyme for now.
-    // In a follow-up PR, we will re-enable linking here and load the pass for them.
-    //if builder.config.llvm_enzyme {
-    //    cargo.rustflag("-l").rustflag("Enzyme-19");
-    //}
+    // We want to link against registerEnzyme and in the future we want to use additional
+    // functionality from Enzyme core. For that we need to link against Enzyme.
+    // FIXME(ZuseZ4): Get the LLVM version number automatically instead of hardcoding it.
+    if builder.config.llvm_enzyme {
+        cargo.rustflag("-l").rustflag("Enzyme-19");
+    }
 
     // Building with protected visibility reduces the number of dynamic relocations needed, giving
     // us a faster startup time. However GNU ld < 2.40 will error if we try to link a shared object
@@ -1099,9 +1140,7 @@ pub fn rustc_cargo(
         cargo.rustflag("-Zdefault-visibility=protected");
     }
 
-    // We currently don't support cross-crate LTO in stage0. This also isn't hugely necessary
-    // and may just be a time sink.
-    if compiler.stage != 0 {
+    if is_lto_stage(compiler) {
         match builder.config.rust_lto {
             RustcLto::Thin | RustcLto::Fat => {
                 // Since using LTO for optimizing dylibs is currently experimental,
@@ -1268,6 +1307,9 @@ pub fn rustc_cargo_env(
 fn rustc_llvm_env(builder: &Builder<'_>, cargo: &mut Cargo, target: TargetSelection) {
     if builder.is_rust_llvm(target) {
         cargo.env("LLVM_RUSTLLVM", "1");
+    }
+    if builder.config.llvm_enzyme {
+        cargo.env("LLVM_ENZYME", "1");
     }
     let llvm::LlvmResult { llvm_config, .. } = builder.ensure(llvm::Llvm { target });
     cargo.env("LLVM_CONFIG", &llvm_config);
@@ -1579,7 +1621,8 @@ pub fn compiler_file(
         return PathBuf::new();
     }
     let mut cmd = command(compiler);
-    cmd.args(builder.cflags(target, GitRepo::Rustc, c));
+    cmd.args(builder.cc_handled_clags(target, c));
+    cmd.args(builder.cc_unhandled_cflags(target, GitRepo::Rustc, c));
     cmd.arg(format!("-print-file-name={file}"));
     let out = cmd.run_capture_stdout(builder).stdout();
     PathBuf::from(out.trim())
@@ -2302,7 +2345,8 @@ pub fn strip_debug(builder: &Builder<'_>, target: TargetSelection, path: &Path) 
     // FIXME: to make things simpler for now, limit this to the host and target where we know
     // `strip -g` is both available and will fix the issue, i.e. on a x64 linux host that is not
     // cross-compiling. Expand this to other appropriate targets in the future.
-    if target != "x86_64-unknown-linux-gnu" || target != builder.config.build || !path.exists() {
+    if target != "x86_64-unknown-linux-gnu" || !builder.is_builder_target(&target) || !path.exists()
+    {
         return;
     }
 
@@ -2324,4 +2368,9 @@ pub fn strip_debug(builder: &Builder<'_>, target: TargetSelection, path: &Path) 
     // is greater than the mtime of rustc-main, and will rebuild rustc-main. That will then cause
     // everything else (standard library, future stages...) to be rebuilt.
     t!(file.set_modified(previous_mtime));
+}
+
+/// We only use LTO for stage 2+, to speed up build time of intermediate stages.
+pub fn is_lto_stage(build_compiler: &Compiler) -> bool {
+    build_compiler.stage != 0
 }

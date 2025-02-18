@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use rustc_abi::ExternAbi;
 use rustc_ast::attr::list_contains_name;
 use rustc_ast::expand::autodiff_attrs::{
     AutoDiffAttrs, DiffActivity, DiffMode, valid_input_activity, valid_ret_activity,
@@ -23,7 +24,7 @@ use rustc_middle::ty::{self as ty, TyCtxt};
 use rustc_session::parse::feature_err;
 use rustc_session::{Session, lint};
 use rustc_span::{Ident, Span, sym};
-use rustc_target::spec::{SanitizerSet, abi};
+use rustc_target::spec::SanitizerSet;
 use tracing::debug;
 
 use crate::errors;
@@ -41,7 +42,6 @@ fn linkage_by_name(tcx: TyCtxt<'_>, def_id: LocalDefId, name: &str) -> Linkage {
     // ghost, dllimport, dllexport and linkonce_odr_autohide are not supported
     // and don't have to be, LLVM treats them as no-ops.
     match name {
-        "appending" => Appending,
         "available_externally" => AvailableExternally,
         "common" => Common,
         "extern_weak" => ExternalWeak,
@@ -49,7 +49,6 @@ fn linkage_by_name(tcx: TyCtxt<'_>, def_id: LocalDefId, name: &str) -> Linkage {
         "internal" => Internal,
         "linkonce" => LinkOnceAny,
         "linkonce_odr" => LinkOnceODR,
-        "private" => Private,
         "weak" => WeakAny,
         "weak_odr" => WeakODR,
         _ => tcx.dcx().span_fatal(tcx.def_span(def_id), "invalid linkage specified"),
@@ -221,7 +220,7 @@ fn codegen_fn_attrs(tcx: TyCtxt<'_>, did: LocalDefId) -> CodegenFnAttrs {
 
                 if !is_closure
                     && let Some(fn_sig) = fn_sig()
-                    && fn_sig.skip_binder().abi() != abi::Abi::Rust
+                    && fn_sig.skip_binder().abi() != ExternAbi::Rust
                 {
                     struct_span_code_err!(
                         tcx.dcx(),
@@ -916,8 +915,6 @@ fn autodiff_attrs(tcx: TyCtxt<'_>, id: DefId) -> Option<AutoDiffAttrs> {
     let mode = match mode.as_str() {
         "Forward" => DiffMode::Forward,
         "Reverse" => DiffMode::Reverse,
-        "ForwardFirst" => DiffMode::ForwardFirst,
-        "ReverseFirst" => DiffMode::ReverseFirst,
         _ => {
             span_bug!(mode.span, "rustc_autodiff attribute contains invalid mode");
         }

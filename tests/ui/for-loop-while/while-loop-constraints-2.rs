@@ -11,7 +11,7 @@ pub fn main() {
         while false { x = y; y = z; }
         println!("{}", y);
     }
-    assert!((y == 42 && z == 50));
+    assert!(y == 42 && z == 50);
 }
 
 // ferrocene-annotations: fls_5jjm1kt43axd

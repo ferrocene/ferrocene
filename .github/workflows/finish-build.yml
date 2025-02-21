@@ -31,6 +31,7 @@ jobs:
       FERROCENE_HOST: ${{ inputs.triple }}
       FERROCENE_BUILD_HOST: ${{ inputs.triple }}
       FERROCENE_TARGETS: ${{ inputs.triple }}
+      ARTIFACT: finish-build
     steps:
       - uses: actions/checkout@v4
       - name: Setup
@@ -59,6 +60,8 @@ jobs:
         with:
           container: ${{ inputs.container }}
           script: |
+            export CIRCLE_SHA1="${{ github.sha }}"
+            export CIRCLE_JOB="${{ env.ARTIFACT }}"
             uv run x.py dist ferrocene-build-metadata
             ./ferrocene/ci/scripts/upload-dist-artifacts.sh
             ./ferrocene/ci/scripts/validate-packages-toml.py ${{ github.sha }}

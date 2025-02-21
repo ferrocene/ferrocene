@@ -376,7 +376,7 @@ jobs:
   #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   finish-build:
-    name: Self-test (x86_64-unknown-linux-gnu)
+    name: Finish build
     uses: ./.github/workflows/finish-build.yml
     needs:
       - container-x86_64-ubuntu-20

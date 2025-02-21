@@ -1327,7 +1327,7 @@ commands:
     steps:
       - run:
           name: Execute the build
-          no_output_timeout: 15m
+          no_output_timeout: 30m
           command: << parameters.wrapper >> ferrocene/ci/run.sh
 
       - run:

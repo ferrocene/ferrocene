@@ -138,6 +138,11 @@ Target Procedures
 
 Currently bare metal targets have a similar procedure for testing.
 
+.. note::
+
+   Currently, these targets use our *secret sauce*.
+   This will eventually be an open source component, but for now, it's our little bit of arcane magic.
+
 :target-with-triple:`aarch64-unknown-none`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -194,10 +199,6 @@ After, you can run the tests:
 
 :target-with-triple:`thumbv7em-none-eabihf` & :target-with-triple:`thumbv7em-none-eabi`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. note::
-    
-    Currently, this target uses our *secret sauce*. Eventually this will be an open source component of Ferrocene, but for now, it's our little bit of arcane magic.
 
 Install the necessary packages:
 

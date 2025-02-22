@@ -122,7 +122,7 @@ pub fn find_target(build: &Build, target: TargetSelection) {
         cfg.compiler(cc);
     }
 
-    // Ferrocene annotation: cc 1.32.0 and newer does not support custom targets outside of
+    // Ferrocene annotation: cc 1.1.32 and newer does not support custom targets outside of
     // build script context (rust-lang/cc-rs#1225). map `ferrocenecoretest` targets back to the
     // targets they are test doubles for, and temporarily pass that triple to `cc` to determine
     // the C compiler

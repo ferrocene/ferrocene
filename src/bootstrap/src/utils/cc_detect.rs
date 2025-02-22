@@ -141,6 +141,10 @@ pub fn find_target(build: &Build, target: TargetSelection) {
     let ar = if let ar @ Some(..) = config.and_then(|c| c.ar.clone()) {
         ar
     } else {
+        if ferrocenecoretest_compiler.is_some() {
+            let sub = target.triple.replace("ferrocenecoretest", "none");
+            cfg.target(&sub);
+        }
         cc2ar(compiler.path(), target, PathBuf::from(cfg.get_archiver().get_program()))
     };
 

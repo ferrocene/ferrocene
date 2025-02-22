@@ -3390,9 +3390,9 @@ impl Step for TestHelpers {
             cfg.compiler(builder.cc(target));
         }
 
-        // Ferrocene annotation: cc 1.32.0 and newer does not support custom targets outside of
-        // build script context (rust-lang/cc-rs#1225). map `ferrocenecoretest` targets back to the
-        // targets they are test doubles for, and pass that triple to `cc`
+        // Ferrocene annotation: cc 1.1.32 and newer does not support custom targets outside of
+        // build script context (rust-lang/cc-rs#1225). Map `ferrocenecoretest` targets back to the
+        // targets they are test doubles for, and pass that triple to `cc`.
         let target = if self.target.contains("-ferrocenecoretest") {
             let sub = target.triple.replace("ferrocenecoretest", "none");
 

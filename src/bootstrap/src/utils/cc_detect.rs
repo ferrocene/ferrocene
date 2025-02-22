@@ -123,9 +123,9 @@ pub fn find_target(build: &Build, target: TargetSelection) {
     }
 
     // Ferrocene annotation: cc 1.1.32 and newer does not support custom targets outside of
-    // build script context (rust-lang/cc-rs#1225). map `ferrocenecoretest` targets back to the
+    // build script context (rust-lang/cc-rs#1225). Map `ferrocenecoretest` targets back to the
     // targets they are test doubles for, and temporarily pass that triple to `cc` to determine
-    // the C compiler
+    // the C compiler.
     let ferrocenecoretest_compiler = if target.triple.contains("-ferrocenecoretest") {
         let sub = target.triple.replace("ferrocenecoretest", "none");
         cfg.target(&sub);

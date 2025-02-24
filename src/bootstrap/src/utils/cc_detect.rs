@@ -29,11 +29,8 @@ use crate::core::config::TargetSelection;
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::{Build, CLang, GitRepo};
 
-// The `cc` crate doesn't provide a way to obtain a path to the detected archiver,
-// so use some simplified logic here. First we respect the environment variable `AR`, then
-// try to infer the archiver path from the C compiler path.
-// In the future this logic should be replaced by calling into the `cc` crate.
-fn cc2ar(cc: &Path, target: TargetSelection) -> Option<PathBuf> {
+/// FIXME(onur-ozkan): This logic should be replaced by calling into the `cc` crate.
+fn cc2ar(cc: &Path, target: TargetSelection, default_ar: PathBuf) -> Option<PathBuf> {
     if let Some(ar) = env::var_os(format!("AR_{}", target.triple.replace('-', "_"))) {
         Some(PathBuf::from(ar))
     } else if let Some(ar) = env::var_os("AR") {
@@ -57,16 +54,7 @@ fn cc2ar(cc: &Path, target: TargetSelection) -> Option<PathBuf> {
     } else if target.contains("android") || target.contains("-wasi") {
         Some(cc.parent().unwrap().join(PathBuf::from("llvm-ar")))
     } else {
-        let parent = cc.parent().unwrap();
-        let file = cc.file_name().unwrap().to_str().unwrap();
-        for suffix in &["gcc", "cc", "clang"] {
-            if let Some(idx) = file.rfind(suffix) {
-                let mut file = file[..idx].to_owned();
-                file.push_str("ar");
-                return Some(parent.join(&file));
-            }
-        }
-        Some(parent.join(file))
+        Some(default_ar)
     }
 }
 
@@ -134,10 +122,10 @@ pub fn find_target(build: &Build, target: TargetSelection) {
         cfg.compiler(cc);
     }
 
-    // Ferrocene annotation: cc 1.32.0 and newer does not support custom targets outside of
-    // build script context (rust-lang/cc-rs#1225). map `ferrocenecoretest` targets back to the
+    // Ferrocene annotation: cc 1.1.32 and newer does not support custom targets outside of
+    // build script context (rust-lang/cc-rs#1225). Map `ferrocenecoretest` targets back to the
     // targets they are test doubles for, and temporarily pass that triple to `cc` to determine
-    // the C compiler
+    // the C compiler.
     let ferrocenecoretest_compiler = if target.triple.contains("-ferrocenecoretest") {
         let sub = target.triple.replace("ferrocenecoretest", "none");
         cfg.target(&sub);
@@ -153,11 +141,16 @@ pub fn find_target(build: &Build, target: TargetSelection) {
     let ar = if let ar @ Some(..) = config.and_then(|c| c.ar.clone()) {
         ar
     } else {
-        cc2ar(compiler.path(), target)
+        if ferrocenecoretest_compiler.is_some() {
+            let sub = target.triple.replace("ferrocenecoretest", "none");
+            cfg.target(&sub);
+        }
+        cc2ar(compiler.path(), target, PathBuf::from(cfg.get_archiver().get_program()))
     };
 
     build.cc.borrow_mut().insert(target, compiler.clone());
-    let cflags = build.cflags(target, GitRepo::Rustc, CLang::C);
+    let mut cflags = build.cc_handled_clags(target, CLang::C);
+    cflags.extend(build.cc_unhandled_cflags(target, GitRepo::Rustc, CLang::C));
 
     // If we use llvm-libunwind, we will need a C++ compiler as well for all targets
     // We'll need one anyways if the target triple is also a host triple
@@ -184,7 +177,8 @@ pub fn find_target(build: &Build, target: TargetSelection) {
     build.verbose(|| println!("CC_{} = {:?}", target.triple, build.cc(target)));
     build.verbose(|| println!("CFLAGS_{} = {cflags:?}", target.triple));
     if let Ok(cxx) = build.cxx(target) {
-        let cxxflags = build.cflags(target, GitRepo::Rustc, CLang::Cxx);
+        let mut cxxflags = build.cc_handled_clags(target, CLang::Cxx);
+        cxxflags.extend(build.cc_unhandled_cflags(target, GitRepo::Rustc, CLang::Cxx));
         build.verbose(|| println!("CXX_{} = {cxx:?}", target.triple));
         build.verbose(|| println!("CXXFLAGS_{} = {cxxflags:?}", target.triple));
     }

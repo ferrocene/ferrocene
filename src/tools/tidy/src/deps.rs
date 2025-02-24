@@ -121,8 +121,11 @@ const EXCEPTIONS: ExceptionList = &[
     ("dissimilar", "Apache-2.0"),                            // rustdoc, rustc_lexer (few tests) via expect-test, (dev deps)
     ("fluent-langneg", "Apache-2.0"),                        // rustc (fluent translations)
     ("foldhash", "Zlib"),                                    // rustc
+<<<<<<< HEAD
     ("insta", "Apache-2.0"),                                 // generate-tarball
     ("mdbook", "MPL-2.0"),                                   // mdbook
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     ("option-ext", "MPL-2.0"),                               // cargo-miri (via `directories`)
     ("rustc_apfloat", "Apache-2.0 WITH LLVM-exception"),     // rustc (license is the same as LLVM uses)
     ("ryu", "Apache-2.0 OR BSL-1.0"), // BSL is not acceptble, but we use it under Apache-2.0                       // cargo/... (because of serde)
@@ -157,6 +160,7 @@ const EXCEPTIONS_CARGO: ExceptionList = &[
     ("dunce", "CC0-1.0 OR MIT-0 OR Apache-2.0"),
     ("encoding_rs", "(Apache-2.0 OR MIT) AND BSD-3-Clause"),
     ("fiat-crypto", "MIT OR Apache-2.0 OR BSD-1-Clause"),
+    ("foldhash", "Zlib"),
     ("im-rc", "MPL-2.0+"),
     ("normalize-line-endings", "Apache-2.0"),
     ("openssl", "Apache-2.0"),
@@ -505,6 +509,8 @@ const PERMITTED_STDLIB_DEPENDENCIES: &[&str] = &[
     "memchr",
     "miniz_oxide",
     "object",
+    "proc-macro2",
+    "quote",
     "r-efi",
     "r-efi-alloc",
     "rand",
@@ -512,6 +518,8 @@ const PERMITTED_STDLIB_DEPENDENCIES: &[&str] = &[
     "rand_xorshift",
     "rustc-demangle",
     "shlex",
+    "syn",
+    "unicode-ident",
     "unicode-width",
     "unwinding",
     "wasi",
@@ -525,6 +533,8 @@ const PERMITTED_STDLIB_DEPENDENCIES: &[&str] = &[
     "windows_x86_64_gnu",
     "windows_x86_64_gnullvm",
     "windows_x86_64_msvc",
+    "zerocopy",
+    "zerocopy-derive",
     // tidy-alphabetical-end
 ];
 
@@ -689,7 +699,7 @@ pub static CRATES: &[&str] = &[
         for extra in expected.difference(&proc_macro_deps) {
             tidy_error!(
                 bad,
-                "`{extra}` is not registered in `src/bootstrap/src/utils/proc_macro_deps.rs`, but is not a proc-macro crate dependency",
+                "`{extra}` is registered in `src/bootstrap/src/utils/proc_macro_deps.rs`, but is not a proc-macro crate dependency",
             );
         }
         if *bad != old_bad {

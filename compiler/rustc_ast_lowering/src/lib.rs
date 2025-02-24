@@ -45,7 +45,6 @@ use std::sync::Arc;
 
 use rustc_ast::node_id::NodeMap;
 use rustc_ast::{self as ast, *};
-use rustc_data_structures::captures::Captures;
 use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_data_structures::sorted_map::SortedMap;
 use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
@@ -407,7 +406,7 @@ fn compute_hir_hash(
         .iter_enumerated()
         .filter_map(|(def_id, info)| {
             let info = info.as_owner()?;
-            let def_path_hash = tcx.hir().def_path_hash(def_id);
+            let def_path_hash = tcx.hir_def_path_hash(def_id);
             Some((def_path_hash, info))
         })
         .collect();
@@ -497,7 +496,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
             "adding a def'n for node-id {:?} and def kind {:?} but a previous def'n exists: {:?}",
             node_id,
             def_kind,
-            self.tcx.hir().def_key(self.local_def_id(node_id)),
+            self.tcx.hir_def_key(self.local_def_id(node_id)),
         );
 
         let def_id = self.tcx.at(span).create_def(parent, name, def_kind).def_id();
@@ -1821,11 +1820,11 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         self.new_named_lifetime_with_res(new_id, ident, res)
     }
 
-    fn lower_generic_params_mut<'s>(
-        &'s mut self,
-        params: &'s [GenericParam],
+    fn lower_generic_params_mut(
+        &mut self,
+        params: &[GenericParam],
         source: hir::GenericParamSource,
-    ) -> impl Iterator<Item = hir::GenericParam<'hir>> + Captures<'a> + Captures<'s> {
+    ) -> impl Iterator<Item = hir::GenericParam<'hir>> {
         params.iter().map(move |param| self.lower_generic_param(param, source))
     }
 
@@ -1986,11 +1985,11 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         self.arena.alloc_from_iter(self.lower_param_bounds_mut(bounds, itctx))
     }
 
-    fn lower_param_bounds_mut<'s>(
-        &'s mut self,
-        bounds: &'s [GenericBound],
+    fn lower_param_bounds_mut(
+        &mut self,
+        bounds: &[GenericBound],
         itctx: ImplTraitContext,
-    ) -> impl Iterator<Item = hir::GenericBound<'hir>> + Captures<'s> + Captures<'a> {
+    ) -> impl Iterator<Item = hir::GenericBound<'hir>> {
         bounds.iter().map(move |bound| self.lower_param_bound(bound, itctx))
     }
 

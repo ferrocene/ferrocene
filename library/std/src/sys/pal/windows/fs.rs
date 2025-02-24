@@ -1,4 +1,4 @@
-use super::api::{self, WinError};
+use super::api::{self, WinError, set_file_information_by_handle};
 use super::{IoResult, to_u16s};
 use crate::alloc::{alloc, handle_alloc_error};
 use crate::borrow::Cow;
@@ -319,31 +319,17 @@ impl File {
                 && creation == c::OPEN_ALWAYS
                 && api::get_last_error() == WinError::ALREADY_EXISTS
             {
-                unsafe {
-                    // This first tries `FileAllocationInfo` but falls back to
-                    // `FileEndOfFileInfo` in order to support WINE.
-                    // If WINE gains support for FileAllocationInfo, we should
-                    // remove the fallback.
-                    let alloc = c::FILE_ALLOCATION_INFO { AllocationSize: 0 };
-                    let result = c::SetFileInformationByHandle(
-                        handle.as_raw_handle(),
-                        c::FileAllocationInfo,
-                        (&raw const alloc).cast::<c_void>(),
-                        mem::size_of::<c::FILE_ALLOCATION_INFO>() as u32,
-                    );
-                    if result == 0 {
+                // This first tries `FileAllocationInfo` but falls back to
+                // `FileEndOfFileInfo` in order to support WINE.
+                // If WINE gains support for FileAllocationInfo, we should
+                // remove the fallback.
+                let alloc = c::FILE_ALLOCATION_INFO { AllocationSize: 0 };
+                set_file_information_by_handle(handle.as_raw_handle(), &alloc)
+                    .or_else(|_| {
                         let eof = c::FILE_END_OF_FILE_INFO { EndOfFile: 0 };
-                        let result = c::SetFileInformationByHandle(
-                            handle.as_raw_handle(),
-                            c::FileEndOfFileInfo,
-                            (&raw const eof).cast::<c_void>(),
-                            mem::size_of::<c::FILE_END_OF_FILE_INFO>() as u32,
-                        );
-                        if result == 0 {
-                            return Err(io::Error::last_os_error());
-                        }
-                    }
-                }
+                        set_file_information_by_handle(handle.as_raw_handle(), &eof)
+                    })
+                    .io_result()?;
             }
             Ok(File { handle: Handle::from_inner(handle) })
         } else {
@@ -631,6 +617,10 @@ impl File {
         Ok(newpos as u64)
     }
 
+    pub fn tell(&self) -> io::Result<u64> {
+        self.seek(SeekFrom::Current(0))
+    }
+
     pub fn duplicate(&self) -> io::Result<File> {
         Ok(Self { handle: self.handle.try_clone()? })
     }
@@ -812,7 +802,7 @@ impl File {
     /// will prevent anyone from opening a new handle to the file.
     #[allow(unused)]
     fn win32_delete(&self) -> Result<(), WinError> {
-        let info = c::FILE_DISPOSITION_INFO { DeleteFile: c::TRUE as _ };
+        let info = c::FILE_DISPOSITION_INFO { DeleteFile: true };
         api::set_file_information_by_handle(self.handle.as_raw_handle(), &info)
     }
 
@@ -1372,7 +1362,7 @@ pub fn rename(old: &Path, new: &Path) -> io::Result<()> {
     if let Err(err) = result {
         if err.raw_os_error() == Some(c::ERROR_INVALID_PARAMETER as _) {
             // FileRenameInfoEx and FILE_RENAME_FLAG_POSIX_SEMANTICS were added in Windows 10 1607; retry with FileRenameInfo.
-            file_rename_info.Anonymous.ReplaceIfExists = 1;
+            file_rename_info.Anonymous.ReplaceIfExists = true;
 
             cvt(unsafe {
                 c::SetFileInformationByHandle(
@@ -1468,9 +1458,7 @@ pub fn link(original: &Path, link: &Path) -> io::Result<()> {
 
 #[cfg(target_vendor = "uwp")]
 pub fn link(_original: &Path, _link: &Path) -> io::Result<()> {
-    return Err(
-        io::const_error!(io::ErrorKind::Unsupported, "hard link are not supported on UWP",),
-    );
+    return Err(io::const_error!(io::ErrorKind::Unsupported, "hard link are not supported on UWP"));
 }
 
 pub fn stat(path: &Path) -> io::Result<FileAttr> {

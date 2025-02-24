@@ -1,4 +1,3 @@
-use rustc_data_structures::captures::Captures;
 use rustc_index::bit_set::DenseBitSet;
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
 use rustc_middle::mir::coverage::{BasicCoverageBlock, CoverageIdsInfo, CoverageKind, MappingKind};
@@ -123,11 +122,20 @@ fn coverage_ids_info<'tcx>(
         }
     }
 
-    // FIXME(Zalathar): It should be possible to sort `priority_list[1..]` by
-    // `!bcbs_seen.contains(bcb)` to simplify the mappings even further, at the
-    // expense of some churn in the tests. When doing so, also consider removing
-    // the sorts in `transcribe_counters`.
-    let node_counters = make_node_counters(&fn_cov_info.node_flow_data, &fn_cov_info.priority_list);
+    // Clone the priority list so that we can re-sort it.
+    let mut priority_list = fn_cov_info.priority_list.clone();
+    // The first ID in the priority list represents the synthetic "sink" node,
+    // and must remain first so that it _never_ gets a physical counter.
+    debug_assert_eq!(priority_list[0], priority_list.iter().copied().max().unwrap());
+    assert!(!bcbs_seen.contains(priority_list[0]));
+    // Partition the priority list, so that unreachable nodes (removed by MIR opts)
+    // are sorted later and therefore are _more_ likely to get a physical counter.
+    // This is counter-intuitive, but it means that `transcribe_counters` can
+    // easily skip those unused physical counters and replace them with zero.
+    // (The original ordering remains in effect within both partitions.)
+    priority_list[1..].sort_by_key(|&bcb| !bcbs_seen.contains(bcb));
+
+    let node_counters = make_node_counters(&fn_cov_info.node_flow_data, &priority_list);
     let coverage_counters = transcribe_counters(&node_counters, &bcb_needs_counter, &bcbs_seen);
 
     let CoverageCounters {
@@ -144,7 +152,7 @@ fn coverage_ids_info<'tcx>(
 
 fn all_coverage_in_mir_body<'a, 'tcx>(
     body: &'a Body<'tcx>,
-) -> impl Iterator<Item = &'a CoverageKind> + Captures<'tcx> {
+) -> impl Iterator<Item = &'a CoverageKind> {
     body.basic_blocks.iter().flat_map(|bb_data| &bb_data.statements).filter_map(|statement| {
         match statement.kind {
             StatementKind::Coverage(ref kind) if !is_inlined(body, statement) => Some(kind),

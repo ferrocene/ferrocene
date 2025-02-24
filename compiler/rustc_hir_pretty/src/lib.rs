@@ -18,14 +18,15 @@ use rustc_ast_pretty::pprust::state::MacHeader;
 use rustc_ast_pretty::pprust::{Comments, PrintState};
 use rustc_hir::{
     BindingMode, ByRef, ConstArgKind, GenericArg, GenericBound, GenericParam, GenericParamKind,
-    HirId, LifetimeParamKind, Node, PatKind, PreciseCapturingArg, RangeEnd, Term, TyPatKind,
+    HirId, ImplicitSelfKind, LifetimeParamKind, Node, PatKind, PreciseCapturingArg, RangeEnd, Term,
+    TyPatKind,
 };
 use rustc_span::source_map::SourceMap;
 use rustc_span::{FileName, Ident, Span, Symbol, kw};
 use {rustc_ast as ast, rustc_hir as hir};
 
-pub fn id_to_string(map: &dyn rustc_hir::intravisit::Map<'_>, hir_id: HirId) -> String {
-    to_string(&map, |s| s.print_node(map.hir_node(hir_id)))
+pub fn id_to_string(cx: &dyn rustc_hir::intravisit::HirTyCtxt<'_>, hir_id: HirId) -> String {
+    to_string(&cx, |s| s.print_node(cx.hir_node(hir_id)))
 }
 
 pub enum AnnNode<'a> {
@@ -54,15 +55,15 @@ pub trait PpAnn {
     fn post(&self, _state: &mut State<'_>, _node: AnnNode<'_>) {}
 }
 
-impl PpAnn for &dyn rustc_hir::intravisit::Map<'_> {
+impl PpAnn for &dyn rustc_hir::intravisit::HirTyCtxt<'_> {
     fn nested(&self, state: &mut State<'_>, nested: Nested) {
         match nested {
-            Nested::Item(id) => state.print_item(self.item(id)),
-            Nested::TraitItem(id) => state.print_trait_item(self.trait_item(id)),
-            Nested::ImplItem(id) => state.print_impl_item(self.impl_item(id)),
-            Nested::ForeignItem(id) => state.print_foreign_item(self.foreign_item(id)),
-            Nested::Body(id) => state.print_expr(self.body(id).value),
-            Nested::BodyParamPat(id, i) => state.print_pat(self.body(id).params[i].pat),
+            Nested::Item(id) => state.print_item(self.hir_item(id)),
+            Nested::TraitItem(id) => state.print_trait_item(self.hir_trait_item(id)),
+            Nested::ImplItem(id) => state.print_impl_item(self.hir_impl_item(id)),
+            Nested::ForeignItem(id) => state.print_foreign_item(self.hir_foreign_item(id)),
+            Nested::Body(id) => state.print_expr(self.hir_body(id).value),
+            Nested::BodyParamPat(id, i) => state.print_pat(self.hir_body(id).params[i].pat),
         }
     }
 }
@@ -692,7 +693,7 @@ impl<'a> State<'a> {
                 }
                 self.bclose(item.span);
             }
-            hir::ItemKind::GlobalAsm(asm) => {
+            hir::ItemKind::GlobalAsm { asm, .. } => {
                 self.head("global_asm!");
                 self.print_inline_asm(asm);
                 self.end()
@@ -1431,10 +1432,10 @@ impl<'a> State<'a> {
                     s.space();
                     s.print_anon_const(anon_const);
                 }
-                hir::InlineAsmOperand::SymFn { ref anon_const } => {
+                hir::InlineAsmOperand::SymFn { ref expr } => {
                     s.word("sym_fn");
                     s.space();
-                    s.print_anon_const(anon_const);
+                    s.print_expr(expr);
                 }
                 hir::InlineAsmOperand::SymStatic { ref path, def_id: _ } => {
                     s.word("sym_static");
@@ -1856,7 +1857,7 @@ impl<'a> State<'a> {
                 self.word_space("=");
                 match term {
                     Term::Ty(ty) => self.print_type(ty),
-                    Term::Const(ref c) => self.print_const_arg(c),
+                    Term::Const(c) => self.print_const_arg(c),
                 }
             }
             hir::AssocItemConstraintKind::Bound { bounds } => {
@@ -2086,6 +2087,28 @@ impl<'a> State<'a> {
         self.print_pat(arg.pat);
     }
 
+    fn print_implicit_self(&mut self, implicit_self_kind: &hir::ImplicitSelfKind) {
+        match implicit_self_kind {
+            ImplicitSelfKind::Imm => {
+                self.word("self");
+            }
+            ImplicitSelfKind::Mut => {
+                self.print_mutability(hir::Mutability::Mut, false);
+                self.word("self");
+            }
+            ImplicitSelfKind::RefImm => {
+                self.word("&");
+                self.word("self");
+            }
+            ImplicitSelfKind::RefMut => {
+                self.word("&");
+                self.print_mutability(hir::Mutability::Mut, false);
+                self.word("self");
+            }
+            ImplicitSelfKind::None => unreachable!(),
+        }
+    }
+
     fn print_arm(&mut self, arm: &hir::Arm<'_>) {
         // I have no idea why this check is necessary, but here it
         // is :(
@@ -2151,27 +2174,33 @@ impl<'a> State<'a> {
         // Make sure we aren't supplied *both* `arg_names` and `body_id`.
         assert!(arg_names.is_empty() || body_id.is_none());
         let mut i = 0;
-        let mut print_arg = |s: &mut Self| {
-            if let Some(arg_name) = arg_names.get(i) {
-                s.word(arg_name.to_string());
-                s.word(":");
-                s.space();
-            } else if let Some(body_id) = body_id {
-                s.ann.nested(s, Nested::BodyParamPat(body_id, i));
-                s.word(":");
-                s.space();
+        let mut print_arg = |s: &mut Self, ty: Option<&hir::Ty<'_>>| {
+            if i == 0 && decl.implicit_self.has_implicit_self() {
+                s.print_implicit_self(&decl.implicit_self);
+            } else {
+                if let Some(arg_name) = arg_names.get(i) {
+                    s.word(arg_name.to_string());
+                    s.word(":");
+                    s.space();
+                } else if let Some(body_id) = body_id {
+                    s.ann.nested(s, Nested::BodyParamPat(body_id, i));
+                    s.word(":");
+                    s.space();
+                }
+                if let Some(ty) = ty {
+                    s.print_type(ty);
+                }
             }
             i += 1;
         };
         self.commasep(Inconsistent, decl.inputs, |s, ty| {
             s.ibox(INDENT_UNIT);
-            print_arg(s);
-            s.print_type(ty);
+            print_arg(s, Some(ty));
             s.end();
         });
         if decl.c_variadic {
             self.word(", ");
-            print_arg(self);
+            print_arg(self, None);
             self.word("...");
         }
         self.pclose();
@@ -2284,7 +2313,9 @@ impl<'a> State<'a> {
                 GenericBound::Use(args, _) => {
                     self.word("use <");
 
-                    self.commasep(Inconsistent, args, |s, arg| s.print_precise_capturing_arg(*arg));
+                    self.commasep(Inconsistent, *args, |s, arg| {
+                        s.print_precise_capturing_arg(*arg)
+                    });
 
                     self.word(">");
                 }
@@ -2300,10 +2331,23 @@ impl<'a> State<'a> {
     }
 
     fn print_generic_params(&mut self, generic_params: &[GenericParam<'_>]) {
-        if !generic_params.is_empty() {
+        let is_lifetime_elided = |generic_param: &GenericParam<'_>| {
+            matches!(
+                generic_param.kind,
+                GenericParamKind::Lifetime { kind: LifetimeParamKind::Elided(_) }
+            )
+        };
+
+        // We don't want to show elided lifetimes as they are compiler-inserted and not
+        // expressible in surface level Rust.
+        if !generic_params.is_empty() && !generic_params.iter().all(is_lifetime_elided) {
             self.word("<");
 
-            self.commasep(Inconsistent, generic_params, |s, param| s.print_generic_param(param));
+            self.commasep(
+                Inconsistent,
+                generic_params.iter().filter(|gp| !is_lifetime_elided(gp)),
+                |s, param| s.print_generic_param(param),
+            );
 
             self.word(">");
         }

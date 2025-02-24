@@ -290,7 +290,7 @@ fn conv_from_spec_abi(tcx: TyCtxt<'_>, abi: ExternAbi, c_variadic: bool) -> Conv
         Aapcs { .. } => Conv::ArmAapcs,
         CCmseNonSecureCall => Conv::CCmseNonSecureCall,
         CCmseNonSecureEntry => Conv::CCmseNonSecureEntry,
-        PtxKernel => Conv::PtxKernel,
+        PtxKernel => Conv::GpuKernel,
         Msp430Interrupt => Conv::Msp430Intr,
         X86Interrupt => Conv::X86Intr,
         GpuKernel => Conv::GpuKernel,
@@ -464,7 +464,7 @@ fn fn_abi_sanity_check<'tcx>(
 
         match &arg.mode {
             PassMode::Ignore => {
-                assert!(arg.layout.is_zst() || arg.layout.is_uninhabited());
+                assert!(arg.layout.is_zst());
             }
             PassMode::Direct(_) => {
                 // Here the Rust type is used to determine the actual ABI, so we have to be very
@@ -472,9 +472,7 @@ fn fn_abi_sanity_check<'tcx>(
                 // `layout.backend_repr` and ignore everything else. We should just reject
                 //`Aggregate` entirely here, but some targets need to be fixed first.
                 match arg.layout.backend_repr {
-                    BackendRepr::Uninhabited
-                    | BackendRepr::Scalar(_)
-                    | BackendRepr::Vector { .. } => {}
+                    BackendRepr::Scalar(_) | BackendRepr::Vector { .. } => {}
                     BackendRepr::ScalarPair(..) => {
                         panic!("`PassMode::Direct` used for ScalarPair type {}", arg.layout.ty)
                     }
@@ -749,7 +747,7 @@ fn make_thin_self_ptr<'tcx>(
         // To get the type `*mut RcInner<Self>`, we just keep unwrapping newtypes until we
         // get a built-in pointer type
         let mut wide_pointer_layout = layout;
-        while !wide_pointer_layout.ty.is_unsafe_ptr() && !wide_pointer_layout.ty.is_ref() {
+        while !wide_pointer_layout.ty.is_raw_ptr() && !wide_pointer_layout.ty.is_ref() {
             wide_pointer_layout = wide_pointer_layout
                 .non_1zst_field(cx)
                 .expect("not exactly one non-1-ZST field in a `DispatchFromDyn` type")

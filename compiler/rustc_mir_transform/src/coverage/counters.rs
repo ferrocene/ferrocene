@@ -50,7 +50,7 @@ fn make_node_flow_priority_list(
     // A "reloop" node has exactly one out-edge, which jumps back to the top
     // of an enclosing loop. Reloop nodes are typically visited more times
     // than loop-exit nodes, so try to avoid giving them physical counters.
-    let is_reloop_node = IndexVec::from_fn_n(
+    let is_reloop_node = IndexVec::<BasicCoverageBlock, _>::from_fn_n(
         |node| match graph.successors[node].as_slice() {
             &[succ] => graph.dominates(succ, node),
             _ => false,
@@ -114,12 +114,8 @@ pub(crate) fn transcribe_counters(
         let mut new_counters_for_sites = |sites: Vec<BasicCoverageBlock>| {
             sites.into_iter().map(|node| new.ensure_phys_counter(node)).collect::<Vec<_>>()
         };
-        let mut pos = new_counters_for_sites(pos);
-        let mut neg = new_counters_for_sites(neg);
-
-        // These sorts are also not strictly necessary; see above.
-        pos.sort();
-        neg.sort();
+        let pos = new_counters_for_sites(pos);
+        let neg = new_counters_for_sites(neg);
 
         let pos_counter = new.make_sum(&pos).unwrap_or(CovTerm::Zero);
         let new_counter = new.make_subtracted_sum(pos_counter, &neg);

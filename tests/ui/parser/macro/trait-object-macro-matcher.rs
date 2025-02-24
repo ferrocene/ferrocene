@@ -10,6 +10,7 @@ macro_rules! m {
 fn main() {
     m!('static);
     //~^ ERROR lifetime in trait object type must be followed by `+`
+    //~| ERROR lifetime in trait object type must be followed by `+`
     //~| ERROR at least one trait is required for an object type
 }
 

@@ -93,6 +93,7 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
+            uv run x.py --stage 2 dist rust-std
             uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
 
       - uses: actions/upload-artifact@v4

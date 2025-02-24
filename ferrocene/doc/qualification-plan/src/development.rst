@@ -36,9 +36,9 @@ There are four requirements for merging any change into the ``main`` and
    with a different merge commit (for example if other changes were merged in
    the meantime) does not count.
 
-4. All changes deemed major must have an approved FD, and must adhere to the
-   proposed solution outlined in the FD. See :ref:`dev-phase-design` for more
-   information about FDs.
+4. All changes deemed major must have an approved ticket, and must adhere to the
+   proposed solution outlined in the ticket. See :ref:`dev-phase-design` for more
+   information about tickets.
 
 An independent Ferrocene Reviewer is any Ferrocene developer who has not
 committed code as part of the change being reviewed. The only exception occurs
@@ -69,23 +69,25 @@ Development Phases
 
 .. _dev-phase-design:
 
-Dev Phase 1: Ferrocene Design (FD) Document Approval
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Dev Phase 1: Development Ticket Approval
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To ensure adequate quality, changes that are deemed *major* by the authors or
-reviewers need to have a Ferrocene Design (FD) document written, approved and
-merged before development can begin.
+reviewers need to have a development ticket written and approved, before
+development can begin.
 
 Whether a change is deemed major is at the discretion of the Ferrocene
 developers and reviewers assigned to the task. Still, any member of the
-Ferrocene team can ask for a change to be deemed major (and thus require an
-FD), even if the developers and reviewers decided it was minor.
+Ferrocene team can ask for a change to be deemed major (and thus require a
+ticket), even if the developers and reviewers decided it was minor.
 
-FDs must be sent as a PR to the ``ferrocene/designs`` repository, following the
-instructions, guidelines and templates present there. An FD must be approved
-by at least another member of the Ferrocene team without any concerns.
+Tickets must be created in the project management tool under the respective
+project board, they must be appropriately scoped, and they must detail acceptance criteria.
+Large tickets must be broken down into smaller, independent tickets. A ticket
+must be approved by at least one other member of the Ferrocene team without any
+concerns.
 
-Once the FD has been approved or merged, or if a change was not deemed major,
+Once the ticket has been scoped and approved, or if a change was not deemed major,
 :ref:`dev-phase-development` can begin.
 
 .. _dev-phase-development:

@@ -105,6 +105,13 @@ jobs:
           path: build/dist
           retention-days: 1
 
+      - name: Upload artifacts to S3
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.ARTIFACT }}
+        run:
+          ./ferrocene/ci/scripts/upload-dist-artifacts.sh
+
       - name: Generate usage report
         uses: ./.github/actions/usage-report/
         if: ${{ always() }}

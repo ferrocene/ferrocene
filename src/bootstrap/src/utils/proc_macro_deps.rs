@@ -8,7 +8,6 @@ pub static CRATES: &[&str] = &[
     "askama_parser",
     "basic-toml",
     "bumpalo",
-    "const-oid",
     "darling",
     "darling_core",
     "derive_builder_core",
@@ -36,7 +35,6 @@ pub static CRATES: &[&str] = &[
     "smallvec",
     "stable_deref_trait",
     "strsim",
-    "subtle",
     "syn",
     "synstructure",
     "thiserror",
@@ -55,7 +53,6 @@ pub static CRATES: &[&str] = &[
     "wasm-bindgen-shared",
     "yoke",
     "zerofrom",
-    "zeroize",
     "zerovec",
     // tidy-alphabetical-end
 ];

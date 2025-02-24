@@ -21,6 +21,7 @@ const LICENSES: &[&str] = &[
     "0BSD OR MIT OR Apache-2.0",                           // adler2 license
     "0BSD",
     "Apache-2.0 / MIT",
+    "Apache-2.0 AND ISC",                                  // ring (0.17.11)
     "Apache-2.0 OR ISC OR MIT",
     "Apache-2.0 OR MIT",
     "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT", // wasi license
@@ -461,6 +462,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "windows-core",
     "windows-implement",
     "windows-interface",
+    "windows-link",
     "windows-result",
     "windows-strings",
     "windows-sys",

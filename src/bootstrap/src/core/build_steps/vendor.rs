@@ -9,7 +9,9 @@ use crate::core::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::utils::exec::command;
 
 /// The name of the directory where vendored dependencies are stored.
-pub const VENDOR_DIR: &str = "vendor";
+// Ferrocene note: "rust" dir added to path
+// ... and look out for a Unix-ism
+pub const VENDOR_DIR: &str = "vendor/rust";
 
 /// Returns the cargo workspaces to vendor for `x vendor` and dist tarballs.
 ///

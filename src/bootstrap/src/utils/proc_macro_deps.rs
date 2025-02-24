@@ -8,13 +8,7 @@ pub static CRATES: &[&str] = &[
     "askama_parser",
     "basic-toml",
     "bumpalo",
-<<<<<<< HEAD
-    "cfg-if",
     "const-oid",
-    "cpufeatures",
-    "crypto-common",
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "darling",
     "darling_core",
     "derive_builder_core",
@@ -55,11 +49,7 @@ pub static CRATES: &[&str] = &[
     "unicase",
     "unicode-ident",
     "unicode-width",
-<<<<<<< HEAD
     "unicode-xid",
-    "version_check",
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "wasm-bindgen-backend",
     "wasm-bindgen-macro-support",
     "wasm-bindgen-shared",

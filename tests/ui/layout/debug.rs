@@ -83,15 +83,13 @@ type Impossible = (str, str); //~ ERROR: cannot be known at compilation time
 union EmptyUnion {} //~ ERROR: has an unknown layout
 //~^ ERROR: unions cannot have zero fields
 
-<<<<<<< HEAD
+// Test the error message of `LayoutError::TooGeneric`
+// (this error is never emitted to users).
+#[rustc_layout(debug)]
+type TooGeneric<T> = T; //~ ERROR: does not have a fixed layout
+
 // ferrocene-annotations: fls_rjxpof29a3nl
 // Struct Type Representation
 //
 // ferrocene-annotations: fls_cmq8ogs84ivh
 // Union Type Representation
-=======
-// Test the error message of `LayoutError::TooGeneric`
-// (this error is never emitted to users).
-#[rustc_layout(debug)]
-type TooGeneric<T> = T; //~ ERROR: does not have a fixed layout
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

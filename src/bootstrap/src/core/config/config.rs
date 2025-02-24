@@ -2298,7 +2298,14 @@ impl Config {
             }
         }
 
-<<<<<<< HEAD
+        match ccache {
+            Some(StringOrBool::String(ref s)) => config.ccache = Some(s.to_string()),
+            Some(StringOrBool::Bool(true)) => {
+                config.ccache = Some("ccache".to_string());
+            }
+            Some(StringOrBool::Bool(false)) | None => {}
+        }
+
         if let Some(f) = toml.ferrocene {
             set(&mut config.ferrocene_raw_channel, f.channel);
             config.ferrocene_traceability_matrix_mode = match f.traceability_matrix_mode.as_deref()
@@ -2374,14 +2381,6 @@ impl Config {
             } else {
                 FerroceneSecretSauce::Download
             }
-=======
-        match ccache {
-            Some(StringOrBool::String(ref s)) => config.ccache = Some(s.to_string()),
-            Some(StringOrBool::Bool(true)) => {
-                config.ccache = Some("ccache".to_string());
-            }
-            Some(StringOrBool::Bool(false)) | None => {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         }
 
         if config.llvm_from_ci {

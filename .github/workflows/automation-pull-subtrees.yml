@@ -63,6 +63,10 @@ jobs:
       - name: Fetch submodules
         run: git submodule update --init --depth=1 --jobs=$(nproc)
 
+      # This avoids builds failing due to a stale version of the toolchain
+      - name: Ensure the latest Rust toolchain is installed
+        run: rustup update stable
+
       - name: Run the manage-subtrees automation
         run: ferrocene/tools/pull-subtrees/pull.py --automation-for-branch main
         env:

@@ -1,4 +1,3 @@
-pub use crate::arch::c_char_def as c_char;
 use crate::prelude::*;
 use crate::{in6_addr, in_addr_t, timespec, DIR};
 
@@ -6,8 +5,6 @@ pub type nlink_t = u16;
 pub type ino_t = u16;
 pub type blkcnt_t = u64;
 pub type blksize_t = i16;
-pub type c_long = isize;
-pub type c_ulong = usize;
 pub type cc_t = u8;
 pub type clock_t = i64;
 pub type dev_t = i32;

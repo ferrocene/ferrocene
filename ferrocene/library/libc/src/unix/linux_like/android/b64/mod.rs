@@ -3,8 +3,6 @@ use crate::prelude::*;
 // The following definitions are correct for aarch64 and x86_64,
 // but may be wrong for mips64
 
-pub type c_long = i64;
-pub type c_ulong = u64;
 pub type mode_t = u32;
 pub type off64_t = i64;
 pub type socklen_t = u32;
@@ -161,7 +159,7 @@ cfg_if! {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                 f.debug_struct("pthread_mutex_t")
                     .field("value", &self.value)
-                    // FIXME: .field("__reserved", &self.__reserved)
+                    // FIXME(debug): .field("__reserved", &self.__reserved)
                     .finish()
             }
         }
@@ -190,7 +188,7 @@ cfg_if! {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                 f.debug_struct("pthread_cond_t")
                     .field("value", &self.value)
-                    // FIXME: .field("__reserved", &self.__reserved)
+                    // FIXME(debug): .field("__reserved", &self.__reserved)
                     .finish()
             }
         }
@@ -227,7 +225,7 @@ cfg_if! {
                     .field("pendingReaders", &self.pendingReaders)
                     .field("pendingWriters", &self.pendingWriters)
                     .field("attr", &self.attr)
-                    // FIXME: .field("__reserved", &self.__reserved)
+                    // FIXME(debug): .field("__reserved", &self.__reserved)
                     .finish()
             }
         }

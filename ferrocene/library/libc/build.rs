@@ -5,7 +5,7 @@ use std::{env, str};
 // need to know all the possible cfgs that this script will set. If you need to set another cfg
 // make sure to add it to this list as well.
 const ALLOWED_CFGS: &'static [&'static str] = &[
-    "emscripten_new_stat_abi",
+    "emscripten_old_stat_abi",
     "espidf_time32",
     "freebsd10",
     "freebsd11",
@@ -18,6 +18,8 @@ const ALLOWED_CFGS: &'static [&'static str] = &[
     "libc_deny_warnings",
     "libc_thread_local",
     "libc_ctest",
+    // Corresponds to `__USE_TIME_BITS64` in UAPI
+    "linux_time_bits64",
 ];
 
 // Extra values to allow for check-cfg.
@@ -74,9 +76,15 @@ fn main() {
     }
 
     match emcc_version_code() {
-        Some(v) if (v >= 30142) => set_cfg("emscripten_new_stat_abi"),
-        // Non-Emscripten or version < 3.1.42.
-        Some(_) | None => (),
+        Some(v) if (v < 30142) => set_cfg("emscripten_old_stat_abi"),
+        // Non-Emscripten or version >= 3.1.42.
+        _ => (),
+    }
+
+    let linux_time_bits64 = env::var("RUST_LIBC_UNSTABLE_LINUX_TIME_BITS64").is_ok();
+    println!("cargo:rerun-if-env-changed=RUST_LIBC_UNSTABLE_LINUX_TIME_BITS64");
+    if linux_time_bits64 {
+        set_cfg("linux_time_bits64");
     }
 
     // On CI: deny all warnings

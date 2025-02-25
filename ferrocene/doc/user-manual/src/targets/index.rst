@@ -63,13 +63,13 @@ qualified upon request.
      - ``thumbv7em-none-eabi``
      - Cross-compilation
      - Bare-metal
-     - \-
+     - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
    * - :ref:`thumbv7em-none-eabihf`
      - ``thumbv7em-none-eabihf``
      - Cross-compilation
      - Bare-metal
-     - \-
+     - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
    * - :ref:`x86_64-unknown-linux-gnu`
      - ``x86_64-unknown-linux-gnu``

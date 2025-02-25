@@ -21,6 +21,7 @@ const LICENSES: &[&str] = &[
     "0BSD OR MIT OR Apache-2.0",                           // adler2 license
     "0BSD",
     "Apache-2.0 / MIT",
+    "Apache-2.0 AND ISC",                                  // ring (0.17.11)
     "Apache-2.0 OR ISC OR MIT",
     "Apache-2.0 OR MIT",
     "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT", // wasi license
@@ -122,7 +123,6 @@ const EXCEPTIONS: ExceptionList = &[
     ("fluent-langneg", "Apache-2.0"),                        // rustc (fluent translations)
     ("foldhash", "Zlib"),                                    // rustc
     ("insta", "Apache-2.0"),                                 // generate-tarball
-    ("mdbook", "MPL-2.0"),                                   // mdbook
     ("option-ext", "MPL-2.0"),                               // cargo-miri (via `directories`)
     ("rustc_apfloat", "Apache-2.0 WITH LLVM-exception"),     // rustc (license is the same as LLVM uses)
     ("ryu", "Apache-2.0 OR BSL-1.0"), // BSL is not acceptble, but we use it under Apache-2.0                       // cargo/... (because of serde)
@@ -157,6 +157,7 @@ const EXCEPTIONS_CARGO: ExceptionList = &[
     ("dunce", "CC0-1.0 OR MIT-0 OR Apache-2.0"),
     ("encoding_rs", "(Apache-2.0 OR MIT) AND BSD-3-Clause"),
     ("fiat-crypto", "MIT OR Apache-2.0 OR BSD-1-Clause"),
+    ("foldhash", "Zlib"),
     ("im-rc", "MPL-2.0+"),
     ("normalize-line-endings", "Apache-2.0"),
     ("openssl", "Apache-2.0"),
@@ -191,7 +192,6 @@ const EXCEPTIONS_RUSTC_PERF: ExceptionList = &[
     ("encoding_rs", "(Apache-2.0 OR MIT) AND BSD-3-Clause"),
     ("inferno", "CDDL-1.0"),
     ("instant", "BSD-3-Clause"),
-    ("ring", NON_STANDARD_LICENSE), // see EXCEPTIONS_NON_STANDARD_LICENSE_DEPS for more.
     ("ryu", "Apache-2.0 OR BSL-1.0"),
     ("snap", "BSD-3-Clause"),
     ("subtle", "BSD-3-Clause"),
@@ -242,9 +242,6 @@ const EXCEPTIONS_BOOTSTRAP: ExceptionList = &[
 const EXCEPTIONS_UEFI_QEMU_TEST: ExceptionList = &[
     ("r-efi", "MIT OR Apache-2.0 OR LGPL-2.1-or-later"), // LGPL is not acceptable, but we use it under MIT OR Apache-2.0
 ];
-
-/// Placeholder for non-standard license file.
-const NON_STANDARD_LICENSE: &str = "NON_STANDARD_LICENSE";
 
 /// These dependencies have non-standard licenses but are genenrally permitted.
 const EXCEPTIONS_NON_STANDARD_LICENSE_DEPS: &[&str] = &[
@@ -461,6 +458,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "windows-core",
     "windows-implement",
     "windows-interface",
+    "windows-link",
     "windows-result",
     "windows-strings",
     "windows-sys",
@@ -505,6 +503,8 @@ const PERMITTED_STDLIB_DEPENDENCIES: &[&str] = &[
     "memchr",
     "miniz_oxide",
     "object",
+    "proc-macro2",
+    "quote",
     "r-efi",
     "r-efi-alloc",
     "rand",
@@ -512,6 +512,8 @@ const PERMITTED_STDLIB_DEPENDENCIES: &[&str] = &[
     "rand_xorshift",
     "rustc-demangle",
     "shlex",
+    "syn",
+    "unicode-ident",
     "unicode-width",
     "unwinding",
     "wasi",
@@ -525,6 +527,8 @@ const PERMITTED_STDLIB_DEPENDENCIES: &[&str] = &[
     "windows_x86_64_gnu",
     "windows_x86_64_gnullvm",
     "windows_x86_64_msvc",
+    "zerocopy",
+    "zerocopy-derive",
     // tidy-alphabetical-end
 ];
 
@@ -689,7 +693,7 @@ pub static CRATES: &[&str] = &[
         for extra in expected.difference(&proc_macro_deps) {
             tidy_error!(
                 bad,
-                "`{extra}` is not registered in `src/bootstrap/src/utils/proc_macro_deps.rs`, but is not a proc-macro crate dependency",
+                "`{extra}` is registered in `src/bootstrap/src/utils/proc_macro_deps.rs`, but is not a proc-macro crate dependency",
             );
         }
         if *bad != old_bad {
@@ -766,9 +770,7 @@ fn check_license_exceptions(metadata: &Metadata, exceptions: &[(&str, &str)], ba
         for pkg in metadata.packages.iter().filter(|p| p.name == *name) {
             match &pkg.license {
                 None => {
-                    if *licenses == [NON_STANDARD_LICENSE]
-                        && EXCEPTIONS_NON_STANDARD_LICENSE_DEPS.contains(&pkg.name.as_str())
-                    {
+                    if EXCEPTIONS_NON_STANDARD_LICENSE_DEPS.contains(&pkg.name.as_str()) {
                         continue;
                     }
                     tidy_error!(

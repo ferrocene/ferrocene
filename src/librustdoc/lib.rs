@@ -13,7 +13,6 @@
 #![feature(iter_intersperse)]
 #![feature(let_chains)]
 #![feature(never_type)]
-#![feature(os_str_display)]
 #![feature(round_char_boundary)]
 #![feature(test)]
 #![feature(type_alias_impl_trait)]
@@ -106,6 +105,7 @@ macro_rules! map {
 mod clean;
 mod config;
 mod core;
+mod display;
 mod docfs;
 mod doctest;
 mod error;
@@ -114,7 +114,6 @@ mod fold;
 mod formats;
 // used by the error-index generator, so it needs to be public
 pub mod html;
-mod joined;
 mod json;
 pub(crate) mod lint;
 mod markdown;

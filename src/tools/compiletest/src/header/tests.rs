@@ -153,7 +153,8 @@ impl ConfigBuilder {
             "--run-lib-path=",
             "--python=",
             "--jsondocck-path=",
-            "--src-base=",
+            "--src-root=",
+            "--src-test-suite-root=",
             "--build-base=",
             "--sysroot-base=",
             "--cc=c",
@@ -465,7 +466,10 @@ fn profiler_runtime() {
 #[test]
 fn asm_support() {
     let asms = [
+        #[cfg(bootstrap)]
         ("avr-unknown-gnu-atmega328", false),
+        #[cfg(not(bootstrap))]
+        ("avr-none", false),
         ("i686-unknown-netbsd", true),
         ("riscv32gc-unknown-linux-gnu", true),
         ("riscv64imac-unknown-none-elf", true),
@@ -888,4 +892,16 @@ fn test_needs_target_has_atomic() {
     // Check whitespace between widths is permitted.
     assert!(!check_ignore(&config, "//@ needs-target-has-atomic: 8, ptr"));
     assert!(check_ignore(&config, "//@ needs-target-has-atomic: 8, ptr, 128"));
+}
+
+#[test]
+fn test_rustc_abi() {
+    let config = cfg().target("i686-unknown-linux-gnu").build();
+    assert_eq!(config.target_cfg().rustc_abi, Some("x86-sse2".to_string()));
+    assert!(check_ignore(&config, "//@ ignore-rustc_abi-x86-sse2"));
+    assert!(!check_ignore(&config, "//@ only-rustc_abi-x86-sse2"));
+    let config = cfg().target("x86_64-unknown-linux-gnu").build();
+    assert_eq!(config.target_cfg().rustc_abi, None);
+    assert!(!check_ignore(&config, "//@ ignore-rustc_abi-x86-sse2"));
+    assert!(check_ignore(&config, "//@ only-rustc_abi-x86-sse2"));
 }

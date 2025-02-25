@@ -24,7 +24,7 @@ use rustc_middle::query::Providers;
 use rustc_middle::ty::layout::{HasTyCtxt, HasTypingEnv, LayoutOf, TyAndLayout};
 use rustc_middle::ty::{self, Instance, Ty, TyCtxt};
 use rustc_session::Session;
-use rustc_session::config::{self, CrateType, EntryFnType, OptLevel, OutputType};
+use rustc_session::config::{self, CrateType, EntryFnType, OutputType};
 use rustc_span::{DUMMY_SP, Symbol, sym};
 use rustc_trait_selection::infer::{BoundRegionConversionTime, TyCtxtInferExt};
 use rustc_trait_selection::traits::{ObligationCause, ObligationCtxt};
@@ -364,13 +364,7 @@ pub(crate) fn build_shift_expr_rhs<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
     let rhs_sz = bx.cx().int_width(rhs_llty);
     let lhs_sz = bx.cx().int_width(lhs_llty);
     if lhs_sz < rhs_sz {
-        if is_unchecked && bx.sess().opts.optimize != OptLevel::No {
-            // FIXME: Use `trunc nuw` once that's available
-            let inrange = bx.icmp(IntPredicate::IntULE, rhs, mask);
-            bx.assume(inrange);
-        }
-
-        bx.trunc(rhs, lhs_llty)
+        if is_unchecked { bx.unchecked_utrunc(rhs, lhs_llty) } else { bx.trunc(rhs, lhs_llty) }
     } else if lhs_sz > rhs_sz {
         // We zero-extend even if the RHS is signed. So e.g. `(x: i32) << -1i8` will zero-extend the
         // RHS to `255i32`. But then we mask the shift amount to be within the size of the LHS
@@ -921,6 +915,7 @@ impl CrateInfo {
         let n_crates = crates.len();
         let mut info = CrateInfo {
             target_cpu,
+            target_features: tcx.global_backend_features(()).clone(),
             crate_types,
             exported_symbols,
             linked_symbols,
@@ -1054,12 +1049,12 @@ pub(crate) fn provide(providers: &mut Providers) {
             config::OptLevel::No => return config::OptLevel::No,
             // If globally optimise-speed is already specified, just use that level.
             config::OptLevel::Less => return config::OptLevel::Less,
-            config::OptLevel::Default => return config::OptLevel::Default,
+            config::OptLevel::More => return config::OptLevel::More,
             config::OptLevel::Aggressive => return config::OptLevel::Aggressive,
             // If globally optimize-for-size has been requested, use -O2 instead (if optimize(size)
             // are present).
-            config::OptLevel::Size => config::OptLevel::Default,
-            config::OptLevel::SizeMin => config::OptLevel::Default,
+            config::OptLevel::Size => config::OptLevel::More,
+            config::OptLevel::SizeMin => config::OptLevel::More,
         };
 
         let defids = tcx.collect_and_partition_mono_items(cratenum).all_mono_items;

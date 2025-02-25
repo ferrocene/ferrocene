@@ -82,7 +82,6 @@ armv7r-none-eabi
 armv7r-none-eabihf
 armv7s-apple-ios
 armv8r-none-eabihf
-avr-unknown-gnu-atmega328
 bpfeb-unknown-none
 bpfel-unknown-none
 csky-unknown-linux-gnuabiv2
@@ -91,7 +90,6 @@ hexagon-unknown-linux-musl
 hexagon-unknown-none-elf
 i386-apple-ios
 i386-lynx-lynxos178
-i586-pc-nto-qnx700
 i586-pc-windows-msvc
 i586-unknown-linux-gnu
 i586-unknown-linux-musl

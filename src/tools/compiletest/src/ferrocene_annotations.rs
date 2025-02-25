@@ -62,7 +62,7 @@ impl Collector {
     }
 
     fn collect(&mut self) {
-        let src_base = self.config.src_base.clone();
+        let src_base = self.config.src_test_suite_root.clone();
         find_tests_in_dir(
             self.config.clone(),
             &src_base,
@@ -167,7 +167,7 @@ fn sample_config() -> Config {
         color: test::ColorConfig::NeverColor,
         format: test::OutputFormat::Json,
         mode: env("FERROCENE_MODE"),
-        src_base: env("FERROCENE_SRC_BASE"),
+        src_test_suite_root: env("FERROCENE_SRC_BASE"),
         suite: env("FERROCENE_SUITE"),
         ..Config::default()
     }

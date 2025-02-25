@@ -289,7 +289,7 @@ fn extend_cause_with_original_assoc_item_obligation<'tcx>(
             && let Some(impl_item) =
                 items.iter().find(|item| item.id.owner_id.to_def_id() == impl_item_id)
         {
-            Some(tcx.hir().impl_item(impl_item.id).expect_type().span)
+            Some(tcx.hir_impl_item(impl_item.id).expect_type().span)
         } else {
             None
         }
@@ -881,7 +881,10 @@ impl<'a, 'tcx> TypeVisitor<TyCtxt<'tcx>> for WfPredicates<'a, 'tcx> {
                         ty.map_bound(|ty| {
                             ty::TraitRef::new(
                                 self.tcx(),
-                                self.tcx().require_lang_item(LangItem::Copy, Some(self.span)),
+                                self.tcx().require_lang_item(
+                                    LangItem::BikeshedGuaranteedNoDrop,
+                                    Some(self.span),
+                                ),
                                 [ty],
                             )
                         }),

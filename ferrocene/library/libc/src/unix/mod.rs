@@ -5,16 +5,6 @@
 
 use crate::prelude::*;
 
-pub type c_schar = i8;
-pub type c_uchar = u8;
-pub type c_short = i16;
-pub type c_ushort = u16;
-pub type c_int = i32;
-pub type c_uint = u32;
-pub type c_float = f32;
-pub type c_double = f64;
-pub type c_longlong = i64;
-pub type c_ulonglong = u64;
 pub type intmax_t = i64;
 pub type uintmax_t = u64;
 
@@ -66,6 +56,7 @@ s! {
         pub modtime: time_t,
     }
 
+    // FIXME(time): Needs updates at least for glibc _TIME_BITS=64
     pub struct timeval {
         pub tv_sec: time_t,
         pub tv_usec: suseconds_t,
@@ -537,7 +528,7 @@ missing! {
     #[cfg_attr(feature = "extra_traits", derive(Debug))]
     pub enum FILE {}
     #[cfg_attr(feature = "extra_traits", derive(Debug))]
-    pub enum fpos_t {} // FIXME: fill this out with a struct
+    pub enum fpos_t {} // FIXME(unix): fill this out with a struct
 }
 
 extern "C" {
@@ -1329,11 +1320,11 @@ extern "C" {
 
     #[cfg_attr(target_os = "netbsd", link_name = "__gmtime_r50")]
     #[cfg_attr(any(target_env = "musl", target_env = "ohos"), allow(deprecated))]
-    // FIXME: for `time_t`
+    // FIXME(time): for `time_t`
     pub fn gmtime_r(time_p: *const time_t, result: *mut tm) -> *mut tm;
     #[cfg_attr(target_os = "netbsd", link_name = "__localtime_r50")]
     #[cfg_attr(any(target_env = "musl", target_env = "ohos"), allow(deprecated))]
-    // FIXME: for `time_t`
+    // FIXME(time): for `time_t`
     pub fn localtime_r(time_p: *const time_t, result: *mut tm) -> *mut tm;
     #[cfg_attr(
         all(target_os = "macos", target_arch = "x86"),
@@ -1349,19 +1340,19 @@ extern "C" {
     pub fn time(time: *mut time_t) -> time_t;
     #[cfg_attr(target_os = "netbsd", link_name = "__gmtime50")]
     #[cfg_attr(any(target_env = "musl", target_env = "ohos"), allow(deprecated))]
-    // FIXME: for `time_t`
+    // FIXME(time): for `time_t`
     pub fn gmtime(time_p: *const time_t) -> *mut tm;
     #[cfg_attr(target_os = "netbsd", link_name = "__locatime50")]
     #[cfg_attr(any(target_env = "musl", target_env = "ohos"), allow(deprecated))]
-    // FIXME: for `time_t`
+    // FIXME(time): for `time_t`
     pub fn localtime(time_p: *const time_t) -> *mut tm;
     #[cfg_attr(target_os = "netbsd", link_name = "__difftime50")]
     #[cfg_attr(any(target_env = "musl", target_env = "ohos"), allow(deprecated))]
-    // FIXME: for `time_t`
+    // FIXME(time): for `time_t`
     pub fn difftime(time1: time_t, time0: time_t) -> c_double;
     #[cfg_attr(target_os = "netbsd", link_name = "__timegm50")]
     #[cfg_attr(any(target_env = "musl", target_env = "ohos"), allow(deprecated))]
-    // FIXME: for `time_t`
+    // FIXME(time): for `time_t`
     pub fn timegm(tm: *mut crate::tm) -> time_t;
 
     #[cfg_attr(target_os = "netbsd", link_name = "__mknod50")]
@@ -1619,7 +1610,7 @@ cfg_if! {
                 all(target_os = "freebsd", any(freebsd11, freebsd10)),
                 link_name = "readdir_r@FBSD_1.0"
             )]
-            #[allow(non_autolinks)] // FIXME: `<>` breaks line length limit.
+            #[allow(non_autolinks)] // FIXME(docs): `<>` breaks line length limit.
             /// The 64-bit libc on Solaris and illumos only has readdir_r. If a
             /// 32-bit Solaris or illumos target is ever created, it should use
             /// __posix_readdir_r. See libc(3LIB) on Solaris or illumos:

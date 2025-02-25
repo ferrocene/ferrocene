@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 // Check that we can manually implement a dyn-incompatible trait for its trait object.
 
 //@ revisions: current next

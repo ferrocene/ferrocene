@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 // Check that we can statically dispatch methods for object
 // unsafe trait objects, directly and indirectly
 //

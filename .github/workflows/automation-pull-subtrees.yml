@@ -68,7 +68,7 @@ jobs:
       # TODO: Remove this step once Rust v1.85 is available in the runner
       # https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md#rust-tools
       - name: Use 2024 edition Rust toolchain
-        run: rustup update
+        run: rustup update stable
 
       - name: Run the manage-subtrees automation
         run: ferrocene/tools/pull-subtrees/pull.py --automation-for-branch main

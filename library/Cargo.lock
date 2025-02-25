@@ -151,7 +151,7 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.169"
+version = "0.2.170"
 dependencies = [
  "rustc-std-workspace-core",
 ]

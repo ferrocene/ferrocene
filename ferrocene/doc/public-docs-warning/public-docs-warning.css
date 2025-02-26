@@ -1,0 +1,49 @@
+/* SPDX-License-Identifier: MIT OR Apache-2.0 */
+/* SPDX-FileCopyrightText: The Ferrocene Developers */
+
+:root {
+    --header-bar-2-height: 2.5rem;
+}
+
+.ferrocene-public-docs-warning {
+    /* The HTML has class="hidden" applied to it, so we have to force the warning to be displayed if
+     * this CSS file is included. */
+    display: block !important;
+
+    position: fixed;
+    top: var(--header-bar-2-offset);
+    left: 0;
+    right: 0;
+    height: var(--header-bar-2-height);
+    z-index: 1000;
+}
+
+.ferrocene-public-docs-warning-wrapper {
+    height: var(--header-bar-2-height);
+    width: 100%;
+    padding: 0.5rem 1rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: #f2bd0d;
+    font-size: 0.9em;
+}
+
+.ferrocene-public-docs-warning-wrapper a {
+    color: var(--text-fg);
+    text-decoration: underline;
+}
+
+@media (max-width: 65rem) {
+    :root {
+        --header-bar-2-height: 5rem;
+    }
+
+    .ferrocene-public-docs-warning-wrapper {
+        flex-direction: column;
+        justify-content: space-around;
+        text-align: center;
+    }
+}

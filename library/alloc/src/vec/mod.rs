@@ -1837,7 +1837,7 @@ impl<T, A: Allocator> Vec<T, A> {
     /// # // don't use this as a starting point for a real library.
     /// # pub struct StreamWrapper { strm: *mut std::ffi::c_void }
     /// # const Z_OK: i32 = 0;
-    /// # extern "C" {
+    /// # unsafe extern "C" {
     /// #     fn deflateGetDictionary(
     /// #         strm: *mut std::ffi::c_void,
     /// #         dictionary: *mut u8,
@@ -2526,7 +2526,7 @@ impl<T, A: Allocator> Vec<T, A> {
     /// assert_eq!(vec, [1, 2, 3]);
     /// assert_eq!(vec.pop_if(pred), None);
     /// ```
-    #[stable(feature = "vec_pop_if", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "vec_pop_if", since = "1.86.0")]
     pub fn pop_if(&mut self, predicate: impl FnOnce(&mut T) -> bool) -> Option<T> {
         let last = self.last_mut()?;
         if predicate(last) { self.pop() } else { None }

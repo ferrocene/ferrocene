@@ -860,6 +860,7 @@ impl Step for Index {
         let index_dir = doc.join("index");
         let pdw_dir = doc.join("public-docs-warning");
         let out = builder.doc_out(self.target);
+        let assets_out = out.join("index-assets");
 
         if builder.config.dry_run() {
             return;
@@ -883,7 +884,8 @@ impl Step for Index {
         std::fs::write(out.join("index.html"), &template).expect("failed to write index.html");
 
         copy_breadcrumbs_assets(builder, &out);
-        builder.cp_link_r(&index_dir.join("index-assets"), &out.join("index-assets"));
+        builder.create_dir(&assets_out);
+        builder.cp_link_r(&index_dir.join("index-assets"), &assets_out);
     }
 }
 

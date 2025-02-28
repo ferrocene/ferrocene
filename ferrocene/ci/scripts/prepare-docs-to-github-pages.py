@@ -13,6 +13,7 @@
 # small internal thing to help our developers view the current state of things.
 
 import os
+import shutil
 import subprocess
 import tempfile
 import tomllib
@@ -34,7 +35,7 @@ def run(branch, *, redirect_from_index=False):
     os.chmod(output, 0o755)
 
     with tempfile.TemporaryDirectory() as download_dir:
-        for tarball, directory_inside in get_docs_tarballs():
+        for tarball, directory_inside in get_docs_tarballs(branch):
             cmd(
                 "aws",
                 "s3",
@@ -59,6 +60,12 @@ def run(branch, *, redirect_from_index=False):
         f"/{branch}/qualification/traceability-matrix.html",
     )
 
+    # Manually include the CSS file causing the public-docs warning to be shown.
+    shutil.copyfile(
+        "ferrocene/doc/public-docs-warning/public-docs-warning.css",
+        f"{output}/{branch}/public-docs-warning.css",
+    )
+
     if redirect_from_index:
         generate_redirect(
             output,
@@ -77,11 +84,11 @@ def generate_redirect(output, src, dest):
         )
 
 
-def get_docs_tarballs():
+def get_docs_tarballs(branch):
     with open("ferrocene/packages.toml", "rb") as f:
         packages = tomllib.load(f)
 
-    commit_hash = cmd("git", "rev-parse", "--short=9", "HEAD", stdout=True).strip()
+    commit_hash = cmd("git", "rev-parse", "--short=9", branch, stdout=True).strip()
 
     for group in packages["groups"].values():
         for package in group["packages"]:

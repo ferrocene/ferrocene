@@ -138,8 +138,8 @@ jobs:
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         # Run dist before test to make sure the tarballs we test are uploaded
         # to CI beforehand, for manual inspection in case of failures.
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)
-        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
+        RUST_BACKTRACE=1 ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)
+        RUST_BACKTRACE=1 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
     steps:
       - ferrocene-job-dist:
           restore-from-job: x86_64-linux-build

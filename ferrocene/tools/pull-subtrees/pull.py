@@ -402,6 +402,12 @@ class PullSubtreePR(AutomatedPR):
 
     def run(self):
         try:
+            print("Status:")
+            subprocess.run(["git", "status"], cwd=self.repo_root)
+            print("Diff:")
+            subprocess.run(["git", "diff"], cwd=self.repo_root)
+            print("End debuging")
+
             self.diff = update_subtree(self.repo_root, self.subtree)
             if self.diff is None:
                 return AutomationResult.NO_CHANGES

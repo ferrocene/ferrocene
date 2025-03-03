@@ -58,10 +58,26 @@ jobs:
           APP_ID: "${{ vars.AUTOMATIONS_APP_ID }}"
           APP_PRIVATE_KEY: "${{ secrets.AUTOMATIONS_APP_PRIVATE_KEY }}"
 
+      # This submodule is pretty large, and we only need a small subset of it.
+      - name: Clone a subset of the LLVM submodule rather than the whole thing
+        run: ferrocene/ci/scripts/clone-llvm-subset.sh
+
+      # This submodule is pretty large and not actually needed.
+      - name: Clone an empty GCC submodule
+        run: ferrocene/ci/scripts/clone-empty-submodule.sh src/gcc
+
+      # This submodule is pretty large and not actually needed.
+      - name: Clone an empty Enzyme submodule
+        run: ferrocene/ci/scripts/clone-empty-submodule.sh src/tools/enzyme
+
       # Some subtrees require updating the Cargo.lock once they're updated, and
       # updating the Cargo.lock requires subtrees to be present.
+      #
+      # Pulling multiple subtrees in parallel (with the -j flag) seems to cause
+      # occasional spurious failures. We thus manually handle big submodules
+      # before this step, and then pull submodules sequentially.
       - name: Fetch submodules
-        run: git submodule update --init --depth=1 --jobs=$(nproc)
+        run: git submodule update --init --depth=1
 
       # This avoids builds failing due to a stale version of the toolchain
       - name: Ensure the latest Rust toolchain is installed

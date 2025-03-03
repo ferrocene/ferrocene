@@ -204,10 +204,6 @@ A :t:`mutable borrow` is a :t:`mutable reference` produced by :t:`borrowing`.
 :dp:`fls_kup2ou22nwyl`
 Immutably :t:`borrowing` a :t:`value` proceeds as follows:
 
-#. :dp:`fls_5bf2x4sm5ei`
-   **???** (**this should describe the order of borrowing and when the borrow
-   is returned**)
-
 #. :dp:`fls_8q5ly4x104ai`
    An :t:`immutable borrow` of :t:`type` ``&'a T`` is created, where
    :t:`lifetime` ``'a`` is replaced by a :t:`lifetime variable`, and

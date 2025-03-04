@@ -81,7 +81,6 @@ fn align_size(size: usize, align: usize) -> usize {
     }
 }
 
-// ferrocene addition: upstreamed as rust-lang/rust#135778
 // this is `TargetOptions.c_enum_min_bits` which is not available as a `cfg` value so we retrieve
 // the value at runtime. On most targets this is `sizeof(c_int)` but on `thumb*-none` is 1 byte
 fn c_enum_min_size() -> usize {

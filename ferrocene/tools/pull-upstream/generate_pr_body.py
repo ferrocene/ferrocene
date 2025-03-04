@@ -17,7 +17,6 @@
 from automations_common import PRLinker
 from dataclasses import dataclass
 from typing import Optional
-import os
 import subprocess
 import sys
 

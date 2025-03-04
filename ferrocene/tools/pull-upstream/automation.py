@@ -19,8 +19,6 @@
 # - `GITHUB_REPOSITORY`: name of the GitHub repository to run this script on
 
 from automations_common import AutomatedPR, AutomationResult
-from dataclasses import dataclass
-from typing import Optional
 import generate_pr_body
 import os
 import sys

@@ -285,6 +285,14 @@ impl<'a, 'ra, 'tcx> visit::Visitor<'a> for DefCollector<'a, 'ra, 'tcx> {
         });
     }
 
+    fn visit_where_predicate(&mut self, pred: &'a WherePredicate) {
+        if pred.is_placeholder {
+            self.visit_macro_invoc(pred.id)
+        } else {
+            visit::walk_where_predicate(self, pred)
+        }
+    }
+
     fn visit_variant_data(&mut self, data: &'a VariantData) {
         // The assumption here is that non-`cfg` macro expansion cannot change field indices.
         // It currently holds because only inert attributes are accepted on fields,
@@ -458,5 +466,44 @@ impl<'a, 'ra, 'tcx> visit::Visitor<'a> for DefCollector<'a, 'ra, 'tcx> {
         let orig_in_attr = mem::replace(&mut self.in_attr, true);
         visit::walk_attribute(self, attr);
         self.in_attr = orig_in_attr;
+    }
+
+    fn visit_inline_asm(&mut self, asm: &'a InlineAsm) {
+        let InlineAsm {
+            asm_macro: _,
+            template: _,
+            template_strs: _,
+            operands,
+            clobber_abis: _,
+            options: _,
+            line_spans: _,
+        } = asm;
+        for (op, _span) in operands {
+            match op {
+                InlineAsmOperand::In { expr, reg: _ }
+                | InlineAsmOperand::Out { expr: Some(expr), reg: _, late: _ }
+                | InlineAsmOperand::InOut { expr, reg: _, late: _ } => {
+                    self.visit_expr(expr);
+                }
+                InlineAsmOperand::Out { expr: None, reg: _, late: _ } => {}
+                InlineAsmOperand::SplitInOut { in_expr, out_expr, reg: _, late: _ } => {
+                    self.visit_expr(in_expr);
+                    if let Some(expr) = out_expr {
+                        self.visit_expr(expr);
+                    }
+                }
+                InlineAsmOperand::Const { anon_const } => {
+                    let def = self.create_def(
+                        anon_const.id,
+                        kw::Empty,
+                        DefKind::InlineConst,
+                        anon_const.value.span,
+                    );
+                    self.with_parent(def, |this| visit::walk_anon_const(this, anon_const));
+                }
+                InlineAsmOperand::Sym { sym } => self.visit_inline_asm_sym(sym),
+                InlineAsmOperand::Label { block } => self.visit_block(block),
+            }
+        }
     }
 }

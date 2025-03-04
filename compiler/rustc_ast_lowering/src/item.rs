@@ -1510,7 +1510,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
             span: abi.span,
             suggestion: suggested_name.map(|suggested_name| InvalidAbiSuggestion {
                 span: abi.span,
-                suggestion: format!("\"{suggested_name}\""),
+                suggestion: suggested_name.to_string(),
             }),
             command: "rustc --print=calling-conventions".to_string(),
         });
@@ -1728,6 +1728,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
     fn lower_where_predicate(&mut self, pred: &WherePredicate) -> hir::WherePredicate<'hir> {
         let hir_id = self.lower_node_id(pred.id);
         let span = self.lower_span(pred.span);
+        self.lower_attrs(hir_id, &pred.attrs, span);
         let kind = self.arena.alloc(match &pred.kind {
             WherePredicateKind::BoundPredicate(WhereBoundPredicate {
                 bound_generic_params,

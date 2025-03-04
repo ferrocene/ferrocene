@@ -12,7 +12,6 @@
 #![feature(exact_size_is_empty)]
 #![feature(extern_types)]
 #![feature(file_buffered)]
-#![feature(hash_raw_entry)]
 #![feature(if_let_guard)]
 #![feature(impl_trait_in_assoc_type)]
 #![feature(iter_intersperse)]
@@ -194,7 +193,7 @@ impl WriteBackendMethods for LlvmCodegenBackend {
     unsafe fn optimize(
         cgcx: &CodegenContext<Self>,
         dcx: DiagCtxtHandle<'_>,
-        module: &ModuleCodegen<Self::Module>,
+        module: &mut ModuleCodegen<Self::Module>,
         config: &ModuleConfig,
     ) -> Result<(), FatalError> {
         unsafe { back::write::optimize(cgcx, dcx, module, config) }

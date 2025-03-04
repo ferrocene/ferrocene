@@ -93,8 +93,8 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            uv run x.py --stage 2 dist rust-std
             uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
+            uv run x.py --stage 2 dist rust-std
 
       - uses: actions/upload-artifact@v4
         id: artifact
@@ -107,7 +107,7 @@ jobs:
         env:
           CIRCLE_SHA1: ${{ github.sha }}
           CIRCLE_JOB: ${{ env.ARTIFACT }}
-        run:
+        run: |
           ./ferrocene/ci/scripts/upload-dist-artifacts.sh
       
       - name: Generate usage report

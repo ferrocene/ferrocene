@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use std::collections::HashMap;
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::path::{Path, PathBuf, absolute};
 
@@ -141,10 +141,11 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
                     format!("{}-doctrees-objectsinv", self.name)
                 }
             });
-        let substitutions =
-            builder.src.join("ferrocene").join("doc").join("sphinx-substitutions.toml");
-        let target_names = builder.src.join("ferrocene").join("doc").join("target-names.toml");
-        let breadcrumbs = builder.src.join("ferrocene").join("doc").join("breadcrumbs");
+        let ferrocene_doc = builder.src.join("ferrocene").join("doc");
+        let substitutions = ferrocene_doc.join("sphinx-substitutions.toml");
+        let target_names = ferrocene_doc.join("target-names.toml");
+        let breadcrumbs = ferrocene_doc.join("breadcrumbs");
+        let public_docs_warning = ferrocene_doc.join("public-docs-warning");
 
         // In some cases we have to perform a fresh build to guarantee deterministic output (for
         // example to generate signatures). We want to purge the old build artifacts only when
@@ -177,6 +178,9 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             fs::read_to_string(&builder.src.join("ferrocene").join("version")).unwrap();
         let ferrocene_version = ferrocene_version.trim();
 
+        let mut include_in_header = Vec::new();
+        let mut css_files = Vec::new();
+
         // Note that we must pass all paths to Sphinx relative to the directory containing conf.py.
         // Absolute paths break our reproducibility, and paths relative from other directories
         // don't really work with Sphinx, as it treats all paths as relative from the directory
@@ -188,38 +192,35 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             // Store doctrees outside the output directory:
             .arg("-d")
             .arg(relative_path(&src, &doctrees))
-            // Include the breadcrumbs
-            .arg("-D")
-            .arg(path_define(
-                "html_theme_options.include_in_header",
-                &relative_path(&src, &breadcrumbs.join("sphinx-template.html")),
-            ))
-            .arg("-A")
-            .arg(format!("ferrocene_breadcrumbs_index={path_to_root}/index.html"))
-            .arg("-D")
-            .arg(format!(
-                "rustfmt_version={}",
-                builder.crates.get("rustfmt-nightly").unwrap().version,
-            ))
-            // Include the CSS for the breadcrumbs. Note that the path here is relative to the
-            // _static directory in the rendered output. The directive works only because before
-            // invoking Sphinx we copy the CSS file into _static manually.
-            .arg("-D")
-            .arg("html_css_files=ferrocene-breadcrumbs.css")
             // Provide the correct substitutions:
-            .arg("-D")
             .arg(path_define("ferrocene_substitutions_path", &relative_path(&src, &substitutions)))
             // Provide the correct target names:
-            .arg("-D")
             .arg(path_define("ferrocene_target_names_path", &relative_path(&src, &target_names)))
             // Toolchain versions
-            .arg("-D")
-            .arg(format!("ferrocene_version={ferrocene_version}"))
-            .arg("-D")
+            .arg(format!("-Dferrocene_version={ferrocene_version}"))
             .arg(format!(
-                "rust_version={}",
+                "-Drust_version={}",
                 fs::read_to_string(&builder.src.join("src").join("version")).unwrap().trim(),
+            ))
+            .arg(format!(
+                "-Drustfmt_version={}",
+                builder.crates.get("rustfmt-nightly").unwrap().version,
             ));
+
+        // Include the breadcrumbs in the generated documentation.
+        css_files.push("ferrocene-breadcrumbs.css".into());
+        include_in_header.push(relative_path(&src, &breadcrumbs.join("sphinx-template.html")));
+        cmd.arg(format!("-Aferrocene_breadcrumbs_index={path_to_root}/index.html"));
+
+        // Include the public-docs warning message.
+        css_files.push(format!("{path_to_root}/../public-docs-warning.css"));
+        include_in_header.push(relative_path(&src, &public_docs_warning.join("header.html")));
+
+        cmd.arg(path_define("html_css_files", comma_separated_paths(&css_files)));
+        cmd.arg(path_define(
+            "html_theme_options.include_in_header",
+            comma_separated_paths(&include_in_header),
+        ));
 
         if builder.config.cmd.fresh() {
             // The `-E` flag forces Sphinx to ignore any saved environment and build everything
@@ -232,7 +233,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         }
 
         if self.require_relnotes {
-            cmd.arg("-D").arg(path_define(
+            cmd.arg(path_define(
                 "rust_release_notes",
                 &relative_path(&src, &builder.src.join("RELEASES.md")),
             ));
@@ -314,15 +315,15 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             (_, SignatureStatus::Present) => {
                 let private_signature_files_dir = builder.ensure(CacheSignatureFiles::<P>::new());
 
-                cmd.args(["-D", "ferrocene_signature=present"]);
+                cmd.arg("-Dferrocene_signature=present");
                 // Provide the directory containing the cached private signature files:
-                cmd.arg("-D").arg(path_define(
+                cmd.arg(path_define(
                     "ferrocene_private_signature_files_dir",
                     &relative_path(&src, &private_signature_files_dir),
                 ));
             }
             (_, SignatureStatus::Missing) => {
-                cmd.args(["-D", "ferrocene_signature=missing"]);
+                cmd.arg("-Dferrocene_signature=missing");
             }
         }
 
@@ -410,7 +411,7 @@ fn add_intersphinx_arguments<P: Step + IsSphinxBook>(
     // configuration key we can set, that accepts the JSON representation of the mappings. The
     // extension then takes care of registering the mappings with InterSphinx.
     let serialized = serde_json::to_string(&inventories).unwrap();
-    cmd.arg("-D").arg(format!("ferrocene_intersphinx_mappings={serialized}"));
+    cmd.arg(format!("-Dferrocene_intersphinx_mappings={serialized}"));
 }
 
 fn add_external_sphinx_needs_argument<P: Step + IsSphinxBook>(
@@ -476,15 +477,27 @@ fn add_external_sphinx_needs_argument<P: Step + IsSphinxBook>(
     }
 
     let serialized = serde_json::to_string(&needs).unwrap();
-    cmd.arg("-D").arg(format!("ferrocene_external_needs={serialized}"));
+    cmd.arg(format!("-Dferrocene_external_needs={serialized}"));
 }
 
-fn path_define(key: &str, value: &Path) -> OsString {
+fn path_define(key: &str, value: impl AsRef<OsStr>) -> OsString {
     let mut string = OsString::new();
+    string.push("-D");
     string.push(key);
     string.push("=");
-    string.push(value);
+    string.push(value.as_ref());
     string
+}
+
+fn comma_separated_paths(paths: &[impl AsRef<Path>]) -> OsString {
+    let mut output = OsString::new();
+    for (idx, path) in paths.iter().enumerate() {
+        if idx != 0 {
+            output.push(",");
+        }
+        output.push(path.as_ref());
+    }
+    output
 }
 
 struct InterSphinxConfig {
@@ -841,11 +854,38 @@ impl Step for Index {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        copy_breadcrumbs_assets(builder, &builder.doc_out(self.target));
-        builder.cp_link_r(
-            &builder.src.join("ferrocene").join("doc").join("index"),
-            &builder.out.join(self.target.triple).join("doc"),
-        );
+        const PDW_PLACEHOLDER: &str = "<!-- FERROCENE-INCLUDE-PUBLIC-DOCS-WARNING -->";
+
+        let doc = builder.src.join("ferrocene").join("doc");
+        let index_dir = doc.join("index");
+        let pdw_dir = doc.join("public-docs-warning");
+        let out = builder.doc_out(self.target);
+        let assets_out = out.join("index-assets");
+
+        if builder.config.dry_run() {
+            return;
+        }
+        builder.create_dir(&out);
+
+        let mut template = builder.read(&index_dir.join("index.html"));
+
+        // We need to include the public-docs warning into index.html. Ideally we would use a
+        // template engine to support includes, but that'd add a big dependency to bootstrap.
+        //
+        // For the time being, replacing a pre-defined placeholder works well enough, and doesn't
+        // slow down bootstrap. If more complex templating needs are required please switch to a
+        // proper template engine.
+        let pdw_template = builder.read(&pdw_dir.join("header.html"));
+        if !template.contains(PDW_PLACEHOLDER) {
+            panic!("the index doesn't require the public-docs warning");
+        }
+        template = template.replace(PDW_PLACEHOLDER, &pdw_template);
+
+        std::fs::write(out.join("index.html"), &template).expect("failed to write index.html");
+
+        copy_breadcrumbs_assets(builder, &out);
+        builder.create_dir(&assets_out);
+        builder.cp_link_r(&index_dir.join("index-assets"), &assets_out);
     }
 }
 

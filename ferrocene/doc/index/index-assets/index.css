@@ -33,8 +33,22 @@
     --body-bg: #f7f7f7;
     --note-fg: #5f5f5f;
     --header-fg: #194e80;
-    --header-offset: 0;
     --section-title-border: #bcbcbc;
+
+    /* Depending on where the theme is used, there might be one or more optional navigation bars
+     * present at the top of the page. To properly offset the theme based on the height of those
+     * navigation bars, we define a variable for each of them.
+     *
+     * When adding a new navigation bar, add a new variable for it, don't reuse an existing one. */
+    --header-bar-1-height: 0rem; /* Assigned to: public-docs warning banner */
+    --header-bar-1-offset: 0rem;
+    --header-bar-2-height: 0rem; /* Assigned to: breadcrumbs */
+    --header-bar-2-offset: var(--header-bar-1-height);
+    --header-offset: calc(var(--header-bar-1-height) + var(--header-bar-2-height));
+}
+
+.hidden {
+    display: none;
 }
 
 body {

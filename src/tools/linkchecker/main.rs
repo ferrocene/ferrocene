@@ -100,6 +100,15 @@ const INTRA_DOC_LINK_EXCEPTIONS: &[(&str, &[&str])] = &[
 
 ];
 
+// Ferrocene has some intentionally broken links present everywhere in our documentation. This list
+// will be checked for every link, regardless of the file it appears in.
+#[rustfmt::skip]
+const FERROCENE_GLOBAL_EXCEPTIONS: &[&str] = &[
+    // The CSS file is intentionally missing from the documentation we produce, as it is only
+    // injected in public-docs.ferrocene.dev.
+    "public-docs-warning.css",
+];
+
 macro_rules! static_regex {
     ($re:literal) => {{
         static RE: ::std::sync::OnceLock<::regex::Regex> = ::std::sync::OnceLock::new();
@@ -510,6 +519,9 @@ fn is_intra_doc_exception(file: &Path, link: &str) -> bool {
 }
 
 fn is_exception(file: &Path, link: &str) -> bool {
+    if FERROCENE_GLOBAL_EXCEPTIONS.contains(&link) {
+        return true;
+    }
     if let Some(entry) = LINKCHECK_EXCEPTIONS.iter().find(|&(f, _)| file.ends_with(f)) {
         entry.1.contains(&link)
     } else {

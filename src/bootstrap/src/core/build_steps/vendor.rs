@@ -4,7 +4,9 @@ use crate::core::build_steps::tool::SUBMODULES_FOR_RUSTBOOK;
 use crate::core::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::utils::exec::command;
 
-pub const VENDOR_DIR: &str = "vendor";
+// Ferrocene note: "rust" dir added to path
+// ... and look out for a Unix-ism
+pub const VENDOR_DIR: &str = "vendor/rust";
 
 /// Returns the cargo workspaces to vendor for `x vendor` and dist tarballs.
 ///

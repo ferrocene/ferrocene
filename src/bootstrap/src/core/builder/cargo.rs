@@ -940,13 +940,7 @@ impl Builder<'_> {
 
         if self.config.rust_remap_debuginfo {
             let mut env_var = OsString::new();
-<<<<<<< HEAD
-            if self.config.vendor {
-                // Ferrocene: "rust" dir added to path
-                let vendor = self.build.src.join("vendor").join("rust");
-=======
             if let Some(vendor) = self.build.vendored_crates_path() {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
                 env_var.push(vendor);
                 env_var.push("=/rust/deps");
             } else {

@@ -57,6 +57,12 @@ jobs:
           aws-region: us-east-1
           role-to-assume:  ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
 
+      - name: Download QNX
+        id: qnx
+        uses: ./.github/actions/qnx/
+        with:
+          version: "7.1.0-472"
+
       - name: Run
         uses: ./.github/actions/run/
         with:

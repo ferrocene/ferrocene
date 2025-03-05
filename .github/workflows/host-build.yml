@@ -64,6 +64,9 @@ jobs:
       - name: Authenicate docker with Azure
         if: runner.os == 'Linux'
         run: az acr login --name ferrocenecr
+      # https://github.com/Azure/login/issues/372#issuecomment-2056289617
+      - name: Cache Azure storage token
+        run: az account get-access-token --scope https://storage.azure.com/.default --output none 
 
       - name: Check cache
         id: check
@@ -144,6 +147,9 @@ jobs:
       - name: Authenicate docker with Azure
         if: ${{ (runner.os == 'Linux') }}
         run: az acr login --name ferrocenecr
+      # https://github.com/Azure/login/issues/372#issuecomment-2056289617
+      - name: Cache Azure storage token
+        run: az account get-access-token --scope https://storage.azure.com/.default --output none 
 
       - name: Get LLVM cache
         shell: bash

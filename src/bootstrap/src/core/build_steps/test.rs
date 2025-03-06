@@ -3437,6 +3437,7 @@ impl Step for TestHelpers {
             cfg.compiler(builder.cc(target));
         }
 
+        // Ferrocene note:
         // override the default arm-none-eabi-gcc header files
         if target.needs_secret_sauce() {
             let dir = builder.ensure(SecretSauceArtifacts { target });

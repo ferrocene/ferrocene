@@ -996,9 +996,9 @@
 [ferrocene]
 
 # The channel for the Ferrocene build to produce. This is merged with Rust's
-# channel to determine the full channel name.
+# channel to determine the full channel name. Can be "rolling", "beta" or "stable".
 #
-# Can be "rolling", "beta" or "stable".
+# You can also set this to "auto-detect" to load the value from `ferrocene/ci/channel`.
 #channel = "rolling"
 
 # Mode of operations for the traceability matrix tool. This changes the links

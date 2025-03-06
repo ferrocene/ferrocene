@@ -2926,7 +2926,7 @@ impl Config {
     /// used instead to provide a nice error to the user if the submodule is
     /// missing.
     pub(crate) fn update_submodule(&self, relative_path: &str) {
-        if !self.submodules() {
+        if self.rust_info.is_from_tarball() || !self.submodules() {
             return;
         }
 

@@ -26,6 +26,7 @@ mod tests;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub enum Profile {
+    FerroceneDist,
     Compiler,
     Library,
     Tools,
@@ -43,12 +44,13 @@ impl Profile {
     pub fn all() -> impl Iterator<Item = Self> {
         use Profile::*;
         // N.B. these are ordered by how they are displayed, not alphabetically
-        [Library, Compiler, Tools, Dist, None].iter().copied()
+        [FerroceneDist, Library, Compiler, Tools, Dist, None].iter().copied()
     }
 
     pub fn purpose(&self) -> String {
         use Profile::*;
         match self {
+            FerroceneDist => "Build Ferrocene as it would be built by CI",
             Library => "Contribute to the standard library",
             Compiler => "Contribute to the compiler itself",
             Tools => "Contribute to tools which depend on the compiler, but do not modify it directly (e.g. rustdoc, clippy, miri)",
@@ -68,6 +70,7 @@ impl Profile {
 
     pub fn as_str(&self) -> &'static str {
         match self {
+            Profile::FerroceneDist => "ferrocene-dist",
             Profile::Compiler => "compiler",
             Profile::Library => "library",
             Profile::Tools => "tools",
@@ -171,6 +174,7 @@ impl Step for Profile {
 
 pub fn setup(config: &Config, profile: Profile) {
     let suggestions: &[&str] = match profile {
+        Profile::FerroceneDist => &["dist", "test"],
         Profile::Compiler | Profile::None => &["check", "build", "test"],
         Profile::Tools => &[
             "check",

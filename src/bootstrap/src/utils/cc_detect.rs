@@ -135,29 +135,10 @@ pub fn find_target(build: &Build, target: TargetSelection) {
         cfg.compiler(cc);
     }
 
-    // Ferrocene annotation: cc 1.1.32 and newer does not support custom targets outside of
-    // build script context (rust-lang/cc-rs#1225). Map `ferrocenecoretest` targets back to the
-    // targets they are test doubles for, and temporarily pass that triple to `cc` to determine
-    // the C compiler.
-    let ferrocenecoretest_compiler = if target.triple.contains("-ferrocenecoretest") {
-        let sub = target.triple.replace("ferrocenecoretest", "none");
-        cfg.target(&sub);
-        let compiler = cfg.get_compiler();
-
-        cfg.target(&target.triple);
-
-        Some(compiler)
-    } else {
-        None
-    };
-    let compiler = ferrocenecoretest_compiler.clone().unwrap_or_else(|| cfg.get_compiler());
+    let compiler = cfg.get_compiler();
     let ar = if let ar @ Some(..) = config.and_then(|c| c.ar.clone()) {
         ar
     } else {
-        if ferrocenecoretest_compiler.is_some() {
-            let sub = target.triple.replace("ferrocenecoretest", "none");
-            cfg.target(&sub);
-        }
         cc2ar(compiler.path(), target, PathBuf::from(cfg.get_archiver().get_program()))
     };
 
@@ -182,8 +163,8 @@ pub fn find_target(build: &Build, target: TargetSelection) {
 
     // for VxWorks, record CXX compiler which will be used in lib.rs:linker()
     // Ferrocene annotation: see annotation above `ferrocenecoretest_compiler` definition
-    if cxx_configured || target.contains("vxworks") || ferrocenecoretest_compiler.is_some() {
-        let compiler = ferrocenecoretest_compiler.clone().unwrap_or_else(|| cfg.get_compiler());
+    if cxx_configured || target.contains("vxworks") {
+        let compiler = cfg.get_compiler();
         build.cxx.borrow_mut().insert(target, compiler);
     }
 

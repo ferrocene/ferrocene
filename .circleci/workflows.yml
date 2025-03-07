@@ -128,11 +128,7 @@ jobs:
     resource_class: large # 4-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      RUST_CONFIGURE_ARGS: |
-        --set
-        ferrocene.test-outcomes=custom
-        --set
-        ferrocene.test-outcomes-dir=/tmp/test-outcomes
+      FERROCENE_TEST_OUTCOMES_DIR: /tmp/test-outcomes
       SCRIPT: |
         ferrocene/ci/scripts/fetch-test-outcomes.sh
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
@@ -219,11 +215,7 @@ jobs:
     resource_class: medium # 2-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      RUST_CONFIGURE_ARGS: |
-        --set
-        ferrocene.test-outcomes=custom
-        --set
-        ferrocene.test-outcomes-dir=/tmp/test-outcomes
+      FERROCENE_TEST_OUTCOMES_DIR: /tmp/test-outcomes
       SCRIPT: |
         ferrocene/ci/scripts/fetch-test-outcomes.sh
         ./x.py run ferrocene/tools/traceability-matrix

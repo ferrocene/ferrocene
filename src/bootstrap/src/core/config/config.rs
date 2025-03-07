@@ -1877,7 +1877,11 @@ impl Config {
 
         let is_user_configured_rust_channel =
             if let Some(channel) = toml.rust.as_ref().and_then(|r| r.channel.clone()) {
-                config.channel = channel;
+                if channel == "auto-detect" {
+                    config.channel = ci_channel.into();
+                } else {
+                    config.channel = channel;
+                }
                 true
             } else {
                 false
@@ -2308,6 +2312,13 @@ impl Config {
 
         if let Some(f) = toml.ferrocene {
             set(&mut config.ferrocene_raw_channel, f.channel);
+            if config.ferrocene_raw_channel == "auto-detect" {
+                let ci_channel = t!(fs::read_to_string(config.src.join("ferrocene/ci/channel")))
+                    .trim()
+                    .to_string();
+                config.ferrocene_raw_channel = ci_channel;
+            }
+
             config.ferrocene_traceability_matrix_mode = match f.traceability_matrix_mode.as_deref()
             {
                 Some("local") | None => FerroceneTraceabilityMatrixMode::Local,

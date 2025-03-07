@@ -819,7 +819,7 @@ dependencies = [
  "cargo_metadata 0.18.1",
  "directories",
  "rustc-build-sysroot",
- "rustc_tools_util",
+ "rustc_tools_util 0.4.0",
  "rustc_version",
  "serde",
  "serde_json",
@@ -868,9 +868,9 @@ version = "0.1.0"
 
 [[package]]
 name = "cc"
-version = "1.2.13"
+version = "1.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7777341816418c02e033934a09f20dc0ccaf65a5201ef8a450ae0105a573fda"
+checksum = "be714c154be609ec7f5dad223a33bf1482fff90472de28f7362806e6d4832b8c"
 dependencies = [
  "shlex",
 ]
@@ -983,7 +983,7 @@ checksum = "f46ad14479a25103f283c0f10005961cf086d8dc42205bb44c46ac563475dca6"
 
 [[package]]
 name = "clippy"
-version = "0.1.86"
+version = "0.1.87"
 dependencies = [
  "anstream",
  "cargo_metadata 0.18.1",
@@ -1000,7 +1000,7 @@ dependencies = [
  "quote",
  "regex",
  "rinja",
- "rustc_tools_util",
+ "rustc_tools_util 0.4.2",
  "serde",
  "serde_json",
  "syn 2.0.98",
@@ -1014,7 +1014,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_config"
-version = "0.1.86"
+version = "0.1.87"
 dependencies = [
  "clippy_utils",
  "itertools",
@@ -1039,7 +1039,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_lints"
-version = "0.1.86"
+version = "0.1.87"
 dependencies = [
  "arrayvec",
  "cargo_metadata 0.18.1",
@@ -1062,7 +1062,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_utils"
-version = "0.1.86"
+version = "0.1.87"
 dependencies = [
  "arrayvec",
  "itertools",
@@ -4807,6 +4807,7 @@ dependencies = [
  "rustc_target",
  "rustc_trait_selection",
  "rustc_type_ir",
+ "smallvec",
  "tracing",
  "unicode-security",
 ]
@@ -5345,6 +5346,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a3b75158011a63889ba12084cf1224baad7bcad50f6ee7c842f772b74aa148ed"
 
 [[package]]
+name = "rustc_tools_util"
+version = "0.4.2"
+
+[[package]]
 name = "rustc_trait_selection"
 version = "0.0.0"
 dependencies = [
@@ -5391,8 +5396,6 @@ dependencies = [
  "rustc_abi",
  "rustc_data_structures",
  "rustc_hir",
- "rustc_infer",
- "rustc_macros",
  "rustc_middle",
  "rustc_span",
  "tracing",

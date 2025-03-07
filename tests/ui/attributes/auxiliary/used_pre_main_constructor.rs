@@ -10,15 +10,22 @@
 
 #[cfg_attr(
     any(
-        target_os = "linux",
         target_os = "android",
+<<<<<<< HEAD
         target_os = "freebsd",
         target_os = "netbsd",
         target_os = "nto",
         target_os = "openbsd",
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         target_os = "dragonfly",
+        target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
-        target_os = "haiku"
+        target_os = "linux",
+        target_os = "netbsd",
+        target_os = "nto",
+        target_os = "openbsd",
     ),
     link_section = ".init_array"
 )]

@@ -42,6 +42,11 @@ tools = ["rustdoc", "cargo", "llvm-tools", "rustfmt", "rust-analyzer", "clippy"]
 # supported by the resulting compiler.
 profiler = true
 
+# All dist builds should default to `--stage 2`, not `--stage 1`.
+build-stage = 2
+test-stage = 2
+doc-stage = 2
+
 
 
 [llvm]

@@ -19,6 +19,7 @@ use serde_derive::Deserialize;
 #[cfg(feature = "tracing")]
 use tracing::{instrument, span};
 
+use crate::core::build_steps::gcc::{Gcc, add_cg_gcc_cargo_flags};
 use crate::core::build_steps::tool::SourceType;
 use crate::core::build_steps::{dist, llvm};
 use crate::core::builder;
@@ -1028,7 +1029,9 @@ impl Step for Rustc {
     fn make_run(run: RunConfig<'_>) {
         let crates = run.cargo_crates_in_set();
         run.builder.ensure(Rustc {
-            compiler: run.builder.compiler(run.builder.top_stage, run.build_triple()),
+            compiler: run
+                .builder
+                .compiler(run.builder.top_stage.saturating_sub(1), run.build_triple()),
             target: run.target,
             crates,
         });
@@ -1649,6 +1652,14 @@ impl Step for CodegenBackend {
             .arg(builder.src.join(format!("compiler/rustc_codegen_{backend}/Cargo.toml")));
         rustc_cargo_env(builder, &mut cargo, target, compiler.stage);
 
+        // Ideally, we'd have a separate step for the individual codegen backends,
+        // like we have in tests (test::CodegenGCC) but that would require a lot of restructuring.
+        // If the logic gets more complicated, it should probably be done.
+        if backend == "gcc" {
+            let gcc = builder.ensure(Gcc { target });
+            add_cg_gcc_cargo_flags(&mut cargo, &gcc);
+        }
+
         let tmp_stamp = BuildStamp::new(&out_dir).with_prefix("tmp");
 
         let _guard = builder.msg_build(compiler, format_args!("codegen backend {backend}"), target);
@@ -1937,7 +1948,7 @@ impl Step for Assemble {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(Assemble {
-            target_compiler: run.builder.compiler(run.builder.top_stage + 1, run.target),
+            target_compiler: run.builder.compiler(run.builder.top_stage, run.target),
         });
     }
 

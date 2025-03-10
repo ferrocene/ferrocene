@@ -40,7 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: '200' # No, you can't make this a number.
+          fetch-depth: '0' # No, you can't make this a number.
       - name: Setup
         uses: ./.github/actions/setup/
         with:

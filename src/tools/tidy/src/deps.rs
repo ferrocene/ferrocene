@@ -275,7 +275,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "blake3",
     "block-buffer",
     "bstr",
-    "byteorder", // via ruzstd in object in thorin-dwp
     "cc",
     "cfg-if",
     "cfg_aliases",

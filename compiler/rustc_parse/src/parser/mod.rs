@@ -24,7 +24,8 @@ pub use pat::{CommaRecoveryMode, RecoverColon, RecoverComma};
 use path::PathStyle;
 use rustc_ast::ptr::P;
 use rustc_ast::token::{
-    self, Delimiter, IdentIsRaw, InvisibleOrigin, MetaVarKind, Nonterminal, Token, TokenKind,
+    self, Delimiter, IdentIsRaw, InvisibleOrigin, MetaVarKind, Nonterminal, NtPatKind, Token,
+    TokenKind,
 };
 use rustc_ast::tokenstream::{AttrsTarget, Spacing, TokenStream, TokenTree};
 use rustc_ast::util::case::Case;
@@ -812,9 +813,9 @@ impl<'a> Parser<'a> {
         self.is_keyword_ahead(0, &[kw::Const])
             && self.look_ahead(1, |t| match &t.kind {
                 // async closures do not work with const closures, so we do not parse that here.
-                token::Ident(kw::Move | kw::Static, IdentIsRaw::No)
-                | token::OrOr
-                | token::BinOp(token::Or) => true,
+                token::Ident(kw::Move | kw::Static, IdentIsRaw::No) | token::OrOr | token::Or => {
+                    true
+                }
                 _ => false,
             })
     }
@@ -1650,7 +1651,7 @@ impl<'a> Parser<'a> {
     /// `::{` or `::*`
     fn is_import_coupler(&mut self) -> bool {
         self.check_path_sep_and_look_ahead(|t| {
-            matches!(t.kind, token::OpenDelim(Delimiter::Brace) | token::BinOp(token::Star))
+            matches!(t.kind, token::OpenDelim(Delimiter::Brace) | token::Star)
         })
     }
 
@@ -1745,7 +1746,10 @@ pub enum ParseNtResult {
     Tt(TokenTree),
     Ident(Ident, IdentIsRaw),
     Lifetime(Ident, IdentIsRaw),
+    Pat(P<ast::Pat>, NtPatKind),
     Ty(P<ast::Ty>),
+    Meta(P<ast::AttrItem>),
+    Path(P<ast::Path>),
     Vis(P<ast::Visibility>),
 
     /// This variant will eventually be removed, along with `Token::Interpolate`.

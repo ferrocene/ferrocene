@@ -203,10 +203,11 @@ pub struct Build {
 #[derive(Debug, Clone)]
 struct Crate {
     name: String,
-    version: String,
     deps: HashSet<String>,
     path: PathBuf,
     features: Vec<String>,
+    // Ferrocene addition: helps get rustfmt version for qualification docs
+    version: String,
 }
 
 impl Crate {

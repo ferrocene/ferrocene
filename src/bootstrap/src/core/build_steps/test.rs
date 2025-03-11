@@ -2750,7 +2750,6 @@ impl Step for Crate {
             _ => panic!("can only test libraries"),
         };
 
-<<<<<<< HEAD
         let mut collect_profraw = false;
         if builder.config.cmd.coverage() {
             let instrument_coverage_flags = builder.ensure(ProfilerBuiltinsNoCore { target });
@@ -2768,16 +2767,6 @@ impl Step for Crate {
             }
         }
 
-        run_cargo_test(
-            cargo,
-            &[],
-            &self.crates,
-            &self.crates[0],
-            &*crate_description(&self.crates),
-            target,
-            builder,
-        );
-
         // NOTE: The profraw files are first created in temp/coverage and then moved to build/coverage
         // This is done so that the existing coverage data in build/coverage if any is not lost
         // if the coverage command fails for some reason.
@@ -2793,7 +2782,7 @@ impl Step for Crate {
                 std::fs::rename(temp_dir, coverage_dir).expect("Failed to move coverage data");
             }
         }
-=======
+
         let mut crates = self.crates.clone();
         // The core and alloc crates can't directly be tested. We
         // could silently ignore them, but adding their own test
@@ -2807,7 +2796,6 @@ impl Step for Crate {
         }
 
         run_cargo_test(cargo, &[], &crates, &*crate_description(&self.crates), target, builder);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 }
 

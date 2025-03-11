@@ -58,12 +58,9 @@ pub fn build(build: &mut Build) {
                 name: name.clone(),
                 deps,
                 path,
-<<<<<<< HEAD
-                version: package.version,
-                has_lib,
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
                 features: package.features.keys().cloned().collect(),
+                // Ferrocene edition: helps get rustfmt version for qualification docs
+                version: package.version,
             };
             let relative_path = krate.local_path(build);
             build.crates.insert(name.clone(), krate);

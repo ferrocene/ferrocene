@@ -813,22 +813,9 @@ fn find_tests_in_dir(
         return Ok(());
     }
 
-<<<<<<< HEAD
-    // For run-make tests, a "test file" is actually a directory that contains
-    // an `rmake.rs` or `Makefile`"
-    if config.mode == Mode::RunMake {
-        if dir.join("Makefile").exists() && dir.join("rmake.rs").exists() {
-            return Err(io::Error::other(
-                "run-make tests cannot have both `Makefile` and `rmake.rs`",
-            ));
-        }
-
-        if dir.join("Makefile").exists() || dir.join("rmake.rs").exists() {
-=======
     // For run-make tests, a "test file" is actually a directory that contains an `rmake.rs`.
-    if cx.config.mode == Mode::RunMake {
+    if config.mode == Mode::RunMake {
         if dir.join("rmake.rs").exists() {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             let paths = TestPaths {
                 file: dir.to_path_buf(),
                 relative_dir: relative_dir_path.parent().unwrap().to_path_buf(),

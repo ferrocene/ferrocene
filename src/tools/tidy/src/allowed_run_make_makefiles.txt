@@ -1,4 +1,3 @@
-<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 run-make/ferrocene/compiler-arguments/out-dir/Makefile
 run-make/ferrocene/compiler-arguments/upper-l/upper-l/Makefile
 run-make/ferrocene/compiler-arguments/upper-l/upper-l_all/Makefile

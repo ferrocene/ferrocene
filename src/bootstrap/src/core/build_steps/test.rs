@@ -92,7 +92,7 @@ impl Step for CrateBootstrap {
         );
 
         let crate_name = path.rsplit_once('/').unwrap().1;
-        run_cargo_test(cargo, &[], &[], crate_name, crate_name, bootstrap_host, builder);
+        run_cargo_test(cargo, &[], &[], crate_name, bootstrap_host, builder);
     }
 }
 
@@ -142,15 +142,7 @@ You can skip linkcheck with --skip src/tools/linkchecker"
             SourceType::InTree,
             &[],
         );
-        run_cargo_test(
-            cargo,
-            &[],
-            &[],
-            "linkchecker",
-            "linkchecker self tests",
-            bootstrap_host,
-            builder,
-        );
+        run_cargo_test(cargo, &[], &[], "linkchecker self tests", bootstrap_host, builder);
 
         if builder.doc_tests == DocTests::No {
             return;
@@ -339,7 +331,7 @@ impl Step for Cargo {
         );
 
         // NOTE: can't use `run_cargo_test` because we need to overwrite `PATH`
-        let mut cargo = prepare_cargo_test(cargo, &[], &[], "cargo", self.host, builder);
+        let mut cargo = prepare_cargo_test(cargo, &[], &[], self.host, builder);
 
         // Don't run cross-compile tests, we may not have cross-compiled libstd libs
         // available.
@@ -425,7 +417,7 @@ impl Step for RustAnalyzer {
         cargo.env("SKIP_SLOW_TESTS", "1");
 
         cargo.add_rustc_lib_path(builder);
-        run_cargo_test(cargo, &[], &[], "rust-analyzer", "rust-analyzer", host, builder);
+        run_cargo_test(cargo, &[], &[], "rust-analyzer", host, builder);
     }
 }
 
@@ -474,7 +466,7 @@ impl Step for Rustfmt {
 
         cargo.add_rustc_lib_path(builder);
 
-        run_cargo_test(cargo, &[], &[], "rustfmt", "rustfmt", host, builder);
+        run_cargo_test(cargo, &[], &[], "rustfmt", host, builder);
     }
 }
 
@@ -590,7 +582,7 @@ impl Step for Miri {
 
         // We can NOT use `run_cargo_test` since Miri's integration tests do not use the usual test
         // harness and therefore do not understand the flags added by `add_flags_and_try_run_test`.
-        let mut cargo = prepare_cargo_test(cargo, &[], &[], "miri", host, builder);
+        let mut cargo = prepare_cargo_test(cargo, &[], &[], host, builder);
 
         // miri tests need to know about the stage sysroot
         cargo.env("MIRI_SYSROOT", &miri_sysroot);
@@ -738,7 +730,7 @@ impl Step for CompiletestTest {
             &[],
         );
         cargo.allow_features("test");
-        run_cargo_test(cargo, &[], &[], "compiletest", "compiletest self test", host, builder);
+        run_cargo_test(cargo, &[], &[], "compiletest self test", host, builder);
     }
 }
 
@@ -799,7 +791,7 @@ impl Step for Clippy {
         cargo.env("HOST_LIBS", host_libs);
 
         cargo.add_rustc_lib_path(builder);
-        let cargo = prepare_cargo_test(cargo, &[], &[], "clippy", host, builder);
+        let cargo = prepare_cargo_test(cargo, &[], &[], host, builder);
 
         let _guard = builder.msg_sysroot_tool(Kind::Test, compiler.stage, "clippy", host, host);
 
@@ -1244,59 +1236,6 @@ macro_rules! test {
     };
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Ord, PartialOrd)]
-pub struct RunMakeSupport {
-    pub compiler: Compiler,
-    pub target: TargetSelection,
-}
-
-impl Step for RunMakeSupport {
-    type Output = PathBuf;
-    const DEFAULT: bool = true;
-
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
-
-    fn make_run(run: RunConfig<'_>) {
-        let compiler = run.builder.compiler(run.builder.top_stage, run.build_triple());
-        run.builder.ensure(RunMakeSupport { compiler, target: run.build_triple() });
-    }
-
-    /// Builds run-make-support and returns the path to the resulting rlib.
-    fn run(self, builder: &Builder<'_>) -> PathBuf {
-        builder.ensure(compile::Std::new(self.compiler, self.target));
-
-        let cargo = tool::prepare_tool_cargo(
-            builder,
-            self.compiler,
-            Mode::ToolStd,
-            self.target,
-            Kind::Build,
-            "src/tools/run-make-support",
-            SourceType::InTree,
-            &[],
-        );
-
-        let _guard = builder.msg_tool(
-            Kind::Build,
-            Mode::ToolStd,
-            "run-make-support",
-            self.compiler.stage,
-            &self.compiler.host,
-            &self.target,
-        );
-        cargo.into_cmd().run(builder);
-
-        let lib_name = "librun_make_support.rlib";
-        let lib = builder.tools_dir(self.compiler).join(lib_name);
-
-        let cargo_out = builder.cargo_out(self.compiler, Mode::ToolStd, self.target).join(lib_name);
-        builder.copy_link(&cargo_out, &lib);
-        lib
-    }
-}
-
 /// Runs `cargo test` on the `src/tools/run-make-support` crate.
 /// That crate is used by run-make tests.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -1332,15 +1271,7 @@ impl Step for CrateRunMakeSupport {
             &[],
         );
         cargo.allow_features("test");
-        run_cargo_test(
-            cargo,
-            &[],
-            &[],
-            "run-make-support",
-            "run-make-support self test",
-            host,
-            builder,
-        );
+        run_cargo_test(cargo, &[], &[], "run-make-support self test", host, builder);
     }
 }
 
@@ -1377,7 +1308,7 @@ impl Step for CrateBuildHelper {
             &[],
         );
         cargo.allow_features("test");
-        run_cargo_test(cargo, &[], &[], "build_helper", "build_helper self test", host, builder);
+        run_cargo_test(cargo, &[], &[], "build_helper self test", host, builder);
     }
 }
 
@@ -1448,40 +1379,7 @@ test!(Pretty {
     only_hosts: true,
 });
 
-/// Special-handling is needed for `run-make`, so don't use `test!` for defining `RunMake`
-/// tests.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub struct RunMake {
-    pub compiler: Compiler,
-    pub target: TargetSelection,
-}
-
-impl Step for RunMake {
-    type Output = ();
-    const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = false;
-
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.suite_path("tests/run-make")
-    }
-
-    fn make_run(run: RunConfig<'_>) {
-        let compiler = run.builder.compiler(run.builder.top_stage, run.build_triple());
-        run.builder.ensure(RunMakeSupport { compiler, target: run.build_triple() });
-        run.builder.ensure(RunMake { compiler, target: run.target });
-    }
-
-    fn run(self, builder: &Builder<'_>) {
-        builder.ensure(Compiletest {
-            compiler: self.compiler,
-            target: self.target,
-            mode: "run-make",
-            suite: "run-make",
-            path: "tests/run-make",
-            compare_mode: None,
-        });
-    }
-}
+test!(RunMake { path: "tests/run-make", mode: "run-make", suite: "run-make", default: true });
 
 test!(Assembly { path: "tests/assembly", mode: "assembly", suite: "assembly", default: true });
 
@@ -1724,6 +1622,9 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
                 host: target,
             });
         }
+        if suite == "run-make" {
+            builder.tool_exe(Tool::RunMakeSupport);
+        }
 
         // Also provide `rust_test_helpers` for the host.
         builder.ensure(TestHelpers { target: compiler.host });
@@ -1776,6 +1677,11 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
             };
 
             cmd.arg("--cargo-path").arg(cargo_path);
+
+            // We need to pass the compiler that was used to compile run-make-support,
+            // because we have to use the same compiler to compile rmake.rs recipes.
+            let stage0_rustc_path = builder.compiler(0, compiler.host);
+            cmd.arg("--stage0-rustc-path").arg(builder.rustc(stage0_rustc_path));
         }
 
         // Avoid depending on rustdoc when we don't need it.
@@ -2593,13 +2499,12 @@ pub(crate) fn run_cargo_test<'a>(
     cargo: builder::Cargo,
     libtest_args: &[&str],
     crates: &[String],
-    primary_crate: &str,
     description: impl Into<Option<&'a str>>,
     target: TargetSelection,
     builder: &Builder<'_>,
 ) -> bool {
     let compiler = cargo.compiler();
-    let mut cargo = prepare_cargo_test(cargo, libtest_args, crates, primary_crate, target, builder);
+    let mut cargo = prepare_cargo_test(cargo, libtest_args, crates, target, builder);
     let _time = helpers::timeit(builder);
     let _group = description.into().and_then(|what| {
         builder.msg_sysroot_tool(Kind::Test, compiler.stage, what, compiler.host, target)
@@ -2623,7 +2528,6 @@ fn prepare_cargo_test(
     cargo: builder::Cargo,
     libtest_args: &[&str],
     crates: &[String],
-    primary_crate: &str,
     target: TargetSelection,
     builder: &Builder<'_>,
 ) -> BootstrapCommand {
@@ -2653,13 +2557,6 @@ fn prepare_cargo_test(
             cargo.arg("--doc");
         }
         DocTests::No => {
-            let krate = &builder
-                .crates
-                .get(primary_crate)
-                .unwrap_or_else(|| panic!("missing crate {primary_crate}"));
-            if krate.has_lib {
-                cargo.arg("--lib");
-            }
             cargo.args(["--bins", "--examples", "--tests", "--benches"]);
         }
         DocTests::Yes => {}
@@ -2720,7 +2617,7 @@ impl Step for Crate {
     const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.crate_or_deps("sysroot").crate_or_deps("coretests")
+        run.crate_or_deps("sysroot").crate_or_deps("coretests").crate_or_deps("alloctests")
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -2853,6 +2750,7 @@ impl Step for Crate {
             _ => panic!("can only test libraries"),
         };
 
+<<<<<<< HEAD
         let mut collect_profraw = false;
         if builder.config.cmd.coverage() {
             let instrument_coverage_flags = builder.ensure(ProfilerBuiltinsNoCore { target });
@@ -2895,6 +2793,21 @@ impl Step for Crate {
                 std::fs::rename(temp_dir, coverage_dir).expect("Failed to move coverage data");
             }
         }
+=======
+        let mut crates = self.crates.clone();
+        // The core and alloc crates can't directly be tested. We
+        // could silently ignore them, but adding their own test
+        // crates is less confusing for users. We still keep core and
+        // alloc themself for doctests
+        if crates.iter().any(|crate_| crate_ == "core") {
+            crates.push("coretests".to_owned());
+        }
+        if crates.iter().any(|crate_| crate_ == "alloc") {
+            crates.push("alloctests".to_owned());
+        }
+
+        run_cargo_test(cargo, &[], &crates, &*crate_description(&self.crates), target, builder);
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 }
 
@@ -2987,15 +2900,7 @@ impl Step for CrateRustdoc {
         dylib_path.insert(0, PathBuf::from(&*libdir));
         cargo.env(dylib_path_var(), env::join_paths(&dylib_path).unwrap());
 
-        run_cargo_test(
-            cargo,
-            &[],
-            &["rustdoc:0.0.0".to_string()],
-            "rustdoc",
-            "rustdoc",
-            target,
-            builder,
-        );
+        run_cargo_test(cargo, &[], &["rustdoc:0.0.0".to_string()], "rustdoc", target, builder);
     }
 }
 
@@ -3051,7 +2956,6 @@ impl Step for CrateRustdocJsonTypes {
             cargo,
             libtest_args,
             &["rustdoc-json-types".to_string()],
-            "rustdoc-json-types",
             "rustdoc-json-types",
             target,
             builder,
@@ -3232,7 +3136,7 @@ impl Step for Bootstrap {
 
         // bootstrap tests are racy on directory creation so just run them one at a time.
         // Since there's not many this shouldn't be a problem.
-        run_cargo_test(cargo, &["--test-threads=1"], &[], "bootstrap", None, host, builder);
+        run_cargo_test(cargo, &["--test-threads=1"], &[], None, host, builder);
     }
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -3357,7 +3261,7 @@ impl Step for RustInstaller {
             bootstrap_host,
             bootstrap_host,
         );
-        run_cargo_test(cargo, &[], &[], "installer", None, bootstrap_host, builder);
+        run_cargo_test(cargo, &[], &[], None, bootstrap_host, builder);
 
         // We currently don't support running the test.sh script outside linux(?) environments.
         // Eventually this should likely migrate to #[test]s in rust-installer proper rather than a
@@ -3765,7 +3669,7 @@ impl Step for TestFloatParse {
             &[],
         );
 
-        run_cargo_test(cargo_test, &[], &[], crate_name, crate_name, bootstrap_host, builder);
+        run_cargo_test(cargo_test, &[], &[], crate_name, bootstrap_host, builder);
 
         // Run the actual parse tests.
         let mut cargo_run = tool::prepare_tool_cargo(

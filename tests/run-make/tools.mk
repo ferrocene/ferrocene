@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 # These deliberately use `=` and not `:=` so that client makefiles can
 # augment HOST_RPATH_DIR / TARGET_RPATH_DIR.
 HOST_RPATH_ENV = \

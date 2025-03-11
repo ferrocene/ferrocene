@@ -43,9 +43,14 @@ error[E0766]: unterminated double quote byte string
    |
 LL |       b"a
    |  ______^
+<<<<<<< HEAD
 ...  |
 LL | | // Value Expressions
    | |____________________^
+=======
+LL | | }
+   | |__^
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 error: aborting due to 6 previous errors
 

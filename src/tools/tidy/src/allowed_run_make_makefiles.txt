@@ -1,15 +1,8 @@
-run-make/ferrocene/compiler-arguments/out-dir/Makefile
 run-make/ferrocene/compiler-arguments/upper-l/upper-l/Makefile
 run-make/ferrocene/compiler-arguments/upper-l/upper-l_all/Makefile
 run-make/ferrocene/compiler-arguments/upper-l/upper-l_crate/Makefile
 run-make/ferrocene/compiler-arguments/upper-l/upper-l_dependency/Makefile
 run-make/ferrocene/compiler-arguments/upper-l/upper-l_native/Makefile
-run-make/ferrocene/compiler-arguments/upper_c_debuginfo/upper_c_debuginfo_multiple/Makefile
-run-make/ferrocene/compiler-arguments/upper_c_extra-filename/upper_c_extra-filename/Makefile
-run-make/ferrocene/compiler-arguments/upper_c_extra-filename/upper_c_extra-filename_mir/Makefile
-run-make/ferrocene/compiler-arguments/upper_c_extra-filename/upper_c_extra-filename_repeat/Makefile
-run-make/ferrocene/compiler-arguments/upper_c_link-arg/upper_c_link-arg/Makefile
-run-make/ferrocene/compiler-arguments/upper_c_link-arg/upper_c_link-arg_multiple/Makefile
 run-make/ferrocene/compiler-arguments/upper_c_link-args/upper_c_link-args/Makefile
 run-make/ferrocene/compiler-arguments/upper_c_link-args/upper_c_link-args_multiple/Makefile
 run-make/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor/Makefile

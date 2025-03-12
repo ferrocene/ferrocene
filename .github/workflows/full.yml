@@ -85,7 +85,8 @@ jobs:
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
-      triples: "{{ env.LINUX_TARGETS }},{{ env.BARE_METAL_TARGETS}},{{ env.QNX_TARGETS }}"
+      # This pulls from env
+      triples: "$LINUX_TARGETS,$BARE_METAL_TARGETS,$QNX_TARGETS"
       runner: 8core-x86_64-unknown-linux-gnu
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
@@ -265,7 +266,8 @@ jobs:
     secrets: inherit
     with:
       host-triple: x86_64-pc-windows-msvc
-      triples: "{{ env.BARE_METAL_TARGETS}},{{ env.QNX_TARGETS }}"
+      # This pulls from env
+      triples: "$BARE_METAL_TARGETS,$QNX_TARGETS"
       runner: 8core-x86_64-pc-windows-msvc
       build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
@@ -334,7 +336,8 @@ jobs:
     secrets: inherit
     with:
       host-triple: aarch64-apple-darwin
-      triples: "{{ env.BARE_METAL_TARGETS}}"
+      # This pulls from env
+      triples: "$BARE_METAL_TARGETS"
       runner: macos-14-xlarge
       build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
       build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}

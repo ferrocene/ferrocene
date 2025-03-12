@@ -4,6 +4,12 @@ defaults:
   run:
     shell: bash
 
+env:
+  # Do not try to break these up...
+  LINUX_TARGETS: aarch64-unknown-linux-gnu,riscv64gc-unknown-linux-gnu
+  BARE_METAL_TARGETS: aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf
+  QNX_TARGETS: aarch64-unknown-nto-qnx710,x86_64-pc-nto-qnx710
+
 on:
   push:
     branches:
@@ -79,8 +85,7 @@ jobs:
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
-      # Do not try to break this up into multiple lines. YAML is not your friend.
-      triples: "aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf,aarch64-unknown-nto-qnx710,x86_64-pc-nto-qnx710"
+      triples: "{{ env.LINUX_TARGETS }},{{ env.BARE_METAL_TARGETS}},{{ env.QNX_TARGETS }}"
       runner: 8core-x86_64-unknown-linux-gnu
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
@@ -260,8 +265,7 @@ jobs:
     secrets: inherit
     with:
       host-triple: x86_64-pc-windows-msvc
-      # Do not try to break this up into multiple lines. YAML is not your friend.
-      triples: "aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf,aarch64-unknown-nto-qnx710,x86_64-pc-nto-qnx710"
+      triples: "{{ env.BARE_METAL_TARGETS}},{{ env.QNX_TARGETS }}"
       runner: 8core-x86_64-pc-windows-msvc
       build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
@@ -330,8 +334,7 @@ jobs:
     secrets: inherit
     with:
       host-triple: aarch64-apple-darwin
-      # Do not try to break this up into multiple lines. YAML is not your friend.
-      triples: "aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf,aarch64-unknown-nto-qnx710,x86_64-pc-nto-qnx710"
+      triples: "{{ env.BARE_METAL_TARGETS}}"
       runner: macos-14-xlarge
       build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
       build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}
@@ -395,7 +398,6 @@ jobs:
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
-      # Do not try to break this up into multiple lines. YAML is not your friend.
       triples: "aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf,aarch64-unknown-nto-qnx710,x86_64-pc-nto-qnx710"
       runner: 8core-x86_64-unknown-linux-gnu
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}

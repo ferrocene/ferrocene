@@ -685,6 +685,7 @@ F_OFD_SETLK
 F_OFD_SETLKW
 F_OK
 F_RDLCK
+F_SEAL_EXEC
 F_SEAL_GROW
 F_SEAL_SEAL
 F_SEAL_SHRINK
@@ -3382,7 +3383,9 @@ group
 hostent
 id_t
 idtype_t
+if_freenameindex
 if_indextoname
+if_nameindex
 if_nametoindex
 ifaddrs
 ifconf

@@ -44,6 +44,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          # Several tests require a valid upstream commit to be fetched in order to pass
+          # while we could possibly set this to a number like '500' and have it work,
+          # it also works with '0' always, so this is easiest.
           fetch-depth: '0' # No, you can't make this a number.
       - name: Setup
         uses: ./.github/actions/setup/

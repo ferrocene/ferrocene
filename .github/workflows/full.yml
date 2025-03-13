@@ -25,6 +25,18 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
+  # This job hacks around `env` not being available to be passed with `with:` structures.
+  calculate-envs:
+    name: Calculate Custom Environments
+    runs-on: ubuntu-24
+    outputs:
+      linux-targets: ${{ env.LINUX_TARGETS }}
+      qnx-targets: ${{ env.QNX_TARGETS }}
+      bare-metal-targets: ${{ env.BARE_METAL_TARGETS }}
+    steps:
+      - run: exit 0
+
+
   # Matrix cannot be used here as later jobs will `need` specific containers
   # and we do not want to make those jobs wait for all containers.
   container-x86_64-ubuntu-20:
@@ -82,11 +94,11 @@ jobs:
       - targets
       - dist-x86_64-unknown-linux-gnu
       - test-x86_64-unknown-linux-gnu
+      - calculate-envs
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
-      # This pulls from env
-      triples: "$LINUX_TARGETS,$BARE_METAL_TARGETS,$QNX_TARGETS"
+      triples: ${{ format('{0},{1},{2}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets, needs.calculate-envs.outputs.linux-targets) }}
       runner: 8core-x86_64-unknown-linux-gnu
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
@@ -258,6 +270,7 @@ jobs:
     name: Self-test (x86_64-pc-windows-msvc)
     uses: ./.github/workflows/self-test.yml
     needs:
+      - calculate-envs
       - container-x86_64-ubuntu-20
       - build-x86_64-pc-windows-msvc
       # - targets
@@ -267,7 +280,7 @@ jobs:
     with:
       host-triple: x86_64-pc-windows-msvc
       # This pulls from env
-      triples: "$BARE_METAL_TARGETS,$QNX_TARGETS"
+      triples: ${{ format('{0},{1}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets) }}
       runner: 8core-x86_64-pc-windows-msvc
       build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
@@ -328,6 +341,7 @@ jobs:
     name: Self-test (aarch64-apple-darwin)
     uses: ./.github/workflows/self-test.yml
     needs:
+      - calculate-envs
       - container-x86_64-ubuntu-20
       - build-aarch64-apple-darwin
       - targets
@@ -337,7 +351,7 @@ jobs:
     with:
       host-triple: aarch64-apple-darwin
       # This pulls from env
-      triples: "$BARE_METAL_TARGETS"
+      triples: ${{ needs.calculate-envs.outputs.bare-metal-targets }}
       runner: macos-14-xlarge
       build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
       build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}

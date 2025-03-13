@@ -45,8 +45,8 @@ a convenience for developers, and doesn't perform any check not performed in
 :ref:`ci-phase-full`.
 
 This phase is triggered whenever a new PR is created, or a new commit is pushed
-under a PR. Github Actions starts the ``commit`` workflow. This workflow performs the
-following steps:
+under a PR. Github Actions starts the ``commit`` workflow. This workflow performs
+the following steps:
 
 * Perform licensing checks.
 * Run linters on the codebase.
@@ -74,7 +74,7 @@ Build and Test Phase 2: Full Build and Test
 
 The goal of this phase is to validate the PR, build and package release
 artifacts, and merge it into the target branch. The phase starts when
-:ref:`dev-phase-test` is reached. CircleCI then runs the ``full`` workflow
+:ref:`dev-phase-test` is reached. Github Actions then runs the ``full`` workflow
 within a pipeline, performing the following steps:
 
 * Prepare a Docker image of the build environment.

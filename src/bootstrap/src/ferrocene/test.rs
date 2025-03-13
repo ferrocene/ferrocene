@@ -145,8 +145,7 @@ impl Step for GenerateTarball {
         crate::core::build_steps::test::run_cargo_test(
             cargo,
             &[],
-            &[],
-            "generate-tarball",
+            &["generate-tarball".into()],
             "generate-tarball",
             self.target,
             builder,

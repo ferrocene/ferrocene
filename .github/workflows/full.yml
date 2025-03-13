@@ -28,7 +28,7 @@ jobs:
   # This job hacks around `env` not being available to be passed with `with:` structures.
   calculate-envs:
     name: Calculate Custom Environments
-    runs-on: ubuntu-24
+    runs-on: ubuntu-latest
     outputs:
       linux-targets: ${{ env.LINUX_TARGETS }}
       qnx-targets: ${{ env.QNX_TARGETS }}

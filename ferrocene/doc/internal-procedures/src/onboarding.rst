@@ -44,9 +44,6 @@ You will need access to the following tools to be able to work on Ferrocene:
    * - `ClickUp <https://ferroussystems.clickup.com/4637546/v/o/s/90040220935>`_
      - SSO
      - Project management and task tracking
-   * - `CircleCI <https://app.circleci.com/pipelines/github/ferrocene>`_
-     - GitHub
-     - CI/CD
    * - `Customer portal <https://customers.ferrocene.dev>`_
      - Individual account
      - Access to `rendered documentation <https://docs.ferrocene.dev>`_ and `releases <https://releases.ferrocene.dev>`_
@@ -68,19 +65,3 @@ Depending on your tasks, you might also need access to:
 
 You should also ask the project manager to give you access to the relevant
 recurring meetings.
-
-CircleCI access
-^^^^^^^^^^^^^^^
-
-To authenticate with CircleCI, you need to go to the `CircleCI login page
-<https://app.circleci.com/settings/user>`_, click "Log in", select "Signed up
-for CircleCI with GitHub or Bitbucket before September 2023?", and then click
-"Log in with GitHub".
-
-Once you have done so, you can access the Ferrocene project on CircleCI `here
-<https://app.circleci.com/pipelines/github/ferrocene/ferrocene>`_.
-
-If you cannot access the page above, make sure you have **write** access to the
-Ferrocene repository, then go to the `CircleCI user settings
-<https://app.circleci.com/settings/user>`_ and click the "Refresh permissions"
-button.

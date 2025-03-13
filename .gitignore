@@ -100,4 +100,7 @@ tests/rustdoc-gui/src/**.lock
 flake.lock
 /default.nix
 
+# Code coverage
+*.profraw
+
 # Before adding new lines, see the comment at the top.

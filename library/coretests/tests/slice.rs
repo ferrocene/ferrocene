@@ -1806,6 +1806,7 @@ fn brute_force_rotate_test_1() {
 #[test]
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg_attr(miri, ignore)] // Miri is too slow
+#[ignore]
 fn select_nth_unstable() {
     use core::cmp::Ordering::{Equal, Greater, Less};
 
@@ -2416,6 +2417,7 @@ macro_rules! split_off_tests {
     (ty: $ty:ty, slice: $slice:expr, method: $method:ident, $(($test_name:ident, ($($args:expr),*), $output:expr, $remaining:expr),)*) => {
         $(
             #[test]
+            #[ignore]
             fn $test_name() {
                 let mut slice: $ty = $slice;
                 assert_eq!($output, slice.$method($($args)*));

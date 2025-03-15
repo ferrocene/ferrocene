@@ -7,8 +7,6 @@ run-make/ferrocene/compiler-arguments/upper_c_link-args/upper_c_link-args/Makefi
 run-make/ferrocene/compiler-arguments/upper_c_link-args/upper_c_link-args_multiple/Makefile
 run-make/ferrocene/compiler-arguments/upper_c_linker-flavor/upper_c_linker-flavor/Makefile
 run-make/ferrocene/compiler-arguments/upper_c_metadata/upper_c_metadata/Makefile
-run-make/ferrocene/compiler-arguments/upper_c_no-vectorize-loops/upper_c_no-vectorize-loops/Makefile
-run-make/ferrocene/compiler-arguments/upper_c_no-vectorize-loops/upper_c_no-vectorize-loops_no-space/Makefile
 run-make/ferrocene/compiler-arguments/upper_c_relocation-model/upper_c_relocation-model_default/Makefile
 run-make/ferrocene/compiler-arguments/upper_c_relocation-model/upper_c_relocation-model_empty/Makefile
 run-make/ferrocene/compiler-arguments/upper_c_relocation-model/upper_c_relocation-model_eq-empty/Makefile

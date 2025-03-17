@@ -20,8 +20,6 @@ pub(crate) fn parse(config: &str) -> Config {
     )
 }
 
-// FIXME: REVERT THIS ANA
-#[ignore]
 #[test]
 fn download_ci_llvm() {
     let config = parse("");

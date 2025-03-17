@@ -14,23 +14,23 @@ mod bar {
 }
 
 pub fn foo() {}
-//~^ ERROR requires `sized` lang_item
 
 fn test1() {
-    //~^ ERROR requires `sized` lang_item
     use bar::foo;
     //~^ ERROR unresolved import `bar::foo` [E0432]
     //~| no `foo` in `bar`
 }
 
 fn test2() {
-    //~^ ERROR requires `sized` lang_item
     use bar::glob::foo;
     //~^ ERROR `foo` is private
 }
 
 fn main() {}
+<<<<<<< HEAD
 //~^ ERROR requires `sized` lang_item
 
 // ferrocene-annotations: fls_9gprp17h6t1q
 // Use Imports
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

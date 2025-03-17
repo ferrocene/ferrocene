@@ -1,7 +1,6 @@
 // As other codegen options, no-vectorize-loops should also work without a space after -C.
 
 //@ check-pass
-//@ edition: 2021
 //@ compile-flags: -Cno-vectorize-loops
 
 fn main() {}

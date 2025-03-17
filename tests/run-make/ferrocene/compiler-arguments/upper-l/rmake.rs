@@ -1,4 +1,5 @@
 // ferrocene-annotations: um_rustc_L
+//@ ignore-remote Temporary ignore, while we fix a bug in the test infrastructure.
 
 use run_make_support::rfs::create_dir_all;
 use run_make_support::{bare_rustc, cc, llvm_ar, run, target};

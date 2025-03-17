@@ -1,2 +1,0 @@
-run-make/ferrocene/compiler-arguments/upper_c_no-vectorize-loops/upper_c_no-vectorize-loops/Makefile
-run-make/ferrocene/compiler-arguments/upper_c_no-vectorize-loops/upper_c_no-vectorize-loops_no-space/Makefile

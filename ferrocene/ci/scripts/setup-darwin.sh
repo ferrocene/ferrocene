@@ -13,7 +13,10 @@ brew install --quiet azure-cli azcopy
 # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
 # This one is squelched otherwise it emits a warning annotation on GHA
 # Using `... 2> >(sed -e "s/Warning://g")` was attempted but it did not resolve it.
+stopMarker="endtoken-brew-install-gcc-$(uuidgen)"
+::stop-commands::{$stopMarker}
 brew install --quiet gcc-arm-embedded  &> /dev/null
+::{$stopMarker}::
 
 # There are a number of reports of very slow uploads in Mac VMs due to TSO, disable it.
 # https://github.com/aws/aws-sdk/issues/469

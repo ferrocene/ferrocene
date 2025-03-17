@@ -1,4 +1,5 @@
 // ferrocene-annotations: um_rustc_C_rpath
+//@ needs-dynamic-linking
 
 use run_make_support::{rustc, target};
 

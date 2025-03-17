@@ -125,7 +125,7 @@ The Ferrocene CI infrastructure employs the QEMU emulator to emulate non-native
 targets such as ``aarch64``. QEMU is integrated into Github Actions.
 
 Amazon S3
------------------
+---------
 
 Amazon S3 is an object storage with a web service interface offered by Amazon.
 
@@ -133,7 +133,7 @@ The Ferrocene CI infrastructure stores all Ferrocene-related build artifacts in
 Amazon S3.
 
 Azure Container Registry and Storage
-----------------------------------------------
+------------------------------------
 
 Azure Container Registry is a Docker container registry for storage, sharing,
 and deployment of container images offered by Microsoft.

@@ -184,6 +184,8 @@ impl Step for GenerateCoverageReport {
             .arg(COVERAGE_EXCLUDE_LINE)
             .arg("-o")
             .arg(coverage_report_out_dir)
+            .arg("--log-level")
+            .arg("WARN")
             // RUSTC environment variable is required by grcov to locate the right version of the llvm-cov.
             // If the variable is not set grcov uses the the rustc in the host.
             // This version mismatch of llvm-cov leads to empty report.

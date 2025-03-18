@@ -114,17 +114,20 @@ impl Step for GenerateCoverageReport {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         builder.info(&"Generating coverage report");
 
+        // input paths to use
         let coverage_report_data_dir =
             env_llvm_profile_data_dir().unwrap_or_else(|| builder.out.join("coverage"));
 
         let coverage_report_out_dir = builder.out.join("coverage_report");
 
+        // the root directory of the source files
         let coverage_src_path = builder.src.join("library/core").canonicalize().unwrap();
 
         if builder.config.dry_run() {
             return;
         }
 
+        // path to the compiled binary to be used
         let core_tests_binary_path =
             get_test_binary_path(builder).expect("Could not find tests binary");
 
@@ -188,7 +191,7 @@ impl Step for GenerateCoverageReport {
             // grcov uses cargo-binutils to invoke llvm-cov. cargo-binutils looks for RUSTC env variable to get the path for llvm-cov.
             // https://github.com/rust-embedded/cargo-binutils/blob/5c38490e1abf91af51d0a345bb581e37facd28ff/src/rustc.rs#L8.
             .env("RUSTC", rustc_path);
-
+        dbg!(&cmd);
         cmd.run(builder);
     }
 
@@ -249,7 +252,7 @@ fn get_test_binary_path(builder: &Builder<'_>) -> Option<PathBuf> {
                 None
             }
         })
-        .max_by(|(_, duration_1), (_, duration_2)| duration_1.cmp(duration_2))
+        .max_by_key(|(_, duration)| *duration)
         .map(|(path, _)| path);
 
     core_tests_binary_file_path

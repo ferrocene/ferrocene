@@ -372,6 +372,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "pulldown-cmark-escape",
     "punycode",
     "quote",
+    "r-efi", // dependency of getrandom 0.3.2
     "rand",
     "rand_chacha",
     "rand_core",

@@ -209,7 +209,7 @@ impl<'a> Parser<'a> {
         let check_pub = def == &Defaultness::Final;
         let mut def_ = || mem::replace(def, Defaultness::Final);
 
-        let info = if self.eat_keyword_case(exp!(Use), case) {
+        let info = if !self.is_use_closure() && self.eat_keyword_case(exp!(Use), case) {
             self.parse_use_item()?
         } else if self.check_fn_front_matter(check_pub, case) {
             // FUNCTION ITEM
@@ -1277,6 +1277,21 @@ impl<'a> Parser<'a> {
         None
     }
 
+    fn is_use_closure(&self) -> bool {
+        if self.token.is_keyword(kw::Use) {
+            // Check if this could be a closure.
+            self.look_ahead(1, |token| {
+                // Move or Async here would be an error but still we're parsing a closure
+                let dist =
+                    if token.is_keyword(kw::Move) || token.is_keyword(kw::Async) { 2 } else { 1 };
+
+                self.look_ahead(dist, |token| matches!(token.kind, token::Or | token::OrOr))
+            })
+        } else {
+            false
+        }
+    }
+
     fn is_unsafe_foreign_mod(&self) -> bool {
         self.token.is_keyword(kw::Unsafe)
             && self.is_keyword_ahead(1, &[kw::Extern])
@@ -1290,7 +1305,7 @@ impl<'a> Parser<'a> {
         if self.check_keyword(exp!(Static)) {
             // Check if this could be a closure.
             !self.look_ahead(1, |token| {
-                if token.is_keyword(kw::Move) {
+                if token.is_keyword(kw::Move) || token.is_keyword(kw::Use) {
                     return true;
                 }
                 matches!(token.kind, token::Or | token::OrOr)
@@ -2954,14 +2969,27 @@ impl<'a> Parser<'a> {
             }
             _ => unreachable!(),
         };
+        // is lifetime `n` tokens ahead?
+        let is_lifetime = |this: &Self, n| this.look_ahead(n, |t| t.is_lifetime());
         // Is `self` `n` tokens ahead?
         let is_isolated_self = |this: &Self, n| {
             this.is_keyword_ahead(n, &[kw::SelfLower])
                 && this.look_ahead(n + 1, |t| t != &token::PathSep)
         };
+        // Is `pin const self` `n` tokens ahead?
+        let is_isolated_pin_const_self = |this: &Self, n| {
+            this.look_ahead(n, |token| token.is_ident_named(sym::pin))
+                && this.is_keyword_ahead(n + 1, &[kw::Const])
+                && is_isolated_self(this, n + 2)
+        };
         // Is `mut self` `n` tokens ahead?
         let is_isolated_mut_self =
             |this: &Self, n| this.is_keyword_ahead(n, &[kw::Mut]) && is_isolated_self(this, n + 1);
+        // Is `pin mut self` `n` tokens ahead?
+        let is_isolated_pin_mut_self = |this: &Self, n| {
+            this.look_ahead(n, |token| token.is_ident_named(sym::pin))
+                && is_isolated_mut_self(this, n + 1)
+        };
         // Parse `self` or `self: TYPE`. We already know the current token is `self`.
         let parse_self_possibly_typed = |this: &mut Self, m| {
             let eself_ident = expect_self_ident(this);
@@ -3012,26 +3040,35 @@ impl<'a> Parser<'a> {
         let eself_lo = self.token.span;
         let (eself, eself_ident, eself_hi) = match self.token.uninterpolate().kind {
             token::And => {
-                let eself = if is_isolated_self(self, 1) {
-                    // `&self`
-                    self.bump();
-                    SelfKind::Region(None, Mutability::Not)
-                } else if is_isolated_mut_self(self, 1) {
-                    // `&mut self`
-                    self.bump();
-                    self.bump();
-                    SelfKind::Region(None, Mutability::Mut)
-                } else if self.look_ahead(1, |t| t.is_lifetime()) && is_isolated_self(self, 2) {
-                    // `&'lt self`
-                    self.bump();
-                    let lt = self.expect_lifetime();
-                    SelfKind::Region(Some(lt), Mutability::Not)
-                } else if self.look_ahead(1, |t| t.is_lifetime()) && is_isolated_mut_self(self, 2) {
-                    // `&'lt mut self`
-                    self.bump();
-                    let lt = self.expect_lifetime();
-                    self.bump();
-                    SelfKind::Region(Some(lt), Mutability::Mut)
+                let has_lifetime = is_lifetime(self, 1);
+                let skip_lifetime_count = has_lifetime as usize;
+                let eself = if is_isolated_self(self, skip_lifetime_count + 1) {
+                    // `&{'lt} self`
+                    self.bump(); // &
+                    let lifetime = has_lifetime.then(|| self.expect_lifetime());
+                    SelfKind::Region(lifetime, Mutability::Not)
+                } else if is_isolated_mut_self(self, skip_lifetime_count + 1) {
+                    // `&{'lt} mut self`
+                    self.bump(); // &
+                    let lifetime = has_lifetime.then(|| self.expect_lifetime());
+                    self.bump(); // mut
+                    SelfKind::Region(lifetime, Mutability::Mut)
+                } else if is_isolated_pin_const_self(self, skip_lifetime_count + 1) {
+                    // `&{'lt} pin const self`
+                    self.bump(); // &
+                    let lifetime = has_lifetime.then(|| self.expect_lifetime());
+                    self.psess.gated_spans.gate(sym::pin_ergonomics, self.token.span);
+                    self.bump(); // pin
+                    self.bump(); // const
+                    SelfKind::Pinned(lifetime, Mutability::Not)
+                } else if is_isolated_pin_mut_self(self, skip_lifetime_count + 1) {
+                    // `&{'lt} pin mut self`
+                    self.bump(); // &
+                    let lifetime = has_lifetime.then(|| self.expect_lifetime());
+                    self.psess.gated_spans.gate(sym::pin_ergonomics, self.token.span);
+                    self.bump(); // pin
+                    self.bump(); // mut
+                    SelfKind::Pinned(lifetime, Mutability::Mut)
                 } else {
                     // `&not_self`
                     return Ok(None);

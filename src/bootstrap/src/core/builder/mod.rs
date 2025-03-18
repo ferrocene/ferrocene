@@ -1122,7 +1122,7 @@ impl<'a> Builder<'a> {
                 dist::PlainSourceTarball,
                 dist::BuildManifest,
                 dist::ReproducibleArtifacts,
-<<<<<<< HEAD
+                dist::Gcc,
                 crate::ferrocene::dist::Docs,
                 crate::ferrocene::dist::DocsDoctrees,
                 crate::ferrocene::dist::flip_link::FlipLink,
@@ -1131,9 +1131,6 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::dist::TestOutcomes,
                 crate::ferrocene::dist::GenerateBuildMetadata,
                 crate::ferrocene::partners::oxidos::DistOxidOs,
-=======
-                dist::Gcc
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             ),
             Kind::Install => describe!(
                 // install::Docs,

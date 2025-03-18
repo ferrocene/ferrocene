@@ -22,10 +22,10 @@ Leadership roles
      - Brigitte Markmann
 
    * - Technical Lead
-     - Pietro Albini
-
-   * - Infrastructure Lead
      - Ana Hobden
+
+   * - Technical Expert
+     - Pietro Albini
 
    * - Release Lead
      - Pietro Albini

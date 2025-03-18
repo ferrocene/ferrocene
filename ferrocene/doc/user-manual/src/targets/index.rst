@@ -125,7 +125,7 @@ should not be used in production.
 
 For any of the following reasons, the target is not quality managed or qualified:
 
-* The Ferrocene test suite may not successfully execute on the target.
+* Some tests present within the Ferrocene test suite may not pass on the target.
 * Some or all of the Ferrocene test suite does not yet execute on the target.
 * An appropriate virtualization target for testing has not been identified.
 * Improved support for the target has not been requested.

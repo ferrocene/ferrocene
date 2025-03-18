@@ -14,29 +14,15 @@ fn main() {
 
     // Compile with a single debuginfo flag
     let debug_0 = out_dir.join("0");
-    rustc().edition("2021").target(target()).input("main.rs").debuginfo("0").output(&debug_0).run();
+    rustc().target(target()).input("main.rs").debuginfo("0").output(&debug_0).run();
     let debug_2 = out_dir.join("2");
-    rustc().edition("2021").target(target()).input("main.rs").debuginfo("2").output(&debug_2).run();
+    rustc().target(target()).input("main.rs").debuginfo("2").output(&debug_2).run();
 
     // Compile with multiple debuginfo flags
     let debug_02 = out_dir.join("02");
-    rustc()
-        .edition("2021")
-        .target(target())
-        .input("main.rs")
-        .debuginfo("0")
-        .debuginfo("2")
-        .output(&debug_02)
-        .run();
+    rustc().target(target()).input("main.rs").debuginfo("0").debuginfo("2").output(&debug_02).run();
     let debug_20 = out_dir.join("20");
-    rustc()
-        .edition("2021")
-        .target(target())
-        .input("main.rs")
-        .debuginfo("2")
-        .debuginfo("0")
-        .output(&debug_20)
-        .run();
+    rustc().target(target()).input("main.rs").debuginfo("2").debuginfo("0").output(&debug_20).run();
 
     // Compare build artifacts, they must be equal
     assert_eq!(rfs::read(&debug_2), rfs::read(&debug_02));

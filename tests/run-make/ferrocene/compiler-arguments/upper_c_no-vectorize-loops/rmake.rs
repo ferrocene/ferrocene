@@ -9,13 +9,11 @@ use run_make_support::{bare_rustc, rfs as fs};
 fn main() {
     let input = Path::new("example.rs");
     let output = input.with_extension("s");
-    let edition = "2021";
 
     let with = Path::new("out-dir-with");
     fs::create_dir(with);
     bare_rustc()
         .input(input)
-        .edition(edition)
         .crate_type("lib")
         .opt()
         .emit("asm")
@@ -26,14 +24,7 @@ fn main() {
 
     let without = Path::new("out-dir-without");
     fs::create_dir(without);
-    bare_rustc()
-        .input(input)
-        .edition(edition)
-        .crate_type("lib")
-        .opt()
-        .emit("asm")
-        .out_dir(without)
-        .run();
+    bare_rustc().input(input).crate_type("lib").opt().emit("asm").out_dir(without).run();
 
     assert_ne!(fs::read_to_string(with.join(&output)), fs::read_to_string(without.join(&output)))
 }

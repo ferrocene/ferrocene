@@ -4,7 +4,6 @@ use run_make_support::{rustc, target};
 
 fn main() {
     rustc()
-        .edition("2021")
         .target(target())
         .link_arg("-lfoo")
         .link_arg("-lbar")

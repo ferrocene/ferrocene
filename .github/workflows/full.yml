@@ -416,7 +416,7 @@ jobs:
     with:
       host-triple: x86_64-unknown-linux-gnu
       triples: ${{ format('{0},{1},{2}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets, needs.calculate-envs.outputs.linux-targets) }}
-      runner: ferrocene-arc-runners-linux-kubernetes-amd64
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
       # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}

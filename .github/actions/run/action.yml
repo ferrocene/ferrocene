@@ -3,10 +3,10 @@ description: "Run in a container, or not."
 inputs:
   container:
     description: The container address
+  configure:
+    description: Any additional configuration to pass to the script
   script:
     description: The script to run
-  test-outcomes-dir:
-    description: The test outcomes directory
   test-device-addr:
     description: The test device address to use
 
@@ -21,7 +21,7 @@ runs:
         SCRIPT: |
           ./ferrocene/ci/scripts/setup-uv.sh
           ${{ inputs.script }}
-        FERROCENE_TEST_OUTCOMES_DIR: ${{ inputs.test-outcomes-dir }}
+        RUST_CONFIGURE_ARGS: ${{ inputs.configure }}
       run: ferrocene/ci/run.sh
 
     - name: Pull container
@@ -38,7 +38,7 @@ runs:
         SCRIPT: |
           ./ferrocene/ci/scripts/setup-uv.sh
           ${{ inputs.script }}
-        FERROCENE_TEST_OUTCOMES_DIR: ${{ inputs.test-outcomes-dir }}
+        RUST_CONFIGURE_ARGS: ${{ inputs.configure }}
       # Due to a GHA limitation, `TEST_DEVICE_ADDR` is always set, but sometimes empty.
       # Detect if it's empty and unset it.
       run: |

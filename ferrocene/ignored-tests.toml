@@ -63,3 +63,8 @@ reason = "The test does not pass on CI, to be revisited later. https://github.co
 tests = ["tests/debuginfo"]
 targets = ["aarch64-unknown-ferrocenecoretest", "thumbv7em-ferrocenecoretest-eabi", "thumbv7em-ferrocenecoretest-eabihf"]
 reason = "Running these tests require changes to bootstrap"
+
+[["tests/ui"]]
+tests = ["tests/ui/asm/global-asm-isnt-really-a-mir-body.rs"]
+targets = ["thumbv7em-ferrocenecoretest-eabi", "thumbv7em-ferrocenecoretest-eabihf"]
+reason = "Linker fail to be investigated later: undefined symbol: __atomic_fetch_add_8"

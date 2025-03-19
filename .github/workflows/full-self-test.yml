@@ -54,9 +54,6 @@ jobs:
       # https://github.com/Azure/login/issues/372#issuecomment-2056289617
       - name: Cache Azure storage token
         run: az account get-access-token --scope https://storage.azure.com/.default --output none 
-      - name: Authenicate docker with Azure
-        if: ${{ (runner.os == 'Linux') }}
-        run: az acr login --name ferrocenecr
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4

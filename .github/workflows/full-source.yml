@@ -60,9 +60,6 @@ jobs:
           client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: Authenicate docker with Azure
-        if: ${{ (runner.os == 'Linux') }}
-        run: az acr login --name ferrocenecr
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4

@@ -217,18 +217,18 @@
 // #![feature(x86_amx_intrinsics)]
 // tidy-alphabetical-end
 
-#![cfg(feature = "uncertified")]
-
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]
 extern crate self as core;
 
 #[prelude_import]
 #[allow(unused)]
+#[cfg(feature = "uncertified")]
 use prelude::rust_2021::*;
 
 #[cfg(not(test))] // See #65860
 #[macro_use]
+#[cfg(feature = "uncertified")]
 mod macros;
 
 // We don't export this through #[macro_export] for now, to avoid breakage.
@@ -236,6 +236,7 @@ mod macros;
 #[cfg(not(test))]
 #[unstable(feature = "assert_matches", issue = "82775")]
 /// Unstable module containing the unstable `assert_matches` macro.
+#[cfg(feature = "uncertified")]
 pub mod assert_matches {
     #[unstable(feature = "assert_matches", issue = "82775")]
     pub use crate::macros::{assert_matches, debug_assert_matches};
@@ -244,153 +245,225 @@ pub mod assert_matches {
 // We don't export this through #[macro_export] for now, to avoid breakage.
 #[unstable(feature = "autodiff", issue = "124509")]
 /// Unstable module containing the unstable `autodiff` macro.
+#[cfg(feature = "uncertified")]
 pub mod autodiff {
     #[unstable(feature = "autodiff", issue = "124509")]
     pub use crate::macros::builtin::autodiff;
 }
 
 #[unstable(feature = "contracts", issue = "128044")]
+#[cfg(feature = "uncertified")]
 pub mod contracts;
 
 #[unstable(feature = "cfg_match", issue = "115585")]
+#[cfg(feature = "uncertified")]
 pub use crate::macros::cfg_match;
 
 #[macro_use]
+#[cfg(feature = "uncertified")]
 mod internal_macros;
 
 #[path = "num/shells/int_macros.rs"]
 #[macro_use]
+#[cfg(feature = "uncertified")]
 mod int_macros;
 
 #[rustc_diagnostic_item = "i128_legacy_mod"]
 #[path = "num/shells/i128.rs"]
+#[cfg(feature = "uncertified")]
 pub mod i128;
 #[rustc_diagnostic_item = "i16_legacy_mod"]
 #[path = "num/shells/i16.rs"]
+#[cfg(feature = "uncertified")]
 pub mod i16;
 #[rustc_diagnostic_item = "i32_legacy_mod"]
 #[path = "num/shells/i32.rs"]
+#[cfg(feature = "uncertified")]
 pub mod i32;
 #[rustc_diagnostic_item = "i64_legacy_mod"]
 #[path = "num/shells/i64.rs"]
+#[cfg(feature = "uncertified")]
 pub mod i64;
 #[rustc_diagnostic_item = "i8_legacy_mod"]
 #[path = "num/shells/i8.rs"]
+#[cfg(feature = "uncertified")]
 pub mod i8;
 #[rustc_diagnostic_item = "isize_legacy_mod"]
 #[path = "num/shells/isize.rs"]
+#[cfg(feature = "uncertified")]
 pub mod isize;
 
 #[rustc_diagnostic_item = "u128_legacy_mod"]
 #[path = "num/shells/u128.rs"]
+#[cfg(feature = "uncertified")]
 pub mod u128;
 #[rustc_diagnostic_item = "u16_legacy_mod"]
 #[path = "num/shells/u16.rs"]
+#[cfg(feature = "uncertified")]
 pub mod u16;
 #[rustc_diagnostic_item = "u32_legacy_mod"]
 #[path = "num/shells/u32.rs"]
+#[cfg(feature = "uncertified")]
 pub mod u32;
 #[rustc_diagnostic_item = "u64_legacy_mod"]
 #[path = "num/shells/u64.rs"]
+#[cfg(feature = "uncertified")]
 pub mod u64;
 #[rustc_diagnostic_item = "u8_legacy_mod"]
 #[path = "num/shells/u8.rs"]
+#[cfg(feature = "uncertified")]
 pub mod u8;
 #[rustc_diagnostic_item = "usize_legacy_mod"]
 #[path = "num/shells/usize.rs"]
+#[cfg(feature = "uncertified")]
 pub mod usize;
 
 #[path = "num/f128.rs"]
+#[cfg(feature = "uncertified")]
 pub mod f128;
 #[path = "num/f16.rs"]
+#[cfg(feature = "uncertified")]
 pub mod f16;
 #[path = "num/f32.rs"]
+#[cfg(feature = "uncertified")]
 pub mod f32;
 #[path = "num/f64.rs"]
+#[cfg(feature = "uncertified")]
 pub mod f64;
 
 #[macro_use]
+#[cfg(feature = "uncertified")]
 pub mod num;
 
 /* The core prelude, not as all-encompassing as the std prelude */
 
+#[cfg(feature = "uncertified")]
 pub mod prelude;
 
 /* Core modules for ownership management */
 
+#[cfg(feature = "uncertified")]
 pub mod hint;
+#[cfg(feature = "uncertified")]
 pub mod intrinsics;
+#[cfg(feature = "uncertified")]
 pub mod mem;
+#[cfg(feature = "uncertified")]
 pub mod ptr;
 #[unstable(feature = "ub_checks", issue = "none")]
+#[cfg(feature = "uncertified")]
 pub mod ub_checks;
 
 /* Core language traits */
 
+#[cfg(feature = "uncertified")]
 pub mod borrow;
+#[cfg(feature = "uncertified")]
 pub mod clone;
+#[cfg(feature = "uncertified")]
 pub mod cmp;
+#[cfg(feature = "uncertified")]
 pub mod convert;
+#[cfg(feature = "uncertified")]
 pub mod default;
+#[cfg(feature = "uncertified")]
 pub mod error;
+#[cfg(feature = "uncertified")]
 pub mod marker;
+#[cfg(feature = "uncertified")]
 pub mod ops;
 
 /* Core types and methods on primitives */
 
+#[cfg(feature = "uncertified")]
 pub mod any;
+#[cfg(feature = "uncertified")]
 pub mod array;
+#[cfg(feature = "uncertified")]
 pub mod ascii;
+#[cfg(feature = "uncertified")]
 pub mod asserting;
 #[unstable(feature = "async_iterator", issue = "79024")]
+#[cfg(feature = "uncertified")]
 pub mod async_iter;
 #[unstable(feature = "bstr", issue = "134915")]
+#[cfg(feature = "uncertified")]
 pub mod bstr;
+#[cfg(feature = "uncertified")]
 pub mod cell;
+#[cfg(feature = "uncertified")]
 pub mod char;
+#[cfg(feature = "uncertified")]
 pub mod ffi;
 #[unstable(feature = "core_io_borrowed_buf", issue = "117693")]
+#[cfg(feature = "uncertified")]
 pub mod io;
+#[cfg(feature = "uncertified")]
 pub mod iter;
+#[cfg(feature = "uncertified")]
 pub mod net;
+#[cfg(feature = "uncertified")]
 pub mod option;
+#[cfg(feature = "uncertified")]
 pub mod panic;
+#[cfg(feature = "uncertified")]
 pub mod panicking;
 #[unstable(feature = "pattern_type_macro", issue = "123646")]
+#[cfg(feature = "uncertified")]
 pub mod pat;
+#[cfg(feature = "uncertified")]
 pub mod pin;
 #[unstable(feature = "random", issue = "130703")]
+#[cfg(feature = "uncertified")]
 pub mod random;
 #[unstable(feature = "new_range_api", issue = "125687")]
+#[cfg(feature = "uncertified")]
 pub mod range;
+#[cfg(feature = "uncertified")]
 pub mod result;
+#[cfg(feature = "uncertified")]
 pub mod sync;
 #[unstable(feature = "unsafe_binders", issue = "130516")]
+#[cfg(feature = "uncertified")]
 pub mod unsafe_binder;
 
+#[cfg(feature = "uncertified")]
 pub mod fmt;
+#[cfg(feature = "uncertified")]
 pub mod hash;
+#[cfg(feature = "uncertified")]
 pub mod slice;
+#[cfg(feature = "uncertified")]
 pub mod str;
+#[cfg(feature = "uncertified")]
 pub mod time;
 
+#[cfg(feature = "uncertified")]
 pub mod unicode;
 
 /* Async */
+#[cfg(feature = "uncertified")]
 pub mod future;
+#[cfg(feature = "uncertified")]
 pub mod task;
 
 /* Heap memory allocator trait */
 #[allow(missing_docs)]
+#[cfg(feature = "uncertified")]
 pub mod alloc;
 
 // note: does not need to be public
+#[cfg(feature = "uncertified")]
 mod bool;
+#[cfg(feature = "uncertified")]
 mod escape;
+#[cfg(feature = "uncertified")]
 mod tuple;
+#[cfg(feature = "uncertified")]
 mod unit;
 
 #[stable(feature = "core_primitive", since = "1.43.0")]
+#[cfg(feature = "uncertified")]
 pub mod primitive;
 
 // Pull in the `core_arch` crate directly into core. The contents of
@@ -411,9 +484,11 @@ pub mod primitive;
     unreachable_pub
 )]
 #[allow(rustdoc::bare_urls)]
+#[cfg(feature = "uncertified")]
 mod core_arch;
 
 #[stable(feature = "simd_arch", since = "1.27.0")]
+#[cfg(feature = "uncertified")]
 pub mod arch;
 
 // Pull in the `core_simd` crate directly into core. The contents of
@@ -426,9 +501,11 @@ pub mod arch;
 #[allow(missing_debug_implementations, dead_code, unsafe_op_in_unsafe_fn)]
 #[allow(rustdoc::bare_urls)]
 #[unstable(feature = "portable_simd", issue = "86656")]
+#[cfg(feature = "uncertified")]
 mod core_simd;
 
 #[unstable(feature = "portable_simd", issue = "86656")]
+#[cfg(feature = "uncertified")]
 pub mod simd {
     #![doc = include_str!("../../portable-simd/crates/core_simd/src/core_simd_docs.md")]
 
@@ -436,4 +513,5 @@ pub mod simd {
     pub use crate::core_simd::simd::*;
 }
 
+#[cfg(feature = "uncertified")]
 include!("primitive_docs.rs");

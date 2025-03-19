@@ -17,7 +17,11 @@ runs:
       if: ${{ inputs.container == '' }}
       shell: bash
       env:
-        SCRIPT: ${{ inputs.script }}
+        TEST_DEVICE_ADDR: ${{ inputs.test-device-addr }}
+        SCRIPT: |
+          ./ferrocene/ci/scripts/setup-uv.sh
+          ${{ inputs.script }}
+        FERROCENE_TEST_OUTCOMES_DIR: ${{ inputs.test-outcomes-dir }}
       run: ferrocene/ci/run.sh
 
     - name: Pull container

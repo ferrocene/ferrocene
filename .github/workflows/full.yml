@@ -13,9 +13,7 @@ env:
 on:
   push:
     branches:
-      - trying
-      - staging
-      - hoverbear/gha-migration
+      - xylakant/ci-experiments
 
 permissions:
   id-token: write # This is required for requesting the JWT

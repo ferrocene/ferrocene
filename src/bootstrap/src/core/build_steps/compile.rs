@@ -2055,7 +2055,9 @@ impl Step for Assemble {
                 builder.info(&format!("Creating a sysroot for stage{stage} compiler (use `rustup toolchain link 'name' build/host/stage{stage}`)", stage=target_compiler.stage));
             }
 
-            maybe_install_llvm_bitcode_linker(target_compiler);
+            let mut precompiled_compiler = target_compiler;
+            precompiled_compiler.forced_compiler(true);
+            maybe_install_llvm_bitcode_linker(precompiled_compiler);
 
             return target_compiler;
         }
@@ -2238,7 +2240,7 @@ impl Step for Assemble {
             );
         }
 
-        maybe_install_llvm_bitcode_linker(build_compiler);
+        maybe_install_llvm_bitcode_linker(target_compiler);
 
         // Ensure that `libLLVM.so` ends up in the newly build compiler directory,
         // so that it can be found when the newly built `rustc` is run.

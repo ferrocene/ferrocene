@@ -149,7 +149,6 @@ const EXCEPTIONS_CARGO: ExceptionList = &[
     ("arrayref", "BSD-2-Clause"),
     ("bitmaps", "MPL-2.0+"),
     ("blake3", "CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception"),
-    ("bytesize", "Apache-2.0"),
     ("ciborium", "Apache-2.0"),
     ("ciborium-io", "Apache-2.0"),
     ("ciborium-ll", "Apache-2.0"),
@@ -276,7 +275,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "blake3",
     "block-buffer",
     "bstr",
-    "byteorder", // via ruzstd in object in thorin-dwp
     "cc",
     "cfg-if",
     "cfg_aliases",
@@ -374,6 +372,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "pulldown-cmark-escape",
     "punycode",
     "quote",
+    "r-efi", // dependency of getrandom 0.3.2
     "rand",
     "rand_chacha",
     "rand_core",

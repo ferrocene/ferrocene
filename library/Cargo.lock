@@ -30,8 +30,6 @@ version = "0.0.0"
 dependencies = [
  "compiler_builtins",
  "core",
- "rand",
- "rand_xorshift",
 ]
 
 [[package]]
@@ -39,6 +37,14 @@ name = "allocator-api2"
 version = "0.2.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "45862d1c77f2228b9e10bc609d5bc203d86ebc9b87ad8d5d5167a6c9abf739d9"
+
+[[package]]
+name = "alloctests"
+version = "0.0.0"
+dependencies = [
+ "rand",
+ "rand_xorshift",
+]
 
 [[package]]
 name = "cc"
@@ -61,9 +67,9 @@ dependencies = [
 
 [[package]]
 name = "compiler_builtins"
-version = "0.1.148"
+version = "0.1.151"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26137996631d90d2727b905b480fdcf8c4479fdbce7afd7f8e3796d689b33cc2"
+checksum = "abc30f1766d387c35f2405e586d3e7a88230dc728ff78cd1d0bc59ae0b63154b"
 dependencies = [
  "cc",
  "rustc-std-workspace-core",

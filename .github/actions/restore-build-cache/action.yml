@@ -10,11 +10,6 @@ runs:
   using: "composite"
   steps:
     - name: Build cache download
-      env:
-        AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
-        AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-        AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
       shell: bash
       run: |
         uv run ./ferrocene/ci/scripts/cache.py retrieve "s3://ferrocene-ci-caches/persist-between-jobs/${{ inputs.build-run-id }}/${{ inputs.build-artifact }}" .

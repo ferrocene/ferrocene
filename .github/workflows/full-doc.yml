@@ -66,6 +66,11 @@ jobs:
 
 
       - name: Restore build cache
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
         uses: ./.github/actions/restore-build-cache/
         with:
           build-artifact: ${{ inputs.build-artifact }}

@@ -9,14 +9,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Download build artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: ${{ inputs.build-artifact }}
-        run-id: ${{ inputs.build-run-id }}
-    - name: Post artifact download steps
+    - name: Build cache download
       shell: bash
-      run: uv run ./ferrocene/ci/scripts/build_cache.py post-download
-    - name: Remove old build cache tar
-      shell: bash
-      run: rm -rf build.tar
+      run: |
+        uv run ./ferrocene/ci/scripts/cache.py retrieve "s3://ferrocene-ci-caches/persist-between-jobs/${{ inputs.build-run-id }}/${{ inputs.build-artifact }}" .
+        uv run ./ferrocene/ci/scripts/build_cache.py post-download

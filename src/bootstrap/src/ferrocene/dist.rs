@@ -108,6 +108,7 @@ impl Step for SourceTarball {
             "README.md",
             "RELEASES.md",
             "REUSE.toml",
+            "TRADEMARK.md",
             "config.example.toml",
             "Cargo.toml",
             "Cargo.lock",

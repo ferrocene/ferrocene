@@ -66,7 +66,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: Authenicate docker with Azure
-        if: runner.os == 'Linux'
+        if: ${{ runner.os == 'Linux' }}
         run: az acr login --name ferrocenecr
       # https://github.com/Azure/login/issues/372#issuecomment-2056289617
       - name: Cache Azure storage token
@@ -182,15 +182,11 @@ jobs:
             uv run x.py --stage 2 build library src/tools/rustdoc
             uv run x.py --stage 1 build src/tools/rustdoc
 
-      - name: Pre artifact upload steps
+      - name: Build cache upload
         shell: bash
-        run: uv run ./ferrocene/ci/scripts/build_cache.py pre-upload
-      - uses: actions/upload-artifact@v4
-        id: artifact
-        with:
-          name: ${{ env.ARTIFACT }}
-          path: build.tar
-          retention-days: 1
+        run: |
+          uv run ./ferrocene/ci/scripts/build_cache.py pre-upload
+          uv run ./ferrocene/ci/scripts/cache.py store "s3://ferrocene-ci-caches/persist-between-jobs/${{ github.run_id }}/${{ env.ARTIFACT }}" ./build
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/

@@ -179,6 +179,11 @@ jobs:
             uv run x.py --stage 1 build src/tools/rustdoc
 
       - name: Build cache upload
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
         shell: bash
         run: |
           uv run ./ferrocene/ci/scripts/build_cache.py pre-upload

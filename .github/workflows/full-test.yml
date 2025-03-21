@@ -110,10 +110,6 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ inputs.qemu-arch != '' && format('sudo update-binfmts --import {0}', inputs.qemu-arch) || '' }}
-            ${{ inputs.qemu-arch != '' && format('sudo update-binfmts --enable {0}', inputs.qemu-arch) || '' }}
-            ${{ inputs.qemu-cpu != '' && format('export QEMU_CPU="{0}"', inputs.qemu-cpu) || '' }}
-            ${{ inputs.qemu-arch != '' && 'sudo update-binfmts --display' || '' }}
             uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report
@@ -174,10 +170,6 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ inputs.qemu-arch != '' && format('sudo update-binfmts --import {0}', inputs.qemu-arch) || '' }}
-            ${{ inputs.qemu-arch != '' && format('sudo update-binfmts --enable {0}', inputs.qemu-arch) || '' }}
-            ${{ inputs.qemu-cpu != '' && format('export QEMU_CPU="{0}"', inputs.qemu-cpu) || '' }}
-            ${{ inputs.qemu-arch != '' && 'sudo update-binfmts --display' || '' }}
             uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:compiletest) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report
@@ -238,10 +230,6 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ inputs.qemu-arch != '' && format('sudo update-binfmts --import {0}', inputs.qemu-arch) || '' }}
-            ${{ inputs.qemu-arch != '' && format('sudo update-binfmts --enable {0}', inputs.qemu-arch) || '' }}
-            ${{ inputs.qemu-cpu != '' && format('export QEMU_CPU="{0}"', inputs.qemu-cpu) || '' }}
-            ${{ inputs.qemu-arch != '' && 'sudo update-binfmts --display' || '' }}
             uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report
@@ -303,10 +291,6 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ inputs.qemu-arch != '' && format('sudo update-binfmts --import {0}', inputs.qemu-arch) || '' }}
-            ${{ inputs.qemu-arch != '' && format('sudo update-binfmts --enable {0}', inputs.qemu-arch) || '' }}
-            ${{ inputs.qemu-cpu != '' && format('export QEMU_CPU="{0}"', inputs.qemu-cpu) || '' }}
-            ${{ inputs.qemu-arch != '' && 'sudo update-binfmts --display' || '' }}
             uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report

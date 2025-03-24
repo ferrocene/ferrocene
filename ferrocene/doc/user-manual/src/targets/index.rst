@@ -35,8 +35,8 @@ Qualified targets
 -----------------
 
 Qualified targets are provided with the highest level of assurance. They are
-qualified for use in safety-critical contexts (when used with a qualified
-rustc), and the full Ferrocene test suite is executed on the target for every
+qualified for use in safety-critical contexts when used with a qualified
+rustc. The full Ferrocene test suite is executed on the target for every
 code change.
 
 Only stable releases of qualified targets are qualified. Other releases, such

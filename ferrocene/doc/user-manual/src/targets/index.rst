@@ -26,6 +26,11 @@ There are also two variants of the standard library available:
 * **Full**: provides the ``core``, ``alloc``, ``std``, ``test`` and
   ``proc_macro`` built-in crates.
 
+.. note::
+  The libraries provided are evaluated and tested within the scope of Ferrocene qualification for compiler use only.
+  The use of these libraries by end-use code is outside the scope of the current Ferrocene qualification.
+  It is the end-user responsibility to certify these libraries if they are used in their code.
+
 Qualified targets
 -----------------
 

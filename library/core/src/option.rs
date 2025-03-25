@@ -1704,9 +1704,9 @@ impl<T> Option<T> {
 //         unsafe { self.as_mut().unwrap_unchecked() }
 //     }
 
-//     /////////////////////////////////////////////////////////////////////////
-//     // Misc
-//     /////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////
+    // Misc
+    /////////////////////////////////////////////////////////////////////////
 
 //     /// Takes the value out of the option, leaving a [`None`] in its place.
 //     ///
@@ -1788,67 +1788,68 @@ impl<T> Option<T> {
 //         mem::replace(self, Some(value))
 //     }
 
-//     /// Zips `self` with another `Option`.
-//     ///
-//     /// If `self` is `Some(s)` and `other` is `Some(o)`, this method returns `Some((s, o))`.
-//     /// Otherwise, `None` is returned.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x = Some(1);
-//     /// let y = Some("hi");
-//     /// let z = None::<u8>;
-//     ///
-//     /// assert_eq!(x.zip(y), Some((1, "hi")));
-//     /// assert_eq!(x.zip(z), None);
-//     /// ```
-//     #[stable(feature = "option_zip_option", since = "1.46.0")]
-//     pub fn zip<U>(self, other: Option<U>) -> Option<(T, U)> {
-//         match (self, other) {
-//             (Some(a), Some(b)) => Some((a, b)),
-//             _ => None,
-//         }
-//     }
+    /// Zips `self` with another `Option`.
+    ///
+    /// If `self` is `Some(s)` and `other` is `Some(o)`, this method returns `Some((s, o))`.
+    /// Otherwise, `None` is returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x = Some(1);
+    /// let y = Some("hi");
+    /// let z = None::<u8>;
+    ///
+    /// assert_eq!(x.zip(y), Some((1, "hi")));
+    /// assert_eq!(x.zip(z), None);
+    /// ```
+    #[stable(feature = "option_zip_option", since = "1.46.0")]
+    pub fn zip<U>(self, other: Option<U>) -> Option<(T, U)> {
+        match (self, other) {
+            (Some(a), Some(b)) => Some((a, b)),
+            _ => None,
+        }
+    }
 
-//     /// Zips `self` and another `Option` with function `f`.
-//     ///
-//     /// If `self` is `Some(s)` and `other` is `Some(o)`, this method returns `Some(f(s, o))`.
-//     /// Otherwise, `None` is returned.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// #![feature(option_zip)]
-//     ///
-//     /// #[derive(Debug, PartialEq)]
-//     /// struct Point {
-//     ///     x: f64,
-//     ///     y: f64,
-//     /// }
-//     ///
-//     /// impl Point {
-//     ///     fn new(x: f64, y: f64) -> Self {
-//     ///         Self { x, y }
-//     ///     }
-//     /// }
-//     ///
-//     /// let x = Some(17.5);
-//     /// let y = Some(42.7);
-//     ///
-//     /// assert_eq!(x.zip_with(y, Point::new), Some(Point { x: 17.5, y: 42.7 }));
-//     /// assert_eq!(x.zip_with(None, Point::new), None);
-//     /// ```
-//     #[unstable(feature = "option_zip", issue = "70086")]
-//     pub fn zip_with<U, F, R>(self, other: Option<U>, f: F) -> Option<R>
-//     where
-//         F: FnOnce(T, U) -> R,
-//     {
-//         match (self, other) {
-//             (Some(a), Some(b)) => Some(f(a, b)),
-//             _ => None,
-//         }
-//     }
+    /// Zips `self` and another `Option` with function `f`.
+    ///
+    /// If `self` is `Some(s)` and `other` is `Some(o)`, this method returns `Some(f(s, o))`.
+    /// Otherwise, `None` is returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #![feature(option_zip)]
+    ///
+    /// #[derive(Debug, PartialEq)]
+    /// struct Point {
+    ///     x: f64,
+    ///     y: f64,
+    /// }
+    ///
+    /// impl Point {
+    ///     fn new(x: f64, y: f64) -> Self {
+    ///         Self { x, y }
+    ///     }
+    /// }
+    ///
+    /// let x = Some(17.5);
+    /// let y = Some(42.7);
+    ///
+    /// assert_eq!(x.zip_with(y, Point::new), Some(Point { x: 17.5, y: 42.7 }));
+    /// assert_eq!(x.zip_with(None, Point::new), None);
+    /// ```
+    #[unstable(feature = "option_zip", issue = "70086")]
+    #[cfg(feature = "unstable")]
+    pub fn zip_with<U, F, R>(self, other: Option<U>, f: F) -> Option<R>
+    where
+        F: FnOnce(T, U) -> R,
+    {
+        match (self, other) {
+            (Some(a), Some(b)) => Some(f(a, b)),
+            _ => None,
+        }
+    }
 }
 
 // impl<T, U> Option<(T, U)> {

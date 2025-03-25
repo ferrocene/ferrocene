@@ -23,7 +23,7 @@ use crate::core::builder::{
 };
 use crate::core::config::TargetSelection;
 use crate::core::config::flags::{Subcommand, get_completion};
-use crate::ferrocene::code_coverage::instrument_coverage;
+use crate::ferrocene::code_coverage::GatherCoverage;
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::utils::build_stamp::{self, BuildStamp};
 use crate::utils::exec::{BootstrapCommand, command};
@@ -2750,33 +2750,9 @@ impl Step for Crate {
             _ => panic!("can only test libraries"),
         };
 
-        let mut collect_profraw = false;
+        let mut coverage = None;
         if builder.config.cmd.coverage() {
-            instrument_coverage(&mut cargo);
-
-            let coverage_dir = builder.tempdir().join("coverage");
-            let coverage_file = coverage_dir.join("default_%m_%p.profraw");
-
-            if !std::env::var("LLVM_PROFILE_FILE").is_ok() {
-                cargo.env("LLVM_PROFILE_FILE", &coverage_file);
-                collect_profraw = true;
-            }
-        }
-
-        // NOTE: The profraw files are first created in temp/coverage and then moved to build/coverage
-        // This is done so that the existing coverage data in build/coverage if any is not lost
-        // if the coverage command fails for some reason.
-        if collect_profraw {
-            let temp_dir = builder.tempdir().join("coverage");
-            let coverage_dir = builder.out.join("coverage");
-
-            if !builder.config.dry_run() {
-                let _ = std::fs::remove_dir_all(&coverage_dir);
-                std::fs::create_dir_all(&coverage_dir)
-                    .expect("Failed to create coverage directory");
-
-                std::fs::rename(temp_dir, coverage_dir).expect("Failed to move coverage data");
-            }
+            coverage = Some(GatherCoverage::new(builder, &mut cargo, target, "library"));
         }
 
         let mut crates = self.crates.clone();
@@ -2792,6 +2768,10 @@ impl Step for Crate {
         }
 
         run_cargo_test(cargo, &[], &crates, &*crate_description(&self.crates), target, builder);
+
+        if let Some(coverage) = coverage {
+            coverage.post_process();
+        }
     }
 }
 

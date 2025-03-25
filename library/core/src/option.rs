@@ -885,214 +885,214 @@ impl<T> Option<T> {
 //         }
 //     }
 
-//     /////////////////////////////////////////////////////////////////////////
-//     // Getting to contained values
-//     /////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////
+    // Getting to contained values
+    /////////////////////////////////////////////////////////////////////////
 
-//     /// Returns the contained [`Some`] value, consuming the `self` value.
-//     ///
-//     /// # Panics
-//     ///
-//     /// Panics if the value is a [`None`] with a custom panic message provided by
-//     /// `msg`.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x = Some("value");
-//     /// assert_eq!(x.expect("fruits are healthy"), "value");
-//     /// ```
-//     ///
-//     /// ```should_panic
-//     /// let x: Option<&str> = None;
-//     /// x.expect("fruits are healthy"); // panics with `fruits are healthy`
-//     /// ```
-//     ///
-//     /// # Recommended Message Style
-//     ///
-//     /// We recommend that `expect` messages are used to describe the reason you
-//     /// _expect_ the `Option` should be `Some`.
-//     ///
-//     /// ```should_panic
-//     /// # let slice: &[u8] = &[];
-//     /// let item = slice.get(0)
-//     ///     .expect("slice should not be empty");
-//     /// ```
-//     ///
-//     /// **Hint**: If you're having trouble remembering how to phrase expect
-//     /// error messages remember to focus on the word "should" as in "env
-//     /// variable should be set by blah" or "the given binary should be available
-//     /// and executable by the current user".
-//     ///
-//     /// For more detail on expect message styles and the reasoning behind our
-//     /// recommendation please refer to the section on ["Common Message
-//     /// Styles"](../../std/error/index.html#common-message-styles) in the [`std::error`](../../std/error/index.html) module docs.
-//     #[inline]
-//     #[track_caller]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[cfg_attr(not(test), rustc_diagnostic_item = "option_expect")]
-//     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
-//     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-//     pub const fn expect(self, msg: &str) -> T {
-//         match self {
-//             Some(val) => val,
-//             None => expect_failed(msg),
-//         }
-//     }
+    /// Returns the contained [`Some`] value, consuming the `self` value.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value is a [`None`] with a custom panic message provided by
+    /// `msg`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x = Some("value");
+    /// assert_eq!(x.expect("fruits are healthy"), "value");
+    /// ```
+    ///
+    /// ```should_panic
+    /// let x: Option<&str> = None;
+    /// x.expect("fruits are healthy"); // panics with `fruits are healthy`
+    /// ```
+    ///
+    /// # Recommended Message Style
+    ///
+    /// We recommend that `expect` messages are used to describe the reason you
+    /// _expect_ the `Option` should be `Some`.
+    ///
+    /// ```should_panic
+    /// # let slice: &[u8] = &[];
+    /// let item = slice.get(0)
+    ///     .expect("slice should not be empty");
+    /// ```
+    ///
+    /// **Hint**: If you're having trouble remembering how to phrase expect
+    /// error messages remember to focus on the word "should" as in "env
+    /// variable should be set by blah" or "the given binary should be available
+    /// and executable by the current user".
+    ///
+    /// For more detail on expect message styles and the reasoning behind our
+    /// recommendation please refer to the section on ["Common Message
+    /// Styles"](../../std/error/index.html#common-message-styles) in the [`std::error`](../../std/error/index.html) module docs.
+    #[inline]
+    #[track_caller]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg_attr(not(test), rustc_diagnostic_item = "option_expect")]
+    #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    pub const fn expect(self, msg: &str) -> T {
+        match self {
+            Some(val) => val,
+            None => expect_failed(msg),
+        }
+    }
 
-//     /// Returns the contained [`Some`] value, consuming the `self` value.
-//     ///
-//     /// Because this function may panic, its use is generally discouraged.
-//     /// Panics are meant for unrecoverable errors, and
-//     /// [may abort the entire program][panic-abort].
-//     ///
-//     /// Instead, prefer to use pattern matching and handle the [`None`]
-//     /// case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or
-//     /// [`unwrap_or_default`]. In functions returning `Option`, you can use
-//     /// [the `?` (try) operator][try-option].
-//     ///
-//     /// [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html
-//     /// [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used
-//     /// [`unwrap_or`]: Option::unwrap_or
-//     /// [`unwrap_or_else`]: Option::unwrap_or_else
-//     /// [`unwrap_or_default`]: Option::unwrap_or_default
-//     ///
-//     /// # Panics
-//     ///
-//     /// Panics if the self value equals [`None`].
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x = Some("air");
-//     /// assert_eq!(x.unwrap(), "air");
-//     /// ```
-//     ///
-//     /// ```should_panic
-//     /// let x: Option<&str> = None;
-//     /// assert_eq!(x.unwrap(), "air"); // fails
-//     /// ```
-//     #[inline(always)]
-//     #[track_caller]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[cfg_attr(not(test), rustc_diagnostic_item = "option_unwrap")]
-//     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
-//     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-//     pub const fn unwrap(self) -> T {
-//         match self {
-//             Some(val) => val,
-//             None => unwrap_failed(),
-//         }
-//     }
+    /// Returns the contained [`Some`] value, consuming the `self` value.
+    ///
+    /// Because this function may panic, its use is generally discouraged.
+    /// Panics are meant for unrecoverable errors, and
+    /// [may abort the entire program][panic-abort].
+    ///
+    /// Instead, prefer to use pattern matching and handle the [`None`]
+    /// case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or
+    /// [`unwrap_or_default`]. In functions returning `Option`, you can use
+    /// [the `?` (try) operator][try-option].
+    ///
+    /// [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html
+    /// [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used
+    /// [`unwrap_or`]: Option::unwrap_or
+    /// [`unwrap_or_else`]: Option::unwrap_or_else
+    /// [`unwrap_or_default`]: Option::unwrap_or_default
+    ///
+    /// # Panics
+    ///
+    /// Panics if the self value equals [`None`].
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x = Some("air");
+    /// assert_eq!(x.unwrap(), "air");
+    /// ```
+    ///
+    /// ```should_panic
+    /// let x: Option<&str> = None;
+    /// assert_eq!(x.unwrap(), "air"); // fails
+    /// ```
+    #[inline(always)]
+    #[track_caller]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg_attr(not(test), rustc_diagnostic_item = "option_unwrap")]
+    #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    pub const fn unwrap(self) -> T {
+        match self {
+            Some(val) => val,
+            None => unwrap_failed(),
+        }
+    }
 
-//     /// Returns the contained [`Some`] value or a provided default.
-//     ///
-//     /// Arguments passed to `unwrap_or` are eagerly evaluated; if you are passing
-//     /// the result of a function call, it is recommended to use [`unwrap_or_else`],
-//     /// which is lazily evaluated.
-//     ///
-//     /// [`unwrap_or_else`]: Option::unwrap_or_else
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// assert_eq!(Some("car").unwrap_or("bike"), "car");
-//     /// assert_eq!(None.unwrap_or("bike"), "bike");
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     pub fn unwrap_or(self, default: T) -> T {
-//         match self {
-//             Some(x) => x,
-//             None => default,
-//         }
-//     }
+    /// Returns the contained [`Some`] value or a provided default.
+    ///
+    /// Arguments passed to `unwrap_or` are eagerly evaluated; if you are passing
+    /// the result of a function call, it is recommended to use [`unwrap_or_else`],
+    /// which is lazily evaluated.
+    ///
+    /// [`unwrap_or_else`]: Option::unwrap_or_else
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// assert_eq!(Some("car").unwrap_or("bike"), "car");
+    /// assert_eq!(None.unwrap_or("bike"), "bike");
+    /// ```
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    pub fn unwrap_or(self, default: T) -> T {
+        match self {
+            Some(x) => x,
+            None => default,
+        }
+    }
 
-//     /// Returns the contained [`Some`] value or computes it from a closure.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let k = 10;
-//     /// assert_eq!(Some(4).unwrap_or_else(|| 2 * k), 4);
-//     /// assert_eq!(None.unwrap_or_else(|| 2 * k), 20);
-//     /// ```
-//     #[inline]
-//     #[track_caller]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     pub fn unwrap_or_else<F>(self, f: F) -> T
-//     where
-//         F: FnOnce() -> T,
-//     {
-//         match self {
-//             Some(x) => x,
-//             None => f(),
-//         }
-//     }
+    /// Returns the contained [`Some`] value or computes it from a closure.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let k = 10;
+    /// assert_eq!(Some(4).unwrap_or_else(|| 2 * k), 4);
+    /// assert_eq!(None.unwrap_or_else(|| 2 * k), 20);
+    /// ```
+    #[inline]
+    #[track_caller]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    pub fn unwrap_or_else<F>(self, f: F) -> T
+    where
+        F: FnOnce() -> T,
+    {
+        match self {
+            Some(x) => x,
+            None => f(),
+        }
+    }
 
-//     /// Returns the contained [`Some`] value or a default.
-//     ///
-//     /// Consumes the `self` argument then, if [`Some`], returns the contained
-//     /// value, otherwise if [`None`], returns the [default value] for that
-//     /// type.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x: Option<u32> = None;
-//     /// let y: Option<u32> = Some(12);
-//     ///
-//     /// assert_eq!(x.unwrap_or_default(), 0);
-//     /// assert_eq!(y.unwrap_or_default(), 12);
-//     /// ```
-//     ///
-//     /// [default value]: Default::default
-//     /// [`parse`]: str::parse
-//     /// [`FromStr`]: crate::str::FromStr
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     pub fn unwrap_or_default(self) -> T
-//     where
-//         T: Default,
-//     {
-//         match self {
-//             Some(x) => x,
-//             None => T::default(),
-//         }
-//     }
+    // /// Returns the contained [`Some`] value or a default.
+    // ///
+    // /// Consumes the `self` argument then, if [`Some`], returns the contained
+    // /// value, otherwise if [`None`], returns the [default value] for that
+    // /// type.
+    // ///
+    // /// # Examples
+    // ///
+    // /// ```
+    // /// let x: Option<u32> = None;
+    // /// let y: Option<u32> = Some(12);
+    // ///
+    // /// assert_eq!(x.unwrap_or_default(), 0);
+    // /// assert_eq!(y.unwrap_or_default(), 12);
+    // /// ```
+    // ///
+    // /// [default value]: Default::default
+    // /// [`parse`]: str::parse
+    // /// [`FromStr`]: crate::str::FromStr
+    // #[inline]
+    // #[stable(feature = "rust1", since = "1.0.0")]
+    // pub fn unwrap_or_default(self) -> T
+    // where
+    //     T: Default,
+    // {
+    //     match self {
+    //         Some(x) => x,
+    //         None => T::default(),
+    //     }
+    // }
 
-//     /// Returns the contained [`Some`] value, consuming the `self` value,
-//     /// without checking that the value is not [`None`].
-//     ///
-//     /// # Safety
-//     ///
-//     /// Calling this method on [`None`] is *[undefined behavior]*.
-//     ///
-//     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x = Some("air");
-//     /// assert_eq!(unsafe { x.unwrap_unchecked() }, "air");
-//     /// ```
-//     ///
-//     /// ```no_run
-//     /// let x: Option<&str> = None;
-//     /// assert_eq!(unsafe { x.unwrap_unchecked() }, "air"); // Undefined behavior!
-//     /// ```
-//     #[inline]
-//     #[track_caller]
-//     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
-//     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
-//     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-//     pub const unsafe fn unwrap_unchecked(self) -> T {
-//         match self {
-//             Some(val) => val,
-//             // SAFETY: the safety contract must be upheld by the caller.
-//             None => unsafe { hint::unreachable_unchecked() },
-//         }
-//     }
+    /// Returns the contained [`Some`] value, consuming the `self` value,
+    /// without checking that the value is not [`None`].
+    ///
+    /// # Safety
+    ///
+    /// Calling this method on [`None`] is *[undefined behavior]*.
+    ///
+    /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x = Some("air");
+    /// assert_eq!(unsafe { x.unwrap_unchecked() }, "air");
+    /// ```
+    ///
+    /// ```no_run
+    /// let x: Option<&str> = None;
+    /// assert_eq!(unsafe { x.unwrap_unchecked() }, "air"); // Undefined behavior!
+    /// ```
+    #[inline]
+    #[track_caller]
+    #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
+    #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    pub const unsafe fn unwrap_unchecked(self) -> T {
+        match self {
+            Some(val) => val,
+            // SAFETY: the safety contract must be upheld by the caller.
+            None => unsafe { hint::unreachable_unchecked() },
+        }
+    }
 
     /////////////////////////////////////////////////////////////////////////
     // Transforming contained values

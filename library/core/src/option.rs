@@ -580,57 +580,57 @@ pub enum Option<T> {
     Some(#[stable(feature = "rust1", since = "1.0.0")] T),
 }
 
-// /////////////////////////////////////////////////////////////////////////////
-// // Type implementation
-// /////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+// Type implementation
+/////////////////////////////////////////////////////////////////////////////
 
-// impl<T> Option<T> {
-//     /////////////////////////////////////////////////////////////////////////
-//     // Querying the contained values
-//     /////////////////////////////////////////////////////////////////////////
+impl<T> Option<T> {
+    /////////////////////////////////////////////////////////////////////////
+    // Querying the contained values
+    /////////////////////////////////////////////////////////////////////////
 
-//     /// Returns `true` if the option is a [`Some`] value.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x: Option<u32> = Some(2);
-//     /// assert_eq!(x.is_some(), true);
-//     ///
-//     /// let x: Option<u32> = None;
-//     /// assert_eq!(x.is_some(), false);
-//     /// ```
-//     #[must_use = "if you intended to assert that this has a value, consider `.unwrap()` instead"]
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
-//     pub const fn is_some(&self) -> bool {
-//         matches!(*self, Some(_))
-//     }
+    /// Returns `true` if the option is a [`Some`] value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x: Option<u32> = Some(2);
+    /// assert_eq!(x.is_some(), true);
+    ///
+    /// let x: Option<u32> = None;
+    /// assert_eq!(x.is_some(), false);
+    /// ```
+    #[must_use = "if you intended to assert that this has a value, consider `.unwrap()` instead"]
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
+    pub const fn is_some(&self) -> bool {
+        matches!(*self, Some(_))
+    }
 
-//     /// Returns `true` if the option is a [`Some`] and the value inside of it matches a predicate.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x: Option<u32> = Some(2);
-//     /// assert_eq!(x.is_some_and(|x| x > 1), true);
-//     ///
-//     /// let x: Option<u32> = Some(0);
-//     /// assert_eq!(x.is_some_and(|x| x > 1), false);
-//     ///
-//     /// let x: Option<u32> = None;
-//     /// assert_eq!(x.is_some_and(|x| x > 1), false);
-//     /// ```
-//     #[must_use]
-//     #[inline]
-//     #[stable(feature = "is_some_and", since = "1.70.0")]
-//     pub fn is_some_and(self, f: impl FnOnce(T) -> bool) -> bool {
-//         match self {
-//             None => false,
-//             Some(x) => f(x),
-//         }
-//     }
+    /// Returns `true` if the option is a [`Some`] and the value inside of it matches a predicate.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x: Option<u32> = Some(2);
+    /// assert_eq!(x.is_some_and(|x| x > 1), true);
+    ///
+    /// let x: Option<u32> = Some(0);
+    /// assert_eq!(x.is_some_and(|x| x > 1), false);
+    ///
+    /// let x: Option<u32> = None;
+    /// assert_eq!(x.is_some_and(|x| x > 1), false);
+    /// ```
+    #[must_use]
+    #[inline]
+    #[stable(feature = "is_some_and", since = "1.70.0")]
+    pub fn is_some_and(self, f: impl FnOnce(T) -> bool) -> bool {
+        match self {
+            None => false,
+            Some(x) => f(x),
+        }
+    }
 
 //     /// Returns `true` if the option is a [`None`] value.
 //     ///
@@ -652,29 +652,29 @@ pub enum Option<T> {
 //         !self.is_some()
 //     }
 
-//     /// Returns `true` if the option is a [`None`] or the value inside of it matches a predicate.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x: Option<u32> = Some(2);
-//     /// assert_eq!(x.is_none_or(|x| x > 1), true);
-//     ///
-//     /// let x: Option<u32> = Some(0);
-//     /// assert_eq!(x.is_none_or(|x| x > 1), false);
-//     ///
-//     /// let x: Option<u32> = None;
-//     /// assert_eq!(x.is_none_or(|x| x > 1), true);
-//     /// ```
-//     #[must_use]
-//     #[inline]
-//     #[stable(feature = "is_none_or", since = "1.82.0")]
-//     pub fn is_none_or(self, f: impl FnOnce(T) -> bool) -> bool {
-//         match self {
-//             None => true,
-//             Some(x) => f(x),
-//         }
-//     }
+    /// Returns `true` if the option is a [`None`] or the value inside of it matches a predicate.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x: Option<u32> = Some(2);
+    /// assert_eq!(x.is_none_or(|x| x > 1), true);
+    ///
+    /// let x: Option<u32> = Some(0);
+    /// assert_eq!(x.is_none_or(|x| x > 1), false);
+    ///
+    /// let x: Option<u32> = None;
+    /// assert_eq!(x.is_none_or(|x| x > 1), true);
+    /// ```
+    #[must_use]
+    #[inline]
+    #[stable(feature = "is_none_or", since = "1.82.0")]
+    pub fn is_none_or(self, f: impl FnOnce(T) -> bool) -> bool {
+        match self {
+            None => true,
+            Some(x) => f(x),
+        }
+    }
 
 //     /////////////////////////////////////////////////////////////////////////
 //     // Adapter for working with references
@@ -1846,7 +1846,7 @@ pub enum Option<T> {
 //             _ => None,
 //         }
 //     }
-// }
+}
 
 // impl<T, U> Option<(T, U)> {
 //     /// Unzips an option containing a tuple of two options.

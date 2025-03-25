@@ -227,7 +227,6 @@ use prelude::rust_2021::*;
 
 #[cfg(not(test))] // See #65860
 #[macro_use]
-#[cfg(feature = "uncertified")]
 mod macros;
 
 // We don't export this through #[macro_export] for now, to avoid breakage.

@@ -1375,217 +1375,217 @@ impl<T> Option<T> {
 //         IterMut { inner: Item { opt: self.as_mut() } }
 //     }
 
-//     /////////////////////////////////////////////////////////////////////////
-//     // Boolean operations on the values, eager and lazy
-//     /////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////
+    // Boolean operations on the values, eager and lazy
+    /////////////////////////////////////////////////////////////////////////
 
-//     /// Returns [`None`] if the option is [`None`], otherwise returns `optb`.
-//     ///
-//     /// Arguments passed to `and` are eagerly evaluated; if you are passing the
-//     /// result of a function call, it is recommended to use [`and_then`], which is
-//     /// lazily evaluated.
-//     ///
-//     /// [`and_then`]: Option::and_then
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x = Some(2);
-//     /// let y: Option<&str> = None;
-//     /// assert_eq!(x.and(y), None);
-//     ///
-//     /// let x: Option<u32> = None;
-//     /// let y = Some("foo");
-//     /// assert_eq!(x.and(y), None);
-//     ///
-//     /// let x = Some(2);
-//     /// let y = Some("foo");
-//     /// assert_eq!(x.and(y), Some("foo"));
-//     ///
-//     /// let x: Option<u32> = None;
-//     /// let y: Option<&str> = None;
-//     /// assert_eq!(x.and(y), None);
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     pub fn and<U>(self, optb: Option<U>) -> Option<U> {
-//         match self {
-//             Some(_) => optb,
-//             None => None,
-//         }
-//     }
+    /// Returns [`None`] if the option is [`None`], otherwise returns `optb`.
+    ///
+    /// Arguments passed to `and` are eagerly evaluated; if you are passing the
+    /// result of a function call, it is recommended to use [`and_then`], which is
+    /// lazily evaluated.
+    ///
+    /// [`and_then`]: Option::and_then
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x = Some(2);
+    /// let y: Option<&str> = None;
+    /// assert_eq!(x.and(y), None);
+    ///
+    /// let x: Option<u32> = None;
+    /// let y = Some("foo");
+    /// assert_eq!(x.and(y), None);
+    ///
+    /// let x = Some(2);
+    /// let y = Some("foo");
+    /// assert_eq!(x.and(y), Some("foo"));
+    ///
+    /// let x: Option<u32> = None;
+    /// let y: Option<&str> = None;
+    /// assert_eq!(x.and(y), None);
+    /// ```
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    pub fn and<U>(self, optb: Option<U>) -> Option<U> {
+        match self {
+            Some(_) => optb,
+            None => None,
+        }
+    }
 
-//     /// Returns [`None`] if the option is [`None`], otherwise calls `f` with the
-//     /// wrapped value and returns the result.
-//     ///
-//     /// Some languages call this operation flatmap.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// fn sq_then_to_string(x: u32) -> Option<String> {
-//     ///     x.checked_mul(x).map(|sq| sq.to_string())
-//     /// }
-//     ///
-//     /// assert_eq!(Some(2).and_then(sq_then_to_string), Some(4.to_string()));
-//     /// assert_eq!(Some(1_000_000).and_then(sq_then_to_string), None); // overflowed!
-//     /// assert_eq!(None.and_then(sq_then_to_string), None);
-//     /// ```
-//     ///
-//     /// Often used to chain fallible operations that may return [`None`].
-//     ///
-//     /// ```
-//     /// let arr_2d = [["A0", "A1"], ["B0", "B1"]];
-//     ///
-//     /// let item_0_1 = arr_2d.get(0).and_then(|row| row.get(1));
-//     /// assert_eq!(item_0_1, Some(&"A1"));
-//     ///
-//     /// let item_2_0 = arr_2d.get(2).and_then(|row| row.get(0));
-//     /// assert_eq!(item_2_0, None);
-//     /// ```
-//     #[doc(alias = "flatmap")]
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[rustc_confusables("flat_map", "flatmap")]
-//     pub fn and_then<U, F>(self, f: F) -> Option<U>
-//     where
-//         F: FnOnce(T) -> Option<U>,
-//     {
-//         match self {
-//             Some(x) => f(x),
-//             None => None,
-//         }
-//     }
+    /// Returns [`None`] if the option is [`None`], otherwise calls `f` with the
+    /// wrapped value and returns the result.
+    ///
+    /// Some languages call this operation flatmap.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// fn sq_then_to_string(x: u32) -> Option<String> {
+    ///     x.checked_mul(x).map(|sq| sq.to_string())
+    /// }
+    ///
+    /// assert_eq!(Some(2).and_then(sq_then_to_string), Some(4.to_string()));
+    /// assert_eq!(Some(1_000_000).and_then(sq_then_to_string), None); // overflowed!
+    /// assert_eq!(None.and_then(sq_then_to_string), None);
+    /// ```
+    ///
+    /// Often used to chain fallible operations that may return [`None`].
+    ///
+    /// ```
+    /// let arr_2d = [["A0", "A1"], ["B0", "B1"]];
+    ///
+    /// let item_0_1 = arr_2d.get(0).and_then(|row| row.get(1));
+    /// assert_eq!(item_0_1, Some(&"A1"));
+    ///
+    /// let item_2_0 = arr_2d.get(2).and_then(|row| row.get(0));
+    /// assert_eq!(item_2_0, None);
+    /// ```
+    #[doc(alias = "flatmap")]
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_confusables("flat_map", "flatmap")]
+    pub fn and_then<U, F>(self, f: F) -> Option<U>
+    where
+        F: FnOnce(T) -> Option<U>,
+    {
+        match self {
+            Some(x) => f(x),
+            None => None,
+        }
+    }
 
-//     /// Returns [`None`] if the option is [`None`], otherwise calls `predicate`
-//     /// with the wrapped value and returns:
-//     ///
-//     /// - [`Some(t)`] if `predicate` returns `true` (where `t` is the wrapped
-//     ///   value), and
-//     /// - [`None`] if `predicate` returns `false`.
-//     ///
-//     /// This function works similar to [`Iterator::filter()`]. You can imagine
-//     /// the `Option<T>` being an iterator over one or zero elements. `filter()`
-//     /// lets you decide which elements to keep.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```rust
-//     /// fn is_even(n: &i32) -> bool {
-//     ///     n % 2 == 0
-//     /// }
-//     ///
-//     /// assert_eq!(None.filter(is_even), None);
-//     /// assert_eq!(Some(3).filter(is_even), None);
-//     /// assert_eq!(Some(4).filter(is_even), Some(4));
-//     /// ```
-//     ///
-//     /// [`Some(t)`]: Some
-//     #[inline]
-//     #[stable(feature = "option_filter", since = "1.27.0")]
-//     pub fn filter<P>(self, predicate: P) -> Self
-//     where
-//         P: FnOnce(&T) -> bool,
-//     {
-//         if let Some(x) = self {
-//             if predicate(&x) {
-//                 return Some(x);
-//             }
-//         }
-//         None
-//     }
+    /// Returns [`None`] if the option is [`None`], otherwise calls `predicate`
+    /// with the wrapped value and returns:
+    ///
+    /// - [`Some(t)`] if `predicate` returns `true` (where `t` is the wrapped
+    ///   value), and
+    /// - [`None`] if `predicate` returns `false`.
+    ///
+    // /// This function works similar to [`Iterator::filter()`]. You can imagine
+    // /// the `Option<T>` being an iterator over one or zero elements. `filter()`
+    // /// lets you decide which elements to keep.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// fn is_even(n: &i32) -> bool {
+    ///     n % 2 == 0
+    /// }
+    ///
+    /// assert_eq!(None.filter(is_even), None);
+    /// assert_eq!(Some(3).filter(is_even), None);
+    /// assert_eq!(Some(4).filter(is_even), Some(4));
+    /// ```
+    ///
+    /// [`Some(t)`]: Some
+    #[inline]
+    #[stable(feature = "option_filter", since = "1.27.0")]
+    pub fn filter<P>(self, predicate: P) -> Self
+    where
+        P: FnOnce(&T) -> bool,
+    {
+        if let Some(x) = self {
+            if predicate(&x) {
+                return Some(x);
+            }
+        }
+        None
+    }
 
-//     /// Returns the option if it contains a value, otherwise returns `optb`.
-//     ///
-//     /// Arguments passed to `or` are eagerly evaluated; if you are passing the
-//     /// result of a function call, it is recommended to use [`or_else`], which is
-//     /// lazily evaluated.
-//     ///
-//     /// [`or_else`]: Option::or_else
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x = Some(2);
-//     /// let y = None;
-//     /// assert_eq!(x.or(y), Some(2));
-//     ///
-//     /// let x = None;
-//     /// let y = Some(100);
-//     /// assert_eq!(x.or(y), Some(100));
-//     ///
-//     /// let x = Some(2);
-//     /// let y = Some(100);
-//     /// assert_eq!(x.or(y), Some(2));
-//     ///
-//     /// let x: Option<u32> = None;
-//     /// let y = None;
-//     /// assert_eq!(x.or(y), None);
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     pub fn or(self, optb: Option<T>) -> Option<T> {
-//         match self {
-//             x @ Some(_) => x,
-//             None => optb,
-//         }
-//     }
+    /// Returns the option if it contains a value, otherwise returns `optb`.
+    ///
+    /// Arguments passed to `or` are eagerly evaluated; if you are passing the
+    /// result of a function call, it is recommended to use [`or_else`], which is
+    /// lazily evaluated.
+    ///
+    /// [`or_else`]: Option::or_else
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x = Some(2);
+    /// let y = None;
+    /// assert_eq!(x.or(y), Some(2));
+    ///
+    /// let x = None;
+    /// let y = Some(100);
+    /// assert_eq!(x.or(y), Some(100));
+    ///
+    /// let x = Some(2);
+    /// let y = Some(100);
+    /// assert_eq!(x.or(y), Some(2));
+    ///
+    /// let x: Option<u32> = None;
+    /// let y = None;
+    /// assert_eq!(x.or(y), None);
+    /// ```
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    pub fn or(self, optb: Option<T>) -> Option<T> {
+        match self {
+            x @ Some(_) => x,
+            None => optb,
+        }
+    }
 
-//     /// Returns the option if it contains a value, otherwise calls `f` and
-//     /// returns the result.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// fn nobody() -> Option<&'static str> { None }
-//     /// fn vikings() -> Option<&'static str> { Some("vikings") }
-//     ///
-//     /// assert_eq!(Some("barbarians").or_else(vikings), Some("barbarians"));
-//     /// assert_eq!(None.or_else(vikings), Some("vikings"));
-//     /// assert_eq!(None.or_else(nobody), None);
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     pub fn or_else<F>(self, f: F) -> Option<T>
-//     where
-//         F: FnOnce() -> Option<T>,
-//     {
-//         match self {
-//             x @ Some(_) => x,
-//             None => f(),
-//         }
-//     }
+    /// Returns the option if it contains a value, otherwise calls `f` and
+    /// returns the result.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// fn nobody() -> Option<&'static str> { None }
+    /// fn vikings() -> Option<&'static str> { Some("vikings") }
+    ///
+    /// assert_eq!(Some("barbarians").or_else(vikings), Some("barbarians"));
+    /// assert_eq!(None.or_else(vikings), Some("vikings"));
+    /// assert_eq!(None.or_else(nobody), None);
+    /// ```
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    pub fn or_else<F>(self, f: F) -> Option<T>
+    where
+        F: FnOnce() -> Option<T>,
+    {
+        match self {
+            x @ Some(_) => x,
+            None => f(),
+        }
+    }
 
-//     /// Returns [`Some`] if exactly one of `self`, `optb` is [`Some`], otherwise returns [`None`].
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x = Some(2);
-//     /// let y: Option<u32> = None;
-//     /// assert_eq!(x.xor(y), Some(2));
-//     ///
-//     /// let x: Option<u32> = None;
-//     /// let y = Some(2);
-//     /// assert_eq!(x.xor(y), Some(2));
-//     ///
-//     /// let x = Some(2);
-//     /// let y = Some(2);
-//     /// assert_eq!(x.xor(y), None);
-//     ///
-//     /// let x: Option<u32> = None;
-//     /// let y: Option<u32> = None;
-//     /// assert_eq!(x.xor(y), None);
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "option_xor", since = "1.37.0")]
-//     pub fn xor(self, optb: Option<T>) -> Option<T> {
-//         match (self, optb) {
-//             (a @ Some(_), None) => a,
-//             (None, b @ Some(_)) => b,
-//             _ => None,
-//         }
-//     }
+    /// Returns [`Some`] if exactly one of `self`, `optb` is [`Some`], otherwise returns [`None`].
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x = Some(2);
+    /// let y: Option<u32> = None;
+    /// assert_eq!(x.xor(y), Some(2));
+    ///
+    /// let x: Option<u32> = None;
+    /// let y = Some(2);
+    /// assert_eq!(x.xor(y), Some(2));
+    ///
+    /// let x = Some(2);
+    /// let y = Some(2);
+    /// assert_eq!(x.xor(y), None);
+    ///
+    /// let x: Option<u32> = None;
+    /// let y: Option<u32> = None;
+    /// assert_eq!(x.xor(y), None);
+    /// ```
+    #[inline]
+    #[stable(feature = "option_xor", since = "1.37.0")]
+    pub fn xor(self, optb: Option<T>) -> Option<T> {
+        match (self, optb) {
+            (a @ Some(_), None) => a,
+            (None, b @ Some(_)) => b,
+            _ => None,
+        }
+    }
 
 //     /////////////////////////////////////////////////////////////////////////
 //     // Entry-like operations to insert a value and return a reference

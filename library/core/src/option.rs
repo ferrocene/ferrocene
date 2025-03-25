@@ -1930,56 +1930,56 @@ impl<T> Option<&T> {
     // }
 }
 
-// impl<T> Option<&mut T> {
-//     /// Maps an `Option<&mut T>` to an `Option<T>` by copying the contents of the
-//     /// option.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let mut x = 12;
-//     /// let opt_x = Some(&mut x);
-//     /// assert_eq!(opt_x, Some(&mut 12));
-//     /// let copied = opt_x.copied();
-//     /// assert_eq!(copied, Some(12));
-//     /// ```
-//     #[must_use = "`self` will be dropped if the result is not used"]
-//     #[stable(feature = "copied", since = "1.35.0")]
-//     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-//     pub const fn copied(self) -> Option<T>
-//     where
-//         T: Copy,
-//     {
-//         match self {
-//             Some(&mut t) => Some(t),
-//             None => None,
-//         }
-//     }
+impl<T> Option<&mut T> {
+    /// Maps an `Option<&mut T>` to an `Option<T>` by copying the contents of the
+    /// option.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut x = 12;
+    /// let opt_x = Some(&mut x);
+    /// assert_eq!(opt_x, Some(&mut 12));
+    /// let copied = opt_x.copied();
+    /// assert_eq!(copied, Some(12));
+    /// ```
+    #[must_use = "`self` will be dropped if the result is not used"]
+    #[stable(feature = "copied", since = "1.35.0")]
+    #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    pub const fn copied(self) -> Option<T>
+    where
+        T: Copy,
+    {
+        match self {
+            Some(&mut t) => Some(t),
+            None => None,
+        }
+    }
 
-//     /// Maps an `Option<&mut T>` to an `Option<T>` by cloning the contents of the
-//     /// option.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let mut x = 12;
-//     /// let opt_x = Some(&mut x);
-//     /// assert_eq!(opt_x, Some(&mut 12));
-//     /// let cloned = opt_x.cloned();
-//     /// assert_eq!(cloned, Some(12));
-//     /// ```
-//     #[must_use = "`self` will be dropped if the result is not used"]
-//     #[stable(since = "1.26.0", feature = "option_ref_mut_cloned")]
-//     pub fn cloned(self) -> Option<T>
-//     where
-//         T: Clone,
-//     {
-//         match self {
-//             Some(t) => Some(t.clone()),
-//             None => None,
-//         }
-//     }
-// }
+    /// Maps an `Option<&mut T>` to an `Option<T>` by cloning the contents of the
+    /// option.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut x = 12;
+    /// let opt_x = Some(&mut x);
+    /// assert_eq!(opt_x, Some(&mut 12));
+    /// let cloned = opt_x.cloned();
+    /// assert_eq!(cloned, Some(12));
+    /// ```
+    #[must_use = "`self` will be dropped if the result is not used"]
+    #[stable(since = "1.26.0", feature = "option_ref_mut_cloned")]
+    pub fn cloned(self) -> Option<T>
+    where
+        T: Clone,
+    {
+        match self {
+            Some(t) => Some(t.clone()),
+            None => None,
+        }
+    }
+}
 
 // impl<T, E> Option<Result<T, E>> {
 //     /// Transposes an `Option` of a [`Result`] into a [`Result`] of an `Option`.

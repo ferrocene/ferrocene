@@ -12,6 +12,7 @@ use std::rc::Rc;
 use serde_json::json;
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::core::build_steps::run::GenerateCopyright;
 use crate::core::config::TargetSelection;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
@@ -108,6 +109,7 @@ impl Step for SourceTarball {
             "README.md",
             "RELEASES.md",
             "REUSE.toml",
+            "TRADEMARK.md",
             "config.example.toml",
             "Cargo.toml",
             "Cargo.lock",
@@ -116,6 +118,7 @@ impl Step for SourceTarball {
             "x.py",
             "x.ps1",
             ".gitmodules",
+            "license-metadata.json",
         ];
         const EXTRA_CARGO_TOMLS: &[&str] = &[
             "compiler/rustc_codegen_cranelift/Cargo.toml",
@@ -136,6 +139,14 @@ impl Step for SourceTarball {
         }
         for item in FILES {
             subsetter.add_file(&builder.src, &builder.src.join(item));
+        }
+
+        // Generate comprehensive copyright data and include the generated files in the tarball
+        for path in builder.ensure(GenerateCopyright) {
+            if !builder.config.dry_run() {
+                // First arg gets the file placed in the root of the tarball, instead of in build/
+                subsetter.add_file(path.parent().unwrap(), &path);
+            }
         }
 
         let generic_tarball = subsetter

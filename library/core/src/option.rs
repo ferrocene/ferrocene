@@ -584,7 +584,7 @@ pub enum Option<T> {
 // Type implementation
 /////////////////////////////////////////////////////////////////////////////
 
-use Option::Some;
+use Option::{Some, None};
 
 impl<T> Option<T> {
     /////////////////////////////////////////////////////////////////////////
@@ -634,25 +634,25 @@ impl<T> Option<T> {
 //         }
 //     }
 
-//     /// Returns `true` if the option is a [`None`] value.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x: Option<u32> = Some(2);
-//     /// assert_eq!(x.is_none(), false);
-//     ///
-//     /// let x: Option<u32> = None;
-//     /// assert_eq!(x.is_none(), true);
-//     /// ```
-//     #[must_use = "if you intended to assert that this doesn't have a value, consider \
-//                   wrapping this in an `assert!()` instead"]
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
-//     pub const fn is_none(&self) -> bool {
-//         !self.is_some()
-//     }
+    /// Returns `true` if the option is a [`None`] value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x: Option<u32> = Some(2);
+    /// assert_eq!(x.is_none(), false);
+    ///
+    /// let x: Option<u32> = None;
+    /// assert_eq!(x.is_none(), true);
+    /// ```
+    #[must_use = "if you intended to assert that this doesn't have a value, consider \
+                  wrapping this in an `assert!()` instead"]
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
+    pub const fn is_none(&self) -> bool {
+        !self.is_some()
+    }
 
 //     /// Returns `true` if the option is a [`None`] or the value inside of it matches a predicate.
 //     ///

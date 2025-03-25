@@ -183,7 +183,7 @@
 #![feature(no_core)]
 // #![feature(no_sanitize)]
 // #![feature(optimize_attribute)]
-// #![feature(prelude_import)]
+#![feature(prelude_import)]
 // #![feature(repr_simd)]
 // #![feature(rustc_allow_const_fn_unstable)]
 #![feature(rustc_attrs)]
@@ -223,7 +223,6 @@ extern crate self as core;
 
 #[prelude_import]
 #[allow(unused)]
-#[cfg(feature = "uncertified")]
 use prelude::rust_2021::*;
 
 #[cfg(not(test))] // See #65860
@@ -337,7 +336,6 @@ pub mod num;
 
 /* The core prelude, not as all-encompassing as the std prelude */
 
-#[cfg(feature = "uncertified")]
 pub mod prelude;
 
 /* Core modules for ownership management */

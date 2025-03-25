@@ -145,7 +145,7 @@
 // mod coroutine;
 mod deref;
 // mod drop;
-// mod function;
+mod function;
 // mod index;
 // mod index_range;
 // mod range;
@@ -177,8 +177,8 @@ pub use self::deref::LegacyReceiver;
 // #[stable(feature = "rust1", since = "1.0.0")]
 // pub use self::drop::Drop;
 // pub(crate) use self::drop::fallback_surface_drop;
-// #[stable(feature = "rust1", since = "1.0.0")]
-// pub use self::function::{Fn, FnMut, FnOnce};
+#[stable(feature = "rust1", since = "1.0.0")]
+pub use self::function::{Fn, FnMut, FnOnce};
 // #[stable(feature = "rust1", since = "1.0.0")]
 // pub use self::index::{Index, IndexMut};
 // pub(crate) use self::index_range::IndexRange;

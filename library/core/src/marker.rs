@@ -984,16 +984,16 @@ pub trait Copy: Clone {
 // #[const_trait]
 // pub trait Destruct {}
 
-// /// A marker for tuple types.
-// ///
-// /// The implementation of this trait is built-in and cannot be implemented
-// /// for any user type.
-// #[unstable(feature = "tuple_trait", issue = "none")]
-// #[lang = "tuple_trait"]
-// #[diagnostic::on_unimplemented(message = "`{Self}` is not a tuple")]
-// #[rustc_deny_explicit_impl]
-// #[rustc_do_not_implement_via_object]
-// pub trait Tuple {}
+/// A marker for tuple types.
+///
+/// The implementation of this trait is built-in and cannot be implemented
+/// for any user type.
+#[unstable(feature = "tuple_trait", issue = "none")]
+#[lang = "tuple_trait"]
+#[diagnostic::on_unimplemented(message = "`{Self}` is not a tuple")]
+#[rustc_deny_explicit_impl]
+#[rustc_do_not_implement_via_object]
+pub trait Tuple {}
 
 // /// A marker for pointer-like types.
 // ///

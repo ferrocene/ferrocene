@@ -732,41 +732,43 @@ impl<T> Option<T> {
         }
     }
 
-//     /// Converts from <code>[Pin]<[&]Option\<T>></code> to <code>Option<[Pin]<[&]T>></code>.
-//     ///
-//     /// [&]: reference "shared reference"
-//     #[inline]
-//     #[must_use]
-//     #[stable(feature = "pin", since = "1.33.0")]
-//     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
-//     pub const fn as_pin_ref(self: Pin<&Self>) -> Option<Pin<&T>> {
-//         // FIXME(const-hack): use `map` once that is possible
-//         match Pin::get_ref(self).as_ref() {
-//             // SAFETY: `x` is guaranteed to be pinned because it comes from `self`
-//             // which is pinned.
-//             Some(x) => unsafe { Some(Pin::new_unchecked(x)) },
-//             None => None,
-//         }
-//     }
+    /// Converts from <code>[Pin]<[&]Option\<T>></code> to <code>Option<[Pin]<[&]T>></code>.
+    ///
+    /// [&]: reference "shared reference"
+    #[inline]
+    #[must_use]
+    #[stable(feature = "pin", since = "1.33.0")]
+    #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
+    #[cfg(feature = "uncertified")]
+    pub const fn as_pin_ref(self: Pin<&Self>) -> Option<Pin<&T>> {
+        // FIXME(const-hack): use `map` once that is possible
+        match Pin::get_ref(self).as_ref() {
+            // SAFETY: `x` is guaranteed to be pinned because it comes from `self`
+            // which is pinned.
+            Some(x) => unsafe { Some(Pin::new_unchecked(x)) },
+            None => None,
+        }
+    }
 
-//     /// Converts from <code>[Pin]<[&mut] Option\<T>></code> to <code>Option<[Pin]<[&mut] T>></code>.
-//     ///
-//     /// [&mut]: reference "mutable reference"
-//     #[inline]
-//     #[must_use]
-//     #[stable(feature = "pin", since = "1.33.0")]
-//     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
-//     pub const fn as_pin_mut(self: Pin<&mut Self>) -> Option<Pin<&mut T>> {
-//         // SAFETY: `get_unchecked_mut` is never used to move the `Option` inside `self`.
-//         // `x` is guaranteed to be pinned because it comes from `self` which is pinned.
-//         unsafe {
-//             // FIXME(const-hack): use `map` once that is possible
-//             match Pin::get_unchecked_mut(self).as_mut() {
-//                 Some(x) => Some(Pin::new_unchecked(x)),
-//                 None => None,
-//             }
-//         }
-//     }
+    /// Converts from <code>[Pin]<[&mut] Option\<T>></code> to <code>Option<[Pin]<[&mut] T>></code>.
+    ///
+    /// [&mut]: reference "mutable reference"
+    #[inline]
+    #[must_use]
+    #[stable(feature = "pin", since = "1.33.0")]
+    #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
+    #[cfg(feature = "uncertified")]
+    pub const fn as_pin_mut(self: Pin<&mut Self>) -> Option<Pin<&mut T>> {
+        // SAFETY: `get_unchecked_mut` is never used to move the `Option` inside `self`.
+        // `x` is guaranteed to be pinned because it comes from `self` which is pinned.
+        unsafe {
+            // FIXME(const-hack): use `map` once that is possible
+            match Pin::get_unchecked_mut(self).as_mut() {
+                Some(x) => Some(Pin::new_unchecked(x)),
+                None => None,
+            }
+        }
+    }
 
 //     #[inline]
 //     const fn len(&self) -> usize {

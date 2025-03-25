@@ -412,7 +412,6 @@ pub mod random;
 #[unstable(feature = "new_range_api", issue = "125687")]
 #[cfg(feature = "uncertified")]
 pub mod range;
-#[cfg(feature = "uncertified")]
 pub mod result;
 #[cfg(feature = "uncertified")]
 pub mod sync;

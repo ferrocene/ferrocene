@@ -12,6 +12,10 @@ profiler_builtins = { path = "../profiler_builtins", optional = true }
 std = { path = "../std", public = true }
 test = { path = "../test", public = true }
 
+# Ferrocene addition: in bootstrap we need to set a libcore feature for code coverage testing, so we
+# need to add it as an explicit dependency here to do `--features core/$foo`.
+core = { path = "../core" }
+
 # Forward features to the `std` crate as necessary
 [features]
 default = ["std_detect_file_io", "std_detect_dlsym_getauxval", "panic-unwind"]

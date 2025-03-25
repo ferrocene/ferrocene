@@ -1123,168 +1123,168 @@ impl<T> Option<T> {
         }
     }
 
-//     /// Calls a function with a reference to the contained value if [`Some`].
-//     ///
-//     /// Returns the original option.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let list = vec![1, 2, 3];
-//     ///
-//     /// // prints "got: 2"
-//     /// let x = list
-//     ///     .get(1)
-//     ///     .inspect(|x| println!("got: {x}"))
-//     ///     .expect("list should be long enough");
-//     ///
-//     /// // prints nothing
-//     /// list.get(5).inspect(|x| println!("got: {x}"));
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "result_option_inspect", since = "1.76.0")]
-//     pub fn inspect<F: FnOnce(&T)>(self, f: F) -> Self {
-//         if let Some(ref x) = self {
-//             f(x);
-//         }
+    /// Calls a function with a reference to the contained value if [`Some`].
+    ///
+    /// Returns the original option.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let list = vec![1, 2, 3];
+    ///
+    /// // prints "got: 2"
+    /// let x = list
+    ///     .get(1)
+    ///     .inspect(|x| println!("got: {x}"))
+    ///     .expect("list should be long enough");
+    ///
+    /// // prints nothing
+    /// list.get(5).inspect(|x| println!("got: {x}"));
+    /// ```
+    #[inline]
+    #[stable(feature = "result_option_inspect", since = "1.76.0")]
+    pub fn inspect<F: FnOnce(&T)>(self, f: F) -> Self {
+        if let Some(ref x) = self {
+            f(x);
+        }
 
-//         self
-//     }
+        self
+    }
 
-//     /// Returns the provided default result (if none),
-//     /// or applies a function to the contained value (if any).
-//     ///
-//     /// Arguments passed to `map_or` are eagerly evaluated; if you are passing
-//     /// the result of a function call, it is recommended to use [`map_or_else`],
-//     /// which is lazily evaluated.
-//     ///
-//     /// [`map_or_else`]: Option::map_or_else
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x = Some("foo");
-//     /// assert_eq!(x.map_or(42, |v| v.len()), 3);
-//     ///
-//     /// let x: Option<&str> = None;
-//     /// assert_eq!(x.map_or(42, |v| v.len()), 42);
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[must_use = "if you don't need the returned value, use `if let` instead"]
-//     pub fn map_or<U, F>(self, default: U, f: F) -> U
-//     where
-//         F: FnOnce(T) -> U,
-//     {
-//         match self {
-//             Some(t) => f(t),
-//             None => default,
-//         }
-//     }
+    /// Returns the provided default result (if none),
+    /// or applies a function to the contained value (if any).
+    ///
+    /// Arguments passed to `map_or` are eagerly evaluated; if you are passing
+    /// the result of a function call, it is recommended to use [`map_or_else`],
+    /// which is lazily evaluated.
+    ///
+    /// [`map_or_else`]: Option::map_or_else
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x = Some("foo");
+    /// assert_eq!(x.map_or(42, |v| v.len()), 3);
+    ///
+    /// let x: Option<&str> = None;
+    /// assert_eq!(x.map_or(42, |v| v.len()), 42);
+    /// ```
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[must_use = "if you don't need the returned value, use `if let` instead"]
+    pub fn map_or<U, F>(self, default: U, f: F) -> U
+    where
+        F: FnOnce(T) -> U,
+    {
+        match self {
+            Some(t) => f(t),
+            None => default,
+        }
+    }
 
-//     /// Computes a default function result (if none), or
-//     /// applies a different function to the contained value (if any).
-//     ///
-//     /// # Basic examples
-//     ///
-//     /// ```
-//     /// let k = 21;
-//     ///
-//     /// let x = Some("foo");
-//     /// assert_eq!(x.map_or_else(|| 2 * k, |v| v.len()), 3);
-//     ///
-//     /// let x: Option<&str> = None;
-//     /// assert_eq!(x.map_or_else(|| 2 * k, |v| v.len()), 42);
-//     /// ```
-//     ///
-//     /// # Handling a Result-based fallback
-//     ///
-//     /// A somewhat common occurrence when dealing with optional values
-//     /// in combination with [`Result<T, E>`] is the case where one wants to invoke
-//     /// a fallible fallback if the option is not present.  This example
-//     /// parses a command line argument (if present), or the contents of a file to
-//     /// an integer.  However, unlike accessing the command line argument, reading
-//     /// the file is fallible, so it must be wrapped with `Ok`.
-//     ///
-//     /// ```no_run
-//     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-//     /// let v: u64 = std::env::args()
-//     ///    .nth(1)
-//     ///    .map_or_else(|| std::fs::read_to_string("/etc/someconfig.conf"), Ok)?
-//     ///    .parse()?;
-//     /// #   Ok(())
-//     /// # }
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     pub fn map_or_else<U, D, F>(self, default: D, f: F) -> U
-//     where
-//         D: FnOnce() -> U,
-//         F: FnOnce(T) -> U,
-//     {
-//         match self {
-//             Some(t) => f(t),
-//             None => default(),
-//         }
-//     }
+    /// Computes a default function result (if none), or
+    /// applies a different function to the contained value (if any).
+    ///
+    /// # Basic examples
+    ///
+    /// ```
+    /// let k = 21;
+    ///
+    /// let x = Some("foo");
+    /// assert_eq!(x.map_or_else(|| 2 * k, |v| v.len()), 3);
+    ///
+    /// let x: Option<&str> = None;
+    /// assert_eq!(x.map_or_else(|| 2 * k, |v| v.len()), 42);
+    /// ```
+    ///
+    /// # Handling a Result-based fallback
+    ///
+    /// A somewhat common occurrence when dealing with optional values
+    /// in combination with [`Result<T, E>`] is the case where one wants to invoke
+    /// a fallible fallback if the option is not present.  This example
+    /// parses a command line argument (if present), or the contents of a file to
+    /// an integer.  However, unlike accessing the command line argument, reading
+    /// the file is fallible, so it must be wrapped with `Ok`.
+    ///
+    /// ```no_run
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let v: u64 = std::env::args()
+    ///    .nth(1)
+    ///    .map_or_else(|| std::fs::read_to_string("/etc/someconfig.conf"), Ok)?
+    ///    .parse()?;
+    /// #   Ok(())
+    /// # }
+    /// ```
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    pub fn map_or_else<U, D, F>(self, default: D, f: F) -> U
+    where
+        D: FnOnce() -> U,
+        F: FnOnce(T) -> U,
+    {
+        match self {
+            Some(t) => f(t),
+            None => default(),
+        }
+    }
 
-//     /// Transforms the `Option<T>` into a [`Result<T, E>`], mapping [`Some(v)`] to
-//     /// [`Ok(v)`] and [`None`] to [`Err(err)`].
-//     ///
-//     /// Arguments passed to `ok_or` are eagerly evaluated; if you are passing the
-//     /// result of a function call, it is recommended to use [`ok_or_else`], which is
-//     /// lazily evaluated.
-//     ///
-//     /// [`Ok(v)`]: Ok
-//     /// [`Err(err)`]: Err
-//     /// [`Some(v)`]: Some
-//     /// [`ok_or_else`]: Option::ok_or_else
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x = Some("foo");
-//     /// assert_eq!(x.ok_or(0), Ok("foo"));
-//     ///
-//     /// let x: Option<&str> = None;
-//     /// assert_eq!(x.ok_or(0), Err(0));
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     pub fn ok_or<E>(self, err: E) -> Result<T, E> {
-//         match self {
-//             Some(v) => Ok(v),
-//             None => Err(err),
-//         }
-//     }
+    /// Transforms the `Option<T>` into a [`Result<T, E>`], mapping [`Some(v)`] to
+    /// [`Ok(v)`] and [`None`] to [`Err(err)`].
+    ///
+    /// Arguments passed to `ok_or` are eagerly evaluated; if you are passing the
+    /// result of a function call, it is recommended to use [`ok_or_else`], which is
+    /// lazily evaluated.
+    ///
+    /// [`Ok(v)`]: Ok
+    /// [`Err(err)`]: Err
+    /// [`Some(v)`]: Some
+    /// [`ok_or_else`]: Option::ok_or_else
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x = Some("foo");
+    /// assert_eq!(x.ok_or(0), Ok("foo"));
+    ///
+    /// let x: Option<&str> = None;
+    /// assert_eq!(x.ok_or(0), Err(0));
+    /// ```
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    pub fn ok_or<E>(self, err: E) -> Result<T, E> {
+        match self {
+            Some(v) => Ok(v),
+            None => Err(err),
+        }
+    }
 
-//     /// Transforms the `Option<T>` into a [`Result<T, E>`], mapping [`Some(v)`] to
-//     /// [`Ok(v)`] and [`None`] to [`Err(err())`].
-//     ///
-//     /// [`Ok(v)`]: Ok
-//     /// [`Err(err())`]: Err
-//     /// [`Some(v)`]: Some
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x = Some("foo");
-//     /// assert_eq!(x.ok_or_else(|| 0), Ok("foo"));
-//     ///
-//     /// let x: Option<&str> = None;
-//     /// assert_eq!(x.ok_or_else(|| 0), Err(0));
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     pub fn ok_or_else<E, F>(self, err: F) -> Result<T, E>
-//     where
-//         F: FnOnce() -> E,
-//     {
-//         match self {
-//             Some(v) => Ok(v),
-//             None => Err(err()),
-//         }
-//     }
+    /// Transforms the `Option<T>` into a [`Result<T, E>`], mapping [`Some(v)`] to
+    /// [`Ok(v)`] and [`None`] to [`Err(err())`].
+    ///
+    /// [`Ok(v)`]: Ok
+    /// [`Err(err())`]: Err
+    /// [`Some(v)`]: Some
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x = Some("foo");
+    /// assert_eq!(x.ok_or_else(|| 0), Ok("foo"));
+    ///
+    /// let x: Option<&str> = None;
+    /// assert_eq!(x.ok_or_else(|| 0), Err(0));
+    /// ```
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    pub fn ok_or_else<E, F>(self, err: F) -> Result<T, E>
+    where
+        F: FnOnce() -> E,
+    {
+        match self {
+            Some(v) => Ok(v),
+            None => Err(err()),
+        }
+    }
 
 //     /// Converts from `Option<T>` (or `&Option<T>`) to `Option<&T::Target>`.
 //     ///

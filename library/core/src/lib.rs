@@ -202,19 +202,19 @@
 //
 // Target features:
 // tidy-alphabetical-start
-#![feature(arm_target_feature)]
-#![feature(avx512_target_feature)]
-#![feature(hexagon_target_feature)]
-#![feature(loongarch_target_feature)]
-#![feature(mips_target_feature)]
-#![feature(powerpc_target_feature)]
-#![feature(riscv_target_feature)]
-#![feature(rtm_target_feature)]
-#![feature(sha512_sm_x86)]
-#![feature(sse4a_target_feature)]
-#![feature(tbm_target_feature)]
-#![feature(wasm_target_feature)]
-#![feature(x86_amx_intrinsics)]
+// #![feature(arm_target_feature)]
+// #![feature(avx512_target_feature)]
+// #![feature(hexagon_target_feature)]
+// #![feature(loongarch_target_feature)]
+// #![feature(mips_target_feature)]
+// #![feature(powerpc_target_feature)]
+// #![feature(riscv_target_feature)]
+// #![feature(rtm_target_feature)]
+// #![feature(sha512_sm_x86)]
+// #![feature(sse4a_target_feature)]
+// #![feature(tbm_target_feature)]
+// #![feature(wasm_target_feature)]
+// #![feature(x86_amx_intrinsics)]
 // tidy-alphabetical-end
 
 #![cfg(feature = "uncertified")]

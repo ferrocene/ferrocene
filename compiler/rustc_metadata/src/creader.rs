@@ -975,10 +975,16 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
         self.inject_dependency_if(cnum, "a panic runtime", &|data| data.needs_panic_runtime());
     }
 
-    fn inject_profiler_runtime(&mut self) {
+    fn inject_profiler_runtime(&mut self, krate: &ast::Crate) {
         let needs_profiler_runtime =
             self.sess.instrument_coverage() || self.sess.opts.cg.profile_generate.enabled();
         if !needs_profiler_runtime || self.sess.opts.unstable_opts.no_profiler_runtime {
+            return;
+        }
+
+        // Ferrocene addition: we don't need to add the profiler runtime when we are building the
+        // profiler runtime itself.
+        if attr::contains_name(&krate.attrs, sym::profiler_runtime) {
             return;
         }
 
@@ -1259,7 +1265,7 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
     pub fn postprocess(&mut self, krate: &ast::Crate) {
         self.inject_compiler_builtins(krate);
         self.inject_forced_externs();
-        self.inject_profiler_runtime();
+        self.inject_profiler_runtime(krate);
         self.inject_allocator_crate(krate);
         self.inject_panic_runtime(krate);
 

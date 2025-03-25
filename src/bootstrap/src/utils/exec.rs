@@ -125,7 +125,6 @@ impl BootstrapCommand {
         Self { failure_behavior: BehaviorOnFailure::DelayFail, ..self }
     }
 
-    #[expect(dead_code)]
     pub fn fail_fast(self) -> Self {
         Self { failure_behavior: BehaviorOnFailure::Exit, ..self }
     }

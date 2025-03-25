@@ -1,4 +1,4 @@
-// /// Used for immutable dereferencing operations, like `*v`.
+/// Used for immutable dereferencing operations, like `*v`.
 // ///
 // /// In addition to being used for explicit dereferencing operations with the
 // /// (unary) `*` operator in immutable contexts, `Deref` is also used implicitly
@@ -128,52 +128,52 @@
 // /// let x = DerefExample { value: 'a' };
 // /// assert_eq!('a', *x);
 // /// ```
-// #[lang = "deref"]
-// #[doc(alias = "*")]
-// #[doc(alias = "&*")]
-// #[stable(feature = "rust1", since = "1.0.0")]
-// #[rustc_diagnostic_item = "Deref"]
-// #[const_trait]
-// #[rustc_const_unstable(feature = "const_deref", issue = "88955")]
-// pub trait Deref {
-//     /// The resulting type after dereferencing.
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[rustc_diagnostic_item = "deref_target"]
-//     #[lang = "deref_target"]
-//     type Target: ?Sized;
+#[lang = "deref"]
+#[doc(alias = "*")]
+#[doc(alias = "&*")]
+#[stable(feature = "rust1", since = "1.0.0")]
+#[rustc_diagnostic_item = "Deref"]
+#[const_trait]
+#[rustc_const_unstable(feature = "const_deref", issue = "88955")]
+pub trait Deref {
+    /// The resulting type after dereferencing.
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_diagnostic_item = "deref_target"]
+    #[lang = "deref_target"]
+    type Target: ?Sized;
 
-//     /// Dereferences the value.
-//     #[must_use]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[rustc_diagnostic_item = "deref_method"]
-//     fn deref(&self) -> &Self::Target;
-// }
+    /// Dereferences the value.
+    #[must_use]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_diagnostic_item = "deref_method"]
+    fn deref(&self) -> &Self::Target;
+}
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// #[rustc_const_unstable(feature = "const_deref", issue = "88955")]
-// impl<T: ?Sized> const Deref for &T {
-//     type Target = T;
+#[stable(feature = "rust1", since = "1.0.0")]
+#[rustc_const_unstable(feature = "const_deref", issue = "88955")]
+impl<T: ?Sized> const Deref for &T {
+    type Target = T;
 
-//     #[rustc_diagnostic_item = "noop_method_deref"]
-//     fn deref(&self) -> &T {
-//         *self
-//     }
-// }
+    #[rustc_diagnostic_item = "noop_method_deref"]
+    fn deref(&self) -> &T {
+        *self
+    }
+}
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<T: ?Sized> !DerefMut for &T {}
+#[stable(feature = "rust1", since = "1.0.0")]
+impl<T: ?Sized> !DerefMut for &T {}
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// #[rustc_const_unstable(feature = "const_deref", issue = "88955")]
-// impl<T: ?Sized> const Deref for &mut T {
-//     type Target = T;
+#[stable(feature = "rust1", since = "1.0.0")]
+#[rustc_const_unstable(feature = "const_deref", issue = "88955")]
+impl<T: ?Sized> const Deref for &mut T {
+    type Target = T;
 
-//     fn deref(&self) -> &T {
-//         *self
-//     }
-// }
+    fn deref(&self) -> &T {
+        *self
+    }
+}
 
-// /// Used for mutable dereferencing operations, like in `*v = 1;`.
+/// Used for mutable dereferencing operations, like in `*v = 1;`.
 // ///
 // /// In addition to being used for explicit dereferencing operations with the
 // /// (unary) `*` operator in mutable contexts, `DerefMut` is also used implicitly
@@ -262,44 +262,44 @@
 // /// *x = 'b';
 // /// assert_eq!('b', x.value);
 // /// ```
-// #[lang = "deref_mut"]
-// #[doc(alias = "*")]
-// #[stable(feature = "rust1", since = "1.0.0")]
-// #[const_trait]
-// #[rustc_const_unstable(feature = "const_deref", issue = "88955")]
-// pub trait DerefMut: ~const Deref {
-//     /// Mutably dereferences the value.
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[rustc_diagnostic_item = "deref_mut_method"]
-//     fn deref_mut(&mut self) -> &mut Self::Target;
-// }
+#[lang = "deref_mut"]
+#[doc(alias = "*")]
+#[stable(feature = "rust1", since = "1.0.0")]
+#[const_trait]
+#[rustc_const_unstable(feature = "const_deref", issue = "88955")]
+pub trait DerefMut: ~const Deref {
+    /// Mutably dereferences the value.
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_diagnostic_item = "deref_mut_method"]
+    fn deref_mut(&mut self) -> &mut Self::Target;
+}
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// #[rustc_const_unstable(feature = "const_deref", issue = "88955")]
-// impl<T: ?Sized> const DerefMut for &mut T {
-//     fn deref_mut(&mut self) -> &mut T {
-//         *self
-//     }
-// }
+#[stable(feature = "rust1", since = "1.0.0")]
+#[rustc_const_unstable(feature = "const_deref", issue = "88955")]
+impl<T: ?Sized> const DerefMut for &mut T {
+    fn deref_mut(&mut self) -> &mut T {
+        *self
+    }
+}
 
-// /// Perma-unstable marker trait. Indicates that the type has a well-behaved [`Deref`]
-// /// (and, if applicable, [`DerefMut`]) implementation. This is relied on for soundness
-// /// of deref patterns.
-// ///
-// /// FIXME(deref_patterns): The precise semantics are undecided; the rough idea is that
-// /// successive calls to `deref`/`deref_mut` without intermediate mutation should be
-// /// idempotent, in the sense that they return the same value as far as pattern-matching
-// /// is concerned. Calls to `deref`/`deref_mut` must leave the pointer itself likewise
-// /// unchanged.
-// #[unstable(feature = "deref_pure_trait", issue = "87121")]
-// #[lang = "deref_pure"]
-// pub unsafe trait DerefPure {}
+/// Perma-unstable marker trait. Indicates that the type has a well-behaved [`Deref`]
+/// (and, if applicable, [`DerefMut`]) implementation. This is relied on for soundness
+/// of deref patterns.
+///
+/// FIXME(deref_patterns): The precise semantics are undecided; the rough idea is that
+/// successive calls to `deref`/`deref_mut` without intermediate mutation should be
+/// idempotent, in the sense that they return the same value as far as pattern-matching
+/// is concerned. Calls to `deref`/`deref_mut` must leave the pointer itself likewise
+/// unchanged.
+#[unstable(feature = "deref_pure_trait", issue = "87121")]
+#[lang = "deref_pure"]
+pub unsafe trait DerefPure {}
 
-// #[unstable(feature = "deref_pure_trait", issue = "87121")]
-// unsafe impl<T: ?Sized> DerefPure for &T {}
+#[unstable(feature = "deref_pure_trait", issue = "87121")]
+unsafe impl<T: ?Sized> DerefPure for &T {}
 
-// #[unstable(feature = "deref_pure_trait", issue = "87121")]
-// unsafe impl<T: ?Sized> DerefPure for &mut T {}
+#[unstable(feature = "deref_pure_trait", issue = "87121")]
+unsafe impl<T: ?Sized> DerefPure for &mut T {}
 
 // /// Indicates that a struct can be used as a method receiver.
 // /// That is, a type can use this type as a type of `self`, like this:

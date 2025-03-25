@@ -558,6 +558,7 @@
 
 // use crate::iter::{self, FusedIterator, TrustedLen};
 // use crate::ops::{self, ControlFlow, Deref, DerefMut};
+use crate::ops::{Deref, DerefMut};
 // use crate::panicking::{panic, panic_display};
 // use crate::pin::Pin;
 // use crate::{cmp, convert, hint, mem, slice};
@@ -1286,51 +1287,51 @@ impl<T> Option<T> {
         }
     }
 
-//     /// Converts from `Option<T>` (or `&Option<T>`) to `Option<&T::Target>`.
-//     ///
-//     /// Leaves the original Option in-place, creating a new one with a reference
-//     /// to the original one, additionally coercing the contents via [`Deref`].
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x: Option<String> = Some("hey".to_owned());
-//     /// assert_eq!(x.as_deref(), Some("hey"));
-//     ///
-//     /// let x: Option<String> = None;
-//     /// assert_eq!(x.as_deref(), None);
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "option_deref", since = "1.40.0")]
-//     pub fn as_deref(&self) -> Option<&T::Target>
-//     where
-//         T: Deref,
-//     {
-//         self.as_ref().map(|t| t.deref())
-//     }
+    /// Converts from `Option<T>` (or `&Option<T>`) to `Option<&T::Target>`.
+    ///
+    /// Leaves the original Option in-place, creating a new one with a reference
+    /// to the original one, additionally coercing the contents via [`Deref`].
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x: Option<String> = Some("hey".to_owned());
+    /// assert_eq!(x.as_deref(), Some("hey"));
+    ///
+    /// let x: Option<String> = None;
+    /// assert_eq!(x.as_deref(), None);
+    /// ```
+    #[inline]
+    #[stable(feature = "option_deref", since = "1.40.0")]
+    pub fn as_deref(&self) -> Option<&T::Target>
+    where
+        T: Deref,
+    {
+        self.as_ref().map(|t| t.deref())
+    }
 
-//     /// Converts from `Option<T>` (or `&mut Option<T>`) to `Option<&mut T::Target>`.
-//     ///
-//     /// Leaves the original `Option` in-place, creating a new one containing a mutable reference to
-//     /// the inner type's [`Deref::Target`] type.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let mut x: Option<String> = Some("hey".to_owned());
-//     /// assert_eq!(x.as_deref_mut().map(|x| {
-//     ///     x.make_ascii_uppercase();
-//     ///     x
-//     /// }), Some("HEY".to_owned().as_mut_str()));
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "option_deref", since = "1.40.0")]
-//     pub fn as_deref_mut(&mut self) -> Option<&mut T::Target>
-//     where
-//         T: DerefMut,
-//     {
-//         self.as_mut().map(|t| t.deref_mut())
-//     }
+    /// Converts from `Option<T>` (or `&mut Option<T>`) to `Option<&mut T::Target>`.
+    ///
+    /// Leaves the original `Option` in-place, creating a new one containing a mutable reference to
+    /// the inner type's [`Deref::Target`] type.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut x: Option<String> = Some("hey".to_owned());
+    /// assert_eq!(x.as_deref_mut().map(|x| {
+    ///     x.make_ascii_uppercase();
+    ///     x
+    /// }), Some("HEY".to_owned().as_mut_str()));
+    /// ```
+    #[inline]
+    #[stable(feature = "option_deref", since = "1.40.0")]
+    pub fn as_deref_mut(&mut self) -> Option<&mut T::Target>
+    where
+        T: DerefMut,
+    {
+        self.as_mut().map(|t| t.deref_mut())
+    }
 
 //     /////////////////////////////////////////////////////////////////////////
 //     // Iterator constructors

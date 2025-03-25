@@ -587,6 +587,8 @@ pub enum Option<T> {
 // TODO: remove imports, there are just there while subsetting
 use Option::{Some, None};
 use crate::ops::FnOnce;
+use crate::default::Default;
+use crate::marker::Sized;
 
 impl<T> Option<T> {
     /////////////////////////////////////////////////////////////////////////
@@ -1030,36 +1032,36 @@ impl<T> Option<T> {
         }
     }
 
-    // /// Returns the contained [`Some`] value or a default.
-    // ///
-    // /// Consumes the `self` argument then, if [`Some`], returns the contained
-    // /// value, otherwise if [`None`], returns the [default value] for that
-    // /// type.
-    // ///
-    // /// # Examples
-    // ///
-    // /// ```
-    // /// let x: Option<u32> = None;
-    // /// let y: Option<u32> = Some(12);
-    // ///
-    // /// assert_eq!(x.unwrap_or_default(), 0);
-    // /// assert_eq!(y.unwrap_or_default(), 12);
-    // /// ```
-    // ///
-    // /// [default value]: Default::default
-    // /// [`parse`]: str::parse
-    // /// [`FromStr`]: crate::str::FromStr
-    // #[inline]
-    // #[stable(feature = "rust1", since = "1.0.0")]
-    // pub fn unwrap_or_default(self) -> T
-    // where
-    //     T: Default,
-    // {
-    //     match self {
-    //         Some(x) => x,
-    //         None => T::default(),
-    //     }
-    // }
+    /// Returns the contained [`Some`] value or a default.
+    ///
+    /// Consumes the `self` argument then, if [`Some`], returns the contained
+    /// value, otherwise if [`None`], returns the [default value] for that
+    /// type.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x: Option<u32> = None;
+    /// let y: Option<u32> = Some(12);
+    ///
+    /// assert_eq!(x.unwrap_or_default(), 0);
+    /// assert_eq!(y.unwrap_or_default(), 12);
+    /// ```
+    ///
+    /// [default value]: Default::default
+    /// [`parse`]: str::parse
+    /// [`FromStr`]: crate::str::FromStr
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    pub fn unwrap_or_default(self) -> T
+    where
+        T: Default,
+    {
+        match self {
+            Some(x) => x,
+            None => T::default(),
+        }
+    }
 
     /// Returns the contained [`Some`] value, consuming the `self` value,
     /// without checking that the value is not [`None`].

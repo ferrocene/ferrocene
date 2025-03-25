@@ -185,7 +185,7 @@
 // #![feature(optimize_attribute)]
 #![feature(prelude_import)]
 // #![feature(repr_simd)]
-// #![feature(rustc_allow_const_fn_unstable)]
+#![feature(rustc_allow_const_fn_unstable)]
 #![feature(rustc_attrs)]
 #![feature(rustdoc_internals)]
 // #![feature(simd_ffi)]

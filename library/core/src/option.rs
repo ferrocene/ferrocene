@@ -1981,35 +1981,35 @@ impl<T> Option<&mut T> {
     }
 }
 
-// impl<T, E> Option<Result<T, E>> {
-//     /// Transposes an `Option` of a [`Result`] into a [`Result`] of an `Option`.
-//     ///
-//     /// [`None`] will be mapped to <code>[Ok]\([None])</code>.
-//     /// <code>[Some]\([Ok]\(\_))</code> and <code>[Some]\([Err]\(\_))</code> will be mapped to
-//     /// <code>[Ok]\([Some]\(\_))</code> and <code>[Err]\(\_)</code>.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// #[derive(Debug, Eq, PartialEq)]
-//     /// struct SomeErr;
-//     ///
-//     /// let x: Result<Option<i32>, SomeErr> = Ok(Some(5));
-//     /// let y: Option<Result<i32, SomeErr>> = Some(Ok(5));
-//     /// assert_eq!(x, y.transpose());
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "transpose_result", since = "1.33.0")]
-//     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
-//     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-//     pub const fn transpose(self) -> Result<Option<T>, E> {
-//         match self {
-//             Some(Ok(x)) => Ok(Some(x)),
-//             Some(Err(e)) => Err(e),
-//             None => Ok(None),
-//         }
-//     }
-// }
+impl<T, E> Option<Result<T, E>> {
+    /// Transposes an `Option` of a [`Result`] into a [`Result`] of an `Option`.
+    ///
+    /// [`None`] will be mapped to <code>[Ok]\([None])</code>.
+    /// <code>[Some]\([Ok]\(\_))</code> and <code>[Some]\([Err]\(\_))</code> will be mapped to
+    /// <code>[Ok]\([Some]\(\_))</code> and <code>[Err]\(\_)</code>.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #[derive(Debug, Eq, PartialEq)]
+    /// struct SomeErr;
+    ///
+    /// let x: Result<Option<i32>, SomeErr> = Ok(Some(5));
+    /// let y: Option<Result<i32, SomeErr>> = Some(Ok(5));
+    /// assert_eq!(x, y.transpose());
+    /// ```
+    #[inline]
+    #[stable(feature = "transpose_result", since = "1.33.0")]
+    #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    pub const fn transpose(self) -> Result<Option<T>, E> {
+        match self {
+            Some(Ok(x)) => Ok(Some(x)),
+            Some(Err(e)) => Err(e),
+            None => Ok(None),
+        }
+    }
+}
 
 // #[cfg_attr(not(feature = "panic_immediate_abort"), inline(never))]
 // #[cfg_attr(feature = "panic_immediate_abort", inline)]

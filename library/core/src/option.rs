@@ -676,61 +676,61 @@ impl<T> Option<T> {
         }
     }
 
-//     /////////////////////////////////////////////////////////////////////////
-//     // Adapter for working with references
-//     /////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////
+    // Adapter for working with references
+    /////////////////////////////////////////////////////////////////////////
 
-//     /// Converts from `&Option<T>` to `Option<&T>`.
-//     ///
-//     /// # Examples
-//     ///
-//     /// Calculates the length of an <code>Option<[String]></code> as an <code>Option<[usize]></code>
-//     /// without moving the [`String`]. The [`map`] method takes the `self` argument by value,
-//     /// consuming the original, so this technique uses `as_ref` to first take an `Option` to a
-//     /// reference to the value inside the original.
-//     ///
-//     /// [`map`]: Option::map
-//     /// [String]: ../../std/string/struct.String.html "String"
-//     /// [`String`]: ../../std/string/struct.String.html "String"
-//     ///
-//     /// ```
-//     /// let text: Option<String> = Some("Hello, world!".to_string());
-//     /// // First, cast `Option<String>` to `Option<&String>` with `as_ref`,
-//     /// // then consume *that* with `map`, leaving `text` on the stack.
-//     /// let text_length: Option<usize> = text.as_ref().map(|s| s.len());
-//     /// println!("still can print text: {text:?}");
-//     /// ```
-//     #[inline]
-//     #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     pub const fn as_ref(&self) -> Option<&T> {
-//         match *self {
-//             Some(ref x) => Some(x),
-//             None => None,
-//         }
-//     }
+    /// Converts from `&Option<T>` to `Option<&T>`.
+    ///
+    /// # Examples
+    ///
+    /// Calculates the length of an <code>Option<[String]></code> as an <code>Option<[usize]></code>
+    /// without moving the [`String`]. The [`map`] method takes the `self` argument by value,
+    /// consuming the original, so this technique uses `as_ref` to first take an `Option` to a
+    /// reference to the value inside the original.
+    ///
+    /// [`map`]: Option::map
+    /// [String]: ../../std/string/struct.String.html "String"
+    /// [`String`]: ../../std/string/struct.String.html "String"
+    ///
+    /// ```
+    /// let text: Option<String> = Some("Hello, world!".to_string());
+    /// // First, cast `Option<String>` to `Option<&String>` with `as_ref`,
+    /// // then consume *that* with `map`, leaving `text` on the stack.
+    /// let text_length: Option<usize> = text.as_ref().map(|s| s.len());
+    /// println!("still can print text: {text:?}");
+    /// ```
+    #[inline]
+    #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    pub const fn as_ref(&self) -> Option<&T> {
+        match *self {
+            Some(ref x) => Some(x),
+            None => None,
+        }
+    }
 
-//     /// Converts from `&mut Option<T>` to `Option<&mut T>`.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let mut x = Some(2);
-//     /// match x.as_mut() {
-//     ///     Some(v) => *v = 42,
-//     ///     None => {},
-//     /// }
-//     /// assert_eq!(x, Some(42));
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-//     pub const fn as_mut(&mut self) -> Option<&mut T> {
-//         match *self {
-//             Some(ref mut x) => Some(x),
-//             None => None,
-//         }
-//     }
+    /// Converts from `&mut Option<T>` to `Option<&mut T>`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut x = Some(2);
+    /// match x.as_mut() {
+    ///     Some(v) => *v = 42,
+    ///     None => {},
+    /// }
+    /// assert_eq!(x, Some(42));
+    /// ```
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    pub const fn as_mut(&mut self) -> Option<&mut T> {
+        match *self {
+            Some(ref mut x) => Some(x),
+            None => None,
+        }
+    }
 
 //     /// Converts from <code>[Pin]<[&]Option\<T>></code> to <code>Option<[Pin]<[&]T>></code>.
 //     ///
@@ -1088,38 +1088,38 @@ impl<T> Option<T> {
 //         }
 //     }
 
-//     /////////////////////////////////////////////////////////////////////////
-//     // Transforming contained values
-//     /////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////
+    // Transforming contained values
+    /////////////////////////////////////////////////////////////////////////
 
-//     /// Maps an `Option<T>` to `Option<U>` by applying a function to a contained value (if `Some`) or returns `None` (if `None`).
-//     ///
-//     /// # Examples
-//     ///
-//     /// Calculates the length of an <code>Option<[String]></code> as an
-//     /// <code>Option<[usize]></code>, consuming the original:
-//     ///
-//     /// [String]: ../../std/string/struct.String.html "String"
-//     /// ```
-//     /// let maybe_some_string = Some(String::from("Hello, World!"));
-//     /// // `Option::map` takes self *by value*, consuming `maybe_some_string`
-//     /// let maybe_some_len = maybe_some_string.map(|s| s.len());
-//     /// assert_eq!(maybe_some_len, Some(13));
-//     ///
-//     /// let x: Option<&str> = None;
-//     /// assert_eq!(x.map(|s| s.len()), None);
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     pub fn map<U, F>(self, f: F) -> Option<U>
-//     where
-//         F: FnOnce(T) -> U,
-//     {
-//         match self {
-//             Some(x) => Some(f(x)),
-//             None => None,
-//         }
-//     }
+    /// Maps an `Option<T>` to `Option<U>` by applying a function to a contained value (if `Some`) or returns `None` (if `None`).
+    ///
+    /// # Examples
+    ///
+    /// Calculates the length of an <code>Option<[String]></code> as an
+    /// <code>Option<[usize]></code>, consuming the original:
+    ///
+    /// [String]: ../../std/string/struct.String.html "String"
+    /// ```
+    /// let maybe_some_string = Some(String::from("Hello, World!"));
+    /// // `Option::map` takes self *by value*, consuming `maybe_some_string`
+    /// let maybe_some_len = maybe_some_string.map(|s| s.len());
+    /// assert_eq!(maybe_some_len, Some(13));
+    ///
+    /// let x: Option<&str> = None;
+    /// assert_eq!(x.map(|s| s.len()), None);
+    /// ```
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    pub fn map<U, F>(self, f: F) -> Option<U>
+    where
+        F: FnOnce(T) -> U,
+    {
+        match self {
+            Some(x) => Some(f(x)),
+            None => None,
+        }
+    }
 
 //     /// Calls a function with a reference to the contained value if [`Some`].
 //     ///

@@ -845,23 +845,23 @@ pub trait Copy: Clone {
 //     type Discriminant: Clone + Copy + Debug + Eq + PartialEq + Hash + Send + Sync + Unpin;
 // }
 
-// /// Used to determine whether a type contains
-// /// any `UnsafeCell` internally, but not through an indirection.
-// /// This affects, for example, whether a `static` of that type is
-// /// placed in read-only static memory or writable static memory.
-// /// This can be used to declare that a constant with a generic type
-// /// will not contain interior mutability, and subsequently allow
-// /// placing the constant behind references.
-// ///
-// /// # Safety
-// ///
-// /// This trait is a core part of the language, it is just expressed as a trait in libcore for
-// /// convenience. Do *not* implement it for other types.
-// // FIXME: Eventually this trait should become `#[rustc_deny_explicit_impl]`.
-// // That requires porting the impls below to native internal impls.
-// #[lang = "freeze"]
-// #[unstable(feature = "freeze", issue = "121675")]
-// pub unsafe auto trait Freeze {}
+/// Used to determine whether a type contains
+/// any `UnsafeCell` internally, but not through an indirection.
+/// This affects, for example, whether a `static` of that type is
+/// placed in read-only static memory or writable static memory.
+/// This can be used to declare that a constant with a generic type
+/// will not contain interior mutability, and subsequently allow
+/// placing the constant behind references.
+///
+/// # Safety
+///
+/// This trait is a core part of the language, it is just expressed as a trait in libcore for
+/// convenience. Do *not* implement it for other types.
+// FIXME: Eventually this trait should become `#[rustc_deny_explicit_impl]`.
+// That requires porting the impls below to native internal impls.
+#[lang = "freeze"]
+#[unstable(feature = "freeze", issue = "121675")]
+pub unsafe auto trait Freeze {}
 
 // #[unstable(feature = "freeze", issue = "121675")]
 // impl<T: ?Sized> !Freeze for UnsafeCell<T> {}

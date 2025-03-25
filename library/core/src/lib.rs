@@ -360,7 +360,6 @@ pub mod clone;
 pub mod cmp;
 #[cfg(feature = "uncertified")]
 pub mod convert;
-#[cfg(feature = "uncertified")]
 pub mod default;
 #[cfg(feature = "uncertified")]
 pub mod error;

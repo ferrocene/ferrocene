@@ -37,9 +37,9 @@ pub use crate::clone::Clone;
 // #[stable(feature = "core_prelude", since = "1.4.0")]
 // #[doc(no_inline)]
 // pub use crate::convert::{AsMut, AsRef, From, Into};
-// #[stable(feature = "core_prelude", since = "1.4.0")]
-// #[doc(no_inline)]
-// pub use crate::default::Default;
+#[stable(feature = "core_prelude", since = "1.4.0")]
+#[doc(no_inline)]
+pub use crate::default::Default;
 // #[stable(feature = "core_prelude", since = "1.4.0")]
 // #[doc(no_inline)]
 // pub use crate::iter::{DoubleEndedIterator, ExactSizeIterator, Extend, IntoIterator, Iterator};

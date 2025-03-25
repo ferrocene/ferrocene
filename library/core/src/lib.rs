@@ -368,7 +368,6 @@ pub mod convert;
 pub mod default;
 #[cfg(feature = "uncertified")]
 pub mod error;
-#[cfg(feature = "uncertified")]
 pub mod marker;
 #[cfg(feature = "uncertified")]
 pub mod ops;
@@ -402,7 +401,7 @@ pub mod io;
 pub mod iter;
 #[cfg(feature = "uncertified")]
 pub mod net;
-#[cfg(feature = "uncertified")]
+// #[cfg(feature = "uncertified")]
 pub mod option;
 #[cfg(feature = "uncertified")]
 pub mod panic;

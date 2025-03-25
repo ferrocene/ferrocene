@@ -584,29 +584,31 @@ pub enum Option<T> {
 // Type implementation
 /////////////////////////////////////////////////////////////////////////////
 
-// impl<T> Option<T> {
-//     /////////////////////////////////////////////////////////////////////////
-//     // Querying the contained values
-//     /////////////////////////////////////////////////////////////////////////
+use Option::Some;
 
-//     /// Returns `true` if the option is a [`Some`] value.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x: Option<u32> = Some(2);
-//     /// assert_eq!(x.is_some(), true);
-//     ///
-//     /// let x: Option<u32> = None;
-//     /// assert_eq!(x.is_some(), false);
-//     /// ```
-//     #[must_use = "if you intended to assert that this has a value, consider `.unwrap()` instead"]
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
-//     pub const fn is_some(&self) -> bool {
-//         matches!(*self, Some(_))
-//     }
+impl<T> Option<T> {
+    /////////////////////////////////////////////////////////////////////////
+    // Querying the contained values
+    /////////////////////////////////////////////////////////////////////////
+
+    /// Returns `true` if the option is a [`Some`] value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x: Option<u32> = Some(2);
+    /// assert_eq!(x.is_some(), true);
+    ///
+    /// let x: Option<u32> = None;
+    /// assert_eq!(x.is_some(), false);
+    /// ```
+    #[must_use = "if you intended to assert that this has a value, consider `.unwrap()` instead"]
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
+    pub const fn is_some(&self) -> bool {
+        matches!(*self, Some(_))
+    }
 
 //     /// Returns `true` if the option is a [`Some`] and the value inside of it matches a predicate.
 //     ///
@@ -1846,7 +1848,7 @@ pub enum Option<T> {
 //             _ => None,
 //         }
 //     }
-// }
+}
 
 // impl<T, U> Option<(T, U)> {
 //     /// Unzips an option containing a tuple of two options.

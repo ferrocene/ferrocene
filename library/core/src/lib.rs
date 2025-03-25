@@ -217,6 +217,8 @@
 #![feature(x86_amx_intrinsics)]
 // tidy-alphabetical-end
 
+#![cfg(feature = "uncertified")]
+
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]
 extern crate self as core;

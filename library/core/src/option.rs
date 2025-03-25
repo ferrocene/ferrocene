@@ -584,7 +584,9 @@ pub enum Option<T> {
 // Type implementation
 /////////////////////////////////////////////////////////////////////////////
 
+// TODO: remove imports, there are just there while subsetting
 use Option::{Some, None};
+use crate::ops::FnOnce;
 
 impl<T> Option<T> {
     /////////////////////////////////////////////////////////////////////////
@@ -1090,38 +1092,38 @@ impl<T> Option<T> {
 //         }
 //     }
 
-//     /////////////////////////////////////////////////////////////////////////
-//     // Transforming contained values
-//     /////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////
+    // Transforming contained values
+    /////////////////////////////////////////////////////////////////////////
 
-//     /// Maps an `Option<T>` to `Option<U>` by applying a function to a contained value (if `Some`) or returns `None` (if `None`).
-//     ///
-//     /// # Examples
-//     ///
-//     /// Calculates the length of an <code>Option<[String]></code> as an
-//     /// <code>Option<[usize]></code>, consuming the original:
-//     ///
-//     /// [String]: ../../std/string/struct.String.html "String"
-//     /// ```
-//     /// let maybe_some_string = Some(String::from("Hello, World!"));
-//     /// // `Option::map` takes self *by value*, consuming `maybe_some_string`
-//     /// let maybe_some_len = maybe_some_string.map(|s| s.len());
-//     /// assert_eq!(maybe_some_len, Some(13));
-//     ///
-//     /// let x: Option<&str> = None;
-//     /// assert_eq!(x.map(|s| s.len()), None);
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     pub fn map<U, F>(self, f: F) -> Option<U>
-//     where
-//         F: FnOnce(T) -> U,
-//     {
-//         match self {
-//             Some(x) => Some(f(x)),
-//             None => None,
-//         }
-//     }
+    /// Maps an `Option<T>` to `Option<U>` by applying a function to a contained value (if `Some`) or returns `None` (if `None`).
+    ///
+    /// # Examples
+    ///
+    /// Calculates the length of an <code>Option<[String]></code> as an
+    /// <code>Option<[usize]></code>, consuming the original:
+    ///
+    /// [String]: ../../std/string/struct.String.html "String"
+    /// ```
+    /// let maybe_some_string = Some(String::from("Hello, World!"));
+    /// // `Option::map` takes self *by value*, consuming `maybe_some_string`
+    /// let maybe_some_len = maybe_some_string.map(|s| s.len());
+    /// assert_eq!(maybe_some_len, Some(13));
+    ///
+    /// let x: Option<&str> = None;
+    /// assert_eq!(x.map(|s| s.len()), None);
+    /// ```
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    pub fn map<U, F>(self, f: F) -> Option<U>
+    where
+        F: FnOnce(T) -> U,
+    {
+        match self {
+            Some(x) => Some(f(x)),
+            None => None,
+        }
+    }
 
 //     /// Calls a function with a reference to the contained value if [`Some`].
 //     ///

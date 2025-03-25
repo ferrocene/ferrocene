@@ -345,7 +345,6 @@ pub mod prelude;
 pub mod hint;
 #[cfg(feature = "uncertified")]
 pub mod intrinsics;
-#[cfg(feature = "uncertified")]
 pub mod mem;
 #[cfg(feature = "uncertified")]
 pub mod ptr;

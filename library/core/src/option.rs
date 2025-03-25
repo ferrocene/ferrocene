@@ -784,109 +784,109 @@ impl<T> Option<T> {
         discriminant as usize
     }
 
-//     /// Returns a slice of the contained value, if any. If this is `None`, an
-//     /// empty slice is returned. This can be useful to have a single type of
-//     /// iterator over an `Option` or slice.
-//     ///
-//     /// Note: Should you have an `Option<&T>` and wish to get a slice of `T`,
-//     /// you can unpack it via `opt.map_or(&[], std::slice::from_ref)`.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```rust
-//     /// assert_eq!(
-//     ///     [Some(1234).as_slice(), None.as_slice()],
-//     ///     [&[1234][..], &[][..]],
-//     /// );
-//     /// ```
-//     ///
-//     /// The inverse of this function is (discounting
-//     /// borrowing) [`[_]::first`](slice::first):
-//     ///
-//     /// ```rust
-//     /// for i in [Some(1234_u16), None] {
-//     ///     assert_eq!(i.as_ref(), i.as_slice().first());
-//     /// }
-//     /// ```
-//     #[inline]
-//     #[must_use]
-//     #[stable(feature = "option_as_slice", since = "1.75.0")]
-//     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
-//     pub const fn as_slice(&self) -> &[T] {
-//         // SAFETY: When the `Option` is `Some`, we're using the actual pointer
-//         // to the payload, with a length of 1, so this is equivalent to
-//         // `slice::from_ref`, and thus is safe.
-//         // When the `Option` is `None`, the length used is 0, so to be safe it
-//         // just needs to be aligned, which it is because `&self` is aligned and
-//         // the offset used is a multiple of alignment.
-//         //
-//         // In the new version, the intrinsic always returns a pointer to an
-//         // in-bounds and correctly aligned position for a `T` (even if in the
-//         // `None` case it's just padding).
-//         unsafe {
-//             slice::from_raw_parts(
-//                 (self as *const Self).byte_add(core::mem::offset_of!(Self, Some.0)).cast(),
-//                 self.len(),
-//             )
-//         }
-//     }
+    /// Returns a slice of the contained value, if any. If this is `None`, an
+    /// empty slice is returned. This can be useful to have a single type of
+    /// iterator over an `Option` or slice.
+    ///
+    /// Note: Should you have an `Option<&T>` and wish to get a slice of `T`,
+    /// you can unpack it via `opt.map_or(&[], std::slice::from_ref)`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     [Some(1234).as_slice(), None.as_slice()],
+    ///     [&[1234][..], &[][..]],
+    /// );
+    /// ```
+    ///
+    // /// The inverse of this function is (discounting
+    // /// borrowing) [`[_]::first`](slice::first):
+    // ///
+    // /// ```rust
+    // /// for i in [Some(1234_u16), None] {
+    // ///     assert_eq!(i.as_ref(), i.as_slice().first());
+    // /// }
+    // /// ```
+    #[inline]
+    #[must_use]
+    #[stable(feature = "option_as_slice", since = "1.75.0")]
+    #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
+    pub const fn as_slice(&self) -> &[T] {
+        // SAFETY: When the `Option` is `Some`, we're using the actual pointer
+        // to the payload, with a length of 1, so this is equivalent to
+        // `slice::from_ref`, and thus is safe.
+        // When the `Option` is `None`, the length used is 0, so to be safe it
+        // just needs to be aligned, which it is because `&self` is aligned and
+        // the offset used is a multiple of alignment.
+        //
+        // In the new version, the intrinsic always returns a pointer to an
+        // in-bounds and correctly aligned position for a `T` (even if in the
+        // `None` case it's just padding).
+        unsafe {
+            slice::from_raw_parts(
+                (self as *const Self).byte_add(core::mem::offset_of!(Self, Some.0)).cast(),
+                self.len(),
+            )
+        }
+    }
 
-//     /// Returns a mutable slice of the contained value, if any. If this is
-//     /// `None`, an empty slice is returned. This can be useful to have a
-//     /// single type of iterator over an `Option` or slice.
-//     ///
-//     /// Note: Should you have an `Option<&mut T>` instead of a
-//     /// `&mut Option<T>`, which this method takes, you can obtain a mutable
-//     /// slice via `opt.map_or(&mut [], std::slice::from_mut)`.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```rust
-//     /// assert_eq!(
-//     ///     [Some(1234).as_mut_slice(), None.as_mut_slice()],
-//     ///     [&mut [1234][..], &mut [][..]],
-//     /// );
-//     /// ```
-//     ///
-//     /// The result is a mutable slice of zero or one items that points into
-//     /// our original `Option`:
-//     ///
-//     /// ```rust
-//     /// let mut x = Some(1234);
-//     /// x.as_mut_slice()[0] += 1;
-//     /// assert_eq!(x, Some(1235));
-//     /// ```
-//     ///
-//     /// The inverse of this method (discounting borrowing)
-//     /// is [`[_]::first_mut`](slice::first_mut):
-//     ///
-//     /// ```rust
-//     /// assert_eq!(Some(123).as_mut_slice().first_mut(), Some(&mut 123))
-//     /// ```
-//     #[inline]
-//     #[must_use]
-//     #[stable(feature = "option_as_slice", since = "1.75.0")]
-//     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
-//     pub const fn as_mut_slice(&mut self) -> &mut [T] {
-//         // SAFETY: When the `Option` is `Some`, we're using the actual pointer
-//         // to the payload, with a length of 1, so this is equivalent to
-//         // `slice::from_mut`, and thus is safe.
-//         // When the `Option` is `None`, the length used is 0, so to be safe it
-//         // just needs to be aligned, which it is because `&self` is aligned and
-//         // the offset used is a multiple of alignment.
-//         //
-//         // In the new version, the intrinsic creates a `*const T` from a
-//         // mutable reference  so it is safe to cast back to a mutable pointer
-//         // here. As with `as_slice`, the intrinsic always returns a pointer to
-//         // an in-bounds and correctly aligned position for a `T` (even if in
-//         // the `None` case it's just padding).
-//         unsafe {
-//             slice::from_raw_parts_mut(
-//                 (self as *mut Self).byte_add(core::mem::offset_of!(Self, Some.0)).cast(),
-//                 self.len(),
-//             )
-//         }
-//     }
+    /// Returns a mutable slice of the contained value, if any. If this is
+    /// `None`, an empty slice is returned. This can be useful to have a
+    /// single type of iterator over an `Option` or slice.
+    ///
+    /// Note: Should you have an `Option<&mut T>` instead of a
+    /// `&mut Option<T>`, which this method takes, you can obtain a mutable
+    /// slice via `opt.map_or(&mut [], std::slice::from_mut)`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     [Some(1234).as_mut_slice(), None.as_mut_slice()],
+    ///     [&mut [1234][..], &mut [][..]],
+    /// );
+    /// ```
+    ///
+    /// The result is a mutable slice of zero or one items that points into
+    /// our original `Option`:
+    ///
+    /// ```rust
+    /// let mut x = Some(1234);
+    /// x.as_mut_slice()[0] += 1;
+    /// assert_eq!(x, Some(1235));
+    /// ```
+    ///
+    // /// The inverse of this method (discounting borrowing)
+    // /// is [`[_]::first_mut`](slice::first_mut):
+    // ///
+    // /// ```rust
+    // /// assert_eq!(Some(123).as_mut_slice().first_mut(), Some(&mut 123))
+    // /// ```
+    #[inline]
+    #[must_use]
+    #[stable(feature = "option_as_slice", since = "1.75.0")]
+    #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
+    pub const fn as_mut_slice(&mut self) -> &mut [T] {
+        // SAFETY: When the `Option` is `Some`, we're using the actual pointer
+        // to the payload, with a length of 1, so this is equivalent to
+        // `slice::from_mut`, and thus is safe.
+        // When the `Option` is `None`, the length used is 0, so to be safe it
+        // just needs to be aligned, which it is because `&self` is aligned and
+        // the offset used is a multiple of alignment.
+        //
+        // In the new version, the intrinsic creates a `*const T` from a
+        // mutable reference  so it is safe to cast back to a mutable pointer
+        // here. As with `as_slice`, the intrinsic always returns a pointer to
+        // an in-bounds and correctly aligned position for a `T` (even if in
+        // the `None` case it's just padding).
+        unsafe {
+            slice::from_raw_parts_mut(
+                (self as *mut Self).byte_add(core::mem::offset_of!(Self, Some.0)).cast(),
+                self.len(),
+            )
+        }
+    }
 
     /////////////////////////////////////////////////////////////////////////
     // Getting to contained values

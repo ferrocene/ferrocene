@@ -170,6 +170,17 @@ impl LldMode {
     }
 }
 
+/// Determines how will GCC be provided.
+#[derive(Default, Clone)]
+pub enum GccCiMode {
+    /// Build GCC from the local `src/gcc` submodule.
+    #[default]
+    BuildLocally,
+    /// Try to download GCC from CI.
+    /// If it is not available on CI, it will be built locally instead.
+    DownloadFromCi,
+}
+
 /// Global configuration for the entire build and/or bootstrap.
 ///
 /// This structure is parsed from `config.toml`, and some of the fields are inferred from `git` or build-time parameters.
@@ -281,6 +292,9 @@ pub struct Config {
     pub llvm_cxxflags: Option<String>,
     pub llvm_ldflags: Option<String>,
     pub llvm_use_libcxx: bool,
+
+    // gcc codegen options
+    pub gcc_ci_mode: GccCiMode,
 
     // rust codegen options
     pub rust_optimize: RustOptimize,
@@ -745,6 +759,7 @@ pub(crate) struct TomlConfig {
     build: Option<Build>,
     install: Option<Install>,
     llvm: Option<Llvm>,
+    gcc: Option<Gcc>,
     rust: Option<Rust>,
     target: Option<HashMap<String, TomlTarget>>,
     dist: Option<Dist>,
@@ -780,6 +795,7 @@ trait Merge {
 impl Merge for TomlConfig {
     fn merge(
         &mut self,
+<<<<<<< HEAD
         TomlConfig {
             build,
             install,
@@ -791,6 +807,9 @@ impl Merge for TomlConfig {
             profile,
             change_id,
         }: Self,
+=======
+        TomlConfig { build, install, llvm, gcc, rust, dist, target, profile, change_id }: Self,
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         replace: ReplaceOpt,
     ) {
         fn do_merge<T: Merge>(x: &mut Option<T>, y: Option<T>, replace: ReplaceOpt) {
@@ -809,6 +828,7 @@ impl Merge for TomlConfig {
         do_merge(&mut self.build, build, replace);
         do_merge(&mut self.install, install, replace);
         do_merge(&mut self.llvm, llvm, replace);
+        do_merge(&mut self.gcc, gcc, replace);
         do_merge(&mut self.rust, rust, replace);
         do_merge(&mut self.dist, dist, replace);
         do_merge(&mut self.ferrocene, ferrocene, replace);
@@ -1074,6 +1094,13 @@ define_config! {
         enable_warnings: Option<bool> = "enable-warnings",
         download_ci_llvm: Option<StringOrBool> = "download-ci-llvm",
         build_config: Option<HashMap<String, String>> = "build-config",
+    }
+}
+
+define_config! {
+    /// TOML representation of how the GCC build is configured.
+    struct Gcc {
+        download_ci_gcc: Option<bool> = "download-ci-gcc",
     }
 }
 
@@ -2238,6 +2265,16 @@ impl Config {
             config.llvm_from_ci = config.parse_download_ci_llvm(None, false);
         }
 
+        if let Some(gcc) = toml.gcc {
+            config.gcc_ci_mode = match gcc.download_ci_gcc {
+                Some(value) => match value {
+                    true => GccCiMode::DownloadFromCi,
+                    false => GccCiMode::BuildLocally,
+                },
+                None => GccCiMode::default(),
+            };
+        }
+
         if let Some(t) = toml.target {
             for (triple, cfg) in t {
                 let mut target = Target::from_triple(&triple);
@@ -3170,6 +3207,9 @@ impl Config {
         // these changes to speed up the build process for library developers. This provides consistent
         // functionality for library developers between `download-rustc=true` and `download-rustc="if-unchanged"`
         // options.
+        //
+        // If you update "library" logic here, update `builder::tests::ci_rustc_if_unchanged_logic` test
+        // logic accordingly.
         if !CiEnv::is_ci() {
             allowed_paths.push(":!library");
         }

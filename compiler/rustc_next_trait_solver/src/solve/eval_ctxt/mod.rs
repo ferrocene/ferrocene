@@ -2,16 +2,18 @@ use std::ops::ControlFlow;
 
 use derive_where::derive_where;
 #[cfg(feature = "nightly")]
-use rustc_macros::{HashStable_NoContext, TyDecodable, TyEncodable};
+use rustc_macros::{Decodable_NoContext, Encodable_NoContext, HashStable_NoContext};
 use rustc_type_ir::data_structures::{HashMap, HashSet, ensure_sufficient_stack};
 use rustc_type_ir::fast_reject::DeepRejectCtxt;
-use rustc_type_ir::fold::{TypeFoldable, TypeFolder, TypeSuperFoldable};
 use rustc_type_ir::inherent::*;
 use rustc_type_ir::relate::Relate;
 use rustc_type_ir::relate::solver_relating::RelateExt;
 use rustc_type_ir::search_graph::PathKind;
-use rustc_type_ir::visit::{TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor};
-use rustc_type_ir::{self as ty, CanonicalVarValues, InferCtxtLike, Interner, TypingMode};
+use rustc_type_ir::{
+    self as ty, CanonicalVarValues, InferCtxtLike, Interner, TypeFoldable, TypeFolder,
+    TypeSuperFoldable, TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor,
+    TypingMode,
+};
 use rustc_type_ir_macros::{Lift_Generic, TypeFoldable_Generic, TypeVisitable_Generic};
 use tracing::{instrument, trace};
 
@@ -129,7 +131,10 @@ where
 
 #[derive_where(Clone, Debug, Default; I: Interner)]
 #[derive(TypeVisitable_Generic, TypeFoldable_Generic, Lift_Generic)]
-#[cfg_attr(feature = "nightly", derive(TyDecodable, TyEncodable, HashStable_NoContext))]
+#[cfg_attr(
+    feature = "nightly",
+    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+)]
 struct NestedGoals<I: Interner> {
     /// These normalizes-to goals are treated specially during the evaluation
     /// loop. In each iteration we take the RHS of the projection, replace it with
@@ -271,12 +276,39 @@ where
     /// and will need to clearly document it in the rustc-dev-guide before
     /// stabilization.
     pub(super) fn step_kind_for_source(&self, source: GoalSource) -> PathKind {
-        match (self.current_goal_kind, source) {
-            (_, GoalSource::NormalizeGoal(step_kind)) => step_kind,
-            (CurrentGoalKind::CoinductiveTrait, GoalSource::ImplWhereBound) => {
-                PathKind::Coinductive
+        match source {
+            // We treat these goals as unknown for now. It is likely that most miscellaneous
+            // nested goals will be converted to an inductive variant in the future.
+            //
+            // Having unknown cycles is always the safer option, as changing that to either
+            // succeed or hard error is backwards compatible. If we incorrectly treat a cycle
+            // as inductive even though it should not be, it may be unsound during coherence and
+            // fixing it may cause inference breakage or introduce ambiguity.
+            GoalSource::Misc => PathKind::Unknown,
+            GoalSource::NormalizeGoal(path_kind) => path_kind,
+            GoalSource::ImplWhereBound => {
+                // We currently only consider a cycle coinductive if it steps
+                // into a where-clause of a coinductive trait.
+                //
+                // We probably want to make all traits coinductive in the future,
+                // so we treat cycles involving their where-clauses as ambiguous.
+                if let CurrentGoalKind::CoinductiveTrait = self.current_goal_kind {
+                    PathKind::Coinductive
+                } else {
+                    PathKind::Unknown
+                }
             }
-            _ => PathKind::Inductive,
+            // Relating types is always unproductive. If we were to map proof trees to
+            // corecursive functions as explained in #136824, relating types never
+            // introduces a constructor which could cause the recursion to be guarded.
+            GoalSource::TypeRelating => PathKind::Inductive,
+            // Instantiating a higher ranked goal can never cause the recursion to be
+            // guarded and is therefore unproductive.
+            GoalSource::InstantiateHigherRanked => PathKind::Inductive,
+            // These goal sources are likely unproductive and can be changed to
+            // `PathKind::Inductive`. Keeping them as unknown until we're confident
+            // about this and have an example where it is necessary.
+            GoalSource::AliasBoundConstCondition | GoalSource::AliasWellFormed => PathKind::Unknown,
         }
     }
 
@@ -606,7 +638,7 @@ where
 
             let (NestedNormalizationGoals(nested_goals), _, certainty) = self.evaluate_goal_raw(
                 GoalEvaluationKind::Nested,
-                GoalSource::Misc,
+                GoalSource::TypeRelating,
                 unconstrained_goal,
             )?;
             // Add the nested goals from normalization to our own nested goals.
@@ -683,7 +715,7 @@ where
     pub(super) fn add_normalizes_to_goal(&mut self, mut goal: Goal<I, ty::NormalizesTo<I>>) {
         goal.predicate = goal.predicate.fold_with(&mut ReplaceAliasWithInfer::new(
             self,
-            GoalSource::Misc,
+            GoalSource::TypeRelating,
             goal.param_env,
         ));
         self.inspect.add_normalizes_to_goal(self.delegate, self.max_input_universe, goal);
@@ -939,7 +971,15 @@ where
         rhs: T,
     ) -> Result<(), NoSolution> {
         let goals = self.delegate.relate(param_env, lhs, variance, rhs, self.origin_span)?;
-        self.add_goals(GoalSource::Misc, goals);
+        if cfg!(debug_assertions) {
+            for g in goals.iter() {
+                match g.predicate.kind().skip_binder() {
+                    ty::PredicateKind::Subtype { .. } | ty::PredicateKind::AliasRelate(..) => {}
+                    p => unreachable!("unexpected nested goal in `relate`: {p:?}"),
+                }
+            }
+        }
+        self.add_goals(GoalSource::TypeRelating, goals);
         Ok(())
     }
 

@@ -7,6 +7,7 @@ edition = "2024"
 # tidy-alphabetical-start
 itertools = "0.12"
 rustc_abi = { path = "../rustc_abi" }
+rustc_attr_parsing = { path = "../rustc_attr_parsing" }
 rustc_data_structures = { path = "../rustc_data_structures" }
 rustc_errors = { path = "../rustc_errors" }
 rustc_fluent_macro = { path = "../rustc_fluent_macro" }
@@ -20,9 +21,5 @@ rustc_session = { path = "../rustc_session" }
 rustc_span = { path = "../rustc_span" }
 rustc_target = { path = "../rustc_target" }
 rustc_trait_selection = { path = "../rustc_trait_selection" }
-rustc_type_ir = { path = "../rustc_type_ir" }
 tracing = "0.1"
 # tidy-alphabetical-end
-
-[lints]
-workspace = true

@@ -26,10 +26,12 @@ type Traitable = impl Trait<Assoc = Sendable>;
 // the hidden type. We already have obligations registered on the inference
 // var to make it uphold the `: Duh` bound on `Trait::Assoc`. The opaque
 // type does not implement `Duh`, even if its hidden type does. So we error out.
+#[define_opaque(Traitable)]
 fn foo() -> Traitable {
     || 42
 }
 
+<<<<<<< HEAD
 fn main() {
 }
 
@@ -41,3 +43,6 @@ fn main() {
 //
 // ferrocene-annotations: fls_85vx1qfa061i
 // Traits
+=======
+fn main() {}
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

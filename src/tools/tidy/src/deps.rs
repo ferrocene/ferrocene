@@ -6,6 +6,7 @@ use std::io::Write;
 use std::path::Path;
 
 use build_helper::ci::CiEnv;
+use cargo_metadata::semver::Version;
 use cargo_metadata::{Metadata, Package, PackageId};
 
 #[path = "../../../bootstrap/src/utils/proc_macro_deps.rs"]
@@ -84,7 +85,6 @@ pub(crate) const WORKSPACES: &[(&str, ExceptionList, Option<(&[&str], &[&str])>,
     ("src/tools/rust-analyzer", EXCEPTIONS_RUST_ANALYZER, None, &[]),
     ("src/tools/rustbook", EXCEPTIONS_RUSTBOOK, None, &["src/doc/book", "src/doc/reference"]),
     ("src/tools/rustc-perf", EXCEPTIONS_RUSTC_PERF, None, &["src/tools/rustc-perf"]),
-    ("src/tools/x", &[], None, &[]),
     // tidy-alphabetical-end
 ];
 
@@ -470,7 +470,11 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "windows_x86_64_gnu",
     "windows_x86_64_gnullvm",
     "windows_x86_64_msvc",
+<<<<<<< HEAD
     "wit-bindgen-rt",
+=======
+    "wit-bindgen-rt@0.33.0", // via wasi
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "writeable",
     "yoke",
     "yoke-derive",
@@ -838,7 +842,17 @@ fn check_permitted_dependencies(
 
     // Check that the PERMITTED_DEPENDENCIES does not have unused entries.
     for permitted in permitted_dependencies {
-        if !deps.iter().any(|dep_id| &pkg_from_id(metadata, dep_id).name == permitted) {
+        fn compare(pkg: &Package, permitted: &str) -> bool {
+            if let Some((name, version)) = permitted.split_once("@") {
+                let Ok(version) = Version::parse(version) else {
+                    return false;
+                };
+                pkg.name == name && pkg.version == version
+            } else {
+                pkg.name == permitted
+            }
+        }
+        if !deps.iter().any(|dep_id| compare(pkg_from_id(metadata, dep_id), permitted)) {
             tidy_error!(
                 bad,
                 "could not find allowed package `{permitted}`\n\
@@ -849,14 +863,30 @@ fn check_permitted_dependencies(
     }
 
     // Get in a convenient form.
-    let permitted_dependencies: HashSet<_> = permitted_dependencies.iter().cloned().collect();
+    let permitted_dependencies: HashMap<_, _> = permitted_dependencies
+        .iter()
+        .map(|s| {
+            if let Some((name, version)) = s.split_once('@') {
+                (name, Version::parse(version).ok())
+            } else {
+                (*s, None)
+            }
+        })
+        .collect();
 
     for dep in deps {
         let dep = pkg_from_id(metadata, dep);
         // If this path is in-tree, we don't require it to be explicitly permitted.
-        if dep.source.is_some() && !permitted_dependencies.contains(dep.name.as_str()) {
-            tidy_error!(bad, "Dependency for {descr} not explicitly permitted: {}", dep.id);
-            has_permitted_dep_error = true;
+        if dep.source.is_some() {
+            let is_eq = if let Some(version) = permitted_dependencies.get(dep.name.as_str()) {
+                if let Some(version) = version { version == &dep.version } else { true }
+            } else {
+                false
+            };
+            if !is_eq {
+                tidy_error!(bad, "Dependency for {descr} not explicitly permitted: {}", dep.id);
+                has_permitted_dep_error = true;
+            }
         }
     }
 

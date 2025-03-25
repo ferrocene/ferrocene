@@ -252,6 +252,8 @@ pub trait FnOnce<Args: Tuple> {
 
 mod impls {
     use crate::marker::Tuple;
+    use crate::marker::Sized;
+    use super::{Fn, FnMut, FnOnce};
 
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<A: Tuple, F: ?Sized> Fn<A> for &F

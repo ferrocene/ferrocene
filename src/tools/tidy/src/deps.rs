@@ -470,11 +470,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "windows_x86_64_gnu",
     "windows_x86_64_gnullvm",
     "windows_x86_64_msvc",
-<<<<<<< HEAD
     "wit-bindgen-rt",
-=======
-    "wit-bindgen-rt@0.33.0", // via wasi
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "writeable",
     "yoke",
     "yoke-derive",

@@ -18,11 +18,8 @@ pub(crate) mod linux_gnu;
 pub(crate) mod linux_musl;
 pub(crate) mod linux_ohos;
 pub(crate) mod linux_uclibc;
-<<<<<<< HEAD
-pub(crate) mod lynxos178;
-=======
 pub(crate) mod linux_wasm;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+pub(crate) mod lynxos178; // Ferrocene addition
 pub(crate) mod msvc;
 pub(crate) mod netbsd;
 pub(crate) mod nto_qnx;

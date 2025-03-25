@@ -31,9 +31,7 @@ fn foo() -> Traitable {
     || 42
 }
 
-<<<<<<< HEAD
-fn main() {
-}
+fn main() {}
 
 // ferrocene-annotations: fls_e1pgdlv81vul
 // Implementation Conformance
@@ -43,6 +41,3 @@ fn main() {
 //
 // ferrocene-annotations: fls_85vx1qfa061i
 // Traits
-=======
-fn main() {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

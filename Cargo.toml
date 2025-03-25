@@ -1,15 +1,7 @@
 [workspace]
 resolver = "1"
 members = [
-<<<<<<< HEAD
-  "ferrocene/tools/traceability-matrix/",
-  "ferrocene/tools/self-test/",
-  "ferrocene/tools/document-signatures/",
-  "ferrocene/tools/generate-tarball/",
-
-=======
 # tidy-alphabetical-start
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
   "compiler/rustc",
   "src/build_helper",
   "src/etc/test-float-parse",
@@ -56,6 +48,10 @@ members = [
   "src/tools/wasm-component-ld",
   "src/tools/x",
 # tidy-alphabetical-end
+  "ferrocene/tools/document-signatures",
+  "ferrocene/tools/generate-tarball",
+  "ferrocene/tools/self-test",
+  "ferrocene/tools/traceability-matrix",
 ]
 
 exclude = [
@@ -66,15 +62,8 @@ exclude = [
   "tests/rustdoc-gui",
   # HACK(eddyb) This hardcodes the fact that our CI uses `/checkout/obj`.
   "obj",
-<<<<<<< HEAD
-  # The `x` binary is a thin wrapper that calls `x.py`, which initializes
-  # submodules, before which workspace members cannot be invoked because
-  # not all `Cargo.toml` files are available, so we exclude the `x` binary,
-  # so it can be invoked before the current checkout is set up.
-  "src/tools/x",
+  # Ferrocene addition: https://github.com/ferrocene/ferrocene/pull/1022
   "src/tools/rustc-perf/site",
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 ]
 
 [profile.release.package.rustc-rayon-core]

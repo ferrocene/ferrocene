@@ -612,29 +612,29 @@ impl<T> Option<T> {
         matches!(*self, Some(_))
     }
 
-//     /// Returns `true` if the option is a [`Some`] and the value inside of it matches a predicate.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x: Option<u32> = Some(2);
-//     /// assert_eq!(x.is_some_and(|x| x > 1), true);
-//     ///
-//     /// let x: Option<u32> = Some(0);
-//     /// assert_eq!(x.is_some_and(|x| x > 1), false);
-//     ///
-//     /// let x: Option<u32> = None;
-//     /// assert_eq!(x.is_some_and(|x| x > 1), false);
-//     /// ```
-//     #[must_use]
-//     #[inline]
-//     #[stable(feature = "is_some_and", since = "1.70.0")]
-//     pub fn is_some_and(self, f: impl FnOnce(T) -> bool) -> bool {
-//         match self {
-//             None => false,
-//             Some(x) => f(x),
-//         }
-//     }
+    /// Returns `true` if the option is a [`Some`] and the value inside of it matches a predicate.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x: Option<u32> = Some(2);
+    /// assert_eq!(x.is_some_and(|x| x > 1), true);
+    ///
+    /// let x: Option<u32> = Some(0);
+    /// assert_eq!(x.is_some_and(|x| x > 1), false);
+    ///
+    /// let x: Option<u32> = None;
+    /// assert_eq!(x.is_some_and(|x| x > 1), false);
+    /// ```
+    #[must_use]
+    #[inline]
+    #[stable(feature = "is_some_and", since = "1.70.0")]
+    pub fn is_some_and(self, f: impl FnOnce(T) -> bool) -> bool {
+        match self {
+            None => false,
+            Some(x) => f(x),
+        }
+    }
 
     /// Returns `true` if the option is a [`None`] value.
     ///
@@ -656,29 +656,29 @@ impl<T> Option<T> {
         !self.is_some()
     }
 
-//     /// Returns `true` if the option is a [`None`] or the value inside of it matches a predicate.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x: Option<u32> = Some(2);
-//     /// assert_eq!(x.is_none_or(|x| x > 1), true);
-//     ///
-//     /// let x: Option<u32> = Some(0);
-//     /// assert_eq!(x.is_none_or(|x| x > 1), false);
-//     ///
-//     /// let x: Option<u32> = None;
-//     /// assert_eq!(x.is_none_or(|x| x > 1), true);
-//     /// ```
-//     #[must_use]
-//     #[inline]
-//     #[stable(feature = "is_none_or", since = "1.82.0")]
-//     pub fn is_none_or(self, f: impl FnOnce(T) -> bool) -> bool {
-//         match self {
-//             None => true,
-//             Some(x) => f(x),
-//         }
-//     }
+    /// Returns `true` if the option is a [`None`] or the value inside of it matches a predicate.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x: Option<u32> = Some(2);
+    /// assert_eq!(x.is_none_or(|x| x > 1), true);
+    ///
+    /// let x: Option<u32> = Some(0);
+    /// assert_eq!(x.is_none_or(|x| x > 1), false);
+    ///
+    /// let x: Option<u32> = None;
+    /// assert_eq!(x.is_none_or(|x| x > 1), true);
+    /// ```
+    #[must_use]
+    #[inline]
+    #[stable(feature = "is_none_or", since = "1.82.0")]
+    pub fn is_none_or(self, f: impl FnOnce(T) -> bool) -> bool {
+        match self {
+            None => true,
+            Some(x) => f(x),
+        }
+    }
 
 //     /////////////////////////////////////////////////////////////////////////
 //     // Adapter for working with references

@@ -231,195 +231,195 @@ pub trait Sized {
 //         {T: ?Sized} &T,
 // }
 
-// /// Types whose values can be duplicated simply by copying bits.
-// ///
-// /// By default, variable bindings have 'move semantics.' In other
-// /// words:
-// ///
-// /// ```
-// /// #[derive(Debug)]
-// /// struct Foo;
-// ///
-// /// let x = Foo;
-// ///
-// /// let y = x;
-// ///
-// /// // `x` has moved into `y`, and so cannot be used
-// ///
-// /// // println!("{x:?}"); // error: use of moved value
-// /// ```
-// ///
-// /// However, if a type implements `Copy`, it instead has 'copy semantics':
-// ///
-// /// ```
-// /// // We can derive a `Copy` implementation. `Clone` is also required, as it's
-// /// // a supertrait of `Copy`.
-// /// #[derive(Debug, Copy, Clone)]
-// /// struct Foo;
-// ///
-// /// let x = Foo;
-// ///
-// /// let y = x;
-// ///
-// /// // `y` is a copy of `x`
-// ///
-// /// println!("{x:?}"); // A-OK!
-// /// ```
-// ///
-// /// It's important to note that in these two examples, the only difference is whether you
-// /// are allowed to access `x` after the assignment. Under the hood, both a copy and a move
-// /// can result in bits being copied in memory, although this is sometimes optimized away.
-// ///
-// /// ## How can I implement `Copy`?
-// ///
-// /// There are two ways to implement `Copy` on your type. The simplest is to use `derive`:
-// ///
-// /// ```
-// /// #[derive(Copy, Clone)]
-// /// struct MyStruct;
-// /// ```
-// ///
-// /// You can also implement `Copy` and `Clone` manually:
-// ///
-// /// ```
-// /// struct MyStruct;
-// ///
-// /// impl Copy for MyStruct { }
-// ///
-// /// impl Clone for MyStruct {
-// ///     fn clone(&self) -> MyStruct {
-// ///         *self
-// ///     }
-// /// }
-// /// ```
-// ///
-// /// There is a small difference between the two. The `derive` strategy will also place a `Copy`
-// /// bound on type parameters:
-// ///
-// /// ```
-// /// #[derive(Clone)]
-// /// struct MyStruct<T>(T);
-// ///
-// /// impl<T: Copy> Copy for MyStruct<T> { }
-// /// ```
-// ///
+/// Types whose values can be duplicated simply by copying bits.
+///
+/// By default, variable bindings have 'move semantics.' In other
+/// words:
+///
+/// ```
+/// #[derive(Debug)]
+/// struct Foo;
+///
+/// let x = Foo;
+///
+/// let y = x;
+///
+/// // `x` has moved into `y`, and so cannot be used
+///
+/// // println!("{x:?}"); // error: use of moved value
+/// ```
+///
+/// However, if a type implements `Copy`, it instead has 'copy semantics':
+///
+/// ```
+/// // We can derive a `Copy` implementation. `Clone` is also required, as it's
+/// // a supertrait of `Copy`.
+/// #[derive(Debug, Copy, Clone)]
+/// struct Foo;
+///
+/// let x = Foo;
+///
+/// let y = x;
+///
+/// // `y` is a copy of `x`
+///
+/// println!("{x:?}"); // A-OK!
+/// ```
+///
+/// It's important to note that in these two examples, the only difference is whether you
+/// are allowed to access `x` after the assignment. Under the hood, both a copy and a move
+/// can result in bits being copied in memory, although this is sometimes optimized away.
+///
+/// ## How can I implement `Copy`?
+///
+/// There are two ways to implement `Copy` on your type. The simplest is to use `derive`:
+///
+/// ```
+/// #[derive(Copy, Clone)]
+/// struct MyStruct;
+/// ```
+///
+/// You can also implement `Copy` and `Clone` manually:
+///
+/// ```
+/// struct MyStruct;
+///
+/// impl Copy for MyStruct { }
+///
+/// impl Clone for MyStruct {
+///     fn clone(&self) -> MyStruct {
+///         *self
+///     }
+/// }
+/// ```
+///
+/// There is a small difference between the two. The `derive` strategy will also place a `Copy`
+/// bound on type parameters:
+///
+/// ```
+/// #[derive(Clone)]
+/// struct MyStruct<T>(T);
+///
+/// impl<T: Copy> Copy for MyStruct<T> { }
+/// ```
+///
 // /// This isn't always desired. For example, shared references (`&T`) can be copied regardless of
 // /// whether `T` is `Copy`. Likewise, a generic struct containing markers such as [`PhantomData`]
 // /// could potentially be duplicated with a bit-wise copy.
-// ///
-// /// ## What's the difference between `Copy` and `Clone`?
-// ///
-// /// Copies happen implicitly, for example as part of an assignment `y = x`. The behavior of
-// /// `Copy` is not overloadable; it is always a simple bit-wise copy.
-// ///
-// /// Cloning is an explicit action, `x.clone()`. The implementation of [`Clone`] can
-// /// provide any type-specific behavior necessary to duplicate values safely. For example,
-// /// the implementation of [`Clone`] for [`String`] needs to copy the pointed-to string
-// /// buffer in the heap. A simple bitwise copy of [`String`] values would merely copy the
-// /// pointer, leading to a double free down the line. For this reason, [`String`] is [`Clone`]
-// /// but not `Copy`.
-// ///
-// /// [`Clone`] is a supertrait of `Copy`, so everything which is `Copy` must also implement
-// /// [`Clone`]. If a type is `Copy` then its [`Clone`] implementation only needs to return `*self`
-// /// (see the example above).
-// ///
-// /// ## When can my type be `Copy`?
-// ///
-// /// A type can implement `Copy` if all of its components implement `Copy`. For example, this
-// /// struct can be `Copy`:
-// ///
-// /// ```
-// /// # #[allow(dead_code)]
-// /// #[derive(Copy, Clone)]
-// /// struct Point {
-// ///    x: i32,
-// ///    y: i32,
-// /// }
-// /// ```
-// ///
-// /// A struct can be `Copy`, and [`i32`] is `Copy`, therefore `Point` is eligible to be `Copy`.
-// /// By contrast, consider
-// ///
-// /// ```
-// /// # #![allow(dead_code)]
-// /// # struct Point;
-// /// struct PointList {
-// ///     points: Vec<Point>,
-// /// }
-// /// ```
-// ///
-// /// The struct `PointList` cannot implement `Copy`, because [`Vec<T>`] is not `Copy`. If we
-// /// attempt to derive a `Copy` implementation, we'll get an error:
-// ///
-// /// ```text
-// /// the trait `Copy` cannot be implemented for this type; field `points` does not implement `Copy`
-// /// ```
-// ///
-// /// Shared references (`&T`) are also `Copy`, so a type can be `Copy`, even when it holds
-// /// shared references of types `T` that are *not* `Copy`. Consider the following struct,
-// /// which can implement `Copy`, because it only holds a *shared reference* to our non-`Copy`
-// /// type `PointList` from above:
-// ///
-// /// ```
-// /// # #![allow(dead_code)]
-// /// # struct PointList;
-// /// #[derive(Copy, Clone)]
-// /// struct PointListWrapper<'a> {
-// ///     point_list_ref: &'a PointList,
-// /// }
-// /// ```
-// ///
-// /// ## When *can't* my type be `Copy`?
-// ///
-// /// Some types can't be copied safely. For example, copying `&mut T` would create an aliased
-// /// mutable reference. Copying [`String`] would duplicate responsibility for managing the
-// /// [`String`]'s buffer, leading to a double free.
-// ///
+///
+/// ## What's the difference between `Copy` and `Clone`?
+///
+/// Copies happen implicitly, for example as part of an assignment `y = x`. The behavior of
+/// `Copy` is not overloadable; it is always a simple bit-wise copy.
+///
+/// Cloning is an explicit action, `x.clone()`. The implementation of [`Clone`] can
+/// provide any type-specific behavior necessary to duplicate values safely. For example,
+/// the implementation of [`Clone`] for [`String`] needs to copy the pointed-to string
+/// buffer in the heap. A simple bitwise copy of [`String`] values would merely copy the
+/// pointer, leading to a double free down the line. For this reason, [`String`] is [`Clone`]
+/// but not `Copy`.
+///
+/// [`Clone`] is a supertrait of `Copy`, so everything which is `Copy` must also implement
+/// [`Clone`]. If a type is `Copy` then its [`Clone`] implementation only needs to return `*self`
+/// (see the example above).
+///
+/// ## When can my type be `Copy`?
+///
+/// A type can implement `Copy` if all of its components implement `Copy`. For example, this
+/// struct can be `Copy`:
+///
+/// ```
+/// # #[allow(dead_code)]
+/// #[derive(Copy, Clone)]
+/// struct Point {
+///    x: i32,
+///    y: i32,
+/// }
+/// ```
+///
+/// A struct can be `Copy`, and [`i32`] is `Copy`, therefore `Point` is eligible to be `Copy`.
+/// By contrast, consider
+///
+/// ```
+/// # #![allow(dead_code)]
+/// # struct Point;
+/// struct PointList {
+///     points: Vec<Point>,
+/// }
+/// ```
+///
+/// The struct `PointList` cannot implement `Copy`, because [`Vec<T>`] is not `Copy`. If we
+/// attempt to derive a `Copy` implementation, we'll get an error:
+///
+/// ```text
+/// the trait `Copy` cannot be implemented for this type; field `points` does not implement `Copy`
+/// ```
+///
+/// Shared references (`&T`) are also `Copy`, so a type can be `Copy`, even when it holds
+/// shared references of types `T` that are *not* `Copy`. Consider the following struct,
+/// which can implement `Copy`, because it only holds a *shared reference* to our non-`Copy`
+/// type `PointList` from above:
+///
+/// ```
+/// # #![allow(dead_code)]
+/// # struct PointList;
+/// #[derive(Copy, Clone)]
+/// struct PointListWrapper<'a> {
+///     point_list_ref: &'a PointList,
+/// }
+/// ```
+///
+/// ## When *can't* my type be `Copy`?
+///
+/// Some types can't be copied safely. For example, copying `&mut T` would create an aliased
+/// mutable reference. Copying [`String`] would duplicate responsibility for managing the
+/// [`String`]'s buffer, leading to a double free.
+///
 // /// Generalizing the latter case, any type implementing [`Drop`] can't be `Copy`, because it's
 // /// managing some resource besides its own [`size_of::<T>`] bytes.
-// ///
-// /// If you try to implement `Copy` on a struct or enum containing non-`Copy` data, you will get
-// /// the error [E0204].
-// ///
-// /// [E0204]: ../../error_codes/E0204.html
-// ///
-// /// ## When *should* my type be `Copy`?
-// ///
-// /// Generally speaking, if your type _can_ implement `Copy`, it should. Keep in mind, though,
-// /// that implementing `Copy` is part of the public API of your type. If the type might become
-// /// non-`Copy` in the future, it could be prudent to omit the `Copy` implementation now, to
-// /// avoid a breaking API change.
-// ///
-// /// ## Additional implementors
-// ///
-// /// In addition to the [implementors listed below][impls],
-// /// the following types also implement `Copy`:
-// ///
-// /// * Function item types (i.e., the distinct types defined for each function)
-// /// * Function pointer types (e.g., `fn() -> i32`)
-// /// * Closure types, if they capture no value from the environment
-// ///   or if all such captured values implement `Copy` themselves.
-// ///   Note that variables captured by shared reference always implement `Copy`
-// ///   (even if the referent doesn't),
-// ///   while variables captured by mutable reference never implement `Copy`.
-// ///
-// /// [`Vec<T>`]: ../../std/vec/struct.Vec.html
-// /// [`String`]: ../../std/string/struct.String.html
-// /// [`size_of::<T>`]: crate::mem::size_of
-// /// [impls]: #implementors
-// #[stable(feature = "rust1", since = "1.0.0")]
-// #[lang = "copy"]
-// // FIXME(matthewjasper) This allows copying a type that doesn't implement
-// // `Copy` because of unsatisfied lifetime bounds (copying `A<'_>` when only
-// // `A<'static>: Copy` and `A<'_>: Clone`).
-// // We have this attribute here for now only because there are quite a few
-// // existing specializations on `Copy` that already exist in the standard
-// // library, and there's no way to safely have this behavior right now.
-// #[rustc_unsafe_specialization_marker]
-// #[rustc_diagnostic_item = "Copy"]
-// pub trait Copy: Clone {
-//     // Empty.
-// }
+///
+/// If you try to implement `Copy` on a struct or enum containing non-`Copy` data, you will get
+/// the error [E0204].
+///
+/// [E0204]: ../../error_codes/E0204.html
+///
+/// ## When *should* my type be `Copy`?
+///
+/// Generally speaking, if your type _can_ implement `Copy`, it should. Keep in mind, though,
+/// that implementing `Copy` is part of the public API of your type. If the type might become
+/// non-`Copy` in the future, it could be prudent to omit the `Copy` implementation now, to
+/// avoid a breaking API change.
+///
+/// ## Additional implementors
+///
+/// In addition to the [implementors listed below][impls],
+/// the following types also implement `Copy`:
+///
+/// * Function item types (i.e., the distinct types defined for each function)
+/// * Function pointer types (e.g., `fn() -> i32`)
+/// * Closure types, if they capture no value from the environment
+///   or if all such captured values implement `Copy` themselves.
+///   Note that variables captured by shared reference always implement `Copy`
+///   (even if the referent doesn't),
+///   while variables captured by mutable reference never implement `Copy`.
+///
+/// [`Vec<T>`]: ../../std/vec/struct.Vec.html
+/// [`String`]: ../../std/string/struct.String.html
+/// [`size_of::<T>`]: crate::mem::size_of
+/// [impls]: #implementors
+#[stable(feature = "rust1", since = "1.0.0")]
+#[lang = "copy"]
+// FIXME(matthewjasper) This allows copying a type that doesn't implement
+// `Copy` because of unsatisfied lifetime bounds (copying `A<'_>` when only
+// `A<'static>: Copy` and `A<'_>: Clone`).
+// We have this attribute here for now only because there are quite a few
+// existing specializations on `Copy` that already exist in the standard
+// library, and there's no way to safely have this behavior right now.
+#[rustc_unsafe_specialization_marker]
+#[rustc_diagnostic_item = "Copy"]
+pub trait Copy: Clone {
+    // Empty.
+}
 
 // /// Derive macro generating an impl of the trait `Copy`.
 // #[rustc_builtin_macro]

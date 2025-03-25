@@ -156,7 +156,7 @@
 // #![feature(cfg_ub_checks)]
 // #![feature(const_precise_live_drops)]
 // #![feature(const_trait_impl)]
-// #![feature(decl_macro)]
+#![feature(decl_macro)]
 // #![feature(deprecated_suggestion)]
 // #![feature(doc_cfg)]
 #![feature(doc_cfg_hide)]
@@ -356,7 +356,6 @@ pub mod ub_checks;
 
 #[cfg(feature = "uncertified")]
 pub mod borrow;
-#[cfg(feature = "uncertified")]
 pub mod clone;
 #[cfg(feature = "uncertified")]
 pub mod cmp;
@@ -367,7 +366,6 @@ pub mod default;
 #[cfg(feature = "uncertified")]
 pub mod error;
 pub mod marker;
-#[cfg(feature = "uncertified")]
 pub mod ops;
 
 /* Core types and methods on primitives */

@@ -1,41 +1,42 @@
 //! The `Clone` trait for types that cannot be 'implicitly copied'.
-//!
-//! In Rust, some simple types are "implicitly copyable" and when you
-//! assign them or pass them as arguments, the receiver will get a copy,
-//! leaving the original value in place. These types do not require
-//! allocation to copy and do not have finalizers (i.e., they do not
-//! contain owned boxes or implement [`Drop`]), so the compiler considers
-//! them cheap and safe to copy. For other types copies must be made
-//! explicitly, by convention implementing the [`Clone`] trait and calling
-//! the [`clone`] method.
-//!
-//! [`clone`]: Clone::clone
-//!
-//! Basic usage example:
-//!
-//! ```
-//! let s = String::new(); // String type implements Clone
-//! let copy = s.clone(); // so we can clone it
-//! ```
-//!
-//! To easily implement the Clone trait, you can also use
-//! `#[derive(Clone)]`. Example:
-//!
-//! ```
-//! #[derive(Clone)] // we add the Clone trait to Morpheus struct
-//! struct Morpheus {
-//!    blue_pill: f32,
-//!    red_pill: i64,
-//! }
-//!
-//! fn main() {
-//!    let f = Morpheus { blue_pill: 0.0, red_pill: 0 };
-//!    let copy = f.clone(); // and now we can clone it!
-//! }
-//! ```
+// //!
+// //! In Rust, some simple types are "implicitly copyable" and when you
+// //! assign them or pass them as arguments, the receiver will get a copy,
+// //! leaving the original value in place. These types do not require
+// //! allocation to copy and do not have finalizers (i.e., they do not
+// //! contain owned boxes or implement [`Drop`]), so the compiler considers
+// //! them cheap and safe to copy. For other types copies must be made
+// //! explicitly, by convention implementing the [`Clone`] trait and calling
+// //! the [`clone`] method.
+// //!
+// //! [`clone`]: Clone::clone
+// //!
+// //! Basic usage example:
+// //!
+// //! ```
+// //! let s = String::new(); // String type implements Clone
+// //! let copy = s.clone(); // so we can clone it
+// //! ```
+// //!
+// //! To easily implement the Clone trait, you can also use
+// //! `#[derive(Clone)]`. Example:
+// //!
+// //! ```
+// //! #[derive(Clone)] // we add the Clone trait to Morpheus struct
+// //! struct Morpheus {
+// //!    blue_pill: f32,
+// //!    red_pill: i64,
+// //! }
+// //!
+// //! fn main() {
+// //!    let f = Morpheus { blue_pill: 0.0, red_pill: 0 };
+// //!    let copy = f.clone(); // and now we can clone it!
+// //! }
+// //! ```
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
+#[cfg(feature = "unstable")]
 mod uninit;
 
 /// A common trait for the ability to explicitly duplicate an object.
@@ -180,6 +181,7 @@ pub trait Clone: Sized {
 #[rustc_builtin_macro]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics, derive_clone_copy)]
+#[cfg(feature = "uncertified")]
 pub macro Clone($item:item) {
     /* compiler built-in */
 }
@@ -195,6 +197,7 @@ pub macro Clone($item:item) {
     reason = "deriving hack, should not be public",
     issue = "none"
 )]
+#[cfg(feature = "uncertified")]
 pub struct AssertParamIsClone<T: Clone + ?Sized> {
     _field: crate::marker::PhantomData<T>,
 }
@@ -205,6 +208,7 @@ pub struct AssertParamIsClone<T: Clone + ?Sized> {
     reason = "deriving hack, should not be public",
     issue = "none"
 )]
+#[cfg(feature = "uncertified")]
 pub struct AssertParamIsCopy<T: Copy + ?Sized> {
     _field: crate::marker::PhantomData<T>,
 }
@@ -229,6 +233,7 @@ pub struct AssertParamIsCopy<T: Copy + ?Sized> {
 ///
 /// [`ToOwned`]: ../../std/borrow/trait.ToOwned.html
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
+#[cfg(feature = "unstable")]
 pub unsafe trait CloneToUninit {
     /// Performs copy-assignment from `self` to `dst`.
     ///
@@ -270,6 +275,7 @@ pub unsafe trait CloneToUninit {
 }
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
+#[cfg(feature = "uncertified")]
 unsafe impl<T: Clone> CloneToUninit for T {
     #[inline]
     unsafe fn clone_to_uninit(&self, dst: *mut u8) {
@@ -279,6 +285,7 @@ unsafe impl<T: Clone> CloneToUninit for T {
 }
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
+#[cfg(feature = "uncertified")]
 unsafe impl<T: Clone> CloneToUninit for [T] {
     #[inline]
     #[cfg_attr(debug_assertions, track_caller)]
@@ -290,6 +297,7 @@ unsafe impl<T: Clone> CloneToUninit for [T] {
 }
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
+#[cfg(feature = "uncertified")]
 unsafe impl CloneToUninit for str {
     #[inline]
     #[cfg_attr(debug_assertions, track_caller)]
@@ -300,6 +308,7 @@ unsafe impl CloneToUninit for str {
 }
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
+#[cfg(feature = "uncertified")]
 unsafe impl CloneToUninit for crate::ffi::CStr {
     #[cfg_attr(debug_assertions, track_caller)]
     unsafe fn clone_to_uninit(&self, dst: *mut u8) {
@@ -312,6 +321,7 @@ unsafe impl CloneToUninit for crate::ffi::CStr {
 }
 
 #[unstable(feature = "bstr", issue = "134915")]
+#[cfg(feature = "uncertified")]
 unsafe impl CloneToUninit for crate::bstr::ByteStr {
     #[inline]
     #[cfg_attr(debug_assertions, track_caller)]
@@ -326,6 +336,7 @@ unsafe impl CloneToUninit for crate::bstr::ByteStr {
 /// Implementations that cannot be described in Rust
 /// are implemented in `traits::SelectionContext::copy_clone_conditions()`
 /// in `rustc_trait_selection`.
+#[cfg(feature = "uncertified")]
 mod impls {
     macro_rules! impl_clone {
         ($($t:ty)*) => {

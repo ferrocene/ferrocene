@@ -7,9 +7,10 @@
 // // No formatting: this file is nothing but re-exports, and their order is worth preserving.
 // #![cfg_attr(rustfmt, rustfmt::skip)]
 
-// // Re-exported core operators
-// #[stable(feature = "core_prelude", since = "1.4.0")]
-// #[doc(no_inline)]
+// Re-exported core operators
+#[stable(feature = "core_prelude", since = "1.4.0")]
+#[doc(no_inline)]
+pub use crate::marker::{Copy, Sized};
 // pub use crate::marker::{Copy, Send, Sized, Sync, Unpin};
 // #[stable(feature = "core_prelude", since = "1.4.0")]
 // #[doc(no_inline)]
@@ -26,10 +27,10 @@
 // #[doc(no_inline)]
 // pub use crate::mem::{align_of, align_of_val, size_of, size_of_val};
 
-// // Re-exported types and traits
-// #[stable(feature = "core_prelude", since = "1.4.0")]
-// #[doc(no_inline)]
-// pub use crate::clone::Clone;
+// Re-exported types and traits
+#[stable(feature = "core_prelude", since = "1.4.0")]
+#[doc(no_inline)]
+pub use crate::clone::Clone;
 // #[stable(feature = "core_prelude", since = "1.4.0")]
 // #[doc(no_inline)]
 // pub use crate::cmp::{Eq, Ord, PartialEq, PartialOrd};

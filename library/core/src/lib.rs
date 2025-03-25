@@ -165,12 +165,12 @@
 // #![feature(f128)]
 // #![feature(f16)]
 // #![feature(freeze_impls)]
-// #![feature(fundamental)]
+#![feature(fundamental)]
 // #![feature(generic_arg_infer)]
 // #![feature(if_let_guard)]
 // #![feature(intra_doc_pointers)]
 // #![feature(intrinsics)]
-// #![feature(lang_items)]
+#![feature(lang_items)]
 // #![feature(let_chains)]
 // #![feature(link_llvm_intrinsics)]
 // #![feature(macro_metavar_expr)]
@@ -368,7 +368,6 @@ pub mod convert;
 pub mod default;
 #[cfg(feature = "uncertified")]
 pub mod error;
-#[cfg(feature = "uncertified")]
 pub mod marker;
 #[cfg(feature = "uncertified")]
 pub mod ops;
@@ -402,7 +401,6 @@ pub mod io;
 pub mod iter;
 #[cfg(feature = "uncertified")]
 pub mod net;
-#[cfg(feature = "uncertified")]
 pub mod option;
 #[cfg(feature = "uncertified")]
 pub mod panic;

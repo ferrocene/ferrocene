@@ -155,7 +155,7 @@
 // #![feature(cfg_target_has_atomic_equal_alignment)]
 // #![feature(cfg_ub_checks)]
 // #![feature(const_precise_live_drops)]
-// #![feature(const_trait_impl)]
+#![feature(const_trait_impl)]
 #![feature(decl_macro)]
 // #![feature(deprecated_suggestion)]
 // #![feature(doc_cfg)]

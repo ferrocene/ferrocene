@@ -770,12 +770,12 @@ impl<T> Option<T> {
 //         }
 //     }
 
-//     #[inline]
-//     const fn len(&self) -> usize {
-//         // Using the intrinsic avoids emitting a branch to get the 0 or 1.
-//         let discriminant: isize = crate::intrinsics::discriminant_value(self);
-//         discriminant as usize
-//     }
+    #[inline]
+    const fn len(&self) -> usize {
+        // Using the intrinsic avoids emitting a branch to get the 0 or 1.
+        let discriminant: isize = crate::intrinsics::discriminant_value(self);
+        discriminant as usize
+    }
 
 //     /// Returns a slice of the contained value, if any. If this is `None`, an
 //     /// empty slice is returned. This can be useful to have a single type of

@@ -680,97 +680,99 @@ impl<T> Option<T> {
         }
     }
 
-//     /////////////////////////////////////////////////////////////////////////
-//     // Adapter for working with references
-//     /////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////
+    // Adapter for working with references
+    /////////////////////////////////////////////////////////////////////////
 
-//     /// Converts from `&Option<T>` to `Option<&T>`.
-//     ///
-//     /// # Examples
-//     ///
-//     /// Calculates the length of an <code>Option<[String]></code> as an <code>Option<[usize]></code>
-//     /// without moving the [`String`]. The [`map`] method takes the `self` argument by value,
-//     /// consuming the original, so this technique uses `as_ref` to first take an `Option` to a
-//     /// reference to the value inside the original.
-//     ///
-//     /// [`map`]: Option::map
-//     /// [String]: ../../std/string/struct.String.html "String"
-//     /// [`String`]: ../../std/string/struct.String.html "String"
-//     ///
-//     /// ```
-//     /// let text: Option<String> = Some("Hello, world!".to_string());
-//     /// // First, cast `Option<String>` to `Option<&String>` with `as_ref`,
-//     /// // then consume *that* with `map`, leaving `text` on the stack.
-//     /// let text_length: Option<usize> = text.as_ref().map(|s| s.len());
-//     /// println!("still can print text: {text:?}");
-//     /// ```
-//     #[inline]
-//     #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     pub const fn as_ref(&self) -> Option<&T> {
-//         match *self {
-//             Some(ref x) => Some(x),
-//             None => None,
-//         }
-//     }
+    /// Converts from `&Option<T>` to `Option<&T>`.
+    ///
+    /// # Examples
+    ///
+    /// Calculates the length of an <code>Option<[String]></code> as an <code>Option<[usize]></code>
+    /// without moving the [`String`]. The [`map`] method takes the `self` argument by value,
+    /// consuming the original, so this technique uses `as_ref` to first take an `Option` to a
+    /// reference to the value inside the original.
+    ///
+    /// [`map`]: Option::map
+    /// [String]: ../../std/string/struct.String.html "String"
+    /// [`String`]: ../../std/string/struct.String.html "String"
+    ///
+    /// ```
+    /// let text: Option<String> = Some("Hello, world!".to_string());
+    /// // First, cast `Option<String>` to `Option<&String>` with `as_ref`,
+    /// // then consume *that* with `map`, leaving `text` on the stack.
+    /// let text_length: Option<usize> = text.as_ref().map(|s| s.len());
+    /// println!("still can print text: {text:?}");
+    /// ```
+    #[inline]
+    #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    pub const fn as_ref(&self) -> Option<&T> {
+        match *self {
+            Some(ref x) => Some(x),
+            None => None,
+        }
+    }
 
-//     /// Converts from `&mut Option<T>` to `Option<&mut T>`.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let mut x = Some(2);
-//     /// match x.as_mut() {
-//     ///     Some(v) => *v = 42,
-//     ///     None => {},
-//     /// }
-//     /// assert_eq!(x, Some(42));
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-//     pub const fn as_mut(&mut self) -> Option<&mut T> {
-//         match *self {
-//             Some(ref mut x) => Some(x),
-//             None => None,
-//         }
-//     }
+    /// Converts from `&mut Option<T>` to `Option<&mut T>`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut x = Some(2);
+    /// match x.as_mut() {
+    ///     Some(v) => *v = 42,
+    ///     None => {},
+    /// }
+    /// assert_eq!(x, Some(42));
+    /// ```
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    pub const fn as_mut(&mut self) -> Option<&mut T> {
+        match *self {
+            Some(ref mut x) => Some(x),
+            None => None,
+        }
+    }
 
-//     /// Converts from <code>[Pin]<[&]Option\<T>></code> to <code>Option<[Pin]<[&]T>></code>.
-//     ///
-//     /// [&]: reference "shared reference"
-//     #[inline]
-//     #[must_use]
-//     #[stable(feature = "pin", since = "1.33.0")]
-//     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
-//     pub const fn as_pin_ref(self: Pin<&Self>) -> Option<Pin<&T>> {
-//         // FIXME(const-hack): use `map` once that is possible
-//         match Pin::get_ref(self).as_ref() {
-//             // SAFETY: `x` is guaranteed to be pinned because it comes from `self`
-//             // which is pinned.
-//             Some(x) => unsafe { Some(Pin::new_unchecked(x)) },
-//             None => None,
-//         }
-//     }
+    /// Converts from <code>[Pin]<[&]Option\<T>></code> to <code>Option<[Pin]<[&]T>></code>.
+    ///
+    /// [&]: reference "shared reference"
+    #[inline]
+    #[must_use]
+    #[stable(feature = "pin", since = "1.33.0")]
+    #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
+    #[cfg(feature = "unstable")]
+    pub const fn as_pin_ref(self: Pin<&Self>) -> Option<Pin<&T>> {
+        // FIXME(const-hack): use `map` once that is possible
+        match Pin::get_ref(self).as_ref() {
+            // SAFETY: `x` is guaranteed to be pinned because it comes from `self`
+            // which is pinned.
+            Some(x) => unsafe { Some(Pin::new_unchecked(x)) },
+            None => None,
+        }
+    }
 
-//     /// Converts from <code>[Pin]<[&mut] Option\<T>></code> to <code>Option<[Pin]<[&mut] T>></code>.
-//     ///
-//     /// [&mut]: reference "mutable reference"
-//     #[inline]
-//     #[must_use]
-//     #[stable(feature = "pin", since = "1.33.0")]
-//     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
-//     pub const fn as_pin_mut(self: Pin<&mut Self>) -> Option<Pin<&mut T>> {
-//         // SAFETY: `get_unchecked_mut` is never used to move the `Option` inside `self`.
-//         // `x` is guaranteed to be pinned because it comes from `self` which is pinned.
-//         unsafe {
-//             // FIXME(const-hack): use `map` once that is possible
-//             match Pin::get_unchecked_mut(self).as_mut() {
-//                 Some(x) => Some(Pin::new_unchecked(x)),
-//                 None => None,
-//             }
-//         }
-//     }
+    /// Converts from <code>[Pin]<[&mut] Option\<T>></code> to <code>Option<[Pin]<[&mut] T>></code>.
+    ///
+    /// [&mut]: reference "mutable reference"
+    #[inline]
+    #[must_use]
+    #[stable(feature = "pin", since = "1.33.0")]
+    #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
+    #[cfg(feature = "unstable")]
+    pub const fn as_pin_mut(self: Pin<&mut Self>) -> Option<Pin<&mut T>> {
+        // SAFETY: `get_unchecked_mut` is never used to move the `Option` inside `self`.
+        // `x` is guaranteed to be pinned because it comes from `self` which is pinned.
+        unsafe {
+            // FIXME(const-hack): use `map` once that is possible
+            match Pin::get_unchecked_mut(self).as_mut() {
+                Some(x) => Some(Pin::new_unchecked(x)),
+                None => None,
+            }
+        }
+    }
 
     #[inline]
     const fn len(&self) -> usize {

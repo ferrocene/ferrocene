@@ -306,7 +306,7 @@ impl Step for Std {
             let target_dir = builder.cargo_out(compiler, Mode::Std, target).join("deps");
             cargo.rustflag(&format!("-L{}", target_dir.to_str().unwrap()));
 
-            instrument_coverage(&mut cargo);
+            instrument_coverage(builder, &mut cargo);
         }
 
         // See src/bootstrap/synthetic_targets.rs

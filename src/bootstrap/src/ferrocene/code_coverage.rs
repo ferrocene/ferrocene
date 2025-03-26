@@ -1,12 +1,21 @@
 use std::path::PathBuf;
 
+use build_helper::exit;
+
 use crate::BootstrapCommand;
 use crate::builder::Builder;
 use crate::core::build_steps::llvm::Llvm;
 use crate::core::builder::Cargo;
 use crate::core::config::TargetSelection;
 
-pub(crate) fn instrument_coverage(cargo: &mut Cargo) {
+pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
+    if !builder.config.profiler {
+        eprintln!();
+        eprintln!("Error: the profiler needs to be enabled to gather coverage.");
+        eprintln!("Please set `build.profiler` to `true` in your bootstrap configuration.");
+        exit!(1);
+    }
+
     cargo.rustflag("-Cinstrument-coverage");
 }
 
@@ -48,7 +57,7 @@ impl<'a> GatherCoverage<'a> {
         let profraw_file_template = profraw_dir.join("%m_%p.profraw");
         cargo.env("LLVM_PROFILE_FILE", profraw_file_template);
 
-        instrument_coverage(cargo);
+        instrument_coverage(builder, cargo);
 
         Self { builder, llvm_bin_dir, profraw_dir, profdata_file }
     }

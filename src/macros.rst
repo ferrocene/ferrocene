@@ -554,28 +554,28 @@ as a :t:`statement`.
 .. rubric:: Examples
 
 :dp:`fls_338rmbazl67o`
-See :ref:`fls_xa7lp0zg1ol2` for the declaration of ``answer_to_life``.
+See :p:`fls_xa7lp0zg1ol2` for the declaration of ``answer_to_life``.
 
 .. code-block:: rust
 
    answer_to_life!();
 
 :dp:`fls_lrr7gg8tian`
-See :ref:`fls_8nzypdu9j3ge` for the declaration of ``square``.
+See :p:`fls_8nzypdu9j3ge` for the declaration of ``square``.
 
 .. code-block:: rust
 
    square!(5);
 
 :dp:`fls_8qxwwf4trnl`
-See :ref:`fls_k01lsksqtq1r` for the declaration of ``generate_pairs``.
+See :p:`fls_k01lsksqtq1r` for the declaration of ``generate_pairs``.
 
 .. code-block:: rust
 
    generate_pairs!(1, 2, 3; 9, 8, 7);
 
 :dp:`fls_8z1sgtvchhhw`
-See :ref:`fls_2d6bqnpy6tvs` for the declaration of
+See :p:`fls_2d6bqnpy6tvs` for the declaration of
 ``make_answer_to_life``.
 
 .. code-block:: rust
@@ -583,7 +583,7 @@ See :ref:`fls_2d6bqnpy6tvs` for the declaration of
    make_answer_to_life!();
 
 :dp:`fls_d9w3dn2yn7mo`
-See :ref:`fls_o8s3r7m90q59` for the declaration of ``Answer``.
+See :p:`fls_o8s3r7m90q59` for the declaration of ``Answer``.
 
 .. code-block:: rust
 
@@ -591,7 +591,7 @@ See :ref:`fls_o8s3r7m90q59` for the declaration of ``Answer``.
    struct derive_macro_invoker;
 
 :dp:`fls_1tftbd91yfpd`
-See :ref:`fls_4vjbkm4ceymk` for the declaration of
+See :p:`fls_4vjbkm4ceymk` for the declaration of
 ``output_and_return_item``.
 
 .. code-block:: rust

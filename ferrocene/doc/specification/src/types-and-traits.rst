@@ -3014,7 +3014,7 @@ A :t:`lifetime bound` shall apply to :t:`[type]s` and other :t:`[lifetime]s`.
    &'static Shape
 
 :dp:`fls_gcszhqg6hnva`
-See :ref:`fls_85vx1qfa061i` for the declaration of ``Shape``.
+See :p:`fls_85vx1qfa061i` for the declaration of ``Shape``.
 
 .. _fls_ikfvbeewame7:
 

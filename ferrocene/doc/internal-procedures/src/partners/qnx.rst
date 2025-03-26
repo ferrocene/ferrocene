@@ -119,11 +119,11 @@ Then, install QNX 7.1.0 BuildID 472:
         -activateLicenseKey $LICENSE_KEY
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
         -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
-        -mirrorBaseline qnx710-472
+        -mirrorBaseline qnx-7.1.0-472
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
         -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
         -installBaseline com.qnx.qnx710/$QNX_VERSION \
-        -destination qnx/qnx710-472 \
+        -destination qnx/qnx-7.1.0-472 \
         -cleanInstall
 
 Finally, you can source your QNX toolchain in ``bash``:
@@ -200,28 +200,37 @@ Create a deployment containing Linux and Windows toolchains:
         -installPackage com.qnx.qnx710.host.win.x86_64/$QNX_HOST_VERSION \
         -installPackage com.qnx.qnx710.host.linux.x86_64/$QNX_HOST_VERSION \
         -installPackage com.qnx.qnx710.bsp.xilinx_xzynq_zcu102/$QNX_BSP_VERSION \
-        -destination qnx/qnx710-472 \
+        -destination qnx/qnx-7.1.0-472 \
         -cleanInstall
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
-        -deploySdpInstallation qnx/qnx710-472 \
+        -deploySdpInstallation qnx/qnx-7.1.0-472 \
         -deployLicense $LICENSE_KEY \
-        -installationDeployAs qnx/qnx710-472-deployment
+        -installationDeployAs qnx/qnx-deployment-7.1.0-472
 
 Finally, create an archive of the deployment (with dereferenced symlinks) and upload it to the S3 URL which the CI attempts to pull from:
 
 .. code-block::
 
     cd $HOME
-    tar -cv --dereference -I 'zstd -T0' -f qnx/qnx710-472-deployment.tar.zst -C qnx/qnx710-472-deployment/ qnx710-472
-    aws s3 cp qnx/qnx710-472-deployment.tar.zst s3://ferrocene-ci-mirrors/manual/qnx/qnx710-472-deployment.tar.zst
+    tar -cv --dereference -I 'zstd -T0' -f qnx/qnx-deployment-7.1.0-472.tar.zst -C qnx/qnx-deployment-7.1.0-472/ qnx-7.1.0-472
+    az storage blob upload \
+          --name qnx-deployment-7.1.0-472.tar.zst \
+          --container-name qnx \
+          --account-name ferroceneci \
+          --file qnx-deployment-7.1.0-472.tar.zst
 
 On CI/CD hosts we use a Python script to setup the toolchain:
 
 .. code-block::
 
     cd $HOME
-    ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx710-472-deployment.tar.zst .
-    source qnx/qnx710-472/qnxsdp-env.sh
+    az storage blob download \
+          --name qnx-deployment-7.1.0-472.tar.zst \
+          --container-name qnx \
+          --account-name ferroceneci \
+          --file qnx-deployment-7.1.0-472.tar.zst
+    ferrocene/ci/scripts/cache.py retrieve qnx-deployment-7.1.0-472.tar.zst .
+    source qnx-7.1.0-472/qnxsdp-env.sh
     qcc -v
 
 It's also possible to use ``tar`` directly, but it can be problematic on Windows hosts.
@@ -229,6 +238,9 @@ It's also possible to use ``tar`` directly, but it can be problematic on Windows
 .. code-block::
 
     cd $HOME
-    aws s3 cp s3://ferrocene-ci-mirrors/manual/qnx/qnx710-472-deployment.tar.zst - | tar -x --zstd -f-
-    source qnx/qnx710-472/qnxsdp-env.sh
+    az storage blob download \
+        --name qnx-deployment-7.1.0-472.tar.zst \
+        --container-name qnx \
+        --account-name ferroceneci | tar -x --zstd -f-
+    source qnx-7.1.0-472/qnxsdp-env.sh
     qcc -v

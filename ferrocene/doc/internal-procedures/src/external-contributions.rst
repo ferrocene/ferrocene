@@ -45,5 +45,4 @@ The workflow to establish confidence is as follows:
 See also
 ^^^^^^^^
 
-- https://circleci.com/blog/triggering-trusted-ci-jobs-on-untrusted-forks/
 - https://stackoverflow.com/questions/27567846/how-can-i-check-out-a-github-pull-request-with-git

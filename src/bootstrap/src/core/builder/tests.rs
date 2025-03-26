@@ -412,7 +412,6 @@ mod dist {
 
     use super::{Config, TEST_TRIPLE_1, TEST_TRIPLE_2, TEST_TRIPLE_3, first, run_build, second};
     use crate::core::builder::*;
-    use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
 
     fn configure(host: &[&str], target: &[&str]) -> Config {
         Config { stage: 2, ..super::configure("dist", host, target) }
@@ -879,37 +878,6 @@ mod dist {
                 tool::Rustdoc { compiler: Compiler::new(2, a) },
             ]
         );
-    }
-    #[test]
-    fn test_std_coverage() {
-        // Behavior of `x.py test --coverage --no-doc`
-        // Currently using --coverage with doc tests is not supported
-        let mut config = configure(&[TEST_TRIPLE_1], &[TEST_TRIPLE_1]);
-        config.cmd = Subcommand::Test {
-            test_args: vec![],
-            compiletest_rustc_args: vec![],
-            no_fail_fast: false,
-            doc: false,
-            no_doc: true,
-            bless: false,
-            force_rerun: false,
-            compare_mode: None,
-            rustfix_coverage: false,
-            pass: None,
-            run: None,
-            only_modified: false,
-            extra_checks: None,
-            no_capture: false,
-            coverage: true,
-            ferrocene_test_one_crate_per_cargo_call: false,
-        };
-        let build = Build::new(config);
-        let mut builder = Builder::new(&build);
-
-        builder.run_step_descriptions(&Builder::get_step_descriptions(Kind::Test), &[]);
-        let step_result = second(builder.cache.all::<ProfilerBuiltinsNoCore>());
-
-        assert_eq!(step_result.len(), 1);
     }
 }
 

@@ -27,7 +27,7 @@ use crate::core::builder::{
     Builder, Cargo, Kind, PathSet, RunConfig, ShouldRun, Step, TaskPath, crate_description,
 };
 use crate::core::config::{DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection};
-use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
+use crate::ferrocene::code_coverage::instrument_coverage;
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::utils::build_stamp;
 use crate::utils::build_stamp::BuildStamp;
@@ -286,11 +286,9 @@ impl Step for Std {
             cargo
         };
 
-        if builder.config.cmd.coverage() && compiler.stage == 1 {
-            let instrument_coverage_flags = builder.ensure(ProfilerBuiltinsNoCore { target });
-            for flag in instrument_coverage_flags.flags() {
-                cargo.rustflag(&flag);
-            }
+        if builder.config.cmd.coverage() && compiler.stage == builder.top_stage {
+            cargo.arg("--features=core/ferrocene_inject_profiler_builtins");
+            instrument_coverage(&mut cargo);
         }
 
         // See src/bootstrap/synthetic_targets.rs

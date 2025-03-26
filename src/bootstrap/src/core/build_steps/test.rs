@@ -23,7 +23,7 @@ use crate::core::builder::{
 };
 use crate::core::config::TargetSelection;
 use crate::core::config::flags::{Subcommand, get_completion};
-use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
+use crate::ferrocene::code_coverage::instrument_coverage;
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::utils::build_stamp::{self, BuildStamp};
 use crate::utils::exec::{BootstrapCommand, command};
@@ -2752,11 +2752,7 @@ impl Step for Crate {
 
         let mut collect_profraw = false;
         if builder.config.cmd.coverage() {
-            let instrument_coverage_flags = builder.ensure(ProfilerBuiltinsNoCore { target });
-
-            for flag in instrument_coverage_flags.flags() {
-                cargo.rustflag(&flag);
-            }
+            instrument_coverage(&mut cargo);
 
             let coverage_dir = builder.tempdir().join("coverage");
             let coverage_file = coverage_dir.join("default_%m_%p.profraw");

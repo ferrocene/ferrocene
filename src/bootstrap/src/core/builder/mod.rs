@@ -981,7 +981,6 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::test::SelfTest,
                 crate::ferrocene::test::CheckDocumentSignatures,
                 crate::ferrocene::test::GenerateTarball,
-                crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore,
                 crate::core::build_steps::toolstate::ToolStateCheck,
                 test::Tidy,
                 test::Ui,

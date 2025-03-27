@@ -196,12 +196,6 @@ should not be used in production.
      - Full
      - The full standard library is available, but unsupported functions in ``std`` will panic.
 
-   * - :target:`x86_64-apple-darwin`
-     - ``x86_64-apple-darwin``
-     - Cross-compilation
-     - Full
-     - Available as a cross-compile target on :ref:`aarch64-apple-darwin`.
-
    * - :ref:`x86_64-pc-windows-msvc`
      - ``x86_64-pc-windows-msvc``
      - Host platform

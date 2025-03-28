@@ -1166,7 +1166,6 @@ impl<'a> Builder<'a> {
             ),
             Kind::Run => describe!(
                 crate::ferrocene::run::TraceabilityMatrix,
-                crate::ferrocene::run::GenerateCoverageReport,
                 run::BuildManifest,
                 run::BumpStage0,
                 run::ReplaceVersionPlaceholder,

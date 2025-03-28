@@ -33,8 +33,6 @@ pub(crate) fn measure_coverage(
     let profraw_file_template = paths.profraw_dir.join("%m_%p.profraw");
     cargo.env("LLVM_PROFILE_FILE", profraw_file_template);
 
-    instrument_coverage(builder, cargo);
-
     // We want to support merging the coverage information from multiple steps (for example,
     // multiple test suites), but that requires all those steps measuring the coverage of the same
     // thing. Because of that, we'll error if we already measured coverage of something and what we

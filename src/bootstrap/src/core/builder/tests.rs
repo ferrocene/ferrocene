@@ -52,9 +52,6 @@ fn configure_with_args(cmd: &[String], host: &[&str], target: &[&str]) -> Config
 fn first<A, B>(v: Vec<(A, B)>) -> Vec<A> {
     v.into_iter().map(|(a, _)| a).collect::<Vec<_>>()
 }
-fn second<A, B>(v: Vec<(A, B)>) -> Vec<B> {
-    v.into_iter().map(|(_, b)| b).collect::<Vec<_>>()
-}
 
 fn run_build(paths: &[PathBuf], config: Config) -> Cache {
     let kind = config.cmd.kind();
@@ -410,7 +407,7 @@ mod defaults {
 mod dist {
     use pretty_assertions::assert_eq;
 
-    use super::{Config, TEST_TRIPLE_1, TEST_TRIPLE_2, TEST_TRIPLE_3, first, run_build, second};
+    use super::{Config, TEST_TRIPLE_1, TEST_TRIPLE_2, TEST_TRIPLE_3, first, run_build};
     use crate::core::builder::*;
 
     fn configure(host: &[&str], target: &[&str]) -> Config {

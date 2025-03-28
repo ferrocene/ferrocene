@@ -1,90 +1,74 @@
-use std::path::Path;
+use std::path::PathBuf;
 
-use crate::builder::{Builder, RunConfig, ShouldRun, Step};
-use crate::core::build_steps::tool::SourceType;
+use build_helper::exit;
+
+use crate::BootstrapCommand;
+use crate::builder::Builder;
+use crate::core::build_steps::llvm::Llvm;
+use crate::core::builder::Cargo;
 use crate::core::config::TargetSelection;
-use crate::{BootstrapCommand, Kind, Mode};
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub(crate) struct ProfilerBuiltinsNoCore {
-    pub(crate) target: TargetSelection,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub(crate) struct InstrumentationCoverageFlags {
-    rustflags: Vec<String>,
-}
-
-impl InstrumentationCoverageFlags {
-    pub fn flags(&self) -> &[String] {
-        &self.rustflags
+pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
+    if !builder.config.profiler {
+        eprintln!();
+        eprintln!("Error: the profiler needs to be enabled to gather coverage.");
+        eprintln!("Please set `build.profiler` to `true` in your bootstrap configuration.");
+        exit!(1);
     }
+
+    cargo.rustflag("-Cinstrument-coverage");
 }
 
-impl Step for ProfilerBuiltinsNoCore {
-    type Output = InstrumentationCoverageFlags;
-    const ONLY_HOSTS: bool = true;
-    const DEFAULT: bool = true;
+pub(crate) struct GatherCoverage<'a> {
+    builder: &'a Builder<'a>,
+    llvm_bin_dir: PathBuf,
+    profraw_dir: PathBuf,
+    profdata_file: PathBuf,
+}
 
-    fn run(self, builder: &Builder<'_>) -> Self::Output {
-        builder.info("Building profiler_builtins with no_core");
+impl<'a> GatherCoverage<'a> {
+    pub(crate) fn new(
+        builder: &'a Builder<'a>,
+        cargo: &mut Cargo,
+        target: TargetSelection,
+        name: &str,
+    ) -> Self {
+        builder.ensure(Llvm { target });
+        let llvm_bin_dir = builder.llvm_out(target).join("bin");
 
-        let target = self.target;
-        let compiler = builder.compiler(1, target);
+        let profraw_dir = builder.tempdir().join(format!("ferrocene-profraw-{name}"));
+        let profdata_file = builder
+            .out
+            .join(target.triple)
+            .join("ferrocene")
+            .join("coverage")
+            .join(format!("{name}.profdata"));
 
-        // x.py test --coverage
-        // [ProfilerBuiltinNoCore step] Builds profiler_builtins with no core -> profiler_builtins_no_core.rlib
-        // [Core Tests step] Compile tests of core with -Cinsturment-coverage -> link against profiler_builtins_no_core.rlib
-
-        let mut cargo = builder.cargo(compiler, Mode::Std, SourceType::InTree, target, Kind::Build);
-
-        cargo.current_dir(Path::new("library/profiler_builtins"));
-
-        let profiler_builtins_no_core_dir = "profiler_builtins_no_core";
-        let target_dir =
-            builder.cargo_out(compiler, Mode::Std, target).join(profiler_builtins_no_core_dir);
-
-        cargo.arg("--target-dir");
-        cargo.arg(&*target_dir.to_string_lossy());
-        cargo.arg("--no-default-features");
-
-        BootstrapCommand::from(cargo).fail_fast().run(builder);
-
-        let cargo_dir = if builder.config.rust_optimize.is_release() { "release" } else { "debug" };
-
-        let lib_dir = target_dir.join(&*target.triple).join(cargo_dir);
-        let lib_path = lib_dir.join("libprofiler_builtins.rlib");
-        let profiler_builtins_no_core_path = lib_dir.join("libprofiler_builtins_no_core.rlib");
-
-        if !builder.config.dry_run() {
-            std::fs::rename(&lib_path, &profiler_builtins_no_core_path)
-                .expect("Could not rename the profiler_builtins_no_core library");
-            assert!(
-                profiler_builtins_no_core_path.exists() && profiler_builtins_no_core_path.is_file()
-            );
+        if profraw_dir.exists() {
+            builder.remove_dir(&profraw_dir);
         }
-        let mut instrument_coverage_flags = InstrumentationCoverageFlags { rustflags: Vec::new() };
+        if profdata_file.exists() {
+            builder.remove(&profdata_file);
+        }
 
-        instrument_coverage_flags.rustflags.push("-Cinstrument-coverage".into());
-        instrument_coverage_flags.rustflags.push("--extern".into());
-        instrument_coverage_flags.rustflags.push(format!(
-            "profiler_builtins_no_core={}",
-            profiler_builtins_no_core_path.to_str().unwrap()
-        ));
-        instrument_coverage_flags
-            .rustflags
-            .push("-Zprofiler_runtime=profiler_builtins_no_core".into());
-        instrument_coverage_flags.rustflags.push("-L".into());
-        instrument_coverage_flags.rustflags.push(lib_dir.to_str().unwrap().to_string());
+        builder.create_dir(&profraw_dir);
+        builder.create_dir(profdata_file.parent().unwrap());
 
-        instrument_coverage_flags
+        let profraw_file_template = profraw_dir.join("%m_%p.profraw");
+        cargo.env("LLVM_PROFILE_FILE", profraw_file_template);
+
+        instrument_coverage(builder, cargo);
+
+        Self { builder, llvm_bin_dir, profraw_dir, profdata_file }
     }
 
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
+    pub(crate) fn post_process(self) {
+        if self.builder.config.dry_run() {
+            return;
+        }
 
-    fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(Self { target: run.target });
+        let mut cmd = BootstrapCommand::new(self.llvm_bin_dir.join("llvm-profdata"));
+        cmd.arg("merge").arg("--sparse").arg("-o").arg(self.profdata_file).arg(self.profraw_dir);
+        cmd.fail_fast().run(self.builder);
     }
 }

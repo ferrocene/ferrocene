@@ -2754,7 +2754,8 @@ impl Step for Crate {
 
         let mut coverage = None;
         if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
-            coverage = Some(GatherCoverage::new(builder, &mut cargo, target, coverage_for));
+            coverage =
+                Some(GatherCoverage::new(builder, &mut cargo, compiler, target, coverage_for));
         }
 
         let mut crates = self.crates.clone();

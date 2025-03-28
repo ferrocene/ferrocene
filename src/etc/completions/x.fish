@@ -322,6 +322,7 @@ complete -c x -n "__fish_x_using_subcommand test" -l extra-checks -d 'comma-sepa
 complete -c x -n "__fish_x_using_subcommand test" -l compare-mode -d 'mode describing what file the actual ui output will be compared to' -r
 complete -c x -n "__fish_x_using_subcommand test" -l pass -d 'force {check,build,run}-pass tests to this mode' -r
 complete -c x -n "__fish_x_using_subcommand test" -l run -d 'whether to execute run-* tests' -r
+complete -c x -n "__fish_x_using_subcommand test" -l coverage -d 'generate coverage for tests' -r -f -a "library\t''"
 complete -c x -n "__fish_x_using_subcommand test" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand test" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand test" -l build -d 'build target of the stage0 compiler' -r -f
@@ -356,7 +357,6 @@ complete -c x -n "__fish_x_using_subcommand test" -l force-rerun -d 'rerun tests
 complete -c x -n "__fish_x_using_subcommand test" -l only-modified -d 'only run tests that result has been changed'
 complete -c x -n "__fish_x_using_subcommand test" -l rustfix-coverage -d 'enable this to generate a Rustfix coverage file, which is saved in `/<build_base>/rustfix_missing_coverage.txt`'
 complete -c x -n "__fish_x_using_subcommand test" -l no-capture -d 'don\'t capture stdout/stderr of tests'
-complete -c x -n "__fish_x_using_subcommand test" -l coverage -d 'generate coverage for tests'
 complete -c x -n "__fish_x_using_subcommand test" -l ferrocene-test-one-crate-per-cargo-call -d 'Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification documents to ensure there is enough granularity for the test outcomes report'
 complete -c x -n "__fish_x_using_subcommand test" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand test" -s i -l incremental -d 'use incremental compilation'

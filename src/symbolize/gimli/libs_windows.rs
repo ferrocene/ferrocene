@@ -1,6 +1,5 @@
 use super::super::super::windows_sys::*;
 use super::mystd::ffi::OsString;
-use super::mystd::os::windows::prelude::*;
 use super::{coff, mmap, Library, LibrarySegment};
 use alloc::vec;
 use alloc::vec::Vec;
@@ -49,7 +48,25 @@ unsafe fn load_library(me: &MODULEENTRY32W) -> Option<Library> {
         .iter()
         .position(|i| *i == 0)
         .unwrap_or(me.szExePath.len());
-    let name = OsString::from_wide(&me.szExePath[..pos]);
+    let mut name_buffer = vec![0_u8; pos * 4];
+    let name_len = unsafe {
+        WideCharToMultiByte(
+            CP_UTF8,
+            0,
+            me.szExePath.as_ptr(),
+            pos as i32,
+            name_buffer.as_mut_ptr(),
+            name_buffer.len() as i32,
+            core::ptr::null_mut(),
+            core::ptr::null_mut(),
+        ) as usize
+    };
+    if name_len == 0 || name_len > name_buffer.len() {
+        // This can't happen.
+        return None;
+    }
+    unsafe { name_buffer.set_len(name_len) };
+    let name = unsafe { OsString::from_encoded_bytes_unchecked(name_buffer) };
 
     // MinGW libraries currently don't support ASLR
     // (rust-lang/rust#16514), but DLLs can still be relocated around in

@@ -7,6 +7,7 @@ use crate::builder::Builder;
 use crate::core::build_steps::llvm::Llvm;
 use crate::core::builder::Cargo;
 use crate::core::config::TargetSelection;
+use crate::core::config::flags::FerroceneCoverageFor;
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     if !builder.config.profiler {
@@ -31,8 +32,10 @@ impl<'a> GatherCoverage<'a> {
         builder: &'a Builder<'a>,
         cargo: &mut Cargo,
         target: TargetSelection,
-        name: &str,
+        coverage_for: FerroceneCoverageFor,
     ) -> Self {
+        let name = coverage_for.as_str();
+
         builder.ensure(Llvm { target });
         let llvm_bin_dir = builder.llvm_out(target).join("bin");
 

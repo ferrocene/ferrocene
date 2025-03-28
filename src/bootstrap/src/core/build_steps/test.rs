@@ -2753,7 +2753,7 @@ impl Step for Crate {
         };
 
         if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
-            measure_coverage(builder, &mut cargo, target, coverage_for);
+            measure_coverage(builder, &mut cargo, compiler, target, coverage_for);
         }
 
         let mut crates = self.crates.clone();

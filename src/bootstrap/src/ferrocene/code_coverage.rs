@@ -4,10 +4,12 @@ use build_helper::exit;
 
 use crate::builder::Builder;
 use crate::core::build_steps::llvm::Llvm;
+use crate::core::build_steps::tool::Tool;
 use crate::core::builder::Cargo;
-use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::TargetSelection;
-use crate::BootstrapCommand;
+use crate::core::config::flags::FerroceneCoverageFor;
+use crate::utils::build_stamp::libstd_stamp;
+use crate::{BootstrapCommand, Compiler, DependencyType};
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     if !builder.config.profiler {
@@ -23,11 +25,13 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
 pub(crate) fn measure_coverage(
     builder: &Builder<'_>,
     cargo: &mut Cargo,
+    compiler: Compiler,
     target: TargetSelection,
     coverage_for: FerroceneCoverageFor,
 ) {
     // Pre-requisites for the `generate_report()` function are built here, as that function is
     // executed after all bootstrap steps are executed.
+    builder.tool_exe(Tool::CoverageDump);
     builder.ensure(Llvm { target });
 
     let paths = Paths::find(builder, target, coverage_for);
@@ -38,7 +42,7 @@ pub(crate) fn measure_coverage(
     // multiple test suites), but that requires all those steps measuring the coverage of the same
     // thing. Because of that, we'll error if we already measured coverage of something and what we
     // are measuring now has a different state.
-    let state = CoverageState { target, coverage_for };
+    let state = CoverageState { target, compiler, coverage_for };
     match &mut *builder.ferrocene_coverage.borrow_mut() {
         storage @ None => {
             // Only clear the paths the first time measure_coverage is called.
@@ -74,19 +78,87 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     let llvm_bin_dir = builder.llvm_out(state.target).join("bin");
 
     let mut cmd = BootstrapCommand::new(llvm_bin_dir.join("llvm-profdata"));
-    cmd.arg("merge").arg("--sparse").arg("-o").arg(paths.profdata_file).arg(paths.profraw_dir);
+    cmd.arg("merge").arg("--sparse").arg("-o").arg(&paths.profdata_file).arg(paths.profraw_dir);
     cmd.fail_fast().run(builder);
+
+    // llvm-cov needs to receive the path to the binary that was instrumented. The path depends
+    // on what we are gathering the coverage for: when adding a variant of FerroceneCoverageFor,
+    // you'll need to calculate the path to the binary you called instrument_coverage() on.
+    let instrumented_binary = match state.coverage_for {
+        // When gathering the code coverage for the standard library, the instrumented binary is
+        // the libstd-HASH.so shared library the tests link to.
+        FerroceneCoverageFor::Library => {
+            let mut libstd = None;
+            let stamp = libstd_stamp(builder, state.compiler, state.target);
+            for (path, kind) in builder.read_stamp_file(&stamp) {
+                match kind {
+                    DependencyType::Host => continue,
+                    DependencyType::Target | DependencyType::TargetSelfContained => {}
+                }
+                let name = path.file_name().unwrap().to_str().unwrap();
+                if name.starts_with("libstd-") && name.ends_with(".so") {
+                    libstd = Some(path);
+                    break;
+                }
+            }
+            libstd.expect("could not find libstd-HASH.so in the sysroot")
+        }
+    };
+
+    let ignored_path_regexes: &[&str] = match state.coverage_for {
+        FerroceneCoverageFor::Library => &[
+            "\\.cargo/registry",
+            "ferrocene/library/backtrace-rs",
+            "ferrocene/library/libc",
+            "library/alloc",
+            "library/panic_unwind",
+            "library/std",
+        ],
+    };
+
+    let mut cmd = BootstrapCommand::new(llvm_bin_dir.join("llvm-cov"));
+    cmd.arg("show").arg(instrumented_binary).arg("--instr-profile").arg(&paths.profdata_file);
+    cmd.arg("--format").arg("html").arg("-o").arg(&paths.report_dir);
+
+    // Note that which paths are ignored changes how llvm-cov displays the paths in the report.
+    // llvm-cov makes all paths relative to the common ancestor.
+    for path in ignored_path_regexes {
+        cmd.arg("--ignore-filename-regex").arg(path);
+    }
+
+    // By default llvm-cov includes the date the report was generated on, but that is a problem
+    // for reproducibility. Disable showing the date.
+    cmd.arg("--show-created-time=false");
+
+    // Use the demangler mode of coverage-dump as the demangler. This is functionally equivalent
+    // to using rustfilt, but it has the advantage of being part of the monorepo. If upstream
+    // removes the demangler functionality from coverage-dump, feel free to replace the tool.
+    //
+    // Note that llvm-cov accepts the --Xdemangler flag multiple times. The first time it
+    // specifies the binary name, and any following occurrences of --Xdemangler specifies an
+    // argument provided to that binary.
+    let coverage_dump = builder.tool_exe(Tool::CoverageDump);
+    cmd.arg("--Xdemangler").arg(coverage_dump).arg("--Xdemangler").arg("--demangle");
+
+    cmd.fail_fast().run(builder);
+
+    eprintln!(
+        "The coverage report is available at: file://{}/index.html",
+        paths.report_dir.display()
+    );
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) struct CoverageState {
     target: TargetSelection,
+    compiler: Compiler,
     coverage_for: FerroceneCoverageFor,
 }
 
 struct Paths {
     profraw_dir: PathBuf,
     profdata_file: PathBuf,
+    report_dir: PathBuf,
 }
 
 impl Paths {
@@ -104,6 +176,7 @@ impl Paths {
                 .join("ferrocene")
                 .join("coverage")
                 .join(format!("{name}.profdata")),
+            report_dir: builder.doc_out(target).join("coverage").join(name),
         }
     }
 
@@ -114,8 +187,12 @@ impl Paths {
         if self.profdata_file.exists() {
             builder.remove(&self.profdata_file);
         }
+        if self.report_dir.exists() {
+            builder.remove_dir(&self.report_dir);
+        }
 
         builder.create_dir(&self.profraw_dir);
         builder.create_dir(self.profdata_file.parent().unwrap());
+        builder.create_dir(&self.report_dir);
     }
 }

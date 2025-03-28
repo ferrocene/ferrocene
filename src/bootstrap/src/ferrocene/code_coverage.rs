@@ -140,7 +140,13 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     let coverage_dump = builder.tool_exe(Tool::CoverageDump);
     cmd.arg("--Xdemangler").arg(coverage_dump).arg("--Xdemangler").arg("--demangle");
 
-    cmd.fail_fast().run(builder);
+    if !cmd.run(builder) {
+        eprintln!("Failed to run llvm-cov to generate a report!");
+        eprintln!();
+        eprintln!("If the error message mentions \"function name is empty\" please check the");
+        eprintln!("comment at the bottom of {}.", file!());
+        exit!(1);
+    }
 
     eprintln!(
         "The coverage report is available at: file://{}/index.html",
@@ -196,3 +202,63 @@ impl Paths {
         builder.create_dir(&self.report_dir);
     }
 }
+
+/////////////////////////////////////////////////////////
+//                                                     //
+//   How to solve the "function name is empty" error   //
+//                                                     //
+/////////////////////////////////////////////////////////
+
+// In March 2025, while developing support for code coverage for libcore, we encountered an llvm-cov
+// failure with the error message "malformed instrumentation profile data: function name is empty".
+//
+// This failure seems to be caused by the LLVM instrumentation emitting a malformed instrumentation
+// record the produced object file, tripping a validation check in llvm-cov. We are still not sure
+// what caused the error, so we never fixed it.
+//
+// Instead, we noticed that disabling coverage instrumentation for the affected function (by adding
+// the `#[coverage(off)]` attribute to it) mitigates the error. The problem then is figuring out
+// which function causes the failure.
+//
+// The way Pietro did it in March 2025 was to patch llvm-cov to suppress the error, set the function
+// name of the erroring frame to a well-known function, and seeing which function had that name in
+// the report. Step-by-step instructions:
+//
+// 1. Get a fresh clone of LLVM:
+//
+//    ```
+//    git clone https://github.com/llvm/llvm-project --depth 1
+//    cd llvm-project
+//    ```
+//
+// 2. Figure out in which file and line the error is emitted:
+//
+//    ```
+//    rg "\"function name is empty\"" llvm -g "*.cpp"
+//    ```
+//
+// 3. Replace the line returning the error with:
+//
+//    ```
+//    FuncName = "THIS_IS_HORRIBLE";
+//    ```
+//
+// 4. Build just llvm-cov:
+//
+//    ```
+//    mkdir build
+//    cd build
+//    cmake ../llvm -DCMAKE_BUILD_TYPE=RelWithDebInfo -G Ninja
+//    cmake --build . --target llvm-cov
+//    ```
+//
+// 5. Run llvm-cov to get the source code of the broken function:
+//
+//    ```
+//    bin/llvm-cov show --name-regex=THIS_IS_HORRIBLE --instr-profile=/path/profdata /path/object
+//    ```
+//
+// 6. Annotate the broken function with `#[coverage(off)]`
+//
+// Note that the steps might have changed since the time this was written. I hope they are still an
+// useful starting point for your debugging.

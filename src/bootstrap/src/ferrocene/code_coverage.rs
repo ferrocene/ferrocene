@@ -57,8 +57,6 @@ impl<'a> GatherCoverage<'a> {
         let profraw_file_template = profraw_dir.join("%m_%p.profraw");
         cargo.env("LLVM_PROFILE_FILE", profraw_file_template);
 
-        instrument_coverage(builder, cargo);
-
         Self { builder, llvm_bin_dir, profraw_dir, profdata_file }
     }
 

@@ -123,7 +123,7 @@ impl<'a> GatherCoverage<'a> {
 
         let mut cmd = BootstrapCommand::new(llvm_bin_dir.join("llvm-cov"));
         cmd.arg("show").arg(instrumented_binary).arg("--instr-profile").arg(&self.profdata_file);
-        cmd.arg("--format").arg("html").arg("-o").arg(self.report_dir);
+        cmd.arg("--format").arg("html").arg("-o").arg(&self.report_dir);
 
         // Note that which paths are ignored changes how llvm-cov displays the paths in the report.
         // llvm-cov makes all paths relative to the common ancestor.
@@ -156,6 +156,8 @@ impl<'a> GatherCoverage<'a> {
             eprintln!("If the error message mentions \"function name is empty\" please check the");
             eprintln!("comment at the bottom of {current_file}.");
         }
+
+        eprintln!("The coverage report is available at: file://{}/index.html", self.report_dir.display());
     }
 }
 

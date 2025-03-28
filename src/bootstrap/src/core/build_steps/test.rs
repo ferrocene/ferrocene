@@ -2662,7 +2662,9 @@ impl Step for Crate {
         let target = self.target;
         let mode = self.mode;
 
-        if builder.config.cmd.coverage() && builder.doc_tests != DocTests::No {
+        if builder.config.cmd.ferrocene_coverage_for().is_some()
+            && builder.doc_tests != DocTests::No
+        {
             panic!("Cannot generate coverage for doc tests");
         }
         // Prepare sysroot
@@ -2750,8 +2752,8 @@ impl Step for Crate {
             _ => panic!("can only test libraries"),
         };
 
-        if builder.config.cmd.coverage() {
-            measure_coverage(builder, &mut cargo, target, "library");
+        if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
+            measure_coverage(builder, &mut cargo, target, coverage_for);
         }
 
         let mut crates = self.crates.clone();

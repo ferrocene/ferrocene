@@ -32,6 +32,19 @@ pub enum Warnings {
     Default,
 }
 
+#[derive(Copy, Clone, Debug, ValueEnum, PartialEq, Eq)]
+pub enum FerroceneCoverageFor {
+    Library,
+}
+
+impl FerroceneCoverageFor {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            FerroceneCoverageFor::Library => "library",
+        }
+    }
+}
+
 /// Deserialized version of all flags for this compile.
 #[derive(Debug, Parser)]
 #[command(
@@ -409,7 +422,7 @@ pub enum Subcommand {
         no_capture: bool,
         /// generate coverage for tests
         #[arg(long)]
-        coverage: bool,
+        coverage: Option<FerroceneCoverageFor>,
         /// Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification
         /// documents to ensure there is enough granularity for the test outcomes report.
         #[arg(long)]
@@ -626,10 +639,10 @@ impl Subcommand {
         }
     }
 
-    pub fn coverage(&self) -> bool {
+    pub fn ferrocene_coverage_for(&self) -> Option<FerroceneCoverageFor> {
         match *self {
             Subcommand::Test { coverage, .. } => coverage,
-            _ => false,
+            _ => None,
         }
     }
 

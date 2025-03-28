@@ -2,11 +2,12 @@ use std::path::PathBuf;
 
 use build_helper::exit;
 
-use crate::BootstrapCommand;
 use crate::builder::Builder;
 use crate::core::build_steps::llvm::Llvm;
 use crate::core::builder::Cargo;
+use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::TargetSelection;
+use crate::BootstrapCommand;
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     if !builder.config.profiler {
@@ -23,13 +24,13 @@ pub(crate) fn measure_coverage(
     builder: &Builder<'_>,
     cargo: &mut Cargo,
     target: TargetSelection,
-    name: &str,
+    coverage_for: FerroceneCoverageFor,
 ) {
     // Pre-requisites for the `generate_report()` function are built here, as that function is
     // executed after all bootstrap steps are executed.
     builder.ensure(Llvm { target });
 
-    let paths = Paths::find(builder, target, name);
+    let paths = Paths::find(builder, target, coverage_for);
     let profraw_file_template = paths.profraw_dir.join("%m_%p.profraw");
     cargo.env("LLVM_PROFILE_FILE", profraw_file_template);
 
@@ -37,7 +38,7 @@ pub(crate) fn measure_coverage(
     // multiple test suites), but that requires all those steps measuring the coverage of the same
     // thing. Because of that, we'll error if we already measured coverage of something and what we
     // are measuring now has a different state.
-    let state = CoverageState { target, name: name.into() };
+    let state = CoverageState { target, coverage_for };
     match &mut *builder.ferrocene_coverage.borrow_mut() {
         storage @ None => {
             // Only clear the paths the first time measure_coverage is called.
@@ -61,7 +62,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     // includes data from all tests suites measuring coverage. It cannot call `builder.ensure`, so
     // make sure to call it in `measure_coverage()`.
 
-    if !builder.config.cmd.coverage() {
+    if builder.config.cmd.ferrocene_coverage_for().is_none() {
         return;
     }
     let Some(state) = builder.ferrocene_coverage.borrow_mut().take() else {
@@ -69,7 +70,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
         exit!(1);
     };
 
-    let paths = Paths::find(builder, state.target, &state.name);
+    let paths = Paths::find(builder, state.target, state.coverage_for);
     let llvm_bin_dir = builder.llvm_out(state.target).join("bin");
 
     let mut cmd = BootstrapCommand::new(llvm_bin_dir.join("llvm-profdata"));
@@ -80,7 +81,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) struct CoverageState {
     target: TargetSelection,
-    name: String,
+    coverage_for: FerroceneCoverageFor,
 }
 
 struct Paths {
@@ -89,7 +90,12 @@ struct Paths {
 }
 
 impl Paths {
-    fn find(builder: &Builder<'_>, target: TargetSelection, name: &str) -> Self {
+    fn find(
+        builder: &Builder<'_>,
+        target: TargetSelection,
+        coverage_for: FerroceneCoverageFor,
+    ) -> Self {
+        let name = coverage_for.as_str();
         Self {
             profraw_dir: builder.tempdir().join(format!("ferrocene-profraw-{name}")),
             profdata_file: builder

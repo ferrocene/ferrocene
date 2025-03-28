@@ -4349,6 +4349,10 @@ _x() {
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
+                --coverage)
+                    COMPREPLY=($(compgen -W "library" -- "${cur}"))
+                    return 0
+                    ;;
                 --config)
                     local oldifs
                     if [ -n "${IFS+x}" ]; then

@@ -755,7 +755,7 @@ mod dist {
             only_modified: false,
             extra_checks: None,
             no_capture: false,
-            coverage: false,
+            coverage: None,
             ferrocene_test_one_crate_per_cargo_call: false,
         };
 
@@ -835,7 +835,7 @@ mod dist {
             only_modified: false,
             extra_checks: None,
             no_capture: false,
-            coverage: false,
+            coverage: None,
             ferrocene_test_one_crate_per_cargo_call: false,
         };
         // Make sure rustfmt binary not being found isn't an error.

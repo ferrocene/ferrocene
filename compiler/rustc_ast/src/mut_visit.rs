@@ -895,19 +895,7 @@ pub fn visit_token<T: MutVisitor>(vis: &mut T, t: &mut Token) {
 // multiple items there....
 fn visit_nonterminal<T: MutVisitor>(vis: &mut T, nt: &mut token::Nonterminal) {
     match nt {
-        token::NtItem(item) => visit_clobber(item, |item| {
-            // This is probably okay, because the only visitors likely to
-            // peek inside interpolated nodes will be renamings/markings,
-            // which map single items to single items.
-            vis.flat_map_item(item).expect_one("expected visitor to produce exactly one item")
-        }),
         token::NtBlock(block) => vis.visit_block(block),
-        token::NtStmt(stmt) => visit_clobber(stmt, |stmt| {
-            // See reasoning above.
-            stmt.map(|stmt| {
-                vis.flat_map_stmt(stmt).expect_one("expected visitor to produce exactly one item")
-            })
-        }),
         token::NtExpr(expr) => vis.visit_expr(expr),
         token::NtLiteral(expr) => vis.visit_expr(expr),
     }
@@ -973,7 +961,14 @@ fn walk_fn<T: MutVisitor>(vis: &mut T, kind: FnKind<'_>) {
             _ctxt,
             _ident,
             _vis,
-            Fn { defaultness, generics, contract, body, sig: FnSig { header, decl, span } },
+            Fn {
+                defaultness,
+                generics,
+                contract,
+                body,
+                sig: FnSig { header, decl, span },
+                define_opaque,
+            },
         ) => {
             // Identifier and visibility are visited as a part of the item.
             visit_defaultness(vis, defaultness);
@@ -987,6 +982,11 @@ fn walk_fn<T: MutVisitor>(vis: &mut T, kind: FnKind<'_>) {
                 vis.visit_block(body);
             }
             vis.visit_span(span);
+
+            for (id, path) in define_opaque.iter_mut().flatten() {
+                vis.visit_id(id);
+                vis.visit_path(path)
+            }
         }
         FnKind::Closure(binder, coroutine_kind, decl, body) => {
             vis.visit_closure_binder(binder);
@@ -1936,7 +1936,7 @@ impl DummyAstNode for Item {
                 span: Default::default(),
                 tokens: Default::default(),
             },
-            ident: Ident::empty(),
+            ident: Ident::dummy(),
             kind: ItemKind::ExternCrate(None),
             tokens: Default::default(),
         }

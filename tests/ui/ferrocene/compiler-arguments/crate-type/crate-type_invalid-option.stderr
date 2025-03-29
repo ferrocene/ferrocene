@@ -1,2 +1,2 @@
-error: unknown crate type: `invalid`
+error: unknown crate type: `invalid`, expected one of: `lib`, `rlib`, `staticlib`, `dylib`, `cdylib`, `bin`, `proc-macro`
 

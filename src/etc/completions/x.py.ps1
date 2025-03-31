@@ -632,13 +632,9 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--rust-profile-use', '--rust-profile-use', [CompletionResultType]::ParameterName, 'use PGO profile for rustc build')
             [CompletionResult]::new('--llvm-profile-use', '--llvm-profile-use', [CompletionResultType]::ParameterName, 'use PGO profile for LLVM build')
             [CompletionResult]::new('--reproducible-artifact', '--reproducible-artifact', [CompletionResultType]::ParameterName, 'Additional reproducible artifacts that should be added to the reproducible artifacts archive')
-<<<<<<< HEAD
-            [CompletionResult]::new('--set', '--set', [CompletionResultType]::ParameterName, 'override options in config.toml')
-            [CompletionResult]::new('--bless', '--bless', [CompletionResultType]::ParameterName, 'update all files of failing tests')
-=======
             [CompletionResult]::new('--set', '--set', [CompletionResultType]::ParameterName, 'override options in bootstrap.toml')
             [CompletionResult]::new('--ci', '--ci', [CompletionResultType]::ParameterName, 'Make bootstrap to behave as it''s running on the CI environment or not')
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+            [CompletionResult]::new('--bless', '--bless', [CompletionResultType]::ParameterName, 'update all files of failing tests')
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
             [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
             [CompletionResult]::new('-i', '-i', [CompletionResultType]::ParameterName, 'use incremental compilation')
@@ -1046,7 +1042,7 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
         }
         'x.py;sign' {
             [CompletionResult]::new('--config', '--config', [CompletionResultType]::ParameterName, 'TOML configuration file for build')
-            [CompletionResult]::new('--build-dir', '--build-dir', [CompletionResultType]::ParameterName, 'Build directory, overrides `build.build-dir` in `config.toml`')
+            [CompletionResult]::new('--build-dir', '--build-dir', [CompletionResultType]::ParameterName, 'Build directory, overrides `build.build-dir` in `bootstrap.toml`')
             [CompletionResult]::new('--build', '--build', [CompletionResultType]::ParameterName, 'build target of the stage0 compiler')
             [CompletionResult]::new('--host', '--host', [CompletionResultType]::ParameterName, 'host targets to build')
             [CompletionResult]::new('--target', '--target', [CompletionResultType]::ParameterName, 'target targets to build')
@@ -1067,7 +1063,8 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--rust-profile-use', '--rust-profile-use', [CompletionResultType]::ParameterName, 'use PGO profile for rustc build')
             [CompletionResult]::new('--llvm-profile-use', '--llvm-profile-use', [CompletionResultType]::ParameterName, 'use PGO profile for LLVM build')
             [CompletionResult]::new('--reproducible-artifact', '--reproducible-artifact', [CompletionResultType]::ParameterName, 'Additional reproducible artifacts that should be added to the reproducible artifacts archive')
-            [CompletionResult]::new('--set', '--set', [CompletionResultType]::ParameterName, 'override options in config.toml')
+            [CompletionResult]::new('--set', '--set', [CompletionResultType]::ParameterName, 'override options in bootstrap.toml')
+            [CompletionResult]::new('--ci', '--ci', [CompletionResultType]::ParameterName, 'Make bootstrap to behave as it''s running on the CI environment or not')
             [CompletionResult]::new('--force', '--force', [CompletionResultType]::ParameterName, 'Force re-signing the document even if its latest version is signed')
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
             [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')

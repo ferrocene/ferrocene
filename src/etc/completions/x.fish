@@ -50,7 +50,8 @@ complete -c x -n "__fish_x_needs_command" -l rust-profile-use -d 'use PGO profil
 complete -c x -n "__fish_x_needs_command" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_needs_command" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_needs_command" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_needs_command" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_needs_command" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_needs_command" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_needs_command" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_needs_command" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -106,7 +107,8 @@ complete -c x -n "__fish_x_using_subcommand build" -l rust-profile-use -d 'use P
 complete -c x -n "__fish_x_using_subcommand build" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand build" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand build" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand build" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand build" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand build" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand build" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand build" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -144,7 +146,8 @@ complete -c x -n "__fish_x_using_subcommand check" -l rust-profile-use -d 'use P
 complete -c x -n "__fish_x_using_subcommand check" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand check" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand check" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand check" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand check" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand check" -l all-targets -d 'Check all targets'
 complete -c x -n "__fish_x_using_subcommand check" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand check" -s i -l incremental -d 'use incremental compilation'
@@ -187,7 +190,8 @@ complete -c x -n "__fish_x_using_subcommand clippy" -l rust-profile-use -d 'use 
 complete -c x -n "__fish_x_using_subcommand clippy" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand clippy" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand clippy" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand clippy" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand clippy" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand clippy" -l fix
 complete -c x -n "__fish_x_using_subcommand clippy" -l allow-dirty
 complete -c x -n "__fish_x_using_subcommand clippy" -l allow-staged
@@ -228,7 +232,8 @@ complete -c x -n "__fish_x_using_subcommand fix" -l rust-profile-use -d 'use PGO
 complete -c x -n "__fish_x_using_subcommand fix" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand fix" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand fix" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand fix" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand fix" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand fix" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand fix" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand fix" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -266,7 +271,8 @@ complete -c x -n "__fish_x_using_subcommand fmt" -l rust-profile-use -d 'use PGO
 complete -c x -n "__fish_x_using_subcommand fmt" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand fmt" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand fmt" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand fmt" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand fmt" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand fmt" -l check -d 'check formatting instead of applying'
 complete -c x -n "__fish_x_using_subcommand fmt" -l all -d 'apply to all appropriate files, not just those that have been modified'
 complete -c x -n "__fish_x_using_subcommand fmt" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
@@ -306,7 +312,8 @@ complete -c x -n "__fish_x_using_subcommand doc" -l rust-profile-use -d 'use PGO
 complete -c x -n "__fish_x_using_subcommand doc" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand doc" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand doc" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand doc" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand doc" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand doc" -l open -d 'open the docs in a browser'
 complete -c x -n "__fish_x_using_subcommand doc" -l serve -d 'start a live-relodaing web server'
 complete -c x -n "__fish_x_using_subcommand doc" -l fresh -d 'ignore caches when building the documentation'
@@ -355,7 +362,8 @@ complete -c x -n "__fish_x_using_subcommand test" -l rust-profile-use -d 'use PG
 complete -c x -n "__fish_x_using_subcommand test" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand test" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand test" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand test" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand test" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand test" -l no-fail-fast -d 'run all tests regardless of failure'
 complete -c x -n "__fish_x_using_subcommand test" -l no-doc -d 'do not run doc tests'
 complete -c x -n "__fish_x_using_subcommand test" -l doc -d 'only run doc tests'
@@ -404,7 +412,8 @@ complete -c x -n "__fish_x_using_subcommand miri" -l rust-profile-use -d 'use PG
 complete -c x -n "__fish_x_using_subcommand miri" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand miri" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand miri" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand miri" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand miri" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand miri" -l no-fail-fast -d 'run all tests regardless of failure'
 complete -c x -n "__fish_x_using_subcommand miri" -l no-doc -d 'do not run doc tests'
 complete -c x -n "__fish_x_using_subcommand miri" -l doc -d 'only run doc tests'
@@ -446,7 +455,8 @@ complete -c x -n "__fish_x_using_subcommand bench" -l rust-profile-use -d 'use P
 complete -c x -n "__fish_x_using_subcommand bench" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand bench" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand bench" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand bench" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand bench" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand bench" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand bench" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand bench" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -484,7 +494,8 @@ complete -c x -n "__fish_x_using_subcommand clean" -l rust-profile-use -d 'use P
 complete -c x -n "__fish_x_using_subcommand clean" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand clean" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand clean" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand clean" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand clean" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand clean" -l all -d 'Clean the entire build directory (not used by default)'
 complete -c x -n "__fish_x_using_subcommand clean" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand clean" -s i -l incremental -d 'use incremental compilation'
@@ -523,7 +534,8 @@ complete -c x -n "__fish_x_using_subcommand dist" -l rust-profile-use -d 'use PG
 complete -c x -n "__fish_x_using_subcommand dist" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand dist" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand dist" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand dist" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand dist" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand dist" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand dist" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand dist" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -561,7 +573,8 @@ complete -c x -n "__fish_x_using_subcommand install" -l rust-profile-use -d 'use
 complete -c x -n "__fish_x_using_subcommand install" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand install" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand install" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand install" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand install" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand install" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand install" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand install" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -599,13 +612,10 @@ complete -c x -n "__fish_x_using_subcommand run" -l rust-profile-generate -d 'ge
 complete -c x -n "__fish_x_using_subcommand run" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand run" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand run" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-<<<<<<< HEAD
-complete -c x -n "__fish_x_using_subcommand run" -l set -d 'override options in config.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand run" -l bless -d 'update all files of failing tests'
-=======
 complete -c x -n "__fish_x_using_subcommand run" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand run" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+complete -c x -n "__fish_x_using_subcommand run" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
+complete -c x -n "__fish_x_using_subcommand run" -l bless -d 'update all files of failing tests'
 complete -c x -n "__fish_x_using_subcommand run" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand run" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand run" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -643,7 +653,8 @@ complete -c x -n "__fish_x_using_subcommand setup" -l rust-profile-use -d 'use P
 complete -c x -n "__fish_x_using_subcommand setup" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand setup" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand setup" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand setup" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand setup" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand setup" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand setup" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand setup" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -681,7 +692,8 @@ complete -c x -n "__fish_x_using_subcommand suggest" -l rust-profile-use -d 'use
 complete -c x -n "__fish_x_using_subcommand suggest" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand suggest" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand suggest" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand suggest" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand suggest" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand suggest" -l run -d 'run suggested tests'
 complete -c x -n "__fish_x_using_subcommand suggest" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand suggest" -s i -l incremental -d 'use incremental compilation'
@@ -721,7 +733,8 @@ complete -c x -n "__fish_x_using_subcommand vendor" -l rust-profile-use -d 'use 
 complete -c x -n "__fish_x_using_subcommand vendor" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand vendor" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand vendor" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand vendor" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand vendor" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand vendor" -l versioned-dirs -d 'Always include version in subdir name'
 complete -c x -n "__fish_x_using_subcommand vendor" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand vendor" -s i -l incremental -d 'use incremental compilation'
@@ -760,7 +773,8 @@ complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -813,7 +827,8 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -861,7 +876,8 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -909,7 +925,8 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -957,7 +974,8 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -995,7 +1013,8 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -1008,7 +1027,7 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand sign" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand sign" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand sign" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand sign" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand sign" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand sign" -l target -d 'target targets to build' -r -f
@@ -1032,7 +1051,9 @@ complete -c x -n "__fish_x_using_subcommand sign" -l rust-profile-generate -d 'g
 complete -c x -n "__fish_x_using_subcommand sign" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand sign" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand sign" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand sign" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand sign" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand sign" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
+false\t''"
 complete -c x -n "__fish_x_using_subcommand sign" -l force -d 'Force re-signing the document even if its latest version is signed'
 complete -c x -n "__fish_x_using_subcommand sign" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand sign" -s i -l incremental -d 'use incremental compilation'

@@ -642,13 +642,9 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-<<<<<<< HEAD
-'*--set=[override options in config.toml]:section.option=value:' \
-'--bless[update all files of failing tests]' \
-=======
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+'--bless[update all files of failing tests]' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -1088,7 +1084,7 @@ esac
 (sign)
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -1109,7 +1105,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--force[Force re-signing the document even if its latest version is signed]' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \

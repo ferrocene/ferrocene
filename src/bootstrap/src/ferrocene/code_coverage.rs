@@ -176,12 +176,7 @@ impl Paths {
         let name = coverage_for.as_str();
         Self {
             profraw_dir: builder.tempdir().join(format!("ferrocene-profraw-{name}")),
-            profdata_file: builder
-                .out
-                .join(target.triple)
-                .join("ferrocene")
-                .join("coverage")
-                .join(format!("{name}.profdata")),
+            profdata_file: builder.tempdir().join(format!("ferrocene-{name}.profdata")),
             report_dir: builder.doc_out(target).join("coverage").join(name),
         }
     }
@@ -198,7 +193,6 @@ impl Paths {
         }
 
         builder.create_dir(&self.profraw_dir);
-        builder.create_dir(self.profdata_file.parent().unwrap());
         builder.create_dir(&self.report_dir);
     }
 }

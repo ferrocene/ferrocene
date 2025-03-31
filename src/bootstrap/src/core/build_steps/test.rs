@@ -23,7 +23,7 @@ use crate::core::builder::{
 };
 use crate::core::config::TargetSelection;
 use crate::core::config::flags::{Subcommand, get_completion};
-use crate::ferrocene::code_coverage::GatherCoverage;
+use crate::ferrocene::code_coverage::measure_coverage;
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::utils::build_stamp::{self, BuildStamp};
 use crate::utils::exec::{BootstrapCommand, command};
@@ -2750,9 +2750,8 @@ impl Step for Crate {
             _ => panic!("can only test libraries"),
         };
 
-        let mut coverage = None;
         if builder.config.cmd.coverage() {
-            coverage = Some(GatherCoverage::new(builder, &mut cargo, target, "library"));
+            measure_coverage(builder, &mut cargo, target, "library");
         }
 
         let mut crates = self.crates.clone();
@@ -2768,10 +2767,6 @@ impl Step for Crate {
         }
 
         run_cargo_test(cargo, &[], &crates, &*crate_description(&self.crates), target, builder);
-
-        if let Some(coverage) = coverage {
-            coverage.post_process();
-        }
     }
 }
 

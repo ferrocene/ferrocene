@@ -52,6 +52,7 @@ pub use utils::change_tracker::{
 };
 
 use crate::core::build_steps::vendor::VENDOR_DIR;
+use crate::ferrocene::code_coverage::generate_coverage_report;
 
 const LLVM_TOOLS: &[&str] = &[
     "llvm-cov",      // used to generate coverage report
@@ -660,6 +661,9 @@ impl Build {
                 self.config.dry_run = DryRun::Disabled;
                 let builder = builder::Builder::new(self);
                 builder.execute_cli();
+
+                // Ferrocene addition
+                generate_coverage_report(&builder);
             }
         } else {
             #[cfg(feature = "tracing")]

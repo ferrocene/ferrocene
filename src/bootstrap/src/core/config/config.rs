@@ -416,7 +416,8 @@ pub struct Config {
     /// Command for visual diff display, e.g. `diff-tool --color=always`.
     pub compiletest_diff_tool: Option<String>,
 
-<<<<<<< HEAD
+    pub is_running_on_ci: bool,
+
     // Ferrocene-specific configuration
     pub ferrocene_raw_channel: String,
     pub ferrocene_aws_profile: Option<String>,
@@ -467,9 +468,6 @@ pub enum FerroceneSecretSauce {
     #[default]
     Download,
     Local(PathBuf),
-=======
-    pub is_running_on_ci: bool,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 #[derive(Clone, Debug, Default)]

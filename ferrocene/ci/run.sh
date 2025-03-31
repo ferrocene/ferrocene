@@ -20,15 +20,15 @@ fi
 # times as part of the same CI job: rust-lang/rust#110123 changed configure.py
 # to error out if an existing configuration file would be overridden, so we
 # have to move the old file out of the way to proceed.
-if [[ -f config.toml ]]; then
-    dest="build/config-backup.toml"
-    mv config.toml "${dest}"
+if [[ -f bootstrap.toml ]]; then
+    dest="build/bootstrap-backup.toml"
+    mv bootstrap.toml "${dest}"
     echo "note: existing configuration file moved to ${dest}" >&2
     echo
 fi
 
 echo "Configuring"
-# Generate `config.toml`.
+# Generate `bootstrap.toml`.
 ferrocene/ci/configure.sh
 
 # Use a Cargo home inside the build directory instead of the default ~/.cargo,

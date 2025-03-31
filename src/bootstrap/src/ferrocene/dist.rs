@@ -110,7 +110,7 @@ impl Step for SourceTarball {
             "RELEASES.md",
             "REUSE.toml",
             "TRADEMARK.md",
-            "config.example.toml",
+            "bootstrap.example.toml",
             "Cargo.toml",
             "Cargo.lock",
             "configure",

@@ -603,13 +603,18 @@ static CSKY_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
 static LOONGARCH_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     // tidy-alphabetical-start
     ("d", Unstable(sym::loongarch_target_feature), &["f"]),
+    ("div32", Unstable(sym::loongarch_target_feature), &[]),
     ("f", Unstable(sym::loongarch_target_feature), &[]),
     ("frecipe", Unstable(sym::loongarch_target_feature), &[]),
+    ("lam-bh", Unstable(sym::loongarch_target_feature), &[]),
+    ("lamcas", Unstable(sym::loongarch_target_feature), &[]),
     ("lasx", Unstable(sym::loongarch_target_feature), &["lsx"]),
     ("lbt", Unstable(sym::loongarch_target_feature), &[]),
+    ("ld-seq-sa", Unstable(sym::loongarch_target_feature), &[]),
     ("lsx", Unstable(sym::loongarch_target_feature), &["d"]),
     ("lvz", Unstable(sym::loongarch_target_feature), &[]),
     ("relax", Unstable(sym::loongarch_target_feature), &[]),
+    ("scq", Unstable(sym::loongarch_target_feature), &[]),
     ("ual", Unstable(sym::loongarch_target_feature), &[]),
     // tidy-alphabetical-end
 ];
@@ -768,17 +773,15 @@ impl Target {
         }
     }
 
-    pub fn implied_target_features<'a>(
-        &self,
-        base_features: impl Iterator<Item = &'a str>,
-    ) -> FxHashSet<&'a str> {
+    // Note: the returned set includes `base_feature`.
+    pub fn implied_target_features<'a>(&self, base_feature: &'a str) -> FxHashSet<&'a str> {
         let implied_features =
             self.rust_target_features().iter().map(|(f, _, i)| (f, i)).collect::<FxHashMap<_, _>>();
 
-        // implied target features have their own implied target features, so we traverse the
-        // map until there are no more features to add
+        // Implied target features have their own implied target features, so we traverse the
+        // map until there are no more features to add.
         let mut features = FxHashSet::default();
-        let mut new_features = base_features.collect::<Vec<&str>>();
+        let mut new_features = vec![base_feature];
         while let Some(new_feature) = new_features.pop() {
             if features.insert(new_feature) {
                 if let Some(implied_features) = implied_features.get(&new_feature) {

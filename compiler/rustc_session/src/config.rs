@@ -1214,7 +1214,7 @@ impl Default for Options {
             describe_lints: false,
             output_types: OutputTypes(BTreeMap::new()),
             search_paths: vec![],
-            maybe_sysroot: None,
+            sysroot: filesearch::materialize_sysroot(None),
             target_triple: TargetTuple::from_tuple(host_tuple()),
             test: false,
             incremental: None,
@@ -2618,7 +2618,7 @@ pub fn build_session_options(early_dcx: &mut EarlyDiagCtxt, matches: &getopts::M
         describe_lints,
         output_types,
         search_paths,
-        maybe_sysroot: Some(sysroot),
+        sysroot,
         target_triple,
         test,
         incremental,
@@ -2709,7 +2709,12 @@ pub fn parse_crate_types_from_list(list_list: Vec<String>) -> Result<Vec<CrateTy
                 "cdylib" => CrateType::Cdylib,
                 "bin" => CrateType::Executable,
                 "proc-macro" => CrateType::ProcMacro,
-                _ => return Err(format!("unknown crate type: `{part}`")),
+                _ => {
+                    return Err(format!(
+                        "unknown crate type: `{part}`, expected one of: \
+                        `lib`, `rlib`, `staticlib`, `dylib`, `cdylib`, `bin`, `proc-macro`",
+                    ));
+                }
             };
             if !crate_types.contains(&new_part) {
                 crate_types.push(new_part)

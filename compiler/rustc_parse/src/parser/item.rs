@@ -21,10 +21,10 @@ use super::diagnostics::{ConsumeClosingDelim, dummy_arg};
 use super::ty::{AllowPlus, RecoverQPath, RecoverReturnSign};
 use super::{
     AttrWrapper, ExpKeywordPair, ExpTokenPair, FollowedByType, ForceCollect, Parser, PathStyle,
-    Trailing, UsePreAttrPos,
+    Recovered, Trailing, UsePreAttrPos,
 };
 use crate::errors::{self, MacroExpandsToAdtField};
-use crate::{exp, fluent_generated as fluent, maybe_whole};
+use crate::{exp, fluent_generated as fluent};
 
 impl<'a> Parser<'a> {
     /// Parses a source module as a crate. This is the main entry point for the parser.
@@ -142,10 +142,13 @@ impl<'a> Parser<'a> {
         fn_parse_mode: FnParseMode,
         force_collect: ForceCollect,
     ) -> PResult<'a, Option<Item>> {
-        maybe_whole!(self, NtItem, |item| {
+        if let Some(item) =
+            self.eat_metavar_seq(MetaVarKind::Item, |this| this.parse_item(ForceCollect::Yes))
+        {
+            let mut item = item.expect("an actual item");
             attrs.prepend_to_nt_inner(&mut item.attrs);
-            Some(item.into_inner())
-        });
+            return Ok(Some(item.into_inner()));
+        }
 
         self.collect_tokens(None, attrs, force_collect, |this, mut attrs| {
             let lo = this.token.span;
@@ -217,7 +220,14 @@ impl<'a> Parser<'a> {
                 self.parse_fn(attrs, fn_parse_mode, lo, vis, case)?;
             (
                 ident,
-                ItemKind::Fn(Box::new(Fn { defaultness: def_(), sig, generics, contract, body })),
+                ItemKind::Fn(Box::new(Fn {
+                    defaultness: def_(),
+                    sig,
+                    generics,
+                    contract,
+                    body,
+                    define_opaque: None,
+                })),
             )
         } else if self.eat_keyword(exp!(Extern)) {
             if self.eat_keyword(exp!(Crate)) {
@@ -639,7 +649,7 @@ impl<'a> Parser<'a> {
 
         let impl_items = self.parse_item_list(attrs, |p| p.parse_impl_item(ForceCollect::No))?;
 
-        let item_kind = match ty_second {
+        let (of_trait, self_ty) = match ty_second {
             Some(ty_second) => {
                 // impl Trait for Type
                 if !has_for {
@@ -672,31 +682,20 @@ impl<'a> Parser<'a> {
                 };
                 let trait_ref = TraitRef { path, ref_id: ty_first.id };
 
-                ItemKind::Impl(Box::new(Impl {
-                    safety,
-                    polarity,
-                    defaultness,
-                    constness,
-                    generics,
-                    of_trait: Some(trait_ref),
-                    self_ty: ty_second,
-                    items: impl_items,
-                }))
+                (Some(trait_ref), ty_second)
             }
-            None => {
-                // impl Type
-                ItemKind::Impl(Box::new(Impl {
-                    safety,
-                    polarity,
-                    defaultness,
-                    constness,
-                    generics,
-                    of_trait: None,
-                    self_ty: ty_first,
-                    items: impl_items,
-                }))
-            }
+            None => (None, ty_first), // impl Type
         };
+        let item_kind = ItemKind::Impl(Box::new(Impl {
+            safety,
+            polarity,
+            defaultness,
+            constness,
+            generics,
+            of_trait,
+            self_ty,
+            items: impl_items,
+        }));
 
         Ok((Ident::empty(), item_kind))
     }

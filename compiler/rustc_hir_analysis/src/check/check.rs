@@ -18,18 +18,17 @@ use rustc_middle::hir::nested_filter;
 use rustc_middle::middle::resolve_bound_vars::ResolvedArg;
 use rustc_middle::middle::stability::EvalResult;
 use rustc_middle::ty::error::TypeErrorToStringExt;
-use rustc_middle::ty::fold::{BottomUpFolder, fold_regions};
 use rustc_middle::ty::layout::{LayoutError, MAX_SIMD_LANES};
 use rustc_middle::ty::util::{Discr, IntTypeExt};
 use rustc_middle::ty::{
-    AdtDef, GenericArgKind, RegionKind, TypeSuperVisitable, TypeVisitable, TypeVisitableExt,
+    AdtDef, BottomUpFolder, GenericArgKind, RegionKind, TypeFoldable, TypeSuperVisitable,
+    TypeVisitable, TypeVisitableExt, fold_regions,
 };
 use rustc_session::lint::builtin::UNINHABITED_STATIC;
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::error_reporting::traits::on_unimplemented::OnUnimplementedDirective;
 use rustc_trait_selection::traits;
 use rustc_trait_selection::traits::query::evaluate_obligation::InferCtxtExt;
-use rustc_type_ir::fold::TypeFoldable;
 use tracing::{debug, instrument};
 use ty::TypingMode;
 use {rustc_attr_parsing as attr, rustc_hir as hir};
@@ -185,7 +184,7 @@ fn check_static_inhabited(tcx: TyCtxt<'_>, def_id: LocalDefId) {
 /// Checks that an opaque type does not contain cycles and does not use `Self` or `T::Foo`
 /// projections that would result in "inheriting lifetimes".
 fn check_opaque(tcx: TyCtxt<'_>, def_id: LocalDefId) {
-    let hir::OpaqueTy { origin, .. } = *tcx.hir().expect_opaque_ty(def_id);
+    let hir::OpaqueTy { origin, .. } = *tcx.hir_expect_opaque_ty(def_id);
 
     // HACK(jynelson): trying to infer the type of `impl trait` breaks documenting
     // `async-std` (and `pub async fn` in general).
@@ -392,6 +391,12 @@ fn best_definition_site_of_opaque<'tcx>(
                 return ControlFlow::Continue(());
             }
 
+            let opaque_types_defined_by = self.tcx.opaque_types_defined_by(item_def_id);
+            // Don't try to check items that cannot possibly constrain the type.
+            if !opaque_types_defined_by.contains(&self.opaque_def_id) {
+                return ControlFlow::Continue(());
+            }
+
             if let Some(hidden_ty) =
                 self.tcx.mir_borrowck(item_def_id).concrete_opaque_types.get(&self.opaque_def_id)
             {
@@ -451,19 +456,7 @@ fn best_definition_site_of_opaque<'tcx>(
             None
         }
         hir::OpaqueTyOrigin::TyAlias { in_assoc_ty: false, .. } => {
-            let scope = tcx.hir_get_defining_scope(tcx.local_def_id_to_hir_id(opaque_def_id));
-            let found = if scope == hir::CRATE_HIR_ID {
-                tcx.hir_walk_toplevel_module(&mut locator)
-            } else {
-                match tcx.hir_node(scope) {
-                    Node::Item(it) => locator.visit_item(it),
-                    Node::ImplItem(it) => locator.visit_impl_item(it),
-                    Node::TraitItem(it) => locator.visit_trait_item(it),
-                    Node::ForeignItem(it) => locator.visit_foreign_item(it),
-                    other => bug!("{:?} is not a valid scope for an opaque type item", other),
-                }
-            };
-            found.break_value()
+            tcx.hir_walk_toplevel_module(&mut locator).break_value()
         }
     }
 }
@@ -791,7 +784,7 @@ pub(crate) fn check_item_type(tcx: TyCtxt<'_>, def_id: LocalDefId) {
             check_type_alias_type_params_are_used(tcx, def_id);
         }
         DefKind::ForeignMod => {
-            let it = tcx.hir().expect_item(def_id);
+            let it = tcx.hir_expect_item(def_id);
             let hir::ItemKind::ForeignMod { abi, items } = it.kind else {
                 return;
             };
@@ -1721,7 +1714,7 @@ fn opaque_type_cycle_error(tcx: TyCtxt<'_>, opaque_def_id: LocalDefId) -> ErrorG
                     opaques: Vec<DefId>,
                     closures: Vec<DefId>,
                 }
-                impl<'tcx> ty::visit::TypeVisitor<TyCtxt<'tcx>> for OpaqueTypeCollector {
+                impl<'tcx> ty::TypeVisitor<TyCtxt<'tcx>> for OpaqueTypeCollector {
                     fn visit_ty(&mut self, t: Ty<'tcx>) {
                         match *t.kind() {
                             ty::Alias(ty::Opaque, ty::AliasTy { def_id: def, .. }) => {

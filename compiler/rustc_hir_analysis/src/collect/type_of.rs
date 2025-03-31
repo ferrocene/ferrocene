@@ -5,10 +5,9 @@ use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::intravisit::VisitorExt;
 use rustc_hir::{self as hir, AmbigArg, HirId};
 use rustc_middle::query::plumbing::CyclePlaceholder;
-use rustc_middle::ty::fold::fold_regions;
 use rustc_middle::ty::print::with_forced_trimmed_paths;
 use rustc_middle::ty::util::IntTypeExt;
-use rustc_middle::ty::{self, IsSuggestable, Ty, TyCtxt, TypeVisitableExt};
+use rustc_middle::ty::{self, IsSuggestable, Ty, TyCtxt, TypeVisitableExt, fold_regions};
 use rustc_middle::{bug, span_bug};
 use rustc_span::{DUMMY_SP, Ident, Span};
 
@@ -480,5 +479,5 @@ pub(crate) fn type_alias_is_lazy<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) ->
             }
         }
     }
-    HasTait.visit_ty_unambig(tcx.hir().expect_item(def_id).expect_ty_alias().0).is_break()
+    HasTait.visit_ty_unambig(tcx.hir_expect_item(def_id).expect_ty_alias().0).is_break()
 }

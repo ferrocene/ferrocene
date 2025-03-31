@@ -89,6 +89,8 @@ const EXTRA_CHECK_CFGS: &[(Option<Mode>, &str, Option<&[&'static str]>)] = &[
     // in the appropriate `library/{std,alloc,core}/Cargo.toml`
     // ferrocene addition: see `std_cargo` function
     (None, "ferrocenecoretest_secretsauce", None),
+    // ferrocene addition: used to ignore tests when measuring coverage
+    (None, "ferrocene_coverage", None),
 ];
 
 /// A structure representing a Rust compiler.

@@ -47,6 +47,14 @@ impl Step for Docs {
         let mut subsetter = Subsetter::new(builder, "ferrocene-docs", "share/doc/ferrocene/html");
         subsetter.add_directory(&doc_out, &doc_out);
 
+        // Generate comprehensive copyright data and include the generated files in the tarball
+        for path in builder.ensure(GenerateCopyright) {
+            if !builder.config.dry_run() {
+                // First arg gets the file placed in the root of the tarball, instead of in build/
+                subsetter.add_file(path.parent().unwrap(), &path);
+            }
+        }
+
         subsetter.into_tarballs().map(|tarball| tarball.generate()).collect()
     }
 }

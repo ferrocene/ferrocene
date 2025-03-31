@@ -96,12 +96,14 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
                     DependencyType::Target | DependencyType::TargetSelfContained => {}
                 }
                 let name = path.file_name().unwrap().to_str().unwrap();
-                if name.starts_with("libstd-") && name.ends_with(".so") {
+                if name.starts_with("libstd-")
+                    && (name.ends_with(".so") || name.ends_with(".dll") || name.ends_with(".dylib"))
+                {
                     libstd = Some(path);
                     break;
                 }
             }
-            libstd.expect("could not find libstd-HASH.so in the sysroot")
+            libstd.expect("could not find the libstd dynamic library in the sysroot")
         }
     };
 

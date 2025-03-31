@@ -33,6 +33,7 @@ use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_data_structures::intern::Interned;
 use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
 use rustc_data_structures::steal::Steal;
+use rustc_data_structures::unord::UnordMap;
 use rustc_errors::{Diag, ErrorGuaranteed};
 use rustc_hir::LangItem;
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, DocLinkResMap, LifetimeRes, Res};
@@ -148,7 +149,6 @@ mod opaque_types;
 mod parameterized;
 mod predicate;
 mod region;
-mod return_position_impl_trait_in_trait;
 mod rvalue_scopes;
 mod structural_impls;
 #[allow(hidden_glob_reexports)]
@@ -169,7 +169,7 @@ pub struct ResolverGlobalCtxt {
     /// Item with a given `LocalDefId` was defined during macro expansion with ID `ExpnId`.
     pub expn_that_defined: FxHashMap<LocalDefId, ExpnId>,
     pub effective_visibilities: EffectiveVisibilities,
-    pub extern_crate_map: FxHashMap<LocalDefId, CrateNum>,
+    pub extern_crate_map: UnordMap<LocalDefId, CrateNum>,
     pub maybe_unused_trait_imports: FxIndexSet<LocalDefId>,
     pub module_children: LocalDefIdMap<Vec<ModChild>>,
     pub glob_map: FxHashMap<LocalDefId, FxHashSet<Symbol>>,
@@ -1208,10 +1208,21 @@ impl VariantDef {
         }
     }
 
-    /// Is this field list non-exhaustive?
+    /// Returns `true` if the field list of this variant is `#[non_exhaustive]`.
+    ///
+    /// Note that this function will return `true` even if the type has been
+    /// defined in the crate currently being compiled. If that's not what you
+    /// want, see [`Self::field_list_has_applicable_non_exhaustive`].
     #[inline]
     pub fn is_field_list_non_exhaustive(&self) -> bool {
         self.flags.intersects(VariantFlags::IS_FIELD_LIST_NON_EXHAUSTIVE)
+    }
+
+    /// Returns `true` if the field list of this variant is `#[non_exhaustive]`
+    /// and the type has been defined in another crate.
+    #[inline]
+    pub fn field_list_has_applicable_non_exhaustive(&self) -> bool {
+        self.is_field_list_non_exhaustive() && !self.def_id.is_local()
     }
 
     /// Computes the `Ident` of this variant by looking up the `Span`

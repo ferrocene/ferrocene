@@ -1,6 +1,6 @@
 # Print an optspec for argparse to handle cmd's options that are independent of any subcommand.
 function __fish_x_global_optspecs
-	string join \n v/verbose i/incremental config= build-dir= build= host= target= exclude= skip= include-default-paths rustc-error-format= on-fail= dry-run dump-bootstrap-shims stage= keep-stage= keep-stage-std= src= j/jobs= warnings= error-format= json-output color= bypass-bootstrap-lock rust-profile-generate= rust-profile-use= llvm-profile-use= llvm-profile-generate enable-bolt-settings skip-stage0-validation reproducible-artifact= set= h/help
+	string join \n v/verbose i/incremental config= build-dir= build= host= target= exclude= skip= include-default-paths rustc-error-format= on-fail= dry-run dump-bootstrap-shims stage= keep-stage= keep-stage-std= src= j/jobs= warnings= error-format= json-output color= bypass-bootstrap-lock rust-profile-generate= rust-profile-use= llvm-profile-use= llvm-profile-generate enable-bolt-settings skip-stage0-validation reproducible-artifact= set= ci= h/help
 end
 
 function __fish_x_needs_command
@@ -25,7 +25,7 @@ function __fish_x_using_subcommand
 end
 
 complete -c x -n "__fish_x_needs_command" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_needs_command" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_needs_command" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_needs_command" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_needs_command" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_needs_command" -l target -d 'target targets to build' -r -f
@@ -49,7 +49,8 @@ complete -c x -n "__fish_x_needs_command" -l rust-profile-generate -d 'generate 
 complete -c x -n "__fish_x_needs_command" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_needs_command" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_needs_command" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_needs_command" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_needs_command" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_needs_command" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_needs_command" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_needs_command" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_needs_command" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -80,7 +81,7 @@ complete -c x -n "__fish_x_needs_command" -a "vendor" -d 'Vendor dependencies'
 complete -c x -n "__fish_x_needs_command" -a "perf" -d 'Perform profiling and benchmarking of the compiler using `rustc-perf`'
 complete -c x -n "__fish_x_needs_command" -a "sign" -d 'Sign Ferrocene qualification documents'
 complete -c x -n "__fish_x_using_subcommand build" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand build" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand build" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand build" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand build" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand build" -l target -d 'target targets to build' -r -f
@@ -104,7 +105,8 @@ complete -c x -n "__fish_x_using_subcommand build" -l rust-profile-generate -d '
 complete -c x -n "__fish_x_using_subcommand build" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand build" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand build" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand build" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand build" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand build" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand build" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand build" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand build" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -117,7 +119,7 @@ complete -c x -n "__fish_x_using_subcommand build" -l enable-bolt-settings -d 'E
 complete -c x -n "__fish_x_using_subcommand build" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x -n "__fish_x_using_subcommand build" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand check" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand check" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand check" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand check" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand check" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand check" -l target -d 'target targets to build' -r -f
@@ -141,7 +143,8 @@ complete -c x -n "__fish_x_using_subcommand check" -l rust-profile-generate -d '
 complete -c x -n "__fish_x_using_subcommand check" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand check" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand check" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand check" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand check" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand check" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand check" -l all-targets -d 'Check all targets'
 complete -c x -n "__fish_x_using_subcommand check" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand check" -s i -l incremental -d 'use incremental compilation'
@@ -159,7 +162,7 @@ complete -c x -n "__fish_x_using_subcommand clippy" -s D -d 'clippy lints to den
 complete -c x -n "__fish_x_using_subcommand clippy" -s W -d 'clippy lints to warn on' -r
 complete -c x -n "__fish_x_using_subcommand clippy" -s F -d 'clippy lints to forbid' -r
 complete -c x -n "__fish_x_using_subcommand clippy" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand clippy" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand clippy" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand clippy" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand clippy" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand clippy" -l target -d 'target targets to build' -r -f
@@ -183,7 +186,8 @@ complete -c x -n "__fish_x_using_subcommand clippy" -l rust-profile-generate -d 
 complete -c x -n "__fish_x_using_subcommand clippy" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand clippy" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand clippy" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand clippy" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand clippy" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand clippy" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand clippy" -l fix
 complete -c x -n "__fish_x_using_subcommand clippy" -l allow-dirty
 complete -c x -n "__fish_x_using_subcommand clippy" -l allow-staged
@@ -199,7 +203,7 @@ complete -c x -n "__fish_x_using_subcommand clippy" -l enable-bolt-settings -d '
 complete -c x -n "__fish_x_using_subcommand clippy" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x -n "__fish_x_using_subcommand clippy" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand fix" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand fix" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand fix" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand fix" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand fix" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand fix" -l target -d 'target targets to build' -r -f
@@ -223,7 +227,8 @@ complete -c x -n "__fish_x_using_subcommand fix" -l rust-profile-generate -d 'ge
 complete -c x -n "__fish_x_using_subcommand fix" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand fix" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand fix" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand fix" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand fix" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand fix" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand fix" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand fix" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand fix" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -236,7 +241,7 @@ complete -c x -n "__fish_x_using_subcommand fix" -l enable-bolt-settings -d 'Ena
 complete -c x -n "__fish_x_using_subcommand fix" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x -n "__fish_x_using_subcommand fix" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand fmt" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand fmt" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand fmt" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand fmt" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand fmt" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand fmt" -l target -d 'target targets to build' -r -f
@@ -260,7 +265,8 @@ complete -c x -n "__fish_x_using_subcommand fmt" -l rust-profile-generate -d 'ge
 complete -c x -n "__fish_x_using_subcommand fmt" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand fmt" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand fmt" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand fmt" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand fmt" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand fmt" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand fmt" -l check -d 'check formatting instead of applying'
 complete -c x -n "__fish_x_using_subcommand fmt" -l all -d 'apply to all appropriate files, not just those that have been modified'
 complete -c x -n "__fish_x_using_subcommand fmt" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
@@ -275,7 +281,7 @@ complete -c x -n "__fish_x_using_subcommand fmt" -l enable-bolt-settings -d 'Ena
 complete -c x -n "__fish_x_using_subcommand fmt" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x -n "__fish_x_using_subcommand fmt" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand doc" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand doc" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand doc" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand doc" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand doc" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand doc" -l target -d 'target targets to build' -r -f
@@ -299,7 +305,8 @@ complete -c x -n "__fish_x_using_subcommand doc" -l rust-profile-generate -d 'ge
 complete -c x -n "__fish_x_using_subcommand doc" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand doc" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand doc" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand doc" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand doc" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand doc" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand doc" -l open -d 'open the docs in a browser'
 complete -c x -n "__fish_x_using_subcommand doc" -l serve -d 'start a live-relodaing web server'
 complete -c x -n "__fish_x_using_subcommand doc" -l fresh -d 'ignore caches when building the documentation'
@@ -323,7 +330,7 @@ complete -c x -n "__fish_x_using_subcommand test" -l compare-mode -d 'mode descr
 complete -c x -n "__fish_x_using_subcommand test" -l pass -d 'force {check,build,run}-pass tests to this mode' -r
 complete -c x -n "__fish_x_using_subcommand test" -l run -d 'whether to execute run-* tests' -r
 complete -c x -n "__fish_x_using_subcommand test" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand test" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand test" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand test" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand test" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand test" -l target -d 'target targets to build' -r -f
@@ -347,7 +354,8 @@ complete -c x -n "__fish_x_using_subcommand test" -l rust-profile-generate -d 'g
 complete -c x -n "__fish_x_using_subcommand test" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand test" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand test" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand test" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand test" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand test" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand test" -l no-fail-fast -d 'run all tests regardless of failure'
 complete -c x -n "__fish_x_using_subcommand test" -l no-doc -d 'do not run doc tests'
 complete -c x -n "__fish_x_using_subcommand test" -l doc -d 'only run doc tests'
@@ -371,7 +379,7 @@ complete -c x -n "__fish_x_using_subcommand test" -l skip-stage0-validation -d '
 complete -c x -n "__fish_x_using_subcommand test" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand miri" -l test-args -d 'extra arguments to be passed for the test tool being used (e.g. libtest, compiletest or rustdoc)' -r
 complete -c x -n "__fish_x_using_subcommand miri" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand miri" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand miri" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand miri" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand miri" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand miri" -l target -d 'target targets to build' -r -f
@@ -395,7 +403,8 @@ complete -c x -n "__fish_x_using_subcommand miri" -l rust-profile-generate -d 'g
 complete -c x -n "__fish_x_using_subcommand miri" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand miri" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand miri" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand miri" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand miri" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand miri" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand miri" -l no-fail-fast -d 'run all tests regardless of failure'
 complete -c x -n "__fish_x_using_subcommand miri" -l no-doc -d 'do not run doc tests'
 complete -c x -n "__fish_x_using_subcommand miri" -l doc -d 'only run doc tests'
@@ -412,7 +421,7 @@ complete -c x -n "__fish_x_using_subcommand miri" -l skip-stage0-validation -d '
 complete -c x -n "__fish_x_using_subcommand miri" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand bench" -l test-args -r
 complete -c x -n "__fish_x_using_subcommand bench" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand bench" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand bench" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand bench" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand bench" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand bench" -l target -d 'target targets to build' -r -f
@@ -436,7 +445,8 @@ complete -c x -n "__fish_x_using_subcommand bench" -l rust-profile-generate -d '
 complete -c x -n "__fish_x_using_subcommand bench" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand bench" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand bench" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand bench" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand bench" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand bench" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand bench" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand bench" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand bench" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -450,7 +460,7 @@ complete -c x -n "__fish_x_using_subcommand bench" -l skip-stage0-validation -d 
 complete -c x -n "__fish_x_using_subcommand bench" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand clean" -l stage -d 'Clean a specific stage without touching other artifacts. By default, every stage is cleaned if this option is not used' -r
 complete -c x -n "__fish_x_using_subcommand clean" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand clean" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand clean" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand clean" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand clean" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand clean" -l target -d 'target targets to build' -r -f
@@ -473,7 +483,8 @@ complete -c x -n "__fish_x_using_subcommand clean" -l rust-profile-generate -d '
 complete -c x -n "__fish_x_using_subcommand clean" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand clean" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand clean" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand clean" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand clean" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand clean" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand clean" -l all -d 'Clean the entire build directory (not used by default)'
 complete -c x -n "__fish_x_using_subcommand clean" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand clean" -s i -l incremental -d 'use incremental compilation'
@@ -487,7 +498,7 @@ complete -c x -n "__fish_x_using_subcommand clean" -l enable-bolt-settings -d 'E
 complete -c x -n "__fish_x_using_subcommand clean" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x -n "__fish_x_using_subcommand clean" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand dist" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand dist" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand dist" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand dist" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand dist" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand dist" -l target -d 'target targets to build' -r -f
@@ -511,7 +522,8 @@ complete -c x -n "__fish_x_using_subcommand dist" -l rust-profile-generate -d 'g
 complete -c x -n "__fish_x_using_subcommand dist" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand dist" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand dist" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand dist" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand dist" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand dist" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand dist" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand dist" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand dist" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -524,7 +536,7 @@ complete -c x -n "__fish_x_using_subcommand dist" -l enable-bolt-settings -d 'En
 complete -c x -n "__fish_x_using_subcommand dist" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x -n "__fish_x_using_subcommand dist" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand install" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand install" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand install" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand install" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand install" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand install" -l target -d 'target targets to build' -r -f
@@ -548,7 +560,8 @@ complete -c x -n "__fish_x_using_subcommand install" -l rust-profile-generate -d
 complete -c x -n "__fish_x_using_subcommand install" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand install" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand install" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand install" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand install" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand install" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand install" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand install" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand install" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -562,7 +575,7 @@ complete -c x -n "__fish_x_using_subcommand install" -l skip-stage0-validation -
 complete -c x -n "__fish_x_using_subcommand install" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand run" -l args -d 'arguments for the tool' -r
 complete -c x -n "__fish_x_using_subcommand run" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand run" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand run" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand run" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand run" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand run" -l target -d 'target targets to build' -r -f
@@ -586,8 +599,13 @@ complete -c x -n "__fish_x_using_subcommand run" -l rust-profile-generate -d 'ge
 complete -c x -n "__fish_x_using_subcommand run" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand run" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand run" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
+<<<<<<< HEAD
 complete -c x -n "__fish_x_using_subcommand run" -l set -d 'override options in config.toml' -r -f
 complete -c x -n "__fish_x_using_subcommand run" -l bless -d 'update all files of failing tests'
+=======
+complete -c x -n "__fish_x_using_subcommand run" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand run" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 complete -c x -n "__fish_x_using_subcommand run" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand run" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand run" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -600,7 +618,7 @@ complete -c x -n "__fish_x_using_subcommand run" -l enable-bolt-settings -d 'Ena
 complete -c x -n "__fish_x_using_subcommand run" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x -n "__fish_x_using_subcommand run" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand setup" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand setup" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand setup" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand setup" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand setup" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand setup" -l target -d 'target targets to build' -r -f
@@ -624,7 +642,8 @@ complete -c x -n "__fish_x_using_subcommand setup" -l rust-profile-generate -d '
 complete -c x -n "__fish_x_using_subcommand setup" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand setup" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand setup" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand setup" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand setup" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand setup" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand setup" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand setup" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand setup" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -637,7 +656,7 @@ complete -c x -n "__fish_x_using_subcommand setup" -l enable-bolt-settings -d 'E
 complete -c x -n "__fish_x_using_subcommand setup" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x -n "__fish_x_using_subcommand setup" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand suggest" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand suggest" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand suggest" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand suggest" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand suggest" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand suggest" -l target -d 'target targets to build' -r -f
@@ -661,7 +680,8 @@ complete -c x -n "__fish_x_using_subcommand suggest" -l rust-profile-generate -d
 complete -c x -n "__fish_x_using_subcommand suggest" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand suggest" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand suggest" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand suggest" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand suggest" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand suggest" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand suggest" -l run -d 'run suggested tests'
 complete -c x -n "__fish_x_using_subcommand suggest" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand suggest" -s i -l incremental -d 'use incremental compilation'
@@ -676,7 +696,7 @@ complete -c x -n "__fish_x_using_subcommand suggest" -l skip-stage0-validation -
 complete -c x -n "__fish_x_using_subcommand suggest" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand vendor" -l sync -d 'Additional `Cargo.toml` to sync and vendor' -r -F
 complete -c x -n "__fish_x_using_subcommand vendor" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand vendor" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand vendor" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand vendor" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand vendor" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand vendor" -l target -d 'target targets to build' -r -f
@@ -700,7 +720,8 @@ complete -c x -n "__fish_x_using_subcommand vendor" -l rust-profile-generate -d 
 complete -c x -n "__fish_x_using_subcommand vendor" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand vendor" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand vendor" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand vendor" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand vendor" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand vendor" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand vendor" -l versioned-dirs -d 'Always include version in subdir name'
 complete -c x -n "__fish_x_using_subcommand vendor" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand vendor" -s i -l incremental -d 'use incremental compilation'
@@ -714,7 +735,7 @@ complete -c x -n "__fish_x_using_subcommand vendor" -l enable-bolt-settings -d '
 complete -c x -n "__fish_x_using_subcommand vendor" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x -n "__fish_x_using_subcommand vendor" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l target -d 'target targets to build' -r -f
@@ -738,7 +759,8 @@ complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -767,7 +789,7 @@ Doc\t''
 Opt\t''
 Clippy\t''"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l target -d 'target targets to build' -r -f
@@ -790,7 +812,8 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -814,7 +837,7 @@ Doc\t''
 Opt\t''
 Clippy\t''"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l target -d 'target targets to build' -r -f
@@ -837,7 +860,8 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -861,7 +885,7 @@ Doc\t''
 Opt\t''
 Clippy\t''"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l target -d 'target targets to build' -r -f
@@ -884,7 +908,8 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -908,7 +933,7 @@ Doc\t''
 Opt\t''
 Clippy\t''"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l target -d 'target targets to build' -r -f
@@ -931,7 +956,8 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -944,7 +970,7 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l config -d 'TOML configuration file for build' -r -F
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l build -d 'build target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l target -d 'target targets to build' -r -f
@@ -968,7 +994,8 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l set -d 'override options in config.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l set -d 'override options in bootstrap.toml' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l include-default-paths -d 'include default paths in addition to the provided ones'

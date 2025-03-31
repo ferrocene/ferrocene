@@ -18,7 +18,7 @@ mod num;
 mod rt;
 
 #[stable(feature = "fmt_flags_align", since = "1.28.0")]
-#[cfg_attr(not(test), rustc_diagnostic_item = "Alignment")]
+#[rustc_diagnostic_item = "Alignment"]
 /// Possible alignments returned by `Formatter::align`
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Alignment {
@@ -710,9 +710,10 @@ impl<'a> Arguments<'a> {
     }
 
     /// Same as [`Arguments::as_str`], but will only return `Some(s)` if it can be determined at compile time.
+    #[unstable(feature = "fmt_internals", reason = "internal to standard library", issue = "none")]
     #[must_use]
     #[inline]
-    fn as_statically_known_str(&self) -> Option<&'static str> {
+    pub fn as_statically_known_str(&self) -> Option<&'static str> {
         let s = self.as_str();
         if core::intrinsics::is_val_statically_known(s.is_some()) { s } else { None }
     }
@@ -2771,7 +2772,14 @@ impl Display for char {
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized> Pointer for *const T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        pointer_fmt_inner(self.expose_provenance(), f)
+        if <<T as core::ptr::Pointee>::Metadata as core::unit::IsUnit>::is_unit() {
+            pointer_fmt_inner(self.expose_provenance(), f)
+        } else {
+            f.debug_struct("Pointer")
+                .field_with("addr", |f| pointer_fmt_inner(self.expose_provenance(), f))
+                .field("metadata", &core::ptr::metadata(*self))
+                .finish()
+        }
     }
 }
 

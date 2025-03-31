@@ -1001,7 +1001,7 @@ dependencies = [
  "termize",
  "tokio",
  "toml 0.7.8",
- "ui_test 0.26.5",
+ "ui_test 0.29.2",
  "walkdir",
 ]
 
@@ -2218,16 +2218,14 @@ dependencies = [
 
 [[package]]
 name = "html5ever"
-version = "0.27.0"
+version = "0.29.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c13771afe0e6e846f1e67d038d4cb29998a6779f93c809212e4e9c32efd244d4"
+checksum = "3b7410cae13cbc75623c98ac4cbfd1f0bedddf3227afc24f370cf0f50a44a11c"
 dependencies = [
  "log",
  "mac",
  "markup5ever",
- "proc-macro2",
- "quote",
- "syn 2.0.100",
+ "match_token",
 ]
 
 [[package]]
@@ -2927,9 +2925,9 @@ checksum = "c41e0c4fef86961ac6d6f8a82609f55f31b05e4fce149ac5710e439df7619ba4"
 
 [[package]]
 name = "markup5ever"
-version = "0.12.1"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16ce3abbeba692c8b8441d036ef91aea6df8da2c6b6e21c7e14d3c18e526be45"
+checksum = "c7a7213d12e1864c0f002f52c2923d4556935a43dec5e71355c2760e0f6e7a18"
 dependencies = [
  "log",
  "phf",
@@ -2937,6 +2935,17 @@ dependencies = [
  "string_cache",
  "string_cache_codegen",
  "tendril",
+]
+
+[[package]]
+name = "match_token"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "88a9689d8d44bf9964484516275f5cd4c9b59457a6940c1d5d0ecbb94510a36b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.100",
 ]
 
 [[package]]
@@ -2963,6 +2972,20 @@ name = "measureme"
 version = "11.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dfa4a40f09af7aa6faef38285402a78847d0d72bf8827006cd2a332e1e6e4a8d"
+dependencies = [
+ "log",
+ "memmap2",
+ "parking_lot",
+ "perf-event-open-sys",
+ "rustc-hash 1.1.0",
+ "smallvec",
+]
+
+[[package]]
+name = "measureme"
+version = "12.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "570a507d8948a66a97f42cbbaf8a6bb9516a51017d4ee949502ad7a10a864395"
 dependencies = [
  "log",
  "memmap2",
@@ -3066,7 +3089,7 @@ dependencies = [
  "libc",
  "libffi",
  "libloading",
- "measureme",
+ "measureme 11.0.1",
  "rand 0.9.0",
  "regex",
  "rustc_version",
@@ -4115,7 +4138,6 @@ dependencies = [
  "rustc_data_structures",
  "rustc_macros",
  "rustc_serialize",
- "rustc_span",
 ]
 
 [[package]]
@@ -4134,7 +4156,6 @@ dependencies = [
  "rustc_index",
  "rustc_macros",
  "rustc_middle",
- "rustc_parse",
  "rustc_session",
  "rustc_span",
  "rustc_target",
@@ -4169,7 +4190,6 @@ version = "0.0.0"
 dependencies = [
  "itertools",
  "rustc_ast",
- "rustc_data_structures",
  "rustc_lexer",
  "rustc_span",
  "thin-vec",
@@ -4197,15 +4217,12 @@ dependencies = [
  "rustc_ast",
  "rustc_ast_pretty",
  "rustc_attr_data_structures",
- "rustc_data_structures",
  "rustc_errors",
  "rustc_feature",
  "rustc_fluent_macro",
  "rustc_hir",
  "rustc_lexer",
  "rustc_macros",
- "rustc_middle",
- "rustc_serialize",
  "rustc_session",
  "rustc_span",
  "thin-vec",
@@ -4284,7 +4301,7 @@ dependencies = [
  "gimli 0.30.0",
  "itertools",
  "libc",
- "measureme",
+ "measureme 12.0.1",
  "object 0.36.7",
  "rustc-demangle",
  "rustc_abi",
@@ -4332,7 +4349,6 @@ dependencies = [
  "rustc_abi",
  "rustc_arena",
  "rustc_ast",
- "rustc_ast_pretty",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -4340,7 +4356,6 @@ dependencies = [
  "rustc_fs_util",
  "rustc_hashes",
  "rustc_hir",
- "rustc_hir_pretty",
  "rustc_incremental",
  "rustc_index",
  "rustc_macros",
@@ -4401,7 +4416,7 @@ dependencies = [
  "indexmap",
  "jobserver",
  "libc",
- "measureme",
+ "measureme 12.0.1",
  "memmap2",
  "parking_lot",
  "portable-atomic",
@@ -4788,7 +4803,6 @@ dependencies = [
  "rustc_query_impl",
  "rustc_query_system",
  "rustc_resolve",
- "rustc_serialize",
  "rustc_session",
  "rustc_span",
  "rustc_symbol_mangling",
@@ -4863,7 +4877,6 @@ dependencies = [
 name = "rustc_log"
 version = "0.0.0"
 dependencies = [
- "rustc_span",
  "tracing",
  "tracing-core",
  "tracing-subscriber",
@@ -4952,13 +4965,11 @@ dependencies = [
 name = "rustc_mir_build"
 version = "0.0.0"
 dependencies = [
- "either",
  "itertools",
  "rustc_abi",
  "rustc_apfloat",
  "rustc_arena",
  "rustc_ast",
- "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -5163,10 +5174,8 @@ dependencies = [
 name = "rustc_query_impl"
 version = "0.0.0"
 dependencies = [
- "measureme",
- "rustc_attr_data_structures",
+ "measureme 12.0.1",
  "rustc_data_structures",
- "rustc_errors",
  "rustc_hashes",
  "rustc_hir",
  "rustc_index",
@@ -5175,7 +5184,6 @@ dependencies = [
  "rustc_serialize",
  "rustc_session",
  "rustc_span",
- "thin-vec",
  "tracing",
 ]
 
@@ -5200,7 +5208,6 @@ dependencies = [
  "rustc_session",
  "rustc_span",
  "smallvec",
- "thin-vec",
  "tracing",
 ]
 
@@ -5238,7 +5245,6 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "rustc_abi",
- "rustc_ast",
  "rustc_data_structures",
  "rustc_hir",
  "rustc_middle",
@@ -5293,7 +5299,6 @@ name = "rustc_smir"
 version = "0.0.0"
 dependencies = [
  "rustc_abi",
- "rustc_ast",
  "rustc_data_structures",
  "rustc_hir",
  "rustc_hir_pretty",
@@ -5335,7 +5340,6 @@ dependencies = [
  "punycode",
  "rustc-demangle",
  "rustc_abi",
- "rustc_ast",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_hashes",
@@ -5430,7 +5434,6 @@ version = "0.0.0"
 dependencies = [
  "itertools",
  "rustc_abi",
- "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -6643,9 +6646,9 @@ dependencies = [
 
 [[package]]
 name = "ui_test"
-version = "0.26.5"
+version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32ee4c40e5a5f9fa6864ff976473e5d6a6e9884b6ce68b40690d9f87e1994c83"
+checksum = "7484683d60d50ca1d1b6433c3dbf6c5ad71d20387acdcfb16fe79573f3fba576"
 dependencies = [
  "annotate-snippets 0.11.5",
  "anyhow",
@@ -6669,9 +6672,9 @@ dependencies = [
 
 [[package]]
 name = "ui_test"
-version = "0.28.0"
+version = "0.29.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7484683d60d50ca1d1b6433c3dbf6c5ad71d20387acdcfb16fe79573f3fba576"
+checksum = "1211b1111c752c73b33073d2958072be08825fd97c9ab4d83444da361a06634b"
 dependencies = [
  "annotate-snippets 0.11.5",
  "anyhow",

@@ -2104,6 +2104,10 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
             builder,
         );
 
+        if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
+            measure_coverage(builder, &mut cmd, compiler, target, coverage_for);
+        }
+
         let _group = builder.msg(
             Kind::Test,
             compiler.stage,
@@ -2753,7 +2757,7 @@ impl Step for Crate {
         };
 
         if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
-            measure_coverage(builder, &mut cargo, compiler, target, coverage_for);
+            measure_coverage(builder, cargo.as_mut(), compiler, target, coverage_for);
         }
 
         let mut crates = self.crates.clone();

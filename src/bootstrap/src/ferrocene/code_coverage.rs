@@ -24,7 +24,7 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
 
 pub(crate) fn measure_coverage(
     builder: &Builder<'_>,
-    cargo: &mut Cargo,
+    cmd: &mut BootstrapCommand,
     compiler: Compiler,
     target: TargetSelection,
     coverage_for: FerroceneCoverageFor,
@@ -36,7 +36,7 @@ pub(crate) fn measure_coverage(
 
     let paths = Paths::find(builder, target, coverage_for);
     let profraw_file_template = paths.profraw_dir.join("%m_%p.profraw");
-    cargo.env("LLVM_PROFILE_FILE", profraw_file_template);
+    cmd.env("LLVM_PROFILE_FILE", profraw_file_template);
 
     // We want to support merging the coverage information from multiple steps (for example,
     // multiple test suites), but that requires all those steps measuring the coverage of the same

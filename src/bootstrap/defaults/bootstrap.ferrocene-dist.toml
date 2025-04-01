@@ -129,7 +129,7 @@ codegen-units-std = 1
 # Enable LLVM IR verification. Verification has a small compiler performance hit, but has a chance
 # of catching compiler bugs.
 #
-# If this configuration is missing LLVM IR verification will be disabled. Never remove this flag.
+# If this configuration is missing, LLVM IR verification will be disabled. Never remove this flag.
 verify-llvm-ir = true
 
 # Enable only the LLVM codegen backend, preventing other codegen backends from being built and

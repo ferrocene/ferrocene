@@ -4,6 +4,7 @@ use std::fs::{File, remove_file};
 use std::io::Write;
 use std::path::Path;
 
+use build_helper::ci::CiEnv;
 use clap::CommandFactory;
 use serde::Deserialize;
 
@@ -69,7 +70,7 @@ fn detect_src_and_out() {
         let expected_src = manifest_dir.ancestors().nth(2).unwrap();
         assert_eq!(&cfg.src, expected_src);
 
-        // test if build-dir was manually given in config.toml
+        // test if build-dir was manually given in bootstrap.toml
         if let Some(custom_build_dir) = build_dir {
             assert_eq!(&cfg.out, Path::new(custom_build_dir));
         }
@@ -229,13 +230,15 @@ fn override_toml_duplicate() {
 #[test]
 fn profile_user_dist() {
     fn get_toml(file: &Path) -> Result<TomlConfig, toml::de::Error> {
-        let contents =
-            if file.ends_with("config.toml") || env::var_os("RUST_BOOTSTRAP_CONFIG").is_some() {
-                "profile = \"user\"".to_owned()
-            } else {
-                assert!(file.ends_with("config.dist.toml"));
-                std::fs::read_to_string(file).unwrap()
-            };
+        let contents = if file.ends_with("bootstrap.toml")
+            || file.ends_with("config.toml")
+            || env::var_os("RUST_BOOTSTRAP_CONFIG").is_some()
+        {
+            "profile = \"user\"".to_owned()
+        } else {
+            assert!(file.ends_with("config.dist.toml") || file.ends_with("bootstrap.dist.toml"));
+            std::fs::read_to_string(file).unwrap()
+        };
 
         toml::from_str(&contents).and_then(|table: toml::Value| TomlConfig::deserialize(table))
     }
@@ -402,7 +405,7 @@ fn jobs_precedence() {
     );
     assert_eq!(config.jobs, Some(67890));
 
-    // `--set build.jobs` should take precedence over `config.toml`.
+    // `--set build.jobs` should take precedence over `bootstrap.toml`.
     let config = Config::parse_inner(
         Flags::parse(&[
             "check".to_owned(),
@@ -420,7 +423,7 @@ fn jobs_precedence() {
     );
     assert_eq!(config.jobs, Some(12345));
 
-    // `--jobs` > `--set build.jobs` > `config.toml`
+    // `--jobs` > `--set build.jobs` > `bootstrap.toml`
     let config = Config::parse_inner(
         Flags::parse(&[
             "check".to_owned(),
@@ -514,4 +517,35 @@ fn test_explicit_stage() {
     assert!(!config.explicit_stage_from_cli);
     assert!(!config.explicit_stage_from_config);
     assert!(!config.is_explicit_stage());
+}
+
+#[test]
+fn test_exclude() {
+    let exclude_path = "compiler";
+    let config = parse(&format!("build.exclude=[\"{}\"]", exclude_path));
+
+    let first_excluded = config
+        .skip
+        .first()
+        .expect("Expected at least one excluded path")
+        .to_str()
+        .expect("Failed to convert excluded path to string");
+
+    assert_eq!(first_excluded, exclude_path);
+}
+
+#[test]
+fn test_ci_flag() {
+    let config = Config::parse_inner(Flags::parse(&["check".into(), "--ci=false".into()]), |&_| {
+        toml::from_str("")
+    });
+    assert!(!config.is_running_on_ci);
+
+    let config = Config::parse_inner(Flags::parse(&["check".into(), "--ci=true".into()]), |&_| {
+        toml::from_str("")
+    });
+    assert!(config.is_running_on_ci);
+
+    let config = Config::parse_inner(Flags::parse(&["check".into()]), |&_| toml::from_str(""));
+    assert_eq!(config.is_running_on_ci, CiEnv::is_ci());
 }

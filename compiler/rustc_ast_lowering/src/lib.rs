@@ -1513,16 +1513,22 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         }))
     }
 
-    fn lower_fn_params_to_names(&mut self, decl: &FnDecl) -> &'hir [Ident] {
+    fn lower_fn_params_to_names(&mut self, decl: &FnDecl) -> &'hir [Option<Ident>] {
         self.arena.alloc_from_iter(decl.inputs.iter().map(|param| match param.pat.kind {
-            PatKind::Ident(_, ident, _) => self.lower_ident(ident),
-            PatKind::Wild => Ident::new(kw::Underscore, self.lower_span(param.pat.span)),
+            PatKind::Ident(_, ident, _) => {
+                if ident.name != kw::Empty {
+                    Some(self.lower_ident(ident))
+                } else {
+                    None
+                }
+            }
+            PatKind::Wild => Some(Ident::new(kw::Underscore, self.lower_span(param.pat.span))),
             _ => {
                 self.dcx().span_delayed_bug(
                     param.pat.span,
                     "non-ident/wild param pat must trigger an error",
                 );
-                Ident::new(kw::Empty, self.lower_span(param.pat.span))
+                None
             }
         }))
     }
@@ -1769,38 +1775,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
     }
 
     fn lower_lifetime(&mut self, l: &Lifetime) -> &'hir hir::Lifetime {
-        let ident = self.lower_ident(l.ident);
-        self.new_named_lifetime(l.id, l.id, ident)
-    }
-
-    #[instrument(level = "debug", skip(self))]
-    fn new_named_lifetime_with_res(
-        &mut self,
-        id: NodeId,
-        ident: Ident,
-        res: LifetimeRes,
-    ) -> &'hir hir::Lifetime {
-        let res = match res {
-            LifetimeRes::Param { param, .. } => hir::LifetimeName::Param(param),
-            LifetimeRes::Fresh { param, .. } => {
-                let param = self.local_def_id(param);
-                hir::LifetimeName::Param(param)
-            }
-            LifetimeRes::Infer => hir::LifetimeName::Infer,
-            LifetimeRes::Static { .. } => hir::LifetimeName::Static,
-            LifetimeRes::Error => hir::LifetimeName::Error,
-            res => panic!(
-                "Unexpected lifetime resolution {:?} for {:?} at {:?}",
-                res, ident, ident.span
-            ),
-        };
-
-        debug!(?res);
-        self.arena.alloc(hir::Lifetime {
-            hir_id: self.lower_node_id(id),
-            ident: self.lower_ident(ident),
-            res,
-        })
+        self.new_named_lifetime(l.id, l.id, l.ident)
     }
 
     #[instrument(level = "debug", skip(self))]
@@ -1811,7 +1786,26 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         ident: Ident,
     ) -> &'hir hir::Lifetime {
         let res = self.resolver.get_lifetime_res(id).unwrap_or(LifetimeRes::Error);
-        self.new_named_lifetime_with_res(new_id, ident, res)
+        let res = match res {
+            LifetimeRes::Param { param, .. } => hir::LifetimeName::Param(param),
+            LifetimeRes::Fresh { param, .. } => {
+                let param = self.local_def_id(param);
+                hir::LifetimeName::Param(param)
+            }
+            LifetimeRes::Infer => hir::LifetimeName::Infer,
+            LifetimeRes::Static { .. } => hir::LifetimeName::Static,
+            LifetimeRes::Error => hir::LifetimeName::Error,
+            LifetimeRes::ElidedAnchor { .. } => {
+                panic!("Unexpected `ElidedAnchar` {:?} at {:?}", ident, ident.span);
+            }
+        };
+
+        debug!(?res);
+        self.arena.alloc(hir::Lifetime {
+            hir_id: self.lower_node_id(new_id),
+            ident: self.lower_ident(ident),
+            res,
+        })
     }
 
     fn lower_generic_params_mut(

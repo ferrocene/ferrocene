@@ -6,7 +6,6 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::OnceLock;
 
-use build_helper::ci::CiEnv;
 use xz2::bufread::XzDecoder;
 
 use crate::core::config::BUILDER_CONFIG_FILENAME;
@@ -124,7 +123,7 @@ impl Config {
                 if let Ok(in_nix_shell) = in_nix_shell {
                     eprintln!(
                         "The IN_NIX_SHELL environment variable is `{in_nix_shell}`; \
-                         you may need to set `patch-binaries-for-nix=true` in config.toml"
+                         you may need to set `patch-binaries-for-nix=true` in bootstrap.toml"
                     );
                 }
             }
@@ -267,7 +266,7 @@ impl Config {
             "--fail",
         ]);
         // Don't print progress in CI; the \r wrapping looks bad and downloads don't take long enough for progress to be useful.
-        if CiEnv::is_ci() {
+        if self.is_running_on_ci {
             curl.arg("--silent");
         } else {
             curl.arg("--progress-bar");
@@ -715,7 +714,7 @@ impl Config {
             help_on_error = "ERROR: failed to download pre-built rustc from CI
 
 NOTE: old builds get deleted after a certain time
-HELP: if trying to compile an old commit of rustc, disable `download-rustc` in config.toml:
+HELP: if trying to compile an old commit of rustc, disable `download-rustc` in bootstrap.toml:
 
 [rust]
 download-rustc = false
@@ -799,7 +798,7 @@ download-rustc = false
                     println!("HELP: Consider rebasing to a newer commit if available.");
                 }
                 Err(e) => {
-                    eprintln!("ERROR: Failed to parse CI LLVM config.toml: {e}");
+                    eprintln!("ERROR: Failed to parse CI LLVM bootstrap.toml: {e}");
                     exit!(2);
                 }
             };
@@ -832,7 +831,7 @@ download-rustc = false
     HELP: There could be two reasons behind this:
         1) The host triple is not supported for `download-ci-llvm`.
         2) Old builds get deleted after a certain time.
-    HELP: In either case, disable `download-ci-llvm` in your config.toml:
+    HELP: In either case, disable `download-ci-llvm` in your bootstrap.toml:
 
     [llvm]
     download-ci-llvm = false
@@ -861,7 +860,7 @@ download-rustc = false
     HELP: There could be two reasons behind this:
         1) The host triple is not supported for `download-ci-gcc`.
         2) Old builds get deleted after a certain time.
-    HELP: In either case, disable `download-ci-gcc` in your config.toml:
+    HELP: In either case, disable `download-ci-gcc` in your bootstrap.toml:
 
     [gcc]
     download-ci-gcc = false

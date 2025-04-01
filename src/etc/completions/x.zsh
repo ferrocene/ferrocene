@@ -16,7 +16,7 @@ _x() {
     local context curcontext="$curcontext" state line
     _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -37,7 +37,8 @@ _x() {
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -66,7 +67,7 @@ _x() {
             (build)
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -87,7 +88,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -108,7 +110,7 @@ _arguments "${_arguments_options[@]}" : \
 (check)
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -129,7 +131,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--all-targets[Check all targets]' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
@@ -155,7 +158,7 @@ _arguments "${_arguments_options[@]}" : \
 '*-W+[clippy lints to warn on]:LINT:_default' \
 '*-F+[clippy lints to forbid]:LINT:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -176,7 +179,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--fix[]' \
 '--allow-dirty[]' \
 '--allow-staged[]' \
@@ -200,7 +204,7 @@ _arguments "${_arguments_options[@]}" : \
 (fix)
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -221,7 +225,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -242,7 +247,7 @@ _arguments "${_arguments_options[@]}" : \
 (fmt)
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -263,7 +268,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--check[check formatting instead of applying]' \
 '--all[apply to all appropriate files, not just those that have been modified]' \
 '*-v[use verbose output (-vv for very verbose)]' \
@@ -286,7 +292,7 @@ _arguments "${_arguments_options[@]}" : \
 (doc)
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -307,7 +313,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--open[open the docs in a browser]' \
 '--serve[start a live-relodaing web server]' \
 '--fresh[ignore caches when building the documentation]' \
@@ -340,7 +347,7 @@ _arguments "${_arguments_options[@]}" : \
 '--run=[whether to execute run-* tests]:auto | always | never:_default' \
 '--coverage=[generate coverage for tests]:COVERAGE:(library)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -361,7 +368,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--no-fail-fast[run all tests regardless of failure]' \
 '--no-doc[do not run doc tests]' \
 '--doc[only run doc tests]' \
@@ -392,7 +400,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '*--test-args=[extra arguments to be passed for the test tool being used (e.g. libtest, compiletest or rustdoc)]:ARGS:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -413,7 +421,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--no-fail-fast[run all tests regardless of failure]' \
 '--no-doc[do not run doc tests]' \
 '--doc[only run doc tests]' \
@@ -438,7 +447,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '*--test-args=[]:TEST_ARGS:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -459,7 +468,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -481,7 +491,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--stage=[Clean a specific stage without touching other artifacts. By default, every stage is cleaned if this option is not used]:N:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -501,7 +511,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--all[Clean the entire build directory (not used by default)]' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
@@ -523,7 +534,7 @@ _arguments "${_arguments_options[@]}" : \
 (dist)
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -544,7 +555,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -565,7 +577,7 @@ _arguments "${_arguments_options[@]}" : \
 (install)
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -586,7 +598,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -608,7 +621,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '*--args=[arguments for the tool]:ARGS:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -629,7 +642,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--bless[update all files of failing tests]' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
@@ -651,7 +665,7 @@ _arguments "${_arguments_options[@]}" : \
 (setup)
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -672,7 +686,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -687,14 +702,14 @@ _arguments "${_arguments_options[@]}" : \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
-'::profile -- Either the profile for `config.toml` or another setup action. May be omitted to set up interactively:_files' \
+'::profile -- Either the profile for `bootstrap.toml` or another setup action. May be omitted to set up interactively:_files' \
 '*::paths -- paths for the subcommand:_files' \
 && ret=0
 ;;
 (suggest)
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -715,7 +730,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--run[run suggested tests]' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
@@ -738,7 +754,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '*--sync=[Additional \`Cargo.toml\` to sync and vendor]:SYNC:_files' \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -759,7 +775,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--versioned-dirs[Always include version in subdir name]' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
@@ -781,7 +798,7 @@ _arguments "${_arguments_options[@]}" : \
 (perf)
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -802,7 +819,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -836,7 +854,7 @@ _arguments "${_arguments_options[@]}" : \
 '*--scenarios=[Select the scenarios that should be benchmarked]:SCENARIOS:(Full IncrFull IncrUnchanged IncrPatched)' \
 '*--profiles=[Select the profiles that should be benchmarked]:PROFILES:(Check Debug Doc Opt Clippy)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -856,7 +874,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -881,7 +900,7 @@ _arguments "${_arguments_options[@]}" : \
 '*--scenarios=[Select the scenarios that should be benchmarked]:SCENARIOS:(Full IncrFull IncrUnchanged IncrPatched)' \
 '*--profiles=[Select the profiles that should be benchmarked]:PROFILES:(Check Debug Doc Opt Clippy)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -901,7 +920,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -926,7 +946,7 @@ _arguments "${_arguments_options[@]}" : \
 '*--scenarios=[Select the scenarios that should be benchmarked]:SCENARIOS:(Full IncrFull IncrUnchanged IncrPatched)' \
 '*--profiles=[Select the profiles that should be benchmarked]:PROFILES:(Check Debug Doc Opt Clippy)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -946,7 +966,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -971,7 +992,7 @@ _arguments "${_arguments_options[@]}" : \
 '*--scenarios=[Select the scenarios that should be benchmarked]:SCENARIOS:(Full IncrFull IncrUnchanged IncrPatched)' \
 '*--profiles=[Select the profiles that should be benchmarked]:PROFILES:(Check Debug Doc Opt Clippy)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -991,7 +1012,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -1013,7 +1035,7 @@ _arguments "${_arguments_options[@]}" : \
 (compare)
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -1034,7 +1056,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -1061,7 +1084,7 @@ esac
 (sign)
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
-'--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
+'--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
@@ -1082,7 +1105,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
-'*--set=[override options in config.toml]:section.option=value:' \
+'*--set=[override options in bootstrap.toml]:section.option=value:' \
+'--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--force[Force re-signing the document even if its latest version is signed]' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \

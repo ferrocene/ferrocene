@@ -26,7 +26,7 @@ if [[ -z "${CI+x}" ]]; then
     echo "    https://public-docs.ferrocene.dev/main/qualification/internal-procedures/setup-local-env.html"
     echo
     echo "If you're trying to simulate CI to debug an issue locally, change the"
-    echo "profile in your config.toml to 'ferrocene-dist'."
+    echo "profile in your bootstrap.toml to 'ferrocene-dist'."
     exit 1
 fi
 

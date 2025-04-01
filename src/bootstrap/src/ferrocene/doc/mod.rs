@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+pub(crate) mod code_coverage;
+
 use std::collections::HashMap;
 use std::ffi::{OsStr, OsString};
 use std::fs;

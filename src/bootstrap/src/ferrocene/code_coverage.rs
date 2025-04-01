@@ -7,6 +7,7 @@ use crate::core::build_steps::llvm::Llvm;
 use crate::core::builder::Cargo;
 use crate::core::config::TargetSelection;
 use crate::core::config::flags::FerroceneCoverageFor;
+use crate::ferrocene::doc::code_coverage::{CoverageMetadata, SingleCoverageReport};
 use crate::utils::build_stamp::libstd_stamp;
 use crate::{BootstrapCommand, Compiler, DependencyType, t};
 
@@ -137,7 +138,20 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
         exit!(1);
     }
 
+    let metadata = CoverageMetadata {
+        metadata_version: CoverageMetadata::CURRENT_VERSION,
+        path_prefix: builder.src.clone(),
+    };
+
     t!(std::fs::write(&paths.lcov_file, result.stdout_bytes()));
+    t!(std::fs::write(&paths.metadata_file, &t!(serde_json::to_vec_pretty(&metadata))));
+
+    builder.ensure(SingleCoverageReport {
+        target: state.target,
+        name: state.coverage_for.as_str().to_string(),
+        lcov: paths.lcov_file,
+        metadata,
+    });
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -151,6 +165,7 @@ struct Paths {
     profraw_dir: PathBuf,
     profdata_file: PathBuf,
     lcov_file: PathBuf,
+    metadata_file: PathBuf,
 }
 
 impl Paths {
@@ -160,15 +175,12 @@ impl Paths {
         coverage_for: FerroceneCoverageFor,
     ) -> Self {
         let name = coverage_for.as_str();
+        let out_dir = builder.out.join(target.triple).join("ferrocene").join("coverage");
         Self {
             profraw_dir: builder.tempdir().join(format!("ferrocene-profraw-{name}")),
             profdata_file: builder.tempdir().join(format!("ferrocene-{name}.profdata")),
-            lcov_file: builder
-                .out
-                .join(target.triple)
-                .join("ferrocene")
-                .join("coverage")
-                .join(format!("lcov-{name}.info")),
+            lcov_file: out_dir.join(format!("lcov-{name}.info")),
+            metadata_file: out_dir.join(format!("metadata-{name}.json")),
         }
     }
 
@@ -181,6 +193,9 @@ impl Paths {
         }
         if self.lcov_file.exists() {
             builder.remove(&self.lcov_file);
+        }
+        if self.metadata_file.exists() {
+            builder.remove(&self.metadata_file);
         }
 
         builder.create_dir(&self.profraw_dir);

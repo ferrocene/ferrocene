@@ -26,6 +26,7 @@ use crate::core::builder;
 use crate::core::builder::{
     Builder, Cargo, Kind, PathSet, RunConfig, ShouldRun, Step, TaskPath, crate_description,
 };
+use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection};
 use crate::ferrocene::code_coverage::instrument_coverage;
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
@@ -282,7 +283,9 @@ impl Step for Std {
             cargo
         };
 
-        if builder.config.cmd.coverage() && compiler.stage == builder.top_stage {
+        if builder.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library)
+            && compiler.stage == builder.top_stage
+        {
             cargo.arg("--features=core/ferrocene_inject_profiler_builtins");
 
             // Usually profiler_builtins is loaded from the sysroot, but that cannot happen when

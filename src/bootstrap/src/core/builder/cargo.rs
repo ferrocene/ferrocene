@@ -593,7 +593,7 @@ impl Builder<'_> {
             }
             None => {
                 // Second condition is specific to Ferrocene
-                if mode == Mode::Std && !self.config.cmd.coverage() {
+                if mode == Mode::Std && self.config.cmd.ferrocene_coverage_for().is_none() {
                     // The standard library defaults to the legacy scheme
                     false
                 } else {

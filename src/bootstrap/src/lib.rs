@@ -53,6 +53,7 @@ pub use utils::change_tracker::{
 };
 
 use crate::core::build_steps::vendor::VENDOR_DIR;
+use crate::ferrocene::code_coverage::generate_coverage_report;
 
 const LLVM_TOOLS: &[&str] = &[
     "llvm-cov",      // used to generate coverage report
@@ -89,6 +90,8 @@ const EXTRA_CHECK_CFGS: &[(Option<Mode>, &str, Option<&[&'static str]>)] = &[
     // in the appropriate `library/{std,alloc,core}/Cargo.toml`
     // ferrocene addition: see `std_cargo` function
     (None, "ferrocenecoretest_secretsauce", None),
+    // ferrocene addition: used to ignore tests when measuring coverage
+    (None, "ferrocene_coverage", None),
 ];
 
 /// A structure representing a Rust compiler.
@@ -661,6 +664,9 @@ impl Build {
                 self.config.dry_run = DryRun::Disabled;
                 let builder = builder::Builder::new(self);
                 builder.execute_cli();
+
+                // Ferrocene addition
+                generate_coverage_report(&builder);
             }
         } else {
             #[cfg(feature = "tracing")]

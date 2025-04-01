@@ -23,6 +23,7 @@ fn shortest_sanity_test() {
 
 #[test]
 #[cfg_attr(miri, ignore)] // Miri is too slow
+#[cfg_attr(ferrocene_coverage, ignore = "test too slow with coverage enabled")]
 fn exact_sanity_test() {
     // This test ends up running what I can only assume is some corner-ish case
     // of the `exp2` library function, defined in whatever C runtime we're

@@ -23,7 +23,7 @@ use crate::core::builder::{
 };
 use crate::core::config::TargetSelection;
 use crate::core::config::flags::{Subcommand, get_completion};
-use crate::ferrocene::code_coverage::GatherCoverage;
+use crate::ferrocene::code_coverage::measure_coverage;
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::utils::build_stamp::{self, BuildStamp};
 use crate::utils::exec::{BootstrapCommand, command};
@@ -2102,6 +2102,10 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
             builder,
         );
 
+        if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
+            measure_coverage(builder, &mut cmd, compiler, target, coverage_for);
+        }
+
         let _group = builder.msg(
             Kind::Test,
             compiler.stage,
@@ -2660,7 +2664,9 @@ impl Step for Crate {
         let target = self.target;
         let mode = self.mode;
 
-        if builder.config.cmd.coverage() && builder.doc_tests != DocTests::No {
+        if builder.config.cmd.ferrocene_coverage_for().is_some()
+            && builder.doc_tests != DocTests::No
+        {
             panic!("Cannot generate coverage for doc tests");
         }
         // Prepare sysroot
@@ -2748,9 +2754,9 @@ impl Step for Crate {
             _ => panic!("can only test libraries"),
         };
 
-        let mut coverage = None;
-        if builder.config.cmd.coverage() {
-            coverage = Some(GatherCoverage::new(builder, &mut cargo, target, "library"));
+        if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
+            measure_coverage(builder, cargo.as_mut(), compiler, target, coverage_for);
+            cargo.rustflag("--cfg=ferrocene_coverage");
         }
 
         let mut crates = self.crates.clone();
@@ -2766,10 +2772,6 @@ impl Step for Crate {
         }
 
         run_cargo_test(cargo, &[], &crates, &*crate_description(&self.crates), target, builder);
-
-        if let Some(coverage) = coverage {
-            coverage.post_process();
-        }
     }
 }
 

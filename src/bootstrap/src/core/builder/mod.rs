@@ -22,6 +22,7 @@ use crate::core::build_steps::{
 };
 use crate::core::config::flags::Subcommand;
 use crate::core::config::{DryRun, TargetSelection};
+use crate::ferrocene::code_coverage::CoverageState;
 use crate::utils::cache::Cache;
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::utils::helpers::{self, LldThreads, add_dylib_path, exe, libdir, linker_args, t};
@@ -59,6 +60,9 @@ pub struct Builder<'a> {
 
     /// This is a Ferrocene flag, to support the --serve CLI option.
     should_serve_called: atomic::AtomicU64,
+
+    /// Ferrocene addition: state for the code coverage instrumentation.
+    pub(crate) ferrocene_coverage: RefCell<Option<CoverageState>>,
 
     /// The paths passed on the command line. Used by steps to figure out what
     /// to do. For example: with `./x check foo bar` we get `paths=["foo",
@@ -1158,7 +1162,6 @@ impl<'a> Builder<'a> {
             ),
             Kind::Run => describe!(
                 crate::ferrocene::run::TraceabilityMatrix,
-                crate::ferrocene::run::GenerateCoverageReport,
                 run::BuildManifest,
                 run::BumpStage0,
                 run::ReplaceVersionPlaceholder,
@@ -1235,6 +1238,7 @@ impl<'a> Builder<'a> {
             cache: Cache::new(),
             stack: RefCell::new(Vec::new()),
             time_spent_on_dependencies: Cell::new(Duration::new(0, 0)),
+            ferrocene_coverage: RefCell::new(None),
             should_serve_called: atomic::AtomicU64::new(0),
             paths,
         }

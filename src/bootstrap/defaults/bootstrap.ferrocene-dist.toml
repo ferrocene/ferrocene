@@ -135,8 +135,7 @@ verify-llvm-ir = true
 # Enable only the LLVM codegen backend, preventing other codegen backends from being built and
 # shipped.
 #
-# If this configuration is missing we'll build all codegen backends built by upstream, which in the
-# future *might* include GCC.
+# If this configuration is missing, we'll build all codegen backends built by upstream.
 codegen-backends = ["llvm"]
 
 # Build and include LLD in the resulting compiler package.

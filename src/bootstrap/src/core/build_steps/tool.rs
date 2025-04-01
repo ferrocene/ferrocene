@@ -453,6 +453,7 @@ bootstrap_tool!(
     FerroceneTraceabilityMatrix, "ferrocene/tools/traceability-matrix", "traceability-matrix";
     FerroceneDocumentSignatures, "ferrocene/tools/document-signatures", "document-signatures";
     FerroceneGenerateTarball, "ferrocene/tools/generate-tarball", "generate-tarball";
+    FerroceneGrcov, "ferrocene/tools/grcov", "grcov", is_external_tool = true, submodules = &["ferrocene/tools/grcov"];
 
     // This is marked as an external tool because it includes dependencies
     // from submodules. Trying to keep the lints in sync between all the repos

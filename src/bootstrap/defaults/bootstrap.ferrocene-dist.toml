@@ -143,7 +143,7 @@ codegen-backends = ["llvm"]
 # If this configuration is missing or changed, LLD will not be included.
 lld = true
 
-# Do not download pre-built rustc, build it from scratch.
+# Do not download pre-built rustc; build it from scratch.
 #
 # If this configuration is missing, a pre-built rustc will be downloaded, which might not match
 # exactly what would be built locally.

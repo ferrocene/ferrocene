@@ -9,7 +9,7 @@ use crate::core::builder::Cargo;
 use crate::core::config::TargetSelection;
 use crate::core::config::flags::FerroceneCoverageFor;
 use crate::utils::build_stamp::libstd_stamp;
-use crate::{BootstrapCommand, Compiler, DependencyType};
+use crate::{BootstrapCommand, Compiler, DependencyType, t};
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     if !builder.config.profiler {
@@ -119,20 +119,16 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
         ],
     };
 
-    builder.info("Generating code coverage report");
+    builder.info("Generating lcov dump of the code coverage measurements");
     let mut cmd = BootstrapCommand::new(llvm_bin_dir.join("llvm-cov"));
-    cmd.arg("show").arg(instrumented_binary).arg("--instr-profile").arg(&paths.profdata_file);
-    cmd.arg("--format").arg("html").arg("-o").arg(&paths.report_dir);
+    cmd.arg("export").arg(instrumented_binary).arg("--instr-profile").arg(&paths.profdata_file);
+    cmd.arg("--format").arg("lcov");
 
     // Note that which paths are ignored changes how llvm-cov displays the paths in the report.
     // llvm-cov makes all paths relative to the common ancestor.
     for path in ignored_path_regexes {
         cmd.arg("--ignore-filename-regex").arg(path);
     }
-
-    // By default llvm-cov includes the date the report was generated on, but that is a problem
-    // for reproducibility. Disable showing the date.
-    cmd.arg("--show-created-time=false");
 
     // Use the demangler mode of coverage-dump as the demangler. This is functionally equivalent
     // to using rustfilt, but it has the advantage of being part of the monorepo. If upstream
@@ -144,7 +140,8 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     let coverage_dump = builder.tool_exe(Tool::CoverageDump);
     cmd.arg("--Xdemangler").arg(coverage_dump).arg("--Xdemangler").arg("--demangle");
 
-    if !cmd.run(builder) {
+    let result = cmd.run_capture_stdout(builder);
+    if result.is_failure() {
         eprintln!("Failed to run llvm-cov to generate a report!");
         eprintln!();
         eprintln!("If the error message mentions \"function name is empty\" please check the");
@@ -152,10 +149,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
         exit!(1);
     }
 
-    eprintln!(
-        "The coverage report is available at: file://{}/index.html",
-        paths.report_dir.display()
-    );
+    t!(std::fs::write(&paths.lcov_file, result.stdout_bytes()));
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -168,7 +162,7 @@ pub(crate) struct CoverageState {
 struct Paths {
     profraw_dir: PathBuf,
     profdata_file: PathBuf,
-    report_dir: PathBuf,
+    lcov_file: PathBuf,
 }
 
 impl Paths {
@@ -181,7 +175,12 @@ impl Paths {
         Self {
             profraw_dir: builder.tempdir().join(format!("ferrocene-profraw-{name}")),
             profdata_file: builder.tempdir().join(format!("ferrocene-{name}.profdata")),
-            report_dir: builder.doc_out(target).join("coverage").join(name),
+            lcov_file: builder
+                .out
+                .join(target.triple)
+                .join("ferrocene")
+                .join("coverage")
+                .join(format!("lcov-{name}.info")),
         }
     }
 
@@ -192,12 +191,12 @@ impl Paths {
         if self.profdata_file.exists() {
             builder.remove(&self.profdata_file);
         }
-        if self.report_dir.exists() {
-            builder.remove_dir(&self.report_dir);
+        if self.lcov_file.exists() {
+            builder.remove(&self.lcov_file);
         }
 
         builder.create_dir(&self.profraw_dir);
-        builder.create_dir(&self.report_dir);
+        builder.create_dir(self.lcov_file.parent().unwrap());
     }
 }
 

@@ -4,7 +4,6 @@ use build_helper::exit;
 
 use crate::builder::Builder;
 use crate::core::build_steps::llvm::Llvm;
-use crate::core::build_steps::tool::Tool;
 use crate::core::builder::Cargo;
 use crate::core::config::TargetSelection;
 use crate::core::config::flags::FerroceneCoverageFor;
@@ -31,7 +30,6 @@ pub(crate) fn measure_coverage(
 ) {
     // Pre-requisites for the `generate_report()` function are built here, as that function is
     // executed after all bootstrap steps are executed.
-    builder.tool_exe(Tool::CoverageDump);
     builder.ensure(Llvm { target });
 
     let paths = Paths::find(builder, target, coverage_for);
@@ -129,16 +127,6 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     for path in ignored_path_regexes {
         cmd.arg("--ignore-filename-regex").arg(path);
     }
-
-    // Use the demangler mode of coverage-dump as the demangler. This is functionally equivalent
-    // to using rustfilt, but it has the advantage of being part of the monorepo. If upstream
-    // removes the demangler functionality from coverage-dump, feel free to replace the tool.
-    //
-    // Note that llvm-cov accepts the --Xdemangler flag multiple times. The first time it
-    // specifies the binary name, and any following occurrences of --Xdemangler specifies an
-    // argument provided to that binary.
-    let coverage_dump = builder.tool_exe(Tool::CoverageDump);
-    cmd.arg("--Xdemangler").arg(coverage_dump).arg("--Xdemangler").arg("--demangle");
 
     let result = cmd.run_capture_stdout(builder);
     if result.is_failure() {

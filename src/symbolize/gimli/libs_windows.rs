@@ -48,7 +48,19 @@ unsafe fn load_library(me: &MODULEENTRY32W) -> Option<Library> {
         .iter()
         .position(|i| *i == 0)
         .unwrap_or(me.szExePath.len());
-    let mut name_buffer = vec![0_u8; pos * 4];
+    let name_len = unsafe {
+        WideCharToMultiByte(
+            CP_UTF8,
+            0,
+            me.szExePath.as_ptr(),
+            pos as i32,
+            core::ptr::null_mut(),
+            0,
+            core::ptr::null_mut(),
+            core::ptr::null_mut(),
+        ) as usize
+    };
+    let mut name_buffer = vec![0_u8; name_len];
     let name_len = unsafe {
         WideCharToMultiByte(
             CP_UTF8,

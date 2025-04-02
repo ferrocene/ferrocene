@@ -265,6 +265,7 @@ impl<'a> Parser<'a> {
                         generics,
                         ty,
                         expr,
+                        define_opaque: None,
                     })),
                 )
             }
@@ -980,13 +981,20 @@ impl<'a> Parser<'a> {
                 let kind = match AssocItemKind::try_from(kind) {
                     Ok(kind) => kind,
                     Err(kind) => match kind {
-                        ItemKind::Static(box StaticItem { ty, safety: _, mutability: _, expr }) => {
+                        ItemKind::Static(box StaticItem {
+                            ty,
+                            safety: _,
+                            mutability: _,
+                            expr,
+                            define_opaque,
+                        }) => {
                             self.dcx().emit_err(errors::AssociatedStaticItemNotAllowed { span });
                             AssocItemKind::Const(Box::new(ConstItem {
                                 defaultness: Defaultness::Final,
                                 generics: Generics::default(),
                                 ty,
                                 expr,
+                                define_opaque,
                             }))
                         }
                         _ => return self.error_bad_item_kind(span, &kind, "`trait`s or `impl`s"),
@@ -1254,6 +1262,7 @@ impl<'a> Parser<'a> {
                                 mutability: Mutability::Not,
                                 expr,
                                 safety: Safety::Default,
+                                define_opaque: None,
                             }))
                         }
                         _ => return self.error_bad_item_kind(span, &kind, "`extern` blocks"),
@@ -1397,7 +1406,7 @@ impl<'a> Parser<'a> {
 
         self.expect_semi()?;
 
-        Ok((ident, StaticItem { ty, safety, mutability, expr }))
+        Ok((ident, StaticItem { ty, safety, mutability, expr, define_opaque: None }))
     }
 
     /// Parse a constant item with the prefix `"const"` already parsed.
@@ -2529,7 +2538,7 @@ impl<'a> Parser<'a> {
             *sig_hi = self.prev_token.span;
             (AttrVec::new(), None)
         } else if self.check(exp!(OpenBrace)) || self.token.is_whole_block() {
-            self.parse_block_common(self.token.span, BlockCheckMode::Default, false, None)
+            self.parse_block_common(self.token.span, BlockCheckMode::Default, None)
                 .map(|(attrs, body)| (attrs, Some(body)))?
         } else if self.token == token::Eq {
             // Recover `fn foo() = $expr;`.
@@ -2871,7 +2880,7 @@ impl<'a> Parser<'a> {
                 // Skip every token until next possible arg or end.
                 p.eat_to_tokens(&[exp!(Comma), exp!(CloseParen)]);
                 // Create a placeholder argument for proper arg count (issue #34264).
-                Ok(dummy_arg(Ident::new(kw::Empty, lo.to(p.prev_token.span)), guar))
+                Ok(dummy_arg(Ident::new(sym::dummy, lo.to(p.prev_token.span)), guar))
             });
             // ...now that we've parsed the first argument, `self` is no longer allowed.
             first_param = false;

@@ -23,5 +23,9 @@ fn main() {
     }
 }
 
+<<<<<<< HEAD
 // ferrocene-annotations: fls_mvd7nz8k3wcy
 // Attribute no_mangle
+=======
+//~? ERROR symbol `collision` is already defined
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

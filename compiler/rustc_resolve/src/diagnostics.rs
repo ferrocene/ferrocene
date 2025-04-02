@@ -1468,7 +1468,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             return;
         }
 
-        #[allow(rustc::potential_query_instability)] // FIXME
         let unused_macro = self.unused_macros.iter().find_map(|(def_id, (_, unused_ident))| {
             if unused_ident.name == ident.name { Some((def_id, unused_ident)) } else { None }
         });
@@ -2439,7 +2438,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         let Res::Def(DefKind::Macro(MacroKind::Bang), _) = binding.res() else {
             return None;
         };
-        let module_name = crate_module.kind.name().unwrap();
+        let module_name = crate_module.kind.name().unwrap_or(kw::Empty);
         let import_snippet = match import.kind {
             ImportKind::Single { source, target, .. } if source != target => {
                 format!("{source} as {target}")

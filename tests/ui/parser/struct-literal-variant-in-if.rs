@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 #[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
 enum E {
     V { field: bool },

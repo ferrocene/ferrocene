@@ -28,4 +28,13 @@ fn main() {
     bar();
 }
 
+<<<<<<< HEAD
 // ferrocene-annotations: um_rustc_F
+=======
+//~? WARN lint `private_no_mangle_fns` has been removed
+//~? WARN lint `private_no_mangle_statics` has been removed
+//~? WARN lint `private_no_mangle_fns` has been removed
+//~? WARN lint `private_no_mangle_statics` has been removed
+//~? WARN lint `private_no_mangle_fns` has been removed
+//~? WARN lint `private_no_mangle_statics` has been removed
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

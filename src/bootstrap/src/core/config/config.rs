@@ -23,6 +23,7 @@ use tracing::{instrument, span};
 
 use crate::core::build_steps::compile::CODEGEN_BACKEND_PREFIX;
 use crate::core::build_steps::llvm;
+use crate::core::build_steps::llvm::LLVM_INVALIDATION_PATHS;
 pub use crate::core::config::flags::Subcommand;
 use crate::core::config::flags::{Color, Flags, Warnings};
 use crate::core::download::is_download_ci_available;
@@ -1529,52 +1530,56 @@ impl Config {
 
         // Infer the rest of the configuration.
 
-        // Infer the source directory. This is non-trivial because we want to support a downloaded bootstrap binary,
-        // running on a completely different machine from where it was compiled.
-        let mut cmd = helpers::git(None);
-        // NOTE: we cannot support running from outside the repository because the only other path we have available
-        // is set at compile time, which can be wrong if bootstrap was downloaded rather than compiled locally.
-        // We still support running outside the repository if we find we aren't in a git directory.
-
-        // NOTE: We get a relative path from git to work around an issue on MSYS/mingw. If we used an absolute path,
-        // and end up using MSYS's git rather than git-for-windows, we would get a unix-y MSYS path. But as bootstrap
-        // has already been (kinda-cross-)compiled to Windows land, we require a normal Windows path.
-        cmd.arg("rev-parse").arg("--show-cdup");
-        // Discard stderr because we expect this to fail when building from a tarball.
-        let output = cmd
-            .as_command_mut()
-            .stderr(std::process::Stdio::null())
-            .output()
-            .ok()
-            .and_then(|output| if output.status.success() { Some(output) } else { None });
-        if let Some(output) = output {
-            let git_root_relative = String::from_utf8(output.stdout).unwrap();
-            // We need to canonicalize this path to make sure it uses backslashes instead of forward slashes,
-            // and to resolve any relative components.
-            let git_root = env::current_dir()
-                .unwrap()
-                .join(PathBuf::from(git_root_relative.trim()))
-                .canonicalize()
-                .unwrap();
-            let s = git_root.to_str().unwrap();
-
-            // Bootstrap is quite bad at handling /? in front of paths
-            let git_root = match s.strip_prefix("\\\\?\\") {
-                Some(p) => PathBuf::from(p),
-                None => git_root,
-            };
-            // If this doesn't have at least `stage0`, we guessed wrong. This can happen when,
-            // for example, the build directory is inside of another unrelated git directory.
-            // In that case keep the original `CARGO_MANIFEST_DIR` handling.
-            //
-            // NOTE: this implies that downloadable bootstrap isn't supported when the build directory is outside
-            // the source directory. We could fix that by setting a variable from all three of python, ./x, and x.ps1.
-            if git_root.join("src").join("stage0").exists() {
-                config.src = git_root;
-            }
+        if let Some(src) = flags.src {
+            config.src = src
         } else {
-            // We're building from a tarball, not git sources.
-            // We don't support pre-downloaded bootstrap in this case.
+            // Infer the source directory. This is non-trivial because we want to support a downloaded bootstrap binary,
+            // running on a completely different machine from where it was compiled.
+            let mut cmd = helpers::git(None);
+            // NOTE: we cannot support running from outside the repository because the only other path we have available
+            // is set at compile time, which can be wrong if bootstrap was downloaded rather than compiled locally.
+            // We still support running outside the repository if we find we aren't in a git directory.
+
+            // NOTE: We get a relative path from git to work around an issue on MSYS/mingw. If we used an absolute path,
+            // and end up using MSYS's git rather than git-for-windows, we would get a unix-y MSYS path. But as bootstrap
+            // has already been (kinda-cross-)compiled to Windows land, we require a normal Windows path.
+            cmd.arg("rev-parse").arg("--show-cdup");
+            // Discard stderr because we expect this to fail when building from a tarball.
+            let output = cmd
+                .as_command_mut()
+                .stderr(std::process::Stdio::null())
+                .output()
+                .ok()
+                .and_then(|output| if output.status.success() { Some(output) } else { None });
+            if let Some(output) = output {
+                let git_root_relative = String::from_utf8(output.stdout).unwrap();
+                // We need to canonicalize this path to make sure it uses backslashes instead of forward slashes,
+                // and to resolve any relative components.
+                let git_root = env::current_dir()
+                    .unwrap()
+                    .join(PathBuf::from(git_root_relative.trim()))
+                    .canonicalize()
+                    .unwrap();
+                let s = git_root.to_str().unwrap();
+
+                // Bootstrap is quite bad at handling /? in front of paths
+                let git_root = match s.strip_prefix("\\\\?\\") {
+                    Some(p) => PathBuf::from(p),
+                    None => git_root,
+                };
+                // If this doesn't have at least `stage0`, we guessed wrong. This can happen when,
+                // for example, the build directory is inside of another unrelated git directory.
+                // In that case keep the original `CARGO_MANIFEST_DIR` handling.
+                //
+                // NOTE: this implies that downloadable bootstrap isn't supported when the build directory is outside
+                // the source directory. We could fix that by setting a variable from all three of python, ./x, and x.ps1.
+                if git_root.join("src").join("stage0").exists() {
+                    config.src = git_root;
+                }
+            } else {
+                // We're building from a tarball, not git sources.
+                // We don't support pre-downloaded bootstrap in this case.
+            }
         }
 
         if cfg!(test) {
@@ -3282,7 +3287,14 @@ impl Config {
         download_ci_llvm: Option<StringOrBool>,
         asserts: bool,
     ) -> bool {
-        let download_ci_llvm = download_ci_llvm.unwrap_or(StringOrBool::Bool(true));
+        // We don't ever want to use `true` on CI, as we should not
+        // download upstream artifacts if there are any local modifications.
+        let default = if self.is_running_on_ci {
+            StringOrBool::String("if-unchanged".to_string())
+        } else {
+            StringOrBool::Bool(true)
+        };
+        let download_ci_llvm = download_ci_llvm.unwrap_or(default);
 
         let if_unchanged = || {
             if self.rust_info.is_from_tarball() {
@@ -3295,13 +3307,13 @@ impl Config {
             #[cfg(not(test))]
             self.update_submodule("src/llvm-project");
 
-            // Check for untracked changes in `src/llvm-project`.
+            // Check for untracked changes in `src/llvm-project` and other important places.
             let has_changes = self
-                .last_modified_commit(&["src/llvm-project"], "download-ci-llvm", true)
+                .last_modified_commit(LLVM_INVALIDATION_PATHS, "download-ci-llvm", true)
                 .is_none();
 
             // Return false if there are untracked changes, otherwise check if CI LLVM is available.
-            if has_changes { false } else { llvm::is_ci_llvm_available(self, asserts) }
+            if has_changes { false } else { llvm::is_ci_llvm_available_for_target(self, asserts) }
         };
 
         match download_ci_llvm {
@@ -3312,8 +3324,15 @@ impl Config {
                     );
                 }
 
+                if b && self.is_running_on_ci {
+                    // On CI, we must always rebuild LLVM if there were any modifications to it
+                    panic!(
+                        "`llvm.download-ci-llvm` cannot be set to `true` on CI. Use `if-unchanged` instead."
+                    );
+                }
+
                 // If download-ci-llvm=true we also want to check that CI llvm is available
-                b && llvm::is_ci_llvm_available(self, asserts)
+                b && llvm::is_ci_llvm_available_for_target(self, asserts)
             }
             StringOrBool::String(s) if s == "if-unchanged" => if_unchanged(),
             StringOrBool::String(other) => {

@@ -5,4 +5,8 @@
 #![feature(no_core)]
 #![no_core]
 
+<<<<<<< HEAD
 // ferrocene-annotations: um_rustc_C_target_feature
+=======
+//~? WARN unknown and unstable feature specified for `-Ctarget-feature`: `rdrnd`
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

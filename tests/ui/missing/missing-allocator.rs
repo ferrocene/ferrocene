@@ -17,4 +17,8 @@ fn oom(_: core::alloc::Layout) -> ! {
 
 extern crate alloc;
 
+<<<<<<< HEAD
 // ferrocene-annotations: um_rustc_C_panic
+=======
+//~? ERROR no global memory allocator found but one is required
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

@@ -31,5 +31,9 @@ fn main() {
     );
 }
 
+<<<<<<< HEAD
 // ferrocene-annotations: fls_66m4rnbssgig
 // Constant Expressions
+=======
+//~? WARN skipping const checks
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

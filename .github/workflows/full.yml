@@ -250,7 +250,7 @@ jobs:
     secrets: inherit
     with:
       host-triple: x86_64-pc-windows-msvc
-      runner: 'Ferrocene Windows'
+      runner: ['self-hosted', 'Windows', 'X86']
 
   dist-x86_64-pc-windows-msvc:
     name: Dist (x86_64-pc-windows-msvc)
@@ -261,7 +261,7 @@ jobs:
     with:
       host-triple: x86_64-pc-windows-msvc
       triples: "x86_64-pc-windows-msvc"
-      runner: 'Ferrocene Windows'
+      runner: ['self-hosted', 'Windows', 'X86']
       build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
 
@@ -279,7 +279,7 @@ jobs:
       host-triple: x86_64-pc-windows-msvc
       # This pulls from env
       triples: ${{ format('{0},{1}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets) }}
-      runner: 'Ferrocene Windows'
+      runner: ['self-hosted', 'Windows', 'X86']
       build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
 

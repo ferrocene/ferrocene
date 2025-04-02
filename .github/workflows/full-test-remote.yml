@@ -94,9 +94,13 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       
       - name: Download QNX
-        if: ${{ inputs.qnx-version != '' }}
         id: qnx
         uses: ./.github/actions/qnx/
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
         with:
           version: ${{ inputs.qnx-version }}
 
@@ -186,9 +190,13 @@ jobs:
           build-run-id: ${{ inputs.build-run-id }}
 
       - name: Download QNX
-        if: ${{ inputs.qnx-version != '' }}
         id: qnx
         uses: ./.github/actions/qnx/
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
         with:
           version: ${{ inputs.qnx-version }}
       
@@ -267,9 +275,13 @@ jobs:
           build-run-id: ${{ inputs.build-run-id }}
 
       - name: Download QNX
-        if: ${{ inputs.qnx-version != '' }}
         id: qnx
         uses: ./.github/actions/qnx/
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
         with:
           version: ${{ inputs.qnx-version }}
 
@@ -349,9 +361,13 @@ jobs:
           build-run-id: ${{ inputs.build-run-id }}
 
       - name: Download QNX
-        if: ${{ inputs.qnx-version != '' }}
         id: qnx
         uses: ./.github/actions/qnx/
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
         with:
           version: ${{ inputs.qnx-version }}
 

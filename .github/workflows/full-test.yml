@@ -67,6 +67,7 @@ jobs:
       ARTIFACT_USAGE: usage-test-${{inputs.triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triple }}
+      QEMU_CPU: ${{ inputs.qemu-cpu }}
     outputs:
       artifact-usage: ${{ env.ARTIFACT_USAGE }}
     steps:
@@ -109,10 +110,6 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ inputs.qemu-arch != '' && format('sudo update-binfmts --import {0}', inputs.qemu-arch) || '' }}
-            ${{ inputs.qemu-arch != '' && format('sudo update-binfmts --enable {0}', inputs.qemu-arch) || '' }}
-            ${{ inputs.qemu-cpu != '' && format('export QEMU_CPU="{0}"', inputs.qemu-cpu) || '' }}
-            ${{ inputs.qemu-arch != '' && 'sudo update-binfmts --display' || '' }}
             uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report
@@ -130,6 +127,7 @@ jobs:
       ARTIFACT_USAGE: usage-test-compiletest-${{inputs.triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triple }}
+      QEMU_CPU: ${{ inputs.qemu-cpu }}
     outputs:
       artifact-usage: ${{ env.ARTIFACT_USAGE }}
     steps:
@@ -189,6 +187,7 @@ jobs:
       ARTIFACT_USAGE: usage-test-library-${{inputs.triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triple }}
+      QEMU_CPU: ${{ inputs.qemu-cpu }}
     outputs:
       artifact-usage: ${{ env.ARTIFACT_USAGE }}
     steps:
@@ -249,6 +248,7 @@ jobs:
       ARTIFACT_USAGE: usage-test-library-std-${{inputs.triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triple }}
+      QEMU_CPU: ${{ inputs.qemu-cpu }}
     outputs:
       artifact-usage: ${{ env.ARTIFACT_USAGE }}
     steps:

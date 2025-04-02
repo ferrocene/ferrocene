@@ -188,101 +188,101 @@ jobs:
       qemu-arch: qemu-arm
       qemu-cpu: cortex-m4
 
-  # test-x86_64-pc-nto-qnx710:
-  #   name: Test (x86_64-pc-nto-qnx710 by x86_64-unknown-linux-gnu)
-  #   uses: ./.github/workflows/full-test-remote.yml
-  #   needs:
-  #     - container-x86_64-ubuntu-20
-  #     - container-x86_64-ubuntu-24
-  #     - build-x86_64-unknown-linux-gnu
-  #     - targets
-  #   secrets: inherit
-  #   with:
-  #     test-host-tools: false
-  #     test-std: true
-  #     triple: x86_64-pc-nto-qnx710
-  #     # In the old CircleCI jobs, we did not pass this...
-  #     # When this is enabled, we experienced test failures where it was
-  #     # trying to test the x86_64 artifacts in CI
-  #     host-triple: "" # x86_64-unknown-linux-gnu
-  #     runner: ferrocene-arc-runners-linux-kubernetes-amd64
-  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-  #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
-  #     test-device-addr: "172.31.1.11:12345"
-  #     emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
-  #     emulator-prepare-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh prepare
-  #     emulator-start-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh
-  #     qnx-version: "7.1.0-472"
+  test-x86_64-pc-nto-qnx710:
+    name: Test (x86_64-pc-nto-qnx710 by x86_64-unknown-linux-gnu)
+    uses: ./.github/workflows/full-test-remote.yml
+    needs:
+      - container-x86_64-ubuntu-20
+      - container-x86_64-ubuntu-24
+      - build-x86_64-unknown-linux-gnu
+      - targets
+    secrets: inherit
+    with:
+      test-host-tools: false
+      test-std: true
+      triple: x86_64-pc-nto-qnx710
+      # In the old CircleCI jobs, we did not pass this...
+      # When this is enabled, we experienced test failures where it was
+      # trying to test the x86_64 artifacts in CI
+      host-triple: "" # x86_64-unknown-linux-gnu
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+      test-device-addr: "172.31.1.11:12345"
+      emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
+      emulator-prepare-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh prepare
+      emulator-start-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh
+      qnx-version: "7.1.0-472"
 
-  # test-aarch64-unknown-nto-qnx710:
-  #   name: Test (aarch64-unknown-nto-qnx710 by x86_64-unknown-linux-gnu)
-  #   uses: ./.github/workflows/full-test-remote.yml
-  #   needs:
-  #     - container-x86_64-ubuntu-20
-  #     - container-x86_64-ubuntu-24
-  #     - build-x86_64-unknown-linux-gnu
-  #     - targets
-  #   secrets: inherit
-  #   with:
-  #     test-host-tools: false
-  #     test-std: true
-  #     triple: aarch64-unknown-nto-qnx710
-  #     # In the old CircleCI jobs, we did not pass this...
-  #     # When this is enabled, we experienced test failures where it was
-  #     # trying to test the x86_64 artifacts in CI
-  #     host-triple: "" # x86_64-unknown-linux-gnu
-  #     runner: ferrocene-arc-runners-linux-kubernetes-amd64
-  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-  #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
-  #     test-device-addr: "172.31.1.105:12345"
-  #     emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
-  #     emulator-prepare-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh prepare
-  #     emulator-start-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh
-  #     qnx-version: "7.1.0-472"
+  test-aarch64-unknown-nto-qnx710:
+    name: Test (aarch64-unknown-nto-qnx710 by x86_64-unknown-linux-gnu)
+    uses: ./.github/workflows/full-test-remote.yml
+    needs:
+      - container-x86_64-ubuntu-20
+      - container-x86_64-ubuntu-24
+      - build-x86_64-unknown-linux-gnu
+      - targets
+    secrets: inherit
+    with:
+      test-host-tools: false
+      test-std: true
+      triple: aarch64-unknown-nto-qnx710
+      # In the old CircleCI jobs, we did not pass this...
+      # When this is enabled, we experienced test failures where it was
+      # trying to test the x86_64 artifacts in CI
+      host-triple: "" # x86_64-unknown-linux-gnu
+      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+      test-device-addr: "172.31.1.105:12345"
+      emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
+      emulator-prepare-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh prepare
+      emulator-start-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh
+      qnx-version: "7.1.0-472"
 
   # Windows
 
-  # build-x86_64-pc-windows-msvc:
-  #   name: Build (x86_64-pc-windows-msvc)
-  #   uses: ./.github/workflows/full-host-build.yml
-  #   secrets: inherit
-  #   with:
-  #     host-triple: x86_64-pc-windows-msvc
-  #     runner: 8core-x86_64-pc-windows-msvc
+  build-x86_64-pc-windows-msvc:
+    name: Build (x86_64-pc-windows-msvc)
+    uses: ./.github/workflows/full-host-build.yml
+    secrets: inherit
+    with:
+      host-triple: x86_64-pc-windows-msvc
+      runner: 'Ferrocene Windows'
 
-  # dist-x86_64-pc-windows-msvc:
-  #   name: Dist (x86_64-pc-windows-msvc)
-  #   uses: ./.github/workflows/full-host-dist.yml
-  #   needs:
-  #     - build-x86_64-pc-windows-msvc
-  #   secrets: inherit
-  #   with:
-  #     host-triple: x86_64-pc-windows-msvc
-  #     triples: "x86_64-pc-windows-msvc"
-  #     runner: 8core-x86_64-pc-windows-msvc
-  #     build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
-  #     build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
+  dist-x86_64-pc-windows-msvc:
+    name: Dist (x86_64-pc-windows-msvc)
+    uses: ./.github/workflows/full-host-dist.yml
+    needs:
+      - build-x86_64-pc-windows-msvc
+    secrets: inherit
+    with:
+      host-triple: x86_64-pc-windows-msvc
+      triples: "x86_64-pc-windows-msvc"
+      runner: 'Ferrocene Windows'
+      build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
 
-  # self-test-x86_64-pc-windows-msvc:
-  #   name: Self-test (x86_64-pc-windows-msvc)
-  #   uses: ./.github/workflows/full-self-test.yml
-  #   needs:
-  #     - calculate-envs
-  #     - container-x86_64-ubuntu-20
-  #     - build-x86_64-pc-windows-msvc
-  #     # - targets
-  #     - dist-x86_64-pc-windows-msvc
-  #     # - test-x86_64-pc-windows-msvc
-  #   secrets: inherit
-  #   with:
-  #     host-triple: x86_64-pc-windows-msvc
-  #     # This pulls from env
-  #     triples: ${{ format('{0},{1}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets) }}
-  #     runner: 8core-x86_64-pc-windows-msvc
-  #     build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
-  #     build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
+  self-test-x86_64-pc-windows-msvc:
+    name: Self-test (x86_64-pc-windows-msvc)
+    uses: ./.github/workflows/full-self-test.yml
+    needs:
+      - calculate-envs
+      - container-x86_64-ubuntu-20
+      - build-x86_64-pc-windows-msvc
+      # - targets
+      - dist-x86_64-pc-windows-msvc
+      # - test-x86_64-pc-windows-msvc
+    secrets: inherit
+    with:
+      host-triple: x86_64-pc-windows-msvc
+      # This pulls from env
+      triples: ${{ format('{0},{1}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets) }}
+      runner: 'Ferrocene Windows'
+      build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
 
   # TODO: Waiting for self hosted runners
   # test-x86_64-pc-windows-msvc:

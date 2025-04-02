@@ -50,7 +50,7 @@ jobs:
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
-      LLVM_BUILD_PARALLELISM: 18
+      LLVM_BUILD_PARALLELISM: 32
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -65,10 +65,12 @@ jobs:
           client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: Authenicate docker with Azure
-        if: ${{ runner.os == 'Linux' }}
-        run: az acr login --name ferrocenecr
+
+      # - name: Authenicate docker with Azure
+      #   if: ${{ runner.os == 'Linux' }}
+      #   run: az acr login --name ferrocenecr
       # https://github.com/Azure/login/issues/372#issuecomment-2056289617
+      
       - name: Cache Azure storage token
         run: az account get-access-token --scope https://storage.azure.com/.default --output none 
 
@@ -155,10 +157,12 @@ jobs:
           client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: Authenicate docker with Azure
-        if: ${{ (runner.os == 'Linux') }}
-        run: az acr login --name ferrocenecr
+
+      # - name: Authenicate docker with Azure
+      #   if: ${{ (runner.os == 'Linux') }}
+      #   run: az acr login --name ferrocenecr
       # https://github.com/Azure/login/issues/372#issuecomment-2056289617
+
       - name: Cache Azure storage token
         run: az account get-access-token --scope https://storage.azure.com/.default --output none 
 

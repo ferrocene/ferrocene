@@ -9,6 +9,10 @@ inputs:
     description: If uv should be set up
     required: false
     default: 'true'
+  setup-kvm:
+    description: If nested virtualization should be enabled (GitHub hosted runners only)
+    required: false
+    default: 'true'
   build-dependencies:
     description: If the dependencies required for a build should be installed
     required: false
@@ -45,7 +49,7 @@ runs:
 
     # https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
     - name: Enable KVM on Linux
-      if: ${{ runner.os == 'linux' }}
+      if: ${{ runner.os == 'linux' && inputs.setup-kvm != 'false' }}
       shell: bash
       run: |
         set -xeo pipefail

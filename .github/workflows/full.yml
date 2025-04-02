@@ -192,8 +192,8 @@ jobs:
     name: Test (x86_64-pc-nto-qnx710 by x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/full-test-remote.yml
     needs:
-      - container-x86_64-ubuntu-20
-      - container-x86_64-ubuntu-24
+      # - container-x86_64-ubuntu-20
+      # - container-x86_64-ubuntu-24
       - build-x86_64-unknown-linux-gnu
       - targets
     secrets: inherit
@@ -219,8 +219,8 @@ jobs:
     name: Test (aarch64-unknown-nto-qnx710 by x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/full-test-remote.yml
     needs:
-      - container-x86_64-ubuntu-20
-      - container-x86_64-ubuntu-24
+      # - container-x86_64-ubuntu-20
+      # - container-x86_64-ubuntu-24
       - build-x86_64-unknown-linux-gnu
       - targets
     secrets: inherit
@@ -270,7 +270,6 @@ jobs:
     uses: ./.github/workflows/full-self-test.yml
     needs:
       - calculate-envs
-      - container-x86_64-ubuntu-20
       - build-x86_64-pc-windows-msvc
       # - targets
       - dist-x86_64-pc-windows-msvc

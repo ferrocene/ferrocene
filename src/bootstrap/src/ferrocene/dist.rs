@@ -17,8 +17,8 @@ use crate::core::config::TargetSelection;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
-use crate::t;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
+use crate::{FileType, t};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct Docs {
@@ -283,8 +283,9 @@ impl<'a> Subsetter<'a> {
         };
 
         let relative = path.strip_prefix(root).unwrap();
-        let mode = if self.is_executable(&path) { 0o755 } else { 0o644 };
-        tarball.add_file(&path, self.output_prefix.join(relative).parent().unwrap(), mode);
+        let file_type =
+            if self.is_executable(&path) { FileType::Executable } else { FileType::Regular };
+        tarball.add_file(&path, self.output_prefix.join(relative).parent().unwrap(), file_type);
     }
 
     #[cfg(unix)]
@@ -346,7 +347,7 @@ impl Step for SelfTest {
         let self_test = builder.ensure(crate::ferrocene::tool::SelfTest { target: self.target });
 
         let mut tarball = Tarball::new(builder, "ferrocene-self-test", &self.target.triple);
-        tarball.add_file(self_test, "bin", 0o755);
+        tarball.add_file(self_test, "bin", FileType::Executable);
 
         tarball.ferrocene_proxied_binary("bin/ferrocene-self-test");
         tarball.generate()

@@ -6,6 +6,7 @@ use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::path::{Path, PathBuf, absolute};
 
+use crate::FileType;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
@@ -32,7 +33,7 @@ fn copy_breadcrumbs_assets(builder: &Builder<'_>, dest: &Path) {
             builder.create_dir(parent);
         }
     }
-    builder.copy_link(&src, &dest);
+    builder.copy_link(&src, &dest, FileType::Regular);
 }
 
 #[derive(Clone)]
@@ -827,7 +828,7 @@ impl Step for TechnicalReport {
         let mut output_file = output_dir.join("technical-report.pdf");
 
         builder.create_dir(&output_dir);
-        builder.copy_link(&cache_path, &output_file);
+        builder.copy_link(&cache_path, &output_file, FileType::Regular);
 
         // Include the technical report file only in the signatures subset.
         output_file.as_mut_os_string().push(".ferrocene-subset");

@@ -1,3 +1,4 @@
+use crate::FileType;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
@@ -25,7 +26,7 @@ impl Step for FlipLink {
             builder.ensure(crate::ferrocene::tool::flip_link::FlipLink { target: self.target });
 
         let mut tarball = Tarball::new(builder, "flip-link", &self.target.triple);
-        tarball.add_file(flip_link, "bin", 0o755);
+        tarball.add_file(flip_link, "bin", FileType::Executable);
         tarball.ferrocene_proxied_binary("bin/flip-link");
         tarball.generate()
     }

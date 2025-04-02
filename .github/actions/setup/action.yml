@@ -36,7 +36,8 @@ runs:
     - name: Install dependencies (Windows)
       if: ${{ (runner.os == 'Windows') && inputs.build-dependencies != 'false' }}
       shell: bash
-      run: ferrocene/ci/scripts/setup-windows.sh
+      run: true
+      # run: ferrocene/ci/scripts/setup-windows.sh
 
     - name: Install dependencies (macOS)
       if: ${{ (runner.os == 'macOS') && inputs.build-dependencies != 'false' }}

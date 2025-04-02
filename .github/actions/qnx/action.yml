@@ -2,10 +2,10 @@ name: "Download QNX deployment"
 description: "Fetch a QNX deployment"
 inputs:
   version:
-    description: The QNX version and BuildID (eg '7.1.0-472' for 7.1.0 BuildID 472)
+    description: The QNX version and BuildID (eg '710-472' for 7.1.0 BuildID 472)
 outputs:
   directory:
-    description: The directory QNX was unpacked to. (eg 'qnx-7.1.0-427')
+    description: The directory QNX was unpacked to. (eg 'qnx-710-427')
     value: ${{ steps.directory.outputs.directory }}
 
 runs:
@@ -18,19 +18,11 @@ runs:
         FILENAME: qnx-deployment-${{ inputs.version }}.tar.zst
       run: |
         echo "filename=$FILENAME" >> $GITHUB_OUTPUT
-    - name: Download QNX deployment
-      shell: bash
-      run: |
-        az storage blob download \
-          --name ${{ steps.calculate.outputs.filename }} \
-          --container-name qnx \
-          --account-name ferroceneci \
-          --auth-mode login \
-          --file ${{ steps.calculate.outputs.filename }}
+
     - name: Unpack the QNX deployment
       shell: bash
       run: |
-        uv run ferrocene/ci/scripts/cache.py retrieve ${{ steps.calculate.outputs.filename }} .
+        uv run ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-build-dependencies/qnx/${{ steps.calculate.outputs.filename }} .
     - name: Remove downloaded artifact
       shell: bash
       run: |

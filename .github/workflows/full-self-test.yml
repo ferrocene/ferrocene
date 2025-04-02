@@ -65,8 +65,13 @@ jobs:
       - name: Download QNX
         id: qnx
         uses: ./.github/actions/qnx/
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
         with:
-          version: "7.1.0-472"
+          version: "710-472"
 
       - name: Run
         uses: ./.github/actions/run/

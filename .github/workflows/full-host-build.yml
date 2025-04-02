@@ -108,26 +108,7 @@ jobs:
         uses: ./.github/actions/run/
         with:
           container: ${{ inputs.container }}
-          script: uv run ferrocene/ci/scripts/llvm_cache.py prepare --url llvm_cache.tar.zst
-
-      # In case it expired
-      - name: Azure CLI Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: Store cache
-        if: ${{ steps.check.outputs.state != 'hit' }}
-        shell: bash
-        run: |
-          set -e
-          az storage blob upload \
-            --file llvm_cache.tar.zst \
-            --name ${{ steps.check.outputs.name }} \
-            --container-name ferrocene-llvm-cache \
-            --account-name ferroceneci \
-            --auth-mode login
+          script: uv run ferrocene/ci/scripts/llvm_cache.py prepare --url s3://ferrocene-ci-caches/llvm-cache/${{ steps.check.outputs.name }}
 
         
   build:
@@ -169,14 +150,7 @@ jobs:
       - name: Get LLVM cache
         shell: bash
         run: |
-          az storage blob download \
-            --file llvm_cache.tar.zst \
-            --name ${{ needs.llvm.outputs.name }} \
-            --container-name ferrocene-llvm-cache \
-            --account-name ferroceneci \
-            --auth-mode login
-          uv run ferrocene/ci/scripts/llvm_cache.py download --url llvm_cache.tar.zst
-          rm llvm_cache.tar.zst
+          uv run ferrocene/ci/scripts/llvm_cache.py download --url s3://ferrocene-ci-caches/llvm-cache/${{ needs.llvm.outputs.name }}
 
       - name: Run
         uses: ./.github/actions/run/

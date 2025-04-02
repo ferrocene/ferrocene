@@ -22,7 +22,12 @@ runs:
           ./ferrocene/ci/scripts/setup-uv.sh
           ${{ inputs.script }}
         RUST_CONFIGURE_ARGS: ${{ inputs.configure }}
-      run: ferrocene/ci/run.sh
+      run: |
+        if [ -z "${TEST_DEVICE_ADDR}" ]; then
+          unset TEST_DEVICE_ADDR
+        fi
+        
+        ferrocene/ci/run.sh
 
     - name: Pull container
       if: ${{ inputs.container != '' }}

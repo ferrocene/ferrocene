@@ -12,7 +12,7 @@ inputs:
   setup-kvm:
     description: If nested virtualization should be enabled (GitHub hosted runners only)
     required: false
-    default: 'true'
+    default: 'false'
   build-dependencies:
     description: If the dependencies required for a build should be installed
     required: false

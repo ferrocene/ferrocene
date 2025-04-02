@@ -208,9 +208,9 @@ jobs:
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+      # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
       test-device-addr: "172.31.1.11:12345"
-      emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
+      # emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
       emulator-prepare-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh prepare
       emulator-start-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh
       qnx-version: "7.1.0-472"
@@ -235,9 +235,9 @@ jobs:
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+      # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
       test-device-addr: "172.31.1.105:12345"
-      emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
+      # emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
       emulator-prepare-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh prepare
       emulator-start-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh
       qnx-version: "7.1.0-472"
@@ -458,8 +458,8 @@ jobs:
       # - self-test-aarch64-apple-darwin
     secrets: inherit
     with:
-      triple: x86_64-unknown-linux-gnu
-      runner: ferrocene-arc-runners-ubuntu-20-amd64
+      triple: aarch64-unknown-linux-gnu
+      runner: ferrocene-arc-runners-ubuntu-20-arm64 
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
       # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}

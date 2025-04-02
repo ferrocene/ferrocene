@@ -32,9 +32,6 @@ pub fn cmp_unsigned(a: u32, b: u32) -> Ordering {
     a.cmp(&b)
 }
 
-<<<<<<< HEAD
-// ferrocene-annotations: um_rustc_C_opt_level
-=======
 // CHECK-LABEL: @cmp_char
 #[no_mangle]
 pub fn cmp_char(a: char, b: char) -> Ordering {
@@ -63,4 +60,5 @@ pub fn cmp_tuple(a: (i16, u16), b: (i16, u16)) -> Ordering {
     // llvm-pre-20: select i1
     a.cmp(&b)
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// ferrocene-annotations: um_rustc_C_opt_level

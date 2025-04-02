@@ -115,7 +115,8 @@ fn main() {
     *OH_YES = 99; //~ ERROR cannot assign to `*OH_YES`, as `OH_YES` is an immutable static item
 }
 
-<<<<<<< HEAD
+//~? WARN skipping const checks
+
 // ferrocene-annotations: fls_qztk0bkju9u
 // Borrow Expression
 //
@@ -124,6 +125,3 @@ fn main() {
 //
 // ferrocene-annotations: fls_v5x85lt5ulva
 // References
-=======
-//~? WARN skipping const checks
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

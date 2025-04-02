@@ -61,11 +61,8 @@ pub static CRATES: &[&str] = &[
     "unicase",
     "unicode-ident",
     "unicode-width",
-<<<<<<< HEAD
     "unicode-xid",
-=======
     "version_check",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "wasm-bindgen-backend",
     "wasm-bindgen-macro-support",
     "wasm-bindgen-shared",

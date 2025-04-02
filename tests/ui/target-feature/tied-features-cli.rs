@@ -19,10 +19,8 @@ trait Sized {}
 
 fn main() {}
 
-<<<<<<< HEAD
-// ferrocene-annotations: um_rustc_C_target_feature
-=======
 //[one]~? ERROR the target features paca, pacg must all be either enabled or disabled together
 //[two]~? ERROR the target features paca, pacg must all be either enabled or disabled together
 //[three]~? ERROR the target features paca, pacg must all be either enabled or disabled together
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// ferrocene-annotations: um_rustc_C_target_feature

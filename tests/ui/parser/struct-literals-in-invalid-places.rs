@@ -90,3 +90,21 @@ enum E {
 fn one() -> isize { 1 }
 
 trait Trait { type Out; }
+
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops
+
+// ferrocene-annotations: fls_mkut7gut49gi
+// If Expressions
+
+// ferrocene-annotations: fls_5jjm1kt43axd
+// While Loops
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+
+// ferrocene-annotations: fls_mkut7gut49gi
+// If Expressions
+
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions

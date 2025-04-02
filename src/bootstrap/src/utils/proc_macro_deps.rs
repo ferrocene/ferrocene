@@ -10,6 +10,7 @@ pub static CRATES: &[&str] = &[
     "block-buffer",
     "bumpalo",
     "cfg-if",
+    "const-oid",
     "cpufeatures",
     "crypto-common",
     "darling",
@@ -47,6 +48,7 @@ pub static CRATES: &[&str] = &[
     "smallvec",
     "stable_deref_trait",
     "strsim",
+    "subtle",
     "syn",
     "synstructure",
     "thiserror",
@@ -68,6 +70,7 @@ pub static CRATES: &[&str] = &[
     "wasm-bindgen-shared",
     "yoke",
     "zerofrom",
+    "zeroize",
     "zerovec",
     // tidy-alphabetical-end
 ];

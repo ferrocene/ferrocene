@@ -3,6 +3,7 @@
 //
 //@ build-fail
 //@ compile-flags: -Clinker=invalid
+//~? not found
 
 fn main() {}
 

@@ -3,6 +3,7 @@
 //
 //@ build-fail
 //@ compile-flags: -C linker=
+//~? couldn't extract file stem from specified linker
 
 fn main() {}
 

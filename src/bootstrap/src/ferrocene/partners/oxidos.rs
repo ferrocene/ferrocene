@@ -10,7 +10,7 @@ use crate::core::build_steps::tool::SourceType;
 use crate::core::config::TargetSelection;
 use crate::utils::build_stamp::BuildStamp;
 use crate::utils::tarball::Tarball;
-use crate::{Compiler, Mode, t};
+use crate::{Compiler, FileType, Mode, t};
 
 const OXIDOS_CRATES: &[&str] = &[
     // List of OxidOS crates to prebuild. Their dependencies will be built and included in the
@@ -93,7 +93,7 @@ impl Step for DistOxidOs {
                 for file in t!(std::fs::read_dir(path.join("deps"))) {
                     let file = t!(file).path();
                     if file.extension().and_then(OsStr::to_str) == Some("rlib") {
-                        tarball.add_file(&file, &dest, 0o644);
+                        tarball.add_file(&file, &dest, FileType::Regular);
                     }
                 }
             }

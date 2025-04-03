@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: --codegen --codegen
+//~? unknown codegen option
 
 fn main() {}
 

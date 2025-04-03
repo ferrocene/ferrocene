@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -C=lto
+//~? unknown codegen option
 
 fn main() {}
 

@@ -7,6 +7,8 @@
 #[no_mangle]
 static X: u32 = 42;
 
+//~? ERROR `#[panic_handler]` function required, but not found
+
 // ferrocene-annotations: fls_fh27ljezn3qz
 // Attribute no_main
 //

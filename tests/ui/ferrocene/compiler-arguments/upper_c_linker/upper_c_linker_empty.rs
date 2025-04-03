@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -Clinker
+//~? requires a path
 
 fn main() {}
 

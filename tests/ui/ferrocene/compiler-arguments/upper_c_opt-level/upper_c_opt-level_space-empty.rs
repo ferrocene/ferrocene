@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -C opt-level
+//~? requires a string
 
 fn main() {}
 

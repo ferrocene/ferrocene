@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -Crpath=invalid
+//~? incorrect value
 
 fn main() {}
 

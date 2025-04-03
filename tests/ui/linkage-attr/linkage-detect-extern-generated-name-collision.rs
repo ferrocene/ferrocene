@@ -23,5 +23,7 @@ fn main() {
     }
 }
 
+//~? ERROR symbol `collision` is already defined
+
 // ferrocene-annotations: fls_mvd7nz8k3wcy
 // Attribute no_mangle

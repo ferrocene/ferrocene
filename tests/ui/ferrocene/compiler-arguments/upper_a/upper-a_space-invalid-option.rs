@@ -2,6 +2,7 @@
 //
 //@ check-pass
 //@ compile-flags: -A invalid_lint_code
+//@ error-pattern: unknown lint
 
 fn main() {}
 

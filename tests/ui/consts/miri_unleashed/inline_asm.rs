@@ -12,5 +12,7 @@ static TEST_BAD: () = {
     //~| NOTE inline assembly is not supported
 };
 
+//~? WARN skipping const checks
+
 // ferrocene-annotations: fls_qezwyridmjob
 // Macros asm and global_asm

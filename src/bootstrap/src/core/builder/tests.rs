@@ -1071,7 +1071,7 @@ fn test_prebuilt_llvm_config_path_resolution() {
     let config = configure(
         r#"
             [llvm]
-            download-ci-llvm = true
+            download-ci-llvm = "if-unchanged"
         "#,
     );
 

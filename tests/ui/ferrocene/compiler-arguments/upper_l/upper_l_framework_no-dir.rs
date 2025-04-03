@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -L framework=
+//~? empty search path
 
 fn main() {}
 

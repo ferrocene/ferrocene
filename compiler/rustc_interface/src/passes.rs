@@ -19,6 +19,7 @@ use rustc_incremental::setup_dep_graph;
 use rustc_lint::{BufferedEarlyLint, EarlyCheckNode, LintStore, unerased_lint_store};
 use rustc_metadata::creader::CStore;
 use rustc_middle::arena::Arena;
+use rustc_middle::dep_graph::DepsType;
 use rustc_middle::ty::{self, CurrentGcx, GlobalCtxt, RegisteredTools, TyCtxt};
 use rustc_middle::util::Providers;
 use rustc_parse::{
@@ -774,7 +775,9 @@ pub fn create_and_enter_global_ctxt<T, F: for<'tcx> FnOnce(TyCtxt<'tcx>) -> T>(
         sess.cfg_version,
     );
     let outputs = util::build_output_filenames(&pre_configured_attrs, sess);
-    let dep_graph = setup_dep_graph(sess, crate_name);
+
+    let dep_type = DepsType { dep_names: rustc_query_impl::dep_kind_names() };
+    let dep_graph = setup_dep_graph(sess, crate_name, &dep_type);
 
     let cstore =
         FreezeLock::new(Box::new(CStore::new(compiler.codegen_backend.metadata_loader())) as _);
@@ -1078,15 +1081,21 @@ pub(crate) fn start_codegen<'tcx>(
     codegen_backend: &dyn CodegenBackend,
     tcx: TyCtxt<'tcx>,
 ) -> Box<dyn Any> {
+    // Hook for UI tests.
+    check_for_rustc_errors_attr(tcx);
+
+    // Don't run this test assertions when not doing codegen. Compiletest tries to build
+    // build-fail tests in check mode first and expects it to not give an error in that case.
+    if tcx.sess.opts.output_types.should_codegen() {
+        rustc_symbol_mangling::test::report_symbol_names(tcx);
+    }
+
     // Don't do code generation if there were any errors. Likewise if
     // there were any delayed bugs, because codegen will likely cause
     // more ICEs, obscuring the original problem.
     if let Some(guar) = tcx.sess.dcx().has_errors_or_delayed_bugs() {
         guar.raise_fatal();
     }
-
-    // Hook for UI tests.
-    check_for_rustc_errors_attr(tcx);
 
     info!("Pre-codegen\n{:?}", tcx.debug_stats());
 
@@ -1096,19 +1105,7 @@ pub(crate) fn start_codegen<'tcx>(
         codegen_backend.codegen_crate(tcx, metadata, need_metadata_module)
     });
 
-    // Don't run this test assertions when not doing codegen. Compiletest tries to build
-    // build-fail tests in check mode first and expects it to not give an error in that case.
-    if tcx.sess.opts.output_types.should_codegen() {
-        rustc_symbol_mangling::test::report_symbol_names(tcx);
-    }
-
     info!("Post-codegen\n{:?}", tcx.debug_stats());
-
-    if tcx.sess.opts.output_types.contains_key(&OutputType::Mir) {
-        if let Err(error) = rustc_mir_transform::dump_mir::emit_mir(tcx) {
-            tcx.dcx().emit_fatal(errors::CantEmitMIR { error });
-        }
-    }
 
     // This must run after monomorphization so that all generic types
     // have been instantiated.

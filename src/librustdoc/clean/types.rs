@@ -768,12 +768,22 @@ impl Item {
             .iter()
             .filter_map(|attr| {
                 if is_json {
-                    if matches!(attr, hir::Attribute::Parsed(AttributeKind::Deprecation { .. })) {
-                        // rustdoc-json stores this in `Item::deprecation`, so we
-                        // don't want it it `Item::attrs`.
-                        None
-                    } else {
-                        Some(rustc_hir_pretty::attribute_to_string(&tcx, attr))
+                    match attr {
+                        hir::Attribute::Parsed(AttributeKind::Deprecation { .. }) => {
+                            // rustdoc-json stores this in `Item::deprecation`, so we
+                            // don't want it it `Item::attrs`.
+                            None
+                        }
+                        rustc_hir::Attribute::Parsed(rustc_attr_parsing::AttributeKind::Repr(
+                            ..,
+                        )) => {
+                            // We have separate pretty-printing logic for `#[repr(..)]` attributes.
+                            // For example, there are circumstances where `#[repr(transparent)]`
+                            // is applied but should not be publicly shown in rustdoc
+                            // because it isn't public API.
+                            None
+                        }
+                        _ => Some(rustc_hir_pretty::attribute_to_string(&tcx, attr)),
                     }
                 } else if ALLOWED_ATTRIBUTES.contains(&attr.name_or_empty()) {
                     Some(
@@ -789,8 +799,7 @@ impl Item {
             .collect();
 
         // Add #[repr(...)]
-        if !is_json
-            && let Some(def_id) = self.def_id()
+        if let Some(def_id) = self.def_id()
             && let ItemType::Struct | ItemType::Enum | ItemType::Union = self.type_()
         {
             let adt = tcx.adt_def(def_id);
@@ -1004,7 +1013,6 @@ pub(crate) fn extract_cfg_from_attrs<'a, I: Iterator<Item = &'a hir::Attribute> 
     tcx: TyCtxt<'_>,
     hidden_cfg: &FxHashSet<Cfg>,
 ) -> Option<Arc<Cfg>> {
-    let sess = tcx.sess;
     let doc_cfg_active = tcx.features().doc_cfg();
     let doc_auto_cfg_active = tcx.features().doc_auto_cfg();
 
@@ -1025,9 +1033,27 @@ pub(crate) fn extract_cfg_from_attrs<'a, I: Iterator<Item = &'a hir::Attribute> 
             .filter(|attr| attr.has_name(sym::cfg))
             .peekable();
         if doc_cfg.peek().is_some() && doc_cfg_active {
-            doc_cfg
-                .filter_map(|attr| Cfg::parse(&attr).ok())
-                .fold(Cfg::True, |cfg, new_cfg| cfg & new_cfg)
+            let sess = tcx.sess;
+            doc_cfg.fold(Cfg::True, |mut cfg, item| {
+                if let Some(cfg_mi) =
+                    item.meta_item().and_then(|item| rustc_expand::config::parse_cfg(item, sess))
+                {
+                    // The result is unused here but we can gate unstable predicates
+                    rustc_attr_parsing::cfg_matches(
+                        cfg_mi,
+                        tcx.sess,
+                        rustc_ast::CRATE_NODE_ID,
+                        Some(tcx.features()),
+                    );
+                    match Cfg::parse(cfg_mi) {
+                        Ok(new_cfg) => cfg &= new_cfg,
+                        Err(e) => {
+                            sess.dcx().span_err(e.span, e.msg);
+                        }
+                    }
+                }
+                cfg
+            })
         } else if doc_auto_cfg_active {
             // If there is no `doc(cfg())`, then we retrieve the `cfg()` attributes (because
             // `doc(cfg())` overrides `cfg()`).
@@ -1043,33 +1069,6 @@ pub(crate) fn extract_cfg_from_attrs<'a, I: Iterator<Item = &'a hir::Attribute> 
     } else {
         Cfg::True
     };
-
-    for attr in attrs.clone() {
-        // #[doc]
-        if attr.doc_str().is_none() && attr.has_name(sym::doc) {
-            // #[doc(...)]
-            if let Some(list) = attr.meta_item_list() {
-                for item in list {
-                    // #[doc(hidden)]
-                    if !item.has_name(sym::cfg) {
-                        continue;
-                    }
-                    // #[doc(cfg(...))]
-                    if let Some(cfg_mi) = item
-                        .meta_item()
-                        .and_then(|item| rustc_expand::config::parse_cfg(item, sess))
-                    {
-                        match Cfg::parse(cfg_mi) {
-                            Ok(new_cfg) => cfg &= new_cfg,
-                            Err(e) => {
-                                sess.dcx().span_err(e.span, e.msg);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     // treat #[target_feature(enable = "feat")] attributes as if they were
     // #[doc(cfg(target_feature = "feat"))] attributes as well
@@ -1536,6 +1535,10 @@ impl Type {
         matches!(self, Type::BorrowedRef { .. })
     }
 
+    fn is_type_alias(&self) -> bool {
+        matches!(self, Type::Path { path: Path { res: Res::Def(DefKind::TyAlias, _), .. } })
+    }
+
     /// Check if two types are "the same" for documentation purposes.
     ///
     /// This is different from `Eq`, because it knows that things like
@@ -1564,6 +1567,16 @@ impl Type {
         } else {
             (self, other)
         };
+
+        // FIXME: `Cache` does not have the data required to unwrap type aliases,
+        // so we just assume they are equal.
+        // This is only remotely acceptable because we were previously
+        // assuming all types were equal when used
+        // as a generic parameter of a type in `Deref::Target`.
+        if self_cleared.is_type_alias() || other_cleared.is_type_alias() {
+            return true;
+        }
+
         match (self_cleared, other_cleared) {
             // Recursive cases.
             (Type::Tuple(a), Type::Tuple(b)) => {

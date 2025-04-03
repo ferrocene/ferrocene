@@ -75,6 +75,9 @@ def arguments():
     download_parser = subparsers.add_parser("download", help="Download the existing LLVM cache")
     download_parser.add_argument("--url", help="Manually set the input `tar.zst` location")
 
+    download_parser = subparsers.add_parser("exists", help="Check if the LLVM cache exists")
+    download_parser.add_argument("--url", help="Manually set the input `tar.zst` location")
+
     url_parser = subparsers.add_parser("url", help="Calculate the LLVM cache URL")
     hash_parser = subparsers.add_parser("hash", help="Calculate the LLVM cache hash")
 
@@ -108,6 +111,8 @@ def main():
         subcommand_download(ferrocene_host, args.url)
     elif args.subcommand == "prepare":
         subcommand_prepare(ferrocene_host, args.url)
+    elif args.subcommand == "exists":
+        subcommand_exists(ferrocene_host, args.url)
     else:
         print(f"Unknown command {args.subcommand}")
 
@@ -116,6 +121,15 @@ def subcommand_download(ferrocene_host, url):
         url = llvm_cache.get_url(ferrocene_host).geturl()
 
     cache.retrieve(url, ".")
+
+def subcommand_exists(ferrocene_host, url):
+    if url == None:
+        url = llvm_cache.get_url(ferrocene_host).geturl()
+
+    if cache.exists(url):
+        sys.exit(0)
+    else:
+        sys.exit(1)
 
 def subcommand_prepare(ferrocene_host, url):
     if url == None:

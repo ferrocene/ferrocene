@@ -213,7 +213,7 @@ jobs:
       # emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
       emulator-prepare-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh prepare
       emulator-start-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh
-      qnx-version: "7.1.0-472"
+      qnx-version: "710-472"
 
   test-aarch64-unknown-nto-qnx710:
     name: Test (aarch64-unknown-nto-qnx710 by x86_64-unknown-linux-gnu)
@@ -240,7 +240,7 @@ jobs:
       # emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
       emulator-prepare-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh prepare
       emulator-start-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh
-      qnx-version: "7.1.0-472"
+      qnx-version: "710-472"
 
   # Windows
 

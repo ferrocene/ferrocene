@@ -17,7 +17,6 @@ impl std::fmt::Display for AnnotatedFile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.source {
             AnnotationSource::TestItself => write!(f, "{}", self.test.display()),
-            AnnotationSource::Makefile => write!(f, "{} (from its Makefile)", self.test.display()),
             AnnotationSource::Rmake => write!(f, "{} (from its rmake.rs)", self.test.display()),
             AnnotationSource::ParentDirectory { .. } => {
                 write!(f, "{} (from its parent directory)", self.test.display())
@@ -47,7 +46,6 @@ impl std::fmt::Display for DisplayCommaSeparatedSet {
 pub(crate) enum AnnotationSource {
     TestItself,
     ParentDirectory { bulk_file: PathBuf },
-    Makefile,
     Rmake,
 }
 
@@ -156,14 +154,12 @@ impl Annotations {
                     AnnotationSource::TestItself
                 } else if annotated_in_parent(annotation, file) {
                     AnnotationSource::ParentDirectory { bulk_file: shrink_path(&annotation.file) }
-                } else if annotation.file == file.file.join("Makefile") {
-                    AnnotationSource::Makefile
                 } else if annotation.file == file.file.join("rmake.rs") {
                     AnnotationSource::Rmake
                 } else {
                     anyhow::bail!(
                         "bug: annotation {annotation:?} doesn't come from the file itself, \
-                        its parent directory, or a Makefile. \
+                        its parent directory, or a rmake file. \
                         If you updated compiletest to accept annotations from other sources, \
                         you also need to update traceability-matrix."
                     );

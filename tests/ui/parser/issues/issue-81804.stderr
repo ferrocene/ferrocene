@@ -1,5 +1,5 @@
 error: mismatched closing delimiter: `}`
-  --> $DIR/issue-81804.rs:6:8
+  --> $DIR/issue-81804.rs:5:8
    |
 LL | fn p([=(}
    |        ^^ mismatched closing delimiter
@@ -7,7 +7,11 @@ LL | fn p([=(}
    |        unclosed delimiter
 
 error: this file contains an unclosed delimiter
+<<<<<<< HEAD
   --> $DIR/issue-81804.rs:9:14
+=======
+  --> $DIR/issue-81804.rs:5:11
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
    |
 LL | fn p([=(}
    |     -- unclosed delimiter

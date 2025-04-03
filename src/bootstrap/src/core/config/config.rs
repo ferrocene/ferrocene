@@ -3,6 +3,8 @@
 //! This module implements parsing `bootstrap.toml` configuration files to tweak
 //! how the build runs.
 
+// ignore-tidy-filelength: Ferrocene addition
+
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fmt::{self, Display};

@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -C no-vectorize-loops=false
+//~? incorrect value
 
 fn main() {}
 

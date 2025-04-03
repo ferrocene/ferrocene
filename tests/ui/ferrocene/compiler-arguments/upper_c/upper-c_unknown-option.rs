@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -C this-codegen-option-does-not-exist
+//~? unknown codegen option
 
 fn main() {}
 

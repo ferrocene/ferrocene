@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -C panic=
+//~? incorrect value
 
 fn main() {}
 

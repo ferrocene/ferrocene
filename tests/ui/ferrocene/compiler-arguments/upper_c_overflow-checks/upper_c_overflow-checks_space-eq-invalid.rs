@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -C overflow-checks=invalid
+//~? incorrect value
 
 fn main() {}
 

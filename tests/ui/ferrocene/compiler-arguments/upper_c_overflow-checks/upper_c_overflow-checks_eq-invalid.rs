@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -Coverflow-checks=invalid
+//~? incorrect value
 
 fn main() {}
 

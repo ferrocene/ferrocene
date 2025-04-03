@@ -83,16 +83,12 @@ jobs:
           name="${{ inputs.host-triple }}-$hash.tar.zst"
           echo "name=$name" >> $GITHUB_OUTPUT
 
-          uri=https://ferroceneci.blob.core.windows.net/ferrocene-llvm-cache/$name
+          uri=s3://ferrocene-ci-caches/llvm-cache/$name
           echo "uri=$uri" >> $GITHUB_OUTPUT
           
           set +e
           state="miss"
-          az storage blob show \
-            --name $name \
-            --container-name ferrocene-llvm-cache \
-            --account-name ferroceneci \
-            --auth-mode login
+          aws s3 ls $uri
           if [ $? -eq 0 ]; then
             state="hit"
           fi
@@ -108,7 +104,7 @@ jobs:
         uses: ./.github/actions/run/
         with:
           container: ${{ inputs.container }}
-          script: uv run ferrocene/ci/scripts/llvm_cache.py prepare --url s3://ferrocene-ci-caches/llvm-cache/${{ steps.check.outputs.name }}
+          script: uv run ferrocene/ci/scripts/llvm_cache.py prepare --url ${{ steps.check.outputs.uri }}
 
         
   build:

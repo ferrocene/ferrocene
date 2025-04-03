@@ -53,13 +53,6 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/setup/
-      
-      - name: Azure CLI Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
@@ -86,12 +79,12 @@ jobs:
           script: |
             ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
 
-      - uses: actions/upload-artifact@v4
-        id: artifact
-        with:
-          name: ${{ env.ARTIFACT }}
-          path: build/dist
-          retention-days: 1
+      - name: Upload artifacts to S3
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.ARTIFACT }}
+        run:
+          ./ferrocene/ci/scripts/upload-dist-artifacts.sh
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/

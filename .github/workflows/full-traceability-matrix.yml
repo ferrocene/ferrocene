@@ -93,9 +93,9 @@ jobs:
           script: |
             ./x.py run ferrocene/tools/traceability-matrix
 
-      - uses: actions/upload-artifact@v4
-        id: artifact
-        with:
-          name: ${{ env.ARTIFACT }}
-          path: build/x86_64-unknown-linux-gnu/doc/qualification/traceability-matrix.html
-          retention-days: 1
+      - name: Upload artifacts to S3
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.ARTIFACT }}
+        run:
+          ./ferrocene/ci/scripts/upload-dist-artifacts.sh

@@ -54,13 +54,6 @@ jobs:
           llvm-subset: 'true'
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
       
-      - name: Azure CLI Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ github.ref == 'refs/heads/staging' && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
         env:

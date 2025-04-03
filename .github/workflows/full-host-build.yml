@@ -93,7 +93,7 @@ jobs:
           
           set +e
           state="miss"
-          aws s3 ls $uri
+          uv run ferrocene/ci/scripts/llvm_cache.py --url $uri
           if [ $? -eq 0 ]; then
             state="hit"
           fi

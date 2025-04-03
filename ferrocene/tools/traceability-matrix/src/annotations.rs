@@ -158,8 +158,8 @@ impl Annotations {
                     AnnotationSource::Rmake
                 } else {
                     anyhow::bail!(
-                        "bug: annotation {annotation:?} doesn't come from the file itself or \
-                        its parent directory. \
+                        "bug: annotation {annotation:?} doesn't come from the file itself, \
+                        its parent directory or a rmake file. \
                         If you updated compiletest to accept annotations from other sources, \
                         you also need to update traceability-matrix."
                     );

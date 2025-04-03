@@ -15,7 +15,7 @@ runs:
       id: calculate
       shell: bash
       env:
-        FILENAME: qnx-deployment-${{ inputs.version }}.tar.zst
+        FILENAME: qnx${{ inputs.version }}-deployment.tar.zst
       run: |
         echo "filename=$FILENAME" >> $GITHUB_OUTPUT
 
@@ -31,6 +31,6 @@ runs:
       id: directory
       shell: bash
       env:
-        DIRECTORY: qnx-${{ inputs.version }}
+        DIRECTORY: qnx${{ inputs.version }}
       run: |
         echo "directory=$DIRECTORY" >> $GITHUB_OUTPUT

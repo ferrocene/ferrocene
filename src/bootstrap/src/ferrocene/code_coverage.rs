@@ -146,12 +146,14 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     t!(std::fs::write(&paths.lcov_file, result.stdout_bytes()));
     t!(std::fs::write(&paths.metadata_file, &t!(serde_json::to_vec_pretty(&metadata))));
 
-    builder.ensure(SingleCoverageReport {
-        target: state.target,
-        name: format!("{}-{}", state.coverage_for.as_str(), state.target.triple),
-        lcov: paths.lcov_file,
-        metadata,
-    });
+    if builder.config.ferrocene_generate_coverage_report_after_tests {
+        builder.ensure(SingleCoverageReport {
+            target: state.target,
+            name: format!("{}-{}", state.coverage_for.as_str(), state.target.triple),
+            lcov: paths.lcov_file,
+            metadata,
+        });
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]

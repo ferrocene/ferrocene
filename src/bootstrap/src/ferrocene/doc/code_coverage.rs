@@ -34,7 +34,7 @@ impl Step for AllCoverageReports {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        let Some(outcomes_dir) = builder.ensure(CoverageOutcomesDir { target: self.target }) else {
+        let Some(outcomes_dir) = builder.ensure(CoverageOutcomesDir) else {
             panic!("can't generate coverage report with ferrocene.coverage-outcomes=\"disabled\"");
         };
 

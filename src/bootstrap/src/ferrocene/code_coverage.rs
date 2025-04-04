@@ -148,7 +148,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
 
     builder.ensure(SingleCoverageReport {
         target: state.target,
-        name: state.coverage_for.as_str().to_string(),
+        name: format!("{}-{}", state.coverage_for.as_str(), state.target.triple),
         lcov: paths.lcov_file,
         metadata,
     });
@@ -174,8 +174,8 @@ impl Paths {
         target: TargetSelection,
         coverage_for: FerroceneCoverageFor,
     ) -> Self {
-        let name = coverage_for.as_str();
-        let out_dir = builder.out.join(target.triple).join("ferrocene").join("coverage");
+        let name = format!("{}-{}", coverage_for.as_str(), target.triple);
+        let out_dir = builder.out.join("ferrocene").join("coverage");
         Self {
             profraw_dir: builder.tempdir().join(format!("ferrocene-profraw-{name}")),
             profdata_file: builder.tempdir().join(format!("ferrocene-{name}.profdata")),
@@ -204,9 +204,7 @@ impl Paths {
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
-pub(crate) struct CoverageOutcomesDir {
-    pub(crate) target: TargetSelection,
-}
+pub(crate) struct CoverageOutcomesDir;
 
 impl Step for CoverageOutcomesDir {
     type Output = Option<PathBuf>;
@@ -219,7 +217,7 @@ impl Step for CoverageOutcomesDir {
         match &builder.config.ferrocene_coverage_outcomes {
             FerroceneCoverageOutcomes::Disabled => None,
             FerroceneCoverageOutcomes::Local => {
-                Some(builder.out.join(self.target.triple).join("ferrocene").join("coverage"))
+                Some(builder.out.join("ferrocene").join("coverage"))
             }
             FerroceneCoverageOutcomes::Custom(path) => Some(path.clone()),
         }

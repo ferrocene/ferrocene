@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+use std::error::Error;
 use std::path::PathBuf;
 
 use build_helper::exit;
@@ -10,7 +11,6 @@ use crate::core::build_steps::tool::Tool;
 use crate::core::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::code_coverage::CoverageOutcomesDir;
-use std::error::Error;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub(crate) struct AllCoverageReports {

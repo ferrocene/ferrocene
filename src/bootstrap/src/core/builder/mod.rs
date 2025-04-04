@@ -1086,6 +1086,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::doc::TraceabilityMatrix,
                 crate::ferrocene::doc::TechnicalReport,
                 crate::ferrocene::doc::Requirements,
+                crate::ferrocene::doc::code_coverage::AllCoverageReports,
                 // QMS Documents
                 crate::ferrocene::doc::InternalProcedures,
                 doc::Bootstrap,

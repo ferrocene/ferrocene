@@ -426,6 +426,7 @@ pub struct Config {
     pub ferrocene_aws_profile: Option<String>,
     pub ferrocene_traceability_matrix_mode: FerroceneTraceabilityMatrixMode,
     pub ferrocene_test_outcomes: FerroceneTestOutcomes,
+    pub ferrocene_coverage_outcomes: FerroceneCoverageOutcomes,
     pub ferrocene_oxidos_src: Option<String>,
     pub ferrocene_tarball_signing_kms_key_arn: Option<String>,
     pub ferrocene_document_signatures: FerroceneDocumentSignatures,
@@ -451,6 +452,14 @@ pub enum FerroceneTestOutcomes {
     Disabled,
     Local,
     DownloadCi,
+    Custom(PathBuf),
+}
+
+#[derive(Debug, Clone, Default)]
+pub enum FerroceneCoverageOutcomes {
+    #[default]
+    Disabled,
+    Local,
     Custom(PathBuf),
 }
 
@@ -1387,6 +1396,8 @@ define_config! {
         traceability_matrix_mode: Option<String> = "traceability-matrix-mode",
         test_outcomes: Option<String> = "test-outcomes",
         test_outcomes_dir: Option<PathBuf> = "test-outcomes-dir",
+        coverage_outcomes: Option<String> = "coverage-outcomes",
+        coverage_outcomes_dir: Option<PathBuf> = "coverage-outcomes-dir",
         oxidos_src: Option<String> = "oxidos-src",
         tarball_signing_kms_key_arn: Option<String> = "tarball-signing-kms-key-arn",
         document_signatures: Option<String> = "document-signatures",
@@ -2478,6 +2489,26 @@ impl Config {
                     "ferrocene.test-outcomes=\"{value}\" is incompatible with ferrocene.test-outcomes-dir"
                 ),
                 (Some(value), None) => panic!("invalid value for ferrocene.test-outcomes: {value}"),
+            };
+
+            config.ferrocene_coverage_outcomes = match (
+                f.coverage_outcomes.as_deref(),
+                f.coverage_outcomes_dir,
+            ) {
+                (None | Some("disabled"), None) => FerroceneCoverageOutcomes::Disabled,
+                (Some("local"), None) => FerroceneCoverageOutcomes::Local,
+                (Some("custom"), Some(path)) => FerroceneCoverageOutcomes::Custom(path),
+                // Error messages:
+                (Some(value), Some(_)) => panic!(
+                    "ferrocene.coverage-outcomes=\"{value}\" is incompatible with \
+                     ferrocene.coverage-outcomes-dir"
+                ),
+                (None, Some(_)) => panic!(
+                    "ferrocene.coverage-outcomes-dir needs ferrocene.coverage-outcomes to be set"
+                ),
+                (Some(value), None) => {
+                    panic!("invalid value for ferrocene.coverage-outcomes: {value}")
+                }
             };
 
             config.ferrocene_secret_sauce = if let Some(path) = f.secret_sauce_dir {

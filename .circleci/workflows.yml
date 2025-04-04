@@ -129,8 +129,10 @@ jobs:
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TEST_OUTCOMES_DIR: /tmp/test-outcomes
+      FERROCENE_COVERAGE_OUTCOMES_DIR: /tmp/coverage-outcomes
       SCRIPT: |
         ferrocene/ci/scripts/fetch-test-outcomes.sh
+        ferrocene/ci/scripts/fetch-coverage-outcomes.sh
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         # Run dist before test to make sure the tarballs we test are uploaded
         # to CI beforehand, for manual inspection in case of failures.
@@ -244,6 +246,21 @@ jobs:
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
+
+  x86_64-linux-library-coverage:
+    executor: docker-x86_64-ubuntu-20
+    resource_class: medium # 2-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      SCRIPT: ./x.py test --no-doc --coverage=library library/core
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout:
+          llvm-subset: true
+      - run:
+          name: Restore files from the x86_64-linux-build job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
+      - ferrocene-ci
 
   x86_64-linux-llvm:
     executor: docker-x86_64-ubuntu-20
@@ -825,6 +842,7 @@ workflows:
             - x86_64-linux-test-library
             - x86_64-linux-test-library-std
             - x86_64-linux-compiletest
+            - x86_64-linux-library-coverage
             - x86_64-qnx-test-library
             - x86_64-qnx-test-library-std
             - x86_64-qnx-test-compiletest
@@ -870,6 +888,9 @@ workflows:
           requires:
             - x86_64-linux-build
       - x86_64-linux-test-library-std:
+          requires:
+            - x86_64-linux-build
+      - x86_64-linux-library-coverage:
           requires:
             - x86_64-linux-build
 

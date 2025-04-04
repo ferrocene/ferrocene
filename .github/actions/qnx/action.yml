@@ -1,6 +1,8 @@
 name: "Download QNX deployment"
 description: "Fetch a QNX deployment"
 inputs:
+  use-minio:
+    description: If minIO should be used (otherwise, S3 is used)
   version:
     description: The QNX version and BuildID (eg '710-472' for 7.1.0 BuildID 472)
 outputs:
@@ -20,9 +22,22 @@ runs:
         echo "filename=$FILENAME" >> $GITHUB_OUTPUT
 
     - name: Unpack the QNX deployment
+      if: ${{ inputs.use-minio != 'true' }}
       shell: bash
       run: |
         uv run ferrocene/ci/scripts/cache.py retrieve s3://build-dependencies/qnx/${{ steps.calculate.outputs.filename }} .
+
+    - name: Unpack the QNX deployment
+      if: ${{ inputs.use-minio != 'true' }}
+      shell: bash
+      env:
+        AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+        AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+      run: |
+        uv run ferrocene/ci/scripts/cache.py retrieve s3://build-dependencies/qnx/${{ steps.calculate.outputs.filename }} .
+    
     - name: Remove downloaded artifact
       shell: bash
       run: |

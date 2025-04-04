@@ -59,13 +59,23 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-      
+
       - name: Download QNX
-        id: qnx
         uses: ./.github/actions/qnx/
+        if: ${{ inputs.use-minio == false }}
         with:
           version: ${{ inputs.qnx-version }}
-          use-minio: ${{ inputs.use-minio && 'true' || 'false' }}
+
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        if: ${{ inputs.use-minio == true }}
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+        with:
+          version: ${{ inputs.qnx-version }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -79,8 +89,8 @@ jobs:
         with:
           container: ${{ inputs.container }}
           script: |
-            export QNX_LICENSE_FILE="${{ steps.qnx.outputs.directory }}/license/licenses"
-            source ${{ steps.qnx.outputs.directory }}/qnxsdp-env.sh
+            export QNX_LICENSE_FILE="qnx${{ inputs.qnx-version }}/license/licenses"
+            source qnx${{ inputs.qnx-version }}/qnxsdp-env.sh
 
             ferrocene/ci/scripts/run-self-test.sh
 

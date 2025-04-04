@@ -4,9 +4,9 @@ use build_helper::exit;
 
 use crate::builder::Builder;
 use crate::core::build_steps::llvm::Llvm;
-use crate::core::builder::Cargo;
-use crate::core::config::TargetSelection;
+use crate::core::builder::{Cargo, ShouldRun, Step};
 use crate::core::config::flags::FerroceneCoverageFor;
+use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::doc::code_coverage::{CoverageMetadata, SingleCoverageReport};
 use crate::utils::build_stamp::libstd_stamp;
 use crate::{BootstrapCommand, Compiler, DependencyType, t};
@@ -200,6 +200,29 @@ impl Paths {
 
         builder.create_dir(&self.profraw_dir);
         builder.create_dir(self.lcov_file.parent().unwrap());
+    }
+}
+
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub(crate) struct CoverageOutcomesDir {
+    pub(crate) target: TargetSelection,
+}
+
+impl Step for CoverageOutcomesDir {
+    type Output = Option<PathBuf>;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.never()
+    }
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        match &builder.config.ferrocene_coverage_outcomes {
+            FerroceneCoverageOutcomes::Disabled => None,
+            FerroceneCoverageOutcomes::Local => {
+                Some(builder.out.join(self.target.triple).join("ferrocene").join("coverage"))
+            }
+            FerroceneCoverageOutcomes::Custom(path) => Some(path.clone()),
+        }
     }
 }
 

@@ -7,8 +7,72 @@ use build_helper::exit;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::core::build_steps::tool::Tool;
-use crate::core::builder::{Builder, ShouldRun, Step};
-use crate::core::config::TargetSelection;
+use crate::core::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
+use crate::ferrocene::code_coverage::CoverageOutcomesDir;
+use std::error::Error;
+
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub(crate) struct AllCoverageReports {
+    pub(crate) target: TargetSelection,
+}
+
+impl Step for AllCoverageReports {
+    type Output = ();
+    const DEFAULT: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        let default = !matches!(
+            run.builder.config.ferrocene_coverage_outcomes,
+            FerroceneCoverageOutcomes::Disabled
+        );
+        run.alias("ferrocene-coverage").default_condition(default)
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(AllCoverageReports { target: run.target });
+    }
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        let Some(outcomes_dir) = builder.ensure(CoverageOutcomesDir { target: self.target }) else {
+            panic!("can't generate coverage report with ferrocene.coverage-outcomes=\"disabled\"");
+        };
+
+        for entry in builder.read_dir(&outcomes_dir) {
+            let Some(name) = entry
+                .file_name()
+                .to_str()
+                .and_then(|s| s.strip_prefix("lcov-"))
+                .and_then(|s| s.strip_suffix(".info"))
+                .map(|s| s.to_string())
+            else {
+                continue;
+            };
+
+            let metadata = entry.path().parent().unwrap().join(format!("metadata-{name}.json"));
+            if !metadata.exists() {
+                panic!("lcov file {:?} without corresponding metadata", entry.path().display());
+            }
+            // We are not using builder.read here because that function doesn't do anything during a
+            // dry run. Instead, we do want the file to be read during the dry run, because it
+            // affects the step we have to execute.
+            let metadata: CoverageMetadata = match std::fs::read(&metadata)
+                .map_err(box_err)
+                .and_then(|raw| serde_json::from_slice(&raw).map_err(box_err))
+            {
+                Ok(parsed) => parsed,
+                Err(err) => panic!("failed to parse {:?}: {err:?}", metadata.display()),
+            };
+
+            builder.ensure(SingleCoverageReport {
+                target: self.target,
+                name,
+                lcov: entry.path(),
+                metadata,
+            });
+        }
+    }
+}
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub(crate) struct SingleCoverageReport {
@@ -64,13 +128,17 @@ impl Step for SingleCoverageReport {
         // The only reliable way to detect errors I found is determining how many percentage signs
         // are present in the index.html, since an empty report always contains 2, and full reports
         // contain at least another percentage for the covered file.
-        let index_html = builder.read(&out.join("index.html"));
-        if index_html.chars().filter(|c| *c == '%').count() <= 2 {
-            eprintln!("error: grcov seems to have produced an empty report, something happened");
-            exit!(1);
+        if !builder.config.dry_run() {
+            let index_html = builder.read(&out.join("index.html"));
+            if index_html.chars().filter(|c| *c == '%').count() <= 2 {
+                eprintln!(
+                    "error: grcov seems to have produced an empty report, something happened"
+                );
+                exit!(1);
+            }
         }
 
-        eprintln!("Coverage report available at file://{}/index.html", out.display());
+        builder.info(&format!("Coverage report available at file://{}/index.html", out.display()));
     }
 }
 
@@ -84,4 +152,8 @@ pub(crate) struct CoverageMetadata {
 
 impl CoverageMetadata {
     pub(crate) const CURRENT_VERSION: u32 = 1;
+}
+
+fn box_err<E: Error + 'static>(err: E) -> Box<dyn Error> {
+    Box::new(err)
 }

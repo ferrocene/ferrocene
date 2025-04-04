@@ -125,7 +125,7 @@ jobs:
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
             export QNX_LICENSE_FILE="qnx${{ inputs.qnx-version }}/license/licenses"
-            source ${{ inputs.qnx-version }}/qnxsdp-env.sh
+            source qnx${{ inputs.qnx-version }}/qnxsdp-env.sh
             
             ./x.py --stage 2 dist rust-std
 

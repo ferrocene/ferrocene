@@ -1,6 +1,8 @@
 name: "Restore build cache"
 description: "Restore build cache from an artifact. Resets mtime, restores removed symlinks..."
 inputs:
+  use-minio:
+    description: If minIO should be used (otherwise, S3 is used)
   build-run-id:
     description: The run id of the build workflow
   build-artifact:
@@ -10,7 +12,20 @@ runs:
   using: "composite"
   steps:
     - name: Build cache download
+      if: ${{ inputs.use-minio != 'true' }}
       shell: bash
+      run: |
+        uv run ./ferrocene/ci/scripts/cache.py retrieve "s3://ferrocene-ci-caches/persist-between-jobs/${{ inputs.build-run-id }}/${{ inputs.build-artifact }}" .
+        uv run ./ferrocene/ci/scripts/build_cache.py post-download
+
+    - name: Build cache download
+      if: ${{ inputs.use-minio == 'true' }}
+      shell: bash
+      env:
+        AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+        AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
       run: |
         uv run ./ferrocene/ci/scripts/cache.py retrieve "s3://ferrocene-ci-caches/persist-between-jobs/${{ inputs.build-run-id }}/${{ inputs.build-artifact }}" .
         uv run ./ferrocene/ci/scripts/build_cache.py post-download

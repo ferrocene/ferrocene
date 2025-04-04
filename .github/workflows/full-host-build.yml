@@ -17,6 +17,10 @@ on:
       runner:
         type: string
         description: The GitHub Runner to run on
+      use-minio:
+        type: boolean
+        default: false
+        description: If minIO should be used (otherwise, S3 is used)
       container:
         type: string
         description: The container URI to run the build in, if any (Linux only)
@@ -59,29 +63,24 @@ jobs:
         with:
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
 
-      - name: Azure CLI Login
-        uses: azure/login@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == false }}
         with:
-          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          aws-region: us-east-1
+          role-to-assume:  ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
 
-      # - name: Authenicate docker with Azure
-      #   if: ${{ runner.os == 'Linux' }}
-      #   run: az acr login --name ferrocenecr
-      # https://github.com/Azure/login/issues/372#issuecomment-2056289617
-
-      - name: Cache Azure storage token
-        run: az account get-access-token --scope https://storage.azure.com/.default --output none 
+      - name: Configuire minIO credentials
+        if: ${{ inputs.use-minio == false }}
+        run: |
+          echo "AWS_ENDPOINT_URL=${{ secrets.CACHE_ENDPOINT_URL }}" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.CACHE_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.CACHE_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_CA_BUNDLE=${{ secrets.CACHE_CA_BUNDLE }}" >> $GITHUB_ENV
 
       - name: Check cache
         id: check
         shell: bash
-        env:
-          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
         run: |
           set -e
           hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
@@ -107,11 +106,6 @@ jobs:
       - name: Run
         if: ${{ steps.check.outputs.state != 'hit' }}
         uses: ./.github/actions/run/
-        env:
-          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
         with:
           container: ${{ inputs.container }}
           script: uv run ferrocene/ci/scripts/llvm_cache.py prepare --url ${{ steps.check.outputs.uri }}
@@ -138,13 +132,23 @@ jobs:
         with:
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == false }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+
+      - name: Configuire minIO credentials
+        if: ${{ inputs.use-minio == false }}
+        run: |
+          echo "AWS_ENDPOINT_URL=${{ secrets.CACHE_ENDPOINT_URL }}" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.CACHE_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.CACHE_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_CA_BUNDLE=${{ secrets.CACHE_CA_BUNDLE }}" >> $GITHUB_ENV
+
       - name: Get LLVM cache
         shell: bash
-        env:
-          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
         run: |
           uv run ferrocene/ci/scripts/llvm_cache.py download --url s3://ferrocene-ci-caches/llvm-cache/${{ needs.llvm.outputs.name }}
 
@@ -157,11 +161,6 @@ jobs:
             uv run x.py --stage 1 build src/tools/rustdoc
 
       - name: Build cache upload
-        env:
-          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
         shell: bash
         run: |
           uv run ./ferrocene/ci/scripts/build_cache.py pre-upload

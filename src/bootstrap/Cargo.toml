@@ -1,9 +1,7 @@
 [package]
 name = "bootstrap"
 version = "0.0.0"
-# Ferrocene note:
-# Setting this to "2024" results in a `./x dist ferrocene-src` fail.
-edition = "2021"
+edition = "2024"
 build = "build.rs"
 default-run = "bootstrap"
 

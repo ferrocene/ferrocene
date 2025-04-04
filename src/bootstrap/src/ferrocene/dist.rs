@@ -167,6 +167,8 @@ impl Step for SourceTarball {
         let mut vendor = Command::new(&builder.initial_cargo);
         vendor.arg("vendor").arg("vendor/rust").current_dir(&dest_dir);
         vendor.env("RUSTC_BOOTSTRAP", "1"); // std's Cargo.toml uses unstable features
+        // Resolver 3 needs the `rustc` binary to fetch the compiler version
+        vendor.env("RUSTC", &builder.initial_rustc);
         for extra in EXTRA_CARGO_TOMLS {
             vendor.arg("--sync").arg(&builder.src.join(extra));
         }

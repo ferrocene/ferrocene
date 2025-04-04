@@ -100,6 +100,9 @@ jobs:
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
         if: ${{ inputs.use-minio == false }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
 
       - name: Download QNX
         uses: ./.github/actions/qnx/
@@ -115,6 +118,9 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
           AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
 
       - name: Download QNX
         uses: ./.github/actions/qnx/
@@ -200,6 +206,9 @@ jobs:
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
         if: ${{ inputs.use-minio == false }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
 
       - name: Download QNX
         uses: ./.github/actions/qnx/
@@ -215,6 +224,9 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
           AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
 
       - name: Download QNX
         uses: ./.github/actions/qnx/
@@ -300,6 +312,9 @@ jobs:
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
         if: ${{ inputs.use-minio == false }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
 
       - name: Download QNX
         uses: ./.github/actions/qnx/
@@ -315,6 +330,9 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
           AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
 
       - name: Download QNX
         uses: ./.github/actions/qnx/
@@ -401,6 +419,9 @@ jobs:
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
         if: ${{ inputs.use-minio == false }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
 
       - name: Download QNX
         uses: ./.github/actions/qnx/
@@ -416,6 +437,9 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
           AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
 
       - name: Download QNX
         uses: ./.github/actions/qnx/

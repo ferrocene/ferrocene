@@ -57,7 +57,7 @@ jobs:
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
       AWS_REGION: us-east-1
-      AWS_ROLE_ARN: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+      AWS_ROLE_ARN: ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
       artifact-usage: ${{ env.ARTIFACT_USAGE }}
@@ -73,21 +73,44 @@ jobs:
         if: ${{ inputs.use-minio == false }}
         with:
           aws-region: us-east-1
-          role-to-assume:  ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-      
-      - name: Download QNX
-        id: qnx
-        uses: ./.github/actions/qnx/
-        with:
-          version: ${{ inputs.qnx-version }}
-          use-minio: ${{ inputs.use-minio && 'true' || 'false' }}
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
 
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == false }}
+
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        if: ${{ inputs.use-minio == false }}
         with:
-          build-artifact: ${{ inputs.build-artifact }}
-          build-run-id: ${{ inputs.build-run-id }}
-          use-minio: ${{ inputs.use-minio && 'true' || 'false' }}
+          version: ${{ inputs.qnx-version }}
+
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == true }}
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        if: ${{ inputs.use-minio == true }}
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+        with:
+          version: ${{ inputs.qnx-version }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == true }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
 
       - name: Run
         uses: ./.github/actions/run/
@@ -95,8 +118,8 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            export QNX_LICENSE_FILE="${{ steps.qnx.outputs.directory }}/license/licenses"
-            source ${{ steps.qnx.outputs.directory }}/qnxsdp-env.sh
+            export QNX_LICENSE_FILE="qnx${{ inputs.qnx-version }}/license/licenses"
+            source ${{ inputs.qnx-version }}/qnxsdp-env.sh
             
             ./x.py --stage 2 dist rust-std
 
@@ -105,7 +128,7 @@ jobs:
         if: ${{ inputs.use-minio == true }}
         with:
           aws-region: us-east-1
-          role-to-assume:  ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
 
       - name: Upload artifacts to S3
         env:

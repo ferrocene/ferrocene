@@ -56,8 +56,8 @@ jobs:
         uses: ./.github/actions/setup/
         with:
           llvm-subset: 'true'
-          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
-      
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}\
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         if: ${{ inputs.use-minio == false }}
@@ -67,8 +67,22 @@ jobs:
 
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == false }}
         with:
-          use-minio: ${{ inputs.use-minio && 'true' || 'false' }}
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == true }}
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -76,7 +90,7 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-
+    
       - name: Run licensing checks
         run: |
           uvx reuse --include-submodules lint

@@ -1,11 +1,11 @@
 error: this file contains an unclosed delimiter
-  --> $DIR/use-unclosed-brace.rs:61:27
+  --> $DIR/use-unclosed-brace.rs:61:14
    |
 LL | use foo::{bar, baz;
    |          - unclosed delimiter
 ...
-LL | // Simple Path Resolution
-   |                          ^
+LL | fn main() {}
+   |             ^
 
 error: aborting due to 1 previous error
 

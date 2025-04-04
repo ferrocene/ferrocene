@@ -140,7 +140,7 @@ jobs:
           role-to-assume:  ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
 
       - name: Configuire minIO credentials
-        if: ${{ inputs.use-minio == false }}
+        if: ${{ inputs.use-minio == true }}
         run: |
           echo "AWS_ENDPOINT_URL=${{ secrets.CACHE_ENDPOINT_URL }}" >> $GITHUB_ENV
           echo "AWS_ACCESS_KEY_ID=${{ secrets.CACHE_ACCESS_KEY_ID }}" >> $GITHUB_ENV

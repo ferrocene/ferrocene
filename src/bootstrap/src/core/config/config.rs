@@ -432,6 +432,7 @@ pub struct Config {
     pub ferrocene_document_signatures: FerroceneDocumentSignatures,
     pub ferrocene_technical_report_url: Option<String>,
     pub ferrocene_secret_sauce: FerroceneSecretSauce,
+    pub ferrocene_generate_coverage_report_after_tests: bool,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1405,6 +1406,7 @@ define_config! {
         document_signatures_tarball: Option<PathBuf> = "document-signatures-tarball",
         technical_report_url: Option<String> = "technical-report-url",
         secret_sauce_dir: Option<PathBuf> = "secret-sauce-dir",
+        generate_coverage_report_after_test: Option<bool> = "generate-coverage-report-after-tests",
     }
 }
 
@@ -2433,6 +2435,9 @@ impl Config {
             config.ferrocene_oxidos_src = f.oxidos_src;
             config.ferrocene_tarball_signing_kms_key_arn = f.tarball_signing_kms_key_arn;
             config.ferrocene_technical_report_url = f.technical_report_url;
+
+            config.ferrocene_generate_coverage_report_after_tests =
+                f.generate_coverage_report_after_test.unwrap_or(true);
 
             config.ferrocene_document_signatures = match (
                 f.document_signatures.as_deref(),

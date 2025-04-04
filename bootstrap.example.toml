@@ -1048,6 +1048,9 @@
 # instrumentation. Must be set only if coverage-outcomes is set to "custom".
 #coverage-outcomes-dir = <none> (path)
 
+# Whether to generate a coverage report after running tests with --coverage.
+#generate-coverage-report-after-tests = true
+
 # Path containing the OxidOS source code tarball. It can be a remote URL, and
 # if so the tarball will be downloaded automatically. If this is not provided,
 # OxidOS will not be built.

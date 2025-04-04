@@ -124,6 +124,10 @@ name = "ferrocene-test-outcomes"
 subset = "source"
 
 [[groups.any-platform.packages]]
+name = "ferrocene-coverage-outcomes"
+subset = "source"
+
+[[groups.any-platform.packages]]
 name = "ferrocene-docs"
 subset = "default"
 docs-in = "share/doc/ferrocene/html"

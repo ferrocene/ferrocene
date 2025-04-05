@@ -1091,7 +1091,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     ));
                 }
                 Scope::BuiltinAttrs => {
-                    let res = Res::NonMacroAttr(NonMacroAttrKind::Builtin(kw::Empty));
+                    let res = Res::NonMacroAttr(NonMacroAttrKind::Builtin(sym::dummy));
                     if filter_fn(res) {
                         suggestions.extend(
                             BUILTIN_ATTRIBUTES
@@ -1323,11 +1323,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     }
                 }
             })
-        }
-
-        // If only some candidates are accessible, take just them
-        if !candidates.iter().all(|v: &ImportSuggestion| !v.accessible) {
-            candidates.retain(|x| x.accessible)
         }
 
         candidates
@@ -1793,7 +1788,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 &import_suggestions,
                 Instead::Yes,
                 FoundUse::Yes,
-                DiagMode::Import { append: single_nested },
+                DiagMode::Import { append: single_nested, unresolved_import: false },
                 vec![],
                 "",
             );
@@ -2750,6 +2745,8 @@ pub(crate) enum DiagMode {
     Pattern,
     /// The binding is part of a use statement
     Import {
+        /// `true` means diagnostics is for unresolved import
+        unresolved_import: bool,
         /// `true` mean add the tips afterward for case `use a::{b,c}`,
         /// rather than replacing within.
         append: bool,
@@ -2800,6 +2797,7 @@ fn show_candidates(
         return false;
     }
 
+    let mut showed = false;
     let mut accessible_path_strings: Vec<PathString<'_>> = Vec::new();
     let mut inaccessible_path_strings: Vec<PathString<'_>> = Vec::new();
 
@@ -2958,8 +2956,11 @@ fn show_candidates(
             append_candidates(&mut msg, accessible_path_strings);
             err.help(msg);
         }
-        true
-    } else if !(inaccessible_path_strings.is_empty() || matches!(mode, DiagMode::Import { .. })) {
+        showed = true;
+    }
+    if !inaccessible_path_strings.is_empty()
+        && (!matches!(mode, DiagMode::Import { unresolved_import: false, .. }))
+    {
         let prefix =
             if let DiagMode::Pattern = mode { "you might have meant to match on " } else { "" };
         if let [(name, descr, source_span, note, _)] = &inaccessible_path_strings[..] {
@@ -3022,10 +3023,9 @@ fn show_candidates(
 
             err.span_note(multi_span, msg);
         }
-        true
-    } else {
-        false
+        showed = true;
     }
+    showed
 }
 
 #[derive(Debug)]
@@ -3063,7 +3063,7 @@ impl<'tcx> visit::Visitor<'tcx> for UsePlacementFinder {
 
     fn visit_item(&mut self, item: &'tcx ast::Item) {
         if self.target_module == item.id {
-            if let ItemKind::Mod(_, ModKind::Loaded(items, _inline, mod_spans, _)) = &item.kind {
+            if let ItemKind::Mod(_, _, ModKind::Loaded(items, _inline, mod_spans, _)) = &item.kind {
                 let inject = mod_spans.inject_use_span;
                 if is_span_suitable_for_use_injection(inject) {
                     self.first_legal_span = Some(inject);

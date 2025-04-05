@@ -214,7 +214,7 @@ pub(crate) fn create_object_file(sess: &Session) -> Option<write::Object<'static
 
     let mut file = write::Object::new(binary_format, architecture, endianness);
     file.set_sub_architecture(sub_architecture);
-    if sess.target.is_like_osx {
+    if sess.target.is_like_darwin {
         if macho_is_arm64e(&sess.target) {
             file.set_macho_cpu_subtype(object::macho::CPU_SUBTYPE_ARM64E);
         }
@@ -540,8 +540,8 @@ pub fn create_compressed_metadata_file(
     symbol_name: &str,
 ) -> Vec<u8> {
     let mut packed_metadata = rustc_metadata::METADATA_HEADER.to_vec();
-    packed_metadata.write_all(&(metadata.raw_data().len() as u64).to_le_bytes()).unwrap();
-    packed_metadata.extend(metadata.raw_data());
+    packed_metadata.write_all(&(metadata.stub_or_full().len() as u64).to_le_bytes()).unwrap();
+    packed_metadata.extend(metadata.stub_or_full());
 
     let Some(mut file) = create_object_file(sess) else {
         if sess.target.is_like_wasm {

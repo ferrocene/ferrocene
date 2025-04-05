@@ -3,7 +3,9 @@
 //
 //@ check-pass
 //@ compile-flags: -F=missing_docs
-//@ error-pattern: unknown lint
+//~? unknown lint
+//~? unknown lint
+//~? unknown lint
 
 fn main() {}
 

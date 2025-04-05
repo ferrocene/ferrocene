@@ -164,8 +164,8 @@ impl Collector {
 
 fn sample_config() -> Config {
     Config {
-        color: test::ColorConfig::NeverColor,
-        format: test::OutputFormat::Json,
+        color: crate::ColorConfig::NeverColor,
+        format: crate::OutputFormat::Json,
         mode: env("FERROCENE_MODE"),
         src_test_suite_root: env("FERROCENE_SRC_BASE"),
         suite: env("FERROCENE_SUITE"),

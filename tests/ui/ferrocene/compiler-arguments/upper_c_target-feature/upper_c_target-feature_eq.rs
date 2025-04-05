@@ -7,6 +7,7 @@
 // output by subset avoids the problem.
 //@ compare-output-lines-by-subset
 //@ error-pattern: not a recognized feature for this target
+//~? unknown and unstable feature specified
 
 fn main() {}
 

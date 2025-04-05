@@ -1659,14 +1659,14 @@ impl From<io::Stderr> for Stdio {
     }
 }
 
-#[stable(feature = "anonymous_pipe", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "anonymous_pipe", since = "1.87.0")]
 impl From<io::PipeWriter> for Stdio {
     fn from(pipe: io::PipeWriter) -> Self {
         Stdio::from_inner(pipe.into_inner().into())
     }
 }
 
-#[stable(feature = "anonymous_pipe", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "anonymous_pipe", since = "1.87.0")]
 impl From<io::PipeReader> for Stdio {
     fn from(pipe: io::PipeReader) -> Self {
         Stdio::from_inner(pipe.into_inner().into())
@@ -1836,7 +1836,7 @@ impl crate::sealed::Sealed for ExitStatusError {}
 /// # if cfg!(unix) {
 /// use std::process::{Command, ExitStatusError};
 ///
-/// fn run(cmd: &str) -> Result<(),ExitStatusError> {
+/// fn run(cmd: &str) -> Result<(), ExitStatusError> {
 ///     Command::new(cmd).status().unwrap().exit_ok()?;
 ///     Ok(())
 /// }

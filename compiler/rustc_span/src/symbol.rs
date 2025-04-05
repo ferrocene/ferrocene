@@ -623,6 +623,7 @@ symbols! {
         cfg_target_has_atomic_equal_alignment,
         cfg_target_thread_local,
         cfg_target_vendor,
+        cfg_trace: "<cfg>", // must not be a valid identifier
         cfg_ub_checks,
         cfg_version,
         cfi,
@@ -2118,7 +2119,9 @@ symbols! {
         type_changing_struct_update,
         type_const,
         type_id,
+        type_ir_infer_ctxt_like,
         type_ir_inherent,
+        type_ir_interner,
         type_length_limit,
         type_macros,
         type_name,

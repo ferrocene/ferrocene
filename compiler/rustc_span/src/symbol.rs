@@ -131,7 +131,7 @@ symbols! {
         // tidy-alphabetical-end
 
         // Weak keywords, have special meaning only in specific contexts.
-        // Matching predicates: none
+        // Matching predicates: `is_weak`
         // tidy-alphabetical-start
         Auto:               "auto",
         Builtin:            "builtin",
@@ -800,6 +800,15 @@ symbols! {
         default_fn,
         default_lib_allocator,
         default_method_body_is_const,
+        // --------------------------
+        // Lang items which are used only for experiments with auto traits with default bounds.
+        // These lang items are not actually defined in core/std. Experiment is a part of
+        // `MCP: Low level components for async drop`(https://github.com/rust-lang/compiler-team/issues/727)
+        default_trait1,
+        default_trait2,
+        default_trait3,
+        default_trait4,
+        // --------------------------
         default_type_parameter_fallback,
         default_type_params,
         define_opaque,
@@ -1378,6 +1387,7 @@ symbols! {
         movbe_target_feature,
         move_ref_pattern,
         move_size_limit,
+        movrs_target_feature,
         mul,
         mul_assign,
         mul_with_overflow,
@@ -2039,6 +2049,7 @@ symbols! {
         sub_assign,
         sub_with_overflow,
         suggestion,
+        super_let,
         supertrait_item_shadowing,
         surface_async_drop_in_place,
         sym,
@@ -2723,6 +2734,10 @@ impl Symbol {
             || self.is_unused_keyword_always()
             || self.is_used_keyword_conditional(edition)
             || self.is_unused_keyword_conditional(edition)
+    }
+
+    pub fn is_weak(self) -> bool {
+        self >= kw::Auto && self <= kw::Yeet
     }
 
     /// A keyword or reserved identifier that can be used as a path segment.

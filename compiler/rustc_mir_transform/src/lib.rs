@@ -12,6 +12,7 @@
 #![feature(map_try_insert)]
 #![feature(never_type)]
 #![feature(try_blocks)]
+#![feature(vec_deque_pop_if)]
 #![feature(yeet_expr)]
 // tidy-alphabetical-end
 
@@ -528,7 +529,7 @@ fn mir_drops_elaborated_and_const_checked(tcx: TyCtxt<'_>, def: LocalDefId) -> &
         | DefKind::Static { .. }
         | DefKind::Const
         | DefKind::AssocConst => {
-            if let Err(guar) = tcx.check_well_formed(root.expect_local()) {
+            if let Err(guar) = tcx.ensure_ok().check_well_formed(root.expect_local()) {
                 body.tainted_by_errors = Some(guar);
             }
         }

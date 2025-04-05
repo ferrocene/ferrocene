@@ -1,6 +1,4 @@
-<<<<<<< HEAD
-//@ error-pattern:expected
-use foo::{bar}::baz
+use foo::{bar}::baz //~ ERROR expected `;`, found `::`
 
 // ferrocene-annotations: fls_9i5msiuuyihf
 // Paths
@@ -52,6 +50,3 @@ use foo::{bar}::baz
 //
 // ferrocene-annotations: fls_bbso3c45kr9z
 // Simple Path Resolution
-=======
-use foo::{bar}::baz //~ ERROR expected `;`, found `::`
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

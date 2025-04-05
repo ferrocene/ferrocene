@@ -18,7 +18,8 @@ fn it_panics() {
     assert_eq!(1 + 1, 4);
 }
 
-<<<<<<< HEAD
+//~? ERROR building tests with panic=abort is not supported without `-Zpanic_abort_tests`
+
 // ferrocene-annotations: fls_k02nt1m5fq1z
 // Panic
 //
@@ -31,6 +32,3 @@ fn it_panics() {
 // ferrocene-annotations: um_rustc_test
 //
 // ferrocene-annotations: um_rustc_C_panic
-=======
-//~? ERROR building tests with panic=abort is not supported without `-Zpanic_abort_tests`
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

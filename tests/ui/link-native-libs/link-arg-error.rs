@@ -2,8 +2,6 @@
 
 fn main() {}
 
-<<<<<<< HEAD
-// ferrocene-annotations: um_rustc_l
-=======
 //~? ERROR linking modifier `bundle` is only compatible with `static` linking kind
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// ferrocene-annotations: um_rustc_l

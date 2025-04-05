@@ -16,8 +16,6 @@
 fn main() {
 }
 
-<<<<<<< HEAD
-// ferrocene-annotations: um_rustc_C_panic
-=======
 //~? ERROR the linked panic runtime `panic_unwind` is not compiled with this crate's panic strategy `abort`
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// ferrocene-annotations: um_rustc_C_panic

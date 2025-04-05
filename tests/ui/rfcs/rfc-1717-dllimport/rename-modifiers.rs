@@ -6,12 +6,9 @@
 
 #[link(name = "foo", kind = "dylib", modifiers = "-as-needed")]
 extern "C" {}
-<<<<<<< HEAD
+//~^ ERROR overriding linking modifiers from command line is not supported
 
 // ferrocene-annotations: fls_o0f9ae22ug1x
 // Attribute link
 //
 // ferrocene-annotations: um_rustc_l
-=======
-//~^ ERROR overriding linking modifiers from command line is not supported
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

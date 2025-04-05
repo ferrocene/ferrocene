@@ -6,10 +6,8 @@
 
 fn main() {}
 
-<<<<<<< HEAD
+//~? WARN unknown lint: `bogus`
+//~? WARN unknown lint: `bogus`
+//~? WARN unknown lint: `bogus`
+
 // ferrocene-annotations: um_rustc_D
-=======
-//~? WARN unknown lint: `bogus`
-//~? WARN unknown lint: `bogus`
-//~? WARN unknown lint: `bogus`
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

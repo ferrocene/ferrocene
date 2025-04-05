@@ -18,9 +18,7 @@ pub fn foo() -> usize {
     std::mem::size_of::<Foo<u8>>()
 }
 
-<<<<<<< HEAD
-// ferrocene-annotations: um_rustc_C_debuginfo
-=======
 // FIXME: the error is reported on different lines on different targets
 //FIXME~? ERROR values of the type `[u8; usize::MAX]` are too big for the target architecture
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// ferrocene-annotations: um_rustc_C_debuginfo

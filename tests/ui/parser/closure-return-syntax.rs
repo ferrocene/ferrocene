@@ -6,10 +6,6 @@ fn needs_braces_1() {
     //~^ ERROR expected `{`, found `22`
 }
 
-<<<<<<< HEAD
-// ferrocene-annotations: fls_tjyexqrx0fx5
-// Closure Expressions
-=======
 // Check other delimiters too.
 
 fn needs_braces_2() {
@@ -23,4 +19,6 @@ fn needs_braces_3() {
 }
 
 fn main() {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

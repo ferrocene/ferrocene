@@ -59,10 +59,8 @@
 
 fn main() {}
 
-<<<<<<< HEAD
-// ferrocene-annotations: um_rustc_crate_type
-=======
 //[proc_underscore_macro]~? ERROR unknown crate type: `proc_macro`
 //[empty_crate_type]~? ERROR unknown crate type: ``
 //[unknown]~? ERROR unknown crate type: `🤡`
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// ferrocene-annotations: um_rustc_crate_type

@@ -8,13 +8,11 @@
 
 fn main() { }
 
-<<<<<<< HEAD
+//~? WARN unknown lint: `bogus`
+//~? WARN unknown lint: `dead_cod`
+//~? WARN unknown lint: `bogus`
+//~? WARN unknown lint: `dead_cod`
+//~? WARN unknown lint: `bogus`
+//~? WARN unknown lint: `dead_cod`
+
 // ferrocene-annotations: um_rustc_D
-=======
-//~? WARN unknown lint: `bogus`
-//~? WARN unknown lint: `dead_cod`
-//~? WARN unknown lint: `bogus`
-//~? WARN unknown lint: `dead_cod`
-//~? WARN unknown lint: `bogus`
-//~? WARN unknown lint: `dead_cod`
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

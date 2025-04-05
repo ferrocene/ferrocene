@@ -8,8 +8,6 @@
 fn main() {
 }
 
-<<<<<<< HEAD
-// ferrocene-annotations: um_rustc_C_linker
-=======
 //~? ERROR `llllll`
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// ferrocene-annotations: um_rustc_C_linker

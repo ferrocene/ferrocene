@@ -4,8 +4,7 @@
 // is conditional too!
 
 #[cfg_attr(foo, cfg(bar))]
-<<<<<<< HEAD
-fn main() { }
+fn main() { } //~ ERROR `main` function not found in crate `cfg_attr_cfg_2`
 
 // ferrocene-annotations: fls_8jb3sjqamdpu
 // Program Entry Point
@@ -14,6 +13,3 @@ fn main() { }
 // Attribute cfg_attr
 //
 // ferrocene-annotations: um_rustc_cfg
-=======
-fn main() { } //~ ERROR `main` function not found in crate `cfg_attr_cfg_2`
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

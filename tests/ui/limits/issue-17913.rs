@@ -15,7 +15,8 @@ fn main() {
     println!("{}", a[0xFFFFFF_usize]);
 }
 
-<<<<<<< HEAD
+//~? ERROR are too big for the target architecture
+
 // ferrocene-annotations: fls_xinykul167l
 // Array Expressions
 //
@@ -24,6 +25,3 @@ fn main() {
 //
 // ferrocene-annotations: fls_fymvsy6ig99a
 // Attribute cfg
-=======
-//~? ERROR are too big for the target architecture
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

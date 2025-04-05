@@ -9,9 +9,7 @@
 extern crate panic_runtime_abort;
 extern crate panic_runtime_lang_items;
 
-<<<<<<< HEAD
+//~? ERROR the linked panic runtime `panic_runtime_abort` is not compiled with this crate's panic strategy `unwind`
+
 // ferrocene-annotations: fls_fh27ljezn3qz
 // Attribute no_main
-=======
-//~? ERROR the linked panic runtime `panic_runtime_abort` is not compiled with this crate's panic strategy `unwind`
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

@@ -25,11 +25,6 @@ impl example_runner::Testable for IsFoo {
 const TEST_1: IsFoo = IsFoo("hello");
 
 #[test_case]
-<<<<<<< HEAD
-const TEST_2: IsFoo = IsFoo("foo");
-
-// ferrocene-annotations: um_rustc_test
-=======
 static TEST_2: IsFoo = IsFoo("foo");
 
 // FIXME: `test_case` is currently ignored on anything other than
@@ -44,4 +39,5 @@ struct _S;
 impl _S {
     fn _f() {}
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// ferrocene-annotations: um_rustc_test

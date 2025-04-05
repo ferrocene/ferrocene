@@ -7,9 +7,7 @@
 #[lang = "eh_personality"]
 fn eh() {}
 
-<<<<<<< HEAD
+//~? ERROR `#[panic_handler]` function required, but not found
+
 // ferrocene-annotations: fls_fh27ljezn3qz
 // Attribute no_main
-=======
-//~? ERROR `#[panic_handler]` function required, but not found
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

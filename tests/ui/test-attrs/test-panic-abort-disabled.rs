@@ -1,4 +1,3 @@
-//@ error-pattern:building tests with panic=abort is not supported
 //@ no-prefer-dynamic
 //@ compile-flags: --test -Cpanic=abort -Zpanic-abort-tests=no
 //@ run-flags: --test-threads=1
@@ -19,6 +18,7 @@ fn it_panics() {
     assert_eq!(1 + 1, 4);
 }
 
+<<<<<<< HEAD
 // ferrocene-annotations: fls_k02nt1m5fq1z
 // Panic
 //
@@ -31,3 +31,6 @@ fn it_panics() {
 // ferrocene-annotations: um_rustc_test
 //
 // ferrocene-annotations: um_rustc_C_panic
+=======
+//~? ERROR building tests with panic=abort is not supported without `-Zpanic_abort_tests`
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

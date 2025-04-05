@@ -1,4 +1,3 @@
-//@ error-pattern:mismatched types
 // issue #513
 
 fn f() { }
@@ -6,7 +5,7 @@ fn f() { }
 fn main() {
 
     // f is not a bool
-    if f { }
+    if f { } //~ ERROR mismatched types
 }
 
 // ferrocene-annotations: fls_exe4zodlwfez

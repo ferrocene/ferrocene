@@ -19,8 +19,8 @@ use rustc_middle::middle::privacy::Level;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_middle::{bug, span_bug};
-use rustc_session::lint;
 use rustc_session::lint::builtin::DEAD_CODE;
+use rustc_session::lint::{self, LintExpectationId};
 use rustc_span::{Symbol, sym};
 
 use crate::errors::{
@@ -421,10 +421,8 @@ impl<'tcx> MarkSymbolVisitor<'tcx> {
                 }
                 hir::ItemKind::ForeignMod { .. } => {}
                 hir::ItemKind::Trait(..) => {
-                    for impl_def_id in self.tcx.all_impls(item.owner_id.to_def_id()) {
-                        if let Some(local_def_id) = impl_def_id.as_local()
-                            && let ItemKind::Impl(impl_ref) =
-                                self.tcx.hir_expect_item(local_def_id).kind
+                    for &impl_def_id in self.tcx.local_trait_impls(item.owner_id.def_id) {
+                        if let ItemKind::Impl(impl_ref) = self.tcx.hir_expect_item(impl_def_id).kind
                         {
                             // skip items
                             // mark dependent traits live
@@ -698,8 +696,8 @@ fn has_allow_dead_code_or_lang_attr(
 
     fn has_allow_expect_dead_code(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {
         let hir_id = tcx.local_def_id_to_hir_id(def_id);
-        let lint_level = tcx.lint_level_at_node(lint::builtin::DEAD_CODE, hir_id).0;
-        matches!(lint_level, lint::Allow | lint::Expect(_))
+        let lint_level = tcx.lint_level_at_node(lint::builtin::DEAD_CODE, hir_id).level;
+        matches!(lint_level, lint::Allow | lint::Expect)
     }
 
     fn has_used_like_attr(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {
@@ -917,7 +915,7 @@ fn live_symbols_and_ignored_derived_traits(
 struct DeadItem {
     def_id: LocalDefId,
     name: Symbol,
-    level: lint::Level,
+    level: (lint::Level, Option<LintExpectationId>),
 }
 
 struct DeadVisitor<'tcx> {
@@ -961,9 +959,10 @@ impl<'tcx> DeadVisitor<'tcx> {
         ShouldWarnAboutField::Yes
     }
 
-    fn def_lint_level(&self, id: LocalDefId) -> lint::Level {
+    fn def_lint_level(&self, id: LocalDefId) -> (lint::Level, Option<LintExpectationId>) {
         let hir_id = self.tcx.local_def_id_to_hir_id(id);
-        self.tcx.lint_level_at_node(DEAD_CODE, hir_id).0
+        let level = self.tcx.lint_level_at_node(DEAD_CODE, hir_id);
+        (level.level, level.lint_id)
     }
 
     // # Panics
@@ -1131,7 +1130,8 @@ impl<'tcx> DeadVisitor<'tcx> {
         if dead_codes.is_empty() {
             return;
         }
-        dead_codes.sort_by_key(|v| v.level);
+        // FIXME: `dead_codes` should probably be morally equivalent to `IndexMap<(Level, LintExpectationId), (DefId, Symbol)>`
+        dead_codes.sort_by_key(|v| v.level.0);
         for group in dead_codes.chunk_by(|a, b| a.level == b.level) {
             self.lint_at_single_level(&group, participle, Some(def_id), report_on);
         }

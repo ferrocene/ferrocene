@@ -1,5 +1,4 @@
 //@ dont-check-compiler-stderr
-//@ error-pattern: `#[panic_handler]` function required, but not found
 
 #![feature(lang_items)]
 #![no_main]
@@ -8,5 +7,9 @@
 #[lang = "eh_personality"]
 fn eh() {}
 
+<<<<<<< HEAD
 // ferrocene-annotations: fls_fh27ljezn3qz
 // Attribute no_main
+=======
+//~? ERROR `#[panic_handler]` function required, but not found
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

@@ -324,6 +324,7 @@ declare_features! (
     (unstable, loongarch_target_feature, "1.73.0", Some(44839)),
     (unstable, m68k_target_feature, "1.85.0", Some(134328)),
     (unstable, mips_target_feature, "1.27.0", Some(44839)),
+    (unstable, movrs_target_feature, "CURRENT_RUSTC_VERSION", Some(137976)),
     (unstable, powerpc_target_feature, "1.27.0", Some(44839)),
     (unstable, prfchw_target_feature, "1.78.0", Some(44839)),
     (unstable, riscv_target_feature, "1.45.0", Some(44839)),
@@ -531,8 +532,6 @@ declare_features! (
     (unstable, import_trait_associated_functions, "1.86.0", Some(134691)),
     /// Allows associated types in inherent impls.
     (incomplete, inherent_associated_types, "1.52.0", Some(8995)),
-    /// Allow anonymous constants from an inline `const` block in pattern position
-    (unstable, inline_const_pat, "1.58.0", Some(76001)),
     /// Allows using `pointer` and `reference` in intra-doc links
     (unstable, intra_doc_pointers, "1.51.0", Some(80896)),
     // Allows using the `kl` and `widekl` target features and the associated intrinsics
@@ -630,6 +629,8 @@ declare_features! (
     (unstable, strict_provenance_lints, "1.61.0", Some(130351)),
     /// Allows string patterns to dereference values to match them.
     (unstable, string_deref_patterns, "1.67.0", Some(87121)),
+    /// Allows `super let` statements.
+    (incomplete, super_let, "CURRENT_RUSTC_VERSION", Some(139076)),
     /// Allows subtrait items to shadow supertrait items.
     (unstable, supertrait_item_shadowing, "1.86.0", Some(89151)),
     /// Allows using `#[thread_local]` on `static` items.

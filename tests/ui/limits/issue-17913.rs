@@ -1,6 +1,5 @@
 //@ build-fail
 //@ normalize-stderr: "\[&usize; \d+\]" -> "[&usize; usize::MAX]"
-//@ error-pattern: too big for the target architecture
 
 #[cfg(target_pointer_width = "64")]
 fn main() {
@@ -16,6 +15,7 @@ fn main() {
     println!("{}", a[0xFFFFFF_usize]);
 }
 
+<<<<<<< HEAD
 // ferrocene-annotations: fls_xinykul167l
 // Array Expressions
 //
@@ -24,3 +24,6 @@ fn main() {
 //
 // ferrocene-annotations: fls_fymvsy6ig99a
 // Attribute cfg
+=======
+//~? ERROR are too big for the target architecture
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

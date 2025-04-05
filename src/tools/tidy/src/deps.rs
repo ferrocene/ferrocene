@@ -373,7 +373,11 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "pulldown-cmark-escape",
     "punycode",
     "quote",
+<<<<<<< HEAD
     "r-efi", // dependency of getrandom 0.3.2
+=======
+    "r-efi",
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "rand",
     "rand_chacha",
     "rand_core",
@@ -471,7 +475,11 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "windows_x86_64_gnu",
     "windows_x86_64_gnullvm",
     "windows_x86_64_msvc",
+<<<<<<< HEAD
     "wit-bindgen-rt",
+=======
+    "wit-bindgen-rt@0.39.0", // pinned to a specific version due to using a binary blob: <https://github.com/rust-lang/rust/pull/136395#issuecomment-2692769062>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "writeable",
     "yoke",
     "yoke-derive",

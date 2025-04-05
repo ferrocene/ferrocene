@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 //@ error-pattern:cannot multiply `bool` by `bool`
 
 fn main() { let x = true * false; }
@@ -10,3 +11,6 @@ fn main() { let x = true * false; }
 //
 // ferrocene-annotations: fls_zfibijmf8qe1
 // Arithmetic Overflow
+=======
+fn main() { let x = true * false; } //~ ERROR cannot multiply `bool` by `bool`
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

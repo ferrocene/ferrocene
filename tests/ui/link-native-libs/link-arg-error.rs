@@ -1,6 +1,9 @@
 //@ compile-flags: -l link-arg:+bundle=arg -Z unstable-options
-//@ error-pattern: linking modifier `bundle` is only compatible with `static` linking kind
 
 fn main() {}
 
+<<<<<<< HEAD
 // ferrocene-annotations: um_rustc_l
+=======
+//~? ERROR linking modifier `bundle` is only compatible with `static` linking kind
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

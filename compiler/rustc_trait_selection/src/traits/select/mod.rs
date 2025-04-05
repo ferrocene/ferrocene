@@ -1446,6 +1446,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         match self.infcx.typing_mode() {
             TypingMode::Coherence => {}
             TypingMode::Analysis { .. }
+            | TypingMode::Borrowck { .. }
             | TypingMode::PostBorrowckAnalysis { .. }
             | TypingMode::PostAnalysis => return Ok(()),
         }
@@ -1491,7 +1492,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             // However, if we disqualify *all* goals from being cached, perf suffers.
             // This is likely fixed by better caching in general in the new solver.
             // See: <https://github.com/rust-lang/rust/issues/132064>.
-            TypingMode::Analysis { defining_opaque_types } => {
+            TypingMode::Analysis { defining_opaque_types }
+            | TypingMode::Borrowck { defining_opaque_types } => {
                 defining_opaque_types.is_empty() || !pred.has_opaque_types()
             }
             // The hidden types of `defined_opaque_types` is not local to the current
@@ -1801,17 +1803,21 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             return Some(candidates.pop().unwrap().candidate);
         }
 
-        // We prefer trivial builtin candidates, i.e. builtin impls without any nested
-        // requirements, over all others. This is a fix for #53123 and prevents winnowing
-        // from accidentally extending the lifetime of a variable.
-        let mut trivial_builtin = candidates
-            .iter()
-            .filter(|c| matches!(c.candidate, BuiltinCandidate { has_nested: false }));
-        if let Some(_trivial) = trivial_builtin.next() {
-            // There should only ever be a single trivial builtin candidate
+        // We prefer `Sized` candidates over everything.
+        let mut sized_candidates =
+            candidates.iter().filter(|c| matches!(c.candidate, SizedCandidate { has_nested: _ }));
+        if let Some(sized_candidate) = sized_candidates.next() {
+            // There should only ever be a single sized candidate
             // as they would otherwise overlap.
-            debug_assert_eq!(trivial_builtin.next(), None);
-            return Some(BuiltinCandidate { has_nested: false });
+            debug_assert_eq!(sized_candidates.next(), None);
+            // Only prefer the built-in `Sized` candidate if its nested goals are certain.
+            // Otherwise, we may encounter failure later on if inference causes this candidate
+            // to not hold, but a where clause would've applied instead.
+            if sized_candidate.evaluation.must_apply_modulo_regions() {
+                return Some(sized_candidate.candidate.clone());
+            } else {
+                return None;
+            }
         }
 
         // Before we consider where-bounds, we have to deduplicate them here and also
@@ -1940,7 +1946,8 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             // Don't use impl candidates which overlap with other candidates.
             // This should pretty much only ever happen with malformed impls.
             if candidates.iter().all(|c| match c.candidate {
-                BuiltinCandidate { has_nested: _ }
+                SizedCandidate { has_nested: _ }
+                | BuiltinCandidate { has_nested: _ }
                 | TransmutabilityCandidate
                 | AutoImplCandidate
                 | ClosureCandidate { .. }
@@ -2294,6 +2301,11 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             | ty::Never
             | ty::Char => ty::Binder::dummy(Vec::new()),
 
+            // This branch is only for `experimental_default_bounds`.
+            // Other foreign types were rejected earlier in
+            // `assemble_candidates_from_auto_impls`.
+            ty::Foreign(..) => ty::Binder::dummy(Vec::new()),
+
             // FIXME(unsafe_binders): Squash the double binder for now, I guess.
             ty::UnsafeBinder(_) => return Err(SelectionError::Unimplemented),
 
@@ -2303,7 +2315,6 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             ty::Placeholder(..)
             | ty::Dynamic(..)
             | ty::Param(..)
-            | ty::Foreign(..)
             | ty::Alias(ty::Projection | ty::Inherent | ty::Weak, ..)
             | ty::Bound(..)
             | ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {

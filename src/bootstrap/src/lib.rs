@@ -46,8 +46,8 @@ mod ferrocene;
 mod utils;
 
 pub use core::builder::PathSet;
-pub use core::config::Config;
 pub use core::config::flags::{Flags, Subcommand};
+pub use core::config::{ChangeId, Config};
 
 #[cfg(feature = "tracing")]
 use tracing::{instrument, span};

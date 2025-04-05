@@ -310,7 +310,7 @@ pub use self::error::RawOsError;
 pub use self::error::SimpleMessage;
 #[unstable(feature = "io_const_error", issue = "133448")]
 pub use self::error::const_error;
-#[stable(feature = "anonymous_pipe", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "anonymous_pipe", since = "1.87.0")]
 pub use self::pipe::{PipeReader, PipeWriter, pipe};
 #[stable(feature = "is_terminal", since = "1.70.0")]
 pub use self::stdio::IsTerminal;
@@ -2989,11 +2989,11 @@ impl<T: Read> Read for Take<T> {
             return Ok(());
         }
 
-        if self.limit <= buf.capacity() as u64 {
-            // if we just use an as cast to convert, limit may wrap around on a 32 bit target
-            let limit = cmp::min(self.limit, usize::MAX as u64) as usize;
+        if self.limit < buf.capacity() as u64 {
+            // The condition above guarantees that `self.limit` fits in `usize`.
+            let limit = self.limit as usize;
 
-            let extra_init = cmp::min(limit as usize, buf.init_ref().len());
+            let extra_init = cmp::min(limit, buf.init_ref().len());
 
             // SAFETY: no uninit data is written to ibuf
             let ibuf = unsafe { &mut buf.as_mut()[..limit] };

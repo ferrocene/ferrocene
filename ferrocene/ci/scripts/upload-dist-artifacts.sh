@@ -16,9 +16,7 @@ mkdir -p "${DIST_DIR}"
 
 if [[ -f "${BUILD_METRICS_FILE}" ]]; then
     mkdir -p "${DIST_DIR}/build-metrics"
-    DEST="${DIST_DIR}/build-metrics/${CIRCLE_JOB}.json"
-    cp "${BUILD_METRICS_FILE}" "$DEST"
-    echo "::notice title=Uploaded: $file::$DEST"
+    cp "${BUILD_METRICS_FILE}" "${DIST_DIR}/build-metrics/${CIRCLE_JOB}.json"
 fi
 
 DEST="s3://${ARTIFACTS_BUCKET}/${ARTIFACTS_PREFIX}${CIRCLE_SHA1}/"

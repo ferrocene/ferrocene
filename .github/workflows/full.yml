@@ -215,8 +215,9 @@ jobs:
       # trying to test the x86_64 artifacts in CI
       host-triple: "" # x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
+      use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}]
       # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
       test-device-addr: "172.31.1.11:12345"
       # emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
@@ -242,6 +243,7 @@ jobs:
       # trying to test the x86_64 artifacts in CI
       host-triple: "" # x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
+      use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
       # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}

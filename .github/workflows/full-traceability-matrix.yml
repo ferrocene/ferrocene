@@ -94,6 +94,9 @@ jobs:
 
       - name: Run
         uses: ./.github/actions/run/
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.ARTIFACT }}
         with:
           container: ${{ inputs.container }}
           # This *exact* format is required for these args. Do not try to join lines.

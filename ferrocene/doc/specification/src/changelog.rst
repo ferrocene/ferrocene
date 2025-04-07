@@ -18,6 +18,49 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.84.0
+-------------------------------
+
+* `Allow \`#[deny]\` inside \`#[forbid]\` as a no-op <https://github.com/rust-lang/rust/pull/121560/>`_
+
+  * No change: Lints are not part of the FLS
+
+* `Show a warning when \`-Ctarget-feature\` is used to toggle features that can lead to unsoundness due to ABI mismatches <https://github.com/rust-lang/rust/pull/129884>`_
+
+  * No change: `target-feature` is outside the scope of the Ferrocene qualification
+
+* `Use the next-generation trait solver in coherence <https://github.com/rust-lang/rust/pull/130654>`_
+
+  * No change: the exact trait solver is not part of the FLS
+
+* `Allow coercions to drop the principal of trait objects <https://github.com/rust-lang/rust/pull/131857>`_
+
+  * Changed paragraph: :p:`fls_SYnFJBhi0IWj`
+
+* `Support \`/\` as the path separator for \`include!()\` in all cases on Windows <https://github.com/rust-lang/rust/pull/125205>`_
+
+  * No change: This past restriction of the `include` macro is not specified by the FLS
+
+* `Taking a raw ref (\`raw (const|mut)\`) of a deref of a pointer (\`*ptr\`) is now safe <https://github.com/rust-lang/rust/pull/129248>`_
+
+  * Changed paragraph: :p:`fls_8i4jzksxlrw0`
+
+* `Stabilize s390x inline assembly <https://github.com/rust-lang/rust/pull/131258>`_
+
+  * No change: These changes affect content that is informational
+
+* `Stabilize Arm64EC inline assembly <https://github.com/rust-lang/rust/pull/131781>`_
+
+  * No change: These changes affect content that is informational
+
+* `Lint against creating pointers to immediately dropped temporaries <https://github.com/rust-lang/rust/pull/128985>`_
+
+  * No change: Lints are not part of the FLS
+
+* `Execute drop glue when unwinding in an \`extern "C"\` function <https://github.com/rust-lang/rust/pull/129582>`_
+
+  * No change: This restricted past behavior is specified by the FLS.
+
 Language changes in Rust 1.83.0
 -------------------------------
 

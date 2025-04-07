@@ -1033,7 +1033,7 @@ The :t:`dereference` is assignable when the :t:`dereference expression` is a
 :t:`mutable place expression`.
 
 :dp:`fls_8i4jzksxlrw0`
-Dereferencing a :t:`raw pointer` shall require :t:`unsafe context`.
+Dereferencing a :t:`raw pointer` shall require :t:`unsafe context` unless the :t:`dereference expression` is the :t:`operand` of a :t:`raw borrow expression`.
 
 :dp:`fls_d68ddlse4zp`
 If the context of a :t:`dereference expression` is an

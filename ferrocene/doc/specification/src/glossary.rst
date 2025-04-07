@@ -539,6 +539,27 @@ an asynchronous manner.
 :dp:`fls_je689rormhd6`
 See :s:`AsyncBlockExpression`.
 
+.. _fls_oUdQnbW1MAFW:
+
+async closure expression
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_SxydbQPPX9Jw`
+An :dt:`async closure expression` is a :t:`closure expression` subject to keyword ``async`` that defines an :t:`async closure type` and constructs a value of that :t:`type`.
+
+:dp:`fls_JZsDFMg85a3u`
+See :s:`ClosureExpression`.
+
+.. _fls_Pq4ohvrMOi5p:
+
+async closure type
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_IT28HJaF8rnm`
+An :dt:`async closure type` is a unique anonymous :t:`function type` that encapsulates
+all :t:`[capture target]s` of a :t:`closure expression` producing a :std:`core::future::Future`.
+
+
 .. _fls_lYrTaCM1LcXU:
 
 async control flow boundary

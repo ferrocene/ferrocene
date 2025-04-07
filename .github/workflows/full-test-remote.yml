@@ -172,6 +172,13 @@ jobs:
         if: ${{ inputs.emulator-container != '' && (success() || failure()) }}
         run: docker logs ${{ steps.start-emulator.outputs.container }}
 
+      - name: Upload artifacts to S3
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.ARTIFACT }}
+        run:
+          ./ferrocene/ci/scripts/upload-dist-artifacts.sh
+
       - name: Generate usage report
         uses: ./.github/actions/usage-report/
         if: ${{ always() }}
@@ -277,6 +284,13 @@ jobs:
       - name: Output container logs
         if: ${{ inputs.emulator-container != '' && (success() || failure()) }}
         run: docker logs ${{ steps.start-emulator.outputs.container }}
+
+      - name: Upload artifacts to S3
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.ARTIFACT }}
+        run:
+          ./ferrocene/ci/scripts/upload-dist-artifacts.sh
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/
@@ -384,6 +398,13 @@ jobs:
         if: ${{ inputs.emulator-container != '' && (success() || failure()) }}
         run: docker logs ${{ steps.start-emulator.outputs.container }}
 
+      - name: Upload artifacts to S3
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.ARTIFACT }}
+        run:
+          ./ferrocene/ci/scripts/upload-dist-artifacts.sh
+
       - name: Generate usage report
         uses: ./.github/actions/usage-report/
         if: ${{ always() }}
@@ -474,7 +495,6 @@ jobs:
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE=qnx{0}/license/licenses', inputs.qnx-version)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source qnx{0}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
             ${{ inputs.emulator-start-command }}
-  
 
       - name: Run
         uses: ./.github/actions/run/
@@ -491,6 +511,13 @@ jobs:
       - name: Output container logs
         if: ${{ inputs.emulator-container != '' && (success() || failure()) }}
         run: docker logs ${{ steps.start-emulator.outputs.container }}
+
+      - name: Upload artifacts to S3
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.ARTIFACT }}
+        run:
+          ./ferrocene/ci/scripts/upload-dist-artifacts.sh
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/

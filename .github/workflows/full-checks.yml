@@ -103,6 +103,13 @@ jobs:
           script: |
             ./x.py test $(ferrocene/ci/split-tasks.py test:misc-checks)
 
+      - name: Upload artifacts to S3
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.ARTIFACT }}
+        run:
+          ./ferrocene/ci/scripts/upload-dist-artifacts.sh
+    
       - name: Generate usage report
         uses: ./.github/actions/usage-report/
         if: ${{ always() }}

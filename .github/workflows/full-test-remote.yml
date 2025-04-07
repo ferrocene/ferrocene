@@ -140,6 +140,10 @@ jobs:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
 
+      - name: Install brctl
+        run: |
+          sudo apt install bridge-utils
+
       - name: Start emulator
         id: start-emulator
         uses: ./.github/actions/start-emulator/
@@ -252,6 +256,10 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+
+      - name: Install brctl
+        run: |
+          sudo apt install bridge-utils
 
       - name: Start emulator
         id: start-emulator
@@ -366,6 +374,10 @@ jobs:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
 
+      - name: Install brctl
+        run: |
+          sudo apt install bridge-utils
+
       - name: Start emulator
         id: start-emulator
         uses: ./.github/actions/start-emulator/
@@ -479,6 +491,10 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+
+      - name: Install brctl
+        run: |
+          sudo apt install bridge-utils
 
       - name: Start emulator
         id: start-emulator

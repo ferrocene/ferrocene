@@ -16,7 +16,15 @@ mkdir -p "${DIST_DIR}"
 
 if [[ -f "${BUILD_METRICS_FILE}" ]]; then
     mkdir -p "${DIST_DIR}/build-metrics"
-    cp "${BUILD_METRICS_FILE}" "${DIST_DIR}/build-metrics/${CIRCLE_JOB}.json"
+    DEST="${DIST_DIR}/build-metrics/${CIRCLE_JOB}.json"
+    cp "${BUILD_METRICS_FILE}" "$DEST"
+    echo "::notice title=Uploaded: $file::$DEST"
 fi
 
-aws s3 cp --recursive "${DIST_DIR}/" "s3://${ARTIFACTS_BUCKET}/${ARTIFACTS_PREFIX}${CIRCLE_SHA1}/"
+DEST="s3://${ARTIFACTS_BUCKET}/${ARTIFACTS_PREFIX}${CIRCLE_SHA1}/"
+aws s3 cp --recursive "${DIST_DIR}/" "$DEST"
+
+for file in "${DIST_DIR}/*.tar.xz"; do
+    echo "::notice title=Uploaded: $file::$DEST"
+done
+      

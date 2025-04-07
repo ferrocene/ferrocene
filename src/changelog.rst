@@ -18,6 +18,31 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.85.0
+-------------------------------
+
+* `The 2024 Edition is now stable. <https://github.com/rust-lang/rust/pull/133349>`_
+
+  * No change: The FLS currently qualifies only the 2021 Edition
+
+* `Stabilize async closures <https://github.com/rust-lang/rust/pull/132706>`_
+
+  * New paragraphs: :p:`fls_My6pMgpeFCFg`, :p:`fls_DSy7bPKGzyov`
+
+  * Changed syntax: :s:`ClosureExpression`
+
+* `Stabilize \`#[diagnostic::do_not_recommend]\` <https://github.com/rust-lang/rust/pull/132056>`_
+
+  * No change: tool attributes are not part of the FLS
+
+* `Add \`unpredictable_function_pointer_comparisons\` lint to warn against function pointer comparisons <https://github.com/rust-lang/rust/pull/118833>`_
+
+  * No change: Lints are not part of the FLS
+
+* `Lint on combining \`#[no_mangle]\` and \`#[export_name]\` attributes. <https://github.com/rust-lang/rust/pull/131558>`_
+
+  * No change: Lints are not part of the FLS
+
 Language changes in Rust 1.84.0
 -------------------------------
 

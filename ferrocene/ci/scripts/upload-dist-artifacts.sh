@@ -22,7 +22,7 @@ fi
 DEST="s3://${ARTIFACTS_BUCKET}/${ARTIFACTS_PREFIX}${CIRCLE_SHA1}/"
 aws s3 cp --recursive "${DIST_DIR}/" "$DEST"
 
-for file in "${DIST_DIR}/*.tar.xz"; do
-    echo "::notice title=Uploaded: $file::$DEST"
+for file in ${DIST_DIR}/*.tar.xz; do
+    echo "::notice title=Uploaded: $(basename $file)::$DEST"
 done
       

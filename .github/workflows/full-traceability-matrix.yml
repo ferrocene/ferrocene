@@ -92,13 +92,6 @@ jobs:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
 
-      - name: Download usage artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: test-outcomes
-          pattern: usage-*
-          merge-multiple: true
-
       - name: Run
         uses: ./.github/actions/run/
         with:
@@ -108,9 +101,10 @@ jobs:
             --set
             ferrocene.test-outcomes=custom
             --set
-            ferrocene.test-outcomes-dir=test-outcomes
+            ferrocene.test-outcomes-dir=/tmp/test-outcomes
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
+            ferrocene/ci/scripts/fetch-test-outcomes.sh
             ./x.py run ferrocene/tools/traceability-matrix
 
       - name: Upload artifacts to S3

@@ -87,13 +87,6 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-          
-      - name: Download usage artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: test-outcomes
-          pattern: usage-*
-          merge-multiple: true
 
       - name: Run
         uses: ./.github/actions/run/
@@ -104,6 +97,7 @@ jobs:
           # Run dist before test to make sure the tarballs we test are uploaded
           # to CI beforehand, for manual inspection in case of failures.
           script: |
+            ferrocene/ci/scripts/fetch-test-outcomes.sh
             ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
 

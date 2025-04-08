@@ -49,14 +49,14 @@ Branching from rolling into beta
 
 The first step to prepare a stable releases is to promote a rolling branch into
 the beta channel of the release. To do so, open a new PR targeting the
-``release/1.NN`` branch changing:
+``release/1.NN`` branch, replacing the content of the following files:
 
 * ``ferrocene/version`` with the full version number of the release.
 * ``ferrocene/ci/channel`` with ``beta``.
 
-Once the PR is merged, the release process will start automatically publishing
+Once the PR is merged, the release process will start to automatically publish
 the latest commit on that branch into the ``beta-${major_version}`` channel
-every night. You can then continue landing changes into the branch until you
+every night. You can continue landing changes into the branch until you
 are ready to release it as a stable release.
 
 .. _release-technical-report:

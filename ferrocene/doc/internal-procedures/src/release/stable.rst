@@ -47,7 +47,7 @@ release, and increment the previous point release number.
 Branching from rolling into beta
 --------------------------------
 
-The first step to prepare a stable releases is to promote a rolling branch into
+The first step to prepare a stable release is to promote a rolling branch into
 the beta channel of the release. To do so, open a new PR targeting the
 ``release/1.NN`` branch changing:
 

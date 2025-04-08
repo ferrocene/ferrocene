@@ -27,7 +27,7 @@ Each major version of Ferrocene's version number is ``YY.MM``, where ``YY`` and
 version. For example, the first release of Ferrocene 23.11 would be published
 on November 2023.
 
-Each major version will have multiple point releases, identified by an
+Each major version can have multiple point releases, identified by an
 incrementing number starting from 0 (the initial release of that major
 version). The format of a release's version number is ``YY.MM.N``, where
 ``YY`` and ``MM`` are the year and month of the *major version's first release*

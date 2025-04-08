@@ -9,7 +9,7 @@ use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::doc::code_coverage::{CoverageMetadata, SingleCoverageReport};
 use crate::utils::build_stamp::libstd_stamp;
-use crate::{BootstrapCommand, Compiler, DependencyType, t};
+use crate::{BootstrapCommand, Compiler, DependencyType, GitRepo, t};
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     if !builder.config.profiler {
@@ -109,7 +109,10 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
 
     let ignored_path_regexes: &[&str] = match state.coverage_for {
         FerroceneCoverageFor::Library => &[
-            "\\.cargo/registry",
+            // Ignore Cargo dependencies:
+            "\\.cargo/registry", // Without remap-path-prefix
+            "/rust/deps",        // With remap-path-prefix
+            // Ignore files we don't currently handle:
             "ferrocene/library/backtrace-rs",
             "ferrocene/library/libc",
             "library/alloc",
@@ -140,7 +143,11 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
 
     let metadata = CoverageMetadata {
         metadata_version: CoverageMetadata::CURRENT_VERSION,
-        path_prefix: builder.src.clone(),
+        path_prefix: if let Some(path) = builder.debuginfo_map_to(GitRepo::Rustc) {
+            path.into()
+        } else {
+            builder.src.clone()
+        },
     };
 
     t!(std::fs::write(&paths.lcov_file, result.stdout_bytes()));

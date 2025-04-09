@@ -389,77 +389,83 @@ impl<'tcx> TyCtxt<'tcx> {
     /// Calculate the destructor of a given type.
     pub fn calculate_dtor(
         self,
-        adt_did: DefId,
-        validate: impl Fn(Self, DefId) -> Result<(), ErrorGuaranteed>,
+        adt_did: LocalDefId,
+        validate: impl Fn(Self, LocalDefId) -> Result<(), ErrorGuaranteed>,
     ) -> Option<ty::Destructor> {
         let drop_trait = self.lang_items().drop_trait()?;
         self.ensure_ok().coherent_trait(drop_trait).ok()?;
 
-        let ty = self.type_of(adt_did).instantiate_identity();
         let mut dtor_candidate = None;
-        self.for_each_relevant_impl(drop_trait, ty, |impl_did| {
+        // `Drop` impls can only be written in the same crate as the adt, and cannot be blanket impls
+        for &impl_did in self.local_trait_impls(drop_trait) {
+            let Some(adt_def) = self.type_of(impl_did).skip_binder().ty_adt_def() else { continue };
+            if adt_def.did() != adt_did.to_def_id() {
+                continue;
+            }
+
             if validate(self, impl_did).is_err() {
                 // Already `ErrorGuaranteed`, no need to delay a span bug here.
-                return;
+                continue;
             }
 
             let Some(item_id) = self.associated_item_def_ids(impl_did).first() else {
                 self.dcx()
                     .span_delayed_bug(self.def_span(impl_did), "Drop impl without drop function");
-                return;
+                continue;
             };
 
-            if let Some((old_item_id, _)) = dtor_candidate {
+            if self.def_kind(item_id) != DefKind::AssocFn {
+                self.dcx().span_delayed_bug(self.def_span(item_id), "drop is not a function");
+                continue;
+            }
+
+            if let Some(old_item_id) = dtor_candidate {
                 self.dcx()
                     .struct_span_err(self.def_span(item_id), "multiple drop impls found")
                     .with_span_note(self.def_span(old_item_id), "other impl here")
                     .delay_as_bug();
             }
 
-            dtor_candidate = Some((*item_id, self.impl_trait_header(impl_did).unwrap().constness));
-        });
+            dtor_candidate = Some(*item_id);
+        }
 
-        let (did, constness) = dtor_candidate?;
-        Some(ty::Destructor { did, constness })
+        let did = dtor_candidate?;
+        Some(ty::Destructor { did })
     }
 
     /// Calculate the async destructor of a given type.
     pub fn calculate_async_dtor(
         self,
-        adt_did: DefId,
-        validate: impl Fn(Self, DefId) -> Result<(), ErrorGuaranteed>,
+        adt_did: LocalDefId,
+        validate: impl Fn(Self, LocalDefId) -> Result<(), ErrorGuaranteed>,
     ) -> Option<ty::AsyncDestructor> {
         let async_drop_trait = self.lang_items().async_drop_trait()?;
         self.ensure_ok().coherent_trait(async_drop_trait).ok()?;
 
-        let ty = self.type_of(adt_did).instantiate_identity();
         let mut dtor_candidate = None;
-        self.for_each_relevant_impl(async_drop_trait, ty, |impl_did| {
-            if validate(self, impl_did).is_err() {
-                // Already `ErrorGuaranteed`, no need to delay a span bug here.
-                return;
+        // `AsyncDrop` impls can only be written in the same crate as the adt, and cannot be blanket impls
+        for &impl_did in self.local_trait_impls(async_drop_trait) {
+            let Some(adt_def) = self.type_of(impl_did).skip_binder().ty_adt_def() else { continue };
+            if adt_def.did() != adt_did.to_def_id() {
+                continue;
             }
 
-            let [future, ctor] = self.associated_item_def_ids(impl_did) else {
-                self.dcx().span_delayed_bug(
-                    self.def_span(impl_did),
-                    "AsyncDrop impl without async_drop function or Dropper type",
-                );
-                return;
-            };
+            if validate(self, impl_did).is_err() {
+                // Already `ErrorGuaranteed`, no need to delay a span bug here.
+                continue;
+            }
 
-            if let Some((_, _, old_impl_did)) = dtor_candidate {
+            if let Some(old_impl_did) = dtor_candidate {
                 self.dcx()
                     .struct_span_err(self.def_span(impl_did), "multiple async drop impls found")
                     .with_span_note(self.def_span(old_impl_did), "other impl here")
                     .delay_as_bug();
             }
 
-            dtor_candidate = Some((*future, *ctor, impl_did));
-        });
+            dtor_candidate = Some(impl_did);
+        }
 
-        let (future, ctor, _) = dtor_candidate?;
-        Some(ty::AsyncDestructor { future, ctor })
+        Some(ty::AsyncDestructor { impl_did: dtor_candidate? })
     }
 
     /// Returns async drop glue morphology for a definition. To get async drop
@@ -1543,55 +1549,6 @@ impl<'tcx> Ty<'tcx> {
     #[inline]
     pub fn outer_exclusive_binder(self) -> ty::DebruijnIndex {
         self.0.outer_exclusive_binder
-    }
-}
-
-pub enum ExplicitSelf<'tcx> {
-    ByValue,
-    ByReference(ty::Region<'tcx>, hir::Mutability),
-    ByRawPointer(hir::Mutability),
-    ByBox,
-    Other,
-}
-
-impl<'tcx> ExplicitSelf<'tcx> {
-    /// Categorizes an explicit self declaration like `self: SomeType`
-    /// into either `self`, `&self`, `&mut self`, `Box<Self>`, or
-    /// `Other`.
-    /// This is mainly used to require the arbitrary_self_types feature
-    /// in the case of `Other`, to improve error messages in the common cases,
-    /// and to make `Other` dyn-incompatible.
-    ///
-    /// Examples:
-    ///
-    /// ```ignore (illustrative)
-    /// impl<'a> Foo for &'a T {
-    ///     // Legal declarations:
-    ///     fn method1(self: &&'a T); // ExplicitSelf::ByReference
-    ///     fn method2(self: &'a T); // ExplicitSelf::ByValue
-    ///     fn method3(self: Box<&'a T>); // ExplicitSelf::ByBox
-    ///     fn method4(self: Rc<&'a T>); // ExplicitSelf::Other
-    ///
-    ///     // Invalid cases will be caught by `check_method_receiver`:
-    ///     fn method_err1(self: &'a mut T); // ExplicitSelf::Other
-    ///     fn method_err2(self: &'static T) // ExplicitSelf::ByValue
-    ///     fn method_err3(self: &&T) // ExplicitSelf::ByReference
-    /// }
-    /// ```
-    ///
-    pub fn determine<P>(self_arg_ty: Ty<'tcx>, is_self_ty: P) -> ExplicitSelf<'tcx>
-    where
-        P: Fn(Ty<'tcx>) -> bool,
-    {
-        use self::ExplicitSelf::*;
-
-        match *self_arg_ty.kind() {
-            _ if is_self_ty(self_arg_ty) => ByValue,
-            ty::Ref(region, ty, mutbl) if is_self_ty(ty) => ByReference(region, mutbl),
-            ty::RawPtr(ty, mutbl) if is_self_ty(ty) => ByRawPointer(mutbl),
-            _ if self_arg_ty.boxed_ty().is_some_and(is_self_ty) => ByBox,
-            _ => Other,
-        }
     }
 }
 

@@ -35,7 +35,7 @@ use rustc_session::lint::builtin::{
     UNKNOWN_OR_MALFORMED_DIAGNOSTIC_ATTRIBUTES, UNUSED_ATTRIBUTES,
 };
 use rustc_session::parse::feature_err;
-use rustc_span::{BytePos, DUMMY_SP, Span, Symbol, kw, sym};
+use rustc_span::{BytePos, DUMMY_SP, Span, Symbol, edition, kw, sym};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::infer::{TyCtxtInferExt, ValuePairs};
 use rustc_trait_selection::traits::ObligationCtxt;
@@ -449,6 +449,23 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     attr_span: attr.span(),
                     defn_span: span,
                 });
+            }
+        }
+
+        // `#[inline]` is ignored if the symbol must be codegened upstream because it's exported.
+        if let Some(did) = hir_id.as_owner()
+            && self.tcx.def_kind(did).has_codegen_attrs()
+            && !matches!(attr.meta_item_list().as_deref(), Some([item]) if item.has_name(sym::never))
+        {
+            let attrs = self.tcx.codegen_fn_attrs(did);
+            // Not checking naked as `#[inline]` is forbidden for naked functions anyways.
+            if attrs.contains_extern_indicator() {
+                self.tcx.emit_node_span_lint(
+                    UNUSED_ATTRIBUTES,
+                    hir_id,
+                    attr.span(),
+                    errors::InlineIgnoredForExported {},
+                );
             }
         }
     }
@@ -1021,14 +1038,14 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             // FIXME: Once rustdoc can handle URL conflicts on case insensitive file systems, we
             // can remove the `SelfTy` case here, remove `sym::SelfTy`, and update the
             // `#[doc(keyword = "SelfTy")` attribute in `library/std/src/keyword_docs.rs`.
-            s <= kw::Union || s == sym::SelfTy
+            s.is_reserved(|| edition::LATEST_STABLE_EDITION) || s.is_weak() || s == sym::SelfTy
         }
 
-        let doc_keyword = meta.value_str().unwrap_or(kw::Empty);
-        if doc_keyword == kw::Empty {
-            self.doc_attr_str_error(meta, "keyword");
-            return;
-        }
+        let doc_keyword = match meta.value_str() {
+            Some(value) if value != kw::Empty => value,
+            _ => return self.doc_attr_str_error(meta, "keyword"),
+        };
+
         let item_kind = match self.tcx.hir_node(hir_id) {
             hir::Node::Item(item) => Some(&item.kind),
             _ => None,
@@ -1140,7 +1157,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     errors::DocInlineOnlyUse {
                         attr_span: meta.span(),
                         item_span: (attr.style() == AttrStyle::Outer)
-                            .then(|| self.tcx.hir().span(hir_id)),
+                            .then(|| self.tcx.hir_span(hir_id)),
                     },
                 );
             }
@@ -1162,7 +1179,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 errors::DocMaskedOnlyExternCrate {
                     attr_span: meta.span(),
                     item_span: (attr.style() == AttrStyle::Outer)
-                        .then(|| self.tcx.hir().span(hir_id)),
+                        .then(|| self.tcx.hir_span(hir_id)),
                 },
             );
             return;
@@ -1176,7 +1193,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 errors::DocMaskedNotExternCrateSelf {
                     attr_span: meta.span(),
                     item_span: (attr.style() == AttrStyle::Outer)
-                        .then(|| self.tcx.hir().span(hir_id)),
+                        .then(|| self.tcx.hir_span(hir_id)),
                 },
             );
         }

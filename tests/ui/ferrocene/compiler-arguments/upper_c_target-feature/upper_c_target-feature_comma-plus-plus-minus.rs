@@ -2,6 +2,9 @@
 //@ compile-flags: -Ctarget-feature=+foo,+bar,-baz
 //@ compare-output-lines-by-subset
 //@ error-pattern: not a recognized feature for this target
+//~? unknown and unstable feature specified
+//~? unknown and unstable feature specified
+//~? unknown and unstable feature specified
 //
 // When an invalid target feature is provided, LLVM outputs multiple copies of the warning.
 // Unfortunately, the number of warnings depends on how many target features are provided, so this

@@ -2054,21 +2054,21 @@ impl<T, E> Option<Result<T, E>> {
 //     }
 // }
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<T> Default for Option<T> {
-//     /// Returns [`None`][Option::None].
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let opt: Option<u32> = Option::default();
-//     /// assert!(opt.is_none());
-//     /// ```
-//     #[inline]
-//     fn default() -> Option<T> {
-//         None
-//     }
-// }
+#[stable(feature = "rust1", since = "1.0.0")]
+impl<T> Default for Option<T> {
+    /// Returns [`None`][Option::None].
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let opt: Option<u32> = Option::default();
+    /// assert!(opt.is_none());
+    /// ```
+    #[inline]
+    fn default() -> Option<T> {
+        None
+    }
+}
 
 // #[stable(feature = "rust1", since = "1.0.0")]
 // impl<T> IntoIterator for Option<T> {

@@ -4,12 +4,12 @@ use build_helper::exit;
 
 use crate::builder::Builder;
 use crate::core::build_steps::llvm::Llvm;
-use crate::core::build_steps::tool::Tool;
-use crate::core::builder::Cargo;
-use crate::core::config::TargetSelection;
+use crate::core::builder::{Cargo, ShouldRun, Step};
 use crate::core::config::flags::FerroceneCoverageFor;
+use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
+use crate::ferrocene::doc::code_coverage::{CoverageMetadata, SingleCoverageReport};
 use crate::utils::build_stamp::libstd_stamp;
-use crate::{BootstrapCommand, Compiler, DependencyType};
+use crate::{BootstrapCommand, Compiler, DependencyType, GitRepo, t};
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     if !builder.config.profiler {
@@ -31,7 +31,6 @@ pub(crate) fn measure_coverage(
 ) {
     // Pre-requisites for the `generate_report()` function are built here, as that function is
     // executed after all bootstrap steps are executed.
-    builder.tool_exe(Tool::CoverageDump);
     builder.ensure(Llvm { target });
 
     let paths = Paths::find(builder, target, coverage_for);
@@ -110,7 +109,10 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
 
     let ignored_path_regexes: &[&str] = match state.coverage_for {
         FerroceneCoverageFor::Library => &[
-            "\\.cargo/registry",
+            // Ignore Cargo dependencies:
+            "\\.cargo/registry", // Without remap-path-prefix
+            "/rust/deps",        // With remap-path-prefix
+            // Ignore files we don't currently handle:
             "ferrocene/library/backtrace-rs",
             "ferrocene/library/libc",
             "library/alloc",
@@ -119,10 +121,10 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
         ],
     };
 
-    builder.info("Generating code coverage report");
+    builder.info("Generating lcov dump of the code coverage measurements");
     let mut cmd = BootstrapCommand::new(llvm_bin_dir.join("llvm-cov"));
-    cmd.arg("show").arg(instrumented_binary).arg("--instr-profile").arg(&paths.profdata_file);
-    cmd.arg("--format").arg("html").arg("-o").arg(&paths.report_dir);
+    cmd.arg("export").arg(instrumented_binary).arg("--instr-profile").arg(&paths.profdata_file);
+    cmd.arg("--format").arg("lcov");
 
     // Note that which paths are ignored changes how llvm-cov displays the paths in the report.
     // llvm-cov makes all paths relative to the common ancestor.
@@ -130,21 +132,8 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
         cmd.arg("--ignore-filename-regex").arg(path);
     }
 
-    // By default llvm-cov includes the date the report was generated on, but that is a problem
-    // for reproducibility. Disable showing the date.
-    cmd.arg("--show-created-time=false");
-
-    // Use the demangler mode of coverage-dump as the demangler. This is functionally equivalent
-    // to using rustfilt, but it has the advantage of being part of the monorepo. If upstream
-    // removes the demangler functionality from coverage-dump, feel free to replace the tool.
-    //
-    // Note that llvm-cov accepts the --Xdemangler flag multiple times. The first time it
-    // specifies the binary name, and any following occurrences of --Xdemangler specifies an
-    // argument provided to that binary.
-    let coverage_dump = builder.tool_exe(Tool::CoverageDump);
-    cmd.arg("--Xdemangler").arg(coverage_dump).arg("--Xdemangler").arg("--demangle");
-
-    if !cmd.run(builder) {
+    let result = cmd.run_capture_stdout(builder);
+    if result.is_failure() {
         eprintln!("Failed to run llvm-cov to generate a report!");
         eprintln!();
         eprintln!("If the error message mentions \"function name is empty\" please check the");
@@ -152,10 +141,26 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
         exit!(1);
     }
 
-    eprintln!(
-        "The coverage report is available at: file://{}/index.html",
-        paths.report_dir.display()
-    );
+    let metadata = CoverageMetadata {
+        metadata_version: CoverageMetadata::CURRENT_VERSION,
+        path_prefix: if let Some(path) = builder.debuginfo_map_to(GitRepo::Rustc) {
+            path.into()
+        } else {
+            builder.src.clone()
+        },
+    };
+
+    t!(std::fs::write(&paths.lcov_file, result.stdout_bytes()));
+    t!(std::fs::write(&paths.metadata_file, &t!(serde_json::to_vec_pretty(&metadata))));
+
+    if builder.config.ferrocene_generate_coverage_report_after_tests {
+        builder.ensure(SingleCoverageReport {
+            target: state.target,
+            name: format!("{}-{}", state.coverage_for.as_str(), state.target.triple),
+            lcov: paths.lcov_file,
+            metadata,
+        });
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -168,7 +173,8 @@ pub(crate) struct CoverageState {
 struct Paths {
     profraw_dir: PathBuf,
     profdata_file: PathBuf,
-    report_dir: PathBuf,
+    lcov_file: PathBuf,
+    metadata_file: PathBuf,
 }
 
 impl Paths {
@@ -177,11 +183,13 @@ impl Paths {
         target: TargetSelection,
         coverage_for: FerroceneCoverageFor,
     ) -> Self {
-        let name = coverage_for.as_str();
+        let name = format!("{}-{}", coverage_for.as_str(), target.triple);
+        let out_dir = builder.out.join("ferrocene").join("coverage");
         Self {
             profraw_dir: builder.tempdir().join(format!("ferrocene-profraw-{name}")),
             profdata_file: builder.tempdir().join(format!("ferrocene-{name}.profdata")),
-            report_dir: builder.doc_out(target).join("coverage").join(name),
+            lcov_file: out_dir.join(format!("lcov-{name}.info")),
+            metadata_file: out_dir.join(format!("metadata-{name}.json")),
         }
     }
 
@@ -192,12 +200,36 @@ impl Paths {
         if self.profdata_file.exists() {
             builder.remove(&self.profdata_file);
         }
-        if self.report_dir.exists() {
-            builder.remove_dir(&self.report_dir);
+        if self.lcov_file.exists() {
+            builder.remove(&self.lcov_file);
+        }
+        if self.metadata_file.exists() {
+            builder.remove(&self.metadata_file);
         }
 
         builder.create_dir(&self.profraw_dir);
-        builder.create_dir(&self.report_dir);
+        builder.create_dir(self.lcov_file.parent().unwrap());
+    }
+}
+
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub(crate) struct CoverageOutcomesDir;
+
+impl Step for CoverageOutcomesDir {
+    type Output = Option<PathBuf>;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.never()
+    }
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        match &builder.config.ferrocene_coverage_outcomes {
+            FerroceneCoverageOutcomes::Disabled => None,
+            FerroceneCoverageOutcomes::Local => {
+                Some(builder.out.join("ferrocene").join("coverage"))
+            }
+            FerroceneCoverageOutcomes::Custom(path) => Some(path.clone()),
+        }
     }
 }
 

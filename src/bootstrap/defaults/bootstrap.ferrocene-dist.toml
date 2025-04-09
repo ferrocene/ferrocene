@@ -192,7 +192,6 @@ x86_64-pc-windows-msvc.jemalloc = false
 # current channel.
 channel = "auto-detect"
 
-
 # Run the traceability matrix tool in CI mode, producing the correct links.
 #
 # If this configuration is missing the traceability matrix might not be properly enforced.

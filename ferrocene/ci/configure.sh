@@ -64,6 +64,9 @@ add --set profile=ferrocene-dist
 # already by scripts in the CI configuration.
 add --disable-manage-submodules
 
+# In our setup we generate coverage reports in the docs job, not in the tests jobs.
+add --set ferrocene.generate-coverage-report-after-tests=false
+
 # Set the target used for the build itself (build system, initial compiler
 # stages, etc). This depends on the OS used in CI.
 #
@@ -149,6 +152,12 @@ fi
 if [[ -n "${FERROCENE_TEST_OUTCOMES_DIR+x}" ]]; then
     add --set ferrocene.test-outcomes=custom
     add --set "ferrocene.test-outcomes-dir=${FERROCENE_TEST_OUTCOMES_DIR}"
+fi
+
+# Set the directory to the coverage outcomes files, if CI provides it.
+if [[ -n "${FERROCENE_COVERAGE_OUTCOMES_DIR+x}" ]]; then
+    add --set ferrocene.coverage-outcomes=custom
+    add --set "ferrocene.coverage-outcomes-dir=${FERROCENE_COVERAGE_OUTCOMES_DIR}"
 fi
 
 # Prevent `cargo` from updating the `Cargo.lock` file if the contents of the

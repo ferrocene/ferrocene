@@ -426,11 +426,13 @@ pub struct Config {
     pub ferrocene_aws_profile: Option<String>,
     pub ferrocene_traceability_matrix_mode: FerroceneTraceabilityMatrixMode,
     pub ferrocene_test_outcomes: FerroceneTestOutcomes,
+    pub ferrocene_coverage_outcomes: FerroceneCoverageOutcomes,
     pub ferrocene_oxidos_src: Option<String>,
     pub ferrocene_tarball_signing_kms_key_arn: Option<String>,
     pub ferrocene_document_signatures: FerroceneDocumentSignatures,
     pub ferrocene_technical_report_url: Option<String>,
     pub ferrocene_secret_sauce: FerroceneSecretSauce,
+    pub ferrocene_generate_coverage_report_after_tests: bool,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -451,6 +453,14 @@ pub enum FerroceneTestOutcomes {
     Disabled,
     Local,
     DownloadCi,
+    Custom(PathBuf),
+}
+
+#[derive(Debug, Clone, Default)]
+pub enum FerroceneCoverageOutcomes {
+    #[default]
+    Disabled,
+    Local,
     Custom(PathBuf),
 }
 
@@ -1387,6 +1397,8 @@ define_config! {
         traceability_matrix_mode: Option<String> = "traceability-matrix-mode",
         test_outcomes: Option<String> = "test-outcomes",
         test_outcomes_dir: Option<PathBuf> = "test-outcomes-dir",
+        coverage_outcomes: Option<String> = "coverage-outcomes",
+        coverage_outcomes_dir: Option<PathBuf> = "coverage-outcomes-dir",
         oxidos_src: Option<String> = "oxidos-src",
         tarball_signing_kms_key_arn: Option<String> = "tarball-signing-kms-key-arn",
         document_signatures: Option<String> = "document-signatures",
@@ -1394,6 +1406,7 @@ define_config! {
         document_signatures_tarball: Option<PathBuf> = "document-signatures-tarball",
         technical_report_url: Option<String> = "technical-report-url",
         secret_sauce_dir: Option<PathBuf> = "secret-sauce-dir",
+        generate_coverage_report_after_test: Option<bool> = "generate-coverage-report-after-tests",
     }
 }
 
@@ -2423,6 +2436,9 @@ impl Config {
             config.ferrocene_tarball_signing_kms_key_arn = f.tarball_signing_kms_key_arn;
             config.ferrocene_technical_report_url = f.technical_report_url;
 
+            config.ferrocene_generate_coverage_report_after_tests =
+                f.generate_coverage_report_after_test.unwrap_or(true);
+
             config.ferrocene_document_signatures = match (
                 f.document_signatures.as_deref(),
                 f.document_signatures_s3_bucket,
@@ -2478,6 +2494,26 @@ impl Config {
                     "ferrocene.test-outcomes=\"{value}\" is incompatible with ferrocene.test-outcomes-dir"
                 ),
                 (Some(value), None) => panic!("invalid value for ferrocene.test-outcomes: {value}"),
+            };
+
+            config.ferrocene_coverage_outcomes = match (
+                f.coverage_outcomes.as_deref(),
+                f.coverage_outcomes_dir,
+            ) {
+                (None | Some("disabled"), None) => FerroceneCoverageOutcomes::Disabled,
+                (Some("local"), None) => FerroceneCoverageOutcomes::Local,
+                (Some("custom"), Some(path)) => FerroceneCoverageOutcomes::Custom(path),
+                // Error messages:
+                (Some(value), Some(_)) => panic!(
+                    "ferrocene.coverage-outcomes=\"{value}\" is incompatible with \
+                     ferrocene.coverage-outcomes-dir"
+                ),
+                (None, Some(_)) => panic!(
+                    "ferrocene.coverage-outcomes-dir needs ferrocene.coverage-outcomes to be set"
+                ),
+                (Some(value), None) => {
+                    panic!("invalid value for ferrocene.coverage-outcomes: {value}")
+                }
             };
 
             config.ferrocene_secret_sauce = if let Some(path) = f.secret_sauce_dir {

@@ -925,6 +925,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::tool::flip_link::FlipLink,
                 tool::FerroceneGenerateTarball,
                 tool::FerroceneTraceabilityMatrix,
+                tool::FerroceneGrcov,
                 tool::RustdocGUITest,
                 tool::OptimizedDist,
                 tool::CoverageDump,
@@ -1085,6 +1086,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::doc::TraceabilityMatrix,
                 crate::ferrocene::doc::TechnicalReport,
                 crate::ferrocene::doc::Requirements,
+                crate::ferrocene::doc::code_coverage::AllCoverageReports,
                 // QMS Documents
                 crate::ferrocene::doc::InternalProcedures,
                 doc::Bootstrap,
@@ -1128,6 +1130,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::dist::SourceTarball,
                 crate::ferrocene::dist::SelfTest,
                 crate::ferrocene::dist::TestOutcomes,
+                crate::ferrocene::dist::CoverageOutcomes,
                 crate::ferrocene::dist::GenerateBuildMetadata,
                 crate::ferrocene::partners::oxidos::DistOxidOs,
             ),

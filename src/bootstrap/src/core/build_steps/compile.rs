@@ -284,7 +284,9 @@ impl Step for Std {
         };
 
         if builder.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library)
-            && compiler.stage == builder.top_stage
+            // Note that for the standard library, stage 1 is tested when either --stage 1 or
+            // --stage 2 are passed.
+            && compiler.stage == 1
         {
             cargo.arg("--features=core/ferrocene_inject_profiler_builtins");
 

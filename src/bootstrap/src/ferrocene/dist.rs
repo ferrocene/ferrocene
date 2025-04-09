@@ -14,6 +14,7 @@ use serde_json::json;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::run::GenerateCopyright;
 use crate::core::config::TargetSelection;
+use crate::ferrocene::code_coverage::CoverageOutcomesDir;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
@@ -378,6 +379,33 @@ impl Step for TestOutcomes {
         let tarball = Tarball::new_targetless(builder, "ferrocene-test-outcomes");
         tarball.add_dir(test_outcomes, "share/ferrocene/test-outcomes");
         Some(tarball.generate())
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub(crate) struct CoverageOutcomes;
+
+impl Step for CoverageOutcomes {
+    type Output = GeneratedTarball;
+    const DEFAULT: bool = false;
+    const ONLY_HOSTS: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.alias("ferrocene-coverage-outcomes")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(CoverageOutcomes);
+    }
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        let Some(path) = builder.ensure(CoverageOutcomesDir) else {
+            panic!("cannot dist coverage-outcomes with ferrocene.coverage-outcomes=\"disabled\"");
+        };
+
+        let tarball = Tarball::new_targetless(builder, "ferrocene-coverage-outcomes");
+        tarball.add_dir(path, "share/ferrocene/coverage-outcomes");
+        tarball.generate()
     }
 }
 

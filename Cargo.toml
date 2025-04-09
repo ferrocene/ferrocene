@@ -55,6 +55,7 @@ members = [
 ]
 
 exclude = [
+  "ferrocene/tools/grcov",
   "build",
   "compiler/rustc_codegen_cranelift",
   "compiler/rustc_codegen_gcc",

@@ -296,6 +296,11 @@ impl CommandOutput {
     }
 
     #[must_use]
+    pub fn stdout_bytes(&self) -> &[u8] {
+        self.stdout.as_deref().expect("Accessing stdout of a command that did not capture stdout")
+    }
+
+    #[must_use]
     pub fn stdout_if_present(&self) -> Option<String> {
         self.stdout.as_ref().and_then(|s| String::from_utf8(s.clone()).ok())
     }

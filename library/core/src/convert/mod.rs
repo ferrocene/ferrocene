@@ -35,13 +35,15 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-use crate::error::Error;
-use crate::fmt;
-use crate::hash::{Hash, Hasher};
+// use crate::error::Error;
+// use crate::fmt;
+// use crate::hash::{Hash, Hasher};
 
+#[cfg(feature = "uncertified")]
 mod num;
 
 #[unstable(feature = "convert_float_to_int", issue = "67057")]
+#[cfg(feature = "uncertified")]
 pub use num::FloatToInt;
 
 /// The identity function.
@@ -106,113 +108,113 @@ pub const fn identity<T>(x: T) -> T {
 }
 
 /// Used to do a cheap reference-to-reference conversion.
-///
-/// This trait is similar to [`AsMut`] which is used for converting between mutable references.
-/// If you need to do a costly conversion it is better to implement [`From`] with type
-/// `&T` or write a custom function.
-///
-/// # Relation to `Borrow`
-///
-/// `AsRef` has the same signature as [`Borrow`], but [`Borrow`] is different in a few aspects:
-///
-/// - Unlike `AsRef`, [`Borrow`] has a blanket impl for any `T`, and can be used to accept either
-///   a reference or a value. (See also note on `AsRef`'s reflexibility below.)
-/// - [`Borrow`] also requires that [`Hash`], [`Eq`] and [`Ord`] for a borrowed value are
-///   equivalent to those of the owned value. For this reason, if you want to
-///   borrow only a single field of a struct you can implement `AsRef`, but not [`Borrow`].
-///
-/// **Note: This trait must not fail**. If the conversion can fail, use a
-/// dedicated method which returns an [`Option<T>`] or a [`Result<T, E>`].
-///
-/// # Generic Implementations
-///
-/// `AsRef` auto-dereferences if the inner type is a reference or a mutable reference
-/// (e.g.: `foo.as_ref()` will work the same if `foo` has type `&mut Foo` or `&&mut Foo`).
-///
-/// Note that due to historic reasons, the above currently does not hold generally for all
-/// [dereferenceable types], e.g. `foo.as_ref()` will *not* work the same as
-/// `Box::new(foo).as_ref()`. Instead, many smart pointers provide an `as_ref` implementation which
-/// simply returns a reference to the [pointed-to value] (but do not perform a cheap
-/// reference-to-reference conversion for that value). However, [`AsRef::as_ref`] should not be
-/// used for the sole purpose of dereferencing; instead ['`Deref` coercion'] can be used:
-///
-/// [dereferenceable types]: core::ops::Deref
-/// [pointed-to value]: core::ops::Deref::Target
-/// ['`Deref` coercion']: core::ops::Deref#deref-coercion
-///
-/// ```
-/// let x = Box::new(5i32);
-/// // Avoid this:
-/// // let y: &i32 = x.as_ref();
-/// // Better just write:
-/// let y: &i32 = &x;
-/// ```
-///
-/// Types which implement [`Deref`] should consider implementing `AsRef<T>` as follows:
-///
-/// [`Deref`]: core::ops::Deref
-///
-/// ```
-/// # use core::ops::Deref;
-/// # struct SomeType;
-/// # impl Deref for SomeType {
-/// #     type Target = [u8];
-/// #     fn deref(&self) -> &[u8] {
-/// #         &[]
-/// #     }
-/// # }
-/// impl<T> AsRef<T> for SomeType
-/// where
-///     T: ?Sized,
-///     <SomeType as Deref>::Target: AsRef<T>,
-/// {
-///     fn as_ref(&self) -> &T {
-///         self.deref().as_ref()
-///     }
-/// }
-/// ```
-///
-/// # Reflexivity
-///
-/// Ideally, `AsRef` would be reflexive, i.e. there would be an `impl<T: ?Sized> AsRef<T> for T`
-/// with [`as_ref`] simply returning its argument unchanged.
-/// Such a blanket implementation is currently *not* provided due to technical restrictions of
-/// Rust's type system (it would be overlapping with another existing blanket implementation for
-/// `&T where T: AsRef<U>` which allows `AsRef` to auto-dereference, see "Generic Implementations"
-/// above).
-///
-/// [`as_ref`]: AsRef::as_ref
-///
-/// A trivial implementation of `AsRef<T> for T` must be added explicitly for a particular type `T`
-/// where needed or desired. Note, however, that not all types from `std` contain such an
-/// implementation, and those cannot be added by external code due to orphan rules.
-///
-/// # Examples
-///
-/// By using trait bounds we can accept arguments of different types as long as they can be
-/// converted to the specified type `T`.
-///
-/// For example: By creating a generic function that takes an `AsRef<str>` we express that we
-/// want to accept all references that can be converted to [`&str`] as an argument.
-/// Since both [`String`] and [`&str`] implement `AsRef<str>` we can accept both as input argument.
-///
-/// [`&str`]: primitive@str
-/// [`Borrow`]: crate::borrow::Borrow
-/// [`Eq`]: crate::cmp::Eq
-/// [`Ord`]: crate::cmp::Ord
-/// [`String`]: ../../std/string/struct.String.html
-///
-/// ```
-/// fn is_hello<T: AsRef<str>>(s: T) {
-///    assert_eq!("hello", s.as_ref());
-/// }
-///
-/// let s = "hello";
-/// is_hello(s);
-///
-/// let s = "hello".to_string();
-/// is_hello(s);
-/// ```
+// ///
+// /// This trait is similar to [`AsMut`] which is used for converting between mutable references.
+// /// If you need to do a costly conversion it is better to implement [`From`] with type
+// /// `&T` or write a custom function.
+// ///
+// /// # Relation to `Borrow`
+// ///
+// /// `AsRef` has the same signature as [`Borrow`], but [`Borrow`] is different in a few aspects:
+// ///
+// /// - Unlike `AsRef`, [`Borrow`] has a blanket impl for any `T`, and can be used to accept either
+// ///   a reference or a value. (See also note on `AsRef`'s reflexibility below.)
+// /// - [`Borrow`] also requires that [`Hash`], [`Eq`] and [`Ord`] for a borrowed value are
+// ///   equivalent to those of the owned value. For this reason, if you want to
+// ///   borrow only a single field of a struct you can implement `AsRef`, but not [`Borrow`].
+// ///
+// /// **Note: This trait must not fail**. If the conversion can fail, use a
+// /// dedicated method which returns an [`Option<T>`] or a [`Result<T, E>`].
+// ///
+// /// # Generic Implementations
+// ///
+// /// `AsRef` auto-dereferences if the inner type is a reference or a mutable reference
+// /// (e.g.: `foo.as_ref()` will work the same if `foo` has type `&mut Foo` or `&&mut Foo`).
+// ///
+// /// Note that due to historic reasons, the above currently does not hold generally for all
+// /// [dereferenceable types], e.g. `foo.as_ref()` will *not* work the same as
+// /// `Box::new(foo).as_ref()`. Instead, many smart pointers provide an `as_ref` implementation which
+// /// simply returns a reference to the [pointed-to value] (but do not perform a cheap
+// /// reference-to-reference conversion for that value). However, [`AsRef::as_ref`] should not be
+// /// used for the sole purpose of dereferencing; instead ['`Deref` coercion'] can be used:
+// ///
+// /// [dereferenceable types]: core::ops::Deref
+// /// [pointed-to value]: core::ops::Deref::Target
+// /// ['`Deref` coercion']: core::ops::Deref#deref-coercion
+// ///
+// /// ```
+// /// let x = Box::new(5i32);
+// /// // Avoid this:
+// /// // let y: &i32 = x.as_ref();
+// /// // Better just write:
+// /// let y: &i32 = &x;
+// /// ```
+// ///
+// /// Types which implement [`Deref`] should consider implementing `AsRef<T>` as follows:
+// ///
+// /// [`Deref`]: core::ops::Deref
+// ///
+// /// ```
+// /// # use core::ops::Deref;
+// /// # struct SomeType;
+// /// # impl Deref for SomeType {
+// /// #     type Target = [u8];
+// /// #     fn deref(&self) -> &[u8] {
+// /// #         &[]
+// /// #     }
+// /// # }
+// /// impl<T> AsRef<T> for SomeType
+// /// where
+// ///     T: ?Sized,
+// ///     <SomeType as Deref>::Target: AsRef<T>,
+// /// {
+// ///     fn as_ref(&self) -> &T {
+// ///         self.deref().as_ref()
+// ///     }
+// /// }
+// /// ```
+// ///
+// /// # Reflexivity
+// ///
+// /// Ideally, `AsRef` would be reflexive, i.e. there would be an `impl<T: ?Sized> AsRef<T> for T`
+// /// with [`as_ref`] simply returning its argument unchanged.
+// /// Such a blanket implementation is currently *not* provided due to technical restrictions of
+// /// Rust's type system (it would be overlapping with another existing blanket implementation for
+// /// `&T where T: AsRef<U>` which allows `AsRef` to auto-dereference, see "Generic Implementations"
+// /// above).
+// ///
+// /// [`as_ref`]: AsRef::as_ref
+// ///
+// /// A trivial implementation of `AsRef<T> for T` must be added explicitly for a particular type `T`
+// /// where needed or desired. Note, however, that not all types from `std` contain such an
+// /// implementation, and those cannot be added by external code due to orphan rules.
+// ///
+// /// # Examples
+// ///
+// /// By using trait bounds we can accept arguments of different types as long as they can be
+// /// converted to the specified type `T`.
+// ///
+// /// For example: By creating a generic function that takes an `AsRef<str>` we express that we
+// /// want to accept all references that can be converted to [`&str`] as an argument.
+// /// Since both [`String`] and [`&str`] implement `AsRef<str>` we can accept both as input argument.
+// ///
+// /// [`&str`]: primitive@str
+// /// [`Borrow`]: crate::borrow::Borrow
+// /// [`Eq`]: crate::cmp::Eq
+// /// [`Ord`]: crate::cmp::Ord
+// /// [`String`]: ../../std/string/struct.String.html
+// ///
+// /// ```
+// /// fn is_hello<T: AsRef<str>>(s: T) {
+// ///    assert_eq!("hello", s.as_ref());
+// /// }
+// ///
+// /// let s = "hello";
+// /// is_hello(s);
+// ///
+// /// let s = "hello".to_string();
+// /// is_hello(s);
+// /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg_attr(not(test), rustc_diagnostic_item = "AsRef")]
 pub trait AsRef<T: ?Sized> {
@@ -453,125 +455,125 @@ pub trait Into<T>: Sized {
 
 /// Used to do value-to-value conversions while consuming the input value. It is the reciprocal of
 /// [`Into`].
-///
-/// One should always prefer implementing `From` over [`Into`]
-/// because implementing `From` automatically provides one with an implementation of [`Into`]
-/// thanks to the blanket implementation in the standard library.
-///
-/// Only implement [`Into`] when targeting a version prior to Rust 1.41 and converting to a type
-/// outside the current crate.
-/// `From` was not able to do these types of conversions in earlier versions because of Rust's
-/// orphaning rules.
-/// See [`Into`] for more details.
-///
-/// Prefer using [`Into`] over using `From` when specifying trait bounds on a generic function.
-/// This way, types that directly implement [`Into`] can be used as arguments as well.
-///
-/// The `From` trait is also very useful when performing error handling. When constructing a function
-/// that is capable of failing, the return type will generally be of the form `Result<T, E>`.
-/// `From` simplifies error handling by allowing a function to return a single error type
-/// that encapsulates multiple error types. See the "Examples" section and [the book][book] for more
-/// details.
-///
-/// **Note: This trait must not fail**. The `From` trait is intended for perfect conversions.
-/// If the conversion can fail or is not perfect, use [`TryFrom`].
-///
-/// # Generic Implementations
-///
-/// - `From<T> for U` implies [`Into`]`<U> for T`
-/// - `From` is reflexive, which means that `From<T> for T` is implemented
-///
-/// # When to implement `From`
-///
-/// While there's no technical restrictions on which conversions can be done using
-/// a `From` implementation, the general expectation is that the conversions
-/// should typically be restricted as follows:
-///
-/// * The conversion is *infallible*: if the conversion can fail, use [`TryFrom`]
-///   instead; don't provide a `From` impl that panics.
-///
-/// * The conversion is *lossless*: semantically, it should not lose or discard
-///   information. For example, `i32: From<u16>` exists, where the original
-///   value can be recovered using `u16: TryFrom<i32>`.  And `String: From<&str>`
-///   exists, where you can get something equivalent to the original value via
-///   `Deref`.  But `From` cannot be used to convert from `u32` to `u16`, since
-///   that cannot succeed in a lossless way.  (There's some wiggle room here for
-///   information not considered semantically relevant.  For example,
-///   `Box<[T]>: From<Vec<T>>` exists even though it might not preserve capacity,
-///   like how two vectors can be equal despite differing capacities.)
-///
-/// * The conversion is *value-preserving*: the conceptual kind and meaning of
-///   the resulting value is the same, even though the Rust type and technical
-///   representation might be different.  For example `-1_i8 as u8` is *lossless*,
-///   since `as` casting back can recover the original value, but that conversion
-///   is *not* available via `From` because `-1` and `255` are different conceptual
-///   values (despite being identical bit patterns technically).  But
-///   `f32: From<i16>` *is* available because `1_i16` and `1.0_f32` are conceptually
-///   the same real number (despite having very different bit patterns technically).
-///   `String: From<char>` is available because they're both *text*, but
-///   `String: From<u32>` is *not* available, since `1` (a number) and `"1"`
-///   (text) are too different.  (Converting values to text is instead covered
-///   by the [`Display`](crate::fmt::Display) trait.)
-///
-/// * The conversion is *obvious*: it's the only reasonable conversion between
-///   the two types.  Otherwise it's better to have it be a named method or
-///   constructor, like how [`str::as_bytes`] is a method and how integers have
-///   methods like [`u32::from_ne_bytes`], [`u32::from_le_bytes`], and
-///   [`u32::from_be_bytes`], none of which are `From` implementations.  Whereas
-///   there's only one reasonable way to wrap an [`Ipv6Addr`](crate::net::Ipv6Addr)
-///   into an [`IpAddr`](crate::net::IpAddr), thus `IpAddr: From<Ipv6Addr>` exists.
-///
-/// # Examples
-///
-/// [`String`] implements `From<&str>`:
-///
-/// An explicit conversion from a `&str` to a String is done as follows:
-///
-/// ```
-/// let string = "hello".to_string();
-/// let other_string = String::from("hello");
-///
-/// assert_eq!(string, other_string);
-/// ```
-///
-/// While performing error handling it is often useful to implement `From` for your own error type.
-/// By converting underlying error types to our own custom error type that encapsulates the
-/// underlying error type, we can return a single error type without losing information on the
-/// underlying cause. The '?' operator automatically converts the underlying error type to our
-/// custom error type with `From::from`.
-///
-/// ```
-/// use std::fs;
-/// use std::io;
-/// use std::num;
-///
-/// enum CliError {
-///     IoError(io::Error),
-///     ParseError(num::ParseIntError),
-/// }
-///
-/// impl From<io::Error> for CliError {
-///     fn from(error: io::Error) -> Self {
-///         CliError::IoError(error)
-///     }
-/// }
-///
-/// impl From<num::ParseIntError> for CliError {
-///     fn from(error: num::ParseIntError) -> Self {
-///         CliError::ParseError(error)
-///     }
-/// }
-///
-/// fn open_and_parse_file(file_name: &str) -> Result<i32, CliError> {
-///     let mut contents = fs::read_to_string(&file_name)?;
-///     let num: i32 = contents.trim().parse()?;
-///     Ok(num)
-/// }
-/// ```
-///
-/// [`String`]: ../../std/string/struct.String.html
-/// [`from`]: From::from
-/// [book]: ../../book/ch09-00-error-handling.html
+// ///
+// /// One should always prefer implementing `From` over [`Into`]
+// /// because implementing `From` automatically provides one with an implementation of [`Into`]
+// /// thanks to the blanket implementation in the standard library.
+// ///
+// /// Only implement [`Into`] when targeting a version prior to Rust 1.41 and converting to a type
+// /// outside the current crate.
+// /// `From` was not able to do these types of conversions in earlier versions because of Rust's
+// /// orphaning rules.
+// /// See [`Into`] for more details.
+// ///
+// /// Prefer using [`Into`] over using `From` when specifying trait bounds on a generic function.
+// /// This way, types that directly implement [`Into`] can be used as arguments as well.
+// ///
+// /// The `From` trait is also very useful when performing error handling. When constructing a function
+// /// that is capable of failing, the return type will generally be of the form `Result<T, E>`.
+// /// `From` simplifies error handling by allowing a function to return a single error type
+// /// that encapsulates multiple error types. See the "Examples" section and [the book][book] for more
+// /// details.
+// ///
+// /// **Note: This trait must not fail**. The `From` trait is intended for perfect conversions.
+// /// If the conversion can fail or is not perfect, use [`TryFrom`].
+// ///
+// /// # Generic Implementations
+// ///
+// /// - `From<T> for U` implies [`Into`]`<U> for T`
+// /// - `From` is reflexive, which means that `From<T> for T` is implemented
+// ///
+// /// # When to implement `From`
+// ///
+// /// While there's no technical restrictions on which conversions can be done using
+// /// a `From` implementation, the general expectation is that the conversions
+// /// should typically be restricted as follows:
+// ///
+// /// * The conversion is *infallible*: if the conversion can fail, use [`TryFrom`]
+// ///   instead; don't provide a `From` impl that panics.
+// ///
+// /// * The conversion is *lossless*: semantically, it should not lose or discard
+// ///   information. For example, `i32: From<u16>` exists, where the original
+// ///   value can be recovered using `u16: TryFrom<i32>`.  And `String: From<&str>`
+// ///   exists, where you can get something equivalent to the original value via
+// ///   `Deref`.  But `From` cannot be used to convert from `u32` to `u16`, since
+// ///   that cannot succeed in a lossless way.  (There's some wiggle room here for
+// ///   information not considered semantically relevant.  For example,
+// ///   `Box<[T]>: From<Vec<T>>` exists even though it might not preserve capacity,
+// ///   like how two vectors can be equal despite differing capacities.)
+// ///
+// /// * The conversion is *value-preserving*: the conceptual kind and meaning of
+// ///   the resulting value is the same, even though the Rust type and technical
+// ///   representation might be different.  For example `-1_i8 as u8` is *lossless*,
+// ///   since `as` casting back can recover the original value, but that conversion
+// ///   is *not* available via `From` because `-1` and `255` are different conceptual
+// ///   values (despite being identical bit patterns technically).  But
+// ///   `f32: From<i16>` *is* available because `1_i16` and `1.0_f32` are conceptually
+// ///   the same real number (despite having very different bit patterns technically).
+// ///   `String: From<char>` is available because they're both *text*, but
+// ///   `String: From<u32>` is *not* available, since `1` (a number) and `"1"`
+// ///   (text) are too different.  (Converting values to text is instead covered
+// ///   by the [`Display`](crate::fmt::Display) trait.)
+// ///
+// /// * The conversion is *obvious*: it's the only reasonable conversion between
+// ///   the two types.  Otherwise it's better to have it be a named method or
+// ///   constructor, like how [`str::as_bytes`] is a method and how integers have
+// ///   methods like [`u32::from_ne_bytes`], [`u32::from_le_bytes`], and
+// ///   [`u32::from_be_bytes`], none of which are `From` implementations.  Whereas
+// ///   there's only one reasonable way to wrap an [`Ipv6Addr`](crate::net::Ipv6Addr)
+// ///   into an [`IpAddr`](crate::net::IpAddr), thus `IpAddr: From<Ipv6Addr>` exists.
+// ///
+// /// # Examples
+// ///
+// /// [`String`] implements `From<&str>`:
+// ///
+// /// An explicit conversion from a `&str` to a String is done as follows:
+// ///
+// /// ```
+// /// let string = "hello".to_string();
+// /// let other_string = String::from("hello");
+// ///
+// /// assert_eq!(string, other_string);
+// /// ```
+// ///
+// /// While performing error handling it is often useful to implement `From` for your own error type.
+// /// By converting underlying error types to our own custom error type that encapsulates the
+// /// underlying error type, we can return a single error type without losing information on the
+// /// underlying cause. The '?' operator automatically converts the underlying error type to our
+// /// custom error type with `From::from`.
+// ///
+// /// ```
+// /// use std::fs;
+// /// use std::io;
+// /// use std::num;
+// ///
+// /// enum CliError {
+// ///     IoError(io::Error),
+// ///     ParseError(num::ParseIntError),
+// /// }
+// ///
+// /// impl From<io::Error> for CliError {
+// ///     fn from(error: io::Error) -> Self {
+// ///         CliError::IoError(error)
+// ///     }
+// /// }
+// ///
+// /// impl From<num::ParseIntError> for CliError {
+// ///     fn from(error: num::ParseIntError) -> Self {
+// ///         CliError::ParseError(error)
+// ///     }
+// /// }
+// ///
+// /// fn open_and_parse_file(file_name: &str) -> Result<i32, CliError> {
+// ///     let mut contents = fs::read_to_string(&file_name)?;
+// ///     let num: i32 = contents.trim().parse()?;
+// ///     Ok(num)
+// /// }
+// /// ```
+// ///
+// /// [`String`]: ../../std/string/struct.String.html
+// /// [`from`]: From::from
+// /// [book]: ../../book/ch09-00-error-handling.html
 #[rustc_diagnostic_item = "From"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_on_unimplemented(on(
@@ -622,7 +624,7 @@ pub trait TryInto<T>: Sized {
 /// using the [`From`] trait, because an [`i64`] may contain a value
 /// that an [`i32`] cannot represent and so the conversion would lose data.
 /// This might be handled by truncating the [`i64`] to an [`i32`] or by
-/// simply returning [`i32::MAX`], or by some other method.  The [`From`]
+// /// simply returning [`i32::MAX`], or by some other method.  The [`From`]
 /// trait is intended for perfect conversions, so the `TryFrom` trait
 /// informs the programmer when a type conversion could go bad and lets
 /// them decide how to handle it.
@@ -772,20 +774,20 @@ impl<T> From<T> for T {
     }
 }
 
-/// **Stability note:** This impl does not yet exist, but we are
-/// "reserving space" to add it in the future. See
-/// [rust-lang/rust#64715][#64715] for details.
-///
-/// [#64715]: https://github.com/rust-lang/rust/issues/64715
-#[stable(feature = "convert_infallible", since = "1.34.0")]
-#[allow(unused_attributes)] // FIXME(#58633): do a principled fix instead.
-#[rustc_reservation_impl = "permitting this impl would forbid us from adding \
-                            `impl<T> From<!> for T` later; see rust-lang/rust#64715 for details"]
-impl<T> From<!> for T {
-    fn from(t: !) -> T {
-        t
-    }
-}
+// /// **Stability note:** This impl does not yet exist, but we are
+// /// "reserving space" to add it in the future. See
+// /// [rust-lang/rust#64715][#64715] for details.
+// ///
+// /// [#64715]: https://github.com/rust-lang/rust/issues/64715
+// #[stable(feature = "convert_infallible", since = "1.34.0")]
+// #[allow(unused_attributes)] // FIXME(#58633): do a principled fix instead.
+// #[rustc_reservation_impl = "permitting this impl would forbid us from adding \
+//                             `impl<T> From<!> for T` later; see rust-lang/rust#64715 for details"]
+// impl<T> From<!> for T {
+//     fn from(t: !) -> T {
+//         t
+//     }
+// }
 
 // TryFrom implies TryInto
 #[stable(feature = "try_from", since = "1.34.0")]
@@ -820,13 +822,13 @@ where
 // CONCRETE IMPLS
 ////////////////////////////////////////////////////////////////////////////////
 
-#[stable(feature = "rust1", since = "1.0.0")]
-impl<T> AsRef<[T]> for [T] {
-    #[inline(always)]
-    fn as_ref(&self) -> &[T] {
-        self
-    }
-}
+// #[stable(feature = "rust1", since = "1.0.0")]
+// impl<T> AsRef<[T]> for [T] {
+//     #[inline(always)]
+//     fn as_ref(&self) -> &[T] {
+//         self
+//     }
+// }
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T> AsMut<[T]> for [T] {
@@ -836,13 +838,13 @@ impl<T> AsMut<[T]> for [T] {
     }
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
-impl AsRef<str> for str {
-    #[inline(always)]
-    fn as_ref(&self) -> &str {
-        self
-    }
-}
+// #[stable(feature = "rust1", since = "1.0.0")]
+// impl AsRef<str> for str {
+//     #[inline(always)]
+//     fn as_ref(&self) -> &str {
+//         self
+//     }
+// }
 
 #[stable(feature = "as_mut_str_for_str", since = "1.51.0")]
 impl AsMut<str> for str {
@@ -902,7 +904,7 @@ impl AsMut<str> for str {
 /// the two `impl`s will start to overlap
 /// and therefore will be disallowed by the language’s trait coherence rules.
 #[stable(feature = "convert_infallible", since = "1.34.0")]
-#[derive(Copy)]
+// #[derive(Copy)]
 pub enum Infallible {}
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
@@ -912,62 +914,62 @@ impl Clone for Infallible {
     }
 }
 
-#[stable(feature = "convert_infallible", since = "1.34.0")]
-impl fmt::Debug for Infallible {
-    fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match *self {}
-    }
-}
+// #[stable(feature = "convert_infallible", since = "1.34.0")]
+// impl fmt::Debug for Infallible {
+//     fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         match *self {}
+//     }
+// }
 
-#[stable(feature = "convert_infallible", since = "1.34.0")]
-impl fmt::Display for Infallible {
-    fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match *self {}
-    }
-}
+// #[stable(feature = "convert_infallible", since = "1.34.0")]
+// impl fmt::Display for Infallible {
+//     fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         match *self {}
+//     }
+// }
 
-#[stable(feature = "str_parse_error2", since = "1.8.0")]
-impl Error for Infallible {
-    fn description(&self) -> &str {
-        match *self {}
-    }
-}
+// #[stable(feature = "str_parse_error2", since = "1.8.0")]
+// impl Error for Infallible {
+//     fn description(&self) -> &str {
+//         match *self {}
+//     }
+// }
 
-#[stable(feature = "convert_infallible", since = "1.34.0")]
-impl PartialEq for Infallible {
-    fn eq(&self, _: &Infallible) -> bool {
-        match *self {}
-    }
-}
+// #[stable(feature = "convert_infallible", since = "1.34.0")]
+// impl PartialEq for Infallible {
+//     fn eq(&self, _: &Infallible) -> bool {
+//         match *self {}
+//     }
+// }
 
-#[stable(feature = "convert_infallible", since = "1.34.0")]
-impl Eq for Infallible {}
+// #[stable(feature = "convert_infallible", since = "1.34.0")]
+// impl Eq for Infallible {}
 
-#[stable(feature = "convert_infallible", since = "1.34.0")]
-impl PartialOrd for Infallible {
-    fn partial_cmp(&self, _other: &Self) -> Option<crate::cmp::Ordering> {
-        match *self {}
-    }
-}
+// #[stable(feature = "convert_infallible", since = "1.34.0")]
+// impl PartialOrd for Infallible {
+//     fn partial_cmp(&self, _other: &Self) -> Option<crate::cmp::Ordering> {
+//         match *self {}
+//     }
+// }
 
-#[stable(feature = "convert_infallible", since = "1.34.0")]
-impl Ord for Infallible {
-    fn cmp(&self, _other: &Self) -> crate::cmp::Ordering {
-        match *self {}
-    }
-}
+// #[stable(feature = "convert_infallible", since = "1.34.0")]
+// impl Ord for Infallible {
+//     fn cmp(&self, _other: &Self) -> crate::cmp::Ordering {
+//         match *self {}
+//     }
+// }
 
-#[stable(feature = "convert_infallible", since = "1.34.0")]
-impl From<!> for Infallible {
-    #[inline]
-    fn from(x: !) -> Self {
-        x
-    }
-}
+// #[stable(feature = "convert_infallible", since = "1.34.0")]
+// impl From<!> for Infallible {
+//     #[inline]
+//     fn from(x: !) -> Self {
+//         x
+//     }
+// }
 
-#[stable(feature = "convert_infallible_hash", since = "1.44.0")]
-impl Hash for Infallible {
-    fn hash<H: Hasher>(&self, _: &mut H) {
-        match *self {}
-    }
-}
+// #[stable(feature = "convert_infallible_hash", since = "1.44.0")]
+// impl Hash for Infallible {
+//     fn hash<H: Hasher>(&self, _: &mut H) {
+//         match *self {}
+//     }
+// }

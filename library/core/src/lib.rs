@@ -358,7 +358,6 @@ pub mod borrow;
 pub mod clone;
 #[cfg(feature = "uncertified")]
 pub mod cmp;
-#[cfg(feature = "uncertified")]
 pub mod convert;
 pub mod default;
 #[cfg(feature = "uncertified")]

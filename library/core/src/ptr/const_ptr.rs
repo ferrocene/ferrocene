@@ -386,7 +386,8 @@ impl<T: ?Sized> *const T {
     /// * If the computed offset is non-zero, then `self` must be [derived from][crate::ptr#provenance] a pointer to some
     ///   [allocated object], and the entire memory range between `self` and the result must be in
     ///   bounds of that allocated object. In particular, this range must not "wrap around" the edge
-    ///   of the address space.
+    ///   of the address space. Note that "range" here refers to a half-open range as usual in Rust,
+    ///   i.e., `self..result` for non-negative offsets and `result..self` for negative offsets.
     ///
     /// Allocated objects can never be larger than `isize::MAX` bytes, so if the computed offset
     /// stays in bounds of the allocated object, it is guaranteed to satisfy the first requirement.
@@ -763,8 +764,8 @@ impl<T: ?Sized> *const T {
     /// // This would be incorrect, as the pointers are not correctly ordered:
     /// // ptr1.offset_from_unsigned(ptr2)
     /// ```
-    #[stable(feature = "ptr_sub_ptr", since = "CURRENT_RUSTC_VERSION")]
-    #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "ptr_sub_ptr", since = "1.87.0")]
+    #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const unsafe fn offset_from_unsigned(self, origin: *const T) -> usize
@@ -808,8 +809,8 @@ impl<T: ?Sized> *const T {
     ///
     /// For non-`Sized` pointees this operation considers only the data pointers,
     /// ignoring the metadata.
-    #[stable(feature = "ptr_sub_ptr", since = "CURRENT_RUSTC_VERSION")]
-    #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "ptr_sub_ptr", since = "1.87.0")]
+    #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const unsafe fn byte_offset_from_unsigned<U: ?Sized>(self, origin: *const U) -> usize {

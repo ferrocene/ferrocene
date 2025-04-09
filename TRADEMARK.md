@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-3.0 -->
 <!-- SPDX-FileCopyrightText: Model Trademark Guidelines authors -->
 <!-- SPDX-FileCopyrightText: System Initiative -->
-<!-- SPDX-FileCopyrightText: Ferrous Systems GmbH -->
+<!-- SPDX-FileCopyrightText: The Ferrocene Developers -->
 
 # Trademark Policy
 

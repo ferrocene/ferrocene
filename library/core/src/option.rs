@@ -1333,47 +1333,47 @@ impl<T> Option<T> {
         self.as_mut().map(|t| t.deref_mut())
     }
 
-//     /////////////////////////////////////////////////////////////////////////
-//     // Iterator constructors
-//     /////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////
+    // Iterator constructors
+    /////////////////////////////////////////////////////////////////////////
 
-//     /// Returns an iterator over the possibly contained value.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x = Some(4);
-//     /// assert_eq!(x.iter().next(), Some(&4));
-//     ///
-//     /// let x: Option<u32> = None;
-//     /// assert_eq!(x.iter().next(), None);
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     pub fn iter(&self) -> Iter<'_, T> {
-//         Iter { inner: Item { opt: self.as_ref() } }
-//     }
+    /// Returns an iterator over the possibly contained value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x = Some(4);
+    /// assert_eq!(x.iter().next(), Some(&4));
+    ///
+    /// let x: Option<u32> = None;
+    /// assert_eq!(x.iter().next(), None);
+    /// ```
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    pub fn iter(&self) -> Iter<'_, T> {
+        Iter { inner: Item { opt: self.as_ref() } }
+    }
 
-//     /// Returns a mutable iterator over the possibly contained value.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let mut x = Some(4);
-//     /// match x.iter_mut().next() {
-//     ///     Some(v) => *v = 42,
-//     ///     None => {},
-//     /// }
-//     /// assert_eq!(x, Some(42));
-//     ///
-//     /// let mut x: Option<u32> = None;
-//     /// assert_eq!(x.iter_mut().next(), None);
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     pub fn iter_mut(&mut self) -> IterMut<'_, T> {
-//         IterMut { inner: Item { opt: self.as_mut() } }
-//     }
+    /// Returns a mutable iterator over the possibly contained value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut x = Some(4);
+    /// match x.iter_mut().next() {
+    ///     Some(v) => *v = 42,
+    ///     None => {},
+    /// }
+    /// assert_eq!(x, Some(42));
+    ///
+    /// let mut x: Option<u32> = None;
+    /// assert_eq!(x.iter_mut().next(), None);
+    /// ```
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    pub fn iter_mut(&mut self) -> IterMut<'_, T> {
+        IterMut { inner: Item { opt: self.as_mut() } }
+    }
 
     /////////////////////////////////////////////////////////////////////////
     // Boolean operations on the values, eager and lazy
@@ -2228,14 +2228,15 @@ impl<T, E> Option<Result<T, E>> {
 //     }
 // }
 
-// /////////////////////////////////////////////////////////////////////////////
-// // The Option Iterators
-// /////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+// The Option Iterators
+/////////////////////////////////////////////////////////////////////////////
 
 // #[derive(Clone, Debug)]
-// struct Item<A> {
-//     opt: Option<A>,
-// }
+struct Item<A> {
+    #[allow(dead_code)]
+    opt: Option<A>,
+}
 
 // impl<A> Iterator for Item<A> {
 //     type Item = A;
@@ -2268,16 +2269,17 @@ impl<T, E> Option<Result<T, E>> {
 // impl<A> FusedIterator for Item<A> {}
 // unsafe impl<A> TrustedLen for Item<A> {}
 
-// /// An iterator over a reference to the [`Some`] variant of an [`Option`].
-// ///
-// /// The iterator yields one value if the [`Option`] is a [`Some`], otherwise none.
-// ///
-// /// This `struct` is created by the [`Option::iter`] function.
-// #[stable(feature = "rust1", since = "1.0.0")]
+/// An iterator over a reference to the [`Some`] variant of an [`Option`].
+///
+/// The iterator yields one value if the [`Option`] is a [`Some`], otherwise none.
+///
+/// This `struct` is created by the [`Option::iter`] function.
+#[stable(feature = "rust1", since = "1.0.0")]
 // #[derive(Debug)]
-// pub struct Iter<'a, A: 'a> {
-//     inner: Item<&'a A>,
-// }
+pub struct Iter<'a, A: 'a> {
+    #[allow(dead_code)]
+    inner: Item<&'a A>,
+}
 
 // #[stable(feature = "rust1", since = "1.0.0")]
 // impl<'a, A> Iterator for Iter<'a, A> {
@@ -2318,16 +2320,17 @@ impl<T, E> Option<Result<T, E>> {
 //     }
 // }
 
-// /// An iterator over a mutable reference to the [`Some`] variant of an [`Option`].
-// ///
-// /// The iterator yields one value if the [`Option`] is a [`Some`], otherwise none.
-// ///
-// /// This `struct` is created by the [`Option::iter_mut`] function.
-// #[stable(feature = "rust1", since = "1.0.0")]
+/// An iterator over a mutable reference to the [`Some`] variant of an [`Option`].
+///
+/// The iterator yields one value if the [`Option`] is a [`Some`], otherwise none.
+///
+/// This `struct` is created by the [`Option::iter_mut`] function.
+#[stable(feature = "rust1", since = "1.0.0")]
 // #[derive(Debug)]
-// pub struct IterMut<'a, A: 'a> {
-//     inner: Item<&'a mut A>,
-// }
+pub struct IterMut<'a, A: 'a> {
+    #[allow(dead_code)]
+    inner: Item<&'a mut A>,
+}
 
 // #[stable(feature = "rust1", since = "1.0.0")]
 // impl<'a, A> Iterator for IterMut<'a, A> {

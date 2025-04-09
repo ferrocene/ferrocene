@@ -1593,122 +1593,130 @@ impl<T> Option<T> {
         }
     }
 
-//     /////////////////////////////////////////////////////////////////////////
-//     // Entry-like operations to insert a value and return a reference
-//     /////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////
+    // Entry-like operations to insert a value and return a reference
+    /////////////////////////////////////////////////////////////////////////
 
-//     /// Inserts `value` into the option, then returns a mutable reference to it.
-//     ///
-//     /// If the option already contains a value, the old value is dropped.
-//     ///
-//     /// See also [`Option::get_or_insert`], which doesn't update the value if
-//     /// the option already contains [`Some`].
-//     ///
-//     /// # Example
-//     ///
-//     /// ```
-//     /// let mut opt = None;
-//     /// let val = opt.insert(1);
-//     /// assert_eq!(*val, 1);
-//     /// assert_eq!(opt.unwrap(), 1);
-//     /// let val = opt.insert(2);
-//     /// assert_eq!(*val, 2);
-//     /// *val = 3;
-//     /// assert_eq!(opt.unwrap(), 3);
-//     /// ```
-//     #[must_use = "if you intended to set a value, consider assignment instead"]
-//     #[inline]
-//     #[stable(feature = "option_insert", since = "1.53.0")]
-//     pub fn insert(&mut self, value: T) -> &mut T {
-//         *self = Some(value);
+    /// Inserts `value` into the option, then returns a mutable reference to it.
+    ///
+    /// If the option already contains a value, the old value is dropped.
+    ///
+    /// See also [`Option::get_or_insert`], which doesn't update the value if
+    /// the option already contains [`Some`].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let mut opt = None;
+    /// let val = opt.insert(1);
+    /// assert_eq!(*val, 1);
+    /// assert_eq!(opt.unwrap(), 1);
+    /// let val = opt.insert(2);
+    /// assert_eq!(*val, 2);
+    /// *val = 3;
+    /// assert_eq!(opt.unwrap(), 3);
+    /// ```
+    #[must_use = "if you intended to set a value, consider assignment instead"]
+    #[inline]
+    #[stable(feature = "option_insert", since = "1.53.0")]
+    // Uncertified because it depends on unwrap_unchecked
+    #[cfg(feature = "uncertified")]
+    pub fn insert(&mut self, value: T) -> &mut T {
+        *self = Some(value);
 
-//         // SAFETY: the code above just filled the option
-//         unsafe { self.as_mut().unwrap_unchecked() }
-//     }
+        // SAFETY: the code above just filled the option
+        unsafe { self.as_mut().unwrap_unchecked() }
+    }
 
-//     /// Inserts `value` into the option if it is [`None`], then
-//     /// returns a mutable reference to the contained value.
-//     ///
-//     /// See also [`Option::insert`], which updates the value even if
-//     /// the option already contains [`Some`].
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let mut x = None;
-//     ///
-//     /// {
-//     ///     let y: &mut u32 = x.get_or_insert(5);
-//     ///     assert_eq!(y, &5);
-//     ///
-//     ///     *y = 7;
-//     /// }
-//     ///
-//     /// assert_eq!(x, Some(7));
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "option_entry", since = "1.20.0")]
-//     pub fn get_or_insert(&mut self, value: T) -> &mut T {
-//         self.get_or_insert_with(|| value)
-//     }
+    /// Inserts `value` into the option if it is [`None`], then
+    /// returns a mutable reference to the contained value.
+    ///
+    /// See also [`Option::insert`], which updates the value even if
+    /// the option already contains [`Some`].
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut x = None;
+    ///
+    /// {
+    ///     let y: &mut u32 = x.get_or_insert(5);
+    ///     assert_eq!(y, &5);
+    ///
+    ///     *y = 7;
+    /// }
+    ///
+    /// assert_eq!(x, Some(7));
+    /// ```
+    #[inline]
+    #[stable(feature = "option_entry", since = "1.20.0")]
+    // Uncertified because it depends on unwrap_unchecked
+    #[cfg(feature = "uncertified")]
+    pub fn get_or_insert(&mut self, value: T) -> &mut T {
+        self.get_or_insert_with(|| value)
+    }
 
-//     /// Inserts the default value into the option if it is [`None`], then
-//     /// returns a mutable reference to the contained value.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let mut x = None;
-//     ///
-//     /// {
-//     ///     let y: &mut u32 = x.get_or_insert_default();
-//     ///     assert_eq!(y, &0);
-//     ///
-//     ///     *y = 7;
-//     /// }
-//     ///
-//     /// assert_eq!(x, Some(7));
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "option_get_or_insert_default", since = "1.83.0")]
-//     pub fn get_or_insert_default(&mut self) -> &mut T
-//     where
-//         T: Default,
-//     {
-//         self.get_or_insert_with(T::default)
-//     }
+    /// Inserts the default value into the option if it is [`None`], then
+    /// returns a mutable reference to the contained value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut x = None;
+    ///
+    /// {
+    ///     let y: &mut u32 = x.get_or_insert_default();
+    ///     assert_eq!(y, &0);
+    ///
+    ///     *y = 7;
+    /// }
+    ///
+    /// assert_eq!(x, Some(7));
+    /// ```
+    #[inline]
+    #[stable(feature = "option_get_or_insert_default", since = "1.83.0")]
+    // Uncertified because it depends on unwrap_unchecked
+    #[cfg(feature = "uncertified")]
+    pub fn get_or_insert_default(&mut self) -> &mut T
+    where
+        T: Default,
+    {
+        self.get_or_insert_with(T::default)
+    }
 
-//     /// Inserts a value computed from `f` into the option if it is [`None`],
-//     /// then returns a mutable reference to the contained value.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let mut x = None;
-//     ///
-//     /// {
-//     ///     let y: &mut u32 = x.get_or_insert_with(|| 5);
-//     ///     assert_eq!(y, &5);
-//     ///
-//     ///     *y = 7;
-//     /// }
-//     ///
-//     /// assert_eq!(x, Some(7));
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "option_entry", since = "1.20.0")]
-//     pub fn get_or_insert_with<F>(&mut self, f: F) -> &mut T
-//     where
-//         F: FnOnce() -> T,
-//     {
-//         if let None = self {
-//             *self = Some(f());
-//         }
+    /// Inserts a value computed from `f` into the option if it is [`None`],
+    /// then returns a mutable reference to the contained value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut x = None;
+    ///
+    /// {
+    ///     let y: &mut u32 = x.get_or_insert_with(|| 5);
+    ///     assert_eq!(y, &5);
+    ///
+    ///     *y = 7;
+    /// }
+    ///
+    /// assert_eq!(x, Some(7));
+    /// ```
+    #[inline]
+    #[stable(feature = "option_entry", since = "1.20.0")]
+    // Uncertified because it depends on unwrap_unchecked
+    #[cfg(feature = "uncertified")]
+    pub fn get_or_insert_with<F>(&mut self, f: F) -> &mut T
+    where
+        F: FnOnce() -> T,
+    {
+        if let None = self {
+            *self = Some(f());
+        }
 
-//         // SAFETY: a `None` variant for `self` would have been replaced by a `Some`
-//         // variant in the code above.
-//         unsafe { self.as_mut().unwrap_unchecked() }
-//     }
+        // SAFETY: a `None` variant for `self` would have been replaced by a `Some`
+        // variant in the code above.
+        unsafe { self.as_mut().unwrap_unchecked() }
+    }
 
     /////////////////////////////////////////////////////////////////////////
     // Misc

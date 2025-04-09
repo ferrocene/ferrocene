@@ -2524,43 +2524,43 @@ pub struct IterMut<'a, A: 'a> {
 //     type TryType = Option<T>;
 // }
 
-// impl<T> Option<Option<T>> {
-//     /// Converts from `Option<Option<T>>` to `Option<T>`.
-//     ///
-//     /// # Examples
-//     ///
-//     /// Basic usage:
-//     ///
-//     /// ```
-//     /// let x: Option<Option<u32>> = Some(Some(6));
-//     /// assert_eq!(Some(6), x.flatten());
-//     ///
-//     /// let x: Option<Option<u32>> = Some(None);
-//     /// assert_eq!(None, x.flatten());
-//     ///
-//     /// let x: Option<Option<u32>> = None;
-//     /// assert_eq!(None, x.flatten());
-//     /// ```
-//     ///
-//     /// Flattening only removes one level of nesting at a time:
-//     ///
-//     /// ```
-//     /// let x: Option<Option<Option<u32>>> = Some(Some(Some(6)));
-//     /// assert_eq!(Some(Some(6)), x.flatten());
-//     /// assert_eq!(Some(6), x.flatten().flatten());
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "option_flattening", since = "1.40.0")]
-//     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
-//     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-//     pub const fn flatten(self) -> Option<T> {
-//         // FIXME(const-hack): could be written with `and_then`
-//         match self {
-//             Some(inner) => inner,
-//             None => None,
-//         }
-//     }
-// }
+impl<T> Option<Option<T>> {
+    /// Converts from `Option<Option<T>>` to `Option<T>`.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// let x: Option<Option<u32>> = Some(Some(6));
+    /// assert_eq!(Some(6), x.flatten());
+    ///
+    /// let x: Option<Option<u32>> = Some(None);
+    /// assert_eq!(None, x.flatten());
+    ///
+    /// let x: Option<Option<u32>> = None;
+    /// assert_eq!(None, x.flatten());
+    /// ```
+    ///
+    /// Flattening only removes one level of nesting at a time:
+    ///
+    /// ```
+    /// let x: Option<Option<Option<u32>>> = Some(Some(Some(6)));
+    /// assert_eq!(Some(Some(6)), x.flatten());
+    /// assert_eq!(Some(6), x.flatten().flatten());
+    /// ```
+    #[inline]
+    #[stable(feature = "option_flattening", since = "1.40.0")]
+    #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    pub const fn flatten(self) -> Option<T> {
+        // FIXME(const-hack): could be written with `and_then`
+        match self {
+            Some(inner) => inner,
+            None => None,
+        }
+    }
+}
 
 // impl<T, const N: usize> [Option<T>; N] {
 //     /// Transposes a `[Option<T>; N]` into a `Option<[T; N]>`.

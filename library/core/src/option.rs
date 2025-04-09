@@ -771,216 +771,221 @@ impl<T> Option<T> {
         }
     }
 
-//     #[inline]
-//     const fn len(&self) -> usize {
-//         // Using the intrinsic avoids emitting a branch to get the 0 or 1.
-//         let discriminant: isize = crate::intrinsics::discriminant_value(self);
-//         discriminant as usize
-//     }
+    #[inline]
+    #[cfg(feature = "uncertified")]
+    const fn len(&self) -> usize {
+        // Using the intrinsic avoids emitting a branch to get the 0 or 1.
+        let discriminant: isize = crate::intrinsics::discriminant_value(self);
+        discriminant as usize
+    }
 
-//     /// Returns a slice of the contained value, if any. If this is `None`, an
-//     /// empty slice is returned. This can be useful to have a single type of
-//     /// iterator over an `Option` or slice.
-//     ///
-//     /// Note: Should you have an `Option<&T>` and wish to get a slice of `T`,
-//     /// you can unpack it via `opt.map_or(&[], std::slice::from_ref)`.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```rust
-//     /// assert_eq!(
-//     ///     [Some(1234).as_slice(), None.as_slice()],
-//     ///     [&[1234][..], &[][..]],
-//     /// );
-//     /// ```
-//     ///
-//     /// The inverse of this function is (discounting
-//     /// borrowing) [`[_]::first`](slice::first):
-//     ///
-//     /// ```rust
-//     /// for i in [Some(1234_u16), None] {
-//     ///     assert_eq!(i.as_ref(), i.as_slice().first());
-//     /// }
-//     /// ```
-//     #[inline]
-//     #[must_use]
-//     #[stable(feature = "option_as_slice", since = "1.75.0")]
-//     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
-//     pub const fn as_slice(&self) -> &[T] {
-//         // SAFETY: When the `Option` is `Some`, we're using the actual pointer
-//         // to the payload, with a length of 1, so this is equivalent to
-//         // `slice::from_ref`, and thus is safe.
-//         // When the `Option` is `None`, the length used is 0, so to be safe it
-//         // just needs to be aligned, which it is because `&self` is aligned and
-//         // the offset used is a multiple of alignment.
-//         //
-//         // In the new version, the intrinsic always returns a pointer to an
-//         // in-bounds and correctly aligned position for a `T` (even if in the
-//         // `None` case it's just padding).
-//         unsafe {
-//             slice::from_raw_parts(
-//                 (self as *const Self).byte_add(core::mem::offset_of!(Self, Some.0)).cast(),
-//                 self.len(),
-//             )
-//         }
-//     }
+    /// Returns a slice of the contained value, if any. If this is `None`, an
+    /// empty slice is returned. This can be useful to have a single type of
+    /// iterator over an `Option` or slice.
+    ///
+    /// Note: Should you have an `Option<&T>` and wish to get a slice of `T`,
+    /// you can unpack it via `opt.map_or(&[], std::slice::from_ref)`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     [Some(1234).as_slice(), None.as_slice()],
+    ///     [&[1234][..], &[][..]],
+    /// );
+    /// ```
+    ///
+    /// The inverse of this function is (discounting
+    /// borrowing) [`[_]::first`](slice::first):
+    ///
+    /// ```rust
+    /// for i in [Some(1234_u16), None] {
+    ///     assert_eq!(i.as_ref(), i.as_slice().first());
+    /// }
+    /// ```
+    #[inline]
+    #[must_use]
+    #[stable(feature = "option_as_slice", since = "1.75.0")]
+    #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
+    #[cfg(feature = "uncertified")]
+    pub const fn as_slice(&self) -> &[T] {
+        // SAFETY: When the `Option` is `Some`, we're using the actual pointer
+        // to the payload, with a length of 1, so this is equivalent to
+        // `slice::from_ref`, and thus is safe.
+        // When the `Option` is `None`, the length used is 0, so to be safe it
+        // just needs to be aligned, which it is because `&self` is aligned and
+        // the offset used is a multiple of alignment.
+        //
+        // In the new version, the intrinsic always returns a pointer to an
+        // in-bounds and correctly aligned position for a `T` (even if in the
+        // `None` case it's just padding).
+        unsafe {
+            slice::from_raw_parts(
+                (self as *const Self).byte_add(core::mem::offset_of!(Self, Some.0)).cast(),
+                self.len(),
+            )
+        }
+    }
 
-//     /// Returns a mutable slice of the contained value, if any. If this is
-//     /// `None`, an empty slice is returned. This can be useful to have a
-//     /// single type of iterator over an `Option` or slice.
-//     ///
-//     /// Note: Should you have an `Option<&mut T>` instead of a
-//     /// `&mut Option<T>`, which this method takes, you can obtain a mutable
-//     /// slice via `opt.map_or(&mut [], std::slice::from_mut)`.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```rust
-//     /// assert_eq!(
-//     ///     [Some(1234).as_mut_slice(), None.as_mut_slice()],
-//     ///     [&mut [1234][..], &mut [][..]],
-//     /// );
-//     /// ```
-//     ///
-//     /// The result is a mutable slice of zero or one items that points into
-//     /// our original `Option`:
-//     ///
-//     /// ```rust
-//     /// let mut x = Some(1234);
-//     /// x.as_mut_slice()[0] += 1;
-//     /// assert_eq!(x, Some(1235));
-//     /// ```
-//     ///
-//     /// The inverse of this method (discounting borrowing)
-//     /// is [`[_]::first_mut`](slice::first_mut):
-//     ///
-//     /// ```rust
-//     /// assert_eq!(Some(123).as_mut_slice().first_mut(), Some(&mut 123))
-//     /// ```
-//     #[inline]
-//     #[must_use]
-//     #[stable(feature = "option_as_slice", since = "1.75.0")]
-//     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
-//     pub const fn as_mut_slice(&mut self) -> &mut [T] {
-//         // SAFETY: When the `Option` is `Some`, we're using the actual pointer
-//         // to the payload, with a length of 1, so this is equivalent to
-//         // `slice::from_mut`, and thus is safe.
-//         // When the `Option` is `None`, the length used is 0, so to be safe it
-//         // just needs to be aligned, which it is because `&self` is aligned and
-//         // the offset used is a multiple of alignment.
-//         //
-//         // In the new version, the intrinsic creates a `*const T` from a
-//         // mutable reference  so it is safe to cast back to a mutable pointer
-//         // here. As with `as_slice`, the intrinsic always returns a pointer to
-//         // an in-bounds and correctly aligned position for a `T` (even if in
-//         // the `None` case it's just padding).
-//         unsafe {
-//             slice::from_raw_parts_mut(
-//                 (self as *mut Self).byte_add(core::mem::offset_of!(Self, Some.0)).cast(),
-//                 self.len(),
-//             )
-//         }
-//     }
+    /// Returns a mutable slice of the contained value, if any. If this is
+    /// `None`, an empty slice is returned. This can be useful to have a
+    /// single type of iterator over an `Option` or slice.
+    ///
+    /// Note: Should you have an `Option<&mut T>` instead of a
+    /// `&mut Option<T>`, which this method takes, you can obtain a mutable
+    /// slice via `opt.map_or(&mut [], std::slice::from_mut)`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     [Some(1234).as_mut_slice(), None.as_mut_slice()],
+    ///     [&mut [1234][..], &mut [][..]],
+    /// );
+    /// ```
+    ///
+    /// The result is a mutable slice of zero or one items that points into
+    /// our original `Option`:
+    ///
+    /// ```rust
+    /// let mut x = Some(1234);
+    /// x.as_mut_slice()[0] += 1;
+    /// assert_eq!(x, Some(1235));
+    /// ```
+    ///
+    /// The inverse of this method (discounting borrowing)
+    /// is [`[_]::first_mut`](slice::first_mut):
+    ///
+    /// ```rust
+    /// assert_eq!(Some(123).as_mut_slice().first_mut(), Some(&mut 123))
+    /// ```
+    #[inline]
+    #[must_use]
+    #[stable(feature = "option_as_slice", since = "1.75.0")]
+    #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
+    #[cfg(feature = "uncertified")]
+    pub const fn as_mut_slice(&mut self) -> &mut [T] {
+        // SAFETY: When the `Option` is `Some`, we're using the actual pointer
+        // to the payload, with a length of 1, so this is equivalent to
+        // `slice::from_mut`, and thus is safe.
+        // When the `Option` is `None`, the length used is 0, so to be safe it
+        // just needs to be aligned, which it is because `&self` is aligned and
+        // the offset used is a multiple of alignment.
+        //
+        // In the new version, the intrinsic creates a `*const T` from a
+        // mutable reference  so it is safe to cast back to a mutable pointer
+        // here. As with `as_slice`, the intrinsic always returns a pointer to
+        // an in-bounds and correctly aligned position for a `T` (even if in
+        // the `None` case it's just padding).
+        unsafe {
+            slice::from_raw_parts_mut(
+                (self as *mut Self).byte_add(core::mem::offset_of!(Self, Some.0)).cast(),
+                self.len(),
+            )
+        }
+    }
 
-//     /////////////////////////////////////////////////////////////////////////
-//     // Getting to contained values
-//     /////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////
+    // Getting to contained values
+    /////////////////////////////////////////////////////////////////////////
 
-//     /// Returns the contained [`Some`] value, consuming the `self` value.
-//     ///
-//     /// # Panics
-//     ///
-//     /// Panics if the value is a [`None`] with a custom panic message provided by
-//     /// `msg`.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x = Some("value");
-//     /// assert_eq!(x.expect("fruits are healthy"), "value");
-//     /// ```
-//     ///
-//     /// ```should_panic
-//     /// let x: Option<&str> = None;
-//     /// x.expect("fruits are healthy"); // panics with `fruits are healthy`
-//     /// ```
-//     ///
-//     /// # Recommended Message Style
-//     ///
-//     /// We recommend that `expect` messages are used to describe the reason you
-//     /// _expect_ the `Option` should be `Some`.
-//     ///
-//     /// ```should_panic
-//     /// # let slice: &[u8] = &[];
-//     /// let item = slice.get(0)
-//     ///     .expect("slice should not be empty");
-//     /// ```
-//     ///
-//     /// **Hint**: If you're having trouble remembering how to phrase expect
-//     /// error messages remember to focus on the word "should" as in "env
-//     /// variable should be set by blah" or "the given binary should be available
-//     /// and executable by the current user".
-//     ///
-//     /// For more detail on expect message styles and the reasoning behind our
-//     /// recommendation please refer to the section on ["Common Message
-//     /// Styles"](../../std/error/index.html#common-message-styles) in the [`std::error`](../../std/error/index.html) module docs.
-//     #[inline]
-//     #[track_caller]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[cfg_attr(not(test), rustc_diagnostic_item = "option_expect")]
-//     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
-//     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-//     pub const fn expect(self, msg: &str) -> T {
-//         match self {
-//             Some(val) => val,
-//             None => expect_failed(msg),
-//         }
-//     }
+    /// Returns the contained [`Some`] value, consuming the `self` value.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value is a [`None`] with a custom panic message provided by
+    /// `msg`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x = Some("value");
+    /// assert_eq!(x.expect("fruits are healthy"), "value");
+    /// ```
+    ///
+    /// ```should_panic
+    /// let x: Option<&str> = None;
+    /// x.expect("fruits are healthy"); // panics with `fruits are healthy`
+    /// ```
+    ///
+    /// # Recommended Message Style
+    ///
+    /// We recommend that `expect` messages are used to describe the reason you
+    /// _expect_ the `Option` should be `Some`.
+    ///
+    /// ```should_panic
+    /// # let slice: &[u8] = &[];
+    /// let item = slice.get(0)
+    ///     .expect("slice should not be empty");
+    /// ```
+    ///
+    /// **Hint**: If you're having trouble remembering how to phrase expect
+    /// error messages remember to focus on the word "should" as in "env
+    /// variable should be set by blah" or "the given binary should be available
+    /// and executable by the current user".
+    ///
+    /// For more detail on expect message styles and the reasoning behind our
+    /// recommendation please refer to the section on ["Common Message
+    /// Styles"](../../std/error/index.html#common-message-styles) in the [`std::error`](../../std/error/index.html) module docs.
+    #[inline]
+    #[track_caller]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg_attr(not(test), rustc_diagnostic_item = "option_expect")]
+    #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    #[cfg(feature = "uncertified")]
+    pub const fn expect(self, msg: &str) -> T {
+        match self {
+            Some(val) => val,
+            None => expect_failed(msg),
+        }
+    }
 
-//     /// Returns the contained [`Some`] value, consuming the `self` value.
-//     ///
-//     /// Because this function may panic, its use is generally discouraged.
-//     /// Panics are meant for unrecoverable errors, and
-//     /// [may abort the entire program][panic-abort].
-//     ///
-//     /// Instead, prefer to use pattern matching and handle the [`None`]
-//     /// case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or
-//     /// [`unwrap_or_default`]. In functions returning `Option`, you can use
-//     /// [the `?` (try) operator][try-option].
-//     ///
-//     /// [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html
-//     /// [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used
-//     /// [`unwrap_or`]: Option::unwrap_or
-//     /// [`unwrap_or_else`]: Option::unwrap_or_else
-//     /// [`unwrap_or_default`]: Option::unwrap_or_default
-//     ///
-//     /// # Panics
-//     ///
-//     /// Panics if the self value equals [`None`].
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x = Some("air");
-//     /// assert_eq!(x.unwrap(), "air");
-//     /// ```
-//     ///
-//     /// ```should_panic
-//     /// let x: Option<&str> = None;
-//     /// assert_eq!(x.unwrap(), "air"); // fails
-//     /// ```
-//     #[inline(always)]
-//     #[track_caller]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[cfg_attr(not(test), rustc_diagnostic_item = "option_unwrap")]
-//     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
-//     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-//     pub const fn unwrap(self) -> T {
-//         match self {
-//             Some(val) => val,
-//             None => unwrap_failed(),
-//         }
-//     }
+    /// Returns the contained [`Some`] value, consuming the `self` value.
+    ///
+    /// Because this function may panic, its use is generally discouraged.
+    /// Panics are meant for unrecoverable errors, and
+    /// [may abort the entire program][panic-abort].
+    ///
+    /// Instead, prefer to use pattern matching and handle the [`None`]
+    /// case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or
+    /// [`unwrap_or_default`]. In functions returning `Option`, you can use
+    /// [the `?` (try) operator][try-option].
+    ///
+    /// [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html
+    /// [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used
+    /// [`unwrap_or`]: Option::unwrap_or
+    /// [`unwrap_or_else`]: Option::unwrap_or_else
+    /// [`unwrap_or_default`]: Option::unwrap_or_default
+    ///
+    /// # Panics
+    ///
+    /// Panics if the self value equals [`None`].
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x = Some("air");
+    /// assert_eq!(x.unwrap(), "air");
+    /// ```
+    ///
+    /// ```should_panic
+    /// let x: Option<&str> = None;
+    /// assert_eq!(x.unwrap(), "air"); // fails
+    /// ```
+    #[inline(always)]
+    #[track_caller]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg_attr(not(test), rustc_diagnostic_item = "option_unwrap")]
+    #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    #[cfg(feature = "uncertified")]
+    pub const fn unwrap(self) -> T {
+        match self {
+            Some(val) => val,
+            None => unwrap_failed(),
+        }
+    }
 
     /// Returns the contained [`Some`] value or a provided default.
     ///
@@ -1058,38 +1063,39 @@ impl<T> Option<T> {
         }
     }
 
-//     /// Returns the contained [`Some`] value, consuming the `self` value,
-//     /// without checking that the value is not [`None`].
-//     ///
-//     /// # Safety
-//     ///
-//     /// Calling this method on [`None`] is *[undefined behavior]*.
-//     ///
-//     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x = Some("air");
-//     /// assert_eq!(unsafe { x.unwrap_unchecked() }, "air");
-//     /// ```
-//     ///
-//     /// ```no_run
-//     /// let x: Option<&str> = None;
-//     /// assert_eq!(unsafe { x.unwrap_unchecked() }, "air"); // Undefined behavior!
-//     /// ```
-//     #[inline]
-//     #[track_caller]
-//     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
-//     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
-//     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-//     pub const unsafe fn unwrap_unchecked(self) -> T {
-//         match self {
-//             Some(val) => val,
-//             // SAFETY: the safety contract must be upheld by the caller.
-//             None => unsafe { hint::unreachable_unchecked() },
-//         }
-//     }
+    /// Returns the contained [`Some`] value, consuming the `self` value,
+    /// without checking that the value is not [`None`].
+    ///
+    /// # Safety
+    ///
+    /// Calling this method on [`None`] is *[undefined behavior]*.
+    ///
+    /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x = Some("air");
+    /// assert_eq!(unsafe { x.unwrap_unchecked() }, "air");
+    /// ```
+    ///
+    /// ```no_run
+    /// let x: Option<&str> = None;
+    /// assert_eq!(unsafe { x.unwrap_unchecked() }, "air"); // Undefined behavior!
+    /// ```
+    #[inline]
+    #[track_caller]
+    #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
+    #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    #[cfg(feature = "uncertified")]
+    pub const unsafe fn unwrap_unchecked(self) -> T {
+        match self {
+            Some(val) => val,
+            // SAFETY: the safety contract must be upheld by the caller.
+            None => unsafe { hint::unreachable_unchecked() },
+        }
+    }
 
     /////////////////////////////////////////////////////////////////////////
     // Transforming contained values
@@ -1905,29 +1911,31 @@ impl<T> Option<&T> {
         }
     }
 
-    // /// Maps an `Option<&T>` to an `Option<T>` by cloning the contents of the
-    // /// option.
-    // ///
-    // /// # Examples
-    // ///
-    // /// ```
-    // /// let x = 12;
-    // /// let opt_x = Some(&x);
-    // /// assert_eq!(opt_x, Some(&12));
-    // /// let cloned = opt_x.cloned();
-    // /// assert_eq!(cloned, Some(12));
-    // /// ```
-    // #[must_use = "`self` will be dropped if the result is not used"]
-    // #[stable(feature = "rust1", since = "1.0.0")]
-    // pub fn cloned(self) -> Option<T>
-    // where
-    //     T: Clone,
-    // {
-    //     match self {
-    //         Some(t) => Some(t.clone()),
-    //         None => None,
-    //     }
-    // }
+    /// Maps an `Option<&T>` to an `Option<T>` by cloning the contents of the
+    /// option.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x = 12;
+    /// let opt_x = Some(&x);
+    /// assert_eq!(opt_x, Some(&12));
+    /// let cloned = opt_x.cloned();
+    /// assert_eq!(cloned, Some(12));
+    /// ```
+    #[must_use = "`self` will be dropped if the result is not used"]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    // Uncertified because ICE "error performing operation: fully_perform"
+    #[cfg(feature= "uncertified")]
+    pub fn cloned(self) -> Option<T>
+    where
+        T: Clone,
+    {
+        match self {
+            Some(t) => Some(t.clone()),
+            None => None,
+        }
+    }
 }
 
 impl<T> Option<&mut T> {

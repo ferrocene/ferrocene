@@ -1307,7 +1307,7 @@ macro_rules! matches {
 //         };
 //     }
 
-//     /// Includes a UTF-8 encoded file as a string.
+    /// Includes a UTF-8 encoded file as a string.
 //     ///
 //     /// The file is located relative to the current file (similarly to how
 //     /// modules are found). The provided path is interpreted in a platform-specific
@@ -1339,13 +1339,13 @@ macro_rules! matches {
 //     /// ```
 //     ///
 //     /// Compiling 'main.rs' and running the resulting binary will print "adiós".
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[rustc_builtin_macro]
-//     #[macro_export]
-//     #[cfg_attr(not(test), rustc_diagnostic_item = "include_str_macro")]
-//     macro_rules! include_str {
-//         ($file:expr $(,)?) => {{ /* compiler built-in */ }};
-//     }
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_builtin_macro]
+    #[macro_export]
+    #[cfg_attr(not(test), rustc_diagnostic_item = "include_str_macro")]
+    macro_rules! include_str {
+        ($file:expr $(,)?) => {{ /* compiler built-in */ }};
+    }
 
 //     /// Includes a file as a reference to a byte array.
 //     ///

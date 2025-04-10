@@ -419,9 +419,9 @@ use crate::ub_checks;
 // #[unstable(feature = "ptr_metadata", issue = "81513")]
 // pub use metadata::{DynMetadata, Pointee, Thin, from_raw_parts, from_raw_parts_mut, metadata};
 
-// mod non_null;
-// #[stable(feature = "nonnull", since = "1.25.0")]
-// pub use non_null::NonNull;
+mod non_null;
+#[stable(feature = "nonnull", since = "1.25.0")]
+pub use non_null::NonNull;
 
 // mod unique;
 // #[unstable(feature = "ptr_internals", issue = "none")]

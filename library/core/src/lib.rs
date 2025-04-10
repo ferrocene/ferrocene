@@ -175,7 +175,7 @@
 // #![feature(link_llvm_intrinsics)]
 // #![feature(macro_metavar_expr)]
 // #![feature(marker_trait_attr)]
-// #![feature(min_specialization)]
+#![feature(min_specialization)]
 #![feature(multiple_supertrait_upcastable)]
 // #![feature(must_not_suspend)]
 #![feature(negative_impls)]
@@ -411,7 +411,6 @@ pub mod sync;
 #[cfg(feature = "uncertified")]
 pub mod unsafe_binder;
 
-#[cfg(feature = "uncertified")]
 pub mod fmt;
 #[cfg(feature = "uncertified")]
 pub mod hash;

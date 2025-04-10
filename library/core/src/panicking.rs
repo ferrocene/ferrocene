@@ -28,7 +28,7 @@
     issue = "none"
 )]
 
-// use crate::fmt;
+use crate::fmt;
 use crate::intrinsics::const_eval_select;
 use crate::panic::{Location, PanicInfo};
 

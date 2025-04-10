@@ -635,7 +635,7 @@ pub trait Copy: Clone {
 // #[stable(feature = "rust1", since = "1.0.0")]
 // impl<T: ?Sized> !Sync for *mut T {}
 
-// /// Zero-sized type used to mark things that "act like" they own a `T`.
+/// Zero-sized type used to mark things that "act like" they own a `T`.
 // ///
 // /// Adding a `PhantomData<T>` field to your type tells the compiler that your
 // /// type acts as though it stores a value of type `T`, even though it doesn't
@@ -769,9 +769,9 @@ pub trait Copy: Clone {
 // /// * `align_of::<PhantomData<T>>() == 1`
 // ///
 // /// [drop check]: Drop#drop-check
-// #[lang = "phantom_data"]
-// #[stable(feature = "rust1", since = "1.0.0")]
-// pub struct PhantomData<T: ?Sized>;
+#[lang = "phantom_data"]
+#[stable(feature = "rust1", since = "1.0.0")]
+pub struct PhantomData<T: ?Sized>;
 
 // #[stable(feature = "rust1", since = "1.0.0")]
 // impl<T: ?Sized> Hash for PhantomData<T> {

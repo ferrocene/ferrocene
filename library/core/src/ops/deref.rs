@@ -301,7 +301,7 @@ unsafe impl<T: ?Sized> DerefPure for &T {}
 #[unstable(feature = "deref_pure_trait", issue = "87121")]
 unsafe impl<T: ?Sized> DerefPure for &mut T {}
 
-// /// Indicates that a struct can be used as a method receiver.
+/// Indicates that a struct can be used as a method receiver.
 // /// That is, a type can use this type as a type of `self`, like this:
 // /// ```compile_fail
 // /// # // This is currently compile_fail because the compiler-side parts

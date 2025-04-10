@@ -777,7 +777,7 @@ impl Build {
             features.push("llvm");
         }
         // keep in sync with `bootstrap/compile.rs:rustc_cargo_env`
-        if self.config.rust_randomize_layout {
+        if self.config.rust_randomize_layout && check("rustc_randomized_layouts") {
             features.push("rustc_randomized_layouts");
         }
 
@@ -1598,7 +1598,7 @@ Executed at: {executed_at}"#,
         !self.config.full_bootstrap
             && !self.config.download_rustc()
             && stage >= 2
-            && (self.hosts.iter().any(|h| *h == target) || target == self.build)
+            && (self.hosts.contains(&target) || target == self.build)
     }
 
     /// Checks whether the `compiler` compiling for `target` should be forced to

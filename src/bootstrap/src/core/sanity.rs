@@ -33,11 +33,15 @@ pub struct Finder {
 //
 // Targets can be removed from this list once they are present in the stage0 compiler (usually by updating the beta compiler of the bootstrap).
 const STAGE0_MISSING_TARGETS: &[&str] = &[
+<<<<<<< HEAD
     "wasm32-wali-linux-musl",
     // Ferrocene additions
     "aarch64-unknown-ferrocenecoretest",
     "thumbv7em-ferrocenecoretest-eabi",
     "thumbv7em-ferrocenecoretest-eabihf",
+=======
+    // just a dummy comment so the list doesn't get onelined
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM

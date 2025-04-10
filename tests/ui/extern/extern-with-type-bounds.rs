@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 #![feature(intrinsics, rustc_attrs)]
 
 // Intrinsics are the only (?) extern blocks supporting generics.

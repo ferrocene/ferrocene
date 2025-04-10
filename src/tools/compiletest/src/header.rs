@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::env;
 use std::fs::File;
 use std::io::BufReader;
@@ -11,6 +11,7 @@ use tracing::*;
 
 use crate::common::{Config, Debugger, FailMode, Mode, PassMode};
 use crate::debuggers::{extract_cdb_version, extract_gdb_version};
+use crate::errors::ErrorKind;
 use crate::executor::{CollectedTestDesc, ShouldPanic};
 use crate::header::auxiliary::{AuxProps, parse_and_update_aux};
 use crate::header::needs::CachedNeedsConditions;
@@ -199,8 +200,13 @@ pub struct TestProps {
     /// Build and use `minicore` as `core` stub for `no_core` tests in cross-compilation scenarios
     /// that don't otherwise want/need `-Z build-std`.
     pub add_core_stubs: bool,
+<<<<<<< HEAD
     // Flag to execute the test within a temporary directory
     pub ferrocene_execute_in_temp: bool,
+=======
+    /// Whether line annotatins are required for the given error kind.
+    pub require_annotations: HashMap<ErrorKind, bool>,
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 mod directives {
@@ -217,6 +223,7 @@ mod directives {
     pub const CHECK_RUN_RESULTS: &'static str = "check-run-results";
     pub const DONT_CHECK_COMPILER_STDOUT: &'static str = "dont-check-compiler-stdout";
     pub const DONT_CHECK_COMPILER_STDERR: &'static str = "dont-check-compiler-stderr";
+    pub const DONT_REQUIRE_ANNOTATIONS: &'static str = "dont-require-annotations";
     pub const NO_PREFER_DYNAMIC: &'static str = "no-prefer-dynamic";
     pub const PRETTY_MODE: &'static str = "pretty-mode";
     pub const PRETTY_COMPARE_ONLY: &'static str = "pretty-compare-only";
@@ -307,7 +314,17 @@ impl TestProps {
             no_auto_check_cfg: false,
             has_enzyme: false,
             add_core_stubs: false,
+<<<<<<< HEAD
             ferrocene_execute_in_temp: false,
+=======
+            require_annotations: HashMap::from([
+                (ErrorKind::Help, true),
+                (ErrorKind::Note, true),
+                (ErrorKind::Error, true),
+                (ErrorKind::Warning, true),
+                (ErrorKind::Suggestion, false),
+            ]),
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         }
     }
 
@@ -587,11 +604,20 @@ impl TestProps {
 
                     self.update_add_core_stubs(ln, config);
 
+<<<<<<< HEAD
                     config.set_name_directive(
                         ln,
                         FERROCENE_EXECUTE_IN_TEMP,
                         &mut self.ferrocene_execute_in_temp,
                     );
+=======
+                    if let Some(err_kind) =
+                        config.parse_name_value_directive(ln, DONT_REQUIRE_ANNOTATIONS)
+                    {
+                        self.require_annotations
+                            .insert(ErrorKind::expect_from_user_str(&err_kind), false);
+                    }
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
                 },
             );
 

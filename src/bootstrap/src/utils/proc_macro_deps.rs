@@ -68,6 +68,7 @@ pub static CRATES: &[&str] = &[
     "wasm-bindgen-backend",
     "wasm-bindgen-macro-support",
     "wasm-bindgen-shared",
+    "winnow",
     "yoke",
     "zerofrom",
     "zeroize",

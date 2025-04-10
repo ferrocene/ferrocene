@@ -39,12 +39,19 @@ class CargoPackageInvocation:
 
 
 @dataclass(order=True)
+class Variant:
+    id: str
+    fields: dict[str, str]
+
+
+@dataclass(order=True)
 class Invocation:
     bootstrap_types: list[str]
     host: str
     target: str
     stage: int
     kind: Union[CompiletestInvocation, CargoPackageInvocation]
+    variant: Variant
 
     passed_tests: int = 0
     failed_tests: int = 0
@@ -141,12 +148,18 @@ class FileLoader:
         else:
             raise RuntimeError(f"unknown test suite kind: {metadata['kind']}")
 
+        variant = Variant(
+            id=metadata["ferrocene_variant"]["id"],
+            fields=metadata["ferrocene_variant"]["human_readable_fields"],
+        )
+
         invocation = Invocation(
             bootstrap_types=list(self.bootstrap_type_stack),
             host=metadata["host"],
             target=metadata["target"],
             stage=metadata["stage"],
             kind=kind,
+            variant=variant,
         )
 
         for test in suite["tests"]:

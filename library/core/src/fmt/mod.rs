@@ -191,30 +191,31 @@ pub trait Write {
         self.write_str(c.encode_utf8(&mut [0; MAX_LEN_UTF8]))
     }
 
-    /// Glue for usage of the [`write!`] macro with implementors of this trait.
     ///
-    /// This method should generally not be invoked manually, but rather through
-    /// the [`write!`] macro itself.
-    ///
-    /// # Errors
-    ///
-    /// This function will return an instance of [`Error`] on error. Please see
-    /// [write_str](Write::write_str) for details.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use std::fmt::{Error, Write};
-    ///
-    /// fn writer<W: Write>(f: &mut W, s: &str) -> Result<(), Error> {
-    ///     f.write_fmt(format_args!("{s}"))
-    /// }
-    ///
-    /// let mut buf = String::new();
-    /// writer(&mut buf, "world")?;
-    /// assert_eq!(&buf, "world");
-    /// # std::fmt::Result::Ok(())
-    /// ```
+    // /// Glue for usage of the [`write!`] macro with implementors of this trait.
+    // ///
+    // /// This method should generally not be invoked manually, but rather through
+    // /// the [`write!`] macro itself.
+    // ///
+    // /// # Errors
+    // ///
+    // /// This function will return an instance of [`Error`] on error. Please see
+    // /// [write_str](Write::write_str) for details.
+    // ///
+    // /// # Examples
+    // ///
+    // /// ```
+    // /// use std::fmt::{Error, Write};
+    // ///
+    // /// fn writer<W: Write>(f: &mut W, s: &str) -> Result<(), Error> {
+    // ///     f.write_fmt(format_args!("{s}"))
+    // /// }
+    // ///
+    // /// let mut buf = String::new();
+    // /// writer(&mut buf, "world")?;
+    // /// assert_eq!(&buf, "world");
+    // /// # std::fmt::Result::Ok(())
+    // /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     fn write_fmt(&mut self, args: Arguments<'_>) -> Result {
         // We use a specialization for `Sized` types to avoid an indirection
@@ -519,14 +520,14 @@ pub struct FormattingOptions {
 // }
 
 /// Configuration for formatting.
-///
-/// A `Formatter` represents various options related to formatting. Users do not
-/// construct `Formatter`s directly; a mutable reference to one is passed to
-/// the `fmt` method of all formatting traits, like [`Debug`] and [`Display`].
-///
-/// To interact with a `Formatter`, you'll call various methods to change the
-/// various options related to formatting. For examples, please see the
-/// documentation of the methods defined on `Formatter` below.
+// ///
+// /// A `Formatter` represents various options related to formatting. Users do not
+// /// construct `Formatter`s directly; a mutable reference to one is passed to
+// /// the `fmt` method of all formatting traits, like [`Debug`] and [`Display`].
+// ///
+// /// To interact with a `Formatter`, you'll call various methods to change the
+// /// various options related to formatting. For examples, please see the
+// /// documentation of the methods defined on `Formatter` below.
 #[allow(missing_debug_implementations)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Formatter"]
@@ -556,10 +557,10 @@ pub struct Formatter<'a> {
 //     }
 // }
 
-// /// This structure represents a safely precompiled version of a format string
-// /// and its arguments. This cannot be generated at runtime because it cannot
-// /// safely be done, so no constructors are given and the fields are private
-// /// to prevent modification.
+/// This structure represents a safely precompiled version of a format string
+/// and its arguments. This cannot be generated at runtime because it cannot
+/// safely be done, so no constructors are given and the fields are private
+/// to prevent modification.
 // ///
 // /// The [`format_args!`] macro will safely create an instance of this structure.
 // /// The macro validates the format string at compile-time so usage of the
@@ -916,7 +917,7 @@ pub struct Arguments<'a> {
 // #[doc(inline)]
 // pub use macros::Debug;
 
-// /// Format trait for an empty format, `{}`.
+/// Format trait for an empty format, `{}`.
 // ///
 // /// Implementing this trait for a type will automatically implement the
 // /// [`ToString`][tostring] trait for the type, allowing the usage

@@ -30,39 +30,39 @@
 /// and `LinkedList`. This is the case because they provide a public API that follows the
 /// normal shared XOR mutable rules of Rust.
 ///
-/// If your type cannot safely be covariant, you must ensure it contains some
-/// additional field to provide invariance. Often this field will be a [`PhantomData`]
-/// type like `PhantomData<Cell<T>>` or `PhantomData<&'a mut T>`.
-///
-/// Notice that `NonNull<T>` has a `From` instance for `&T`. However, this does
-/// not change the fact that mutating through a (pointer derived from a) shared
-/// reference is undefined behavior unless the mutation happens inside an
-/// [`UnsafeCell<T>`]. The same goes for creating a mutable reference from a shared
-/// reference. When using this `From` instance without an `UnsafeCell<T>`,
-/// it is your responsibility to ensure that `as_mut` is never called, and `as_ptr`
-/// is never used for mutation.
-///
-/// # Representation
-///
-/// Thanks to the [null pointer optimization],
-/// `NonNull<T>` and `Option<NonNull<T>>`
-/// are guaranteed to have the same size and alignment:
-///
-/// ```
-/// # use std::mem::{size_of, align_of};
-/// use std::ptr::NonNull;
-///
-/// assert_eq!(size_of::<NonNull<i16>>(), size_of::<Option<NonNull<i16>>>());
-/// assert_eq!(align_of::<NonNull<i16>>(), align_of::<Option<NonNull<i16>>>());
-///
-/// assert_eq!(size_of::<NonNull<str>>(), size_of::<Option<NonNull<str>>>());
-/// assert_eq!(align_of::<NonNull<str>>(), align_of::<Option<NonNull<str>>>());
-/// ```
-///
+// /// If your type cannot safely be covariant, you must ensure it contains some
+// /// additional field to provide invariance. Often this field will be a [`PhantomData`]
+// /// type like `PhantomData<Cell<T>>` or `PhantomData<&'a mut T>`.
+// ///
+// /// Notice that `NonNull<T>` has a `From` instance for `&T`. However, this does
+// /// not change the fact that mutating through a (pointer derived from a) shared
+// /// reference is undefined behavior unless the mutation happens inside an
+// /// [`UnsafeCell<T>`]. The same goes for creating a mutable reference from a shared
+// /// reference. When using this `From` instance without an `UnsafeCell<T>`,
+// /// it is your responsibility to ensure that `as_mut` is never called, and `as_ptr`
+// /// is never used for mutation.
+// ///
+// /// # Representation
+// ///
+// /// Thanks to the [null pointer optimization],
+// /// `NonNull<T>` and `Option<NonNull<T>>`
+// /// are guaranteed to have the same size and alignment:
+// ///
+// /// ```
+// /// # use std::mem::{size_of, align_of};
+// /// use std::ptr::NonNull;
+// ///
+// /// assert_eq!(size_of::<NonNull<i16>>(), size_of::<Option<NonNull<i16>>>());
+// /// assert_eq!(align_of::<NonNull<i16>>(), align_of::<Option<NonNull<i16>>>());
+// ///
+// /// assert_eq!(size_of::<NonNull<str>>(), size_of::<Option<NonNull<str>>>());
+// /// assert_eq!(align_of::<NonNull<str>>(), align_of::<Option<NonNull<str>>>());
+// /// ```
+// ///
 /// [covariant]: https://doc.rust-lang.org/reference/subtyping.html
-/// [`PhantomData`]: crate::marker::PhantomData
-/// [`UnsafeCell<T>`]: crate::cell::UnsafeCell
-/// [null pointer optimization]: crate::option#representation
+// /// [`PhantomData`]: crate::marker::PhantomData
+// /// [`UnsafeCell<T>`]: crate::cell::UnsafeCell
+// /// [null pointer optimization]: crate::option#representation
 #[stable(feature = "nonnull", since = "1.25.0")]
 #[repr(transparent)]
 #[rustc_layout_scalar_valid_range_start(1)]

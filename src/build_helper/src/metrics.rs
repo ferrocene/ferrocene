@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::time::Duration;
 
 use serde_derive::{Deserialize, Serialize};
@@ -69,6 +70,7 @@ pub enum TestSuiteMetadata {
         target: String,
         host: String,
         stage: u32,
+        ferrocene_variant: FerroceneVariantMetadata,
     },
     Compiletest {
         suite: String,
@@ -77,6 +79,7 @@ pub enum TestSuiteMetadata {
         target: String,
         host: String,
         stage: u32,
+        ferrocene_variant: FerroceneVariantMetadata,
     },
 }
 
@@ -109,6 +112,13 @@ pub struct JsonInvocationSystemStats {
 pub struct JsonStepSystemStats {
     #[serde(deserialize_with = "null_as_f64_nan")]
     pub cpu_utilization_percent: f64,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct FerroceneVariantMetadata {
+    pub id: String,
+    pub human_readable_fields: BTreeMap<String, String>,
 }
 
 fn null_as_f64_nan<'de, D: serde::Deserializer<'de>>(d: D) -> Result<f64, D::Error> {

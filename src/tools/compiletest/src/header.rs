@@ -200,13 +200,10 @@ pub struct TestProps {
     /// Build and use `minicore` as `core` stub for `no_core` tests in cross-compilation scenarios
     /// that don't otherwise want/need `-Z build-std`.
     pub add_core_stubs: bool,
-<<<<<<< HEAD
-    // Flag to execute the test within a temporary directory
-    pub ferrocene_execute_in_temp: bool,
-=======
     /// Whether line annotatins are required for the given error kind.
     pub require_annotations: HashMap<ErrorKind, bool>,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    // Flag to execute the test within a temporary directory
+    pub ferrocene_execute_in_temp: bool,
 }
 
 mod directives {
@@ -314,9 +311,6 @@ impl TestProps {
             no_auto_check_cfg: false,
             has_enzyme: false,
             add_core_stubs: false,
-<<<<<<< HEAD
-            ferrocene_execute_in_temp: false,
-=======
             require_annotations: HashMap::from([
                 (ErrorKind::Help, true),
                 (ErrorKind::Note, true),
@@ -324,7 +318,7 @@ impl TestProps {
                 (ErrorKind::Warning, true),
                 (ErrorKind::Suggestion, false),
             ]),
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+            ferrocene_execute_in_temp: false,
         }
     }
 
@@ -604,20 +598,18 @@ impl TestProps {
 
                     self.update_add_core_stubs(ln, config);
 
-<<<<<<< HEAD
-                    config.set_name_directive(
-                        ln,
-                        FERROCENE_EXECUTE_IN_TEMP,
-                        &mut self.ferrocene_execute_in_temp,
-                    );
-=======
                     if let Some(err_kind) =
                         config.parse_name_value_directive(ln, DONT_REQUIRE_ANNOTATIONS)
                     {
                         self.require_annotations
                             .insert(ErrorKind::expect_from_user_str(&err_kind), false);
                     }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+                    config.set_name_directive(
+                        ln,
+                        FERROCENE_EXECUTE_IN_TEMP,
+                        &mut self.ferrocene_execute_in_temp,
+                    );
                 },
             );
 

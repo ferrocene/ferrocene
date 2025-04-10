@@ -13,11 +13,7 @@ impl<N> Foo for B<N> {}
 struct C<const C: u8, const N: u8>;
 impl<const N: u8> Foo for C<N, T> {}
 //~^ ERROR cannot find type
-<<<<<<< HEAD
-//~| unresolved item provided when a constant
+//~| ERROR unresolved item provided when a constant
 
 // ferrocene-annotations: fls_utuu8mdbuyxm
 // Generic Arguments
-=======
-//~| ERROR unresolved item provided when a constant
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

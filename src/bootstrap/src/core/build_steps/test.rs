@@ -25,6 +25,7 @@ use crate::core::config::TargetSelection;
 use crate::core::config::flags::{Subcommand, get_completion};
 use crate::ferrocene::code_coverage::measure_coverage;
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
+use crate::ferrocene::test_variants::{TestVariant, VariantCondition};
 use crate::utils::build_stamp::{self, BuildStamp};
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::utils::helpers::{
@@ -339,6 +340,16 @@ impl Step for Cargo {
         // same value as `-Zroot-dir`.
         cargo.env("CARGO_RUSTC_CURRENT_DIR", builder.src.display().to_string());
 
+        let variant = TestVariant::current(builder, self.host);
+        for condition in variant.condititions() {
+            match condition.get() {
+                VariantCondition::Edition(_) => condition.mark_unused(),
+                VariantCondition::QemuCpu(cpu) => {
+                    cargo.env("QEMU_CPU", cpu);
+                }
+            }
+        }
+
         #[cfg(feature = "build-metrics")]
         builder.metrics.begin_test_suite(
             build_helper::metrics::TestSuiteMetadata::CargoPackage {
@@ -346,6 +357,7 @@ impl Step for Cargo {
                 target: self.host.triple.to_string(),
                 host: self.host.triple.to_string(),
                 stage,
+                ferrocene_variant: variant.for_metrics(),
             },
             builder,
         );
@@ -2076,6 +2088,18 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
         cmd.arg("--git-merge-commit-email").arg(git_config.git_merge_commit_email);
         cmd.force_coloring_in_ci();
 
+        let variant = TestVariant::current(builder, self.target);
+        for condition in variant.condititions() {
+            match condition.get() {
+                VariantCondition::Edition(edition) => {
+                    cmd.arg(format!("--edition={edition}"));
+                }
+                VariantCondition::QemuCpu(cpu) => {
+                    cmd.env("QEMU_CPU", cpu);
+                }
+            }
+        }
+
         #[cfg(feature = "build-metrics")]
         builder.metrics.begin_test_suite(
             build_helper::metrics::TestSuiteMetadata::Compiletest {
@@ -2085,6 +2109,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
                 target: self.target.triple.to_string(),
                 host: self.compiler.host.triple.to_string(),
                 stage: self.compiler.stage,
+                ferrocene_variant: variant.for_metrics(),
             },
             builder,
         );
@@ -2114,6 +2139,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
                     target: self.target.triple.to_string(),
                     host: self.compiler.host.triple.to_string(),
                     stage: self.compiler.stage,
+                    ferrocene_variant: variant.for_metrics(),
                 },
                 builder,
             );
@@ -2499,6 +2525,16 @@ pub(crate) fn run_cargo_test<'a>(
         builder.msg_sysroot_tool(Kind::Test, compiler.stage, what, compiler.host, target)
     });
 
+    let variant = TestVariant::current(builder, target);
+    for condition in variant.condititions() {
+        match condition.get() {
+            VariantCondition::Edition(_) => condition.mark_unused(),
+            VariantCondition::QemuCpu(cpu) => {
+                cargo.env("QEMU_CPU", cpu);
+            }
+        }
+    }
+
     #[cfg(feature = "build-metrics")]
     builder.metrics.begin_test_suite(
         build_helper::metrics::TestSuiteMetadata::CargoPackage {
@@ -2506,6 +2542,7 @@ pub(crate) fn run_cargo_test<'a>(
             target: target.triple.to_string(),
             host: compiler.host.triple.to_string(),
             stage: compiler.stage,
+            ferrocene_variant: variant.for_metrics(),
         },
         builder,
     );

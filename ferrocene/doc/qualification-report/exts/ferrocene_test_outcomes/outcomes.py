@@ -77,7 +77,7 @@ class Platform:
 
 @dataclass
 class Outcomes:
-    platforms: OrderedDict[(str, str), Platform] = field(default_factory=OrderedDict)
+    platforms: OrderedDict[tuple[str, str], Platform] = field(default_factory=OrderedDict)
 
     def load_file(self, file):
         with open(file, "r", encoding="utf-8") as f:

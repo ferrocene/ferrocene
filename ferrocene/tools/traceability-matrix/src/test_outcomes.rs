@@ -13,10 +13,10 @@ const EXPECTED_FORMAT_VERSION: usize = 1;
 pub(crate) struct TestOutcomes {
     // key is name of test, represented by a path
     // value is targets on which the tests were executed
-    pub(crate) executed_tests: BTreeMap<String, BTreeSet<String>>,
+    pub(crate) executed_tests: BTreeMap<String, BTreeSet<On>>,
     // key is name of test, also represented by a path
     // value can be any number of ignored tests
-    pub(crate) ignored_tests: BTreeMap<String, BTreeSet<String>>,
+    pub(crate) ignored_tests: BTreeMap<String, BTreeSet<On>>,
 }
 
 impl TestOutcomes {
@@ -46,11 +46,11 @@ impl TestOutcomes {
                     MetricsNode::RustbuildStep { children } => search_queue.extend(children),
                     MetricsNode::TestSuite {
                         tests,
-                        metadata: TestSuiteMetadata::Compiletest { target },
+                        metadata: TestSuiteMetadata::Compiletest { ferrocene_variant, target },
                     } => {
                         for Test { name, outcome } in tests {
                             let Some(name) = parse_name(name) else { continue };
-                            test_outcomes.insert(outcome, name, &target);
+                            test_outcomes.insert(outcome, name, &target, &ferrocene_variant.id);
                         }
                     }
                     // Ignore test results from Cargo packages, as we don't consider those in the
@@ -65,12 +65,27 @@ impl TestOutcomes {
         Ok(test_outcomes)
     }
 
-    fn insert(&mut self, outcome: MetricsTestOutcome, name: String, target: &str) {
+    fn insert(&mut self, outcome: MetricsTestOutcome, name: String, target: &str, variant: &str) {
         let tests = match outcome {
             MetricsTestOutcome::Ignored => &mut self.ignored_tests,
             MetricsTestOutcome::Passed => &mut self.executed_tests,
         };
-        tests.entry(name).or_default().insert(target.into());
+        tests
+            .entry(name)
+            .or_default()
+            .insert(On { target: target.into(), variant: variant.into() });
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Hash)]
+pub(crate) struct On {
+    target: String,
+    variant: String,
+}
+
+impl std::fmt::Display for On {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} with variant {}", self.target, self.variant)
     }
 }
 
@@ -107,7 +122,12 @@ enum MetricsNode {
 #[serde(tag = "kind", rename_all = "snake_case")]
 enum TestSuiteMetadata {
     CargoPackage,
-    Compiletest { target: String },
+    Compiletest { ferrocene_variant: TestSuiteVariant, target: String },
+}
+
+#[derive(serde::Deserialize)]
+struct TestSuiteVariant {
+    id: String,
 }
 
 #[derive(serde::Deserialize)]
@@ -158,8 +178,11 @@ mod tests {
         Ok(())
     }
 
-    fn arrange_tests<const N: usize>(tests: [&str; N]) -> BTreeMap<String, BTreeSet<String>> {
-        let targets = BTreeSet::from(["aarch64-unknown-linux-gnu".into()]);
+    fn arrange_tests<const N: usize>(tests: [&str; N]) -> BTreeMap<String, BTreeSet<On>> {
+        let targets = BTreeSet::from([On {
+            target: "aarch64-unknown-linux-gnu".into(),
+            variant: "empty".into(),
+        }]);
         tests.into_iter().map(|test| (test.into(), targets.clone())).collect()
     }
 
@@ -187,6 +210,9 @@ mod tests {
                                             "metadata": {
                                                 "target": "aarch64-unknown-linux-gnu",
                                                 "kind": "compiletest",
+                                                "ferrocene_variant": {
+                                                    "id": "empty",
+                                                },
                                             },
                                             "tests": [
                                                 {
@@ -220,6 +246,9 @@ mod tests {
                                             "metadata": {
                                                 "target": "aarch64-unknown-linux-gnu",
                                                 "kind": "compiletest",
+                                                "ferrocene_variant": {
+                                                    "id": "empty",
+                                                },
                                             },
                                             "tests": [
                                                 {
@@ -241,6 +270,9 @@ mod tests {
                                     "metadata": {
                                         "target": "aarch64-unknown-linux-gnu",
                                         "kind": "compiletest",
+                                        "ferrocene_variant": {
+                                            "id": "empty",
+                                        },
                                     },
                                     "tests": [
                                         {
@@ -276,6 +308,9 @@ mod tests {
                                                 "metadata": {
                                                     "target": "aarch64-unknown-linux-gnu",
                                                     "kind": "compiletest",
+                                                    "ferrocene_variant": {
+                                                        "id": "empty",
+                                                    },
                                                 },
                                                 "tests": [
                                                     {
@@ -305,6 +340,9 @@ mod tests {
                                                 "metadata": {
                                                     "target": "aarch64-unknown-linux-gnu",
                                                     "kind": "compiletest",
+                                                    "ferrocene_variant": {
+                                                        "id": "empty",
+                                                    },
                                                 },
                                                 "tests": [
                                                     {

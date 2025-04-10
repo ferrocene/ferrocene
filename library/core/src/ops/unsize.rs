@@ -33,39 +33,49 @@ use crate::marker::Unsize;
 /// [nomicon-coerce]: ../../nomicon/coercions.html
 #[unstable(feature = "coerce_unsized", issue = "18598")]
 #[lang = "coerce_unsized"]
+#[cfg(feature = "unstable")]
 pub trait CoerceUnsized<T: ?Sized> {
     // Empty.
 }
 
 // &mut T -> &mut U
 #[unstable(feature = "coerce_unsized", issue = "18598")]
+#[cfg(feature = "unstable")]
 impl<'a, T: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<&'a mut U> for &'a mut T {}
 // &mut T -> &U
 #[unstable(feature = "coerce_unsized", issue = "18598")]
+#[cfg(feature = "unstable")]
 impl<'a, 'b: 'a, T: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<&'a U> for &'b mut T {}
 // &mut T -> *mut U
 #[unstable(feature = "coerce_unsized", issue = "18598")]
+#[cfg(feature = "unstable")]
 impl<'a, T: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<*mut U> for &'a mut T {}
 // &mut T -> *const U
 #[unstable(feature = "coerce_unsized", issue = "18598")]
+#[cfg(feature = "unstable")]
 impl<'a, T: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<*const U> for &'a mut T {}
 
 // &T -> &U
 #[unstable(feature = "coerce_unsized", issue = "18598")]
+#[cfg(feature = "unstable")]
 impl<'a, 'b: 'a, T: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<&'a U> for &'b T {}
 // &T -> *const U
 #[unstable(feature = "coerce_unsized", issue = "18598")]
+#[cfg(feature = "unstable")]
 impl<'a, T: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<*const U> for &'a T {}
 
 // *mut T -> *mut U
 #[unstable(feature = "coerce_unsized", issue = "18598")]
+#[cfg(feature = "unstable")]
 impl<T: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<*mut U> for *mut T {}
 // *mut T -> *const U
 #[unstable(feature = "coerce_unsized", issue = "18598")]
+#[cfg(feature = "unstable")]
 impl<T: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<*const U> for *mut T {}
 
 // *const T -> *const U
 #[unstable(feature = "coerce_unsized", issue = "18598")]
+#[cfg(feature = "unstable")]
 impl<T: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<*const U> for *const T {}
 
 /// `DispatchFromDyn` is used in the implementation of dyn-compatibility[^1] checks (specifically

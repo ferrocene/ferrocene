@@ -150,7 +150,7 @@ mod function;
 // mod index_range;
 // mod range;
 // mod try_trait;
-// mod unsize;
+mod unsize;
 
 // #[stable(feature = "rust1", since = "1.0.0")]
 // pub use self::arith::{Add, Div, Mul, Neg, Rem, Sub};

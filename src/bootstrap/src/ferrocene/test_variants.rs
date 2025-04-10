@@ -1,0 +1,117 @@
+use std::cell::RefCell;
+#[cfg(feature = "build-metrics")]
+use std::collections::BTreeMap;
+
+#[cfg(feature = "build-metrics")]
+use build_helper::metrics::FerroceneVariantMetadata;
+
+use crate::Subcommand;
+use crate::builder::Builder;
+use crate::core::config::TargetSelection;
+
+// The variants are so few that setting up an OnceLock to define a global hashmap is too
+// much complexity. If we are able to test so many variants that this loop becomes a
+// bottleneck I guess congrats on Ferrocene's success :D
+static VARIANTS: &[(&str, &[VariantCondition])] = &[
+    // FIXME: all of these point to edition 2015 instead of 2021!!!
+    ("2021", &[VariantCondition::Edition("2015")]),
+    (
+        "2021-cortex-a53",
+        &[VariantCondition::Edition("2015"), VariantCondition::QemuCpu("cortex-a53")],
+    ),
+    (
+        "2021-cortex-m4",
+        &[VariantCondition::Edition("2015"), VariantCondition::QemuCpu("cortex-m4")],
+    ),
+];
+static DEFAULT_VARIANTS_BY_TARGET: &[(&str, &str)] = &[
+    ("aarch64-unknown-ferrocenecoretest", "2021-cortex-a53"),
+    ("thumbv7em-ferrocenecoretest-eabihf", "2021-cortex-m4"),
+];
+static DEFAULT_VARIANT_FALLBACK: &str = "2021";
+
+pub(crate) enum VariantCondition {
+    Edition(&'static str),
+    QemuCpu(&'static str),
+}
+
+#[derive(Clone)]
+pub(crate) struct TestVariant {
+    base: &'static [VariantCondition],
+    masks: RefCell<Vec<bool>>,
+}
+
+impl TestVariant {
+    pub(crate) fn current(builder: &Builder<'_>, target: TargetSelection) -> Self {
+        let name = match &builder.config.cmd {
+            Subcommand::Test { test_variant: Some(name), .. } => name,
+            _ => find_in_slice(DEFAULT_VARIANTS_BY_TARGET, &target.triple)
+                .map(|s| *s)
+                .unwrap_or(DEFAULT_VARIANT_FALLBACK),
+        };
+
+        let base = find_in_slice(VARIANTS, name).expect(&format!("unknown test variant: {name}"));
+        TestVariant { masks: RefCell::new(vec![true; base.len()]), base }
+    }
+
+    pub(crate) fn condititions(&self) -> impl Iterator<Item = VariantConditionAccessor<'_>> {
+        self.base
+            .iter()
+            .enumerate()
+            .filter(|(idx, _)| self.masks.borrow()[*idx])
+            .map(|(index, condition)| VariantConditionAccessor { parent: self, condition, index })
+    }
+
+    #[cfg(feature = "build-metrics")]
+    pub(crate) fn id(&self) -> String {
+        let mut id = String::new();
+        for condition in self.condititions() {
+            match condition.get() {
+                VariantCondition::Edition(edition) => id.push_str(&format!("e{edition}")),
+                VariantCondition::QemuCpu(cpu) => id.push_str(&format!("q{cpu}")),
+            }
+        }
+        if id.is_empty() { "empty".into() } else { id }
+    }
+
+    #[cfg(feature = "build-metrics")]
+    pub(crate) fn for_metrics(&self) -> FerroceneVariantMetadata {
+        let mut fields = BTreeMap::new();
+        for condition in self.condititions() {
+            match condition.get() {
+                VariantCondition::Edition(edition) => {
+                    fields.insert("Edition".into(), edition.to_string());
+                }
+                VariantCondition::QemuCpu(cpu) => {
+                    fields.insert("Emulated CPU".into(), cpu.to_string());
+                }
+            }
+        }
+        FerroceneVariantMetadata { id: self.id(), human_readable_fields: fields }
+    }
+}
+
+pub(crate) struct VariantConditionAccessor<'a> {
+    parent: &'a TestVariant,
+    condition: &'a VariantCondition,
+    index: usize,
+}
+
+impl VariantConditionAccessor<'_> {
+    pub(crate) fn get(&self) -> &VariantCondition {
+        self.condition
+    }
+
+    pub(crate) fn mark_unused(&self) {
+        self.parent.masks.borrow_mut()[self.index] = false;
+    }
+}
+
+fn find_in_slice<'a, T>(slice: &'a [(&str, T)], expected: &str) -> Option<&'a T> {
+    for (key, value) in slice {
+        if *key == expected {
+            return Some(value);
+        }
+    }
+    None
+}

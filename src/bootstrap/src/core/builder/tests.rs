@@ -740,6 +740,7 @@ mod dist {
             no_capture: false,
             coverage: false,
             ferrocene_test_one_crate_per_cargo_call: false,
+            test_variant: None,
         };
 
         let build = Build::new(config);
@@ -820,6 +821,7 @@ mod dist {
             no_capture: false,
             coverage: false,
             ferrocene_test_one_crate_per_cargo_call: false,
+            test_variant: None,
         };
         // Make sure rustfmt binary not being found isn't an error.
         config.channel = "beta".to_string();

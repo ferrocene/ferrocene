@@ -562,6 +562,7 @@ use crate::ops::{Deref, DerefMut};
 // use crate::panicking::{panic, panic_display};
 // use crate::pin::Pin;
 // use crate::{cmp, convert, hint, mem, slice};
+use crate::mem;
 
 /// The `Option` type. See [the module level documentation](self) for more.
 #[doc(search_unbox)]
@@ -1722,28 +1723,28 @@ impl<T> Option<T> {
     // Misc
     /////////////////////////////////////////////////////////////////////////
 
-//     /// Takes the value out of the option, leaving a [`None`] in its place.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let mut x = Some(2);
-//     /// let y = x.take();
-//     /// assert_eq!(x, None);
-//     /// assert_eq!(y, Some(2));
-//     ///
-//     /// let mut x: Option<u32> = None;
-//     /// let y = x.take();
-//     /// assert_eq!(x, None);
-//     /// assert_eq!(y, None);
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-//     pub const fn take(&mut self) -> Option<T> {
-//         // FIXME(const-hack) replace `mem::replace` by `mem::take` when the latter is const ready
-//         mem::replace(self, None)
-//     }
+    /// Takes the value out of the option, leaving a [`None`] in its place.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut x = Some(2);
+    /// let y = x.take();
+    /// assert_eq!(x, None);
+    /// assert_eq!(y, Some(2));
+    ///
+    /// let mut x: Option<u32> = None;
+    /// let y = x.take();
+    /// assert_eq!(x, None);
+    /// assert_eq!(y, None);
+    /// ```
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    pub const fn take(&mut self) -> Option<T> {
+        // FIXME(const-hack) replace `mem::replace` by `mem::take` when the latter is const ready
+        mem::replace(self, None)
+    }
 
 //     /// Takes the value out of the option, but only if the predicate evaluates to
 //     /// `true` on a mutable reference to the value.

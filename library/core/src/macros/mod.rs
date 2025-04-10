@@ -1170,27 +1170,27 @@ macro_rules! matches {
 //         ($($e:literal),+ $(,)?) => {{ /* compiler built-in */ }};
 //     }
 
-//     /// Concatenates literals into a static string slice.
-//     ///
-//     /// This macro takes any number of comma-separated literals, yielding an
-//     /// expression of type `&'static str` which represents all of the literals
-//     /// concatenated left-to-right.
-//     ///
-//     /// Integer and floating point literals are [stringified](core::stringify) in order to be
-//     /// concatenated.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let s = concat!("test", 10, 'b', true);
-//     /// assert_eq!(s, "test10btrue");
-//     /// ```
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[rustc_builtin_macro]
-//     #[macro_export]
-//     macro_rules! concat {
-//         ($($e:expr),* $(,)?) => {{ /* compiler built-in */ }};
-//     }
+    /// Concatenates literals into a static string slice.
+    // ///
+    // /// This macro takes any number of comma-separated literals, yielding an
+    // /// expression of type `&'static str` which represents all of the literals
+    // /// concatenated left-to-right.
+    // ///
+    // /// Integer and floating point literals are [stringified](core::stringify) in order to be
+    // /// concatenated.
+    // ///
+    // /// # Examples
+    // ///
+    // /// ```
+    // /// let s = concat!("test", 10, 'b', true);
+    // /// assert_eq!(s, "test10btrue");
+    // /// ```
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_builtin_macro]
+    #[macro_export]
+    macro_rules! concat {
+        ($($e:expr),* $(,)?) => {{ /* compiler built-in */ }};
+    }
 
 //     /// Expands to the line number on which it was invoked.
 //     ///
@@ -1413,7 +1413,7 @@ macro_rules! matches {
 //         };
 //     }
 
-//     /// Evaluates boolean combinations of configuration flags at compile-time.
+    /// Evaluates boolean combinations of configuration flags at compile-time.
 //     ///
 //     /// In addition to the `#[cfg]` attribute, this macro is provided to allow
 //     /// boolean expression evaluation of configuration flags. This frequently
@@ -1437,14 +1437,14 @@ macro_rules! matches {
 //     ///     "unix-directory"
 //     /// };
 //     /// ```
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[rustc_builtin_macro]
-//     #[macro_export]
-//     macro_rules! cfg {
-//         ($($cfg:tt)*) => {
-//             /* compiler built-in */
-//         };
-//     }
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_builtin_macro]
+    #[macro_export]
+    macro_rules! cfg {
+        ($($cfg:tt)*) => {
+            /* compiler built-in */
+        };
+    }
 
 //     /// Parses a file as an expression or an item according to the context.
 //     ///

@@ -136,7 +136,7 @@
 // #![feature(str_internals)]
 // #![feature(str_split_inclusive_remainder)]
 // #![feature(str_split_remainder)]
-// #![feature(ub_checks)]
+#![feature(ub_checks)]
 // #![feature(unchecked_neg)]
 // #![feature(unchecked_shifts)]
 // #![feature(utf16_extra)]
@@ -153,7 +153,7 @@
 // #![feature(cfg_sanitize)]
 // #![feature(cfg_target_has_atomic)]
 // #![feature(cfg_target_has_atomic_equal_alignment)]
-// #![feature(cfg_ub_checks)]
+#![feature(cfg_ub_checks)]
 // #![feature(const_precise_live_drops)]
 #![feature(const_trait_impl)]
 #![feature(decl_macro)]
@@ -169,7 +169,7 @@
 // #![feature(generic_arg_infer)]
 // #![feature(if_let_guard)]
 // #![feature(intra_doc_pointers)]
-// #![feature(intrinsics)]
+#![feature(intrinsics)]
 #![feature(lang_items)]
 // #![feature(let_chains)]
 // #![feature(link_llvm_intrinsics)]
@@ -341,14 +341,10 @@ pub mod prelude;
 
 #[cfg(feature = "uncertified")]
 pub mod hint;
-#[cfg(feature = "uncertified")]
 pub mod intrinsics;
-#[cfg(feature = "uncertified")]
 pub mod mem;
-#[cfg(feature = "uncertified")]
 pub mod ptr;
 #[unstable(feature = "ub_checks", issue = "none")]
-#[cfg(feature = "uncertified")]
 pub mod ub_checks;
 
 /* Core language traits */
@@ -395,9 +391,7 @@ pub mod iter;
 #[cfg(feature = "uncertified")]
 pub mod net;
 pub mod option;
-#[cfg(feature = "uncertified")]
 pub mod panic;
-#[cfg(feature = "uncertified")]
 pub mod panicking;
 #[unstable(feature = "pattern_type_macro", issue = "123646")]
 #[cfg(feature = "uncertified")]

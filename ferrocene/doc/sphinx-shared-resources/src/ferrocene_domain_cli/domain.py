@@ -5,9 +5,11 @@
 from dataclasses import dataclass
 import re
 import string
+from typing import Optional
 
 from docutils import nodes
 from docutils.parsers.rst import directives
+import docutils
 
 from sphinx import addnodes
 from sphinx.directives import SphinxDirective, ObjectDescription
@@ -18,12 +20,19 @@ import sphinx
 
 PROGRAM_STORAGE = "ferrocene_domain_cli:program"
 
+ALLOWED_CATEGORIES = {
+    "informational": "informational",
+    "narrow": "narrow impact",
+    "wide": "wide impact",
+    "unqualified": "not qualified",
+}
+
 
 class ProgramDirective(SphinxDirective):
     has_content = True
     required_arguments = 1
     final_argument_whitespace = True
-    option_spec = {"no_traceability_matrix": directives.flag}
+    option_spec = {"not_qualified": directives.flag}
 
     def run(self):
         # if there already is program data in storage, a ProgramDirective is
@@ -34,8 +43,8 @@ class ProgramDirective(SphinxDirective):
 
         # store arguments, so they can be accessed by child `OptionDirective`s
         self.env.temp_data[PROGRAM_STORAGE] = ProgramStorage(
-            self.arguments[0],
-            "no_traceability_matrix" in self.options,
+            program_name=self.arguments[0],
+            qualified="not_qualified" not in self.options,
         )
 
         # parse and process content of `ProgramDirective``
@@ -52,7 +61,7 @@ class ProgramDirective(SphinxDirective):
 class OptionDirective(ObjectDescription):
     has_content = True
     required_arguments = 1
-    option_spec = {}
+    option_spec = {"category": directives.unchanged}
 
     def handle_signature(self, sig, signode):
         signode += addnodes.desc_name("", sig)
@@ -64,11 +73,27 @@ class OptionDirective(ObjectDescription):
         else:
             program_storage: ProgramStorage = self.env.temp_data[PROGRAM_STORAGE]
 
+        if "category" not in self.options:
+            if program_storage.qualified:
+                warn("cli:option without a category", self.get_location())
+            category = None
+        elif self.options["category"] not in ALLOWED_CATEGORIES:
+            warn(
+                f"unsupported category: {self.options['category']}", self.get_location()
+            )
+            category = None
+        else:
+            if not program_storage.qualified:
+                warn("category set in an unqualified program", self.get_location())
+            category = self.options["category"]
+
         option = Option(
-            self.env.docname,
-            program_storage.program_name,
-            sig,
-            program_storage.no_traceability_matrix,
+            document=self.env.docname,
+            program=program_storage.program_name,
+            option=sig,
+            category=category,
+            location=self.get_location(),
+            no_traceability_matrix=not program_storage.qualified,
         )
 
         signode["ids"].append(option.id())
@@ -82,12 +107,14 @@ MULTIPLE_UNDERSCORES_RE = re.compile(r"__+")
 ALLOWED_CHARS_IN_OPTION_ID = string.ascii_letters + string.digits + "_"
 
 
+@dataclass
 class Option:
-    def __init__(self, document, program, option, no_traceability_matrix):
-        self.document = document
-        self.program = program
-        self.option = option
-        self.no_traceability_matrix = no_traceability_matrix
+    document: str
+    program: str
+    option: str
+    category: Optional[str]
+    location: str
+    no_traceability_matrix: bool
 
     def id(self):
         option = (
@@ -101,7 +128,7 @@ class Option:
 
         # Sanity check to notice when the normalization doesn't work
         if any(c for c in option if c not in ALLOWED_CHARS_IN_OPTION_ID):
-            warn(f"cannot properly normalize option {self.option}")
+            warn(f"cannot properly normalize option {self.option}", self.location)
 
         return f"um_{self.program}_{option}"
 
@@ -177,4 +204,4 @@ def setup(app):
 @dataclass
 class ProgramStorage:
     program_name: str
-    no_traceability_matrix: bool
+    qualified: bool

@@ -2760,15 +2760,20 @@ impl Step for Crate {
         }
 
         let mut crates = self.crates.clone();
-        // The core and alloc crates can't directly be tested. We
-        // could silently ignore them, but adding their own test
-        // crates is less confusing for users. We still keep core and
-        // alloc themself for doctests
-        if crates.iter().any(|crate_| crate_ == "core") {
-            crates.push("coretests".to_owned());
-        }
-        if crates.iter().any(|crate_| crate_ == "alloc") {
-            crates.push("alloctests".to_owned());
+        // When the --ferrocene-test-one-crate-per-cargo-call flag is passed, we don't want multiple
+        // crates to be tested at the same time. The flag is only used in CI, where all crates are
+        // tested anyway, so there is no need to add coretests when testing core.
+        if !builder.config.cmd.ferrocene_test_one_crate_per_cargo_call() {
+            // The core and alloc crates can't directly be tested. We
+            // could silently ignore them, but adding their own test
+            // crates is less confusing for users. We still keep core and
+            // alloc themself for doctests
+            if crates.iter().any(|crate_| crate_ == "core") {
+                crates.push("coretests".to_owned());
+            }
+            if crates.iter().any(|crate_| crate_ == "alloc") {
+                crates.push("alloctests".to_owned());
+            }
         }
 
         run_cargo_test(cargo, &[], &crates, &*crate_description(&self.crates), target, builder);

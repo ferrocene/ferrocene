@@ -347,7 +347,7 @@ fi
 #
 # This will not work for non-employees of Ferrous Systems
 if is_internal; then
-    add --set ferrocene.oxidos-src="s3://ferrocene-ci-mirrors/manual/oxidos/oxidos-source-2023-09-21.tar.xz"
+    add --set ferrocene.oxidos-src="s3://ferrocene-ci-mirrors/manual/oxidos/oxidos-source-2025-03-01.tar.xz"
 fi
 
 # Include the technical report from the assessor in the documentation.

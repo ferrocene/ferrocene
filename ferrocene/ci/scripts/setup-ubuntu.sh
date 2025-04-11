@@ -12,8 +12,8 @@ sudo apt install -y \
 
 if [[ ! -z "${INSTALL_LLVM}" ]]; then
     sudo apt install -y \
-        llvm-18-tools \
-        llvm-18-dev
+        llvm-19-tools \
+        llvm-19-dev
 else
     echo 'Not installing LLVM, $INSTALL_LLVM is unset.'
 fi

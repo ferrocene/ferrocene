@@ -60,6 +60,7 @@ pub mod crt_objects;
 mod base;
 mod json;
 
+pub use base::apple;
 pub use base::avr::ef_avr_arch;
 
 /// Linker is called through a C/C++ compiler.
@@ -2966,14 +2967,9 @@ impl Target {
     pub fn is_abi_supported(&self, abi: ExternAbi) -> bool {
         use ExternAbi::*;
         match abi {
-            Rust
-            | C { .. }
-            | System { .. }
-            | RustIntrinsic
-            | RustCall
-            | Unadjusted
-            | Cdecl { .. }
-            | RustCold => true,
+            Rust | C { .. } | System { .. } | RustCall | Unadjusted | Cdecl { .. } | RustCold => {
+                true
+            }
             EfiApi => {
                 ["arm", "aarch64", "riscv32", "riscv64", "x86", "x86_64"].contains(&&self.arch[..])
             }
@@ -3521,7 +3517,7 @@ impl Target {
                     Err("the `i586-pc-windows-msvc` target has been removed. Use the `i686-pc-windows-msvc` target instead.\n\
                         Windows 10 (the minimum required OS version) requires a CPU baseline of at least i686 so you can safely switch".into())
                 } else {
-                    Err(format!("Could not find specification for target {target_tuple:?}"))
+                    Err(format!("could not find specification for target {target_tuple:?}"))
                 }
             }
             TargetTuple::TargetJson { ref contents, .. } => {

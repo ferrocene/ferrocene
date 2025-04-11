@@ -263,13 +263,7 @@ impl Step for Cargotest {
             .args(builder.config.test_args())
             .env("RUSTC", builder.rustc(compiler))
             .env("RUSTDOC", builder.rustdoc(compiler));
-        add_rustdoc_cargo_linker_args(
-            &mut cmd,
-            builder,
-            compiler.host,
-            LldThreads::No,
-            compiler.stage,
-        );
+        add_rustdoc_cargo_linker_args(&mut cmd, builder, compiler.host, LldThreads::No);
         cmd.delay_failure().run(builder);
     }
 }
@@ -847,7 +841,7 @@ impl Step for RustdocTheme {
             .env("CFG_RELEASE_CHANNEL", &builder.config.channel)
             .env("RUSTDOC_REAL", builder.rustdoc(self.compiler))
             .env("RUSTC_BOOTSTRAP", "1");
-        cmd.args(linker_args(builder, self.compiler.host, LldThreads::No, self.compiler.stage));
+        cmd.args(linker_args(builder, self.compiler.host, LldThreads::No));
 
         cmd.delay_failure().run(builder);
     }
@@ -1023,13 +1017,7 @@ impl Step for RustdocGUI {
         cmd.env("RUSTDOC", builder.rustdoc(self.compiler))
             .env("RUSTC", builder.rustc(self.compiler));
 
-        add_rustdoc_cargo_linker_args(
-            &mut cmd,
-            builder,
-            self.compiler.host,
-            LldThreads::No,
-            self.compiler.stage,
-        );
+        add_rustdoc_cargo_linker_args(&mut cmd, builder, self.compiler.host, LldThreads::No);
 
         for path in &builder.paths {
             if let Some(p) = helpers::is_valid_test_suite_arg(path, "tests/rustdoc-gui", builder) {
@@ -1626,19 +1614,11 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
             builder.tool_exe(Tool::RunMakeSupport);
         }
 
-        // Also provide `rust_test_helpers` for the host.
-        builder.ensure(TestHelpers { target: compiler.host });
-
         // ensure that `libproc_macro` is available on the host.
         if suite == "mir-opt" {
             builder.ensure(compile::Std::new(compiler, compiler.host).is_for_mir_opt_tests(true));
         } else {
             builder.ensure(compile::Std::new(compiler, compiler.host));
-        }
-
-        // As well as the target
-        if suite != "mir-opt" {
-            builder.ensure(TestHelpers { target });
         }
 
         let mut cmd = builder.tool_cmd(Tool::Compiletest);
@@ -1806,11 +1786,18 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
         }
 
         let mut hostflags = flags.clone();
-        hostflags.push(format!("-Lnative={}", builder.test_helpers_out(compiler.host).display()));
-        hostflags.extend(linker_flags(builder, compiler.host, LldThreads::No, compiler.stage));
+        hostflags.extend(linker_flags(builder, compiler.host, LldThreads::No));
 
         let mut targetflags = flags;
-        targetflags.push(format!("-Lnative={}", builder.test_helpers_out(target).display()));
+
+        // Provide `rust_test_helpers` for both host and target.
+        if suite == "ui" || suite == "incremental" {
+            builder.ensure(TestHelpers { target: compiler.host });
+            builder.ensure(TestHelpers { target });
+            hostflags
+                .push(format!("-Lnative={}", builder.test_helpers_out(compiler.host).display()));
+            targetflags.push(format!("-Lnative={}", builder.test_helpers_out(target).display()));
+        }
 
         for flag in hostflags {
             cmd.arg("--host-rustcflags").arg(flag);

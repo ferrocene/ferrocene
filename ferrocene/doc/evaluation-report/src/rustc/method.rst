@@ -105,3 +105,31 @@ directory, and executes the ``ferrocene-self-test`` tool on it. The tool
 ensures that packages contain the correct files, that files are installed in
 the correct places, and that the installed toolchain can successfully compile a
 small number of example programs.
+
+.. _rustc-cli-testing-categories:
+
+Compiler arguments affecting the compilation outcome
+----------------------------------------------------
+
+The compiler supports :doc:`multiple command-line arguments
+<user-manual:rustc/cli>` affecting its behavior. Not all of them affect the
+compilation process the same way, so different testing strategies are required.
+For the purpose of testing, we categorize command-line arguments in:
+
+- **Informational:** these arguments do not affect the compilation process, but
+  instead configure the compiler to output information. An example of such
+  arguments is ``--version``, showing the compiler version number.
+
+- **Narrow impact:** these arguments do affect the compilation process, but
+  their effect is narrow and well scoped, and they can be tested independently.
+  An example is ``-C debuginfo``, to configure the compiler to emit debug
+  information alongside executable code.
+
+- **Wide impact:** these arguments affect the compilation process, and their
+  effects can influence all parts of the compilation process. An example is ``-C
+  opt-level``, to configure the code generation optimization level.
+
+For informational and narrow impact arguments it is sufficient to add tests in
+the test suite verifying their effects. For wide impact arguments, since every
+test could be affected by them, we deem it necessary to re-execute every test
+suite with each combination of wide impact argument values.

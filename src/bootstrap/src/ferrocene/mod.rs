@@ -11,6 +11,7 @@ pub(crate) mod secret_sauce;
 pub(crate) mod sign;
 pub(crate) mod test;
 pub(crate) mod test_outcomes;
+pub(crate) mod test_variants;
 pub(crate) mod tool;
 
 use std::collections::HashMap;

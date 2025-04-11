@@ -430,6 +430,9 @@ pub enum Subcommand {
         /// documents to ensure there is enough granularity for the test outcomes report.
         #[arg(long)]
         ferrocene_test_one_crate_per_cargo_call: bool,
+        /// Choose the test variant to use for this execution.
+        #[arg(long)]
+        test_variant: Option<String>,
     },
     /// Build and run some test suites *in Miri*
     Miri {

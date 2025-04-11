@@ -346,6 +346,7 @@ _arguments "${_arguments_options[@]}" : \
 '--pass=[force {check,build,run}-pass tests to this mode]:check | build | run:_default' \
 '--run=[whether to execute run-* tests]:auto | always | never:_default' \
 '--coverage=[generate coverage for tests]:COVERAGE:(library)' \
+'--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:' \

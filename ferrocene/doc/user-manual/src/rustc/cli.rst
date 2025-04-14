@@ -34,12 +34,6 @@
 
          $ rustc -A warnings -A absolute-paths-not-starting-with-crate
 
-   .. cli:option:: -C
-      :category: narrow
-
-      Compiler argument ``-C`` customizes code generation. The compiler
-      argument must be followed by at least one code generation option.
-
    .. cli:option:: -C codegen-units=<number>
       :category: narrow
 
@@ -596,11 +590,6 @@
       attribute ``#[cfg(key = "value")]``.
 
       Multiple ``--cfg`` compiler arguments are allowed on the command line.
-
-   .. cli:option:: --codegen
-      :category: narrow
-
-      Compiler argument ``--codegen`` is identical to compiler argument ``-C``.
 
    .. cli:option:: --color <option>
       :category: informational

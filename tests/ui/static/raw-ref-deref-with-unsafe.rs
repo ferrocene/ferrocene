@@ -14,3 +14,6 @@ static mut DEREF_BYTE_PTR: *mut u8 = unsafe { ptr::addr_of_mut!(*BYTE_PTR) };
 fn main() {
     let _ = unsafe { DEREF_BYTE_PTR };
 }
+
+// ferrocene-annotations: fls_vxguvrwolbee
+// Raw Borrow Expression

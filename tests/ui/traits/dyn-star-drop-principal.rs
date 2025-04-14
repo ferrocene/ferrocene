@@ -10,3 +10,6 @@ fn main() {
     let x: dyn* Trait + Send = 1usize;
     x as dyn* Send; //~ error: `dyn* Trait + Send` needs to have the same ABI as a pointer
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

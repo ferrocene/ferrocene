@@ -66,3 +66,6 @@ const fn yeet_principal_4(x: &dyn Bar) -> &(dyn Send + Sync) {
 
 #[used]
 pub static BAR: &(dyn Send + Sync) = yeet_principal_4(&false);
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

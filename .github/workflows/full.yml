@@ -214,7 +214,7 @@ jobs:
       # When this is enabled, we experienced test failures where it was
       # trying to test the x86_64 artifacts in CI
       host-triple: "" # x86_64-unknown-linux-gnu
-      runner: ferrocene-arc-runners-ubuntu-20-amd64-vm
+      runner: ferrocene-arc-runners-ubuntu-24-amd64-vm
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
@@ -242,7 +242,7 @@ jobs:
       # When this is enabled, we experienced test failures where it was
       # trying to test the x86_64 artifacts in CI
       host-triple: "" # x86_64-unknown-linux-gnu
-      runner: ferrocene-arc-runners-ubuntu-20-amd64-vm
+      runner: ferrocene-arc-runners-ubuntu-24-amd64-vm
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}

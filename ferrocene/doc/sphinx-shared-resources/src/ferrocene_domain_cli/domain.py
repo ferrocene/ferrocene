@@ -28,6 +28,15 @@ ALLOWED_CATEGORIES = {
 }
 
 
+CATEGORIES_TARGET_REF = "evaluation-report:rustc-cli-testing-categories"
+
+
+@dataclass
+class ProgramStorage:
+    program_name: str
+    qualified: bool
+
+
 class ProgramDirective(SphinxDirective):
     has_content = True
     required_arguments = 1
@@ -66,12 +75,27 @@ class OptionDirective(ObjectDescription):
     def handle_signature(self, sig, signode):
         signode += addnodes.desc_name("", sig)
 
+    def transform_content(self, content_node):
+        category = None
+        if self._program_storage().qualified and self.options["category"] in ALLOWED_CATEGORIES:
+            category = self.options["category"]
+
+        if category is not None:
+            xref = addnodes.pending_xref()
+            xref["reftype"] = "ref"
+            xref["refdomain"] = "std"
+            xref["refexplicit"] = True
+            xref["refdoc"] = self.env.docname
+            xref["reftarget"] = CATEGORIES_TARGET_REF
+            xref += nodes.strong("", ALLOWED_CATEGORIES[self.options["category"]])
+
+            paragraph = nodes.paragraph()
+            paragraph += nodes.Text("Testing category: ")
+            paragraph += xref
+            content_node.insert(0, paragraph)
+
     def add_target_and_index(self, name_cls, sig, signode):
-        if PROGRAM_STORAGE not in self.env.temp_data:
-            warn("cli:option outside cli:program isn't supported", self.get_location())
-            program_storage = ProgramStorage("PLACEHOLDER", False)
-        else:
-            program_storage: ProgramStorage = self.env.temp_data[PROGRAM_STORAGE]
+        program_storage = self._program_storage()
 
         if "category" not in self.options:
             if program_storage.qualified:
@@ -100,6 +124,13 @@ class OptionDirective(ObjectDescription):
 
         domain = self.env.get_domain("cli")
         domain.add_option(option)
+
+    def _program_storage(self) -> ProgramStorage:
+        if PROGRAM_STORAGE not in self.env.temp_data:
+            warn("cli:option outside cli:program isn't supported", self.get_location())
+            return ProgramStorage("PLACEHOLDER", False)
+        else:
+            return self.env.temp_data[PROGRAM_STORAGE]
 
 
 ARGUMENT_PLACEHOLDER_RE = re.compile(r"(<[^>]+>|\[[^\]]+\])")
@@ -199,9 +230,3 @@ def warn(message, location):
 
 def setup(app):
     app.add_domain(CliDomain)
-
-
-@dataclass
-class ProgramStorage:
-    program_name: str
-    qualified: bool

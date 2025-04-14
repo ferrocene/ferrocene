@@ -781,3 +781,11 @@ pre.spec-syntax .spec-syntax-literal {
 .ferrocene-cli-title em {
     font-weight: 400;
 }
+
+/********+***********
+ *   sphinx-needs   *
+ ********************/
+
+a.external_link:after {
+    content: "" !important;
+}

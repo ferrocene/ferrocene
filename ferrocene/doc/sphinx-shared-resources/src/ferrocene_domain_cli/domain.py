@@ -32,8 +32,12 @@ UNQUALIFIED_MESSAGE = (
     "safety critical context. Its documentation is presented for your convenience."
 )
 
-
 CATEGORIES_TARGET_REF = "evaluation-report:rustc-cli-testing-categories"
+
+
+ARGUMENT_PLACEHOLDER_RE = re.compile(r"(<[^>]+>|\[[^\]]+\])")
+MULTIPLE_UNDERSCORES_RE = re.compile(r"__+")
+ALLOWED_CHARS_IN_OPTION_ID = string.ascii_letters + string.digits + "_"
 
 
 @dataclass
@@ -78,9 +82,21 @@ class OptionDirective(ObjectDescription):
     option_spec = {"category": directives.unchanged}
 
     def handle_signature(self, sig, signode):
-        name = addnodes.desc_name("", sig)
+        name = addnodes.desc_name()
         name["classes"].append("inline-code")
         name["classes"].append("ferrocene-cli-title")
+
+        # When the regex is wrapped in parentheses, split returns a list alternating text not
+        # matching the regex and text matching the regex.
+        is_argument = False
+        for part in ARGUMENT_PLACEHOLDER_RE.split(sig):
+            if is_argument:
+                name += nodes.emphasis("", part)
+                is_argument = False
+            else:
+                name += nodes.Text(part)
+                is_argument = True
+
         signode += name
 
     def transform_content(self, content_node):
@@ -144,11 +160,6 @@ class OptionDirective(ObjectDescription):
             return ProgramStorage("PLACEHOLDER", False)
         else:
             return self.env.temp_data[PROGRAM_STORAGE]
-
-
-ARGUMENT_PLACEHOLDER_RE = re.compile(r"(<[^>]+>|\[[^\]]+\])")
-MULTIPLE_UNDERSCORES_RE = re.compile(r"__+")
-ALLOWED_CHARS_IN_OPTION_ID = string.ascii_letters + string.digits + "_"
 
 
 @dataclass

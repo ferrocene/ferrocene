@@ -27,6 +27,11 @@ ALLOWED_CATEGORIES = {
     "unqualified": "not qualified",
 }
 
+UNQUALIFIED_MESSAGE = (
+    "This argument is outside the scope of the Ferrocene qualification, and must not be used in a "
+    "safety critical context. Its documentation is presented for your convenience."
+)
+
 
 CATEGORIES_TARGET_REF = "evaluation-report:rustc-cli-testing-categories"
 
@@ -80,7 +85,12 @@ class OptionDirective(ObjectDescription):
         if self._program_storage().qualified and self.options["category"] in ALLOWED_CATEGORIES:
             category = self.options["category"]
 
-        if category is not None:
+        if category == "unqualified":
+            caution = nodes.caution()
+            caution += nodes.paragraph("", UNQUALIFIED_MESSAGE)
+            content_node.insert(0, caution)
+
+        if category is not None and category != "unqualified":
             xref = addnodes.pending_xref()
             xref["reftype"] = "ref"
             xref["refdomain"] = "std"

@@ -133,12 +133,6 @@
    .. cli:option:: -C llvm-args=<args>
       :category: unqualified
 
-      .. caution::
-
-         This code generation option is outside the scope of the Ferrocene
-         qualification, and must not be used in a safety critical
-         context. Its documentation is presented for your convenience.
-
       Code generation option ``llvm-args`` can be used to pass a list of arguments
       directly to LLVM.
       The list must be separated by spaces.
@@ -324,12 +318,6 @@
    .. cli:option:: -C no-vectorize-loops
       :category: unqualified
 
-      .. caution::
-
-         This code generation option is outside the scope of the Ferrocene
-         qualification, and must not be used in a safety critical
-         context. Its documentation is presented for your convenience.
-
       Code generation option ``no-vectorize-loops`` disables loop
       vectorization.
 
@@ -457,13 +445,7 @@
       command line, where precedence increases from left to right.
 
    .. cli:option:: -C relocation-model=<model>
-      :category: narrow
-
-      .. caution::
-
-         This code generation option is outside the scope of the Ferrocene
-         qualification, and must not be used in a safety critical
-         context. Its documentation is presented for your convenience.
+      :category: unqualified
 
       Code generation option ``relocation-model`` enables the generation of
       position-independent code.
@@ -504,12 +486,6 @@
    .. cli:option:: -C target-cpu=<cpu>
       :category: unqualified
 
-      .. caution::
-
-         This code generation option is outside the scope of the Ferrocene
-         qualification, and must not be used in a safety critical
-         context. Its documentation is presented for your convenience.
-
       Code generation option ``target-cpu`` indicates the CPU of the target to
       generate code for.
 
@@ -527,12 +503,6 @@
 
    .. cli:option:: -C target-feature=<features>
       :category: unqualified
-
-      .. caution::
-
-         This code generation option is outside the scope of the Ferrocene
-         qualification, and must not be used in a safety critical
-         context. Its documentation is presented for your convenience.
 
       Code generation option ``target-feature`` enables (or disables) a
       feature of the target.

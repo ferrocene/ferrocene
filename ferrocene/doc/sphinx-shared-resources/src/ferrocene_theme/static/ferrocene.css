@@ -785,6 +785,10 @@ pre.spec-syntax .spec-syntax-literal {
     margin-bottom: 0.2em;
 }
 
+.ferrocene-cli-title em {
+    font-weight: 400;
+}
+
 /********+***********
  *   sphinx-needs   *
  ********************/

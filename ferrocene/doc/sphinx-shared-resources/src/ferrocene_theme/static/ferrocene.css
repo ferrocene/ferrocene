@@ -270,7 +270,7 @@ pre {
     overflow-y: scroll;
 }
 
-code {
+code, .inline-code {
     display: inline-block;
     background: var(--inline-code-bg);
     padding: 0 0.2em;

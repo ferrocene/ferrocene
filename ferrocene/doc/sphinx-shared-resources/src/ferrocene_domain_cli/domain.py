@@ -78,7 +78,10 @@ class OptionDirective(ObjectDescription):
     option_spec = {"category": directives.unchanged}
 
     def handle_signature(self, sig, signode):
-        signode += addnodes.desc_name("", sig)
+        name = addnodes.desc_name("", sig)
+        name["classes"].append("inline-code")
+        name["classes"].append("ferrocene-cli-title")
+        signode += name
 
     def transform_content(self, content_node):
         category = None

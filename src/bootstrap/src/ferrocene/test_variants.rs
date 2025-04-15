@@ -1,3 +1,27 @@
+//! Test variants are a mechanism to run test suites for a target multiple times, each time varying
+//! some of the parameters passed to the suite.
+//!
+//! Every time a test suite is called, `TestVariant::current` should be called to determine the
+//! current test variant (based on the CLI argument --test-variant, or if missing, the default).
+//! Then, the code should iterate through all the conditions and apply them:
+//!
+//! ```rust
+//! let variant = TestVariant::current(builder, target);
+//! for condition in variant.conditions() {
+//!     match condition.get() {
+//!         // Replace those with the actual conditions:
+//!         VariantCondition::Foo(content) => do_something_with(content),
+//!         VariantCondition::Bar(_) => condition.mark_unused(),
+//!     }
+//! }
+//! ```
+//!
+//! Then later, `variant.for_metrics()` should be passed to the test suite representation in the
+//! build metrics, so that the variant gets propagated to the traceability matrix.
+//!
+//! **Note:** it is imperative that all conditions are applied to each test suite. If a condition is
+//! not applicable you must call `condition.mark_unused()` to mark it as such.
+
 use std::cell::RefCell;
 #[cfg(feature = "build-metrics")]
 use std::collections::BTreeMap;
@@ -12,17 +36,26 @@ use crate::core::config::TargetSelection;
 // The variants are so few that setting up an OnceLock to define a global hashmap is too
 // much complexity. If we are able to test so many variants that this loop becomes a
 // bottleneck I guess congrats on Ferrocene's success :D
+#[rustfmt::skip]
 static VARIANTS: &[(&str, &[VariantCondition])] = &[
     // FIXME: all of these point to edition 2015 instead of 2021!!!
-    ("2021", &[VariantCondition::Edition("2015")]),
-    (
-        "2021-cortex-a53",
-        &[VariantCondition::Edition("2015"), VariantCondition::QemuCpu("cortex-a53")],
-    ),
-    (
-        "2021-cortex-m4",
-        &[VariantCondition::Edition("2015"), VariantCondition::QemuCpu("cortex-m4")],
-    ),
+
+    // The snippet between INTERNAL_PROCEDURES_{START,END}_TEST_VARIANTS is included in our
+    // documentation, as the list of test variants currently supported.
+
+    // INTERNAL_PROCEDURES_START_TEST_VARIANTS
+    ("2021", &[
+        VariantCondition::Edition("2015"),
+    ]),
+    ("2021-cortex-a53", &[
+        VariantCondition::Edition("2015"),
+        VariantCondition::QemuCpu("cortex-a53"),
+    ]),
+    ("2021-cortex-m4", &[
+        VariantCondition::Edition("2015"),
+        VariantCondition::QemuCpu("cortex-m4"),
+    ]),
+    // INTERNAL_PROCEDURES_END_TEST_VARIANTS
 ];
 static DEFAULT_VARIANTS_BY_TARGET: &[(&str, &str)] = &[
     ("aarch64-unknown-ferrocenecoretest", "2021-cortex-a53"),

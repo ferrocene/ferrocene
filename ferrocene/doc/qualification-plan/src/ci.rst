@@ -144,3 +144,26 @@ Since the only difference between the two targets is the implementation of the
 APIs in the ``std`` crate, and that crate is not shipped to customers for bare
 metal targets, we can conclude that the test results of the two targets are
 equivalent.
+
+.. _test-variants:
+
+Test variants
+-------------
+
+During :ref:`ci-phase-full`, we need to verify that each of our qualified host
+compilers can compile for each of our qualified compilation targets. It is not
+enough to execute the test suites once for each pair of host and target:
+
+- A bare metal target can run on a multitude of embedded CPUs, and some CPUs
+  might expose more functionality than the baseline for that target. We thus
+  need to configure our emulator to precisely emulate the CPU we target.
+
+- Some of the command-line arguments we qualify :ref:`have a wide impact
+  <evaluation-report:rustc-cli-testing-categories>`, and they could affect the
+  whole test suite. We thus need to run a copy of the test suite for each
+  combination of those flags's values.
+
+To address this, we define multiple "test variants": each variant consists of
+the target to be tested, one of the combinations of wide impact flags, and (if
+applicable) the embedded CPU to emulate. Each test suite will be executed for
+all applicable test variants, and each variant will have its own test results.

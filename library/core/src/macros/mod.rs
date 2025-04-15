@@ -1,16 +1,17 @@
+///
 // #[doc = include_str!("panic.md")]
-// #[macro_export]
-// #[rustc_builtin_macro(core_panic)]
-// #[allow_internal_unstable(edition_panic)]
-// #[stable(feature = "core", since = "1.6.0")]
-// #[rustc_diagnostic_item = "core_panic_macro"]
-// macro_rules! panic {
-//     // Expands to either `$crate::panic::panic_2015` or `$crate::panic::panic_2021`
-//     // depending on the edition of the caller.
-//     ($($arg:tt)*) => {
-//         /* compiler built-in */
-//     };
-// }
+#[macro_export]
+#[rustc_builtin_macro(core_panic)]
+#[allow_internal_unstable(edition_panic)]
+#[stable(feature = "core", since = "1.6.0")]
+#[rustc_diagnostic_item = "core_panic_macro"]
+macro_rules! panic {
+    // Expands to either `$crate::panic::panic_2015` or `$crate::panic::panic_2021`
+    // depending on the edition of the caller.
+    ($($arg:tt)*) => {
+        /* compiler built-in */
+    };
+}
 
 // /// Asserts that two expressions are equal to each other (using [`PartialEq`]).
 // ///
@@ -1005,19 +1006,20 @@ macro_rules! matches {
 //         ($fmt:expr, $($args:tt)*) => {{ /* compiler built-in */ }};
 //     }
 
+    ///
 //     /// Same as [`format_args`], but can be used in some const contexts.
 //     ///
 //     /// This macro is used by the panic macros for the `const_panic` feature.
 //     ///
 //     /// This macro will be removed once `format_args` is allowed in const contexts.
-//     #[unstable(feature = "const_format_args", issue = "none")]
-//     #[allow_internal_unstable(fmt_internals, const_fmt_arguments_new)]
-//     #[rustc_builtin_macro]
-//     #[macro_export]
-//     macro_rules! const_format_args {
-//         ($fmt:expr) => {{ /* compiler built-in */ }};
-//         ($fmt:expr, $($args:tt)*) => {{ /* compiler built-in */ }};
-//     }
+    #[unstable(feature = "const_format_args", issue = "none")]
+    #[allow_internal_unstable(fmt_internals, const_fmt_arguments_new)]
+    #[rustc_builtin_macro]
+    #[macro_export]
+    macro_rules! const_format_args {
+        ($fmt:expr) => {{ /* compiler built-in */ }};
+        ($fmt:expr, $($args:tt)*) => {{ /* compiler built-in */ }};
+    }
 
 //     /// Same as [`format_args`], but adds a newline in the end.
 //     #[unstable(

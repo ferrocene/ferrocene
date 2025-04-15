@@ -398,6 +398,7 @@
 // use crate::intrinsics::const_eval_select;
 // use crate::marker::FnPtr;
 // use crate::mem::{self, MaybeUninit, SizedTypeProperties};
+use crate::mem::SizedTypeProperties;
 // use crate::{fmt, hash, intrinsics, ub_checks};
 use crate::ub_checks;
 
@@ -427,7 +428,7 @@ pub use non_null::NonNull;
 // #[unstable(feature = "ptr_internals", issue = "none")]
 // pub use unique::Unique;
 
-// mod const_ptr;
+mod const_ptr;
 // mod mut_ptr;
 
 // /// Executes the destructor (if any) of the pointed-to value.

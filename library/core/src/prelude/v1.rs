@@ -23,8 +23,9 @@ pub use crate::ops::{Drop, Fn, FnMut, FnOnce};
 // #[stable(feature = "core_prelude", since = "1.4.0")]
 // #[doc(no_inline)]
 // pub use crate::mem::drop;
-// #[stable(feature = "size_of_prelude", since = "1.80.0")]
-// #[doc(no_inline)]
+#[stable(feature = "size_of_prelude", since = "1.80.0")]
+#[doc(no_inline)]
+pub use crate::mem::align_of;
 // pub use crate::mem::{align_of, align_of_val, size_of, size_of_val};
 
 // Re-exported types and traits

@@ -1,8 +1,7 @@
 //! Provides the [`assert_unsafe_precondition`] macro as well as some utility functions that cover
 //! common preconditions.
 
-// use crate::intrinsics::{self, const_eval_select};
-use crate::intrinsics;
+use crate::intrinsics::{self, const_eval_select};
 
 /// Checks that the preconditions of an unsafe function are followed.
 // ///
@@ -85,50 +84,50 @@ pub use assert_unsafe_precondition;
 #[unstable(feature = "ub_checks", issue = "none")]
 pub use intrinsics::ub_checks as check_library_ub;
 
-// /// Determines whether we should check for language UB.
-// ///
-// /// The intention is to not do that when running in the interpreter, as that one has its own
-// /// language UB checks which generally produce better errors.
-// #[inline]
-// #[rustc_allow_const_fn_unstable(const_eval_select)]
-// pub(crate) const fn check_language_ub() -> bool {
-//     // Only used for UB checks so we may const_eval_select.
-//     intrinsics::ub_checks()
-//         && const_eval_select!(
-//             @capture { } -> bool:
-//             if const {
-//                 // Always disable UB checks.
-//                 false
-//             } else {
-//                 // Disable UB checks in Miri.
-//                 !cfg!(miri)
-//             }
-//         )
-// }
+/// Determines whether we should check for language UB.
+///
+/// The intention is to not do that when running in the interpreter, as that one has its own
+/// language UB checks which generally produce better errors.
+#[inline]
+#[rustc_allow_const_fn_unstable(const_eval_select)]
+pub(crate) const fn check_language_ub() -> bool {
+    // Only used for UB checks so we may const_eval_select.
+    intrinsics::ub_checks()
+        && const_eval_select!(
+            @capture { } -> bool:
+            if const {
+                // Always disable UB checks.
+                false
+            } else {
+                // Disable UB checks in Miri.
+                !cfg!(miri)
+            }
+        )
+}
 
-// /// Checks whether `ptr` is properly aligned with respect to the given alignment, and
-// /// if `is_zst == false`, that `ptr` is not null.
-// ///
-// /// In `const` this is approximate and can fail spuriously. It is primarily intended
-// /// for `assert_unsafe_precondition!` with `check_language_ub`, in which case the
-// /// check is anyway not executed in `const`.
-// #[inline]
-// #[rustc_allow_const_fn_unstable(const_eval_select)]
-// pub(crate) const fn maybe_is_aligned_and_not_null(
-//     ptr: *const (),
-//     align: usize,
-//     is_zst: bool,
-// ) -> bool {
-//     // This is just for safety checks so we can const_eval_select.
-//     const_eval_select!(
-//         @capture { ptr: *const (), align: usize, is_zst: bool } -> bool:
-//         if const {
-//             is_zst || !ptr.is_null()
-//         } else {
-//             ptr.is_aligned_to(align) && (is_zst || !ptr.is_null())
-//         }
-//     )
-// }
+/// Checks whether `ptr` is properly aligned with respect to the given alignment, and
+/// if `is_zst == false`, that `ptr` is not null.
+///
+/// In `const` this is approximate and can fail spuriously. It is primarily intended
+/// for `assert_unsafe_precondition!` with `check_language_ub`, in which case the
+/// check is anyway not executed in `const`.
+#[inline]
+#[rustc_allow_const_fn_unstable(const_eval_select)]
+pub(crate) const fn maybe_is_aligned_and_not_null(
+    ptr: *const (),
+    align: usize,
+    is_zst: bool,
+) -> bool {
+    // This is just for safety checks so we can const_eval_select.
+    const_eval_select!(
+        @capture { ptr: *const (), align: usize, is_zst: bool } -> bool:
+        if const {
+            is_zst || !ptr.is_null()
+        } else {
+            ptr.is_aligned_to(align) && (is_zst || !ptr.is_null())
+        }
+    )
+}
 
 // #[inline]
 // pub(crate) const fn is_valid_allocation_size(size: usize, len: usize) -> bool {

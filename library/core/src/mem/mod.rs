@@ -8,7 +8,7 @@
 // use crate::alloc::Layout;
 // use crate::marker::DiscriminantKind;
 // use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
-use crate::ptr;
+use crate::{intrinsics, ptr};
 
 // mod manually_drop;
 // #[stable(feature = "manually_drop", since = "1.20.0")]
@@ -156,7 +156,7 @@ use crate::ptr;
 //     intrinsics::forget(t)
 // }
 
-// /// Returns the size of a type in bytes.
+/// Returns the size of a type in bytes.
 // ///
 // /// More specifically, this is the offset in bytes between successive elements
 // /// in an array with that item type including alignment padding. Thus, for any
@@ -300,15 +300,15 @@ use crate::ptr;
 // /// [`Box<T>`]: ../../std/boxed/struct.Box.html
 // /// [`Option<&T>`]: crate::option::Option
 // ///
-// #[inline(always)]
-// #[must_use]
-// #[stable(feature = "rust1", since = "1.0.0")]
-// #[rustc_promotable]
-// #[rustc_const_stable(feature = "const_mem_size_of", since = "1.24.0")]
-// #[cfg_attr(not(test), rustc_diagnostic_item = "mem_size_of")]
-// pub const fn size_of<T>() -> usize {
-//     intrinsics::size_of::<T>()
-// }
+#[inline(always)]
+#[must_use]
+#[stable(feature = "rust1", since = "1.0.0")]
+#[rustc_promotable]
+#[rustc_const_stable(feature = "const_mem_size_of", since = "1.24.0")]
+#[cfg_attr(not(test), rustc_diagnostic_item = "mem_size_of")]
+pub const fn size_of<T>() -> usize {
+    intrinsics::size_of::<T>()
+}
 
 // /// Returns the size of the pointed-to value in bytes.
 // ///
@@ -444,14 +444,14 @@ use crate::ptr;
 //     unsafe { intrinsics::min_align_of_val(val) }
 // }
 
-// /// Returns the [ABI]-required minimum alignment of a type in bytes.
-// ///
-// /// Every reference to a value of the type `T` must be a multiple of this number.
-// ///
-// /// This is the alignment used for struct fields. It may be smaller than the preferred alignment.
-// ///
-// /// [ABI]: https://en.wikipedia.org/wiki/Application_binary_interface
-// ///
+/// Returns the [ABI]-required minimum alignment of a type in bytes.
+///
+/// Every reference to a value of the type `T` must be a multiple of this number.
+///
+/// This is the alignment used for struct fields. It may be smaller than the preferred alignment.
+///
+/// [ABI]: https://en.wikipedia.org/wiki/Application_binary_interface
+///
 // /// # Examples
 // ///
 // /// ```
@@ -459,14 +459,14 @@ use crate::ptr;
 // ///
 // /// assert_eq!(4, mem::align_of::<i32>());
 // /// ```
-// #[inline(always)]
-// #[must_use]
-// #[stable(feature = "rust1", since = "1.0.0")]
-// #[rustc_promotable]
-// #[rustc_const_stable(feature = "const_align_of", since = "1.24.0")]
-// pub const fn align_of<T>() -> usize {
-//     intrinsics::min_align_of::<T>()
-// }
+#[inline(always)]
+#[must_use]
+#[stable(feature = "rust1", since = "1.0.0")]
+#[rustc_promotable]
+#[rustc_const_stable(feature = "const_align_of", since = "1.24.0")]
+pub const fn align_of<T>() -> usize {
+    intrinsics::min_align_of::<T>()
+}
 
 // /// Returns the [ABI]-required minimum alignment of the type of the value that `val` points to in
 // /// bytes.
@@ -1202,16 +1202,16 @@ pub const fn replace<T>(dest: &mut T, src: T) -> T {
 //     intrinsics::variant_count::<T>()
 // }
 
-// /// Provides associated constants for various useful properties of types,
-// /// to give them a canonical form in our code and make them easier to read.
-// ///
-// /// This is here only to simplify all the ZST checks we need in the library.
-// /// It's not on a stabilization track right now.
-// #[doc(hidden)]
-// #[unstable(feature = "sized_type_properties", issue = "none")]
-// pub trait SizedTypeProperties: Sized {
-//     /// `true` if this type requires no storage.
-//     /// `false` if its [size](size_of) is greater than zero.
+/// Provides associated constants for various useful properties of types,
+/// to give them a canonical form in our code and make them easier to read.
+///
+/// This is here only to simplify all the ZST checks we need in the library.
+/// It's not on a stabilization track right now.
+#[doc(hidden)]
+#[unstable(feature = "sized_type_properties", issue = "none")]
+pub trait SizedTypeProperties: Sized {
+    /// `true` if this type requires no storage.
+    /// `false` if its [size](size_of) is greater than zero.
 //     ///
 //     /// # Examples
 //     ///
@@ -1235,9 +1235,9 @@ pub const fn replace<T>(dest: &mut T, src: T) -> T {
 //     /// // As it can sometimes hide in the type otherwise
 //     /// assert!(!String::IS_ZST);
 //     /// ```
-//     #[doc(hidden)]
-//     #[unstable(feature = "sized_type_properties", issue = "none")]
-//     const IS_ZST: bool = size_of::<Self>() == 0;
+    #[doc(hidden)]
+    #[unstable(feature = "sized_type_properties", issue = "none")]
+    const IS_ZST: bool = size_of::<Self>() == 0;
 
 //     #[doc(hidden)]
 //     #[unstable(feature = "sized_type_properties", issue = "none")]
@@ -1253,10 +1253,10 @@ pub const fn replace<T>(dest: &mut T, src: T) -> T {
 //         0 => usize::MAX,
 //         n => (isize::MAX as usize) / n,
 //     };
-// }
-// #[doc(hidden)]
-// #[unstable(feature = "sized_type_properties", issue = "none")]
-// impl<T> SizedTypeProperties for T {}
+}
+#[doc(hidden)]
+#[unstable(feature = "sized_type_properties", issue = "none")]
+impl<T> SizedTypeProperties for T {}
 
 // /// Expands to the offset in bytes of a field from the beginning of the given type.
 // ///

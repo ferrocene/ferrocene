@@ -4,6 +4,7 @@
 
 // use crate::cell::{Cell, Ref, RefCell, RefMut, SyncUnsafeCell, UnsafeCell};
 // use crate::char::{EscapeDebugExtArgs, MAX_LEN_UTF8};
+use crate::char::MAX_LEN_UTF8;
 use crate::marker::PhantomData;
 // use crate::num::fmt as numfmt;
 // use crate::ops::Deref;

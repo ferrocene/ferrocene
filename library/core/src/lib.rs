@@ -148,7 +148,7 @@
 // #![feature(abi_unadjusted)]
 // #![feature(adt_const_params)]
 // #![feature(allow_internal_unsafe)]
-// #![feature(allow_internal_unstable)]
+#![feature(allow_internal_unstable)]
 #![feature(auto_traits)]
 // #![feature(cfg_sanitize)]
 // #![feature(cfg_target_has_atomic)]
@@ -379,7 +379,6 @@ pub mod async_iter;
 pub mod bstr;
 #[cfg(feature = "uncertified")]
 pub mod cell;
-#[cfg(feature = "uncertified")]
 pub mod char;
 #[cfg(feature = "uncertified")]
 pub mod ffi;

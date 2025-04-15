@@ -207,16 +207,16 @@ pub const fn panic_nounwind_fmt(fmt: fmt::Arguments<'_>, force_no_backtrace: boo
 //     panic_const_gen_fn_none_panic = "`gen fn` should just keep returning `None` after panicking",
 // }
 
-// /// Like `panic`, but without unwinding and track_caller to reduce the impact on codesize on the caller.
-// /// If you want `#[track_caller]` for nicer errors, call `panic_nounwind_fmt` directly.
-// #[cfg_attr(not(feature = "panic_immediate_abort"), inline(never), cold)]
-// #[cfg_attr(feature = "panic_immediate_abort", inline)]
-// #[lang = "panic_nounwind"] // needed by codegen for non-unwinding panics
-// #[rustc_nounwind]
-// #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
-// pub const fn panic_nounwind(expr: &'static str) -> ! {
-//     panic_nounwind_fmt(fmt::Arguments::new_const(&[expr]), /* force_no_backtrace */ false);
-// }
+/// Like `panic`, but without unwinding and track_caller to reduce the impact on codesize on the caller.
+/// If you want `#[track_caller]` for nicer errors, call `panic_nounwind_fmt` directly.
+#[cfg_attr(not(feature = "panic_immediate_abort"), inline(never), cold)]
+#[cfg_attr(feature = "panic_immediate_abort", inline)]
+#[lang = "panic_nounwind"] // needed by codegen for non-unwinding panics
+#[rustc_nounwind]
+#[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
+pub const fn panic_nounwind(expr: &'static str) -> ! {
+    panic_nounwind_fmt(fmt::Arguments::new_const(&[expr]), /* force_no_backtrace */ false);
+}
 
 // /// Like `panic_nounwind`, but also inhibits showing a backtrace.
 // #[cfg_attr(not(feature = "panic_immediate_abort"), inline(never), cold)]

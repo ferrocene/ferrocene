@@ -1061,24 +1061,24 @@ use crate::marker::Tuple;
 // #[rustc_intrinsic]
 // pub fn rustc_peek<T>(_: T) -> T;
 
-// /// Aborts the execution of the process.
-// ///
-// /// Note that, unlike most intrinsics, this is safe to call;
-// /// it does not require an `unsafe` block.
-// /// Therefore, implementations must not require the user to uphold
-// /// any safety invariants.
-// ///
-// /// [`std::process::abort`](../../std/process/fn.abort.html) is to be preferred if possible,
-// /// as its behavior is more user-friendly and more stable.
-// ///
-// /// The current implementation of `intrinsics::abort` is to invoke an invalid instruction,
-// /// on most platforms.
-// /// On Unix, the
-// /// process will probably terminate with a signal like `SIGABRT`, `SIGILL`, `SIGTRAP`, `SIGSEGV` or
-// /// `SIGBUS`.  The precise behavior is not guaranteed and not stable.
-// #[rustc_nounwind]
-// #[rustc_intrinsic]
-// pub fn abort() -> !;
+/// Aborts the execution of the process.
+///
+/// Note that, unlike most intrinsics, this is safe to call;
+/// it does not require an `unsafe` block.
+/// Therefore, implementations must not require the user to uphold
+/// any safety invariants.
+///
+/// [`std::process::abort`](../../std/process/fn.abort.html) is to be preferred if possible,
+/// as its behavior is more user-friendly and more stable.
+///
+/// The current implementation of `intrinsics::abort` is to invoke an invalid instruction,
+/// on most platforms.
+/// On Unix, the
+/// process will probably terminate with a signal like `SIGABRT`, `SIGILL`, `SIGTRAP`, `SIGSEGV` or
+/// `SIGBUS`.  The precise behavior is not guaranteed and not stable.
+#[rustc_nounwind]
+#[rustc_intrinsic]
+pub fn abort() -> !;
 
 // /// Informs the optimizer that this point in the code is not reachable,
 // /// enabling further optimizations.
@@ -2814,16 +2814,16 @@ use crate::marker::Tuple;
 // #[rustc_intrinsic]
 // pub const fn saturating_sub<T: Copy>(_a: T, _b: T) -> T;
 
-// /// This is an implementation detail of [`crate::ptr::read`] and should
-// /// not be used anywhere else.  See its comments for why this exists.
-// ///
-// /// This intrinsic can *only* be called where the pointer is a local without
-// /// projections (`read_via_copy(ptr)`, not `read_via_copy(*ptr)`) so that it
-// /// trivially obeys runtime-MIR rules about derefs in operands.
-// #[rustc_intrinsic_const_stable_indirect]
-// #[rustc_nounwind]
-// #[rustc_intrinsic]
-// pub const unsafe fn read_via_copy<T>(_ptr: *const T) -> T;
+/// This is an implementation detail of [`crate::ptr::read`] and should
+/// not be used anywhere else.  See its comments for why this exists.
+///
+/// This intrinsic can *only* be called where the pointer is a local without
+/// projections (`read_via_copy(ptr)`, not `read_via_copy(*ptr)`) so that it
+/// trivially obeys runtime-MIR rules about derefs in operands.
+#[rustc_intrinsic_const_stable_indirect]
+#[rustc_nounwind]
+#[rustc_intrinsic]
+pub const unsafe fn read_via_copy<T>(_ptr: *const T) -> T;
 
 // /// This is an implementation detail of [`crate::ptr::write`] and should
 // /// not be used anywhere else.  See its comments for why this exists.
@@ -3331,36 +3331,36 @@ pub const fn ub_checks() -> bool {
 // #[rustc_intrinsic]
 // pub unsafe fn vtable_align(_ptr: *const ()) -> usize;
 
-// /// The size of a type in bytes.
-// ///
-// /// Note that, unlike most intrinsics, this is safe to call;
-// /// it does not require an `unsafe` block.
-// /// Therefore, implementations must not require the user to uphold
-// /// any safety invariants.
-// ///
-// /// More specifically, this is the offset in bytes between successive
-// /// items of the same type, including alignment padding.
-// ///
-// /// The stabilized version of this intrinsic is [`core::mem::size_of`].
-// #[rustc_nounwind]
-// #[unstable(feature = "core_intrinsics", issue = "none")]
-// #[rustc_intrinsic_const_stable_indirect]
-// #[rustc_intrinsic]
-// pub const fn size_of<T>() -> usize;
+/// The size of a type in bytes.
+///
+/// Note that, unlike most intrinsics, this is safe to call;
+/// it does not require an `unsafe` block.
+/// Therefore, implementations must not require the user to uphold
+/// any safety invariants.
+///
+/// More specifically, this is the offset in bytes between successive
+/// items of the same type, including alignment padding.
+///
+/// The stabilized version of this intrinsic is [`core::mem::size_of`].
+#[rustc_nounwind]
+#[unstable(feature = "core_intrinsics", issue = "none")]
+#[rustc_intrinsic_const_stable_indirect]
+#[rustc_intrinsic]
+pub const fn size_of<T>() -> usize;
 
-// /// The minimum alignment of a type.
-// ///
-// /// Note that, unlike most intrinsics, this is safe to call;
-// /// it does not require an `unsafe` block.
-// /// Therefore, implementations must not require the user to uphold
-// /// any safety invariants.
-// ///
-// /// The stabilized version of this intrinsic is [`core::mem::align_of`].
-// #[rustc_nounwind]
-// #[unstable(feature = "core_intrinsics", issue = "none")]
-// #[rustc_intrinsic_const_stable_indirect]
-// #[rustc_intrinsic]
-// pub const fn min_align_of<T>() -> usize;
+/// The minimum alignment of a type.
+///
+/// Note that, unlike most intrinsics, this is safe to call;
+/// it does not require an `unsafe` block.
+/// Therefore, implementations must not require the user to uphold
+/// any safety invariants.
+///
+/// The stabilized version of this intrinsic is [`core::mem::align_of`].
+#[rustc_nounwind]
+#[unstable(feature = "core_intrinsics", issue = "none")]
+#[rustc_intrinsic_const_stable_indirect]
+#[rustc_intrinsic]
+pub const fn min_align_of<T>() -> usize;
 
 // /// The preferred alignment of a type.
 // ///

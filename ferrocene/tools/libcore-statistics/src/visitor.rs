@@ -1,7 +1,7 @@
 use rustdoc_types::{
     Constant, Crate, Enum, Function, GenericBound, Generics, Impl, Import, Item, ItemEnum, Module,
-    Primitive, Static, Struct, StructKind, Trait, TraitAlias, Type, Typedef, Union, Variant,
-    VariantKind, OpaqueTy, ProcMacro,
+    OpaqueTy, Primitive, ProcMacro, Static, Struct, StructKind, Trait, TraitAlias, Type, Typedef,
+    Union, Variant, VariantKind,
 };
 
 pub(crate) trait Visitor {

@@ -1,7 +1,7 @@
 use anyhow::Error;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use tokei::{Languages, Config, LanguageType};
+use tokei::{Config, LanguageType, Languages};
 
 const REMOVE_SYMBOLS: &[char] = &[',', ';', '}', ']', ')'];
 
@@ -18,7 +18,12 @@ impl LOC {
         }
     }
 
-    pub(crate) fn stats_for(&mut self, path: &Path, begin: usize, end: usize) -> Result<usize, Error> {
+    pub(crate) fn stats_for(
+        &mut self,
+        path: &Path,
+        begin: usize,
+        end: usize,
+    ) -> Result<usize, Error> {
         if !self.files.contains_key(path) {
             self.load_file(path)?;
         }
@@ -39,7 +44,10 @@ impl LOC {
         let mut languages = Languages::new();
         languages.get_statistics(&[temp.path()], &[], &config);
 
-        Ok(languages.get(&LanguageType::Rust).map(|lang| lang.code).unwrap_or(0))
+        Ok(languages
+            .get(&LanguageType::Rust)
+            .map(|lang| lang.code)
+            .unwrap_or(0))
     }
 
     fn load_file(&mut self, path: &Path) -> Result<(), Error> {

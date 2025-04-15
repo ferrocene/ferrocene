@@ -29,7 +29,10 @@ pub(crate) fn parse_stability(attrs: &[String]) -> Option<Stability> {
             };
 
             let Ok(meta): Result<Punctuated<MetaNameValue, Comma>, _> =
-                parsed.parse_args_with(Punctuated::parse_terminated) else { continue };
+                parsed.parse_args_with(Punctuated::parse_terminated)
+            else {
+                continue;
+            };
 
             for key_value in meta.iter() {
                 if !key_value.path.is_ident("feature") {

@@ -7,10 +7,6 @@ import os
 import sys
 
 sys.path.append(os.path.abspath("../exts"))
-<<<<<<< HEAD
-#sys.path.append(os.path.abspath("../shared/exts"))
-=======
->>>>>>> 1c2301c720331dd2d4be9a7930a5ab27be3bc383
 
 
 # -- Project information -----------------------------------------------------

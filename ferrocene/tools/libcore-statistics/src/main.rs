@@ -22,7 +22,7 @@ fn main() -> Result<(), Error> {
 
     let loc = LOC::new(Path::new(source_dir));
 
-    let contents = std::fs::read(&path)?;
+    let contents = std::fs::read(path)?;
     let root: Crate = serde_json::from_slice(&contents)?;
 
     let mut collector = StatsCollector::new(loc);

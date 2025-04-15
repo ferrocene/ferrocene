@@ -462,7 +462,7 @@ impl Common {
 
     pub(crate) fn feature_str(&self) -> &str {
         match &self.stability {
-            Some(Stability { feature, .. }) => &feature,
+            Some(Stability { feature, .. }) => feature,
             None => "",
         }
     }

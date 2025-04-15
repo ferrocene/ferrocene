@@ -29,7 +29,7 @@ impl LOC {
         }
 
         let file = &self.files[path];
-        let contents = &file.contents[(file.line_ranges[begin - 1].0..file.line_ranges[end - 1].1)];
+        let contents = &file.contents[file.line_ranges[begin - 1].0..file.line_ranges[end - 1].1];
 
         // tokei unfortunately doesn't have an API accepting a string, only works by providing a
         // real file to it. We thus need to create a temporary file just for this :/

@@ -103,7 +103,7 @@ fn render_generic_param(buf: &mut String, crate_: &Crate, param: &GenericParamDe
             render_type(buf, crate_, type_);
             if let Some(default) = default {
                 buf.push_str(" = ");
-                buf.push_str(&default);
+                buf.push_str(default);
             }
         }
     }
@@ -130,7 +130,7 @@ fn render_generic_bounds(buf: &mut String, crate_: &Crate, bounds: &[GenericBoun
                 }
                 render_path(buf, crate_, trait_);
             }
-            GenericBound::Outlives(lifetime) => buf.push_str(&lifetime),
+            GenericBound::Outlives(lifetime) => buf.push_str(lifetime),
         }
     }
 }
@@ -145,7 +145,7 @@ fn render_path(buf: &mut String, crate_: &Crate, path: &Path) {
         buf.push_str(&path.name);
     }
     if let Some(args) = &path.args {
-        render_generic_args(buf, crate_, &**args)
+        render_generic_args(buf, crate_, args)
     }
 }
 
@@ -260,9 +260,9 @@ pub(crate) fn render_type(buf: &mut String, crate_: &Crate, type_: &Type) {
             self_type,
             trait_,
         } => {
-            buf.push_str("<");
-            render_type(buf, crate_, &self_type);
-            render_generic_args(buf, crate_, &**args);
+            buf.push('<');
+            render_type(buf, crate_, self_type);
+            render_generic_args(buf, crate_, args);
             buf.push_str(" as ");
             render_path(buf, crate_, trait_);
             buf.push_str(">::");
@@ -345,7 +345,7 @@ pub(crate) fn render_type(buf: &mut String, crate_: &Crate, type_: &Type) {
                 separator.insert(buf);
                 buf.push_str("..");
             }
-            buf.push_str(")");
+            buf.push(')');
             if let Some(output) = &function.decl.output {
                 buf.push_str(" -> ");
                 render_type(buf, crate_, output);

@@ -2631,22 +2631,6 @@ impl Step for Crate {
     /// Currently this runs all tests for a DAG by passing a bunch of `-p foo`
     /// arguments, and those arguments are discovered from `cargo metadata`.
     fn run(self, builder: &Builder<'_>) {
-        // The current way build metrics are gathered means there is a single test_suite node
-        // emitted for every execution of this step. As we want crate granularity in the metrics,
-        // when CI passes the --ferrocene-test-one-crate-per-cargo-call flag, we will split this
-        // step into one step per crate.
-        if builder.config.cmd.ferrocene_test_one_crate_per_cargo_call() && self.crates.len() > 1 {
-            for krate in &self.crates {
-                builder.ensure(Crate {
-                    compiler: self.compiler,
-                    target: self.target,
-                    mode: self.mode,
-                    crates: vec![krate.clone()],
-                });
-            }
-            return;
-        }
-
         let compiler = self.compiler;
         let target = self.target;
         let mode = self.mode;
@@ -2747,23 +2731,37 @@ impl Step for Crate {
         }
 
         let mut crates = self.crates.clone();
-        // When the --ferrocene-test-one-crate-per-cargo-call flag is passed, we don't want multiple
-        // crates to be tested at the same time. The flag is only used in CI, where all crates are
-        // tested anyway, so there is no need to add coretests when testing core.
-        if !builder.config.cmd.ferrocene_test_one_crate_per_cargo_call() {
-            // The core and alloc crates can't directly be tested. We
-            // could silently ignore them, but adding their own test
-            // crates is less confusing for users. We still keep core and
-            // alloc themself for doctests
-            if crates.iter().any(|crate_| crate_ == "core") {
-                crates.push("coretests".to_owned());
-            }
-            if crates.iter().any(|crate_| crate_ == "alloc") {
-                crates.push("alloctests".to_owned());
-            }
+        // The core and alloc crates can't directly be tested. We
+        // could silently ignore them, but adding their own test
+        // crates is less confusing for users. We still keep core and
+        // alloc themself for doctests
+        if crates.iter().any(|crate_| crate_ == "core") {
+            crates.push("coretests".to_owned());
+        }
+        if crates.iter().any(|crate_| crate_ == "alloc") {
+            crates.push("alloctests".to_owned());
         }
 
-        run_cargo_test(cargo, &[], &crates, &*crate_description(&self.crates), target, builder);
+        // The current way build metrics are gathered means there is a single test_suite node
+        // emitted for every execution of this step. As we want crate granularity in the metrics,
+        // when CI passes the --ferrocene-test-one-crate-per-cargo-call flag, we will split this
+        // step into one step per crate.
+        //
+        // Note that this must happen AFTER any additional crate being pushed to `crates`!
+        if builder.config.cmd.ferrocene_test_one_crate_per_cargo_call() && self.crates.len() > 1 {
+            for krate in &self.crates {
+                builder.ensure(Crate {
+                    compiler: self.compiler,
+                    target: self.target,
+                    mode: self.mode,
+                    crates: vec![krate.clone()],
+                });
+            }
+            // Avoid panicking because we are not executing the Cargo we prepared.
+            cargo.into_cmd().mark_as_executed();
+        } else {
+            run_cargo_test(cargo, &[], &crates, &*crate_description(&self.crates), target, builder);
+        }
     }
 }
 

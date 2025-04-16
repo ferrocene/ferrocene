@@ -4,7 +4,7 @@ struct A<const N: u8>;
 trait Foo {}
 impl Foo for A<N> {}
 //~^ ERROR cannot find type
-//~| unresolved item provided when a constant
+//~| ERROR unresolved item provided when a constant
 
 struct B<const N: u8>;
 impl<N> Foo for B<N> {}
@@ -13,7 +13,7 @@ impl<N> Foo for B<N> {}
 struct C<const C: u8, const N: u8>;
 impl<const N: u8> Foo for C<N, T> {}
 //~^ ERROR cannot find type
-//~| unresolved item provided when a constant
+//~| ERROR unresolved item provided when a constant
 
 // ferrocene-annotations: fls_utuu8mdbuyxm
 // Generic Arguments

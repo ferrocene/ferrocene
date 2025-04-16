@@ -2,7 +2,7 @@
 // the last byte in the file (including not having a trailing newline)
 // Prior to the fix you get the error: 'expected item, found `r" ...`'
 // because the string being unterminated wasn't properly detected.
-r" //~ unterminated raw string
+r" //~ ERROR unterminated raw string
 
 // ferrocene-annotations: fls_usr6iuwpwqqh
 // Raw String Literals

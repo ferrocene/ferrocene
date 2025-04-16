@@ -190,7 +190,7 @@ const EXCEPTIONS_RUSTC_PERF: ExceptionList = &[
     ("brotli-decompressor", "BSD-3-Clause/MIT"),
     ("encoding_rs", "(Apache-2.0 OR MIT) AND BSD-3-Clause"),
     ("inferno", "CDDL-1.0"),
-    ("instant", "BSD-3-Clause"),
+    ("ring", NON_STANDARD_LICENSE), // see EXCEPTIONS_NON_STANDARD_LICENSE_DEPS for more.
     ("ryu", "Apache-2.0 OR BSL-1.0"),
     ("snap", "BSD-3-Clause"),
     ("subtle", "BSD-3-Clause"),
@@ -243,6 +243,9 @@ const EXCEPTIONS_BOOTSTRAP: ExceptionList = &[
 const EXCEPTIONS_UEFI_QEMU_TEST: ExceptionList = &[
     ("r-efi", "MIT OR Apache-2.0 OR LGPL-2.1-or-later"), // LGPL is not acceptable, but we use it under MIT OR Apache-2.0
 ];
+
+/// Placeholder for non-standard license file.
+const NON_STANDARD_LICENSE: &str = "NON_STANDARD_LICENSE";
 
 /// These dependencies have non-standard licenses but are genenrally permitted.
 const EXCEPTIONS_NON_STANDARD_LICENSE_DEPS: &[&str] = &[
@@ -384,6 +387,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "regex-syntax",
     "rustc-demangle",
     "rustc-hash",
+    "rustc-literal-escaper",
     "rustc-rayon",
     "rustc-rayon-core",
     "rustc-stable-hash",
@@ -511,6 +515,7 @@ const PERMITTED_STDLIB_DEPENDENCIES: &[&str] = &[
     "rand_core",
     "rand_xorshift",
     "rustc-demangle",
+    "rustc-literal-escaper",
     "shlex",
     "syn",
     "unicode-ident",

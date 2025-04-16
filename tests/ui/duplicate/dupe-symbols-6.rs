@@ -8,7 +8,7 @@ static HELLO: u8 = 0;
 
 #[export_name="fail"]
 static HELLO_TWICE: u16 = 0;
-//~^ symbol `fail` is already defined
+//~^ ERROR symbol `fail` is already defined
 
 // ferrocene-annotations: fls_osd6c4utyjb3
 // FFI

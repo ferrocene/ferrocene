@@ -1,7 +1,7 @@
 use syn::parse::Parser;
 use syn::punctuated::Punctuated;
 use syn::token::Comma;
-use syn::{Lit, MetaNameValue};
+use syn::{Expr, ExprLit, Lit, MetaNameValue};
 
 #[derive(Clone)]
 pub(crate) struct Stability {
@@ -20,9 +20,9 @@ pub(crate) fn parse_stability(attrs: &[String]) -> Option<Stability> {
             .flatten();
 
         for parsed in iter {
-            let stable = if parsed.path.is_ident("stable") {
+            let stable = if parsed.path().is_ident("stable") {
                 true
-            } else if parsed.path.is_ident("unstable") {
+            } else if parsed.path().is_ident("unstable") {
                 false
             } else {
                 continue;
@@ -38,7 +38,10 @@ pub(crate) fn parse_stability(attrs: &[String]) -> Option<Stability> {
                 if !key_value.path.is_ident("feature") {
                     continue;
                 }
-                if let Lit::Str(s) = &key_value.lit {
+                if let Expr::Lit(ExprLit {
+                    lit: Lit::Str(s), ..
+                }) = &key_value.value
+                {
                     return Some(Stability {
                         stable,
                         feature: s.value(),

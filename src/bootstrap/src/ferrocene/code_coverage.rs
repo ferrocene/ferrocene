@@ -8,6 +8,7 @@ use crate::core::builder::{Cargo, ShouldRun, Step};
 use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::doc::code_coverage::{CoverageMetadata, SingleCoverageReport};
+use crate::ferrocene::download_and_extract_ci_outcomes;
 use crate::utils::build_stamp::libstd_stamp;
 use crate::{BootstrapCommand, Compiler, DependencyType, GitRepo, t};
 
@@ -225,6 +226,9 @@ impl Step for CoverageOutcomesDir {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         match &builder.config.ferrocene_coverage_outcomes {
             FerroceneCoverageOutcomes::Disabled => None,
+            FerroceneCoverageOutcomes::DownloadCi => {
+                Some(download_and_extract_ci_outcomes(builder, "coverage"))
+            }
             FerroceneCoverageOutcomes::Local => {
                 Some(builder.out.join("ferrocene").join("coverage"))
             }

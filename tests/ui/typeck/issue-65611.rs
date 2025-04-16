@@ -58,7 +58,6 @@ fn main() {
     let mut buffer = ArrayVec::new();
     let x = buffer.last().unwrap().0.clone();
     //~^ ERROR type annotations needed
-    //~| ERROR no field `0` on type `&_`
     buffer.reverse();
 }
 

@@ -12,9 +12,8 @@
 //
 //@ [merge1] compile-flags: -Cremark=all    -Cremark=giraffe
 //@ [merge2] compile-flags: -Cremark=inline -Cremark=giraffe
-//
-//@ error-pattern: inline (missed): 'f' not inlined into 'g'
 //@ dont-check-compiler-stderr
+//@ dont-require-annotations: NOTE
 
 #[no_mangle]
 #[inline(never)]
@@ -26,4 +25,8 @@ pub fn g() {
     f();
 }
 
+<<<<<<< HEAD
 // ferrocene-annotations: um_rustc_C_debuginfo
+=======
+//~? NOTE inline (missed): 'f' not inlined into 'g'
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

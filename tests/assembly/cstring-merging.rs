@@ -1,10 +1,11 @@
 //@ only-linux
 //@ assembly-output: emit-asm
-//@ compile-flags: --crate-type=lib -Copt-level=3 --edition 2024
+//@ compile-flags: --crate-type=lib -Copt-level=3
+//@ edition: 2024
 
 use std::ffi::CStr;
 
-// CHECK: .section .rodata.str1.1,"aMS"
+// CHECK: .section .rodata.str1.{{[12]}},"aMS"
 // CHECK: .Lanon.{{.+}}:
 // CHECK-NEXT: .asciz "foo"
 #[unsafe(no_mangle)]

@@ -44,7 +44,7 @@ use rustc_trait_selection::traits::ObligationCtxt;
 use tracing::{debug, instrument};
 
 use crate::errors;
-use crate::hir_ty_lowering::errors::assoc_kind_str;
+use crate::hir_ty_lowering::errors::assoc_tag_str;
 use crate::hir_ty_lowering::{FeedConstTy, HirTyLowerer, RegionInferReason};
 
 pub(crate) mod dump;
@@ -439,9 +439,9 @@ impl<'tcx> HirTyLowerer<'tcx> for ItemCtxt<'tcx> {
         &self,
         span: Span,
         def_id: LocalDefId,
-        assoc_name: Ident,
+        assoc_ident: Ident,
     ) -> ty::EarlyBinder<'tcx, &'tcx [(ty::Clause<'tcx>, Span)]> {
-        self.tcx.at(span).type_param_predicates((self.item_def_id, def_id, assoc_name))
+        self.tcx.at(span).type_param_predicates((self.item_def_id, def_id, assoc_ident))
     }
 
     fn lower_assoc_shared(
@@ -450,7 +450,7 @@ impl<'tcx> HirTyLowerer<'tcx> for ItemCtxt<'tcx> {
         item_def_id: DefId,
         item_segment: &rustc_hir::PathSegment<'tcx>,
         poly_trait_ref: ty::PolyTraitRef<'tcx>,
-        kind: ty::AssocKind,
+        assoc_tag: ty::AssocTag,
     ) -> Result<(DefId, ty::GenericArgsRef<'tcx>), ErrorGuaranteed> {
         if let Some(trait_ref) = poly_trait_ref.no_bound_vars() {
             let item_args = self.lowerer().lower_generic_args_of_assoc_item(
@@ -525,7 +525,7 @@ impl<'tcx> HirTyLowerer<'tcx> for ItemCtxt<'tcx> {
                 inferred_sugg,
                 bound,
                 mpart_sugg,
-                what: assoc_kind_str(kind),
+                what: assoc_tag_str(assoc_tag),
             }))
         }
     }

@@ -135,6 +135,7 @@ const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "min-llvm-version",
     "min-system-llvm-version",
     "needs-asm-support",
+    "needs-crate-type",
     "needs-deterministic-layouts",
     "needs-dlltool",
     "needs-dynamic-linking",

@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::env;
 use std::fs::File;
 use std::io::BufReader;
@@ -16,7 +16,6 @@ use crate::executor::{CollectedTestDesc, ShouldPanic};
 use crate::header::auxiliary::{AuxProps, parse_and_update_aux};
 use crate::header::needs::CachedNeedsConditions;
 use crate::util::static_regex;
- use std::collections::HashMap;
 
 pub(crate) mod auxiliary;
 mod cfg;

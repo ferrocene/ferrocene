@@ -839,9 +839,9 @@ fn find_tests_in_dir(
             debug!(%file_path, "found test file");
 
             // Record the stem of the test file, to check for overlaps later.
-            let rel_test_path = Utf8PathBuf::try_from(relative_dir_path.join(file_path.file_stem().unwrap()));
-            let paths =
-                TestPaths { file: file_path, relative_dir: (&relative_dir_path).into() };
+            let rel_test_path =
+                Utf8PathBuf::try_from(relative_dir_path.join(file_path.file_stem().unwrap()));
+            let paths = TestPaths { file: file_path, relative_dir: (&relative_dir_path).into() };
 
             on_test_found(&paths, Some(rel_test_path.unwrap()));
         } else if file_path.is_dir() {

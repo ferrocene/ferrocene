@@ -8,9 +8,10 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::sync::Arc;
 
+use camino::Utf8Path;
+
 use crate::common::{Config, Mode, TestPaths};
 use crate::find_tests_in_dir;
-use camino::Utf8Path;
 
 const BULK_ANNOTATIONS_FILE_NAME: &str = "ferrocene-annotations";
 
@@ -84,8 +85,8 @@ impl Collector {
         } else {
             paths.file.clone()
         };
-        let contents =
-            std::fs::read_to_string(&path).expect(&format!("failed to read {}", path.as_std_path().display()));
+        let contents = std::fs::read_to_string(&path)
+            .expect(&format!("failed to read {}", path.as_std_path().display()));
         let mut annotations = self.collect_annotations(&path, &contents);
         self.append_directory_annotations(paths, &mut annotations);
 

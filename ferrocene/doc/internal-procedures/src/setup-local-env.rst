@@ -182,6 +182,7 @@ content in it:
    [ferrocene]
    aws-profile = "ferrocene-ci"
    test-outcomes = "download-ci"
+   coverage-outcomes = "download-ci"
 
    [rust]
    lld = true

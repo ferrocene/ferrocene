@@ -1050,6 +1050,7 @@
 # Can be one of the following values:
 #
 # - disabled (default): do not include coverage outcomes
+# - download-ci: download the outcomes of the git merge base from CI
 # - local: use the code coverage outcomes from the current build directory (see
 #          the internal procedures for instructions on how to use this).
 # - custom: provide a custom path to the outcomes (see coverage-outcomes-dir)

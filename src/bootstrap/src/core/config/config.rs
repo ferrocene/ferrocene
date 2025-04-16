@@ -465,6 +465,7 @@ pub enum FerroceneCoverageOutcomes {
     #[default]
     Disabled,
     Local,
+    DownloadCi,
     Custom(PathBuf),
 }
 
@@ -2608,6 +2609,7 @@ impl Config {
             ) {
                 (None | Some("disabled"), None) => FerroceneCoverageOutcomes::Disabled,
                 (Some("local"), None) => FerroceneCoverageOutcomes::Local,
+                (Some("download-ci"), None) => FerroceneCoverageOutcomes::DownloadCi,
                 (Some("custom"), Some(path)) => FerroceneCoverageOutcomes::Custom(path),
                 // Error messages:
                 (Some(value), Some(_)) => panic!(

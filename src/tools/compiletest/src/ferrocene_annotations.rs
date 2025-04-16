@@ -2,7 +2,6 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use std::collections::HashMap;
-use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
@@ -11,6 +10,7 @@ use std::sync::Arc;
 
 use crate::common::{Config, Mode, TestPaths};
 use crate::find_tests_in_dir;
+use camino::Utf8Path;
 
 const BULK_ANNOTATIONS_FILE_NAME: &str = "ferrocene-annotations";
 
@@ -66,7 +66,7 @@ impl Collector {
         find_tests_in_dir(
             self.config.clone(),
             &src_base,
-            &PathBuf::new(),
+            &Utf8Path::new(""),
             &Vec::new(),
             &mut |test, _| {
                 if let Some(t) = self.collect_test(test) {
@@ -85,27 +85,27 @@ impl Collector {
             paths.file.clone()
         };
         let contents =
-            std::fs::read_to_string(&path).expect(&format!("failed to read {}", path.display()));
+            std::fs::read_to_string(&path).expect(&format!("failed to read {}", path.as_std_path().display()));
         let mut annotations = self.collect_annotations(&path, &contents);
         self.append_directory_annotations(paths, &mut annotations);
 
         if annotations.is_empty() {
             None
         } else {
-            Some(TestFile { file: paths.file.to_str().unwrap().into(), annotations })
+            Some(TestFile { file: paths.file.as_std_path().to_str().unwrap().into(), annotations })
         }
     }
 
     fn append_directory_annotations(&mut self, paths: &TestPaths, extend: &mut Vec<Annotation>) {
         if let Some(parent) = paths.file.parent() {
-            if let Some(annotations) = self.directory_annotations.get(parent) {
+            if let Some(annotations) = self.directory_annotations.get(parent.as_std_path()) {
                 extend.extend_from_slice(&annotations);
             } else {
                 let file = parent.join(BULK_ANNOTATIONS_FILE_NAME);
                 let mut annotations = match std::fs::read_to_string(&file) {
                     Ok(contents) => self.collect_annotations(&file, &contents),
                     Err(err) if err.kind() == std::io::ErrorKind::NotFound => Vec::new(),
-                    Err(err) => panic!("failed to load {}: {err}", file.display()),
+                    Err(err) => panic!("failed to load {}: {err}", file.as_std_path().display()),
                 };
                 self.directory_annotations.insert(parent.into(), annotations.clone());
                 extend.append(&mut annotations);
@@ -113,17 +113,17 @@ impl Collector {
         }
     }
 
-    fn collect_annotations(&self, path: &Path, contents: &str) -> Vec<Annotation> {
+    fn collect_annotations(&self, path: &Utf8Path, contents: &str) -> Vec<Annotation> {
         let mut found = Vec::new();
         for line in contents.lines() {
-            let prefix = if path.file_name() == Some(OsStr::new("Makefile")) {
+            let prefix = if path.file_name() == Some("Makefile") {
                 "# "
-            } else if path.extension() == Some(OsStr::new("rs"))
-                || path.file_name() == Some(OsStr::new(BULK_ANNOTATIONS_FILE_NAME))
+            } else if path.extension() == Some("rs")
+                || path.file_name() == Some(BULK_ANNOTATIONS_FILE_NAME)
             {
                 "// "
             } else {
-                panic!("unknown type of file encountered: {}", path.display());
+                panic!("unknown type of file encountered: {}", path.as_std_path().display());
             };
             let remaining = if let Some(remaining) = line.strip_prefix(prefix) {
                 remaining
@@ -138,7 +138,7 @@ impl Collector {
                 // Prevent common typos
                 panic!(
                     "{}: attribute is called 'ferrocene-annotations', not 'ferrocene-annotation'",
-                    path.display()
+                    path.as_std_path().display()
                 );
             }
         }

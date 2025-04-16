@@ -16,6 +16,7 @@ use crate::executor::{CollectedTestDesc, ShouldPanic};
 use crate::header::auxiliary::{AuxProps, parse_and_update_aux};
 use crate::header::needs::CachedNeedsConditions;
 use crate::util::static_regex;
+ use std::collections::HashMap;
 
 pub(crate) mod auxiliary;
 mod cfg;
@@ -201,13 +202,10 @@ pub struct TestProps {
     /// that don't otherwise want/need `-Z build-std`.
     pub add_core_stubs: bool,
     /// Whether line annotatins are required for the given error kind.
-<<<<<<< HEAD
     pub require_annotations: HashMap<ErrorKind, bool>,
     // Flag to execute the test within a temporary directory
     pub ferrocene_execute_in_temp: bool,
-=======
     pub dont_require_annotations: HashSet<ErrorKind>,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 mod directives {
@@ -315,7 +313,6 @@ impl TestProps {
             no_auto_check_cfg: false,
             has_enzyme: false,
             add_core_stubs: false,
-<<<<<<< HEAD
             require_annotations: HashMap::from([
                 (ErrorKind::Help, true),
                 (ErrorKind::Note, true),
@@ -324,9 +321,7 @@ impl TestProps {
                 (ErrorKind::Suggestion, false),
             ]),
             ferrocene_execute_in_temp: false,
-=======
             dont_require_annotations: Default::default(),
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         }
     }
 

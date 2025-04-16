@@ -25,8 +25,6 @@ pub fn g() {
     f();
 }
 
-<<<<<<< HEAD
-// ferrocene-annotations: um_rustc_C_debuginfo
-=======
 //~? NOTE inline (missed): 'f' not inlined into 'g'
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// ferrocene-annotations: um_rustc_C_debuginfo

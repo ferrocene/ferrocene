@@ -770,7 +770,7 @@ fn modified_tests(config: &Config, dir: &Utf8Path) -> Result<Vec<Utf8PathBuf>, S
 fn collect_tests_from_dir(
     cx: &TestCollectorCx,
     collector: &mut TestCollector,
-    dir: &Utf8Path,
+    dir: &Utf8PathBuf,
     relative_dir_path: &Utf8Path,
 ) -> io::Result<()> {
     find_tests_in_dir(
@@ -790,6 +790,8 @@ fn collect_tests_from_dir(
                 fs::create_dir_all(&build_dir).unwrap();
             }
             if let Some(rel_test_path) = rel_test_path {
+                // Failure not probable at this step
+                let rel_test_path = Utf8PathBuf::try_from(rel_test_path).unwrap();
                 collector.found_path_stems.insert(rel_test_path);
             }
             make_test(cx, collector, &paths);
@@ -800,10 +802,10 @@ fn collect_tests_from_dir(
 // Added to allow reuse by custom Ferrocene code
 fn find_tests_in_dir(
     config: Arc<Config>,
-    dir: &Path,
-    relative_dir_path: &Path,
-    modified_tests: &Vec<PathBuf>,
-    on_test_found: &mut dyn FnMut(&TestPaths, Option<PathBuf>),
+    dir: &Utf8Path,
+    relative_dir_path: &Utf8Path,
+    modified_tests: &Vec<Utf8PathBuf>,
+    on_test_found: &mut dyn FnMut(&TestPaths, Option<Utf8PathBuf>),
 ) -> io::Result<()> {
     // Ignore directories that contain a file named `compiletest-ignore-dir`.
     if dir.join("compiletest-ignore-dir").exists() {
@@ -832,28 +834,21 @@ fn find_tests_in_dir(
         let file_path = Utf8PathBuf::try_from(file.path()).unwrap();
         let file_name = file_path.file_name().unwrap();
 
-<<<<<<< HEAD
         if is_test(&file_name) && (!config.only_modified || modified_tests.contains(&file_path)) {
-=======
-        if is_test(file_name)
-            && (!cx.config.only_modified || cx.modified_tests.contains(&file_path))
-        {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             // We found a test file, so create the corresponding libtest structures.
             debug!(%file_path, "found test file");
 
             // Record the stem of the test file, to check for overlaps later.
-            let rel_test_path = relative_dir_path.join(file_path.file_stem().unwrap());
+            let rel_test_path = Utf8PathBuf::try_from(relative_dir_path.join(file_path.file_stem().unwrap()));
             let paths =
-                TestPaths { file: file_path, relative_dir: relative_dir_path.to_path_buf() };
+                TestPaths { file: file_path, relative_dir: (&relative_dir_path).into() };
 
-            on_test_found(&paths, Some(rel_test_path));
+            on_test_found(&paths, Some(rel_test_path.unwrap()));
         } else if file_path.is_dir() {
             // Recurse to find more tests in a subdirectory.
-<<<<<<< HEAD
-            let relative_file_path = relative_dir_path.join(file.file_name());
-            if &file_name != "auxiliary" {
-                debug!("found directory: {:?}", file_path.display());
+            let relative_file_path = relative_dir_path.join(file.file_name().to_str().unwrap());
+            if file_name != "auxiliary" {
+                debug!("found directory: {:?}", file_path.as_std_path().display());
                 find_tests_in_dir(
                     config.clone(),
                     &file_path,
@@ -861,12 +856,6 @@ fn find_tests_in_dir(
                     modified_tests,
                     on_test_found,
                 )?;
-=======
-            let relative_file_path = relative_dir_path.join(file_name);
-            if file_name != "auxiliary" {
-                debug!(%file_path, "found directory");
-                collect_tests_from_dir(cx, collector, &file_path, &relative_file_path)?;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             }
         } else {
             debug!(%file_path, "found other file/directory");

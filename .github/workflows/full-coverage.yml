@@ -33,17 +33,17 @@ on:
       run-id:
         description: The id of the workflow run
         value: ${{ github.run_id }}
-      artifact-doc:
-        description: The name of the doc job artifact
-        value: ${{ jobs.doc.outputs.artifact-name }}
+      artifact-coverage:
+        description: The name of the coverage job artifact
+        value: ${{ jobs.coverage.outputs.artifact-name }}
 
 jobs:
 
-  doc:
+  coverage:
     runs-on: ${{ inputs.runner }}
     env:
-      ARTIFACT: doc-${{inputs.host-triple}}
-      ARTIFACT_USAGE: usage-doc-${{inputs.host-triple}}
+      ARTIFACT: coverage-${{inputs.host-triple}}
+      ARTIFACT_USAGE: usage-coverage-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
@@ -95,14 +95,12 @@ jobs:
           CIRCLE_JOB: ${{ env.ARTIFACT }}
         with:
           container: ${{ inputs.container }}
+          test-outcomes-dir: /tmp/test-outcomes
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           # Run dist before test to make sure the tarballs we test are uploaded
           # to CI beforehand, for manual inspection in case of failures.
           script: |
-            ferrocene/ci/scripts/fetch-test-outcomes.sh
-            ferrocene/ci/scripts/fetch-coverage-outcomes.sh
-            ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)
-            ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
+            ./x.py test --no-doc --coverage=library library/core
 
       - name: Upload artifacts to S3
         env:

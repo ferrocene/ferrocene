@@ -647,7 +647,7 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
                     && tc.polarity() == ty::PredicatePolarity::Positive
                     && supertrait_def_ids(tcx, tc.def_id())
                         .flat_map(|trait_did| tcx.associated_items(trait_did).in_definition_order())
-                        .any(|item| item.fn_has_self_parameter)
+                        .any(|item| item.is_method())
             })
         }) {
             return None;
@@ -2500,11 +2500,11 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
         );
         let ty::Tuple(params) = tupled_params.kind() else { return };
 
-        // Find the first argument with a matching type, get its name
-        let Some(this_name) = params.iter().zip(tcx.hir_body_param_names(closure.body)).find_map(
-            |(param_ty, name)| {
+        // Find the first argument with a matching type and get its identifier.
+        let Some(this_name) = params.iter().zip(tcx.hir_body_param_idents(closure.body)).find_map(
+            |(param_ty, ident)| {
                 // FIXME: also support deref for stuff like `Rc` arguments
-                if param_ty.peel_refs() == local_ty { name } else { None }
+                if param_ty.peel_refs() == local_ty { ident } else { None }
             },
         ) else {
             return;
@@ -3774,7 +3774,7 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
                 method_args,
                 *fn_span,
                 call_source.from_hir_call(),
-                self.infcx.tcx.fn_arg_names(method_did)[0],
+                self.infcx.tcx.fn_arg_idents(method_did)[0],
             )
         {
             err.note(format!("borrow occurs due to deref coercion to `{deref_target_ty}`"));

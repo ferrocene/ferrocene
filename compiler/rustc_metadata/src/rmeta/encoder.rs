@@ -201,9 +201,9 @@ impl<'a, 'tcx> SpanEncoder for EncodeContext<'a, 'tcx> {
     }
 
     fn encode_symbol(&mut self, symbol: Symbol) {
-        // if symbol preinterned, emit tag and symbol index
-        if symbol.is_preinterned() {
-            self.opaque.emit_u8(SYMBOL_PREINTERNED);
+        // if symbol predefined, emit tag and symbol index
+        if symbol.is_predefined() {
+            self.opaque.emit_u8(SYMBOL_PREDEFINED);
             self.opaque.emit_u32(symbol.as_u32());
         } else {
             // otherwise write it as string or as offset to it
@@ -1338,7 +1338,7 @@ fn should_encode_const(def_kind: DefKind) -> bool {
 fn should_encode_fn_impl_trait_in_trait<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId) -> bool {
     if let Some(assoc_item) = tcx.opt_associated_item(def_id)
         && assoc_item.container == ty::AssocItemContainer::Trait
-        && assoc_item.kind == ty::AssocKind::Fn
+        && assoc_item.is_fn()
     {
         true
     } else {
@@ -1469,7 +1469,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             }
             if let DefKind::Fn | DefKind::AssocFn = def_kind {
                 self.tables.asyncness.set_some(def_id.index, tcx.asyncness(def_id));
-                record_array!(self.tables.fn_arg_names[def_id] <- tcx.fn_arg_names(def_id));
+                record_array!(self.tables.fn_arg_idents[def_id] <- tcx.fn_arg_idents(def_id));
             }
             if let Some(name) = tcx.intrinsic(def_id) {
                 record!(self.tables.intrinsic[def_id] <- name);
@@ -1691,7 +1691,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
 
         match item.container {
             AssocItemContainer::Trait => {
-                if let ty::AssocKind::Type = item.kind {
+                if item.is_type() {
                     self.encode_explicit_item_bounds(def_id);
                     self.encode_explicit_item_self_bounds(def_id);
                     if tcx.is_conditionally_const(def_id) {
@@ -1706,7 +1706,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                 }
             }
         }
-        if let Some(rpitit_info) = item.opt_rpitit_info {
+        if let ty::AssocKind::Type { data: ty::AssocTypeData::Rpitit(rpitit_info) } = item.kind {
             record!(self.tables.opt_rpitit_info[def_id] <- rpitit_info);
             if matches!(rpitit_info, ty::ImplTraitInTraitData::Trait { .. }) {
                 record_array!(
@@ -2199,7 +2199,7 @@ fn prefetch_mir(tcx: TyCtxt<'_>) {
     }
 
     let reachable_set = tcx.reachable_set(());
-    par_for_each_in(tcx.mir_keys(()), |&def_id| {
+    par_for_each_in(tcx.mir_keys(()), |&&def_id| {
         let (encode_const, encode_opt) = should_encode_mir(tcx, reachable_set, def_id);
 
         if encode_const {

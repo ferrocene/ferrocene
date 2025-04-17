@@ -3,8 +3,6 @@
 //!
 //! This test does not try to check if the output artifacts are valid.
 
-// FIXME(#132309): add a proper `supports-crate-type` directive.
-
 // Single valid crate types should pass
 //@ revisions: lib rlib staticlib dylib cdylib bin proc_dash_macro
 
@@ -25,6 +23,8 @@
 
 //@[cdylib] ignore-musl (cdylib is supported, but musl libc is statically linked by default)
 //@[cdylib] ignore-ferrocenecoretest (cdylibs are not supported)
+//@[dylib] needs-crate-type: dylib
+//@[cdylib] needs-crate-type: cdylib
 //@[cdylib] compile-flags: --crate-type=cdylib
 //@[cdylib] check-pass
 
@@ -33,6 +33,7 @@
 
 //@[proc_dash_macro] ignore-wasm (proc-macro is not supported)
 //@[proc_dash_macro] ignore-ferrocenecoretest (proc-macro is not supported)
+//@[proc_dash_macro] needs-crate-type: proc-macro
 //@[proc_dash_macro] needs-unwind (panic=abort causes warning to be emitted)
 //@[proc_dash_macro] compile-flags: --crate-type=proc-macro
 //@[proc_dash_macro] check-pass

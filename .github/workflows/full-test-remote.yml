@@ -419,7 +419,7 @@ jobs:
         uses: ./.github/actions/run/
         with:
           test-device-addr: ${{ inputs.test-device-addr }}
-          container: ${{ inputs.container && format('{0}/{1}', secrets.REGISTRY_URL, inputs.emulator-container) || ''}}
+          container: ${{ inputs.container && format('{0}/{1}', secrets.REGISTRY_URL, inputs.container) || ''}}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE=qnx{0}/license/licenses', inputs.qnx-version)) || '' }}

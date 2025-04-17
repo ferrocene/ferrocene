@@ -1556,5 +1556,5 @@ Word ``union`` acts as a :t:`keyword` only when used in the context of a
 :s:`UnionDeclaration`.
 
 :dp:`fls_g0JEluWqBpNc`
-Word ``safe`` acts as a :t:`keyword` only when used as a qualifier of :s:`Function` or :s:`Static` in the context of a :s:`ExternalBlock`.
+Word ``safe`` acts as a :t:`keyword` only when used as a qualifier of :s:`FunctionDeclaration` or :s:`StaticDeclaration` in the context of a :s:`ExternalBlock`.
 

@@ -44,3 +44,8 @@ To gather the standard library coverage, we recommend this command:
    Right now, only the ``core`` crate's coverage will be displayed in the
    report, as the other crates are ignored in
    ``src/bootstrap/src/ferrocene/code_coverage.rs``.
+
+.. note::
+
+   Doctests are not supported when gathering the coverage of the standard
+   library, and the build system will enforce the presence of ``--no-doc``.

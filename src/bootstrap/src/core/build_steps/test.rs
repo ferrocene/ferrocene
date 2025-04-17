@@ -22,9 +22,10 @@ use crate::core::builder::{
     self, Alias, Builder, Compiler, Kind, RunConfig, ShouldRun, Step, crate_description,
 };
 use crate::core::config::TargetSelection;
-use crate::core::config::flags::{Subcommand, get_completion};
+use crate::core::config::flags::{FerroceneCoverageFor, Subcommand, get_completion};
 use crate::ferrocene::code_coverage::measure_coverage;
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
+use crate::ferrocene::test_variants::{TestVariant, VariantCondition};
 use crate::utils::build_stamp::{self, BuildStamp};
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::utils::helpers::{
@@ -339,6 +340,16 @@ impl Step for Cargo {
         // same value as `-Zroot-dir`.
         cargo.env("CARGO_RUSTC_CURRENT_DIR", builder.src.display().to_string());
 
+        let variant = TestVariant::current(builder, self.host);
+        for condition in variant.condititions() {
+            match condition.get() {
+                VariantCondition::Edition(_) => condition.mark_unused(),
+                VariantCondition::QemuCpu(cpu) => {
+                    cargo.env("QEMU_CPU", cpu);
+                }
+            }
+        }
+
         #[cfg(feature = "build-metrics")]
         builder.metrics.begin_test_suite(
             build_helper::metrics::TestSuiteMetadata::CargoPackage {
@@ -346,6 +357,7 @@ impl Step for Cargo {
                 target: self.host.triple.to_string(),
                 host: self.host.triple.to_string(),
                 stage,
+                ferrocene_variant: variant.for_metrics(),
             },
             builder,
         );
@@ -2076,6 +2088,18 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
         cmd.arg("--git-merge-commit-email").arg(git_config.git_merge_commit_email);
         cmd.force_coloring_in_ci();
 
+        let variant = TestVariant::current(builder, self.target);
+        for condition in variant.condititions() {
+            match condition.get() {
+                VariantCondition::Edition(edition) => {
+                    cmd.arg(format!("--edition={edition}"));
+                }
+                VariantCondition::QemuCpu(cpu) => {
+                    cmd.env("QEMU_CPU", cpu);
+                }
+            }
+        }
+
         #[cfg(feature = "build-metrics")]
         builder.metrics.begin_test_suite(
             build_helper::metrics::TestSuiteMetadata::Compiletest {
@@ -2085,6 +2109,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
                 target: self.target.triple.to_string(),
                 host: self.compiler.host.triple.to_string(),
                 stage: self.compiler.stage,
+                ferrocene_variant: variant.for_metrics(),
             },
             builder,
         );
@@ -2114,6 +2139,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
                     target: self.target.triple.to_string(),
                     host: self.compiler.host.triple.to_string(),
                     stage: self.compiler.stage,
+                    ferrocene_variant: variant.for_metrics(),
                 },
                 builder,
             );
@@ -2499,6 +2525,16 @@ pub(crate) fn run_cargo_test<'a>(
         builder.msg_sysroot_tool(Kind::Test, compiler.stage, what, compiler.host, target)
     });
 
+    let variant = TestVariant::current(builder, target);
+    for condition in variant.condititions() {
+        match condition.get() {
+            VariantCondition::Edition(_) => condition.mark_unused(),
+            VariantCondition::QemuCpu(cpu) => {
+                cargo.env("QEMU_CPU", cpu);
+            }
+        }
+    }
+
     #[cfg(feature = "build-metrics")]
     builder.metrics.begin_test_suite(
         build_helper::metrics::TestSuiteMetadata::CargoPackage {
@@ -2506,6 +2542,7 @@ pub(crate) fn run_cargo_test<'a>(
             target: target.triple.to_string(),
             host: compiler.host.triple.to_string(),
             stage: compiler.stage,
+            ferrocene_variant: variant.for_metrics(),
         },
         builder,
     );
@@ -2635,11 +2672,30 @@ impl Step for Crate {
         let target = self.target;
         let mode = self.mode;
 
-        if builder.config.cmd.ferrocene_coverage_for().is_some()
+        // Doctests are incompatible with gathering the code coverage of libcore.
+        //
+        // In general, testing libcore has the problem that everything depends on libcore, and
+        // building a different libcore with testing flags enabled will generate errors due to
+        // duplicated lang items. This is why upstream defines the libcore tests in the coretests
+        // crate instead of the core crate.
+        //
+        // Running doctests with coverage instrumentation enabled causes similar problems, as Pietro
+        // was getting duplicate language items errors when trying to make it work. If in the future
+        // you want to try and make this work again:
+        //
+        // - Ensure that the flags we add to libcore for coverage instrumentation are added every
+        //   time libcore is built, by changing the `std_cargo` function.
+        //
+        // - If you need to persist the test binaries to pass to llvm-cov, check out this:
+        //   https://doc.rust-lang.org/stable/rustc/instrument-coverage.html#including-doc-tests
+        //   I don't think the `cargo test --no-run` step is necessary, we can just list the
+        //   binaries with bootstrap code. Please note the rustdoc flags from that page though.
+        if builder.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library)
             && builder.doc_tests != DocTests::No
         {
             panic!("Cannot generate coverage for doc tests");
         }
+
         // Prepare sysroot
         // See [field@compile::Std::force_recompile].
         builder.ensure(compile::Std::new(compiler, compiler.host).force_recompile(true));

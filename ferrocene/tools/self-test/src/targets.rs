@@ -24,6 +24,8 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { triple: "armebv7r-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "armv7r-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "armv8r-none-eabihf", std: false, linker: Linker::BundledLld },
+    // We do not currently have access to a prebuilt riscv toolchain for aarch64, it must be skipped
+    #[cfg(target_arch = "x86_64")]
     TargetSpec {
         triple: "riscv64gc-unknown-linux-gnu",
         std: true,

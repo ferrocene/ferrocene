@@ -59,6 +59,7 @@ static VARIANTS: &[(&str, &[VariantCondition])] = &[
 ];
 static DEFAULT_VARIANTS_BY_TARGET: &[(&str, &str)] = &[
     ("aarch64-unknown-ferrocenecoretest", "2021-cortex-a53"),
+    ("thumbv7em-ferrocenecoretest-eabi", "2021-cortex-m4"),
     ("thumbv7em-ferrocenecoretest-eabihf", "2021-cortex-m4"),
 ];
 static DEFAULT_VARIANT_FALLBACK: &str = "2021";
@@ -99,6 +100,9 @@ impl TestVariant {
     pub(crate) fn id(&self) -> String {
         let mut id = String::new();
         for condition in self.condititions() {
+            if !id.is_empty() {
+                id.push('-');
+            }
             match condition.get() {
                 VariantCondition::Edition(edition) => id.push_str(&format!("e{edition}")),
                 VariantCondition::QemuCpu(cpu) => id.push_str(&format!("q{cpu}")),

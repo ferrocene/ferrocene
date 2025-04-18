@@ -7,6 +7,7 @@ use std::ops::Deref;
 
 use crate::annotations::{AnnotatedFile, Annotations};
 use crate::documentations::{CliOption, Documentation, Section};
+use crate::test_outcomes::On;
 
 pub(crate) const ELEMENT_KIND_SECTION: ElementKind = ElementKind {
     singular: "specification section",
@@ -168,9 +169,9 @@ impl MatrixAnalysis {
     }
 }
 
-fn filter_targets_from_tests<F>(tests: &[LinkTest], getter: F) -> BTreeSet<&String>
+fn filter_targets_from_tests<F>(tests: &[LinkTest], getter: F) -> BTreeSet<&On>
 where
-    F: Fn(&AnnotatedFile) -> &BTreeSet<String>,
+    F: Fn(&AnnotatedFile) -> &BTreeSet<On>,
 {
     tests.iter().filter_map(LinkTest::unwrap_file).flat_map(getter).collect()
 }

@@ -59,6 +59,9 @@ jobs:
         env:
           INSTALL_LLVM: 1
 
+      - name: Install licensing tool
+        run: uv tool install reuse
+
       # We deliberately avoid using docker containers as that would require either adding
       # a couple minutes to the build, or doing auth/trust related things that would impact
       # the experience for new contributors. (eg. not being able to run external contributor tests)
@@ -68,9 +71,11 @@ jobs:
           FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-19
           FERROCENE_HOST: x86_64-unknown-linux-gnu
           SCRIPT: |
+            set -e
             ./x.py test tidy
             ./x.py check library compiler/rustc
             ./x.py run ferrocene/tools/traceability-matrix
+            ./x test collect-license-metadata
           # Commit checks cannot authenticate with our AWS environment. Disable the parts of CI that
           # rely on that (for example including document signatures).
           FERROCENE_UNPRIVILEGED_CI: 1

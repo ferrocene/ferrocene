@@ -200,7 +200,8 @@ than building it.
         .reuse
         .take()
         .map(|p| cmd_finder.must_have(p))
-        .or_else(|| cmd_finder.maybe_have("reuse"));
+        // Ferrocene note: changed to "uv" since we don't use Python directly
+        .or_else(|| cmd_finder.maybe_have("uvx"));
 
     build.config.uv = build
         .config

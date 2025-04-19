@@ -1048,6 +1048,7 @@ impl<'a> Builder<'a> {
                 doc::StyleGuide,
                 doc::Tidy,
                 crate::ferrocene::doc::AllSphinxDocuments,
+                crate::ferrocene::doc::CopyrightFiles,
                 // Basic Documents
                 crate::ferrocene::doc::Index,
                 crate::ferrocene::doc::Specification,

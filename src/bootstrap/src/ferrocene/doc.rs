@@ -7,11 +7,13 @@ use std::fs;
 use std::path::{Path, PathBuf, absolute};
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::core::build_steps::run::GenerateCopyright;
 use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
 use crate::utils::exec::BootstrapCommand;
+use crate::{FileType, t};
 
 pub(crate) trait IsSphinxBook {
     const SOURCE: &'static str;
@@ -764,6 +766,40 @@ impl Step for TraceabilityMatrix {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         builder.ensure(crate::ferrocene::run::TraceabilityMatrix { target: self.target });
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub(crate) struct CopyrightFiles {
+    target: TargetSelection,
+}
+
+impl Step for CopyrightFiles {
+    type Output = ();
+    const DEFAULT: bool = true;
+    const ONLY_HOSTS: bool = false;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.alias("copyright-files")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(Self { target: run.target });
+    }
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        for path in builder.ensure(GenerateCopyright) {
+            if !builder.config.dry_run() {
+                t!(fs::copy(
+                    &path,
+                    builder
+                        .out
+                        .join(self.target.triple)
+                        .join("doc")
+                        .join(&path.file_name().unwrap()),
+                ));
+            }
+        }
     }
 }
 

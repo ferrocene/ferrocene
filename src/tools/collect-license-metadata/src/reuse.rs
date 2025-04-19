@@ -34,7 +34,14 @@ pub(crate) fn collect(
 
 fn obtain_spdx_document(reuse_exe: &Path) -> Result<String, Error> {
     let output = Command::new(reuse_exe)
-        .args(&["--include-submodules", "spdx", "--add-license-concluded", "--creator-person=bors"])
+        // Ferrocene note: changed to assume reuse is intalled via "ux" instead of directly
+        .args(&[
+            "reuse",
+            "--include-submodules",
+            "spdx",
+            "--add-license-concluded",
+            "--creator-person=bors",
+        ])
         .stdout(Stdio::piped())
         .spawn()?
         .wait_with_output()?;

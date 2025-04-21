@@ -93,9 +93,9 @@ jobs:
         env:
           CIRCLE_SHA1: ${{ github.sha }}
           CIRCLE_JOB: ${{ env.ARTIFACT }}
+          FERROCENE_TEST_OUTCOMES_DIR: /tmp/test-outcomes
+          FERROCENE_COVERAGE_OUTCOMES_DIR: /tmp/coverage-outcomes
         with:
-          test-outcomes-dir: /tmp/test-outcomes
-          coverage-outcomes-dir: /tmp/coverage-outcomes
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           # Run dist before test to make sure the tarballs we test are uploaded

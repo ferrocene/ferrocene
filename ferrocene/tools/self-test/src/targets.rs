@@ -20,6 +20,7 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { triple: "aarch64-unknown-linux-gnu", std: true, linker: Linker::HostCc },
     TargetSpec { triple: "aarch64-apple-darwin", std: true, linker: Linker::BundledLld },
     TargetSpec { triple: "aarch64-unknown-none", std: false, linker: Linker::BundledLld },
+    #[cfg(target_arch = "x86_64")] // QNX does not distribute aarch64 host toolchains
     TargetSpec { triple: "aarch64-unknown-nto-qnx710", std: true, linker: Linker::BundledLld },
     TargetSpec { triple: "armebv7r-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "armv7r-none-eabihf", std: false, linker: Linker::BundledLld },
@@ -40,7 +41,7 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { triple: "thumbv8m.main-none-eabi", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "thumbv8m.main-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "x86_64-apple-darwin", std: true, linker: Linker::BundledLld },
-    #[cfg(target_arch = "x86_64")] // QNX does not distribute ARM toolchains
+    #[cfg(target_arch = "x86_64")] // QNX does not distribute aarch64 host toolchains
     TargetSpec { triple: "x86_64-pc-nto-qnx710", std: true, linker: Linker::BundledLld },
     TargetSpec { triple: "x86_64-pc-windows-msvc", std: true, linker: Linker::BundledLld },
     #[cfg(target_arch = "aarch64")]

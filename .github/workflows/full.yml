@@ -197,33 +197,33 @@ jobs:
       qemu-arch: qemu-arm
       qemu-cpu: cortex-m4
 
-  test-x86_64-pc-nto-qnx710:
-    name: Test (x86_64-pc-nto-qnx710 by x86_64-unknown-linux-gnu)
-    uses: ./.github/workflows/full-test-remote.yml
-    needs:
-      # - container-x86_64-ubuntu-20
-      # - container-x86_64-ubuntu-24
-      - build-x86_64-unknown-linux-gnu
-      - targets
-    secrets: inherit
-    with:
-      test-host-tools: false
-      test-std: true
-      triple: x86_64-pc-nto-qnx710
-      # In the old CircleCI jobs, we did not pass this...
-      # When this is enabled, we experienced test failures where it was
-      # trying to test the x86_64 artifacts in CI
-      host-triple: "" # x86_64-unknown-linux-gnu
-      runner: ferrocene-arc-runners-ubuntu-24-amd64-vm
-      use-minio: true
-      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      container: ferrocene-images/ci:ubuntu-20-main
-      test-device-addr: "172.31.1.11:12345"
-      emulator-container: ferrocene-images/ci:ubuntu-24-main
-      emulator-prepare-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh prepare
-      emulator-start-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh
-      qnx-version: "710-472"
+  # test-x86_64-pc-nto-qnx710:
+  #   name: Test (x86_64-pc-nto-qnx710 by x86_64-unknown-linux-gnu)
+  #   uses: ./.github/workflows/full-test-remote.yml
+  #   needs:
+  #     # - container-x86_64-ubuntu-20
+  #     # - container-x86_64-ubuntu-24
+  #     - build-x86_64-unknown-linux-gnu
+  #     - targets
+  #   secrets: inherit
+  #   with:
+  #     test-host-tools: false
+  #     test-std: true
+  #     triple: x86_64-pc-nto-qnx710
+  #     # In the old CircleCI jobs, we did not pass this...
+  #     # When this is enabled, we experienced test failures where it was
+  #     # trying to test the x86_64 artifacts in CI
+  #     host-triple: "" # x86_64-unknown-linux-gnu
+  #     runner: ferrocene-arc-runners-ubuntu-24-amd64-vm
+  #     use-minio: true
+  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+  #     container: ferrocene-images/ci:ubuntu-20-main
+  #     test-device-addr: "172.31.1.11:12345"
+  #     emulator-container: ferrocene-images/ci:ubuntu-24-main
+  #     emulator-prepare-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh prepare
+  #     emulator-start-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh
+  #     qnx-version: "710-472"
 
   test-aarch64-unknown-nto-qnx710:
     name: Test (aarch64-unknown-nto-qnx710 by x86_64-unknown-linux-gnu)

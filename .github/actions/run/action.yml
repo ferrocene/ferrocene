@@ -7,6 +7,10 @@ inputs:
     description: Any additional configuration to pass to the script
   script:
     description: The script to run
+  test-outcomes-dir:
+    description: The directory of the test outcomes (if any)
+  coverage-outcomes-dir:
+    description: The directory of the coverage outcomes (if any)
   test-device-addr:
     description: The test device address to use
 
@@ -18,6 +22,8 @@ runs:
       shell: bash
       env:
         TEST_DEVICE_ADDR: ${{ inputs.test-device-addr }}
+        FERROCENE_TEST_OUTCOMES_DIR: ${{ inputs.test-outcomes-dir }}
+        FERROCENE_COVERAGE_OUTCOMES_DIR: ${{ inputs.coverage-outcomes-dir }}
         SCRIPT: |
           ${{ inputs.script }}
         RUST_CONFIGURE_ARGS: ${{ inputs.configure }}
@@ -62,6 +68,8 @@ runs:
           --env FERROCENE_HOST \
           --env FERROCENE_TARGETS \
           --env FERROCENE_UNPRIVILEDGED_CI \
+          --env FERROCENE_TEST_OUTCOMES_DIR \
+          --env FERROCENE_COVERAGE_OUTCOMES_DIR \
           --env LLVM_BUILD_PARALLELISM \
           --env TEST_DEVICE_ADDR \
           --env RUST_CONFIGURE_ARGS \

@@ -94,24 +94,24 @@ Mentioning targets
 
 When you need to refer to targets across the documentation, it's better to use
 a human-readable name (like ":target:`aarch64-unknown-none`") than the target
-triple, as the latter is often inconsistent between similar targets and could
+tuple, as the latter is often inconsistent between similar targets and could
 be confusing to customers.
 
 To keep the target names consistent, you can use the ``:target:`` role with the
-target triple as its content, which will be rendered as the human-readable
+target tuple as its content, which will be rendered as the human-readable
 name:
 
 .. code-block:: rst
 
    :target:`x86_64-unknown-linux-gnu`
 
-The ``:target-with-triple:`` role will also add the triple following the
+The ``:target-with-tuple:`` role will also add the tuple following the
 human-readable name, which is best used when customers then need to copy/paste
-the triple:
+the tuple:
 
 .. code-block:: rst
 
-   :target-with-triple:`aarch64-unknown-none`
+   :target-with-tuple:`aarch64-unknown-none`
 
 The human-readable names are stored in ``ferrocene/doc/target-names.toml``, and
 referring to a target not defined in that file will emit a warning.
@@ -189,7 +189,7 @@ the CLI option:
 
       .. cli::option: --target <name>
 
-         Used to specify the target triple.
+         Used to specify the target tuple.
 
       .. cli::option: --help
 
@@ -271,9 +271,9 @@ with the :ref:`test outcomes <test-outcomes>` of a tested target. The
 directive accepts a single argument, the path to the template to render. It
 also accepts multiple options:
 
-* ``host`` (required): the target triple of the host platform
-* ``target`` (required): the target triple of the compilation target
-* ``bare_metal_test_target`` (optional): the target triple of the special
+* ``host`` (required): the target tuple of the host platform
+* ``target`` (required): the target tuple of the compilation target
+* ``bare_metal_test_target`` (optional): the target tuple of the special
   target used for bare metal testing; it should be omitted if no special target
   was used
 * ``remote_testing`` (optional): whether the tests were executed on CI or on a

@@ -13,8 +13,8 @@ New features
 
 * Two new targets are now supported and qualified for safety critical use:
 
-  * ``thumbv7em-none-eabi`` (Arm Cortex-M4, Arm Cortex-M7)
-  * ``thumbv7em-none-eabihf`` (Arm Cortex-M4F, Arm Cortex-M7F)
+  * :target-with-tuple:`thumbv7em-none-eabi`
+  * :target-with-tuple:`thumbv7em-none-eabihf`
 
 Fixed known problems
 --------------------

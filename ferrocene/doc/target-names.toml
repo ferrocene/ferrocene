@@ -5,7 +5,7 @@
 # Ferrocene, to provide consistency across documents on how we refer to them.
 #
 # In the documents, as long as the ferrocene_qualification extension is added,
-# you can refer to them with :target:`triple`.
+# you can refer to them with :target:`tuple`.
 
 
 aarch64-apple-darwin        = "Apple Silicon macOS"

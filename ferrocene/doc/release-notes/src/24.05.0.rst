@@ -29,9 +29,9 @@ shipped as a preview.
   Note that experimental targets are not qualified for safety critical use. The
   new targets are:
 
-  * :target-with-triple:`thumbv7em-none-eabi`
-  * :target-with-triple:`thumbv7em-none-eabihf`
-  * :target-with-triple:`wasm32-unknown-unknown`
+  * :target-with-tuple:`thumbv7em-none-eabi`
+  * :target-with-tuple:`thumbv7em-none-eabihf`
+  * :target-with-tuple:`wasm32-unknown-unknown`
 
 * The self-testing tool now checks the correct behavior of *linker drivers*,
   according to the new requirements for linkers. Note that the self-testing

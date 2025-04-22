@@ -48,7 +48,7 @@ impl StatsCollector {
 
     fn gather_common(&self, item: &rustdoc_types::Item) -> Common {
         Common {
-            id: item.id.clone(),
+            id: item.id,
             name: self.name_stack.join("::"),
             module: self.module_stack.join("::"),
             public: match &self.inside {
@@ -66,7 +66,7 @@ impl StatsCollector {
     ) -> Option<&'a mut TypeCounters> {
         match type_ {
             rustdoc_types::Type::ResolvedPath(path) => {
-                Some(self.type_counters.entry(path.id.clone()).or_default())
+                Some(self.type_counters.entry(path.id).or_default())
             }
             _ => None,
         }
@@ -75,7 +75,7 @@ impl StatsCollector {
 
 impl Visitor for StatsCollector {
     fn visit_item(&mut self, crate_: &rustdoc_types::Crate, item: &rustdoc_types::Item) {
-        if self.seen.insert(item.id.clone()) {
+        if self.seen.insert(item.id) {
             let mut pop_name = false;
             let mut pop_stability = false;
 
@@ -113,7 +113,7 @@ impl Visitor for StatsCollector {
                 let trait_ = crate_.index.get(&trait_.id).unwrap();
                 this.inside = Inside::TraitImpl {
                     type_: impl_.for_.clone(),
-                    trait_id: trait_.id.clone(),
+                    trait_id: trait_.id,
                     signature,
                     public: trait_.visibility == rustdoc_types::Visibility::Public,
                 };
@@ -153,12 +153,12 @@ impl Visitor for StatsCollector {
     ) {
         self.override_inside(|this| {
             this.inside = Inside::TraitDefinition {
-                id: item.id.clone(),
+                id: item.id,
                 public: item.visibility == rustdoc_types::Visibility::Public,
             };
 
             this.traits.insert(
-                item.id.clone(),
+                item.id,
                 Trait {
                     common: this.gather_common(item),
                     implementations: trait_.implementations.len(),
@@ -199,7 +199,7 @@ impl Visitor for StatsCollector {
                 }
             }
             Inside::TraitDefinition { id, .. } => {
-                let counters = self.trait_counters.entry(id.clone()).or_default();
+                let counters = self.trait_counters.entry(id).or_default();
                 if function.has_body {
                     counters.default_methods += 1;
                 } else {
@@ -221,7 +221,7 @@ impl Visitor for StatsCollector {
                 },
             },
             trait_id: match &self.inside {
-                Inside::TraitImpl { trait_id, .. } => Some(trait_id.clone()),
+                Inside::TraitImpl { trait_id, .. } => Some(*trait_id),
                 _ => None,
             },
             impl_: match &self.inside {

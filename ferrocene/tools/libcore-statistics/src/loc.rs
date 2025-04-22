@@ -13,7 +13,7 @@ pub(crate) struct LOC {
 }
 
 impl LOC {
-    pub(crate) fn new(base: &Path) -> Self {
+    pub(crate) fn new(base: &str) -> Self {
         Self {
             base: base.into(),
             files: HashMap::new(),

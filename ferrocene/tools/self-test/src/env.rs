@@ -14,7 +14,7 @@ use crate::error::Error;
 //
 /// The Rust release ferrocene-self-test is being compiled for
 pub(crate) const CFG_RELEASE: &str = env!("CFG_RELEASE");
-/// The target-tuple ferroce-self-test is being compiled for
+/// The target-tuple ferrocene-self-test is being compiled for
 pub(crate) const SELFTEST_TARGET: &str = env!("SELFTEST_TARGET");
 pub(crate) const SELFTEST_RUST_HASH: Option<&str> = option_env!("SELFTEST_RUST_HASH");
 pub(crate) const SELFTEST_CARGO_HASH: Option<&str> = option_env!("SELFTEST_CARGO_HASH");

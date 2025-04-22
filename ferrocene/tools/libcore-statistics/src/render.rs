@@ -41,7 +41,7 @@ pub(crate) fn render_impl(buf: &mut String, crate_: &Crate, impl_: &Impl) {
                     buf.push_str(": ");
                     render_generic_bounds(buf, crate_, bounds);
                 }
-                WherePredicate::LifetimePredicate { lifetime, outlives } => unreachable!(),
+                WherePredicate::LifetimePredicate { .. } => unreachable!(),
                 WherePredicate::EqPredicate { lhs, rhs } => {
                     render_type(buf, crate_, lhs);
                     buf.push_str(" = ");

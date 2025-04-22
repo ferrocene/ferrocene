@@ -187,6 +187,8 @@ fn main() -> Result<(), Error> {
     Ok(())
 }
 
+/// Tab-separated values
+#[allow(clippy::upper_case_acronyms)]
 struct TSV<const N: usize> {
     writer: BufWriter<File>,
 }

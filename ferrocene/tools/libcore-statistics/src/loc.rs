@@ -5,6 +5,8 @@ use tokei::{Config, LanguageType, Languages};
 
 const REMOVE_SYMBOLS: &[char] = &[',', ';', '}', ']', ')'];
 
+/// Lines of code
+#[allow(clippy::upper_case_acronyms)]
 pub(crate) struct LOC {
     base: PathBuf,
     files: HashMap<PathBuf, CachedFile>,
@@ -39,8 +41,10 @@ impl LOC {
         // Note that the statistics by tokei here will be different than the statistics of tokei in
         // the CLI, since we do some pre-processing to remove the symbols in REMOVE_SYMBOLS before
         // passing the contents to tokei.
-        let mut config = Config::default();
-        config.treat_doc_strings_as_comments = Some(true);
+        let config = Config {
+            treat_doc_strings_as_comments: Some(true),
+            ..Default::default()
+        };
         let mut languages = Languages::new();
         languages.get_statistics(&[temp.path()], &[], &config);
 

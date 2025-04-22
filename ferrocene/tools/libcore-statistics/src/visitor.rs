@@ -121,10 +121,8 @@ pub(crate) trait Visitor {
         match &struct_.kind {
             StructKind::Unit => {}
             StructKind::Tuple(items) => {
-                for item in items {
-                    if let Some(id) = item {
-                        self.visit_item(crate_, crate_.index.get(id).unwrap());
-                    }
+                for id in items.iter().flatten() {
+                    self.visit_item(crate_, crate_.index.get(id).unwrap());
                 }
             }
             StructKind::Plain { fields, .. } => {
@@ -154,10 +152,8 @@ pub(crate) trait Visitor {
         match &variant.kind {
             VariantKind::Plain => {}
             VariantKind::Tuple(items) => {
-                for item in items {
-                    if let Some(id) = item {
-                        self.visit_item(crate_, crate_.index.get(id).unwrap());
-                    }
+                for id in items.iter().flatten() {
+                    self.visit_item(crate_, crate_.index.get(id).unwrap());
                 }
             }
             VariantKind::Struct { fields, .. } => {

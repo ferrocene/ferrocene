@@ -1,6 +1,6 @@
 use rustdoc_types::{
-    Abi, Crate, GenericArg, GenericArgs, GenericBound, GenericParamDef, GenericParamDefKind, Impl,
-    Path, Term, TraitBoundModifier, Type, TypeBindingKind, WherePredicate,
+    Abi, AssocItemConstraintKind, Crate, GenericArg, GenericArgs, GenericBound, GenericParamDef,
+    GenericParamDefKind, Impl, Path, Term, TraitBoundModifier, Type, WherePredicate,
 };
 
 pub(crate) fn render_impl(buf: &mut String, crate_: &Crate, impl_: &Impl) {
@@ -13,7 +13,7 @@ pub(crate) fn render_impl(buf: &mut String, crate_: &Crate, impl_: &Impl) {
     }
     buf.push(' ');
     if let Some(trait_) = &impl_.trait_ {
-        if impl_.negative {
+        if impl_.is_negative {
             buf.push('!');
         }
         render_path(buf, crate_, trait_);
@@ -41,11 +41,7 @@ pub(crate) fn render_impl(buf: &mut String, crate_: &Crate, impl_: &Impl) {
                     buf.push_str(": ");
                     render_generic_bounds(buf, crate_, bounds);
                 }
-                WherePredicate::RegionPredicate { lifetime, bounds } => {
-                    buf.push_str(lifetime);
-                    buf.push_str(": ");
-                    render_generic_bounds(buf, crate_, bounds);
-                }
+                WherePredicate::LifetimePredicate { lifetime, outlives } => unreachable!(),
                 WherePredicate::EqPredicate { lhs, rhs } => {
                     render_type(buf, crate_, lhs);
                     buf.push_str(" = ");
@@ -61,7 +57,7 @@ fn render_generic_params(buf: &mut String, crate_: &Crate, params: &[GenericPara
     let mut separator = Separator::new(", ");
     for param in params {
         if let GenericParamDefKind::Type {
-            synthetic: true, ..
+            is_synthetic: true, ..
         } = &param.kind
         {
             continue;
@@ -82,9 +78,7 @@ fn render_generic_param(buf: &mut String, crate_: &Crate, param: &GenericParamDe
             }
         }
         GenericParamDefKind::Type {
-            bounds,
-            default,
-            synthetic: _,
+            bounds, default, ..
         } => {
             buf.push_str(&param.name);
             if !bounds.is_empty() {
@@ -131,18 +125,19 @@ fn render_generic_bounds(buf: &mut String, crate_: &Crate, bounds: &[GenericBoun
                 render_path(buf, crate_, trait_);
             }
             GenericBound::Outlives(lifetime) => buf.push_str(lifetime),
+            GenericBound::Use(_) => unreachable!(),
         }
     }
 }
 
 fn render_path(buf: &mut String, crate_: &Crate, path: &Path) {
-    if path.name.is_empty() {
+    if path.path.is_empty() {
         let item = crate_.index.get(&path.id).unwrap();
         if let Some(name) = &item.name {
             buf.push_str(name);
         }
     } else {
-        buf.push_str(&path.name);
+        buf.push_str(&path.path);
     }
     if let Some(args) = &path.args {
         render_generic_args(buf, crate_, args)
@@ -151,8 +146,8 @@ fn render_path(buf: &mut String, crate_: &Crate, path: &Path) {
 
 fn render_generic_args(buf: &mut String, crate_: &Crate, args: &GenericArgs) {
     match args {
-        GenericArgs::AngleBracketed { args, bindings } => {
-            if args.is_empty() && bindings.is_empty() {
+        GenericArgs::AngleBracketed { args, constraints } => {
+            if args.is_empty() && constraints.is_empty() {
                 return;
             }
 
@@ -167,16 +162,16 @@ fn render_generic_args(buf: &mut String, crate_: &Crate, args: &GenericArgs) {
                     GenericArg::Infer => buf.push('_'),
                 }
             }
-            for binding in bindings {
+            for constraint in constraints {
                 separator.insert(buf);
-                buf.push_str(&binding.name);
-                render_generic_args(buf, crate_, &binding.args);
-                match &binding.binding {
-                    TypeBindingKind::Equality(term) => {
+                buf.push_str(&constraint.name);
+                render_generic_args(buf, crate_, &constraint.args);
+                match &constraint.binding {
+                    AssocItemConstraintKind::Equality(term) => {
                         buf.push_str(" = ");
                         render_term(buf, crate_, term);
                     }
-                    TypeBindingKind::Constraint(bounds) => {
+                    AssocItemConstraintKind::Constraint(bounds) => {
                         buf.push_str(": ");
                         render_generic_bounds(buf, crate_, bounds);
                     }
@@ -197,6 +192,7 @@ fn render_generic_args(buf: &mut String, crate_: &Crate, args: &GenericArgs) {
                 render_type(buf, crate_, output);
             }
         }
+        GenericArgs::ReturnTypeNotation => unreachable!(),
     }
 }
 
@@ -230,9 +226,9 @@ pub(crate) fn render_type(buf: &mut String, crate_: &Crate, type_: &Type) {
             render_generic_bounds(buf, crate_, bounds);
         }
         Type::Infer => buf.push('_'),
-        Type::RawPointer { mutable, type_ } => {
+        Type::RawPointer { is_mutable, type_ } => {
             buf.push('*');
-            if *mutable {
+            if *is_mutable {
                 buf.push_str("mut ");
             }
             render_type(buf, crate_, type_);
@@ -240,7 +236,7 @@ pub(crate) fn render_type(buf: &mut String, crate_: &Crate, type_: &Type) {
 
         Type::BorrowedRef {
             lifetime,
-            mutable,
+            is_mutable,
             type_,
         } => {
             buf.push('&');
@@ -248,7 +244,7 @@ pub(crate) fn render_type(buf: &mut String, crate_: &Crate, type_: &Type) {
                 buf.push_str(lifetime);
                 buf.push(' ');
             }
-            if *mutable {
+            if *is_mutable {
                 buf.push_str("mut ");
             }
             render_type(buf, crate_, type_);
@@ -264,7 +260,7 @@ pub(crate) fn render_type(buf: &mut String, crate_: &Crate, type_: &Type) {
             render_type(buf, crate_, self_type);
             render_generic_args(buf, crate_, args);
             buf.push_str(" as ");
-            render_path(buf, crate_, trait_);
+            render_path(buf, crate_, trait_.as_ref().unwrap());
             buf.push_str(">::");
             buf.push_str(name);
         }
@@ -303,13 +299,13 @@ pub(crate) fn render_type(buf: &mut String, crate_: &Crate, type_: &Type) {
                 render_generic_params(buf, crate_, &function.generic_params);
                 buf.push(' ');
             }
-            if function.header.const_ {
+            if function.header.is_const {
                 buf.push_str("const ");
             }
-            if function.header.unsafe_ {
+            if function.header.is_unsafe {
                 buf.push_str("unsafe ");
             }
-            if function.header.async_ {
+            if function.header.is_async {
                 buf.push_str("async ");
             }
             let abi = match &function.header.abi {
@@ -335,22 +331,24 @@ pub(crate) fn render_type(buf: &mut String, crate_: &Crate, type_: &Type) {
 
             buf.push_str("fn(");
             let mut separator = Separator::new(", ");
-            for input in &function.decl.inputs {
+            for input in &function.sig.inputs {
                 separator.insert(buf);
                 buf.push_str(&input.0);
                 buf.push_str(": ");
                 render_type(buf, crate_, &input.1);
             }
-            if function.decl.c_variadic {
+            if function.sig.is_c_variadic {
                 separator.insert(buf);
                 buf.push_str("..");
             }
             buf.push(')');
-            if let Some(output) = &function.decl.output {
+            if let Some(output) = &function.sig.output {
                 buf.push_str(" -> ");
                 render_type(buf, crate_, output);
             }
         }
+
+        Type::Pat { .. } => unreachable!(),
     }
 }
 

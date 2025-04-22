@@ -286,14 +286,15 @@ impl Visitor for StatsCollector {
         crate_: &rustdoc_types::Crate,
         item: &rustdoc_types::Item,
         constant: &rustdoc_types::Constant,
+        type_: &rustdoc_types::Type,
     ) {
-        let mut type_ = String::new();
-        render_type(&mut type_, crate_, &constant.type_);
+        let mut rendered_type = String::new();
+        render_type(&mut rendered_type, crate_, type_);
 
         self.items.push(Item {
             common: self.gather_common(item),
             kind: ItemKind::Const,
-            type_,
+            type_: rendered_type,
             value: constant.expr.clone(),
         });
     }

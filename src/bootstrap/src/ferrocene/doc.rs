@@ -12,8 +12,8 @@ use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
+use crate::t;
 use crate::utils::exec::BootstrapCommand;
-use crate::{FileType, t};
 
 pub(crate) trait IsSphinxBook {
     const SOURCE: &'static str;

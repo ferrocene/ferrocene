@@ -297,10 +297,10 @@ mod tests {
     #[test]
     fn test_check_binary_wrong_host() {
         test_wrong_version_data(
-            CliVersionContent { host: "bad-target-triple", ..CliVersionContent::default() },
+            CliVersionContent { host: "bad-target-tuple", ..CliVersionContent::default() },
             "host",
             CliVersionContent::default().host,
-            "bad-target-triple",
+            "bad-target-tuple",
         );
     }
 

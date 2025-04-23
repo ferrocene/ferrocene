@@ -29,7 +29,6 @@ Options:
         --emit [asm|llvm-bc|llvm-ir|obj|metadata|link|dep-info|mir]
                         Comma separated list of types of output for the
                         compiler to emit
-                        Compiler information to print on stdout
     -g                  Equivalent to -C debuginfo=2
     -o FILENAME         Write output to <filename>
         --out-dir DIR   Write output to compiler-chosen filename in <dir>

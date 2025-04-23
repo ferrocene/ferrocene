@@ -1,7 +1,7 @@
 use rustdoc_types::{
-    Constant, Crate, Enum, Function, GenericBound, Generics, Impl, Import, Item, ItemEnum, Module,
-    Primitive, Static, Struct, StructKind, Trait, TraitAlias, Type, Typedef, Union, Variant,
-    VariantKind, OpaqueTy, ProcMacro,
+    Constant, Crate, Enum, Function, GenericBound, Generics, Impl, Item, ItemEnum, Module,
+    Primitive, ProcMacro, Static, Struct, StructKind, Trait, TraitAlias, Type, TypeAlias, Union,
+    Use, Variant, VariantKind,
 };
 
 pub(crate) trait Visitor {
@@ -19,7 +19,7 @@ pub(crate) trait Visitor {
         self.walk_module(crate_, item, module);
     }
 
-    fn visit_import(&mut self, crate_: &Crate, item: &Item, import: &Import) {
+    fn visit_import(&mut self, crate_: &Crate, item: &Item, import: &Use) {
         self.walk_import(crate_, item, import);
     }
 
@@ -52,14 +52,20 @@ pub(crate) trait Visitor {
     }
 
     fn visit_macro(&mut self, _crate_: &Crate, _item: &Item, _macro_: &str) {}
-    fn visit_constant(&mut self, _crate_: &Crate, _item: &Item, _constant: &Constant) {}
+    fn visit_constant(
+        &mut self,
+        _crate_: &Crate,
+        _item: &Item,
+        _constant: &Constant,
+        _type: &Type,
+    ) {
+    }
     fn visit_function(&mut self, _crate_: &Crate, _item: &Item, _function: &Function) {}
     fn visit_struct_field(&mut self, _crate_: &Crate, _item: &Item, _field: &Type) {}
-    fn visit_typedef(&mut self, _crate_: &Crate, _item: &Item, _typedef: &Typedef) {}
+    fn visit_typedef(&mut self, _crate_: &Crate, _item: &Item, _typedef: &TypeAlias) {}
     fn visit_foreign_type(&mut self, _crate_: &Crate, _item: &Item) {}
     fn visit_trait_alias(&mut self, _crate_: &Crate, _item: &Item, _alias: &TraitAlias) {}
     fn visit_static(&mut self, _crate_: &Crate, _item: &Item, _static_: &Static) {}
-    fn visit_opaque_type(&mut self, _crate_: &Crate, _item: &Item, _opaque: &OpaqueTy) {}
     fn visit_proc_macro(&mut self, _crate_: &Crate, _item: &Item, _proc_macro: &ProcMacro) {}
 
     fn visit_extern_crate(
@@ -102,7 +108,7 @@ pub(crate) trait Visitor {
         }
     }
 
-    fn walk_import(&mut self, crate_: &Crate, _item: &Item, import: &Import) {
+    fn walk_import(&mut self, crate_: &Crate, _item: &Item, import: &Use) {
         if let Some(id) = &import.id {
             self.visit_item(crate_, crate_.index.get(id).unwrap());
         }
@@ -115,10 +121,8 @@ pub(crate) trait Visitor {
         match &struct_.kind {
             StructKind::Unit => {}
             StructKind::Tuple(items) => {
-                for item in items {
-                    if let Some(id) = item {
-                        self.visit_item(crate_, crate_.index.get(id).unwrap());
-                    }
+                for id in items.iter().flatten() {
+                    self.visit_item(crate_, crate_.index.get(id).unwrap());
                 }
             }
             StructKind::Plain { fields, .. } => {
@@ -148,10 +152,8 @@ pub(crate) trait Visitor {
         match &variant.kind {
             VariantKind::Plain => {}
             VariantKind::Tuple(items) => {
-                for item in items {
-                    if let Some(id) = item {
-                        self.visit_item(crate_, crate_.index.get(id).unwrap());
-                    }
+                for id in items.iter().flatten() {
+                    self.visit_item(crate_, crate_.index.get(id).unwrap());
                 }
             }
             VariantKind::Struct { fields, .. } => {
@@ -192,7 +194,7 @@ pub(crate) trait Visitor {
             ItemEnum::ExternCrate { name, rename } => {
                 self.visit_extern_crate(crate_, item, name, rename)
             }
-            ItemEnum::Import(import) => self.visit_import(crate_, item, import),
+            ItemEnum::Use(use_) => self.visit_import(crate_, item, use_),
             ItemEnum::Union(union_) => self.visit_union(crate_, item, union_),
             ItemEnum::Struct(struct_) => self.visit_struct(crate_, item, struct_),
             ItemEnum::StructField(field) => self.visit_struct_field(crate_, item, field),
@@ -202,22 +204,23 @@ pub(crate) trait Visitor {
             ItemEnum::Trait(trait_) => self.visit_trait(crate_, item, trait_),
             ItemEnum::TraitAlias(alias) => self.visit_trait_alias(crate_, item, alias),
             ItemEnum::Impl(impl_) => self.visit_impl(crate_, item, impl_),
-            ItemEnum::Typedef(typedef) => self.visit_typedef(crate_, item, typedef),
-            ItemEnum::OpaqueTy(opaque) => self.visit_opaque_type(crate_, item, opaque),
-            ItemEnum::Constant(constant) => self.visit_constant(crate_, item, constant),
+            ItemEnum::TypeAlias(type_alias) => self.visit_typedef(crate_, item, type_alias),
+            ItemEnum::Constant { type_, const_ } => {
+                self.visit_constant(crate_, item, const_, type_)
+            }
             ItemEnum::Static(static_) => self.visit_static(crate_, item, static_),
-            ItemEnum::ForeignType => self.visit_foreign_type(crate_, item),
+            ItemEnum::ExternType => self.visit_foreign_type(crate_, item),
             ItemEnum::Macro(macro_) => self.visit_macro(crate_, item, macro_),
             ItemEnum::ProcMacro(proc_macro) => self.visit_proc_macro(crate_, item, proc_macro),
             ItemEnum::Primitive(primitive) => self.visit_primitive(crate_, item, primitive),
-            ItemEnum::AssocConst { type_, default } => {
-                self.visit_associated_const(crate_, item, type_, default)
+            ItemEnum::AssocConst { type_, value } => {
+                self.visit_associated_const(crate_, item, type_, value)
             }
             ItemEnum::AssocType {
                 generics,
                 bounds,
-                default,
-            } => self.visit_associated_type(crate_, item, generics, bounds, default),
+                type_,
+            } => self.visit_associated_type(crate_, item, generics, bounds, type_),
         }
     }
 }

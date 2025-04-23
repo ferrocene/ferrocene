@@ -1,30 +1,37 @@
 use anyhow::Error;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use tokei::{Languages, Config, LanguageType};
+use tokei::{Config, LanguageType, Languages};
 
 const REMOVE_SYMBOLS: &[char] = &[',', ';', '}', ']', ')'];
 
+/// Lines of code
+#[allow(clippy::upper_case_acronyms)]
 pub(crate) struct LOC {
     base: PathBuf,
     files: HashMap<PathBuf, CachedFile>,
 }
 
 impl LOC {
-    pub(crate) fn new(base: &Path) -> Self {
+    pub(crate) fn new(base: &str) -> Self {
         Self {
             base: base.into(),
             files: HashMap::new(),
         }
     }
 
-    pub(crate) fn stats_for(&mut self, path: &Path, begin: usize, end: usize) -> Result<usize, Error> {
+    pub(crate) fn stats_for(
+        &mut self,
+        path: &Path,
+        begin: usize,
+        end: usize,
+    ) -> Result<usize, Error> {
         if !self.files.contains_key(path) {
             self.load_file(path)?;
         }
 
         let file = &self.files[path];
-        let contents = &file.contents[(file.line_ranges[begin - 1].0..file.line_ranges[end - 1].1)];
+        let contents = &file.contents[file.line_ranges[begin - 1].0..file.line_ranges[end - 1].1];
 
         // tokei unfortunately doesn't have an API accepting a string, only works by providing a
         // real file to it. We thus need to create a temporary file just for this :/
@@ -34,12 +41,17 @@ impl LOC {
         // Note that the statistics by tokei here will be different than the statistics of tokei in
         // the CLI, since we do some pre-processing to remove the symbols in REMOVE_SYMBOLS before
         // passing the contents to tokei.
-        let mut config = Config::default();
-        config.treat_doc_strings_as_comments = Some(true);
+        let config = Config {
+            treat_doc_strings_as_comments: Some(true),
+            ..Default::default()
+        };
         let mut languages = Languages::new();
         languages.get_statistics(&[temp.path()], &[], &config);
 
-        Ok(languages.get(&LanguageType::Rust).map(|lang| lang.code).unwrap_or(0))
+        Ok(languages
+            .get(&LanguageType::Rust)
+            .map(|lang| lang.code)
+            .unwrap_or(0))
     }
 
     fn load_file(&mut self, path: &Path) -> Result<(), Error> {

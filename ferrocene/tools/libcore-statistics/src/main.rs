@@ -16,13 +16,13 @@ use std::path::{Path, PathBuf};
 fn main() -> Result<(), Error> {
     let args = std::env::args().collect::<Vec<_>>();
     let [_, path, out_dir, source_dir] = args.as_slice() else {
-        eprintln!("two arguments required: path to json, output directory, and source directory");
+        eprintln!("three arguments required: path to json, output directory, and source directory");
         std::process::exit(1);
     };
 
-    let loc = LOC::new(Path::new(source_dir));
+    let loc = LOC::new(source_dir);
 
-    let contents = std::fs::read(&path)?;
+    let contents = std::fs::read(path)?;
     let root: Crate = serde_json::from_slice(&contents)?;
 
     let mut collector = StatsCollector::new(loc);
@@ -187,6 +187,8 @@ fn main() -> Result<(), Error> {
     Ok(())
 }
 
+/// Tab-separated values
+#[allow(clippy::upper_case_acronyms)]
 struct TSV<const N: usize> {
     writer: BufWriter<File>,
 }

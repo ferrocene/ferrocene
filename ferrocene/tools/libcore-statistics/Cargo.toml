@@ -6,9 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.68"
-rustdoc-types = "0.20.0"
-serde_json = "1.0.91"
-syn = { version = "1.0.107", default-features = false, features = ["derive", "parsing"] }
-tempfile = "3.3.0"
-tokei = "12.1.2"
+anyhow = "1"
+rustdoc-types = "0.39"
+serde_json = "1"
+syn = { version = "2", default-features = false, features = ["derive", "parsing"] }
+tempfile = "3"
+tokei = "12"

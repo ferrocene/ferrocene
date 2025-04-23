@@ -2959,21 +2959,27 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
             }
         }
 
-        let mut err = self.path_does_not_live_long_enough(borrow_span, &format!("`{name}`"));
+        let name = if borrow_span.in_external_macro(self.infcx.tcx.sess.source_map()) {
+            // Don't name local variables in external macros.
+            "value".to_string()
+        } else {
+            format!("`{name}`")
+        };
+
+        let mut err = self.path_does_not_live_long_enough(borrow_span, &name);
 
         if let Some(annotation) = self.annotate_argument_and_return_for_borrow(borrow) {
             let region_name = annotation.emit(self, &mut err);
 
             err.span_label(
                 borrow_span,
-                format!("`{name}` would have to be valid for `{region_name}`..."),
+                format!("{name} would have to be valid for `{region_name}`..."),
             );
 
             err.span_label(
                 drop_span,
                 format!(
-                    "...but `{}` will be dropped here, when the {} returns",
-                    name,
+                    "...but {name} will be dropped here, when the {} returns",
                     self.infcx
                         .tcx
                         .opt_item_name(self.mir_def_id().to_def_id())
@@ -3011,7 +3017,7 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
             }
         } else {
             err.span_label(borrow_span, "borrowed value does not live long enough");
-            err.span_label(drop_span, format!("`{name}` dropped here while still borrowed"));
+            err.span_label(drop_span, format!("{name} dropped here while still borrowed"));
 
             borrow_spans.args_subdiag(&mut err, |args_span| {
                 crate::session_diagnostics::CaptureArgLabel::Capture {
@@ -3376,10 +3382,15 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
 
         let (sugg_span, suggestion) = match tcx.sess.source_map().span_to_snippet(args_span) {
             Ok(string) => {
-                let coro_prefix = if string.starts_with("async") {
-                    // `async` is 5 chars long. Not using `.len()` to avoid the cast from `usize`
-                    // to `u32`.
-                    Some(5)
+                let coro_prefix = if let Some(sub) = string.strip_prefix("async") {
+                    let trimmed_sub = sub.trim_end();
+                    if trimmed_sub.ends_with("gen") {
+                        // `async` is 5 chars long.
+                        Some((trimmed_sub.len() + 5) as _)
+                    } else {
+                        // `async` is 5 chars long.
+                        Some(5)
+                    }
                 } else if string.starts_with("gen") {
                     // `gen` is 3 chars long
                     Some(3)

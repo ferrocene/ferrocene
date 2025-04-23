@@ -117,7 +117,14 @@ pub(crate) fn clean_doc_module<'tcx>(doc: &DocModule<'tcx>, cx: &mut DocContext<
             hir::ItemKind::Use(path, kind) => {
                 let hir::UsePath { segments, span, .. } = *path;
                 let path = hir::Path { segments, res: *res, span };
-                clean_use_statement_inner(import, name, &path, kind, cx, &mut Default::default())
+                clean_use_statement_inner(
+                    import,
+                    Some(name),
+                    &path,
+                    kind,
+                    cx,
+                    &mut Default::default(),
+                )
             }
             _ => unreachable!(),
         }
@@ -125,8 +132,7 @@ pub(crate) fn clean_doc_module<'tcx>(doc: &DocModule<'tcx>, cx: &mut DocContext<
     items.extend(doc.items.values().flat_map(|(item, renamed, _)| {
         // Now we actually lower the imports, skipping everything else.
         if let hir::ItemKind::Use(path, hir::UseKind::Glob) = item.kind {
-            let name = renamed.unwrap_or(kw::Empty); // using kw::Empty is a bit of a hack
-            clean_use_statement(item, name, path, hir::UseKind::Glob, cx, &mut inserted)
+            clean_use_statement(item, *renamed, path, hir::UseKind::Glob, cx, &mut inserted)
         } else {
             // skip everything else
             Vec::new()
@@ -1046,7 +1052,7 @@ fn clean_fn_or_proc_macro<'tcx>(
     match macro_kind {
         Some(kind) => clean_proc_macro(item, name, kind, cx),
         None => {
-            let mut func = clean_function(cx, sig, generics, FunctionArgs::Body(body_id));
+            let mut func = clean_function(cx, sig, generics, ParamsSrc::Body(body_id));
             clean_fn_decl_legacy_const_generics(&mut func, attrs);
             FunctionItem(func)
         }
@@ -1065,17 +1071,12 @@ fn clean_fn_decl_legacy_const_generics(func: &mut Function, attrs: &[hir::Attrib
         for (pos, literal) in meta_item_list.iter().filter_map(|meta| meta.lit()).enumerate() {
             match literal.kind {
                 ast::LitKind::Int(a, _) => {
-                    let param = func.generics.params.remove(0);
-                    if let GenericParamDef {
-                        name,
-                        kind: GenericParamDefKind::Const { ty, .. },
-                        ..
-                    } = param
-                    {
-                        func.decl
-                            .inputs
-                            .values
-                            .insert(a.get() as _, Argument { name, type_: *ty, is_const: true });
+                    let GenericParamDef { name, kind, .. } = func.generics.params.remove(0);
+                    if let GenericParamDefKind::Const { ty, .. } = kind {
+                        func.decl.inputs.insert(
+                            a.get() as _,
+                            Parameter { name: Some(name), type_: *ty, is_const: true },
+                        );
                     } else {
                         panic!("unexpected non const in position {pos}");
                     }
@@ -1086,7 +1087,7 @@ fn clean_fn_decl_legacy_const_generics(func: &mut Function, attrs: &[hir::Attrib
     }
 }
 
-enum FunctionArgs<'tcx> {
+enum ParamsSrc<'tcx> {
     Body(hir::BodyId),
     Idents(&'tcx [Option<Ident>]),
 }
@@ -1095,86 +1096,62 @@ fn clean_function<'tcx>(
     cx: &mut DocContext<'tcx>,
     sig: &hir::FnSig<'tcx>,
     generics: &hir::Generics<'tcx>,
-    args: FunctionArgs<'tcx>,
+    params: ParamsSrc<'tcx>,
 ) -> Box<Function> {
     let (generics, decl) = enter_impl_trait(cx, |cx| {
-        // NOTE: generics must be cleaned before args
+        // NOTE: Generics must be cleaned before params.
         let generics = clean_generics(generics, cx);
-        let args = match args {
-            FunctionArgs::Body(body_id) => {
-                clean_args_from_types_and_body_id(cx, sig.decl.inputs, body_id)
-            }
-            FunctionArgs::Idents(idents) => {
-                clean_args_from_types_and_names(cx, sig.decl.inputs, idents)
-            }
+        let params = match params {
+            ParamsSrc::Body(body_id) => clean_params_via_body(cx, sig.decl.inputs, body_id),
+            // Let's not perpetuate anon params from Rust 2015; use `_` for them.
+            ParamsSrc::Idents(idents) => clean_params(cx, sig.decl.inputs, idents, |ident| {
+                Some(ident.map_or(kw::Underscore, |ident| ident.name))
+            }),
         };
-        let decl = clean_fn_decl_with_args(cx, sig.decl, Some(&sig.header), args);
+        let decl = clean_fn_decl_with_params(cx, sig.decl, Some(&sig.header), params);
         (generics, decl)
     });
     Box::new(Function { decl, generics })
 }
 
-fn clean_args_from_types_and_names<'tcx>(
+fn clean_params<'tcx>(
     cx: &mut DocContext<'tcx>,
     types: &[hir::Ty<'tcx>],
     idents: &[Option<Ident>],
-) -> Arguments {
-    fn nonempty_name(ident: &Option<Ident>) -> Option<Symbol> {
-        if let Some(ident) = ident
-            && ident.name != kw::Underscore
-        {
-            Some(ident.name)
-        } else {
-            None
-        }
-    }
-
-    // If at least one argument has a name, use `_` as the name of unnamed
-    // arguments. Otherwise omit argument names.
-    let default_name = if idents.iter().any(|ident| nonempty_name(ident).is_some()) {
-        kw::Underscore
-    } else {
-        kw::Empty
-    };
-
-    Arguments {
-        values: types
-            .iter()
-            .enumerate()
-            .map(|(i, ty)| Argument {
-                type_: clean_ty(ty, cx),
-                name: idents.get(i).and_then(nonempty_name).unwrap_or(default_name),
-                is_const: false,
-            })
-            .collect(),
-    }
+    postprocess: impl Fn(Option<Ident>) -> Option<Symbol>,
+) -> Vec<Parameter> {
+    types
+        .iter()
+        .enumerate()
+        .map(|(i, ty)| Parameter {
+            name: postprocess(idents[i]),
+            type_: clean_ty(ty, cx),
+            is_const: false,
+        })
+        .collect()
 }
 
-fn clean_args_from_types_and_body_id<'tcx>(
+fn clean_params_via_body<'tcx>(
     cx: &mut DocContext<'tcx>,
     types: &[hir::Ty<'tcx>],
     body_id: hir::BodyId,
-) -> Arguments {
-    let body = cx.tcx.hir_body(body_id);
-
-    Arguments {
-        values: types
-            .iter()
-            .zip(body.params)
-            .map(|(ty, param)| Argument {
-                name: name_from_pat(param.pat),
-                type_: clean_ty(ty, cx),
-                is_const: false,
-            })
-            .collect(),
-    }
+) -> Vec<Parameter> {
+    types
+        .iter()
+        .zip(cx.tcx.hir_body(body_id).params)
+        .map(|(ty, param)| Parameter {
+            name: Some(name_from_pat(param.pat)),
+            type_: clean_ty(ty, cx),
+            is_const: false,
+        })
+        .collect()
 }
 
-fn clean_fn_decl_with_args<'tcx>(
+fn clean_fn_decl_with_params<'tcx>(
     cx: &mut DocContext<'tcx>,
     decl: &hir::FnDecl<'tcx>,
     header: Option<&hir::FnHeader>,
-    args: Arguments,
+    params: Vec<Parameter>,
 ) -> FnDecl {
     let mut output = match decl.output {
         hir::FnRetTy::Return(typ) => clean_ty(typ, cx),
@@ -1185,7 +1162,7 @@ fn clean_fn_decl_with_args<'tcx>(
     {
         output = output.sugared_async_return_type();
     }
-    FnDecl { inputs: args, output, c_variadic: decl.c_variadic }
+    FnDecl { inputs: params, output, c_variadic: decl.c_variadic }
 }
 
 fn clean_poly_fn_sig<'tcx>(
@@ -1193,10 +1170,6 @@ fn clean_poly_fn_sig<'tcx>(
     did: Option<DefId>,
     sig: ty::PolyFnSig<'tcx>,
 ) -> FnDecl {
-    let mut names = did.map_or(&[] as &[_], |did| cx.tcx.fn_arg_idents(did)).iter();
-
-    // We assume all empty tuples are default return type. This theoretically can discard `-> ()`,
-    // but shouldn't change any code meaning.
     let mut output = clean_middle_ty(sig.output(), cx, None, None);
 
     // If the return type isn't an `impl Trait`, we can safely assume that this
@@ -1209,25 +1182,25 @@ fn clean_poly_fn_sig<'tcx>(
         output = output.sugared_async_return_type();
     }
 
-    FnDecl {
-        output,
-        c_variadic: sig.skip_binder().c_variadic,
-        inputs: Arguments {
-            values: sig
-                .inputs()
-                .iter()
-                .map(|t| Argument {
-                    type_: clean_middle_ty(t.map_bound(|t| *t), cx, None, None),
-                    name: if let Some(Some(ident)) = names.next() {
-                        ident.name
-                    } else {
-                        kw::Underscore
-                    },
-                    is_const: false,
-                })
-                .collect(),
-        },
-    }
+    let mut idents = did.map(|did| cx.tcx.fn_arg_idents(did)).unwrap_or_default().iter().copied();
+
+    // If this comes from a fn item, let's not perpetuate anon params from Rust 2015; use `_` for them.
+    // If this comes from a fn ptr ty, we just keep params unnamed since it's more conventional stylistically.
+    // Since the param name is not part of the semantic type, these params never bear a name unlike
+    // in the HIR case, thus we can't peform any fancy fallback logic unlike `clean_bare_fn_ty`.
+    let fallback = did.map(|_| kw::Underscore);
+
+    let params = sig
+        .inputs()
+        .iter()
+        .map(|ty| Parameter {
+            name: idents.next().flatten().map(|ident| ident.name).or(fallback),
+            type_: clean_middle_ty(ty.map_bound(|ty| *ty), cx, None, None),
+            is_const: false,
+        })
+        .collect();
+
+    FnDecl { inputs: params, output, c_variadic: sig.skip_binder().c_variadic }
 }
 
 fn clean_trait_ref<'tcx>(trait_ref: &hir::TraitRef<'tcx>, cx: &mut DocContext<'tcx>) -> Path {
@@ -1267,11 +1240,11 @@ fn clean_trait_item<'tcx>(trait_item: &hir::TraitItem<'tcx>, cx: &mut DocContext
                 RequiredAssocConstItem(generics, Box::new(clean_ty(ty, cx)))
             }
             hir::TraitItemKind::Fn(ref sig, hir::TraitFn::Provided(body)) => {
-                let m = clean_function(cx, sig, trait_item.generics, FunctionArgs::Body(body));
+                let m = clean_function(cx, sig, trait_item.generics, ParamsSrc::Body(body));
                 MethodItem(m, None)
             }
             hir::TraitItemKind::Fn(ref sig, hir::TraitFn::Required(idents)) => {
-                let m = clean_function(cx, sig, trait_item.generics, FunctionArgs::Idents(idents));
+                let m = clean_function(cx, sig, trait_item.generics, ParamsSrc::Idents(idents));
                 RequiredMethodItem(m)
             }
             hir::TraitItemKind::Type(bounds, Some(default)) => {
@@ -1312,7 +1285,7 @@ pub(crate) fn clean_impl_item<'tcx>(
                 type_: clean_ty(ty, cx),
             })),
             hir::ImplItemKind::Fn(ref sig, body) => {
-                let m = clean_function(cx, sig, impl_.generics, FunctionArgs::Body(body));
+                let m = clean_function(cx, sig, impl_.generics, ParamsSrc::Body(body));
                 let defaultness = cx.tcx.defaultness(impl_.owner_id);
                 MethodItem(m, Some(defaultness))
             }
@@ -1384,14 +1357,14 @@ pub(crate) fn clean_middle_assoc_item(assoc_item: &ty::AssocItem, cx: &mut DocCo
                     }
                     ty::AssocItemContainer::Trait => tcx.types.self_param,
                 };
-                let self_arg_ty =
+                let self_param_ty =
                     tcx.fn_sig(assoc_item.def_id).instantiate_identity().input(0).skip_binder();
-                if self_arg_ty == self_ty {
-                    item.decl.inputs.values[0].type_ = SelfTy;
-                } else if let ty::Ref(_, ty, _) = *self_arg_ty.kind()
+                if self_param_ty == self_ty {
+                    item.decl.inputs[0].type_ = SelfTy;
+                } else if let ty::Ref(_, ty, _) = *self_param_ty.kind()
                     && ty == self_ty
                 {
-                    match item.decl.inputs.values[0].type_ {
+                    match item.decl.inputs[0].type_ {
                         BorrowedRef { ref mut type_, .. } => **type_ = SelfTy,
                         _ => unreachable!(),
                     }
@@ -2605,15 +2578,25 @@ fn clean_bare_fn_ty<'tcx>(
     cx: &mut DocContext<'tcx>,
 ) -> BareFunctionDecl {
     let (generic_params, decl) = enter_impl_trait(cx, |cx| {
-        // NOTE: generics must be cleaned before args
+        // NOTE: Generics must be cleaned before params.
         let generic_params = bare_fn
             .generic_params
             .iter()
             .filter(|p| !is_elided_lifetime(p))
             .map(|x| clean_generic_param(cx, None, x))
             .collect();
-        let args = clean_args_from_types_and_names(cx, bare_fn.decl.inputs, bare_fn.param_idents);
-        let decl = clean_fn_decl_with_args(cx, bare_fn.decl, None, args);
+        // Since it's more conventional stylistically, elide the name of all params called `_`
+        // unless there's at least one interestingly named param in which case don't elide any
+        // name since mixing named and unnamed params is less legible.
+        let filter = |ident: Option<Ident>| {
+            ident.map(|ident| ident.name).filter(|&ident| ident != kw::Underscore)
+        };
+        let fallback =
+            bare_fn.param_idents.iter().copied().find_map(filter).map(|_| kw::Underscore);
+        let params = clean_params(cx, bare_fn.decl.inputs, bare_fn.param_idents, |ident| {
+            filter(ident).or(fallback)
+        });
+        let decl = clean_fn_decl_with_params(cx, bare_fn.decl, None, params);
         (generic_params, decl)
     });
     BareFunctionDecl { safety: bare_fn.safety, abi: bare_fn.abi, decl, generic_params }
@@ -2623,7 +2606,6 @@ fn clean_unsafe_binder_ty<'tcx>(
     unsafe_binder_ty: &hir::UnsafeBinderTy<'tcx>,
     cx: &mut DocContext<'tcx>,
 ) -> UnsafeBinderTy {
-    // NOTE: generics must be cleaned before args
     let generic_params = unsafe_binder_ty
         .generic_params
         .iter()
@@ -2791,13 +2773,35 @@ fn clean_maybe_renamed_item<'tcx>(
 ) -> Vec<Item> {
     use hir::ItemKind;
 
-    let def_id = item.owner_id.to_def_id();
-    let mut name = renamed.unwrap_or_else(|| {
-        // FIXME: using kw::Empty is a bit of a hack
-        cx.tcx.hir_opt_name(item.hir_id()).unwrap_or(kw::Empty)
-    });
+    fn get_name(
+        cx: &DocContext<'_>,
+        item: &hir::Item<'_>,
+        renamed: Option<Symbol>,
+    ) -> Option<Symbol> {
+        renamed.or_else(|| cx.tcx.hir_opt_name(item.hir_id()))
+    }
 
+    let def_id = item.owner_id.to_def_id();
     cx.with_param_env(def_id, |cx| {
+        // These kinds of item either don't need a `name` or accept a `None` one so we handle them
+        // before.
+        match item.kind {
+            ItemKind::Impl(impl_) => return clean_impl(impl_, item.owner_id.def_id, cx),
+            ItemKind::Use(path, kind) => {
+                return clean_use_statement(
+                    item,
+                    get_name(cx, item, renamed),
+                    path,
+                    kind,
+                    cx,
+                    &mut FxHashSet::default(),
+                );
+            }
+            _ => {}
+        }
+
+        let mut name = get_name(cx, item, renamed).unwrap();
+
         let kind = match item.kind {
             ItemKind::Static(_, ty, mutability, body_id) => StaticItem(Static {
                 type_: Box::new(clean_ty(ty, cx)),
@@ -2859,7 +2863,6 @@ fn clean_maybe_renamed_item<'tcx>(
                 generics: clean_generics(generics, cx),
                 fields: variant_data.fields().iter().map(|x| clean_field(x, cx)).collect(),
             }),
-            ItemKind::Impl(impl_) => return clean_impl(impl_, item.owner_id.def_id, cx),
             ItemKind::Macro(_, macro_def, MacroKind::Bang) => MacroItem(Macro {
                 source: display_macro_source(cx, name, macro_def),
                 macro_rules: macro_def.macro_rules,
@@ -2884,9 +2887,6 @@ fn clean_maybe_renamed_item<'tcx>(
             }
             ItemKind::ExternCrate(orig_name, _) => {
                 return clean_extern_crate(item, name, orig_name, cx);
-            }
-            ItemKind::Use(path, kind) => {
-                return clean_use_statement(item, name, path, kind, cx, &mut FxHashSet::default());
             }
             _ => span_bug!(item.span, "not yet converted"),
         };
@@ -3006,7 +3006,7 @@ fn clean_extern_crate<'tcx>(
 
 fn clean_use_statement<'tcx>(
     import: &hir::Item<'tcx>,
-    name: Symbol,
+    name: Option<Symbol>,
     path: &hir::UsePath<'tcx>,
     kind: hir::UseKind,
     cx: &mut DocContext<'tcx>,
@@ -3023,7 +3023,7 @@ fn clean_use_statement<'tcx>(
 
 fn clean_use_statement_inner<'tcx>(
     import: &hir::Item<'tcx>,
-    name: Symbol,
+    name: Option<Symbol>,
     path: &hir::Path<'tcx>,
     kind: hir::UseKind,
     cx: &mut DocContext<'tcx>,
@@ -3042,7 +3042,7 @@ fn clean_use_statement_inner<'tcx>(
     let visibility = cx.tcx.visibility(import.owner_id);
     let attrs = cx.tcx.hir_attrs(import.hir_id());
     let inline_attr = hir_attr_lists(attrs, sym::doc).get_word_attr(sym::inline);
-    let pub_underscore = visibility.is_public() && name == kw::Underscore;
+    let pub_underscore = visibility.is_public() && name == Some(kw::Underscore);
     let current_mod = cx.tcx.parent_module_from_def_id(import.owner_id.def_id);
     let import_def_id = import.owner_id.def_id;
 
@@ -3108,6 +3108,7 @@ fn clean_use_statement_inner<'tcx>(
         }
         Import::new_glob(resolve_use_source(cx, path), true)
     } else {
+        let name = name.unwrap();
         if inline_attr.is_none()
             && let Res::Def(DefKind::Mod, did) = path.res
             && !did.is_local()
@@ -3149,7 +3150,7 @@ fn clean_maybe_renamed_foreign_item<'tcx>(
     cx.with_param_env(def_id, |cx| {
         let kind = match item.kind {
             hir::ForeignItemKind::Fn(sig, idents, generics) => ForeignFunctionItem(
-                clean_function(cx, &sig, generics, FunctionArgs::Idents(idents)),
+                clean_function(cx, &sig, generics, ParamsSrc::Idents(idents)),
                 sig.header.safety(),
             ),
             hir::ForeignItemKind::Static(ty, mutability, safety) => ForeignStaticItem(

@@ -9,6 +9,7 @@ use std::process::{Child, Command, ExitStatus, Output, Stdio};
 use std::sync::Arc;
 use std::{env, iter, str};
 
+use build_helper::fs::remove_and_create_dir_all;
 use camino::{Utf8Path, Utf8PathBuf};
 use colored::Colorize;
 use regex::{Captures, Regex};
@@ -205,12 +206,6 @@ pub fn compute_stamp_hash(config: &Config) -> String {
     }
 
     format!("{:x}", hash.finish())
-}
-
-fn remove_and_create_dir_all(path: &Utf8Path) {
-    let path = path.as_std_path();
-    let _ = fs::remove_dir_all(path);
-    fs::create_dir_all(path).unwrap();
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -523,7 +518,9 @@ impl<'test> TestCx<'test> {
         let mut rustc = Command::new(&self.config.rustc_path);
 
         let out_dir = self.output_base_name().with_extension("pretty-out");
-        remove_and_create_dir_all(&out_dir);
+        remove_and_create_dir_all(&out_dir).unwrap_or_else(|e| {
+            panic!("failed to remove and recreate output directory `{out_dir}`: {e}")
+        });
 
         let target = if self.props.force_host { &*self.config.host } else { &*self.config.target };
 
@@ -1098,13 +1095,19 @@ impl<'test> TestCx<'test> {
         let aux_dir = self.aux_output_dir_name();
 
         if !self.props.aux.builds.is_empty() {
-            remove_and_create_dir_all(&aux_dir);
+            remove_and_create_dir_all(&aux_dir).unwrap_or_else(|e| {
+                panic!("failed to remove and recreate output directory `{aux_dir}`: {e}")
+            });
         }
 
         if !self.props.aux.bins.is_empty() {
             let aux_bin_dir = self.aux_bin_output_dir_name();
-            remove_and_create_dir_all(&aux_dir);
-            remove_and_create_dir_all(&aux_bin_dir);
+            remove_and_create_dir_all(&aux_dir).unwrap_or_else(|e| {
+                panic!("failed to remove and recreate output directory `{aux_dir}`: {e}")
+            });
+            remove_and_create_dir_all(&aux_bin_dir).unwrap_or_else(|e| {
+                panic!("failed to remove and recreate output directory `{aux_bin_dir}`: {e}")
+            });
         }
 
         aux_dir
@@ -1395,14 +1398,6 @@ impl<'test> TestCx<'test> {
         matches!(self.config.suite.as_str(), "rustdoc-ui" | "rustdoc-js" | "rustdoc-json")
     }
 
-    fn get_mir_dump_dir(&self) -> Utf8PathBuf {
-        let mut mir_dump_dir = self.config.build_test_suite_root.clone();
-        debug!("input_file: {}", self.testpaths.file);
-        mir_dump_dir.push(&self.testpaths.relative_dir);
-        mir_dump_dir.push(self.testpaths.file.file_stem().unwrap());
-        mir_dump_dir
-    }
-
     fn make_compile_args(
         &self,
         input_file: &Utf8Path,
@@ -1511,8 +1506,7 @@ impl<'test> TestCx<'test> {
         }
 
         let set_mir_dump_dir = |rustc: &mut Command| {
-            let mir_dump_dir = self.get_mir_dump_dir();
-            remove_and_create_dir_all(&mir_dump_dir);
+            let mir_dump_dir = self.output_base_dir();
             let mut dir_opt = "-Zdump-mir-dir=".to_string();
             dir_opt.push_str(mir_dump_dir.as_str());
             debug!("dir_opt: {:?}", dir_opt);
@@ -1972,7 +1966,9 @@ impl<'test> TestCx<'test> {
         let suffix =
             self.safe_revision().map_or("nightly".into(), |path| path.to_owned() + "-nightly");
         let compare_dir = output_base_dir(self.config, self.testpaths, Some(&suffix));
-        remove_and_create_dir_all(&compare_dir);
+        remove_and_create_dir_all(&compare_dir).unwrap_or_else(|e| {
+            panic!("failed to remove and recreate output directory `{compare_dir}`: {e}")
+        });
 
         // We need to create a new struct for the lifetimes on `config` to work.
         let new_rustdoc = TestCx {
@@ -2381,12 +2377,19 @@ impl<'test> TestCx<'test> {
         // eg.
         // /home/user/rust/build/x86_64-unknown-linux-gnu/test/ui/<test_dir>/$name.$revision.$mode/
         normalize_path(&self.output_base_dir(), "$TEST_BUILD_DIR");
+        // Same as above, but with a canonicalized path.
+        // This is required because some tests print canonical paths inside test build directory,
+        // so if the build directory is a symlink, normalization doesn't help.
+        //
+        // NOTE: There are also tests which print the non-canonical name, so we need both this and
+        // the above normalizations.
+        normalize_path(&self.output_base_dir().canonicalize_utf8().unwrap(), "$TEST_BUILD_DIR");
         // eg. /home/user/rust/build
         normalize_path(&self.config.build_root, "$BUILD_DIR");
 
         if json {
             // escaped newlines in json strings should be readable
-            // in the stderr files. There's no point int being correct,
+            // in the stderr files. There's no point in being correct,
             // since only humans process the stderr files.
             // Thus we just turn escaped newlines back into newlines.
             normalized = normalized.replace("\\n", "\n");

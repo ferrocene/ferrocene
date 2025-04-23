@@ -1326,7 +1326,7 @@ pub const fn unlikely(b: bool) -> bool {
 /// Therefore, implementations must not require the user to uphold
 /// any safety invariants.
 ///
-/// The public form of this instrinsic is [`bool::select_unpredictable`].
+/// The public form of this instrinsic is [`core::hint::select_unpredictable`].
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[rustc_nounwind]
@@ -2628,13 +2628,15 @@ pub const fn bswap<T: Copy>(x: T) -> T;
 #[rustc_intrinsic]
 pub const fn bitreverse<T: Copy>(x: T) -> T;
 
-/// Does a three-way comparison between the two integer arguments.
+/// Does a three-way comparison between the two arguments,
+/// which must be of character or integer (signed or unsigned) type.
 ///
-/// This is included as an intrinsic as it's useful to let it be one thing
-/// in MIR, rather than the multiple checks and switches that make its IR
-/// large and difficult to optimize.
+/// This was originally added because it greatly simplified the MIR in `cmp`
+/// implementations, and then LLVM 20 added a backend intrinsic for it too.
 ///
 /// The stabilized version of this intrinsic is [`Ord::cmp`].
+#[rustc_intrinsic_const_stable_indirect]
+#[rustc_nounwind]
 #[rustc_intrinsic]
 pub const fn three_way_compare<T: Copy>(lhs: T, rhss: T) -> crate::cmp::Ordering;
 
@@ -2735,6 +2737,7 @@ pub const fn carrying_mul_add<T: ~const fallback::CarryingMulAdd<Unsigned = U>, 
 /// `x % y != 0` or `y == 0` or `x == T::MIN && y == -1`
 ///
 /// This intrinsic does not have a stable counterpart.
+#[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
 pub const unsafe fn exact_div<T: Copy>(x: T, y: T) -> T;
@@ -3399,20 +3402,62 @@ pub const fn contract_checks() -> bool {
 ///
 /// By default, if `contract_checks` is enabled, this will panic with no unwind if the condition
 /// returns false.
-#[unstable(feature = "contracts_internals", issue = "128044" /* compiler-team#759 */)]
+///
+/// Note that this function is a no-op during constant evaluation.
+#[unstable(feature = "contracts_internals", issue = "128044")]
+// Calls to this function get inserted by an AST expansion pass, which uses the equivalent of
+// `#[allow_internal_unstable]` to allow using `contracts_internals` functions. Const-checking
+// doesn't honor `#[allow_internal_unstable]`, so for the const feature gate we use the user-facing
+// `contracts` feature rather than the perma-unstable `contracts_internals`
+#[rustc_const_unstable(feature = "contracts", issue = "128044")]
 #[lang = "contract_check_requires"]
 #[rustc_intrinsic]
-pub fn contract_check_requires<C: Fn() -> bool>(cond: C) {
-    if contract_checks() && !cond() {
-        // Emit no unwind panic in case this was a safety requirement.
-        crate::panicking::panic_nounwind("failed requires check");
-    }
+pub const fn contract_check_requires<C: Fn() -> bool + Copy>(cond: C) {
+    const_eval_select!(
+        @capture[C: Fn() -> bool + Copy] { cond: C } :
+        if const {
+                // Do nothing
+        } else {
+            if contract_checks() && !cond() {
+                // Emit no unwind panic in case this was a safety requirement.
+                crate::panicking::panic_nounwind("failed requires check");
+            }
+        }
+    )
 }
 
 /// Check if the post-condition `cond` has been met.
 ///
 /// By default, if `contract_checks` is enabled, this will panic with no unwind if the condition
 /// returns false.
+///
+/// Note that this function is a no-op during constant evaluation.
+#[cfg(not(bootstrap))]
+#[unstable(feature = "contracts_internals", issue = "128044")]
+// Similar to `contract_check_requires`, we need to use the user-facing
+// `contracts` feature rather than the perma-unstable `contracts_internals`.
+// Const-checking doesn't honor allow_internal_unstable logic used by contract expansion.
+#[rustc_const_unstable(feature = "contracts", issue = "128044")]
+#[lang = "contract_check_ensures"]
+#[rustc_intrinsic]
+pub const fn contract_check_ensures<C: Fn(&Ret) -> bool + Copy, Ret>(cond: C, ret: Ret) -> Ret {
+    const_eval_select!(
+        @capture[C: Fn(&Ret) -> bool + Copy, Ret] { cond: C, ret: Ret } -> Ret :
+        if const {
+            // Do nothing
+            ret
+        } else {
+            if contract_checks() && !cond(&ret) {
+                // Emit no unwind panic in case this was a safety requirement.
+                crate::panicking::panic_nounwind("failed ensures check");
+            }
+            ret
+        }
+    )
+}
+
+/// This is the old version of contract_check_ensures kept here for bootstrap only.
+#[cfg(bootstrap)]
 #[unstable(feature = "contracts_internals", issue = "128044" /* compiler-team#759 */)]
 #[rustc_intrinsic]
 pub fn contract_check_ensures<'a, Ret, C: Fn(&'a Ret) -> bool>(ret: &'a Ret, cond: C) {

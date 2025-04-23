@@ -101,7 +101,6 @@
 #![feature(bstr)]
 #![feature(bstr_internals)]
 #![feature(cfg_match)]
-#![feature(closure_track_caller)]
 #![feature(const_carrying_mul_add)]
 #![feature(const_eval_select)]
 #![feature(core_intrinsics)]
@@ -127,6 +126,7 @@
 #![feature(ub_checks)]
 #![feature(unchecked_neg)]
 #![feature(unchecked_shifts)]
+#![feature(unsafe_pinned)]
 #![feature(utf16_extra)]
 #![feature(variant_count)]
 // tidy-alphabetical-end

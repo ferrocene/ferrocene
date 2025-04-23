@@ -1,7 +1,7 @@
 [package]
 name = "compiletest"
 version = "0.0.0"
-edition = "2021"
+edition = "2024"
 
 [lib]
 doctest = false
@@ -10,6 +10,7 @@ doctest = false
 # tidy-alphabetical-start
 anstyle-svg = "0.1.3"
 build_helper = { path = "../../build_helper" }
+camino = "1"
 colored = "2"
 diff = "0.1.10"
 getopts = "0.2"

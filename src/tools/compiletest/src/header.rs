@@ -200,14 +200,9 @@ pub struct TestProps {
     /// Build and use `minicore` as `core` stub for `no_core` tests in cross-compilation scenarios
     /// that don't otherwise want/need `-Z build-std`.
     pub add_core_stubs: bool,
-    /// Whether line annotatins are required for the given error kind.
-<<<<<<< HEAD
-    pub require_annotations: HashMap<ErrorKind, bool>,
     // Flag to execute the test within a temporary directory
     pub ferrocene_execute_in_temp: bool,
-=======
     pub dont_require_annotations: HashSet<ErrorKind>,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 mod directives {
@@ -315,18 +310,8 @@ impl TestProps {
             no_auto_check_cfg: false,
             has_enzyme: false,
             add_core_stubs: false,
-<<<<<<< HEAD
-            require_annotations: HashMap::from([
-                (ErrorKind::Help, true),
-                (ErrorKind::Note, true),
-                (ErrorKind::Error, true),
-                (ErrorKind::Warning, true),
-                (ErrorKind::Suggestion, false),
-            ]),
             ferrocene_execute_in_temp: false,
-=======
             dont_require_annotations: Default::default(),
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         }
     }
 

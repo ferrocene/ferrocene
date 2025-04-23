@@ -15,34 +15,18 @@
 //@[staticlib] compile-flags: --crate-type=staticlib
 //@[staticlib] check-pass
 
-<<<<<<< HEAD
-//@[dylib] ignore-musl (dylib is supported, but musl libc is statically linked by default)
-//@[dylib] ignore-wasm (dylib is not supported)
-//@[dylib] ignore-ferrocenecoretest (dylibs are not supported)
-//@[dylib] compile-flags: --crate-type=dylib
-//@[dylib] check-pass
-
-//@[cdylib] ignore-musl (cdylib is supported, but musl libc is statically linked by default)
-//@[cdylib] ignore-ferrocenecoretest (cdylibs are not supported)
-=======
 //@[dylib] needs-crate-type: dylib
 //@[dylib] compile-flags: --crate-type=dylib
 //@[dylib] check-pass
 
 //@[cdylib] needs-crate-type: cdylib
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 //@[cdylib] compile-flags: --crate-type=cdylib
 //@[cdylib] check-pass
 
 //@[bin] compile-flags: --crate-type=bin
 //@[bin] check-pass
 
-<<<<<<< HEAD
-//@[proc_dash_macro] ignore-wasm (proc-macro is not supported)
-//@[proc_dash_macro] ignore-ferrocenecoretest (proc-macro is not supported)
-=======
 //@[proc_dash_macro] needs-crate-type: proc-macro
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 //@[proc_dash_macro] needs-unwind (panic=abort causes warning to be emitted)
 //@[proc_dash_macro] compile-flags: --crate-type=proc-macro
 //@[proc_dash_macro] check-pass

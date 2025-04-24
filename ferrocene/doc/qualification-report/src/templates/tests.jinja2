@@ -36,6 +36,12 @@ As a result, the {{ suite }} test suite reports a **pass** for this
 qualification.
 {% endmacro %}
 
+{% macro render_variant(variant) -%}
+    {%- for key, value in variant.fields.items() -%}
+        {% if not loop.first %} , {% endif -%}{{ key }}: {{ value }}
+    {%- endfor -%}
+{%- endmacro %}
+
 {% macro cargo_tests_summary(bootstrap_type, only_match_root_node=False) %}
 {% if platform_outcomes is none %}
 {{ no_outcomes_error() }}
@@ -46,6 +52,7 @@ qualification.
    :header-rows: 1
 
    * - Crate name
+     - :ref:`Variant <qualification-plan:test-variants>`
      - Passed tests
      - Ignored tests
      - Failed tests
@@ -58,6 +65,8 @@ qualification.
        {%- else -%}
            N/A
        {%- endif %}
+
+     - {{ render_variant(invocation.variant) }}
 
        .. rst-class:: align-right
      - {{ invocation.passed_tests }}
@@ -128,6 +137,7 @@ The following compiletest suites were executed as part of this test suite:
    :header-rows: 1
 
    * - Compiletest suite
+     - :ref:`Variant <qualification-plan:test-variants>`
      - Passed tests
      - Ignored tests
      - Failed tests
@@ -135,6 +145,8 @@ The following compiletest suites were executed as part of this test suite:
 
    {% for invocation in invocations %}
    * - ``{{ invocation.kind.suite }}`` {% if invocation.kind.mode is not none %} (mode: ``{{ invocation.kind.mode }}``){% endif %}
+
+     - {{ render_variant(invocation.variant) }}
 
        .. rst-class:: align-right
      - {{ invocation.passed_tests }}

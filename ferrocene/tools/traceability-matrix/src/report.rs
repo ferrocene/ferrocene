@@ -8,6 +8,7 @@ use askama::Template;
 
 use crate::annotations::{AnnotationSource, Annotations};
 use crate::matrix::{Element, ElementKind, LinkTest, Page, TraceabilityMatrix};
+use crate::test_outcomes::On;
 
 #[derive(Template)]
 #[template(path = "report.html")]
@@ -15,7 +16,7 @@ struct Report<'a> {
     considers_ignored_tests: bool,
     matrix: &'a TraceabilityMatrix,
     summary: Vec<SummaryRow<'a>>,
-    ignored_tests: BTreeMap<String, BTreeSet<String>>,
+    ignored_tests: BTreeMap<String, BTreeSet<On>>,
     urls: Urls,
 }
 

@@ -208,6 +208,11 @@ where
             }
         }
 
+        // We need to make sure to stall any coroutines we are inferring to avoid query cycles.
+        if let Some(cand) = ecx.try_stall_coroutine_witness(goal.predicate.self_ty()) {
+            return cand;
+        }
+
         ecx.probe_and_evaluate_goal_for_constituent_tys(
             CandidateSource::BuiltinImpl(BuiltinImplSource::Misc),
             goal,
@@ -257,6 +262,11 @@ where
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
             return Err(NoSolution);
+        }
+
+        // We need to make sure to stall any coroutines we are inferring to avoid query cycles.
+        if let Some(cand) = ecx.try_stall_coroutine_witness(goal.predicate.self_ty()) {
+            return cand;
         }
 
         ecx.probe_and_evaluate_goal_for_constituent_tys(
@@ -1298,18 +1308,6 @@ where
                     return true;
                 }
 
-                // We don't consider a trait-bound global if it has a projection bound.
-                //
-                // See ui/traits/next-solver/normalization-shadowing/global-trait-with-project.rs
-                // for an example where this is necessary.
-                for p in goal.param_env.caller_bounds().iter() {
-                    if let ty::ClauseKind::Projection(proj) = p.kind().skip_binder() {
-                        if proj.projection_term.trait_ref(self.cx()) == trait_pred.trait_ref {
-                            return true;
-                        }
-                    }
-                }
-
                 false
             }
             _ => false,
@@ -1367,5 +1365,29 @@ where
     ) -> Result<(CanonicalResponse<I>, Option<TraitGoalProvenVia>), NoSolution> {
         let candidates = self.assemble_and_evaluate_candidates(goal, AssembleCandidatesFrom::All);
         self.merge_trait_candidates(goal, candidates)
+    }
+
+    fn try_stall_coroutine_witness(
+        &mut self,
+        self_ty: I::Ty,
+    ) -> Option<Result<Candidate<I>, NoSolution>> {
+        if let ty::CoroutineWitness(def_id, _) = self_ty.kind() {
+            match self.typing_mode() {
+                TypingMode::Analysis {
+                    defining_opaque_types_and_generators: stalled_generators,
+                } => {
+                    if def_id.as_local().is_some_and(|def_id| stalled_generators.contains(&def_id))
+                    {
+                        return Some(self.forced_ambiguity(MaybeCause::Ambiguity));
+                    }
+                }
+                TypingMode::Coherence
+                | TypingMode::PostAnalysis
+                | TypingMode::Borrowck { defining_opaque_types: _ }
+                | TypingMode::PostBorrowckAnalysis { defined_opaque_types: _ } => {}
+            }
+        }
+
+        None
     }
 }

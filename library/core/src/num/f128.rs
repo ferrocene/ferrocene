@@ -145,6 +145,9 @@ impl f128 {
     pub const RADIX: u32 = 2;
 
     /// Number of significant digits in base 2.
+    ///
+    /// Note that the size of the mantissa in the bitwise representation is one
+    /// smaller than this since the leading 1 is not stored explicitly.
     #[unstable(feature = "f128", issue = "116909")]
     pub const MANTISSA_DIGITS: u32 = 113;
 
@@ -801,7 +804,7 @@ impl f128 {
         }
     }
 
-    /// Calculates the middle point of `self` and `rhs`.
+    /// Calculates the midpoint (average) between `self` and `rhs`.
     ///
     /// This returns NaN when *either* argument is NaN or if a combination of
     /// +inf and -inf is provided as arguments.
@@ -818,6 +821,7 @@ impl f128 {
     /// # }
     /// ```
     #[inline]
+    #[doc(alias = "average")]
     #[unstable(feature = "f128", issue = "116909")]
     #[rustc_const_unstable(feature = "f128", issue = "116909")]
     pub const fn midpoint(self, other: f128) -> f128 {

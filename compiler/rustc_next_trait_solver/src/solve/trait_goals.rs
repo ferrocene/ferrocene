@@ -13,7 +13,7 @@ use tracing::{instrument, trace};
 
 use crate::delegate::SolverDelegate;
 use crate::solve::assembly::structural_traits::{self, AsyncCallableRelevantTypes};
-use crate::solve::assembly::{self, Candidate};
+use crate::solve::assembly::{self, AssembleCandidatesFrom, Candidate};
 use crate::solve::inspect::ProbeKind;
 use crate::solve::{
     BuiltinImplSource, CandidateSource, Certainty, EvalCtxt, Goal, GoalSource, MaybeCause,
@@ -944,7 +944,7 @@ where
              target_projection: ty::Binder<I, ty::ExistentialProjection<I>>| {
                 source_projection.item_def_id() == target_projection.item_def_id()
                     && ecx
-                        .probe(|_| ProbeKind::UpcastProjectionCompatibility)
+                        .probe(|_| ProbeKind::ProjectionCompatibility)
                         .enter(|ecx| -> Result<_, NoSolution> {
                             ecx.enter_forall(target_projection, |ecx, target_projection| {
                                 let source_projection =
@@ -1365,7 +1365,7 @@ where
         &mut self,
         goal: Goal<I, TraitPredicate<I>>,
     ) -> Result<(CanonicalResponse<I>, Option<TraitGoalProvenVia>), NoSolution> {
-        let candidates = self.assemble_and_evaluate_candidates(goal);
+        let candidates = self.assemble_and_evaluate_candidates(goal, AssembleCandidatesFrom::All);
         self.merge_trait_candidates(goal, candidates)
     }
 }

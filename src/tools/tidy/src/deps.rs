@@ -158,15 +158,16 @@ const EXCEPTIONS_CARGO: ExceptionList = &[
     ("fiat-crypto", "MIT OR Apache-2.0 OR BSD-1-Clause"),
     ("foldhash", "Zlib"),
     ("im-rc", "MPL-2.0+"),
+    ("libz-rs-sys", "Zlib"),
     ("normalize-line-endings", "Apache-2.0"),
     ("openssl", "Apache-2.0"),
     ("ryu", "Apache-2.0 OR BSL-1.0"), // BSL is not acceptble, but we use it under Apache-2.0
-    ("sha1_smol", "BSD-3-Clause"),
     ("similar", "Apache-2.0"),
     ("sized-chunks", "MPL-2.0+"),
     ("subtle", "BSD-3-Clause"),
     ("supports-hyperlinks", "Apache-2.0"),
     ("unicode-bom", "Apache-2.0"),
+    ("zlib-rs", "Zlib"),
     // tidy-alphabetical-end
 ];
 
@@ -286,7 +287,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "constant_time_eq",
     "cpufeatures",
     "crc32fast",
-    "crossbeam-channel",
     "crossbeam-deque",
     "crossbeam-epoch",
     "crossbeam-utils",
@@ -321,7 +321,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "gimli",
     "gsgdt",
     "hashbrown",
-    "hermit-abi",
     "icu_list",
     "icu_list_data",
     "icu_locid",
@@ -355,7 +354,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "miniz_oxide",
     "nix",
     "nu-ansi-term",
-    "num_cpus",
     "object",
     "odht",
     "once_cell",
@@ -711,8 +709,10 @@ pub static CRATES: &[&str] = &[
 pub fn has_missing_submodule(root: &Path, submodules: &[&str]) -> bool {
     !CiEnv::is_ci()
         && submodules.iter().any(|submodule| {
+            let path = root.join(submodule);
+            !path.exists()
             // If the directory is empty, we can consider it as an uninitialized submodule.
-            read_dir(root.join(submodule)).unwrap().next().is_none()
+            || read_dir(path).unwrap().next().is_none()
         })
 }
 

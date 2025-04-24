@@ -443,6 +443,7 @@ pub static BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
     ungated!(unsafe(Edition2024) no_mangle, Normal, template!(Word), WarnFollowing, EncodeCrossCrate::No),
     ungated!(used, Normal, template!(Word, List: "compiler|linker"), WarnFollowing, EncodeCrossCrate::No),
     ungated!(link_ordinal, Normal, template!(List: "ordinal"), ErrorPreceding, EncodeCrossCrate::Yes),
+    ungated!(unsafe naked, Normal, template!(Word), WarnFollowing, EncodeCrossCrate::No),
 
     // Limits:
     ungated!(
@@ -514,12 +515,6 @@ pub static BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
     // ==========================================================================
     // Unstable attributes:
     // ==========================================================================
-
-    // Linking:
-    gated!(
-        naked, Normal, template!(Word), WarnFollowing, EncodeCrossCrate::No,
-        naked_functions, experimental!(naked)
-    ),
 
     // Testing:
     gated!(
@@ -676,14 +671,6 @@ pub static BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
         "`rustc_never_type_options` is used to experiment with never type fallback and work on \
          never type stabilization, and will never be stable"
     ),
-    rustc_attr!(
-        rustc_macro_edition_2021,
-        Normal,
-        template!(Word),
-        ErrorFollowing,
-        EncodeCrossCrate::No,
-        "makes spans in this macro edition 2021"
-    ),
 
     // ==========================================================================
     // Internal attributes: Runtime related:
@@ -767,7 +754,7 @@ pub static BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
     ),
     rustc_attr!(
         rustc_macro_transparency, Normal,
-        template!(NameValueStr: "transparent|semitransparent|opaque"), ErrorFollowing,
+        template!(NameValueStr: "transparent|semiopaque|opaque"), ErrorFollowing,
         EncodeCrossCrate::Yes, "used internally for testing macro hygiene",
     ),
     rustc_attr!(

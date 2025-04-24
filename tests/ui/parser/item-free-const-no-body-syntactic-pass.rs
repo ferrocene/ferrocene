@@ -4,7 +4,7 @@
 
 fn main() {}
 
-#[cfg(FALSE)]
+#[cfg(false)]
 const X: u8;
 
 // ferrocene-annotations: fls_ixjc5jaamx84

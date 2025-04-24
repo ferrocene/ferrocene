@@ -425,7 +425,9 @@ pub struct Config {
 
     pub is_running_on_ci: bool,
 
-<<<<<<< HEAD
+    /// Cache for determining path modifications
+    pub path_modification_cache: Arc<Mutex<HashMap<Vec<&'static str>, PathFreshness>>>,
+
     // Ferrocene-specific configuration
     pub ferrocene_raw_channel: String,
     pub ferrocene_aws_profile: Option<String>,
@@ -486,10 +488,6 @@ pub enum FerroceneSecretSauce {
     #[default]
     Download,
     Local(PathBuf),
-=======
-    /// Cache for determining path modifications
-    pub path_modification_cache: Arc<Mutex<HashMap<Vec<&'static str>, PathFreshness>>>,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 #[derive(Clone, Debug, Default)]

@@ -843,7 +843,8 @@ trait Merge {
 impl Merge for TomlConfig {
     fn merge(
         &mut self,
-<<<<<<< HEAD
+        parent_config_path: Option<PathBuf>,
+        included_extensions: &mut HashSet<PathBuf>,
         TomlConfig {
             build,
             install,
@@ -855,12 +856,8 @@ impl Merge for TomlConfig {
             ferrocene,
             profile,
             change_id,
+            include,
         }: Self,
-=======
-        parent_config_path: Option<PathBuf>,
-        included_extensions: &mut HashSet<PathBuf>,
-        TomlConfig { build, install, llvm, gcc, rust, dist, target, profile, change_id, include }: Self,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         replace: ReplaceOpt,
     ) {
         fn do_merge<T: Merge>(x: &mut Option<T>, y: Option<T>, replace: ReplaceOpt) {

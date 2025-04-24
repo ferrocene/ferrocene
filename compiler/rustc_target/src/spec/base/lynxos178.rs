@@ -1,27 +1,12 @@
-<<<<<<< HEAD
-use crate::spec::{PanicStrategy, RelocModel, TargetOptions};
-=======
 use std::borrow::Cow;
 
 use crate::spec::{
     PanicStrategy, RelocModel, RelroLevel, SplitDebuginfo, StackProbeType, TargetOptions, cvs,
 };
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 pub(crate) fn opts() -> TargetOptions {
     TargetOptions {
         os: "lynxos178".into(),
-<<<<<<< HEAD
-        vendor: "lynx".into(),
-        linker: Some("i386-lynx-lynxos178-gcc-7.1.0".into()),
-        panic_strategy: PanicStrategy::Abort,
-        relocation_model: RelocModel::Static,
-        emit_debug_gdb_scripts: false,
-        has_thread_local: true,
-        crt_static_default: true,
-        crt_static_respected: true,
-        crt_static_allows_dylibs: false,
-=======
         dynamic_linking: false,
         families: cvs!["unix"],
         position_independent_executables: false,
@@ -41,7 +26,6 @@ pub(crate) fn opts() -> TargetOptions {
         ]),
         relocation_model: RelocModel::Static,
         stack_probes: StackProbeType::Inline,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         ..Default::default()
     }
 }

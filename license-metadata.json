@@ -8,6 +8,285 @@
               {
                 "children": [
                   {
+                    "children": [],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "backtrace-rs",
+                    "type": "directory"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Rust libc developers"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "library",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [],
+                    "files": [
+                      "Dockerfile",
+                      "sudoers"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Ferrocene Developers"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "Colin Watson"
+                  ],
+                  "spdx": "GPL-3.0-or-later"
+                },
+                "name": "ci/docker-images/ubuntu-20",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Ferrocene Developers"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "ferrocene-breadcrumbs.css",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "Fonticons, Inc",
+                    "The Ferrocene Developers"
+                  ],
+                  "spdx": "CC-BY-4.0 AND (Apache-2.0 OR MIT)"
+                },
+                "name": "doc/breadcrumbs",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [
+                      "subset-filters"
+                    ],
+                    "files": [
+                      "index.css"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Ferrocene Developers"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  },
+                  {
+                    "directories": [],
+                    "files": [
+                      "favicon.svg",
+                      "ferrocene.svg"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "Critical Section GmbH"
+                      ],
+                      "spdx": "LicenseRef-Proprietary"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Raleway Project Authors (impallari@gmail.com)"
+                  ],
+                  "spdx": "OFL-1.1"
+                },
+                "name": "doc/index/index-assets",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "directories": [],
+                        "files": [
+                          "raleway-400-italic.ttf",
+                          "raleway-400-italic.woff2",
+                          "raleway-400.ttf",
+                          "raleway-400.woff2",
+                          "raleway-700-italic.ttf",
+                          "raleway-700-italic.woff2",
+                          "raleway-700.ttf",
+                          "raleway-700.woff2"
+                        ],
+                        "license": {
+                          "copyright": [
+                            "The Raleway Project Authors (impallari@gmail.com)"
+                          ],
+                          "spdx": "OFL-1.1"
+                        },
+                        "type": "group"
+                      }
+                    ],
+                    "license": {
+                      "copyright": [
+                        "Christian Robertson"
+                      ],
+                      "spdx": "Apache-2.0"
+                    },
+                    "name": "fonts",
+                    "type": "directory"
+                  },
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Ferrocene Developers"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "ferrocene.css",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "Critical Section GmbH"
+                  ],
+                  "spdx": "LicenseRef-Proprietary"
+                },
+                "name": "doc/sphinx-shared-resources/src/ferrocene_theme/static",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "license": {
+                      "copyright": [
+                        "The Ferrocene Developers"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "snapshots",
+                    "type": "directory"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Ferrocene Developers",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "tools/generate-tarball/src",
+                "type": "directory"
+              },
+              {
+                "license": {
+                  "copyright": [
+                    "The Ferrocene Authors"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "ci/scripts/require-uv-shebang.py",
+                "type": "file"
+              },
+              {
+                "license": {
+                  "copyright": [
+                    "Critical Section GmbH"
+                  ],
+                  "spdx": "LicenseRef-Proprietary"
+                },
+                "name": "logo.svg",
+                "type": "file"
+              },
+              {
+                "license": {
+                  "copyright": [
+                    "2016, 2017, 2018, 2019, 2020, 2021 AXE Consultants. All Rights",
+                    "Notice",
+                    "The Ferrocene Developers"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "doc/specification/src/licenses.rst",
+                "type": "file"
+              },
+              {
+                "license": {
+                  "copyright": [
+                    "2022 Fonticons, Inc",
+                    "Fonticons, Inc"
+                  ],
+                  "spdx": "CC-BY-4.0"
+                },
+                "name": "doc/sphinx-shared-resources/src/ferrocene_theme/fontawesome.html",
+                "type": "file"
+              },
+              {
+                "license": {
+                  "copyright": [
+                    "&copy; {{ copyright }}",
+                    "The Ferrocene Developers"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "doc/sphinx-shared-resources/src/ferrocene_theme/layout.html",
+                "type": "file"
+              },
+              {
+                "children": [],
+                "license": {
+                  "copyright": [
+                    "The Knurling-rs developers"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "tools/flip-link",
+                "type": "directory"
+              },
+              {
+                "license": {
+                  "copyright": [
+                    "The Ferrocene Developers",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "tools/generate-tarball/Cargo.toml",
+                "type": "file"
+              }
+            ],
+            "license": {
+              "copyright": [
+                "The Ferrocene Developers"
+              ],
+              "spdx": "Apache-2.0 OR MIT"
+            },
+            "name": "ferrocene",
+            "type": "directory"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
                     "children": [
                       {
                         "directories": [],
@@ -153,6 +432,35 @@
             },
             "name": "src/librustdoc/html/static/fonts",
             "type": "directory"
+          },
+          {
+            "directories": [
+              ".circleci"
+            ],
+            "files": [
+              ".dockerignore",
+              ".python-version",
+              "bors.toml"
+            ],
+            "license": {
+              "copyright": [
+                "The Ferrocene Developers"
+              ],
+              "spdx": "Apache-2.0 OR MIT"
+            },
+            "type": "group"
+          },
+          {
+            "license": {
+              "copyright": [
+                "Ferrous Systems GmbH",
+                "Model Trademark Guidelines authors",
+                "System Initiative"
+              ],
+              "spdx": "CC-BY-3.0"
+            },
+            "name": "TRADEMARK.md",
+            "type": "file"
           },
           {
             "license": {

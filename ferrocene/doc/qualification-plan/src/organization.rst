@@ -24,11 +24,8 @@ Leadership roles
    * - Technical Lead
      - Ana Hobden
 
-   * - Technical Expert
-     - Pietro Albini
-
    * - Release Lead
-     - Pietro Albini
+     - Ana Hobden
 
    * - ISO 9001 Quality Manager
      - Sina Krause
@@ -40,5 +37,5 @@ Release managers are allowed to :ref:`approve manually published releases
 <release:Manually-started Releases>`. This role does not have the
 responsibilities of the Release Lead. The current release managers are:
 
-* Pietro Albini
+* Ana Hobden
 * Florian Gilcher

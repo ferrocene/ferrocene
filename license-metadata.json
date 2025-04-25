@@ -453,9 +453,9 @@
           {
             "license": {
               "copyright": [
-                "Ferrous Systems GmbH",
                 "Model Trademark Guidelines authors",
-                "System Initiative"
+                "System Initiative",
+                "The Ferrocene Developers"
               ],
               "spdx": "CC-BY-3.0"
             },

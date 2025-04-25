@@ -37,9 +37,15 @@ qualification.
 {% endmacro %}
 
 {% macro render_variant(variant) -%}
-    {%- for key, value in variant.fields.items() -%}
-        {% if not loop.first %} , {% endif -%}{{ key }}: {{ value }}
-    {%- endfor -%}
+    {%- if variant.fields -%}
+        {%- for key, value in variant.fields.items() -%}
+            {% if not loop.first %} , {% endif -%}{{ key }}: {{ value }}
+        {%- endfor -%}
+    {%- else -%}
+        .. rst-class:: align-center
+
+        \-
+    {%- endif -%}
 {%- endmacro %}
 
 {% macro cargo_tests_summary(bootstrap_type, only_match_root_node=False) %}

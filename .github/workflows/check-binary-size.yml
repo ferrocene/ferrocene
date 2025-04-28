@@ -13,6 +13,7 @@ on:
 # Both the "measure" and "report" jobs need to know this.
 env:
   SIZE_DATA_DIR: sizes
+  RUST_BACKTRACE: 1
 
 # Responsibility is divided between two jobs "measure" and "report", so that the
 # job that builds (and potentnially runs) untrusted code does not have PR write
@@ -55,17 +56,20 @@ jobs:
         with:
           repository: rust-lang/rust
           path: ${{ env.RUSTC_DIR }}
+          # Arbitrary version from 2024-04-28
+          ref: cc74ed08d53fbb440b4ab70035a92d89d418d23c
       - name: Set up std repository and backtrace submodule for size test
         shell: bash
         working-directory: ${{ env.RUSTC_DIR }}
         env:
           PR_SOURCE_REPO: ${{ github.event.pull_request.head.repo.full_name }}
         run: |
+          set -x
           # Bootstrap config
-          cat <<EOF > config.toml
+          cat <<EOF > bootstrap.toml
           change-id = 9999999
           [llvm]
-          download-ci-llvm = true
+          download-ci-llvm = "if-unchanged"
           [rust]
           incremental = false
           EOF

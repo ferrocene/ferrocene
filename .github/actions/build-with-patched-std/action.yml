@@ -31,8 +31,10 @@ runs:
         # symlink on Linux and a junction on Windows, so it will exist on both
         # platforms.
         RUSTC_BUILD_DIR: build/host
+        RUST_BACKTRACE: 1
       working-directory: ${{ inputs.rustc-dir }}
       run: |
+        set -x
         rm -rf "$RUSTC_BUILD_DIR/stage0-std"
 
         (cd library/backtrace && git checkout ${{ inputs.backtrace-commit }})

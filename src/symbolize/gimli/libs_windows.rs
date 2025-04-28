@@ -1,7 +1,5 @@
 use super::super::super::windows_sys::*;
 use super::mystd::ffi::OsString;
-#[cfg(windows)]
-use super::mystd::os::windows::prelude::*;
 use super::{coff, mmap, Library, LibrarySegment};
 use alloc::vec;
 use alloc::vec::Vec;
@@ -47,7 +45,7 @@ unsafe fn add_loaded_images(ret: &mut Vec<Library>) {
 // Safety: long_path should be null-terminated
 #[cfg(target_os = "cygwin")]
 unsafe fn get_posix_path(long_path: &[u16]) -> Option<OsString> {
-    use std::os::unix::ffi::OsStringExt;
+    use super::mystd::os::unix::ffi::OsStringExt;
 
     unsafe extern "C" {
         fn cygwin_conv_path(
@@ -91,17 +89,20 @@ unsafe fn get_posix_path(long_path: &[u16]) -> Option<OsString> {
 }
 
 unsafe fn load_library(me: &MODULEENTRY32W) -> Option<Library> {
-    let pos = me
-        .szExePath
-        .iter()
-        .position(|i| *i == 0)
-        .unwrap_or(me.szExePath.len());
     #[cfg(windows)]
-    let name = OsString::from_wide(&me.szExePath[..pos]);
+    let name = {
+        use super::mystd::os::windows::prelude::*;
+        let pos = me
+            .szExePath
+            .iter()
+            .position(|i| *i == 0)
+            .unwrap_or(me.szExePath.len());
+        OsString::from_wide(&me.szExePath[..pos])
+    };
     #[cfg(target_os = "cygwin")]
     // Safety: the path with max length MAX_PATH always contains a null
-    // terminator
-    let name = unsafe { get_posix_path(&me.szExePath[..pos])? };
+    // terminator. Don't slice it.
+    let name = unsafe { get_posix_path(&me.szExePath[..])? };
 
     // MinGW libraries currently don't support ASLR
     // (rust-lang/rust#16514), but DLLs can still be relocated around in

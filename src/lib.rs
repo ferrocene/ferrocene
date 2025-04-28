@@ -150,7 +150,7 @@ mod lock {
     static mut LOCK: *mut Mutex<()> = ptr::null_mut();
     static INIT: Once = Once::new();
     // Whether this thread is the one that holds the lock
-    thread_local!(static LOCK_HELD: Cell<bool> = Cell::new(false));
+    thread_local!(static LOCK_HELD: Cell<bool> = const { Cell::new(false) });
 
     impl Drop for LockGuard {
         fn drop(&mut self) {

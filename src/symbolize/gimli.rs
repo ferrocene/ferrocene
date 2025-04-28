@@ -43,6 +43,7 @@ cfg_if::cfg_if! {
         target_os = "solaris",
         target_os = "illumos",
         target_os = "aix",
+        target_os = "cygwin",
     ))] {
         #[path = "gimli/mmap_unix.rs"]
         mod mmap;

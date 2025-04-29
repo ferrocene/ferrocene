@@ -29,6 +29,7 @@ based on software engineering best practices.
    :maxdepth: 4
    :caption: Testing
 
+   code-coverage
    test-variants
    testing-other-targets
 

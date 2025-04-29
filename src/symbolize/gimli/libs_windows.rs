@@ -48,6 +48,12 @@ unsafe fn get_posix_path(long_path: &[u16]) -> Option<OsString> {
     use super::mystd::os::unix::ffi::OsStringExt;
 
     unsafe extern "C" {
+        // Doc: https://cygwin.com/cygwin-api/func-cygwin-conv-path.html
+        // Src: https://github.com/cygwin/cygwin/blob/718a15ba50e0d01c79800bd658c2477f9a603540/winsup/cygwin/path.cc#L3902
+        // Safety:
+        // * `what` should be `CCP_WIN_W_TO_POSIX` here
+        // * `from` is `*const u16`, null-terminated, UTF-16 path
+        // * `to` is `*mut u8` buffer, the buffer size is `size`.
         fn cygwin_conv_path(
             what: libc::c_uint,
             from: *const libc::c_void,
@@ -57,6 +63,9 @@ unsafe fn get_posix_path(long_path: &[u16]) -> Option<OsString> {
     }
     const CCP_WIN_W_TO_POSIX: libc::c_uint = 3;
 
+    // If `size` is 0, returns needed buffer size, including null terminator;
+    // or -1 if error.
+    // Safety: **Confirmed from source:** If `size` is 0, `to` is not used.
     let name_len = unsafe {
         cygwin_conv_path(
             CCP_WIN_W_TO_POSIX,
@@ -66,11 +75,13 @@ unsafe fn get_posix_path(long_path: &[u16]) -> Option<OsString> {
         )
     };
     // Expect at least 1 for null terminator.
+    // It's not likely to return error here.
     if name_len < 1 {
         return None;
     }
     let name_len = name_len as usize;
     let mut name_buffer = vec![0_u8; name_len];
+    // Safety: `name_buffer` is large enough.
     let res = unsafe {
         cygwin_conv_path(
             CCP_WIN_W_TO_POSIX,
@@ -79,6 +90,7 @@ unsafe fn get_posix_path(long_path: &[u16]) -> Option<OsString> {
             name_buffer.len(),
         )
     };
+    // It's not likely to return error here.
     if res != 0 {
         return None;
     }

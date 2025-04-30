@@ -103,6 +103,7 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
 
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
@@ -146,6 +147,7 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
 
       - name: Install brctl
         run: |
@@ -227,6 +229,7 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
     
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
@@ -270,6 +273,7 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
 
       - name: Install brctl
         run: |
@@ -351,6 +355,7 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
 
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
@@ -394,6 +399,7 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
 
       - name: Install brctl
         run: |
@@ -476,6 +482,7 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
   
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
@@ -519,6 +526,7 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
 
       - name: Install brctl
         run: |

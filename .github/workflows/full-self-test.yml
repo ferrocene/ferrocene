@@ -59,6 +59,7 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
 
       - name: Download QNX
         uses: ./.github/actions/qnx/
@@ -83,6 +84,7 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
   
       - name: Run
         uses: ./.github/actions/run/

@@ -20,7 +20,7 @@ pub(crate) fn sign(
     env: &Env,
 ) -> Result<(), Error> {
     let config = Config::load(source_dir)?;
-    let pinned = Pinned::generate(output_dir)?;
+    let pinned = Pinned::generate(env, output_dir)?;
     let mut signature_files = SignatureFiles::load(source_dir, env)?;
 
     let regenerate_pinned = if let Some(existing_raw) = signature_files.read("pinned.toml")? {

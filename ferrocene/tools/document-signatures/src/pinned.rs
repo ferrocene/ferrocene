@@ -8,7 +8,7 @@ use anyhow::{Context, Error};
 use base64::Engine;
 use sha2::{Digest, Sha256};
 
-use crate::TOML_HEADER_COMMENTS;
+use crate::{Env, TOML_HEADER_COMMENTS};
 
 const TAR_REPRODUCIBILITY_FLAGS: &[&str] = &[
     // Use a consistent ordering for the files in the archive.
@@ -42,13 +42,13 @@ pub(crate) struct Pinned {
 }
 
 impl Pinned {
-    pub(crate) fn generate(output_dir: &Path) -> Result<Self, Error> {
+    pub(crate) fn generate(env: &Env, output_dir: &Path) -> Result<Self, Error> {
         let document_id = std::fs::read_to_string(output_dir.join("document-id.txt"))
             .context("failed to read document-id.txt from the output directory")?
             .trim()
             .to_string();
 
-        let mut tar = Command::new("tar")
+        let mut tar = Command::new(env.tar_binary)
             .args(TAR_REPRODUCIBILITY_FLAGS)
             .arg("-C")
             .arg(output_dir)

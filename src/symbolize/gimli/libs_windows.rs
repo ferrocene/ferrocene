@@ -94,6 +94,8 @@ unsafe fn get_posix_path(long_path: &[u16]) -> Option<OsString> {
     if res != 0 {
         return None;
     }
+    // Remove the null terminator.
+    unsafe { name_buffer.set_len(name_len - 1) };
     let name = OsString::from_vec(name_buffer);
     Some(name)
 }

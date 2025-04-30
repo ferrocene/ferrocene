@@ -52,12 +52,12 @@ unsafe fn get_posix_path(long_path: &[u16]) -> Option<OsString> {
         // Src: https://github.com/cygwin/cygwin/blob/718a15ba50e0d01c79800bd658c2477f9a603540/winsup/cygwin/path.cc#L3902
         // Safety:
         // * `what` should be `CCP_WIN_W_TO_POSIX` here
-        // * `from` is `*const u16`, null-terminated, UTF-16 path
-        // * `to` is `*mut u8` buffer, the buffer size is `size`.
+        // * `from` is null-terminated UTF-16 path
+        // * `to` is buffer, the buffer size is `size`.
         fn cygwin_conv_path(
             what: libc::c_uint,
-            from: *const libc::c_void,
-            to: *mut libc::c_void,
+            from: *const u16,
+            to: *mut u8,
             size: libc::size_t,
         ) -> libc::ssize_t;
     }
@@ -69,7 +69,7 @@ unsafe fn get_posix_path(long_path: &[u16]) -> Option<OsString> {
     let name_len = unsafe {
         cygwin_conv_path(
             CCP_WIN_W_TO_POSIX,
-            long_path.as_ptr().cast(),
+            long_path.as_ptr(),
             core::ptr::null_mut(),
             0,
         )
@@ -85,8 +85,8 @@ unsafe fn get_posix_path(long_path: &[u16]) -> Option<OsString> {
     let res = unsafe {
         cygwin_conv_path(
             CCP_WIN_W_TO_POSIX,
-            long_path.as_ptr().cast(),
-            name_buffer.as_mut_ptr().cast(),
+            long_path.as_ptr(),
+            name_buffer.as_mut_ptr(),
             name_buffer.len(),
         )
     };
@@ -94,8 +94,6 @@ unsafe fn get_posix_path(long_path: &[u16]) -> Option<OsString> {
     if res != 0 {
         return None;
     }
-    // Ignore null terminator.
-    unsafe { name_buffer.set_len(name_len - 1) };
     let name = OsString::from_vec(name_buffer);
     Some(name)
 }

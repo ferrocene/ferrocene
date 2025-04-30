@@ -40,6 +40,7 @@ pub(crate) fn verify(source_dir: &Path, output_dir: &Path, env: &Env) -> Result<
         file
     } else {
         // The document was not signed.
+        eprintln!("WARNING: {} is not signed", output_dir.display());
         return Ok(());
     };
 

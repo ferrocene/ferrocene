@@ -91,20 +91,17 @@ macro_rules! documents {
         pub(super) fn for_each_signable_document(
             builder: &Builder<'_>,
             target: TargetSelection,
-            condition: impl Fn(&Path) -> bool,
             f: impl Fn(BootstrapCommand, &Path, &Path),
         ) {
             $({
                 let source_dir = builder.src.join(crate::ferrocene::doc::$name::SOURCE);
-                if condition(&source_dir) {
-                    let output_dir = builder.ensure(crate::ferrocene::doc::$name {
-                        mode: SphinxMode::Html,
-                        target,
-                        fresh_build: false,
-                    });
-                    let cmd = document_signatures_cmd::<crate::ferrocene::doc::$name>(builder);
-                    f(cmd, &source_dir, &output_dir);
-                }
+                let output_dir = builder.ensure(crate::ferrocene::doc::$name {
+                    mode: SphinxMode::Html,
+                    target,
+                    fresh_build: false,
+                });
+                let cmd = document_signatures_cmd::<crate::ferrocene::doc::$name>(builder);
+                f(cmd, &source_dir, &output_dir);
             })*
         }
     };

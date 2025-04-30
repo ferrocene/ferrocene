@@ -80,14 +80,14 @@ unsafe fn get_posix_path(long_path: &[u16]) -> Option<OsString> {
         return None;
     }
     let name_len = name_len as usize;
-    let mut name_buffer = vec![0_u8; name_len];
+    let mut name_buffer = Vec::with_capacity(name_len);
     // Safety: `name_buffer` is large enough.
     let res = unsafe {
         cygwin_conv_path(
             CCP_WIN_W_TO_POSIX,
             long_path.as_ptr(),
             name_buffer.as_mut_ptr(),
-            name_buffer.len(),
+            name_len,
         )
     };
     // It's not likely to return error here.

@@ -71,7 +71,7 @@ Then use Homebrew to install the remaining packages:
 
 .. note::
 
-   Ferrocene development is only supported on Windows 11 Pro with 
+   Ferrocene development is only supported on Windows 11 Pro with
    `"Developer Mode" <https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development#activate-developer-mode>`_
    enabled.
 
@@ -134,6 +134,8 @@ in your work device:
    If you already have the ``[sso-session ferrous-systems]`` block in your
    ``~/.aws/config`` you do not need to add it again, as only one copy of it is
    required.
+
+.. _aws-auth:
 
 Once that's done, you can log into the CLI with the following command:
 

@@ -9,6 +9,13 @@ signed by the responsible parties, to attest they were reviewed and to prevent
 accidental changes to the documents (which would require the assessor to review
 the documents again).
 
+.. caution::
+
+   Signing documents will store your work email address in the `Rekor
+   transparency log <https://docs.sigstore.dev/logging/overview/>`_. Do not
+   attempt to sign documents if you don't want your work email address to be
+   published in it.
+
 Signing all documents
 ---------------------
 
@@ -28,29 +35,25 @@ We developed a small wrapper around the "cosign" tool to make it easy to
 sign our qualification documents. Cosign is fully managed by the Ferrocene build
 system: you don't need to install it.
 
-To sign all of the Ferrocene documents in a single invocation, you can run:
+To sign all of the Ferrocene documents, :ref:`authenticate with AWS <aws-auth>`
+(if you haven't done so today) and run:
 
 .. code-block:: text
 
    ./x sign
 
-Running the command will build the documentation locally, download the correct
-version of cosign, and start the signing process for each document. The signing
-process will:
+Running the command will build all the documents locally, download the correct
+version of cosign, and start the signing process for each document.
 
-* Ask you whether you agree for your (company) email address to being published
-  in the Rektor transparency log. You need to agree to this.
+The signing process will open the signature page in the browser (or, if the
+build system cannot open your browser, show you the link to the page). In the
+signature page, you will need to select **Microsoft** as your identity provider,
+and authenticate with your work credentials. The tool will then perform the
+signature, and save the signature files to disk.
 
-* Open the signature page in the browser (or, if the build system cannot open
-  your browser, show you the link to the page). In the signature page, you will
-  need to select **Microsoft** as your identity provider, and authenticate with
-  your company credentials.
-
-* Verify the signature locally, and persist it to disk.
-
-The signing process will be repeated *separately* for each document you need to
-sign. Once ``./x sign`` finishes, the signing process will be completed, and you
-can commit and push the changes.
+The signing process will be automatically repeated for each document you need to
+sign. Each signature will repeat the whole signing process. Once ``./x sign``
+finishes you can commit and push the changes.
 
 .. tip::
 

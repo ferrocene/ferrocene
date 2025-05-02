@@ -190,4 +190,12 @@ content in it:
    lld = true
 
 There are a lot of other options available: you can look at the documentation
-for all of them in the ``config.toml.example`` file for further details.
+for all of them in the ``bootstrap.toml.example`` file for further details.
+
+.. note::
+
+   Starting from Rust 1.87, upstream renamed ``config.toml`` to
+   ``bootstrap.toml``, retaining support for the old name to avoid breaking
+   compatibility. For Ferrocene we recommend continuing to name your
+   configuration file ``config.toml``: this way, your settings will still
+   apply even on older branches.

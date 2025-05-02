@@ -56,8 +56,7 @@ def validate_config(app, config):
 
 
 def inject_version(app, config):
-    # sphinx-needs requires the document version to be configured in order for
-    # external needs to be loaded. Dynamically set it to the Ferrocene version
+    #  Dynamically set it to the Ferrocene version
     # if there is no existing version.
     if not config.version and config.ferrocene_version:
         config.version = config.ferrocene_version

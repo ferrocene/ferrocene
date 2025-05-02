@@ -63,7 +63,7 @@ Then use Homebrew to install the remaining packages:
 
 .. code-block:: bash
 
-   brew install ninja bzip2 cmake awscli uv
+   brew install ninja bzip2 cmake awscli uv gnu-tar
 
 
 :target-with-triple:`x86_64-pc-windows-msvc`

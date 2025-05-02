@@ -18,7 +18,7 @@
 # - "update-cargo-lock": regenerate the Cargo.lock after the pull.
 
 - path: ferrocene/doc/specification
-  repo: ferrocene/specification
+  repo: rust-lang/fls
   pull: branch:main
 
 - path: ferrocene/library/libc

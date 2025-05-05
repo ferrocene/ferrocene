@@ -92,6 +92,32 @@ This will emit warnings if some documents are not signed.
    if some of the cached pages built locally are out of date. To fix them,
    remove the ``build/`` directory.
 
+Debugging signatures differences locally compared to CI
+-------------------------------------------------------
+
+The signature process relies on the documentation produced locally and the
+documentation produced in CI to be bit-by-bit identical. If there is any
+difference, the signature will not match.
+
+Debugging why signatures pass locally but fail on CI require looking at the
+differences between the two. To aid generating such a diff, we created the
+``ferrocene/tools/document-signatures/diff.py`` script. The script is supposed
+to be run by the person who signed the document.
+
+Before running the script, make sure you have a valid GitHub Personal Access
+Token authorized with SSO to access the Ferrocene organization, and place it in
+the ``GITHUB_TOKEN`` environment variable. Then run this command, replacing
+``PR_NUMBER`` with the number of the PR that failed CI:
+
+.. code-block::
+
+   AWS_PROFILE=ferrocene-ci ferrocene/tools/document-signatures/diff.py PR_NUMBER
+
+The command will fetch the documentation from CI, build a fresh copy of the
+documentation locally, and then compare the two. At the end, the script will
+show the path to the diff: copy that file and send it to the engineer in charge
+of debugging the difference.
+
 Configuring the roles allowed to sign
 -------------------------------------
 

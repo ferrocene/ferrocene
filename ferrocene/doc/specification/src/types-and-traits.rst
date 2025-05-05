@@ -382,7 +382,7 @@ Floating Point Types
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_nuFAwLHOdQBx`
-Operations on values of :t:`floating point types` may not preserve the sign bit in case of the value being a IEEE floating-point ``NaN``.
+Operations on values of :t:`[floating point type]s` may not preserve the sign bit in case of the value being a IEEE floating-point ``NaN``.
 
 .. _fls_3qnpv2z7yjil:
 
@@ -2046,9 +2046,7 @@ occur when:
   :t:`type`.
 
 * :dp:`fls_SYnFJBhi0IWj`
-  The source :t:`type` is a :t:`trait object type` and the target :t:`type` is a
-  :t:`trait object type` with the same :t:`[trait bound]s` and additional
-  :t:`[auto trait]s`.
+  The source :t:`type` is a :t:`trait object type` and the target :t:`type` is a :t:`trait object type` with the same or no :t:`principal trait`, and the target :t:`type` has the same or less non-:t:`principal trait` :t:`[trait bound]s`.
 
 :dp:`fls_iiiu2q7pym4p`
 An :t:`unsized coercion` is a :t:`type coercion` that converts a :t:`sized type`
@@ -2847,7 +2845,7 @@ A :t:`trait` is :t:`object safe` when:
   Its :t:`[associated function]s` are :t:`object safe`, and
 
 * :dp:`fls_vmLLL82EQasI`
-  Its :t:`[associated type alias]es` specify a :std:`core::marker::Sized`
+  Its :t:`[associated type]s` specify a :std:`core::marker::Sized`
   :t:`[trait bound]` for :c:`Self` in a :t:`type bound predicate`.
 
 :dp:`fls_uixekv82g2e5`
@@ -3014,7 +3012,7 @@ A :t:`lifetime bound` shall apply to :t:`[type]s` and other :t:`[lifetime]s`.
    &'static Shape
 
 :dp:`fls_gcszhqg6hnva`
-See :p:`4.12. <fls_85vx1qfa061i>` for the declaration of Shape.
+See :p:`fls_85vx1qfa061i` for the declaration of ``Shape``.
 
 .. _fls_ikfvbeewame7:
 

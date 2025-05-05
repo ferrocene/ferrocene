@@ -105,8 +105,7 @@ adjusted call operand
 ^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_mchqbc64iu0u`
-An :dt:`adjusted call operand` is a :t:`call operand` with possible
-:t:`auto-dereferencing` adjustments.
+An :dt:`adjusted call operand` is a :t:`call operand` adjusted with inserted :t:`[borrow expression]s` and :t:`[dereference expression]s`.
 
 .. _fls_j775guurkgo4:
 
@@ -539,6 +538,27 @@ an asynchronous manner.
 
 :dp:`fls_je689rormhd6`
 See :s:`AsyncBlockExpression`.
+
+.. _fls_oUdQnbW1MAFW:
+
+async closure expression
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_SxydbQPPX9Jw`
+An :dt:`async closure expression` is a :t:`closure expression` subject to keyword ``async`` that defines an :t:`async closure type` and constructs a value of that :t:`type`.
+
+:dp:`fls_JZsDFMg85a3u`
+See :s:`ClosureExpression`.
+
+.. _fls_Pq4ohvrMOi5p:
+
+async closure type
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_IT28HJaF8rnm`
+An :dt:`async closure type` is a unique anonymous :t:`function type` that encapsulates
+all :t:`[capture target]s` of a :t:`closure expression` producing a :std:`core::future::Future`.
+
 
 .. _fls_lYrTaCM1LcXU:
 
@@ -6806,7 +6826,7 @@ trivial predicate
 
 :dp:`fls_db5njwrjolhs`
 A :dt:`trivial predicate` is a :t:`where clause predicate` that does not use
-the :t:`[generic parameter]s` or :t:`[higher-ranked lifetime]s` of the related
+the :t:`[generic parameter]s` or :t:`[higher-ranked trait bound]s` of the related
 :t:`construct`.
 
 .. _fls_si70t19ox07e:
@@ -7442,6 +7462,14 @@ unsafe context
 :dp:`fls_qn1s845ejbu0`
 An :dt:`unsafe context` is either an :t:`unsafe block` or an
 :t:`unsafe function`.
+
+.. _fls_pre02nas9dad:
+
+unsafe external block
+^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_pkfgas34msas`
+An :dt:`unsafe external block` is an :t:`external block` subject to keyword ``unsafe``.
 
 .. _fls_ua64pv82skaw:
 

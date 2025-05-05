@@ -1033,7 +1033,7 @@ The :t:`dereference` is assignable when the :t:`dereference expression` is a
 :t:`mutable place expression`.
 
 :dp:`fls_8i4jzksxlrw0`
-Dereferencing a :t:`raw pointer` shall require :t:`unsafe context`.
+Dereferencing a :t:`raw pointer` shall require :t:`unsafe context` unless the :t:`dereference expression` is the :t:`operand` of a :t:`raw borrow expression`.
 
 :dp:`fls_d68ddlse4zp`
 If the context of a :t:`dereference expression` is an
@@ -2218,7 +2218,7 @@ A :t:`type cast expression` with the following characteristics performs a
 
 * :dp:`fls_bhw2j9wjpf2x`
   An :t:`operand` of a :t:`function pointer type` and a target :t:`integer type`
-  perform :t:`function-pointer-to-address` cast. A
+  perform :t:`function-pointer-to-address cast`. A
   :dt:`function-pointer-to-address cast` produces an integer that represents the
   machine address of the referenced :t:`function`. If the :t:`integer type` is
   smaller than the size of the :t:`function pointer type`, the address is
@@ -3697,7 +3697,7 @@ Closure Expressions
 .. syntax::
 
    ClosureExpression ::=
-       $$move$$? $$|$$ ClosureParameterList? $$|$$
+       $$async$$? $$move$$? $$|$$ ClosureParameterList? $$|$$
          (ClosureBody | ClosureBodyWithReturnType)
 
    ClosureBody ::=
@@ -3721,6 +3721,9 @@ Closure Expressions
 A :t:`closure expression` is an :t:`expression` that defines a
 :t:`closure type` and constructs a value of that :t:`type`.
 
+:dp:`fls_My6pMgpeFCFg`
+An :t:`async closure expression` is a :t:`closure expression` subject to keyword ``async`` that defines an :t:`async closure type` and constructs a value of that :t:`type`.
+
 :dp:`fls_UgJgur0z6d4a`
 The :t:`return type` of a :t:`closure type` is determined as follows:
 
@@ -3729,6 +3732,9 @@ The :t:`return type` of a :t:`closure type` is determined as follows:
 
 * :dp:`fls_wLVeE6cNG8oa`
   Otherwise the :t:`return type` is the :t:`type` of the :t:`closure body`.
+
+:dp:`fls_DSy7bPKGzyov`
+The :t:`return type` of an :t:`async closure type` is an :t:`anonymous return type` with a :std:`core::future::Future` :t:`trait bound` and a :t:`binding argument` for the ``Output`` :t:`associated type alias` with the actual :t:`return type` of the corresponding :t:`closure type`.
 
 :dp:`fls_srbl7ptknjyk`
 A :t:`closure body` is a :t:`construct` that represents the executable portion

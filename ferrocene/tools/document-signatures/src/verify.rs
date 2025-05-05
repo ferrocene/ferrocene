@@ -20,7 +20,7 @@ pub(crate) fn verify(source_dir: &Path, output_dir: &Path, env: &Env) -> Result<
         file.read_to_end(&mut contents)?;
 
         let existing: Pinned = toml::from_slice(&contents)?;
-        let expected = Pinned::generate(output_dir)?;
+        let expected = Pinned::generate(env, output_dir)?;
 
         if existing != expected {
             eprintln!("Signature incorrect: {}", output_dir.display());
@@ -40,6 +40,7 @@ pub(crate) fn verify(source_dir: &Path, output_dir: &Path, env: &Env) -> Result<
         file
     } else {
         // The document was not signed.
+        eprintln!("WARNING: {} is not signed", output_dir.display());
         return Ok(());
     };
 

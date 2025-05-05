@@ -62,16 +62,46 @@ struct Env {
     cosign_binary: PathBuf,
     s3_bucket: Option<String>,
     s3_cache_dir: PathBuf,
+    tar_binary: &'static str,
 }
 
 impl Env {
     fn load() -> Result<Self, Error> {
         Ok(Self {
+            tar_binary: find_tar_binary()?,
             cosign_binary: env("COSIGN_BINARY")?,
             s3_bucket: maybe_env("S3_BUCKET")?,
             s3_cache_dir: env("S3_CACHE_DIR")?,
         })
     }
+}
+
+// macOS by default ships BSD tar, which does not support the --sort flag we need to generate the
+// archived sha256. This tries to probe the system for a few well-known names of GNU tar, and if
+// missing recommends the user to install tar with Homebrew.
+#[cfg(target_os = "macos")]
+fn find_tar_binary() -> Result<&'static str, Error> {
+    use std::process::Command;
+
+    for name in ["tar", "gtar"] {
+        let Ok(output) = Command::new(name).arg("--version").output() else { continue };
+        if std::str::from_utf8(&output.stdout).map(|s| s.contains("GNU tar")).unwrap_or(false) {
+            dbg!(name);
+            return Ok(name);
+        }
+    }
+
+    anyhow::bail!(
+        "could not find GNU tar on this system\n\n\
+         You should install the `gnu-tar` Homebrew package:\n\
+         \n\
+         \u{20}   brew install gnu-tar\n"
+    );
+}
+
+#[cfg(not(target_os = "macos"))]
+fn find_tar_binary() -> Result<&'static str, Error> {
+    Ok("tar")
 }
 
 fn maybe_env<T>(var: &str) -> Result<Option<T>, Error>

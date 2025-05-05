@@ -19,7 +19,7 @@ This extension implements "global" features that are not tied to any specific
 document, and should be imported in each document.
 
 The extension also enables ``sphinx.ext.intersphinx`` without the need to
-manually enable them in ``conf.py``.
+manually enable it in ``conf.py``.
 
 
 Defining and linking to IDs

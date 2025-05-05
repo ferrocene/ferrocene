@@ -20,7 +20,6 @@ const OXIDOS_CRATES: &[&str] = &[
     "deno",
     "wasm",
     "capsules-core",
-    "capsules-extra",
 ];
 const OXIDOS_DEBUG_FEATURES: &[&str] = &[
     // We build two variants of OxidOS: the standard variant, and a variant meant for

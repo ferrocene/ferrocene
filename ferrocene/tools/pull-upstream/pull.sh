@@ -326,7 +326,7 @@ fi
 # Some parts of src/stage0 need to be updated when we branch off from main to a release branch.
 # Running the fixup script here ensures the fix is always applied.
 echo "pull-upstream: trying to fix src/stage0"
-ferrocene/ci/scripts/fix-stage0-branch.py
+ferrocene/ci/scripts/fix-stage0-branch.py || automation_warning "Could not fix src/stage0; will commit with conflict markers"
 if git status --porcelain=v1 | grep "^ M src/stage0$" >/dev/null; then
     git add src/stage0
     git commit -m "update src/stage0"

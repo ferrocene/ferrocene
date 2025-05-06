@@ -65,7 +65,7 @@ unsafe fn get_posix_path(long_path: &[u16]) -> Option<OsString> {
 
     // If `size` is 0, returns needed buffer size, including null terminator;
     // or -1 if error.
-    // Safety: **Confirmed from source:** If `size` is 0, `to` is not used.
+    // Safety: if `size` is 0, `to` is not used.
     let name_len = unsafe {
         cygwin_conv_path(
             CCP_WIN_W_TO_POSIX,

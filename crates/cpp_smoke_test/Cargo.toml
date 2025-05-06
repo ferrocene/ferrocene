@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Nick Fitzgerald <fitzgen@gmail.com>"]
 edition = "2021"
 build = "build.rs"
+publish = false
 
 [build-dependencies]
 cc = "1.0"

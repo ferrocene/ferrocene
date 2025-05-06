@@ -476,7 +476,7 @@ keyword]s`.
 
 :dp:`fls_jpecw46eh061`
 A :t:`pure identifier` shall follow the specification in Unicode Standard Annex
-#31 for :t:`Unicode` version 13.0, with the following profile:
+#31 for :t:`Unicode` version 16.0, with the following profile:
 
 * :dp:`fls_lwcflgezgs5z`
   ``Start`` = ``XID_Start``, plus character 0x5F (low line).

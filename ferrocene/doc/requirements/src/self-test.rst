@@ -93,7 +93,7 @@ Checks for executables
    The output of the executable should have at least 3 key-value pairs,
    with these 3 keys: ``host``, ``commit-hash``, and ``release``:
 
-   - ``host`` is the target triple of the platform that the executable is built for
+   - ``host`` is the target tuple of the platform that the executable is built for
    - ``commit-hash`` is an identifier for the Git commit from which the Ferrocene release was built
    - ``release`` is the name of the upstream release from which the Ferrocene release was based
 

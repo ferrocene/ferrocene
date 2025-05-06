@@ -1006,12 +1006,14 @@ checksum = "f46ad14479a25103f283c0f10005961cf086d8dc42205bb44c46ac563475dca6"
 
 [[package]]
 name = "clippy"
-version = "0.1.87"
+version = "0.1.88"
 dependencies = [
  "anstream",
+ "askama 0.13.1",
  "cargo_metadata 0.18.1",
  "clippy_config",
  "clippy_lints",
+ "clippy_lints_internal",
  "clippy_utils",
  "color-print",
  "filetime",
@@ -1022,7 +1024,6 @@ dependencies = [
  "pulldown-cmark 0.11.3",
  "quote",
  "regex",
- "rinja",
  "rustc_tools_util 0.4.2",
  "serde",
  "serde_json",
@@ -1037,7 +1038,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_config"
-version = "0.1.87"
+version = "0.1.88"
 dependencies = [
  "clippy_utils",
  "itertools",
@@ -1062,7 +1063,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_lints"
-version = "0.1.87"
+version = "0.1.88"
 dependencies = [
  "arrayvec",
  "cargo_metadata 0.18.1",
@@ -1070,12 +1071,9 @@ dependencies = [
  "clippy_utils",
  "itertools",
  "quine-mc_cluskey",
- "regex",
  "regex-syntax 0.8.5",
  "semver",
  "serde",
- "serde_json",
- "tempfile",
  "toml 0.7.8",
  "unicode-normalization",
  "unicode-script",
@@ -1084,8 +1082,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "clippy_lints_internal"
+version = "0.0.1"
+dependencies = [
+ "clippy_config",
+ "clippy_utils",
+ "regex",
+ "rustc-semver",
+]
+
+[[package]]
 name = "clippy_utils"
-version = "0.1.87"
+version = "0.1.88"
 dependencies = [
  "arrayvec",
  "itertools",
@@ -1190,6 +1198,7 @@ dependencies = [
  "libc",
  "miow",
  "miropt-test-tools",
+ "rayon",
  "regex",
  "rustfix",
  "semver",
@@ -3999,45 +4008,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rinja"
-version = "0.3.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3dc4940d00595430b3d7d5a01f6222b5e5b51395d1120bdb28d854bb8abb17a5"
-dependencies = [
- "itoa",
- "rinja_derive",
-]
-
-[[package]]
-name = "rinja_derive"
-version = "0.3.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "08d9ed0146aef6e2825f1b1515f074510549efba38d71f4554eec32eb36ba18b"
-dependencies = [
- "basic-toml",
- "memchr",
- "mime",
- "mime_guess",
- "proc-macro2",
- "quote",
- "rinja_parser",
- "rustc-hash 2.1.1",
- "serde",
- "syn 2.0.100",
-]
-
-[[package]]
-name = "rinja_parser"
-version = "0.3.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93f9a866e2e00a7a1fb27e46e9e324a6f7c0e7edc4543cae1d38f4e4a100c610"
-dependencies = [
- "memchr",
- "nom",
- "serde",
-]
-
-[[package]]
 name = "run_make_support"
 version = "0.2.0"
 dependencies = [
@@ -4109,6 +4079,12 @@ dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
 ]
+
+[[package]]
+name = "rustc-semver"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5be1bdc7edf596692617627bbfeaba522131b18e06ca4df2b6b689e3c5d5ce84"
 
 [[package]]
 name = "rustc-stable-hash"
@@ -4654,6 +4630,9 @@ dependencies = [
 [[package]]
 name = "rustc_fs_util"
 version = "0.0.0"
+dependencies = [
+ "tempfile",
+]
 
 [[package]]
 name = "rustc_graphviz"
@@ -4966,7 +4945,6 @@ dependencies = [
  "rustc_session",
  "rustc_span",
  "rustc_target",
- "tempfile",
  "tracing",
 ]
 
@@ -5113,7 +5091,6 @@ dependencies = [
  "rustc_data_structures",
  "rustc_index",
  "rustc_macros",
- "rustc_serialize",
  "rustc_type_ir",
  "rustc_type_ir_macros",
  "tracing",
@@ -5476,6 +5453,7 @@ dependencies = [
  "rustc_hir",
  "rustc_middle",
  "rustc_span",
+ "smallvec",
  "tracing",
 ]
 
@@ -5977,15 +5955,6 @@ checksum = "86af297923fbcfd107c20a189a6e9c872160df71a7190ae4a7a6c5dce4b2feb6"
 dependencies = [
  "bstr",
  "color-eyre",
-]
-
-[[package]]
-name = "spdx"
-version = "0.10.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58b69356da67e2fc1f542c71ea7e654a361a79c938e4424392ecf4fa065d2193"
-dependencies = [
- "smallvec",
 ]
 
 [[package]]
@@ -6990,9 +6959,9 @@ dependencies = [
 
 [[package]]
 name = "wasi-preview1-component-adapter-provider"
-version = "29.0.1"
+version = "31.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dcd9f21bbde82ba59e415a8725e6ad0d0d7e9e460b1a3ccbca5bdee952c1a324"
+checksum = "86fabda09a0d89ffd1615b297b4a5d4b4d99df9598aeb24685837e63019e927b"
 
 [[package]]
 name = "wasm-bindgen"
@@ -7054,9 +7023,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-component-ld"
-version = "0.5.12"
+version = "0.5.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "580305a8e3f1b7a79859a8db897de643533b2851c5eb080fe5800233f16dec88"
+checksum = "a60a07a994a3538b57d8c5f8caba19f4793fb4c7156276e5e90e90acbb829e20"
 dependencies = [
  "anyhow",
  "clap",
@@ -7064,7 +7033,7 @@ dependencies = [
  "libc",
  "tempfile",
  "wasi-preview1-component-adapter-provider",
- "wasmparser 0.223.1",
+ "wasmparser 0.229.0",
  "wat",
  "windows-sys 0.59.0",
  "winsplit",
@@ -7091,16 +7060,6 @@ dependencies = [
 
 [[package]]
 name = "wasm-encoder"
-version = "0.223.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a0a96fdeaee8fbeb4bd917fb8157d48c0d61c3b1f4ee4c363c8e8d68b2f4fe8"
-dependencies = [
- "leb128",
- "wasmparser 0.223.1",
-]
-
-[[package]]
-name = "wasm-encoder"
 version = "0.229.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "38ba1d491ecacb085a2552025c10a675a6fddcbd03b1fc9b36c536010ce265d2"
@@ -7111,19 +7070,14 @@ dependencies = [
 
 [[package]]
 name = "wasm-metadata"
-version = "0.223.1"
+version = "0.229.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2e7e37883181704d96b89dbd8f1291be13694c71cd0663aebb94b46d235a377"
+checksum = "78fdb7d29a79191ab363dc90c1ddd3a1e880ffd5348d92d48482393a9e6c5f4d"
 dependencies = [
  "anyhow",
  "indexmap",
- "serde",
- "serde_derive",
- "serde_json",
- "spdx",
- "url",
- "wasm-encoder 0.223.1",
- "wasmparser 0.223.1",
+ "wasm-encoder 0.229.0",
+ "wasmparser 0.229.0",
 ]
 
 [[package]]
@@ -7147,26 +7101,15 @@ dependencies = [
 
 [[package]]
 name = "wasmparser"
-version = "0.223.1"
+version = "0.229.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "664b980991ed9a8c834eb528a8979ab1109edcf52dc05dd5751e2cc3fb31035d"
+checksum = "0cc3b1f053f5d41aa55640a1fa9b6d1b8a9e4418d118ce308d20e24ff3575a8c"
 dependencies = [
  "bitflags",
  "hashbrown",
  "indexmap",
  "semver",
  "serde",
-]
-
-[[package]]
-name = "wasmparser"
-version = "0.229.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0cc3b1f053f5d41aa55640a1fa9b6d1b8a9e4418d118ce308d20e24ff3575a8c"
-dependencies = [
- "bitflags",
- "indexmap",
- "semver",
 ]
 
 [[package]]
@@ -7655,9 +7598,9 @@ dependencies = [
 
 [[package]]
 name = "wit-component"
-version = "0.223.1"
+version = "0.229.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3fc2fcc52a79f6f010a89c867e53e06d4227f86c58984add3e37f32b8e7af5f0"
+checksum = "7f550067740e223bfe6c4878998e81cdbe2529dd9a793dc49248dd6613394e8b"
 dependencies = [
  "anyhow",
  "bitflags",
@@ -7666,17 +7609,17 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
- "wasm-encoder 0.223.1",
+ "wasm-encoder 0.229.0",
  "wasm-metadata",
- "wasmparser 0.223.1",
+ "wasmparser 0.229.0",
  "wit-parser",
 ]
 
 [[package]]
 name = "wit-parser"
-version = "0.223.1"
+version = "0.229.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "263fde17f1fbe55a413f16eb59094bf751795c6da469a05c3d45ea6c77df6b40"
+checksum = "459c6ba62bf511d6b5f2a845a2a736822e38059c1cfa0b644b467bbbfae4efa6"
 dependencies = [
  "anyhow",
  "id-arena",
@@ -7687,7 +7630,7 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "unicode-xid",
- "wasmparser 0.223.1",
+ "wasmparser 0.229.0",
 ]
 
 [[package]]

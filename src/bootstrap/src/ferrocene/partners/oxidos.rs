@@ -176,6 +176,8 @@ impl Step for BuildOxidOS {
             }
         }
 
+        cargo.rustflag("-Arust_2018_idioms");
+
         let stamp =
             BuildStamp::new(&builder.cargo_out(compiler, mode, target)).with_prefix(self.name());
         run_cargo(builder, cargo, Vec::new(), &stamp, Vec::new(), false, false);

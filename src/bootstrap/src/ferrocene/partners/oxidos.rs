@@ -138,7 +138,7 @@ impl Step for BuildOxidOS {
         let _guard = builder.msg(Kind::Build, compiler.stage, self.name(), compiler.host, target);
 
         let mode = Mode::ToolCustom { name: self.name() };
-        let mut cargo = builder.cargo(compiler, mode, SourceType::InTree, target, Kind::Build);
+        let mut cargo = builder.cargo(compiler, mode, SourceType::Submodule, target, Kind::Build);
 
         cargo.current_dir(&source);
         cargo.rustflag(&format!("-Zallow-features={}", OXIDOS_ALLOW_UNSTABLE_FEATURES.join(",")));

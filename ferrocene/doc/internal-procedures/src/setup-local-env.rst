@@ -63,7 +63,7 @@ Then use Homebrew to install the remaining packages:
 
 .. code-block:: bash
 
-   brew install ninja bzip2 cmake awscli uv
+   brew install ninja bzip2 cmake awscli uv gnu-tar
 
 
 :target-with-triple:`x86_64-pc-windows-msvc`
@@ -71,7 +71,7 @@ Then use Homebrew to install the remaining packages:
 
 .. note::
 
-   Ferrocene development is only supported on Windows 11 Pro with 
+   Ferrocene development is only supported on Windows 11 Pro with
    `"Developer Mode" <https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development#activate-developer-mode>`_
    enabled.
 
@@ -135,6 +135,8 @@ in your work device:
    ``~/.aws/config`` you do not need to add it again, as only one copy of it is
    required.
 
+.. _aws-auth:
+
 Once that's done, you can log into the CLI with the following command:
 
 .. code-block:: text
@@ -182,9 +184,18 @@ content in it:
    [ferrocene]
    aws-profile = "ferrocene-ci"
    test-outcomes = "download-ci"
+   coverage-outcomes = "download-ci"
 
    [rust]
    lld = true
 
 There are a lot of other options available: you can look at the documentation
-for all of them in the ``config.toml.example`` file for further details.
+for all of them in the ``bootstrap.toml.example`` file for further details.
+
+.. note::
+
+   Starting from Rust 1.87, upstream renamed ``config.toml`` to
+   ``bootstrap.toml``, retaining support for the old name to avoid breaking
+   compatibility. For Ferrocene we recommend continuing to name your
+   configuration file ``config.toml``: this way, your settings will still
+   apply even on older branches.

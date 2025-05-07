@@ -115,6 +115,8 @@ struct Context<'a> {
 }
 
 impl<'data> Context<'data> {
+    // #[feature(optimize_attr)] is enabled when we're built inside libstd
+    #[cfg_attr(backtrace_in_libstd, optimize(size))]
     fn new(
         stash: &'data Stash,
         object: Object<'data>,
@@ -356,6 +358,8 @@ impl Cache {
     }
 
     // unsafe because this is required to be externally synchronized
+    // #[feature(optimize_attr)] is enabled when we're built inside libstd
+    #[cfg_attr(backtrace_in_libstd, optimize(size))]
     unsafe fn with_global(f: impl FnOnce(&mut Self)) {
         // A very small, very simple LRU cache for debug info mappings.
         //

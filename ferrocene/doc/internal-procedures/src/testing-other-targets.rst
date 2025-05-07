@@ -47,23 +47,23 @@ You can create a guest with the following:
 
 .. code-block:: yaml
 
-    cat <<- EOF | limactl create --name=ferrocene
-        minimumLimaVersion: "1.0.0"
-        images:
-        - location: "https://cloud-images.ubuntu.com/releases/24.10/release-20241212/ubuntu-24.10-server-cloudimg-arm64.img"
-            arch: "aarch64"
-            digest: "sha256:fb39312ffd2b47b97eaef6ff197912eaa3e0a215eb3eecfbf2a24acd96ee1125"
-        - location: "https://cloud-images.ubuntu.com/releases/24.10/release/ubuntu-24.10-server-cloudimg-arm64.img"
-            arch: "aarch64"
-        mounts:
-        - location: "~"
-        - location: "/tmp/lima"
-        writable: true
-        ssh:
-        forwardAgent: true
-        cpus: 8
-        memory: "8GiB"
-        mountTypesUnsupported: ["9p"]
+    cat <<EOF | limactl create --name=ferrocene -
+    minimumLimaVersion: "1.0.0"
+    images:
+    - location: "https://cloud-images.ubuntu.com/releases/24.10/release-20241212/ubuntu-24.10-server-cloudimg-arm64.img"
+      arch: "aarch64"
+      digest: "sha256:fb39312ffd2b47b97eaef6ff197912eaa3e0a215eb3eecfbf2a24acd96ee1125"
+    - location: "https://cloud-images.ubuntu.com/releases/24.10/release/ubuntu-24.10-server-cloudimg-arm64.img"
+      arch: "aarch64"
+    mounts:
+    - location: "~"
+    - location: "/tmp/lima"
+    writable: true
+    ssh:
+      forwardAgent: true
+    cpus: 8
+    memory: "8GiB"
+    mountTypesUnsupported: ["9p"]
     EOF
 
 Start the guest:

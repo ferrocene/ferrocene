@@ -28,6 +28,7 @@ use std::collections::HashSet;
 use std::fmt::Write;
 use std::io::{self, ErrorKind};
 use std::process::{Command, Stdio};
+use std::sync::mpsc::Sender;
 use std::sync::{Arc, OnceLock};
 use std::time::SystemTime;
 use std::{env, fs, vec};
@@ -774,35 +775,26 @@ fn modified_tests(config: &Config, dir: &Utf8Path) -> Result<Vec<Utf8PathBuf>, S
     Ok(full_paths)
 }
 
+// Added to allow reuse by custom Ferrocene code
+#[derive(Clone)]
+enum TestHandler<'a> {
+    Sender(Sender<TestPaths>),
+    Cx(&'a TestCollectorCx),
+}
+
 /// Recursively scans a directory to find test files and create test structures
 /// that will be handed over to libtest.
 fn collect_tests_from_dir(
     cx: &TestCollectorCx,
     dir: &Utf8Path,
     relative_dir_path: &Utf8Path,
-<<<<<<< HEAD
-) -> io::Result<()> {
+) -> io::Result<TestCollector> {
     find_tests_in_dir(
         cx.config.clone(),
         dir,
         relative_dir_path,
         &cx.modified_tests,
-        &mut |paths, rel_test_path| {
-            // If we find a test foo/bar.rs, we have to build the
-            // output directory `$build/foo` so we can write
-            // `$build/foo/bar` into it. We do this *now* in this
-            // sequential loop because otherwise, if we do it in the
-            // tests themselves, they race for the privilege of
-            // creating the directories and sometimes fail randomly.
-            let build_dir = output_relative_path(&cx.config, &paths.relative_dir);
-            if !build_dir.exists() {
-                fs::create_dir_all(&build_dir).unwrap();
-            }
-            if let Some(rel_test_path) = rel_test_path {
-                collector.found_path_stems.insert(rel_test_path);
-            }
-            make_test(cx, collector, &paths);
-        },
+        TestHandler::Cx(cx),
     )
 }
 
@@ -812,37 +804,38 @@ fn find_tests_in_dir(
     dir: &Utf8Path,
     relative_dir_path: &Utf8Path,
     modified_tests: &Vec<Utf8PathBuf>,
-    on_test_found: &mut dyn FnMut(&TestPaths, Option<Utf8PathBuf>),
-) -> io::Result<()> {
-=======
+    handler: TestHandler<'_>,
 ) -> io::Result<TestCollector> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     // Ignore directories that contain a file named `compiletest-ignore-dir`.
     if dir.join("compiletest-ignore-dir").exists() {
         return Ok(TestCollector::new());
     }
 
     // For run-make tests, a "test file" is actually a directory that contains an `rmake.rs`.
-<<<<<<< HEAD
     if config.mode == Mode::RunMake {
-=======
-    if cx.config.mode == Mode::RunMake {
         let mut collector = TestCollector::new();
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         if dir.join("rmake.rs").exists() {
             let paths = TestPaths {
                 file: dir.to_path_buf(),
                 relative_dir: relative_dir_path.parent().unwrap().to_path_buf(),
             };
-<<<<<<< HEAD
-            on_test_found(&paths, None);
-=======
-            make_test(cx, &mut collector, &paths);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+            match &handler {
+                TestHandler::Sender(tx) => tx.send(paths).unwrap(),
+                TestHandler::Cx(cx) => make_test(cx, &mut collector, &paths),
+            }
             // This directory is a test, so don't try to find other tests inside it.
             return Ok(collector);
         }
     }
+
+    // If we find a test foo/bar.rs, we have to build the
+    // output directory `$build/foo` so we can write
+    // `$build/foo/bar` into it. We do this *now* in this
+    // sequential loop because otherwise, if we do it in the
+    // tests themselves, they race for the privilege of
+    // creating the directories and sometimes fail randomly.
+    let build_dir = output_relative_path(&config, relative_dir_path);
+    fs::create_dir_all(&build_dir).unwrap();
 
     // Add each `.rs` file as a test, and recurse further on any
     // subdirectories we find, except for `auxiliary` directories.
@@ -856,32 +849,7 @@ fn find_tests_in_dir(
             let file_path = Utf8PathBuf::try_from(file.path()).unwrap();
             let file_name = file_path.file_name().unwrap();
 
-<<<<<<< HEAD
-        if is_test(file_name) && (!config.only_modified || modified_tests.contains(&file_path)) {
-            // We found a test file, so create the corresponding libtest structures.
-            debug!(%file_path, "found test file");
-
-            // Record the stem of the test file, to check for overlaps later.
-            let rel_test_path = relative_dir_path.join(file_path.file_stem().unwrap());
-            let paths =
-                TestPaths { file: file_path, relative_dir: relative_dir_path.to_path_buf() };
-
-            on_test_found(&paths, Some(rel_test_path));
-        } else if file_path.is_dir() {
-            // Recurse to find more tests in a subdirectory.
-            let relative_file_path = relative_dir_path.join(file.file_name().to_str().unwrap());
-            if file_name != "auxiliary" {
-                debug!(%file_path, "found directory");
-                find_tests_in_dir(
-                    config.clone(),
-                    &file_path,
-                    &relative_file_path,
-                    modified_tests,
-                    on_test_found,
-                )?;
-=======
-            if is_test(file_name)
-                && (!cx.config.only_modified || cx.modified_tests.contains(&file_path))
+            if is_test(file_name) && (!config.only_modified || modified_tests.contains(&file_path))
             {
                 // We found a test file, so create the corresponding libtest structures.
                 debug!(%file_path, "found test file");
@@ -892,17 +860,26 @@ fn find_tests_in_dir(
 
                 let paths =
                     TestPaths { file: file_path, relative_dir: relative_dir_path.to_path_buf() };
-                make_test(cx, &mut collector, &paths);
+
+                match &handler {
+                    TestHandler::Sender(tx) => tx.send(paths).unwrap(),
+                    TestHandler::Cx(cx) => make_test(cx, &mut collector, &paths),
+                }
             } else if file_path.is_dir() {
                 // Recurse to find more tests in a subdirectory.
                 let relative_file_path = relative_dir_path.join(file_name);
                 if file_name != "auxiliary" {
                     debug!(%file_path, "found directory");
-                    collector.merge(collect_tests_from_dir(cx, &file_path, &relative_file_path)?);
+                    collector.merge(find_tests_in_dir(
+                        config.clone(),
+                        &file_path,
+                        &relative_file_path,
+                        modified_tests,
+                        handler.clone(),
+                    )?);
                 }
             } else {
                 debug!(%file_path, "found other file/directory");
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             }
             Ok(collector)
         })

@@ -7,11 +7,12 @@ use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::sync::Arc;
+use std::sync::mpsc::channel;
 
 use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::common::{Config, Mode, TestPaths};
-use crate::find_tests_in_dir;
+use crate::{TestHandler, find_tests_in_dir};
 
 const BULK_ANNOTATIONS_FILE_NAME: &str = "ferrocene-annotations";
 
@@ -64,18 +65,21 @@ impl Collector {
 
     fn collect(&mut self) {
         let src_base = self.config.src_test_suite_root.clone();
+        let (tx, rx) = channel();
         find_tests_in_dir(
             self.config.clone(),
             &src_base,
             &Utf8PathBuf::new(),
             &Vec::new(),
-            &mut |test, _| {
-                if let Some(t) = self.collect_test(test) {
-                    self.tests.push(t);
-                }
-            },
+            TestHandler::Sender(tx),
         )
         .unwrap();
+
+        for test in rx.iter() {
+            if let Some(t) = self.collect_test(&test) {
+                self.tests.push(t);
+            }
+        }
     }
 
     fn collect_test(&mut self, paths: &TestPaths) -> Option<TestFile> {

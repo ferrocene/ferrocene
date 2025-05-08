@@ -28,6 +28,7 @@ use std::collections::HashSet;
 use std::fmt::Write;
 use std::io::{self, ErrorKind};
 use std::process::{Command, Stdio};
+use std::sync::mpsc::Sender;
 use std::sync::{Arc, OnceLock};
 use std::time::SystemTime;
 use std::{env, fs, vec};
@@ -35,6 +36,7 @@ use std::{env, fs, vec};
 use build_helper::git::{get_git_modified_files, get_git_untracked_files};
 use camino::{Utf8Path, Utf8PathBuf};
 use getopts::Options;
+use rayon::iter::{ParallelBridge, ParallelIterator};
 use tracing::*;
 use walkdir::WalkDir;
 
@@ -190,7 +192,6 @@ pub fn parse_config(args: Vec<String>) -> Config {
             "run tests which rely on commit version being compiled into the binaries",
         )
         .optopt("", "edition", "default Rust edition", "EDITION")
-        .reqopt("", "git-repository", "name of the git repository", "ORG/REPO")
         .reqopt("", "nightly-branch", "name of the git branch for nightly", "BRANCH")
         .reqopt(
             "",
@@ -205,7 +206,7 @@ pub fn parse_config(args: Vec<String>) -> Config {
             "COMMAND",
         )
         .reqopt("", "minicore-path", "path to minicore aux library", "PATH")
-        .optflag("n", "new-executor", "enables the new test executor instead of using libtest")
+        .optflag("N", "no-new-executor", "disables the new test executor, and uses libtest instead")
         .optopt(
             "",
             "debugger",
@@ -442,7 +443,6 @@ pub fn parse_config(args: Vec<String>) -> Config {
 
         nocapture: matches.opt_present("no-capture"),
 
-        git_repository: matches.opt_str("git-repository").unwrap(),
         nightly_branch: matches.opt_str("nightly-branch").unwrap(),
         git_merge_commit_email: matches.opt_str("git-merge-commit-email").unwrap(),
 
@@ -452,7 +452,7 @@ pub fn parse_config(args: Vec<String>) -> Config {
 
         minicore_path: opt_path(matches, "minicore-path"),
 
-        new_executor: matches.opt_present("new-executor"),
+        no_new_executor: matches.opt_present("no-new-executor"),
     }
 }
 
@@ -579,9 +579,10 @@ pub fn run_tests(config: Arc<Config>) {
     // Delegate to the executor to filter and run the big list of test structures
     // created during test discovery. When the executor decides to run a test,
     // it will return control to the rest of compiletest by calling `runtest::run`.
-    let res = if config.new_executor {
+    let res = if !config.no_new_executor {
         Ok(executor::run_tests(&config, tests))
     } else {
+        // FIXME(Zalathar): Eventually remove the libtest executor entirely.
         crate::executor::libtest::execute_tests(&config, tests)
     };
 
@@ -642,6 +643,18 @@ struct TestCollector {
     poisoned: bool,
 }
 
+impl TestCollector {
+    fn new() -> Self {
+        TestCollector { tests: vec![], found_path_stems: HashSet::new(), poisoned: false }
+    }
+
+    fn merge(&mut self, mut other: Self) {
+        self.tests.append(&mut other.tests);
+        self.found_path_stems.extend(other.found_path_stems);
+        self.poisoned |= other.poisoned;
+    }
+}
+
 /// Creates test structures for every test/revision in the test suite directory.
 ///
 /// This always inspects _all_ test files in the suite (e.g. all 17k+ ui tests),
@@ -660,10 +673,7 @@ pub(crate) fn collect_and_make_tests(config: Arc<Config>) -> Vec<CollectedTest> 
     let cache = HeadersCache::load(&config);
 
     let cx = TestCollectorCx { config, cache, common_inputs_stamp, modified_tests };
-    let mut collector =
-        TestCollector { tests: vec![], found_path_stems: HashSet::new(), poisoned: false };
-
-    collect_tests_from_dir(&cx, &mut collector, &cx.config.src_test_suite_root, Utf8Path::new(""))
+    let collector = collect_tests_from_dir(&cx, &cx.config.src_test_suite_root, Utf8Path::new(""))
         .unwrap_or_else(|reason| {
             panic!("Could not read tests from {}: {reason}", cx.config.src_test_suite_root)
         });
@@ -747,7 +757,7 @@ fn modified_tests(config: &Config, dir: &Utf8Path) -> Result<Vec<Utf8PathBuf>, S
         &vec!["rs", "stderr", "fixed"],
     )?;
     // Add new test cases to the list, it will be convenient in daily development.
-    let untracked_files = get_git_untracked_files(&config.git_config(), None)?.unwrap_or(vec![]);
+    let untracked_files = get_git_untracked_files(Some(dir.as_std_path()))?.unwrap_or(vec![]);
 
     let all_paths = [&files[..], &untracked_files[..]].concat();
     let full_paths = {
@@ -765,35 +775,26 @@ fn modified_tests(config: &Config, dir: &Utf8Path) -> Result<Vec<Utf8PathBuf>, S
     Ok(full_paths)
 }
 
+// Added to allow reuse by custom Ferrocene code
+#[derive(Clone)]
+enum TestHandler<'a> {
+    Sender(Sender<TestPaths>),
+    Cx(&'a TestCollectorCx),
+}
+
 /// Recursively scans a directory to find test files and create test structures
 /// that will be handed over to libtest.
 fn collect_tests_from_dir(
     cx: &TestCollectorCx,
-    collector: &mut TestCollector,
     dir: &Utf8Path,
     relative_dir_path: &Utf8Path,
-) -> io::Result<()> {
+) -> io::Result<TestCollector> {
     find_tests_in_dir(
         cx.config.clone(),
         dir,
         relative_dir_path,
         &cx.modified_tests,
-        &mut |paths, rel_test_path| {
-            // If we find a test foo/bar.rs, we have to build the
-            // output directory `$build/foo` so we can write
-            // `$build/foo/bar` into it. We do this *now* in this
-            // sequential loop because otherwise, if we do it in the
-            // tests themselves, they race for the privilege of
-            // creating the directories and sometimes fail randomly.
-            let build_dir = output_relative_path(&cx.config, &paths.relative_dir);
-            if !build_dir.exists() {
-                fs::create_dir_all(&build_dir).unwrap();
-            }
-            if let Some(rel_test_path) = rel_test_path {
-                collector.found_path_stems.insert(rel_test_path);
-            }
-            make_test(cx, collector, &paths);
-        },
+        TestHandler::Cx(cx),
     )
 }
 
@@ -803,63 +804,93 @@ fn find_tests_in_dir(
     dir: &Utf8Path,
     relative_dir_path: &Utf8Path,
     modified_tests: &Vec<Utf8PathBuf>,
-    on_test_found: &mut dyn FnMut(&TestPaths, Option<Utf8PathBuf>),
-) -> io::Result<()> {
+    handler: TestHandler<'_>,
+) -> io::Result<TestCollector> {
     // Ignore directories that contain a file named `compiletest-ignore-dir`.
     if dir.join("compiletest-ignore-dir").exists() {
-        return Ok(());
+        return Ok(TestCollector::new());
     }
 
     // For run-make tests, a "test file" is actually a directory that contains an `rmake.rs`.
     if config.mode == Mode::RunMake {
+        let mut collector = TestCollector::new();
         if dir.join("rmake.rs").exists() {
             let paths = TestPaths {
                 file: dir.to_path_buf(),
                 relative_dir: relative_dir_path.parent().unwrap().to_path_buf(),
             };
-            on_test_found(&paths, None);
+            match &handler {
+                TestHandler::Sender(tx) => tx.send(paths).unwrap(),
+                TestHandler::Cx(cx) => make_test(cx, &mut collector, &paths),
+            }
             // This directory is a test, so don't try to find other tests inside it.
-            return Ok(());
+            return Ok(collector);
         }
     }
+
+    // If we find a test foo/bar.rs, we have to build the
+    // output directory `$build/foo` so we can write
+    // `$build/foo/bar` into it. We do this *now* in this
+    // sequential loop because otherwise, if we do it in the
+    // tests themselves, they race for the privilege of
+    // creating the directories and sometimes fail randomly.
+    let build_dir = output_relative_path(&config, relative_dir_path);
+    fs::create_dir_all(&build_dir).unwrap();
 
     // Add each `.rs` file as a test, and recurse further on any
     // subdirectories we find, except for `auxiliary` directories.
     // FIXME: this walks full tests tree, even if we have something to ignore
     // use walkdir/ignore like in tidy?
-    for file in fs::read_dir(dir.as_std_path())? {
-        let file = file?;
-        let file_path = Utf8PathBuf::try_from(file.path()).unwrap();
-        let file_name = file_path.file_name().unwrap();
+    fs::read_dir(dir.as_std_path())?
+        .par_bridge()
+        .map(|file| {
+            let mut collector = TestCollector::new();
+            let file = file?;
+            let file_path = Utf8PathBuf::try_from(file.path()).unwrap();
+            let file_name = file_path.file_name().unwrap();
 
-        if is_test(file_name) && (!config.only_modified || modified_tests.contains(&file_path)) {
-            // We found a test file, so create the corresponding libtest structures.
-            debug!(%file_path, "found test file");
+            if is_test(file_name) && (!config.only_modified || modified_tests.contains(&file_path))
+            {
+                // We found a test file, so create the corresponding libtest structures.
+                debug!(%file_path, "found test file");
 
-            // Record the stem of the test file, to check for overlaps later.
-            let rel_test_path = relative_dir_path.join(file_path.file_stem().unwrap());
-            let paths =
-                TestPaths { file: file_path, relative_dir: relative_dir_path.to_path_buf() };
+                // Record the stem of the test file, to check for overlaps later.
+                let rel_test_path = relative_dir_path.join(file_path.file_stem().unwrap());
+                collector.found_path_stems.insert(rel_test_path);
 
-            on_test_found(&paths, Some(rel_test_path));
-        } else if file_path.is_dir() {
-            // Recurse to find more tests in a subdirectory.
-            let relative_file_path = relative_dir_path.join(file.file_name().to_str().unwrap());
-            if file_name != "auxiliary" {
-                debug!(%file_path, "found directory");
-                find_tests_in_dir(
-                    config.clone(),
-                    &file_path,
-                    &relative_file_path,
-                    modified_tests,
-                    on_test_found,
-                )?;
+                let paths =
+                    TestPaths { file: file_path, relative_dir: relative_dir_path.to_path_buf() };
+
+                match &handler {
+                    TestHandler::Sender(tx) => tx.send(paths).unwrap(),
+                    TestHandler::Cx(cx) => make_test(cx, &mut collector, &paths),
+                }
+            } else if file_path.is_dir() {
+                // Recurse to find more tests in a subdirectory.
+                let relative_file_path = relative_dir_path.join(file_name);
+                if file_name != "auxiliary" {
+                    debug!(%file_path, "found directory");
+                    collector.merge(find_tests_in_dir(
+                        config.clone(),
+                        &file_path,
+                        &relative_file_path,
+                        modified_tests,
+                        handler.clone(),
+                    )?);
+                }
+            } else {
+                debug!(%file_path, "found other file/directory");
             }
-        } else {
-            debug!(%file_path, "found other file/directory");
-        }
-    }
-    Ok(())
+            Ok(collector)
+        })
+        .reduce(
+            || Ok(TestCollector::new()),
+            |a, b| {
+                let mut a = a?;
+                a.merge(b?);
+                Ok(a)
+            },
+        )
 }
 
 /// Returns true if `file_name` looks like a proper test file name.

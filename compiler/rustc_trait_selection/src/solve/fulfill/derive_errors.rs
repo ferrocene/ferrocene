@@ -1,5 +1,6 @@
 use std::ops::ControlFlow;
 
+use rustc_hir::LangItem;
 use rustc_infer::infer::InferCtxt;
 use rustc_infer::traits::solve::{CandidateSource, GoalSource, MaybeCause};
 use rustc_infer::traits::{
@@ -109,10 +110,16 @@ pub(super) fn fulfillment_error_for_stalled<'tcx>(
                 false,
             ),
             Ok((_, Certainty::Yes)) => {
-                bug!("did not expect successful goal when collecting ambiguity errors")
+                bug!(
+                    "did not expect successful goal when collecting ambiguity errors for `{:?}`",
+                    infcx.resolve_vars_if_possible(root_obligation.predicate),
+                )
             }
             Err(_) => {
-                bug!("did not expect selection error when collecting ambiguity errors")
+                bug!(
+                    "did not expect selection error when collecting ambiguity errors for `{:?}`",
+                    infcx.resolve_vars_if_possible(root_obligation.predicate),
+                )
             }
         }
     });
@@ -234,13 +241,13 @@ impl<'tcx> BestObligation<'tcx> {
     fn visit_well_formed_goal(
         &mut self,
         candidate: &inspect::InspectCandidate<'_, 'tcx>,
-        arg: ty::GenericArg<'tcx>,
+        term: ty::Term<'tcx>,
     ) -> ControlFlow<PredicateObligation<'tcx>> {
         let infcx = candidate.goal().infcx();
         let param_env = candidate.goal().goal().param_env;
         let body_id = self.obligation.cause.body_id;
 
-        for obligation in wf::unnormalized_obligations(infcx, param_env, arg, self.span(), body_id)
+        for obligation in wf::unnormalized_obligations(infcx, param_env, term, self.span(), body_id)
             .into_iter()
             .flatten()
         {
@@ -436,8 +443,8 @@ impl<'tcx> ProofTreeVisitor<'tcx> for BestObligation<'tcx> {
                     polarity: ty::PredicatePolarity::Positive,
                 }))
             }
-            ty::PredicateKind::Clause(ty::ClauseKind::WellFormed(arg)) => {
-                return self.visit_well_formed_goal(candidate, arg);
+            ty::PredicateKind::Clause(ty::ClauseKind::WellFormed(term)) => {
+                return self.visit_well_formed_goal(candidate, term);
             }
             _ => ChildMode::PassThrough,
         };
@@ -452,9 +459,8 @@ impl<'tcx> ProofTreeVisitor<'tcx> for BestObligation<'tcx> {
         // We do this as a separate loop so that we do not choose to tell the user about some nested
         // goal before we encounter a `T: FnPtr` nested goal.
         for nested_goal in &nested_goals {
-            if let Some(fn_ptr_trait) = tcx.lang_items().fn_ptr_trait()
-                && let Some(poly_trait_pred) = nested_goal.goal().predicate.as_trait_clause()
-                && poly_trait_pred.def_id() == fn_ptr_trait
+            if let Some(poly_trait_pred) = nested_goal.goal().predicate.as_trait_clause()
+                && tcx.is_lang_item(poly_trait_pred.def_id(), LangItem::FnPtrTrait)
                 && let Err(NoSolution) = nested_goal.result()
             {
                 return ControlFlow::Break(self.obligation.clone());

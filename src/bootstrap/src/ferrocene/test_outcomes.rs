@@ -3,6 +3,9 @@
 
 use std::path::PathBuf;
 
+use build_helper::ci::CiEnv;
+use build_helper::git::get_closest_upstream_commit;
+
 use crate::core::builder::{Builder, ShouldRun, Step};
 use crate::core::config::FerroceneTestOutcomes;
 use crate::ferrocene::download_and_extract_ci_outcomes;
@@ -20,7 +23,15 @@ impl Step for TestOutcomesDir {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         match &builder.config.ferrocene_test_outcomes {
             FerroceneTestOutcomes::DownloadCi => {
-                Some(download_and_extract_ci_outcomes(builder, "test"))
+                let commit = get_closest_upstream_commit(
+                    None,
+                    &builder.config.git_config(),
+                    CiEnv::None,
+                )
+                .expect(
+                    "failed to retrieve the git commit for ferrocene.test-outcomes=download-ci",
+                );
+                Some(download_and_extract_ci_outcomes(builder, &commit.unwrap()))
             }
             FerroceneTestOutcomes::Disabled => None,
             FerroceneTestOutcomes::Custom(path) => Some(std::fs::canonicalize(path).unwrap()),

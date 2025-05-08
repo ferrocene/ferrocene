@@ -146,7 +146,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                             && leaf_trait_predicate.def_id() != root_pred.def_id()
                             // The root trait is not `Unsize`, as to avoid talking about it in
                             // `tests/ui/coercion/coerce-issue-49593-box-never.rs`.
-                            && Some(root_pred.def_id()) != self.tcx.lang_items().unsize_trait()
+                            && !self.tcx.is_lang_item(root_pred.def_id(), LangItem::Unsize)
                         {
                             (
                                 self.resolve_vars_if_possible(
@@ -813,38 +813,17 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         obligation: &PredicateObligation<'tcx>,
         mut trait_pred: ty::PolyTraitPredicate<'tcx>,
     ) -> Option<ErrorGuaranteed> {
-        // If `AsyncFnKindHelper` is not implemented, that means that the closure kind
-        // doesn't extend the goal kind. This is worth reporting, but we can only do so
-        // if we actually know which closure this goal comes from, so look at the cause
-        // to see if we can extract that information.
-        if self.tcx.is_lang_item(trait_pred.def_id(), LangItem::AsyncFnKindHelper)
-            && let Some(found_kind) =
-                trait_pred.skip_binder().trait_ref.args.type_at(0).to_opt_closure_kind()
-            && let Some(expected_kind) =
-                trait_pred.skip_binder().trait_ref.args.type_at(1).to_opt_closure_kind()
-            && !found_kind.extends(expected_kind)
-        {
-            if let Some((_, Some(parent))) = obligation.cause.code().parent_with_predicate() {
-                // If we have a derived obligation, then the parent will be a `AsyncFn*` goal.
+        // If we end up on an `AsyncFnKindHelper` goal, try to unwrap the parent
+        // `AsyncFn*` goal.
+        if self.tcx.is_lang_item(trait_pred.def_id(), LangItem::AsyncFnKindHelper) {
+            let mut code = obligation.cause.code();
+            // Unwrap a `FunctionArg` cause, which has been refined from a derived obligation.
+            if let ObligationCauseCode::FunctionArg { parent_code, .. } = code {
+                code = &**parent_code;
+            }
+            // If we have a derived obligation, then the parent will be a `AsyncFn*` goal.
+            if let Some((_, Some(parent))) = code.parent_with_predicate() {
                 trait_pred = parent;
-            } else if let &ObligationCauseCode::FunctionArg { arg_hir_id, .. } =
-                obligation.cause.code()
-                && let Some(typeck_results) = &self.typeck_results
-                && let ty::Closure(closure_def_id, _) | ty::CoroutineClosure(closure_def_id, _) =
-                    *typeck_results.node_type(arg_hir_id).kind()
-            {
-                // Otherwise, extract the closure kind from the obligation,
-                // but only if we actually have an argument to deduce the
-                // closure type from...
-                let mut err = self.report_closure_error(
-                    &obligation,
-                    closure_def_id,
-                    found_kind,
-                    expected_kind,
-                    "Async",
-                );
-                self.note_obligation_cause(&mut err, &obligation);
-                return Some(err.emit());
             }
         }
 
@@ -1523,19 +1502,17 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     return None;
                 };
 
-                let trait_assoc_item = self.tcx.opt_associated_item(proj.projection_term.def_id)?;
-                let trait_assoc_ident = trait_assoc_item.ident(self.tcx);
-
                 let mut associated_items = vec![];
                 self.tcx.for_each_relevant_impl(
                     self.tcx.trait_of_item(proj.projection_term.def_id)?,
                     proj.projection_term.self_ty(),
                     |impl_def_id| {
                         associated_items.extend(
-                            self.tcx
-                                .associated_items(impl_def_id)
-                                .in_definition_order()
-                                .find(|assoc| assoc.ident(self.tcx) == trait_assoc_ident),
+                            self.tcx.associated_items(impl_def_id).in_definition_order().find(
+                                |assoc| {
+                                    assoc.trait_item_def_id == Some(proj.projection_term.def_id)
+                                },
+                            ),
                         );
                     },
                 );
@@ -2274,10 +2251,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         // auto-traits or fundamental traits that might not be exactly what
         // the user might expect to be presented with. Instead this is
         // useful for less general traits.
-        if peeled
-            && !self.tcx.trait_is_auto(def_id)
-            && !self.tcx.lang_items().iter().any(|(_, id)| id == def_id)
-        {
+        if peeled && !self.tcx.trait_is_auto(def_id) && self.tcx.as_lang_item(def_id).is_none() {
             let impl_candidates = self.find_similar_impl_candidates(trait_pred);
             self.report_similar_impl_candidates(
                 &impl_candidates,
@@ -3013,8 +2987,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         // This shouldn't be common unless manually implementing one of the
         // traits manually, but don't make it more confusing when it does
         // happen.
-        if Some(expected_trait_ref.def_id) != self.tcx.lang_items().coroutine_trait() && not_tupled
-        {
+        if !self.tcx.is_lang_item(expected_trait_ref.def_id, LangItem::Coroutine) && not_tupled {
             return Ok(self.report_and_explain_type_error(
                 TypeTrace::trait_refs(&obligation.cause, expected_trait_ref, found_trait_ref),
                 obligation.param_env,

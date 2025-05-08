@@ -399,7 +399,6 @@ pub struct Config {
     pub nocapture: bool,
 
     // Needed both to construct build_helper::git::GitConfig
-    pub git_repository: String,
     pub nightly_branch: String,
     pub git_merge_commit_email: String,
 
@@ -415,10 +414,13 @@ pub struct Config {
     /// ABI tests.
     pub minicore_path: Utf8PathBuf,
 
-    /// If true, run tests with the "new" executor that was written to replace
-    /// compiletest's dependency on libtest. Eventually this will become the
-    /// default, and the libtest dependency will be removed.
-    pub new_executor: bool,
+    /// If true, disable the "new" executor, and use the older libtest-based
+    /// executor to run tests instead. This is a temporary fallback, to make
+    /// manual comparative testing easier if bugs are found in the new executor.
+    ///
+    /// FIXME(Zalathar): Eventually remove this flag and remove the libtest
+    /// dependency.
+    pub no_new_executor: bool,
 }
 
 impl Config {
@@ -511,7 +513,6 @@ impl Config {
 
     pub fn git_config(&self) -> GitConfig<'_> {
         GitConfig {
-            git_repository: &self.git_repository,
             nightly_branch: &self.nightly_branch,
             git_merge_commit_email: &self.git_merge_commit_email,
         }

@@ -18,6 +18,13 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.86.0
+-------------------------------
+
+- `Stabilize upcasting trait objects to supertraits. <https://github.com/rust-lang/rust/pull/134367>`_
+
+  - New paragraph: :p:`fls_QB4c6FNKxaPl`
+
 Language changes in Rust 1.85.0
 -------------------------------
 

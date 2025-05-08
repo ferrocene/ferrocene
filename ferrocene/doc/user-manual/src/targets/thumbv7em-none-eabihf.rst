@@ -13,14 +13,16 @@
    <https://doc.rust-lang.org/nightly/rustc/platform-support/thumbv7em-none-eabi.html#target-cpu-and-target-feature-options>`_.
 
    Please contact support if your use case demands fully optimized builds for
-   a specific CPU configuration.
+   a specific CPU configuration, or double-precision FPU support.
 
 
 The ``thumbv7em-none-eabihf`` Ferrocene target provides support for
 bare-metal ARMv7E-M processors with the 
 `T32 ISA <https://developer.arm.com/Architectures/T32%20Instruction%20Set%20Architecture>`_,
-using the *hard-float ABI* with a single precision FPU. This includes the Arm Cortex-M4F and Arm
-Cortex-M7F.
+using the *hard-float ABI* with a single precision FPU. This includes the Arm
+Cortex-M4F and the single-precision variant of the Arm Cortex-M7F. The
+double-precision variant of the Arm Cortex-M7F is also supported but only
+single-precision operations will be executed on the FPU.
 
 On this target, functions accepting ``f32`` or ``f64`` will have those
 arguments passed via FPU registers. For more information on the

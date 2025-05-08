@@ -19,7 +19,7 @@
 The ``thumbv7em-none-eabi`` Ferrocene target provides support for
 bare-metal ARMv7E-M processors with the 
 `T32 ISA <https://developer.arm.com/Architectures/T32%20Instruction%20Set%20Architecture>`_,
-using the *soft-float ABI*.
+using the *soft-float ABI*. This includes the Arm Cortex-M4 and Arm Cortex-M7.
 
 On this target, functions accepting ``f32`` or ``f64`` will have those
 arguments packed into integer registers. For more information on the

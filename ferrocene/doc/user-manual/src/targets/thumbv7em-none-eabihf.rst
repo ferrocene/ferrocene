@@ -16,10 +16,11 @@
    a specific CPU configuration.
 
 
-The ``thumbv7em-none-eabi`` Ferrocene target provides support for
+The ``thumbv7em-none-eabihf`` Ferrocene target provides support for
 bare-metal ARMv7E-M processors with the 
 `T32 ISA <https://developer.arm.com/Architectures/T32%20Instruction%20Set%20Architecture>`_,
-using the *hard-float ABI*.
+using the *hard-float ABI* with a single precision FPU. This includes the Arm Cortex-M4F and Arm
+Cortex-M7F.
 
 On this target, functions accepting ``f32`` or ``f64`` will have those
 arguments passed via FPU registers. For more information on the

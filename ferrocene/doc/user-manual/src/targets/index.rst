@@ -5,10 +5,10 @@ Compilation targets overview
 ============================
 
 Ferrocene has support for multiple compilation targets and host platforms.
-Targets are categorized as either "supported" or "experimental" depending on
-the level of support. This page lists the current support status for all
-targets, and individual pages with more details are provided for supported
-targets.
+Targets are categorized as either "qualified", "quality managed", "untested",
+or "experimental" depending on the level of support. This page lists the
+current support status for all targets, and individual pages with more details
+are provided for supported targets, as well as some other targets.
 
 There are two kinds of targets available:
 
@@ -99,9 +99,11 @@ available.
 For any of the following reasons, the target is not qualified:
 
 * The target is deemed unlikely to be used in a safety critical context.
-* The target is in the process of qualification, but is not completed yet.
+* The target is in the process of qualification, but the work has not
+  been completed yet.
 
-Quality managed targets are not qualified, but can usually be qualified on request.
+Quality managed targets are not qualified, but can usually become qualified on
+request.
 
 .. list-table::
    :header-rows: 1
@@ -118,14 +120,23 @@ Quality managed targets are not qualified, but can usually be qualified on reque
      - Full
      - \-
 
+Untested targets
+----------------
 
-Experimental targets
---------------------
-
-Experimental targets cannot be used in safety-critical contexts, and there is
+Untested targets cannot be used in safety-critical contexts, and there is
 no guarantee that the Ferrocene test suite is successfully executed on the
 target. They are provided as a preview, with limited support available. They
 should not be used in production.
+
+For any of the following reasons, the target is not quality managed or qualified:
+
+* Some tests present within the Ferrocene test suite may not pass on the target.
+* Some or all of the Ferrocene test suite does not yet execute on the target.
+* An appropriate virtualization target for testing has not been identified.
+* Improved support for the target has not been requested.
+
+Untested managed targets are not quality managed or qualified, but can usually
+become quality managed or qualified on request.
 
 .. list-table::
    :header-rows: 1
@@ -190,6 +201,37 @@ should not be used in production.
      - Bare-metal
      - \-
 
+   * - :ref:`x86_64-pc-windows-msvc`
+     - ``x86_64-pc-windows-msvc``
+     - Host platform
+     - Full
+     - \-
+
+Experimental Targets
+--------------------
+
+Experimental targets cannot be used in safety-critical contexts, the Ferrocene test suite
+was not executed on the target. No support is available for these targets, artifacts are
+provided as-is and the targets could be removed from future versions without notice.
+
+For any of the following reasons, the target is experimental:
+
+* The target is deprecated and no longer produced.
+* The target has an unstable API.
+* The target is a proof of concept.
+
+If your project needs support for one of these targets, consider reaching out the Ferrocene
+support team to discuss custom support contracts.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Target
+     - Triple
+     - Kind
+     - Standard library
+     - Notes
+
    * - :target:`wasm32-unknown-unknown`
      - ``wasm32-unknown-unknown``
      - Cross-compilation
@@ -200,17 +242,8 @@ should not be used in production.
      - ``x86_64-apple-darwin``
      - Cross-compilation
      - Full
-     - Available as a cross-compile target on :ref:`aarch64-apple-darwin`.
+     - Apple is no longer producing x86 machines.
 
-   * - :ref:`x86_64-pc-windows-msvc`
-     - ``x86_64-pc-windows-msvc``
-     - Host platform
-     - Full
-     - \-
-
-
-If your project needs support for one of these targets, please reach out to the
-Ferrocene support team.
 
 Unsupported targets
 -------------------

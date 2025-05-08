@@ -20,7 +20,6 @@ const OXIDOS_CRATES: &[&str] = &[
     "deno",
     "wasm",
     "capsules-core",
-    "capsules-extra",
 ];
 const OXIDOS_DEBUG_FEATURES: &[&str] = &[
     // We build two variants of OxidOS: the standard variant, and a variant meant for
@@ -139,7 +138,7 @@ impl Step for BuildOxidOS {
         let _guard = builder.msg(Kind::Build, compiler.stage, self.name(), compiler.host, target);
 
         let mode = Mode::ToolCustom { name: self.name() };
-        let mut cargo = builder.cargo(compiler, mode, SourceType::InTree, target, Kind::Build);
+        let mut cargo = builder.cargo(compiler, mode, SourceType::Submodule, target, Kind::Build);
 
         cargo.current_dir(&source);
         cargo.rustflag(&format!("-Zallow-features={}", OXIDOS_ALLOW_UNSTABLE_FEATURES.join(",")));
@@ -176,6 +175,8 @@ impl Step for BuildOxidOS {
                 cargo.args(["--features", *feature]);
             }
         }
+
+        cargo.rustflag("-Arust_2018_idioms");
 
         let stamp =
             BuildStamp::new(&builder.cargo_out(compiler, mode, target)).with_prefix(self.name());

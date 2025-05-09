@@ -76,3 +76,6 @@ fn main() {
     let x2 = x as &dyn Parent2<P2=u32>;
     x2.p2();
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

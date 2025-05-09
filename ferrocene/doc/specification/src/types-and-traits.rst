@@ -2048,6 +2048,11 @@ occur when:
 * :dp:`fls_SYnFJBhi0IWj`
   The source :t:`type` is a :t:`trait object type` and the target :t:`type` is a :t:`trait object type` with the same or no :t:`principal trait`, and the target :t:`type` has the same or less non-:t:`principal trait` :t:`[trait bound]s`.
 
+* :dp:`fls_QB4c6FNKxaPl`
+  The source :t:`type` is a :t:`trait object type` with some :t:`principal trait` ``T``
+  and the target :t:`type` is a :t:`trait object type` with some :t:`principal trait` ``U``,
+  where ``U`` is a :t:`supertrait` of ``T``.
+
 :dp:`fls_iiiu2q7pym4p`
 An :t:`unsized coercion` is a :t:`type coercion` that converts a :t:`sized type`
 into an :t:`unsized type`. :t:`Unsized coercion` from a source :t:`type` to a

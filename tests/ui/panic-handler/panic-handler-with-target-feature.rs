@@ -12,3 +12,6 @@ use core::panic::PanicInfo;
 fn panic(info: &PanicInfo) -> ! {
     unimplemented!();
 }
+
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

@@ -31,3 +31,6 @@ unsafe fn without_avx(x: __m256) -> __m256 {
     };
     add(x, x)
 }
+
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

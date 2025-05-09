@@ -10,3 +10,6 @@ fn main() {
     let y: &dyn Bar<i32> = x;
     let z: &dyn Bar<u32> = x;
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

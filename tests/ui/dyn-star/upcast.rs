@@ -30,3 +30,6 @@ fn main() {
     let w: dyn* Bar = w;
     w.world();
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

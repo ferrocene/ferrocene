@@ -14,3 +14,6 @@ fn test(f: impl AsyncFn()) {}
 fn main() {
     test(target_feature); //~ ERROR the trait bound
 }
+
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

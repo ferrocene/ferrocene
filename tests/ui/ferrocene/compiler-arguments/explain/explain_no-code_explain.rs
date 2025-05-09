@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: --explain --explain
-//~? not a valid error code
+//~? ERROR not a valid error code
 
 fn main() {}
 

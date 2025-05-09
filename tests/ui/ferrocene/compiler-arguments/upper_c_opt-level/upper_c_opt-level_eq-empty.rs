@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -Copt-level=
-//~? level needs to be
+//~? ERROR level needs to be
 
 fn main() {}
 

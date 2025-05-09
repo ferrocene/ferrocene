@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -L all=
-//~? empty search path
+//~? ERROR empty search path
 
 fn main() {}
 

@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: --crate-name=
-//~? crate name must not be empty
+//~? ERROR crate name must not be empty
 
 fn main() {}
 

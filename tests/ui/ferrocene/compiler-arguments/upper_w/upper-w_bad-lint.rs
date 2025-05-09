@@ -1,7 +1,7 @@
 //@ check-pass
 //@ compile-flags: -W junk
-//~? unknown lint
-//~? unknown lint
-//~? unknown lint
+//~? WARN unknown lint
+//~? WARN unknown lint
+//~? WARN unknown lint
 
 fn main() {}

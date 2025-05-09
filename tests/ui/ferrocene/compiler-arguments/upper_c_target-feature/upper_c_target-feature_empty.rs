@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -Ctarget-feature
-//~? requires a string
+//~? ERROR requires a string
 
 fn main() {}
 

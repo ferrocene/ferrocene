@@ -893,16 +893,10 @@ impl Builder<'_> {
                 Mode::Std => self.config.std_debug_assertions,
                 Mode::Rustc => self.config.rustc_debug_assertions,
                 Mode::Codegen => self.config.rustc_debug_assertions,
-<<<<<<< HEAD
-                Mode::ToolBootstrap => false,
-                Mode::ToolStd => false,
-                Mode::ToolRustc => false,
-                Mode::ToolCustom { .. } => false,
-=======
                 Mode::ToolBootstrap => self.config.tools_debug_assertions,
                 Mode::ToolStd => self.config.tools_debug_assertions,
                 Mode::ToolRustc => self.config.tools_debug_assertions,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+                Mode::ToolCustom { .. } => self.config.tools_debug_assertions,
             }
             .to_string(),
         );

@@ -29,6 +29,14 @@ Language changes in Rust 1.86.0
 
   - Changed paragraph: :p:`fls_3qj3jvmtxvx6`
 
+- `The missing_abi lint now warns-by-default. <https://github.com/rust-lang/rust/pull/132397>`_
+
+  - No change: Lints are not part of the FLS
+
+- Rust now lints about double negations, to catch cases that might have intended to be a prefix decrement operator (--x) as written in other languages. This was previously a clippy lint, clippy::double_neg, and is `now available directly in Rust as double_negations. <https://github.com/rust-lang/rust/pull/126604>`_
+
+  - No change: Lints are not part of the FLS
+
 Language changes in Rust 1.85.0
 -------------------------------
 

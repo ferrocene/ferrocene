@@ -109,3 +109,6 @@ fn main() {
 fn some_extern() -> __m256 {
     todo!()
 }
+
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

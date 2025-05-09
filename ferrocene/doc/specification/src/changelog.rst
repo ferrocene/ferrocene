@@ -25,6 +25,10 @@ Language changes in Rust 1.86.0
 
   - New paragraph: :p:`fls_QB4c6FNKxaPl`
 
+- `Allow safe functions to be marked with the #[target_feature] attribute. <https://github.com/rust-lang/rust/pull/134090>`_
+
+  - Changed paragraph: :p:`fls_3qj3jvmtxvx6`
+
 Language changes in Rust 1.85.0
 -------------------------------
 

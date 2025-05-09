@@ -56,3 +56,6 @@ pub fn sse41_blend_doinline(x: __m128, y: __m128) -> __m128 {
     };
     f(x, y)
 }
+
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

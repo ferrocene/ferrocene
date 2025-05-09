@@ -36,6 +36,8 @@ mod float_iter_sum_identity;
 mod ieee754;
 mod nan;
 
+mod error;
+
 /// Adds the attribute to all items in the block.
 macro_rules! cfg_block {
     ($(#[$attr:meta]{$($it:item)*})*) => {$($(

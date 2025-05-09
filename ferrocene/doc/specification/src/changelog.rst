@@ -37,6 +37,10 @@ Language changes in Rust 1.86.0
 
   - No change: Lints are not part of the FLS
 
+- `More pointers are now detected as definitely not-null based on their alignment in const eval. <https://github.com/rust-lang/rust/pull/133700>`_
+
+  - No change: rules on when pointers are null were not documented
+
 - `Empty repr() attribute applied to invalid items are now correctly rejected. <https://github.com/rust-lang/rust/pull/133925>`_
 
   - No change: this bug was not documented

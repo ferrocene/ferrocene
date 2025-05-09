@@ -11,6 +11,14 @@ mod json_bom_plus_crlf_multifile_aux;
 fn main() {
     json_bom_plus_crlf_multifile_aux::test();
 }
+<<<<<<< HEAD
 
 // ferrocene-annotations: um_rustc_json
 // ferrocene-annotations: um_rustc_error_format
+=======
+
+//~? ERROR mismatched types
+//~? ERROR mismatched types
+//~? ERROR mismatched types
+//~? ERROR mismatched types
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

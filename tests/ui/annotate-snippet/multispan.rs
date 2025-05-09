@@ -1,5 +1,4 @@
 //@ proc-macro: multispan.rs
-//@ error-pattern:hello to you, too!
 //@ compile-flags: --error-format human-annotate-rs -Z unstable-options
 
 #![feature(proc_macro_hygiene)]
@@ -28,4 +27,8 @@ fn main() {
     hello!(hi good hi and good bye);
 }
 
+<<<<<<< HEAD
 // ferrocene-annotations: um_rustc_error_format
+=======
+//~? RAW hello to you, too!
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

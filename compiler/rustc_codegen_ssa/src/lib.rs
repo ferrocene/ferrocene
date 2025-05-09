@@ -14,6 +14,7 @@
 #![feature(string_from_utf8_lossy_owned)]
 #![feature(trait_alias)]
 #![feature(try_blocks)]
+#![recursion_limit = "256"]
 // tidy-alphabetical-end
 
 //! This crate contains codegen code that is used by all codegen backends (LLVM and others).
@@ -218,7 +219,7 @@ pub struct CrateInfo {
     pub target_cpu: String,
     pub target_features: Vec<String>,
     pub crate_types: Vec<CrateType>,
-    pub exported_symbols: UnordMap<CrateType, Vec<String>>,
+    pub exported_symbols: UnordMap<CrateType, Vec<(String, SymbolExportKind)>>,
     pub linked_symbols: FxIndexMap<CrateType, Vec<(String, SymbolExportKind)>>,
     pub local_crate_name: Symbol,
     pub compiler_builtins: Option<CrateNum>,
@@ -233,6 +234,24 @@ pub struct CrateInfo {
     pub windows_subsystem: Option<String>,
     pub natvis_debugger_visualizers: BTreeSet<DebuggerVisualizerFile>,
     pub lint_levels: CodegenLintLevels,
+}
+
+/// Target-specific options that get set in `cfg(...)`.
+///
+/// RUSTC_SPECIFIC_FEATURES should be skipped here, those are handled outside codegen.
+pub struct TargetConfig {
+    /// Options to be set in `cfg(target_features)`.
+    pub target_features: Vec<Symbol>,
+    /// Options to be set in `cfg(target_features)`, but including unstable features.
+    pub unstable_target_features: Vec<Symbol>,
+    /// Option for `cfg(target_has_reliable_f16)`, true if `f16` basic arithmetic works.
+    pub has_reliable_f16: bool,
+    /// Option for `cfg(target_has_reliable_f16_math)`, true if `f16` math calls work.
+    pub has_reliable_f16_math: bool,
+    /// Option for `cfg(target_has_reliable_f128)`, true if `f128` basic arithmetic works.
+    pub has_reliable_f128: bool,
+    /// Option for `cfg(target_has_reliable_f128_math)`, true if `f128` math calls work.
+    pub has_reliable_f128_math: bool,
 }
 
 #[derive(Encodable, Decodable)]

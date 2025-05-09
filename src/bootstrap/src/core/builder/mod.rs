@@ -977,6 +977,7 @@ impl<'a> Builder<'a> {
                 check::RunMakeSupport,
                 check::Compiletest,
                 check::FeaturesStatusDump,
+                check::CoverageDump,
             ),
             Kind::Test => describe!(
                 crate::ferrocene::test::TraceabilityMatrixTool,
@@ -1176,6 +1177,8 @@ impl<'a> Builder<'a> {
                 run::UnicodeTableGenerator,
                 run::FeaturesStatusDump,
                 run::CyclicStep,
+                run::CoverageDump,
+                run::Rustfmt,
             ),
             Kind::Sign => describe!(
                 // Qualification Documents
@@ -1610,7 +1613,7 @@ impl<'a> Builder<'a> {
             let out = step.clone().run(self);
             let dur = start.elapsed();
             let deps = self.time_spent_on_dependencies.replace(parent + dur);
-            (out, dur - deps)
+            (out, dur.saturating_sub(deps))
         };
 
         if self.config.print_step_timings && !self.config.dry_run() {

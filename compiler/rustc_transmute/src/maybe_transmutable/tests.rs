@@ -314,7 +314,7 @@ mod union {
         let u = s.clone().union(t.clone(), new_state);
 
         let expected_u =
-            Dfa::from_edges(b, a, &[(b, 0, c), (b, 1, d), (d, 1, a), (d, 0, a), (c, 0, a)]);
+            Dfa::from_edges(b, a, &[(b, 0..=0, c), (b, 1..=1, d), (d, 0..=1, a), (c, 0..=0, a)]);
 
         assert_eq!(u, expected_u);
 
@@ -400,16 +400,23 @@ mod r#ref {
     fn should_permit_identity_transmutation() {
         type Tree = crate::layout::Tree<Def, [(); 1]>;
 
-        let layout = Tree::Seq(vec![Tree::byte(0x00), Tree::Ref([()])]);
+        for validity in [false, true] {
+            let layout = Tree::Seq(vec![Tree::byte(0x00), Tree::Ref([()])]);
 
-        let answer = crate::maybe_transmutable::MaybeTransmutableQuery::new(
-            layout.clone(),
-            layout,
-            Assume::default(),
-            UltraMinimal::default(),
-        )
-        .answer();
-        assert_eq!(answer, Answer::If(crate::Condition::IfTransmutable { src: [()], dst: [()] }));
+            let assume = Assume { validity, ..Assume::default() };
+
+            let answer = crate::maybe_transmutable::MaybeTransmutableQuery::new(
+                layout.clone(),
+                layout,
+                assume,
+                UltraMinimal::default(),
+            )
+            .answer();
+            assert_eq!(
+                answer,
+                Answer::If(crate::Condition::IfTransmutable { src: [()], dst: [()] })
+            );
+        }
     }
 }
 

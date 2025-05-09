@@ -161,9 +161,6 @@ name = "anyhow"
 version = "1.0.98"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e16d2d3311acee920a9eb8d33b8cbc1787ce4a264e85f964c2404b969bdcd487"
-dependencies = [
- "backtrace",
-]
 
 [[package]]
 name = "ar_archive_writer"
@@ -1021,7 +1018,7 @@ dependencies = [
  "if_chain",
  "itertools",
  "parking_lot",
- "pulldown-cmark 0.11.3",
+ "pulldown-cmark",
  "quote",
  "regex",
  "rustc_tools_util 0.4.2",
@@ -1208,7 +1205,7 @@ dependencies = [
  "tracing-subscriber",
  "unified-diff",
  "walkdir",
- "windows 0.59.0",
+ "windows",
 ]
 
 [[package]]
@@ -1257,6 +1254,7 @@ name = "coverage-dump"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "itertools",
  "leb128",
  "md-5",
  "miniz_oxide 0.7.4",
@@ -3264,6 +3262,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "830b246a0e5f20af87141b25c173cd1b609bd7779a4617d6ec582abaf90870f3"
 
 [[package]]
+name = "objc2-core-foundation"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1c10c2894a6fed806ade6027bcd50662746363a9589d3ec9d9bef30a4e4bc166"
+dependencies = [
+ "bitflags",
+]
+
+[[package]]
+name = "objc2-io-kit"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "71c1c64d6120e51cd86033f67176b1cb66780c2efe34dec55176f77befd93c0a"
+dependencies = [
+ "libc",
+ "objc2-core-foundation",
+]
+
+[[package]]
 name = "object"
 version = "0.36.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3347,7 +3364,6 @@ dependencies = [
  "humansize",
  "humantime",
  "log",
- "serde",
  "serde_json",
  "sysinfo",
  "tabled",
@@ -3699,17 +3715,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6e944464ec8536cd1beb0bbfd96987eb5e3b72f2ecdafdc5c769a37f1fa2ae1f"
 dependencies = [
  "cc",
-]
-
-[[package]]
-name = "pulldown-cmark"
-version = "0.9.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57206b407293d2bcd3af849ce869d52068623f19e1b5ff8e8778e3309439682b"
-dependencies = [
- "bitflags",
- "memchr",
- "unicase",
 ]
 
 [[package]]
@@ -4382,7 +4387,7 @@ dependencies = [
  "thorin-dwp",
  "tracing",
  "wasm-encoder 0.219.2",
- "windows 0.59.0",
+ "windows",
 ]
 
 [[package]]
@@ -4441,7 +4446,7 @@ dependencies = [
  "tempfile",
  "thin-vec",
  "tracing",
- "windows 0.59.0",
+ "windows",
 ]
 
 [[package]]
@@ -4496,15 +4501,15 @@ dependencies = [
  "rustc_query_system",
  "rustc_resolve",
  "rustc_session",
- "rustc_smir",
  "rustc_span",
  "rustc_target",
  "rustc_trait_selection",
  "rustc_ty_utils",
  "serde_json",
  "shlex",
+ "stable_mir",
  "tracing",
- "windows 0.59.0",
+ "windows",
 ]
 
 [[package]]
@@ -4559,7 +4564,7 @@ dependencies = [
  "termcolor",
  "termize",
  "tracing",
- "windows 0.59.0",
+ "windows",
 ]
 
 [[package]]
@@ -4670,7 +4675,6 @@ dependencies = [
  "rustc_middle",
  "rustc_session",
  "rustc_span",
- "rustc_target",
  "rustc_trait_selection",
  "smallvec",
  "tracing",
@@ -4709,6 +4713,7 @@ dependencies = [
  "rustc_middle",
  "rustc_session",
  "rustc_span",
+ "rustc_target",
  "rustc_trait_selection",
  "smallvec",
  "tracing",
@@ -4928,6 +4933,7 @@ dependencies = [
  "rustc_session",
  "rustc_span",
  "rustc_target",
+ "tempfile",
  "tracing",
 ]
 
@@ -5227,7 +5233,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "itertools",
- "pulldown-cmark 0.11.3",
+ "pulldown-cmark",
  "rustc_arena",
  "rustc_ast",
  "rustc_ast_pretty",
@@ -5302,7 +5308,7 @@ dependencies = [
  "smallvec",
  "termize",
  "tracing",
- "windows 0.59.0",
+ "windows",
 ]
 
 [[package]]
@@ -5394,7 +5400,6 @@ dependencies = [
  "itertools",
  "rustc_abi",
  "rustc_ast",
- "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -5407,7 +5412,6 @@ dependencies = [
  "rustc_session",
  "rustc_span",
  "rustc_transmute",
- "rustc_type_ir",
  "smallvec",
  "thin-vec",
  "tracing",
@@ -5513,7 +5517,6 @@ dependencies = [
  "indexmap",
  "itertools",
  "minifier",
- "pulldown-cmark 0.9.6",
  "pulldown-cmark-escape",
  "regex",
  "rustdoc-json-types",
@@ -6128,13 +6131,14 @@ dependencies = [
 
 [[package]]
 name = "sysinfo"
-version = "0.31.4"
+version = "0.35.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "355dbe4f8799b304b05e1b0f05fc59b2a18d36645cf169607da45bde2f69a1be"
+checksum = "b897c8ea620e181c7955369a31be5f48d9a9121cb59fd33ecef9ff2a34323422"
 dependencies = [
- "core-foundation-sys",
  "libc",
- "windows 0.57.0",
+ "objc2-core-foundation",
+ "objc2-io-kit",
+ "windows",
 ]
 
 [[package]]
@@ -7191,16 +7195,6 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 
 [[package]]
 name = "windows"
-version = "0.57.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12342cb4d8e3b046f3d80effd474a7a02447231330ef77d71daa6fbc40681143"
-dependencies = [
- "windows-core 0.57.0",
- "windows-targets 0.52.6",
-]
-
-[[package]]
-name = "windows"
 version = "0.59.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f919aee0a93304be7f62e8e5027811bbba96bcb1de84d6618be56e43f8a32a1"
@@ -7222,25 +7216,13 @@ dependencies = [
 
 [[package]]
 name = "windows-core"
-version = "0.57.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2ed2439a290666cd67ecce2b0ffaad89c2a56b976b736e6ece670297897832d"
-dependencies = [
- "windows-implement 0.57.0",
- "windows-interface 0.57.0",
- "windows-result 0.1.2",
- "windows-targets 0.52.6",
-]
-
-[[package]]
-name = "windows-core"
 version = "0.59.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "810ce18ed2112484b0d4e15d022e5f598113e220c53e373fb31e67e21670c1ce"
 dependencies = [
  "windows-implement 0.59.0",
- "windows-interface 0.59.1",
- "windows-result 0.3.2",
+ "windows-interface",
+ "windows-result",
  "windows-strings 0.3.1",
  "windows-targets 0.53.0",
 ]
@@ -7252,21 +7234,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4763c1de310c86d75a878046489e2e5ba02c649d185f21c67d4cf8a56d098980"
 dependencies = [
  "windows-implement 0.60.0",
- "windows-interface 0.59.1",
+ "windows-interface",
  "windows-link",
- "windows-result 0.3.2",
+ "windows-result",
  "windows-strings 0.4.0",
-]
-
-[[package]]
-name = "windows-implement"
-version = "0.57.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9107ddc059d5b6fbfbffdfa7a7fe3e22a226def0b2608f72e9d552763d3e1ad7"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.101",
 ]
 
 [[package]]
@@ -7293,17 +7264,6 @@ dependencies = [
 
 [[package]]
 name = "windows-interface"
-version = "0.57.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "29bee4b38ea3cde66011baa44dba677c432a78593e202392d1e9070cf2a7fca7"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.101",
-]
-
-[[package]]
-name = "windows-interface"
 version = "0.59.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bd9211b69f8dcdfa817bfd14bf1c97c9188afa36f4750130fcdf3f400eca9fa8"
@@ -7318,15 +7278,6 @@ name = "windows-link"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "76840935b766e1b0a05c0066835fb9ec80071d4c09a16f6bd5f7e655e3c14c38"
-
-[[package]]
-name = "windows-result"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e383302e8ec8515204254685643de10811af0ed97ea37210dc26fb0032647f8"
-dependencies = [
- "windows-targets 0.52.6",
-]
 
 [[package]]
 name = "windows-result"

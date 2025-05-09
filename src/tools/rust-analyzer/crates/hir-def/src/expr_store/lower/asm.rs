@@ -3,8 +3,8 @@ use hir_expand::name::Name;
 use intern::Symbol;
 use rustc_hash::{FxHashMap, FxHashSet};
 use syntax::{
-    ast::{self, HasName, IsString},
     AstNode, AstPtr, AstToken, T,
+    ast::{self, HasName, IsString},
 };
 use tt::TextRange;
 
@@ -158,7 +158,12 @@ impl ExprCollector<'_> {
                                 AsmOperand::Const(self.collect_expr_opt(c.expr()))
                             }
                             ast::AsmOperand::AsmSym(s) => {
-                                let Some(path) = s.path().and_then(|p| self.parse_path(p)) else {
+                                let Some(path) = s.path().and_then(|p| {
+                                    self.lower_path(
+                                        p,
+                                        &mut ExprCollector::impl_trait_error_allocator,
+                                    )
+                                }) else {
                                     continue;
                                 };
                                 AsmOperand::Sym(path)
@@ -219,7 +224,7 @@ impl ExprCollector<'_> {
 
                     curarg = parser.curarg;
 
-                    let to_span = |inner_span: rustc_parse_format::InnerSpan| {
+                    let to_span = |inner_span: std::ops::Range<usize>| {
                         is_direct_literal.then(|| {
                             TextRange::new(
                                 inner_span.start.try_into().unwrap(),

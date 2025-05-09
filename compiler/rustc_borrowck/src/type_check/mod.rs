@@ -151,8 +151,8 @@ pub(crate) fn type_check<'a, 'tcx>(
         body,
         promoted,
         user_type_annotations: &body.user_type_annotations,
-        region_bound_pairs,
-        known_type_outlives_obligations,
+        region_bound_pairs: &region_bound_pairs,
+        known_type_outlives_obligations: &known_type_outlives_obligations,
         reported_errors: Default::default(),
         universal_regions: &universal_region_relations.universal_regions,
         location_table,
@@ -216,8 +216,8 @@ struct TypeChecker<'a, 'tcx> {
     /// User type annotations are shared between the main MIR and the MIR of
     /// all of the promoted items.
     user_type_annotations: &'a CanonicalUserTypeAnnotations<'tcx>,
-    region_bound_pairs: RegionBoundPairs<'tcx>,
-    known_type_outlives_obligations: Vec<ty::PolyTypeOutlivesPredicate<'tcx>>,
+    region_bound_pairs: &'a RegionBoundPairs<'tcx>,
+    known_type_outlives_obligations: &'a [ty::PolyTypeOutlivesPredicate<'tcx>],
     reported_errors: FxIndexSet<(Ty<'tcx>, Span)>,
     universal_regions: &'a UniversalRegions<'tcx>,
     location_table: &'a PoloniusLocationTable,
@@ -412,9 +412,9 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
         constraint_conversion::ConstraintConversion::new(
             self.infcx,
             self.universal_regions,
-            &self.region_bound_pairs,
+            self.region_bound_pairs,
             self.infcx.param_env,
-            &self.known_type_outlives_obligations,
+            self.known_type_outlives_obligations,
             locations,
             locations.span(self.body),
             category,
@@ -2079,8 +2079,14 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                 }
             }
             TerminatorKind::Unreachable => {}
-            TerminatorKind::Drop { target, unwind, .. }
-            | TerminatorKind::Assert { target, unwind, .. } => {
+            TerminatorKind::Drop { target, unwind, drop, .. } => {
+                self.assert_iscleanup(block_data, target, is_cleanup);
+                self.assert_iscleanup_unwind(block_data, unwind, is_cleanup);
+                if let Some(drop) = drop {
+                    self.assert_iscleanup(block_data, drop, is_cleanup);
+                }
+            }
+            TerminatorKind::Assert { target, unwind, .. } => {
                 self.assert_iscleanup(block_data, target, is_cleanup);
                 self.assert_iscleanup_unwind(block_data, unwind, is_cleanup);
             }
@@ -2500,9 +2506,9 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
             constraint_conversion::ConstraintConversion::new(
                 self.infcx,
                 self.universal_regions,
-                &self.region_bound_pairs,
+                self.region_bound_pairs,
                 self.infcx.param_env,
-                &self.known_type_outlives_obligations,
+                self.known_type_outlives_obligations,
                 locations,
                 self.body.span,             // irrelevant; will be overridden.
                 ConstraintCategory::Boring, // same as above.

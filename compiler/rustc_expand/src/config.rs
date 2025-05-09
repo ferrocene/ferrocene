@@ -162,7 +162,7 @@ pub(crate) fn attr_into_trace(mut attr: Attribute, trace_name: Symbol) -> Attrib
             let NormalAttr { item, tokens } = &mut **normal;
             item.path.segments[0].ident.name = trace_name;
             // This makes the trace attributes unobservable to token-based proc macros.
-            *tokens = Some(LazyAttrTokenStream::new(AttrTokenStream::default()));
+            *tokens = Some(LazyAttrTokenStream::new_direct(AttrTokenStream::default()));
         }
         AttrKind::DocComment(..) => unreachable!(),
     }
@@ -192,7 +192,7 @@ impl<'a> StripUnconfigured<'a> {
         if self.config_tokens {
             if let Some(Some(tokens)) = node.tokens_mut() {
                 let attr_stream = tokens.to_attr_token_stream();
-                *tokens = LazyAttrTokenStream::new(self.configure_tokens(&attr_stream));
+                *tokens = LazyAttrTokenStream::new_direct(self.configure_tokens(&attr_stream));
             }
         }
     }
@@ -223,7 +223,7 @@ impl<'a> StripUnconfigured<'a> {
                     target.attrs.flat_map_in_place(|attr| self.process_cfg_attr(&attr));
 
                     if self.in_cfg(&target.attrs) {
-                        target.tokens = LazyAttrTokenStream::new(
+                        target.tokens = LazyAttrTokenStream::new_direct(
                             self.configure_tokens(&target.tokens.to_attr_token_stream()),
                         );
                         Some(AttrTokenTree::AttrsTarget(target))
@@ -274,7 +274,12 @@ impl<'a> StripUnconfigured<'a> {
     /// is in the original source file. Gives a compiler error if the syntax of
     /// the attribute is incorrect.
     pub(crate) fn expand_cfg_attr(&self, cfg_attr: &Attribute, recursive: bool) -> Vec<Attribute> {
-        validate_attr::check_attribute_safety(&self.sess.psess, AttributeSafety::Normal, &cfg_attr);
+        validate_attr::check_attribute_safety(
+            &self.sess.psess,
+            Some(AttributeSafety::Normal),
+            &cfg_attr,
+            ast::CRATE_NODE_ID,
+        );
 
         // A trace attribute left in AST in place of the original `cfg_attr` attribute.
         // It can later be used by lints or other diagnostics.
@@ -361,7 +366,7 @@ impl<'a> StripUnconfigured<'a> {
                 .to_attr_token_stream(),
         ));
 
-        let tokens = Some(LazyAttrTokenStream::new(AttrTokenStream::new(trees)));
+        let tokens = Some(LazyAttrTokenStream::new_direct(AttrTokenStream::new(trees)));
         let attr = ast::attr::mk_attr_from_item(
             &self.sess.psess.attr_id_generator,
             item,

@@ -1,6 +1,7 @@
 # Summary
 
 [Getting Started](./getting-started.md)
+
 [About this guide](./about-this-guide.md)
 
 ---
@@ -156,6 +157,7 @@
     - [ADTs and Generic Arguments](./ty_module/generic_arguments.md)
     - [Parameter types/consts/regions](./ty_module/param_ty_const_regions.md)
 - [`TypeFolder` and `TypeFoldable`](./ty-fold.md)
+- [Aliases and Normalization](./normalization.md)
 - [Typing/Param Envs](./typing_parameter_envs.md)
 - [Type inference](./type-inference.md)
 - [Trait solving](./traits/resolution.md)
@@ -175,7 +177,6 @@
         - [Coinduction](./solve/coinduction.md)
         - [Caching](./solve/caching.md)
         - [Proof trees](./solve/proof-trees.md)
-        - [Normalization](./solve/normalization.md)
         - [Opaque types](./solve/opaque-types.md)
         - [Significant changes and quirks](./solve/significant-changes.md)
     - [`Unsize` and `CoerceUnsized` traits](./traits/unsize.md)
@@ -231,9 +232,13 @@
 ---
 
 [Appendix A: Background topics](./appendix/background.md)
+
 [Appendix B: Glossary](./appendix/glossary.md)
+
 [Appendix C: Code Index](./appendix/code-index.md)
+
 [Appendix D: Compiler Lecture Series](./appendix/compiler-lecture.md)
+
 [Appendix E: Bibliography](./appendix/bibliography.md)
 
 [Appendix Z: HumorRust](./appendix/humorust.md)

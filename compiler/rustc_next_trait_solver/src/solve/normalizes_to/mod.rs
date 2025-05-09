@@ -1,12 +1,12 @@
 mod anon_const;
+mod free_alias;
 mod inherent;
 mod opaque_types;
-mod weak_types;
 
 use rustc_type_ir::fast_reject::DeepRejectCtxt;
 use rustc_type_ir::inherent::*;
 use rustc_type_ir::lang_items::TraitSolverLangItem;
-use rustc_type_ir::{self as ty, Interner, NormalizesTo, Upcast as _};
+use rustc_type_ir::{self as ty, Interner, NormalizesTo, PredicateKind, Upcast as _};
 use tracing::instrument;
 
 use crate::delegate::SolverDelegate;
@@ -48,9 +48,13 @@ where
                     })
                 })
             }
-            ty::AliasTermKind::InherentTy => self.normalize_inherent_associated_type(goal),
+            ty::AliasTermKind::InherentTy | ty::AliasTermKind::InherentConst => {
+                self.normalize_inherent_associated_term(goal)
+            }
             ty::AliasTermKind::OpaqueTy => self.normalize_opaque_type(goal),
-            ty::AliasTermKind::WeakTy => self.normalize_weak_type(goal),
+            ty::AliasTermKind::FreeTy | ty::AliasTermKind::FreeConst => {
+                self.normalize_free_alias(goal)
+            }
             ty::AliasTermKind::UnevaluatedConst => self.normalize_anon_const(goal),
         }
     }
@@ -102,50 +106,48 @@ where
         self.trait_def_id(cx)
     }
 
-    fn probe_and_match_goal_against_assumption(
+    fn fast_reject_assumption(
         ecx: &mut EvalCtxt<'_, D>,
-        source: CandidateSource<I>,
         goal: Goal<I, Self>,
         assumption: I::Clause,
-        then: impl FnOnce(&mut EvalCtxt<'_, D>) -> QueryResult<I>,
-    ) -> Result<Candidate<I>, NoSolution> {
+    ) -> Result<(), NoSolution> {
         if let Some(projection_pred) = assumption.as_projection_clause() {
             if projection_pred.item_def_id() == goal.predicate.def_id() {
-                let cx = ecx.cx();
-                if !DeepRejectCtxt::relate_rigid_rigid(ecx.cx()).args_may_unify(
+                if DeepRejectCtxt::relate_rigid_rigid(ecx.cx()).args_may_unify(
                     goal.predicate.alias.args,
                     projection_pred.skip_binder().projection_term.args,
                 ) {
-                    return Err(NoSolution);
+                    return Ok(());
                 }
-                ecx.probe_trait_candidate(source).enter(|ecx| {
-                    let assumption_projection_pred =
-                        ecx.instantiate_binder_with_infer(projection_pred);
-                    ecx.eq(
-                        goal.param_env,
-                        goal.predicate.alias,
-                        assumption_projection_pred.projection_term,
-                    )?;
-
-                    ecx.instantiate_normalizes_to_term(goal, assumption_projection_pred.term);
-
-                    // Add GAT where clauses from the trait's definition
-                    // FIXME: We don't need these, since these are the type's own WF obligations.
-                    ecx.add_goals(
-                        GoalSource::AliasWellFormed,
-                        cx.own_predicates_of(goal.predicate.def_id())
-                            .iter_instantiated(cx, goal.predicate.alias.args)
-                            .map(|pred| goal.with(cx, pred)),
-                    );
-
-                    then(ecx)
-                })
-            } else {
-                Err(NoSolution)
             }
-        } else {
-            Err(NoSolution)
         }
+
+        Err(NoSolution)
+    }
+
+    fn match_assumption(
+        ecx: &mut EvalCtxt<'_, D>,
+        goal: Goal<I, Self>,
+        assumption: I::Clause,
+    ) -> Result<(), NoSolution> {
+        let projection_pred = assumption.as_projection_clause().unwrap();
+
+        let assumption_projection_pred = ecx.instantiate_binder_with_infer(projection_pred);
+        ecx.eq(goal.param_env, goal.predicate.alias, assumption_projection_pred.projection_term)?;
+
+        ecx.instantiate_normalizes_to_term(goal, assumption_projection_pred.term);
+
+        // Add GAT where clauses from the trait's definition
+        // FIXME: We don't need these, since these are the type's own WF obligations.
+        let cx = ecx.cx();
+        ecx.add_goals(
+            GoalSource::AliasWellFormed,
+            cx.own_predicates_of(goal.predicate.def_id())
+                .iter_instantiated(cx, goal.predicate.alias.args)
+                .map(|pred| goal.with(cx, pred)),
+        );
+
+        Ok(())
     }
 
     fn consider_additional_alias_assumptions(
@@ -194,6 +196,12 @@ where
                 .map(|pred| goal.with(cx, pred));
             ecx.add_goals(GoalSource::ImplWhereBound, where_clause_bounds);
 
+            // Bail if the nested goals don't hold here. This is to avoid unnecessarily
+            // computing the `type_of` query for associated types that never apply, as
+            // this may result in query cycles in the case of RPITITs.
+            // See <https://github.com/rust-lang/trait-system-refactor-initiative/issues/185>.
+            ecx.try_evaluate_added_goals()?;
+
             // Add GAT where clauses from the trait's definition.
             // FIXME: We don't need these, since these are the type's own WF obligations.
             ecx.add_goals(
@@ -221,13 +229,21 @@ where
                 Ok(Some(target_item_def_id)) => target_item_def_id,
                 Ok(None) => {
                     match ecx.typing_mode() {
-                        // In case the associated item is hidden due to specialization, we have to
-                        // return ambiguity this would otherwise be incomplete, resulting in
-                        // unsoundness during coherence (#105782).
+                        // In case the associated item is hidden due to specialization,
+                        // normalizing this associated item is always ambiguous. Treating
+                        // the associated item as rigid would be incomplete and allow for
+                        // overlapping impls, see #105782.
+                        //
+                        // As this ambiguity is unavoidable we emit a nested ambiguous
+                        // goal instead of using `Certainty::AMBIGUOUS`. This allows us to
+                        // return the nested goals to the parent `AliasRelate` goal. This
+                        // would be relevant if any of the nested goals refer to the `term`.
+                        // This is not the case here and we only prefer adding an ambiguous
+                        // nested goal for consistency.
                         ty::TypingMode::Coherence => {
-                            return ecx.evaluate_added_goals_and_make_canonical_response(
-                                Certainty::AMBIGUOUS,
-                            );
+                            ecx.add_goal(GoalSource::Misc, goal.with(cx, PredicateKind::Ambiguous));
+                            return ecx
+                                .evaluate_added_goals_and_make_canonical_response(Certainty::Yes);
                         }
                         // Outside of coherence, we treat the associated item as rigid instead.
                         ty::TypingMode::Analysis { .. }
@@ -254,10 +270,20 @@ where
                 // treat it as rigid.
                 if cx.impl_self_is_guaranteed_unsized(impl_def_id) {
                     match ecx.typing_mode() {
+                        // Trying to normalize such associated items is always ambiguous
+                        // during coherence to avoid cyclic reasoning. See the example in
+                        // tests/ui/traits/trivial-unsized-projection-in-coherence.rs.
+                        //
+                        // As this ambiguity is unavoidable we emit a nested ambiguous
+                        // goal instead of using `Certainty::AMBIGUOUS`. This allows us to
+                        // return the nested goals to the parent `AliasRelate` goal. This
+                        // would be relevant if any of the nested goals refer to the `term`.
+                        // This is not the case here and we only prefer adding an ambiguous
+                        // nested goal for consistency.
                         ty::TypingMode::Coherence => {
-                            return ecx.evaluate_added_goals_and_make_canonical_response(
-                                Certainty::AMBIGUOUS,
-                            );
+                            ecx.add_goal(GoalSource::Misc, goal.with(cx, PredicateKind::Ambiguous));
+                            return ecx
+                                .evaluate_added_goals_and_make_canonical_response(Certainty::Yes);
                         }
                         ty::TypingMode::Analysis { .. }
                         | ty::TypingMode::Borrowck { .. }
@@ -309,6 +335,8 @@ where
                     cx.type_of(target_item_def_id).map_bound(|ty| ty.into())
                 }
                 ty::AliasTermKind::ProjectionConst => {
+                    // FIXME(mgca): once const items are actual aliases defined as equal to type system consts
+                    // this should instead return that.
                     if cx.features().associated_const_equality() {
                         panic!("associated const projection is not supported yet")
                     } else {
@@ -883,66 +911,6 @@ where
 
         ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc).enter(|ecx| {
             ecx.instantiate_normalizes_to_term(goal, discriminant_ty.into());
-            ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
-        })
-    }
-
-    fn consider_builtin_async_destruct_candidate(
-        ecx: &mut EvalCtxt<'_, D>,
-        goal: Goal<I, Self>,
-    ) -> Result<Candidate<I>, NoSolution> {
-        let self_ty = goal.predicate.self_ty();
-        let async_destructor_ty = match self_ty.kind() {
-            ty::Bool
-            | ty::Char
-            | ty::Int(..)
-            | ty::Uint(..)
-            | ty::Float(..)
-            | ty::Array(..)
-            | ty::RawPtr(..)
-            | ty::Ref(..)
-            | ty::FnDef(..)
-            | ty::FnPtr(..)
-            | ty::Closure(..)
-            | ty::CoroutineClosure(..)
-            | ty::Infer(ty::IntVar(..) | ty::FloatVar(..))
-            | ty::Never
-            | ty::Adt(_, _)
-            | ty::Str
-            | ty::Slice(_)
-            | ty::Tuple(_)
-            | ty::Error(_) => self_ty.async_destructor_ty(ecx.cx()),
-
-            ty::UnsafeBinder(_) => {
-                // FIXME(unsafe_binders): Instantiate the binder with placeholders I guess.
-                todo!()
-            }
-
-            // Given an alias, parameter, or placeholder we add an impl candidate normalizing to a rigid
-            // alias. In case there's a where-bound further constraining this alias it is preferred over
-            // this impl candidate anyways. It's still a bit scuffed.
-            ty::Alias(_, _) | ty::Param(_) | ty::Placeholder(..) => {
-                return ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc).enter(|ecx| {
-                    ecx.structurally_instantiate_normalizes_to_term(goal, goal.predicate.alias);
-                    ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
-                });
-            }
-
-            ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_))
-            | ty::Foreign(..)
-            | ty::Bound(..) => panic!(
-                "unexpected self ty `{:?}` when normalizing `<T as AsyncDestruct>::AsyncDestructor`",
-                goal.predicate.self_ty()
-            ),
-
-            ty::Pat(..) | ty::Dynamic(..) | ty::Coroutine(..) | ty::CoroutineWitness(..) => panic!(
-                "`consider_builtin_async_destruct_candidate` is not yet implemented for type: {self_ty:?}"
-            ),
-        };
-
-        ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc).enter(|ecx| {
-            ecx.eq(goal.param_env, goal.predicate.term, async_destructor_ty.into())
-                .expect("expected goal term to be fully unconstrained");
             ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
         })
     }

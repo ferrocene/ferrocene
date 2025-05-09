@@ -177,16 +177,8 @@ impl<'a> ConditionSet<'a> {
         arena: &'a DroplessArena,
         f: impl Fn(Condition) -> Option<Condition>,
     ) -> Option<ConditionSet<'a>> {
-        let mut all_ok = true;
-        let set = arena.alloc_from_iter(self.iter().map_while(|c| {
-            if let Some(c) = f(c) {
-                Some(c)
-            } else {
-                all_ok = false;
-                None
-            }
-        }));
-        all_ok.then_some(ConditionSet(set))
+        let set = arena.try_alloc_from_iter(self.iter().map(|c| f(c).ok_or(()))).ok()?;
+        Some(ConditionSet(set))
     }
 }
 
@@ -765,12 +757,12 @@ impl OpportunitySet {
 
             // Replace `succ` by `new_succ` where it appears.
             let mut num_edges = 0;
-            for s in basic_blocks[current].terminator_mut().successors_mut() {
+            basic_blocks[current].terminator_mut().successors_mut(|s| {
                 if *s == succ {
                     *s = new_succ;
                     num_edges += 1;
                 }
-            }
+            });
 
             // Update predecessors with the new block.
             let _new_succ = self.predecessors.push(num_edges);

@@ -37,6 +37,10 @@ Language changes in Rust 1.86.0
 
   - No change: Lints are not part of the FLS
 
+- `Empty repr() attribute applied to invalid items are now correctly rejected. <https://github.com/rust-lang/rust/pull/133925>`_
+
+  - No change: this bug was not documented
+
 Language changes in Rust 1.85.0
 -------------------------------
 

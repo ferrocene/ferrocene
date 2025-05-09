@@ -205,6 +205,8 @@ declare_features! (
     (unstable, anonymous_lifetime_in_impl_trait, "1.63.0", None),
     /// Allows access to the emscripten_wasm_eh config, used by panic_unwind and unwind
     (internal, cfg_emscripten_wasm_eh, "1.86.0", None),
+    /// Allows checking whether or not the backend correctly supports unstable float types.
+    (internal, cfg_target_has_reliable_f16_f128, "CURRENT_RUSTC_VERSION", None),
     /// Allows identifying the `compiler_builtins` crate.
     (internal, compiler_builtins, "1.13.0", None),
     /// Allows writing custom MIR
@@ -314,6 +316,7 @@ declare_features! (
     // Unstable `#[target_feature]` directives.
     (unstable, aarch64_unstable_target_feature, "1.82.0", Some(44839)),
     (unstable, aarch64_ver_target_feature, "1.27.0", Some(44839)),
+    (unstable, apx_target_feature, "CURRENT_RUSTC_VERSION", Some(139284)),
     (unstable, arm_target_feature, "1.27.0", Some(44839)),
     (unstable, avx512_target_feature, "1.27.0", Some(44839)),
     (unstable, bpf_target_feature, "1.54.0", Some(44839)),
@@ -381,6 +384,8 @@ declare_features! (
     (unstable, associated_const_equality, "1.58.0", Some(92827)),
     /// Allows associated type defaults.
     (unstable, associated_type_defaults, "1.2.0", Some(29661)),
+    /// Allows implementing `AsyncDrop`.
+    (incomplete, async_drop, "CURRENT_RUSTC_VERSION", Some(126482)),
     /// Allows async functions to be called from `dyn Trait`.
     (incomplete, async_fn_in_dyn_trait, "1.85.0", Some(133119)),
     /// Allows `#[track_caller]` on async functions.
@@ -389,6 +394,8 @@ declare_features! (
     (unstable, async_for_loop, "1.77.0", Some(118898)),
     /// Allows `async` trait bound modifier.
     (unstable, async_trait_bounds, "1.85.0", Some(62290)),
+    /// Allows using Intel AVX10 target features and intrinsics
+    (unstable, avx10_target_feature, "CURRENT_RUSTC_VERSION", Some(138843)),
     /// Allows using C-variadics.
     (unstable, c_variadic, "1.34.0", Some(44930)),
     /// Allows the use of `#[cfg(contract_checks)` to check if contract checks are enabled.
@@ -479,6 +486,8 @@ declare_features! (
     (unstable, explicit_extern_abis, "CURRENT_RUSTC_VERSION", Some(134986)),
     /// Allows explicit tail calls via `become` expression.
     (incomplete, explicit_tail_calls, "1.72.0", Some(112788)),
+    /// Allows using `#[export_stable]` which indicates that an item is exportable.
+    (incomplete, export_stable, "CURRENT_RUSTC_VERSION", Some(139939)),
     /// Allows using `aapcs`, `efiapi`, `sysv64` and `win64` as calling conventions
     /// for functions with varargs.
     (unstable, extended_varargs_abi_support, "1.65.0", Some(100189)),
@@ -502,6 +511,8 @@ declare_features! (
     (incomplete, fn_delegation, "1.76.0", Some(118212)),
     /// Allows impls for the Freeze trait.
     (internal, freeze_impls, "1.78.0", Some(121675)),
+    /// Frontmatter `---` blocks for use by external tools.
+    (unstable, frontmatter, "CURRENT_RUSTC_VERSION", Some(136889)),
     /// Allows defining gen blocks and `gen fn`.
     (unstable, gen_blocks, "1.75.0", Some(117078)),
     /// Infer generic args for both consts and types.

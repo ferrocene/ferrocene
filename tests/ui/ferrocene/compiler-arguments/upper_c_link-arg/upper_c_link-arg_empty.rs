@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -C link-arg
-//~? codegen option `link-arg` requires a string
+//~? ERROR codegen option `link-arg` requires a string
 
 fn main() {}
 

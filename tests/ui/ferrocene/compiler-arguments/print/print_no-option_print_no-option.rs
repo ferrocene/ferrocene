@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: --print --print
-//~? unknown print request
+//~? ERROR unknown print request
 
 fn main() {}
 

@@ -15,10 +15,9 @@ use rustc_hir::lang_items::LangItem;
 use rustc_infer::infer::{DefineOpaqueTypes, HigherRankedType, InferOk};
 use rustc_infer::traits::ObligationCauseCode;
 use rustc_middle::traits::{BuiltinImplSource, SignatureMismatchData};
-use rustc_middle::ty::{self, GenericArgsRef, Ty, TyCtxt, Upcast};
+use rustc_middle::ty::{self, GenericArgsRef, Ty, TyCtxt, Upcast, elaborate};
 use rustc_middle::{bug, span_bug};
 use rustc_span::def_id::DefId;
-use rustc_type_ir::elaborate;
 use thin_vec::thin_vec;
 use tracing::{debug, instrument};
 
@@ -407,7 +406,6 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         let predicate = self.infcx.enter_forall_and_leak_universe(obligation.predicate);
 
         let mut assume = predicate.trait_ref.args.const_at(2);
-        // FIXME(mgca): We should shallowly normalize this.
         if self.tcx().features().generic_const_exprs() {
             assume = crate::traits::evaluate_const(self.infcx, assume, obligation.param_env)
         }

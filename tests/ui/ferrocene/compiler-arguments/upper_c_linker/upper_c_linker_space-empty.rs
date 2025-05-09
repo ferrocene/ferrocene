@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -C linker
-//~? requires a path
+//~? ERROR requires a path
 
 fn main() {}
 

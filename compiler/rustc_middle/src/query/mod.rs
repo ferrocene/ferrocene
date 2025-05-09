@@ -289,7 +289,7 @@ rustc_queries! {
 
     /// Returns whether the type alias given by `DefId` is lazy.
     ///
-    /// I.e., if the type alias expands / ought to expand to a [weak] [alias type]
+    /// I.e., if the type alias expands / ought to expand to a [free] [alias type]
     /// instead of the underyling aliased type.
     ///
     /// Relevant for features `lazy_type_alias` and `type_alias_impl_trait`.
@@ -298,7 +298,7 @@ rustc_queries! {
     ///
     /// This query *may* panic if the given definition is not a type alias.
     ///
-    /// [weak]: rustc_middle::ty::Weak
+    /// [free]: rustc_middle::ty::Free
     /// [alias type]: rustc_middle::ty::AliasTy
     query type_alias_is_lazy(key: DefId) -> bool {
         desc { |tcx|
@@ -387,7 +387,7 @@ rustc_queries! {
         }
     }
 
-    query stalled_generators_within(
+    query nested_bodies_within(
         key: LocalDefId
     ) -> &'tcx ty::List<LocalDefId> {
         desc {
@@ -1359,7 +1359,11 @@ rustc_queries! {
     /// Generates a MIR body for the shim.
     query mir_shims(key: ty::InstanceKind<'tcx>) -> &'tcx mir::Body<'tcx> {
         arena_cache
-        desc { |tcx| "generating MIR shim for `{}`", tcx.def_path_str(key.def_id()) }
+        desc {
+            |tcx| "generating MIR shim for `{}`, instance={:?}",
+            tcx.def_path_str(key.def_id()),
+            key
+        }
     }
 
     /// The `symbol_name` query provides the symbol name for calling a
@@ -1590,6 +1594,10 @@ rustc_queries! {
     query is_unpin_raw(env: ty::PseudoCanonicalInput<'tcx, Ty<'tcx>>) -> bool {
         desc { "computing whether `{}` is `Unpin`", env.value }
     }
+    /// Query backing `Ty::is_async_drop`.
+    query is_async_drop_raw(env: ty::PseudoCanonicalInput<'tcx, Ty<'tcx>>) -> bool {
+        desc { "computing whether `{}` is `AsyncDrop`", env.value }
+    }
     /// Query backing `Ty::needs_drop`.
     query needs_drop_raw(env: ty::PseudoCanonicalInput<'tcx, Ty<'tcx>>) -> bool {
         desc { "computing whether `{}` needs drop", env.value }
@@ -1619,6 +1627,14 @@ rustc_queries! {
     /// then `Err(AlwaysRequiresDrop)` is returned.
     query adt_drop_tys(def_id: DefId) -> Result<&'tcx ty::List<Ty<'tcx>>, AlwaysRequiresDrop> {
         desc { |tcx| "computing when `{}` needs drop", tcx.def_path_str(def_id) }
+        cache_on_disk_if { true }
+    }
+
+    /// A list of types where the ADT requires async drop if and only if any of
+    /// those types require async drop. If the ADT is known to always need async drop
+    /// then `Err(AlwaysRequiresDrop)` is returned.
+    query adt_async_drop_tys(def_id: DefId) -> Result<&'tcx ty::List<Ty<'tcx>>, AlwaysRequiresDrop> {
+        desc { |tcx| "computing when `{}` needs async drop", tcx.def_path_str(def_id) }
         cache_on_disk_if { true }
     }
 
@@ -2189,7 +2205,7 @@ rustc_queries! {
     query maybe_unused_trait_imports(_: ()) -> &'tcx FxIndexSet<LocalDefId> {
         desc { "fetching potentially unused trait imports" }
     }
-    query names_imported_by_glob_use(def_id: LocalDefId) -> &'tcx UnordSet<Symbol> {
+    query names_imported_by_glob_use(def_id: LocalDefId) -> &'tcx FxIndexSet<Symbol> {
         desc { |tcx| "finding names imported by glob use for `{}`", tcx.def_path_str(def_id) }
     }
 
@@ -2220,6 +2236,16 @@ rustc_queries! {
 
     query trait_impls_in_crate(_: CrateNum) -> &'tcx [DefId] {
         desc { "fetching all trait impls in a crate" }
+        separate_provide_extern
+    }
+
+    query stable_order_of_exportable_impls(_: CrateNum) -> &'tcx FxIndexMap<DefId, usize> {
+        desc { "fetching the stable impl's order" }
+        separate_provide_extern
+    }
+
+    query exportable_items(_: CrateNum) -> &'tcx [DefId] {
+        desc { "fetching all exportable items in a crate" }
         separate_provide_extern
     }
 
@@ -2280,7 +2306,7 @@ rustc_queries! {
     /// Do not call this query directly: Invoke `normalize` instead.
     ///
     /// </div>
-    query normalize_canonicalized_weak_ty(
+    query normalize_canonicalized_free_alias(
         goal: CanonicalAliasGoal<'tcx>
     ) -> Result<
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, NormalizationResult<'tcx>>>,
@@ -2455,7 +2481,7 @@ rustc_queries! {
     query resolve_instance_raw(
         key: ty::PseudoCanonicalInput<'tcx, (DefId, GenericArgsRef<'tcx>)>
     ) -> Result<Option<ty::Instance<'tcx>>, ErrorGuaranteed> {
-        desc { "resolving instance `{}`", ty::Instance::new(key.value.0, key.value.1) }
+        desc { "resolving instance `{}`", ty::Instance::new_raw(key.value.0, key.value.1) }
     }
 
     query reveal_opaque_types_in_bounds(key: ty::Clauses<'tcx>) -> ty::Clauses<'tcx> {
@@ -2562,5 +2588,5 @@ rustc_queries! {
     }
 }
 
-rustc_query_append! { define_callbacks! }
+rustc_with_all_queries! { define_callbacks! }
 rustc_feedable_queries! { define_feedable! }

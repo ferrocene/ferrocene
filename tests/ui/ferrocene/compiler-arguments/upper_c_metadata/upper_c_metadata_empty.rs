@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -Cmetadata
-//~? requires a space-separated list of strings
+//~? ERROR requires a space-separated list of strings
 
 fn main() {}
 

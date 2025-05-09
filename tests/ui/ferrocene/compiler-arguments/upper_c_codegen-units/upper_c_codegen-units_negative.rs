@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -Ccodegen-units=-1
-//~? incorrect value
+//~? ERROR incorrect value
 
 fn main() {}
 

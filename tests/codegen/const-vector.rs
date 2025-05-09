@@ -1,4 +1,8 @@
-//@ compile-flags: -C no-prepopulate-passes -Copt-level=0
+//@ revisions: OPT0 OPT0_S390X
+//@ [OPT0] ignore-s390x
+//@ [OPT0_S390X] only-s390x
+//@ [OPT0] compile-flags: -C no-prepopulate-passes -Copt-level=0
+//@ [OPT0_S390X] compile-flags: -C no-prepopulate-passes -Copt-level=0 -C target-cpu=z13
 
 // This test checks that constants of SIMD type are passed as immediate vectors.
 // We ensure that both vector representations (struct with fields and struct wrapping array) work.
@@ -9,6 +13,7 @@
 #![feature(rustc_attrs)]
 #![feature(simd_ffi)]
 #![feature(arm_target_feature)]
+#![feature(mips_target_feature)]
 #![allow(non_camel_case_types)]
 
 // Setting up structs that can be used as const vectors
@@ -45,6 +50,7 @@ extern "unadjusted" {
 #[cfg_attr(target_family = "wasm", target_feature(enable = "simd128"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "neon"))]
 #[cfg_attr(target_arch = "x86", target_feature(enable = "sse"))]
+#[cfg_attr(target_arch = "mips", target_feature(enable = "msa"))]
 pub fn do_call() {
     unsafe {
         // CHECK: call void @test_i8x2(<2 x i8> <i8 32, i8 64>

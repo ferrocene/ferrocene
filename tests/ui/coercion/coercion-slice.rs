@@ -3,7 +3,8 @@
 fn main() {
     let _: &[i32] = [0];
     //~^ ERROR mismatched types
-    //~| expected `&[i32]`, found `[{integer}; 1]`
+    //~| NOTE expected `&[i32]`, found `[{integer}; 1]`
+    //~| NOTE expected due to this
 }
 
 // ferrocene-annotations: fls_uj0kpjwyld60

@@ -23,7 +23,7 @@ use crate::common::{
     output_base_dir, output_base_name, output_testname_unique,
 };
 use crate::compute_diff::{DiffLine, make_diff, write_diff, write_filtered_diff};
-use crate::errors::{Error, ErrorKind};
+use crate::errors::{Error, ErrorKind, load_errors};
 use crate::header::TestProps;
 use crate::read2::{Truncated, read2_abbreviated};
 use crate::util::{Utf8PathBufExt, add_dylib_path, logv, static_regex};
@@ -577,23 +577,9 @@ impl<'test> TestCx<'test> {
         }
     }
 
-    fn check_all_error_patterns(
-        &self,
-        output_to_check: &str,
-        proc_res: &ProcRes,
-        pm: Option<PassMode>,
-    ) {
-        if self.props.error_patterns.is_empty() && self.props.regex_error_patterns.is_empty() {
-            if pm.is_some() {
-                // FIXME(#65865)
-                return;
-            } else {
-                self.fatal(&format!("no error pattern specified in {}", self.testpaths.file));
-            }
-        }
-
+    /// Check `error-pattern` and `regex-error-pattern` directives.
+    fn check_all_error_patterns(&self, output_to_check: &str, proc_res: &ProcRes) {
         let mut missing_patterns: Vec<String> = Vec::new();
-
         self.check_error_patterns(output_to_check, &mut missing_patterns);
         self.check_regex_error_patterns(output_to_check, proc_res, &mut missing_patterns);
 
@@ -670,14 +656,14 @@ impl<'test> TestCx<'test> {
         }
     }
 
-    fn check_expected_errors(&self, expected_errors: Vec<Error>, proc_res: &ProcRes) {
+    /// Check `//~ KIND message` annotations.
+    fn check_expected_errors(&self, proc_res: &ProcRes) {
+        let expected_errors = load_errors(&self.testpaths.file, self.revision);
         debug!(
             "check_expected_errors: expected_errors={:?} proc_res.status={:?}",
             expected_errors, proc_res.status
         );
-        if proc_res.status.success()
-            && expected_errors.iter().any(|x| x.kind == Some(ErrorKind::Error))
-        {
+        if proc_res.status.success() && expected_errors.iter().any(|x| x.kind == ErrorKind::Error) {
             self.fatal_proc_rec("process did not return an error status", proc_res);
         }
 
@@ -709,22 +695,34 @@ impl<'test> TestCx<'test> {
         // if one of them actually occurs in the test.
         let expected_kinds: HashSet<_> = [ErrorKind::Error, ErrorKind::Warning]
             .into_iter()
-            .chain(expected_errors.iter().filter_map(|e| e.kind))
+            .chain(expected_errors.iter().map(|e| e.kind))
             .collect();
 
         // Parse the JSON output from the compiler and extract out the messages.
-        let actual_errors = json::parse_output(&diagnostic_file_name, &proc_res.stderr, proc_res);
+        let actual_errors = json::parse_output(&diagnostic_file_name, &self.get_output(proc_res))
+            .into_iter()
+            .map(|e| Error { msg: self.normalize_output(&e.msg, &[]), ..e });
+
         let mut unexpected = Vec::new();
         let mut found = vec![false; expected_errors.len()];
-        for mut actual_error in actual_errors {
-            actual_error.msg = self.normalize_output(&actual_error.msg, &[]);
+        for actual_error in actual_errors {
+            for pattern in &self.props.error_patterns {
+                let pattern = pattern.trim();
+                if actual_error.msg.contains(pattern) {
+                    let q = if actual_error.line_num.is_none() { "?" } else { "" };
+                    self.fatal(&format!(
+                        "error pattern '{pattern}' is found in structured \
+                         diagnostics, use `//~{q} {} {pattern}` instead",
+                        actual_error.kind,
+                    ));
+                }
+            }
 
             let opt_index =
                 expected_errors.iter().enumerate().position(|(index, expected_error)| {
                     !found[index]
                         && actual_error.line_num == expected_error.line_num
-                        && (expected_error.kind.is_none()
-                            || actual_error.kind == expected_error.kind)
+                        && actual_error.kind == expected_error.kind
                         && actual_error.msg.contains(&expected_error.msg)
                 });
 
@@ -737,19 +735,14 @@ impl<'test> TestCx<'test> {
 
                 None => {
                     if actual_error.require_annotation
-                        && actual_error.kind.map_or(false, |kind| {
-                            expected_kinds.contains(&kind)
-                                && !self.props.dont_require_annotations.contains(&kind)
-                        })
+                        && expected_kinds.contains(&actual_error.kind)
+                        && !self.props.dont_require_annotations.contains(&actual_error.kind)
                     {
                         self.error(&format!(
                             "{}:{}: unexpected {}: '{}'",
                             file_name,
                             actual_error.line_num_str(),
-                            actual_error
-                                .kind
-                                .as_ref()
-                                .map_or(String::from("message"), |k| k.to_string()),
+                            actual_error.kind,
                             actual_error.msg
                         ));
                         unexpected.push(actual_error);
@@ -766,7 +759,7 @@ impl<'test> TestCx<'test> {
                     "{}:{}: expected {} not found: {}",
                     file_name,
                     expected_error.line_num_str(),
-                    expected_error.kind.as_ref().map_or("message".into(), |k| k.to_string()),
+                    expected_error.kind,
                     expected_error.msg
                 ));
                 not_found.push(expected_error);

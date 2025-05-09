@@ -7,11 +7,11 @@ use rustc_infer::traits::{
     self, MismatchedProjectionTypes, Obligation, ObligationCause, ObligationCauseCode,
     PredicateObligation, SelectionError,
 };
+use rustc_middle::traits::query::NoSolution;
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_middle::{bug, span_bug};
 use rustc_next_trait_solver::solve::{GenerateProofTree, SolverDelegateEvalExt as _};
-use rustc_type_ir::solve::NoSolution;
 use tracing::{instrument, trace};
 
 use crate::solve::delegate::SolverDelegate;
@@ -99,7 +99,13 @@ pub(super) fn fulfillment_error_for_stalled<'tcx>(
             Ok((_, Certainty::Maybe(MaybeCause::Ambiguity))) => {
                 (FulfillmentErrorCode::Ambiguity { overflow: None }, true)
             }
-            Ok((_, Certainty::Maybe(MaybeCause::Overflow { suggest_increasing_limit }))) => (
+            Ok((
+                _,
+                Certainty::Maybe(MaybeCause::Overflow {
+                    suggest_increasing_limit,
+                    keep_constraints: _,
+                }),
+            )) => (
                 FulfillmentErrorCode::Ambiguity { overflow: Some(suggest_increasing_limit) },
                 // Don't look into overflows because we treat overflows weirdly anyways.
                 // We discard the inference constraints from overflowing goals, so

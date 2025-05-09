@@ -82,3 +82,6 @@ pub fn upcast_diamond_to_base(x: &dyn Diamond) -> &dyn Base {
     // CHECK-NEXT: ret
     x as &dyn Base
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

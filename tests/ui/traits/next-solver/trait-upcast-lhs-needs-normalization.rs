@@ -16,3 +16,6 @@ pub fn foo<'a>(x: &'a <dyn B + 'static as Mirror>::Assoc) -> &'a (dyn A + 'stati
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

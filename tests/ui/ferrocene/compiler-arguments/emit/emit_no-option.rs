@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: --emit=
-//~? unknown emission type
+//~? ERROR unknown emission type
 
 fn main() {}
 

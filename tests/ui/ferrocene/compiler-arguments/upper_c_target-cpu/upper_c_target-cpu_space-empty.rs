@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -C target-cpu
-//~? requires a string
+//~? ERROR requires a string
 
 fn main() {}
 

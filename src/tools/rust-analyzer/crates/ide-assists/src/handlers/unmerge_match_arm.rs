@@ -1,11 +1,11 @@
 use syntax::{
-    algo::neighbor,
-    ast::{self, edit::IndentLevel, make, AstNode},
-    ted::{self, Position},
     Direction, SyntaxKind, T,
+    algo::neighbor,
+    ast::{self, AstNode, edit::IndentLevel, make},
+    ted::{self, Position},
 };
 
-use crate::{AssistContext, AssistId, AssistKind, Assists};
+use crate::{AssistContext, AssistId, Assists};
 
 // Assist: unmerge_match_arm
 //
@@ -47,14 +47,20 @@ pub(crate) fn unmerge_match_arm(acc: &mut Assists, ctx: &AssistContext<'_>) -> O
     let old_parent_range = new_parent.text_range();
 
     acc.add(
-        AssistId("unmerge_match_arm", AssistKind::RefactorRewrite),
+        AssistId::refactor_rewrite("unmerge_match_arm"),
         "Unmerge match arm",
         pipe_token.text_range(),
         |edit| {
             let pats_after = pipe_token
                 .siblings_with_tokens(Direction::Next)
-                .filter_map(|it| ast::Pat::cast(it.into_node()?));
-            let new_pat = make::or_pat(pats_after, or_pat.leading_pipe().is_some());
+                .filter_map(|it| ast::Pat::cast(it.into_node()?))
+                .collect::<Vec<_>>();
+            // It is guaranteed that `pats_after` has at least one element
+            let new_pat = if pats_after.len() == 1 {
+                pats_after[0].clone()
+            } else {
+                make::or_pat(pats_after, or_pat.leading_pipe().is_some()).into()
+            };
             let new_match_arm =
                 make::match_arm(new_pat, match_arm.guard(), match_arm_body).clone_for_update();
 

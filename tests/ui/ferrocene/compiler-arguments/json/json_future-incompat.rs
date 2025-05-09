@@ -1,5 +1,6 @@
 //@ check-pass
 //@ compile-flags: --error-format=json --json=future-incompat
+//@ dont-require-annotations: WARN
 
 // From https://github.com/rust-lang/rust/issues/79813
 

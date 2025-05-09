@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: --error-format human --color auto
-//@ error-pattern: cannot find value `x` in this scope
+//~? RAW cannot find value `x` in this scope
 
 fn main() {
     let x = x;

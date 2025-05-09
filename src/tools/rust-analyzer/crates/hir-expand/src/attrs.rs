@@ -1,26 +1,25 @@
 //! A higher level attributes based on TokenTree, with also some shortcuts.
 use std::{borrow::Cow, fmt, ops};
 
-use base_db::CrateId;
-use cfg::CfgExpr;
+use base_db::Crate;
+use cfg::{CfgExpr, CfgOptions};
 use either::Either;
-use intern::{sym, Interned, Symbol};
+use intern::{Interned, Symbol, sym};
 
 use mbe::{DelimiterKind, Punct};
-use smallvec::{smallvec, SmallVec};
-use span::{Span, SyntaxContextId};
+use smallvec::{SmallVec, smallvec};
+use span::{Span, SyntaxContext};
 use syntax::unescape;
-use syntax::{ast, match_ast, AstNode, AstToken, SyntaxNode};
-use syntax_bridge::{desugar_doc_comment_text, syntax_node_to_token_tree, DocCommentDesugarMode};
+use syntax::{AstNode, AstToken, SyntaxNode, ast, match_ast};
+use syntax_bridge::{DocCommentDesugarMode, desugar_doc_comment_text, syntax_node_to_token_tree};
 use triomphe::ThinArc;
 
-use crate::name::Name;
 use crate::{
     db::ExpandDatabase,
     mod_path::ModPath,
+    name::Name,
     span_map::SpanMapRef,
-    tt::{self, token_to_literal, TopSubtree},
-    InFile,
+    tt::{self, TopSubtree, token_to_literal},
 };
 
 /// Syntactical attributes, without filtering of `cfg_attr`s.
@@ -49,32 +48,7 @@ impl RawAttrs {
         owner: &dyn ast::HasAttrs,
         span_map: SpanMapRef<'_>,
     ) -> Self {
-        let entries: Vec<_> = collect_attrs(owner)
-            .filter_map(|(id, attr)| match attr {
-                Either::Left(attr) => {
-                    attr.meta().and_then(|meta| Attr::from_src(db, meta, span_map, id))
-                }
-                Either::Right(comment) => comment.doc_comment().map(|doc| {
-                    let span = span_map.span_for_range(comment.syntax().text_range());
-                    let (text, kind) =
-                        desugar_doc_comment_text(doc, DocCommentDesugarMode::ProcMacro);
-                    Attr {
-                        id,
-                        input: Some(Box::new(AttrInput::Literal(tt::Literal {
-                            symbol: text,
-                            span,
-                            kind,
-                            suffix: None,
-                        }))),
-                        path: Interned::new(ModPath::from(Name::new_symbol(
-                            sym::doc.clone(),
-                            span.ctx,
-                        ))),
-                        ctxt: span.ctx,
-                    }
-                }),
-            })
-            .collect();
+        let entries: Vec<_> = Self::attrs_iter::<true>(db, owner, span_map).collect();
 
         let entries = if entries.is_empty() {
             None
@@ -85,12 +59,61 @@ impl RawAttrs {
         RawAttrs { entries }
     }
 
-    pub fn from_attrs_owner(
+    /// A [`RawAttrs`] that has its `#[cfg_attr(...)]` attributes expanded.
+    pub fn new_expanded(
         db: &dyn ExpandDatabase,
-        owner: InFile<&dyn ast::HasAttrs>,
+        owner: &dyn ast::HasAttrs,
         span_map: SpanMapRef<'_>,
+        cfg_options: &CfgOptions,
     ) -> Self {
-        Self::new(db, owner.value, span_map)
+        let entries: Vec<_> =
+            Self::attrs_iter_expanded::<true>(db, owner, span_map, cfg_options).collect();
+
+        let entries = if entries.is_empty() {
+            None
+        } else {
+            Some(ThinArc::from_header_and_iter((), entries.into_iter()))
+        };
+
+        RawAttrs { entries }
+    }
+
+    pub fn attrs_iter<const DESUGAR_COMMENTS: bool>(
+        db: &dyn ExpandDatabase,
+        owner: &dyn ast::HasAttrs,
+        span_map: SpanMapRef<'_>,
+    ) -> impl Iterator<Item = Attr> {
+        collect_attrs(owner).filter_map(move |(id, attr)| match attr {
+            Either::Left(attr) => {
+                attr.meta().and_then(|meta| Attr::from_src(db, meta, span_map, id))
+            }
+            Either::Right(comment) if DESUGAR_COMMENTS => comment.doc_comment().map(|doc| {
+                let span = span_map.span_for_range(comment.syntax().text_range());
+                let (text, kind) = desugar_doc_comment_text(doc, DocCommentDesugarMode::ProcMacro);
+                Attr {
+                    id,
+                    input: Some(Box::new(AttrInput::Literal(tt::Literal {
+                        symbol: text,
+                        span,
+                        kind,
+                        suffix: None,
+                    }))),
+                    path: Interned::new(ModPath::from(Name::new_symbol(sym::doc, span.ctx))),
+                    ctxt: span.ctx,
+                }
+            }),
+            Either::Right(_) => None,
+        })
+    }
+
+    pub fn attrs_iter_expanded<const DESUGAR_COMMENTS: bool>(
+        db: &dyn ExpandDatabase,
+        owner: &dyn ast::HasAttrs,
+        span_map: SpanMapRef<'_>,
+        cfg_options: &CfgOptions,
+    ) -> impl Iterator<Item = Attr> {
+        Self::attrs_iter::<DESUGAR_COMMENTS>(db, owner, span_map)
+            .flat_map(|attr| attr.expand_cfg_attr(db, cfg_options))
     }
 
     pub fn merge(&self, other: Self) -> Self {
@@ -117,52 +140,20 @@ impl RawAttrs {
         }
     }
 
-    /// Processes `cfg_attr`s, returning the resulting semantic `Attrs`.
-    // FIXME: This should return a different type, signaling it was filtered?
-    pub fn filter(self, db: &dyn ExpandDatabase, krate: CrateId) -> RawAttrs {
-        let has_cfg_attrs = self
-            .iter()
-            .any(|attr| attr.path.as_ident().is_some_and(|name| *name == sym::cfg_attr.clone()));
+    /// Processes `cfg_attr`s
+    pub fn expand_cfg_attr(self, db: &dyn ExpandDatabase, krate: Crate) -> RawAttrs {
+        let has_cfg_attrs =
+            self.iter().any(|attr| attr.path.as_ident().is_some_and(|name| *name == sym::cfg_attr));
         if !has_cfg_attrs {
             return self;
         }
 
-        let crate_graph = db.crate_graph();
-        let new_attrs =
-            self.iter()
-                .flat_map(|attr| -> SmallVec<[_; 1]> {
-                    let is_cfg_attr =
-                        attr.path.as_ident().is_some_and(|name| *name == sym::cfg_attr.clone());
-                    if !is_cfg_attr {
-                        return smallvec![attr.clone()];
-                    }
-
-                    let subtree = match attr.token_tree_value() {
-                        Some(it) => it,
-                        _ => return smallvec![attr.clone()],
-                    };
-
-                    let (cfg, parts) = match parse_cfg_attr_input(subtree) {
-                        Some(it) => it,
-                        None => return smallvec![attr.clone()],
-                    };
-                    let index = attr.id;
-                    let attrs = parts.enumerate().take(1 << AttrId::CFG_ATTR_BITS).filter_map(
-                        |(idx, attr)| Attr::from_tt(db, attr, index.with_cfg_attr(idx)),
-                    );
-
-                    let cfg_options = &crate_graph[krate].cfg_options;
-                    let cfg = TopSubtree::from_token_trees(subtree.top_subtree().delimiter, cfg);
-                    let cfg = CfgExpr::parse(&cfg);
-                    if cfg_options.check(&cfg) == Some(false) {
-                        smallvec![]
-                    } else {
-                        cov_mark::hit!(cfg_attr_active);
-
-                        attrs.collect()
-                    }
-                })
-                .collect::<Vec<_>>();
+        let cfg_options = krate.cfg_options(db);
+        let new_attrs = self
+            .iter()
+            .cloned()
+            .flat_map(|attr| attr.expand_cfg_attr(db, cfg_options))
+            .collect::<Vec<_>>();
         let entries = if new_attrs.is_empty() {
             None
         } else {
@@ -211,7 +202,7 @@ pub struct Attr {
     pub id: AttrId,
     pub path: Interned<ModPath>,
     pub input: Option<Box<AttrInput>>,
-    pub ctxt: SyntaxContextId,
+    pub ctxt: SyntaxContext,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -306,13 +297,12 @@ impl Attr {
                 Some(Box::new(AttrInput::TokenTree(tt::TopSubtree::from_subtree(tree))))
             }
             (Some(tt::TokenTree::Leaf(tt::Leaf::Punct(tt::Punct { char: '=', .. }))), _) => {
-                let input = match input.flat_tokens().get(1) {
+                match input.flat_tokens().get(1) {
                     Some(tt::TokenTree::Leaf(tt::Leaf::Literal(lit))) => {
                         Some(Box::new(AttrInput::Literal(lit.clone())))
                     }
                     _ => None,
-                };
-                input
+                }
             }
             _ => None,
         };
@@ -321,6 +311,42 @@ impl Attr {
 
     pub fn path(&self) -> &ModPath {
         &self.path
+    }
+
+    pub fn expand_cfg_attr(
+        self,
+        db: &dyn ExpandDatabase,
+        cfg_options: &CfgOptions,
+    ) -> impl IntoIterator<Item = Self> {
+        let is_cfg_attr = self.path.as_ident().is_some_and(|name| *name == sym::cfg_attr);
+        if !is_cfg_attr {
+            return smallvec![self];
+        }
+
+        let subtree = match self.token_tree_value() {
+            Some(it) => it,
+            _ => return smallvec![self.clone()],
+        };
+
+        let (cfg, parts) = match parse_cfg_attr_input(subtree) {
+            Some(it) => it,
+            None => return smallvec![self.clone()],
+        };
+        let index = self.id;
+        let attrs = parts
+            .enumerate()
+            .take(1 << AttrId::CFG_ATTR_BITS)
+            .filter_map(|(idx, attr)| Attr::from_tt(db, attr, index.with_cfg_attr(idx)));
+
+        let cfg = TopSubtree::from_token_trees(subtree.top_subtree().delimiter, cfg);
+        let cfg = CfgExpr::parse(&cfg);
+        if cfg_options.check(&cfg) == Some(false) {
+            smallvec![]
+        } else {
+            cov_mark::hit!(cfg_attr_active);
+
+            attrs.collect::<SmallVec<[_; 1]>>()
+        }
     }
 }
 
@@ -403,7 +429,7 @@ impl Attr {
     }
 
     pub fn cfg(&self) -> Option<CfgExpr> {
-        if *self.path.as_ident()? == sym::cfg.clone() {
+        if *self.path.as_ident()? == sym::cfg {
             self.token_tree_value().map(CfgExpr::parse)
         } else {
             None

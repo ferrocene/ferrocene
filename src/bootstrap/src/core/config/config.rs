@@ -307,6 +307,7 @@ pub struct Config {
 
     pub rustc_debug_assertions: bool,
     pub std_debug_assertions: bool,
+    pub tools_debug_assertions: bool,
 
     pub rust_overflow_checks: bool,
     pub rust_overflow_checks_std: bool,
@@ -1377,6 +1378,7 @@ define_config! {
         rustc_debug_assertions: Option<bool> = "debug-assertions",
         randomize_layout: Option<bool> = "randomize-layout",
         std_debug_assertions: Option<bool> = "debug-assertions-std",
+        tools_debug_assertions: Option<bool> = "debug-assertions-tools",
         overflow_checks: Option<bool> = "overflow-checks",
         overflow_checks_std: Option<bool> = "overflow-checks-std",
         debug_logging: Option<bool> = "debug-logging",
@@ -2057,6 +2059,7 @@ impl Config {
         let mut debug = None;
         let mut rustc_debug_assertions = None;
         let mut std_debug_assertions = None;
+        let mut tools_debug_assertions = None;
         let mut overflow_checks = None;
         let mut overflow_checks_std = None;
         let mut debug_logging = None;
@@ -2120,6 +2123,7 @@ impl Config {
                 codegen_units_std,
                 rustc_debug_assertions: rustc_debug_assertions_toml,
                 std_debug_assertions: std_debug_assertions_toml,
+                tools_debug_assertions: tools_debug_assertions_toml,
                 overflow_checks: overflow_checks_toml,
                 overflow_checks_std: overflow_checks_std_toml,
                 debug_logging: debug_logging_toml,
@@ -2204,6 +2208,7 @@ impl Config {
             debug = debug_toml;
             rustc_debug_assertions = rustc_debug_assertions_toml;
             std_debug_assertions = std_debug_assertions_toml;
+            tools_debug_assertions = tools_debug_assertions_toml;
             overflow_checks = overflow_checks_toml;
             overflow_checks_std = overflow_checks_std_toml;
             debug_logging = debug_logging_toml;
@@ -2737,6 +2742,8 @@ impl Config {
         let default = debug == Some(true);
         config.rustc_debug_assertions = rustc_debug_assertions.unwrap_or(default);
         config.std_debug_assertions = std_debug_assertions.unwrap_or(config.rustc_debug_assertions);
+        config.tools_debug_assertions =
+            tools_debug_assertions.unwrap_or(config.rustc_debug_assertions);
         config.rust_overflow_checks = overflow_checks.unwrap_or(default);
         config.rust_overflow_checks_std =
             overflow_checks_std.unwrap_or(config.rust_overflow_checks);
@@ -3795,6 +3802,7 @@ fn check_incompatible_options_for_ci_rustc(
         codegen_units_std: _,
         rustc_debug_assertions: _,
         std_debug_assertions: _,
+        tools_debug_assertions: _,
         overflow_checks: _,
         overflow_checks_std: _,
         debuginfo_level: _,

@@ -17,7 +17,7 @@ use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
 use std::num::NonZero;
 use std::ptr::NonNull;
-use std::{fmt, str};
+use std::{fmt, iter, str};
 
 pub use adt::*;
 pub use assoc::*;
@@ -38,7 +38,9 @@ use rustc_errors::{Diag, ErrorGuaranteed};
 use rustc_hir::LangItem;
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, DocLinkResMap, LifetimeRes, Res};
 use rustc_hir::def_id::{CrateNum, DefId, DefIdMap, LocalDefId, LocalDefIdMap};
+use rustc_hir::definitions::DisambiguatorState;
 use rustc_index::IndexVec;
+use rustc_index::bit_set::BitMatrix;
 use rustc_macros::{
     Decodable, Encodable, HashStable, TyDecodable, TyEncodable, TypeFoldable, TypeVisitable,
     extension,
@@ -49,8 +51,17 @@ use rustc_session::lint::LintBuffer;
 pub use rustc_session::lint::RegisteredTools;
 use rustc_span::hygiene::MacroKind;
 use rustc_span::{DUMMY_SP, ExpnId, ExpnKind, Ident, Span, Symbol, kw, sym};
+pub use rustc_type_ir::data_structures::{DelayedMap, DelayedSet};
+#[allow(
+    hidden_glob_reexports,
+    rustc::usage_of_type_ir_inherent,
+    rustc::non_glob_import_of_type_ir_inherent
+)]
+use rustc_type_ir::inherent;
 pub use rustc_type_ir::relate::VarianceDiagInfo;
 pub use rustc_type_ir::*;
+#[allow(hidden_glob_reexports, unused_imports)]
+use rustc_type_ir::{InferCtxtLike, Interner};
 use tracing::{debug, instrument};
 pub use vtable::*;
 use {rustc_ast as ast, rustc_attr_data_structures as attr, rustc_hir as hir};
@@ -103,7 +114,7 @@ pub use self::visit::*;
 use crate::error::{OpaqueHiddenTypeMismatch, TypeMismatchReason};
 use crate::metadata::ModChild;
 use crate::middle::privacy::EffectiveVisibilities;
-use crate::mir::{Body, CoroutineLayout};
+use crate::mir::{Body, CoroutineLayout, CoroutineSavedLocal, SourceInfo};
 use crate::query::{IntoQueryParam, Providers};
 use crate::ty;
 use crate::ty::codec::{TyDecoder, TyEncoder};
@@ -171,7 +182,7 @@ pub struct ResolverGlobalCtxt {
     pub extern_crate_map: UnordMap<LocalDefId, CrateNum>,
     pub maybe_unused_trait_imports: FxIndexSet<LocalDefId>,
     pub module_children: LocalDefIdMap<Vec<ModChild>>,
-    pub glob_map: FxHashMap<LocalDefId, FxHashSet<Symbol>>,
+    pub glob_map: FxIndexMap<LocalDefId, FxIndexSet<Symbol>>,
     pub main_def: Option<MainDefinition>,
     pub trait_impls: FxIndexMap<DefId, Vec<LocalDefId>>,
     /// A list of proc macro LocalDefIds, written out in the order in which
@@ -206,6 +217,8 @@ pub struct ResolverAstLowering {
     pub next_node_id: ast::NodeId,
 
     pub node_id_to_def_id: NodeMap<LocalDefId>,
+
+    pub disambiguator: DisambiguatorState,
 
     pub trait_map: NodeMap<Vec<hir::TraitCandidate>>,
     /// List functions and methods for which lifetime elision was successful.
@@ -296,7 +309,10 @@ impl Visibility {
                 } else if restricted_id == tcx.parent_module_from_def_id(def_id).to_local_def_id() {
                     "pub(self)".to_string()
                 } else {
-                    format!("pub({})", tcx.item_name(restricted_id.to_def_id()))
+                    format!(
+                        "pub(in crate{})",
+                        tcx.def_path(restricted_id.to_def_id()).to_string_no_crate_verbose()
+                    )
                 }
             }
             ty::Visibility::Public => "pub".to_string(),
@@ -1739,11 +1755,13 @@ impl<'tcx> TyCtxt<'tcx> {
             | ty::InstanceKind::Virtual(..)
             | ty::InstanceKind::ClosureOnceShim { .. }
             | ty::InstanceKind::ConstructCoroutineInClosureShim { .. }
+            | ty::InstanceKind::FutureDropPollShim(..)
             | ty::InstanceKind::DropGlue(..)
             | ty::InstanceKind::CloneShim(..)
             | ty::InstanceKind::ThreadLocalShim(..)
             | ty::InstanceKind::FnPtrAddrShim(..)
-            | ty::InstanceKind::AsyncDropGlueCtorShim(..) => self.mir_shims(instance),
+            | ty::InstanceKind::AsyncDropGlueCtorShim(..)
+            | ty::InstanceKind::AsyncDropGlue(..) => self.mir_shims(instance),
         }
     }
 
@@ -1859,12 +1877,12 @@ impl<'tcx> TyCtxt<'tcx> {
         self.def_kind(trait_def_id) == DefKind::TraitAlias
     }
 
-    /// Returns layout of a coroutine. Layout might be unavailable if the
+    /// Returns layout of a non-async-drop coroutine. Layout might be unavailable if the
     /// coroutine is tainted by errors.
     ///
     /// Takes `coroutine_kind` which can be acquired from the `CoroutineArgs::kind_ty`,
     /// e.g. `args.as_coroutine().kind_ty()`.
-    pub fn coroutine_layout(
+    fn ordinary_coroutine_layout(
         self,
         def_id: DefId,
         coroutine_kind_ty: Ty<'tcx>,
@@ -1898,6 +1916,55 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
+    /// Returns layout of a `async_drop_in_place::{closure}` coroutine
+    ///   (returned from `async fn async_drop_in_place<T>(..)`).
+    /// Layout might be unavailable if the coroutine is tainted by errors.
+    fn async_drop_coroutine_layout(
+        self,
+        def_id: DefId,
+        args: GenericArgsRef<'tcx>,
+    ) -> Option<&'tcx CoroutineLayout<'tcx>> {
+        let instance = InstanceKind::AsyncDropGlue(def_id, Ty::new_coroutine(self, def_id, args));
+        self.mir_shims(instance).coroutine_layout_raw()
+    }
+
+    /// Returns layout of a coroutine. Layout might be unavailable if the
+    /// coroutine is tainted by errors.
+    pub fn coroutine_layout(
+        self,
+        def_id: DefId,
+        args: GenericArgsRef<'tcx>,
+    ) -> Option<&'tcx CoroutineLayout<'tcx>> {
+        if self.is_async_drop_in_place_coroutine(def_id) {
+            // layout of `async_drop_in_place<T>::{closure}` in case,
+            // when T is a coroutine, contains this internal coroutine's ptr in upvars
+            // and doesn't require any locals. Here is an `empty coroutine's layout`
+            let arg_cor_ty = args.first().unwrap().expect_ty();
+            if arg_cor_ty.is_coroutine() {
+                let span = self.def_span(def_id);
+                let source_info = SourceInfo::outermost(span);
+                // Even minimal, empty coroutine has 3 states (RESERVED_VARIANTS),
+                // so variant_fields and variant_source_info should have 3 elements.
+                let variant_fields: IndexVec<VariantIdx, IndexVec<FieldIdx, CoroutineSavedLocal>> =
+                    iter::repeat(IndexVec::new()).take(CoroutineArgs::RESERVED_VARIANTS).collect();
+                let variant_source_info: IndexVec<VariantIdx, SourceInfo> =
+                    iter::repeat(source_info).take(CoroutineArgs::RESERVED_VARIANTS).collect();
+                let proxy_layout = CoroutineLayout {
+                    field_tys: [].into(),
+                    field_names: [].into(),
+                    variant_fields,
+                    variant_source_info,
+                    storage_conflicts: BitMatrix::new(0, 0),
+                };
+                return Some(self.arena.alloc(proxy_layout));
+            } else {
+                self.async_drop_coroutine_layout(def_id, args)
+            }
+        } else {
+            self.ordinary_coroutine_layout(def_id, args.as_coroutine().kind_ty())
+        }
+    }
+
     /// Given the `DefId` of an impl, returns the `DefId` of the trait it implements.
     /// If it implements no trait, returns `None`.
     pub fn trait_id_of_impl(self, def_id: DefId) -> Option<DefId> {
@@ -1927,6 +1994,10 @@ impl<'tcx> TyCtxt<'tcx> {
             }
         }
         None
+    }
+
+    pub fn is_exportable(self, def_id: DefId) -> bool {
+        self.exportable_items(def_id.krate).contains(&def_id)
     }
 
     /// Check if the given `DefId` is `#\[automatically_derived\]`, *and*

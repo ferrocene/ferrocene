@@ -54,6 +54,7 @@ use tracing::{instrument, span};
 pub use utils::change_tracker::{
     CONFIG_CHANGE_HISTORY, find_recent_config_change_ids, human_readable_changes,
 };
+pub use utils::helpers::PanicTracker;
 
 use crate::core::build_steps::vendor::VENDOR_DIR;
 use crate::ferrocene::code_coverage::generate_coverage_report;

@@ -1,6 +1,12 @@
-// Type resolution: the phase that finds all the types in the AST with
-// unresolved type variables and replaces "ty_var" types with their
-// generic parameters.
+//! During type inference, partially inferred terms are
+//! represented using inference variables (ty::Infer). These don't appear in
+//! the final [`ty::TypeckResults`] since all of the types should have been
+//! inferred once typeck is done.
+//!
+//! When type inference is running however, having to update the typeck results
+//! every time a new type is inferred would be unreasonably slow, so instead all
+//! of the replacement happens at the end in [`FnCtxt::resolve_type_vars_in_body`],
+//! which creates a new `TypeckResults` which doesn't contain any inference variables.
 
 use std::mem;
 
@@ -9,7 +15,6 @@ use rustc_errors::ErrorGuaranteed;
 use rustc_hir::intravisit::{self, InferKind, Visitor};
 use rustc_hir::{self as hir, AmbigArg, HirId};
 use rustc_infer::traits::solve::Goal;
-use rustc_middle::span_bug;
 use rustc_middle::traits::ObligationCause;
 use rustc_middle::ty::adjustment::{Adjust, Adjustment, PointerCoercion};
 use rustc_middle::ty::{
@@ -27,15 +32,6 @@ use crate::FnCtxt;
 ///////////////////////////////////////////////////////////////////////////
 // Entry point
 
-// During type inference, partially inferred types are
-// represented using Type variables (ty::Infer). These don't appear in
-// the final TypeckResults since all of the types should have been
-// inferred once typeck is done.
-// When type inference is running however, having to update the typeck
-// typeck results every time a new type is inferred would be unreasonably slow,
-// so instead all of the replacement happens at the end in
-// resolve_type_vars_in_body, which creates a new TypeTables which
-// doesn't contain any inference types.
 impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     pub(crate) fn resolve_type_vars_in_body(
         &self,
@@ -90,14 +86,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     }
 }
 
-///////////////////////////////////////////////////////////////////////////
-// The Writeback context. This visitor walks the HIR, checking the
-// fn-specific typeck results to find references to types or regions. It
-// resolves those regions to remove inference variables and writes the
-// final result back into the master typeck results in the tcx. Here and
-// there, it applies a few ad-hoc checks that were not convenient to
-// do elsewhere.
-
+/// The Writeback context. This visitor walks the HIR, checking the
+/// fn-specific typeck results to find inference variables. It resolves
+/// those inference variables and writes the final result into the
+/// `TypeckResults`. It also applies a few ad-hoc checks that were not
+/// convenient to do elsewhere.
 struct WritebackCx<'cx, 'tcx> {
     fcx: &'cx FnCtxt<'cx, 'tcx>,
 
@@ -513,15 +506,6 @@ impl<'cx, 'tcx> WritebackCx<'cx, 'tcx> {
         self.typeck_results.user_provided_types_mut().extend(
             fcx_typeck_results.user_provided_types().items().map(|(local_id, c_ty)| {
                 let hir_id = HirId { owner: common_hir_owner, local_id };
-
-                if cfg!(debug_assertions) && c_ty.has_infer() {
-                    span_bug!(
-                        hir_id.to_span(self.fcx.tcx),
-                        "writeback: `{:?}` has inference variables",
-                        c_ty
-                    );
-                };
-
                 (hir_id, *c_ty)
             }),
         );
@@ -532,17 +516,7 @@ impl<'cx, 'tcx> WritebackCx<'cx, 'tcx> {
         assert_eq!(fcx_typeck_results.hir_owner, self.typeck_results.hir_owner);
 
         self.typeck_results.user_provided_sigs.extend_unord(
-            fcx_typeck_results.user_provided_sigs.items().map(|(&def_id, c_sig)| {
-                if cfg!(debug_assertions) && c_sig.has_infer() {
-                    span_bug!(
-                        self.fcx.tcx.def_span(def_id),
-                        "writeback: `{:?}` has inference variables",
-                        c_sig
-                    );
-                };
-
-                (def_id, *c_sig)
-            }),
+            fcx_typeck_results.user_provided_sigs.items().map(|(def_id, c_sig)| (*def_id, *c_sig)),
         );
     }
 
@@ -561,13 +535,10 @@ impl<'cx, 'tcx> WritebackCx<'cx, 'tcx> {
         let tcx = self.tcx();
         // We clone the opaques instead of stealing them here as they are still used for
         // normalization in the next generation trait solver.
-        //
-        // FIXME(-Znext-solver): Opaque types defined after this would simply get dropped
-        // at the end of typeck. While this seems unlikely to happen in practice this
-        // should still get fixed. Either by preventing writeback from defining new opaque
-        // types or by using this function at the end of writeback and running it as a
-        // fixpoint.
         let opaque_types = self.fcx.infcx.clone_opaque_types();
+        let num_entries = self.fcx.inner.borrow_mut().opaque_types().num_entries();
+        let prev = self.fcx.checked_opaque_types_storage_entries.replace(Some(num_entries));
+        debug_assert_eq!(prev, None);
         for (opaque_type_key, hidden_type) in opaque_types {
             let hidden_type = self.resolve(hidden_type, &hidden_type.span);
             let opaque_type_key = self.resolve(opaque_type_key, &hidden_type.span);
@@ -581,15 +552,16 @@ impl<'cx, 'tcx> WritebackCx<'cx, 'tcx> {
                 }
             }
 
-            if let Err(guar) = check_opaque_type_parameter_valid(
+            if let Err(err) = check_opaque_type_parameter_valid(
                 &self.fcx,
                 opaque_type_key,
                 hidden_type.span,
                 DefiningScopeKind::HirTypeck,
             ) {
-                self.typeck_results
-                    .concrete_opaque_types
-                    .insert(opaque_type_key.def_id, ty::OpaqueHiddenType::new_error(tcx, guar));
+                self.typeck_results.concrete_opaque_types.insert(
+                    opaque_type_key.def_id,
+                    ty::OpaqueHiddenType::new_error(tcx, err.report(self.fcx)),
+                );
             }
 
             let hidden_type = hidden_type.remap_generic_params_to_declaration_params(
@@ -897,7 +869,7 @@ impl<'cx, 'tcx> Resolver<'cx, 'tcx> {
             let cause = ObligationCause::misc(self.span.to_span(tcx), body_id);
             let at = self.fcx.at(&cause, self.fcx.param_env);
             let universes = vec![None; outer_exclusive_binder(value).as_usize()];
-            match solve::deeply_normalize_with_skipped_universes_and_ambiguous_goals(
+            match solve::deeply_normalize_with_skipped_universes_and_ambiguous_coroutine_goals(
                 at, value, universes,
             ) {
                 Ok((value, goals)) => {

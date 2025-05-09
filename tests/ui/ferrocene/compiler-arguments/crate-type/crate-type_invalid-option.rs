@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: --crate-type=invalid
-//~? unknown crate type
+//~? ERROR unknown crate type
 
 fn main() {}
 

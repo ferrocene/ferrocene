@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -Ccodegen-units=0
-//~? value for codegen units must be a positive non-zero integer
+//~? ERROR value for codegen units must be a positive non-zero integer
 
 fn main() {}
 

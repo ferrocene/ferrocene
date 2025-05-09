@@ -470,14 +470,19 @@ pub enum AliasTermKind {
     /// An opaque type (usually from `impl Trait` in type aliases or function return types)
     /// Can only be normalized away in PostAnalysis mode or its defining scope.
     OpaqueTy,
-    /// A type alias that actually checks its trait bounds.
+    /// A free type alias that actually checks its trait bounds.
     /// Currently only used if the type alias references opaque types.
     /// Can always be normalized away.
-    WeakTy,
-    /// An unevaluated const coming from a generic const expression.
+    FreeTy,
+
+    /// An unevaluated anonymous constants.
     UnevaluatedConst,
     /// An unevaluated const coming from an associated const.
     ProjectionConst,
+    /// A top level const item not part of a trait or impl.
+    FreeConst,
+    /// An associated const in an inherent `impl`
+    InherentConst,
 }
 
 impl AliasTermKind {
@@ -486,9 +491,25 @@ impl AliasTermKind {
             AliasTermKind::ProjectionTy => "associated type",
             AliasTermKind::ProjectionConst => "associated const",
             AliasTermKind::InherentTy => "inherent associated type",
+            AliasTermKind::InherentConst => "inherent associated const",
             AliasTermKind::OpaqueTy => "opaque type",
-            AliasTermKind::WeakTy => "type alias",
+            AliasTermKind::FreeTy => "type alias",
+            AliasTermKind::FreeConst => "unevaluated constant",
             AliasTermKind::UnevaluatedConst => "unevaluated constant",
+        }
+    }
+
+    pub fn is_type(self) -> bool {
+        match self {
+            AliasTermKind::ProjectionTy
+            | AliasTermKind::InherentTy
+            | AliasTermKind::OpaqueTy
+            | AliasTermKind::FreeTy => true,
+
+            AliasTermKind::UnevaluatedConst
+            | AliasTermKind::ProjectionConst
+            | AliasTermKind::InherentConst
+            | AliasTermKind::FreeConst => false,
         }
     }
 }
@@ -498,7 +519,7 @@ impl From<ty::AliasTyKind> for AliasTermKind {
         match value {
             ty::Projection => AliasTermKind::ProjectionTy,
             ty::Opaque => AliasTermKind::OpaqueTy,
-            ty::Weak => AliasTermKind::WeakTy,
+            ty::Free => AliasTermKind::FreeTy,
             ty::Inherent => AliasTermKind::InherentTy,
         }
     }
@@ -565,8 +586,11 @@ impl<I: Interner> AliasTerm<I> {
             AliasTermKind::ProjectionTy
             | AliasTermKind::InherentTy
             | AliasTermKind::OpaqueTy
-            | AliasTermKind::WeakTy => {}
-            AliasTermKind::UnevaluatedConst | AliasTermKind::ProjectionConst => {
+            | AliasTermKind::FreeTy => {}
+            AliasTermKind::InherentConst
+            | AliasTermKind::FreeConst
+            | AliasTermKind::UnevaluatedConst
+            | AliasTermKind::ProjectionConst => {
                 panic!("Cannot turn `UnevaluatedConst` into `AliasTy`")
             }
         }
@@ -597,24 +621,25 @@ impl<I: Interner> AliasTerm<I> {
                 ty::AliasTy { def_id: self.def_id, args: self.args, _use_alias_ty_new_instead: () },
             )
             .into(),
-            AliasTermKind::WeakTy => Ty::new_alias(
+            AliasTermKind::FreeTy => Ty::new_alias(
                 interner,
-                ty::AliasTyKind::Weak,
+                ty::AliasTyKind::Free,
                 ty::AliasTy { def_id: self.def_id, args: self.args, _use_alias_ty_new_instead: () },
             )
             .into(),
-            AliasTermKind::UnevaluatedConst | AliasTermKind::ProjectionConst => {
-                I::Const::new_unevaluated(
-                    interner,
-                    ty::UnevaluatedConst::new(self.def_id, self.args),
-                )
-                .into()
-            }
+            AliasTermKind::FreeConst
+            | AliasTermKind::InherentConst
+            | AliasTermKind::UnevaluatedConst
+            | AliasTermKind::ProjectionConst => I::Const::new_unevaluated(
+                interner,
+                ty::UnevaluatedConst::new(self.def_id, self.args),
+            )
+            .into(),
         }
     }
 }
 
-/// The following methods work only with (trait) associated type projections.
+/// The following methods work only with (trait) associated term projections.
 impl<I: Interner> AliasTerm<I> {
     pub fn self_ty(self) -> I::Ty {
         self.args.type_at(0)
@@ -656,6 +681,31 @@ impl<I: Interner> AliasTerm<I> {
     /// as well.
     pub fn trait_ref(self, interner: I) -> TraitRef<I> {
         self.trait_ref_and_own_args(interner).0
+    }
+}
+
+/// The following methods work only with inherent associated term projections.
+impl<I: Interner> AliasTerm<I> {
+    /// Transform the generic parameters to have the given `impl` args as the base and the GAT args on top of that.
+    ///
+    /// Does the following transformation:
+    ///
+    /// ```text
+    /// [Self, P_0...P_m] -> [I_0...I_n, P_0...P_m]
+    ///
+    ///     I_i impl args
+    ///     P_j GAT args
+    /// ```
+    pub fn rebase_inherent_args_onto_impl(
+        self,
+        impl_args: I::GenericArgs,
+        interner: I,
+    ) -> I::GenericArgs {
+        debug_assert!(matches!(
+            self.kind(interner),
+            AliasTermKind::InherentTy | AliasTermKind::InherentConst
+        ));
+        interner.mk_args_from_iter(impl_args.iter().chain(self.args.iter().skip(1)))
     }
 }
 

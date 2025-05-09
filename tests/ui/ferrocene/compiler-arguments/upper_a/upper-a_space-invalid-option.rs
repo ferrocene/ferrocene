@@ -2,9 +2,9 @@
 //
 //@ check-pass
 //@ compile-flags: -A invalid_lint_code
-//~? unknown lint
-//~? unknown lint
-//~? unknown lint
+//~? WARN unknown lint
+//~? WARN unknown lint
+//~? WARN unknown lint
 
 fn main() {}
 

@@ -1,18 +1,17 @@
 //! Utilities for computing drop info about types.
 
-use base_db::ra_salsa;
 use chalk_ir::cast::Cast;
-use hir_def::data::adt::StructFlags;
-use hir_def::lang_item::LangItem;
 use hir_def::AdtId;
+use hir_def::lang_item::LangItem;
+use hir_def::signatures::StructFlags;
 use stdx::never;
 use triomphe::Arc;
 
 use crate::{
-    db::HirDatabase, method_resolution::TyFingerprint, AliasTy, Canonical, CanonicalVarKinds,
-    InEnvironment, Interner, ProjectionTy, TraitEnvironment, Ty, TyBuilder, TyKind,
+    AliasTy, Canonical, CanonicalVarKinds, ConcreteConst, ConstScalar, ConstValue, InEnvironment,
+    Interner, ProjectionTy, TraitEnvironment, Ty, TyBuilder, TyKind, db::HirDatabase,
+    method_resolution::TyFingerprint,
 };
-use crate::{ConcreteConst, ConstScalar, ConstValue};
 
 fn has_destructor(db: &dyn HirDatabase, adt: AdtId) -> bool {
     let module = match adt {
@@ -20,9 +19,7 @@ fn has_destructor(db: &dyn HirDatabase, adt: AdtId) -> bool {
         AdtId::StructId(id) => db.lookup_intern_struct(id).container,
         AdtId::UnionId(id) => db.lookup_intern_union(id).container,
     };
-    let Some(drop_trait) =
-        db.lang_item(module.krate(), LangItem::Drop).and_then(|it| it.as_trait())
-    else {
+    let Some(drop_trait) = LangItem::Drop.resolve_trait(db, module.krate()) else {
         return false;
     };
     let impls = match module.containing_block() {
@@ -32,8 +29,7 @@ fn has_destructor(db: &dyn HirDatabase, adt: AdtId) -> bool {
         },
         None => db.trait_impls_in_crate(module.krate()),
     };
-    let result = impls.for_trait_and_self_ty(drop_trait, TyFingerprint::Adt(adt)).next().is_some();
-    result
+    impls.for_trait_and_self_ty(drop_trait, TyFingerprint::Adt(adt)).next().is_some()
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -55,7 +51,7 @@ pub(crate) fn has_drop_glue(db: &dyn HirDatabase, ty: Ty, env: Arc<TraitEnvironm
             }
             match adt.0 {
                 AdtId::StructId(id) => {
-                    if db.struct_data(id).flags.contains(StructFlags::IS_MANUALLY_DROP) {
+                    if db.struct_signature(id).flags.contains(StructFlags::IS_MANUALLY_DROP) {
                         return DropGlue::None;
                     }
                     db.field_types(id.into())
@@ -72,7 +68,7 @@ pub(crate) fn has_drop_glue(db: &dyn HirDatabase, ty: Ty, env: Arc<TraitEnvironm
                 // Unions cannot have fields with destructors.
                 AdtId::UnionId(_) => DropGlue::None,
                 AdtId::EnumId(id) => db
-                    .enum_data(id)
+                    .enum_variants(id)
                     .variants
                     .iter()
                     .map(|&(variant, _)| {
@@ -176,19 +172,14 @@ fn projection_has_drop_glue(
     let normalized = db.normalize_projection(projection, env.clone());
     match normalized.kind(Interner) {
         TyKind::Alias(AliasTy::Projection(_)) | TyKind::AssociatedType(..) => {
-            if is_copy(db, ty, env) {
-                DropGlue::None
-            } else {
-                DropGlue::DependOnParams
-            }
+            if is_copy(db, ty, env) { DropGlue::None } else { DropGlue::DependOnParams }
         }
         _ => db.has_drop_glue(normalized, env),
     }
 }
 
 fn is_copy(db: &dyn HirDatabase, ty: Ty, env: Arc<TraitEnvironment>) -> bool {
-    let Some(copy_trait) = db.lang_item(env.krate, LangItem::Copy).and_then(|it| it.as_trait())
-    else {
+    let Some(copy_trait) = LangItem::Copy.resolve_trait(db, env.krate) else {
         return false;
     };
     let trait_ref = TyBuilder::trait_ref(db, copy_trait).push(ty).build();
@@ -199,11 +190,10 @@ fn is_copy(db: &dyn HirDatabase, ty: Ty, env: Arc<TraitEnvironment>) -> bool {
     db.trait_solve(env.krate, env.block, goal).is_some()
 }
 
-pub(crate) fn has_drop_glue_recover(
+pub(crate) fn has_drop_glue_cycle_result(
     _db: &dyn HirDatabase,
-    _cycle: &ra_salsa::Cycle,
-    _ty: &Ty,
-    _env: &Arc<TraitEnvironment>,
+    _ty: Ty,
+    _env: Arc<TraitEnvironment>,
 ) -> DropGlue {
     DropGlue::None
 }

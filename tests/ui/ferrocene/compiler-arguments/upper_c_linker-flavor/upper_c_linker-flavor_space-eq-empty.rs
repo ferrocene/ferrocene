@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -C linker-flavor=
-//~? incorrect value
+//~? ERROR incorrect value
 
 fn main() {}
 

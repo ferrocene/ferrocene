@@ -93,6 +93,17 @@ macro_rules! parallel {
         };
     }
 
+pub fn spawn(func: impl FnOnce() + DynSend + 'static) {
+    if mode::is_dyn_thread_safe() {
+        let func = FromDyn::from(func);
+        rayon_core::spawn(|| {
+            (func.into_inner())();
+        });
+    } else {
+        func()
+    }
+}
+
 // This function only works when `mode::is_dyn_thread_safe()`.
 pub fn scope<'scope, OP, R>(op: OP) -> R
 where
@@ -225,4 +236,14 @@ pub fn par_map<I: DynSend, T: IntoIterator<Item = I>, R: DynSend, C: FromIterato
             t.into_iter().filter_map(|i| guard.run(|| map(i))).collect()
         }
     })
+}
+
+pub fn broadcast<R: DynSend>(op: impl Fn(usize) -> R + DynSync) -> Vec<R> {
+    if mode::is_dyn_thread_safe() {
+        let op = FromDyn::from(op);
+        let results = rayon_core::broadcast(|context| op.derive(op(context.index())));
+        results.into_iter().map(|r| r.into_inner()).collect()
+    } else {
+        vec![op(0)]
+    }
 }

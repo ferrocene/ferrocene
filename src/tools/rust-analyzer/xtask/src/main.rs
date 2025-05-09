@@ -22,6 +22,7 @@ mod codegen;
 mod dist;
 mod install;
 mod metrics;
+mod pgo;
 mod publish;
 mod release;
 mod tidy;
@@ -29,7 +30,7 @@ mod util;
 
 use anyhow::bail;
 use std::{env, path::PathBuf};
-use xshell::{cmd, Shell};
+use xshell::{Shell, cmd};
 
 fn main() -> anyhow::Result<()> {
     let flags = flags::Xtask::from_env_or_exit();

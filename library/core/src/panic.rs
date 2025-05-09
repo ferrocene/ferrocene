@@ -77,6 +77,7 @@ pub macro panic_2021 {
 #[rustc_diagnostic_item = "core_panic_2021_macro"]
 #[rustc_macro_transparency = "semitransparent"]
 #[cfg(not(feature = "panic_immediate_abort"))]
+#[allow_internal_unstable(coverage_attribute)]
 pub macro panic_2021 {
     () => ({
         // Create a function so that the argument for `track_caller`
@@ -96,6 +97,7 @@ pub macro panic_2021 {
         #[inline(never)]
         #[rustc_const_panic_str] // enforce a &&str argument in const-check and hook this by const-eval
         #[rustc_do_not_const_check] // hooked by const-eval
+        #[coverage(off)]
         const fn panic_cold_display<T: $crate::fmt::Display>(arg: &T) -> ! {
             $crate::panicking::panic_display(arg)
         }
@@ -208,6 +210,7 @@ pub macro const_panic {
         #[rustc_allow_const_fn_unstable(const_eval_select)]
         #[inline(always)] // inline the wrapper
         #[track_caller]
+        #[coverage(off)]
         const fn do_panic($($arg: $ty),*) -> ! {
             $crate::intrinsics::const_eval_select!(
                 @capture { $($arg: $ty = $arg),* } -> !:

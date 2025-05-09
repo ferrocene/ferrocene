@@ -83,6 +83,7 @@ const LINKCHECK_EXCEPTIONS: &[(&str, &[&str])] = &[
     // This is fine though, because that section is hidden by the build system with `display: none`
     // when the link is missing. We thus ignore it to avoid a linkchecker complaint.
     ("index.html", &["qualification/technical-report.pdf"]),
+    ("release-notes/25.05.0.html", &["#check-cfg"]),
 ];
 
 #[rustfmt::skip]

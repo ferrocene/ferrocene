@@ -56,7 +56,7 @@ pub trait Interner:
         data: PredefinedOpaquesData<Self>,
     ) -> Self::PredefinedOpaques;
 
-    type DefiningOpaqueTypes: Copy
+    type LocalDefIds: Copy
         + Debug
         + Hash
         + Default
@@ -286,6 +286,8 @@ pub trait Interner:
 
     fn has_item_definition(self, def_id: Self::DefId) -> bool;
 
+    fn impl_specializes(self, impl_def_id: Self::DefId, victim_def_id: Self::DefId) -> bool;
+
     fn impl_is_default(self, impl_def_id: Self::DefId) -> bool;
 
     fn impl_trait_ref(self, impl_def_id: Self::DefId) -> ty::EarlyBinder<Self, ty::TraitRef<Self>>;
@@ -330,10 +332,12 @@ pub trait Interner:
         binder: ty::Binder<Self, T>,
     ) -> ty::Binder<Self, T>;
 
-    fn opaque_types_defined_by(
+    fn opaque_types_defined_by(self, defining_anchor: Self::LocalDefId) -> Self::LocalDefIds;
+
+    fn opaque_types_and_generators_defined_by(
         self,
         defining_anchor: Self::LocalDefId,
-    ) -> Self::DefiningOpaqueTypes;
+    ) -> Self::LocalDefIds;
 }
 
 /// Imagine you have a function `F: FnOnce(&[T]) -> R`, plus an iterator `iter`

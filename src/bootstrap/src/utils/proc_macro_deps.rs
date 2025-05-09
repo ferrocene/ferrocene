@@ -40,7 +40,6 @@ pub static CRATES: &[&str] = &[
     "pest_meta",
     "proc-macro2",
     "quote",
-    "rinja_parser",
     "rustc-hash",
     "self_cell",
     "serde",

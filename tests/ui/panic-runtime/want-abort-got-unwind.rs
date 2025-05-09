@@ -16,12 +16,5 @@ extern crate panic_runtime_unwind;
 fn main() {}
 
 //~? ERROR the linked panic runtime `panic_runtime_unwind` is not compiled with this crate's panic strategy `abort`
-<<<<<<< HEAD
-// FIXME: These errors are target-dependent, could be served by some "optional error" annotation
-// instead of `dont-require-annotations`.
-//FIXME~? ERROR cannot link together two panic runtimes: panic_unwind and panic_runtime_unwind
-//FIXME~? ERROR the crate `panic_unwind` requires panic strategy `unwind` which is incompatible with this crate's strategy of `abort`
 
 // ferrocene-annotations: um_rustc_C_panic
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

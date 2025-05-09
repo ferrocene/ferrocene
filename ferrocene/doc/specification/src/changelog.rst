@@ -41,6 +41,10 @@ Language changes in Rust 1.86.0
 
   - No change: this bug was not documented
 
+- `Inner attributes, #![test] and #![rustfmt::skip], are no longer accepted in more places than intended. <https://github.com/rust-lang/rust/pull/134276>`_
+
+  - No change: custom attributes were not documented
+
 Language changes in Rust 1.85.0
 -------------------------------
 

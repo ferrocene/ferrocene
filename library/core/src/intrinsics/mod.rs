@@ -3186,6 +3186,7 @@ pub(crate) macro const_eval_select {
         }
 
         $(#[$compiletime_attr])*
+        #[coverage(off)]
         const fn compiletime$(<$($binders)*>)?($($arg: $ty),*) $( -> $ret )? {
             // Don't warn if one of the arguments is unused.
             $(let _ = $arg;)*

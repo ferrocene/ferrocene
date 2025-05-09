@@ -220,6 +220,7 @@ mod macros;
 
 #[unstable(feature = "assert_matches", issue = "82775")]
 /// Unstable module containing the unstable `assert_matches` macro.
+#[coverage(off)]
 pub mod assert_matches {
     #[unstable(feature = "assert_matches", issue = "82775")]
     pub use crate::macros::{assert_matches, debug_assert_matches};
@@ -228,12 +229,14 @@ pub mod assert_matches {
 // We don't export this through #[macro_export] for now, to avoid breakage.
 #[unstable(feature = "autodiff", issue = "124509")]
 /// Unstable module containing the unstable `autodiff` macro.
+#[coverage(off)]
 pub mod autodiff {
     #[unstable(feature = "autodiff", issue = "124509")]
     pub use crate::macros::builtin::autodiff;
 }
 
 #[unstable(feature = "contracts", issue = "128044")]
+#[coverage(off)]
 pub mod contracts;
 
 #[unstable(feature = "cfg_match", issue = "115585")]
@@ -248,133 +251,200 @@ mod int_macros;
 
 #[rustc_diagnostic_item = "i128_legacy_mod"]
 #[path = "num/shells/i128.rs"]
+#[coverage(off)]
 pub mod i128;
 #[rustc_diagnostic_item = "i16_legacy_mod"]
 #[path = "num/shells/i16.rs"]
+#[coverage(off)]
 pub mod i16;
 #[rustc_diagnostic_item = "i32_legacy_mod"]
 #[path = "num/shells/i32.rs"]
+#[coverage(off)]
 pub mod i32;
 #[rustc_diagnostic_item = "i64_legacy_mod"]
 #[path = "num/shells/i64.rs"]
+#[coverage(off)]
 pub mod i64;
 #[rustc_diagnostic_item = "i8_legacy_mod"]
 #[path = "num/shells/i8.rs"]
+#[coverage(off)]
 pub mod i8;
 #[rustc_diagnostic_item = "isize_legacy_mod"]
 #[path = "num/shells/isize.rs"]
+#[coverage(off)]
 pub mod isize;
 
 #[rustc_diagnostic_item = "u128_legacy_mod"]
 #[path = "num/shells/u128.rs"]
+#[coverage(off)]
 pub mod u128;
 #[rustc_diagnostic_item = "u16_legacy_mod"]
 #[path = "num/shells/u16.rs"]
+#[coverage(off)]
 pub mod u16;
 #[rustc_diagnostic_item = "u32_legacy_mod"]
 #[path = "num/shells/u32.rs"]
+#[coverage(off)]
 pub mod u32;
 #[rustc_diagnostic_item = "u64_legacy_mod"]
 #[path = "num/shells/u64.rs"]
+#[coverage(off)]
 pub mod u64;
 #[rustc_diagnostic_item = "u8_legacy_mod"]
 #[path = "num/shells/u8.rs"]
+#[coverage(off)]
 pub mod u8;
 #[rustc_diagnostic_item = "usize_legacy_mod"]
 #[path = "num/shells/usize.rs"]
+#[coverage(off)]
 pub mod usize;
 
 #[path = "num/f128.rs"]
+#[coverage(off)]
 pub mod f128;
 #[path = "num/f16.rs"]
+#[coverage(off)]
 pub mod f16;
 #[path = "num/f32.rs"]
+#[coverage(off)]
 pub mod f32;
 #[path = "num/f64.rs"]
+#[coverage(off)]
 pub mod f64;
 
 #[macro_use]
+#[coverage(off)]
 pub mod num;
 
 /* The core prelude, not as all-encompassing as the std prelude */
 
+#[coverage(off)]
 pub mod prelude;
 
 /* Core modules for ownership management */
 
+#[coverage(off)]
 pub mod hint;
+#[coverage(off)]
 pub mod intrinsics;
+#[coverage(off)]
 pub mod mem;
+#[coverage(off)]
 pub mod ptr;
 #[unstable(feature = "ub_checks", issue = "none")]
+#[coverage(off)]
 pub mod ub_checks;
 
 /* Core language traits */
 
+#[coverage(off)]
 pub mod borrow;
+#[coverage(off)]
 pub mod clone;
+#[coverage(off)]
 pub mod cmp;
+#[coverage(off)]
 pub mod convert;
+#[coverage(off)]
 pub mod default;
+#[coverage(off)]
 pub mod error;
+#[coverage(off)]
 pub mod marker;
+#[coverage(off)]
 pub mod ops;
 
 /* Core types and methods on primitives */
 
+#[coverage(off)]
 pub mod any;
+#[coverage(off)]
 pub mod array;
+#[coverage(off)]
 pub mod ascii;
+#[coverage(off)]
 pub mod asserting;
 #[unstable(feature = "async_iterator", issue = "79024")]
+#[coverage(off)]
 pub mod async_iter;
 #[unstable(feature = "bstr", issue = "134915")]
+#[coverage(off)]
 pub mod bstr;
+#[coverage(off)]
 pub mod cell;
+#[coverage(off)]
 pub mod char;
+#[coverage(off)]
 pub mod ffi;
 #[unstable(feature = "core_io_borrowed_buf", issue = "117693")]
+#[coverage(off)]
 pub mod io;
+#[coverage(off)]
 pub mod iter;
+#[coverage(off)]
 pub mod net;
+#[coverage(off)]
 pub mod option;
+#[coverage(off)]
 pub mod panic;
+#[coverage(off)]
 pub mod panicking;
 #[unstable(feature = "pattern_type_macro", issue = "123646")]
+#[coverage(off)]
 pub mod pat;
+#[coverage(off)]
 pub mod pin;
 #[unstable(feature = "random", issue = "130703")]
+#[coverage(off)]
 pub mod random;
 #[unstable(feature = "new_range_api", issue = "125687")]
+#[coverage(off)]
 pub mod range;
+#[coverage(off)]
 pub mod result;
+#[coverage(off)]
 pub mod sync;
 #[unstable(feature = "unsafe_binders", issue = "130516")]
+#[coverage(off)]
 pub mod unsafe_binder;
 
+#[coverage(off)]
 pub mod fmt;
+#[coverage(off)]
 pub mod hash;
+#[coverage(off)]
 pub mod slice;
+#[coverage(off)]
 pub mod str;
+#[coverage(off)]
 pub mod time;
 
+#[coverage(off)]
 pub mod unicode;
 
 /* Async */
+#[coverage(off)]
 pub mod future;
+#[coverage(off)]
 pub mod task;
 
 /* Heap memory allocator trait */
 #[allow(missing_docs)]
+#[coverage(off)]
 pub mod alloc;
 
 // note: does not need to be public
+#[coverage(off)]
 mod bool;
+#[coverage(off)]
 mod escape;
+#[coverage(off)]
 mod tuple;
+#[coverage(off)]
 mod unit;
 
 #[stable(feature = "core_primitive", since = "1.43.0")]
+#[coverage(off)]
 pub mod primitive;
 
 // Pull in the `core_arch` crate directly into core. The contents of
@@ -395,9 +465,11 @@ pub mod primitive;
     unreachable_pub
 )]
 #[allow(rustdoc::bare_urls)]
+#[coverage(off)]
 mod core_arch;
 
 #[stable(feature = "simd_arch", since = "1.27.0")]
+#[coverage(off)]
 pub mod arch;
 
 // Pull in the `core_simd` crate directly into core. The contents of
@@ -410,9 +482,11 @@ pub mod arch;
 #[allow(missing_debug_implementations, dead_code, unsafe_op_in_unsafe_fn)]
 #[allow(rustdoc::bare_urls)]
 #[unstable(feature = "portable_simd", issue = "86656")]
+#[coverage(off)]
 mod core_simd;
 
 #[unstable(feature = "portable_simd", issue = "86656")]
+#[coverage(off)]
 pub mod simd {
     #![doc = include_str!("../../portable-simd/crates/core_simd/src/core_simd_docs.md")]
 

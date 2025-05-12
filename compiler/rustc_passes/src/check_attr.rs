@@ -179,6 +179,9 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         [sym::rustc_as_ptr, ..] => {
                             self.check_applied_to_fn_or_method(hir_id, attr, span, target)
                         }
+                        [sym::rustc_no_implicit_autorefs, ..] => {
+                            self.check_applied_to_fn_or_method(hir_id, attr, span, target)
+                        }
                         [sym::rustc_never_returns_null_ptr, ..] => {
                             self.check_applied_to_fn_or_method(hir_id, attr, span, target)
                         }
@@ -274,6 +277,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                             | sym::cfg_attr
                             | sym::cfg_trace
                             | sym::cfg_attr_trace
+                            | sym::export_stable // handled in `check_export`
                             // need to be fixed
                             | sym::cfi_encoding // FIXME(cfi_encoding)
                             | sym::pointee // FIXME(derive_coerce_pointee)
@@ -622,6 +626,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             sym::naked,
             sym::instruction_set,
             sym::repr,
+            sym::rustc_std_internal_symbol,
             // code generation
             sym::cold,
             // documentation
@@ -679,7 +684,9 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         }
                     }
 
-                    if !other_attr.has_any_name(ALLOW_LIST) {
+                    if !other_attr.has_any_name(ALLOW_LIST)
+                        && !matches!(other_attr.path().as_slice(), [sym::rustfmt, ..])
+                    {
                         let path = other_attr.path();
                         let path: Vec<_> = path.iter().map(|s| s.as_str()).collect();
                         let other_attr_name = path.join("::");

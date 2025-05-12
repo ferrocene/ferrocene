@@ -9,6 +9,7 @@
 #![cfg_attr(bootstrap, feature(let_chains))]
 #![doc(html_root_url = "https://doc.rust-lang.org/nightly/nightly-rustc/")]
 #![doc(rust_logo)]
+#![feature(box_patterns)]
 #![feature(map_try_insert)]
 #![feature(rustdoc_internals)]
 #![feature(try_blocks)]
@@ -18,6 +19,7 @@ use rustc_middle::query::Providers;
 
 pub mod abi_test;
 mod check_attr;
+mod check_export;
 pub mod dead;
 mod debugger_visualizer;
 mod diagnostic_items;
@@ -53,4 +55,5 @@ pub fn provide(providers: &mut Providers) {
     reachable::provide(providers);
     stability::provide(providers);
     upvars::provide(providers);
+    check_export::provide(providers);
 }

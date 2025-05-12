@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: --print --print crate-name
-//~? unknown print request
+//~? ERROR unknown print request
 
 fn main() {}
 

@@ -111,10 +111,8 @@ impl<'a, 'tcx> PatCtxt<'a, 'tcx> {
             let kind = match adjust.kind {
                 PatAdjust::BuiltinDeref => PatKind::Deref { subpattern: thir_pat },
                 PatAdjust::OverloadedDeref => {
-                    let mutable = self.typeck_results.pat_has_ref_mut_binding(pat);
-                    let mutability =
-                        if mutable { hir::Mutability::Mut } else { hir::Mutability::Not };
-                    PatKind::DerefPattern { subpattern: thir_pat, mutability }
+                    let borrow = self.typeck_results.deref_pat_borrow_mode(adjust.source, pat);
+                    PatKind::DerefPattern { subpattern: thir_pat, borrow }
                 }
             };
             Box::new(Pat { span, ty: adjust.source, kind })
@@ -308,9 +306,8 @@ impl<'a, 'tcx> PatCtxt<'a, 'tcx> {
             }
 
             hir::PatKind::Deref(subpattern) => {
-                let mutable = self.typeck_results.pat_has_ref_mut_binding(subpattern);
-                let mutability = if mutable { hir::Mutability::Mut } else { hir::Mutability::Not };
-                PatKind::DerefPattern { subpattern: self.lower_pattern(subpattern), mutability }
+                let borrow = self.typeck_results.deref_pat_borrow_mode(ty, subpattern);
+                PatKind::DerefPattern { subpattern: self.lower_pattern(subpattern), borrow }
             }
             hir::PatKind::Ref(subpattern, _) => {
                 // Track the default binding mode for the Rust 2024 migration suggestion.
@@ -556,8 +553,7 @@ impl<'a, 'tcx> PatCtxt<'a, 'tcx> {
         let res = self.typeck_results.qpath_res(qpath, id);
 
         let (def_id, user_ty) = match res {
-            Res::Def(DefKind::Const, def_id) => (def_id, None),
-            Res::Def(DefKind::AssocConst, def_id) => {
+            Res::Def(DefKind::Const, def_id) | Res::Def(DefKind::AssocConst, def_id) => {
                 (def_id, self.typeck_results.user_provided_types().get(id))
             }
 
@@ -571,6 +567,8 @@ impl<'a, 'tcx> PatCtxt<'a, 'tcx> {
 
         // Lower the named constant to a THIR pattern.
         let args = self.typeck_results.node_args(id);
+        // FIXME(mgca): we will need to special case IACs here to have type system compatible
+        // generic args, instead of how we represent them in body expressions.
         let c = ty::Const::new_unevaluated(self.tcx, ty::UnevaluatedConst { def: def_id, args });
         let mut pattern = self.const_to_pat(c, ty, id, span);
 

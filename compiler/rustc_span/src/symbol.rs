@@ -174,7 +174,6 @@ symbols! {
         Arc,
         ArcWeak,
         Argument,
-        ArgumentMethods,
         ArrayIntoIter,
         AsMut,
         AsRef,
@@ -249,6 +248,7 @@ symbols! {
         Error,
         File,
         FileType,
+        FmtArgumentsNew,
         Fn,
         FnMut,
         FnOnce,
@@ -459,6 +459,7 @@ symbols! {
         anonymous_lifetime_in_impl_trait,
         any,
         append_const_msg,
+        apx_target_feature,
         arbitrary_enum_discriminant,
         arbitrary_self_types,
         arbitrary_self_types_pointers,
@@ -502,17 +503,8 @@ symbols! {
         async_call_mut,
         async_call_once,
         async_closure,
-        async_destruct,
         async_drop,
-        async_drop_chain,
-        async_drop_defer,
-        async_drop_deferred_drop_in_place,
-        async_drop_either,
-        async_drop_fuse,
         async_drop_in_place,
-        async_drop_noop,
-        async_drop_slice,
-        async_drop_surface_drop_in_place,
         async_fn,
         async_fn_in_dyn_trait,
         async_fn_in_trait,
@@ -540,6 +532,7 @@ symbols! {
         autodiff,
         automatically_derived,
         avx,
+        avx10_target_feature,
         avx512_target_feature,
         avx512bw,
         avx512f,
@@ -623,6 +616,7 @@ symbols! {
         cfg_target_feature,
         cfg_target_has_atomic,
         cfg_target_has_atomic_equal_alignment,
+        cfg_target_has_reliable_f16_f128,
         cfg_target_thread_local,
         cfg_target_vendor,
         cfg_trace: "<cfg>", // must not be a valid identifier
@@ -921,6 +915,7 @@ symbols! {
         explicit_generic_args_with_impl_trait,
         explicit_tail_calls,
         export_name,
+        export_stable,
         expr,
         expr_2021,
         expr_fragment_specifier_2024,
@@ -983,7 +978,6 @@ symbols! {
         fadd_fast,
         fake_variadic,
         fallback,
-        fallback_surface_drop,
         fdiv_algebraic,
         fdiv_fast,
         feature,
@@ -1056,6 +1050,7 @@ symbols! {
         from_u16,
         from_usize,
         from_yeet,
+        frontmatter,
         fs_create_dir,
         fsub_algebraic,
         fsub_fast,
@@ -1064,6 +1059,7 @@ symbols! {
         fundamental,
         fused_iterator,
         future,
+        future_drop_poll,
         future_output,
         future_trait,
         gdb_script_file,
@@ -1522,14 +1518,18 @@ symbols! {
         panic_cannot_unwind,
         panic_const_add_overflow,
         panic_const_async_fn_resumed,
+        panic_const_async_fn_resumed_drop,
         panic_const_async_fn_resumed_panic,
         panic_const_async_gen_fn_resumed,
+        panic_const_async_gen_fn_resumed_drop,
         panic_const_async_gen_fn_resumed_panic,
         panic_const_coroutine_resumed,
+        panic_const_coroutine_resumed_drop,
         panic_const_coroutine_resumed_panic,
         panic_const_div_by_zero,
         panic_const_div_overflow,
         panic_const_gen_fn_none,
+        panic_const_gen_fn_none_drop,
         panic_const_gen_fn_none_panic,
         panic_const_mul_overflow,
         panic_const_neg_overflow,
@@ -1830,6 +1830,7 @@ symbols! {
         rustc_must_implement_one_of,
         rustc_never_returns_null_ptr,
         rustc_never_type_options,
+        rustc_no_implicit_autorefs,
         rustc_no_mir_inline,
         rustc_nonnull_optimization_guaranteed,
         rustc_nounwind,
@@ -1880,6 +1881,7 @@ symbols! {
         saturating_add,
         saturating_div,
         saturating_sub,
+        sdylib,
         search_unbox,
         select_unpredictable,
         self_in_typedefs,
@@ -2057,7 +2059,6 @@ symbols! {
         suggestion,
         super_let,
         supertrait_item_shadowing,
-        surface_async_drop_in_place,
         sym,
         sync,
         synthetic,
@@ -2073,6 +2074,10 @@ symbols! {
         target_has_atomic,
         target_has_atomic_equal_alignment,
         target_has_atomic_load_store,
+        target_has_reliable_f128,
+        target_has_reliable_f128_math,
+        target_has_reliable_f16,
+        target_has_reliable_f16_math,
         target_os,
         target_pointer_width,
         target_thread_local,
@@ -2337,6 +2342,9 @@ pub const STDLIB_STABLE_CRATES: &[Symbol] = &[sym::std, sym::core, sym::alloc, s
 
 #[derive(Copy, Clone, Eq, HashStable_Generic, Encodable, Decodable)]
 pub struct Ident {
+    // `name` should never be the empty symbol. If you are considering that,
+    // you are probably conflating "empty identifer with "no identifier" and
+    // you should use `Option<Ident>` instead.
     pub name: Symbol,
     pub span: Span,
 }
@@ -2344,28 +2352,21 @@ pub struct Ident {
 impl Ident {
     #[inline]
     /// Constructs a new identifier from a symbol and a span.
-    pub const fn new(name: Symbol, span: Span) -> Ident {
+    pub fn new(name: Symbol, span: Span) -> Ident {
+        assert_ne!(name, kw::Empty);
         Ident { name, span }
     }
 
     /// Constructs a new identifier with a dummy span.
     #[inline]
-    pub const fn with_dummy_span(name: Symbol) -> Ident {
+    pub fn with_dummy_span(name: Symbol) -> Ident {
         Ident::new(name, DUMMY_SP)
     }
 
-    /// This is best avoided, because it blurs the lines between "empty
-    /// identifier" and "no identifier". Using `Option<Ident>` is preferable,
-    /// where possible, because that is unambiguous.
-    #[inline]
-    pub fn empty() -> Ident {
-        Ident::with_dummy_span(kw::Empty)
-    }
-
     // For dummy identifiers that are never used and absolutely must be
-    // present, it's better to use `Ident::dummy` than `Ident::Empty`, because
-    // it's clearer that it's intended as a dummy value, and more likely to be
-    // detected if it accidentally does get used.
+    // present. Note that this does *not* use the empty symbol; `sym::dummy`
+    // makes it clear that it's intended as a dummy value, and is more likely
+    // to be detected if it accidentally does get used.
     #[inline]
     pub fn dummy() -> Ident {
         Ident::with_dummy_span(sym::dummy)

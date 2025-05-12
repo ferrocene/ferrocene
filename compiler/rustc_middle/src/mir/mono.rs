@@ -318,7 +318,7 @@ impl<'tcx> fmt::Display for MonoItem<'tcx> {
         match *self {
             MonoItem::Fn(instance) => write!(f, "fn {instance}"),
             MonoItem::Static(def_id) => {
-                write!(f, "static {}", Instance::new(def_id, GenericArgs::empty()))
+                write!(f, "static {}", Instance::new_raw(def_id, GenericArgs::empty()))
             }
             MonoItem::GlobalAsm(..) => write!(f, "global_asm"),
         }
@@ -530,6 +530,8 @@ impl<'tcx> CodegenUnit<'tcx> {
                             | InstanceKind::CloneShim(..)
                             | InstanceKind::ThreadLocalShim(..)
                             | InstanceKind::FnPtrAddrShim(..)
+                            | InstanceKind::AsyncDropGlue(..)
+                            | InstanceKind::FutureDropPollShim(..)
                             | InstanceKind::AsyncDropGlueCtorShim(..) => None,
                         }
                     }

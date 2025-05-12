@@ -1,17 +1,18 @@
 use std::iter::{self, Peekable};
 
 use either::Either;
-use hir::{sym, Adt, Crate, HasAttrs, ImportPathConfig, ModuleDef, Semantics};
-use ide_db::syntax_helpers::suggest_name;
+use hir::{Adt, Crate, HasAttrs, ImportPathConfig, ModuleDef, Semantics, sym};
 use ide_db::RootDatabase;
+use ide_db::assists::ExprFillDefaultMode;
+use ide_db::syntax_helpers::suggest_name;
 use ide_db::{famous_defs::FamousDefs, helpers::mod_path_to_ast};
 use itertools::Itertools;
 use syntax::ast::edit::IndentLevel;
 use syntax::ast::edit_in_place::Indent;
 use syntax::ast::syntax_factory::SyntaxFactory;
-use syntax::ast::{self, make, AstNode, MatchArmList, MatchExpr, Pat};
+use syntax::ast::{self, AstNode, MatchArmList, MatchExpr, Pat, make};
 
-use crate::{utils, AssistContext, AssistId, AssistKind, Assists};
+use crate::{AssistContext, AssistId, Assists, utils};
 
 // Assist: add_missing_match_arms
 //
@@ -76,7 +77,7 @@ pub(crate) fn add_missing_match_arms(acc: &mut Assists, ctx: &AssistContext<'_>)
 
     let cfg = ctx.config.import_path_config();
 
-    let make = SyntaxFactory::new();
+    let make = SyntaxFactory::with_mappings();
 
     let module = ctx.sema.scope(expr.syntax())?.module();
     let (mut missing_pats, is_non_exhaustive, has_hidden_variants): (
@@ -204,7 +205,7 @@ pub(crate) fn add_missing_match_arms(acc: &mut Assists, ctx: &AssistContext<'_>)
     }
 
     acc.add(
-        AssistId("add_missing_match_arms", AssistKind::QuickFix),
+        AssistId::quick_fix("add_missing_match_arms"),
         "Fill match arms",
         ctx.sema.original_range(match_expr.syntax()).range,
         |builder| {
@@ -216,7 +217,17 @@ pub(crate) fn add_missing_match_arms(acc: &mut Assists, ctx: &AssistContext<'_>)
                     // filter out hidden patterns because they're handled by the catch-all arm
                     !hidden
                 })
-                .map(|(pat, _)| make.match_arm(pat, None, make::ext::expr_todo()));
+                .map(|(pat, _)| {
+                    make.match_arm(
+                        pat,
+                        None,
+                        match ctx.config.expr_fill_default {
+                            ExprFillDefaultMode::Todo => make::ext::expr_todo(),
+                            ExprFillDefaultMode::Underscore => make::ext::expr_underscore(),
+                            ExprFillDefaultMode::Default => make::ext::expr_todo(),
+                        },
+                    )
+                });
 
             let mut arms: Vec<_> = match_arm_list
                 .arms()
@@ -246,7 +257,15 @@ pub(crate) fn add_missing_match_arms(acc: &mut Assists, ctx: &AssistContext<'_>)
 
             if needs_catch_all_arm && !has_catch_all_arm {
                 cov_mark::hit!(added_wildcard_pattern);
-                let arm = make.match_arm(make.wildcard_pat().into(), None, make::ext::expr_todo());
+                let arm = make.match_arm(
+                    make.wildcard_pat().into(),
+                    None,
+                    match ctx.config.expr_fill_default {
+                        ExprFillDefaultMode::Todo => make::ext::expr_todo(),
+                        ExprFillDefaultMode::Underscore => make::ext::expr_underscore(),
+                        ExprFillDefaultMode::Default => make::ext::expr_todo(),
+                    },
+                );
                 arms.push(arm);
             }
 
@@ -294,7 +313,7 @@ pub(crate) fn add_missing_match_arms(acc: &mut Assists, ctx: &AssistContext<'_>)
             }
 
             editor.add_mappings(make.take());
-            builder.add_file_edits(ctx.file_id(), editor);
+            builder.add_file_edits(ctx.vfs_file_id(), editor);
         },
     )
 }
@@ -386,7 +405,7 @@ impl ExtendedEnum {
     fn is_non_exhaustive(self, db: &RootDatabase, krate: Crate) -> bool {
         match self {
             ExtendedEnum::Enum(e) => {
-                e.attrs(db).by_key(&sym::non_exhaustive).exists() && e.module(db).krate() != krate
+                e.attrs(db).by_key(sym::non_exhaustive).exists() && e.module(db).krate() != krate
             }
             _ => false,
         }
@@ -461,7 +480,7 @@ fn build_pat(
             let fields = var.fields(db);
             let pat: ast::Pat = match var.kind(db) {
                 hir::StructKind::Tuple => {
-                    let mut name_generator = suggest_name::NameGenerator::new();
+                    let mut name_generator = suggest_name::NameGenerator::default();
                     let pats = fields.into_iter().map(|f| {
                         let name = name_generator.for_type(&f.ty(db), db, edition);
                         match name {
@@ -474,8 +493,8 @@ fn build_pat(
                 hir::StructKind::Record => {
                     let fields = fields
                         .into_iter()
-                        .map(|f| make.name_ref(f.name(db).as_str()))
-                        .map(|name_ref| make.record_pat_field_shorthand(name_ref));
+                        .map(|f| make.ident_pat(false, false, make.name(f.name(db).as_str())))
+                        .map(|ident| make.record_pat_field_shorthand(ident.into()));
                     let fields = make.record_pat_field_list(fields, None);
                     make.record_pat_with_fields(path, fields).into()
                 }

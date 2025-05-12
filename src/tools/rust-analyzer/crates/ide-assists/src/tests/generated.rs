@@ -440,6 +440,30 @@ fn main() {
 }
 
 #[test]
+fn doctest_convert_for_loop_to_while_let() {
+    check_doc_test(
+        "convert_for_loop_to_while_let",
+        r#####"
+fn main() {
+    let x = vec![1, 2, 3];
+    for$0 v in x {
+        let y = v * 2;
+    };
+}
+"#####,
+        r#####"
+fn main() {
+    let x = vec![1, 2, 3];
+    let mut tmp = x.into_iter();
+    while let Some(v) = tmp.next() {
+        let y = v * 2;
+    };
+}
+"#####,
+    )
+}
+
+#[test]
 fn doctest_convert_for_loop_with_for_each() {
     check_doc_test(
         "convert_for_loop_with_for_each",
@@ -1713,7 +1737,7 @@ fn foo() {
     bar("", baz());
 }
 
-fn bar(arg: &str, baz: Baz) ${0:-> _} {
+fn bar(arg: &'static str, baz: Baz) ${0:-> _} {
     todo!()
 }
 
@@ -2725,6 +2749,25 @@ fn main() {
 }
 
 #[test]
+fn doctest_remove_underscore_from_used_variables() {
+    check_doc_test(
+        "remove_underscore_from_used_variables",
+        r#####"
+fn main() {
+    let mut _$0foo = 1;
+    _foo = 2;
+}
+"#####,
+        r#####"
+fn main() {
+    let mut foo = 1;
+    foo = 2;
+}
+"#####,
+    )
+}
+
+#[test]
 fn doctest_remove_unused_imports() {
     check_doc_test(
         "remove_unused_imports",
@@ -3297,6 +3340,20 @@ sth!{ }
 }
 
 #[test]
+fn doctest_unmerge_imports() {
+    check_doc_test(
+        "unmerge_imports",
+        r#####"
+use std::fmt::{Debug, Display$0};
+"#####,
+        r#####"
+use std::fmt::{Debug};
+use std::fmt::Display;
+"#####,
+    )
+}
+
+#[test]
 fn doctest_unmerge_match_arm() {
     check_doc_test(
         "unmerge_match_arm",
@@ -3318,20 +3375,6 @@ fn handle(action: Action) {
         Action::Stop => foo(),
     }
 }
-"#####,
-    )
-}
-
-#[test]
-fn doctest_unmerge_use() {
-    check_doc_test(
-        "unmerge_use",
-        r#####"
-use std::fmt::{Debug, Display$0};
-"#####,
-        r#####"
-use std::fmt::{Debug};
-use std::fmt::Display;
 "#####,
     )
 }

@@ -1,6 +1,6 @@
 //@ check-fail
 //@ compile-flags: -Cextra-filename
-//~? codegen option `extra-filename` requires a string
+//~? ERROR codegen option `extra-filename` requires a string
 
 fn main() {}
 

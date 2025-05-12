@@ -3,8 +3,8 @@
 //@ build-fail
 //@ ignore-cross-compile
 //@ ignore-aarch64 This test does not produce the final line of the stderr about 64 bit code
-//@ error-pattern: not a recognized processor for this target
-//~? target feature `x87` must be enabled
+//~? RAW not a recognized processor for this target
+//~? WARN target feature `x87` must be enabled
 
 // Note: we have different behavior when cross-compiling (compared to when not),
 // so this test is disabled when cross-compiling.

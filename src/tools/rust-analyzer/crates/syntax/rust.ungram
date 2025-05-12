@@ -133,6 +133,7 @@ Meta =
 
 SourceFile =
   '#shebang'?
+  '#frontmatter'?
   Attr*
   Item*
 
@@ -240,7 +241,7 @@ RecordFieldList =
  '{' fields:(RecordField (',' RecordField)* ','?)? '}'
 
 RecordField =
-  Attr* Visibility?
+  Attr* Visibility? 'unsafe'?
   Name ':' Type ('=' Expr)?
 
 TupleFieldList =
@@ -287,8 +288,9 @@ VariantDef =
 Const =
   Attr* Visibility?
   'default'?
-  'const' (Name | '_') ':' Type
-  ('=' body:Expr)? ';'
+  'const' (Name | '_') GenericParamList? ':' Type
+  ('=' body:Expr)?
+  WhereClause? ';'
 
 Static =
   Attr* Visibility?
@@ -348,7 +350,7 @@ Stmt =
 | LetStmt
 
 LetStmt =
-  Attr* 'let' Pat (':' Type)?
+  Attr* 'super'? 'let' Pat (':' Type)?
   '=' initializer:Expr
   LetElse?
   ';'

@@ -54,7 +54,7 @@ pub enum AliasTyKind {
     /// A type alias that actually checks its trait bounds.
     /// Currently only used if the type alias references opaque types.
     /// Can always be normalized away.
-    Weak,
+    Free,
 }
 
 impl AliasTyKind {
@@ -63,7 +63,7 @@ impl AliasTyKind {
             AliasTyKind::Projection => "associated type",
             AliasTyKind::Inherent => "inherent associated type",
             AliasTyKind::Opaque => "opaque type",
-            AliasTyKind::Weak => "type alias",
+            AliasTyKind::Free => "type alias",
         }
     }
 }
@@ -223,7 +223,7 @@ pub enum TyKind<I: Interner> {
     /// A tuple type. For example, `(i32, bool)`.
     Tuple(I::Tys),
 
-    /// A projection, opaque type, weak type alias, or inherent associated type.
+    /// A projection, opaque type, free type alias, or inherent associated type.
     /// All of these types are represented as pairs of def-id and args, and can
     /// be normalized, so they are grouped conceptually.
     Alias(AliasTyKind, AliasTy<I>),
@@ -511,28 +511,6 @@ impl<I: Interner> AliasTy<I> {
     /// as well.
     pub fn trait_ref(self, interner: I) -> ty::TraitRef<I> {
         self.trait_ref_and_own_args(interner).0
-    }
-}
-
-/// The following methods work only with inherent associated type projections.
-impl<I: Interner> AliasTy<I> {
-    /// Transform the generic parameters to have the given `impl` args as the base and the GAT args on top of that.
-    ///
-    /// Does the following transformation:
-    ///
-    /// ```text
-    /// [Self, P_0...P_m] -> [I_0...I_n, P_0...P_m]
-    ///
-    ///     I_i impl args
-    ///     P_j GAT args
-    /// ```
-    pub fn rebase_inherent_args_onto_impl(
-        self,
-        impl_args: I::GenericArgs,
-        interner: I,
-    ) -> I::GenericArgs {
-        debug_assert_eq!(self.kind(interner), AliasTyKind::Inherent);
-        interner.mk_args_from_iter(impl_args.iter().chain(self.args.iter().skip(1)))
     }
 }
 

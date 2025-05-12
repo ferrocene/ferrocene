@@ -1,6 +1,12 @@
 //@compile-flags: -C opt-level=3 -C no-prepopulate-passes
 
-#![feature(core_intrinsics, repr_simd, arm_target_feature)]
+#![feature(
+    core_intrinsics,
+    repr_simd,
+    arm_target_feature,
+    mips_target_feature,
+    s390x_target_feature
+)]
 #![no_std]
 #![crate_type = "lib"]
 #![allow(non_camel_case_types)]
@@ -24,6 +30,8 @@ pub struct i8x16([i8; 16]);
 #[cfg_attr(target_family = "wasm", target_feature(enable = "simd128"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "neon"))]
 #[cfg_attr(target_arch = "x86", target_feature(enable = "sse"))]
+#[cfg_attr(target_arch = "mips", target_feature(enable = "msa"))]
+#[cfg_attr(target_arch = "s390x", target_feature(enable = "vector"))]
 unsafe extern "C" fn dyn_simd_extract(x: i8x16, idx: u32) -> i8 {
     simd_extract_dyn(x, idx)
 }
@@ -34,6 +42,8 @@ unsafe extern "C" fn dyn_simd_extract(x: i8x16, idx: u32) -> i8 {
 #[cfg_attr(target_family = "wasm", target_feature(enable = "simd128"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "neon"))]
 #[cfg_attr(target_arch = "x86", target_feature(enable = "sse"))]
+#[cfg_attr(target_arch = "mips", target_feature(enable = "msa"))]
+#[cfg_attr(target_arch = "s390x", target_feature(enable = "vector"))]
 unsafe extern "C" fn literal_dyn_simd_extract(x: i8x16) -> i8 {
     simd_extract_dyn(x, 7)
 }
@@ -44,6 +54,8 @@ unsafe extern "C" fn literal_dyn_simd_extract(x: i8x16) -> i8 {
 #[cfg_attr(target_family = "wasm", target_feature(enable = "simd128"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "neon"))]
 #[cfg_attr(target_arch = "x86", target_feature(enable = "sse"))]
+#[cfg_attr(target_arch = "mips", target_feature(enable = "msa"))]
+#[cfg_attr(target_arch = "s390x", target_feature(enable = "vector"))]
 unsafe extern "C" fn const_dyn_simd_extract(x: i8x16) -> i8 {
     simd_extract_dyn(x, const { 3 + 4 })
 }
@@ -54,6 +66,8 @@ unsafe extern "C" fn const_dyn_simd_extract(x: i8x16) -> i8 {
 #[cfg_attr(target_family = "wasm", target_feature(enable = "simd128"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "neon"))]
 #[cfg_attr(target_arch = "x86", target_feature(enable = "sse"))]
+#[cfg_attr(target_arch = "mips", target_feature(enable = "msa"))]
+#[cfg_attr(target_arch = "s390x", target_feature(enable = "vector"))]
 unsafe extern "C" fn const_simd_extract(x: i8x16) -> i8 {
     simd_extract(x, const { 3 + 4 })
 }
@@ -64,6 +78,8 @@ unsafe extern "C" fn const_simd_extract(x: i8x16) -> i8 {
 #[cfg_attr(target_family = "wasm", target_feature(enable = "simd128"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "neon"))]
 #[cfg_attr(target_arch = "x86", target_feature(enable = "sse"))]
+#[cfg_attr(target_arch = "mips", target_feature(enable = "msa"))]
+#[cfg_attr(target_arch = "s390x", target_feature(enable = "vector"))]
 unsafe extern "C" fn dyn_simd_insert(x: i8x16, e: i8, idx: u32) -> i8x16 {
     simd_insert_dyn(x, idx, e)
 }
@@ -74,6 +90,8 @@ unsafe extern "C" fn dyn_simd_insert(x: i8x16, e: i8, idx: u32) -> i8x16 {
 #[cfg_attr(target_family = "wasm", target_feature(enable = "simd128"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "neon"))]
 #[cfg_attr(target_arch = "x86", target_feature(enable = "sse"))]
+#[cfg_attr(target_arch = "mips", target_feature(enable = "msa"))]
+#[cfg_attr(target_arch = "s390x", target_feature(enable = "vector"))]
 unsafe extern "C" fn literal_dyn_simd_insert(x: i8x16, e: i8) -> i8x16 {
     simd_insert_dyn(x, 7, e)
 }
@@ -84,6 +102,8 @@ unsafe extern "C" fn literal_dyn_simd_insert(x: i8x16, e: i8) -> i8x16 {
 #[cfg_attr(target_family = "wasm", target_feature(enable = "simd128"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "neon"))]
 #[cfg_attr(target_arch = "x86", target_feature(enable = "sse"))]
+#[cfg_attr(target_arch = "mips", target_feature(enable = "msa"))]
+#[cfg_attr(target_arch = "s390x", target_feature(enable = "vector"))]
 unsafe extern "C" fn const_dyn_simd_insert(x: i8x16, e: i8) -> i8x16 {
     simd_insert_dyn(x, const { 3 + 4 }, e)
 }
@@ -94,6 +114,8 @@ unsafe extern "C" fn const_dyn_simd_insert(x: i8x16, e: i8) -> i8x16 {
 #[cfg_attr(target_family = "wasm", target_feature(enable = "simd128"))]
 #[cfg_attr(target_arch = "arm", target_feature(enable = "neon"))]
 #[cfg_attr(target_arch = "x86", target_feature(enable = "sse"))]
+#[cfg_attr(target_arch = "mips", target_feature(enable = "msa"))]
+#[cfg_attr(target_arch = "s390x", target_feature(enable = "vector"))]
 unsafe extern "C" fn const_simd_insert(x: i8x16, e: i8) -> i8x16 {
     simd_insert(x, const { 3 + 4 }, e)
 }

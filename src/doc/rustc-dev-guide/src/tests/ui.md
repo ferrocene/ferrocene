@@ -344,8 +344,7 @@ For checking runtime output, `//@ check-run-results` may be preferable.
 
 Only use `error-pattern` if none of the above works.
 
-Line annotations `//~` are still checked in tests using `error-pattern`.
-In exceptional cases, use `//@ compile-flags: --error-format=human` to opt out of these checks.
+Line annotations `//~` and `error-pattern` are compatible and can be used in the same test.
 
 ### Diagnostic kinds (error levels)
 
@@ -356,9 +355,12 @@ The diagnostic kinds that you can have are:
 - `NOTE`
 - `HELP`
 - `SUGGESTION`
+- `RAW`
 
 The `SUGGESTION` kind is used for specifying what the expected replacement text
 should be for a diagnostic suggestion.
+The `RAW` kind can be used for matching on lines from non-structured output sometimes emitted
+by the compiler instead of or in addition to structured json.
 
 `ERROR` and `WARN` kinds are required to be exhaustively covered by line annotations
 `//~` by default.
@@ -372,9 +374,9 @@ E.g. use `//@ dont-require-annotations: NOTE` to annotate notes selectively.
 Avoid using this directive for `ERROR`s and `WARN`ings, unless there's a serious reason, like
 target-dependent compiler output.
 
-Missing diagnostic kinds (`//~ message`) are currently accepted, but are being phased away.
-They will match any compiler output kind, but will not force exhaustive annotations for that kind.
-Prefer explicit kind and `//@ dont-require-annotations` to achieve the same effect.
+Some diagnostics are never required to be line-annotated, regardless of their kind or directives,
+for example secondary lines of multiline diagnostics,
+or ubiquitous diagnostics like `aborting due to N previous errors`.
 
 UI tests use the `-A unused` flag by default to ignore all unused warnings, as
 unused warnings are usually not the focus of a test. However, simple code

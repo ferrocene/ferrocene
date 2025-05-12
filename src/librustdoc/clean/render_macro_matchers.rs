@@ -34,20 +34,20 @@ pub(super) fn render_macro_matcher(tcx: TyCtxt<'_>, matcher: &TokenTree) -> Stri
     //             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
     //         ) => {...};
     //     }
-    printer.cbox(8);
+    let cb = printer.cbox(8);
     printer.word("(");
     printer.zerobreak();
-    printer.ibox(0);
+    let ib = printer.ibox(0);
     match matcher {
         TokenTree::Delimited(_span, _spacing, _delim, tts) => print_tts(&mut printer, tts),
         // Matcher which is not a Delimited is unexpected and should've failed
         // to compile, but we render whatever it is wrapped in parens.
         TokenTree::Token(..) => print_tt(&mut printer, matcher),
     }
-    printer.end();
+    printer.end(ib);
     printer.break_offset_if_not_bol(0, -4);
     printer.word(")");
-    printer.end();
+    printer.end(cb);
     printer.s.eof()
 }
 
@@ -167,7 +167,7 @@ fn print_tts(printer: &mut Printer<'_>, tts: &TokenStream) {
 }
 
 fn usually_needs_space_between_keyword_and_open_delim(symbol: Symbol, span: Span) -> bool {
-    let ident = Ident { name: symbol, span };
+    let ident = Ident::new(symbol, span);
     let is_keyword = ident.is_used_keyword() || ident.is_unused_keyword();
     if !is_keyword {
         // An identifier that is not a keyword usually does not need a space

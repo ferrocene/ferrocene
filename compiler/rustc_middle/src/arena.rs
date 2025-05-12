@@ -9,6 +9,7 @@ macro_rules! arena_types {
     ($macro:path) => (
         $macro!([
             [] layout: rustc_abi::LayoutData<rustc_abi::FieldIdx, rustc_abi::VariantIdx>,
+            [] proxy_coroutine_layout: rustc_middle::mir::CoroutineLayout<'tcx>,
             [] fn_abi: rustc_target::callconv::FnAbi<'tcx, rustc_middle::ty::Ty<'tcx>>,
             // AdtDef are interned and compared by address
             [decode] adt_def: rustc_middle::ty::AdtDefData,
@@ -90,6 +91,8 @@ macro_rules! arena_types {
             [] autodiff_item: rustc_ast::expand::autodiff_attrs::AutoDiffItem,
             [] ordered_name_set: rustc_data_structures::fx::FxIndexSet<rustc_span::Symbol>,
             [] valtree: rustc_middle::ty::ValTreeKind<'tcx>,
+            [] stable_order_of_exportable_impls:
+                rustc_data_structures::fx::FxIndexMap<rustc_hir::def_id::DefId, usize>,
 
             // Note that this deliberately duplicates items in the `rustc_hir::arena`,
             // since we need to allocate this type on both the `rustc_hir` arena

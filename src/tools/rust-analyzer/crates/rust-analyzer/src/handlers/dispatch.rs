@@ -4,10 +4,12 @@ use std::{
     panic, thread,
 };
 
-use ide::Cancelled;
-use ide_db::base_db::ra_salsa::Cycle;
+use ide_db::base_db::{
+    DbPanicContext,
+    salsa::{self, Cancelled},
+};
 use lsp_server::{ExtractError, Response, ResponseError};
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 use stdx::thread::ThreadIntent;
 
 use crate::{
@@ -57,7 +59,7 @@ impl RequestDispatcher<'_> {
             tracing::info_span!("request", method = ?req.method, "request_id" = ?req.id).entered();
         tracing::debug!(?params);
         let result = {
-            let _pctx = stdx::panic_context::enter(panic_context);
+            let _pctx = DbPanicContext::enter(panic_context);
             f(self.global_state, params)
         };
         if let Ok(response) = result_to_response::<R>(req.id, result) {
@@ -87,7 +89,7 @@ impl RequestDispatcher<'_> {
         let global_state_snapshot = self.global_state.snapshot();
 
         let result = panic::catch_unwind(move || {
-            let _pctx = stdx::panic_context::enter(panic_context);
+            let _pctx = DbPanicContext::enter(panic_context);
             f(global_state_snapshot, params)
         });
 
@@ -258,7 +260,7 @@ impl RequestDispatcher<'_> {
         }
         .spawn(intent, move || {
             let result = panic::catch_unwind(move || {
-                let _pctx = stdx::panic_context::enter(panic_context);
+                let _pctx = DbPanicContext::enter(panic_context);
                 f(world, params)
             });
             match thread_result_to_response::<R>(req.id.clone(), result) {
@@ -310,14 +312,12 @@ impl RequestDispatcher<'_> {
 
 #[derive(Debug)]
 enum HandlerCancelledError {
-    PropagatedPanic,
-    Inner(ide::Cancelled),
+    Inner(salsa::Cancelled),
 }
 
 impl std::error::Error for HandlerCancelledError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
-            HandlerCancelledError::PropagatedPanic => None,
             HandlerCancelledError::Inner(cancelled) => Some(cancelled),
         }
     }
@@ -350,9 +350,6 @@ where
             if let Some(panic_message) = panic_message {
                 message.push_str(": ");
                 message.push_str(panic_message)
-            } else if let Some(cycle) = panic.downcast_ref::<Cycle>() {
-                tracing::error!("Cycle propagated out of salsa! This is a bug: {cycle:?}");
-                return Err(HandlerCancelledError::PropagatedPanic);
             } else if let Ok(cancelled) = panic.downcast::<Cancelled>() {
                 tracing::error!("Cancellation propagated out of salsa! This is a bug");
                 return Err(HandlerCancelledError::Inner(*cancelled));
@@ -427,11 +424,8 @@ impl NotificationDispatcher<'_> {
 
         tracing::debug!(?params);
 
-        let _pctx = stdx::panic_context::enter(format!(
-            "\nversion: {}\nnotification: {}",
-            version(),
-            N::METHOD
-        ));
+        let _pctx =
+            DbPanicContext::enter(format!("\nversion: {}\nnotification: {}", version(), N::METHOD));
         if let Err(e) = f(self.global_state, params) {
             tracing::error!(handler = %N::METHOD, error = %e, "notification handler failed");
         }

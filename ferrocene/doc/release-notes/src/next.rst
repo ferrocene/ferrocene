@@ -16,5 +16,5 @@ New features
   qualified for safety critical use, but are otherwise fully tested and supported. The new
   targets are:
 
-  * :target-with-triple:`thumbv7em-none-eabi`
-  * :target-with-triple:`thumbv7em-none-eabihf`
+  * :target-with-tuple:`thumbv7em-none-eabi`
+  * :target-with-tuple:`thumbv7em-none-eabihf`

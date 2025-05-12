@@ -209,7 +209,8 @@ Rustdoc
 <a id="1.85.0-Compatibility-Notes"></a>
 Compatibility Notes
 -------------------
-- [`rustc` no longer treats the `test` cfg as a well known check-cfg](https://github.com/rust-lang/rust/pull/131729), instead it is up to the build systems and users of `--check-cfg`[^check-cfg] to set it as a well known cfg using `--check-cfg=cfg(test)`.
+- [`rustc` no longer treats the `test` cfg as a well known check-cfg](https://github.com/rust-lang/rust/pull/131729), instead it is up to the build systems and users of `--check-cfg` to set it as a well known cfg using `--check-cfg=cfg(test)`.
+
   This is done to enable build systems like Cargo to set it conditionally, as not all source files are suitable for unit tests.
   [Cargo (for now) unconditionally sets the `test` cfg as a well known cfg](https://github.com/rust-lang/cargo/pull/14963).
   [^check-cfg]: https://doc.rust-lang.org/nightly/rustc/check-cfg.html

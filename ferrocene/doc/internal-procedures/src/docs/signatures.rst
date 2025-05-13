@@ -106,7 +106,7 @@ to be run by the person who signed the document.
 
 Before running the script, make sure you have a valid GitHub Personal Access
 Token authorized with SSO to access the Ferrocene organization, and place it in
-the ``GITHUB_TOKEN`` environment variable. Then run this command, replacing
+the ``GITHUB_TOKEN`` environment variable by running `$ export GITHUB_TOKEN=your_token`. Then run this command, replacing
 ``PR_NUMBER`` with the number of the PR that failed CI:
 
 .. code-block::

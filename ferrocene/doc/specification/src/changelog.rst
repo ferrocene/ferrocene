@@ -39,7 +39,7 @@ Language changes in Rust 1.86.0
 
 - `More pointers are now detected as definitely not-null based on their alignment in const eval. <https://github.com/rust-lang/rust/pull/133700>`_
 
-  - No change: rules on when pointers are null were not documented
+  - No change: The concrete semantics of constant evaluation is not described within the FLS
 
 - `Empty repr() attribute applied to invalid items are now correctly rejected. <https://github.com/rust-lang/rust/pull/133925>`_
 

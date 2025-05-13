@@ -104,10 +104,11 @@ differences between the two. To aid generating such a diff, we created the
 ``ferrocene/tools/document-signatures/diff.py`` script. The script is supposed
 to be run by the person who signed the document.
 
-Before running the script, make sure you have a valid GitHub Personal Access
-Token authorized with SSO to access the Ferrocene organization, and place it in
-the ``GITHUB_TOKEN`` environment variable by running `$ export GITHUB_TOKEN=your_token`. Then run this command, replacing
-``PR_NUMBER`` with the number of the PR that failed CI:
+Before running the script, make sure you have a valid `GitHub Personal Access
+Token (classic) <https://github.com/settings/tokens>`_ authorized with SSO to
+access the Ferrocene organization, and place it in the ``GITHUB_TOKEN``
+environment variable by running `$ export GITHUB_TOKEN=your_token`. Then run
+this command, replacing ``PR_NUMBER`` with the number of the PR that failed CI:
 
 .. code-block::
 

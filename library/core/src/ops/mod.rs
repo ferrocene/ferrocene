@@ -150,7 +150,7 @@ mod function;
 // mod index_range;
 // mod range;
 // mod try_trait;
-// mod unsize;
+mod unsize;
 
 // #[stable(feature = "rust1", since = "1.0.0")]
 // pub use self::arith::{Add, Div, Mul, Neg, Rem, Sub};
@@ -197,7 +197,7 @@ pub use self::function::{Fn, FnMut, FnOnce};
 // pub(crate) use self::try_trait::{ChangeOutputType, NeverShortCircuit};
 // #[unstable(feature = "try_trait_v2", issue = "84277")]
 // pub use self::try_trait::{FromResidual, Try};
-// #[unstable(feature = "coerce_unsized", issue = "18598")]
-// pub use self::unsize::CoerceUnsized;
-// #[unstable(feature = "dispatch_from_dyn", issue = "none")]
-// pub use self::unsize::DispatchFromDyn;
+#[unstable(feature = "coerce_unsized", issue = "18598")]
+pub use self::unsize::CoerceUnsized;
+#[unstable(feature = "dispatch_from_dyn", issue = "none")]
+pub use self::unsize::DispatchFromDyn;

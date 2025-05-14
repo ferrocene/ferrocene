@@ -155,7 +155,7 @@ pub trait Sized {
     // Empty.
 }
 
-// /// Types that can be "unsized" to a dynamically-sized type.
+/// Types that can be "unsized" to a dynamically-sized type.
 // ///
 // /// For example, the sized array type `[i8; 2]` implements `Unsize<[i8]>` and
 // /// `Unsize<dyn fmt::Debug>`.
@@ -187,13 +187,13 @@ pub trait Sized {
 // /// [RFC982]: https://github.com/rust-lang/rfcs/blob/master/text/0982-dst-coercion.md
 // /// [nomicon-coerce]: ../../nomicon/coercions.html
 // /// [^1]: Formerly known as *object safe*.
-// #[unstable(feature = "unsize", issue = "18598")]
-// #[lang = "unsize"]
-// #[rustc_deny_explicit_impl]
-// #[rustc_do_not_implement_via_object]
-// pub trait Unsize<T: ?Sized> {
-//     // Empty.
-// }
+#[unstable(feature = "unsize", issue = "18598")]
+#[lang = "unsize"]
+#[rustc_deny_explicit_impl]
+#[rustc_do_not_implement_via_object]
+pub trait Unsize<T: ?Sized> {
+    // Empty.
+}
 
 // /// Required trait for constants used in pattern matches.
 // ///

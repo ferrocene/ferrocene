@@ -147,8 +147,8 @@
 // tidy-alphabetical-start
 // #![feature(abi_unadjusted)]
 // #![feature(adt_const_params)]
-// #![feature(allow_internal_unsafe)]
-// #![feature(allow_internal_unstable)]
+#![feature(allow_internal_unsafe)]
+#![feature(allow_internal_unstable)]
 #![feature(auto_traits)]
 // #![feature(cfg_sanitize)]
 // #![feature(cfg_target_has_atomic)]
@@ -243,7 +243,6 @@ pub mod assert_matches {
 // We don't export this through #[macro_export] for now, to avoid breakage.
 #[unstable(feature = "autodiff", issue = "124509")]
 /// Unstable module containing the unstable `autodiff` macro.
-#[cfg(feature = "uncertified")]
 pub mod autodiff {
     #[unstable(feature = "autodiff", issue = "124509")]
     pub use crate::macros::builtin::autodiff;

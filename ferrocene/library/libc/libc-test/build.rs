@@ -13,7 +13,7 @@ fn src_hotfix_dir() -> PathBuf {
 
 fn do_cc() {
     let target = env::var("TARGET").unwrap();
-    if cfg!(unix) {
+    if cfg!(unix) || target.contains("cygwin") {
         let exclude = ["redox", "wasi", "wali"];
         if !exclude.iter().any(|x| target.contains(x)) {
             let mut cmsg = cc::Build::new();
@@ -700,6 +700,7 @@ fn test_cygwin(target: &str) {
         "dlfcn.h",
         "errno.h",
         "fcntl.h",
+        "fnmatch.h",
         "grp.h",
         "iconv.h",
         "langinfo.h",
@@ -710,11 +711,13 @@ fn test_cygwin(target: &str) {
         "netinet/tcp.h",
         "poll.h",
         "pthread.h",
+        "pty.h",
         "pwd.h",
         "resolv.h",
         "sched.h",
         "semaphore.h",
         "signal.h",
+        "spawn.h",
         "stddef.h",
         "stdlib.h",
         "string.h",
@@ -734,6 +737,7 @@ fn test_cygwin(target: &str) {
         "sys/uio.h",
         "sys/un.h",
         "sys/utsname.h",
+        "sys/vfs.h",
         "syslog.h",
         "termios.h",
         "unistd.h",
@@ -853,7 +857,7 @@ fn test_cygwin(target: &str) {
         }
     });
 
-    cfg.generate("../src/lib.rs", "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 }
 
 fn test_windows(target: &str) {
@@ -1048,6 +1052,13 @@ fn test_solarish(target: &str) {
     cfg.define("_XOPEN_SOURCE", Some("700"));
     cfg.define("__EXTENSIONS__", None);
     cfg.define("_LCONV_C99", None);
+
+    // FIXME(solaris): This should be removed once new Nix crate is released.
+    // See comment in src/unix/solarish/solaris.rs for these.
+    if is_solaris {
+        cfg.define("O_DIRECT", Some("0x2000000"));
+        cfg.define("SIGINFO", Some("41"));
+    }
 
     headers! {
         cfg:
@@ -1306,6 +1317,10 @@ fn test_solarish(target: &str) {
             // We should probably be at least using `&`/`&mut` here, see:
             // https://github.com/gnzlbg/ctest/issues/68
             "lio_listio" => true,
+
+            // Exists on illumos too but, for now, is
+            // [a recent addition](https://www.illumos.org/issues/17094).
+            "secure_getenv" if is_illumos => true,
 
             _ => false,
         }
@@ -2840,6 +2855,9 @@ fn test_freebsd(target: &str) {
             "CAP_UNUSED0_44" | "CAP_UNUSED0_57" | "CAP_UNUSED1_22" | "CAP_UNUSED1_57"
             | "CAP_ALL0" | "CAP_ALL1" => true,
 
+            // FIXME(freebsd): Removed in FreeBSD 15, deprecated in libc
+            "TCP_PCAP_OUT" | "TCP_PCAP_IN" => true,
+
             _ => false,
         }
     });
@@ -3289,6 +3307,20 @@ fn test_neutrino(target: &str) {
     assert!(target.contains("nto-qnx"));
 
     let mut cfg = ctest_cfg();
+    if target.ends_with("_iosock") {
+        let qnx_target_val = std::env::var("QNX_TARGET")
+            .unwrap_or_else(|_| "QNX_TARGET_not_set_please_source_qnxsdp".into());
+
+        cfg.include(qnx_target_val + "/usr/include/io-sock");
+        headers! { cfg:
+            "io-sock.h",
+            "sys/types.h",
+            "sys/socket.h",
+            "sys/sysctl.h",
+            "net/if.h",
+            "net/if_arp.h"
+        }
+    }
 
     headers! { cfg:
         "ctype.h",
@@ -3446,6 +3478,9 @@ fn test_neutrino(target: &str) {
             // Does not exist in Neutrino
             "locale_t" => true,
 
+            // FIXME: "'__uint128' undeclared" in C
+            "__uint128" => true,
+
             _ => false,
         }
     });
@@ -3508,6 +3543,9 @@ fn test_neutrino(target: &str) {
             // Not defined in any headers.  Defined to work around a
             // stack unwinding bug.
             "__my_thread_exit" => true,
+
+            // Wrong const-ness
+            "dl_iterate_phdr" => true,
 
             _ => false,
         }
@@ -3646,6 +3684,26 @@ fn test_vxworks(target: &str) {
     cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
 }
 
+fn config_gnu_bits(target: &str, cfg: &mut ctest::TestGenerator) {
+    match env::var("RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS") {
+        Ok(val) if val == "64" => {
+            if target.contains("gnu")
+                && target.contains("linux")
+                && !target.ends_with("x32")
+                && !target.contains("riscv32")
+                && env::var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap() == "32"
+            {
+                cfg.define("_FILE_OFFSET_BITS", Some("64"));
+                cfg.cfg("gnu_file_offset_bits64", None);
+            }
+        }
+        Ok(val) if val != "32" => {
+            panic!("RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS may only be set to '32' or '64'")
+        }
+        _ => {}
+    }
+}
+
 fn test_linux(target: &str) {
     assert!(target.contains("linux"));
 
@@ -3688,6 +3746,8 @@ fn test_linux(target: &str) {
     // deprecated since glibc >= 2.29. This allows Rust binaries to link against
     // glibc versions older than 2.29.
     cfg.define("__GLIBC_USE_DEPRECATED_SCANF", None);
+
+    config_gnu_bits(target, &mut cfg);
 
     headers! { cfg:
                "ctype.h",
@@ -4136,8 +4196,10 @@ fn test_linux(target: &str) {
             "epoll_params" => true,
 
             // FIXME(linux): Requires >= 6.12 kernel headers.
-            "dmabuf_cmsg" |
-            "dmabuf_token" => true,
+            "dmabuf_cmsg" | "dmabuf_token" => true,
+
+            // FIXME(linux): Requires >= 6.4 kernel headers.
+            "ptrace_sud_config" => true,
 
             _ => false,
         }
@@ -4344,10 +4406,7 @@ fn test_linux(target: &str) {
                 if ppc64 || riscv64 => true,
 
             // FIXME(linux): requires more recent kernel headers on CI
-            | "MFD_EXEC"
-            | "MFD_NOEXEC_SEAL"
-            | "SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV"
-                if sparc64 => true,
+            "SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV" if sparc64 => true,
 
             // FIXME(linux): Not currently available in headers on ARM and musl.
             "NETLINK_GET_STRICT_CHK" if arm => true,
@@ -4566,6 +4625,8 @@ fn test_linux(target: &str) {
             | "SO_DEVMEM_DONTNEED"
             | "SCM_DEVMEM_LINEAR"
             | "SCM_DEVMEM_DMABUF" => true,
+            // FIXME(linux): Requires >= 6.4 kernel headers.
+            "PTRACE_SET_SYSCALL_USER_DISPATCH_CONFIG" | "PTRACE_GET_SYSCALL_USER_DISPATCH_CONFIG" => true,
 
             _ => false,
         }
@@ -4855,6 +4916,7 @@ fn test_linux_like_apis(target: &str) {
     if linux || android || emscripten {
         // test strerror_r from the `string.h` header
         let mut cfg = ctest_cfg();
+        config_gnu_bits(target, &mut cfg);
         cfg.skip_type(|_| true).skip_static(|_| true);
 
         headers! { cfg: "string.h" }
@@ -4871,6 +4933,7 @@ fn test_linux_like_apis(target: &str) {
         // test fcntl - see:
         // http://man7.org/linux/man-pages/man2/fcntl.2.html
         let mut cfg = ctest_cfg();
+        config_gnu_bits(target, &mut cfg);
 
         if musl {
             cfg.header("fcntl.h");
@@ -4900,6 +4963,7 @@ fn test_linux_like_apis(target: &str) {
     if (linux && !wali) || android {
         // test termios
         let mut cfg = ctest_cfg();
+        config_gnu_bits(target, &mut cfg);
         cfg.header("asm/termbits.h");
         cfg.header("linux/termios.h");
         cfg.skip_type(|_| true)
@@ -4924,6 +4988,7 @@ fn test_linux_like_apis(target: &str) {
     if linux || android {
         // test IPV6_ constants:
         let mut cfg = ctest_cfg();
+        config_gnu_bits(target, &mut cfg);
         headers! {
             cfg:
             "linux/in6.h"
@@ -4955,6 +5020,7 @@ fn test_linux_like_apis(target: &str) {
         // "resolve.h" defines a `p_type` macro that expands to `__p_type`
         // making the tests for these fails when both are included.
         let mut cfg = ctest_cfg();
+        config_gnu_bits(target, &mut cfg);
         cfg.header("elf.h");
         cfg.skip_fn(|_| true)
             .skip_static(|_| true)
@@ -4974,6 +5040,7 @@ fn test_linux_like_apis(target: &str) {
     if (linux && !wali) || android {
         // Test `ARPHRD_CAN`.
         let mut cfg = ctest_cfg();
+        config_gnu_bits(target, &mut cfg);
         cfg.header("linux/if_arp.h");
         cfg.skip_fn(|_| true)
             .skip_static(|_| true)

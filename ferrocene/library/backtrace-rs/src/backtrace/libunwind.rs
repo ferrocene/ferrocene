@@ -168,7 +168,7 @@ mod uw {
     pub type _Unwind_Trace_Fn =
         extern "C" fn(ctx: *mut _Unwind_Context, arg: *mut c_void) -> _Unwind_Reason_Code;
 
-    extern "C" {
+    unsafe extern "C" {
         pub fn _Unwind_Backtrace(
             trace: _Unwind_Trace_Fn,
             trace_argument: *mut c_void,
@@ -185,7 +185,7 @@ mod uw {
             not(all(target_os = "rtems", target_arch = "arm")),
             not(all(target_os = "vita", target_arch = "arm")),
         ))] {
-            extern "C" {
+            unsafe extern "C" {
                 pub fn _Unwind_GetIP(ctx: *mut _Unwind_Context) -> libc::uintptr_t;
                 pub fn _Unwind_FindEnclosingFunction(pc: *mut c_void) -> *mut c_void;
 
@@ -245,7 +245,7 @@ mod uw {
             }
 
             type _Unwind_Word = libc::c_uint;
-            extern "C" {
+            unsafe extern "C" {
                 fn _Unwind_VRS_Get(
                     ctx: *mut _Unwind_Context,
                     klass: _Unwind_VRS_RegClass,

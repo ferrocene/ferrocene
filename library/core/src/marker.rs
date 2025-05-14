@@ -23,6 +23,7 @@ use crate::cmp;
 use crate::fmt::Debug;
 #[cfg(feature = "uncertified")]
 use crate::hash::{Hash, Hasher};
+use crate::pin::UnsafePinned;
 
 /// Implements a given marker trait for multiple types at the same time.
 ///
@@ -89,7 +90,7 @@ macro marker_impls {
 // /// [arc]: ../../std/sync/struct.Arc.html
 // /// [ub]: ../../reference/behavior-considered-undefined.html
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(not(test), rustc_diagnostic_item = "Send")]
+#[rustc_diagnostic_item = "Send"]
 #[diagnostic::on_unimplemented(
     message = "`{Self}` cannot be sent between threads safely",
     label = "`{Self}` cannot be sent between threads safely"
@@ -414,7 +415,7 @@ marker_impls! {
 ///
 /// [`Vec<T>`]: ../../std/vec/struct.Vec.html
 /// [`String`]: ../../std/string/struct.String.html
-/// [`size_of::<T>`]: crate::mem::size_of
+/// [`size_of::<T>`]: size_of
 /// [impls]: #implementors
 #[stable(feature = "rust1", since = "1.0.0")]
 #[lang = "copy"]
@@ -466,8 +467,8 @@ impl Copy for ! {}
 #[cfg(feature = "uncertified")]
 impl<T: ?Sized> Copy for &T {}
 
-/// Marker trait for the types that are allowed in union fields, unsafe fields,
-/// and unsafe binder types.
+/// Marker trait for the types that are allowed in union fields and unsafe
+/// binder types.
 ///
 /// Implemented for:
 /// * `&T`, `&mut T` for all `T`,
@@ -478,9 +479,13 @@ impl<T: ?Sized> Copy for &T {}
 /// Notably, this doesn't include all trivially-destructible types for semver
 /// reasons.
 ///
-/// Bikeshed name for now.
+/// Bikeshed name for now. This trait does not do anything other than reflect the
+/// set of types that are allowed within unions for field validity.
 #[unstable(feature = "bikeshed_guaranteed_no_drop", issue = "none")]
 #[lang = "bikeshed_guaranteed_no_drop"]
+#[rustc_deny_explicit_impl]
+#[rustc_do_not_implement_via_object]
+#[doc(hidden)]
 #[cfg(feature = "uncertified")]
 pub trait BikeshedGuaranteedNoDrop {}
 
@@ -555,7 +560,7 @@ pub trait BikeshedGuaranteedNoDrop {}
 // /// [transmute]: crate::mem::transmute
 // /// [nomicon-send-and-sync]: ../../nomicon/send-and-sync.html
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(not(test), rustc_diagnostic_item = "Sync")]
+#[rustc_diagnostic_item = "Sync"]
 #[lang = "sync"]
 #[rustc_on_unimplemented(
     on(
@@ -747,7 +752,6 @@ impl<T: ?Sized> !Sync for *mut T {}
 /// # }
 /// # fn convert_params(_: ParamType) -> usize { 42 }
 /// use std::marker::PhantomData;
-/// use std::mem;
 ///
 /// struct ExternalResource<R> {
 ///    resource_handle: *mut (),
@@ -756,7 +760,7 @@ impl<T: ?Sized> !Sync for *mut T {}
 ///
 /// impl<R: ResType> ExternalResource<R> {
 ///     fn new() -> Self {
-///         let size_of_res = mem::size_of::<R>();
+///         let size_of_res = size_of::<R>();
 ///         Self {
 ///             resource_handle: foreign_lib::new(size_of_res),
 ///             resource_type: PhantomData,
@@ -904,6 +908,23 @@ marker_impls! {
         {T: ?Sized} &mut T,
 }
 
+/// Used to determine whether a type contains any `UnsafePinned` (or `PhantomPinned`) internally,
+/// but not through an indirection. This affects, for example, whether we emit `noalias` metadata
+/// for `&mut T` or not.
+///
+/// This is part of [RFC 3467](https://rust-lang.github.io/rfcs/3467-unsafe-pinned.html), and is
+/// tracked by [#125735](https://github.com/rust-lang/rust/issues/125735).
+#[cfg_attr(not(bootstrap), lang = "unsafe_unpin")]
+#[cfg_attr(bootstrap, allow(dead_code))]
+pub(crate) unsafe auto trait UnsafeUnpin {}
+
+impl<T: ?Sized> !UnsafeUnpin for UnsafePinned<T> {}
+unsafe impl<T: ?Sized> UnsafeUnpin for PhantomData<T> {}
+unsafe impl<T: ?Sized> UnsafeUnpin for *const T {}
+unsafe impl<T: ?Sized> UnsafeUnpin for *mut T {}
+unsafe impl<T: ?Sized> UnsafeUnpin for &T {}
+unsafe impl<T: ?Sized> UnsafeUnpin for &mut T {}
+
 /// Types that do not require any pinning guarantees.
 ///
 /// For information on what "pinning" is, see the [`pin` module] documentation.
@@ -980,6 +1001,11 @@ pub auto trait Unpin {}
 /// A marker type which does not implement `Unpin`.
 ///
 /// If a type contains a `PhantomPinned`, it will not implement `Unpin` by default.
+//
+// FIXME(unsafe_pinned): This is *not* a stable guarantee we want to make, at least not yet.
+// Note that for backwards compatibility with the new [`UnsafePinned`] wrapper type, placing this
+// marker in your struct acts as if you wrapped the entire struct in an `UnsafePinned`. This type
+// will likely eventually be deprecated, and all new code should be using `UnsafePinned` instead.
 #[stable(feature = "pin", since = "1.33.0")]
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg(feature = "uncertified")]
@@ -988,6 +1014,13 @@ pub struct PhantomPinned;
 #[stable(feature = "pin", since = "1.33.0")]
 #[cfg(feature = "uncertified")]
 impl !Unpin for PhantomPinned {}
+
+#[cfg(feature = "uncertified")]
+// This is a small hack to allow existing code which uses PhantomPinned to opt-out of noalias to
+// continue working. Ideally PhantomPinned could just wrap an `UnsafePinned<()>` to get the same
+// effect, but we can't add a new field to an already stable unit struct -- that would be a breaking
+// change.
+impl !UnsafeUnpin for PhantomPinned {}
 
 #[cfg(feature = "uncertified")]
 marker_impls! {
@@ -1345,7 +1378,7 @@ pub trait FnPtr: Copy + Clone {
 /// ```
 #[rustc_builtin_macro(CoercePointee, attributes(pointee))]
 #[allow_internal_unstable(dispatch_from_dyn, coerce_unsized, unsize, coerce_pointee_validated)]
-#[cfg_attr(not(test), rustc_diagnostic_item = "CoercePointee")]
+#[rustc_diagnostic_item = "CoercePointee"]
 #[unstable(feature = "derive_coerce_pointee", issue = "123430")]
 #[cfg(feature = "uncertified")]
 pub macro CoercePointee($item:item) {

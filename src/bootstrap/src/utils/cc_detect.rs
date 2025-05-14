@@ -4,8 +4,8 @@
 //! C and C++ compilers for each target configured. A compiler is found through
 //! a number of vectors (in order of precedence)
 //!
-//! 1. Configuration via `target.$target.cc` in `config.toml`.
-//! 2. Configuration via `target.$target.android-ndk` in `config.toml`, if
+//! 1. Configuration via `target.$target.cc` in `bootstrap.toml`.
+//! 2. Configuration via `target.$target.android-ndk` in `bootstrap.toml`, if
 //!    applicable
 //! 3. Special logic to probe on OpenBSD
 //! 4. The `CC_$target` environment variable.
@@ -96,6 +96,7 @@ pub fn find(build: &Build) {
     let targets: HashSet<_> = match build.config.cmd {
         // We don't need to check cross targets for these commands.
         crate::Subcommand::Clean { .. }
+        | crate::Subcommand::Check { .. }
         | crate::Subcommand::Suggest { .. }
         | crate::Subcommand::Format { .. }
         | crate::Subcommand::Setup { .. } => {
@@ -122,7 +123,7 @@ pub fn find(build: &Build) {
 
 /// Probes and configures the C and C++ compilers for a single target.
 ///
-/// This function uses both user-specified configuration (from `config.toml`) and auto-detection
+/// This function uses both user-specified configuration (from `bootstrap.toml`) and auto-detection
 /// logic to determine the correct C/C++ compilers for the target. It also determines the appropriate
 /// archiver (`ar`) and sets up additional compilation flags (both handled and unhandled).
 pub fn find_target(build: &Build, target: TargetSelection) {
@@ -206,7 +207,7 @@ pub fn find_target(build: &Build, target: TargetSelection) {
 }
 
 /// Determines the default compiler for a given target and language when not explicitly
-/// configured in `config.toml`.
+/// configured in `bootstrap.toml`.
 fn default_compiler(
     cfg: &mut cc::Build,
     compiler: Language,
@@ -215,7 +216,7 @@ fn default_compiler(
 ) -> Option<PathBuf> {
     match &*target.triple {
         // When compiling for android we may have the NDK configured in the
-        // config.toml in which case we look there. Otherwise the default
+        // bootstrap.toml in which case we look there. Otherwise the default
         // compiler already takes into account the triple in question.
         t if t.contains("android") => {
             build.config.android_ndk.as_ref().map(|ndk| ndk_compiler(compiler, &target.triple, ndk))

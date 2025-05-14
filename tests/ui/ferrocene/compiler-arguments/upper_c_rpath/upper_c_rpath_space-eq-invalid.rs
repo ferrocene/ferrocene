@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -C rpath=invalid
+//~? ERROR incorrect value
 
 fn main() {}
 

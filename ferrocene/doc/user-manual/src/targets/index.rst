@@ -26,12 +26,17 @@ There are also two variants of the standard library available:
 * **Full**: provides the ``core``, ``alloc``, ``std``, ``test`` and
   ``proc_macro`` built-in crates.
 
+.. note::
+  The libraries provided are evaluated and tested within the scope of Ferrocene qualification for compiler use only.
+  The use of these libraries by end-use code is outside the scope of the current Ferrocene qualification.
+  It is the end-user responsibility to certify these libraries if they are used in their code.
+
 Qualified targets
 -----------------
 
 Qualified targets are provided with the highest level of assurance. They are
-qualified for use in safety-critical contexts (when used with a qualified
-rustc), and the full Ferrocene test suite is executed on the target for every
+qualified for use in safety-critical contexts when used with a qualified
+rustc. The full Ferrocene test suite is executed on the target for every
 code change.
 
 Only stable releases of qualified targets are qualified. Other releases, such

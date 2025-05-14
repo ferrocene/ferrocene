@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 use parse::Position::ArgumentNamed;
 use rustc_ast::ptr::P;
 use rustc_ast::tokenstream::TokenStream;
@@ -190,7 +192,8 @@ fn make_format_args(
                                 && let [stmt] = block.stmts.as_slice()
                                 && let StmtKind::Expr(expr) = &stmt.kind
                                 && let ExprKind::Path(None, path) = &expr.kind
-                                && path.is_potential_trivial_const_arg()
+                                && path.segments.len() == 1
+                                && path.segments[0].args.is_none()
                             {
                                 err.multipart_suggestion(
                                     "quote your inlined format argument to use as string literal",
@@ -334,7 +337,7 @@ fn make_format_args(
         return ExpandResult::Ready(Err(guar));
     }
 
-    let to_span = |inner_span: parse::InnerSpan| {
+    let to_span = |inner_span: Range<usize>| {
         is_source_literal.then(|| {
             fmt_span.from_inner(InnerSpan { start: inner_span.start, end: inner_span.end })
         })
@@ -406,7 +409,7 @@ fn make_format_args(
     let mut placeholder_index = 0;
 
     for piece in &pieces {
-        match *piece {
+        match piece.clone() {
             parse::Piece::Lit(s) => {
                 unfinished_literal.push_str(s);
             }
@@ -416,7 +419,8 @@ fn make_format_args(
                     unfinished_literal.clear();
                 }
 
-                let span = parser.arg_places.get(placeholder_index).and_then(|&s| to_span(s));
+                let span =
+                    parser.arg_places.get(placeholder_index).and_then(|s| to_span(s.clone()));
                 placeholder_index += 1;
 
                 let position_span = to_span(position_span);
@@ -608,7 +612,7 @@ fn make_format_args(
 fn invalid_placeholder_type_error(
     ecx: &ExtCtxt<'_>,
     ty: &str,
-    ty_span: Option<parse::InnerSpan>,
+    ty_span: Option<Range<usize>>,
     fmt_span: Span,
 ) {
     let sp = ty_span.map(|sp| fmt_span.from_inner(InnerSpan::new(sp.start, sp.end)));
@@ -710,11 +714,9 @@ fn report_missing_placeholders(
                     };
 
                     let pos = sub.position();
-                    let sub = String::from(sub.as_str());
-                    if explained.contains(&sub) {
+                    if !explained.insert(sub.to_string()) {
                         continue;
                     }
-                    explained.insert(sub);
 
                     if !found_foreign {
                         found_foreign = true;

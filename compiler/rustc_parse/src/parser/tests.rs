@@ -95,12 +95,6 @@ pub(crate) fn string_to_stream(source_str: String) -> TokenStream {
     ))
 }
 
-/// Parses a string, returns a crate.
-pub(crate) fn string_to_crate(source_str: String) -> ast::Crate {
-    let psess = psess();
-    with_error_checking_parse(source_str, &psess, |p| p.parse_crate_mod())
-}
-
 /// Does the given string match the pattern? whitespace in the first string
 /// may be deleted or replaced with other whitespace to match the pattern.
 /// This function is relatively Unicode-ignorant; fortunately, the careful design
@@ -2554,7 +2548,7 @@ fn look(p: &Parser<'_>, dist: usize, kind: rustc_ast::token::TokenKind) {
     // Do the `assert_eq` outside the closure so that `track_caller` works.
     // (`#![feature(closure_track_caller)]` + `#[track_caller]` on the closure
     // doesn't give the line number in the test below if the assertion fails.)
-    let tok = p.look_ahead(dist, |tok| tok.clone());
+    let tok = p.look_ahead(dist, |tok| *tok);
     assert_eq!(kind, tok.kind);
 }
 
@@ -2573,14 +2567,14 @@ fn look_ahead() {
         // Current position is the `fn`.
         look(&p, 0, token::Ident(kw::Fn, raw_no));
         look(&p, 1, token::Ident(sym_f, raw_no));
-        look(&p, 2, token::OpenDelim(Delimiter::Parenthesis));
+        look(&p, 2, token::OpenParen);
         look(&p, 3, token::Ident(sym_x, raw_no));
         look(&p, 4, token::Colon);
         look(&p, 5, token::Ident(sym::u32, raw_no));
-        look(&p, 6, token::CloseDelim(Delimiter::Parenthesis));
-        look(&p, 7, token::OpenDelim(Delimiter::Brace));
+        look(&p, 6, token::CloseParen);
+        look(&p, 7, token::OpenBrace);
         look(&p, 8, token::Ident(sym_x, raw_no));
-        look(&p, 9, token::CloseDelim(Delimiter::Brace));
+        look(&p, 9, token::CloseBrace);
         look(&p, 10, token::Ident(kw::Struct, raw_no));
         look(&p, 11, token::Ident(sym_S, raw_no));
         look(&p, 12, token::Semi);
@@ -2597,10 +2591,10 @@ fn look_ahead() {
         look(&p, 0, token::Ident(sym_x, raw_no));
         look(&p, 1, token::Colon);
         look(&p, 2, token::Ident(sym::u32, raw_no));
-        look(&p, 3, token::CloseDelim(Delimiter::Parenthesis));
-        look(&p, 4, token::OpenDelim(Delimiter::Brace));
+        look(&p, 3, token::CloseParen);
+        look(&p, 4, token::OpenBrace);
         look(&p, 5, token::Ident(sym_x, raw_no));
-        look(&p, 6, token::CloseDelim(Delimiter::Brace));
+        look(&p, 6, token::CloseBrace);
         look(&p, 7, token::Ident(kw::Struct, raw_no));
         look(&p, 8, token::Ident(sym_S, raw_no));
         look(&p, 9, token::Semi);
@@ -2652,18 +2646,18 @@ fn look_ahead_non_outermost_stream() {
         }
         look(&p, 0, token::Ident(kw::Fn, raw_no));
         look(&p, 1, token::Ident(sym_f, raw_no));
-        look(&p, 2, token::OpenDelim(Delimiter::Parenthesis));
+        look(&p, 2, token::OpenParen);
         look(&p, 3, token::Ident(sym_x, raw_no));
         look(&p, 4, token::Colon);
         look(&p, 5, token::Ident(sym::u32, raw_no));
-        look(&p, 6, token::CloseDelim(Delimiter::Parenthesis));
-        look(&p, 7, token::OpenDelim(Delimiter::Brace));
+        look(&p, 6, token::CloseParen);
+        look(&p, 7, token::OpenBrace);
         look(&p, 8, token::Ident(sym_x, raw_no));
-        look(&p, 9, token::CloseDelim(Delimiter::Brace));
+        look(&p, 9, token::CloseBrace);
         look(&p, 10, token::Ident(kw::Struct, raw_no));
         look(&p, 11, token::Ident(sym_S, raw_no));
         look(&p, 12, token::Semi);
-        look(&p, 13, token::CloseDelim(Delimiter::Brace));
+        look(&p, 13, token::CloseBrace);
         // Any lookahead past the end of the token stream returns `Eof`.
         look(&p, 14, token::Eof);
         look(&p, 15, token::Eof);
@@ -2723,9 +2717,7 @@ fn debug_lookahead() {
             \"f\",
             No,
         ),
-        OpenDelim(
-            Parenthesis,
-        ),
+        OpenParen,
         Ident(
             \"x\",
             No,
@@ -2735,9 +2727,7 @@ fn debug_lookahead() {
             \"u32\",
             No,
         ),
-        CloseDelim(
-            Parenthesis,
-        ),
+        CloseParen,
     ],
     approx_token_stream_pos: 0,
     ..
@@ -2768,9 +2758,7 @@ fn debug_lookahead() {
             \"f\",
             No,
         ),
-        OpenDelim(
-            Parenthesis,
-        ),
+        OpenParen,
         Ident(
             \"x\",
             No,
@@ -2780,19 +2768,13 @@ fn debug_lookahead() {
             \"u32\",
             No,
         ),
-        CloseDelim(
-            Parenthesis,
-        ),
-        OpenDelim(
-            Brace,
-        ),
+        CloseParen,
+        OpenBrace,
         Ident(
             \"x\",
             No,
         ),
-        CloseDelim(
-            Brace,
-        ),
+        CloseBrace,
         Ident(
             \"struct\",
             No,
@@ -2817,9 +2799,7 @@ fn debug_lookahead() {
             &format!("{:#?}", p.debug_lookahead(1)),
             "Parser {
     prev_token: Token {
-        kind: OpenDelim(
-            Brace,
-        ),
+        kind: OpenBrace,
         span: Span {
             lo: BytePos(
                 13,
@@ -2844,9 +2824,7 @@ fn debug_lookahead() {
             &format!("{:#?}", p.debug_lookahead(4)),
             "Parser {
     prev_token: Token {
-        kind: OpenDelim(
-            Brace,
-        ),
+        kind: OpenBrace,
         span: Span {
             lo: BytePos(
                 13,
@@ -2862,9 +2840,7 @@ fn debug_lookahead() {
             \"x\",
             No,
         ),
-        CloseDelim(
-            Brace,
-        ),
+        CloseBrace,
         Ident(
             \"struct\",
             No,
@@ -2922,7 +2898,7 @@ fn out_of_line_mod() {
         .unwrap()
         .unwrap();
 
-        let ast::ItemKind::Mod(_, mod_kind) = &item.kind else { panic!() };
+        let ast::ItemKind::Mod(_, _, mod_kind) = &item.kind else { panic!() };
         assert_matches!(mod_kind, ast::ModKind::Loaded(items, ..) if items.len() == 2);
     });
 }

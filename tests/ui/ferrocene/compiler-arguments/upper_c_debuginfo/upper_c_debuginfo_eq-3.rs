@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -Cdebuginfo=3
+//~? ERROR incorrect value
 
 fn main() {}
 

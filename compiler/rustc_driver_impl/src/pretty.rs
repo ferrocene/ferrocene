@@ -10,8 +10,8 @@ use rustc_middle::ty::{self, TyCtxt};
 use rustc_mir_build::thir::print::{thir_flat, thir_tree};
 use rustc_session::Session;
 use rustc_session::config::{OutFileName, PpHirMode, PpMode, PpSourceMode};
-use rustc_smir::rustc_internal::pretty::write_smir_pretty;
 use rustc_span::{FileName, Ident};
+use stable_mir::rustc_internal::pretty::write_smir_pretty;
 use tracing::debug;
 use {rustc_ast as ast, rustc_hir_pretty as pprust_hir};
 
@@ -268,8 +268,7 @@ pub fn print<'tcx>(sess: &Session, ppm: PpMode, ex: PrintExtra<'tcx>) {
             let tcx = ex.tcx();
             let f = |annotation: &dyn pprust_hir::PpAnn| {
                 let sm = sess.source_map();
-                let hir_map = tcx.hir();
-                let attrs = |id| hir_map.attrs(id);
+                let attrs = |id| tcx.hir_attrs(id);
                 pprust_hir::print_crate(
                     sm,
                     tcx.hir_root_module(),

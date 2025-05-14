@@ -154,7 +154,8 @@
         target_os = "emscripten",
         target_os = "wasi",
         target_env = "sgx",
-        target_os = "xous"
+        target_os = "xous",
+        target_os = "trusty",
     ))
 ))]
 mod tests;
@@ -167,8 +168,6 @@ use crate::num::NonZero;
 use crate::path::Path;
 use crate::sys::pipe::{AnonPipe, read2};
 use crate::sys::process as imp;
-#[stable(feature = "command_access", since = "1.57.0")]
-pub use crate::sys_common::process::CommandEnvs;
 use crate::sys_common::{AsInner, AsInnerMut, FromInner, IntoInner};
 use crate::{fmt, fs, str};
 
@@ -1072,7 +1071,7 @@ impl Command {
     /// ```
     #[stable(feature = "process", since = "1.0.0")]
     pub fn output(&mut self) -> io::Result<Output> {
-        let (status, stdout, stderr) = self.inner.output()?;
+        let (status, stdout, stderr) = imp::output(&mut self.inner)?;
         Ok(Output { status: ExitStatus(status), stdout, stderr })
     }
 
@@ -1173,7 +1172,7 @@ impl Command {
     /// ```
     #[stable(feature = "command_access", since = "1.57.0")]
     pub fn get_envs(&self) -> CommandEnvs<'_> {
-        self.inner.get_envs()
+        CommandEnvs { iter: self.inner.get_envs() }
     }
 
     /// Returns the working directory for the child process.
@@ -1263,6 +1262,48 @@ impl<'a> ExactSizeIterator for CommandArgs<'a> {
     }
 }
 
+/// An iterator over the command environment variables.
+///
+/// This struct is created by
+/// [`Command::get_envs`][crate::process::Command::get_envs]. See its
+/// documentation for more.
+#[must_use = "iterators are lazy and do nothing unless consumed"]
+#[stable(feature = "command_access", since = "1.57.0")]
+pub struct CommandEnvs<'a> {
+    iter: imp::CommandEnvs<'a>,
+}
+
+#[stable(feature = "command_access", since = "1.57.0")]
+impl<'a> Iterator for CommandEnvs<'a> {
+    type Item = (&'a OsStr, Option<&'a OsStr>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next()
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.iter.size_hint()
+    }
+}
+
+#[stable(feature = "command_access", since = "1.57.0")]
+impl<'a> ExactSizeIterator for CommandEnvs<'a> {
+    fn len(&self) -> usize {
+        self.iter.len()
+    }
+
+    fn is_empty(&self) -> bool {
+        self.iter.is_empty()
+    }
+}
+
+#[stable(feature = "command_access", since = "1.57.0")]
+impl<'a> fmt::Debug for CommandEnvs<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.iter.fmt(f)
+    }
+}
+
 /// The output of a finished process.
 ///
 /// This is returned in a Result by either the [`output`] method of a
@@ -1283,6 +1324,40 @@ pub struct Output {
     /// The data that the process wrote to stderr.
     #[stable(feature = "process", since = "1.0.0")]
     pub stderr: Vec<u8>,
+}
+
+impl Output {
+    /// Returns an error if a nonzero exit status was received.
+    ///
+    /// If the [`Command`] exited successfully,
+    /// `self` is returned.
+    ///
+    /// This is equivalent to calling [`exit_ok`](ExitStatus::exit_ok)
+    /// on [`Output.status`](Output::status).
+    ///
+    /// Note that this will throw away the [`Output::stderr`] field in the error case.
+    /// If the child process outputs useful informantion to stderr, you can:
+    /// * Use `cmd.stderr(Stdio::inherit())` to forward the
+    ///   stderr child process to the parent's stderr,
+    ///   usually printing it to console where the user can see it.
+    ///   This is usually correct for command-line applications.
+    /// * Capture `stderr` using a custom error type.
+    ///   This is usually correct for libraries.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #![feature(exit_status_error)]
+    /// # #[cfg(unix)] {
+    /// use std::process::Command;
+    /// assert!(Command::new("false").output().unwrap().exit_ok().is_err());
+    /// # }
+    /// ```
+    #[unstable(feature = "exit_status_error", issue = "84908")]
+    pub fn exit_ok(self) -> Result<Self, ExitStatusError> {
+        self.status.exit_ok()?;
+        Ok(self)
+    }
 }
 
 // If either stderr or stdout are valid utf8 strings it prints the valid
@@ -1658,6 +1733,20 @@ impl From<io::Stderr> for Stdio {
     }
 }
 
+#[stable(feature = "anonymous_pipe", since = "1.87.0")]
+impl From<io::PipeWriter> for Stdio {
+    fn from(pipe: io::PipeWriter) -> Self {
+        Stdio::from_inner(pipe.into_inner().into())
+    }
+}
+
+#[stable(feature = "anonymous_pipe", since = "1.87.0")]
+impl From<io::PipeReader> for Stdio {
+    fn from(pipe: io::PipeReader) -> Self {
+        Stdio::from_inner(pipe.into_inner().into())
+    }
+}
+
 /// Describes the result of a process after it has terminated.
 ///
 /// This `struct` is used to represent the exit status or other termination of a child process.
@@ -1821,7 +1910,7 @@ impl crate::sealed::Sealed for ExitStatusError {}
 /// # if cfg!(unix) {
 /// use std::process::{Command, ExitStatusError};
 ///
-/// fn run(cmd: &str) -> Result<(),ExitStatusError> {
+/// fn run(cmd: &str) -> Result<(), ExitStatusError> {
 ///     Command::new(cmd).status().unwrap().exit_ok()?;
 ///     Ok(())
 /// }
@@ -2003,9 +2092,9 @@ impl ExitCode {
     ///
     /// Note that this has the same caveats as [`process::exit()`][exit], namely that this function
     /// terminates the process immediately, so no destructors on the current stack or any other
-    /// thread's stack will be run. If a clean shutdown is needed, it is recommended to simply
-    /// return this ExitCode from the `main` function, as demonstrated in the [type
-    /// documentation](#examples).
+    /// thread's stack will be run. Also see those docs for some important notes on interop with C
+    /// code. If a clean shutdown is needed, it is recommended to simply return this ExitCode from
+    /// the `main` function, as demonstrated in the [type documentation](#examples).
     ///
     /// # Differences from `process::exit()`
     ///
@@ -2311,6 +2400,33 @@ impl Child {
 ///
 /// process::exit(0x0100);
 /// ```
+///
+/// ### Safe interop with C code
+///
+/// On Unix, this function is currently implemented using the `exit` C function [`exit`][C-exit]. As
+/// of C23, the C standard does not permit multiple threads to call `exit` concurrently. Rust
+/// mitigates this with a lock, but if C code calls `exit`, that can still cause undefined behavior.
+/// Note that returning from `main` is equivalent to calling `exit`.
+///
+/// Therefore, it is undefined behavior to have two concurrent threads perform the following
+/// without synchronization:
+/// - One thread calls Rust's `exit` function or returns from Rust's `main` function
+/// - Another thread calls the C function `exit` or `quick_exit`, or returns from C's `main` function
+///
+/// Note that if a binary contains multiple copies of the Rust runtime (e.g., when combining
+/// multiple `cdylib` or `staticlib`), they each have their own separate lock, so from the
+/// perspective of code running in one of the Rust runtimes, the "outside" Rust code is basically C
+/// code, and concurrent `exit` again causes undefined behavior.
+///
+/// Individual C implementations might provide more guarantees than the standard and permit concurrent
+/// calls to `exit`; consult the documentation of your C implementation for details.
+///
+/// For some of the on-going discussion to make `exit` thread-safe in C, see:
+/// - [Rust issue #126600](https://github.com/rust-lang/rust/issues/126600)
+/// - [Austin Group Bugzilla (for POSIX)](https://austingroupbugs.net/view.php?id=1845)
+/// - [GNU C library Bugzilla](https://sourceware.org/bugzilla/show_bug.cgi?id=31997)
+///
+/// [C-exit]: https://en.cppreference.com/w/c/program/exit
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg_attr(not(test), rustc_diagnostic_item = "process_exit")]
 pub fn exit(code: i32) -> ! {

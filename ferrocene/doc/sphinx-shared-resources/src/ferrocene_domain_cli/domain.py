@@ -5,9 +5,11 @@
 from dataclasses import dataclass
 import re
 import string
+from typing import Optional
 
 from docutils import nodes
 from docutils.parsers.rst import directives
+import docutils
 
 from sphinx import addnodes
 from sphinx.directives import SphinxDirective, ObjectDescription
@@ -18,12 +20,37 @@ import sphinx
 
 PROGRAM_STORAGE = "ferrocene_domain_cli:program"
 
+ALLOWED_CATEGORIES = {
+    "informational": "informational",
+    "narrow": "narrow impact",
+    "wide": "wide impact",
+    "unqualified": "not qualified",
+}
+
+UNQUALIFIED_MESSAGE = (
+    "This argument is outside the scope of the Ferrocene qualification, and must not be used in a "
+    "safety critical context. Its documentation is presented for your convenience."
+)
+
+CATEGORIES_TARGET_REF = "evaluation-report:rustc-cli-testing-categories"
+
+
+ARGUMENT_PLACEHOLDER_RE = re.compile(r"(<[^>]+>|\[[^\]]+\])")
+MULTIPLE_UNDERSCORES_RE = re.compile(r"__+")
+ALLOWED_CHARS_IN_OPTION_ID = string.ascii_letters + string.digits + "_"
+
+
+@dataclass
+class ProgramStorage:
+    program_name: str
+    qualified: bool
+
 
 class ProgramDirective(SphinxDirective):
     has_content = True
     required_arguments = 1
     final_argument_whitespace = True
-    option_spec = {"no_traceability_matrix": directives.flag}
+    option_spec = {"not_qualified": directives.flag}
 
     def run(self):
         # if there already is program data in storage, a ProgramDirective is
@@ -34,8 +61,8 @@ class ProgramDirective(SphinxDirective):
 
         # store arguments, so they can be accessed by child `OptionDirective`s
         self.env.temp_data[PROGRAM_STORAGE] = ProgramStorage(
-            self.arguments[0],
-            "no_traceability_matrix" in self.options,
+            program_name=self.arguments[0],
+            qualified="not_qualified" not in self.options,
         )
 
         # parse and process content of `ProgramDirective``
@@ -52,23 +79,74 @@ class ProgramDirective(SphinxDirective):
 class OptionDirective(ObjectDescription):
     has_content = True
     required_arguments = 1
-    option_spec = {}
+    option_spec = {"category": directives.unchanged}
 
     def handle_signature(self, sig, signode):
-        signode += addnodes.desc_name("", sig)
+        name = addnodes.desc_name()
+        name["classes"].append("inline-code")
+        name["classes"].append("ferrocene-cli-title")
+
+        # When the regex is wrapped in parentheses, split returns a list alternating text not
+        # matching the regex and text matching the regex.
+        is_argument = False
+        for part in ARGUMENT_PLACEHOLDER_RE.split(sig):
+            if is_argument:
+                name += nodes.emphasis("", part)
+                is_argument = False
+            else:
+                name += nodes.Text(part)
+                is_argument = True
+
+        signode += name
+
+    def transform_content(self, content_node):
+        category = None
+        if self._program_storage().qualified and self.options["category"] in ALLOWED_CATEGORIES:
+            category = self.options["category"]
+
+        if category == "unqualified":
+            caution = nodes.caution()
+            caution += nodes.paragraph("", UNQUALIFIED_MESSAGE)
+            content_node.insert(0, caution)
+
+        if category is not None and category != "unqualified":
+            xref = addnodes.pending_xref()
+            xref["reftype"] = "ref"
+            xref["refdomain"] = "std"
+            xref["refexplicit"] = True
+            xref["refdoc"] = self.env.docname
+            xref["reftarget"] = CATEGORIES_TARGET_REF
+            xref += nodes.strong("", ALLOWED_CATEGORIES[self.options["category"]])
+
+            paragraph = nodes.paragraph()
+            paragraph += nodes.Text("Testing category: ")
+            paragraph += xref
+            content_node.insert(0, paragraph)
 
     def add_target_and_index(self, name_cls, sig, signode):
-        if PROGRAM_STORAGE not in self.env.temp_data:
-            warn("cli:option outside cli:program isn't supported", self.get_location())
-            program_storage = ProgramStorage("PLACEHOLDER", False)
+        program_storage = self._program_storage()
+
+        if "category" not in self.options:
+            if program_storage.qualified:
+                warn("cli:option without a category", self.get_location())
+            category = None
+        elif self.options["category"] not in ALLOWED_CATEGORIES:
+            warn(
+                f"unsupported category: {self.options['category']}", self.get_location()
+            )
+            category = None
         else:
-            program_storage: ProgramStorage = self.env.temp_data[PROGRAM_STORAGE]
+            if not program_storage.qualified:
+                warn("category set in an unqualified program", self.get_location())
+            category = self.options["category"]
 
         option = Option(
-            self.env.docname,
-            program_storage.program_name,
-            sig,
-            program_storage.no_traceability_matrix,
+            document=self.env.docname,
+            program=program_storage.program_name,
+            option=sig,
+            category=category,
+            location=self.get_location(),
+            no_traceability_matrix=not program_storage.qualified,
         )
 
         signode["ids"].append(option.id())
@@ -76,18 +154,22 @@ class OptionDirective(ObjectDescription):
         domain = self.env.get_domain("cli")
         domain.add_option(option)
 
+    def _program_storage(self) -> ProgramStorage:
+        if PROGRAM_STORAGE not in self.env.temp_data:
+            warn("cli:option outside cli:program isn't supported", self.get_location())
+            return ProgramStorage("PLACEHOLDER", False)
+        else:
+            return self.env.temp_data[PROGRAM_STORAGE]
 
-ARGUMENT_PLACEHOLDER_RE = re.compile(r"(<[^>]+>|\[[^\]]+\])")
-MULTIPLE_UNDERSCORES_RE = re.compile(r"__+")
-ALLOWED_CHARS_IN_OPTION_ID = string.ascii_letters + string.digits + "_"
 
-
+@dataclass
 class Option:
-    def __init__(self, document, program, option, no_traceability_matrix):
-        self.document = document
-        self.program = program
-        self.option = option
-        self.no_traceability_matrix = no_traceability_matrix
+    document: str
+    program: str
+    option: str
+    category: Optional[str]
+    location: str
+    no_traceability_matrix: bool
 
     def id(self):
         option = (
@@ -101,7 +183,7 @@ class Option:
 
         # Sanity check to notice when the normalization doesn't work
         if any(c for c in option if c not in ALLOWED_CHARS_IN_OPTION_ID):
-            warn(f"cannot properly normalize option {self.option}")
+            warn(f"cannot properly normalize option {self.option}", self.location)
 
         return f"um_{self.program}_{option}"
 
@@ -172,9 +254,3 @@ def warn(message, location):
 
 def setup(app):
     app.add_domain(CliDomain)
-
-
-@dataclass
-class ProgramStorage:
-    program_name: str
-    no_traceability_matrix: bool

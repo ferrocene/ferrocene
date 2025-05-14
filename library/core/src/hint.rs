@@ -4,6 +4,7 @@
 //!
 //! Hints may be compile time or runtime.
 
+use crate::mem::MaybeUninit;
 use crate::{intrinsics, ub_checks};
 
 /// Informs the compiler that the site which is calling this function is not
@@ -98,6 +99,7 @@ use crate::{intrinsics, ub_checks};
 #[stable(feature = "unreachable", since = "1.27.0")]
 #[rustc_const_stable(feature = "const_unreachable_unchecked", since = "1.57.0")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+#[coverage(off)] // Ferrocene addition: this function breaks llvm-cov
 pub const unsafe fn unreachable_unchecked() -> ! {
     ub_checks::assert_unsafe_precondition!(
         check_language_ub,
@@ -318,6 +320,10 @@ pub fn spin_loop() {
 /// identity function. As such, it **must not be relied upon to control critical program behavior.**
 /// This also means that this function does not offer any guarantees for cryptographic or security
 /// purposes.
+///
+/// This limitation is not specific to `black_box`; there is no mechanism in the entire Rust
+/// language that can provide the guarantees required for constant-time cryptography.
+/// (There is also no such mechanism in LLVM, so the same is true for every other LLVM-based compiler.)
 ///
 /// </div>
 ///
@@ -733,4 +739,62 @@ pub const fn unlikely(b: bool) -> bool {
 #[inline(always)]
 pub const fn cold_path() {
     crate::intrinsics::cold_path()
+}
+
+/// Returns either `true_val` or `false_val` depending on the value of
+/// `condition`, with a hint to the compiler that `condition` is unlikely to be
+/// correctly predicted by a CPU’s branch predictor.
+///
+/// This method is functionally equivalent to
+/// ```ignore (this is just for illustrative purposes)
+/// fn select_unpredictable<T>(b: bool, true_val: T, false_val: T) -> T {
+///     if b { true_val } else { false_val }
+/// }
+/// ```
+/// but might generate different assembly. In particular, on platforms with
+/// a conditional move or select instruction (like `cmov` on x86 or `csel`
+/// on ARM) the optimizer might use these instructions to avoid branches,
+/// which can benefit performance if the branch predictor is struggling
+/// with predicting `condition`, such as in an implementation of binary
+/// search.
+///
+/// Note however that this lowering is not guaranteed (on any platform) and
+/// should not be relied upon when trying to write cryptographic constant-time
+/// code. Also be aware that this lowering might *decrease* performance if
+/// `condition` is well-predictable. It is advisable to perform benchmarks to
+/// tell if this function is useful.
+///
+/// # Examples
+///
+/// Distribute values evenly between two buckets:
+/// ```
+/// use std::hash::BuildHasher;
+/// use std::hint;
+///
+/// fn append<H: BuildHasher>(hasher: &H, v: i32, bucket_one: &mut Vec<i32>, bucket_two: &mut Vec<i32>) {
+///     let hash = hasher.hash_one(&v);
+///     let bucket = hint::select_unpredictable(hash % 2 == 0, bucket_one, bucket_two);
+///     bucket.push(v);
+/// }
+/// # let hasher = std::collections::hash_map::RandomState::new();
+/// # let mut bucket_one = Vec::new();
+/// # let mut bucket_two = Vec::new();
+/// # append(&hasher, 42, &mut bucket_one, &mut bucket_two);
+/// # assert_eq!(bucket_one.len() + bucket_two.len(), 1);
+/// ```
+#[inline(always)]
+#[stable(feature = "select_unpredictable", since = "CURRENT_RUSTC_VERSION")]
+pub fn select_unpredictable<T>(condition: bool, true_val: T, false_val: T) -> T {
+    // FIXME(https://github.com/rust-lang/unsafe-code-guidelines/issues/245):
+    // Change this to use ManuallyDrop instead.
+    let mut true_val = MaybeUninit::new(true_val);
+    let mut false_val = MaybeUninit::new(false_val);
+    // SAFETY: The value that is not selected is dropped, and the selected one
+    // is returned. This is necessary because the intrinsic doesn't drop the
+    // value that is  not selected.
+    unsafe {
+        crate::intrinsics::select_unpredictable(!condition, &mut true_val, &mut false_val)
+            .assume_init_drop();
+        crate::intrinsics::select_unpredictable(condition, true_val, false_val).assume_init()
+    }
 }

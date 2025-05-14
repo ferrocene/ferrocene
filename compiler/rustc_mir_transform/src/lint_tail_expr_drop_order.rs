@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::collections::hash_map;
 use std::rc::Rc;
 
-use rustc_data_structures::fx::{FxHashMap, FxHashSet};
+use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexMap};
 use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_errors::Subdiagnostic;
 use rustc_hir::CRATE_HIR_ID;
@@ -25,7 +25,6 @@ use rustc_mir_dataflow::{Analysis, MaybeReachable, ResultsCursor};
 use rustc_session::lint::builtin::TAIL_EXPR_DROP_ORDER;
 use rustc_session::lint::{self};
 use rustc_span::{DUMMY_SP, Span, Symbol};
-use rustc_type_ir::data_structures::IndexMap;
 use tracing::debug;
 
 fn place_has_common_prefix<'tcx>(left: &Place<'tcx>, right: &Place<'tcx>) -> bool {
@@ -135,6 +134,8 @@ impl<'a, 'mir, 'tcx> DropsReachable<'a, 'mir, 'tcx> {
                     target: _,
                     unwind: _,
                     replace: _,
+                    drop: _,
+                    async_fut: _,
                 } = &terminator.kind
                 && place_has_common_prefix(dropped_place, self.place)
             {
@@ -199,7 +200,7 @@ pub(crate) fn run_lint<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId, body: &Body<
     // and, for each block, the vector of locations.
     //
     // We group them per-block because they tend to scheduled in the same drop ladder block.
-    let mut bid_per_block = IndexMap::default();
+    let mut bid_per_block = FxIndexMap::default();
     let mut bid_places = UnordSet::new();
 
     let mut ty_dropped_components = UnordMap::default();
@@ -234,8 +235,9 @@ pub(crate) fn run_lint<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId, body: &Body<
     // When we encounter a DROP of some place P we only care
     // about the drop if `P` may be initialized.
     let move_data = MoveData::gather_moves(body, tcx, |_| true);
-    let maybe_init = MaybeInitializedPlaces::new(tcx, body, &move_data);
-    let mut maybe_init = maybe_init.iterate_to_fixpoint(tcx, body, None).into_results_cursor(body);
+    let mut maybe_init = MaybeInitializedPlaces::new(tcx, body, &move_data)
+        .iterate_to_fixpoint(tcx, body, None)
+        .into_results_cursor(body);
     let mut block_drop_value_info =
         IndexVec::from_elem_n(MovePathIndexAtBlock::Unknown, body.basic_blocks.len());
     for (&block, candidates) in &bid_per_block {
@@ -455,8 +457,8 @@ pub(crate) fn run_lint<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId, body: &Body<
 }
 
 /// Extract binding names if available for diagnosis
-fn collect_user_names(body: &Body<'_>) -> IndexMap<Local, Symbol> {
-    let mut names = IndexMap::default();
+fn collect_user_names(body: &Body<'_>) -> FxIndexMap<Local, Symbol> {
+    let mut names = FxIndexMap::default();
     for var_debug_info in &body.var_debug_info {
         if let mir::VarDebugInfoContents::Place(place) = &var_debug_info.value
             && let Some(local) = place.local_or_deref_local()
@@ -470,9 +472,9 @@ fn collect_user_names(body: &Body<'_>) -> IndexMap<Local, Symbol> {
 /// Assign names for anonymous or temporary values for diagnosis
 fn assign_observables_names(
     locals: impl IntoIterator<Item = Local>,
-    user_names: &IndexMap<Local, Symbol>,
-) -> IndexMap<Local, (String, bool)> {
-    let mut names = IndexMap::default();
+    user_names: &FxIndexMap<Local, Symbol>,
+) -> FxIndexMap<Local, (String, bool)> {
+    let mut names = FxIndexMap::default();
     let mut assigned_names = FxHashSet::default();
     let mut idx = 0u64;
     let mut fresh_name = || {
@@ -513,23 +515,17 @@ struct LocalLabel<'a> {
 
 /// A custom `Subdiagnostic` implementation so that the notes are delivered in a specific order
 impl Subdiagnostic for LocalLabel<'_> {
-    fn add_to_diag_with<
-        G: rustc_errors::EmissionGuarantee,
-        F: rustc_errors::SubdiagMessageOp<G>,
-    >(
-        self,
-        diag: &mut rustc_errors::Diag<'_, G>,
-        f: &F,
-    ) {
+    fn add_to_diag<G: rustc_errors::EmissionGuarantee>(self, diag: &mut rustc_errors::Diag<'_, G>) {
         diag.arg("name", self.name);
         diag.arg("is_generated_name", self.is_generated_name);
         diag.arg("is_dropped_first_edition_2024", self.is_dropped_first_edition_2024);
-        let msg = f(diag, crate::fluent_generated::mir_transform_tail_expr_local.into());
+        let msg = diag.eagerly_translate(crate::fluent_generated::mir_transform_tail_expr_local);
         diag.span_label(self.span, msg);
         for dtor in self.destructors {
-            dtor.add_to_diag_with(diag, f);
+            dtor.add_to_diag(diag);
         }
-        let msg = f(diag, crate::fluent_generated::mir_transform_label_local_epilogue);
+        let msg =
+            diag.eagerly_translate(crate::fluent_generated::mir_transform_label_local_epilogue);
         diag.span_label(self.span, msg);
     }
 }

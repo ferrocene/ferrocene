@@ -96,7 +96,7 @@ use rustc_middle::query::Providers;
 use rustc_middle::span_bug;
 use rustc_middle::ty::{self, RootVariableMinCaptureList, Ty, TyCtxt};
 use rustc_session::lint;
-use rustc_span::{BytePos, Span, Symbol, kw, sym};
+use rustc_span::{BytePos, Span, Symbol, sym};
 use tracing::{debug, instrument};
 
 use self::LiveNodeKind::*;
@@ -157,7 +157,7 @@ fn check_liveness(tcx: TyCtxt<'_>, def_id: LocalDefId) {
 
     if let Some(upvars) = tcx.upvars_mentioned(def_id) {
         for &var_hir_id in upvars.keys() {
-            let var_name = tcx.hir().name(var_hir_id);
+            let var_name = tcx.hir_name(var_hir_id);
             maps.add_variable(Upvar(var_hir_id, var_name));
         }
     }
@@ -426,6 +426,7 @@ impl<'tcx> Visitor<'tcx> for IrMaps<'tcx> {
             | hir::ExprKind::Array(..)
             | hir::ExprKind::Call(..)
             | hir::ExprKind::MethodCall(..)
+            | hir::ExprKind::Use(..)
             | hir::ExprKind::Tup(..)
             | hir::ExprKind::Binary(..)
             | hir::ExprKind::AddrOf(..)
@@ -577,8 +578,7 @@ impl<'a, 'tcx> Liveness<'a, 'tcx> {
     where
         F: FnMut(Variable) -> bool,
     {
-        for var_idx in 0..self.ir.var_kinds.len() {
-            let var = Variable::from(var_idx);
+        for var in self.ir.var_kinds.indices() {
             if test(var) {
                 write!(wr, " {var:?}")?;
             }
@@ -608,8 +608,8 @@ impl<'a, 'tcx> Liveness<'a, 'tcx> {
         debug!(
             "^^ liveness computation results for body {} (entry={:?})",
             {
-                for ln_idx in 0..self.ir.lnks.len() {
-                    debug!("{:?}", self.ln_str(LiveNode::from(ln_idx)));
+                for ln_idx in self.ir.lnks.indices() {
+                    debug!("{:?}", self.ln_str(ln_idx));
                 }
                 hir_id
             },
@@ -705,7 +705,7 @@ impl<'a, 'tcx> Liveness<'a, 'tcx> {
                             );
                             self.acc(self.exit_ln, var, ACC_READ | ACC_USE);
                         }
-                        ty::UpvarCapture::ByValue => {}
+                        ty::UpvarCapture::ByValue | ty::UpvarCapture::ByUse => {}
                     }
                 }
             }
@@ -1020,7 +1020,10 @@ impl<'a, 'tcx> Liveness<'a, 'tcx> {
             }
 
             hir::ExprKind::Call(ref f, args) => {
-                let succ = self.check_is_ty_uninhabited(expr, succ);
+                let is_ctor = |f: &Expr<'_>| matches!(f.kind, hir::ExprKind::Path(hir::QPath::Resolved(_, path)) if matches!(path.res, rustc_hir::def::Res::Def(rustc_hir::def::DefKind::Ctor(_, _), _)));
+                let succ =
+                    if !is_ctor(f) { self.check_is_ty_uninhabited(expr, succ) } else { succ };
+
                 let succ = self.propagate_through_exprs(args, succ);
                 self.propagate_through_expr(f, succ)
             }
@@ -1029,6 +1032,11 @@ impl<'a, 'tcx> Liveness<'a, 'tcx> {
                 let succ = self.check_is_ty_uninhabited(expr, succ);
                 let succ = self.propagate_through_exprs(args, succ);
                 self.propagate_through_expr(receiver, succ)
+            }
+
+            hir::ExprKind::Use(expr, _) => {
+                let succ = self.check_is_ty_uninhabited(expr, succ);
+                self.propagate_through_expr(expr, succ)
             }
 
             hir::ExprKind::Tup(exprs) => self.propagate_through_exprs(exprs, succ),
@@ -1418,6 +1426,7 @@ fn check_expr<'tcx>(this: &mut Liveness<'_, 'tcx>, expr: &'tcx Expr<'tcx>) {
         // no correctness conditions related to liveness
         hir::ExprKind::Call(..)
         | hir::ExprKind::MethodCall(..)
+        | hir::ExprKind::Use(..)
         | hir::ExprKind::Match(..)
         | hir::ExprKind::Loop(..)
         | hir::ExprKind::Index(..)
@@ -1474,9 +1483,6 @@ impl<'tcx> Liveness<'_, 'tcx> {
 
     fn should_warn(&self, var: Variable) -> Option<String> {
         let name = self.ir.variable_name(var);
-        if name == kw::Empty {
-            return None;
-        }
         let name = name.as_str();
         if name.as_bytes()[0] == b'_' {
             return None;
@@ -1493,7 +1499,7 @@ impl<'tcx> Liveness<'_, 'tcx> {
         for (&var_hir_id, min_capture_list) in closure_min_captures {
             for captured_place in min_capture_list {
                 match captured_place.info.capture_kind {
-                    ty::UpvarCapture::ByValue => {}
+                    ty::UpvarCapture::ByValue | ty::UpvarCapture::ByUse => {}
                     ty::UpvarCapture::ByRef(..) => continue,
                 };
                 let span = captured_place.get_capture_kind_span(self.ir.tcx);
@@ -1648,7 +1654,7 @@ impl<'tcx> Liveness<'_, 'tcx> {
                 // `&'name Ty` -> `&'name mut Ty` or `&Ty` -> `&mut Ty`
                 Some(mut_ty.ty.span.shrink_to_lo())
             };
-            let pre = if lt.ident.span.lo() == lt.ident.span.hi() { "" } else { " " };
+            let pre = if lt.ident.span.is_empty() { "" } else { " " };
             Some(errors::UnusedAssignSuggestion {
                 ty_span,
                 pre,

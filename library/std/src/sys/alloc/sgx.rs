@@ -1,6 +1,6 @@
 use crate::alloc::{GlobalAlloc, Layout, System};
 use crate::ptr;
-use crate::sync::atomic::{AtomicBool, Ordering};
+use crate::sync::atomic::{Atomic, AtomicBool, Ordering};
 use crate::sys::pal::abi::mem as sgx_mem;
 use crate::sys::pal::waitqueue::SpinMutex;
 
@@ -10,8 +10,10 @@ use crate::sys::pal::waitqueue::SpinMutex;
 // The current allocator here is the `dlmalloc` crate which we've got included
 // in the rust-lang/rust repository as a submodule. The crate is a port of
 // dlmalloc.c from C to Rust.
+//
+// Specifying linkage/symbol name is solely to ensure a single instance between this crate and its unit tests
 #[cfg_attr(test, linkage = "available_externally")]
-#[unsafe(export_name = "_ZN16__rust_internals3std3sys3sgx5alloc8DLMALLOCE")]
+#[unsafe(export_name = "_ZN16__rust_internals3std3sys5alloc3sgx8DLMALLOCE")]
 static DLMALLOC: SpinMutex<dlmalloc::Dlmalloc<Sgx>> =
     SpinMutex::new(dlmalloc::Dlmalloc::new_with_allocator(Sgx {}));
 
@@ -20,7 +22,7 @@ struct Sgx;
 unsafe impl dlmalloc::Allocator for Sgx {
     /// Allocs system resources
     fn alloc(&self, _size: usize) -> (*mut u8, usize, u32) {
-        static INIT: AtomicBool = AtomicBool::new(false);
+        static INIT: Atomic<bool> = AtomicBool::new(false);
 
         // No ordering requirement since this function is protected by the global lock.
         if !INIT.swap(true, Ordering::Relaxed) {

@@ -510,7 +510,7 @@ impl<'rt, 'tcx, M: Machine<'tcx>> ValidityVisitor<'rt, 'tcx, M> {
             self.ecx.check_ptr_access(
                 place.ptr(),
                 size,
-                CheckInAllocMsg::InboundsTest, // will anyway be replaced by validity message
+                CheckInAllocMsg::Dereferenceable, // will anyway be replaced by validity message
             ),
             self.path,
             Ub(DanglingIntPointer { addr: 0, .. }) => NullPtr { ptr_kind },
@@ -1248,6 +1248,14 @@ impl<'rt, 'tcx, M: Machine<'tcx>> ValueVisitor<'tcx, M> for ValidityVisitor<'rt,
                     // Range patterns are precisely reflected into `valid_range` and thus
                     // handled fully by `visit_scalar` (called below).
                     ty::PatternKind::Range { .. } => {},
+
+                    // FIXME(pattern_types): check that the value is covered by one of the variants.
+                    // For now, we rely on layout computation setting the scalar's `valid_range` to
+                    // match the pattern. However, this cannot always work; the layout may
+                    // pessimistically cover actually illegal ranges and Miri would miss that UB.
+                    // The consolation here is that codegen also will miss that UB, so at least
+                    // we won't see optimizations actually breaking such programs.
+                    ty::PatternKind::Or(_patterns) => {}
                 }
             }
             _ => {
@@ -1322,7 +1330,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         trace!("validate_operand_internal: {:?}, {:?}", *val, val.layout.ty);
 
         // Run the visitor.
-        self.run_for_validation(|ecx| {
+        self.run_for_validation_mut(|ecx| {
             let reset_padding = reset_provenance_and_padding && {
                 // Check if `val` is actually stored in memory. If not, padding is not even
                 // represented and we need not reset it.

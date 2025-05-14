@@ -6,20 +6,21 @@
 
 // tidy-alphabetical-start
 #![allow(internal_features)]
+#![cfg_attr(bootstrap, feature(let_chains))]
 #![doc(
     html_root_url = "https://doc.rust-lang.org/nightly/nightly-rustc/",
     test(attr(deny(warnings)))
 )]
 #![doc(rust_logo)]
+#![feature(array_windows)]
 #![feature(associated_type_defaults)]
 #![feature(box_patterns)]
 #![feature(if_let_guard)]
-#![feature(let_chains)]
 #![feature(negative_impls)]
 #![feature(never_type)]
 #![feature(rustdoc_internals)]
 #![feature(stmt_expr_attributes)]
-#![warn(unreachable_pub)]
+#![recursion_limit = "256"]
 // tidy-alphabetical-end
 
 pub mod util {

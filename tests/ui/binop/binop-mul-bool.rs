@@ -1,6 +1,4 @@
-//@ error-pattern:cannot multiply `bool` by `bool`
-
-fn main() { let x = true * false; }
+fn main() { let x = true * false; } //~ ERROR cannot multiply `bool` by `bool`
 
 // ferrocene-annotations: fls_tiqp1gxf116z
 // Bool Type

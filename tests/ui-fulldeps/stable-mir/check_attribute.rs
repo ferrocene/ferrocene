@@ -15,7 +15,6 @@ extern crate rustc_driver;
 extern crate rustc_interface;
 extern crate stable_mir;
 
-use rustc_smir::rustc_internal;
 use stable_mir::{CrateDef, CrateItems};
 use std::io::Write;
 use std::ops::ControlFlow;
@@ -36,12 +35,12 @@ fn test_stable_mir() -> ControlFlow<()> {
 fn test_tool(items: &CrateItems) {
     let rustfmt_fn = *get_item(&items, "do_not_format").unwrap();
     let rustfmt_attrs = rustfmt_fn.tool_attrs(&["rustfmt".to_string(), "skip".to_string()]);
-    assert_eq!(rustfmt_attrs[0].as_str(), "#[rustfmt::skip]");
+    assert_eq!(rustfmt_attrs[0].as_str(), "#[rustfmt::skip]\n");
 
     let clippy_fn = *get_item(&items, "complex_fn").unwrap();
     let clippy_attrs = clippy_fn.tool_attrs(&["clippy".to_string(),
                                                "cyclomatic_complexity".to_string()]);
-    assert_eq!(clippy_attrs[0].as_str(), "#[clippy::cyclomatic_complexity = \"100\"]");
+    assert_eq!(clippy_attrs[0].as_str(), "#[clippy::cyclomatic_complexity = \"100\"]\n");
 }
 
 fn get_item<'a>(
@@ -58,7 +57,7 @@ fn get_item<'a>(
 fn main() {
     let path = "attribute_input.rs";
     generate_input(&path).unwrap();
-    let args = vec![
+    let args = &[
         "rustc".to_string(),
         "--crate-type=lib".to_string(),
         "--crate-name".to_string(),

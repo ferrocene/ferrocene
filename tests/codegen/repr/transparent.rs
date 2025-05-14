@@ -9,7 +9,7 @@
 // For LoongArch: see codegen/loongarch-abi
 
 #![crate_type = "lib"]
-#![feature(repr_simd, transparent_unions)]
+#![feature(repr_simd, transparent_unions, arm_target_feature, mips_target_feature)]
 
 use std::marker::PhantomData;
 
@@ -139,6 +139,10 @@ pub struct Vector(f32x4);
 
 // CHECK: define{{.*}}<4 x float> @test_Vector(<4 x float> %_1)
 #[no_mangle]
+#[cfg_attr(target_family = "wasm", target_feature(enable = "simd128"))]
+#[cfg_attr(target_arch = "arm", target_feature(enable = "neon"))]
+#[cfg_attr(target_arch = "x86", target_feature(enable = "sse"))]
+#[cfg_attr(target_arch = "mips", target_feature(enable = "msa"))]
 pub extern "C" fn test_Vector(_: Vector) -> Vector {
     loop {}
 }

@@ -11,8 +11,6 @@
 // Internal Compiler Error strangely, but it doesn't even go through normal diagnostic infra. Very
 // strange.
 
-#![feature(anonymous_pipe)]
-
 use std::io::Read;
 use std::process::{Command, Stdio};
 

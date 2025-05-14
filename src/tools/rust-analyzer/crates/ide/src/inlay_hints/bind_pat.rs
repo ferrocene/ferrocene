@@ -3,26 +3,25 @@
 //! fn f(a: i32, b: i32) -> i32 { a + b }
 //! let _x /* i32 */= f(4, 4);
 //! ```
-use hir::Semantics;
-use ide_db::{famous_defs::FamousDefs, RootDatabase};
+use hir::{DisplayTarget, Semantics};
+use ide_db::{RootDatabase, famous_defs::FamousDefs};
 
 use itertools::Itertools;
-use span::EditionedFileId;
 use syntax::{
     ast::{self, AstNode, HasGenericArgs, HasName},
     match_ast,
 };
 
 use crate::{
-    inlay_hints::{closure_has_block_body, label_of_ty, ty_to_text_edit},
     InlayHint, InlayHintPosition, InlayHintsConfig, InlayKind,
+    inlay_hints::{closure_has_block_body, label_of_ty, ty_to_text_edit},
 };
 
 pub(super) fn hints(
     acc: &mut Vec<InlayHint>,
     famous_defs @ FamousDefs(sema, _): &FamousDefs<'_, '_>,
     config: &InlayHintsConfig,
-    file_id: EditionedFileId,
+    display_target: DisplayTarget,
     pat: &ast::IdentPat,
 ) -> Option<()> {
     if !config.type_hints {
@@ -70,7 +69,7 @@ pub(super) fn hints(
         return None;
     }
 
-    let mut label = label_of_ty(famous_defs, config, &ty, file_id.edition())?;
+    let mut label = label_of_ty(famous_defs, config, &ty, display_target)?;
 
     if config.hide_named_constructor_hints
         && is_named_constructor(sema, pat, &label.to_string()).is_some()
@@ -88,6 +87,7 @@ pub(super) fn hints(
                 .as_ref()
                 .map_or_else(|| pat.syntax().text_range(), |t| t.text_range())
                 .end(),
+            &|_| (),
             if colon_token.is_some() { "" } else { ": " },
         )
     } else {
@@ -182,10 +182,10 @@ mod tests {
     use syntax::{TextRange, TextSize};
     use test_utils::extract_annotations;
 
-    use crate::{fixture, inlay_hints::InlayHintsConfig, ClosureReturnTypeHints};
+    use crate::{ClosureReturnTypeHints, fixture, inlay_hints::InlayHintsConfig};
 
     use crate::inlay_hints::tests::{
-        check, check_edit, check_no_edit, check_with_config, DISABLED_CONFIG, TEST_CONFIG,
+        DISABLED_CONFIG, TEST_CONFIG, check, check_edit, check_no_edit, check_with_config,
     };
 
     #[track_caller]
@@ -380,9 +380,9 @@ fn main() {
     let foo = foo3();
      // ^^^ impl Fn(f64, f64) -> u32
     let foo = foo4();
-     // ^^^ &dyn Fn(f64, f64) -> u32
+     // ^^^ &'static (dyn Fn(f64, f64) -> u32 + 'static)
     let foo = foo5();
-     // ^^^ &dyn Fn(&dyn Fn(f64, f64) -> u32, f64) -> u32
+     // ^^^ &'static (dyn Fn(&(dyn Fn(f64, f64) -> u32 + 'static), f64) -> u32 + 'static)
     let foo = foo6();
      // ^^^ impl Fn(f64, f64) -> u32
     let foo = foo7();
@@ -413,7 +413,7 @@ fn main() {
     let foo = foo3();
      // ^^^ impl Fn(f64, f64) -> u32
     let foo = foo4();
-     // ^^^ &dyn Fn(f64, f64) -> u32
+     // ^^^ &'static (dyn Fn(f64, f64) -> u32 + 'static)
     let foo = foo5();
     let foo = foo6();
     let foo = foo7();
@@ -528,7 +528,7 @@ fn main() {
           //^^^^ i32
     let _ = 22;
     let test = "test";
-      //^^^^ &str
+      //^^^^ &'static str
     let test = InnerStruct {};
       //^^^^ InnerStruct
 
@@ -618,12 +618,12 @@ impl<T> Iterator for IntoIter<T> {
 
 fn main() {
     let mut data = Vec::new();
-          //^^^^ Vec<&str>
+          //^^^^ Vec<&'static str>
     data.push("foo");
     for i in data {
-      //^ &str
+      //^ &'static str
       let z = i;
-        //^ &str
+        //^ &'static str
     }
 }
 "#,
@@ -651,8 +651,8 @@ fn main() {
       //^^ Vec<Box<&(dyn Display + Sync)>>
     let _v = { Vec::<Box<*const (dyn Display + Sync)>>::new() };
       //^^ Vec<Box<*const (dyn Display + Sync)>>
-    let _v = { Vec::<Box<dyn Display + Sync>>::new() };
-      //^^ Vec<Box<dyn Display + Sync>>
+    let _v = { Vec::<Box<dyn Display + Sync + 'static>>::new() };
+      //^^ Vec<Box<dyn Display + Sync + 'static>>
 }
 "#,
         );
@@ -862,28 +862,6 @@ fn main() {
         check_with_config(
             InlayHintsConfig {
                 type_hints: true,
-                closure_style: ClosureStyle::ClosureWithId,
-                ..DISABLED_CONFIG
-            },
-            r#"
-//- minicore: fn
-fn main() {
-    let x = || 2;
-      //^ {closure#0}
-    let y = |t: i32| x() + t;
-      //^ {closure#1}
-    let mut t = 5;
-          //^ i32
-    let z = |k: i32| { t += k; };
-      //^ {closure#2}
-    let p = (y, z);
-      //^ ({closure#1}, {closure#2})
-}
-            "#,
-        );
-        check_with_config(
-            InlayHintsConfig {
-                type_hints: true,
                 closure_style: ClosureStyle::Hide,
                 ..DISABLED_CONFIG
             },
@@ -1039,7 +1017,7 @@ fn test<T>(t: T) {
 "#,
             expect![[r#"
                 fn test<T>(t: T) {
-                    let f = |a: i32, b: &str, c: T| {};
+                    let f = |a: i32, b: &'static str, c: T| {};
                     let result: () = f(42, "", t);
                 }
             "#]],
@@ -1141,12 +1119,11 @@ fn test() {
 
     #[test]
     fn no_edit_for_closure_return_without_body_block() {
-        // We can lift this limitation; see FIXME in closure_ret module.
         let config = InlayHintsConfig {
             closure_return_type_hints: ClosureReturnTypeHints::Always,
             ..TEST_CONFIG
         };
-        check_no_edit(
+        check_edit(
             config,
             r#"
 struct S<T>(T);
@@ -1155,6 +1132,13 @@ fn test() {
     let f = |a: S<usize>| S(a);
 }
 "#,
+            expect![[r#"
+            struct S<T>(T);
+            fn test() {
+                let f = || -> i32 { 3 };
+                let f = |a: S<usize>| -> S<S<usize>> { S(a) };
+            }
+            "#]],
         );
     }
 

@@ -4,7 +4,7 @@
 
 fn main() {}
 
-#[cfg(FALSE)]
+#[cfg(false)]
 static X: u8;
 
 // ferrocene-annotations: fls_xdvdl2ssnhlo

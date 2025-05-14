@@ -39,15 +39,18 @@ pub enum TestResult {
 
 /// Creates a `TestResult` depending on the raw result of test execution
 /// and associated data.
-pub(crate) fn calc_result<'a>(
+pub(crate) fn calc_result(
     desc: &TestDesc,
-    task_result: Result<(), &'a (dyn Any + 'static + Send)>,
+    panic_payload: Option<&(dyn Any + Send)>,
     time_opts: Option<&time::TestTimeOptions>,
     exec_time: Option<&time::TestExecTime>,
 ) -> TestResult {
-    let result = match (&desc.should_panic, task_result) {
-        (&ShouldPanic::No, Ok(())) | (&ShouldPanic::Yes, Err(_)) => TestResult::TrOk,
-        (&ShouldPanic::YesWithMessage(msg), Err(err)) => {
+    let result = match (desc.should_panic, panic_payload) {
+        // The test did or didn't panic, as expected.
+        (ShouldPanic::No, None) | (ShouldPanic::Yes, Some(_)) => TestResult::TrOk,
+
+        // Check the actual panic message against the expected message.
+        (ShouldPanic::YesWithMessage(msg), Some(err)) => {
             let maybe_panic_str = err
                 .downcast_ref::<String>()
                 .map(|e| &**e)
@@ -58,23 +61,31 @@ pub(crate) fn calc_result<'a>(
             } else if let Some(panic_str) = maybe_panic_str {
                 TestResult::TrFailedMsg(format!(
                     r#"panic did not contain expected string
-      panic message: `{panic_str:?}`,
- expected substring: `{msg:?}`"#
+      panic message: {panic_str:?}
+ expected substring: {msg:?}"#
                 ))
             } else {
                 TestResult::TrFailedMsg(format!(
                     r#"expected panic with string value,
  found non-string value: `{:?}`
-     expected substring: `{:?}`"#,
-                    (*err).type_id(),
-                    msg
+     expected substring: {msg:?}"#,
+                    (*err).type_id()
                 ))
             }
         }
-        (&ShouldPanic::Yes, Ok(())) | (&ShouldPanic::YesWithMessage(_), Ok(())) => {
-            TestResult::TrFailedMsg("test did not panic as expected".to_string())
+
+        // The test should have panicked, but didn't panic.
+        (ShouldPanic::Yes, None) | (ShouldPanic::YesWithMessage(_), None) => {
+            let fn_location = if !desc.source_file.is_empty() {
+                &format!(" at {}:{}:{}", desc.source_file, desc.start_line, desc.start_col)
+            } else {
+                ""
+            };
+            TestResult::TrFailedMsg(format!("test did not panic as expected{}", fn_location))
         }
-        _ => TestResult::TrFailed,
+
+        // The test should not have panicked, but did panic.
+        (ShouldPanic::No, Some(_)) => TestResult::TrFailed,
     };
 
     // If test is already failed (or allowed to fail), do not change the result.

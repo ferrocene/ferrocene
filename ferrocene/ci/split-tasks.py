@@ -73,7 +73,12 @@ JOBS_DEFINITION: JobsDefinition = {
         # Build the documentation on a different jobs, since building it takes
         # a while and with a separate job we can run dist inside the same job
         # as linkchecker (which also needs to generate docs).
-        "docs": ["ferrocene-docs", "ferrocene-test-outcomes", "ferrocene-docs-doctrees"],
+        "docs": [
+            "ferrocene-docs",
+            "ferrocene-test-outcomes",
+            "ferrocene-coverage-outcomes",
+            "ferrocene-docs-doctrees",
+        ],
 
         # Build the source code tarball on a different job, since that requires
         # a (slower) clone of the whole LLVM submodule, not just the subset,
@@ -126,12 +131,7 @@ JOBS_DEFINITION: JobsDefinition = {
         # them in a separate job to reduce the CI wall clock time. Note that
         # stdlib tests are run in a separate job, as those require IPv6 and
         # thus can't be executed in containers due to CircleCI limitations.
-        "library": [
-            "library/core", # doc tests (tests/examples in doc comments)
-            "library/coretests", # unit tests (`#[test]` functions)
-            "library/alloc",
-            "library/test",
-        ],
+        "library": ["library/core", "library/alloc", "library/test"],
 
         # The standard library tests require IPv6, which is not available in
         # containers. Run them separately in a VM.

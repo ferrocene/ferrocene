@@ -1,23 +1,33 @@
 use rustc_abi::{BackendRepr, Float, Integer, Primitive, RegKind};
 use rustc_attr_parsing::InstructionSetAttr;
 use rustc_hir::def_id::DefId;
-use rustc_middle::mir::mono::{Linkage, MonoItem, MonoItemData, Visibility};
-use rustc_middle::mir::{Body, InlineAsmOperand};
-use rustc_middle::ty::layout::{FnAbiOf, HasTyCtxt, HasTypingEnv, LayoutOf};
-use rustc_middle::ty::{Instance, Ty, TyCtxt};
+use rustc_middle::mir::mono::{Linkage, MonoItemData, Visibility};
+use rustc_middle::mir::{InlineAsmOperand, START_BLOCK};
+use rustc_middle::ty::layout::{FnAbiOf, LayoutOf, TyAndLayout};
+use rustc_middle::ty::{Instance, Ty, TyCtxt, TypeVisitableExt};
 use rustc_middle::{bug, span_bug, ty};
 use rustc_span::sym;
 use rustc_target::callconv::{ArgAbi, FnAbi, PassMode};
 use rustc_target::spec::{BinaryFormat, WasmCAbi};
 
 use crate::common;
-use crate::traits::{AsmCodegenMethods, BuilderMethods, GlobalAsmOperandRef, MiscCodegenMethods};
+use crate::mir::AsmCodegenMethods;
+use crate::traits::GlobalAsmOperandRef;
 
-pub(crate) fn codegen_naked_asm<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
-    cx: &'a Bx::CodegenCx,
-    mir: &Body<'tcx>,
+pub fn codegen_naked_asm<
+    'a,
+    'tcx,
+    Cx: LayoutOf<'tcx, LayoutOfResult = TyAndLayout<'tcx>>
+        + FnAbiOf<'tcx, FnAbiOfResult = &'tcx FnAbi<'tcx, Ty<'tcx>>>
+        + AsmCodegenMethods<'tcx>,
+>(
+    cx: &'a mut Cx,
     instance: Instance<'tcx>,
+    item_data: MonoItemData,
 ) {
+    assert!(!instance.args.has_infer());
+    let mir = cx.tcx().instance_mir(instance.def);
+
     let rustc_middle::mir::TerminatorKind::InlineAsm {
         asm_macro: _,
         template,
@@ -26,15 +36,14 @@ pub(crate) fn codegen_naked_asm<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
         line_spans,
         targets: _,
         unwind: _,
-    } = mir.basic_blocks.iter().next().unwrap().terminator().kind
+    } = mir.basic_blocks[START_BLOCK].terminator().kind
     else {
         bug!("#[naked] functions should always terminate with an asm! block")
     };
 
     let operands: Vec<_> =
-        operands.iter().map(|op| inline_to_global_operand::<Bx>(cx, instance, op)).collect();
+        operands.iter().map(|op| inline_to_global_operand::<Cx>(cx, instance, op)).collect();
 
-    let item_data = cx.codegen_unit().items().get(&MonoItem::Fn(instance)).unwrap();
     let name = cx.mangled_name(instance);
     let fn_abi = cx.fn_abi_of_instance(instance, ty::List::empty());
     let (begin, end) = prefix_and_suffix(cx.tcx(), instance, &name, item_data, fn_abi);
@@ -47,8 +56,8 @@ pub(crate) fn codegen_naked_asm<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
     cx.codegen_global_asm(&template_vec, &operands, options, line_spans);
 }
 
-fn inline_to_global_operand<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
-    cx: &'a Bx::CodegenCx,
+fn inline_to_global_operand<'a, 'tcx, Cx: LayoutOf<'tcx, LayoutOfResult = TyAndLayout<'tcx>>>(
+    cx: &'a Cx,
     instance: Instance<'tcx>,
     op: &InlineAsmOperand<'tcx>,
 ) -> GlobalAsmOperandRef<'tcx> {
@@ -86,7 +95,9 @@ fn inline_to_global_operand<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
             );
 
             let instance = match mono_type.kind() {
-                &ty::FnDef(def_id, args) => Instance::new(def_id, args),
+                &ty::FnDef(def_id, args) => {
+                    Instance::expect_resolve(cx.tcx(), cx.typing_env(), def_id, args, value.span)
+                }
                 _ => bug!("asm sym is not a function"),
             };
 
@@ -108,7 +119,7 @@ fn prefix_and_suffix<'tcx>(
     tcx: TyCtxt<'tcx>,
     instance: Instance<'tcx>,
     asm_name: &str,
-    item_data: &MonoItemData,
+    item_data: MonoItemData,
     fn_abi: &FnAbi<'tcx, Ty<'tcx>>,
 ) -> (String, String) {
     use std::fmt::Write;
@@ -125,7 +136,8 @@ fn prefix_and_suffix<'tcx>(
     // the alignment from a `#[repr(align(<n>))]` is used if it specifies a higher alignment.
     // if no alignment is specified, an alignment of 4 bytes is used.
     let min_function_alignment = tcx.sess.opts.unstable_opts.min_function_alignment;
-    let align = Ord::max(min_function_alignment, attrs.alignment).map(|a| a.bytes()).unwrap_or(4);
+    let align_bytes =
+        Ord::max(min_function_alignment, attrs.alignment).map(|a| a.bytes()).unwrap_or(4);
 
     // In particular, `.arm` can also be written `.code 32` and `.thumb` as `.code 16`.
     let (arch_prefix, arch_suffix) = if is_arm {
@@ -157,11 +169,15 @@ fn prefix_and_suffix<'tcx>(
             }
             Linkage::LinkOnceAny | Linkage::LinkOnceODR | Linkage::WeakAny | Linkage::WeakODR => {
                 match asm_binary_format {
-                    BinaryFormat::Elf
-                    | BinaryFormat::Coff
-                    | BinaryFormat::Wasm
-                    | BinaryFormat::Xcoff => {
+                    BinaryFormat::Elf | BinaryFormat::Coff | BinaryFormat::Wasm => {
                         writeln!(w, ".weak {asm_name}")?;
+                    }
+                    BinaryFormat::Xcoff => {
+                        // FIXME: there is currently no way of defining a weak symbol in inline assembly
+                        // for AIX. See https://github.com/llvm/llvm-project/issues/130269
+                        emit_fatal(
+                            "cannot create weak symbols from inline assembly for this target",
+                        )
                     }
                     BinaryFormat::MachO => {
                         writeln!(w, ".globl {asm_name}")?;
@@ -189,7 +205,7 @@ fn prefix_and_suffix<'tcx>(
     let mut begin = String::new();
     let mut end = String::new();
     match asm_binary_format {
-        BinaryFormat::Elf | BinaryFormat::Xcoff => {
+        BinaryFormat::Elf => {
             let section = link_section.unwrap_or(format!(".text.{asm_name}"));
 
             let progbits = match is_arm {
@@ -203,10 +219,12 @@ fn prefix_and_suffix<'tcx>(
             };
 
             writeln!(begin, ".pushsection {section},\"ax\", {progbits}").unwrap();
-            writeln!(begin, ".balign {align}").unwrap();
+            writeln!(begin, ".balign {align_bytes}").unwrap();
             write_linkage(&mut begin).unwrap();
-            if let Visibility::Hidden = item_data.visibility {
-                writeln!(begin, ".hidden {asm_name}").unwrap();
+            match item_data.visibility {
+                Visibility::Default => {}
+                Visibility::Protected => writeln!(begin, ".protected {asm_name}").unwrap(),
+                Visibility::Hidden => writeln!(begin, ".hidden {asm_name}").unwrap(),
             }
             writeln!(begin, ".type {asm_name}, {function}").unwrap();
             if !arch_prefix.is_empty() {
@@ -224,10 +242,11 @@ fn prefix_and_suffix<'tcx>(
         BinaryFormat::MachO => {
             let section = link_section.unwrap_or("__TEXT,__text".to_string());
             writeln!(begin, ".pushsection {},regular,pure_instructions", section).unwrap();
-            writeln!(begin, ".balign {align}").unwrap();
+            writeln!(begin, ".balign {align_bytes}").unwrap();
             write_linkage(&mut begin).unwrap();
-            if let Visibility::Hidden = item_data.visibility {
-                writeln!(begin, ".private_extern {asm_name}").unwrap();
+            match item_data.visibility {
+                Visibility::Default | Visibility::Protected => {}
+                Visibility::Hidden => writeln!(begin, ".private_extern {asm_name}").unwrap(),
             }
             writeln!(begin, "{asm_name}:").unwrap();
 
@@ -240,12 +259,12 @@ fn prefix_and_suffix<'tcx>(
         BinaryFormat::Coff => {
             let section = link_section.unwrap_or(format!(".text.{asm_name}"));
             writeln!(begin, ".pushsection {},\"xr\"", section).unwrap();
-            writeln!(begin, ".balign {align}").unwrap();
+            writeln!(begin, ".balign {align_bytes}").unwrap();
             write_linkage(&mut begin).unwrap();
             writeln!(begin, ".def {asm_name}").unwrap();
             writeln!(begin, ".scl 2").unwrap();
             writeln!(begin, ".type 32").unwrap();
-            writeln!(begin, ".endef {asm_name}").unwrap();
+            writeln!(begin, ".endef").unwrap();
             writeln!(begin, "{asm_name}:").unwrap();
 
             writeln!(end).unwrap();
@@ -279,6 +298,33 @@ fn prefix_and_suffix<'tcx>(
             // .size is ignored for function symbols, so we can skip it
             writeln!(end, "end_function").unwrap();
         }
+        BinaryFormat::Xcoff => {
+            // the LLVM XCOFFAsmParser is extremely incomplete and does not implement many of the
+            // documented directives.
+            //
+            // - https://github.com/llvm/llvm-project/blob/1b25c0c4da968fe78921ce77736e5baef4db75e3/llvm/lib/MC/MCParser/XCOFFAsmParser.cpp
+            // - https://www.ibm.com/docs/en/ssw_aix_71/assembler/assembler_pdf.pdf
+            //
+            // Consequently, we try our best here but cannot do as good a job as for other binary
+            // formats.
+
+            // FIXME: start a section. `.csect` is not currently implemented in LLVM
+
+            // fun fact: according to the assembler documentation, .align takes an exponent,
+            // but LLVM only accepts powers of 2 (but does emit the exponent)
+            // so when we hand `.align 32` to LLVM, the assembly output will contain `.align 5`
+            writeln!(begin, ".align {}", align_bytes).unwrap();
+
+            write_linkage(&mut begin).unwrap();
+            if let Visibility::Hidden = item_data.visibility {
+                // FIXME apparently `.globl {asm_name}, hidden` is valid
+                // but due to limitations with `.weak` (see above) we can't really use that in general yet
+            }
+            writeln!(begin, "{asm_name}:").unwrap();
+
+            writeln!(end).unwrap();
+            // FIXME: end the section?
+        }
     }
 
     (begin, end)
@@ -300,7 +346,7 @@ fn wasm_functype<'tcx>(tcx: TyCtxt<'tcx>, fn_abi: &FnAbi<'tcx, Ty<'tcx>>, def_id
     // please also add `wasm32-unknown-unknown` back in `tests/assembly/wasm32-naked-fn.rs`
     // basically the commit introducing this comment should be reverted
     if let PassMode::Pair { .. } = fn_abi.ret.mode {
-        let _ = WasmCAbi::Legacy;
+        let _ = WasmCAbi::Legacy { with_lint: true };
         span_bug!(
             tcx.def_span(def_id),
             "cannot return a pair (the wasm32-unknown-unknown ABI is broken, see https://github.com/rust-lang/rust/issues/115666"
@@ -352,7 +398,7 @@ fn wasm_type<'tcx>(
                 BackendRepr::SimdVector { .. } => "v128",
                 BackendRepr::Memory { .. } => {
                     // FIXME: remove this branch once the wasm32-unknown-unknown ABI is fixed
-                    let _ = WasmCAbi::Legacy;
+                    let _ = WasmCAbi::Legacy { with_lint: true };
                     span_bug!(
                         tcx.def_span(def_id),
                         "cannot use memory args (the wasm32-unknown-unknown ABI is broken, see https://github.com/rust-lang/rust/issues/115666"

@@ -32,6 +32,19 @@ pub enum Warnings {
     Default,
 }
 
+#[derive(Copy, Clone, Debug, ValueEnum, PartialEq, Eq)]
+pub enum FerroceneCoverageFor {
+    Library,
+}
+
+impl FerroceneCoverageFor {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            FerroceneCoverageFor::Library => "library",
+        }
+    }
+}
+
 /// Deserialized version of all flags for this compile.
 #[derive(Debug, Parser)]
 #[command(
@@ -54,7 +67,7 @@ pub struct Flags {
     /// TOML configuration file for build
     pub config: Option<PathBuf>,
     #[arg(global = true, long, value_hint = clap::ValueHint::DirPath, value_name = "DIR")]
-    /// Build directory, overrides `build.build-dir` in `config.toml`
+    /// Build directory, overrides `build.build-dir` in `bootstrap.toml`
     pub build_dir: Option<PathBuf>,
 
     #[arg(global = true, long, value_hint = clap::ValueHint::Other, value_name = "BUILD")]
@@ -173,12 +186,15 @@ pub struct Flags {
     #[arg(global = true)]
     /// paths for the subcommand
     pub paths: Vec<PathBuf>,
-    /// override options in config.toml
+    /// override options in bootstrap.toml
     #[arg(global = true, value_hint = clap::ValueHint::Other, long, value_name = "section.option=value")]
     pub set: Vec<String>,
     /// arguments passed to subcommands
     #[arg(global = true, last(true), value_name = "ARGS")]
     pub free_args: Vec<String>,
+    /// Make bootstrap to behave as it's running on the CI environment or not.
+    #[arg(global = true, long, value_name = "bool")]
+    pub ci: Option<bool>,
 }
 
 impl Flags {
@@ -409,11 +425,14 @@ pub enum Subcommand {
         no_capture: bool,
         /// generate coverage for tests
         #[arg(long)]
-        coverage: bool,
+        coverage: Option<FerroceneCoverageFor>,
         /// Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification
         /// documents to ensure there is enough granularity for the test outcomes report.
         #[arg(long)]
         ferrocene_test_one_crate_per_cargo_call: bool,
+        /// Choose the test variant to use for this execution.
+        #[arg(long)]
+        test_variant: Option<String>,
     },
     /// Build and run some test suites *in Miri*
     Miri {
@@ -467,7 +486,7 @@ pub enum Subcommand {
     /// Set up the environment for development
     #[command(long_about = format!(
         "\n
-x.py setup creates a `config.toml` which changes the defaults for x.py itself,
+x.py setup creates a `bootstrap.toml` which changes the defaults for x.py itself,
 as well as setting up a git pre-push hook, VS Code config and toolchain link.
 Arguments:
     This subcommand accepts a 'profile' to use for builds. For example:
@@ -480,7 +499,7 @@ Arguments:
         ./x.py setup editor
         ./x.py setup link", Profile::all_for_help("        ").trim_end()))]
     Setup {
-        /// Either the profile for `config.toml` or another setup action.
+        /// Either the profile for `bootstrap.toml` or another setup action.
         /// May be omitted to set up interactively
         #[arg(value_name = "<PROFILE>|hook|editor|link")]
         profile: Option<PathBuf>,
@@ -626,10 +645,10 @@ impl Subcommand {
         }
     }
 
-    pub fn coverage(&self) -> bool {
+    pub fn ferrocene_coverage_for(&self) -> Option<FerroceneCoverageFor> {
         match *self {
             Subcommand::Test { coverage, .. } => coverage,
-            _ => false,
+            _ => None,
         }
     }
 

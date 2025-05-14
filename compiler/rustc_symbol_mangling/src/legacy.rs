@@ -28,7 +28,10 @@ pub(super) fn mangle<'tcx>(
     loop {
         let key = tcx.def_key(ty_def_id);
         match key.disambiguated_data.data {
-            DefPathData::TypeNs(_) | DefPathData::ValueNs(_) | DefPathData::Closure => {
+            DefPathData::TypeNs(_)
+            | DefPathData::ValueNs(_)
+            | DefPathData::Closure
+            | DefPathData::SyntheticCoroutineBody => {
                 instance_ty = tcx.type_of(ty_def_id).instantiate_identity();
                 debug!(?instance_ty);
                 break;
@@ -60,10 +63,17 @@ pub(super) fn mangle<'tcx>(
         .print_def_path(
             def_id,
             if let ty::InstanceKind::DropGlue(_, _)
-            | ty::InstanceKind::AsyncDropGlueCtorShim(_, _) = instance.def
+            | ty::InstanceKind::AsyncDropGlueCtorShim(_, _)
+            | ty::InstanceKind::FutureDropPollShim(_, _, _) = instance.def
             {
                 // Add the name of the dropped type to the symbol name
                 &*instance.args
+            } else if let ty::InstanceKind::AsyncDropGlue(_, ty) = instance.def {
+                let ty::Coroutine(_, cor_args) = ty.kind() else {
+                    bug!();
+                };
+                let drop_ty = cor_args.first().unwrap().expect_ty();
+                tcx.mk_args(&[GenericArg::from(drop_ty)])
             } else {
                 &[]
             },
@@ -94,6 +104,10 @@ pub(super) fn mangle<'tcx>(
                 .unwrap();
         }
         _ => {}
+    }
+
+    if let ty::InstanceKind::FutureDropPollShim(..) = instance.def {
+        let _ = printer.write_str("{{drop-shim}}");
     }
 
     printer.path.finish(hash)

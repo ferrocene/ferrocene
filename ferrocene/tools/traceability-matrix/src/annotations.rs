@@ -2,9 +2,10 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use std::collections::{BTreeMap, BTreeSet};
+use std::fmt::Display;
 use std::path::{Path, PathBuf};
 
-use crate::test_outcomes::TestOutcomes;
+use crate::test_outcomes::{On, TestOutcomes};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct AnnotatedFile {
@@ -13,11 +14,10 @@ pub(crate) struct AnnotatedFile {
     pub(crate) targets: Targets,
 }
 
-impl std::fmt::Display for AnnotatedFile {
+impl Display for AnnotatedFile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.source {
             AnnotationSource::TestItself => write!(f, "{}", self.test.display()),
-            AnnotationSource::Makefile => write!(f, "{} (from its Makefile)", self.test.display()),
             AnnotationSource::Rmake => write!(f, "{} (from its rmake.rs)", self.test.display()),
             AnnotationSource::ParentDirectory { .. } => {
                 write!(f, "{} (from its parent directory)", self.test.display())
@@ -28,18 +28,24 @@ impl std::fmt::Display for AnnotatedFile {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub(crate) struct Targets {
-    pub(crate) executed: DisplayCommaSeparatedSet,
-    pub(crate) ignored: DisplayCommaSeparatedSet,
+    pub(crate) executed: DisplayCommaSeparatedSet<On>,
+    pub(crate) ignored: DisplayCommaSeparatedSet<On>,
 }
 
 // created only so as to impl Display for Targets fields
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub(crate) struct DisplayCommaSeparatedSet(pub BTreeSet<String>);
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub(crate) struct DisplayCommaSeparatedSet<T: Display>(pub BTreeSet<T>);
 
-impl std::fmt::Display for DisplayCommaSeparatedSet {
+impl<T: Display> Display for DisplayCommaSeparatedSet<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let targets: Vec<_> = self.0.clone().into_iter().collect();
-        write!(f, "{}", targets.as_slice().join(", "))
+        let values: Vec<_> = self.0.iter().map(|value| value.to_string()).collect();
+        write!(f, "{}", values.as_slice().join(", "))
+    }
+}
+
+impl<T: Display> Default for DisplayCommaSeparatedSet<T> {
+    fn default() -> Self {
+        DisplayCommaSeparatedSet(BTreeSet::new())
     }
 }
 
@@ -47,14 +53,13 @@ impl std::fmt::Display for DisplayCommaSeparatedSet {
 pub(crate) enum AnnotationSource {
     TestItself,
     ParentDirectory { bulk_file: PathBuf },
-    Makefile,
     Rmake,
 }
 
 #[derive(Debug)]
 pub(crate) struct Annotations {
     pub(crate) ids: BTreeMap<String, BTreeSet<AnnotatedFile>>,
-    pub(crate) ignored_tests: BTreeMap<String, BTreeSet<String>>,
+    pub(crate) ignored_tests: BTreeMap<String, BTreeSet<On>>,
     pub(crate) considers_ignored_tests: bool,
 }
 
@@ -156,14 +161,12 @@ impl Annotations {
                     AnnotationSource::TestItself
                 } else if annotated_in_parent(annotation, file) {
                     AnnotationSource::ParentDirectory { bulk_file: shrink_path(&annotation.file) }
-                } else if annotation.file == file.file.join("Makefile") {
-                    AnnotationSource::Makefile
                 } else if annotation.file == file.file.join("rmake.rs") {
                     AnnotationSource::Rmake
                 } else {
                     anyhow::bail!(
                         "bug: annotation {annotation:?} doesn't come from the file itself, \
-                        its parent directory, or a Makefile. \
+                        its parent directory, or a rmake file. \
                         If you updated compiletest to accept annotations from other sources, \
                         you also need to update traceability-matrix."
                     );

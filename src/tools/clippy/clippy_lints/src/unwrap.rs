@@ -1,7 +1,7 @@
 use clippy_utils::diagnostics::span_lint_hir_and_then;
 use clippy_utils::ty::is_type_diagnostic_item;
 use clippy_utils::usage::is_potentially_local_place;
-use clippy_utils::{higher, path_to_local};
+use clippy_utils::{higher, path_to_local, sym};
 use rustc_errors::Applicability;
 use rustc_hir::intravisit::{FnKind, Visitor, walk_expr, walk_fn};
 use rustc_hir::{BinOpKind, Body, Expr, ExprKind, FnDecl, HirId, Node, PathSegment, UnOp};
@@ -11,8 +11,8 @@ use rustc_middle::hir::nested_filter;
 use rustc_middle::mir::FakeReadCause;
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_session::declare_lint_pass;
+use rustc_span::Span;
 use rustc_span::def_id::LocalDefId;
-use rustc_span::{Span, sym};
 
 declare_clippy_lint! {
     /// ### What it does
@@ -208,7 +208,7 @@ fn is_option_as_mut_use(tcx: TyCtxt<'_>, expr_id: HirId) -> bool {
     if let Node::Expr(mutating_expr) = tcx.parent_hir_node(expr_id)
         && let ExprKind::MethodCall(path, _, [], _) = mutating_expr.kind
     {
-        path.ident.name.as_str() == "as_mut"
+        path.ident.name == sym::as_mut
     } else {
         false
     }
@@ -229,6 +229,8 @@ impl<'tcx> Delegate<'tcx> for MutationVisitor<'tcx> {
     }
 
     fn consume(&mut self, _: &PlaceWithHirId<'tcx>, _: HirId) {}
+
+    fn use_cloned(&mut self, _: &PlaceWithHirId<'tcx>, _: HirId) {}
 
     fn fake_read(&mut self, _: &PlaceWithHirId<'tcx>, _: FakeReadCause, _: HirId) {}
 }
@@ -276,7 +278,7 @@ fn consume_option_as_ref<'tcx>(expr: &'tcx Expr<'tcx>) -> (&'tcx Expr<'tcx>, Opt
     if let ExprKind::MethodCall(path, recv, [], _) = expr.kind {
         if path.ident.name == sym::as_ref {
             (recv, Some(AsRefKind::AsRef))
-        } else if path.ident.name.as_str() == "as_mut" {
+        } else if path.ident.name == sym::as_mut {
             (recv, Some(AsRefKind::AsMut))
         } else {
             (expr, None)
@@ -305,8 +307,8 @@ impl<'tcx> Visitor<'tcx> for UnwrappableVariablesVisitor<'_, 'tcx> {
             if let ExprKind::MethodCall(method_name, self_arg, ..) = expr.kind
                 && let (self_arg, as_ref_kind) = consume_option_as_ref(self_arg)
                 && let Some(id) = path_to_local(self_arg)
-                && [sym::unwrap, sym::expect, sym!(unwrap_err)].contains(&method_name.ident.name)
-                && let call_to_unwrap = [sym::unwrap, sym::expect].contains(&method_name.ident.name)
+                && matches!(method_name.ident.name, sym::unwrap | sym::expect | sym::unwrap_err)
+                && let call_to_unwrap = matches!(method_name.ident.name, sym::unwrap | sym::expect)
                 && let Some(unwrappable) = self.unwrappables.iter()
                     .find(|u| u.local_id == id)
                 // Span contexts should not differ with the conditional branch
@@ -316,7 +318,7 @@ impl<'tcx> Visitor<'tcx> for UnwrappableVariablesVisitor<'_, 'tcx> {
             {
                 if call_to_unwrap == unwrappable.safe_to_unwrap {
                     let is_entire_condition = unwrappable.is_entire_condition;
-                    let unwrappable_variable_name = self.cx.tcx.hir().name(unwrappable.local_id);
+                    let unwrappable_variable_name = self.cx.tcx.hir_name(unwrappable.local_id);
                     let suggested_pattern = if call_to_unwrap {
                         unwrappable.kind.success_variant_pattern()
                     } else {

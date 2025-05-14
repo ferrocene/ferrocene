@@ -1,13 +1,12 @@
 // tidy-alphabetical-start
+#![cfg_attr(bootstrap, feature(let_chains))]
 #![feature(assert_matches)]
 #![feature(associated_type_defaults)]
 #![feature(box_patterns)]
 #![feature(exact_size_is_empty)]
 #![feature(file_buffered)]
-#![feature(let_chains)]
 #![feature(never_type)]
 #![feature(try_blocks)]
-#![warn(unreachable_pub)]
 // tidy-alphabetical-end
 
 use rustc_middle::ty;
@@ -19,8 +18,8 @@ pub use self::drop_flag_effects::{
     move_path_children_matching, on_all_children_bits, on_lookup_result_bits,
 };
 pub use self::framework::{
-    Analysis, Backward, Direction, EntryStates, Forward, GenKill, JoinSemiLattice, MaybeReachable,
-    Results, ResultsCursor, ResultsVisitor, fmt, graphviz, lattice, visit_results,
+    Analysis, Backward, Direction, Forward, GenKill, JoinSemiLattice, MaybeReachable, Results,
+    ResultsCursor, ResultsVisitor, fmt, graphviz, lattice, visit_reachable_results, visit_results,
 };
 use self::move_paths::MoveData;
 

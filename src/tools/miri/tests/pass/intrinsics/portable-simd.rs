@@ -16,7 +16,7 @@ use std::simd::prelude::*;
 
 #[rustc_intrinsic]
 #[rustc_nounwind]
-pub unsafe fn simd_shuffle_const_generic<T, U, const IDX: &'static [u32]>(_x: T, _y: T) -> U;
+pub unsafe fn simd_shuffle_const_generic<T, U, const IDX: &'static [u32]>(x: T, y: T) -> U;
 
 fn simd_ops_f32() {
     let a = f32x4::splat(10.0);
@@ -326,6 +326,19 @@ fn simd_mask() {
         );
         let selected2 = simd_select_bitmask::<[u8; 1], _>(
             if cfg!(target_endian = "little") { [0b1000] } else { [0b0001] },
+            i32x4::splat(1), // yes
+            i32x4::splat(0), // no
+        );
+        assert_eq!(selected1, i32x4::from_array([0, 0, 0, 1]));
+        assert_eq!(selected2, selected1);
+        // Non-zero "padding" (the extra bits) is also allowed.
+        let selected1 = simd_select_bitmask::<u8, _>(
+            if cfg!(target_endian = "little") { 0b11111000 } else { 0b11110001 },
+            i32x4::splat(1), // yes
+            i32x4::splat(0), // no
+        );
+        let selected2 = simd_select_bitmask::<[u8; 1], _>(
+            if cfg!(target_endian = "little") { [0b11111000] } else { [0b11110001] },
             i32x4::splat(1), // yes
             i32x4::splat(0), // no
         );

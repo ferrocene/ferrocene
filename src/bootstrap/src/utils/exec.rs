@@ -125,7 +125,6 @@ impl BootstrapCommand {
         Self { failure_behavior: BehaviorOnFailure::DelayFail, ..self }
     }
 
-    #[allow(dead_code)]
     pub fn fail_fast(self) -> Self {
         Self { failure_behavior: BehaviorOnFailure::Exit, ..self }
     }
@@ -280,7 +279,7 @@ impl CommandOutput {
         !self.is_success()
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn status(&self) -> Option<ExitStatus> {
         match self.status {
             CommandStatus::Finished(status) => Some(status),
@@ -294,6 +293,11 @@ impl CommandOutput {
             self.stdout.clone().expect("Accessing stdout of a command that did not capture stdout"),
         )
         .expect("Cannot parse process stdout as UTF-8")
+    }
+
+    #[must_use]
+    pub fn stdout_bytes(&self) -> &[u8] {
+        self.stdout.as_deref().expect("Accessing stdout of a command that did not capture stdout")
     }
 
     #[must_use]
@@ -332,7 +336,6 @@ impl Default for CommandOutput {
 
 /// Helper trait to format both Command and BootstrapCommand as a short execution line,
 /// without all the other details (e.g. environment variables).
-#[allow(unused)]
 pub trait FormatShortCmd {
     fn format_short_cmd(&self) -> String;
 }

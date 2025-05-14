@@ -98,12 +98,12 @@ pub fn filename_for_input(
         CrateType::Rlib => {
             OutFileName::Real(outputs.out_directory.join(&format!("lib{libname}.rlib")))
         }
-        CrateType::Cdylib | CrateType::ProcMacro | CrateType::Dylib => {
+        CrateType::Cdylib | CrateType::ProcMacro | CrateType::Dylib | CrateType::Sdylib => {
             let (prefix, suffix) = (&sess.target.dll_prefix, &sess.target.dll_suffix);
             OutFileName::Real(outputs.out_directory.join(&format!("{prefix}{libname}{suffix}")))
         }
         CrateType::Staticlib => {
-            let (prefix, suffix) = (&sess.target.staticlib_prefix, &sess.target.staticlib_suffix);
+            let (prefix, suffix) = sess.staticlib_components(false);
             OutFileName::Real(outputs.out_directory.join(&format!("{prefix}{libname}{suffix}")))
         }
         CrateType::Executable => {
@@ -167,6 +167,7 @@ pub const CRATE_TYPES: &[(Symbol, CrateType)] = &[
     (sym::staticlib, CrateType::Staticlib),
     (sym::proc_dash_macro, CrateType::ProcMacro),
     (sym::bin, CrateType::Executable),
+    (sym::sdylib, CrateType::Sdylib),
 ];
 
 pub fn categorize_crate_type(s: Symbol) -> Option<CrateType> {
@@ -177,7 +178,19 @@ pub fn collect_crate_types(session: &Session, attrs: &[ast::Attribute]) -> Vec<C
     // If we're generating a test executable, then ignore all other output
     // styles at all other locations
     if session.opts.test {
+        if !session.target.executables {
+            session.dcx().emit_warn(errors::UnsupportedCrateTypeForTarget {
+                crate_type: CrateType::Executable,
+                target_triple: &session.opts.target_triple,
+            });
+            return Vec::new();
+        }
         return vec![CrateType::Executable];
+    }
+
+    // Shadow `sdylib` crate type in interface build.
+    if session.opts.unstable_opts.build_sdylib_interface {
+        return vec![CrateType::Rlib];
     }
 
     // Only check command line flags if present. If no types are specified by

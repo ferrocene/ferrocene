@@ -44,8 +44,9 @@
 //! The most important aspect of this model is that *data races* are undefined behavior. A data race
 //! is defined as conflicting non-synchronized accesses where at least one of the accesses is
 //! non-atomic. Here, accesses are *conflicting* if they affect overlapping regions of memory and at
-//! least one of them is a write. They are *non-synchronized* if neither of them *happens-before*
-//! the other, according to the happens-before order of the memory model.
+//! least one of them is a write. (A `compare_exchange` or `compare_exchange_weak` that does not
+//! succeed is not considered a write.) They are *non-synchronized* if neither of them
+//! *happens-before* the other, according to the happens-before order of the memory model.
 //!
 //! The other possible cause of undefined behavior in the memory model are mixed-size accesses: Rust
 //! inherits the C++ limitation that non-synchronized conflicting atomic accesses may not partially
@@ -246,6 +247,100 @@ use crate::cell::UnsafeCell;
 use crate::hint::spin_loop;
 use crate::{fmt, intrinsics};
 
+trait Sealed {}
+
+/// A marker trait for primitive types which can be modified atomically.
+///
+/// This is an implementation detail for <code>[Atomic]\<T></code> which may disappear or be replaced at any time.
+///
+/// # Safety
+///
+/// Types implementing this trait must be primitives that can be modified atomically.
+///
+/// The associated `Self::AtomicInner` type must have the same size and bit validity as `Self`,
+/// but may have a higher alignment requirement, so the following `transmute`s are sound:
+///
+/// - `&mut Self::AtomicInner` as `&mut Self`
+/// - `Self` as `Self::AtomicInner` or the reverse
+#[unstable(
+    feature = "atomic_internals",
+    reason = "implementation detail which may disappear or be replaced at any time",
+    issue = "none"
+)]
+#[expect(private_bounds)]
+pub unsafe trait AtomicPrimitive: Sized + Copy + Sealed {
+    /// Temporary implementation detail.
+    type AtomicInner: Sized;
+}
+
+macro impl_atomic_primitive(
+    $Atom:ident $(<$T:ident>)? ($Primitive:ty),
+    size($size:literal),
+    align($align:literal) $(,)?
+) {
+    impl $(<$T>)? Sealed for $Primitive {}
+
+    #[unstable(
+        feature = "atomic_internals",
+        reason = "implementation detail which may disappear or be replaced at any time",
+        issue = "none"
+    )]
+    #[cfg(target_has_atomic_load_store = $size)]
+    unsafe impl $(<$T>)? AtomicPrimitive for $Primitive {
+        type AtomicInner = $Atom $(<$T>)?;
+    }
+}
+
+impl_atomic_primitive!(AtomicBool(bool), size("8"), align(1));
+impl_atomic_primitive!(AtomicI8(i8), size("8"), align(1));
+impl_atomic_primitive!(AtomicU8(u8), size("8"), align(1));
+impl_atomic_primitive!(AtomicI16(i16), size("16"), align(2));
+impl_atomic_primitive!(AtomicU16(u16), size("16"), align(2));
+impl_atomic_primitive!(AtomicI32(i32), size("32"), align(4));
+impl_atomic_primitive!(AtomicU32(u32), size("32"), align(4));
+impl_atomic_primitive!(AtomicI64(i64), size("64"), align(8));
+impl_atomic_primitive!(AtomicU64(u64), size("64"), align(8));
+impl_atomic_primitive!(AtomicI128(i128), size("128"), align(16));
+impl_atomic_primitive!(AtomicU128(u128), size("128"), align(16));
+
+#[cfg(target_pointer_width = "16")]
+impl_atomic_primitive!(AtomicIsize(isize), size("ptr"), align(2));
+#[cfg(target_pointer_width = "32")]
+impl_atomic_primitive!(AtomicIsize(isize), size("ptr"), align(4));
+#[cfg(target_pointer_width = "64")]
+impl_atomic_primitive!(AtomicIsize(isize), size("ptr"), align(8));
+
+#[cfg(target_pointer_width = "16")]
+impl_atomic_primitive!(AtomicUsize(usize), size("ptr"), align(2));
+#[cfg(target_pointer_width = "32")]
+impl_atomic_primitive!(AtomicUsize(usize), size("ptr"), align(4));
+#[cfg(target_pointer_width = "64")]
+impl_atomic_primitive!(AtomicUsize(usize), size("ptr"), align(8));
+
+#[cfg(target_pointer_width = "16")]
+impl_atomic_primitive!(AtomicPtr<T>(*mut T), size("ptr"), align(2));
+#[cfg(target_pointer_width = "32")]
+impl_atomic_primitive!(AtomicPtr<T>(*mut T), size("ptr"), align(4));
+#[cfg(target_pointer_width = "64")]
+impl_atomic_primitive!(AtomicPtr<T>(*mut T), size("ptr"), align(8));
+
+/// A memory location which can be safely modified from multiple threads.
+///
+/// This has the same size and bit validity as the underlying type `T`. However,
+/// the alignment of this type is always equal to its size, even on targets where
+/// `T` has alignment less than its size.
+///
+/// For more about the differences between atomic types and non-atomic types as
+/// well as information about the portability of this type, please see the
+/// [module-level documentation].
+///
+/// **Note:** This type is only available on platforms that support atomic loads
+/// and stores of `T`.
+///
+/// [module-level documentation]: crate::sync::atomic
+#[unstable(feature = "generic_atomic", issue = "130539")]
+pub type Atomic<T> = <T as AtomicPrimitive>::AtomicInner;
+
 // Some architectures don't have byte-sized atomics, which results in LLVM
 // emulating them using a LL/SC loop. However for AtomicBool we can take
 // advantage of the fact that it only ever contains 0 or 1 and use atomic OR/AND
@@ -294,7 +389,7 @@ unsafe impl Sync for AtomicBool {}
 /// loads and stores of pointers. Its size depends on the target pointer's size.
 #[cfg(target_has_atomic_load_store = "ptr")]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(not(test), rustc_diagnostic_item = "AtomicPtr")]
+#[rustc_diagnostic_item = "AtomicPtr"]
 #[cfg_attr(target_pointer_width = "16", repr(C, align(2)))]
 #[cfg_attr(target_pointer_width = "32", repr(C, align(4)))]
 #[cfg_attr(target_pointer_width = "64", repr(C, align(8)))]
@@ -468,6 +563,7 @@ impl AtomicBool {
     ///
     /// [valid]: crate::ptr#safety
     /// [Memory model for atomic accesses]: self#memory-model-for-atomic-accesses
+    #[inline]
     #[stable(feature = "atomic_from_ptr", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_atomic_from_ptr", since = "1.84.0")]
     pub const unsafe fn from_ptr<'a>(ptr: *mut bool) -> &'a AtomicBool {
@@ -1388,6 +1484,7 @@ impl<T> AtomicPtr<T> {
     ///
     /// [valid]: crate::ptr#safety
     /// [Memory model for atomic accesses]: self#memory-model-for-atomic-accesses
+    #[inline]
     #[stable(feature = "atomic_from_ptr", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_atomic_from_ptr", since = "1.84.0")]
     pub const unsafe fn from_ptr<'a>(ptr: *mut *mut T) -> &'a AtomicPtr<T> {
@@ -2033,7 +2130,7 @@ impl<T> AtomicPtr<T> {
     #[unstable(feature = "strict_provenance_atomic_ptr", issue = "99108")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub fn fetch_ptr_add(&self, val: usize, order: Ordering) -> *mut T {
-        self.fetch_byte_add(val.wrapping_mul(core::mem::size_of::<T>()), order)
+        self.fetch_byte_add(val.wrapping_mul(size_of::<T>()), order)
     }
 
     /// Offsets the pointer's address by subtracting `val` (in units of `T`),
@@ -2078,7 +2175,7 @@ impl<T> AtomicPtr<T> {
     #[unstable(feature = "strict_provenance_atomic_ptr", issue = "99108")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub fn fetch_ptr_sub(&self, val: usize, order: Ordering) -> *mut T {
-        self.fetch_byte_sub(val.wrapping_mul(core::mem::size_of::<T>()), order)
+        self.fetch_byte_sub(val.wrapping_mul(size_of::<T>()), order)
     }
 
     /// Offsets the pointer's address by adding `val` *bytes*, returning the
@@ -2524,6 +2621,7 @@ macro_rules! atomic_int {
             ///
             /// [valid]: crate::ptr#safety
             /// [Memory model for atomic accesses]: self#memory-model-for-atomic-accesses
+            #[inline]
             #[stable(feature = "atomic_from_ptr", since = "1.75.0")]
             #[rustc_const_stable(feature = "const_atomic_from_ptr", since = "1.84.0")]
             pub const unsafe fn from_ptr<'a>(ptr: *mut $int_type) -> &'a $atomic_type {
@@ -3445,7 +3543,7 @@ atomic_int! {
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     rustc_const_stable(feature = "const_integer_atomics", since = "1.34.0"),
     rustc_const_stable(feature = "const_atomic_into_inner", since = "1.79.0"),
-    cfg_attr(not(test), rustc_diagnostic_item = "AtomicI8"),
+    rustc_diagnostic_item = "AtomicI8",
     "i8",
     "",
     atomic_min, atomic_max,
@@ -3464,7 +3562,7 @@ atomic_int! {
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     rustc_const_stable(feature = "const_integer_atomics", since = "1.34.0"),
     rustc_const_stable(feature = "const_atomic_into_inner", since = "1.79.0"),
-    cfg_attr(not(test), rustc_diagnostic_item = "AtomicU8"),
+    rustc_diagnostic_item = "AtomicU8",
     "u8",
     "",
     atomic_umin, atomic_umax,
@@ -3483,7 +3581,7 @@ atomic_int! {
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     rustc_const_stable(feature = "const_integer_atomics", since = "1.34.0"),
     rustc_const_stable(feature = "const_atomic_into_inner", since = "1.79.0"),
-    cfg_attr(not(test), rustc_diagnostic_item = "AtomicI16"),
+    rustc_diagnostic_item = "AtomicI16",
     "i16",
     "",
     atomic_min, atomic_max,
@@ -3502,7 +3600,7 @@ atomic_int! {
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     rustc_const_stable(feature = "const_integer_atomics", since = "1.34.0"),
     rustc_const_stable(feature = "const_atomic_into_inner", since = "1.79.0"),
-    cfg_attr(not(test), rustc_diagnostic_item = "AtomicU16"),
+    rustc_diagnostic_item = "AtomicU16",
     "u16",
     "",
     atomic_umin, atomic_umax,
@@ -3521,7 +3619,7 @@ atomic_int! {
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     rustc_const_stable(feature = "const_integer_atomics", since = "1.34.0"),
     rustc_const_stable(feature = "const_atomic_into_inner", since = "1.79.0"),
-    cfg_attr(not(test), rustc_diagnostic_item = "AtomicI32"),
+    rustc_diagnostic_item = "AtomicI32",
     "i32",
     "",
     atomic_min, atomic_max,
@@ -3540,7 +3638,7 @@ atomic_int! {
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     rustc_const_stable(feature = "const_integer_atomics", since = "1.34.0"),
     rustc_const_stable(feature = "const_atomic_into_inner", since = "1.79.0"),
-    cfg_attr(not(test), rustc_diagnostic_item = "AtomicU32"),
+    rustc_diagnostic_item = "AtomicU32",
     "u32",
     "",
     atomic_umin, atomic_umax,
@@ -3559,7 +3657,7 @@ atomic_int! {
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     rustc_const_stable(feature = "const_integer_atomics", since = "1.34.0"),
     rustc_const_stable(feature = "const_atomic_into_inner", since = "1.79.0"),
-    cfg_attr(not(test), rustc_diagnostic_item = "AtomicI64"),
+    rustc_diagnostic_item = "AtomicI64",
     "i64",
     "",
     atomic_min, atomic_max,
@@ -3578,7 +3676,7 @@ atomic_int! {
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     rustc_const_stable(feature = "const_integer_atomics", since = "1.34.0"),
     rustc_const_stable(feature = "const_atomic_into_inner", since = "1.79.0"),
-    cfg_attr(not(test), rustc_diagnostic_item = "AtomicU64"),
+    rustc_diagnostic_item = "AtomicU64",
     "u64",
     "",
     atomic_umin, atomic_umax,
@@ -3597,7 +3695,7 @@ atomic_int! {
     unstable(feature = "integer_atomics", issue = "99069"),
     rustc_const_unstable(feature = "integer_atomics", issue = "99069"),
     rustc_const_unstable(feature = "integer_atomics", issue = "99069"),
-    cfg_attr(not(test), rustc_diagnostic_item = "AtomicI128"),
+    rustc_diagnostic_item = "AtomicI128",
     "i128",
     "#![feature(integer_atomics)]\n\n",
     atomic_min, atomic_max,
@@ -3616,7 +3714,7 @@ atomic_int! {
     unstable(feature = "integer_atomics", issue = "99069"),
     rustc_const_unstable(feature = "integer_atomics", issue = "99069"),
     rustc_const_unstable(feature = "integer_atomics", issue = "99069"),
-    cfg_attr(not(test), rustc_diagnostic_item = "AtomicU128"),
+    rustc_diagnostic_item = "AtomicU128",
     "u128",
     "#![feature(integer_atomics)]\n\n",
     atomic_umin, atomic_umax,
@@ -3639,7 +3737,7 @@ macro_rules! atomic_int_ptr_sized {
             stable(feature = "atomic_nand", since = "1.27.0"),
             rustc_const_stable(feature = "const_ptr_sized_atomics", since = "1.24.0"),
             rustc_const_stable(feature = "const_atomic_into_inner", since = "1.79.0"),
-            cfg_attr(not(test), rustc_diagnostic_item = "AtomicIsize"),
+            rustc_diagnostic_item = "AtomicIsize",
             "isize",
             "",
             atomic_min, atomic_max,
@@ -3658,7 +3756,7 @@ macro_rules! atomic_int_ptr_sized {
             stable(feature = "atomic_nand", since = "1.27.0"),
             rustc_const_stable(feature = "const_ptr_sized_atomics", since = "1.24.0"),
             rustc_const_stable(feature = "const_atomic_into_inner", since = "1.79.0"),
-            cfg_attr(not(test), rustc_diagnostic_item = "AtomicUsize"),
+            rustc_diagnostic_item = "AtomicUsize",
             "usize",
             "",
             atomic_umin, atomic_umax,
@@ -3997,24 +4095,24 @@ unsafe fn atomic_umin<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
 ///
 /// A fence 'A' which has (at least) [`Release`] ordering semantics, synchronizes
 /// with a fence 'B' with (at least) [`Acquire`] semantics, if and only if there
-/// exist operations X and Y, both operating on some atomic object 'M' such
+/// exist operations X and Y, both operating on some atomic object 'm' such
 /// that A is sequenced before X, Y is sequenced before B and Y observes
-/// the change to M. This provides a happens-before dependence between A and B.
+/// the change to m. This provides a happens-before dependence between A and B.
 ///
 /// ```text
 ///     Thread 1                                          Thread 2
 ///
 /// fence(Release);      A --------------
-/// x.store(3, Relaxed); X ---------    |
+/// m.store(3, Relaxed); X ---------    |
 ///                                |    |
 ///                                |    |
-///                                -------------> Y  if x.load(Relaxed) == 3 {
+///                                -------------> Y  if m.load(Relaxed) == 3 {
 ///                                     |-------> B      fence(Acquire);
 ///                                                      ...
 ///                                                  }
 /// ```
 ///
-/// Note that in the example above, it is crucial that the accesses to `x` are atomic. Fences cannot
+/// Note that in the example above, it is crucial that the accesses to `m` are atomic. Fences cannot
 /// be used to establish synchronization among non-atomic accesses in different threads. However,
 /// thanks to the happens-before relationship between A and B, any non-atomic accesses that
 /// happen-before A are now also properly synchronized with any non-atomic accesses that

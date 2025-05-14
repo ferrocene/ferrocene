@@ -97,12 +97,12 @@ targets = [
 name = "rust-std"
 subset = "qnx"
 
-#[groups.oxidos]
-#targets = ["wasm32-unknown-unknown"]
-#
-#[[groups.oxidos.packages]]
-#name = "oxidos"
-#subset = "oxidos"
+[groups.oxidos]
+targets = ["wasm32-unknown-unknown"]
+
+[[groups.oxidos.packages]]
+name = "oxidos"
+subset = "oxidos"
 
 [groups.any-platform]
 targets = ["*"]
@@ -121,6 +121,10 @@ subset = "signatures"
 
 [[groups.any-platform.packages]]
 name = "ferrocene-test-outcomes"
+subset = "source"
+
+[[groups.any-platform.packages]]
+name = "ferrocene-coverage-outcomes"
 subset = "source"
 
 [[groups.any-platform.packages]]

@@ -1,5 +1,5 @@
 use core::convert::TryInto;
-use core::sync::atomic::{AtomicUsize, Ordering};
+use core::sync::atomic::{Atomic, AtomicUsize, Ordering};
 
 use super::*;
 use crate::cell::Cell;
@@ -27,7 +27,7 @@ pub struct UdpSocket {
     read_timeout: Cell<u64>,
     // in milliseconds. The setting applies only to `send` calls after the timeout is set.
     write_timeout: Cell<u64>,
-    handle_count: Arc<AtomicUsize>,
+    handle_count: Arc<Atomic<usize>>,
     nonblocking: Cell<bool>,
 }
 
@@ -244,7 +244,7 @@ impl UdpSocket {
         // let buf = unsafe {
         //     xous::MemoryRange::new(
         //         &mut tx_req as *mut SendData as usize,
-        //         core::mem::size_of::<SendData>(),
+        //         size_of::<SendData>(),
         //     )
         //     .unwrap()
         // };

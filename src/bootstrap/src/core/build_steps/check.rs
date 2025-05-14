@@ -3,7 +3,7 @@
 use crate::core::build_steps::compile::{
     add_to_sysroot, run_cargo, rustc_cargo, rustc_cargo_env, std_cargo, std_crates_for_run_make,
 };
-use crate::core::build_steps::tool::{SourceType, prepare_tool_cargo};
+use crate::core::build_steps::tool::{COMPILETEST_ALLOW_FEATURES, SourceType, prepare_tool_cargo};
 use crate::core::builder::{
     self, Alias, Builder, Kind, RunConfig, ShouldRun, Step, crate_description,
 };
@@ -45,7 +45,10 @@ impl Step for Std {
     const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.crate_or_deps("sysroot").crate_or_deps("coretests").path("library")
+        run.crate_or_deps("sysroot")
+            .crate_or_deps("coretests")
+            .crate_or_deps("alloctests")
+            .path("library")
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -366,6 +369,69 @@ impl Step for RustAnalyzer {
     }
 }
 
+/// Compiletest is implicitly "checked" when it gets built in order to run tests,
+/// so this is mainly for people working on compiletest to run locally.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Compiletest {
+    pub target: TargetSelection,
+}
+
+impl Step for Compiletest {
+    type Output = ();
+    const ONLY_HOSTS: bool = true;
+    const DEFAULT: bool = false;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.path("src/tools/compiletest")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(Compiletest { target: run.target });
+    }
+
+    fn run(self, builder: &Builder<'_>) {
+        let mode = if builder.config.compiletest_use_stage0_libtest {
+            Mode::ToolBootstrap
+        } else {
+            Mode::ToolStd
+        };
+
+        let compiler = builder.compiler(
+            if mode == Mode::ToolBootstrap { 0 } else { builder.top_stage },
+            builder.config.build,
+        );
+
+        if mode != Mode::ToolBootstrap {
+            builder.ensure(Rustc::new(self.target, builder));
+        }
+
+        let mut cargo = prepare_tool_cargo(
+            builder,
+            compiler,
+            mode,
+            self.target,
+            builder.kind,
+            "src/tools/compiletest",
+            SourceType::InTree,
+            &[],
+        );
+
+        cargo.allow_features(COMPILETEST_ALLOW_FEATURES);
+
+        // For ./x.py clippy, don't run with --all-targets because
+        // linting tests and benchmarks can produce very noisy results
+        if builder.kind != Kind::Clippy {
+            cargo.arg("--all-targets");
+        }
+
+        let stamp = BuildStamp::new(&builder.cargo_out(compiler, mode, self.target))
+            .with_prefix("compiletest-check");
+
+        let _guard = builder.msg_check("compiletest artifacts", self.target);
+        run_cargo(builder, cargo, builder.config.free_args.clone(), &stamp, vec![], true, false);
+    }
+}
+
 macro_rules! tool_check_step {
     (
         $name:ident {
@@ -451,7 +517,6 @@ tool_check_step!(Rustdoc { path: "src/tools/rustdoc", alt_path: "src/librustdoc"
 tool_check_step!(Clippy { path: "src/tools/clippy" });
 tool_check_step!(Miri { path: "src/tools/miri" });
 tool_check_step!(CargoMiri { path: "src/tools/miri/cargo-miri" });
-tool_check_step!(Rls { path: "src/tools/rls" });
 tool_check_step!(Rustfmt { path: "src/tools/rustfmt" });
 tool_check_step!(MiroptTestTools { path: "src/tools/miropt-test-tools" });
 tool_check_step!(TestFloatParse { path: "src/etc/test-float-parse" });
@@ -463,6 +528,69 @@ tool_check_step!(Bootstrap { path: "src/bootstrap", default: false });
 // check to make it easier to work on.
 tool_check_step!(RunMakeSupport { path: "src/tools/run-make-support", default: false });
 
-// Compiletest is implicitly "checked" when it gets built in order to run tests,
-// so this is mainly for people working on compiletest to run locally.
-tool_check_step!(Compiletest { path: "src/tools/compiletest", default: false });
+/// Check step for the `coverage-dump` bootstrap tool. The coverage-dump tool
+/// is used internally by coverage tests.
+///
+/// FIXME(Zalathar): This is temporarily separate from the other tool check
+/// steps so that it can use the stage 0 compiler instead of `top_stage`,
+/// without introducing conflicts with the stage 0 redesign (#119899).
+///
+/// After the stage 0 redesign lands, we can look into using the stage 0
+/// compiler to check all bootstrap tools (#139170).
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub(crate) struct CoverageDump;
+
+impl CoverageDump {
+    const PATH: &str = "src/tools/coverage-dump";
+}
+
+impl Step for CoverageDump {
+    type Output = ();
+
+    /// Most contributors won't care about coverage-dump, so don't make their
+    /// check builds slower unless they opt in and check it explicitly.
+    const DEFAULT: bool = false;
+    const ONLY_HOSTS: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.path(Self::PATH)
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(Self {});
+    }
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        // Make sure we haven't forgotten any fields, if there are any.
+        let Self {} = self;
+        let display_name = "coverage-dump";
+        let host = builder.config.build;
+        let target = host;
+        let mode = Mode::ToolBootstrap;
+
+        let compiler = builder.compiler(0, host);
+        let cargo = prepare_tool_cargo(
+            builder,
+            compiler,
+            mode,
+            target,
+            builder.kind,
+            Self::PATH,
+            SourceType::InTree,
+            &[],
+        );
+
+        let stamp = BuildStamp::new(&builder.cargo_out(compiler, mode, target))
+            .with_prefix(&format!("{display_name}-check"));
+
+        let _guard = builder.msg_tool(
+            builder.kind,
+            mode,
+            display_name,
+            compiler.stage,
+            &compiler.host,
+            &target,
+        );
+        run_cargo(builder, cargo, builder.config.free_args.clone(), &stamp, vec![], true, false);
+    }
+}

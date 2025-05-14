@@ -165,7 +165,7 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 }
 
-#[inline]
+#[inline(always)]
 pub fn query_get_at<'tcx, Cache>(
     tcx: TyCtxt<'tcx>,
     execute_query: fn(TyCtxt<'tcx>, Span, Cache::Key, QueryMode) -> Option<Cache::Value>,
@@ -313,8 +313,11 @@ macro_rules! separate_provide_extern_default {
 
 macro_rules! define_callbacks {
     (
-     $($(#[$attr:meta])*
-        [$($modifiers:tt)*] fn $name:ident($($K:tt)*) -> $V:ty,)*) => {
+        $(
+            $(#[$attr:meta])*
+            [$($modifiers:tt)*] fn $name:ident($($K:tt)*) -> $V:ty,
+        )*
+    ) => {
 
         #[allow(unused_lifetimes)]
         pub mod queries {
@@ -366,11 +369,11 @@ macro_rules! define_callbacks {
 
                 pub type Storage<'tcx> = <$($K)* as keys::Key>::Cache<Erase<$V>>;
 
-                // Ensure that keys grow no larger than 80 bytes by accident.
+                // Ensure that keys grow no larger than 88 bytes by accident.
                 // Increase this limit if necessary, but do try to keep the size low if possible
                 #[cfg(target_pointer_width = "64")]
                 const _: () = {
-                    if mem::size_of::<Key<'static>>() > 88 {
+                    if size_of::<Key<'static>>() > 88 {
                         panic!("{}", concat!(
                             "the query `",
                             stringify!($name),
@@ -386,7 +389,7 @@ macro_rules! define_callbacks {
                 #[cfg(target_pointer_width = "64")]
                 #[cfg(not(feature = "rustc_randomized_layouts"))]
                 const _: () = {
-                    if mem::size_of::<Value<'static>>() > 64 {
+                    if size_of::<Value<'static>>() > 64 {
                         panic!("{}", concat!(
                             "the query `",
                             stringify!($name),
@@ -488,7 +491,7 @@ macro_rules! define_callbacks {
         #[derive(Default)]
         pub struct QueryStates<'tcx> {
             $(
-                pub $name: QueryState<$($K)*>,
+                pub $name: QueryState<$($K)*, QueryStackDeferred<'tcx>>,
             )*
         }
 

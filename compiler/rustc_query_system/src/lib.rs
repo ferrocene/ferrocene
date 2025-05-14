@@ -1,12 +1,10 @@
 // tidy-alphabetical-start
 #![allow(rustc::potential_query_instability, internal_features)]
+#![cfg_attr(bootstrap, feature(let_chains))]
 #![feature(assert_matches)]
 #![feature(core_intrinsics)]
 #![feature(dropck_eyepatch)]
-#![feature(hash_raw_entry)]
-#![feature(let_chains)]
 #![feature(min_specialization)]
-#![warn(unreachable_pub)]
 // tidy-alphabetical-end
 
 pub mod cache;

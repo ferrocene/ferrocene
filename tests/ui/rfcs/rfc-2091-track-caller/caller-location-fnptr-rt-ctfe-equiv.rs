@@ -31,5 +31,7 @@ fn main() {
     );
 }
 
+//~? WARN skipping const checks
+
 // ferrocene-annotations: fls_66m4rnbssgig
 // Constant Expressions

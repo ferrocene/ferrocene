@@ -1,3 +1,4 @@
+use rustc_abi::Align;
 use rustc_index::IndexVec;
 use rustc_middle::mir::interpret::Scalar;
 use rustc_middle::mir::visit::PlaceContext;
@@ -5,16 +6,12 @@ use rustc_middle::mir::*;
 use rustc_middle::ty::{Ty, TyCtxt};
 use rustc_session::Session;
 
-use crate::check_pointers::{BorrowCheckMode, PointerCheck, check_pointers};
+use crate::check_pointers::{BorrowedFieldProjectionMode, PointerCheck, check_pointers};
 
 pub(super) struct CheckAlignment;
 
 impl<'tcx> crate::MirPass<'tcx> for CheckAlignment {
     fn is_enabled(&self, sess: &Session) -> bool {
-        // FIXME(#112480) MSVC and rustc disagree on minimum stack alignment on x86 Windows
-        if sess.target.llvm_target == "i686-pc-windows-msvc" {
-            return false;
-        }
         sess.ub_checks()
     }
 
@@ -22,15 +19,15 @@ impl<'tcx> crate::MirPass<'tcx> for CheckAlignment {
         // Skip trivially aligned place types.
         let excluded_pointees = [tcx.types.bool, tcx.types.i8, tcx.types.u8];
 
-        // We have to exclude borrows here: in `&x.field`, the exact
-        // requirement is that the final reference must be aligned, but
-        // `check_pointers` would check that `x` is aligned, which would be wrong.
+        // When checking the alignment of references to field projections (`&(*ptr).a`),
+        // we need to make sure that the reference is aligned according to the field type
+        // and not to the pointer type.
         check_pointers(
             tcx,
             body,
             &excluded_pointees,
             insert_alignment_check,
-            BorrowCheckMode::ExcludeBorrows,
+            BorrowedFieldProjectionMode::FollowProjections,
         );
     }
 
@@ -86,6 +83,33 @@ fn insert_alignment_check<'tcx>(
             Rvalue::BinaryOp(BinOp::Sub, Box::new((Operand::Copy(alignment), one))),
         ))),
     });
+
+    // If this target does not have reliable alignment, further limit the mask by anding it with
+    // the mask for the highest reliable alignment.
+    #[allow(irrefutable_let_patterns)]
+    if let max_align = tcx.sess.target.max_reliable_alignment()
+        && max_align < Align::MAX
+    {
+        let max_mask = max_align.bytes() - 1;
+        let max_mask = Operand::Constant(Box::new(ConstOperand {
+            span: source_info.span,
+            user_ty: None,
+            const_: Const::Val(
+                ConstValue::Scalar(Scalar::from_target_usize(max_mask, &tcx)),
+                tcx.types.usize,
+            ),
+        }));
+        stmts.push(Statement {
+            source_info,
+            kind: StatementKind::Assign(Box::new((
+                alignment_mask,
+                Rvalue::BinaryOp(
+                    BinOp::BitAnd,
+                    Box::new((Operand::Copy(alignment_mask), max_mask)),
+                ),
+            ))),
+        });
+    }
 
     // BitAnd the alignment mask with the pointer
     let alignment_bits =

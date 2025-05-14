@@ -92,7 +92,7 @@ fn generic_arg_mismatch_err(
             GenericArg::Type(hir::Ty { kind: hir::TyKind::Array(_, len), .. }),
             GenericParamDefKind::Const { .. },
         ) if tcx.type_of(param.def_id).skip_binder() == tcx.types.usize => {
-            let snippet = sess.source_map().span_to_snippet(tcx.hir().span(len.hir_id));
+            let snippet = sess.source_map().span_to_snippet(tcx.hir_span(len.hir_id));
             if let Ok(snippet) = snippet {
                 err.span_suggestion(
                     arg.span(),
@@ -115,7 +115,7 @@ fn generic_arg_mismatch_err(
                     body.value.kind
                 && let Res::Def(DefKind::Fn { .. }, id) = path.res
             {
-                // FIXME(min_generic_const_args): this branch is dead once new const path lowering
+                // FIXME(mgca): this branch is dead once new const path lowering
                 // (for single-segment paths) is no longer gated
                 err.help(format!("`{}` is a function item, not a type", tcx.item_name(id)));
                 err.help("function item types cannot be named directly");

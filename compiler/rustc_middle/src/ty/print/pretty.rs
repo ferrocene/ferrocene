@@ -6,7 +6,7 @@ use std::ops::{Deref, DerefMut};
 use rustc_abi::{ExternAbi, Size};
 use rustc_apfloat::Float;
 use rustc_apfloat::ieee::{Double, Half, Quad, Single};
-use rustc_data_structures::fx::{FxHashMap, FxIndexMap};
+use rustc_data_structures::fx::{FxIndexMap, IndexEntry};
 use rustc_data_structures::unord::UnordMap;
 use rustc_hir as hir;
 use rustc_hir::LangItem;
@@ -63,6 +63,19 @@ thread_local! {
     static FORCE_TRIMMED_PATH: Cell<bool> = const { Cell::new(false) };
     static REDUCED_QUERIES: Cell<bool> = const { Cell::new(false) };
     static NO_VISIBLE_PATH: Cell<bool> = const { Cell::new(false) };
+    static NO_VISIBLE_PATH_IF_DOC_HIDDEN: Cell<bool> = const { Cell::new(false) };
+    static RTN_MODE: Cell<RtnMode> = const { Cell::new(RtnMode::ForDiagnostic) };
+}
+
+/// Rendering style for RTN types.
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub enum RtnMode {
+    /// Print the RTN type as an impl trait with its path, i.e.e `impl Sized { T::method(..) }`.
+    ForDiagnostic,
+    /// Print the RTN type as an impl trait, i.e. `impl Sized`.
+    ForSignature,
+    /// Print the RTN type as a value path, i.e. `T::method(..): ...`.
+    ForSuggestion,
 }
 
 macro_rules! define_helper {
@@ -122,7 +135,41 @@ define_helper!(
     /// Prevent selection of visible paths. `Display` impl of DefId will prefer
     /// visible (public) reexports of types as paths.
     fn with_no_visible_paths(NoVisibleGuard, NO_VISIBLE_PATH);
+    /// Prevent selection of visible paths if the paths are through a doc hidden path.
+    fn with_no_visible_paths_if_doc_hidden(NoVisibleIfDocHiddenGuard, NO_VISIBLE_PATH_IF_DOC_HIDDEN);
 );
+
+#[must_use]
+pub struct RtnModeHelper(RtnMode);
+
+impl RtnModeHelper {
+    pub fn with(mode: RtnMode) -> RtnModeHelper {
+        RtnModeHelper(RTN_MODE.with(|c| c.replace(mode)))
+    }
+}
+
+impl Drop for RtnModeHelper {
+    fn drop(&mut self) {
+        RTN_MODE.with(|c| c.set(self.0))
+    }
+}
+
+/// Print types for the purposes of a suggestion.
+///
+/// Specifically, this will render RPITITs as `T::method(..)` which is suitable for
+/// things like where-clauses.
+pub macro with_types_for_suggestion($e:expr) {{
+    let _guard = $crate::ty::print::pretty::RtnModeHelper::with(RtnMode::ForSuggestion);
+    $e
+}}
+
+/// Print types for the purposes of a signature suggestion.
+///
+/// Specifically, this will render RPITITs as `impl Trait` rather than `T::method(..)`.
+pub macro with_types_for_signature($e:expr) {{
+    let _guard = $crate::ty::print::pretty::RtnModeHelper::with(RtnMode::ForSignature);
+    $e
+}}
 
 /// Avoids running any queries during prints.
 pub macro with_no_queries($e:expr) {{
@@ -525,6 +572,10 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
             return Ok(false);
         };
 
+        if self.tcx().is_doc_hidden(visible_parent) && with_no_visible_paths_if_doc_hidden() {
+            return Ok(false);
+        }
+
         let actual_parent = self.tcx().opt_parent(def_id);
         debug!(
             "try_print_visible_def_path: visible_parent={:?} actual_parent={:?}",
@@ -769,7 +820,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
             ty::Foreign(def_id) => {
                 p!(print_def_path(def_id, &[]));
             }
-            ty::Alias(ty::Projection | ty::Inherent | ty::Weak, ref data) => {
+            ty::Alias(ty::Projection | ty::Inherent | ty::Free, ref data) => {
                 p!(print(data))
             }
             ty::Placeholder(placeholder) => match placeholder.bound.kind {
@@ -1163,7 +1214,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                             && assoc
                                 .trait_container(tcx)
                                 .is_some_and(|def_id| tcx.is_lang_item(def_id, LangItem::Coroutine))
-                            && assoc.name == rustc_span::sym::Return
+                            && assoc.opt_name() == Some(rustc_span::sym::Return)
                         {
                             if let ty::Coroutine(_, args) = args.type_at(0).kind() {
                                 let return_ty = args.as_coroutine().return_ty();
@@ -1186,7 +1237,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                             p!(", ");
                         }
 
-                        p!(write("{} = ", tcx.associated_item(assoc_item_def_id).name));
+                        p!(write("{} = ", tcx.associated_item(assoc_item_def_id).name()));
 
                         match term.unpack() {
                             TermKind::Ty(ty) => p!(print(ty)),
@@ -1221,22 +1272,6 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                 write!(self, " + ")?;
                 self.print_region(re)?;
             }
-        }
-
-        if self.tcx().features().return_type_notation()
-            && let Some(ty::ImplTraitInTraitData::Trait { fn_def_id, .. }) =
-                self.tcx().opt_rpitit_info(def_id)
-            && let ty::Alias(_, alias_ty) =
-                self.tcx().fn_sig(fn_def_id).skip_binder().output().skip_binder().kind()
-            && alias_ty.def_id == def_id
-            && let generics = self.tcx().generics_of(fn_def_id)
-            // FIXME(return_type_notation): We only support lifetime params for now.
-            && generics.own_params.iter().all(|param| matches!(param.kind, ty::GenericParamDefKind::Lifetime))
-        {
-            let num_args = generics.count();
-            write!(self, " {{ ")?;
-            self.print_def_path(fn_def_id, &args[..num_args])?;
-            write!(self, "(..) }}")?;
         }
 
         Ok(())
@@ -1304,6 +1339,46 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
             },
             &alias_ty.args[1..],
         )
+    }
+
+    fn pretty_print_rpitit(
+        &mut self,
+        def_id: DefId,
+        args: ty::GenericArgsRef<'tcx>,
+    ) -> Result<(), PrintError> {
+        let fn_args = if self.tcx().features().return_type_notation()
+            && let Some(ty::ImplTraitInTraitData::Trait { fn_def_id, .. }) =
+                self.tcx().opt_rpitit_info(def_id)
+            && let ty::Alias(_, alias_ty) =
+                self.tcx().fn_sig(fn_def_id).skip_binder().output().skip_binder().kind()
+            && alias_ty.def_id == def_id
+            && let generics = self.tcx().generics_of(fn_def_id)
+            // FIXME(return_type_notation): We only support lifetime params for now.
+            && generics.own_params.iter().all(|param| matches!(param.kind, ty::GenericParamDefKind::Lifetime))
+        {
+            let num_args = generics.count();
+            Some((fn_def_id, &args[..num_args]))
+        } else {
+            None
+        };
+
+        match (fn_args, RTN_MODE.with(|c| c.get())) {
+            (Some((fn_def_id, fn_args)), RtnMode::ForDiagnostic) => {
+                self.pretty_print_opaque_impl_type(def_id, args)?;
+                write!(self, " {{ ")?;
+                self.print_def_path(fn_def_id, fn_args)?;
+                write!(self, "(..) }}")?;
+            }
+            (Some((fn_def_id, fn_args)), RtnMode::ForSuggestion) => {
+                self.print_def_path(fn_def_id, fn_args)?;
+                write!(self, "(..)")?;
+            }
+            _ => {
+                self.pretty_print_opaque_impl_type(def_id, args)?;
+            }
+        }
+
+        Ok(())
     }
 
     fn ty_infer_name(&self, _: ty::TyVid) -> Option<Symbol> {
@@ -2452,7 +2527,7 @@ impl<'tcx> PrettyPrinter<'tcx> for FmtPrinter<'_, 'tcx> {
 
         let identify_regions = self.tcx.sess.opts.unstable_opts.identify_regions;
 
-        match *region {
+        match region.kind() {
             ty::ReEarlyParam(ref data) => data.has_name(),
 
             ty::ReLateParam(ty::LateParamRegion { kind, .. }) => kind.is_named(),
@@ -2522,12 +2597,10 @@ impl<'tcx> FmtPrinter<'_, 'tcx> {
         // the user might want to diagnose an error, but there is basically no way
         // to fit that into a short string. Hence the recommendation to use
         // `explain_region()` or `note_and_explain_region()`.
-        match *region {
-            ty::ReEarlyParam(ref data) => {
-                if data.name != kw::Empty {
-                    p!(write("{}", data.name));
-                    return Ok(());
-                }
+        match region.kind() {
+            ty::ReEarlyParam(data) => {
+                p!(write("{}", data.name));
+                return Ok(());
             }
             ty::ReLateParam(ty::LateParamRegion { kind, .. }) => {
                 if let Some(name) = kind.get_name() {
@@ -2614,7 +2687,7 @@ impl<'a, 'tcx> ty::TypeFolder<TyCtxt<'tcx>> for RegionFolder<'a, 'tcx> {
 
     fn fold_region(&mut self, r: ty::Region<'tcx>) -> ty::Region<'tcx> {
         let name = &mut self.name;
-        let region = match *r {
+        let region = match r.kind() {
             ty::ReBound(db, br) if db >= self.current_index => {
                 *self.region_map.entry(br).or_insert_with(|| name(Some(db), self.current_index, br))
             }
@@ -2638,7 +2711,7 @@ impl<'a, 'tcx> ty::TypeFolder<TyCtxt<'tcx>> for RegionFolder<'a, 'tcx> {
             }
             _ => return r,
         };
-        if let ty::ReBound(debruijn1, br) = *region {
+        if let ty::ReBound(debruijn1, br) = region.kind() {
             assert_eq!(debruijn1, ty::INNERMOST);
             ty::Region::new_bound(self.tcx, self.current_index, br)
         } else {
@@ -2766,7 +2839,7 @@ impl<'tcx> FmtPrinter<'_, 'tcx> {
 
                         (name, ty::BoundRegionKind::Named(CRATE_DEF_ID.to_def_id(), name))
                     }
-                    ty::BoundRegionKind::Named(def_id, kw::UnderscoreLifetime | kw::Empty) => {
+                    ty::BoundRegionKind::Named(def_id, kw::UnderscoreLifetime) => {
                         let name = next_name(self);
 
                         if let Some(lt_idx) = lifetime_idx {
@@ -2861,7 +2934,7 @@ impl<'tcx> FmtPrinter<'_, 'tcx> {
 
     fn prepare_region_info<T>(&mut self, value: &ty::Binder<'tcx, T>)
     where
-        T: TypeVisitable<TyCtxt<'tcx>>,
+        T: TypeFoldable<TyCtxt<'tcx>>,
     {
         struct RegionNameCollector<'tcx> {
             used_region_names: FxHashSet<Symbol>,
@@ -2877,7 +2950,7 @@ impl<'tcx> FmtPrinter<'_, 'tcx> {
             }
         }
 
-        impl<'tcx> ty::visit::TypeVisitor<TyCtxt<'tcx>> for RegionNameCollector<'tcx> {
+        impl<'tcx> ty::TypeVisitor<TyCtxt<'tcx>> for RegionNameCollector<'tcx> {
             fn visit_region(&mut self, r: ty::Region<'tcx>) {
                 trace!("address: {:p}", r.0.0);
 
@@ -3122,22 +3195,22 @@ define_print! {
 
     ty::AliasTerm<'tcx> {
         match self.kind(cx.tcx()) {
-            ty::AliasTermKind::InherentTy => p!(pretty_print_inherent_projection(*self)),
-            ty::AliasTermKind::ProjectionTy
-            | ty::AliasTermKind::WeakTy
-            | ty::AliasTermKind::OpaqueTy
-            | ty::AliasTermKind::UnevaluatedConst
-            | ty::AliasTermKind::ProjectionConst => {
-                // If we're printing verbosely, or don't want to invoke queries
-                // (`is_impl_trait_in_trait`), then fall back to printing the def path.
-                // This is likely what you want if you're debugging the compiler anyways.
+            ty::AliasTermKind::InherentTy | ty::AliasTermKind::InherentConst => p!(pretty_print_inherent_projection(*self)),
+            ty::AliasTermKind::ProjectionTy => {
                 if !(cx.should_print_verbose() || with_reduced_queries())
                     && cx.tcx().is_impl_trait_in_trait(self.def_id)
                 {
-                    return cx.pretty_print_opaque_impl_type(self.def_id, self.args);
+                    p!(pretty_print_rpitit(self.def_id, self.args))
                 } else {
                     p!(print_def_path(self.def_id, self.args));
                 }
+            }
+            ty::AliasTermKind::FreeTy
+            | ty::AliasTermKind::FreeConst
+            | ty::AliasTermKind::OpaqueTy
+            | ty::AliasTermKind::UnevaluatedConst
+            | ty::AliasTermKind::ProjectionConst => {
+                p!(print_def_path(self.def_id, self.args));
             }
         }
     }
@@ -3175,7 +3248,7 @@ define_print! {
             ty::ClauseKind::ConstArgHasType(ct, ty) => {
                 p!("the constant `", print(ct), "` has type `", print(ty), "`")
             },
-            ty::ClauseKind::WellFormed(arg) => p!(print(arg), " well-formed"),
+            ty::ClauseKind::WellFormed(term) => p!(print(term), " well-formed"),
             ty::ClauseKind::ConstEvaluatable(ct) => {
                 p!("the constant `", print(ct), "` can be evaluated")
             }
@@ -3219,7 +3292,7 @@ define_print! {
     }
 
     ty::ExistentialProjection<'tcx> {
-        let name = cx.tcx().associated_item(self.def_id).name;
+        let name = cx.tcx().associated_item(self.def_id).name();
         // The args don't contain the self ty (as it has been erased) but the corresp.
         // generics do as the trait always has a self ty param. We need to offset.
         let args = &self.args[cx.tcx().generics_of(self.def_id).parent_count - 1..];
@@ -3339,20 +3412,18 @@ define_print_and_forward_display! {
 }
 
 fn for_each_def(tcx: TyCtxt<'_>, mut collect_fn: impl for<'b> FnMut(&'b Ident, Namespace, DefId)) {
-    // Iterate all local crate items no matter where they are defined.
+    // Iterate all (non-anonymous) local crate items no matter where they are defined.
     for id in tcx.hir_free_items() {
         if matches!(tcx.def_kind(id.owner_id), DefKind::Use) {
             continue;
         }
 
         let item = tcx.hir_item(id);
-        if item.ident.name == kw::Empty {
-            continue;
-        }
+        let Some(ident) = item.kind.ident() else { continue };
 
         let def_id = item.owner_id.to_def_id();
         let ns = tcx.def_kind(def_id).ns().unwrap_or(Namespace::TypeNS);
-        collect_fn(&item.ident, ns, def_id);
+        collect_fn(&ident, ns, def_id);
     }
 
     // Now take care of extern crate items.
@@ -3426,8 +3497,8 @@ pub fn trimmed_def_paths(tcx: TyCtxt<'_>, (): ()) -> DefIdMap<Symbol> {
 
     // Once constructed, unique namespace+symbol pairs will have a `Some(_)` entry, while
     // non-unique pairs will have a `None` entry.
-    let unique_symbols_rev: &mut FxHashMap<(Namespace, Symbol), Option<DefId>> =
-        &mut FxHashMap::default();
+    let unique_symbols_rev: &mut FxIndexMap<(Namespace, Symbol), Option<DefId>> =
+        &mut FxIndexMap::default();
 
     for symbol_set in tcx.resolutions(()).glob_map.values() {
         for symbol in symbol_set {
@@ -3437,27 +3508,23 @@ pub fn trimmed_def_paths(tcx: TyCtxt<'_>, (): ()) -> DefIdMap<Symbol> {
         }
     }
 
-    for_each_def(tcx, |ident, ns, def_id| {
-        use std::collections::hash_map::Entry::{Occupied, Vacant};
-
-        match unique_symbols_rev.entry((ns, ident.name)) {
-            Occupied(mut v) => match v.get() {
-                None => {}
-                Some(existing) => {
-                    if *existing != def_id {
-                        v.insert(None);
-                    }
+    for_each_def(tcx, |ident, ns, def_id| match unique_symbols_rev.entry((ns, ident.name)) {
+        IndexEntry::Occupied(mut v) => match v.get() {
+            None => {}
+            Some(existing) => {
+                if *existing != def_id {
+                    v.insert(None);
                 }
-            },
-            Vacant(v) => {
-                v.insert(Some(def_id));
             }
+        },
+        IndexEntry::Vacant(v) => {
+            v.insert(Some(def_id));
         }
     });
 
     // Put the symbol from all the unique namespace+symbol pairs into `map`.
     let mut map: DefIdMap<Symbol> = Default::default();
-    for ((_, symbol), opt_def_id) in unique_symbols_rev.drain() {
+    for ((_, symbol), opt_def_id) in unique_symbols_rev.drain(..) {
         use std::collections::hash_map::Entry::{Occupied, Vacant};
 
         if let Some(def_id) = opt_def_id {

@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -L dependency=
+//~? ERROR empty search path
 
 fn main() {}
 

@@ -942,6 +942,22 @@ trait UnusedDelimLint {
         match s.kind {
             StmtKind::Let(ref local) if Self::LINT_EXPR_IN_PATTERN_MATCHING_CTX => {
                 if let Some((init, els)) = local.kind.init_else_opt() {
+                    if els.is_some()
+                        && let ExprKind::Paren(paren) = &init.kind
+                        && !init.span.eq_ctxt(paren.span)
+                    {
+                        // This branch prevents cases where parentheses wrap an expression
+                        // resulting from macro expansion, such as:
+                        // ```
+                        // macro_rules! x {
+                        // () => { None::<i32> };
+                        // }
+                        // let Some(_) = (x!{}) else { return };
+                        // // -> let Some(_) = (None::<i32>) else { return };
+                        // //                  ~           ~ No Lint
+                        // ```
+                        return;
+                    }
                     let ctx = match els {
                         None => UnusedDelimsCtx::AssignedValue,
                         Some(_) => UnusedDelimsCtx::AssignedValueLetElse,
@@ -1201,7 +1217,8 @@ impl EarlyLintPass for UnusedParens {
             // Do not lint on `(..)` as that will result in the other arms being useless.
             Paren(_)
             // The other cases do not contain sub-patterns.
-            | Wild | Never | Rest | Expr(..) | MacCall(..) | Range(..) | Ident(.., None) | Path(..) | Err(_) => {},
+            | Missing | Wild | Never | Rest | Expr(..) | MacCall(..) | Range(..) | Ident(.., None)
+            | Path(..) | Err(_) => {},
             // These are list-like patterns; parens can always be removed.
             TupleStruct(_, _, ps) | Tuple(ps) | Slice(ps) | Or(ps) => for p in ps {
                 self.check_unused_parens_pat(cx, p, false, false, keep_space);

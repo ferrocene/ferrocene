@@ -22,7 +22,7 @@ path = [
     "Cargo.lock",
     "Cargo.toml",
     "CODE_OF_CONDUCT.md",
-    "config.example.toml",
+    "bootstrap.example.toml",
     "configure",
     "CONTRIBUTING.md",
     "COPYRIGHT",
@@ -233,6 +233,18 @@ path = "ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-arm"
 precedence = "override"
 SPDX-FileCopyrightText = "Colin Watson"
 SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+path = "ferrocene/tools/grcov/**"
+precedence = "override"
+SPDX-FileCopyrightText = "The grcov developers"
+SPDX-License-Identifier = "MPL-2.0"
+
+[[annotations]]
+path = "ferrocene/tools/grcov/src/bulma"
+precedence = "override"
+SPDX-FileCopyrightText = "Jeremy Thomas"
+SPDX-License-Identifier = "MIT"
 
 [[annotations]]
 path = "requirements.txt"

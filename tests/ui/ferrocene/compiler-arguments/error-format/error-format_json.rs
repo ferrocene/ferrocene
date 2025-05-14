@@ -1,9 +1,8 @@
 //@ check-fail
 //@ compile-flags: --error-format json
-//@ error-pattern: cannot find value `x` in this scope
 
 fn main() {
-    let x = x;
+    let x = x; //~ ERROR cannot find value `x` in this scope
 }
 
 // ferrocene-annotations: um_rustc_error_format

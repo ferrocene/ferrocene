@@ -5,6 +5,7 @@ import * as ra from "./lsp_ext";
 import { Config, prepareVSCodeConfig } from "./config";
 import { createClient } from "./client";
 import {
+    isCargoTomlEditor,
     isDocumentInWorkspace,
     isRustDocument,
     isRustEditor,
@@ -189,11 +190,11 @@ export class Ctx implements RustAnalyzerExtensionApi {
         }
 
         if (!this.traceOutputChannel) {
-            this.traceOutputChannel = new LazyOutputChannel("Rust Analyzer Language Server Trace");
+            this.traceOutputChannel = new LazyOutputChannel("rust-analyzer LSP Trace");
             this.pushExtCleanup(this.traceOutputChannel);
         }
         if (!this.outputChannel) {
-            this.outputChannel = vscode.window.createOutputChannel("Rust Analyzer Language Server");
+            this.outputChannel = vscode.window.createOutputChannel("rust-analyzer Language Server");
             this.pushExtCleanup(this.outputChannel);
         }
 
@@ -212,7 +213,14 @@ export class Ctx implements RustAnalyzerExtensionApi {
                     this.refreshServerStatus();
                 },
             );
-            const newEnv = Object.assign({}, process.env, this.config.serverExtraEnv);
+            const newEnv = { ...process.env };
+            for (const [k, v] of Object.entries(this.config.serverExtraEnv)) {
+                if (v) {
+                    newEnv[k] = v;
+                } else if (k in newEnv) {
+                    delete newEnv[k];
+                }
+            }
             const run: lc.Executable = {
                 command: this._serverPath,
                 options: { env: newEnv },
@@ -427,6 +435,11 @@ export class Ctx implements RustAnalyzerExtensionApi {
     get activeRustEditor(): RustEditor | undefined {
         const editor = vscode.window.activeTextEditor;
         return editor && isRustEditor(editor) ? editor : undefined;
+    }
+
+    get activeCargoTomlEditor(): RustEditor | undefined {
+        const editor = vscode.window.activeTextEditor;
+        return editor && isCargoTomlEditor(editor) ? editor : undefined;
     }
 
     get extensionPath(): string {

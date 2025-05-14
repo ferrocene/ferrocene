@@ -1,90 +1,298 @@
-use std::path::Path;
+use std::path::PathBuf;
 
-use crate::builder::{Builder, RunConfig, ShouldRun, Step};
-use crate::core::build_steps::tool::SourceType;
-use crate::core::config::TargetSelection;
-use crate::{BootstrapCommand, Kind, Mode};
+use build_helper::exit;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub(crate) struct ProfilerBuiltinsNoCore {
-    pub(crate) target: TargetSelection,
-}
+use crate::builder::Builder;
+use crate::core::build_steps::llvm::Llvm;
+use crate::core::builder::{Cargo, ShouldRun, Step};
+use crate::core::config::flags::FerroceneCoverageFor;
+use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
+use crate::ferrocene::doc::code_coverage::{CoverageMetadata, SingleCoverageReport};
+use crate::ferrocene::download_and_extract_ci_outcomes;
+use crate::utils::build_stamp::libstd_stamp;
+use crate::{BootstrapCommand, Compiler, DependencyType, GitRepo, t};
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub(crate) struct InstrumentationCoverageFlags {
-    rustflags: Vec<String>,
-}
-
-impl InstrumentationCoverageFlags {
-    pub fn flags(&self) -> &[String] {
-        &self.rustflags
+pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
+    if !builder.config.profiler {
+        eprintln!();
+        eprintln!("Error: the profiler needs to be enabled to measure coverage.");
+        eprintln!("Please set `build.profiler` to `true` in your bootstrap configuration.");
+        exit!(1);
     }
+
+    cargo.rustflag("-Cinstrument-coverage");
 }
 
-impl Step for ProfilerBuiltinsNoCore {
-    type Output = InstrumentationCoverageFlags;
-    const ONLY_HOSTS: bool = true;
-    const DEFAULT: bool = true;
+pub(crate) fn measure_coverage(
+    builder: &Builder<'_>,
+    cmd: &mut BootstrapCommand,
+    compiler: Compiler,
+    target: TargetSelection,
+    coverage_for: FerroceneCoverageFor,
+) {
+    // Pre-requisites for the `generate_report()` function are built here, as that function is
+    // executed after all bootstrap steps are executed.
+    builder.ensure(Llvm { target });
 
-    fn run(self, builder: &Builder<'_>) -> Self::Output {
-        builder.info("Building profiler_builtins with no_core");
+    let paths = Paths::find(builder, target, coverage_for);
+    let profraw_file_template = paths.profraw_dir.join("%m_%p.profraw");
+    cmd.env("LLVM_PROFILE_FILE", profraw_file_template);
 
-        let target = self.target;
-        let compiler = builder.compiler(1, target);
+    // We want to support merging the coverage information from multiple steps (for example,
+    // multiple test suites), but that requires all those steps measuring the coverage of the same
+    // thing. Because of that, we'll error if we already measured coverage of something and what we
+    // are measuring now has a different state.
+    let state = CoverageState { target, compiler, coverage_for };
+    match &mut *builder.ferrocene_coverage.borrow_mut() {
+        storage @ None => {
+            // Only clear the paths the first time measure_coverage is called.
+            paths.ensure_clean(builder);
 
-        // x.py test --coverage
-        // [ProfilerBuiltinNoCore step] Builds profiler_builtins with no core -> profiler_builtins_no_core.rlib
-        // [Core Tests step] Compile tests of core with -Cinsturment-coverage -> link against profiler_builtins_no_core.rlib
-
-        let mut cargo = builder.cargo(compiler, Mode::Std, SourceType::InTree, target, Kind::Build);
-
-        cargo.current_dir(Path::new("library/profiler_builtins"));
-
-        let profiler_builtins_no_core_dir = "profiler_builtins_no_core";
-        let target_dir =
-            builder.cargo_out(compiler, Mode::Std, target).join(profiler_builtins_no_core_dir);
-
-        cargo.arg("--target-dir");
-        cargo.arg(&*target_dir.to_string_lossy());
-        cargo.arg("--no-default-features");
-
-        BootstrapCommand::from(cargo).fail_fast().run(builder);
-
-        let cargo_dir = if builder.config.rust_optimize.is_release() { "release" } else { "debug" };
-
-        let lib_dir = target_dir.join(&*target.triple).join(cargo_dir);
-        let lib_path = lib_dir.join("libprofiler_builtins.rlib");
-        let profiler_builtins_no_core_path = lib_dir.join("libprofiler_builtins_no_core.rlib");
-
-        if !builder.config.dry_run() {
-            std::fs::rename(&lib_path, &profiler_builtins_no_core_path)
-                .expect("Could not rename the profiler_builtins_no_core library");
-            assert!(
-                profiler_builtins_no_core_path.exists() && profiler_builtins_no_core_path.is_file()
-            );
+            *storage = Some(state)
         }
-        let mut instrument_coverage_flags = InstrumentationCoverageFlags { rustflags: Vec::new() };
-
-        instrument_coverage_flags.rustflags.push("-Cinstrument-coverage".into());
-        instrument_coverage_flags.rustflags.push("--extern".into());
-        instrument_coverage_flags.rustflags.push(format!(
-            "profiler_builtins_no_core={}",
-            profiler_builtins_no_core_path.to_str().unwrap()
-        ));
-        instrument_coverage_flags
-            .rustflags
-            .push("-Zprofiler_runtime=profiler_builtins_no_core".into());
-        instrument_coverage_flags.rustflags.push("-L".into());
-        instrument_coverage_flags.rustflags.push(lib_dir.to_str().unwrap().to_string());
-
-        instrument_coverage_flags
+        Some(existing) => {
+            if state != *existing {
+                eprintln!("error: cannot measure coverage in steps with different configuration!");
+                eprintln!("step 1 configuration: {state:?}");
+                eprintln!("step 2 configuration: {existing:?}");
+                exit!(1);
+            }
+        }
     }
+}
+
+pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
+    // Note: this function is called after all bootstrap steps are executed, to ensure the report
+    // includes data from all tests suites measuring coverage. It cannot call `builder.ensure`, so
+    // make sure to call it in `measure_coverage()`.
+
+    if builder.config.cmd.ferrocene_coverage_for().is_none() {
+        return;
+    }
+    let Some(state) = builder.ferrocene_coverage.borrow_mut().take() else {
+        eprintln!("error: --coverage was passed but no steps measured coverage data.");
+        exit!(1);
+    };
+
+    let paths = Paths::find(builder, state.target, state.coverage_for);
+    let llvm_bin_dir = builder.llvm_out(state.target).join("bin");
+
+    builder.info("Merging together code coverage measurements");
+    let mut cmd = BootstrapCommand::new(llvm_bin_dir.join("llvm-profdata"));
+    cmd.arg("merge").arg("--sparse").arg("-o").arg(&paths.profdata_file).arg(paths.profraw_dir);
+    cmd.fail_fast().run(builder);
+
+    // llvm-cov needs to receive the path to the binary that was instrumented. The path depends
+    // on what we are gathering the coverage for: when adding a variant of FerroceneCoverageFor,
+    // you'll need to calculate the path to the binary you called instrument_coverage() on.
+    let instrumented_binary = match state.coverage_for {
+        // When gathering the code coverage for the standard library, the instrumented binary is
+        // the libstd-HASH.so shared library the tests link to.
+        FerroceneCoverageFor::Library => {
+            let mut libstd = None;
+            let stamp = libstd_stamp(builder, state.compiler, state.target);
+            for (path, kind) in builder.read_stamp_file(&stamp) {
+                match kind {
+                    DependencyType::Host => continue,
+                    DependencyType::Target | DependencyType::TargetSelfContained => {}
+                }
+                let name = path.file_name().unwrap().to_str().unwrap();
+                if name.starts_with("libstd-")
+                    && (name.ends_with(".so") || name.ends_with(".dll") || name.ends_with(".dylib"))
+                {
+                    libstd = Some(path);
+                    break;
+                }
+            }
+            libstd.expect("could not find the libstd dynamic library in the sysroot")
+        }
+    };
+
+    let ignored_path_regexes: &[&str] = match state.coverage_for {
+        FerroceneCoverageFor::Library => &[
+            // Ignore Cargo dependencies:
+            "\\.cargo/registry", // Without remap-path-prefix
+            "/rust/deps",        // With remap-path-prefix
+            // Ignore files we don't currently handle:
+            "ferrocene/library/backtrace-rs",
+            "ferrocene/library/libc",
+            "library/alloc",
+            "library/panic_unwind",
+            "library/std",
+        ],
+    };
+
+    builder.info("Generating lcov dump of the code coverage measurements");
+    let mut cmd = BootstrapCommand::new(llvm_bin_dir.join("llvm-cov"));
+    cmd.arg("export").arg(instrumented_binary).arg("--instr-profile").arg(&paths.profdata_file);
+    cmd.arg("--format").arg("lcov");
+
+    // Note that which paths are ignored changes how llvm-cov displays the paths in the report.
+    // llvm-cov makes all paths relative to the common ancestor.
+    for path in ignored_path_regexes {
+        cmd.arg("--ignore-filename-regex").arg(path);
+    }
+
+    let result = cmd.run_capture_stdout(builder);
+    if result.is_failure() {
+        eprintln!("Failed to run llvm-cov to generate a report!");
+        eprintln!();
+        eprintln!("If the error message mentions \"function name is empty\" please check the");
+        eprintln!("comment at the bottom of {}.", file!());
+        exit!(1);
+    }
+
+    let metadata = CoverageMetadata {
+        metadata_version: CoverageMetadata::CURRENT_VERSION,
+        path_prefix: if let Some(path) = builder.debuginfo_map_to(GitRepo::Rustc) {
+            path.into()
+        } else {
+            builder.src.clone()
+        },
+    };
+
+    t!(std::fs::write(&paths.lcov_file, result.stdout_bytes()));
+    t!(std::fs::write(&paths.metadata_file, &t!(serde_json::to_vec_pretty(&metadata))));
+
+    if builder.config.ferrocene_generate_coverage_report_after_tests {
+        builder.ensure(SingleCoverageReport {
+            target: state.target,
+            name: format!("{}-{}", state.coverage_for.as_str(), state.target.triple),
+            lcov: paths.lcov_file,
+            metadata,
+        });
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub(crate) struct CoverageState {
+    target: TargetSelection,
+    compiler: Compiler,
+    coverage_for: FerroceneCoverageFor,
+}
+
+struct Paths {
+    profraw_dir: PathBuf,
+    profdata_file: PathBuf,
+    lcov_file: PathBuf,
+    metadata_file: PathBuf,
+}
+
+impl Paths {
+    fn find(
+        builder: &Builder<'_>,
+        target: TargetSelection,
+        coverage_for: FerroceneCoverageFor,
+    ) -> Self {
+        let name = format!("{}-{}", coverage_for.as_str(), target.triple);
+        let out_dir = builder.out.join("ferrocene").join("coverage");
+        Self {
+            profraw_dir: builder.tempdir().join(format!("ferrocene-profraw-{name}")),
+            profdata_file: builder.tempdir().join(format!("ferrocene-{name}.profdata")),
+            lcov_file: out_dir.join(format!("lcov-{name}.info")),
+            metadata_file: out_dir.join(format!("metadata-{name}.json")),
+        }
+    }
+
+    fn ensure_clean(&self, builder: &Builder<'_>) {
+        if self.profraw_dir.exists() {
+            builder.remove_dir(&self.profraw_dir);
+        }
+        if self.profdata_file.exists() {
+            builder.remove(&self.profdata_file);
+        }
+        if self.lcov_file.exists() {
+            builder.remove(&self.lcov_file);
+        }
+        if self.metadata_file.exists() {
+            builder.remove(&self.metadata_file);
+        }
+
+        builder.create_dir(&self.profraw_dir);
+        builder.create_dir(self.lcov_file.parent().unwrap());
+    }
+}
+
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub(crate) struct CoverageOutcomesDir;
+
+impl Step for CoverageOutcomesDir {
+    type Output = Option<PathBuf>;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.never()
     }
 
-    fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(Self { target: run.target });
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        match &builder.config.ferrocene_coverage_outcomes {
+            FerroceneCoverageOutcomes::Disabled => None,
+            FerroceneCoverageOutcomes::DownloadCi => {
+                Some(download_and_extract_ci_outcomes(builder, "coverage"))
+            }
+            FerroceneCoverageOutcomes::Local => {
+                Some(builder.out.join("ferrocene").join("coverage"))
+            }
+            FerroceneCoverageOutcomes::Custom(path) => Some(path.clone()),
+        }
     }
 }
+
+/////////////////////////////////////////////////////////
+//                                                     //
+//   How to solve the "function name is empty" error   //
+//                                                     //
+/////////////////////////////////////////////////////////
+
+// In March 2025, while developing support for code coverage for libcore, we encountered an llvm-cov
+// failure with the error message "malformed instrumentation profile data: function name is empty".
+//
+// This failure seems to be caused by the LLVM instrumentation emitting a malformed instrumentation
+// record the produced object file, tripping a validation check in llvm-cov. We are still not sure
+// what caused the error, so we never fixed it.
+//
+// Instead, we noticed that disabling coverage instrumentation for the affected function (by adding
+// the `#[coverage(off)]` attribute to it) mitigates the error. The problem then is figuring out
+// which function causes the failure.
+//
+// The way Pietro did it in March 2025 was to patch llvm-cov to suppress the error, set the function
+// name of the erroring frame to a well-known function, and seeing which function had that name in
+// the report. Step-by-step instructions:
+//
+// 1. Get a fresh clone of LLVM:
+//
+//    ```
+//    git clone https://github.com/llvm/llvm-project --depth 1
+//    cd llvm-project
+//    ```
+//
+// 2. Figure out in which file and line the error is emitted:
+//
+//    ```
+//    rg "\"function name is empty\"" llvm -g "*.cpp"
+//    ```
+//
+// 3. Replace the line returning the error with:
+//
+//    ```
+//    FuncName = "THIS_IS_HORRIBLE";
+//    ```
+//
+// 4. Build just llvm-cov:
+//
+//    ```
+//    mkdir build
+//    cd build
+//    cmake ../llvm -DCMAKE_BUILD_TYPE=RelWithDebInfo -G Ninja
+//    cmake --build . --target llvm-cov
+//    ```
+//
+// 5. Run llvm-cov to get the source code of the broken function:
+//
+//    ```
+//    bin/llvm-cov show --name-regex=THIS_IS_HORRIBLE --instr-profile=/path/profdata /path/object
+//    ```
+//
+// 6. Annotate the broken function with `#[coverage(off)]`
+//
+// Note that the steps might have changed since the time this was written. I hope they are still an
+// useful starting point for your debugging.

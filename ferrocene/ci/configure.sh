@@ -26,7 +26,7 @@ if [[ -z "${CI+x}" ]]; then
     echo "    https://public-docs.ferrocene.dev/main/qualification/internal-procedures/setup-local-env.html"
     echo
     echo "If you're trying to simulate CI to debug an issue locally, change the"
-    echo "profile in your config.toml to 'ferrocene-dist'."
+    echo "profile in your bootstrap.toml to 'ferrocene-dist'."
     exit 1
 fi
 
@@ -63,6 +63,9 @@ add --set profile=ferrocene-dist
 # Prevent `./x.py` from managing submodules, as those are cloned and managed
 # already by scripts in the CI configuration.
 add --disable-manage-submodules
+
+# In our setup we generate coverage reports in the docs job, not in the tests jobs.
+add --set ferrocene.generate-coverage-report-after-tests=false
 
 # Set the target used for the build itself (build system, initial compiler
 # stages, etc). This depends on the OS used in CI.
@@ -151,6 +154,12 @@ if [[ -n "${FERROCENE_TEST_OUTCOMES_DIR+x}" ]]; then
     add --set "ferrocene.test-outcomes-dir=${FERROCENE_TEST_OUTCOMES_DIR}"
 fi
 
+# Set the directory to the coverage outcomes files, if CI provides it.
+if [[ -n "${FERROCENE_COVERAGE_OUTCOMES_DIR+x}" ]]; then
+    add --set ferrocene.coverage-outcomes=custom
+    add --set "ferrocene.coverage-outcomes-dir=${FERROCENE_COVERAGE_OUTCOMES_DIR}"
+fi
+
 # Prevent `cargo` from updating the `Cargo.lock` file if the contents of the
 # file are out of date, failing the build instead.
 #
@@ -175,7 +184,7 @@ else
     # source code automatically from a public repository.
     #
     # This will not work for non-employees of Ferrous Systems
-    add --set ferrocene.oxidos-src="s3://ferrocene-ci-mirrors/manual/oxidos/oxidos-source-2023-09-21.tar.xz"
+    add --set ferrocene.oxidos-src="s3://ferrocene-ci-mirrors/manual/oxidos/oxidos-source-2025-04-30.tar.xz"
 
     # Include the technical report from the assessor in the documentation.
     #

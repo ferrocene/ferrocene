@@ -211,8 +211,8 @@ directory for ``/ferrocene/build``:
 Note that you will need to create the `container-build` directory in the host
 system beforehand.
 
-Sharing miscelaneous directories with the container
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Sharing miscellaneous directories with the container
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you need to share any extra directories from the host with the container you
 can use a similar strategy as the one used to mount the ferrocene repository.

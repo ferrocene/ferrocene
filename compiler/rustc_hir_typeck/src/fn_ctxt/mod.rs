@@ -17,7 +17,7 @@ use rustc_infer::infer;
 use rustc_infer::traits::Obligation;
 use rustc_middle::ty::{self, Const, Ty, TyCtxt, TypeVisitableExt};
 use rustc_session::Session;
-use rustc_span::{self, DUMMY_SP, Ident, Span, sym};
+use rustc_span::{self, DUMMY_SP, ErrorGuaranteed, Ident, Span, sym};
 use rustc_trait_selection::error_reporting::TypeErrCtxt;
 use rustc_trait_selection::error_reporting::infer::sub_relations::SubRelations;
 use rustc_trait_selection::traits::{ObligationCause, ObligationCauseCode, ObligationCtxt};
@@ -308,15 +308,17 @@ impl<'tcx> HirTyLowerer<'tcx> for FnCtxt<'_, 'tcx> {
         ))
     }
 
-    fn lower_assoc_ty(
+    fn lower_assoc_shared(
         &self,
         span: Span,
         item_def_id: DefId,
-        item_segment: &hir::PathSegment<'tcx>,
+        item_segment: &rustc_hir::PathSegment<'tcx>,
         poly_trait_ref: ty::PolyTraitRef<'tcx>,
-    ) -> Ty<'tcx> {
+        _assoc_tag: ty::AssocTag,
+    ) -> Result<(DefId, ty::GenericArgsRef<'tcx>), ErrorGuaranteed> {
         let trait_ref = self.instantiate_binder_with_fresh_vars(
             span,
+            // FIXME(mgca): this should be assoc const if that is the `kind`
             infer::BoundRegionConversionTime::AssocTypeProjection(item_def_id),
             poly_trait_ref,
         );
@@ -328,14 +330,14 @@ impl<'tcx> HirTyLowerer<'tcx> for FnCtxt<'_, 'tcx> {
             trait_ref.args,
         );
 
-        Ty::new_projection_from_args(self.tcx(), item_def_id, item_args)
+        Ok((item_def_id, item_args))
     }
 
     fn probe_adt(&self, span: Span, ty: Ty<'tcx>) -> Option<ty::AdtDef<'tcx>> {
         match ty.kind() {
             ty::Adt(adt_def, _) => Some(*adt_def),
             // FIXME(#104767): Should we handle bound regions here?
-            ty::Alias(ty::Projection | ty::Inherent | ty::Weak, _)
+            ty::Alias(ty::Projection | ty::Inherent | ty::Free, _)
                 if !ty.has_escaping_bound_vars() =>
             {
                 if self.next_trait_solver() {
@@ -355,7 +357,7 @@ impl<'tcx> HirTyLowerer<'tcx> for FnCtxt<'_, 'tcx> {
             // WF obligations that are registered elsewhere, but they have a
             // better cause code assigned to them in `add_required_obligations_for_hir`.
             // This means that they should shadow obligations with worse spans.
-            if let ty::Alias(ty::Projection | ty::Weak, ty::AliasTy { args, def_id, .. }) =
+            if let ty::Alias(ty::Projection | ty::Free, ty::AliasTy { args, def_id, .. }) =
                 ty.kind()
             {
                 self.add_required_obligations_for_hir(span, *def_id, args, hir_id);
@@ -486,7 +488,7 @@ fn parse_never_type_options_attr(
             item.span(),
             format!(
                 "unknown or duplicate never type option: `{}` (supported: `fallback`, `diverging_block_default`)",
-                item.name_or_empty()
+                item.name().unwrap()
             ),
         );
     }

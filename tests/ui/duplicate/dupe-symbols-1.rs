@@ -10,7 +10,7 @@ pub fn a() {
 
 #[export_name="fail"]
 pub fn b() {
-//~^ symbol `fail` is already defined
+//~^ ERROR symbol `fail` is already defined
 }
 
 // ferrocene-annotations: fls_osd6c4utyjb3

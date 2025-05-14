@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -Cprefer-dynamic=invalid
+//~? ERROR incorrect value
 
 fn main() {}
 

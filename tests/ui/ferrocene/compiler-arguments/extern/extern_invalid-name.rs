@@ -3,6 +3,7 @@
 //@ aux-build:some_crate.rs
 //@ compile-flags:--extern -
 //@ edition:2018
+//~? ERROR not a valid ASCII identifier
 
 fn main() {}
 

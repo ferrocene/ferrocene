@@ -1,4 +1,4 @@
-use crate::spec::{Cc, LinkerFlavor, Lld, StackProbeType, Target, base};
+use crate::spec::{Cc, LinkerFlavor, Lld, RelocModel, StackProbeType, Target, base};
 
 pub(crate) fn target() -> Target {
     let mut base = base::lynxos178::opts();
@@ -6,6 +6,13 @@ pub(crate) fn target() -> Target {
     base.max_atomic_width = Some(32);
     base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-m32"]);
     base.stack_probes = StackProbeType::Inline;
+    base.vendor = "lynx".into();
+    base.linker = Some("i386-lynx-lynxos178-gcc-7.1.0".into());
+    base.relocation_model = RelocModel::Static;
+    base.emit_debug_gdb_scripts = false;
+    base.has_thread_local = true;
+    base.crt_static_default = true;
+    base.crt_static_allows_dylibs = false;
 
     Target {
         llvm_target: "i686-unknown-linux-gnu".into(),

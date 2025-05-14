@@ -35,10 +35,10 @@ impl Step for BuildManifest {
         // (https://github.com/rust-lang/promote-release).
         let mut cmd = builder.tool_cmd(Tool::BuildManifest);
         let sign = builder.config.dist_sign_folder.as_ref().unwrap_or_else(|| {
-            panic!("\n\nfailed to specify `dist.sign-folder` in `config.toml`\n\n")
+            panic!("\n\nfailed to specify `dist.sign-folder` in `bootstrap.toml`\n\n")
         });
         let addr = builder.config.dist_upload_addr.as_ref().unwrap_or_else(|| {
-            panic!("\n\nfailed to specify `dist.upload-addr` in `config.toml`\n\n")
+            panic!("\n\nfailed to specify `dist.upload-addr` in `bootstrap.toml`\n\n")
         });
 
         let today = command("date").arg("+%Y-%m-%d").run_capture_stdout(builder).stdout();
@@ -365,5 +365,111 @@ impl Step for FeaturesStatusDump {
         cmd.arg(builder.out.join("features-status-dump.json"));
 
         cmd.run(builder);
+    }
+}
+
+/// Dummy step that can be used to deliberately trigger bootstrap's step cycle
+/// detector, for automated and manual testing.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct CyclicStep {
+    n: u32,
+}
+
+impl Step for CyclicStep {
+    type Output = ();
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.alias("cyclic-step")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        // Start with n=2, so that we build up a few stack entries before panicking.
+        run.builder.ensure(CyclicStep { n: 2 })
+    }
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        // When n=0, the step will try to ensure itself, causing a step cycle.
+        builder.ensure(CyclicStep { n: self.n.saturating_sub(1) })
+    }
+}
+
+/// Step to manually run the coverage-dump tool (`./x run coverage-dump`).
+///
+/// The coverage-dump tool is an internal detail of coverage tests, so this run
+/// step is only needed when testing coverage-dump manually.
+#[derive(Debug, PartialOrd, Ord, Clone, Hash, PartialEq, Eq)]
+pub struct CoverageDump;
+
+impl Step for CoverageDump {
+    type Output = ();
+
+    const DEFAULT: bool = false;
+    const ONLY_HOSTS: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.path("src/tools/coverage-dump")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(Self {});
+    }
+
+    fn run(self, builder: &Builder<'_>) {
+        let mut cmd = builder.tool_cmd(Tool::CoverageDump);
+        cmd.args(&builder.config.free_args);
+        cmd.run(builder);
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Rustfmt;
+
+impl Step for Rustfmt {
+    type Output = ();
+    const ONLY_HOSTS: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.path("src/tools/rustfmt")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(Rustfmt);
+    }
+
+    fn run(self, builder: &Builder<'_>) {
+        let host = builder.build.build;
+
+        // `x run` uses stage 0 by default but rustfmt does not work well with stage 0.
+        // Change the stage to 1 if it's not set explicitly.
+        let stage = if builder.config.is_explicit_stage() || builder.top_stage >= 1 {
+            builder.top_stage
+        } else {
+            1
+        };
+
+        if stage == 0 {
+            eprintln!("rustfmt cannot be run at stage 0");
+            eprintln!("HELP: Use `x fmt` to use stage 0 rustfmt.");
+            std::process::exit(1);
+        }
+
+        let compiler = builder.compiler(stage, host);
+        let rustfmt_build = builder.ensure(tool::Rustfmt { compiler, target: host });
+
+        let mut rustfmt = tool::prepare_tool_cargo(
+            builder,
+            rustfmt_build.build_compiler,
+            Mode::ToolRustc,
+            host,
+            Kind::Run,
+            "src/tools/rustfmt",
+            SourceType::InTree,
+            &[],
+        );
+
+        rustfmt.args(["--bin", "rustfmt", "--"]);
+        rustfmt.args(builder.config.args());
+
+        rustfmt.into_cmd().run(builder);
     }
 }

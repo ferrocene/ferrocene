@@ -102,6 +102,9 @@ impl Stability {
 // check whether they're named already elsewhere in rust
 // e.g. in stdarch and whether the given name matches LLVM's
 // if it doesn't, to_llvm_feature in llvm_util in rustc_codegen_llvm needs to be adapted.
+// Additionally, if the feature is not available in older version of LLVM supported by the current
+// rust, the same function must be updated to filter out these features to avoid triggering
+// warnings.
 //
 // Also note that all target features listed here must be purely additive: for target_feature 1.1 to
 // be sound, we can never allow features like `+soft-float` (on x86) to be controlled on a
@@ -380,12 +383,38 @@ static X86_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     // tidy-alphabetical-start
     ("adx", Stable, &[]),
     ("aes", Stable, &["sse2"]),
+    ("amx-avx512", Unstable(sym::x86_amx_intrinsics), &["amx-tile"]),
     ("amx-bf16", Unstable(sym::x86_amx_intrinsics), &["amx-tile"]),
     ("amx-complex", Unstable(sym::x86_amx_intrinsics), &["amx-tile"]),
     ("amx-fp16", Unstable(sym::x86_amx_intrinsics), &["amx-tile"]),
+    ("amx-fp8", Unstable(sym::x86_amx_intrinsics), &["amx-tile"]),
     ("amx-int8", Unstable(sym::x86_amx_intrinsics), &["amx-tile"]),
+    ("amx-movrs", Unstable(sym::x86_amx_intrinsics), &["amx-tile"]),
+    ("amx-tf32", Unstable(sym::x86_amx_intrinsics), &["amx-tile"]),
     ("amx-tile", Unstable(sym::x86_amx_intrinsics), &[]),
+    ("amx-transpose", Unstable(sym::x86_amx_intrinsics), &["amx-tile"]),
+    ("apxf", Unstable(sym::apx_target_feature), &[]),
     ("avx", Stable, &["sse4.2"]),
+    (
+        "avx10.1",
+        Unstable(sym::avx10_target_feature),
+        &[
+            "avx512bf16",
+            "avx512bitalg",
+            "avx512bw",
+            "avx512cd",
+            "avx512dq",
+            "avx512f",
+            "avx512fp16",
+            "avx512ifma",
+            "avx512vbmi",
+            "avx512vbmi2",
+            "avx512vl",
+            "avx512vnni",
+            "avx512vpopcntdq",
+        ],
+    ),
+    ("avx10.2", Unstable(sym::avx10_target_feature), &["avx10.1"]),
     ("avx2", Stable, &["avx"]),
     ("avx512bf16", Unstable(sym::avx512_target_feature), &["avx512bw"]),
     ("avx512bitalg", Unstable(sym::avx512_target_feature), &["avx512bw"]),
@@ -393,7 +422,7 @@ static X86_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     ("avx512cd", Unstable(sym::avx512_target_feature), &["avx512f"]),
     ("avx512dq", Unstable(sym::avx512_target_feature), &["avx512f"]),
     ("avx512f", Unstable(sym::avx512_target_feature), &["avx2", "fma", "f16c"]),
-    ("avx512fp16", Unstable(sym::avx512_target_feature), &["avx512bw", "avx512vl", "avx512dq"]),
+    ("avx512fp16", Unstable(sym::avx512_target_feature), &["avx512bw"]),
     ("avx512ifma", Unstable(sym::avx512_target_feature), &["avx512f"]),
     ("avx512vbmi", Unstable(sym::avx512_target_feature), &["avx512bw"]),
     ("avx512vbmi2", Unstable(sym::avx512_target_feature), &["avx512bw"]),
@@ -418,6 +447,7 @@ static X86_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     ("lahfsahf", Unstable(sym::lahfsahf_target_feature), &[]),
     ("lzcnt", Stable, &[]),
     ("movbe", Stable, &[]),
+    ("movrs", Unstable(sym::movrs_target_feature), &[]),
     ("pclmulqdq", Stable, &["sse2"]),
     ("popcnt", Stable, &[]),
     ("prfchw", Unstable(sym::prfchw_target_feature), &[]),
@@ -485,10 +515,11 @@ const MIPS_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
 static RISCV_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     // tidy-alphabetical-start
     ("a", Stable, &["zaamo", "zalrsc"]),
-    ("c", Stable, &[]),
+    ("b", Unstable(sym::riscv_target_feature), &["zba", "zbb", "zbs"]),
+    ("c", Stable, &["zca"]),
     ("d", Unstable(sym::riscv_target_feature), &["f"]),
     ("e", Unstable(sym::riscv_target_feature), &[]),
-    ("f", Unstable(sym::riscv_target_feature), &[]),
+    ("f", Unstable(sym::riscv_target_feature), &["zicsr"]),
     (
         "forced-atomics",
         Stability::Forbidden { reason: "unsound because it changes the ABI of atomic operations" },
@@ -497,9 +528,10 @@ static RISCV_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     ("m", Stable, &[]),
     ("relax", Unstable(sym::riscv_target_feature), &[]),
     ("unaligned-scalar-mem", Unstable(sym::riscv_target_feature), &[]),
-    ("v", Unstable(sym::riscv_target_feature), &[]),
+    ("unaligned-vector-mem", Unstable(sym::riscv_target_feature), &[]),
+    ("v", Unstable(sym::riscv_target_feature), &["zvl128b", "zve64d"]),
     ("za128rs", Unstable(sym::riscv_target_feature), &[]),
-    ("za64rs", Unstable(sym::riscv_target_feature), &[]),
+    ("za64rs", Unstable(sym::riscv_target_feature), &["za128rs"]), // Za64rs ⊃ Za128rs
     ("zaamo", Unstable(sym::riscv_target_feature), &[]),
     ("zabha", Unstable(sym::riscv_target_feature), &["zaamo"]),
     ("zacas", Unstable(sym::riscv_target_feature), &["zaamo"]),
@@ -508,17 +540,38 @@ static RISCV_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     ("zawrs", Unstable(sym::riscv_target_feature), &[]),
     ("zba", Stable, &[]),
     ("zbb", Stable, &[]),
-    ("zbc", Stable, &[]),
+    ("zbc", Stable, &["zbkc"]), // Zbc ⊃ Zbkc
     ("zbkb", Stable, &[]),
     ("zbkc", Stable, &[]),
     ("zbkx", Stable, &[]),
     ("zbs", Stable, &[]),
+    ("zca", Unstable(sym::riscv_target_feature), &[]),
+    ("zcb", Unstable(sym::riscv_target_feature), &["zca"]),
+    ("zcmop", Unstable(sym::riscv_target_feature), &["zca"]),
     ("zdinx", Unstable(sym::riscv_target_feature), &["zfinx"]),
+    ("zfa", Unstable(sym::riscv_target_feature), &["f"]),
+    ("zfbfmin", Unstable(sym::riscv_target_feature), &["f"]), // and a subset of Zfhmin
     ("zfh", Unstable(sym::riscv_target_feature), &["zfhmin"]),
     ("zfhmin", Unstable(sym::riscv_target_feature), &["f"]),
-    ("zfinx", Unstable(sym::riscv_target_feature), &[]),
+    ("zfinx", Unstable(sym::riscv_target_feature), &["zicsr"]),
     ("zhinx", Unstable(sym::riscv_target_feature), &["zhinxmin"]),
     ("zhinxmin", Unstable(sym::riscv_target_feature), &["zfinx"]),
+    ("zic64b", Unstable(sym::riscv_target_feature), &[]),
+    ("zicbom", Unstable(sym::riscv_target_feature), &[]),
+    ("zicbop", Unstable(sym::riscv_target_feature), &[]),
+    ("zicboz", Unstable(sym::riscv_target_feature), &[]),
+    ("ziccamoa", Unstable(sym::riscv_target_feature), &[]),
+    ("ziccif", Unstable(sym::riscv_target_feature), &[]),
+    ("zicclsm", Unstable(sym::riscv_target_feature), &[]),
+    ("ziccrse", Unstable(sym::riscv_target_feature), &[]),
+    ("zicntr", Unstable(sym::riscv_target_feature), &["zicsr"]),
+    ("zicond", Unstable(sym::riscv_target_feature), &[]),
+    ("zicsr", Unstable(sym::riscv_target_feature), &[]),
+    ("zifencei", Unstable(sym::riscv_target_feature), &[]),
+    ("zihintntl", Unstable(sym::riscv_target_feature), &[]),
+    ("zihintpause", Unstable(sym::riscv_target_feature), &[]),
+    ("zihpm", Unstable(sym::riscv_target_feature), &["zicsr"]),
+    ("zimop", Unstable(sym::riscv_target_feature), &[]),
     ("zk", Stable, &["zkn", "zkr", "zkt"]),
     ("zkn", Stable, &["zbkb", "zbkc", "zbkx", "zkne", "zknd", "zknh"]),
     ("zknd", Stable, &[]),
@@ -529,6 +582,44 @@ static RISCV_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     ("zksed", Stable, &[]),
     ("zksh", Stable, &[]),
     ("zkt", Stable, &[]),
+    ("ztso", Unstable(sym::riscv_target_feature), &[]),
+    ("zvbb", Unstable(sym::riscv_target_feature), &["zvkb"]), // Zvbb ⊃ Zvkb
+    ("zvbc", Unstable(sym::riscv_target_feature), &["zve64x"]),
+    ("zve32f", Unstable(sym::riscv_target_feature), &["zve32x", "f"]),
+    ("zve32x", Unstable(sym::riscv_target_feature), &["zvl32b", "zicsr"]),
+    ("zve64d", Unstable(sym::riscv_target_feature), &["zve64f", "d"]),
+    ("zve64f", Unstable(sym::riscv_target_feature), &["zve32f", "zve64x"]),
+    ("zve64x", Unstable(sym::riscv_target_feature), &["zve32x", "zvl64b"]),
+    ("zvfbfmin", Unstable(sym::riscv_target_feature), &["zve32f"]),
+    ("zvfbfwma", Unstable(sym::riscv_target_feature), &["zfbfmin", "zvfbfmin"]),
+    ("zvfh", Unstable(sym::riscv_target_feature), &["zvfhmin", "zve32f", "zfhmin"]), // Zvfh ⊃ Zvfhmin
+    ("zvfhmin", Unstable(sym::riscv_target_feature), &["zve32f"]),
+    ("zvkb", Unstable(sym::riscv_target_feature), &["zve32x"]),
+    ("zvkg", Unstable(sym::riscv_target_feature), &["zve32x"]),
+    ("zvkn", Unstable(sym::riscv_target_feature), &["zvkned", "zvknhb", "zvkb", "zvkt"]),
+    ("zvknc", Unstable(sym::riscv_target_feature), &["zvkn", "zvbc"]),
+    ("zvkned", Unstable(sym::riscv_target_feature), &["zve32x"]),
+    ("zvkng", Unstable(sym::riscv_target_feature), &["zvkn", "zvkg"]),
+    ("zvknha", Unstable(sym::riscv_target_feature), &["zve32x"]),
+    ("zvknhb", Unstable(sym::riscv_target_feature), &["zvknha", "zve64x"]), // Zvknhb ⊃ Zvknha
+    ("zvks", Unstable(sym::riscv_target_feature), &["zvksed", "zvksh", "zvkb", "zvkt"]),
+    ("zvksc", Unstable(sym::riscv_target_feature), &["zvks", "zvbc"]),
+    ("zvksed", Unstable(sym::riscv_target_feature), &["zve32x"]),
+    ("zvksg", Unstable(sym::riscv_target_feature), &["zvks", "zvkg"]),
+    ("zvksh", Unstable(sym::riscv_target_feature), &["zve32x"]),
+    ("zvkt", Unstable(sym::riscv_target_feature), &[]),
+    ("zvl1024b", Unstable(sym::riscv_target_feature), &["zvl512b"]),
+    ("zvl128b", Unstable(sym::riscv_target_feature), &["zvl64b"]),
+    ("zvl16384b", Unstable(sym::riscv_target_feature), &["zvl8192b"]),
+    ("zvl2048b", Unstable(sym::riscv_target_feature), &["zvl1024b"]),
+    ("zvl256b", Unstable(sym::riscv_target_feature), &["zvl128b"]),
+    ("zvl32768b", Unstable(sym::riscv_target_feature), &["zvl16384b"]),
+    ("zvl32b", Unstable(sym::riscv_target_feature), &[]),
+    ("zvl4096b", Unstable(sym::riscv_target_feature), &["zvl2048b"]),
+    ("zvl512b", Unstable(sym::riscv_target_feature), &["zvl256b"]),
+    ("zvl64b", Unstable(sym::riscv_target_feature), &["zvl32b"]),
+    ("zvl65536b", Unstable(sym::riscv_target_feature), &["zvl32768b"]),
+    ("zvl8192b", Unstable(sym::riscv_target_feature), &["zvl4096b"]),
     // tidy-alphabetical-end
 ];
 
@@ -603,13 +694,18 @@ static CSKY_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
 static LOONGARCH_FEATURES: &[(&str, Stability, ImpliedFeatures)] = &[
     // tidy-alphabetical-start
     ("d", Unstable(sym::loongarch_target_feature), &["f"]),
+    ("div32", Unstable(sym::loongarch_target_feature), &[]),
     ("f", Unstable(sym::loongarch_target_feature), &[]),
     ("frecipe", Unstable(sym::loongarch_target_feature), &[]),
+    ("lam-bh", Unstable(sym::loongarch_target_feature), &[]),
+    ("lamcas", Unstable(sym::loongarch_target_feature), &[]),
     ("lasx", Unstable(sym::loongarch_target_feature), &["lsx"]),
     ("lbt", Unstable(sym::loongarch_target_feature), &[]),
+    ("ld-seq-sa", Unstable(sym::loongarch_target_feature), &[]),
     ("lsx", Unstable(sym::loongarch_target_feature), &["d"]),
     ("lvz", Unstable(sym::loongarch_target_feature), &[]),
     ("relax", Unstable(sym::loongarch_target_feature), &[]),
+    ("scq", Unstable(sym::loongarch_target_feature), &[]),
     ("ual", Unstable(sym::loongarch_target_feature), &[]),
     // tidy-alphabetical-end
 ];
@@ -699,9 +795,21 @@ const ARM_FEATURES_FOR_CORRECT_VECTOR_ABI: &'static [(u64, &'static str)] = &[(1
 const POWERPC_FEATURES_FOR_CORRECT_VECTOR_ABI: &'static [(u64, &'static str)] = &[(128, "altivec")];
 const WASM_FEATURES_FOR_CORRECT_VECTOR_ABI: &'static [(u64, &'static str)] = &[(128, "simd128")];
 const S390X_FEATURES_FOR_CORRECT_VECTOR_ABI: &'static [(u64, &'static str)] = &[(128, "vector")];
-const RISCV_FEATURES_FOR_CORRECT_VECTOR_ABI: &'static [(u64, &'static str)] =
-    &[/*(64, "zvl64b"), */ (128, "v")];
-// Always warn on SPARC, as the necessary target features cannot be enabled in Rust at the moment.
+const RISCV_FEATURES_FOR_CORRECT_VECTOR_ABI: &'static [(u64, &'static str)] = &[
+    (32, "zvl32b"),
+    (64, "zvl64b"),
+    (128, "zvl128b"),
+    (256, "zvl256b"),
+    (512, "zvl512b"),
+    (1024, "zvl1024b"),
+    (2048, "zvl2048b"),
+    (4096, "zvl4096b"),
+    (8192, "zvl8192b"),
+    (16384, "zvl16384b"),
+    (32768, "zvl32768b"),
+    (65536, "zvl65536b"),
+];
+// Always error on SPARC, as the necessary target features cannot be enabled in Rust at the moment.
 const SPARC_FEATURES_FOR_CORRECT_VECTOR_ABI: &'static [(u64, &'static str)] = &[/*(64, "vis")*/];
 
 const HEXAGON_FEATURES_FOR_CORRECT_VECTOR_ABI: &'static [(u64, &'static str)] =
@@ -768,17 +876,15 @@ impl Target {
         }
     }
 
-    pub fn implied_target_features<'a>(
-        &self,
-        base_features: impl Iterator<Item = &'a str>,
-    ) -> FxHashSet<&'a str> {
+    // Note: the returned set includes `base_feature`.
+    pub fn implied_target_features<'a>(&self, base_feature: &'a str) -> FxHashSet<&'a str> {
         let implied_features =
             self.rust_target_features().iter().map(|(f, _, i)| (f, i)).collect::<FxHashMap<_, _>>();
 
-        // implied target features have their own implied target features, so we traverse the
-        // map until there are no more features to add
+        // Implied target features have their own implied target features, so we traverse the
+        // map until there are no more features to add.
         let mut features = FxHashSet::default();
-        let mut new_features = base_features.collect::<Vec<&str>>();
+        let mut new_features = vec![base_feature];
         while let Some(new_feature) = new_features.pop() {
             if features.insert(new_feature) {
                 if let Some(implied_features) = implied_features.get(&new_feature) {
@@ -891,12 +997,12 @@ impl Target {
                 // about what the intended ABI is.
                 match &*self.llvm_abiname {
                     "ilp32d" | "lp64d" => {
-                        // Requires d (which implies f), incompatible with e.
-                        FeatureConstraints { required: &["d"], incompatible: &["e"] }
+                        // Requires d (which implies f), incompatible with e and zfinx.
+                        FeatureConstraints { required: &["d"], incompatible: &["e", "zfinx"] }
                     }
                     "ilp32f" | "lp64f" => {
-                        // Requires f, incompatible with e.
-                        FeatureConstraints { required: &["f"], incompatible: &["e"] }
+                        // Requires f, incompatible with e and zfinx.
+                        FeatureConstraints { required: &["f"], incompatible: &["e", "zfinx"] }
                     }
                     "ilp32" | "lp64" => {
                         // Requires nothing, incompatible with e.
@@ -915,6 +1021,28 @@ impl Target {
                     }
                     "lp64e" => {
                         // As above, `e` is not required.
+                        NOTHING
+                    }
+                    _ => unreachable!(),
+                }
+            }
+            "loongarch64" => {
+                // LoongArch handles ABI in a very sane way, being fully explicit via `llvm_abiname`
+                // about what the intended ABI is.
+                match &*self.llvm_abiname {
+                    "ilp32d" | "lp64d" => {
+                        // Requires d (which implies f), incompatible with nothing.
+                        FeatureConstraints { required: &["d"], incompatible: &[] }
+                    }
+                    "ilp32f" | "lp64f" => {
+                        // Requires f, incompatible with nothing.
+                        FeatureConstraints { required: &["f"], incompatible: &[] }
+                    }
+                    "ilp32s" | "lp64s" => {
+                        // The soft-float ABI does not require any features and is also not
+                        // incompatible with any features. Rust targets explicitly specify the
+                        // LLVM ABI names, which allows for enabling hard-float support even on
+                        // soft-float targets, and ensures that the ABI behavior is as expected.
                         NOTHING
                     }
                     _ => unreachable!(),

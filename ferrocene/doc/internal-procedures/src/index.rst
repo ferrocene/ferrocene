@@ -16,7 +16,6 @@ based on software engineering best practices.
    onboarding
    setup-local-env
    working-with-the-ci
-   testing-other-targets
    upstream-pulls
    subtree-pulls
    known-problems
@@ -25,6 +24,14 @@ based on software engineering best practices.
    release-notes
    bors
    external-contributions
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Testing
+
+   code-coverage
+   test-variants
+   testing-other-targets
 
 .. toctree::
    :maxdepth: 4

@@ -8,11 +8,10 @@ use rustc_infer::infer::canonical::{
 };
 use rustc_infer::infer::{InferCtxt, RegionVariableOrigin, TyCtxtInferExt};
 use rustc_infer::traits::solve::Goal;
-use rustc_middle::ty::fold::TypeFoldable;
-use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitableExt as _};
+use rustc_middle::traits::query::NoSolution;
+use rustc_middle::traits::solve::Certainty;
+use rustc_middle::ty::{self, Ty, TyCtxt, TypeFoldable, TypeVisitableExt as _, TypingMode};
 use rustc_span::{DUMMY_SP, ErrorGuaranteed, Span};
-use rustc_type_ir::TypingMode;
-use rustc_type_ir::solve::{Certainty, NoSolution};
 
 use crate::traits::{EvaluateConstErr, specialization_graph};
 
@@ -93,16 +92,16 @@ impl<'tcx> rustc_next_trait_solver::delegate::SolverDelegate for SolverDelegate<
     fn well_formed_goals(
         &self,
         param_env: ty::ParamEnv<'tcx>,
-        arg: ty::GenericArg<'tcx>,
+        term: ty::Term<'tcx>,
     ) -> Option<Vec<Goal<'tcx, ty::Predicate<'tcx>>>> {
-        crate::traits::wf::unnormalized_obligations(&self.0, param_env, arg, DUMMY_SP, CRATE_DEF_ID)
-            .map(|obligations| {
-                obligations.into_iter().map(|obligation| obligation.into()).collect()
-            })
-    }
-
-    fn clone_opaque_types_for_query_response(&self) -> Vec<(ty::OpaqueTypeKey<'tcx>, Ty<'tcx>)> {
-        self.0.clone_opaque_types_for_query_response()
+        crate::traits::wf::unnormalized_obligations(
+            &self.0,
+            param_env,
+            term,
+            DUMMY_SP,
+            CRATE_DEF_ID,
+        )
+        .map(|obligations| obligations.into_iter().map(|obligation| obligation.as_goal()).collect())
     }
 
     fn make_deduplicated_outlives_constraints(
@@ -150,18 +149,6 @@ impl<'tcx> rustc_next_trait_solver::delegate::SolverDelegate for SolverDelegate<
         self.0.instantiate_canonical_var(span, cv_info, universe_map)
     }
 
-    fn insert_hidden_type(
-        &self,
-        opaque_type_key: ty::OpaqueTypeKey<'tcx>,
-        param_env: ty::ParamEnv<'tcx>,
-        hidden_ty: Ty<'tcx>,
-        goals: &mut Vec<Goal<'tcx, ty::Predicate<'tcx>>>,
-    ) -> Result<(), NoSolution> {
-        self.0
-            .insert_hidden_type(opaque_type_key, DUMMY_SP, param_env, hidden_ty, goals)
-            .map_err(|_| NoSolution)
-    }
-
     fn add_item_bounds_for_hidden_type(
         &self,
         def_id: DefId,
@@ -171,19 +158,6 @@ impl<'tcx> rustc_next_trait_solver::delegate::SolverDelegate for SolverDelegate<
         goals: &mut Vec<Goal<'tcx, ty::Predicate<'tcx>>>,
     ) {
         self.0.add_item_bounds_for_hidden_type(def_id, args, param_env, hidden_ty, goals);
-    }
-
-    fn inject_new_hidden_type_unchecked(
-        &self,
-        key: ty::OpaqueTypeKey<'tcx>,
-        hidden_ty: Ty<'tcx>,
-        span: Span,
-    ) {
-        self.0.inject_new_hidden_type_unchecked(key, ty::OpaqueHiddenType { ty: hidden_ty, span })
-    }
-
-    fn reset_opaque_types(&self) {
-        let _ = self.take_opaque_types();
     }
 
     fn fetch_eligible_assoc_item(
@@ -205,6 +179,7 @@ impl<'tcx> rustc_next_trait_solver::delegate::SolverDelegate for SolverDelegate<
             match self.typing_mode() {
                 TypingMode::Coherence
                 | TypingMode::Analysis { .. }
+                | TypingMode::Borrowck { .. }
                 | TypingMode::PostBorrowckAnalysis { .. } => false,
                 TypingMode::PostAnalysis => {
                     let poly_trait_ref = self.resolve_vars_if_possible(goal_trait_ref);

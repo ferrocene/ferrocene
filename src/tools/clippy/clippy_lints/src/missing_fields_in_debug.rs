@@ -1,9 +1,9 @@
 use std::ops::ControlFlow;
 
 use clippy_utils::diagnostics::span_lint_and_then;
-use clippy_utils::is_path_lang_item;
 use clippy_utils::ty::is_type_diagnostic_item;
 use clippy_utils::visitors::{Visitable, for_each_expr};
+use clippy_utils::{is_path_lang_item, sym};
 use rustc_ast::LitKind;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_hir::def::{DefKind, Res};
@@ -13,7 +13,7 @@ use rustc_hir::{
 use rustc_lint::{LateContext, LateLintPass};
 use rustc_middle::ty::{Ty, TypeckResults};
 use rustc_session::declare_lint_pass;
-use rustc_span::{Span, Symbol, sym};
+use rustc_span::{Span, Symbol};
 
 declare_clippy_lint! {
     /// ### What it does
@@ -116,7 +116,7 @@ fn should_lint<'tcx>(
 
             if path.ident.name == sym::debug_struct && is_type_diagnostic_item(cx, recv_ty, sym::Formatter) {
                 has_debug_struct = true;
-            } else if path.ident.name.as_str() == "finish_non_exhaustive"
+            } else if path.ident.name == sym::finish_non_exhaustive
                 && is_type_diagnostic_item(cx, recv_ty, sym::DebugStruct)
             {
                 has_finish_non_exhaustive = true;
@@ -209,7 +209,7 @@ impl<'tcx> LateLintPass<'tcx> for MissingFieldsInDebug {
             && let Res::Def(DefKind::Struct | DefKind::Enum | DefKind::Union, self_path_did) = self_path.res
             && cx.tcx.is_diagnostic_item(sym::Debug, trait_def_id)
             // don't trigger if this impl was derived
-            && !cx.tcx.has_attr(item.owner_id, sym::automatically_derived)
+            && !cx.tcx.is_automatically_derived(item.owner_id.to_def_id())
             && !item.span.from_expansion()
             // find `Debug::fmt` function
             && let Some(fmt_item) = items.iter().find(|i| i.ident.name == sym::fmt)
@@ -224,11 +224,10 @@ impl<'tcx> LateLintPass<'tcx> for MissingFieldsInDebug {
             // NB: can't call cx.typeck_results() as we are not in a body
             && let typeck_results = cx.tcx.typeck_body(*body_id)
             && should_lint(cx, typeck_results, block)
-        {
             // we intentionally only lint structs, see lint description
-            if let ItemKind::Struct(data, _) = &self_item.kind {
-                check_struct(cx, typeck_results, block, self_ty, item, data);
-            }
+            && let ItemKind::Struct(_, data, _) = &self_item.kind
+        {
+            check_struct(cx, typeck_results, block, self_ty, item, data);
         }
     }
 }

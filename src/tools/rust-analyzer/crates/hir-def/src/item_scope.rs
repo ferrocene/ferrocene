@@ -3,23 +3,23 @@
 
 use std::sync::LazyLock;
 
-use base_db::CrateId;
-use hir_expand::{attrs::AttrId, db::ExpandDatabase, name::Name, AstId, MacroCallId};
+use base_db::Crate;
+use hir_expand::{AstId, MacroCallId, attrs::AttrId, db::ExpandDatabase, name::Name};
 use indexmap::map::Entry;
 use itertools::Itertools;
 use la_arena::Idx;
 use rustc_hash::{FxHashMap, FxHashSet};
-use smallvec::{smallvec, SmallVec};
+use smallvec::{SmallVec, smallvec};
 use span::Edition;
 use stdx::format_to;
 use syntax::ast;
 
 use crate::{
+    AdtId, BuiltinType, ConstId, ExternBlockId, ExternCrateId, FxIndexMap, HasModule, ImplId,
+    LocalModuleId, Lookup, MacroId, ModuleDefId, ModuleId, TraitId, UseId,
     db::DefDatabase,
     per_ns::{Item, MacrosItem, PerNs, TypesItem, ValuesItem},
     visibility::{Visibility, VisibilityExplicitness},
-    AdtId, BuiltinType, ConstId, ExternBlockId, ExternCrateId, FxIndexMap, HasModule, ImplId,
-    LocalModuleId, Lookup, MacroId, ModuleDefId, ModuleId, TraitId, UseId,
 };
 
 #[derive(Debug, Default)]
@@ -167,7 +167,7 @@ pub struct ItemScope {
     // the resolutions of the imports of this scope
     use_imports_types: FxHashMap<ImportOrExternCrate, ImportOrDef>,
     use_imports_values: FxHashMap<ImportOrGlob, ImportOrDef>,
-    use_imports_macros: FxHashMap<ImportOrGlob, ImportOrDef>,
+    use_imports_macros: FxHashMap<ImportOrExternCrate, ImportOrDef>,
 
     use_decls: Vec<UseId>,
     extern_crate_decls: Vec<ExternCrateId>,
@@ -242,7 +242,7 @@ impl ItemScope {
         self.types.iter().map(|(n, &i)| (n, i))
     }
 
-    pub fn macros(&self) -> impl Iterator<Item = (&Name, Item<MacroId, ImportOrGlob>)> + '_ {
+    pub fn macros(&self) -> impl Iterator<Item = (&Name, Item<MacroId, ImportOrExternCrate>)> + '_ {
         self.macros.iter().map(|(n, &i)| (n, i))
     }
 
@@ -250,9 +250,9 @@ impl ItemScope {
         self.use_imports_types
             .keys()
             .copied()
+            .chain(self.use_imports_macros.keys().copied())
             .filter_map(ImportOrExternCrate::import_or_glob)
             .chain(self.use_imports_values.keys().copied())
-            .chain(self.use_imports_macros.keys().copied())
             .filter_map(ImportOrGlob::into_import)
             .sorted()
             .dedup()
@@ -263,7 +263,7 @@ impl ItemScope {
 
         let mut def_map;
         let mut scope = self;
-        while let Some(&m) = scope.use_imports_macros.get(&ImportOrGlob::Import(import)) {
+        while let Some(&m) = scope.use_imports_macros.get(&ImportOrExternCrate::Import(import)) {
             match m {
                 ImportOrDef::Import(i) => {
                     let module_id = i.use_.lookup(db).container;
@@ -358,7 +358,7 @@ impl ItemScope {
     }
 
     /// Get a name from current module scope, legacy macros are not included
-    pub(crate) fn get(&self, name: &Name) -> PerNs {
+    pub fn get(&self, name: &Name) -> PerNs {
         PerNs {
             types: self.types.get(name).copied(),
             values: self.values.get(name).copied(),
@@ -453,7 +453,7 @@ impl ItemScope {
         )
     }
 
-    pub(crate) fn macro_invoc(&self, call: AstId<ast::MacroCall>) -> Option<MacroCallId> {
+    pub fn macro_invoc(&self, call: AstId<ast::MacroCall>) -> Option<MacroCallId> {
         self.macro_invocations.get(&call).copied()
     }
 
@@ -682,7 +682,6 @@ impl ItemScope {
                         }
                         _ => _ = glob_imports.macros.remove(&lookup),
                     }
-                    let import = import.and_then(ImportOrExternCrate::import_or_glob);
                     let prev = std::mem::replace(&mut fld.import, import);
                     if let Some(import) = import {
                         self.use_imports_macros.insert(
@@ -698,7 +697,6 @@ impl ItemScope {
                 {
                     if glob_imports.macros.remove(&lookup) {
                         cov_mark::hit!(import_shadowed);
-                        let import = import.and_then(ImportOrExternCrate::import_or_glob);
                         let prev = std::mem::replace(&mut fld.import, import);
                         if let Some(import) = import {
                             self.use_imports_macros.insert(
@@ -783,8 +781,9 @@ impl ItemScope {
             if let Some(Item { import, .. }) = def.macros {
                 buf.push_str(" m");
                 match import {
-                    Some(ImportOrGlob::Import(_)) => buf.push('i'),
-                    Some(ImportOrGlob::Glob(_)) => buf.push('g'),
+                    Some(ImportOrExternCrate::Import(_)) => buf.push('i'),
+                    Some(ImportOrExternCrate::Glob(_)) => buf.push('g'),
+                    Some(ImportOrExternCrate::ExternCrate(_)) => buf.push('e'),
                     None => (),
                 }
             }
@@ -893,9 +892,7 @@ impl PerNs {
             ModuleDefId::TraitAliasId(_) => PerNs::types(def, v, import),
             ModuleDefId::TypeAliasId(_) => PerNs::types(def, v, import),
             ModuleDefId::BuiltinType(_) => PerNs::types(def, v, import),
-            ModuleDefId::MacroId(mac) => {
-                PerNs::macros(mac, v, import.and_then(ImportOrExternCrate::import_or_glob))
-            }
+            ModuleDefId::MacroId(mac) => PerNs::macros(mac, v, import),
         }
     }
 }
@@ -916,7 +913,7 @@ impl ItemInNs {
     }
 
     /// Returns the crate defining this item (or `None` if `self` is built-in).
-    pub fn krate(&self, db: &dyn DefDatabase) -> Option<CrateId> {
+    pub fn krate(&self, db: &dyn DefDatabase) -> Option<Crate> {
         match self {
             ItemInNs::Types(id) | ItemInNs::Values(id) => id.module(db).map(|m| m.krate),
             ItemInNs::Macros(id) => Some(id.module(db).krate),

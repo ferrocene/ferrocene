@@ -1,12 +1,12 @@
 // tidy-alphabetical-start
 #![allow(internal_features)]
 #![allow(rustc::diagnostic_outside_of_impl)]
+#![cfg_attr(bootstrap, feature(let_chains))]
 #![doc(rust_logo)]
 #![feature(assert_matches)]
 #![feature(box_patterns)]
 #![feature(decl_macro)]
 #![feature(if_let_guard)]
-#![feature(let_chains)]
 #![feature(never_type)]
 #![feature(rustdoc_internals)]
 #![feature(slice_ptr_get)]
@@ -16,7 +16,6 @@
 #![feature(unqualified_local_imports)]
 #![feature(yeet_expr)]
 #![warn(unqualified_local_imports)]
-#![warn(unreachable_pub)]
 // tidy-alphabetical-end
 
 pub mod check_consts;

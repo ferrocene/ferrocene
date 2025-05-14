@@ -108,9 +108,6 @@ impl Step for CheckDocumentSignatures {
         crate::ferrocene::sign::for_each_signable_document(
             builder,
             self.target,
-            // Condition
-            |source| source.join("signature").join("signature.toml").exists(),
-            // Function executed
             |mut cmd, source, output| {
                 cmd.arg("verify").arg(source).arg(output).run(builder);
             },
@@ -146,7 +143,6 @@ impl Step for GenerateTarball {
             cargo,
             &[],
             &[],
-            "generate-tarball",
             "generate-tarball",
             self.target,
             builder,

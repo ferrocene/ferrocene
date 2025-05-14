@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -Copt-level
+//~? ERROR requires a string
 
 fn main() {}
 

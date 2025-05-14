@@ -12,12 +12,12 @@ use rustc_middle::mir::coverage::CoverageKind;
 use rustc_middle::mir::visit::{NonUseContext, PlaceContext, Visitor};
 use rustc_middle::mir::*;
 use rustc_middle::ty::adjustment::PointerCoercion;
+use rustc_middle::ty::print::with_no_trimmed_paths;
 use rustc_middle::ty::{
-    self, CoroutineArgsExt, InstanceKind, ScalarInt, Ty, TyCtxt, TypeVisitableExt, Variance,
+    self, CoroutineArgsExt, InstanceKind, ScalarInt, Ty, TyCtxt, TypeVisitableExt, Upcast, Variance,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_trait_selection::traits::ObligationCtxt;
-use rustc_type_ir::Upcast;
 
 use crate::util::{self, is_within_packed};
 
@@ -57,7 +57,7 @@ impl<'tcx> crate::MirPass<'tcx> for Validator {
                 ty::Coroutine(..) => ExternAbi::Rust,
                 // No need to do MIR validation on error bodies
                 ty::Error(_) => return,
-                _ => span_bug!(body.span, "unexpected body ty: {body_ty:?}"),
+                _ => span_bug!(body.span, "unexpected body ty: {body_ty}"),
             };
 
             ty::layout::fn_can_unwind(tcx, Some(def_id), body_abi)
@@ -221,12 +221,11 @@ impl<'a, 'tcx> CfgChecker<'a, 'tcx> {
 
         // Check for cycles
         let mut stack = FxHashSet::default();
-        for i in 0..parent.len() {
-            let mut bb = BasicBlock::from_usize(i);
+        for (mut bb, parent) in parent.iter_enumerated_mut() {
             stack.clear();
             stack.insert(bb);
             loop {
-                let Some(parent) = parent[bb].take() else { break };
+                let Some(parent) = parent.take() else { break };
                 let no_cycle = stack.insert(parent);
                 if !no_cycle {
                     self.fail(
@@ -373,9 +372,12 @@ impl<'a, 'tcx> Visitor<'tcx> for CfgChecker<'a, 'tcx> {
                     );
                 }
             }
-            TerminatorKind::Drop { target, unwind, .. } => {
+            TerminatorKind::Drop { target, unwind, drop, .. } => {
                 self.check_edge(location, *target, EdgeKind::Normal);
                 self.check_unwind_edge(location, *unwind);
+                if let Some(drop) = drop {
+                    self.check_edge(location, *drop, EdgeKind::Normal);
+                }
             }
             TerminatorKind::Call { func, args, .. }
             | TerminatorKind::TailCall { func, args, .. } => {
@@ -544,7 +546,13 @@ pub(super) fn validate_types<'tcx>(
     caller_body: &Body<'tcx>,
 ) -> Vec<(Location, String)> {
     let mut type_checker = TypeChecker { body, caller_body, tcx, typing_env, failures: Vec::new() };
-    type_checker.visit_body(body);
+    // The type checker formats a bunch of strings with type names in it, but these strings
+    // are not always going to be encountered on the error path since the inliner also uses
+    // the validator, and there are certain kinds of inlining (even for valid code) that
+    // can cause validation errors (mostly around where clauses and rigid projections).
+    with_no_trimmed_paths!({
+        type_checker.visit_body(body);
+    });
     type_checker.failures
 }
 
@@ -656,7 +664,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
             ProjectionElem::Index(index) => {
                 let index_ty = self.body.local_decls[index].ty;
                 if index_ty != self.tcx.types.usize {
-                    self.fail(location, format!("bad index ({index_ty:?} != usize)"))
+                    self.fail(location, format!("bad index ({index_ty} != usize)"))
                 }
             }
             ProjectionElem::Deref
@@ -665,10 +673,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                 let base_ty = place_ref.ty(&self.body.local_decls, self.tcx).ty;
 
                 if base_ty.is_box() {
-                    self.fail(
-                        location,
-                        format!("{base_ty:?} dereferenced after ElaborateBoxDerefs"),
-                    )
+                    self.fail(location, format!("{base_ty} dereferenced after ElaborateBoxDerefs"))
                 }
             }
             ProjectionElem::Field(f, ty) => {
@@ -681,7 +686,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                         this.fail(
                             location,
                             format!(
-                                "Field projection `{place_ref:?}.{f:?}` specified type `{ty:?}`, but actual type is `{f_ty:?}`"
+                                "Field projection `{place_ref:?}.{f:?}` specified type `{ty}`, but actual type is `{f_ty}`"
                             )
                         )
                     }
@@ -745,7 +750,9 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                             // since we may be in the process of computing this MIR in the
                             // first place.
                             let layout = if def_id == self.caller_body.source.def_id() {
-                                self.caller_body.coroutine_layout_raw()
+                                self.caller_body
+                                    .coroutine_layout_raw()
+                                    .or_else(|| self.tcx.coroutine_layout(def_id, args))
                             } else if self.tcx.needs_coroutine_by_move_body_def_id(def_id)
                                 && let ty::ClosureKind::FnOnce =
                                     args.as_coroutine().kind_ty().to_opt_closure_kind().unwrap()
@@ -755,7 +762,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                                 // Same if this is the by-move body of a coroutine-closure.
                                 self.caller_body.coroutine_layout_raw()
                             } else {
-                                self.tcx.coroutine_layout(def_id, args.as_coroutine().kind_ty())
+                                self.tcx.coroutine_layout(def_id, args)
                             };
 
                             let Some(layout) = layout else {
@@ -807,7 +814,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                     self.fail(
                         location,
                         format!(
-                            "Failed subtyping {ty:#?} and {:#?}",
+                            "Failed subtyping {ty} and {}",
                             place_ref.ty(&self.body.local_decls, self.tcx).ty
                         ),
                     )
@@ -827,7 +834,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                     self.fail(
                         location,
                         format!(
-                            "Cannot unwrap unsafe binder {binder_ty:?} into type {unwrapped_ty:?}"
+                            "Cannot unwrap unsafe binder {binder_ty:?} into type {unwrapped_ty}"
                         ),
                     );
                 }
@@ -842,7 +849,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
             if ty.is_union() || ty.is_enum() {
                 self.fail(
                     START_BLOCK.start_location(),
-                    format!("invalid type {ty:?} in debuginfo for {:?}", debuginfo.name),
+                    format!("invalid type {ty} in debuginfo for {:?}", debuginfo.name),
                 );
             }
             if projection.is_empty() {
@@ -1065,15 +1072,13 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                         if !self.mir_assign_valid_types(a, b) {
                             self.fail(
                                 location,
-                                format!("Cannot {op:?} compare incompatible types {a:?} and {b:?}"),
+                                format!("Cannot {op:?} compare incompatible types {a} and {b}"),
                             );
                         }
                     } else if a != b {
                         self.fail(
                             location,
-                            format!(
-                                "Cannot perform binary op {op:?} on unequal types {a:?} and {b:?}"
-                            ),
+                            format!("Cannot perform binary op {op:?} on unequal types {a} and {b}"),
                         );
                     }
                 }
@@ -1082,7 +1087,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                     Offset => {
                         check_kinds!(a, "Cannot offset non-pointer type {:?}", ty::RawPtr(..));
                         if b != self.tcx.types.isize && b != self.tcx.types.usize {
-                            self.fail(location, format!("Cannot offset by non-isize type {b:?}"));
+                            self.fail(location, format!("Cannot offset by non-isize type {b}"));
                         }
                     }
                     Eq | Lt | Le | Ne | Ge | Gt => {
@@ -1314,7 +1319,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                             {
                                 self.fail(
                                     location,
-                                    format!("Cannot transmute from non-`Sized` type {op_ty:?}"),
+                                    format!("Cannot transmute from non-`Sized` type {op_ty}"),
                                 );
                             }
                             if !self
@@ -1341,7 +1346,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
             }
             Rvalue::NullaryOp(NullOp::OffsetOf(indices), container) => {
                 let fail_out_of_bounds = |this: &mut Self, location, field, ty| {
-                    this.fail(location, format!("Out of bounds field {field:?} for {ty:?}"));
+                    this.fail(location, format!("Out of bounds field {field:?} for {ty}"));
                 };
 
                 let mut current_ty = *container;
@@ -1375,7 +1380,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                         _ => {
                             self.fail(
                                 location,
-                                format!("Cannot get offset ({variant:?}, {field:?}) from type {current_ty:?}"),
+                                format!("Cannot get offset ({variant:?}, {field:?}) from type {current_ty}"),
                             );
                             return;
                         }
@@ -1404,7 +1409,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                 if !self.mir_assign_valid_types(unwrapped_ty, binder_inner_ty) {
                     self.fail(
                         location,
-                        format!("Cannot wrap {unwrapped_ty:?} into unsafe binder {binder_ty:?}"),
+                        format!("Cannot wrap {unwrapped_ty} into unsafe binder {binder_ty:?}"),
                     );
                 }
             }
@@ -1490,24 +1495,27 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                 // since CopyNonOverlapping is parametrized by 1 type,
                 // we only need to check that they are equal and not keep an extra parameter.
                 if !self.mir_assign_valid_types(op_src_ty, op_dst_ty) {
-                    self.fail(location, format!("bad arg ({op_src_ty:?} != {op_dst_ty:?})"));
+                    self.fail(location, format!("bad arg ({op_src_ty} != {op_dst_ty})"));
                 }
 
                 let op_cnt_ty = count.ty(&self.body.local_decls, self.tcx);
                 if op_cnt_ty != self.tcx.types.usize {
-                    self.fail(location, format!("bad arg ({op_cnt_ty:?} != usize)"))
+                    self.fail(location, format!("bad arg ({op_cnt_ty} != usize)"))
                 }
             }
             StatementKind::SetDiscriminant { place, .. } => {
                 if self.body.phase < MirPhase::Runtime(RuntimePhase::Initial) {
                     self.fail(location, "`SetDiscriminant`is not allowed until deaggregation");
                 }
-                let pty = place.ty(&self.body.local_decls, self.tcx).ty.kind();
-                if !matches!(pty, ty::Adt(..) | ty::Coroutine(..) | ty::Alias(ty::Opaque, ..)) {
+                let pty = place.ty(&self.body.local_decls, self.tcx).ty;
+                if !matches!(
+                    pty.kind(),
+                    ty::Adt(..) | ty::Coroutine(..) | ty::Alias(ty::Opaque, ..)
+                ) {
                     self.fail(
                         location,
                         format!(
-                            "`SetDiscriminant` is only allowed on ADTs and coroutines, not {pty:?}"
+                            "`SetDiscriminant` is only allowed on ADTs and coroutines, not {pty}"
                         ),
                     );
                 }
@@ -1556,7 +1564,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                     if ScalarInt::try_from_uint(value, size).is_none() {
                         self.fail(
                             location,
-                            format!("the value {value:#x} is not a proper {switch_ty:?}"),
+                            format!("the value {value:#x} is not a proper {switch_ty}"),
                         )
                     }
                 }

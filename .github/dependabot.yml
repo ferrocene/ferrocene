@@ -1,9 +1,11 @@
+# https://docs.github.com/code-security/dependabot/working-with-dependabot/dependabot-options-reference
 version: 2
 updates:
   - package-ecosystem: gitsubmodule
     directory: /
     allow:
       - dependency-name: ferrocene/tools/flip-link
+      - dependency-name: ferrocene/tools/grcov
     schedule:
       interval: daily
       time: "05:00"

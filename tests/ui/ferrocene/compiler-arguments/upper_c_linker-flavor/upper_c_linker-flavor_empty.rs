@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -Clinker-flavor
+//~? ERROR requires one of
 
 fn main() {}
 

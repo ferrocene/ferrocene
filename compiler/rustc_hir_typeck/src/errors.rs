@@ -5,7 +5,7 @@ use std::borrow::Cow;
 use rustc_errors::codes::*;
 use rustc_errors::{
     Applicability, Diag, DiagArgValue, DiagSymbolList, EmissionGuarantee, IntoDiagArg, MultiSpan,
-    SubdiagMessageOp, Subdiagnostic,
+    Subdiagnostic,
 };
 use rustc_macros::{Diagnostic, LintDiagnostic, Subdiagnostic};
 use rustc_middle::ty::{self, Ty};
@@ -270,11 +270,7 @@ pub(crate) struct SuggestAnnotations {
     pub suggestions: Vec<SuggestAnnotation>,
 }
 impl Subdiagnostic for SuggestAnnotations {
-    fn add_to_diag_with<G: EmissionGuarantee, F: SubdiagMessageOp<G>>(
-        self,
-        diag: &mut Diag<'_, G>,
-        _: &F,
-    ) {
+    fn add_to_diag<G: EmissionGuarantee>(self, diag: &mut Diag<'_, G>) {
         if self.suggestions.is_empty() {
             return;
         }
@@ -337,11 +333,7 @@ pub(crate) struct TypeMismatchFruTypo {
 }
 
 impl Subdiagnostic for TypeMismatchFruTypo {
-    fn add_to_diag_with<G: EmissionGuarantee, F: SubdiagMessageOp<G>>(
-        self,
-        diag: &mut Diag<'_, G>,
-        _f: &F,
-    ) {
+    fn add_to_diag<G: EmissionGuarantee>(self, diag: &mut Diag<'_, G>) {
         diag.arg("expr", self.expr.as_deref().unwrap_or("NONE"));
 
         // Only explain that `a ..b` is a range if it's split up
@@ -373,9 +365,14 @@ pub(crate) struct LossyProvenanceInt2Ptr<'tcx> {
     pub sugg: LossyProvenanceInt2PtrSuggestion,
 }
 
-#[derive(LintDiagnostic)]
-#[diag(hir_typeck_ptr_cast_add_auto_to_object)]
+#[derive(Diagnostic)]
+#[diag(hir_typeck_ptr_cast_add_auto_to_object, code = E0804)]
+#[note]
+#[help]
 pub(crate) struct PtrCastAddAutoToObject {
+    #[primary_span]
+    #[label]
+    pub span: Span,
     pub traits_len: usize,
     pub traits: DiagSymbolList<String>,
 }
@@ -594,11 +591,7 @@ pub(crate) struct RemoveSemiForCoerce {
 }
 
 impl Subdiagnostic for RemoveSemiForCoerce {
-    fn add_to_diag_with<G: EmissionGuarantee, F: SubdiagMessageOp<G>>(
-        self,
-        diag: &mut Diag<'_, G>,
-        _f: &F,
-    ) {
+    fn add_to_diag<G: EmissionGuarantee>(self, diag: &mut Diag<'_, G>) {
         let mut multispan: MultiSpan = self.semi.into();
         multispan.push_span_label(self.expr, fluent::hir_typeck_remove_semi_for_coerce_expr);
         multispan.push_span_label(self.ret, fluent::hir_typeck_remove_semi_for_coerce_ret);
@@ -722,7 +715,7 @@ pub(crate) struct NoAssociatedItem {
     #[primary_span]
     pub span: Span,
     pub item_kind: &'static str,
-    pub item_name: Ident,
+    pub item_ident: Ident,
     pub ty_prefix: Cow<'static, str>,
     pub ty_str: String,
     pub trait_missing_method: bool,
@@ -773,20 +766,16 @@ pub(crate) enum CastUnknownPointerSub {
 }
 
 impl rustc_errors::Subdiagnostic for CastUnknownPointerSub {
-    fn add_to_diag_with<G: EmissionGuarantee, F: SubdiagMessageOp<G>>(
-        self,
-        diag: &mut Diag<'_, G>,
-        f: &F,
-    ) {
+    fn add_to_diag<G: EmissionGuarantee>(self, diag: &mut Diag<'_, G>) {
         match self {
             CastUnknownPointerSub::To(span) => {
-                let msg = f(diag, crate::fluent_generated::hir_typeck_label_to);
+                let msg = diag.eagerly_translate(fluent::hir_typeck_label_to);
                 diag.span_label(span, msg);
-                let msg = f(diag, crate::fluent_generated::hir_typeck_note);
+                let msg = diag.eagerly_translate(fluent::hir_typeck_note);
                 diag.note(msg);
             }
             CastUnknownPointerSub::From(span) => {
-                let msg = f(diag, crate::fluent_generated::hir_typeck_label_from);
+                let msg = diag.eagerly_translate(fluent::hir_typeck_label_from);
                 diag.span_label(span, msg);
             }
         }
@@ -973,4 +962,12 @@ pub(crate) enum SupertraitItemShadowee {
         spans: MultiSpan,
         traits: DiagSymbolList,
     },
+}
+
+#[derive(Diagnostic)]
+#[diag(hir_typeck_register_type_unstable)]
+pub(crate) struct RegisterTypeUnstable<'a> {
+    #[primary_span]
+    pub span: Span,
+    pub ty: Ty<'a>,
 }

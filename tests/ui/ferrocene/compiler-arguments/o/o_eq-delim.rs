@@ -1,6 +1,7 @@
 //@ check-pass
 //@ compile-flags: -o=foo
 //@ ferrocene-execute-in-temp
+//~? WARN ignoring --out-dir flag due to -o flag
 
 fn main() {}
 

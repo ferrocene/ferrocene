@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -C link-dead-code=invalid
+//~? ERROR incorrect value
 
 fn main() {}
 

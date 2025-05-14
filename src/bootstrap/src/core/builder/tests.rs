@@ -1,11 +1,16 @@
-use std::thread;
+use std::env::VarError;
+use std::{panic, thread};
 
+use build_helper::ci::CiEnv;
+use build_helper::git::GitConfig;
+use build_helper::stage0_parser::parse_stage0_file;
 use llvm::prebuilt_llvm_config;
 
 use super::*;
 use crate::Flags;
 use crate::core::build_steps::doc::DocumentationFormat;
 use crate::core::config::Config;
+use crate::utils::tests::git::{GitCtx, git_test};
 
 static TEST_TRIPLE_1: &str = "i686-unknown-haiku";
 static TEST_TRIPLE_2: &str = "i686-unknown-hurd-gnu";
@@ -52,9 +57,6 @@ fn configure_with_args(cmd: &[String], host: &[&str], target: &[&str]) -> Config
 fn first<A, B>(v: Vec<(A, B)>) -> Vec<A> {
     v.into_iter().map(|(a, _)| a).collect::<Vec<_>>()
 }
-fn second<A, B>(v: Vec<(A, B)>) -> Vec<B> {
-    v.into_iter().map(|(_, b)| b).collect::<Vec<_>>()
-}
 
 fn run_build(paths: &[PathBuf], config: Config) -> Cache {
     let kind = config.cmd.kind();
@@ -74,7 +76,7 @@ fn check_cli<const N: usize>(paths: [&str; N]) {
 macro_rules! std {
     ($host:ident => $target:ident, stage = $stage:literal) => {
         compile::Std::new(
-            Compiler { host: TargetSelection::from_user($host), stage: $stage },
+            Compiler::new($stage, TargetSelection::from_user($host)),
             TargetSelection::from_user($target),
         )
     };
@@ -87,7 +89,7 @@ macro_rules! doc_std {
 macro_rules! rustc {
     ($host:ident => $target:ident, stage = $stage:literal) => {
         compile::Rustc::new(
-            Compiler { host: TargetSelection::from_user($host), stage: $stage },
+            Compiler::new($stage, TargetSelection::from_user($host)),
             TargetSelection::from_user($target),
         )
     };
@@ -242,36 +244,106 @@ fn alias_and_path_for_library() {
 }
 
 #[test]
-fn ci_rustc_if_unchanged_logic() {
-    let config = Config::parse_inner(
+fn ci_rustc_if_unchanged_invalidate_on_compiler_changes() {
+    git_test(|ctx| {
+        prepare_rustc_checkout(ctx);
+        ctx.create_upstream_merge(&["compiler/bar"]);
+        // This change should invalidate download-ci-rustc
+        ctx.create_nonupstream_merge(&["compiler/foo"]);
+
+        let config = parse_config_download_rustc_at(ctx.get_path(), "if-unchanged", true);
+        assert_eq!(config.download_rustc_commit, None);
+    });
+}
+
+#[test]
+fn ci_rustc_if_unchanged_invalidate_on_library_changes_in_ci() {
+    git_test(|ctx| {
+        prepare_rustc_checkout(ctx);
+        ctx.create_upstream_merge(&["compiler/bar"]);
+        // This change should invalidate download-ci-rustc
+        ctx.create_nonupstream_merge(&["library/foo"]);
+
+        let config = parse_config_download_rustc_at(ctx.get_path(), "if-unchanged", true);
+        assert_eq!(config.download_rustc_commit, None);
+    });
+}
+
+// this test is similar to the other two `ci_rustc_if_unchanged_` tests below but overrides
+// `merge_bot_email`. it uses the lower level `build_helper::git` API because
+// `parse_config_download_rustc_at` is hard-coded to use the `git_merge_commit_email` value in
+// the git-tracked file `/src/stage0`
+#[test]
+fn ci_rustc_with_square_bracket_in_author_email() {
+    git_test(|ctx| {
+        let author_email = "bors[bot]@example.com";
+        ctx.merge_bot_email = format!("Merge bot <{}>", author_email);
+        ctx.write("src/ci/channel", "nightly");
+        ctx.commit();
+
+        let sha = ctx.create_upstream_merge(&["compiler/bar"]);
+
+        let git_config =
+            GitConfig { nightly_branch: &ctx.nightly_branch, git_merge_commit_email: author_email };
+        let got = build_helper::git::get_closest_upstream_commit(
+            Some(ctx.get_path()),
+            &git_config,
+            CiEnv::None,
+        );
+
+        assert_eq!(got, Ok(Some(sha)));
+    });
+}
+
+#[test]
+fn ci_rustc_if_unchanged_do_not_invalidate_on_library_changes_outside_ci() {
+    git_test(|ctx| {
+        prepare_rustc_checkout(ctx);
+        let sha = ctx.create_upstream_merge(&["compiler/bar"]);
+        // This change should not invalidate download-ci-rustc
+        ctx.create_nonupstream_merge(&["library/foo"]);
+
+        let config = parse_config_download_rustc_at(ctx.get_path(), "if-unchanged", false);
+        assert_eq!(config.download_rustc_commit, Some(sha));
+    });
+}
+
+#[test]
+fn ci_rustc_if_unchanged_do_not_invalidate_on_tool_changes() {
+    git_test(|ctx| {
+        prepare_rustc_checkout(ctx);
+        let sha = ctx.create_upstream_merge(&["compiler/bar"]);
+        // This change should not invalidate download-ci-rustc
+        ctx.create_nonupstream_merge(&["src/tools/foo"]);
+
+        let config = parse_config_download_rustc_at(ctx.get_path(), "if-unchanged", true);
+        assert_eq!(config.download_rustc_commit, Some(sha));
+    });
+}
+
+/// Prepares the given directory so that it looks like a rustc checkout.
+/// Also configures `GitCtx` to use the correct merge bot e-mail for upstream merge commits.
+fn prepare_rustc_checkout(ctx: &mut GitCtx) {
+    ctx.merge_bot_email =
+        format!("Merge bot <{}>", parse_stage0_file().config.git_merge_commit_email);
+    ctx.write("src/ci/channel", "nightly");
+    ctx.commit();
+}
+
+/// Parses a Config directory from `path`, with the given value of `download_rustc`.
+fn parse_config_download_rustc_at(path: &Path, download_rustc: &str, ci: bool) -> Config {
+    Config::parse_inner(
         Flags::parse(&[
             "build".to_owned(),
             "--dry-run".to_owned(),
-            "--set=rust.download-rustc='if-unchanged'".to_owned(),
+            "--ci".to_owned(),
+            if ci { "true" } else { "false" }.to_owned(),
+            format!("--set=rust.download-rustc='{download_rustc}'"),
+            "--src".to_owned(),
+            path.to_str().unwrap().to_owned(),
         ]),
         |&_| Ok(Default::default()),
-    );
-
-    let build = Build::new(config.clone());
-    let builder = Builder::new(&build);
-
-    if config.out.exists() {
-        fs::remove_dir_all(&config.out).unwrap();
-    }
-
-    builder.run_step_descriptions(&Builder::get_step_descriptions(config.cmd.kind()), &[]);
-
-    // Make sure "if-unchanged" logic doesn't try to use CI rustc while there are changes
-    // in compiler and/or library.
-    if config.download_rustc_commit.is_some() {
-        let has_changes =
-            config.last_modified_commit(&["compiler", "library"], "download-rustc", true).is_none();
-
-        assert!(
-            !has_changes,
-            "CI-rustc can't be used with 'if-unchanged' while there are changes in compiler and/or library."
-        );
-    }
+    )
 }
 
 mod defaults {
@@ -299,7 +371,7 @@ mod defaults {
             first(cache.all::<tool::Rustdoc>()),
             // Recall that rustdoc stages are off-by-one
             // - this is the compiler it's _linked_ to, not built with.
-            &[tool::Rustdoc { compiler: Compiler { host: a, stage: 1 } }],
+            &[tool::Rustdoc { compiler: Compiler::new(1, a) }],
         );
         assert_eq!(
             first(cache.all::<compile::Rustc>()),
@@ -322,7 +394,7 @@ mod defaults {
             first(cache.all::<tool::Rustdoc>()),
             // This is the beta rustdoc.
             // Add an assert here to make sure this is the only rustdoc built.
-            &[tool::Rustdoc { compiler: Compiler { host: a, stage: 0 } }],
+            &[tool::Rustdoc { compiler: Compiler::new(0, a) }],
         );
         assert!(cache.all::<compile::Rustc>().is_empty());
     }
@@ -355,16 +427,16 @@ mod defaults {
         assert_eq!(
             first(cache.all::<compile::Assemble>()),
             &[
-                compile::Assemble { target_compiler: Compiler { host: a, stage: 0 } },
-                compile::Assemble { target_compiler: Compiler { host: a, stage: 1 } },
-                compile::Assemble { target_compiler: Compiler { host: b, stage: 1 } },
+                compile::Assemble { target_compiler: Compiler::new(0, a) },
+                compile::Assemble { target_compiler: Compiler::new(1, a) },
+                compile::Assemble { target_compiler: Compiler::new(1, b) },
             ]
         );
         assert_eq!(
             first(cache.all::<tool::Rustdoc>()),
             &[
-                tool::Rustdoc { compiler: Compiler { host: a, stage: 1 } },
-                tool::Rustdoc { compiler: Compiler { host: b, stage: 1 } },
+                tool::Rustdoc { compiler: Compiler::new(1, a) },
+                tool::Rustdoc { compiler: Compiler::new(1, b) },
             ],
         );
         assert_eq!(
@@ -395,14 +467,14 @@ mod defaults {
         assert_eq!(first(cache.all::<doc::ErrorIndex>()), &[doc::ErrorIndex { target: a },]);
         assert_eq!(
             first(cache.all::<tool::ErrorIndex>()),
-            &[tool::ErrorIndex { compiler: Compiler { host: a, stage: 0 } }]
+            &[tool::ErrorIndex { compiler: Compiler::new(0, a) }]
         );
         // docs should be built with the beta compiler, not with the stage0 artifacts.
         // recall that rustdoc is off-by-one: `stage` is the compiler rustdoc is _linked_ to,
         // not the one it was built by.
         assert_eq!(
             first(cache.all::<tool::Rustdoc>()),
-            &[tool::Rustdoc { compiler: Compiler { host: a, stage: 0 } },]
+            &[tool::Rustdoc { compiler: Compiler::new(0, a) },]
         );
     }
 }
@@ -410,9 +482,9 @@ mod defaults {
 mod dist {
     use pretty_assertions::assert_eq;
 
-    use super::{Config, TEST_TRIPLE_1, TEST_TRIPLE_2, TEST_TRIPLE_3, first, run_build, second};
+    use super::{Config, TEST_TRIPLE_1, TEST_TRIPLE_2, TEST_TRIPLE_3, first, run_build};
+    use crate::Flags;
     use crate::core::builder::*;
-    use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
 
     fn configure(host: &[&str], target: &[&str]) -> Config {
         Config { stage: 2, ..super::configure("dist", host, target) }
@@ -427,17 +499,17 @@ mod dist {
         assert_eq!(first(cache.all::<dist::Mingw>()), &[dist::Mingw { host: a },]);
         assert_eq!(
             first(cache.all::<dist::Rustc>()),
-            &[dist::Rustc { compiler: Compiler { host: a, stage: 2 } },]
+            &[dist::Rustc { compiler: Compiler::new(2, a) },]
         );
         assert_eq!(
             first(cache.all::<dist::Std>()),
-            &[dist::Std { compiler: Compiler { host: a, stage: 1 }, target: a },]
+            &[dist::Std { compiler: Compiler::new(1, a), target: a },]
         );
         assert_eq!(first(cache.all::<dist::Src>()), &[dist::Src]);
         // Make sure rustdoc is only built once.
         assert_eq!(
             first(cache.all::<tool::Rustdoc>()),
-            &[tool::Rustdoc { compiler: Compiler { host: a, stage: 2 } },]
+            &[tool::Rustdoc { compiler: Compiler::new(2, a) },]
         );
     }
 
@@ -455,13 +527,13 @@ mod dist {
         );
         assert_eq!(
             first(cache.all::<dist::Rustc>()),
-            &[dist::Rustc { compiler: Compiler { host: a, stage: 2 } },]
+            &[dist::Rustc { compiler: Compiler::new(2, a) },]
         );
         assert_eq!(
             first(cache.all::<dist::Std>()),
             &[
-                dist::Std { compiler: Compiler { host: a, stage: 1 }, target: a },
-                dist::Std { compiler: Compiler { host: a, stage: 2 }, target: b },
+                dist::Std { compiler: Compiler::new(1, a), target: a },
+                dist::Std { compiler: Compiler::new(2, a), target: b },
             ]
         );
         assert_eq!(first(cache.all::<dist::Src>()), &[dist::Src]);
@@ -484,15 +556,15 @@ mod dist {
         assert_eq!(
             first(cache.all::<dist::Rustc>()),
             &[
-                dist::Rustc { compiler: Compiler { host: a, stage: 2 } },
-                dist::Rustc { compiler: Compiler { host: b, stage: 2 } },
+                dist::Rustc { compiler: Compiler::new(2, a) },
+                dist::Rustc { compiler: Compiler::new(2, b) },
             ]
         );
         assert_eq!(
             first(cache.all::<dist::Std>()),
             &[
-                dist::Std { compiler: Compiler { host: a, stage: 1 }, target: a },
-                dist::Std { compiler: Compiler { host: a, stage: 1 }, target: b },
+                dist::Std { compiler: Compiler::new(1, a), target: a },
+                dist::Std { compiler: Compiler::new(1, a), target: b },
             ]
         );
         assert_eq!(
@@ -520,13 +592,12 @@ mod dist {
 
         assert_eq!(
             first(cache.all::<dist::Rustc>()),
-            &[dist::Rustc { compiler: Compiler { host: b, stage: 2 } },]
+            &[dist::Rustc { compiler: Compiler::new(2, b) },]
         );
         assert_eq!(
             first(cache.all::<compile::Rustc>()),
             &[
                 rustc!(TEST_TRIPLE_1 => TEST_TRIPLE_1, stage = 0),
-                rustc!(TEST_TRIPLE_1 => TEST_TRIPLE_1, stage = 1),
                 rustc!(TEST_TRIPLE_1 => TEST_TRIPLE_2, stage = 1),
             ]
         );
@@ -553,16 +624,16 @@ mod dist {
         assert_eq!(
             first(cache.all::<dist::Rustc>()),
             &[
-                dist::Rustc { compiler: Compiler { host: a, stage: 2 } },
-                dist::Rustc { compiler: Compiler { host: b, stage: 2 } },
+                dist::Rustc { compiler: Compiler::new(2, a) },
+                dist::Rustc { compiler: Compiler::new(2, b) },
             ]
         );
         assert_eq!(
             first(cache.all::<dist::Std>()),
             &[
-                dist::Std { compiler: Compiler { host: a, stage: 1 }, target: a },
-                dist::Std { compiler: Compiler { host: a, stage: 1 }, target: b },
-                dist::Std { compiler: Compiler { host: a, stage: 2 }, target: c },
+                dist::Std { compiler: Compiler::new(1, a), target: a },
+                dist::Std { compiler: Compiler::new(1, a), target: b },
+                dist::Std { compiler: Compiler::new(2, a), target: c },
             ]
         );
         assert_eq!(first(cache.all::<dist::Src>()), &[dist::Src]);
@@ -579,7 +650,7 @@ mod dist {
         assert_eq!(first(cache.all::<dist::Mingw>()), &[dist::Mingw { host: c },]);
         assert_eq!(
             first(cache.all::<dist::Std>()),
-            &[dist::Std { compiler: Compiler { host: a, stage: 2 }, target: c },]
+            &[dist::Std { compiler: Compiler::new(2, a), target: c },]
         );
     }
 
@@ -599,15 +670,15 @@ mod dist {
         assert_eq!(
             first(cache.all::<dist::Rustc>()),
             &[
-                dist::Rustc { compiler: Compiler { host: a, stage: 2 } },
-                dist::Rustc { compiler: Compiler { host: b, stage: 2 } },
+                dist::Rustc { compiler: Compiler::new(2, a) },
+                dist::Rustc { compiler: Compiler::new(2, b) },
             ]
         );
         assert_eq!(
             first(cache.all::<dist::Std>()),
             &[
-                dist::Std { compiler: Compiler { host: a, stage: 1 }, target: a },
-                dist::Std { compiler: Compiler { host: a, stage: 1 }, target: b },
+                dist::Std { compiler: Compiler::new(1, a), target: a },
+                dist::Std { compiler: Compiler::new(1, a), target: b },
             ]
         );
         assert_eq!(first(cache.all::<dist::Src>()), &[dist::Src]);
@@ -624,10 +695,41 @@ mod dist {
         assert_eq!(
             first(cache.all::<compile::Assemble>()),
             &[
-                compile::Assemble { target_compiler: Compiler { host: a, stage: 0 } },
-                compile::Assemble { target_compiler: Compiler { host: a, stage: 1 } },
-                compile::Assemble { target_compiler: Compiler { host: a, stage: 2 } },
-                compile::Assemble { target_compiler: Compiler { host: b, stage: 2 } },
+                compile::Assemble { target_compiler: Compiler::new(0, a) },
+                compile::Assemble { target_compiler: Compiler::new(1, a) },
+                compile::Assemble { target_compiler: Compiler::new(2, a) },
+                compile::Assemble { target_compiler: Compiler::new(2, b) },
+            ]
+        );
+    }
+
+    /// This also serves as an important regression test for <https://github.com/rust-lang/rust/issues/138123>
+    /// and <https://github.com/rust-lang/rust/issues/138004>.
+    #[test]
+    fn dist_all_cross() {
+        let cmd_args =
+            &["dist", "--stage", "2", "--dry-run", "--config=/does/not/exist"].map(str::to_owned);
+        let config_str = r#"
+            [rust]
+            channel = "nightly"
+
+            [build]
+            extended = true
+
+            build = "i686-unknown-haiku"
+            host = ["i686-unknown-netbsd"]
+            target = ["i686-unknown-netbsd"]
+        "#;
+        let config = Config::parse_inner(Flags::parse(cmd_args), |&_| toml::from_str(config_str));
+        let mut cache = run_build(&[], config);
+
+        // Stage 2 `compile::Rustc` should **NEVER** be cached here.
+        assert_eq!(
+            first(cache.all::<compile::Rustc>()),
+            &[
+                rustc!(TEST_TRIPLE_1 => TEST_TRIPLE_1, stage = 0),
+                rustc!(TEST_TRIPLE_1 => TEST_TRIPLE_1, stage = 1),
+                rustc!(TEST_TRIPLE_1 => TEST_TRIPLE_3, stage = 1),
             ]
         );
     }
@@ -674,28 +776,16 @@ mod dist {
             first(builder.cache.all::<compile::Assemble>()),
             &[
                 compile::Assemble {
-                    target_compiler: Compiler {
-                        host: TargetSelection::from_user(TEST_TRIPLE_1),
-                        stage: 0
-                    }
+                    target_compiler: Compiler::new(0, TargetSelection::from_user(TEST_TRIPLE_1),)
                 },
                 compile::Assemble {
-                    target_compiler: Compiler {
-                        host: TargetSelection::from_user(TEST_TRIPLE_1),
-                        stage: 1
-                    }
+                    target_compiler: Compiler::new(1, TargetSelection::from_user(TEST_TRIPLE_1),)
                 },
                 compile::Assemble {
-                    target_compiler: Compiler {
-                        host: TargetSelection::from_user(TEST_TRIPLE_1),
-                        stage: 2
-                    }
+                    target_compiler: Compiler::new(2, TargetSelection::from_user(TEST_TRIPLE_1),)
                 },
                 compile::Assemble {
-                    target_compiler: Compiler {
-                        host: TargetSelection::from_user(TEST_TRIPLE_2),
-                        stage: 2
-                    }
+                    target_compiler: Compiler::new(2, TargetSelection::from_user(TEST_TRIPLE_2),)
                 },
             ]
         );
@@ -738,9 +828,9 @@ mod dist {
         assert_eq!(
             first(builder.cache.all::<compile::Assemble>()),
             &[
-                compile::Assemble { target_compiler: Compiler { host: a, stage: 0 } },
-                compile::Assemble { target_compiler: Compiler { host: a, stage: 1 } },
-                compile::Assemble { target_compiler: Compiler { host: a, stage: 2 } },
+                compile::Assemble { target_compiler: Compiler::new(0, a) },
+                compile::Assemble { target_compiler: Compiler::new(1, a) },
+                compile::Assemble { target_compiler: Compiler::new(2, a) },
             ]
         );
         assert_eq!(
@@ -772,8 +862,9 @@ mod dist {
             only_modified: false,
             extra_checks: None,
             no_capture: false,
-            coverage: false,
+            coverage: None,
             ferrocene_test_one_crate_per_cargo_call: false,
+            test_variant: None,
         };
 
         let build = Build::new(config);
@@ -791,7 +882,7 @@ mod dist {
         assert_eq!(
             first(builder.cache.all::<test::Crate>()),
             &[test::Crate {
-                compiler: Compiler { host, stage: 0 },
+                compiler: Compiler::new(0, host),
                 target: host,
                 mode: crate::Mode::Std,
                 crates: vec!["std".to_owned()],
@@ -823,13 +914,13 @@ mod dist {
         );
         assert_eq!(
             first(builder.cache.all::<tool::ErrorIndex>()),
-            &[tool::ErrorIndex { compiler: Compiler { host: a, stage: 1 } }]
+            &[tool::ErrorIndex { compiler: Compiler::new(1, a) }]
         );
         // This is actually stage 1, but Rustdoc::run swaps out the compiler with
         // stage minus 1 if --stage is not 0. Very confusing!
         assert_eq!(
             first(builder.cache.all::<tool::Rustdoc>()),
-            &[tool::Rustdoc { compiler: Compiler { host: a, stage: 2 } },]
+            &[tool::Rustdoc { compiler: Compiler::new(2, a) },]
         );
     }
 
@@ -852,8 +943,9 @@ mod dist {
             only_modified: false,
             extra_checks: None,
             no_capture: false,
-            coverage: false,
+            coverage: None,
             ferrocene_test_one_crate_per_cargo_call: false,
+            test_variant: None,
         };
         // Make sure rustfmt binary not being found isn't an error.
         config.channel = "beta".to_string();
@@ -871,7 +963,7 @@ mod dist {
         );
         assert_eq!(
             first(builder.cache.all::<tool::ErrorIndex>()),
-            &[tool::ErrorIndex { compiler: Compiler { host: a, stage: 1 } }]
+            &[tool::ErrorIndex { compiler: Compiler::new(1, a) }]
         );
         // Unfortunately rustdoc is built twice. Once from stage1 for compiletest
         // (and other things), and once from stage0 for std crates. Ideally it
@@ -887,42 +979,11 @@ mod dist {
         assert_eq!(
             first(builder.cache.all::<tool::Rustdoc>()),
             &[
-                tool::Rustdoc { compiler: Compiler { host: a, stage: 0 } },
-                tool::Rustdoc { compiler: Compiler { host: a, stage: 1 } },
-                tool::Rustdoc { compiler: Compiler { host: a, stage: 2 } },
+                tool::Rustdoc { compiler: Compiler::new(0, a) },
+                tool::Rustdoc { compiler: Compiler::new(1, a) },
+                tool::Rustdoc { compiler: Compiler::new(2, a) },
             ]
         );
-    }
-    #[test]
-    fn test_std_coverage() {
-        // Behavior of `x.py test --coverage --no-doc`
-        // Currently using --coverage with doc tests is not supported
-        let mut config = configure(&[TEST_TRIPLE_1], &[TEST_TRIPLE_1]);
-        config.cmd = Subcommand::Test {
-            test_args: vec![],
-            compiletest_rustc_args: vec![],
-            no_fail_fast: false,
-            doc: false,
-            no_doc: true,
-            bless: false,
-            force_rerun: false,
-            compare_mode: None,
-            rustfix_coverage: false,
-            pass: None,
-            run: None,
-            only_modified: false,
-            extra_checks: None,
-            no_capture: false,
-            coverage: true,
-            ferrocene_test_one_crate_per_cargo_call: false,
-        };
-        let build = Build::new(config);
-        let mut builder = Builder::new(&build);
-
-        builder.run_step_descriptions(&Builder::get_step_descriptions(Kind::Test), &[]);
-        let step_result = second(builder.cache.all::<ProfilerBuiltinsNoCore>());
-
-        assert_eq!(step_result.len(), 1);
     }
 }
 
@@ -936,7 +997,7 @@ mod sysroot_target_dirs {
         let build = Build::new(configure("build", &[TEST_TRIPLE_1], &[TEST_TRIPLE_1]));
         let builder = Builder::new(&build);
         let target_triple_1 = TargetSelection::from_user(TEST_TRIPLE_1);
-        let compiler = Compiler { stage: 1, host: target_triple_1 };
+        let compiler = Compiler::new(1, target_triple_1);
         let target_triple_2 = TargetSelection::from_user(TEST_TRIPLE_2);
         let actual = builder.sysroot_target_libdir(compiler, target_triple_2);
 
@@ -956,7 +1017,7 @@ mod sysroot_target_dirs {
         let build = Build::new(configure("build", &[TEST_TRIPLE_1], &[TEST_TRIPLE_1]));
         let builder = Builder::new(&build);
         let target_triple_1 = TargetSelection::from_user(TEST_TRIPLE_1);
-        let compiler = Compiler { stage: 1, host: target_triple_1 };
+        let compiler = Compiler::new(1, target_triple_1);
         let target_triple_2 = TargetSelection::from_user(TEST_TRIPLE_2);
         let actual = builder.sysroot_target_bindir(compiler, target_triple_2);
 
@@ -1113,7 +1174,7 @@ fn test_prebuilt_llvm_config_path_resolution() {
     let config = configure(
         r#"
             [llvm]
-            download-ci-llvm = true
+            download-ci-llvm = "if-unchanged"
         "#,
     );
 
@@ -1146,8 +1207,8 @@ fn test_is_builder_target() {
         let build = Build::new(config);
         let builder = Builder::new(&build);
 
-        assert!(builder.is_builder_target(target1));
-        assert!(!builder.is_builder_target(target2));
+        assert!(builder.config.is_host_target(target1));
+        assert!(!builder.config.is_host_target(target2));
     }
 }
 
@@ -1160,13 +1221,13 @@ fn test_get_tool_rustc_compiler() {
 
     let target_triple_1 = TargetSelection::from_user(TEST_TRIPLE_1);
 
-    let compiler = Compiler { stage: 2, host: target_triple_1 };
-    let expected = Compiler { stage: 1, host: target_triple_1 };
+    let compiler = Compiler::new(2, target_triple_1);
+    let expected = Compiler::new(1, target_triple_1);
     let actual = tool::get_tool_rustc_compiler(&builder, compiler);
     assert_eq!(expected, actual);
 
-    let compiler = Compiler { stage: 1, host: target_triple_1 };
-    let expected = Compiler { stage: 0, host: target_triple_1 };
+    let compiler = Compiler::new(1, target_triple_1);
+    let expected = Compiler::new(0, target_triple_1);
     let actual = tool::get_tool_rustc_compiler(&builder, compiler);
     assert_eq!(expected, actual);
 
@@ -1175,8 +1236,40 @@ fn test_get_tool_rustc_compiler() {
     let build = Build::new(config);
     let builder = Builder::new(&build);
 
-    let compiler = Compiler { stage: 1, host: target_triple_1 };
-    let expected = Compiler { stage: 1, host: target_triple_1 };
+    let compiler = Compiler::new(1, target_triple_1);
+    let expected = Compiler::new(1, target_triple_1);
     let actual = tool::get_tool_rustc_compiler(&builder, compiler);
     assert_eq!(expected, actual);
+}
+
+/// When bootstrap detects a step dependency cycle (which is a bug), its panic
+/// message should show the actual steps on the stack, not just several copies
+/// of `Any { .. }`.
+#[test]
+fn step_cycle_debug() {
+    let cmd = ["run", "cyclic-step"].map(str::to_owned);
+    let config = configure_with_args(&cmd, &[TEST_TRIPLE_1], &[TEST_TRIPLE_1]);
+
+    let err = panic::catch_unwind(|| run_build(&config.paths.clone(), config)).unwrap_err();
+    let err = err.downcast_ref::<String>().unwrap().as_str();
+
+    assert!(!err.contains("Any"));
+    assert!(err.contains("CyclicStep { n: 1 }"));
+}
+
+/// The `AnyDebug` trait should delegate to the underlying type's `Debug`, and
+/// should also allow downcasting as expected.
+#[test]
+fn any_debug() {
+    #[derive(Debug, PartialEq, Eq)]
+    struct MyStruct {
+        x: u32,
+    }
+
+    let x: &dyn AnyDebug = &MyStruct { x: 7 };
+
+    // Debug-formatting should delegate to the underlying type.
+    assert_eq!(format!("{x:?}"), format!("{:?}", MyStruct { x: 7 }));
+    // Downcasting to the underlying type should succeed.
+    assert_eq!(x.downcast_ref::<MyStruct>(), Some(&MyStruct { x: 7 }));
 }

@@ -14,3 +14,6 @@ fn main() {
     let raw2nowhere  = &raw const NOWHERE;
     let raw2nowhere  = &raw mut NOWHERE;
 }
+
+// ferrocene-annotations: fls_vxguvrwolbee
+// Raw Borrow Expression

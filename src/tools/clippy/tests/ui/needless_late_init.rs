@@ -246,9 +246,7 @@ fn does_not_lint() {
     }
 
     let x;
-    if true
-        && let Some(n) = Some("let chains too")
-    {
+    if true && let Some(n) = Some("let chains too") {
         x = 1;
     } else {
         x = 2;
@@ -296,4 +294,10 @@ macro_rules! issue13776_mac {
 fn issue13776() {
     let x;
     issue13776_mac!(x, 10); // should not lint
+}
+
+fn issue9895() {
+    let r;
+    //~^ needless_late_init
+    (r = 5);
 }

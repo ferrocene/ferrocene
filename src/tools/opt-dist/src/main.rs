@@ -76,7 +76,7 @@ enum EnvironmentCmd {
         rustc_perf_checkout_dir: Option<Utf8PathBuf>,
 
         /// Is LLVM for `rustc` built in shared library mode?
-        #[arg(long, default_value_t = true)]
+        #[arg(long, default_value_t = true, action(clap::ArgAction::Set))]
         llvm_shared: bool,
 
         /// Should BOLT optimization be used? If yes, host LLVM must have BOLT binaries
@@ -94,6 +94,10 @@ enum EnvironmentCmd {
         /// Arguments passed to `rustc-perf --cargo-config <value>` when running benchmarks.
         #[arg(long)]
         benchmark_cargo_config: Vec<String>,
+
+        /// Perform tests after final build if it's not a fast try build
+        #[arg(long)]
+        run_tests: bool,
     },
     /// Perform an optimized build on Linux CI, from inside Docker.
     LinuxCi {
@@ -107,11 +111,14 @@ enum EnvironmentCmd {
     },
 }
 
-fn is_try_build() -> bool {
+/// For a fast try build, we want to only build the bare minimum of components to get a
+/// working toolchain, and not run any tests.
+fn is_fast_try_build() -> bool {
     std::env::var("DIST_TRY_BUILD").unwrap_or_else(|_| "0".to_string()) != "0"
 }
 
 fn create_environment(args: Args) -> anyhow::Result<(Environment, Vec<String>)> {
+    let is_fast_try_build = is_fast_try_build();
     let (env, args) = match args.env {
         EnvironmentCmd::Local {
             target_triple,
@@ -125,6 +132,7 @@ fn create_environment(args: Args) -> anyhow::Result<(Environment, Vec<String>)> 
             skipped_tests,
             benchmark_cargo_config,
             shared,
+            run_tests,
         } => {
             let env = EnvironmentBuilder::default()
                 .host_tuple(target_triple)
@@ -138,6 +146,8 @@ fn create_environment(args: Args) -> anyhow::Result<(Environment, Vec<String>)> 
                 .use_bolt(use_bolt)
                 .skipped_tests(skipped_tests)
                 .benchmark_cargo_config(benchmark_cargo_config)
+                .run_tests(run_tests)
+                .fast_try_build(is_fast_try_build)
                 .build()?;
 
             (env, shared.build_args)
@@ -160,6 +170,8 @@ fn create_environment(args: Args) -> anyhow::Result<(Environment, Vec<String>)> 
                 // FIXME: Enable bolt for aarch64 once it's fixed upstream. Broken as of December 2024.
                 .use_bolt(!is_aarch64)
                 .skipped_tests(vec![])
+                .run_tests(true)
+                .fast_try_build(is_fast_try_build)
                 .build()?;
 
             (env, shared.build_args)
@@ -179,6 +191,8 @@ fn create_environment(args: Args) -> anyhow::Result<(Environment, Vec<String>)> 
                 .shared_llvm(false)
                 .use_bolt(false)
                 .skipped_tests(vec![])
+                .run_tests(true)
+                .fast_try_build(is_fast_try_build)
                 .build()?;
 
             (env, shared.build_args)
@@ -342,9 +356,8 @@ fn execute_pipeline(
 
     // After dist has finished, run a subset of the test suite on the optimized artifacts to discover
     // possible regressions.
-    // The tests are not executed for try builds, which can be in various broken states, so we don't
-    // want to gatekeep them with tests.
-    if !is_try_build() {
+    // The tests are not executed for fast try builds, which can be broken and might not pass them.
+    if !is_fast_try_build() && env.run_tests() {
         timer.section("Run tests", |_| run_tests(env))?;
     }
 
@@ -353,7 +366,10 @@ fn execute_pipeline(
 
 fn main() -> anyhow::Result<()> {
     // Make sure that we get backtraces for easier debugging in CI
-    std::env::set_var("RUST_BACKTRACE", "1");
+    unsafe {
+        // SAFETY: we are the only thread running at this point
+        std::env::set_var("RUST_BACKTRACE", "1");
+    }
 
     env_logger::builder()
         .filter_level(LevelFilter::Info)
@@ -369,17 +385,25 @@ fn main() -> anyhow::Result<()> {
         println!("Environment values\n{}", format_env_variables());
     });
 
-    with_log_group("Printing config.toml", || {
-        if let Ok(config) = std::fs::read_to_string("config.toml") {
-            println!("Contents of `config.toml`:\n{config}");
+    with_log_group("Printing bootstrap.toml", || {
+        let config_file = if std::path::Path::new("bootstrap.toml").exists() {
+            "bootstrap.toml"
+        } else {
+            "config.toml" // Fall back for backward compatibility
+        };
+
+        if let Ok(config) = std::fs::read_to_string(config_file) {
+            println!("Contents of `bootstrap.toml`:\n{config}");
+        } else {
+            eprintln!("Failed to read `{}`", config_file);
         }
     });
 
     let (env, mut build_args) = create_environment(args).context("Cannot create environment")?;
 
-    // Skip components that are not needed for try builds to speed them up
-    if is_try_build() {
-        log::info!("Skipping building of unimportant components for a try build");
+    // Skip components that are not needed for fast try builds to speed them up
+    if is_fast_try_build() {
+        log::info!("Skipping building of unimportant components for a fast try build");
         for target in [
             "rust-docs",
             "rustc-docs",
@@ -389,6 +413,7 @@ fn main() -> anyhow::Result<()> {
             "clippy",
             "miri",
             "rustfmt",
+            "gcc",
         ] {
             build_args.extend(["--skip".to_string(), target.to_string()]);
         }

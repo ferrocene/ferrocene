@@ -91,12 +91,12 @@ pub(super) fn extract_all_mapping_info_from_mir<'tcx>(
         // When debugging flag `-Zcoverage-options=no-mir-spans` is set, we need
         // to give the same treatment to _all_ functions, because `llvm-cov`
         // seems to ignore functions that don't have any ordinary code spans.
-        if let Some(span) = hir_info.fn_sig_span_extended {
+        if let Some(span) = hir_info.fn_sig_span {
             code_mappings.push(CodeMapping { span, bcb: START_BCB });
         }
     } else {
         // Extract coverage spans from MIR statements/terminators as normal.
-        extract_refined_covspans(mir_body, hir_info, graph, &mut code_mappings);
+        extract_refined_covspans(tcx, mir_body, hir_info, graph, &mut code_mappings);
     }
 
     branch_pairs.extend(extract_branch_pairs(mir_body, hir_info, graph));

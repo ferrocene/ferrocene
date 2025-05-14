@@ -101,6 +101,10 @@ fn parse_cfg_name_directive<'a>(
         message: "always"
     }
     condition! {
+        name: "auxiliary",
+        message: "used by another main test file"
+    }
+    condition! {
         name: &config.target,
         allowed_names: &target_cfgs.all_targets,
         message: "when the target is {name}"
@@ -164,6 +168,16 @@ fn parse_cfg_name_directive<'a>(
         name: "apple",
         condition: config.target.contains("apple"),
         message: "when the target vendor is Apple"
+    }
+
+    condition! {
+        name: "elf",
+        condition: !config.target.contains("windows")
+            && !config.target.contains("wasm")
+            && !config.target.contains("apple")
+            && !config.target.contains("aix")
+            && !config.target.contains("uefi"),
+        message: "when the target binary format is ELF"
     }
 
     condition! {

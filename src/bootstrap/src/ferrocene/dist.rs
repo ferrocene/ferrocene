@@ -12,16 +12,28 @@ use std::rc::Rc;
 use serde_json::json;
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::core::build_steps::run::GenerateCopyright;
 use crate::core::config::TargetSelection;
+use crate::ferrocene::code_coverage::CoverageOutcomesDir;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
-use crate::t;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
+use crate::{FileType, t};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct Docs {
     pub(crate) target: TargetSelection,
+}
+
+// Generate comprehensive copyright data, and include the generated files in the tarball
+fn add_copyright_files(subsetter: &mut Subsetter<'_>, builder: &Builder<'_>) {
+    for path in builder.ensure(GenerateCopyright) {
+        if !builder.config.dry_run() {
+            // First arg gets the file placed in the root of the tarball, instead of in build/
+            subsetter.add_file(path.parent().unwrap(), &path);
+        }
+    }
 }
 
 impl Step for Docs {
@@ -45,6 +57,7 @@ impl Step for Docs {
 
         let mut subsetter = Subsetter::new(builder, "ferrocene-docs", "share/doc/ferrocene/html");
         subsetter.add_directory(&doc_out, &doc_out);
+        add_copyright_files(&mut subsetter, &builder);
 
         subsetter.into_tarballs().map(|tarball| tarball.generate()).collect()
     }
@@ -108,7 +121,8 @@ impl Step for SourceTarball {
             "README.md",
             "RELEASES.md",
             "REUSE.toml",
-            "config.example.toml",
+            "TRADEMARK.md",
+            "bootstrap.example.toml",
             "Cargo.toml",
             "Cargo.lock",
             "configure",
@@ -116,6 +130,7 @@ impl Step for SourceTarball {
             "x.py",
             "x.ps1",
             ".gitmodules",
+            "license-metadata.json",
         ];
         const EXTRA_CARGO_TOMLS: &[&str] = &[
             "compiler/rustc_codegen_cranelift/Cargo.toml",
@@ -137,6 +152,7 @@ impl Step for SourceTarball {
         for item in FILES {
             subsetter.add_file(&builder.src, &builder.src.join(item));
         }
+        add_copyright_files(&mut subsetter, &builder);
 
         let generic_tarball = subsetter
             .tarballs
@@ -156,6 +172,8 @@ impl Step for SourceTarball {
         let mut vendor = Command::new(&builder.initial_cargo);
         vendor.arg("vendor").arg("vendor/rust").current_dir(&dest_dir);
         vendor.env("RUSTC_BOOTSTRAP", "1"); // std's Cargo.toml uses unstable features
+        // Resolver 3 needs the `rustc` binary to fetch the compiler version
+        vendor.env("RUSTC", &builder.initial_rustc);
         for extra in EXTRA_CARGO_TOMLS {
             vendor.arg("--sync").arg(&builder.src.join(extra));
         }
@@ -272,8 +290,9 @@ impl<'a> Subsetter<'a> {
         };
 
         let relative = path.strip_prefix(root).unwrap();
-        let mode = if self.is_executable(&path) { 0o755 } else { 0o644 };
-        tarball.add_file(&path, self.output_prefix.join(relative).parent().unwrap(), mode);
+        let file_type =
+            if self.is_executable(&path) { FileType::Executable } else { FileType::Regular };
+        tarball.add_file(&path, self.output_prefix.join(relative).parent().unwrap(), file_type);
     }
 
     #[cfg(unix)]
@@ -335,7 +354,7 @@ impl Step for SelfTest {
         let self_test = builder.ensure(crate::ferrocene::tool::SelfTest { target: self.target });
 
         let mut tarball = Tarball::new(builder, "ferrocene-self-test", &self.target.triple);
-        tarball.add_file(self_test, "bin", 0o755);
+        tarball.add_file(self_test, "bin", FileType::Executable);
 
         tarball.ferrocene_proxied_binary("bin/ferrocene-self-test");
         tarball.generate()
@@ -364,6 +383,33 @@ impl Step for TestOutcomes {
         let tarball = Tarball::new_targetless(builder, "ferrocene-test-outcomes");
         tarball.add_dir(test_outcomes, "share/ferrocene/test-outcomes");
         Some(tarball.generate())
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub(crate) struct CoverageOutcomes;
+
+impl Step for CoverageOutcomes {
+    type Output = GeneratedTarball;
+    const DEFAULT: bool = false;
+    const ONLY_HOSTS: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.alias("ferrocene-coverage-outcomes")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(CoverageOutcomes);
+    }
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        let Some(path) = builder.ensure(CoverageOutcomesDir) else {
+            panic!("cannot dist coverage-outcomes with ferrocene.coverage-outcomes=\"disabled\"");
+        };
+
+        let tarball = Tarball::new_targetless(builder, "ferrocene-coverage-outcomes");
+        tarball.add_dir(path, "share/ferrocene/coverage-outcomes");
+        tarball.generate()
     }
 }
 

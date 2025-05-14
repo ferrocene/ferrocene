@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: -Clinker-flavor=
+//~? ERROR incorrect value
 
 fn main() {}
 

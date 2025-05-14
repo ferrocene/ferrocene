@@ -98,7 +98,8 @@ rustc_index::newtype_index! {
 pub fn save_as_intervals<'tcx, N, A>(
     elements: &DenseLocationMap,
     body: &mir::Body<'tcx>,
-    mut results: Results<'tcx, A>,
+    mut analysis: A,
+    results: Results<A::Domain>,
 ) -> SparseIntervalMatrix<N, PointIndex>
 where
     N: Idx,
@@ -109,7 +110,8 @@ where
     visit_results(
         body,
         body.basic_blocks.reverse_postorder().iter().copied(),
-        &mut results,
+        &mut analysis,
+        &results,
         &mut visitor,
     );
     visitor.values
@@ -120,14 +122,14 @@ struct Visitor<'a, N: Idx> {
     values: SparseIntervalMatrix<N, PointIndex>,
 }
 
-impl<'mir, 'tcx, A, N> ResultsVisitor<'mir, 'tcx, A> for Visitor<'_, N>
+impl<'tcx, A, N> ResultsVisitor<'tcx, A> for Visitor<'_, N>
 where
     A: Analysis<'tcx, Domain = DenseBitSet<N>>,
     N: Idx,
 {
-    fn visit_after_primary_statement_effect(
+    fn visit_after_primary_statement_effect<'mir>(
         &mut self,
-        _results: &mut Results<'tcx, A>,
+        _analysis: &mut A,
         state: &A::Domain,
         _statement: &'mir mir::Statement<'tcx>,
         location: Location,
@@ -139,9 +141,9 @@ where
         });
     }
 
-    fn visit_after_primary_terminator_effect(
+    fn visit_after_primary_terminator_effect<'mir>(
         &mut self,
-        _results: &mut Results<'tcx, A>,
+        _analysis: &mut A,
         state: &A::Domain,
         _terminator: &'mir mir::Terminator<'tcx>,
         location: Location,

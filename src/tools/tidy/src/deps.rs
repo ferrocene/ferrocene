@@ -6,6 +6,7 @@ use std::io::Write;
 use std::path::Path;
 
 use build_helper::ci::CiEnv;
+use cargo_metadata::semver::Version;
 use cargo_metadata::{Metadata, Package, PackageId};
 
 #[path = "../../../bootstrap/src/utils/proc_macro_deps.rs"]
@@ -84,7 +85,6 @@ pub(crate) const WORKSPACES: &[(&str, ExceptionList, Option<(&[&str], &[&str])>,
     ("src/tools/rust-analyzer", EXCEPTIONS_RUST_ANALYZER, None, &[]),
     ("src/tools/rustbook", EXCEPTIONS_RUSTBOOK, None, &["src/doc/book", "src/doc/reference"]),
     ("src/tools/rustc-perf", EXCEPTIONS_RUSTC_PERF, None, &["src/tools/rustc-perf"]),
-    ("src/tools/x", &[], None, &[]),
     // tidy-alphabetical-end
 ];
 
@@ -149,7 +149,6 @@ const EXCEPTIONS_CARGO: ExceptionList = &[
     ("arrayref", "BSD-2-Clause"),
     ("bitmaps", "MPL-2.0+"),
     ("blake3", "CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception"),
-    ("bytesize", "Apache-2.0"),
     ("ciborium", "Apache-2.0"),
     ("ciborium-io", "Apache-2.0"),
     ("ciborium-ll", "Apache-2.0"),
@@ -159,21 +158,23 @@ const EXCEPTIONS_CARGO: ExceptionList = &[
     ("fiat-crypto", "MIT OR Apache-2.0 OR BSD-1-Clause"),
     ("foldhash", "Zlib"),
     ("im-rc", "MPL-2.0+"),
+    ("libz-rs-sys", "Zlib"),
     ("normalize-line-endings", "Apache-2.0"),
     ("openssl", "Apache-2.0"),
     ("ryu", "Apache-2.0 OR BSL-1.0"), // BSL is not acceptble, but we use it under Apache-2.0
-    ("sha1_smol", "BSD-3-Clause"),
     ("similar", "Apache-2.0"),
     ("sized-chunks", "MPL-2.0+"),
     ("subtle", "BSD-3-Clause"),
     ("supports-hyperlinks", "Apache-2.0"),
     ("unicode-bom", "Apache-2.0"),
+    ("zlib-rs", "Zlib"),
     // tidy-alphabetical-end
 ];
 
 const EXCEPTIONS_RUST_ANALYZER: ExceptionList = &[
     // tidy-alphabetical-start
     ("dissimilar", "Apache-2.0"),
+    ("foldhash", "Zlib"),
     ("notify", "CC0-1.0"),
     ("option-ext", "MPL-2.0"),
     ("pulldown-cmark-to-cmark", "Apache-2.0"),
@@ -191,7 +192,7 @@ const EXCEPTIONS_RUSTC_PERF: ExceptionList = &[
     ("brotli-decompressor", "BSD-3-Clause/MIT"),
     ("encoding_rs", "(Apache-2.0 OR MIT) AND BSD-3-Clause"),
     ("inferno", "CDDL-1.0"),
-    ("instant", "BSD-3-Clause"),
+    ("ring", NON_STANDARD_LICENSE), // see EXCEPTIONS_NON_STANDARD_LICENSE_DEPS for more.
     ("ryu", "Apache-2.0 OR BSL-1.0"),
     ("snap", "BSD-3-Clause"),
     ("subtle", "BSD-3-Clause"),
@@ -200,6 +201,9 @@ const EXCEPTIONS_RUSTC_PERF: ExceptionList = &[
 
 const EXCEPTIONS_RUSTBOOK: ExceptionList = &[
     // tidy-alphabetical-start
+    ("cssparser", "MPL-2.0"),
+    ("cssparser-macros", "MPL-2.0"),
+    ("dtoa-short", "MPL-2.0"),
     ("mdbook", "MPL-2.0"),
     ("ryu", "Apache-2.0 OR BSL-1.0"),
     // tidy-alphabetical-end
@@ -207,6 +211,8 @@ const EXCEPTIONS_RUSTBOOK: ExceptionList = &[
 
 const EXCEPTIONS_CRANELIFT: ExceptionList = &[
     // tidy-alphabetical-start
+    ("cranelift-assembler-x64", "Apache-2.0 WITH LLVM-exception"),
+    ("cranelift-assembler-x64-meta", "Apache-2.0 WITH LLVM-exception"),
     ("cranelift-bforest", "Apache-2.0 WITH LLVM-exception"),
     ("cranelift-bitset", "Apache-2.0 WITH LLVM-exception"),
     ("cranelift-codegen", "Apache-2.0 WITH LLVM-exception"),
@@ -243,6 +249,9 @@ const EXCEPTIONS_UEFI_QEMU_TEST: ExceptionList = &[
     ("r-efi", "MIT OR Apache-2.0 OR LGPL-2.1-or-later"), // LGPL is not acceptable, but we use it under MIT OR Apache-2.0
 ];
 
+/// Placeholder for non-standard license file.
+const NON_STANDARD_LICENSE: &str = "NON_STANDARD_LICENSE";
+
 /// These dependencies have non-standard licenses but are genenrally permitted.
 const EXCEPTIONS_NON_STANDARD_LICENSE_DEPS: &[&str] = &[
     // `ring` is included because it is an optional dependency of `hyper`,
@@ -263,7 +272,6 @@ const PERMITTED_DEPS_LOCATION: &str = concat!(file!(), ":", line!());
 const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     // tidy-alphabetical-start
     "adler2",
-    "ahash",
     "aho-corasick",
     "allocator-api2", // FIXME: only appears in Cargo.lock due to https://github.com/rust-lang/cargo/issues/10801
     "annotate-snippets",
@@ -276,7 +284,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "blake3",
     "block-buffer",
     "bstr",
-    "byteorder", // via ruzstd in object in thorin-dwp
     "cc",
     "cfg-if",
     "cfg_aliases",
@@ -284,7 +291,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "constant_time_eq",
     "cpufeatures",
     "crc32fast",
-    "crossbeam-channel",
     "crossbeam-deque",
     "crossbeam-epoch",
     "crossbeam-utils",
@@ -294,7 +300,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "darling_core",
     "darling_macro",
     "datafrog",
-    "deranged",
     "derive-where",
     "derive_setters",
     "digest",
@@ -320,7 +325,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "gimli",
     "gsgdt",
     "hashbrown",
-    "hermit-abi",
     "icu_list",
     "icu_list_data",
     "icu_locid",
@@ -335,6 +339,8 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "intl_pluralrules",
     "itertools",
     "itoa",
+    "jiff",
+    "jiff-static",
     "jobserver",
     "lazy_static",
     "leb128",
@@ -352,8 +358,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "miniz_oxide",
     "nix",
     "nu-ansi-term",
-    "num-conv",
-    "num_cpus",
     "object",
     "odht",
     "once_cell",
@@ -365,7 +369,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "pin-project-lite",
     "polonius-engine",
     "portable-atomic", // dependency for platforms doesn't support `AtomicU64` in std
-    "powerfmt",
+    "portable-atomic-util",
     "ppv-lite86",
     "proc-macro-hack",
     "proc-macro2",
@@ -374,6 +378,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "pulldown-cmark-escape",
     "punycode",
     "quote",
+    "r-efi",
     "rand",
     "rand_chacha",
     "rand_core",
@@ -384,7 +389,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "regex-syntax",
     "rustc-demangle",
     "rustc-hash",
-    "rustc-rayon",
+    "rustc-literal-escaper",
     "rustc-rayon-core",
     "rustc-stable-hash",
     "rustc_apfloat",
@@ -418,9 +423,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "thorin-dwp",
     "thread_local",
     "tikv-jemalloc-sys",
-    "time",
-    "time-core",
-    "time-macros",
     "tinystr",
     "tinyvec",
     "tinyvec_macros",
@@ -471,7 +473,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "windows_x86_64_gnu",
     "windows_x86_64_gnullvm",
     "windows_x86_64_msvc",
-    "wit-bindgen-rt",
+    "wit-bindgen-rt@0.39.0", // pinned to a specific version due to using a binary blob: <https://github.com/rust-lang/rust/pull/136395#issuecomment-2692769062>
     "writeable",
     "yoke",
     "yoke-derive",
@@ -489,7 +491,6 @@ const PERMITTED_STDLIB_DEPENDENCIES: &[&str] = &[
     // tidy-alphabetical-start
     "addr2line",
     "adler2",
-    "allocator-api2",
     "cc",
     "cfg-if",
     "compiler_builtins",
@@ -503,17 +504,14 @@ const PERMITTED_STDLIB_DEPENDENCIES: &[&str] = &[
     "memchr",
     "miniz_oxide",
     "object",
-    "proc-macro2",
-    "quote",
     "r-efi",
     "r-efi-alloc",
     "rand",
     "rand_core",
     "rand_xorshift",
     "rustc-demangle",
+    "rustc-literal-escaper",
     "shlex",
-    "syn",
-    "unicode-ident",
     "unicode-width",
     "unwinding",
     "wasi",
@@ -527,8 +525,6 @@ const PERMITTED_STDLIB_DEPENDENCIES: &[&str] = &[
     "windows_x86_64_gnu",
     "windows_x86_64_gnullvm",
     "windows_x86_64_msvc",
-    "zerocopy",
-    "zerocopy-derive",
     // tidy-alphabetical-end
 ];
 
@@ -540,6 +536,8 @@ const PERMITTED_CRANELIFT_DEPENDENCIES: &[&str] = &[
     "bitflags",
     "bumpalo",
     "cfg-if",
+    "cranelift-assembler-x64",
+    "cranelift-assembler-x64-meta",
     "cranelift-bforest",
     "cranelift-bitset",
     "cranelift-codegen",
@@ -708,8 +706,10 @@ pub static CRATES: &[&str] = &[
 pub fn has_missing_submodule(root: &Path, submodules: &[&str]) -> bool {
     !CiEnv::is_ci()
         && submodules.iter().any(|submodule| {
+            let path = root.join(submodule);
+            !path.exists()
             // If the directory is empty, we can consider it as an uninitialized submodule.
-            read_dir(root.join(submodule)).unwrap().next().is_none()
+            || read_dir(path).unwrap().next().is_none()
         })
 }
 
@@ -839,7 +839,17 @@ fn check_permitted_dependencies(
 
     // Check that the PERMITTED_DEPENDENCIES does not have unused entries.
     for permitted in permitted_dependencies {
-        if !deps.iter().any(|dep_id| &pkg_from_id(metadata, dep_id).name == permitted) {
+        fn compare(pkg: &Package, permitted: &str) -> bool {
+            if let Some((name, version)) = permitted.split_once("@") {
+                let Ok(version) = Version::parse(version) else {
+                    return false;
+                };
+                pkg.name == name && pkg.version == version
+            } else {
+                pkg.name == permitted
+            }
+        }
+        if !deps.iter().any(|dep_id| compare(pkg_from_id(metadata, dep_id), permitted)) {
             tidy_error!(
                 bad,
                 "could not find allowed package `{permitted}`\n\
@@ -850,14 +860,30 @@ fn check_permitted_dependencies(
     }
 
     // Get in a convenient form.
-    let permitted_dependencies: HashSet<_> = permitted_dependencies.iter().cloned().collect();
+    let permitted_dependencies: HashMap<_, _> = permitted_dependencies
+        .iter()
+        .map(|s| {
+            if let Some((name, version)) = s.split_once('@') {
+                (name, Version::parse(version).ok())
+            } else {
+                (*s, None)
+            }
+        })
+        .collect();
 
     for dep in deps {
         let dep = pkg_from_id(metadata, dep);
         // If this path is in-tree, we don't require it to be explicitly permitted.
-        if dep.source.is_some() && !permitted_dependencies.contains(dep.name.as_str()) {
-            tidy_error!(bad, "Dependency for {descr} not explicitly permitted: {}", dep.id);
-            has_permitted_dep_error = true;
+        if dep.source.is_some() {
+            let is_eq = if let Some(version) = permitted_dependencies.get(dep.name.as_str()) {
+                if let Some(version) = version { version == &dep.version } else { true }
+            } else {
+                false
+            };
+            if !is_eq {
+                tidy_error!(bad, "Dependency for {descr} not explicitly permitted: {}", dep.id);
+                has_permitted_dep_error = true;
+            }
         }
     }
 

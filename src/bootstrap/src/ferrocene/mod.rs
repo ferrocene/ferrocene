@@ -11,11 +11,15 @@ pub(crate) mod secret_sauce;
 pub(crate) mod sign;
 pub(crate) mod test;
 pub(crate) mod test_outcomes;
+pub(crate) mod test_variants;
 pub(crate) mod tool;
 
 use std::collections::HashMap;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
+
+use build_helper::ci::CiEnv;
+use build_helper::git::get_closest_upstream_commit;
 
 use crate::builder::Builder;
 use crate::core::config::{Config, TargetSelection};
@@ -156,4 +160,47 @@ fn uv_command(builder: &Builder<'_>) -> BootstrapCommand {
     }
 
     command
+}
+
+fn download_and_extract_ci_outcomes(builder: &Builder<'_>, kind: &str) -> PathBuf {
+    if builder.config.dry_run() {
+        return PathBuf::new();
+    }
+
+    let name = format!("{kind}-outcomes");
+    let prefix = "s3://ferrocene-ci-artifacts/ferrocene/dist";
+    let commit = get_closest_upstream_commit(None, &builder.config.git_config(), CiEnv::None)
+        .expect(&format!("failed to retrieve git commit for ferrocene.{name}=download-ci"))
+        .expect("did not find a commit by merge bot");
+
+    let base = builder.out.join("cache").join("ferrocene").join(&name);
+    let extracted_dir = base.join("extracted");
+    let tarballs_dir = base.join("tarballs");
+
+    let commit_file = extracted_dir.join(".ferrocene-commit");
+    let tarball_file = tarballs_dir.join(&format!("{commit}.tar.xz"));
+
+    if !tarball_file.exists() {
+        builder.info(&format!("Downloading {kind} outcomes for commit {commit}"));
+        let version = builder.config.artifact_version_part(&commit);
+        let url = format!("{prefix}/{commit}/ferrocene-{name}-{version}.tar.xz");
+        builder.create_dir(&tarballs_dir);
+        builder.config.download_file(
+            &url,
+            &tarball_file,
+            &format!("Could not download the {kind} outcomes."),
+        );
+    }
+
+    if !commit_file.exists() || builder.read(&commit_file) != commit {
+        builder.info(&format!("Extracting {kind} outcomes for commit {commit}"));
+        if extracted_dir.exists() {
+            builder.remove_dir(&extracted_dir);
+        }
+        builder.create_dir(&extracted_dir);
+        builder.config.unpack(&tarball_file, &extracted_dir, "");
+        std::fs::write(&commit_file, commit.as_bytes()).unwrap();
+    }
+
+    extracted_dir.join("share").join("ferrocene").join(&name)
 }

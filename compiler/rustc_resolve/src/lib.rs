@@ -9,18 +9,17 @@
 // tidy-alphabetical-start
 #![allow(internal_features)]
 #![allow(rustc::diagnostic_outside_of_impl)]
-#![allow(rustc::potential_query_instability)]
 #![allow(rustc::untranslatable_diagnostic)]
+#![cfg_attr(bootstrap, feature(let_chains))]
 #![doc(html_root_url = "https://doc.rust-lang.org/nightly/nightly-rustc/")]
 #![doc(rust_logo)]
 #![feature(assert_matches)]
 #![feature(box_patterns)]
 #![feature(if_let_guard)]
 #![feature(iter_intersperse)]
-#![feature(let_chains)]
 #![feature(rustc_attrs)]
 #![feature(rustdoc_internals)]
-#![warn(unreachable_pub)]
+#![recursion_limit = "256"]
 // tidy-alphabetical-end
 
 use std::cell::{Cell, RefCell};
@@ -32,7 +31,10 @@ use diagnostics::{ImportSuggestion, LabelSuggestion, Suggestion};
 use effective_visibilities::EffectiveVisibilitiesVisitor;
 use errors::{ParamKindInEnumDiscriminant, ParamKindInNonTrivialAnonConst};
 use imports::{Import, ImportData, ImportKind, NameResolution};
-use late::{HasGenericParams, PathSource, PatternSource, UnnecessaryQualification};
+use late::{
+    ForwardGenericParamBanReason, HasGenericParams, PathSource, PatternSource,
+    UnnecessaryQualification,
+};
 use macros::{MacroRulesBinding, MacroRulesScope, MacroRulesScopeRef};
 use rustc_arena::{DroplessArena, TypedArena};
 use rustc_ast::expand::StrippedCfgItem;
@@ -45,6 +47,7 @@ use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_data_structures::intern::Interned;
 use rustc_data_structures::steal::Steal;
 use rustc_data_structures::sync::FreezeReadGuard;
+use rustc_data_structures::unord::UnordMap;
 use rustc_errors::{Applicability, Diag, ErrCode, ErrorGuaranteed};
 use rustc_expand::base::{DeriveResolution, SyntaxExtension, SyntaxExtensionKind};
 use rustc_feature::BUILTIN_ATTRIBUTES;
@@ -53,8 +56,8 @@ use rustc_hir::def::{
     self, CtorOf, DefKind, DocLinkResMap, LifetimeRes, NonMacroAttrKind, PartialRes, PerNS,
 };
 use rustc_hir::def_id::{CRATE_DEF_ID, CrateNum, DefId, LOCAL_CRATE, LocalDefId, LocalDefIdMap};
+use rustc_hir::definitions::DisambiguatorState;
 use rustc_hir::{PrimTy, TraitCandidate};
-use rustc_index::IndexVec;
 use rustc_metadata::creader::{CStore, CrateLoader};
 use rustc_middle::metadata::ModChild;
 use rustc_middle::middle::privacy::EffectiveVisibilities;
@@ -85,6 +88,8 @@ mod imports;
 mod late;
 mod macros;
 pub mod rustdoc;
+
+pub use macros::registered_tools_ast;
 
 rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 
@@ -273,7 +278,7 @@ enum ResolutionError<'ra> {
         shadowed_binding_span: Span,
     },
     /// Error E0128: generic parameters with a default cannot use forward-declared identifiers.
-    ForwardDeclaredGenericParam,
+    ForwardDeclaredGenericParam(Symbol, ForwardGenericParamBanReason),
     // FIXME(generic_const_parameter_types): This should give custom output specifying it's only
     // problematic to use *forward declared* parameters when the feature is enabled.
     /// ERROR E0770: the type of const parameters must not depend on other generic parameters.
@@ -287,7 +292,7 @@ enum ResolutionError<'ra> {
     /// This error is emitted even with `generic_const_exprs`.
     ParamInEnumDiscriminant { name: Symbol, param_kind: ParamKindInEnumDiscriminant },
     /// Error E0735: generic parameters with a default cannot use `Self`
-    SelfInGenericParamDefault,
+    ForwardDeclaredSelf(ForwardGenericParamBanReason),
     /// Error E0767: use of unreachable label
     UnreachableLabel { name: Symbol, definition_span: Span, suggestion: Option<LabelSuggestion> },
     /// Error E0323, E0324, E0325: mismatch between trait item and impl item.
@@ -501,18 +506,18 @@ enum ModuleKind {
     ///
     /// * A normal module – either `mod from_file;` or `mod from_block { }` –
     ///   or the crate root (which is conceptually a top-level module).
-    ///   Note that the crate root's [name][Self::name] will be [`kw::Empty`].
+    ///   The crate root will have `None` for the symbol.
     /// * A trait or an enum (it implicitly contains associated types, methods and variant
     ///   constructors).
-    Def(DefKind, DefId, Symbol),
+    Def(DefKind, DefId, Option<Symbol>),
 }
 
 impl ModuleKind {
     /// Get name of the module.
     fn name(&self) -> Option<Symbol> {
-        match self {
+        match *self {
             ModuleKind::Block => None,
-            ModuleKind::Def(.., name) => Some(*name),
+            ModuleKind::Def(.., name) => name,
         }
     }
 }
@@ -945,14 +950,8 @@ impl<'ra> NameBindingData<'ra> {
         }
     }
 
-    fn is_importable(&self) -> bool {
-        !matches!(self.res(), Res::Def(DefKind::AssocTy, _))
-    }
-
-    // FIXME(import_trait_associated_functions): associate `const` or `fn` are not importable unless
-    // the feature `import_trait_associated_functions` is enable
-    fn is_assoc_const_or_fn(&self) -> bool {
-        matches!(self.res(), Res::Def(DefKind::AssocConst | DefKind::AssocFn, _))
+    fn is_assoc_item(&self) -> bool {
+        matches!(self.res(), Res::Def(DefKind::AssocConst | DefKind::AssocFn | DefKind::AssocTy, _))
     }
 
     fn macro_kind(&self) -> Option<MacroKind> {
@@ -1008,12 +1007,6 @@ impl ExternPreludeEntry<'_> {
     }
 }
 
-/// Used for better errors for E0773
-enum BuiltinMacroState {
-    NotYetSeen(SyntaxExtensionKind),
-    AlreadySeen(Span),
-}
-
 struct DeriveData {
     resolutions: Vec<DeriveResolution>,
     helper_attrs: Vec<(usize, Ident)>,
@@ -1044,7 +1037,7 @@ pub struct Resolver<'ra, 'tcx> {
     graph_root: Module<'ra>,
 
     prelude: Option<Module<'ra>>,
-    extern_prelude: FxHashMap<Ident, ExternPreludeEntry<'ra>>,
+    extern_prelude: FxIndexMap<Ident, ExternPreludeEntry<'ra>>,
 
     /// N.B., this is used only for better diagnostics, not name resolution itself.
     field_names: LocalDefIdMap<Vec<Ident>>,
@@ -1077,7 +1070,7 @@ pub struct Resolver<'ra, 'tcx> {
     extra_lifetime_params_map: NodeMap<Vec<(Ident, NodeId, LifetimeRes)>>,
 
     /// `CrateNum` resolutions of `extern crate` items.
-    extern_crate_map: FxHashMap<LocalDefId, CrateNum>,
+    extern_crate_map: UnordMap<LocalDefId, CrateNum>,
     module_children: LocalDefIdMap<Vec<ModChild>>,
     trait_map: NodeMap<Vec<TraitCandidate>>,
 
@@ -1100,13 +1093,13 @@ pub struct Resolver<'ra, 'tcx> {
     /// some AST passes can generate identifiers that only resolve to local or
     /// lang items.
     empty_module: Module<'ra>,
-    module_map: FxHashMap<DefId, Module<'ra>>,
+    module_map: FxIndexMap<DefId, Module<'ra>>,
     binding_parent_modules: FxHashMap<NameBinding<'ra>, Module<'ra>>,
 
     underscore_disambiguator: u32,
 
     /// Maps glob imports to the names of items actually imported.
-    glob_map: FxHashMap<LocalDefId, FxHashSet<Symbol>>,
+    glob_map: FxIndexMap<LocalDefId, FxIndexSet<Symbol>>,
     glob_error: Option<ErrorGuaranteed>,
     visibilities_for_hashing: Vec<(LocalDefId, ty::Visibility)>,
     used_imports: FxHashSet<NodeId>,
@@ -1132,18 +1125,18 @@ pub struct Resolver<'ra, 'tcx> {
 
     used_extern_options: FxHashSet<Symbol>,
     macro_names: FxHashSet<Ident>,
-    builtin_macros: FxHashMap<Symbol, BuiltinMacroState>,
+    builtin_macros: FxHashMap<Symbol, SyntaxExtensionKind>,
     registered_tools: &'tcx RegisteredTools,
-    macro_use_prelude: FxHashMap<Symbol, NameBinding<'ra>>,
+    macro_use_prelude: FxIndexMap<Symbol, NameBinding<'ra>>,
     macro_map: FxHashMap<DefId, MacroData>,
     dummy_ext_bang: Arc<SyntaxExtension>,
     dummy_ext_derive: Arc<SyntaxExtension>,
     non_macro_attr: MacroData,
     local_macro_def_scopes: FxHashMap<LocalDefId, Module<'ra>>,
     ast_transform_scopes: FxHashMap<LocalExpnId, Module<'ra>>,
-    unused_macros: FxHashMap<LocalDefId, (NodeId, Ident)>,
+    unused_macros: FxIndexMap<LocalDefId, (NodeId, Ident)>,
     /// A map from the macro to all its potentially unused arms.
-    unused_macro_rules: FxIndexMap<LocalDefId, FxHashMap<usize, (Ident, Span)>>,
+    unused_macro_rules: FxIndexMap<NodeId, UnordMap<usize, (Ident, Span)>>,
     proc_macro_stubs: FxHashSet<LocalDefId>,
     /// Traces collected during macro resolution and validated when it's complete.
     single_segment_macro_resolutions:
@@ -1186,7 +1179,8 @@ pub struct Resolver<'ra, 'tcx> {
     next_node_id: NodeId,
 
     node_id_to_def_id: NodeMap<Feed<'tcx, LocalDefId>>,
-    def_id_to_node_id: IndexVec<LocalDefId, ast::NodeId>,
+
+    disambiguator: DisambiguatorState,
 
     /// Indices of unnamed struct or variant fields with unresolved attributes.
     placeholder_field_indices: FxHashMap<NodeId, usize>,
@@ -1194,10 +1188,6 @@ pub struct Resolver<'ra, 'tcx> {
     /// we know what parent node that fragment should be attached to thanks to this table,
     /// and how the `impl Trait` fragments were introduced.
     invocation_parents: FxHashMap<LocalExpnId, InvocationParent>,
-
-    /// Some way to know that we are in a *trait* impl in `visit_assoc_item`.
-    /// FIXME: Replace with a more general AST map (together with some other fields).
-    trait_impl_items: FxHashSet<LocalDefId>,
 
     legacy_const_generic_args: FxHashMap<DefId, Option<Vec<usize>>>,
     /// Amount of lifetime parameters for each item in the crate.
@@ -1208,7 +1198,7 @@ pub struct Resolver<'ra, 'tcx> {
     trait_impls: FxIndexMap<DefId, Vec<LocalDefId>>,
     /// A list of proc macro LocalDefIds, written out in the order in which
     /// they are declared in the static array generated by proc_macro_harness.
-    proc_macros: Vec<NodeId>,
+    proc_macros: Vec<LocalDefId>,
     confused_type_with_std_module: FxIndexMap<Span, Span>,
     /// Whether lifetime elision was successful.
     lifetime_elision_allowed: FxHashSet<NodeId>,
@@ -1257,7 +1247,7 @@ impl<'ra> ResolverArenas<'ra> {
         expn_id: ExpnId,
         span: Span,
         no_implicit_prelude: bool,
-        module_map: &mut FxHashMap<DefId, Module<'ra>>,
+        module_map: &mut FxIndexMap<DefId, Module<'ra>>,
         module_self_bindings: &mut FxHashMap<Module<'ra>, NameBinding<'ra>>,
     ) -> Module<'ra> {
         let module = Module(Interned::new_unchecked(self.modules.alloc(ModuleData::new(
@@ -1340,22 +1330,22 @@ impl<'tcx> Resolver<'_, 'tcx> {
         &mut self,
         parent: LocalDefId,
         node_id: ast::NodeId,
-        name: Symbol,
+        name: Option<Symbol>,
         def_kind: DefKind,
         expn_id: ExpnId,
         span: Span,
     ) -> TyCtxtFeed<'tcx, LocalDefId> {
-        let data = def_kind.def_path_data(name);
         assert!(
             !self.node_id_to_def_id.contains_key(&node_id),
-            "adding a def'n for node-id {:?} and data {:?} but a previous def'n exists: {:?}",
+            "adding a def for node-id {:?}, name {:?}, data {:?} but a previous def exists: {:?}",
             node_id,
-            data,
+            name,
+            def_kind,
             self.tcx.definitions_untracked().def_key(self.node_id_to_def_id[&node_id].key()),
         );
 
         // FIXME: remove `def_span` body, pass in the right spans here and call `tcx.at().create_def()`
-        let feed = self.tcx.create_def(parent, name, def_kind);
+        let feed = self.tcx.create_def(parent, name, def_kind, None, &mut self.disambiguator);
         let def_id = feed.def_id();
 
         // Create the definition.
@@ -1375,7 +1365,6 @@ impl<'tcx> Resolver<'_, 'tcx> {
             debug!("create_def: def_id_to_node_id[{:?}] <-> {:?}", def_id, node_id);
             self.node_id_to_def_id.insert(node_id, feed.downgrade());
         }
-        assert_eq!(self.def_id_to_node_id.push(node_id), def_id);
 
         feed
     }
@@ -1391,6 +1380,19 @@ impl<'tcx> Resolver<'_, 'tcx> {
     pub fn tcx(&self) -> TyCtxt<'tcx> {
         self.tcx
     }
+
+    /// This function is very slow, as it iterates over the entire
+    /// [Resolver::node_id_to_def_id] map just to find the [NodeId]
+    /// that corresponds to the given [LocalDefId]. Only use this in
+    /// diagnostics code paths.
+    fn def_id_to_node_id(&self, def_id: LocalDefId) -> NodeId {
+        self.node_id_to_def_id
+            .items()
+            .filter(|(_, v)| v.key() == def_id)
+            .map(|(k, _)| *k)
+            .get_only()
+            .unwrap()
+    }
 }
 
 impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
@@ -1402,11 +1404,11 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         arenas: &'ra ResolverArenas<'ra>,
     ) -> Resolver<'ra, 'tcx> {
         let root_def_id = CRATE_DEF_ID.to_def_id();
-        let mut module_map = FxHashMap::default();
+        let mut module_map = FxIndexMap::default();
         let mut module_self_bindings = FxHashMap::default();
         let graph_root = arenas.new_module(
             None,
-            ModuleKind::Def(DefKind::Mod, root_def_id, kw::Empty),
+            ModuleKind::Def(DefKind::Mod, root_def_id, None),
             ExpnId::root(),
             crate_span,
             attr::contains_name(attrs, sym::no_implicit_prelude),
@@ -1415,16 +1417,14 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         );
         let empty_module = arenas.new_module(
             None,
-            ModuleKind::Def(DefKind::Mod, root_def_id, kw::Empty),
+            ModuleKind::Def(DefKind::Mod, root_def_id, None),
             ExpnId::root(),
             DUMMY_SP,
             true,
-            &mut FxHashMap::default(),
-            &mut FxHashMap::default(),
+            &mut Default::default(),
+            &mut Default::default(),
         );
 
-        let mut def_id_to_node_id = IndexVec::default();
-        assert_eq!(def_id_to_node_id.push(CRATE_NODE_ID), CRATE_DEF_ID);
         let mut node_id_to_def_id = NodeMap::default();
         let crate_feed = tcx.create_local_crate_def_id(crate_span);
 
@@ -1435,7 +1435,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         let mut invocation_parents = FxHashMap::default();
         invocation_parents.insert(LocalExpnId::ROOT, InvocationParent::ROOT);
 
-        let mut extern_prelude: FxHashMap<Ident, ExternPreludeEntry<'_>> = tcx
+        let mut extern_prelude: FxIndexMap<Ident, ExternPreludeEntry<'_>> = tcx
             .sess
             .opts
             .externs
@@ -1534,7 +1534,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             macro_names: FxHashSet::default(),
             builtin_macros: Default::default(),
             registered_tools,
-            macro_use_prelude: FxHashMap::default(),
+            macro_use_prelude: Default::default(),
             macro_map: FxHashMap::default(),
             dummy_ext_bang: Arc::new(SyntaxExtension::dummy_bang(edition)),
             dummy_ext_derive: Arc::new(SyntaxExtension::dummy_derive(edition)),
@@ -1559,10 +1559,9 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             lint_buffer: LintBuffer::default(),
             next_node_id: CRATE_NODE_ID,
             node_id_to_def_id,
-            def_id_to_node_id,
+            disambiguator: DisambiguatorState::new(),
             placeholder_field_indices: Default::default(),
             invocation_parents,
-            trait_impl_items: Default::default(),
             legacy_const_generic_args: Default::default(),
             item_generics_num_lifetimes: Default::default(),
             main_def: Default::default(),
@@ -1640,7 +1639,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     }
 
     pub fn into_outputs(self) -> ResolverOutputs {
-        let proc_macros = self.proc_macros.iter().map(|id| self.local_def_id(*id)).collect();
+        let proc_macros = self.proc_macros;
         let expn_that_defined = self.expn_that_defined;
         let extern_crate_map = self.extern_crate_map;
         let maybe_unused_trait_imports = self.maybe_unused_trait_imports;
@@ -1655,7 +1654,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 .filter_map(|item| {
                     let parent_module =
                         self.node_id_to_def_id.get(&item.parent_module)?.key().to_def_id();
-                    Some(StrippedCfgItem { parent_module, name: item.name, cfg: item.cfg })
+                    Some(StrippedCfgItem { parent_module, ident: item.ident, cfg: item.cfg })
                 })
                 .collect(),
         );
@@ -1690,6 +1689,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 .into_items()
                 .map(|(k, f)| (k, f.key()))
                 .collect(),
+            disambiguator: self.disambiguator,
             trait_map: self.trait_map,
             lifetime_elision_allowed: self.lifetime_elision_allowed,
             lint_buffer: Steal::new(self.lint_buffer),
@@ -2007,16 +2007,16 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 result,
                 result.map(|r| r.expn_data())
             );
-            // Then find the last semi-transparent mark from the end if it exists.
+            // Then find the last semi-opaque mark from the end if it exists.
             for (mark, transparency) in iter {
-                if transparency == Transparency::SemiTransparent {
+                if transparency == Transparency::SemiOpaque {
                     result = Some(mark);
                 } else {
                     break;
                 }
             }
             debug!(
-                "resolve_crate_root: found semi-transparent mark {:?} {:?}",
+                "resolve_crate_root: found semi-opaque mark {:?} {:?}",
                 result,
                 result.map(|r| r.expn_data())
             );
@@ -2157,13 +2157,24 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         ns: Namespace,
         parent_scope: ParentScope<'ra>,
     ) -> Option<Res> {
-        let mut segments =
-            Vec::from_iter(path_str.split("::").map(Ident::from_str).map(Segment::from_ident));
-        if let Some(segment) = segments.first_mut() {
-            if segment.ident.name == kw::Empty {
-                segment.ident.name = kw::PathRoot;
-            }
-        }
+        let segments: Result<Vec<_>, ()> = path_str
+            .split("::")
+            .enumerate()
+            .map(|(i, s)| {
+                let sym = if s.is_empty() {
+                    if i == 0 {
+                        // For a path like `::a::b`, use `kw::PathRoot` as the leading segment.
+                        kw::PathRoot
+                    } else {
+                        return Err(()); // occurs in cases like `String::`
+                    }
+                } else {
+                    Symbol::intern(s)
+                };
+                Ok(Segment::from_ident(Ident::with_dummy_span(sym)))
+            })
+            .collect();
+        let Ok(segments) = segments else { return None };
 
         match self.maybe_resolve_path(&segments, Some(ns), &parent_scope, None) {
             PathResult::Module(ModuleOrUniformRoot::Module(module)) => Some(module.res().unwrap()),
@@ -2290,7 +2301,8 @@ fn module_to_string(mut module: Module<'_>) -> Option<String> {
     loop {
         if let ModuleKind::Def(.., name) = module.kind {
             if let Some(parent) = module.parent {
-                names.push(name);
+                // `unwrap` is safe: the presence of a parent means it's not the crate root.
+                names.push(name.unwrap());
                 module = parent
             } else {
                 break;

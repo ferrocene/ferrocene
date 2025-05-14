@@ -22,7 +22,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let f = 3.7_f16;
     /// let g = 3.0_f16;
@@ -49,7 +53,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let f = 3.01_f16;
     /// let g = 4.0_f16;
@@ -76,7 +84,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let f = 3.3_f16;
     /// let g = -3.3_f16;
@@ -108,7 +120,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let f = 3.3_f16;
     /// let g = -3.3_f16;
@@ -138,7 +154,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let f = 3.7_f16;
     /// let g = 3.0_f16;
@@ -166,7 +186,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = 3.6_f16;
     /// let y = -3.6_f16;
@@ -203,7 +227,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let m = 10.0_f16;
     /// let x = 4.0_f16;
@@ -247,7 +275,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let a: f16 = 7.0;
     /// let b = 4.0;
@@ -289,7 +321,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let a: f16 = 7.0;
     /// let b = 4.0;
@@ -326,7 +362,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = 2.0_f16;
     /// let abs_difference = (x.powi(2) - (x * x)).abs();
@@ -354,7 +394,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = 2.0_f16;
     /// let abs_difference = (x.powf(2.0) - (x * x)).abs();
@@ -386,7 +430,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let positive = 4.0_f16;
     /// let negative = -4.0_f16;
@@ -417,7 +465,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let one = 1.0f16;
     /// // e^1
@@ -448,7 +500,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let f = 2.0f16;
     ///
@@ -468,6 +524,8 @@ impl f16 {
 
     /// Returns the natural logarithm of the number.
     ///
+    /// This returns NaN when the number is negative, and negative infinity when number is zero.
+    ///
     /// # Unspecified precision
     ///
     /// The precision of this function is non-deterministic. This means it varies by platform,
@@ -477,7 +535,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let one = 1.0f16;
     /// // e^1
@@ -489,6 +551,20 @@ impl f16 {
     /// assert!(abs_difference <= f16::EPSILON);
     /// # }
     /// ```
+    ///
+    /// Non-positive values:
+    /// ```
+    /// #![feature(f16)]
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
+    ///
+    /// assert_eq!(0_f16.ln(), f16::NEG_INFINITY);
+    /// assert!((-42_f16).ln().is_nan());
+    /// # }
+    /// ```
     #[inline]
     #[rustc_allow_incoherent_impl]
     #[unstable(feature = "f16", issue = "116909")]
@@ -498,6 +574,8 @@ impl f16 {
     }
 
     /// Returns the logarithm of the number with respect to an arbitrary base.
+    ///
+    /// This returns NaN when the number is negative, and negative infinity when number is zero.
     ///
     /// The result might not be correctly rounded owing to implementation details;
     /// `self.log2()` can produce more accurate results for base 2, and
@@ -512,7 +590,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let five = 5.0f16;
     ///
@@ -520,6 +602,20 @@ impl f16 {
     /// let abs_difference = (five.log(5.0) - 1.0).abs();
     ///
     /// assert!(abs_difference <= f16::EPSILON);
+    /// # }
+    /// ```
+    ///
+    /// Non-positive values:
+    /// ```
+    /// #![feature(f16)]
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
+    ///
+    /// assert_eq!(0_f16.log(10.0), f16::NEG_INFINITY);
+    /// assert!((-42_f16).log(10.0).is_nan());
     /// # }
     /// ```
     #[inline]
@@ -532,6 +628,8 @@ impl f16 {
 
     /// Returns the base 2 logarithm of the number.
     ///
+    /// This returns NaN when the number is negative, and negative infinity when number is zero.
+    ///
     /// # Unspecified precision
     ///
     /// The precision of this function is non-deterministic. This means it varies by platform,
@@ -541,7 +639,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let two = 2.0f16;
     ///
@@ -549,6 +651,20 @@ impl f16 {
     /// let abs_difference = (two.log2() - 1.0).abs();
     ///
     /// assert!(abs_difference <= f16::EPSILON);
+    /// # }
+    /// ```
+    ///
+    /// Non-positive values:
+    /// ```
+    /// #![feature(f16)]
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
+    ///
+    /// assert_eq!(0_f16.log2(), f16::NEG_INFINITY);
+    /// assert!((-42_f16).log2().is_nan());
     /// # }
     /// ```
     #[inline]
@@ -561,6 +677,8 @@ impl f16 {
 
     /// Returns the base 10 logarithm of the number.
     ///
+    /// This returns NaN when the number is negative, and negative infinity when number is zero.
+    ///
     /// # Unspecified precision
     ///
     /// The precision of this function is non-deterministic. This means it varies by platform,
@@ -570,7 +688,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let ten = 10.0f16;
     ///
@@ -578,6 +700,20 @@ impl f16 {
     /// let abs_difference = (ten.log10() - 1.0).abs();
     ///
     /// assert!(abs_difference <= f16::EPSILON);
+    /// # }
+    /// ```
+    ///
+    /// Non-positive values:
+    /// ```
+    /// #![feature(f16)]
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
+    ///
+    /// assert_eq!(0_f16.log10(), f16::NEG_INFINITY);
+    /// assert!((-42_f16).log10().is_nan());
     /// # }
     /// ```
     #[inline]
@@ -602,7 +738,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = 8.0f16;
     ///
@@ -617,7 +757,7 @@ impl f16 {
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn cbrt(self) -> f16 {
-        (unsafe { cmath::cbrtf(self as f32) }) as f16
+        cmath::cbrtf(self as f32) as f16
     }
 
     /// Compute the distance between the origin and a point (`x`, `y`) on the
@@ -637,7 +777,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = 2.0f16;
     /// let y = 3.0f16;
@@ -653,7 +797,7 @@ impl f16 {
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn hypot(self, other: f16) -> f16 {
-        (unsafe { cmath::hypotf(self as f32, other as f32) }) as f16
+        cmath::hypotf(self as f32, other as f32) as f16
     }
 
     /// Computes the sine of a number (in radians).
@@ -667,7 +811,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = std::f16::consts::FRAC_PI_2;
     ///
@@ -695,7 +843,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = 2.0 * std::f16::consts::PI;
     ///
@@ -726,7 +878,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = std::f16::consts::FRAC_PI_4;
     /// let abs_difference = (x.tan() - 1.0).abs();
@@ -739,7 +895,7 @@ impl f16 {
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn tan(self) -> f16 {
-        (unsafe { cmath::tanf(self as f32) }) as f16
+        cmath::tanf(self as f32) as f16
     }
 
     /// Computes the arcsine of a number. Return value is in radians in
@@ -758,7 +914,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let f = std::f16::consts::FRAC_PI_2;
     ///
@@ -774,7 +934,7 @@ impl f16 {
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn asin(self) -> f16 {
-        (unsafe { cmath::asinf(self as f32) }) as f16
+        cmath::asinf(self as f32) as f16
     }
 
     /// Computes the arccosine of a number. Return value is in radians in
@@ -793,7 +953,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let f = std::f16::consts::FRAC_PI_4;
     ///
@@ -809,7 +973,7 @@ impl f16 {
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn acos(self) -> f16 {
-        (unsafe { cmath::acosf(self as f32) }) as f16
+        cmath::acosf(self as f32) as f16
     }
 
     /// Computes the arctangent of a number. Return value is in radians in the
@@ -827,7 +991,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let f = 1.0f16;
     ///
@@ -843,7 +1011,7 @@ impl f16 {
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn atan(self) -> f16 {
-        (unsafe { cmath::atanf(self as f32) }) as f16
+        cmath::atanf(self as f32) as f16
     }
 
     /// Computes the four quadrant arctangent of `self` (`y`) and `other` (`x`) in radians.
@@ -865,7 +1033,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// // Positive angles measured counter-clockwise
     /// // from positive x axis
@@ -889,7 +1061,7 @@ impl f16 {
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn atan2(self, other: f16) -> f16 {
-        (unsafe { cmath::atan2f(self as f32, other as f32) }) as f16
+        cmath::atan2f(self as f32, other as f32) as f16
     }
 
     /// Simultaneously computes the sine and cosine of the number, `x`. Returns
@@ -907,7 +1079,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = std::f16::consts::FRAC_PI_4;
     /// let f = x.sin_cos();
@@ -942,7 +1118,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = 1e-4_f16;
     ///
@@ -958,11 +1138,13 @@ impl f16 {
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn exp_m1(self) -> f16 {
-        (unsafe { cmath::expm1f(self as f32) }) as f16
+        cmath::expm1f(self as f32) as f16
     }
 
     /// Returns `ln(1+n)` (natural logarithm) more accurately than if
     /// the operations were performed separately.
+    ///
+    /// This returns NaN when `n < -1.0`, and negative infinity when `n == -1.0`.
     ///
     /// # Unspecified precision
     ///
@@ -976,7 +1158,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = 1e-4_f16;
     ///
@@ -987,13 +1173,27 @@ impl f16 {
     /// assert!(abs_difference < 1e-4);
     /// # }
     /// ```
+    ///
+    /// Out-of-range values:
+    /// ```
+    /// #![feature(f16)]
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
+    ///
+    /// assert_eq!((-1.0_f16).ln_1p(), f16::NEG_INFINITY);
+    /// assert!((-2.0_f16).ln_1p().is_nan());
+    /// # }
+    /// ```
     #[inline]
     #[doc(alias = "log1p")]
     #[rustc_allow_incoherent_impl]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn ln_1p(self) -> f16 {
-        (unsafe { cmath::log1pf(self as f32) }) as f16
+        cmath::log1pf(self as f32) as f16
     }
 
     /// Hyperbolic sine function.
@@ -1010,7 +1210,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let e = std::f16::consts::E;
     /// let x = 1.0f16;
@@ -1028,7 +1232,7 @@ impl f16 {
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn sinh(self) -> f16 {
-        (unsafe { cmath::sinhf(self as f32) }) as f16
+        cmath::sinhf(self as f32) as f16
     }
 
     /// Hyperbolic cosine function.
@@ -1045,7 +1249,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let e = std::f16::consts::E;
     /// let x = 1.0f16;
@@ -1063,7 +1271,7 @@ impl f16 {
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn cosh(self) -> f16 {
-        (unsafe { cmath::coshf(self as f32) }) as f16
+        cmath::coshf(self as f32) as f16
     }
 
     /// Hyperbolic tangent function.
@@ -1080,7 +1288,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let e = std::f16::consts::E;
     /// let x = 1.0f16;
@@ -1098,7 +1310,7 @@ impl f16 {
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn tanh(self) -> f16 {
-        (unsafe { cmath::tanhf(self as f32) }) as f16
+        cmath::tanhf(self as f32) as f16
     }
 
     /// Inverse hyperbolic sine function.
@@ -1112,7 +1324,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = 1.0f16;
     /// let f = x.sinh().asinh();
@@ -1144,7 +1360,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = 1.0f16;
     /// let f = x.cosh().acosh();
@@ -1178,7 +1398,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let e = std::f16::consts::E;
     /// let f = e.tanh().atanh();
@@ -1212,7 +1436,11 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// #![feature(float_gamma)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = 5.0f16;
     ///
@@ -1227,7 +1455,7 @@ impl f16 {
     // #[unstable(feature = "float_gamma", issue = "99842")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn gamma(self) -> f16 {
-        (unsafe { cmath::tgammaf(self as f32) }) as f16
+        cmath::tgammaf(self as f32) as f16
     }
 
     /// Natural logarithm of the absolute value of the gamma function
@@ -1247,7 +1475,11 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// #![feature(float_gamma)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = 2.0f16;
     ///
@@ -1263,7 +1495,7 @@ impl f16 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn ln_gamma(self) -> (f16, i32) {
         let mut signgamp: i32 = 0;
-        let x = (unsafe { cmath::lgammaf_r(self as f32, &mut signgamp) }) as f16;
+        let x = cmath::lgammaf_r(self as f32, &mut signgamp) as f16;
         (x, signgamp)
     }
 
@@ -1282,7 +1514,11 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// #![feature(float_erf)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     /// /// The error function relates what percent of a normal distribution lies
     /// /// within `x` standard deviations (scaled by `1/sqrt(2)`).
     /// fn within_standard_deviations(x: f16) -> f16 {
@@ -1303,7 +1539,7 @@ impl f16 {
     // #[unstable(feature = "float_erf", issue = "136321")]
     #[inline]
     pub fn erf(self) -> f16 {
-        (unsafe { cmath::erff(self as f32) }) as f16
+        cmath::erff(self as f32) as f16
     }
 
     /// Complementary error function.
@@ -1321,7 +1557,11 @@ impl f16 {
     /// ```
     /// #![feature(f16)]
     /// #![feature(float_erf)]
-    /// # #[cfg(reliable_f16_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f16_math)] {
     /// let x: f16 = 0.123;
     ///
     /// let one = x.erf() + x.erfc();
@@ -1336,6 +1576,6 @@ impl f16 {
     // #[unstable(feature = "float_erf", issue = "136321")]
     #[inline]
     pub fn erfc(self) -> f16 {
-        (unsafe { cmath::erfcf(self as f32) }) as f16
+        cmath::erfcf(self as f32) as f16
     }
 }

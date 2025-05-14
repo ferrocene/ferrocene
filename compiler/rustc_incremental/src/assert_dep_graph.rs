@@ -38,7 +38,7 @@ use std::fs::{self, File};
 use std::io::Write;
 
 use rustc_data_structures::fx::FxIndexSet;
-use rustc_data_structures::graph::implementation::{Direction, INCOMING, NodeIndex, OUTGOING};
+use rustc_data_structures::graph::linked_graph::{Direction, INCOMING, NodeIndex, OUTGOING};
 use rustc_hir::def_id::{CRATE_DEF_ID, DefId, LocalDefId};
 use rustc_hir::intravisit::{self, Visitor};
 use rustc_middle::dep_graph::{
@@ -123,7 +123,7 @@ impl<'tcx> IfThisChanged<'tcx> {
     fn process_attrs(&mut self, def_id: LocalDefId) {
         let def_path_hash = self.tcx.def_path_hash(def_id.to_def_id());
         let hir_id = self.tcx.local_def_id_to_hir_id(def_id);
-        let attrs = self.tcx.hir().attrs(hir_id);
+        let attrs = self.tcx.hir_attrs(hir_id);
         for attr in attrs {
             if attr.has_name(sym::rustc_if_this_changed) {
                 let dep_node_interned = self.argument(attr);

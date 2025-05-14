@@ -26,10 +26,6 @@ resolve_associated_fn_with_similar_name_exists =
 resolve_associated_type_with_similar_name_exists =
     there is an associated type with a similar name
 
-resolve_attempt_to_define_builtin_macro_twice =
-    attempted to define built-in macro more than once
-    .note = previously defined here
-
 resolve_attempt_to_use_non_constant_value_in_constant =
     attempt to use a non-constant value in a constant
 
@@ -153,9 +149,13 @@ resolve_extern_crate_self_requires_renaming =
     `extern crate self;` requires renaming
     .suggestion = rename the `self` crate to be able to import it
 
+resolve_forward_declared_generic_in_const_param_ty =
+    const parameter types cannot reference parameters before they are declared
+    .label = const parameter type cannot reference `{$param}` before it is declared
+
 resolve_forward_declared_generic_param =
-    generic parameters with a default cannot use forward declared identifiers
-    .label = defaulted generic parameters cannot be forward declared
+    generic parameter defaults cannot reference parameters before they are declared
+    .label = cannot reference `{$param}` before it is declared
 
 resolve_found_an_item_configured_out =
     found an item that was configured out
@@ -218,10 +218,6 @@ resolve_invalid_asm_sym =
     .label = is a local variable
     .help = `sym` operands must refer to either a function or a static
 
-resolve_is_not_directly_importable =
-    `{$target}` is not directly importable
-    .label = cannot be imported directly
-
 resolve_is_private =
     {$ident_descr} `{$ident}` is private
     .label = private {$ident_descr}
@@ -230,9 +226,6 @@ resolve_item_was_behind_feature =
     the item is gated behind the `{$feature}` feature
 
 resolve_item_was_cfg_out = the item is gated here
-
-resolve_items_in_traits_are_not_importable =
-    items in traits are not importable
 
 resolve_label_with_similar_name_reachable =
     a label with a similar name is reachable
@@ -377,9 +370,11 @@ resolve_self_imports_only_allowed_within_multipart_suggestion =
 resolve_self_imports_only_allowed_within_suggestion =
     consider importing the module directly
 
+resolve_self_in_const_generic_ty =
+    cannot use `Self` in const parameter type
+
 resolve_self_in_generic_param_default =
     generic parameters cannot use `Self` in their defaults
-    .label = `Self` in generic parameter default
 
 resolve_similarly_named_defined_here =
     similarly named {$candidate_descr} `{$candidate}` defined here

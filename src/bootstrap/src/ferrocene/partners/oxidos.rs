@@ -10,7 +10,7 @@ use crate::core::build_steps::tool::SourceType;
 use crate::core::config::TargetSelection;
 use crate::utils::build_stamp::BuildStamp;
 use crate::utils::tarball::Tarball;
-use crate::{Compiler, Mode, t};
+use crate::{Compiler, FileType, Mode, t};
 
 const OXIDOS_CRATES: &[&str] = &[
     // List of OxidOS crates to prebuild. Their dependencies will be built and included in the
@@ -20,7 +20,6 @@ const OXIDOS_CRATES: &[&str] = &[
     "deno",
     "wasm",
     "capsules-core",
-    "capsules-extra",
 ];
 const OXIDOS_DEBUG_FEATURES: &[&str] = &[
     // We build two variants of OxidOS: the standard variant, and a variant meant for
@@ -93,7 +92,7 @@ impl Step for DistOxidOs {
                 for file in t!(std::fs::read_dir(path.join("deps"))) {
                     let file = t!(file).path();
                     if file.extension().and_then(OsStr::to_str) == Some("rlib") {
-                        tarball.add_file(&file, &dest, 0o644);
+                        tarball.add_file(&file, &dest, FileType::Regular);
                     }
                 }
             }
@@ -139,7 +138,7 @@ impl Step for BuildOxidOS {
         let _guard = builder.msg(Kind::Build, compiler.stage, self.name(), compiler.host, target);
 
         let mode = Mode::ToolCustom { name: self.name() };
-        let mut cargo = builder.cargo(compiler, mode, SourceType::InTree, target, Kind::Build);
+        let mut cargo = builder.cargo(compiler, mode, SourceType::Submodule, target, Kind::Build);
 
         cargo.current_dir(&source);
         cargo.rustflag(&format!("-Zallow-features={}", OXIDOS_ALLOW_UNSTABLE_FEATURES.join(",")));
@@ -176,6 +175,8 @@ impl Step for BuildOxidOS {
                 cargo.args(["--features", *feature]);
             }
         }
+
+        cargo.rustflag("-Arust_2018_idioms");
 
         let stamp =
             BuildStamp::new(&builder.cargo_out(compiler, mode, target)).with_prefix(self.name());

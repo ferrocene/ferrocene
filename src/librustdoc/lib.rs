@@ -147,7 +147,7 @@ pub fn main() {
 
         #[cfg(target_os = "macos")]
         {
-            extern "C" {
+            unsafe extern "C" {
                 fn _rjem_je_zone_register();
             }
 
@@ -170,12 +170,28 @@ pub fn main() {
     // NOTE: this compiles both versions of tracing unconditionally, because
     // - The compile time hit is not that bad, especially compared to rustdoc's incremental times, and
     // - Otherwise, there's no warning that logging is being ignored when `download-rustc` is enabled
-    // NOTE: The reason this doesn't show double logging when `download-rustc = false` and
-    // `debug_logging = true` is because all rustc logging goes to its version of tracing (the one
-    // in the sysroot), and all of rustdoc's logging goes to its version (the one in Cargo.toml).
 
-    init_logging(&early_dcx);
-    rustc_driver::init_logger(&early_dcx, rustc_log::LoggerConfig::from_env("RUSTDOC_LOG"));
+    crate::init_logging(&early_dcx);
+    match rustc_log::init_logger(rustc_log::LoggerConfig::from_env("RUSTDOC_LOG")) {
+        Ok(()) => {}
+        // With `download-rustc = true` there are definitely 2 distinct tracing crates in the
+        // dependency graph: one in the downloaded sysroot and one built just now as a dependency of
+        // rustdoc. So the sysroot's tracing is definitely not yet initialized here.
+        //
+        // But otherwise, depending on link style, there may or may not be 2 tracing crates in play.
+        // The one we just initialized in `crate::init_logging` above is rustdoc's direct dependency
+        // on tracing. When rustdoc is built by x.py using Cargo, rustc_driver's and rustc_log's
+        // tracing dependency is distinct from this one and also needs to be initialized (using the
+        // same RUSTDOC_LOG environment variable for both). Other build systems may use just a
+        // single tracing crate throughout the rustc and rustdoc build.
+        //
+        // The reason initializing 2 tracings does not show double logging when `download-rustc =
+        // false` and `debug_logging = true` is because all rustc logging goes only to its version
+        // of tracing (the one in the sysroot) and all of rustdoc's logging only goes to its version
+        // (the one in Cargo.toml).
+        Err(rustc_log::Error::AlreadyInit(_)) => {}
+        Err(error) => early_dcx.early_fatal(error.to_string()),
+    }
 
     let exit_code = rustc_driver::catch_with_exit_code(|| {
         let at_args = rustc_driver::args::raw_args(&early_dcx);
@@ -507,28 +523,20 @@ fn opts() -> Vec<RustcOptGroup> {
             "",
         ),
         opt(
-            Unstable,
-            FlagMulti,
-            "",
-            "enable-per-target-ignores",
-            "parse ignore-foo for ignoring doctests on a per-target basis",
-            "",
-        ),
-        opt(
-            Unstable,
+            Stable,
             Opt,
             "",
-            "runtool",
+            "test-runtool",
             "",
             "The tool to run tests with when building for a different target than host",
         ),
         opt(
-            Unstable,
+            Stable,
             Multi,
             "",
-            "runtool-arg",
+            "test-runtool-arg",
             "",
-            "One (of possibly many) arguments to pass to the runtool",
+            "One argument (of possibly many) to pass to the runtool",
         ),
         opt(
             Unstable,

@@ -14,7 +14,7 @@ use tracing::{info, instrument, trace};
 
 use super::{
     FnArg, FnVal, ImmTy, Immediate, InterpCx, InterpResult, Machine, MemPlaceMeta, PlaceTy,
-    Projectable, Scalar, interp_ok, throw_ub,
+    Projectable, Scalar, interp_ok, throw_ub, throw_unsup_format,
 };
 use crate::util;
 
@@ -539,7 +539,11 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 }
             }
 
-            Drop { place, target, unwind, replace: _ } => {
+            Drop { place, target, unwind, replace: _, drop, async_fut } => {
+                assert!(
+                    async_fut.is_none() && drop.is_none(),
+                    "Async Drop must be expanded or reset to sync in runtime MIR"
+                );
                 let place = self.eval_place(place)?;
                 let instance = Instance::resolve_drop_in_place(*self.tcx, place.layout.ty);
                 if let ty::InstanceKind::DropGlue(_, None) = instance.def {
@@ -590,8 +594,8 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 terminator.kind
             ),
 
-            InlineAsm { template, ref operands, options, ref targets, .. } => {
-                M::eval_inline_asm(self, template, operands, options, targets)?;
+            InlineAsm { .. } => {
+                throw_unsup_format!("inline assembly is not supported");
             }
         }
 

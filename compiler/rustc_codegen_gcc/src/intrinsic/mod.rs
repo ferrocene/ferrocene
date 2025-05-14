@@ -78,6 +78,7 @@ fn get_simple_intrinsic<'gcc, 'tcx>(
         sym::maxnumf64 => "fmax",
         sym::copysignf32 => "copysignf",
         sym::copysignf64 => "copysign",
+        sym::copysignf128 => "copysignl",
         sym::floorf32 => "floorf",
         sym::floorf64 => "floor",
         sym::ceilf32 => "ceilf",
@@ -398,7 +399,7 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
             }
 
             // Fall back to default body
-            _ => return Err(Instance::new(instance.def_id(), instance.args)),
+            _ => return Err(Instance::new_raw(instance.def_id(), instance.args)),
         };
 
         if !fn_abi.ret.is_ignore() {

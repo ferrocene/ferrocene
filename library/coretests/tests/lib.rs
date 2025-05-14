@@ -12,11 +12,9 @@
 #![feature(async_iterator)]
 #![feature(bigint_helper_methods)]
 #![feature(bstr)]
-#![feature(cell_update)]
 #![feature(char_max_len)]
 #![feature(clone_to_uninit)]
 #![feature(const_eval_select)]
-#![feature(const_swap_nonoverlapping)]
 #![feature(const_trait_impl)]
 #![feature(core_intrinsics)]
 #![feature(core_intrinsics_fallbacks)]
@@ -39,7 +37,6 @@
 #![feature(generic_assert_internals)]
 #![feature(hasher_prefixfree_extras)]
 #![feature(hashmap_internals)]
-#![feature(inline_const_pat)]
 #![feature(int_roundings)]
 #![feature(ip)]
 #![feature(ip_from)]
@@ -64,6 +61,7 @@
 #![feature(maybe_uninit_write_slice)]
 #![feature(min_specialization)]
 #![feature(never_type)]
+#![feature(next_index)]
 #![feature(numfmt)]
 #![feature(pattern)]
 #![feature(pointer_is_aligned_to)]
@@ -73,7 +71,6 @@
 #![feature(slice_internals)]
 #![feature(slice_partition_dedup)]
 #![feature(slice_split_once)]
-#![feature(slice_take)]
 #![feature(split_array)]
 #![feature(split_as_slice)]
 #![feature(std_internals)]
@@ -88,7 +85,6 @@
 #![feature(try_find)]
 #![feature(try_trait_v2)]
 #![feature(unsize)]
-#![feature(unsized_tuple_coercion)]
 #![feature(unwrap_infallible)]
 // tidy-alphabetical-end
 #![allow(internal_features)]
@@ -97,16 +93,17 @@
 
 /// Version of `assert_matches` that ignores fancy runtime printing in const context and uses structural equality.
 macro_rules! assert_eq_const_safe {
-    ($left:expr, $right:expr) => {
-        assert_eq_const_safe!($left, $right, concat!(stringify!($left), " == ", stringify!($right)));
+    ($t:ty: $left:expr, $right:expr) => {
+        assert_eq_const_safe!($t: $left, $right, concat!(stringify!($left), " == ", stringify!($right)));
     };
-    ($left:expr, $right:expr$(, $($arg:tt)+)?) => {
+    ($t:ty: $left:expr, $right:expr$(, $($arg:tt)+)?) => {
         {
             fn runtime() {
                 assert_eq!($left, $right, $($($arg)*),*);
             }
             const fn compiletime() {
-                assert!(matches!($left, const { $right }));
+                const PAT: $t = $right;
+                assert!(matches!($left, PAT), $($($arg)*),*);
             }
             core::intrinsics::const_eval_select((), compiletime, runtime)
         }
@@ -149,6 +146,7 @@ mod ffi;
 mod fmt;
 mod future;
 mod hash;
+mod hint;
 mod intrinsics;
 mod io;
 mod iter;

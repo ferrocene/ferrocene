@@ -73,6 +73,7 @@ fn frob() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_rw_arc_poison_wr() {
     let arc = Arc::new(RwLock::new(1));
     let arc2 = arc.clone();
@@ -85,6 +86,7 @@ fn test_rw_arc_poison_wr() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_rw_arc_poison_mapped_w_r() {
     let arc = Arc::new(RwLock::new(1));
     let arc2 = arc.clone();
@@ -98,6 +100,7 @@ fn test_rw_arc_poison_mapped_w_r() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_rw_arc_poison_ww() {
     let arc = Arc::new(RwLock::new(1));
     assert!(!arc.is_poisoned());
@@ -112,6 +115,7 @@ fn test_rw_arc_poison_ww() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_rw_arc_poison_mapped_w_w() {
     let arc = Arc::new(RwLock::new(1));
     let arc2 = arc.clone();
@@ -126,6 +130,7 @@ fn test_rw_arc_poison_mapped_w_w() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_rw_arc_no_poison_rr() {
     let arc = Arc::new(RwLock::new(1));
     let arc2 = arc.clone();
@@ -139,6 +144,7 @@ fn test_rw_arc_no_poison_rr() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_rw_arc_no_poison_mapped_r_r() {
     let arc = Arc::new(RwLock::new(1));
     let arc2 = arc.clone();
@@ -153,6 +159,7 @@ fn test_rw_arc_no_poison_mapped_r_r() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_rw_arc_no_poison_rw() {
     let arc = Arc::new(RwLock::new(1));
     let arc2 = arc.clone();
@@ -166,6 +173,7 @@ fn test_rw_arc_no_poison_rw() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_rw_arc_no_poison_mapped_r_w() {
     let arc = Arc::new(RwLock::new(1));
     let arc2 = arc.clone();
@@ -218,6 +226,7 @@ fn test_rw_arc() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_rw_arc_access_in_unwind() {
     let arc = Arc::new(RwLock::new(1));
     let arc2 = arc.clone();
@@ -316,6 +325,7 @@ fn test_into_inner_drop() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_into_inner_poison() {
     let m = new_poisoned_rwlock(NonCopy(10));
 
@@ -333,6 +343,7 @@ fn test_get_cloned() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_get_cloned_poison() {
     let m = new_poisoned_rwlock(Cloneable(10));
 
@@ -350,6 +361,7 @@ fn test_get_mut() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_get_mut_poison() {
     let mut m = new_poisoned_rwlock(NonCopy(10));
 
@@ -377,6 +389,7 @@ fn test_set() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_set_poison() {
     fn inner<T>(mut init: impl FnMut() -> T, mut value: impl FnMut() -> T)
     where
@@ -415,6 +428,7 @@ fn test_replace() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_replace_poison() {
     fn inner<T>(mut init: impl FnMut() -> T, mut value: impl FnMut() -> T)
     where
@@ -482,6 +496,7 @@ fn test_mapping_mapped_guard() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn panic_while_mapping_read_unlocked_no_poison() {
     let lock = RwLock::new(());
 
@@ -502,16 +517,20 @@ fn panic_while_mapping_read_unlocked_no_poison() {
 
     let _ = panic::catch_unwind(|| {
         let guard = lock.read().unwrap();
-        let _guard = RwLockReadGuard::try_map::<(), _>(guard, |_| panic!());
+        let _guard = RwLockReadGuard::filter_map::<(), _>(guard, |_| panic!());
     });
 
     match lock.try_write() {
         Ok(_) => {}
         Err(TryLockError::WouldBlock) => {
-            panic!("panicking in a RwLockReadGuard::try_map closure should release the read lock")
+            panic!(
+                "panicking in a RwLockReadGuard::filter_map closure should release the read lock"
+            )
         }
         Err(TryLockError::Poisoned(_)) => {
-            panic!("panicking in a RwLockReadGuard::try_map closure should not poison the RwLock")
+            panic!(
+                "panicking in a RwLockReadGuard::filter_map closure should not poison the RwLock"
+            )
         }
     }
 
@@ -534,16 +553,16 @@ fn panic_while_mapping_read_unlocked_no_poison() {
     let _ = panic::catch_unwind(|| {
         let guard = lock.read().unwrap();
         let guard = RwLockReadGuard::map::<(), _>(guard, |val| val);
-        let _guard = MappedRwLockReadGuard::try_map::<(), _>(guard, |_| panic!());
+        let _guard = MappedRwLockReadGuard::filter_map::<(), _>(guard, |_| panic!());
     });
 
     match lock.try_write() {
         Ok(_) => {}
         Err(TryLockError::WouldBlock) => panic!(
-            "panicking in a MappedRwLockReadGuard::try_map closure should release the read lock"
+            "panicking in a MappedRwLockReadGuard::filter_map closure should release the read lock"
         ),
         Err(TryLockError::Poisoned(_)) => panic!(
-            "panicking in a MappedRwLockReadGuard::try_map closure should not poison the RwLock"
+            "panicking in a MappedRwLockReadGuard::filter_map closure should not poison the RwLock"
         ),
     }
 
@@ -551,6 +570,7 @@ fn panic_while_mapping_read_unlocked_no_poison() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn panic_while_mapping_write_unlocked_poison() {
     let lock = RwLock::new(());
 
@@ -569,15 +589,17 @@ fn panic_while_mapping_write_unlocked_poison() {
 
     let _ = panic::catch_unwind(|| {
         let guard = lock.write().unwrap();
-        let _guard = RwLockWriteGuard::try_map::<(), _>(guard, |_| panic!());
+        let _guard = RwLockWriteGuard::filter_map::<(), _>(guard, |_| panic!());
     });
 
     match lock.try_write() {
         Ok(_) => {
-            panic!("panicking in a RwLockWriteGuard::try_map closure should poison the RwLock")
+            panic!("panicking in a RwLockWriteGuard::filter_map closure should poison the RwLock")
         }
         Err(TryLockError::WouldBlock) => {
-            panic!("panicking in a RwLockWriteGuard::try_map closure should release the write lock")
+            panic!(
+                "panicking in a RwLockWriteGuard::filter_map closure should release the write lock"
+            )
         }
         Err(TryLockError::Poisoned(_)) => {}
     }
@@ -601,15 +623,15 @@ fn panic_while_mapping_write_unlocked_poison() {
     let _ = panic::catch_unwind(|| {
         let guard = lock.write().unwrap();
         let guard = RwLockWriteGuard::map::<(), _>(guard, |val| val);
-        let _guard = MappedRwLockWriteGuard::try_map::<(), _>(guard, |_| panic!());
+        let _guard = MappedRwLockWriteGuard::filter_map::<(), _>(guard, |_| panic!());
     });
 
     match lock.try_write() {
         Ok(_) => panic!(
-            "panicking in a MappedRwLockWriteGuard::try_map closure should poison the RwLock"
+            "panicking in a MappedRwLockWriteGuard::filter_map closure should poison the RwLock"
         ),
         Err(TryLockError::WouldBlock) => panic!(
-            "panicking in a MappedRwLockWriteGuard::try_map closure should release the write lock"
+            "panicking in a MappedRwLockWriteGuard::filter_map closure should release the write lock"
         ),
         Err(TryLockError::Poisoned(_)) => {}
     }

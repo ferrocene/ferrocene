@@ -1,6 +1,6 @@
-//@ ignore-test (auxiliary, used by other tests)
+//@ ignore-auxiliary (used by `./inner-cfg-non-inline-mod.rs`)
 
-#![cfg_attr(all(), cfg(FALSE))]
+#![cfg_attr(all(), cfg(false))]
 
 // ferrocene-annotations: fls_fymvsy6ig99a
 // Attribute cfg

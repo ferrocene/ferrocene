@@ -28,6 +28,29 @@ fn foo(n: i32) -> i32 {
 }
 
 #[test]
+fn doctest_add_explicit_enum_discriminant() {
+    check_doc_test(
+        "add_explicit_enum_discriminant",
+        r#####"
+enum TheEnum$0 {
+    Foo,
+    Bar,
+    Baz = 42,
+    Quux,
+}
+"#####,
+        r#####"
+enum TheEnum {
+    Foo = 0,
+    Bar = 1,
+    Baz = 42,
+    Quux = 43,
+}
+"#####,
+    )
+}
+
+#[test]
 fn doctest_add_explicit_type() {
     check_doc_test(
         "add_explicit_type",
@@ -305,34 +328,6 @@ fn some_function(x: i32) {
 }
 
 #[test]
-fn doctest_bool_to_enum() {
-    check_doc_test(
-        "bool_to_enum",
-        r#####"
-fn main() {
-    let $0bool = true;
-
-    if bool {
-        println!("foo");
-    }
-}
-"#####,
-        r#####"
-#[derive(PartialEq, Eq)]
-enum Bool { True, False }
-
-fn main() {
-    let bool = Bool::True;
-
-    if bool == Bool::True {
-        println!("foo");
-    }
-}
-"#####,
-    )
-}
-
-#[test]
 fn doctest_change_visibility() {
     check_doc_test(
         "change_visibility",
@@ -383,6 +378,34 @@ fn main() {
 }
 
 #[test]
+fn doctest_convert_bool_to_enum() {
+    check_doc_test(
+        "convert_bool_to_enum",
+        r#####"
+fn main() {
+    let $0bool = true;
+
+    if bool {
+        println!("foo");
+    }
+}
+"#####,
+        r#####"
+#[derive(PartialEq, Eq)]
+enum Bool { True, False }
+
+fn main() {
+    let bool = Bool::True;
+
+    if bool == Bool::True {
+        println!("foo");
+    }
+}
+"#####,
+    )
+}
+
+#[test]
 fn doctest_convert_closure_to_fn() {
     check_doc_test(
         "convert_closure_to_fn",
@@ -411,6 +434,30 @@ fn main() {
         s.push_str(a)
     }
     closure("abc", &mut s);
+}
+"#####,
+    )
+}
+
+#[test]
+fn doctest_convert_for_loop_to_while_let() {
+    check_doc_test(
+        "convert_for_loop_to_while_let",
+        r#####"
+fn main() {
+    let x = vec![1, 2, 3];
+    for$0 v in x {
+        let y = v * 2;
+    };
+}
+"#####,
+        r#####"
+fn main() {
+    let x = vec![1, 2, 3];
+    let mut tmp = x.into_iter();
+    while let Some(v) = tmp.next() {
+        let y = v * 2;
+    };
 }
 "#####,
     )
@@ -933,23 +980,42 @@ pub use foo::{Bar, Baz};
 }
 
 #[test]
-fn doctest_explicit_enum_discriminant() {
+fn doctest_expand_record_rest_pattern() {
     check_doc_test(
-        "explicit_enum_discriminant",
+        "expand_record_rest_pattern",
         r#####"
-enum TheEnum$0 {
-    Foo,
-    Bar,
-    Baz = 42,
-    Quux,
+struct Bar { y: Y, z: Z }
+
+fn foo(bar: Bar) {
+    let Bar { ..$0 } = bar;
 }
 "#####,
         r#####"
-enum TheEnum {
-    Foo = 0,
-    Bar = 1,
-    Baz = 42,
-    Quux = 43,
+struct Bar { y: Y, z: Z }
+
+fn foo(bar: Bar) {
+    let Bar { y, z  } = bar;
+}
+"#####,
+    )
+}
+
+#[test]
+fn doctest_expand_tuple_struct_rest_pattern() {
+    check_doc_test(
+        "expand_tuple_struct_rest_pattern",
+        r#####"
+struct Bar(Y, Z);
+
+fn foo(bar: Bar) {
+    let Bar(..$0) = bar;
+}
+"#####,
+        r#####"
+struct Bar(Y, Z);
+
+fn foo(bar: Bar) {
+    let Bar(_0, _1) = bar;
 }
 "#####,
     )
@@ -1112,27 +1178,6 @@ fn main() {
 fn main() {
     let $0var_name = 1 + 2;
     var_name * 4;
-}
-"#####,
-    )
-}
-
-#[test]
-fn doctest_fill_record_pattern_fields() {
-    check_doc_test(
-        "fill_record_pattern_fields",
-        r#####"
-struct Bar { y: Y, z: Z }
-
-fn foo(bar: Bar) {
-    let Bar { ..$0 } = bar;
-}
-"#####,
-        r#####"
-struct Bar { y: Y, z: Z }
-
-fn foo(bar: Bar) {
-    let Bar { y, z  } = bar;
 }
 "#####,
     )
@@ -1692,7 +1737,7 @@ fn foo() {
     bar("", baz());
 }
 
-fn bar(arg: &str, baz: Baz) ${0:-> _} {
+fn bar(arg: &'static str, baz: Baz) ${0:-> _} {
     todo!()
 }
 
@@ -2194,19 +2239,6 @@ fn main() -> () {
 }
 
 #[test]
-fn doctest_introduce_named_generic() {
-    check_doc_test(
-        "introduce_named_generic",
-        r#####"
-fn foo(bar: $0impl Bar) {}
-"#####,
-        r#####"
-fn foo<$0B: Bar>(bar: B) {}
-"#####,
-    )
-}
-
-#[test]
 fn doctest_introduce_named_lifetime() {
     check_doc_test(
         "introduce_named_lifetime",
@@ -2227,6 +2259,19 @@ impl<'a> Cursor<'a> {
         }
     }
 }
+"#####,
+    )
+}
+
+#[test]
+fn doctest_introduce_named_type_parameter() {
+    check_doc_test(
+        "introduce_named_type_parameter",
+        r#####"
+fn foo(bar: $0impl Bar) {}
+"#####,
+        r#####"
+fn foo<$0B: Bar>(bar: B) {}
 "#####,
     )
 }
@@ -2698,6 +2743,25 @@ fn main() {
         r#####"
 fn main() {
     _ = 2 + 2;
+}
+"#####,
+    )
+}
+
+#[test]
+fn doctest_remove_underscore_from_used_variables() {
+    check_doc_test(
+        "remove_underscore_from_used_variables",
+        r#####"
+fn main() {
+    let mut _$0foo = 1;
+    _foo = 2;
+}
+"#####,
+        r#####"
+fn main() {
+    let mut foo = 1;
+    foo = 2;
 }
 "#####,
     )
@@ -3276,6 +3340,20 @@ sth!{ }
 }
 
 #[test]
+fn doctest_unmerge_imports() {
+    check_doc_test(
+        "unmerge_imports",
+        r#####"
+use std::fmt::{Debug, Display$0};
+"#####,
+        r#####"
+use std::fmt::{Debug};
+use std::fmt::Display;
+"#####,
+    )
+}
+
+#[test]
 fn doctest_unmerge_match_arm() {
     check_doc_test(
         "unmerge_match_arm",
@@ -3297,20 +3375,6 @@ fn handle(action: Action) {
         Action::Stop => foo(),
     }
 }
-"#####,
-    )
-}
-
-#[test]
-fn doctest_unmerge_use() {
-    check_doc_test(
-        "unmerge_use",
-        r#####"
-use std::fmt::{Debug, Display$0};
-"#####,
-        r#####"
-use std::fmt::{Debug};
-use std::fmt::Display;
 "#####,
     )
 }

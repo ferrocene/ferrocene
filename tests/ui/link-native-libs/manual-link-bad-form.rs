@@ -1,7 +1,8 @@
 //@ compile-flags:-l static=
-//@ error-pattern: library name must not be empty
 
 fn main() {
 }
+
+//~? ERROR library name must not be empty
 
 // ferrocene-annotations: um_rustc_l

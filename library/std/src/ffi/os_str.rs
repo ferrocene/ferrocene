@@ -257,7 +257,30 @@ impl OsString {
     #[inline]
     #[rustc_confusables("append", "put")]
     pub fn push<T: AsRef<OsStr>>(&mut self, s: T) {
-        self.inner.push_slice(&s.as_ref().inner)
+        trait SpecPushTo {
+            fn spec_push_to(&self, buf: &mut OsString);
+        }
+
+        impl<T: AsRef<OsStr>> SpecPushTo for T {
+            #[inline]
+            default fn spec_push_to(&self, buf: &mut OsString) {
+                buf.inner.push_slice(&self.as_ref().inner);
+            }
+        }
+
+        // Use a more efficient implementation when the string is UTF-8.
+        macro spec_str($T:ty) {
+            impl SpecPushTo for $T {
+                #[inline]
+                fn spec_push_to(&self, buf: &mut OsString) {
+                    buf.inner.push_str(self);
+                }
+            }
+        }
+        spec_str!(str);
+        spec_str!(String);
+
+        s.spec_push_to(self)
     }
 
     /// Creates a new `OsString` with at least the given capacity.
@@ -559,15 +582,25 @@ impl OsString {
     #[unstable(feature = "os_string_truncate", issue = "133262")]
     pub fn truncate(&mut self, len: usize) {
         self.as_os_str().inner.check_public_boundary(len);
-        self.inner.truncate(len);
+        // SAFETY: The length was just checked to be at a valid boundary.
+        unsafe { self.inner.truncate_unchecked(len) };
     }
 
-    /// Provides plumbing to core `Vec::extend_from_slice`.
-    /// More well behaving alternative to allowing outer types
-    /// full mutable access to the core `Vec`.
+    /// Provides plumbing to `Vec::extend_from_slice` without giving full
+    /// mutable access to the `Vec`.
+    ///
+    /// # Safety
+    ///
+    /// The slice must be valid for the platform encoding (as described in
+    /// [`OsStr::from_encoded_bytes_unchecked`]).
+    ///
+    /// This bypasses the encoding-dependent surrogate joining, so `self` must
+    /// not end with a leading surrogate half and `other` must not start with
+    /// with a trailing surrogate half.
     #[inline]
-    pub(crate) fn extend_from_slice(&mut self, other: &[u8]) {
-        self.inner.extend_from_slice(other);
+    pub(crate) unsafe fn extend_from_slice_unchecked(&mut self, other: &[u8]) {
+        // SAFETY: Guaranteed by caller.
+        unsafe { self.inner.extend_from_slice_unchecked(other) };
     }
 }
 
@@ -587,7 +620,30 @@ impl<T: ?Sized + AsRef<OsStr>> From<&T> for OsString {
     /// Copies any value implementing <code>[AsRef]&lt;[OsStr]&gt;</code>
     /// into a newly allocated [`OsString`].
     fn from(s: &T) -> OsString {
-        s.as_ref().to_os_string()
+        trait SpecToOsString {
+            fn spec_to_os_string(&self) -> OsString;
+        }
+
+        impl<T: AsRef<OsStr>> SpecToOsString for T {
+            #[inline]
+            default fn spec_to_os_string(&self) -> OsString {
+                self.as_ref().to_os_string()
+            }
+        }
+
+        // Preserve the known-UTF-8 property for strings.
+        macro spec_str($T:ty) {
+            impl SpecToOsString for $T {
+                #[inline]
+                fn spec_to_os_string(&self) -> OsString {
+                    OsString::from(String::from(self))
+                }
+            }
+        }
+        spec_str!(str);
+        spec_str!(String);
+
+        s.spec_to_os_string()
     }
 }
 
@@ -1209,7 +1265,7 @@ impl OsStr {
     /// let s = OsStr::new("Hello, world!");
     /// println!("{}", s.display());
     /// ```
-    #[stable(feature = "os_str_display", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "os_str_display", since = "1.87.0")]
     #[must_use = "this does not display the `OsStr`; \
                   it returns an object that can be displayed"]
     #[inline]
@@ -1566,19 +1622,19 @@ impl fmt::Debug for OsStr {
 ///
 /// [`Display`]: fmt::Display
 /// [`format!`]: crate::format
-#[stable(feature = "os_str_display", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "os_str_display", since = "1.87.0")]
 pub struct Display<'a> {
     os_str: &'a OsStr,
 }
 
-#[stable(feature = "os_str_display", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "os_str_display", since = "1.87.0")]
 impl fmt::Debug for Display<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(&self.os_str, f)
     }
 }
 
-#[stable(feature = "os_str_display", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "os_str_display", since = "1.87.0")]
 impl fmt::Display for Display<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(&self.os_str.inner, f)

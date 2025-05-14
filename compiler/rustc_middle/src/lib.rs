@@ -27,8 +27,8 @@
 // tidy-alphabetical-start
 #![allow(internal_features)]
 #![allow(rustc::diagnostic_outside_of_impl)]
-#![allow(rustc::potential_query_instability)]
 #![allow(rustc::untranslatable_diagnostic)]
+#![cfg_attr(bootstrap, feature(let_chains))]
 #![doc(html_root_url = "https://doc.rust-lang.org/nightly/nightly-rustc/")]
 #![doc(rust_logo)]
 #![feature(allocator_api)]
@@ -48,7 +48,6 @@
 #![feature(if_let_guard)]
 #![feature(intra_doc_pointers)]
 #![feature(iter_from_coroutine)]
-#![feature(let_chains)]
 #![feature(min_specialization)]
 #![feature(negative_impls)]
 #![feature(never_type)]
@@ -61,7 +60,7 @@
 #![feature(try_trait_v2_yeet)]
 #![feature(type_alias_impl_trait)]
 #![feature(yeet_expr)]
-#![warn(unreachable_pub)]
+#![recursion_limit = "256"]
 // tidy-alphabetical-end
 
 #[cfg(test)]

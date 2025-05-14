@@ -4,10 +4,10 @@ use rustc_infer::traits::{
     ImplDerivedHostCause, ImplSource, Obligation, ObligationCauseCode, PredicateObligation,
 };
 use rustc_middle::span_bug;
+use rustc_middle::traits::query::NoSolution;
+use rustc_middle::ty::elaborate::elaborate;
 use rustc_middle::ty::fast_reject::DeepRejectCtxt;
 use rustc_middle::ty::{self, TypingMode};
-use rustc_type_ir::elaborate::elaborate;
-use rustc_type_ir::solve::NoSolution;
 use thin_vec::{ThinVec, thin_vec};
 
 use super::SelectionContext;
@@ -105,10 +105,6 @@ fn match_candidate<'tcx>(
     );
 
     more_nested(selcx, &mut nested);
-
-    for nested in &mut nested {
-        nested.set_depth_from_parent(obligation.recursion_depth);
-    }
 
     Ok(nested)
 }
@@ -256,6 +252,9 @@ fn evaluate_host_effect_for_destruct_goal<'tcx>(
     let self_ty = obligation.predicate.self_ty();
 
     let const_conditions = match *self_ty.kind() {
+        // `ManuallyDrop` is trivially `~const Destruct` as we do not run any drop glue on it.
+        ty::Adt(adt_def, _) if adt_def.is_manually_drop() => thin_vec![],
+
         // An ADT is `~const Destruct` only if all of the fields are,
         // *and* if there is a `Drop` impl, that `Drop` impl is also `~const`.
         ty::Adt(adt_def, args) => {
@@ -263,7 +262,7 @@ fn evaluate_host_effect_for_destruct_goal<'tcx>(
                 .all_fields()
                 .map(|field| ty::TraitRef::new(tcx, destruct_def_id, [field.ty(tcx, args)]))
                 .collect();
-            match adt_def.destructor(tcx).map(|dtor| dtor.constness) {
+            match adt_def.destructor(tcx).map(|dtor| tcx.constness(dtor.did)) {
                 // `Drop` impl exists, but it's not const. Type cannot be `~const Destruct`.
                 Some(hir::Constness::NotConst) => return Err(EvaluationFailure::NoSolution),
                 // `Drop` impl exists, and it's const. Require `Ty: ~const Drop` to hold.
@@ -377,10 +376,6 @@ fn evaluate_host_effect_from_selection_candiate<'tcx>(
                                 )
                             }),
                     );
-
-                    for nested in &mut nested {
-                        nested.set_depth_from_parent(obligation.recursion_depth);
-                    }
 
                     Ok(nested)
                 }

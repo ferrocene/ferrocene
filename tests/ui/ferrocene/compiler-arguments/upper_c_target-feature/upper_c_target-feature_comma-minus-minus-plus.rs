@@ -6,6 +6,10 @@
 // test would fail when executed across tests with different amounts of target features. Comparing
 // output by subset avoids the problem.
 //@ compare-output-lines-by-subset
+//~? RAW not a recognized feature for this target
+//~? WARN unknown and unstable feature specified
+//~? WARN unknown and unstable feature specified
+//~? WARN unknown and unstable feature specified
 
 fn main() {}
 

@@ -1,5 +1,4 @@
-//@ error-pattern:expected
-use foo::*::bar
+use foo::*::bar //~ ERROR expected `;`, found `::`
 
 // ferrocene-annotations: fls_9i5msiuuyihf
 // Paths

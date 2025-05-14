@@ -22,7 +22,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let f = 3.7_f128;
     /// let g = 3.0_f128;
@@ -49,7 +53,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let f = 3.01_f128;
     /// let g = 4.0_f128;
@@ -76,7 +84,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let f = 3.3_f128;
     /// let g = -3.3_f128;
@@ -108,7 +120,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let f = 3.3_f128;
     /// let g = -3.3_f128;
@@ -138,7 +154,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let f = 3.7_f128;
     /// let g = 3.0_f128;
@@ -166,7 +186,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let x = 3.6_f128;
     /// let y = -3.6_f128;
@@ -203,7 +227,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let m = 10.0_f128;
     /// let x = 4.0_f128;
@@ -247,7 +275,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let a: f128 = 7.0;
     /// let b = 4.0;
@@ -289,7 +321,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let a: f128 = 7.0;
     /// let b = 4.0;
@@ -326,7 +362,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let x = 2.0_f128;
     /// let abs_difference = (x.powi(2) - (x * x)).abs();
@@ -354,7 +394,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let x = 2.0_f128;
     /// let abs_difference = (x.powf(2.0) - (x * x)).abs();
@@ -386,7 +430,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let positive = 4.0_f128;
     /// let negative = -4.0_f128;
@@ -417,7 +465,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let one = 1.0f128;
     /// // e^1
@@ -448,7 +500,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let f = 2.0f128;
     ///
@@ -468,6 +524,8 @@ impl f128 {
 
     /// Returns the natural logarithm of the number.
     ///
+    /// This returns NaN when the number is negative, and negative infinity when number is zero.
+    ///
     /// # Unspecified precision
     ///
     /// The precision of this function is non-deterministic. This means it varies by platform,
@@ -477,7 +535,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let one = 1.0f128;
     /// // e^1
@@ -489,6 +551,20 @@ impl f128 {
     /// assert!(abs_difference <= f128::EPSILON);
     /// # }
     /// ```
+    ///
+    /// Non-positive values:
+    /// ```
+    /// #![feature(f128)]
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
+    ///
+    /// assert_eq!(0_f128.ln(), f128::NEG_INFINITY);
+    /// assert!((-42_f128).ln().is_nan());
+    /// # }
+    /// ```
     #[inline]
     #[rustc_allow_incoherent_impl]
     #[unstable(feature = "f128", issue = "116909")]
@@ -498,6 +574,8 @@ impl f128 {
     }
 
     /// Returns the logarithm of the number with respect to an arbitrary base.
+    ///
+    /// This returns NaN when the number is negative, and negative infinity when number is zero.
     ///
     /// The result might not be correctly rounded owing to implementation details;
     /// `self.log2()` can produce more accurate results for base 2, and
@@ -512,7 +590,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let five = 5.0f128;
     ///
@@ -520,6 +602,20 @@ impl f128 {
     /// let abs_difference = (five.log(5.0) - 1.0).abs();
     ///
     /// assert!(abs_difference <= f128::EPSILON);
+    /// # }
+    /// ```
+    ///
+    /// Non-positive values:
+    /// ```
+    /// #![feature(f128)]
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
+    ///
+    /// assert_eq!(0_f128.log(10.0), f128::NEG_INFINITY);
+    /// assert!((-42_f128).log(10.0).is_nan());
     /// # }
     /// ```
     #[inline]
@@ -532,6 +628,8 @@ impl f128 {
 
     /// Returns the base 2 logarithm of the number.
     ///
+    /// This returns NaN when the number is negative, and negative infinity when number is zero.
+    ///
     /// # Unspecified precision
     ///
     /// The precision of this function is non-deterministic. This means it varies by platform,
@@ -541,7 +639,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let two = 2.0f128;
     ///
@@ -549,6 +651,20 @@ impl f128 {
     /// let abs_difference = (two.log2() - 1.0).abs();
     ///
     /// assert!(abs_difference <= f128::EPSILON);
+    /// # }
+    /// ```
+    ///
+    /// Non-positive values:
+    /// ```
+    /// #![feature(f128)]
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
+    ///
+    /// assert_eq!(0_f128.log2(), f128::NEG_INFINITY);
+    /// assert!((-42_f128).log2().is_nan());
     /// # }
     /// ```
     #[inline]
@@ -561,6 +677,8 @@ impl f128 {
 
     /// Returns the base 10 logarithm of the number.
     ///
+    /// This returns NaN when the number is negative, and negative infinity when number is zero.
+    ///
     /// # Unspecified precision
     ///
     /// The precision of this function is non-deterministic. This means it varies by platform,
@@ -570,7 +688,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let ten = 10.0f128;
     ///
@@ -578,6 +700,20 @@ impl f128 {
     /// let abs_difference = (ten.log10() - 1.0).abs();
     ///
     /// assert!(abs_difference <= f128::EPSILON);
+    /// # }
+    /// ```
+    ///
+    /// Non-positive values:
+    /// ```
+    /// #![feature(f128)]
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
+    ///
+    /// assert_eq!(0_f128.log10(), f128::NEG_INFINITY);
+    /// assert!((-42_f128).log10().is_nan());
     /// # }
     /// ```
     #[inline]
@@ -603,7 +739,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let x = 8.0f128;
     ///
@@ -618,7 +758,7 @@ impl f128 {
     #[unstable(feature = "f128", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn cbrt(self) -> f128 {
-        unsafe { cmath::cbrtf128(self) }
+        cmath::cbrtf128(self)
     }
 
     /// Compute the distance between the origin and a point (`x`, `y`) on the
@@ -639,7 +779,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let x = 2.0f128;
     /// let y = 3.0f128;
@@ -655,7 +799,7 @@ impl f128 {
     #[unstable(feature = "f128", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn hypot(self, other: f128) -> f128 {
-        unsafe { cmath::hypotf128(self, other) }
+        cmath::hypotf128(self, other)
     }
 
     /// Computes the sine of a number (in radians).
@@ -669,7 +813,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let x = std::f128::consts::FRAC_PI_2;
     ///
@@ -697,7 +845,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let x = 2.0 * std::f128::consts::PI;
     ///
@@ -728,7 +880,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let x = std::f128::consts::FRAC_PI_4;
     /// let abs_difference = (x.tan() - 1.0).abs();
@@ -741,7 +897,7 @@ impl f128 {
     #[unstable(feature = "f128", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn tan(self) -> f128 {
-        unsafe { cmath::tanf128(self) }
+        cmath::tanf128(self)
     }
 
     /// Computes the arcsine of a number. Return value is in radians in
@@ -760,7 +916,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let f = std::f128::consts::FRAC_PI_2;
     ///
@@ -776,7 +936,7 @@ impl f128 {
     #[unstable(feature = "f128", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn asin(self) -> f128 {
-        unsafe { cmath::asinf128(self) }
+        cmath::asinf128(self)
     }
 
     /// Computes the arccosine of a number. Return value is in radians in
@@ -795,7 +955,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let f = std::f128::consts::FRAC_PI_4;
     ///
@@ -811,7 +975,7 @@ impl f128 {
     #[unstable(feature = "f128", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn acos(self) -> f128 {
-        unsafe { cmath::acosf128(self) }
+        cmath::acosf128(self)
     }
 
     /// Computes the arctangent of a number. Return value is in radians in the
@@ -829,7 +993,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let f = 1.0f128;
     ///
@@ -845,7 +1013,7 @@ impl f128 {
     #[unstable(feature = "f128", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn atan(self) -> f128 {
-        unsafe { cmath::atanf128(self) }
+        cmath::atanf128(self)
     }
 
     /// Computes the four quadrant arctangent of `self` (`y`) and `other` (`x`) in radians.
@@ -867,7 +1035,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// // Positive angles measured counter-clockwise
     /// // from positive x axis
@@ -891,7 +1063,7 @@ impl f128 {
     #[unstable(feature = "f128", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn atan2(self, other: f128) -> f128 {
-        unsafe { cmath::atan2f128(self, other) }
+        cmath::atan2f128(self, other)
     }
 
     /// Simultaneously computes the sine and cosine of the number, `x`. Returns
@@ -909,7 +1081,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let x = std::f128::consts::FRAC_PI_4;
     /// let f = x.sin_cos();
@@ -944,7 +1120,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let x = 1e-8_f128;
     ///
@@ -960,11 +1140,13 @@ impl f128 {
     #[unstable(feature = "f128", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn exp_m1(self) -> f128 {
-        unsafe { cmath::expm1f128(self) }
+        cmath::expm1f128(self)
     }
 
     /// Returns `ln(1+n)` (natural logarithm) more accurately than if
     /// the operations were performed separately.
+    ///
+    /// This returns NaN when `n < -1.0`, and negative infinity when `n == -1.0`.
     ///
     /// # Unspecified precision
     ///
@@ -978,7 +1160,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let x = 1e-8_f128;
     ///
@@ -989,13 +1175,27 @@ impl f128 {
     /// assert!(abs_difference < 1e-10);
     /// # }
     /// ```
+    ///
+    /// Out-of-range values:
+    /// ```
+    /// #![feature(f128)]
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
+    ///
+    /// assert_eq!((-1.0_f128).ln_1p(), f128::NEG_INFINITY);
+    /// assert!((-2.0_f128).ln_1p().is_nan());
+    /// # }
+    /// ```
     #[inline]
     #[doc(alias = "log1p")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[rustc_allow_incoherent_impl]
     #[unstable(feature = "f128", issue = "116909")]
     pub fn ln_1p(self) -> f128 {
-        unsafe { cmath::log1pf128(self) }
+        cmath::log1pf128(self)
     }
 
     /// Hyperbolic sine function.
@@ -1012,7 +1212,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let e = std::f128::consts::E;
     /// let x = 1.0f128;
@@ -1030,7 +1234,7 @@ impl f128 {
     #[unstable(feature = "f128", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn sinh(self) -> f128 {
-        unsafe { cmath::sinhf128(self) }
+        cmath::sinhf128(self)
     }
 
     /// Hyperbolic cosine function.
@@ -1047,7 +1251,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let e = std::f128::consts::E;
     /// let x = 1.0f128;
@@ -1065,7 +1273,7 @@ impl f128 {
     #[unstable(feature = "f128", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn cosh(self) -> f128 {
-        unsafe { cmath::coshf128(self) }
+        cmath::coshf128(self)
     }
 
     /// Hyperbolic tangent function.
@@ -1082,7 +1290,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let e = std::f128::consts::E;
     /// let x = 1.0f128;
@@ -1100,7 +1312,7 @@ impl f128 {
     #[unstable(feature = "f128", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn tanh(self) -> f128 {
-        unsafe { cmath::tanhf128(self) }
+        cmath::tanhf128(self)
     }
 
     /// Inverse hyperbolic sine function.
@@ -1114,7 +1326,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let x = 1.0f128;
     /// let f = x.sinh().asinh();
@@ -1146,7 +1362,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let x = 1.0f128;
     /// let f = x.cosh().acosh();
@@ -1180,7 +1400,11 @@ impl f128 {
     ///
     /// ```
     /// #![feature(f128)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let e = std::f128::consts::E;
     /// let f = e.tanh().atanh();
@@ -1214,7 +1438,11 @@ impl f128 {
     /// ```
     /// #![feature(f128)]
     /// #![feature(float_gamma)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let x = 5.0f128;
     ///
@@ -1229,7 +1457,7 @@ impl f128 {
     // #[unstable(feature = "float_gamma", issue = "99842")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn gamma(self) -> f128 {
-        unsafe { cmath::tgammaf128(self) }
+        cmath::tgammaf128(self)
     }
 
     /// Natural logarithm of the absolute value of the gamma function
@@ -1249,7 +1477,11 @@ impl f128 {
     /// ```
     /// #![feature(f128)]
     /// #![feature(float_gamma)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     ///
     /// let x = 2.0f128;
     ///
@@ -1265,7 +1497,7 @@ impl f128 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn ln_gamma(self) -> (f128, i32) {
         let mut signgamp: i32 = 0;
-        let x = unsafe { cmath::lgammaf128_r(self, &mut signgamp) };
+        let x = cmath::lgammaf128_r(self, &mut signgamp);
         (x, signgamp)
     }
 
@@ -1284,7 +1516,11 @@ impl f128 {
     /// ```
     /// #![feature(f128)]
     /// #![feature(float_erf)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     /// /// The error function relates what percent of a normal distribution lies
     /// /// within `x` standard deviations (scaled by `1/sqrt(2)`).
     /// fn within_standard_deviations(x: f128) -> f128 {
@@ -1305,7 +1541,7 @@ impl f128 {
     // #[unstable(feature = "float_erf", issue = "136321")]
     #[inline]
     pub fn erf(self) -> f128 {
-        unsafe { cmath::erff128(self) }
+        cmath::erff128(self)
     }
 
     /// Complementary error function.
@@ -1323,7 +1559,11 @@ impl f128 {
     /// ```
     /// #![feature(f128)]
     /// #![feature(float_erf)]
-    /// # #[cfg(reliable_f128_math)] {
+    /// # #![cfg_attr(not(bootstrap), feature(cfg_target_has_reliable_f16_f128))]
+    /// # #![cfg_attr(not(bootstrap), expect(internal_features))]
+    /// # #[cfg(not(miri))]
+    /// # #[cfg(not(bootstrap))]
+    /// # #[cfg(target_has_reliable_f128_math)] {
     /// let x: f128 = 0.123;
     ///
     /// let one = x.erf() + x.erfc();
@@ -1338,6 +1578,6 @@ impl f128 {
     // #[unstable(feature = "float_erf", issue = "136321")]
     #[inline]
     pub fn erfc(self) -> f128 {
-        unsafe { cmath::erfcf128(self) }
+        cmath::erfcf128(self)
     }
 }

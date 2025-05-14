@@ -2,6 +2,9 @@
 //
 //@ check-pass
 //@ compile-flags: -A=
+//~? WARN unknown lint
+//~? WARN unknown lint
+//~? WARN unknown lint
 
 fn main() {}
 

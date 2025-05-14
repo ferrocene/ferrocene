@@ -1,14 +1,3 @@
-//@ error-pattern: this file contains an unclosed delimiter
-use foo::{bar, baz;
-
-use std::fmt::Display;
-
-mod bar { }
-
-mod baz { }
-
-fn main() {}
-
 // ferrocene-annotations: fls_9i5msiuuyihf
 // Paths
 //
@@ -59,3 +48,14 @@ fn main() {}
 //
 // ferrocene-annotations: fls_bbso3c45kr9z
 // Simple Path Resolution
+
+use foo::{bar, baz;
+
+use std::fmt::Display;
+
+mod bar { }
+
+mod baz { }
+
+//~v ERROR this file contains an unclosed delimiter
+fn main() {}

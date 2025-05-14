@@ -1,5 +1,6 @@
 //@ check-fail
 //@ compile-flags: --explain junk
+//~? ERROR not a valid error code
 
 fn main() {}
 

@@ -2,7 +2,7 @@ use std::mem;
 
 use ast::token::IdentIsRaw;
 use rustc_ast::ptr::P;
-use rustc_ast::token::{self, Delimiter, MetaVarKind, Token, TokenKind};
+use rustc_ast::token::{self, MetaVarKind, Token, TokenKind};
 use rustc_ast::{
     self as ast, AngleBracketedArg, AngleBracketedArgs, AnonConst, AssocItemConstraint,
     AssocItemConstraintKind, BlockCheckMode, GenericArg, GenericArgs, Generics, ParenthesizedArgs,
@@ -15,7 +15,11 @@ use tracing::debug;
 
 use super::ty::{AllowPlus, RecoverQPath, RecoverReturnSign};
 use super::{Parser, Restrictions, TokenType};
-use crate::errors::{self, PathSingleColon, PathTripleColon};
+use crate::ast::{PatKind, TyKind};
+use crate::errors::{
+    self, FnPathFoundNamedParams, PathFoundAttributeInParams, PathFoundCVariadicParams,
+    PathSingleColon, PathTripleColon,
+};
 use crate::exp;
 use crate::parser::{CommaRecoveryMode, RecoverColon, RecoverComma};
 
@@ -248,19 +252,13 @@ impl<'a> Parser<'a> {
             segments.push(segment);
 
             if self.is_import_coupler() || !self.eat_path_sep() {
-                let ok_for_recovery = self.may_recover()
-                    && match style {
-                        PathStyle::Expr => true,
-                        PathStyle::Type if let Some((ident, _)) = self.prev_token.ident() => {
-                            self.token == token::Colon
-                                && ident.as_str().chars().all(|c| c.is_lowercase())
-                                && self.token.span.lo() == self.prev_token.span.hi()
-                                && self
-                                    .look_ahead(1, |token| self.token.span.hi() == token.span.lo())
-                        }
-                        _ => false,
-                    };
-                if ok_for_recovery
+                // IMPORTANT: We can *only ever* treat single colons as typo'ed double colons in
+                // expression contexts (!) since only there paths cannot possibly be followed by
+                // a colon and still form a syntactically valid construct. In pattern contexts,
+                // a path may be followed by a type annotation. E.g., `let pat:ty`. In type
+                // contexts, a path may be followed by a list of bounds. E.g., `where ty:bound`.
+                if self.may_recover()
+                    && style == PathStyle::Expr // (!)
                     && self.token == token::Colon
                     && self.look_ahead(1, |token| token.is_ident() && !token.is_reserved_ident())
                 {
@@ -273,7 +271,6 @@ impl<'a> Parser<'a> {
                         self.dcx().emit_err(PathSingleColon {
                             span: self.prev_token.span,
                             suggestion: self.prev_token.span.shrink_to_hi(),
-                            type_ascription: self.psess.unstable_features.is_nightly_build(),
                         });
                     }
                     continue;
@@ -303,10 +300,7 @@ impl<'a> Parser<'a> {
     ) -> PResult<'a, PathSegment> {
         let ident = self.parse_path_segment_ident()?;
         let is_args_start = |token: &Token| {
-            matches!(
-                token.kind,
-                token::Lt | token::Shl | token::OpenDelim(Delimiter::Parenthesis) | token::LArrow
-            )
+            matches!(token.kind, token::Lt | token::Shl | token::OpenParen | token::LArrow)
         };
         let check_args_start = |this: &mut Self| {
             this.expected_token_types.insert(TokenType::Lt);
@@ -348,7 +342,6 @@ impl<'a> Parser<'a> {
                             err = self.dcx().create_err(PathSingleColon {
                                 span: self.token.span,
                                 suggestion: self.prev_token.span.shrink_to_hi(),
-                                type_ascription: self.psess.unstable_features.is_nightly_build(),
                             });
                         }
                         // Attempt to find places where a missing `>` might belong.
@@ -368,7 +361,7 @@ impl<'a> Parser<'a> {
                     })?;
                     let span = lo.to(self.prev_token.span);
                     AngleBracketedArgs { args, span }.into()
-                } else if self.token == token::OpenDelim(Delimiter::Parenthesis)
+                } else if self.token == token::OpenParen
                     // FIXME(return_type_notation): Could also recover `...` here.
                     && self.look_ahead(1, |t| *t == token::DotDot)
                 {
@@ -393,8 +386,8 @@ impl<'a> Parser<'a> {
                 } else {
                     // `(T, U) -> R`
 
-                    let prev_token_before_parsing = self.prev_token.clone();
-                    let token_before_parsing = self.token.clone();
+                    let prev_token_before_parsing = self.prev_token;
+                    let token_before_parsing = self.token;
                     let mut snapshot = None;
                     if self.may_recover()
                         && prev_token_before_parsing == token::PathSep
@@ -407,7 +400,28 @@ impl<'a> Parser<'a> {
                         snapshot = Some(self.create_snapshot_for_diagnostic());
                     }
 
-                    let (inputs, _) = match self.parse_paren_comma_seq(|p| p.parse_ty()) {
+                    let dcx = self.dcx();
+                    let parse_params_result = self.parse_paren_comma_seq(|p| {
+                        let param = p.parse_param_general(|_| false, false, false);
+                        param.map(move |param| {
+                            if !matches!(param.pat.kind, PatKind::Missing) {
+                                dcx.emit_err(FnPathFoundNamedParams {
+                                    named_param_span: param.pat.span,
+                                });
+                            }
+                            if matches!(param.ty.kind, TyKind::CVarArgs) {
+                                dcx.emit_err(PathFoundCVariadicParams { span: param.pat.span });
+                            }
+                            if !param.attrs.is_empty() {
+                                dcx.emit_err(PathFoundAttributeInParams {
+                                    span: param.attrs[0].span,
+                                });
+                            }
+                            param.ty
+                        })
+                    });
+
+                    let (inputs, _) = match parse_params_result {
                         Ok(output) => output,
                         Err(mut error) if prev_token_before_parsing == token::PathSep => {
                             error.span_label(
@@ -854,7 +868,7 @@ impl<'a> Parser<'a> {
     /// the caller.
     pub(super) fn parse_const_arg(&mut self) -> PResult<'a, AnonConst> {
         // Parse const argument.
-        let value = if let token::OpenDelim(Delimiter::Brace) = self.token.kind {
+        let value = if self.token.kind == token::OpenBrace {
             self.parse_expr_block(None, self.token.span, BlockCheckMode::Default)?
         } else {
             self.handle_unambiguous_unbraced_const_arg()?

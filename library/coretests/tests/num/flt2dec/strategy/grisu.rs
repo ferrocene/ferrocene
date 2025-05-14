@@ -43,6 +43,7 @@ fn shortest_sanity_test() {
 
 #[test]
 #[cfg_attr(miri, ignore)] // Miri is too slow
+#[cfg_attr(ferrocene_coverage, ignore = "test too slow with coverage enabled")]
 fn exact_sanity_test() {
     // See comments in dragon.rs's exact_sanity_test for why this test is
     // ignored on MSVC

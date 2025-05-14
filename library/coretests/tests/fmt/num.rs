@@ -123,6 +123,7 @@ fn test_format_int_exp_limits() {
 }
 
 #[test]
+#[cfg_attr(ferrocene_coverage, ignore = "test too slow with coverage enabled")]
 fn test_format_int_exp_precision() {
     //test that float and integer match
     let big_int: u32 = 314_159_265;

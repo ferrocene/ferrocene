@@ -8,4 +8,8 @@ fn main() {
     let x: u8 = 1000; //~ ERROR literal out of range
 }
 
+//~? WARN unknown lint
+//~? WARN unknown lint
+//~? WARN unknown lint
+
 // ferrocene-annotations: um_rustc_A

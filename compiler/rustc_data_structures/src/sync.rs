@@ -43,7 +43,7 @@ pub use self::freeze::{FreezeLock, FreezeReadGuard, FreezeWriteGuard};
 pub use self::lock::{Lock, LockGuard, Mode};
 pub use self::mode::{is_dyn_thread_safe, set_dyn_thread_safe_mode};
 pub use self::parallel::{
-    join, par_for_each_in, par_map, parallel_guard, scope, try_par_for_each_in,
+    broadcast, join, par_for_each_in, par_map, parallel_guard, scope, spawn, try_par_for_each_in,
 };
 pub use self::vec::{AppendOnlyIndexVec, AppendOnlyVec};
 pub use self::worker_local::{Registry, WorkerLocal};
@@ -88,7 +88,7 @@ mod mode {
 
     // Whether thread safety might be enabled.
     #[inline]
-    pub fn might_be_dyn_thread_safe() -> bool {
+    pub(super) fn might_be_dyn_thread_safe() -> bool {
         DYN_THREAD_SAFE_MODE.load(Ordering::Relaxed) != DYN_NOT_THREAD_SAFE
     }
 

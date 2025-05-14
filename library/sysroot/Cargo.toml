@@ -3,7 +3,7 @@ cargo-features = ["public-dependency"]
 [package]
 name = "sysroot"
 version = "0.0.0"
-edition = "2021"
+edition = "2024"
 
 # this is a dummy crate to ensure that all required crates appear in the sysroot
 [dependencies]
@@ -11,6 +11,10 @@ proc_macro = { path = "../proc_macro", public = true }
 profiler_builtins = { path = "../profiler_builtins", optional = true }
 std = { path = "../std", public = true }
 test = { path = "../test", public = true }
+
+# Ferrocene addition: in bootstrap we need to set a libcore feature for code coverage testing, so we
+# need to add it as an explicit dependency here to do `--features core/$foo`.
+core = { path = "../core" }
 
 # Forward features to the `std` crate as necessary
 [features]
@@ -31,5 +35,4 @@ panic_immediate_abort = ["std/panic_immediate_abort"]
 profiler = ["dep:profiler_builtins"]
 std_detect_file_io = ["std/std_detect_file_io"]
 std_detect_dlsym_getauxval = ["std/std_detect_dlsym_getauxval"]
-std_detect_env_override = ["std/std_detect_env_override"]
 windows_raw_dylib = ["std/windows_raw_dylib"]

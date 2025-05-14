@@ -3,7 +3,7 @@ use std::ffi::OsStr;
 use std::path::{Component, Path, PathBuf};
 use std::{fmt, fs};
 
-use rinja::Template;
+use askama::Template;
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap};
 use rustc_hir::def_id::LOCAL_CRATE;
 use rustc_middle::ty::TyCtxt;
@@ -333,7 +333,7 @@ pub(crate) fn print_src(
     source_context: &SourceContext<'_>,
 ) {
     let mut lines = s.lines().count();
-    let line_info = if let SourceContext::Embedded(ref info) = source_context {
+    let line_info = if let SourceContext::Embedded(info) = source_context {
         highlight::LineInfo::new_scraped(lines as u32, info.offset as u32)
     } else {
         highlight::LineInfo::new(lines as u32)

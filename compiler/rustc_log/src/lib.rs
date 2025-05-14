@@ -9,17 +9,12 @@
 //! [dependencies]
 //! rustc_ast = { path = "../rust/compiler/rustc_ast" }
 //! rustc_log = { path = "../rust/compiler/rustc_log" }
-//! rustc_span = { path = "../rust/compiler/rustc_span" }
 //! ```
 //!
 //! ```
 //! fn main() {
 //!     rustc_log::init_logger(rustc_log::LoggerConfig::from_env("LOG")).unwrap();
-//!
-//!     let edition = rustc_span::edition::Edition::Edition2021;
-//!     rustc_span::create_session_globals_then(edition, None, || {
-//!         /* ... */
-//!     });
+//!     /* ... */
 //! }
 //! ```
 //!
@@ -42,6 +37,7 @@ use std::env::{self, VarError};
 use std::fmt::{self, Display};
 use std::io::{self, IsTerminal};
 
+use tracing::dispatcher::SetGlobalDefaultError;
 use tracing_core::{Event, Subscriber};
 use tracing_subscriber::filter::{Directive, EnvFilter, LevelFilter};
 use tracing_subscriber::fmt::FmtContext;
@@ -136,10 +132,10 @@ pub fn init_logger(cfg: LoggerConfig) -> Result<(), Error> {
                 .without_time()
                 .event_format(BacktraceFormatter { backtrace_target });
             let subscriber = subscriber.with(fmt_layer);
-            tracing::subscriber::set_global_default(subscriber).unwrap();
+            tracing::subscriber::set_global_default(subscriber)?;
         }
         Err(_) => {
-            tracing::subscriber::set_global_default(subscriber).unwrap();
+            tracing::subscriber::set_global_default(subscriber)?;
         }
     };
 
@@ -185,6 +181,7 @@ pub enum Error {
     InvalidColorValue(String),
     NonUnicodeColorValue,
     InvalidWraptree(String),
+    AlreadyInit(SetGlobalDefaultError),
 }
 
 impl std::error::Error for Error {}
@@ -204,6 +201,13 @@ impl Display for Error {
                 formatter,
                 "invalid log WRAPTREE value '{value}': expected a non-negative integer",
             ),
+            Error::AlreadyInit(tracing_error) => Display::fmt(tracing_error, formatter),
         }
+    }
+}
+
+impl From<SetGlobalDefaultError> for Error {
+    fn from(tracing_error: SetGlobalDefaultError) -> Self {
+        Error::AlreadyInit(tracing_error)
     }
 }

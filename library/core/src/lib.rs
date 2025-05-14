@@ -416,7 +416,6 @@ pub mod sync;
 #[cfg(feature = "uncertified")]
 pub mod unsafe_binder;
 
-#[cfg(feature = "uncertified")]
 pub mod fmt;
 #[cfg(feature = "uncertified")]
 pub mod hash;

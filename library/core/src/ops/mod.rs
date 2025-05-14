@@ -170,8 +170,8 @@ mod unsize;
 pub use self::deref::DerefPure;
 #[unstable(feature = "legacy_receiver_trait", issue = "none")]
 pub use self::deref::LegacyReceiver;
-// #[unstable(feature = "arbitrary_self_types", issue = "44874")]
-// pub use self::deref::Receiver;
+#[unstable(feature = "arbitrary_self_types", issue = "44874")]
+pub use self::deref::Receiver;
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use self::deref::{Deref, DerefMut};
 #[stable(feature = "rust1", since = "1.0.0")]

@@ -80,16 +80,16 @@
 //! functions that may encounter errors but don't otherwise return a
 //! useful value.
 //!
-//! Consider the [`write_all`] method defined for I/O types
-//! by the [`Write`] trait:
-//!
-//! ```
-//! use std::io;
-//!
-//! trait Write {
-//!     fn write_all(&mut self, bytes: &[u8]) -> Result<(), io::Error>;
-//! }
-//! ```
+// //! Consider the [`write_all`] method defined for I/O types
+// //! by the [`Write`] trait:
+// //!
+// //! ```
+// //! use std::io;
+// //!
+// //! trait Write {
+// //!     fn write_all(&mut self, bytes: &[u8]) -> Result<(), io::Error>;
+// //! }
+// //! ```
 //!
 // //! *Note: The actual definition of [`Write`] uses [`io::Result`], which
 // //! is just a synonym for <code>[Result]<T, [io::Error]></code>.*
@@ -1784,6 +1784,7 @@ where
 }
 
 #[unstable(feature = "ergonomic_clones", issue = "132290")]
+#[cfg(feature = "uncertified")]
 impl<T, E> crate::clone::UseCloned for Result<T, E>
 where
     T: crate::clone::UseCloned,

@@ -81,6 +81,7 @@ pub mod rust_2024 {
 /// See the [module-level documentation](self) for more.
 #[doc(hidden)]
 #[unstable(feature = "prelude_future", issue = "none")]
+#[cfg(feature = "uncertified")]
 pub mod rust_future {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[doc(no_inline)]

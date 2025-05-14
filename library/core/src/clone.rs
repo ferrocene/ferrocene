@@ -219,10 +219,12 @@ pub macro Clone($item:item) {
 /// This is similar to have a closure that you would call `.use` over each captured value.
 #[unstable(feature = "ergonomic_clones", issue = "132290")]
 #[lang = "use_cloned"]
+#[cfg(feature = "uncertified")]
 pub trait UseCloned: Clone {
     // Empty.
 }
 
+#[cfg(feature = "uncertified")]
 macro_rules! impl_use_cloned {
     ($($t:ty)*) => {
         $(
@@ -232,6 +234,7 @@ macro_rules! impl_use_cloned {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl_use_cloned! {
     usize u8 u16 u32 u64 u128
     isize i8 i16 i32 i64 i128

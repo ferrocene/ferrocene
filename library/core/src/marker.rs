@@ -23,6 +23,7 @@ use crate::cmp;
 use crate::fmt::Debug;
 #[cfg(feature = "uncertified")]
 use crate::hash::{Hash, Hasher};
+#[cfg(feature = "uncertified")]
 use crate::pin::UnsafePinned;
 
 /// Implements a given marker trait for multiple types at the same time.
@@ -415,7 +416,7 @@ marker_impls! {
 ///
 /// [`Vec<T>`]: ../../std/vec/struct.Vec.html
 /// [`String`]: ../../std/string/struct.String.html
-/// [`size_of::<T>`]: size_of
+// /// [`size_of::<T>`]: size_of
 /// [impls]: #implementors
 #[stable(feature = "rust1", since = "1.0.0")]
 #[lang = "copy"]
@@ -916,13 +917,20 @@ marker_impls! {
 /// tracked by [#125735](https://github.com/rust-lang/rust/issues/125735).
 #[cfg_attr(not(bootstrap), lang = "unsafe_unpin")]
 #[cfg_attr(bootstrap, allow(dead_code))]
+#[cfg(feature = "uncertified")]
 pub(crate) unsafe auto trait UnsafeUnpin {}
 
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> !UnsafeUnpin for UnsafePinned<T> {}
+#[cfg(feature = "uncertified")]
 unsafe impl<T: ?Sized> UnsafeUnpin for PhantomData<T> {}
+#[cfg(feature = "uncertified")]
 unsafe impl<T: ?Sized> UnsafeUnpin for *const T {}
+#[cfg(feature = "uncertified")]
 unsafe impl<T: ?Sized> UnsafeUnpin for *mut T {}
+#[cfg(feature = "uncertified")]
 unsafe impl<T: ?Sized> UnsafeUnpin for &T {}
+#[cfg(feature = "uncertified")]
 unsafe impl<T: ?Sized> UnsafeUnpin for &mut T {}
 
 /// Types that do not require any pinning guarantees.

@@ -1080,8 +1080,8 @@ impl<T> Option<T> {
     /// ```
     ///
     /// [default value]: Default::default
-    /// [`parse`]: str::parse
-    /// [`FromStr`]: crate::str::FromStr
+    // /// [`parse`]: str::parse
+    // /// [`FromStr`]: crate::str::FromStr
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn unwrap_or_default(self) -> T
@@ -2108,6 +2108,7 @@ where
 }
 
 #[unstable(feature = "ergonomic_clones", issue = "132290")]
+#[cfg(feature = "uncertified")]
 impl<T> crate::clone::UseCloned for Option<T> where T: crate::clone::UseCloned {}
 
 #[stable(feature = "rust1", since = "1.0.0")]

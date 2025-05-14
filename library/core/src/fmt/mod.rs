@@ -330,6 +330,7 @@ pub struct FormattingOptions {
 }
 
 // This needs to match with compiler/rustc_ast_lowering/src/format.rs.
+#[cfg(feature = "uncertified")]
 mod flags {
     pub(super) const SIGN_PLUS_FLAG: u32 = 1 << 21;
     pub(super) const SIGN_MINUS_FLAG: u32 = 1 << 22;

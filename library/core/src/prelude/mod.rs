@@ -40,13 +40,15 @@ pub mod rust_2021 {
     #[doc(no_inline)]
     pub use super::v1::*;
 
-    // #[stable(feature = "prelude_2021", since = "1.55.0")]
-    // #[doc(no_inline)]
-    // pub use crate::iter::FromIterator;
+    #[stable(feature = "prelude_2021", since = "1.55.0")]
+    #[doc(no_inline)]
+    #[cfg(feature = "uncertified")]
+    pub use crate::iter::FromIterator;
 
-    // #[stable(feature = "prelude_2021", since = "1.55.0")]
-    // #[doc(no_inline)]
-    // pub use crate::convert::{TryFrom, TryInto};
+    #[stable(feature = "prelude_2021", since = "1.55.0")]
+    #[doc(no_inline)]
+    #[cfg(feature = "uncertified")]
+    pub use crate::convert::{TryFrom, TryInto};
 }
 
 /// The 2024 version of the core prelude.
@@ -58,15 +60,18 @@ pub mod rust_2024 {
     #[doc(no_inline)]
     pub use super::v1::*;
 
-    // #[stable(feature = "prelude_2021", since = "1.55.0")]
-    // #[doc(no_inline)]
-    // pub use crate::iter::FromIterator;
+    #[stable(feature = "prelude_2021", since = "1.55.0")]
+    #[doc(no_inline)]
+    #[cfg(feature = "uncertified")]
+    pub use crate::iter::FromIterator;
 
-    // #[stable(feature = "prelude_2021", since = "1.55.0")]
-    // #[doc(no_inline)]
-    // pub use crate::convert::{TryFrom, TryInto};
+    #[stable(feature = "prelude_2021", since = "1.55.0")]
+    #[doc(no_inline)]
+    #[cfg(feature = "uncertified")]
+    pub use crate::convert::{TryFrom, TryInto};
 
-    // #[stable(feature = "prelude_2024", since = "1.85.0")]
-    // #[doc(no_inline)]
-    // pub use crate::future::{Future, IntoFuture};
+    #[stable(feature = "prelude_2024", since = "1.85.0")]
+    #[doc(no_inline)]
+    #[cfg(feature = "uncertified")]
+    pub use crate::future::{Future, IntoFuture};
 }

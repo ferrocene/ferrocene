@@ -35,9 +35,12 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-// use crate::error::Error;
-// use crate::fmt;
-// use crate::hash::{Hash, Hasher};
+#[cfg(feature = "uncertified")]
+use crate::error::Error;
+#[cfg(feature = "uncertified")]
+use crate::fmt;
+#[cfg(feature = "uncertified")]
+use crate::hash::{Hash, Hasher};
 
 #[cfg(feature = "uncertified")]
 mod num;
@@ -774,20 +777,21 @@ impl<T> From<T> for T {
     }
 }
 
-// /// **Stability note:** This impl does not yet exist, but we are
-// /// "reserving space" to add it in the future. See
-// /// [rust-lang/rust#64715][#64715] for details.
-// ///
-// /// [#64715]: https://github.com/rust-lang/rust/issues/64715
-// #[stable(feature = "convert_infallible", since = "1.34.0")]
-// #[allow(unused_attributes)] // FIXME(#58633): do a principled fix instead.
-// #[rustc_reservation_impl = "permitting this impl would forbid us from adding \
-//                             `impl<T> From<!> for T` later; see rust-lang/rust#64715 for details"]
-// impl<T> From<!> for T {
-//     fn from(t: !) -> T {
-//         t
-//     }
-// }
+/// **Stability note:** This impl does not yet exist, but we are
+/// "reserving space" to add it in the future. See
+/// [rust-lang/rust#64715][#64715] for details.
+///
+/// [#64715]: https://github.com/rust-lang/rust/issues/64715
+#[stable(feature = "convert_infallible", since = "1.34.0")]
+#[allow(unused_attributes)] // FIXME(#58633): do a principled fix instead.
+#[rustc_reservation_impl = "permitting this impl would forbid us from adding \
+                            `impl<T> From<!> for T` later; see rust-lang/rust#64715 for details"]
+#[cfg(feature = "uncertified")]
+impl<T> From<!> for T {
+    fn from(t: !) -> T {
+        t
+    }
+}
 
 // TryFrom implies TryInto
 #[stable(feature = "try_from", since = "1.34.0")]
@@ -822,13 +826,14 @@ where
 // CONCRETE IMPLS
 ////////////////////////////////////////////////////////////////////////////////
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<T> AsRef<[T]> for [T] {
-//     #[inline(always)]
-//     fn as_ref(&self) -> &[T] {
-//         self
-//     }
-// }
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<T> AsRef<[T]> for [T] {
+    #[inline(always)]
+    fn as_ref(&self) -> &[T] {
+        self
+    }
+}
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T> AsMut<[T]> for [T] {
@@ -838,13 +843,14 @@ impl<T> AsMut<[T]> for [T] {
     }
 }
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl AsRef<str> for str {
-//     #[inline(always)]
-//     fn as_ref(&self) -> &str {
-//         self
-//     }
-// }
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl AsRef<str> for str {
+    #[inline(always)]
+    fn as_ref(&self) -> &str {
+        self
+    }
+}
 
 #[stable(feature = "as_mut_str_for_str", since = "1.51.0")]
 impl AsMut<str> for str {
@@ -914,62 +920,71 @@ impl Clone for Infallible {
     }
 }
 
-// #[stable(feature = "convert_infallible", since = "1.34.0")]
-// impl fmt::Debug for Infallible {
-//     fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         match *self {}
-//     }
-// }
+#[stable(feature = "convert_infallible", since = "1.34.0")]
+#[cfg(feature = "uncertified")]
+impl fmt::Debug for Infallible {
+    fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {}
+    }
+}
 
-// #[stable(feature = "convert_infallible", since = "1.34.0")]
-// impl fmt::Display for Infallible {
-//     fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         match *self {}
-//     }
-// }
+#[stable(feature = "convert_infallible", since = "1.34.0")]
+#[cfg(feature = "uncertified")]
+impl fmt::Display for Infallible {
+    fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {}
+    }
+}
 
-// #[stable(feature = "str_parse_error2", since = "1.8.0")]
-// impl Error for Infallible {
-//     fn description(&self) -> &str {
-//         match *self {}
-//     }
-// }
+#[stable(feature = "str_parse_error2", since = "1.8.0")]
+#[cfg(feature = "uncertified")]
+impl Error for Infallible {
+    fn description(&self) -> &str {
+        match *self {}
+    }
+}
 
-// #[stable(feature = "convert_infallible", since = "1.34.0")]
-// impl PartialEq for Infallible {
-//     fn eq(&self, _: &Infallible) -> bool {
-//         match *self {}
-//     }
-// }
+#[stable(feature = "convert_infallible", since = "1.34.0")]
+#[cfg(feature = "uncertified")]
+impl PartialEq for Infallible {
+    fn eq(&self, _: &Infallible) -> bool {
+        match *self {}
+    }
+}
 
-// #[stable(feature = "convert_infallible", since = "1.34.0")]
-// impl Eq for Infallible {}
+#[stable(feature = "convert_infallible", since = "1.34.0")]
+#[cfg(feature = "uncertified")]
+impl Eq for Infallible {}
 
-// #[stable(feature = "convert_infallible", since = "1.34.0")]
-// impl PartialOrd for Infallible {
-//     fn partial_cmp(&self, _other: &Self) -> Option<crate::cmp::Ordering> {
-//         match *self {}
-//     }
-// }
+#[stable(feature = "convert_infallible", since = "1.34.0")]
+#[cfg(feature = "uncertified")]
+impl PartialOrd for Infallible {
+    fn partial_cmp(&self, _other: &Self) -> Option<crate::cmp::Ordering> {
+        match *self {}
+    }
+}
 
-// #[stable(feature = "convert_infallible", since = "1.34.0")]
-// impl Ord for Infallible {
-//     fn cmp(&self, _other: &Self) -> crate::cmp::Ordering {
-//         match *self {}
-//     }
-// }
+#[stable(feature = "convert_infallible", since = "1.34.0")]
+#[cfg(feature = "uncertified")]
+impl Ord for Infallible {
+    fn cmp(&self, _other: &Self) -> crate::cmp::Ordering {
+        match *self {}
+    }
+}
 
-// #[stable(feature = "convert_infallible", since = "1.34.0")]
-// impl From<!> for Infallible {
-//     #[inline]
-//     fn from(x: !) -> Self {
-//         x
-//     }
-// }
+#[stable(feature = "convert_infallible", since = "1.34.0")]
+#[cfg(feature = "uncertified")]
+impl From<!> for Infallible {
+    #[inline]
+    fn from(x: !) -> Self {
+        x
+    }
+}
 
-// #[stable(feature = "convert_infallible_hash", since = "1.44.0")]
-// impl Hash for Infallible {
-//     fn hash<H: Hasher>(&self, _: &mut H) {
-//         match *self {}
-//     }
-// }
+#[stable(feature = "convert_infallible_hash", since = "1.44.0")]
+#[cfg(feature = "uncertified")]
+impl Hash for Infallible {
+    fn hash<H: Hasher>(&self, _: &mut H) {
+        match *self {}
+    }
+}

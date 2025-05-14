@@ -314,3 +314,32 @@ fn wrapping_const() {
         assert!(i32::MIN.wrapping_rem(-1) == 0);
     };
 }
+
+#[test]
+fn test_wrapping_fmt() {
+    let a = Wrapping(0_i32);
+
+    // Debug
+    let b = format!("{:?}", a);
+    assert_eq!(b, "0");
+
+    // Display
+    let c = format!("{}", a);
+    assert_eq!(c, "0");
+
+    // Binary
+    let d = format!("{:b}", a);
+    assert_eq!(d, "0");
+
+    // Octal
+    let e = format!("{:o}", a);
+    assert_eq!(e, "0");
+
+    // LowerHex
+    let f = format!("{:x}", a);
+    assert_eq!(f, "0");
+
+    // UpperHex
+    let g = format!("{:X}", a);
+    assert_eq!(g, "0");
+}

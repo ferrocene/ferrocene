@@ -556,12 +556,17 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-// use crate::iter::{self, FusedIterator, TrustedLen};
-// use crate::ops::{self, ControlFlow, Deref, DerefMut};
+#[cfg(feature = "uncertified")]
+use crate::iter::{self, FusedIterator, TrustedLen};
+#[cfg(feature = "uncertified")]
+use crate::ops::{self, ControlFlow, Deref, DerefMut};
 use crate::ops::{Deref, DerefMut};
-// use crate::panicking::{panic, panic_display};
-// use crate::pin::Pin;
-// use crate::{cmp, convert, hint, mem, slice};
+#[cfg(feature = "uncertified")]
+use crate::panicking::{panic, panic_display};
+#[cfg(feature = "uncertified")]
+use crate::pin::Pin;
+#[cfg(feature = "uncertified")]
+use crate::{cmp, convert, hint, mem, slice};
 
 /// The `Option` type. See [the module level documentation](self) for more.
 #[doc(search_unbox)]
@@ -633,25 +638,26 @@ impl<T> Option<T> {
         }
     }
 
-//     /// Returns `true` if the option is a [`None`] value.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x: Option<u32> = Some(2);
-//     /// assert_eq!(x.is_none(), false);
-//     ///
-//     /// let x: Option<u32> = None;
-//     /// assert_eq!(x.is_none(), true);
-//     /// ```
-//     #[must_use = "if you intended to assert that this doesn't have a value, consider \
-//                   wrapping this in an `assert!()` instead"]
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
-//     pub const fn is_none(&self) -> bool {
-//         !self.is_some()
-//     }
+    /// Returns `true` if the option is a [`None`] value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x: Option<u32> = Some(2);
+    /// assert_eq!(x.is_none(), false);
+    ///
+    /// let x: Option<u32> = None;
+    /// assert_eq!(x.is_none(), true);
+    /// ```
+    #[must_use = "if you intended to assert that this doesn't have a value, consider \
+                  wrapping this in an `assert!()` instead"]
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
+    #[cfg(feature = "uncertified")]
+    pub const fn is_none(&self) -> bool {
+        !self.is_some()
+    }
 
     /// Returns `true` if the option is a [`None`] or the value inside of it matches a predicate.
     ///
@@ -1722,85 +1728,88 @@ impl<T> Option<T> {
     // Misc
     /////////////////////////////////////////////////////////////////////////
 
-//     /// Takes the value out of the option, leaving a [`None`] in its place.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let mut x = Some(2);
-//     /// let y = x.take();
-//     /// assert_eq!(x, None);
-//     /// assert_eq!(y, Some(2));
-//     ///
-//     /// let mut x: Option<u32> = None;
-//     /// let y = x.take();
-//     /// assert_eq!(x, None);
-//     /// assert_eq!(y, None);
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "rust1", since = "1.0.0")]
-//     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-//     pub const fn take(&mut self) -> Option<T> {
-//         // FIXME(const-hack) replace `mem::replace` by `mem::take` when the latter is const ready
-//         mem::replace(self, None)
-//     }
+    /// Takes the value out of the option, leaving a [`None`] in its place.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut x = Some(2);
+    /// let y = x.take();
+    /// assert_eq!(x, None);
+    /// assert_eq!(y, Some(2));
+    ///
+    /// let mut x: Option<u32> = None;
+    /// let y = x.take();
+    /// assert_eq!(x, None);
+    /// assert_eq!(y, None);
+    /// ```
+    #[inline]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    #[cfg(feature = "uncertified")]
+    pub const fn take(&mut self) -> Option<T> {
+        // FIXME(const-hack) replace `mem::replace` by `mem::take` when the latter is const ready
+        mem::replace(self, None)
+    }
 
-//     /// Takes the value out of the option, but only if the predicate evaluates to
-//     /// `true` on a mutable reference to the value.
-//     ///
-//     /// In other words, replaces `self` with `None` if the predicate returns `true`.
-//     /// This method operates similar to [`Option::take`] but conditional.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let mut x = Some(42);
-//     ///
-//     /// let prev = x.take_if(|v| if *v == 42 {
-//     ///     *v += 1;
-//     ///     false
-//     /// } else {
-//     ///     false
-//     /// });
-//     /// assert_eq!(x, Some(43));
-//     /// assert_eq!(prev, None);
-//     ///
-//     /// let prev = x.take_if(|v| *v == 43);
-//     /// assert_eq!(x, None);
-//     /// assert_eq!(prev, Some(43));
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "option_take_if", since = "1.80.0")]
-//     pub fn take_if<P>(&mut self, predicate: P) -> Option<T>
-//     where
-//         P: FnOnce(&mut T) -> bool,
-//     {
-//         if self.as_mut().map_or(false, predicate) { self.take() } else { None }
-//     }
+    /// Takes the value out of the option, but only if the predicate evaluates to
+    /// `true` on a mutable reference to the value.
+    ///
+    /// In other words, replaces `self` with `None` if the predicate returns `true`.
+    /// This method operates similar to [`Option::take`] but conditional.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut x = Some(42);
+    ///
+    /// let prev = x.take_if(|v| if *v == 42 {
+    ///     *v += 1;
+    ///     false
+    /// } else {
+    ///     false
+    /// });
+    /// assert_eq!(x, Some(43));
+    /// assert_eq!(prev, None);
+    ///
+    /// let prev = x.take_if(|v| *v == 43);
+    /// assert_eq!(x, None);
+    /// assert_eq!(prev, Some(43));
+    /// ```
+    #[inline]
+    #[stable(feature = "option_take_if", since = "1.80.0")]
+    #[cfg(feature = "uncertified")]
+    pub fn take_if<P>(&mut self, predicate: P) -> Option<T>
+    where
+        P: FnOnce(&mut T) -> bool,
+    {
+        if self.as_mut().map_or(false, predicate) { self.take() } else { None }
+    }
 
-//     /// Replaces the actual value in the option by the value given in parameter,
-//     /// returning the old value if present,
-//     /// leaving a [`Some`] in its place without deinitializing either one.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let mut x = Some(2);
-//     /// let old = x.replace(5);
-//     /// assert_eq!(x, Some(5));
-//     /// assert_eq!(old, Some(2));
-//     ///
-//     /// let mut x = None;
-//     /// let old = x.replace(3);
-//     /// assert_eq!(x, Some(3));
-//     /// assert_eq!(old, None);
-//     /// ```
-//     #[inline]
-//     #[stable(feature = "option_replace", since = "1.31.0")]
-//     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-//     pub const fn replace(&mut self, value: T) -> Option<T> {
-//         mem::replace(self, Some(value))
-//     }
+    /// Replaces the actual value in the option by the value given in parameter,
+    /// returning the old value if present,
+    /// leaving a [`Some`] in its place without deinitializing either one.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut x = Some(2);
+    /// let old = x.replace(5);
+    /// assert_eq!(x, Some(5));
+    /// assert_eq!(old, Some(2));
+    ///
+    /// let mut x = None;
+    /// let old = x.replace(3);
+    /// assert_eq!(x, Some(3));
+    /// assert_eq!(old, None);
+    /// ```
+    #[inline]
+    #[stable(feature = "option_replace", since = "1.31.0")]
+    #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    #[cfg(feature = "uncertified")]
+    pub const fn replace(&mut self, value: T) -> Option<T> {
+        mem::replace(self, Some(value))
+    }
 
     /// Zips `self` with another `Option`.
     ///
@@ -2027,48 +2036,51 @@ impl<T, E> Option<Result<T, E>> {
     }
 }
 
-// #[cfg_attr(not(feature = "panic_immediate_abort"), inline(never))]
-// #[cfg_attr(feature = "panic_immediate_abort", inline)]
-// #[cold]
-// #[track_caller]
-// const fn unwrap_failed() -> ! {
-//     panic("called `Option::unwrap()` on a `None` value")
-// }
+#[cfg_attr(not(feature = "panic_immediate_abort"), inline(never))]
+#[cfg_attr(feature = "panic_immediate_abort", inline)]
+#[cold]
+#[track_caller]
+#[cfg(feature = "uncertified")]
+const fn unwrap_failed() -> ! {
+    panic("called `Option::unwrap()` on a `None` value")
+}
 
-// // This is a separate function to reduce the code size of .expect() itself.
-// #[cfg_attr(not(feature = "panic_immediate_abort"), inline(never))]
-// #[cfg_attr(feature = "panic_immediate_abort", inline)]
-// #[cold]
-// #[track_caller]
-// const fn expect_failed(msg: &str) -> ! {
-//     panic_display(&msg)
-// }
+// This is a separate function to reduce the code size of .expect() itself.
+#[cfg_attr(not(feature = "panic_immediate_abort"), inline(never))]
+#[cfg_attr(feature = "panic_immediate_abort", inline)]
+#[cold]
+#[track_caller]
+#[cfg(feature = "uncertified")]
+const fn expect_failed(msg: &str) -> ! {
+    panic_display(&msg)
+}
 
-// /////////////////////////////////////////////////////////////////////////////
-// // Trait implementations
-// /////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+// Trait implementations
+/////////////////////////////////////////////////////////////////////////////
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<T> Clone for Option<T>
-// where
-//     T: Clone,
-// {
-//     #[inline]
-//     fn clone(&self) -> Self {
-//         match self {
-//             Some(x) => Some(x.clone()),
-//             None => None,
-//         }
-//     }
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<T> Clone for Option<T>
+where
+    T: Clone,
+{
+    #[inline]
+    fn clone(&self) -> Self {
+        match self {
+            Some(x) => Some(x.clone()),
+            None => None,
+        }
+    }
 
-//     #[inline]
-//     fn clone_from(&mut self, source: &Self) {
-//         match (self, source) {
-//             (Some(to), Some(from)) => to.clone_from(from),
-//             (to, from) => *to = from.clone(),
-//         }
-//     }
-// }
+    #[inline]
+    fn clone_from(&mut self, source: &Self) {
+        match (self, source) {
+            (Some(to), Some(from)) => to.clone_from(from),
+            (to, from) => *to = from.clone(),
+        }
+    }
+}
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T> Default for Option<T> {
@@ -2086,49 +2098,52 @@ impl<T> Default for Option<T> {
     }
 }
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<T> IntoIterator for Option<T> {
-//     type Item = T;
-//     type IntoIter = IntoIter<T>;
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<T> IntoIterator for Option<T> {
+    type Item = T;
+    type IntoIter = IntoIter<T>;
 
-//     /// Returns a consuming iterator over the possibly contained value.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// let x = Some("string");
-//     /// let v: Vec<&str> = x.into_iter().collect();
-//     /// assert_eq!(v, ["string"]);
-//     ///
-//     /// let x = None;
-//     /// let v: Vec<&str> = x.into_iter().collect();
-//     /// assert!(v.is_empty());
-//     /// ```
-//     #[inline]
-//     fn into_iter(self) -> IntoIter<T> {
-//         IntoIter { inner: Item { opt: self } }
-//     }
-// }
+    /// Returns a consuming iterator over the possibly contained value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x = Some("string");
+    /// let v: Vec<&str> = x.into_iter().collect();
+    /// assert_eq!(v, ["string"]);
+    ///
+    /// let x = None;
+    /// let v: Vec<&str> = x.into_iter().collect();
+    /// assert!(v.is_empty());
+    /// ```
+    #[inline]
+    fn into_iter(self) -> IntoIter<T> {
+        IntoIter { inner: Item { opt: self } }
+    }
+}
 
-// #[stable(since = "1.4.0", feature = "option_iter")]
-// impl<'a, T> IntoIterator for &'a Option<T> {
-//     type Item = &'a T;
-//     type IntoIter = Iter<'a, T>;
+#[stable(since = "1.4.0", feature = "option_iter")]
+#[cfg(feature = "uncertified")]
+impl<'a, T> IntoIterator for &'a Option<T> {
+    type Item = &'a T;
+    type IntoIter = Iter<'a, T>;
 
-//     fn into_iter(self) -> Iter<'a, T> {
-//         self.iter()
-//     }
-// }
+    fn into_iter(self) -> Iter<'a, T> {
+        self.iter()
+    }
+}
 
-// #[stable(since = "1.4.0", feature = "option_iter")]
-// impl<'a, T> IntoIterator for &'a mut Option<T> {
-//     type Item = &'a mut T;
-//     type IntoIter = IterMut<'a, T>;
+#[stable(since = "1.4.0", feature = "option_iter")]
+#[cfg(feature = "uncertified")]
+impl<'a, T> IntoIterator for &'a mut Option<T> {
+    type Item = &'a mut T;
+    type IntoIter = IterMut<'a, T>;
 
-//     fn into_iter(self) -> IterMut<'a, T> {
-//         self.iter_mut()
-//     }
-// }
+    fn into_iter(self) -> IterMut<'a, T> {
+        self.iter_mut()
+    }
+}
 
 #[stable(since = "1.12.0", feature = "option_from")]
 impl<T> From<T> for Option<T> {
@@ -2195,54 +2210,58 @@ impl<'a, T> From<&'a mut Option<T>> for Option<&'a mut T> {
     }
 }
 
-// // Ideally, LLVM should be able to optimize our derive code to this.
-// // Once https://github.com/llvm/llvm-project/issues/52622 is fixed, we can
-// // go back to deriving `PartialEq`.
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<T> crate::marker::StructuralPartialEq for Option<T> {}
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<T: PartialEq> PartialEq for Option<T> {
-//     #[inline]
-//     fn eq(&self, other: &Self) -> bool {
-//         // Spelling out the cases explicitly optimizes better than
-//         // `_ => false`
-//         match (self, other) {
-//             (Some(l), Some(r)) => *l == *r,
-//             (Some(_), None) => false,
-//             (None, Some(_)) => false,
-//             (None, None) => true,
-//         }
-//     }
-// }
+// Ideally, LLVM should be able to optimize our derive code to this.
+// Once https://github.com/llvm/llvm-project/issues/52622 is fixed, we can
+// go back to deriving `PartialEq`.
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<T> crate::marker::StructuralPartialEq for Option<T> {}
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<T: PartialEq> PartialEq for Option<T> {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        // Spelling out the cases explicitly optimizes better than
+        // `_ => false`
+        match (self, other) {
+            (Some(l), Some(r)) => *l == *r,
+            (Some(_), None) => false,
+            (None, Some(_)) => false,
+            (None, None) => true,
+        }
+    }
+}
 
-// // Manually implementing here somewhat improves codegen for
-// // https://github.com/rust-lang/rust/issues/49892, although still
-// // not optimal.
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<T: PartialOrd> PartialOrd for Option<T> {
-//     #[inline]
-//     fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
-//         match (self, other) {
-//             (Some(l), Some(r)) => l.partial_cmp(r),
-//             (Some(_), None) => Some(cmp::Ordering::Greater),
-//             (None, Some(_)) => Some(cmp::Ordering::Less),
-//             (None, None) => Some(cmp::Ordering::Equal),
-//         }
-//     }
-// }
+// Manually implementing here somewhat improves codegen for
+// https://github.com/rust-lang/rust/issues/49892, although still
+// not optimal.
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<T: PartialOrd> PartialOrd for Option<T> {
+    #[inline]
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        match (self, other) {
+            (Some(l), Some(r)) => l.partial_cmp(r),
+            (Some(_), None) => Some(cmp::Ordering::Greater),
+            (None, Some(_)) => Some(cmp::Ordering::Less),
+            (None, None) => Some(cmp::Ordering::Equal),
+        }
+    }
+}
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<T: Ord> Ord for Option<T> {
-//     #[inline]
-//     fn cmp(&self, other: &Self) -> cmp::Ordering {
-//         match (self, other) {
-//             (Some(l), Some(r)) => l.cmp(r),
-//             (Some(_), None) => cmp::Ordering::Greater,
-//             (None, Some(_)) => cmp::Ordering::Less,
-//             (None, None) => cmp::Ordering::Equal,
-//         }
-//     }
-// }
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<T: Ord> Ord for Option<T> {
+    #[inline]
+    fn cmp(&self, other: &Self) -> cmp::Ordering {
+        match (self, other) {
+            (Some(l), Some(r)) => l.cmp(r),
+            (Some(_), None) => cmp::Ordering::Greater,
+            (None, Some(_)) => cmp::Ordering::Less,
+            (None, None) => cmp::Ordering::Equal,
+        }
+    }
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // The Option Iterators
@@ -2254,36 +2273,41 @@ struct Item<A> {
     opt: Option<A>,
 }
 
-// impl<A> Iterator for Item<A> {
-//     type Item = A;
+#[cfg(feature = "uncertified")]
+impl<A> Iterator for Item<A> {
+    type Item = A;
 
-//     #[inline]
-//     fn next(&mut self) -> Option<A> {
-//         self.opt.take()
-//     }
+    #[inline]
+    fn next(&mut self) -> Option<A> {
+        self.opt.take()
+    }
 
-//     #[inline]
-//     fn size_hint(&self) -> (usize, Option<usize>) {
-//         let len = self.len();
-//         (len, Some(len))
-//     }
-// }
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = self.len();
+        (len, Some(len))
+    }
+}
 
-// impl<A> DoubleEndedIterator for Item<A> {
-//     #[inline]
-//     fn next_back(&mut self) -> Option<A> {
-//         self.opt.take()
-//     }
-// }
+#[cfg(feature = "uncertified")]
+impl<A> DoubleEndedIterator for Item<A> {
+    #[inline]
+    fn next_back(&mut self) -> Option<A> {
+        self.opt.take()
+    }
+}
 
-// impl<A> ExactSizeIterator for Item<A> {
-//     #[inline]
-//     fn len(&self) -> usize {
-//         self.opt.len()
-//     }
-// }
-// impl<A> FusedIterator for Item<A> {}
-// unsafe impl<A> TrustedLen for Item<A> {}
+#[cfg(feature = "uncertified")]
+impl<A> ExactSizeIterator for Item<A> {
+    #[inline]
+    fn len(&self) -> usize {
+        self.opt.len()
+    }
+}
+#[cfg(feature = "uncertified")]
+impl<A> FusedIterator for Item<A> {}
+#[cfg(feature = "uncertified")]
+unsafe impl<A> TrustedLen for Item<A> {}
 
 /// An iterator over a reference to the [`Some`] variant of an [`Option`].
 ///
@@ -2297,44 +2321,50 @@ pub struct Iter<'a, A: 'a> {
     inner: Item<&'a A>,
 }
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<'a, A> Iterator for Iter<'a, A> {
-//     type Item = &'a A;
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<'a, A> Iterator for Iter<'a, A> {
+    type Item = &'a A;
 
-//     #[inline]
-//     fn next(&mut self) -> Option<&'a A> {
-//         self.inner.next()
-//     }
-//     #[inline]
-//     fn size_hint(&self) -> (usize, Option<usize>) {
-//         self.inner.size_hint()
-//     }
-// }
+    #[inline]
+    fn next(&mut self) -> Option<&'a A> {
+        self.inner.next()
+    }
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.inner.size_hint()
+    }
+}
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<'a, A> DoubleEndedIterator for Iter<'a, A> {
-//     #[inline]
-//     fn next_back(&mut self) -> Option<&'a A> {
-//         self.inner.next_back()
-//     }
-// }
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<'a, A> DoubleEndedIterator for Iter<'a, A> {
+    #[inline]
+    fn next_back(&mut self) -> Option<&'a A> {
+        self.inner.next_back()
+    }
+}
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<A> ExactSizeIterator for Iter<'_, A> {}
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<A> ExactSizeIterator for Iter<'_, A> {}
 
-// #[stable(feature = "fused", since = "1.26.0")]
-// impl<A> FusedIterator for Iter<'_, A> {}
+#[stable(feature = "fused", since = "1.26.0")]
+#[cfg(feature = "uncertified")]
+impl<A> FusedIterator for Iter<'_, A> {}
 
-// #[unstable(feature = "trusted_len", issue = "37572")]
-// unsafe impl<A> TrustedLen for Iter<'_, A> {}
+#[unstable(feature = "trusted_len", issue = "37572")]
+#[cfg(feature = "uncertified")]
+unsafe impl<A> TrustedLen for Iter<'_, A> {}
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<A> Clone for Iter<'_, A> {
-//     #[inline]
-//     fn clone(&self) -> Self {
-//         Iter { inner: self.inner.clone() }
-//     }
-// }
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<A> Clone for Iter<'_, A> {
+    #[inline]
+    fn clone(&self) -> Self {
+        Iter { inner: self.inner.clone() }
+    }
+}
 
 /// An iterator over a mutable reference to the [`Some`] variant of an [`Option`].
 ///
@@ -2348,197 +2378,213 @@ pub struct IterMut<'a, A: 'a> {
     inner: Item<&'a mut A>,
 }
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<'a, A> Iterator for IterMut<'a, A> {
-//     type Item = &'a mut A;
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<'a, A> Iterator for IterMut<'a, A> {
+    type Item = &'a mut A;
 
-//     #[inline]
-//     fn next(&mut self) -> Option<&'a mut A> {
-//         self.inner.next()
-//     }
-//     #[inline]
-//     fn size_hint(&self) -> (usize, Option<usize>) {
-//         self.inner.size_hint()
-//     }
-// }
+    #[inline]
+    fn next(&mut self) -> Option<&'a mut A> {
+        self.inner.next()
+    }
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.inner.size_hint()
+    }
+}
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<'a, A> DoubleEndedIterator for IterMut<'a, A> {
-//     #[inline]
-//     fn next_back(&mut self) -> Option<&'a mut A> {
-//         self.inner.next_back()
-//     }
-// }
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<'a, A> DoubleEndedIterator for IterMut<'a, A> {
+    #[inline]
+    fn next_back(&mut self) -> Option<&'a mut A> {
+        self.inner.next_back()
+    }
+}
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<A> ExactSizeIterator for IterMut<'_, A> {}
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<A> ExactSizeIterator for IterMut<'_, A> {}
 
-// #[stable(feature = "fused", since = "1.26.0")]
-// impl<A> FusedIterator for IterMut<'_, A> {}
-// #[unstable(feature = "trusted_len", issue = "37572")]
-// unsafe impl<A> TrustedLen for IterMut<'_, A> {}
+#[stable(feature = "fused", since = "1.26.0")]
+#[cfg(feature = "uncertified")]
+impl<A> FusedIterator for IterMut<'_, A> {}
+#[unstable(feature = "trusted_len", issue = "37572")]
+#[cfg(feature = "uncertified")]
+unsafe impl<A> TrustedLen for IterMut<'_, A> {}
 
-// /// An iterator over the value in [`Some`] variant of an [`Option`].
-// ///
-// /// The iterator yields one value if the [`Option`] is a [`Some`], otherwise none.
-// ///
-// /// This `struct` is created by the [`Option::into_iter`] function.
-// #[derive(Clone, Debug)]
-// #[stable(feature = "rust1", since = "1.0.0")]
-// pub struct IntoIter<A> {
-//     inner: Item<A>,
-// }
+/// An iterator over the value in [`Some`] variant of an [`Option`].
+///
+/// The iterator yields one value if the [`Option`] is a [`Some`], otherwise none.
+///
+/// This `struct` is created by the [`Option::into_iter`] function.
+#[derive(Clone, Debug)]
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+pub struct IntoIter<A> {
+    inner: Item<A>,
+}
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<A> Iterator for IntoIter<A> {
-//     type Item = A;
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<A> Iterator for IntoIter<A> {
+    type Item = A;
 
-//     #[inline]
-//     fn next(&mut self) -> Option<A> {
-//         self.inner.next()
-//     }
-//     #[inline]
-//     fn size_hint(&self) -> (usize, Option<usize>) {
-//         self.inner.size_hint()
-//     }
-// }
+    #[inline]
+    fn next(&mut self) -> Option<A> {
+        self.inner.next()
+    }
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.inner.size_hint()
+    }
+}
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<A> DoubleEndedIterator for IntoIter<A> {
-//     #[inline]
-//     fn next_back(&mut self) -> Option<A> {
-//         self.inner.next_back()
-//     }
-// }
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<A> DoubleEndedIterator for IntoIter<A> {
+    #[inline]
+    fn next_back(&mut self) -> Option<A> {
+        self.inner.next_back()
+    }
+}
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<A> ExactSizeIterator for IntoIter<A> {}
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<A> ExactSizeIterator for IntoIter<A> {}
 
-// #[stable(feature = "fused", since = "1.26.0")]
-// impl<A> FusedIterator for IntoIter<A> {}
+#[stable(feature = "fused", since = "1.26.0")]
+#[cfg(feature = "uncertified")]
+impl<A> FusedIterator for IntoIter<A> {}
 
-// #[unstable(feature = "trusted_len", issue = "37572")]
-// unsafe impl<A> TrustedLen for IntoIter<A> {}
+#[unstable(feature = "trusted_len", issue = "37572")]
+#[cfg(feature = "uncertified")]
+unsafe impl<A> TrustedLen for IntoIter<A> {}
 
-// /////////////////////////////////////////////////////////////////////////////
-// // FromIterator
-// /////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+// FromIterator
+/////////////////////////////////////////////////////////////////////////////
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<A, V: FromIterator<A>> FromIterator<Option<A>> for Option<V> {
-//     /// Takes each element in the [`Iterator`]: if it is [`None`][Option::None],
-//     /// no further elements are taken, and the [`None`][Option::None] is
-//     /// returned. Should no [`None`][Option::None] occur, a container of type
-//     /// `V` containing the values of each [`Option`] is returned.
-//     ///
-//     /// # Examples
-//     ///
-//     /// Here is an example which increments every integer in a vector.
-//     /// We use the checked variant of `add` that returns `None` when the
-//     /// calculation would result in an overflow.
-//     ///
-//     /// ```
-//     /// let items = vec![0_u16, 1, 2];
-//     ///
-//     /// let res: Option<Vec<u16>> = items
-//     ///     .iter()
-//     ///     .map(|x| x.checked_add(1))
-//     ///     .collect();
-//     ///
-//     /// assert_eq!(res, Some(vec![1, 2, 3]));
-//     /// ```
-//     ///
-//     /// As you can see, this will return the expected, valid items.
-//     ///
-//     /// Here is another example that tries to subtract one from another list
-//     /// of integers, this time checking for underflow:
-//     ///
-//     /// ```
-//     /// let items = vec![2_u16, 1, 0];
-//     ///
-//     /// let res: Option<Vec<u16>> = items
-//     ///     .iter()
-//     ///     .map(|x| x.checked_sub(1))
-//     ///     .collect();
-//     ///
-//     /// assert_eq!(res, None);
-//     /// ```
-//     ///
-//     /// Since the last element is zero, it would underflow. Thus, the resulting
-//     /// value is `None`.
-//     ///
-//     /// Here is a variation on the previous example, showing that no
-//     /// further elements are taken from `iter` after the first `None`.
-//     ///
-//     /// ```
-//     /// let items = vec![3_u16, 2, 1, 10];
-//     ///
-//     /// let mut shared = 0;
-//     ///
-//     /// let res: Option<Vec<u16>> = items
-//     ///     .iter()
-//     ///     .map(|x| { shared += x; x.checked_sub(2) })
-//     ///     .collect();
-//     ///
-//     /// assert_eq!(res, None);
-//     /// assert_eq!(shared, 6);
-//     /// ```
-//     ///
-//     /// Since the third element caused an underflow, no further elements were taken,
-//     /// so the final value of `shared` is 6 (= `3 + 2 + 1`), not 16.
-//     #[inline]
-//     fn from_iter<I: IntoIterator<Item = Option<A>>>(iter: I) -> Option<V> {
-//         // FIXME(#11084): This could be replaced with Iterator::scan when this
-//         // performance bug is closed.
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+impl<A, V: FromIterator<A>> FromIterator<Option<A>> for Option<V> {
+    /// Takes each element in the [`Iterator`]: if it is [`None`][Option::None],
+    /// no further elements are taken, and the [`None`][Option::None] is
+    /// returned. Should no [`None`][Option::None] occur, a container of type
+    /// `V` containing the values of each [`Option`] is returned.
+    ///
+    /// # Examples
+    ///
+    /// Here is an example which increments every integer in a vector.
+    /// We use the checked variant of `add` that returns `None` when the
+    /// calculation would result in an overflow.
+    ///
+    /// ```
+    /// let items = vec![0_u16, 1, 2];
+    ///
+    /// let res: Option<Vec<u16>> = items
+    ///     .iter()
+    ///     .map(|x| x.checked_add(1))
+    ///     .collect();
+    ///
+    /// assert_eq!(res, Some(vec![1, 2, 3]));
+    /// ```
+    ///
+    /// As you can see, this will return the expected, valid items.
+    ///
+    /// Here is another example that tries to subtract one from another list
+    /// of integers, this time checking for underflow:
+    ///
+    /// ```
+    /// let items = vec![2_u16, 1, 0];
+    ///
+    /// let res: Option<Vec<u16>> = items
+    ///     .iter()
+    ///     .map(|x| x.checked_sub(1))
+    ///     .collect();
+    ///
+    /// assert_eq!(res, None);
+    /// ```
+    ///
+    /// Since the last element is zero, it would underflow. Thus, the resulting
+    /// value is `None`.
+    ///
+    /// Here is a variation on the previous example, showing that no
+    /// further elements are taken from `iter` after the first `None`.
+    ///
+    /// ```
+    /// let items = vec![3_u16, 2, 1, 10];
+    ///
+    /// let mut shared = 0;
+    ///
+    /// let res: Option<Vec<u16>> = items
+    ///     .iter()
+    ///     .map(|x| { shared += x; x.checked_sub(2) })
+    ///     .collect();
+    ///
+    /// assert_eq!(res, None);
+    /// assert_eq!(shared, 6);
+    /// ```
+    ///
+    /// Since the third element caused an underflow, no further elements were taken,
+    /// so the final value of `shared` is 6 (= `3 + 2 + 1`), not 16.
+    #[inline]
+    fn from_iter<I: IntoIterator<Item = Option<A>>>(iter: I) -> Option<V> {
+        // FIXME(#11084): This could be replaced with Iterator::scan when this
+        // performance bug is closed.
 
-//         iter::try_process(iter.into_iter(), |i| i.collect())
-//     }
-// }
+        iter::try_process(iter.into_iter(), |i| i.collect())
+    }
+}
 
-// #[unstable(feature = "try_trait_v2", issue = "84277")]
-// impl<T> ops::Try for Option<T> {
-//     type Output = T;
-//     type Residual = Option<convert::Infallible>;
+#[unstable(feature = "try_trait_v2", issue = "84277")]
+#[cfg(feature = "uncertified")]
+impl<T> ops::Try for Option<T> {
+    type Output = T;
+    type Residual = Option<convert::Infallible>;
 
-//     #[inline]
-//     fn from_output(output: Self::Output) -> Self {
-//         Some(output)
-//     }
+    #[inline]
+    fn from_output(output: Self::Output) -> Self {
+        Some(output)
+    }
 
-//     #[inline]
-//     fn branch(self) -> ControlFlow<Self::Residual, Self::Output> {
-//         match self {
-//             Some(v) => ControlFlow::Continue(v),
-//             None => ControlFlow::Break(None),
-//         }
-//     }
-// }
+    #[inline]
+    fn branch(self) -> ControlFlow<Self::Residual, Self::Output> {
+        match self {
+            Some(v) => ControlFlow::Continue(v),
+            None => ControlFlow::Break(None),
+        }
+    }
+}
 
-// #[unstable(feature = "try_trait_v2", issue = "84277")]
-// // Note: manually specifying the residual type instead of using the default to work around
-// // https://github.com/rust-lang/rust/issues/99940
-// impl<T> ops::FromResidual<Option<convert::Infallible>> for Option<T> {
-//     #[inline]
-//     fn from_residual(residual: Option<convert::Infallible>) -> Self {
-//         match residual {
-//             None => None,
-//         }
-//     }
-// }
+#[unstable(feature = "try_trait_v2", issue = "84277")]
+#[cfg(feature = "uncertified")]
+// Note: manually specifying the residual type instead of using the default to work around
+// https://github.com/rust-lang/rust/issues/99940
+impl<T> ops::FromResidual<Option<convert::Infallible>> for Option<T> {
+    #[inline]
+    fn from_residual(residual: Option<convert::Infallible>) -> Self {
+        match residual {
+            None => None,
+        }
+    }
+}
 
-// #[diagnostic::do_not_recommend]
-// #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
-// impl<T> ops::FromResidual<ops::Yeet<()>> for Option<T> {
-//     #[inline]
-//     fn from_residual(ops::Yeet(()): ops::Yeet<()>) -> Self {
-//         None
-//     }
-// }
+#[diagnostic::do_not_recommend]
+#[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
+#[cfg(feature = "uncertified")]
+impl<T> ops::FromResidual<ops::Yeet<()>> for Option<T> {
+    #[inline]
+    fn from_residual(ops::Yeet(()): ops::Yeet<()>) -> Self {
+        None
+    }
+}
 
-// #[unstable(feature = "try_trait_v2_residual", issue = "91285")]
-// impl<T> ops::Residual<T> for Option<convert::Infallible> {
-//     type TryType = Option<T>;
-// }
+#[unstable(feature = "try_trait_v2_residual", issue = "91285")]
+#[cfg(feature = "uncertified")]
+impl<T> ops::Residual<T> for Option<convert::Infallible> {
+    type TryType = Option<T>;
+}
 
 impl<T> Option<Option<T>> {
     /// Converts from `Option<Option<T>>` to `Option<T>`.
@@ -2578,26 +2624,27 @@ impl<T> Option<Option<T>> {
     }
 }
 
-// impl<T, const N: usize> [Option<T>; N] {
-//     /// Transposes a `[Option<T>; N]` into a `Option<[T; N]>`.
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// #![feature(option_array_transpose)]
-//     /// # use std::option::Option;
-//     ///
-//     /// let data = [Some(0); 1000];
-//     /// let data: Option<[u8; 1000]> = data.transpose();
-//     /// assert_eq!(data, Some([0; 1000]));
-//     ///
-//     /// let data = [Some(0), None];
-//     /// let data: Option<[u8; 2]> = data.transpose();
-//     /// assert_eq!(data, None);
-//     /// ```
-//     #[inline]
-//     #[unstable(feature = "option_array_transpose", issue = "130828")]
-//     pub fn transpose(self) -> Option<[T; N]> {
-//         self.try_map(core::convert::identity)
-//     }
-// }
+#[cfg(feature = "uncertified")]
+impl<T, const N: usize> [Option<T>; N] {
+    /// Transposes a `[Option<T>; N]` into a `Option<[T; N]>`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #![feature(option_array_transpose)]
+    /// # use std::option::Option;
+    ///
+    /// let data = [Some(0); 1000];
+    /// let data: Option<[u8; 1000]> = data.transpose();
+    /// assert_eq!(data, Some([0; 1000]));
+    ///
+    /// let data = [Some(0), None];
+    /// let data: Option<[u8; 2]> = data.transpose();
+    /// assert_eq!(data, None);
+    /// ```
+    #[inline]
+    #[unstable(feature = "option_array_transpose", issue = "130828")]
+    pub fn transpose(self) -> Option<[T; N]> {
+        self.try_map(core::convert::identity)
+    }
+}

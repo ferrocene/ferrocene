@@ -64,10 +64,10 @@
 //     ( $(#[$($meta:tt)*])* unsafe $Trait:ident for ) => {},
 // }
 
-// /// Types that can be transferred across thread boundaries.
-// ///
-// /// This trait is automatically implemented when the compiler determines it's
-// /// appropriate.
+/// Types that can be transferred across thread boundaries.
+///
+/// This trait is automatically implemented when the compiler determines it's
+/// appropriate.
 // ///
 // /// An example of a non-`Send` type is the reference-counting pointer
 // /// [`rc::Rc`][`Rc`]. If two threads attempt to clone [`Rc`]s that point to the same
@@ -81,26 +81,26 @@
 // /// [`Rc`]: ../../std/rc/struct.Rc.html
 // /// [arc]: ../../std/sync/struct.Arc.html
 // /// [ub]: ../../reference/behavior-considered-undefined.html
-// #[stable(feature = "rust1", since = "1.0.0")]
-// #[cfg_attr(not(test), rustc_diagnostic_item = "Send")]
-// #[diagnostic::on_unimplemented(
-//     message = "`{Self}` cannot be sent between threads safely",
-//     label = "`{Self}` cannot be sent between threads safely"
-// )]
-// pub unsafe auto trait Send {
-//     // empty.
-// }
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg_attr(not(test), rustc_diagnostic_item = "Send")]
+#[diagnostic::on_unimplemented(
+    message = "`{Self}` cannot be sent between threads safely",
+    label = "`{Self}` cannot be sent between threads safely"
+)]
+pub unsafe auto trait Send {
+    // empty.
+}
 
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<T: ?Sized> !Send for *const T {}
-// #[stable(feature = "rust1", since = "1.0.0")]
-// impl<T: ?Sized> !Send for *mut T {}
+#[stable(feature = "rust1", since = "1.0.0")]
+impl<T: ?Sized> !Send for *const T {}
+#[stable(feature = "rust1", since = "1.0.0")]
+impl<T: ?Sized> !Send for *mut T {}
 
-// // Most instances arise automatically, but this instance is needed to link up `T: Sync` with
-// // `&T: Send` (and it also removes the unsound default instance `T Send` -> `&T: Send` that would
-// // otherwise exist).
-// #[stable(feature = "rust1", since = "1.0.0")]
-// unsafe impl<T: Sync + ?Sized> Send for &T {}
+// Most instances arise automatically, but this instance is needed to link up `T: Sync` with
+// `&T: Send` (and it also removes the unsound default instance `T Send` -> `&T: Send` that would
+// otherwise exist).
+#[stable(feature = "rust1", since = "1.0.0")]
+unsafe impl<T: Sync + ?Sized> Send for &T {}
 
 /// Types with a constant size known at compile time.
 ///
@@ -470,11 +470,11 @@ pub trait Copy: Clone {
 // #[lang = "bikeshed_guaranteed_no_drop"]
 // pub trait BikeshedGuaranteedNoDrop {}
 
-// /// Types for which it is safe to share references between threads.
-// ///
-// /// This trait is automatically implemented when the compiler determines
-// /// it's appropriate.
-// ///
+/// Types for which it is safe to share references between threads.
+///
+/// This trait is automatically implemented when the compiler determines
+/// it's appropriate.
+///
 // /// The precise definition is: a type `T` is [`Sync`] if and only if `&T` is
 // /// [`Send`]. In other words, if there is no possibility of
 // /// [undefined behavior][ub] (including data races) when passing
@@ -540,95 +540,95 @@ pub trait Copy: Clone {
 // /// [ub]: ../../reference/behavior-considered-undefined.html
 // /// [transmute]: crate::mem::transmute
 // /// [nomicon-send-and-sync]: ../../nomicon/send-and-sync.html
-// #[stable(feature = "rust1", since = "1.0.0")]
-// #[cfg_attr(not(test), rustc_diagnostic_item = "Sync")]
-// #[lang = "sync"]
-// #[rustc_on_unimplemented(
-//     on(
-//         _Self = "core::cell::once::OnceCell<T>",
-//         note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::OnceLock` instead"
-//     ),
-//     on(
-//         _Self = "core::cell::Cell<u8>",
-//         note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicU8` instead",
-//     ),
-//     on(
-//         _Self = "core::cell::Cell<u16>",
-//         note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicU16` instead",
-//     ),
-//     on(
-//         _Self = "core::cell::Cell<u32>",
-//         note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicU32` instead",
-//     ),
-//     on(
-//         _Self = "core::cell::Cell<u64>",
-//         note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicU64` instead",
-//     ),
-//     on(
-//         _Self = "core::cell::Cell<usize>",
-//         note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicUsize` instead",
-//     ),
-//     on(
-//         _Self = "core::cell::Cell<i8>",
-//         note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicI8` instead",
-//     ),
-//     on(
-//         _Self = "core::cell::Cell<i16>",
-//         note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicI16` instead",
-//     ),
-//     on(
-//         _Self = "core::cell::Cell<i32>",
-//         note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicI32` instead",
-//     ),
-//     on(
-//         _Self = "core::cell::Cell<i64>",
-//         note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicI64` instead",
-//     ),
-//     on(
-//         _Self = "core::cell::Cell<isize>",
-//         note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicIsize` instead",
-//     ),
-//     on(
-//         _Self = "core::cell::Cell<bool>",
-//         note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicBool` instead",
-//     ),
-//     on(
-//         all(
-//             _Self = "core::cell::Cell<T>",
-//             not(_Self = "core::cell::Cell<u8>"),
-//             not(_Self = "core::cell::Cell<u16>"),
-//             not(_Self = "core::cell::Cell<u32>"),
-//             not(_Self = "core::cell::Cell<u64>"),
-//             not(_Self = "core::cell::Cell<usize>"),
-//             not(_Self = "core::cell::Cell<i8>"),
-//             not(_Self = "core::cell::Cell<i16>"),
-//             not(_Self = "core::cell::Cell<i32>"),
-//             not(_Self = "core::cell::Cell<i64>"),
-//             not(_Self = "core::cell::Cell<isize>"),
-//             not(_Self = "core::cell::Cell<bool>")
-//         ),
-//         note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock`",
-//     ),
-//     on(
-//         _Self = "core::cell::RefCell<T>",
-//         note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` instead",
-//     ),
-//     message = "`{Self}` cannot be shared between threads safely",
-//     label = "`{Self}` cannot be shared between threads safely"
-// )]
-// pub unsafe auto trait Sync {
-//     // FIXME(estebank): once support to add notes in `rustc_on_unimplemented`
-//     // lands in beta, and it has been extended to check whether a closure is
-//     // anywhere in the requirement chain, extend it as such (#48534):
-//     // ```
-//     // on(
-//     //     closure,
-//     //     note="`{Self}` cannot be shared safely, consider marking the closure `move`"
-//     // ),
-//     // ```
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg_attr(not(test), rustc_diagnostic_item = "Sync")]
+#[lang = "sync"]
+#[rustc_on_unimplemented(
+    on(
+        _Self = "core::cell::once::OnceCell<T>",
+        note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::OnceLock` instead"
+    ),
+    on(
+        _Self = "core::cell::Cell<u8>",
+        note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicU8` instead",
+    ),
+    on(
+        _Self = "core::cell::Cell<u16>",
+        note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicU16` instead",
+    ),
+    on(
+        _Self = "core::cell::Cell<u32>",
+        note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicU32` instead",
+    ),
+    on(
+        _Self = "core::cell::Cell<u64>",
+        note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicU64` instead",
+    ),
+    on(
+        _Self = "core::cell::Cell<usize>",
+        note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicUsize` instead",
+    ),
+    on(
+        _Self = "core::cell::Cell<i8>",
+        note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicI8` instead",
+    ),
+    on(
+        _Self = "core::cell::Cell<i16>",
+        note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicI16` instead",
+    ),
+    on(
+        _Self = "core::cell::Cell<i32>",
+        note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicI32` instead",
+    ),
+    on(
+        _Self = "core::cell::Cell<i64>",
+        note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicI64` instead",
+    ),
+    on(
+        _Self = "core::cell::Cell<isize>",
+        note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicIsize` instead",
+    ),
+    on(
+        _Self = "core::cell::Cell<bool>",
+        note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicBool` instead",
+    ),
+    on(
+        all(
+            _Self = "core::cell::Cell<T>",
+            not(_Self = "core::cell::Cell<u8>"),
+            not(_Self = "core::cell::Cell<u16>"),
+            not(_Self = "core::cell::Cell<u32>"),
+            not(_Self = "core::cell::Cell<u64>"),
+            not(_Self = "core::cell::Cell<usize>"),
+            not(_Self = "core::cell::Cell<i8>"),
+            not(_Self = "core::cell::Cell<i16>"),
+            not(_Self = "core::cell::Cell<i32>"),
+            not(_Self = "core::cell::Cell<i64>"),
+            not(_Self = "core::cell::Cell<isize>"),
+            not(_Self = "core::cell::Cell<bool>")
+        ),
+        note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock`",
+    ),
+    on(
+        _Self = "core::cell::RefCell<T>",
+        note = "if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` instead",
+    ),
+    message = "`{Self}` cannot be shared between threads safely",
+    label = "`{Self}` cannot be shared between threads safely"
+)]
+pub unsafe auto trait Sync {
+    // FIXME(estebank): once support to add notes in `rustc_on_unimplemented`
+    // lands in beta, and it has been extended to check whether a closure is
+    // anywhere in the requirement chain, extend it as such (#48534):
+    // ```
+    // on(
+    //     closure,
+    //     note="`{Self}` cannot be shared safely, consider marking the closure `move`"
+    // ),
+    // ```
 
-//     // Empty
-// }
+    // Empty
+}
 
 // #[stable(feature = "rust1", since = "1.0.0")]
 // impl<T: ?Sized> !Sync for *const T {}

@@ -18,6 +18,7 @@ pub(crate) fn check(reporter: &dyn Reporter, sysroot: &Path) -> Result<(), Error
     check_binary(reporter, sysroot, "rustc", CommitHashOf::Rust)?;
     check_binary(reporter, sysroot, "rustdoc", CommitHashOf::Rust)?;
     check_optional_binary(reporter, sysroot, "cargo", CommitHashOf::Cargo)?;
+    check_libexec_binary(reporter, sysroot, "rust-analyzer-proc-macro-srv")?;
 
     Ok(())
 }
@@ -39,6 +40,19 @@ fn check_binary(
     check_version(version, hash, name)?;
 
     reporter.success(&format!("binary {name} is valid"));
+    Ok(())
+}
+
+fn check_libexec_binary(reporter: &dyn Reporter, sysroot: &Path, name: &str) -> Result<(), Error> {
+    let libexec_dir = sysroot.join("libexec");
+    #[cfg(not(windows))]
+    let bin = libexec_dir.join(name);
+    #[cfg(windows)]
+    let bin = libexec_dir.join(&format!("{name}.exe"));
+
+    check_file(&bin, &libexec_dir, name)?;
+
+    reporter.success(&format!("libexec binary {name} is valid"));
     Ok(())
 }
 
@@ -375,6 +389,17 @@ mod tests {
                 Err(err) => panic!("unexpected error: {err}"),
             }
         }
+    }
+
+    #[test]
+    fn test_check_libexec_binary_missing_file() {
+        let utils = TestUtils::new();
+        let libexec_dir = utils.sysroot().join("libexec");
+        std::fs::create_dir_all(&libexec_dir).unwrap();
+        assert!(
+            check_libexec_binary(utils.reporter(), utils.sysroot(), "rust-analyzer-proc-macro-srv")
+                .is_err()
+        );
     }
 
     #[cfg(not(windows))] // Windows does permissions differently

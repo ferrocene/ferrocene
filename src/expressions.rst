@@ -1087,7 +1087,7 @@ See :p:`fls_350qejoq9i23` for the declaration of ``ref_answer``.
 
 .. code-block:: rust
 
-   let deref_asnwer = *ref_answer;
+   let deref_answer = *ref_answer;
 
 .. _fls_pocsh1neugpc:
 

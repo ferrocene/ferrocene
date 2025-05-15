@@ -536,7 +536,8 @@
 #[cfg(feature = "uncertified")]
 use crate::iter::{self, FusedIterator, TrustedLen};
 #[cfg(feature = "uncertified")]
-use crate::ops::{self, ControlFlow, Deref, DerefMut};
+use crate::ops::{self, ControlFlow};
+use crate::ops::{Deref, DerefMut};
 #[cfg(feature = "uncertified")]
 use crate::{convert, fmt, hint};
 
@@ -564,7 +565,6 @@ pub enum Result<T, E> {
 // Type implementation
 /////////////////////////////////////////////////////////////////////////////
 
-#[cfg(feature = "uncertified")]
 impl<T, E> Result<T, E> {
     /////////////////////////////////////////////////////////////////////////
     // Querying the contained values
@@ -632,6 +632,7 @@ impl<T, E> Result<T, E> {
     #[rustc_const_stable(feature = "const_result_basics", since = "1.48.0")]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")] /* blocked on `impl Not for bool` */
     pub const fn is_err(&self) -> bool {
         !self.is_ok()
     }
@@ -1007,6 +1008,7 @@ impl<T, E> Result<T, E> {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")] /* blocked on Iterator */
     pub fn iter(&self) -> Iter<'_, T> {
         Iter { inner: self.as_ref().ok() }
     }
@@ -1030,6 +1032,7 @@ impl<T, E> Result<T, E> {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")] /* blocked on Iterator */
     pub fn iter_mut(&mut self) -> IterMut<'_, T> {
         IterMut { inner: self.as_mut().ok() }
     }
@@ -1084,6 +1087,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[track_caller]
     #[stable(feature = "result_expect", since = "1.4.0")]
+    #[cfg(feature = "uncertified")] /* blocked on Debug */
     pub fn expect(self, msg: &str) -> T
     where
         E: fmt::Debug,
@@ -1132,6 +1136,7 @@ impl<T, E> Result<T, E> {
     #[inline(always)]
     #[track_caller]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")] /* blocked on Debug */
     pub fn unwrap(self) -> T
     where
         E: fmt::Debug,
@@ -1147,26 +1152,26 @@ impl<T, E> Result<T, E> {
     /// Consumes the `self` argument then, if [`Ok`], returns the contained
     /// value, otherwise if [`Err`], returns the default value for that
     /// type.
-    ///
-    /// # Examples
-    ///
-    /// Converts a string to an integer, turning poorly-formed strings
-    /// into 0 (the default value for integers). [`parse`] converts
-    /// a string to any other type that implements [`FromStr`], returning an
-    /// [`Err`] on error.
-    ///
-    /// ```
-    /// let good_year_from_input = "1909";
-    /// let bad_year_from_input = "190blarg";
-    /// let good_year = good_year_from_input.parse().unwrap_or_default();
-    /// let bad_year = bad_year_from_input.parse().unwrap_or_default();
-    ///
-    /// assert_eq!(1909, good_year);
-    /// assert_eq!(0, bad_year);
-    /// ```
-    ///
-    /// [`parse`]: str::parse
-    /// [`FromStr`]: crate::str::FromStr
+    // ///
+    // /// # Examples
+    // ///
+    // /// Converts a string to an integer, turning poorly-formed strings
+    // /// into 0 (the default value for integers). [`parse`] converts
+    // /// a string to any other type that implements [`FromStr`], returning an
+    // /// [`Err`] on error.
+    // ///
+    // /// ```
+    // /// let good_year_from_input = "1909";
+    // /// let bad_year_from_input = "190blarg";
+    // /// let good_year = good_year_from_input.parse().unwrap_or_default();
+    // /// let bad_year = bad_year_from_input.parse().unwrap_or_default();
+    // ///
+    // /// assert_eq!(1909, good_year);
+    // /// assert_eq!(0, bad_year);
+    // /// ```
+    // ///
+    // /// [`parse`]: str::parse
+    // /// [`FromStr`]: crate::str::FromStr
     #[inline]
     #[stable(feature = "result_unwrap_or_default", since = "1.16.0")]
     pub fn unwrap_or_default(self) -> T
@@ -1196,6 +1201,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[track_caller]
     #[stable(feature = "result_expect_err", since = "1.17.0")]
+    #[cfg(feature = "uncertified")] /* blocked on Debug */
     pub fn expect_err(self, msg: &str) -> E
     where
         T: fmt::Debug,
@@ -1227,6 +1233,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[track_caller]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")] /* blocked on Debug */
     pub fn unwrap_err(self) -> E
     where
         T: fmt::Debug,
@@ -1262,6 +1269,7 @@ impl<T, E> Result<T, E> {
     /// ```
     #[unstable(feature = "unwrap_infallible", reason = "newly added", issue = "61695")]
     #[inline]
+    #[cfg(feature = "uncertified")] /* blocked on ! */
     pub fn into_ok(self) -> T
     where
         E: Into<!>,
@@ -1297,6 +1305,7 @@ impl<T, E> Result<T, E> {
     /// ```
     #[unstable(feature = "unwrap_infallible", reason = "newly added", issue = "61695")]
     #[inline]
+    #[cfg(feature = "uncertified")] /* blocked on ! */
     pub fn into_err(self) -> E
     where
         T: Into<!>,
@@ -1519,6 +1528,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[track_caller]
     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
+    #[cfg(feature = "uncertified")] /* blocked on hint */
     pub unsafe fn unwrap_unchecked(self) -> T {
         match self {
             Ok(t) => t,
@@ -1550,6 +1560,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[track_caller]
     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
+    #[cfg(feature = "uncertified")] /* blocked on hint */
     pub unsafe fn unwrap_err_unchecked(self) -> E {
         match self {
             // SAFETY: the safety contract must be upheld by the caller.
@@ -1559,7 +1570,6 @@ impl<T, E> Result<T, E> {
     }
 }
 
-#[cfg(feature = "uncertified")]
 impl<T, E> Result<&T, E> {
     /// Maps a `Result<&T, E>` to a `Result<T, E>` by copying the contents of the
     /// `Ok` part.
@@ -1611,7 +1621,6 @@ impl<T, E> Result<&T, E> {
     }
 }
 
-#[cfg(feature = "uncertified")]
 impl<T, E> Result<&mut T, E> {
     /// Maps a `Result<&mut T, E>` to a `Result<T, E>` by copying the contents of the
     /// `Ok` part.
@@ -1663,7 +1672,6 @@ impl<T, E> Result<&mut T, E> {
     }
 }
 
-#[cfg(feature = "uncertified")]
 impl<T, E> Result<Option<T>, E> {
     /// Transposes a `Result` of an `Option` into an `Option` of a `Result`.
     ///
@@ -1693,7 +1701,6 @@ impl<T, E> Result<Option<T>, E> {
     }
 }
 
-#[cfg(feature = "uncertified")]
 impl<T, E> Result<Result<T, E>, E> {
     /// Converts from `Result<Result<T, E>, E>` to `Result<T, E>`
     ///
@@ -1722,6 +1729,7 @@ impl<T, E> Result<Result<T, E>, E> {
     #[inline]
     #[unstable(feature = "result_flattening", issue = "70142")]
     #[rustc_const_unstable(feature = "result_flattening", issue = "70142")]
+    #[cfg(feature = "uncertified")] /* blocked on impl Drop for Result */
     pub const fn flatten(self) -> Result<T, E> {
         // FIXME(const-hack): could be written with `and_then`
         match self {
@@ -1736,7 +1744,7 @@ impl<T, E> Result<Result<T, E>, E> {
 #[inline(never)]
 #[cold]
 #[track_caller]
-#[cfg(feature = "uncertified")]
+#[cfg(feature = "uncertified")] /* blocked on Debug */
 fn unwrap_failed(msg: &str, error: &dyn fmt::Debug) -> ! {
     panic!("{msg}: {error:?}")
 }
@@ -1749,7 +1757,7 @@ fn unwrap_failed(msg: &str, error: &dyn fmt::Debug) -> ! {
 #[inline]
 #[cold]
 #[track_caller]
-#[cfg(feature = "uncertified")]
+#[cfg(feature = "uncertified")] /* blocked on Debug */
 fn unwrap_failed<T>(_msg: &str, _error: &T) -> ! {
     panic!()
 }

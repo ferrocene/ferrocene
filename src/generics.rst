@@ -246,7 +246,7 @@ Where Clauses
        $$where$$ WhereClausePredicateList
 
    WhereClausePredicateList ::=
-       WhereClausePredicate (, WhereClausePredicate)* $$,$$?
+       WhereClausePredicate ($$,$$ WhereClausePredicate)* $$,$$?
 
    WhereClausePredicate ::=
        LifetimeBoundPredicate

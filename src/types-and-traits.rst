@@ -23,7 +23,7 @@ Types
      | TypeSpecificationWithoutBounds
 
    TypeSpecificationList ::=
-       TypeSpecification (, TypeSpecification)* $$,$$?
+       TypeSpecification ($$,$$ TypeSpecification)* $$,$$?
 
    TypeSpecificationWithoutBounds ::=
        ArrayTypeSpecification
@@ -576,7 +576,7 @@ Tuple Types
        $$($$ TupleFieldList? $$)$$
 
    TupleFieldList ::=
-       TupleField (, TupleField)* ,?
+       TupleField ($$,$$ TupleField)* $$,$$?
 
    TupleField ::=
        TypeSpecification

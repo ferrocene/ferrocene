@@ -769,13 +769,13 @@ Record Struct Patterns
 
    RecordStructPatternContent ::=
        RecordStructRestPattern
-     | FieldDeconstructorList (, RecordStructRestPattern | ,?)
+     | FieldDeconstructorList ($$,$$ RecordStructRestPattern | $$,$$?)
 
    RecordStructRestPattern ::=
        OuterAttributeOrDoc* RestPattern
 
    FieldDeconstructorList ::=
-       FieldDeconstructor (, FieldDeconstructor)*
+       FieldDeconstructor ($$,$$ FieldDeconstructor)*
 
    FieldDeconstructor ::=
        OuterAttributeOrDoc* (

@@ -1458,6 +1458,7 @@ Strict Keywords
      | $$continue$$
      | $$crate$$
      | $$dyn$$
+     | $$else$$
      | $$enum$$
      | $$extern$$
      | $$false$$

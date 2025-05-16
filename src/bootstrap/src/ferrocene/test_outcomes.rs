@@ -3,7 +3,6 @@
 
 use std::path::PathBuf;
 
-
 use crate::core::builder::{Builder, ShouldRun, Step};
 use crate::core::config::FerroceneTestOutcomes;
 use crate::ferrocene::download_and_extract_ci_outcomes;

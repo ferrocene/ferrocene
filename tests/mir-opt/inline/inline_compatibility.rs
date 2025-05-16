@@ -74,3 +74,6 @@ unsafe extern "C" fn sum(n: u32, mut vs: ...) -> u32 {
     }
     s
 }
+
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

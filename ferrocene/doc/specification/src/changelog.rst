@@ -18,6 +18,37 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.86.0
+-------------------------------
+
+- `Stabilize upcasting trait objects to supertraits. <https://github.com/rust-lang/rust/pull/134367>`_
+
+  - New paragraph: :p:`fls_QB4c6FNKxaPl`
+
+- `Allow safe functions to be marked with the #[target_feature] attribute. <https://github.com/rust-lang/rust/pull/134090>`_
+
+  - Changed paragraph: :p:`fls_3qj3jvmtxvx6`
+
+- `The missing_abi lint now warns-by-default. <https://github.com/rust-lang/rust/pull/132397>`_
+
+  - No change: Lints are not part of the FLS
+
+- `Rust now lints about double negations, to catch cases that might have intended to be a prefix decrement operator (--x) as written in other languages. This was previously a clippy lint, clippy::double_neg, and is now available directly in Rust as double_negations. <https://github.com/rust-lang/rust/pull/126604>`_
+
+  - No change: Lints are not part of the FLS
+
+- `More pointers are now detected as definitely not-null based on their alignment in const eval. <https://github.com/rust-lang/rust/pull/133700>`_
+
+  - No change: The concrete semantics of constant evaluation is not described within the FLS
+
+- `Empty repr() attribute applied to invalid items are now correctly rejected. <https://github.com/rust-lang/rust/pull/133925>`_
+
+  - No change: this bug was not documented
+
+- `Inner attributes, #![test] and #![rustfmt::skip], are no longer accepted in more places than intended. <https://github.com/rust-lang/rust/pull/134276>`_
+
+  - No change: These attributes are not part of the FLS
+
 Language changes in Rust 1.85.0
 -------------------------------
 

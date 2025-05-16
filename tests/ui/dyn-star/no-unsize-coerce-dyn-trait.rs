@@ -11,3 +11,6 @@ fn main() {
     let y: Box<dyn* B> = x;
     //~^ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

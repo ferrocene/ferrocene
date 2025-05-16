@@ -38,7 +38,6 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "thumbv7em-ferrocenecoretest-eabi",
     "thumbv7em-ferrocenecoretest-eabihf",
     // just a dummy comment so the list doesn't get onelined
-    "x86_64-lynx-lynxos178",
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM
@@ -122,8 +121,8 @@ pub fn check(build: &mut Build) {
                     eprintln!(
                         "\nYour system's libstdc++ version is too old for the `llvm.download-ci-llvm` option."
                     );
-                    eprintln!("Current version detected: '{}'", version);
-                    eprintln!("Minimum required version: '{}'", LIBSTDCXX_MIN_VERSION_THRESHOLD);
+                    eprintln!("Current version detected: '{version}'");
+                    eprintln!("Minimum required version: '{LIBSTDCXX_MIN_VERSION_THRESHOLD}'");
                     eprintln!(
                         "Consider upgrading libstdc++ or disabling the `llvm.download-ci-llvm` option."
                     );

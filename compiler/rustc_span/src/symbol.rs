@@ -280,6 +280,8 @@ symbols! {
         IoSeek,
         IoWrite,
         IpAddr,
+        Ipv4Addr,
+        Ipv6Addr,
         IrTyKind,
         Is,
         Item,
@@ -1301,6 +1303,10 @@ symbols! {
         match_beginning_vert,
         match_default_bindings,
         matches_macro,
+        maximumf128,
+        maximumf16,
+        maximumf32,
+        maximumf64,
         maxnumf128,
         maxnumf16,
         maxnumf32,
@@ -1335,6 +1341,10 @@ symbols! {
         min_generic_const_args,
         min_specialization,
         min_type_alias_impl_trait,
+        minimumf128,
+        minimumf16,
+        minimumf32,
+        minimumf64,
         minnumf128,
         minnumf16,
         minnumf32,
@@ -2099,7 +2109,6 @@ symbols! {
         three_way_compare,
         thumb2,
         thumb_mode: "thumb-mode",
-        time,
         tmm_reg,
         to_owned_method,
         to_string,
@@ -2353,7 +2362,7 @@ impl Ident {
     #[inline]
     /// Constructs a new identifier from a symbol and a span.
     pub fn new(name: Symbol, span: Span) -> Ident {
-        assert_ne!(name, kw::Empty);
+        debug_assert_ne!(name, kw::Empty);
         Ident { name, span }
     }
 

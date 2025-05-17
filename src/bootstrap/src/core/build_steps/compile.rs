@@ -1827,7 +1827,7 @@ impl Step for Sysroot {
             } else if builder.download_rustc() && compiler.stage != builder.top_stage {
                 host_dir.join("ci-rustc-sysroot")
             } else {
-                host_dir.join(format!("stage{}", stage))
+                host_dir.join(format!("stage{stage}"))
             }
         };
         let sysroot = sysroot_dir(compiler.stage);

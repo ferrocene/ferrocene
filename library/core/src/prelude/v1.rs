@@ -36,6 +36,9 @@ pub use crate::mem::{align_of, align_of_val, size_of, size_of_val};
 pub use crate::clone::Clone;
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
+pub use crate::cmp::{Eq, PartialEq};
+#[stable(feature = "core_prelude", since = "1.4.0")]
+#[doc(no_inline)]
 #[cfg(feature = "uncertified")]
 pub use crate::cmp::{Eq, Ord, PartialEq, PartialOrd};
 #[stable(feature = "core_prelude", since = "1.4.0")]

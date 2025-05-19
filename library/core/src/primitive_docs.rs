@@ -8,7 +8,7 @@
 ///
 /// # Basic usage
 ///
-/// `bool` implements various traits, such as [`BitAnd`], [`BitOr`], [`Not`], etc.,
+// /// `bool` implements various traits, such as [`BitAnd`], [`BitOr`], [`Not`], etc.,
 /// which allow us to perform boolean operations using `&`, `|` and `!`.
 ///
 /// [`if`] requires a `bool` value as its conditional. [`assert!`], which is an
@@ -22,9 +22,9 @@
 ///
 /// [`true`]: ../std/keyword.true.html
 /// [`false`]: ../std/keyword.false.html
-/// [`BitAnd`]: ops::BitAnd
-/// [`BitOr`]: ops::BitOr
-/// [`Not`]: ops::Not
+// /// [`BitAnd`]: ops::BitAnd
+// /// [`BitOr`]: ops::BitOr
+// /// [`Not`]: ops::Not
 /// [`if`]: ../std/keyword.if.html
 ///
 /// # Examples
@@ -314,6 +314,7 @@ mod prim_bool {}
 /// [2024 edition]: <https://doc.rust-lang.org/nightly/edition-guide/rust-2024/index.html>
 ///
 #[unstable(feature = "never_type", issue = "35121")]
+#[cfg(feature = "uncertified")]
 mod prim_never {}
 
 #[rustc_doc_primitive = "char"]
@@ -445,6 +446,7 @@ mod prim_never {}
 /// assert_eq!(32, size_of_val(&v[..]));
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_char {}
 
 #[rustc_doc_primitive = "unit"]
@@ -486,11 +488,13 @@ mod prim_char {}
 /// ```
 ///
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_unit {}
 
 // Required to make auto trait impls render.
 // See src/librustdoc/passes/collect_trait_impls.rs:collect_trait_impls
 #[doc(hidden)]
+#[cfg(feature = "uncertified")]
 impl () {}
 
 #[rustc_doc_primitive = "pointer"]
@@ -613,6 +617,7 @@ impl () {}
 /// [`write`]: ptr::write
 /// [valid]: ptr#safety
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_pointer {}
 
 #[rustc_doc_primitive = "array"]
@@ -825,6 +830,7 @@ mod prim_pointer {}
 /// [slice pattern]: ../reference/patterns.html#slice-patterns
 /// [`From<Tuple>`]: convert::From
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_array {}
 
 #[rustc_doc_primitive = "slice"]
@@ -939,6 +945,7 @@ mod prim_array {}
 /// [`.chunks`]: slice::chunks
 /// [`.windows`]: slice::windows
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_slice {}
 
 #[rustc_doc_primitive = "str"]
@@ -1012,6 +1019,7 @@ mod prim_slice {}
 /// called on a string slice may assume that it is valid UTF-8, which means that a non-UTF-8 string
 /// slice can lead to undefined behavior down the road.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_str {}
 
 #[rustc_doc_primitive = "tuple"]
@@ -1139,11 +1147,13 @@ mod prim_str {}
 /// ```
 ///
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_tuple {}
 
 // Required to make auto trait impls render.
 // See src/librustdoc/passes/collect_trait_impls.rs:collect_trait_impls
 #[doc(hidden)]
+#[cfg(feature = "uncertified")]
 impl<T> (T,) {}
 
 #[rustc_doc_primitive = "f16"]
@@ -1164,6 +1174,7 @@ impl<T> (T,) {}
 ///
 /// [wikipedia]: https://en.wikipedia.org/wiki/Half-precision_floating-point_format
 #[unstable(feature = "f16", issue = "116909")]
+#[cfg(feature = "uncertified")]
 mod prim_f16 {}
 
 #[rustc_doc_primitive = "f32"]
@@ -1362,6 +1373,7 @@ mod prim_f16 {}
 /// ```
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_f32 {}
 
 #[rustc_doc_primitive = "f64"]
@@ -1376,6 +1388,7 @@ mod prim_f32 {}
 ///
 /// [wikipedia]: https://en.wikipedia.org/wiki/Double-precision_floating-point_format
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_f64 {}
 
 #[rustc_doc_primitive = "f128"]
@@ -1399,66 +1412,77 @@ mod prim_f64 {}
 ///
 /// [wikipedia]: https://en.wikipedia.org/wiki/Quadruple-precision_floating-point_format
 #[unstable(feature = "f128", issue = "116909")]
+#[cfg(feature = "uncertified")]
 mod prim_f128 {}
 
 #[rustc_doc_primitive = "i8"]
 //
 /// The 8-bit signed integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_i8 {}
 
 #[rustc_doc_primitive = "i16"]
 //
 /// The 16-bit signed integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_i16 {}
 
 #[rustc_doc_primitive = "i32"]
 //
 /// The 32-bit signed integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_i32 {}
 
 #[rustc_doc_primitive = "i64"]
 //
 /// The 64-bit signed integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_i64 {}
 
 #[rustc_doc_primitive = "i128"]
 //
 /// The 128-bit signed integer type.
 #[stable(feature = "i128", since = "1.26.0")]
+#[cfg(feature = "uncertified")]
 mod prim_i128 {}
 
 #[rustc_doc_primitive = "u8"]
 //
 /// The 8-bit unsigned integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_u8 {}
 
 #[rustc_doc_primitive = "u16"]
 //
 /// The 16-bit unsigned integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_u16 {}
 
 #[rustc_doc_primitive = "u32"]
 //
 /// The 32-bit unsigned integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_u32 {}
 
 #[rustc_doc_primitive = "u64"]
 //
 /// The 64-bit unsigned integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_u64 {}
 
 #[rustc_doc_primitive = "u128"]
 //
 /// The 128-bit unsigned integer type.
 #[stable(feature = "i128", since = "1.26.0")]
+#[cfg(feature = "uncertified")]
 mod prim_u128 {}
 
 #[rustc_doc_primitive = "isize"]
@@ -1469,6 +1493,7 @@ mod prim_u128 {}
 /// location in memory. For example, on a 32 bit target, this is 4 bytes
 /// and on a 64 bit target, this is 8 bytes.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_isize {}
 
 #[rustc_doc_primitive = "usize"]
@@ -1479,6 +1504,7 @@ mod prim_isize {}
 /// location in memory. For example, on a 32 bit target, this is 4 bytes
 /// and on a 64 bit target, this is 8 bytes.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_usize {}
 
 #[rustc_doc_primitive = "reference"]
@@ -1641,6 +1667,7 @@ mod prim_usize {}
 ///
 /// [allocated object]: ptr#allocated-object
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_ref {}
 
 #[rustc_doc_primitive = "fn"]
@@ -1910,9 +1937,11 @@ mod prim_ref {}
 /// In addition, all *safe* function pointers implement [`Fn`], [`FnMut`], and [`FnOnce`], because
 /// these traits are specially known to the compiler.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_fn {}
 
 // Required to make auto trait impls render.
 // See src/librustdoc/passes/collect_trait_impls.rs:collect_trait_impls
 #[doc(hidden)]
+#[cfg(feature = "uncertified")]
 impl<Ret, T> fn(T) -> Ret {}

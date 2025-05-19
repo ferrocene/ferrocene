@@ -106,7 +106,7 @@
 // #![feature(core_intrinsics)]
 // #![feature(coverage_attribute)]
 // #![feature(disjoint_bitor)]
-// #![feature(internal_impls_macro)]
+#![feature(internal_impls_macro)]
 // #![feature(ip)]
 // #![feature(is_ascii_octdigit)]
 // #![feature(lazy_get)]
@@ -242,7 +242,6 @@ pub mod contracts;
 pub use crate::macros::cfg_match;
 
 #[macro_use]
-#[cfg(feature = "uncertified")]
 mod internal_macros;
 
 #[path = "num/shells/int_macros.rs"]
@@ -340,7 +339,6 @@ pub mod ub_checks;
 #[cfg(feature = "uncertified")]
 pub mod borrow;
 pub mod clone;
-#[cfg(feature = "uncertified")]
 pub mod cmp;
 pub mod convert;
 pub mod default;
@@ -436,7 +434,6 @@ mod tuple;
 mod unit;
 
 #[stable(feature = "core_primitive", since = "1.43.0")]
-#[cfg(feature = "uncertified")]
 pub mod primitive;
 
 // Pull in the `core_arch` crate directly into core. The contents of
@@ -486,5 +483,4 @@ pub mod simd {
     pub use crate::core_simd::simd::*;
 }
 
-#[cfg(feature = "uncertified")]
 include!("primitive_docs.rs");

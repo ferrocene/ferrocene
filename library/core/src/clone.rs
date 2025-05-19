@@ -219,12 +219,10 @@ pub macro Clone($item:item) {
 /// This is similar to have a closure that you would call `.use` over each captured value.
 #[unstable(feature = "ergonomic_clones", issue = "132290")]
 #[lang = "use_cloned"]
-#[cfg(feature = "uncertified")]
 pub trait UseCloned: Clone {
     // Empty.
 }
 
-#[cfg(feature = "uncertified")]
 macro_rules! impl_use_cloned {
     ($($t:ty)*) => {
         $(
@@ -234,6 +232,7 @@ macro_rules! impl_use_cloned {
     }
 }
 
+impl_use_cloned! { bool }
 #[cfg(feature = "uncertified")]
 impl_use_cloned! {
     usize u8 u16 u32 u64 u128
@@ -507,7 +506,6 @@ unsafe impl CloneToUninit for crate::bstr::ByteStr {
 /// Implementations that cannot be described in Rust
 /// are implemented in `traits::SelectionContext::copy_clone_conditions()`
 /// in `rustc_trait_selection`.
-#[cfg(feature = "uncertified")]
 mod impls {
     macro_rules! impl_clone {
         ($($t:ty)*) => {
@@ -524,6 +522,10 @@ mod impls {
     }
 
     impl_clone! {
+        bool
+    }
+    #[cfg(feature = "uncertified")]
+    impl_clone! {
         usize u8 u16 u32 u64 u128
         isize i8 i16 i32 i64 i128
         f16 f32 f64 f128
@@ -531,6 +533,7 @@ mod impls {
     }
 
     #[unstable(feature = "never_type", issue = "35121")]
+    #[cfg(feature = "uncertified")]
     impl Clone for ! {
         #[inline]
         fn clone(&self) -> Self {
@@ -539,6 +542,7 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl<T: ?Sized> Clone for *const T {
         #[inline(always)]
         fn clone(&self) -> Self {
@@ -547,6 +551,7 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl<T: ?Sized> Clone for *mut T {
         #[inline(always)]
         fn clone(&self) -> Self {
@@ -556,6 +561,7 @@ mod impls {
 
     /// Shared references can be cloned, but mutable references *cannot*!
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl<T: ?Sized> Clone for &T {
         #[inline(always)]
         #[rustc_diagnostic_item = "noop_method_clone"]
@@ -566,5 +572,6 @@ mod impls {
 
     /// Shared references can be cloned, but mutable references *cannot*!
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl<T: ?Sized> !Clone for &mut T {}
 }

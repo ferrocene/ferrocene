@@ -997,7 +997,7 @@ checksum = "f46ad14479a25103f283c0f10005961cf086d8dc42205bb44c46ac563475dca6"
 
 [[package]]
 name = "clippy"
-version = "0.1.88"
+version = "0.1.89"
 dependencies = [
  "anstream",
  "askama 0.13.1",
@@ -1029,7 +1029,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_config"
-version = "0.1.88"
+version = "0.1.89"
 dependencies = [
  "clippy_utils",
  "itertools",
@@ -1054,7 +1054,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_lints"
-version = "0.1.88"
+version = "0.1.89"
 dependencies = [
  "arrayvec",
  "cargo_metadata 0.18.1",
@@ -1084,7 +1084,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_utils"
-version = "0.1.88"
+version = "0.1.89"
 dependencies = [
  "arrayvec",
  "itertools",
@@ -1199,7 +1199,7 @@ dependencies = [
  "tracing-subscriber",
  "unified-diff",
  "walkdir",
- "windows 0.59.0",
+ "windows",
 ]
 
 [[package]]
@@ -2346,7 +2346,7 @@ dependencies = [
  "js-sys",
  "log",
  "wasm-bindgen",
- "windows-core 0.61.1",
+ "windows-core",
 ]
 
 [[package]]
@@ -4313,6 +4313,7 @@ version = "0.0.0"
 dependencies = [
  "rustc_ast",
  "rustc_ast_pretty",
+ "rustc_attr_data_structures",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -4347,7 +4348,7 @@ dependencies = [
  "rustc-demangle",
  "rustc_abi",
  "rustc_ast",
- "rustc_attr_parsing",
+ "rustc_attr_data_structures",
  "rustc_codegen_ssa",
  "rustc_data_structures",
  "rustc_errors",
@@ -4390,6 +4391,7 @@ dependencies = [
  "rustc_abi",
  "rustc_arena",
  "rustc_ast",
+ "rustc_attr_data_structures",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -4416,7 +4418,7 @@ dependencies = [
  "thorin-dwp",
  "tracing",
  "wasm-encoder 0.219.2",
- "windows 0.59.0",
+ "windows",
 ]
 
 [[package]]
@@ -4427,7 +4429,7 @@ dependencies = [
  "rustc_abi",
  "rustc_apfloat",
  "rustc_ast",
- "rustc_attr_parsing",
+ "rustc_attr_data_structures",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -4475,7 +4477,7 @@ dependencies = [
  "tempfile",
  "thin-vec",
  "tracing",
- "windows 0.59.0",
+ "windows",
 ]
 
 [[package]]
@@ -4538,7 +4540,7 @@ dependencies = [
  "shlex",
  "stable_mir",
  "tracing",
- "windows 0.59.0",
+ "windows",
 ]
 
 [[package]]
@@ -4593,7 +4595,7 @@ dependencies = [
  "termcolor",
  "termize",
  "tracing",
- "windows 0.59.0",
+ "windows",
 ]
 
 [[package]]
@@ -4603,6 +4605,7 @@ dependencies = [
  "rustc_ast",
  "rustc_ast_passes",
  "rustc_ast_pretty",
+ "rustc_attr_data_structures",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -4691,7 +4694,7 @@ dependencies = [
  "rustc_abi",
  "rustc_arena",
  "rustc_ast",
- "rustc_attr_parsing",
+ "rustc_attr_data_structures",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_feature",
@@ -4728,7 +4731,7 @@ dependencies = [
  "itertools",
  "rustc_abi",
  "rustc_ast",
- "rustc_attr_parsing",
+ "rustc_attr_data_structures",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -4873,6 +4876,7 @@ dependencies = [
  "rustc_abi",
  "rustc_ast",
  "rustc_ast_pretty",
+ "rustc_attr_data_structures",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -4946,6 +4950,7 @@ dependencies = [
  "odht",
  "rustc_abi",
  "rustc_ast",
+ "rustc_attr_data_structures",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -5059,7 +5064,7 @@ dependencies = [
  "rustc_abi",
  "rustc_arena",
  "rustc_ast",
- "rustc_attr_parsing",
+ "rustc_attr_data_structures",
  "rustc_const_eval",
  "rustc_data_structures",
  "rustc_errors",
@@ -5085,7 +5090,7 @@ version = "0.0.0"
 dependencies = [
  "rustc_abi",
  "rustc_ast",
- "rustc_attr_parsing",
+ "rustc_attr_data_structures",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -5155,7 +5160,7 @@ dependencies = [
  "rustc_ast",
  "rustc_ast_lowering",
  "rustc_ast_pretty",
- "rustc_attr_parsing",
+ "rustc_attr_data_structures",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_expand",
@@ -5201,7 +5206,7 @@ name = "rustc_privacy"
 version = "0.0.0"
 dependencies = [
  "rustc_ast",
- "rustc_attr_parsing",
+ "rustc_attr_data_structures",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -5338,7 +5343,7 @@ dependencies = [
  "smallvec",
  "termize",
  "tracing",
- "windows 0.59.0",
+ "windows",
 ]
 
 [[package]]
@@ -6168,7 +6173,7 @@ dependencies = [
  "libc",
  "objc2-core-foundation",
  "objc2-io-kit",
- "windows 0.61.1",
+ "windows",
 ]
 
 [[package]]
@@ -7229,22 +7234,12 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 
 [[package]]
 name = "windows"
-version = "0.59.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f919aee0a93304be7f62e8e5027811bbba96bcb1de84d6618be56e43f8a32a1"
-dependencies = [
- "windows-core 0.59.0",
- "windows-targets 0.53.0",
-]
-
-[[package]]
-name = "windows"
 version = "0.61.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c5ee8f3d025738cb02bad7868bbb5f8a6327501e870bf51f1b455b0a2454a419"
 dependencies = [
  "windows-collections",
- "windows-core 0.61.1",
+ "windows-core",
  "windows-future",
  "windows-link",
  "windows-numerics",
@@ -7267,20 +7262,7 @@ version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3beeceb5e5cfd9eb1d76b381630e82c4241ccd0d27f1a39ed41b2760b255c5e8"
 dependencies = [
- "windows-core 0.61.1",
-]
-
-[[package]]
-name = "windows-core"
-version = "0.59.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "810ce18ed2112484b0d4e15d022e5f598113e220c53e373fb31e67e21670c1ce"
-dependencies = [
- "windows-implement 0.59.0",
- "windows-interface",
- "windows-result",
- "windows-strings 0.3.1",
- "windows-targets 0.53.0",
+ "windows-core",
 ]
 
 [[package]]
@@ -7289,11 +7271,11 @@ version = "0.61.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "46ec44dc15085cea82cf9c78f85a9114c463a369786585ad2882d1ff0b0acf40"
 dependencies = [
- "windows-implement 0.60.0",
+ "windows-implement",
  "windows-interface",
  "windows-link",
  "windows-result",
- "windows-strings 0.4.1",
+ "windows-strings",
 ]
 
 [[package]]
@@ -7302,20 +7284,9 @@ version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc6a41e98427b19fe4b73c550f060b59fa592d7d686537eebf9385621bfbad8e"
 dependencies = [
- "windows-core 0.61.1",
+ "windows-core",
  "windows-link",
  "windows-threading",
-]
-
-[[package]]
-name = "windows-implement"
-version = "0.59.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83577b051e2f49a058c308f17f273b570a6a758386fc291b5f6a934dd84e48c1"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.101",
 ]
 
 [[package]]
@@ -7352,7 +7323,7 @@ version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9150af68066c4c5c07ddc0ce30421554771e528bde427614c61038bc2c92c2b1"
 dependencies = [
- "windows-core 0.61.1",
+ "windows-core",
  "windows-link",
 ]
 
@@ -7361,15 +7332,6 @@ name = "windows-result"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4b895b5356fc36103d0f64dd1e94dfa7ac5633f1c9dd6e80fe9ec4adef69e09d"
-dependencies = [
- "windows-link",
-]
-
-[[package]]
-name = "windows-strings"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87fa48cc5d406560701792be122a10132491cff9d0aeb23583cc2dcafc847319"
 dependencies = [
  "windows-link",
 ]

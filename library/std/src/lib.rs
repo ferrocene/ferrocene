@@ -287,6 +287,7 @@
 #![feature(cfi_encoding)]
 #![feature(char_max_len)]
 #![feature(concat_idents)]
+#![feature(core_float_math)]
 #![feature(decl_macro)]
 #![feature(deprecated_suggestion)]
 #![feature(doc_cfg)]
@@ -304,7 +305,6 @@
 #![feature(iter_advance_by)]
 #![feature(iter_next_chunk)]
 #![feature(lang_items)]
-#![feature(let_chains)]
 #![feature(link_cfg)]
 #![feature(linkage)]
 #![feature(macro_metavar_expr_concat)]
@@ -325,6 +325,7 @@
 #![feature(try_blocks)]
 #![feature(try_trait_v2)]
 #![feature(type_alias_impl_trait)]
+#![feature(unsigned_signed_diff)]
 // tidy-alphabetical-end
 //
 // Library features (core):

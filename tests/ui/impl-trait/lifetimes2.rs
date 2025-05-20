@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 //@ check-pass
 
 pub fn keys<'a>(x: &'a Result<u32, u32>) -> impl std::fmt::Debug + 'a {

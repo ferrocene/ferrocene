@@ -38,7 +38,6 @@ mod rt;
 /// Possible alignments returned by `Formatter::align`
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub enum Alignment {
     #[stable(feature = "fmt_flags_align", since = "1.28.0")]
     /// Indication that contents should be left-aligned.
@@ -123,7 +122,6 @@ pub type Result = result::Result<(), Error>;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub struct Error;
 
 /// A trait for writing or formatting into Unicode-accepting buffers or streams.
@@ -281,7 +279,6 @@ impl<W: Write + ?Sized> Write for &mut W {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[unstable(feature = "formatting_options", issue = "118117")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub enum Sign {
     /// Represents the `+` flag.
     Plus,
@@ -294,7 +291,6 @@ pub enum Sign {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[unstable(feature = "formatting_options", issue = "118117")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub enum DebugAsHex {
     /// Use lower-case hexadecimal integers for the `Debug` trait (like [the `x?` type](../../std/fmt/index.html#formatting-traits)).
     Lower,
@@ -309,7 +305,6 @@ pub enum DebugAsHex {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[unstable(feature = "formatting_options", issue = "118117")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub struct FormattingOptions {
     /// Flags, with the following bit fields:
     ///
@@ -599,7 +594,6 @@ impl Default for FormattingOptions {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Formatter"]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub struct Formatter<'a> {
     options: FormattingOptions,
 
@@ -654,7 +648,6 @@ impl<'a> Formatter<'a> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Copy, Clone)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub struct Arguments<'a> {
     // Format string pieces to print.
     pieces: &'a [&'static str],

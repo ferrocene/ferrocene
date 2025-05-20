@@ -208,7 +208,6 @@ pub use self::function::{Fn, FnMut, FnOnce};
 #[cfg(feature = "uncertified")]
 pub use self::index::{Index, IndexMut};
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub(crate) use self::index_range::IndexRange;
 #[unstable(feature = "range_into_bounds", issue = "136903")]
 #[cfg(feature = "uncertified")]
@@ -229,7 +228,6 @@ pub use self::try_trait::Residual;
 #[cfg(feature = "uncertified")]
 pub use self::try_trait::Yeet;
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub(crate) use self::try_trait::{ChangeOutputType, NeverShortCircuit};
 #[unstable(feature = "try_trait_v2", issue = "84277")]
 #[cfg(feature = "uncertified")]

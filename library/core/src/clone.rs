@@ -254,7 +254,6 @@ impl_use_cloned! {
     issue = "none"
 )]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub struct AssertParamIsClone<T: Clone + ?Sized> {
     _field: crate::marker::PhantomData<T>,
 }
@@ -266,7 +265,6 @@ pub struct AssertParamIsClone<T: Clone + ?Sized> {
     issue = "none"
 )]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub struct AssertParamIsCopy<T: Copy + ?Sized> {
     _field: crate::marker::PhantomData<T>,
 }

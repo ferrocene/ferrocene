@@ -29,7 +29,6 @@
 #[coverage(off)]
 mod bytewise;
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub(crate) use bytewise::BytewiseEq;
 
 #[cfg(feature = "uncertified")]
@@ -368,7 +367,6 @@ pub macro Eq($item:item) {
 #[allow(missing_debug_implementations)]
 #[unstable(feature = "derive_eq", reason = "deriving hack, should not be public", issue = "none")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub struct AssertParamIsEq<T: Eq + ?Sized> {
     _field: crate::marker::PhantomData<T>,
 }
@@ -394,7 +392,6 @@ pub struct AssertParamIsEq<T: Eq + ?Sized> {
 #[lang = "Ordering"]
 #[repr(i8)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub enum Ordering {
     /// An ordering where a compared value is less than another.
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -672,7 +669,6 @@ impl Ordering {
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
 #[repr(transparent)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub struct Reverse<T>(#[stable(feature = "reverse_cmp_key", since = "1.19.0")] pub T);
 
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]

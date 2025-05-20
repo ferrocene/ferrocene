@@ -2494,7 +2494,6 @@ unsafe impl<A> TrustedLen for IterMut<'_, A> {}
 #[derive(Clone, Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub struct IntoIter<A> {
     inner: Item<A>,
 }

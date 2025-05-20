@@ -805,7 +805,6 @@ impl<T: ?Sized> !Sync for *mut T {}
 #[lang = "phantom_data"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub struct PhantomData<T: ?Sized>;
 
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -1049,7 +1048,6 @@ pub auto trait Unpin {}
 #[stable(feature = "pin", since = "1.33.0")]
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub struct PhantomPinned;
 
 #[stable(feature = "pin", since = "1.33.0")]

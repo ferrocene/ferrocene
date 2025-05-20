@@ -23,7 +23,7 @@ use crate::core::builder::{
 };
 use crate::core::config::TargetSelection;
 use crate::core::config::flags::{FerroceneCoverageFor, Subcommand, get_completion};
-use crate::ferrocene::code_coverage::measure_coverage;
+use crate::ferrocene::code_coverage::{instrument_coverage, measure_coverage};
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::ferrocene::test_variants::{TestVariant, VariantCondition};
 use crate::utils::build_stamp::{self, BuildStamp};
@@ -2782,6 +2782,10 @@ impl Step for Crate {
         };
 
         if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
+            if coverage_for == FerroceneCoverageFor::Library {
+                instrument_coverage(builder, &mut cargo);
+            }
+
             measure_coverage(builder, cargo.as_mut(), compiler, target, coverage_for);
             cargo.rustflag("--cfg=ferrocene_coverage");
         }

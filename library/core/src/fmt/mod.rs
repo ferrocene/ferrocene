@@ -144,7 +144,6 @@ pub struct Error;
 /// [flushable]: ../../std/io/trait.Write.html#tymethod.flush
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait Write {
     /// Writes a string slice into this writer, returning whether the write
     /// succeeded.
@@ -931,7 +930,6 @@ impl Display for Arguments<'_> {
 #[rustc_diagnostic_item = "Debug"]
 #[rustc_trivial_field_reads]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait Debug {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     ///
@@ -1054,7 +1052,6 @@ pub use macros::Debug;
 #[rustc_diagnostic_item = "Display"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait Display {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     ///
@@ -1132,7 +1129,6 @@ pub trait Display {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait Octal {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1193,7 +1189,6 @@ pub trait Octal {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait Binary {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1250,7 +1245,6 @@ pub trait Binary {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait LowerHex {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1307,7 +1301,6 @@ pub trait LowerHex {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait UpperHex {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1368,7 +1361,6 @@ pub trait UpperHex {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Pointer"]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait Pointer {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1421,7 +1413,6 @@ pub trait Pointer {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait LowerExp {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1474,7 +1465,6 @@ pub trait LowerExp {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait UpperExp {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -2733,7 +2723,6 @@ impl Display for Error {
 // Implementations of the core formatting traits
 
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! fmt_refs {
     ($($tr:ident),*) => {
         $(
@@ -2977,13 +2966,11 @@ impl<T: ?Sized> Debug for *mut T {
 }
 
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! peel {
     ($name:ident, $($other:ident,)*) => (tuple! { $($other,)* })
 }
 
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! tuple {
     () => ();
     ( $($name:ident,)+ ) => (
@@ -3008,7 +2995,6 @@ macro_rules! tuple {
 }
 
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! maybe_tuple_doc {
     ($a:ident @ #[$meta:meta] $item:item) => {
         #[doc(fake_variadic)]
@@ -3024,7 +3010,6 @@ macro_rules! maybe_tuple_doc {
 }
 
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! last_type {
     ($a:ident,) => { $a };
     ($a:ident, $($rest_a:ident,)+) => { last_type!($($rest_a,)+) };

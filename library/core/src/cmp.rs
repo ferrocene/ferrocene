@@ -977,7 +977,6 @@ impl<T: Clone> Clone for Reverse<T> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Ord"]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait Ord: Eq + PartialOrd<Self> {
     /// This method returns an [`Ordering`] between `self` and `other`.
     ///
@@ -1366,7 +1365,6 @@ pub macro Ord($item:item) {
 )]
 #[rustc_diagnostic_item = "PartialOrd"]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
     /// This method returns an ordering between `self` and `other` values if one exists.
     ///

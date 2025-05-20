@@ -5,7 +5,6 @@
 #[stable(feature = "core", since = "1.6.0")]
 #[rustc_diagnostic_item = "core_panic_macro"]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! panic {
     // Expands to either `$crate::panic::panic_2015` or `$crate::panic::panic_2021`
     // depending on the edition of the caller.
@@ -42,7 +41,6 @@ macro_rules! panic {
 #[rustc_diagnostic_item = "assert_eq_macro"]
 #[allow_internal_unstable(panic_internals)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! assert_eq {
     ($left:expr, $right:expr $(,)?) => {
         match (&$left, &$right) {
@@ -100,7 +98,6 @@ macro_rules! assert_eq {
 #[rustc_diagnostic_item = "assert_ne_macro"]
 #[allow_internal_unstable(panic_internals)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! assert_ne {
     ($left:expr, $right:expr $(,)?) => {
         match (&$left, &$right) {
@@ -314,7 +311,6 @@ pub macro cfg_match {
 #[rustc_diagnostic_item = "debug_assert_macro"]
 #[allow_internal_unstable(edition_panic)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! debug_assert {
     ($($arg:tt)*) => {
         if $crate::cfg!(debug_assertions) {
@@ -346,7 +342,6 @@ macro_rules! debug_assert {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "debug_assert_eq_macro"]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! debug_assert_eq {
     ($($arg:tt)*) => {
         if $crate::cfg!(debug_assertions) {
@@ -378,7 +373,6 @@ macro_rules! debug_assert_eq {
 #[stable(feature = "assert_ne", since = "1.13.0")]
 #[rustc_diagnostic_item = "debug_assert_ne_macro"]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! debug_assert_ne {
     ($($arg:tt)*) => {
         if $crate::cfg!(debug_assertions) {
@@ -538,7 +532,6 @@ macro_rules! matches {
 #[deprecated(since = "1.39.0", note = "use the `?` operator instead")]
 #[doc(alias = "?")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! r#try {
     ($expr:expr $(,)?) => {
         match $expr {
@@ -640,7 +633,6 @@ macro_rules! r#try {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "write_macro"]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! write {
     ($dst:expr, $($arg:tt)*) => {
         $dst.write_fmt($crate::format_args!($($arg)*))
@@ -677,7 +669,6 @@ macro_rules! write {
 #[rustc_diagnostic_item = "writeln_macro"]
 #[allow_internal_unstable(format_args_nl)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! writeln {
     ($dst:expr $(,)?) => {
         $crate::write!($dst, "\n")
@@ -745,7 +736,6 @@ macro_rules! writeln {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "unreachable_macro"]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! unreachable {
     // Expands to either `$crate::panic::unreachable_2015` or `$crate::panic::unreachable_2021`
     // depending on the edition of the caller.
@@ -833,7 +823,6 @@ macro_rules! unreachable {
 #[rustc_diagnostic_item = "unimplemented_macro"]
 #[allow_internal_unstable(panic_internals)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! unimplemented {
     () => {
         $crate::panicking::panic("not implemented")
@@ -915,7 +904,6 @@ macro_rules! unimplemented {
 #[rustc_diagnostic_item = "todo_macro"]
 #[allow_internal_unstable(panic_internals)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! todo {
     () => {
         $crate::panicking::panic("not yet implemented")

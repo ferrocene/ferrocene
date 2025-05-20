@@ -152,7 +152,6 @@ pub macro Default($item:item) {
 }
 
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 macro_rules! default_impl {
     ($t:ty, $v:expr, $doc:tt) => {
         #[stable(feature = "rust1", since = "1.0.0")]

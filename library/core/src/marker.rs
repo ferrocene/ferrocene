@@ -229,7 +229,6 @@ pub trait Unsize<T: ?Sized> {
 #[diagnostic::on_unimplemented(message = "the type `{Self}` does not `#[derive(PartialEq)]`")]
 #[lang = "structural_peq"]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait StructuralPartialEq {
     // Empty.
 }
@@ -506,7 +505,6 @@ impl<T: ?Sized> Copy for &T {}
 #[rustc_do_not_implement_via_object]
 #[doc(hidden)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait BikeshedGuaranteedNoDrop {}
 
 /// Types for which it is safe to share references between threads.
@@ -901,7 +899,6 @@ impl<T: ?Sized> StructuralPartialEq for PhantomData<T> {}
 #[rustc_deny_explicit_impl]
 #[rustc_do_not_implement_via_object]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait DiscriminantKind {
     /// The type of the discriminant, which must satisfy the trait
     /// bounds required by `mem::Discriminant`.
@@ -1135,7 +1132,6 @@ pub trait Tuple {}
 )]
 #[rustc_do_not_implement_via_object]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait PointerLike {}
 
 #[cfg(feature = "uncertified")]
@@ -1166,7 +1162,6 @@ marker_impls! {
 // be used independently of `unsized_const_params` without requiring a full path
 // to the derive macro every time it is used. This should be renamed on stabilization.
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait ConstParamTy_: UnsizedConstParamTy + StructuralPartialEq + Eq {}
 
 /// Derive macro generating an impl of the trait `ConstParamTy`.
@@ -1244,7 +1239,6 @@ marker_impls! {
 #[rustc_deny_explicit_impl]
 #[rustc_do_not_implement_via_object]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait FnPtr: Copy + Clone {
     /// Returns the address of the function pointer.
     #[lang = "fn_ptr_addr"]
@@ -1460,7 +1454,6 @@ pub macro CoercePointee($item:item) {
 #[unstable(feature = "coerce_pointee_validated", issue = "none")]
 #[doc(hidden)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub trait CoercePointeeValidated {
     /* compiler built-in */
 }

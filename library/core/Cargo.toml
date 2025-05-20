@@ -21,7 +21,7 @@ test = false
 bench = false
 
 [features]
-# default = ["uncertified"]
+default = ["uncertified"]
 
 # Ferrocene addition: only add the explicit dependency to profiler_builtins when we are building
 # core specifically for profiling.

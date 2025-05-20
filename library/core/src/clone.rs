@@ -232,6 +232,7 @@ macro_rules! impl_use_cloned {
     }
 }
 
+#[cfg(not(feature = "uncertified"))]
 impl_use_cloned! { bool }
 #[cfg(feature = "uncertified")]
 #[coverage(off)]
@@ -527,6 +528,7 @@ mod impls {
         }
     }
 
+    #[cfg(not(feature = "uncertified"))]
     impl_clone! {
         bool
     }

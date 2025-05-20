@@ -65,6 +65,7 @@ macro_rules! not_impl {
     )*)
 }
 
+#[cfg(not(feature = "uncertified"))]
 not_impl! { bool }
 #[cfg(feature = "uncertified")]
 #[coverage(off)]

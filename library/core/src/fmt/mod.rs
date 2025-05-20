@@ -83,7 +83,6 @@ pub use self::builders::{FromFn, from_fn};
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub type Result = result::Result<(), Error>;
 
 /// The error type which is returned from formatting a message into a stream.
@@ -1580,7 +1579,6 @@ unsafe fn getcount(args: &[rt::Argument<'_>], cnt: &rt::Count) -> u16 {
 /// Padding after the end of something. Returned by `Formatter::padding`.
 #[must_use = "don't forget to write the post padding"]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub(crate) struct PostPadding {
     fill: char,
     padding: u16,

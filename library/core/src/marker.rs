@@ -461,6 +461,8 @@ marker_impls! {
 
 }
 
+
+#[cfg(not(feature = "uncertified"))]
 marker_impls! {
     #[stable(feature = "rust1", since = "1.0.0")]
     Copy for
@@ -941,7 +943,6 @@ marker_impls! {
 #[cfg_attr(not(bootstrap), lang = "unsafe_unpin")]
 #[cfg_attr(bootstrap, allow(dead_code))]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub(crate) unsafe auto trait UnsafeUnpin {}
 
 #[cfg(feature = "uncertified")]
@@ -1034,7 +1035,6 @@ unsafe impl<T: ?Sized> UnsafeUnpin for &mut T {}
 )]
 #[lang = "unpin"]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub auto trait Unpin {}
 
 /// A marker type which does not implement `Unpin`.
@@ -1168,7 +1168,6 @@ pub macro ConstParamTy($item:item) {
 #[unstable(feature = "unsized_const_params", issue = "95174")]
 #[diagnostic::on_unimplemented(message = "`{Self}` can't be used as a const parameter type")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 /// A marker for types which can be used as types of `const` generic parameters.
 ///
 /// Equivalent to [`ConstParamTy_`] except that this is used by

@@ -1874,6 +1874,7 @@ mod impls {
         }
     }
 
+    #[cfg(not(feature = "uncertified"))]
     partial_eq_impl! { bool }
     #[cfg(feature = "uncertified")]
     #[coverage(off)]
@@ -1888,6 +1889,7 @@ mod impls {
         )*)
     }
 
+    #[cfg(not(feature = "uncertified"))]
     eq_impl! { bool }
     #[cfg(feature = "uncertified")]
     #[coverage(off)]
@@ -1895,7 +1897,6 @@ mod impls {
 
     #[rustfmt::skip]
     #[cfg(feature = "uncertified")]
-    #[coverage(off)]
     macro_rules! partial_ord_methods_primitive_impl {
         () => {
             #[inline(always)]
@@ -1935,7 +1936,6 @@ mod impls {
     }
 
     #[cfg(feature = "uncertified")]
-    #[coverage(off)]
     macro_rules! partial_ord_impl {
         ($($t:ty)*) => ($(
             #[stable(feature = "rust1", since = "1.0.0")]
@@ -1982,7 +1982,6 @@ mod impls {
     partial_ord_impl! { f16 f32 f64 f128 }
 
     #[cfg(feature = "uncertified")]
-    #[coverage(off)]
     macro_rules! ord_impl {
         ($($t:ty)*) => ($(
             #[stable(feature = "rust1", since = "1.0.0")]

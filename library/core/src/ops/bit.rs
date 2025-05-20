@@ -67,10 +67,12 @@ macro_rules! not_impl {
 
 not_impl! { bool }
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 not_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
 #[stable(feature = "not_never", since = "1.60.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 impl Not for ! {
     type Output = !;
 
@@ -145,6 +147,7 @@ impl Not for ! {
     label = "no implementation for `{Self} & {Rhs}`"
 )]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub trait BitAnd<Rhs = Self> {
     /// The resulting type after applying the `&` operator.
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -166,6 +169,7 @@ pub trait BitAnd<Rhs = Self> {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 macro_rules! bitand_impl {
     ($($t:ty)*) => ($(
         #[stable(feature = "rust1", since = "1.0.0")]
@@ -181,6 +185,7 @@ macro_rules! bitand_impl {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 bitand_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
 /// The bitwise OR operator `|`.
@@ -248,6 +253,7 @@ bitand_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
     label = "no implementation for `{Self} | {Rhs}`"
 )]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub trait BitOr<Rhs = Self> {
     /// The resulting type after applying the `|` operator.
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -269,6 +275,7 @@ pub trait BitOr<Rhs = Self> {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 macro_rules! bitor_impl {
     ($($t:ty)*) => ($(
         #[stable(feature = "rust1", since = "1.0.0")]
@@ -284,6 +291,7 @@ macro_rules! bitor_impl {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 bitor_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
 /// The bitwise XOR operator `^`.
@@ -351,6 +359,7 @@ bitor_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
     label = "no implementation for `{Self} ^ {Rhs}`"
 )]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub trait BitXor<Rhs = Self> {
     /// The resulting type after applying the `^` operator.
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -372,6 +381,7 @@ pub trait BitXor<Rhs = Self> {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 macro_rules! bitxor_impl {
     ($($t:ty)*) => ($(
         #[stable(feature = "rust1", since = "1.0.0")]
@@ -387,6 +397,7 @@ macro_rules! bitxor_impl {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 bitxor_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
 /// The left shift operator `<<`. Note that because this trait is implemented
@@ -453,6 +464,7 @@ bitxor_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
     label = "no implementation for `{Self} << {Rhs}`"
 )]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub trait Shl<Rhs = Self> {
     /// The resulting type after applying the `<<` operator.
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -472,6 +484,7 @@ pub trait Shl<Rhs = Self> {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 macro_rules! shl_impl {
     ($t:ty, $f:ty) => {
         #[stable(feature = "rust1", since = "1.0.0")]
@@ -490,6 +503,7 @@ macro_rules! shl_impl {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 macro_rules! shl_impl_all {
     ($($t:ty)*) => ($(
         shl_impl! { $t, u8 }
@@ -509,6 +523,7 @@ macro_rules! shl_impl_all {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 shl_impl_all! { u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize }
 
 /// The right shift operator `>>`. Note that because this trait is implemented
@@ -575,6 +590,7 @@ shl_impl_all! { u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize }
     label = "no implementation for `{Self} >> {Rhs}`"
 )]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub trait Shr<Rhs = Self> {
     /// The resulting type after applying the `>>` operator.
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -594,6 +610,7 @@ pub trait Shr<Rhs = Self> {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 macro_rules! shr_impl {
     ($t:ty, $f:ty) => {
         #[stable(feature = "rust1", since = "1.0.0")]
@@ -612,6 +629,7 @@ macro_rules! shr_impl {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 macro_rules! shr_impl_all {
     ($($t:ty)*) => ($(
         shr_impl! { $t, u8 }
@@ -631,6 +649,7 @@ macro_rules! shr_impl_all {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 shr_impl_all! { u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize }
 
 /// The bitwise AND assignment operator `&=`.
@@ -706,6 +725,7 @@ shr_impl_all! { u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize }
     label = "no implementation for `{Self} &= {Rhs}`"
 )]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub trait BitAndAssign<Rhs = Self> {
     /// Performs the `&=` operation.
     ///
@@ -733,6 +753,7 @@ pub trait BitAndAssign<Rhs = Self> {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 macro_rules! bitand_assign_impl {
     ($($t:ty)+) => ($(
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
@@ -746,6 +767,7 @@ macro_rules! bitand_assign_impl {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 bitand_assign_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
 /// The bitwise OR assignment operator `|=`.
@@ -780,6 +802,7 @@ bitand_assign_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
     label = "no implementation for `{Self} |= {Rhs}`"
 )]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub trait BitOrAssign<Rhs = Self> {
     /// Performs the `|=` operation.
     ///
@@ -807,6 +830,7 @@ pub trait BitOrAssign<Rhs = Self> {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 macro_rules! bitor_assign_impl {
     ($($t:ty)+) => ($(
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
@@ -820,6 +844,7 @@ macro_rules! bitor_assign_impl {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 bitor_assign_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
 /// The bitwise XOR assignment operator `^=`.
@@ -854,6 +879,7 @@ bitor_assign_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
     label = "no implementation for `{Self} ^= {Rhs}`"
 )]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub trait BitXorAssign<Rhs = Self> {
     /// Performs the `^=` operation.
     ///
@@ -881,6 +907,7 @@ pub trait BitXorAssign<Rhs = Self> {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 macro_rules! bitxor_assign_impl {
     ($($t:ty)+) => ($(
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
@@ -894,6 +921,7 @@ macro_rules! bitxor_assign_impl {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 bitxor_assign_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
 /// The left shift assignment operator `<<=`.
@@ -926,6 +954,7 @@ bitxor_assign_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
     label = "no implementation for `{Self} <<= {Rhs}`"
 )]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub trait ShlAssign<Rhs = Self> {
     /// Performs the `<<=` operation.
     ///
@@ -945,6 +974,7 @@ pub trait ShlAssign<Rhs = Self> {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 macro_rules! shl_assign_impl {
     ($t:ty, $f:ty) => {
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
@@ -961,6 +991,7 @@ macro_rules! shl_assign_impl {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 macro_rules! shl_assign_impl_all {
     ($($t:ty)*) => ($(
         shl_assign_impl! { $t, u8 }
@@ -980,6 +1011,7 @@ macro_rules! shl_assign_impl_all {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 shl_assign_impl_all! { u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize }
 
 /// The right shift assignment operator `>>=`.
@@ -1012,6 +1044,7 @@ shl_assign_impl_all! { u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize }
     label = "no implementation for `{Self} >>= {Rhs}`"
 )]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub trait ShrAssign<Rhs = Self> {
     /// Performs the `>>=` operation.
     ///
@@ -1031,6 +1064,7 @@ pub trait ShrAssign<Rhs = Self> {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 macro_rules! shr_assign_impl {
     ($t:ty, $f:ty) => {
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
@@ -1047,6 +1081,7 @@ macro_rules! shr_assign_impl {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 macro_rules! shr_assign_impl_all {
     ($($t:ty)*) => ($(
         shr_assign_impl! { $t, u8 }
@@ -1066,4 +1101,5 @@ macro_rules! shr_assign_impl_all {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 shr_assign_impl_all! { u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize }

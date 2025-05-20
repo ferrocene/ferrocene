@@ -315,6 +315,7 @@ mod prim_bool {}
 ///
 #[unstable(feature = "never_type", issue = "35121")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_never {}
 
 #[rustc_doc_primitive = "char"]
@@ -447,6 +448,7 @@ mod prim_never {}
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_char {}
 
 #[rustc_doc_primitive = "unit"]
@@ -489,12 +491,14 @@ mod prim_char {}
 ///
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_unit {}
 
 // Required to make auto trait impls render.
 // See src/librustdoc/passes/collect_trait_impls.rs:collect_trait_impls
 #[doc(hidden)]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 impl () {}
 
 #[rustc_doc_primitive = "pointer"]
@@ -618,6 +622,7 @@ impl () {}
 /// [valid]: ptr#safety
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_pointer {}
 
 #[rustc_doc_primitive = "array"]
@@ -831,6 +836,7 @@ mod prim_pointer {}
 /// [`From<Tuple>`]: convert::From
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_array {}
 
 #[rustc_doc_primitive = "slice"]
@@ -946,6 +952,7 @@ mod prim_array {}
 /// [`.windows`]: slice::windows
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_slice {}
 
 #[rustc_doc_primitive = "str"]
@@ -1020,6 +1027,7 @@ mod prim_slice {}
 /// slice can lead to undefined behavior down the road.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_str {}
 
 #[rustc_doc_primitive = "tuple"]
@@ -1148,12 +1156,14 @@ mod prim_str {}
 ///
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_tuple {}
 
 // Required to make auto trait impls render.
 // See src/librustdoc/passes/collect_trait_impls.rs:collect_trait_impls
 #[doc(hidden)]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 impl<T> (T,) {}
 
 #[rustc_doc_primitive = "f16"]
@@ -1175,6 +1185,7 @@ impl<T> (T,) {}
 /// [wikipedia]: https://en.wikipedia.org/wiki/Half-precision_floating-point_format
 #[unstable(feature = "f16", issue = "116909")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_f16 {}
 
 #[rustc_doc_primitive = "f32"]
@@ -1374,6 +1385,7 @@ mod prim_f16 {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_f32 {}
 
 #[rustc_doc_primitive = "f64"]
@@ -1389,6 +1401,7 @@ mod prim_f32 {}
 /// [wikipedia]: https://en.wikipedia.org/wiki/Double-precision_floating-point_format
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_f64 {}
 
 #[rustc_doc_primitive = "f128"]
@@ -1413,6 +1426,7 @@ mod prim_f64 {}
 /// [wikipedia]: https://en.wikipedia.org/wiki/Quadruple-precision_floating-point_format
 #[unstable(feature = "f128", issue = "116909")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_f128 {}
 
 #[rustc_doc_primitive = "i8"]
@@ -1420,6 +1434,7 @@ mod prim_f128 {}
 /// The 8-bit signed integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_i8 {}
 
 #[rustc_doc_primitive = "i16"]
@@ -1427,6 +1442,7 @@ mod prim_i8 {}
 /// The 16-bit signed integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_i16 {}
 
 #[rustc_doc_primitive = "i32"]
@@ -1434,6 +1450,7 @@ mod prim_i16 {}
 /// The 32-bit signed integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_i32 {}
 
 #[rustc_doc_primitive = "i64"]
@@ -1441,6 +1458,7 @@ mod prim_i32 {}
 /// The 64-bit signed integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_i64 {}
 
 #[rustc_doc_primitive = "i128"]
@@ -1448,6 +1466,7 @@ mod prim_i64 {}
 /// The 128-bit signed integer type.
 #[stable(feature = "i128", since = "1.26.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_i128 {}
 
 #[rustc_doc_primitive = "u8"]
@@ -1455,6 +1474,7 @@ mod prim_i128 {}
 /// The 8-bit unsigned integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_u8 {}
 
 #[rustc_doc_primitive = "u16"]
@@ -1462,6 +1482,7 @@ mod prim_u8 {}
 /// The 16-bit unsigned integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_u16 {}
 
 #[rustc_doc_primitive = "u32"]
@@ -1469,6 +1490,7 @@ mod prim_u16 {}
 /// The 32-bit unsigned integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_u32 {}
 
 #[rustc_doc_primitive = "u64"]
@@ -1476,6 +1498,7 @@ mod prim_u32 {}
 /// The 64-bit unsigned integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_u64 {}
 
 #[rustc_doc_primitive = "u128"]
@@ -1483,6 +1506,7 @@ mod prim_u64 {}
 /// The 128-bit unsigned integer type.
 #[stable(feature = "i128", since = "1.26.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_u128 {}
 
 #[rustc_doc_primitive = "isize"]
@@ -1494,6 +1518,7 @@ mod prim_u128 {}
 /// and on a 64 bit target, this is 8 bytes.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_isize {}
 
 #[rustc_doc_primitive = "usize"]
@@ -1505,6 +1530,7 @@ mod prim_isize {}
 /// and on a 64 bit target, this is 8 bytes.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_usize {}
 
 #[rustc_doc_primitive = "reference"]
@@ -1668,6 +1694,7 @@ mod prim_usize {}
 /// [allocated object]: ptr#allocated-object
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_ref {}
 
 #[rustc_doc_primitive = "fn"]
@@ -1938,10 +1965,12 @@ mod prim_ref {}
 /// these traits are specially known to the compiler.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod prim_fn {}
 
 // Required to make auto trait impls render.
 // See src/librustdoc/passes/collect_trait_impls.rs:collect_trait_impls
 #[doc(hidden)]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 impl<Ret, T> fn(T) -> Ret {}

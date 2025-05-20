@@ -26,13 +26,17 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 mod bytewise;
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub(crate) use bytewise::BytewiseEq;
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 use self::Ordering::*;
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 use crate::ops::ControlFlow;
 
 /// Trait for comparisons using the equality operator.
@@ -366,6 +370,7 @@ pub macro Eq($item:item) {
 #[allow(missing_debug_implementations)]
 #[unstable(feature = "derive_eq", reason = "deriving hack, should not be public", issue = "none")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub struct AssertParamIsEq<T: Eq + ?Sized> {
     _field: crate::marker::PhantomData<T>,
 }
@@ -391,6 +396,7 @@ pub struct AssertParamIsEq<T: Eq + ?Sized> {
 #[lang = "Ordering"]
 #[repr(i8)]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub enum Ordering {
     /// An ordering where a compared value is less than another.
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -404,6 +410,7 @@ pub enum Ordering {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 impl Ordering {
     #[inline]
     const fn as_raw(self) -> i8 {
@@ -667,10 +674,12 @@ impl Ordering {
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
 #[repr(transparent)]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub struct Reverse<T>(#[stable(feature = "reverse_cmp_key", since = "1.19.0")] pub T);
 
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 impl<T: PartialOrd> PartialOrd for Reverse<T> {
     #[inline]
     fn partial_cmp(&self, other: &Reverse<T>) -> Option<Ordering> {
@@ -697,6 +706,7 @@ impl<T: PartialOrd> PartialOrd for Reverse<T> {
 
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 impl<T: Ord> Ord for Reverse<T> {
     #[inline]
     fn cmp(&self, other: &Reverse<T>) -> Ordering {
@@ -706,6 +716,7 @@ impl<T: Ord> Ord for Reverse<T> {
 
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 impl<T: Clone> Clone for Reverse<T> {
     #[inline]
     fn clone(&self) -> Reverse<T> {
@@ -966,6 +977,7 @@ impl<T: Clone> Clone for Reverse<T> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Ord"]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub trait Ord: Eq + PartialOrd<Self> {
     /// This method returns an [`Ordering`] between `self` and `other`.
     ///
@@ -1104,7 +1116,9 @@ pub trait Ord: Eq + PartialOrd<Self> {
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics)]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub macro Ord($item:item) {
     /* compiler built-in */
 }
@@ -1352,6 +1366,7 @@ pub macro Ord($item:item) {
 )]
 #[rustc_diagnostic_item = "PartialOrd"]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
     /// This method returns an ordering between `self` and `other` values if one exists.
     ///
@@ -1497,6 +1512,7 @@ pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
 }
 
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 fn default_chaining_impl<T: ?Sized, U: ?Sized>(
     lhs: &T,
     rhs: &U,
@@ -1521,6 +1537,7 @@ where
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics)]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub macro PartialOrd($item:item) {
     /* compiler built-in */
 }
@@ -1562,6 +1579,7 @@ pub macro PartialOrd($item:item) {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "cmp_min"]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub fn min<T: Ord>(v1: T, v2: T) -> T {
     v1.min(v2)
 }
@@ -1590,6 +1608,7 @@ pub fn min<T: Ord>(v1: T, v2: T) -> T {
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub fn min_by<T, F: FnOnce(&T, &T) -> Ordering>(v1: T, v2: T, compare: F) -> T {
     if compare(&v2, &v1).is_lt() { v2 } else { v1 }
 }
@@ -1616,6 +1635,7 @@ pub fn min_by<T, F: FnOnce(&T, &T) -> Ordering>(v1: T, v2: T, compare: F) -> T {
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub fn min_by_key<T, F: FnMut(&T) -> K, K: Ord>(v1: T, v2: T, mut f: F) -> T {
     if f(&v2) < f(&v1) { v2 } else { v1 }
 }
@@ -1657,6 +1677,7 @@ pub fn min_by_key<T, F: FnMut(&T) -> K, K: Ord>(v1: T, v2: T, mut f: F) -> T {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "cmp_max"]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub fn max<T: Ord>(v1: T, v2: T) -> T {
     v1.max(v2)
 }
@@ -1685,6 +1706,7 @@ pub fn max<T: Ord>(v1: T, v2: T) -> T {
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub fn max_by<T, F: FnOnce(&T, &T) -> Ordering>(v1: T, v2: T, compare: F) -> T {
     if compare(&v2, &v1).is_lt() { v1 } else { v2 }
 }
@@ -1711,6 +1733,7 @@ pub fn max_by<T, F: FnOnce(&T, &T) -> Ordering>(v1: T, v2: T, compare: F) -> T {
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub fn max_by_key<T, F: FnMut(&T) -> K, K: Ord>(v1: T, v2: T, mut f: F) -> T {
     if f(&v2) < f(&v1) { v1 } else { v2 }
 }
@@ -1756,6 +1779,7 @@ pub fn max_by_key<T, F: FnMut(&T) -> K, K: Ord>(v1: T, v2: T, mut f: F) -> T {
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub fn minmax<T>(v1: T, v2: T) -> [T; 2]
 where
     T: Ord,
@@ -1788,6 +1812,7 @@ where
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub fn minmax_by<T, F>(v1: T, v2: T, compare: F) -> [T; 2]
 where
     F: FnOnce(&T, &T) -> Ordering,
@@ -1817,6 +1842,7 @@ where
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub fn minmax_by_key<T, F, K>(v1: T, v2: T, mut f: F) -> [T; 2]
 where
     F: FnMut(&T) -> K,
@@ -1828,10 +1854,13 @@ where
 // Implementation of PartialEq, Eq, PartialOrd and Ord for primitive types
 mod impls {
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     use crate::cmp::Ordering::{self, Equal, Greater, Less};
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     use crate::hint::unreachable_unchecked;
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     use crate::ops::ControlFlow::{self, Break, Continue};
 
     macro_rules! partial_eq_impl {
@@ -1848,6 +1877,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl PartialEq for () {
         #[inline]
         fn eq(&self, _other: &()) -> bool {
@@ -1861,6 +1891,7 @@ mod impls {
 
     partial_eq_impl! { bool }
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     partial_eq_impl! {
         bool char usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128
     }
@@ -1874,10 +1905,12 @@ mod impls {
 
     eq_impl! { bool }
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     eq_impl! { () bool char usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
     #[rustfmt::skip]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     macro_rules! partial_ord_methods_primitive_impl {
         () => {
             #[inline(always)]
@@ -1917,6 +1950,7 @@ mod impls {
     }
 
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     macro_rules! partial_ord_impl {
         ($($t:ty)*) => ($(
             #[stable(feature = "rust1", since = "1.0.0")]
@@ -1938,6 +1972,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl PartialOrd for () {
         #[inline]
         fn partial_cmp(&self, _: &()) -> Option<Ordering> {
@@ -1947,6 +1982,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl PartialOrd for bool {
         #[inline]
         fn partial_cmp(&self, other: &bool) -> Option<Ordering> {
@@ -1957,9 +1993,11 @@ mod impls {
     }
 
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     partial_ord_impl! { f16 f32 f64 f128 }
 
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     macro_rules! ord_impl {
         ($($t:ty)*) => ($(
             #[stable(feature = "rust1", since = "1.0.0")]
@@ -1984,6 +2022,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl Ord for () {
         #[inline]
         fn cmp(&self, _other: &()) -> Ordering {
@@ -1993,6 +2032,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl Ord for bool {
         #[inline]
         fn cmp(&self, other: &bool) -> Ordering {
@@ -2026,10 +2066,12 @@ mod impls {
     }
 
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     ord_impl! { char usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
     #[unstable(feature = "never_type", issue = "35121")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl PartialEq for ! {
         #[inline]
         fn eq(&self, _: &!) -> bool {
@@ -2039,10 +2081,12 @@ mod impls {
 
     #[unstable(feature = "never_type", issue = "35121")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl Eq for ! {}
 
     #[unstable(feature = "never_type", issue = "35121")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl PartialOrd for ! {
         #[inline]
         fn partial_cmp(&self, _: &!) -> Option<Ordering> {
@@ -2052,6 +2096,7 @@ mod impls {
 
     #[unstable(feature = "never_type", issue = "35121")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl Ord for ! {
         #[inline]
         fn cmp(&self, _: &!) -> Ordering {
@@ -2063,6 +2108,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl<A: ?Sized, B: ?Sized> PartialEq<&B> for &A
     where
         A: PartialEq<B>,
@@ -2078,6 +2124,7 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl<A: ?Sized, B: ?Sized> PartialOrd<&B> for &A
     where
         A: PartialOrd<B>,
@@ -2121,6 +2168,7 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl<A: ?Sized> Ord for &A
     where
         A: Ord,
@@ -2132,12 +2180,14 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl<A: ?Sized> Eq for &A where A: Eq {}
 
     // &mut pointers
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl<A: ?Sized, B: ?Sized> PartialEq<&mut B> for &mut A
     where
         A: PartialEq<B>,
@@ -2153,6 +2203,7 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl<A: ?Sized, B: ?Sized> PartialOrd<&mut B> for &mut A
     where
         A: PartialOrd<B>,
@@ -2196,6 +2247,7 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl<A: ?Sized> Ord for &mut A
     where
         A: Ord,
@@ -2207,10 +2259,12 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl<A: ?Sized> Eq for &mut A where A: Eq {}
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl<A: ?Sized, B: ?Sized> PartialEq<&mut B> for &A
     where
         A: PartialEq<B>,
@@ -2227,6 +2281,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl<A: ?Sized, B: ?Sized> PartialEq<&B> for &mut A
     where
         A: PartialEq<B>,

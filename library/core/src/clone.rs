@@ -182,6 +182,7 @@ pub trait Clone: Sized {
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics, derive_clone_copy)]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub macro Clone($item:item) {
     /* compiler built-in */
 }
@@ -234,6 +235,7 @@ macro_rules! impl_use_cloned {
 
 impl_use_cloned! { bool }
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 impl_use_cloned! {
     usize u8 u16 u32 u64 u128
     isize i8 i16 i32 i64 i128
@@ -253,6 +255,7 @@ impl_use_cloned! {
     issue = "none"
 )]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub struct AssertParamIsClone<T: Clone + ?Sized> {
     _field: crate::marker::PhantomData<T>,
 }
@@ -264,6 +267,7 @@ pub struct AssertParamIsClone<T: Clone + ?Sized> {
     issue = "none"
 )]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 pub struct AssertParamIsCopy<T: Copy + ?Sized> {
     _field: crate::marker::PhantomData<T>,
 }
@@ -446,6 +450,7 @@ pub unsafe trait CloneToUninit {
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 unsafe impl<T: Clone> CloneToUninit for T {
     #[inline]
     unsafe fn clone_to_uninit(&self, dest: *mut u8) {
@@ -456,6 +461,7 @@ unsafe impl<T: Clone> CloneToUninit for T {
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 unsafe impl<T: Clone> CloneToUninit for [T] {
     #[inline]
     #[cfg_attr(debug_assertions, track_caller)]
@@ -468,6 +474,7 @@ unsafe impl<T: Clone> CloneToUninit for [T] {
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 unsafe impl CloneToUninit for str {
     #[inline]
     #[cfg_attr(debug_assertions, track_caller)]
@@ -479,6 +486,7 @@ unsafe impl CloneToUninit for str {
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 unsafe impl CloneToUninit for crate::ffi::CStr {
     #[cfg_attr(debug_assertions, track_caller)]
     unsafe fn clone_to_uninit(&self, dest: *mut u8) {
@@ -492,6 +500,7 @@ unsafe impl CloneToUninit for crate::ffi::CStr {
 
 #[unstable(feature = "bstr", issue = "134915")]
 #[cfg(feature = "uncertified")]
+#[coverage(off)]
 unsafe impl CloneToUninit for crate::bstr::ByteStr {
     #[inline]
     #[cfg_attr(debug_assertions, track_caller)]
@@ -525,6 +534,7 @@ mod impls {
         bool
     }
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl_clone! {
         usize u8 u16 u32 u64 u128
         isize i8 i16 i32 i64 i128
@@ -534,6 +544,7 @@ mod impls {
 
     #[unstable(feature = "never_type", issue = "35121")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl Clone for ! {
         #[inline]
         fn clone(&self) -> Self {
@@ -543,6 +554,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl<T: ?Sized> Clone for *const T {
         #[inline(always)]
         fn clone(&self) -> Self {
@@ -552,6 +564,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl<T: ?Sized> Clone for *mut T {
         #[inline(always)]
         fn clone(&self) -> Self {
@@ -562,6 +575,7 @@ mod impls {
     /// Shared references can be cloned, but mutable references *cannot*!
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl<T: ?Sized> Clone for &T {
         #[inline(always)]
         #[rustc_diagnostic_item = "noop_method_clone"]
@@ -573,5 +587,6 @@ mod impls {
     /// Shared references can be cloned, but mutable references *cannot*!
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(feature = "uncertified")]
+    #[coverage(off)]
     impl<T: ?Sized> !Clone for &mut T {}
 }

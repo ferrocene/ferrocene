@@ -1765,6 +1765,7 @@ fn test_rotate_right() {
 
 #[test]
 #[cfg_attr(miri, ignore)] // Miri is too slow
+#[cfg_attr(ferrocene_coverage, ignore = "test too slow with coverage enabled")]
 fn brute_force_rotate_test_0() {
     // In case of edge cases involving multiple algorithms
     let n = 300;
@@ -1804,6 +1805,7 @@ fn brute_force_rotate_test_1() {
 #[test]
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg_attr(miri, ignore)] // Miri is too slow
+#[cfg_attr(ferrocene_coverage, ignore = "test too slow with coverage enabled")]
 fn select_nth_unstable() {
     use core::cmp::Ordering::{Equal, Greater, Less};
 
@@ -2413,6 +2415,7 @@ macro_rules! split_off_tests {
     (ty: $ty:ty, slice: $slice:expr, method: $method:ident, $(($test_name:ident, ($($args:expr),*), $output:expr, $remaining:expr),)*) => {
         $(
             #[test]
+            #[cfg_attr(ferrocene_coverage, ignore = "test too slow with coverage enabled")]
             fn $test_name() {
                 let mut slice: $ty = $slice;
                 assert_eq!($output, slice.$method($($args)*));

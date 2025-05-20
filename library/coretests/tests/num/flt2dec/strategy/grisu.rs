@@ -4,6 +4,7 @@ use super::super::*;
 
 #[test]
 #[cfg_attr(miri, ignore)] // Miri is too slow
+#[cfg_attr(ferrocene_coverage, ignore = "test too slow with coverage enabled")]
 fn test_cached_power() {
     assert_eq!(CACHED_POW10.first().unwrap().1, CACHED_POW10_FIRST_E);
     assert_eq!(CACHED_POW10.last().unwrap().1, CACHED_POW10_LAST_E);

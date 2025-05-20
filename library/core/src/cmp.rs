@@ -1848,13 +1848,10 @@ where
 // Implementation of PartialEq, Eq, PartialOrd and Ord for primitive types
 mod impls {
     #[cfg(feature = "uncertified")]
-    #[coverage(off)]
     use crate::cmp::Ordering::{self, Equal, Greater, Less};
     #[cfg(feature = "uncertified")]
-    #[coverage(off)]
     use crate::hint::unreachable_unchecked;
     #[cfg(feature = "uncertified")]
-    #[coverage(off)]
     use crate::ops::ControlFlow::{self, Break, Continue};
 
     macro_rules! partial_eq_impl {

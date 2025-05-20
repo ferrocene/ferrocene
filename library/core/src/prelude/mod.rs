@@ -43,13 +43,11 @@ pub mod rust_2021 {
     #[stable(feature = "prelude_2021", since = "1.55.0")]
     #[doc(no_inline)]
     #[cfg(feature = "uncertified")]
-    #[coverage(off)]
     pub use crate::iter::FromIterator;
 
     #[stable(feature = "prelude_2021", since = "1.55.0")]
     #[doc(no_inline)]
     #[cfg(feature = "uncertified")]
-    #[coverage(off)]
     pub use crate::convert::{TryFrom, TryInto};
 }
 
@@ -65,19 +63,16 @@ pub mod rust_2024 {
     #[stable(feature = "prelude_2021", since = "1.55.0")]
     #[doc(no_inline)]
     #[cfg(feature = "uncertified")]
-    #[coverage(off)]
     pub use crate::iter::FromIterator;
 
     #[stable(feature = "prelude_2021", since = "1.55.0")]
     #[doc(no_inline)]
     #[cfg(feature = "uncertified")]
-    #[coverage(off)]
     pub use crate::convert::{TryFrom, TryInto};
 
     #[stable(feature = "prelude_2024", since = "1.85.0")]
     #[doc(no_inline)]
     #[cfg(feature = "uncertified")]
-    #[coverage(off)]
     pub use crate::future::{Future, IntoFuture};
 }
 

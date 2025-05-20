@@ -44,6 +44,7 @@ pub struct Wrapping<T>(#[stable(feature = "rust1", since = "1.0.0")] pub T);
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: fmt::Debug> fmt::Debug for Wrapping<T> {
+    #[coverage(off)] // Reason: Trivial, just forwards to T::fmt
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
     }
@@ -51,6 +52,7 @@ impl<T: fmt::Debug> fmt::Debug for Wrapping<T> {
 
 #[stable(feature = "wrapping_display", since = "1.10.0")]
 impl<T: fmt::Display> fmt::Display for Wrapping<T> {
+    #[coverage(off)] // Reason: Trivial, just forwards to T::fmt
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
     }
@@ -58,6 +60,7 @@ impl<T: fmt::Display> fmt::Display for Wrapping<T> {
 
 #[stable(feature = "wrapping_fmt", since = "1.11.0")]
 impl<T: fmt::Binary> fmt::Binary for Wrapping<T> {
+    #[coverage(off)] // Reason: Trivial, just forwards to T::fmt
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
     }
@@ -65,6 +68,7 @@ impl<T: fmt::Binary> fmt::Binary for Wrapping<T> {
 
 #[stable(feature = "wrapping_fmt", since = "1.11.0")]
 impl<T: fmt::Octal> fmt::Octal for Wrapping<T> {
+    #[coverage(off)] // Reason: Trivial, just forwards to T::fmt
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
     }
@@ -72,6 +76,7 @@ impl<T: fmt::Octal> fmt::Octal for Wrapping<T> {
 
 #[stable(feature = "wrapping_fmt", since = "1.11.0")]
 impl<T: fmt::LowerHex> fmt::LowerHex for Wrapping<T> {
+    #[coverage(off)] // Reason: Trivial, just forwards to T::fmt
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
     }
@@ -79,6 +84,7 @@ impl<T: fmt::LowerHex> fmt::LowerHex for Wrapping<T> {
 
 #[stable(feature = "wrapping_fmt", since = "1.11.0")]
 impl<T: fmt::UpperHex> fmt::UpperHex for Wrapping<T> {
+    #[coverage(off)] // Reason: Trivial, just forwards to T::fmt
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
     }

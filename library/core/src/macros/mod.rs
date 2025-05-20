@@ -242,7 +242,6 @@ pub macro assert_matches {
 #[unstable(feature = "cfg_match", issue = "115585")]
 #[rustc_diagnostic_item = "cfg_match"]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 #[rustc_macro_transparency = "semitransparent"]
 pub macro cfg_match {
     ({ $($tt:tt)* }) => {{

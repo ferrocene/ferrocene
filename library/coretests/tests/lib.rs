@@ -96,6 +96,8 @@
 #![feature(try_trait_v2)]
 #![feature(unsize)]
 #![feature(unwrap_infallible)]
+#![feature(wrapping_int_impl)]
+#![feature(wrapping_next_power_of_two)]
 // tidy-alphabetical-end
 #![allow(internal_features)]
 #![deny(fuzzy_provenance_casts)]

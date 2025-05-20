@@ -314,3 +314,100 @@ fn wrapping_const() {
         assert!(i32::MIN.wrapping_rem(-1) == 0);
     };
 }
+
+#[test]
+fn test_wrapping_fmt() {
+    use core::fmt;
+
+    for i in 0..100 {
+        let a: Wrapping<i32> = Wrapping(i);
+
+        let b = d(a);
+        let c = d(i);
+
+        assert_eq!(b, c);
+    }
+
+    fn d<T>(e: T) -> [String; 6]
+    where
+        T: fmt::Debug + fmt::Display + fmt::Binary + fmt::Octal + fmt::LowerHex + fmt::UpperHex,
+    {
+        [
+            format!("{}", e),
+            format!("{:?}", e),
+            format!("{:b}", e),
+            format!("{:o}", e),
+            format!("{:x}", e),
+            format!("{:X}", e),
+        ]
+    }
+}
+
+#[test]
+fn wrapping_sh_impl_unsigned() {
+    use core::ops::{Shl, ShlAssign, Shr, ShrAssign};
+
+    let mut a = Wrapping(10_i32);
+
+    let _b = a.shl(1);
+    let _c = a.shl_assign(1);
+    let _d = a.shr(1);
+    let _e = a.shr_assign(1);
+
+    // use core::hint;
+
+    // let f_shl: fn(Wrapping<i32>, usize) -> Wrapping<i32> = Shl::shl;
+    // let f_shl = hint::black_box(f_shl);
+    // let b = f_shl(a, 1);
+    // assert_eq!(b, Wrapping(20));
+
+    // let f_shl_assign: fn(&mut Wrapping<i32>, usize) = ShlAssign::shl_assign;
+    // let f_shl_assign = hint::black_box(f_shl_assign);
+    // f_shl_assign(&mut a, 2);
+    // assert_eq!(a, Wrapping(40));
+
+    // let f_shr: fn(Wrapping<i32>, usize) -> Wrapping<i32> = Shr::shr;
+    // let f_shr = hint::black_box(f_shr);
+    // let c = f_shr(a, 3);
+    // assert_eq!(c, Wrapping(5));
+
+    // let f_shr_assign: fn(&mut Wrapping<i32>, usize) = ShrAssign::shr_assign;
+    // let f_shr_assign = hint::black_box(f_shr_assign);
+    // f_shr_assign(&mut a, 4);
+    // assert_eq!(a, Wrapping(2));
+}
+
+#[test]
+fn wrapping_ops() {
+    let mut a: Wrapping<i32> = Wrapping(10);
+    let b: Wrapping<i32> = Wrapping(1);
+    let c: i32 = 2;
+
+    // impl Add for Wrapping<$t>
+    let _ = a + b;
+    // impl AddAssign for Wrapping<$t>
+    a += b;
+    // impl AddAssign<$t> for Wrapping<$t>
+    a += c;
+
+    // impl Sub for Wrapping<$t>
+    let _ = a - b;
+    // impl AddAssign for Wrapping<$t>
+    a -= b;
+    // impl AddAssign<$t> for Wrapping<$t>
+    a -= c;
+
+    // impl Mul for Wrapping<$t>
+    let _ = a * b;
+    // impl MulAssign for Wrapping<$t>
+    a *= b;
+    // impl MulAssign<$t> for Wrapping<$t>
+    a *= c;
+
+    // impl Div for Wrapping<$t>
+    let _ = a / b;
+    // impl DivAssign for Wrapping<$t>
+    a /= b;
+    // impl DivAssign<$t> for Wrapping<$t>
+    a /= c;
+}

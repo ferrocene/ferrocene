@@ -2782,6 +2782,9 @@ impl Step for Crate {
         };
 
         if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
+            cargo.arg("--features=core/ferrocene_inject_profiler_builtins");
+            crate::ferrocene::code_coverage::instrument_coverage(builder, &mut cargo);
+
             measure_coverage(builder, cargo.as_mut(), compiler, target, coverage_for);
             cargo.rustflag("--cfg=ferrocene_coverage");
         }

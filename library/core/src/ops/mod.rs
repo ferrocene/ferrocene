@@ -170,33 +170,27 @@ mod unsize;
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::arith::{Add, Div, Mul, Neg, Rem, Sub};
 #[stable(feature = "op_assign_traits", since = "1.8.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::arith::{AddAssign, DivAssign, MulAssign, RemAssign, SubAssign};
 #[unstable(feature = "async_fn_traits", issue = "none")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::async_function::{AsyncFn, AsyncFnMut, AsyncFnOnce};
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "uncertified"))]
 pub use self::bit::Not;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::bit::{BitAnd, BitOr, BitXor, Not, Shl, Shr};
 #[stable(feature = "op_assign_traits", since = "1.8.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::bit::{BitAndAssign, BitOrAssign, BitXorAssign, ShlAssign, ShrAssign};
 #[stable(feature = "control_flow_enum_type", since = "1.55.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::control_flow::ControlFlow;
 #[unstable(feature = "coroutine_trait", issue = "43122")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::coroutine::{Coroutine, CoroutineState};
 #[unstable(feature = "deref_pure_trait", issue = "87121")]
 pub use self::deref::DerefPure;
@@ -212,41 +206,33 @@ pub use self::drop::Drop;
 pub use self::function::{Fn, FnMut, FnOnce};
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::index::{Index, IndexMut};
 #[cfg(feature = "uncertified")]
 #[coverage(off)]
 pub(crate) use self::index_range::IndexRange;
 #[unstable(feature = "range_into_bounds", issue = "136903")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::range::IntoBounds;
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::range::{Bound, RangeBounds, RangeInclusive, RangeToInclusive};
 #[unstable(feature = "one_sided_range", issue = "69780")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::range::{OneSidedRange, OneSidedRangeBound};
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::range::{Range, RangeFrom, RangeFull, RangeTo};
 #[unstable(feature = "try_trait_v2_residual", issue = "91285")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::try_trait::Residual;
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::try_trait::Yeet;
 #[cfg(feature = "uncertified")]
 #[coverage(off)]
 pub(crate) use self::try_trait::{ChangeOutputType, NeverShortCircuit};
 #[unstable(feature = "try_trait_v2", issue = "84277")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::try_trait::{FromResidual, Try};
 #[unstable(feature = "coerce_unsized", issue = "18598")]
 pub use self::unsize::CoerceUnsized;

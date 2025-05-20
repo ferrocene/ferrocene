@@ -10,27 +10,26 @@
 // Re-exported core operators
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
-// pub use crate::marker::{Copy, Send, Sized, Sync, Unpin};
+#[cfg(not(feature = "uncertified"))]
 pub use crate::marker::{Copy, Send, Sized, Sync};
+#[cfg(feature = "uncertified")]
+pub use crate::marker::{Copy, Send, Sized, Sync, Unpin};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
 pub use crate::ops::{Drop, Fn, FnMut, FnOnce};
 #[stable(feature = "async_closure", since = "1.85.0")]
 #[doc(no_inline)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use crate::ops::{AsyncFn, AsyncFnMut, AsyncFnOnce};
 
 // Re-exported functions
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use crate::mem::drop;
 #[stable(feature = "size_of_prelude", since = "1.80.0")]
 #[doc(no_inline)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use crate::mem::{align_of, align_of_val, size_of, size_of_val};
 
 // Re-exported types and traits
@@ -39,11 +38,11 @@ pub use crate::mem::{align_of, align_of_val, size_of, size_of_val};
 pub use crate::clone::Clone;
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
+#[cfg(not(feature = "uncertified"))]
 pub use crate::cmp::{Eq, PartialEq};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use crate::cmp::{Eq, Ord, PartialEq, PartialOrd};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
@@ -54,7 +53,6 @@ pub use crate::default::Default;
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use crate::iter::{DoubleEndedIterator, ExactSizeIterator, Extend, IntoIterator, Iterator};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
@@ -67,12 +65,10 @@ pub use crate::result::Result::{self, Err, Ok};
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use crate::fmt::macros::Debug;
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use crate::hash::macros::Hash;
 
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
@@ -80,7 +76,6 @@ pub use crate::hash::macros::Hash;
 #[cfg_attr(bootstrap, allow(deprecated_in_future))]
 #[doc(no_inline)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use crate::{
     assert, cfg, column, compile_error, concat, concat_idents, env, file, format_args,
     format_args_nl, include, include_bytes, include_str, line, log_syntax, module_path, option_env,
@@ -94,7 +89,6 @@ pub use crate::{
 )]
 #[doc(no_inline)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use crate::concat_bytes;
 
 // Do not `doc(no_inline)` so that they become doc items on their own

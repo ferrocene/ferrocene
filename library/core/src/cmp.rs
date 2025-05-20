@@ -33,10 +33,8 @@ mod bytewise;
 pub(crate) use bytewise::BytewiseEq;
 
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use self::Ordering::*;
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::ops::ControlFlow;
 
 /// Trait for comparisons using the equality operator.
@@ -1117,7 +1115,6 @@ pub trait Ord: Eq + PartialOrd<Self> {
 #[cfg(feature = "uncertified")]
 #[coverage(off)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub macro Ord($item:item) {
     /* compiler built-in */
 }
@@ -1535,7 +1532,6 @@ where
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub macro PartialOrd($item:item) {
     /* compiler built-in */
 }

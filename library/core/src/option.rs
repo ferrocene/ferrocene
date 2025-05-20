@@ -574,20 +574,16 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::iter::{self, FusedIterator, TrustedLen};
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
+#[cfg(not(feature = "uncertified"))]
 use crate::ops::{Deref, DerefMut};
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::panicking::{panic, panic_display};
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::pin::Pin;
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::{cmp, convert, hint, mem, slice};
 
 /// The `Option` type. See [the module level documentation](self) for more.
@@ -1909,7 +1905,7 @@ impl<T> Option<T> {
     /// assert_eq!(x.zip_with(None, Point::new), None);
     /// ```
     #[unstable(feature = "option_zip", issue = "70086")]
-    #[cfg(feature = "unstable")]
+    #[cfg(feature = "uncertified")]
     pub fn zip_with<U, F, R>(self, other: Option<U>, f: F) -> Option<R>
     where
         F: FnOnce(T, U) -> R,

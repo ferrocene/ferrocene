@@ -173,7 +173,6 @@ macro_rules! assert_ne {
 #[allow_internal_unstable(panic_internals)]
 #[rustc_macro_transparency = "semitransparent"]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub macro assert_matches {
     ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) => {
         match $left {
@@ -427,7 +426,6 @@ macro_rules! debug_assert_ne {
 #[allow_internal_unstable(assert_matches)]
 #[rustc_macro_transparency = "semitransparent"]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub macro debug_assert_matches($($arg:tt)*) {
     if $crate::cfg!(debug_assertions) {
         $crate::assert_matches::assert_matches!($($arg)*);

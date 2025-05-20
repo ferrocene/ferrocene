@@ -534,14 +534,11 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::iter::{self, FusedIterator, TrustedLen};
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::ops::{self, ControlFlow};
 use crate::ops::{Deref, DerefMut};
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::{convert, fmt, hint};
 
 /// `Result` is a type that represents either success ([`Ok`]) or failure ([`Err`]).

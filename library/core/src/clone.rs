@@ -36,7 +36,7 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(feature = "unstable")]
+#[cfg(feature = "uncertified")]
 mod uninit;
 
 /// A common trait for the ability to explicitly duplicate an object.
@@ -182,7 +182,6 @@ pub trait Clone: Sized {
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics, derive_clone_copy)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub macro Clone($item:item) {
     /* compiler built-in */
 }
@@ -408,7 +407,7 @@ pub struct AssertParamIsCopy<T: Copy + ?Sized> {
 /// [DST]: https://doc.rust-lang.org/reference/dynamically-sized-types.html
 /// [trait object]: https://doc.rust-lang.org/reference/types/trait-object.html
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
-#[cfg(feature = "unstable")]
+#[cfg(feature = "uncertified")]
 pub unsafe trait CloneToUninit {
     /// Performs copy-assignment from `self` to `dest`.
     ///

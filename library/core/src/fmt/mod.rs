@@ -3,22 +3,16 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::cell::{Cell, Ref, RefCell, RefMut, SyncUnsafeCell, UnsafeCell};
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::char::{EscapeDebugExtArgs, MAX_LEN_UTF8};
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::marker::PhantomData;
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::num::fmt as numfmt;
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::ops::Deref;
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::{iter, result, str};
 
 #[cfg(feature = "uncertified")]
@@ -59,11 +53,9 @@ pub enum Alignment {
 
 #[stable(feature = "debug_builders", since = "1.2.0")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::builders::{DebugList, DebugMap, DebugSet, DebugStruct, DebugTuple};
 #[unstable(feature = "debug_closure_helpers", issue = "117729")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::builders::{FromFn, from_fn};
 
 /// The type returned by formatter methods.
@@ -979,7 +971,6 @@ pub(crate) mod macros {
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(inline)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use macros::Debug;
 
 /// Format trait for an empty format, `{}`.

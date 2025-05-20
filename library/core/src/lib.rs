@@ -206,6 +206,8 @@
 #![cfg_attr(feature = "uncertified", feature(x86_amx_intrinsics))]
 // tidy-alphabetical-end
 
+#![allow(unused_attributes)]
+
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]
 extern crate self as core;
@@ -241,7 +243,6 @@ pub mod contracts;
 
 #[unstable(feature = "cfg_match", issue = "115585")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use crate::macros::cfg_match;
 
 #[macro_use]

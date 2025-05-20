@@ -36,13 +36,10 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::error::Error;
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::fmt;
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::hash::{Hash, Hasher};
 
 #[cfg(feature = "uncertified")]
@@ -51,7 +48,6 @@ mod num;
 
 #[unstable(feature = "convert_float_to_int", issue = "67057")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use num::FloatToInt;
 
 /// The identity function.

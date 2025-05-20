@@ -3,7 +3,6 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::ascii::Char as AsciiChar;
 
 /// A trait for giving a type a useful default value.
@@ -146,7 +145,6 @@ pub trait Default: Sized {
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub macro Default($item:item) {
     /* compiler built-in */
 }

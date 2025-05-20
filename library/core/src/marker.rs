@@ -12,25 +12,19 @@ mod variance;
 
 #[unstable(feature = "phantom_variance_markers", issue = "135806")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub use self::variance::{
     PhantomContravariant, PhantomContravariantLifetime, PhantomCovariant, PhantomCovariantLifetime,
     PhantomInvariant, PhantomInvariantLifetime, Variance, variance,
 };
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::cell::UnsafeCell;
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::cmp;
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::fmt::Debug;
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::hash::{Hash, Hasher};
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 use crate::pin::UnsafePinned;
 
 /// Implements a given marker trait for multiple types at the same time.
@@ -444,7 +438,6 @@ pub trait Copy: Clone {
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics, derive_clone_copy)]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub macro Copy($item:item) {
     /* compiler built-in */
 }
@@ -1169,7 +1162,6 @@ pub trait ConstParamTy_: UnsizedConstParamTy + StructuralPartialEq + Eq {}
 #[allow_internal_unstable(unsized_const_params)]
 #[unstable(feature = "adt_const_params", issue = "95174")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub macro ConstParamTy($item:item) {
     /* compiler built-in */
 }
@@ -1190,7 +1182,6 @@ pub trait UnsizedConstParamTy: StructuralPartialEq + Eq {}
 #[allow_internal_unstable(unsized_const_params)]
 #[unstable(feature = "unsized_const_params", issue = "95174")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub macro UnsizedConstParamTy($item:item) {
     /* compiler built-in */
 }
@@ -1439,7 +1430,6 @@ pub trait FnPtr: Copy + Clone {
 #[rustc_diagnostic_item = "CoercePointee"]
 #[unstable(feature = "derive_coerce_pointee", issue = "123430")]
 #[cfg(feature = "uncertified")]
-#[coverage(off)]
 pub macro CoercePointee($item:item) {
     /* compiler built-in */
 }

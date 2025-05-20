@@ -768,10 +768,16 @@ pre.spec-syntax .spec-syntax-literal {
     border-radius: 0.2em;
 }
 
-/********+***********
- *   sphinx-needs   *
- ********************/
+/****************************
+ *   Ferrocene CLI domain   *
+ ****************************/
 
-a.external_link:after {
-    content: "" !important;
+.ferrocene-cli-title {
+    font-size: 1.25em;
+    margin-top: 1.5em;
+    margin-bottom: 0.2em;
+}
+
+.ferrocene-cli-title em {
+    font-weight: 400;
 }

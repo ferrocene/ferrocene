@@ -655,7 +655,7 @@ impl<T> Option<T> {
     /// println!("still alive {:?}", x);
     /// ```
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "is_some_and", since = "1.70.0")]
     pub fn is_some_and(self, f: impl FnOnce(T) -> bool) -> bool {
         match self {
@@ -705,7 +705,7 @@ impl<T> Option<T> {
     /// println!("still alive {:?}", x);
     /// ```
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "is_none_or", since = "1.82.0")]
     pub fn is_none_or(self, f: impl FnOnce(T) -> bool) -> bool {
         match self {
@@ -1193,7 +1193,7 @@ impl<T> Option<T> {
     /// // prints nothing
     /// list.get(5).inspect(|x| println!("got: {x}"));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "result_option_inspect", since = "1.76.0")]
     pub fn inspect<F: FnOnce(&T)>(self, f: F) -> Self {
         if let Some(ref x) = self {
@@ -1267,7 +1267,7 @@ impl<T> Option<T> {
     /// #   Ok(())
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn map_or_else<U, D, F>(self, default: D, f: F) -> U
     where

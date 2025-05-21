@@ -570,10 +570,15 @@ fn zip_unzip_roundtrip() {
 
 #[test]
 fn as_slice() {
-    assert_eq!(Some(42).as_slice(), &[42]);
-    assert_eq!(Some(43).as_mut_slice(), &[43]);
-    assert_eq!(None::<i32>.as_slice(), &[]);
-    assert_eq!(None::<i32>.as_mut_slice(), &[]);
+    let as_slice_i32: fn(&Option<i32>) -> &[i32] = Option::as_slice;
+    let as_slice_i32 = core::hint::black_box(as_slice_i32);
+    let as_mut_slice_i32: fn(&mut Option<i32>) -> &mut [i32] = Option::as_mut_slice;
+    let as_mut_slice_i32 = core::hint::black_box(as_mut_slice_i32);
+
+    assert_eq!(as_slice_i32(&Some(42)), &[42]);
+    assert_eq!(as_mut_slice_i32(&mut Some(43)), &[43]);
+    assert_eq!(as_slice_i32(&None), &[]);
+    assert_eq!(as_mut_slice_i32(&mut None), &[]);
 
     const A: &[u32] = Some(44).as_slice();
     const B: &[u32] = None.as_slice();
@@ -583,4 +588,53 @@ fn as_slice() {
     };
     assert_eq!(A, &[44]);
     assert_eq!(B, &[]);
+}
+
+#[test]
+fn test_is_some_and() {
+    let x: Option<isize> = Some(1);
+    assert_eq!(x.is_some_and(|_| true), true);
+    assert_eq!(x.is_some_and(|_| false), false);
+
+    let x: Option<isize> = None;
+    assert_eq!(x.is_some_and(|_| true), false);
+    assert_eq!(x.is_some_and(|_| false), false);
+}
+
+#[test]
+fn test_is_none_or() {
+    let x: Option<isize> = Some(1);
+    assert_eq!(x.is_none_or(|_| true), true);
+    assert_eq!(x.is_none_or(|_| false), false);
+
+    let x: Option<isize> = None;
+    assert_eq!(x.is_none_or(|_| true), true);
+    assert_eq!(x.is_none_or(|_| false), true);
+}
+
+#[test]
+fn test_inspect() {
+    let x: Option<isize> = Some(1);
+    x.inspect(|y| assert_eq!(y, &1));
+
+    let x: Option<isize> = None;
+    x.inspect(|y| assert_eq!(y, &10)); // this assert_eq! will not get executed
+}
+
+#[test]
+fn test_map_or_else() {
+    let x: Option<isize> = Some(1);
+    assert_eq!(x.map_or_else(|| "default", |_| "computed"), "computed");
+
+    let x: Option<isize> = None;
+    assert_eq!(x.map_or_else(|| "default", |_| "computed"), "default");
+}
+
+#[test]
+fn test_ok_or_else() {
+    let x: Option<isize> = Some(1);
+    assert_eq!(x.ok_or_else(|| "error"), Ok(1));
+
+    let x: Option<isize> = None;
+    assert_eq!(x.ok_or_else(|| "error"), Err("error"));
 }

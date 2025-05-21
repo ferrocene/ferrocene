@@ -203,9 +203,6 @@ fn shortest_f64_hard_random_equivalence_test() {
 }
 
 #[test]
-<<<<<<< HEAD
-#[cfg_attr(ferrocene_coverage, ignore = "test too slow with coverage enabled")]
-=======
 #[cfg(target_has_reliable_f16)]
 fn exact_f16_random_equivalence_test() {
     use core::num::flt2dec::strategy::dragon::format_exact as fallback;
@@ -223,7 +220,7 @@ fn exact_f16_random_equivalence_test() {
 }
 
 #[test]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg_attr(ferrocene_coverage, ignore = "test too slow with coverage enabled")]
 fn exact_f32_random_equivalence_test() {
     use core::num::flt2dec::strategy::dragon::format_exact as fallback;
     // Miri is too slow

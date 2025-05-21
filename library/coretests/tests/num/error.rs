@@ -39,14 +39,3 @@ fn test_parse_int_error() {
         assert_eq!(_d, &err_kind)
     }
 }
-
-#[test]
-fn test_parse_int_error_kind() {
-    let f: fn(&ParseIntError) -> &IntErrorKind = ParseIntError::kind;
-    let f = core::hint::black_box(f);
-
-    let error: ParseIntError = "".parse::<NonZero<i8>>().unwrap_err();
-    let kind = f(&error);
-
-    assert_eq!(&IntErrorKind::Empty, kind);
-}

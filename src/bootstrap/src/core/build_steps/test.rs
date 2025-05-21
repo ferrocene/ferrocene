@@ -2787,6 +2787,9 @@ impl Step for Crate {
 
             measure_coverage(builder, cargo.as_mut(), compiler, target, coverage_for);
             cargo.rustflag("--cfg=ferrocene_coverage");
+
+            // cargo.rustflag("-Cllvm-args=-inline-threshold=999999999");
+            // cargo.rustflag("-Cllvm-args=-inlinehint-threshold=999999999");
         }
 
         let mut crates = self.crates.clone();

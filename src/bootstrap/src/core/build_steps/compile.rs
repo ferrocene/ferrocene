@@ -304,6 +304,9 @@ impl Step for Std {
             cargo.rustflag(&format!("-L{}", target_dir.to_str().unwrap()));
 
             instrument_coverage(builder, &mut cargo);
+
+            // cargo.rustflag("-Cllvm-args=-inline-threshold=999999999");
+            // cargo.rustflag("-Cllvm-args=-inlinehint-threshold=999999999");
         }
 
         // See src/bootstrap/synthetic_targets.rs

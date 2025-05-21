@@ -343,10 +343,13 @@ fn test_wrapping_fmt() {
     }
 }
 
+use core::ops::{
+    Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Div, DivAssign,
+    Mul, MulAssign, Neg, Not, Rem, RemAssign, Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign,
+};
+
 #[test]
 fn wrapping_sh_impl_unsigned() {
-    use core::ops::{Shl, ShlAssign, Shr, ShrAssign};
-
     let mut a = Wrapping(10_i32);
 
     let _b = a.shl(1);
@@ -378,36 +381,109 @@ fn wrapping_sh_impl_unsigned() {
 }
 
 #[test]
-fn wrapping_ops() {
-    let mut a: Wrapping<i32> = Wrapping(10);
+fn test_ops() {
+    let a: Wrapping<i32> = Wrapping(10);
     let b: Wrapping<i32> = Wrapping(1);
     let c: i32 = 2;
 
-    // impl Add for Wrapping<$t>
-    let _ = a + b;
-    // impl AddAssign for Wrapping<$t>
-    a += b;
-    // impl AddAssign<$t> for Wrapping<$t>
-    a += c;
+    assert_eq!(
+        test_op(a, b, c, Wrapping::add, Wrapping::add_assign, Wrapping::add_assign),
+        [Wrapping(11), Wrapping(11), Wrapping(13)]
+    );
+    assert_eq!(
+        test_op(a, b, c, Wrapping::sub, Wrapping::sub_assign, Wrapping::sub_assign),
+        [Wrapping(9), Wrapping(9), Wrapping(7)]
+    );
+    assert_eq!(
+        test_op(a, b, c, Wrapping::mul, Wrapping::mul_assign, Wrapping::mul_assign),
+        [Wrapping(10), Wrapping(10), Wrapping(20)]
+    );
+    assert_eq!(
+        test_op(a, b, c, Wrapping::div, Wrapping::div_assign, Wrapping::div_assign),
+        [Wrapping(10), Wrapping(10), Wrapping(5)]
+    );
+    assert_eq!(
+        test_op(a, b, c, Wrapping::rem, Wrapping::rem_assign, Wrapping::rem_assign),
+        [Wrapping(0), Wrapping(0), Wrapping(0)]
+    );
+    assert_eq!(
+        test_op(a, b, c, Wrapping::bitxor, Wrapping::bitxor_assign, Wrapping::bitxor_assign),
+        [Wrapping(11), Wrapping(11), Wrapping(9)]
+    );
+    assert_eq!(
+        test_op(a, b, c, Wrapping::bitor, Wrapping::bitor_assign, Wrapping::bitor_assign),
+        [Wrapping(11), Wrapping(11), Wrapping(11)]
+    );
+    assert_eq!(
+        test_op(a, b, c, Wrapping::bitand, Wrapping::bitand_assign, Wrapping::bitand_assign),
+        [Wrapping(0), Wrapping(0), Wrapping(0)]
+    );
 
-    // impl Sub for Wrapping<$t>
-    let _ = a - b;
-    // impl AddAssign for Wrapping<$t>
-    a -= b;
-    // impl AddAssign<$t> for Wrapping<$t>
-    a -= c;
+    assert_eq!(Wrapping::neg(a), Wrapping(-10));
+    assert_eq!(Wrapping::not(a), Wrapping(-11));
+}
 
-    // impl Mul for Wrapping<$t>
-    let _ = a * b;
-    // impl MulAssign for Wrapping<$t>
-    a *= b;
-    // impl MulAssign<$t> for Wrapping<$t>
-    a *= c;
+fn test_op<F1, F2, F3>(
+    mut a: Wrapping<i32>,
+    b: Wrapping<i32>,
+    c: i32,
+    op: F1,
+    op_assign: F2,
+    op_assign_other: F3,
+) -> [Wrapping<i32>; 3]
+where
+    F1: Fn(Wrapping<i32>, Wrapping<i32>) -> Wrapping<i32>,
+    F2: Fn(&mut Wrapping<i32>, Wrapping<i32>),
+    F3: Fn(&mut Wrapping<i32>, i32),
+{
+    let x = op(a, b);
+    op_assign(&mut a, b);
+    let y = a;
+    op_assign_other(&mut a, c);
+    let z = a;
+    [x, y, z]
+}
 
-    // impl Div for Wrapping<$t>
-    let _ = a / b;
-    // impl DivAssign for Wrapping<$t>
-    a /= b;
-    // impl DivAssign<$t> for Wrapping<$t>
-    a /= c;
+#[test]
+fn test_wrapping_int_impl() {
+    let a: Wrapping<u32> = Wrapping(5);
+
+    assert_eq!(a.count_ones(), 2);
+    assert_eq!(a.count_zeros(), 30);
+    assert_eq!(a.trailing_zeros(), 0);
+    assert_eq!(a.rotate_left(5), Wrapping(160));
+    assert_eq!(a.rotate_right(5), Wrapping(671088640));
+    assert_eq!(a.swap_bytes(), Wrapping(83886080));
+    assert_eq!(a.reverse_bits(), Wrapping(2684354560));
+    assert_eq!(Wrapping::<u32>::from_be(a), Wrapping(83886080));
+    assert_eq!(Wrapping::<u32>::from_le(a), Wrapping(5));
+    assert_eq!(a.to_be(), Wrapping(83886080));
+    assert_eq!(a.to_le(), Wrapping(5));
+    assert_eq!(a.pow(5), Wrapping(3125));
+}
+
+#[test]
+fn test_wrapping_int_impl_signed() {
+    let a: Wrapping<i32> = Wrapping(5);
+    assert_eq!(a.leading_zeros(), 29);
+    assert_eq!(a.abs(), Wrapping(5));
+    assert_eq!(a.signum(), Wrapping(1));
+    assert_eq!(a.is_positive(), true);
+    assert_eq!(a.is_negative(), false);
+
+    let a: Wrapping<i32> = Wrapping(-5);
+    assert_eq!(a.leading_zeros(), 0);
+    assert_eq!(a.abs(), Wrapping(5));
+    assert_eq!(a.signum(), Wrapping(-1));
+    assert_eq!(a.is_positive(), false);
+    assert_eq!(a.is_negative(), true);
+}
+
+#[test]
+fn test_wrapping_int_impl_unsigned() {
+
+    let a: Wrapping<u32> = Wrapping(5);
+    assert_eq!(a.leading_zeros(), 29);
+    assert_eq!(a.is_power_of_two(), false);
+    assert_eq!(a.next_power_of_two(), Wrapping(8));
 }

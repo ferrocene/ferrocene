@@ -632,7 +632,6 @@ impl<T, E> Result<T, E> {
     #[rustc_const_stable(feature = "const_result_basics", since = "1.48.0")]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(feature = "uncertified")] /* blocked on `impl Not for bool` */
     pub const fn is_err(&self) -> bool {
         !self.is_ok()
     }

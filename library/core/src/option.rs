@@ -576,7 +576,7 @@
 #[cfg(feature = "uncertified")]
 use crate::iter::{self, FusedIterator, TrustedLen};
 #[cfg(feature = "uncertified")]
-use crate::ops::{self, ControlFlow, Deref, DerefMut};
+use crate::ops::{self, ControlFlow};
 use crate::ops::{Deref, DerefMut};
 #[cfg(feature = "uncertified")]
 use crate::panicking::{panic, panic_display};

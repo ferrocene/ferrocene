@@ -11,7 +11,7 @@
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
 #[cfg(feature = "uncertified")]
-pub use crate::marker::{Copy, Send, Sized, Sync, Unpin};
+pub use crate::marker::Unpin;
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
 pub use crate::marker::{Copy, Send, Sized, Sync};

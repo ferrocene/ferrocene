@@ -425,7 +425,6 @@ pub mod task;
 pub mod alloc;
 
 // note: does not need to be public
-#[cfg(feature = "uncertified")]
 mod bool;
 #[cfg(feature = "uncertified")]
 mod escape;

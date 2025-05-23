@@ -483,5 +483,4 @@ pub mod simd {
     pub use crate::core_simd::simd::*;
 }
 
-#[cfg(feature = "uncertified")]
 include!("primitive_docs.rs");

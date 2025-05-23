@@ -2,61 +2,61 @@
 #[doc(alias = "true")]
 #[doc(alias = "false")]
 /// The boolean type.
-///
-/// The `bool` represents a value, which could only be either [`true`] or [`false`]. If you cast
-/// a `bool` into an integer, [`true`] will be 1 and [`false`] will be 0.
-///
-/// # Basic usage
-///
-/// `bool` implements various traits, such as [`BitAnd`], [`BitOr`], [`Not`], etc.,
-/// which allow us to perform boolean operations using `&`, `|` and `!`.
-///
-/// [`if`] requires a `bool` value as its conditional. [`assert!`], which is an
-/// important macro in testing, checks whether an expression is [`true`] and panics
-/// if it isn't.
-///
-/// ```
-/// let bool_val = true & false | false;
-/// assert!(!bool_val);
-/// ```
-///
-/// [`true`]: ../std/keyword.true.html
-/// [`false`]: ../std/keyword.false.html
-/// [`BitAnd`]: ops::BitAnd
-/// [`BitOr`]: ops::BitOr
-/// [`Not`]: ops::Not
-/// [`if`]: ../std/keyword.if.html
-///
-/// # Examples
-///
-/// A trivial example of the usage of `bool`:
-///
-/// ```
-/// let praise_the_borrow_checker = true;
-///
-/// // using the `if` conditional
-/// if praise_the_borrow_checker {
-///     println!("oh, yeah!");
-/// } else {
-///     println!("what?!!");
-/// }
-///
-/// // ... or, a match pattern
-/// match praise_the_borrow_checker {
-///     true => println!("keep praising!"),
-///     false => println!("you should praise!"),
-/// }
-/// ```
-///
-/// Also, since `bool` implements the [`Copy`] trait, we don't
-/// have to worry about the move semantics (just like the integer and float primitives).
-///
-/// Now an example of `bool` cast to integer type:
-///
-/// ```
-/// assert_eq!(true as i32, 1);
-/// assert_eq!(false as i32, 0);
-/// ```
+// ///
+// /// The `bool` represents a value, which could only be either [`true`] or [`false`]. If you cast
+// /// a `bool` into an integer, [`true`] will be 1 and [`false`] will be 0.
+// ///
+// /// # Basic usage
+// ///
+// /// `bool` implements various traits, such as [`BitAnd`], [`BitOr`], [`Not`], etc.,
+// /// which allow us to perform boolean operations using `&`, `|` and `!`.
+// ///
+// /// [`if`] requires a `bool` value as its conditional. [`assert!`], which is an
+// /// important macro in testing, checks whether an expression is [`true`] and panics
+// /// if it isn't.
+// ///
+// /// ```
+// /// let bool_val = true & false | false;
+// /// assert!(!bool_val);
+// /// ```
+// ///
+// /// [`true`]: ../std/keyword.true.html
+// /// [`false`]: ../std/keyword.false.html
+// /// [`BitAnd`]: ops::BitAnd
+// /// [`BitOr`]: ops::BitOr
+// /// [`Not`]: ops::Not
+// /// [`if`]: ../std/keyword.if.html
+// ///
+// /// # Examples
+// ///
+// /// A trivial example of the usage of `bool`:
+// ///
+// /// ```
+// /// let praise_the_borrow_checker = true;
+// ///
+// /// // // using the `if` conditional
+// /// if praise_the_borrow_checker {
+// ///     println!("oh, yeah!");
+// /// } else {
+// ///     println!("what?!!");
+// /// }
+// ///
+// /// // // ... or, a match pattern
+// /// match praise_the_borrow_checker {
+// ///     true => println!("keep praising!"),
+// ///     false => println!("you should praise!"),
+// /// }
+// /// ```
+// ///
+// /// Also, since `bool` implements the [`Copy`] trait, we don't
+// /// have to worry about the move semantics (just like the integer and float primitives).
+// ///
+// /// Now an example of `bool` cast to integer type:
+// ///
+// /// ```
+// /// assert_eq!(true as i32, 1);
+// /// assert_eq!(false as i32, 0);
+// /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 mod prim_bool {}
 
@@ -314,6 +314,7 @@ mod prim_bool {}
 /// [2024 edition]: <https://doc.rust-lang.org/nightly/edition-guide/rust-2024/index.html>
 ///
 #[unstable(feature = "never_type", issue = "35121")]
+#[cfg(feature = "uncertified")]
 mod prim_never {}
 
 #[rustc_doc_primitive = "char"]
@@ -445,6 +446,7 @@ mod prim_never {}
 /// assert_eq!(32, size_of_val(&v[..]));
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_char {}
 
 #[rustc_doc_primitive = "unit"]
@@ -486,11 +488,13 @@ mod prim_char {}
 /// ```
 ///
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_unit {}
 
 // Required to make auto trait impls render.
 // See src/librustdoc/passes/collect_trait_impls.rs:collect_trait_impls
 #[doc(hidden)]
+#[cfg(feature = "uncertified")]
 impl () {}
 
 #[rustc_doc_primitive = "pointer"]
@@ -613,6 +617,7 @@ impl () {}
 /// [`write`]: ptr::write
 /// [valid]: ptr#safety
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_pointer {}
 
 #[rustc_doc_primitive = "array"]
@@ -621,209 +626,209 @@ mod prim_pointer {}
 #[doc(alias = "[T; N]")]
 /// A fixed-size array, denoted `[T; N]`, for the element type, `T`, and the
 /// non-negative compile-time constant size, `N`.
-///
-/// There are two syntactic forms for creating an array:
-///
-/// * A list with each element, i.e., `[x, y, z]`.
-/// * A repeat expression `[expr; N]` where `N` is how many times to repeat `expr` in the array. `expr` must either be:
-///
-///   * A value of a type implementing the [`Copy`] trait
-///   * A `const` value
-///
-/// Note that `[expr; 0]` is allowed, and produces an empty array.
-/// This will still evaluate `expr`, however, and immediately drop the resulting value, so
-/// be mindful of side effects.
-///
-/// Arrays of *any* size implement the following traits if the element type allows it:
-///
-/// - [`Copy`]
-/// - [`Clone`]
-/// - [`Debug`]
-/// - [`IntoIterator`] (implemented for `[T; N]`, `&[T; N]` and `&mut [T; N]`)
-/// - [`PartialEq`], [`PartialOrd`], [`Eq`], [`Ord`]
-/// - [`Hash`]
-/// - [`AsRef`], [`AsMut`]
-/// - [`Borrow`], [`BorrowMut`]
-///
-/// Arrays of sizes from 0 to 32 (inclusive) implement the [`Default`] trait
-/// if the element type allows it. As a stopgap, trait implementations are
-/// statically generated up to size 32.
-///
-/// Arrays of sizes from 1 to 12 (inclusive) implement [`From<Tuple>`], where `Tuple`
-/// is a homogeneous [prim@tuple] of appropriate length.
-///
-/// Arrays coerce to [slices (`[T]`)][slice], so a slice method may be called on
-/// an array. Indeed, this provides most of the API for working with arrays.
-///
-/// Slices have a dynamic size and do not coerce to arrays. Instead, use
-/// `slice.try_into().unwrap()` or `<ArrayType>::try_from(slice).unwrap()`.
-///
-/// Array's `try_from(slice)` implementations (and the corresponding `slice.try_into()`
-/// array implementations) succeed if the input slice length is the same as the result
-/// array length. They optimize especially well when the optimizer can easily determine
-/// the slice length, e.g. `<[u8; 4]>::try_from(&slice[4..8]).unwrap()`. Array implements
-/// [TryFrom](crate::convert::TryFrom) returning:
-///
-/// - `[T; N]` copies from the slice's elements
-/// - `&[T; N]` references the original slice's elements
-/// - `&mut [T; N]` references the original slice's elements
-///
-/// You can move elements out of an array with a [slice pattern]. If you want
-/// one element, see [`mem::replace`].
-///
-/// # Examples
-///
-/// ```
-/// let mut array: [i32; 3] = [0; 3];
-///
-/// array[1] = 1;
-/// array[2] = 2;
-///
-/// assert_eq!([1, 2], &array[1..]);
-///
-/// // This loop prints: 0 1 2
-/// for x in array {
-///     print!("{x} ");
-/// }
-/// ```
-///
-/// You can also iterate over reference to the array's elements:
-///
-/// ```
-/// let array: [i32; 3] = [0; 3];
-///
-/// for x in &array { }
-/// ```
-///
-/// You can use `<ArrayType>::try_from(slice)` or `slice.try_into()` to get an array from
-/// a slice:
-///
-/// ```
-/// let bytes: [u8; 3] = [1, 0, 2];
-/// assert_eq!(1, u16::from_le_bytes(<[u8; 2]>::try_from(&bytes[0..2]).unwrap()));
-/// assert_eq!(512, u16::from_le_bytes(bytes[1..3].try_into().unwrap()));
-/// ```
-///
-/// You can use a [slice pattern] to move elements out of an array:
-///
-/// ```
-/// fn move_away(_: String) { /* Do interesting things. */ }
-///
-/// let [john, roa] = ["John".to_string(), "Roa".to_string()];
-/// move_away(john);
-/// move_away(roa);
-/// ```
-///
-/// Arrays can be created from homogeneous tuples of appropriate length:
-///
-/// ```
-/// let tuple: (u32, u32, u32) = (1, 2, 3);
-/// let array: [u32; 3] = tuple.into();
-/// ```
-///
-/// # Editions
-///
-/// Prior to Rust 1.53, arrays did not implement [`IntoIterator`] by value, so the method call
-/// `array.into_iter()` auto-referenced into a [slice iterator](slice::iter). Right now, the old
-/// behavior is preserved in the 2015 and 2018 editions of Rust for compatibility, ignoring
-/// [`IntoIterator`] by value. In the future, the behavior on the 2015 and 2018 edition
-/// might be made consistent to the behavior of later editions.
-///
-/// ```rust,edition2018
-/// // Rust 2015 and 2018:
-///
-/// # #![allow(array_into_iter)] // override our `deny(warnings)`
-/// let array: [i32; 3] = [0; 3];
-///
-/// // This creates a slice iterator, producing references to each value.
-/// for item in array.into_iter().enumerate() {
-///     let (i, x): (usize, &i32) = item;
-///     println!("array[{i}] = {x}");
-/// }
-///
-/// // The `array_into_iter` lint suggests this change for future compatibility:
-/// for item in array.iter().enumerate() {
-///     let (i, x): (usize, &i32) = item;
-///     println!("array[{i}] = {x}");
-/// }
-///
-/// // You can explicitly iterate an array by value using `IntoIterator::into_iter`
-/// for item in IntoIterator::into_iter(array).enumerate() {
-///     let (i, x): (usize, i32) = item;
-///     println!("array[{i}] = {x}");
-/// }
-/// ```
-///
-/// Starting in the 2021 edition, `array.into_iter()` uses `IntoIterator` normally to iterate
-/// by value, and `iter()` should be used to iterate by reference like previous editions.
-///
-/// ```rust,edition2021
-/// // Rust 2021:
-///
-/// let array: [i32; 3] = [0; 3];
-///
-/// // This iterates by reference:
-/// for item in array.iter().enumerate() {
-///     let (i, x): (usize, &i32) = item;
-///     println!("array[{i}] = {x}");
-/// }
-///
-/// // This iterates by value:
-/// for item in array.into_iter().enumerate() {
-///     let (i, x): (usize, i32) = item;
-///     println!("array[{i}] = {x}");
-/// }
-/// ```
-///
-/// Future language versions might start treating the `array.into_iter()`
-/// syntax on editions 2015 and 2018 the same as on edition 2021. So code using
-/// those older editions should still be written with this change in mind, to
-/// prevent breakage in the future. The safest way to accomplish this is to
-/// avoid the `into_iter` syntax on those editions. If an edition update is not
-/// viable/desired, there are multiple alternatives:
-/// * use `iter`, equivalent to the old behavior, creating references
-/// * use [`IntoIterator::into_iter`], equivalent to the post-2021 behavior (Rust 1.53+)
-/// * replace `for ... in array.into_iter() {` with `for ... in array {`,
-///   equivalent to the post-2021 behavior (Rust 1.53+)
-///
-/// ```rust,edition2018
-/// // Rust 2015 and 2018:
-///
-/// let array: [i32; 3] = [0; 3];
-///
-/// // This iterates by reference:
-/// for item in array.iter() {
-///     let x: &i32 = item;
-///     println!("{x}");
-/// }
-///
-/// // This iterates by value:
-/// for item in IntoIterator::into_iter(array) {
-///     let x: i32 = item;
-///     println!("{x}");
-/// }
-///
-/// // This iterates by value:
-/// for item in array {
-///     let x: i32 = item;
-///     println!("{x}");
-/// }
-///
-/// // IntoIter can also start a chain.
-/// // This iterates by value:
-/// for item in IntoIterator::into_iter(array).enumerate() {
-///     let (i, x): (usize, i32) = item;
-///     println!("array[{i}] = {x}");
-/// }
-/// ```
-///
-/// [slice]: prim@slice
-/// [`Debug`]: fmt::Debug
-/// [`Hash`]: hash::Hash
-/// [`Borrow`]: borrow::Borrow
-/// [`BorrowMut`]: borrow::BorrowMut
-/// [slice pattern]: ../reference/patterns.html#slice-patterns
-/// [`From<Tuple>`]: convert::From
+// ///
+// /// There are two syntactic forms for creating an array:
+// ///
+// /// * A list with each element, i.e., `[x, y, z]`.
+// /// * A repeat expression `[expr; N]` where `N` is how many times to repeat `expr` in the array. `expr` must either be:
+// ///
+// ///   * A value of a type implementing the [`Copy`] trait
+// ///   * A `const` value
+// ///
+// /// Note that `[expr; 0]` is allowed, and produces an empty array.
+// /// This will still evaluate `expr`, however, and immediately drop the resulting value, so
+// /// be mindful of side effects.
+// ///
+// /// Arrays of *any* size implement the following traits if the element type allows it:
+// ///
+// /// - [`Copy`]
+// /// - [`Clone`]
+// /// - [`Debug`]
+// /// - [`IntoIterator`] (implemented for `[T; N]`, `&[T; N]` and `&mut [T; N]`)
+// /// - [`PartialEq`], [`PartialOrd`], [`Eq`], [`Ord`]
+// /// - [`Hash`]
+// /// - [`AsRef`], [`AsMut`]
+// /// - [`Borrow`], [`BorrowMut`]
+// ///
+// /// Arrays of sizes from 0 to 32 (inclusive) implement the [`Default`] trait
+// /// if the element type allows it. As a stopgap, trait implementations are
+// /// statically generated up to size 32.
+// ///
+// /// Arrays of sizes from 1 to 12 (inclusive) implement [`From<Tuple>`], where `Tuple`
+// /// is a homogeneous [prim@tuple] of appropriate length.
+// ///
+// /// Arrays coerce to [slices (`[T]`)][slice], so a slice method may be called on
+// /// an array. Indeed, this provides most of the API for working with arrays.
+// ///
+// /// Slices have a dynamic size and do not coerce to arrays. Instead, use
+// /// `slice.try_into().unwrap()` or `<ArrayType>::try_from(slice).unwrap()`.
+// ///
+// /// Array's `try_from(slice)` implementations (and the corresponding `slice.try_into()`
+// /// array implementations) succeed if the input slice length is the same as the result
+// /// array length. They optimize especially well when the optimizer can easily determine
+// /// the slice length, e.g. `<[u8; 4]>::try_from(&slice[4..8]).unwrap()`. Array implements
+// /// [TryFrom](crate::convert::TryFrom) returning:
+// ///
+// /// - `[T; N]` copies from the slice's elements
+// /// - `&[T; N]` references the original slice's elements
+// /// - `&mut [T; N]` references the original slice's elements
+// ///
+// /// You can move elements out of an array with a [slice pattern]. If you want
+// /// one element, see [`mem::replace`].
+// ///
+// /// # Examples
+// ///
+// /// ```
+// /// let mut array: [i32; 3] = [0; 3];
+// ///
+// /// array[1] = 1;
+// /// array[2] = 2;
+// ///
+// /// assert_eq!([1, 2], &array[1..]);
+// ///
+// /// // // This loop prints: 0 1 2
+// /// for x in array {
+// ///     print!("{x} ");
+// /// }
+// /// ```
+// ///
+// /// You can also iterate over reference to the array's elements:
+// ///
+// /// ```
+// /// let array: [i32; 3] = [0; 3];
+// ///
+// /// for x in &array { }
+// /// ```
+// ///
+// /// You can use `<ArrayType>::try_from(slice)` or `slice.try_into()` to get an array from
+// /// a slice:
+// ///
+// /// ```
+// /// let bytes: [u8; 3] = [1, 0, 2];
+// /// assert_eq!(1, u16::from_le_bytes(<[u8; 2]>::try_from(&bytes[0..2]).unwrap()));
+// /// assert_eq!(512, u16::from_le_bytes(bytes[1..3].try_into().unwrap()));
+// /// ```
+// ///
+// /// You can use a [slice pattern] to move elements out of an array:
+// ///
+// /// ```
+// /// fn move_away(_: String) { /* Do interesting things. */ }
+// ///
+// /// let [john, roa] = ["John".to_string(), "Roa".to_string()];
+// /// move_away(john);
+// /// move_away(roa);
+// /// ```
+// ///
+// /// Arrays can be created from homogeneous tuples of appropriate length:
+// ///
+// /// ```
+// /// let tuple: (u32, u32, u32) = (1, 2, 3);
+// /// let array: [u32; 3] = tuple.into();
+// /// ```
+// ///
+// /// # Editions
+// ///
+// /// Prior to Rust 1.53, arrays did not implement [`IntoIterator`] by value, so the method call
+// /// `array.into_iter()` auto-referenced into a [slice iterator](slice::iter). Right now, the old
+// /// behavior is preserved in the 2015 and 2018 editions of Rust for compatibility, ignoring
+// /// [`IntoIterator`] by value. In the future, the behavior on the 2015 and 2018 edition
+// /// might be made consistent to the behavior of later editions.
+// ///
+// /// ```rust,edition2018
+// /// // // Rust 2015 and 2018:
+// ///
+// /// # #![allow(array_into_iter)] // // override our `deny(warnings)`
+// /// let array: [i32; 3] = [0; 3];
+// ///
+// /// // // This creates a slice iterator, producing references to each value.
+// /// for item in array.into_iter().enumerate() {
+// ///     let (i, x): (usize, &i32) = item;
+// ///     println!("array[{i}] = {x}");
+// /// }
+// ///
+// /// // // The `array_into_iter` lint suggests this change for future compatibility:
+// /// for item in array.iter().enumerate() {
+// ///     let (i, x): (usize, &i32) = item;
+// ///     println!("array[{i}] = {x}");
+// /// }
+// ///
+// /// // // You can explicitly iterate an array by value using `IntoIterator::into_iter`
+// /// for item in IntoIterator::into_iter(array).enumerate() {
+// ///     let (i, x): (usize, i32) = item;
+// ///     println!("array[{i}] = {x}");
+// /// }
+// /// ```
+// ///
+// /// Starting in the 2021 edition, `array.into_iter()` uses `IntoIterator` normally to iterate
+// /// by value, and `iter()` should be used to iterate by reference like previous editions.
+// ///
+// /// ```rust,edition2021
+// /// // // Rust 2021:
+// ///
+// /// let array: [i32; 3] = [0; 3];
+// ///
+// /// // // This iterates by reference:
+// /// for item in array.iter().enumerate() {
+// ///     let (i, x): (usize, &i32) = item;
+// ///     println!("array[{i}] = {x}");
+// /// }
+// ///
+// /// // // This iterates by value:
+// /// for item in array.into_iter().enumerate() {
+// ///     let (i, x): (usize, i32) = item;
+// ///     println!("array[{i}] = {x}");
+// /// }
+// /// ```
+// ///
+// /// Future language versions might start treating the `array.into_iter()`
+// /// syntax on editions 2015 and 2018 the same as on edition 2021. So code using
+// /// those older editions should still be written with this change in mind, to
+// /// prevent breakage in the future. The safest way to accomplish this is to
+// /// avoid the `into_iter` syntax on those editions. If an edition update is not
+// /// viable/desired, there are multiple alternatives:
+// /// * use `iter`, equivalent to the old behavior, creating references
+// /// * use [`IntoIterator::into_iter`], equivalent to the post-2021 behavior (Rust 1.53+)
+// /// * replace `for ... in array.into_iter() {` with `for ... in array {`,
+// ///   equivalent to the post-2021 behavior (Rust 1.53+)
+// ///
+// /// ```rust,edition2018
+// /// // // Rust 2015 and 2018:
+// ///
+// /// let array: [i32; 3] = [0; 3];
+// ///
+// /// // // This iterates by reference:
+// /// for item in array.iter() {
+// ///     let x: &i32 = item;
+// ///     println!("{x}");
+// /// }
+// ///
+// /// // // This iterates by value:
+// /// for item in IntoIterator::into_iter(array) {
+// ///     let x: i32 = item;
+// ///     println!("{x}");
+// /// }
+// ///
+// /// // // This iterates by value:
+// /// for item in array {
+// ///     let x: i32 = item;
+// ///     println!("{x}");
+// /// }
+// ///
+// /// // // IntoIter can also start a chain.
+// /// // // This iterates by value:
+// /// for item in IntoIterator::into_iter(array).enumerate() {
+// ///     let (i, x): (usize, i32) = item;
+// ///     println!("array[{i}] = {x}");
+// /// }
+// /// ```
+// ///
+// /// [slice]: prim@slice
+// /// [`Debug`]: fmt::Debug
+// /// [`Hash`]: hash::Hash
+// /// [`Borrow`]: borrow::Borrow
+// /// [`BorrowMut`]: borrow::BorrowMut
+// /// [slice pattern]: ../reference/patterns.html#slice-patterns
+// /// [`From<Tuple>`]: convert::From
 #[stable(feature = "rust1", since = "1.0.0")]
 mod prim_array {}
 
@@ -939,6 +944,7 @@ mod prim_array {}
 /// [`.chunks`]: slice::chunks
 /// [`.windows`]: slice::windows
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_slice {}
 
 #[rustc_doc_primitive = "str"]
@@ -1012,6 +1018,7 @@ mod prim_slice {}
 /// called on a string slice may assume that it is valid UTF-8, which means that a non-UTF-8 string
 /// slice can lead to undefined behavior down the road.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_str {}
 
 #[rustc_doc_primitive = "tuple"]
@@ -1139,6 +1146,7 @@ mod prim_str {}
 /// ```
 ///
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_tuple {}
 
 // Required to make auto trait impls render.
@@ -1164,6 +1172,7 @@ impl<T> (T,) {}
 ///
 /// [wikipedia]: https://en.wikipedia.org/wiki/Half-precision_floating-point_format
 #[unstable(feature = "f16", issue = "116909")]
+#[cfg(feature = "uncertified")]
 mod prim_f16 {}
 
 #[rustc_doc_primitive = "f32"]
@@ -1362,6 +1371,7 @@ mod prim_f16 {}
 /// ```
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_f32 {}
 
 #[rustc_doc_primitive = "f64"]
@@ -1376,6 +1386,7 @@ mod prim_f32 {}
 ///
 /// [wikipedia]: https://en.wikipedia.org/wiki/Double-precision_floating-point_format
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_f64 {}
 
 #[rustc_doc_primitive = "f128"]
@@ -1399,66 +1410,77 @@ mod prim_f64 {}
 ///
 /// [wikipedia]: https://en.wikipedia.org/wiki/Quadruple-precision_floating-point_format
 #[unstable(feature = "f128", issue = "116909")]
+#[cfg(feature = "uncertified")]
 mod prim_f128 {}
 
 #[rustc_doc_primitive = "i8"]
 //
 /// The 8-bit signed integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_i8 {}
 
 #[rustc_doc_primitive = "i16"]
 //
 /// The 16-bit signed integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_i16 {}
 
 #[rustc_doc_primitive = "i32"]
 //
 /// The 32-bit signed integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_i32 {}
 
 #[rustc_doc_primitive = "i64"]
 //
 /// The 64-bit signed integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_i64 {}
 
 #[rustc_doc_primitive = "i128"]
 //
 /// The 128-bit signed integer type.
 #[stable(feature = "i128", since = "1.26.0")]
+#[cfg(feature = "uncertified")]
 mod prim_i128 {}
 
 #[rustc_doc_primitive = "u8"]
 //
 /// The 8-bit unsigned integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_u8 {}
 
 #[rustc_doc_primitive = "u16"]
 //
 /// The 16-bit unsigned integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_u16 {}
 
 #[rustc_doc_primitive = "u32"]
 //
 /// The 32-bit unsigned integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_u32 {}
 
 #[rustc_doc_primitive = "u64"]
 //
 /// The 64-bit unsigned integer type.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_u64 {}
 
 #[rustc_doc_primitive = "u128"]
 //
 /// The 128-bit unsigned integer type.
 #[stable(feature = "i128", since = "1.26.0")]
+#[cfg(feature = "uncertified")]
 mod prim_u128 {}
 
 #[rustc_doc_primitive = "isize"]
@@ -1469,6 +1491,7 @@ mod prim_u128 {}
 /// location in memory. For example, on a 32 bit target, this is 4 bytes
 /// and on a 64 bit target, this is 8 bytes.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_isize {}
 
 #[rustc_doc_primitive = "usize"]
@@ -1479,6 +1502,7 @@ mod prim_isize {}
 /// location in memory. For example, on a 32 bit target, this is 4 bytes
 /// and on a 64 bit target, this is 8 bytes.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_usize {}
 
 #[rustc_doc_primitive = "reference"]
@@ -1486,160 +1510,160 @@ mod prim_usize {}
 #[doc(alias = "&mut")]
 //
 /// References, `&T` and `&mut T`.
-///
-/// A reference represents a borrow of some owned value. You can get one by using the `&` or `&mut`
-/// operators on a value, or by using a [`ref`](../std/keyword.ref.html) or
-/// <code>[ref](../std/keyword.ref.html) [mut](../std/keyword.mut.html)</code> pattern.
-///
-/// For those familiar with pointers, a reference is just a pointer that is assumed to be
-/// aligned, not null, and pointing to memory containing a valid value of `T` - for example,
-/// <code>&[bool]</code> can only point to an allocation containing the integer values `1`
-/// ([`true`](../std/keyword.true.html)) or `0` ([`false`](../std/keyword.false.html)), but
-/// creating a <code>&[bool]</code> that points to an allocation containing
-/// the value `3` causes undefined behavior.
-/// In fact, <code>[Option]\<&T></code> has the same memory representation as a
-/// nullable but aligned pointer, and can be passed across FFI boundaries as such.
-///
-/// In most cases, references can be used much like the original value. Field access, method
-/// calling, and indexing work the same (save for mutability rules, of course). In addition, the
-/// comparison operators transparently defer to the referent's implementation, allowing references
-/// to be compared the same as owned values.
-///
-/// References have a lifetime attached to them, which represents the scope for which the borrow is
-/// valid. A lifetime is said to "outlive" another one if its representative scope is as long or
-/// longer than the other. The `'static` lifetime is the longest lifetime, which represents the
-/// total life of the program. For example, string literals have a `'static` lifetime because the
-/// text data is embedded into the binary of the program, rather than in an allocation that needs
-/// to be dynamically managed.
-///
-/// `&mut T` references can be freely coerced into `&T` references with the same referent type, and
-/// references with longer lifetimes can be freely coerced into references with shorter ones.
-///
-/// Reference equality by address, instead of comparing the values pointed to, is accomplished via
-/// implicit reference-pointer coercion and raw pointer equality via [`ptr::eq`], while
-/// [`PartialEq`] compares values.
-///
-/// ```
-/// use std::ptr;
-///
-/// let five = 5;
-/// let other_five = 5;
-/// let five_ref = &five;
-/// let same_five_ref = &five;
-/// let other_five_ref = &other_five;
-///
-/// assert!(five_ref == same_five_ref);
-/// assert!(five_ref == other_five_ref);
-///
-/// assert!(ptr::eq(five_ref, same_five_ref));
-/// assert!(!ptr::eq(five_ref, other_five_ref));
-/// ```
-///
-/// For more information on how to use references, see [the book's section on "References and
-/// Borrowing"][book-refs].
-///
-/// [book-refs]: ../book/ch04-02-references-and-borrowing.html
-///
-/// # Trait implementations
-///
-/// The following traits are implemented for all `&T`, regardless of the type of its referent:
-///
-/// * [`Copy`]
-/// * [`Clone`] \(Note that this will not defer to `T`'s `Clone` implementation if it exists!)
-/// * [`Deref`]
-/// * [`Borrow`]
-/// * [`fmt::Pointer`]
-///
-/// [`Deref`]: ops::Deref
-/// [`Borrow`]: borrow::Borrow
-///
-/// `&mut T` references get all of the above except `Copy` and `Clone` (to prevent creating
-/// multiple simultaneous mutable borrows), plus the following, regardless of the type of its
-/// referent:
-///
-/// * [`DerefMut`]
-/// * [`BorrowMut`]
-///
-/// [`DerefMut`]: ops::DerefMut
-/// [`BorrowMut`]: borrow::BorrowMut
-/// [bool]: prim@bool
-///
-/// The following traits are implemented on `&T` references if the underlying `T` also implements
-/// that trait:
-///
-/// * All the traits in [`std::fmt`] except [`fmt::Pointer`] (which is implemented regardless of the type of its referent) and [`fmt::Write`]
-/// * [`PartialOrd`]
-/// * [`Ord`]
-/// * [`PartialEq`]
-/// * [`Eq`]
-/// * [`AsRef`]
-/// * [`Fn`] \(in addition, `&T` references get [`FnMut`] and [`FnOnce`] if `T: Fn`)
-/// * [`Hash`]
-/// * [`ToSocketAddrs`]
-/// * [`Sync`]
-///
-/// [`std::fmt`]: fmt
-/// [`Hash`]: hash::Hash
-/// [`ToSocketAddrs`]: ../std/net/trait.ToSocketAddrs.html
-///
-/// `&mut T` references get all of the above except `ToSocketAddrs`, plus the following, if `T`
-/// implements that trait:
-///
-/// * [`AsMut`]
-/// * [`FnMut`] \(in addition, `&mut T` references get [`FnOnce`] if `T: FnMut`)
-/// * [`fmt::Write`]
-/// * [`Iterator`]
-/// * [`DoubleEndedIterator`]
-/// * [`ExactSizeIterator`]
-/// * [`FusedIterator`]
-/// * [`TrustedLen`]
-/// * [`Send`]
-/// * [`io::Write`]
-/// * [`Read`]
-/// * [`Seek`]
-/// * [`BufRead`]
-///
-/// [`FusedIterator`]: iter::FusedIterator
-/// [`TrustedLen`]: iter::TrustedLen
-/// [`Seek`]: ../std/io/trait.Seek.html
-/// [`BufRead`]: ../std/io/trait.BufRead.html
-/// [`Read`]: ../std/io/trait.Read.html
-/// [`io::Write`]: ../std/io/trait.Write.html
-///
-/// In addition, `&T` references implement [`Send`] if and only if `T` implements [`Sync`].
-///
-/// Note that due to method call deref coercion, simply calling a trait method will act like they
-/// work on references as well as they do on owned values! The implementations described here are
-/// meant for generic contexts, where the final type `T` is a type parameter or otherwise not
-/// locally known.
-///
-/// # Safety
-///
-/// For all types, `T: ?Sized`, and for all `t: &T` or `t: &mut T`, when such values cross an API
-/// boundary, the following invariants must generally be upheld:
-///
-/// * `t` is non-null
-/// * `t` is aligned to `align_of_val(t)`
-/// * if `size_of_val(t) > 0`, then `t` is dereferenceable for `size_of_val(t)` many bytes
-///
-/// If `t` points at address `a`, being "dereferenceable" for N bytes means that the memory range
-/// `[a, a + N)` is all contained within a single [allocated object].
-///
-/// For instance, this means that unsafe code in a safe function may assume these invariants are
-/// ensured of arguments passed by the caller, and it may assume that these invariants are ensured
-/// of return values from any safe functions it calls.
-///
-/// For the other direction, things are more complicated: when unsafe code passes arguments
-/// to safe functions or returns values from safe functions, they generally must *at least*
-/// not violate these invariants. The full requirements are stronger, as the reference generally
-/// must point to data that is safe to use at type `T`.
-///
-/// It is not decided yet whether unsafe code may violate these invariants temporarily on internal
-/// data. As a consequence, unsafe code which violates these invariants temporarily on internal data
-/// may be unsound or become unsound in future versions of Rust depending on how this question is
-/// decided.
-///
-/// [allocated object]: ptr#allocated-object
+// ///
+// /// A reference represents a borrow of some owned value. You can get one by using the `&` or `&mut`
+// /// operators on a value, or by using a [`ref`](../std/keyword.ref.html) or
+// /// <code>[ref](../std/keyword.ref.html) [mut](../std/keyword.mut.html)</code> pattern.
+// ///
+// /// For those familiar with pointers, a reference is just a pointer that is assumed to be
+// /// aligned, not null, and pointing to memory containing a valid value of `T` - for example,
+// /// <code>&[bool]</code> can only point to an allocation containing the integer values `1`
+// /// ([`true`](../std/keyword.true.html)) or `0` ([`false`](../std/keyword.false.html)), but
+// /// creating a <code>&[bool]</code> that points to an allocation containing
+// /// the value `3` causes undefined behavior.
+// /// In fact, <code>[Option]\<&T></code> has the same memory representation as a
+// /// nullable but aligned pointer, and can be passed across FFI boundaries as such.
+// ///
+// /// In most cases, references can be used much like the original value. Field access, method
+// /// calling, and indexing work the same (save for mutability rules, of course). In addition, the
+// /// comparison operators transparently defer to the referent's implementation, allowing references
+// /// to be compared the same as owned values.
+// ///
+// /// References have a lifetime attached to them, which represents the scope for which the borrow is
+// /// valid. A lifetime is said to "outlive" another one if its representative scope is as long or
+// /// longer than the other. The `'static` lifetime is the longest lifetime, which represents the
+// /// total life of the program. For example, string literals have a `'static` lifetime because the
+// /// text data is embedded into the binary of the program, rather than in an allocation that needs
+// /// to be dynamically managed.
+// ///
+// /// `&mut T` references can be freely coerced into `&T` references with the same referent type, and
+// /// references with longer lifetimes can be freely coerced into references with shorter ones.
+// ///
+// /// Reference equality by address, instead of comparing the values pointed to, is accomplished via
+// /// implicit reference-pointer coercion and raw pointer equality via [`ptr::eq`], while
+// /// [`PartialEq`] compares values.
+// ///
+// /// ```
+// /// use std::ptr;
+// ///
+// /// let five = 5;
+// /// let other_five = 5;
+// /// let five_ref = &five;
+// /// let same_five_ref = &five;
+// /// let other_five_ref = &other_five;
+// ///
+// /// assert!(five_ref == same_five_ref);
+// /// assert!(five_ref == other_five_ref);
+// ///
+// /// assert!(ptr::eq(five_ref, same_five_ref));
+// /// assert!(!ptr::eq(five_ref, other_five_ref));
+// /// ```
+// ///
+// /// For more information on how to use references, see [the book's section on "References and
+// /// Borrowing"][book-refs].
+// ///
+// /// [book-refs]: ../book/ch04-02-references-and-borrowing.html
+// ///
+// /// # Trait implementations
+// ///
+// /// The following traits are implemented for all `&T`, regardless of the type of its referent:
+// ///
+// /// * [`Copy`]
+// /// * [`Clone`] \(Note that this will not defer to `T`'s `Clone` implementation if it exists!)
+// /// * [`Deref`]
+// /// * [`Borrow`]
+// /// * [`fmt::Pointer`]
+// ///
+// /// [`Deref`]: ops::Deref
+// /// [`Borrow`]: borrow::Borrow
+// ///
+// /// `&mut T` references get all of the above except `Copy` and `Clone` (to prevent creating
+// /// multiple simultaneous mutable borrows), plus the following, regardless of the type of its
+// /// referent:
+// ///
+// /// * [`DerefMut`]
+// /// * [`BorrowMut`]
+// ///
+// /// [`DerefMut`]: ops::DerefMut
+// /// [`BorrowMut`]: borrow::BorrowMut
+// /// [bool]: prim@bool
+// ///
+// /// The following traits are implemented on `&T` references if the underlying `T` also implements
+// /// that trait:
+// ///
+// /// * All the traits in [`std::fmt`] except [`fmt::Pointer`] (which is implemented regardless of the type of its referent) and [`fmt::Write`]
+// /// * [`PartialOrd`]
+// /// * [`Ord`]
+// /// * [`PartialEq`]
+// /// * [`Eq`]
+// /// * [`AsRef`]
+// /// * [`Fn`] \(in addition, `&T` references get [`FnMut`] and [`FnOnce`] if `T: Fn`)
+// /// * [`Hash`]
+// /// * [`ToSocketAddrs`]
+// /// * [`Sync`]
+// ///
+// /// [`std::fmt`]: fmt
+// /// [`Hash`]: hash::Hash
+// /// [`ToSocketAddrs`]: ../std/net/trait.ToSocketAddrs.html
+// ///
+// /// `&mut T` references get all of the above except `ToSocketAddrs`, plus the following, if `T`
+// /// implements that trait:
+// ///
+// /// * [`AsMut`]
+// /// * [`FnMut`] \(in addition, `&mut T` references get [`FnOnce`] if `T: FnMut`)
+// /// * [`fmt::Write`]
+// /// * [`Iterator`]
+// /// * [`DoubleEndedIterator`]
+// /// * [`ExactSizeIterator`]
+// /// * [`FusedIterator`]
+// /// * [`TrustedLen`]
+// /// * [`Send`]
+// /// * [`io::Write`]
+// /// * [`Read`]
+// /// * [`Seek`]
+// /// * [`BufRead`]
+// ///
+// /// [`FusedIterator`]: iter::FusedIterator
+// /// [`TrustedLen`]: iter::TrustedLen
+// /// [`Seek`]: ../std/io/trait.Seek.html
+// /// [`BufRead`]: ../std/io/trait.BufRead.html
+// /// [`Read`]: ../std/io/trait.Read.html
+// /// [`io::Write`]: ../std/io/trait.Write.html
+// ///
+// /// In addition, `&T` references implement [`Send`] if and only if `T` implements [`Sync`].
+// ///
+// /// Note that due to method call deref coercion, simply calling a trait method will act like they
+// /// work on references as well as they do on owned values! The implementations described here are
+// /// meant for generic contexts, where the final type `T` is a type parameter or otherwise not
+// /// locally known.
+// ///
+// /// # Safety
+// ///
+// /// For all types, `T: ?Sized`, and for all `t: &T` or `t: &mut T`, when such values cross an API
+// /// boundary, the following invariants must generally be upheld:
+// ///
+// /// * `t` is non-null
+// /// * `t` is aligned to `align_of_val(t)`
+// /// * if `size_of_val(t) > 0`, then `t` is dereferenceable for `size_of_val(t)` many bytes
+// ///
+// /// If `t` points at address `a`, being "dereferenceable" for N bytes means that the memory range
+// /// `[a, a + N)` is all contained within a single [allocated object].
+// ///
+// /// For instance, this means that unsafe code in a safe function may assume these invariants are
+// /// ensured of arguments passed by the caller, and it may assume that these invariants are ensured
+// /// of return values from any safe functions it calls.
+// ///
+// /// For the other direction, things are more complicated: when unsafe code passes arguments
+// /// to safe functions or returns values from safe functions, they generally must *at least*
+// /// not violate these invariants. The full requirements are stronger, as the reference generally
+// /// must point to data that is safe to use at type `T`.
+// ///
+// /// It is not decided yet whether unsafe code may violate these invariants temporarily on internal
+// /// data. As a consequence, unsafe code which violates these invariants temporarily on internal data
+// /// may be unsound or become unsound in future versions of Rust depending on how this question is
+// /// decided.
+// ///
+// /// [allocated object]: ptr#allocated-object
 #[stable(feature = "rust1", since = "1.0.0")]
 mod prim_ref {}
 
@@ -1910,6 +1934,7 @@ mod prim_ref {}
 /// In addition, all *safe* function pointers implement [`Fn`], [`FnMut`], and [`FnOnce`], because
 /// these traits are specially known to the compiler.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 mod prim_fn {}
 
 // Required to make auto trait impls render.

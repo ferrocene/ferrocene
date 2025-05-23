@@ -1,5 +1,5 @@
 //@ check-fail
-//@ compile-flags: --edition=foo
+//@ edition: foo
 
 fn main() {}
 

@@ -1,5 +1,6 @@
 //@ check-fail
-//@ compile-flags:--extern some_crate --edition 2018
+//@ compile-flags:--extern some_crate
+//@ edition: 2018
 
 struct Foo;
 

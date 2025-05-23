@@ -1,5 +1,6 @@
 //@ check-pass
-//@ compile-flags:--extern some_crate --edition 2021
+//@ compile-flags:--extern some_crate
+//@ edition: 2021
 
 struct Foo;
 

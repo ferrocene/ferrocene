@@ -142,7 +142,6 @@
 mod arith;
 #[cfg(feature = "uncertified")]
 mod async_function;
-#[cfg(feature = "uncertified")]
 mod bit;
 #[cfg(feature = "uncertified")]
 mod control_flow;
@@ -171,6 +170,7 @@ pub use self::arith::{AddAssign, DivAssign, MulAssign, RemAssign, SubAssign};
 #[cfg(feature = "uncertified")]
 pub use self::async_function::{AsyncFn, AsyncFnMut, AsyncFnOnce};
 #[stable(feature = "rust1", since = "1.0.0")]
+pub use self::bit::Not;
 #[cfg(feature = "uncertified")]
 pub use self::bit::{BitAnd, BitOr, BitXor, Not, Shl, Shr};
 #[stable(feature = "op_assign_traits", since = "1.8.0")]

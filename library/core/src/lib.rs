@@ -242,7 +242,6 @@ pub mod contracts;
 pub use crate::macros::cfg_match;
 
 #[macro_use]
-#[cfg(feature = "uncertified")]
 mod internal_macros;
 
 #[path = "num/shells/int_macros.rs"]

@@ -1967,8 +1967,6 @@ impl<T> Option<&T> {
     /// ```
     #[must_use = "`self` will be dropped if the result is not used"]
     #[stable(feature = "rust1", since = "1.0.0")]
-    // Uncertified because ICE "error performing operation: fully_perform"
-    #[cfg(feature = "uncertified")]
     pub fn cloned(self) -> Option<T>
     where
         T: Clone,
@@ -2085,7 +2083,6 @@ const fn expect_failed(msg: &str) -> ! {
 /////////////////////////////////////////////////////////////////////////////
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "uncertified")]
 impl<T> Clone for Option<T>
 where
     T: Clone,

@@ -469,7 +469,6 @@ impl Copy for ! {}
 
 /// Shared references can be copied, but mutable references *cannot*!
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "uncertified")]
 impl<T: ?Sized> Copy for &T {}
 
 /// Marker trait for the types that are allowed in union fields and unsafe

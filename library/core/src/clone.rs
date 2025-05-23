@@ -561,7 +561,6 @@ mod impls {
     }
 
     /// Shared references can be cloned, but mutable references *cannot*!
-    #[cfg(feature = "uncertified")]
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> Clone for &T {
         #[inline(always)]

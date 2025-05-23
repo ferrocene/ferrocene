@@ -1728,7 +1728,7 @@ impl<T, E> Result<Result<T, E>, E> {
     #[inline]
     #[unstable(feature = "result_flattening", issue = "70142")]
     #[rustc_const_unstable(feature = "result_flattening", issue = "70142")]
-    #[cfg(feature = "uncertified")] /* blocked on impl Drop for Result */
+    #[cfg(feature = "uncertified")] /* blocked on const impl Drop for Result<Result<T, E>> */
     pub const fn flatten(self) -> Result<T, E> {
         // FIXME(const-hack): could be written with `and_then`
         match self {

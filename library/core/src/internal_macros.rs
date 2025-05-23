@@ -20,7 +20,6 @@ macro_rules! forward_ref_unop {
 
 // implements binary operators "&T op U", "T op &U", "&T op &U"
 // based on "T op U" where T and U are expected to be `Copy`able
-#[cfg(feature = "uncertified")]
 macro_rules! forward_ref_binop {
     (impl $imp:ident, $method:ident for $t:ty, $u:ty) => {
         forward_ref_binop!(impl $imp, $method for $t, $u,
@@ -64,7 +63,6 @@ macro_rules! forward_ref_binop {
 
 // implements "T op= &U", based on "T op= U"
 // where U is expected to be `Copy`able
-#[cfg(feature = "uncertified")]
 macro_rules! forward_ref_op_assign {
     (impl $imp:ident, $method:ident for $t:ty, $u:ty) => {
         forward_ref_op_assign!(impl $imp, $method for $t, $u,

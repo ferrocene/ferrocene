@@ -587,7 +587,7 @@ use crate::{cmp, convert, hint, mem, slice};
 
 /// The `Option` type. See [the module level documentation](self) for more.
 #[doc(search_unbox)]
-// #[derive(Copy, Eq, Debug, Hash)]
+#[cfg_attr(feature = "uncertified", derive(Copy, Eq, Debug, Hash))]
 #[rustc_diagnostic_item = "Option"]
 #[lang = "Option"]
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -2296,7 +2296,7 @@ impl<T: Ord> Ord for Option<T> {
 // The Option Iterators
 /////////////////////////////////////////////////////////////////////////////
 
-// #[derive(Clone, Debug)]
+#[cfg_attr(feature = "uncertified", derive(Clone, Debug))]
 struct Item<A> {
     #[allow(dead_code)]
     opt: Option<A>,
@@ -2344,9 +2344,9 @@ unsafe impl<A> TrustedLen for Item<A> {}
 ///
 /// This `struct` is created by the [`Option::iter`] function.
 #[stable(feature = "rust1", since = "1.0.0")]
-// #[derive(Debug)]
+#[cfg_attr(feature = "uncertified", derive(Debug))]
 pub struct Iter<'a, A: 'a> {
-    #[allow(dead_code)]
+    #[cfg_attr(not(feature = "uncertified"), allow(dead_code))]
     inner: Item<&'a A>,
 }
 
@@ -2401,9 +2401,9 @@ impl<A> Clone for Iter<'_, A> {
 ///
 /// This `struct` is created by the [`Option::iter_mut`] function.
 #[stable(feature = "rust1", since = "1.0.0")]
-// #[derive(Debug)]
+#[cfg_attr(feature = "uncertified", derive(Debug))]
 pub struct IterMut<'a, A: 'a> {
-    #[allow(dead_code)]
+    #[cfg_attr(not(feature = "uncertified"), allow(dead_code))]
     inner: Item<&'a mut A>,
 }
 

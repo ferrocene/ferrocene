@@ -909,7 +909,7 @@ impl AsMut<str> for str {
 /// the two `impl`s will start to overlap
 /// and therefore will be disallowed by the language’s trait coherence rules.
 #[stable(feature = "convert_infallible", since = "1.34.0")]
-// #[derive(Copy)]
+#[cfg_attr(feature = "uncertified", derive(Copy))]
 pub enum Infallible {}
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]

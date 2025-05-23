@@ -507,7 +507,6 @@ unsafe impl CloneToUninit for crate::bstr::ByteStr {
 /// Implementations that cannot be described in Rust
 /// are implemented in `traits::SelectionContext::copy_clone_conditions()`
 /// in `rustc_trait_selection`.
-#[cfg(feature = "uncertified")]
 mod impls {
     macro_rules! impl_clone {
         ($($t:ty)*) => {
@@ -523,13 +522,18 @@ mod impls {
         }
     }
 
+    #[cfg(feature = "uncertified")]
     impl_clone! {
         usize u8 u16 u32 u64 u128
         isize i8 i16 i32 i64 i128
         f16 f32 f64 f128
         bool char
     }
+    impl_clone! {
+        bool
+    }
 
+    #[cfg(feature = "uncertified")]
     #[unstable(feature = "never_type", issue = "35121")]
     impl Clone for ! {
         #[inline]
@@ -538,6 +542,7 @@ mod impls {
         }
     }
 
+    #[cfg(feature = "uncertified")]
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> Clone for *const T {
         #[inline(always)]
@@ -546,6 +551,7 @@ mod impls {
         }
     }
 
+    #[cfg(feature = "uncertified")]
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> Clone for *mut T {
         #[inline(always)]
@@ -555,6 +561,7 @@ mod impls {
     }
 
     /// Shared references can be cloned, but mutable references *cannot*!
+    #[cfg(feature = "uncertified")]
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> Clone for &T {
         #[inline(always)]
@@ -565,6 +572,7 @@ mod impls {
     }
 
     /// Shared references can be cloned, but mutable references *cannot*!
+    #[cfg(feature = "uncertified")]
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> !Clone for &mut T {}
 }

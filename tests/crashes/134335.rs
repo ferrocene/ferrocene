@@ -1,5 +1,6 @@
 //@ known-bug: #134335
-//@compile-flags: -Zunstable-options --edition=2024 --crate-type=lib
+//@compile-flags: -Zunstable-options --crate-type=lib
+//@ edition: 2024
 pub async fn async_closure(x: &mut i32) {
     let c = async move || {
         *x += 1;

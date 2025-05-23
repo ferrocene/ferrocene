@@ -1,5 +1,6 @@
 //@ known-bug: #135128
-//@ compile-flags: -Copt-level=1 --edition=2021
+//@ compile-flags: -Copt-level=1
+//@ edition: 2021
 
 async fn return_str() -> str
 where

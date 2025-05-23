@@ -163,7 +163,6 @@
 #![cfg_attr(feature = "uncertified", feature(stmt_expr_attributes))]
 #![cfg_attr(feature = "uncertified", feature(trait_alias))]
 #![cfg_attr(feature = "uncertified", feature(transparent_unions))]
-#![cfg_attr(feature = "uncertified", feature(try_blocks))]
 #![cfg_attr(feature = "uncertified", feature(unsized_fn_params))]
 #![cfg_attr(feature = "uncertified", feature(with_negative_coherence))]
 #![feature(allow_internal_unsafe)]
@@ -183,6 +182,7 @@
 #![feature(rustdoc_internals)]
 #![feature(staged_api)]
 #![feature(strict_provenance_lints)]
+#![feature(try_blocks)]
 #![feature(unboxed_closures)]
 // tidy-alphabetical-end
 //
@@ -352,7 +352,6 @@ pub mod ops;
 
 #[cfg(feature = "uncertified")]
 pub mod any;
-#[cfg(feature = "uncertified")]
 pub mod array;
 #[cfg(feature = "uncertified")]
 pub mod ascii;

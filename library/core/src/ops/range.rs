@@ -1,48 +1,51 @@
+#[cfg(feature = "uncertified")]
 use crate::fmt;
+#[cfg(feature = "uncertified")]
 use crate::hash::Hash;
 
 /// An unbounded range (`..`).
-///
-/// `RangeFull` is primarily used as a [slicing index], its shorthand is `..`.
-/// It cannot serve as an [`Iterator`] because it doesn't have a starting point.
-///
-/// # Examples
-///
-/// The `..` syntax is a `RangeFull`:
-///
-/// ```
-/// assert_eq!(.., std::ops::RangeFull);
-/// ```
-///
-/// It does not have an [`IntoIterator`] implementation, so you can't use it in
-/// a `for` loop directly. This won't compile:
-///
-/// ```compile_fail,E0277
-/// for i in .. {
-///     // ...
-/// }
-/// ```
-///
-/// Used as a [slicing index], `RangeFull` produces the full array as a slice.
-///
-/// ```
-/// let arr = [0, 1, 2, 3, 4];
-/// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]); // This is the `RangeFull`
-/// assert_eq!(arr[ .. 3], [0, 1, 2      ]);
-/// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]);
-/// assert_eq!(arr[1..  ], [   1, 2, 3, 4]);
-/// assert_eq!(arr[1.. 3], [   1, 2      ]);
-/// assert_eq!(arr[1..=3], [   1, 2, 3   ]);
-/// ```
-///
-/// [slicing index]: crate::slice::SliceIndex
+// ///
+// /// `RangeFull` is primarily used as a [slicing index], its shorthand is `..`.
+// /// It cannot serve as an [`Iterator`] because it doesn't have a starting point.
+// ///
+// /// # Examples
+// ///
+// /// The `..` syntax is a `RangeFull`:
+// ///
+// /// ```
+// /// assert_eq!(.., std::ops::RangeFull);
+// /// ```
+// ///
+// /// It does not have an [`IntoIterator`] implementation, so you can't use it in
+// /// a `for` loop directly. This won't compile:
+// ///
+// /// ```compile_fail,E0277
+// /// for i in .. {
+// ///     // // ...
+// /// }
+// /// ```
+// ///
+// /// Used as a [slicing index], `RangeFull` produces the full array as a slice.
+// ///
+// /// ```
+// /// let arr = [0, 1, 2, 3, 4];
+// /// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]); // // This is the `RangeFull`
+// /// assert_eq!(arr[ .. 3], [0, 1, 2      ]);
+// /// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]);
+// /// assert_eq!(arr[1..  ], [   1, 2, 3, 4]);
+// /// assert_eq!(arr[1.. 3], [   1, 2      ]);
+// /// assert_eq!(arr[1..=3], [   1, 2, 3   ]);
+// /// ```
+// ///
+// /// [slicing index]: crate::slice::SliceIndex
 #[lang = "RangeFull"]
 #[doc(alias = "..")]
-#[derive(Copy, Clone, Default, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "uncertified", derive(Copy, Clone, Default, PartialEq, Eq, Hash))]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct RangeFull;
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl fmt::Debug for RangeFull {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "..")
@@ -75,7 +78,7 @@ impl fmt::Debug for RangeFull {
 /// ```
 #[lang = "Range"]
 #[doc(alias = "..")]
-#[derive(Clone, Default, PartialEq, Eq, Hash)] // not Copy -- see #27186
+#[cfg_attr(feature = "uncertified", derive(Clone, Default, PartialEq, Eq, Hash))] // not Copy -- see #27186
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct Range<Idx> {
     /// The lower bound of the range (inclusive).
@@ -87,6 +90,7 @@ pub struct Range<Idx> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<Idx: fmt::Debug> fmt::Debug for Range<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
@@ -96,6 +100,7 @@ impl<Idx: fmt::Debug> fmt::Debug for Range<Idx> {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<Idx: PartialOrd<Idx>> Range<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -150,41 +155,41 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
 }
 
 /// A range only bounded inclusively below (`start..`).
-///
-/// The `RangeFrom` `start..` contains all values with `x >= start`.
-///
-/// *Note*: Overflow in the [`Iterator`] implementation (when the contained
-/// data type reaches its numerical limit) is allowed to panic, wrap, or
-/// saturate. This behavior is defined by the implementation of the [`Step`]
-/// trait. For primitive integers, this follows the normal rules, and respects
-/// the overflow checks profile (panic in debug, wrap in release). Note also
-/// that overflow happens earlier than you might assume: the overflow happens
-/// in the call to `next` that yields the maximum value, as the range must be
-/// set to a state to yield the next value.
-///
-/// [`Step`]: crate::iter::Step
-///
-/// # Examples
-///
-/// The `start..` syntax is a `RangeFrom`:
-///
-/// ```
-/// assert_eq!((2..), std::ops::RangeFrom { start: 2 });
-/// assert_eq!(2 + 3 + 4, (2..).take(3).sum());
-/// ```
-///
-/// ```
-/// let arr = [0, 1, 2, 3, 4];
-/// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]);
-/// assert_eq!(arr[ .. 3], [0, 1, 2      ]);
-/// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]);
-/// assert_eq!(arr[1..  ], [   1, 2, 3, 4]); // This is a `RangeFrom`
-/// assert_eq!(arr[1.. 3], [   1, 2      ]);
-/// assert_eq!(arr[1..=3], [   1, 2, 3   ]);
-/// ```
+// ///
+// /// The `RangeFrom` `start..` contains all values with `x >= start`.
+// ///
+// /// *Note*: Overflow in the [`Iterator`] implementation (when the contained
+// /// data type reaches its numerical limit) is allowed to panic, wrap, or
+// /// saturate. This behavior is defined by the implementation of the [`Step`]
+// /// trait. For primitive integers, this follows the normal rules, and respects
+// /// the overflow checks profile (panic in debug, wrap in release). Note also
+// /// that overflow happens earlier than you might assume: the overflow happens
+// /// in the call to `next` that yields the maximum value, as the range must be
+// /// set to a state to yield the next value.
+// ///
+// /// [`Step`]: crate::iter::Step
+// ///
+// /// # Examples
+// ///
+// /// The `start..` syntax is a `RangeFrom`:
+// ///
+// /// ```
+// /// assert_eq!((2..), std::ops::RangeFrom { start: 2 });
+// /// assert_eq!(2 + 3 + 4, (2..).take(3).sum());
+// /// ```
+// ///
+// /// ```
+// /// let arr = [0, 1, 2, 3, 4];
+// /// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]);
+// /// assert_eq!(arr[ .. 3], [0, 1, 2      ]);
+// /// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]);
+// /// assert_eq!(arr[1..  ], [   1, 2, 3, 4]); // // This is a `RangeFrom`
+// /// assert_eq!(arr[1.. 3], [   1, 2      ]);
+// /// assert_eq!(arr[1..=3], [   1, 2, 3   ]);
+// /// ```
 #[lang = "RangeFrom"]
 #[doc(alias = "..")]
-#[derive(Clone, PartialEq, Eq, Hash)] // not Copy -- see #27186
+#[cfg_attr(feature = "uncertified", derive(Clone, PartialEq, Eq, Hash))] // not Copy -- see #27186
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct RangeFrom<Idx> {
     /// The lower bound of the range (inclusive).
@@ -193,6 +198,7 @@ pub struct RangeFrom<Idx> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<Idx: fmt::Debug> fmt::Debug for RangeFrom<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
@@ -201,6 +207,7 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeFrom<Idx> {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<Idx: PartialOrd<Idx>> RangeFrom<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -227,46 +234,46 @@ impl<Idx: PartialOrd<Idx>> RangeFrom<Idx> {
 }
 
 /// A range only bounded exclusively above (`..end`).
-///
-/// The `RangeTo` `..end` contains all values with `x < end`.
-/// It cannot serve as an [`Iterator`] because it doesn't have a starting point.
-///
-/// # Examples
-///
-/// The `..end` syntax is a `RangeTo`:
-///
-/// ```
-/// assert_eq!((..5), std::ops::RangeTo { end: 5 });
-/// ```
-///
-/// It does not have an [`IntoIterator`] implementation, so you can't use it in
-/// a `for` loop directly. This won't compile:
-///
-/// ```compile_fail,E0277
-/// // error[E0277]: the trait bound `std::ops::RangeTo<{integer}>:
-/// // std::iter::Iterator` is not satisfied
-/// for i in ..5 {
-///     // ...
-/// }
-/// ```
-///
-/// When used as a [slicing index], `RangeTo` produces a slice of all array
-/// elements before the index indicated by `end`.
-///
-/// ```
-/// let arr = [0, 1, 2, 3, 4];
-/// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]);
-/// assert_eq!(arr[ .. 3], [0, 1, 2      ]); // This is a `RangeTo`
-/// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]);
-/// assert_eq!(arr[1..  ], [   1, 2, 3, 4]);
-/// assert_eq!(arr[1.. 3], [   1, 2      ]);
-/// assert_eq!(arr[1..=3], [   1, 2, 3   ]);
-/// ```
-///
-/// [slicing index]: crate::slice::SliceIndex
+// ///
+// /// The `RangeTo` `..end` contains all values with `x < end`.
+// /// It cannot serve as an [`Iterator`] because it doesn't have a starting point.
+// ///
+// /// # Examples
+// ///
+// /// The `..end` syntax is a `RangeTo`:
+// ///
+// /// ```
+// /// assert_eq!((..5), std::ops::RangeTo { end: 5 });
+// /// ```
+// ///
+// /// It does not have an [`IntoIterator`] implementation, so you can't use it in
+// /// a `for` loop directly. This won't compile:
+// ///
+// /// ```compile_fail,E0277
+// /// // // error[E0277]: the trait bound `std::ops::RangeTo<{integer}>:
+// /// // // std::iter::Iterator` is not satisfied
+// /// for i in ..5 {
+// ///     // // ...
+// /// }
+// /// ```
+// ///
+// /// When used as a [slicing index], `RangeTo` produces a slice of all array
+// /// elements before the index indicated by `end`.
+// ///
+// /// ```
+// /// let arr = [0, 1, 2, 3, 4];
+// /// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]);
+// /// assert_eq!(arr[ .. 3], [0, 1, 2      ]); // // This is a `RangeTo`
+// /// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]);
+// /// assert_eq!(arr[1..  ], [   1, 2, 3, 4]);
+// /// assert_eq!(arr[1.. 3], [   1, 2      ]);
+// /// assert_eq!(arr[1..=3], [   1, 2, 3   ]);
+// /// ```
+// ///
+// /// [slicing index]: crate::slice::SliceIndex
 #[lang = "RangeTo"]
 #[doc(alias = "..")]
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "uncertified", derive(Copy, Clone, PartialEq, Eq, Hash))]
 #[stable(feature = "rust1", since = "1.0.0")]
 pub struct RangeTo<Idx> {
     /// The upper bound of the range (exclusive).
@@ -275,6 +282,7 @@ pub struct RangeTo<Idx> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<Idx: fmt::Debug> fmt::Debug for RangeTo<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "..")?;
@@ -283,6 +291,7 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeTo<Idx> {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<Idx: PartialOrd<Idx>> RangeTo<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -309,38 +318,38 @@ impl<Idx: PartialOrd<Idx>> RangeTo<Idx> {
 }
 
 /// A range bounded inclusively below and above (`start..=end`).
-///
-/// The `RangeInclusive` `start..=end` contains all values with `x >= start`
-/// and `x <= end`. It is empty unless `start <= end`.
-///
-/// This iterator is [fused], but the specific values of `start` and `end` after
-/// iteration has finished are **unspecified** other than that [`.is_empty()`]
-/// will return `true` once no more values will be produced.
-///
-/// [fused]: crate::iter::FusedIterator
-/// [`.is_empty()`]: RangeInclusive::is_empty
-///
-/// # Examples
-///
-/// The `start..=end` syntax is a `RangeInclusive`:
-///
-/// ```
-/// assert_eq!((3..=5), std::ops::RangeInclusive::new(3, 5));
-/// assert_eq!(3 + 4 + 5, (3..=5).sum());
-/// ```
-///
-/// ```
-/// let arr = [0, 1, 2, 3, 4];
-/// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]);
-/// assert_eq!(arr[ .. 3], [0, 1, 2      ]);
-/// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]);
-/// assert_eq!(arr[1..  ], [   1, 2, 3, 4]);
-/// assert_eq!(arr[1.. 3], [   1, 2      ]);
-/// assert_eq!(arr[1..=3], [   1, 2, 3   ]); // This is a `RangeInclusive`
-/// ```
+// ///
+// /// The `RangeInclusive` `start..=end` contains all values with `x >= start`
+// /// and `x <= end`. It is empty unless `start <= end`.
+// ///
+// /// This iterator is [fused], but the specific values of `start` and `end` after
+// /// iteration has finished are **unspecified** other than that [`.is_empty()`]
+// /// will return `true` once no more values will be produced.
+// ///
+// /// [fused]: crate::iter::FusedIterator
+// /// [`.is_empty()`]: RangeInclusive::is_empty
+// ///
+// /// # Examples
+// ///
+// /// The `start..=end` syntax is a `RangeInclusive`:
+// ///
+// /// ```
+// /// assert_eq!((3..=5), std::ops::RangeInclusive::new(3, 5));
+// /// assert_eq!(3 + 4 + 5, (3..=5).sum());
+// /// ```
+// ///
+// /// ```
+// /// let arr = [0, 1, 2, 3, 4];
+// /// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]);
+// /// assert_eq!(arr[ .. 3], [0, 1, 2      ]);
+// /// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]);
+// /// assert_eq!(arr[1..  ], [   1, 2, 3, 4]);
+// /// assert_eq!(arr[1.. 3], [   1, 2      ]);
+// /// assert_eq!(arr[1..=3], [   1, 2, 3   ]); // // This is a `RangeInclusive`
+// /// ```
 #[lang = "RangeInclusive"]
 #[doc(alias = "..=")]
-#[derive(Clone, PartialEq, Eq, Hash)] // not Copy -- see #27186
+#[cfg_attr(feature = "uncertified", derive(Clone, PartialEq, Eq, Hash))] // not Copy -- see #27186
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 pub struct RangeInclusive<Idx> {
     // Note that the fields here are not public to allow changing the
@@ -380,23 +389,23 @@ impl<Idx> RangeInclusive<Idx> {
     }
 
     /// Returns the lower bound of the range (inclusive).
-    ///
-    /// When using an inclusive range for iteration, the values of `start()` and
-    /// [`end()`] are unspecified after the iteration ended. To determine
-    /// whether the inclusive range is empty, use the [`is_empty()`] method
-    /// instead of comparing `start() > end()`.
-    ///
-    /// Note: the value returned by this method is unspecified after the range
-    /// has been iterated to exhaustion.
-    ///
-    /// [`end()`]: RangeInclusive::end
-    /// [`is_empty()`]: RangeInclusive::is_empty
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// assert_eq!((3..=5).start(), &3);
-    /// ```
+    // ///
+    // /// When using an inclusive range for iteration, the values of `start()` and
+    // /// [`end()`] are unspecified after the iteration ended. To determine
+    // /// whether the inclusive range is empty, use the [`is_empty()`] method
+    // /// instead of comparing `start() > end()`.
+    // ///
+    // /// Note: the value returned by this method is unspecified after the range
+    // /// has been iterated to exhaustion.
+    // ///
+    // /// [`end()`]: RangeInclusive::end
+    // /// [`is_empty()`]: RangeInclusive::is_empty
+    // ///
+    // /// # Examples
+    // ///
+    // /// ```
+    // /// assert_eq!((3..=5).start(), &3);
+    // /// ```
     #[stable(feature = "inclusive_range_methods", since = "1.27.0")]
     #[rustc_const_stable(feature = "const_inclusive_range_methods", since = "1.32.0")]
     #[inline]
@@ -405,23 +414,23 @@ impl<Idx> RangeInclusive<Idx> {
     }
 
     /// Returns the upper bound of the range (inclusive).
-    ///
-    /// When using an inclusive range for iteration, the values of [`start()`]
-    /// and `end()` are unspecified after the iteration ended. To determine
-    /// whether the inclusive range is empty, use the [`is_empty()`] method
-    /// instead of comparing `start() > end()`.
-    ///
-    /// Note: the value returned by this method is unspecified after the range
-    /// has been iterated to exhaustion.
-    ///
-    /// [`start()`]: RangeInclusive::start
-    /// [`is_empty()`]: RangeInclusive::is_empty
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// assert_eq!((3..=5).end(), &5);
-    /// ```
+    // ///
+    // /// When using an inclusive range for iteration, the values of [`start()`]
+    // /// and `end()` are unspecified after the iteration ended. To determine
+    // /// whether the inclusive range is empty, use the [`is_empty()`] method
+    // /// instead of comparing `start() > end()`.
+    // ///
+    // /// Note: the value returned by this method is unspecified after the range
+    // /// has been iterated to exhaustion.
+    // ///
+    // /// [`start()`]: RangeInclusive::start
+    // /// [`is_empty()`]: RangeInclusive::is_empty
+    // ///
+    // /// # Examples
+    // ///
+    // /// ```
+    // /// assert_eq!((3..=5).end(), &5);
+    // /// ```
     #[stable(feature = "inclusive_range_methods", since = "1.27.0")]
     #[rustc_const_stable(feature = "const_inclusive_range_methods", since = "1.32.0")]
     #[inline]
@@ -442,11 +451,13 @@ impl<Idx> RangeInclusive<Idx> {
     #[stable(feature = "inclusive_range_methods", since = "1.27.0")]
     #[inline]
     #[rustc_const_unstable(feature = "const_range_bounds", issue = "108082")]
+    #[cfg(feature = "uncertified")]
     pub const fn into_inner(self) -> (Idx, Idx) {
         (self.start, self.end)
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl RangeInclusive<usize> {
     /// Converts to an exclusive `Range` for `SliceIndex` implementations.
     /// The caller is responsible for dealing with `end == usize::MAX`.
@@ -462,6 +473,7 @@ impl RangeInclusive<usize> {
 }
 
 #[stable(feature = "inclusive_range", since = "1.26.0")]
+#[cfg(feature = "uncertified")]
 impl<Idx: fmt::Debug> fmt::Debug for RangeInclusive<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
@@ -474,6 +486,7 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeInclusive<Idx> {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -548,46 +561,46 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
 }
 
 /// A range only bounded inclusively above (`..=end`).
-///
-/// The `RangeToInclusive` `..=end` contains all values with `x <= end`.
-/// It cannot serve as an [`Iterator`] because it doesn't have a starting point.
-///
-/// # Examples
-///
-/// The `..=end` syntax is a `RangeToInclusive`:
-///
-/// ```
-/// assert_eq!((..=5), std::ops::RangeToInclusive{ end: 5 });
-/// ```
-///
-/// It does not have an [`IntoIterator`] implementation, so you can't use it in a
-/// `for` loop directly. This won't compile:
-///
-/// ```compile_fail,E0277
-/// // error[E0277]: the trait bound `std::ops::RangeToInclusive<{integer}>:
-/// // std::iter::Iterator` is not satisfied
-/// for i in ..=5 {
-///     // ...
-/// }
-/// ```
-///
-/// When used as a [slicing index], `RangeToInclusive` produces a slice of all
-/// array elements up to and including the index indicated by `end`.
-///
-/// ```
-/// let arr = [0, 1, 2, 3, 4];
-/// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]);
-/// assert_eq!(arr[ .. 3], [0, 1, 2      ]);
-/// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]); // This is a `RangeToInclusive`
-/// assert_eq!(arr[1..  ], [   1, 2, 3, 4]);
-/// assert_eq!(arr[1.. 3], [   1, 2      ]);
-/// assert_eq!(arr[1..=3], [   1, 2, 3   ]);
-/// ```
-///
-/// [slicing index]: crate::slice::SliceIndex
+// ///
+// /// The `RangeToInclusive` `..=end` contains all values with `x <= end`.
+// /// It cannot serve as an [`Iterator`] because it doesn't have a starting point.
+// ///
+// /// # Examples
+// ///
+// /// The `..=end` syntax is a `RangeToInclusive`:
+// ///
+// /// ```
+// /// assert_eq!((..=5), std::ops::RangeToInclusive{ end: 5 });
+// /// ```
+// ///
+// /// It does not have an [`IntoIterator`] implementation, so you can't use it in a
+// /// `for` loop directly. This won't compile:
+// ///
+// /// ```compile_fail,E0277
+// /// // // error[E0277]: the trait bound `std::ops::RangeToInclusive<{integer}>:
+// /// // // std::iter::Iterator` is not satisfied
+// /// for i in ..=5 {
+// ///     // // ...
+// /// }
+// /// ```
+// ///
+// /// When used as a [slicing index], `RangeToInclusive` produces a slice of all
+// /// array elements up to and including the index indicated by `end`.
+// ///
+// /// ```
+// /// let arr = [0, 1, 2, 3, 4];
+// /// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]);
+// /// assert_eq!(arr[ .. 3], [0, 1, 2      ]);
+// /// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]); // // This is a `RangeToInclusive`
+// /// assert_eq!(arr[1..  ], [   1, 2, 3, 4]);
+// /// assert_eq!(arr[1.. 3], [   1, 2      ]);
+// /// assert_eq!(arr[1..=3], [   1, 2, 3   ]);
+// /// ```
+// ///
+// /// [slicing index]: crate::slice::SliceIndex
 #[lang = "RangeToInclusive"]
 #[doc(alias = "..=")]
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "uncertified", derive(Copy, Clone, PartialEq, Eq, Hash))]
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 pub struct RangeToInclusive<Idx> {
     /// The upper bound of the range (inclusive)
@@ -596,6 +609,7 @@ pub struct RangeToInclusive<Idx> {
 }
 
 #[stable(feature = "inclusive_range", since = "1.26.0")]
+#[cfg(feature = "uncertified")]
 impl<Idx: fmt::Debug> fmt::Debug for RangeToInclusive<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "..=")?;
@@ -604,6 +618,7 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeToInclusive<Idx> {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<Idx: PartialOrd<Idx>> RangeToInclusive<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -668,7 +683,7 @@ impl<Idx: PartialOrd<Idx>> RangeToInclusive<Idx> {
 ///
 /// [`BTreeMap::range`]: ../../std/collections/btree_map/struct.BTreeMap.html#method.range
 #[stable(feature = "collections_bound", since = "1.17.0")]
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[cfg_attr(feature = "uncertified", derive(Clone, Copy, Debug, Hash, PartialEq, Eq))]
 pub enum Bound<T> {
     /// An inclusive bound.
     #[stable(feature = "collections_bound", since = "1.17.0")]
@@ -810,6 +825,7 @@ pub trait RangeBounds<T: ?Sized> {
     /// assert!(!(f32::NAN..1.0).contains(&0.5));
     #[inline]
     #[stable(feature = "range_contains", since = "1.35.0")]
+    #[cfg(feature = "uncertified")]
     fn contains<U>(&self, item: &U) -> bool
     where
         T: PartialOrd<U>,
@@ -878,6 +894,7 @@ pub trait RangeBounds<T: ?Sized> {
     /// assert!( (Excluded(3), Excluded(1)).is_empty());
     /// ```
     #[unstable(feature = "range_bounds_is_empty", issue = "137300")]
+    #[cfg(feature = "uncertified")]
     fn is_empty(&self) -> bool
     where
         T: PartialOrd,
@@ -941,6 +958,7 @@ pub trait IntoBounds<T>: RangeBounds<T> {
     /// assert!(!(-12..387).intersect(0..256).is_empty());
     /// assert!((1..5).intersect(6..).is_empty());
     /// ```
+    #[cfg(feature = "uncertified")]
     fn intersect<R>(self, other: R) -> (Bound<T>, Bound<T>)
     where
         Self: Sized,
@@ -1131,6 +1149,7 @@ impl<T> IntoBounds<T> for (Bound<T>, Bound<T>) {
 }
 
 #[stable(feature = "collections_range", since = "1.28.0")]
+#[cfg(feature = "uncertified")]
 impl<'a, T: ?Sized + 'a> RangeBounds<T> for (Bound<&'a T>, Bound<&'a T>) {
     fn start_bound(&self) -> Bound<&T> {
         self.0

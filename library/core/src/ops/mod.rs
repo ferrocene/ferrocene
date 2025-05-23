@@ -154,7 +154,6 @@ mod function;
 mod index;
 #[cfg(feature = "uncertified")]
 mod index_range;
-#[cfg(feature = "uncertified")]
 mod range;
 #[cfg(feature = "uncertified")]
 mod try_trait;
@@ -201,16 +200,12 @@ pub use self::index::{Index, IndexMut};
 #[cfg(feature = "uncertified")]
 pub(crate) use self::index_range::IndexRange;
 #[unstable(feature = "range_into_bounds", issue = "136903")]
-#[cfg(feature = "uncertified")]
 pub use self::range::IntoBounds;
 #[stable(feature = "inclusive_range", since = "1.26.0")]
-#[cfg(feature = "uncertified")]
 pub use self::range::{Bound, RangeBounds, RangeInclusive, RangeToInclusive};
 #[unstable(feature = "one_sided_range", issue = "69780")]
-#[cfg(feature = "uncertified")]
 pub use self::range::{OneSidedRange, OneSidedRangeBound};
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "uncertified")]
 pub use self::range::{Range, RangeFrom, RangeFull, RangeTo};
 #[unstable(feature = "try_trait_v2_residual", issue = "91285")]
 #[cfg(feature = "uncertified")]

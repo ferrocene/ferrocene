@@ -1,61 +1,82 @@
 //! Utilities for the `char` primitive type.
-//!
-//! *[See also the `char` primitive type](primitive@char).*
-//!
-//! The `char` type represents a single character. More specifically, since
-//! 'character' isn't a well-defined concept in Unicode, `char` is a '[Unicode
-//! scalar value]', which is similar to, but not the same as, a '[Unicode code
-//! point]'.
-//!
-//! [Unicode scalar value]: https://www.unicode.org/glossary/#unicode_scalar_value
-//! [Unicode code point]: https://www.unicode.org/glossary/#code_point
-//!
-//! This module exists for technical reasons, the primary documentation for
-//! `char` is directly on [the `char` primitive type][char] itself.
-//!
-//! This module is the home of the iterator implementations for the iterators
-//! implemented on `char`, as well as some useful constants and conversion
-//! functions that convert various types to `char`.
+// //!
+// //! *[See also the `char` primitive type](primitive@char).*
+// //!
+// //! The `char` type represents a single character. More specifically, since
+// //! 'character' isn't a well-defined concept in Unicode, `char` is a '[Unicode
+// //! scalar value]', which is similar to, but not the same as, a '[Unicode code
+// //! point]'.
+// //!
+// //! [Unicode scalar value]: https://www.unicode.org/glossary/#unicode_scalar_value
+// //! [Unicode code point]: https://www.unicode.org/glossary/#code_point
+// //!
+// //! This module exists for technical reasons, the primary documentation for
+// //! `char` is directly on [the `char` primitive type][char] itself.
+// //!
+// //! This module is the home of the iterator implementations for the iterators
+// //! implemented on `char`, as well as some useful constants and conversion
+// //! functions that convert various types to `char`.
 
 #![allow(non_snake_case)]
 #![stable(feature = "rust1", since = "1.0.0")]
 
+#[cfg(feature = "uncertified")]
 mod convert;
+#[cfg(feature = "uncertified")]
 mod decode;
 mod methods;
 
 // stable re-exports
 #[rustfmt::skip]
 #[stable(feature = "try_from", since = "1.34.0")]
+#[cfg(feature = "uncertified")]
 pub use self::convert::CharTryFromError;
 #[stable(feature = "char_from_str", since = "1.20.0")]
+#[cfg(feature = "uncertified")]
 pub use self::convert::ParseCharError;
 #[stable(feature = "decode_utf16", since = "1.9.0")]
+#[cfg(feature = "uncertified")]
 pub use self::decode::{DecodeUtf16, DecodeUtf16Error};
 
 // perma-unstable re-exports
 #[rustfmt::skip]
 #[unstable(feature = "char_internals", reason = "exposed only for libstd", issue = "none")]
+#[cfg(feature = "uncertified")]
 pub use self::methods::encode_utf16_raw; // perma-unstable
 #[unstable(feature = "char_internals", reason = "exposed only for libstd", issue = "none")]
+#[cfg(feature = "uncertified")]
 pub use self::methods::{encode_utf8_raw, encode_utf8_raw_unchecked}; // perma-unstable
 
 #[rustfmt::skip]
+#[cfg(feature = "uncertified")]
 use crate::ascii;
+#[cfg(feature = "uncertified")]
 pub(crate) use self::methods::EscapeDebugExtArgs;
+#[cfg(feature = "uncertified")]
 use crate::error::Error;
+#[cfg(feature = "uncertified")]
 use crate::escape;
+#[cfg(feature = "uncertified")]
 use crate::fmt::{self, Write};
+#[cfg(feature = "uncertified")]
 use crate::iter::{FusedIterator, TrustedLen, TrustedRandomAccess, TrustedRandomAccessNoCoerce};
+#[cfg(feature = "uncertified")]
 use crate::num::NonZero;
 
 // UTF-8 ranges and tags for encoding characters
+#[cfg(feature = "uncertified")]
 const TAG_CONT: u8 = 0b1000_0000;
+#[cfg(feature = "uncertified")]
 const TAG_TWO_B: u8 = 0b1100_0000;
+#[cfg(feature = "uncertified")]
 const TAG_THREE_B: u8 = 0b1110_0000;
+#[cfg(feature = "uncertified")]
 const TAG_FOUR_B: u8 = 0b1111_0000;
+#[cfg(feature = "uncertified")]
 const MAX_ONE_B: u32 = 0x80;
+#[cfg(feature = "uncertified")]
 const MAX_TWO_B: u32 = 0x800;
+#[cfg(feature = "uncertified")]
 const MAX_THREE_B: u32 = 0x10000;
 
 /*
@@ -93,32 +114,38 @@ const MAX_THREE_B: u32 = 0x10000;
 
 /// The highest valid code point a `char` can have, `'\u{10FFFF}'`. Use [`char::MAX`] instead.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 pub const MAX: char = char::MAX;
 
-/// The maximum number of bytes required to [encode](char::encode_utf8) a `char` to
-/// UTF-8 encoding.
+// /// The maximum number of bytes required to [encode](char::encode_utf8) a `char` to
+// /// UTF-8 encoding.
+/// FIXME:docs
 #[unstable(feature = "char_max_len", issue = "121714")]
 pub const MAX_LEN_UTF8: usize = char::MAX_LEN_UTF8;
 
 /// The maximum number of two-byte units required to [encode](char::encode_utf16) a `char`
 /// to UTF-16 encoding.
 #[unstable(feature = "char_max_len", issue = "121714")]
+#[cfg(feature = "uncertified")]
 pub const MAX_LEN_UTF16: usize = char::MAX_LEN_UTF16;
 
 /// `U+FFFD REPLACEMENT CHARACTER` (�) is used in Unicode to represent a
 /// decoding error. Use [`char::REPLACEMENT_CHARACTER`] instead.
 #[stable(feature = "decode_utf16", since = "1.9.0")]
+#[cfg(feature = "uncertified")]
 pub const REPLACEMENT_CHARACTER: char = char::REPLACEMENT_CHARACTER;
 
 /// The version of [Unicode](https://www.unicode.org/) that the Unicode parts of
 /// `char` and `str` methods are based on. Use [`char::UNICODE_VERSION`] instead.
 #[stable(feature = "unicode_version", since = "1.45.0")]
+#[cfg(feature = "uncertified")]
 pub const UNICODE_VERSION: (u8, u8, u8) = char::UNICODE_VERSION;
 
 /// Creates an iterator over the UTF-16 encoded code points in `iter`, returning
 /// unpaired surrogates as `Err`s. Use [`char::decode_utf16`] instead.
 #[stable(feature = "decode_utf16", since = "1.9.0")]
 #[inline]
+#[cfg(feature = "uncertified")]
 pub fn decode_utf16<I: IntoIterator<Item = u16>>(iter: I) -> DecodeUtf16<I::IntoIter> {
     self::decode::decode_utf16(iter)
 }
@@ -128,6 +155,7 @@ pub fn decode_utf16<I: IntoIterator<Item = u16>>(iter: I) -> DecodeUtf16<I::Into
 #[rustc_const_stable(feature = "const_char_convert", since = "1.67.0")]
 #[must_use]
 #[inline]
+#[cfg(feature = "uncertified")]
 pub const fn from_u32(i: u32) -> Option<char> {
     self::convert::from_u32(i)
 }
@@ -138,6 +166,7 @@ pub const fn from_u32(i: u32) -> Option<char> {
 #[rustc_const_stable(feature = "const_char_from_u32_unchecked", since = "1.81.0")]
 #[must_use]
 #[inline]
+#[cfg(feature = "uncertified")]
 pub const unsafe fn from_u32_unchecked(i: u32) -> char {
     // SAFETY: the safety contract must be upheld by the caller.
     unsafe { self::convert::from_u32_unchecked(i) }
@@ -148,6 +177,7 @@ pub const unsafe fn from_u32_unchecked(i: u32) -> char {
 #[rustc_const_stable(feature = "const_char_convert", since = "1.67.0")]
 #[must_use]
 #[inline]
+#[cfg(feature = "uncertified")]
 pub const fn from_digit(num: u32, radix: u32) -> Option<char> {
     self::convert::from_digit(num, radix)
 }
@@ -161,8 +191,11 @@ pub const fn from_digit(num: u32, radix: u32) -> Option<char> {
 /// [`escape_unicode`]: char::escape_unicode
 #[derive(Clone, Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+#[cfg(feature = "uncertified")]
 pub struct EscapeUnicode(escape::EscapeIterInner<10>);
 
+#[cfg(feature = "uncertified")]
 impl EscapeUnicode {
     #[inline]
     const fn new(c: char) -> Self {
@@ -171,6 +204,7 @@ impl EscapeUnicode {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl Iterator for EscapeUnicode {
     type Item = char;
 
@@ -202,6 +236,7 @@ impl Iterator for EscapeUnicode {
 }
 
 #[stable(feature = "exact_size_escape", since = "1.11.0")]
+#[cfg(feature = "uncertified")]
 impl ExactSizeIterator for EscapeUnicode {
     #[inline]
     fn len(&self) -> usize {
@@ -210,9 +245,11 @@ impl ExactSizeIterator for EscapeUnicode {
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
+#[cfg(feature = "uncertified")]
 impl FusedIterator for EscapeUnicode {}
 
 #[stable(feature = "char_struct_display", since = "1.16.0")]
+#[cfg(feature = "uncertified")]
 impl fmt::Display for EscapeUnicode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.0.as_str())
@@ -227,8 +264,11 @@ impl fmt::Display for EscapeUnicode {
 /// [`escape_default`]: char::escape_default
 #[derive(Clone, Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
+#[cfg(feature = "uncertified")]
 pub struct EscapeDefault(escape::EscapeIterInner<10>);
 
+#[cfg(feature = "uncertified")]
 impl EscapeDefault {
     #[inline]
     const fn printable(c: ascii::Char) -> Self {
@@ -247,6 +287,7 @@ impl EscapeDefault {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl Iterator for EscapeDefault {
     type Item = char;
 
@@ -278,6 +319,7 @@ impl Iterator for EscapeDefault {
 }
 
 #[stable(feature = "exact_size_escape", since = "1.11.0")]
+#[cfg(feature = "uncertified")]
 impl ExactSizeIterator for EscapeDefault {
     #[inline]
     fn len(&self) -> usize {
@@ -286,9 +328,11 @@ impl ExactSizeIterator for EscapeDefault {
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
+#[cfg(feature = "uncertified")]
 impl FusedIterator for EscapeDefault {}
 
 #[stable(feature = "char_struct_display", since = "1.16.0")]
+#[cfg(feature = "uncertified")]
 impl fmt::Display for EscapeDefault {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.0.as_str())
@@ -303,6 +347,8 @@ impl fmt::Display for EscapeDefault {
 /// [`escape_debug`]: char::escape_debug
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
 #[derive(Clone, Debug)]
+#[cfg(feature = "uncertified")]
+#[cfg(feature = "uncertified")]
 pub struct EscapeDebug(EscapeDebugInner);
 
 #[derive(Clone, Debug)]
@@ -310,11 +356,13 @@ pub struct EscapeDebug(EscapeDebugInner);
 // EscapeIterInner (e.g. with alive=254..255 indicating that data[0..4] holds
 // a char) which would likely result in a more optimised code.  For now we use
 // the option easier to implement.
+#[cfg(feature = "uncertified")]
 enum EscapeDebugInner {
     Bytes(escape::EscapeIterInner<10>),
     Char(char),
 }
 
+#[cfg(feature = "uncertified")]
 impl EscapeDebug {
     #[inline]
     const fn printable(chr: char) -> Self {
@@ -338,6 +386,7 @@ impl EscapeDebug {
 }
 
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
+#[cfg(feature = "uncertified")]
 impl Iterator for EscapeDebug {
     type Item = char;
 
@@ -365,6 +414,7 @@ impl Iterator for EscapeDebug {
 }
 
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
+#[cfg(feature = "uncertified")]
 impl ExactSizeIterator for EscapeDebug {
     fn len(&self) -> usize {
         match &self.0 {
@@ -375,9 +425,11 @@ impl ExactSizeIterator for EscapeDebug {
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
+#[cfg(feature = "uncertified")]
 impl FusedIterator for EscapeDebug {}
 
 #[stable(feature = "char_escape_debug", since = "1.20.0")]
+#[cfg(feature = "uncertified")]
 impl fmt::Display for EscapeDebug {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.0 {
@@ -387,6 +439,7 @@ impl fmt::Display for EscapeDebug {
     }
 }
 
+#[cfg(feature = "uncertified")]
 macro_rules! casemappingiter_impls {
     ($(#[$attr:meta])* $ITER_NAME:ident) => {
         $(#[$attr])*
@@ -487,6 +540,7 @@ macro_rules! casemappingiter_impls {
     }
 }
 
+#[cfg(feature = "uncertified")]
 casemappingiter_impls! {
     /// Returns an iterator that yields the lowercase equivalent of a `char`.
     ///
@@ -497,6 +551,7 @@ casemappingiter_impls! {
     ToLowercase
 }
 
+#[cfg(feature = "uncertified")]
 casemappingiter_impls! {
     /// Returns an iterator that yields the uppercase equivalent of a `char`.
     ///
@@ -508,8 +563,10 @@ casemappingiter_impls! {
 }
 
 #[derive(Debug, Clone)]
+#[cfg(feature = "uncertified")]
 struct CaseMappingIter(core::array::IntoIter<char, 3>);
 
+#[cfg(feature = "uncertified")]
 impl CaseMappingIter {
     #[inline]
     fn new(chars: [char; 3]) -> CaseMappingIter {
@@ -527,6 +584,7 @@ impl CaseMappingIter {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl Iterator for CaseMappingIter {
     type Item = char;
 
@@ -563,6 +621,7 @@ impl Iterator for CaseMappingIter {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl DoubleEndedIterator for CaseMappingIter {
     fn next_back(&mut self) -> Option<char> {
         self.0.next_back()
@@ -580,6 +639,7 @@ impl DoubleEndedIterator for CaseMappingIter {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl ExactSizeIterator for CaseMappingIter {
     fn len(&self) -> usize {
         self.0.len()
@@ -590,19 +650,24 @@ impl ExactSizeIterator for CaseMappingIter {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl FusedIterator for CaseMappingIter {}
 
 // SAFETY: forwards to inner `array::IntoIter`
+#[cfg(feature = "uncertified")]
 unsafe impl TrustedLen for CaseMappingIter {}
 
 // SAFETY: forwards to inner `array::IntoIter`
+#[cfg(feature = "uncertified")]
 unsafe impl TrustedRandomAccessNoCoerce for CaseMappingIter {
     const MAY_HAVE_SIDE_EFFECT: bool = false;
 }
 
 // SAFETY: `CaseMappingIter` has no subtypes/supertypes
+#[cfg(feature = "uncertified")]
 unsafe impl TrustedRandomAccess for CaseMappingIter {}
 
+#[cfg(feature = "uncertified")]
 impl fmt::Display for CaseMappingIter {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -616,9 +681,12 @@ impl fmt::Display for CaseMappingIter {
 /// The error type returned when a checked char conversion fails.
 #[stable(feature = "u8_from_char", since = "1.59.0")]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[cfg(feature = "uncertified")]
+#[cfg(feature = "uncertified")]
 pub struct TryFromCharError(pub(crate) ());
 
 #[stable(feature = "u8_from_char", since = "1.59.0")]
+#[cfg(feature = "uncertified")]
 impl fmt::Display for TryFromCharError {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         "unicode code point out of range".fmt(fmt)
@@ -626,4 +694,5 @@ impl fmt::Display for TryFromCharError {
 }
 
 #[stable(feature = "u8_from_char", since = "1.59.0")]
+#[cfg(feature = "uncertified")]
 impl Error for TryFromCharError {}

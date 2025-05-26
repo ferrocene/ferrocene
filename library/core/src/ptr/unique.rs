@@ -1,6 +1,11 @@
+#[cfg(feature = "uncertified")]
 use crate::fmt;
-use crate::marker::{PhantomData, Unsize};
+use crate::marker::PhantomData;
+#[cfg(feature = "uncertified")]
+use crate::marker::Unsize;
+#[cfg(feature = "uncertified")]
 use crate::ops::{CoerceUnsized, DispatchFromDyn};
+#[cfg(feature = "uncertified")]
 use crate::pin::PinCoerceUnsized;
 use crate::ptr::NonNull;
 
@@ -59,6 +64,7 @@ unsafe impl<T: Send + ?Sized> Send for Unique<T> {}
 unsafe impl<T: Sync + ?Sized> Sync for Unique<T> {}
 
 #[unstable(feature = "ptr_internals", issue = "none")]
+#[cfg(feature = "uncertified")]
 impl<T: Sized> Unique<T> {
     /// Creates a new `Unique` that is dangling, but well-aligned.
     ///
@@ -78,6 +84,7 @@ impl<T: Sized> Unique<T> {
 }
 
 #[unstable(feature = "ptr_internals", issue = "none")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> Unique<T> {
     /// Creates a new `Unique`.
     ///
@@ -157,6 +164,7 @@ impl<T: ?Sized> Unique<T> {
 }
 
 #[unstable(feature = "ptr_internals", issue = "none")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> Clone for Unique<T> {
     #[inline]
     fn clone(&self) -> Self {
@@ -165,18 +173,23 @@ impl<T: ?Sized> Clone for Unique<T> {
 }
 
 #[unstable(feature = "ptr_internals", issue = "none")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> Copy for Unique<T> {}
 
 #[unstable(feature = "ptr_internals", issue = "none")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized, U: ?Sized> CoerceUnsized<Unique<U>> for Unique<T> where T: Unsize<U> {}
 
 #[unstable(feature = "ptr_internals", issue = "none")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized, U: ?Sized> DispatchFromDyn<Unique<U>> for Unique<T> where T: Unsize<U> {}
 
 #[unstable(feature = "pin_coerce_unsized_trait", issue = "123430")]
+#[cfg(feature = "uncertified")]
 unsafe impl<T: ?Sized> PinCoerceUnsized for Unique<T> {}
 
 #[unstable(feature = "ptr_internals", issue = "none")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> fmt::Debug for Unique<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Pointer::fmt(&self.as_ptr(), f)
@@ -184,6 +197,7 @@ impl<T: ?Sized> fmt::Debug for Unique<T> {
 }
 
 #[unstable(feature = "ptr_internals", issue = "none")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> fmt::Pointer for Unique<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Pointer::fmt(&self.as_ptr(), f)
@@ -191,6 +205,7 @@ impl<T: ?Sized> fmt::Pointer for Unique<T> {
 }
 
 #[unstable(feature = "ptr_internals", issue = "none")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> From<&mut T> for Unique<T> {
     /// Converts a `&mut T` to a `Unique<T>`.
     ///
@@ -202,6 +217,7 @@ impl<T: ?Sized> From<&mut T> for Unique<T> {
 }
 
 #[unstable(feature = "ptr_internals", issue = "none")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> From<NonNull<T>> for Unique<T> {
     /// Converts a `NonNull<T>` to a `Unique<T>`.
     ///

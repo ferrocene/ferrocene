@@ -7,11 +7,12 @@
 //! Do not modify them without understanding the consequences for the format_args!() macro.
 
 use super::*;
+#[cfg(feature = "uncertified")]
 use crate::hint::unreachable_unchecked;
 use crate::ptr::NonNull;
 
 #[lang = "format_placeholder"]
-#[derive(Copy, Clone)]
+#[cfg_attr(feature = "uncertified", derive(Copy, Clone))]
 pub struct Placeholder {
     pub position: usize,
     pub flags: u32,
@@ -30,7 +31,7 @@ impl Placeholder {
 /// Used by [width](https://doc.rust-lang.org/std/fmt/#width)
 /// and [precision](https://doc.rust-lang.org/std/fmt/#precision) specifiers.
 #[lang = "format_count"]
-#[derive(Copy, Clone)]
+#[cfg_attr(feature = "uncertified", derive(Copy, Clone))]
 pub enum Count {
     /// Specified with a literal number, stores the value
     Is(u16),
@@ -40,7 +41,7 @@ pub enum Count {
     Implied,
 }
 
-#[derive(Copy, Clone)]
+#[cfg_attr(feature = "uncertified", derive(Copy, Clone))]
 enum ArgumentType<'a> {
     Placeholder {
         // INVARIANT: `formatter` has type `fn(&T, _) -> _` for some `T`, and `value`
@@ -63,11 +64,12 @@ enum ArgumentType<'a> {
 /// * A count argument contains a count for dynamic formatting parameters like
 ///   precision and width.
 #[lang = "format_argument"]
-#[derive(Copy, Clone)]
+#[cfg_attr(feature = "uncertified", derive(Copy, Clone))]
 pub struct Argument<'a> {
     ty: ArgumentType<'a>,
 }
 
+#[cfg(feature = "uncertified")]
 macro_rules! argument_new {
     ($t:ty, $x:expr, $f:expr) => {
         Argument {
@@ -113,6 +115,7 @@ macro_rules! argument_new {
     };
 }
 
+#[cfg(feature = "uncertified")]
 impl Argument<'_> {
     #[inline]
     pub const fn new_display<T: Display>(x: &T) -> Argument<'_> {
@@ -212,10 +215,12 @@ impl Argument<'_> {
 /// It exists, rather than an unsafe function, in order to simplify the expansion
 /// of `format_args!(..)` and reduce the scope of the `unsafe` block.
 #[lang = "format_unsafe_arg"]
+#[cfg(feature = "uncertified")]
 pub struct UnsafeArg {
     _private: (),
 }
 
+#[cfg(feature = "uncertified")]
 impl UnsafeArg {
     /// See documentation where `UnsafeArg` is required to know when it is safe to
     /// create and use `UnsafeArg`.
@@ -229,6 +234,7 @@ impl UnsafeArg {
 #[doc(hidden)]
 #[unstable(feature = "fmt_internals", issue = "none")]
 #[rustc_diagnostic_item = "FmtArgumentsNew"]
+#[cfg(feature = "uncertified")]
 impl<'a> Arguments<'a> {
     #[inline]
     pub const fn new_const<const N: usize>(pieces: &'a [&'static str; N]) -> Self {

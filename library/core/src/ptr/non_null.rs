@@ -1,67 +1,78 @@
+#[cfg(feature = "uncertified")]
 use crate::cmp::Ordering;
+#[cfg(feature = "uncertified")]
 use crate::marker::Unsize;
+#[cfg(feature = "uncertified")]
 use crate::mem::{MaybeUninit, SizedTypeProperties};
+#[cfg(feature = "uncertified")]
 use crate::num::NonZero;
+#[cfg(feature = "uncertified")]
 use crate::ops::{CoerceUnsized, DispatchFromDyn};
+#[cfg(feature = "uncertified")]
 use crate::pin::PinCoerceUnsized;
+#[cfg(feature = "uncertified")]
 use crate::ptr::Unique;
+#[cfg(feature = "uncertified")]
 use crate::slice::{self, SliceIndex};
+#[cfg(feature = "uncertified")]
 use crate::ub_checks::assert_unsafe_precondition;
+#[cfg(feature = "uncertified")]
 use crate::{fmt, hash, intrinsics, mem, ptr};
 
-/// `*mut T` but non-zero and [covariant].
-///
-/// This is often the correct thing to use when building data structures using
-/// raw pointers, but is ultimately more dangerous to use because of its additional
-/// properties. If you're not sure if you should use `NonNull<T>`, just use `*mut T`!
-///
-/// Unlike `*mut T`, the pointer must always be non-null, even if the pointer
-/// is never dereferenced. This is so that enums may use this forbidden value
-/// as a discriminant -- `Option<NonNull<T>>` has the same size as `*mut T`.
-/// However the pointer may still dangle if it isn't dereferenced.
-///
-/// Unlike `*mut T`, `NonNull<T>` was chosen to be covariant over `T`. This makes it
-/// possible to use `NonNull<T>` when building covariant types, but introduces the
-/// risk of unsoundness if used in a type that shouldn't actually be covariant.
-/// (The opposite choice was made for `*mut T` even though technically the unsoundness
-/// could only be caused by calling unsafe functions.)
-///
-/// Covariance is correct for most safe abstractions, such as `Box`, `Rc`, `Arc`, `Vec`,
-/// and `LinkedList`. This is the case because they provide a public API that follows the
-/// normal shared XOR mutable rules of Rust.
-///
-/// If your type cannot safely be covariant, you must ensure it contains some
-/// additional field to provide invariance. Often this field will be a [`PhantomData`]
-/// type like `PhantomData<Cell<T>>` or `PhantomData<&'a mut T>`.
-///
-/// Notice that `NonNull<T>` has a `From` instance for `&T`. However, this does
-/// not change the fact that mutating through a (pointer derived from a) shared
-/// reference is undefined behavior unless the mutation happens inside an
-/// [`UnsafeCell<T>`]. The same goes for creating a mutable reference from a shared
-/// reference. When using this `From` instance without an `UnsafeCell<T>`,
-/// it is your responsibility to ensure that `as_mut` is never called, and `as_ptr`
-/// is never used for mutation.
-///
-/// # Representation
-///
-/// Thanks to the [null pointer optimization],
-/// `NonNull<T>` and `Option<NonNull<T>>`
-/// are guaranteed to have the same size and alignment:
-///
-/// ```
-/// use std::ptr::NonNull;
-///
-/// assert_eq!(size_of::<NonNull<i16>>(), size_of::<Option<NonNull<i16>>>());
-/// assert_eq!(align_of::<NonNull<i16>>(), align_of::<Option<NonNull<i16>>>());
-///
-/// assert_eq!(size_of::<NonNull<str>>(), size_of::<Option<NonNull<str>>>());
-/// assert_eq!(align_of::<NonNull<str>>(), align_of::<Option<NonNull<str>>>());
-/// ```
-///
-/// [covariant]: https://doc.rust-lang.org/reference/subtyping.html
-/// [`PhantomData`]: crate::marker::PhantomData
-/// [`UnsafeCell<T>`]: crate::cell::UnsafeCell
-/// [null pointer optimization]: crate::option#representation
+// /// `*mut T` but non-zero and [covariant].
+// ///
+// /// This is often the correct thing to use when building data structures using
+// /// raw pointers, but is ultimately more dangerous to use because of its additional
+// /// properties. If you're not sure if you should use `NonNull<T>`, just use `*mut T`!
+// ///
+// /// Unlike `*mut T`, the pointer must always be non-null, even if the pointer
+// /// is never dereferenced. This is so that enums may use this forbidden value
+// /// as a discriminant -- `Option<NonNull<T>>` has the same size as `*mut T`.
+// /// However the pointer may still dangle if it isn't dereferenced.
+// ///
+// /// Unlike `*mut T`, `NonNull<T>` was chosen to be covariant over `T`. This makes it
+// /// possible to use `NonNull<T>` when building covariant types, but introduces the
+// /// risk of unsoundness if used in a type that shouldn't actually be covariant.
+// /// (The opposite choice was made for `*mut T` even though technically the unsoundness
+// /// could only be caused by calling unsafe functions.)
+// ///
+// /// Covariance is correct for most safe abstractions, such as `Box`, `Rc`, `Arc`, `Vec`,
+// /// and `LinkedList`. This is the case because they provide a public API that follows the
+// /// normal shared XOR mutable rules of Rust.
+// ///
+// /// If your type cannot safely be covariant, you must ensure it contains some
+// /// additional field to provide invariance. Often this field will be a [`PhantomData`]
+// /// type like `PhantomData<Cell<T>>` or `PhantomData<&'a mut T>`.
+// ///
+// /// Notice that `NonNull<T>` has a `From` instance for `&T`. However, this does
+// /// not change the fact that mutating through a (pointer derived from a) shared
+// /// reference is undefined behavior unless the mutation happens inside an
+// /// [`UnsafeCell<T>`]. The same goes for creating a mutable reference from a shared
+// /// reference. When using this `From` instance without an `UnsafeCell<T>`,
+// /// it is your responsibility to ensure that `as_mut` is never called, and `as_ptr`
+// /// is never used for mutation.
+// ///
+// /// # Representation
+// ///
+// /// Thanks to the [null pointer optimization],
+// /// `NonNull<T>` and `Option<NonNull<T>>`
+// /// are guaranteed to have the same size and alignment:
+// ///
+// /// ```
+// /// use std::ptr::NonNull;
+// ///
+// /// assert_eq!(size_of::<NonNull<i16>>(), size_of::<Option<NonNull<i16>>>());
+// /// assert_eq!(align_of::<NonNull<i16>>(), align_of::<Option<NonNull<i16>>>());
+// ///
+// /// assert_eq!(size_of::<NonNull<str>>(), size_of::<Option<NonNull<str>>>());
+// /// assert_eq!(align_of::<NonNull<str>>(), align_of::<Option<NonNull<str>>>());
+// /// ```
+// ///
+// /// [covariant]: https://doc.rust-lang.org/reference/subtyping.html
+// /// [`PhantomData`]: crate::marker::PhantomData
+// /// [`UnsafeCell<T>`]: crate::cell::UnsafeCell
+// /// [null pointer optimization]: crate::option#representation
+/// FIXME: docs
 #[stable(feature = "nonnull", since = "1.25.0")]
 #[repr(transparent)]
 #[rustc_layout_scalar_valid_range_start(1)]
@@ -76,13 +87,16 @@ pub struct NonNull<T: ?Sized> {
 /// `NonNull` pointers are not `Send` because the data they reference may be aliased.
 // N.B., this impl is unnecessary, but should provide better error messages.
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> !Send for NonNull<T> {}
 
 /// `NonNull` pointers are not `Sync` because the data they reference may be aliased.
 // N.B., this impl is unnecessary, but should provide better error messages.
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> !Sync for NonNull<T> {}
 
+#[cfg(feature = "uncertified")]
 impl<T: Sized> NonNull<T> {
     /// Creates a pointer with the given address and no [provenance][crate::ptr#provenance].
     ///
@@ -189,6 +203,7 @@ impl<T: Sized> NonNull<T> {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> NonNull<T> {
     /// Creates a new `NonNull`.
     ///
@@ -1321,6 +1336,7 @@ impl<T: ?Sized> NonNull<T> {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<T> NonNull<[T]> {
     /// Creates a non-null raw slice from a thin pointer and a length.
     ///
@@ -1573,6 +1589,7 @@ impl<T> NonNull<[T]> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> Clone for NonNull<T> {
     #[inline(always)]
     fn clone(&self) -> Self {
@@ -1581,21 +1598,27 @@ impl<T: ?Sized> Clone for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> Copy for NonNull<T> {}
 
 #[unstable(feature = "coerce_unsized", issue = "18598")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized, U: ?Sized> CoerceUnsized<NonNull<U>> for NonNull<T> where T: Unsize<U> {}
 
 #[unstable(feature = "dispatch_from_dyn", issue = "none")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized, U: ?Sized> DispatchFromDyn<NonNull<U>> for NonNull<T> where T: Unsize<U> {}
 
 #[stable(feature = "pin", since = "1.33.0")]
+#[cfg(feature = "uncertified")]
 unsafe impl<T: ?Sized> PinCoerceUnsized for NonNull<T> {}
 
 #[unstable(feature = "pointer_like_trait", issue = "none")]
+#[cfg(feature = "uncertified")]
 impl<T> core::marker::PointerLike for NonNull<T> {}
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> fmt::Debug for NonNull<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Pointer::fmt(&self.as_ptr(), f)
@@ -1603,6 +1626,7 @@ impl<T: ?Sized> fmt::Debug for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> fmt::Pointer for NonNull<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Pointer::fmt(&self.as_ptr(), f)
@@ -1610,9 +1634,11 @@ impl<T: ?Sized> fmt::Pointer for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> Eq for NonNull<T> {}
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> PartialEq for NonNull<T> {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -1622,6 +1648,7 @@ impl<T: ?Sized> PartialEq for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> Ord for NonNull<T> {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -1631,6 +1658,7 @@ impl<T: ?Sized> Ord for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> PartialOrd for NonNull<T> {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -1640,6 +1668,7 @@ impl<T: ?Sized> PartialOrd for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> hash::Hash for NonNull<T> {
     #[inline]
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
@@ -1648,6 +1677,7 @@ impl<T: ?Sized> hash::Hash for NonNull<T> {
 }
 
 #[unstable(feature = "ptr_internals", issue = "none")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> From<Unique<T>> for NonNull<T> {
     #[inline]
     fn from(unique: Unique<T>) -> Self {
@@ -1656,6 +1686,7 @@ impl<T: ?Sized> From<Unique<T>> for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> From<&mut T> for NonNull<T> {
     /// Converts a `&mut T` to a `NonNull<T>`.
     ///
@@ -1667,6 +1698,7 @@ impl<T: ?Sized> From<&mut T> for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> From<&T> for NonNull<T> {
     /// Converts a `&T` to a `NonNull<T>`.
     ///

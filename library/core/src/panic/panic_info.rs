@@ -1,4 +1,6 @@
-use crate::fmt::{self, Display};
+use crate::fmt;
+#[cfg(feature = "uncertified")]
+use crate::fmt::Display;
 use crate::panic::Location;
 
 /// A struct providing information about a panic.
@@ -10,7 +12,7 @@ use crate::panic::Location;
 /// [`std::panic::PanicHookInfo`]: ../../std/panic/struct.PanicHookInfo.html
 #[lang = "panic_info"]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[derive(Debug)]
+#[cfg_attr(feature = "uncertified", derive(Debug))]
 pub struct PanicInfo<'a> {
     message: &'a fmt::Arguments<'a>,
     location: &'a Location<'a>,
@@ -25,10 +27,12 @@ pub struct PanicInfo<'a> {
 ///
 /// See [`PanicInfo::message`].
 #[stable(feature = "panic_info_message", since = "1.81.0")]
+#[cfg(feature = "uncertified")]
 pub struct PanicMessage<'a> {
     message: &'a fmt::Arguments<'a>,
 }
 
+#[cfg(feature = "uncertified")]
 impl<'a> PanicInfo<'a> {
     #[inline]
     pub(crate) fn new(
@@ -141,6 +145,7 @@ impl<'a> PanicInfo<'a> {
 }
 
 #[stable(feature = "panic_hook_display", since = "1.26.0")]
+#[cfg(feature = "uncertified")]
 impl Display for PanicInfo<'_> {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str("panicked at ")?;
@@ -151,6 +156,7 @@ impl Display for PanicInfo<'_> {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<'a> PanicMessage<'a> {
     /// Gets the formatted message, if it has no arguments to be formatted at runtime.
     ///
@@ -174,6 +180,7 @@ impl<'a> PanicMessage<'a> {
 }
 
 #[stable(feature = "panic_info_message", since = "1.81.0")]
+#[cfg(feature = "uncertified")]
 impl Display for PanicMessage<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -182,6 +189,7 @@ impl Display for PanicMessage<'_> {
 }
 
 #[stable(feature = "panic_info_message", since = "1.81.0")]
+#[cfg(feature = "uncertified")]
 impl fmt::Debug for PanicMessage<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {

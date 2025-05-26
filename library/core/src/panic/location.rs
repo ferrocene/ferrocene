@@ -1,35 +1,36 @@
+#[cfg(feature = "uncertified")]
 use crate::fmt;
 
 /// A struct containing information about the location of a panic.
-///
-/// This structure is created by [`PanicHookInfo::location()`] and [`PanicInfo::location()`].
-///
-/// [`PanicInfo::location()`]: crate::panic::PanicInfo::location
-/// [`PanicHookInfo::location()`]: ../../std/panic/struct.PanicHookInfo.html#method.location
-///
-/// # Examples
-///
-/// ```should_panic
-/// use std::panic;
-///
-/// panic::set_hook(Box::new(|panic_info| {
-///     if let Some(location) = panic_info.location() {
-///         println!("panic occurred in file '{}' at line {}", location.file(), location.line());
-///     } else {
-///         println!("panic occurred but can't get location information...");
-///     }
-/// }));
-///
-/// panic!("Normal panic");
-/// ```
-///
-/// # Comparisons
-///
-/// Comparisons for equality and ordering are made in file, line, then column priority.
-/// Files are compared as strings, not `Path`, which could be unexpected.
-/// See [`Location::file`]'s documentation for more discussion.
+// ///
+// /// This structure is created by [`PanicHookInfo::location()`] and [`PanicInfo::location()`].
+// ///
+// /// [`PanicInfo::location()`]: crate::panic::PanicInfo::location
+// /// [`PanicHookInfo::location()`]: ../../std/panic/struct.PanicHookInfo.html#method.location
+// ///
+// /// # Examples
+// ///
+// /// ```should_panic
+// /// use std::panic;
+// ///
+// /// panic::set_hook(Box::new(|panic_info| {
+// ///     if let Some(location) = panic_info.location() {
+// ///         println!("panic occurred in file '{}' at line {}", location.file(), location.line());
+// ///     } else {
+// ///         println!("panic occurred but can't get location information...");
+// ///     }
+// /// }));
+// ///
+// /// panic!("Normal panic");
+// /// ```
+// ///
+// /// # Comparisons
+// ///
+// /// Comparisons for equality and ordering are made in file, line, then column priority.
+// /// Files are compared as strings, not `Path`, which could be unexpected.
+// /// See [`Location::file`]'s documentation for more discussion.
 #[lang = "panic_location"]
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "uncertified", derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd))]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
 pub struct Location<'a> {
     file: &'a str,
@@ -37,6 +38,7 @@ pub struct Location<'a> {
     col: u32,
 }
 
+#[cfg(feature = "uncertified")]
 impl<'a> Location<'a> {
     /// Returns the source location of the caller of this function. If that function's caller is
     /// annotated then its call location will be returned, and so on up the stack to the first call
@@ -186,6 +188,7 @@ impl<'a> Location<'a> {
     reason = "internal details of the implementation of the `panic!` and related macros",
     issue = "none"
 )]
+#[cfg(feature = "uncertified")]
 impl<'a> Location<'a> {
     #[doc(hidden)]
     pub const fn internal_constructor(file: &'a str, line: u32, col: u32) -> Self {
@@ -194,6 +197,7 @@ impl<'a> Location<'a> {
 }
 
 #[stable(feature = "panic_hook_display", since = "1.26.0")]
+#[cfg(feature = "uncertified")]
 impl fmt::Display for Location<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {

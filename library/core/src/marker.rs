@@ -795,7 +795,6 @@ impl<T: ?Sized> !Sync for *mut T {}
 /// [drop check]: Drop#drop-check
 #[lang = "phantom_data"]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "uncertified")]
 pub struct PhantomData<T: ?Sized>;
 
 #[stable(feature = "rust1", since = "1.0.0")]

@@ -102,9 +102,6 @@
 #![cfg_attr(feature = "uncertified", feature(bstr_internals))]
 #![cfg_attr(feature = "uncertified", feature(cfg_match))]
 #![cfg_attr(feature = "uncertified", feature(const_carrying_mul_add))]
-#![cfg_attr(feature = "uncertified", feature(const_eval_select))]
-#![cfg_attr(feature = "uncertified", feature(core_intrinsics))]
-#![cfg_attr(feature = "uncertified", feature(coverage_attribute))]
 #![cfg_attr(feature = "uncertified", feature(disjoint_bitor))]
 #![cfg_attr(feature = "uncertified", feature(ip))]
 #![cfg_attr(feature = "uncertified", feature(is_ascii_octdigit))]
@@ -121,13 +118,16 @@
 #![cfg_attr(feature = "uncertified", feature(str_internals))]
 #![cfg_attr(feature = "uncertified", feature(str_split_inclusive_remainder))]
 #![cfg_attr(feature = "uncertified", feature(str_split_remainder))]
-#![cfg_attr(feature = "uncertified", feature(ub_checks))]
 #![cfg_attr(feature = "uncertified", feature(unchecked_neg))]
 #![cfg_attr(feature = "uncertified", feature(unchecked_shifts))]
 #![cfg_attr(feature = "uncertified", feature(unsafe_pinned))]
 #![cfg_attr(feature = "uncertified", feature(utf16_extra))]
 #![cfg_attr(feature = "uncertified", feature(variant_count))]
+#![feature(core_intrinsics)]
+#![feature(const_eval_select)]
+#![feature(coverage_attribute)]
 #![feature(internal_impls_macro)]
+#![feature(ub_checks)]
 // tidy-alphabetical-end
 //
 // Language features:
@@ -137,7 +137,6 @@
 #![cfg_attr(feature = "uncertified", feature(cfg_sanitize))]
 #![cfg_attr(feature = "uncertified", feature(cfg_target_has_atomic))]
 #![cfg_attr(feature = "uncertified", feature(cfg_target_has_atomic_equal_alignment))]
-#![cfg_attr(feature = "uncertified", feature(cfg_ub_checks))]
 #![cfg_attr(feature = "uncertified", feature(const_precise_live_drops))]
 #![cfg_attr(feature = "uncertified", feature(deprecated_suggestion))]
 #![cfg_attr(feature = "uncertified", feature(doc_cfg))]
@@ -149,12 +148,10 @@
 #![cfg_attr(feature = "uncertified", feature(generic_arg_infer))]
 #![cfg_attr(feature = "uncertified", feature(if_let_guard))]
 #![cfg_attr(feature = "uncertified", feature(intra_doc_pointers))]
-#![cfg_attr(feature = "uncertified", feature(intrinsics))]
 #![cfg_attr(feature = "uncertified", feature(let_chains))]
 #![cfg_attr(feature = "uncertified", feature(link_llvm_intrinsics))]
 #![cfg_attr(feature = "uncertified", feature(macro_metavar_expr))]
 #![cfg_attr(feature = "uncertified", feature(marker_trait_attr))]
-#![cfg_attr(feature = "uncertified", feature(min_specialization))]
 #![cfg_attr(feature = "uncertified", feature(must_not_suspend))]
 #![cfg_attr(feature = "uncertified", feature(never_type))]
 #![cfg_attr(feature = "uncertified", feature(optimize_attribute))]
@@ -168,11 +165,14 @@
 #![feature(allow_internal_unsafe)]
 #![feature(allow_internal_unstable)]
 #![feature(auto_traits)]
+#![feature(cfg_ub_checks)]
 #![feature(const_trait_impl)]
 #![feature(decl_macro)]
 #![feature(doc_cfg_hide)]
 #![feature(fundamental)]
+#![feature(intrinsics)]
 #![feature(lang_items)]
+#![feature(min_specialization)]
 #![feature(multiple_supertrait_upcastable)]
 #![feature(negative_impls)]
 #![feature(no_core)]
@@ -322,16 +322,12 @@ pub mod prelude;
 
 /* Core modules for ownership management */
 
-#[cfg(feature = "uncertified")]
 pub mod hint;
-#[cfg(feature = "uncertified")]
 pub mod intrinsics;
 #[cfg(feature = "uncertified")]
 pub mod mem;
-#[cfg(feature = "uncertified")]
 pub mod ptr;
 #[unstable(feature = "ub_checks", issue = "none")]
-#[cfg(feature = "uncertified")]
 pub mod ub_checks;
 
 /* Core language traits */
@@ -365,7 +361,6 @@ pub mod async_iter;
 pub mod bstr;
 #[cfg(feature = "uncertified")]
 pub mod cell;
-#[cfg(feature = "uncertified")]
 pub mod char;
 #[cfg(feature = "uncertified")]
 pub mod ffi;
@@ -377,9 +372,7 @@ pub mod iter;
 #[cfg(feature = "uncertified")]
 pub mod net;
 pub mod option;
-#[cfg(feature = "uncertified")]
 pub mod panic;
-#[cfg(feature = "uncertified")]
 pub mod panicking;
 #[unstable(feature = "pattern_type_macro", issue = "123646")]
 #[cfg(feature = "uncertified")]

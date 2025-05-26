@@ -4,16 +4,17 @@
 
 #[cfg(feature = "uncertified")]
 use crate::cell::{Cell, Ref, RefCell, RefMut, SyncUnsafeCell, UnsafeCell};
+use crate::char::MAX_LEN_UTF8;
 #[cfg(feature = "uncertified")]
-use crate::char::{EscapeDebugExtArgs, MAX_LEN_UTF8};
-#[cfg(feature = "uncertified")]
+use crate::char::EscapeDebugExtArgs;
 use crate::marker::PhantomData;
 #[cfg(feature = "uncertified")]
 use crate::num::fmt as numfmt;
 #[cfg(feature = "uncertified")]
 use crate::ops::Deref;
+use crate::result;
 #[cfg(feature = "uncertified")]
-use crate::{iter, result, str};
+use crate::{iter, str};
 
 #[cfg(feature = "uncertified")]
 mod builders;
@@ -25,7 +26,6 @@ mod float;
 mod nofloat;
 #[cfg(feature = "uncertified")]
 mod num;
-#[cfg(feature = "uncertified")]
 mod rt;
 
 #[stable(feature = "fmt_flags_align", since = "1.28.0")]
@@ -77,7 +77,6 @@ pub use self::builders::{FromFn, from_fn};
 /// assert_eq!(format!("{pythagorean_triple}"), "(3, 4, 5)");
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "uncertified")]
 pub type Result = result::Result<(), Error>;
 
 /// The error type which is returned from formatting a message into a stream.
@@ -114,8 +113,7 @@ pub type Result = result::Result<(), Error>;
 /// }
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg(feature = "uncertified")]
+#[cfg_attr(feature = "uncertified", derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd))]
 pub struct Error;
 
 /// A trait for writing or formatting into Unicode-accepting buffers or streams.
@@ -127,7 +125,6 @@ pub struct Error;
 /// [`std::io::Write`]: ../../std/io/trait.Write.html
 /// [flushable]: ../../std/io/trait.Write.html#tymethod.flush
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "uncertified")]
 pub trait Write {
     /// Writes a string slice into this writer, returning whether the write
     /// succeeded.
@@ -194,30 +191,31 @@ pub trait Write {
         self.write_str(c.encode_utf8(&mut [0; MAX_LEN_UTF8]))
     }
 
-    /// Glue for usage of the [`write!`] macro with implementors of this trait.
-    ///
-    /// This method should generally not be invoked manually, but rather through
-    /// the [`write!`] macro itself.
-    ///
-    /// # Errors
-    ///
-    /// This function will return an instance of [`Error`] on error. Please see
-    /// [write_str](Write::write_str) for details.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use std::fmt::{Error, Write};
-    ///
-    /// fn writer<W: Write>(f: &mut W, s: &str) -> Result<(), Error> {
-    ///     f.write_fmt(format_args!("{s}"))
-    /// }
-    ///
-    /// let mut buf = String::new();
-    /// writer(&mut buf, "world")?;
-    /// assert_eq!(&buf, "world");
-    /// # std::fmt::Result::Ok(())
-    /// ```
+    // /// Glue for usage of the [`write!`] macro with implementors of this trait.
+    // ///
+    // /// This method should generally not be invoked manually, but rather through
+    // /// the [`write!`] macro itself.
+    // ///
+    // /// # Errors
+    // ///
+    // /// This function will return an instance of [`Error`] on error. Please see
+    // /// [write_str](Write::write_str) for details.
+    // ///
+    // /// # Examples
+    // ///
+    // /// ```
+    // /// use std::fmt::{Error, Write};
+    // ///
+    // /// fn writer<W: Write>(f: &mut W, s: &str) -> Result<(), Error> {
+    // ///     f.write_fmt(format_args!("{s}"))
+    // /// }
+    // ///
+    // /// let mut buf = String::new();
+    // /// writer(&mut buf, "world")?;
+    // /// assert_eq!(&buf, "world");
+    // /// # std::fmt::Result::Ok(())
+    // /// ```
+    /// FIXME: docs
     #[stable(feature = "rust1", since = "1.0.0")]
     fn write_fmt(&mut self, args: Arguments<'_>) -> Result {
         // We use a specialization for `Sized` types to avoid an indirection
@@ -295,9 +293,8 @@ pub enum DebugAsHex {
 ///
 /// `FormattingOptions` is a [`Formatter`] without an attached [`Write`] trait.
 /// It is mainly used to construct `Formatter` instances.
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "uncertified", derive(Copy, Clone, Debug, PartialEq, Eq))]
 #[unstable(feature = "formatting_options", issue = "118117")]
-#[cfg(feature = "uncertified")]
 pub struct FormattingOptions {
     /// Flags, with the following bit fields:
     ///
@@ -572,18 +569,17 @@ impl Default for FormattingOptions {
 }
 
 /// Configuration for formatting.
-///
-/// A `Formatter` represents various options related to formatting. Users do not
-/// construct `Formatter`s directly; a mutable reference to one is passed to
-/// the `fmt` method of all formatting traits, like [`Debug`] and [`Display`].
-///
-/// To interact with a `Formatter`, you'll call various methods to change the
-/// various options related to formatting. For examples, please see the
-/// documentation of the methods defined on `Formatter` below.
+// ///
+// /// A `Formatter` represents various options related to formatting. Users do not
+// /// construct `Formatter`s directly; a mutable reference to one is passed to
+// /// the `fmt` method of all formatting traits, like [`Debug`] and [`Display`].
+// ///
+// /// To interact with a `Formatter`, you'll call various methods to change the
+// /// various options related to formatting. For examples, please see the
+// /// documentation of the methods defined on `Formatter` below.
 #[allow(missing_debug_implementations)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Formatter"]
-#[cfg(feature = "uncertified")]
 pub struct Formatter<'a> {
     options: FormattingOptions,
 
@@ -615,28 +611,27 @@ impl<'a> Formatter<'a> {
 /// and its arguments. This cannot be generated at runtime because it cannot
 /// safely be done, so no constructors are given and the fields are private
 /// to prevent modification.
-///
-/// The [`format_args!`] macro will safely create an instance of this structure.
-/// The macro validates the format string at compile-time so usage of the
-/// [`write()`] and [`format()`] functions can be safely performed.
-///
-/// You can use the `Arguments<'a>` that [`format_args!`] returns in `Debug`
-/// and `Display` contexts as seen below. The example also shows that `Debug`
-/// and `Display` format to the same thing: the interpolated format string
-/// in `format_args!`.
-///
-/// ```rust
-/// let debug = format!("{:?}", format_args!("{} foo {:?}", 1, 2));
-/// let display = format!("{}", format_args!("{} foo {:?}", 1, 2));
-/// assert_eq!("1 foo 2", display);
-/// assert_eq!(display, debug);
-/// ```
-///
-/// [`format()`]: ../../std/fmt/fn.format.html
+// ///
+// /// The [`format_args!`] macro will safely create an instance of this structure.
+// /// The macro validates the format string at compile-time so usage of the
+// /// [`write()`] and [`format()`] functions can be safely performed.
+// ///
+// /// You can use the `Arguments<'a>` that [`format_args!`] returns in `Debug`
+// /// and `Display` contexts as seen below. The example also shows that `Debug`
+// /// and `Display` format to the same thing: the interpolated format string
+// /// in `format_args!`.
+// ///
+// /// ```rust
+// /// let debug = format!("{:?}", format_args!("{} foo {:?}", 1, 2));
+// /// let display = format!("{}", format_args!("{} foo {:?}", 1, 2));
+// /// assert_eq!("1 foo 2", display);
+// /// assert_eq!(display, debug);
+// /// ```
+// ///
+// /// [`format()`]: ../../std/fmt/fn.format.html
 #[lang = "format_arguments"]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[derive(Copy, Clone)]
-#[cfg(feature = "uncertified")]
+#[cfg_attr(feature = "uncertified", derive(Copy, Clone))]
 pub struct Arguments<'a> {
     // Format string pieces to print.
     pieces: &'a [&'static str],
@@ -1437,39 +1432,39 @@ pub trait UpperExp {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result;
 }
 
-/// Takes an output stream and an `Arguments` struct that can be precompiled with
-/// the `format_args!` macro.
-///
-/// The arguments will be formatted according to the specified format string
-/// into the output stream provided.
-///
-/// # Examples
-///
-/// Basic usage:
-///
-/// ```
-/// use std::fmt;
-///
-/// let mut output = String::new();
-/// fmt::write(&mut output, format_args!("Hello {}!", "world"))
-///     .expect("Error occurred while trying to write in String");
-/// assert_eq!(output, "Hello world!");
-/// ```
-///
-/// Please note that using [`write!`] might be preferable. Example:
-///
-/// ```
-/// use std::fmt::Write;
-///
-/// let mut output = String::new();
-/// write!(&mut output, "Hello {}!", "world")
-///     .expect("Error occurred while trying to write in String");
-/// assert_eq!(output, "Hello world!");
-/// ```
-///
-/// [`write!`]: crate::write!
+// /// Takes an output stream and an `Arguments` struct that can be precompiled with
+// /// the `format_args!` macro.
+// ///
+// /// The arguments will be formatted according to the specified format string
+// /// into the output stream provided.
+// ///
+// /// # Examples
+// ///
+// /// Basic usage:
+// ///
+// /// ```
+// /// use std::fmt;
+// ///
+// /// let mut output = String::new();
+// /// fmt::write(&mut output, format_args!("Hello {}!", "world"))
+// ///     .expect("Error occurred while trying to write in String");
+// /// assert_eq!(output, "Hello world!");
+// /// ```
+// ///
+// /// Please note that using [`write!`] might be preferable. Example:
+// ///
+// /// ```
+// /// use std::fmt::Write;
+// ///
+// /// let mut output = String::new();
+// /// write!(&mut output, "Hello {}!", "world")
+// ///     .expect("Error occurred while trying to write in String");
+// /// assert_eq!(output, "Hello world!");
+// /// ```
+// ///
+// /// [`write!`]: crate::write!
+/// FIXME: docs
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "uncertified")]
 pub fn write(output: &mut dyn Write, args: Arguments<'_>) -> Result {
     let mut formatter = Formatter::new(output, FormattingOptions::new());
     let mut idx = 0;

@@ -280,64 +280,63 @@ pub macro PartialEq($item:item) {
 
 /// Trait for comparisons corresponding to [equivalence relations](
 /// https://en.wikipedia.org/wiki/Equivalence_relation).
-///
-/// The primary difference to [`PartialEq`] is the additional requirement for reflexivity. A type
-/// that implements [`PartialEq`] guarantees that for all `a`, `b` and `c`:
-///
-/// - symmetric: `a == b` implies `b == a` and `a != b` implies `!(a == b)`
-/// - transitive: `a == b` and `b == c` implies `a == c`
-///
-/// `Eq`, which builds on top of [`PartialEq`] also implies:
-///
-/// - reflexive: `a == a`
-///
-/// This property cannot be checked by the compiler, and therefore `Eq` is a trait without methods.
-///
-/// Violating this property is a logic error. The behavior resulting from a logic error is not
-/// specified, but users of the trait must ensure that such logic errors do *not* result in
-/// undefined behavior. This means that `unsafe` code **must not** rely on the correctness of these
-/// methods.
-///
-/// Floating point types such as [`f32`] and [`f64`] implement only [`PartialEq`] but *not* `Eq`
-/// because `NaN` != `NaN`.
-///
-/// ## Derivable
-///
-/// This trait can be used with `#[derive]`. When `derive`d, because `Eq` has no extra methods, it
-/// is only informing the compiler that this is an equivalence relation rather than a partial
-/// equivalence relation. Note that the `derive` strategy requires all fields are `Eq`, which isn't
-/// always desired.
-///
-/// ## How can I implement `Eq`?
-///
-/// If you cannot use the `derive` strategy, specify that your type implements `Eq`, which has no
-/// extra methods:
-///
-/// ```
-/// enum BookFormat {
-///     Paperback,
-///     Hardback,
-///     Ebook,
-/// }
-///
-/// struct Book {
-///     isbn: i32,
-///     format: BookFormat,
-/// }
-///
-/// impl PartialEq for Book {
-///     fn eq(&self, other: &Self) -> bool {
-///         self.isbn == other.isbn
-///     }
-/// }
-///
-/// impl Eq for Book {}
-/// ```
+// ///
+// /// The primary difference to [`PartialEq`] is the additional requirement for reflexivity. A type
+// /// that implements [`PartialEq`] guarantees that for all `a`, `b` and `c`:
+// ///
+// /// - symmetric: `a == b` implies `b == a` and `a != b` implies `!(a == b)`
+// /// - transitive: `a == b` and `b == c` implies `a == c`
+// ///
+// /// `Eq`, which builds on top of [`PartialEq`] also implies:
+// ///
+// /// - reflexive: `a == a`
+// ///
+// /// This property cannot be checked by the compiler, and therefore `Eq` is a trait without methods.
+// ///
+// /// Violating this property is a logic error. The behavior resulting from a logic error is not
+// /// specified, but users of the trait must ensure that such logic errors do *not* result in
+// /// undefined behavior. This means that `unsafe` code **must not** rely on the correctness of these
+// /// methods.
+// ///
+// /// Floating point types such as [`f32`] and [`f64`] implement only [`PartialEq`] but *not* `Eq`
+// /// because `NaN` != `NaN`.
+// ///
+// /// ## Derivable
+// ///
+// /// This trait can be used with `#[derive]`. When `derive`d, because `Eq` has no extra methods, it
+// /// is only informing the compiler that this is an equivalence relation rather than a partial
+// /// equivalence relation. Note that the `derive` strategy requires all fields are `Eq`, which isn't
+// /// always desired.
+// ///
+// /// ## How can I implement `Eq`?
+// ///
+// /// If you cannot use the `derive` strategy, specify that your type implements `Eq`, which has no
+// /// extra methods:
+// ///
+// /// ```
+// /// enum BookFormat {
+// ///     Paperback,
+// ///     Hardback,
+// ///     Ebook,
+// /// }
+// ///
+// /// struct Book {
+// ///     isbn: i32,
+// ///     format: BookFormat,
+// /// }
+// ///
+// /// impl PartialEq for Book {
+// ///     fn eq(&self, other: &Self) -> bool {
+// ///         self.isbn == other.isbn
+// ///     }
+// /// }
+// ///
+// /// impl Eq for Book {}
+// /// ```
 #[doc(alias = "==")]
 #[doc(alias = "!=")]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Eq"]
-#[cfg(feature = "uncertified")]
 pub trait Eq: PartialEq<Self> {
     // this method is used solely by `impl Eq or #[derive(Eq)]` to assert that every component of a
     // type implements `Eq` itself. The current deriving infrastructure means doing this assertion
@@ -345,7 +344,7 @@ pub trait Eq: PartialEq<Self> {
     //
     // This should never be implemented by hand.
     #[doc(hidden)]
-    #[coverage(off)]
+    #[cfg_attr(feature = "uncertified", coverage(off))]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     fn assert_receiver_is_total_eq(&self) {}
@@ -1869,7 +1868,6 @@ mod impls {
         bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64
     }
 
-    #[cfg(feature = "uncertified")]
     macro_rules! eq_impl {
         ($($t:ty)*) => ($(
             #[stable(feature = "rust1", since = "1.0.0")]
@@ -1878,7 +1876,8 @@ mod impls {
     }
 
     #[cfg(feature = "uncertified")]
-    eq_impl! { () bool char usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
+    eq_impl! { () char }
+    eq_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
     #[rustfmt::skip]
     #[cfg(feature = "uncertified")]

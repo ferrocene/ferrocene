@@ -142,7 +142,6 @@ mod arith;
 #[cfg(feature = "uncertified")]
 mod async_function;
 mod bit;
-#[cfg(feature = "uncertified")]
 mod control_flow;
 #[cfg(feature = "uncertified")]
 mod coroutine;
@@ -154,7 +153,6 @@ mod index;
 #[cfg(feature = "uncertified")]
 mod index_range;
 mod range;
-#[cfg(feature = "uncertified")]
 mod try_trait;
 mod unsize;
 
@@ -170,7 +168,6 @@ pub use self::bit::{BitAnd, BitOr, BitXor, Not, Shl, Shr};
 #[stable(feature = "op_assign_traits", since = "1.8.0")]
 pub use self::bit::{BitAndAssign, BitOrAssign, BitXorAssign, ShlAssign, ShrAssign};
 #[stable(feature = "control_flow_enum_type", since = "1.55.0")]
-#[cfg(feature = "uncertified")]
 pub use self::control_flow::ControlFlow;
 #[unstable(feature = "coroutine_trait", issue = "43122")]
 #[cfg(feature = "uncertified")]
@@ -201,7 +198,6 @@ pub use self::range::{OneSidedRange, OneSidedRangeBound};
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use self::range::{Range, RangeFrom, RangeFull, RangeTo};
 #[unstable(feature = "try_trait_v2_residual", issue = "91285")]
-#[cfg(feature = "uncertified")]
 pub use self::try_trait::Residual;
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
 #[cfg(feature = "uncertified")]
@@ -209,7 +205,6 @@ pub use self::try_trait::Yeet;
 #[cfg(feature = "uncertified")]
 pub(crate) use self::try_trait::{ChangeOutputType, NeverShortCircuit};
 #[unstable(feature = "try_trait_v2", issue = "84277")]
-#[cfg(feature = "uncertified")]
 pub use self::try_trait::{FromResidual, Try};
 #[unstable(feature = "coerce_unsized", issue = "18598")]
 pub use self::unsize::CoerceUnsized;

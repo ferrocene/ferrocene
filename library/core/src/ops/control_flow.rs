@@ -1,89 +1,89 @@
 use crate::{convert, ops};
 
 /// Used to tell an operation whether it should exit early or go on as usual.
-///
-/// This is used when exposing things (like graph traversals or visitors) where
-/// you want the user to be able to choose whether to exit early.
-/// Having the enum makes it clearer -- no more wondering "wait, what did `false`
-/// mean again?" -- and allows including a value.
-///
-/// Similar to [`Option`] and [`Result`], this enum can be used with the `?` operator
-/// to return immediately if the [`Break`] variant is present or otherwise continue normally
-/// with the value inside the [`Continue`] variant.
-///
-/// # Examples
-///
-/// Early-exiting from [`Iterator::try_for_each`]:
-/// ```
-/// use std::ops::ControlFlow;
-///
-/// let r = (2..100).try_for_each(|x| {
-///     if 403 % x == 0 {
-///         return ControlFlow::Break(x)
-///     }
-///
-///     ControlFlow::Continue(())
-/// });
-/// assert_eq!(r, ControlFlow::Break(13));
-/// ```
-///
-/// A basic tree traversal:
-/// ```
-/// use std::ops::ControlFlow;
-///
-/// pub struct TreeNode<T> {
-///     value: T,
-///     left: Option<Box<TreeNode<T>>>,
-///     right: Option<Box<TreeNode<T>>>,
-/// }
-///
-/// impl<T> TreeNode<T> {
-///     pub fn traverse_inorder<B>(&self, f: &mut impl FnMut(&T) -> ControlFlow<B>) -> ControlFlow<B> {
-///         if let Some(left) = &self.left {
-///             left.traverse_inorder(f)?;
-///         }
-///         f(&self.value)?;
-///         if let Some(right) = &self.right {
-///             right.traverse_inorder(f)?;
-///         }
-///         ControlFlow::Continue(())
-///     }
-///     fn leaf(value: T) -> Option<Box<TreeNode<T>>> {
-///         Some(Box::new(Self { value, left: None, right: None }))
-///     }
-/// }
-///
-/// let node = TreeNode {
-///     value: 0,
-///     left: TreeNode::leaf(1),
-///     right: Some(Box::new(TreeNode {
-///         value: -1,
-///         left: TreeNode::leaf(5),
-///         right: TreeNode::leaf(2),
-///     }))
-/// };
-/// let mut sum = 0;
-///
-/// let res = node.traverse_inorder(&mut |val| {
-///     if *val < 0 {
-///         ControlFlow::Break(*val)
-///     } else {
-///         sum += *val;
-///         ControlFlow::Continue(())
-///     }
-/// });
-/// assert_eq!(res, ControlFlow::Break(-1));
-/// assert_eq!(sum, 6);
-/// ```
-///
-/// [`Break`]: ControlFlow::Break
-/// [`Continue`]: ControlFlow::Continue
+// ///
+// /// This is used when exposing things (like graph traversals or visitors) where
+// /// you want the user to be able to choose whether to exit early.
+// /// Having the enum makes it clearer -- no more wondering "wait, what did `false`
+// /// mean again?" -- and allows including a value.
+// ///
+// /// Similar to [`Option`] and [`Result`], this enum can be used with the `?` operator
+// /// to return immediately if the [`Break`] variant is present or otherwise continue normally
+// /// with the value inside the [`Continue`] variant.
+// ///
+// /// # Examples
+// ///
+// /// Early-exiting from [`Iterator::try_for_each`]:
+// /// ```
+// /// use std::ops::ControlFlow;
+// ///
+// /// let r = (2..100).try_for_each(|x| {
+// ///     if 403 % x == 0 {
+// ///         return ControlFlow::Break(x)
+// ///     }
+// ///
+// ///     ControlFlow::Continue(())
+// /// });
+// /// assert_eq!(r, ControlFlow::Break(13));
+// /// ```
+// ///
+// /// A basic tree traversal:
+// /// ```
+// /// use std::ops::ControlFlow;
+// ///
+// /// pub struct TreeNode<T> {
+// ///     value: T,
+// ///     left: Option<Box<TreeNode<T>>>,
+// ///     right: Option<Box<TreeNode<T>>>,
+// /// }
+// ///
+// /// impl<T> TreeNode<T> {
+// ///     pub fn traverse_inorder<B>(&self, f: &mut impl FnMut(&T) -> ControlFlow<B>) -> ControlFlow<B> {
+// ///         if let Some(left) = &self.left {
+// ///             left.traverse_inorder(f)?;
+// ///         }
+// ///         f(&self.value)?;
+// ///         if let Some(right) = &self.right {
+// ///             right.traverse_inorder(f)?;
+// ///         }
+// ///         ControlFlow::Continue(())
+// ///     }
+// ///     fn leaf(value: T) -> Option<Box<TreeNode<T>>> {
+// ///         Some(Box::new(Self { value, left: None, right: None }))
+// ///     }
+// /// }
+// ///
+// /// let node = TreeNode {
+// ///     value: 0,
+// ///     left: TreeNode::leaf(1),
+// ///     right: Some(Box::new(TreeNode {
+// ///         value: -1,
+// ///         left: TreeNode::leaf(5),
+// ///         right: TreeNode::leaf(2),
+// ///     }))
+// /// };
+// /// let mut sum = 0;
+// ///
+// /// let res = node.traverse_inorder(&mut |val| {
+// ///     if *val < 0 {
+// ///         ControlFlow::Break(*val)
+// ///     } else {
+// ///         sum += *val;
+// ///         ControlFlow::Continue(())
+// ///     }
+// /// });
+// /// assert_eq!(res, ControlFlow::Break(-1));
+// /// assert_eq!(sum, 6);
+// /// ```
+// ///
+// /// [`Break`]: ControlFlow::Break
+// /// [`Continue`]: ControlFlow::Continue
 #[stable(feature = "control_flow_enum_type", since = "1.55.0")]
 #[rustc_diagnostic_item = "ControlFlow"]
 #[must_use]
 // ControlFlow should not implement PartialOrd or Ord, per RFC 3058:
 // https://rust-lang.github.io/rfcs/3058-try-trait-v2.html#traits-for-controlflow
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "uncertified", derive(Debug, Clone, Copy, PartialEq, Eq, Hash))]
 pub enum ControlFlow<B, C = ()> {
     /// Move on to the next phase of the operation as normal.
     #[stable(feature = "control_flow_enum_type", since = "1.55.0")]
@@ -254,6 +254,7 @@ impl<T> ControlFlow<T, T> {
 /// These are used only as part of implementing the iterator adapters.
 /// They have mediocre names and non-obvious semantics, so aren't
 /// currently on a path to potential stabilization.
+#[cfg(feature = "uncertified")]
 impl<R: ops::Try> ControlFlow<R, R::Output> {
     /// Creates a `ControlFlow` from any type implementing `Try`.
     #[inline]

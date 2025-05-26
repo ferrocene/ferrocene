@@ -93,7 +93,6 @@ pub trait Add<Rhs = Self> {
     fn add(self, rhs: Rhs) -> Self::Output;
 }
 
-#[cfg(feature = "uncertified")]
 macro_rules! add_impl {
     ($($t:ty)*) => ($(
         #[stable(feature = "rust1", since = "1.0.0")]
@@ -112,7 +111,8 @@ macro_rules! add_impl {
 }
 
 #[cfg(feature = "uncertified")]
-add_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+add_impl! { f16 f128 }
+add_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 /// The subtraction operator `-`.
 ///
@@ -205,7 +205,6 @@ pub trait Sub<Rhs = Self> {
     fn sub(self, rhs: Rhs) -> Self::Output;
 }
 
-#[cfg(feature = "uncertified")]
 macro_rules! sub_impl {
     ($($t:ty)*) => ($(
         #[stable(feature = "rust1", since = "1.0.0")]
@@ -223,7 +222,8 @@ macro_rules! sub_impl {
 }
 
 #[cfg(feature = "uncertified")]
-sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+sub_impl! { f16 f128 }
+sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 /// The multiplication operator `*`.
 ///
@@ -337,7 +337,6 @@ pub trait Mul<Rhs = Self> {
     fn mul(self, rhs: Rhs) -> Self::Output;
 }
 
-#[cfg(feature = "uncertified")]
 macro_rules! mul_impl {
     ($($t:ty)*) => ($(
         #[stable(feature = "rust1", since = "1.0.0")]
@@ -355,7 +354,8 @@ macro_rules! mul_impl {
 }
 
 #[cfg(feature = "uncertified")]
-mul_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+mul_impl! { f16 f128 }
+mul_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 /// The division operator `/`.
 ///
@@ -473,7 +473,6 @@ pub trait Div<Rhs = Self> {
     fn div(self, rhs: Rhs) -> Self::Output;
 }
 
-#[cfg(feature = "uncertified")]
 macro_rules! div_impl_integer {
     ($(($($t:ty)*) => $panic:expr),*) => ($($(
         /// This operation rounds towards zero, truncating any
@@ -495,13 +494,11 @@ macro_rules! div_impl_integer {
     )*)*)
 }
 
-#[cfg(feature = "uncertified")]
 div_impl_integer! {
     (usize u8 u16 u32 u64 u128) => "This operation will panic if `other == 0`.",
     (isize i8 i16 i32 i64 i128) => "This operation will panic if `other == 0` or the division results in overflow."
 }
 
-#[cfg(feature = "uncertified")]
 macro_rules! div_impl_float {
     ($($t:ty)*) => ($(
         #[stable(feature = "rust1", since = "1.0.0")]
@@ -517,7 +514,8 @@ macro_rules! div_impl_float {
 }
 
 #[cfg(feature = "uncertified")]
-div_impl_float! { f16 f32 f64 f128 }
+div_impl_float! { f16 f128 }
+div_impl_float! { f32 f64 }
 
 /// The remainder operator `%`.
 ///
@@ -579,7 +577,6 @@ pub trait Rem<Rhs = Self> {
     fn rem(self, rhs: Rhs) -> Self::Output;
 }
 
-#[cfg(feature = "uncertified")]
 macro_rules! rem_impl_integer {
     ($(($($t:ty)*) => $panic:expr),*) => ($($(
         /// This operation satisfies `n % d == n - (n / d) * d`. The
@@ -601,13 +598,11 @@ macro_rules! rem_impl_integer {
     )*)*)
 }
 
-#[cfg(feature = "uncertified")]
 rem_impl_integer! {
     (usize u8 u16 u32 u64 u128) => "This operation will panic if `other == 0`.",
     (isize i8 i16 i32 i64 i128) => "This operation will panic if `other == 0` or if `self / other` results in overflow."
 }
 
-#[cfg(feature = "uncertified")]
 macro_rules! rem_impl_float {
     ($($t:ty)*) => ($(
 
@@ -638,7 +633,8 @@ macro_rules! rem_impl_float {
 }
 
 #[cfg(feature = "uncertified")]
-rem_impl_float! { f16 f32 f64 f128 }
+rem_impl_float! { f16 f128 }
+rem_impl_float! { f32 f64 }
 
 /// The unary negation operator `-`.
 ///
@@ -698,7 +694,6 @@ pub trait Neg {
     fn neg(self) -> Self::Output;
 }
 
-#[cfg(feature = "uncertified")]
 macro_rules! neg_impl {
     ($($t:ty)*) => ($(
         #[stable(feature = "rust1", since = "1.0.0")]
@@ -715,7 +710,8 @@ macro_rules! neg_impl {
 }
 
 #[cfg(feature = "uncertified")]
-neg_impl! { isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+neg_impl! { f16 f128 }
+neg_impl! { isize i8 i16 i32 i64 i128 f32 f64 }
 
 /// The addition assignment operator `+=`.
 ///
@@ -768,7 +764,6 @@ pub trait AddAssign<Rhs = Self> {
     fn add_assign(&mut self, rhs: Rhs);
 }
 
-#[cfg(feature = "uncertified")]
 macro_rules! add_assign_impl {
     ($($t:ty)+) => ($(
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
@@ -784,7 +779,8 @@ macro_rules! add_assign_impl {
 }
 
 #[cfg(feature = "uncertified")]
-add_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+add_assign_impl! { f16 f128 }
+add_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 /// The subtraction assignment operator `-=`.
 ///
@@ -837,7 +833,6 @@ pub trait SubAssign<Rhs = Self> {
     fn sub_assign(&mut self, rhs: Rhs);
 }
 
-#[cfg(feature = "uncertified")]
 macro_rules! sub_assign_impl {
     ($($t:ty)+) => ($(
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
@@ -853,7 +848,8 @@ macro_rules! sub_assign_impl {
 }
 
 #[cfg(feature = "uncertified")]
-sub_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+sub_assign_impl! { f16 f128 }
+sub_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 /// The multiplication assignment operator `*=`.
 ///
@@ -897,7 +893,6 @@ pub trait MulAssign<Rhs = Self> {
     fn mul_assign(&mut self, rhs: Rhs);
 }
 
-#[cfg(feature = "uncertified")]
 macro_rules! mul_assign_impl {
     ($($t:ty)+) => ($(
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
@@ -913,7 +908,8 @@ macro_rules! mul_assign_impl {
 }
 
 #[cfg(feature = "uncertified")]
-mul_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+mul_assign_impl! { f16 f128 }
+mul_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 /// The division assignment operator `/=`.
 ///
@@ -957,7 +953,6 @@ pub trait DivAssign<Rhs = Self> {
     fn div_assign(&mut self, rhs: Rhs);
 }
 
-#[cfg(feature = "uncertified")]
 macro_rules! div_assign_impl {
     ($($t:ty)+) => ($(
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
@@ -972,7 +967,8 @@ macro_rules! div_assign_impl {
 }
 
 #[cfg(feature = "uncertified")]
-div_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+div_assign_impl! { f16 f128 }
+div_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 /// The remainder assignment operator `%=`.
 ///
@@ -1020,7 +1016,6 @@ pub trait RemAssign<Rhs = Self> {
     fn rem_assign(&mut self, rhs: Rhs);
 }
 
-#[cfg(feature = "uncertified")]
 macro_rules! rem_assign_impl {
     ($($t:ty)+) => ($(
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
@@ -1035,4 +1030,5 @@ macro_rules! rem_assign_impl {
 }
 
 #[cfg(feature = "uncertified")]
-rem_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+rem_assign_impl! { f16 f128 }
+rem_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }

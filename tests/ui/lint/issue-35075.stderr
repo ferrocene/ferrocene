@@ -4,10 +4,10 @@ error[E0412]: cannot find type `Foo` in this scope
 LL |     inner: Foo<T>
    |            ^^^ not found in this scope
    |
-help: there is an enum variant `Baz::Foo`; try using the variant's enum
+help: there is an enum variant `crate::Baz::Foo`; try using the variant's enum
    |
 LL -     inner: Foo<T>
-LL +     inner: Baz
+LL +     inner: crate::Baz
    |
 
 error[E0412]: cannot find type `Foo` in this scope
@@ -16,10 +16,10 @@ error[E0412]: cannot find type `Foo` in this scope
 LL |     Foo(Foo<T>)
    |         ^^^ not found in this scope
    |
-help: there is an enum variant `Baz::Foo`; try using the variant's enum
+help: there is an enum variant `crate::Baz::Foo`; try using the variant's enum
    |
 LL -     Foo(Foo<T>)
-LL +     Foo(Baz)
+LL +     Foo(crate::Baz)
    |
 
 error: aborting due to 2 previous errors

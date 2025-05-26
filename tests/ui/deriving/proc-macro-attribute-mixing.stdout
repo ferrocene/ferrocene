@@ -1,5 +1,4 @@
 #![feature(prelude_import)]
-#![no_std]
 // This test certify that we can mix attribute macros from Rust and external proc-macros.
 // For instance, `#[derive(Default)]` uses `#[default]` and `#[derive(CoercePointee)]` uses
 // `#[pointee]`.
@@ -12,7 +11,7 @@
 
 #![feature(derive_coerce_pointee)]
 #[prelude_import]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 #[macro_use]
 extern crate std;
 

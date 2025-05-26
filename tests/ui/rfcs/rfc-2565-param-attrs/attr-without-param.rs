@@ -1,3 +1,4 @@
+//@ edition: 2015
 #[cfg(FALSE)]
 impl S {
     fn f(#[attr]) {} //~ ERROR expected parameter name, found `)`

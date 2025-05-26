@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Test to ensure private traits are inaccessible with UFCS angle-bracket syntax.
 
 mod foo {

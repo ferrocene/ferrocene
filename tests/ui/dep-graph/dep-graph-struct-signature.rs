@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Test cases where a changing struct appears in the signature of fns
 // and methods.
 

@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![allow(warnings)]
 
 trait Trait<T> {

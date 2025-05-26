@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![warn(unused_imports)]
 
 mod a {

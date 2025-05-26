@@ -6,7 +6,7 @@ LL | pub fn test(_: Foo) {}
    |
 help: consider importing this struct
    |
-LL + use local::Foo;
+LL + use crate::local::Foo;
    |
 
 error[E0412]: cannot find type `Bar` in this scope

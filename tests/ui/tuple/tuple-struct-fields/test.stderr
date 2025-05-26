@@ -1,5 +1,5 @@
 error: expected one of `)` or `,`, found `(`
-  --> $DIR/test.rs:4:26
+  --> $DIR/test.rs:5:26
    |
 LL |     struct S2(pub((foo)) ());
    |                         -^ expected one of `)` or `,`
@@ -7,7 +7,7 @@ LL |     struct S2(pub((foo)) ());
    |                         help: missing `,`
 
 error[E0412]: cannot find type `foo` in this scope
-  --> $DIR/test.rs:4:20
+  --> $DIR/test.rs:5:20
    |
 LL |     struct S2(pub((foo)) ());
    |                    ^^^ not found in this scope

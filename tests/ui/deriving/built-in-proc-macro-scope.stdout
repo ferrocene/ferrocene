@@ -1,12 +1,11 @@
 #![feature(prelude_import)]
-#![no_std]
 //@ check-pass
 //@ proc-macro: another-proc-macro.rs
 //@ compile-flags: -Zunpretty=expanded
 
 #![feature(derive_coerce_pointee)]
 #[prelude_import]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 #[macro_use]
 extern crate std;
 

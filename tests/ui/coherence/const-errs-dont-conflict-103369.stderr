@@ -14,7 +14,7 @@ note: inside `<() as ConstGenericTrait<{my_fn(1)}>>::{constant#0}`
    |
 LL | impl ConstGenericTrait<{my_fn(1)}> for () {}
    |                         ^^^^^^^^
-   = note: this error originates in the macro `$crate::panic::panic_2015` which comes from the expansion of the macro `panic` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the macro `$crate::panic::panic_2021` which comes from the expansion of the macro `panic` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0080]: evaluation of constant value failed
   --> $DIR/const-errs-dont-conflict-103369.rs:10:5
@@ -32,7 +32,7 @@ note: inside `<() as ConstGenericTrait<{my_fn(2)}>>::{constant#0}`
    |
 LL | impl ConstGenericTrait<{my_fn(2)}> for () {}
    |                         ^^^^^^^^
-   = note: this error originates in the macro `$crate::panic::panic_2015` which comes from the expansion of the macro `panic` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the macro `$crate::panic::panic_2021` which comes from the expansion of the macro `panic` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: aborting due to 2 previous errors
 

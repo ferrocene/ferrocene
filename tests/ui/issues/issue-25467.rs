@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 #![allow(unused_variables)]
 //@ aux-build:issue-25467.rs

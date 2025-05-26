@@ -1,3 +1,4 @@
+//@ edition: 2015
 mod moon {
     pub fn foo() {}
 }

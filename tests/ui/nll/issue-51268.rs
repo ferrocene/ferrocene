@@ -1,3 +1,4 @@
+//@ edition: 2015
 struct Bar;
 
 impl Bar {

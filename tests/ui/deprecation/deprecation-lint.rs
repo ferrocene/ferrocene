@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ aux-build:deprecation-lint.rs
 
 #![deny(deprecated)]

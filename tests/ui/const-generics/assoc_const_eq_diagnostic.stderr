@@ -5,7 +5,7 @@ LL | pub trait CoolStuff: Parse<MODE = Mode::Cool> {}
    |                                   ^^^^^^^^^^
    |                                   |
    |                                   not a type
-   |                                   help: try using the variant's enum: `Mode`
+   |                                   help: try using the variant's enum: `crate::Mode`
 
 error[E0573]: expected type, found variant `Mode::Cool`
   --> $DIR/assoc_const_eq_diagnostic.rs:17:17
@@ -14,7 +14,7 @@ LL | fn no_help() -> Mode::Cool {}
    |                 ^^^^^^^^^^
    |                 |
    |                 not a type
-   |                 help: try using the variant's enum: `Mode`
+   |                 help: try using the variant's enum: `crate::Mode`
 
 error: expected constant, found type
   --> $DIR/assoc_const_eq_diagnostic.rs:11:35

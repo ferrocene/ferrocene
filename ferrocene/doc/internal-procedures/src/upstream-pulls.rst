@@ -11,7 +11,7 @@ An "upstream pull" is a pull request that pulls in commits from the upstream Rus
 repository back into the Ferrocene repository to keep them in sync. This
 procedure is usually performed by a periodic Github Action that opens a pull
 request automatically. Sometimes merge conflicts may occur in which case the conflict
-needs to to be resolved manually.
+needs to be resolved manually.
 
 Upstream Pull without merge conflicts
 -------------------------------------

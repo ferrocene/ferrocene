@@ -339,7 +339,6 @@ pub mod ub_checks;
 #[cfg(feature = "uncertified")]
 pub mod borrow;
 pub mod clone;
-#[cfg(feature = "uncertified")]
 pub mod cmp;
 pub mod convert;
 pub mod default;

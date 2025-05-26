@@ -1,241 +1,245 @@
 //! Utilities for comparing and ordering values.
-//!
-//! This module contains various tools for comparing and ordering values. In
-//! summary:
-//!
-//! * [`PartialEq<Rhs>`] overloads the `==` and `!=` operators. In cases where
-//!   `Rhs` (the right hand side's type) is `Self`, this trait corresponds to a
-//!   partial equivalence relation.
-//! * [`Eq`] indicates that the overloaded `==` operator corresponds to an
-//!   equivalence relation.
-//! * [`Ord`] and [`PartialOrd`] are traits that allow you to define total and
-//!   partial orderings between values, respectively. Implementing them overloads
-//!   the `<`, `<=`, `>`, and `>=` operators.
-//! * [`Ordering`] is an enum returned by the main functions of [`Ord`] and
-//!   [`PartialOrd`], and describes an ordering of two values (less, equal, or
-//!   greater).
-//! * [`Reverse`] is a struct that allows you to easily reverse an ordering.
-//! * [`max`] and [`min`] are functions that build off of [`Ord`] and allow you
-//!   to find the maximum or minimum of two values.
-//!
-//! For more details, see the respective documentation of each item in the list.
-//!
-//! [`max`]: Ord::max
-//! [`min`]: Ord::min
+// //!
+// //! This module contains various tools for comparing and ordering values. In
+// //! summary:
+// //!
+// //! * [`PartialEq<Rhs>`] overloads the `==` and `!=` operators. In cases where
+// //!   `Rhs` (the right hand side's type) is `Self`, this trait corresponds to a
+// //!   partial equivalence relation.
+// //! * [`Eq`] indicates that the overloaded `==` operator corresponds to an
+// //!   equivalence relation.
+// //! * [`Ord`] and [`PartialOrd`] are traits that allow you to define total and
+// //!   partial orderings between values, respectively. Implementing them overloads
+// //!   the `<`, `<=`, `>`, and `>=` operators.
+// //! * [`Ordering`] is an enum returned by the main functions of [`Ord`] and
+// //!   [`PartialOrd`], and describes an ordering of two values (less, equal, or
+// //!   greater).
+// //! * [`Reverse`] is a struct that allows you to easily reverse an ordering.
+// //! * [`max`] and [`min`] are functions that build off of [`Ord`] and allow you
+// //!   to find the maximum or minimum of two values.
+// //!
+// //! For more details, see the respective documentation of each item in the list.
+// //!
+// //! [`max`]: Ord::max
+// //! [`min`]: Ord::min
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
+#[cfg(feature = "uncertified")]
 mod bytewise;
+#[cfg(feature = "uncertified")]
 pub(crate) use bytewise::BytewiseEq;
 
+#[cfg(feature = "uncertified")]
 use self::Ordering::*;
+#[cfg(feature = "uncertified")]
 use crate::ops::ControlFlow;
 
 /// Trait for comparisons using the equality operator.
-///
-/// Implementing this trait for types provides the `==` and `!=` operators for
-/// those types.
-///
-/// `x.eq(y)` can also be written `x == y`, and `x.ne(y)` can be written `x != y`.
-/// We use the easier-to-read infix notation in the remainder of this documentation.
-///
-/// This trait allows for comparisons using the equality operator, for types
-/// that do not have a full equivalence relation. For example, in floating point
-/// numbers `NaN != NaN`, so floating point types implement `PartialEq` but not
-/// [`trait@Eq`]. Formally speaking, when `Rhs == Self`, this trait corresponds
-/// to a [partial equivalence relation].
-///
-/// [partial equivalence relation]: https://en.wikipedia.org/wiki/Partial_equivalence_relation
-///
-/// Implementations must ensure that `eq` and `ne` are consistent with each other:
-///
-/// - `a != b` if and only if `!(a == b)`.
-///
-/// The default implementation of `ne` provides this consistency and is almost
-/// always sufficient. It should not be overridden without very good reason.
-///
-/// If [`PartialOrd`] or [`Ord`] are also implemented for `Self` and `Rhs`, their methods must also
-/// be consistent with `PartialEq` (see the documentation of those traits for the exact
-/// requirements). It's easy to accidentally make them disagree by deriving some of the traits and
-/// manually implementing others.
-///
-/// The equality relation `==` must satisfy the following conditions
-/// (for all `a`, `b`, `c` of type `A`, `B`, `C`):
-///
-/// - **Symmetry**: if `A: PartialEq<B>` and `B: PartialEq<A>`, then **`a == b`
-///   implies `b == a`**; and
-///
-/// - **Transitivity**: if `A: PartialEq<B>` and `B: PartialEq<C>` and `A:
-///   PartialEq<C>`, then **`a == b` and `b == c` implies `a == c`**.
-///   This must also work for longer chains, such as when `A: PartialEq<B>`, `B: PartialEq<C>`,
-///   `C: PartialEq<D>`, and `A: PartialEq<D>` all exist.
-///
-/// Note that the `B: PartialEq<A>` (symmetric) and `A: PartialEq<C>`
-/// (transitive) impls are not forced to exist, but these requirements apply
-/// whenever they do exist.
-///
-/// Violating these requirements is a logic error. The behavior resulting from a logic error is not
-/// specified, but users of the trait must ensure that such logic errors do *not* result in
-/// undefined behavior. This means that `unsafe` code **must not** rely on the correctness of these
-/// methods.
-///
-/// ## Cross-crate considerations
-///
-/// Upholding the requirements stated above can become tricky when one crate implements `PartialEq`
-/// for a type of another crate (i.e., to allow comparing one of its own types with a type from the
-/// standard library). The recommendation is to never implement this trait for a foreign type. In
-/// other words, such a crate should do `impl PartialEq<ForeignType> for LocalType`, but it should
-/// *not* do `impl PartialEq<LocalType> for ForeignType`.
-///
-/// This avoids the problem of transitive chains that criss-cross crate boundaries: for all local
-/// types `T`, you may assume that no other crate will add `impl`s that allow comparing `T == U`. In
-/// other words, if other crates add `impl`s that allow building longer transitive chains `U1 == ...
-/// == T == V1 == ...`, then all the types that appear to the right of `T` must be types that the
-/// crate defining `T` already knows about. This rules out transitive chains where downstream crates
-/// can add new `impl`s that "stitch together" comparisons of foreign types in ways that violate
-/// transitivity.
-///
-/// Not having such foreign `impl`s also avoids forward compatibility issues where one crate adding
-/// more `PartialEq` implementations can cause build failures in downstream crates.
-///
-/// ## Derivable
-///
-/// This trait can be used with `#[derive]`. When `derive`d on structs, two
-/// instances are equal if all fields are equal, and not equal if any fields
-/// are not equal. When `derive`d on enums, two instances are equal if they
-/// are the same variant and all fields are equal.
-///
-/// ## How can I implement `PartialEq`?
-///
-/// An example implementation for a domain in which two books are considered
-/// the same book if their ISBN matches, even if the formats differ:
-///
-/// ```
-/// enum BookFormat {
-///     Paperback,
-///     Hardback,
-///     Ebook,
-/// }
-///
-/// struct Book {
-///     isbn: i32,
-///     format: BookFormat,
-/// }
-///
-/// impl PartialEq for Book {
-///     fn eq(&self, other: &Self) -> bool {
-///         self.isbn == other.isbn
-///     }
-/// }
-///
-/// let b1 = Book { isbn: 3, format: BookFormat::Paperback };
-/// let b2 = Book { isbn: 3, format: BookFormat::Ebook };
-/// let b3 = Book { isbn: 10, format: BookFormat::Paperback };
-///
-/// assert!(b1 == b2);
-/// assert!(b1 != b3);
-/// ```
-///
-/// ## How can I compare two different types?
-///
-/// The type you can compare with is controlled by `PartialEq`'s type parameter.
-/// For example, let's tweak our previous code a bit:
-///
-/// ```
-/// // The derive implements <BookFormat> == <BookFormat> comparisons
-/// #[derive(PartialEq)]
-/// enum BookFormat {
-///     Paperback,
-///     Hardback,
-///     Ebook,
-/// }
-///
-/// struct Book {
-///     isbn: i32,
-///     format: BookFormat,
-/// }
-///
-/// // Implement <Book> == <BookFormat> comparisons
-/// impl PartialEq<BookFormat> for Book {
-///     fn eq(&self, other: &BookFormat) -> bool {
-///         self.format == *other
-///     }
-/// }
-///
-/// // Implement <BookFormat> == <Book> comparisons
-/// impl PartialEq<Book> for BookFormat {
-///     fn eq(&self, other: &Book) -> bool {
-///         *self == other.format
-///     }
-/// }
-///
-/// let b1 = Book { isbn: 3, format: BookFormat::Paperback };
-///
-/// assert!(b1 == BookFormat::Paperback);
-/// assert!(BookFormat::Ebook != b1);
-/// ```
-///
-/// By changing `impl PartialEq for Book` to `impl PartialEq<BookFormat> for Book`,
-/// we allow `BookFormat`s to be compared with `Book`s.
-///
-/// A comparison like the one above, which ignores some fields of the struct,
-/// can be dangerous. It can easily lead to an unintended violation of the
-/// requirements for a partial equivalence relation. For example, if we kept
-/// the above implementation of `PartialEq<Book>` for `BookFormat` and added an
-/// implementation of `PartialEq<Book>` for `Book` (either via a `#[derive]` or
-/// via the manual implementation from the first example) then the result would
-/// violate transitivity:
-///
-/// ```should_panic
-/// #[derive(PartialEq)]
-/// enum BookFormat {
-///     Paperback,
-///     Hardback,
-///     Ebook,
-/// }
-///
-/// #[derive(PartialEq)]
-/// struct Book {
-///     isbn: i32,
-///     format: BookFormat,
-/// }
-///
-/// impl PartialEq<BookFormat> for Book {
-///     fn eq(&self, other: &BookFormat) -> bool {
-///         self.format == *other
-///     }
-/// }
-///
-/// impl PartialEq<Book> for BookFormat {
-///     fn eq(&self, other: &Book) -> bool {
-///         *self == other.format
-///     }
-/// }
-///
-/// fn main() {
-///     let b1 = Book { isbn: 1, format: BookFormat::Paperback };
-///     let b2 = Book { isbn: 2, format: BookFormat::Paperback };
-///
-///     assert!(b1 == BookFormat::Paperback);
-///     assert!(BookFormat::Paperback == b2);
-///
-///     // The following should hold by transitivity but doesn't.
-///     assert!(b1 == b2); // <-- PANICS
-/// }
-/// ```
-///
-/// # Examples
-///
-/// ```
-/// let x: u32 = 0;
-/// let y: u32 = 1;
-///
-/// assert_eq!(x == y, false);
-/// assert_eq!(x.eq(&y), false);
-/// ```
-///
-/// [`eq`]: PartialEq::eq
-/// [`ne`]: PartialEq::ne
+// ///
+// /// Implementing this trait for types provides the `==` and `!=` operators for
+// /// those types.
+// ///
+// /// `x.eq(y)` can also be written `x == y`, and `x.ne(y)` can be written `x != y`.
+// /// We use the easier-to-read infix notation in the remainder of this documentation.
+// ///
+// /// This trait allows for comparisons using the equality operator, for types
+// /// that do not have a full equivalence relation. For example, in floating point
+// /// numbers `NaN != NaN`, so floating point types implement `PartialEq` but not
+// /// [`trait@Eq`]. Formally speaking, when `Rhs == Self`, this trait corresponds
+// /// to a [partial equivalence relation].
+// ///
+// /// [partial equivalence relation]: https:// //en.wikipedia.org/wiki/Partial_equivalence_relation
+// ///
+// /// Implementations must ensure that `eq` and `ne` are consistent with each other:
+// ///
+// /// - `a != b` if and only if `!(a == b)`.
+// ///
+// /// The default implementation of `ne` provides this consistency and is almost
+// /// always sufficient. It should not be overridden without very good reason.
+// ///
+// /// If [`PartialOrd`] or [`Ord`] are also implemented for `Self` and `Rhs`, their methods must also
+// /// be consistent with `PartialEq` (see the documentation of those traits for the exact
+// /// requirements). It's easy to accidentally make them disagree by deriving some of the traits and
+// /// manually implementing others.
+// ///
+// /// The equality relation `==` must satisfy the following conditions
+// /// (for all `a`, `b`, `c` of type `A`, `B`, `C`):
+// ///
+// /// - **Symmetry**: if `A: PartialEq<B>` and `B: PartialEq<A>`, then **`a == b`
+// ///   implies `b == a`**; and
+// ///
+// /// - **Transitivity**: if `A: PartialEq<B>` and `B: PartialEq<C>` and `A:
+// ///   PartialEq<C>`, then **`a == b` and `b == c` implies `a == c`**.
+// ///   This must also work for longer chains, such as when `A: PartialEq<B>`, `B: PartialEq<C>`,
+// ///   `C: PartialEq<D>`, and `A: PartialEq<D>` all exist.
+// ///
+// /// Note that the `B: PartialEq<A>` (symmetric) and `A: PartialEq<C>`
+// /// (transitive) impls are not forced to exist, but these requirements apply
+// /// whenever they do exist.
+// ///
+// /// Violating these requirements is a logic error. The behavior resulting from a logic error is not
+// /// specified, but users of the trait must ensure that such logic errors do *not* result in
+// /// undefined behavior. This means that `unsafe` code **must not** rely on the correctness of these
+// /// methods.
+// ///
+// /// ## Cross-crate considerations
+// ///
+// /// Upholding the requirements stated above can become tricky when one crate implements `PartialEq`
+// /// for a type of another crate (i.e., to allow comparing one of its own types with a type from the
+// /// standard library). The recommendation is to never implement this trait for a foreign type. In
+// /// other words, such a crate should do `impl PartialEq<ForeignType> for LocalType`, but it should
+// /// *not* do `impl PartialEq<LocalType> for ForeignType`.
+// ///
+// /// This avoids the problem of transitive chains that criss-cross crate boundaries: for all local
+// /// types `T`, you may assume that no other crate will add `impl`s that allow comparing `T == U`. In
+// /// other words, if other crates add `impl`s that allow building longer transitive chains `U1 == ...
+// /// == T == V1 == ...`, then all the types that appear to the right of `T` must be types that the
+// /// crate defining `T` already knows about. This rules out transitive chains where downstream crates
+// /// can add new `impl`s that "stitch together" comparisons of foreign types in ways that violate
+// /// transitivity.
+// ///
+// /// Not having such foreign `impl`s also avoids forward compatibility issues where one crate adding
+// /// more `PartialEq` implementations can cause build failures in downstream crates.
+// ///
+// /// ## Derivable
+// ///
+// /// This trait can be used with `#[derive]`. When `derive`d on structs, two
+// /// instances are equal if all fields are equal, and not equal if any fields
+// /// are not equal. When `derive`d on enums, two instances are equal if they
+// /// are the same variant and all fields are equal.
+// ///
+// /// ## How can I implement `PartialEq`?
+// ///
+// /// An example implementation for a domain in which two books are considered
+// /// the same book if their ISBN matches, even if the formats differ:
+// ///
+// /// ```
+// /// enum BookFormat {
+// ///     Paperback,
+// ///     Hardback,
+// ///     Ebook,
+// /// }
+// ///
+// /// struct Book {
+// ///     isbn: i32,
+// ///     format: BookFormat,
+// /// }
+// ///
+// /// impl PartialEq for Book {
+// ///     fn eq(&self, other: &Self) -> bool {
+// ///         self.isbn == other.isbn
+// ///     }
+// /// }
+// ///
+// /// let b1 = Book { isbn: 3, format: BookFormat::Paperback };
+// /// let b2 = Book { isbn: 3, format: BookFormat::Ebook };
+// /// let b3 = Book { isbn: 10, format: BookFormat::Paperback };
+// ///
+// /// assert!(b1 == b2);
+// /// assert!(b1 != b3);
+// /// ```
+// ///
+// /// ## How can I compare two different types?
+// ///
+// /// The type you can compare with is controlled by `PartialEq`'s type parameter.
+// /// For example, let's tweak our previous code a bit:
+// ///
+// /// ```
+// /// // // The derive implements <BookFormat> == <BookFormat> comparisons
+// /// #[derive(PartialEq)]
+// /// enum BookFormat {
+// ///     Paperback,
+// ///     Hardback,
+// ///     Ebook,
+// /// }
+// ///
+// /// struct Book {
+// ///     isbn: i32,
+// ///     format: BookFormat,
+// /// }
+// ///
+// /// // // Implement <Book> == <BookFormat> comparisons
+// /// impl PartialEq<BookFormat> for Book {
+// ///     fn eq(&self, other: &BookFormat) -> bool {
+// ///         self.format == *other
+// ///     }
+// /// }
+// ///
+// /// // // Implement <BookFormat> == <Book> comparisons
+// /// impl PartialEq<Book> for BookFormat {
+// ///     fn eq(&self, other: &Book) -> bool {
+// ///         *self == other.format
+// ///     }
+// /// }
+// ///
+// /// let b1 = Book { isbn: 3, format: BookFormat::Paperback };
+// ///
+// /// assert!(b1 == BookFormat::Paperback);
+// /// assert!(BookFormat::Ebook != b1);
+// /// ```
+// ///
+// /// By changing `impl PartialEq for Book` to `impl PartialEq<BookFormat> for Book`,
+// /// we allow `BookFormat`s to be compared with `Book`s.
+// ///
+// /// A comparison like the one above, which ignores some fields of the struct,
+// /// can be dangerous. It can easily lead to an unintended violation of the
+// /// requirements for a partial equivalence relation. For example, if we kept
+// /// the above implementation of `PartialEq<Book>` for `BookFormat` and added an
+// /// implementation of `PartialEq<Book>` for `Book` (either via a `#[derive]` or
+// /// via the manual implementation from the first example) then the result would
+// /// violate transitivity:
+// ///
+// /// ```should_panic
+// /// #[derive(PartialEq)]
+// /// enum BookFormat {
+// ///     Paperback,
+// ///     Hardback,
+// ///     Ebook,
+// /// }
+// ///
+// /// #[derive(PartialEq)]
+// /// struct Book {
+// ///     isbn: i32,
+// ///     format: BookFormat,
+// /// }
+// ///
+// /// impl PartialEq<BookFormat> for Book {
+// ///     fn eq(&self, other: &BookFormat) -> bool {
+// ///         self.format == *other
+// ///     }
+// /// }
+// ///
+// /// impl PartialEq<Book> for BookFormat {
+// ///     fn eq(&self, other: &Book) -> bool {
+// ///         *self == other.format
+// ///     }
+// /// }
+// ///
+// /// fn main() {
+// ///     let b1 = Book { isbn: 1, format: BookFormat::Paperback };
+// ///     let b2 = Book { isbn: 2, format: BookFormat::Paperback };
+// ///
+// ///     assert!(b1 == BookFormat::Paperback);
+// ///     assert!(BookFormat::Paperback == b2);
+// ///
+// ///     // // The following should hold by transitivity but doesn't.
+// ///     assert!(b1 == b2); // // <-- PANICS
+// /// }
+// /// ```
+// ///
+// /// # Examples
+// ///
+// /// ```
+// /// let x: u32 = 0;
+// /// let y: u32 = 1;
+// ///
+// /// assert_eq!(x == y, false);
+// /// assert_eq!(x.eq(&y), false);
+// /// ```
+// ///
+// /// [`eq`]: PartialEq::eq
+// /// [`ne`]: PartialEq::ne
 #[lang = "eq"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[doc(alias = "==")]
@@ -269,6 +273,7 @@ pub trait PartialEq<Rhs: ?Sized = Self> {
 #[rustc_builtin_macro]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics, structural_match)]
+#[cfg(feature = "uncertified")]
 pub macro PartialEq($item:item) {
     /* compiler built-in */
 }
@@ -332,6 +337,7 @@ pub macro PartialEq($item:item) {
 #[doc(alias = "!=")]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Eq"]
+#[cfg(feature = "uncertified")]
 pub trait Eq: PartialEq<Self> {
     // this method is used solely by `impl Eq or #[derive(Eq)]` to assert that every component of a
     // type implements `Eq` itself. The current deriving infrastructure means doing this assertion
@@ -350,6 +356,7 @@ pub trait Eq: PartialEq<Self> {
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics, derive_eq, structural_match)]
 #[allow_internal_unstable(coverage_attribute)]
+#[cfg(feature = "uncertified")]
 pub macro Eq($item:item) {
     /* compiler built-in */
 }
@@ -361,6 +368,7 @@ pub macro Eq($item:item) {
 #[doc(hidden)]
 #[allow(missing_debug_implementations)]
 #[unstable(feature = "derive_eq", reason = "deriving hack, should not be public", issue = "none")]
+#[cfg(feature = "uncertified")]
 pub struct AssertParamIsEq<T: Eq + ?Sized> {
     _field: crate::marker::PhantomData<T>,
 }
@@ -385,6 +393,7 @@ pub struct AssertParamIsEq<T: Eq + ?Sized> {
 // `Less`/`Equal`/`Greater` remain `-1_i8`/`0_i8`/`+1_i8` respectively.
 #[lang = "Ordering"]
 #[repr(i8)]
+#[cfg(feature = "uncertified")]
 pub enum Ordering {
     /// An ordering where a compared value is less than another.
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -397,6 +406,7 @@ pub enum Ordering {
     Greater = 1,
 }
 
+#[cfg(feature = "uncertified")]
 impl Ordering {
     #[inline]
     const fn as_raw(self) -> i8 {
@@ -659,9 +669,11 @@ impl Ordering {
 #[derive(PartialEq, Eq, Debug, Copy, Default, Hash)]
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
 #[repr(transparent)]
+#[cfg(feature = "uncertified")]
 pub struct Reverse<T>(#[stable(feature = "reverse_cmp_key", since = "1.19.0")] pub T);
 
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
+#[cfg(feature = "uncertified")]
 impl<T: PartialOrd> PartialOrd for Reverse<T> {
     #[inline]
     fn partial_cmp(&self, other: &Reverse<T>) -> Option<Ordering> {
@@ -687,6 +699,7 @@ impl<T: PartialOrd> PartialOrd for Reverse<T> {
 }
 
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
+#[cfg(feature = "uncertified")]
 impl<T: Ord> Ord for Reverse<T> {
     #[inline]
     fn cmp(&self, other: &Reverse<T>) -> Ordering {
@@ -695,6 +708,7 @@ impl<T: Ord> Ord for Reverse<T> {
 }
 
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
+#[cfg(feature = "uncertified")]
 impl<T: Clone> Clone for Reverse<T> {
     #[inline]
     fn clone(&self) -> Reverse<T> {
@@ -954,6 +968,7 @@ impl<T: Clone> Clone for Reverse<T> {
 #[doc(alias = ">=")]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Ord"]
+#[cfg(feature = "uncertified")]
 pub trait Ord: Eq + PartialOrd<Self> {
     /// This method returns an [`Ordering`] between `self` and `other`.
     ///
@@ -1091,6 +1106,7 @@ pub trait Ord: Eq + PartialOrd<Self> {
 #[rustc_builtin_macro]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics)]
+#[cfg(feature = "uncertified")]
 pub macro Ord($item:item) {
     /* compiler built-in */
 }
@@ -1337,6 +1353,7 @@ pub macro Ord($item:item) {
     append_const_msg
 )]
 #[rustc_diagnostic_item = "PartialOrd"]
+#[cfg(feature = "uncertified")]
 pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
     /// This method returns an ordering between `self` and `other` values if one exists.
     ///
@@ -1481,6 +1498,7 @@ pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
     }
 }
 
+#[cfg(feature = "uncertified")]
 fn default_chaining_impl<T: ?Sized, U: ?Sized>(
     lhs: &T,
     rhs: &U,
@@ -1504,6 +1522,7 @@ where
 #[rustc_builtin_macro]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics)]
+#[cfg(feature = "uncertified")]
 pub macro PartialOrd($item:item) {
     /* compiler built-in */
 }
@@ -1544,6 +1563,7 @@ pub macro PartialOrd($item:item) {
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "cmp_min"]
+#[cfg(feature = "uncertified")]
 pub fn min<T: Ord>(v1: T, v2: T) -> T {
     v1.min(v2)
 }
@@ -1571,6 +1591,7 @@ pub fn min<T: Ord>(v1: T, v2: T) -> T {
 #[inline]
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
+#[cfg(feature = "uncertified")]
 pub fn min_by<T, F: FnOnce(&T, &T) -> Ordering>(v1: T, v2: T, compare: F) -> T {
     if compare(&v2, &v1).is_lt() { v2 } else { v1 }
 }
@@ -1596,6 +1617,7 @@ pub fn min_by<T, F: FnOnce(&T, &T) -> Ordering>(v1: T, v2: T, compare: F) -> T {
 #[inline]
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
+#[cfg(feature = "uncertified")]
 pub fn min_by_key<T, F: FnMut(&T) -> K, K: Ord>(v1: T, v2: T, mut f: F) -> T {
     if f(&v2) < f(&v1) { v2 } else { v1 }
 }
@@ -1636,6 +1658,7 @@ pub fn min_by_key<T, F: FnMut(&T) -> K, K: Ord>(v1: T, v2: T, mut f: F) -> T {
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "cmp_max"]
+#[cfg(feature = "uncertified")]
 pub fn max<T: Ord>(v1: T, v2: T) -> T {
     v1.max(v2)
 }
@@ -1663,6 +1686,7 @@ pub fn max<T: Ord>(v1: T, v2: T) -> T {
 #[inline]
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
+#[cfg(feature = "uncertified")]
 pub fn max_by<T, F: FnOnce(&T, &T) -> Ordering>(v1: T, v2: T, compare: F) -> T {
     if compare(&v2, &v1).is_lt() { v1 } else { v2 }
 }
@@ -1688,6 +1712,7 @@ pub fn max_by<T, F: FnOnce(&T, &T) -> Ordering>(v1: T, v2: T, compare: F) -> T {
 #[inline]
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
+#[cfg(feature = "uncertified")]
 pub fn max_by_key<T, F: FnMut(&T) -> K, K: Ord>(v1: T, v2: T, mut f: F) -> T {
     if f(&v2) < f(&v1) { v1 } else { v2 }
 }
@@ -1732,6 +1757,7 @@ pub fn max_by_key<T, F: FnMut(&T) -> K, K: Ord>(v1: T, v2: T, mut f: F) -> T {
 #[inline]
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
+#[cfg(feature = "uncertified")]
 pub fn minmax<T>(v1: T, v2: T) -> [T; 2]
 where
     T: Ord,
@@ -1763,6 +1789,7 @@ where
 #[inline]
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
+#[cfg(feature = "uncertified")]
 pub fn minmax_by<T, F>(v1: T, v2: T, compare: F) -> [T; 2]
 where
     F: FnOnce(&T, &T) -> Ordering,
@@ -1791,6 +1818,7 @@ where
 #[inline]
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
+#[cfg(feature = "uncertified")]
 pub fn minmax_by_key<T, F, K>(v1: T, v2: T, mut f: F) -> [T; 2]
 where
     F: FnMut(&T) -> K,
@@ -1801,8 +1829,11 @@ where
 
 // Implementation of PartialEq, Eq, PartialOrd and Ord for primitive types
 mod impls {
+    #[cfg(feature = "uncertified")]
     use crate::cmp::Ordering::{self, Equal, Greater, Less};
+    #[cfg(feature = "uncertified")]
     use crate::hint::unreachable_unchecked;
+    #[cfg(feature = "uncertified")]
     use crate::ops::ControlFlow::{self, Break, Continue};
 
     macro_rules! partial_eq_impl {
@@ -1818,6 +1849,7 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl PartialEq for () {
         #[inline]
         fn eq(&self, _other: &()) -> bool {
@@ -1829,10 +1861,15 @@ mod impls {
         }
     }
 
+    #[cfg(feature = "uncertified")]
     partial_eq_impl! {
-        bool char usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128
+        char f16 f128
+    }
+    partial_eq_impl! {
+        bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64
     }
 
+    #[cfg(feature = "uncertified")]
     macro_rules! eq_impl {
         ($($t:ty)*) => ($(
             #[stable(feature = "rust1", since = "1.0.0")]
@@ -1840,9 +1877,11 @@ mod impls {
         )*)
     }
 
+    #[cfg(feature = "uncertified")]
     eq_impl! { () bool char usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
     #[rustfmt::skip]
+    #[cfg(feature = "uncertified")]
     macro_rules! partial_ord_methods_primitive_impl {
         () => {
             #[inline(always)]
@@ -1881,6 +1920,7 @@ mod impls {
         };
     }
 
+    #[cfg(feature = "uncertified")]
     macro_rules! partial_ord_impl {
         ($($t:ty)*) => ($(
             #[stable(feature = "rust1", since = "1.0.0")]
@@ -1901,6 +1941,7 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl PartialOrd for () {
         #[inline]
         fn partial_cmp(&self, _: &()) -> Option<Ordering> {
@@ -1909,6 +1950,7 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl PartialOrd for bool {
         #[inline]
         fn partial_cmp(&self, other: &bool) -> Option<Ordering> {
@@ -1918,8 +1960,10 @@ mod impls {
         partial_ord_methods_primitive_impl!();
     }
 
+    #[cfg(feature = "uncertified")]
     partial_ord_impl! { f16 f32 f64 f128 }
 
+    #[cfg(feature = "uncertified")]
     macro_rules! ord_impl {
         ($($t:ty)*) => ($(
             #[stable(feature = "rust1", since = "1.0.0")]
@@ -1943,6 +1987,7 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl Ord for () {
         #[inline]
         fn cmp(&self, _other: &()) -> Ordering {
@@ -1951,6 +1996,7 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl Ord for bool {
         #[inline]
         fn cmp(&self, other: &bool) -> Ordering {
@@ -1983,9 +2029,11 @@ mod impls {
         }
     }
 
+    #[cfg(feature = "uncertified")]
     ord_impl! { char usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
     #[unstable(feature = "never_type", issue = "35121")]
+    #[cfg(feature = "uncertified")]
     impl PartialEq for ! {
         #[inline]
         fn eq(&self, _: &!) -> bool {
@@ -1994,9 +2042,11 @@ mod impls {
     }
 
     #[unstable(feature = "never_type", issue = "35121")]
+    #[cfg(feature = "uncertified")]
     impl Eq for ! {}
 
     #[unstable(feature = "never_type", issue = "35121")]
+    #[cfg(feature = "uncertified")]
     impl PartialOrd for ! {
         #[inline]
         fn partial_cmp(&self, _: &!) -> Option<Ordering> {
@@ -2005,6 +2055,7 @@ mod impls {
     }
 
     #[unstable(feature = "never_type", issue = "35121")]
+    #[cfg(feature = "uncertified")]
     impl Ord for ! {
         #[inline]
         fn cmp(&self, _: &!) -> Ordering {
@@ -2015,6 +2066,7 @@ mod impls {
     // & pointers
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl<A: ?Sized, B: ?Sized> PartialEq<&B> for &A
     where
         A: PartialEq<B>,
@@ -2029,6 +2081,7 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl<A: ?Sized, B: ?Sized> PartialOrd<&B> for &A
     where
         A: PartialOrd<B>,
@@ -2071,6 +2124,7 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl<A: ?Sized> Ord for &A
     where
         A: Ord,
@@ -2081,11 +2135,13 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl<A: ?Sized> Eq for &A where A: Eq {}
 
     // &mut pointers
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl<A: ?Sized, B: ?Sized> PartialEq<&mut B> for &mut A
     where
         A: PartialEq<B>,
@@ -2100,6 +2156,7 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl<A: ?Sized, B: ?Sized> PartialOrd<&mut B> for &mut A
     where
         A: PartialOrd<B>,
@@ -2142,6 +2199,7 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl<A: ?Sized> Ord for &mut A
     where
         A: Ord,
@@ -2152,9 +2210,11 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl<A: ?Sized> Eq for &mut A where A: Eq {}
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl<A: ?Sized, B: ?Sized> PartialEq<&mut B> for &A
     where
         A: PartialEq<B>,
@@ -2170,6 +2230,7 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     impl<A: ?Sized, B: ?Sized> PartialEq<&B> for &mut A
     where
         A: PartialEq<B>,

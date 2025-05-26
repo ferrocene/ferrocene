@@ -882,6 +882,7 @@ mod dist {
             extra_checks: None,
             no_capture: false,
             coverage: true,
+            test_variant: None,
             ferrocene_test_one_crate_per_cargo_call: false,
         };
         let build = Build::new(config);

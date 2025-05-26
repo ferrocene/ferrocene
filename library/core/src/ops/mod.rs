@@ -138,7 +138,6 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(feature = "uncertified")]
 mod arith;
 #[cfg(feature = "uncertified")]
 mod async_function;
@@ -160,10 +159,8 @@ mod try_trait;
 mod unsize;
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "uncertified")]
 pub use self::arith::{Add, Div, Mul, Neg, Rem, Sub};
 #[stable(feature = "op_assign_traits", since = "1.8.0")]
-#[cfg(feature = "uncertified")]
 pub use self::arith::{AddAssign, DivAssign, MulAssign, RemAssign, SubAssign};
 #[unstable(feature = "async_fn_traits", issue = "none")]
 #[cfg(feature = "uncertified")]

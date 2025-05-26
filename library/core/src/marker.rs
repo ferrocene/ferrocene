@@ -449,9 +449,7 @@ pub macro Copy($item:item) {
 marker_impls! {
     #[stable(feature = "rust1", since = "1.0.0")]
     Copy for
-        usize, u8, u16, u32, u64, u128,
-        isize, i8, i16, i32, i64, i128,
-        f16, f32, f64, f128,
+        f16, f128,
         char,
         {T: ?Sized} *const T,
         {T: ?Sized} *mut T,
@@ -460,6 +458,9 @@ marker_impls! {
 marker_impls! {
     #[stable(feature = "rust1", since = "1.0.0")]
     Copy for
+        usize, u8, u16, u32, u64, u128,
+        isize, i8, i16, i32, i64, i128,
+        f32, f64,
         bool,
 }
 

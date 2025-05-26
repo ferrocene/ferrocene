@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ no-prefer-dynamic
 
 #![feature(allocator_api)]

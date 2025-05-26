@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![crate_type = "lib"]
 
 static private: isize = 0;

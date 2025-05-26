@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ check-pass
 
 #![allow(bare_trait_objects)]

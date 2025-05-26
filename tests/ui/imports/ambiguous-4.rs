@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ build-pass
 //@ aux-build: ../ambiguous-4-extern.rs
 

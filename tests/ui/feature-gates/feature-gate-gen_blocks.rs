@@ -1,4 +1,5 @@
 //@ revisions: e2024 none
+//@[none] edition: 2015
 //@[e2024] edition: 2024
 
 fn test_gen() {

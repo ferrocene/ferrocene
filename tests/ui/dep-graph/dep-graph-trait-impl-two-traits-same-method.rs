@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Test that adding an impl to a trait `Foo` DOES affect functions
 // that only use `Bar` if they have methods in common.
 

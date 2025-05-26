@@ -1,3 +1,4 @@
+//@ edition: 2015
 trait I {}
 type K = dyn I;
 impl K for isize {} //~ ERROR expected trait, found type alias `K`

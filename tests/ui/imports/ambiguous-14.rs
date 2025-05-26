@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ check-pass
 // https://github.com/rust-lang/rust/issues/98467
 

@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 #![allow(dead_code)]
 //@ compile-flags: -C codegen-units=3

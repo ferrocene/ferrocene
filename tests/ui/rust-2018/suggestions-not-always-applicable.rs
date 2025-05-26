@@ -1,5 +1,5 @@
 //@ proc-macro: suggestions-not-always-applicable.rs
-//@ edition:2015
+//@ edition: 2015
 //@ run-rustfix
 //@ rustfix-only-machine-applicable
 //@ check-pass

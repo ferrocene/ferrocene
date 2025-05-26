@@ -1,3 +1,4 @@
+//@ edition: 2015
 mod a {
   pub enum Enum {
     EnumStructVariant { x: u8, y: u8, z: u8 }

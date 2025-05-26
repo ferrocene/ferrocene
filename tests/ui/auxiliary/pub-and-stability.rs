@@ -1,3 +1,4 @@
+//@ edition: 2015
 // This crate attempts to enumerate the various scenarios for how a
 // type can define fields and methods with various visibilities and
 // stabilities.

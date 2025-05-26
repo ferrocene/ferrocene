@@ -2,6 +2,10 @@
 thread 'main' panicked at $DIR/issue-47429-short-backtraces.rs:25:5:
 explicit panic
 stack backtrace:
-   0: std::panicking::begin_panic
-   1: issue_47429_short_backtraces::main
+   0: begin_panic_handler
+   1: panic_fmt
+   2: panic_display<&str>
+   3: panic_explicit
+   4: issue_47429_short_backtraces::main::panic_cold_explicit
+   5: issue_47429_short_backtraces::main
 note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.

@@ -1,3 +1,4 @@
+//@ edition: 2015
 mod a {}
 
 pub (a) fn afn() {} //~ incorrect visibility restriction

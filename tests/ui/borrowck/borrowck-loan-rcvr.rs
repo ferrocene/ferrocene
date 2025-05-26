@@ -1,3 +1,4 @@
+//@ edition: 2015
 struct Point { x: isize, y: isize }
 
 trait Methods {

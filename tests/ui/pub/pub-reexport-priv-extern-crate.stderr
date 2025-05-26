@@ -1,29 +1,29 @@
 error[E0603]: crate import `core` is private
-  --> $DIR/pub-reexport-priv-extern-crate.rs:10:15
+  --> $DIR/pub-reexport-priv-extern-crate.rs:11:15
    |
 LL |     use foo1::core;
    |               ^^^^ private crate import
    |
 note: the crate import `core` is defined here
-  --> $DIR/pub-reexport-priv-extern-crate.rs:6:5
+  --> $DIR/pub-reexport-priv-extern-crate.rs:7:5
    |
 LL |     extern crate core;
    |     ^^^^^^^^^^^^^^^^^^
 
 error[E0603]: crate import `core` is private
-  --> $DIR/pub-reexport-priv-extern-crate.rs:17:24
+  --> $DIR/pub-reexport-priv-extern-crate.rs:18:24
    |
 LL |     pub use foo2::bar::core;
    |                        ^^^^ private crate import
    |
 note: the crate import `core` is defined here
-  --> $DIR/pub-reexport-priv-extern-crate.rs:12:9
+  --> $DIR/pub-reexport-priv-extern-crate.rs:13:9
    |
 LL |         extern crate core;
    |         ^^^^^^^^^^^^^^^^^^
 
 error[E0365]: extern crate `core` is private and cannot be re-exported
-  --> $DIR/pub-reexport-priv-extern-crate.rs:2:9
+  --> $DIR/pub-reexport-priv-extern-crate.rs:3:9
    |
 LL | pub use core as reexported_core;
    |         ^^^^^^^^^^^^^^^^^^^^^^^
@@ -42,7 +42,7 @@ Some errors have detailed explanations: E0365, E0603.
 For more information about an error, try `rustc --explain E0365`.
 Future incompatibility report: Future breakage diagnostic:
 error[E0365]: extern crate `core` is private and cannot be re-exported
-  --> $DIR/pub-reexport-priv-extern-crate.rs:2:9
+  --> $DIR/pub-reexport-priv-extern-crate.rs:3:9
    |
 LL | pub use core as reexported_core;
    |         ^^^^^^^^^^^^^^^^^^^^^^^

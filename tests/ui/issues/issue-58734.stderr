@@ -1,5 +1,5 @@
 warning: trait objects without an explicit `dyn` are deprecated
-  --> $DIR/issue-58734.rs:20:5
+  --> $DIR/issue-58734.rs:21:5
    |
 LL |     Trait::nonexistent(());
    |     ^^^^^
@@ -13,14 +13,14 @@ LL |     <dyn Trait>::nonexistent(());
    |     ++++      +
 
 error[E0038]: the trait `Trait` is not dyn compatible
-  --> $DIR/issue-58734.rs:20:5
+  --> $DIR/issue-58734.rs:21:5
    |
 LL |     Trait::nonexistent(());
    |     ^^^^^ `Trait` is not dyn compatible
    |
 note: for a trait to be dyn compatible it needs to allow building a vtable
       for more information, visit <https://doc.rust-lang.org/reference/items/traits.html#dyn-compatibility>
-  --> $DIR/issue-58734.rs:4:8
+  --> $DIR/issue-58734.rs:5:8
    |
 LL | trait Trait {
    |       ----- this trait is not dyn compatible...
@@ -38,7 +38,7 @@ LL |     fn dyn_incompatible() -> Self where Self: Sized;
    |                                   +++++++++++++++++
 
 error[E0599]: no function or associated item named `nonexistent` found for trait object `dyn Trait` in the current scope
-  --> $DIR/issue-58734.rs:20:12
+  --> $DIR/issue-58734.rs:21:12
    |
 LL |     Trait::nonexistent(());
    |            ^^^^^^^^^^^ function or associated item not found in `dyn Trait`

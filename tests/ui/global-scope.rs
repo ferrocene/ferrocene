@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 
 pub fn f() -> isize { return 1; }

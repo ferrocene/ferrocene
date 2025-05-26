@@ -1,3 +1,4 @@
+//@ edition: 2015
 fn expect_fn<F>(f: F) where F : Fn() {
     f();
 }

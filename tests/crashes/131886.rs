@@ -10,3 +10,8 @@ trait Bar<'a, 'b, T> {}
 fn test_correct3<'a>(x: &dyn Foo<'a>, _: Tait) {
     let _ = x as &dyn Bar<'_, '_, ()>;
 }
+
+fn main() {}
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

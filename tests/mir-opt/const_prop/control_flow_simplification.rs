@@ -1,3 +1,4 @@
+//@ edition: 2015
 // skip-filecheck
 // EMIT_MIR_FOR_EACH_PANIC_STRATEGY
 //@ test-mir-pass: GVN

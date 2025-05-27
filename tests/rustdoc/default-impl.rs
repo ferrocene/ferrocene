@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ aux-build:rustdoc-default-impl.rs
 //@ ignore-cross-compile
 

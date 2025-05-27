@@ -1,4 +1,5 @@
 //@ compile-flags:-Zprint-mono-items=eager -Zmir-opt-level=0
+//@ edition: 2015
 
 #![deny(dead_code)]
 #![crate_type = "lib"]

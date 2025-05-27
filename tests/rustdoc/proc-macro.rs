@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ force-host
 //@ no-prefer-dynamic
 //@ compile-flags: --crate-type proc-macro --document-private-items

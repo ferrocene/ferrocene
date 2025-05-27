@@ -2,6 +2,7 @@
 // content of the `make` function, and we find that we can reuse the
 // `y` module entirely (but not the `x` module).
 
+//@ edition: 2015
 //@ revisions:rpass1 rpass2
 //@ compile-flags: -Z query-dep-graph
 

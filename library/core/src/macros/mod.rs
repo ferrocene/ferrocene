@@ -1,10 +1,10 @@
-#[doc = include_str!("panic.md")]
+#[cfg_attr(feature = "uncertified", doc = include_str!("panic.md"))] /* remove once `include_str` is added */
 #[macro_export]
 #[rustc_builtin_macro(core_panic)]
 #[allow_internal_unstable(edition_panic)]
 #[stable(feature = "core", since = "1.6.0")]
 #[rustc_diagnostic_item = "core_panic_macro"]
-#[cfg(feature = "uncertified")]
+/// FIXME: docs
 macro_rules! panic {
     // Expands to either `$crate::panic::panic_2015` or `$crate::panic::panic_2021`
     // depending on the edition of the caller.

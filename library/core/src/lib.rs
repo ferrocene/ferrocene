@@ -375,9 +375,7 @@ pub mod iter;
 #[cfg(feature = "uncertified")]
 pub mod net;
 pub mod option;
-#[cfg(feature = "uncertified")]
 pub mod panic;
-#[cfg(feature = "uncertified")]
 pub mod panicking;
 #[unstable(feature = "pattern_type_macro", issue = "123646")]
 #[cfg(feature = "uncertified")]

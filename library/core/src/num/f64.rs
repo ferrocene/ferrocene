@@ -526,7 +526,7 @@ impl f64 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
-    #[inline(never)]
+    #[inline]
     #[allow(clippy::eq_op)] // > if you intended to check if the operand is NaN, use `.is_nan()` instead :)
     pub const fn is_nan(self) -> bool {
         self != self
@@ -550,7 +550,7 @@ impl f64 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
-    #[inline(never)]
+    #[inline]
     pub const fn is_infinite(self) -> bool {
         // Getting clever with transmutation can result in incorrect answers on some FPUs
         // FIXME: alter the Rust <-> Rust calling convention to prevent this problem.
@@ -720,7 +720,7 @@ impl f64 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
-    #[inline(never)]
+    #[inline]
     pub const fn is_sign_negative(self) -> bool {
         // IEEE754 says: isSignMinus(x) is true if and only if x has negative sign. isSignMinus
         // applies to zeros and NaNs as well.
@@ -1101,7 +1101,7 @@ impl f64 {
     #[stable(feature = "float_bits_conv", since = "1.20.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
     #[cfg_attr(not(bootstrap), allow(unnecessary_transmutes))]
-    #[inline(never)]
+    #[inline]
     pub const fn to_bits(self) -> u64 {
         // SAFETY: `u64` is a plain old datatype so we can always transmute to it.
         unsafe { mem::transmute(self) }
@@ -1146,7 +1146,7 @@ impl f64 {
     #[stable(feature = "float_bits_conv", since = "1.20.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
     #[must_use]
-    #[inline(never)]
+    #[inline]
     #[cfg_attr(not(bootstrap), allow(unnecessary_transmutes))]
     pub const fn from_bits(v: u64) -> Self {
         // It turns out the safety issues with sNaN were overblown! Hooray!
@@ -1452,7 +1452,7 @@ impl f64 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[inline(never)]
+    #[inline]
     pub const fn abs(self) -> f64 {
         // SAFETY: this is actually a safe intrinsic
         unsafe { intrinsics::fabsf64(self) }
@@ -1511,7 +1511,7 @@ impl f64 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[stable(feature = "copysign", since = "1.35.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[inline(never)]
+    #[inline]
     pub const fn copysign(self, sign: f64) -> f64 {
         // SAFETY: this is actually a safe intrinsic
         unsafe { intrinsics::copysignf64(self, sign) }

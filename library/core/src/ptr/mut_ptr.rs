@@ -1024,7 +1024,7 @@ impl<T: ?Sized> *mut T {
         T: Sized,
     {
         #[cfg(debug_assertions)]
-        #[inline(never)]
+        #[inline]
         #[rustc_allow_const_fn_unstable(const_eval_select)]
         const fn runtime_add_nowrap(this: *const (), count: usize, size: usize) -> bool {
             const_eval_select!(

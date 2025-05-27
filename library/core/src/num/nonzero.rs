@@ -566,7 +566,7 @@ macro_rules! nonzero_integer {
             #[rustc_const_stable(feature = "nonzero_leading_trailing_zeros", since = "1.53.0")]
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
-            #[inline(never)]
+            #[inline]
             pub const fn leading_zeros(self) -> u32 {
                 // SAFETY: since `self` cannot be zero, it is safe to call `ctlz_nonzero`.
                 unsafe {
@@ -1555,7 +1555,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[rustc_const_stable(feature = "int_log", since = "1.67.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(never)]
+        #[inline]
         pub const fn ilog2(self) -> u32 {
             Self::BITS - 1 - self.leading_zeros()
         }

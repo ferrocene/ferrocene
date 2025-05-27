@@ -285,7 +285,7 @@ impl f128 {
     /// assert!(!f.is_nan());
     /// # }
     /// ```
-    #[inline(never)]
+    #[inline]
     #[must_use]
     #[unstable(feature = "f128", issue = "116909")]
     #[allow(clippy::eq_op)] // > if you intended to check if the operand is NaN, use `.is_nan()` instead :)
@@ -487,7 +487,7 @@ impl f128 {
     /// assert!(!f.is_sign_negative());
     /// assert!(g.is_sign_negative());
     /// ```
-    #[inline(never)]
+    #[inline]
     #[must_use]
     #[unstable(feature = "f128", issue = "116909")]
     pub const fn is_sign_negative(self) -> bool {
@@ -907,7 +907,7 @@ impl f128 {
     /// # // assert_ne!((1f128).to_bits(), 1f128 as u128); // to_bits() is not casting!
     /// assert_eq!((12.5f128).to_bits(), 0x40029000000000000000000000000000);
     /// ```
-    #[inline(never)]
+    #[inline]
     #[unstable(feature = "f128", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     #[cfg_attr(not(bootstrap), allow(unnecessary_transmutes))]
@@ -955,7 +955,7 @@ impl f128 {
     /// assert_eq!(v, 12.5);
     /// # }
     /// ```
-    #[inline(never)]
+    #[inline]
     #[must_use]
     #[unstable(feature = "f128", issue = "116909")]
     #[cfg_attr(not(bootstrap), allow(unnecessary_transmutes))]
@@ -1368,7 +1368,7 @@ impl f128 {
     /// assert!(f128::NAN.copysign(1.0).is_nan());
     /// # }
     /// ```
-    #[inline(never)]
+    #[inline]
     #[unstable(feature = "f128", issue = "116909")]
     #[rustc_const_unstable(feature = "f128", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]

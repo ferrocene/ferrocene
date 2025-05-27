@@ -202,7 +202,7 @@ impl Argument<'_> {
     /// let f = format_args!("{}", "a");
     /// println!("{f}");
     /// ```
-    #[inline(never)]
+    #[inline]
     pub const fn none() -> [Self; 0] {
         []
     }

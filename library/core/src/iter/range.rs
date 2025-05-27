@@ -183,7 +183,7 @@ pub trait Step: Clone + PartialOrd + Sized {
 // than the signed::MAX value. Therefore `as` casting to the signed type would be incorrect.
 macro_rules! step_signed_methods {
     ($unsigned: ty) => {
-        #[inline(never)]
+        #[inline]
         unsafe fn forward_unchecked(start: Self, n: usize) -> Self {
             // SAFETY: the caller has to guarantee that `start + n` doesn't overflow.
             unsafe { start.checked_add_unsigned(n as $unsigned).unwrap_unchecked() }
@@ -199,7 +199,7 @@ macro_rules! step_signed_methods {
 
 macro_rules! step_unsigned_methods {
     () => {
-        #[inline(never)]
+        #[inline]
         unsafe fn forward_unchecked(start: Self, n: usize) -> Self {
             // SAFETY: the caller has to guarantee that `start + n` doesn't overflow.
             unsafe { start.unchecked_add(n as Self) }

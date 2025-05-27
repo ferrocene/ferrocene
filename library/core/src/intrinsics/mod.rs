@@ -3162,11 +3162,11 @@ pub(crate) macro const_eval_select {
             @capture$([$($binders)*])? { $($arg : $ty = $val),* } $(-> $ret)? :
             #[noinline]
             if const
-                #[inline(never)] // prevent codegen on this function
+                #[inline] // prevent codegen on this function
                 $(#[$compiletime_attr])*
                 $compiletime
             else
-                #[inline(never)] // avoid the overhead of an extra fn call
+                #[inline] // avoid the overhead of an extra fn call
                 $(#[$runtime_attr])*
                 $runtime
         )

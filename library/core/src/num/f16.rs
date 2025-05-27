@@ -279,7 +279,7 @@ impl f16 {
     /// assert!(!f.is_nan());
     /// # }
     /// ```
-    #[inline(never)]
+    #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
     #[allow(clippy::eq_op)] // > if you intended to check if the operand is NaN, use `.is_nan()` instead :)
@@ -480,7 +480,7 @@ impl f16 {
     /// assert!(g.is_sign_negative());
     /// # }
     /// ```
-    #[inline(never)]
+    #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
     pub const fn is_sign_negative(self) -> bool {
@@ -895,7 +895,7 @@ impl f16 {
     /// assert_eq!((12.5f16).to_bits(), 0x4a40);
     /// # }
     /// ```
-    #[inline(never)]
+    #[inline]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     #[cfg_attr(not(bootstrap), allow(unnecessary_transmutes))]
@@ -942,7 +942,7 @@ impl f16 {
     /// assert_eq!(v, 12.5);
     /// # }
     /// ```
-    #[inline(never)]
+    #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
     #[cfg_attr(not(bootstrap), allow(unnecessary_transmutes))]

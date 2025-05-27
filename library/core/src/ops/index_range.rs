@@ -28,22 +28,22 @@ impl IndexRange {
         IndexRange { start, end }
     }
 
-    #[inline(never)]
+    #[inline]
     pub(crate) const fn zero_to(end: usize) -> Self {
         IndexRange { start: 0, end }
     }
 
-    #[inline(never)]
+    #[inline]
     pub(crate) const fn start(&self) -> usize {
         self.start
     }
 
-    #[inline(never)]
+    #[inline]
     pub(crate) const fn end(&self) -> usize {
         self.end
     }
 
-    #[inline(never)]
+    #[inline]
     pub(crate) const fn len(&self) -> usize {
         // SAFETY: By invariant, this cannot wrap
         // Using the intrinsic because a UB check here impedes LLVM optimization. (#131563)
@@ -52,7 +52,7 @@ impl IndexRange {
 
     /// # Safety
     /// - Can only be called when `start < end`, aka when `len > 0`.
-    #[inline(never)]
+    #[inline]
     unsafe fn next_unchecked(&mut self) -> usize {
         debug_assert!(self.start < self.end);
 
@@ -124,7 +124,7 @@ impl IndexRange {
 impl Iterator for IndexRange {
     type Item = usize;
 
-    #[inline(never)]
+    #[inline]
     fn next(&mut self) -> Option<usize> {
         if self.len() > 0 {
             // SAFETY: We just checked that the range is non-empty
@@ -214,7 +214,7 @@ impl DoubleEndedIterator for IndexRange {
 }
 
 impl ExactSizeIterator for IndexRange {
-    #[inline(never)]
+    #[inline]
     fn len(&self) -> usize {
         self.len()
     }

@@ -2790,7 +2790,7 @@ macro_rules! atomic_int {
             ///
             /// assert_eq!(some_var.load(Ordering::Relaxed), 5);
             /// ```
-            #[inline(never)]
+            #[inline]
             #[$stable]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
             pub fn load(&self, order: Ordering) -> $int_type {
@@ -2817,7 +2817,7 @@ macro_rules! atomic_int {
             /// some_var.store(10, Ordering::Relaxed);
             /// assert_eq!(some_var.load(Ordering::Relaxed), 10);
             /// ```
-            #[inline(never)]
+            #[inline]
             #[$stable]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
             pub fn store(&self, val: $int_type, order: Ordering) {

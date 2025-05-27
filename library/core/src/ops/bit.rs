@@ -57,7 +57,7 @@ macro_rules! not_impl {
         impl Not for $t {
             type Output = $t;
 
-            #[inline(never)]
+            #[inline]
             fn not(self) -> $t { !self }
         }
 
@@ -71,7 +71,7 @@ not_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 impl Not for ! {
     type Output = !;
 
-    #[inline(never)]
+    #[inline]
     fn not(self) -> ! {
         match self {}
     }
@@ -167,7 +167,7 @@ macro_rules! bitand_impl {
         impl BitAnd for $t {
             type Output = $t;
 
-            #[inline(never)]
+            #[inline]
             fn bitand(self, rhs: $t) -> $t { self & rhs }
         }
 
@@ -267,7 +267,7 @@ macro_rules! bitor_impl {
         impl BitOr for $t {
             type Output = $t;
 
-            #[inline(never)]
+            #[inline]
             fn bitor(self, rhs: $t) -> $t { self | rhs }
         }
 
@@ -367,7 +367,7 @@ macro_rules! bitxor_impl {
         impl BitXor for $t {
             type Output = $t;
 
-            #[inline(never)]
+            #[inline]
             fn bitxor(self, other: $t) -> $t { self ^ other }
         }
 
@@ -464,7 +464,7 @@ macro_rules! shl_impl {
         impl Shl<$f> for $t {
             type Output = $t;
 
-            #[inline(never)]
+            #[inline]
             #[rustc_inherit_overflow_checks]
             fn shl(self, other: $f) -> $t {
                 self << other
@@ -582,7 +582,7 @@ macro_rules! shr_impl {
         impl Shr<$f> for $t {
             type Output = $t;
 
-            #[inline(never)]
+            #[inline]
             #[rustc_inherit_overflow_checks]
             fn shr(self, other: $f) -> $t {
                 self >> other
@@ -715,7 +715,7 @@ macro_rules! bitand_assign_impl {
     ($($t:ty)+) => ($(
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
         impl BitAndAssign for $t {
-            #[inline(never)]
+            #[inline]
             fn bitand_assign(&mut self, other: $t) { *self &= other }
         }
 
@@ -786,7 +786,7 @@ macro_rules! bitor_assign_impl {
     ($($t:ty)+) => ($(
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
         impl BitOrAssign for $t {
-            #[inline(never)]
+            #[inline]
             fn bitor_assign(&mut self, other: $t) { *self |= other }
         }
 
@@ -857,7 +857,7 @@ macro_rules! bitxor_assign_impl {
     ($($t:ty)+) => ($(
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
         impl BitXorAssign for $t {
-            #[inline(never)]
+            #[inline]
             fn bitxor_assign(&mut self, other: $t) { *self ^= other }
         }
 
@@ -918,7 +918,7 @@ macro_rules! shl_assign_impl {
     ($t:ty, $f:ty) => {
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
         impl ShlAssign<$f> for $t {
-            #[inline(never)]
+            #[inline]
             #[rustc_inherit_overflow_checks]
             fn shl_assign(&mut self, other: $f) {
                 *self <<= other
@@ -1000,7 +1000,7 @@ macro_rules! shr_assign_impl {
     ($t:ty, $f:ty) => {
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
         impl ShrAssign<$f> for $t {
-            #[inline(never)]
+            #[inline]
             #[rustc_inherit_overflow_checks]
             fn shr_assign(&mut self, other: $f) {
                 *self >>= other

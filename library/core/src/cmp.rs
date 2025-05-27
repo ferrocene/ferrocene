@@ -1809,9 +1809,9 @@ mod impls {
         ($($t:ty)*) => ($(
             #[stable(feature = "rust1", since = "1.0.0")]
             impl PartialEq for $t {
-                #[inline(never)]
+                #[inline]
                 fn eq(&self, other: &Self) -> bool { *self == *other }
-                #[inline(never)]
+                #[inline]
                 fn ne(&self, other: &Self) -> bool { *self != *other }
             }
         )*)

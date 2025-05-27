@@ -124,7 +124,7 @@ macro_rules! impl_nonzero_fmt {
             where
                 T: ZeroablePrimitive + fmt::$Trait,
             {
-                #[inline]
+                #[inline(never)]
                 fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                     self.get().fmt(f)
                 }
@@ -177,7 +177,7 @@ impl<T> Clone for NonZero<T>
 where
     T: ZeroablePrimitive,
 {
-    #[inline]
+    #[inline(never)]
     fn clone(&self) -> Self {
         *self
     }
@@ -194,12 +194,12 @@ impl<T> PartialEq for NonZero<T>
 where
     T: ZeroablePrimitive + PartialEq,
 {
-    #[inline]
+    #[inline(never)]
     fn eq(&self, other: &Self) -> bool {
         self.get() == other.get()
     }
 
-    #[inline]
+    #[inline(never)]
     fn ne(&self, other: &Self) -> bool {
         self.get() != other.get()
     }
@@ -216,27 +216,27 @@ impl<T> PartialOrd for NonZero<T>
 where
     T: ZeroablePrimitive + PartialOrd,
 {
-    #[inline]
+    #[inline(never)]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.get().partial_cmp(&other.get())
     }
 
-    #[inline]
+    #[inline(never)]
     fn lt(&self, other: &Self) -> bool {
         self.get() < other.get()
     }
 
-    #[inline]
+    #[inline(never)]
     fn le(&self, other: &Self) -> bool {
         self.get() <= other.get()
     }
 
-    #[inline]
+    #[inline(never)]
     fn gt(&self, other: &Self) -> bool {
         self.get() > other.get()
     }
 
-    #[inline]
+    #[inline(never)]
     fn ge(&self, other: &Self) -> bool {
         self.get() >= other.get()
     }
@@ -247,24 +247,24 @@ impl<T> Ord for NonZero<T>
 where
     T: ZeroablePrimitive + Ord,
 {
-    #[inline]
+    #[inline(never)]
     fn cmp(&self, other: &Self) -> Ordering {
         self.get().cmp(&other.get())
     }
 
-    #[inline]
+    #[inline(never)]
     fn max(self, other: Self) -> Self {
         // SAFETY: The maximum of two non-zero values is still non-zero.
         unsafe { Self::new_unchecked(self.get().max(other.get())) }
     }
 
-    #[inline]
+    #[inline(never)]
     fn min(self, other: Self) -> Self {
         // SAFETY: The minimum of two non-zero values is still non-zero.
         unsafe { Self::new_unchecked(self.get().min(other.get())) }
     }
 
-    #[inline]
+    #[inline(never)]
     fn clamp(self, min: Self, max: Self) -> Self {
         // SAFETY: A non-zero value clamped between two non-zero values is still non-zero.
         unsafe { Self::new_unchecked(self.get().clamp(min.get(), max.get())) }
@@ -276,7 +276,7 @@ impl<T> Hash for NonZero<T>
 where
     T: ZeroablePrimitive + Hash,
 {
-    #[inline]
+    #[inline(never)]
     fn hash<H>(&self, state: &mut H)
     where
         H: Hasher,
@@ -290,7 +290,7 @@ impl<T> From<NonZero<T>> for T
 where
     T: ZeroablePrimitive,
 {
-    #[inline]
+    #[inline(never)]
     fn from(nonzero: NonZero<T>) -> Self {
         // Call `get` method to keep range information.
         nonzero.get()
@@ -304,7 +304,7 @@ where
 {
     type Output = Self;
 
-    #[inline]
+    #[inline(never)]
     fn bitor(self, rhs: Self) -> Self::Output {
         // SAFETY: Bitwise OR of two non-zero values is still non-zero.
         unsafe { Self::new_unchecked(self.get() | rhs.get()) }
@@ -318,7 +318,7 @@ where
 {
     type Output = Self;
 
-    #[inline]
+    #[inline(never)]
     fn bitor(self, rhs: T) -> Self::Output {
         // SAFETY: Bitwise OR of a non-zero value with anything is still non-zero.
         unsafe { Self::new_unchecked(self.get() | rhs) }
@@ -332,7 +332,7 @@ where
 {
     type Output = NonZero<T>;
 
-    #[inline]
+    #[inline(never)]
     fn bitor(self, rhs: NonZero<T>) -> Self::Output {
         // SAFETY: Bitwise OR of anything with a non-zero value is still non-zero.
         unsafe { NonZero::new_unchecked(self | rhs.get()) }
@@ -345,7 +345,7 @@ where
     T: ZeroablePrimitive,
     Self: BitOr<Output = Self>,
 {
-    #[inline]
+    #[inline(never)]
     fn bitor_assign(&mut self, rhs: Self) {
         *self = *self | rhs;
     }
@@ -357,7 +357,7 @@ where
     T: ZeroablePrimitive,
     Self: BitOr<T, Output = Self>,
 {
-    #[inline]
+    #[inline(never)]
     fn bitor_assign(&mut self, rhs: T) {
         *self = *self | rhs;
     }
@@ -371,7 +371,7 @@ where
     #[stable(feature = "nonzero", since = "1.28.0")]
     #[rustc_const_stable(feature = "const_nonzero_int_methods", since = "1.47.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn new(n: T) -> Option<Self> {
         // SAFETY: Memory layout optimization guarantees that `Option<NonZero<T>>` has
         //         the same layout and size as `T`, with `0` representing `None`.
@@ -387,7 +387,7 @@ where
     #[stable(feature = "nonzero", since = "1.28.0")]
     #[rustc_const_stable(feature = "nonzero", since = "1.28.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const unsafe fn new_unchecked(n: T) -> Self {
         match Self::new(n) {
             Some(n) => n,
@@ -409,7 +409,7 @@ where
     /// if the referenced value is not zero.
     #[unstable(feature = "nonzero_from_mut", issue = "106290")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub fn from_mut(n: &mut T) -> Option<&mut Self> {
         // SAFETY: Memory layout optimization guarantees that `Option<NonZero<T>>` has
         //         the same layout and size as `T`, with `0` representing `None`.
@@ -427,7 +427,7 @@ where
     /// The referenced value must not be zero.
     #[unstable(feature = "nonzero_from_mut", issue = "106290")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn from_mut_unchecked(n: &mut T) -> &mut Self {
         match Self::from_mut(n) {
             Some(n) => n,
@@ -448,7 +448,7 @@ where
     /// Returns the contained value as a primitive type.
     #[stable(feature = "nonzero", since = "1.28.0")]
     #[rustc_const_stable(feature = "const_nonzero_get", since = "1.34.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn get(self) -> T {
         // Rustc can set range metadata only if it loads `self` from
         // memory somewhere. If the value of `self` was from by-value argument
@@ -566,7 +566,7 @@ macro_rules! nonzero_integer {
             #[rustc_const_stable(feature = "nonzero_leading_trailing_zeros", since = "1.53.0")]
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
-            #[inline]
+            #[inline(never)]
             pub const fn leading_zeros(self) -> u32 {
                 // SAFETY: since `self` cannot be zero, it is safe to call `ctlz_nonzero`.
                 unsafe {
@@ -598,7 +598,7 @@ macro_rules! nonzero_integer {
             #[rustc_const_stable(feature = "nonzero_leading_trailing_zeros", since = "1.53.0")]
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
-            #[inline]
+            #[inline(never)]
             pub const fn trailing_zeros(self) -> u32 {
                 // SAFETY: since `self` cannot be zero, it is safe to call `cttz_nonzero`.
                 unsafe {
@@ -998,7 +998,7 @@ macro_rules! nonzero_integer {
             #[rustc_const_stable(feature = "const_nonzero_checked_ops", since = "1.64.0")]
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
-            #[inline]
+            #[inline(never)]
             pub const fn checked_mul(self, other: Self) -> Option<Self> {
                 if let Some(result) = self.get().checked_mul(other.get()) {
                     // SAFETY:
@@ -1037,7 +1037,7 @@ macro_rules! nonzero_integer {
             #[rustc_const_stable(feature = "const_nonzero_checked_ops", since = "1.64.0")]
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
-            #[inline]
+            #[inline(never)]
             pub const fn saturating_mul(self, other: Self) -> Self {
                 // SAFETY:
                 // - `saturating_mul` returns `u*::MAX`/`i*::MAX`/`i*::MIN` on overflow/underflow,
@@ -1085,7 +1085,7 @@ macro_rules! nonzero_integer {
             #[unstable(feature = "nonzero_ops", issue = "84186")]
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
-            #[inline]
+            #[inline(never)]
             pub const unsafe fn unchecked_mul(self, other: Self) -> Self {
                 // SAFETY: The caller ensures there is no overflow.
                 unsafe { Self::new_unchecked(self.get().unchecked_mul(other.get())) }
@@ -1115,7 +1115,7 @@ macro_rules! nonzero_integer {
             #[rustc_const_stable(feature = "const_nonzero_checked_ops", since = "1.64.0")]
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
-            #[inline]
+            #[inline(never)]
             pub const fn checked_pow(self, other: u32) -> Option<Self> {
                 if let Some(result) = self.get().checked_pow(other) {
                     // SAFETY:
@@ -1163,7 +1163,7 @@ macro_rules! nonzero_integer {
             #[rustc_const_stable(feature = "const_nonzero_checked_ops", since = "1.64.0")]
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
-            #[inline]
+            #[inline(never)]
             pub const fn saturating_pow(self, other: u32) -> Self {
                 // SAFETY:
                 // - `saturating_pow` returns `u*::MAX`/`i*::MAX`/`i*::MIN` on overflow/underflow,
@@ -1260,7 +1260,7 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             /// This operation rounds towards zero, truncating any fractional
             /// part of the exact result, and cannot panic.
             #[doc(alias = "unchecked_div")]
-            #[inline]
+            #[inline(never)]
             fn div(self, other: NonZero<$Int>) -> $Int {
                 // SAFETY: Division by zero is checked because `other` is non-zero,
                 // and MIN/-1 is checked because `self` is an unsigned int.
@@ -1275,7 +1275,7 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             ///
             /// This operation rounds towards zero, truncating any fractional
             /// part of the exact result, and cannot panic.
-            #[inline]
+            #[inline(never)]
             fn div_assign(&mut self, other: NonZero<$Int>) {
                 *self = *self / other;
             }
@@ -1286,7 +1286,7 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             type Output = $Int;
 
             /// This operation satisfies `n % d == n - (n / d) * d`, and cannot panic.
-            #[inline]
+            #[inline(never)]
             fn rem(self, other: NonZero<$Int>) -> $Int {
                 // SAFETY: Remainder by zero is checked because `other` is non-zero,
                 // and MIN/-1 is checked because `self` is an unsigned int.
@@ -1297,7 +1297,7 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
         #[stable(feature = "nonzero_div_assign", since = "1.79.0")]
         impl RemAssign<NonZero<$Int>> for $Int {
             /// This operation satisfies `n % d == n - (n / d) * d`, and cannot panic.
-            #[inline]
+            #[inline(never)]
             fn rem_assign(&mut self, other: NonZero<$Int>) {
                 *self = *self % other;
             }
@@ -1324,7 +1324,7 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             #[unstable(feature = "unsigned_nonzero_div_ceil", issue = "132968")]
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
-            #[inline]
+            #[inline(never)]
             pub const fn div_ceil(self, rhs: Self) -> Self {
                 let v = self.get().div_ceil(rhs.get());
                 // SAFETY: ceiled division of two positive integers can never be zero.
@@ -1338,7 +1338,7 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
         impl Neg for NonZero<$Int> {
             type Output = Self;
 
-            #[inline]
+            #[inline(never)]
             fn neg(self) -> Self {
                 // SAFETY: negation of nonzero cannot yield zero values.
                 unsafe { Self::new_unchecked(self.get().neg()) }
@@ -1410,7 +1410,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[rustc_const_stable(feature = "const_nonzero_checked_ops", since = "1.64.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline]
+        #[inline(never)]
         pub const fn checked_add(self, other: $Int) -> Option<Self> {
             if let Some(result) = self.get().checked_add(other) {
                 // SAFETY:
@@ -1449,7 +1449,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[rustc_const_stable(feature = "const_nonzero_checked_ops", since = "1.64.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline]
+        #[inline(never)]
         pub const fn saturating_add(self, other: $Int) -> Self {
             // SAFETY:
             // - `saturating_add` returns `u*::MAX` on overflow, which is non-zero
@@ -1487,7 +1487,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[unstable(feature = "nonzero_ops", issue = "84186")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline]
+        #[inline(never)]
         pub const unsafe fn unchecked_add(self, other: $Int) -> Self {
             // SAFETY: The caller ensures there is no overflow.
             unsafe { Self::new_unchecked(self.get().unchecked_add(other)) }
@@ -1520,7 +1520,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[rustc_const_stable(feature = "const_nonzero_checked_ops", since = "1.64.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline]
+        #[inline(never)]
         pub const fn checked_next_power_of_two(self) -> Option<Self> {
             if let Some(nz) = self.get().checked_next_power_of_two() {
                 // SAFETY: The next power of two is positive
@@ -1555,7 +1555,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[rustc_const_stable(feature = "int_log", since = "1.67.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline]
+        #[inline(never)]
         pub const fn ilog2(self) -> u32 {
             Self::BITS - 1 - self.leading_zeros()
         }
@@ -1584,7 +1584,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[rustc_const_stable(feature = "int_log", since = "1.67.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline]
+        #[inline(never)]
         pub const fn ilog10(self) -> u32 {
             super::int_log10::$Int(self.get())
         }
@@ -1617,7 +1617,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
                       without modifying the original"]
         #[doc(alias = "average_floor")]
         #[doc(alias = "average")]
-        #[inline]
+        #[inline(never)]
         pub const fn midpoint(self, rhs: Self) -> Self {
             // SAFETY: The only way to get `0` with midpoint is to have two opposite or
             // near opposite numbers: (-5, 5), (0, 1), (0, 0) which is impossible because
@@ -1650,7 +1650,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use]
         #[stable(feature = "nonzero_is_power_of_two", since = "1.59.0")]
         #[rustc_const_stable(feature = "nonzero_is_power_of_two", since = "1.59.0")]
-        #[inline]
+        #[inline(never)]
         pub const fn is_power_of_two(self) -> bool {
             // LLVM 11 normalizes `unchecked_sub(x, 1) & x == 0` to the implementation seen here.
             // On the basic x86-64 target, this saves 3 instructions for the zero check.
@@ -1681,7 +1681,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[rustc_const_stable(feature = "isqrt", since = "1.84.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline]
+        #[inline(never)]
         pub const fn isqrt(self) -> Self {
             let result = self.get().isqrt();
 
@@ -1782,7 +1782,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[rustc_const_stable(feature = "const_nonzero_checked_ops", since = "1.64.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline]
+        #[inline(never)]
         pub const fn abs(self) -> Self {
             // SAFETY: This cannot overflow to zero.
             unsafe { Self::new_unchecked(self.get().abs()) }
@@ -1813,7 +1813,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[rustc_const_stable(feature = "const_nonzero_checked_ops", since = "1.64.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline]
+        #[inline(never)]
         pub const fn checked_abs(self) -> Option<Self> {
             if let Some(nz) = self.get().checked_abs() {
                 // SAFETY: absolute value of nonzero cannot yield zero values.
@@ -1848,7 +1848,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[rustc_const_stable(feature = "const_nonzero_checked_ops", since = "1.64.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline]
+        #[inline(never)]
         pub const fn overflowing_abs(self) -> (Self, bool) {
             let (nz, flag) = self.get().overflowing_abs();
             (
@@ -1885,7 +1885,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[rustc_const_stable(feature = "const_nonzero_checked_ops", since = "1.64.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline]
+        #[inline(never)]
         pub const fn saturating_abs(self) -> Self {
             // SAFETY: absolute value of nonzero cannot yield zero values.
             unsafe { Self::new_unchecked(self.get().saturating_abs()) }
@@ -1917,7 +1917,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[rustc_const_stable(feature = "const_nonzero_checked_ops", since = "1.64.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline]
+        #[inline(never)]
         pub const fn wrapping_abs(self) -> Self {
             // SAFETY: absolute value of nonzero cannot yield zero values.
             unsafe { Self::new_unchecked(self.get().wrapping_abs()) }
@@ -1949,7 +1949,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[rustc_const_stable(feature = "const_nonzero_checked_ops", since = "1.64.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline]
+        #[inline(never)]
         pub const fn unsigned_abs(self) -> NonZero<$Uint> {
             // SAFETY: absolute value of nonzero cannot yield zero values.
             unsafe { NonZero::new_unchecked(self.get().unsigned_abs()) }
@@ -1974,7 +1974,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         /// # }
         /// ```
         #[must_use]
-        #[inline]
+        #[inline(never)]
         #[stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         #[rustc_const_stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         pub const fn is_positive(self) -> bool {
@@ -2000,7 +2000,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         /// # }
         /// ```
         #[must_use]
-        #[inline]
+        #[inline(never)]
         #[stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         #[rustc_const_stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         pub const fn is_negative(self) -> bool {
@@ -2026,7 +2026,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         /// # Some(())
         /// # }
         /// ```
-        #[inline]
+        #[inline(never)]
         #[stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         #[rustc_const_stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         pub const fn checked_neg(self) -> Option<Self> {
@@ -2058,7 +2058,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         /// # Some(())
         /// # }
         /// ```
-        #[inline]
+        #[inline(never)]
         #[stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         #[rustc_const_stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         pub const fn overflowing_neg(self) -> (Self, bool) {
@@ -2091,7 +2091,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         /// # Some(())
         /// # }
         /// ```
-        #[inline]
+        #[inline(never)]
         #[stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         #[rustc_const_stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         pub const fn saturating_neg(self) -> Self {
@@ -2123,7 +2123,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         /// # Some(())
         /// # }
         /// ```
-        #[inline]
+        #[inline(never)]
         #[stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         #[rustc_const_stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         pub const fn wrapping_neg(self) -> Self {

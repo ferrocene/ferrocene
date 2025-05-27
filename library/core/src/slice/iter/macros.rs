@@ -76,7 +76,7 @@ macro_rules! iterator {
             /// # Safety
             ///
             /// The iterator must not be empty
-            #[inline]
+            #[inline(never)]
             unsafe fn next_back_unchecked(&mut self) -> $elem {
                 // SAFETY: the caller promised it's not empty, so
                 // the offsetting is in-bounds and there's an element to return.
@@ -152,7 +152,7 @@ macro_rules! iterator {
         impl<'a, T> Iterator for $name<'a, T> {
             type Item = $elem;
 
-            #[inline]
+            #[inline(never)]
             fn next(&mut self) -> Option<$elem> {
                 // intentionally not using the helpers because this is
                 // one of the most mono'd things in the library.
@@ -190,18 +190,18 @@ macro_rules! iterator {
                 }
             }
 
-            #[inline]
+            #[inline(never)]
             fn size_hint(&self) -> (usize, Option<usize>) {
                 let exact = len!(self);
                 (exact, Some(exact))
             }
 
-            #[inline]
+            #[inline(never)]
             fn count(self) -> usize {
                 len!(self)
             }
 
-            #[inline]
+            #[inline(never)]
             fn nth(&mut self, n: usize) -> Option<$elem> {
                 if n >= len!(self) {
                     // This iterator is now empty.
@@ -218,7 +218,7 @@ macro_rules! iterator {
                 }
             }
 
-            #[inline]
+            #[inline(never)]
             fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
                 let advance = cmp::min(len!(self), n);
                 // SAFETY: By construction, `advance` does not exceed `self.len()`.
@@ -226,12 +226,12 @@ macro_rules! iterator {
                 NonZero::new(n - advance).map_or(Ok(()), Err)
             }
 
-            #[inline]
+            #[inline(never)]
             fn last(mut self) -> Option<$elem> {
                 self.next_back()
             }
 
-            #[inline]
+            #[inline(never)]
             fn fold<B, F>(self, init: B, mut f: F) -> B
                 where
                     F: FnMut(B, Self::Item) -> B,
@@ -267,7 +267,7 @@ macro_rules! iterator {
             // We override the default implementation, which uses `try_fold`,
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
-            #[inline]
+            #[inline(never)]
             fn for_each<F>(mut self, mut f: F)
             where
                 Self: Sized,
@@ -281,7 +281,7 @@ macro_rules! iterator {
             // We override the default implementation, which uses `try_fold`,
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
-            #[inline]
+            #[inline(never)]
             fn all<F>(&mut self, mut f: F) -> bool
             where
                 Self: Sized,
@@ -298,7 +298,7 @@ macro_rules! iterator {
             // We override the default implementation, which uses `try_fold`,
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
-            #[inline]
+            #[inline(never)]
             fn any<F>(&mut self, mut f: F) -> bool
             where
                 Self: Sized,
@@ -315,7 +315,7 @@ macro_rules! iterator {
             // We override the default implementation, which uses `try_fold`,
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
-            #[inline]
+            #[inline(never)]
             fn find<P>(&mut self, mut predicate: P) -> Option<Self::Item>
             where
                 Self: Sized,
@@ -332,7 +332,7 @@ macro_rules! iterator {
             // We override the default implementation, which uses `try_fold`,
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
-            #[inline]
+            #[inline(never)]
             fn find_map<B, F>(&mut self, mut f: F) -> Option<B>
             where
                 Self: Sized,
@@ -349,7 +349,7 @@ macro_rules! iterator {
             // We override the default implementation, which uses `try_fold`,
             // because this simple implementation generates less LLVM IR and is
             // faster to compile. Also, the `assume` avoids a bounds check.
-            #[inline]
+            #[inline(never)]
             #[rustc_inherit_overflow_checks]
             fn position<P>(&mut self, mut predicate: P) -> Option<usize> where
                 Self: Sized,
@@ -372,7 +372,7 @@ macro_rules! iterator {
             // We override the default implementation, which uses `try_fold`,
             // because this simple implementation generates less LLVM IR and is
             // faster to compile. Also, the `assume` avoids a bounds check.
-            #[inline]
+            #[inline(never)]
             fn rposition<P>(&mut self, mut predicate: P) -> Option<usize> where
                 P: FnMut(Self::Item) -> bool,
                 Self: Sized + ExactSizeIterator + DoubleEndedIterator
@@ -391,7 +391,7 @@ macro_rules! iterator {
                 None
             }
 
-            #[inline]
+            #[inline(never)]
             unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
                 // SAFETY: the caller must guarantee that `i` is in bounds of
                 // the underlying slice, so `i` cannot overflow an `isize`, and
@@ -411,7 +411,7 @@ macro_rules! iterator {
 
         #[stable(feature = "rust1", since = "1.0.0")]
         impl<'a, T> DoubleEndedIterator for $name<'a, T> {
-            #[inline]
+            #[inline(never)]
             fn next_back(&mut self) -> Option<$elem> {
                 // could be implemented with slices, but this avoids bounds checks
 
@@ -426,7 +426,7 @@ macro_rules! iterator {
                 }
             }
 
-            #[inline]
+            #[inline(never)]
             fn nth_back(&mut self, n: usize) -> Option<$elem> {
                 if n >= len!(self) {
                     // This iterator is now empty.
@@ -443,7 +443,7 @@ macro_rules! iterator {
                 }
             }
 
-            #[inline]
+            #[inline(never)]
             fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
                 let advance = cmp::min(len!(self), n);
                 // SAFETY: By construction, `advance` does not exceed `self.len()`.
@@ -459,7 +459,7 @@ macro_rules! iterator {
         unsafe impl<T> TrustedLen for $name<'_, T> {}
 
         impl<'a, T> UncheckedIterator for $name<'a, T> {
-            #[inline]
+            #[inline(never)]
             unsafe fn next_unchecked(&mut self) -> $elem {
                 // SAFETY: The caller promised there's at least one more item.
                 unsafe {
@@ -493,12 +493,12 @@ macro_rules! forward_iterator {
         {
             type Item = $iter_of;
 
-            #[inline]
+            #[inline(never)]
             fn next(&mut self) -> Option<$iter_of> {
                 self.inner.next()
             }
 
-            #[inline]
+            #[inline(never)]
             fn size_hint(&self) -> (usize, Option<usize>) {
                 self.inner.size_hint()
             }

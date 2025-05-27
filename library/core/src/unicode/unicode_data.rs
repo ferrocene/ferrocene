@@ -58,12 +58,12 @@ impl ShortOffsetRunHeader {
         Self((start_index as u32) << 21 | prefix_sum)
     }
 
-    #[inline]
+    #[inline(never)]
     const fn start_index(&self) -> usize {
         (self.0 >> 21) as usize
     }
 
-    #[inline]
+    #[inline(never)]
     const fn prefix_sum(&self) -> u32 {
         self.0 & ((1 << 21) - 1)
     }
@@ -435,7 +435,7 @@ pub mod grapheme_extend {
         8, 2, 7, 30, 4, 148, 3, 0, 55, 4, 50, 8, 1, 14, 1, 22, 5, 1, 15, 0, 7, 1, 17, 2, 7, 1, 2, 1,
         5, 100, 1, 160, 7, 0, 1, 61, 4, 0, 4, 254, 2, 0, 7, 109, 7, 0, 96, 128, 240, 0,
     ];
-    #[inline]
+    #[inline(never)]
     pub fn lookup(c: char) -> bool {
         (c as u32) >= 0x300 && lookup_slow(c)
     }
@@ -722,7 +722,7 @@ pub mod white_space {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0,
     ];
-    #[inline]
+    #[inline(never)]
     pub const fn lookup(c: char) -> bool {
         match c as u32 >> 8 {
             0 => WHITESPACE_MAP[c as usize & 0xff] & 1 != 0,

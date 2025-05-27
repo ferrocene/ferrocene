@@ -34,7 +34,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[rustc_diagnostic_item = "ptr_const_is_null"]
-    #[inline]
+    #[inline(never)]
     #[rustc_allow_const_fn_unstable(const_eval_select)]
     pub const fn is_null(self) -> bool {
         // Compare via a cast to a thin pointer, so fat pointers are only
@@ -117,7 +117,7 @@ impl<T: ?Sized> *const T {
     /// ```
     #[unstable(feature = "set_ptr_value", issue = "75091")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
-    #[inline]
+    #[inline(never)]
     pub const fn with_metadata_of<U>(self, meta: *const U) -> *const U
     where
         U: ?Sized,
@@ -211,7 +211,7 @@ impl<T: ?Sized> *const T {
     ///
     /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
     pub fn with_addr(self, addr: usize) -> Self {
         // This should probably be an intrinsic to avoid doing any sort of arithmetic, but
@@ -230,7 +230,7 @@ impl<T: ?Sized> *const T {
     ///
     /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
     pub fn map_addr(self, f: impl FnOnce(usize) -> usize) -> Self {
         self.with_addr(f(self.addr()))
@@ -240,7 +240,7 @@ impl<T: ?Sized> *const T {
     ///
     /// The pointer can be later reconstructed with [`from_raw_parts`].
     #[unstable(feature = "ptr_metadata", issue = "81513")]
-    #[inline]
+    #[inline(never)]
     pub const fn to_raw_parts(self) -> (*const (), <T as super::Pointee>::Metadata) {
         (self.cast(), metadata(self))
     }
@@ -291,7 +291,7 @@ impl<T: ?Sized> *const T {
     /// ```
     #[stable(feature = "ptr_as_ref", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
-    #[inline]
+    #[inline(never)]
     pub const unsafe fn as_ref<'a>(self) -> Option<&'a T> {
         // SAFETY: the caller must guarantee that `self` is valid
         // for a reference if it isn't null.
@@ -322,7 +322,7 @@ impl<T: ?Sized> *const T {
     /// ```
     // FIXME: mention it in the docs for `as_ref` and `as_uninit_ref` once stabilized.
     #[unstable(feature = "ptr_as_ref_unchecked", issue = "122034")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const unsafe fn as_ref_unchecked<'a>(self) -> &'a T {
         // SAFETY: the caller must guarantee that `self` is valid for a reference
@@ -360,7 +360,7 @@ impl<T: ?Sized> *const T {
     ///     }
     /// }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
     pub const unsafe fn as_uninit_ref<'a>(self) -> Option<&'a MaybeUninit<T>>
     where
@@ -421,7 +421,7 @@ impl<T: ?Sized> *const T {
     where
         T: Sized,
     {
-        #[inline]
+        #[inline(never)]
         #[rustc_allow_const_fn_unstable(const_eval_select)]
         const fn runtime_offset_nowrap(this: *const (), count: isize, size: usize) -> bool {
             // We can use const_eval_select here because this is only for UB checks.
@@ -678,7 +678,7 @@ impl<T: ?Sized> *const T {
     /// ```
     #[stable(feature = "ptr_offset_from", since = "1.47.0")]
     #[rustc_const_stable(feature = "const_ptr_offset_from", since = "1.65.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const unsafe fn offset_from(self, origin: *const T) -> isize
     where
@@ -767,7 +767,7 @@ impl<T: ?Sized> *const T {
     /// ```
     #[stable(feature = "ptr_sub_ptr", since = "1.87.0")]
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const unsafe fn offset_from_unsigned(self, origin: *const T) -> usize
     where
@@ -812,7 +812,7 @@ impl<T: ?Sized> *const T {
     /// ignoring the metadata.
     #[stable(feature = "ptr_sub_ptr", since = "1.87.0")]
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const unsafe fn byte_offset_from_unsigned<U: ?Sized>(self, origin: *const U) -> usize {
         // SAFETY: the caller must uphold the safety contract for `offset_from_unsigned`.
@@ -838,7 +838,7 @@ impl<T: ?Sized> *const T {
     /// of this issue.
     #[unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[rustc_const_unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
-    #[inline]
+    #[inline(never)]
     pub const fn guaranteed_eq(self, other: *const T) -> Option<bool>
     where
         T: Sized,
@@ -868,7 +868,7 @@ impl<T: ?Sized> *const T {
     /// of this issue.
     #[unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[rustc_const_unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
-    #[inline]
+    #[inline(never)]
     pub const fn guaranteed_ne(self, other: *const T) -> Option<bool>
     where
         T: Sized,
@@ -933,7 +933,7 @@ impl<T: ?Sized> *const T {
         T: Sized,
     {
         #[cfg(debug_assertions)]
-        #[inline]
+        #[inline(never)]
         #[rustc_allow_const_fn_unstable(const_eval_select)]
         const fn runtime_add_nowrap(this: *const (), count: usize, size: usize) -> bool {
             const_eval_select!(
@@ -1039,7 +1039,7 @@ impl<T: ?Sized> *const T {
         T: Sized,
     {
         #[cfg(debug_assertions)]
-        #[inline]
+        #[inline(never)]
         #[rustc_allow_const_fn_unstable(const_eval_select)]
         const fn runtime_sub_nowrap(this: *const (), count: usize, size: usize) -> bool {
             const_eval_select!(
@@ -1263,7 +1263,7 @@ impl<T: ?Sized> *const T {
     /// [`ptr::read`]: crate::ptr::read()
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const unsafe fn read(self) -> T
     where
@@ -1284,7 +1284,7 @@ impl<T: ?Sized> *const T {
     ///
     /// [`ptr::read_volatile`]: crate::ptr::read_volatile()
     #[stable(feature = "pointer_methods", since = "1.26.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub unsafe fn read_volatile(self) -> T
     where
@@ -1304,7 +1304,7 @@ impl<T: ?Sized> *const T {
     /// [`ptr::read_unaligned`]: crate::ptr::read_unaligned()
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const unsafe fn read_unaligned(self) -> T
     where
@@ -1324,7 +1324,7 @@ impl<T: ?Sized> *const T {
     /// [`ptr::copy`]: crate::ptr::copy()
     #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
     #[stable(feature = "pointer_methods", since = "1.26.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const unsafe fn copy_to(self, dest: *mut T, count: usize)
     where
@@ -1344,7 +1344,7 @@ impl<T: ?Sized> *const T {
     /// [`ptr::copy_nonoverlapping`]: crate::ptr::copy_nonoverlapping()
     #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
     #[stable(feature = "pointer_methods", since = "1.26.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const unsafe fn copy_to_nonoverlapping(self, dest: *mut T, count: usize)
     where
@@ -1391,7 +1391,7 @@ impl<T: ?Sized> *const T {
     /// # }
     /// ```
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "align_offset", since = "1.36.0")]
     pub fn align_offset(self, align: usize) -> usize
     where
@@ -1429,7 +1429,7 @@ impl<T: ?Sized> *const T {
     /// assert!(!ptr.wrapping_byte_add(1).is_aligned());
     /// ```
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "pointer_is_aligned", since = "1.79.0")]
     pub fn is_aligned(self) -> bool
     where
@@ -1469,7 +1469,7 @@ impl<T: ?Sized> *const T {
     /// assert_ne!(ptr.is_aligned_to(8), ptr.wrapping_add(1).is_aligned_to(8));
     /// ```
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "pointer_is_aligned_to", issue = "96284")]
     pub fn is_aligned_to(self, align: usize) -> bool {
         if !align.is_power_of_two() {
@@ -1496,7 +1496,7 @@ impl<T> *const [T] {
     /// let slice: *const [i8] = ptr::slice_from_raw_parts(ptr::null(), 3);
     /// assert_eq!(slice.len(), 3);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "slice_ptr_len", since = "1.79.0")]
     #[rustc_const_stable(feature = "const_slice_ptr_len", since = "1.79.0")]
     pub const fn len(self) -> usize {
@@ -1533,7 +1533,7 @@ impl<T> *const [T] {
     /// let slice: *const [i8] = ptr::slice_from_raw_parts(ptr::null(), 3);
     /// assert_eq!(slice.as_ptr(), ptr::null());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
     pub const fn as_ptr(self) -> *const T {
         self as *const T
@@ -1543,7 +1543,7 @@ impl<T> *const [T] {
     ///
     /// If `N` is not exactly equal to the length of `self`, then this method returns `None`.
     #[unstable(feature = "slice_as_array", issue = "133508")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn as_array<const N: usize>(self) -> Option<*const [T; N]> {
         if self.len() == N {
@@ -1574,7 +1574,7 @@ impl<T> *const [T] {
     /// }
     /// ```
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn get_unchecked<I>(self, index: I) -> *const I::Output
     where
         I: SliceIndex<[T]>,
@@ -1627,7 +1627,7 @@ impl<T> *const [T] {
     /// determined to be null or not. See [`is_null`] for more information.
     ///
     /// [`is_null`]: #method.is_null
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
     pub const unsafe fn as_uninit_slice<'a>(self) -> Option<&'a [MaybeUninit<T>]> {
         if self.is_null() {
@@ -1653,7 +1653,7 @@ impl<T, const N: usize> *const [T; N] {
     /// let arr: *const [i8; 3] = ptr::null();
     /// assert_eq!(arr.as_ptr(), ptr::null());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "array_ptr_get", issue = "119834")]
     pub const fn as_ptr(self) -> *const T {
         self as *const T
@@ -1670,7 +1670,7 @@ impl<T, const N: usize> *const [T; N] {
     /// let slice: *const [i32] = arr.as_slice();
     /// assert_eq!(slice.len(), 3);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "array_ptr_get", issue = "119834")]
     pub const fn as_slice(self) -> *const [T] {
         self
@@ -1680,7 +1680,7 @@ impl<T, const N: usize> *const [T; N] {
 /// Pointer equality is by address, as produced by the [`<*const T>::addr`](pointer::addr) method.
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized> PartialEq for *const T {
-    #[inline]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn eq(&self, other: &*const T) -> bool {
         *self == *other
@@ -1694,7 +1694,7 @@ impl<T: ?Sized> Eq for *const T {}
 /// Pointer comparison is by address, as produced by the `[`<*const T>::addr`](pointer::addr)` method.
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized> Ord for *const T {
-    #[inline]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn cmp(&self, other: &*const T) -> Ordering {
         if self < other {
@@ -1710,31 +1710,31 @@ impl<T: ?Sized> Ord for *const T {
 /// Pointer comparison is by address, as produced by the `[`<*const T>::addr`](pointer::addr)` method.
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized> PartialOrd for *const T {
-    #[inline]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn partial_cmp(&self, other: &*const T) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 
-    #[inline]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn lt(&self, other: &*const T) -> bool {
         *self < *other
     }
 
-    #[inline]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn le(&self, other: &*const T) -> bool {
         *self <= *other
     }
 
-    #[inline]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn gt(&self, other: &*const T) -> bool {
         *self > *other
     }
 
-    #[inline]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn ge(&self, other: &*const T) -> bool {
         *self >= *other

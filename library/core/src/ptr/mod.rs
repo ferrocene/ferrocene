@@ -878,7 +878,7 @@ pub const fn from_mut<T: ?Sized>(r: &mut T) -> *mut T {
 ///     danger.as_ref().expect("references must not be null");
 /// }
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "slice_from_raw_parts", since = "1.42.0")]
 #[rustc_const_stable(feature = "const_slice_from_raw_parts", since = "1.64.0")]
 #[rustc_diagnostic_item = "ptr_slice_from_raw_parts"]
@@ -924,7 +924,7 @@ pub const fn slice_from_raw_parts<T>(data: *const T, len: usize) -> *const [T] {
 ///     danger.as_mut().expect("references must not be null");
 /// }
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "slice_from_raw_parts", since = "1.42.0")]
 #[rustc_const_stable(feature = "const_slice_from_raw_parts_mut", since = "1.83.0")]
 #[rustc_diagnostic_item = "ptr_slice_from_raw_parts_mut"]
@@ -1003,7 +1003,7 @@ pub const fn slice_from_raw_parts_mut<T>(data: *mut T, len: usize) -> *mut [T] {
 ///     assert_eq!([1, 0, 1, 2], array);
 /// }
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_swap", since = "1.85.0")]
 #[rustc_diagnostic_item = "ptr_swap"]
@@ -1099,7 +1099,7 @@ pub const unsafe fn swap<T>(x: *mut T, y: *mut T) {
 ///     assert!(*ptr == 42);
 /// } }
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "swap_nonoverlapping", since = "1.27.0")]
 #[rustc_const_stable(feature = "const_swap_nonoverlapping", since = "CURRENT_RUSTC_VERSION")]
 #[rustc_diagnostic_item = "ptr_swap_nonoverlapping"]
@@ -1147,7 +1147,7 @@ pub const unsafe fn swap_nonoverlapping<T>(x: *mut T, y: *mut T, count: usize) {
 }
 
 /// Same behavior and safety conditions as [`swap_nonoverlapping`]
-#[inline]
+#[inline(never)]
 const unsafe fn swap_nonoverlapping_const<T>(x: *mut T, y: *mut T, count: usize) {
     let mut i = 0;
     while i < count {
@@ -1174,7 +1174,7 @@ const unsafe fn swap_nonoverlapping_const<T>(x: *mut T, y: *mut T, count: usize)
 
 // Don't let MIR inline this, because we really want it to keep its noalias metadata
 #[rustc_no_mir_inline]
-#[inline]
+#[inline(never)]
 fn swap_chunk<const N: usize>(x: &mut MaybeUninit<[u8; N]>, y: &mut MaybeUninit<[u8; N]>) {
     let a = *x;
     let b = *y;
@@ -1182,7 +1182,7 @@ fn swap_chunk<const N: usize>(x: &mut MaybeUninit<[u8; N]>, y: &mut MaybeUninit<
     *y = a;
 }
 
-#[inline]
+#[inline(never)]
 unsafe fn swap_nonoverlapping_bytes(x: *mut u8, y: *mut u8, bytes: NonZero<usize>) {
     // Same as `swap_nonoverlapping::<[u8; N]>`.
     unsafe fn swap_nonoverlapping_chunks<const N: usize>(
@@ -1198,7 +1198,7 @@ unsafe fn swap_nonoverlapping_bytes(x: *mut u8, y: *mut u8, bytes: NonZero<usize
     }
 
     // Same as `swap_nonoverlapping_bytes`, but accepts at most 1+2+4=7 bytes
-    #[inline]
+    #[inline(never)]
     unsafe fn swap_nonoverlapping_short(x: *mut u8, y: *mut u8, bytes: NonZero<usize>) {
         // Tail handling for auto-vectorized code sometimes has element-at-a-time behaviour,
         // see <https://github.com/rust-lang/rust/issues/134946>.
@@ -1280,7 +1280,7 @@ unsafe fn swap_nonoverlapping_bytes(x: *mut u8, y: *mut u8, bytes: NonZero<usize
 /// assert_eq!(b, 'b');
 /// assert_eq!(rust, &['r', 'u', 's', 't']);
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_replace", since = "1.83.0")]
 #[rustc_diagnostic_item = "ptr_replace"]
@@ -1408,7 +1408,7 @@ pub const unsafe fn replace<T>(dst: *mut T, src: T) -> T {
 /// ```
 ///
 /// [valid]: self#safety
-#[inline]
+#[inline(never)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1526,7 +1526,7 @@ pub const unsafe fn read<T>(src: *const T) -> T {
 ///     unsafe { ptr.read_unaligned() }
 /// }
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "ptr_unaligned", since = "1.17.0")]
 #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1624,7 +1624,7 @@ pub const unsafe fn read_unaligned<T>(src: *const T) -> T {
 /// assert_eq!(foo, "bar");
 /// assert_eq!(bar, "foo");
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
 #[rustc_diagnostic_item = "ptr_write"]
@@ -1728,7 +1728,7 @@ pub const unsafe fn write<T>(dst: *mut T, src: T) {
 ///     unsafe { ptr.write_unaligned(val) }
 /// }
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "ptr_unaligned", since = "1.17.0")]
 #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
 #[rustc_diagnostic_item = "ptr_write_unaligned"]
@@ -1804,7 +1804,7 @@ pub const unsafe fn write_unaligned<T>(dst: *mut T, src: T) {
 ///     assert_eq!(std::ptr::read_volatile(y), 12);
 /// }
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "volatile", since = "1.9.0")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_diagnostic_item = "ptr_read_volatile"]
@@ -1884,7 +1884,7 @@ pub unsafe fn read_volatile<T>(src: *const T) -> T {
 ///     assert_eq!(std::ptr::read_volatile(y), 12);
 /// }
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "volatile", since = "1.9.0")]
 #[rustc_diagnostic_item = "ptr_write_volatile"]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1939,7 +1939,7 @@ pub(crate) unsafe fn align_offset<T: Sized>(p: *const T, a: usize) -> usize {
     /// * `x < m`; (if `x ≥ m`, pass in `x % m` instead)
     ///
     /// Implementation of this function shall not panic. Ever.
-    #[inline]
+    #[inline(never)]
     const unsafe fn mod_inv(x: usize, m: usize) -> usize {
         /// Multiplicative modular inverse table modulo 2⁴ = 16.
         ///
@@ -2256,7 +2256,7 @@ pub fn hash<T: ?Sized, S: hash::Hasher>(hashee: *const T, into: &mut S) {
 
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
 impl<F: FnPtr> PartialEq for F {
-    #[inline]
+    #[inline(never)]
     fn eq(&self, other: &Self) -> bool {
         self.addr() == other.addr()
     }
@@ -2266,14 +2266,14 @@ impl<F: FnPtr> Eq for F {}
 
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
 impl<F: FnPtr> PartialOrd for F {
-    #[inline]
+    #[inline(never)]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.addr().partial_cmp(&other.addr())
     }
 }
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
 impl<F: FnPtr> Ord for F {
-    #[inline]
+    #[inline(never)]
     fn cmp(&self, other: &Self) -> Ordering {
         self.addr().cmp(&other.addr())
     }

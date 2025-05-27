@@ -579,7 +579,7 @@ impl<T, E> Result<T, E> {
     /// ```
     #[must_use = "if you intended to assert that this is ok, consider `.unwrap()` instead"]
     #[rustc_const_stable(feature = "const_result_basics", since = "1.48.0")]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub const fn is_ok(&self) -> bool {
         matches!(*self, Ok(_))
@@ -604,7 +604,7 @@ impl<T, E> Result<T, E> {
     /// println!("still alive {:?}", x);
     /// ```
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "is_some_and", since = "1.70.0")]
     pub fn is_ok_and(self, f: impl FnOnce(T) -> bool) -> bool {
         match self {
@@ -626,7 +626,7 @@ impl<T, E> Result<T, E> {
     /// ```
     #[must_use = "if you intended to assert that this is err, consider `.unwrap_err()` instead"]
     #[rustc_const_stable(feature = "const_result_basics", since = "1.48.0")]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub const fn is_err(&self) -> bool {
         !self.is_ok()
@@ -653,7 +653,7 @@ impl<T, E> Result<T, E> {
     /// println!("still alive {:?}", x);
     /// ```
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "is_some_and", since = "1.70.0")]
     pub fn is_err_and(self, f: impl FnOnce(E) -> bool) -> bool {
         match self {
@@ -680,7 +680,7 @@ impl<T, E> Result<T, E> {
     /// let x: Result<u32, &str> = Err("Nothing here");
     /// assert_eq!(x.ok(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "result_ok_method"]
     pub fn ok(self) -> Option<T> {
@@ -704,7 +704,7 @@ impl<T, E> Result<T, E> {
     /// let x: Result<u32, &str> = Err("Nothing here");
     /// assert_eq!(x.err(), Some("Nothing here"));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn err(self) -> Option<E> {
         match self {
@@ -731,7 +731,7 @@ impl<T, E> Result<T, E> {
     /// let x: Result<u32, &str> = Err("Error");
     /// assert_eq!(x.as_ref(), Err(&"Error"));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "const_result_basics", since = "1.48.0")]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub const fn as_ref(&self) -> Result<&T, &E> {
@@ -761,7 +761,7 @@ impl<T, E> Result<T, E> {
     /// mutate(&mut x);
     /// assert_eq!(x.unwrap_err(), 0);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_result", since = "1.83.0")]
     pub const fn as_mut(&mut self) -> Result<&mut T, &mut E> {
@@ -794,7 +794,7 @@ impl<T, E> Result<T, E> {
     ///     }
     /// }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn map<U, F: FnOnce(T) -> U>(self, op: F) -> Result<U, E> {
         match self {
@@ -821,7 +821,7 @@ impl<T, E> Result<T, E> {
     /// let x: Result<&str, _> = Err("bar");
     /// assert_eq!(x.map_or(42, |v| v.len()), 42);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "result_map_or", since = "1.41.0")]
     #[must_use = "if you don't need the returned value, use `if let` instead"]
     pub fn map_or<U, F: FnOnce(T) -> U>(self, default: U, f: F) -> U {
@@ -849,7 +849,7 @@ impl<T, E> Result<T, E> {
     /// let x : Result<&str, _> = Err("bar");
     /// assert_eq!(x.map_or_else(|e| k * 2, |v| v.len()), 42);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "result_map_or_else", since = "1.41.0")]
     pub fn map_or_else<U, D: FnOnce(E) -> U, F: FnOnce(T) -> U>(self, default: D, f: F) -> U {
         match self {
@@ -876,7 +876,7 @@ impl<T, E> Result<T, E> {
     /// let x: Result<u32, u32> = Err(13);
     /// assert_eq!(x.map_err(stringify), Err("error code: 13".to_string()));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn map_err<F, O: FnOnce(E) -> F>(self, op: O) -> Result<T, F> {
         match self {
@@ -898,7 +898,7 @@ impl<T, E> Result<T, E> {
     ///     .map(|x| x.pow(3))
     ///     .expect("failed to parse number");
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "result_option_inspect", since = "1.76.0")]
     pub fn inspect<F: FnOnce(&T)>(self, f: F) -> Self {
         if let Ok(ref t) = self {
@@ -922,7 +922,7 @@ impl<T, E> Result<T, E> {
     ///         .inspect_err(|e| eprintln!("failed to read file: {e}"))
     /// }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "result_option_inspect", since = "1.76.0")]
     pub fn inspect_err<F: FnOnce(&E)>(self, f: F) -> Self {
         if let Err(ref e) = self {
@@ -948,7 +948,7 @@ impl<T, E> Result<T, E> {
     /// let y: Result<&str, &u32> = Err(&42);
     /// assert_eq!(x.as_deref(), y);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "inner_deref", since = "1.47.0")]
     pub fn as_deref(&self) -> Result<&T::Target, &E>
     where
@@ -975,7 +975,7 @@ impl<T, E> Result<T, E> {
     /// let y: Result<&mut str, &mut u32> = Err(&mut i);
     /// assert_eq!(x.as_deref_mut().map(|x| { x.make_ascii_uppercase(); x }), y);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "inner_deref", since = "1.47.0")]
     pub fn as_deref_mut(&mut self) -> Result<&mut T::Target, &mut E>
     where
@@ -1001,7 +1001,7 @@ impl<T, E> Result<T, E> {
     /// let x: Result<u32, &str> = Err("nothing!");
     /// assert_eq!(x.iter().next(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn iter(&self) -> Iter<'_, T> {
         Iter { inner: self.as_ref().ok() }
@@ -1024,7 +1024,7 @@ impl<T, E> Result<T, E> {
     /// let mut x: Result<u32, &str> = Err("nothing!");
     /// assert_eq!(x.iter_mut().next(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn iter_mut(&mut self) -> IterMut<'_, T> {
         IterMut { inner: self.as_mut().ok() }
@@ -1077,7 +1077,7 @@ impl<T, E> Result<T, E> {
     /// refer to the section on ["Common Message
     /// Styles"](../../std/error/index.html#common-message-styles) in the
     /// [`std::error`](../../std/error/index.html) module docs.
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     #[stable(feature = "result_expect", since = "1.4.0")]
     pub fn expect(self, msg: &str) -> T
@@ -1163,7 +1163,7 @@ impl<T, E> Result<T, E> {
     ///
     /// [`parse`]: str::parse
     /// [`FromStr`]: crate::str::FromStr
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "result_unwrap_or_default", since = "1.16.0")]
     pub fn unwrap_or_default(self) -> T
     where
@@ -1189,7 +1189,7 @@ impl<T, E> Result<T, E> {
     /// let x: Result<u32, &str> = Ok(10);
     /// x.expect_err("Testing expect_err"); // panics with `Testing expect_err: 10`
     /// ```
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     #[stable(feature = "result_expect_err", since = "1.17.0")]
     pub fn expect_err(self, msg: &str) -> E
@@ -1220,7 +1220,7 @@ impl<T, E> Result<T, E> {
     /// let x: Result<u32, &str> = Err("emergency failure");
     /// assert_eq!(x.unwrap_err(), "emergency failure");
     /// ```
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn unwrap_err(self) -> E
@@ -1257,7 +1257,7 @@ impl<T, E> Result<T, E> {
     /// println!("{s}");
     /// ```
     #[unstable(feature = "unwrap_infallible", reason = "newly added", issue = "61695")]
-    #[inline]
+    #[inline(never)]
     pub fn into_ok(self) -> T
     where
         E: Into<!>,
@@ -1292,7 +1292,7 @@ impl<T, E> Result<T, E> {
     /// println!("{error}");
     /// ```
     #[unstable(feature = "unwrap_infallible", reason = "newly added", issue = "61695")]
-    #[inline]
+    #[inline(never)]
     pub fn into_err(self) -> E
     where
         T: Into<!>,
@@ -1334,7 +1334,7 @@ impl<T, E> Result<T, E> {
     /// let y: Result<&str, &str> = Ok("different result type");
     /// assert_eq!(x.and(y), Ok("different result type"));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn and<U>(self, res: Result<U, E>) -> Result<U, E> {
         match self {
@@ -1373,7 +1373,7 @@ impl<T, E> Result<T, E> {
     /// assert!(should_fail.is_err());
     /// assert_eq!(should_fail.unwrap_err().kind(), ErrorKind::NotFound);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_confusables("flat_map", "flatmap")]
     pub fn and_then<U, F: FnOnce(T) -> Result<U, E>>(self, op: F) -> Result<U, E> {
@@ -1410,7 +1410,7 @@ impl<T, E> Result<T, E> {
     /// let y: Result<u32, &str> = Ok(100);
     /// assert_eq!(x.or(y), Ok(2));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn or<F>(self, res: Result<T, F>) -> Result<T, F> {
         match self {
@@ -1435,7 +1435,7 @@ impl<T, E> Result<T, E> {
     /// assert_eq!(Err(3).or_else(sq).or_else(err), Ok(9));
     /// assert_eq!(Err(3).or_else(err).or_else(err), Err(3));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn or_else<F, O: FnOnce(E) -> Result<T, F>>(self, op: O) -> Result<T, F> {
         match self {
@@ -1462,7 +1462,7 @@ impl<T, E> Result<T, E> {
     /// let x: Result<u32, &str> = Err("error");
     /// assert_eq!(x.unwrap_or(default), default);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn unwrap_or(self, default: T) -> T {
         match self {
@@ -1482,7 +1482,7 @@ impl<T, E> Result<T, E> {
     /// assert_eq!(Ok(2).unwrap_or_else(count), 2);
     /// assert_eq!(Err("foo").unwrap_or_else(count), 3);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn unwrap_or_else<F: FnOnce(E) -> T>(self, op: F) -> T {
@@ -1512,7 +1512,7 @@ impl<T, E> Result<T, E> {
     /// let x: Result<u32, &str> = Err("emergency failure");
     /// unsafe { x.unwrap_unchecked(); } // Undefined behavior!
     /// ```
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
     pub unsafe fn unwrap_unchecked(self) -> T {
@@ -1543,7 +1543,7 @@ impl<T, E> Result<T, E> {
     /// let x: Result<u32, &str> = Err("emergency failure");
     /// assert_eq!(unsafe { x.unwrap_err_unchecked() }, "emergency failure");
     /// ```
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
     pub unsafe fn unwrap_err_unchecked(self) -> E {
@@ -1568,7 +1568,7 @@ impl<T, E> Result<&T, E> {
     /// let copied = x.copied();
     /// assert_eq!(copied, Ok(12));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "result_copied", since = "1.59.0")]
     #[rustc_const_stable(feature = "const_result", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
@@ -1596,7 +1596,7 @@ impl<T, E> Result<&T, E> {
     /// let cloned = x.cloned();
     /// assert_eq!(cloned, Ok(12));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "result_cloned", since = "1.59.0")]
     pub fn cloned(self) -> Result<T, E>
     where
@@ -1619,7 +1619,7 @@ impl<T, E> Result<&mut T, E> {
     /// let copied = x.copied();
     /// assert_eq!(copied, Ok(12));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "result_copied", since = "1.59.0")]
     #[rustc_const_stable(feature = "const_result", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
@@ -1647,7 +1647,7 @@ impl<T, E> Result<&mut T, E> {
     /// let cloned = x.cloned();
     /// assert_eq!(cloned, Ok(12));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "result_cloned", since = "1.59.0")]
     pub fn cloned(self) -> Result<T, E>
     where
@@ -1673,7 +1673,7 @@ impl<T, E> Result<Option<T>, E> {
     /// let y: Option<Result<i32, SomeErr>> = Some(Ok(5));
     /// assert_eq!(x.transpose(), y);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "transpose_result", since = "1.33.0")]
     #[rustc_const_stable(feature = "const_result", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
@@ -1711,7 +1711,7 @@ impl<T, E> Result<Result<T, E>, E> {
     /// assert_eq!(Ok(Ok("hello")), x.flatten());
     /// assert_eq!(Ok("hello"), x.flatten().flatten());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "result_flattening", issue = "70142")]
     #[rustc_const_unstable(feature = "result_flattening", issue = "70142")]
     pub const fn flatten(self) -> Result<T, E> {
@@ -1737,7 +1737,7 @@ fn unwrap_failed(msg: &str, error: &dyn fmt::Debug) -> ! {
 // by dead code elimination if a trait object is constructed even if it goes
 // unused
 #[cfg(feature = "panic_immediate_abort")]
-#[inline]
+#[inline(never)]
 #[cold]
 #[track_caller]
 fn unwrap_failed<T>(_msg: &str, _error: &T) -> ! {
@@ -1754,7 +1754,7 @@ where
     T: Clone,
     E: Clone,
 {
-    #[inline]
+    #[inline(never)]
     fn clone(&self) -> Self {
         match self {
             Ok(x) => Ok(x.clone()),
@@ -1762,7 +1762,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn clone_from(&mut self, source: &Self) {
         match (self, source) {
             (Ok(to), Ok(from)) => to.clone_from(from),
@@ -1800,7 +1800,7 @@ impl<T, E> IntoIterator for Result<T, E> {
     /// let v: Vec<u32> = x.into_iter().collect();
     /// assert_eq!(v, []);
     /// ```
-    #[inline]
+    #[inline(never)]
     fn into_iter(self) -> IntoIter<T> {
         IntoIter { inner: self.ok() }
     }
@@ -1845,11 +1845,11 @@ pub struct Iter<'a, T: 'a> {
 impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<&'a T> {
         self.inner.take()
     }
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let n = if self.inner.is_some() { 1 } else { 0 };
         (n, Some(n))
@@ -1858,7 +1858,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a, T> DoubleEndedIterator for Iter<'a, T> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<&'a T> {
         self.inner.take()
     }
@@ -1875,7 +1875,7 @@ unsafe impl<A> TrustedLen for Iter<'_, A> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T> Clone for Iter<'_, T> {
-    #[inline]
+    #[inline(never)]
     fn clone(&self) -> Self {
         Iter { inner: self.inner }
     }
@@ -1894,11 +1894,11 @@ pub struct IterMut<'a, T: 'a> {
 impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<&'a mut T> {
         self.inner.take()
     }
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let n = if self.inner.is_some() { 1 } else { 0 };
         (n, Some(n))
@@ -1907,7 +1907,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a, T> DoubleEndedIterator for IterMut<'a, T> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<&'a mut T> {
         self.inner.take()
     }
@@ -1940,11 +1940,11 @@ pub struct IntoIter<T> {
 impl<T> Iterator for IntoIter<T> {
     type Item = T;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<T> {
         self.inner.take()
     }
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let n = if self.inner.is_some() { 1 } else { 0 };
         (n, Some(n))
@@ -1953,7 +1953,7 @@ impl<T> Iterator for IntoIter<T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T> DoubleEndedIterator for IntoIter<T> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<T> {
         self.inner.take()
     }
@@ -2016,7 +2016,7 @@ impl<A, E, V: FromIterator<A>> FromIterator<Result<A, E>> for Result<V, E> {
     ///
     /// Since the third element caused an underflow, no further elements were taken,
     /// so the final value of `shared` is 6 (= `3 + 2 + 1`), not 16.
-    #[inline]
+    #[inline(never)]
     fn from_iter<I: IntoIterator<Item = Result<A, E>>>(iter: I) -> Result<V, E> {
         iter::try_process(iter.into_iter(), |i| i.collect())
     }
@@ -2027,12 +2027,12 @@ impl<T, E> ops::Try for Result<T, E> {
     type Output = T;
     type Residual = Result<convert::Infallible, E>;
 
-    #[inline]
+    #[inline(never)]
     fn from_output(output: Self::Output) -> Self {
         Ok(output)
     }
 
-    #[inline]
+    #[inline(never)]
     fn branch(self) -> ControlFlow<Self::Residual, Self::Output> {
         match self {
             Ok(v) => ControlFlow::Continue(v),
@@ -2043,7 +2043,7 @@ impl<T, E> ops::Try for Result<T, E> {
 
 #[unstable(feature = "try_trait_v2", issue = "84277")]
 impl<T, E, F: From<E>> ops::FromResidual<Result<convert::Infallible, E>> for Result<T, F> {
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     fn from_residual(residual: Result<convert::Infallible, E>) -> Self {
         match residual {
@@ -2054,7 +2054,7 @@ impl<T, E, F: From<E>> ops::FromResidual<Result<convert::Infallible, E>> for Res
 #[diagnostic::do_not_recommend]
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
 impl<T, E, F: From<E>> ops::FromResidual<ops::Yeet<E>> for Result<T, F> {
-    #[inline]
+    #[inline(never)]
     fn from_residual(ops::Yeet(e): ops::Yeet<E>) -> Self {
         Err(From::from(e))
     }

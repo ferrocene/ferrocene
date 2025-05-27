@@ -779,7 +779,7 @@ pub struct PhantomData<T: ?Sized>;
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized> Hash for PhantomData<T> {
-    #[inline]
+    #[inline(never)]
     fn hash<H: Hasher>(&self, _: &mut H) {}
 }
 

@@ -95,7 +95,7 @@ use crate::{intrinsics, ub_checks};
 /// assert_eq!(div_1(9, 1), 4);
 /// assert_eq!(div_1(11, u32::MAX), 0);
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "unreachable", since = "1.27.0")]
 #[rustc_const_stable(feature = "const_unreachable_unchecked", since = "1.57.0")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -476,7 +476,7 @@ pub fn spin_loop() {
 /// ```
 ///
 /// During constant evaluation, `black_box` is treated as a no-op.
-#[inline]
+#[inline(never)]
 #[stable(feature = "bench_black_box", since = "1.66.0")]
 #[rustc_const_stable(feature = "const_black_box", since = "1.86.0")]
 pub const fn black_box<T>(dummy: T) -> T {

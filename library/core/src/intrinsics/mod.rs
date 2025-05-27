@@ -77,7 +77,7 @@ use crate::sync::atomic::{self, AtomicBool, AtomicI32, AtomicIsize, AtomicU32, O
 #[stable(feature = "drop_in_place", since = "1.8.0")]
 #[rustc_allowed_through_unstable_modules = "import this function via `std::ptr` instead"]
 #[deprecated(note = "no longer an intrinsic - use `ptr::drop_in_place` directly", since = "1.52.0")]
-#[inline]
+#[inline(never)]
 pub unsafe fn drop_in_place<T: ?Sized>(to_drop: *mut T) {
     // SAFETY: see `ptr::drop_in_place`
     unsafe { crate::ptr::drop_in_place(to_drop) }
@@ -1333,7 +1333,7 @@ pub const fn unlikely(b: bool) -> bool {
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
-#[inline]
+#[inline(never)]
 pub fn select_unpredictable<T>(b: bool, true_val: T, false_val: T) -> T {
     if b { true_val } else { false_val }
 }
@@ -3009,7 +3009,7 @@ pub const unsafe fn ptr_offset_from_unsigned<T>(ptr: *const T, base: *const T) -
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[rustc_do_not_const_check]
-#[inline]
+#[inline(never)]
 #[miri::intrinsic_fallback_is_spec]
 pub const fn ptr_guaranteed_cmp<T>(ptr: *const T, other: *const T) -> u8 {
     (ptr == other) as u8
@@ -3146,7 +3146,7 @@ where
 /// used inside the `if const`.
 /// Note that the two arms of this `if` really each become their own function, which is why the
 /// macro supports setting attributes for those functions. The runtime function is always
-/// markes as `#[inline]`.
+/// markes as `#[inline(never)]`.
 ///
 /// See [`const_eval_select()`] for the rules and requirements around that intrinsic.
 pub(crate) macro const_eval_select {
@@ -3162,11 +3162,11 @@ pub(crate) macro const_eval_select {
             @capture$([$($binders)*])? { $($arg : $ty = $val),* } $(-> $ret)? :
             #[noinline]
             if const
-                #[inline] // prevent codegen on this function
+                #[inline(never)] // prevent codegen on this function
                 $(#[$compiletime_attr])*
                 $compiletime
             else
-                #[inline] // avoid the overhead of an extra fn call
+                #[inline(never)] // avoid the overhead of an extra fn call
                 $(#[$runtime_attr])*
                 $runtime
         )
@@ -3317,7 +3317,7 @@ pub const fn is_val_statically_known<T: Copy>(_arg: T) -> bool {
 ///
 /// [valid]: crate::ptr#safety
 #[rustc_nounwind]
-#[inline]
+#[inline(never)]
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
 pub const unsafe fn typed_swap_nonoverlapping<T>(x: *mut T, y: *mut T) {
@@ -3335,7 +3335,7 @@ pub const unsafe fn typed_swap_nonoverlapping<T>(x: *mut T, y: *mut T) {
 /// The common case here is a user program built with ub_checks linked against the distributed
 /// sysroot which is built without ub_checks but with `#[rustc_preserve_ub_checks]`.
 /// For code that gets monomorphized in the user crate (i.e., generic functions and functions with
-/// `#[inline]`), gating assertions on `ub_checks()` rather than `cfg!(ub_checks)` means that
+/// `#[inline(never)]`), gating assertions on `ub_checks()` rather than `cfg!(ub_checks)` means that
 /// assertions are enabled whenever the *user crate* has UB checks enabled. However, if the
 /// user has UB checks disabled, the checks will still get optimized out. This intrinsic is
 /// primarily used by [`ub_checks::assert_unsafe_precondition`].

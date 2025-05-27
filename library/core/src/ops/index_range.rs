@@ -18,7 +18,7 @@ pub(crate) struct IndexRange {
 impl IndexRange {
     /// # Safety
     /// - `start <= end`
-    #[inline]
+    #[inline(never)]
     pub(crate) const unsafe fn new_unchecked(start: usize, end: usize) -> Self {
         ub_checks::assert_unsafe_precondition!(
             check_library_ub,
@@ -28,22 +28,22 @@ impl IndexRange {
         IndexRange { start, end }
     }
 
-    #[inline]
+    #[inline(never)]
     pub(crate) const fn zero_to(end: usize) -> Self {
         IndexRange { start: 0, end }
     }
 
-    #[inline]
+    #[inline(never)]
     pub(crate) const fn start(&self) -> usize {
         self.start
     }
 
-    #[inline]
+    #[inline(never)]
     pub(crate) const fn end(&self) -> usize {
         self.end
     }
 
-    #[inline]
+    #[inline(never)]
     pub(crate) const fn len(&self) -> usize {
         // SAFETY: By invariant, this cannot wrap
         // Using the intrinsic because a UB check here impedes LLVM optimization. (#131563)
@@ -52,7 +52,7 @@ impl IndexRange {
 
     /// # Safety
     /// - Can only be called when `start < end`, aka when `len > 0`.
-    #[inline]
+    #[inline(never)]
     unsafe fn next_unchecked(&mut self) -> usize {
         debug_assert!(self.start < self.end);
 
@@ -64,7 +64,7 @@ impl IndexRange {
 
     /// # Safety
     /// - Can only be called when `start < end`, aka when `len > 0`.
-    #[inline]
+    #[inline(never)]
     unsafe fn next_back_unchecked(&mut self) -> usize {
         debug_assert!(self.start < self.end);
 
@@ -79,7 +79,7 @@ impl IndexRange {
     /// `self` is left empty.
     ///
     /// This is designed to help implement `Iterator::advance_by`.
-    #[inline]
+    #[inline(never)]
     pub(crate) fn take_prefix(&mut self, n: usize) -> Self {
         let mid = if n <= self.len() {
             // SAFETY: We just checked that this will be between start and end,
@@ -99,7 +99,7 @@ impl IndexRange {
     /// `self` is left empty.
     ///
     /// This is designed to help implement `Iterator::advance_back_by`.
-    #[inline]
+    #[inline(never)]
     pub(crate) fn take_suffix(&mut self, n: usize) -> Self {
         let mid = if n <= self.len() {
             // SAFETY: We just checked that this will be between start and end,
@@ -114,7 +114,7 @@ impl IndexRange {
         suffix
     }
 
-    #[inline]
+    #[inline(never)]
     fn assume_range(&self) {
         // SAFETY: This is the type invariant
         unsafe { crate::hint::assert_unchecked(self.start <= self.end) }
@@ -124,7 +124,7 @@ impl IndexRange {
 impl Iterator for IndexRange {
     type Item = usize;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<usize> {
         if self.len() > 0 {
             // SAFETY: We just checked that the range is non-empty
@@ -134,24 +134,24 @@ impl Iterator for IndexRange {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.len();
         (len, Some(len))
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let taken = self.take_prefix(n);
         NonZero::new(n - taken.len()).map_or(Ok(()), Err)
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<B, F: FnMut(B, usize) -> B>(mut self, init: B, f: F) -> B {
         self.try_fold(init, NeverShortCircuit::wrap_mut_2(f)).0
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<B, F, R>(&mut self, mut accum: B, mut f: F) -> R
     where
         Self: Sized,
@@ -172,7 +172,7 @@ impl Iterator for IndexRange {
 }
 
 impl DoubleEndedIterator for IndexRange {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<usize> {
         if self.len() > 0 {
             // SAFETY: We just checked that the range is non-empty
@@ -182,18 +182,18 @@ impl DoubleEndedIterator for IndexRange {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let taken = self.take_suffix(n);
         NonZero::new(n - taken.len()).map_or(Ok(()), Err)
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfold<B, F: FnMut(B, usize) -> B>(mut self, init: B, f: F) -> B {
         self.try_rfold(init, NeverShortCircuit::wrap_mut_2(f)).0
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<B, F, R>(&mut self, mut accum: B, mut f: F) -> R
     where
         Self: Sized,
@@ -214,7 +214,7 @@ impl DoubleEndedIterator for IndexRange {
 }
 
 impl ExactSizeIterator for IndexRange {
-    #[inline]
+    #[inline(never)]
     fn len(&self) -> usize {
         self.len()
     }

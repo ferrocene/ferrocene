@@ -699,7 +699,7 @@ impl<T: ?Sized, U: ?Sized> AsRef<U> for &T
 where
     T: AsRef<U>,
 {
-    #[inline]
+    #[inline(never)]
     fn as_ref(&self) -> &U {
         <T as AsRef<U>>::as_ref(*self)
     }
@@ -711,7 +711,7 @@ impl<T: ?Sized, U: ?Sized> AsRef<U> for &mut T
 where
     T: AsRef<U>,
 {
-    #[inline]
+    #[inline(never)]
     fn as_ref(&self) -> &U {
         <T as AsRef<U>>::as_ref(*self)
     }
@@ -731,7 +731,7 @@ impl<T: ?Sized, U: ?Sized> AsMut<U> for &mut T
 where
     T: AsMut<U>,
 {
-    #[inline]
+    #[inline(never)]
     fn as_mut(&mut self) -> &mut U {
         (*self).as_mut()
     }
@@ -755,7 +755,7 @@ where
     ///
     /// That is, this conversion is whatever the implementation of
     /// <code>[From]&lt;T&gt; for U</code> chooses to do.
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     fn into(self) -> U {
         U::from(self)
@@ -794,7 +794,7 @@ where
 {
     type Error = U::Error;
 
-    #[inline]
+    #[inline(never)]
     fn try_into(self) -> Result<U, U::Error> {
         U::try_from(self)
     }
@@ -809,7 +809,7 @@ where
 {
     type Error = Infallible;
 
-    #[inline]
+    #[inline(never)]
     fn try_from(value: U) -> Result<Self, Self::Error> {
         Ok(U::into(value))
     }
@@ -958,7 +958,7 @@ impl Ord for Infallible {
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 impl From<!> for Infallible {
-    #[inline]
+    #[inline(never)]
     fn from(x: !) -> Self {
         x
     }

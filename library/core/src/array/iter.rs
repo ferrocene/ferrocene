@@ -22,11 +22,11 @@ pub struct IntoIter<T, const N: usize> {
 }
 
 impl<T, const N: usize> IntoIter<T, N> {
-    #[inline]
+    #[inline(never)]
     fn unsize(&self) -> &InnerUnsized<T> {
         &self.inner
     }
-    #[inline]
+    #[inline(never)]
     fn unsize_mut(&mut self) -> &mut InnerUnsized<T> {
         &mut self.inner
     }
@@ -50,7 +50,7 @@ impl<T, const N: usize> IntoIterator for [T; N] {
     /// 2021 edition -- see the [array] Editions section for more information.
     ///
     /// [array]: prim@array
-    #[inline]
+    #[inline(never)]
     fn into_iter(self) -> Self::IntoIter {
         // SAFETY: The transmute here is actually safe. The docs of `MaybeUninit`
         // promise:
@@ -137,7 +137,7 @@ impl<T, const N: usize> IntoIter<T, N> {
     /// assert_eq!(r.collect::<Vec<_>>(), vec![10, 11, 12, 13, 14, 15]);
     /// ```
     #[unstable(feature = "array_into_iter_constructors", issue = "91583")]
-    #[inline]
+    #[inline(never)]
     pub const unsafe fn new_unchecked(
         buffer: [MaybeUninit<T>; N],
         initialized: Range<usize>,
@@ -202,7 +202,7 @@ impl<T, const N: usize> IntoIter<T, N> {
     /// assert_eq!(get_bytes(false).collect::<Vec<_>>(), vec![]);
     /// ```
     #[unstable(feature = "array_into_iter_constructors", issue = "91583")]
-    #[inline]
+    #[inline(never)]
     pub const fn empty() -> Self {
         let inner = InnerSized::empty();
         IntoIter { inner }
@@ -211,14 +211,14 @@ impl<T, const N: usize> IntoIter<T, N> {
     /// Returns an immutable slice of all elements that have not been yielded
     /// yet.
     #[stable(feature = "array_value_iter", since = "1.51.0")]
-    #[inline]
+    #[inline(never)]
     pub fn as_slice(&self) -> &[T] {
         self.unsize().as_slice()
     }
 
     /// Returns a mutable slice of all elements that have not been yielded yet.
     #[stable(feature = "array_value_iter", since = "1.51.0")]
-    #[inline]
+    #[inline(never)]
     pub fn as_mut_slice(&mut self) -> &mut [T] {
         self.unsize_mut().as_mut_slice()
     }
@@ -228,17 +228,17 @@ impl<T, const N: usize> IntoIter<T, N> {
 impl<T, const N: usize> Iterator for IntoIter<T, N> {
     type Item = T;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<Self::Item> {
         self.unsize_mut().next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.unsize().size_hint()
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<Acc, Fold>(mut self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -246,7 +246,7 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
         self.unsize_mut().fold(init, fold)
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -256,22 +256,22 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
         self.unsize_mut().try_fold(init, f)
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         self.len()
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(mut self) -> Option<Self::Item> {
         self.next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.unsize_mut().advance_by(n)
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
         // SAFETY: The caller must provide an idx that is in bound of the remainder.
         let elem_ref = unsafe { self.as_mut_slice().get_unchecked_mut(idx) };
@@ -283,12 +283,12 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
 
 #[stable(feature = "array_value_iter_impls", since = "1.40.0")]
 impl<T, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<Self::Item> {
         self.unsize_mut().next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfold<Acc, Fold>(mut self, init: Acc, rfold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -296,7 +296,7 @@ impl<T, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
         self.unsize_mut().rfold(init, rfold)
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -306,7 +306,7 @@ impl<T, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
         self.unsize_mut().try_rfold(init, f)
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.unsize_mut().advance_back_by(n)
     }
@@ -314,7 +314,7 @@ impl<T, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
 
 #[stable(feature = "array_value_iter_impls", since = "1.40.0")]
 impl<T, const N: usize> Drop for IntoIter<T, N> {
-    #[inline]
+    #[inline(never)]
     fn drop(&mut self) {
         // `inner` now handles this, but it'd technically be a breaking change
         // to remove this `impl`, even though it's useless.
@@ -323,11 +323,11 @@ impl<T, const N: usize> Drop for IntoIter<T, N> {
 
 #[stable(feature = "array_value_iter_impls", since = "1.40.0")]
 impl<T, const N: usize> ExactSizeIterator for IntoIter<T, N> {
-    #[inline]
+    #[inline(never)]
     fn len(&self) -> usize {
         self.inner.len()
     }
-    #[inline]
+    #[inline(never)]
     fn is_empty(&self) -> bool {
         self.inner.len() == 0
     }

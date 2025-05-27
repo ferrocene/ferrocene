@@ -24,7 +24,7 @@ macro_rules! impl_float_to_int {
         $(
             #[unstable(feature = "convert_float_to_int", issue = "67057")]
             impl FloatToInt<$Int> for $Float {
-                #[inline]
+                #[inline(never)]
                 unsafe fn to_int_unchecked(self) -> $Int {
                     // SAFETY: the safety contract must be upheld by the caller.
                     unsafe { crate::intrinsics::float_to_int_unchecked(self) }
@@ -216,7 +216,7 @@ macro_rules! impl_float_from_bool {
             /// assert_eq!(y, 1.0);
             $($(#[doc = $doctest_suffix])*)?
             /// ```
-            #[inline]
+            #[inline(never)]
             fn from(small: bool) -> Self {
                 small as u8 as Self
             }
@@ -257,7 +257,7 @@ macro_rules! impl_try_from_unbounded {
             /// Tries to create the target number type from a source
             /// number type. This returns an error if the source value
             /// is outside of the range of the target type.
-            #[inline]
+            #[inline(never)]
             fn try_from(value: $source) -> Result<Self, Self::Error> {
                 Ok(value as Self)
             }
@@ -275,7 +275,7 @@ macro_rules! impl_try_from_lower_bounded {
             /// Tries to create the target number type from a source
             /// number type. This returns an error if the source value
             /// is outside of the range of the target type.
-            #[inline]
+            #[inline(never)]
             fn try_from(u: $source) -> Result<Self, Self::Error> {
                 if u >= 0 {
                     Ok(u as Self)
@@ -297,7 +297,7 @@ macro_rules! impl_try_from_upper_bounded {
             /// Tries to create the target number type from a source
             /// number type. This returns an error if the source value
             /// is outside of the range of the target type.
-            #[inline]
+            #[inline(never)]
             fn try_from(u: $source) -> Result<Self, Self::Error> {
                 if u > (Self::MAX as $source) {
                     Err(TryFromIntError(()))
@@ -319,7 +319,7 @@ macro_rules! impl_try_from_both_bounded {
             /// Tries to create the target number type from a source
             /// number type. This returns an error if the source value
             /// is outside of the range of the target type.
-            #[inline]
+            #[inline(never)]
             fn try_from(u: $source) -> Result<Self, Self::Error> {
                 let min = Self::MIN as $source;
                 let max = Self::MAX as $source;
@@ -456,7 +456,7 @@ macro_rules! impl_nonzero_int_from_nonzero_int {
             // Rustdocs on functions do not.
             #[doc = concat!("Converts <code>[NonZero]\\<[", stringify!($Small), "]></code> ")]
             #[doc = concat!("to <code>[NonZero]\\<[", stringify!($Large), "]></code> losslessly.")]
-            #[inline]
+            #[inline(never)]
             fn from(small: NonZero<$Small>) -> Self {
                 // SAFETY: input type guarantees the value is non-zero
                 unsafe { Self::new_unchecked(From::from(small.get())) }
@@ -516,7 +516,7 @@ macro_rules! impl_nonzero_int_try_from_int {
             // Rustdocs on functions do not.
             #[doc = concat!("Attempts to convert [`", stringify!($Int), "`] ")]
             #[doc = concat!("to <code>[NonZero]\\<[", stringify!($Int), "]></code>.")]
-            #[inline]
+            #[inline(never)]
             fn try_from(value: $Int) -> Result<Self, Self::Error> {
                 Self::new(value).ok_or(TryFromIntError(()))
             }
@@ -548,7 +548,7 @@ macro_rules! impl_nonzero_int_try_from_nonzero_int {
             // Rustdocs on functions do not.
             #[doc = concat!("Attempts to convert <code>[NonZero]\\<[", stringify!($source), "]></code> ")]
             #[doc = concat!("to <code>[NonZero]\\<[", stringify!($target), "]></code>.")]
-            #[inline]
+            #[inline(never)]
             fn try_from(value: NonZero<$source>) -> Result<Self, Self::Error> {
                 // SAFETY: Input is guaranteed to be non-zero.
                 Ok(unsafe { Self::new_unchecked(<$target>::try_from(value.get())?) })

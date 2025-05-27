@@ -233,7 +233,7 @@ floating! { f32 f64 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Debug for f16 {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "{:#06x}", self.to_bits())
     }
@@ -241,7 +241,7 @@ impl Debug for f16 {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Debug for f128 {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "{:#034x}", self.to_bits())
     }

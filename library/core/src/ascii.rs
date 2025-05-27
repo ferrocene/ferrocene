@@ -94,17 +94,17 @@ pub fn escape_default(c: u8) -> EscapeDefault {
 }
 
 impl EscapeDefault {
-    #[inline]
+    #[inline(never)]
     pub(crate) const fn new(c: u8) -> Self {
         Self(escape::EscapeIterInner::ascii(c))
     }
 
-    #[inline]
+    #[inline(never)]
     pub(crate) fn empty() -> Self {
         Self(escape::EscapeIterInner::empty())
     }
 
-    #[inline]
+    #[inline(never)]
     pub(crate) fn as_str(&self) -> &str {
         self.0.as_str()
     }
@@ -114,28 +114,28 @@ impl EscapeDefault {
 impl Iterator for EscapeDefault {
     type Item = u8;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<u8> {
         self.0.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let n = self.0.len();
         (n, Some(n))
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         self.0.len()
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(mut self) -> Option<u8> {
         self.0.next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.0.advance_by(n)
     }
@@ -143,12 +143,12 @@ impl Iterator for EscapeDefault {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl DoubleEndedIterator for EscapeDefault {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<u8> {
         self.0.next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.0.advance_back_by(n)
     }
@@ -156,7 +156,7 @@ impl DoubleEndedIterator for EscapeDefault {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl ExactSizeIterator for EscapeDefault {
-    #[inline]
+    #[inline(never)]
     fn len(&self) -> usize {
         self.0.len()
     }

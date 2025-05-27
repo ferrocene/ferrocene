@@ -137,7 +137,7 @@ pub use crate::intrinsics::transmute;
 /// [`Box::into_raw`]: ../../std/boxed/struct.Box.html#method.into_raw
 /// [`mem::drop`]: drop
 /// [ub]: ../../reference/behavior-considered-undefined.html
-#[inline]
+#[inline(never)]
 #[rustc_const_stable(feature = "const_forget", since = "1.46.0")]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "mem_forget"]
@@ -149,7 +149,7 @@ pub const fn forget<T>(t: T) {
 ///
 /// This function is just a shim intended to be removed when the `unsized_locals` feature gets
 /// stabilized.
-#[inline]
+#[inline(never)]
 #[unstable(feature = "forget_unsized", issue = "none")]
 pub fn forget_unsized<T: ?Sized>(t: T) {
     intrinsics::forget(t)
@@ -324,7 +324,7 @@ pub const fn size_of<T>() -> usize {
 /// ```
 ///
 /// [`size_of::<T>()`]: size_of
-#[inline]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_size_of_val", since = "1.85.0")]
@@ -381,7 +381,7 @@ pub const fn size_of_val<T: ?Sized>(val: &T) -> usize {
 /// let y: &[u8] = &x;
 /// assert_eq!(13, unsafe { mem::size_of_val_raw(y) });
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[unstable(feature = "layout_for_ptr", issue = "69835")]
 pub const unsafe fn size_of_val_raw<T: ?Sized>(val: *const T) -> usize {
@@ -405,7 +405,7 @@ pub const unsafe fn size_of_val_raw<T: ?Sized>(val: *const T) -> usize {
 ///
 /// assert_eq!(4, mem::min_align_of::<i32>());
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[deprecated(note = "use `align_of` instead", since = "1.2.0", suggestion = "align_of")]
@@ -428,7 +428,7 @@ pub fn min_align_of<T>() -> usize {
 ///
 /// assert_eq!(4, mem::min_align_of_val(&5i32));
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[deprecated(note = "use `align_of_val` instead", since = "1.2.0", suggestion = "align_of_val")]
@@ -471,7 +471,7 @@ pub const fn align_of<T>() -> usize {
 /// ```
 /// assert_eq!(4, align_of_val(&5i32));
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_align_of_val", since = "1.85.0")]
@@ -520,7 +520,7 @@ pub const fn align_of_val<T: ?Sized>(val: &T) -> usize {
 ///
 /// assert_eq!(4, unsafe { mem::align_of_val_raw(&5i32) });
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[unstable(feature = "layout_for_ptr", issue = "69835")]
 pub const unsafe fn align_of_val_raw<T: ?Sized>(val: *const T) -> usize {
@@ -584,7 +584,7 @@ pub const unsafe fn align_of_val_raw<T: ?Sized>(val: *const T) -> usize {
 ///     }
 /// }
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "needs_drop", since = "1.21.0")]
 #[rustc_const_stable(feature = "const_mem_needs_drop", since = "1.36.0")]
@@ -713,7 +713,7 @@ pub unsafe fn uninitialized<T>() -> T {
 /// assert_eq!(42, x);
 /// assert_eq!(5, y);
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_swap", since = "1.85.0")]
 #[rustc_diagnostic_item = "mem_swap"]
@@ -778,7 +778,7 @@ pub const fn swap<T>(x: &mut T, y: &mut T) {
 /// assert_eq!(buffer.get_and_reset(), vec![0, 1]);
 /// assert_eq!(buffer.buf.len(), 0);
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "mem_take", since = "1.40.0")]
 pub fn take<T: Default>(dest: &mut T) -> T {
     replace(dest, T::default())
@@ -842,7 +842,7 @@ pub fn take<T: Default>(dest: &mut T) -> T {
 /// assert_eq!(buffer.replace_index(0, 2), 0);
 /// assert_eq!(buffer.buf[0], 2);
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "if you don't need the old value, you can just assign the new value directly"]
 #[rustc_const_stable(feature = "const_replace", since = "1.83.0")]
@@ -929,7 +929,7 @@ pub const fn replace<T>(dest: &mut T, src: T) -> T {
 /// ```
 ///
 /// [`RefCell`]: crate::cell::RefCell
-#[inline]
+#[inline(never)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "mem_drop"]
 pub fn drop<T>(_x: T) {}
@@ -950,7 +950,7 @@ pub fn drop<T>(_x: T) {}
 /// let result_from_ffi_function: Result<(), &i32> = Err(&1);
 /// let result_copied: Result<(), i32> = result_from_ffi_function.map_err(copy);
 /// ```
-#[inline]
+#[inline(never)]
 #[unstable(feature = "mem_copy_fn", issue = "98262")]
 pub const fn copy<T: Copy>(x: &T) -> T {
     *x
@@ -996,7 +996,7 @@ pub const fn copy<T: Copy>(x: &T) -> T {
 /// // The contents of 'foo_array' should not have changed
 /// assert_eq!(foo_array, [10]);
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[track_caller]
 #[stable(feature = "rust1", since = "1.0.0")]

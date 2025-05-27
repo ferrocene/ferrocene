@@ -91,7 +91,7 @@ impl<T: Sized> NonNull<T> {
     /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
     #[unstable(feature = "nonnull_provenance", issue = "135243")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn without_provenance(addr: NonZero<usize>) -> Self {
         let pointer = crate::ptr::without_provenance(addr.get());
         // SAFETY: we know `addr` is non-zero.
@@ -120,7 +120,7 @@ impl<T: Sized> NonNull<T> {
     #[stable(feature = "nonnull", since = "1.25.0")]
     #[rustc_const_stable(feature = "const_nonnull_dangling", since = "1.36.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn dangling() -> Self {
         let align = crate::ptr::Alignment::of::<T>();
         NonNull::without_provenance(align.as_nonzero())
@@ -133,7 +133,7 @@ impl<T: Sized> NonNull<T> {
     ///
     /// This is an [Exposed Provenance][crate::ptr#exposed-provenance] API.
     #[unstable(feature = "nonnull_provenance", issue = "135243")]
-    #[inline]
+    #[inline(never)]
     pub fn with_exposed_provenance(addr: NonZero<usize>) -> Self {
         // SAFETY: we know `addr` is non-zero.
         unsafe {
@@ -156,7 +156,7 @@ impl<T: Sized> NonNull<T> {
     /// the pointer is [convertible to a reference](crate::ptr#pointer-to-reference-conversion).
     /// Note that because the created reference is to `MaybeUninit<T>`, the
     /// source pointer can point to uninitialized memory.
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
     pub const unsafe fn as_uninit_ref<'a>(self) -> &'a MaybeUninit<T> {
@@ -179,7 +179,7 @@ impl<T: Sized> NonNull<T> {
     /// the pointer is [convertible to a reference](crate::ptr#pointer-to-reference-conversion).
     /// Note that because the created reference is to `MaybeUninit<T>`, the
     /// source pointer can point to uninitialized memory.
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
     pub const unsafe fn as_uninit_mut<'a>(self) -> &'a mut MaybeUninit<T> {
@@ -215,7 +215,7 @@ impl<T: ?Sized> NonNull<T> {
     /// ```
     #[stable(feature = "nonnull", since = "1.25.0")]
     #[rustc_const_stable(feature = "const_nonnull_new_unchecked", since = "1.25.0")]
-    #[inline]
+    #[inline(never)]
     pub const unsafe fn new_unchecked(ptr: *mut T) -> Self {
         // SAFETY: the caller must guarantee that `ptr` is non-null.
         unsafe {
@@ -251,7 +251,7 @@ impl<T: ?Sized> NonNull<T> {
     /// ```
     #[stable(feature = "nonnull", since = "1.25.0")]
     #[rustc_const_stable(feature = "const_nonnull_new", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn new(ptr: *mut T) -> Option<Self> {
         if !ptr.is_null() {
             // SAFETY: The pointer is already checked and is not null
@@ -263,7 +263,7 @@ impl<T: ?Sized> NonNull<T> {
 
     /// Converts a reference to a `NonNull` pointer.
     #[unstable(feature = "non_null_from_ref", issue = "130823")]
-    #[inline]
+    #[inline(never)]
     pub const fn from_ref(r: &T) -> Self {
         // SAFETY: A reference cannot be null.
         unsafe { NonNull { pointer: r as *const T } }
@@ -271,7 +271,7 @@ impl<T: ?Sized> NonNull<T> {
 
     /// Converts a mutable reference to a `NonNull` pointer.
     #[unstable(feature = "non_null_from_ref", issue = "130823")]
-    #[inline]
+    #[inline(never)]
     pub const fn from_mut(r: &mut T) -> Self {
         // SAFETY: A mutable reference cannot be null.
         unsafe { NonNull { pointer: r as *mut T } }
@@ -284,7 +284,7 @@ impl<T: ?Sized> NonNull<T> {
     ///
     /// [`std::ptr::from_raw_parts`]: crate::ptr::from_raw_parts
     #[unstable(feature = "ptr_metadata", issue = "81513")]
-    #[inline]
+    #[inline(never)]
     pub const fn from_raw_parts(
         data_pointer: NonNull<impl super::Thin>,
         metadata: <T as super::Pointee>::Metadata,
@@ -301,7 +301,7 @@ impl<T: ?Sized> NonNull<T> {
     #[unstable(feature = "ptr_metadata", issue = "81513")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     pub const fn to_raw_parts(self) -> (NonNull<()>, <T as super::Pointee>::Metadata) {
         (self.cast(), super::metadata(self.as_ptr()))
     }
@@ -312,7 +312,7 @@ impl<T: ?Sized> NonNull<T> {
     ///
     /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
     pub fn addr(self) -> NonZero<usize> {
         // SAFETY: The pointer is guaranteed by the type to be non-null,
@@ -340,7 +340,7 @@ impl<T: ?Sized> NonNull<T> {
     ///
     /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
     pub fn with_addr(self, addr: NonZero<usize>) -> Self {
         // SAFETY: The result of `ptr::from::with_addr` is non-null because `addr` is guaranteed to be non-zero.
@@ -354,7 +354,7 @@ impl<T: ?Sized> NonNull<T> {
     ///
     /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
     pub fn map_addr(self, f: impl FnOnce(NonZero<usize>) -> NonZero<usize>) -> Self {
         self.with_addr(f(self.addr()))
@@ -482,7 +482,7 @@ impl<T: ?Sized> NonNull<T> {
     #[rustc_const_stable(feature = "const_nonnull_cast", since = "1.36.0")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     pub const fn cast<U>(self) -> NonNull<U> {
         // SAFETY: `self` is a `NonNull` pointer which is necessarily non-null
         unsafe { NonNull { pointer: self.as_ptr() as *mut U } }
@@ -807,7 +807,7 @@ impl<T: ?Sized> NonNull<T> {
     ///
     /// let one = unsafe { ptr2_other.offset_from(ptr2) }; // Undefined Behavior! ⚠️
     /// ```
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
@@ -898,7 +898,7 @@ impl<T: ?Sized> NonNull<T> {
     /// // This would be incorrect, as the pointers are not correctly ordered:
     /// // ptr1.offset_from_unsigned(ptr2)
     /// ```
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "ptr_sub_ptr", since = "1.87.0")]
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
@@ -935,7 +935,7 @@ impl<T: ?Sized> NonNull<T> {
     /// See [`ptr::read`] for safety concerns and examples.
     ///
     /// [`ptr::read`]: crate::ptr::read()
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
@@ -957,7 +957,7 @@ impl<T: ?Sized> NonNull<T> {
     /// See [`ptr::read_volatile`] for safety concerns and examples.
     ///
     /// [`ptr::read_volatile`]: crate::ptr::read_volatile()
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     pub unsafe fn read_volatile(self) -> T
@@ -976,7 +976,7 @@ impl<T: ?Sized> NonNull<T> {
     /// See [`ptr::read_unaligned`] for safety concerns and examples.
     ///
     /// [`ptr::read_unaligned`]: crate::ptr::read_unaligned()
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
@@ -1239,7 +1239,7 @@ impl<T: ?Sized> NonNull<T> {
     /// }
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     pub fn align_offset(self, align: usize) -> usize
@@ -1273,7 +1273,7 @@ impl<T: ?Sized> NonNull<T> {
     /// assert!(ptr.is_aligned());
     /// assert!(!NonNull::new(ptr.as_ptr().wrapping_byte_add(1)).unwrap().is_aligned());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "pointer_is_aligned", since = "1.79.0")]
     pub fn is_aligned(self) -> bool
@@ -1313,7 +1313,7 @@ impl<T: ?Sized> NonNull<T> {
     ///
     /// assert_ne!(ptr.is_aligned_to(8), ptr.wrapping_add(1).is_aligned_to(8));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "pointer_is_aligned_to", issue = "96284")]
     pub fn is_aligned_to(self, align: usize) -> bool {
@@ -1346,7 +1346,7 @@ impl<T> NonNull<[T]> {
     #[stable(feature = "nonnull_slice_from_raw_parts", since = "1.70.0")]
     #[rustc_const_stable(feature = "const_slice_from_raw_parts_mut", since = "1.83.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn slice_from_raw_parts(data: NonNull<T>, len: usize) -> Self {
         // SAFETY: `data` is a `NonNull` pointer which is necessarily non-null
         unsafe { Self::new_unchecked(super::slice_from_raw_parts_mut(data.as_ptr(), len)) }
@@ -1370,7 +1370,7 @@ impl<T> NonNull<[T]> {
     #[stable(feature = "slice_ptr_len_nonnull", since = "1.63.0")]
     #[rustc_const_stable(feature = "const_slice_ptr_len_nonnull", since = "1.63.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn len(self) -> usize {
         self.as_ptr().len()
     }
@@ -1388,7 +1388,7 @@ impl<T> NonNull<[T]> {
     #[stable(feature = "slice_ptr_is_empty_nonnull", since = "1.79.0")]
     #[rustc_const_stable(feature = "const_slice_ptr_is_empty_nonnull", since = "1.79.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn is_empty(self) -> bool {
         self.len() == 0
     }
@@ -1404,7 +1404,7 @@ impl<T> NonNull<[T]> {
     /// let slice: NonNull<[i8]> = NonNull::slice_from_raw_parts(NonNull::dangling(), 3);
     /// assert_eq!(slice.as_non_null_ptr(), NonNull::<i8>::dangling());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
     pub const fn as_non_null_ptr(self) -> NonNull<T> {
@@ -1422,7 +1422,7 @@ impl<T> NonNull<[T]> {
     /// let slice: NonNull<[i8]> = NonNull::slice_from_raw_parts(NonNull::dangling(), 3);
     /// assert_eq!(slice.as_mut_ptr(), NonNull::<i8>::dangling().as_ptr());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
     #[rustc_never_returns_null_ptr]
@@ -1467,7 +1467,7 @@ impl<T> NonNull<[T]> {
     /// See also [`slice::from_raw_parts`].
     ///
     /// [valid]: crate::ptr#safety
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
     pub const unsafe fn as_uninit_slice<'a>(self) -> &'a [MaybeUninit<T>] {
@@ -1531,7 +1531,7 @@ impl<T> NonNull<[T]> {
     /// # unsafe { Global.deallocate(memory.cast(), Layout::new::<[u8; 32]>()); }
     /// # Ok::<_, std::alloc::AllocError>(())
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
     pub const unsafe fn as_uninit_slice_mut<'a>(self) -> &'a mut [MaybeUninit<T>] {
@@ -1561,7 +1561,7 @@ impl<T> NonNull<[T]> {
     /// }
     /// ```
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn get_unchecked_mut<I>(self, index: I) -> NonNull<I::Output>
     where
         I: SliceIndex<[T]>,
@@ -1614,7 +1614,7 @@ impl<T: ?Sized> Eq for NonNull<T> {}
 
 #[stable(feature = "nonnull", since = "1.25.0")]
 impl<T: ?Sized> PartialEq for NonNull<T> {
-    #[inline]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn eq(&self, other: &Self) -> bool {
         self.as_ptr() == other.as_ptr()
@@ -1623,7 +1623,7 @@ impl<T: ?Sized> PartialEq for NonNull<T> {
 
 #[stable(feature = "nonnull", since = "1.25.0")]
 impl<T: ?Sized> Ord for NonNull<T> {
-    #[inline]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn cmp(&self, other: &Self) -> Ordering {
         self.as_ptr().cmp(&other.as_ptr())
@@ -1632,7 +1632,7 @@ impl<T: ?Sized> Ord for NonNull<T> {
 
 #[stable(feature = "nonnull", since = "1.25.0")]
 impl<T: ?Sized> PartialOrd for NonNull<T> {
-    #[inline]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.as_ptr().partial_cmp(&other.as_ptr())
@@ -1641,7 +1641,7 @@ impl<T: ?Sized> PartialOrd for NonNull<T> {
 
 #[stable(feature = "nonnull", since = "1.25.0")]
 impl<T: ?Sized> hash::Hash for NonNull<T> {
-    #[inline]
+    #[inline(never)]
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
         self.as_ptr().hash(state)
     }
@@ -1649,7 +1649,7 @@ impl<T: ?Sized> hash::Hash for NonNull<T> {
 
 #[unstable(feature = "ptr_internals", issue = "none")]
 impl<T: ?Sized> From<Unique<T>> for NonNull<T> {
-    #[inline]
+    #[inline(never)]
     fn from(unique: Unique<T>) -> Self {
         unique.as_non_null_ptr()
     }
@@ -1660,7 +1660,7 @@ impl<T: ?Sized> From<&mut T> for NonNull<T> {
     /// Converts a `&mut T` to a `NonNull<T>`.
     ///
     /// This conversion is safe and infallible since references cannot be null.
-    #[inline]
+    #[inline(never)]
     fn from(r: &mut T) -> Self {
         NonNull::from_mut(r)
     }
@@ -1671,7 +1671,7 @@ impl<T: ?Sized> From<&T> for NonNull<T> {
     /// Converts a `&T` to a `NonNull<T>`.
     ///
     /// This conversion is safe and infallible since references cannot be null.
-    #[inline]
+    #[inline(never)]
     fn from(r: &T) -> Self {
         NonNull::from_ref(r)
     }

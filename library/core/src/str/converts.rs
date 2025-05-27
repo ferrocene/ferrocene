@@ -164,7 +164,7 @@ pub const fn from_utf8_mut(v: &mut [u8]) -> Result<&mut str, Utf8Error> {
 ///
 /// assert_eq!("💖", sparkle_heart);
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_str_from_utf8_unchecked", since = "1.55.0")]
@@ -192,7 +192,7 @@ pub const unsafe fn from_utf8_unchecked(v: &[u8]) -> &str {
 ///
 /// assert_eq!("💖", heart);
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "str_mut_extras", since = "1.20.0")]
 #[rustc_const_stable(feature = "const_str_from_utf8_unchecked_mut", since = "1.83.0")]
@@ -215,7 +215,7 @@ pub const unsafe fn from_utf8_unchecked_mut(v: &mut [u8]) -> &mut str {
 /// See that function's documentation for safety concerns and examples.
 ///
 /// The mutable version of this function is [`from_raw_parts_mut`].
-#[inline]
+#[inline(never)]
 #[must_use]
 #[unstable(feature = "str_from_raw_parts", issue = "119206")]
 pub const unsafe fn from_raw_parts<'a>(ptr: *const u8, len: usize) -> &'a str {
@@ -233,7 +233,7 @@ pub const unsafe fn from_raw_parts<'a>(ptr: *const u8, len: usize) -> &'a str {
 /// See that function's documentation for safety concerns and examples.
 ///
 /// The immutable version of this function is [`from_raw_parts`].
-#[inline]
+#[inline(never)]
 #[must_use]
 #[unstable(feature = "str_from_raw_parts", issue = "119206")]
 pub const unsafe fn from_raw_parts_mut<'a>(ptr: *mut u8, len: usize) -> &'a mut str {

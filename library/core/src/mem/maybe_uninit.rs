@@ -372,7 +372,7 @@ impl<T> MaybeUninit<T> {
     /// // Inside a pair, we create a `NotZero` that does not have a valid discriminant.
     /// // This is undefined behavior. ⚠️
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[rustc_diagnostic_item = "maybe_uninit_zeroed"]
     #[stable(feature = "maybe_uninit", since = "1.36.0")]
@@ -1554,7 +1554,7 @@ impl<T, const N: usize> MaybeUninit<[T; N]> {
     /// let data: [MaybeUninit<u8>; 1000] = MaybeUninit::uninit().transpose();
     /// ```
     #[unstable(feature = "maybe_uninit_uninit_array_transpose", issue = "96097")]
-    #[inline]
+    #[inline(never)]
     pub const fn transpose(self) -> [MaybeUninit<T>; N] {
         // SAFETY: T and MaybeUninit<T> have the same layout
         unsafe { intrinsics::transmute_unchecked(self) }
@@ -1574,7 +1574,7 @@ impl<T, const N: usize> [MaybeUninit<T>; N] {
     /// let data: MaybeUninit<[u8; 1000]> = data.transpose();
     /// ```
     #[unstable(feature = "maybe_uninit_uninit_array_transpose", issue = "96097")]
-    #[inline]
+    #[inline(never)]
     pub const fn transpose(self) -> MaybeUninit<[T; N]> {
         // SAFETY: T and MaybeUninit<T> have the same layout
         unsafe { intrinsics::transmute_unchecked(self) }

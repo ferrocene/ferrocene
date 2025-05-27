@@ -136,7 +136,7 @@ impl str {
     #[rustc_diagnostic_item = "str_len"]
     #[cfg_attr(not(bootstrap), rustc_no_implicit_autorefs)]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn len(&self) -> usize {
         self.as_bytes().len()
     }
@@ -156,7 +156,7 @@ impl str {
     #[rustc_const_stable(feature = "const_str_is_empty", since = "1.39.0")]
     #[cfg_attr(not(bootstrap), rustc_no_implicit_autorefs)]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn is_empty(&self) -> bool {
         self.len() == 0
     }
@@ -295,7 +295,7 @@ impl str {
     ///
     /// assert_eq!("💖", sparkle_heart);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "inherent_str_constructors", since = "1.87.0")]
     #[rustc_const_stable(feature = "inherent_str_constructors", since = "1.87.0")]
@@ -320,7 +320,7 @@ impl str {
     ///
     /// assert_eq!("💖", heart);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "inherent_str_constructors", since = "1.87.0")]
     #[rustc_const_stable(feature = "inherent_str_constructors", since = "1.87.0")]
@@ -356,7 +356,7 @@ impl str {
     #[must_use]
     #[stable(feature = "is_char_boundary", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_is_char_boundary", since = "1.86.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn is_char_boundary(&self, index: usize) -> bool {
         // 0 is always ok.
         // Test for 0 explicitly so that it can optimize out the check
@@ -405,7 +405,7 @@ impl str {
     /// assert_eq!(&s[..closest], "❤️🧡");
     /// ```
     #[unstable(feature = "round_char_boundary", issue = "93743")]
-    #[inline]
+    #[inline(never)]
     pub fn floor_char_boundary(&self, index: usize) -> usize {
         if index >= self.len() {
             self.len()
@@ -443,7 +443,7 @@ impl str {
     /// assert_eq!(&s[..closest], "❤️🧡💛");
     /// ```
     #[unstable(feature = "round_char_boundary", issue = "93743")]
-    #[inline]
+    #[inline(never)]
     pub fn ceil_char_boundary(&self, index: usize) -> usize {
         if index > self.len() {
             self.len()
@@ -588,7 +588,7 @@ impl str {
     /// assert!(v.get(..42).is_none());
     /// ```
     #[stable(feature = "str_checked_slicing", since = "1.20.0")]
-    #[inline]
+    #[inline(never)]
     pub fn get<I: SliceIndex<str>>(&self, i: I) -> Option<&I::Output> {
         i.get(self)
     }
@@ -620,7 +620,7 @@ impl str {
     /// assert_eq!("HEllo", v);
     /// ```
     #[stable(feature = "str_checked_slicing", since = "1.20.0")]
-    #[inline]
+    #[inline(never)]
     pub fn get_mut<I: SliceIndex<str>>(&mut self, i: I) -> Option<&mut I::Output> {
         i.get_mut(self)
     }
@@ -652,7 +652,7 @@ impl str {
     /// }
     /// ```
     #[stable(feature = "str_checked_slicing", since = "1.20.0")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn get_unchecked<I: SliceIndex<str>>(&self, i: I) -> &I::Output {
         // SAFETY: the caller must uphold the safety contract for `get_unchecked`;
         // the slice is dereferenceable because `self` is a safe reference.
@@ -687,7 +687,7 @@ impl str {
     /// }
     /// ```
     #[stable(feature = "str_checked_slicing", since = "1.20.0")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn get_unchecked_mut<I: SliceIndex<str>>(&mut self, i: I) -> &mut I::Output {
         // SAFETY: the caller must uphold the safety contract for `get_unchecked_mut`;
         // the slice is dereferenceable because `self` is a safe reference.
@@ -738,7 +738,7 @@ impl str {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(since = "1.29.0", note = "use `get_unchecked(begin..end)` instead")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn slice_unchecked(&self, begin: usize, end: usize) -> &str {
         // SAFETY: the caller must uphold the safety contract for `get_unchecked`;
         // the slice is dereferenceable because `self` is a safe reference.
@@ -772,7 +772,7 @@ impl str {
     /// * `begin` and `end` must lie on UTF-8 sequence boundaries.
     #[stable(feature = "str_slice_mut", since = "1.5.0")]
     #[deprecated(since = "1.29.0", note = "use `get_unchecked_mut(begin..end)` instead")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn slice_mut_unchecked(&mut self, begin: usize, end: usize) -> &mut str {
         // SAFETY: the caller must uphold the safety contract for `get_unchecked_mut`;
         // the slice is dereferenceable because `self` is a safe reference.
@@ -809,7 +809,7 @@ impl str {
     /// assert_eq!("Per", first);
     /// assert_eq!(" Martin-Löf", last);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "str_split_at", since = "1.4.0")]
     #[rustc_const_stable(feature = "const_str_split_at", since = "1.86.0")]
@@ -850,7 +850,7 @@ impl str {
     /// }
     /// assert_eq!("PER Martin-Löf", s);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "str_split_at", since = "1.4.0")]
     #[rustc_const_stable(feature = "const_str_split_at", since = "1.86.0")]
@@ -890,7 +890,7 @@ impl str {
     /// assert_eq!(None, s.split_at_checked(13));  // Inside “ö”
     /// assert_eq!(None, s.split_at_checked(16));  // Beyond the string length
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "split_at_checked", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_str_split_at", since = "1.86.0")]
@@ -931,7 +931,7 @@ impl str {
     /// assert_eq!(None, s.split_at_mut_checked(13));  // Inside “ö”
     /// assert_eq!(None, s.split_at_mut_checked(16));  // Beyond the string length
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "split_at_checked", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_str_split_at", since = "1.86.0")]
@@ -1029,7 +1029,7 @@ impl str {
     /// assert_eq!(None, chars.next());
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     #[rustc_diagnostic_item = "str_chars"]
     pub fn chars(&self) -> Chars<'_> {
         Chars { iter: self.as_bytes().iter() }
@@ -1087,7 +1087,7 @@ impl str {
     /// assert_eq!(None, char_indices.next());
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn char_indices(&self) -> CharIndices<'_> {
         CharIndices { front_offset: 0, iter: self.chars() }
     }
@@ -1110,7 +1110,7 @@ impl str {
     /// assert_eq!(None, bytes.next());
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn bytes(&self) -> Bytes<'_> {
         Bytes(self.as_bytes().iter().copied())
     }
@@ -1162,7 +1162,7 @@ impl str {
                   without modifying the original"]
     #[stable(feature = "split_whitespace", since = "1.1.0")]
     #[rustc_diagnostic_item = "str_split_whitespace"]
-    #[inline]
+    #[inline(never)]
     pub fn split_whitespace(&self) -> SplitWhitespace<'_> {
         SplitWhitespace { inner: self.split(IsWhitespace).filter(IsNotEmpty) }
     }
@@ -1211,7 +1211,7 @@ impl str {
     #[must_use = "this returns the split string as an iterator, \
                   without modifying the original"]
     #[stable(feature = "split_ascii_whitespace", since = "1.34.0")]
-    #[inline]
+    #[inline(never)]
     pub fn split_ascii_whitespace(&self) -> SplitAsciiWhitespace<'_> {
         let inner =
             self.as_bytes().split(IsAsciiWhitespace).filter(BytesIsNotEmpty).map(UnsafeBytesToStr);
@@ -1264,7 +1264,7 @@ impl str {
     /// assert_eq!(None, lines.next());
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn lines(&self) -> Lines<'_> {
         Lines(self.split_inclusive('\n').map(LinesMap))
     }
@@ -1272,7 +1272,7 @@ impl str {
     /// Returns an iterator over the lines of a string.
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(since = "1.4.0", note = "use lines() instead now", suggestion = "lines")]
-    #[inline]
+    #[inline(never)]
     #[allow(deprecated)]
     pub fn lines_any(&self) -> LinesAny<'_> {
         LinesAny(self.lines())
@@ -1318,7 +1318,7 @@ impl str {
     /// assert!(!bananas.contains("apples"));
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn contains<P: Pattern>(&self, pat: P) -> bool {
         pat.is_contained_in(self)
     }
@@ -1432,7 +1432,7 @@ impl str {
     /// assert_eq!(s.find(x), None);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn find<P: Pattern>(&self, pat: P) -> Option<usize> {
         pat.into_searcher(self).next_match().map(|(i, _)| i)
     }
@@ -1478,7 +1478,7 @@ impl str {
     /// assert_eq!(s.rfind(x), None);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn rfind<P: Pattern>(&self, pat: P) -> Option<usize>
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
@@ -1600,7 +1600,7 @@ impl str {
     ///
     /// [`split_whitespace`]: str::split_whitespace
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn split<P: Pattern>(&self, pat: P) -> Split<'_, P> {
         Split(SplitInternal {
             start: 0,
@@ -1641,7 +1641,7 @@ impl str {
     /// assert_eq!(v, ["Mary had a little lamb\n", "little lamb\n", "little lamb.\n"]);
     /// ```
     #[stable(feature = "split_inclusive", since = "1.51.0")]
-    #[inline]
+    #[inline(never)]
     pub fn split_inclusive<P: Pattern>(&self, pat: P) -> SplitInclusive<'_, P> {
         SplitInclusive(SplitInternal {
             start: 0,
@@ -1696,7 +1696,7 @@ impl str {
     /// assert_eq!(v, ["ghi", "def", "abc"]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn rsplit<P: Pattern>(&self, pat: P) -> RSplit<'_, P>
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
@@ -1745,7 +1745,7 @@ impl str {
     /// assert_eq!(v, ["A", "B", "C", "D"]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn split_terminator<P: Pattern>(&self, pat: P) -> SplitTerminator<'_, P> {
         SplitTerminator(SplitInternal { allow_trailing_empty: false, ..self.split(pat).0 })
     }
@@ -1791,7 +1791,7 @@ impl str {
     /// assert_eq!(v, ["D", "C", "B", "A"]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn rsplit_terminator<P: Pattern>(&self, pat: P) -> RSplitTerminator<'_, P>
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
@@ -1846,7 +1846,7 @@ impl str {
     /// assert_eq!(v, ["abc", "defXghi"]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn splitn<P: Pattern>(&self, n: usize, pat: P) -> SplitN<'_, P> {
         SplitN(SplitNInternal { iter: self.split(pat).0, count: n })
     }
@@ -1895,7 +1895,7 @@ impl str {
     /// assert_eq!(v, ["ghi", "abc1def"]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn rsplitn<P: Pattern>(&self, n: usize, pat: P) -> RSplitN<'_, P>
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
@@ -1915,7 +1915,7 @@ impl str {
     /// assert_eq!("cfg=foo=bar".split_once('='), Some(("cfg", "foo=bar")));
     /// ```
     #[stable(feature = "str_split_once", since = "1.52.0")]
-    #[inline]
+    #[inline(never)]
     pub fn split_once<P: Pattern>(&self, delimiter: P) -> Option<(&'_ str, &'_ str)> {
         let (start, end) = delimiter.into_searcher(self).next_match()?;
         // SAFETY: `Searcher` is known to return valid indices.
@@ -1933,7 +1933,7 @@ impl str {
     /// assert_eq!("cfg=foo=bar".rsplit_once('='), Some(("cfg=foo", "bar")));
     /// ```
     #[stable(feature = "str_split_once", since = "1.52.0")]
-    #[inline]
+    #[inline(never)]
     pub fn rsplit_once<P: Pattern>(&self, delimiter: P) -> Option<(&'_ str, &'_ str)>
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
@@ -1973,7 +1973,7 @@ impl str {
     /// assert_eq!(v, ["1", "2", "3"]);
     /// ```
     #[stable(feature = "str_matches", since = "1.2.0")]
-    #[inline]
+    #[inline(never)]
     pub fn matches<P: Pattern>(&self, pat: P) -> Matches<'_, P> {
         Matches(MatchesInternal(pat.into_searcher(self)))
     }
@@ -2007,7 +2007,7 @@ impl str {
     /// assert_eq!(v, ["3", "2", "1"]);
     /// ```
     #[stable(feature = "str_matches", since = "1.2.0")]
-    #[inline]
+    #[inline(never)]
     pub fn rmatches<P: Pattern>(&self, pat: P) -> RMatches<'_, P>
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
@@ -2051,7 +2051,7 @@ impl str {
     /// assert_eq!(v, [(0, "aba")]); // only the first `aba`
     /// ```
     #[stable(feature = "str_match_indices", since = "1.5.0")]
-    #[inline]
+    #[inline(never)]
     pub fn match_indices<P: Pattern>(&self, pat: P) -> MatchIndices<'_, P> {
         MatchIndices(MatchIndicesInternal(pat.into_searcher(self)))
     }
@@ -2091,7 +2091,7 @@ impl str {
     /// assert_eq!(v, [(2, "aba")]); // only the last `aba`
     /// ```
     #[stable(feature = "str_match_indices", since = "1.5.0")]
-    #[inline]
+    #[inline(never)]
     pub fn rmatch_indices<P: Pattern>(&self, pat: P) -> RMatchIndices<'_, P>
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
@@ -2111,7 +2111,7 @@ impl str {
     ///
     /// assert_eq!("Hello\tworld", s.trim());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use = "this returns the trimmed string as a slice, \
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -2150,7 +2150,7 @@ impl str {
     /// let s = "  עברית  ";
     /// assert!(Some('ע') == s.trim_start().chars().next());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use = "this returns the trimmed string as a new slice, \
                   without modifying the original"]
     #[stable(feature = "trim_direction", since = "1.30.0")]
@@ -2189,7 +2189,7 @@ impl str {
     /// let s = "  עברית  ";
     /// assert!(Some('ת') == s.trim_end().chars().rev().next());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use = "this returns the trimmed string as a new slice, \
                   without modifying the original"]
     #[stable(feature = "trim_direction", since = "1.30.0")]
@@ -2231,7 +2231,7 @@ impl str {
     /// ```
     #[must_use = "this returns the trimmed string as a new slice, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(since = "1.33.0", note = "superseded by `trim_start`", suggestion = "trim_start")]
     pub fn trim_left(&self) -> &str {
@@ -2271,7 +2271,7 @@ impl str {
     /// ```
     #[must_use = "this returns the trimmed string as a new slice, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(since = "1.33.0", note = "superseded by `trim_end`", suggestion = "trim_end")]
     pub fn trim_right(&self) -> &str {
@@ -2596,7 +2596,7 @@ impl str {
     ///
     /// assert!(nope.is_err());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn parse<F: FromStr>(&self) -> Result<F, F::Err> {
         FromStr::from_str(self)
@@ -2616,7 +2616,7 @@ impl str {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_slice_is_ascii", since = "1.74.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn is_ascii(&self) -> bool {
         // We can treat each byte as character here: all multibyte characters
         // start with a byte that is not in the ASCII range, so we will stop
@@ -2628,7 +2628,7 @@ impl str {
     /// of [ASCII characters](`ascii::Char`), otherwise returns `None`.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn as_ascii(&self) -> Option<&[ascii::Char]> {
         // Like in `is_ascii`, we can work on the bytes directly.
         self.as_bytes().as_ascii()
@@ -2649,7 +2649,7 @@ impl str {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_unstable(feature = "const_eq_ignore_ascii_case", issue = "131719")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn eq_ignore_ascii_case(&self, other: &str) -> bool {
         self.as_bytes().eq_ignore_ascii_case(other.as_bytes())
     }
@@ -2675,7 +2675,7 @@ impl str {
     /// ```
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_make_ascii", since = "1.84.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn make_ascii_uppercase(&mut self) {
         // SAFETY: changing ASCII letters only does not invalidate UTF-8.
         let me = unsafe { self.as_bytes_mut() };
@@ -2703,7 +2703,7 @@ impl str {
     /// ```
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_make_ascii", since = "1.84.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn make_ascii_lowercase(&mut self) {
         // SAFETY: changing ASCII letters only does not invalidate UTF-8.
         let me = unsafe { self.as_bytes_mut() };
@@ -2728,7 +2728,7 @@ impl str {
                   without modifying the original"]
     #[stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[rustc_const_stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn trim_ascii_start(&self) -> &str {
         // SAFETY: Removing ASCII characters from a `&str` does not invalidate
         // UTF-8.
@@ -2753,7 +2753,7 @@ impl str {
                   without modifying the original"]
     #[stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[rustc_const_stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn trim_ascii_end(&self) -> &str {
         // SAFETY: Removing ASCII characters from a `&str` does not invalidate
         // UTF-8.
@@ -2779,7 +2779,7 @@ impl str {
                   without modifying the original"]
     #[stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[rustc_const_stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn trim_ascii(&self) -> &str {
         // SAFETY: Removing ASCII characters from a `&str` does not invalidate
         // UTF-8.
@@ -2949,7 +2949,7 @@ impl str {
     /// This method is redundant when used directly on `&str`, but
     /// it helps dereferencing other string-like types to string slices,
     /// for example references to `Box<str>` or `Arc<str>`.
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "str_as_str", issue = "130366")]
     pub fn as_str(&self) -> &str {
         self
@@ -2958,7 +2958,7 @@ impl str {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl AsRef<[u8]> for str {
-    #[inline]
+    #[inline(never)]
     fn as_ref(&self) -> &[u8] {
         self.as_bytes()
     }
@@ -2967,7 +2967,7 @@ impl AsRef<[u8]> for str {
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Default for &str {
     /// Creates an empty str
-    #[inline]
+    #[inline(never)]
     fn default() -> Self {
         ""
     }
@@ -2976,7 +2976,7 @@ impl Default for &str {
 #[stable(feature = "default_mut_str", since = "1.28.0")]
 impl Default for &mut str {
     /// Creates an empty mutable str
-    #[inline]
+    #[inline(never)]
     fn default() -> Self {
         // SAFETY: The empty string is valid UTF-8.
         unsafe { from_utf8_unchecked_mut(&mut []) }

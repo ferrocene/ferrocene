@@ -81,7 +81,7 @@ pub use raw::{from_raw_parts, from_raw_parts_mut};
 /// This is a helper function for `split_off` and `split_off_mut` that returns
 /// the direction of the split (front or back) as well as the index at
 /// which to split. Returns `None` if the split index would overflow.
-#[inline]
+#[inline(never)]
 fn split_point_of(range: impl OneSidedRange<usize>) -> Option<(Direction, usize)> {
     use OneSidedRangeBound::{End, EndInclusive, StartInclusive};
 
@@ -110,7 +110,7 @@ impl<T> [T] {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_slice_len", since = "1.39.0")]
     #[cfg_attr(not(bootstrap), rustc_no_implicit_autorefs)]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn len(&self) -> usize {
         ptr::metadata(self)
@@ -130,7 +130,7 @@ impl<T> [T] {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_slice_is_empty", since = "1.39.0")]
     #[cfg_attr(not(bootstrap), rustc_no_implicit_autorefs)]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn is_empty(&self) -> bool {
         self.len() == 0
@@ -149,7 +149,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_slice_first_last_not_mut", since = "1.56.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn first(&self) -> Option<&T> {
         if let [first, ..] = self { Some(first) } else { None }
@@ -172,7 +172,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_slice_first_last", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn first_mut(&mut self) -> Option<&mut T> {
         if let [first, ..] = self { Some(first) } else { None }
@@ -192,7 +192,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_splits", since = "1.5.0")]
     #[rustc_const_stable(feature = "const_slice_first_last_not_mut", since = "1.56.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn split_first(&self) -> Option<(&T, &[T])> {
         if let [first, tail @ ..] = self { Some((first, tail)) } else { None }
@@ -214,7 +214,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_splits", since = "1.5.0")]
     #[rustc_const_stable(feature = "const_slice_first_last", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn split_first_mut(&mut self) -> Option<(&mut T, &mut [T])> {
         if let [first, tail @ ..] = self { Some((first, tail)) } else { None }
@@ -234,7 +234,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_splits", since = "1.5.0")]
     #[rustc_const_stable(feature = "const_slice_first_last_not_mut", since = "1.56.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn split_last(&self) -> Option<(&T, &[T])> {
         if let [init @ .., last] = self { Some((last, init)) } else { None }
@@ -256,7 +256,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_splits", since = "1.5.0")]
     #[rustc_const_stable(feature = "const_slice_first_last", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn split_last_mut(&mut self) -> Option<(&mut T, &mut [T])> {
         if let [init @ .., last] = self { Some((last, init)) } else { None }
@@ -275,7 +275,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_slice_first_last_not_mut", since = "1.56.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn last(&self) -> Option<&T> {
         if let [.., last] = self { Some(last) } else { None }
@@ -298,7 +298,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_slice_first_last", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn last_mut(&mut self) -> Option<&mut T> {
         if let [.., last] = self { Some(last) } else { None }
@@ -320,7 +320,7 @@ impl<T> [T] {
     /// let w: &[i32] = &[];
     /// assert_eq!(Some(&[]), w.first_chunk::<0>());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     pub const fn first_chunk<const N: usize>(&self) -> Option<&[T; N]> {
@@ -350,7 +350,7 @@ impl<T> [T] {
     ///
     /// assert_eq!(None, x.first_chunk_mut::<4>());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "const_slice_first_last_chunk", since = "1.83.0")]
     pub const fn first_chunk_mut<const N: usize>(&mut self) -> Option<&mut [T; N]> {
@@ -380,7 +380,7 @@ impl<T> [T] {
     ///
     /// assert_eq!(None, x.split_first_chunk::<4>());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     pub const fn split_first_chunk<const N: usize>(&self) -> Option<(&[T; N], &[T])> {
@@ -410,7 +410,7 @@ impl<T> [T] {
     ///
     /// assert_eq!(None, x.split_first_chunk_mut::<4>());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "const_slice_first_last_chunk", since = "1.83.0")]
     pub const fn split_first_chunk_mut<const N: usize>(
@@ -440,7 +440,7 @@ impl<T> [T] {
     ///
     /// assert_eq!(None, x.split_last_chunk::<4>());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     pub const fn split_last_chunk<const N: usize>(&self) -> Option<(&[T], &[T; N])> {
@@ -471,7 +471,7 @@ impl<T> [T] {
     ///
     /// assert_eq!(None, x.split_last_chunk_mut::<4>());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "const_slice_first_last_chunk", since = "1.83.0")]
     pub const fn split_last_chunk_mut<const N: usize>(
@@ -502,7 +502,7 @@ impl<T> [T] {
     /// let w: &[i32] = &[];
     /// assert_eq!(Some(&[]), w.last_chunk::<0>());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "const_slice_last_chunk", since = "1.80.0")]
     pub const fn last_chunk<const N: usize>(&self) -> Option<&[T; N]> {
@@ -532,7 +532,7 @@ impl<T> [T] {
     ///
     /// assert_eq!(None, x.last_chunk_mut::<4>());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "const_slice_first_last_chunk", since = "1.83.0")]
     pub const fn last_chunk_mut<const N: usize>(&mut self) -> Option<&mut [T; N]> {
@@ -565,7 +565,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg_attr(not(bootstrap), rustc_no_implicit_autorefs)]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub fn get<I>(&self, index: I) -> Option<&I::Output>
     where
@@ -591,7 +591,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg_attr(not(bootstrap), rustc_no_implicit_autorefs)]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub fn get_mut<I>(&mut self, index: I) -> Option<&mut I::Output>
     where
@@ -629,7 +629,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg_attr(not(bootstrap), rustc_no_implicit_autorefs)]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub unsafe fn get_unchecked<I>(&self, index: I) -> &I::Output
     where
@@ -672,7 +672,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg_attr(not(bootstrap), rustc_no_implicit_autorefs)]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub unsafe fn get_unchecked_mut<I>(&mut self, index: I) -> &mut I::Output
     where
@@ -781,7 +781,7 @@ impl<T> [T] {
     /// [`as_ptr`]: slice::as_ptr
     #[stable(feature = "slice_ptr_range", since = "1.48.0")]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn as_ptr_range(&self) -> Range<*const T> {
         let start = self.as_ptr();
@@ -824,7 +824,7 @@ impl<T> [T] {
     /// [`as_mut_ptr`]: slice::as_mut_ptr
     #[stable(feature = "slice_ptr_range", since = "1.48.0")]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn as_mut_ptr_range(&mut self) -> Range<*mut T> {
         let start = self.as_mut_ptr();
@@ -837,7 +837,7 @@ impl<T> [T] {
     ///
     /// If `N` is not exactly equal to the length of `self`, then this method returns `None`.
     #[unstable(feature = "slice_as_array", issue = "133508")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn as_array<const N: usize>(&self) -> Option<&[T; N]> {
         if self.len() == N {
@@ -855,7 +855,7 @@ impl<T> [T] {
     ///
     /// If `N` is not exactly equal to the length of `self`, then this method returns `None`.
     #[unstable(feature = "slice_as_array", issue = "133508")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn as_mut_array<const N: usize>(&mut self) -> Option<&mut [T; N]> {
         if self.len() == N {
@@ -891,7 +891,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_swap", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub const fn swap(&mut self, a: usize, b: usize) {
         // FIXME: use swap_unchecked here (https://github.com/rust-lang/rust/pull/88540#issuecomment-944344343)
@@ -964,7 +964,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_slice_reverse", issue = "135120")]
-    #[inline]
+    #[inline(never)]
     pub const fn reverse(&mut self) {
         let half_len = self.len() / 2;
         let Range { start, end } = self.as_mut_ptr_range();
@@ -987,7 +987,7 @@ impl<T> [T] {
         // knows that they're disjoint, unlike in the original slice.
         revswap(front_half, back_half, half_len);
 
-        #[inline]
+        #[inline(never)]
         const fn revswap<T>(a: &mut [T], b: &mut [T], n: usize) {
             debug_assert!(a.len() == n);
             debug_assert!(b.len() == n);
@@ -1024,7 +1024,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
-    #[inline]
+    #[inline(never)]
     #[rustc_diagnostic_item = "slice_iter"]
     pub const fn iter(&self) -> Iter<'_, T> {
         Iter::new(self)
@@ -1045,7 +1045,7 @@ impl<T> [T] {
     /// ```
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn iter_mut(&mut self) -> IterMut<'_, T> {
         IterMut::new(self)
     }
@@ -1099,7 +1099,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub const fn windows(&self, size: usize) -> Windows<'_, T> {
         let size = NonZero::new(size).expect("window size must be non-zero");
@@ -1135,7 +1135,7 @@ impl<T> [T] {
     /// [`rchunks`]: slice::rchunks
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub const fn chunks(&self, chunk_size: usize) -> Chunks<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
@@ -1175,7 +1175,7 @@ impl<T> [T] {
     /// [`rchunks_mut`]: slice::rchunks_mut
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub const fn chunks_mut(&mut self, chunk_size: usize) -> ChunksMut<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
@@ -1214,7 +1214,7 @@ impl<T> [T] {
     /// [`rchunks_exact`]: slice::rchunks_exact
     #[stable(feature = "chunks_exact", since = "1.31.0")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub const fn chunks_exact(&self, chunk_size: usize) -> ChunksExact<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
@@ -1258,7 +1258,7 @@ impl<T> [T] {
     /// [`rchunks_exact_mut`]: slice::rchunks_exact_mut
     #[stable(feature = "chunks_exact", since = "1.31.0")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub const fn chunks_exact_mut(&mut self, chunk_size: usize) -> ChunksExactMut<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
@@ -1305,7 +1305,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_as_chunks", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_const_stable(feature = "slice_as_chunks", since = "CURRENT_RUSTC_VERSION")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const unsafe fn as_chunks_unchecked<const N: usize>(&self) -> &[[T; N]] {
         assert_unsafe_precondition!(
@@ -1362,7 +1362,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_as_chunks", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_const_stable(feature = "slice_as_chunks", since = "CURRENT_RUSTC_VERSION")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     #[must_use]
     pub const fn as_chunks<const N: usize>(&self) -> (&[[T; N]], &[T]) {
@@ -1409,7 +1409,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_as_chunks", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_const_stable(feature = "slice_as_chunks", since = "CURRENT_RUSTC_VERSION")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     #[must_use]
     pub const fn as_rchunks<const N: usize>(&self) -> (&[T], &[[T; N]]) {
@@ -1451,7 +1451,7 @@ impl<T> [T] {
     /// [`chunks_exact`]: slice::chunks_exact
     #[unstable(feature = "array_chunks", issue = "74985")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub const fn array_chunks<const N: usize>(&self) -> ArrayChunks<'_, T, N> {
         assert!(N != 0, "chunk size must be non-zero");
@@ -1500,7 +1500,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_as_chunks", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_const_stable(feature = "slice_as_chunks", since = "CURRENT_RUSTC_VERSION")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const unsafe fn as_chunks_unchecked_mut<const N: usize>(&mut self) -> &mut [[T; N]] {
         assert_unsafe_precondition!(
@@ -1553,7 +1553,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_as_chunks", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_const_stable(feature = "slice_as_chunks", since = "CURRENT_RUSTC_VERSION")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     #[must_use]
     pub const fn as_chunks_mut<const N: usize>(&mut self) -> (&mut [[T; N]], &mut [T]) {
@@ -1606,7 +1606,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_as_chunks", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_const_stable(feature = "slice_as_chunks", since = "CURRENT_RUSTC_VERSION")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     #[must_use]
     pub const fn as_rchunks_mut<const N: usize>(&mut self) -> (&mut [T], &mut [[T; N]]) {
@@ -1650,7 +1650,7 @@ impl<T> [T] {
     /// [`chunks_exact_mut`]: slice::chunks_exact_mut
     #[unstable(feature = "array_chunks", issue = "74985")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub const fn array_chunks_mut<const N: usize>(&mut self) -> ArrayChunksMut<'_, T, N> {
         assert!(N != 0, "chunk size must be non-zero");
@@ -1684,7 +1684,7 @@ impl<T> [T] {
     /// [`windows`]: slice::windows
     #[unstable(feature = "array_windows", issue = "75027")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub const fn array_windows<const N: usize>(&self) -> ArrayWindows<'_, T, N> {
         assert!(N != 0, "window size must be non-zero");
@@ -1720,7 +1720,7 @@ impl<T> [T] {
     /// [`chunks`]: slice::chunks
     #[stable(feature = "rchunks", since = "1.31.0")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub const fn rchunks(&self, chunk_size: usize) -> RChunks<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
@@ -1760,7 +1760,7 @@ impl<T> [T] {
     /// [`chunks_mut`]: slice::chunks_mut
     #[stable(feature = "rchunks", since = "1.31.0")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub const fn rchunks_mut(&mut self, chunk_size: usize) -> RChunksMut<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
@@ -1801,7 +1801,7 @@ impl<T> [T] {
     /// [`chunks_exact`]: slice::chunks_exact
     #[stable(feature = "rchunks", since = "1.31.0")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub const fn rchunks_exact(&self, chunk_size: usize) -> RChunksExact<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
@@ -1846,7 +1846,7 @@ impl<T> [T] {
     /// [`chunks_exact_mut`]: slice::chunks_exact_mut
     #[stable(feature = "rchunks", since = "1.31.0")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub const fn rchunks_exact_mut(&mut self, chunk_size: usize) -> RChunksExactMut<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
@@ -1887,7 +1887,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_group_by", since = "1.77.0")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
-    #[inline]
+    #[inline(never)]
     pub const fn chunk_by<F>(&self, pred: F) -> ChunkBy<'_, T, F>
     where
         F: FnMut(&T, &T) -> bool,
@@ -1929,7 +1929,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_group_by", since = "1.77.0")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
-    #[inline]
+    #[inline(never)]
     pub const fn chunk_by_mut<F>(&mut self, pred: F) -> ChunkByMut<'_, T, F>
     where
         F: FnMut(&T, &T) -> bool,
@@ -1973,7 +1973,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_slice_split_at_not_mut", since = "1.71.0")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     #[must_use]
     pub const fn split_at(&self, mid: usize) -> (&[T], &[T]) {
@@ -2006,7 +2006,7 @@ impl<T> [T] {
     /// assert_eq!(v, [1, 2, 3, 4, 5, 6]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     #[must_use]
     #[rustc_const_stable(feature = "const_slice_split_at_mut", since = "1.83.0")]
@@ -2059,7 +2059,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_split_at_unchecked", since = "1.79.0")]
     #[rustc_const_stable(feature = "const_slice_split_at_unchecked", since = "1.77.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const unsafe fn split_at_unchecked(&self, mid: usize) -> (&[T], &[T]) {
         // FIXME(const-hack): the const function `from_raw_parts` is used to make this
@@ -2112,7 +2112,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_split_at_unchecked", since = "1.79.0")]
     #[rustc_const_stable(feature = "const_slice_split_at_mut", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const unsafe fn split_at_mut_unchecked(&mut self, mid: usize) -> (&mut [T], &mut [T]) {
         let len = self.len();
@@ -2173,7 +2173,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "split_at_checked", since = "1.80.0")]
     #[rustc_const_stable(feature = "split_at_checked", since = "1.80.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn split_at_checked(&self, mid: usize) -> Option<(&[T], &[T])> {
         if mid <= self.len() {
@@ -2212,7 +2212,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "split_at_checked", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_slice_split_at_mut", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn split_at_mut_checked(&mut self, mid: usize) -> Option<(&mut [T], &mut [T])> {
         if mid <= self.len() {
@@ -2265,7 +2265,7 @@ impl<T> [T] {
     /// assert!(iter.next().is_none());
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn split<F>(&self, pred: F) -> Split<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2287,7 +2287,7 @@ impl<T> [T] {
     /// assert_eq!(v, [1, 40, 30, 1, 60, 1]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn split_mut<F>(&mut self, pred: F) -> SplitMut<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2323,7 +2323,7 @@ impl<T> [T] {
     /// assert!(iter.next().is_none());
     /// ```
     #[stable(feature = "split_inclusive", since = "1.51.0")]
-    #[inline]
+    #[inline(never)]
     pub fn split_inclusive<F>(&self, pred: F) -> SplitInclusive<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2347,7 +2347,7 @@ impl<T> [T] {
     /// assert_eq!(v, [10, 40, 1, 20, 1, 1]);
     /// ```
     #[stable(feature = "split_inclusive", since = "1.51.0")]
-    #[inline]
+    #[inline(never)]
     pub fn split_inclusive_mut<F>(&mut self, pred: F) -> SplitInclusiveMut<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2383,7 +2383,7 @@ impl<T> [T] {
     /// assert_eq!(it.next(), None);
     /// ```
     #[stable(feature = "slice_rsplit", since = "1.27.0")]
-    #[inline]
+    #[inline(never)]
     pub fn rsplit<F>(&self, pred: F) -> RSplit<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2409,7 +2409,7 @@ impl<T> [T] {
     /// ```
     ///
     #[stable(feature = "slice_rsplit", since = "1.27.0")]
-    #[inline]
+    #[inline(never)]
     pub fn rsplit_mut<F>(&mut self, pred: F) -> RSplitMut<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2437,7 +2437,7 @@ impl<T> [T] {
     /// }
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn splitn<F>(&self, n: usize, pred: F) -> SplitN<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2463,7 +2463,7 @@ impl<T> [T] {
     /// assert_eq!(v, [1, 40, 30, 1, 60, 50]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn splitn_mut<F>(&mut self, n: usize, pred: F) -> SplitNMut<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2492,7 +2492,7 @@ impl<T> [T] {
     /// }
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn rsplitn<F>(&self, n: usize, pred: F) -> RSplitN<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2519,7 +2519,7 @@ impl<T> [T] {
     /// assert_eq!(s, [1, 40, 30, 20, 60, 1]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn rsplitn_mut<F>(&mut self, n: usize, pred: F) -> RSplitNMut<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2546,7 +2546,7 @@ impl<T> [T] {
     /// assert_eq!(s.split_once(|&x| x == 0), None);
     /// ```
     #[unstable(feature = "slice_split_once", reason = "newly added", issue = "112811")]
-    #[inline]
+    #[inline(never)]
     pub fn split_once<F>(&self, pred: F) -> Option<(&[T], &[T])>
     where
         F: FnMut(&T) -> bool,
@@ -2574,7 +2574,7 @@ impl<T> [T] {
     /// assert_eq!(s.rsplit_once(|&x| x == 0), None);
     /// ```
     #[unstable(feature = "slice_split_once", reason = "newly added", issue = "112811")]
-    #[inline]
+    #[inline(never)]
     pub fn rsplit_once<F>(&self, pred: F) -> Option<(&[T], &[T])>
     where
         F: FnMut(&T) -> bool,
@@ -2609,7 +2609,7 @@ impl<T> [T] {
     /// assert!(!v.iter().any(|e| e == "hi"));
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub fn contains(&self, x: &T) -> bool
     where
@@ -2876,7 +2876,7 @@ impl<T> [T] {
     /// assert!(match r { Ok(1..=4) => true, _ => false, });
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn binary_search_by<'a, F>(&'a self, mut f: F) -> Result<usize, usize>
     where
         F: FnMut(&'a T) -> Ordering,
@@ -2977,7 +2977,7 @@ impl<T> [T] {
     // would break when the item is re-exported. So allow the core links to be broken for now.
     #[allow(rustdoc::broken_intra_doc_links)]
     #[stable(feature = "slice_binary_search_by_key", since = "1.10.0")]
-    #[inline]
+    #[inline(never)]
     pub fn binary_search_by_key<'a, B, F>(&'a self, b: &B, mut f: F) -> Result<usize, usize>
     where
         F: FnMut(&'a T) -> B,
@@ -3039,7 +3039,7 @@ impl<T> [T] {
     /// [ipnsort]: https://github.com/Voultapher/sort-research-rs/tree/main/ipnsort
     /// [total order]: https://en.wikipedia.org/wiki/Total_order
     #[stable(feature = "sort_unstable", since = "1.20.0")]
-    #[inline]
+    #[inline(never)]
     pub fn sort_unstable(&mut self)
     where
         T: Ord,
@@ -3094,7 +3094,7 @@ impl<T> [T] {
     /// [ipnsort]: https://github.com/Voultapher/sort-research-rs/tree/main/ipnsort
     /// [total order]: https://en.wikipedia.org/wiki/Total_order
     #[stable(feature = "sort_unstable", since = "1.20.0")]
-    #[inline]
+    #[inline(never)]
     pub fn sort_unstable_by<F>(&mut self, mut compare: F)
     where
         F: FnMut(&T, &T) -> Ordering,
@@ -3146,7 +3146,7 @@ impl<T> [T] {
     /// [ipnsort]: https://github.com/Voultapher/sort-research-rs/tree/main/ipnsort
     /// [total order]: https://en.wikipedia.org/wiki/Total_order
     #[stable(feature = "sort_unstable", since = "1.20.0")]
-    #[inline]
+    #[inline(never)]
     pub fn sort_unstable_by_key<K, F>(&mut self, mut f: F)
     where
         F: FnMut(&T) -> K,
@@ -3209,7 +3209,7 @@ impl<T> [T] {
     /// [ipnsort]: https://github.com/Voultapher/sort-research-rs/tree/main/ipnsort
     /// [total order]: https://en.wikipedia.org/wiki/Total_order
     #[stable(feature = "slice_select_nth_unstable", since = "1.49.0")]
-    #[inline]
+    #[inline(never)]
     pub fn select_nth_unstable(&mut self, index: usize) -> (&mut [T], &mut T, &mut [T])
     where
         T: Ord,
@@ -3274,7 +3274,7 @@ impl<T> [T] {
     /// [ipnsort]: https://github.com/Voultapher/sort-research-rs/tree/main/ipnsort
     /// [total order]: https://en.wikipedia.org/wiki/Total_order
     #[stable(feature = "slice_select_nth_unstable", since = "1.49.0")]
-    #[inline]
+    #[inline(never)]
     pub fn select_nth_unstable_by<F>(
         &mut self,
         index: usize,
@@ -3341,7 +3341,7 @@ impl<T> [T] {
     /// [ipnsort]: https://github.com/Voultapher/sort-research-rs/tree/main/ipnsort
     /// [total order]: https://en.wikipedia.org/wiki/Total_order
     #[stable(feature = "slice_select_nth_unstable", since = "1.49.0")]
-    #[inline]
+    #[inline(never)]
     pub fn select_nth_unstable_by_key<K, F>(
         &mut self,
         index: usize,
@@ -3375,7 +3375,7 @@ impl<T> [T] {
     /// assert_eq!(duplicates, [2, 3, 1]);
     /// ```
     #[unstable(feature = "slice_partition_dedup", issue = "54279")]
-    #[inline]
+    #[inline(never)]
     pub fn partition_dedup(&mut self) -> (&mut [T], &mut [T])
     where
         T: PartialEq,
@@ -3409,7 +3409,7 @@ impl<T> [T] {
     /// assert_eq!(duplicates, ["bar", "Foo", "BAZ"]);
     /// ```
     #[unstable(feature = "slice_partition_dedup", issue = "54279")]
-    #[inline]
+    #[inline(never)]
     pub fn partition_dedup_by<F>(&mut self, mut same_bucket: F) -> (&mut [T], &mut [T])
     where
         F: FnMut(&mut T, &mut T) -> bool,
@@ -3535,7 +3535,7 @@ impl<T> [T] {
     /// assert_eq!(duplicates, [21, 30, 13]);
     /// ```
     #[unstable(feature = "slice_partition_dedup", issue = "54279")]
-    #[inline]
+    #[inline(never)]
     pub fn partition_dedup_by_key<K, F>(&mut self, mut key: F) -> (&mut [T], &mut [T])
     where
         F: FnMut(&mut T) -> K,
@@ -3794,7 +3794,7 @@ impl<T> [T] {
     /// [`clone_from_slice`]: slice::clone_from_slice
     /// [`split_at_mut`]: slice::split_at_mut
     #[doc(alias = "memcpy")]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "copy_from_slice", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_copy_from_slice", since = "1.87.0")]
     #[track_caller]
@@ -4226,7 +4226,7 @@ impl<T> [T] {
     /// assert!(empty.is_sorted());
     /// assert!(![0.0, 1.0, f32::NAN].is_sorted());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "is_sorted", since = "1.82.0")]
     #[must_use]
     pub fn is_sorted(&self) -> bool
@@ -4293,7 +4293,7 @@ impl<T> [T] {
     /// assert!(["c", "bb", "aaa"].is_sorted_by_key(|s| s.len()));
     /// assert!(![-2i32, -1, 0, 3].is_sorted_by_key(|n| n.abs()));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "is_sorted", since = "1.82.0")]
     #[must_use]
     pub fn is_sorted_by_key<'a, F, K>(&'a self, f: F) -> bool
@@ -4404,7 +4404,7 @@ impl<T> [T] {
     /// let expected: &[char] = &['a', 'b', 'c', 'd'];
     /// assert_eq!(Some(expected), slice.split_off(..4));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use = "method does not modify the slice if the range is out of bounds"]
     #[stable(feature = "slice_take", since = "1.87.0")]
     pub fn split_off<'a, R: OneSidedRange<usize>>(
@@ -4470,7 +4470,7 @@ impl<T> [T] {
     /// let expected: &mut [_] = &mut ['a', 'b', 'c', 'd'];
     /// assert_eq!(Some(expected), slice.split_off_mut(..4));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use = "method does not modify the slice if the range is out of bounds"]
     #[stable(feature = "slice_take", since = "1.87.0")]
     pub fn split_off_mut<'a, R: OneSidedRange<usize>>(
@@ -4508,7 +4508,7 @@ impl<T> [T] {
     /// assert_eq!(slice, &['b', 'c']);
     /// assert_eq!(first, &'a');
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "slice_take", since = "1.87.0")]
     #[rustc_const_unstable(feature = "const_split_off_first_last", issue = "138539")]
     pub const fn split_off_first<'a>(self: &mut &'a Self) -> Option<&'a T> {
@@ -4533,7 +4533,7 @@ impl<T> [T] {
     /// assert_eq!(slice, &['b', 'c']);
     /// assert_eq!(first, &'d');
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "slice_take", since = "1.87.0")]
     #[rustc_const_unstable(feature = "const_split_off_first_last", issue = "138539")]
     pub const fn split_off_first_mut<'a>(self: &mut &'a mut Self) -> Option<&'a mut T> {
@@ -4558,7 +4558,7 @@ impl<T> [T] {
     /// assert_eq!(slice, &['a', 'b']);
     /// assert_eq!(last, &'c');
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "slice_take", since = "1.87.0")]
     #[rustc_const_unstable(feature = "const_split_off_first_last", issue = "138539")]
     pub const fn split_off_last<'a>(self: &mut &'a Self) -> Option<&'a T> {
@@ -4583,7 +4583,7 @@ impl<T> [T] {
     /// assert_eq!(slice, &['a', 'b']);
     /// assert_eq!(last, &'d');
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "slice_take", since = "1.87.0")]
     #[rustc_const_unstable(feature = "const_split_off_first_last", issue = "138539")]
     pub const fn split_off_last_mut<'a>(self: &mut &'a mut Self) -> Option<&'a mut T> {
@@ -4641,7 +4641,7 @@ impl<T> [T] {
     /// [`get_disjoint_mut`]: slice::get_disjoint_mut
     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
     #[stable(feature = "get_many_mut", since = "1.86.0")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn get_disjoint_unchecked_mut<I, const N: usize>(
         &mut self,
         indices: [I; N],
@@ -4708,7 +4708,7 @@ impl<T> [T] {
     /// assert_eq!(v, &[1, 11, 111]);
     /// ```
     #[stable(feature = "get_many_mut", since = "1.86.0")]
-    #[inline]
+    #[inline(never)]
     pub fn get_disjoint_mut<I, const N: usize>(
         &mut self,
         indices: [I; N],
@@ -4877,7 +4877,7 @@ impl<T> [MaybeUninit<T>] {
     /// assert_eq!(v, Some(&mut 42));
     /// ```
     #[unstable(feature = "align_to_uninit_mut", issue = "139062")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub fn align_to_uninit_mut<U>(&mut self) -> (&mut Self, &mut [MaybeUninit<U>], &mut Self) {
         // SAFETY: `MaybeUninit` is transparent. Correct size and alignment are guaranteed by
@@ -4999,7 +4999,7 @@ impl [f32] {
     /// assert!(v[8].is_nan());
     /// ```
     #[unstable(feature = "sort_floats", issue = "93396")]
-    #[inline]
+    #[inline(never)]
     pub fn sort_floats(&mut self) {
         self.sort_unstable_by(f32::total_cmp);
     }
@@ -5027,7 +5027,7 @@ impl [f64] {
     /// assert!(v[8].is_nan());
     /// ```
     #[unstable(feature = "sort_floats", issue = "93396")]
-    #[inline]
+    #[inline(never)]
     pub fn sort_floats(&mut self) {
         self.sort_unstable_by(f64::total_cmp);
     }
@@ -5097,7 +5097,7 @@ pub trait SlicePattern {
 impl<T> SlicePattern for [T] {
     type Item = T;
 
-    #[inline]
+    #[inline(never)]
     fn as_slice(&self) -> &[Self::Item] {
         self
     }
@@ -5107,7 +5107,7 @@ impl<T> SlicePattern for [T] {
 impl<T, const N: usize> SlicePattern for [T; N] {
     type Item = T;
 
-    #[inline]
+    #[inline(never)]
     fn as_slice(&self) -> &[Self::Item] {
         self
     }
@@ -5117,7 +5117,7 @@ impl<T, const N: usize> SlicePattern for [T; N] {
 ///
 /// This will do `binomial(N + 1, 2) = N * (N + 1) / 2 = 0, 1, 3, 6, 10, ..`
 /// comparison operations.
-#[inline]
+#[inline(never)]
 fn get_disjoint_check_valid<I: GetDisjointMutIndex, const N: usize>(
     indices: &[I; N],
     len: usize,
@@ -5216,12 +5216,12 @@ pub unsafe trait GetDisjointMutIndex:
 #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
 // SAFETY: We implement `is_in_bounds()` and `is_overlapping()` correctly.
 unsafe impl GetDisjointMutIndex for usize {
-    #[inline]
+    #[inline(never)]
     fn is_in_bounds(&self, len: usize) -> bool {
         *self < len
     }
 
-    #[inline]
+    #[inline(never)]
     fn is_overlapping(&self, other: &Self) -> bool {
         *self == *other
     }
@@ -5230,12 +5230,12 @@ unsafe impl GetDisjointMutIndex for usize {
 #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
 // SAFETY: We implement `is_in_bounds()` and `is_overlapping()` correctly.
 unsafe impl GetDisjointMutIndex for Range<usize> {
-    #[inline]
+    #[inline(never)]
     fn is_in_bounds(&self, len: usize) -> bool {
         (self.start <= self.end) & (self.end <= len)
     }
 
-    #[inline]
+    #[inline(never)]
     fn is_overlapping(&self, other: &Self) -> bool {
         (self.start < other.end) & (other.start < self.end)
     }
@@ -5244,12 +5244,12 @@ unsafe impl GetDisjointMutIndex for Range<usize> {
 #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
 // SAFETY: We implement `is_in_bounds()` and `is_overlapping()` correctly.
 unsafe impl GetDisjointMutIndex for RangeInclusive<usize> {
-    #[inline]
+    #[inline(never)]
     fn is_in_bounds(&self, len: usize) -> bool {
         (self.start <= self.end) & (self.end < len)
     }
 
-    #[inline]
+    #[inline(never)]
     fn is_overlapping(&self, other: &Self) -> bool {
         (self.start <= other.end) & (other.start <= self.end)
     }
@@ -5258,12 +5258,12 @@ unsafe impl GetDisjointMutIndex for RangeInclusive<usize> {
 #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
 // SAFETY: We implement `is_in_bounds()` and `is_overlapping()` correctly.
 unsafe impl GetDisjointMutIndex for range::Range<usize> {
-    #[inline]
+    #[inline(never)]
     fn is_in_bounds(&self, len: usize) -> bool {
         Range::from(*self).is_in_bounds(len)
     }
 
-    #[inline]
+    #[inline(never)]
     fn is_overlapping(&self, other: &Self) -> bool {
         Range::from(*self).is_overlapping(&Range::from(*other))
     }
@@ -5272,12 +5272,12 @@ unsafe impl GetDisjointMutIndex for range::Range<usize> {
 #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
 // SAFETY: We implement `is_in_bounds()` and `is_overlapping()` correctly.
 unsafe impl GetDisjointMutIndex for range::RangeInclusive<usize> {
-    #[inline]
+    #[inline(never)]
     fn is_in_bounds(&self, len: usize) -> bool {
         RangeInclusive::from(*self).is_in_bounds(len)
     }
 
-    #[inline]
+    #[inline(never)]
     fn is_overlapping(&self, other: &Self) -> bool {
         RangeInclusive::from(*self).is_overlapping(&RangeInclusive::from(*other))
     }

@@ -36,7 +36,7 @@ const U8_ISQRT_WITH_REMAINDER: [(u8, u8); 256] = {
 /// input.
 #[must_use = "this returns the result of the operation, \
               without modifying the original"]
-#[inline]
+#[inline(never)]
 pub(super) const fn u8(n: u8) -> u8 {
     U8_ISQRT_WITH_REMAINDER[n as usize].0
 }
@@ -57,7 +57,7 @@ macro_rules! signed_fn {
         /// This results in undefined behavior when the input is negative.
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline]
+        #[inline(never)]
         pub(super) const unsafe fn $SignedT(n: $SignedT) -> $SignedT {
             debug_assert!(n >= 0, "Negative input inside `isqrt`.");
             $UnsignedT(n as $UnsignedT) as $SignedT
@@ -82,7 +82,7 @@ macro_rules! unsigned_fn {
         /// input.
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline]
+        #[inline(never)]
         pub(super) const fn $UnsignedT(mut n: $UnsignedT) -> $UnsignedT {
             if n <= <$HalfBitsT>::MAX as $UnsignedT {
                 $HalfBitsT(n as $HalfBitsT) as $UnsignedT
@@ -254,7 +254,7 @@ macro_rules! last_stage {
 /// # Safety
 ///
 /// `n` must be nonzero.
-#[inline]
+#[inline(never)]
 const fn u16_stages(n: u16) -> u16 {
     let (s, r) = first_stage!(16, n);
     last_stage!(u16, n, s, r)
@@ -266,7 +266,7 @@ const fn u16_stages(n: u16) -> u16 {
 /// # Safety
 ///
 /// `n` must be nonzero.
-#[inline]
+#[inline(never)]
 const fn u32_stages(n: u32) -> u32 {
     let (s, r) = first_stage!(32, n);
     let (s, r) = middle_stage!(32, u16, n, s, r);
@@ -279,7 +279,7 @@ const fn u32_stages(n: u32) -> u32 {
 /// # Safety
 ///
 /// `n` must be nonzero.
-#[inline]
+#[inline(never)]
 const fn u64_stages(n: u64) -> u64 {
     let (s, r) = first_stage!(64, n);
     let (s, r) = middle_stage!(64, u16, n, s, r);
@@ -293,7 +293,7 @@ const fn u64_stages(n: u64) -> u64 {
 /// # Safety
 ///
 /// `n` must be nonzero.
-#[inline]
+#[inline(never)]
 const fn u128_stages(n: u128) -> u128 {
     let (s, r) = first_stage!(128, n);
     let (s, r) = middle_stage!(128, u16, n, s, r);

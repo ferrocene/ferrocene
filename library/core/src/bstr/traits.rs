@@ -7,7 +7,7 @@ use crate::{hash, ops, range};
 
 #[unstable(feature = "bstr", issue = "134915")]
 impl Ord for ByteStr {
-    #[inline]
+    #[inline(never)]
     fn cmp(&self, other: &ByteStr) -> Ordering {
         Ord::cmp(&self.0, &other.0)
     }
@@ -15,7 +15,7 @@ impl Ord for ByteStr {
 
 #[unstable(feature = "bstr", issue = "134915")]
 impl PartialOrd for ByteStr {
-    #[inline]
+    #[inline(never)]
     fn partial_cmp(&self, other: &ByteStr) -> Option<Ordering> {
         PartialOrd::partial_cmp(&self.0, &other.0)
     }
@@ -23,7 +23,7 @@ impl PartialOrd for ByteStr {
 
 #[unstable(feature = "bstr", issue = "134915")]
 impl PartialEq<ByteStr> for ByteStr {
-    #[inline]
+    #[inline(never)]
     fn eq(&self, other: &ByteStr) -> bool {
         &self.0 == &other.0
     }
@@ -34,7 +34,7 @@ impl Eq for ByteStr {}
 
 #[unstable(feature = "bstr", issue = "134915")]
 impl hash::Hash for ByteStr {
-    #[inline]
+    #[inline(never)]
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
         self.0.hash(state);
     }
@@ -47,7 +47,7 @@ macro_rules! impl_partial_eq {
     ($lhs:ty, $rhs:ty) => {
         #[allow(unused_lifetimes)]
         impl<'a> PartialEq<$rhs> for $lhs {
-            #[inline]
+            #[inline(never)]
             fn eq(&self, other: &$rhs) -> bool {
                 let other: &[u8] = other.as_ref();
                 PartialEq::eq(self.as_bytes(), other)
@@ -56,7 +56,7 @@ macro_rules! impl_partial_eq {
 
         #[allow(unused_lifetimes)]
         impl<'a> PartialEq<$lhs> for $rhs {
-            #[inline]
+            #[inline(never)]
             fn eq(&self, other: &$lhs) -> bool {
                 let this: &[u8] = self.as_ref();
                 PartialEq::eq(this, other.as_bytes())
@@ -79,7 +79,7 @@ macro_rules! impl_partial_eq_ord {
         #[allow(unused_lifetimes)]
         #[unstable(feature = "bstr", issue = "134915")]
         impl<'a> PartialOrd<$rhs> for $lhs {
-            #[inline]
+            #[inline(never)]
             fn partial_cmp(&self, other: &$rhs) -> Option<Ordering> {
                 let other: &[u8] = other.as_ref();
                 PartialOrd::partial_cmp(self.as_bytes(), other)
@@ -89,7 +89,7 @@ macro_rules! impl_partial_eq_ord {
         #[allow(unused_lifetimes)]
         #[unstable(feature = "bstr", issue = "134915")]
         impl<'a> PartialOrd<$lhs> for $rhs {
-            #[inline]
+            #[inline(never)]
             fn partial_cmp(&self, other: &$lhs) -> Option<Ordering> {
                 let this: &[u8] = self.as_ref();
                 PartialOrd::partial_cmp(this, other.as_bytes())
@@ -110,7 +110,7 @@ macro_rules! impl_partial_eq_n {
         #[allow(unused_lifetimes)]
         #[unstable(feature = "bstr", issue = "134915")]
         impl<const N: usize> PartialEq<$rhs> for $lhs {
-            #[inline]
+            #[inline(never)]
             fn eq(&self, other: &$rhs) -> bool {
                 let other: &[u8] = other.as_ref();
                 PartialEq::eq(self.as_bytes(), other)
@@ -120,7 +120,7 @@ macro_rules! impl_partial_eq_n {
         #[allow(unused_lifetimes)]
         #[unstable(feature = "bstr", issue = "134915")]
         impl<const N: usize> PartialEq<$lhs> for $rhs {
-            #[inline]
+            #[inline(never)]
             fn eq(&self, other: &$lhs) -> bool {
                 let this: &[u8] = self.as_ref();
                 PartialEq::eq(this, other.as_bytes())
@@ -153,7 +153,7 @@ where
 {
     type Output = I::Output;
 
-    #[inline]
+    #[inline(never)]
     fn index(&self, index: I) -> &I::Output {
         index.index(self)
     }
@@ -164,7 +164,7 @@ impl<I> ops::IndexMut<I> for ByteStr
 where
     I: SliceIndex<ByteStr>,
 {
-    #[inline]
+    #[inline(never)]
     fn index_mut(&mut self, index: I) -> &mut I::Output {
         index.index_mut(self)
     }
@@ -173,27 +173,27 @@ where
 #[unstable(feature = "bstr", issue = "134915")]
 unsafe impl SliceIndex<ByteStr> for ops::RangeFull {
     type Output = ByteStr;
-    #[inline]
+    #[inline(never)]
     fn get(self, slice: &ByteStr) -> Option<&Self::Output> {
         Some(slice)
     }
-    #[inline]
+    #[inline(never)]
     fn get_mut(self, slice: &mut ByteStr) -> Option<&mut Self::Output> {
         Some(slice)
     }
-    #[inline]
+    #[inline(never)]
     unsafe fn get_unchecked(self, slice: *const ByteStr) -> *const Self::Output {
         slice
     }
-    #[inline]
+    #[inline(never)]
     unsafe fn get_unchecked_mut(self, slice: *mut ByteStr) -> *mut Self::Output {
         slice
     }
-    #[inline]
+    #[inline(never)]
     fn index(self, slice: &ByteStr) -> &Self::Output {
         slice
     }
-    #[inline]
+    #[inline(never)]
     fn index_mut(self, slice: &mut ByteStr) -> &mut Self::Output {
         slice
     }
@@ -202,29 +202,29 @@ unsafe impl SliceIndex<ByteStr> for ops::RangeFull {
 #[unstable(feature = "bstr", issue = "134915")]
 unsafe impl SliceIndex<ByteStr> for usize {
     type Output = u8;
-    #[inline]
+    #[inline(never)]
     fn get(self, slice: &ByteStr) -> Option<&Self::Output> {
         self.get(slice.as_bytes())
     }
-    #[inline]
+    #[inline(never)]
     fn get_mut(self, slice: &mut ByteStr) -> Option<&mut Self::Output> {
         self.get_mut(slice.as_bytes_mut())
     }
-    #[inline]
+    #[inline(never)]
     unsafe fn get_unchecked(self, slice: *const ByteStr) -> *const Self::Output {
         // SAFETY: the caller has to uphold the safety contract for `get_unchecked`.
         unsafe { self.get_unchecked(slice as *const [u8]) }
     }
-    #[inline]
+    #[inline(never)]
     unsafe fn get_unchecked_mut(self, slice: *mut ByteStr) -> *mut Self::Output {
         // SAFETY: the caller has to uphold the safety contract for `get_unchecked_mut`.
         unsafe { self.get_unchecked_mut(slice as *mut [u8]) }
     }
-    #[inline]
+    #[inline(never)]
     fn index(self, slice: &ByteStr) -> &Self::Output {
         self.index(slice.as_bytes())
     }
-    #[inline]
+    #[inline(never)]
     fn index_mut(self, slice: &mut ByteStr) -> &mut Self::Output {
         self.index_mut(slice.as_bytes_mut())
     }
@@ -235,29 +235,29 @@ macro_rules! impl_slice_index {
         #[unstable(feature = "bstr", issue = "134915")]
         unsafe impl SliceIndex<ByteStr> for $index {
             type Output = ByteStr;
-            #[inline]
+            #[inline(never)]
             fn get(self, slice: &ByteStr) -> Option<&Self::Output> {
                 self.get(slice.as_bytes()).map(ByteStr::from_bytes)
             }
-            #[inline]
+            #[inline(never)]
             fn get_mut(self, slice: &mut ByteStr) -> Option<&mut Self::Output> {
                 self.get_mut(slice.as_bytes_mut()).map(ByteStr::from_bytes_mut)
             }
-            #[inline]
+            #[inline(never)]
             unsafe fn get_unchecked(self, slice: *const ByteStr) -> *const Self::Output {
                 // SAFETY: the caller has to uphold the safety contract for `get_unchecked`.
                 unsafe { self.get_unchecked(slice as *const [u8]) as *const ByteStr }
             }
-            #[inline]
+            #[inline(never)]
             unsafe fn get_unchecked_mut(self, slice: *mut ByteStr) -> *mut Self::Output {
                 // SAFETY: the caller has to uphold the safety contract for `get_unchecked_mut`.
                 unsafe { self.get_unchecked_mut(slice as *mut [u8]) as *mut ByteStr }
             }
-            #[inline]
+            #[inline(never)]
             fn index(self, slice: &ByteStr) -> &Self::Output {
                 ByteStr::from_bytes(self.index(slice.as_bytes()))
             }
-            #[inline]
+            #[inline(never)]
             fn index_mut(self, slice: &mut ByteStr) -> &mut Self::Output {
                 ByteStr::from_bytes_mut(self.index_mut(slice.as_bytes_mut()))
             }

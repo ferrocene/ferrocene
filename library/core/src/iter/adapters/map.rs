@@ -102,12 +102,12 @@ where
 {
     type Item = B;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<B> {
         self.iter.next().map(&mut self.f)
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.iter.size_hint()
     }
@@ -128,7 +128,7 @@ where
         self.iter.fold(init, map_fold(self.f, g))
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> B
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -144,7 +144,7 @@ impl<B, I: DoubleEndedIterator, F> DoubleEndedIterator for Map<I, F>
 where
     F: FnMut(I::Item) -> B,
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<B> {
         self.iter.next_back().map(&mut self.f)
     }
@@ -227,7 +227,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut I::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.iter) }

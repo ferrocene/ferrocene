@@ -216,7 +216,7 @@ impl<T> ManuallyDrop<T> {
     ///
     #[must_use = "if you don't need the value, you can use `ManuallyDrop::drop` instead"]
     #[stable(feature = "manually_drop_take", since = "1.42.0")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn take(slot: &mut ManuallyDrop<T>) -> T {
         // SAFETY: we are reading from a reference, which is guaranteed
         // to be valid for reads.
@@ -248,7 +248,7 @@ impl<T: ?Sized> ManuallyDrop<T> {
     ///
     /// [pinned]: crate::pin
     #[stable(feature = "manually_drop", since = "1.20.0")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn drop(slot: &mut ManuallyDrop<T>) {
         // SAFETY: we are dropping the value pointed to by a mutable reference
         // which is guaranteed to be valid for writes.

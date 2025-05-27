@@ -219,14 +219,14 @@ impl fmt::Display for ParseFloatError {
     }
 }
 
-#[inline]
+#[inline(never)]
 pub(super) fn pfe_empty() -> ParseFloatError {
     ParseFloatError { kind: FloatErrorKind::Empty }
 }
 
 // Used in unit tests, keep public.
 // This is much better than making FloatErrorKind and ParseFloatError::kind public.
-#[inline]
+#[inline(never)]
 pub fn pfe_invalid() -> ParseFloatError {
     ParseFloatError { kind: FloatErrorKind::Invalid }
 }

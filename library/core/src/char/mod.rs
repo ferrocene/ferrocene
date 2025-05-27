@@ -118,7 +118,7 @@ pub const UNICODE_VERSION: (u8, u8, u8) = char::UNICODE_VERSION;
 /// Creates an iterator over the UTF-16 encoded code points in `iter`, returning
 /// unpaired surrogates as `Err`s. Use [`char::decode_utf16`] instead.
 #[stable(feature = "decode_utf16", since = "1.9.0")]
-#[inline]
+#[inline(never)]
 pub fn decode_utf16<I: IntoIterator<Item = u16>>(iter: I) -> DecodeUtf16<I::IntoIter> {
     self::decode::decode_utf16(iter)
 }
@@ -127,7 +127,7 @@ pub fn decode_utf16<I: IntoIterator<Item = u16>>(iter: I) -> DecodeUtf16<I::Into
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_char_convert", since = "1.67.0")]
 #[must_use]
-#[inline]
+#[inline(never)]
 pub const fn from_u32(i: u32) -> Option<char> {
     self::convert::from_u32(i)
 }
@@ -137,7 +137,7 @@ pub const fn from_u32(i: u32) -> Option<char> {
 #[stable(feature = "char_from_unchecked", since = "1.5.0")]
 #[rustc_const_stable(feature = "const_char_from_u32_unchecked", since = "1.81.0")]
 #[must_use]
-#[inline]
+#[inline(never)]
 pub const unsafe fn from_u32_unchecked(i: u32) -> char {
     // SAFETY: the safety contract must be upheld by the caller.
     unsafe { self::convert::from_u32_unchecked(i) }
@@ -147,7 +147,7 @@ pub const unsafe fn from_u32_unchecked(i: u32) -> char {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_char_convert", since = "1.67.0")]
 #[must_use]
-#[inline]
+#[inline(never)]
 pub const fn from_digit(num: u32, radix: u32) -> Option<char> {
     self::convert::from_digit(num, radix)
 }
@@ -164,7 +164,7 @@ pub const fn from_digit(num: u32, radix: u32) -> Option<char> {
 pub struct EscapeUnicode(escape::EscapeIterInner<10>);
 
 impl EscapeUnicode {
-    #[inline]
+    #[inline(never)]
     const fn new(c: char) -> Self {
         Self(escape::EscapeIterInner::unicode(c))
     }
@@ -174,28 +174,28 @@ impl EscapeUnicode {
 impl Iterator for EscapeUnicode {
     type Item = char;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<char> {
         self.0.next().map(char::from)
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let n = self.0.len();
         (n, Some(n))
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         self.0.len()
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(mut self) -> Option<char> {
         self.0.next_back().map(char::from)
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.0.advance_by(n)
     }
@@ -203,7 +203,7 @@ impl Iterator for EscapeUnicode {
 
 #[stable(feature = "exact_size_escape", since = "1.11.0")]
 impl ExactSizeIterator for EscapeUnicode {
-    #[inline]
+    #[inline(never)]
     fn len(&self) -> usize {
         self.0.len()
     }
@@ -230,17 +230,17 @@ impl fmt::Display for EscapeUnicode {
 pub struct EscapeDefault(escape::EscapeIterInner<10>);
 
 impl EscapeDefault {
-    #[inline]
+    #[inline(never)]
     const fn printable(c: ascii::Char) -> Self {
         Self(escape::EscapeIterInner::ascii(c.to_u8()))
     }
 
-    #[inline]
+    #[inline(never)]
     const fn backslash(c: ascii::Char) -> Self {
         Self(escape::EscapeIterInner::backslash(c))
     }
 
-    #[inline]
+    #[inline(never)]
     const fn unicode(c: char) -> Self {
         Self(escape::EscapeIterInner::unicode(c))
     }
@@ -250,28 +250,28 @@ impl EscapeDefault {
 impl Iterator for EscapeDefault {
     type Item = char;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<char> {
         self.0.next().map(char::from)
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let n = self.0.len();
         (n, Some(n))
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         self.0.len()
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(mut self) -> Option<char> {
         self.0.next_back().map(char::from)
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.0.advance_by(n)
     }
@@ -279,7 +279,7 @@ impl Iterator for EscapeDefault {
 
 #[stable(feature = "exact_size_escape", since = "1.11.0")]
 impl ExactSizeIterator for EscapeDefault {
-    #[inline]
+    #[inline(never)]
     fn len(&self) -> usize {
         self.0.len()
     }
@@ -316,22 +316,22 @@ enum EscapeDebugInner {
 }
 
 impl EscapeDebug {
-    #[inline]
+    #[inline(never)]
     const fn printable(chr: char) -> Self {
         Self(EscapeDebugInner::Char(chr))
     }
 
-    #[inline]
+    #[inline(never)]
     const fn backslash(c: ascii::Char) -> Self {
         Self(EscapeDebugInner::Bytes(escape::EscapeIterInner::backslash(c)))
     }
 
-    #[inline]
+    #[inline(never)]
     const fn unicode(c: char) -> Self {
         Self(EscapeDebugInner::Bytes(escape::EscapeIterInner::unicode(c)))
     }
 
-    #[inline]
+    #[inline(never)]
     fn clear(&mut self) {
         self.0 = EscapeDebugInner::Bytes(escape::EscapeIterInner::empty());
     }
@@ -341,7 +341,7 @@ impl EscapeDebug {
 impl Iterator for EscapeDebug {
     type Item = char;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<char> {
         match self.0 {
             EscapeDebugInner::Bytes(ref mut bytes) => bytes.next().map(char::from),
@@ -352,13 +352,13 @@ impl Iterator for EscapeDebug {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let n = self.len();
         (n, Some(n))
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         self.len()
     }
@@ -511,7 +511,7 @@ casemappingiter_impls! {
 struct CaseMappingIter(core::array::IntoIter<char, 3>);
 
 impl CaseMappingIter {
-    #[inline]
+    #[inline(never)]
     fn new(chars: [char; 3]) -> CaseMappingIter {
         let mut iter = chars.into_iter();
         if chars[2] == '\0' {
@@ -604,7 +604,7 @@ unsafe impl TrustedRandomAccessNoCoerce for CaseMappingIter {
 unsafe impl TrustedRandomAccess for CaseMappingIter {}
 
 impl fmt::Display for CaseMappingIter {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for c in self.0.clone() {
             f.write_char(c)?;

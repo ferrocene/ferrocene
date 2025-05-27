@@ -34,7 +34,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[rustc_diagnostic_item = "ptr_is_null"]
-    #[inline]
+    #[inline(never)]
     pub const fn is_null(self) -> bool {
         self.cast_const().is_null()
     }
@@ -98,7 +98,7 @@ impl<T: ?Sized> *mut T {
     /// println!("{:?}", unsafe { &*bad });
     #[unstable(feature = "set_ptr_value", issue = "75091")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
-    #[inline]
+    #[inline(never)]
     pub const fn with_metadata_of<U>(self, meta: *const U) -> *mut U
     where
         U: ?Sized,
@@ -198,7 +198,7 @@ impl<T: ?Sized> *mut T {
     ///
     /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
     pub fn with_addr(self, addr: usize) -> Self {
         // This should probably be an intrinsic to avoid doing any sort of arithmetic, but
@@ -217,7 +217,7 @@ impl<T: ?Sized> *mut T {
     ///
     /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
     pub fn map_addr(self, f: impl FnOnce(usize) -> usize) -> Self {
         self.with_addr(f(self.addr()))
@@ -227,7 +227,7 @@ impl<T: ?Sized> *mut T {
     ///
     /// The pointer can be later reconstructed with [`from_raw_parts_mut`].
     #[unstable(feature = "ptr_metadata", issue = "81513")]
-    #[inline]
+    #[inline(never)]
     pub const fn to_raw_parts(self) -> (*mut (), <T as super::Pointee>::Metadata) {
         (self.cast(), super::metadata(self))
     }
@@ -281,7 +281,7 @@ impl<T: ?Sized> *mut T {
     /// ```
     #[stable(feature = "ptr_as_ref", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
-    #[inline]
+    #[inline(never)]
     pub const unsafe fn as_ref<'a>(self) -> Option<&'a T> {
         // SAFETY: the caller must guarantee that `self` is valid for a
         // reference if it isn't null.
@@ -314,7 +314,7 @@ impl<T: ?Sized> *mut T {
     /// ```
     // FIXME: mention it in the docs for `as_ref` and `as_uninit_ref` once stabilized.
     #[unstable(feature = "ptr_as_ref_unchecked", issue = "122034")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const unsafe fn as_ref_unchecked<'a>(self) -> &'a T {
         // SAFETY: the caller must guarantee that `self` is valid for a reference
@@ -357,7 +357,7 @@ impl<T: ?Sized> *mut T {
     ///     }
     /// }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
     pub const unsafe fn as_uninit_ref<'a>(self) -> Option<&'a MaybeUninit<T>>
     where
@@ -417,7 +417,7 @@ impl<T: ?Sized> *mut T {
     where
         T: Sized,
     {
-        #[inline]
+        #[inline(never)]
         #[rustc_allow_const_fn_unstable(const_eval_select)]
         const fn runtime_offset_nowrap(this: *const (), count: isize, size: usize) -> bool {
             // We can use const_eval_select here because this is only for UB checks.
@@ -642,7 +642,7 @@ impl<T: ?Sized> *mut T {
     /// ```
     #[stable(feature = "ptr_as_ref", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
-    #[inline]
+    #[inline(never)]
     pub const unsafe fn as_mut<'a>(self) -> Option<&'a mut T> {
         // SAFETY: the caller must guarantee that `self` is be valid for
         // a mutable reference if it isn't null.
@@ -677,7 +677,7 @@ impl<T: ?Sized> *mut T {
     /// ```
     // FIXME: mention it in the docs for `as_mut` and `as_uninit_mut` once stabilized.
     #[unstable(feature = "ptr_as_ref_unchecked", issue = "122034")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const unsafe fn as_mut_unchecked<'a>(self) -> &'a mut T {
         // SAFETY: the caller must guarantee that `self` is valid for a reference
@@ -704,7 +704,7 @@ impl<T: ?Sized> *mut T {
     /// determined to be null or not. See [`is_null`] for more information.
     ///
     /// [`is_null`]: #method.is_null-1
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
     pub const unsafe fn as_uninit_mut<'a>(self) -> Option<&'a mut MaybeUninit<T>>
     where
@@ -734,7 +734,7 @@ impl<T: ?Sized> *mut T {
     /// of this issue.
     #[unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[rustc_const_unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
-    #[inline]
+    #[inline(never)]
     pub const fn guaranteed_eq(self, other: *mut T) -> Option<bool>
     where
         T: Sized,
@@ -761,7 +761,7 @@ impl<T: ?Sized> *mut T {
     /// of this issue.
     #[unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[rustc_const_unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
-    #[inline]
+    #[inline(never)]
     pub const fn guaranteed_ne(self, other: *mut T) -> Option<bool>
     where
         T: Sized,
@@ -941,7 +941,7 @@ impl<T: ?Sized> *mut T {
     /// ```
     #[stable(feature = "ptr_sub_ptr", since = "1.87.0")]
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const unsafe fn offset_from_unsigned(self, origin: *const T) -> usize
     where
@@ -963,7 +963,7 @@ impl<T: ?Sized> *mut T {
     /// ignoring the metadata.
     #[stable(feature = "ptr_sub_ptr", since = "1.87.0")]
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const unsafe fn byte_offset_from_unsigned<U: ?Sized>(self, origin: *mut U) -> usize {
         // SAFETY: the caller must uphold the safety contract for `byte_offset_from_unsigned`.
@@ -1024,7 +1024,7 @@ impl<T: ?Sized> *mut T {
         T: Sized,
     {
         #[cfg(debug_assertions)]
-        #[inline]
+        #[inline(never)]
         #[rustc_allow_const_fn_unstable(const_eval_select)]
         const fn runtime_add_nowrap(this: *const (), count: usize, size: usize) -> bool {
             const_eval_select!(
@@ -1130,7 +1130,7 @@ impl<T: ?Sized> *mut T {
         T: Sized,
     {
         #[cfg(debug_assertions)]
-        #[inline]
+        #[inline(never)]
         #[rustc_allow_const_fn_unstable(const_eval_select)]
         const fn runtime_sub_nowrap(this: *const (), count: usize, size: usize) -> bool {
             const_eval_select!(
@@ -1643,7 +1643,7 @@ impl<T: ?Sized> *mut T {
     /// # }
     /// ```
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "align_offset", since = "1.36.0")]
     pub fn align_offset(self, align: usize) -> usize
     where
@@ -1684,7 +1684,7 @@ impl<T: ?Sized> *mut T {
     /// assert!(!ptr.wrapping_byte_add(1).is_aligned());
     /// ```
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "pointer_is_aligned", since = "1.79.0")]
     pub fn is_aligned(self) -> bool
     where
@@ -1724,7 +1724,7 @@ impl<T: ?Sized> *mut T {
     /// assert_ne!(ptr.is_aligned_to(8), ptr.wrapping_add(1).is_aligned_to(8));
     /// ```
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "pointer_is_aligned_to", issue = "96284")]
     pub fn is_aligned_to(self, align: usize) -> bool {
         if !align.is_power_of_two() {
@@ -1779,7 +1779,7 @@ impl<T> *mut [T] {
     ///
     /// If `N` is not exactly equal to the length of `self`, then this method returns `None`.
     #[unstable(feature = "slice_as_array", issue = "133508")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     pub const fn as_mut_array<const N: usize>(self) -> Option<*mut [T; N]> {
         if self.len() == N {
@@ -1984,7 +1984,7 @@ impl<T> *mut [T] {
     /// determined to be null or not. See [`is_null`] for more information.
     ///
     /// [`is_null`]: #method.is_null-1
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
     pub const unsafe fn as_uninit_slice<'a>(self) -> Option<&'a [MaybeUninit<T>]> {
         if self.is_null() {
@@ -2042,7 +2042,7 @@ impl<T> *mut [T] {
     /// determined to be null or not. See [`is_null`] for more information.
     ///
     /// [`is_null`]: #method.is_null-1
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
     pub const unsafe fn as_uninit_slice_mut<'a>(self) -> Option<&'a mut [MaybeUninit<T>]> {
         if self.is_null() {
@@ -2068,7 +2068,7 @@ impl<T, const N: usize> *mut [T; N] {
     /// let arr: *mut [i8; 3] = ptr::null_mut();
     /// assert_eq!(arr.as_mut_ptr(), ptr::null_mut());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "array_ptr_get", issue = "119834")]
     pub const fn as_mut_ptr(self) -> *mut T {
         self as *mut T
@@ -2088,7 +2088,7 @@ impl<T, const N: usize> *mut [T; N] {
     /// }
     /// assert_eq!(arr, [3, 4, 5]);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "array_ptr_get", issue = "119834")]
     pub const fn as_mut_slice(self) -> *mut [T] {
         self
@@ -2112,7 +2112,7 @@ impl<T: ?Sized> Eq for *mut T {}
 /// Pointer comparison is by address, as produced by the [`<*mut T>::addr`](pointer::addr) method.
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized> Ord for *mut T {
-    #[inline]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn cmp(&self, other: &*mut T) -> Ordering {
         if self < other {

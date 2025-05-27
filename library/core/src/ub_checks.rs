@@ -38,7 +38,7 @@ use crate::intrinsics::{self, const_eval_select};
 ///     precondition_check(args)
 /// }
 /// ```
-/// where `precondition_check` is monomorphic with the attributes `#[rustc_nounwind]`, `#[inline]` and
+/// where `precondition_check` is monomorphic with the attributes `#[rustc_nounwind]`, `#[inline(never)]` and
 /// `#[rustc_no_mir_inline]`. This combination of attributes ensures that the actual check logic is
 /// compiled only once and generates a minimal amount of IR because the check cannot be inlined in
 /// MIR, but *can* be inlined and fully optimized by a codegen backend.
@@ -61,7 +61,7 @@ macro_rules! assert_unsafe_precondition {
             // LLVM on the other hand sees the constant branch, so if it's `false`, it can immediately delete it without
             // inlining the check. If it's `true`, it can inline it and get significantly better performance.
             #[rustc_no_mir_inline]
-            #[inline]
+            #[inline(never)]
             #[rustc_nounwind]
             const fn precondition_check($($name:$ty),*) {
                 if !$e {
@@ -88,7 +88,7 @@ pub use intrinsics::ub_checks as check_library_ub;
 ///
 /// The intention is to not do that when running in the interpreter, as that one has its own
 /// language UB checks which generally produce better errors.
-#[inline]
+#[inline(never)]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
 pub(crate) const fn check_language_ub() -> bool {
     // Only used for UB checks so we may const_eval_select.
@@ -111,7 +111,7 @@ pub(crate) const fn check_language_ub() -> bool {
 /// In `const` this is approximate and can fail spuriously. It is primarily intended
 /// for `assert_unsafe_precondition!` with `check_language_ub`, in which case the
 /// check is anyway not executed in `const`.
-#[inline]
+#[inline(never)]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
 pub(crate) const fn maybe_is_aligned_and_not_null(
     ptr: *const (),
@@ -129,7 +129,7 @@ pub(crate) const fn maybe_is_aligned_and_not_null(
     )
 }
 
-#[inline]
+#[inline(never)]
 pub(crate) const fn is_valid_allocation_size(size: usize, len: usize) -> bool {
     let max_len = if size == 0 { usize::MAX } else { isize::MAX as usize / size };
     len <= max_len
@@ -140,7 +140,7 @@ pub(crate) const fn is_valid_allocation_size(size: usize, len: usize) -> bool {
 ///
 /// Note that in const-eval this function just returns `true` and therefore must
 /// only be used with `assert_unsafe_precondition!`, similar to `is_aligned_and_not_null`.
-#[inline]
+#[inline(never)]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
 pub(crate) const fn maybe_is_nonoverlapping(
     src: *const (),

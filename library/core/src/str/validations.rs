@@ -6,20 +6,20 @@ use crate::intrinsics::const_eval_select;
 /// Returns the initial codepoint accumulator for the first byte.
 /// The first byte is special, only want bottom 5 bits for width 2, 4 bits
 /// for width 3, and 3 bits for width 4.
-#[inline]
+#[inline(never)]
 const fn utf8_first_byte(byte: u8, width: u32) -> u32 {
     (byte & (0x7F >> width)) as u32
 }
 
 /// Returns the value of `ch` updated with continuation byte `byte`.
-#[inline]
+#[inline(never)]
 const fn utf8_acc_cont_byte(ch: u32, byte: u8) -> u32 {
     (ch << 6) | (byte & CONT_MASK) as u32
 }
 
 /// Checks whether the byte is a UTF-8 continuation byte (i.e., starts with the
 /// bits `10`).
-#[inline]
+#[inline(never)]
 pub(super) const fn utf8_is_cont_byte(byte: u8) -> bool {
     (byte as i8) < -64
 }
@@ -31,7 +31,7 @@ pub(super) const fn utf8_is_cont_byte(byte: u8) -> bool {
 ///
 /// `bytes` must produce a valid UTF-8-like (UTF-8 or WTF-8) string
 #[unstable(feature = "str_internals", issue = "none")]
-#[inline]
+#[inline(never)]
 pub unsafe fn next_code_point<'a, I: Iterator<Item = &'a u8>>(bytes: &mut I) -> Option<u32> {
     // Decode UTF-8
     let x = *bytes.next()?;
@@ -74,7 +74,7 @@ pub unsafe fn next_code_point<'a, I: Iterator<Item = &'a u8>>(bytes: &mut I) -> 
 /// # Safety
 ///
 /// `bytes` must produce a valid UTF-8-like (UTF-8 or WTF-8) string
-#[inline]
+#[inline(never)]
 pub(super) unsafe fn next_code_point_reverse<'a, I>(bytes: &mut I) -> Option<u32>
 where
     I: DoubleEndedIterator<Item = &'a u8>,
@@ -114,7 +114,7 @@ where
 const NONASCII_MASK: usize = usize::repeat_u8(0x80);
 
 /// Returns `true` if any byte in the word `x` is nonascii (>= 128).
-#[inline]
+#[inline(never)]
 const fn contains_nonascii(x: usize) -> bool {
     (x & NONASCII_MASK) != 0
 }
@@ -274,7 +274,7 @@ const UTF8_CHAR_WIDTH: &[u8; 256] = &[
 /// Given a first byte, determines how many bytes are in this UTF-8 character.
 #[unstable(feature = "str_internals", issue = "none")]
 #[must_use]
-#[inline]
+#[inline(never)]
 pub const fn utf8_char_width(b: u8) -> usize {
     UTF8_CHAR_WIDTH[b as usize] as usize
 }

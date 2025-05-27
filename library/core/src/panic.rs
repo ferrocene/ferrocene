@@ -212,7 +212,7 @@ pub macro const_panic {
             $crate::intrinsics::const_eval_select!(
                 @capture { $($arg: $ty = $arg),* } -> !:
                 #[noinline]
-                if const #[track_caller] #[inline] { // Inline this, to prevent codegen
+                if const #[track_caller] #[inline(never)] { // Inline this, to prevent codegen
                     $crate::panic!($const_msg)
                 } else #[track_caller] { // Do not inline this, it makes perf worse
                     $crate::panic!($runtime_msg)

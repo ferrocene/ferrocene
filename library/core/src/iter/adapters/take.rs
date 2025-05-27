@@ -32,7 +32,7 @@ where
 {
     type Item = <I as Iterator>::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<<I as Iterator>::Item> {
         if self.n != 0 {
             self.n -= 1;
@@ -42,7 +42,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<I::Item> {
         if self.n > n {
             self.n -= n + 1;
@@ -56,7 +56,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.n == 0 {
             return (0, Some(0));
@@ -74,7 +74,7 @@ where
         (lower, upper)
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Fold: FnMut(Acc, Self::Item) -> R,
@@ -99,7 +99,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<B, F>(self, init: B, f: F) -> B
     where
         Self: Sized,
@@ -108,12 +108,12 @@ where
         Self::spec_fold(self, init, f)
     }
 
-    #[inline]
+    #[inline(never)]
     fn for_each<F: FnMut(Self::Item)>(self, f: F) {
         Self::spec_for_each(self, f)
     }
 
-    #[inline]
+    #[inline(never)]
     #[rustc_inherit_overflow_checks]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let min = self.n.min(n);
@@ -134,7 +134,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut I::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.iter) }
@@ -152,7 +152,7 @@ impl<I> DoubleEndedIterator for Take<I>
 where
     I: DoubleEndedIterator + ExactSizeIterator,
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.n == 0 {
             None
@@ -163,7 +163,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
         let len = self.iter.len();
         if self.n > n {
@@ -178,7 +178,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -197,7 +197,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfold<Acc, Fold>(mut self, init: Acc, fold: Fold) -> Acc
     where
         Self: Sized,
@@ -215,7 +215,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     #[rustc_inherit_overflow_checks]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         // The amount by which the inner iterator needs to be shortened for it to be
@@ -259,7 +259,7 @@ trait SpecTake: Iterator {
 }
 
 impl<I: Iterator> SpecTake for Take<I> {
-    #[inline]
+    #[inline(never)]
     default fn spec_fold<B, F>(mut self, init: B, f: F) -> B
     where
         Self: Sized,
@@ -269,7 +269,7 @@ impl<I: Iterator> SpecTake for Take<I> {
         self.try_fold(init, NeverShortCircuit::wrap_mut_2(f)).0
     }
 
-    #[inline]
+    #[inline(never)]
     default fn spec_for_each<F: FnMut(Self::Item)>(mut self, f: F) {
         // The default implementation would use a unit accumulator, so we can
         // avoid a stateful closure by folding over the remaining number
@@ -291,7 +291,7 @@ impl<I: Iterator> SpecTake for Take<I> {
 }
 
 impl<I: Iterator + TrustedRandomAccess> SpecTake for Take<I> {
-    #[inline]
+    #[inline(never)]
     fn spec_fold<B, F>(mut self, init: B, mut f: F) -> B
     where
         Self: Sized,
@@ -307,7 +307,7 @@ impl<I: Iterator + TrustedRandomAccess> SpecTake for Take<I> {
         acc
     }
 
-    #[inline]
+    #[inline(never)]
     fn spec_for_each<F: FnMut(Self::Item)>(mut self, mut f: F) {
         let end = self.n.min(self.iter.size());
         for i in 0..end {
@@ -320,17 +320,17 @@ impl<I: Iterator + TrustedRandomAccess> SpecTake for Take<I> {
 
 #[stable(feature = "exact_size_take_repeat", since = "1.82.0")]
 impl<T: Clone> DoubleEndedIterator for Take<crate::iter::Repeat<T>> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<Self::Item> {
         self.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
         self.nth(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -340,7 +340,7 @@ impl<T: Clone> DoubleEndedIterator for Take<crate::iter::Repeat<T>> {
         self.try_fold(init, fold)
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Self: Sized,
@@ -349,7 +349,7 @@ impl<T: Clone> DoubleEndedIterator for Take<crate::iter::Repeat<T>> {
         self.fold(init, fold)
     }
 
-    #[inline]
+    #[inline(never)]
     #[rustc_inherit_overflow_checks]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.advance_by(n)

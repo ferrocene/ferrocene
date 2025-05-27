@@ -1824,7 +1824,6 @@ where
 // Implementation of PartialEq, Eq, PartialOrd and Ord for primitive types
 mod impls {
     use crate::cmp::Ordering::{self, Equal, Greater, Less};
-    #[cfg(feature = "uncertified")]
     use crate::hint::unreachable_unchecked;
     use crate::ops::ControlFlow::{self, Break, Continue};
 
@@ -1940,7 +1939,6 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(feature = "uncertified")]
     impl PartialOrd for bool {
         #[inline]
         fn partial_cmp(&self, other: &bool) -> Option<Ordering> {
@@ -1986,7 +1984,6 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(feature = "uncertified")]
     impl Ord for bool {
         #[inline]
         fn cmp(&self, other: &bool) -> Ordering {

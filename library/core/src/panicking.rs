@@ -30,7 +30,6 @@
 
 #[cfg(feature = "uncertified")]
 use crate::fmt;
-#[cfg(feature = "uncertified")]
 use crate::intrinsics::const_eval_select;
 #[cfg(feature = "uncertified")]
 use crate::panic::{Location, PanicInfo};
@@ -132,6 +131,28 @@ pub const fn panic_nounwind_fmt(fmt: fmt::Arguments<'_>, force_no_backtrace: boo
 
             // SAFETY: `panic_impl` is defined in safe Rust code and thus is safe to call.
             unsafe { panic_impl(&pi) }
+        }
+    )
+}
+
+/// FIXME: This is just a hack so we can get `panic_nounwind` working.
+#[inline]
+#[track_caller]
+// This attribute has the key side-effect that if the panic handler ignores `can_unwind`
+// and unwinds anyway, we will hit the "unwinding out of nounwind function" guard,
+// which causes a "panic in a function that cannot unwind".
+#[rustc_nounwind]
+#[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
+#[rustc_allow_const_fn_unstable(const_eval_select)]
+#[cfg(all(not(feature = "uncertified"), feature = "panic_immediate_abort"))]
+pub const fn panic_nounwind_fmt(_expr: &'static str, _force_no_backtrace: bool) -> ! {
+    const_eval_select!(
+        @capture { _expr: &'static str, _force_no_backtrace: bool } -> !:
+        if const #[track_caller] {
+            // We don't unwind anyway at compile-time so we can call the regular `panic_fmt`.
+            panic_fmt(_expr)
+        } else #[track_caller] {
+            super::intrinsics::abort()
         }
     )
 }
@@ -244,9 +265,11 @@ pub mod panic_const {
 #[lang = "panic_nounwind"] // needed by codegen for non-unwinding panics
 #[rustc_nounwind]
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
-#[cfg(feature = "uncertified")]
 pub const fn panic_nounwind(expr: &'static str) -> ! {
+    #[cfg(feature = "uncertified")]
     panic_nounwind_fmt(fmt::Arguments::new_const(&[expr]), /* force_no_backtrace */ false);
+    #[cfg(not(feature = "uncertified"))]
+    panic_nounwind_fmt(expr, /* force_no_backtrace */ false);
 }
 
 /// Like `panic_nounwind`, but also inhibits showing a backtrace.

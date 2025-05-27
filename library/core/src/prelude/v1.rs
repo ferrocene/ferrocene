@@ -76,7 +76,7 @@ pub use crate::hash::macros::Hash;
 #[doc(no_inline)]
 #[cfg(feature = "uncertified")]
 pub use crate::{
-    cfg, column, compile_error, concat, concat_idents, env, file, format_args,
+    column, compile_error, concat_idents, env, file, format_args,
     format_args_nl, include, include_bytes, include_str, line, log_syntax, module_path, option_env,
     stringify, trace_macros,
 };
@@ -84,7 +84,7 @@ pub use crate::{
 #[allow(deprecated)]
 #[cfg_attr(bootstrap, allow(deprecated_in_future))]
 #[doc(no_inline)]
-pub use crate::assert;
+pub use crate::{ assert, cfg, concat };
 
 #[unstable(
     feature = "concat_bytes",

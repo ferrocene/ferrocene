@@ -102,7 +102,6 @@
 #![cfg_attr(feature = "uncertified", feature(bstr_internals))]
 #![cfg_attr(feature = "uncertified", feature(cfg_match))]
 #![cfg_attr(feature = "uncertified", feature(const_carrying_mul_add))]
-#![cfg_attr(feature = "uncertified", feature(const_eval_select))]
 #![cfg_attr(feature = "uncertified", feature(coverage_attribute))]
 #![cfg_attr(feature = "uncertified", feature(disjoint_bitor))]
 #![cfg_attr(feature = "uncertified", feature(ip))]
@@ -120,14 +119,15 @@
 #![cfg_attr(feature = "uncertified", feature(str_internals))]
 #![cfg_attr(feature = "uncertified", feature(str_split_inclusive_remainder))]
 #![cfg_attr(feature = "uncertified", feature(str_split_remainder))]
-#![cfg_attr(feature = "uncertified", feature(ub_checks))]
 #![cfg_attr(feature = "uncertified", feature(unchecked_neg))]
 #![cfg_attr(feature = "uncertified", feature(unchecked_shifts))]
 #![cfg_attr(feature = "uncertified", feature(unsafe_pinned))]
 #![cfg_attr(feature = "uncertified", feature(utf16_extra))]
 #![cfg_attr(feature = "uncertified", feature(variant_count))]
+#![feature(const_eval_select)]
 #![feature(core_intrinsics)]
 #![feature(internal_impls_macro)]
+#![feature(ub_checks)]
 // tidy-alphabetical-end
 //
 // Language features:
@@ -137,7 +137,6 @@
 #![cfg_attr(feature = "uncertified", feature(cfg_sanitize))]
 #![cfg_attr(feature = "uncertified", feature(cfg_target_has_atomic))]
 #![cfg_attr(feature = "uncertified", feature(cfg_target_has_atomic_equal_alignment))]
-#![cfg_attr(feature = "uncertified", feature(cfg_ub_checks))]
 #![cfg_attr(feature = "uncertified", feature(const_precise_live_drops))]
 #![cfg_attr(feature = "uncertified", feature(deprecated_suggestion))]
 #![cfg_attr(feature = "uncertified", feature(doc_cfg))]
@@ -167,6 +166,7 @@
 #![feature(allow_internal_unsafe)]
 #![feature(allow_internal_unstable)]
 #![feature(auto_traits)]
+#![feature(cfg_ub_checks)]
 #![feature(const_trait_impl)]
 #![feature(decl_macro)]
 #![feature(doc_cfg_hide)]
@@ -322,7 +322,6 @@ pub mod prelude;
 
 /* Core modules for ownership management */
 
-#[cfg(feature = "uncertified")]
 pub mod hint;
 pub mod intrinsics;
 #[cfg(feature = "uncertified")]
@@ -330,7 +329,6 @@ pub mod mem;
 #[cfg(feature = "uncertified")]
 pub mod ptr;
 #[unstable(feature = "ub_checks", issue = "none")]
-#[cfg(feature = "uncertified")]
 pub mod ub_checks;
 
 /* Core language traits */

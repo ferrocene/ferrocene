@@ -61,9 +61,7 @@
 )]
 #![allow(missing_docs)]
 
-use crate::marker::DiscriminantKind;
-#[cfg(feature = "uncertified")]
-use crate::marker::Tuple;
+use crate::marker::{DiscriminantKind, Tuple};
 #[cfg(feature = "uncertified")]
 use crate::mem::SizedTypeProperties;
 #[cfg(feature = "uncertified")]
@@ -1347,7 +1345,6 @@ pub fn abort() -> !;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(feature = "uncertified")]
 pub const unsafe fn unreachable() -> !;
 
 /// Informs the optimizer that a condition is always true.
@@ -3380,7 +3377,6 @@ pub const fn black_box<T>(dummy: T) -> T;
 /// otherwise, that principle should not be violated.
 #[rustc_const_unstable(feature = "const_eval_select", issue = "124625")]
 #[rustc_intrinsic]
-#[cfg(feature = "uncertified")]
 pub const fn const_eval_select<ARG: Tuple, F, G, RET>(
     _arg: ARG,
     _called_in_const: F,
@@ -3408,7 +3404,6 @@ where
 /// markes as `#[inline]`.
 ///
 /// See [`const_eval_select()`] for the rules and requirements around that intrinsic.
-#[cfg(feature = "uncertified")]
 pub(crate) macro const_eval_select {
     (
         @capture$([$($binders:tt)*])? { $($arg:ident : $ty:ty = $val:expr),* $(,)? } $( -> $ret:ty )? :
@@ -3594,17 +3589,16 @@ pub const unsafe fn typed_swap_nonoverlapping<T>(x: *mut T, y: *mut T) {
 /// attribute, evaluation is delayed until monomorphization (or until the call gets inlined into
 /// a crate that does not delay evaluation further); otherwise it can happen any time.
 ///
-/// The common case here is a user program built with ub_checks linked against the distributed
-/// sysroot which is built without ub_checks but with `#[rustc_preserve_ub_checks]`.
-/// For code that gets monomorphized in the user crate (i.e., generic functions and functions with
-/// `#[inline]`), gating assertions on `ub_checks()` rather than `cfg!(ub_checks)` means that
-/// assertions are enabled whenever the *user crate* has UB checks enabled. However, if the
-/// user has UB checks disabled, the checks will still get optimized out. This intrinsic is
-/// primarily used by [`ub_checks::assert_unsafe_precondition`].
+// /// The common case here is a user program built with ub_checks linked against the distributed
+// /// sysroot which is built without ub_checks but with `#[rustc_preserve_ub_checks]`.
+// /// For code that gets monomorphized in the user crate (i.e., generic functions and functions with
+// /// `#[inline]`), gating assertions on `ub_checks()` rather than `cfg!(ub_checks)` means that
+// /// assertions are enabled whenever the *user crate* has UB checks enabled. However, if the
+// /// user has UB checks disabled, the checks will still get optimized out. This intrinsic is
+// /// primarily used by [`ub_checks::assert_unsafe_precondition`].
 #[rustc_intrinsic_const_stable_indirect] // just for UB checks
 #[inline(always)]
 #[rustc_intrinsic]
-#[cfg(feature = "uncertified")]
 pub const fn ub_checks() -> bool {
     cfg!(ub_checks)
 }

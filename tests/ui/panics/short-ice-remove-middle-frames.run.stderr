@@ -2,8 +2,8 @@
 thread 'main' panicked at $DIR/short-ice-remove-middle-frames.rs:58:5:
 debug!!!
 stack backtrace:
-   0: begin_panic_handler
-   1: panic_fmt
+   0: rust_begin_unwind
+   1: core::panicking::panic_fmt
    2: short_ice_remove_middle_frames::seven
    3: short_ice_remove_middle_frames::sixth
    4: short_ice_remove_middle_frames::fifth::{{closure}}

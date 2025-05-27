@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Ensure that rustdoc gives errors for trait impls inside function bodies that don't resolve.
 // See https://github.com/rust-lang/rust/pull/73566
 pub struct ValidType;

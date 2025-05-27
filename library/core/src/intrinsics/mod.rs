@@ -1305,7 +1305,7 @@ pub const fn likely(b: bool) -> bool {
 /// This intrinsic does not have a stable counterpart.
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_nounwind]
-#[inline(never)]
+#[inline(always)]
 pub const fn unlikely(b: bool) -> bool {
     if b {
         cold_path();

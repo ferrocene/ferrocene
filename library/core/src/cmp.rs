@@ -1845,13 +1845,13 @@ mod impls {
     #[rustfmt::skip]
     macro_rules! partial_ord_methods_primitive_impl {
         () => {
-            #[inline(always)]
+            #[inline(never)]
             fn lt(&self, other: &Self) -> bool { *self <  *other }
-            #[inline(always)]
+            #[inline(never)]
             fn le(&self, other: &Self) -> bool { *self <= *other }
-            #[inline(always)]
+            #[inline(never)]
             fn gt(&self, other: &Self) -> bool { *self >  *other }
-            #[inline(always)]
+            #[inline(never)]
             fn ge(&self, other: &Self) -> bool { *self >= *other }
 
             // These implementations are the same for `Ord` or `PartialOrd` types

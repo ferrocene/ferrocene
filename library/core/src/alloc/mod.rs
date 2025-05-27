@@ -358,7 +358,7 @@ pub unsafe trait Allocator {
     /// Creates a "by reference" adapter for this instance of `Allocator`.
     ///
     /// The returned adapter also implements `Allocator` and will simply borrow this.
-    #[inline(always)]
+    #[inline(never)]
     fn by_ref(&self) -> &Self
     where
         Self: Sized,

@@ -1282,7 +1282,7 @@ pub const fn cold_path() {}
 /// This intrinsic does not have a stable counterpart.
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_nounwind]
-#[inline(always)]
+#[inline(never)]
 pub const fn likely(b: bool) -> bool {
     if b {
         true
@@ -1305,7 +1305,7 @@ pub const fn likely(b: bool) -> bool {
 /// This intrinsic does not have a stable counterpart.
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_nounwind]
-#[inline(always)]
+#[inline(never)]
 pub const fn unlikely(b: bool) -> bool {
     if b {
         cold_path();
@@ -2319,7 +2319,7 @@ pub fn round_ties_even_f16(x: f16) -> f16;
 pub fn round_ties_even_f32(x: f32) -> f32;
 
 /// Provided for compatibility with stdarch. DO NOT USE.
-#[inline(always)]
+#[inline(never)]
 pub unsafe fn rintf32(x: f32) -> f32 {
     round_ties_even_f32(x)
 }
@@ -2334,7 +2334,7 @@ pub unsafe fn rintf32(x: f32) -> f32 {
 pub fn round_ties_even_f64(x: f64) -> f64;
 
 /// Provided for compatibility with stdarch. DO NOT USE.
-#[inline(always)]
+#[inline(never)]
 pub unsafe fn rintf64(x: f64) -> f64 {
     round_ties_even_f64(x)
 }
@@ -3340,7 +3340,7 @@ pub const unsafe fn typed_swap_nonoverlapping<T>(x: *mut T, y: *mut T) {
 /// user has UB checks disabled, the checks will still get optimized out. This intrinsic is
 /// primarily used by [`ub_checks::assert_unsafe_precondition`].
 #[rustc_intrinsic_const_stable_indirect] // just for UB checks
-#[inline(always)]
+#[inline(never)]
 #[rustc_intrinsic]
 pub const fn ub_checks() -> bool {
     cfg!(ub_checks)
@@ -3391,7 +3391,7 @@ pub const unsafe fn const_deallocate(_ptr: *mut u8, _size: usize, _align: usize)
 /// and let an end user opt into turning them on.
 #[rustc_const_unstable(feature = "contracts_internals", issue = "128044" /* compiler-team#759 */)]
 #[unstable(feature = "contracts_internals", issue = "128044" /* compiler-team#759 */)]
-#[inline(always)]
+#[inline(never)]
 #[rustc_intrinsic]
 pub const fn contract_checks() -> bool {
     // FIXME: should this be `false` or `cfg!(contract_checks)`?
@@ -3721,7 +3721,7 @@ pub const fn ptr_metadata<P: ptr::Pointee<Metadata = M> + ?Sized, M>(ptr: *const
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_allowed_through_unstable_modules = "import this function via `std::ptr` instead"]
 #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
-#[inline(always)]
+#[inline(never)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_diagnostic_item = "ptr_copy_nonoverlapping"]
 pub const unsafe fn copy_nonoverlapping<T>(src: *const T, dst: *mut T, count: usize) {
@@ -3824,7 +3824,7 @@ pub const unsafe fn copy_nonoverlapping<T>(src: *const T, dst: *mut T, count: us
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_allowed_through_unstable_modules = "import this function via `std::ptr` instead"]
 #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
-#[inline(always)]
+#[inline(never)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_diagnostic_item = "ptr_copy"]
 pub const unsafe fn copy<T>(src: *const T, dst: *mut T, count: usize) {
@@ -3904,7 +3904,7 @@ pub const unsafe fn copy<T>(src: *const T, dst: *mut T, count: usize) {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_allowed_through_unstable_modules = "import this function via `std::ptr` instead"]
 #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
-#[inline(always)]
+#[inline(never)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_diagnostic_item = "ptr_write_bytes"]
 pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize) {

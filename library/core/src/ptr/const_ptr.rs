@@ -61,7 +61,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "ptr_cast", since = "1.38.0")]
     #[rustc_const_stable(feature = "const_ptr_cast", since = "1.38.0")]
     #[rustc_diagnostic_item = "const_ptr_cast"]
-    #[inline(always)]
+    #[inline(never)]
     pub const fn cast<U>(self) -> *const U {
         self as _
     }
@@ -132,7 +132,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "ptr_const_cast", since = "1.65.0")]
     #[rustc_const_stable(feature = "ptr_const_cast", since = "1.65.0")]
     #[rustc_diagnostic_item = "ptr_cast_mut"]
-    #[inline(always)]
+    #[inline(never)]
     pub const fn cast_mut(self) -> *mut T {
         self as _
     }
@@ -160,7 +160,7 @@ impl<T: ?Sized> *const T {
     ///
     /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
     #[must_use]
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
     pub fn addr(self) -> usize {
         // A pointer-to-integer transmute currently has exactly the right semantics: it returns the
@@ -193,7 +193,7 @@ impl<T: ?Sized> *const T {
     /// This is an [Exposed Provenance][crate::ptr#exposed-provenance] API.
     ///
     /// [`with_exposed_provenance`]: with_exposed_provenance
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "exposed_provenance", since = "1.84.0")]
     pub fn expose_provenance(self) -> usize {
         self.cast::<()>() as usize
@@ -415,7 +415,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const unsafe fn offset(self, count: isize) -> *const T
     where
@@ -466,7 +466,7 @@ impl<T: ?Sized> *const T {
     /// For non-`Sized` pointees this operation changes only the data pointer,
     /// leaving the metadata untouched.
     #[must_use]
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -530,7 +530,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "ptr_wrapping_offset", since = "1.16.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[inline(always)]
+    #[inline(never)]
     pub const fn wrapping_offset(self, count: isize) -> *const T
     where
         T: Sized,
@@ -550,7 +550,7 @@ impl<T: ?Sized> *const T {
     /// For non-`Sized` pointees this operation changes only the data pointer,
     /// leaving the metadata untouched.
     #[must_use]
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     pub const fn wrapping_byte_offset(self, count: isize) -> Self {
@@ -590,7 +590,7 @@ impl<T: ?Sized> *const T {
     /// ```
     #[unstable(feature = "ptr_mask", issue = "98290")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
-    #[inline(always)]
+    #[inline(never)]
     pub fn mask(self, mask: usize) -> *const T {
         intrinsics::ptr_mask(self.cast::<()>(), mask).with_metadata_of(self)
     }
@@ -699,7 +699,7 @@ impl<T: ?Sized> *const T {
     ///
     /// For non-`Sized` pointees this operation considers only the data pointers,
     /// ignoring the metadata.
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -926,7 +926,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const unsafe fn add(self, count: usize) -> Self
     where
@@ -976,7 +976,7 @@ impl<T: ?Sized> *const T {
     /// For non-`Sized` pointees this operation changes only the data pointer,
     /// leaving the metadata untouched.
     #[must_use]
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1032,7 +1032,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const unsafe fn sub(self, count: usize) -> Self
     where
@@ -1088,7 +1088,7 @@ impl<T: ?Sized> *const T {
     /// For non-`Sized` pointees this operation changes only the data pointer,
     /// leaving the metadata untouched.
     #[must_use]
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1151,7 +1151,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[inline(always)]
+    #[inline(never)]
     pub const fn wrapping_add(self, count: usize) -> Self
     where
         T: Sized,
@@ -1169,7 +1169,7 @@ impl<T: ?Sized> *const T {
     /// For non-`Sized` pointees this operation changes only the data pointer,
     /// leaving the metadata untouched.
     #[must_use]
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     pub const fn wrapping_byte_add(self, count: usize) -> Self {
@@ -1230,7 +1230,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[inline(always)]
+    #[inline(never)]
     pub const fn wrapping_sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -1248,7 +1248,7 @@ impl<T: ?Sized> *const T {
     /// For non-`Sized` pointees this operation changes only the data pointer,
     /// leaving the metadata untouched.
     #[must_use]
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     pub const fn wrapping_byte_sub(self, count: usize) -> Self {
@@ -1513,7 +1513,7 @@ impl<T> *const [T] {
     /// let slice: *const [i8] = ptr::slice_from_raw_parts(ptr::null(), 3);
     /// assert!(!slice.is_empty());
     /// ```
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "slice_ptr_len", since = "1.79.0")]
     #[rustc_const_stable(feature = "const_slice_ptr_len", since = "1.79.0")]
     pub const fn is_empty(self) -> bool {

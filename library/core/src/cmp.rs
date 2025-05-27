@@ -1088,13 +1088,7 @@ pub trait Ord: Eq + PartialOrd<Self> {
     where
         Self: Sized,
     {
-        #[cfg(feature = "uncertified")]
         assert!(min <= max);
-        #[cfg(not(feature = "uncertified"))]
-        // FIXME: remove once panic and assert are certified.
-        if min > max {
-            crate::intrinsics::abort();
-        }
         if self < min {
             min
         } else if self > max {

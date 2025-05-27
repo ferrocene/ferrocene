@@ -103,7 +103,6 @@
 #![cfg_attr(feature = "uncertified", feature(cfg_match))]
 #![cfg_attr(feature = "uncertified", feature(const_carrying_mul_add))]
 #![cfg_attr(feature = "uncertified", feature(const_eval_select))]
-#![cfg_attr(feature = "uncertified", feature(core_intrinsics))]
 #![cfg_attr(feature = "uncertified", feature(coverage_attribute))]
 #![cfg_attr(feature = "uncertified", feature(disjoint_bitor))]
 #![cfg_attr(feature = "uncertified", feature(ip))]
@@ -127,6 +126,7 @@
 #![cfg_attr(feature = "uncertified", feature(unsafe_pinned))]
 #![cfg_attr(feature = "uncertified", feature(utf16_extra))]
 #![cfg_attr(feature = "uncertified", feature(variant_count))]
+#![feature(core_intrinsics)]
 #![feature(internal_impls_macro)]
 // tidy-alphabetical-end
 //
@@ -149,7 +149,6 @@
 #![cfg_attr(feature = "uncertified", feature(generic_arg_infer))]
 #![cfg_attr(feature = "uncertified", feature(if_let_guard))]
 #![cfg_attr(feature = "uncertified", feature(intra_doc_pointers))]
-#![cfg_attr(feature = "uncertified", feature(intrinsics))]
 #![cfg_attr(feature = "uncertified", feature(let_chains))]
 #![cfg_attr(feature = "uncertified", feature(link_llvm_intrinsics))]
 #![cfg_attr(feature = "uncertified", feature(macro_metavar_expr))]
@@ -172,6 +171,7 @@
 #![feature(decl_macro)]
 #![feature(doc_cfg_hide)]
 #![feature(fundamental)]
+#![feature(intrinsics)]
 #![feature(lang_items)]
 #![feature(multiple_supertrait_upcastable)]
 #![feature(negative_impls)]
@@ -324,7 +324,6 @@ pub mod prelude;
 
 #[cfg(feature = "uncertified")]
 pub mod hint;
-#[cfg(feature = "uncertified")]
 pub mod intrinsics;
 #[cfg(feature = "uncertified")]
 pub mod mem;

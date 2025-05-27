@@ -859,12 +859,12 @@ impl<T: ?Sized> Default for PhantomData<T> {
 impl<T: ?Sized> StructuralPartialEq for PhantomData<T> {}
 
 /// Compiler-internal trait used to indicate the type of enum discriminants.
-///
-/// This trait is automatically implemented for every type and does not add any
-/// guarantees to [`mem::Discriminant`]. It is **undefined behavior** to transmute
-/// between `DiscriminantKind::Discriminant` and `mem::Discriminant`.
-///
-/// [`mem::Discriminant`]: crate::mem::Discriminant
+// ///
+// /// This trait is automatically implemented for every type and does not add any
+// /// guarantees to [`mem::Discriminant`]. It is **undefined behavior** to transmute
+// /// between `DiscriminantKind::Discriminant` and `mem::Discriminant`.
+// ///
+// /// [`mem::Discriminant`]: crate::mem::Discriminant
 #[unstable(
     feature = "discriminant_kind",
     issue = "none",
@@ -873,12 +873,16 @@ impl<T: ?Sized> StructuralPartialEq for PhantomData<T> {}
 #[lang = "discriminant_kind"]
 #[rustc_deny_explicit_impl]
 #[rustc_do_not_implement_via_object]
-#[cfg(feature = "uncertified")]
 pub trait DiscriminantKind {
     /// The type of the discriminant, which must satisfy the trait
     /// bounds required by `mem::Discriminant`.
     #[lang = "discriminant_type"]
+    #[cfg(feature = "uncertified")]
     type Discriminant: Clone + Copy + Debug + Eq + PartialEq + Hash + Send + Sync + Unpin;
+    #[lang = "discriminant_type"]
+    #[cfg(not(feature = "uncertified"))]
+    /// FIXME: docs
+    type Discriminant: Clone + Copy + Eq + PartialEq + Send + Sync;
 }
 
 /// Used to determine whether a type contains

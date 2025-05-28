@@ -1,5 +1,5 @@
 error[E0433]: failed to resolve: `String` is a struct, not a module
-  --> $DIR/unresolved-segments-visibility.rs:8:27
+  --> $DIR/unresolved-segments-visibility.rs:9:27
    |
 LL |         pub(in b::string::String::newy) extern crate alloc as e;
    |                           ^^^^^^ `String` is a struct, not a module

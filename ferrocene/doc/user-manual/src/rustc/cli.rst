@@ -7,6 +7,7 @@
 .. cli:program:: rustc
 
    .. cli:option:: -A <lints>
+      :category: narrow
 
       Compiler argument ``-A`` indicates which lints are suppressed. A
       suppressed lint is never checked and does not emit a diagnostic.
@@ -33,12 +34,8 @@
 
          $ rustc -A warnings -A absolute-paths-not-starting-with-crate
 
-   .. cli:option:: -C
-
-      Compiler argument ``-C`` customizes code generation. The compiler
-      argument must be followed by at least one code generation option.
-
    .. cli:option:: -C codegen-units=<number>
+      :category: narrow
 
       Code generation option ``codegen-units`` instructs the compiler to
       split the crate being compiled into multiple units. This may increase
@@ -56,6 +53,7 @@
       command line, where precedence increases from left to right.
 
    .. cli:option:: -C debug-assertions=<flag>
+      :category: narrow
 
       Code generation option ``debug-assertions`` enables (or disables)
       conditional compilation that is predicated on attribute
@@ -83,6 +81,7 @@
       command line, where precedence increases from left to right.
 
    .. cli:option:: -C debuginfo=<level>
+      :category: narrow
 
       Code generation option ``debuginfo`` indicates the level of detail of
       the debug information produced by the compiler.
@@ -109,6 +108,7 @@
       line, where precedence increases from left to right.
 
    .. cli:option:: -C extra-filename=<suffix>
+      :category: narrow
 
       Code generation option ``extra-filename`` appends a suffix to the name
       of each output file.
@@ -125,12 +125,7 @@
       command line, where precedence increases from left to right.
 
    .. cli:option:: -C llvm-args=<args>
-
-      .. caution::
-
-         This code generation option is outside the scope of the Ferrocene
-         qualification, and must not be used in a safety critical
-         context. Its documentation is presented for your convenience.
+      :category: unqualified
 
       Code generation option ``llvm-args`` can be used to pass a list of arguments
       directly to LLVM.
@@ -143,6 +138,7 @@
          $ rustc -C llvm-args=--inline-threshold=123 my_program.rs
 
    .. cli:option:: -C link-arg=<arg>
+      :category: wide
 
       .. caution::
 
@@ -168,6 +164,7 @@
       line.
 
    .. cli:option:: -C link-args=<args>
+      :category: wide
 
       .. caution::
 
@@ -194,6 +191,7 @@
       line.
 
    .. cli:option:: -C link-dead-code=<flag>
+      :category: narrow
 
       Code generation option ``link-dead-code`` indicates whether dead code
       is linked.
@@ -220,6 +218,7 @@
       command line, where precedence increases from left to right.
 
    .. cli:option:: -C linker=<path>
+      :category: wide
 
       .. caution::
 
@@ -243,6 +242,7 @@
       line, where precedence increases from left to right.
 
    .. cli:option:: -C linker-flavor=<flavor>
+      :category: wide
 
       .. caution::
 
@@ -292,6 +292,7 @@
       command line.
 
    .. cli:option:: -C metadata=<data>
+      :category: narrow
 
       Code generation option ``metadata`` enhances symbol mangling by supplying
       additional data used in the hashed suffixes of symbols.
@@ -309,12 +310,7 @@
       line, where precedence increases from left to right.
 
    .. cli:option:: -C no-vectorize-loops
-
-      .. caution::
-
-         This code generation option is outside the scope of the Ferrocene
-         qualification, and must not be used in a safety critical
-         context. Its documentation is presented for your convenience.
+      :category: unqualified
 
       Code generation option ``no-vectorize-loops`` disables loop
       vectorization.
@@ -329,6 +325,7 @@
       the command line, where precedence increases from left to right.
 
    .. cli:option:: -C opt-level=<level>
+      :category: wide
 
       .. caution::
 
@@ -361,6 +358,7 @@
       line, where precedence increases from left to right.
 
    .. cli:option:: -C overflow-checks=<flag>
+      :category: narrow
 
       Code generation option ``overflow-checks`` enables (or disables)
       checks on runtime integer overflow. If overflow checks are enabled
@@ -388,6 +386,7 @@
       command line, where precedence increases from left to right.
 
    .. cli:option:: -C panic=<behavior>
+      :category: narrow
 
       Code generation option ``panic`` indicates the behavior of panics.
 
@@ -412,6 +411,7 @@
       line, where precedence increases from left to right.
 
    .. cli:option:: -C prefer-dynamic=<flag>
+      :category: narrow
 
       Code generation option ``prefer-dynamic`` indicates whether dynamic
       linking is preferable when both a static and a dynamic version of a
@@ -439,12 +439,7 @@
       command line, where precedence increases from left to right.
 
    .. cli:option:: -C relocation-model=<model>
-
-      .. caution::
-
-         This code generation option is outside the scope of the Ferrocene
-         qualification, and must not be used in a safety critical
-         context. Its documentation is presented for your convenience.
+      :category: unqualified
 
       Code generation option ``relocation-model`` enables the generation of
       position-independent code.
@@ -455,6 +450,7 @@
       command line, where precedence increases from left to right.
 
    .. cli:option:: -C rpath=<flag>
+      :category: narrow
 
       Code generation option ``rpath`` indicates whether the run-time search
       path is enabled (or disabled).
@@ -482,12 +478,7 @@
       line, where precedence increases from left to right.
 
    .. cli:option:: -C target-cpu=<cpu>
-
-      .. caution::
-
-         This code generation option is outside the scope of the Ferrocene
-         qualification, and must not be used in a safety critical
-         context. Its documentation is presented for your convenience.
+      :category: unqualified
 
       Code generation option ``target-cpu`` indicates the CPU of the target to
       generate code for.
@@ -505,12 +496,7 @@
       command line, where precedence increases from left to right.
 
    .. cli:option:: -C target-feature=<features>
-
-      .. caution::
-
-         This code generation option is outside the scope of the Ferrocene
-         qualification, and must not be used in a safety critical
-         context. Its documentation is presented for your convenience.
+      :category: unqualified
 
       Code generation option ``target-feature`` enables (or disables) a
       feature of the target.
@@ -548,6 +534,7 @@
       command line.
 
    .. cli:option:: --cap-lints <level>
+      :category: narrow
 
       Compiler argument ``--cap-lints`` indicates the overall diagnostic level
       of all lints.
@@ -581,6 +568,7 @@
       line.
 
    .. cli:option:: --cfg <option>
+      :category: narrow
 
       Compiler argument ``--cfg`` specifies conditional compilation option
       keys and values.
@@ -603,11 +591,8 @@
 
       Multiple ``--cfg`` compiler arguments are allowed on the command line.
 
-   .. cli:option:: --codegen
-
-      Compiler argument ``--codegen`` is identical to compiler argument ``-C``.
-
    .. cli:option:: --color <option>
+      :category: informational
 
       Compiler argument ``--color`` sets the color of the output.
 
@@ -633,6 +618,7 @@
       Only one ``--color`` compiler argument is allowed on the command line.
 
    .. cli:option:: --crate-name <name>
+      :category: narrow
 
       Compiler argument ``--crate-name`` specifies the name of the crate to
       build.
@@ -652,6 +638,7 @@
       line.
 
    .. cli:option:: --crate-type <types>
+      :category: narrow
 
       .. caution::
 
@@ -696,6 +683,7 @@
          $ rustc --crate-type dylib --crate-type rlib my_library.rs
 
    .. cli:option:: -D <lints>
+      :category: narrow
 
       Compiler argument ``-D`` indicates which lints emit their diagnostics as
       errors. This compiler argument may be used to treat warnings as errors.
@@ -724,6 +712,7 @@
          $ rustc -D warnings -D absolute-paths-not-starting-with-crate
 
    .. cli:option:: --edition <edition>
+      :category: wide
 
       .. caution::
 
@@ -745,6 +734,7 @@
       Only one ``--edition`` compiler argument is allowed on the command line.
 
    .. cli:option:: --emit <kinds>
+      :category: narrow
 
       Compiler argument ``--emit`` indicates which kind of output to emit.
 
@@ -778,6 +768,7 @@
          $ rustc --emit dep-info --emit metadata my_program.rs
 
    .. cli:option:: --error-format <kind>
+      :category: informational
 
       Indicate which kind of error format to use.
 
@@ -807,6 +798,7 @@
       line.
 
    .. cli:option:: --explain <code>
+      :category: informational
 
       Compiler argument ``--explain`` outputs a verbose explanation of an error
       denoted by a code.
@@ -823,6 +815,7 @@
       Only one ``--explain`` compiler argument is allowed on the command line.
 
    .. cli:option:: --extern <details>
+      :category: narrow
 
       Compiler argument ``--extern`` indicates the name and location of an
       external crate. The crate is added to the external prelude, and will
@@ -866,6 +859,7 @@
                  my_program.rs
 
    .. cli:option:: -F <lints>
+      :category: narrow
 
       Compiler argument ``-F`` indicates which lints always emit their
       diagnostics as errors, regardless of whether other lint-related compiler
@@ -895,15 +889,18 @@
          $ rustc -F warnings -F absolute-paths-not-starting-with-crate
 
    .. cli:option:: -g
+      :category: narrow
 
       Compiler argument ``-g`` is identical to compiler argument
       ``-C debuginfo=2``.
 
    .. cli:option:: -h
+      :category: informational
 
       Compiler option ``-h`` is identical to compiler argument ``--help``.
 
    .. cli:option:: --help
+      :category: informational
 
       Compiler argument ``--help`` emits usage and help information.
 
@@ -914,6 +911,7 @@
          $ rustc -help
 
    .. cli:option:: --json <format>
+      :category: informational
 
       Compiler argument ``--json`` indicates the format of the JSON output when
       compiler argument ``--error-format json`` is in effect.
@@ -944,6 +942,7 @@
       Only one ``--json`` compiler argument is allowed on the command line.
 
    .. cli:option:: -L <details>
+      :category: narrow
 
       Compiler argument ``-L`` indicates the kind and location of a search
       path.
@@ -980,6 +979,7 @@
          $ rust -L libraries -L native=include/c_libraries my_program.rs
 
    .. cli:option:: -l <details>
+      :category: narrow
 
       Compiler argument ``-l`` indicates a native library to link.
 
@@ -1057,11 +1057,13 @@
          $ rustc -l static+bundle=mine:libmy_static_library my_program.rs
 
    .. cli:option:: -O
+      :category: wide
 
       Compiler argument ``-O`` is identical to compiler argument
       ``-C opt-level=2``.
 
    .. cli:option:: -o <name>
+      :category: narrow
 
       Compiler argument ``-o`` indicates the name of the compilation output
       file.
@@ -1080,6 +1082,7 @@
       Only one ``-o`` compiler argument is allowed on the command line.
 
    .. cli:option:: --out-dir <directory>
+      :category: narrow
 
       Compiler argument ``--out-dir`` indicates the output directory.
 
@@ -1098,6 +1101,7 @@
       Only one ``--out-dir`` compiler argument is allowed on the command line.
 
    .. cli:option:: --print <option>
+      :category: informational
 
       Compiler argument ``--print`` emits information about the compiler.
 
@@ -1129,6 +1133,7 @@
       Multiple ``--print`` compiler arguments are allowed on the command line.
 
    .. cli:option:: --remap-path-prefix <from>=<to>
+      :category: narrow
 
       Remap source path prefixes in all output.
       Compiler argument ``--remap-path-prefix`` causes path prefixes in all
@@ -1149,6 +1154,7 @@
       command line.
 
    .. cli:option:: --sysroot
+      :category: narrow
 
       Compiler option ``--sysroot`` indicates the compiler installation root.
 
@@ -1161,6 +1167,7 @@
       Only one ``--sysroot`` compiler argument is allowed on the command line.
 
    .. cli:option:: --target <target>
+      :category: wide
 
       Compiler argument ``--target`` indicates the target triple to build.
 
@@ -1175,6 +1182,7 @@
       Only one ``--target`` compiler argument is allowed on the command line.
 
    .. cli:option:: --test
+      :category: narrow
 
       Compiler argument ``--test`` builds a test harness in the form of an
       executable binary.
@@ -1188,14 +1196,17 @@
       Only one ``--test`` compiler argument is allowed on the command line.
 
    .. cli:option:: -V
+      :category: informational
 
       Compiler argument ``-V`` is identical to compiler argument ``--version``.
 
    .. cli:option:: -v
+      :category: informational
 
       Compiler argument ``-v`` is identical to compiler argument ``--verbose``.
 
    .. cli:option:: --verbose
+      :category: informational
 
       Compiler argument ``--verbose`` emits verbose output.
 
@@ -1208,6 +1219,7 @@
       Only one ``--verbose`` compiler argument is allowed on the command line.
 
    .. cli:option:: --version
+      :category: informational
 
       Compiler argument ``--version`` emits the compiler version.
 
@@ -1220,6 +1232,7 @@
       Only one ``--version`` compiler argument is allowed on the command line.
 
    .. cli:option:: -W <lints>
+      :category: narrow
 
       Compiler argument ``-W`` indicates which lints emit their diagnostics as
       warnings. This compiler argument may be used to treat errors as warnings.

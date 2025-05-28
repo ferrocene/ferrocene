@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Test that when a trait impl changes, fns whose body uses that trait
 // must also be recompiled.
 

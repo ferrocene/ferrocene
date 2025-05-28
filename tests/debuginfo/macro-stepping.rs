@@ -1,8 +1,8 @@
+//@ edition: 2015
 //@ ignore-android
 //@ ignore-aarch64
 //@ min-lldb-version: 1800
 //@ min-gdb-version: 13.0
-
 //@ aux-build:macro-stepping.rs
 
 #![allow(unused)]

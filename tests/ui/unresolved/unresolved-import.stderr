@@ -1,5 +1,5 @@
 error[E0432]: unresolved import `foo`
-  --> $DIR/unresolved-import.rs:1:5
+  --> $DIR/unresolved-import.rs:2:5
    |
 LL | use foo::bar;
    |     ^^^ use of unresolved module or unlinked crate `foo`
@@ -10,7 +10,7 @@ LL + extern crate foo;
    |
 
 error[E0432]: unresolved import `bar::Baz`
-  --> $DIR/unresolved-import.rs:7:5
+  --> $DIR/unresolved-import.rs:8:5
    |
 LL | use bar::Baz as x;
    |     ^^^^^---^^^^^
@@ -19,7 +19,7 @@ LL | use bar::Baz as x;
    |     no `Baz` in `bar`
 
 error[E0432]: unresolved import `food::baz`
-  --> $DIR/unresolved-import.rs:13:5
+  --> $DIR/unresolved-import.rs:14:5
    |
 LL | use food::baz;
    |     ^^^^^^---
@@ -28,7 +28,7 @@ LL | use food::baz;
    |     no `baz` in `food`
 
 error[E0432]: unresolved import `food::beens`
-  --> $DIR/unresolved-import.rs:19:12
+  --> $DIR/unresolved-import.rs:20:12
    |
 LL | use food::{beens as Foo};
    |            -----^^^^^^^
@@ -37,13 +37,13 @@ LL | use food::{beens as Foo};
    |            help: a similar name exists in the module: `beans`
 
 error[E0432]: unresolved import `MyEnum`
-  --> $DIR/unresolved-import.rs:44:9
+  --> $DIR/unresolved-import.rs:45:9
    |
 LL |     use MyEnum::*;
    |         ^^^^^^ help: a similar path exists: `self::MyEnum`
 
 error[E0432]: unresolved import `Enum`
-  --> $DIR/unresolved-import.rs:55:9
+  --> $DIR/unresolved-import.rs:56:9
    |
 LL |     use Enum::*;
    |         ^^^^ help: a similar path exists: `self::Enum`

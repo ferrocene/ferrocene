@@ -1,3 +1,4 @@
+//@ edition: 2015
 // This previously triggered an ICE.
 
 pub(in crate::r#mod) fn main() {}

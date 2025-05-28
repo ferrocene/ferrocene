@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Regression test for #85794
 
 struct Baz {

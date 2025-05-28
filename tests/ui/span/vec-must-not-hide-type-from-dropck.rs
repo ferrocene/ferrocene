@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Checking that `Vec<T>` cannot hide lifetimes within `T` when `T`
 // implements `Drop` and might access methods of values that have
 // since been deallocated.

@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![allow(warnings)]
 
 // Some type that is not copyable.

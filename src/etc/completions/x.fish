@@ -322,6 +322,7 @@ complete -c x -n "__fish_x_using_subcommand test" -l extra-checks -d 'comma-sepa
 complete -c x -n "__fish_x_using_subcommand test" -l compare-mode -d 'mode describing what file the actual ui output will be compared to' -r
 complete -c x -n "__fish_x_using_subcommand test" -l pass -d 'force {check,build,run}-pass tests to this mode' -r
 complete -c x -n "__fish_x_using_subcommand test" -l run -d 'whether to execute run-* tests' -r
+complete -c x -n "__fish_x_using_subcommand test" -l test-variant -d 'Choose the test variant to use for this execution' -r
 complete -c x -n "__fish_x_using_subcommand test" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand test" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand test" -l build -d 'build target of the stage0 compiler' -r -f

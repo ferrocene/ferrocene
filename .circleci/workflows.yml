@@ -202,6 +202,8 @@ jobs:
     parameters:
       job:
         type: string
+      test-variant:
+        type: string
       resource-class:
         type: string
     resource_class: << parameters.resource-class >>
@@ -209,7 +211,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - ferrocene-job-test-container:
           restore-from-job: x86_64-linux-build
@@ -239,13 +241,16 @@ jobs:
   x86_64-linux-test-library-std:
     executor: linux-vm
     resource_class: large # 4-core
+    parameters:
+      test-variant:
+        type: string
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       # Standard library tests need IPv6, which is not available in container
       # jobs. Because of that we need to run *just* standard library tests in a
       # virtual machine.
       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-      SCRIPT: ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call
+      SCRIPT: ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - aws-oidc-auth
       - ferrocene-job-test-vm:
@@ -296,6 +301,8 @@ jobs:
     parameters:
       job:
         type: string
+      test-variant:
+        type: string
       resource-class:
         type: string
     resource_class: << parameters.resource-class >>
@@ -303,7 +310,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: x86_64-pc-nto-qnx710
       SCRIPT: |
-        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.11:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.11:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -582,7 +589,7 @@ jobs:
     parameters:
       qemu-arch:
         type: string
-      qemu-cpu:
+      test-variant:
         type: string
       target:
         type: string
@@ -595,7 +602,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << parameters.target >>
       SCRIPT: |
-        sudo update-binfmts --import && sudo update-binfmts --enable << parameters.qemu-arch >> && QEMU_CPU=<< parameters.qemu-cpu >> ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+        sudo update-binfmts --import && sudo update-binfmts --enable << parameters.qemu-arch >> && ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -629,6 +636,8 @@ jobs:
     parameters:
       job:
         type: string
+      test-variant:
+        type: string
       resource-class:
         type: string
     resource_class: << parameters.resource-class >>
@@ -636,7 +645,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-nto-qnx710
       SCRIPT: |
-        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -863,29 +872,33 @@ workflows:
           name: x86_64-linux-test
           job: test
           resource-class: large # 4-core
+          test-variant: "2021"
           requires:
             - x86_64-linux-build
       - x86_64-linux-generic-test-container:
           name: x86_64-linux-test-library
           job: test:library
           resource-class: large # 4-core
+          test-variant: "2021"
           requires:
             - x86_64-linux-build
       - x86_64-linux-generic-test-container:
           name: x86_64-linux-compiletest
           job: test:compiletest
           resource-class: xlarge # 8-core
+          test-variant: "2021"
           requires:
             - x86_64-linux-build
       - x86_64-linux-test-library-std:
+          test-variant: "2021"
           requires:
             - x86_64-linux-build
 
       - ferrocenecoretest-generic-test:
           name: aarch64-none-compiletest
           target: aarch64-unknown-ferrocenecoretest
+          test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
-          qemu-cpu: cortex-a53
           job: qnx:compiletest-no-only-hosts
           resource-class: large # 4-core
           requires:
@@ -893,8 +906,8 @@ workflows:
       - ferrocenecoretest-generic-test:
           name: aarch64-none-test-library
           target: aarch64-unknown-ferrocenecoretest
+          test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
-          qemu-cpu: cortex-a53
           job: test:library
           resource-class: large # 4-core
           requires:
@@ -914,6 +927,7 @@ workflows:
       - x86_64-qnx-generic-test-vm:
           name: x86_64-qnx-test-library
           job: test:library
+          test-variant: "2021"
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -922,6 +936,7 @@ workflows:
       - x86_64-qnx-generic-test-vm:
           name: x86_64-qnx-test-library-std
           job: test:library-std
+          test-variant: "2021"
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -930,6 +945,7 @@ workflows:
       - x86_64-qnx-generic-test-vm:
           name: x86_64-qnx-test-compiletest
           job: qnx:compiletest-no-only-hosts
+          test-variant: "2021"
           resource-class: xlarge # 8-core
           requires:
             - x86_64-linux-build
@@ -938,8 +954,8 @@ workflows:
       - ferrocenecoretest-generic-test:
           name: thumbv7em-eabihf-test-library
           target: thumbv7em-ferrocenecoretest-eabihf
+          test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
-          qemu-cpu: cortex-m4
           job: test:library
           resource-class: large # 4-core
           requires:
@@ -948,8 +964,8 @@ workflows:
       - ferrocenecoretest-generic-test:
           name: thumbv7em-eabi-test-library
           target: thumbv7em-ferrocenecoretest-eabi
+          test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
-          qemu-cpu: cortex-m4
           job: test:library
           resource-class: large # 4-core
           requires:
@@ -958,8 +974,8 @@ workflows:
       - ferrocenecoretest-generic-test:
           name: thumbv7em-eabihf-test-compiletest
           target: thumbv7em-ferrocenecoretest-eabihf
+          test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
-          qemu-cpu: cortex-m4
           job: qnx:compiletest-no-only-hosts
           resource-class: xlarge # 8-core
           requires:
@@ -968,8 +984,8 @@ workflows:
       - ferrocenecoretest-generic-test:
           name: thumbv7em-eabi-test-compiletest
           target: thumbv7em-ferrocenecoretest-eabi
+          test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
-          qemu-cpu: cortex-m4
           job: qnx:compiletest-no-only-hosts
           resource-class: xlarge # 8-core
           requires:
@@ -978,6 +994,7 @@ workflows:
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-library
           job: test:library
+          test-variant: "2021"
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -986,6 +1003,7 @@ workflows:
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-library-std
           job: test:library-std
+          test-variant: "2021"
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -994,6 +1012,7 @@ workflows:
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-compiletest
           job: qnx:compiletest-no-only-hosts
+          test-variant: "2021"
           resource-class: xlarge # 8-core
           requires:
             - x86_64-linux-build

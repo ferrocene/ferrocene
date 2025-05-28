@@ -1,5 +1,5 @@
 error[E0659]: `env` is ambiguous
-  --> $DIR/glob-shadowing.rs:11:17
+  --> $DIR/glob-shadowing.rs:12:17
    |
 LL |         let x = env!("PATH");
    |                 ^^^ ambiguous name
@@ -7,7 +7,7 @@ LL |         let x = env!("PATH");
    = note: ambiguous because of a conflict between a name from a glob import and an outer scope during import or macro resolution
    = note: `env` could refer to a macro from prelude
 note: `env` could also refer to the macro imported here
-  --> $DIR/glob-shadowing.rs:9:9
+  --> $DIR/glob-shadowing.rs:10:9
    |
 LL |     use m::*;
    |         ^^^^
@@ -15,7 +15,7 @@ LL |     use m::*;
    = help: or use `self::env` to refer to this macro unambiguously
 
 error[E0659]: `env` is ambiguous
-  --> $DIR/glob-shadowing.rs:19:21
+  --> $DIR/glob-shadowing.rs:20:21
    |
 LL |             let x = env!("PATH");
    |                     ^^^ ambiguous name
@@ -23,27 +23,27 @@ LL |             let x = env!("PATH");
    = note: ambiguous because of a conflict between a name from a glob import and an outer scope during import or macro resolution
    = note: `env` could refer to a macro from prelude
 note: `env` could also refer to the macro imported here
-  --> $DIR/glob-shadowing.rs:17:13
+  --> $DIR/glob-shadowing.rs:18:13
    |
 LL |         use m::*;
    |             ^^^^
    = help: consider adding an explicit import of `env` to disambiguate
 
 error[E0659]: `fenv` is ambiguous
-  --> $DIR/glob-shadowing.rs:29:21
+  --> $DIR/glob-shadowing.rs:30:21
    |
 LL |             let x = fenv!();
    |                     ^^^^ ambiguous name
    |
    = note: ambiguous because of a conflict between a name from a glob import and an outer scope during import or macro resolution
 note: `fenv` could refer to the macro imported here
-  --> $DIR/glob-shadowing.rs:27:13
+  --> $DIR/glob-shadowing.rs:28:13
    |
 LL |         use m::*;
    |             ^^^^
    = help: consider adding an explicit import of `fenv` to disambiguate
 note: `fenv` could also refer to the macro defined here
-  --> $DIR/glob-shadowing.rs:25:5
+  --> $DIR/glob-shadowing.rs:26:5
    |
 LL |     pub macro fenv($e: expr) { $e }
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

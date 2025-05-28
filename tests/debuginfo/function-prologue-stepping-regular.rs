@@ -1,6 +1,6 @@
 // This test case checks if function arguments already have the correct value when breaking at the
 // beginning of a function.
-
+//@ edition: 2015
 //@ min-lldb-version: 1800
 //@ ignore-gdb
 //@ compile-flags:-g

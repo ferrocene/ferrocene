@@ -270,7 +270,7 @@ pre {
     overflow-y: scroll;
 }
 
-code {
+code, .inline-code {
     display: inline-block;
     background: var(--inline-code-bg);
     padding: 0 0.2em;
@@ -780,4 +780,12 @@ pre.spec-syntax .spec-syntax-literal {
 
 .ferrocene-cli-title em {
     font-weight: 400;
+}
+
+/********+***********
+ *   sphinx-needs   *
+ ********************/
+
+a.external_link:after {
+    content: "" !important;
 }

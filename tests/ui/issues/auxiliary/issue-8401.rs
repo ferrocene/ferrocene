@@ -1,3 +1,4 @@
+//@ edition: 2015
 // for this issue, this code must be built in a library
 
 use std::mem;

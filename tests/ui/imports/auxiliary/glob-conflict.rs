@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![allow(ambiguous_glob_reexports)]
 
 mod m1 {

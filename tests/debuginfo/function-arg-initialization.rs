@@ -4,7 +4,7 @@
 // the __morestack part of the prologue GDB incorrectly breaks at before the
 // arguments have been properly loaded when setting the breakpoint via the
 // function name.
-
+//@ edition: 2015
 //@ min-lldb-version: 1800
 //@ compile-flags:-g -Zmir-enable-passes=-SingleUseConsts
 // SingleUseConsts shouldn't need to be disabled, see #128945

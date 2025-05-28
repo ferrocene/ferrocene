@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 //@ aux-build:pub_use_mods_xcrate.rs
 

@@ -1,3 +1,4 @@
+//@ edition: 2015
 use self::A;
 use self::B;
 mod A {} //~ ERROR the name `A` is defined multiple times

@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ known-bug: #124189
 trait Trait {
     type Type;

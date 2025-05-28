@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ aux-build:issue-29584.rs
 //@ ignore-cross-compile
 

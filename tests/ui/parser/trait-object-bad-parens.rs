@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![feature(auto_traits)]
 #![feature(negative_impls)]
 #![allow(bare_trait_objects)]

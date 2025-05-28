@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ check-pass
 
 mod foo {

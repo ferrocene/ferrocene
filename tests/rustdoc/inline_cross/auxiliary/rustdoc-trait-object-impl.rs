@@ -1,3 +1,4 @@
+//@ edition: 2015
 use std::fmt;
 
 pub trait Bar {}

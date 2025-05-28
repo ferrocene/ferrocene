@@ -4,6 +4,7 @@
 // x86 only.
 
 //@ revisions: ENABLED DISABLED
+//@ edition: 2015
 //@ add-core-stubs
 //@ compile-flags: --target i686-unknown-linux-gnu -Cno-prepopulate-passes -Copt-level=3
 //@ [ENABLED] compile-flags: -Zreg-struct-return

@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 // Test calling methods on an impl for a bare trait.
 

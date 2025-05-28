@@ -1,3 +1,4 @@
+//@ edition: 2015
 use zed::bar;
 use zed::baz; //~ ERROR unresolved import `zed::baz` [E0432]
               //~| no `baz` in `zed`

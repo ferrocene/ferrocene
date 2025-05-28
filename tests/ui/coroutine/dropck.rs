@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![feature(coroutines, coroutine_trait, stmt_expr_attributes)]
 
 use std::cell::RefCell;

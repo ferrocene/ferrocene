@@ -14,6 +14,10 @@ note: this value implements `FnOnce`, which causes it to be moved when called
    |
 LL |     c();
    |     ^
+help: consider further restricting type parameter `T` with trait `Copy`
+   |
+LL | fn f<T: std::fmt::Display + Copy>(y: T) {
+   |                           ++++++
 
 error: aborting due to 1 previous error
 

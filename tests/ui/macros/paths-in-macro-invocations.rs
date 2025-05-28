@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 #![allow(dead_code)]
 //@ aux-build:two_macros-rpass.rs

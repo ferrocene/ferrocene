@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Test that immediate callers have to change when callee changes, but
 // not callers' callers.
 

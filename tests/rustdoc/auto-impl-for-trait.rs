@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Test for https://github.com/rust-lang/rust/issues/48463 issue.
 
 use std::any::Any;

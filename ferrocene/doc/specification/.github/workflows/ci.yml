@@ -5,24 +5,23 @@
 
 name: CI
 on:
-  push:
-    branches: [staging, trying]
-  pull_request: {}
+  pull_request:
+  merge_group:
 
-permissions:
-  contents: write
-  pull-requests: write
-  id-token: write
+# Defined at the job level.
+permissions: {}
 
 jobs:
-  ci:
-    name: CI
+  build:
+    name: Build the documentation
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
 
       - name: Build documentation and check links
         run: ./make.py --check-links
@@ -36,30 +35,34 @@ jobs:
       - name: Lint Python code with flake8
         run: uvx flake8 . --exclude .venv
 
-      - name: Publish to GitHub Pages
-        uses: ferrous-systems/shared-github-actions/github-pages@main
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: build/html
-          cname: spec.ferrocene.dev
-          token: ${{ secrets.GITHUB_TOKEN }}
-        if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
 
-      - name: Authenticate with AWS
-        uses: ferrous-systems/shared-github-actions/aws-oidc@main
-        with:
-          role: arn:aws:iam::886866542769:role/publish-specification-preview
-        if: github.event_name == 'push' && github.ref == 'refs/heads/trying'
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: [ build ]
+    if: github.event_name == 'merge_group'
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+        id: deployment
 
-      - name: Upload specification preview to AWS
-        run: aws s3 cp --recursive build/html "s3://ferrocene-specification-preview/${GITHUB_SHA}"
-        if: github.event_name == 'push' && github.ref == 'refs/heads/trying'
-
-      - name: Post comment in the PR with the preview link
-        run: |
-          # https://stackoverflow.com/a/66365284
-          # Extract the PR number from the commit message, or return code 128
-          pr="$(git show --format="%s" | head -n 1 | sed 's/^Try #\([0-9]\+\):.*$/\1/; t; q 128')"
-          curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${pr}/comments -d "{\"body\": \"[Open the preview for this pull request!](https://ferrocene-specification-preview.s3.us-east-1.amazonaws.com/${GITHUB_SHA}/index.html)\"}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: github.event_name == 'push' && github.ref == 'refs/heads/trying'
+  finished:
+    name: CI finished
+    runs-on: ubuntu-latest
+    needs: [ build, deploy ]
+    if: "${{ !cancelled() }}"
+    env:
+      NEEDS: "${{ toJson(needs) }}"
+    steps:
+      - name: Check if all jobs were successful or skipped
+        run: echo "${NEEDS}" | jq --exit-status 'all(.result == "success" or .result == "skipped")'

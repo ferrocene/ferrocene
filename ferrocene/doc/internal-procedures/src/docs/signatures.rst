@@ -33,7 +33,7 @@ Signing all documents
 
 We developed a small wrapper around the "cosign" tool to make it easy to
 sign our qualification documents. Cosign is fully managed by the Ferrocene build
-system: you don't need to install it.
+system: you don't need to install it manually.
 
 To sign all of the Ferrocene documents, :ref:`authenticate with AWS <aws-auth>`
 (if you haven't done so today) and run:

@@ -1,0 +1,365 @@
+name: Test
+run-name: Test (${{inputs.host-triple}})
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  workflow_call:
+    inputs:
+      host-triple:
+        type: string
+        description: The Rust triple of the host platform
+      triple:
+        type: string
+        description: The target triple to test
+      test-host-tools:
+        type: boolean
+        default: true
+        description: If the host tools should be tested (enables the 'test' job)
+      test-std:
+        type: boolean
+        default: true
+        description: If the stdlib should be tested (enables the `library-std` job)
+      runner:
+        type: string
+        description: The GitHub Runner to run on
+      use-minio:
+        type: boolean
+        default: false
+        description: If minIO should be used (otherwise, S3 is used)
+      build-run-id:
+        type: string
+        description: The run id of the build workflow
+      build-artifact:
+        type: string
+        description: The artifact from the build workflow
+      container:
+        type: string
+        description: The container URI to run the build in, if any (Linux only)
+      qemu-arch:
+        type: string
+        description: The QEMU architecture to enable using binfmt, if any (Linux only)/
+      qemu-cpu:
+        type: string
+        description: The QEMU_CPU to set during the run, if any (Linux only)
+      environment:
+        type: string
+    outputs:
+      artifact-test-usage:
+        description: The name of the resource usage report artifact for the test job
+        value: ${{ jobs.test.outputs.artifact-usage }}
+      artifact-compiletest-usage:
+        description: The name of the resource usage report artifact for the compiletest job
+        value: ${{ jobs.compiletest.outputs.artifact-usage }}
+      artifact-library-usage:
+        description: The name of the resource usage report artifact for the library job
+        value: ${{ jobs.library.outputs.artifact-usage }}
+      artifact-library-std-usage:
+        description: The name of the resource usage report artifact for the library-std job
+        value: ${{ jobs.library-std.outputs.artifact-usage }}
+
+jobs:
+
+  test:
+    if: ${{ inputs.test-host-tools }}
+    runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    env:
+      ARTIFACT: test-${{inputs.triple}}
+      ARTIFACT_USAGE: usage-test-${{inputs.triple}}
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      FERROCENE_TARGETS: ${{ inputs.triple }}
+      QEMU_CPU: ${{ inputs.qemu-cpu }}
+    outputs:
+      artifact-usage: ${{ env.ARTIFACT_USAGE }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}      
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == false }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+  
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == false }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == true }}
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == true }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+
+      - name: Run
+        uses: ./.github/actions/run/
+        with:
+          container: ${{ inputs.container }}
+          # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+          script: |
+            uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test) --ferrocene-test-one-crate-per-cargo-call
+
+      - name: Upload artifacts to S3
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.ARTIFACT }}
+        run:
+          ./ferrocene/ci/scripts/upload-dist-artifacts.sh
+
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        if: ${{ always() }}
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
+          name: ${{ env.ARTIFACT }}
+
+  compiletest:
+    runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    env:
+      ARTIFACT: test-compiletest-${{inputs.triple}}
+      ARTIFACT_USAGE: usage-test-compiletest-${{inputs.triple}}
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      FERROCENE_TARGETS: ${{ inputs.triple }}
+      QEMU_CPU: ${{ inputs.qemu-cpu }}
+    outputs:
+      artifact-usage: ${{ env.ARTIFACT_USAGE }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == false }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+  
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == false }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == true }}
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == true }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+
+      - name: Run
+        uses: ./.github/actions/run/
+        with:
+          container: ${{ inputs.container }}
+          # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+          script: |
+            uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:compiletest) --ferrocene-test-one-crate-per-cargo-call
+
+      - name: Upload artifacts to S3
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.ARTIFACT }}
+        run:
+          ./ferrocene/ci/scripts/upload-dist-artifacts.sh
+
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        if: ${{ always() }}
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
+          name: ${{ env.ARTIFACT }}
+
+  library:
+    runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    env:
+      ARTIFACT: test-library-${{inputs.triple}}
+      ARTIFACT_USAGE: usage-test-library-${{inputs.triple}}
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      FERROCENE_TARGETS: ${{ inputs.triple }}
+      QEMU_CPU: ${{ inputs.qemu-cpu }}
+    outputs:
+      artifact-usage: ${{ env.ARTIFACT_USAGE }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == false }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+  
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == false }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == true }}
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == true }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+
+      - name: Run
+        uses: ./.github/actions/run/
+        with:
+          container: ${{ inputs.container }}
+          # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+          script: |
+            uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library) --ferrocene-test-one-crate-per-cargo-call
+
+      - name: Upload artifacts to S3
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.ARTIFACT }}
+        run:
+          ./ferrocene/ci/scripts/upload-dist-artifacts.sh
+
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        if: ${{ always() }}
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
+          name: ${{ env.ARTIFACT }}
+
+  library-std:
+    if: ${{ inputs.test-std }}
+    runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    env:
+      ARTIFACT: test-library-std-${{inputs.triple}}
+      ARTIFACT_USAGE: usage-test-library-std-${{inputs.triple}}
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      FERROCENE_TARGETS: ${{ inputs.triple }}
+      QEMU_CPU: ${{ inputs.qemu-cpu }}
+    outputs:
+      artifact-usage: ${{ env.ARTIFACT_USAGE }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == false }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+  
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == false }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == true }}
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == true }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+
+      - name: Run
+        uses: ./.github/actions/run/
+        with:
+          container: ${{ inputs.container }}
+          # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+          script: |
+            uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call
+
+      - name: Upload artifacts to S3
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.ARTIFACT }}
+        run:
+          ./ferrocene/ci/scripts/upload-dist-artifacts.sh
+
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        if: ${{ always() }}
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
+          name: ${{ env.ARTIFACT }}

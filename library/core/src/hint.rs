@@ -98,12 +98,8 @@ use crate::{intrinsics, ub_checks};
 #[inline]
 #[stable(feature = "unreachable", since = "1.27.0")]
 #[rustc_const_stable(feature = "const_unreachable_unchecked", since = "1.57.0")]
-<<<<<<< HEAD
-#[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-#[coverage(off)] // Ferrocene addition: this function breaks llvm-cov
-=======
 #[track_caller]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[coverage(off)] // Ferrocene addition: this function breaks llvm-cov
 pub const unsafe fn unreachable_unchecked() -> ! {
     ub_checks::assert_unsafe_precondition!(
         check_language_ub,

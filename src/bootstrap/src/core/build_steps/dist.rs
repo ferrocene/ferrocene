@@ -2296,6 +2296,10 @@ impl Step for LlvmTools {
             }
         }
 
+        if !builder.config.dry_run() {
+            builder.require_submodule("src/llvm-project", None);
+        }
+
         builder.ensure(crate::core::build_steps::llvm::Llvm { target });
 
         let mut tarball = Tarball::new(builder, "llvm-tools", &target.triple);
@@ -2413,6 +2417,10 @@ impl Step for RustDev {
                 builder.info(&format!("Skipping RustDev ({target}): external LLVM"));
                 return None;
             }
+        }
+
+        if !builder.config.dry_run() {
+            builder.require_submodule("src/llvm-project", None);
         }
 
         let mut tarball = Tarball::new(builder, "rust-dev", &target.triple);

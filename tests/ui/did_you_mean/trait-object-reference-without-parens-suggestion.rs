@@ -4,6 +4,7 @@ fn main() {
     let _: &Copy + 'static; //~ ERROR expected a path
     //~^ ERROR is not dyn compatible
     let _: &'static Copy + 'static; //~ ERROR expected a path
+    //~^ ERROR is not dyn compatible
 }
 
 // ferrocene-annotations: fls_qa98qdi42orq

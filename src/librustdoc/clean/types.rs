@@ -12,8 +12,9 @@ use rustc_data_structures::fx::{FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_hir::def::{CtorKind, DefKind, Res};
 use rustc_hir::def_id::{CrateNum, DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::lang_items::LangItem;
-use rustc_hir::{BodyId, Mutability};
+use rustc_hir::{BodyId, HirId, Mutability};
 use rustc_index::IndexVec;
+use rustc_lint_defs::{BuiltinLintDiag, Lint};
 use rustc_metadata::rendered_const;
 use rustc_middle::span_bug;
 use rustc_middle::ty::fast_reject::SimplifiedType;
@@ -477,7 +478,12 @@ impl Item {
             name,
             kind,
             Attributes::from_hir(hir_attrs),
-            extract_cfg_from_attrs(hir_attrs.iter(), cx.tcx, &cx.cache.hidden_cfg),
+            extract_cfg_from_attrs(
+                hir_attrs.iter(),
+                cx.tcx,
+                def_id.as_local().map(|did| cx.tcx.local_def_id_to_hir_id(did)),
+                &cx.cache.hidden_cfg,
+            ),
         )
     }
 
@@ -610,6 +616,9 @@ impl Item {
             UnionItem(ref union_) => Some(union_.has_stripped_entries()),
             EnumItem(ref enum_) => Some(enum_.has_stripped_entries()),
             VariantItem(ref v) => v.has_stripped_entries(),
+            TypeAliasItem(ref type_alias) => {
+                type_alias.inner_type.as_ref().and_then(|t| t.has_stripped_entries())
+            }
             _ => None,
         }
     }
@@ -761,33 +770,21 @@ impl Item {
         Some(tcx.visibility(def_id))
     }
 
-    pub(crate) fn attributes(&self, tcx: TyCtxt<'_>, cache: &Cache, is_json: bool) -> Vec<String> {
+    pub(crate) fn attributes_without_repr(&self, tcx: TyCtxt<'_>, is_json: bool) -> Vec<String> {
         const ALLOWED_ATTRIBUTES: &[Symbol] =
             &[sym::export_name, sym::link_section, sym::no_mangle, sym::non_exhaustive];
 
-        use rustc_abi::IntegerType;
-
-        let mut attrs: Vec<String> = self
-            .attrs
+        self.attrs
             .other_attrs
             .iter()
             .filter_map(|attr| {
                 if is_json {
                     match attr {
-                        hir::Attribute::Parsed(AttributeKind::Deprecation { .. }) => {
-                            // rustdoc-json stores this in `Item::deprecation`, so we
-                            // don't want it it `Item::attrs`.
-                            None
-                        }
-                        rustc_hir::Attribute::Parsed(
-                            rustc_attr_data_structures::AttributeKind::Repr(..),
-                        ) => {
-                            // We have separate pretty-printing logic for `#[repr(..)]` attributes.
-                            // For example, there are circumstances where `#[repr(transparent)]`
-                            // is applied but should not be publicly shown in rustdoc
-                            // because it isn't public API.
-                            None
-                        }
+                        // rustdoc-json stores this in `Item::deprecation`, so we
+                        // don't want it it `Item::attrs`.
+                        hir::Attribute::Parsed(AttributeKind::Deprecation { .. }) => None,
+                        // We have separate pretty-printing logic for `#[repr(..)]` attributes.
+                        hir::Attribute::Parsed(AttributeKind::Repr(..)) => None,
                         _ => Some({
                             let mut s = rustc_hir_pretty::attribute_to_string(&tcx, attr);
                             assert_eq!(s.pop(), Some('\n'));
@@ -805,71 +802,26 @@ impl Item {
                     None
                 }
             })
-            .collect();
+            .collect()
+    }
 
-        // Add #[repr(...)]
-        if let Some(def_id) = self.def_id()
-            && let ItemType::Struct | ItemType::Enum | ItemType::Union = self.type_()
-        {
-            let adt = tcx.adt_def(def_id);
-            let repr = adt.repr();
-            let mut out = Vec::new();
-            if repr.c() {
-                out.push("C");
-            }
-            if repr.transparent() {
-                // Render `repr(transparent)` iff the non-1-ZST field is public or at least one
-                // field is public in case all fields are 1-ZST fields.
-                let render_transparent = cache.document_private
-                    || adt
-                        .all_fields()
-                        .find(|field| {
-                            let ty =
-                                field.ty(tcx, ty::GenericArgs::identity_for_item(tcx, field.did));
-                            tcx.layout_of(
-                                ty::TypingEnv::post_analysis(tcx, field.did).as_query_input(ty),
-                            )
-                            .is_ok_and(|layout| !layout.is_1zst())
-                        })
-                        .map_or_else(
-                            || adt.all_fields().any(|field| field.vis.is_public()),
-                            |field| field.vis.is_public(),
-                        );
+    pub(crate) fn attributes_and_repr(
+        &self,
+        tcx: TyCtxt<'_>,
+        cache: &Cache,
+        is_json: bool,
+    ) -> Vec<String> {
+        let mut attrs = self.attributes_without_repr(tcx, is_json);
 
-                if render_transparent {
-                    out.push("transparent");
-                }
-            }
-            if repr.simd() {
-                out.push("simd");
-            }
-            let pack_s;
-            if let Some(pack) = repr.pack {
-                pack_s = format!("packed({})", pack.bytes());
-                out.push(&pack_s);
-            }
-            let align_s;
-            if let Some(align) = repr.align {
-                align_s = format!("align({})", align.bytes());
-                out.push(&align_s);
-            }
-            let int_s;
-            if let Some(int) = repr.int {
-                int_s = match int {
-                    IntegerType::Pointer(is_signed) => {
-                        format!("{}size", if is_signed { 'i' } else { 'u' })
-                    }
-                    IntegerType::Fixed(size, is_signed) => {
-                        format!("{}{}", if is_signed { 'i' } else { 'u' }, size.size().bytes() * 8)
-                    }
-                };
-                out.push(&int_s);
-            }
-            if !out.is_empty() {
-                attrs.push(format!("#[repr({})]", out.join(", ")));
-            }
+        if let Some(repr_attr) = self.repr(tcx, cache, is_json) {
+            attrs.push(repr_attr);
         }
         attrs
+    }
+
+    /// Returns a stringified `#[repr(...)]` attribute.
+    pub(crate) fn repr(&self, tcx: TyCtxt<'_>, cache: &Cache, is_json: bool) -> Option<String> {
+        repr_attributes(tcx, cache, self.def_id()?, self.type_(), is_json)
     }
 
     pub fn is_doc_hidden(&self) -> bool {
@@ -879,6 +831,73 @@ impl Item {
     pub fn def_id(&self) -> Option<DefId> {
         self.item_id.as_def_id()
     }
+}
+
+pub(crate) fn repr_attributes(
+    tcx: TyCtxt<'_>,
+    cache: &Cache,
+    def_id: DefId,
+    item_type: ItemType,
+    is_json: bool,
+) -> Option<String> {
+    use rustc_abi::IntegerType;
+
+    if !matches!(item_type, ItemType::Struct | ItemType::Enum | ItemType::Union) {
+        return None;
+    }
+    let adt = tcx.adt_def(def_id);
+    let repr = adt.repr();
+    let mut out = Vec::new();
+    if repr.c() {
+        out.push("C");
+    }
+    if repr.transparent() {
+        // Render `repr(transparent)` iff the non-1-ZST field is public or at least one
+        // field is public in case all fields are 1-ZST fields.
+        let render_transparent = cache.document_private
+            || is_json
+            || adt
+                .all_fields()
+                .find(|field| {
+                    let ty = field.ty(tcx, ty::GenericArgs::identity_for_item(tcx, field.did));
+                    tcx.layout_of(ty::TypingEnv::post_analysis(tcx, field.did).as_query_input(ty))
+                        .is_ok_and(|layout| !layout.is_1zst())
+                })
+                .map_or_else(
+                    || adt.all_fields().any(|field| field.vis.is_public()),
+                    |field| field.vis.is_public(),
+                );
+
+        if render_transparent {
+            out.push("transparent");
+        }
+    }
+    if repr.simd() {
+        out.push("simd");
+    }
+    let pack_s;
+    if let Some(pack) = repr.pack {
+        pack_s = format!("packed({})", pack.bytes());
+        out.push(&pack_s);
+    }
+    let align_s;
+    if let Some(align) = repr.align {
+        align_s = format!("align({})", align.bytes());
+        out.push(&align_s);
+    }
+    let int_s;
+    if let Some(int) = repr.int {
+        int_s = match int {
+            IntegerType::Pointer(is_signed) => {
+                format!("{}size", if is_signed { 'i' } else { 'u' })
+            }
+            IntegerType::Fixed(size, is_signed) => {
+                format!("{}{}", if is_signed { 'i' } else { 'u' }, size.size().bytes() * 8)
+            }
+        };
+        out.push(&int_s);
+    }
+    if !out.is_empty() { Some(format!("#[repr({})]", out.join(", "))) } else { None }
 }
 
 #[derive(Clone, Debug)]
@@ -1020,6 +1039,7 @@ pub(crate) fn hir_attr_lists<'a, I: IntoIterator<Item = &'a hir::Attribute>>(
 pub(crate) fn extract_cfg_from_attrs<'a, I: Iterator<Item = &'a hir::Attribute> + Clone>(
     attrs: I,
     tcx: TyCtxt<'_>,
+    hir_id: Option<HirId>,
     hidden_cfg: &FxHashSet<Cfg>,
 ) -> Option<Arc<Cfg>> {
     let doc_cfg_active = tcx.features().doc_cfg();
@@ -1043,6 +1063,32 @@ pub(crate) fn extract_cfg_from_attrs<'a, I: Iterator<Item = &'a hir::Attribute> 
             .peekable();
         if doc_cfg.peek().is_some() && doc_cfg_active {
             let sess = tcx.sess;
+
+            struct RustdocCfgMatchesLintEmitter<'a>(TyCtxt<'a>, Option<HirId>);
+
+            impl<'a> rustc_attr_parsing::CfgMatchesLintEmitter for RustdocCfgMatchesLintEmitter<'a> {
+                fn emit_span_lint(
+                    &self,
+                    sess: &Session,
+                    lint: &'static Lint,
+                    sp: rustc_span::Span,
+                    builtin_diag: BuiltinLintDiag,
+                ) {
+                    if let Some(hir_id) = self.1 {
+                        self.0.node_span_lint(lint, hir_id, sp, |diag| {
+                            rustc_lint::decorate_builtin_lint(
+                                sess,
+                                Some(self.0),
+                                builtin_diag,
+                                diag,
+                            )
+                        });
+                    } else {
+                        // No HIR id. Probably in another crate. Don't lint.
+                    }
+                }
+            }
+
             doc_cfg.fold(Cfg::True, |mut cfg, item| {
                 if let Some(cfg_mi) =
                     item.meta_item().and_then(|item| rustc_expand::config::parse_cfg(item, sess))
@@ -1051,7 +1097,7 @@ pub(crate) fn extract_cfg_from_attrs<'a, I: Iterator<Item = &'a hir::Attribute> 
                     rustc_attr_parsing::cfg_matches(
                         cfg_mi,
                         tcx.sess,
-                        rustc_ast::CRATE_NODE_ID,
+                        RustdocCfgMatchesLintEmitter(tcx, hir_id),
                         Some(tcx.features()),
                     );
                     match Cfg::parse(cfg_mi) {
@@ -2115,7 +2161,7 @@ impl Enum {
         self.variants.iter().any(|f| f.is_stripped())
     }
 
-    pub(crate) fn variants(&self) -> impl Iterator<Item = &Item> {
+    pub(crate) fn non_stripped_variants(&self) -> impl Iterator<Item = &Item> {
         self.variants.iter().filter(|v| !v.is_stripped())
     }
 }
@@ -2351,6 +2397,17 @@ pub(crate) enum TypeAliasInnerType {
     Enum { variants: IndexVec<VariantIdx, Item>, is_non_exhaustive: bool },
     Union { fields: Vec<Item> },
     Struct { ctor_kind: Option<CtorKind>, fields: Vec<Item> },
+}
+
+impl TypeAliasInnerType {
+    fn has_stripped_entries(&self) -> Option<bool> {
+        Some(match self {
+            Self::Enum { variants, .. } => variants.iter().any(|v| v.is_stripped()),
+            Self::Union { fields } | Self::Struct { fields, .. } => {
+                fields.iter().any(|f| f.is_stripped())
+            }
+        })
+    }
 }
 
 #[derive(Clone, Debug)]

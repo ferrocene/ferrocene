@@ -5,7 +5,7 @@ use rustc_hir::LangItem;
 use rustc_hir::def_id::{CRATE_DEF_ID, DefId};
 use rustc_infer::infer::canonical::query_response::make_query_region_constraints;
 use rustc_infer::infer::canonical::{
-    Canonical, CanonicalExt as _, CanonicalQueryInput, CanonicalVarInfo, CanonicalVarValues,
+    Canonical, CanonicalExt as _, CanonicalQueryInput, CanonicalVarKind, CanonicalVarValues,
 };
 use rustc_infer::infer::{InferCtxt, RegionVariableOrigin, SubregionOrigin, TyCtxtInferExt};
 use rustc_infer::traits::solve::Goal;
@@ -76,7 +76,7 @@ impl<'tcx> rustc_next_trait_solver::delegate::SolverDelegate for SolverDelegate<
                 Some(HasChanged::No)
             }
             ty::PredicateKind::Clause(ty::ClauseKind::TypeOutlives(outlives)) => {
-                self.0.register_region_obligation_with_cause(
+                self.0.register_type_outlives_constraint(
                     outlives.0,
                     outlives.1,
                     &ObligationCause::dummy_with_span(span),
@@ -108,7 +108,7 @@ impl<'tcx> rustc_next_trait_solver::delegate::SolverDelegate for SolverDelegate<
         arg: ty::GenericArg<'tcx>,
         span: Span,
     ) -> ty::GenericArg<'tcx> {
-        match arg.unpack() {
+        match arg.kind() {
             ty::GenericArgKind::Lifetime(_) => {
                 self.next_region_var(RegionVariableOrigin::MiscVariable(span)).into()
             }
@@ -190,11 +190,11 @@ impl<'tcx> rustc_next_trait_solver::delegate::SolverDelegate for SolverDelegate<
 
     fn instantiate_canonical_var_with_infer(
         &self,
-        cv_info: CanonicalVarInfo<'tcx>,
+        kind: CanonicalVarKind<'tcx>,
         span: Span,
         universe_map: impl Fn(ty::UniverseIndex) -> ty::UniverseIndex,
     ) -> ty::GenericArg<'tcx> {
-        self.0.instantiate_canonical_var(span, cv_info, universe_map)
+        self.0.instantiate_canonical_var(span, kind, universe_map)
     }
 
     fn add_item_bounds_for_hidden_type(

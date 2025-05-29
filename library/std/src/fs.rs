@@ -391,6 +391,16 @@ impl fmt::Display for TryLockError {
     }
 }
 
+#[unstable(feature = "file_lock", issue = "130994")]
+impl From<TryLockError> for io::Error {
+    fn from(err: TryLockError) -> io::Error {
+        match err {
+            TryLockError::Error(err) => err,
+            TryLockError::WouldBlock => io::ErrorKind::WouldBlock.into(),
+        }
+    }
+}
+
 impl File {
     /// Attempts to open a file in read-only mode.
     ///
@@ -820,11 +830,14 @@ impl File {
     ///
     /// fn main() -> std::io::Result<()> {
     ///     let f = File::create("foo.txt")?;
+    ///     // Explicit handling of the WouldBlock error
     ///     match f.try_lock() {
     ///         Ok(_) => (),
     ///         Err(TryLockError::WouldBlock) => (), // Lock not acquired
     ///         Err(TryLockError::Error(err)) => return Err(err),
     ///     }
+    ///     // Alternately, propagate the error as an io::Error
+    ///     f.try_lock()?;
     ///     Ok(())
     /// }
     /// ```
@@ -881,11 +894,14 @@ impl File {
     ///
     /// fn main() -> std::io::Result<()> {
     ///     let f = File::open("foo.txt")?;
+    ///     // Explicit handling of the WouldBlock error
     ///     match f.try_lock_shared() {
     ///         Ok(_) => (),
     ///         Err(TryLockError::WouldBlock) => (), // Lock not acquired
     ///         Err(TryLockError::Error(err)) => return Err(err),
     ///     }
+    ///     // Alternately, propagate the error as an io::Error
+    ///     f.try_lock_shared()?;
     ///
     ///     Ok(())
     /// }
@@ -2803,8 +2819,8 @@ pub fn create_dir<P: AsRef<Path>>(path: P) -> io::Result<()> {
 /// Recursively create a directory and all of its parent components if they
 /// are missing.
 ///
-/// If this function returns an error, some of the parent components might have
-/// been created already.
+/// This function is not atomic. If it returns an error, any parent components it was able to create
+/// will remain.
 ///
 /// If the empty path is passed to this function, it always succeeds without
 /// creating any directories.

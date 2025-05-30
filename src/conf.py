@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
+# SPDX-FileCopyrightText: The Rust Project Contributors
 
 # -- Path setup --------------------------------------------------------------
 
@@ -27,6 +28,7 @@ extensions = [
     "ferrocene_spec",
     "ferrocene_spec_lints",
     "ferrocene_toctrees",
+    "ferrocene_theme",
 ]
 
 # Add any paths that contain templates here, relative to this directory.

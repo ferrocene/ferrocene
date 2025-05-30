@@ -18,7 +18,6 @@ fn main() {
     let mut thing = Thing;
     let test: &mut dyn Bar = &mut thing;
     //~^ ERROR E0038
-    //~| ERROR E0038
 }
 
 // ferrocene-annotations: fls_lv7w7aalpwm5

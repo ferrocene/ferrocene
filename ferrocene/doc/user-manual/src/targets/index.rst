@@ -47,7 +47,7 @@ qualified upon request.
    :header-rows: 1
 
    * - Target
-     - Triple
+     - Tuple
      - Kind
      - Standard library
      - Notes
@@ -107,7 +107,7 @@ Quality managed targets are not qualified, but can usually be qualified on reque
    :header-rows: 1
 
    * - Target
-     - Triple
+     - Tuple
      - Kind
      - Standard library
      - Notes
@@ -131,7 +131,7 @@ should not be used in production.
    :header-rows: 1
 
    * - Target
-     - Triple
+     - Tuple
      - Kind
      - Standard library
      - Notes

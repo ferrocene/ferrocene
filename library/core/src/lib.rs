@@ -159,7 +159,6 @@
 #![cfg_attr(feature = "uncertified", feature(repr_simd))]
 #![cfg_attr(feature = "uncertified", feature(simd_ffi))]
 #![cfg_attr(feature = "uncertified", feature(stmt_expr_attributes))]
-#![cfg_attr(feature = "uncertified", feature(trait_alias))]
 #![cfg_attr(feature = "uncertified", feature(transparent_unions))]
 #![cfg_attr(feature = "uncertified", feature(unsized_fn_params))]
 #![cfg_attr(feature = "uncertified", feature(with_negative_coherence))]
@@ -182,6 +181,7 @@
 #![feature(rustdoc_internals)]
 #![feature(staged_api)]
 #![feature(strict_provenance_lints)]
+#![feature(trait_alias)]
 #![feature(try_blocks)]
 #![feature(unboxed_closures)]
 // tidy-alphabetical-end
@@ -313,7 +313,6 @@ pub mod f32;
 pub mod f64;
 
 #[macro_use]
-#[cfg(feature = "uncertified")]
 pub mod num;
 
 /* The core prelude, not as all-encompassing as the std prelude */
@@ -325,7 +324,6 @@ pub mod prelude;
 pub mod hint;
 pub mod intrinsics;
 pub mod mem;
-#[cfg(feature = "uncertified")]
 pub mod ptr;
 #[unstable(feature = "ub_checks", issue = "none")]
 pub mod ub_checks;
@@ -413,7 +411,6 @@ pub mod task;
 
 /* Heap memory allocator trait */
 #[allow(missing_docs)]
-#[cfg(feature = "uncertified")]
 pub mod alloc;
 
 // note: does not need to be public

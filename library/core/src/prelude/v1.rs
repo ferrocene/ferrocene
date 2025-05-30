@@ -26,12 +26,14 @@ pub use crate::ops::{AsyncFn, AsyncFnMut, AsyncFnOnce};
 // Re-exported functions
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
-#[cfg(feature = "uncertified")]
 pub use crate::mem::drop;
 #[stable(feature = "size_of_prelude", since = "1.80.0")]
 #[doc(no_inline)]
 #[cfg(feature = "uncertified")]
-pub use crate::mem::{align_of, align_of_val, size_of, size_of_val};
+pub use crate::mem::{align_of_val, size_of_val};
+#[stable(feature = "size_of_prelude", since = "1.80.0")]
+#[doc(no_inline)]
+pub use crate::mem::{ size_of, align_of };
 
 // Re-exported types and traits
 #[stable(feature = "core_prelude", since = "1.4.0")]

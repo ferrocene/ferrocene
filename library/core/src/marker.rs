@@ -435,7 +435,6 @@ pub trait Copy: Clone {
 #[rustc_builtin_macro]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics, derive_clone_copy)]
-#[cfg(feature = "uncertified")]
 pub macro Copy($item:item) {
     /* compiler built-in */
 }
@@ -451,8 +450,6 @@ marker_impls! {
     Copy for
         f16, f128,
         char,
-        {T: ?Sized} *const T,
-        {T: ?Sized} *mut T,
 
 }
 marker_impls! {
@@ -462,6 +459,8 @@ marker_impls! {
         isize, i8, i16, i32, i64, i128,
         f32, f64,
         bool,
+        {T: ?Sized} *const T,
+        {T: ?Sized} *mut T,
 }
 
 #[unstable(feature = "never_type", issue = "35121")]
@@ -796,7 +795,6 @@ impl<T: ?Sized> !Sync for *mut T {}
 /// [drop check]: Drop#drop-check
 #[lang = "phantom_data"]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "uncertified")]
 pub struct PhantomData<T: ?Sized>;
 
 #[stable(feature = "rust1", since = "1.0.0")]

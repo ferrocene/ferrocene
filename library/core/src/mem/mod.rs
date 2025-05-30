@@ -5,12 +5,12 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(feature = "uncertified")]
 use crate::alloc::Layout;
+use crate::intrinsics;
 #[cfg(feature = "uncertified")]
 use crate::marker::DiscriminantKind;
 #[cfg(feature = "uncertified")]
-use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
+use crate::{clone, cmp, fmt, hash, ptr};
 
 #[cfg(feature = "uncertified")]
 mod manually_drop;
@@ -32,7 +32,6 @@ pub use transmutability::{Assume, TransmuteFrom};
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[doc(inline)]
-#[cfg(feature = "uncertified")]
 pub use crate::intrinsics::transmute;
 
 /// Takes ownership and "forgets" about the value **without running its destructor**.
@@ -313,7 +312,6 @@ pub fn forget_unsized<T: ?Sized>(t: T) {
 #[rustc_promotable]
 #[rustc_const_stable(feature = "const_mem_size_of", since = "1.24.0")]
 #[rustc_diagnostic_item = "mem_size_of"]
-#[cfg(feature = "uncertified")]
 pub const fn size_of<T>() -> usize {
     intrinsics::size_of::<T>()
 }
@@ -472,7 +470,6 @@ pub fn min_align_of_val<T: ?Sized>(val: &T) -> usize {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_promotable]
 #[rustc_const_stable(feature = "const_align_of", since = "1.24.0")]
-#[cfg(feature = "uncertified")]
 pub const fn align_of<T>() -> usize {
     intrinsics::min_align_of::<T>()
 }
@@ -1240,7 +1237,6 @@ pub const fn variant_count<T>() -> usize {
 /// It's not on a stabilization track right now.
 #[doc(hidden)]
 #[unstable(feature = "sized_type_properties", issue = "none")]
-#[cfg(feature = "uncertified")]
 pub trait SizedTypeProperties: Sized {
     /// `true` if this type requires no storage.
     /// `false` if its [size](size_of) is greater than zero.
@@ -1288,7 +1284,6 @@ pub trait SizedTypeProperties: Sized {
 }
 #[doc(hidden)]
 #[unstable(feature = "sized_type_properties", issue = "none")]
-#[cfg(feature = "uncertified")]
 impl<T> SizedTypeProperties for T {}
 
 /// Expands to the offset in bytes of a field from the beginning of the given type.

@@ -1,9 +1,15 @@
+#[cfg(feature = "uncertified")]
 use super::*;
+#[cfg(feature = "uncertified")]
 use crate::cmp::Ordering::{Equal, Greater, Less};
+#[cfg(feature = "uncertified")]
 use crate::intrinsics::const_eval_select;
+#[cfg(feature = "uncertified")]
 use crate::mem::{self, SizedTypeProperties};
+#[cfg(feature = "uncertified")]
 use crate::slice::{self, SliceIndex};
 
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> *mut T {
     /// Returns `true` if the pointer is null.
     ///
@@ -1735,6 +1741,7 @@ impl<T: ?Sized> *mut T {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<T> *mut [T] {
     /// Returns the length of a raw slice.
     ///
@@ -2054,6 +2061,7 @@ impl<T> *mut [T] {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<T, const N: usize> *mut [T; N] {
     /// Returns a raw pointer to the array's buffer.
     ///
@@ -2097,6 +2105,7 @@ impl<T, const N: usize> *mut [T; N] {
 
 /// Pointer equality is by address, as produced by the [`<*mut T>::addr`](pointer::addr) method.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> PartialEq for *mut T {
     #[inline(always)]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -2107,10 +2116,12 @@ impl<T: ?Sized> PartialEq for *mut T {
 
 /// Pointer equality is an equivalence relation.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> Eq for *mut T {}
 
 /// Pointer comparison is by address, as produced by the [`<*mut T>::addr`](pointer::addr) method.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> Ord for *mut T {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -2127,6 +2138,7 @@ impl<T: ?Sized> Ord for *mut T {
 
 /// Pointer comparison is by address, as produced by the [`<*mut T>::addr`](pointer::addr) method.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> PartialOrd for *mut T {
     #[inline(always)]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -2160,6 +2172,7 @@ impl<T: ?Sized> PartialOrd for *mut T {
 }
 
 #[stable(feature = "raw_ptr_default", since = "CURRENT_RUSTC_VERSION")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized + Thin> Default for *mut T {
     /// Returns the default value of [`null_mut()`][crate::ptr::null_mut].
     fn default() -> Self {

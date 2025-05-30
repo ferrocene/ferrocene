@@ -1,57 +1,63 @@
 #![unstable(feature = "ptr_metadata", issue = "81513")]
 
+#[cfg(feature = "uncertified")]
 use crate::fmt;
+#[cfg(feature = "uncertified")]
 use crate::hash::{Hash, Hasher};
-use crate::intrinsics::{aggregate_raw_ptr, ptr_metadata};
+use crate::intrinsics::aggregate_raw_ptr;
+#[cfg(feature = "uncertified")]
+use crate::intrinsics::ptr_metadata;
+#[cfg(feature = "uncertified")]
 use crate::marker::Freeze;
+#[cfg(feature = "uncertified")]
 use crate::ptr::NonNull;
 
 /// Provides the pointer metadata type of any pointed-to type.
-///
-/// # Pointer metadata
-///
-/// Raw pointer types and reference types in Rust can be thought of as made of two parts:
-/// a data pointer that contains the memory address of the value, and some metadata.
-///
-/// For statically-sized types (that implement the `Sized` traits)
-/// as well as for `extern` types,
-/// pointers are said to be “thin”: metadata is zero-sized and its type is `()`.
-///
-/// Pointers to [dynamically-sized types][dst] are said to be “wide” or “fat”,
-/// they have non-zero-sized metadata:
-///
-/// * For structs whose last field is a DST, metadata is the metadata for the last field
-/// * For the `str` type, metadata is the length in bytes as `usize`
-/// * For slice types like `[T]`, metadata is the length in items as `usize`
-/// * For trait objects like `dyn SomeTrait`, metadata is [`DynMetadata<Self>`][DynMetadata]
-///   (e.g. `DynMetadata<dyn SomeTrait>`)
-///
-/// In the future, the Rust language may gain new kinds of types
-/// that have different pointer metadata.
-///
-/// [dst]: https://doc.rust-lang.org/nomicon/exotic-sizes.html#dynamically-sized-types-dsts
-///
-///
-/// # The `Pointee` trait
-///
-/// The point of this trait is its `Metadata` associated type,
-/// which is `()` or `usize` or `DynMetadata<_>` as described above.
-/// It is automatically implemented for every type.
-/// It can be assumed to be implemented in a generic context, even without a corresponding bound.
-///
-///
-/// # Usage
-///
-/// Raw pointers can be decomposed into the data pointer and metadata components
-/// with their [`to_raw_parts`] method.
-///
-/// Alternatively, metadata alone can be extracted with the [`metadata`] function.
-/// A reference can be passed to [`metadata`] and implicitly coerced.
-///
-/// A (possibly-wide) pointer can be put back together from its data pointer and metadata
-/// with [`from_raw_parts`] or [`from_raw_parts_mut`].
-///
-/// [`to_raw_parts`]: *const::to_raw_parts
+// ///
+// /// # Pointer metadata
+// ///
+// /// Raw pointer types and reference types in Rust can be thought of as made of two parts:
+// /// a data pointer that contains the memory address of the value, and some metadata.
+// ///
+// /// For statically-sized types (that implement the `Sized` traits)
+// /// as well as for `extern` types,
+// /// pointers are said to be “thin”: metadata is zero-sized and its type is `()`.
+// ///
+// /// Pointers to [dynamically-sized types][dst] are said to be “wide” or “fat”,
+// /// they have non-zero-sized metadata:
+// ///
+// /// * For structs whose last field is a DST, metadata is the metadata for the last field
+// /// * For the `str` type, metadata is the length in bytes as `usize`
+// /// * For slice types like `[T]`, metadata is the length in items as `usize`
+// /// * For trait objects like `dyn SomeTrait`, metadata is [`DynMetadata<Self>`][DynMetadata]
+// ///   (e.g. `DynMetadata<dyn SomeTrait>`)
+// ///
+// /// In the future, the Rust language may gain new kinds of types
+// /// that have different pointer metadata.
+// ///
+// /// [dst]: https://doc.rust-lang.org/nomicon/exotic-sizes.html#dynamically-sized-types-dsts
+// ///
+// ///
+// /// # The `Pointee` trait
+// ///
+// /// The point of this trait is its `Metadata` associated type,
+// /// which is `()` or `usize` or `DynMetadata<_>` as described above.
+// /// It is automatically implemented for every type.
+// /// It can be assumed to be implemented in a generic context, even without a corresponding bound.
+// ///
+// ///
+// /// # Usage
+// ///
+// /// Raw pointers can be decomposed into the data pointer and metadata components
+// /// with their [`to_raw_parts`] method.
+// ///
+// /// Alternatively, metadata alone can be extracted with the [`metadata`] function.
+// /// A reference can be passed to [`metadata`] and implicitly coerced.
+// ///
+// /// A (possibly-wide) pointer can be put back together from its data pointer and metadata
+// /// with [`from_raw_parts`] or [`from_raw_parts_mut`].
+// ///
+// /// [`to_raw_parts`]: *const::to_raw_parts
 #[lang = "pointee_trait"]
 #[rustc_deny_explicit_impl]
 #[rustc_do_not_implement_via_object]
@@ -63,7 +69,12 @@ pub trait Pointee {
     // in sync with those here:
     // NOTE: The metadata of `dyn Trait + 'a` is `DynMetadata<dyn Trait + 'a>`
     // so a `'static` bound must not be added.
+    #[cfg(feature = "uncertified")]
     type Metadata: fmt::Debug + Copy + Send + Sync + Ord + Hash + Unpin + Freeze;
+    /// The type for metadata in pointers and references to `Self`.
+    #[lang = "metadata_type"]
+    #[cfg(not(feature = "uncertified"))]
+    type Metadata: Copy + Send + Sync + Ord;
 }
 
 /// Pointers to types implementing this trait alias are “thin”.
@@ -96,17 +107,18 @@ pub trait Thin = Pointee<Metadata = ()>;
 /// assert_eq!(std::ptr::metadata("foo"), 3_usize);
 /// ```
 #[inline]
+#[cfg(feature = "uncertified")]
 pub const fn metadata<T: ?Sized>(ptr: *const T) -> <T as Pointee>::Metadata {
     ptr_metadata(ptr)
 }
 
 /// Forms a (possibly-wide) raw pointer from a data pointer and metadata.
-///
-/// This function is safe but the returned pointer is not necessarily safe to dereference.
-/// For slices, see the documentation of [`slice::from_raw_parts`] for safety requirements.
-/// For trait objects, the metadata must come from a pointer to the same underlying erased type.
-///
-/// [`slice::from_raw_parts`]: crate::slice::from_raw_parts
+// ///
+// /// This function is safe but the returned pointer is not necessarily safe to dereference.
+// /// For slices, see the documentation of [`slice::from_raw_parts`] for safety requirements.
+// /// For trait objects, the metadata must come from a pointer to the same underlying erased type.
+// ///
+// /// [`slice::from_raw_parts`]: crate::slice::from_raw_parts
 #[unstable(feature = "ptr_metadata", issue = "81513")]
 #[inline]
 pub const fn from_raw_parts<T: ?Sized>(
@@ -152,11 +164,13 @@ pub const fn from_raw_parts_mut<T: ?Sized>(
 /// duplicated in multiple codegen units), and pointers to vtables of *different* types/traits can
 /// compare equal (since identical vtables can be deduplicated within a codegen unit).
 #[lang = "dyn_metadata"]
+#[cfg(feature = "uncertified")]
 pub struct DynMetadata<Dyn: ?Sized> {
     _vtable_ptr: NonNull<VTable>,
     _phantom: crate::marker::PhantomData<Dyn>,
 }
 
+#[cfg(feature = "uncertified")]
 unsafe extern "C" {
     /// Opaque type for accessing vtables.
     ///
@@ -165,6 +179,7 @@ unsafe extern "C" {
     type VTable;
 }
 
+#[cfg(feature = "uncertified")]
 impl<Dyn: ?Sized> DynMetadata<Dyn> {
     /// When `DynMetadata` appears as the metadata field of a wide pointer, the rustc_middle layout
     /// computation does magic and the resulting layout is *not* a `FieldsShape::Aggregate`, instead
@@ -206,9 +221,12 @@ impl<Dyn: ?Sized> DynMetadata<Dyn> {
     }
 }
 
+#[cfg(feature = "uncertified")]
 unsafe impl<Dyn: ?Sized> Send for DynMetadata<Dyn> {}
+#[cfg(feature = "uncertified")]
 unsafe impl<Dyn: ?Sized> Sync for DynMetadata<Dyn> {}
 
+#[cfg(feature = "uncertified")]
 impl<Dyn: ?Sized> fmt::Debug for DynMetadata<Dyn> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("DynMetadata").field(&self.vtable_ptr()).finish()
@@ -217,10 +235,13 @@ impl<Dyn: ?Sized> fmt::Debug for DynMetadata<Dyn> {
 
 // Manual impls needed to avoid `Dyn: $Trait` bounds.
 
+#[cfg(feature = "uncertified")]
 impl<Dyn: ?Sized> Unpin for DynMetadata<Dyn> {}
 
+#[cfg(feature = "uncertified")]
 impl<Dyn: ?Sized> Copy for DynMetadata<Dyn> {}
 
+#[cfg(feature = "uncertified")]
 impl<Dyn: ?Sized> Clone for DynMetadata<Dyn> {
     #[inline]
     fn clone(&self) -> Self {
@@ -228,8 +249,10 @@ impl<Dyn: ?Sized> Clone for DynMetadata<Dyn> {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<Dyn: ?Sized> Eq for DynMetadata<Dyn> {}
 
+#[cfg(feature = "uncertified")]
 impl<Dyn: ?Sized> PartialEq for DynMetadata<Dyn> {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
@@ -237,6 +260,7 @@ impl<Dyn: ?Sized> PartialEq for DynMetadata<Dyn> {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<Dyn: ?Sized> Ord for DynMetadata<Dyn> {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -245,6 +269,7 @@ impl<Dyn: ?Sized> Ord for DynMetadata<Dyn> {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<Dyn: ?Sized> PartialOrd for DynMetadata<Dyn> {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<crate::cmp::Ordering> {
@@ -252,6 +277,7 @@ impl<Dyn: ?Sized> PartialOrd for DynMetadata<Dyn> {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<Dyn: ?Sized> Hash for DynMetadata<Dyn> {
     #[inline]
     fn hash<H: Hasher>(&self, hasher: &mut H) {

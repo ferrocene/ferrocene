@@ -82,7 +82,6 @@ pub use assert_unsafe_precondition;
 /// Checking library UB is always enabled when UB-checking is done
 /// (and we use a reexport so that there is no unnecessary wrapper function).
 #[unstable(feature = "ub_checks", issue = "none")]
-#[cfg(feature = "uncertified")]
 pub use intrinsics::ub_checks as check_library_ub;
 
 /// Determines whether we should check for language UB.
@@ -114,7 +113,6 @@ pub(crate) const fn check_language_ub() -> bool {
 /// check is anyway not executed in `const`.
 #[inline]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
-#[cfg(feature = "uncertified")]
 pub(crate) const fn maybe_is_aligned_and_not_null(
     ptr: *const (),
     align: usize,

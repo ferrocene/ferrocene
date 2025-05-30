@@ -1,36 +1,40 @@
 use super::*;
+#[cfg(feature = "uncertified")]
 use crate::cmp::Ordering::{Equal, Greater, Less};
 use crate::intrinsics::const_eval_select;
-use crate::mem::{self, SizedTypeProperties};
+use crate::mem;
+#[cfg(feature = "uncertified")]
+use crate::mem::SizedTypeProperties;
+#[cfg(feature = "uncertified")]
 use crate::slice::{self, SliceIndex};
 
 impl<T: ?Sized> *const T {
     /// Returns `true` if the pointer is null.
-    ///
-    /// Note that unsized types have many possible null pointers, as only the
-    /// raw data pointer is considered, not their length, vtable, etc.
-    /// Therefore, two pointers that are null may still not compare equal to
-    /// each other.
-    ///
-    /// # Panics during const evaluation
-    ///
-    /// If this method is used during const evaluation, and `self` is a pointer
-    /// that is offset beyond the bounds of the memory it initially pointed to,
-    /// then there might not be enough information to determine whether the
-    /// pointer is null. This is because the absolute address in memory is not
-    /// known at compile time. If the nullness of the pointer cannot be
-    /// determined, this method will panic.
-    ///
-    /// In-bounds pointers are never null, so the method will never panic for
-    /// such pointers.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let s: &str = "Follow the rabbit";
-    /// let ptr: *const u8 = s.as_ptr();
-    /// assert!(!ptr.is_null());
-    /// ```
+    // ///
+    // /// Note that unsized types have many possible null pointers, as only the
+    // /// raw data pointer is considered, not their length, vtable, etc.
+    // /// Therefore, two pointers that are null may still not compare equal to
+    // /// each other.
+    // ///
+    // /// # Panics during const evaluation
+    // ///
+    // /// If this method is used during const evaluation, and `self` is a pointer
+    // /// that is offset beyond the bounds of the memory it initially pointed to,
+    // /// then there might not be enough information to determine whether the
+    // /// pointer is null. This is because the absolute address in memory is not
+    // /// known at compile time. If the nullness of the pointer cannot be
+    // /// determined, this method will panic.
+    // ///
+    // /// In-bounds pointers are never null, so the method will never panic for
+    // /// such pointers.
+    // ///
+    // /// # Examples
+    // ///
+    // /// ```
+    // /// let s: &str = "Follow the rabbit";
+    // /// let ptr: *const u8 = s.as_ptr();
+    // /// assert!(!ptr.is_null());
+    // /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[rustc_diagnostic_item = "ptr_const_is_null"]
@@ -118,6 +122,7 @@ impl<T: ?Sized> *const T {
     #[unstable(feature = "set_ptr_value", issue = "75091")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[inline]
+    #[cfg(feature = "uncertified")]
     pub const fn with_metadata_of<U>(self, meta: *const U) -> *const U
     where
         U: ?Sized,
@@ -133,32 +138,33 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "ptr_const_cast", since = "1.65.0")]
     #[rustc_diagnostic_item = "ptr_cast_mut"]
     #[inline(always)]
+    #[cfg(feature = "uncertified")]
     pub const fn cast_mut(self) -> *mut T {
         self as _
     }
 
     /// Gets the "address" portion of the pointer.
-    ///
-    /// This is similar to `self as usize`, except that the [provenance][crate::ptr#provenance] of
-    /// the pointer is discarded and not [exposed][crate::ptr#exposed-provenance]. This means that
-    /// casting the returned address back to a pointer yields a [pointer without
-    /// provenance][without_provenance], which is undefined behavior to dereference. To properly
-    /// restore the lost information and obtain a dereferenceable pointer, use
-    /// [`with_addr`][pointer::with_addr] or [`map_addr`][pointer::map_addr].
-    ///
-    /// If using those APIs is not possible because there is no way to preserve a pointer with the
-    /// required provenance, then Strict Provenance might not be for you. Use pointer-integer casts
-    /// or [`expose_provenance`][pointer::expose_provenance] and [`with_exposed_provenance`][with_exposed_provenance]
-    /// instead. However, note that this makes your code less portable and less amenable to tools
-    /// that check for compliance with the Rust memory model.
-    ///
-    /// On most platforms this will produce a value with the same bytes as the original
-    /// pointer, because all the bytes are dedicated to describing the address.
-    /// Platforms which need to store additional information in the pointer may
-    /// perform a change of representation to produce a value containing only the address
-    /// portion of the pointer. What that means is up to the platform to define.
-    ///
-    /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
+    // ///
+    // /// This is similar to `self as usize`, except that the [provenance][crate::ptr#provenance] of
+    // /// the pointer is discarded and not [exposed][crate::ptr#exposed-provenance]. This means that
+    // /// casting the returned address back to a pointer yields a [pointer without
+    // /// provenance][without_provenance], which is undefined behavior to dereference. To properly
+    // /// restore the lost information and obtain a dereferenceable pointer, use
+    // /// [`with_addr`][pointer::with_addr] or [`map_addr`][pointer::map_addr].
+    // ///
+    // /// If using those APIs is not possible because there is no way to preserve a pointer with the
+    // /// required provenance, then Strict Provenance might not be for you. Use pointer-integer casts
+    // /// or [`expose_provenance`][pointer::expose_provenance] and [`with_exposed_provenance`][with_exposed_provenance]
+    // /// instead. However, note that this makes your code less portable and less amenable to tools
+    // /// that check for compliance with the Rust memory model.
+    // ///
+    // /// On most platforms this will produce a value with the same bytes as the original
+    // /// pointer, because all the bytes are dedicated to describing the address.
+    // /// Platforms which need to store additional information in the pointer may
+    // /// perform a change of representation to produce a value containing only the address
+    // /// portion of the pointer. What that means is up to the platform to define.
+    // ///
+    // /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
     #[must_use]
     #[inline(always)]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
@@ -195,6 +201,7 @@ impl<T: ?Sized> *const T {
     /// [`with_exposed_provenance`]: with_exposed_provenance
     #[inline(always)]
     #[stable(feature = "exposed_provenance", since = "1.84.0")]
+    #[cfg(feature = "uncertified")]
     pub fn expose_provenance(self) -> usize {
         self.cast::<()>() as usize
     }
@@ -213,6 +220,7 @@ impl<T: ?Sized> *const T {
     #[must_use]
     #[inline]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
+    #[cfg(feature = "uncertified")]
     pub fn with_addr(self, addr: usize) -> Self {
         // This should probably be an intrinsic to avoid doing any sort of arithmetic, but
         // meanwhile, we can implement it with `wrapping_offset`, which preserves the pointer's
@@ -232,6 +240,7 @@ impl<T: ?Sized> *const T {
     #[must_use]
     #[inline]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
+    #[cfg(feature = "uncertified")]
     pub fn map_addr(self, f: impl FnOnce(usize) -> usize) -> Self {
         self.with_addr(f(self.addr()))
     }
@@ -241,6 +250,7 @@ impl<T: ?Sized> *const T {
     /// The pointer can be later reconstructed with [`from_raw_parts`].
     #[unstable(feature = "ptr_metadata", issue = "81513")]
     #[inline]
+    #[cfg(feature = "uncertified")]
     pub const fn to_raw_parts(self) -> (*const (), <T as super::Pointee>::Metadata) {
         (self.cast(), metadata(self))
     }
@@ -292,6 +302,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "ptr_as_ref", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[inline]
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn as_ref<'a>(self) -> Option<&'a T> {
         // SAFETY: the caller must guarantee that `self` is valid
         // for a reference if it isn't null.
@@ -324,6 +335,7 @@ impl<T: ?Sized> *const T {
     #[unstable(feature = "ptr_as_ref_unchecked", issue = "122034")]
     #[inline]
     #[must_use]
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn as_ref_unchecked<'a>(self) -> &'a T {
         // SAFETY: the caller must guarantee that `self` is valid for a reference
         unsafe { &*self }
@@ -362,6 +374,7 @@ impl<T: ?Sized> *const T {
     /// ```
     #[inline]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn as_uninit_ref<'a>(self) -> Option<&'a MaybeUninit<T>>
     where
         T: Sized,
@@ -417,6 +430,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn offset(self, count: isize) -> *const T
     where
         T: Sized,
@@ -470,6 +484,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn byte_offset(self, count: isize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `offset`.
         unsafe { self.cast::<u8>().offset(count).with_metadata_of(self) }
@@ -531,6 +546,7 @@ impl<T: ?Sized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
+    #[cfg(feature = "uncertified")]
     pub const fn wrapping_offset(self, count: isize) -> *const T
     where
         T: Sized,
@@ -553,6 +569,7 @@ impl<T: ?Sized> *const T {
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
+    #[cfg(feature = "uncertified")]
     pub const fn wrapping_byte_offset(self, count: isize) -> Self {
         self.cast::<u8>().wrapping_offset(count).with_metadata_of(self)
     }
@@ -591,6 +608,7 @@ impl<T: ?Sized> *const T {
     #[unstable(feature = "ptr_mask", issue = "98290")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[inline(always)]
+    #[cfg(feature = "uncertified")]
     pub fn mask(self, mask: usize) -> *const T {
         intrinsics::ptr_mask(self.cast::<()>(), mask).with_metadata_of(self)
     }
@@ -680,6 +698,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_ptr_offset_from", since = "1.65.0")]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn offset_from(self, origin: *const T) -> isize
     where
         T: Sized,
@@ -703,6 +722,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn byte_offset_from<U: ?Sized>(self, origin: *const U) -> isize {
         // SAFETY: the caller must uphold the safety contract for `offset_from`.
         unsafe { self.cast::<u8>().offset_from(origin.cast::<u8>()) }
@@ -769,6 +789,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn offset_from_unsigned(self, origin: *const T) -> usize
     where
         T: Sized,
@@ -814,6 +835,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn byte_offset_from_unsigned<U: ?Sized>(self, origin: *const U) -> usize {
         // SAFETY: the caller must uphold the safety contract for `offset_from_unsigned`.
         unsafe { self.cast::<u8>().offset_from_unsigned(origin.cast::<u8>()) }
@@ -869,6 +891,7 @@ impl<T: ?Sized> *const T {
     #[unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[rustc_const_unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[inline]
+    #[cfg(feature = "uncertified")]
     pub const fn guaranteed_ne(self, other: *const T) -> Option<bool>
     where
         T: Sized,
@@ -928,6 +951,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn add(self, count: usize) -> Self
     where
         T: Sized,
@@ -980,6 +1004,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn byte_add(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `add`.
         unsafe { self.cast::<u8>().add(count).with_metadata_of(self) }
@@ -1034,6 +1059,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -1092,6 +1118,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn byte_sub(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `sub`.
         unsafe { self.cast::<u8>().sub(count).with_metadata_of(self) }
@@ -1152,6 +1179,7 @@ impl<T: ?Sized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
+    #[cfg(feature = "uncertified")]
     pub const fn wrapping_add(self, count: usize) -> Self
     where
         T: Sized,
@@ -1172,6 +1200,7 @@ impl<T: ?Sized> *const T {
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
+    #[cfg(feature = "uncertified")]
     pub const fn wrapping_byte_add(self, count: usize) -> Self {
         self.cast::<u8>().wrapping_add(count).with_metadata_of(self)
     }
@@ -1231,6 +1260,7 @@ impl<T: ?Sized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
+    #[cfg(feature = "uncertified")]
     pub const fn wrapping_sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -1251,6 +1281,7 @@ impl<T: ?Sized> *const T {
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
+    #[cfg(feature = "uncertified")]
     pub const fn wrapping_byte_sub(self, count: usize) -> Self {
         self.cast::<u8>().wrapping_sub(count).with_metadata_of(self)
     }
@@ -1265,6 +1296,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn read(self) -> T
     where
         T: Sized,
@@ -1286,6 +1318,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(feature = "uncertified")]
     pub unsafe fn read_volatile(self) -> T
     where
         T: Sized,
@@ -1306,6 +1339,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn read_unaligned(self) -> T
     where
         T: Sized,
@@ -1326,6 +1360,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn copy_to(self, dest: *mut T, count: usize)
     where
         T: Sized,
@@ -1346,6 +1381,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(feature = "uncertified")]
     pub const unsafe fn copy_to_nonoverlapping(self, dest: *mut T, count: usize)
     where
         T: Sized,
@@ -1393,6 +1429,7 @@ impl<T: ?Sized> *const T {
     #[must_use]
     #[inline]
     #[stable(feature = "align_offset", since = "1.36.0")]
+    #[cfg(feature = "uncertified")]
     pub fn align_offset(self, align: usize) -> usize
     where
         T: Sized,
@@ -1431,6 +1468,7 @@ impl<T: ?Sized> *const T {
     #[must_use]
     #[inline]
     #[stable(feature = "pointer_is_aligned", since = "1.79.0")]
+    #[cfg(feature = "uncertified")]
     pub fn is_aligned(self) -> bool
     where
         T: Sized,
@@ -1442,32 +1480,32 @@ impl<T: ?Sized> *const T {
     ///
     /// For non-`Sized` pointees this operation considers only the data pointer,
     /// ignoring the metadata.
-    ///
-    /// # Panics
-    ///
-    /// The function panics if `align` is not a power-of-two (this includes 0).
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// #![feature(pointer_is_aligned_to)]
-    ///
-    /// // On some platforms, the alignment of i32 is less than 4.
-    /// #[repr(align(4))]
-    /// struct AlignedI32(i32);
-    ///
-    /// let data = AlignedI32(42);
-    /// let ptr = &data as *const AlignedI32;
-    ///
-    /// assert!(ptr.is_aligned_to(1));
-    /// assert!(ptr.is_aligned_to(2));
-    /// assert!(ptr.is_aligned_to(4));
-    ///
-    /// assert!(ptr.wrapping_byte_add(2).is_aligned_to(2));
-    /// assert!(!ptr.wrapping_byte_add(2).is_aligned_to(4));
-    ///
-    /// assert_ne!(ptr.is_aligned_to(8), ptr.wrapping_add(1).is_aligned_to(8));
-    /// ```
+    // ///
+    // /// # Panics
+    // ///
+    // /// The function panics if `align` is not a power-of-two (this includes 0).
+    // ///
+    // /// # Examples
+    // ///
+    // /// ```
+    // /// #![feature(pointer_is_aligned_to)]
+    // ///
+    // /// // On some platforms, the alignment of i32 is less than 4.
+    // /// #[repr(align(4))]
+    // /// struct AlignedI32(i32);
+    // ///
+    // /// let data = AlignedI32(42);
+    // /// let ptr = &data as *const AlignedI32;
+    // ///
+    // /// assert!(ptr.is_aligned_to(1));
+    // /// assert!(ptr.is_aligned_to(2));
+    // /// assert!(ptr.is_aligned_to(4));
+    // ///
+    // /// assert!(ptr.wrapping_byte_add(2).is_aligned_to(2));
+    // /// assert!(!ptr.wrapping_byte_add(2).is_aligned_to(4));
+    // ///
+    // /// assert_ne!(ptr.is_aligned_to(8), ptr.wrapping_add(1).is_aligned_to(8));
+    // /// ```
     #[must_use]
     #[inline]
     #[unstable(feature = "pointer_is_aligned_to", issue = "96284")]
@@ -1480,6 +1518,7 @@ impl<T: ?Sized> *const T {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<T> *const [T] {
     /// Returns the length of a raw slice.
     ///
@@ -1639,6 +1678,7 @@ impl<T> *const [T] {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<T, const N: usize> *const [T; N] {
     /// Returns a raw pointer to the array's buffer.
     ///
@@ -1677,7 +1717,7 @@ impl<T, const N: usize> *const [T; N] {
     }
 }
 
-/// Pointer equality is by address, as produced by the [`<*const T>::addr`](pointer::addr) method.
+// /// Pointer equality is by address, as produced by the [`<*const T>::addr`](pointer::addr) method.
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized> PartialEq for *const T {
     #[inline]
@@ -1693,6 +1733,7 @@ impl<T: ?Sized> Eq for *const T {}
 
 /// Pointer comparison is by address, as produced by the `[`<*const T>::addr`](pointer::addr)` method.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> Ord for *const T {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -1709,6 +1750,7 @@ impl<T: ?Sized> Ord for *const T {
 
 /// Pointer comparison is by address, as produced by the `[`<*const T>::addr`](pointer::addr)` method.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized> PartialOrd for *const T {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -1742,6 +1784,7 @@ impl<T: ?Sized> PartialOrd for *const T {
 }
 
 #[stable(feature = "raw_ptr_default", since = "CURRENT_RUSTC_VERSION")]
+#[cfg(feature = "uncertified")]
 impl<T: ?Sized + Thin> Default for *const T {
     /// Returns the default value of [`null()`][crate::ptr::null].
     fn default() -> Self {

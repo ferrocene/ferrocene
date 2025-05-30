@@ -181,7 +181,6 @@ pub trait Clone: Sized {
 #[rustc_builtin_macro]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics, derive_clone_copy)]
-#[cfg(feature = "uncertified")]
 pub macro Clone($item:item) {
     /* compiler built-in */
 }
@@ -253,7 +252,6 @@ impl_use_cloned! {
     reason = "deriving hack, should not be public",
     issue = "none"
 )]
-#[cfg(feature = "uncertified")]
 pub struct AssertParamIsClone<T: Clone + ?Sized> {
     _field: crate::marker::PhantomData<T>,
 }
@@ -543,7 +541,6 @@ mod impls {
         }
     }
 
-    #[cfg(feature = "uncertified")]
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> Clone for *const T {
         #[inline(always)]
@@ -552,7 +549,6 @@ mod impls {
         }
     }
 
-    #[cfg(feature = "uncertified")]
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> Clone for *mut T {
         #[inline(always)]

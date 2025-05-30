@@ -4374,6 +4374,7 @@ dependencies = [
  "rustc_macros",
  "rustc_parse",
  "rustc_parse_format",
+ "rustc_proc_macro",
  "rustc_session",
  "rustc_span",
  "rustc_target",
@@ -4663,6 +4664,7 @@ dependencies = [
  "rustc_lint_defs",
  "rustc_macros",
  "rustc_parse",
+ "rustc_proc_macro",
  "rustc_serialize",
  "rustc_session",
  "rustc_span",
@@ -5011,6 +5013,7 @@ dependencies = [
  "rustc_index",
  "rustc_macros",
  "rustc_middle",
+ "rustc_proc_macro",
  "rustc_serialize",
  "rustc_session",
  "rustc_span",
@@ -5265,6 +5268,13 @@ dependencies = [
  "rustc_span",
  "rustc_ty_utils",
  "tracing",
+]
+
+[[package]]
+name = "rustc_proc_macro"
+version = "0.0.0"
+dependencies = [
+ "rustc-literal-escaper",
 ]
 
 [[package]]

@@ -1243,8 +1243,8 @@ mod prim_f16 {}
 ///
 /// For more information on floating-point numbers, see [Wikipedia][wikipedia].
 ///
-/// *[See also the `std::f32::consts` module](crate::f32::consts).*
-///
+// /// *[See also the `std::f32::consts` module](crate::f32::consts).*
+// ///
 /// [wikipedia]: https://en.wikipedia.org/wiki/Single-precision_floating-point_format
 ///
 /// # NaN bit patterns
@@ -1371,7 +1371,6 @@ mod prim_f16 {}
 /// ```
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "uncertified")]
 mod prim_f32 {}
 
 #[rustc_doc_primitive = "f64"]
@@ -1382,11 +1381,10 @@ mod prim_f32 {}
 /// bits. Please see [the documentation for `f32`](prim@f32) or [Wikipedia on double-precision
 /// values][wikipedia] for more information.
 ///
-/// *[See also the `std::f64::consts` module](crate::f64::consts).*
-///
+// /// *[See also the `std::f64::consts` module](crate::f64::consts).*
+// ///
 /// [wikipedia]: https://en.wikipedia.org/wiki/Double-precision_floating-point_format
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "uncertified")]
 mod prim_f64 {}
 
 #[rustc_doc_primitive = "f128"]

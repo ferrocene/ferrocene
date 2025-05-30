@@ -1,0 +1,2 @@
+# SPDX-License-Identifier: LicenseRef-Proprietary
+# SPDX-FileCopyrightText: The Ferrocene Developers

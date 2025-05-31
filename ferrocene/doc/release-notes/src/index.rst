@@ -4,14 +4,6 @@
 Ferrocene Release Notes
 =======================
 
-This document contains the list of new features, changes and bug fixes included
-in Ferrocene releases.
-
-.. toctree::
-   :maxdepth: 1
-
-   next
-
 .. toctree::
    :caption: Ferrocene 25.05 series:
    :maxdepth: 1

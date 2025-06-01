@@ -12,9 +12,9 @@ sys.path.append(os.path.abspath("../exts"))
 
 # -- Project information -----------------------------------------------------
 
-project = "Ferrocene Language Specification"
-copyright = "The Ferrocene Developers"
-author = "The Ferrocene Developers"
+project = "FLS"
+copyright = "The Ferrocene Developers and The Rust Project Contributors"
+author = "The Ferrocene Developers and The Rust Project Contributors"
 
 
 # -- General configuration ---------------------------------------------------
@@ -44,15 +44,15 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 
-html_theme = "ferrocene"
+html_theme = "fls"
 html_theme_path = ["../themes"]
 
 html_theme_options = {
     "license": "MIT or Apache 2.0",
 }
 
-html_title = "Ferrocene Language Specification"
-html_short_title = "Language Specification"
+html_title = "FLS"
+html_short_title = "FLS"
 
 # -- Options for linting -----------------------------------------------------
 

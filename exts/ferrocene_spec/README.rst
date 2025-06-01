@@ -5,10 +5,10 @@
 FLS Sphinx Extension
 ====================
 
-To enhance the Ferrocene Language Specification, and to facilitate its
-authoring, updating, and testing it easier, we developed and use a custom
-Sphinx extension that adds new roles and directives. The source code of the
-extension is in the ``exts/ferrocene_spec`` directory.
+To enhance the FLS, and to facilitate its authoring, updating, and testing it
+easier, we developed and use a custom Sphinx extension that adds new roles and
+directives. The source code of the extension is in the ``exts/ferrocene_spec``
+directory.
 
 .. contents:: In this document:
 

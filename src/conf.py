@@ -28,7 +28,7 @@ extensions = [
     "ferrocene_spec",
     "ferrocene_spec_lints",
     "ferrocene_toctrees",
-    "ferrocene_theme",
+
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -46,7 +46,7 @@ exclude_patterns = []
 #
 
 html_theme = "ferrocene"
-html_theme_path = ["../shared/themes"]
+html_theme_path = ["../themes"]
 
 html_theme_options = {
     "license": "MIT or Apache 2.0",

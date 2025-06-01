@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
+# SPDX-FileCopyrightText: The Rust Project Contributors
 
 # -- Path setup --------------------------------------------------------------
 
@@ -44,7 +45,7 @@ exclude_patterns = []
 #
 
 html_theme = "ferrocene"
-html_theme_path = ["../shared/themes"]
+html_theme_path = ["../themes"]
 
 html_theme_options = {
     "license": "MIT or Apache 2.0",

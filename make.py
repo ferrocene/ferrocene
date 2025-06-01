@@ -154,4 +154,5 @@ def main(root):
             print("error: linkchecker failed")
             exit(1)
 
+
 main(os.path.abspath(os.path.dirname(__file__)))

@@ -28,7 +28,6 @@ extensions = [
     "ferrocene_spec",
     "ferrocene_spec_lints",
     "ferrocene_toctrees",
-
 ]
 
 # Add any paths that contain templates here, relative to this directory.

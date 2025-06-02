@@ -1,61 +1,101 @@
-#[cfg(feature = "uncertified")] use crate::iter::InPlaceIterable;
-#[cfg(feature = "uncertified")] use crate::num::NonZero;
-#[cfg(feature = "uncertified")] use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
+#[cfg(feature = "uncertified")]
+use crate::iter::InPlaceIterable;
+#[cfg(feature = "uncertified")]
+use crate::num::NonZero;
+#[cfg(feature = "uncertified")]
+use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 
-#[cfg(feature = "uncertified")] mod array_chunks;
-#[cfg(feature = "uncertified")] mod by_ref_sized;
-#[cfg(feature = "uncertified")] mod chain;
-#[cfg(feature = "uncertified")] mod cloned;
-#[cfg(feature = "uncertified")] mod copied;
-#[cfg(feature = "uncertified")] mod cycle;
-#[cfg(feature = "uncertified")] mod enumerate;
-#[cfg(feature = "uncertified")] mod filter;
-#[cfg(feature = "uncertified")] mod filter_map;
-#[cfg(feature = "uncertified")] mod flatten;
-#[cfg(feature = "uncertified")] mod fuse;
-#[cfg(feature = "uncertified")] mod inspect;
-#[cfg(feature = "uncertified")] mod intersperse;
-#[cfg(feature = "uncertified")] mod map;
-#[cfg(feature = "uncertified")] mod map_while;
-#[cfg(feature = "uncertified")] mod map_windows;
-#[cfg(feature = "uncertified")] mod peekable;
-#[cfg(feature = "uncertified")] mod rev;
-#[cfg(feature = "uncertified")] mod scan;
-#[cfg(feature = "uncertified")] mod skip;
-#[cfg(feature = "uncertified")] mod skip_while;
- mod step_by;
-#[cfg(feature = "uncertified")] mod take;
-#[cfg(feature = "uncertified")] mod take_while;
-#[cfg(feature = "uncertified")] mod zip;
+#[cfg(feature = "uncertified")]
+mod array_chunks;
+#[cfg(feature = "uncertified")]
+mod by_ref_sized;
+#[cfg(feature = "uncertified")]
+mod chain;
+#[cfg(feature = "uncertified")]
+mod cloned;
+#[cfg(feature = "uncertified")]
+mod copied;
+#[cfg(feature = "uncertified")]
+mod cycle;
+#[cfg(feature = "uncertified")]
+mod enumerate;
+#[cfg(feature = "uncertified")]
+mod filter;
+#[cfg(feature = "uncertified")]
+mod filter_map;
+#[cfg(feature = "uncertified")]
+mod flatten;
+#[cfg(feature = "uncertified")]
+mod fuse;
+#[cfg(feature = "uncertified")]
+mod inspect;
+#[cfg(feature = "uncertified")]
+mod intersperse;
+#[cfg(feature = "uncertified")]
+mod map;
+#[cfg(feature = "uncertified")]
+mod map_while;
+#[cfg(feature = "uncertified")]
+mod map_windows;
+#[cfg(feature = "uncertified")]
+mod peekable;
+#[cfg(feature = "uncertified")]
+mod rev;
+#[cfg(feature = "uncertified")]
+mod scan;
+#[cfg(feature = "uncertified")]
+mod skip;
+#[cfg(feature = "uncertified")]
+mod skip_while;
+mod step_by;
+#[cfg(feature = "uncertified")]
+mod take;
+#[cfg(feature = "uncertified")]
+mod take_while;
+#[cfg(feature = "uncertified")]
+mod zip;
 
 #[unstable(feature = "iter_array_chunks", reason = "recently added", issue = "100450")]
-#[cfg(feature = "uncertified")] pub use self::array_chunks::ArrayChunks;
+#[cfg(feature = "uncertified")]
+pub use self::array_chunks::ArrayChunks;
 #[unstable(feature = "std_internals", issue = "none")]
-#[cfg(feature = "uncertified")] pub use self::by_ref_sized::ByRefSized;
+#[cfg(feature = "uncertified")]
+pub use self::by_ref_sized::ByRefSized;
 #[unstable(feature = "iter_chain", reason = "recently added", issue = "125964")]
-#[cfg(feature = "uncertified")] pub use self::chain::chain;
+#[cfg(feature = "uncertified")]
+pub use self::chain::chain;
 #[stable(feature = "iter_cloned", since = "1.1.0")]
-#[cfg(feature = "uncertified")] pub use self::cloned::Cloned;
+#[cfg(feature = "uncertified")]
+pub use self::cloned::Cloned;
 #[stable(feature = "iter_copied", since = "1.36.0")]
-#[cfg(feature = "uncertified")] pub use self::copied::Copied;
+#[cfg(feature = "uncertified")]
+pub use self::copied::Copied;
 #[stable(feature = "iterator_flatten", since = "1.29.0")]
-#[cfg(feature = "uncertified")] pub use self::flatten::Flatten;
+#[cfg(feature = "uncertified")]
+pub use self::flatten::Flatten;
 #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
-#[cfg(feature = "uncertified")] pub use self::intersperse::{Intersperse, IntersperseWith};
+#[cfg(feature = "uncertified")]
+pub use self::intersperse::{Intersperse, IntersperseWith};
 #[stable(feature = "iter_map_while", since = "1.57.0")]
-#[cfg(feature = "uncertified")] pub use self::map_while::MapWhile;
+#[cfg(feature = "uncertified")]
+pub use self::map_while::MapWhile;
 #[unstable(feature = "iter_map_windows", reason = "recently added", issue = "87155")]
-#[cfg(feature = "uncertified")] pub use self::map_windows::MapWindows;
+#[cfg(feature = "uncertified")]
+pub use self::map_windows::MapWindows;
 #[stable(feature = "iterator_step_by", since = "1.28.0")]
- pub use self::step_by::StepBy;
+pub use self::step_by::StepBy;
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(feature = "uncertified")] pub use self::zip::TrustedRandomAccess;
+#[cfg(feature = "uncertified")]
+pub use self::zip::TrustedRandomAccess;
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(feature = "uncertified")] pub use self::zip::TrustedRandomAccessNoCoerce;
+#[cfg(feature = "uncertified")]
+pub use self::zip::TrustedRandomAccessNoCoerce;
 #[stable(feature = "iter_zip", since = "1.59.0")]
-#[cfg(feature = "uncertified")] pub use self::zip::zip;
+#[cfg(feature = "uncertified")]
+pub use self::zip::zip;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "uncertified")] pub use self::{
+#[cfg(feature = "uncertified")]
+pub use self::{
     chain::Chain, cycle::Cycle, enumerate::Enumerate, filter::Filter, filter_map::FilterMap,
     flatten::FlatMap, fuse::Fuse, inspect::Inspect, map::Map, peekable::Peekable, rev::Rev,
     scan::Scan, skip::Skip, skip_while::SkipWhile, take::Take, take_while::TakeWhile, zip::Zip,
@@ -102,7 +142,8 @@
 #[unstable(issue = "none", feature = "inplace_iteration")]
 #[doc(hidden)]
 #[rustc_specialization_trait]
-#[cfg(feature = "uncertified")] pub unsafe trait SourceIter {
+#[cfg(feature = "uncertified")]
+pub unsafe trait SourceIter {
     /// A source stage in an iterator pipeline.
     type Source;
 
@@ -141,7 +182,8 @@
 ///
 /// If a `ControlFlow::Break` is encountered, the iterator stops and the
 /// residual is stored.
-#[cfg(feature = "uncertified")] pub(crate) struct GenericShunt<'a, I, R> {
+#[cfg(feature = "uncertified")]
+pub(crate) struct GenericShunt<'a, I, R> {
     iter: I,
     residual: &'a mut Option<R>,
 }
@@ -149,7 +191,8 @@
 /// Process the given iterator as if it yielded the item's `Try::Output`
 /// type instead. Any `Try::Residual`s encountered will stop the inner iterator
 /// and be propagated back to the overall result.
-#[cfg(feature = "uncertified")] pub(crate) fn try_process<I, T, R, F, U>(iter: I, mut f: F) -> ChangeOutputType<I::Item, U>
+#[cfg(feature = "uncertified")]
+pub(crate) fn try_process<I, T, R, F, U>(iter: I, mut f: F) -> ChangeOutputType<I::Item, U>
 where
     I: Iterator<Item: Try<Output = T, Residual = R>>,
     for<'a> F: FnMut(GenericShunt<'a, I, R>) -> U,
@@ -164,17 +207,20 @@ where
     }
 }
 
-#[cfg(feature = "uncertified")] impl<I, R> Iterator for GenericShunt<'_, I, R>
+#[cfg(feature = "uncertified")]
+impl<I, R> Iterator for GenericShunt<'_, I, R>
 where
     I: Iterator<Item: Try<Residual = R>>,
 {
     type Item = <I::Item as Try>::Output;
 
-    #[cfg(feature = "uncertified")] fn next(&mut self) -> Option<Self::Item> {
+    #[cfg(feature = "uncertified")]
+    fn next(&mut self) -> Option<Self::Item> {
         self.try_for_each(ControlFlow::Break).break_value()
     }
 
-    #[cfg(feature = "uncertified")] fn size_hint(&self) -> (usize, Option<usize>) {
+    #[cfg(feature = "uncertified")]
+    fn size_hint(&self) -> (usize, Option<usize>) {
         if self.residual.is_some() {
             (0, Some(0))
         } else {
@@ -183,7 +229,8 @@ where
         }
     }
 
-    #[cfg(feature = "uncertified")] fn try_fold<B, F, T>(&mut self, init: B, mut f: F) -> T
+    #[cfg(feature = "uncertified")]
+    fn try_fold<B, F, T>(&mut self, init: B, mut f: F) -> T
     where
         F: FnMut(B, Self::Item) -> T,
         T: Try<Output = B>,
@@ -203,14 +250,16 @@ where
 }
 
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(feature = "uncertified")] unsafe impl<I, R> SourceIter for GenericShunt<'_, I, R>
+#[cfg(feature = "uncertified")]
+unsafe impl<I, R> SourceIter for GenericShunt<'_, I, R>
 where
     I: SourceIter,
 {
     type Source = I::Source;
 
     #[inline]
-    #[cfg(feature = "uncertified")] unsafe fn as_inner(&mut self) -> &mut Self::Source {
+    #[cfg(feature = "uncertified")]
+    unsafe fn as_inner(&mut self) -> &mut Self::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.iter) }
     }
@@ -220,10 +269,13 @@ where
 // in order to return `Some(_)`. Since `iter` has type `I: InPlaceIterable` it's
 // guaranteed that at least one item will be moved out from the underlying source.
 #[unstable(issue = "none", feature = "inplace_iteration")]
-#[cfg(feature = "uncertified")] unsafe impl<I, R> InPlaceIterable for GenericShunt<'_, I, R>
+#[cfg(feature = "uncertified")]
+unsafe impl<I, R> InPlaceIterable for GenericShunt<'_, I, R>
 where
     I: InPlaceIterable,
 {
-    #[cfg(feature = "uncertified")] const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;
-    #[cfg(feature = "uncertified")] const MERGE_BY: Option<NonZero<usize>> = I::MERGE_BY;
+    #[cfg(feature = "uncertified")]
+    const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;
+    #[cfg(feature = "uncertified")]
+    const MERGE_BY: Option<NonZero<usize>> = I::MERGE_BY;
 }

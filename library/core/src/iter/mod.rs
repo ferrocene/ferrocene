@@ -493,7 +493,6 @@ pub use self::traits::{
     DoubleEndedIterator, ExactSizeIterator, Extend, FromIterator, IntoIterator, Product, Sum,
 };
 
-
 mod adapters;
 #[cfg(feature = "uncertified")]
 mod range;

@@ -42,6 +42,7 @@ FLS
    glossary
    undefined-behavior
    changelog
+   background
 
 Indices and tables
 ------------------

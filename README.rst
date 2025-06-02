@@ -2,9 +2,9 @@
    SPDX-FileCopyrightText: The Ferrocene Developers
    SPDX-FileCopyrightText: The Rust Project Contributors
 
-================================
+===
 FLS
-================================
+===
 
 .. raw:: html
 

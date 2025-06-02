@@ -190,7 +190,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    
+
     fn size_hint(&self) -> (usize, Option<usize>) {
         (0, None)
     }
@@ -226,7 +226,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    
+
     fn count(self) -> usize
     where
         Self: Sized,
@@ -255,13 +255,12 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(feature = "uncertified")]
+
     fn last(self) -> Option<Self::Item>
     where
         Self: Sized,
     {
         #[inline]
-        #[cfg(feature = "uncertified")]
         fn some<T>(_: Option<T>, x: T) -> Option<T> {
             Some(x)
         }
@@ -2615,7 +2614,7 @@ pub trait Iterator {
     #[doc(alias = "inject", alias = "foldl")]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    
+
     fn fold<B, F>(mut self, init: B, mut f: F) -> B
     where
         Self: Sized,

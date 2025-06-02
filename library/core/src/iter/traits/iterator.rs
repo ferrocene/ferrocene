@@ -226,7 +226,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(feature = "uncertified")]
+    
     fn count(self) -> usize
     where
         Self: Sized,
@@ -2615,7 +2615,7 @@ pub trait Iterator {
     #[doc(alias = "inject", alias = "foldl")]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(feature = "uncertified")]
+    
     fn fold<B, F>(mut self, init: B, mut f: F) -> B
     where
         Self: Sized,

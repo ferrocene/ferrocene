@@ -1,6 +1,10 @@
+#[cfg(feature = "uncertified")]
 use crate::intrinsics;
+#[cfg(feature = "uncertified")]
 use crate::iter::{TrustedLen, TrustedRandomAccess, from_fn};
+#[cfg(feature = "uncertified")]
 use crate::num::NonZero;
+#[cfg(feature = "uncertified")]
 use crate::ops::{Range, Try};
 
 /// An iterator for stepping iterators by a custom amount.
@@ -12,7 +16,10 @@ use crate::ops::{Range, Try};
 /// [`Iterator`]: trait.Iterator.html
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "iterator_step_by", since = "1.28.0")]
-#[derive(Clone, Debug)]
+#[cfg_attr(feature = "uncertified", derive(Debug))]
+// FIXME(@pvdrz): remove once the fields are used
+#[cfg_attr(not(feature = "uncertified"), allow(dead_code))]
+#[derive(Clone)]
 pub struct StepBy<I> {
     /// This field is guaranteed to be preprocessed by the specialized `SpecRangeSetup::setup`
     /// in the constructor.
@@ -40,6 +47,7 @@ impl<I> StepBy<I> {
     /// The `step` that was originally passed to `Iterator::step_by(step)`,
     /// aka `self.step_minus_one + 1`.
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn original_step(&self) -> NonZero<usize> {
         // SAFETY: By type invariant, `step_minus_one` cannot be `MAX`, which
         // means the addition cannot overflow and the result cannot be zero.
@@ -48,6 +56,7 @@ impl<I> StepBy<I> {
 }
 
 #[stable(feature = "iterator_step_by", since = "1.28.0")]
+#[cfg(feature = "uncertified")]
 impl<I> Iterator for StepBy<I>
 where
     I: Iterator,
@@ -55,20 +64,24 @@ where
     type Item = I::Item;
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn next(&mut self) -> Option<Self::Item> {
         self.spec_next()
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.spec_size_hint()
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         self.spec_nth(n)
     }
 
+    #[cfg(feature = "uncertified")]
     fn try_fold<Acc, F, R>(&mut self, acc: Acc, f: F) -> R
     where
         F: FnMut(Acc, Self::Item) -> R,
@@ -78,6 +91,7 @@ where
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn fold<Acc, F>(self, acc: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -86,12 +100,14 @@ where
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<I> StepBy<I>
 where
     I: ExactSizeIterator,
 {
     // The zero-based index starting from the end of the iterator of the
     // last element. Used in the `DoubleEndedIterator` implementation.
+    #[cfg(feature = "uncertified")]
     fn next_back_index(&self) -> usize {
         let rem = self.iter.len() % self.original_step();
         if self.first_take { if rem == 0 { self.step_minus_one } else { rem - 1 } } else { rem }
@@ -99,20 +115,24 @@ where
 }
 
 #[stable(feature = "double_ended_step_by_iterator", since = "1.38.0")]
+#[cfg(feature = "uncertified")]
 impl<I> DoubleEndedIterator for StepBy<I>
 where
     I: DoubleEndedIterator + ExactSizeIterator,
 {
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn next_back(&mut self) -> Option<Self::Item> {
         self.spec_next_back()
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
         self.spec_nth_back(n)
     }
 
+    #[cfg(feature = "uncertified")]
     fn try_rfold<Acc, F, R>(&mut self, init: Acc, f: F) -> R
     where
         F: FnMut(Acc, Self::Item) -> R,
@@ -122,6 +142,7 @@ where
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn rfold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         Self: Sized,
@@ -133,6 +154,7 @@ where
 
 // StepBy can only make the iterator shorter, so the len will still fit.
 #[stable(feature = "iterator_step_by", since = "1.28.0")]
+#[cfg(feature = "uncertified")]
 impl<I> ExactSizeIterator for StepBy<I> where I: ExactSizeIterator {}
 
 // SAFETY: This adapter is shortening. TrustedLen requires the upper bound to be calculated correctly.
@@ -141,6 +163,7 @@ impl<I> ExactSizeIterator for StepBy<I> where I: ExactSizeIterator {}
 // I: TrustedLen would not.
 // This also covers the Range specializations since the ranges also implement TRA
 #[unstable(feature = "trusted_len", issue = "37572")]
+#[cfg(feature = "uncertified")]
 unsafe impl<I> TrustedLen for StepBy<I> where I: Iterator + TrustedRandomAccess {}
 
 trait SpecRangeSetup<T> {
@@ -164,6 +187,7 @@ impl<T> SpecRangeSetup<T> for T {
 /// For correctness *all* public StepBy methods must be specialized
 /// because `setup` drastically alters the meaning of the struct fields so that mixing
 /// different implementations would lead to incorrect results.
+#[cfg(feature = "uncertified")]
 unsafe trait StepByImpl<I> {
     type Item;
 
@@ -193,6 +217,7 @@ unsafe trait StepByImpl<I> {
 /// where applicable. I.e. if `StepBy` does support backwards iteration
 /// for a given iterator and that is specialized for forward iteration then
 /// it must also be specialized for backwards iteration.
+#[cfg(feature = "uncertified")]
 unsafe trait StepByBackImpl<I> {
     type Item;
 
@@ -216,10 +241,12 @@ unsafe trait StepByBackImpl<I> {
         F: FnMut(Acc, Self::Item) -> Acc;
 }
 
+#[cfg(feature = "uncertified")]
 unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
     type Item = I::Item;
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     default fn spec_next(&mut self) -> Option<I::Item> {
         let step_size = if self.first_take { 0 } else { self.step_minus_one };
         self.first_take = false;
@@ -227,13 +254,16 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     default fn spec_size_hint(&self) -> (usize, Option<usize>) {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn first_size(step: NonZero<usize>) -> impl Fn(usize) -> usize {
             move |n| if n == 0 { 0 } else { 1 + (n - 1) / step }
         }
 
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn other_size(step: NonZero<usize>) -> impl Fn(usize) -> usize {
             move |n| n / step
         }
@@ -250,6 +280,7 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     default fn spec_nth(&mut self, mut n: usize) -> Option<I::Item> {
         if self.first_take {
             self.first_take = false;
@@ -293,12 +324,14 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
         }
     }
 
+    #[cfg(feature = "uncertified")]
     default fn spec_try_fold<Acc, F, R>(&mut self, mut acc: Acc, mut f: F) -> R
     where
         F: FnMut(Acc, Self::Item) -> R,
         R: Try<Output = Acc>,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn nth<I: Iterator>(
             iter: &mut I,
             step_minus_one: usize,
@@ -316,11 +349,13 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
         from_fn(nth(&mut self.iter, self.step_minus_one)).try_fold(acc, f)
     }
 
+    #[cfg(feature = "uncertified")]
     default fn spec_fold<Acc, F>(mut self, mut acc: Acc, mut f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn nth<I: Iterator>(
             iter: &mut I,
             step_minus_one: usize,
@@ -339,15 +374,18 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
     }
 }
 
+#[cfg(feature = "uncertified")]
 unsafe impl<I: DoubleEndedIterator + ExactSizeIterator> StepByBackImpl<I> for StepBy<I> {
     type Item = I::Item;
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     default fn spec_next_back(&mut self) -> Option<Self::Item> {
         self.iter.nth_back(self.next_back_index())
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     default fn spec_nth_back(&mut self, n: usize) -> Option<I::Item> {
         // `self.iter.nth_back(usize::MAX)` does the right thing here when `n`
         // is out of bounds because the length of `self.iter` does not exceed
@@ -357,12 +395,14 @@ unsafe impl<I: DoubleEndedIterator + ExactSizeIterator> StepByBackImpl<I> for St
         self.iter.nth_back(n)
     }
 
+    #[cfg(feature = "uncertified")]
     default fn spec_try_rfold<Acc, F, R>(&mut self, init: Acc, mut f: F) -> R
     where
         F: FnMut(Acc, Self::Item) -> R,
         R: Try<Output = Acc>,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn nth_back<I: DoubleEndedIterator>(
             iter: &mut I,
             step_minus_one: usize,
@@ -380,12 +420,14 @@ unsafe impl<I: DoubleEndedIterator + ExactSizeIterator> StepByBackImpl<I> for St
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     default fn spec_rfold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc
     where
         Self: Sized,
         F: FnMut(Acc, I::Item) -> Acc,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn nth_back<I: DoubleEndedIterator>(
             iter: &mut I,
             step_minus_one: usize,
@@ -418,6 +460,7 @@ unsafe impl<I: DoubleEndedIterator + ExactSizeIterator> StepByBackImpl<I> for St
 /// and we must consistently specialize backwards and forwards iteration
 /// that makes the situation complicated enough that it's not covered
 /// for now.
+#[cfg(feature = "uncertified")]
 macro_rules! spec_int_ranges {
     ($($t:ty)*) => ($(
 
@@ -506,6 +549,7 @@ macro_rules! spec_int_ranges {
     )*)
 }
 
+#[cfg(feature = "uncertified")]
 macro_rules! spec_int_ranges_r {
     ($($t:ty)*) => ($(
         const _: () = assert!(usize::BITS >= <$t>::BITS);
@@ -565,17 +609,23 @@ macro_rules! spec_int_ranges_r {
 }
 
 #[cfg(target_pointer_width = "64")]
+#[cfg(feature = "uncertified")]
 spec_int_ranges!(u8 u16 u32 u64 usize);
 // DoubleEndedIterator requires ExactSizeIterator, which isn't implemented for Range<u64>
 #[cfg(target_pointer_width = "64")]
+#[cfg(feature = "uncertified")]
 spec_int_ranges_r!(u8 u16 u32 usize);
 
 #[cfg(target_pointer_width = "32")]
+#[cfg(feature = "uncertified")]
 spec_int_ranges!(u8 u16 u32 usize);
 #[cfg(target_pointer_width = "32")]
+#[cfg(feature = "uncertified")]
 spec_int_ranges_r!(u8 u16 u32 usize);
 
 #[cfg(target_pointer_width = "16")]
+#[cfg(feature = "uncertified")]
 spec_int_ranges!(u8 u16 usize);
 #[cfg(target_pointer_width = "16")]
+#[cfg(feature = "uncertified")]
 spec_int_ranges_r!(u8 u16 usize);

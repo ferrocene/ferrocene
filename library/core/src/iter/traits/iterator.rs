@@ -1,9 +1,10 @@
+use super::super::StepBy;
 #[cfg(feature = "uncertified")]
 use super::super::{
     ArrayChunks, ByRefSized, Chain, Cloned, Copied, Cycle, Enumerate, Filter, FilterMap, FlatMap,
     Flatten, Fuse, Inspect, Intersperse, IntersperseWith, Map, MapWhile, MapWindows, Peekable,
-    Product, Rev, Scan, Skip, SkipWhile, StepBy, Sum, Take, TakeWhile, TrustedRandomAccessNoCoerce,
-    Zip, try_process,
+    Product, Rev, Scan, Skip, SkipWhile, Sum, Take, TakeWhile, TrustedRandomAccessNoCoerce, Zip,
+    try_process,
 };
 #[cfg(feature = "uncertified")]
 use crate::array;
@@ -406,7 +407,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_step_by", since = "1.28.0")]
-    #[cfg(feature = "uncertified")]
+
     fn step_by(self, step: usize) -> StepBy<Self>
     where
         Self: Sized,

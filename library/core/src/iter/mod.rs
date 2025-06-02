@@ -406,7 +406,6 @@ pub use self::adapters::MapWindows;
 #[cfg(feature = "uncertified")]
 pub use self::adapters::SourceIter;
 #[stable(feature = "iterator_step_by", since = "1.28.0")]
-#[cfg(feature = "uncertified")]
 pub use self::adapters::StepBy;
 #[unstable(feature = "trusted_random_access", issue = "none")]
 #[cfg(feature = "uncertified")]
@@ -494,7 +493,7 @@ pub use self::traits::{
     DoubleEndedIterator, ExactSizeIterator, Extend, FromIterator, IntoIterator, Product, Sum,
 };
 
-#[cfg(feature = "uncertified")]
+
 mod adapters;
 #[cfg(feature = "uncertified")]
 mod range;

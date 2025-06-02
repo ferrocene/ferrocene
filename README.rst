@@ -48,8 +48,8 @@ industries. The FLS provides a structured and detailed reference for Rust's
 syntax, semantics, and behavior, serving as a foundation for verification,
 compliance, and standardization efforts. The FLS represented a major step toward
 describing Rust in a way that aligns with industry requirements, particularly in
-high-assurance domains. Ferrous Systems had been the sole steward of the FLS
-since July 2023.
+high-assurance domains. Until its transfer in April 2025, Ferrous Systems had
+been the sole steward of the FLS since July 2023.
 
 .. _Ferrous Systems: https://ferrous-systems.com
 .. _donating: https://rustfoundation.org/media/ferrous-systems-donates-ferrocene-language-specification-to-rust-project/

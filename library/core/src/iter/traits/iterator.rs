@@ -190,7 +190,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(feature = "uncertified")]
+    
     fn size_hint(&self) -> (usize, Option<usize>) {
         (0, None)
     }

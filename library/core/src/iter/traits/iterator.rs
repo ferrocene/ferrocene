@@ -1,14 +1,20 @@
+#[cfg(feature = "uncertified")]
 use super::super::{
     ArrayChunks, ByRefSized, Chain, Cloned, Copied, Cycle, Enumerate, Filter, FilterMap, FlatMap,
     Flatten, Fuse, Inspect, Intersperse, IntersperseWith, Map, MapWhile, MapWindows, Peekable,
     Product, Rev, Scan, Skip, SkipWhile, StepBy, Sum, Take, TakeWhile, TrustedRandomAccessNoCoerce,
     Zip, try_process,
 };
+#[cfg(feature = "uncertified")]
 use crate::array;
+#[cfg(feature = "uncertified")]
 use crate::cmp::{self, Ordering};
+#[cfg(feature = "uncertified")]
 use crate::num::NonZero;
+#[cfg(feature = "uncertified")]
 use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 
+#[cfg(feature = "uncertified")]
 fn _assert_is_dyn_compatible(_: &dyn Iterator<Item = ()>) {}
 
 /// A trait for dealing with iterators.
@@ -106,6 +112,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "iter_next_chunk", reason = "recently added", issue = "98326")]
+    #[cfg(feature = "uncertified")]
     fn next_chunk<const N: usize>(
         &mut self,
     ) -> Result<[Self::Item; N], array::IntoIter<Self::Item, N>>
@@ -183,6 +190,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn size_hint(&self) -> (usize, Option<usize>) {
         (0, None)
     }
@@ -218,6 +226,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn count(self) -> usize
     where
         Self: Sized,
@@ -246,11 +255,13 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn last(self) -> Option<Self::Item>
     where
         Self: Sized,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn some<T>(_: Option<T>, x: T) -> Option<T> {
             Some(x)
         }
@@ -293,6 +304,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "iter_advance_by", reason = "recently added", issue = "77404")]
+    #[cfg(feature = "uncertified")]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         for i in 0..n {
             if self.next().is_none() {
@@ -344,6 +356,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         self.advance_by(n).ok()?;
         self.next()
@@ -394,6 +407,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_step_by", since = "1.28.0")]
+    #[cfg(feature = "uncertified")]
     fn step_by(self, step: usize) -> StepBy<Self>
     where
         Self: Sized,
@@ -465,6 +479,7 @@ pub trait Iterator {
     /// [`OsStr`]: ../../std/ffi/struct.OsStr.html
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn chain<U>(self, other: U) -> Chain<Self, U::IntoIter>
     where
         Self: Sized,
@@ -583,6 +598,7 @@ pub trait Iterator {
     /// [`zip`]: crate::iter::zip
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn zip<U>(self, other: U) -> Zip<Self, U::IntoIter>
     where
         Self: Sized,
@@ -626,6 +642,7 @@ pub trait Iterator {
     /// [`intersperse_with`]: Iterator::intersperse_with
     #[inline]
     #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
+    #[cfg(feature = "uncertified")]
     fn intersperse(self, separator: Self::Item) -> Intersperse<Self>
     where
         Self: Sized,
@@ -684,6 +701,7 @@ pub trait Iterator {
     /// [`intersperse`]: Iterator::intersperse
     #[inline]
     #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
+    #[cfg(feature = "uncertified")]
     fn intersperse_with<G>(self, separator: G) -> IntersperseWith<Self, G>
     where
         Self: Sized,
@@ -743,6 +761,7 @@ pub trait Iterator {
     #[rustc_diagnostic_item = "IteratorMap"]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn map<B, F>(self, f: F) -> Map<Self, F>
     where
         Self: Sized,
@@ -788,12 +807,14 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_for_each", since = "1.21.0")]
+    #[cfg(feature = "uncertified")]
     fn for_each<F>(self, f: F)
     where
         Self: Sized,
         F: FnMut(Self::Item),
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn call<T>(mut f: impl FnMut(T)) -> impl FnMut((), T) {
             move |(), item| f(item)
         }
@@ -863,6 +884,7 @@ pub trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "iter_filter"]
+    #[cfg(feature = "uncertified")]
     fn filter<P>(self, predicate: P) -> Filter<Self, P>
     where
         Self: Sized,
@@ -908,6 +930,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn filter_map<B, F>(self, f: F) -> FilterMap<Self, F>
     where
         Self: Sized,
@@ -955,6 +978,7 @@ pub trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "enumerate_method"]
+    #[cfg(feature = "uncertified")]
     fn enumerate(self) -> Enumerate<Self>
     where
         Self: Sized,
@@ -1026,6 +1050,7 @@ pub trait Iterator {
     /// [`next`]: Iterator::next
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn peekable(self) -> Peekable<Self>
     where
         Self: Sized,
@@ -1091,6 +1116,7 @@ pub trait Iterator {
     #[inline]
     #[doc(alias = "drop_while")]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn skip_while<P>(self, predicate: P) -> SkipWhile<Self, P>
     where
         Self: Sized,
@@ -1169,6 +1195,7 @@ pub trait Iterator {
     /// the iteration should stop, but wasn't placed back into the iterator.
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn take_while<P>(self, predicate: P) -> TakeWhile<Self, P>
     where
         Self: Sized,
@@ -1257,6 +1284,7 @@ pub trait Iterator {
     /// [`fuse`]: Iterator::fuse
     #[inline]
     #[stable(feature = "iter_map_while", since = "1.57.0")]
+    #[cfg(feature = "uncertified")]
     fn map_while<B, P>(self, predicate: P) -> MapWhile<Self, P>
     where
         Self: Sized,
@@ -1286,6 +1314,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn skip(self, n: usize) -> Skip<Self>
     where
         Self: Sized,
@@ -1358,6 +1387,7 @@ pub trait Iterator {
     #[doc(alias = "limit")]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn take(self, n: usize) -> Take<Self>
     where
         Self: Sized,
@@ -1405,6 +1435,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn scan<St, B, F>(self, initial_state: St, f: F) -> Scan<Self, St, F>
     where
         Self: Sized,
@@ -1443,6 +1474,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn flat_map<U, F>(self, f: F) -> FlatMap<Self, U, F>
     where
         Self: Sized,
@@ -1527,6 +1559,7 @@ pub trait Iterator {
     /// [`flat_map()`]: Iterator::flat_map
     #[inline]
     #[stable(feature = "iterator_flatten", since = "1.29.0")]
+    #[cfg(feature = "uncertified")]
     fn flatten(self) -> Flatten<Self>
     where
         Self: Sized,
@@ -1683,6 +1716,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "iter_map_windows", reason = "recently added", issue = "87155")]
+    #[cfg(feature = "uncertified")]
     fn map_windows<F, R, const N: usize>(self, f: F) -> MapWindows<Self, F, N>
     where
         Self: Sized,
@@ -1745,6 +1779,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn fuse(self) -> Fuse<Self>
     where
         Self: Sized,
@@ -1829,6 +1864,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn inspect<F>(self, f: F) -> Inspect<Self, F>
     where
         Self: Sized,
@@ -1866,6 +1902,7 @@ pub trait Iterator {
     /// assert_eq!(of_rust, vec!["of", "Rust"]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn by_ref(&mut self) -> &mut Self
     where
         Self: Sized,
@@ -1985,6 +2022,7 @@ pub trait Iterator {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use = "if you really need to exhaust the iterator, consider `.for_each(drop)` instead"]
     #[rustc_diagnostic_item = "iterator_collect_fn"]
+    #[cfg(feature = "uncertified")]
     fn collect<B: FromIterator<Self::Item>>(self) -> B
     where
         Self: Sized,
@@ -2072,6 +2110,7 @@ pub trait Iterator {
     /// [`collect`]: Iterator::collect
     #[inline]
     #[unstable(feature = "iterator_try_collect", issue = "94047")]
+    #[cfg(feature = "uncertified")]
     fn try_collect<B>(&mut self) -> ChangeOutputType<Self::Item, B>
     where
         Self: Sized,
@@ -2144,6 +2183,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "iter_collect_into", reason = "new API", issue = "94780")]
+    #[cfg(feature = "uncertified")]
     fn collect_into<E: Extend<Self::Item>>(self, collection: &mut E) -> &mut E
     where
         Self: Sized,
@@ -2176,6 +2216,7 @@ pub trait Iterator {
     /// assert_eq!(odd, [1, 3]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn partition<B, F>(self, f: F) -> (B, B)
     where
         Self: Sized,
@@ -2183,6 +2224,7 @@ pub trait Iterator {
         F: FnMut(&Self::Item) -> bool,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn extend<'a, T, B: Extend<T>>(
             mut f: impl FnMut(&T) -> bool + 'a,
             left: &'a mut B,
@@ -2238,6 +2280,7 @@ pub trait Iterator {
     /// assert!(a[i..].iter().all(|n| n % 2 == 1)); // odds
     /// ```
     #[unstable(feature = "iter_partition_in_place", reason = "new API", issue = "62543")]
+    #[cfg(feature = "uncertified")]
     fn partition_in_place<'a, T: 'a, P>(mut self, ref mut predicate: P) -> usize
     where
         Self: Sized + DoubleEndedIterator<Item = &'a mut T>,
@@ -2249,6 +2292,7 @@ pub trait Iterator {
         // These closure "factory" functions exist to avoid genericity in `Self`.
 
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn is_false<'a, T>(
             predicate: &'a mut impl FnMut(&T) -> bool,
             true_count: &'a mut usize,
@@ -2261,6 +2305,7 @@ pub trait Iterator {
         }
 
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn is_true<T>(predicate: &mut impl FnMut(&T) -> bool) -> impl FnMut(&&mut T) -> bool + '_ {
             move |x| predicate(&**x)
         }
@@ -2295,6 +2340,7 @@ pub trait Iterator {
     /// assert!(!"IntoIterator".chars().is_partitioned(char::is_uppercase));
     /// ```
     #[unstable(feature = "iter_is_partitioned", reason = "new API", issue = "62544")]
+    #[cfg(feature = "uncertified")]
     fn is_partitioned<P>(mut self, mut predicate: P) -> bool
     where
         Self: Sized,
@@ -2389,6 +2435,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_try_fold", since = "1.27.0")]
+    #[cfg(feature = "uncertified")]
     fn try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -2447,6 +2494,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_try_fold", since = "1.27.0")]
+    #[cfg(feature = "uncertified")]
     fn try_for_each<F, R>(&mut self, f: F) -> R
     where
         Self: Sized,
@@ -2454,6 +2502,7 @@ pub trait Iterator {
         R: Try<Output = ()>,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn call<T, R>(mut f: impl FnMut(T) -> R) -> impl FnMut((), T) -> R {
             move |(), x| f(x)
         }
@@ -2566,6 +2615,7 @@ pub trait Iterator {
     #[doc(alias = "inject", alias = "foldl")]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn fold<B, F>(mut self, init: B, mut f: F) -> B
     where
         Self: Sized,
@@ -2603,6 +2653,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_fold_self", since = "1.51.0")]
+    #[cfg(feature = "uncertified")]
     fn reduce<F>(mut self, f: F) -> Option<Self::Item>
     where
         Self: Sized,
@@ -2674,6 +2725,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "iterator_try_reduce", reason = "new API", issue = "87053")]
+    #[cfg(feature = "uncertified")]
     fn try_reduce<R>(
         &mut self,
         f: impl FnMut(Self::Item, Self::Item) -> R,
@@ -2732,12 +2784,14 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn all<F>(&mut self, f: F) -> bool
     where
         Self: Sized,
         F: FnMut(Self::Item) -> bool,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn check<T>(mut f: impl FnMut(T) -> bool) -> impl FnMut((), T) -> ControlFlow<()> {
             move |(), x| {
                 if f(x) { ControlFlow::Continue(()) } else { ControlFlow::Break(()) }
@@ -2785,12 +2839,14 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn any<F>(&mut self, f: F) -> bool
     where
         Self: Sized,
         F: FnMut(Self::Item) -> bool,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn check<T>(mut f: impl FnMut(T) -> bool) -> impl FnMut((), T) -> ControlFlow<()> {
             move |(), x| {
                 if f(x) { ControlFlow::Break(()) } else { ControlFlow::Continue(()) }
@@ -2847,12 +2903,14 @@ pub trait Iterator {
     /// Note that `iter.find(f)` is equivalent to `iter.filter(f).next()`.
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn find<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         Self: Sized,
         P: FnMut(&Self::Item) -> bool,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn check<T>(mut predicate: impl FnMut(&T) -> bool) -> impl FnMut((), T) -> ControlFlow<T> {
             move |(), x| {
                 if predicate(&x) { ControlFlow::Break(x) } else { ControlFlow::Continue(()) }
@@ -2878,12 +2936,14 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_find_map", since = "1.30.0")]
+    #[cfg(feature = "uncertified")]
     fn find_map<B, F>(&mut self, f: F) -> Option<B>
     where
         Self: Sized,
         F: FnMut(Self::Item) -> Option<B>,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn check<T, B>(mut f: impl FnMut(T) -> Option<B>) -> impl FnMut((), T) -> ControlFlow<B> {
             move |(), x| match f(x) {
                 Some(x) => ControlFlow::Break(x),
@@ -2936,6 +2996,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "try_find", reason = "new API", issue = "63178")]
+    #[cfg(feature = "uncertified")]
     fn try_find<R>(
         &mut self,
         f: impl FnMut(&Self::Item) -> R,
@@ -2945,6 +3006,7 @@ pub trait Iterator {
         R: Try<Output = bool, Residual: Residual<Option<Self::Item>>>,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn check<I, V, R>(
             mut f: impl FnMut(&I) -> V,
         ) -> impl FnMut((), I) -> ControlFlow<R::TryType>
@@ -3019,12 +3081,14 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn position<P>(&mut self, predicate: P) -> Option<usize>
     where
         Self: Sized,
         P: FnMut(Self::Item) -> bool,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn check<'a, T>(
             mut predicate: impl FnMut(T) -> bool + 'a,
             acc: &'a mut usize,
@@ -3084,6 +3148,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn rposition<P>(&mut self, predicate: P) -> Option<usize>
     where
         P: FnMut(Self::Item) -> bool,
@@ -3092,6 +3157,7 @@ pub trait Iterator {
         // No need for an overflow check here, because `ExactSizeIterator`
         // implies that the number of elements fits into a `usize`.
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn check<T>(
             mut predicate: impl FnMut(T) -> bool,
         ) -> impl FnMut(usize, T) -> ControlFlow<usize, usize> {
@@ -3133,6 +3199,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn max(self) -> Option<Self::Item>
     where
         Self: Sized,
@@ -3169,6 +3236,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn min(self) -> Option<Self::Item>
     where
         Self: Sized,
@@ -3191,17 +3259,20 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iter_cmp_by_key", since = "1.6.0")]
+    #[cfg(feature = "uncertified")]
     fn max_by_key<B: Ord, F>(self, f: F) -> Option<Self::Item>
     where
         Self: Sized,
         F: FnMut(&Self::Item) -> B,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn key<T, B>(mut f: impl FnMut(&T) -> B) -> impl FnMut(T) -> (B, T) {
             move |x| (f(&x), x)
         }
 
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn compare<T, B: Ord>((x_p, _): &(B, T), (y_p, _): &(B, T)) -> Ordering {
             x_p.cmp(y_p)
         }
@@ -3224,12 +3295,14 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iter_max_by", since = "1.15.0")]
+    #[cfg(feature = "uncertified")]
     fn max_by<F>(self, compare: F) -> Option<Self::Item>
     where
         Self: Sized,
         F: FnMut(&Self::Item, &Self::Item) -> Ordering,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn fold<T>(mut compare: impl FnMut(&T, &T) -> Ordering) -> impl FnMut(T, T) -> T {
             move |x, y| cmp::max_by(x, y, &mut compare)
         }
@@ -3251,17 +3324,20 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iter_cmp_by_key", since = "1.6.0")]
+    #[cfg(feature = "uncertified")]
     fn min_by_key<B: Ord, F>(self, f: F) -> Option<Self::Item>
     where
         Self: Sized,
         F: FnMut(&Self::Item) -> B,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn key<T, B>(mut f: impl FnMut(&T) -> B) -> impl FnMut(T) -> (B, T) {
             move |x| (f(&x), x)
         }
 
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn compare<T, B: Ord>((x_p, _): &(B, T), (y_p, _): &(B, T)) -> Ordering {
             x_p.cmp(y_p)
         }
@@ -3284,12 +3360,14 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iter_min_by", since = "1.15.0")]
+    #[cfg(feature = "uncertified")]
     fn min_by<F>(self, compare: F) -> Option<Self::Item>
     where
         Self: Sized,
         F: FnMut(&Self::Item, &Self::Item) -> Ordering,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn fold<T>(mut compare: impl FnMut(&T, &T) -> Ordering) -> impl FnMut(T, T) -> T {
             move |x, y| cmp::min_by(x, y, &mut compare)
         }
@@ -3321,6 +3399,7 @@ pub trait Iterator {
     #[inline]
     #[doc(alias = "reverse")]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn rev(self) -> Rev<Self>
     where
         Self: Sized + DoubleEndedIterator,
@@ -3357,6 +3436,7 @@ pub trait Iterator {
     /// assert_eq!(z, [3, 6]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn unzip<A, B, FromA, FromB>(self) -> (FromA, FromB)
     where
         FromA: Default + Extend<A>,
@@ -3388,6 +3468,7 @@ pub trait Iterator {
     /// ```
     #[stable(feature = "iter_copied", since = "1.36.0")]
     #[rustc_diagnostic_item = "iter_copied"]
+    #[cfg(feature = "uncertified")]
     fn copied<'a, T: 'a>(self) -> Copied<Self>
     where
         Self: Sized + Iterator<Item = &'a T>,
@@ -3436,6 +3517,7 @@ pub trait Iterator {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "iter_cloned"]
+    #[cfg(feature = "uncertified")]
     fn cloned<'a, T: 'a>(self) -> Cloned<Self>
     where
         Self: Sized + Iterator<Item = &'a T>,
@@ -3467,6 +3549,7 @@ pub trait Iterator {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn cycle(self) -> Cycle<Self>
     where
         Self: Sized + Clone,
@@ -3510,6 +3593,7 @@ pub trait Iterator {
     /// ```
     #[track_caller]
     #[unstable(feature = "iter_array_chunks", reason = "recently added", issue = "100450")]
+    #[cfg(feature = "uncertified")]
     fn array_chunks<const N: usize>(self) -> ArrayChunks<Self, N>
     where
         Self: Sized,
@@ -3546,6 +3630,7 @@ pub trait Iterator {
     /// assert_eq!(sum, -0.0_f32);
     /// ```
     #[stable(feature = "iter_arith", since = "1.11.0")]
+    #[cfg(feature = "uncertified")]
     fn sum<S>(self) -> S
     where
         Self: Sized,
@@ -3578,6 +3663,7 @@ pub trait Iterator {
     /// assert_eq!(factorial(5), 120);
     /// ```
     #[stable(feature = "iter_arith", since = "1.11.0")]
+    #[cfg(feature = "uncertified")]
     fn product<P>(self) -> P
     where
         Self: Sized,
@@ -3599,6 +3685,7 @@ pub trait Iterator {
     /// assert_eq!([1, 2].iter().cmp([1].iter()), Ordering::Greater);
     /// ```
     #[stable(feature = "iter_order", since = "1.5.0")]
+    #[cfg(feature = "uncertified")]
     fn cmp<I>(self, other: I) -> Ordering
     where
         I: IntoIterator<Item = Self::Item>,
@@ -3626,6 +3713,7 @@ pub trait Iterator {
     /// assert_eq!(xs.into_iter().cmp_by(ys, |x, y| (2 * x).cmp(&y)), Ordering::Greater);
     /// ```
     #[unstable(feature = "iter_order_by", issue = "64295")]
+    #[cfg(feature = "uncertified")]
     fn cmp_by<I, F>(self, other: I, cmp: F) -> Ordering
     where
         Self: Sized,
@@ -3633,6 +3721,7 @@ pub trait Iterator {
         F: FnMut(Self::Item, I::Item) -> Ordering,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn compare<X, Y, F>(mut cmp: F) -> impl FnMut(X, Y) -> ControlFlow<Ordering>
         where
             F: FnMut(X, Y) -> Ordering,
@@ -3682,6 +3771,7 @@ pub trait Iterator {
     /// ```
     ///
     #[stable(feature = "iter_order", since = "1.5.0")]
+    #[cfg(feature = "uncertified")]
     fn partial_cmp<I>(self, other: I) -> Option<Ordering>
     where
         I: IntoIterator,
@@ -3718,6 +3808,7 @@ pub trait Iterator {
     /// );
     /// ```
     #[unstable(feature = "iter_order_by", issue = "64295")]
+    #[cfg(feature = "uncertified")]
     fn partial_cmp_by<I, F>(self, other: I, partial_cmp: F) -> Option<Ordering>
     where
         Self: Sized,
@@ -3725,6 +3816,7 @@ pub trait Iterator {
         F: FnMut(Self::Item, I::Item) -> Option<Ordering>,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn compare<X, Y, F>(mut partial_cmp: F) -> impl FnMut(X, Y) -> ControlFlow<Option<Ordering>>
         where
             F: FnMut(X, Y) -> Option<Ordering>,
@@ -3751,6 +3843,7 @@ pub trait Iterator {
     /// assert_eq!([1].iter().eq([1, 2].iter()), false);
     /// ```
     #[stable(feature = "iter_order", since = "1.5.0")]
+    #[cfg(feature = "uncertified")]
     fn eq<I>(self, other: I) -> bool
     where
         I: IntoIterator,
@@ -3774,6 +3867,7 @@ pub trait Iterator {
     /// assert!(xs.iter().eq_by(ys, |x, y| x * x == y));
     /// ```
     #[unstable(feature = "iter_order_by", issue = "64295")]
+    #[cfg(feature = "uncertified")]
     fn eq_by<I, F>(self, other: I, eq: F) -> bool
     where
         Self: Sized,
@@ -3781,6 +3875,7 @@ pub trait Iterator {
         F: FnMut(Self::Item, I::Item) -> bool,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn compare<X, Y, F>(mut eq: F) -> impl FnMut(X, Y) -> ControlFlow<()>
         where
             F: FnMut(X, Y) -> bool,
@@ -3806,6 +3901,7 @@ pub trait Iterator {
     /// assert_eq!([1].iter().ne([1, 2].iter()), true);
     /// ```
     #[stable(feature = "iter_order", since = "1.5.0")]
+    #[cfg(feature = "uncertified")]
     fn ne<I>(self, other: I) -> bool
     where
         I: IntoIterator,
@@ -3827,6 +3923,7 @@ pub trait Iterator {
     /// assert_eq!([1, 2].iter().lt([1, 2].iter()), false);
     /// ```
     #[stable(feature = "iter_order", since = "1.5.0")]
+    #[cfg(feature = "uncertified")]
     fn lt<I>(self, other: I) -> bool
     where
         I: IntoIterator,
@@ -3848,6 +3945,7 @@ pub trait Iterator {
     /// assert_eq!([1, 2].iter().le([1, 2].iter()), true);
     /// ```
     #[stable(feature = "iter_order", since = "1.5.0")]
+    #[cfg(feature = "uncertified")]
     fn le<I>(self, other: I) -> bool
     where
         I: IntoIterator,
@@ -3869,6 +3967,7 @@ pub trait Iterator {
     /// assert_eq!([1, 2].iter().gt([1, 2].iter()), false);
     /// ```
     #[stable(feature = "iter_order", since = "1.5.0")]
+    #[cfg(feature = "uncertified")]
     fn gt<I>(self, other: I) -> bool
     where
         I: IntoIterator,
@@ -3890,6 +3989,7 @@ pub trait Iterator {
     /// assert_eq!([1, 2].iter().ge([1, 2].iter()), true);
     /// ```
     #[stable(feature = "iter_order", since = "1.5.0")]
+    #[cfg(feature = "uncertified")]
     fn ge<I>(self, other: I) -> bool
     where
         I: IntoIterator,
@@ -3919,6 +4019,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "is_sorted", since = "1.82.0")]
+    #[cfg(feature = "uncertified")]
     fn is_sorted(self) -> bool
     where
         Self: Sized,
@@ -3945,12 +4046,14 @@ pub trait Iterator {
     /// assert!(std::iter::empty::<i32>().is_sorted_by(|a, b| true));
     /// ```
     #[stable(feature = "is_sorted", since = "1.82.0")]
+    #[cfg(feature = "uncertified")]
     fn is_sorted_by<F>(mut self, compare: F) -> bool
     where
         Self: Sized,
         F: FnMut(&Self::Item, &Self::Item) -> bool,
     {
         #[inline]
+        #[cfg(feature = "uncertified")]
         fn check<'a, T>(
             last: &'a mut T,
             mut compare: impl FnMut(&T, &T) -> bool + 'a,
@@ -3989,6 +4092,7 @@ pub trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "is_sorted", since = "1.82.0")]
+    #[cfg(feature = "uncertified")]
     fn is_sorted_by_key<F, K>(self, f: F) -> bool
     where
         Self: Sized,
@@ -4004,6 +4108,7 @@ pub trait Iterator {
     #[inline]
     #[doc(hidden)]
     #[unstable(feature = "trusted_random_access", issue = "none")]
+    #[cfg(feature = "uncertified")]
     unsafe fn __iterator_get_unchecked(&mut self, _idx: usize) -> Self::Item
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -4023,6 +4128,7 @@ pub trait Iterator {
 /// Isolates the logic shared by ['cmp_by'](Iterator::cmp_by),
 /// ['partial_cmp_by'](Iterator::partial_cmp_by), and ['eq_by'](Iterator::eq_by).
 #[inline]
+#[cfg(feature = "uncertified")]
 fn iter_compare<A, B, F, T>(mut a: A, mut b: B, f: F) -> ControlFlow<T, Ordering>
 where
     A: Iterator,
@@ -4030,6 +4136,7 @@ where
     F: FnMut(A::Item, B::Item) -> ControlFlow<T>,
 {
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn compare<'a, B, X, T>(
         b: &'a mut B,
         mut f: impl FnMut(X, B::Item) -> ControlFlow<T> + 'a,
@@ -4056,27 +4163,34 @@ where
 ///
 /// This implementation passes all method calls on to the original iterator.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<I: Iterator + ?Sized> Iterator for &mut I {
     type Item = I::Item;
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn next(&mut self) -> Option<I::Item> {
         (**self).next()
     }
+    #[cfg(feature = "uncertified")]
     fn size_hint(&self) -> (usize, Option<usize>) {
         (**self).size_hint()
     }
+    #[cfg(feature = "uncertified")]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         (**self).advance_by(n)
     }
+    #[cfg(feature = "uncertified")]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         (**self).nth(n)
     }
+    #[cfg(feature = "uncertified")]
     fn fold<B, F>(self, init: B, f: F) -> B
     where
         F: FnMut(B, Self::Item) -> B,
     {
         self.spec_fold(init, f)
     }
+    #[cfg(feature = "uncertified")]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         F: FnMut(B, Self::Item) -> R,
@@ -4087,6 +4201,7 @@ impl<I: Iterator + ?Sized> Iterator for &mut I {
 }
 
 /// Helper trait to specialize `fold` and `try_fold` for `&mut I where I: Sized`
+#[cfg(feature = "uncertified")]
 trait IteratorRefSpec: Iterator {
     fn spec_fold<B, F>(self, init: B, f: F) -> B
     where
@@ -4098,7 +4213,9 @@ trait IteratorRefSpec: Iterator {
         R: Try<Output = B>;
 }
 
+#[cfg(feature = "uncertified")]
 impl<I: Iterator + ?Sized> IteratorRefSpec for &mut I {
+    #[cfg(feature = "uncertified")]
     default fn spec_fold<B, F>(self, init: B, mut f: F) -> B
     where
         F: FnMut(B, Self::Item) -> B,
@@ -4110,6 +4227,7 @@ impl<I: Iterator + ?Sized> IteratorRefSpec for &mut I {
         accum
     }
 
+    #[cfg(feature = "uncertified")]
     default fn spec_try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         F: FnMut(B, Self::Item) -> R,
@@ -4123,9 +4241,11 @@ impl<I: Iterator + ?Sized> IteratorRefSpec for &mut I {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<I: Iterator> IteratorRefSpec for &mut I {
     impl_fold_via_try_fold! { spec_fold -> spec_try_fold }
 
+    #[cfg(feature = "uncertified")]
     fn spec_try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         F: FnMut(B, Self::Item) -> R,

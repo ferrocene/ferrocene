@@ -140,7 +140,6 @@
 #![cfg_attr(feature = "uncertified", feature(const_precise_live_drops))]
 #![cfg_attr(feature = "uncertified", feature(deprecated_suggestion))]
 #![cfg_attr(feature = "uncertified", feature(doc_cfg))]
-#![cfg_attr(feature = "uncertified", feature(doc_notable_trait))]
 #![cfg_attr(feature = "uncertified", feature(extern_types))]
 #![cfg_attr(feature = "uncertified", feature(f128))]
 #![cfg_attr(feature = "uncertified", feature(f16))]
@@ -175,6 +174,7 @@
 #![feature(multiple_supertrait_upcastable)]
 #![feature(negative_impls)]
 #![feature(no_core)]
+#![feature(doc_notable_trait)]
 #![feature(prelude_import)]
 #![feature(rustc_allow_const_fn_unstable)]
 #![feature(rustc_attrs)]
@@ -365,7 +365,6 @@ pub mod ffi;
 #[unstable(feature = "core_io_borrowed_buf", issue = "117693")]
 #[cfg(feature = "uncertified")]
 pub mod io;
-#[cfg(feature = "uncertified")]
 pub mod iter;
 #[cfg(feature = "uncertified")]
 pub mod net;

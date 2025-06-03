@@ -1,3 +1,4 @@
+#[cfg(feature = "uncertified")]
 use super::TrustedLen;
 
 /// Conversion from an [`Iterator`].
@@ -131,6 +132,7 @@ use super::TrustedLen;
     label = "value of type `{Self}` cannot be built from `std::iter::Iterator<Item={A}>`"
 )]
 #[rustc_diagnostic_item = "FromIterator"]
+#[cfg(feature = "uncertified")]
 pub trait FromIterator<A>: Sized {
     /// Creates a value from an iterator.
     ///
@@ -149,6 +151,7 @@ pub trait FromIterator<A>: Sized {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "from_iter_fn"]
+    #[cfg(feature = "uncertified")]
     fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self;
 }
 
@@ -314,11 +317,15 @@ pub trait IntoIterator {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<I: Iterator> IntoIterator for I {
+    #[cfg(feature = "uncertified")]
     type Item = I::Item;
+    #[cfg(feature = "uncertified")]
     type IntoIter = I;
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn into_iter(self) -> I {
         self
     }
@@ -394,6 +401,7 @@ impl<I: Iterator> IntoIterator for I {
 /// assert_eq!("MyCollection([5, 6, 7, 1, 2, 3])", format!("{c:?}"));
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 pub trait Extend<A> {
     /// Extends a collection with the contents of an iterator.
     ///
@@ -413,10 +421,12 @@ pub trait Extend<A> {
     /// assert_eq!("abcdef", &message);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature = "uncertified")]
     fn extend<T: IntoIterator<Item = A>>(&mut self, iter: T);
 
     /// Extends a collection with exactly one element.
     #[unstable(feature = "extend_one", issue = "72631")]
+    #[cfg(feature = "uncertified")]
     fn extend_one(&mut self, item: A) {
         self.extend(Some(item));
     }
@@ -425,6 +435,7 @@ pub trait Extend<A> {
     ///
     /// The default implementation does nothing.
     #[unstable(feature = "extend_one", issue = "72631")]
+    #[cfg(feature = "uncertified")]
     fn extend_reserve(&mut self, additional: usize) {
         let _ = additional;
     }
@@ -443,6 +454,7 @@ pub trait Extend<A> {
     // This method is for internal usage only. It is only on the trait because of specialization's limitations.
     #[unstable(feature = "extend_one_unchecked", issue = "none")]
     #[doc(hidden)]
+    #[cfg(feature = "uncertified")]
     unsafe fn extend_one_unchecked(&mut self, item: A)
     where
         Self: Sized,
@@ -452,13 +464,17 @@ pub trait Extend<A> {
 }
 
 #[stable(feature = "extend_for_unit", since = "1.28.0")]
+#[cfg(feature = "uncertified")]
 impl Extend<()> for () {
+    #[cfg(feature = "uncertified")]
     fn extend<T: IntoIterator<Item = ()>>(&mut self, iter: T) {
         iter.into_iter().for_each(drop)
     }
+    #[cfg(feature = "uncertified")]
     fn extend_one(&mut self, _item: ()) {}
 }
 
+#[cfg(feature = "uncertified")]
 macro_rules! spec_tuple_impl {
     (
         (
@@ -676,6 +692,7 @@ macro_rules! spec_tuple_impl {
     };
 }
 
+#[cfg(feature = "uncertified")]
 spec_tuple_impl!(
     (L, l, EL, TraitL, default_extend_tuple_l, 11),
     (K, k, EK, TraitK, default_extend_tuple_k, 10),

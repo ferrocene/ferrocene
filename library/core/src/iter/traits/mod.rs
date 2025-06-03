@@ -1,6 +1,6 @@
 #[cfg(feature = "uncertified")]
 mod accum;
-#[cfg(feature = "uncertified")]
+
 mod collect;
 #[cfg(feature = "uncertified")]
 mod double_ended;
@@ -12,8 +12,6 @@ mod marker;
 #[cfg(feature = "uncertified")]
 mod unchecked_iterator;
 
-#[stable(feature = "rust1", since = "1.0.0")]
-pub use self::iterator::Iterator;
 #[unstable(issue = "none", feature = "inplace_iteration")]
 #[cfg(feature = "uncertified")]
 pub use self::marker::InPlaceIterable;
@@ -29,8 +27,10 @@ pub(crate) use self::unchecked_iterator::UncheckedIterator;
 #[cfg(feature = "uncertified")]
 pub use self::{
     accum::{Product, Sum},
-    collect::{Extend, FromIterator, IntoIterator},
+    collect::{Extend, FromIterator},
     double_ended::DoubleEndedIterator,
     exact_size::ExactSizeIterator,
     marker::{FusedIterator, TrustedLen},
 };
+#[stable(feature = "rust1", since = "1.0.0")]
+pub use self::{collect::IntoIterator, iterator::Iterator};

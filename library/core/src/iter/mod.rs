@@ -475,6 +475,8 @@ pub use self::traits::FusedIterator;
 #[cfg(feature = "uncertified")]
 pub use self::traits::InPlaceIterable;
 #[stable(feature = "rust1", since = "1.0.0")]
+pub use self::traits::IntoIterator;
+#[stable(feature = "rust1", since = "1.0.0")]
 pub use self::traits::Iterator;
 #[unstable(issue = "none", feature = "trusted_fused")]
 #[cfg(feature = "uncertified")]

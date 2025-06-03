@@ -387,6 +387,8 @@ pub use self::adapters::ArrayChunks;
 #[unstable(feature = "std_internals", issue = "none")]
 #[cfg(feature = "uncertified")]
 pub use self::adapters::ByRefSized;
+#[stable(feature = "rust1", since = "1.0.0")]
+pub use self::adapters::Chain;
 #[stable(feature = "iter_cloned", since = "1.1.0")]
 #[cfg(feature = "uncertified")]
 pub use self::adapters::Cloned;
@@ -424,8 +426,8 @@ pub use self::adapters::zip;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
 pub use self::adapters::{
-    Chain, Cycle, Enumerate, Filter, FilterMap, FlatMap, Fuse, Inspect, Map, Peekable, Rev, Scan,
-    Skip, SkipWhile, Take, TakeWhile, Zip,
+    Cycle, Enumerate, Filter, FilterMap, FlatMap, Fuse, Inspect, Map, Peekable, Rev, Scan, Skip,
+    SkipWhile, Take, TakeWhile, Zip,
 };
 #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
 #[cfg(feature = "uncertified")]

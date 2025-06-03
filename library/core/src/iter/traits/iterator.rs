@@ -1,11 +1,10 @@
-use super::super::StepBy;
 #[cfg(feature = "uncertified")]
 use super::super::{
-    ArrayChunks, ByRefSized, Chain, Cloned, Copied, Cycle, Enumerate, Filter, FilterMap, FlatMap,
-    Flatten, Fuse, Inspect, Intersperse, IntersperseWith, Map, MapWhile, MapWindows, Peekable,
-    Product, Rev, Scan, Skip, SkipWhile, Sum, Take, TakeWhile, TrustedRandomAccessNoCoerce, Zip,
-    try_process,
+    ArrayChunks, ByRefSized, Cloned, Copied, Cycle, Enumerate, Filter, FilterMap, FlatMap, Flatten,
+    Fuse, Inspect, Intersperse, IntersperseWith, Map, MapWhile, MapWindows, Peekable, Product, Rev,
+    Scan, Skip, SkipWhile, Sum, Take, TakeWhile, TrustedRandomAccessNoCoerce, Zip, try_process,
 };
+use super::super::{Chain, StepBy};
 #[cfg(feature = "uncertified")]
 use crate::array;
 #[cfg(feature = "uncertified")]
@@ -479,7 +478,7 @@ pub trait Iterator {
     /// [`OsStr`]: ../../std/ffi/struct.OsStr.html
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(feature = "uncertified")]
+
     fn chain<U>(self, other: U) -> Chain<Self, U::IntoIter>
     where
         Self: Sized,

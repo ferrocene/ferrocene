@@ -1,5 +1,8 @@
+#[cfg(feature = "uncertified")]
 use crate::iter::{FusedIterator, TrustedLen};
+#[cfg(feature = "uncertified")]
 use crate::num::NonZero;
+#[cfg(feature = "uncertified")]
 use crate::ops::Try;
 
 /// An iterator that links two iterators together, in a chain.
@@ -17,9 +20,12 @@ use crate::ops::Try;
 /// let a2 = [4, 5, 6];
 /// let iter: Chain<Iter<'_, _>, Iter<'_, _>> = a1.iter().chain(a2.iter());
 /// ```
-#[derive(Clone, Debug)]
+#[derive(Clone)]
+#[cfg_attr(feature = "uncertified", derive(Debug))]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
+// FIXME(pvdrz): Remove this once the fields are used
+#[cfg_attr(not(feature = "uncertified"), allow(dead_code))]
 pub struct Chain<A, B> {
     // These are "fused" with `Option` so we don't need separate state to track which part is
     // already exhausted, and we may also get niche layout for `None`. We don't use the real `Fuse`
@@ -63,6 +69,7 @@ impl<A, B> Chain<A, B> {
 /// assert_eq!(iter.next(), None);
 /// ```
 #[unstable(feature = "iter_chain", reason = "recently added", issue = "125964")]
+#[cfg(feature = "uncertified")]
 pub fn chain<A, B>(a: A, b: B) -> Chain<A::IntoIter, B::IntoIter>
 where
     A: IntoIterator,
@@ -72,20 +79,24 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<A, B> Iterator for Chain<A, B>
 where
     A: Iterator,
     B: Iterator<Item = A::Item>,
 {
+    #[cfg(feature = "uncertified")]
     type Item = A::Item;
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn next(&mut self) -> Option<A::Item> {
         and_then_or_clear(&mut self.a, Iterator::next).or_else(|| self.b.as_mut()?.next())
     }
 
     #[inline]
     #[rustc_inherit_overflow_checks]
+    #[cfg(feature = "uncertified")]
     fn count(self) -> usize {
         let a_count = match self.a {
             Some(a) => a.count(),
@@ -98,6 +109,7 @@ where
         a_count + b_count
     }
 
+    #[cfg(feature = "uncertified")]
     fn try_fold<Acc, F, R>(&mut self, mut acc: Acc, mut f: F) -> R
     where
         Self: Sized,
@@ -115,6 +127,7 @@ where
         try { acc }
     }
 
+    #[cfg(feature = "uncertified")]
     fn fold<Acc, F>(self, mut acc: Acc, mut f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -129,6 +142,7 @@ where
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn advance_by(&mut self, mut n: usize) -> Result<(), NonZero<usize>> {
         if let Some(ref mut a) = self.a {
             n = match a.advance_by(n) {
@@ -147,6 +161,7 @@ where
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn nth(&mut self, mut n: usize) -> Option<Self::Item> {
         if let Some(ref mut a) = self.a {
             n = match a.advance_by(n) {
@@ -164,6 +179,7 @@ where
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn find<P>(&mut self, mut predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -173,6 +189,7 @@ where
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn last(self) -> Option<A::Item> {
         // Must exhaust a before b.
         let a_last = self.a.and_then(Iterator::last);
@@ -181,6 +198,7 @@ where
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn size_hint(&self) -> (usize, Option<usize>) {
         match self {
             Chain { a: Some(a), b: Some(b) } => {
@@ -204,17 +222,20 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<A, B> DoubleEndedIterator for Chain<A, B>
 where
     A: DoubleEndedIterator,
     B: DoubleEndedIterator<Item = A::Item>,
 {
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn next_back(&mut self) -> Option<A::Item> {
         and_then_or_clear(&mut self.b, |b| b.next_back()).or_else(|| self.a.as_mut()?.next_back())
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn advance_back_by(&mut self, mut n: usize) -> Result<(), NonZero<usize>> {
         if let Some(ref mut b) = self.b {
             n = match b.advance_back_by(n) {
@@ -233,6 +254,7 @@ where
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn nth_back(&mut self, mut n: usize) -> Option<Self::Item> {
         if let Some(ref mut b) = self.b {
             n = match b.advance_back_by(n) {
@@ -250,6 +272,7 @@ where
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn rfind<P>(&mut self, mut predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -258,6 +281,7 @@ where
             .or_else(|| self.a.as_mut()?.rfind(predicate))
     }
 
+    #[cfg(feature = "uncertified")]
     fn try_rfold<Acc, F, R>(&mut self, mut acc: Acc, mut f: F) -> R
     where
         Self: Sized,
@@ -275,6 +299,7 @@ where
         try { acc }
     }
 
+    #[cfg(feature = "uncertified")]
     fn rfold<Acc, F>(self, mut acc: Acc, mut f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -291,6 +316,7 @@ where
 
 // Note: *both* must be fused to handle double-ended iterators.
 #[stable(feature = "fused", since = "1.26.0")]
+#[cfg(feature = "uncertified")]
 impl<A, B> FusedIterator for Chain<A, B>
 where
     A: FusedIterator,
@@ -299,6 +325,7 @@ where
 }
 
 #[unstable(feature = "trusted_len", issue = "37572")]
+#[cfg(feature = "uncertified")]
 unsafe impl<A, B> TrustedLen for Chain<A, B>
 where
     A: TrustedLen,
@@ -307,6 +334,7 @@ where
 }
 
 #[stable(feature = "default_iters", since = "1.70.0")]
+#[cfg(feature = "uncertified")]
 impl<A: Default, B: Default> Default for Chain<A, B> {
     /// Creates a `Chain` from the default values for `A` and `B`.
     ///
@@ -323,12 +351,14 @@ impl<A: Default, B: Default> Default for Chain<A, B> {
     ///
     /// // take requires `Default`
     /// let _: Chain<_, _> = mem::take(&mut foo.0);
+    #[cfg(feature = "uncertified")]
     fn default() -> Self {
         Chain::new(Default::default(), Default::default())
     }
 }
 
 #[inline]
+#[cfg(feature = "uncertified")]
 fn and_then_or_clear<T, U>(opt: &mut Option<T>, f: impl FnOnce(&mut T) -> Option<U>) -> Option<U> {
     let x = f(opt.as_mut()?);
     if x.is_none() {

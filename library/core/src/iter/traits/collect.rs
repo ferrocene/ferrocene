@@ -164,7 +164,7 @@ pub trait FromIterator<A>: Sized {
 /// One benefit of implementing `IntoIterator` is that your type will [work
 /// with Rust's `for` loop syntax](crate::iter#for-loops-and-intoiterator).
 ///
-/// See also: [`FromIterator`].
+// /// See also: [`FromIterator`].
 ///
 /// # Examples
 ///

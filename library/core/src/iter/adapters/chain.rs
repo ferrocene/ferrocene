@@ -6,20 +6,20 @@ use crate::num::NonZero;
 use crate::ops::Try;
 
 /// An iterator that links two iterators together, in a chain.
-///
-/// This `struct` is created by [`chain`] or [`Iterator::chain`]. See their
-/// documentation for more.
-///
-/// # Examples
-///
-/// ```
-/// use std::iter::Chain;
-/// use std::slice::Iter;
-///
-/// let a1 = [1, 2, 3];
-/// let a2 = [4, 5, 6];
-/// let iter: Chain<Iter<'_, _>, Iter<'_, _>> = a1.iter().chain(a2.iter());
-/// ```
+// ///
+// /// This `struct` is created by [`chain`] or [`Iterator::chain`]. See their
+// /// documentation for more.
+// ///
+// /// # Examples
+// ///
+// /// ```
+// /// use std::iter::Chain;
+// /// use std::slice::Iter;
+// ///
+// /// let a1 = [1, 2, 3];
+// /// let a2 = [4, 5, 6];
+// /// let iter: Chain<Iter<'_, _>, Iter<'_, _>> = a1.iter().chain(a2.iter());
+// /// ```
 #[derive(Clone)]
 #[cfg_attr(feature = "uncertified", derive(Debug))]
 #[must_use = "iterators are lazy and do nothing unless consumed"]

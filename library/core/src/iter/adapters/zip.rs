@@ -10,9 +10,9 @@ use crate::iter::{
 use crate::num::NonZero;
 
 /// An iterator that iterates two other iterators simultaneously.
-///
-/// This `struct` is created by [`zip`] or [`Iterator::zip`].
-/// See their documentation for more.
+// ///
+// /// This `struct` is created by [`zip`] or [`Iterator::zip`].
+// /// See their documentation for more.
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]

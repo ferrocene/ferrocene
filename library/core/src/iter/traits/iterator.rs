@@ -422,8 +422,8 @@ pub trait Iterator {
     ///
     /// In other words, it links two iterators together, in a chain. 🔗
     ///
-    /// [`once`] is commonly used to adapt a single value into a chain of
-    /// other kinds of iteration.
+    // /// [`once`] is commonly used to adapt a single value into a chain of
+    // /// other kinds of iteration.
     ///
     /// # Examples
     ///
@@ -474,7 +474,7 @@ pub trait Iterator {
     /// }
     /// ```
     ///
-    /// [`once`]: crate::iter::once
+    // /// [`once`]: crate::iter::once
     /// [`OsStr`]: ../../std/ffi/struct.OsStr.html
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -501,9 +501,9 @@ pub trait Iterator {
     /// it will first try to advance the first iterator at most one time and if it still yielded an item
     /// try to advance the second iterator at most one time.
     ///
-    /// To 'undo' the result of zipping up two iterators, see [`unzip`].
-    ///
-    /// [`unzip`]: Iterator::unzip
+    // /// To 'undo' the result of zipping up two iterators, see [`unzip`].
+    // ///
+    // /// [`unzip`]: Iterator::unzip
     ///
     /// # Examples
     ///
@@ -538,9 +538,9 @@ pub trait Iterator {
     /// assert_eq!(iter.next(), None);
     /// ```
     ///
-    /// `zip()` is often used to zip an infinite iterator to a finite one.
-    /// This works because the finite iterator will eventually return [`None`],
-    /// ending the zipper. Zipping with `(0..)` can look a lot like [`enumerate`]:
+    // /// `zip()` is often used to zip an infinite iterator to a finite one.
+    // /// This works because the finite iterator will eventually return [`None`],
+    // /// ending the zipper. Zipping with `(0..)` can look a lot like [`enumerate`]:
     ///
     /// ```
     /// let enumerate: Vec<_> = "foo".chars().enumerate().collect();
@@ -557,7 +557,7 @@ pub trait Iterator {
     /// assert_eq!((2, 'o'), zipper[2]);
     /// ```
     ///
-    /// If both iterators have roughly equivalent syntax, it may be more readable to use [`zip`]:
+    // /// If both iterators have roughly equivalent syntax, it may be more readable to use [`zip`]:
     ///
     /// ```
     /// use std::iter::zip;
@@ -592,9 +592,9 @@ pub trait Iterator {
     /// # assert_eq!(zipped.next(), None);
     /// ```
     ///
-    /// [`enumerate`]: Iterator::enumerate
+    // /// [`enumerate`]: Iterator::enumerate
     /// [`next`]: Iterator::next
-    /// [`zip`]: crate::iter::zip
+    // /// [`zip`]: crate::iter::zip
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
 
@@ -2531,13 +2531,13 @@ pub trait Iterator {
     /// might not terminate for infinite iterators, even on traits for which a
     /// result is determinable in finite time.
     ///
-    /// Note: [`reduce()`] can be used to use the first element as the initial
-    /// value, if the accumulator type and item type is the same.
+    // /// Note: [`reduce()`] can be used to use the first element as the initial
+    // /// value, if the accumulator type and item type is the same.
     ///
     /// Note: `fold()` combines elements in a *left-associative* fashion. For associative
     /// operators like `+`, the order the elements are combined in is not important, but for non-associative
     /// operators like `-` the order will affect the final result.
-    /// For a *right-associative* version of `fold()`, see [`DoubleEndedIterator::rfold()`].
+    // /// For a *right-associative* version of `fold()`, see [`DoubleEndedIterator::rfold()`].
     ///
     /// # Note to Implementors
     ///
@@ -2610,7 +2610,7 @@ pub trait Iterator {
     /// assert_eq!(result, result2);
     /// ```
     ///
-    /// [`reduce()`]: Iterator::reduce
+    // /// [`reduce()`]: Iterator::reduce
     #[doc(alias = "inject", alias = "foldl")]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]

@@ -738,7 +738,10 @@ fn doc_std(
     }
 
     if builder.config.library_docs_private_items {
-        cargo.rustdocflag("--document-private-items").rustdocflag("--document-hidden-items");
+        // cargo
+        // .rustdocflag("--document-private-items")
+        // .rustdocflag("--document-hidden-items")
+        // ;
     }
 
     for krate in requested_crates {

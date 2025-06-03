@@ -52,7 +52,7 @@ mod step_by;
 mod take;
 #[cfg(feature = "uncertified")]
 mod take_while;
-#[cfg(feature = "uncertified")]
+
 mod zip;
 
 #[unstable(feature = "iter_array_chunks", reason = "recently added", issue = "100450")]
@@ -61,8 +61,6 @@ pub use self::array_chunks::ArrayChunks;
 #[unstable(feature = "std_internals", issue = "none")]
 #[cfg(feature = "uncertified")]
 pub use self::by_ref_sized::ByRefSized;
-#[stable(feature = "rust1", since = "1.0.0")]
-pub use self::chain::Chain;
 #[unstable(feature = "iter_chain", reason = "recently added", issue = "125964")]
 #[cfg(feature = "uncertified")]
 pub use self::chain::chain;
@@ -96,11 +94,13 @@ pub use self::zip::TrustedRandomAccessNoCoerce;
 #[cfg(feature = "uncertified")]
 pub use self::zip::zip;
 #[stable(feature = "rust1", since = "1.0.0")]
+pub use self::{chain::Chain, zip::Zip};
+#[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "uncertified")]
 pub use self::{
     cycle::Cycle, enumerate::Enumerate, filter::Filter, filter_map::FilterMap, flatten::FlatMap,
     fuse::Fuse, inspect::Inspect, map::Map, peekable::Peekable, rev::Rev, scan::Scan, skip::Skip,
-    skip_while::SkipWhile, take::Take, take_while::TakeWhile, zip::Zip,
+    skip_while::SkipWhile, take::Take, take_while::TakeWhile,
 };
 
 /// This trait provides transitive access to source-stage in an iterator-adapter pipeline

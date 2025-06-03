@@ -2,9 +2,9 @@
 use super::super::{
     ArrayChunks, ByRefSized, Cloned, Copied, Cycle, Enumerate, Filter, FilterMap, FlatMap, Flatten,
     Fuse, Inspect, Intersperse, IntersperseWith, Map, MapWhile, MapWindows, Peekable, Product, Rev,
-    Scan, Skip, SkipWhile, Sum, Take, TakeWhile, TrustedRandomAccessNoCoerce, Zip, try_process,
+    Scan, Skip, SkipWhile, Sum, Take, TakeWhile, TrustedRandomAccessNoCoerce, try_process,
 };
-use super::super::{Chain, StepBy};
+use super::super::{Chain, StepBy, Zip};
 #[cfg(feature = "uncertified")]
 use crate::array;
 #[cfg(feature = "uncertified")]
@@ -597,7 +597,7 @@ pub trait Iterator {
     /// [`zip`]: crate::iter::zip
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(feature = "uncertified")]
+
     fn zip<U>(self, other: U) -> Zip<Self, U::IntoIter>
     where
         Self: Sized,

@@ -1,8 +1,12 @@
+#[cfg(feature = "uncertified")]
 use crate::cmp;
+#[cfg(feature = "uncertified")]
 use crate::fmt::{self, Debug};
+#[cfg(feature = "uncertified")]
 use crate::iter::{
     FusedIterator, InPlaceIterable, SourceIter, TrustedFused, TrustedLen, UncheckedIterator,
 };
+#[cfg(feature = "uncertified")]
 use crate::num::NonZero;
 
 /// An iterator that iterates two other iterators simultaneously.
@@ -12,6 +16,8 @@ use crate::num::NonZero;
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
+// FIXME(pvdrz): Remove once fields are used
+#[cfg_attr(not(feature = "uncertified"), allow(dead_code))]
 pub struct Zip<A, B> {
     a: A,
     b: B,
@@ -24,6 +30,7 @@ impl<A: Iterator, B: Iterator> Zip<A, B> {
     pub(in crate::iter) fn new(a: A, b: B) -> Zip<A, B> {
         ZipImpl::new(a, b)
     }
+    #[cfg(feature = "uncertified")]
     fn super_nth(&mut self, mut n: usize) -> Option<(A::Item, B::Item)> {
         while let Some(x) = Iterator::next(self) {
             if n == 0 {
@@ -65,6 +72,7 @@ impl<A: Iterator, B: Iterator> Zip<A, B> {
 /// assert!(iter.next().is_none());
 /// ```
 #[stable(feature = "iter_zip", since = "1.59.0")]
+#[cfg(feature = "uncertified")]
 pub fn zip<A, B>(a: A, b: B) -> Zip<A::IntoIter, B::IntoIter>
 where
     A: IntoIterator,
@@ -74,29 +82,35 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<A, B> Iterator for Zip<A, B>
 where
     A: Iterator,
     B: Iterator,
 {
+    #[cfg(feature = "uncertified")]
     type Item = (A::Item, B::Item);
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn next(&mut self) -> Option<Self::Item> {
         ZipImpl::next(self)
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn size_hint(&self) -> (usize, Option<usize>) {
         ZipImpl::size_hint(self)
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         ZipImpl::nth(self, n)
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -105,6 +119,7 @@ where
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -116,12 +131,14 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<A, B> DoubleEndedIterator for Zip<A, B>
 where
     A: DoubleEndedIterator + ExactSizeIterator,
     B: DoubleEndedIterator + ExactSizeIterator,
 {
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn next_back(&mut self) -> Option<(A::Item, B::Item)> {
         ZipImpl::next_back(self)
     }
@@ -132,17 +149,23 @@ where
 trait ZipImpl<A, B> {
     type Item;
     fn new(a: A, b: B) -> Self;
+    #[cfg(feature = "uncertified")]
     fn next(&mut self) -> Option<Self::Item>;
+    #[cfg(feature = "uncertified")]
     fn size_hint(&self) -> (usize, Option<usize>);
+    #[cfg(feature = "uncertified")]
     fn nth(&mut self, n: usize) -> Option<Self::Item>;
+    #[cfg(feature = "uncertified")]
     fn next_back(&mut self) -> Option<Self::Item>
     where
         A: DoubleEndedIterator + ExactSizeIterator,
         B: DoubleEndedIterator + ExactSizeIterator;
+    #[cfg(feature = "uncertified")]
     fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc;
     // This has the same safety requirements as `Iterator::__iterator_get_unchecked`
+    #[cfg(feature = "uncertified")]
     unsafe fn get_unchecked(&mut self, idx: usize) -> <Self as Iterator>::Item
     where
         Self: Iterator + TrustedRandomAccessNoCoerce;
@@ -163,6 +186,7 @@ macro_rules! zip_impl_general_defaults {
         }
 
         #[inline]
+        #[cfg(feature = "uncertified")]
         default fn next(&mut self) -> Option<(A::Item, B::Item)> {
             let x = self.a.next()?;
             let y = self.b.next()?;
@@ -170,11 +194,13 @@ macro_rules! zip_impl_general_defaults {
         }
 
         #[inline]
+        #[cfg(feature = "uncertified")]
         default fn nth(&mut self, n: usize) -> Option<Self::Item> {
             self.super_nth(n)
         }
 
         #[inline]
+        #[cfg(feature = "uncertified")]
         default fn next_back(&mut self) -> Option<(A::Item, B::Item)>
         where
             A: DoubleEndedIterator + ExactSizeIterator,
@@ -219,6 +245,7 @@ where
     zip_impl_general_defaults! {}
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     default fn size_hint(&self) -> (usize, Option<usize>) {
         let (a_lower, a_upper) = self.a.size_hint();
         let (b_lower, b_upper) = self.b.size_hint();
@@ -235,6 +262,7 @@ where
         (lower, upper)
     }
 
+    #[cfg(feature = "uncertified")]
     default unsafe fn get_unchecked(&mut self, _idx: usize) -> <Self as Iterator>::Item
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -243,6 +271,7 @@ where
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     default fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -252,20 +281,24 @@ where
 }
 
 #[doc(hidden)]
+#[cfg(feature = "uncertified")]
 impl<A, B> ZipImpl<A, B> for Zip<A, B>
 where
     A: TrustedRandomAccessNoCoerce + Iterator,
     B: TrustedRandomAccessNoCoerce + Iterator,
 {
+    #[cfg(feature = "uncertified")]
     zip_impl_general_defaults! {}
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     default fn size_hint(&self) -> (usize, Option<usize>) {
         let size = cmp::min(self.a.size(), self.b.size());
         (size, Some(size))
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     unsafe fn get_unchecked(&mut self, idx: usize) -> <Self as Iterator>::Item {
         let idx = self.index + idx;
         // SAFETY: the caller must uphold the contract for
@@ -274,6 +307,7 @@ where
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn fold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -293,11 +327,13 @@ where
 }
 
 #[doc(hidden)]
+#[cfg(feature = "uncertified")]
 impl<A, B> ZipImpl<A, B> for Zip<A, B>
 where
     A: TrustedRandomAccess + Iterator,
     B: TrustedRandomAccess + Iterator,
 {
+    #[cfg(feature = "uncertified")]
     fn new(a: A, b: B) -> Self {
         let a_len = a.size();
         let len = cmp::min(a_len, b.size());
@@ -305,6 +341,7 @@ where
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn next(&mut self) -> Option<(A::Item, B::Item)> {
         if self.index < self.len {
             let i = self.index;
@@ -332,12 +369,14 @@ where
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.len - self.index;
         (len, Some(len))
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         let delta = cmp::min(n, self.len - self.index);
         let end = self.index + delta;
@@ -366,6 +405,7 @@ where
     }
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn next_back(&mut self) -> Option<(A::Item, B::Item)>
     where
         A: DoubleEndedIterator + ExactSizeIterator,
@@ -414,6 +454,7 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<A, B> ExactSizeIterator for Zip<A, B>
 where
     A: ExactSizeIterator,
@@ -423,6 +464,7 @@ where
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
+#[cfg(feature = "uncertified")]
 unsafe impl<A, B> TrustedRandomAccess for Zip<A, B>
 where
     A: TrustedRandomAccess,
@@ -432,15 +474,18 @@ where
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
+#[cfg(feature = "uncertified")]
 unsafe impl<A, B> TrustedRandomAccessNoCoerce for Zip<A, B>
 where
     A: TrustedRandomAccessNoCoerce,
     B: TrustedRandomAccessNoCoerce,
 {
+    #[cfg(feature = "uncertified")]
     const MAY_HAVE_SIDE_EFFECT: bool = A::MAY_HAVE_SIDE_EFFECT || B::MAY_HAVE_SIDE_EFFECT;
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
+#[cfg(feature = "uncertified")]
 impl<A, B> FusedIterator for Zip<A, B>
 where
     A: FusedIterator,
@@ -449,6 +494,7 @@ where
 }
 
 #[unstable(issue = "none", feature = "trusted_fused")]
+#[cfg(feature = "uncertified")]
 unsafe impl<A, B> TrustedFused for Zip<A, B>
 where
     A: TrustedFused,
@@ -457,6 +503,7 @@ where
 }
 
 #[unstable(feature = "trusted_len", issue = "37572")]
+#[cfg(feature = "uncertified")]
 unsafe impl<A, B> TrustedLen for Zip<A, B>
 where
     A: TrustedLen,
@@ -464,6 +511,7 @@ where
 {
 }
 
+#[cfg(feature = "uncertified")]
 impl<A, B> UncheckedIterator for Zip<A, B>
 where
     A: UncheckedIterator,
@@ -474,13 +522,16 @@ where
 // Arbitrarily selects the left side of the zip iteration as extractable "source"
 // it would require negative trait bounds to be able to try both
 #[unstable(issue = "none", feature = "inplace_iteration")]
+#[cfg(feature = "uncertified")]
 unsafe impl<A, B> SourceIter for Zip<A, B>
 where
     A: SourceIter,
 {
+    #[cfg(feature = "uncertified")]
     type Source = A::Source;
 
     #[inline]
+    #[cfg(feature = "uncertified")]
     unsafe fn as_inner(&mut self) -> &mut A::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.a) }
@@ -489,31 +540,42 @@ where
 
 // Since SourceIter forwards the left hand side we do the same here
 #[unstable(issue = "none", feature = "inplace_iteration")]
+#[cfg(feature = "uncertified")]
 unsafe impl<A: InPlaceIterable, B> InPlaceIterable for Zip<A, B> {
+    #[cfg(feature = "uncertified")]
     const EXPAND_BY: Option<NonZero<usize>> = A::EXPAND_BY;
+    #[cfg(feature = "uncertified")]
     const MERGE_BY: Option<NonZero<usize>> = A::MERGE_BY;
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "uncertified")]
 impl<A: Debug, B: Debug> Debug for Zip<A, B> {
+    #[cfg(feature = "uncertified")]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         ZipFmt::fmt(self, f)
     }
 }
 
+#[cfg(feature = "uncertified")]
 trait ZipFmt<A, B> {
+    #[cfg(feature = "uncertified")]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result;
 }
 
+#[cfg(feature = "uncertified")]
 impl<A: Debug, B: Debug> ZipFmt<A, B> for Zip<A, B> {
+    #[cfg(feature = "uncertified")]
     default fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Zip").field("a", &self.a).field("b", &self.b).finish()
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<A: Debug + TrustedRandomAccessNoCoerce, B: Debug + TrustedRandomAccessNoCoerce> ZipFmt<A, B>
     for Zip<A, B>
 {
+    #[cfg(feature = "uncertified")]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // It's *not safe* to call fmt on the contained iterators, since once
         // we start iterating they're in strange, potentially unsafe, states.
@@ -577,6 +639,7 @@ impl<A: Debug + TrustedRandomAccessNoCoerce, B: Debug + TrustedRandomAccessNoCoe
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 #[rustc_specialization_trait]
+#[cfg(feature = "uncertified")]
 pub unsafe trait TrustedRandomAccess: TrustedRandomAccessNoCoerce {}
 
 /// Like [`TrustedRandomAccess`] but without any of the requirements / guarantees around
@@ -590,8 +653,10 @@ pub unsafe trait TrustedRandomAccess: TrustedRandomAccessNoCoerce {}
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 #[rustc_specialization_trait]
+#[cfg(feature = "uncertified")]
 pub unsafe trait TrustedRandomAccessNoCoerce: Sized {
     // Convenience method.
+    #[cfg(feature = "uncertified")]
     fn size(&self) -> usize
     where
         Self: Iterator,
@@ -600,6 +665,7 @@ pub unsafe trait TrustedRandomAccessNoCoerce: Sized {
     }
     /// `true` if getting an iterator element may have side effects.
     /// Remember to take inner iterators into account.
+    #[cfg(feature = "uncertified")]
     const MAY_HAVE_SIDE_EFFECT: bool;
 }
 
@@ -611,6 +677,7 @@ pub unsafe trait TrustedRandomAccessNoCoerce: Sized {
 /// Same requirements calling `get_unchecked` directly.
 #[doc(hidden)]
 #[inline]
+#[cfg(feature = "uncertified")]
 pub(in crate::iter::adapters) unsafe fn try_get_unchecked<I>(it: &mut I, idx: usize) -> I::Item
 where
     I: Iterator,
@@ -620,20 +687,26 @@ where
     unsafe { it.try_get_unchecked(idx) }
 }
 
+#[cfg(feature = "uncertified")]
 unsafe trait SpecTrustedRandomAccess: Iterator {
     /// If `Self: TrustedRandomAccess`, it must be safe to call
     /// `Iterator::__iterator_get_unchecked(self, index)`.
+    #[cfg(feature = "uncertified")]
     unsafe fn try_get_unchecked(&mut self, index: usize) -> Self::Item;
 }
 
+#[cfg(feature = "uncertified")]
 unsafe impl<I: Iterator> SpecTrustedRandomAccess for I {
+    #[cfg(feature = "uncertified")]
     default unsafe fn try_get_unchecked(&mut self, _: usize) -> Self::Item {
         panic!("Should only be called on TrustedRandomAccess iterators");
     }
 }
 
+#[cfg(feature = "uncertified")]
 unsafe impl<I: Iterator + TrustedRandomAccessNoCoerce> SpecTrustedRandomAccess for I {
     #[inline]
+    #[cfg(feature = "uncertified")]
     unsafe fn try_get_unchecked(&mut self, index: usize) -> Self::Item {
         // SAFETY: the caller must uphold the contract for
         // `Iterator::__iterator_get_unchecked`.
@@ -641,16 +714,20 @@ unsafe impl<I: Iterator + TrustedRandomAccessNoCoerce> SpecTrustedRandomAccess f
     }
 }
 
+#[cfg(feature = "uncertified")]
 trait SpecFold: Iterator {
+    #[cfg(feature = "uncertified")]
     fn spec_fold<B, F>(self, init: B, f: F) -> B
     where
         Self: Sized,
         F: FnMut(B, Self::Item) -> B;
 }
 
+#[cfg(feature = "uncertified")]
 impl<A: Iterator, B: Iterator> SpecFold for Zip<A, B> {
     // Adapted from default impl from the Iterator trait
     #[inline]
+    #[cfg(feature = "uncertified")]
     default fn spec_fold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -663,8 +740,10 @@ impl<A: Iterator, B: Iterator> SpecFold for Zip<A, B> {
     }
 }
 
+#[cfg(feature = "uncertified")]
 impl<A: TrustedLen, B: TrustedLen> SpecFold for Zip<A, B> {
     #[inline]
+    #[cfg(feature = "uncertified")]
     fn spec_fold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,

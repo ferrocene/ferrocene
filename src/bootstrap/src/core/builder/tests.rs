@@ -239,7 +239,7 @@ fn alias_and_path_for_library() {
     );
     assert_eq!(
         first(cache.all::<doc::Std>()),
-        &[doc_std!(TEST_TRIPLE_1 => TEST_TRIPLE_1, stage = 0)]
+        &[doc_std!(TEST_TRIPLE_1 => TEST_TRIPLE_1, stage = 1)]
     );
 }
 
@@ -257,6 +257,7 @@ fn ci_rustc_if_unchanged_invalidate_on_compiler_changes() {
 }
 
 #[test]
+<<<<<<< HEAD
 fn ci_rustc_if_unchanged_invalidate_on_library_changes_in_ci() {
     git_test(|ctx| {
         prepare_rustc_checkout(ctx);
@@ -296,6 +297,8 @@ fn ci_rustc_with_square_bracket_in_author_email() {
 }
 
 #[test]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 fn ci_rustc_if_unchanged_do_not_invalidate_on_library_changes_outside_ci() {
     git_test(|ctx| {
         prepare_rustc_checkout(ctx);
@@ -467,14 +470,14 @@ mod defaults {
         assert_eq!(first(cache.all::<doc::ErrorIndex>()), &[doc::ErrorIndex { target: a },]);
         assert_eq!(
             first(cache.all::<tool::ErrorIndex>()),
-            &[tool::ErrorIndex { compiler: Compiler::new(0, a) }]
+            &[tool::ErrorIndex { compiler: Compiler::new(1, a) }]
         );
-        // docs should be built with the beta compiler, not with the stage0 artifacts.
+        // docs should be built with the stage0 compiler, not with the stage0 artifacts.
         // recall that rustdoc is off-by-one: `stage` is the compiler rustdoc is _linked_ to,
         // not the one it was built by.
         assert_eq!(
             first(cache.all::<tool::Rustdoc>()),
-            &[tool::Rustdoc { compiler: Compiler::new(0, a) },]
+            &[tool::Rustdoc { compiler: Compiler::new(1, a) },]
         );
     }
 }

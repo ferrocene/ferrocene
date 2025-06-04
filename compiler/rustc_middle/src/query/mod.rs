@@ -535,7 +535,8 @@ rustc_queries! {
         separate_provide_extern
     }
 
-    /// Fetch the THIR for a given body.
+    /// Fetch the THIR for a given body. The THIR body gets stolen by unsafety checking unless
+    /// `-Zno-steal-thir` is on.
     query thir_body(key: LocalDefId) -> Result<(&'tcx Steal<thir::Thir<'tcx>>, thir::ExprId), ErrorGuaranteed> {
         // Perf tests revealed that hashing THIR is inefficient (see #85729).
         no_hash
@@ -1137,7 +1138,7 @@ rustc_queries! {
     /// their respective impl (i.e., part of the derive macro)
     query live_symbols_and_ignored_derived_traits(_: ()) -> &'tcx (
         LocalDefIdSet,
-        LocalDefIdMap<Vec<(DefId, DefId)>>
+        LocalDefIdMap<FxIndexSet<(DefId, DefId)>>
     ) {
         arena_cache
         desc { "finding live symbols in crate" }

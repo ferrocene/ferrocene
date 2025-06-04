@@ -321,9 +321,9 @@ pub(crate) fn get_tool_rustc_compiler(
         return target_compiler;
     }
 
-    if builder.download_rustc() && target_compiler.stage > 0 {
-        // We already have the stage N compiler, we don't need to cut the stage.
-        return builder.compiler(target_compiler.stage, builder.config.build);
+    if builder.download_rustc() && target_compiler.stage == 1 {
+        // We shouldn't drop to stage0 compiler when using CI rustc.
+        return builder.compiler(1, builder.config.build);
     }
 
     // Similar to `compile::Assemble`, build with the previous stage's compiler. Otherwise
@@ -1195,9 +1195,9 @@ fn run_tool_build_step(
             artifact_kind: ToolArtifactKind::Binary,
         });
 
-    // FIXME: This should just be an if-let-chain, but those are unstable.
-    if let Some(add_bins_to_sysroot) =
-        add_bins_to_sysroot.filter(|bins| !bins.is_empty() && target_compiler.stage > 0)
+    if let Some(add_bins_to_sysroot) = add_bins_to_sysroot
+        && !add_bins_to_sysroot.is_empty()
+        && target_compiler.stage > 0
     {
         let bindir = builder.sysroot(target_compiler).join("bin");
         t!(fs::create_dir_all(&bindir));
@@ -1267,7 +1267,7 @@ impl Step for TestFloatParse {
     const DEFAULT: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.path("src/etc/test-float-parse")
+        run.path("src/tools/test-float-parse")
     }
 
     fn run(self, builder: &Builder<'_>) -> ToolBuildResult {
@@ -1279,7 +1279,7 @@ impl Step for TestFloatParse {
             target: bootstrap_host,
             tool: "test-float-parse",
             mode: Mode::ToolStd,
-            path: "src/etc/test-float-parse",
+            path: "src/tools/test-float-parse",
             source_type: SourceType::InTree,
             extra_features: Vec::new(),
             allow_features: Self::ALLOW_FEATURES,

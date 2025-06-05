@@ -1,0 +1,62 @@
+name: Finish build
+run-name: Finish build
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  workflow_call:
+    inputs:
+      triple:
+        type: string
+        description: The Rust triple of the host platform
+      runner:
+        type: string
+        description: The GitHub Runner to run on
+      build-run-id:
+        type: string
+        description: The run id of the build workflow
+      build-artifact:
+        type: string
+        description: The artifact from the build workflow
+      container:
+        type: string
+        description: The container URI to run the build in, if any (Linux only)
+      environment:
+        type: string
+
+jobs:
+
+  finish-build:
+    runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    env:
+      FERROCENE_HOST: ${{ inputs.triple }}
+      FERROCENE_BUILD_HOST: ${{ inputs.triple }}
+      FERROCENE_TARGETS: ${{ inputs.triple }}
+      ARTIFACT: finish-build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+
+      - name: Run
+        uses: ./.github/actions/run/
+        with:
+          container: ${{ inputs.container }}
+          script: |
+            export CIRCLE_SHA1="${{ github.sha }}"
+            export CIRCLE_JOB="${{ env.ARTIFACT }}"
+            uv run x.py dist ferrocene-build-metadata
+            ./ferrocene/ci/scripts/upload-dist-artifacts.sh
+            ./ferrocene/ci/scripts/validate-packages-toml.py ${{ github.sha }}

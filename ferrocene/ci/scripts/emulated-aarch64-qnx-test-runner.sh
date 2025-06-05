@@ -80,6 +80,7 @@ start_vm() {
         -net nic,model=cadence_gem,netdev=net0 -netdev bridge,br=br0,id=net0 \
         -no-reboot \
         -nographic \
+        -accel kvm \
         -pidfile "${emulatordir}"/qemu.pid \
         -serial pipe:"${emulatordir}"/pipe &
 

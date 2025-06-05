@@ -10,7 +10,7 @@ CACHE_BUCKET="ferrocene-ci-caches"
 CACHE_PREFIX="prebuilt-llvm"
 
 
-def get_s3_url(ferrocene_host):
+def get_url(ferrocene_host):
     cache_hash = get_llvm_cache_hash()
     cache_file = f"{CACHE_PREFIX}/{ferrocene_host}-{cache_hash}.tar.zst"
     s3_url = f"s3://{CACHE_BUCKET}/{cache_file}"
@@ -42,6 +42,7 @@ def get_llvm_cache_hash():
         buf = f.read()
         shasum = hashlib.sha256(buf)
         m.update(str.encode(shasum.hexdigest()))
+        f.close()
 
     # Hashing all of the LLVM source code takes time. Instead we can simply get
     # the hash of the tree from git, saving time and achieving the same effect.

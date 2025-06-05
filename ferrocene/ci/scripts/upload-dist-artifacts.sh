@@ -24,4 +24,12 @@ if [[ -d "${COVERAGE_DIR}" ]]; then
     cp -r "${COVERAGE_DIR}" "${DIST_DIR}/coverage"
 fi
 
-aws s3 cp --recursive "${DIST_DIR}/" "s3://${ARTIFACTS_BUCKET}/${ARTIFACTS_PREFIX}${CIRCLE_SHA1}/"
+DEST="s3://${ARTIFACTS_BUCKET}/${ARTIFACTS_PREFIX}${CIRCLE_SHA1}/"
+aws s3 cp --recursive "${DIST_DIR}/" "$DEST"
+
+if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    for file in ${DIST_DIR}/*.tar.xz; do
+        echo "::notice title=Uploaded: $(basename $file)::$DEST"
+    done
+fi
+      

@@ -54,33 +54,14 @@ low-level to most general and high-level:
 
 * A *runner* is a server that executes triggered workflows.
 
-While Ferrocene does not use GitHub Actions to perform CI builds as of today,
-GitHub Actions is used to automate various Ferrocene processes that would
-otherwise require manual intervention, such as opening daily PRs or performing
-releases. The following screenshot shows the GitHub Actions of the Ferrocene
+Ferrocene uses GitHub Actions to perform CI builds as well as various automated Ferrocene
+processes that would otherwise require manual intervention, such as opening daily PRs or
+performing releases. The following screenshot shows the GitHub Actions of the Ferrocene
 GitHub repository.
 
 .. figure:: figures/ferrocene-github-actions.png
 
    GitHub Actions
-
-
-CircleCI
---------
-
-CircleCI is a CI/CD platform that launches a build with each new commit using
-a *pipeline*. CircleCI automatically tests builds in either Docker containers
-or virtual machines, and deploys passing builds to target environments. The
-CircleCI UI allows for the monitoring of pipelines, restarting workflows, etc.
-
-The Ferrocene CI infrastructure utilizes multiple pipelines that perform builds
-and execute tests for the various Ferrocene release channels. The following
-screenshot shows the CircleCI UI for the ``main`` branch of the Ferrocene GitHub
-repository.
-
-.. figure:: figures/ferrocene-circleci-ui.png
-
-   CircleCI UI
 
 
 .. _bors:
@@ -141,16 +122,25 @@ Emulators
 ---------
 
 The Ferrocene CI infrastructure employs the QEMU emulator to emulate non-native
-targets such as ``aarch64``. QEMU is integrated into CircleCI.
+targets such as ``aarch64``. QEMU is integrated into Github Actions.
 
-Amazon ECR and S3
------------------
-
-Amazon ECR is a Docker container registry for storage, sharing, and deployment
-of container images offered by Amazon.
+Amazon S3
+---------
 
 Amazon S3 is an object storage with a web service interface offered by Amazon.
 
-The Ferrocene CI infrastructure stores pre-built Docker images in Amazon ECR
-and all Ferrocene-related build artifacts, caches, and mirrored software
-installers in Amazon S3.
+The Ferrocene CI infrastructure stores all Ferrocene-related build artifacts in
+Amazon S3.
+
+Azure Container Registry and Storage
+------------------------------------
+
+Azure Container Registry is a Docker container registry for storage, sharing,
+and deployment of container images offered by Microsoft.
+
+Azure Storage is an object storage with a web service interface offered by
+Microsoft.
+
+The Ferrocene CI infrastructure stores most caches and mirrored software
+installers in Azure Storage, and pre-build Docker images in Azure Container
+Registry.

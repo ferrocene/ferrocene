@@ -22,6 +22,9 @@ on:
         type: boolean
         default: true
         description: If the stdlib should be tested (enables the `library-std` job)
+      test-variant:
+        type: string
+        description: The variant to test
       runner:
         type: string
         description: The GitHub Runner to run on
@@ -179,7 +182,7 @@ jobs:
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE=qnx{0}/license/licenses', inputs.qnx-version)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source qnx{0}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
             ${{ inputs.qnx-version != '' && 'export RUST_TEST_THREADS=1' || '' }}
-            uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test) --ferrocene-test-one-crate-per-cargo-call
+            uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test) --ferrocene-test-one-crate-per-cargo-call  --test-variant ${{ inputs.test-variant }}
 
       - name: Output container logs
         if: ${{ inputs.emulator-container != '' && (success() || failure()) }}
@@ -305,7 +308,7 @@ jobs:
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE=qnx{0}/license/licenses', inputs.qnx-version)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source qnx{0}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
             ${{ inputs.qnx-version != '' && 'export RUST_TEST_THREADS=1' || '' }}
-            uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:compiletest) --ferrocene-test-one-crate-per-cargo-call
+            uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:compiletest) --ferrocene-test-one-crate-per-cargo-call --test-variant ${{ inputs.test-variant }}
 
       - name: Output container logs
         if: ${{ inputs.emulator-container != '' && (success() || failure()) }}
@@ -431,7 +434,7 @@ jobs:
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE=qnx{0}/license/licenses', inputs.qnx-version)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source qnx{0}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
             ${{ inputs.qnx-version != '' && 'export RUST_TEST_THREADS=1' || '' }}
-            uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library) --ferrocene-test-one-crate-per-cargo-call
+            uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library) --ferrocene-test-one-crate-per-cargo-call --test-variant ${{ inputs.test-variant }}
 
       - name: Output container logs
         if: ${{ inputs.emulator-container != '' && (success() || failure()) }}
@@ -558,7 +561,7 @@ jobs:
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE=qnx{0}/license/licenses', inputs.qnx-version)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source qnx{0}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
             ${{ inputs.qnx-version != '' && 'export RUST_TEST_THREADS=1' || '' }}
-            uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call
+            uv run ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call --test-variant ${{ inputs.test-variant }}
 
       - name: Output container logs
         if: ${{ inputs.emulator-container != '' && (success() || failure()) }}

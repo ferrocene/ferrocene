@@ -127,7 +127,7 @@ download and execute them::
 Using the CI ``config.toml``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To create the ``config.toml`` used by the CI, set ``FERROCENE_HOST`` to your host triple,
+To create the ``config.toml`` used by the CI, set ``FERROCENE_HOST`` to your host tuple,
 then run the ``configure.sh``:
 
 .. code-block:: bash
@@ -168,10 +168,10 @@ Most CI jobs are formatted similar to this:
       - ferrocene-job-dist:
           restore-from-job: x86_64-linux-build
 
-Jobs can only be reproduced on the host triple specified in ``FERROCENE_HOST``.
+Jobs can only be reproduced on the host tuple specified in ``FERROCENE_HOST``.
 Ensure your host is correct.
 
-If ``FERROCENE_TARGETS`` is different than your host triple,
+If ``FERROCENE_TARGETS`` is different than your host tuple,
 update your ``config.toml``'s ``[build]`` section's ``host`` and ``target`` to
 reflect that.
 

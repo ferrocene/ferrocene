@@ -17,7 +17,7 @@ New features
   qualified for safety critical use, but are otherwise fully tested and supported. The new
   target is:
 
-  * :target-with-triple:`aarch64-apple-darwin`
+  * :target-with-tuple:`aarch64-apple-darwin`
 
 
 New experimental features
@@ -30,11 +30,11 @@ shipped as a preview.
   Note that experimental targets are not qualified for safety critical use. The
   new targets are:
 
-  * :target-with-triple:`thumbv6m-none-eabi`
-  * :target-with-triple:`thumbv8m.base-none-eabi`
-  * :target-with-triple:`thumbv8m.main-none-eabi`
-  * :target-with-triple:`thumbv8m.main-none-eabihf`
-  * :target-with-triple:`riscv64gc-unknown-linux-gnu`
+  * :target-with-tuple:`thumbv6m-none-eabi`
+  * :target-with-tuple:`thumbv8m.base-none-eabi`
+  * :target-with-tuple:`thumbv8m.main-none-eabi`
+  * :target-with-tuple:`thumbv8m.main-none-eabihf`
+  * :target-with-tuple:`riscv64gc-unknown-linux-gnu`
 
 Fixed known problems
 --------------------

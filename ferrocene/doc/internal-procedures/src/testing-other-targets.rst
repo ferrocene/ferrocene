@@ -23,7 +23,7 @@ Host Setup
 Unless otherwise noted, all bare-metal targets are tested via QEMU on a Linux host.
 On macOS, a tool like Lima or Docker must be used. On Windows, WSL2 must be used.
 
-:target-with-triple:`x86_64-unknown-linux-gnu`
+:target-with-tuple:`x86_64-unknown-linux-gnu`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You need to have all the normal prerequisites from :doc:`internal-procedures:setup-local-env`
@@ -34,7 +34,7 @@ installed, as well as a few extras:
    sudo apt install qemu-user-static binfmt-support
 
 
-:target-with-triple:`aarch64-apple-darwin`
+:target-with-tuple:`aarch64-apple-darwin`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Install Lima, if you don't have it:
@@ -82,7 +82,7 @@ Shell into the guest:
 You can also point `Visual Studio Code's SSH extension <https://code.visualstudio.com/docs/remote/ssh>`_ at it
 using `these steps <https://github.com/lima-vm/lima/discussions/1890#discussioncomment-7221563>`_.
 
-Finally, ensure the guest is configured according to :doc:`internal-procedures:setup-local-env` as well as the :target-with-triple:`x86_64-unknown-linux-gnu` on this page.
+Finally, ensure the guest is configured according to :doc:`internal-procedures:setup-local-env` as well as the :target-with-tuple:`x86_64-unknown-linux-gnu` on this page.
 
 .. Warning::
     
@@ -91,7 +91,7 @@ Finally, ensure the guest is configured according to :doc:`internal-procedures:s
 
     Please ensure you always work from the guest-local repository.
 
-:target-with-triple:`x86_64-pc-windows-msvc`
+:target-with-tuple:`x86_64-pc-windows-msvc`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Setup WSL2, if you don't have it:
@@ -124,7 +124,7 @@ Shell into the guest:
     
 You can also point `Visual Studio Code WSL extension <https://code.visualstudio.com/docs/remote/wsl-tutorial>`_ at it.
 
-Finally, ensure the guest is configured according to :doc:`internal-procedures:setup-local-env` as well as the :target-with-triple:`x86_64-unknown-linux-gnu` on this page.
+Finally, ensure the guest is configured according to :doc:`internal-procedures:setup-local-env` as well as the :target-with-tuple:`x86_64-unknown-linux-gnu` on this page.
 
 .. Warning::
     
@@ -143,7 +143,7 @@ Currently bare metal targets have a similar procedure for testing.
    Currently, these targets use our *secret sauce*.
    This will eventually be an open source component, but for now, it's our little bit of arcane magic.
 
-:target-with-triple:`aarch64-unknown-none`
+:target-with-tuple:`aarch64-unknown-none`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. Warning::
@@ -197,8 +197,8 @@ After, you can run the tests:
     export QEMU_CPU=cortex-a53
     ./x test --stage 1 --target aarch64-unknown-ferrocenecoretest library/core
 
-:target-with-triple:`thumbv7em-none-eabihf` & :target-with-triple:`thumbv7em-none-eabi`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:target-with-tuple:`thumbv7em-none-eabihf` & :target-with-tuple:`thumbv7em-none-eabi`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Install the necessary packages:
 

@@ -88,10 +88,6 @@ jobs:
           CIRCLE_JOB: ${{ env.ARTIFACT }}
         with:
           container: ${{ inputs.container }}
-          test-outcomes-dir: /tmp/test-outcomes
-          # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-          # Run dist before test to make sure the tarballs we test are uploaded
-          # to CI beforehand, for manual inspection in case of failures.
           script: |
             ./x.py test --no-doc --coverage=library library/core
 

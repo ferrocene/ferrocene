@@ -17,7 +17,11 @@ set -euo pipefail
 IFS=$'\n\t'
 
 set_env() {
-    echo "$1=$2" >> "${GITHUB_ENV}"
+    set +u
+    if [ ! -z "${GITHUB_ENV}" ]; then
+        echo "$1=$2" >> "${GITHUB_ENV}"
+    fi
+    set -u
     export "$1=$2"
 }
 
@@ -28,7 +32,7 @@ chmod 0400 /tmp/awsjwt
 # Configure AWS CLI to use the JWT we just received.
 set_env AWS_WEB_IDENTITY_TOKEN_FILE "/tmp/awsjwt"
 set_env AWS_ROLE_SESSION_NAME "github-actions"
-set_env AWS_DEFAULT_REGION "eu-central-1"
+set_env AWS_DEFAULT_REGION "${AWS_DEFAULT_REGION:-eu-central-1}"
 set_env AWS_ROLE_ARN "${AWS_ROLE_ARN}"
 
 # Prevent AWS CLI from connecting to the metadata server, which causes problems

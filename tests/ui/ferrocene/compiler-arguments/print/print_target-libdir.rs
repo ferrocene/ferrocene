@@ -6,6 +6,7 @@
 //
 // If this test fails on a new platform, add a new normalization annotation:
 //@ normalize-stdout: "x86_64-unknown-linux-gnu" -> "$$TARGET"
+//@ normalize-stdout: "x86_64-pc-windows-msvc" -> "$$TARGET"
 //@ normalize-stdout: "x86_64-pc-nto-qnx710" -> "$$TARGET"
 //@ normalize-stdout: "aarch64-unknown-linux-gnu" -> "$$TARGET"
 //@ normalize-stdout: "aarch64-unknown-ferrocene.facade" -> "$$TARGET"

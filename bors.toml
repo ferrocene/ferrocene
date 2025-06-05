@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 # Gate PRs on the `full` CircleCI workflow
-status = ["full"]
+status = ["Full / Finish build"]
 
 # Wait until the `commit` GHA workflow passes before queueing a PR
 pr_status = ["Checks"]

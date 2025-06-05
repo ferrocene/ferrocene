@@ -35,7 +35,9 @@ RUN <<-EOF
         moreutils \
         cmake \
         python-is-python3 \
-        pipx
+        pipx \
+        less\
+        jq
 
     # On x86_64, gcc-multilib lets us compile to aarch64
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then

@@ -1,0 +1,82 @@
+name: Container
+run-name: Container (${{inputs.name}})
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        type: string
+        description: The name of the container image
+      architecture:
+        # `choice` is not valid here: https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_dispatchinputs
+        type: string
+        description: The architecture (x86_64 or aarch64)
+      runner:
+        type: string
+        description: The GitHub Runner to run on (Linux only)
+      environment:
+        type: string
+    outputs:
+      run-id:
+        description: The id of the workflow run
+        value: ${{ github.run_id }}
+      uri:
+        description: The URI of the container to run in, if any
+        value: ${{ jobs.container.outputs.uri }}
+
+
+jobs: 
+  container:
+    runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    outputs:
+      uri: ${{ steps.check.outputs.uri }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          llvm-subset: 'true'
+          build-dependencies: 'false'
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{github.ref == 'refs/heads/staging' && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Authenicate docker with Azure
+        shell: bash
+        run: az acr login --name ferrocenecr
+
+      - name: Check cache
+        id: check
+        shell: bash
+        run: |
+          set -e
+
+          uri=$(uv run ./ferrocene/ci/scripts/container.py uri ${{ inputs.architecture }} ${{ inputs.name }})
+          echo "uri=$uri" >> $GITHUB_OUTPUT
+          
+          set +e
+          state="miss"
+          docker manifest inspect ${uri}
+          if [ $? -eq 0 ]; then
+            state="hit"
+          fi
+          set -e
+
+          echo "state=$state" >> $GITHUB_OUTPUT
+
+          echo "Cache $state: Docker (${{ inputs.name }} ${{ inputs.architecture }})"
+          echo "::notice title=Cache $state: Docker (${{ inputs.name }} ${{ inputs.architecture }})::$uri"
+      
+      - id: container
+        if: ${{ steps.check.outputs.state != 'hit' }}
+        run: |
+          uv run ./ferrocene/ci/scripts/container.py ensure-built ${{ inputs.architecture }} ${{ inputs.name }}

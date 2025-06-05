@@ -112,6 +112,7 @@ fi
 add --set target.aarch64-unknown-nto-qnx710.cc=qcc
 add --set target.aarch64-unknown-nto-qnx710.cxx=q++
 add --set target.aarch64-unknown-nto-qnx710.ar=ntoaarch64-ar
+add --set target.aarch64-unknown-nto-qnx710.profiler=false # Build failures were noted if this is enabled.
 add --set target.x86_64-pc-nto-qnx710.cc=qcc
 add --set target.x86_64-pc-nto-qnx710.cxx=q++
 add --set target.x86_64-pc-nto-qnx710.ar=ntox86_64-ar

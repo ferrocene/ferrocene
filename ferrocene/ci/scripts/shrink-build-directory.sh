@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 #
 # This script reduces the size of the build directory, and it's meant to be
-# executed before persisting the build directory into the CircleCI workspace.
+# executed before persisting the build directory into the cache.
 
 set -euo pipefail
 IFS=$'\n\t'

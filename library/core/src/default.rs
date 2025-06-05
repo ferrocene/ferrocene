@@ -2,7 +2,7 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ascii::Char as AsciiChar;
 
 /// A trait for giving a type a useful default value.
@@ -144,12 +144,12 @@ pub trait Default: Sized {
 #[rustc_builtin_macro(Default, attributes(default))]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics)]
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub macro Default($item:item) {
     /* compiler built-in */
 }
 
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! default_impl {
     ($t:ty, $v:expr, $doc:tt) => {
         #[stable(feature = "rust1", since = "1.0.0")]
@@ -163,46 +163,46 @@ macro_rules! default_impl {
     };
 }
 
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { (), (), "Returns the default value of `()`" }
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { bool, false, "Returns the default value of `false`" }
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { char, '\x00', "Returns the default value of `\\x00`" }
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { AsciiChar, AsciiChar::Null, "Returns the default value of `Null`" }
 
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { usize, 0, "Returns the default value of `0`" }
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { u8, 0, "Returns the default value of `0`" }
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { u16, 0, "Returns the default value of `0`" }
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { u32, 0, "Returns the default value of `0`" }
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { u64, 0, "Returns the default value of `0`" }
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { u128, 0, "Returns the default value of `0`" }
 
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { isize, 0, "Returns the default value of `0`" }
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { i8, 0, "Returns the default value of `0`" }
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { i16, 0, "Returns the default value of `0`" }
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { i32, 0, "Returns the default value of `0`" }
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { i64, 0, "Returns the default value of `0`" }
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { i128, 0, "Returns the default value of `0`" }
 
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { f16, 0.0f16, "Returns the default value of `0.0`" }
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { f32, 0.0f32, "Returns the default value of `0.0`" }
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { f64, 0.0f64, "Returns the default value of `0.0`" }
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 default_impl! { f128, 0.0f128, "Returns the default value of `0.0`" }

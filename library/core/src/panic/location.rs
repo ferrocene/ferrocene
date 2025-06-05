@@ -1,4 +1,4 @@
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 
 /// A struct containing information about the location of a panic.
@@ -31,7 +31,7 @@ use crate::fmt;
 // /// See [`Location::file`]'s documentation for more discussion.
 #[lang = "panic_location"]
 #[cfg_attr(
-    feature = "uncertified",
+    not(feature = "ferrocene_certified"),
     derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)
 )]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
@@ -89,7 +89,7 @@ impl<'a> Location<'a> {
     #[rustc_const_stable(feature = "const_caller_location", since = "1.79.0")]
     #[track_caller]
     #[inline]
-    #[cfg(feature = "uncertified")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn caller() -> &'static Location<'static> {
         crate::intrinsics::caller_location()
     }
@@ -191,7 +191,7 @@ impl<'a> Location<'a> {
     reason = "internal details of the implementation of the `panic!` and related macros",
     issue = "none"
 )]
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a> Location<'a> {
     #[doc(hidden)]
     pub const fn internal_constructor(file: &'a str, line: u32, col: u32) -> Self {
@@ -200,7 +200,7 @@ impl<'a> Location<'a> {
 }
 
 #[stable(feature = "panic_hook_display", since = "1.26.0")]
-#[cfg(feature = "uncertified")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Display for Location<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {

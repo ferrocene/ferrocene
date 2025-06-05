@@ -1,0 +1,85 @@
+name: "Run (with or without container)"
+description: "Run in a container, or not."
+inputs:
+  container:
+    description: The container address
+  configure:
+    description: Any additional configuration to pass to the script
+  script:
+    description: The script to run
+  test-device-addr:
+    description: The test device address to use
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run
+      if: ${{ inputs.container == '' }}
+      shell: bash
+      env:
+        TEST_DEVICE_ADDR: ${{ inputs.test-device-addr }}
+        SCRIPT: |
+          ${{ inputs.script }}
+        RUST_CONFIGURE_ARGS: ${{ inputs.configure }}
+      run: |
+        if [ -z "${TEST_DEVICE_ADDR}" ]; then
+          unset TEST_DEVICE_ADDR
+        fi
+        
+        ferrocene/ci/run.sh
+
+    - name: Pull container
+      if: ${{ inputs.container != '' }}
+      shell: bash
+      run: docker pull --quiet ${{ inputs.container }}
+
+    - name: Run in container
+      if: ${{ inputs.container != '' }}
+      # Workaround for https://github.com/actions/runner/issues/241
+      shell: script --return --quiet --log-out /dev/null --command "bash -e {0}"
+      env:
+        TEST_DEVICE_ADDR: ${{ inputs.test-device-addr }}
+        SCRIPT: |
+          ${{ inputs.script }}
+        RUST_CONFIGURE_ARGS: ${{ inputs.configure }}
+      # Due to a GHA limitation, `TEST_DEVICE_ADDR` is always set, but sometimes empty.
+      # Detect if it's empty and unset it.
+      run: |
+        if [ -z "${TEST_DEVICE_ADDR}" ]; then
+          unset TEST_DEVICE_ADDR
+        fi
+
+        docker run \
+          --rm \
+          --init \
+          --interactive \
+          --tty \
+          --privileged \
+          --env RUST_BACKTRACE="full" \
+          --env CI \
+          --env GITHUB_ACTIONS \
+          --env SCRIPT \
+          --env FERROCENE_HOST \
+          --env FERROCENE_TARGETS \
+          --env FERROCENE_UNPRIVILEDGED_CI \
+          --env FERROCENE_TEST_OUTCOMES_DIR \
+          --env FERROCENE_COVERAGE_OUTCOMES_DIR \
+          --env LLVM_BUILD_PARALLELISM \
+          --env TEST_DEVICE_ADDR \
+          --env RUST_CONFIGURE_ARGS \
+          --env ACTIONS_ID_TOKEN_REQUEST_TOKEN \
+          --env ACTIONS_ID_TOKEN_REQUEST_URL \
+          --env AWS_ROLE_ARN \
+          --env AWS_REGION \
+          --env AWS_ACCESS_KEY_ID \
+          --env AWS_SESSION_TOKEN \
+          --env AWS_ROLE_SESSION_NAME \
+          --env AWS_SECRET_ACCESS_KEY \
+          --env AWS_EC2_METADATA_DISABLED \
+          --env QEMU_CPU \
+          --workdir /home/ci/project \
+          --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+          --user $(id -u):$(id -g) \
+          --network host \
+          ${{ inputs.container }} \
+          ferrocene/ci/run.sh

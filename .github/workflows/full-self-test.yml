@@ -1,0 +1,97 @@
+name: Self-Test
+run-name: Self-Test (${{inputs.host-triple}})
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  workflow_call:
+    inputs:
+      host-triple:
+        type: string
+        description: The Rust triple of the host platform
+      triples:
+        type: string
+        description: The target triples to test
+      runner:
+        type: string
+        description: The GitHub Runner to run on
+      use-minio:
+        type: boolean
+        default: false
+        description: If minIO should be used (otherwise, S3 is used)
+      build-run-id:
+        type: string
+        description: The run id of the build workflow
+      build-artifact:
+        type: string
+        description: The artifact from the build workflow
+      container:
+        type: string
+        description: The container URI to run the build in, if any (Linux only)
+      qnx-version:
+        type: string
+        default: ""
+        description: The QNX version (if any) and BuildID (eg '7.1.0-472' for 7.1.0 BuildID 472)
+      environment:
+        type: string
+
+jobs:
+
+  self-test:
+    runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    env:
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      FERROCENE_BUILD_HOST: ${{ inputs.host-triple }}
+      FERROCENE_TARGETS: ${{ inputs.triples }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == false }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        if: ${{ inputs.use-minio == false }}
+        with:
+          version: ${{ inputs.qnx-version }}
+
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        if: ${{ inputs.use-minio == true }}
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+        with:
+          version: ${{ inputs.qnx-version }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == true }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+  
+      - name: Run
+        uses: ./.github/actions/run/
+        with:
+          container: ${{ inputs.container }}
+          script: |
+            export QNX_LICENSE_FILE="qnx${{ inputs.qnx-version }}/license/licenses"
+            source qnx${{ inputs.qnx-version }}/qnxsdp-env.sh
+
+            ferrocene/ci/scripts/run-self-test.sh

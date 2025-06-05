@@ -1,0 +1,119 @@
+name: Doc host
+run-name: Doc
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  workflow_call:
+    inputs:
+      host-triple:
+        type: string
+        description: The Rust triple of the host platform
+      runner:
+        type: string
+        description: The GitHub Runner to run on
+      use-minio:
+        type: boolean
+        default: false
+        description: If minIO should be used (otherwise, S3 is used)
+      build-run-id:
+        type: string
+        description: The run id of the build workflow
+      build-artifact:
+        type: string
+        description: The artifact from the build workflow
+      container:
+        type: string
+        description: The container URI to run the build in, if any (Linux only)
+      environment:
+        type: string
+    outputs:
+      run-id:
+        description: The id of the workflow run
+        value: ${{ github.run_id }}
+      artifact-coverage:
+        description: The name of the coverage job artifact
+        value: ${{ jobs.coverage.outputs.artifact-name }}
+
+jobs:
+
+  coverage:
+    runs-on: ${{ inputs.runner }}
+    env:
+      ARTIFACT: coverage-${{inputs.host-triple}}
+      ARTIFACT_USAGE: usage-coverage-${{inputs.host-triple}}
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+    outputs:
+      artifact-name: ${{ env.ARTIFACT }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == false }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == false }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == true }}
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == true }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+
+      - name: Run
+        uses: ./.github/actions/run/
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.ARTIFACT }}
+        with:
+          container: ${{ inputs.container }}
+          test-outcomes-dir: /tmp/test-outcomes
+          # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+          # Run dist before test to make sure the tarballs we test are uploaded
+          # to CI beforehand, for manual inspection in case of failures.
+          script: |
+            ./x.py test --no-doc --coverage=library library/core
+
+      - name: Upload artifacts to S3
+        env:
+          CIRCLE_SHA1: ${{ github.sha }}
+          CIRCLE_JOB: ${{ env.ARTIFACT }}
+        run:
+          ./ferrocene/ci/scripts/upload-dist-artifacts.sh
+
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        if: ${{ always() }}
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
+          name: ${{ env.ARTIFACT }}

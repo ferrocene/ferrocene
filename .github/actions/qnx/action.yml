@@ -1,0 +1,37 @@
+name: "Download QNX deployment"
+description: "Fetch a QNX deployment"
+inputs:
+  version:
+    description: The QNX version and BuildID (eg '710-472' for 7.1.0 BuildID 472)
+outputs:
+  directory:
+    description: The directory QNX was unpacked to. (eg 'qnx-710-427')
+    value: ${{ steps.directory.outputs.directory }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Calculate QNX filename
+      id: calculate
+      shell: bash
+      env:
+        FILENAME: qnx${{ inputs.version }}-deployment.tar.zst
+      run: |
+        echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+
+    - name: Unpack the QNX deployment
+      shell: bash
+      run: |
+        uv run ferrocene/ci/scripts/cache.py retrieve s3://build-dependencies/qnx/${{ steps.calculate.outputs.filename }} .
+
+    - name: Remove downloaded artifact
+      shell: bash
+      run: |
+        rm -rf ${{ steps.calculate.outputs.filename }}
+    - name: Set output directory
+      id: directory
+      shell: bash
+      env:
+        DIRECTORY: qnx${{ inputs.version }}
+      run: |
+        echo "directory=$DIRECTORY" >> $GITHUB_OUTPUT

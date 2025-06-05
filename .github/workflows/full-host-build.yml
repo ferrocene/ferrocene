@@ -1,0 +1,179 @@
+name: Build host
+run-name: Build (${{inputs.host-triple}})
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  workflow_call:
+    inputs:
+      host-triple:
+        type: string
+        description: The Rust triple of the host platform
+      triples:
+        type: string
+        description: A comma separated list of targets to build
+      rust-runner:
+        type: string
+        description: The GitHub Runner to run the rust build on
+      llvm-runner:
+        type: string
+        description: The GitHub Runner to run the llvm build on
+      use-minio:
+        type: boolean
+        default: false
+        description: If minIO should be used (otherwise, S3 is used)
+      container:
+        type: string
+        description: The container URI to run the build in, if any (Linux only)
+      environment:
+        type: string
+    outputs:
+      run-id:
+        description: The id of the workflow run
+        value: ${{ github.run_id }}
+      cache-llvm-uri:
+        description: The URI of the (pre-cached or new built, then cached) LLVM build
+        value: ${{ jobs.llvm.outputs.uri }}
+      cache-llvm-name:
+        description: The filename of the (pre-cached or new built, then cached) LLVM build
+        value: ${{ jobs.llvm.outputs.name }}
+      artifact-build:
+        description: The name of the build job artifact
+        value: ${{ jobs.build.outputs.artifact-name }}
+
+jobs:
+
+  # A job to build LLVM.
+  llvm:
+    runs-on: ${{ inputs.llvm-runner }}
+    environment: ${{ inputs.environment }}
+    outputs:
+      name: ${{ steps.check.outputs.name }}
+      uri: ${{ steps.check.outputs.uri }}
+    env:
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      # This tries to strike a balance between the highest concurrency possible
+      # and not running out of memory during a build. If building LLVM fails
+      # due to the OOM killer killing the build, decrease this number.
+      LLVM_BUILD_PARALLELISM: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == false }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+
+      - name: Configuire minIO credentials
+        if: ${{ inputs.use-minio == true }}
+        run: |
+          echo "AWS_ENDPOINT_URL=${{ secrets.CACHE_ENDPOINT_URL }}" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.CACHE_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.CACHE_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_CA_BUNDLE=${{ secrets.CACHE_CA_BUNDLE }}" >> $GITHUB_ENV
+
+      - name: Check cache
+        id: check
+        shell: bash
+        run: |
+          set -e
+          hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
+          name="${{ inputs.host-triple }}-$hash.tar.zst"
+          echo "name=$name" >> $GITHUB_OUTPUT
+
+          uri=s3://ferrocene-ci-caches/llvm-cache/$name
+          echo "uri=$uri" >> $GITHUB_OUTPUT
+          
+          set +e
+          state="miss"
+          uv run ferrocene/ci/scripts/llvm_cache.py exists --url $uri
+          if [ $? -eq 0 ]; then
+            state="hit"
+          fi
+          set -e
+
+          echo "state=$state" >> $GITHUB_OUTPUT
+
+          echo "Cache $state: LLVM (${{ inputs.host-triple }})"
+          echo "::notice title=Cache $state: LLVM (${{ inputs.host-triple }})::$uri"
+
+      - name: Run
+        if: ${{ steps.check.outputs.state != 'hit' }}
+        uses: ./.github/actions/run/
+        with:
+          container: ${{ inputs.container }}
+          script: uv run ferrocene/ci/scripts/llvm_cache.py prepare --url ${{ steps.check.outputs.uri }}
+
+        
+  build:
+    runs-on: ${{ inputs.rust-runner }}
+    environment: ${{ inputs.environment }}
+    needs:
+      - llvm
+    env:
+      ARTIFACT: build-${{inputs.host-triple}}
+      ARTIFACT_USAGE: usage-build-${{inputs.host-triple}}
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      FERROCENE_TARGETS: ${{ inputs.triples }}
+    outputs:
+      artifact-name: ${{ env.ARTIFACT }}
+      artifact-usage: ${{ env.ARTIFACT_USAGE }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.use-minio == false }}
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+          role-duration-seconds: 7200
+
+      - name: Configuire minIO credentials
+        if: ${{ inputs.use-minio == true }}
+        run: |
+          echo "AWS_ENDPOINT_URL=${{ secrets.CACHE_ENDPOINT_URL }}" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.CACHE_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.CACHE_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_CA_BUNDLE=${{ secrets.CACHE_CA_BUNDLE }}" >> $GITHUB_ENV
+
+      - name: Get LLVM cache
+        shell: bash
+        run: |
+          uv run ferrocene/ci/scripts/llvm_cache.py download --url s3://ferrocene-ci-caches/llvm-cache/${{ needs.llvm.outputs.name }}
+
+      - name: Run
+        uses: ./.github/actions/run/
+        with:
+          container: ${{ inputs.container }}
+          script: |
+            uv run x.py --stage 2 build library src/tools/rustdoc
+            uv run x.py --stage 1 build src/tools/rustdoc
+
+      - name: Build cache upload
+        shell: bash
+        run: |
+          uv run ./ferrocene/ci/scripts/build_cache.py pre-upload
+          uv run ./ferrocene/ci/scripts/cache.py store "s3://ferrocene-ci-caches/persist-between-jobs/${{ github.run_id }}/${{ env.ARTIFACT }}" ./build
+
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        if: ${{ always() }}
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
+          name: ${{ env.ARTIFACT }}

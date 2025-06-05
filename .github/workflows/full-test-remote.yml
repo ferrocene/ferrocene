@@ -100,27 +100,6 @@ jobs:
           username: ${{ secrets.REGISTRY_USER }}
           password: ${{ secrets.REGISTRY_TOKEN }}
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        if: ${{ inputs.use-minio == false }}
-        with:
-          aws-region: us-east-1
-          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-          role-duration-seconds: 7200
-
-      - name: Restore build cache
-        uses: ./.github/actions/restore-build-cache/
-        if: ${{ inputs.use-minio == false }}
-        with:
-          build-artifact: ${{ inputs.build-artifact }}
-          build-run-id: ${{ inputs.build-run-id }}
-
-      - name: Download QNX
-        uses: ./.github/actions/qnx/
-        if: ${{ inputs.use-minio == false }}
-        with:
-          version: ${{ inputs.qnx-version }}
-
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
         if: ${{ inputs.use-minio == true }}
@@ -146,11 +125,23 @@ jobs:
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
-        if: ${{ inputs.use-minio == true }}
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
           role-duration-seconds: 7200
+  
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == false }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        if: ${{ inputs.use-minio == false }}
+        with:
+          version: ${{ inputs.qnx-version }}
 
       - name: Install brctl
         run: |
@@ -226,27 +217,7 @@ jobs:
           username: ${{ secrets.REGISTRY_USER }}
           password: ${{ secrets.REGISTRY_TOKEN }}
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        if: ${{ inputs.use-minio == false }}
-        with:
-          aws-region: us-east-1
-          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-          role-duration-seconds: 7200
-    
-      - name: Restore build cache
-        uses: ./.github/actions/restore-build-cache/
-        if: ${{ inputs.use-minio == false }}
-        with:
-          build-artifact: ${{ inputs.build-artifact }}
-          build-run-id: ${{ inputs.build-run-id }}
-
-      - name: Download QNX
-        uses: ./.github/actions/qnx/
-        if: ${{ inputs.use-minio == false }}
-        with:
-          version: ${{ inputs.qnx-version }}
-
+      
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
         if: ${{ inputs.use-minio == true }}
@@ -272,11 +243,23 @@ jobs:
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
-        if: ${{ inputs.use-minio == true }}
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
           role-duration-seconds: 7200
+  
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == false }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        if: ${{ inputs.use-minio == false }}
+        with:
+          version: ${{ inputs.qnx-version }}
 
       - name: Install brctl
         run: |
@@ -352,27 +335,6 @@ jobs:
           username: ${{ secrets.REGISTRY_USER }}
           password: ${{ secrets.REGISTRY_TOKEN }}
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        if: ${{ inputs.use-minio == false }}
-        with:
-          aws-region: us-east-1
-          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-          role-duration-seconds: 7200
-
-      - name: Restore build cache
-        uses: ./.github/actions/restore-build-cache/
-        if: ${{ inputs.use-minio == false }}
-        with:
-          build-artifact: ${{ inputs.build-artifact }}
-          build-run-id: ${{ inputs.build-run-id }}
-
-      - name: Download QNX
-        uses: ./.github/actions/qnx/
-        if: ${{ inputs.use-minio == false }}
-        with:
-          version: ${{ inputs.qnx-version }}
-
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
         if: ${{ inputs.use-minio == true }}
@@ -398,11 +360,23 @@ jobs:
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
-        if: ${{ inputs.use-minio == true }}
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
           role-duration-seconds: 7200
+  
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == false }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        if: ${{ inputs.use-minio == false }}
+        with:
+          version: ${{ inputs.qnx-version }}
 
       - name: Install brctl
         run: |
@@ -479,9 +453,31 @@ jobs:
           username: ${{ secrets.REGISTRY_USER }}
           password: ${{ secrets.REGISTRY_TOKEN }}
 
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        if: ${{ inputs.use-minio == true }}
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        if: ${{ inputs.use-minio == true }}
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
+          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
+        with:
+          version: ${{ inputs.qnx-version }}
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
-        if: ${{ inputs.use-minio == false }}
         with:
           aws-region: us-east-1
           role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
@@ -499,37 +495,6 @@ jobs:
         if: ${{ inputs.use-minio == false }}
         with:
           version: ${{ inputs.qnx-version }}
-
-      - name: Restore build cache
-        uses: ./.github/actions/restore-build-cache/
-        if: ${{ inputs.use-minio == true }}
-        env:
-          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
-        with:
-          build-artifact: ${{ inputs.build-artifact }}
-          build-run-id: ${{ inputs.build-run-id }}
-
-      - name: Download QNX
-        uses: ./.github/actions/qnx/
-        if: ${{ inputs.use-minio == true }}
-        env:
-          AWS_ENDPOINT_URL: ${{ secrets.CACHE_ENDPOINT_URL }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_SECRET_ACCESS_KEY }}
-          AWS_CA_BUNDLE: ${{ secrets.CACHE_CA_BUNDLE }}
-        with:
-          version: ${{ inputs.qnx-version }}
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        if: ${{ inputs.use-minio == true }}
-        with:
-          aws-region: us-east-1
-          role-to-assume:  ${{github.ref == 'refs/heads/staging' && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
-          role-duration-seconds: 7200
 
       - name: Install brctl
         run: |

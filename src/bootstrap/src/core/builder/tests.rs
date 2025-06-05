@@ -256,20 +256,6 @@ fn ci_rustc_if_unchanged_invalidate_on_compiler_changes() {
     });
 }
 
-#[test]
-<<<<<<< HEAD
-fn ci_rustc_if_unchanged_invalidate_on_library_changes_in_ci() {
-    git_test(|ctx| {
-        prepare_rustc_checkout(ctx);
-        ctx.create_upstream_merge(&["compiler/bar"]);
-        // This change should invalidate download-ci-rustc
-        ctx.create_nonupstream_merge(&["library/foo"]);
-
-        let config = parse_config_download_rustc_at(ctx.get_path(), "if-unchanged", true);
-        assert_eq!(config.download_rustc_commit, None);
-    });
-}
-
 // this test is similar to the other two `ci_rustc_if_unchanged_` tests below but overrides
 // `merge_bot_email`. it uses the lower level `build_helper::git` API because
 // `parse_config_download_rustc_at` is hard-coded to use the `git_merge_commit_email` value in
@@ -297,8 +283,6 @@ fn ci_rustc_with_square_bracket_in_author_email() {
 }
 
 #[test]
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 fn ci_rustc_if_unchanged_do_not_invalidate_on_library_changes_outside_ci() {
     git_test(|ctx| {
         prepare_rustc_checkout(ctx);

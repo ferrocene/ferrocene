@@ -426,7 +426,11 @@ pub struct Config {
     /// Cache for determining path modifications
     pub path_modification_cache: Arc<Mutex<HashMap<Vec<&'static str>, PathFreshness>>>,
 
-<<<<<<< HEAD
+    /// Skip checking the standard library if `rust.download-rustc` isn't available.
+    /// This is mostly for RA as building the stage1 compiler to check the library tree
+    /// on each code change might be too much for some computers.
+    pub skip_std_check_if_no_download_rustc: bool,
+
     // Ferrocene-specific configuration
     pub ferrocene_raw_channel: String,
     pub ferrocene_aws_profile: Option<String>,
@@ -488,12 +492,6 @@ pub enum FerroceneSecretSauce {
     #[default]
     Download,
     Local(PathBuf),
-=======
-    /// Skip checking the standard library if `rust.download-rustc` isn't available.
-    /// This is mostly for RA as building the stage1 compiler to check the library tree
-    /// on each code change might be too much for some computers.
-    pub skip_std_check_if_no_download_rustc: bool,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]

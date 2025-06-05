@@ -107,12 +107,7 @@ const TEST_ICE_89765: () = {
     };
 };
 
-<<<<<<< HEAD
-fn main() {
-}
+fn main() {}
 
 // ferrocene-annotations: fls_szibmtfv117b
 // Enum Type
-=======
-fn main() {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

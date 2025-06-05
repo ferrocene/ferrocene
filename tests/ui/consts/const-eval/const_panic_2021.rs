@@ -31,14 +31,10 @@ const D_CORE: () = core::unimplemented!();
 //~^ ERROR evaluation panicked
 
 const E_CORE: () = core::panic!("{}", MSG);
-<<<<<<< HEAD
-//~^ ERROR evaluation of constant value failed
+//~^ ERROR evaluation panicked
 
 // ferrocene-annotations: fls_k02nt1m5fq1z
 // Panic
 //
 // ferrocene-annotations: fls_zjoamsr3dbqk
 // Diverging Expressions
-=======
-//~^ ERROR evaluation panicked
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

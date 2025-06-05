@@ -20,8 +20,7 @@ static MY_TOO_BIG_ARRAY_1: TooBigArray = TooBigArray::new();
 static MY_TOO_BIG_ARRAY_2: [u8; HUGE_SIZE] = [0x00; HUGE_SIZE];
 //~^ ERROR too big
 
-<<<<<<< HEAD
-fn main() { }
+fn main() {}
 
 // ferrocene-annotations: fls_uj0kpjwyld60
 // Array Type
@@ -31,6 +30,3 @@ fn main() { }
 //
 // ferrocene-annotations: fls_xdvdl2ssnhlo
 // Statics
-=======
-fn main() {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

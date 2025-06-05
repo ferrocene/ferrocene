@@ -1089,4 +1089,5 @@ complete -c x.py -n "__fish_x.py_using_subcommand sign" -l bypass-bootstrap-lock
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l enable-bolt-settings -d 'Enable BOLT link flags'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
+complete -c x.py -n "__fish_x.py_using_subcommand sign" -l skip-std-check-if-no-download-rustc -d 'Skip checking the standard library if `rust.download-rustc` isn\'t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -s h -l help -d 'Print help (see more with \'--help\')'

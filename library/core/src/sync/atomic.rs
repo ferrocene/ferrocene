@@ -3823,12 +3823,13 @@ unsafe fn atomic_store<T: Copy>(dst: *mut T, val: T, order: Ordering) {
 #[inline]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 unsafe fn atomic_load<T: Copy>(dst: *const T, order: Ordering) -> T {
+    use intrinsics::AtomicOrdering;
     // SAFETY: the caller must uphold the safety contract for `atomic_load`.
     unsafe {
         match order {
-            Relaxed => intrinsics::atomic_load_relaxed(dst),
-            Acquire => intrinsics::atomic_load_acquire(dst),
-            SeqCst => intrinsics::atomic_load_seqcst(dst),
+            Relaxed => intrinsics::atomic_load::<T, { AtomicOrdering::Relaxed }>(dst),
+            Acquire => intrinsics::atomic_load::<T, { AtomicOrdering::Acquire }>(dst),
+            SeqCst => intrinsics::atomic_load::<T, { AtomicOrdering::SeqCst }>(dst),
             Release => panic!("there is no such thing as a release load"),
             AcqRel => panic!("there is no such thing as an acquire-release load"),
         }

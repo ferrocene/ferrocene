@@ -4,6 +4,7 @@ fn main() {}
 const Z: i32 = unsafe { *(&1 as *const i32) };
 
 // bad, will thus error in miri
+<<<<<<< HEAD
 const Z2: i32 = unsafe { *(42 as *const i32) }; //~ ERROR evaluation of constant value failed
 //~| NOTE dangling pointer
 const Z3: i32 = unsafe { *(44 as *const i32) }; //~ ERROR evaluation of constant value failed
@@ -11,3 +12,7 @@ const Z3: i32 = unsafe { *(44 as *const i32) }; //~ ERROR evaluation of constant
 
 // ferrocene-annotations: fls_ppd1xwve3tr7
 // Raw Pointer Type
+=======
+const Z2: i32 = unsafe { *(42 as *const i32) }; //~ ERROR dangling pointer
+const Z3: i32 = unsafe { *(44 as *const i32) }; //~ ERROR dangling pointer
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

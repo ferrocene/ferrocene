@@ -4,33 +4,34 @@
 const MSG: &str = "hello";
 
 const A: () = std::panic!("blåhaj");
-//~^ ERROR evaluation of constant value failed
+//~^ ERROR evaluation panicked
 
 const B: () = std::panic!();
-//~^ ERROR evaluation of constant value failed
+//~^ ERROR evaluation panicked
 
 const C: () = std::unreachable!();
-//~^ ERROR evaluation of constant value failed
+//~^ ERROR evaluation panicked
 
 const D: () = std::unimplemented!();
-//~^ ERROR evaluation of constant value failed
+//~^ ERROR evaluation panicked
 
 const E: () = std::panic!("{}", MSG);
-//~^ ERROR evaluation of constant value failed
+//~^ ERROR evaluation panicked
 
 const A_CORE: () = core::panic!("shark");
-//~^ ERROR evaluation of constant value failed
+//~^ ERROR evaluation panicked
 
 const B_CORE: () = core::panic!();
-//~^ ERROR evaluation of constant value failed
+//~^ ERROR evaluation panicked
 
 const C_CORE: () = core::unreachable!();
-//~^ ERROR evaluation of constant value failed
+//~^ ERROR evaluation panicked
 
 const D_CORE: () = core::unimplemented!();
-//~^ ERROR evaluation of constant value failed
+//~^ ERROR evaluation panicked
 
 const E_CORE: () = core::panic!("{}", MSG);
+<<<<<<< HEAD
 //~^ ERROR evaluation of constant value failed
 
 // ferrocene-annotations: fls_k02nt1m5fq1z
@@ -38,3 +39,6 @@ const E_CORE: () = core::panic!("{}", MSG);
 //
 // ferrocene-annotations: fls_zjoamsr3dbqk
 // Diverging Expressions
+=======
+//~^ ERROR evaluation panicked
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

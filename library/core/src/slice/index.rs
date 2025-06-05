@@ -1,5 +1,6 @@
 //! Indexing implementations for `[T]`.
 
+use crate::intrinsics::slice_get_unchecked;
 use crate::panic::const_panic;
 use crate::ub_checks::assert_unsafe_precondition;
 use crate::{ops, range};
@@ -84,27 +85,14 @@ const fn slice_end_index_overflow_fail() -> ! {
 // which use intrinsics directly to get *no* extra checks.
 
 #[inline(always)]
-const unsafe fn get_noubcheck<T>(ptr: *const [T], index: usize) -> *const T {
-    let ptr = ptr as *const T;
-    // SAFETY: The caller already checked these preconditions
-    unsafe { crate::intrinsics::offset(ptr, index) }
-}
-
-#[inline(always)]
-const unsafe fn get_mut_noubcheck<T>(ptr: *mut [T], index: usize) -> *mut T {
-    let ptr = ptr as *mut T;
-    // SAFETY: The caller already checked these preconditions
-    unsafe { crate::intrinsics::offset(ptr, index) }
-}
-
-#[inline(always)]
 const unsafe fn get_offset_len_noubcheck<T>(
     ptr: *const [T],
     offset: usize,
     len: usize,
 ) -> *const [T] {
+    let ptr = ptr as *const T;
     // SAFETY: The caller already checked these preconditions
-    let ptr = unsafe { get_noubcheck(ptr, offset) };
+    let ptr = unsafe { crate::intrinsics::offset(ptr, offset) };
     crate::intrinsics::aggregate_raw_ptr(ptr, len)
 }
 
@@ -114,8 +102,9 @@ const unsafe fn get_offset_len_mut_noubcheck<T>(
     offset: usize,
     len: usize,
 ) -> *mut [T] {
+    let ptr = ptr as *mut T;
     // SAFETY: The caller already checked these preconditions
-    let ptr = unsafe { get_mut_noubcheck(ptr, offset) };
+    let ptr = unsafe { crate::intrinsics::offset(ptr, offset) };
     crate::intrinsics::aggregate_raw_ptr(ptr, len)
 }
 
@@ -224,15 +213,19 @@ unsafe impl<T> SliceIndex<[T]> for usize {
 
     #[inline]
     fn get(self, slice: &[T]) -> Option<&T> {
-        // SAFETY: `self` is checked to be in bounds.
-        if self < slice.len() { unsafe { Some(&*get_noubcheck(slice, self)) } } else { None }
+        if self < slice.len() {
+            // SAFETY: `self` is checked to be in bounds.
+            unsafe { Some(slice_get_unchecked(slice, self)) }
+        } else {
+            None
+        }
     }
 
     #[inline]
     fn get_mut(self, slice: &mut [T]) -> Option<&mut T> {
         if self < slice.len() {
             // SAFETY: `self` is checked to be in bounds.
-            unsafe { Some(&mut *get_mut_noubcheck(slice, self)) }
+            unsafe { Some(slice_get_unchecked(slice, self)) }
         } else {
             None
         }
@@ -254,7 +247,7 @@ unsafe impl<T> SliceIndex<[T]> for usize {
             // Use intrinsics::assume instead of hint::assert_unchecked so that we don't check the
             // precondition of this function twice.
             crate::intrinsics::assume(self < slice.len());
-            get_noubcheck(slice, self)
+            slice_get_unchecked(slice, self)
         }
     }
 
@@ -267,7 +260,7 @@ unsafe impl<T> SliceIndex<[T]> for usize {
             (this: usize = self, len: usize = slice.len()) => this < len
         );
         // SAFETY: see comments for `get_unchecked` above.
-        unsafe { get_mut_noubcheck(slice, self) }
+        unsafe { slice_get_unchecked(slice, self) }
     }
 
     #[inline]

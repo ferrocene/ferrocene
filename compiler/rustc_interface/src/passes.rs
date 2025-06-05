@@ -60,10 +60,6 @@ pub fn parse<'a>(sess: &'a Session) -> ast::Crate {
             guar.raise_fatal();
         });
 
-    if sess.opts.unstable_opts.input_stats {
-        input_stats::print_ast_stats(&krate, "PRE EXPANSION AST STATS", "ast-stats-1");
-    }
-
     rustc_builtin_macros::cmdline_attrs::inject(
         &mut krate,
         &sess.psess,
@@ -298,7 +294,7 @@ fn early_lint_checks(tcx: TyCtxt<'_>, (): ()) {
     let mut lint_buffer = resolver.lint_buffer.steal();
 
     if sess.opts.unstable_opts.input_stats {
-        input_stats::print_ast_stats(krate, "POST EXPANSION AST STATS", "ast-stats-2");
+        input_stats::print_ast_stats(krate, "POST EXPANSION AST STATS", "ast-stats");
     }
 
     // Needs to go *after* expansion to be able to check the results of macro expansion.
@@ -1012,10 +1008,6 @@ fn run_required_analyses(tcx: TyCtxt<'_>) {
             {
                 tcx.ensure_ok().mir_drops_elaborated_and_const_checked(def_id);
             }
-        });
-    });
-    sess.time("coroutine_obligations", || {
-        tcx.par_hir_body_owners(|def_id| {
             if tcx.is_coroutine(def_id.to_def_id()) {
                 tcx.ensure_ok().mir_coroutine_witnesses(def_id);
                 let _ = tcx.ensure_ok().check_coroutine_obligations(

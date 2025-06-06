@@ -42,3 +42,96 @@ fn inject_coverage_attribute(file_content: &str) -> String {
 fn is_rust_file(file_path: &Path) -> bool {
     file_path.extension().unwrap() == "rs"
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_inject_coverage_attribute() {
+        // Arrange
+        let before = TEST_FILE_BEFORE;
+        let correct = TEST_FILE_CORRECT;
+
+        // Act
+        let after = inject_coverage_attribute(before);
+
+        // Assert
+        assert_eq!(after, correct);
+    }
+
+    #[test]
+    fn test_is_rust_file() {
+        // Arrange
+        for (file, correct) in [
+            ("src/lib.rs", true),
+            ("src/module.rs", true),
+            ("src/module/module2.rs", true),
+            ("README.md", false),
+            ("rs.md", false),
+        ] {
+            // Act
+            let b = is_rust_file(Path::new(file));
+
+            // Assert
+            assert_eq!(b, correct);
+        }
+    }
+
+    const TEST_FILE_BEFORE: &str = r#"
+#[cfg(not(feature = "ferrocene_certified"))]
+fn a{} {}
+
+#[cfg(not(feature = "ferrocene_certified"))]
+fn b() {}
+
+#[cfg(feature = "ferrocene_certified")]
+fn b() {}
+
+#[cfg(not(feature = "ferrocene_certified"))]
+mod c;
+
+#[cfg(not(feature = "ferrocene_certified"))]
+impl D {
+    fn e() {}
+}
+
+impl F {
+    fn g() {}
+
+    #[cfg(not(feature = "ferrocene_certified"))]
+    fn h() {}
+}
+"#;
+
+    const TEST_FILE_CORRECT: &str = r#"
+#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
+fn a{} {}
+
+#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
+fn b() {}
+
+#[cfg(feature = "ferrocene_certified")]
+fn b() {}
+
+#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
+mod c;
+
+#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
+impl D {
+    fn e() {}
+}
+
+impl F {
+    fn g() {}
+
+    #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
+    fn h() {}
+}
+"#;
+}

@@ -257,14 +257,16 @@ jobs:
     resource_class: medium # 2-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      SCRIPT: ./x.py test --no-doc --coverage=library library/core
+      SCRIPT: |
+        ferrocene/ci/scripts/llvm_cache.py download
+        ./x.py test --no-doc --coverage=library library/core
     steps:
       - aws-oidc-auth
       - ferrocene-checkout:
           llvm-subset: true
-      - run:
-          name: Restore files from the x86_64-linux-build job
-          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
+      # - run:
+      #     name: Restore files from the x86_64-linux-build job
+      #     command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
       - ferrocene-ci
 
   x86_64-linux-llvm:

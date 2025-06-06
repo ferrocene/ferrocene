@@ -55,7 +55,7 @@ pub macro panic_2015 {
 #[allow_internal_unstable(panic_internals, const_format_args)]
 #[rustc_diagnostic_item = "core_panic_2021_macro"]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg(all(not(not(feature = "ferrocene_certified")), feature = "panic_immediate_abort"))]
+#[cfg(all(feature = "ferrocene_certified", feature = "panic_immediate_abort"))]
 pub macro panic_2021($($t:tt)*) {{ $crate::panicking::panic("explicit panic") }}
 
 #[doc(hidden)]

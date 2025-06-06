@@ -418,6 +418,9 @@
 // tidy-alphabetical-end
 //
 // Only used in tests/benchmarks:
+// tidy-alphabetical-start
+#![feature(coverage_attribute)] // Ferrocene addition
+// tidy-alphabetical-end
 //
 // Only for const-ness:
 // tidy-alphabetical-start

@@ -1565,10 +1565,10 @@ pub fn is_ctor_or_promotable_const_function(cx: &LateContext<'_>, expr: &Expr<'_
 /// Returns `true` if a pattern is refutable.
 // TODO: should be implemented using rustc/mir_build/thir machinery
 pub fn is_refutable(cx: &LateContext<'_>, pat: &Pat<'_>) -> bool {
-    fn is_enum_variant(cx: &LateContext<'_>, qpath: &QPath<'_>, id: HirId) -> bool {
-        matches!(
+    fn is_qpath_refutable(cx: &LateContext<'_>, qpath: &QPath<'_>, id: HirId) -> bool {
+        !matches!(
             cx.qpath_res(qpath, id),
-            Res::Def(DefKind::Variant, ..) | Res::Def(DefKind::Ctor(def::CtorOf::Variant, _), _)
+            Res::Def(DefKind::Struct, ..) | Res::Def(DefKind::Ctor(def::CtorOf::Struct, _), _)
         )
     }
 
@@ -1585,16 +1585,18 @@ pub fn is_refutable(cx: &LateContext<'_>, pat: &Pat<'_>) -> bool {
             kind: PatExprKind::Path(qpath),
             hir_id,
             ..
-        }) => is_enum_variant(cx, qpath, *hir_id),
+        }) => is_qpath_refutable(cx, qpath, *hir_id),
         PatKind::Or(pats) => {
             // TODO: should be the honest check, that pats is exhaustive set
             are_refutable(cx, pats)
         },
         PatKind::Tuple(pats, _) => are_refutable(cx, pats),
         PatKind::Struct(ref qpath, fields, _) => {
-            is_enum_variant(cx, qpath, pat.hir_id) || are_refutable(cx, fields.iter().map(|field| field.pat))
+            is_qpath_refutable(cx, qpath, pat.hir_id) || are_refutable(cx, fields.iter().map(|field| field.pat))
         },
-        PatKind::TupleStruct(ref qpath, pats, _) => is_enum_variant(cx, qpath, pat.hir_id) || are_refutable(cx, pats),
+        PatKind::TupleStruct(ref qpath, pats, _) => {
+            is_qpath_refutable(cx, qpath, pat.hir_id) || are_refutable(cx, pats)
+        },
         PatKind::Slice(head, middle, tail) => {
             match &cx.typeck_results().node_type(pat.hir_id).kind() {
                 rustc_ty::Slice(..) => {
@@ -2362,7 +2364,7 @@ fn with_test_item_names(tcx: TyCtxt<'_>, module: LocalModDefId, f: impl FnOnce(&
             for id in tcx.hir_module_free_items(module) {
                 if matches!(tcx.def_kind(id.owner_id), DefKind::Const)
                     && let item = tcx.hir_item(id)
-                    && let ItemKind::Const(ident, ty, _generics, _body) = item.kind
+                    && let ItemKind::Const(ident, _generics, ty, _body) = item.kind
                     && let TyKind::Path(QPath::Resolved(_, path)) = ty.kind
                         // We could also check for the type name `test::TestDescAndFn`
                         && let Res::Def(DefKind::Struct, _) = path.res

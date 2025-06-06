@@ -32,7 +32,7 @@ use rustc_data_structures::tagged_ptr::Tag;
 use rustc_macros::{Decodable, Encodable, HashStable_Generic};
 pub use rustc_span::AttrId;
 use rustc_span::source_map::{Spanned, respan};
-use rustc_span::{ErrorGuaranteed, Ident, Span, Symbol, kw, sym};
+use rustc_span::{DUMMY_SP, ErrorGuaranteed, Ident, Span, Symbol, kw, sym};
 use thin_vec::{ThinVec, thin_vec};
 
 pub use crate::format::*;
@@ -99,8 +99,15 @@ pub struct Path {
 
 impl PartialEq<Symbol> for Path {
     #[inline]
-    fn eq(&self, symbol: &Symbol) -> bool {
-        matches!(&self.segments[..], [segment] if segment.ident.name == *symbol)
+    fn eq(&self, name: &Symbol) -> bool {
+        if let [segment] = self.segments.as_ref()
+            && segment.args.is_none()
+            && segment.ident.name == *name
+        {
+            true
+        } else {
+            false
+        }
     }
 }
 
@@ -118,17 +125,6 @@ impl Path {
     /// one-segment path.
     pub fn from_ident(ident: Ident) -> Path {
         Path { segments: thin_vec![PathSegment::from_ident(ident)], span: ident.span, tokens: None }
-    }
-
-    pub fn is_ident(&self, name: Symbol) -> bool {
-        if let [segment] = self.segments.as_ref()
-            && segment.args.is_none()
-            && segment.ident.name == name
-        {
-            true
-        } else {
-            false
-        }
     }
 
     pub fn is_global(&self) -> bool {
@@ -1526,6 +1522,19 @@ impl Expr {
                 | ExprKind::Struct(_)
         )
     }
+
+    /// Creates a dummy `P<Expr>`.
+    ///
+    /// Should only be used when it will be replaced afterwards or as a return value when an error was encountered.
+    pub fn dummy() -> P<Expr> {
+        P(Expr {
+            id: DUMMY_NODE_ID,
+            kind: ExprKind::Dummy,
+            span: DUMMY_SP,
+            attrs: ThinVec::new(),
+            tokens: None,
+        })
+    }
 }
 
 #[derive(Clone, Encodable, Decodable, Debug)]
@@ -2451,6 +2460,39 @@ impl TyKind {
         } else {
             None
         }
+    }
+
+    /// Returns `true` if this type is considered a scalar primitive (e.g.,
+    /// `i32`, `u8`, `bool`, etc).
+    ///
+    /// This check is based on **symbol equality** and does **not** remove any
+    /// path prefixes or references. If a type alias or shadowing is present
+    /// (e.g., `type i32 = CustomType;`), this method will still return `true`
+    /// for `i32`, even though it may not refer to the primitive type.
+    pub fn maybe_scalar(&self) -> bool {
+        let Some(ty_sym) = self.is_simple_path() else {
+            // unit type
+            return self.is_unit();
+        };
+        matches!(
+            ty_sym,
+            sym::i8
+                | sym::i16
+                | sym::i32
+                | sym::i64
+                | sym::i128
+                | sym::u8
+                | sym::u16
+                | sym::u32
+                | sym::u64
+                | sym::u128
+                | sym::f16
+                | sym::f32
+                | sym::f64
+                | sym::f128
+                | sym::char
+                | sym::bool
+        )
     }
 }
 

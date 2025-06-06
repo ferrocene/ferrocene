@@ -85,7 +85,7 @@ pub const fn panic_fmt(fmt: fmt::Arguments<'_>) -> ! {
 #[lang = "panic_fmt"] // needed for const-evaluated panics
 #[rustc_do_not_const_check] // hooked by const-eval
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
-#[cfg(all(not(not(feature = "ferrocene_certified")), feature = "panic_immediate_abort"))]
+#[cfg(all(feature = "ferrocene_certified", feature = "panic_immediate_abort"))]
 const fn panic_fmt(_expr: &'static str) -> ! {
     super::intrinsics::abort()
 }
@@ -144,7 +144,7 @@ pub const fn panic_nounwind_fmt(fmt: fmt::Arguments<'_>, force_no_backtrace: boo
 #[rustc_nounwind]
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
 #[rustc_allow_const_fn_unstable(const_eval_select)]
-#[cfg(all(not(not(feature = "ferrocene_certified")), feature = "panic_immediate_abort"))]
+#[cfg(all(feature = "ferrocene_certified", feature = "panic_immediate_abort"))]
 pub const fn panic_nounwind_fmt(_expr: &'static str, _force_no_backtrace: bool) -> ! {
     const_eval_select!(
         @capture { _expr: &'static str, _force_no_backtrace: bool } -> !:

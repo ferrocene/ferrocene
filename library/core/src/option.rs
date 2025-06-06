@@ -2343,7 +2343,7 @@ unsafe impl<A> TrustedLen for Item<A> {}
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
 pub struct Iter<'a, A: 'a> {
-    #[cfg_attr(not(not(feature = "ferrocene_certified")), allow(dead_code))]
+    #[cfg_attr(feature = "ferrocene_certified", allow(dead_code))]
     inner: Item<&'a A>,
 }
 
@@ -2400,7 +2400,7 @@ impl<A> Clone for Iter<'_, A> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
 pub struct IterMut<'a, A: 'a> {
-    #[cfg_attr(not(not(feature = "ferrocene_certified")), allow(dead_code))]
+    #[cfg_attr(feature = "ferrocene_certified", allow(dead_code))]
     inner: Item<&'a mut A>,
 }
 

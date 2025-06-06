@@ -1,5 +1,6 @@
+#![cfg_attr(bootstrap, feature(cfg_match))]
+#![cfg_attr(not(bootstrap), feature(cfg_select))]
 #![feature(rustc_private)]
-#![feature(cfg_select)]
 #![feature(float_gamma)]
 #![feature(float_erf)]
 #![feature(map_try_insert)]
@@ -11,6 +12,7 @@
 #![feature(nonzero_ops)]
 #![feature(strict_overflow_ops)]
 #![feature(pointer_is_aligned_to)]
+#![feature(ptr_metadata)]
 #![feature(unqualified_local_imports)]
 #![feature(derive_coerce_pointee)]
 #![feature(arbitrary_self_types)]
@@ -69,8 +71,8 @@ extern crate rustc_target;
 #[allow(unused_extern_crates)]
 extern crate rustc_driver;
 
+mod alloc;
 mod alloc_addresses;
-mod alloc_bytes;
 mod borrow_tracker;
 mod clock;
 mod concurrency;
@@ -105,8 +107,8 @@ pub type OpTy<'tcx> = interpret::OpTy<'tcx, machine::Provenance>;
 pub type PlaceTy<'tcx> = interpret::PlaceTy<'tcx, machine::Provenance>;
 pub type MPlaceTy<'tcx> = interpret::MPlaceTy<'tcx, machine::Provenance>;
 
+pub use crate::alloc::MiriAllocBytes;
 pub use crate::alloc_addresses::{EvalContextExt as _, ProvenanceMode};
-pub use crate::alloc_bytes::MiriAllocBytes;
 pub use crate::borrow_tracker::stacked_borrows::{
     EvalContextExt as _, Item, Permission, Stack, Stacks,
 };

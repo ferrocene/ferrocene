@@ -3,10 +3,11 @@ use rustc_ast::ptr::P;
 use rustc_ast::visit::AssocCtxt;
 use rustc_ast::*;
 use rustc_errors::ErrorGuaranteed;
-use rustc_hir::def::{DefKind, Res};
+use rustc_hir::def::{DefKind, PerNS, Res};
 use rustc_hir::def_id::{CRATE_DEF_ID, LocalDefId};
 use rustc_hir::{self as hir, HirId, LifetimeSource, PredicateOrigin};
 use rustc_index::{IndexSlice, IndexVec};
+use rustc_middle::span_bug;
 use rustc_middle::ty::{ResolverAstLowering, TyCtxt};
 use rustc_span::edit_distance::find_best_match_for_name;
 use rustc_span::{DUMMY_SP, DesugaringKind, Ident, Span, Symbol, kw, sym};
@@ -180,7 +181,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 let (ty, body_id) =
                     self.lower_const_item(t, span, e.as_deref(), ImplTraitPosition::StaticTy);
                 self.lower_define_opaque(hir_id, define_opaque);
-                hir::ItemKind::Static(ident, ty, *m, body_id)
+                hir::ItemKind::Static(*m, ident, ty, body_id)
             }
             ItemKind::Const(box ast::ConstItem {
                 ident,
@@ -200,7 +201,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     },
                 );
                 self.lower_define_opaque(hir_id, &define_opaque);
-                hir::ItemKind::Const(ident, ty, generics, body_id)
+                hir::ItemKind::Const(ident, generics, ty, body_id)
             }
             ItemKind::Fn(box Fn {
                 sig: FnSig { decl, header, span: fn_sig_span },
@@ -304,7 +305,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                         ),
                     },
                 );
-                hir::ItemKind::TyAlias(ident, ty, generics)
+                hir::ItemKind::TyAlias(ident, generics, ty)
             }
             ItemKind::Enum(ident, generics, enum_definition) => {
                 let ident = self.lower_ident(*ident);
@@ -318,7 +319,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                         )
                     },
                 );
-                hir::ItemKind::Enum(ident, hir::EnumDef { variants }, generics)
+                hir::ItemKind::Enum(ident, generics, hir::EnumDef { variants })
             }
             ItemKind::Struct(ident, generics, struct_def) => {
                 let ident = self.lower_ident(*ident);
@@ -328,7 +329,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     ImplTraitContext::Disallowed(ImplTraitPosition::Generic),
                     |this| this.lower_variant_data(hir_id, struct_def),
                 );
-                hir::ItemKind::Struct(ident, struct_def, generics)
+                hir::ItemKind::Struct(ident, generics, struct_def)
             }
             ItemKind::Union(ident, generics, vdata) => {
                 let ident = self.lower_ident(*ident);
@@ -338,7 +339,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     ImplTraitContext::Disallowed(ImplTraitPosition::Generic),
                     |this| this.lower_variant_data(hir_id, vdata),
                 );
-                hir::ItemKind::Union(ident, vdata, generics)
+                hir::ItemKind::Union(ident, generics, vdata)
             }
             ItemKind::Impl(box Impl {
                 safety,
@@ -467,8 +468,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
             ItemKind::Delegation(box delegation) => {
                 let delegation_results = self.lower_delegation(delegation, id, false);
                 hir::ItemKind::Fn {
-                    ident: delegation_results.ident,
                     sig: delegation_results.sig,
+                    ident: delegation_results.ident,
                     generics: delegation_results.generics,
                     body: delegation_results.body_id,
                     has_body: true,
@@ -527,7 +528,22 @@ impl<'hir> LoweringContext<'_, 'hir> {
             }
             UseTreeKind::Glob => {
                 let res = self.expect_full_res(id);
-                let res = smallvec![self.lower_res(res)];
+                let res = self.lower_res(res);
+                // Put the result in the appropriate namespace.
+                let res = match res {
+                    Res::Def(DefKind::Mod | DefKind::Trait, _) => {
+                        PerNS { type_ns: Some(res), value_ns: None, macro_ns: None }
+                    }
+                    Res::Def(DefKind::Enum, _) => {
+                        PerNS { type_ns: None, value_ns: Some(res), macro_ns: None }
+                    }
+                    Res::Err => {
+                        // Propagate the error to all namespaces, just to be sure.
+                        let err = Some(Res::Err);
+                        PerNS { type_ns: err, value_ns: err, macro_ns: err }
+                    }
+                    _ => span_bug!(path.span, "bad glob res {:?}", res),
+                };
                 let path = Path { segments, span: path.span, tokens: None };
                 let path = self.lower_use_path(res, &path, ParamMode::Explicit);
                 hir::ItemKind::Use(path, hir::UseKind::Glob)
@@ -601,7 +617,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 } else {
                     // For non-empty lists we can just drop all the data, the prefix is already
                     // present in HIR as a part of nested imports.
-                    self.arena.alloc(hir::UsePath { res: smallvec![], segments: &[], span })
+                    self.arena.alloc(hir::UsePath { res: PerNS::default(), segments: &[], span })
                 };
                 hir::ItemKind::Use(path, hir::UseKind::ListStem)
             }

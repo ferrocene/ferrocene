@@ -2,7 +2,7 @@
 //@[next] compile-flags: -Znext-solver
 
 struct Foo<const N: u8 = { 255 + 1 }>;
-//~^ ERROR evaluation of constant value failed
+//~^ ERROR overflow
 fn main() {}
 
 // ferrocene-annotations: fls_66m4rnbssgig

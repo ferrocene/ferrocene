@@ -1,7 +1,7 @@
 use rustc_abi::WrappingRange;
+use rustc_middle::bug;
 use rustc_middle::mir::SourceInfo;
 use rustc_middle::ty::{self, Ty, TyCtxt};
-use rustc_middle::{bug, span_bug};
 use rustc_session::config::OptLevel;
 use rustc_span::sym;
 
@@ -60,18 +60,10 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
         source_info: SourceInfo,
     ) -> Result<(), ty::Instance<'tcx>> {
         let span = source_info.span;
-        let callee_ty = instance.ty(bx.tcx(), bx.typing_env());
 
-        let ty::FnDef(def_id, fn_args) = *callee_ty.kind() else {
-            span_bug!(span, "expected fn item type, found {}", callee_ty);
-        };
-
-        let sig = callee_ty.fn_sig(bx.tcx());
-        let sig = bx.tcx().normalize_erasing_late_bound_regions(bx.typing_env(), sig);
-        let arg_tys = sig.inputs();
-        let ret_ty = sig.output();
-        let name = bx.tcx().item_name(def_id);
+        let name = bx.tcx().item_name(instance.def_id());
         let name_str = name.as_str();
+        let fn_args = instance.args;
 
         // If we're swapping something that's *not* an `OperandValue::Ref`,
         // then we can do it directly and avoid the alloca.
@@ -97,7 +89,15 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             }
         }
 
-        let llret_ty = bx.backend_type(bx.layout_of(ret_ty));
+        let ret_llval = |bx: &mut Bx, llval| {
+            if result.layout.ty.is_bool() {
+                let val = bx.from_immediate(llval);
+                bx.store_to_place(val, result.val);
+            } else if !result.layout.ty.is_unit() {
+                bx.store_to_place(llval, result.val);
+            }
+            Ok(())
+        };
 
         let llval = match name {
             sym::abort => {
@@ -132,7 +132,11 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                     sym::vtable_align => ty::COMMON_VTABLE_ENTRIES_ALIGN,
                     _ => bug!(),
                 };
-                let value = meth::VirtualIndex::from_index(idx).get_usize(bx, vtable, callee_ty);
+                let value = meth::VirtualIndex::from_index(idx).get_usize(
+                    bx,
+                    vtable,
+                    instance.ty(bx.tcx(), bx.typing_env()),
+                );
                 match name {
                     // Size is always <= isize::MAX.
                     sym::vtable_size => {
@@ -153,7 +157,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             | sym::type_name
             | sym::variant_count => {
                 let value = bx.tcx().const_eval_instance(bx.typing_env(), instance, span).unwrap();
-                OperandRef::from_const(bx, value, ret_ty).immediate_or_packed_pair(bx)
+                OperandRef::from_const(bx, value, result.layout.ty).immediate_or_packed_pair(bx)
             }
             sym::arith_offset => {
                 let ty = fn_args.type_at(0);
@@ -237,7 +241,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                 bx.or_disjoint(a, b)
             }
             sym::exact_div => {
-                let ty = arg_tys[0];
+                let ty = args[0].layout.ty;
                 match int_type_width_signed(ty, bx.tcx()) {
                     Some((_width, signed)) => {
                         if signed {
@@ -257,7 +261,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                 }
             }
             sym::fadd_fast | sym::fsub_fast | sym::fmul_fast | sym::fdiv_fast | sym::frem_fast => {
-                match float_type_width(arg_tys[0]) {
+                match float_type_width(args[0].layout.ty) {
                     Some(_width) => match name {
                         sym::fadd_fast => bx.fadd_fast(args[0].immediate(), args[1].immediate()),
                         sym::fsub_fast => bx.fsub_fast(args[0].immediate(), args[1].immediate()),
@@ -270,7 +274,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                         bx.tcx().dcx().emit_err(InvalidMonomorphization::BasicFloatType {
                             span,
                             name,
-                            ty: arg_tys[0],
+                            ty: args[0].layout.ty,
                         });
                         return Ok(());
                     }
@@ -280,7 +284,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             | sym::fsub_algebraic
             | sym::fmul_algebraic
             | sym::fdiv_algebraic
-            | sym::frem_algebraic => match float_type_width(arg_tys[0]) {
+            | sym::frem_algebraic => match float_type_width(args[0].layout.ty) {
                 Some(_width) => match name {
                     sym::fadd_algebraic => {
                         bx.fadd_algebraic(args[0].immediate(), args[1].immediate())
@@ -303,39 +307,79 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                     bx.tcx().dcx().emit_err(InvalidMonomorphization::BasicFloatType {
                         span,
                         name,
-                        ty: arg_tys[0],
+                        ty: args[0].layout.ty,
                     });
                     return Ok(());
                 }
             },
 
             sym::float_to_int_unchecked => {
-                if float_type_width(arg_tys[0]).is_none() {
+                if float_type_width(args[0].layout.ty).is_none() {
                     bx.tcx().dcx().emit_err(InvalidMonomorphization::FloatToIntUnchecked {
                         span,
-                        ty: arg_tys[0],
+                        ty: args[0].layout.ty,
                     });
                     return Ok(());
                 }
-                let Some((_width, signed)) = int_type_width_signed(ret_ty, bx.tcx()) else {
+                let Some((_width, signed)) = int_type_width_signed(result.layout.ty, bx.tcx())
+                else {
                     bx.tcx().dcx().emit_err(InvalidMonomorphization::FloatToIntUnchecked {
                         span,
-                        ty: ret_ty,
+                        ty: result.layout.ty,
                     });
                     return Ok(());
                 };
                 if signed {
-                    bx.fptosi(args[0].immediate(), llret_ty)
+                    bx.fptosi(args[0].immediate(), bx.backend_type(result.layout))
                 } else {
-                    bx.fptoui(args[0].immediate(), llret_ty)
+                    bx.fptoui(args[0].immediate(), bx.backend_type(result.layout))
                 }
             }
 
             // This requires that atomic intrinsics follow a specific naming pattern:
             // "atomic_<operation>[_<ordering>]"
             name if let Some(atomic) = name_str.strip_prefix("atomic_") => {
-                use crate::common::AtomicOrdering::*;
+                use rustc_middle::ty::AtomicOrdering::*;
+
                 use crate::common::{AtomicRmwBinOp, SynchronizationScope};
+
+                let invalid_monomorphization = |ty| {
+                    bx.tcx().dcx().emit_err(InvalidMonomorphization::BasicIntegerType {
+                        span,
+                        name,
+                        ty,
+                    });
+                };
+
+                let parse_const_generic_ordering = |ord: ty::Value<'tcx>| {
+                    let discr = ord.valtree.unwrap_branch()[0].unwrap_leaf();
+                    discr.to_atomic_ordering()
+                };
+
+                // Some intrinsics have the ordering already converted to a const generic parameter, we handle those first.
+                match name {
+                    sym::atomic_load => {
+                        let ty = fn_args.type_at(0);
+                        let ordering = fn_args.const_at(1).to_value();
+                        if !(int_type_width_signed(ty, bx.tcx()).is_some() || ty.is_raw_ptr()) {
+                            invalid_monomorphization(ty);
+                            return Ok(());
+                        }
+                        let layout = bx.layout_of(ty);
+                        let source = args[0].immediate();
+                        let llval = bx.atomic_load(
+                            bx.backend_type(layout),
+                            source,
+                            parse_const_generic_ordering(ordering),
+                            layout.size,
+                        );
+
+                        return ret_llval(bx, llval);
+                    }
+
+                    // The rest falls back to below.
+                    _ => {}
+                }
 
                 let Some((instruction, ordering)) = atomic.split_once('_') else {
                     bx.sess().dcx().emit_fatal(errors::MissingMemoryOrdering);
@@ -345,17 +389,9 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                     "relaxed" => Relaxed,
                     "acquire" => Acquire,
                     "release" => Release,
-                    "acqrel" => AcquireRelease,
-                    "seqcst" => SequentiallyConsistent,
+                    "acqrel" => AcqRel,
+                    "seqcst" => SeqCst,
                     _ => bx.sess().dcx().emit_fatal(errors::UnknownAtomicOrdering),
-                };
-
-                let invalid_monomorphization = |ty| {
-                    bx.tcx().dcx().emit_err(InvalidMonomorphization::BasicIntegerType {
-                        span,
-                        name,
-                        ty,
-                    });
                 };
 
                 match instruction {
@@ -388,24 +424,6 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                             invalid_monomorphization(ty);
                         }
                         return Ok(());
-                    }
-
-                    "load" => {
-                        let ty = fn_args.type_at(0);
-                        if int_type_width_signed(ty, bx.tcx()).is_some() || ty.is_raw_ptr() {
-                            let layout = bx.layout_of(ty);
-                            let size = layout.size;
-                            let source = args[0].immediate();
-                            bx.atomic_load(
-                                bx.backend_type(layout),
-                                source,
-                                parse_ordering(bx, ordering),
-                                size,
-                            )
-                        } else {
-                            invalid_monomorphization(ty);
-                            return Ok(());
-                        }
                     }
 
                     "store" => {
@@ -538,14 +556,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             }
         };
 
-        if result.layout.ty.is_bool() {
-            OperandRef::from_immediate_or_packed_pair(bx, llval, result.layout)
-                .val
-                .store(bx, result);
-        } else if !result.layout.ty.is_unit() {
-            bx.store_to_place(llval, result.val);
-        }
-        Ok(())
+        ret_llval(bx, llval)
     }
 }
 

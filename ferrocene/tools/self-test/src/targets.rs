@@ -34,6 +34,11 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { triple: "thumbv6m-none-eabi", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "thumbv7em-none-eabi", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "thumbv7em-none-eabihf", std: false, linker: Linker::BundledLld },
+    TargetSpec {
+        triple: "thumbv7em-ferrocenecoretest-eabihf",
+        std: true,
+        linker: Linker::BundledLld,
+    },
     TargetSpec { triple: "thumbv8m.base-none-eabi", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "thumbv8m.main-none-eabi", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "thumbv8m.main-none-eabihf", std: false, linker: Linker::BundledLld },

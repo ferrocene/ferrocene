@@ -54,6 +54,7 @@ GENERIC_BUILD_STD_TARGETS = [
     "thumbv6m-none-eabi",
     "thumbv7em-none-eabi",
     "thumbv7em-none-eabihf",
+    "thumbv7em-ferrocenecoretest-eabihf",
     "armv8r-none-eabihf",
     "thumbv8m.base-none-eabi",
     "thumbv8m.main-none-eabi",

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+pub(crate) mod coverage_of_subset;
+
 use std::path::PathBuf;
 
 use crate::Compiler;

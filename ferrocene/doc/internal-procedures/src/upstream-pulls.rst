@@ -106,7 +106,7 @@ Unknown conflicts and new errors
 
 When an error previously unknown appears, such as a library not being found,
 try to isolate the faulty process that triggered it with `ferrocene/ci/split-tasks.py`.
-The list of possible jobs can be found in `.circleci/workflow.yml`.
+The list of possible jobs can be found in `.github/workflows`.
 
 Then check upstream for related fixes. If the failure was solved later, close the current PR
 and pull a new one, including the fix.

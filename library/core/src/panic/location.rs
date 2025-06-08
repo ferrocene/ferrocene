@@ -1,4 +1,5 @@
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::fmt;
 
 /// A struct containing information about the location of a panic.
@@ -90,6 +91,7 @@ impl<'a> Location<'a> {
     #[track_caller]
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn caller() -> &'static Location<'static> {
         crate::intrinsics::caller_location()
     }
@@ -192,6 +194,7 @@ impl<'a> Location<'a> {
     issue = "none"
 )]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<'a> Location<'a> {
     #[doc(hidden)]
     pub const fn internal_constructor(file: &'a str, line: u32, col: u32) -> Self {
@@ -201,6 +204,7 @@ impl<'a> Location<'a> {
 
 #[stable(feature = "panic_hook_display", since = "1.26.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl fmt::Display for Location<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {

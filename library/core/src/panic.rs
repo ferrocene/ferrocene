@@ -4,22 +4,28 @@
 
 mod location;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 mod panic_info;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 mod unwind_safe;
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
 pub use self::location::Location;
 #[stable(feature = "panic_hooks", since = "1.10.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub use self::panic_info::PanicInfo;
 #[stable(feature = "panic_info_message", since = "1.81.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub use self::panic_info::PanicMessage;
 #[stable(feature = "catch_unwind", since = "1.9.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub use self::unwind_safe::{AssertUnwindSafe, RefUnwindSafe, UnwindSafe};
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::any::Any;
 
 #[doc(hidden)]
@@ -28,6 +34,7 @@ use crate::any::Any;
 #[rustc_diagnostic_item = "core_panic_2015_macro"]
 #[rustc_macro_transparency = "semitransparent"]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub macro panic_2015 {
     () => (
         $crate::panicking::panic("explicit panic")
@@ -93,6 +100,7 @@ pub macro panic_2021 {
 #[rustc_macro_transparency = "semitransparent"]
 #[cfg(not(feature = "panic_immediate_abort"))]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 #[allow_internal_unstable(coverage_attribute)] // Ferrocene addition
 pub macro panic_2021 {
     () => ({
@@ -132,6 +140,7 @@ pub macro panic_2021 {
 #[rustc_diagnostic_item = "unreachable_2015_macro"]
 #[rustc_macro_transparency = "semitransparent"]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub macro unreachable_2015 {
     () => (
         $crate::panicking::panic("internal error: entered unreachable code")
@@ -151,6 +160,7 @@ pub macro unreachable_2015 {
 #[allow_internal_unstable(panic_internals)]
 #[rustc_macro_transparency = "semitransparent"]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub macro unreachable_2021 {
     () => (
         $crate::panicking::panic("internal error: entered unreachable code")
@@ -182,6 +192,7 @@ pub macro unreachable_2021 {
 #[unstable(feature = "abort_unwind", issue = "130338")]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub fn abort_unwind<F: FnOnce() -> R, R>(f: F) -> R {
     f()
 }
@@ -192,6 +203,7 @@ pub fn abort_unwind<F: FnOnce() -> R, R>(f: F) -> R {
 #[unstable(feature = "std_internals", issue = "none")]
 #[doc(hidden)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe trait PanicPayload: crate::fmt::Display {
     /// Take full ownership of the contents.
     /// The return type is actually `Box<dyn Any + Send>`, but we cannot use `Box` in core.
@@ -223,6 +235,7 @@ pub unsafe trait PanicPayload: crate::fmt::Display {
 #[unstable(feature = "panic_internals", issue = "none")]
 #[doc(hidden)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub macro const_panic {
     ($const_msg:literal, $runtime_msg:literal, $($arg:ident : $ty:ty = $val:expr),* $(,)?) => {{
         // Wrap call to `const_eval_select` in a function so that we can
@@ -263,6 +276,7 @@ pub macro const_panic {
 #[unstable(feature = "panic_internals", issue = "none")]
 #[doc(hidden)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub macro const_assert {
     ($condition: expr, $const_msg:literal, $runtime_msg:literal, $($arg:tt)*) => {{
         if !$crate::intrinsics::likely($condition) {

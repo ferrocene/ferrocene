@@ -7,23 +7,30 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 mod variance;
 
 #[unstable(feature = "phantom_variance_markers", issue = "135806")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub use self::variance::{
     PhantomContravariant, PhantomContravariantLifetime, PhantomCovariant, PhantomCovariantLifetime,
     PhantomInvariant, PhantomInvariantLifetime, Variance, variance,
 };
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::cell::UnsafeCell;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::cmp;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::fmt::Debug;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::hash::{Hash, Hasher};
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::pin::UnsafePinned;
 
 /// Implements a given marker trait for multiple types at the same time.
@@ -222,11 +229,13 @@ pub trait Unsize<T: ?Sized> {
 #[diagnostic::on_unimplemented(message = "the type `{Self}` does not `#[derive(PartialEq)]`")]
 #[lang = "structural_peq"]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub trait StructuralPartialEq {
     // Empty.
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 marker_impls! {
     #[unstable(feature = "structural_match", issue = "31434")]
     StructuralPartialEq for
@@ -445,6 +454,7 @@ pub macro Copy($item:item) {
 // are implemented in `traits::SelectionContext::copy_clone_conditions()`
 // in `rustc_trait_selection`.
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 marker_impls! {
     #[stable(feature = "rust1", since = "1.0.0")]
     Copy for
@@ -465,6 +475,7 @@ marker_impls! {
 
 #[unstable(feature = "never_type", issue = "35121")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl Copy for ! {}
 
 /// Shared references can be copied, but mutable references *cannot*!
@@ -491,6 +502,7 @@ impl<T: ?Sized> Copy for &T {}
 #[rustc_do_not_implement_via_object]
 #[doc(hidden)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub trait BikeshedGuaranteedNoDrop {}
 
 /// Types for which it is safe to share references between threads.
@@ -655,9 +667,11 @@ pub unsafe auto trait Sync {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: ?Sized> !Sync for *const T {}
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: ?Sized> !Sync for *mut T {}
 
 /// Zero-sized type used to mark things that "act like" they own a `T`.
@@ -799,6 +813,7 @@ pub struct PhantomData<T: ?Sized>;
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: ?Sized> Hash for PhantomData<T> {
     #[inline]
     fn hash<H: Hasher>(&self, _: &mut H) {}
@@ -806,6 +821,7 @@ impl<T: ?Sized> Hash for PhantomData<T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: ?Sized> cmp::PartialEq for PhantomData<T> {
     fn eq(&self, _other: &PhantomData<T>) -> bool {
         true
@@ -814,10 +830,12 @@ impl<T: ?Sized> cmp::PartialEq for PhantomData<T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: ?Sized> cmp::Eq for PhantomData<T> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: ?Sized> cmp::PartialOrd for PhantomData<T> {
     fn partial_cmp(&self, _other: &PhantomData<T>) -> Option<cmp::Ordering> {
         Option::Some(cmp::Ordering::Equal)
@@ -826,6 +844,7 @@ impl<T: ?Sized> cmp::PartialOrd for PhantomData<T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: ?Sized> cmp::Ord for PhantomData<T> {
     fn cmp(&self, _other: &PhantomData<T>) -> cmp::Ordering {
         cmp::Ordering::Equal
@@ -834,10 +853,12 @@ impl<T: ?Sized> cmp::Ord for PhantomData<T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: ?Sized> Copy for PhantomData<T> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: ?Sized> Clone for PhantomData<T> {
     fn clone(&self) -> Self {
         Self
@@ -846,6 +867,7 @@ impl<T: ?Sized> Clone for PhantomData<T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: ?Sized> Default for PhantomData<T> {
     fn default() -> Self {
         Self
@@ -854,6 +876,7 @@ impl<T: ?Sized> Default for PhantomData<T> {
 
 #[unstable(feature = "structural_match", issue = "31434")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: ?Sized> StructuralPartialEq for PhantomData<T> {}
 
 /// Compiler-internal trait used to indicate the type of enum discriminants.
@@ -876,6 +899,7 @@ pub trait DiscriminantKind {
     /// bounds required by `mem::Discriminant`.
     #[lang = "discriminant_type"]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
     type Discriminant: Clone + Copy + Debug + Eq + PartialEq + Hash + Send + Sync + Unpin;
     #[lang = "discriminant_type"]
     #[cfg(not(not(feature = "ferrocene_certified")))]
@@ -903,8 +927,10 @@ pub unsafe auto trait Freeze {}
 
 #[unstable(feature = "freeze", issue = "121675")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: ?Sized> !Freeze for UnsafeCell<T> {}
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 marker_impls! {
     #[unstable(feature = "freeze", issue = "121675")]
     unsafe Freeze for
@@ -924,19 +950,26 @@ marker_impls! {
 #[cfg_attr(not(bootstrap), lang = "unsafe_unpin")]
 #[cfg_attr(bootstrap, allow(dead_code))]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub(crate) unsafe auto trait UnsafeUnpin {}
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: ?Sized> !UnsafeUnpin for UnsafePinned<T> {}
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 unsafe impl<T: ?Sized> UnsafeUnpin for PhantomData<T> {}
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 unsafe impl<T: ?Sized> UnsafeUnpin for *const T {}
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 unsafe impl<T: ?Sized> UnsafeUnpin for *mut T {}
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 unsafe impl<T: ?Sized> UnsafeUnpin for &T {}
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 unsafe impl<T: ?Sized> UnsafeUnpin for &mut T {}
 
 /// Types that do not require any pinning guarantees.
@@ -1010,6 +1043,7 @@ unsafe impl<T: ?Sized> UnsafeUnpin for &mut T {}
 )]
 #[lang = "unpin"]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub auto trait Unpin {}
 
 /// A marker type which does not implement `Unpin`.
@@ -1023,13 +1057,16 @@ pub auto trait Unpin {}
 #[stable(feature = "pin", since = "1.33.0")]
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub struct PhantomPinned;
 
 #[stable(feature = "pin", since = "1.33.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl !Unpin for PhantomPinned {}
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 // This is a small hack to allow existing code which uses PhantomPinned to opt-out of noalias to
 // continue working. Ideally PhantomPinned could just wrap an `UnsafePinned<()>` to get the same
 // effect, but we can't add a new field to an already stable unit struct -- that would be a breaking
@@ -1037,6 +1074,7 @@ impl !Unpin for PhantomPinned {}
 impl !UnsafeUnpin for PhantomPinned {}
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 marker_impls! {
     #[stable(feature = "pin", since = "1.33.0")]
     Unpin for
@@ -1045,6 +1083,7 @@ marker_impls! {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 marker_impls! {
     #[stable(feature = "pin_raw", since = "1.38.0")]
     Unpin for
@@ -1094,9 +1133,11 @@ pub trait Tuple {}
 )]
 #[rustc_do_not_implement_via_object]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub trait PointerLike {}
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 marker_impls! {
     #[unstable(feature = "pointer_like_trait", issue = "none")]
     PointerLike for
@@ -1123,6 +1164,7 @@ marker_impls! {
 // be used independently of `unsized_const_params` without requiring a full path
 // to the derive macro every time it is used. This should be renamed on stabilization.
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub trait ConstParamTy_: UnsizedConstParamTy + StructuralPartialEq + Eq {}
 
 /// Derive macro generating an impl of the trait `ConstParamTy`.
@@ -1130,6 +1172,7 @@ pub trait ConstParamTy_: UnsizedConstParamTy + StructuralPartialEq + Eq {}
 #[allow_internal_unstable(unsized_const_params)]
 #[unstable(feature = "adt_const_params", issue = "95174")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub macro ConstParamTy($item:item) {
     /* compiler built-in */
 }
@@ -1138,6 +1181,7 @@ pub macro ConstParamTy($item:item) {
 #[unstable(feature = "unsized_const_params", issue = "95174")]
 #[diagnostic::on_unimplemented(message = "`{Self}` can't be used as a const parameter type")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 /// A marker for types which can be used as types of `const` generic parameters.
 ///
 /// Equivalent to [`ConstParamTy_`] except that this is used by
@@ -1149,12 +1193,14 @@ pub trait UnsizedConstParamTy: StructuralPartialEq + Eq {}
 #[allow_internal_unstable(unsized_const_params)]
 #[unstable(feature = "unsized_const_params", issue = "95174")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub macro UnsizedConstParamTy($item:item) {
     /* compiler built-in */
 }
 
 // FIXME(adt_const_params): handle `ty::FnDef`/`ty::Closure`
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 marker_impls! {
     #[unstable(feature = "adt_const_params", issue = "95174")]
     ConstParamTy_ for
@@ -1167,6 +1213,7 @@ marker_impls! {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 marker_impls! {
     #[unstable(feature = "unsized_const_params", issue = "95174")]
     UnsizedConstParamTy for
@@ -1195,6 +1242,7 @@ marker_impls! {
 #[rustc_deny_explicit_impl]
 #[rustc_do_not_implement_via_object]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub trait FnPtr: Copy + Clone {
     /// Returns the address of the function pointer.
     #[lang = "fn_ptr_addr"]
@@ -1395,6 +1443,7 @@ pub trait FnPtr: Copy + Clone {
 #[rustc_diagnostic_item = "CoercePointee"]
 #[unstable(feature = "derive_coerce_pointee", issue = "123430")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub macro CoercePointee($item:item) {
     /* compiler built-in */
 }
@@ -1409,6 +1458,7 @@ pub macro CoercePointee($item:item) {
 #[unstable(feature = "coerce_pointee_validated", issue = "none")]
 #[doc(hidden)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub trait CoercePointeeValidated {
     /* compiler built-in */
 }

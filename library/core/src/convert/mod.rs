@@ -36,17 +36,22 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::error::Error;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::hash::{Hash, Hasher};
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 mod num;
 
 #[unstable(feature = "convert_float_to_int", issue = "67057")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub use num::FloatToInt;
 
 /// The identity function.
@@ -786,6 +791,7 @@ impl<T> From<T> for T {
 #[rustc_reservation_impl = "permitting this impl would forbid us from adding \
                             `impl<T> From<!> for T` later; see rust-lang/rust#64715 for details"]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T> From<!> for T {
     fn from(t: !) -> T {
         t
@@ -827,6 +833,7 @@ where
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T> AsRef<[T]> for [T] {
     #[inline(always)]
     fn as_ref(&self) -> &[T] {
@@ -844,6 +851,7 @@ impl<T> AsMut<[T]> for [T] {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl AsRef<str> for str {
     #[inline(always)]
     fn as_ref(&self) -> &str {
@@ -921,6 +929,7 @@ impl Clone for Infallible {
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl fmt::Debug for Infallible {
     fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {}
@@ -929,6 +938,7 @@ impl fmt::Debug for Infallible {
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl fmt::Display for Infallible {
     fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {}
@@ -937,6 +947,7 @@ impl fmt::Display for Infallible {
 
 #[stable(feature = "str_parse_error2", since = "1.8.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl Error for Infallible {
     fn description(&self) -> &str {
         match *self {}
@@ -945,6 +956,7 @@ impl Error for Infallible {
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl PartialEq for Infallible {
     fn eq(&self, _: &Infallible) -> bool {
         match *self {}
@@ -953,10 +965,12 @@ impl PartialEq for Infallible {
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl Eq for Infallible {}
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl PartialOrd for Infallible {
     fn partial_cmp(&self, _other: &Self) -> Option<crate::cmp::Ordering> {
         match *self {}
@@ -965,6 +979,7 @@ impl PartialOrd for Infallible {
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl Ord for Infallible {
     fn cmp(&self, _other: &Self) -> crate::cmp::Ordering {
         match *self {}
@@ -973,6 +988,7 @@ impl Ord for Infallible {
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl From<!> for Infallible {
     #[inline]
     fn from(x: !) -> Self {
@@ -982,6 +998,7 @@ impl From<!> for Infallible {
 
 #[stable(feature = "convert_infallible_hash", since = "1.44.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl Hash for Infallible {
     fn hash<H: Hasher>(&self, _: &mut H) {
         match *self {}

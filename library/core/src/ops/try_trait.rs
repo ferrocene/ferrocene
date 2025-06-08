@@ -340,6 +340,7 @@ pub trait FromResidual<R = <Self as Try>::Residual> {
 #[lang = "from_yeet"]
 #[allow(unreachable_pub)] // not-exposed but still used via lang-item
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub fn from_yeet<T, Y>(yeeted: Y) -> T
 where
     T: FromResidual<Yeet<Y>>,
@@ -367,6 +368,7 @@ pub trait Residual<O> {
 #[unstable(feature = "pub_crate_should_not_need_unstable_attr", issue = "none")]
 #[allow(type_alias_bounds)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub(crate) type ChangeOutputType<T: Try<Residual: Residual<V>>, V> =
     <T::Residual as Residual<V>>::TryType;
 
@@ -381,6 +383,7 @@ pub(crate) type ChangeOutputType<T: Try<Residual: Residual<V>>, V> =
 pub(crate) struct NeverShortCircuit<T>(pub T);
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T> NeverShortCircuit<T> {
     /// Wraps a unary function to produce one that wraps the output into a `NeverShortCircuit`.
     ///
@@ -432,4 +435,5 @@ impl<T> Residual<T> for NeverShortCircuitResidual {
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
 #[derive(Debug)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub struct Yeet<T>(pub T);

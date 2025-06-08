@@ -63,22 +63,28 @@
 
 use crate::marker::{DiscriminantKind, Tuple};
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::mem::SizedTypeProperties;
 use crate::ptr;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::ub_checks;
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub mod fallback;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub mod mir;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub mod simd;
 
 // These imports are used for simplifying intra-doc links
 #[allow(unused_imports)]
 #[cfg(all(target_has_atomic = "8", target_has_atomic = "32", target_has_atomic = "ptr"))]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::sync::atomic::{self, AtomicBool, AtomicI32, AtomicIsize, AtomicU32, Ordering};
 
 #[stable(feature = "drop_in_place", since = "1.8.0")]
@@ -86,6 +92,7 @@ use crate::sync::atomic::{self, AtomicBool, AtomicI32, AtomicIsize, AtomicU32, O
 #[deprecated(note = "no longer an intrinsic - use `ptr::drop_in_place` directly", since = "1.52.0")]
 #[inline]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn drop_in_place<T: ?Sized>(to_drop: *mut T) {
     // SAFETY: see `ptr::drop_in_place`
     unsafe { crate::ptr::drop_in_place(to_drop) }
@@ -104,6 +111,7 @@ pub unsafe fn drop_in_place<T: ?Sized>(to_drop: *mut T) {
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchg_relaxed_relaxed<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -115,6 +123,7 @@ pub unsafe fn atomic_cxchg_relaxed_relaxed<T: Copy>(dst: *mut T, old: T, src: T)
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchg_relaxed_acquire<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -126,6 +135,7 @@ pub unsafe fn atomic_cxchg_relaxed_acquire<T: Copy>(dst: *mut T, old: T, src: T)
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchg_relaxed_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -137,6 +147,7 @@ pub unsafe fn atomic_cxchg_relaxed_seqcst<T: Copy>(dst: *mut T, old: T, src: T) 
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchg_acquire_relaxed<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -148,6 +159,7 @@ pub unsafe fn atomic_cxchg_acquire_relaxed<T: Copy>(dst: *mut T, old: T, src: T)
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchg_acquire_acquire<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -159,6 +171,7 @@ pub unsafe fn atomic_cxchg_acquire_acquire<T: Copy>(dst: *mut T, old: T, src: T)
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchg_acquire_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -170,6 +183,7 @@ pub unsafe fn atomic_cxchg_acquire_seqcst<T: Copy>(dst: *mut T, old: T, src: T) 
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchg_release_relaxed<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -181,6 +195,7 @@ pub unsafe fn atomic_cxchg_release_relaxed<T: Copy>(dst: *mut T, old: T, src: T)
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchg_release_acquire<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -192,6 +207,7 @@ pub unsafe fn atomic_cxchg_release_acquire<T: Copy>(dst: *mut T, old: T, src: T)
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchg_release_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -203,6 +219,7 @@ pub unsafe fn atomic_cxchg_release_seqcst<T: Copy>(dst: *mut T, old: T, src: T) 
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchg_acqrel_relaxed<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -214,6 +231,7 @@ pub unsafe fn atomic_cxchg_acqrel_relaxed<T: Copy>(dst: *mut T, old: T, src: T) 
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchg_acqrel_acquire<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -225,6 +243,7 @@ pub unsafe fn atomic_cxchg_acqrel_acquire<T: Copy>(dst: *mut T, old: T, src: T) 
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchg_acqrel_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -236,6 +255,7 @@ pub unsafe fn atomic_cxchg_acqrel_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchg_seqcst_relaxed<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -247,6 +267,7 @@ pub unsafe fn atomic_cxchg_seqcst_relaxed<T: Copy>(dst: *mut T, old: T, src: T) 
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchg_seqcst_acquire<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -258,6 +279,7 @@ pub unsafe fn atomic_cxchg_seqcst_acquire<T: Copy>(dst: *mut T, old: T, src: T) 
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchg_seqcst_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 
 /// Stores a value if the current value is the same as the `old` value.
@@ -270,6 +292,7 @@ pub unsafe fn atomic_cxchg_seqcst_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchgweak_relaxed_relaxed<T: Copy>(
     _dst: *mut T,
     _old: T,
@@ -285,6 +308,7 @@ pub unsafe fn atomic_cxchgweak_relaxed_relaxed<T: Copy>(
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchgweak_relaxed_acquire<T: Copy>(
     _dst: *mut T,
     _old: T,
@@ -300,6 +324,7 @@ pub unsafe fn atomic_cxchgweak_relaxed_acquire<T: Copy>(
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchgweak_relaxed_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -311,6 +336,7 @@ pub unsafe fn atomic_cxchgweak_relaxed_seqcst<T: Copy>(dst: *mut T, old: T, src:
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchgweak_acquire_relaxed<T: Copy>(
     _dst: *mut T,
     _old: T,
@@ -326,6 +352,7 @@ pub unsafe fn atomic_cxchgweak_acquire_relaxed<T: Copy>(
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchgweak_acquire_acquire<T: Copy>(
     _dst: *mut T,
     _old: T,
@@ -341,6 +368,7 @@ pub unsafe fn atomic_cxchgweak_acquire_acquire<T: Copy>(
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchgweak_acquire_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -352,6 +380,7 @@ pub unsafe fn atomic_cxchgweak_acquire_seqcst<T: Copy>(dst: *mut T, old: T, src:
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchgweak_release_relaxed<T: Copy>(
     _dst: *mut T,
     _old: T,
@@ -367,6 +396,7 @@ pub unsafe fn atomic_cxchgweak_release_relaxed<T: Copy>(
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchgweak_release_acquire<T: Copy>(
     _dst: *mut T,
     _old: T,
@@ -382,6 +412,7 @@ pub unsafe fn atomic_cxchgweak_release_acquire<T: Copy>(
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchgweak_release_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -393,6 +424,7 @@ pub unsafe fn atomic_cxchgweak_release_seqcst<T: Copy>(dst: *mut T, old: T, src:
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchgweak_acqrel_relaxed<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -404,6 +436,7 @@ pub unsafe fn atomic_cxchgweak_acqrel_relaxed<T: Copy>(dst: *mut T, old: T, src:
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchgweak_acqrel_acquire<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -415,6 +448,7 @@ pub unsafe fn atomic_cxchgweak_acqrel_acquire<T: Copy>(dst: *mut T, old: T, src:
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchgweak_acqrel_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -426,6 +460,7 @@ pub unsafe fn atomic_cxchgweak_acqrel_seqcst<T: Copy>(dst: *mut T, old: T, src: 
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchgweak_seqcst_relaxed<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -437,6 +472,7 @@ pub unsafe fn atomic_cxchgweak_seqcst_relaxed<T: Copy>(dst: *mut T, old: T, src:
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchgweak_seqcst_acquire<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -448,6 +484,7 @@ pub unsafe fn atomic_cxchgweak_seqcst_acquire<T: Copy>(dst: *mut T, old: T, src:
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_cxchgweak_seqcst_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 
 /// Loads the current value of the pointer.
@@ -459,6 +496,7 @@ pub unsafe fn atomic_cxchgweak_seqcst_seqcst<T: Copy>(dst: *mut T, old: T, src: 
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_load_seqcst<T: Copy>(src: *const T) -> T;
 /// Loads the current value of the pointer.
 /// `T` must be an integer or pointer type.
@@ -469,6 +507,7 @@ pub unsafe fn atomic_load_seqcst<T: Copy>(src: *const T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_load_acquire<T: Copy>(src: *const T) -> T;
 /// Loads the current value of the pointer.
 /// `T` must be an integer or pointer type.
@@ -479,6 +518,7 @@ pub unsafe fn atomic_load_acquire<T: Copy>(src: *const T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_load_relaxed<T: Copy>(src: *const T) -> T;
 /// Do NOT use this intrinsic; "unordered" operations do not exist in our memory model!
 /// In terms of the Rust Abstract Machine, this operation is equivalent to `src.read()`,
@@ -486,6 +526,7 @@ pub unsafe fn atomic_load_relaxed<T: Copy>(src: *const T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_load_unordered<T: Copy>(src: *const T) -> T;
 
 /// Stores the value at the specified memory location.
@@ -497,6 +538,7 @@ pub unsafe fn atomic_load_unordered<T: Copy>(src: *const T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_store_seqcst<T: Copy>(dst: *mut T, val: T);
 /// Stores the value at the specified memory location.
 /// `T` must be an integer or pointer type.
@@ -507,6 +549,7 @@ pub unsafe fn atomic_store_seqcst<T: Copy>(dst: *mut T, val: T);
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_store_release<T: Copy>(dst: *mut T, val: T);
 /// Stores the value at the specified memory location.
 /// `T` must be an integer or pointer type.
@@ -517,6 +560,7 @@ pub unsafe fn atomic_store_release<T: Copy>(dst: *mut T, val: T);
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_store_relaxed<T: Copy>(dst: *mut T, val: T);
 /// Do NOT use this intrinsic; "unordered" operations do not exist in our memory model!
 /// In terms of the Rust Abstract Machine, this operation is equivalent to `dst.write(val)`,
@@ -524,6 +568,7 @@ pub unsafe fn atomic_store_relaxed<T: Copy>(dst: *mut T, val: T);
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_store_unordered<T: Copy>(dst: *mut T, val: T);
 
 /// Stores the value at the specified memory location, returning the old value.
@@ -535,6 +580,7 @@ pub unsafe fn atomic_store_unordered<T: Copy>(dst: *mut T, val: T);
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xchg_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Stores the value at the specified memory location, returning the old value.
 /// `T` must be an integer or pointer type.
@@ -545,6 +591,7 @@ pub unsafe fn atomic_xchg_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xchg_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Stores the value at the specified memory location, returning the old value.
 /// `T` must be an integer or pointer type.
@@ -555,6 +602,7 @@ pub unsafe fn atomic_xchg_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xchg_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Stores the value at the specified memory location, returning the old value.
 /// `T` must be an integer or pointer type.
@@ -565,6 +613,7 @@ pub unsafe fn atomic_xchg_release<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xchg_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Stores the value at the specified memory location, returning the old value.
 /// `T` must be an integer or pointer type.
@@ -575,6 +624,7 @@ pub unsafe fn atomic_xchg_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xchg_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Adds to the current value, returning the previous value.
@@ -588,6 +638,7 @@ pub unsafe fn atomic_xchg_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xadd_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Adds to the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -600,6 +651,7 @@ pub unsafe fn atomic_xadd_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xadd_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Adds to the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -612,6 +664,7 @@ pub unsafe fn atomic_xadd_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xadd_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Adds to the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -624,6 +677,7 @@ pub unsafe fn atomic_xadd_release<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xadd_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Adds to the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -636,6 +690,7 @@ pub unsafe fn atomic_xadd_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xadd_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Subtract from the current value, returning the previous value.
@@ -649,6 +704,7 @@ pub unsafe fn atomic_xadd_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xsub_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Subtract from the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -661,6 +717,7 @@ pub unsafe fn atomic_xsub_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xsub_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Subtract from the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -673,6 +730,7 @@ pub unsafe fn atomic_xsub_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xsub_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Subtract from the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -685,6 +743,7 @@ pub unsafe fn atomic_xsub_release<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xsub_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Subtract from the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -697,6 +756,7 @@ pub unsafe fn atomic_xsub_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xsub_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Bitwise and with the current value, returning the previous value.
@@ -710,6 +770,7 @@ pub unsafe fn atomic_xsub_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_and_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise and with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -722,6 +783,7 @@ pub unsafe fn atomic_and_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_and_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise and with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -734,6 +796,7 @@ pub unsafe fn atomic_and_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_and_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise and with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -746,6 +809,7 @@ pub unsafe fn atomic_and_release<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_and_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise and with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -758,6 +822,7 @@ pub unsafe fn atomic_and_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_and_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Bitwise nand with the current value, returning the previous value.
@@ -771,6 +836,7 @@ pub unsafe fn atomic_and_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_nand_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise nand with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -783,6 +849,7 @@ pub unsafe fn atomic_nand_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_nand_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise nand with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -795,6 +862,7 @@ pub unsafe fn atomic_nand_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_nand_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise nand with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -807,6 +875,7 @@ pub unsafe fn atomic_nand_release<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_nand_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise nand with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -819,6 +888,7 @@ pub unsafe fn atomic_nand_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_nand_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Bitwise or with the current value, returning the previous value.
@@ -832,6 +902,7 @@ pub unsafe fn atomic_nand_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_or_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise or with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -844,6 +915,7 @@ pub unsafe fn atomic_or_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_or_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise or with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -856,6 +928,7 @@ pub unsafe fn atomic_or_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_or_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise or with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -868,6 +941,7 @@ pub unsafe fn atomic_or_release<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_or_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise or with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -880,6 +954,7 @@ pub unsafe fn atomic_or_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_or_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Bitwise xor with the current value, returning the previous value.
@@ -893,6 +968,7 @@ pub unsafe fn atomic_or_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xor_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise xor with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -905,6 +981,7 @@ pub unsafe fn atomic_xor_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xor_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise xor with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -917,6 +994,7 @@ pub unsafe fn atomic_xor_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xor_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise xor with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -929,6 +1007,7 @@ pub unsafe fn atomic_xor_release<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xor_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise xor with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -941,6 +1020,7 @@ pub unsafe fn atomic_xor_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_xor_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Maximum with the current value using a signed comparison.
@@ -952,6 +1032,7 @@ pub unsafe fn atomic_xor_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_max_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Maximum with the current value using a signed comparison.
 /// `T` must be a signed integer type.
@@ -962,6 +1043,7 @@ pub unsafe fn atomic_max_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_max_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Maximum with the current value using a signed comparison.
 /// `T` must be a signed integer type.
@@ -972,6 +1054,7 @@ pub unsafe fn atomic_max_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_max_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Maximum with the current value using a signed comparison.
 /// `T` must be a signed integer type.
@@ -982,6 +1065,7 @@ pub unsafe fn atomic_max_release<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_max_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Maximum with the current value using a signed comparison.
 /// `T` must be a signed integer type.
@@ -992,6 +1076,7 @@ pub unsafe fn atomic_max_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_max_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Minimum with the current value using a signed comparison.
@@ -1003,6 +1088,7 @@ pub unsafe fn atomic_max_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_min_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Minimum with the current value using a signed comparison.
 /// `T` must be a signed integer type.
@@ -1013,6 +1099,7 @@ pub unsafe fn atomic_min_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_min_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Minimum with the current value using a signed comparison.
 /// `T` must be a signed integer type.
@@ -1023,6 +1110,7 @@ pub unsafe fn atomic_min_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_min_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Minimum with the current value using a signed comparison.
 /// `T` must be a signed integer type.
@@ -1033,6 +1121,7 @@ pub unsafe fn atomic_min_release<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_min_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Minimum with the current value using a signed comparison.
 /// `T` must be a signed integer type.
@@ -1043,6 +1132,7 @@ pub unsafe fn atomic_min_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_min_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Minimum with the current value using an unsigned comparison.
@@ -1054,6 +1144,7 @@ pub unsafe fn atomic_min_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_umin_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Minimum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -1064,6 +1155,7 @@ pub unsafe fn atomic_umin_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_umin_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Minimum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -1074,6 +1166,7 @@ pub unsafe fn atomic_umin_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_umin_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Minimum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -1084,6 +1177,7 @@ pub unsafe fn atomic_umin_release<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_umin_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Minimum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -1094,6 +1188,7 @@ pub unsafe fn atomic_umin_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_umin_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Maximum with the current value using an unsigned comparison.
@@ -1105,6 +1200,7 @@ pub unsafe fn atomic_umin_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_umax_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Maximum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -1115,6 +1211,7 @@ pub unsafe fn atomic_umax_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_umax_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Maximum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -1125,6 +1222,7 @@ pub unsafe fn atomic_umax_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_umax_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Maximum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -1135,6 +1233,7 @@ pub unsafe fn atomic_umax_release<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_umax_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Maximum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -1145,6 +1244,7 @@ pub unsafe fn atomic_umax_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_umax_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// An atomic fence.
@@ -1155,6 +1255,7 @@ pub unsafe fn atomic_umax_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_fence_seqcst();
 /// An atomic fence.
 ///
@@ -1164,6 +1265,7 @@ pub unsafe fn atomic_fence_seqcst();
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_fence_acquire();
 /// An atomic fence.
 ///
@@ -1173,6 +1275,7 @@ pub unsafe fn atomic_fence_acquire();
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_fence_release();
 /// An atomic fence.
 ///
@@ -1182,6 +1285,7 @@ pub unsafe fn atomic_fence_release();
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_fence_acqrel();
 
 /// A compiler-only memory barrier.
@@ -1197,6 +1301,7 @@ pub unsafe fn atomic_fence_acqrel();
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_singlethreadfence_seqcst();
 /// A compiler-only memory barrier.
 ///
@@ -1211,6 +1316,7 @@ pub unsafe fn atomic_singlethreadfence_seqcst();
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_singlethreadfence_acquire();
 /// A compiler-only memory barrier.
 ///
@@ -1225,6 +1331,7 @@ pub unsafe fn atomic_singlethreadfence_acquire();
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_singlethreadfence_release();
 /// A compiler-only memory barrier.
 ///
@@ -1239,6 +1346,7 @@ pub unsafe fn atomic_singlethreadfence_release();
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn atomic_singlethreadfence_acqrel();
 
 /// The `prefetch` intrinsic is a hint to the code generator to insert a prefetch instruction
@@ -1253,6 +1361,7 @@ pub unsafe fn atomic_singlethreadfence_acqrel();
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn prefetch_read_data<T>(data: *const T, locality: i32);
 /// The `prefetch` intrinsic is a hint to the code generator to insert a prefetch instruction
 /// if supported; otherwise, it is a no-op.
@@ -1266,6 +1375,7 @@ pub unsafe fn prefetch_read_data<T>(data: *const T, locality: i32);
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn prefetch_write_data<T>(data: *const T, locality: i32);
 /// The `prefetch` intrinsic is a hint to the code generator to insert a prefetch instruction
 /// if supported; otherwise, it is a no-op.
@@ -1279,6 +1389,7 @@ pub unsafe fn prefetch_write_data<T>(data: *const T, locality: i32);
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn prefetch_read_instruction<T>(data: *const T, locality: i32);
 /// The `prefetch` intrinsic is a hint to the code generator to insert a prefetch instruction
 /// if supported; otherwise, it is a no-op.
@@ -1292,6 +1403,7 @@ pub unsafe fn prefetch_read_instruction<T>(data: *const T, locality: i32);
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn prefetch_write_instruction<T>(data: *const T, locality: i32);
 
 /// Executes a breakpoint trap, for inspection by a debugger.
@@ -1300,6 +1412,7 @@ pub unsafe fn prefetch_write_instruction<T>(data: *const T, locality: i32);
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub fn breakpoint();
 
 /// Magic intrinsic that derives its meaning from attributes
@@ -1314,6 +1427,7 @@ pub fn breakpoint();
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub fn rustc_peek<T>(_: T) -> T;
 
 /// Aborts the execution of the process.
@@ -1363,6 +1477,7 @@ pub const unsafe fn unreachable() -> !;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn assume(b: bool) {
     if !b {
         // SAFETY: the caller must guarantee the argument is never `false`
@@ -1384,6 +1499,7 @@ pub const unsafe fn assume(b: bool) {
 #[miri::intrinsic_fallback_is_spec]
 #[cold]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn cold_path() {}
 
 /// Hints to the compiler that branch condition is likely to be true.
@@ -1401,6 +1517,7 @@ pub const fn cold_path() {}
 #[rustc_nounwind]
 #[inline(always)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn likely(b: bool) -> bool {
     if b {
         true
@@ -1425,6 +1542,7 @@ pub const fn likely(b: bool) -> bool {
 #[rustc_nounwind]
 #[inline(always)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn unlikely(b: bool) -> bool {
     if b {
         cold_path();
@@ -1454,6 +1572,7 @@ pub const fn unlikely(b: bool) -> bool {
 #[miri::intrinsic_fallback_is_spec]
 #[inline]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub fn select_unpredictable<T>(b: bool, true_val: T, false_val: T) -> T {
     if b { true_val } else { false_val }
 }
@@ -1466,6 +1585,7 @@ pub fn select_unpredictable<T>(b: bool, true_val: T, false_val: T) -> T {
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn assert_inhabited<T>();
 
 /// A guard for unsafe functions that cannot ever be executed if `T` does not permit
@@ -1476,6 +1596,7 @@ pub const fn assert_inhabited<T>();
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn assert_zero_valid<T>();
 
 /// A guard for `std::mem::uninitialized`. This will statically either panic, or do nothing.
@@ -1485,6 +1606,7 @@ pub const fn assert_zero_valid<T>();
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn assert_mem_uninitialized_valid<T>();
 
 /// Gets a reference to a static `Location` indicating where it was called.
@@ -1499,6 +1621,7 @@ pub const fn assert_mem_uninitialized_valid<T>();
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn caller_location() -> &'static crate::panic::Location<'static>;
 
 /// Moves a value out of scope without running drop glue.
@@ -1514,6 +1637,7 @@ pub const fn caller_location() -> &'static crate::panic::Location<'static>;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn forget<T: ?Sized>(_: T);
 
 /// Reinterprets the bits of a value of one type as another type.
@@ -1823,6 +1947,7 @@ pub const unsafe fn transmute<Src, Dst>(src: Src) -> Dst;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn transmute_unchecked<Src, Dst>(src: Src) -> Dst;
 
 /// Returns `true` if the actual type given as `T` requires drop
@@ -1842,6 +1967,7 @@ pub const unsafe fn transmute_unchecked<Src, Dst>(src: Src) -> Dst;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn needs_drop<T: ?Sized>() -> bool;
 
 /// Calculates the offset from a pointer.
@@ -1865,6 +1991,7 @@ pub const fn needs_drop<T: ?Sized>() -> bool;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn offset<Ptr, Delta>(dst: Ptr, offset: Delta) -> Ptr;
 
 /// Calculates the offset from a pointer, potentially wrapping.
@@ -1885,6 +2012,7 @@ pub const unsafe fn offset<Ptr, Delta>(dst: Ptr, offset: Delta) -> Ptr;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn arith_offset<T>(dst: *const T, offset: isize) -> *const T;
 
 /// Masks out bits of the pointer according to a mask.
@@ -1898,6 +2026,7 @@ pub const unsafe fn arith_offset<T>(dst: *const T, offset: isize) -> *const T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub fn ptr_mask<T>(ptr: *const T, mask: usize) -> *const T;
 
 /// Equivalent to the appropriate `llvm.memcpy.p0i8.0i8.*` intrinsic, with
@@ -1915,6 +2044,7 @@ pub fn ptr_mask<T>(ptr: *const T, mask: usize) -> *const T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn volatile_copy_nonoverlapping_memory<T>(dst: *mut T, src: *const T, count: usize);
 /// Equivalent to the appropriate `llvm.memmove.p0i8.0i8.*` intrinsic, with
 /// a size of `count * size_of::<T>()` and an alignment of
@@ -1927,6 +2057,7 @@ pub unsafe fn volatile_copy_nonoverlapping_memory<T>(dst: *mut T, src: *const T,
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn volatile_copy_memory<T>(dst: *mut T, src: *const T, count: usize);
 /// Equivalent to the appropriate `llvm.memset.p0i8.*` intrinsic, with a
 /// size of `count * size_of::<T>()` and an alignment of
@@ -1942,6 +2073,7 @@ pub unsafe fn volatile_copy_memory<T>(dst: *mut T, src: *const T, count: usize);
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn volatile_set_memory<T>(dst: *mut T, val: u8, count: usize);
 
 /// Performs a volatile load from the `src` pointer.
@@ -1950,6 +2082,7 @@ pub unsafe fn volatile_set_memory<T>(dst: *mut T, val: u8, count: usize);
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn volatile_load<T>(src: *const T) -> T;
 /// Performs a volatile store to the `dst` pointer.
 ///
@@ -1957,6 +2090,7 @@ pub unsafe fn volatile_load<T>(src: *const T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn volatile_store<T>(dst: *mut T, val: T);
 
 /// Performs a volatile load from the `src` pointer
@@ -1967,6 +2101,7 @@ pub unsafe fn volatile_store<T>(dst: *mut T, val: T);
 #[rustc_nounwind]
 #[rustc_diagnostic_item = "intrinsics_unaligned_volatile_load"]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn unaligned_volatile_load<T>(src: *const T) -> T;
 /// Performs a volatile store to the `dst` pointer.
 /// The pointer is not required to be aligned.
@@ -1976,6 +2111,7 @@ pub unsafe fn unaligned_volatile_load<T>(src: *const T) -> T;
 #[rustc_nounwind]
 #[rustc_diagnostic_item = "intrinsics_unaligned_volatile_store"]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn unaligned_volatile_store<T>(dst: *mut T, val: T);
 
 /// Returns the square root of an `f16`
@@ -1985,6 +2121,7 @@ pub unsafe fn unaligned_volatile_store<T>(dst: *mut T, val: T);
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn sqrtf16(x: f16) -> f16;
 /// Returns the square root of an `f32`
 ///
@@ -1993,6 +2130,7 @@ pub unsafe fn sqrtf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn sqrtf32(x: f32) -> f32;
 /// Returns the square root of an `f64`
 ///
@@ -2001,6 +2139,7 @@ pub unsafe fn sqrtf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn sqrtf64(x: f64) -> f64;
 /// Returns the square root of an `f128`
 ///
@@ -2009,6 +2148,7 @@ pub unsafe fn sqrtf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn sqrtf128(x: f128) -> f128;
 
 /// Raises an `f16` to an integer power.
@@ -2018,6 +2158,7 @@ pub unsafe fn sqrtf128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn powif16(a: f16, x: i32) -> f16;
 /// Raises an `f32` to an integer power.
 ///
@@ -2026,6 +2167,7 @@ pub unsafe fn powif16(a: f16, x: i32) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn powif32(a: f32, x: i32) -> f32;
 /// Raises an `f64` to an integer power.
 ///
@@ -2034,6 +2176,7 @@ pub unsafe fn powif32(a: f32, x: i32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn powif64(a: f64, x: i32) -> f64;
 /// Raises an `f128` to an integer power.
 ///
@@ -2042,6 +2185,7 @@ pub unsafe fn powif64(a: f64, x: i32) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn powif128(a: f128, x: i32) -> f128;
 
 /// Returns the sine of an `f16`.
@@ -2051,6 +2195,7 @@ pub unsafe fn powif128(a: f128, x: i32) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn sinf16(x: f16) -> f16;
 /// Returns the sine of an `f32`.
 ///
@@ -2059,6 +2204,7 @@ pub unsafe fn sinf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn sinf32(x: f32) -> f32;
 /// Returns the sine of an `f64`.
 ///
@@ -2067,6 +2213,7 @@ pub unsafe fn sinf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn sinf64(x: f64) -> f64;
 /// Returns the sine of an `f128`.
 ///
@@ -2075,6 +2222,7 @@ pub unsafe fn sinf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn sinf128(x: f128) -> f128;
 
 /// Returns the cosine of an `f16`.
@@ -2084,6 +2232,7 @@ pub unsafe fn sinf128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn cosf16(x: f16) -> f16;
 /// Returns the cosine of an `f32`.
 ///
@@ -2092,6 +2241,7 @@ pub unsafe fn cosf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn cosf32(x: f32) -> f32;
 /// Returns the cosine of an `f64`.
 ///
@@ -2100,6 +2250,7 @@ pub unsafe fn cosf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn cosf64(x: f64) -> f64;
 /// Returns the cosine of an `f128`.
 ///
@@ -2108,6 +2259,7 @@ pub unsafe fn cosf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn cosf128(x: f128) -> f128;
 
 /// Raises an `f16` to an `f16` power.
@@ -2117,6 +2269,7 @@ pub unsafe fn cosf128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn powf16(a: f16, x: f16) -> f16;
 /// Raises an `f32` to an `f32` power.
 ///
@@ -2125,6 +2278,7 @@ pub unsafe fn powf16(a: f16, x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn powf32(a: f32, x: f32) -> f32;
 /// Raises an `f64` to an `f64` power.
 ///
@@ -2133,6 +2287,7 @@ pub unsafe fn powf32(a: f32, x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn powf64(a: f64, x: f64) -> f64;
 /// Raises an `f128` to an `f128` power.
 ///
@@ -2141,6 +2296,7 @@ pub unsafe fn powf64(a: f64, x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn powf128(a: f128, x: f128) -> f128;
 
 /// Returns the exponential of an `f16`.
@@ -2150,6 +2306,7 @@ pub unsafe fn powf128(a: f128, x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn expf16(x: f16) -> f16;
 /// Returns the exponential of an `f32`.
 ///
@@ -2158,6 +2315,7 @@ pub unsafe fn expf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn expf32(x: f32) -> f32;
 /// Returns the exponential of an `f64`.
 ///
@@ -2166,6 +2324,7 @@ pub unsafe fn expf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn expf64(x: f64) -> f64;
 /// Returns the exponential of an `f128`.
 ///
@@ -2174,6 +2333,7 @@ pub unsafe fn expf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn expf128(x: f128) -> f128;
 
 /// Returns 2 raised to the power of an `f16`.
@@ -2183,6 +2343,7 @@ pub unsafe fn expf128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn exp2f16(x: f16) -> f16;
 /// Returns 2 raised to the power of an `f32`.
 ///
@@ -2191,6 +2352,7 @@ pub unsafe fn exp2f16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn exp2f32(x: f32) -> f32;
 /// Returns 2 raised to the power of an `f64`.
 ///
@@ -2199,6 +2361,7 @@ pub unsafe fn exp2f32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn exp2f64(x: f64) -> f64;
 /// Returns 2 raised to the power of an `f128`.
 ///
@@ -2207,6 +2370,7 @@ pub unsafe fn exp2f64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn exp2f128(x: f128) -> f128;
 
 /// Returns the natural logarithm of an `f16`.
@@ -2216,6 +2380,7 @@ pub unsafe fn exp2f128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn logf16(x: f16) -> f16;
 /// Returns the natural logarithm of an `f32`.
 ///
@@ -2224,6 +2389,7 @@ pub unsafe fn logf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn logf32(x: f32) -> f32;
 /// Returns the natural logarithm of an `f64`.
 ///
@@ -2232,6 +2398,7 @@ pub unsafe fn logf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn logf64(x: f64) -> f64;
 /// Returns the natural logarithm of an `f128`.
 ///
@@ -2240,6 +2407,7 @@ pub unsafe fn logf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn logf128(x: f128) -> f128;
 
 /// Returns the base 10 logarithm of an `f16`.
@@ -2249,6 +2417,7 @@ pub unsafe fn logf128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn log10f16(x: f16) -> f16;
 /// Returns the base 10 logarithm of an `f32`.
 ///
@@ -2257,6 +2426,7 @@ pub unsafe fn log10f16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn log10f32(x: f32) -> f32;
 /// Returns the base 10 logarithm of an `f64`.
 ///
@@ -2265,6 +2435,7 @@ pub unsafe fn log10f32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn log10f64(x: f64) -> f64;
 /// Returns the base 10 logarithm of an `f128`.
 ///
@@ -2273,6 +2444,7 @@ pub unsafe fn log10f64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn log10f128(x: f128) -> f128;
 
 /// Returns the base 2 logarithm of an `f16`.
@@ -2282,6 +2454,7 @@ pub unsafe fn log10f128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn log2f16(x: f16) -> f16;
 /// Returns the base 2 logarithm of an `f32`.
 ///
@@ -2290,6 +2463,7 @@ pub unsafe fn log2f16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn log2f32(x: f32) -> f32;
 /// Returns the base 2 logarithm of an `f64`.
 ///
@@ -2298,6 +2472,7 @@ pub unsafe fn log2f32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn log2f64(x: f64) -> f64;
 /// Returns the base 2 logarithm of an `f128`.
 ///
@@ -2306,6 +2481,7 @@ pub unsafe fn log2f64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn log2f128(x: f128) -> f128;
 
 /// Returns `a * b + c` for `f16` values.
@@ -2315,6 +2491,7 @@ pub unsafe fn log2f128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn fmaf16(a: f16, b: f16, c: f16) -> f16;
 /// Returns `a * b + c` for `f32` values.
 ///
@@ -2323,6 +2500,7 @@ pub unsafe fn fmaf16(a: f16, b: f16, c: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn fmaf32(a: f32, b: f32, c: f32) -> f32;
 /// Returns `a * b + c` for `f64` values.
 ///
@@ -2331,6 +2509,7 @@ pub unsafe fn fmaf32(a: f32, b: f32, c: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn fmaf64(a: f64, b: f64, c: f64) -> f64;
 /// Returns `a * b + c` for `f128` values.
 ///
@@ -2339,6 +2518,7 @@ pub unsafe fn fmaf64(a: f64, b: f64, c: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn fmaf128(a: f128, b: f128, c: f128) -> f128;
 
 /// Returns `a * b + c` for `f16` values, non-deterministically executing
@@ -2354,6 +2534,7 @@ pub unsafe fn fmaf128(a: f128, b: f128, c: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn fmuladdf16(a: f16, b: f16, c: f16) -> f16;
 /// Returns `a * b + c` for `f32` values, non-deterministically executing
 /// either a fused multiply-add or two operations with rounding of the
@@ -2368,6 +2549,7 @@ pub unsafe fn fmuladdf16(a: f16, b: f16, c: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn fmuladdf32(a: f32, b: f32, c: f32) -> f32;
 /// Returns `a * b + c` for `f64` values, non-deterministically executing
 /// either a fused multiply-add or two operations with rounding of the
@@ -2382,6 +2564,7 @@ pub unsafe fn fmuladdf32(a: f32, b: f32, c: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn fmuladdf64(a: f64, b: f64, c: f64) -> f64;
 /// Returns `a * b + c` for `f128` values, non-deterministically executing
 /// either a fused multiply-add or two operations with rounding of the
@@ -2396,6 +2579,7 @@ pub unsafe fn fmuladdf64(a: f64, b: f64, c: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn fmuladdf128(a: f128, b: f128, c: f128) -> f128;
 
 /// Returns the largest integer less than or equal to an `f16`.
@@ -2405,6 +2589,7 @@ pub unsafe fn fmuladdf128(a: f128, b: f128, c: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn floorf16(x: f16) -> f16;
 /// Returns the largest integer less than or equal to an `f32`.
 ///
@@ -2413,6 +2598,7 @@ pub unsafe fn floorf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn floorf32(x: f32) -> f32;
 /// Returns the largest integer less than or equal to an `f64`.
 ///
@@ -2421,6 +2607,7 @@ pub unsafe fn floorf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn floorf64(x: f64) -> f64;
 /// Returns the largest integer less than or equal to an `f128`.
 ///
@@ -2429,6 +2616,7 @@ pub unsafe fn floorf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn floorf128(x: f128) -> f128;
 
 /// Returns the smallest integer greater than or equal to an `f16`.
@@ -2438,6 +2626,7 @@ pub unsafe fn floorf128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn ceilf16(x: f16) -> f16;
 /// Returns the smallest integer greater than or equal to an `f32`.
 ///
@@ -2446,6 +2635,7 @@ pub unsafe fn ceilf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn ceilf32(x: f32) -> f32;
 /// Returns the smallest integer greater than or equal to an `f64`.
 ///
@@ -2454,6 +2644,7 @@ pub unsafe fn ceilf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn ceilf64(x: f64) -> f64;
 /// Returns the smallest integer greater than or equal to an `f128`.
 ///
@@ -2462,6 +2653,7 @@ pub unsafe fn ceilf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn ceilf128(x: f128) -> f128;
 
 /// Returns the integer part of an `f16`.
@@ -2471,6 +2663,7 @@ pub unsafe fn ceilf128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn truncf16(x: f16) -> f16;
 /// Returns the integer part of an `f32`.
 ///
@@ -2479,6 +2672,7 @@ pub unsafe fn truncf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn truncf32(x: f32) -> f32;
 /// Returns the integer part of an `f64`.
 ///
@@ -2487,6 +2681,7 @@ pub unsafe fn truncf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn truncf64(x: f64) -> f64;
 /// Returns the integer part of an `f128`.
 ///
@@ -2495,6 +2690,7 @@ pub unsafe fn truncf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn truncf128(x: f128) -> f128;
 
 /// Returns the nearest integer to an `f16`. Rounds half-way cases to the number with an even
@@ -2505,6 +2701,7 @@ pub unsafe fn truncf128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub fn round_ties_even_f16(x: f16) -> f16;
 
 /// Returns the nearest integer to an `f32`. Rounds half-way cases to the number with an even
@@ -2515,11 +2712,13 @@ pub fn round_ties_even_f16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub fn round_ties_even_f32(x: f32) -> f32;
 
 /// Provided for compatibility with stdarch. DO NOT USE.
 #[inline(always)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn rintf32(x: f32) -> f32 {
     round_ties_even_f32(x)
 }
@@ -2532,11 +2731,13 @@ pub unsafe fn rintf32(x: f32) -> f32 {
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub fn round_ties_even_f64(x: f64) -> f64;
 
 /// Provided for compatibility with stdarch. DO NOT USE.
 #[inline(always)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn rintf64(x: f64) -> f64 {
     round_ties_even_f64(x)
 }
@@ -2549,6 +2750,7 @@ pub unsafe fn rintf64(x: f64) -> f64 {
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub fn round_ties_even_f128(x: f128) -> f128;
 
 /// Returns the nearest integer to an `f16`. Rounds half-way cases away from zero.
@@ -2558,6 +2760,7 @@ pub fn round_ties_even_f128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn roundf16(x: f16) -> f16;
 /// Returns the nearest integer to an `f32`. Rounds half-way cases away from zero.
 ///
@@ -2566,6 +2769,7 @@ pub unsafe fn roundf16(x: f16) -> f16;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn roundf32(x: f32) -> f32;
 /// Returns the nearest integer to an `f64`. Rounds half-way cases away from zero.
 ///
@@ -2574,6 +2778,7 @@ pub unsafe fn roundf32(x: f32) -> f32;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn roundf64(x: f64) -> f64;
 /// Returns the nearest integer to an `f128`. Rounds half-way cases away from zero.
 ///
@@ -2582,6 +2787,7 @@ pub unsafe fn roundf64(x: f64) -> f64;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn roundf128(x: f128) -> f128;
 
 /// Float addition that allows optimizations based on algebraic rules.
@@ -2591,6 +2797,7 @@ pub unsafe fn roundf128(x: f128) -> f128;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn fadd_fast<T: Copy>(a: T, b: T) -> T;
 
 /// Float subtraction that allows optimizations based on algebraic rules.
@@ -2600,6 +2807,7 @@ pub unsafe fn fadd_fast<T: Copy>(a: T, b: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn fsub_fast<T: Copy>(a: T, b: T) -> T;
 
 /// Float multiplication that allows optimizations based on algebraic rules.
@@ -2609,6 +2817,7 @@ pub unsafe fn fsub_fast<T: Copy>(a: T, b: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn fmul_fast<T: Copy>(a: T, b: T) -> T;
 
 /// Float division that allows optimizations based on algebraic rules.
@@ -2618,6 +2827,7 @@ pub unsafe fn fmul_fast<T: Copy>(a: T, b: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn fdiv_fast<T: Copy>(a: T, b: T) -> T;
 
 /// Float remainder that allows optimizations based on algebraic rules.
@@ -2627,6 +2837,7 @@ pub unsafe fn fdiv_fast<T: Copy>(a: T, b: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn frem_fast<T: Copy>(a: T, b: T) -> T;
 
 /// Converts with LLVM’s fptoui/fptosi, which may return undef for values out of range
@@ -2636,6 +2847,7 @@ pub unsafe fn frem_fast<T: Copy>(a: T, b: T) -> T;
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn float_to_int_unchecked<Float: Copy, Int: Copy>(value: Float) -> Int;
 
 /// Float addition that allows optimizations based on algebraic rules.
@@ -2644,6 +2856,7 @@ pub unsafe fn float_to_int_unchecked<Float: Copy, Int: Copy>(value: Float) -> In
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn fadd_algebraic<T: Copy>(a: T, b: T) -> T;
 
 /// Float subtraction that allows optimizations based on algebraic rules.
@@ -2652,6 +2865,7 @@ pub const fn fadd_algebraic<T: Copy>(a: T, b: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn fsub_algebraic<T: Copy>(a: T, b: T) -> T;
 
 /// Float multiplication that allows optimizations based on algebraic rules.
@@ -2660,6 +2874,7 @@ pub const fn fsub_algebraic<T: Copy>(a: T, b: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn fmul_algebraic<T: Copy>(a: T, b: T) -> T;
 
 /// Float division that allows optimizations based on algebraic rules.
@@ -2668,6 +2883,7 @@ pub const fn fmul_algebraic<T: Copy>(a: T, b: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn fdiv_algebraic<T: Copy>(a: T, b: T) -> T;
 
 /// Float remainder that allows optimizations based on algebraic rules.
@@ -2676,6 +2892,7 @@ pub const fn fdiv_algebraic<T: Copy>(a: T, b: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn frem_algebraic<T: Copy>(a: T, b: T) -> T;
 
 /// Returns the number of bits set in an integer type `T`
@@ -2733,6 +2950,7 @@ pub const fn ctpop<T: Copy>(x: T) -> u32;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn ctlz<T: Copy>(x: T) -> u32;
 
 /// Like `ctlz`, but extra-unsafe as it returns `undef` when
@@ -2756,6 +2974,7 @@ pub const fn ctlz<T: Copy>(x: T) -> u32;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn ctlz_nonzero<T: Copy>(x: T) -> u32;
 
 /// Returns the number of trailing unset bits (zeroes) in an integer type `T`.
@@ -2798,6 +3017,7 @@ pub const unsafe fn ctlz_nonzero<T: Copy>(x: T) -> u32;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn cttz<T: Copy>(x: T) -> u32;
 
 /// Like `cttz`, but extra-unsafe as it returns `undef` when
@@ -2821,6 +3041,7 @@ pub const fn cttz<T: Copy>(x: T) -> u32;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn cttz_nonzero<T: Copy>(x: T) -> u32;
 
 /// Reverses the bytes in an integer type `T`.
@@ -2837,6 +3058,7 @@ pub const unsafe fn cttz_nonzero<T: Copy>(x: T) -> u32;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn bswap<T: Copy>(x: T) -> T;
 
 /// Reverses the bits in an integer type `T`.
@@ -2853,6 +3075,7 @@ pub const fn bswap<T: Copy>(x: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn bitreverse<T: Copy>(x: T) -> T;
 
 /// Does a three-way comparison between the two arguments,
@@ -2883,6 +3106,7 @@ pub const fn three_way_compare<T: Copy>(lhs: T, rhss: T) -> crate::cmp::Ordering
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[miri::intrinsic_fallback_is_spec] // the fallbacks all `assume` to tell Miri
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn disjoint_bitor<T: ~const fallback::DisjointBitOr>(a: T, b: T) -> T {
     // SAFETY: same preconditions as this function.
     unsafe { fallback::DisjointBitOr::disjoint_bitor(a, b) }
@@ -2902,6 +3126,7 @@ pub const unsafe fn disjoint_bitor<T: ~const fallback::DisjointBitOr>(a: T, b: T
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn add_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 
 /// Performs checked integer subtraction
@@ -2918,6 +3143,7 @@ pub const fn add_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn sub_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 
 /// Performs checked integer multiplication
@@ -2934,6 +3160,7 @@ pub const fn sub_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn mul_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 
 /// Performs full-width multiplication and addition with a carry:
@@ -2956,6 +3183,7 @@ pub const fn mul_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn carrying_mul_add<T: ~const fallback::CarryingMulAdd<Unsigned = U>, U>(
     multiplier: T,
     multiplicand: T,
@@ -2973,6 +3201,7 @@ pub const fn carrying_mul_add<T: ~const fallback::CarryingMulAdd<Unsigned = U>, 
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn exact_div<T: Copy>(x: T, y: T) -> T;
 
 /// Performs an unchecked division, resulting in undefined behavior
@@ -2985,6 +3214,7 @@ pub const unsafe fn exact_div<T: Copy>(x: T, y: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn unchecked_div<T: Copy>(x: T, y: T) -> T;
 /// Returns the remainder of an unchecked division, resulting in
 /// undefined behavior when `y == 0` or `x == T::MIN && y == -1`
@@ -2996,6 +3226,7 @@ pub const unsafe fn unchecked_div<T: Copy>(x: T, y: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn unchecked_rem<T: Copy>(x: T, y: T) -> T;
 
 /// Performs an unchecked left shift, resulting in undefined behavior when
@@ -3008,6 +3239,7 @@ pub const unsafe fn unchecked_rem<T: Copy>(x: T, y: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn unchecked_shl<T: Copy, U: Copy>(x: T, y: U) -> T;
 /// Performs an unchecked right shift, resulting in undefined behavior when
 /// `y < 0` or `y >= N`, where N is the width of T in bits.
@@ -3019,6 +3251,7 @@ pub const unsafe fn unchecked_shl<T: Copy, U: Copy>(x: T, y: U) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn unchecked_shr<T: Copy, U: Copy>(x: T, y: U) -> T;
 
 /// Returns the result of an unchecked addition, resulting in
@@ -3030,6 +3263,7 @@ pub const unsafe fn unchecked_shr<T: Copy, U: Copy>(x: T, y: U) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn unchecked_add<T: Copy>(x: T, y: T) -> T;
 
 /// Returns the result of an unchecked subtraction, resulting in
@@ -3051,6 +3285,7 @@ pub const unsafe fn unchecked_sub<T: Copy>(x: T, y: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn unchecked_mul<T: Copy>(x: T, y: T) -> T;
 
 /// Performs rotate left.
@@ -3067,6 +3302,7 @@ pub const unsafe fn unchecked_mul<T: Copy>(x: T, y: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn rotate_left<T: Copy>(x: T, shift: u32) -> T;
 
 /// Performs rotate right.
@@ -3083,6 +3319,7 @@ pub const fn rotate_left<T: Copy>(x: T, shift: u32) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn rotate_right<T: Copy>(x: T, shift: u32) -> T;
 
 /// Returns (a + b) mod 2<sup>N</sup>, where N is the width of T in bits.
@@ -3099,6 +3336,7 @@ pub const fn rotate_right<T: Copy>(x: T, shift: u32) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn wrapping_add<T: Copy>(a: T, b: T) -> T;
 /// Returns (a - b) mod 2<sup>N</sup>, where N is the width of T in bits.
 ///
@@ -3114,6 +3352,7 @@ pub const fn wrapping_add<T: Copy>(a: T, b: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn wrapping_sub<T: Copy>(a: T, b: T) -> T;
 /// Returns (a * b) mod 2<sup>N</sup>, where N is the width of T in bits.
 ///
@@ -3129,6 +3368,7 @@ pub const fn wrapping_sub<T: Copy>(a: T, b: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn wrapping_mul<T: Copy>(a: T, b: T) -> T;
 
 /// Computes `a + b`, saturating at numeric bounds.
@@ -3145,6 +3385,7 @@ pub const fn wrapping_mul<T: Copy>(a: T, b: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn saturating_add<T: Copy>(a: T, b: T) -> T;
 /// Computes `a - b`, saturating at numeric bounds.
 ///
@@ -3160,6 +3401,7 @@ pub const fn saturating_add<T: Copy>(a: T, b: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn saturating_sub<T: Copy>(a: T, b: T) -> T;
 
 /// This is an implementation detail of [`crate::ptr::read`] and should
@@ -3218,6 +3460,7 @@ pub const fn discriminant_value<T>(v: &T) -> <T as DiscriminantKind>::Discrimina
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn catch_unwind(
     _try_fn: fn(*mut u8),
     _data: *mut u8,
@@ -3233,6 +3476,7 @@ pub unsafe fn catch_unwind(
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn nontemporal_store<T>(ptr: *mut T, val: T);
 
 /// See documentation of `<*const T>::offset_from` for details.
@@ -3240,6 +3484,7 @@ pub unsafe fn nontemporal_store<T>(ptr: *mut T, val: T);
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn ptr_offset_from<T>(ptr: *const T, base: *const T) -> isize;
 
 /// See documentation of `<*const T>::offset_from_unsigned` for details.
@@ -3247,6 +3492,7 @@ pub const unsafe fn ptr_offset_from<T>(ptr: *const T, base: *const T) -> isize;
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn ptr_offset_from_unsigned<T>(ptr: *const T, base: *const T) -> usize;
 
 /// See documentation of `<*const T>::guaranteed_eq` for details.
@@ -3288,6 +3534,7 @@ pub const fn ptr_guaranteed_cmp<T>(ptr: *const T, other: *const T) -> u8 {
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn raw_eq<T>(a: &T, b: &T) -> bool;
 
 /// Lexicographically compare `[left, left + bytes)` and `[right, right + bytes)`
@@ -3307,6 +3554,7 @@ pub const unsafe fn raw_eq<T>(a: &T, b: &T) -> bool;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn compare_bytes(left: *const u8, right: *const u8, bytes: usize) -> i32;
 
 /// See documentation of [`std::hint::black_box`] for details.
@@ -3316,6 +3564,7 @@ pub const unsafe fn compare_bytes(left: *const u8, right: *const u8, bytes: usiz
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn black_box<T>(dummy: T) -> T;
 
 /// Selects which function to call depending on the context.
@@ -3543,6 +3792,7 @@ pub(crate) macro const_eval_select {
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn is_val_statically_known<T: Copy>(_arg: T) -> bool {
     false
 }
@@ -3572,6 +3822,7 @@ pub const fn is_val_statically_known<T: Copy>(_arg: T) -> bool {
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn typed_swap_nonoverlapping<T>(x: *mut T, y: *mut T) {
     // SAFETY: The caller provided single non-overlapping items behind
     // pointers, so swapping them with `count: 1` is fine.
@@ -3611,6 +3862,7 @@ pub const fn ub_checks() -> bool {
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn const_allocate(_size: usize, _align: usize) -> *mut u8 {
     // const eval overrides this function, but runtime code for now just returns null pointers.
     // See <https://github.com/rust-lang/rust/issues/93935>.
@@ -3633,6 +3885,7 @@ pub const unsafe fn const_allocate(_size: usize, _align: usize) -> *mut u8 {
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn const_deallocate(_ptr: *mut u8, _size: usize, _align: usize) {
     // Runtime NOP
 }
@@ -3648,6 +3901,7 @@ pub const unsafe fn const_deallocate(_ptr: *mut u8, _size: usize, _align: usize)
 #[inline(always)]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn contract_checks() -> bool {
     // FIXME: should this be `false` or `cfg!(contract_checks)`?
 
@@ -3670,6 +3924,7 @@ pub const fn contract_checks() -> bool {
 #[lang = "contract_check_requires"]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn contract_check_requires<C: Fn() -> bool + Copy>(cond: C) {
     const_eval_select!(
         @capture[C: Fn() -> bool + Copy] { cond: C } :
@@ -3699,6 +3954,7 @@ pub const fn contract_check_requires<C: Fn() -> bool + Copy>(cond: C) {
 #[lang = "contract_check_ensures"]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn contract_check_ensures<C: Fn(&Ret) -> bool + Copy, Ret>(cond: C, ret: Ret) -> Ret {
     const_eval_select!(
         @capture[C: Fn(&Ret) -> bool + Copy, Ret] { cond: C, ret: Ret } -> Ret :
@@ -3720,6 +3976,7 @@ pub const fn contract_check_ensures<C: Fn(&Ret) -> bool + Copy, Ret>(cond: C, re
 #[unstable(feature = "contracts_internals", issue = "128044" /* compiler-team#759 */)]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub fn contract_check_ensures<'a, Ret, C: Fn(&'a Ret) -> bool>(ret: &'a Ret, cond: C) {
     if contract_checks() && !cond(ret) {
         crate::panicking::panic_nounwind("failed ensures check");
@@ -3735,6 +3992,7 @@ pub fn contract_check_ensures<'a, Ret, C: Fn(&'a Ret) -> bool>(ret: &'a Ret, con
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn vtable_size(ptr: *const ()) -> usize;
 
 /// The intrinsic will return the alignment stored in that vtable.
@@ -3746,6 +4004,7 @@ pub unsafe fn vtable_size(ptr: *const ()) -> usize;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub unsafe fn vtable_align(ptr: *const ()) -> usize;
 
 /// The size of a type in bytes.
@@ -3787,6 +4046,7 @@ pub const fn min_align_of<T>() -> usize;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn pref_align_of<T>() -> usize;
 
 /// Returns the number of variants of the type `T` cast to a `usize`;
@@ -3802,6 +4062,7 @@ pub const unsafe fn pref_align_of<T>() -> usize;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn variant_count<T>() -> usize;
 
 /// The size of the referenced value in bytes.
@@ -3816,6 +4077,7 @@ pub const fn variant_count<T>() -> usize;
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn size_of_val<T: ?Sized>(ptr: *const T) -> usize;
 
 /// The required alignment of the referenced value.
@@ -3830,6 +4092,7 @@ pub const unsafe fn size_of_val<T: ?Sized>(ptr: *const T) -> usize;
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn min_align_of_val<T: ?Sized>(ptr: *const T) -> usize;
 
 /// Gets a static string slice containing the name of a type.
@@ -3844,6 +4107,7 @@ pub const unsafe fn min_align_of_val<T: ?Sized>(ptr: *const T) -> usize;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn type_name<T: ?Sized>() -> &'static str;
 
 /// Gets an identifier which is globally unique to the specified type. This
@@ -3860,6 +4124,7 @@ pub const fn type_name<T: ?Sized>() -> &'static str;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn type_id<T: ?Sized + 'static>() -> u128;
 
 /// Lowers in MIR to `Rvalue::Aggregate` with `AggregateKind::RawPtr`.
@@ -3892,6 +4157,7 @@ impl<P: ?Sized, T: ptr::Thin> AggregateRawPtr<*mut T> for *mut P {
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn ptr_metadata<P: ptr::Pointee<Metadata = M> + ?Sized, M>(ptr: *const P) -> M;
 
 // Some functions are defined here because they accidentally got made
@@ -3992,6 +4258,7 @@ pub const fn ptr_metadata<P: ptr::Pointee<Metadata = M> + ?Sized, M>(ptr: *const
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_diagnostic_item = "ptr_copy_nonoverlapping"]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn copy_nonoverlapping<T>(src: *const T, dst: *mut T, count: usize) {
     #[rustc_intrinsic_const_stable_indirect]
     #[rustc_nounwind]
@@ -4096,6 +4363,7 @@ pub const unsafe fn copy_nonoverlapping<T>(src: *const T, dst: *mut T, count: us
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_diagnostic_item = "ptr_copy"]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn copy<T>(src: *const T, dst: *mut T, count: usize) {
     #[rustc_intrinsic_const_stable_indirect]
     #[rustc_nounwind]
@@ -4177,6 +4445,7 @@ pub const unsafe fn copy<T>(src: *const T, dst: *mut T, count: usize) {
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_diagnostic_item = "ptr_write_bytes"]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize) {
     #[rustc_intrinsic_const_stable_indirect]
     #[rustc_nounwind]
@@ -4210,6 +4479,7 @@ pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize) {
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn minnumf16(x: f16, y: f16) -> f16;
 
 /// Returns the minimum of two `f32` values.
@@ -4225,6 +4495,7 @@ pub const fn minnumf16(x: f16, y: f16) -> f16;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn minnumf32(x: f32, y: f32) -> f32;
 
 /// Returns the minimum of two `f64` values.
@@ -4240,6 +4511,7 @@ pub const fn minnumf32(x: f32, y: f32) -> f32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn minnumf64(x: f64, y: f64) -> f64;
 
 /// Returns the minimum of two `f128` values.
@@ -4254,6 +4526,7 @@ pub const fn minnumf64(x: f64, y: f64) -> f64;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn minnumf128(x: f128, y: f128) -> f128;
 
 /// Returns the maximum of two `f16` values.
@@ -4268,6 +4541,7 @@ pub const fn minnumf128(x: f128, y: f128) -> f128;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn maxnumf16(x: f16, y: f16) -> f16;
 
 /// Returns the maximum of two `f32` values.
@@ -4283,6 +4557,7 @@ pub const fn maxnumf16(x: f16, y: f16) -> f16;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn maxnumf32(x: f32, y: f32) -> f32;
 
 /// Returns the maximum of two `f64` values.
@@ -4298,6 +4573,7 @@ pub const fn maxnumf32(x: f32, y: f32) -> f32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn maxnumf64(x: f64, y: f64) -> f64;
 
 /// Returns the maximum of two `f128` values.
@@ -4312,6 +4588,7 @@ pub const fn maxnumf64(x: f64, y: f64) -> f64;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn maxnumf128(x: f128, y: f128) -> f128;
 
 /// Returns the absolute value of an `f16`.
@@ -4321,6 +4598,7 @@ pub const fn maxnumf128(x: f128, y: f128) -> f128;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn fabsf16(x: f16) -> f16;
 
 /// Returns the absolute value of an `f32`.
@@ -4331,6 +4609,7 @@ pub const unsafe fn fabsf16(x: f16) -> f16;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn fabsf32(x: f32) -> f32;
 
 /// Returns the absolute value of an `f64`.
@@ -4341,6 +4620,7 @@ pub const unsafe fn fabsf32(x: f32) -> f32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn fabsf64(x: f64) -> f64;
 
 /// Returns the absolute value of an `f128`.
@@ -4350,6 +4630,7 @@ pub const unsafe fn fabsf64(x: f64) -> f64;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn fabsf128(x: f128) -> f128;
 
 /// Copies the sign from `y` to `x` for `f16` values.
@@ -4359,6 +4640,7 @@ pub const unsafe fn fabsf128(x: f128) -> f128;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn copysignf16(x: f16, y: f16) -> f16;
 
 /// Copies the sign from `y` to `x` for `f32` values.
@@ -4369,6 +4651,7 @@ pub const unsafe fn copysignf16(x: f16, y: f16) -> f16;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn copysignf32(x: f32, y: f32) -> f32;
 /// Copies the sign from `y` to `x` for `f64` values.
 ///
@@ -4378,6 +4661,7 @@ pub const unsafe fn copysignf32(x: f32, y: f32) -> f32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn copysignf64(x: f64, y: f64) -> f64;
 
 /// Copies the sign from `y` to `x` for `f128` values.
@@ -4387,12 +4671,14 @@ pub const unsafe fn copysignf64(x: f64, y: f64) -> f64;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const unsafe fn copysignf128(x: f128, y: f128) -> f128;
 
 /// Inform Miri that a given pointer definitely has a certain alignment.
 #[cfg(miri)]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub(crate) const fn miri_promise_symbolic_alignment(ptr: *const (), align: usize) {
     unsafe extern "Rust" {
         /// Miri-provided extern function to promise that a given pointer is properly aligned for

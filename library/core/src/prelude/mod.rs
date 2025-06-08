@@ -43,11 +43,13 @@ pub mod rust_2021 {
     #[stable(feature = "prelude_2021", since = "1.55.0")]
     #[doc(no_inline)]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
     pub use crate::iter::FromIterator;
 
     #[stable(feature = "prelude_2021", since = "1.55.0")]
     #[doc(no_inline)]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
     pub use crate::convert::{TryFrom, TryInto};
 }
 
@@ -63,16 +65,19 @@ pub mod rust_2024 {
     #[stable(feature = "prelude_2021", since = "1.55.0")]
     #[doc(no_inline)]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
     pub use crate::iter::FromIterator;
 
     #[stable(feature = "prelude_2021", since = "1.55.0")]
     #[doc(no_inline)]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
     pub use crate::convert::{TryFrom, TryInto};
 
     #[stable(feature = "prelude_2024", since = "1.85.0")]
     #[doc(no_inline)]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
     pub use crate::future::{Future, IntoFuture};
 }
 
@@ -82,6 +87,7 @@ pub mod rust_2024 {
 #[doc(hidden)]
 #[unstable(feature = "prelude_future", issue = "none")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub mod rust_future {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[doc(no_inline)]

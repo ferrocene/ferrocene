@@ -111,6 +111,7 @@ macro_rules! add_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 add_impl! { f16 f128 }
 add_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
@@ -222,6 +223,7 @@ macro_rules! sub_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 sub_impl! { f16 f128 }
 sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
@@ -354,6 +356,7 @@ macro_rules! mul_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 mul_impl! { f16 f128 }
 mul_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
@@ -514,6 +517,7 @@ macro_rules! div_impl_float {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 div_impl_float! { f16 f128 }
 div_impl_float! { f32 f64 }
 
@@ -633,6 +637,7 @@ macro_rules! rem_impl_float {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 rem_impl_float! { f16 f128 }
 rem_impl_float! { f32 f64 }
 
@@ -710,6 +715,7 @@ macro_rules! neg_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 neg_impl! { f16 f128 }
 neg_impl! { isize i8 i16 i32 i64 i128 f32 f64 }
 
@@ -779,6 +785,7 @@ macro_rules! add_assign_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 add_assign_impl! { f16 f128 }
 add_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
@@ -848,6 +855,7 @@ macro_rules! sub_assign_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 sub_assign_impl! { f16 f128 }
 sub_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
@@ -908,6 +916,7 @@ macro_rules! mul_assign_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 mul_assign_impl! { f16 f128 }
 mul_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
@@ -967,6 +976,7 @@ macro_rules! div_assign_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 div_assign_impl! { f16 f128 }
 div_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
@@ -1030,5 +1040,6 @@ macro_rules! rem_assign_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 rem_assign_impl! { f16 f128 }
 rem_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }

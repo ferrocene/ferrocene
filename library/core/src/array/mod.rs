@@ -5,45 +5,63 @@
 #![stable(feature = "core_array", since = "1.35.0")]
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::borrow::{Borrow, BorrowMut};
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::convert::Infallible;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::error::Error;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::hash::{self, Hash};
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::intrinsics::transmute_unchecked;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::iter::{UncheckedIterator, repeat_n};
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::mem::{self, MaybeUninit};
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::ops::{
     ChangeOutputType, ControlFlow, FromResidual, Index, IndexMut, NeverShortCircuit, Residual, Try,
 };
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::ptr::{null, null_mut};
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 use crate::slice::{Iter, IterMut};
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 mod ascii;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 mod drain;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 mod equality;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 mod iter;
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub(crate) use drain::drain_array_with;
 #[stable(feature = "array_value_iter", since = "1.51.0")]
-#[cfg(not(feature = "ferrocene_certified"))] /* blocked by IntoIter */
+#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))] /* blocked by IntoIter */
 pub use iter::IntoIter;
 
 /// Creates an array of type `[T; N]` by repeatedly cloning a value.
@@ -70,6 +88,7 @@ pub use iter::IntoIter;
 #[inline]
 #[unstable(feature = "array_repeat", issue = "126695")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub fn repeat<T: Clone, const N: usize>(val: T) -> [T; N] {
     from_trusted_iterator(repeat_n(val, N))
 }
@@ -125,6 +144,7 @@ pub fn repeat<T: Clone, const N: usize>(val: T) -> [T; N] {
 #[inline]
 #[stable(feature = "array_from_fn", since = "1.63.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub fn from_fn<T, const N: usize, F>(f: F) -> [T; N]
 where
     F: FnMut(usize) -> T,
@@ -164,6 +184,7 @@ where
 #[inline]
 #[unstable(feature = "array_try_from_fn", issue = "89379")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub fn try_from_fn<R, const N: usize, F>(cb: F) -> ChangeOutputType<R, [R::Output; N]>
 where
     F: FnMut(usize) -> R,
@@ -184,6 +205,7 @@ where
 #[stable(feature = "array_from_ref", since = "1.53.0")]
 #[rustc_const_stable(feature = "const_array_from_ref_shared", since = "1.63.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn from_ref<T>(s: &T) -> &[T; 1] {
     // SAFETY: Converting `&T` to `&[T; 1]` is sound.
     unsafe { &*(s as *const T).cast::<[T; 1]>() }
@@ -193,6 +215,7 @@ pub const fn from_ref<T>(s: &T) -> &[T; 1] {
 #[stable(feature = "array_from_ref", since = "1.53.0")]
 #[rustc_const_stable(feature = "const_array_from_ref", since = "1.83.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub const fn from_mut<T>(s: &mut T) -> &mut [T; 1] {
     // SAFETY: Converting `&mut T` to `&mut [T; 1]` is sound.
     unsafe { &mut *(s as *mut T).cast::<[T; 1]>() }
@@ -202,10 +225,12 @@ pub const fn from_mut<T>(s: &mut T) -> &mut [T; 1] {
 #[stable(feature = "try_from", since = "1.34.0")]
 #[derive(Debug, Copy, Clone)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub struct TryFromSliceError(());
 
 #[stable(feature = "core_array", since = "1.35.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl fmt::Display for TryFromSliceError {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -216,6 +241,7 @@ impl fmt::Display for TryFromSliceError {
 
 #[stable(feature = "try_from", since = "1.34.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl Error for TryFromSliceError {
     #[allow(deprecated)]
     fn description(&self) -> &str {
@@ -225,6 +251,7 @@ impl Error for TryFromSliceError {
 
 #[stable(feature = "try_from_slice_error", since = "1.36.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl From<Infallible> for TryFromSliceError {
     fn from(x: Infallible) -> TryFromSliceError {
         match x {}
@@ -233,6 +260,7 @@ impl From<Infallible> for TryFromSliceError {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T, const N: usize> AsRef<[T]> for [T; N] {
     #[inline]
     fn as_ref(&self) -> &[T] {
@@ -242,6 +270,7 @@ impl<T, const N: usize> AsRef<[T]> for [T; N] {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T, const N: usize> AsMut<[T]> for [T; N] {
     #[inline]
     fn as_mut(&mut self) -> &mut [T] {
@@ -251,6 +280,7 @@ impl<T, const N: usize> AsMut<[T]> for [T; N] {
 
 #[stable(feature = "array_borrow", since = "1.4.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T, const N: usize> Borrow<[T]> for [T; N] {
     fn borrow(&self) -> &[T] {
         self
@@ -259,6 +289,7 @@ impl<T, const N: usize> Borrow<[T]> for [T; N] {
 
 #[stable(feature = "array_borrow", since = "1.4.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T, const N: usize> BorrowMut<[T]> for [T; N] {
     fn borrow_mut(&mut self) -> &mut [T] {
         self
@@ -279,6 +310,7 @@ impl<T, const N: usize> BorrowMut<[T]> for [T; N] {
 /// ```
 #[stable(feature = "try_from", since = "1.34.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T, const N: usize> TryFrom<&[T]> for [T; N]
 where
     T: Copy,
@@ -305,6 +337,7 @@ where
 /// ```
 #[stable(feature = "try_from_mut_slice_to_array", since = "1.59.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T, const N: usize> TryFrom<&mut [T]> for [T; N]
 where
     T: Copy,
@@ -331,6 +364,7 @@ where
 /// ```
 #[stable(feature = "try_from", since = "1.34.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<'a, T, const N: usize> TryFrom<&'a [T]> for &'a [T; N] {
     type Error = TryFromSliceError;
 
@@ -354,6 +388,7 @@ impl<'a, T, const N: usize> TryFrom<&'a [T]> for &'a [T; N] {
 /// ```
 #[stable(feature = "try_from", since = "1.34.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<'a, T, const N: usize> TryFrom<&'a mut [T]> for &'a mut [T; N] {
     type Error = TryFromSliceError;
 
@@ -376,6 +411,7 @@ impl<'a, T, const N: usize> TryFrom<&'a mut [T]> for &'a mut [T; N] {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: Hash, const N: usize> Hash for [T; N] {
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
         Hash::hash(&self[..], state)
@@ -384,6 +420,7 @@ impl<T: Hash, const N: usize> Hash for [T; N] {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: fmt::Debug, const N: usize> fmt::Debug for [T; N] {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(&&self[..], f)
@@ -392,6 +429,7 @@ impl<T: fmt::Debug, const N: usize> fmt::Debug for [T; N] {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<'a, T, const N: usize> IntoIterator for &'a [T; N] {
     type Item = &'a T;
     type IntoIter = Iter<'a, T>;
@@ -403,6 +441,7 @@ impl<'a, T, const N: usize> IntoIterator for &'a [T; N] {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<'a, T, const N: usize> IntoIterator for &'a mut [T; N] {
     type Item = &'a mut T;
     type IntoIter = IterMut<'a, T>;
@@ -414,6 +453,7 @@ impl<'a, T, const N: usize> IntoIterator for &'a mut [T; N] {
 
 #[stable(feature = "index_trait_on_arrays", since = "1.50.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T, I, const N: usize> Index<I> for [T; N]
 where
     [T]: Index<I>,
@@ -428,6 +468,7 @@ where
 
 #[stable(feature = "index_trait_on_arrays", since = "1.50.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T, I, const N: usize> IndexMut<I> for [T; N]
 where
     [T]: IndexMut<I>,
@@ -440,7 +481,8 @@ where
 
 /// Implements comparison of arrays [lexicographically](Ord#lexicographical-comparison).
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))] /* blocked by PartialOrd */
+#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))] /* blocked by PartialOrd */
 impl<T: PartialOrd, const N: usize> PartialOrd for [T; N] {
     #[inline]
     fn partial_cmp(&self, other: &[T; N]) -> Option<Ordering> {
@@ -467,6 +509,7 @@ impl<T: PartialOrd, const N: usize> PartialOrd for [T; N] {
 /// Implements comparison of arrays [lexicographically](Ord#lexicographical-comparison).
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: Ord, const N: usize> Ord for [T; N] {
     #[inline]
     fn cmp(&self, other: &[T; N]) -> Ordering {
@@ -476,10 +519,12 @@ impl<T: Ord, const N: usize> Ord for [T; N] {
 
 #[stable(feature = "copy_clone_array_lib", since = "1.58.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: Copy, const N: usize> Copy for [T; N] {}
 
 #[stable(feature = "copy_clone_array_lib", since = "1.58.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: Clone, const N: usize> Clone for [T; N] {
     #[inline]
     fn clone(&self) -> Self {
@@ -493,11 +538,13 @@ impl<T: Clone, const N: usize> Clone for [T; N] {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 trait SpecArrayClone: Clone {
     fn clone<const N: usize>(array: &[Self; N]) -> [Self; N];
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: Clone> SpecArrayClone for T {
     #[inline]
     default fn clone<const N: usize>(array: &[T; N]) -> [T; N] {
@@ -506,6 +553,7 @@ impl<T: Clone> SpecArrayClone for T {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T: Copy> SpecArrayClone for T {
     #[inline]
     fn clone<const N: usize>(array: &[T; N]) -> [T; N] {
@@ -518,6 +566,7 @@ impl<T: Copy> SpecArrayClone for T {
 // different numbers isn't supported yet.
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 macro_rules! array_impl_default {
     {$n:expr, $t:ident $($ts:ident)*} => {
         #[stable(since = "1.4.0", feature = "array_default")]
@@ -537,6 +586,7 @@ macro_rules! array_impl_default {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 array_impl_default! {32, T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T}
 
 impl<T, const N: usize> [T; N] {
@@ -583,6 +633,7 @@ impl<T, const N: usize> [T; N] {
     /// ```
     #[stable(feature = "array_map", since = "1.55.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
     pub fn map<F, U>(self, f: F) -> [U; N]
     where
         F: FnMut(T) -> U,
@@ -622,6 +673,7 @@ impl<T, const N: usize> [T; N] {
     /// ```
     #[unstable(feature = "array_try_map", issue = "79711")]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
     pub fn try_map<R>(self, f: impl FnMut(T) -> R) -> ChangeOutputType<R, [R::Output; N]>
     where
         R: Try<Residual: Residual<[R::Output; N]>>,
@@ -671,6 +723,7 @@ impl<T, const N: usize> [T; N] {
     #[stable(feature = "array_methods", since = "1.77.0")]
     #[rustc_const_unstable(feature = "const_array_each_ref", issue = "133289")]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn each_ref(&self) -> [&T; N] {
         let mut buf = [null::<T>(); N];
 
@@ -703,6 +756,7 @@ impl<T, const N: usize> [T; N] {
     #[stable(feature = "array_methods", since = "1.77.0")]
     #[rustc_const_unstable(feature = "const_array_each_ref", issue = "133289")]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn each_mut(&mut self) -> [&mut T; N] {
         let mut buf = [null_mut::<T>(); N];
 
@@ -760,6 +814,7 @@ impl<T, const N: usize> [T; N] {
     )]
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
     pub fn split_array_ref<const M: usize>(&self) -> (&[T; M], &[T]) {
         (&self[..]).split_first_chunk::<M>().unwrap()
     }
@@ -794,6 +849,7 @@ impl<T, const N: usize> [T; N] {
     )]
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
     pub fn split_array_mut<const M: usize>(&mut self) -> (&mut [T; M], &mut [T]) {
         (&mut self[..]).split_first_chunk_mut::<M>().unwrap()
     }
@@ -840,6 +896,7 @@ impl<T, const N: usize> [T; N] {
     )]
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
     pub fn rsplit_array_ref<const M: usize>(&self) -> (&[T], &[T; M]) {
         (&self[..]).split_last_chunk::<M>().unwrap()
     }
@@ -874,6 +931,7 @@ impl<T, const N: usize> [T; N] {
     )]
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
     pub fn rsplit_array_mut<const M: usize>(&mut self) -> (&mut [T], &mut [T; M]) {
         (&mut self[..]).split_last_chunk_mut::<M>().unwrap()
     }
@@ -889,12 +947,14 @@ impl<T, const N: usize> [T; N] {
 /// it easily optimizes away) so it doesn't impact the loop that fills the array.
 #[inline]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 fn from_trusted_iterator<T, const N: usize>(iter: impl UncheckedIterator<Item = T>) -> [T; N] {
     try_from_trusted_iterator(iter.map(NeverShortCircuit)).0
 }
 
 #[inline]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 fn try_from_trusted_iterator<T, R, const N: usize>(
     iter: impl UncheckedIterator<Item = R>,
 ) -> ChangeOutputType<R, [T; N]>
@@ -929,6 +989,7 @@ where
 /// happens in the codegen tests.
 #[inline]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 fn try_from_fn_erased<T, R>(
     buffer: &mut [MaybeUninit<T>],
     mut generator: impl FnMut(usize) -> R,
@@ -961,6 +1022,7 @@ where
 /// To minimize indirection fields are still pub but callers should at least use
 /// `push_unchecked` to signal that something unsafe is going on.
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 struct Guard<'a, T> {
     /// The array to be initialized.
     pub array_mut: &'a mut [MaybeUninit<T>],
@@ -969,6 +1031,7 @@ struct Guard<'a, T> {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T> Guard<'_, T> {
     /// Adds an item to the array and updates the initialized item counter.
     ///
@@ -988,6 +1051,7 @@ impl<T> Guard<'_, T> {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 impl<T> Drop for Guard<'_, T> {
     #[inline]
     fn drop(&mut self) {
@@ -1014,6 +1078,7 @@ impl<T> Drop for Guard<'_, T> {
 /// Used for [`Iterator::next_chunk`].
 #[inline]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 pub(crate) fn iter_next_chunk<T, const N: usize>(
     iter: &mut impl Iterator<Item = T>,
 ) -> Result<[T; N], IntoIter<T, N>> {
@@ -1038,6 +1103,7 @@ pub(crate) fn iter_next_chunk<T, const N: usize>(
 /// or the iterator running out of items, making it tend to optimize poorly.
 #[inline]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(bootstrap), coverage(off))]
 fn iter_next_chunk_erased<T>(
     buffer: &mut [MaybeUninit<T>],
     iter: &mut impl Iterator<Item = T>,

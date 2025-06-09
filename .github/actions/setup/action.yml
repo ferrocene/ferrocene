@@ -24,41 +24,64 @@ runs:
     - name: Clone llvm subset
       if: ${{ inputs.llvm-subset != 'false' }}
       shell: bash
-      run: ferrocene/ci/scripts/clone-llvm-subset.sh
+      run: |
+        echo "::group::Clone llvm subset"
+        ferrocene/ci/scripts/clone-llvm-subset.sh
+        echo "::endgroup::"
     - name: Checkout submodules
       shell: bash
-      run: ferrocene/ci/scripts/checkout-submodules.sh
+      run: |
+        echo "::group::Checkout submodules"
+        ferrocene/ci/scripts/checkout-submodules.sh
+        echo "::endgroup::"
     - name: Change file modification time to be consistent
       shell: bash
-      run: ferrocene/ci/scripts/reset-mtime-to-last-commit.sh
+      run: |
+        echo "::group::Change file modification time to be consistent"
+        ferrocene/ci/scripts/reset-mtime-to-last-commit.sh
+        echo "::endgroup::"
 
     - name: Install dependencies (Ubuntu)
       if: ${{ contains(runner.name, 'ubuntu') && inputs.build-dependencies != 'false' }}
       shell: bash
-      run: ferrocene/ci/scripts/setup-ubuntu.sh
+      run: |
+        echo "::group::Install dependencies (Ubuntu)"
+        ferrocene/ci/scripts/setup-ubuntu.sh
+        echo "::endgroup::"
 
     - name: Install dependencies (Windows)
       if: ${{ (runner.os == 'Windows') && inputs.build-dependencies != 'false' }}
       shell: bash
-      run: ferrocene/ci/scripts/setup-windows.sh
+      run: |
+        echo "::group::Install dependencies (Windows)"
+        ferrocene/ci/scripts/setup-windows.sh
+        echo "::endgroup::"
 
     - name: Install dependencies (macOS)
       if: ${{ (runner.os == 'macOS') && inputs.build-dependencies != 'false' }}
       shell: bash
-      run: ferrocene/ci/scripts/setup-darwin.sh
+      run: |
+        echo "::group::Install dependencies (macOS)"
+        ferrocene/ci/scripts/setup-darwin.sh
+        echo "::endgroup::"
 
     # https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
     - name: Enable KVM on Linux
       if: ${{ runner.os == 'linux' && inputs.setup-kvm != 'false' }}
       shell: bash
       run: |
+        echo "::group::Enable KVM on Linux"
         set -xeo pipefail
 
         echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
         sudo udevadm control --reload-rules
         sudo udevadm trigger --name-match=kvm
+        echo "::endgroup::"
 
     - name: Setup uv
       if: ${{ inputs.setup-uv != 'false' }}
       shell: bash
-      run: ferrocene/ci/scripts/setup-uv.sh
+      run: |
+        echo "::group::Setup uv"
+        ferrocene/ci/scripts/setup-uv.sh
+        echo "::endgroup::"

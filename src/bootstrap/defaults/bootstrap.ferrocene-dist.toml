@@ -5,6 +5,10 @@
 # recommended to run this configuration during local development, except if your development
 # configuration cannot reproduce a CI failure.
 
+# This setting matters more during development, which is where a decision on the value is made.
+# Setting it to "ignore" avoids CI warnings.
+change-id = "ignore"
+
 [build]
 # Enable the generation of build metrics, which provide extra information on the duration of each
 # step of the build. This is then used by scripts and tools to analyze how time is spent on CI.

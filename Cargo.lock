@@ -1223,7 +1223,6 @@ dependencies = [
  "diff",
  "getopts",
  "glob",
- "hex",
  "home",
  "indexmap",
  "libc",

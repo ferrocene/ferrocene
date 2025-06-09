@@ -30,9 +30,6 @@ unified-diff = "0.2.1"
 walkdir = "2"
 # tidy-alphabetical-end
 
-# Ferrocene-specific dependencies
-hex = "0.4"
-
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
 

@@ -374,8 +374,6 @@ lint_improper_ctypes = `extern` {$desc} uses type `{$ty}`, which is not FFI-safe
     .label = not FFI-safe
     .note = the type is defined here
 
-lint_improper_ctypes_128bit = 128-bit integers don't currently have a known stable ABI
-
 lint_improper_ctypes_array_help = consider passing a pointer to the array
 
 lint_improper_ctypes_array_reason = passing raw arrays by value is not FFI-safe
@@ -960,7 +958,8 @@ lint_unused_doc_comment = unused doc comment
     .help = to document an item produced by a macro, the macro must produce the documentation as part of its expansion
 
 lint_unused_extern_crate = unused extern crate
-    .suggestion = remove it
+    .label = unused
+    .suggestion = remove the unused `extern crate`
 
 lint_unused_import_braces = braces around {$node} is unnecessary
 

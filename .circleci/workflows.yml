@@ -120,7 +120,6 @@ jobs:
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build library src/tools/rustdoc
-        ./x.py --stage 1 build src/tools/rustdoc
     steps: [ferrocene-job-build]
 
   x86_64-linux-docs:

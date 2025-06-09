@@ -177,7 +177,7 @@ jobs:
       - name: Get LLVM cache
         shell: bash
         run: |
-          uv run ferrocene/ci/scripts/llvm_cache.py download --url s3://${{ inputs.cache-bucket }}/llvm-cache/${{ needs.llvm.outputs.name }}
+          uv run ferrocene/ci/scripts/llvm_cache.py download --url s3://${{ inputs.cache-bucket }}/${{ inputs.cache-prefix }}llvm-cache/${{ needs.llvm.outputs.name }}
 
       - name: Run
         uses: ./.github/actions/run/
@@ -191,7 +191,7 @@ jobs:
         shell: bash
         run: |
           uv run ./ferrocene/ci/scripts/build_cache.py pre-upload
-          uv run ./ferrocene/ci/scripts/cache.py store "s3://${{ inputs.cache-bucket }}/persist-between-jobs/${{ github.run_id }}/${{ env.ARTIFACT }}" ./build
+          uv run ./ferrocene/ci/scripts/cache.py store "s3://${{ inputs.cache-bucket }}/${{ inputs.cache-prefix }}persist-between-jobs/${{ github.run_id }}/${{ env.ARTIFACT }}" ./build
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/

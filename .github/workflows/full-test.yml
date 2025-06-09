@@ -109,6 +109,8 @@ jobs:
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
+          bucket: ${{ inputs.cache-bucket }}
+          prefix: ${{ inputs.cache-prefix }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -123,6 +125,8 @@ jobs:
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
+          bucket: ${{ inputs.cache-bucket }}
+          prefix: ${{ inputs.cache-prefix }}
 
       - name: Run
         uses: ./.github/actions/run/
@@ -174,6 +178,8 @@ jobs:
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
+          bucket: ${{ inputs.cache-bucket }}
+          prefix: ${{ inputs.cache-prefix }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -188,6 +194,8 @@ jobs:
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
+          bucket: ${{ inputs.cache-bucket }}
+          prefix: ${{ inputs.cache-prefix }}
 
       - name: Run
         uses: ./.github/actions/run/
@@ -239,6 +247,8 @@ jobs:
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
+          bucket: ${{ inputs.cache-bucket }}
+          prefix: ${{ inputs.cache-prefix }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -253,6 +263,8 @@ jobs:
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
+          bucket: ${{ inputs.cache-bucket }}
+          prefix: ${{ inputs.cache-prefix }}
 
       - name: Run
         uses: ./.github/actions/run/
@@ -305,6 +317,8 @@ jobs:
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
+          bucket: ${{ inputs.cache-bucket }}
+          prefix: ${{ inputs.cache-prefix }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -319,6 +333,8 @@ jobs:
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
+          bucket: ${{ inputs.cache-bucket }}
+          prefix: ${{ inputs.cache-prefix }}
 
       - name: Run
         uses: ./.github/actions/run/

@@ -104,12 +104,16 @@ jobs:
         id: check
         shell: bash
         run: |
+          if [ -z "${AWS_CA_BUNDLE}" ]; then
+            unset AWS_CA_BUNDLE
+          fi
+
           set -e
           hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
           name="${{ inputs.host-triple }}-$hash.tar.zst"
           echo "name=$name" >> $GITHUB_OUTPUT
 
-          uri=s3://${{ inputs.cache-bucket }}/llvm-cache/$name
+          uri=s3://${{ inputs.cache-bucket }}/${{ inputs.cache-prefix }}llvm-cache/$name
           echo "uri=$uri" >> $GITHUB_OUTPUT
           
           set +e

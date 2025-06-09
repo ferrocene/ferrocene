@@ -1,6 +1,9 @@
 name: "Restore build cache"
 description: "Restore build cache from an artifact. Resets mtime, restores removed symlinks..."
 inputs:
+  bucket:
+    description: The bucket to use
+    default: ferrocene-ci-caches
   build-run-id:
     description: The run id of the build workflow
   build-artifact:
@@ -16,5 +19,5 @@ runs:
         if [ -z "${AWS_CA_BUNDLE}" ]; then
           unset AWS_CA_BUNDLE
         fi
-        uv run ./ferrocene/ci/scripts/cache.py retrieve "s3://ferrocene-ci-caches/persist-between-jobs/${{ inputs.build-run-id }}/${{ inputs.build-artifact }}" .
+        uv run ./ferrocene/ci/scripts/cache.py retrieve "s3://${{ inputs.bucket }}/persist-between-jobs/${{ inputs.build-run-id }}/${{ inputs.build-artifact }}" .
         uv run ./ferrocene/ci/scripts/build_cache.py post-download

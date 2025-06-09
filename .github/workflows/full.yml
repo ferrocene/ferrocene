@@ -9,6 +9,10 @@ env:
   LINUX_TARGETS: aarch64-unknown-linux-gnu,riscv64gc-unknown-linux-gnu
   BARE_METAL_TARGETS: aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf
   QNX_TARGETS: aarch64-unknown-nto-qnx710,x86_64-pc-nto-qnx710
+  ARTIFACTS_BUCKET: ferrocene-ci-artifacts
+  ARTIFACTS_PREFIX: gha-testing/ferrocene/dist/
+  CACHE_BUCKET: ferrocene-ci-caches
+  CACHE_PREFIX: gha-testing/
 
 on:
   push:
@@ -34,6 +38,10 @@ jobs:
       linux-targets: ${{ env.LINUX_TARGETS }}
       qnx-targets: ${{ env.QNX_TARGETS }}
       bare-metal-targets: ${{ env.BARE_METAL_TARGETS }}
+      artifacts-bucket: ${{ env.ARTIFACTS_BUCKET }}
+      artifacts-prefix: ${{ env.ARTIFACTS_PREFIX }}
+      cache-bucket: ${{ env.CACHE_BUCKET }}
+      cache-prefix: ${{ env.CACHE_PREFIX }}
     steps:
       - run: exit 0
 
@@ -41,7 +49,8 @@ jobs:
 
   build-x86_64-unknown-linux-gnu:
     name: Build (x86_64-unknown-linux-gnu)
-    # needs: []
+    needs:
+      - calculate-envs
     uses: ./.github/workflows/full-host-build.yml
     secrets: inherit
     with:
@@ -54,6 +63,7 @@ jobs:
     name: Dist (x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/full-host-dist.yml
     needs:
+      - calculate-envs
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
@@ -63,14 +73,19 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
 
   self-test-x86_64-unknown-linux-gnu:
     name: Self-test (x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/full-self-test.yml
     needs:
-      - targets
-      - dist-x86_64-unknown-linux-gnu
       - calculate-envs
+      - dist-x86_64-unknown-linux-gnu
+      - targets
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
@@ -78,11 +93,16 @@ jobs:
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
       qnx-version: "710-472"
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   test-x86_64-unknown-linux-gnu:
     name: Test (x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/full-test.yml
     needs:
+      - calculate-envs
       - build-x86_64-unknown-linux-gnu
       # - targets
     secrets: inherit
@@ -94,11 +114,16 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   test-aarch64-unknown-none:
     name: Test (aarch64-unknown-none by x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/full-test.yml
     needs:
+      - calculate-envs
       - build-x86_64-unknown-linux-gnu
       - targets
     secrets: inherit
@@ -113,14 +138,19 @@ jobs:
       host-triple: "" # x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
+      qemu-arch: qemu-aarch64
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      qemu-arch: qemu-aarch64
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   test-thumbv7em-none-eabi:
     name: Test (thumbv7em-none-eabi by x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/full-test.yml
     needs:
+      - calculate-envs
       - build-x86_64-unknown-linux-gnu
       - targets
     secrets: inherit
@@ -135,14 +165,19 @@ jobs:
       host-triple: "" # x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
+      qemu-arch: qemu-arm
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      qemu-arch: qemu-arm
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   test-thumbv7em-none-eabihf:
     name: Test (thumbv7em-none-eabihf by x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/full-test.yml
     needs:
+      - calculate-envs
       - build-x86_64-unknown-linux-gnu
       - targets
     secrets: inherit
@@ -157,14 +192,19 @@ jobs:
       host-triple: "" # x86_64-unknown-linux-gnu
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
+      qemu-arch: qemu-arm
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      qemu-arch: qemu-arm
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   # test-x86_64-pc-nto-qnx710:
   #   name: Test (x86_64-pc-nto-qnx710 by x86_64-unknown-linux-gnu)
   #   uses: ./.github/workflows/full-test-remote.yml
   #   needs:
+  #     - calculate-envs
   #     - build-x86_64-unknown-linux-gnu
   #     - targets
   #   secrets: inherit
@@ -186,12 +226,17 @@ jobs:
   #     emulator-container: ferrocene-images/ci:ubuntu-24-main
   #     emulator-prepare-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh prepare
   #     emulator-start-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh
-  #     qnx-version: "710-472"
+  # #     qnx-version: "710-472"
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   # test-aarch64-unknown-nto-qnx710:
   #   name: Test (aarch64-unknown-nto-qnx710 by x86_64-unknown-linux-gnu)
   #   uses: ./.github/workflows/full-test-remote.yml
   #   needs:
+  #     - calculate-envs
   #     - build-x86_64-unknown-linux-gnu
   #     - targets
   #   secrets: inherit
@@ -214,11 +259,16 @@ jobs:
   #     emulator-prepare-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh prepare
   #     emulator-start-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh
   #     qnx-version: "710-472"
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   # aarch64 Linux
 
   build-aarch64-unknown-linux-gnu:
-    # needs: []
+    needs:
+      - calculate-envs
     uses: ./.github/workflows/full-host-build.yml
     secrets: inherit
     with:
@@ -226,11 +276,16 @@ jobs:
       rust-runner: ferrocene-arc-runners-ubuntu-20-arm64
       llvm-runner: ubuntu-20-llvm-20core-30gb-arm64
       use-minio: true
-      # container: ${{ needs.container-aarch64-ubuntu-20.outputs.uri }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
+
 
   dist-aarch64-unknown-linux-gnu:
     uses: ./.github/workflows/full-host-dist.yml
     needs:
+      - calculate-envs
       - build-aarch64-unknown-linux-gnu
     secrets: inherit
     with:
@@ -240,17 +295,18 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-aarch64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-aarch64-unknown-linux-gnu.outputs.artifact-build }}
-      # container: ${{ needs.container-aarch64-ubuntu-20.outputs.uri }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   self-test-aarch64-unknown-linux-gnu:
     name: Self-test (aarch64-unknown-linux-gnu)
     uses: ./.github/workflows/full-self-test.yml
     needs:
-      # - build-aarch64-unknown-linux-gnu
+      - calculate-envs
       - targets
       - dist-aarch64-unknown-linux-gnu
-      # - test-aarch64-unknown-linux-gnu
-      - calculate-envs
     secrets: inherit
     with:
       host-triple: aarch64-unknown-linux-gnu
@@ -258,9 +314,10 @@ jobs:
       runner: ferrocene-arc-runners-ubuntu-20-arm64
       use-minio: true
       qnx-version: "710-472"
-      # build-run-id: ${{ needs.build-aarch64-unknown-linux-gnu.outputs.run-id }}
-      # build-artifact: ${{ needs.build-aarch64-unknown-linux-gnu.outputs.artifact-build }}
-      # container: ${{ needs.container-aarch64-ubuntu-20.outputs.uri }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
 
   # x86_64 Windows
@@ -268,10 +325,15 @@ jobs:
   # build-x86_64-pc-windows-msvc:
   #   name: Build (x86_64-pc-windows-msvc)
   #   uses: ./.github/workflows/full-host-build.yml
+  #     - calculate-envs
   #   secrets: inherit
   #   with:
   #     host-triple: x86_64-pc-windows-msvc
   #     runner: 8core-x86_64-pc-windows-msvc
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   # dist-x86_64-pc-windows-msvc:
   #   name: Dist (x86_64-pc-windows-msvc)
@@ -285,6 +347,10 @@ jobs:
   #     runner: 8core-x86_64-pc-windows-msvc
   #     build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
   #     build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   # self-test-x86_64-pc-windows-msvc:
   #   name: Self-test (x86_64-pc-windows-msvc)
@@ -292,23 +358,26 @@ jobs:
   #   needs:
   #     - calculate-envs
   #     - build-x86_64-pc-windows-msvc
-  #     # - targets
+  #     - targets
   #     - dist-x86_64-pc-windows-msvc
-  #     # - test-x86_64-pc-windows-msvc
   #   secrets: inherit
   #   with:
   #     host-triple: x86_64-pc-windows-msvc
   #     # This pulls from env
   #     triples: ${{ format('{0},{1}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets) }}
   #     runner: 8core-x86_64-pc-windows-msvc
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   # TODO: Waiting for self hosted runners
   # test-x86_64-pc-windows-msvc:
   #   name: Test (x86_64-pc-windows-msvc)
   #   uses: ./.github/workflows/full-test.yml
   #   needs:
+  #     - calculate-envs
   #     - build-x86_64-pc-windows-msvc
-  #     # - targets
   #   secrets: inherit
   #   with:
   #     triple: x86_64-pc-windows-msvc
@@ -317,21 +386,32 @@ jobs:
   #     runner: 8core-x86_64-pc-windows-msvc
   #     build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
   #     build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   # aarch64 Mac
 
   # build-aarch64-apple-darwin:
   #   name: Build (aarch64-apple-darwin)
   #   uses: ./.github/workflows/full-host-build.yml
+  #   needs:
+  #     - calculate-envs
   #   secrets: inherit
   #   with:
   #     host-triple: aarch64-apple-darwin
   #     runner: macos-14-xlarge
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   # dist-aarch64-apple-darwin:
   #   name: Dist (aarch64-apple-darwin)
   #   uses: ./.github/workflows/full-host-dist.yml
   #   needs:
+  #     - calculate-envs
   #     - build-aarch64-apple-darwin
   #   secrets: inherit
   #   with:
@@ -340,11 +420,16 @@ jobs:
   #     runner: macos-14-xlarge
   #     build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
   #     build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   # test-aarch64-apple-darwin:
   #   name: Test (aarch64-apple-darwin)
   #   uses: ./.github/workflows/full-test.yml
   #   needs:
+  #     - calulate-envs
   #     - build-aarch64-apple-darwin
   #     # - targets
   #   secrets: inherit
@@ -355,6 +440,10 @@ jobs:
   #     runner: macos-14-xlarge
   #     build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
   #     build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
   
   # self-test-aarch64-apple-darwin:
   #   name: Self-test (aarch64-apple-darwin)
@@ -371,12 +460,17 @@ jobs:
   #     # This pulls from env
   #     triples: ${{ needs.calculate-envs.outputs.bare-metal-targets }}
   #     runner: macos-14-xlarge
+  #     artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+  #     artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+  #     cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+  #     cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   # # General
   coverage:
     name: Coverage
     uses: ./.github/workflows/full-coverage.yml
     needs:
+      - calculate-envs
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
@@ -385,11 +479,16 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   docs:
     name: Docs
     uses: ./.github/workflows/full-doc.yml
     needs:
+      - calculate-envs
       - build-x86_64-unknown-linux-gnu
       - checks
       - coverage
@@ -406,11 +505,16 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   source:
     name: Source
     uses: ./.github/workflows/full-source.yml
     needs:
+      - calculate-envs
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
@@ -419,11 +523,16 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   checks:
     name: Checks (x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/full-checks.yml
     needs:
+      - calculate-envs
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
@@ -432,6 +541,10 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   targets:
     name: Build additional targets
@@ -448,11 +561,16 @@ jobs:
       qnx-version: "710-472"
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   traceability-matrix:
     name: Tracability Matrix
     uses: ./.github/workflows/full-traceability-matrix.yml
     needs:
+      - calculate-envs
       - build-x86_64-unknown-linux-gnu
       - docs
       - source
@@ -472,11 +590,16 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   finish-build:
     name: Finish build
     uses: ./.github/workflows/full-finish-build.yml
     needs:
+      - calculate-envs
       - build-x86_64-unknown-linux-gnu
       - targets
       - traceability-matrix
@@ -490,3 +613,7 @@ jobs:
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}

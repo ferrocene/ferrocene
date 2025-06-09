@@ -8,8 +8,8 @@ set -euo pipefail
 IFS=$'\n\t'
 
 DIST_DIR="build/dist"
-ARTIFACTS_BUCKET="ferrocene-ci-artifacts"
-ARTIFACTS_PREFIX="ferrocene/dist/"
+ARTIFACTS_BUCKET="${ARTIFACTS_BUCKET:-ferrocene-ci-artifacts}"
+ARTIFACTS_PREFIX="${ARTIFACTS_PREFIX:-ferrocene/dist/}"
 BUILD_METRICS_FILE="build/metrics.json"
 COVERAGE_DIR="build/ferrocene/coverage"
 

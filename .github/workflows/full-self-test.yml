@@ -28,8 +28,26 @@ on:
         type: string
         default: ""
         description: The QNX version (if any) and BuildID (eg '7.1.0-472' for 7.1.0 BuildID 472)
+      artifacts-bucket:
+        type: string
+        description: The artifact bucket
+      artifacts-prefix:
+        type: string
+        description: The artifact prefix
+      cache-bucket:
+        type: string
+        description: The cache bucket
+      cache-prefix:
+        type: string
+        description: The cache prefix
       environment:
         type: string
+
+env:
+  ARTIFACTS_BUCKET: ${{ inputs.artifacts-bucket }}
+  ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
+  CACHE_BUCKET: ${{ inputs.cache-bucket }}
+  CACHE_PREFIX: ${{ inputs.cache-prefix }}
 
 jobs:
 

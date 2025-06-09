@@ -27,6 +27,18 @@ on:
       container:
         type: string
         description: The container URI to run the build in, if any (Linux only)
+      artifacts-bucket:
+        type: string
+        description: The artifact bucket
+      artifacts-prefix:
+        type: string
+        description: The artifact prefix
+      cache-bucket:
+        type: string
+        description: The cache bucket
+      cache-prefix:
+        type: string
+        description: The cache prefix
       environment:
         type: string
     outputs:
@@ -42,6 +54,12 @@ on:
       artifact-build:
         description: The name of the build job artifact
         value: ${{ jobs.build.outputs.artifact-name }}
+
+env:
+  ARTIFACTS_BUCKET: ${{ inputs.artifacts-bucket }}
+  ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
+  CACHE_BUCKET: ${{ inputs.cache-bucket }}
+  CACHE_PREFIX: ${{ inputs.cache-prefix }}
 
 jobs:
 
@@ -91,7 +109,7 @@ jobs:
           name="${{ inputs.host-triple }}-$hash.tar.zst"
           echo "name=$name" >> $GITHUB_OUTPUT
 
-          uri=s3://ferrocene-ci-caches/llvm-cache/$name
+          uri=s3://${{ inputs.cache-bucket }}/llvm-cache/$name
           echo "uri=$uri" >> $GITHUB_OUTPUT
           
           set +e
@@ -155,7 +173,7 @@ jobs:
       - name: Get LLVM cache
         shell: bash
         run: |
-          uv run ferrocene/ci/scripts/llvm_cache.py download --url s3://ferrocene-ci-caches/llvm-cache/${{ needs.llvm.outputs.name }}
+          uv run ferrocene/ci/scripts/llvm_cache.py download --url s3://${{ inputs.cache-bucket }}/llvm-cache/${{ needs.llvm.outputs.name }}
 
       - name: Run
         uses: ./.github/actions/run/
@@ -169,7 +187,7 @@ jobs:
         shell: bash
         run: |
           uv run ./ferrocene/ci/scripts/build_cache.py pre-upload
-          uv run ./ferrocene/ci/scripts/cache.py store "s3://ferrocene-ci-caches/persist-between-jobs/${{ github.run_id }}/${{ env.ARTIFACT }}" ./build
+          uv run ./ferrocene/ci/scripts/cache.py store "s3://${{ inputs.cache-bucket }}/persist-between-jobs/${{ github.run_id }}/${{ env.ARTIFACT }}" ./build
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/

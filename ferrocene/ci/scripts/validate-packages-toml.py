@@ -20,8 +20,8 @@ import sys
 import tomllib
 
 
-S3_BUCKET = "ferrocene-ci-artifacts"
-S3_PREFIX = "ferrocene/dist"
+ARTIFACTS_BUCKET=(os.environ.get("ARTIFACTS_BUCKET") or "ferrocene-ci-artifacts")
+ARTIFACTS_PREFIX=(os.environ.get("ARTIFACTS_PREFIX") or "ferrocene/dist")
 GIT_REMOTE = "origin"
 
 SUPPORTED_MANIFEST_VERSION = 2
@@ -52,7 +52,7 @@ def get_version_string(commit):
 
 
 def packages_from_toml(commit):
-    raw = s3_file_content(S3_BUCKET, f"{S3_PREFIX}/{commit}/packages.toml")
+    raw = s3_file_content(ARTIFACTS_BUCKET, f"{ARTIFACTS_PREFIX}/{commit}/packages.toml")
     toml = tomllib.loads(raw)
 
     if toml["manifest-version"] != SUPPORTED_MANIFEST_VERSION:
@@ -98,7 +98,7 @@ def main():
     parser.add_argument("commit", help="Commit hash to validate")
     args = parser.parse_args()
 
-    uploaded = set(s3_list_files(S3_BUCKET, f"{S3_PREFIX}/{args.commit}/"))
+    uploaded = set(s3_list_files(ARTIFACTS_BUCKET, f"{ARTIFACTS_PREFIX}/{args.commit}/"))
     expected = set(packages_from_toml(args.commit))
 
     checker = Checker(IGNORE_PATTERNS)

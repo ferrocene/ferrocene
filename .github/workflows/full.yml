@@ -58,6 +58,10 @@ jobs:
       rust-runner: ferrocene-arc-runners-ubuntu-20-amd64
       llvm-runner: ubuntu-20-llvm-20core-30gb-amd64
       use-minio: true
+      artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
+      artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
+      cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}
+      cache-prefix: ${{ needs.calculate-envs.outputs.cache-prefix }}
 
   dist-x86_64-unknown-linux-gnu:
     name: Dist (x86_64-unknown-linux-gnu)

@@ -21,12 +21,6 @@ on:
         type: boolean
         default: false
         description: If minIO should be used (otherwise, S3 is used)
-      build-run-id:
-        type: string
-        description: The run id of the build workflow
-      build-artifact:
-        type: string
-        description: The artifact from the build workflow
       container:
         type: string
         description: The container URI to run the build in, if any (Linux only)

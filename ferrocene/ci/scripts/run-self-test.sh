@@ -8,8 +8,9 @@ IFS=$'\n\t'
 COMMIT="${COMMIT:-$(git rev-parse HEAD)}"
 SKIP_CLEANUP="${SKIP_CLEANUP:-}"
 
-BUCKET="ferrocene-ci-artifacts"
-PREFIX="ferrocene/dist/${COMMIT}"
+ARTIFACTS_BUCKET="${ARTIFACTS_BUCKET:-ferrocene-ci-artifacts}"
+ARTIFACTS_PREFIX="${ARTIFACTS_PREFIX:-ferrocene/dist/}"
+PREFIX="${ARTIFACTS_PREFIX}${COMMIT}"
 
 TAR="tar"
 FERROCENE_SELF_TEST="ferrocene-self-test"

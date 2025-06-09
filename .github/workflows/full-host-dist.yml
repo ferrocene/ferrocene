@@ -30,20 +30,30 @@ on:
       container:
         type: string
         description: The container URI to run the build in, if any (Linux only)
+      artifacts-bucket:
+        type: string
+        description: The artifact bucket
+      artifacts-prefix:
+        type: string
+        description: The artifact prefix
+      cache-bucket:
+        type: string
+        description: The cache bucket
+      cache-prefix:
+        type: string
+        description: The cache prefix
       environment:
         type: string
     outputs:
       run-id:
         description: The id of the workflow run
         value: ${{ github.run_id }}
-      
       artifact-dist:
         description: The name of the dist job artifact
         value: ${{ jobs.dist.outputs.artifact-name }}
       artifact-dist-usage:
         description: The name of the resource usage report artifact for the dist job
         value: ${{ jobs.dist.outputs.artifact-usage }}
-
       artifact-tools:
         description: The name of the tools job artifact
         value: ${{ jobs.tools.outputs.artifact-name }}
@@ -51,6 +61,12 @@ on:
         description: The name of the resource usage report artifact for the tools job
         value: ${{ jobs.dist.outputs.artifact-usage }}
 
+env:
+  ARTIFACTS_BUCKET: ${{ inputs.artifacts-bucket }}
+  ARTIFACTS_PREFIX: ${{ inputs.artifacts-prefix }}
+  CACHE_BUCKET: ${{ inputs.cache-bucket }}
+  CACHE_PREFIX: ${{ inputs.cache-prefix }}
+        
 jobs:
 
   dist:

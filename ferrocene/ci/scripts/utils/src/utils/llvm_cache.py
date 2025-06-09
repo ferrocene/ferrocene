@@ -4,15 +4,17 @@
 import hashlib
 import subprocess
 import urllib.parse
+import os
 
 
-CACHE_BUCKET="ferrocene-ci-caches"
-CACHE_PREFIX="prebuilt-llvm"
+CACHE_BUCKET=(os.environ.get("CACHE_BUCKET") or "ferrocene-ci-caches")
+CACHE_PREFIX=(os.environ.get("CACHE_PREFIX") or "")
+CACHE_DIR="prebuilt-llvm"
 
 
 def get_url(ferrocene_host):
     cache_hash = get_llvm_cache_hash()
-    cache_file = f"{CACHE_PREFIX}/{ferrocene_host}-{cache_hash}.tar.zst"
+    cache_file = f"{CACHE_PREFIX}{CACHE_DIR}/{ferrocene_host}-{cache_hash}.tar.zst"
     s3_url = f"s3://{CACHE_BUCKET}/{cache_file}"
     return urllib.parse.urlparse(s3_url)
 

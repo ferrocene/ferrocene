@@ -37,32 +37,11 @@ jobs:
     steps:
       - run: exit 0
 
-  # Matrix cannot be used here as later jobs will `need` specific containers
-  # # and we do not want to make those jobs wait for all containers.
-  # container-x86_64-ubuntu-20:
-  #   name: Container (x86_64, ubuntu-20)
-  #   uses: ./.github/workflows/full-container.yml
-  #   secrets: inherit
-  #   with:
-  #     name: ubuntu-20
-  #     architecture: x86_64
-  #     runner: ferrocene-arc-runners-linux-dind-amd64
-
-  # container-x86_64-ubuntu-24:
-  #   name: Container (x86_64, ubuntu-24)
-  #   uses: ./.github/workflows/full-container.yml
-  #   secrets: inherit
-  #   with:
-  #     name: ubuntu-24
-  #     architecture: x86_64
-  #     runner: ferrocene-arc-runners-linux-dind-amd64
-
   # x86_64 Linux
 
   build-x86_64-unknown-linux-gnu:
     name: Build (x86_64-unknown-linux-gnu)
     # needs: []
-      # - container-x86_64-ubuntu-20
     uses: ./.github/workflows/full-host-build.yml
     secrets: inherit
     with:
@@ -70,13 +49,11 @@ jobs:
       rust-runner: ferrocene-arc-runners-ubuntu-20-amd64
       llvm-runner: ubuntu-20-llvm-20core-30gb-amd64
       use-minio: true
-      # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   dist-x86_64-unknown-linux-gnu:
     name: Dist (x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/full-host-dist.yml
     needs:
-      # - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
@@ -86,17 +63,13 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   self-test-x86_64-unknown-linux-gnu:
     name: Self-test (x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/full-self-test.yml
     needs:
-      # - container-x86_64-ubuntu-20
-      # - build-x86_64-unknown-linux-gnu
       - targets
       - dist-x86_64-unknown-linux-gnu
-      # - test-x86_64-unknown-linux-gnu
       - calculate-envs
     secrets: inherit
     with:
@@ -105,15 +78,11 @@ jobs:
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       use-minio: true
       qnx-version: "710-472"
-      # build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-      # build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   test-x86_64-unknown-linux-gnu:
     name: Test (x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/full-test.yml
     needs:
-      # - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
       # - targets
     secrets: inherit
@@ -125,13 +94,11 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   test-aarch64-unknown-none:
     name: Test (aarch64-unknown-none by x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/full-test.yml
     needs:
-      # - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
       - targets
     secrets: inherit
@@ -148,14 +115,12 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
       qemu-arch: qemu-aarch64
 
   test-thumbv7em-none-eabi:
     name: Test (thumbv7em-none-eabi by x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/full-test.yml
     needs:
-      # - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
       - targets
     secrets: inherit
@@ -172,14 +137,12 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
       qemu-arch: qemu-arm
 
   test-thumbv7em-none-eabihf:
     name: Test (thumbv7em-none-eabihf by x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/full-test.yml
     needs:
-      # - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
       - targets
     secrets: inherit
@@ -196,15 +159,12 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
       qemu-arch: qemu-arm
 
   # test-x86_64-pc-nto-qnx710:
   #   name: Test (x86_64-pc-nto-qnx710 by x86_64-unknown-linux-gnu)
   #   uses: ./.github/workflows/full-test-remote.yml
   #   needs:
-  #     # - container-x86_64-ubuntu-20
-  #     # - container-x86_64-ubuntu-24
   #     - build-x86_64-unknown-linux-gnu
   #     - targets
   #   secrets: inherit
@@ -232,8 +192,6 @@ jobs:
   #   name: Test (aarch64-unknown-nto-qnx710 by x86_64-unknown-linux-gnu)
   #   uses: ./.github/workflows/full-test-remote.yml
   #   needs:
-  #     # - container-x86_64-ubuntu-20
-  #     # - container-x86_64-ubuntu-24
   #     - build-x86_64-unknown-linux-gnu
   #     - targets
   #   secrets: inherit
@@ -261,7 +219,6 @@ jobs:
 
   build-aarch64-unknown-linux-gnu:
     # needs: []
-      # - container-aarch64-ubuntu-20
     uses: ./.github/workflows/full-host-build.yml
     secrets: inherit
     with:
@@ -274,7 +231,6 @@ jobs:
   dist-aarch64-unknown-linux-gnu:
     uses: ./.github/workflows/full-host-dist.yml
     needs:
-      # - container-aarch64-ubuntu-20
       - build-aarch64-unknown-linux-gnu
     secrets: inherit
     with:
@@ -290,7 +246,6 @@ jobs:
     name: Self-test (aarch64-unknown-linux-gnu)
     uses: ./.github/workflows/full-self-test.yml
     needs:
-      # - container-aarch64-ubuntu-20
       # - build-aarch64-unknown-linux-gnu
       - targets
       - dist-aarch64-unknown-linux-gnu
@@ -346,8 +301,6 @@ jobs:
   #     # This pulls from env
   #     triples: ${{ format('{0},{1}', needs.calculate-envs.outputs.bare-metal-targets, needs.calculate-envs.outputs.qnx-targets) }}
   #     runner: 8core-x86_64-pc-windows-msvc
-  #     build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
-  #     build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
 
   # TODO: Waiting for self hosted runners
   # test-x86_64-pc-windows-msvc:
@@ -418,8 +371,6 @@ jobs:
   #     # This pulls from env
   #     triples: ${{ needs.calculate-envs.outputs.bare-metal-targets }}
   #     runner: macos-14-xlarge
-  #     build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
-  #     build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}
 
   # # General
   coverage:
@@ -434,13 +385,11 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   docs:
     name: Docs
     uses: ./.github/workflows/full-doc.yml
     needs:
-      # - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
       - checks
       - coverage
@@ -457,13 +406,11 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   source:
     name: Source
     uses: ./.github/workflows/full-source.yml
     needs:
-      # - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
@@ -472,13 +419,11 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   checks:
     name: Checks (x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/full-checks.yml
     needs:
-      # - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
@@ -487,14 +432,12 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   targets:
     name: Build additional targets
     uses: ./.github/workflows/full-targets.yml
     needs:
       - calculate-envs
-      # - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
@@ -505,13 +448,11 @@ jobs:
       qnx-version: "710-472"
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   traceability-matrix:
     name: Tracability Matrix
     uses: ./.github/workflows/full-traceability-matrix.yml
     needs:
-      # - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
       - docs
       - source
@@ -531,13 +472,11 @@ jobs:
       use-minio: true
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   finish-build:
     name: Finish build
     uses: ./.github/workflows/full-finish-build.yml
     needs:
-      # - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
       - targets
       - traceability-matrix
@@ -551,4 +490,3 @@ jobs:
       runner: ferrocene-arc-runners-ubuntu-20-amd64
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      # container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}

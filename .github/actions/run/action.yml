@@ -25,6 +25,9 @@ runs:
         if [ -z "${TEST_DEVICE_ADDR}" ]; then
           unset TEST_DEVICE_ADDR
         fi
+        if [ -z "${AWS_CA_BUNDLE}" ]; then
+          unset AWS_CA_BUNDLE
+        fi
         
         ferrocene/ci/run.sh
 
@@ -47,6 +50,9 @@ runs:
       run: |
         if [ -z "${TEST_DEVICE_ADDR}" ]; then
           unset TEST_DEVICE_ADDR
+        fi
+        if [ -z "${AWS_CA_BUNDLE}" ]; then
+          unset AWS_CA_BUNDLE
         fi
 
         docker run \
@@ -77,6 +83,10 @@ runs:
           --env AWS_SECRET_ACCESS_KEY \
           --env AWS_EC2_METADATA_DISABLED \
           --env QEMU_CPU \
+          --env ARTIFACTS_BUCKET \
+          --env ARTIFACTS_PREFIX \
+          --env CACHE_BUCKET \
+          --env CACHE_PREFIX \
           --workdir /home/ci/project \
           --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
           --user $(id -u):$(id -g) \

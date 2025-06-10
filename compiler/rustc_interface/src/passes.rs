@@ -956,7 +956,6 @@ fn run_required_analyses(tcx: TyCtxt<'_>) {
                 tcx.par_hir_for_each_module(|module| {
                     tcx.ensure_ok().check_mod_loops(module);
                     tcx.ensure_ok().check_mod_attrs(module);
-                    tcx.ensure_ok().check_mod_naked_functions(module);
                     tcx.ensure_ok().check_mod_unstable_api_usage(module);
                 });
             },
@@ -977,13 +976,6 @@ fn run_required_analyses(tcx: TyCtxt<'_>) {
     });
 
     rustc_hir_analysis::check_crate(tcx);
-    sess.time("MIR_coroutine_by_move_body", || {
-        tcx.par_hir_body_owners(|def_id| {
-            if tcx.needs_coroutine_by_move_body_def_id(def_id.to_def_id()) {
-                tcx.ensure_done().coroutine_by_move_body_def_id(def_id);
-            }
-        });
-    });
     // Freeze definitions as we don't add new ones at this point.
     // We need to wait until now since we synthesize a by-move body
     // for all coroutine-closures.

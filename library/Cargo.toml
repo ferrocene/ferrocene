@@ -50,5 +50,9 @@ rustc-demangle.opt-level = "s"
 rustc-std-workspace-core = { path = 'rustc-std-workspace-core' }
 rustc-std-workspace-alloc = { path = 'rustc-std-workspace-alloc' }
 rustc-std-workspace-std = { path = 'rustc-std-workspace-std' }
+<<<<<<< HEAD
 
 libc = { path = '../ferrocene/library/libc' }
+=======
+compiler_builtins = { path = "compiler-builtins/compiler-builtins" }
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

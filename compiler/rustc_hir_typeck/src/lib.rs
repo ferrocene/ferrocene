@@ -1,13 +1,11 @@
 // tidy-alphabetical-start
 #![allow(rustc::diagnostic_outside_of_impl)]
 #![allow(rustc::untranslatable_diagnostic)]
-#![feature(array_windows)]
 #![feature(assert_matches)]
 #![feature(box_patterns)]
 #![feature(if_let_guard)]
 #![feature(iter_intersperse)]
 #![feature(never_type)]
-#![feature(try_blocks)]
 // tidy-alphabetical-end
 
 mod _match;
@@ -31,6 +29,7 @@ mod fn_ctxt;
 mod gather_locals;
 mod intrinsicck;
 mod method;
+mod naked_functions;
 mod op;
 mod opaque_types;
 mod pat;
@@ -55,8 +54,8 @@ use rustc_middle::query::Providers;
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_middle::{bug, span_bug};
 use rustc_session::config;
-use rustc_span::Span;
 use rustc_span::def_id::LocalDefId;
+use rustc_span::{Span, sym};
 use tracing::{debug, instrument};
 use typeck_root_ctxt::TypeckRootCtxt;
 
@@ -149,7 +148,7 @@ fn typeck_with_inspect<'tcx>(
             tcx.fn_sig(def_id).instantiate_identity()
         };
 
-        check_abi(tcx, span, fn_sig.abi());
+        check_abi(tcx, id, span, fn_sig.abi());
 
         // Compute the function signature from point of view of inside the fn.
         let mut fn_sig = tcx.liberate_late_bound_regions(def_id.to_def_id(), fn_sig);
@@ -169,6 +168,10 @@ fn typeck_with_inspect<'tcx>(
                 .enumerate()
                 .map(|(idx, ty)| fcx.normalize(arg_span(idx), ty)),
         );
+
+        if tcx.has_attr(def_id, sym::naked) {
+            naked_functions::typeck_naked_fn(tcx, def_id, body);
+        }
 
         check_fn(&mut fcx, fn_sig, None, decl, def_id, body, tcx.features().unsized_fn_params());
     } else {

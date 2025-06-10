@@ -89,7 +89,8 @@
 #![allow(internal_features)]
 #![deny(ffi_unwind_calls)]
 #![warn(unreachable_pub)]
-#![allow(unused_attributes)] // Ferrocene addition: accept coverage(off) no-ops
+#![allow(unused_attributes)]
+// Ferrocene addition: accept coverage(off) no-ops
 // Do not check link redundancy on bootstraping phase
 #![allow(rustdoc::redundant_explicit_links)]
 #![warn(rustdoc::unescaped_backticks)]
@@ -136,8 +137,6 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(abi_unadjusted))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(adt_const_params))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_sanitize))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_target_has_atomic))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_target_has_atomic_equal_alignment))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(const_precise_live_drops))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(deprecated_suggestion))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_cfg))]
@@ -166,6 +165,8 @@
 #![feature(allow_internal_unsafe)]
 #![feature(allow_internal_unstable)]
 #![feature(auto_traits)]
+#![feature(cfg_target_has_atomic)]
+#![feature(cfg_target_has_atomic_equal_alignment)]
 #![feature(cfg_ub_checks)]
 #![feature(const_trait_impl)]
 #![feature(decl_macro)]
@@ -357,7 +358,7 @@ pub mod async_iter;
 #[unstable(feature = "bstr", issue = "134915")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod bstr;
-#[cfg(not(feature = "ferrocene_certified"))]
+
 pub mod cell;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod char;
@@ -385,7 +386,7 @@ pub mod random;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod range;
 pub mod result;
-#[cfg(not(feature = "ferrocene_certified"))]
+
 pub mod sync;
 #[unstable(feature = "unsafe_binders", issue = "130516")]
 #[cfg(not(feature = "ferrocene_certified"))]

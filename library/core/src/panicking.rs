@@ -200,7 +200,6 @@ pub const fn panic(expr: &'static str) -> ! {
 //
 // This is especially important when this code is called often (e.g., with -Coverflow-checks) for
 // reducing binary size impact.
-#[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
 macro_rules! panic_const {
     ($($lang:ident = $message:expr,)+) => {
@@ -221,7 +220,10 @@ macro_rules! panic_const {
                 // truncation and padding (even though none is used here). Using
                 // Arguments::new_const may allow the compiler to omit Formatter::pad from the
                 // output binary, saving up to a few kilobytes.
+                #[cfg(not(feature = "ferrocene_certified"))]
                 panic_fmt(fmt::Arguments::new_const(&[$message]));
+                #[cfg(feature = "ferrocene_certified")]
+                panic_fmt($message);
             }
         )+
     }
@@ -231,7 +233,6 @@ macro_rules! panic_const {
 // slightly different forms. It's not clear if there's a good way to deduplicate without adding
 // special cases to the compiler (e.g., a const generic function wouldn't have a single definition
 // shared across crates, which is exactly what we want here).
-#[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
 pub mod panic_const {
     use super::*;
@@ -246,6 +247,9 @@ pub mod panic_const {
         panic_const_shl_overflow = "attempt to shift left with overflow",
         panic_const_div_by_zero = "attempt to divide by zero",
         panic_const_rem_by_zero = "attempt to calculate the remainder with a divisor of zero",
+    }
+    #[cfg(not(feature = "ferrocene_certified"))]
+    panic_const! {
         panic_const_coroutine_resumed = "coroutine resumed after completion",
         panic_const_async_fn_resumed = "`async fn` resumed after completion",
         panic_const_async_gen_fn_resumed = "`async gen fn` resumed after completion",
@@ -258,6 +262,7 @@ pub mod panic_const {
     // Separated panic constants list for async drop feature
     // (May be joined when the corresponding lang items will be in the bootstrap)
     #[cfg(not(bootstrap))]
+    #[cfg(not(feature = "ferrocene_certified"))]
     panic_const! {
         panic_const_coroutine_resumed_drop = "coroutine resumed after async drop",
         panic_const_async_fn_resumed_drop = "`async fn` resumed after async drop",
@@ -397,7 +402,6 @@ fn panic_null_pointer_dereference() -> ! {
 #[cfg_attr(feature = "panic_immediate_abort", inline)]
 #[lang = "panic_cannot_unwind"] // needed by codegen for panic in nounwind function
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
 fn panic_cannot_unwind() -> ! {
     // Keep the text in sync with `UnwindTerminateReason::as_str` in `rustc_middle`.

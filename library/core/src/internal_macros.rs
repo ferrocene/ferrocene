@@ -10,7 +10,7 @@ macro_rules! forward_ref_unop {
         impl $imp for &$t {
             type Output = <$t as $imp>::Output;
 
-            #[inline]
+            #[inline(never)]
             fn $method(self) -> <$t as $imp>::Output {
                 $imp::$method(*self)
             }
@@ -41,7 +41,7 @@ macro_rules! forward_ref_binop {
         impl $imp<&$u> for $t {
             type Output = <$t as $imp<$u>>::Output;
 
-            #[inline]
+            #[inline(never)]
             #[track_caller]
             fn $method(self, other: &$u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(self, *other)
@@ -52,7 +52,7 @@ macro_rules! forward_ref_binop {
         impl $imp<&$u> for &$t {
             type Output = <$t as $imp<$u>>::Output;
 
-            #[inline]
+            #[inline(never)]
             #[track_caller]
             fn $method(self, other: &$u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(*self, *other)
@@ -71,7 +71,7 @@ macro_rules! forward_ref_op_assign {
     (impl $imp:ident, $method:ident for $t:ty, $u:ty, #[$attr:meta]) => {
         #[$attr]
         impl $imp<&$u> for $t {
-            #[inline]
+            #[inline(never)]
             #[track_caller]
             fn $method(&mut self, other: &$u) {
                 $imp::$method(self, *other);
@@ -95,14 +95,14 @@ macro_rules! impl_fn_for_zst {
             struct $Name;
 
             impl $( <$( $lifetime ),+> )? Fn<($( $ArgTy, )*)> for $Name {
-                #[inline]
+                #[inline(never)]
                 extern "rust-call" fn call(&self, ($( $arg, )*): ($( $ArgTy, )*)) -> $ReturnTy {
                     $body
                 }
             }
 
             impl $( <$( $lifetime ),+> )? FnMut<($( $ArgTy, )*)> for $Name {
-                #[inline]
+                #[inline(never)]
                 extern "rust-call" fn call_mut(
                     &mut self,
                     ($( $arg, )*): ($( $ArgTy, )*)
@@ -114,7 +114,7 @@ macro_rules! impl_fn_for_zst {
             impl $( <$( $lifetime ),+> )? FnOnce<($( $ArgTy, )*)> for $Name {
                 type Output = $ReturnTy;
 
-                #[inline]
+                #[inline(never)]
                 extern "rust-call" fn call_once(self, ($( $arg, )*): ($( $ArgTy, )*)) -> $ReturnTy {
                     Fn::call(&self, ($( $arg, )*))
                 }

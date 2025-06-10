@@ -448,7 +448,7 @@ impl AsciiChar {
     /// Creates an ascii character from the byte `b`,
     /// or returns `None` if it's too large.
     #[unstable(feature = "ascii_char", issue = "110998")]
-    #[inline]
+    #[inline(never)]
     pub const fn from_u8(b: u8) -> Option<Self> {
         if b <= 127 {
             // SAFETY: Just checked that `b` is in-range
@@ -465,7 +465,7 @@ impl AsciiChar {
     ///
     /// `b` must be in `0..=127`, or else this is UB.
     #[unstable(feature = "ascii_char", issue = "110998")]
-    #[inline]
+    #[inline(never)]
     pub const unsafe fn from_u8_unchecked(b: u8) -> Self {
         // SAFETY: Our safety precondition is that `b` is in-range.
         unsafe { transmute(b) }
@@ -476,7 +476,7 @@ impl AsciiChar {
     ///
     /// If `d >= 10`, returns `None`.
     #[unstable(feature = "ascii_char", issue = "110998")]
-    #[inline]
+    #[inline(never)]
     pub const fn digit(d: u8) -> Option<Self> {
         if d < 10 {
             // SAFETY: Just checked it's in-range.
@@ -502,7 +502,7 @@ impl AsciiChar {
     /// need something really specific, not to make those other arguments do
     /// something useful. It might be tightened before stabilization.)
     #[unstable(feature = "ascii_char", issue = "110998")]
-    #[inline]
+    #[inline(never)]
     pub const unsafe fn digit_unchecked(d: u8) -> Self {
         assert_unsafe_precondition!(
             check_language_ub,
@@ -521,21 +521,21 @@ impl AsciiChar {
 
     /// Gets this ASCII character as a byte.
     #[unstable(feature = "ascii_char", issue = "110998")]
-    #[inline]
+    #[inline(never)]
     pub const fn to_u8(self) -> u8 {
         self as u8
     }
 
     /// Gets this ASCII character as a `char` Unicode Scalar Value.
     #[unstable(feature = "ascii_char", issue = "110998")]
-    #[inline]
+    #[inline(never)]
     pub const fn to_char(self) -> char {
         self as u8 as char
     }
 
     /// Views this ASCII character as a one-code-unit UTF-8 `str`.
     #[unstable(feature = "ascii_char", issue = "110998")]
-    #[inline]
+    #[inline(never)]
     pub const fn as_str(&self) -> &str {
         crate::slice::from_ref(self).as_str()
     }
@@ -546,7 +546,7 @@ macro_rules! into_int_impl {
         $(
             #[unstable(feature = "ascii_char", issue = "110998")]
             impl From<AsciiChar> for $ty {
-                #[inline]
+                #[inline(never)]
                 fn from(chr: AsciiChar) -> $ty {
                     chr as u8 as $ty
                 }
@@ -560,7 +560,7 @@ into_int_impl!(u8 u16 u32 u64 u128 char);
 impl [AsciiChar] {
     /// Views this slice of ASCII characters as a UTF-8 `str`.
     #[unstable(feature = "ascii_char", issue = "110998")]
-    #[inline]
+    #[inline(never)]
     pub const fn as_str(&self) -> &str {
         let ascii_ptr: *const Self = self;
         let str_ptr = ascii_ptr as *const str;
@@ -571,7 +571,7 @@ impl [AsciiChar] {
 
     /// Views this slice of ASCII characters as a slice of `u8` bytes.
     #[unstable(feature = "ascii_char", issue = "110998")]
-    #[inline]
+    #[inline(never)]
     pub const fn as_bytes(&self) -> &[u8] {
         self.as_str().as_bytes()
     }

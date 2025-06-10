@@ -53,7 +53,7 @@ impl<T, F: FnOnce() -> T> LazyCell<T, F> {
     ///
     /// assert_eq!(&*lazy, "HELLO, WORLD!");
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "lazy_cell", since = "1.80.0")]
     #[rustc_const_stable(feature = "lazy_cell", since = "1.80.0")]
     pub const fn new(f: F) -> LazyCell<T, F> {
@@ -103,7 +103,7 @@ impl<T, F: FnOnce() -> T> LazyCell<T, F> {
     /// assert_eq!(LazyCell::force(&lazy), &92);
     /// assert_eq!(&*lazy, &92);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "lazy_cell", since = "1.80.0")]
     pub fn force(this: &LazyCell<T, F>) -> &T {
         // SAFETY:
@@ -136,7 +136,7 @@ impl<T, F: FnOnce() -> T> LazyCell<T, F> {
     /// *p = 44;
     /// assert_eq!(*lazy, 44);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "lazy_get", issue = "129333")]
     pub fn force_mut(this: &mut LazyCell<T, F>) -> &mut T {
         #[cold]
@@ -146,7 +146,7 @@ impl<T, F: FnOnce() -> T> LazyCell<T, F> {
             // INVARIANT: Always valid, but the value may not be dropped.
             struct PoisonOnPanic<T, F>(*mut State<T, F>);
             impl<T, F> Drop for PoisonOnPanic<T, F> {
-                #[inline]
+                #[inline(never)]
                 fn drop(&mut self) {
                     // SAFETY: Invariant states it is valid, and we don't drop the old value.
                     unsafe {
@@ -235,7 +235,7 @@ impl<T, F> LazyCell<T, F> {
     /// *LazyCell::get_mut(&mut lazy).unwrap() = 44;
     /// assert_eq!(*lazy, 44);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "lazy_get", issue = "129333")]
     pub fn get_mut(this: &mut LazyCell<T, F>) -> Option<&mut T> {
         let state = this.state.get_mut();
@@ -260,7 +260,7 @@ impl<T, F> LazyCell<T, F> {
     /// let _ = LazyCell::force(&lazy);
     /// assert_eq!(LazyCell::get(&lazy), Some(&92));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "lazy_get", issue = "129333")]
     pub fn get(this: &LazyCell<T, F>) -> Option<&T> {
         // SAFETY:
@@ -278,7 +278,7 @@ impl<T, F> LazyCell<T, F> {
 #[stable(feature = "lazy_cell", since = "1.80.0")]
 impl<T, F: FnOnce() -> T> Deref for LazyCell<T, F> {
     type Target = T;
-    #[inline]
+    #[inline(never)]
     fn deref(&self) -> &T {
         LazyCell::force(self)
     }
@@ -287,7 +287,7 @@ impl<T, F: FnOnce() -> T> Deref for LazyCell<T, F> {
 #[stable(feature = "lazy_cell", since = "1.80.0")]
 impl<T: Default> Default for LazyCell<T> {
     /// Creates a new lazy value using `Default` as the initializing function.
-    #[inline]
+    #[inline(never)]
     fn default() -> LazyCell<T> {
         LazyCell::new(T::default)
     }

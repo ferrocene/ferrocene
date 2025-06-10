@@ -78,7 +78,7 @@ impl Layout {
     ///    less than or equal to `isize::MAX`).
     #[stable(feature = "alloc_layout", since = "1.28.0")]
     #[rustc_const_stable(feature = "const_alloc_layout_size_align", since = "1.50.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn from_size_align(size: usize, align: usize) -> Result<Self, LayoutError> {
@@ -98,7 +98,7 @@ impl Layout {
         true
     }
 
-    #[inline(always)]
+    #[inline(never)]
     const fn max_size_for_align(align: Alignment) -> usize {
         // (power-of-two implies align != 0.)
 
@@ -121,7 +121,7 @@ impl Layout {
     }
 
     /// Internal helper constructor to skip revalidating alignment validity.
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
     const fn from_size_alignment(size: usize, align: Alignment) -> Result<Self, LayoutError> {
@@ -142,7 +142,7 @@ impl Layout {
     #[stable(feature = "alloc_layout", since = "1.28.0")]
     #[rustc_const_stable(feature = "const_alloc_layout_unchecked", since = "1.36.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const unsafe fn from_size_align_unchecked(size: usize, align: usize) -> Self {
         assert_unsafe_precondition!(
             check_library_ub,
@@ -161,7 +161,7 @@ impl Layout {
     #[stable(feature = "alloc_layout", since = "1.28.0")]
     #[rustc_const_stable(feature = "const_alloc_layout_size_align", since = "1.50.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn size(&self) -> usize {
         self.size
     }
@@ -173,7 +173,7 @@ impl Layout {
     #[rustc_const_stable(feature = "const_alloc_layout_size_align", since = "1.50.0")]
     #[must_use = "this returns the minimum alignment, \
                   without modifying the layout"]
-    #[inline]
+    #[inline(never)]
     pub const fn align(&self) -> usize {
         self.align.as_usize()
     }
@@ -182,7 +182,7 @@ impl Layout {
     #[stable(feature = "alloc_layout", since = "1.28.0")]
     #[rustc_const_stable(feature = "alloc_layout_const_new", since = "1.42.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn new<T>() -> Self {
         let (size, align) = size_align::<T>();
         // SAFETY: if the type is instantiated, rustc already ensures that its
@@ -197,7 +197,7 @@ impl Layout {
     #[stable(feature = "alloc_layout", since = "1.28.0")]
     #[rustc_const_stable(feature = "const_alloc_layout", since = "1.85.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn for_value<T: ?Sized>(t: &T) -> Self {
@@ -252,7 +252,7 @@ impl Layout {
     /// some other means.
     #[unstable(feature = "alloc_layout_extra", issue = "55724")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn dangling(&self) -> NonNull<u8> {
@@ -275,7 +275,7 @@ impl Layout {
     /// `align` violates the conditions listed in [`Layout::from_size_align`].
     #[stable(feature = "alloc_layout_manipulation", since = "1.44.0")]
     #[rustc_const_stable(feature = "const_alloc_layout", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn align_to(&self, align: usize) -> Result<Self, LayoutError> {
@@ -305,7 +305,7 @@ impl Layout {
     #[unstable(feature = "alloc_layout_extra", issue = "55724")]
     #[must_use = "this returns the padding needed, \
                   without modifying the `Layout`"]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn padding_needed_for(&self, align: usize) -> usize {
@@ -320,7 +320,7 @@ impl Layout {
     ///
     /// This can return at most `Alignment::MAX` (aka `isize::MAX + 1`)
     /// because the original size is at most `isize::MAX`.
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
     const fn size_rounded_up_to_custom_align(&self, align: Alignment) -> usize {
@@ -358,7 +358,7 @@ impl Layout {
     #[rustc_const_stable(feature = "const_alloc_layout", since = "1.85.0")]
     #[must_use = "this returns a new `Layout`, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn pad_to_align(&self) -> Layout {
@@ -400,7 +400,7 @@ impl Layout {
     /// assert_eq!(repeated, (Layout::from_size_align(24, 4).unwrap(), 8));
     /// ```
     #[unstable(feature = "alloc_layout_extra", issue = "55724")]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn repeat(&self, n: usize) -> Result<(Self, usize), LayoutError> {
@@ -459,7 +459,7 @@ impl Layout {
     /// ```
     #[stable(feature = "alloc_layout_manipulation", since = "1.44.0")]
     #[rustc_const_stable(feature = "const_alloc_layout", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn extend(&self, next: Self) -> Result<(Self, usize), LayoutError> {
@@ -492,7 +492,7 @@ impl Layout {
     ///
     /// On arithmetic overflow, returns `LayoutError`.
     #[unstable(feature = "alloc_layout_extra", issue = "55724")]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn repeat_packed(&self, n: usize) -> Result<Self, LayoutError> {
@@ -511,7 +511,7 @@ impl Layout {
     ///
     /// On arithmetic overflow, returns `LayoutError`.
     #[unstable(feature = "alloc_layout_extra", issue = "55724")]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn extend_packed(&self, next: Self) -> Result<Self, LayoutError> {
@@ -528,14 +528,14 @@ impl Layout {
     /// `isize::MAX`, returns `LayoutError`.
     #[stable(feature = "alloc_layout_manipulation", since = "1.44.0")]
     #[rustc_const_stable(feature = "const_alloc_layout", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn array<T>(n: usize) -> Result<Self, LayoutError> {
         // Reduce the amount of code we need to monomorphize per `T`.
         return inner(T::LAYOUT, n);
 
-        #[inline]
+        #[inline(never)]
         const fn inner(element_layout: Layout, n: usize) -> Result<Layout, LayoutError> {
             let Layout { size: element_size, align } = element_layout;
 
@@ -565,7 +565,7 @@ impl Layout {
     /// Perma-unstable access to `align` as `Alignment` type.
     #[unstable(issue = "none", feature = "std_internals")]
     #[doc(hidden)]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn alignment(&self) -> Alignment {

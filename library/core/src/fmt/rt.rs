@@ -21,7 +21,7 @@ pub struct Placeholder {
 
 #[cfg(bootstrap)]
 impl Placeholder {
-    #[inline]
+    #[inline(never)]
     pub const fn new(position: usize, flags: u32, precision: Count, width: Count) -> Self {
         Self { position, flags, precision, width }
     }
@@ -114,47 +114,47 @@ macro_rules! argument_new {
 }
 
 impl Argument<'_> {
-    #[inline]
+    #[inline(never)]
     pub const fn new_display<T: Display>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as Display>::fmt)
     }
-    #[inline]
+    #[inline(never)]
     pub const fn new_debug<T: Debug>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as Debug>::fmt)
     }
-    #[inline]
+    #[inline(never)]
     pub const fn new_debug_noop<T: Debug>(x: &T) -> Argument<'_> {
         argument_new!(T, x, |_: &T, _| Ok(()))
     }
-    #[inline]
+    #[inline(never)]
     pub const fn new_octal<T: Octal>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as Octal>::fmt)
     }
-    #[inline]
+    #[inline(never)]
     pub const fn new_lower_hex<T: LowerHex>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as LowerHex>::fmt)
     }
-    #[inline]
+    #[inline(never)]
     pub const fn new_upper_hex<T: UpperHex>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as UpperHex>::fmt)
     }
-    #[inline]
+    #[inline(never)]
     pub const fn new_pointer<T: Pointer>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as Pointer>::fmt)
     }
-    #[inline]
+    #[inline(never)]
     pub const fn new_binary<T: Binary>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as Binary>::fmt)
     }
-    #[inline]
+    #[inline(never)]
     pub const fn new_lower_exp<T: LowerExp>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as LowerExp>::fmt)
     }
-    #[inline]
+    #[inline(never)]
     pub const fn new_upper_exp<T: UpperExp>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as UpperExp>::fmt)
     }
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub const fn from_usize(x: &usize) -> Argument<'_> {
         if *x > u16::MAX as usize {
@@ -168,7 +168,7 @@ impl Argument<'_> {
     /// # Safety
     ///
     /// This argument must actually be a placeholder argument.
-    #[inline]
+    #[inline(never)]
     pub(super) unsafe fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self.ty {
             // SAFETY:
@@ -184,7 +184,7 @@ impl Argument<'_> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     pub(super) const fn as_u16(&self) -> Option<u16> {
         match self.ty {
             ArgumentType::Count(count) => Some(count),
@@ -219,7 +219,7 @@ pub struct UnsafeArg {
 impl UnsafeArg {
     /// See documentation where `UnsafeArg` is required to know when it is safe to
     /// create and use `UnsafeArg`.
-    #[inline]
+    #[inline(never)]
     pub const unsafe fn new() -> Self {
         Self { _private: () }
     }
@@ -230,7 +230,7 @@ impl UnsafeArg {
 #[unstable(feature = "fmt_internals", issue = "none")]
 #[rustc_diagnostic_item = "FmtArgumentsNew"]
 impl<'a> Arguments<'a> {
-    #[inline]
+    #[inline(never)]
     pub const fn new_const<const N: usize>(pieces: &'a [&'static str; N]) -> Self {
         const { assert!(N <= 1) };
         Arguments { pieces, fmt: None, args: &[] }
@@ -245,7 +245,7 @@ impl<'a> Arguments<'a> {
     /// ```compile_fail,E0015
     /// const _: () = if false { panic!("a {}", "a") };
     /// ```
-    #[inline]
+    #[inline(never)]
     pub fn new_v1<const P: usize, const A: usize>(
         pieces: &'a [&'static str; P],
         args: &'a [rt::Argument<'a>; A],
@@ -268,7 +268,7 @@ impl<'a> Arguments<'a> {
     /// ```compile_fail,E0015
     /// const _: () = if false { panic!("a {:1}", "a") };
     /// ```
-    #[inline]
+    #[inline(never)]
     pub fn new_v1_formatted(
         pieces: &'a [&'static str],
         args: &'a [rt::Argument<'a>],

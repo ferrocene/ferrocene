@@ -188,7 +188,7 @@ impl Duration {
     /// let five_seconds = Duration::new(5, 0);
     /// ```
     #[stable(feature = "duration", since = "1.3.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[rustc_const_stable(feature = "duration_consts_2", since = "1.58.0")]
     pub const fn new(secs: u64, nanos: u32) -> Duration {
@@ -219,7 +219,7 @@ impl Duration {
     /// ```
     #[stable(feature = "duration", since = "1.3.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "duration_consts", since = "1.32.0")]
     pub const fn from_secs(secs: u64) -> Duration {
         Duration { secs, nanos: Nanoseconds::ZERO }
@@ -239,7 +239,7 @@ impl Duration {
     /// ```
     #[stable(feature = "duration", since = "1.3.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "duration_consts", since = "1.32.0")]
     pub const fn from_millis(millis: u64) -> Duration {
         let secs = millis / MILLIS_PER_SEC;
@@ -265,7 +265,7 @@ impl Duration {
     /// ```
     #[stable(feature = "duration_from_micros", since = "1.27.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "duration_consts", since = "1.32.0")]
     pub const fn from_micros(micros: u64) -> Duration {
         let secs = micros / MICROS_PER_SEC;
@@ -296,7 +296,7 @@ impl Duration {
     /// ```
     #[stable(feature = "duration_extras", since = "1.27.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "duration_consts", since = "1.32.0")]
     pub const fn from_nanos(nanos: u64) -> Duration {
         const NANOS_PER_SEC: u64 = self::NANOS_PER_SEC as u64;
@@ -327,7 +327,7 @@ impl Duration {
     /// ```
     #[unstable(feature = "duration_constructors", issue = "120301")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn from_weeks(weeks: u64) -> Duration {
         if weeks > u64::MAX / (SECS_PER_MINUTE * MINS_PER_HOUR * HOURS_PER_DAY * DAYS_PER_WEEK) {
             panic!("overflow in Duration::from_weeks");
@@ -355,7 +355,7 @@ impl Duration {
     /// ```
     #[unstable(feature = "duration_constructors", issue = "120301")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn from_days(days: u64) -> Duration {
         if days > u64::MAX / (SECS_PER_MINUTE * MINS_PER_HOUR * HOURS_PER_DAY) {
             panic!("overflow in Duration::from_days");
@@ -383,7 +383,7 @@ impl Duration {
     /// ```
     #[unstable(feature = "duration_constructors", issue = "120301")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn from_hours(hours: u64) -> Duration {
         if hours > u64::MAX / (SECS_PER_MINUTE * MINS_PER_HOUR) {
             panic!("overflow in Duration::from_hours");
@@ -411,7 +411,7 @@ impl Duration {
     /// ```
     #[unstable(feature = "duration_constructors", issue = "120301")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn from_mins(mins: u64) -> Duration {
         if mins > u64::MAX / SECS_PER_MINUTE {
             panic!("overflow in Duration::from_mins");
@@ -439,7 +439,7 @@ impl Duration {
     #[must_use]
     #[stable(feature = "duration_zero", since = "1.53.0")]
     #[rustc_const_stable(feature = "duration_zero", since = "1.53.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn is_zero(&self) -> bool {
         self.secs == 0 && self.nanos.as_inner() == 0
     }
@@ -467,7 +467,7 @@ impl Duration {
     #[stable(feature = "duration", since = "1.3.0")]
     #[rustc_const_stable(feature = "duration_consts", since = "1.32.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn as_secs(&self) -> u64 {
         self.secs
     }
@@ -490,7 +490,7 @@ impl Duration {
     #[stable(feature = "duration_extras", since = "1.27.0")]
     #[rustc_const_stable(feature = "duration_consts", since = "1.32.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn subsec_millis(&self) -> u32 {
         self.nanos.as_inner() / NANOS_PER_MILLI
     }
@@ -513,7 +513,7 @@ impl Duration {
     #[stable(feature = "duration_extras", since = "1.27.0")]
     #[rustc_const_stable(feature = "duration_consts", since = "1.32.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn subsec_micros(&self) -> u32 {
         self.nanos.as_inner() / NANOS_PER_MICRO
     }
@@ -536,7 +536,7 @@ impl Duration {
     #[stable(feature = "duration", since = "1.3.0")]
     #[rustc_const_stable(feature = "duration_consts", since = "1.32.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn subsec_nanos(&self) -> u32 {
         self.nanos.as_inner()
     }
@@ -554,7 +554,7 @@ impl Duration {
     #[stable(feature = "duration_as_u128", since = "1.33.0")]
     #[rustc_const_stable(feature = "duration_as_u128", since = "1.33.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn as_millis(&self) -> u128 {
         self.secs as u128 * MILLIS_PER_SEC as u128
             + (self.nanos.as_inner() / NANOS_PER_MILLI) as u128
@@ -573,7 +573,7 @@ impl Duration {
     #[stable(feature = "duration_as_u128", since = "1.33.0")]
     #[rustc_const_stable(feature = "duration_as_u128", since = "1.33.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn as_micros(&self) -> u128 {
         self.secs as u128 * MICROS_PER_SEC as u128
             + (self.nanos.as_inner() / NANOS_PER_MICRO) as u128
@@ -592,7 +592,7 @@ impl Duration {
     #[stable(feature = "duration_as_u128", since = "1.33.0")]
     #[rustc_const_stable(feature = "duration_as_u128", since = "1.33.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn as_nanos(&self) -> u128 {
         self.secs as u128 * NANOS_PER_SEC as u128 + self.nanos.as_inner() as u128
     }
@@ -611,7 +611,7 @@ impl Duration {
     #[rustc_const_stable(feature = "duration_abs_diff", since = "1.81.0")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     pub const fn abs_diff(self, other: Duration) -> Duration {
         if let Some(res) = self.checked_sub(other) { res } else { other.checked_sub(self).unwrap() }
     }
@@ -630,7 +630,7 @@ impl Duration {
     #[stable(feature = "duration_checked_ops", since = "1.16.0")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "duration_consts_2", since = "1.58.0")]
     pub const fn checked_add(self, rhs: Duration) -> Option<Duration> {
         if let Some(mut secs) = self.secs.checked_add(rhs.secs) {
@@ -665,7 +665,7 @@ impl Duration {
     #[stable(feature = "duration_saturating_ops", since = "1.53.0")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "duration_consts_2", since = "1.58.0")]
     pub const fn saturating_add(self, rhs: Duration) -> Duration {
         match self.checked_add(rhs) {
@@ -688,7 +688,7 @@ impl Duration {
     #[stable(feature = "duration_checked_ops", since = "1.16.0")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "duration_consts_2", since = "1.58.0")]
     pub const fn checked_sub(self, rhs: Duration) -> Option<Duration> {
         if let Some(mut secs) = self.secs.checked_sub(rhs.secs) {
@@ -721,7 +721,7 @@ impl Duration {
     #[stable(feature = "duration_saturating_ops", since = "1.53.0")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "duration_consts_2", since = "1.58.0")]
     pub const fn saturating_sub(self, rhs: Duration) -> Duration {
         match self.checked_sub(rhs) {
@@ -744,7 +744,7 @@ impl Duration {
     #[stable(feature = "duration_checked_ops", since = "1.16.0")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "duration_consts_2", since = "1.58.0")]
     pub const fn checked_mul(self, rhs: u32) -> Option<Duration> {
         // Multiply nanoseconds as u64, because it cannot overflow that way.
@@ -776,7 +776,7 @@ impl Duration {
     #[stable(feature = "duration_saturating_ops", since = "1.53.0")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "duration_consts_2", since = "1.58.0")]
     pub const fn saturating_mul(self, rhs: u32) -> Duration {
         match self.checked_mul(rhs) {
@@ -800,7 +800,7 @@ impl Duration {
     #[stable(feature = "duration_checked_ops", since = "1.16.0")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "duration_consts_2", since = "1.58.0")]
     pub const fn checked_div(self, rhs: u32) -> Option<Duration> {
         if rhs != 0 {
@@ -829,7 +829,7 @@ impl Duration {
     /// ```
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "duration_consts_float", since = "1.83.0")]
     pub const fn as_secs_f64(&self) -> f64 {
         (self.secs as f64) + (self.nanos.as_inner() as f64) / (NANOS_PER_SEC as f64)
@@ -848,7 +848,7 @@ impl Duration {
     /// ```
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "duration_consts_float", since = "1.83.0")]
     pub const fn as_secs_f32(&self) -> f32 {
         (self.secs as f32) + (self.nanos.as_inner() as f32) / (NANOS_PER_SEC as f32)
@@ -868,7 +868,7 @@ impl Duration {
     /// ```
     #[unstable(feature = "duration_millis_float", issue = "122451")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn as_millis_f64(&self) -> f64 {
         (self.secs as f64) * (MILLIS_PER_SEC as f64)
             + (self.nanos.as_inner() as f64) / (NANOS_PER_MILLI as f64)
@@ -888,7 +888,7 @@ impl Duration {
     /// ```
     #[unstable(feature = "duration_millis_float", issue = "122451")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn as_millis_f32(&self) -> f32 {
         (self.secs as f32) * (MILLIS_PER_SEC as f32)
             + (self.nanos.as_inner() as f32) / (NANOS_PER_MILLI as f32)
@@ -923,7 +923,7 @@ impl Duration {
     /// ```
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub fn from_secs_f64(secs: f64) -> Duration {
         match Duration::try_from_secs_f64(secs) {
             Ok(v) => v,
@@ -960,7 +960,7 @@ impl Duration {
     /// ```
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub fn from_secs_f32(secs: f32) -> Duration {
         match Duration::try_from_secs_f32(secs) {
             Ok(v) => v,
@@ -984,7 +984,7 @@ impl Duration {
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     pub fn mul_f64(self, rhs: f64) -> Duration {
         Duration::from_secs_f64(rhs * self.as_secs_f64())
     }
@@ -1005,7 +1005,7 @@ impl Duration {
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     pub fn mul_f32(self, rhs: f32) -> Duration {
         Duration::from_secs_f32(rhs * self.as_secs_f32())
     }
@@ -1026,7 +1026,7 @@ impl Duration {
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     pub fn div_f64(self, rhs: f64) -> Duration {
         Duration::from_secs_f64(self.as_secs_f64() / rhs)
     }
@@ -1049,7 +1049,7 @@ impl Duration {
     #[stable(feature = "duration_float", since = "1.38.0")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     pub fn div_f32(self, rhs: f32) -> Duration {
         Duration::from_secs_f32(self.as_secs_f32() / rhs)
     }
@@ -1067,7 +1067,7 @@ impl Duration {
     #[stable(feature = "div_duration", since = "1.80.0")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "duration_consts_float", since = "1.83.0")]
     pub const fn div_duration_f64(self, rhs: Duration) -> f64 {
         let self_nanos =
@@ -1089,7 +1089,7 @@ impl Duration {
     #[stable(feature = "div_duration", since = "1.80.0")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "duration_consts_float", since = "1.83.0")]
     pub const fn div_duration_f32(self, rhs: Duration) -> f32 {
         let self_nanos =
@@ -1103,7 +1103,7 @@ impl Duration {
 impl Add for Duration {
     type Output = Duration;
 
-    #[inline]
+    #[inline(never)]
     fn add(self, rhs: Duration) -> Duration {
         self.checked_add(rhs).expect("overflow when adding durations")
     }
@@ -1111,7 +1111,7 @@ impl Add for Duration {
 
 #[stable(feature = "time_augmented_assignment", since = "1.9.0")]
 impl AddAssign for Duration {
-    #[inline]
+    #[inline(never)]
     fn add_assign(&mut self, rhs: Duration) {
         *self = *self + rhs;
     }
@@ -1121,7 +1121,7 @@ impl AddAssign for Duration {
 impl Sub for Duration {
     type Output = Duration;
 
-    #[inline]
+    #[inline(never)]
     fn sub(self, rhs: Duration) -> Duration {
         self.checked_sub(rhs).expect("overflow when subtracting durations")
     }
@@ -1129,7 +1129,7 @@ impl Sub for Duration {
 
 #[stable(feature = "time_augmented_assignment", since = "1.9.0")]
 impl SubAssign for Duration {
-    #[inline]
+    #[inline(never)]
     fn sub_assign(&mut self, rhs: Duration) {
         *self = *self - rhs;
     }
@@ -1139,7 +1139,7 @@ impl SubAssign for Duration {
 impl Mul<u32> for Duration {
     type Output = Duration;
 
-    #[inline]
+    #[inline(never)]
     fn mul(self, rhs: u32) -> Duration {
         self.checked_mul(rhs).expect("overflow when multiplying duration by scalar")
     }
@@ -1149,7 +1149,7 @@ impl Mul<u32> for Duration {
 impl Mul<Duration> for u32 {
     type Output = Duration;
 
-    #[inline]
+    #[inline(never)]
     fn mul(self, rhs: Duration) -> Duration {
         rhs * self
     }
@@ -1157,7 +1157,7 @@ impl Mul<Duration> for u32 {
 
 #[stable(feature = "time_augmented_assignment", since = "1.9.0")]
 impl MulAssign<u32> for Duration {
-    #[inline]
+    #[inline(never)]
     fn mul_assign(&mut self, rhs: u32) {
         *self = *self * rhs;
     }
@@ -1167,7 +1167,7 @@ impl MulAssign<u32> for Duration {
 impl Div<u32> for Duration {
     type Output = Duration;
 
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     fn div(self, rhs: u32) -> Duration {
         self.checked_div(rhs).expect("divide by zero error when dividing duration by scalar")
@@ -1176,7 +1176,7 @@ impl Div<u32> for Duration {
 
 #[stable(feature = "time_augmented_assignment", since = "1.9.0")]
 impl DivAssign<u32> for Duration {
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     fn div_assign(&mut self, rhs: u32) {
         *self = *self / rhs;
@@ -1601,7 +1601,7 @@ impl Duration {
     /// assert_eq!(res, Ok(Duration::new(1, 2_929_688)));
     /// ```
     #[stable(feature = "duration_checked_float", since = "1.66.0")]
-    #[inline]
+    #[inline(never)]
     pub fn try_from_secs_f32(secs: f32) -> Result<Duration, TryFromFloatSecsError> {
         try_from_secs!(
             secs = secs,
@@ -1677,7 +1677,7 @@ impl Duration {
     /// assert_eq!(res, Ok(Duration::new(1, 2_929_688)));
     /// ```
     #[stable(feature = "duration_checked_float", since = "1.66.0")]
-    #[inline]
+    #[inline(never)]
     pub fn try_from_secs_f64(secs: f64) -> Result<Duration, TryFromFloatSecsError> {
         try_from_secs!(
             secs = secs,

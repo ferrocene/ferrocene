@@ -8,12 +8,12 @@ pub(super) struct DisplayBuffer<const SIZE: usize> {
 }
 
 impl<const SIZE: usize> DisplayBuffer<SIZE> {
-    #[inline]
+    #[inline(never)]
     pub(super) const fn new() -> Self {
         Self { buf: [MaybeUninit::uninit(); SIZE], len: 0 }
     }
 
-    #[inline]
+    #[inline(never)]
     pub(super) fn as_str(&self) -> &str {
         // SAFETY: `buf` is only written to by the `fmt::Write::write_str` implementation
         // which writes a valid UTF-8 string to `buf` and correctly sets `len`.

@@ -580,7 +580,7 @@ pub unsafe fn drop_in_place<T: ?Sized>(to_drop: *mut T) {
 /// assert!(p.is_null());
 /// assert_eq!(p as usize, 0); // this pointer has the address 0
 /// ```
-#[inline(always)]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_promotable]
@@ -605,7 +605,7 @@ pub const fn null<T: ?Sized + Thin>() -> *const T {
 /// assert!(p.is_null());
 /// assert_eq!(p as usize, 0); // this pointer has the address 0
 /// ```
-#[inline(always)]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_promotable]
@@ -628,7 +628,7 @@ pub const fn null_mut<T: ?Sized + Thin>() -> *mut T {
 // /// exposed provenance. See [`with_exposed_provenance`] for more details on that operation.
 // ///
 // /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
-#[inline(always)]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "strict_provenance", since = "1.84.0")]
 #[rustc_const_stable(feature = "strict_provenance", since = "1.84.0")]
@@ -645,7 +645,7 @@ pub const fn without_provenance<T>(addr: usize) -> *const T {
 /// a `T`, which means this must not be used as a "not yet initialized"
 /// sentinel value. Types that lazily allocate must track initialization by
 /// some other means.
-#[inline(always)]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "strict_provenance", since = "1.84.0")]
 #[rustc_const_stable(feature = "strict_provenance", since = "1.84.0")]
@@ -668,7 +668,7 @@ pub const fn dangling<T>() -> *const T {
 // /// exposed provenance. See [`with_exposed_provenance_mut`] for more details on that operation.
 // ///
 // /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
-#[inline(always)]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "strict_provenance", since = "1.84.0")]
 #[rustc_const_stable(feature = "strict_provenance", since = "1.84.0")]
@@ -690,7 +690,7 @@ pub const fn without_provenance_mut<T>(addr: usize) -> *mut T {
 /// a `T`, which means this must not be used as a "not yet initialized"
 /// sentinel value. Types that lazily allocate must track initialization by
 /// some other means.
-#[inline(always)]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "strict_provenance", since = "1.84.0")]
 #[rustc_const_stable(feature = "strict_provenance", since = "1.84.0")]
@@ -732,7 +732,7 @@ pub const fn dangling_mut<T>() -> *mut T {
 ///
 /// This is an [Exposed Provenance][crate::ptr#exposed-provenance] API.
 #[must_use]
-#[inline(always)]
+#[inline(never)]
 #[stable(feature = "exposed_provenance", since = "1.84.0")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[allow(fuzzy_provenance_casts)] // this *is* the explicit provenance API one should use instead
@@ -774,7 +774,7 @@ pub fn with_exposed_provenance<T>(addr: usize) -> *const T {
 ///
 /// This is an [Exposed Provenance][crate::ptr#exposed-provenance] API.
 #[must_use]
-#[inline(always)]
+#[inline(never)]
 #[stable(feature = "exposed_provenance", since = "1.84.0")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[allow(fuzzy_provenance_casts)] // this *is* the explicit provenance API one should use instead
@@ -831,7 +831,7 @@ pub fn with_exposed_provenance_mut<T>(addr: usize) -> *mut T {
 /// let p = ptr::from_ref(&x);
 /// unsafe { p.read() };
 /// ```
-#[inline(always)]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "ptr_from_ref", since = "1.76.0")]
 #[rustc_const_stable(feature = "ptr_from_ref", since = "1.76.0")]
@@ -884,7 +884,7 @@ pub const fn from_ref<T: ?Sized>(r: &T) -> *const T {
 /// let p = ptr::from_mut(&mut x);
 /// unsafe { p.write(T::default()) };
 /// ```
-#[inline(always)]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "ptr_from_ref", since = "1.76.0")]
 #[rustc_const_stable(feature = "ptr_from_ref", since = "1.76.0")]
@@ -2212,7 +2212,7 @@ pub(crate) unsafe fn align_offset<T: Sized>(p: *const T, a: usize) -> usize {
 /// assert!(!std::ptr::eq(&a[0..2], &a[1..3]));
 /// ```
 #[stable(feature = "ptr_eq", since = "1.17.0")]
-#[inline(always)]
+#[inline(never)]
 #[must_use = "pointer comparison produces a value"]
 #[rustc_diagnostic_item = "ptr_eq"]
 #[allow(ambiguous_wide_pointer_comparisons)] // it's actually clear here
@@ -2240,7 +2240,7 @@ pub fn eq<T: ?Sized>(a: *const T, b: *const T) -> bool {
 /// assert!(!ptr::eq::<dyn std::fmt::Debug>(whole, first));
 /// ```
 #[stable(feature = "ptr_addr_eq", since = "1.76.0")]
-#[inline(always)]
+#[inline(never)]
 #[must_use = "pointer comparison produces a value"]
 #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
@@ -2295,7 +2295,7 @@ pub fn addr_eq<T: ?Sized, U: ?Sized>(p: *const T, q: *const U) -> bool {
 ///
 /// [subtype]: https://doc.rust-lang.org/reference/subtyping.html
 #[stable(feature = "ptr_fn_addr_eq", since = "1.85.0")]
-#[inline(always)]
+#[inline(never)]
 #[must_use = "function pointer comparison produces a value"]
 #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]

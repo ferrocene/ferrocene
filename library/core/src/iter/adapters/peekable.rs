@@ -34,7 +34,7 @@ impl<I: Iterator> Peekable<I> {
 impl<I: Iterator> Iterator for Peekable<I> {
     type Item = I::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<I::Item> {
         match self.peeked.take() {
             Some(v) => v,
@@ -42,7 +42,7 @@ impl<I: Iterator> Iterator for Peekable<I> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     #[rustc_inherit_overflow_checks]
     fn count(mut self) -> usize {
         match self.peeked.take() {
@@ -52,7 +52,7 @@ impl<I: Iterator> Iterator for Peekable<I> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<I::Item> {
         match self.peeked.take() {
             Some(None) => None,
@@ -62,7 +62,7 @@ impl<I: Iterator> Iterator for Peekable<I> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(mut self) -> Option<I::Item> {
         let peek_opt = match self.peeked.take() {
             Some(None) => return None,
@@ -72,7 +72,7 @@ impl<I: Iterator> Iterator for Peekable<I> {
         self.iter.last().or(peek_opt)
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let peek_len = match self.peeked {
             Some(None) => return (0, Some(0)),
@@ -88,7 +88,7 @@ impl<I: Iterator> Iterator for Peekable<I> {
         (lo, hi)
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -103,7 +103,7 @@ impl<I: Iterator> Iterator for Peekable<I> {
         self.iter.try_fold(acc, f)
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<Acc, Fold>(self, init: Acc, mut fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -122,7 +122,7 @@ impl<I> DoubleEndedIterator for Peekable<I>
 where
     I: DoubleEndedIterator,
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<Self::Item> {
         match self.peeked.as_mut() {
             Some(v @ Some(_)) => self.iter.next_back().or_else(|| v.take()),
@@ -131,7 +131,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -151,7 +151,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfold<Acc, Fold>(self, init: Acc, mut fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -211,7 +211,7 @@ impl<I: Iterator> Peekable<I> {
     /// assert_eq!(iter.peek(), None);
     /// assert_eq!(iter.next(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn peek(&mut self) -> Option<&I::Item> {
         let iter = &mut self.iter;
@@ -251,7 +251,7 @@ impl<I: Iterator> Peekable<I> {
     /// // The value we put in reappears as the iterator continues.
     /// assert_eq!(iter.collect::<Vec<_>>(), vec![&5, &3]);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "peekable_peek_mut", since = "1.53.0")]
     pub fn peek_mut(&mut self) -> Option<&mut I::Item> {
         let iter = &mut self.iter;
@@ -329,7 +329,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut I::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.iter) }

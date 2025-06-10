@@ -189,7 +189,7 @@ macro_rules! step_signed_methods {
             unsafe { start.checked_add_unsigned(n as $unsigned).unwrap_unchecked() }
         }
 
-        #[inline]
+        #[inline(never)]
         unsafe fn backward_unchecked(start: Self, n: usize) -> Self {
             // SAFETY: the caller has to guarantee that `start - n` doesn't overflow.
             unsafe { start.checked_sub_unsigned(n as $unsigned).unwrap_unchecked() }
@@ -205,7 +205,7 @@ macro_rules! step_unsigned_methods {
             unsafe { start.unchecked_add(n as Self) }
         }
 
-        #[inline]
+        #[inline(never)]
         unsafe fn backward_unchecked(start: Self, n: usize) -> Self {
             // SAFETY: the caller has to guarantee that `start - n` doesn't overflow.
             unsafe { start.unchecked_sub(n as Self) }
@@ -216,7 +216,7 @@ macro_rules! step_unsigned_methods {
 // These are still macro-generated because the integer literals resolve to different types.
 macro_rules! step_identical_methods {
     () => {
-        #[inline]
+        #[inline(never)]
         #[allow(arithmetic_overflow)]
         #[rustc_inherit_overflow_checks]
         fn forward(start: Self, n: usize) -> Self {
@@ -229,7 +229,7 @@ macro_rules! step_identical_methods {
             start.wrapping_add(n as Self)
         }
 
-        #[inline]
+        #[inline(never)]
         #[allow(arithmetic_overflow)]
         #[rustc_inherit_overflow_checks]
         fn backward(start: Self, n: usize) -> Self {
@@ -258,7 +258,7 @@ macro_rules! step_integer_impls {
                 step_identical_methods!();
                 step_unsigned_methods!();
 
-                #[inline]
+                #[inline(never)]
                 fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
                     if *start <= *end {
                         // This relies on $u_narrower <= usize
@@ -269,7 +269,7 @@ macro_rules! step_integer_impls {
                     }
                 }
 
-                #[inline]
+                #[inline(never)]
                 fn forward_checked(start: Self, n: usize) -> Option<Self> {
                     match Self::try_from(n) {
                         Ok(n) => start.checked_add(n),
@@ -277,7 +277,7 @@ macro_rules! step_integer_impls {
                     }
                 }
 
-                #[inline]
+                #[inline(never)]
                 fn backward_checked(start: Self, n: usize) -> Option<Self> {
                     match Self::try_from(n) {
                         Ok(n) => start.checked_sub(n),
@@ -292,7 +292,7 @@ macro_rules! step_integer_impls {
                 step_identical_methods!();
                 step_signed_methods!($u_narrower);
 
-                #[inline]
+                #[inline(never)]
                 fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
                     if *start <= *end {
                         // This relies on $i_narrower <= usize
@@ -307,7 +307,7 @@ macro_rules! step_integer_impls {
                     }
                 }
 
-                #[inline]
+                #[inline(never)]
                 fn forward_checked(start: Self, n: usize) -> Option<Self> {
                     match $u_narrower::try_from(n) {
                         Ok(n) => {
@@ -328,7 +328,7 @@ macro_rules! step_integer_impls {
                     }
                 }
 
-                #[inline]
+                #[inline(never)]
                 fn backward_checked(start: Self, n: usize) -> Option<Self> {
                     match $u_narrower::try_from(n) {
                         Ok(n) => {
@@ -358,7 +358,7 @@ macro_rules! step_integer_impls {
                 step_identical_methods!();
                 step_unsigned_methods!();
 
-                #[inline]
+                #[inline(never)]
                 fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
                     if *start <= *end {
                         if let Ok(steps) = usize::try_from(*end - *start) {
@@ -371,12 +371,12 @@ macro_rules! step_integer_impls {
                     }
                 }
 
-                #[inline]
+                #[inline(never)]
                 fn forward_checked(start: Self, n: usize) -> Option<Self> {
                     start.checked_add(n as Self)
                 }
 
-                #[inline]
+                #[inline(never)]
                 fn backward_checked(start: Self, n: usize) -> Option<Self> {
                     start.checked_sub(n as Self)
                 }
@@ -388,7 +388,7 @@ macro_rules! step_integer_impls {
                 step_identical_methods!();
                 step_signed_methods!($u_wider);
 
-                #[inline]
+                #[inline(never)]
                 fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
                     if *start <= *end {
                         match end.checked_sub(*start) {
@@ -408,12 +408,12 @@ macro_rules! step_integer_impls {
                     }
                 }
 
-                #[inline]
+                #[inline(never)]
                 fn forward_checked(start: Self, n: usize) -> Option<Self> {
                     start.checked_add(n as Self)
                 }
 
-                #[inline]
+                #[inline(never)]
                 fn backward_checked(start: Self, n: usize) -> Option<Self> {
                     start.checked_sub(n as Self)
                 }
@@ -442,7 +442,7 @@ step_integer_impls! {
 
 #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
 impl Step for char {
-    #[inline]
+    #[inline(never)]
     fn steps_between(&start: &char, &end: &char) -> (usize, Option<usize>) {
         let start = start as u32;
         let end = end as u32;
@@ -466,7 +466,7 @@ impl Step for char {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn forward_checked(start: char, count: usize) -> Option<char> {
         let start = start as u32;
         let mut res = Step::forward_checked(start, count)?;
@@ -482,7 +482,7 @@ impl Step for char {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn backward_checked(start: char, count: usize) -> Option<char> {
         let start = start as u32;
         let mut res = Step::backward_checked(start, count)?;
@@ -494,7 +494,7 @@ impl Step for char {
         Some(unsafe { char::from_u32_unchecked(res) })
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn forward_unchecked(start: char, count: usize) -> char {
         let start = start as u32;
         // SAFETY: the caller must guarantee that this doesn't overflow
@@ -510,7 +510,7 @@ impl Step for char {
         unsafe { char::from_u32_unchecked(res) }
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn backward_unchecked(start: char, count: usize) -> char {
         let start = start as u32;
         // SAFETY: the caller must guarantee that this doesn't overflow
@@ -529,18 +529,18 @@ impl Step for char {
 
 #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
 impl Step for AsciiChar {
-    #[inline]
+    #[inline(never)]
     fn steps_between(&start: &AsciiChar, &end: &AsciiChar) -> (usize, Option<usize>) {
         Step::steps_between(&start.to_u8(), &end.to_u8())
     }
 
-    #[inline]
+    #[inline(never)]
     fn forward_checked(start: AsciiChar, count: usize) -> Option<AsciiChar> {
         let end = Step::forward_checked(start.to_u8(), count)?;
         AsciiChar::from_u8(end)
     }
 
-    #[inline]
+    #[inline(never)]
     fn backward_checked(start: AsciiChar, count: usize) -> Option<AsciiChar> {
         let end = Step::backward_checked(start.to_u8(), count)?;
 
@@ -548,7 +548,7 @@ impl Step for AsciiChar {
         Some(unsafe { AsciiChar::from_u8_unchecked(end) })
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn forward_unchecked(start: AsciiChar, count: usize) -> AsciiChar {
         // SAFETY: Caller asserts that result is a valid ASCII character,
         // and therefore it is a valid u8.
@@ -558,7 +558,7 @@ impl Step for AsciiChar {
         unsafe { AsciiChar::from_u8_unchecked(end) }
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn backward_unchecked(start: AsciiChar, count: usize) -> AsciiChar {
         // SAFETY: Caller asserts that result is a valid ASCII character,
         // and therefore it is a valid u8.
@@ -571,29 +571,29 @@ impl Step for AsciiChar {
 
 #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
 impl Step for Ipv4Addr {
-    #[inline]
+    #[inline(never)]
     fn steps_between(&start: &Ipv4Addr, &end: &Ipv4Addr) -> (usize, Option<usize>) {
         u32::steps_between(&start.to_bits(), &end.to_bits())
     }
 
-    #[inline]
+    #[inline(never)]
     fn forward_checked(start: Ipv4Addr, count: usize) -> Option<Ipv4Addr> {
         u32::forward_checked(start.to_bits(), count).map(Ipv4Addr::from_bits)
     }
 
-    #[inline]
+    #[inline(never)]
     fn backward_checked(start: Ipv4Addr, count: usize) -> Option<Ipv4Addr> {
         u32::backward_checked(start.to_bits(), count).map(Ipv4Addr::from_bits)
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn forward_unchecked(start: Ipv4Addr, count: usize) -> Ipv4Addr {
         // SAFETY: Since u32 and Ipv4Addr are losslessly convertible,
         //   this is as safe as the u32 version.
         Ipv4Addr::from_bits(unsafe { u32::forward_unchecked(start.to_bits(), count) })
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn backward_unchecked(start: Ipv4Addr, count: usize) -> Ipv4Addr {
         // SAFETY: Since u32 and Ipv4Addr are losslessly convertible,
         //   this is as safe as the u32 version.
@@ -603,29 +603,29 @@ impl Step for Ipv4Addr {
 
 #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
 impl Step for Ipv6Addr {
-    #[inline]
+    #[inline(never)]
     fn steps_between(&start: &Ipv6Addr, &end: &Ipv6Addr) -> (usize, Option<usize>) {
         u128::steps_between(&start.to_bits(), &end.to_bits())
     }
 
-    #[inline]
+    #[inline(never)]
     fn forward_checked(start: Ipv6Addr, count: usize) -> Option<Ipv6Addr> {
         u128::forward_checked(start.to_bits(), count).map(Ipv6Addr::from_bits)
     }
 
-    #[inline]
+    #[inline(never)]
     fn backward_checked(start: Ipv6Addr, count: usize) -> Option<Ipv6Addr> {
         u128::backward_checked(start.to_bits(), count).map(Ipv6Addr::from_bits)
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn forward_unchecked(start: Ipv6Addr, count: usize) -> Ipv6Addr {
         // SAFETY: Since u128 and Ipv6Addr are losslessly convertible,
         //   this is as safe as the u128 version.
         Ipv6Addr::from_bits(unsafe { u128::forward_unchecked(start.to_bits(), count) })
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn backward_unchecked(start: Ipv6Addr, count: usize) -> Ipv6Addr {
         // SAFETY: Since u128 and Ipv6Addr are losslessly convertible,
         //   this is as safe as the u128 version.
@@ -681,7 +681,7 @@ trait RangeIteratorImpl {
 impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     type Item = A;
 
-    #[inline]
+    #[inline(never)]
     default fn spec_next(&mut self) -> Option<A> {
         if self.start < self.end {
             let n =
@@ -692,7 +692,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     default fn spec_nth(&mut self, n: usize) -> Option<A> {
         if let Some(plus_n) = Step::forward_checked(self.start.clone(), n) {
             if plus_n < self.end {
@@ -706,7 +706,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
         None
     }
 
-    #[inline]
+    #[inline(never)]
     default fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let steps = Step::steps_between(&self.start, &self.end);
         let available = steps.1.unwrap_or(steps.0);
@@ -719,7 +719,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
         NonZero::new(n - taken).map_or(Ok(()), Err)
     }
 
-    #[inline]
+    #[inline(never)]
     default fn spec_next_back(&mut self) -> Option<A> {
         if self.start < self.end {
             self.end =
@@ -730,7 +730,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     default fn spec_nth_back(&mut self, n: usize) -> Option<A> {
         if let Some(minus_n) = Step::backward_checked(self.end.clone(), n) {
             if minus_n > self.start {
@@ -744,7 +744,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
         None
     }
 
-    #[inline]
+    #[inline(never)]
     default fn spec_advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let steps = Step::steps_between(&self.start, &self.end);
         let available = steps.1.unwrap_or(steps.0);
@@ -759,7 +759,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
 }
 
 impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
-    #[inline]
+    #[inline(never)]
     fn spec_next(&mut self) -> Option<T> {
         if self.start < self.end {
             let old = self.start;
@@ -771,7 +771,7 @@ impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn spec_nth(&mut self, n: usize) -> Option<T> {
         if let Some(plus_n) = Step::forward_checked(self.start, n) {
             if plus_n < self.end {
@@ -785,7 +785,7 @@ impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
         None
     }
 
-    #[inline]
+    #[inline(never)]
     fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let steps = Step::steps_between(&self.start, &self.end);
         let available = steps.1.unwrap_or(steps.0);
@@ -801,7 +801,7 @@ impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
         NonZero::new(n - taken).map_or(Ok(()), Err)
     }
 
-    #[inline]
+    #[inline(never)]
     fn spec_next_back(&mut self) -> Option<T> {
         if self.start < self.end {
             // SAFETY: just checked precondition
@@ -812,7 +812,7 @@ impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn spec_nth_back(&mut self, n: usize) -> Option<T> {
         if let Some(minus_n) = Step::backward_checked(self.end, n) {
             if minus_n > self.start {
@@ -826,7 +826,7 @@ impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
         None
     }
 
-    #[inline]
+    #[inline(never)]
     fn spec_advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let steps = Step::steps_between(&self.start, &self.end);
         let available = steps.1.unwrap_or(steps.0);
@@ -844,12 +844,12 @@ impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
 impl<A: Step> Iterator for ops::Range<A> {
     type Item = A;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<A> {
         self.spec_next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.start < self.end {
             Step::steps_between(&self.start, &self.end)
@@ -858,7 +858,7 @@ impl<A: Step> Iterator for ops::Range<A> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         if self.start < self.end {
             Step::steps_between(&self.start, &self.end).1.expect("count overflowed usize")
@@ -867,17 +867,17 @@ impl<A: Step> Iterator for ops::Range<A> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<A> {
         self.spec_nth(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(mut self) -> Option<A> {
         self.next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn min(mut self) -> Option<A>
     where
         A: Ord,
@@ -885,7 +885,7 @@ impl<A: Step> Iterator for ops::Range<A> {
         self.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn max(mut self) -> Option<A>
     where
         A: Ord,
@@ -893,17 +893,17 @@ impl<A: Step> Iterator for ops::Range<A> {
         self.next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn is_sorted(self) -> bool {
         true
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.spec_advance_by(n)
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -966,17 +966,17 @@ range_incl_exact_iter_impl! {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<A: Step> DoubleEndedIterator for ops::Range<A> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<A> {
         self.spec_next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, n: usize) -> Option<A> {
         self.spec_nth_back(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.spec_advance_back_by(n)
     }
@@ -1011,18 +1011,18 @@ impl<A: Step> FusedIterator for ops::Range<A> {}
 impl<A: Step> Iterator for ops::RangeFrom<A> {
     type Item = A;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<A> {
         let n = Step::forward(self.start.clone(), 1);
         Some(mem::replace(&mut self.start, n))
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         (usize::MAX, None)
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<A> {
         let plus_n = Step::forward(self.start.clone(), n);
         self.start = Step::forward(plus_n.clone(), 1);
@@ -1060,7 +1060,7 @@ trait RangeInclusiveIteratorImpl {
 impl<A: Step> RangeInclusiveIteratorImpl for ops::RangeInclusive<A> {
     type Item = A;
 
-    #[inline]
+    #[inline(never)]
     default fn spec_next(&mut self) -> Option<A> {
         if self.is_empty() {
             return None;
@@ -1076,7 +1076,7 @@ impl<A: Step> RangeInclusiveIteratorImpl for ops::RangeInclusive<A> {
         })
     }
 
-    #[inline]
+    #[inline(never)]
     default fn spec_try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -1105,7 +1105,7 @@ impl<A: Step> RangeInclusiveIteratorImpl for ops::RangeInclusive<A> {
         try { accum }
     }
 
-    #[inline]
+    #[inline(never)]
     default fn spec_next_back(&mut self) -> Option<A> {
         if self.is_empty() {
             return None;
@@ -1121,7 +1121,7 @@ impl<A: Step> RangeInclusiveIteratorImpl for ops::RangeInclusive<A> {
         })
     }
 
-    #[inline]
+    #[inline(never)]
     default fn spec_try_rfold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -1152,7 +1152,7 @@ impl<A: Step> RangeInclusiveIteratorImpl for ops::RangeInclusive<A> {
 }
 
 impl<T: TrustedStep> RangeInclusiveIteratorImpl for ops::RangeInclusive<T> {
-    #[inline]
+    #[inline(never)]
     fn spec_next(&mut self) -> Option<T> {
         if self.is_empty() {
             return None;
@@ -1168,7 +1168,7 @@ impl<T: TrustedStep> RangeInclusiveIteratorImpl for ops::RangeInclusive<T> {
         })
     }
 
-    #[inline]
+    #[inline(never)]
     fn spec_try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -1197,7 +1197,7 @@ impl<T: TrustedStep> RangeInclusiveIteratorImpl for ops::RangeInclusive<T> {
         try { accum }
     }
 
-    #[inline]
+    #[inline(never)]
     fn spec_next_back(&mut self) -> Option<T> {
         if self.is_empty() {
             return None;
@@ -1213,7 +1213,7 @@ impl<T: TrustedStep> RangeInclusiveIteratorImpl for ops::RangeInclusive<T> {
         })
     }
 
-    #[inline]
+    #[inline(never)]
     fn spec_try_rfold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -1247,12 +1247,12 @@ impl<T: TrustedStep> RangeInclusiveIteratorImpl for ops::RangeInclusive<T> {
 impl<A: Step> Iterator for ops::RangeInclusive<A> {
     type Item = A;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<A> {
         self.spec_next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.is_empty() {
             return (0, Some(0));
@@ -1262,7 +1262,7 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
         (hint.0.saturating_add(1), hint.1.and_then(|steps| steps.checked_add(1)))
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         if self.is_empty() {
             return 0;
@@ -1274,7 +1274,7 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
             .expect("count overflowed usize")
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<A> {
         if self.is_empty() {
             return None;
@@ -1302,7 +1302,7 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
         None
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -1314,12 +1314,12 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
 
     impl_fold_via_try_fold! { fold -> try_fold }
 
-    #[inline]
+    #[inline(never)]
     fn last(mut self) -> Option<A> {
         self.next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn min(mut self) -> Option<A>
     where
         A: Ord,
@@ -1327,7 +1327,7 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
         self.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn max(mut self) -> Option<A>
     where
         A: Ord,
@@ -1335,7 +1335,7 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
         self.next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn is_sorted(self) -> bool {
         true
     }
@@ -1343,12 +1343,12 @@ impl<A: Step> Iterator for ops::RangeInclusive<A> {
 
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 impl<A: Step> DoubleEndedIterator for ops::RangeInclusive<A> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<A> {
         self.spec_next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, n: usize) -> Option<A> {
         if self.is_empty() {
             return None;
@@ -1376,7 +1376,7 @@ impl<A: Step> DoubleEndedIterator for ops::RangeInclusive<A> {
         None
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,

@@ -38,7 +38,7 @@ use crate::intrinsics::{self, const_eval_select};
 // ///     precondition_check(args)
 // /// }
 // /// ```
-// /// where `precondition_check` is monomorphic with the attributes `#[rustc_nounwind]`, `#[inline]` and
+// /// where `precondition_check` is monomorphic with the attributes `#[rustc_nounwind]`, `#[inline(never)]` and
 // /// `#[rustc_no_mir_inline]`. This combination of attributes ensures that the actual check logic is
 // /// compiled only once and generates a minimal amount of IR because the check cannot be inlined in
 // /// MIR, but *can* be inlined and fully optimized by a codegen backend.
@@ -129,7 +129,7 @@ pub(crate) const fn maybe_is_aligned_and_not_null(
     )
 }
 
-#[inline]
+#[inline(never)]
 #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
 pub(crate) const fn is_valid_allocation_size(size: usize, len: usize) -> bool {

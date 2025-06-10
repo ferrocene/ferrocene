@@ -89,7 +89,7 @@ impl<'a> Location<'a> {
     #[stable(feature = "track_caller", since = "1.46.0")]
     #[rustc_const_stable(feature = "const_caller_location", since = "1.79.0")]
     #[track_caller]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn caller() -> &'static Location<'static> {
@@ -132,7 +132,7 @@ impl<'a> Location<'a> {
     #[must_use]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_location_fields", since = "1.79.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn file(&self) -> &str {
         self.file
     }
@@ -157,7 +157,7 @@ impl<'a> Location<'a> {
     #[must_use]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_location_fields", since = "1.79.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn line(&self) -> u32 {
         self.line
     }
@@ -182,7 +182,7 @@ impl<'a> Location<'a> {
     #[must_use]
     #[stable(feature = "panic_col", since = "1.25.0")]
     #[rustc_const_stable(feature = "const_location_fields", since = "1.79.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn column(&self) -> u32 {
         self.col
     }
@@ -206,7 +206,7 @@ impl<'a> Location<'a> {
 #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
 impl fmt::Display for Location<'_> {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(formatter, "{}:{}:{}", self.file, self.line, self.col)
     }

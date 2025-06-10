@@ -1490,7 +1490,7 @@ pub enum FpCategory {
 /// Note that if the radix is known to the compiler, it is just the check of digits.len that
 /// is done at runtime.
 #[doc(hidden)]
-#[inline(always)]
+#[inline(never)]
 #[unstable(issue = "none", feature = "std_internals")]
 #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]

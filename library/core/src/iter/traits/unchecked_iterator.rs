@@ -26,7 +26,7 @@ pub(crate) trait UncheckedIterator: TrustedLen {
     /// instructions remaining in the IR from the `Option` handling, at which
     /// point you might want to implement this manually instead.
     #[unstable(feature = "trusted_len_next_unchecked", issue = "37572")]
-    #[inline]
+    #[inline(never)]
     unsafe fn next_unchecked(&mut self) -> Self::Item {
         let opt = self.next();
         // SAFETY: The caller promised that we're not empty, and

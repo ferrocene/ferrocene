@@ -41,19 +41,19 @@ where
 {
     type Item = B;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<B> {
         let a = self.iter.next()?;
         (self.f)(&mut self.state, a)
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (_, upper) = self.iter.size_hint();
         (0, upper) // can't know a lower bound, due to the scan function
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -86,7 +86,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut I::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.iter) }

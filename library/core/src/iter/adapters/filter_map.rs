@@ -59,12 +59,12 @@ where
 {
     type Item = B;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<B> {
         self.iter.find_map(&mut self.f)
     }
 
-    #[inline]
+    #[inline(never)]
     fn next_chunk<const N: usize>(
         &mut self,
     ) -> Result<[Self::Item; N], array::IntoIter<Self::Item, N>> {
@@ -76,7 +76,7 @@ where
         }
 
         impl<T> Drop for Guard<'_, T> {
-            #[inline]
+            #[inline(never)]
             fn drop(&mut self) {
                 if const { crate::mem::needs_drop::<T>() } {
                     // SAFETY: self.initialized is always <= N, which also is the length of the array.
@@ -122,13 +122,13 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (_, upper) = self.iter.size_hint();
         (0, upper) // can't know a lower bound, due to the predicate
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -138,7 +138,7 @@ where
         self.iter.try_fold(init, filter_map_try_fold(&mut self.f, fold))
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -152,9 +152,9 @@ impl<B, I: DoubleEndedIterator, F> DoubleEndedIterator for FilterMap<I, F>
 where
     F: FnMut(I::Item) -> Option<B>,
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<B> {
-        #[inline]
+        #[inline(never)]
         fn find<T, B>(
             f: &mut impl FnMut(T) -> Option<B>,
         ) -> impl FnMut((), T) -> ControlFlow<B> + '_ {
@@ -167,7 +167,7 @@ where
         self.iter.try_rfold((), find(&mut self.f)).break_value()
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -177,7 +177,7 @@ where
         self.iter.try_rfold(init, filter_map_try_fold(&mut self.f, fold))
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -199,7 +199,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut I::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.iter) }

@@ -176,7 +176,7 @@ impl<T> ManuallyDrop<T> {
     #[must_use = "if you don't need the wrapper, you can use `mem::forget` instead"]
     #[stable(feature = "manually_drop", since = "1.20.0")]
     #[rustc_const_stable(feature = "const_manually_drop", since = "1.32.0")]
-    #[inline(always)]
+    #[inline(never)]
     pub const fn new(value: T) -> ManuallyDrop<T> {
         ManuallyDrop { value }
     }
@@ -194,7 +194,7 @@ impl<T> ManuallyDrop<T> {
     /// ```
     #[stable(feature = "manually_drop", since = "1.20.0")]
     #[rustc_const_stable(feature = "const_manually_drop", since = "1.32.0")]
-    #[inline(always)]
+    #[inline(never)]
     pub const fn into_inner(slot: ManuallyDrop<T>) -> T {
         slot.value
     }
@@ -260,7 +260,7 @@ impl<T: ?Sized> ManuallyDrop<T> {
 #[stable(feature = "manually_drop", since = "1.20.0")]
 impl<T: ?Sized> Deref for ManuallyDrop<T> {
     type Target = T;
-    #[inline(always)]
+    #[inline(never)]
     fn deref(&self) -> &T {
         &self.value
     }
@@ -268,7 +268,7 @@ impl<T: ?Sized> Deref for ManuallyDrop<T> {
 
 #[stable(feature = "manually_drop", since = "1.20.0")]
 impl<T: ?Sized> DerefMut for ManuallyDrop<T> {
-    #[inline(always)]
+    #[inline(never)]
     fn deref_mut(&mut self) -> &mut T {
         &mut self.value
     }

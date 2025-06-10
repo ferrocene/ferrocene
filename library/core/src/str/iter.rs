@@ -35,19 +35,19 @@ pub struct Chars<'a> {
 impl<'a> Iterator for Chars<'a> {
     type Item = char;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<char> {
         // SAFETY: `str` invariant says `self.iter` is a valid UTF-8 string and
         // the resulting `ch` is a valid Unicode Scalar Value.
         unsafe { next_code_point(&mut self.iter).map(|ch| char::from_u32_unchecked(ch)) }
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         super::count::count_chars(self.as_str())
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, mut remainder: usize) -> Result<(), NonZero<usize>> {
         const CHUNK_SIZE: usize = 32;
 
@@ -96,7 +96,7 @@ impl<'a> Iterator for Chars<'a> {
         NonZero::new(remainder).map_or(Ok(()), Err)
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.iter.len();
         // `(len + 3)` can't overflow, because we know that the `slice::Iter`
@@ -105,7 +105,7 @@ impl<'a> Iterator for Chars<'a> {
         ((len + 3) / 4, Some(len))
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(mut self) -> Option<char> {
         // No need to go through the entire string.
         self.next_back()
@@ -124,7 +124,7 @@ impl fmt::Debug for Chars<'_> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> DoubleEndedIterator for Chars<'a> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<char> {
         // SAFETY: `str` invariant says `self.iter` is a valid UTF-8 string and
         // the resulting `ch` is a valid Unicode Scalar Value.
@@ -155,7 +155,7 @@ impl<'a> Chars<'a> {
     /// ```
     #[stable(feature = "iter_to_slice", since = "1.4.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub fn as_str(&self) -> &'a str {
         // SAFETY: `Chars` is only made from a str, which guarantees the iter is valid UTF-8.
         unsafe { from_utf8_unchecked(self.iter.as_slice()) }
@@ -181,7 +181,7 @@ pub struct CharIndices<'a> {
 impl<'a> Iterator for CharIndices<'a> {
     type Item = (usize, char);
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<(usize, char)> {
         let pre_len = self.iter.iter.len();
         match self.iter.next() {
@@ -195,17 +195,17 @@ impl<'a> Iterator for CharIndices<'a> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         self.iter.count()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.iter.size_hint()
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(mut self) -> Option<(usize, char)> {
         // No need to go through the entire string.
         self.next_back()
@@ -214,7 +214,7 @@ impl<'a> Iterator for CharIndices<'a> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> DoubleEndedIterator for CharIndices<'a> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<(usize, char)> {
         self.iter.next_back().map(|ch| {
             let index = self.front_offset + self.iter.iter.len();
@@ -233,7 +233,7 @@ impl<'a> CharIndices<'a> {
     /// iterator can continue to be used while this exists.
     #[stable(feature = "iter_to_slice", since = "1.4.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub fn as_str(&self) -> &'a str {
         self.iter.as_str()
     }
@@ -267,7 +267,7 @@ impl<'a> CharIndices<'a> {
     /// assert_eq!(chars.offset(), 4);
     /// assert_eq!(chars.next(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "char_indices_offset", since = "1.82.0")]
     pub fn offset(&self) -> usize {
@@ -290,32 +290,32 @@ pub struct Bytes<'a>(pub(super) Copied<slice::Iter<'a, u8>>);
 impl Iterator for Bytes<'_> {
     type Item = u8;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<u8> {
         self.0.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.0.size_hint()
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         self.0.count()
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(self) -> Option<Self::Item> {
         self.0.last()
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         self.0.nth(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn all<F>(&mut self, f: F) -> bool
     where
         F: FnMut(Self::Item) -> bool,
@@ -323,7 +323,7 @@ impl Iterator for Bytes<'_> {
         self.0.all(f)
     }
 
-    #[inline]
+    #[inline(never)]
     fn any<F>(&mut self, f: F) -> bool
     where
         F: FnMut(Self::Item) -> bool,
@@ -331,7 +331,7 @@ impl Iterator for Bytes<'_> {
         self.0.any(f)
     }
 
-    #[inline]
+    #[inline(never)]
     fn find<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -339,7 +339,7 @@ impl Iterator for Bytes<'_> {
         self.0.find(predicate)
     }
 
-    #[inline]
+    #[inline(never)]
     fn position<P>(&mut self, predicate: P) -> Option<usize>
     where
         P: FnMut(Self::Item) -> bool,
@@ -347,7 +347,7 @@ impl Iterator for Bytes<'_> {
         self.0.position(predicate)
     }
 
-    #[inline]
+    #[inline(never)]
     fn rposition<P>(&mut self, predicate: P) -> Option<usize>
     where
         P: FnMut(Self::Item) -> bool,
@@ -355,7 +355,7 @@ impl Iterator for Bytes<'_> {
         self.0.rposition(predicate)
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> u8 {
         // SAFETY: the caller must uphold the safety contract
         // for `Iterator::__iterator_get_unchecked`.
@@ -365,17 +365,17 @@ impl Iterator for Bytes<'_> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl DoubleEndedIterator for Bytes<'_> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<u8> {
         self.0.next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
         self.0.nth_back(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfind<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -386,12 +386,12 @@ impl DoubleEndedIterator for Bytes<'_> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl ExactSizeIterator for Bytes<'_> {
-    #[inline]
+    #[inline(never)]
     fn len(&self) -> usize {
         self.0.len()
     }
 
-    #[inline]
+    #[inline(never)]
     fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
@@ -510,7 +510,7 @@ macro_rules! generate_pattern_iterators {
         impl<'a, P: Pattern> Iterator for $forward_iterator<'a, P> {
             type Item = $iterty;
 
-            #[inline]
+            #[inline(never)]
             fn next(&mut self) -> Option<$iterty> {
                 self.0.next()
             }
@@ -549,7 +549,7 @@ macro_rules! generate_pattern_iterators {
         {
             type Item = $iterty;
 
-            #[inline]
+            #[inline(never)]
             fn next(&mut self) -> Option<$iterty> {
                 self.0.next_back()
             }
@@ -588,7 +588,7 @@ macro_rules! generate_pattern_iterators {
         where
             P: Pattern<Searcher<'a>: DoubleEndedSearcher<'a>>,
         {
-            #[inline]
+            #[inline(never)]
             fn next_back(&mut self) -> Option<$iterty> {
                 self.0.next_back()
             }
@@ -599,7 +599,7 @@ macro_rules! generate_pattern_iterators {
         where
             P: Pattern<Searcher<'a>: DoubleEndedSearcher<'a>>,
         {
-            #[inline]
+            #[inline(never)]
             fn next_back(&mut self) -> Option<$iterty> {
                 self.0.next()
             }
@@ -641,7 +641,7 @@ where
 }
 
 impl<'a, P: Pattern> SplitInternal<'a, P> {
-    #[inline]
+    #[inline(never)]
     fn get_end(&mut self) -> Option<&'a str> {
         if !self.finished {
             self.finished = true;
@@ -656,7 +656,7 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
         None
     }
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<&'a str> {
         if self.finished {
             return None;
@@ -674,7 +674,7 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn next_inclusive(&mut self) -> Option<&'a str> {
         if self.finished {
             return None;
@@ -694,7 +694,7 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<&'a str>
     where
         P::Searcher<'a>: ReverseSearcher<'a>,
@@ -731,7 +731,7 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn next_back_inclusive(&mut self) -> Option<&'a str>
     where
         P::Searcher<'a>: ReverseSearcher<'a>,
@@ -774,7 +774,7 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn remainder(&self) -> Option<&'a str> {
         // `Self::get_end` doesn't change `self.start`
         if self.finished {
@@ -820,7 +820,7 @@ impl<'a, P: Pattern> Split<'a, P> {
     /// split.by_ref().for_each(drop);
     /// assert_eq!(split.remainder(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "str_split_remainder", issue = "77998")]
     pub fn remainder(&self) -> Option<&'a str> {
         self.0.remainder()
@@ -843,7 +843,7 @@ impl<'a, P: Pattern> RSplit<'a, P> {
     /// split.by_ref().for_each(drop);
     /// assert_eq!(split.remainder(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "str_split_remainder", issue = "77998")]
     pub fn remainder(&self) -> Option<&'a str> {
         self.0.remainder()
@@ -884,7 +884,7 @@ impl<'a, P: Pattern> SplitTerminator<'a, P> {
     /// split.by_ref().for_each(drop);
     /// assert_eq!(split.remainder(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "str_split_remainder", issue = "77998")]
     pub fn remainder(&self) -> Option<&'a str> {
         self.0.remainder()
@@ -907,7 +907,7 @@ impl<'a, P: Pattern> RSplitTerminator<'a, P> {
     /// split.by_ref().for_each(drop);
     /// assert_eq!(split.remainder(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "str_split_remainder", issue = "77998")]
     pub fn remainder(&self) -> Option<&'a str> {
         self.0.remainder()
@@ -938,7 +938,7 @@ where
 }
 
 impl<'a, P: Pattern> SplitNInternal<'a, P> {
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<&'a str> {
         match self.count {
             0 => None,
@@ -953,7 +953,7 @@ impl<'a, P: Pattern> SplitNInternal<'a, P> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<&'a str>
     where
         P::Searcher<'a>: ReverseSearcher<'a>,
@@ -971,7 +971,7 @@ impl<'a, P: Pattern> SplitNInternal<'a, P> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn remainder(&self) -> Option<&'a str> {
         self.iter.remainder()
     }
@@ -1011,7 +1011,7 @@ impl<'a, P: Pattern> SplitN<'a, P> {
     /// split.by_ref().for_each(drop);
     /// assert_eq!(split.remainder(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "str_split_remainder", issue = "77998")]
     pub fn remainder(&self) -> Option<&'a str> {
         self.0.remainder()
@@ -1034,7 +1034,7 @@ impl<'a, P: Pattern> RSplitN<'a, P> {
     /// split.by_ref().for_each(drop);
     /// assert_eq!(split.remainder(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "str_split_remainder", issue = "77998")]
     pub fn remainder(&self) -> Option<&'a str> {
         self.0.remainder()
@@ -1058,7 +1058,7 @@ where
 }
 
 impl<'a, P: Pattern> MatchIndicesInternal<'a, P> {
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<(usize, &'a str)> {
         self.0
             .next_match()
@@ -1066,7 +1066,7 @@ impl<'a, P: Pattern> MatchIndicesInternal<'a, P> {
             .map(|(start, end)| unsafe { (start, self.0.haystack().get_unchecked(start..end)) })
     }
 
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<(usize, &'a str)>
     where
         P::Searcher<'a>: ReverseSearcher<'a>,
@@ -1113,7 +1113,7 @@ where
 }
 
 impl<'a, P: Pattern> MatchesInternal<'a, P> {
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<&'a str> {
         // SAFETY: `Searcher` guarantees that `start` and `end` lie on unicode boundaries.
         self.0.next_match().map(|(a, b)| unsafe {
@@ -1122,7 +1122,7 @@ impl<'a, P: Pattern> MatchesInternal<'a, P> {
         })
     }
 
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<&'a str>
     where
         P::Searcher<'a>: ReverseSearcher<'a>,
@@ -1168,17 +1168,17 @@ pub struct Lines<'a>(pub(super) Map<SplitInclusive<'a, char>, LinesMap>);
 impl<'a> Iterator for Lines<'a> {
     type Item = &'a str;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<&'a str> {
         self.0.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.0.size_hint()
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(mut self) -> Option<&'a str> {
         self.next_back()
     }
@@ -1186,7 +1186,7 @@ impl<'a> Iterator for Lines<'a> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> DoubleEndedIterator for Lines<'a> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<&'a str> {
         self.0.next_back()
     }
@@ -1212,7 +1212,7 @@ impl<'a> Lines<'a> {
     /// lines.by_ref().for_each(drop);
     /// assert_eq!(lines.remainder(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "str_lines_remainder", issue = "77998")]
     pub fn remainder(&self) -> Option<&'a str> {
@@ -1235,12 +1235,12 @@ pub struct LinesAny<'a>(pub(super) Lines<'a>);
 impl<'a> Iterator for LinesAny<'a> {
     type Item = &'a str;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<&'a str> {
         self.0.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.0.size_hint()
     }
@@ -1249,7 +1249,7 @@ impl<'a> Iterator for LinesAny<'a> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[allow(deprecated)]
 impl<'a> DoubleEndedIterator for LinesAny<'a> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<&'a str> {
         self.0.next_back()
     }
@@ -1302,17 +1302,17 @@ pub struct SplitInclusive<'a, P: Pattern>(pub(super) SplitInternal<'a, P>);
 impl<'a> Iterator for SplitWhitespace<'a> {
     type Item = &'a str;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<&'a str> {
         self.inner.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.inner.size_hint()
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(mut self) -> Option<&'a str> {
         self.next_back()
     }
@@ -1320,7 +1320,7 @@ impl<'a> Iterator for SplitWhitespace<'a> {
 
 #[stable(feature = "split_whitespace", since = "1.1.0")]
 impl<'a> DoubleEndedIterator for SplitWhitespace<'a> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<&'a str> {
         self.inner.next_back()
     }
@@ -1346,7 +1346,7 @@ impl<'a> SplitWhitespace<'a> {
     /// split.by_ref().for_each(drop);
     /// assert_eq!(split.remainder(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "str_split_whitespace_remainder", issue = "77998")]
     pub fn remainder(&self) -> Option<&'a str> {
@@ -1358,17 +1358,17 @@ impl<'a> SplitWhitespace<'a> {
 impl<'a> Iterator for SplitAsciiWhitespace<'a> {
     type Item = &'a str;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<&'a str> {
         self.inner.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.inner.size_hint()
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(mut self) -> Option<&'a str> {
         self.next_back()
     }
@@ -1376,7 +1376,7 @@ impl<'a> Iterator for SplitAsciiWhitespace<'a> {
 
 #[stable(feature = "split_ascii_whitespace", since = "1.34.0")]
 impl<'a> DoubleEndedIterator for SplitAsciiWhitespace<'a> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<&'a str> {
         self.inner.next_back()
     }
@@ -1404,7 +1404,7 @@ impl<'a> SplitAsciiWhitespace<'a> {
     /// split.by_ref().for_each(drop);
     /// assert_eq!(split.remainder(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "str_split_whitespace_remainder", issue = "77998")]
     pub fn remainder(&self) -> Option<&'a str> {
@@ -1421,7 +1421,7 @@ impl<'a> SplitAsciiWhitespace<'a> {
 impl<'a, P: Pattern> Iterator for SplitInclusive<'a, P> {
     type Item = &'a str;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<&'a str> {
         self.0.next_inclusive()
     }
@@ -1446,7 +1446,7 @@ impl<'a, P: Pattern<Searcher<'a>: Clone>> Clone for SplitInclusive<'a, P> {
 impl<'a, P: Pattern<Searcher<'a>: DoubleEndedSearcher<'a>>> DoubleEndedIterator
     for SplitInclusive<'a, P>
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<&'a str> {
         self.0.next_back_inclusive()
     }
@@ -1471,7 +1471,7 @@ impl<'a, P: Pattern> SplitInclusive<'a, P> {
     /// split.by_ref().for_each(drop);
     /// assert_eq!(split.remainder(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "str_split_inclusive_remainder", issue = "77998")]
     pub fn remainder(&self) -> Option<&'a str> {
         self.0.remainder()
@@ -1502,7 +1502,7 @@ impl fmt::Debug for EncodeUtf16<'_> {
 impl<'a> Iterator for EncodeUtf16<'a> {
     type Item = u16;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<u16> {
         if self.extra != 0 {
             let tmp = self.extra;
@@ -1520,7 +1520,7 @@ impl<'a> Iterator for EncodeUtf16<'a> {
         })
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.chars.iter.len();
         // The highest bytes:code units ratio occurs for 3-byte sequences,
@@ -1581,20 +1581,20 @@ macro_rules! escape_types_impls {
         impl<'a> Iterator for $Name<'a> {
             type Item = char;
 
-            #[inline]
+            #[inline(never)]
             fn next(&mut self) -> Option<char> { self.inner.next() }
 
-            #[inline]
+            #[inline(never)]
             fn size_hint(&self) -> (usize, Option<usize>) { self.inner.size_hint() }
 
-            #[inline]
+            #[inline(never)]
             fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R where
                 Self: Sized, Fold: FnMut(Acc, Self::Item) -> R, R: Try<Output = Acc>
             {
                 self.inner.try_fold(init, fold)
             }
 
-            #[inline]
+            #[inline(never)]
             fn fold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
                 where Fold: FnMut(Acc, Self::Item) -> Acc,
             {

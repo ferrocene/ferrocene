@@ -45,17 +45,17 @@ where
 {
     type Item = <I as Iterator>::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<Self::Item> {
         FuseImpl::next(self)
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<I::Item> {
         FuseImpl::nth(self, n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(self) -> Option<Self::Item> {
         match self.iter {
             Some(iter) => iter.last(),
@@ -63,7 +63,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         match self.iter {
             Some(iter) => iter.count(),
@@ -71,7 +71,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         match self.iter {
             Some(ref iter) => iter.size_hint(),
@@ -79,7 +79,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, Fold, R>(&mut self, acc: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -89,7 +89,7 @@ where
         FuseImpl::try_fold(self, acc, fold)
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<Acc, Fold>(self, mut acc: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -100,7 +100,7 @@ where
         acc
     }
 
-    #[inline]
+    #[inline(never)]
     fn find<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -108,7 +108,7 @@ where
         FuseImpl::find(self, predicate)
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -128,17 +128,17 @@ impl<I> DoubleEndedIterator for Fuse<I>
 where
     I: DoubleEndedIterator,
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<<I as Iterator>::Item> {
         FuseImpl::next_back(self)
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, n: usize) -> Option<<I as Iterator>::Item> {
         FuseImpl::nth_back(self, n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<Acc, Fold, R>(&mut self, acc: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -148,7 +148,7 @@ where
         FuseImpl::try_rfold(self, acc, fold)
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfold<Acc, Fold>(self, mut acc: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -159,7 +159,7 @@ where
         acc
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfind<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -274,17 +274,17 @@ where
 {
     type Item = <I as Iterator>::Item;
 
-    #[inline]
+    #[inline(never)]
     default fn next(&mut self) -> Option<<I as Iterator>::Item> {
         and_then_or_clear(&mut self.iter, Iterator::next)
     }
 
-    #[inline]
+    #[inline(never)]
     default fn nth(&mut self, n: usize) -> Option<I::Item> {
         and_then_or_clear(&mut self.iter, |iter| iter.nth(n))
     }
 
-    #[inline]
+    #[inline(never)]
     default fn try_fold<Acc, Fold, R>(&mut self, mut acc: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -298,7 +298,7 @@ where
         try { acc }
     }
 
-    #[inline]
+    #[inline(never)]
     default fn find<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -306,7 +306,7 @@ where
         and_then_or_clear(&mut self.iter, |iter| iter.find(predicate))
     }
 
-    #[inline]
+    #[inline(never)]
     default fn next_back(&mut self) -> Option<<I as Iterator>::Item>
     where
         I: DoubleEndedIterator,
@@ -314,7 +314,7 @@ where
         and_then_or_clear(&mut self.iter, |iter| iter.next_back())
     }
 
-    #[inline]
+    #[inline(never)]
     default fn nth_back(&mut self, n: usize) -> Option<<I as Iterator>::Item>
     where
         I: DoubleEndedIterator,
@@ -322,7 +322,7 @@ where
         and_then_or_clear(&mut self.iter, |iter| iter.nth_back(n))
     }
 
-    #[inline]
+    #[inline(never)]
     default fn try_rfold<Acc, Fold, R>(&mut self, mut acc: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -337,7 +337,7 @@ where
         try { acc }
     }
 
-    #[inline]
+    #[inline(never)]
     default fn rfind<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -354,17 +354,17 @@ impl<I> FuseImpl<I> for Fuse<I>
 where
     I: FusedIterator,
 {
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<<I as Iterator>::Item> {
         self.iter.as_mut()?.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<I::Item> {
         self.iter.as_mut()?.nth(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, Fold, R>(&mut self, mut acc: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -377,7 +377,7 @@ where
         try { acc }
     }
 
-    #[inline]
+    #[inline(never)]
     fn find<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -385,7 +385,7 @@ where
         self.iter.as_mut()?.find(predicate)
     }
 
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<<I as Iterator>::Item>
     where
         I: DoubleEndedIterator,
@@ -393,7 +393,7 @@ where
         self.iter.as_mut()?.next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, n: usize) -> Option<<I as Iterator>::Item>
     where
         I: DoubleEndedIterator,
@@ -401,7 +401,7 @@ where
         self.iter.as_mut()?.nth_back(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<Acc, Fold, R>(&mut self, mut acc: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -415,7 +415,7 @@ where
         try { acc }
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfind<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -433,7 +433,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut I::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements.
         // TrustedFused guarantees that we'll never encounter a case where `self.iter` would
@@ -442,7 +442,7 @@ where
     }
 }
 
-#[inline]
+#[inline(never)]
 fn and_then_or_clear<T, U>(opt: &mut Option<T>, f: impl FnOnce(&mut T) -> Option<U>) -> Option<U> {
     let x = f(opt.as_mut()?);
     if x.is_none() {

@@ -70,7 +70,7 @@ impl<T: Sized> Unique<T> {
     /// sentinel value. Types that lazily allocate must track initialization by
     /// some other means.
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn dangling() -> Self {
         // FIXME(const-hack) replace with `From`
         Unique { pointer: NonNull::dangling(), _marker: PhantomData }
@@ -84,14 +84,14 @@ impl<T: ?Sized> Unique<T> {
     /// # Safety
     ///
     /// `ptr` must be non-null.
-    #[inline]
+    #[inline(never)]
     pub const unsafe fn new_unchecked(ptr: *mut T) -> Self {
         // SAFETY: the caller must guarantee that `ptr` is non-null.
         unsafe { Unique { pointer: NonNull::new_unchecked(ptr), _marker: PhantomData } }
     }
 
     /// Creates a new `Unique` if `ptr` is non-null.
-    #[inline]
+    #[inline(never)]
     pub const fn new(ptr: *mut T) -> Option<Self> {
         if let Some(pointer) = NonNull::new(ptr) {
             Some(Unique { pointer, _marker: PhantomData })
@@ -101,21 +101,21 @@ impl<T: ?Sized> Unique<T> {
     }
 
     /// Create a new `Unique` from a `NonNull` in const context.
-    #[inline]
+    #[inline(never)]
     pub const fn from_non_null(pointer: NonNull<T>) -> Self {
         Unique { pointer, _marker: PhantomData }
     }
 
     /// Acquires the underlying `*mut` pointer.
     #[must_use = "`self` will be dropped if the result is not used"]
-    #[inline]
+    #[inline(never)]
     pub const fn as_ptr(self) -> *mut T {
         self.pointer.as_ptr()
     }
 
     /// Acquires the underlying `*mut` pointer.
     #[must_use = "`self` will be dropped if the result is not used"]
-    #[inline]
+    #[inline(never)]
     pub const fn as_non_null_ptr(self) -> NonNull<T> {
         self.pointer
     }
@@ -126,7 +126,7 @@ impl<T: ?Sized> Unique<T> {
     /// it were actually an instance of T that is getting borrowed. If a longer
     /// (unbound) lifetime is needed, use `&*my_ptr.as_ptr()`.
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const unsafe fn as_ref(&self) -> &T {
         // SAFETY: the caller must guarantee that `self` meets all the
         // requirements for a reference.
@@ -139,7 +139,7 @@ impl<T: ?Sized> Unique<T> {
     /// it were actually an instance of T that is getting borrowed. If a longer
     /// (unbound) lifetime is needed, use `&mut *my_ptr.as_ptr()`.
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const unsafe fn as_mut(&mut self) -> &mut T {
         // SAFETY: the caller must guarantee that `self` meets all the
         // requirements for a mutable reference.
@@ -148,7 +148,7 @@ impl<T: ?Sized> Unique<T> {
 
     /// Casts to a pointer of another type.
     #[must_use = "`self` will be dropped if the result is not used"]
-    #[inline]
+    #[inline(never)]
     pub const fn cast<U>(self) -> Unique<U> {
         // FIXME(const-hack): replace with `From`
         // SAFETY: is `NonNull`
@@ -158,7 +158,7 @@ impl<T: ?Sized> Unique<T> {
 
 #[unstable(feature = "ptr_internals", issue = "none")]
 impl<T: ?Sized> Clone for Unique<T> {
-    #[inline]
+    #[inline(never)]
     fn clone(&self) -> Self {
         *self
     }
@@ -195,7 +195,7 @@ impl<T: ?Sized> From<&mut T> for Unique<T> {
     /// Converts a `&mut T` to a `Unique<T>`.
     ///
     /// This conversion is infallible since references cannot be null.
-    #[inline]
+    #[inline(never)]
     fn from(reference: &mut T) -> Self {
         Self::from(NonNull::from(reference))
     }
@@ -206,7 +206,7 @@ impl<T: ?Sized> From<NonNull<T>> for Unique<T> {
     /// Converts a `NonNull<T>` to a `Unique<T>`.
     ///
     /// This conversion is infallible since `NonNull` cannot be null.
-    #[inline]
+    #[inline(never)]
     fn from(pointer: NonNull<T>) -> Self {
         Unique::from_non_null(pointer)
     }

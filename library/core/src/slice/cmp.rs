@@ -32,7 +32,7 @@ impl<T: Ord> Ord for [T] {
     }
 }
 
-#[inline]
+#[inline(never)]
 fn as_underlying(x: ControlFlow<bool>) -> u8 {
     // SAFETY: This will only compile if `bool` and `ControlFlow<bool>` have the same
     // size (which isn't guaranteed but this is libcore). Because they have the same
@@ -46,11 +46,11 @@ fn as_underlying(x: ControlFlow<bool>) -> u8 {
 /// Implements comparison of slices [lexicographically](Ord#lexicographical-comparison).
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: PartialOrd> PartialOrd for [T] {
-    #[inline]
+    #[inline(never)]
     fn partial_cmp(&self, other: &[T]) -> Option<Ordering> {
         SlicePartialOrd::partial_compare(self, other)
     }
-    #[inline]
+    #[inline(never)]
     fn lt(&self, other: &Self) -> bool {
         // This is certainly not the obvious way to implement these methods.
         // Unfortunately, using anything that looks at the discriminant means that
@@ -62,31 +62,31 @@ impl<T: PartialOrd> PartialOrd for [T] {
 
         as_underlying(self.__chaining_lt(other)) == 1
     }
-    #[inline]
+    #[inline(never)]
     fn le(&self, other: &Self) -> bool {
         as_underlying(self.__chaining_le(other)) != 0
     }
-    #[inline]
+    #[inline(never)]
     fn gt(&self, other: &Self) -> bool {
         as_underlying(self.__chaining_gt(other)) == 1
     }
-    #[inline]
+    #[inline(never)]
     fn ge(&self, other: &Self) -> bool {
         as_underlying(self.__chaining_ge(other)) != 0
     }
-    #[inline]
+    #[inline(never)]
     fn __chaining_lt(&self, other: &Self) -> ControlFlow<bool> {
         SliceChain::chaining_lt(self, other)
     }
-    #[inline]
+    #[inline(never)]
     fn __chaining_le(&self, other: &Self) -> ControlFlow<bool> {
         SliceChain::chaining_le(self, other)
     }
-    #[inline]
+    #[inline(never)]
     fn __chaining_gt(&self, other: &Self) -> ControlFlow<bool> {
         SliceChain::chaining_gt(self, other)
     }
-    #[inline]
+    #[inline(never)]
     fn __chaining_ge(&self, other: &Self) -> ControlFlow<bool> {
         SliceChain::chaining_ge(self, other)
     }
@@ -190,7 +190,7 @@ impl<A: PartialOrd> SliceChain for A {
     }
 }
 
-#[inline]
+#[inline(never)]
 fn chaining_impl<'l, 'r, A: PartialOrd, B, C>(
     left: &'l [A],
     right: &'r [A],
@@ -286,7 +286,7 @@ unsafe impl UnsignedBytewiseOrd for ascii::Char {}
 // `compare_bytes` compares a sequence of unsigned bytes lexicographically, so
 // use it if the requirements for `UnsignedBytewiseOrd` are fulfilled.
 impl<A: Ord + UnsignedBytewiseOrd> SliceOrd for A {
-    #[inline]
+    #[inline(never)]
     fn compare(left: &[Self], right: &[Self]) -> Ordering {
         // Since the length of a slice is always less than or equal to
         // isize::MAX, this never underflows.
@@ -311,28 +311,28 @@ impl<A: Ord + UnsignedBytewiseOrd> SliceOrd for A {
 
 // Don't generate our own chaining loops for `memcmp`-able things either.
 impl<A: PartialOrd + UnsignedBytewiseOrd> SliceChain for A {
-    #[inline]
+    #[inline(never)]
     fn chaining_lt(left: &[Self], right: &[Self]) -> ControlFlow<bool> {
         match SliceOrd::compare(left, right) {
             Ordering::Equal => ControlFlow::Continue(()),
             ne => ControlFlow::Break(ne.is_lt()),
         }
     }
-    #[inline]
+    #[inline(never)]
     fn chaining_le(left: &[Self], right: &[Self]) -> ControlFlow<bool> {
         match SliceOrd::compare(left, right) {
             Ordering::Equal => ControlFlow::Continue(()),
             ne => ControlFlow::Break(ne.is_le()),
         }
     }
-    #[inline]
+    #[inline(never)]
     fn chaining_gt(left: &[Self], right: &[Self]) -> ControlFlow<bool> {
         match SliceOrd::compare(left, right) {
             Ordering::Equal => ControlFlow::Continue(()),
             ne => ControlFlow::Break(ne.is_gt()),
         }
     }
-    #[inline]
+    #[inline(never)]
     fn chaining_ge(left: &[Self], right: &[Self]) -> ControlFlow<bool> {
         match SliceOrd::compare(left, right) {
             Ordering::Equal => ControlFlow::Continue(()),
@@ -355,14 +355,14 @@ where
 }
 
 impl SliceContains for u8 {
-    #[inline]
+    #[inline(never)]
     fn slice_contains(&self, x: &[Self]) -> bool {
         memchr::memchr(*self, x).is_some()
     }
 }
 
 impl SliceContains for i8 {
-    #[inline]
+    #[inline(never)]
     fn slice_contains(&self, x: &[Self]) -> bool {
         let byte = *self as u8;
         // SAFETY: `i8` and `u8` have the same memory layout, thus casting `x.as_ptr()`
@@ -378,7 +378,7 @@ macro_rules! impl_slice_contains {
     ($($t:ty),*) => {
         $(
             impl SliceContains for $t {
-                #[inline]
+                #[inline(never)]
                 fn slice_contains(&self, arr: &[$t]) -> bool {
                     // Make our LANE_COUNT 4x the normal lane count (aiming for 128 bit vectors).
                     // The compiler will nicely unroll it.

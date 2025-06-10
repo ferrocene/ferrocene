@@ -1016,7 +1016,7 @@ impl<T> Option<T> {
     /// let x: Option<&str> = None;
     /// assert_eq!(x.unwrap(), "air"); // fails
     /// ```
-    #[inline(always)]
+    #[inline(never)]
     #[track_caller]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "option_unwrap"]

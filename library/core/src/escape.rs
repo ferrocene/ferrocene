@@ -6,7 +6,7 @@ use crate::ops::Range;
 
 const HEX_DIGITS: [ascii::Char; 16] = *b"0123456789abcdef".as_ascii().unwrap();
 
-#[inline]
+#[inline(never)]
 const fn backslash<const N: usize>(a: ascii::Char) -> ([ascii::Char; N], Range<u8>) {
     const { assert!(N >= 2) };
 
@@ -18,7 +18,7 @@ const fn backslash<const N: usize>(a: ascii::Char) -> ([ascii::Char; N], Range<u
     (output, 0..2)
 }
 
-#[inline]
+#[inline(never)]
 const fn hex_escape<const N: usize>(byte: u8) -> ([ascii::Char; N], Range<u8>) {
     const { assert!(N >= 4) };
 
@@ -35,7 +35,7 @@ const fn hex_escape<const N: usize>(byte: u8) -> ([ascii::Char; N], Range<u8>) {
     (output, 0..4)
 }
 
-#[inline]
+#[inline(never)]
 const fn verbatim<const N: usize>(a: ascii::Char) -> ([ascii::Char; N], Range<u8>) {
     const { assert!(N >= 1) };
 
@@ -178,12 +178,12 @@ impl<const N: usize> EscapeIterInner<N> {
         Self { data, alive: range }
     }
 
-    #[inline]
+    #[inline(never)]
     pub(crate) const fn empty() -> Self {
         Self { data: [ascii::Char::Null; N], alive: 0..0 }
     }
 
-    #[inline]
+    #[inline(never)]
     pub(crate) fn as_ascii(&self) -> &[ascii::Char] {
         // SAFETY: `self.alive` is guaranteed to be a valid range for indexing `self.data`.
         unsafe {
@@ -191,12 +191,12 @@ impl<const N: usize> EscapeIterInner<N> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     pub(crate) fn as_str(&self) -> &str {
         self.as_ascii().as_str()
     }
 
-    #[inline]
+    #[inline(never)]
     pub(crate) fn len(&self) -> usize {
         usize::from(self.alive.end - self.alive.start)
     }

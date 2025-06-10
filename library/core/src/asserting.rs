@@ -26,7 +26,7 @@ pub trait TryCaptureGeneric<E, M> {
 }
 
 impl<E> TryCaptureGeneric<E, TryCaptureWithoutDebug> for &Wrapper<&E> {
-    #[inline]
+    #[inline(never)]
     fn try_capture(&self, _: &mut Capture<E, TryCaptureWithoutDebug>) {}
 }
 
@@ -53,7 +53,7 @@ impl<E> TryCapturePrintable<E, TryCaptureWithDebug> for Wrapper<&E>
 where
     E: Printable,
 {
-    #[inline]
+    #[inline(never)]
     fn try_capture(&self, to: &mut Capture<E, TryCaptureWithDebug>) {
         to.elem = Some(*self.0);
     }
@@ -90,7 +90,7 @@ pub struct Capture<E, M> {
 }
 
 impl<M, T> Capture<M, T> {
-    #[inline]
+    #[inline(never)]
     pub const fn new() -> Self {
         Self { elem: None, phantom: PhantomData }
     }

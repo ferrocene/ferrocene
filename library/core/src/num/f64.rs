@@ -575,7 +575,7 @@ impl f64 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn is_finite(self) -> bool {
         // There's no need to handle NaN separately: if self is NaN,
         // the comparison is not true, exactly as desired.
@@ -603,7 +603,7 @@ impl f64 {
     #[must_use]
     #[stable(feature = "is_subnormal", since = "1.53.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn is_subnormal(self) -> bool {
         matches!(self.classify(), FpCategory::Subnormal)
     }
@@ -630,7 +630,7 @@ impl f64 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn is_normal(self) -> bool {
         matches!(self.classify(), FpCategory::Normal)
     }
@@ -686,7 +686,7 @@ impl f64 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn is_sign_positive(self) -> bool {
         !self.is_sign_negative()
     }
@@ -694,7 +694,7 @@ impl f64 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(since = "1.0.0", note = "renamed to is_sign_positive")]
-    #[inline]
+    #[inline(never)]
     #[doc(hidden)]
     pub fn is_positive(self) -> bool {
         self.is_sign_positive()
@@ -730,7 +730,7 @@ impl f64 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(since = "1.0.0", note = "renamed to is_sign_negative")]
-    #[inline]
+    #[inline(never)]
     #[doc(hidden)]
     pub fn is_negative(self) -> bool {
         self.is_sign_negative()
@@ -763,7 +763,7 @@ impl f64 {
     /// [`INFINITY`]: Self::INFINITY
     /// [`MIN`]: Self::MIN
     /// [`MAX`]: Self::MAX
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "nextUp")]
     #[stable(feature = "float_next_up_down", since = "1.86.0")]
     #[rustc_const_stable(feature = "float_next_up_down", since = "1.86.0")]
@@ -814,7 +814,7 @@ impl f64 {
     /// [`INFINITY`]: Self::INFINITY
     /// [`MIN`]: Self::MIN
     /// [`MAX`]: Self::MAX
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "nextDown")]
     #[stable(feature = "float_next_up_down", since = "1.86.0")]
     #[rustc_const_stable(feature = "float_next_up_down", since = "1.86.0")]
@@ -849,7 +849,7 @@ impl f64 {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn recip(self) -> f64 {
         1.0 / self
     }
@@ -867,7 +867,7 @@ impl f64 {
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn to_degrees(self) -> f64 {
         // The division here is correctly rounded with respect to the true
         // value of 180/π. (This differs from f32, where a constant must be
@@ -888,7 +888,7 @@ impl f64 {
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn to_radians(self) -> f64 {
         const RADS_PER_DEG: f64 = consts::PI / 180.0;
         self * RADS_PER_DEG
@@ -911,7 +911,7 @@ impl f64 {
     #[must_use = "this returns the result of the comparison, without modifying either input"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn max(self, other: f64) -> f64 {
         intrinsics::maxnumf64(self, other)
     }
@@ -933,7 +933,7 @@ impl f64 {
     #[must_use = "this returns the result of the comparison, without modifying either input"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn min(self, other: f64) -> f64 {
         intrinsics::minnumf64(self, other)
     }
@@ -960,7 +960,7 @@ impl f64 {
     /// operand is conserved; see the [specification of NaN bit patterns](f32#nan-bit-patterns) for more info.
     #[must_use = "this returns the result of the comparison, without modifying either input"]
     #[unstable(feature = "float_minimum_maximum", issue = "91079")]
-    #[inline]
+    #[inline(never)]
     pub const fn maximum(self, other: f64) -> f64 {
         if self > other {
             self
@@ -995,7 +995,7 @@ impl f64 {
     /// operand is conserved; see the [specification of NaN bit patterns](f32#nan-bit-patterns) for more info.
     #[must_use = "this returns the result of the comparison, without modifying either input"]
     #[unstable(feature = "float_minimum_maximum", issue = "91079")]
-    #[inline]
+    #[inline(never)]
     pub const fn minimum(self, other: f64) -> f64 {
         if self < other {
             self
@@ -1020,7 +1020,7 @@ impl f64 {
     /// assert_eq!(1f64.midpoint(4.0), 2.5);
     /// assert_eq!((-5.5f64).midpoint(8.0), 1.25);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "average")]
     #[stable(feature = "num_midpoint", since = "1.85.0")]
     #[rustc_const_stable(feature = "num_midpoint", since = "1.85.0")]
@@ -1070,7 +1070,7 @@ impl f64 {
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[stable(feature = "float_approx_unchecked_to", since = "1.44.0")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn to_int_unchecked<Int>(self) -> Int
     where
         Self: FloatToInt<Int>,
@@ -1170,7 +1170,7 @@ impl f64 {
                   without modifying the original"]
     #[stable(feature = "float_to_from_bytes", since = "1.40.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn to_be_bytes(self) -> [u8; 8] {
         self.to_bits().to_be_bytes()
     }
@@ -1191,7 +1191,7 @@ impl f64 {
                   without modifying the original"]
     #[stable(feature = "float_to_from_bytes", since = "1.40.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn to_le_bytes(self) -> [u8; 8] {
         self.to_bits().to_le_bytes()
     }
@@ -1225,7 +1225,7 @@ impl f64 {
                   without modifying the original"]
     #[stable(feature = "float_to_from_bytes", since = "1.40.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn to_ne_bytes(self) -> [u8; 8] {
         self.to_bits().to_ne_bytes()
     }
@@ -1244,7 +1244,7 @@ impl f64 {
     #[stable(feature = "float_to_from_bytes", since = "1.40.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn from_be_bytes(bytes: [u8; 8]) -> Self {
         Self::from_bits(u64::from_be_bytes(bytes))
     }
@@ -1263,7 +1263,7 @@ impl f64 {
     #[stable(feature = "float_to_from_bytes", since = "1.40.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn from_le_bytes(bytes: [u8; 8]) -> Self {
         Self::from_bits(u64::from_le_bytes(bytes))
     }
@@ -1293,7 +1293,7 @@ impl f64 {
     #[stable(feature = "float_to_from_bytes", since = "1.40.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn from_ne_bytes(bytes: [u8; 8]) -> Self {
         Self::from_bits(u64::from_ne_bytes(bytes))
     }
@@ -1359,7 +1359,7 @@ impl f64 {
     /// ```
     #[stable(feature = "total_cmp", since = "1.62.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub fn total_cmp(&self, other: &Self) -> crate::cmp::Ordering {
         let mut left = self.to_bits() as i64;
         let mut right = other.to_bits() as i64;
@@ -1415,7 +1415,7 @@ impl f64 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[stable(feature = "clamp", since = "1.50.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn clamp(mut self, min: f64, max: f64) -> f64 {
         const_assert!(
             min <= max,
@@ -1477,7 +1477,7 @@ impl f64 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn signum(self) -> f64 {
         if self.is_nan() { Self::NAN } else { 1.0_f64.copysign(self) }
     }
@@ -1523,7 +1523,7 @@ impl f64 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
-    #[inline]
+    #[inline(never)]
     pub const fn algebraic_add(self, rhs: f64) -> f64 {
         intrinsics::fadd_algebraic(self, rhs)
     }
@@ -1534,7 +1534,7 @@ impl f64 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
-    #[inline]
+    #[inline(never)]
     pub const fn algebraic_sub(self, rhs: f64) -> f64 {
         intrinsics::fsub_algebraic(self, rhs)
     }
@@ -1545,7 +1545,7 @@ impl f64 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
-    #[inline]
+    #[inline(never)]
     pub const fn algebraic_mul(self, rhs: f64) -> f64 {
         intrinsics::fmul_algebraic(self, rhs)
     }
@@ -1556,7 +1556,7 @@ impl f64 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
-    #[inline]
+    #[inline(never)]
     pub const fn algebraic_div(self, rhs: f64) -> f64 {
         intrinsics::fdiv_algebraic(self, rhs)
     }
@@ -1567,7 +1567,7 @@ impl f64 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
-    #[inline]
+    #[inline(never)]
     pub const fn algebraic_rem(self, rhs: f64) -> f64 {
         intrinsics::frem_algebraic(self, rhs)
     }

@@ -30,7 +30,7 @@ pub struct StepBy<I> {
 }
 
 impl<I> StepBy<I> {
-    #[inline]
+    #[inline(never)]
     pub(in crate::iter) fn new(iter: I, step: usize) -> StepBy<I> {
         assert!(step != 0);
         let iter = <I as SpecRangeSetup<I>>::setup(iter, step);
@@ -39,7 +39,7 @@ impl<I> StepBy<I> {
 
     /// The `step` that was originally passed to `Iterator::step_by(step)`,
     /// aka `self.step_minus_one + 1`.
-    #[inline]
+    #[inline(never)]
     fn original_step(&self) -> NonZero<usize> {
         // SAFETY: By type invariant, `step_minus_one` cannot be `MAX`, which
         // means the addition cannot overflow and the result cannot be zero.
@@ -54,17 +54,17 @@ where
 {
     type Item = I::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<Self::Item> {
         self.spec_next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.spec_size_hint()
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         self.spec_nth(n)
     }
@@ -77,7 +77,7 @@ where
         self.spec_try_fold(acc, f)
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<Acc, F>(self, acc: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -103,12 +103,12 @@ impl<I> DoubleEndedIterator for StepBy<I>
 where
     I: DoubleEndedIterator + ExactSizeIterator,
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<Self::Item> {
         self.spec_next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
         self.spec_nth_back(n)
     }
@@ -121,7 +121,7 @@ where
         self.spec_try_rfold(init, f)
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         Self: Sized,
@@ -148,7 +148,7 @@ trait SpecRangeSetup<T> {
 }
 
 impl<T> SpecRangeSetup<T> for T {
-    #[inline]
+    #[inline(never)]
     default fn setup(inner: T, _step: usize) -> T {
         inner
     }
@@ -219,21 +219,21 @@ unsafe trait StepByBackImpl<I> {
 unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
     type Item = I::Item;
 
-    #[inline]
+    #[inline(never)]
     default fn spec_next(&mut self) -> Option<I::Item> {
         let step_size = if self.first_take { 0 } else { self.step_minus_one };
         self.first_take = false;
         self.iter.nth(step_size)
     }
 
-    #[inline]
+    #[inline(never)]
     default fn spec_size_hint(&self) -> (usize, Option<usize>) {
-        #[inline]
+        #[inline(never)]
         fn first_size(step: NonZero<usize>) -> impl Fn(usize) -> usize {
             move |n| if n == 0 { 0 } else { 1 + (n - 1) / step }
         }
 
-        #[inline]
+        #[inline(never)]
         fn other_size(step: NonZero<usize>) -> impl Fn(usize) -> usize {
             move |n| n / step
         }
@@ -249,7 +249,7 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     default fn spec_nth(&mut self, mut n: usize) -> Option<I::Item> {
         if self.first_take {
             self.first_take = false;
@@ -298,7 +298,7 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
         F: FnMut(Acc, Self::Item) -> R,
         R: Try<Output = Acc>,
     {
-        #[inline]
+        #[inline(never)]
         fn nth<I: Iterator>(
             iter: &mut I,
             step_minus_one: usize,
@@ -320,7 +320,7 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
     where
         F: FnMut(Acc, Self::Item) -> Acc,
     {
-        #[inline]
+        #[inline(never)]
         fn nth<I: Iterator>(
             iter: &mut I,
             step_minus_one: usize,
@@ -342,12 +342,12 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
 unsafe impl<I: DoubleEndedIterator + ExactSizeIterator> StepByBackImpl<I> for StepBy<I> {
     type Item = I::Item;
 
-    #[inline]
+    #[inline(never)]
     default fn spec_next_back(&mut self) -> Option<Self::Item> {
         self.iter.nth_back(self.next_back_index())
     }
 
-    #[inline]
+    #[inline(never)]
     default fn spec_nth_back(&mut self, n: usize) -> Option<I::Item> {
         // `self.iter.nth_back(usize::MAX)` does the right thing here when `n`
         // is out of bounds because the length of `self.iter` does not exceed
@@ -362,7 +362,7 @@ unsafe impl<I: DoubleEndedIterator + ExactSizeIterator> StepByBackImpl<I> for St
         F: FnMut(Acc, Self::Item) -> R,
         R: Try<Output = Acc>,
     {
-        #[inline]
+        #[inline(never)]
         fn nth_back<I: DoubleEndedIterator>(
             iter: &mut I,
             step_minus_one: usize,
@@ -379,13 +379,13 @@ unsafe impl<I: DoubleEndedIterator + ExactSizeIterator> StepByBackImpl<I> for St
         }
     }
 
-    #[inline]
+    #[inline(never)]
     default fn spec_rfold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc
     where
         Self: Sized,
         F: FnMut(Acc, I::Item) -> Acc,
     {
-        #[inline]
+        #[inline(never)]
         fn nth_back<I: DoubleEndedIterator>(
             iter: &mut I,
             step_minus_one: usize,
@@ -424,7 +424,7 @@ macro_rules! spec_int_ranges {
         const _: () = assert!(usize::BITS >= <$t>::BITS);
 
         impl SpecRangeSetup<Range<$t>> for Range<$t> {
-            #[inline]
+            #[inline(never)]
             fn setup(mut r: Range<$t>, step: usize) -> Range<$t> {
                 let inner_len = r.size_hint().0;
                 // If step exceeds $t::MAX, then the count will be at most 1 and
@@ -437,7 +437,7 @@ macro_rules! spec_int_ranges {
         }
 
         unsafe impl StepByImpl<Range<$t>> for StepBy<Range<$t>> {
-            #[inline]
+            #[inline(never)]
             fn spec_next(&mut self) -> Option<$t> {
                 // if a step size larger than the type has been specified fall back to
                 // t::MAX, in which case remaining will be at most 1.
@@ -455,7 +455,7 @@ macro_rules! spec_int_ranges {
                 }
             }
 
-            #[inline]
+            #[inline(never)]
             fn spec_size_hint(&self) -> (usize, Option<usize>) {
                 let remaining = self.iter.end as usize;
                 (remaining, Some(remaining))
@@ -464,13 +464,13 @@ macro_rules! spec_int_ranges {
             // The methods below are all copied from the Iterator trait default impls.
             // We have to repeat them here so that the specialization overrides the StepByImpl defaults
 
-            #[inline]
+            #[inline(never)]
             fn spec_nth(&mut self, n: usize) -> Option<Self::Item> {
                 self.advance_by(n).ok()?;
                 self.next()
             }
 
-            #[inline]
+            #[inline(never)]
             fn spec_try_fold<Acc, F, R>(&mut self, init: Acc, mut f: F) -> R
                 where
                     F: FnMut(Acc, Self::Item) -> R,
@@ -483,7 +483,7 @@ macro_rules! spec_int_ranges {
                 try { accum }
             }
 
-            #[inline]
+            #[inline(never)]
             fn spec_fold<Acc, F>(self, init: Acc, mut f: F) -> Acc
                 where
                     F: FnMut(Acc, Self::Item) -> Acc
@@ -512,7 +512,7 @@ macro_rules! spec_int_ranges_r {
 
         unsafe impl StepByBackImpl<Range<$t>> for StepBy<Range<$t>> {
 
-            #[inline]
+            #[inline(never)]
             fn spec_next_back(&mut self) -> Option<Self::Item> {
                 let step = self.original_step().get() as $t;
                 let remaining = self.iter.end;
@@ -528,7 +528,7 @@ macro_rules! spec_int_ranges_r {
             // The methods below are all copied from the Iterator trait default impls.
             // We have to repeat them here so that the specialization overrides the StepByImplBack defaults
 
-            #[inline]
+            #[inline(never)]
             fn spec_nth_back(&mut self, n: usize) -> Option<Self::Item> {
                 if self.advance_back_by(n).is_err() {
                     return None;
@@ -536,7 +536,7 @@ macro_rules! spec_int_ranges_r {
                 self.next_back()
             }
 
-            #[inline]
+            #[inline(never)]
             fn spec_try_rfold<Acc, F, R>(&mut self, init: Acc, mut f: F) -> R
             where
                 F: FnMut(Acc, Self::Item) -> R,
@@ -549,7 +549,7 @@ macro_rules! spec_int_ranges_r {
                 try { accum }
             }
 
-            #[inline]
+            #[inline(never)]
             fn spec_rfold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc
             where
                 F: FnMut(Acc, Self::Item) -> Acc

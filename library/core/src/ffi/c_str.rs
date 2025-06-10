@@ -171,7 +171,7 @@ impl fmt::Debug for CStr {
 
 #[stable(feature = "cstr_default", since = "1.10.0")]
 impl Default for &CStr {
-    #[inline]
+    #[inline(never)]
     fn default() -> Self {
         const SLICE: &[c_char] = &[0];
         // SAFETY: `SLICE` is indeed pointing to a valid nul-terminated string.
@@ -254,7 +254,7 @@ impl CStr {
     /// ```
     ///
     /// [valid]: core::ptr#safety
-    #[inline] // inline is necessary for codegen to see strlen.
+    #[inline(never)] // inline is necessary for codegen to see strlen.
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cstr_from_ptr", since = "1.81.0")]
@@ -388,7 +388,7 @@ impl CStr {
     /// let cstr = unsafe { CStr::from_bytes_with_nul_unchecked(bytes) };
     /// assert_eq!(cstr.to_bytes_with_nul(), bytes);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "cstr_from_bytes", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_cstr_unchecked", since = "1.59.0")]
@@ -482,7 +482,7 @@ impl CStr {
     ///
     /// assert_eq!(unsafe { CStr::from_ptr(ptr) }, c"HI!");
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_str_as_ptr", since = "1.32.0")]
@@ -493,7 +493,7 @@ impl CStr {
     }
 
     /// We could eventually expose this publicly, if we wanted.
-    #[inline]
+    #[inline(never)]
     #[must_use]
     const fn as_non_null_ptr(&self) -> NonNull<c_char> {
         // FIXME(const_trait_impl) replace with `NonNull::from`
@@ -519,7 +519,7 @@ impl CStr {
     /// let cstr = CStr::from_bytes_with_nul(b"\0").unwrap();
     /// assert_eq!(cstr.count_bytes(), 0);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[doc(alias("len", "strlen"))]
     #[stable(feature = "cstr_count_bytes", since = "1.79.0")]
@@ -547,7 +547,7 @@ impl CStr {
     /// # Ok(())
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "cstr_is_empty", since = "1.71.0")]
     #[rustc_const_stable(feature = "cstr_is_empty", since = "1.71.0")]
     pub const fn is_empty(&self) -> bool {
@@ -574,7 +574,7 @@ impl CStr {
     /// let cstr = CStr::from_bytes_with_nul(b"foo\0").expect("CStr::from_bytes_with_nul failed");
     /// assert_eq!(cstr.to_bytes(), b"foo");
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -603,7 +603,7 @@ impl CStr {
     /// let cstr = CStr::from_bytes_with_nul(b"foo\0").expect("CStr::from_bytes_with_nul failed");
     /// assert_eq!(cstr.to_bytes_with_nul(), b"foo\0");
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -628,7 +628,7 @@ impl CStr {
     /// let cstr = CStr::from_bytes_with_nul(b"foo\0").expect("CStr::from_bytes_with_nul failed");
     /// assert!(cstr.bytes().eq(*b"foo"));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "cstr_bytes", issue = "112115")]
     pub fn bytes(&self) -> Bytes<'_> {
         Bytes::new(self)
@@ -666,14 +666,14 @@ impl CStr {
 // That is why this is implemented manually and not derived.
 #[stable(feature = "rust1", since = "1.0.0")]
 impl PartialOrd for CStr {
-    #[inline]
+    #[inline(never)]
     fn partial_cmp(&self, other: &CStr) -> Option<Ordering> {
         self.to_bytes().partial_cmp(&other.to_bytes())
     }
 }
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Ord for CStr {
-    #[inline]
+    #[inline(never)]
     fn cmp(&self, other: &CStr) -> Ordering {
         self.to_bytes().cmp(&other.to_bytes())
     }
@@ -683,7 +683,7 @@ impl Ord for CStr {
 impl ops::Index<ops::RangeFrom<usize>> for CStr {
     type Output = CStr;
 
-    #[inline]
+    #[inline(never)]
     fn index(&self, index: ops::RangeFrom<usize>) -> &CStr {
         let bytes = self.to_bytes_with_nul();
         // we need to manually check the starting index to account for the null
@@ -704,7 +704,7 @@ impl ops::Index<ops::RangeFrom<usize>> for CStr {
 
 #[stable(feature = "cstring_asref", since = "1.7.0")]
 impl AsRef<CStr> for CStr {
-    #[inline]
+    #[inline(never)]
     fn as_ref(&self) -> &CStr {
         self
     }
@@ -716,7 +716,7 @@ impl AsRef<CStr> for CStr {
 ///
 /// The pointer must point to a valid buffer that contains a NUL terminator. The NUL must be
 /// located within `isize::MAX` from `ptr`.
-#[inline]
+#[inline(never)]
 #[unstable(feature = "cstr_internals", issue = "none")]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
 const unsafe fn strlen(ptr: *const c_char) -> usize {
@@ -765,12 +765,12 @@ unsafe impl Send for Bytes<'_> {}
 unsafe impl Sync for Bytes<'_> {}
 
 impl<'a> Bytes<'a> {
-    #[inline]
+    #[inline(never)]
     fn new(s: &'a CStr) -> Self {
         Self { ptr: s.as_non_null_ptr().cast(), phantom: PhantomData }
     }
 
-    #[inline]
+    #[inline(never)]
     fn is_empty(&self) -> bool {
         // SAFETY: We uphold that the pointer is always valid to dereference
         // by starting with a valid C string and then never incrementing beyond
@@ -783,7 +783,7 @@ impl<'a> Bytes<'a> {
 impl Iterator for Bytes<'_> {
     type Item = u8;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<u8> {
         // SAFETY: We only choose a pointer from a valid C string, which must
         // be non-null and contain at least one value. Since we always stop at
@@ -802,12 +802,12 @@ impl Iterator for Bytes<'_> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.is_empty() { (0, Some(0)) } else { (1, None) }
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         // SAFETY: We always hold a valid pointer to a C string
         unsafe { strlen(self.ptr.as_ptr().cast()) }

@@ -522,7 +522,7 @@ mod impls {
             $(
                 #[stable(feature = "rust1", since = "1.0.0")]
                 impl Clone for $t {
-                    #[inline(always)]
+                    #[inline(never)]
                     fn clone(&self) -> Self {
                         *self
                     }
@@ -556,7 +556,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> Clone for *const T {
-        #[inline(always)]
+        #[inline(never)]
         fn clone(&self) -> Self {
             *self
         }
@@ -564,7 +564,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> Clone for *mut T {
-        #[inline(always)]
+        #[inline(never)]
         fn clone(&self) -> Self {
             *self
         }
@@ -573,7 +573,7 @@ mod impls {
     /// Shared references can be cloned, but mutable references *cannot*!
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> Clone for &T {
-        #[inline(always)]
+        #[inline(never)]
         #[rustc_diagnostic_item = "noop_method_clone"]
         fn clone(&self) -> Self {
             *self

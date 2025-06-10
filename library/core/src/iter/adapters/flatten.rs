@@ -59,17 +59,17 @@ where
 {
     type Item = U::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<U::Item> {
         self.inner.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.inner.size_hint()
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -79,7 +79,7 @@ where
         self.inner.try_fold(init, fold)
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -87,17 +87,17 @@ where
         self.inner.fold(init, fold)
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.inner.advance_by(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         self.inner.count()
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(self) -> Option<Self::Item> {
         self.inner.last()
     }
@@ -109,12 +109,12 @@ where
     F: FnMut(I::Item) -> U,
     U: IntoIterator<IntoIter: DoubleEndedIterator>,
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<U::Item> {
         self.inner.next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -124,7 +124,7 @@ where
         self.inner.try_rfold(init, fold)
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -132,7 +132,7 @@ where
         self.inner.rfold(init, fold)
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.inner.advance_back_by(n)
     }
@@ -165,7 +165,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut I::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.inner.iter) }
@@ -221,17 +221,17 @@ where
 {
     type Item = U::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<U::Item> {
         self.inner.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.inner.size_hint()
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -241,7 +241,7 @@ where
         self.inner.try_fold(init, fold)
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -249,17 +249,17 @@ where
         self.inner.fold(init, fold)
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.inner.advance_by(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         self.inner.count()
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(self) -> Option<Self::Item> {
         self.inner.last()
     }
@@ -271,12 +271,12 @@ where
     I: DoubleEndedIterator<Item: IntoIterator<IntoIter = U, Item = U::Item>>,
     U: DoubleEndedIterator,
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<U::Item> {
         self.inner.next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -286,7 +286,7 @@ where
         self.inner.try_rfold(init, fold)
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -294,7 +294,7 @@ where
         self.inner.rfold(init, fold)
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.inner.advance_back_by(n)
     }
@@ -324,7 +324,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut I::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.inner.iter) }
@@ -376,12 +376,12 @@ where
     ///
     /// Folds over the inner iterators, not over their elements. Is used by the `fold`, `count`,
     /// and `last` methods.
-    #[inline]
+    #[inline(never)]
     fn iter_fold<Acc, Fold>(self, mut acc: Acc, mut fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, U) -> Acc,
     {
-        #[inline]
+        #[inline(never)]
         fn flatten<T: IntoIterator, Acc>(
             fold: &mut impl FnMut(Acc, T::IntoIter) -> Acc,
         ) -> impl FnMut(Acc, T) -> Acc + '_ {
@@ -406,13 +406,13 @@ where
     ///
     /// Folds over the inner iterators, not over their elements. Is used by the `try_fold` and
     /// `advance_by` methods.
-    #[inline]
+    #[inline(never)]
     fn iter_try_fold<Acc, Fold, R>(&mut self, mut acc: Acc, mut fold: Fold) -> R
     where
         Fold: FnMut(Acc, &mut U) -> R,
         R: Try<Output = Acc>,
     {
-        #[inline]
+        #[inline(never)]
         fn flatten<'a, T: IntoIterator, Acc, R: Try<Output = Acc>>(
             frontiter: &'a mut Option<T::IntoIter>,
             fold: &'a mut impl FnMut(Acc, &mut T::IntoIter) -> R,
@@ -445,12 +445,12 @@ where
     /// back.
     ///
     /// Folds over the inner iterators, not over their elements. Is used by the `rfold` method.
-    #[inline]
+    #[inline(never)]
     fn iter_rfold<Acc, Fold>(self, mut acc: Acc, mut fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, U) -> Acc,
     {
-        #[inline]
+        #[inline(never)]
         fn flatten<T: IntoIterator, Acc>(
             fold: &mut impl FnMut(Acc, T::IntoIter) -> Acc,
         ) -> impl FnMut(Acc, T) -> Acc + '_ {
@@ -475,13 +475,13 @@ where
     ///
     /// Folds over the inner iterators, not over their elements. Is used by the `try_rfold` and
     /// `advance_back_by` methods.
-    #[inline]
+    #[inline(never)]
     fn iter_try_rfold<Acc, Fold, R>(&mut self, mut acc: Acc, mut fold: Fold) -> R
     where
         Fold: FnMut(Acc, &mut U) -> R,
         R: Try<Output = Acc>,
     {
-        #[inline]
+        #[inline(never)]
         fn flatten<'a, T: IntoIterator, Acc, R: Try>(
             backiter: &'a mut Option<T::IntoIter>,
             fold: &'a mut impl FnMut(Acc, &mut T::IntoIter) -> R,
@@ -514,7 +514,7 @@ where
 {
     type Item = U::Item;
 
-    #[inline]
+    #[inline(never)]
     default fn next(&mut self) -> Option<U::Item> {
         loop {
             if let elt @ Some(_) = and_then_or_clear(&mut self.frontiter, Iterator::next) {
@@ -527,7 +527,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     default fn size_hint(&self) -> (usize, Option<usize>) {
         let (flo, fhi) = self.frontiter.as_ref().map_or((0, Some(0)), U::size_hint);
         let (blo, bhi) = self.backiter.as_ref().map_or((0, Some(0)), U::size_hint);
@@ -549,14 +549,14 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     default fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
         Fold: FnMut(Acc, Self::Item) -> R,
         R: Try<Output = Acc>,
     {
-        #[inline]
+        #[inline(never)]
         fn flatten<U: Iterator, Acc, R: Try<Output = Acc>>(
             mut fold: impl FnMut(Acc, U::Item) -> R,
         ) -> impl FnMut(Acc, &mut U) -> R {
@@ -566,12 +566,12 @@ where
         self.iter_try_fold(init, flatten(fold))
     }
 
-    #[inline]
+    #[inline(never)]
     default fn fold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
     {
-        #[inline]
+        #[inline(never)]
         fn flatten<U: Iterator, Acc>(
             mut fold: impl FnMut(Acc, U::Item) -> Acc,
         ) -> impl FnMut(Acc, U) -> Acc {
@@ -581,10 +581,10 @@ where
         self.iter_fold(init, flatten(fold))
     }
 
-    #[inline]
+    #[inline(never)]
     #[rustc_inherit_overflow_checks]
     default fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
-        #[inline]
+        #[inline(never)]
         #[rustc_inherit_overflow_checks]
         fn advance<U: Iterator>(n: usize, iter: &mut U) -> ControlFlow<(), usize> {
             match iter.advance_by(n) {
@@ -599,9 +599,9 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     default fn count(self) -> usize {
-        #[inline]
+        #[inline(never)]
         #[rustc_inherit_overflow_checks]
         fn count<U: Iterator>(acc: usize, iter: U) -> usize {
             acc + iter.count()
@@ -610,9 +610,9 @@ where
         self.iter_fold(0, count)
     }
 
-    #[inline]
+    #[inline(never)]
     default fn last(self) -> Option<Self::Item> {
-        #[inline]
+        #[inline(never)]
         fn last<U: Iterator>(last: Option<U::Item>, iter: U) -> Option<U::Item> {
             iter.last().or(last)
         }
@@ -627,7 +627,7 @@ where
     I: DoubleEndedIterator<Item: IntoIterator<IntoIter = U, Item = U::Item>>,
     U: DoubleEndedIterator,
 {
-    #[inline]
+    #[inline(never)]
     default fn next_back(&mut self) -> Option<U::Item> {
         loop {
             if let elt @ Some(_) = and_then_or_clear(&mut self.backiter, |b| b.next_back()) {
@@ -640,14 +640,14 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     default fn try_rfold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
         Fold: FnMut(Acc, Self::Item) -> R,
         R: Try<Output = Acc>,
     {
-        #[inline]
+        #[inline(never)]
         fn flatten<U: DoubleEndedIterator, Acc, R: Try<Output = Acc>>(
             mut fold: impl FnMut(Acc, U::Item) -> R,
         ) -> impl FnMut(Acc, &mut U) -> R {
@@ -657,12 +657,12 @@ where
         self.iter_try_rfold(init, flatten(fold))
     }
 
-    #[inline]
+    #[inline(never)]
     default fn rfold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
     {
-        #[inline]
+        #[inline(never)]
         fn flatten<U: DoubleEndedIterator, Acc>(
             mut fold: impl FnMut(Acc, U::Item) -> Acc,
         ) -> impl FnMut(Acc, U) -> Acc {
@@ -672,10 +672,10 @@ where
         self.iter_rfold(init, flatten(fold))
     }
 
-    #[inline]
+    #[inline(never)]
     #[rustc_inherit_overflow_checks]
     default fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
-        #[inline]
+        #[inline(never)]
         #[rustc_inherit_overflow_checks]
         fn advance<U: DoubleEndedIterator>(n: usize, iter: &mut U) -> ControlFlow<(), usize> {
             match iter.advance_back_by(n) {
@@ -721,34 +721,34 @@ impl<T> ConstSizeIntoIterator for T
 where
     T: IntoIterator,
 {
-    #[inline]
+    #[inline(never)]
     default fn size() -> Option<usize> {
         None
     }
 }
 
 impl<T, const N: usize> ConstSizeIntoIterator for [T; N] {
-    #[inline]
+    #[inline(never)]
     fn size() -> Option<usize> {
         Some(N)
     }
 }
 
 impl<T, const N: usize> ConstSizeIntoIterator for &[T; N] {
-    #[inline]
+    #[inline(never)]
     fn size() -> Option<usize> {
         Some(N)
     }
 }
 
 impl<T, const N: usize> ConstSizeIntoIterator for &mut [T; N] {
-    #[inline]
+    #[inline(never)]
     fn size() -> Option<usize> {
         Some(N)
     }
 }
 
-#[inline]
+#[inline(never)]
 fn and_then_or_clear<T, U>(opt: &mut Option<T>, f: impl FnOnce(&mut T) -> Option<U>) -> Option<U> {
     let x = f(opt.as_mut()?);
     if x.is_none() {
@@ -791,7 +791,7 @@ impl<I: OneShot, F> OneShot for Map<I, F> {}
 // (but we can't do `Box<I>` unless we expose this trait to alloc)
 impl<I: OneShot> OneShot for &mut I {}
 
-#[inline]
+#[inline(never)]
 fn into_item<I>(inner: I) -> Option<I::Item>
 where
     I: IntoIterator<IntoIter: OneShot>,
@@ -799,7 +799,7 @@ where
     inner.into_iter().next()
 }
 
-#[inline]
+#[inline(never)]
 fn flatten_one<I: IntoIterator<IntoIter: OneShot>, Acc>(
     mut fold: impl FnMut(Acc, I::Item) -> Acc,
 ) -> impl FnMut(Acc, I) -> Acc {
@@ -809,7 +809,7 @@ fn flatten_one<I: IntoIterator<IntoIter: OneShot>, Acc>(
     }
 }
 
-#[inline]
+#[inline(never)]
 fn try_flatten_one<I: IntoIterator<IntoIter: OneShot>, Acc, R: Try<Output = Acc>>(
     mut fold: impl FnMut(Acc, I::Item) -> R,
 ) -> impl FnMut(Acc, I) -> R {
@@ -819,7 +819,7 @@ fn try_flatten_one<I: IntoIterator<IntoIter: OneShot>, Acc, R: Try<Output = Acc>
     }
 }
 
-#[inline]
+#[inline(never)]
 fn advance_by_one<I>(n: NonZero<usize>, inner: I) -> Option<NonZero<usize>>
 where
     I: IntoIterator<IntoIter: OneShot>,
@@ -847,7 +847,7 @@ where
     I: Iterator<Item: IntoIterator<IntoIter = U, Item = U::Item>>,
     U: Iterator + OneShot,
 {
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<U::Item> {
         while let Some(inner) = self.iter.next() {
             if let item @ Some(_) = inner.into_iter().next() {
@@ -857,7 +857,7 @@ where
         None
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (lower, upper) = self.iter.size_hint();
         match <I::Item as ConstSizeIntoIterator>::size() {
@@ -867,7 +867,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -877,7 +877,7 @@ where
         self.iter.try_fold(init, try_flatten_one(fold))
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -885,7 +885,7 @@ where
         self.iter.fold(init, flatten_one(fold))
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         if let Some(n) = NonZero::new(n) {
             self.iter.try_fold(n, advance_by_one).map_or(Ok(()), Err)
@@ -895,12 +895,12 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         self.iter.filter_map(into_item).count()
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(self) -> Option<Self::Item> {
         self.iter.filter_map(into_item).last()
     }
@@ -913,7 +913,7 @@ where
     I: DoubleEndedIterator<Item: IntoIterator<IntoIter = U, Item = U::Item>>,
     U: DoubleEndedIterator + OneShot,
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<U::Item> {
         while let Some(inner) = self.iter.next_back() {
             if let item @ Some(_) = inner.into_iter().next() {
@@ -923,7 +923,7 @@ where
         None
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -933,7 +933,7 @@ where
         self.iter.try_rfold(init, try_flatten_one(fold))
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -941,7 +941,7 @@ where
         self.iter.rfold(init, flatten_one(fold))
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         if let Some(n) = NonZero::new(n) {
             self.iter.try_rfold(n, advance_by_one).map_or(Ok(()), Err)

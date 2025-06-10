@@ -10,7 +10,7 @@ type BufType = [usize; 32];
 /// # Safety
 ///
 /// The specified range must be valid for reading and writing.
-#[inline]
+#[inline(never)]
 pub(super) unsafe fn ptr_rotate<T>(left: usize, mid: *mut T, right: usize) {
     if T::IS_ZST {
         return;
@@ -44,7 +44,7 @@ pub(super) unsafe fn ptr_rotate<T>(left: usize, mid: *mut T, right: usize) {
 /// # Safety
 ///
 /// The specified range must be valid for reading and writing.
-#[inline]
+#[inline(never)]
 unsafe fn ptr_rotate_memmove<T>(left: usize, mid: *mut T, right: usize) {
     // The `[T; 0]` here is to ensure this is appropriately aligned for T
     let mut rawarray = MaybeUninit::<(BufType, [T; 0])>::uninit();
@@ -116,7 +116,7 @@ unsafe fn ptr_rotate_memmove<T>(left: usize, mid: *mut T, right: usize) {
 /// # Safety
 ///
 /// The specified range must be valid for reading and writing.
-#[inline]
+#[inline(never)]
 unsafe fn ptr_rotate_gcd<T>(left: usize, mid: *mut T, right: usize) {
     // Algorithm 2
     // Microbenchmarks indicate that the average performance for random shifts is better all
@@ -221,7 +221,7 @@ unsafe fn ptr_rotate_gcd<T>(left: usize, mid: *mut T, right: usize) {
 /// # Safety
 ///
 /// The specified range must be valid for reading and writing.
-#[inline]
+#[inline(never)]
 unsafe fn ptr_rotate_swap<T>(mut left: usize, mut mid: *mut T, mut right: usize) {
     loop {
         if left >= right {

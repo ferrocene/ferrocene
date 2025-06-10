@@ -22,7 +22,7 @@ use crate::pin::Pin;
 /// let v: Vec<_> = it.collect();
 /// assert_eq!(v, [1, 2, 3]);
 /// ```
-#[inline]
+#[inline(never)]
 #[unstable(feature = "iter_from_coroutine", issue = "43122", reason = "coroutines are unstable")]
 pub fn from_coroutine<G: Coroutine<Return = ()> + Unpin>(coroutine: G) -> FromCoroutine<G> {
     FromCoroutine(coroutine)

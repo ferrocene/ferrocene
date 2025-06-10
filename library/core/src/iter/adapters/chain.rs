@@ -79,12 +79,12 @@ where
 {
     type Item = A::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<A::Item> {
         and_then_or_clear(&mut self.a, Iterator::next).or_else(|| self.b.as_mut()?.next())
     }
 
-    #[inline]
+    #[inline(never)]
     #[rustc_inherit_overflow_checks]
     fn count(self) -> usize {
         let a_count = match self.a {
@@ -128,7 +128,7 @@ where
         acc
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, mut n: usize) -> Result<(), NonZero<usize>> {
         if let Some(ref mut a) = self.a {
             n = match a.advance_by(n) {
@@ -146,7 +146,7 @@ where
         NonZero::new(n).map_or(Ok(()), Err)
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, mut n: usize) -> Option<Self::Item> {
         if let Some(ref mut a) = self.a {
             n = match a.advance_by(n) {
@@ -163,7 +163,7 @@ where
         self.b.as_mut()?.nth(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn find<P>(&mut self, mut predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -172,7 +172,7 @@ where
             .or_else(|| self.b.as_mut()?.find(predicate))
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(self) -> Option<A::Item> {
         // Must exhaust a before b.
         let a_last = self.a.and_then(Iterator::last);
@@ -180,7 +180,7 @@ where
         b_last.or(a_last)
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         match self {
             Chain { a: Some(a), b: Some(b) } => {
@@ -209,12 +209,12 @@ where
     A: DoubleEndedIterator,
     B: DoubleEndedIterator<Item = A::Item>,
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<A::Item> {
         and_then_or_clear(&mut self.b, |b| b.next_back()).or_else(|| self.a.as_mut()?.next_back())
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, mut n: usize) -> Result<(), NonZero<usize>> {
         if let Some(ref mut b) = self.b {
             n = match b.advance_back_by(n) {
@@ -232,7 +232,7 @@ where
         NonZero::new(n).map_or(Ok(()), Err)
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, mut n: usize) -> Option<Self::Item> {
         if let Some(ref mut b) = self.b {
             n = match b.advance_back_by(n) {
@@ -249,7 +249,7 @@ where
         self.a.as_mut()?.nth_back(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfind<P>(&mut self, mut predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -328,7 +328,7 @@ impl<A: Default, B: Default> Default for Chain<A, B> {
     }
 }
 
-#[inline]
+#[inline(never)]
 fn and_then_or_clear<T, U>(opt: &mut Option<T>, f: impl FnOnce(&mut T) -> Option<U>) -> Option<U> {
     let x = f(opt.as_mut()?);
     if x.is_none() {

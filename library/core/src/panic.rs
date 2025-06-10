@@ -242,7 +242,7 @@ pub macro const_panic {
         // add the `rustc_allow_const_fn_unstable`. This is okay to do
         // because both variants will panic, just with different messages.
         #[rustc_allow_const_fn_unstable(const_eval_select)]
-        #[inline(always)] // inline the wrapper
+        #[inline(never)] // inline the wrapper
         #[track_caller]
         #[coverage(off)] // Ferrocene addition
         const fn do_panic($($arg: $ty),*) -> ! {

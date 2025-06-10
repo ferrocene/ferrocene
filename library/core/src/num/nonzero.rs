@@ -628,7 +628,7 @@ macro_rules! nonzero_integer {
             #[unstable(feature = "isolate_most_least_significant_one", issue = "136909")]
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
-            #[inline(always)]
+            #[inline(never)]
             pub const fn isolate_most_significant_one(self) -> Self {
                 let n = self.get() & (((1 as $Int) << (<$Int>::BITS - 1)).wrapping_shr(self.leading_zeros()));
 
@@ -660,7 +660,7 @@ macro_rules! nonzero_integer {
             #[unstable(feature = "isolate_most_least_significant_one", issue = "136909")]
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
-            #[inline(always)]
+            #[inline(never)]
             pub const fn isolate_least_significant_one(self) -> Self {
                 let n = self.get();
                 let n = n & n.wrapping_neg();
@@ -696,7 +696,7 @@ macro_rules! nonzero_integer {
             #[doc(alias = "popcnt")]
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
-            #[inline(always)]
+            #[inline(never)]
             pub const fn count_ones(self) -> NonZero<u32> {
                 // SAFETY:
                 // `self` is non-zero, which means it has at least one bit set, which means
@@ -729,7 +729,7 @@ macro_rules! nonzero_integer {
             #[unstable(feature = "nonzero_bitwise", issue = "128281")]
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
-            #[inline(always)]
+            #[inline(never)]
             pub const fn rotate_left(self, n: u32) -> Self {
                 let result = self.get().rotate_left(n);
                 // SAFETY: Rotating bits preserves the property int > 0.
@@ -762,7 +762,7 @@ macro_rules! nonzero_integer {
             #[unstable(feature = "nonzero_bitwise", issue = "128281")]
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
-            #[inline(always)]
+            #[inline(never)]
             pub const fn rotate_right(self, n: u32) -> Self {
                 let result = self.get().rotate_right(n);
                 // SAFETY: Rotating bits preserves the property int > 0.
@@ -791,7 +791,7 @@ macro_rules! nonzero_integer {
             #[unstable(feature = "nonzero_bitwise", issue = "128281")]
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
-            #[inline(always)]
+            #[inline(never)]
             pub const fn swap_bytes(self) -> Self {
                 let result = self.get().swap_bytes();
                 // SAFETY: Shuffling bytes preserves the property int > 0.
@@ -821,7 +821,7 @@ macro_rules! nonzero_integer {
             #[unstable(feature = "nonzero_bitwise", issue = "128281")]
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
-            #[inline(always)]
+            #[inline(never)]
             pub const fn reverse_bits(self) -> Self {
                 let result = self.get().reverse_bits();
                 // SAFETY: Reversing bits preserves the property int > 0.
@@ -856,7 +856,7 @@ macro_rules! nonzero_integer {
             /// ```
             #[unstable(feature = "nonzero_bitwise", issue = "128281")]
             #[must_use]
-            #[inline(always)]
+            #[inline(never)]
             pub const fn from_be(x: Self) -> Self {
                 let result = $Int::from_be(x.get());
                 // SAFETY: Shuffling bytes preserves the property int > 0.
@@ -891,7 +891,7 @@ macro_rules! nonzero_integer {
             /// ```
             #[unstable(feature = "nonzero_bitwise", issue = "128281")]
             #[must_use]
-            #[inline(always)]
+            #[inline(never)]
             pub const fn from_le(x: Self) -> Self {
                 let result = $Int::from_le(x.get());
                 // SAFETY: Shuffling bytes preserves the property int > 0.
@@ -926,7 +926,7 @@ macro_rules! nonzero_integer {
             #[unstable(feature = "nonzero_bitwise", issue = "128281")]
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
-            #[inline(always)]
+            #[inline(never)]
             pub const fn to_be(self) -> Self {
                 let result = self.get().to_be();
                 // SAFETY: Shuffling bytes preserves the property int > 0.
@@ -961,7 +961,7 @@ macro_rules! nonzero_integer {
             #[unstable(feature = "nonzero_bitwise", issue = "128281")]
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
-            #[inline(always)]
+            #[inline(never)]
             pub const fn to_le(self) -> Self {
                 let result = self.get().to_le();
                 // SAFETY: Shuffling bytes preserves the property int > 0.
@@ -1710,7 +1710,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[rustc_const_stable(feature = "integer_sign_cast", since = "1.87.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         pub const fn cast_signed(self) -> NonZero<$Sint> {
             // SAFETY: `self.get()` can't be zero
             unsafe { NonZero::new_unchecked(self.get().cast_signed()) }
@@ -2149,7 +2149,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[rustc_const_stable(feature = "integer_sign_cast", since = "1.87.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         pub const fn cast_unsigned(self) -> NonZero<$Uint> {
             // SAFETY: `self.get()` can't be zero
             unsafe { NonZero::new_unchecked(self.get().cast_unsigned()) }

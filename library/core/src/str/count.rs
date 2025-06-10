@@ -23,7 +23,7 @@ use core::intrinsics::unlikely;
 const USIZE_SIZE: usize = size_of::<usize>();
 const UNROLL_INNER: usize = 4;
 
-#[inline]
+#[inline(never)]
 pub(super) fn count_chars(s: &str) -> usize {
     if cfg!(feature = "optimize_for_size") || s.len() < USIZE_SIZE * UNROLL_INNER {
         // Avoid entering the optimized implementation for strings where the
@@ -111,7 +111,7 @@ fn do_count_chars(s: &str) -> usize {
 // sequence. Bytes in `w` which are continuation bytes are left as `0x00` (e.g.
 // false), and bytes which are non-continuation bytes are left as `0x01` (e.g.
 // true)
-#[inline]
+#[inline(never)]
 fn contains_non_continuation_byte(w: usize) -> usize {
     const LSB: usize = usize::repeat_u8(0x01);
     ((!w >> 7) | (w >> 6)) & LSB
@@ -119,7 +119,7 @@ fn contains_non_continuation_byte(w: usize) -> usize {
 
 // Morally equivalent to `values.to_ne_bytes().into_iter().sum::<usize>()`, but
 // more efficient.
-#[inline]
+#[inline(never)]
 fn sum_bytes_in_usize(values: usize) -> usize {
     const LSB_SHORTS: usize = usize::repeat_u16(0x0001);
     const SKIP_BYTES: usize = usize::repeat_u16(0x00ff);

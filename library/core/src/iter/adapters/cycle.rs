@@ -30,7 +30,7 @@ where
 {
     type Item = <I as Iterator>::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<<I as Iterator>::Item> {
         match self.iter.next() {
             None => {
@@ -41,7 +41,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         // the cycle iterator is either empty or infinite
         match self.orig.size_hint() {
@@ -51,7 +51,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, F, R>(&mut self, mut acc: Acc, mut f: F) -> R
     where
         F: FnMut(Acc, Self::Item) -> R,
@@ -81,7 +81,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     #[rustc_inherit_overflow_checks]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let mut n = match self.iter.advance_by(n) {

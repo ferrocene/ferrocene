@@ -80,7 +80,7 @@ macro_rules! int_impl {
         #[doc(alias = "popcnt")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn count_ones(self) -> u32 { (self as $UnsignedT).count_ones() }
@@ -98,7 +98,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_int_methods", since = "1.32.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn count_zeros(self) -> u32 {
@@ -168,7 +168,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "leading_trailing_ones", since = "1.46.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn leading_ones(self) -> u32 {
@@ -190,7 +190,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "leading_trailing_ones", since = "1.46.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn trailing_ones(self) -> u32 {
@@ -215,7 +215,7 @@ macro_rules! int_impl {
         #[unstable(feature = "isolate_most_least_significant_one", issue = "136909")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn isolate_most_significant_one(self) -> Self {
@@ -240,7 +240,7 @@ macro_rules! int_impl {
         #[unstable(feature = "isolate_most_least_significant_one", issue = "136909")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn isolate_least_significant_one(self) -> Self {
@@ -266,7 +266,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "integer_sign_cast", since = "1.87.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn cast_unsigned(self) -> $UnsignedT {
@@ -319,7 +319,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_int_methods", since = "1.32.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn rotate_right(self, n: u32) -> Self {
@@ -343,7 +343,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_int_methods", since = "1.32.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn swap_bytes(self) -> Self {
@@ -368,7 +368,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "reverse_bits", since = "1.37.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn reverse_bits(self) -> Self {
@@ -594,7 +594,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "unchecked_math", since = "1.79.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
@@ -754,7 +754,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "unchecked_math", since = "1.79.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
@@ -914,7 +914,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "unchecked_math", since = "1.79.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
@@ -1278,7 +1278,7 @@ macro_rules! int_impl {
         )]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
@@ -1820,7 +1820,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_saturating_int_methods", since = "1.47.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn saturating_add(self, rhs: Self) -> Self {
@@ -1870,7 +1870,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_saturating_int_methods", since = "1.47.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn saturating_sub(self, rhs: Self) -> Self {
@@ -1922,7 +1922,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_saturating_int_methods", since = "1.47.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn saturating_neg(self) -> Self {
@@ -2083,7 +2083,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "mixed_integer_ops", since = "1.66.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn wrapping_add_unsigned(self, rhs: $UnsignedT) -> Self {
@@ -2127,7 +2127,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "mixed_integer_ops", since = "1.66.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn wrapping_sub_unsigned(self, rhs: $UnsignedT) -> Self {
@@ -2722,7 +2722,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_int_methods", since = "1.32.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn overflowing_mul(self, rhs: Self) -> (Self, bool) {
@@ -3792,7 +3792,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_int_sign", since = "1.47.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn signum(self) -> Self {
@@ -3818,7 +3818,7 @@ macro_rules! int_impl {
         #[must_use]
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_stable(feature = "const_int_methods", since = "1.32.0")]
-        #[inline(always)]
+        #[inline(never)]
         #[cfg(not(feature = "ferrocene_certified"))]
 #[cfg_attr(not(bootstrap), coverage(off))]
         pub const fn is_positive(self) -> bool { self > 0 }
@@ -4040,7 +4040,7 @@ macro_rules! int_impl {
         ///
         /// Returns the smallest value that can be represented by this integer type.
         #[stable(feature = "rust1", since = "1.0.0")]
-        #[inline(always)]
+        #[inline(never)]
         #[rustc_promotable]
         #[rustc_const_stable(feature = "const_min_value", since = "1.32.0")]
         #[deprecated(since = "TBD", note = "replaced by the `MIN` associated constant on this type")]
@@ -4056,7 +4056,7 @@ macro_rules! int_impl {
         ///
         /// Returns the largest value that can be represented by this integer type.
         #[stable(feature = "rust1", since = "1.0.0")]
-        #[inline(always)]
+        #[inline(never)]
         #[rustc_promotable]
         #[rustc_const_stable(feature = "const_max_value", since = "1.32.0")]
         #[deprecated(since = "TBD", note = "replaced by the `MAX` associated constant on this type")]

@@ -81,22 +81,22 @@ where
 {
     type Item = (A::Item, B::Item);
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<Self::Item> {
         ZipImpl::next(self)
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         ZipImpl::size_hint(self)
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         ZipImpl::nth(self, n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -104,7 +104,7 @@ where
         ZipImpl::fold(self, init, f)
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -121,7 +121,7 @@ where
     A: DoubleEndedIterator + ExactSizeIterator,
     B: DoubleEndedIterator + ExactSizeIterator,
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<(A::Item, B::Item)> {
         ZipImpl::next_back(self)
     }
@@ -162,19 +162,19 @@ macro_rules! zip_impl_general_defaults {
             }
         }
 
-        #[inline]
+        #[inline(never)]
         default fn next(&mut self) -> Option<(A::Item, B::Item)> {
             let x = self.a.next()?;
             let y = self.b.next()?;
             Some((x, y))
         }
 
-        #[inline]
+        #[inline(never)]
         default fn nth(&mut self, n: usize) -> Option<Self::Item> {
             self.super_nth(n)
         }
 
-        #[inline]
+        #[inline(never)]
         default fn next_back(&mut self) -> Option<(A::Item, B::Item)>
         where
             A: DoubleEndedIterator + ExactSizeIterator,
@@ -218,7 +218,7 @@ where
 
     zip_impl_general_defaults! {}
 
-    #[inline]
+    #[inline(never)]
     default fn size_hint(&self) -> (usize, Option<usize>) {
         let (a_lower, a_upper) = self.a.size_hint();
         let (b_lower, b_upper) = self.b.size_hint();
@@ -242,7 +242,7 @@ where
         unreachable!("Always specialized");
     }
 
-    #[inline]
+    #[inline(never)]
     default fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -259,13 +259,13 @@ where
 {
     zip_impl_general_defaults! {}
 
-    #[inline]
+    #[inline(never)]
     default fn size_hint(&self) -> (usize, Option<usize>) {
         let size = cmp::min(self.a.size(), self.b.size());
         (size, Some(size))
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn get_unchecked(&mut self, idx: usize) -> <Self as Iterator>::Item {
         let idx = self.index + idx;
         // SAFETY: the caller must uphold the contract for
@@ -273,7 +273,7 @@ where
         unsafe { (self.a.__iterator_get_unchecked(idx), self.b.__iterator_get_unchecked(idx)) }
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -304,7 +304,7 @@ where
         Zip { a, b, index: 0, len, a_len }
     }
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<(A::Item, B::Item)> {
         if self.index < self.len {
             let i = self.index;
@@ -331,13 +331,13 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.len - self.index;
         (len, Some(len))
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         let delta = cmp::min(n, self.len - self.index);
         let end = self.index + delta;
@@ -365,7 +365,7 @@ where
         self.super_nth(n - delta)
     }
 
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<(A::Item, B::Item)>
     where
         A: DoubleEndedIterator + ExactSizeIterator,
@@ -480,7 +480,7 @@ where
 {
     type Source = A::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut A::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.a) }
@@ -610,7 +610,7 @@ pub unsafe trait TrustedRandomAccessNoCoerce: Sized {
 ///
 /// Same requirements calling `get_unchecked` directly.
 #[doc(hidden)]
-#[inline]
+#[inline(never)]
 pub(in crate::iter::adapters) unsafe fn try_get_unchecked<I>(it: &mut I, idx: usize) -> I::Item
 where
     I: Iterator,
@@ -633,7 +633,7 @@ unsafe impl<I: Iterator> SpecTrustedRandomAccess for I {
 }
 
 unsafe impl<I: Iterator + TrustedRandomAccessNoCoerce> SpecTrustedRandomAccess for I {
-    #[inline]
+    #[inline(never)]
     unsafe fn try_get_unchecked(&mut self, index: usize) -> Self::Item {
         // SAFETY: the caller must uphold the contract for
         // `Iterator::__iterator_get_unchecked`.
@@ -650,7 +650,7 @@ trait SpecFold: Iterator {
 
 impl<A: Iterator, B: Iterator> SpecFold for Zip<A, B> {
     // Adapted from default impl from the Iterator trait
-    #[inline]
+    #[inline(never)]
     default fn spec_fold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -664,7 +664,7 @@ impl<A: Iterator, B: Iterator> SpecFold for Zip<A, B> {
 }
 
 impl<A: TrustedLen, B: TrustedLen> SpecFold for Zip<A, B> {
-    #[inline]
+    #[inline(never)]
     fn spec_fold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,

@@ -89,7 +89,7 @@ impl<Idx: Step> Range<Idx> {
     /// assert_eq!(i.next(), Some(25));
     /// ```
     #[unstable(feature = "new_range_api", issue = "125687")]
-    #[inline]
+    #[inline(never)]
     pub fn iter(&self) -> IterRange<Idx> {
         self.clone().into_iter()
     }
@@ -117,7 +117,7 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
     /// assert!(!Range::from(0.0..f32::NAN).contains(&0.5));
     /// assert!(!Range::from(f32::NAN..1.0).contains(&0.5));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "new_range_api", issue = "125687")]
     pub fn contains<U>(&self, item: &U) -> bool
     where
@@ -150,7 +150,7 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
     /// assert!( Range::from(3.0..f32::NAN).is_empty());
     /// assert!( Range::from(f32::NAN..5.0).is_empty());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "new_range_api", issue = "125687")]
     pub fn is_empty(&self) -> bool {
         !(self.start < self.end)
@@ -187,14 +187,14 @@ impl<T> IntoBounds<T> for Range<T> {
 
 #[unstable(feature = "new_range_api", issue = "125687")]
 impl<T> From<Range<T>> for legacy::Range<T> {
-    #[inline]
+    #[inline(never)]
     fn from(value: Range<T>) -> Self {
         Self { start: value.start, end: value.end }
     }
 }
 #[unstable(feature = "new_range_api", issue = "125687")]
 impl<T> From<legacy::Range<T>> for Range<T> {
-    #[inline]
+    #[inline(never)]
     fn from(value: legacy::Range<T>) -> Self {
         Self { start: value.start, end: value.end }
     }
@@ -261,7 +261,7 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     /// assert!(!RangeInclusive::from(0.0..=f32::NAN).contains(&0.0));
     /// assert!(!RangeInclusive::from(f32::NAN..=1.0).contains(&1.0));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "new_range_api", issue = "125687")]
     pub fn contains<U>(&self, item: &U) -> bool
     where
@@ -295,7 +295,7 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     /// assert!( RangeInclusive::from(f32::NAN..=5.0).is_empty());
     /// ```
     #[unstable(feature = "new_range_api", issue = "125687")]
-    #[inline]
+    #[inline(never)]
     pub fn is_empty(&self) -> bool {
         !(self.start <= self.end)
     }
@@ -318,7 +318,7 @@ impl<Idx: Step> RangeInclusive<Idx> {
     /// assert_eq!(i.next(), Some(25));
     /// ```
     #[unstable(feature = "new_range_api", issue = "125687")]
-    #[inline]
+    #[inline(never)]
     pub fn iter(&self) -> IterRangeInclusive<Idx> {
         self.clone().into_iter()
     }
@@ -327,7 +327,7 @@ impl<Idx: Step> RangeInclusive<Idx> {
 impl RangeInclusive<usize> {
     /// Converts to an exclusive `Range` for `SliceIndex` implementations.
     /// The caller is responsible for dealing with `end == usize::MAX`.
-    #[inline]
+    #[inline(never)]
     pub(crate) const fn into_slice_range(self) -> Range<usize> {
         Range { start: self.start, end: self.end + 1 }
     }
@@ -363,14 +363,14 @@ impl<T> IntoBounds<T> for RangeInclusive<T> {
 
 #[unstable(feature = "new_range_api", issue = "125687")]
 impl<T> From<RangeInclusive<T>> for legacy::RangeInclusive<T> {
-    #[inline]
+    #[inline(never)]
     fn from(value: RangeInclusive<T>) -> Self {
         Self::new(value.start, value.end)
     }
 }
 #[unstable(feature = "new_range_api", issue = "125687")]
 impl<T> From<legacy::RangeInclusive<T>> for RangeInclusive<T> {
-    #[inline]
+    #[inline(never)]
     fn from(value: legacy::RangeInclusive<T>) -> Self {
         assert!(
             !value.exhausted,
@@ -443,7 +443,7 @@ impl<Idx: Step> RangeFrom<Idx> {
     /// assert_eq!(i.next(), Some(25));
     /// ```
     #[unstable(feature = "new_range_api", issue = "125687")]
-    #[inline]
+    #[inline(never)]
     pub fn iter(&self) -> IterRangeFrom<Idx> {
         self.clone().into_iter()
     }
@@ -466,7 +466,7 @@ impl<Idx: PartialOrd<Idx>> RangeFrom<Idx> {
     /// assert!(!RangeFrom::from(0.0..).contains(&f32::NAN));
     /// assert!(!RangeFrom::from(f32::NAN..).contains(&0.5));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "new_range_api", issue = "125687")]
     pub fn contains<U>(&self, item: &U) -> bool
     where
@@ -507,14 +507,14 @@ impl<T> IntoBounds<T> for RangeFrom<T> {
 
 #[unstable(feature = "new_range_api", issue = "125687")]
 impl<T> From<RangeFrom<T>> for legacy::RangeFrom<T> {
-    #[inline]
+    #[inline(never)]
     fn from(value: RangeFrom<T>) -> Self {
         Self { start: value.start }
     }
 }
 #[unstable(feature = "new_range_api", issue = "125687")]
 impl<T> From<legacy::RangeFrom<T>> for RangeFrom<T> {
-    #[inline]
+    #[inline(never)]
     fn from(value: legacy::RangeFrom<T>) -> Self {
         Self { start: value.start }
     }

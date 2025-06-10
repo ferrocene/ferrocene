@@ -111,7 +111,7 @@ pub trait ExactSizeIterator: Iterator {
     /// let _ = range.next();
     /// assert_eq!(4, range.len());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     fn len(&self) -> usize {
         let (lower, upper) = self.size_hint();
@@ -143,7 +143,7 @@ pub trait ExactSizeIterator: Iterator {
     ///
     /// assert_eq!(one_element.next(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "exact_size_is_empty", issue = "35428")]
     fn is_empty(&self) -> bool {
         self.len() == 0

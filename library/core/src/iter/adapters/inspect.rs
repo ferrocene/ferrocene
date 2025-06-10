@@ -36,7 +36,7 @@ impl<I: Iterator, F> Inspect<I, F>
 where
     F: FnMut(&I::Item),
 {
-    #[inline]
+    #[inline(never)]
     fn do_inspect(&mut self, elt: Option<I::Item>) -> Option<I::Item> {
         if let Some(ref a) = elt {
             (self.f)(a);
@@ -73,18 +73,18 @@ where
 {
     type Item = I::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<I::Item> {
         let next = self.iter.next();
         self.do_inspect(next)
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.iter.size_hint()
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -94,7 +94,7 @@ where
         self.iter.try_fold(init, inspect_try_fold(&mut self.f, fold))
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -108,13 +108,13 @@ impl<I: DoubleEndedIterator, F> DoubleEndedIterator for Inspect<I, F>
 where
     F: FnMut(&I::Item),
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<I::Item> {
         let next = self.iter.next_back();
         self.do_inspect(next)
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -124,7 +124,7 @@ where
         self.iter.try_rfold(init, inspect_try_fold(&mut self.f, fold))
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -160,7 +160,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut I::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.iter) }

@@ -33,7 +33,7 @@ pub struct Decimal {
 
 impl Decimal {
     /// Detect if the float can be accurately reconstructed from native floats.
-    #[inline]
+    #[inline(never)]
     fn can_use_fast_path<F: RawFloat>(&self) -> bool {
         F::MIN_EXPONENT_FAST_PATH <= self.exponent
             && self.exponent <= F::MAX_EXPONENT_DISGUISED_FAST_PATH

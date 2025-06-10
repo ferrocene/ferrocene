@@ -54,7 +54,7 @@ use crate::num::NonZero;
 /// // ... and now we're done
 /// assert_eq!(None, four_fours.next());
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "iter_repeat"]
 pub fn repeat<T: Clone>(elt: T) -> Repeat<T> {
@@ -74,24 +74,24 @@ pub struct Repeat<A> {
 impl<A: Clone> Iterator for Repeat<A> {
     type Item = A;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<A> {
         Some(self.element.clone())
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         (usize::MAX, None)
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         // Advancing an infinite iterator of a single element is a no-op.
         let _ = n;
         Ok(())
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<A> {
         let _ = n;
         Some(self.element.clone())
@@ -108,19 +108,19 @@ impl<A: Clone> Iterator for Repeat<A> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<A: Clone> DoubleEndedIterator for Repeat<A> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<A> {
         Some(self.element.clone())
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         // Advancing an infinite iterator of a single element is a no-op.
         let _ = n;
         Ok(())
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, n: usize) -> Option<A> {
         let _ = n;
         Some(self.element.clone())

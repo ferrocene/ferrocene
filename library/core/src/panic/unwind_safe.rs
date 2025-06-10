@@ -267,7 +267,7 @@ impl<T> DerefMut for AssertUnwindSafe<T> {
 impl<R, F: FnOnce() -> R> FnOnce<()> for AssertUnwindSafe<F> {
     type Output = R;
 
-    #[inline]
+    #[inline(never)]
     extern "rust-call" fn call_once(self, _args: ()) -> R {
         (self.0)()
     }

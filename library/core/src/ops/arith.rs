@@ -488,7 +488,7 @@ macro_rules! div_impl_integer {
         impl Div for $t {
             type Output = $t;
 
-            #[inline]
+            #[inline(never)]
             #[track_caller]
             fn div(self, other: $t) -> $t { self / other }
         }
@@ -593,7 +593,7 @@ macro_rules! rem_impl_integer {
         impl Rem for $t {
             type Output = $t;
 
-            #[inline]
+            #[inline(never)]
             #[track_caller]
             fn rem(self, other: $t) -> $t { self % other }
         }
@@ -628,7 +628,7 @@ macro_rules! rem_impl_float {
         impl Rem for $t {
             type Output = $t;
 
-            #[inline]
+            #[inline(never)]
             fn rem(self, other: $t) -> $t { self % other }
         }
 
@@ -966,7 +966,7 @@ macro_rules! div_assign_impl {
     ($($t:ty)+) => ($(
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
         impl DivAssign for $t {
-            #[inline]
+            #[inline(never)]
             #[track_caller]
             fn div_assign(&mut self, other: $t) { *self /= other }
         }

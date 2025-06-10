@@ -2,7 +2,7 @@
 /// that someone has already checked that the value is strictly positive.
 
 // 0 < val <= u8::MAX
-#[inline]
+#[inline(never)]
 pub(super) const fn u8(val: u8) -> u32 {
     let val = val as u32;
 
@@ -23,7 +23,7 @@ pub(super) const fn u8(val: u8) -> u32 {
 }
 
 // 0 < val < 100_000
-#[inline]
+#[inline(never)]
 const fn less_than_5(val: u32) -> u32 {
     // Similar to u8, when adding one of these constants to val,
     // we get two possible bit patterns above the low 17 bits,
@@ -44,13 +44,13 @@ const fn less_than_5(val: u32) -> u32 {
 }
 
 // 0 < val <= u16::MAX
-#[inline]
+#[inline(never)]
 pub(super) const fn u16(val: u16) -> u32 {
     less_than_5(val as u32)
 }
 
 // 0 < val <= u32::MAX
-#[inline]
+#[inline(never)]
 pub(super) const fn u32(mut val: u32) -> u32 {
     let mut log = 0;
     if val >= 100_000 {
@@ -61,7 +61,7 @@ pub(super) const fn u32(mut val: u32) -> u32 {
 }
 
 // 0 < val <= u64::MAX
-#[inline]
+#[inline(never)]
 pub(super) const fn u64(mut val: u64) -> u32 {
     let mut log = 0;
     if val >= 10_000_000_000 {
@@ -76,7 +76,7 @@ pub(super) const fn u64(mut val: u64) -> u32 {
 }
 
 // 0 < val <= u128::MAX
-#[inline]
+#[inline(never)]
 pub(super) const fn u128(mut val: u128) -> u32 {
     let mut log = 0;
     if val >= 100_000_000_000_000_000_000_000_000_000_000 {
@@ -92,49 +92,49 @@ pub(super) const fn u128(mut val: u128) -> u32 {
 }
 
 #[cfg(target_pointer_width = "16")]
-#[inline]
+#[inline(never)]
 pub(super) const fn usize(val: usize) -> u32 {
     u16(val as _)
 }
 
 #[cfg(target_pointer_width = "32")]
-#[inline]
+#[inline(never)]
 pub(super) const fn usize(val: usize) -> u32 {
     u32(val as _)
 }
 
 #[cfg(target_pointer_width = "64")]
-#[inline]
+#[inline(never)]
 pub(super) const fn usize(val: usize) -> u32 {
     u64(val as _)
 }
 
 // 0 < val <= i8::MAX
-#[inline]
+#[inline(never)]
 pub(super) const fn i8(val: i8) -> u32 {
     u8(val as u8)
 }
 
 // 0 < val <= i16::MAX
-#[inline]
+#[inline(never)]
 pub(super) const fn i16(val: i16) -> u32 {
     u16(val as u16)
 }
 
 // 0 < val <= i32::MAX
-#[inline]
+#[inline(never)]
 pub(super) const fn i32(val: i32) -> u32 {
     u32(val as u32)
 }
 
 // 0 < val <= i64::MAX
-#[inline]
+#[inline(never)]
 pub(super) const fn i64(val: i64) -> u32 {
     u64(val as u64)
 }
 
 // 0 < val <= i128::MAX
-#[inline]
+#[inline(never)]
 pub(super) const fn i128(val: i128) -> u32 {
     u128(val as u128)
 }

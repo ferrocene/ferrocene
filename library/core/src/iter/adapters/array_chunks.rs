@@ -45,7 +45,7 @@ where
     /// assert_eq!(rem.next(), None);
     /// ```
     #[unstable(feature = "iter_array_chunks", reason = "recently added", issue = "100450")]
-    #[inline]
+    #[inline(never)]
     pub fn into_remainder(mut self) -> Option<array::IntoIter<I::Item, N>> {
         if self.remainder.is_none() {
             while let Some(_) = self.next() {}
@@ -61,19 +61,19 @@ where
 {
     type Item = [I::Item; N];
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<Self::Item> {
         self.try_for_each(ControlFlow::Break).break_value()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (lower, upper) = self.iter.size_hint();
 
         (lower / N, upper.map(|n| n / N))
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         self.iter.count() / N
     }
@@ -113,7 +113,7 @@ impl<I, const N: usize> DoubleEndedIterator for ArrayChunks<I, N>
 where
     I: DoubleEndedIterator + ExactSizeIterator,
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<Self::Item> {
         self.try_rfold((), |(), x| ControlFlow::Break(x)).break_value()
     }
@@ -184,12 +184,12 @@ impl<I, const N: usize> ExactSizeIterator for ArrayChunks<I, N>
 where
     I: ExactSizeIterator,
 {
-    #[inline]
+    #[inline(never)]
     fn len(&self) -> usize {
         self.iter.len() / N
     }
 
-    #[inline]
+    #[inline(never)]
     fn is_empty(&self) -> bool {
         self.iter.len() < N
     }
@@ -206,7 +206,7 @@ impl<I, const N: usize> SpecFold for ArrayChunks<I, N>
 where
     I: Iterator,
 {
-    #[inline]
+    #[inline(never)]
     default fn fold<B, F>(mut self, init: B, f: F) -> B
     where
         Self: Sized,
@@ -220,7 +220,7 @@ impl<I, const N: usize> SpecFold for ArrayChunks<I, N>
 where
     I: Iterator + TrustedRandomAccessNoCoerce,
 {
-    #[inline]
+    #[inline(never)]
     fn fold<B, F>(mut self, init: B, mut f: F) -> B
     where
         Self: Sized,
@@ -257,7 +257,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut I::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.iter) }

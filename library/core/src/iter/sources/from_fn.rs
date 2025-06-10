@@ -40,7 +40,7 @@ use crate::fmt;
 /// });
 /// assert_eq!(counter.collect::<Vec<_>>(), &[1, 2, 3, 4, 5]);
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "iter_from_fn", since = "1.34.0")]
 pub fn from_fn<T, F>(f: F) -> FromFn<F>
 where
@@ -66,7 +66,7 @@ where
 {
     type Item = T;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<Self::Item> {
         (self.0)()
     }

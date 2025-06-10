@@ -335,7 +335,7 @@ pub trait FromResidual<R = <Self as Try>::Residual> {
     issue = "none",
     reason = "just here to simplify the desugaring; will never be stabilized"
 )]
-#[inline]
+#[inline(never)]
 #[track_caller] // because `Result::from_residual` has it
 #[lang = "from_yeet"]
 #[allow(unreachable_pub)] // not-exposed but still used via lang-item
@@ -389,14 +389,14 @@ impl<T> NeverShortCircuit<T> {
     ///
     /// This is useful for implementing infallible functions in terms of the `try_` ones,
     /// without accidentally capturing extra generic parameters in a closure.
-    #[inline]
+    #[inline(never)]
     pub(crate) fn wrap_mut_1<A>(
         mut f: impl FnMut(A) -> T,
     ) -> impl FnMut(A) -> NeverShortCircuit<T> {
         move |a| NeverShortCircuit(f(a))
     }
 
-    #[inline]
+    #[inline(never)]
     pub(crate) fn wrap_mut_2<A, B>(mut f: impl FnMut(A, B) -> T) -> impl FnMut(A, B) -> Self {
         move |a, b| NeverShortCircuit(f(a, b))
     }
@@ -408,19 +408,19 @@ impl<T> Try for NeverShortCircuit<T> {
     type Output = T;
     type Residual = NeverShortCircuitResidual;
 
-    #[inline]
+    #[inline(never)]
     fn branch(self) -> ControlFlow<NeverShortCircuitResidual, T> {
         ControlFlow::Continue(self.0)
     }
 
-    #[inline]
+    #[inline(never)]
     fn from_output(x: T) -> Self {
         NeverShortCircuit(x)
     }
 }
 
 impl<T> FromResidual for NeverShortCircuit<T> {
-    #[inline]
+    #[inline(never)]
     fn from_residual(never: NeverShortCircuitResidual) -> Self {
         match never {}
     }

@@ -61,7 +61,7 @@ impl ByteStr {
     /// assert_eq!(a, b);
     /// assert_eq!(a, c);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "bstr", issue = "134915")]
     pub fn new<B: ?Sized + AsRef<[u8]>>(bytes: &B) -> &Self {
         ByteStr::from_bytes(bytes.as_ref())
@@ -69,7 +69,7 @@ impl ByteStr {
 
     #[doc(hidden)]
     #[unstable(feature = "bstr_internals", issue = "none")]
-    #[inline]
+    #[inline(never)]
     pub fn from_bytes(slice: &[u8]) -> &Self {
         // SAFETY: `ByteStr` is a transparent wrapper around `[u8]`, so we can turn a reference to
         // the wrapped type into a reference to the wrapper type.
@@ -78,7 +78,7 @@ impl ByteStr {
 
     #[doc(hidden)]
     #[unstable(feature = "bstr_internals", issue = "none")]
-    #[inline]
+    #[inline(never)]
     pub fn from_bytes_mut(slice: &mut [u8]) -> &mut Self {
         // SAFETY: `ByteStr` is a transparent wrapper around `[u8]`, so we can turn a reference to
         // the wrapped type into a reference to the wrapper type.
@@ -87,14 +87,14 @@ impl ByteStr {
 
     #[doc(hidden)]
     #[unstable(feature = "bstr_internals", issue = "none")]
-    #[inline]
+    #[inline(never)]
     pub fn as_bytes(&self) -> &[u8] {
         &self.0
     }
 
     #[doc(hidden)]
     #[unstable(feature = "bstr_internals", issue = "none")]
-    #[inline]
+    #[inline(never)]
     pub fn as_bytes_mut(&mut self) -> &mut [u8] {
         &mut self.0
     }
@@ -104,7 +104,7 @@ impl ByteStr {
 impl Deref for ByteStr {
     type Target = [u8];
 
-    #[inline]
+    #[inline(never)]
     fn deref(&self) -> &[u8] {
         &self.0
     }
@@ -112,7 +112,7 @@ impl Deref for ByteStr {
 
 #[unstable(feature = "bstr", issue = "134915")]
 impl DerefMut for ByteStr {
-    #[inline]
+    #[inline(never)]
     fn deref_mut(&mut self) -> &mut [u8] {
         &mut self.0
     }
@@ -186,7 +186,7 @@ impl fmt::Display for ByteStr {
 
 #[unstable(feature = "bstr", issue = "134915")]
 impl AsRef<[u8]> for ByteStr {
-    #[inline]
+    #[inline(never)]
     fn as_ref(&self) -> &[u8] {
         &self.0
     }
@@ -194,7 +194,7 @@ impl AsRef<[u8]> for ByteStr {
 
 #[unstable(feature = "bstr", issue = "134915")]
 impl AsRef<ByteStr> for ByteStr {
-    #[inline]
+    #[inline(never)]
     fn as_ref(&self) -> &ByteStr {
         self
     }
@@ -204,7 +204,7 @@ impl AsRef<ByteStr> for ByteStr {
 
 #[unstable(feature = "bstr", issue = "134915")]
 impl AsRef<ByteStr> for str {
-    #[inline]
+    #[inline(never)]
     fn as_ref(&self) -> &ByteStr {
         ByteStr::new(self)
     }
@@ -212,7 +212,7 @@ impl AsRef<ByteStr> for str {
 
 #[unstable(feature = "bstr", issue = "134915")]
 impl AsMut<[u8]> for ByteStr {
-    #[inline]
+    #[inline(never)]
     fn as_mut(&mut self) -> &mut [u8] {
         &mut self.0
     }
@@ -226,7 +226,7 @@ impl AsMut<[u8]> for ByteStr {
 
 #[unstable(feature = "bstr", issue = "134915")]
 impl Borrow<[u8]> for ByteStr {
-    #[inline]
+    #[inline(never)]
     fn borrow(&self) -> &[u8] {
         &self.0
     }
@@ -236,7 +236,7 @@ impl Borrow<[u8]> for ByteStr {
 
 #[unstable(feature = "bstr", issue = "134915")]
 impl BorrowMut<[u8]> for ByteStr {
-    #[inline]
+    #[inline(never)]
     fn borrow_mut(&mut self) -> &mut [u8] {
         &mut self.0
     }
@@ -260,7 +260,7 @@ impl<'a> Default for &'a mut ByteStr {
 //
 // #[unstable(feature = "bstr", issue = "134915")]
 // impl<'a, const N: usize> From<&'a [u8; N]> for &'a ByteStr {
-//     #[inline]
+//     #[inline(never)]
 //     fn from(s: &'a [u8; N]) -> Self {
 //         ByteStr::from_bytes(s)
 //     }
@@ -268,7 +268,7 @@ impl<'a> Default for &'a mut ByteStr {
 //
 // #[unstable(feature = "bstr", issue = "134915")]
 // impl<'a> From<&'a [u8]> for &'a ByteStr {
-//     #[inline]
+//     #[inline(never)]
 //     fn from(s: &'a [u8]) -> Self {
 //         ByteStr::from_bytes(s)
 //     }
@@ -278,7 +278,7 @@ impl<'a> Default for &'a mut ByteStr {
 //
 // #[unstable(feature = "bstr", issue = "134915")]
 // impl<'a> From<&'a ByteStr> for &'a [u8] {
-//     #[inline]
+//     #[inline(never)]
 //     fn from(s: &'a ByteStr) -> Self {
 //         &s.0
 //     }
@@ -286,7 +286,7 @@ impl<'a> Default for &'a mut ByteStr {
 //
 // #[unstable(feature = "bstr", issue = "134915")]
 // impl<'a> From<&'a mut ByteStr> for &'a mut [u8] {
-//     #[inline]
+//     #[inline(never)]
 //     fn from(s: &'a mut ByteStr) -> Self {
 //         &mut s.0
 //     }
@@ -296,7 +296,7 @@ impl<'a> Default for &'a mut ByteStr {
 //
 // #[unstable(feature = "bstr", issue = "134915")]
 // impl<'a> From<&'a str> for &'a ByteStr {
-//     #[inline]
+//     #[inline(never)]
 //     fn from(s: &'a str) -> Self {
 //         ByteStr::from_bytes(s.as_bytes())
 //     }
@@ -306,7 +306,7 @@ impl<'a> Default for &'a mut ByteStr {
 impl<'a> TryFrom<&'a ByteStr> for &'a str {
     type Error = crate::str::Utf8Error;
 
-    #[inline]
+    #[inline(never)]
     fn try_from(s: &'a ByteStr) -> Result<Self, Self::Error> {
         crate::str::from_utf8(&s.0)
     }
@@ -316,7 +316,7 @@ impl<'a> TryFrom<&'a ByteStr> for &'a str {
 impl<'a> TryFrom<&'a mut ByteStr> for &'a mut str {
     type Error = crate::str::Utf8Error;
 
-    #[inline]
+    #[inline(never)]
     fn try_from(s: &'a mut ByteStr) -> Result<Self, Self::Error> {
         crate::str::from_utf8_mut(&mut s.0)
     }

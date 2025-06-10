@@ -219,7 +219,7 @@ impl Error for ! {}
 impl dyn Error + 'static {
     /// Returns `true` if the inner type is the same as `T`.
     #[stable(feature = "error_downcast", since = "1.3.0")]
-    #[inline]
+    #[inline(never)]
     pub fn is<T: Error + 'static>(&self) -> bool {
         // Get `TypeId` of the type this function is instantiated with.
         let t = TypeId::of::<T>();
@@ -234,7 +234,7 @@ impl dyn Error + 'static {
     /// Returns some reference to the inner value if it is of type `T`, or
     /// `None` if it isn't.
     #[stable(feature = "error_downcast", since = "1.3.0")]
-    #[inline]
+    #[inline(never)]
     pub fn downcast_ref<T: Error + 'static>(&self) -> Option<&T> {
         if self.is::<T>() {
             // SAFETY: `is` ensures this type cast is correct
@@ -247,7 +247,7 @@ impl dyn Error + 'static {
     /// Returns some mutable reference to the inner value if it is of type `T`, or
     /// `None` if it isn't.
     #[stable(feature = "error_downcast", since = "1.3.0")]
-    #[inline]
+    #[inline(never)]
     pub fn downcast_mut<T: Error + 'static>(&mut self) -> Option<&mut T> {
         if self.is::<T>() {
             // SAFETY: `is` ensures this type cast is correct
@@ -261,21 +261,21 @@ impl dyn Error + 'static {
 impl dyn Error + 'static + Send {
     /// Forwards to the method defined on the type `dyn Error`.
     #[stable(feature = "error_downcast", since = "1.3.0")]
-    #[inline]
+    #[inline(never)]
     pub fn is<T: Error + 'static>(&self) -> bool {
         <dyn Error + 'static>::is::<T>(self)
     }
 
     /// Forwards to the method defined on the type `dyn Error`.
     #[stable(feature = "error_downcast", since = "1.3.0")]
-    #[inline]
+    #[inline(never)]
     pub fn downcast_ref<T: Error + 'static>(&self) -> Option<&T> {
         <dyn Error + 'static>::downcast_ref::<T>(self)
     }
 
     /// Forwards to the method defined on the type `dyn Error`.
     #[stable(feature = "error_downcast", since = "1.3.0")]
-    #[inline]
+    #[inline(never)]
     pub fn downcast_mut<T: Error + 'static>(&mut self) -> Option<&mut T> {
         <dyn Error + 'static>::downcast_mut::<T>(self)
     }
@@ -284,21 +284,21 @@ impl dyn Error + 'static + Send {
 impl dyn Error + 'static + Send + Sync {
     /// Forwards to the method defined on the type `dyn Error`.
     #[stable(feature = "error_downcast", since = "1.3.0")]
-    #[inline]
+    #[inline(never)]
     pub fn is<T: Error + 'static>(&self) -> bool {
         <dyn Error + 'static>::is::<T>(self)
     }
 
     /// Forwards to the method defined on the type `dyn Error`.
     #[stable(feature = "error_downcast", since = "1.3.0")]
-    #[inline]
+    #[inline(never)]
     pub fn downcast_ref<T: Error + 'static>(&self) -> Option<&T> {
         <dyn Error + 'static>::downcast_ref::<T>(self)
     }
 
     /// Forwards to the method defined on the type `dyn Error`.
     #[stable(feature = "error_downcast", since = "1.3.0")]
-    #[inline]
+    #[inline(never)]
     pub fn downcast_mut<T: Error + 'static>(&mut self) -> Option<&mut T> {
         <dyn Error + 'static>::downcast_mut::<T>(self)
     }
@@ -357,7 +357,7 @@ impl dyn Error {
     /// assert!(iter.next().is_none());
     /// ```
     #[unstable(feature = "error_iter", issue = "58520")]
-    #[inline]
+    #[inline(never)]
     pub fn sources(&self) -> Source<'_> {
         // You may think this method would be better in the `Error` trait, and you'd be right.
         // Unfortunately that doesn't work, not because of the dyn-incompatibility rules but
@@ -980,7 +980,7 @@ struct Tagged<E: ?Sized> {
 impl<'a> Tagged<dyn Erased<'a> + 'a> {
     /// Returns some reference to the dynamic value if it is tagged with `I`,
     /// or `None` otherwise.
-    #[inline]
+    #[inline(never)]
     fn downcast<I>(&self) -> Option<&TaggedOption<'a, I>>
     where
         I: tags::Type<'a>,
@@ -995,7 +995,7 @@ impl<'a> Tagged<dyn Erased<'a> + 'a> {
 
     /// Returns some mutable reference to the dynamic value if it is tagged with `I`,
     /// or `None` otherwise.
-    #[inline]
+    #[inline(never)]
     fn downcast_mut<I>(&mut self) -> Option<&mut TaggedOption<'a, I>>
     where
         I: tags::Type<'a>,

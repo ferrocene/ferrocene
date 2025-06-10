@@ -29,21 +29,21 @@ where
 {
     type Item = <I as Iterator>::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<<I as Iterator>::Item> {
         self.iter.next_back()
     }
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.iter.size_hint()
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.iter.advance_back_by(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<<I as Iterator>::Item> {
         self.iter.nth_back(n)
     }
@@ -64,7 +64,7 @@ where
         self.iter.rfold(init, f)
     }
 
-    #[inline]
+    #[inline(never)]
     fn find<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -78,17 +78,17 @@ impl<I> DoubleEndedIterator for Rev<I>
 where
     I: DoubleEndedIterator,
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<<I as Iterator>::Item> {
         self.iter.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.iter.advance_by(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, n: usize) -> Option<<I as Iterator>::Item> {
         self.iter.nth(n)
     }

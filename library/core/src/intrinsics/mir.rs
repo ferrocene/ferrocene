@@ -316,7 +316,7 @@ pub use UnwindTerminateReason::{Abi as ReasonAbi, InCleanup as ReasonInCleanup};
 macro_rules! define {
     ($name:literal, $( #[ $meta:meta ] )* fn $($sig:tt)*) => {
         #[rustc_diagnostic_item = $name]
-        #[inline]
+        #[inline(never)]
         $( #[ $meta ] )*
         pub fn $($sig)* { panic!() }
     }

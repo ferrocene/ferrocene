@@ -50,14 +50,14 @@ where
 {
     type Item = T;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<Self::Item> {
         let item = self.next.take()?;
         self.next = (self.succ)(&item);
         Some(item)
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.next.is_some() { (1, None) } else { (0, Some(0)) }
     }

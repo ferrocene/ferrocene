@@ -56,7 +56,7 @@ use crate::iter::{FusedIterator, TrustedLen};
 ///     println!("{f:?}");
 /// }
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "iter_once_with", since = "1.43.0")]
 pub fn once_with<A, F: FnOnce() -> A>(make: F) -> OnceWith<F> {
     OnceWith { make: Some(make) }
@@ -88,13 +88,13 @@ impl<F> fmt::Debug for OnceWith<F> {
 impl<A, F: FnOnce() -> A> Iterator for OnceWith<F> {
     type Item = A;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<A> {
         let f = self.make.take()?;
         Some(f())
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.make.iter().size_hint()
     }

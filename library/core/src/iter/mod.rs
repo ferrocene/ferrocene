@@ -475,8 +475,6 @@ pub use self::traits::FusedIterator;
 #[unstable(issue = "none", feature = "inplace_iteration")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::traits::InPlaceIterable;
-#[stable(feature = "rust1", since = "1.0.0")]
-pub use self::traits::Iterator;
 #[unstable(issue = "none", feature = "trusted_fused")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::traits::TrustedFused;
@@ -491,8 +489,10 @@ pub(crate) use self::traits::UncheckedIterator;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::traits::{
-    DoubleEndedIterator, ExactSizeIterator, Extend, FromIterator, IntoIterator, Product, Sum,
+    DoubleEndedIterator, ExactSizeIterator, Extend, FromIterator, Product, Sum,
 };
+#[stable(feature = "rust1", since = "1.0.0")]
+pub use self::traits::{IntoIterator, Iterator};
 
 #[cfg(not(feature = "ferrocene_certified"))]
 mod adapters;

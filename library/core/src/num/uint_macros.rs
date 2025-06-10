@@ -769,58 +769,67 @@ macro_rules! uint_impl {
 
         /// Unchecked integer subtraction. Computes `self - rhs`, assuming overflow
         /// cannot occur.
-        ///
-        /// Calling `x.unchecked_sub(y)` is semantically equivalent to calling
-        /// `x.`[`checked_sub`]`(y).`[`unwrap_unchecked`]`()`.
-        ///
-        /// If you're just trying to avoid the panic in debug mode, then **do not**
-        /// use this.  Instead, you're looking for [`wrapping_sub`].
-        ///
-        /// If you find yourself writing code like this:
-        ///
-        /// ```
-        /// # let foo = 30_u32;
-        /// # let bar = 20;
-        /// if foo >= bar {
-        ///     // SAFETY: just checked it will not overflow
-        ///     let diff = unsafe { foo.unchecked_sub(bar) };
-        ///     // ... use diff ...
-        /// }
-        /// ```
-        ///
-        /// Consider changing it to
-        ///
-        /// ```
-        /// # let foo = 30_u32;
-        /// # let bar = 20;
-        /// if let Some(diff) = foo.checked_sub(bar) {
-        ///     // ... use diff ...
-        /// }
-        /// ```
-        ///
-        /// As that does exactly the same thing -- including telling the optimizer
-        /// that the subtraction cannot overflow -- but avoids needing `unsafe`.
-        ///
-        /// # Safety
-        ///
-        /// This results in undefined behavior when
-        #[doc = concat!("`self - rhs > ", stringify!($SelfT), "::MAX` or `self - rhs < ", stringify!($SelfT), "::MIN`,")]
-        /// i.e. when [`checked_sub`] would return `None`.
-        ///
-        /// [`unwrap_unchecked`]: option/enum.Option.html#method.unwrap_unchecked
-        #[doc = concat!("[`checked_sub`]: ", stringify!($SelfT), "::checked_sub")]
-        #[doc = concat!("[`wrapping_sub`]: ", stringify!($SelfT), "::wrapping_sub")]
+        // ///
+        // /// Calling `x.unchecked_sub(y)` is semantically equivalent to calling
+        // /// `x.`[`checked_sub`]`(y).`[`unwrap_unchecked`]`()`.
+        // ///
+        // /// If you're just trying to avoid the panic in debug mode, then **do not**
+        // /// use this.  Instead, you're looking for [`wrapping_sub`].
+        // ///
+        // /// If you find yourself writing code like this:
+        // ///
+        // /// ```
+        // /// # let foo = 30_u32;
+        // /// # let bar = 20;
+        // /// if foo >= bar {
+        // ///     // SAFETY: just checked it will not overflow
+        // ///     let diff = unsafe { foo.unchecked_sub(bar) };
+        // ///     // ... use diff ...
+        // /// }
+        // /// ```
+        // ///
+        // /// Consider changing it to
+        // ///
+        // /// ```
+        // /// # let foo = 30_u32;
+        // /// # let bar = 20;
+        // /// if let Some(diff) = foo.checked_sub(bar) {
+        // ///     // ... use diff ...
+        // /// }
+        // /// ```
+        // ///
+        // /// As that does exactly the same thing -- including telling the optimizer
+        // /// that the subtraction cannot overflow -- but avoids needing `unsafe`.
+        // ///
+        // /// # Safety
+        // ///
+        // /// This results in undefined behavior when
+        // #[doc = concat!("`self - rhs > ", stringify!($SelfT), "::MAX` or `self - rhs < ", stringify!($SelfT), "::MIN`,")]
+        // /// i.e. when [`checked_sub`] would return `None`.
+        // ///
+        // /// [`unwrap_unchecked`]: option/enum.Option.html#method.unwrap_unchecked
+        // #[doc = concat!("[`checked_sub`]: ", stringify!($SelfT), "::checked_sub")]
+        // #[doc = concat!("[`wrapping_sub`]: ", stringify!($SelfT), "::wrapping_sub")]
         #[stable(feature = "unchecked_math", since = "1.79.0")]
         #[rustc_const_stable(feature = "unchecked_math", since = "1.79.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
         #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const unsafe fn unchecked_sub(self, rhs: Self) -> Self {
+            #[cfg(not(feature = "ferrocene_certified"))]
             assert_unsafe_precondition!(
                 check_language_ub,
                 concat!(stringify!($SelfT), "::unchecked_sub cannot overflow"),
+                (
+                    lhs: $SelfT = self,
+                    rhs: $SelfT = rhs,
+                ) => !lhs.overflowing_sub(rhs).1,
+            );
+            #[cfg(feature = "ferrocene_certified")]
+            assert_unsafe_precondition!(
+                check_language_ub,
+                "unchecked_sub cannot overflow",
                 (
                     lhs: $SelfT = self,
                     rhs: $SelfT = rhs,
@@ -925,21 +934,20 @@ macro_rules! uint_impl {
 
         /// Checked integer multiplication. Computes `self * rhs`, returning
         /// `None` if overflow occurred.
-        ///
-        /// # Examples
-        ///
-        /// Basic usage:
-        ///
-        /// ```
-        #[doc = concat!("assert_eq!(5", stringify!($SelfT), ".checked_mul(1), Some(5));")]
-        #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MAX.checked_mul(2), None);")]
-        /// ```
+        // ///
+        // /// # Examples
+        // ///
+        // /// Basic usage:
+        // ///
+        // /// ```
+        // #[doc = concat!("assert_eq!(5", stringify!($SelfT), ".checked_mul(1), Some(5));")]
+        // #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MAX.checked_mul(2), None);")]
+        // /// ```
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_stable(feature = "const_checked_int_methods", since = "1.47.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn checked_mul(self, rhs: Self) -> Option<Self> {
             let (a, b) = self.overflowing_mul(rhs);
             if intrinsics::unlikely(b) { None } else { Some(a) }
@@ -2455,21 +2463,20 @@ macro_rules! uint_impl {
         /// Returns a tuple of the addition along with a boolean indicating
         /// whether an arithmetic overflow would occur. If an overflow would
         /// have occurred then the wrapped value is returned.
-        ///
-        /// # Examples
-        ///
-        /// Basic usage:
-        ///
-        /// ```
-        #[doc = concat!("assert_eq!(5", stringify!($SelfT), ".overflowing_add(2), (7, false));")]
-        #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MAX.overflowing_add(1), (0, true));")]
-        /// ```
+        // ///
+        // /// # Examples
+        // ///
+        // /// Basic usage:
+        // ///
+        // /// ```
+        // #[doc = concat!("assert_eq!(5", stringify!($SelfT), ".overflowing_add(2), (7, false));")]
+        // #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MAX.overflowing_add(1), (0, true));")]
+        // /// ```
         #[stable(feature = "wrapping", since = "1.7.0")]
         #[rustc_const_stable(feature = "const_wrapping_math", since = "1.32.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn overflowing_add(self, rhs: Self) -> (Self, bool) {
             let (a, b) = intrinsics::add_with_overflow(self as $ActualT, rhs as $ActualT);
             (a as Self, b)
@@ -2563,21 +2570,20 @@ macro_rules! uint_impl {
         /// Returns a tuple of the subtraction along with a boolean indicating
         /// whether an arithmetic overflow would occur. If an overflow would
         /// have occurred then the wrapped value is returned.
-        ///
-        /// # Examples
-        ///
-        /// Basic usage:
-        ///
-        /// ```
-        #[doc = concat!("assert_eq!(5", stringify!($SelfT), ".overflowing_sub(2), (3, false));")]
-        #[doc = concat!("assert_eq!(0", stringify!($SelfT), ".overflowing_sub(1), (", stringify!($SelfT), "::MAX, true));")]
-        /// ```
+        // ///
+        // /// # Examples
+        // ///
+        // /// Basic usage:
+        // ///
+        // /// ```
+        // #[doc = concat!("assert_eq!(5", stringify!($SelfT), ".overflowing_sub(2), (3, false));")]
+        // #[doc = concat!("assert_eq!(0", stringify!($SelfT), ".overflowing_sub(1), (", stringify!($SelfT), "::MAX, true));")]
+        // /// ```
         #[stable(feature = "wrapping", since = "1.7.0")]
         #[rustc_const_stable(feature = "const_wrapping_math", since = "1.32.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn overflowing_sub(self, rhs: Self) -> (Self, bool) {
             let (a, b) = intrinsics::sub_with_overflow(self as $ActualT, rhs as $ActualT);
             (a as Self, b)
@@ -2710,7 +2716,6 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn overflowing_mul(self, rhs: Self) -> (Self, bool) {
             let (a, b) = intrinsics::mul_with_overflow(self as $ActualT, rhs as $ActualT);
             (a as Self, b)

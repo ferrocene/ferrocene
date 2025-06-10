@@ -429,16 +429,16 @@ pub use crate::intrinsics::write_bytes;
 mod metadata;
 #[unstable(feature = "ptr_metadata", issue = "81513")]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub use metadata::{DynMetadata, metadata};
+pub use metadata::DynMetadata;
+#[unstable(feature = "ptr_metadata", issue = "81513")]
+pub use metadata::metadata;
 #[unstable(feature = "ptr_metadata", issue = "81513")]
 pub use metadata::{Pointee, Thin};
 #[unstable(feature = "ptr_metadata", issue = "81513")]
 pub use metadata::{from_raw_parts, from_raw_parts_mut};
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod non_null;
 #[stable(feature = "nonnull", since = "1.25.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use non_null::NonNull;
 
 #[cfg(not(feature = "ferrocene_certified"))]

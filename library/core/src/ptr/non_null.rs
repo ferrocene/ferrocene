@@ -1,13 +1,24 @@
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::Unsize;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{MaybeUninit, SizedTypeProperties};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{CoerceUnsized, DispatchFromDyn};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::pin::PinCoerceUnsized;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::Unique;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::slice::{self, SliceIndex};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ub_checks::assert_unsafe_precondition;
-use crate::{fmt, hash, intrinsics, mem, ptr};
+#[cfg(not(feature = "ferrocene_certified"))]
+use crate::{fmt, hash, mem, ptr};
+use crate::{intrinsics, mem};
 
 /// `*mut T` but non-zero and [covariant].
 ///
@@ -33,35 +44,35 @@ use crate::{fmt, hash, intrinsics, mem, ptr};
 /// If your type cannot safely be covariant, you must ensure it contains some
 /// additional field to provide invariance. Often this field will be a [`PhantomData`]
 /// type like `PhantomData<Cell<T>>` or `PhantomData<&'a mut T>`.
-///
-/// Notice that `NonNull<T>` has a `From` instance for `&T`. However, this does
-/// not change the fact that mutating through a (pointer derived from a) shared
-/// reference is undefined behavior unless the mutation happens inside an
-/// [`UnsafeCell<T>`]. The same goes for creating a mutable reference from a shared
-/// reference. When using this `From` instance without an `UnsafeCell<T>`,
-/// it is your responsibility to ensure that `as_mut` is never called, and `as_ptr`
-/// is never used for mutation.
-///
-/// # Representation
-///
-/// Thanks to the [null pointer optimization],
-/// `NonNull<T>` and `Option<NonNull<T>>`
-/// are guaranteed to have the same size and alignment:
-///
-/// ```
-/// use std::ptr::NonNull;
-///
-/// assert_eq!(size_of::<NonNull<i16>>(), size_of::<Option<NonNull<i16>>>());
-/// assert_eq!(align_of::<NonNull<i16>>(), align_of::<Option<NonNull<i16>>>());
-///
-/// assert_eq!(size_of::<NonNull<str>>(), size_of::<Option<NonNull<str>>>());
-/// assert_eq!(align_of::<NonNull<str>>(), align_of::<Option<NonNull<str>>>());
-/// ```
+// ///
+// /// Notice that `NonNull<T>` has a `From` instance for `&T`. However, this does
+// /// not change the fact that mutating through a (pointer derived from a) shared
+// /// reference is undefined behavior unless the mutation happens inside an
+// /// [`UnsafeCell<T>`]. The same goes for creating a mutable reference from a shared
+// /// reference. When using this `From` instance without an `UnsafeCell<T>`,
+// /// it is your responsibility to ensure that `as_mut` is never called, and `as_ptr`
+// /// is never used for mutation.
+// ///
+// /// # Representation
+// ///
+// /// Thanks to the [null pointer optimization],
+// /// `NonNull<T>` and `Option<NonNull<T>>`
+// /// are guaranteed to have the same size and alignment:
+// ///
+// /// ```
+// /// use std::ptr::NonNull;
+// ///
+// /// assert_eq!(size_of::<NonNull<i16>>(), size_of::<Option<NonNull<i16>>>());
+// /// assert_eq!(align_of::<NonNull<i16>>(), align_of::<Option<NonNull<i16>>>());
+// ///
+// /// assert_eq!(size_of::<NonNull<str>>(), size_of::<Option<NonNull<str>>>());
+// /// assert_eq!(align_of::<NonNull<str>>(), align_of::<Option<NonNull<str>>>());
+// /// ```
 ///
 /// [covariant]: https://doc.rust-lang.org/reference/subtyping.html
 /// [`PhantomData`]: crate::marker::PhantomData
-/// [`UnsafeCell<T>`]: crate::cell::UnsafeCell
-/// [null pointer optimization]: crate::option#representation
+// /// [`UnsafeCell<T>`]: crate::cell::UnsafeCell
+// /// [null pointer optimization]: crate::option#representation
 #[stable(feature = "nonnull", since = "1.25.0")]
 #[repr(transparent)]
 #[rustc_layout_scalar_valid_range_start(1)]
@@ -76,11 +87,13 @@ pub struct NonNull<T: ?Sized> {
 /// `NonNull` pointers are not `Send` because the data they reference may be aliased.
 // N.B., this impl is unnecessary, but should provide better error messages.
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> !Send for NonNull<T> {}
 
 /// `NonNull` pointers are not `Sync` because the data they reference may be aliased.
 // N.B., this impl is unnecessary, but should provide better error messages.
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> !Sync for NonNull<T> {}
 
 impl<T: Sized> NonNull<T> {
@@ -92,6 +105,7 @@ impl<T: Sized> NonNull<T> {
     #[unstable(feature = "nonnull_provenance", issue = "135243")]
     #[must_use]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn without_provenance(addr: NonZero<usize>) -> Self {
         let pointer = crate::ptr::without_provenance(addr.get());
         // SAFETY: we know `addr` is non-zero.
@@ -121,6 +135,7 @@ impl<T: Sized> NonNull<T> {
     #[rustc_const_stable(feature = "const_nonnull_dangling", since = "1.36.0")]
     #[must_use]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn dangling() -> Self {
         let align = crate::ptr::Alignment::of::<T>();
         NonNull::without_provenance(align.as_nonzero())
@@ -134,6 +149,7 @@ impl<T: Sized> NonNull<T> {
     /// This is an [Exposed Provenance][crate::ptr#exposed-provenance] API.
     #[unstable(feature = "nonnull_provenance", issue = "135243")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn with_exposed_provenance(addr: NonZero<usize>) -> Self {
         // SAFETY: we know `addr` is non-zero.
         unsafe {
@@ -159,6 +175,7 @@ impl<T: Sized> NonNull<T> {
     #[inline]
     #[must_use]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_uninit_ref<'a>(self) -> &'a MaybeUninit<T> {
         // SAFETY: the caller must guarantee that `self` meets all the
         // requirements for a reference.
@@ -182,6 +199,7 @@ impl<T: Sized> NonNull<T> {
     #[inline]
     #[must_use]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_uninit_mut<'a>(self) -> &'a mut MaybeUninit<T> {
         // SAFETY: the caller must guarantee that `self` meets all the
         // requirements for a reference.
@@ -216,6 +234,7 @@ impl<T: ?Sized> NonNull<T> {
     #[stable(feature = "nonnull", since = "1.25.0")]
     #[rustc_const_stable(feature = "const_nonnull_new_unchecked", since = "1.25.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn new_unchecked(ptr: *mut T) -> Self {
         // SAFETY: the caller must guarantee that `ptr` is non-null.
         unsafe {
@@ -252,6 +271,7 @@ impl<T: ?Sized> NonNull<T> {
     #[stable(feature = "nonnull", since = "1.25.0")]
     #[rustc_const_stable(feature = "const_nonnull_new", since = "1.85.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn new(ptr: *mut T) -> Option<Self> {
         if !ptr.is_null() {
             // SAFETY: The pointer is already checked and is not null
@@ -264,6 +284,7 @@ impl<T: ?Sized> NonNull<T> {
     /// Converts a reference to a `NonNull` pointer.
     #[unstable(feature = "non_null_from_ref", issue = "130823")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn from_ref(r: &T) -> Self {
         // SAFETY: A reference cannot be null.
         unsafe { NonNull { pointer: r as *const T } }
@@ -285,6 +306,7 @@ impl<T: ?Sized> NonNull<T> {
     /// [`std::ptr::from_raw_parts`]: crate::ptr::from_raw_parts
     #[unstable(feature = "ptr_metadata", issue = "81513")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn from_raw_parts(
         data_pointer: NonNull<impl super::Thin>,
         metadata: <T as super::Pointee>::Metadata,
@@ -302,6 +324,7 @@ impl<T: ?Sized> NonNull<T> {
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn to_raw_parts(self) -> (NonNull<()>, <T as super::Pointee>::Metadata) {
         (self.cast(), super::metadata(self.as_ptr()))
     }
@@ -314,6 +337,7 @@ impl<T: ?Sized> NonNull<T> {
     #[must_use]
     #[inline]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn addr(self) -> NonZero<usize> {
         // SAFETY: The pointer is guaranteed by the type to be non-null,
         // meaning that the address will be non-zero.
@@ -327,6 +351,7 @@ impl<T: ?Sized> NonNull<T> {
     ///
     /// This is an [Exposed Provenance][crate::ptr#exposed-provenance] API.
     #[unstable(feature = "nonnull_provenance", issue = "135243")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn expose_provenance(self) -> NonZero<usize> {
         // SAFETY: The pointer is guaranteed by the type to be non-null,
         // meaning that the address will be non-zero.
@@ -342,6 +367,7 @@ impl<T: ?Sized> NonNull<T> {
     #[must_use]
     #[inline]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn with_addr(self, addr: NonZero<usize>) -> Self {
         // SAFETY: The result of `ptr::from::with_addr` is non-null because `addr` is guaranteed to be non-zero.
         unsafe { NonNull::new_unchecked(self.as_ptr().with_addr(addr.get()) as *mut _) }
@@ -356,6 +382,7 @@ impl<T: ?Sized> NonNull<T> {
     #[must_use]
     #[inline]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn map_addr(self, f: impl FnOnce(NonZero<usize>) -> NonZero<usize>) -> Self {
         self.with_addr(f(self.addr()))
     }
@@ -421,6 +448,7 @@ impl<T: ?Sized> NonNull<T> {
     #[rustc_const_stable(feature = "const_nonnull_as_ref", since = "1.73.0")]
     #[must_use]
     #[inline(always)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_ref<'a>(&self) -> &'a T {
         // SAFETY: the caller must guarantee that `self` meets all the
         // requirements for a reference.
@@ -428,33 +456,34 @@ impl<T: ?Sized> NonNull<T> {
         unsafe { &*self.as_ptr().cast_const() }
     }
 
-    /// Returns a unique reference to the value. If the value may be uninitialized, [`as_uninit_mut`]
-    /// must be used instead.
-    ///
-    /// For the shared counterpart see [`as_ref`].
-    ///
-    /// [`as_uninit_mut`]: NonNull::as_uninit_mut
-    /// [`as_ref`]: NonNull::as_ref
-    ///
-    /// # Safety
-    ///
-    /// When calling this method, you have to ensure that
-    /// the pointer is [convertible to a reference](crate::ptr#pointer-to-reference-conversion).
-    /// # Examples
-    ///
-    /// ```
-    /// use std::ptr::NonNull;
-    ///
-    /// let mut x = 0u32;
-    /// let mut ptr = NonNull::new(&mut x).expect("null pointer");
-    ///
-    /// let x_ref = unsafe { ptr.as_mut() };
-    /// assert_eq!(*x_ref, 0);
-    /// *x_ref += 2;
-    /// assert_eq!(*x_ref, 2);
-    /// ```
-    ///
-    /// [the module documentation]: crate::ptr#safety
+    // /// Returns a unique reference to the value. If the value may be uninitialized, [`as_uninit_mut`]
+    // /// must be used instead.
+    // ///
+    // /// For the shared counterpart see [`as_ref`].
+    // ///
+    // /// [`as_uninit_mut`]: NonNull::as_uninit_mut
+    // /// [`as_ref`]: NonNull::as_ref
+    // ///
+    // /// # Safety
+    // ///
+    // /// When calling this method, you have to ensure that
+    // /// the pointer is [convertible to a reference](crate::ptr#pointer-to-reference-conversion).
+    // /// # Examples
+    // ///
+    // /// ```
+    // /// use std::ptr::NonNull;
+    // ///
+    // /// let mut x = 0u32;
+    // /// let mut ptr = NonNull::new(&mut x).expect("null pointer");
+    // ///
+    // /// let x_ref = unsafe { ptr.as_mut() };
+    // /// assert_eq!(*x_ref, 0);
+    // /// *x_ref += 2;
+    // /// assert_eq!(*x_ref, 2);
+    // /// ```
+    // ///
+    // /// [the module documentation]: crate::ptr#safety
+    /// FIXME(@pvdrz): docs
     #[stable(feature = "nonnull", since = "1.25.0")]
     #[rustc_const_stable(feature = "const_ptr_as_ref", since = "1.83.0")]
     #[must_use]
@@ -529,6 +558,7 @@ impl<T: ?Sized> NonNull<T> {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn offset(self, count: isize) -> Self
     where
         T: Sized,
@@ -555,6 +585,7 @@ impl<T: ?Sized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_offset(self, count: isize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `offset` and `byte_offset` has
         // the same safety contract.
@@ -631,6 +662,7 @@ impl<T: ?Sized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_add(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `add` and `byte_add` has the same
         // safety contract.
@@ -682,6 +714,7 @@ impl<T: ?Sized> NonNull<T> {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -713,6 +746,7 @@ impl<T: ?Sized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_sub(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `sub` and `byte_sub` has the same
         // safety contract.
@@ -811,6 +845,7 @@ impl<T: ?Sized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn offset_from(self, origin: NonNull<T>) -> isize
     where
         T: Sized,
@@ -832,6 +867,7 @@ impl<T: ?Sized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_offset_from<U: ?Sized>(self, origin: NonNull<U>) -> isize {
         // SAFETY: the caller must uphold the safety contract for `byte_offset_from`.
         unsafe { self.as_ptr().byte_offset_from(origin.as_ptr()) }
@@ -902,6 +938,7 @@ impl<T: ?Sized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "ptr_sub_ptr", since = "1.87.0")]
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn offset_from_unsigned(self, subtracted: NonNull<T>) -> usize
     where
         T: Sized,
@@ -924,6 +961,7 @@ impl<T: ?Sized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "ptr_sub_ptr", since = "1.87.0")]
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_offset_from_unsigned<U: ?Sized>(self, origin: NonNull<U>) -> usize {
         // SAFETY: the caller must uphold the safety contract for `byte_offset_from_unsigned`.
         unsafe { self.as_ptr().byte_offset_from_unsigned(origin.as_ptr()) }
@@ -939,6 +977,7 @@ impl<T: ?Sized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn read(self) -> T
     where
         T: Sized,
@@ -960,6 +999,7 @@ impl<T: ?Sized> NonNull<T> {
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn read_volatile(self) -> T
     where
         T: Sized,
@@ -980,6 +1020,7 @@ impl<T: ?Sized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn read_unaligned(self) -> T
     where
         T: Sized,
@@ -1000,6 +1041,7 @@ impl<T: ?Sized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn copy_to(self, dest: NonNull<T>, count: usize)
     where
         T: Sized,
@@ -1020,6 +1062,7 @@ impl<T: ?Sized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn copy_to_nonoverlapping(self, dest: NonNull<T>, count: usize)
     where
         T: Sized,
@@ -1040,6 +1083,7 @@ impl<T: ?Sized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn copy_from(self, src: NonNull<T>, count: usize)
     where
         T: Sized,
@@ -1060,6 +1104,7 @@ impl<T: ?Sized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn copy_from_nonoverlapping(self, src: NonNull<T>, count: usize)
     where
         T: Sized,
@@ -1075,6 +1120,7 @@ impl<T: ?Sized> NonNull<T> {
     /// [`ptr::drop_in_place`]: crate::ptr::drop_in_place()
     #[inline(always)]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn drop_in_place(self) {
         // SAFETY: the caller must uphold the safety contract for `drop_in_place`.
         unsafe { ptr::drop_in_place(self.as_ptr()) }
@@ -1090,6 +1136,7 @@ impl<T: ?Sized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn write(self, val: T)
     where
         T: Sized,
@@ -1109,6 +1156,7 @@ impl<T: ?Sized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn write_bytes(self, val: u8, count: usize)
     where
         T: Sized,
@@ -1130,6 +1178,7 @@ impl<T: ?Sized> NonNull<T> {
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn write_volatile(self, val: T)
     where
         T: Sized,
@@ -1150,6 +1199,7 @@ impl<T: ?Sized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn write_unaligned(self, val: T)
     where
         T: Sized,
@@ -1167,6 +1217,7 @@ impl<T: ?Sized> NonNull<T> {
     #[inline(always)]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_inherent_ptr_replace", since = "CURRENT_RUSTC_VERSION")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn replace(self, src: T) -> T
     where
         T: Sized,
@@ -1185,6 +1236,7 @@ impl<T: ?Sized> NonNull<T> {
     #[inline(always)]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_swap", since = "1.85.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn swap(self, with: NonNull<T>)
     where
         T: Sized,
@@ -1242,6 +1294,7 @@ impl<T: ?Sized> NonNull<T> {
     #[inline]
     #[must_use]
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn align_offset(self, align: usize) -> usize
     where
         T: Sized,
@@ -1276,6 +1329,7 @@ impl<T: ?Sized> NonNull<T> {
     #[inline]
     #[must_use]
     #[stable(feature = "pointer_is_aligned", since = "1.79.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn is_aligned(self) -> bool
     where
         T: Sized,
@@ -1316,11 +1370,13 @@ impl<T: ?Sized> NonNull<T> {
     #[inline]
     #[must_use]
     #[unstable(feature = "pointer_is_aligned_to", issue = "96284")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn is_aligned_to(self, align: usize) -> bool {
         self.as_ptr().is_aligned_to(align)
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> NonNull<[T]> {
     /// Creates a non-null raw slice from a thin pointer and a length.
     ///
@@ -1347,6 +1403,7 @@ impl<T> NonNull<[T]> {
     #[rustc_const_stable(feature = "const_slice_from_raw_parts_mut", since = "1.83.0")]
     #[must_use]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn slice_from_raw_parts(data: NonNull<T>, len: usize) -> Self {
         // SAFETY: `data` is a `NonNull` pointer which is necessarily non-null
         unsafe { Self::new_unchecked(super::slice_from_raw_parts_mut(data.as_ptr(), len)) }
@@ -1371,6 +1428,7 @@ impl<T> NonNull<[T]> {
     #[rustc_const_stable(feature = "const_slice_ptr_len_nonnull", since = "1.63.0")]
     #[must_use]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn len(self) -> usize {
         self.as_ptr().len()
     }
@@ -1389,6 +1447,7 @@ impl<T> NonNull<[T]> {
     #[rustc_const_stable(feature = "const_slice_ptr_is_empty_nonnull", since = "1.79.0")]
     #[must_use]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_empty(self) -> bool {
         self.len() == 0
     }
@@ -1407,6 +1466,7 @@ impl<T> NonNull<[T]> {
     #[inline]
     #[must_use]
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_non_null_ptr(self) -> NonNull<T> {
         self.cast()
     }
@@ -1426,6 +1486,7 @@ impl<T> NonNull<[T]> {
     #[must_use]
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
     #[rustc_never_returns_null_ptr]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_mut_ptr(self) -> *mut T {
         self.as_non_null_ptr().as_ptr()
     }
@@ -1470,6 +1531,7 @@ impl<T> NonNull<[T]> {
     #[inline]
     #[must_use]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_uninit_slice<'a>(self) -> &'a [MaybeUninit<T>] {
         // SAFETY: the caller must uphold the safety contract for `as_uninit_slice`.
         unsafe { slice::from_raw_parts(self.cast().as_ptr(), self.len()) }
@@ -1534,6 +1596,7 @@ impl<T> NonNull<[T]> {
     #[inline]
     #[must_use]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_uninit_slice_mut<'a>(self) -> &'a mut [MaybeUninit<T>] {
         // SAFETY: the caller must uphold the safety contract for `as_uninit_slice_mut`.
         unsafe { slice::from_raw_parts_mut(self.cast().as_ptr(), self.len()) }
@@ -1562,6 +1625,7 @@ impl<T> NonNull<[T]> {
     /// ```
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn get_unchecked_mut<I>(self, index: I) -> NonNull<I::Output>
     where
         I: SliceIndex<[T]>,
@@ -1584,26 +1648,34 @@ impl<T: ?Sized> Clone for NonNull<T> {
 impl<T: ?Sized> Copy for NonNull<T> {}
 
 #[unstable(feature = "coerce_unsized", issue = "18598")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized, U: ?Sized> CoerceUnsized<NonNull<U>> for NonNull<T> where T: Unsize<U> {}
 
 #[unstable(feature = "dispatch_from_dyn", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized, U: ?Sized> DispatchFromDyn<NonNull<U>> for NonNull<T> where T: Unsize<U> {}
 
 #[stable(feature = "pin", since = "1.33.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: ?Sized> PinCoerceUnsized for NonNull<T> {}
 
 #[unstable(feature = "pointer_like_trait", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> core::marker::PointerLike for NonNull<T> {}
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> fmt::Debug for NonNull<T> {
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Pointer::fmt(&self.as_ptr(), f)
     }
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> fmt::Pointer for NonNull<T> {
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Pointer::fmt(&self.as_ptr(), f)
     }
@@ -1622,56 +1694,68 @@ impl<T: ?Sized> PartialEq for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Ord for NonNull<T> {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn cmp(&self, other: &Self) -> Ordering {
         self.as_ptr().cmp(&other.as_ptr())
     }
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> PartialOrd for NonNull<T> {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.as_ptr().partial_cmp(&other.as_ptr())
     }
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> hash::Hash for NonNull<T> {
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
         self.as_ptr().hash(state)
     }
 }
 
 #[unstable(feature = "ptr_internals", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> From<Unique<T>> for NonNull<T> {
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn from(unique: Unique<T>) -> Self {
         unique.as_non_null_ptr()
     }
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> From<&mut T> for NonNull<T> {
     /// Converts a `&mut T` to a `NonNull<T>`.
     ///
     /// This conversion is safe and infallible since references cannot be null.
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn from(r: &mut T) -> Self {
         NonNull::from_mut(r)
     }
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> From<&T> for NonNull<T> {
     /// Converts a `&T` to a `NonNull<T>`.
     ///
     /// This conversion is safe and infallible since references cannot be null.
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn from(r: &T) -> Self {
         NonNull::from_ref(r)
     }

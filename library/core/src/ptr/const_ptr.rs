@@ -951,7 +951,6 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn add(self, count: usize) -> Self
     where
         T: Sized,

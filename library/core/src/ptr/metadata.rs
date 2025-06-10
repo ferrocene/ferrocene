@@ -4,9 +4,7 @@
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::hash::{Hash, Hasher};
-use crate::intrinsics::aggregate_raw_ptr;
-#[cfg(not(feature = "ferrocene_certified"))]
-use crate::intrinsics::ptr_metadata;
+use crate::intrinsics::{aggregate_raw_ptr, ptr_metadata};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::Freeze;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -107,7 +105,6 @@ pub trait Thin = Pointee<Metadata = ()>;
 /// assert_eq!(std::ptr::metadata("foo"), 3_usize);
 /// ```
 #[inline]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn metadata<T: ?Sized>(ptr: *const T) -> <T as Pointee>::Metadata {
     ptr_metadata(ptr)
 }

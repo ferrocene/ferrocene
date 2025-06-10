@@ -150,7 +150,6 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(generic_arg_infer))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(if_let_guard))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(intra_doc_pointers))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(let_chains))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(link_llvm_intrinsics))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(macro_metavar_expr))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(marker_trait_attr))]
@@ -174,6 +173,7 @@
 #![feature(fundamental)]
 #![feature(intrinsics)]
 #![feature(lang_items)]
+#![feature(let_chains)]
 #![feature(multiple_supertrait_upcastable)]
 #![feature(negative_impls)]
 #![feature(no_core)]
@@ -394,7 +394,6 @@ pub mod unsafe_binder;
 pub mod fmt;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod hash;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod slice;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod str;

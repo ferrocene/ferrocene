@@ -1383,7 +1383,6 @@ pub const unsafe fn assume(b: bool) {
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
 #[cold]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn cold_path() {}
 
 /// Hints to the compiler that branch condition is likely to be true.
@@ -1424,7 +1423,6 @@ pub const fn likely(b: bool) -> bool {
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_nounwind]
 #[inline(always)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn unlikely(b: bool) -> bool {
     if b {
         cold_path();
@@ -1858,13 +1856,12 @@ pub const fn needs_drop<T: ?Sized>() -> bool;
 /// If the computed offset is non-zero, then both the starting and resulting pointer must be
 /// either in bounds or at the end of an allocated object. If either pointer is out
 /// of bounds or arithmetic overflow occurs then this operation is undefined behavior.
-///
-/// The stabilized version of this intrinsic is [`pointer::offset`].
+// ///
+// /// The stabilized version of this intrinsic is [`pointer::offset`].
 #[must_use = "returns a new pointer rather than modifying its argument"]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn offset<Ptr, Delta>(dst: Ptr, offset: Delta) -> Ptr;
 
 /// Calculates the offset from a pointer, potentially wrapping.
@@ -2901,7 +2898,6 @@ pub const unsafe fn disjoint_bitor<T: ~const fallback::DisjointBitOr>(a: T, b: T
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn add_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 
 /// Performs checked integer subtraction
@@ -2917,7 +2913,6 @@ pub const fn add_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn sub_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 
 /// Performs checked integer multiplication
@@ -2933,7 +2928,6 @@ pub const fn sub_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn mul_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 
 /// Performs full-width multiplication and addition with a carry:
@@ -3891,7 +3885,6 @@ impl<P: ?Sized, T: ptr::Thin> AggregateRawPtr<*mut T> for *mut P {
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn ptr_metadata<P: ptr::Pointee<Metadata = M> + ?Sized, M>(ptr: *const P) -> M;
 
 // Some functions are defined here because they accidentally got made

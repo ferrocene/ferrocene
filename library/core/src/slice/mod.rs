@@ -6,15 +6,25 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering::{self, Equal, Greater, Less};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::{exact_div, unchecked_sub};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, MaybeUninit, SizedTypeProperties};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{OneSidedRange, OneSidedRangeBound, Range, RangeBounds, RangeInclusive};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_panic;
+use crate::ptr;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::simd::{self, Simd};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ub_checks::assert_unsafe_precondition;
-use crate::{fmt, hint, ptr, range, slice};
+#[cfg(not(feature = "ferrocene_certified"))]
+use crate::{fmt, hint, range, slice};
 
 #[unstable(
     feature = "slice_internals",
@@ -22,6 +32,7 @@ use crate::{fmt, hint, ptr, range, slice};
     reason = "exposed from core to be reused in std; use the memchr crate"
 )]
 /// Pure Rust memchr implementation, taken from rust-memchr
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod memchr;
 
 #[unstable(
@@ -30,50 +41,76 @@ pub mod memchr;
     reason = "exposed from core to be reused in std;"
 )]
 #[doc(hidden)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod sort;
 
+#[cfg(not(feature = "ferrocene_certified"))]
 mod ascii;
+#[cfg(not(feature = "ferrocene_certified"))]
 mod cmp;
+#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) mod index;
 mod iter;
+#[cfg(not(feature = "ferrocene_certified"))]
 mod raw;
+#[cfg(not(feature = "ferrocene_certified"))]
 mod rotate;
+#[cfg(not(feature = "ferrocene_certified"))]
 mod specialize;
 
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use ascii::EscapeAscii;
 #[unstable(feature = "str_internals", issue = "none")]
 #[doc(hidden)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use ascii::is_ascii_simple;
 #[stable(feature = "slice_get_slice", since = "1.28.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use index::SliceIndex;
 #[unstable(feature = "slice_range", issue = "76393")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use index::{range, try_range};
 #[unstable(feature = "array_windows", issue = "75027")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::ArrayWindows;
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
+pub use iter::Iter;
+#[stable(feature = "rust1", since = "1.0.0")]
+pub use iter::IterMut;
 #[unstable(feature = "array_chunks", issue = "74985")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{ArrayChunks, ArrayChunksMut};
 #[stable(feature = "slice_group_by", since = "1.77.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{ChunkBy, ChunkByMut};
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{Chunks, ChunksMut, Windows};
 #[stable(feature = "chunks_exact", since = "1.31.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{ChunksExact, ChunksExactMut};
-#[stable(feature = "rust1", since = "1.0.0")]
-pub use iter::{Iter, IterMut};
 #[stable(feature = "rchunks", since = "1.31.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{RChunks, RChunksExact, RChunksExactMut, RChunksMut};
 #[stable(feature = "slice_rsplit", since = "1.27.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{RSplit, RSplitMut};
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{RSplitN, RSplitNMut, Split, SplitMut, SplitN, SplitNMut};
 #[stable(feature = "split_inclusive", since = "1.51.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::{SplitInclusive, SplitInclusiveMut};
 #[stable(feature = "from_ref", since = "1.28.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use raw::{from_mut, from_ref};
 #[unstable(feature = "slice_from_ptr_range", issue = "89792")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use raw::{from_mut_ptr_range, from_ptr_range};
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use raw::{from_raw_parts, from_raw_parts_mut};
 
 /// Calculates the direction and split point of a one-sided range.
@@ -82,6 +119,7 @@ pub use raw::{from_raw_parts, from_raw_parts_mut};
 /// the direction of the split (front or back) as well as the index at
 /// which to split. Returns `None` if the split index would overflow.
 #[inline]
+#[cfg(not(feature = "ferrocene_certified"))]
 fn split_point_of(range: impl OneSidedRange<usize>) -> Option<(Direction, usize)> {
     use OneSidedRangeBound::{End, EndInclusive, StartInclusive};
 
@@ -92,6 +130,7 @@ fn split_point_of(range: impl OneSidedRange<usize>) -> Option<(Direction, usize)
     })
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 enum Direction {
     Front,
     Back,
@@ -111,7 +150,6 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_len", since = "1.39.0")]
     #[cfg_attr(not(bootstrap), rustc_no_implicit_autorefs)]
     #[inline]
-    #[must_use]
     pub const fn len(&self) -> usize {
         ptr::metadata(self)
     }
@@ -132,6 +170,7 @@ impl<T> [T] {
     #[cfg_attr(not(bootstrap), rustc_no_implicit_autorefs)]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_empty(&self) -> bool {
         self.len() == 0
     }
@@ -151,6 +190,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_first_last_not_mut", since = "1.56.0")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn first(&self) -> Option<&T> {
         if let [first, ..] = self { Some(first) } else { None }
     }
@@ -174,6 +214,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_first_last", since = "1.83.0")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn first_mut(&mut self) -> Option<&mut T> {
         if let [first, ..] = self { Some(first) } else { None }
     }
@@ -194,6 +235,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_first_last_not_mut", since = "1.56.0")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_first(&self) -> Option<(&T, &[T])> {
         if let [first, tail @ ..] = self { Some((first, tail)) } else { None }
     }
@@ -216,6 +258,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_first_last", since = "1.83.0")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_first_mut(&mut self) -> Option<(&mut T, &mut [T])> {
         if let [first, tail @ ..] = self { Some((first, tail)) } else { None }
     }
@@ -236,6 +279,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_first_last_not_mut", since = "1.56.0")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_last(&self) -> Option<(&T, &[T])> {
         if let [init @ .., last] = self { Some((last, init)) } else { None }
     }
@@ -258,6 +302,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_first_last", since = "1.83.0")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_last_mut(&mut self) -> Option<(&mut T, &mut [T])> {
         if let [init @ .., last] = self { Some((last, init)) } else { None }
     }
@@ -277,6 +322,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_first_last_not_mut", since = "1.56.0")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn last(&self) -> Option<&T> {
         if let [.., last] = self { Some(last) } else { None }
     }
@@ -300,6 +346,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_first_last", since = "1.83.0")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn last_mut(&mut self) -> Option<&mut T> {
         if let [.., last] = self { Some(last) } else { None }
     }
@@ -323,6 +370,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "slice_first_last_chunk", since = "1.77.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn first_chunk<const N: usize>(&self) -> Option<&[T; N]> {
         if self.len() < N {
             None
@@ -353,6 +401,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "const_slice_first_last_chunk", since = "1.83.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn first_chunk_mut<const N: usize>(&mut self) -> Option<&mut [T; N]> {
         if self.len() < N {
             None
@@ -383,6 +432,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "slice_first_last_chunk", since = "1.77.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_first_chunk<const N: usize>(&self) -> Option<(&[T; N], &[T])> {
         let Some((first, tail)) = self.split_at_checked(N) else { return None };
 
@@ -413,6 +463,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "const_slice_first_last_chunk", since = "1.83.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_first_chunk_mut<const N: usize>(
         &mut self,
     ) -> Option<(&mut [T; N], &mut [T])> {
@@ -443,6 +494,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "slice_first_last_chunk", since = "1.77.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_last_chunk<const N: usize>(&self) -> Option<(&[T], &[T; N])> {
         let Some(index) = self.len().checked_sub(N) else { return None };
         let (init, last) = self.split_at(index);
@@ -474,6 +526,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "const_slice_first_last_chunk", since = "1.83.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_last_chunk_mut<const N: usize>(
         &mut self,
     ) -> Option<(&mut [T], &mut [T; N])> {
@@ -505,6 +558,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "const_slice_last_chunk", since = "1.80.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn last_chunk<const N: usize>(&self) -> Option<&[T; N]> {
         // FIXME(const-hack): Without const traits, we need this instead of `get`.
         let Some(index) = self.len().checked_sub(N) else { return None };
@@ -535,6 +589,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "const_slice_first_last_chunk", since = "1.83.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn last_chunk_mut<const N: usize>(&mut self) -> Option<&mut [T; N]> {
         // FIXME(const-hack): Without const traits, we need this instead of `get`.
         let Some(index) = self.len().checked_sub(N) else { return None };
@@ -567,6 +622,7 @@ impl<T> [T] {
     #[cfg_attr(not(bootstrap), rustc_no_implicit_autorefs)]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn get<I>(&self, index: I) -> Option<&I::Output>
     where
         I: SliceIndex<Self>,
@@ -593,6 +649,7 @@ impl<T> [T] {
     #[cfg_attr(not(bootstrap), rustc_no_implicit_autorefs)]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn get_mut<I>(&mut self, index: I) -> Option<&mut I::Output>
     where
         I: SliceIndex<Self>,
@@ -631,6 +688,7 @@ impl<T> [T] {
     #[cfg_attr(not(bootstrap), rustc_no_implicit_autorefs)]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn get_unchecked<I>(&self, index: I) -> &I::Output
     where
         I: SliceIndex<Self>,
@@ -674,6 +732,7 @@ impl<T> [T] {
     #[cfg_attr(not(bootstrap), rustc_no_implicit_autorefs)]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn get_unchecked_mut<I>(&mut self, index: I) -> &mut I::Output
     where
         I: SliceIndex<Self>,
@@ -716,6 +775,7 @@ impl<T> [T] {
     #[rustc_as_ptr]
     #[inline(always)]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_ptr(&self) -> *const T {
         self as *const [T] as *const T
     }
@@ -747,6 +807,7 @@ impl<T> [T] {
     #[rustc_as_ptr]
     #[inline(always)]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_mut_ptr(&mut self) -> *mut T {
         self as *mut [T] as *mut T
     }
@@ -783,6 +844,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_ptr_range(&self) -> Range<*const T> {
         let start = self.as_ptr();
         // SAFETY: The `add` here is safe, because:
@@ -826,6 +888,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_mut_ptr_range(&mut self) -> Range<*mut T> {
         let start = self.as_mut_ptr();
         // SAFETY: See as_ptr_range() above for why `add` here is safe.
@@ -839,6 +902,7 @@ impl<T> [T] {
     #[unstable(feature = "slice_as_array", issue = "133508")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_array<const N: usize>(&self) -> Option<&[T; N]> {
         if self.len() == N {
             let ptr = self.as_ptr() as *const [T; N];
@@ -857,6 +921,7 @@ impl<T> [T] {
     #[unstable(feature = "slice_as_array", issue = "133508")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_mut_array<const N: usize>(&mut self) -> Option<&mut [T; N]> {
         if self.len() == N {
             let ptr = self.as_mut_ptr() as *mut [T; N];
@@ -893,6 +958,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_swap", since = "1.85.0")]
     #[inline]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn swap(&mut self, a: usize, b: usize) {
         // FIXME: use swap_unchecked here (https://github.com/rust-lang/rust/pull/88540#issuecomment-944344343)
         // Can't take two mutable loans from one vector, so instead use raw pointers.
@@ -935,6 +1001,7 @@ impl<T> [T] {
     /// [`swap`]: slice::swap
     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
     #[unstable(feature = "slice_swap_unchecked", issue = "88539")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn swap_unchecked(&mut self, a: usize, b: usize) {
         assert_unsafe_precondition!(
             check_library_ub,
@@ -965,6 +1032,7 @@ impl<T> [T] {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_slice_reverse", issue = "135120")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn reverse(&mut self) {
         let half_len = self.len() / 2;
         let Range { start, end } = self.as_mut_ptr_range();
@@ -1026,6 +1094,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[rustc_diagnostic_item = "slice_iter"]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn iter(&self) -> Iter<'_, T> {
         Iter::new(self)
     }
@@ -1101,6 +1170,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn windows(&self, size: usize) -> Windows<'_, T> {
         let size = NonZero::new(size).expect("window size must be non-zero");
         Windows::new(self, size)
@@ -1137,6 +1207,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn chunks(&self, chunk_size: usize) -> Chunks<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         Chunks::new(self, chunk_size)
@@ -1177,6 +1248,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn chunks_mut(&mut self, chunk_size: usize) -> ChunksMut<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         ChunksMut::new(self, chunk_size)
@@ -1216,6 +1288,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn chunks_exact(&self, chunk_size: usize) -> ChunksExact<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         ChunksExact::new(self, chunk_size)
@@ -1260,6 +1333,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn chunks_exact_mut(&mut self, chunk_size: usize) -> ChunksExactMut<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         ChunksExactMut::new(self, chunk_size)
@@ -1307,6 +1381,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "slice_as_chunks", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_chunks_unchecked<const N: usize>(&self) -> &[[T; N]] {
         assert_unsafe_precondition!(
             check_language_ub,
@@ -1365,6 +1440,7 @@ impl<T> [T] {
     #[inline]
     #[track_caller]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_chunks<const N: usize>(&self) -> (&[[T; N]], &[T]) {
         assert!(N != 0, "chunk size must be non-zero");
         let len_rounded_down = self.len() / N * N;
@@ -1412,6 +1488,7 @@ impl<T> [T] {
     #[inline]
     #[track_caller]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_rchunks<const N: usize>(&self) -> (&[T], &[[T; N]]) {
         assert!(N != 0, "chunk size must be non-zero");
         let len = self.len() / N;
@@ -1453,6 +1530,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn array_chunks<const N: usize>(&self) -> ArrayChunks<'_, T, N> {
         assert!(N != 0, "chunk size must be non-zero");
         ArrayChunks::new(self)
@@ -1502,6 +1580,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "slice_as_chunks", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_chunks_unchecked_mut<const N: usize>(&mut self) -> &mut [[T; N]] {
         assert_unsafe_precondition!(
             check_language_ub,
@@ -1556,6 +1635,7 @@ impl<T> [T] {
     #[inline]
     #[track_caller]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_chunks_mut<const N: usize>(&mut self) -> (&mut [[T; N]], &mut [T]) {
         assert!(N != 0, "chunk size must be non-zero");
         let len_rounded_down = self.len() / N * N;
@@ -1609,6 +1689,7 @@ impl<T> [T] {
     #[inline]
     #[track_caller]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_rchunks_mut<const N: usize>(&mut self) -> (&mut [T], &mut [[T; N]]) {
         assert!(N != 0, "chunk size must be non-zero");
         let len = self.len() / N;
@@ -1652,6 +1733,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn array_chunks_mut<const N: usize>(&mut self) -> ArrayChunksMut<'_, T, N> {
         assert!(N != 0, "chunk size must be non-zero");
         ArrayChunksMut::new(self)
@@ -1686,6 +1768,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn array_windows<const N: usize>(&self) -> ArrayWindows<'_, T, N> {
         assert!(N != 0, "window size must be non-zero");
         ArrayWindows::new(self)
@@ -1722,6 +1805,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn rchunks(&self, chunk_size: usize) -> RChunks<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         RChunks::new(self, chunk_size)
@@ -1762,6 +1846,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn rchunks_mut(&mut self, chunk_size: usize) -> RChunksMut<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         RChunksMut::new(self, chunk_size)
@@ -1803,6 +1888,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn rchunks_exact(&self, chunk_size: usize) -> RChunksExact<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         RChunksExact::new(self, chunk_size)
@@ -1848,6 +1934,7 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn rchunks_exact_mut(&mut self, chunk_size: usize) -> RChunksExactMut<'_, T> {
         assert!(chunk_size != 0, "chunk size must be non-zero");
         RChunksExactMut::new(self, chunk_size)
@@ -1888,6 +1975,7 @@ impl<T> [T] {
     #[stable(feature = "slice_group_by", since = "1.77.0")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn chunk_by<F>(&self, pred: F) -> ChunkBy<'_, T, F>
     where
         F: FnMut(&T, &T) -> bool,
@@ -1930,6 +2018,7 @@ impl<T> [T] {
     #[stable(feature = "slice_group_by", since = "1.77.0")]
     #[rustc_const_unstable(feature = "const_slice_make_iter", issue = "137737")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn chunk_by_mut<F>(&mut self, pred: F) -> ChunkByMut<'_, T, F>
     where
         F: FnMut(&T, &T) -> bool,
@@ -1976,6 +2065,7 @@ impl<T> [T] {
     #[inline]
     #[track_caller]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_at(&self, mid: usize) -> (&[T], &[T]) {
         match self.split_at_checked(mid) {
             Some(pair) => pair,
@@ -2010,6 +2100,7 @@ impl<T> [T] {
     #[track_caller]
     #[must_use]
     #[rustc_const_stable(feature = "const_slice_split_at_mut", since = "1.83.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_at_mut(&mut self, mid: usize) -> (&mut [T], &mut [T]) {
         match self.split_at_mut_checked(mid) {
             Some(pair) => pair,
@@ -2061,6 +2152,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_split_at_unchecked", since = "1.77.0")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn split_at_unchecked(&self, mid: usize) -> (&[T], &[T]) {
         // FIXME(const-hack): the const function `from_raw_parts` is used to make this
         // function const; previously the implementation used
@@ -2114,6 +2206,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_split_at_mut", since = "1.83.0")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn split_at_mut_unchecked(&mut self, mid: usize) -> (&mut [T], &mut [T]) {
         let len = self.len();
         let ptr = self.as_mut_ptr();
@@ -2175,6 +2268,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "split_at_checked", since = "1.80.0")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_at_checked(&self, mid: usize) -> Option<(&[T], &[T])> {
         if mid <= self.len() {
             // SAFETY: `[ptr; mid]` and `[mid; len]` are inside `self`, which
@@ -2214,6 +2308,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_slice_split_at_mut", since = "1.83.0")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_at_mut_checked(&mut self, mid: usize) -> Option<(&mut [T], &mut [T])> {
         if mid <= self.len() {
             // SAFETY: `[ptr; mid]` and `[mid; len]` are inside `self`, which
@@ -2266,6 +2361,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn split<F>(&self, pred: F) -> Split<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2288,6 +2384,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn split_mut<F>(&mut self, pred: F) -> SplitMut<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2324,6 +2421,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "split_inclusive", since = "1.51.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn split_inclusive<F>(&self, pred: F) -> SplitInclusive<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2348,6 +2446,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "split_inclusive", since = "1.51.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn split_inclusive_mut<F>(&mut self, pred: F) -> SplitInclusiveMut<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2384,6 +2483,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_rsplit", since = "1.27.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn rsplit<F>(&self, pred: F) -> RSplit<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2410,6 +2510,7 @@ impl<T> [T] {
     ///
     #[stable(feature = "slice_rsplit", since = "1.27.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn rsplit_mut<F>(&mut self, pred: F) -> RSplitMut<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2438,6 +2539,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn splitn<F>(&self, n: usize, pred: F) -> SplitN<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2464,6 +2566,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn splitn_mut<F>(&mut self, n: usize, pred: F) -> SplitNMut<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2493,6 +2596,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn rsplitn<F>(&self, n: usize, pred: F) -> RSplitN<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2520,6 +2624,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn rsplitn_mut<F>(&mut self, n: usize, pred: F) -> RSplitNMut<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2547,6 +2652,7 @@ impl<T> [T] {
     /// ```
     #[unstable(feature = "slice_split_once", reason = "newly added", issue = "112811")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn split_once<F>(&self, pred: F) -> Option<(&[T], &[T])>
     where
         F: FnMut(&T) -> bool,
@@ -2575,6 +2681,7 @@ impl<T> [T] {
     /// ```
     #[unstable(feature = "slice_split_once", reason = "newly added", issue = "112811")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn rsplit_once<F>(&self, pred: F) -> Option<(&[T], &[T])>
     where
         F: FnMut(&T) -> bool,
@@ -2611,6 +2718,7 @@ impl<T> [T] {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn contains(&self, x: &T) -> bool
     where
         T: PartialEq,
@@ -2641,6 +2749,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn starts_with(&self, needle: &[T]) -> bool
     where
         T: PartialEq,
@@ -2672,6 +2781,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn ends_with(&self, needle: &[T]) -> bool
     where
         T: PartialEq,
@@ -2704,6 +2814,7 @@ impl<T> [T] {
     /// ```
     #[must_use = "returns the subslice without modifying the original"]
     #[stable(feature = "slice_strip", since = "1.51.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn strip_prefix<P: SlicePattern<Item = T> + ?Sized>(&self, prefix: &P) -> Option<&[T]>
     where
         T: PartialEq,
@@ -2740,6 +2851,7 @@ impl<T> [T] {
     /// ```
     #[must_use = "returns the subslice without modifying the original"]
     #[stable(feature = "slice_strip", since = "1.51.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn strip_suffix<P: SlicePattern<Item = T> + ?Sized>(&self, suffix: &P) -> Option<&[T]>
     where
         T: PartialEq,
@@ -2826,6 +2938,7 @@ impl<T> [T] {
     /// assert_eq!(s, [0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 42, 55]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn binary_search(&self, x: &T) -> Result<usize, usize>
     where
         T: Ord,
@@ -2877,6 +2990,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn binary_search_by<'a, F>(&'a self, mut f: F) -> Result<usize, usize>
     where
         F: FnMut(&'a T) -> Ordering,
@@ -2978,6 +3092,7 @@ impl<T> [T] {
     #[allow(rustdoc::broken_intra_doc_links)]
     #[stable(feature = "slice_binary_search_by_key", since = "1.10.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn binary_search_by_key<'a, B, F>(&'a self, b: &B, mut f: F) -> Result<usize, usize>
     where
         F: FnMut(&'a T) -> B,
@@ -3040,6 +3155,7 @@ impl<T> [T] {
     /// [total order]: https://en.wikipedia.org/wiki/Total_order
     #[stable(feature = "sort_unstable", since = "1.20.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn sort_unstable(&mut self)
     where
         T: Ord,
@@ -3095,6 +3211,7 @@ impl<T> [T] {
     /// [total order]: https://en.wikipedia.org/wiki/Total_order
     #[stable(feature = "sort_unstable", since = "1.20.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn sort_unstable_by<F>(&mut self, mut compare: F)
     where
         F: FnMut(&T, &T) -> Ordering,
@@ -3147,6 +3264,7 @@ impl<T> [T] {
     /// [total order]: https://en.wikipedia.org/wiki/Total_order
     #[stable(feature = "sort_unstable", since = "1.20.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn sort_unstable_by_key<K, F>(&mut self, mut f: F)
     where
         F: FnMut(&T) -> K,
@@ -3210,6 +3328,7 @@ impl<T> [T] {
     /// [total order]: https://en.wikipedia.org/wiki/Total_order
     #[stable(feature = "slice_select_nth_unstable", since = "1.49.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn select_nth_unstable(&mut self, index: usize) -> (&mut [T], &mut T, &mut [T])
     where
         T: Ord,
@@ -3275,6 +3394,7 @@ impl<T> [T] {
     /// [total order]: https://en.wikipedia.org/wiki/Total_order
     #[stable(feature = "slice_select_nth_unstable", since = "1.49.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn select_nth_unstable_by<F>(
         &mut self,
         index: usize,
@@ -3342,6 +3462,7 @@ impl<T> [T] {
     /// [total order]: https://en.wikipedia.org/wiki/Total_order
     #[stable(feature = "slice_select_nth_unstable", since = "1.49.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn select_nth_unstable_by_key<K, F>(
         &mut self,
         index: usize,
@@ -3376,6 +3497,7 @@ impl<T> [T] {
     /// ```
     #[unstable(feature = "slice_partition_dedup", issue = "54279")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn partition_dedup(&mut self) -> (&mut [T], &mut [T])
     where
         T: PartialEq,
@@ -3410,6 +3532,7 @@ impl<T> [T] {
     /// ```
     #[unstable(feature = "slice_partition_dedup", issue = "54279")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn partition_dedup_by<F>(&mut self, mut same_bucket: F) -> (&mut [T], &mut [T])
     where
         F: FnMut(&mut T, &mut T) -> bool,
@@ -3536,6 +3659,7 @@ impl<T> [T] {
     /// ```
     #[unstable(feature = "slice_partition_dedup", issue = "54279")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn partition_dedup_by_key<K, F>(&mut self, mut key: F) -> (&mut [T], &mut [T])
     where
         F: FnMut(&mut T) -> K,
@@ -3577,6 +3701,7 @@ impl<T> [T] {
     /// assert_eq!(a, ['a', 'c', 'd', 'e', 'b', 'f']);
     /// ```
     #[stable(feature = "slice_rotate", since = "1.26.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn rotate_left(&mut self, mid: usize) {
         assert!(mid <= self.len());
         let k = self.len() - mid;
@@ -3622,6 +3747,7 @@ impl<T> [T] {
     /// assert_eq!(a, ['a', 'e', 'b', 'c', 'd', 'f']);
     /// ```
     #[stable(feature = "slice_rotate", since = "1.26.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn rotate_right(&mut self, k: usize) {
         assert!(k <= self.len());
         let mid = self.len() - k;
@@ -3645,6 +3771,7 @@ impl<T> [T] {
     /// ```
     #[doc(alias = "memset")]
     #[stable(feature = "slice_fill", since = "1.50.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn fill(&mut self, value: T)
     where
         T: Clone,
@@ -3653,21 +3780,21 @@ impl<T> [T] {
     }
 
     /// Fills `self` with elements returned by calling a closure repeatedly.
-    ///
-    /// This method uses a closure to create new values. If you'd rather
-    /// [`Clone`] a given value, use [`fill`]. If you want to use the [`Default`]
-    /// trait to generate values, you can pass [`Default::default`] as the
-    /// argument.
-    ///
-    /// [`fill`]: slice::fill
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let mut buf = vec![1; 10];
-    /// buf.fill_with(Default::default);
-    /// assert_eq!(buf, vec![0; 10]);
-    /// ```
+    // ///
+    // /// This method uses a closure to create new values. If you'd rather
+    // /// [`Clone`] a given value, use [`fill`]. If you want to use the [`Default`]
+    // /// trait to generate values, you can pass [`Default::default`] as the
+    // /// argument.
+    // ///
+    // /// [`fill`]: slice::fill
+    // ///
+    // /// # Examples
+    // ///
+    // /// ```
+    // /// let mut buf = vec![1; 10];
+    // /// buf.fill_with(Default::default);
+    // /// assert_eq!(buf, vec![0; 10]);
+    // /// ```
     #[stable(feature = "slice_fill_with", since = "1.51.0")]
     pub fn fill_with<F>(&mut self, mut f: F)
     where
@@ -3732,6 +3859,7 @@ impl<T> [T] {
     /// [`split_at_mut`]: slice::split_at_mut
     #[stable(feature = "clone_from_slice", since = "1.7.0")]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn clone_from_slice(&mut self, src: &[T])
     where
         T: Clone,
@@ -3798,6 +3926,7 @@ impl<T> [T] {
     #[stable(feature = "copy_from_slice", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_copy_from_slice", since = "1.87.0")]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn copy_from_slice(&mut self, src: &[T])
     where
         T: Copy,
@@ -3854,6 +3983,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "copy_within", since = "1.37.0")]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn copy_within<R: RangeBounds<usize>>(&mut self, src: R, dest: usize)
     where
         T: Copy,
@@ -3921,6 +4051,7 @@ impl<T> [T] {
     /// [`split_at_mut`]: slice::split_at_mut
     #[stable(feature = "swap_with_slice", since = "1.27.0")]
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn swap_with_slice(&mut self, other: &mut [T]) {
         assert!(self.len() == other.len(), "destination and source slices have different lengths");
         // SAFETY: `self` is valid for `self.len()` elements by definition, and `src` was
@@ -3932,6 +4063,7 @@ impl<T> [T] {
     }
 
     /// Function to calculate lengths of the middle and trailing slice for `align_to{,_mut}`.
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn align_to_offsets<U>(&self) -> (usize, usize) {
         // What we gonna do about `rest` is figure out what multiple of `U`s we can put in a
         // lowest number of `T`s. And how many `T`s we need for each such "multiple".
@@ -3998,6 +4130,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_align_to", since = "1.30.0")]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn align_to<U>(&self) -> (&[T], &[U], &[T]) {
         // Note that most of this function will be constant-evaluated,
         if U::IS_ZST || T::IS_ZST {
@@ -4063,6 +4196,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "slice_align_to", since = "1.30.0")]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn align_to_mut<U>(&mut self) -> (&mut [T], &mut [U], &mut [T]) {
         // Note that most of this function will be constant-evaluated,
         if U::IS_ZST || T::IS_ZST {
@@ -4154,6 +4288,7 @@ impl<T> [T] {
     /// ```
     #[unstable(feature = "portable_simd", issue = "86656")]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn as_simd<const LANES: usize>(&self) -> (&[T], &[Simd<T, LANES>], &[T])
     where
         Simd<T, LANES>: AsRef<[T; LANES]>,
@@ -4190,6 +4325,7 @@ impl<T> [T] {
     /// method for something like `LANES == 3`.
     #[unstable(feature = "portable_simd", issue = "86656")]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn as_simd_mut<const LANES: usize>(&mut self) -> (&mut [T], &mut [Simd<T, LANES>], &mut [T])
     where
         Simd<T, LANES>: AsMut<[T; LANES]>,
@@ -4229,6 +4365,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "is_sorted", since = "1.82.0")]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn is_sorted(&self) -> bool
     where
         T: PartialOrd,
@@ -4272,6 +4409,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "is_sorted", since = "1.82.0")]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn is_sorted_by<'a, F>(&'a self, mut compare: F) -> bool
     where
         F: FnMut(&'a T, &'a T) -> bool,
@@ -4296,6 +4434,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "is_sorted", since = "1.82.0")]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn is_sorted_by_key<'a, F, K>(&'a self, f: F) -> bool
     where
         F: FnMut(&'a T) -> K,
@@ -4355,6 +4494,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "partition_point", since = "1.52.0")]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn partition_point<P>(&self, mut pred: P) -> usize
     where
         P: FnMut(&T) -> bool,
@@ -4407,6 +4547,7 @@ impl<T> [T] {
     #[inline]
     #[must_use = "method does not modify the slice if the range is out of bounds"]
     #[stable(feature = "slice_take", since = "1.87.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn split_off<'a, R: OneSidedRange<usize>>(
         self: &mut &'a Self,
         range: R,
@@ -4473,6 +4614,7 @@ impl<T> [T] {
     #[inline]
     #[must_use = "method does not modify the slice if the range is out of bounds"]
     #[stable(feature = "slice_take", since = "1.87.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn split_off_mut<'a, R: OneSidedRange<usize>>(
         self: &mut &'a mut Self,
         range: R,
@@ -4511,6 +4653,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "slice_take", since = "1.87.0")]
     #[rustc_const_unstable(feature = "const_split_off_first_last", issue = "138539")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_off_first<'a>(self: &mut &'a Self) -> Option<&'a T> {
         // FIXME(const-hack): Use `?` when available in const instead of `let-else`.
         let Some((first, rem)) = self.split_first() else { return None };
@@ -4536,6 +4679,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "slice_take", since = "1.87.0")]
     #[rustc_const_unstable(feature = "const_split_off_first_last", issue = "138539")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_off_first_mut<'a>(self: &mut &'a mut Self) -> Option<&'a mut T> {
         // FIXME(const-hack): Use `mem::take` and `?` when available in const.
         // Original: `mem::take(self).split_first_mut()?`
@@ -4561,6 +4705,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "slice_take", since = "1.87.0")]
     #[rustc_const_unstable(feature = "const_split_off_first_last", issue = "138539")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_off_last<'a>(self: &mut &'a Self) -> Option<&'a T> {
         // FIXME(const-hack): Use `?` when available in const instead of `let-else`.
         let Some((last, rem)) = self.split_last() else { return None };
@@ -4586,6 +4731,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "slice_take", since = "1.87.0")]
     #[rustc_const_unstable(feature = "const_split_off_first_last", issue = "138539")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn split_off_last_mut<'a>(self: &mut &'a mut Self) -> Option<&'a mut T> {
         // FIXME(const-hack): Use `mem::take` and `?` when available in const.
         // Original: `mem::take(self).split_last_mut()?`
@@ -4642,6 +4788,7 @@ impl<T> [T] {
     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
     #[stable(feature = "get_many_mut", since = "1.86.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn get_disjoint_unchecked_mut<I, const N: usize>(
         &mut self,
         indices: [I; N],
@@ -4709,6 +4856,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "get_many_mut", since = "1.86.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn get_disjoint_mut<I, const N: usize>(
         &mut self,
         indices: [I; N],
@@ -4764,6 +4912,7 @@ impl<T> [T] {
     /// ```
     #[must_use]
     #[unstable(feature = "substr_range", issue = "126769")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn element_offset(&self, element: &T) -> Option<usize> {
         if T::IS_ZST {
             panic!("elements are zero-sized");
@@ -4818,6 +4967,7 @@ impl<T> [T] {
     /// ```
     #[must_use]
     #[unstable(feature = "substr_range", issue = "126769")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn subslice_range(&self, subslice: &[T]) -> Option<Range<usize>> {
         if T::IS_ZST {
             panic!("elements are zero-sized");
@@ -4839,6 +4989,7 @@ impl<T> [T] {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> [MaybeUninit<T>] {
     /// Transmutes the mutable uninitialized slice to a mutable uninitialized slice of
     /// another type, ensuring alignment of the types is maintained.
@@ -4879,6 +5030,7 @@ impl<T> [MaybeUninit<T>] {
     #[unstable(feature = "align_to_uninit_mut", issue = "139062")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn align_to_uninit_mut<U>(&mut self) -> (&mut Self, &mut [MaybeUninit<U>], &mut Self) {
         // SAFETY: `MaybeUninit` is transparent. Correct size and alignment are guaranteed by
         // `align_to_mut` itself. Therefore the only thing that we have to ensure for a safe
@@ -4888,6 +5040,7 @@ impl<T> [MaybeUninit<T>] {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> [[T; N]] {
     /// Takes a `&[[T; N]]`, and flattens it to a `&[T]`.
     ///
@@ -4922,6 +5075,7 @@ impl<T, const N: usize> [[T; N]] {
     /// ```
     #[stable(feature = "slice_flatten", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_slice_flatten", since = "1.87.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_flattened(&self) -> &[T] {
         let len = if T::IS_ZST {
             self.len().checked_mul(N).expect("slice len overflow")
@@ -4964,6 +5118,7 @@ impl<T, const N: usize> [[T; N]] {
     /// ```
     #[stable(feature = "slice_flatten", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_slice_flatten", since = "1.87.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_flattened_mut(&mut self) -> &mut [T] {
         let len = if T::IS_ZST {
             self.len().checked_mul(N).expect("slice len overflow")
@@ -4977,6 +5132,7 @@ impl<T, const N: usize> [[T; N]] {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl [f32] {
     /// Sorts the slice of floats.
     ///
@@ -5000,11 +5156,13 @@ impl [f32] {
     /// ```
     #[unstable(feature = "sort_floats", issue = "93396")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn sort_floats(&mut self) {
         self.sort_unstable_by(f32::total_cmp);
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl [f64] {
     /// Sorts the slice of floats.
     ///
@@ -5028,20 +5186,25 @@ impl [f64] {
     /// ```
     #[unstable(feature = "sort_floats", issue = "93396")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn sort_floats(&mut self) {
         self.sort_unstable_by(f64::total_cmp);
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 trait CloneFromSpec<T> {
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_clone_from(&mut self, src: &[T]);
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> CloneFromSpec<T> for [T]
 where
     T: Clone,
 {
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     default fn spec_clone_from(&mut self, src: &[T]) {
         assert!(self.len() == src.len(), "destination and source slices have different lengths");
         // NOTE: We need to explicitly slice them to the same length
@@ -5055,27 +5218,33 @@ where
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> CloneFromSpec<T> for [T]
 where
     T: Copy,
 {
     #[track_caller]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn spec_clone_from(&mut self, src: &[T]) {
         self.copy_from_slice(src);
     }
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> Default for &[T] {
     /// Creates an empty slice.
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn default() -> Self {
         &[]
     }
 }
 
 #[stable(feature = "mut_slice_default", since = "1.5.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> Default for &mut [T] {
     /// Creates a mutable empty slice.
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn default() -> Self {
         &mut []
     }
@@ -5085,29 +5254,37 @@ impl<T> Default for &mut [T] {
 /// Patterns in slices - currently, only used by `strip_prefix` and `strip_suffix`.  At a future
 /// point, we hope to generalise `core::str::Pattern` (which at the time of writing is limited to
 /// `str`) to slices, and then this trait will be replaced or abolished.
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait SlicePattern {
     /// The element type of the slice being matched on.
     type Item;
 
     /// Currently, the consumers of `SlicePattern` need a slice.
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn as_slice(&self) -> &[Self::Item];
 }
 
 #[stable(feature = "slice_strip", since = "1.51.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> SlicePattern for [T] {
+    #[cfg(not(feature = "ferrocene_certified"))]
     type Item = T;
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn as_slice(&self) -> &[Self::Item] {
         self
     }
 }
 
 #[stable(feature = "slice_strip", since = "1.51.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> SlicePattern for [T; N] {
+    #[cfg(not(feature = "ferrocene_certified"))]
     type Item = T;
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn as_slice(&self) -> &[Self::Item] {
         self
     }
@@ -5118,6 +5295,7 @@ impl<T, const N: usize> SlicePattern for [T; N] {
 /// This will do `binomial(N + 1, 2) = N * (N + 1) / 2 = 0, 1, 3, 6, 10, ..`
 /// comparison operations.
 #[inline]
+#[cfg(not(feature = "ferrocene_certified"))]
 fn get_disjoint_check_valid<I: GetDisjointMutIndex, const N: usize>(
     indices: &[I; N],
     len: usize,
@@ -5155,6 +5333,7 @@ fn get_disjoint_check_valid<I: GetDisjointMutIndex, const N: usize>(
 /// ```
 #[stable(feature = "get_many_mut", since = "1.86.0")]
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub enum GetDisjointMutError {
     /// An index provided was out-of-bounds for the slice.
     IndexOutOfBounds,
@@ -5163,7 +5342,9 @@ pub enum GetDisjointMutError {
 }
 
 #[stable(feature = "get_many_mut", since = "1.86.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Display for GetDisjointMutError {
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let msg = match self {
             GetDisjointMutError::IndexOutOfBounds => "an index is out of bounds",
@@ -5173,21 +5354,29 @@ impl fmt::Display for GetDisjointMutError {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 mod private_get_disjoint_mut_index {
+    #[cfg(not(feature = "ferrocene_certified"))]
     use super::{Range, RangeInclusive, range};
 
     #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub trait Sealed {}
 
     #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl Sealed for usize {}
     #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl Sealed for Range<usize> {}
     #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl Sealed for RangeInclusive<usize> {}
     #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl Sealed for range::Range<usize> {}
     #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl Sealed for range::RangeInclusive<usize> {}
 }
 
@@ -5198,11 +5387,13 @@ mod private_get_disjoint_mut_index {
 /// If `is_in_bounds()` returns `true` and `is_overlapping()` returns `false`,
 /// it must be safe to index the slice with the indices.
 #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe trait GetDisjointMutIndex:
     Clone + private_get_disjoint_mut_index::Sealed
 {
     /// Returns `true` if `self` is in bounds for `len` slice elements.
     #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_in_bounds(&self, len: usize) -> bool;
 
     /// Returns `true` if `self` overlaps with `other`.
@@ -5210,18 +5401,22 @@ pub unsafe trait GetDisjointMutIndex:
     /// Note that we don't consider zero-length ranges to overlap at the beginning or the end,
     /// but do consider them to overlap in the middle.
     #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_overlapping(&self, other: &Self) -> bool;
 }
 
 #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
 // SAFETY: We implement `is_in_bounds()` and `is_overlapping()` correctly.
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl GetDisjointMutIndex for usize {
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_in_bounds(&self, len: usize) -> bool {
         *self < len
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_overlapping(&self, other: &Self) -> bool {
         *self == *other
     }
@@ -5229,13 +5424,16 @@ unsafe impl GetDisjointMutIndex for usize {
 
 #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
 // SAFETY: We implement `is_in_bounds()` and `is_overlapping()` correctly.
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl GetDisjointMutIndex for Range<usize> {
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_in_bounds(&self, len: usize) -> bool {
         (self.start <= self.end) & (self.end <= len)
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_overlapping(&self, other: &Self) -> bool {
         (self.start < other.end) & (other.start < self.end)
     }
@@ -5243,13 +5441,16 @@ unsafe impl GetDisjointMutIndex for Range<usize> {
 
 #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
 // SAFETY: We implement `is_in_bounds()` and `is_overlapping()` correctly.
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl GetDisjointMutIndex for RangeInclusive<usize> {
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_in_bounds(&self, len: usize) -> bool {
         (self.start <= self.end) & (self.end < len)
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_overlapping(&self, other: &Self) -> bool {
         (self.start <= other.end) & (other.start <= self.end)
     }
@@ -5257,13 +5458,16 @@ unsafe impl GetDisjointMutIndex for RangeInclusive<usize> {
 
 #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
 // SAFETY: We implement `is_in_bounds()` and `is_overlapping()` correctly.
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl GetDisjointMutIndex for range::Range<usize> {
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_in_bounds(&self, len: usize) -> bool {
         Range::from(*self).is_in_bounds(len)
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_overlapping(&self, other: &Self) -> bool {
         Range::from(*self).is_overlapping(&Range::from(*other))
     }
@@ -5271,13 +5475,16 @@ unsafe impl GetDisjointMutIndex for range::Range<usize> {
 
 #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
 // SAFETY: We implement `is_in_bounds()` and `is_overlapping()` correctly.
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl GetDisjointMutIndex for range::RangeInclusive<usize> {
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_in_bounds(&self, len: usize) -> bool {
         RangeInclusive::from(*self).is_in_bounds(len)
     }
 
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     fn is_overlapping(&self, other: &Self) -> bool {
         RangeInclusive::from(*self).is_overlapping(&RangeInclusive::from(*other))
     }

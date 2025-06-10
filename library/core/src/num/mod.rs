@@ -7,7 +7,6 @@ use crate::intrinsics;
 use crate::panic::const_panic;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::str::FromStr;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{ascii, mem};

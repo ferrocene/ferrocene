@@ -186,7 +186,7 @@ pub const fn panic(expr: &'static str) -> ! {
     // stack frames get popped during unwinding, and couldn't be directly referenced from the
     // payload.
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     panic_fmt(fmt::Arguments::new_const(&[expr]));
     #[cfg(not(not(feature = "ferrocene_certified")))]
     panic_fmt(expr)
@@ -275,7 +275,7 @@ pub mod panic_const {
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
 pub const fn panic_nounwind(expr: &'static str) -> ! {
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     panic_nounwind_fmt(fmt::Arguments::new_const(&[expr]), /* force_no_backtrace */ false);
     #[cfg(not(not(feature = "ferrocene_certified")))]
     panic_nounwind_fmt(expr, /* force_no_backtrace */ false);

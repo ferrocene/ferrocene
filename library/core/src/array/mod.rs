@@ -633,7 +633,7 @@ impl<T, const N: usize> [T; N] {
     /// ```
     #[stable(feature = "array_map", since = "1.55.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn map<F, U>(self, f: F) -> [U; N]
     where
         F: FnMut(T) -> U,
@@ -673,7 +673,7 @@ impl<T, const N: usize> [T; N] {
     /// ```
     #[unstable(feature = "array_try_map", issue = "79711")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn try_map<R>(self, f: impl FnMut(T) -> R) -> ChangeOutputType<R, [R::Output; N]>
     where
         R: Try<Residual: Residual<[R::Output; N]>>,
@@ -723,7 +723,7 @@ impl<T, const N: usize> [T; N] {
     #[stable(feature = "array_methods", since = "1.77.0")]
     #[rustc_const_unstable(feature = "const_array_each_ref", issue = "133289")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn each_ref(&self) -> [&T; N] {
         let mut buf = [null::<T>(); N];
 
@@ -756,7 +756,7 @@ impl<T, const N: usize> [T; N] {
     #[stable(feature = "array_methods", since = "1.77.0")]
     #[rustc_const_unstable(feature = "const_array_each_ref", issue = "133289")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn each_mut(&mut self) -> [&mut T; N] {
         let mut buf = [null_mut::<T>(); N];
 
@@ -814,7 +814,7 @@ impl<T, const N: usize> [T; N] {
     )]
     #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn split_array_ref<const M: usize>(&self) -> (&[T; M], &[T]) {
         (&self[..]).split_first_chunk::<M>().unwrap()
     }
@@ -849,7 +849,7 @@ impl<T, const N: usize> [T; N] {
     )]
     #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn split_array_mut<const M: usize>(&mut self) -> (&mut [T; M], &mut [T]) {
         (&mut self[..]).split_first_chunk_mut::<M>().unwrap()
     }
@@ -896,7 +896,7 @@ impl<T, const N: usize> [T; N] {
     )]
     #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn rsplit_array_ref<const M: usize>(&self) -> (&[T], &[T; M]) {
         (&self[..]).split_last_chunk::<M>().unwrap()
     }
@@ -931,7 +931,7 @@ impl<T, const N: usize> [T; N] {
     )]
     #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn rsplit_array_mut<const M: usize>(&mut self) -> (&mut [T], &mut [T; M]) {
         (&mut self[..]).split_last_chunk_mut::<M>().unwrap()
     }

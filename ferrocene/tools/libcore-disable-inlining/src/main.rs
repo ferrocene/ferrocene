@@ -1,8 +1,6 @@
-use std::{
-    env, fs,
-    path::{Path, PathBuf},
-    process::Command,
-};
+use std::path::{Path, PathBuf};
+use std::process::Command;
+use std::{env, fs};
 
 const INLINE: &str = "#[inline]";
 const INLINE_ALWAYS: &str = "#[inline(always)]";

@@ -126,7 +126,7 @@ impl<T: ?Sized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn with_metadata_of<U>(self, meta: *const U) -> *const U
     where
         U: ?Sized,
@@ -143,7 +143,7 @@ impl<T: ?Sized> *const T {
     #[rustc_diagnostic_item = "ptr_cast_mut"]
     #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn cast_mut(self) -> *mut T {
         self as _
     }
@@ -207,7 +207,7 @@ impl<T: ?Sized> *const T {
     #[inline(never)]
     #[stable(feature = "exposed_provenance", since = "1.84.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn expose_provenance(self) -> usize {
         self.cast::<()>() as usize
     }
@@ -227,7 +227,7 @@ impl<T: ?Sized> *const T {
     #[inline]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn with_addr(self, addr: usize) -> Self {
         // This should probably be an intrinsic to avoid doing any sort of arithmetic, but
         // meanwhile, we can implement it with `wrapping_offset`, which preserves the pointer's
@@ -248,7 +248,7 @@ impl<T: ?Sized> *const T {
     #[inline]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn map_addr(self, f: impl FnOnce(usize) -> usize) -> Self {
         self.with_addr(f(self.addr()))
     }
@@ -259,7 +259,7 @@ impl<T: ?Sized> *const T {
     #[unstable(feature = "ptr_metadata", issue = "81513")]
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn to_raw_parts(self) -> (*const (), <T as super::Pointee>::Metadata) {
         (self.cast(), metadata(self))
     }
@@ -312,7 +312,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn as_ref<'a>(self) -> Option<&'a T> {
         // SAFETY: the caller must guarantee that `self` is valid
         // for a reference if it isn't null.
@@ -346,7 +346,7 @@ impl<T: ?Sized> *const T {
     #[inline]
     #[must_use]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn as_ref_unchecked<'a>(self) -> &'a T {
         // SAFETY: the caller must guarantee that `self` is valid for a reference
         unsafe { &*self }
@@ -386,7 +386,7 @@ impl<T: ?Sized> *const T {
     #[inline]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn as_uninit_ref<'a>(self) -> Option<&'a MaybeUninit<T>>
     where
         T: Sized,
@@ -443,7 +443,7 @@ impl<T: ?Sized> *const T {
     #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn offset(self, count: isize) -> *const T
     where
         T: Sized,
@@ -498,7 +498,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn byte_offset(self, count: isize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `offset`.
         unsafe { self.cast::<u8>().offset(count).with_metadata_of(self) }
@@ -561,7 +561,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn wrapping_offset(self, count: isize) -> *const T
     where
         T: Sized,
@@ -585,7 +585,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn wrapping_byte_offset(self, count: isize) -> Self {
         self.cast::<u8>().wrapping_offset(count).with_metadata_of(self)
     }
@@ -625,7 +625,7 @@ impl<T: ?Sized> *const T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn mask(self, mask: usize) -> *const T {
         intrinsics::ptr_mask(self.cast::<()>(), mask).with_metadata_of(self)
     }
@@ -716,7 +716,7 @@ impl<T: ?Sized> *const T {
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn offset_from(self, origin: *const T) -> isize
     where
         T: Sized,
@@ -741,7 +741,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn byte_offset_from<U: ?Sized>(self, origin: *const U) -> isize {
         // SAFETY: the caller must uphold the safety contract for `offset_from`.
         unsafe { self.cast::<u8>().offset_from(origin.cast::<u8>()) }
@@ -809,7 +809,7 @@ impl<T: ?Sized> *const T {
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn offset_from_unsigned(self, origin: *const T) -> usize
     where
         T: Sized,
@@ -856,7 +856,7 @@ impl<T: ?Sized> *const T {
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn byte_offset_from_unsigned<U: ?Sized>(self, origin: *const U) -> usize {
         // SAFETY: the caller must uphold the safety contract for `offset_from_unsigned`.
         unsafe { self.cast::<u8>().offset_from_unsigned(origin.cast::<u8>()) }
@@ -913,7 +913,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn guaranteed_ne(self, other: *const T) -> Option<bool>
     where
         T: Sized,
@@ -974,7 +974,7 @@ impl<T: ?Sized> *const T {
     #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn add(self, count: usize) -> Self
     where
         T: Sized,
@@ -1028,7 +1028,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn byte_add(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `add`.
         unsafe { self.cast::<u8>().add(count).with_metadata_of(self) }
@@ -1084,7 +1084,7 @@ impl<T: ?Sized> *const T {
     #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -1144,7 +1144,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn byte_sub(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `sub`.
         unsafe { self.cast::<u8>().sub(count).with_metadata_of(self) }
@@ -1206,7 +1206,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn wrapping_add(self, count: usize) -> Self
     where
         T: Sized,
@@ -1228,7 +1228,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn wrapping_byte_add(self, count: usize) -> Self {
         self.cast::<u8>().wrapping_add(count).with_metadata_of(self)
     }
@@ -1289,7 +1289,7 @@ impl<T: ?Sized> *const T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn wrapping_sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -1311,7 +1311,7 @@ impl<T: ?Sized> *const T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn wrapping_byte_sub(self, count: usize) -> Self {
         self.cast::<u8>().wrapping_sub(count).with_metadata_of(self)
     }
@@ -1327,7 +1327,7 @@ impl<T: ?Sized> *const T {
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn read(self) -> T
     where
         T: Sized,
@@ -1350,7 +1350,7 @@ impl<T: ?Sized> *const T {
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub unsafe fn read_volatile(self) -> T
     where
         T: Sized,
@@ -1372,7 +1372,7 @@ impl<T: ?Sized> *const T {
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn read_unaligned(self) -> T
     where
         T: Sized,
@@ -1394,7 +1394,7 @@ impl<T: ?Sized> *const T {
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn copy_to(self, dest: *mut T, count: usize)
     where
         T: Sized,
@@ -1416,7 +1416,7 @@ impl<T: ?Sized> *const T {
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn copy_to_nonoverlapping(self, dest: *mut T, count: usize)
     where
         T: Sized,
@@ -1465,7 +1465,7 @@ impl<T: ?Sized> *const T {
     #[inline]
     #[stable(feature = "align_offset", since = "1.36.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn align_offset(self, align: usize) -> usize
     where
         T: Sized,
@@ -1505,7 +1505,7 @@ impl<T: ?Sized> *const T {
     #[inline]
     #[stable(feature = "pointer_is_aligned", since = "1.79.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn is_aligned(self) -> bool
     where
         T: Sized,

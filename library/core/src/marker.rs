@@ -899,7 +899,7 @@ pub trait DiscriminantKind {
     /// bounds required by `mem::Discriminant`.
     #[lang = "discriminant_type"]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     type Discriminant: Clone + Copy + Debug + Eq + PartialEq + Hash + Send + Sync + Unpin;
     #[lang = "discriminant_type"]
     #[cfg(not(not(feature = "ferrocene_certified")))]

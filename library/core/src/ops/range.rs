@@ -461,7 +461,7 @@ impl<Idx> RangeInclusive<Idx> {
     #[inline(never)]
     #[rustc_const_unstable(feature = "const_range_bounds", issue = "108082")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn into_inner(self) -> (Idx, Idx) {
         (self.start, self.end)
     }
@@ -841,7 +841,7 @@ pub trait RangeBounds<T: ?Sized> {
     #[inline(never)]
     #[stable(feature = "range_contains", since = "1.35.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     fn contains<U>(&self, item: &U) -> bool
     where
         T: PartialOrd<U>,
@@ -911,7 +911,7 @@ pub trait RangeBounds<T: ?Sized> {
     /// ```
     #[unstable(feature = "range_bounds_is_empty", issue = "137300")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     fn is_empty(&self) -> bool
     where
         T: PartialOrd,
@@ -976,7 +976,7 @@ pub trait IntoBounds<T>: RangeBounds<T> {
     /// assert!((1..5).intersect(6..).is_empty());
     /// ```
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     fn intersect<R>(self, other: R) -> (Bound<T>, Bound<T>)
     where
         Self: Sized,

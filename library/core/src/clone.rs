@@ -532,7 +532,7 @@ mod impls {
     }
 
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl_clone! {
         f16 f128
         char
@@ -545,7 +545,7 @@ mod impls {
     }
 
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     #[unstable(feature = "never_type", issue = "35121")]
     impl Clone for ! {
         #[inline]
@@ -582,7 +582,7 @@ mod impls {
 
     /// Shared references can be cloned, but mutable references *cannot*!
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> !Clone for &mut T {}
 }

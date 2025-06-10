@@ -47,7 +47,7 @@ impl Alignment {
     /// ```
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const MIN: Self = Self(AlignmentEnum::_Align1Shl0);
 
     /// Returns the alignment for a type.
@@ -58,7 +58,7 @@ impl Alignment {
     #[inline(never)]
     #[must_use]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn of<T>() -> Self {
         // This can't actually panic since type alignment is always a power of two.
         const { Alignment::new(align_of::<T>()).unwrap() }
@@ -112,7 +112,7 @@ impl Alignment {
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn as_nonzero(self) -> NonZero<usize> {
         // This transmutes directly to avoid the UbCheck in `NonZero::new_unchecked`
         // since there's no way for the user to trip that check anyway -- the
@@ -139,7 +139,7 @@ impl Alignment {
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn log2(self) -> u32 {
         self.as_nonzero().trailing_zeros()
     }
@@ -170,7 +170,7 @@ impl Alignment {
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn mask(self) -> usize {
         // SAFETY: The alignment is always nonzero, and therefore decrementing won't overflow.
         !(unsafe { self.as_usize().unchecked_sub(1) })
@@ -178,7 +178,7 @@ impl Alignment {
 
     // FIXME(const-hack) Remove me once `Ord::max` is usable in const
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub(crate) const fn max(a: Self, b: Self) -> Self {
         if a.as_usize() > b.as_usize() { a } else { b }
     }

@@ -91,7 +91,7 @@ impl<'a> Location<'a> {
     #[track_caller]
     #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn caller() -> &'static Location<'static> {
         crate::intrinsics::caller_location()
     }

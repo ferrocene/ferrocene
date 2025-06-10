@@ -681,7 +681,7 @@ impl<T> Option<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn is_none(&self) -> bool {
         !self.is_some()
     }
@@ -778,7 +778,7 @@ impl<T> Option<T> {
     #[stable(feature = "pin", since = "1.33.0")]
     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn as_pin_ref(self: Pin<&Self>) -> Option<Pin<&T>> {
         // FIXME(const-hack): use `map` once that is possible
         match Pin::get_ref(self).as_ref() {
@@ -797,7 +797,7 @@ impl<T> Option<T> {
     #[stable(feature = "pin", since = "1.33.0")]
     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn as_pin_mut(self: Pin<&mut Self>) -> Option<Pin<&mut T>> {
         // SAFETY: `get_unchecked_mut` is never used to move the `Option` inside `self`.
         // `x` is guaranteed to be pinned because it comes from `self` which is pinned.
@@ -812,7 +812,7 @@ impl<T> Option<T> {
 
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     const fn len(&self) -> usize {
         // Using the intrinsic avoids emitting a branch to get the 0 or 1.
         let discriminant: isize = crate::intrinsics::discriminant_value(self);
@@ -848,7 +848,7 @@ impl<T> Option<T> {
     #[stable(feature = "option_as_slice", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn as_slice(&self) -> &[T] {
         // SAFETY: When the `Option` is `Some`, we're using the actual pointer
         // to the payload, with a length of 1, so this is equivalent to
@@ -905,7 +905,7 @@ impl<T> Option<T> {
     #[stable(feature = "option_as_slice", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn as_mut_slice(&mut self) -> &mut [T] {
         // SAFETY: When the `Option` is `Some`, we're using the actual pointer
         // to the payload, with a length of 1, so this is equivalent to
@@ -976,7 +976,7 @@ impl<T> Option<T> {
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn expect(self, msg: &str) -> T {
         match self {
             Some(val) => val,
@@ -1023,7 +1023,7 @@ impl<T> Option<T> {
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn unwrap(self) -> T {
         match self {
             Some(val) => val,
@@ -1133,7 +1133,7 @@ impl<T> Option<T> {
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const unsafe fn unwrap_unchecked(self) -> T {
         match self {
             Some(val) => val,
@@ -1666,7 +1666,7 @@ impl<T> Option<T> {
     #[stable(feature = "option_insert", since = "1.53.0")]
     // Uncertified because it depends on unwrap_unchecked
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn insert(&mut self, value: T) -> &mut T {
         *self = Some(value);
 
@@ -1698,7 +1698,7 @@ impl<T> Option<T> {
     #[stable(feature = "option_entry", since = "1.20.0")]
     // Uncertified because it depends on unwrap_unchecked
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn get_or_insert(&mut self, value: T) -> &mut T {
         self.get_or_insert_with(|| value)
     }
@@ -1724,7 +1724,7 @@ impl<T> Option<T> {
     #[stable(feature = "option_get_or_insert_default", since = "1.83.0")]
     // Uncertified because it depends on unwrap_unchecked
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn get_or_insert_default(&mut self) -> &mut T
     where
         T: Default,
@@ -1753,7 +1753,7 @@ impl<T> Option<T> {
     #[stable(feature = "option_entry", since = "1.20.0")]
     // Uncertified because it depends on unwrap_unchecked
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn get_or_insert_with<F>(&mut self, f: F) -> &mut T
     where
         F: FnOnce() -> T,
@@ -1790,7 +1790,7 @@ impl<T> Option<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn take(&mut self) -> Option<T> {
         // FIXME(const-hack) replace `mem::replace` by `mem::take` when the latter is const ready
         mem::replace(self, None)
@@ -1823,7 +1823,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_take_if", since = "1.80.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn take_if<P>(&mut self, predicate: P) -> Option<T>
     where
         P: FnOnce(&mut T) -> bool,
@@ -1852,7 +1852,7 @@ impl<T> Option<T> {
     #[stable(feature = "option_replace", since = "1.31.0")]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub const fn replace(&mut self, value: T) -> Option<T> {
         mem::replace(self, Some(value))
     }

@@ -1014,7 +1014,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))] /* blocked on Iterator */
+    #[cfg_attr(not(bootstrap), coverage(off))] /* blocked on Iterator */
     pub fn iter(&self) -> Iter<'_, T> {
         Iter { inner: self.as_ref().ok() }
     }
@@ -1039,7 +1039,7 @@ impl<T, E> Result<T, E> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))] /* blocked on Iterator */
+    #[cfg_attr(not(bootstrap), coverage(off))] /* blocked on Iterator */
     pub fn iter_mut(&mut self) -> IterMut<'_, T> {
         IterMut { inner: self.as_mut().ok() }
     }
@@ -1095,7 +1095,7 @@ impl<T, E> Result<T, E> {
     #[track_caller]
     #[stable(feature = "result_expect", since = "1.4.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))] /* blocked on Debug */
+    #[cfg_attr(not(bootstrap), coverage(off))] /* blocked on Debug */
     pub fn expect(self, msg: &str) -> T
     where
         E: fmt::Debug,
@@ -1145,7 +1145,7 @@ impl<T, E> Result<T, E> {
     #[track_caller]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))] /* blocked on Debug */
+    #[cfg_attr(not(bootstrap), coverage(off))] /* blocked on Debug */
     pub fn unwrap(self) -> T
     where
         E: fmt::Debug,
@@ -1211,7 +1211,7 @@ impl<T, E> Result<T, E> {
     #[track_caller]
     #[stable(feature = "result_expect_err", since = "1.17.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))] /* blocked on Debug */
+    #[cfg_attr(not(bootstrap), coverage(off))] /* blocked on Debug */
     pub fn expect_err(self, msg: &str) -> E
     where
         T: fmt::Debug,
@@ -1244,7 +1244,7 @@ impl<T, E> Result<T, E> {
     #[track_caller]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))] /* blocked on Debug */
+    #[cfg_attr(not(bootstrap), coverage(off))] /* blocked on Debug */
     pub fn unwrap_err(self) -> E
     where
         T: fmt::Debug,
@@ -1281,7 +1281,7 @@ impl<T, E> Result<T, E> {
     #[unstable(feature = "unwrap_infallible", reason = "newly added", issue = "61695")]
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))] /* blocked on ! */
+    #[cfg_attr(not(bootstrap), coverage(off))] /* blocked on ! */
     pub fn into_ok(self) -> T
     where
         E: Into<!>,
@@ -1318,7 +1318,7 @@ impl<T, E> Result<T, E> {
     #[unstable(feature = "unwrap_infallible", reason = "newly added", issue = "61695")]
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))] /* blocked on ! */
+    #[cfg_attr(not(bootstrap), coverage(off))] /* blocked on ! */
     pub fn into_err(self) -> E
     where
         T: Into<!>,
@@ -1542,7 +1542,7 @@ impl<T, E> Result<T, E> {
     #[track_caller]
     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))] /* blocked on hint */
+    #[cfg_attr(not(bootstrap), coverage(off))] /* blocked on hint */
     pub unsafe fn unwrap_unchecked(self) -> T {
         match self {
             Ok(t) => t,
@@ -1575,7 +1575,7 @@ impl<T, E> Result<T, E> {
     #[track_caller]
     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))] /* blocked on hint */
+    #[cfg_attr(not(bootstrap), coverage(off))] /* blocked on hint */
     pub unsafe fn unwrap_err_unchecked(self) -> E {
         match self {
             // SAFETY: the safety contract must be upheld by the caller.
@@ -1745,7 +1745,7 @@ impl<T, E> Result<Result<T, E>, E> {
     #[unstable(feature = "result_flattening", issue = "70142")]
     #[rustc_const_unstable(feature = "result_flattening", issue = "70142")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))] /* blocked on const impl Drop for Result<Result<T, E>> */
+    #[cfg_attr(not(bootstrap), coverage(off))] /* blocked on const impl Drop for Result<Result<T, E>> */
     pub const fn flatten(self) -> Result<T, E> {
         // FIXME(const-hack): could be written with `and_then`
         match self {

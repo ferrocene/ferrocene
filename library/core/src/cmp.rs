@@ -646,7 +646,7 @@ impl Ordering {
     #[must_use]
     #[stable(feature = "ordering_chaining", since = "1.17.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     pub fn then_with<F: FnOnce() -> Ordering>(self, f: F) -> Ordering {
         match self {
             Equal => f(),
@@ -1860,7 +1860,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl PartialEq for () {
         #[inline]
         fn eq(&self, _other: &()) -> bool {
@@ -1873,7 +1873,7 @@ mod impls {
     }
 
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     partial_eq_impl! {
         char f16 f128
     }
@@ -1889,7 +1889,7 @@ mod impls {
     }
 
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     eq_impl! { () char }
     eq_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
@@ -1953,7 +1953,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl PartialOrd for () {
         #[inline]
         fn partial_cmp(&self, _: &()) -> Option<Ordering> {
@@ -1972,7 +1972,7 @@ mod impls {
     }
 
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     partial_ord_impl! { f16 f128 }
     partial_ord_impl! { f32 f64 }
 
@@ -2000,7 +2000,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl Ord for () {
         #[inline]
         fn cmp(&self, _other: &()) -> Ordering {
@@ -2042,13 +2042,13 @@ mod impls {
     }
 
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     ord_impl! { char }
     ord_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
     #[unstable(feature = "never_type", issue = "35121")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl PartialEq for ! {
         #[inline]
         fn eq(&self, _: &!) -> bool {
@@ -2058,12 +2058,12 @@ mod impls {
 
     #[unstable(feature = "never_type", issue = "35121")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl Eq for ! {}
 
     #[unstable(feature = "never_type", issue = "35121")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl PartialOrd for ! {
         #[inline]
         fn partial_cmp(&self, _: &!) -> Option<Ordering> {
@@ -2073,7 +2073,7 @@ mod impls {
 
     #[unstable(feature = "never_type", issue = "35121")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl Ord for ! {
         #[inline]
         fn cmp(&self, _: &!) -> Ordering {
@@ -2085,7 +2085,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl<A: ?Sized, B: ?Sized> PartialEq<&B> for &A
     where
         A: PartialEq<B>,
@@ -2101,7 +2101,7 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl<A: ?Sized, B: ?Sized> PartialOrd<&B> for &A
     where
         A: PartialOrd<B>,
@@ -2145,7 +2145,7 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl<A: ?Sized> Ord for &A
     where
         A: Ord,
@@ -2157,14 +2157,14 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl<A: ?Sized> Eq for &A where A: Eq {}
 
     // &mut pointers
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl<A: ?Sized, B: ?Sized> PartialEq<&mut B> for &mut A
     where
         A: PartialEq<B>,
@@ -2180,7 +2180,7 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl<A: ?Sized, B: ?Sized> PartialOrd<&mut B> for &mut A
     where
         A: PartialOrd<B>,
@@ -2224,7 +2224,7 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl<A: ?Sized> Ord for &mut A
     where
         A: Ord,
@@ -2236,12 +2236,12 @@ mod impls {
     }
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl<A: ?Sized> Eq for &mut A where A: Eq {}
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl<A: ?Sized, B: ?Sized> PartialEq<&mut B> for &A
     where
         A: PartialEq<B>,
@@ -2258,7 +2258,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     impl<A: ?Sized, B: ?Sized> PartialEq<&B> for &mut A
     where
         A: PartialEq<B>,

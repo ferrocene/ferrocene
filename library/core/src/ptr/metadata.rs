@@ -75,7 +75,7 @@ pub trait Pointee {
     // NOTE: The metadata of `dyn Trait + 'a` is `DynMetadata<dyn Trait + 'a>`
     // so a `'static` bound must not be added.
     #[cfg(not(feature = "ferrocene_certified"))]
-#[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg_attr(not(bootstrap), coverage(off))]
     type Metadata: fmt::Debug + Copy + Send + Sync + Ord + Hash + Unpin + Freeze;
     /// The type for metadata in pointers and references to `Self`.
     #[lang = "metadata_type"]

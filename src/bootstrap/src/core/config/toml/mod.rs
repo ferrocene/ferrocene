@@ -12,22 +12,22 @@ use serde_derive::Deserialize;
 pub mod build;
 pub mod change_id;
 pub mod dist;
+pub mod ferrocene;
 pub mod gcc;
 pub mod install;
 pub mod llvm;
 pub mod rust;
 pub mod target;
-pub mod ferrocene;
 
 use build::Build;
 use change_id::{ChangeId, ChangeIdWrapper};
 use dist::Dist;
+use ferrocene::Ferrocene;
 use gcc::Gcc;
 use install::Install;
 use llvm::Llvm;
 use rust::Rust;
 use target::TomlTarget;
-use ferrocene::Ferrocene;
 
 use crate::core::config::{Merge, ReplaceOpt};
 use crate::{Config, HashMap, HashSet, Path, PathBuf, exit, fs, t};
@@ -59,7 +59,19 @@ impl Merge for TomlConfig {
         &mut self,
         parent_config_path: Option<PathBuf>,
         included_extensions: &mut HashSet<PathBuf>,
-        TomlConfig { build, install, llvm, gcc, rust, dist, target, profile, change_id, include, ferrocene }: Self,
+        TomlConfig {
+            build,
+            install,
+            llvm,
+            gcc,
+            rust,
+            dist,
+            target,
+            profile,
+            change_id,
+            include,
+            ferrocene,
+        }: Self,
         replace: ReplaceOpt,
     ) {
         fn do_merge<T: Merge>(x: &mut Option<T>, y: Option<T>, replace: ReplaceOpt) {

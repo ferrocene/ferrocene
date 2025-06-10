@@ -10,7 +10,7 @@ use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::doc::code_coverage::{CoverageMetadata, SingleCoverageReport};
 use crate::ferrocene::download_and_extract_ci_outcomes;
 use crate::utils::build_stamp::libstd_stamp;
-use crate::{RemapScheme, BootstrapCommand, Compiler, DependencyType, GitRepo, t};
+use crate::{BootstrapCommand, Compiler, DependencyType, GitRepo, RemapScheme, t};
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo) {
     if !builder.config.profiler {
@@ -144,7 +144,9 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
 
     let metadata = CoverageMetadata {
         metadata_version: CoverageMetadata::CURRENT_VERSION,
-        path_prefix: if let Some(path) = builder.debuginfo_map_to(GitRepo::Rustc, RemapScheme::Compiler) {
+        path_prefix: if let Some(path) =
+            builder.debuginfo_map_to(GitRepo::Rustc, RemapScheme::Compiler)
+        {
             path.into()
         } else {
             builder.src.clone()

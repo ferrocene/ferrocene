@@ -14,8 +14,6 @@
 //! cross-component validation. The main `parse_inner` function and its supporting
 //! helpers reside here, transforming raw `Toml` data into the structured `Config` type.
 
-// ignore-tidy-filelength: Ferrocene addition
-
 use std::cell::Cell;
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::io::IsTerminal;
@@ -69,7 +67,7 @@ pub fn rustc_if_unchanged_allowed_paths() -> Vec<&'static str> {
         ":!src/librustdoc",
         ":!src/rustdoc-json-types",
         ":!tests",
-        ":!triagebot.toml",
+        // ":!triagebot.toml", // ferrocene deletion: We don't have triagebot.toml
     ];
 
     if !CiEnv::is_ci() {

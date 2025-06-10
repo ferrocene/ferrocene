@@ -84,7 +84,11 @@ pub struct Target {
 impl Target {
     pub fn from_triple(triple: &str) -> Self {
         let mut target: Self = Default::default();
-        if triple.contains("lynxos178") || triple.contains("-none") || triple.contains("nvptx") || triple.contains("switch") {
+        if triple.contains("lynxos178")
+            || triple.contains("-none")
+            || triple.contains("nvptx")
+            || triple.contains("switch")
+        {
             target.no_std = true;
         }
         if triple.contains("emscripten") {

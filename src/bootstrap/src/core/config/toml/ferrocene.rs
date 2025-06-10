@@ -2,9 +2,9 @@
 
 use serde::{Deserialize, Deserializer};
 
+use crate::core::config::Merge;
 use crate::core::config::toml::ReplaceOpt;
-use crate::core::config::{Merge};
-use crate::{define_config, PathBuf, HashSet, exit};
+use crate::{HashSet, PathBuf, define_config, exit};
 
 define_config! {
     struct Ferrocene {

@@ -37,6 +37,7 @@ use crate::fmt;
     derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)
 )]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
+#[cfg_attr(feature = "ferrocene_certified", allow(dead_code))]
 pub struct Location<'a> {
     // Note: this filename will have exactly one nul byte at its end, but otherwise
     // it must never contain interior nul bytes. This is relied on for the conversion
@@ -137,6 +138,7 @@ impl<'a> Location<'a> {
     #[must_use]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_location_fields", since = "1.79.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn file(&self) -> &str {
         let str_len = self.file_bytes_with_nul.len() - 1;
         // SAFETY: `file_bytes_with_nul` without the trailing nul byte is guaranteed to be
@@ -151,6 +153,7 @@ impl<'a> Location<'a> {
     #[must_use]
     #[unstable(feature = "file_with_nul", issue = "141727")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn file_with_nul(&self) -> &CStr {
         // SAFETY: `file_bytes_with_nul` is guaranteed to have a trailing nul byte and no
         // interior nul bytes.

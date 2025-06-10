@@ -1075,6 +1075,7 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn checked_exact_div(self, rhs: Self) -> Option<Self> {
             if intrinsics::unlikely(rhs == 0 || ((self == Self::MIN) && (rhs == -1))) {
                 None
@@ -1123,6 +1124,7 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn exact_div(self, rhs: Self) -> Self {
             match self.checked_exact_div(rhs) {
                 Some(x) => x,
@@ -1144,6 +1146,7 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const unsafe fn unchecked_exact_div(self, rhs: Self) -> Self {
             assert_unsafe_precondition!(
                 check_language_ub,

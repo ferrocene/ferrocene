@@ -50,10 +50,12 @@
 )]
 #![allow(missing_docs)]
 
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{ConstParamTy, DiscriminantKind, Tuple};
+#[cfg(feature = "ferrocene_certified")]
+use crate::marker::{DiscriminantKind, Tuple};
 use crate::ptr;
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod bounds;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod fallback;
@@ -1861,6 +1863,7 @@ pub const unsafe fn arith_offset<T>(dst: *const T, offset: isize) -> *const T;
 ///   always the case for references, but needs to be upheld manually for pointers
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn slice_get_unchecked<
     ItemPtr: bounds::ChangePointee<[T], Pointee = T, Output = SlicePtr>,
     SlicePtr,
@@ -3944,6 +3947,7 @@ pub const fn minnumf128(x: f128, y: f128) -> f128;
 /// any safety invariants.
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn minimumf16(x: f16, y: f16) -> f16 {
     if x < y {
         x
@@ -3965,6 +3969,7 @@ pub const fn minimumf16(x: f16, y: f16) -> f16 {
 /// any safety invariants.
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn minimumf32(x: f32, y: f32) -> f32 {
     if x < y {
         x
@@ -3986,6 +3991,7 @@ pub const fn minimumf32(x: f32, y: f32) -> f32 {
 /// any safety invariants.
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn minimumf64(x: f64, y: f64) -> f64 {
     if x < y {
         x
@@ -4007,6 +4013,7 @@ pub const fn minimumf64(x: f64, y: f64) -> f64 {
 /// any safety invariants.
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn minimumf128(x: f128, y: f128) -> f128 {
     if x < y {
         x
@@ -4086,6 +4093,7 @@ pub const fn maxnumf128(x: f128, y: f128) -> f128;
 /// any safety invariants.
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn maximumf16(x: f16, y: f16) -> f16 {
     if x > y {
         x
@@ -4106,6 +4114,7 @@ pub const fn maximumf16(x: f16, y: f16) -> f16 {
 /// any safety invariants.
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn maximumf32(x: f32, y: f32) -> f32 {
     if x > y {
         x
@@ -4126,6 +4135,7 @@ pub const fn maximumf32(x: f32, y: f32) -> f32 {
 /// any safety invariants.
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn maximumf64(x: f64, y: f64) -> f64 {
     if x > y {
         x
@@ -4146,6 +4156,7 @@ pub const fn maximumf64(x: f64, y: f64) -> f64 {
 /// any safety invariants.
 #[rustc_nounwind]
 #[rustc_intrinsic]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn maximumf128(x: f128, y: f128) -> f128 {
     if x > y {
         x

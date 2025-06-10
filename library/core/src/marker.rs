@@ -1128,7 +1128,6 @@ pub trait ConstParamTy_: UnsizedConstParamTy + StructuralPartialEq + Eq {}
 #[rustc_builtin_macro]
 #[allow_internal_unstable(unsized_const_params)]
 #[unstable(feature = "adt_const_params", issue = "95174")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub macro ConstParamTy($item:item) {
     /* compiler built-in */
 }

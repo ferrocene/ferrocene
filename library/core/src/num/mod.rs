@@ -550,6 +550,7 @@ impl u8 {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_ascii_unchecked(&self) -> ascii::Char {
         assert_unsafe_precondition!(
             check_library_ub,

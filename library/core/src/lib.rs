@@ -366,7 +366,6 @@ pub mod ffi;
 #[unstable(feature = "core_io_borrowed_buf", issue = "117693")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod io;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod iter;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod net;

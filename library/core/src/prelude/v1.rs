@@ -53,8 +53,11 @@ pub use crate::convert::{AsMut, AsRef, From, Into};
 pub use crate::default::Default;
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
+pub use crate::iter::Iterator;
+#[stable(feature = "core_prelude", since = "1.4.0")]
+#[doc(no_inline)]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub use crate::iter::{DoubleEndedIterator, ExactSizeIterator, Extend, IntoIterator, Iterator};
+pub use crate::iter::{DoubleEndedIterator, ExactSizeIterator, Extend, IntoIterator};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
 pub use crate::option::Option::{self, None, Some};

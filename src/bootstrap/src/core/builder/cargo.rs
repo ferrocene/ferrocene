@@ -969,7 +969,7 @@ impl Builder<'_> {
                     cargo.env("CFG_VIRTUAL_RUSTC_DEV_SOURCE_BASE_DIR", map_to);
                 }
             }
-            Mode::Std | Mode::ToolBootstrap | Mode::ToolRustc | Mode::ToolStd => {
+            Mode::Std | Mode::ToolBootstrap | Mode::ToolRustc | Mode::ToolStd | Mode::ToolCustom { .. } => {
                 if let Some(ref map_to) =
                     self.build.debuginfo_map_to(GitRepo::Rustc, RemapScheme::NonCompiler)
                 {

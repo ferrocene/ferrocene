@@ -17,6 +17,7 @@ pub mod install;
 pub mod llvm;
 pub mod rust;
 pub mod target;
+pub mod ferrocene;
 
 use build::Build;
 use change_id::{ChangeId, ChangeIdWrapper};
@@ -26,6 +27,7 @@ use install::Install;
 use llvm::Llvm;
 use rust::Rust;
 use target::TomlTarget;
+use ferrocene::Ferrocene;
 
 use crate::core::config::{Merge, ReplaceOpt};
 use crate::{Config, HashMap, HashSet, Path, PathBuf, exit, fs, t};
@@ -47,6 +49,7 @@ pub(crate) struct TomlConfig {
     pub(super) rust: Option<Rust>,
     pub(super) target: Option<HashMap<String, TomlTarget>>,
     pub(super) dist: Option<Dist>,
+    pub(super) ferrocene: Option<Ferrocene>,
     pub(super) profile: Option<String>,
     pub(super) include: Option<Vec<PathBuf>>,
 }
@@ -56,7 +59,7 @@ impl Merge for TomlConfig {
         &mut self,
         parent_config_path: Option<PathBuf>,
         included_extensions: &mut HashSet<PathBuf>,
-        TomlConfig { build, install, llvm, gcc, rust, dist, target, profile, change_id, include }: Self,
+        TomlConfig { build, install, llvm, gcc, rust, dist, target, profile, change_id, include, ferrocene }: Self,
         replace: ReplaceOpt,
     ) {
         fn do_merge<T: Merge>(x: &mut Option<T>, y: Option<T>, replace: ReplaceOpt) {
@@ -78,6 +81,7 @@ impl Merge for TomlConfig {
         do_merge(&mut self.gcc, gcc, replace);
         do_merge(&mut self.rust, rust, replace);
         do_merge(&mut self.dist, dist, replace);
+        do_merge(&mut self.ferrocene, ferrocene, replace);
 
         match (self.target.as_mut(), target) {
             (_, None) => {}

@@ -35,6 +35,7 @@ define_config! {
         nodejs: Option<String> = "nodejs",
         npm: Option<String> = "npm",
         python: Option<String> = "python",
+        uv: Option<String> = "uv", // Ferrocene addition
         reuse: Option<String> = "reuse",
         locked_deps: Option<bool> = "locked-deps",
         vendor: Option<bool> = "vendor",

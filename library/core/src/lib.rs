@@ -89,13 +89,12 @@
 #![allow(internal_features)]
 #![deny(ffi_unwind_calls)]
 #![warn(unreachable_pub)]
-#![allow(unused_attributes)] // Ferrocene addition: accept coverage(off) no-ops
 // Do not check link redundancy on bootstraping phase
 #![allow(rustdoc::redundant_explicit_links)]
 #![warn(rustdoc::unescaped_backticks)]
 //
 // Library features:
-// tidy-alphabetical-start
+// // tidy-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(array_ptr_get))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(asm_experimental_arch))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(bigint_helper_methods))]
@@ -106,72 +105,88 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(const_carrying_mul_add))]
 #![feature(const_eval_select)]
 #![feature(core_intrinsics)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(coverage_attribute))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(disjoint_bitor))]
 #![feature(internal_impls_macro)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(ip))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(is_ascii_octdigit))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(lazy_get))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(link_cfg))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(offset_of_enum))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(panic_internals))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_alignment_type))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_metadata))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(set_ptr_value))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(slice_as_array))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(slice_ptr_get))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(str_internals))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(str_split_inclusive_remainder))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(str_split_remainder))]
 #![feature(ub_checks)]
-// tidy-alphabetical-end
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(unchecked_neg))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(unchecked_shifts))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(unsafe_pinned))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(utf16_extra))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(variant_count))]
+// // tidy-alphabetical-end
 //
 // Language features:
-// tidy-alphabetical-start
+// // tidy-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(abi_unadjusted))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(adt_const_params))]
+#![feature(allow_internal_unsafe)]
+#![feature(allow_internal_unstable)]
+#![feature(auto_traits)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_sanitize))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_target_has_atomic))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_target_has_atomic_equal_alignment))]
+#![feature(cfg_ub_checks)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(const_precise_live_drops))]
+#![feature(const_trait_impl)]
+#![feature(decl_macro)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(deprecated_suggestion))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_cfg))]
+#![feature(doc_cfg_hide)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_notable_trait))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(extern_types))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(f128))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(f16))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(freeze_impls))]
+#![feature(fundamental)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(generic_arg_infer))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(if_let_guard))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(intra_doc_pointers))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(let_chains))]
+#![feature(intrinsics)]
+#![feature(lang_items)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(link_llvm_intrinsics))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(macro_metavar_expr))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(marker_trait_attr))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(min_specialization))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(must_not_suspend))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(never_type))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(optimize_attribute))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(repr_simd))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(simd_ffi))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(stmt_expr_attributes))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(transparent_unions))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(unsized_fn_params))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(with_negative_coherence))]
-#![feature(allow_internal_unsafe)]
-#![feature(allow_internal_unstable)]
-#![feature(auto_traits)]
-#![feature(cfg_ub_checks)]
-#![feature(const_trait_impl)]
-#![feature(decl_macro)]
-#![feature(doc_cfg_hide)]
-#![feature(fundamental)]
-#![feature(intrinsics)]
-#![feature(lang_items)]
 #![feature(multiple_supertrait_upcastable)]
-#![feature(negative_impls)]
-#![feature(no_core)]
-#![feature(prelude_import)]
-#![feature(rustc_allow_const_fn_unstable)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(must_not_suspend))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(negative_impls))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(never_type))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(no_core))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(optimize_attribute))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(prelude_import))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(repr_simd))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(rustc_allow_const_fn_unstable))]
 #![feature(rustc_attrs)]
 #![feature(rustdoc_internals)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(simd_ffi))]
 #![feature(staged_api)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(stmt_expr_attributes))]
 #![feature(strict_provenance_lints)]
 #![feature(trait_alias)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(transparent_unions))]
 #![feature(try_blocks)]
 #![feature(unboxed_closures)]
-// tidy-alphabetical-end
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(unsized_fn_params))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(with_negative_coherence))]
+// // tidy-alphabetical-end
 //
 // Target features:
-// tidy-alphabetical-start
+// // tidy-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(aarch64_unstable_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(arm_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(hexagon_target_feature))]
@@ -187,7 +202,13 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(tbm_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(wasm_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(x86_amx_intrinsics))]
-// tidy-alphabetical-end
+// // tidy-alphabetical-end
+//
+// Ferrocene lints/features:
+//
+// accept coverage(off) no-ops
+#![allow(unused_attributes)]
+//
 
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]

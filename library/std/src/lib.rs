@@ -416,12 +416,16 @@
 //
 // Only used in tests/benchmarks:
 // tidy-alphabetical-start
-#![feature(coverage_attribute)] // Ferrocene addition
 // tidy-alphabetical-end
 //
 // Only for const-ness:
 // tidy-alphabetical-start
 #![feature(io_const_error)]
+// tidy-alphabetical-end
+//
+// Ferrocene lints/features:
+// tidy-alphabetical-start
+#![allow(unused_attributes)]
 // tidy-alphabetical-end
 //
 #![default_lib_allocator]

@@ -2366,6 +2366,8 @@ options! {
         "run LLVM in non-parallel mode (while keeping codegen-units and ThinLTO)"),
     no_profiler_runtime: bool = (false, parse_no_value, [TRACKED],
         "prevent automatic injection of the profiler_builtins crate"),
+    no_steal_thir: bool = (false, parse_bool, [UNTRACKED],
+        "don't steal the THIR when we're done with it; useful for rustc drivers (default: no)"),
     no_trait_vptr: bool = (false, parse_no_value, [TRACKED],
         "disable generation of trait vptr in vtable for upcasting"),
     no_unique_section_names: bool = (false, parse_bool, [TRACKED],
@@ -2408,10 +2410,8 @@ options! {
         "print codegen statistics (default: no)"),
     print_llvm_passes: bool = (false, parse_bool, [UNTRACKED],
         "print the LLVM optimization passes being run (default: no)"),
-    print_mono_items: Option<String> = (None, parse_opt_string, [UNTRACKED],
-        "print the result of the monomorphization collection pass. \
-         Value `lazy` means to use normal collection; `eager` means to collect all items.
-         Note that this overwrites the effect `-Clink-dead-code` has on collection!"),
+    print_mono_items: bool = (false, parse_bool, [UNTRACKED],
+        "print the result of the monomorphization collection pass (default: no)"),
     print_type_sizes: bool = (false, parse_bool, [UNTRACKED],
         "print layout information for each type encountered (default: no)"),
     proc_macro_backtrace: bool = (false, parse_bool, [UNTRACKED],

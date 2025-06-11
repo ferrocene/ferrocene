@@ -57,7 +57,7 @@ impl Config {
         if self.dry_run() {
             return;
         }
-        fs::remove_file(f).unwrap_or_else(|_| panic!("failed to remove {:?}", f));
+        fs::remove_file(f).unwrap_or_else(|_| panic!("failed to remove {f:?}"));
     }
 
     /// Create a temporary directory in `out` and return its path.
@@ -112,7 +112,7 @@ impl Config {
             // The latter one does not exist on NixOS when using tmpfs as root.
             let is_nixos = match File::open("/etc/os-release") {
                 Err(e) if e.kind() == ErrorKind::NotFound => false,
-                Err(e) => panic!("failed to access /etc/os-release: {}", e),
+                Err(e) => panic!("failed to access /etc/os-release: {e}"),
                 Ok(os_release) => BufReader::new(os_release).lines().any(|l| {
                     let l = l.expect("reading /etc/os-release");
                     matches!(l.trim(), "ID=nixos" | "ID='nixos'" | "ID=\"nixos\"")
@@ -462,7 +462,7 @@ impl Config {
 
     #[cfg(test)]
     pub(crate) fn maybe_download_rustfmt(&self) -> Option<PathBuf> {
-        None
+        Some(PathBuf::new())
     }
 
     /// NOTE: rustfmt is a completely different toolchain than the bootstrap compiler, so it can't
@@ -470,6 +470,10 @@ impl Config {
     #[cfg(not(test))]
     pub(crate) fn maybe_download_rustfmt(&self) -> Option<PathBuf> {
         use build_helper::stage0_parser::VersionMetadata;
+
+        if self.dry_run() {
+            return Some(PathBuf::new());
+        }
 
         let VersionMetadata { date, version } = self.stage0_metadata.rustfmt.as_ref()?;
         let channel = format!("{version}-{date}");
@@ -678,7 +682,7 @@ impl Config {
             }
         };
 
-        // For the beta compiler, put special effort into ensuring the checksums are valid.
+        // For the stage0 compiler, put special effort into ensuring the checksums are valid.
         let checksum = if should_verify {
             let error = format!(
                 "src/stage0 doesn't contain a checksum for {url}. \
@@ -721,10 +725,10 @@ download-rustc = false
 ";
         }
         self.download_file(&format!("{base_url}/{url}"), &tarball, help_on_error);
-        if let Some(sha256) = checksum {
-            if !self.verify(&tarball, sha256) {
-                panic!("failed to verify {}", tarball.display());
-            }
+        if let Some(sha256) = checksum
+            && !self.verify(&tarball, sha256)
+        {
+            panic!("failed to verify {}", tarball.display());
         }
 
         self.unpack(&tarball, &bin_root, prefix);
@@ -868,7 +872,8 @@ download-rustc = false
             t!(fs::create_dir_all(&gcc_cache));
         }
         let base = &self.stage0_metadata.config.artifacts_server;
-        let filename = format!("gcc-nightly-{}.tar.xz", self.build.triple);
+        let version = self.artifact_version_part(gcc_sha);
+        let filename = format!("gcc-{version}-{}.tar.xz", self.build.triple);
         let tarball = gcc_cache.join(&filename);
         if !tarball.exists() {
             let help_on_error = "ERROR: failed to download gcc from ci

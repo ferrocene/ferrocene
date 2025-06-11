@@ -54,6 +54,7 @@ GENERIC_BUILD_STD_TARGETS = [
     "thumbv6m-none-eabi",
     "thumbv7em-none-eabi",
     "thumbv7em-none-eabihf",
+    "thumbv7em-ferrocenecoretest-eabihf",
     "armv8r-none-eabihf",
     "thumbv8m.base-none-eabi",
     "thumbv8m.main-none-eabi",
@@ -77,7 +78,7 @@ AARCH64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD
 
 # Targets only built (and tested!) on Mac
 AARCH64_MAC_BUILD_HOSTS = ["aarch64-apple-darwin"]
-AARCH64_MAC_BUILD_STD_TARGETS = ["x86_64-apple-darwin"]
+AARCH64_MAC_BUILD_STD_TARGETS = []
 AARCH64_MAC_SELF_TEST_TARGETS = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS + GENERIC_BUILD_STD_TARGETS
 
 # Tagets only built (and tested!) on Windows

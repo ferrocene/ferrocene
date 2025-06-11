@@ -55,8 +55,8 @@ The first step in [`clean::utils::krate`][ck1] is to invoke
   * inlining public `use` exports of private items, or showing a "Reexport"
     line in the module page
   * inlining items with `#[doc(hidden)]` if the base item is hidden but the
-  * showing `#[macro_export]`-ed macros at the crate root, regardless of where
-    they're defined reexport is not
+  * showing `#[macro_export]`-ed macros at the crate root, regardless of whether
+    they're defined as a reexport or not
 
 After this step, `clean::krate` invokes [`clean_doc_module`], which actually
 converts the `HIR` items to the cleaned [`AST`][ast]. This is also the step where cross-
@@ -281,10 +281,10 @@ using `XPath` notation to get a precise look at the output. The full
 description of all the commands available to `rustdoc` tests (e.g. [`@has`] and
 [`@matches`]) is in [`htmldocck.py`].
 
-To use multiple crates in a `rustdoc` test, add `// aux-build:filename.rs`
+To use multiple crates in a `rustdoc` test, add `//@ aux-build:filename.rs`
 to the top of the test file. `filename.rs` should be placed in an `auxiliary`
 directory relative to the test file with the comment. If you need to build
-docs for the auxiliary file, use `// build-aux-docs`.
+docs for the auxiliary file, use `//@ build-aux-docs`.
 
 In addition, there are separate tests for the search index and `rustdoc`'s
 ability to query it. The files in `tests/rustdoc-js` each contain a

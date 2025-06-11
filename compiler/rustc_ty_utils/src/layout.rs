@@ -492,9 +492,7 @@ fn layout_of_uncached<'tcx>(
         ty::Coroutine(def_id, args) => {
             use rustc_middle::ty::layout::PrimitiveExt as _;
 
-            let Some(info) = tcx.coroutine_layout(def_id, args) else {
-                return Err(error(cx, LayoutError::Unknown(ty)));
-            };
+            let info = tcx.coroutine_layout(def_id, args)?;
 
             let local_layouts = info
                 .field_tys
@@ -934,7 +932,7 @@ fn variant_info_for_coroutine<'tcx>(
             // However, if the discriminant is placed past the end of the variant, then we need
             // to factor in the size of the discriminant manually. This really should be refactored
             // better, but this "works" for now.
-            if layout.fields.offset(tag_field) >= variant_size {
+            if layout.fields.offset(tag_field.as_usize()) >= variant_size {
                 variant_size += match tag_encoding {
                     TagEncoding::Direct => tag.size(cx),
                     _ => Size::ZERO,

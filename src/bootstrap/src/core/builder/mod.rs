@@ -513,8 +513,8 @@ impl StepDescription {
                 match std::path::absolute(p) {
                     Ok(p) => p.strip_prefix(&builder.src).unwrap_or(&p).to_path_buf(),
                     Err(e) => {
-                        eprintln!("ERROR: {:?}", e);
-                        panic!("Due to the above error, failed to resolve path: {:?}", p);
+                        eprintln!("ERROR: {e:?}");
+                        panic!("Due to the above error, failed to resolve path: {p:?}");
                     }
                 }
             })
@@ -703,8 +703,7 @@ impl<'a> ShouldRun<'a> {
                     if !submodules_paths.iter().any(|sm_p| p.contains(sm_p)) {
                         assert!(
                             self.builder.src.join(p).exists(),
-                            "`should_run.paths` should correspond to real on-disk paths - use `alias` if there is no relevant path: {}",
-                            p
+                            "`should_run.paths` should correspond to real on-disk paths - use `alias` if there is no relevant path: {p}"
                         );
                     }
 
@@ -962,7 +961,6 @@ impl<'a> Builder<'a> {
                 clippy::CI,
             ),
             Kind::Check | Kind::Fix => describe!(
-                check::Std,
                 check::Rustc,
                 check::Rustdoc,
                 check::CodegenBackend,
@@ -978,6 +976,13 @@ impl<'a> Builder<'a> {
                 check::Compiletest,
                 check::FeaturesStatusDump,
                 check::CoverageDump,
+                // This has special staging logic, it may run on stage 1 while others run on stage 0.
+                // It takes quite some time to build stage 1, so put this at the end.
+                //
+                // FIXME: This also helps bootstrap to not interfere with stage 0 builds. We should probably fix
+                // that issue somewhere else, but we still want to keep `check::Std` at the end so that the
+                // quicker steps run before this.
+                check::Std,
             ),
             Kind::Test => describe!(
                 crate::ferrocene::test::TraceabilityMatrixTool,
@@ -1466,7 +1471,7 @@ impl<'a> Builder<'a> {
         // Windows doesn't need dylib path munging because the dlls for the
         // compiler live next to the compiler and the system will find them
         // automatically.
-        if cfg!(windows) {
+        if cfg!(any(windows, target_os = "cygwin")) {
             return;
         }
 

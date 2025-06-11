@@ -865,6 +865,36 @@ impl<T, E> Result<T, E> {
         }
     }
 
+    /// Maps a `Result<T, E>` to a `U` by applying function `f` to the contained
+    /// value if the result is [`Ok`], otherwise if [`Err`], returns the
+    /// [default value] for the type `U`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #![feature(result_option_map_or_default)]
+    ///
+    /// let x: Result<_, &str> = Ok("foo");
+    /// let y: Result<&str, _> = Err("bar");
+    ///
+    /// assert_eq!(x.map_or_default(|x| x.len()), 3);
+    /// assert_eq!(y.map_or_default(|y| y.len()), 0);
+    /// ```
+    ///
+    /// [default value]: Default::default
+    #[inline]
+    #[unstable(feature = "result_option_map_or_default", issue = "138099")]
+    pub fn map_or_default<U, F>(self, f: F) -> U
+    where
+        U: Default,
+        F: FnOnce(T) -> U,
+    {
+        match self {
+            Ok(t) => f(t),
+            Err(_) => U::default(),
+        }
+    }
+
     /// Maps a `Result<T, E>` to `Result<T, F>` by applying a function to a
     /// contained [`Err`] value, leaving an [`Ok`] value untouched.
     ///
@@ -1709,7 +1739,6 @@ impl<T, E> Result<Result<T, E>, E> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(result_flattening)]
     /// let x: Result<Result<&'static str, u32>, u32> = Ok(Ok("hello"));
     /// assert_eq!(Ok("hello"), x.flatten());
     ///
@@ -1723,15 +1752,20 @@ impl<T, E> Result<Result<T, E>, E> {
     /// Flattening only removes one level of nesting at a time:
     ///
     /// ```
-    /// #![feature(result_flattening)]
     /// let x: Result<Result<Result<&'static str, u32>, u32>, u32> = Ok(Ok(Ok("hello")));
     /// assert_eq!(Ok(Ok("hello")), x.flatten());
     /// assert_eq!(Ok("hello"), x.flatten().flatten());
     /// ```
     #[inline]
+<<<<<<< HEAD
     #[unstable(feature = "result_flattening", issue = "70142")]
     #[rustc_const_unstable(feature = "result_flattening", issue = "70142")]
     #[cfg(not(feature = "ferrocene_certified"))] /* blocked on const impl Drop for Result<Result<T, E>> */
+=======
+    #[stable(feature = "result_flattening", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[rustc_const_stable(feature = "result_flattening", since = "CURRENT_RUSTC_VERSION")]
+>>>>>>> main
     pub const fn flatten(self) -> Result<T, E> {
         // FIXME(const-hack): could be written with `and_then`
         match self {

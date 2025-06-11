@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
+=======
+use crate::ffi::CStr;
+>>>>>>> main
 use crate::fmt;
 
 /// A struct containing information about the location of a panic.
@@ -36,7 +40,12 @@ use crate::fmt;
 )]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
 pub struct Location<'a> {
-    file: &'a str,
+    // Note: this filename will have exactly one nul byte at its end, but otherwise
+    // it must never contain interior nul bytes. This is relied on for the conversion
+    // to `CStr` below.
+    //
+    // The prefix of the string without the trailing nul byte will be a regular UTF8 `str`.
+    file_bytes_with_nul: &'a [u8],
     line: u32,
     col: u32,
 }
@@ -130,9 +139,24 @@ impl<'a> Location<'a> {
     #[must_use]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_location_fields", since = "1.79.0")]
-    #[inline]
     pub const fn file(&self) -> &str {
-        self.file
+        let str_len = self.file_bytes_with_nul.len() - 1;
+        // SAFETY: `file_bytes_with_nul` without the trailing nul byte is guaranteed to be
+        // valid UTF8.
+        unsafe { crate::str::from_raw_parts(self.file_bytes_with_nul.as_ptr(), str_len) }
+    }
+
+    /// Returns the name of the source file as a nul-terminated `CStr`.
+    ///
+    /// This is useful for interop with APIs that expect C/C++ `__FILE__` or
+    /// `std::source_location::file_name`, both of which return a nul-terminated `const char*`.
+    #[must_use]
+    #[unstable(feature = "file_with_nul", issue = "141727")]
+    #[inline]
+    pub const fn file_with_nul(&self) -> &CStr {
+        // SAFETY: `file_bytes_with_nul` is guaranteed to have a trailing nul byte and no
+        // interior nul bytes.
+        unsafe { CStr::from_bytes_with_nul_unchecked(self.file_bytes_with_nul) }
     }
 
     /// Returns the line number from which the panic originated.
@@ -186,6 +210,7 @@ impl<'a> Location<'a> {
     }
 }
 
+<<<<<<< HEAD
 #[unstable(
     feature = "panic_internals",
     reason = "internal details of the implementation of the `panic!` and related macros",
@@ -199,11 +224,13 @@ impl<'a> Location<'a> {
     }
 }
 
+=======
+>>>>>>> main
 #[stable(feature = "panic_hook_display", since = "1.26.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Display for Location<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(formatter, "{}:{}:{}", self.file, self.line, self.col)
+        write!(formatter, "{}:{}:{}", self.file(), self.line, self.col)
     }
 }

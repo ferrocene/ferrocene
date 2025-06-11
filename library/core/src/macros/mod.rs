@@ -239,15 +239,10 @@ pub macro assert_matches {
 ///     _ => { "Behind every successful diet is an unwatched pizza" }
 /// }};
 /// ```
-<<<<<<< HEAD
-#[unstable(feature = "cfg_match", issue = "115585")]
-#[rustc_diagnostic_item = "cfg_match"]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[unstable(feature = "cfg_select", issue = "115585")]
 #[rustc_diagnostic_item = "cfg_select"]
->>>>>>> main
 #[rustc_macro_transparency = "semitransparent"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub macro cfg_select {
     ({ $($tt:tt)* }) => {{
         $crate::cfg_select! { $($tt)* }

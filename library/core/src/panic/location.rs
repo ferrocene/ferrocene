@@ -1,8 +1,6 @@
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-=======
 use crate::ffi::CStr;
->>>>>>> main
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 
 /// A struct containing information about the location of a panic.
@@ -210,22 +208,6 @@ impl<'a> Location<'a> {
     }
 }
 
-<<<<<<< HEAD
-#[unstable(
-    feature = "panic_internals",
-    reason = "internal details of the implementation of the `panic!` and related macros",
-    issue = "none"
-)]
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<'a> Location<'a> {
-    #[doc(hidden)]
-    pub const fn internal_constructor(file: &'a str, line: u32, col: u32) -> Self {
-        Location { file, line, col }
-    }
-}
-
-=======
->>>>>>> main
 #[stable(feature = "panic_hook_display", since = "1.26.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Display for Location<'_> {

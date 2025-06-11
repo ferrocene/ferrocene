@@ -2140,12 +2140,8 @@ impl<T: ?Sized> PartialOrd for *mut T {
     }
 }
 
-<<<<<<< HEAD
-#[stable(feature = "raw_ptr_default", since = "CURRENT_RUSTC_VERSION")]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[stable(feature = "raw_ptr_default", since = "1.88.0")]
->>>>>>> main
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized + Thin> Default for *mut T {
     /// Returns the default value of [`null_mut()`][crate::ptr::null_mut].
     fn default() -> Self {

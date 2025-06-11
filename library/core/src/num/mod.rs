@@ -61,11 +61,9 @@ mod error;
 mod int_log10;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod int_sqrt;
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-=======
 pub(crate) mod libm;
->>>>>>> main
+#[cfg(not(feature = "ferrocene_certified"))]
 mod nonzero;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod overflow_panic;

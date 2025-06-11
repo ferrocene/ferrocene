@@ -1757,15 +1757,10 @@ impl<T, E> Result<Result<T, E>, E> {
     /// assert_eq!(Ok("hello"), x.flatten().flatten());
     /// ```
     #[inline]
-<<<<<<< HEAD
-    #[unstable(feature = "result_flattening", issue = "70142")]
-    #[rustc_const_unstable(feature = "result_flattening", issue = "70142")]
-    #[cfg(not(feature = "ferrocene_certified"))] /* blocked on const impl Drop for Result<Result<T, E>> */
-=======
     #[stable(feature = "result_flattening", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "result_flattening", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> main
+    #[cfg(not(feature = "ferrocene_certified"))] /* blocked on const impl Drop for Result<Result<T, E>> */
     pub const fn flatten(self) -> Result<T, E> {
         // FIXME(const-hack): could be written with `and_then`
         match self {

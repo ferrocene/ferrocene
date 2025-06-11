@@ -458,7 +458,6 @@ pub trait Into<T>: Sized {
 
 /// Used to do value-to-value conversions while consuming the input value. It is the reciprocal of
 /// [`Into`].
-<<<<<<< HEAD
 // ///
 // /// One should always prefer implementing `From` over [`Into`]
 // /// because implementing `From` automatically provides one with an implementation of [`Into`]
@@ -470,8 +469,8 @@ pub trait Into<T>: Sized {
 // /// orphaning rules.
 // /// See [`Into`] for more details.
 // ///
-// /// Prefer using [`Into`] over using `From` when specifying trait bounds on a generic function.
-// /// This way, types that directly implement [`Into`] can be used as arguments as well.
+// /// Prefer using [`Into`] over [`From`] when specifying trait bounds on a generic function
+// /// to ensure that types that only implement [`Into`] can be used as well.
 // ///
 // /// The `From` trait is also very useful when performing error handling. When constructing a function
 // /// that is capable of failing, the return type will generally be of the form `Result<T, E>`.
@@ -578,127 +577,6 @@ pub trait Into<T>: Sized {
 // /// [`String`]: ../../std/string/struct.String.html
 // /// [`from`]: From::from
 // /// [book]: ../../book/ch09-00-error-handling.html
-=======
-///
-/// One should always prefer implementing `From` over [`Into`]
-/// because implementing `From` automatically provides one with an implementation of [`Into`]
-/// thanks to the blanket implementation in the standard library.
-///
-/// Only implement [`Into`] when targeting a version prior to Rust 1.41 and converting to a type
-/// outside the current crate.
-/// `From` was not able to do these types of conversions in earlier versions because of Rust's
-/// orphaning rules.
-/// See [`Into`] for more details.
-///
-/// Prefer using [`Into`] over [`From`] when specifying trait bounds on a generic function
-/// to ensure that types that only implement [`Into`] can be used as well.
-///
-/// The `From` trait is also very useful when performing error handling. When constructing a function
-/// that is capable of failing, the return type will generally be of the form `Result<T, E>`.
-/// `From` simplifies error handling by allowing a function to return a single error type
-/// that encapsulates multiple error types. See the "Examples" section and [the book][book] for more
-/// details.
-///
-/// **Note: This trait must not fail**. The `From` trait is intended for perfect conversions.
-/// If the conversion can fail or is not perfect, use [`TryFrom`].
-///
-/// # Generic Implementations
-///
-/// - `From<T> for U` implies [`Into`]`<U> for T`
-/// - `From` is reflexive, which means that `From<T> for T` is implemented
-///
-/// # When to implement `From`
-///
-/// While there's no technical restrictions on which conversions can be done using
-/// a `From` implementation, the general expectation is that the conversions
-/// should typically be restricted as follows:
-///
-/// * The conversion is *infallible*: if the conversion can fail, use [`TryFrom`]
-///   instead; don't provide a `From` impl that panics.
-///
-/// * The conversion is *lossless*: semantically, it should not lose or discard
-///   information. For example, `i32: From<u16>` exists, where the original
-///   value can be recovered using `u16: TryFrom<i32>`.  And `String: From<&str>`
-///   exists, where you can get something equivalent to the original value via
-///   `Deref`.  But `From` cannot be used to convert from `u32` to `u16`, since
-///   that cannot succeed in a lossless way.  (There's some wiggle room here for
-///   information not considered semantically relevant.  For example,
-///   `Box<[T]>: From<Vec<T>>` exists even though it might not preserve capacity,
-///   like how two vectors can be equal despite differing capacities.)
-///
-/// * The conversion is *value-preserving*: the conceptual kind and meaning of
-///   the resulting value is the same, even though the Rust type and technical
-///   representation might be different.  For example `-1_i8 as u8` is *lossless*,
-///   since `as` casting back can recover the original value, but that conversion
-///   is *not* available via `From` because `-1` and `255` are different conceptual
-///   values (despite being identical bit patterns technically).  But
-///   `f32: From<i16>` *is* available because `1_i16` and `1.0_f32` are conceptually
-///   the same real number (despite having very different bit patterns technically).
-///   `String: From<char>` is available because they're both *text*, but
-///   `String: From<u32>` is *not* available, since `1` (a number) and `"1"`
-///   (text) are too different.  (Converting values to text is instead covered
-///   by the [`Display`](crate::fmt::Display) trait.)
-///
-/// * The conversion is *obvious*: it's the only reasonable conversion between
-///   the two types.  Otherwise it's better to have it be a named method or
-///   constructor, like how [`str::as_bytes`] is a method and how integers have
-///   methods like [`u32::from_ne_bytes`], [`u32::from_le_bytes`], and
-///   [`u32::from_be_bytes`], none of which are `From` implementations.  Whereas
-///   there's only one reasonable way to wrap an [`Ipv6Addr`](crate::net::Ipv6Addr)
-///   into an [`IpAddr`](crate::net::IpAddr), thus `IpAddr: From<Ipv6Addr>` exists.
-///
-/// # Examples
-///
-/// [`String`] implements `From<&str>`:
-///
-/// An explicit conversion from a `&str` to a String is done as follows:
-///
-/// ```
-/// let string = "hello".to_string();
-/// let other_string = String::from("hello");
-///
-/// assert_eq!(string, other_string);
-/// ```
-///
-/// While performing error handling it is often useful to implement `From` for your own error type.
-/// By converting underlying error types to our own custom error type that encapsulates the
-/// underlying error type, we can return a single error type without losing information on the
-/// underlying cause. The '?' operator automatically converts the underlying error type to our
-/// custom error type with `From::from`.
-///
-/// ```
-/// use std::fs;
-/// use std::io;
-/// use std::num;
-///
-/// enum CliError {
-///     IoError(io::Error),
-///     ParseError(num::ParseIntError),
-/// }
-///
-/// impl From<io::Error> for CliError {
-///     fn from(error: io::Error) -> Self {
-///         CliError::IoError(error)
-///     }
-/// }
-///
-/// impl From<num::ParseIntError> for CliError {
-///     fn from(error: num::ParseIntError) -> Self {
-///         CliError::ParseError(error)
-///     }
-/// }
-///
-/// fn open_and_parse_file(file_name: &str) -> Result<i32, CliError> {
-///     let mut contents = fs::read_to_string(&file_name)?;
-///     let num: i32 = contents.trim().parse()?;
-///     Ok(num)
-/// }
-/// ```
-///
-/// [`String`]: ../../std/string/struct.String.html
-/// [`from`]: From::from
-/// [book]: ../../book/ch09-00-error-handling.html
->>>>>>> main
 #[rustc_diagnostic_item = "From"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_on_unimplemented(on(

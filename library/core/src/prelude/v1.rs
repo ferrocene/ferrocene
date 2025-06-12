@@ -11,9 +11,10 @@
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub use crate::marker::Unpin;
+pub use crate::marker::{Copy, Send, Sized, Sync, Unpin};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
+#[cfg(feature = "ferrocene_certified")]
 pub use crate::marker::{Copy, Send, Sized, Sync};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
@@ -30,9 +31,10 @@ pub use crate::mem::drop;
 #[stable(feature = "size_of_prelude", since = "1.80.0")]
 #[doc(no_inline)]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub use crate::mem::{align_of_val, size_of_val};
+pub use crate::mem::{align_of, align_of_val, size_of, size_of_val};
 #[stable(feature = "size_of_prelude", since = "1.80.0")]
 #[doc(no_inline)]
+#[cfg(feature = "ferrocene_certified")]
 pub use crate::mem::{ size_of, align_of };
 
 // Re-exported types and traits
@@ -41,10 +43,7 @@ pub use crate::mem::{ size_of, align_of };
 pub use crate::clone::Clone;
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
-pub use crate::cmp::{Ord, PartialOrd};
-#[stable(feature = "core_prelude", since = "1.4.0")]
-#[doc(no_inline)]
-pub use crate::cmp::{Eq, PartialEq};
+pub use crate::cmp::{Eq, Ord, PartialEq, PartialOrd};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
 pub use crate::convert::{AsMut, AsRef, From, Into};

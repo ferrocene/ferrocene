@@ -2,6 +2,7 @@
 #[doc(alias = "true")]
 #[doc(alias = "false")]
 /// The boolean type.
+// FIXME(pvdrz): fix docs
 // ///
 // /// The `bool` represents a value, which could only be either [`true`] or [`false`]. If you cast
 // /// a `bool` into an integer, [`true`] will be 1 and [`false`] will be 0.
@@ -626,6 +627,7 @@ mod prim_pointer {}
 #[doc(alias = "[T; N]")]
 /// A fixed-size array, denoted `[T; N]`, for the element type, `T`, and the
 /// non-negative compile-time constant size, `N`.
+// FIXME(pvdrz): fix docs
 // ///
 // /// There are two syntactic forms for creating an array:
 // ///
@@ -1243,6 +1245,7 @@ mod prim_f16 {}
 ///
 /// For more information on floating-point numbers, see [Wikipedia][wikipedia].
 ///
+// FIXME(pvdrz): fix docs
 // /// *[See also the `std::f32::consts` module](crate::f32::consts).*
 // ///
 /// [wikipedia]: https://en.wikipedia.org/wiki/Single-precision_floating-point_format
@@ -1381,6 +1384,7 @@ mod prim_f32 {}
 /// bits. Please see [the documentation for `f32`](prim@f32) or [Wikipedia on double-precision
 /// values][wikipedia] for more information.
 ///
+// FIXME(pvdrz): fix docs
 // /// *[See also the `std::f64::consts` module](crate::f64::consts).*
 // ///
 /// [wikipedia]: https://en.wikipedia.org/wiki/Double-precision_floating-point_format

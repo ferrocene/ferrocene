@@ -4,7 +4,7 @@
 #[allow_internal_unstable(edition_panic)]
 #[stable(feature = "core", since = "1.6.0")]
 #[rustc_diagnostic_item = "core_panic_macro"]
-/// FIXME: docs
+/// FIXME(pvdrz): docs
 macro_rules! panic {
     // Expands to either `$crate::panic::panic_2015` or `$crate::panic::panic_2021`
     // depending on the edition of the caller.
@@ -437,6 +437,7 @@ pub macro debug_assert_matches($($arg:tt)*) {
 /// used to add additional checks that must be true for the matched value, otherwise this macro will
 /// return `false`.
 ///
+// FIXME(pvdrz): fix docs
 // /// When testing that a value matches a pattern, it's generally preferable to use
 // /// [`assert_matches!`] as it will print the debug representation of the value if the assertion
 // /// fails.
@@ -919,6 +920,7 @@ pub(crate) mod builtin {
 
     /// Causes compilation to fail with the given error message when encountered.
     ///
+    // FIXME(pvdrz): fix docs
     // /// This macro should be used when a crate uses a conditional compilation strategy to provide
     // /// better error messages for erroneous conditions. It's the compiler-level form of [`panic!`],
     // /// but emits an error during *compilation* rather than at *runtime*.
@@ -959,6 +961,7 @@ pub(crate) mod builtin {
 
     /// Constructs parameters for the other string-formatting macros.
     ///
+    // FIXME(pvdrz): fix docs
     // /// This macro functions by taking a formatting string literal containing
     // /// `{}` for each additional argument passed. `format_args!` prepares the
     // /// additional parameters to ensure the output can be interpreted as a string
@@ -1052,6 +1055,7 @@ pub(crate) mod builtin {
 
     /// Inspects an environment variable at compile time.
     ///
+    // FIXME(pvdrz): fix docs
     // /// This macro will expand to the value of the named environment variable at
     // /// compile time, yielding an expression of type `&'static str`. Use
     // /// [`std::env::var`] instead if you want to read the value at runtime.
@@ -1214,6 +1218,7 @@ pub(crate) mod builtin {
 
     /// Expands to the line number on which it was invoked.
     ///
+    // FIXME(pvdrz): fix docs
     // /// With [`column!`] and [`file!`], these macros provide debugging information for
     // /// developers about the location within the source.
     // ///
@@ -1241,6 +1246,7 @@ pub(crate) mod builtin {
 
     /// Expands to the column number at which it was invoked.
     ///
+    // FIXME(pvdrz): fix docs
     // /// With [`line!`] and [`file!`], these macros provide debugging information for
     // /// developers about the location within the source.
     // ///
@@ -1280,6 +1286,7 @@ pub(crate) mod builtin {
 
     /// Expands to the file name in which it was invoked.
     ///
+    // FIXME(pvdrz): fix docs
     // /// With [`line!`] and [`column!`], these macros provide debugging information for
     // /// developers about the location within the source.
     // ///
@@ -1572,6 +1579,7 @@ pub(crate) mod builtin {
 
     /// Asserts that a boolean expression is `true` at runtime.
     ///
+    // FIXME(pvdrz): fix docs
     // /// This will invoke the [`panic!`] macro if the provided expression cannot be
     // /// evaluated to `true` at runtime.
     // ///

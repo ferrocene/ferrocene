@@ -1,4 +1,5 @@
 //! The `Clone` trait for types that cannot be 'implicitly copied'.
+// FIXME(pvdrz): Fix docs
 // //!
 // //! In Rust, some simple types are "implicitly copyable" and when you
 // //! assign them or pass them as arguments, the receiver will get a copy,
@@ -557,9 +558,13 @@ mod impls {
 
     #[cfg(not(feature = "ferrocene_certified"))]
     impl_clone! {
-        f16 f128
-        char
+        usize u8 u16 u32 u64 u128
+        isize i8 i16 i32 i64 i128
+        f16 f32 f64 f128
+        bool char
     }
+
+    #[cfg(feature = "ferrocene_certified")]
     impl_clone! {
         usize u8 u16 u32 u64 u128
         isize i8 i16 i32 i64 i128

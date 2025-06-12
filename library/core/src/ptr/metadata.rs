@@ -4,15 +4,17 @@
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::hash::{Hash, Hasher};
+#[cfg(feature = "ferrocene_certified")]
 use crate::intrinsics::aggregate_raw_ptr;
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::intrinsics::ptr_metadata;
+use crate::intrinsics::{aggregate_raw_ptr, ptr_metadata};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::Freeze;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::NonNull;
 
 /// Provides the pointer metadata type of any pointed-to type.
+// FIXME(pvdrz): fix docs
 // ///
 // /// # Pointer metadata
 // ///
@@ -113,6 +115,7 @@ pub const fn metadata<T: ?Sized>(ptr: *const T) -> <T as Pointee>::Metadata {
 }
 
 /// Forms a (possibly-wide) raw pointer from a data pointer and metadata.
+// FIXME(pvdrz): fix docs
 // ///
 // /// This function is safe but the returned pointer is not necessarily safe to dereference.
 // /// For slices, see the documentation of [`slice::from_raw_parts`] for safety requirements.

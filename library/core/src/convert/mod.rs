@@ -111,6 +111,7 @@ pub const fn identity<T>(x: T) -> T {
 }
 
 /// Used to do a cheap reference-to-reference conversion.
+// FIXME(pvdrz): fix docs
 // ///
 // /// This trait is similar to [`AsMut`] which is used for converting between mutable references.
 // /// If you need to do a costly conversion it is better to implement [`From`] with type
@@ -458,6 +459,7 @@ pub trait Into<T>: Sized {
 
 /// Used to do value-to-value conversions while consuming the input value. It is the reciprocal of
 /// [`Into`].
+// FIXME(pvdrz): fix docs
 // ///
 // /// One should always prefer implementing `From` over [`Into`]
 // /// because implementing `From` automatically provides one with an implementation of [`Into`]
@@ -630,6 +632,7 @@ pub trait TryInto<T>: Sized {
 /// using the [`From`] trait, because an [`i64`] may contain a value
 /// that an [`i32`] cannot represent and so the conversion would lose data.
 /// This might be handled by truncating the [`i64`] to an [`i32`] or by
+// FIXME(pvdrz): fix docs
 // /// simply returning [`i32::MAX`], or by some other method.  The [`From`]
 /// trait is intended for perfect conversions, so the `TryFrom` trait
 /// informs the programmer when a type conversion could go bad and lets
@@ -915,7 +918,7 @@ impl AsMut<str> for str {
 /// the two `impl`s will start to overlap
 /// and therefore will be disallowed by the language’s trait coherence rules.
 #[stable(feature = "convert_infallible", since = "1.34.0")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy))]
+#[derive(Copy)]
 pub enum Infallible {}
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]

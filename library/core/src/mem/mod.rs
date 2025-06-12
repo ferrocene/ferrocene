@@ -6,11 +6,12 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 use crate::alloc::Layout;
+#[cfg(feature = "ferrocene_certified")]
 use crate::intrinsics;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::DiscriminantKind;
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::{clone, cmp, fmt, hash, ptr};
+use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
 
 #[cfg(not(feature = "ferrocene_certified"))]
 mod manually_drop;
@@ -910,6 +911,7 @@ pub const fn replace<T>(dest: &mut T, src: T) -> T {
 /// the function returns.
 ///
 /// [drop]: Drop
+// FIXME(pvdrz): fix docs
 // ///
 // /// # Examples
 // ///

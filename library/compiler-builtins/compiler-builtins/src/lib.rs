@@ -82,3 +82,29 @@ pub mod x86;
 pub mod x86_64;
 
 pub mod probestack;
+
+// ferrocene addition: symbol needed by profiler-builtins on 32-bit ARM
+#[cfg(all(ferrocenecoretest_secretsauce, target_arch = "arm"))]
+#[unsafe(no_mangle)]
+fn __atomic_fetch_add_8(ptr: *mut u64, val: u64, _model: i32) -> u64 {
+    unsafe {
+        let __kuser_cmpxchg64: extern "C" fn(
+            oldval: *const u64,
+            newval: *const u64,
+            ptr: *mut u64,
+        ) -> i32 = core::mem::transmute(0xffff0f60_usize);
+
+        let mut old;
+        let mut new;
+        loop {
+            old = ptr.read_volatile();
+            new = old + val;
+
+            if __kuser_cmpxchg64(&old, &new, ptr) == 0 {
+                break;
+            }
+        }
+
+        old
+    }
+}

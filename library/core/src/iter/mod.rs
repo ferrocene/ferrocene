@@ -497,10 +497,9 @@ pub(crate) use self::traits::UncheckedIterator;
 pub use self::traits::{
     DoubleEndedIterator, ExactSizeIterator, Extend, FromIterator, IntoIterator, Product, Sum,
 };
-
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "ferrocene_certified")]
-pub use self::traits::Iterator;
+pub use self::traits::{IntoIterator, Iterator};
 
 #[cfg(not(feature = "ferrocene_certified"))]
 mod adapters;

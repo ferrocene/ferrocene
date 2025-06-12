@@ -257,14 +257,16 @@ jobs:
     resource_class: medium # 2-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      SCRIPT: ./x.py test --no-doc --coverage=library library/core
+      SCRIPT: |
+        ferrocene/ci/scripts/llvm_cache.py download
+        ./x.py test --no-doc --coverage=library library/core
     steps:
       - aws-oidc-auth
       - ferrocene-checkout:
           llvm-subset: true
-      - run:
-          name: Restore files from the x86_64-linux-build job
-          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
+      # - run:
+      #     name: Restore files from the x86_64-linux-build job
+      #     command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
       - ferrocene-ci
 
   x86_64-linux-llvm:
@@ -417,7 +419,7 @@ jobs:
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin
+      FERROCENE_TARGETS: aarch64-apple-darwin
       SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails

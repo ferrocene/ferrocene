@@ -17,3 +17,6 @@ fn main() {
     let mut a: Vec<Box<dyn C>> = Vec::new();
     test(a.iter_mut().map(|c| c.as_mut() as &mut dyn B));
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

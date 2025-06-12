@@ -1,4 +1,9 @@
-use std::{fs, path::Path, sync::LazyLock};
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-FileCopyrightText: The Ferrocene Developers
+
+use std::fs;
+use std::path::Path;
+use std::sync::LazyLock;
 
 /// Uncertified code is marked with this attribute
 const MARKER: &str = "#[cfg(not(feature = \"ferrocene_certified\"))]";

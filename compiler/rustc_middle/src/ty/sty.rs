@@ -1260,8 +1260,7 @@ impl<'tcx> Ty<'tcx> {
                     return true;
                 };
                 alloc.expect_ty().ty_adt_def().is_some_and(|alloc_adt| {
-                    let global_alloc = tcx.require_lang_item(LangItem::GlobalAlloc, None);
-                    alloc_adt.did() == global_alloc
+                    tcx.is_lang_item(alloc_adt.did(), LangItem::GlobalAlloc)
                 })
             }
             _ => false,
@@ -1883,10 +1882,8 @@ impl<'tcx> Ty<'tcx> {
             // Needs normalization or revealing to determine, so no is the safe answer.
             ty::Alias(..) => false,
 
-            ty::Param(..) | ty::Infer(..) | ty::Error(..) => false,
-
-            ty::Bound(..) | ty::Placeholder(..) => {
-                bug!("`is_trivially_pure_clone_copy` applied to unexpected type: {:?}", self);
+            ty::Param(..) | ty::Placeholder(..) | ty::Bound(..) | ty::Infer(..) | ty::Error(..) => {
+                false
             }
         }
     }

@@ -82,9 +82,13 @@ You can also pass the name of a repository to only pull that specific repo::
 
    ferrocene/tools/pull-subtrees/pull.py <SUBTREE_REPO>
 
-Note that `<SUBTREE_REPO>` must be the repository of the subtree and not its path.
+.. note::
 
-If merging fails for one of the subtrees the script will stop and report which
+   An example of ``<SUBTREE_REPO>`` is ``rust-lang/fls``,
+   indicating that the format to follow is ``$org/$repo``,
+   and implying that the repo should be hosted on GitHub.
+
+If merging fails for one of the subtrees, the script will stop and report which
 one failed as well as the conflicts that have occured.
 
 After having manually fixed the conflicts, finish up the merge by doing the following::

@@ -339,7 +339,6 @@ forward! {
     tempdir() -> PathBuf,
     llvm_link_shared() -> bool,
     download_rustc() -> bool,
-    initial_rustfmt() -> Option<PathBuf>,
 }
 
 impl Build {
@@ -378,19 +377,35 @@ impl Build {
         let in_tree_llvm_info = config.in_tree_llvm_info.clone();
         let in_tree_gcc_info = config.in_tree_gcc_info.clone();
 
-        let initial_target_libdir_str =
-            config.initial_sysroot.join("lib/rustlib").join(config.build).join("lib");
+        let initial_target_libdir =
+            output(Command::new(&config.initial_rustc).args(["--print", "target-libdir"]))
+                .trim()
+                .to_owned();
 
-        let initial_target_dir = Path::new(&initial_target_libdir_str).parent().unwrap();
+        let initial_target_dir = Path::new(&initial_target_libdir)
+            .parent()
+            .unwrap_or_else(|| panic!("{initial_target_libdir} has no parent"));
+
         let initial_lld = initial_target_dir.join("bin").join("rust-lld");
 
-        let initial_relative_libdir = initial_target_dir
-            .ancestors()
-            .nth(2)
-            .unwrap()
-            .strip_prefix(&config.initial_sysroot)
-            .expect("Couldn’t determine initial relative libdir.")
-            .to_path_buf();
+        let initial_relative_libdir = if cfg!(test) {
+            // On tests, bootstrap uses the shim rustc, not the one from the stage0 toolchain.
+            PathBuf::default()
+        } else {
+            let ancestor = initial_target_dir.ancestors().nth(2).unwrap_or_else(|| {
+                panic!("Not enough ancestors for {}", initial_target_dir.display())
+            });
+
+            ancestor
+                .strip_prefix(&config.initial_sysroot)
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Couldn’t resolve the initial relative libdir from {}",
+                        initial_target_dir.display()
+                    )
+                })
+                .to_path_buf()
+        };
 
         let version = std::fs::read_to_string(src.join("src").join("version"))
             .expect("failed to read src/version");
@@ -627,10 +642,6 @@ impl Build {
         unsafe {
             crate::utils::job::setup(self);
         }
-
-        // Download rustfmt early so that it can be used in rust-analyzer configs.
-        trace!("downloading rustfmt early");
-        let _ = &builder::Builder::new(self).initial_rustfmt();
 
         // Handle hard-coded subcommands.
         {
@@ -1134,8 +1145,15 @@ Executed at: {executed_at}"#,
         &self,
         what: impl Display,
         target: impl Into<Option<TargetSelection>>,
+        custom_stage: Option<u32>,
     ) -> Option<gha::Group> {
-        self.msg(Kind::Check, self.config.stage, what, self.config.build, target)
+        self.msg(
+            Kind::Check,
+            custom_stage.unwrap_or(self.config.stage),
+            what,
+            self.config.build,
+            target,
+        )
     }
 
     #[must_use = "Groups should not be dropped until the Step finishes running"]
@@ -1481,23 +1499,23 @@ Executed at: {executed_at}"#,
         // Look for Wasmtime, and for its default options be sure to disable
         // its caching system since we're executing quite a lot of tests and
         // ideally shouldn't pollute the cache too much.
-        if let Some(path) = finder.maybe_have("wasmtime") {
-            if let Ok(mut path) = path.into_os_string().into_string() {
-                path.push_str(" run -C cache=n --dir .");
-                // Make sure that tests have access to RUSTC_BOOTSTRAP. This (for example) is
-                // required for libtest to work on beta/stable channels.
-                //
-                // NB: with Wasmtime 20 this can change to `-S inherit-env` to
-                // inherit the entire environment rather than just this single
-                // environment variable.
-                path.push_str(" --env RUSTC_BOOTSTRAP");
+        if let Some(path) = finder.maybe_have("wasmtime")
+            && let Ok(mut path) = path.into_os_string().into_string()
+        {
+            path.push_str(" run -C cache=n --dir .");
+            // Make sure that tests have access to RUSTC_BOOTSTRAP. This (for example) is
+            // required for libtest to work on beta/stable channels.
+            //
+            // NB: with Wasmtime 20 this can change to `-S inherit-env` to
+            // inherit the entire environment rather than just this single
+            // environment variable.
+            path.push_str(" --env RUSTC_BOOTSTRAP");
 
-                if target.contains("wasip2") {
-                    path.push_str(" --wasi inherit-network --wasi allow-ip-name-lookup");
-                }
-
-                return Some(path);
+            if target.contains("wasip2") {
+                path.push_str(" --wasi inherit-network --wasi allow-ip-name-lookup");
             }
+
+            return Some(path);
         }
 
         None
@@ -1667,12 +1685,12 @@ Executed at: {executed_at}"#,
     /// sha, version, etc.
     fn rust_version(&self) -> String {
         let mut version = self.rust_info().version(self, &self.version);
-        if let Some(ref s) = self.config.description {
-            if !s.is_empty() {
-                version.push_str(" (");
-                version.push_str(s);
-                version.push(')');
-            }
+        if let Some(ref s) = self.config.description
+            && !s.is_empty()
+        {
+            version.push_str(" (");
+            version.push_str(s);
+            version.push(')');
         }
         version
     }
@@ -1790,14 +1808,14 @@ Executed at: {executed_at}"#,
     pub fn copy_link(&self, src: &Path, dst: &Path, file_type: FileType) {
         self.copy_link_internal(src, dst, false);
 
-        if file_type.could_have_split_debuginfo() {
-            if let Some(dbg_file) = split_debuginfo(src) {
-                self.copy_link_internal(
-                    &dbg_file,
-                    &dst.with_extension(dbg_file.extension().unwrap()),
-                    false,
-                );
-            }
+        if file_type.could_have_split_debuginfo()
+            && let Some(dbg_file) = split_debuginfo(src)
+        {
+            self.copy_link_internal(
+                &dbg_file,
+                &dst.with_extension(dbg_file.extension().unwrap()),
+                false,
+            );
         }
     }
 
@@ -1809,19 +1827,21 @@ Executed at: {executed_at}"#,
         if src == dst {
             return;
         }
-        if let Err(e) = fs::remove_file(dst) {
-            if cfg!(windows) && e.kind() != io::ErrorKind::NotFound {
-                // workaround for https://github.com/rust-lang/rust/issues/127126
-                // if removing the file fails, attempt to rename it instead.
-                let now = t!(SystemTime::now().duration_since(SystemTime::UNIX_EPOCH));
-                let _ = fs::rename(dst, format!("{}-{}", dst.display(), now.as_nanos()));
-            }
+        if let Err(e) = fs::remove_file(dst)
+            && cfg!(windows)
+            && e.kind() != io::ErrorKind::NotFound
+        {
+            // workaround for https://github.com/rust-lang/rust/issues/127126
+            // if removing the file fails, attempt to rename it instead.
+            let now = t!(SystemTime::now().duration_since(SystemTime::UNIX_EPOCH));
+            let _ = fs::rename(dst, format!("{}-{}", dst.display(), now.as_nanos()));
         }
-        let metadata = t!(src.symlink_metadata(), format!("src = {}", src.display()));
+        let mut metadata = t!(src.symlink_metadata(), format!("src = {}", src.display()));
         let mut src = src.to_path_buf();
         if metadata.file_type().is_symlink() {
             if dereference_symlinks {
                 src = t!(fs::canonicalize(src));
+                metadata = t!(fs::metadata(&src), format!("target = {}", src.display()));
             } else {
                 let link = t!(fs::read_link(src));
                 t!(self.symlink_file(link, dst));
@@ -1924,10 +1944,10 @@ Executed at: {executed_at}"#,
         chmod(&dst, file_type.perms());
 
         // If this file can have debuginfo, look for split debuginfo and install it too.
-        if file_type.could_have_split_debuginfo() {
-            if let Some(dbg_file) = split_debuginfo(src) {
-                self.install(&dbg_file, dstdir, FileType::Regular);
-            }
+        if file_type.could_have_split_debuginfo()
+            && let Some(dbg_file) = split_debuginfo(src)
+        {
+            self.install(&dbg_file, dstdir, FileType::Regular);
         }
     }
 

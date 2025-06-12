@@ -72,6 +72,13 @@ pub enum InvalidOnClause {
         span: Span,
         invalid_flag: Symbol,
     },
+    #[diag(trait_selection_rustc_on_unimplemented_invalid_name, code = E0232)]
+    InvalidName {
+        #[primary_span]
+        #[label]
+        span: Span,
+        invalid_name: Symbol,
+    },
 }
 
 #[derive(Diagnostic)]
@@ -194,11 +201,12 @@ pub struct ClosureFnMutLabel {
 }
 
 #[derive(Diagnostic)]
-#[diag(trait_selection_async_closure_not_fn)]
-pub(crate) struct AsyncClosureNotFn {
+#[diag(trait_selection_coro_closure_not_fn)]
+pub(crate) struct CoroClosureNotFn {
     #[primary_span]
     pub span: Span,
     pub kind: &'static str,
+    pub coro_kind: String,
 }
 
 #[derive(Diagnostic)]
@@ -219,8 +227,6 @@ pub struct AnnotationRequired<'a> {
     #[note(trait_selection_full_type_written)]
     pub was_written: bool,
     pub path: PathBuf,
-    #[note(trait_selection_type_annotations_needed_error_time)]
-    pub time_version: bool,
 }
 
 // Copy of `AnnotationRequired` for E0283

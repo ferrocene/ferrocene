@@ -51,6 +51,7 @@ _x.py() {
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '::paths -- paths for the subcommand:_files' \
@@ -102,6 +103,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -146,6 +148,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -196,6 +199,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -239,6 +243,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -284,6 +289,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -332,6 +338,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -392,6 +399,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -439,6 +447,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -483,6 +492,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -527,6 +537,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -570,6 +581,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -613,6 +625,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -658,6 +671,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -701,6 +715,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '::profile -- Either the profile for `bootstrap.toml` or another setup action. May be omitted to set up interactively:_files' \
@@ -746,6 +761,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -791,6 +807,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -834,6 +851,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '::paths -- paths for the subcommand:_files' \
@@ -889,6 +907,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -935,6 +954,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -981,6 +1001,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \
@@ -1027,6 +1048,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 ':benchmark-id -- Identifier to associate benchmark results with:_default' \
@@ -1071,6 +1093,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 ':base -- The name of the base artifact to be compared:_default' \
@@ -1121,6 +1144,7 @@ _arguments "${_arguments_options[@]}" : \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \
 '--skip-stage0-validation[Skip stage0 compiler validation]' \
+'--skip-std-check-if-no-download-rustc[Skip checking the standard library if \`rust.download-rustc\` isn'\''t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '*::paths -- paths for the subcommand:_files' \

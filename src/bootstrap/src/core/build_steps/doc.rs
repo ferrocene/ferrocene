@@ -737,6 +737,19 @@ fn doc_std(
         cargo.rustdocflag(arg);
     }
 
+    // ferrocene addition: need to duplicate this logic from `compile::std_cargo` to prevent
+    // a compiler error when generating docs for libstd
+    if target.contains("ferrocenecoretest") {
+        match &*target.triple {
+            "aarch64-unknown-ferrocenecoretest"
+            | "thumbv7em-ferrocenecoretest-eabi"
+            | "thumbv7em-ferrocenecoretest-eabihf" => {
+                cargo.rustdocflag("--cfg=ferrocenecoretest_secretsauce");
+            }
+            _ => unimplemented!("extend this `match`"),
+        }
+    }
+
     if builder.config.library_docs_private_items {
         cargo.rustdocflag("--document-private-items").rustdocflag("--document-hidden-items");
     }

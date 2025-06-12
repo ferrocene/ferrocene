@@ -255,8 +255,7 @@ pub fn report_error<'tcx>(
                 ],
             UnsupportedForeignItem(_) => {
                 vec![
-                    note!("if this is a basic API commonly used on this target, please report an issue with Miri"),
-                    note!("however, note that Miri does not aim to support every FFI function out there; for instance, we will not support APIs for things such as GUIs, scripting languages, or databases"),
+                    note!("this means the program tried to do something Miri does not support; it does not indicate a bug in the program"),
                 ]
             }
             StackedBorrowsUb { help, history, .. } => {
@@ -648,8 +647,7 @@ impl<'tcx> MiriMachine<'tcx> {
             AccessedAlloc(AllocId(id), access_kind) =>
                 format!("{access_kind} to allocation with id {id}"),
             FreedAlloc(AllocId(id)) => format!("freed allocation with id {id}"),
-            RejectedIsolatedOp(ref op) =>
-                format!("{op} was made to return an error due to isolation"),
+            RejectedIsolatedOp(op) => format!("{op} was made to return an error due to isolation"),
             ProgressReport { .. } =>
                 format!("progress report: current operation being executed is here"),
             Int2Ptr { .. } => format!("integer-to-pointer cast"),

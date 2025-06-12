@@ -5,7 +5,7 @@
 
 // ignore-tidy-filelength: Ferrocene addition
 
-use std::cell::{Cell, RefCell};
+use std::cell::Cell;
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fmt::{self, Display};
 use std::hash::Hash;
@@ -47,6 +47,7 @@ use crate::utils::helpers::{self, exe, output, t};
 /// final output/compiler, which can be significantly affected by changes made to the bootstrap sources.
 #[rustfmt::skip] // We don't want rustfmt to oneline this list
 pub(crate) const RUSTC_IF_UNCHANGED_ALLOWED_PATHS: &[&str] = &[
+    ":!library",
     ":!src/tools",
     ":!src/librustdoc",
     ":!src/rustdoc-json-types",
@@ -408,11 +409,7 @@ pub struct Config {
     pub initial_rustc: PathBuf,
     pub initial_cargo_clippy: Option<PathBuf>,
     pub initial_sysroot: PathBuf,
-
-    #[cfg(not(test))]
-    initial_rustfmt: RefCell<RustfmtState>,
-    #[cfg(test)]
-    pub initial_rustfmt: RefCell<RustfmtState>,
+    pub initial_rustfmt: Option<PathBuf>,
 
     /// The paths to work with. For example: with `./x check foo bar` we get
     /// `paths=["foo", "bar"]`.
@@ -428,6 +425,11 @@ pub struct Config {
 
     /// Cache for determining path modifications
     pub path_modification_cache: Arc<Mutex<HashMap<Vec<&'static str>, PathFreshness>>>,
+
+    /// Skip checking the standard library if `rust.download-rustc` isn't available.
+    /// This is mostly for RA as building the stage1 compiler to check the library tree
+    /// on each code change might be too much for some computers.
+    pub skip_std_check_if_no_download_rustc: bool,
 
     // Ferrocene-specific configuration
     pub ferrocene_raw_channel: String,
@@ -490,15 +492,6 @@ pub enum FerroceneSecretSauce {
     #[default]
     Download,
     Local(PathBuf),
-}
-
-#[derive(Clone, Debug, Default)]
-pub enum RustfmtState {
-    SystemToolchain(PathBuf),
-    Downloaded(PathBuf),
-    Unavailable,
-    #[default]
-    LazyEvaluated,
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
@@ -1637,6 +1630,7 @@ impl Config {
         config.enable_bolt_settings = flags.enable_bolt_settings;
         config.bypass_bootstrap_lock = flags.bypass_bootstrap_lock;
         config.is_running_on_ci = flags.ci.unwrap_or(CiEnv::is_ci());
+        config.skip_std_check_if_no_download_rustc = flags.skip_std_check_if_no_download_rustc;
 
         // Infer the rest of the configuration.
 
@@ -1830,20 +1824,20 @@ impl Config {
             };
             // We want to be able to set string values without quotes,
             // like in `configure.py`. Try adding quotes around the right hand side
-            if let Some((key, value)) = option.split_once('=') {
-                if !value.contains('"') {
-                    match get_table(&format!(r#"{key}="{value}""#)) {
-                        Ok(v) => {
-                            override_toml.merge(
-                                None,
-                                &mut Default::default(),
-                                v,
-                                ReplaceOpt::ErrorOnDuplicate,
-                            );
-                            continue;
-                        }
-                        Err(e) => err = e,
+            if let Some((key, value)) = option.split_once('=')
+                && !value.contains('"')
+            {
+                match get_table(&format!(r#"{key}="{value}""#)) {
+                    Ok(v) => {
+                        override_toml.merge(
+                            None,
+                            &mut Default::default(),
+                            v,
+                            ReplaceOpt::ErrorOnDuplicate,
+                        );
+                        continue;
                     }
+                    Err(e) => err = e,
                 }
             }
             eprintln!("failed to parse override `{option}`: `{err}");
@@ -1964,7 +1958,9 @@ impl Config {
                 .join(exe("rustc", config.build))
         };
 
-        config.initial_sysroot = config.initial_rustc.ancestors().nth(2).unwrap().into();
+        config.initial_sysroot = t!(PathBuf::from_str(
+            output(Command::new(&config.initial_rustc).args(["--print", "sysroot"])).trim()
+        ));
 
         config.initial_cargo_clippy = cargo_clippy;
 
@@ -2187,16 +2183,15 @@ impl Config {
                 || (matches!(debug_toml, Some(true))
                     && !matches!(rustc_debug_assertions_toml, Some(false)));
 
-            if debug_assertions_requested {
-                if let Some(ref opt) = download_rustc {
-                    if opt.is_string_or_true() {
-                        eprintln!(
-                            "WARN: currently no CI rustc builds have rustc debug assertions \
+            if debug_assertions_requested
+                && let Some(ref opt) = download_rustc
+                && opt.is_string_or_true()
+            {
+                eprintln!(
+                    "WARN: currently no CI rustc builds have rustc debug assertions \
                             enabled. Please either set `rust.debug-assertions` to `false` if you \
                             want to use download CI rustc or set `rust.download-rustc` to `false`."
-                        );
-                    }
-                }
+                );
             }
 
             config.download_rustc_commit = config.download_ci_rustc_commit(
@@ -2307,19 +2302,17 @@ impl Config {
         // We need to override `rust.channel` if it's manually specified when using the CI rustc.
         // This is because if the compiler uses a different channel than the one specified in bootstrap.toml,
         // tests may fail due to using a different channel than the one used by the compiler during tests.
-        if let Some(commit) = &config.download_rustc_commit {
-            if is_user_configured_rust_channel {
-                println!(
-                    "WARNING: `rust.download-rustc` is enabled. The `rust.channel` option will be overridden by the CI rustc's channel."
-                );
+        if let Some(commit) = &config.download_rustc_commit
+            && is_user_configured_rust_channel
+        {
+            println!(
+                "WARNING: `rust.download-rustc` is enabled. The `rust.channel` option will be overridden by the CI rustc's channel."
+            );
 
-                let channel = config
-                    .read_file_by_commit(Path::new("src/ci/channel"), commit)
-                    .trim()
-                    .to_owned();
+            let channel =
+                config.read_file_by_commit(Path::new("src/ci/channel"), commit).trim().to_owned();
 
-                config.channel = channel;
-            }
+            config.channel = channel;
         }
 
         if let Some(llvm) = toml.llvm {
@@ -2676,13 +2669,8 @@ impl Config {
             });
         }
 
-        if let Some(r) = rustfmt {
-            *config.initial_rustfmt.borrow_mut() = if r.exists() {
-                RustfmtState::SystemToolchain(r)
-            } else {
-                RustfmtState::Unavailable
-            };
-        }
+        config.initial_rustfmt =
+            if let Some(r) = rustfmt { Some(r) } else { config.maybe_download_rustfmt() };
 
         // Now that we've reached the end of our configuration, infer the
         // default values for all options that we haven't otherwise stored yet.
@@ -2778,9 +2766,10 @@ impl Config {
         // See https://github.com/rust-lang/compiler-team/issues/326
         config.stage = match config.cmd {
             Subcommand::Check { .. } => flags.stage.or(check_stage).unwrap_or(0),
+            Subcommand::Clippy { .. } | Subcommand::Fix => flags.stage.or(check_stage).unwrap_or(1),
             // `download-rustc` only has a speed-up for stage2 builds. Default to stage2 unless explicitly overridden.
             Subcommand::Doc { .. } => {
-                flags.stage.or(doc_stage).unwrap_or(if download_rustc { 2 } else { 0 })
+                flags.stage.or(doc_stage).unwrap_or(if download_rustc { 2 } else { 1 })
             }
             Subcommand::Build => {
                 flags.stage.or(build_stage).unwrap_or(if download_rustc { 2 } else { 1 })
@@ -2795,8 +2784,6 @@ impl Config {
             // These are all bootstrap tools, which don't depend on the compiler.
             // The stage we pass shouldn't matter, but use 0 just in case.
             Subcommand::Clean { .. }
-            | Subcommand::Clippy { .. }
-            | Subcommand::Fix
             | Subcommand::Run { .. }
             | Subcommand::Setup { .. }
             | Subcommand::Sign { .. }
@@ -2941,10 +2928,10 @@ impl Config {
         let bindir = &self.bindir;
         if bindir.is_absolute() {
             // Try to make it relative to the prefix.
-            if let Some(prefix) = &self.prefix {
-                if let Ok(stripped) = bindir.strip_prefix(prefix) {
-                    return stripped;
-                }
+            if let Some(prefix) = &self.prefix
+                && let Ok(stripped) = bindir.strip_prefix(prefix)
+            {
+                return stripped;
             }
         }
         bindir
@@ -3076,25 +3063,6 @@ impl Config {
                 }
             })
             .as_deref()
-    }
-
-    pub(crate) fn initial_rustfmt(&self) -> Option<PathBuf> {
-        match &mut *self.initial_rustfmt.borrow_mut() {
-            RustfmtState::SystemToolchain(p) | RustfmtState::Downloaded(p) => Some(p.clone()),
-            RustfmtState::Unavailable => None,
-            r @ RustfmtState::LazyEvaluated => {
-                if self.dry_run() {
-                    return Some(PathBuf::new());
-                }
-                let path = self.maybe_download_rustfmt();
-                *r = if let Some(p) = &path {
-                    RustfmtState::Downloaded(p.clone())
-                } else {
-                    RustfmtState::Unavailable
-                };
-                path
-            }
-        }
     }
 
     /// Runs a function if verbosity is greater than 0
@@ -3269,7 +3237,7 @@ impl Config {
         let actual_hash = recorded
             .split_whitespace()
             .nth(2)
-            .unwrap_or_else(|| panic!("unexpected output `{}`", recorded));
+            .unwrap_or_else(|| panic!("unexpected output `{recorded}`"));
 
         if actual_hash == checked_out_hash {
             // already checked out
@@ -3412,24 +3380,10 @@ impl Config {
             }
         };
 
-        // RUSTC_IF_UNCHANGED_ALLOWED_PATHS
-        let mut allowed_paths = RUSTC_IF_UNCHANGED_ALLOWED_PATHS.to_vec();
-
-        // In CI, disable ci-rustc if there are changes in the library tree. But for non-CI, allow
-        // these changes to speed up the build process for library developers. This provides consistent
-        // functionality for library developers between `download-rustc=true` and `download-rustc="if-unchanged"`
-        // options.
-        //
-        // If you update "library" logic here, update `builder::tests::ci_rustc_if_unchanged_logic` test
-        // logic accordingly.
-        if !self.is_running_on_ci {
-            allowed_paths.push(":!library");
-        }
-
         let commit = if self.rust_info.is_managed_git_subrepository() {
             // Look for a version to compare to based on the current commit.
             // Only commits merged by bors will have CI artifacts.
-            let freshness = self.check_path_modifications(&allowed_paths);
+            let freshness = self.check_path_modifications(RUSTC_IF_UNCHANGED_ALLOWED_PATHS);
             self.verbose(|| {
                 eprintln!("rustc freshness: {freshness:?}");
             });
@@ -3524,7 +3478,7 @@ impl Config {
             }
             StringOrBool::String(s) if s == "if-unchanged" => if_unchanged(),
             StringOrBool::String(other) => {
-                panic!("unrecognized option for download-ci-llvm: {:?}", other)
+                panic!("unrecognized option for download-ci-llvm: {other:?}")
             }
         }
     }
@@ -3755,19 +3709,19 @@ fn check_incompatible_options_for_ci_rustc(
     // We always build the in-tree compiler on cross targets, so we only care
     // about the host target here.
     let host_str = host.to_string();
-    if let Some(current_cfg) = current_config_toml.target.as_ref().and_then(|c| c.get(&host_str)) {
-        if current_cfg.profiler.is_some() {
-            let ci_target_toml = ci_config_toml.target.as_ref().and_then(|c| c.get(&host_str));
-            let ci_cfg = ci_target_toml.ok_or(format!(
-                "Target specific config for '{host_str}' is not present for CI-rustc"
-            ))?;
+    if let Some(current_cfg) = current_config_toml.target.as_ref().and_then(|c| c.get(&host_str))
+        && current_cfg.profiler.is_some()
+    {
+        let ci_target_toml = ci_config_toml.target.as_ref().and_then(|c| c.get(&host_str));
+        let ci_cfg = ci_target_toml.ok_or(format!(
+            "Target specific config for '{host_str}' is not present for CI-rustc"
+        ))?;
 
-            let profiler = &ci_cfg.profiler;
-            err!(current_cfg.profiler, profiler, "build");
+        let profiler = &ci_cfg.profiler;
+        err!(current_cfg.profiler, profiler, "build");
 
-            let optimized_compiler_builtins = &ci_cfg.optimized_compiler_builtins;
-            err!(current_cfg.optimized_compiler_builtins, optimized_compiler_builtins, "build");
-        }
+        let optimized_compiler_builtins = &ci_cfg.optimized_compiler_builtins;
+        err!(current_cfg.optimized_compiler_builtins, optimized_compiler_builtins, "build");
     }
 
     let (Some(current_rust_config), Some(ci_rust_config)) =

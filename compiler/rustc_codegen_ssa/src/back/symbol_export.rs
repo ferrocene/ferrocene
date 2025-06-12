@@ -1,5 +1,6 @@
 use std::collections::hash_map::Entry::*;
 
+use rustc_abi::{CanonAbi, X86Call};
 use rustc_ast::expand::allocator::{ALLOCATOR_METHODS, NO_ALLOC_SHIM_IS_UNSTABLE, global_fn_name};
 use rustc_data_structures::unord::UnordMap;
 use rustc_hir::def::DefKind;
@@ -14,7 +15,6 @@ use rustc_middle::ty::{self, GenericArgKind, GenericArgsRef, Instance, SymbolNam
 use rustc_middle::util::Providers;
 use rustc_session::config::{CrateType, OomStrategy};
 use rustc_symbol_mangling::mangle_internal_symbol;
-use rustc_target::callconv::Conv;
 use rustc_target::spec::{SanitizerSet, TlsModel};
 use tracing::debug;
 
@@ -128,7 +128,7 @@ fn reachable_non_generics_provider(tcx: TyCtxt<'_>, _: LocalCrate) -> DefIdMap<S
                 } else {
                     SymbolExportKind::Text
                 },
-                used: codegen_attrs.flags.contains(CodegenFnAttrFlags::USED)
+                used: codegen_attrs.flags.contains(CodegenFnAttrFlags::USED_COMPILER)
                     || codegen_attrs.flags.contains(CodegenFnAttrFlags::USED_LINKER)
                     || used,
             };
@@ -370,7 +370,7 @@ fn exported_symbols_provider_local<'tcx>(
 
             if !tcx.sess.opts.share_generics() {
                 if tcx.codegen_fn_attrs(mono_item.def_id()).inline
-                    == rustc_attr_parsing::InlineAttr::Never
+                    == rustc_attr_data_structures::InlineAttr::Never
                 {
                     // this is OK, we explicitly allow sharing inline(never) across crates even
                     // without share-generics.
@@ -652,7 +652,7 @@ pub(crate) fn symbol_name_for_instance_in_crate<'tcx>(
 fn calling_convention_for_symbol<'tcx>(
     tcx: TyCtxt<'tcx>,
     symbol: ExportedSymbol<'tcx>,
-) -> (Conv, &'tcx [rustc_target::callconv::ArgAbi<'tcx, Ty<'tcx>>]) {
+) -> (CanonAbi, &'tcx [rustc_target::callconv::ArgAbi<'tcx, Ty<'tcx>>]) {
     let instance = match symbol {
         ExportedSymbol::NonGeneric(def_id) | ExportedSymbol::Generic(def_id, _)
             if tcx.is_static(def_id) =>
@@ -683,7 +683,7 @@ fn calling_convention_for_symbol<'tcx>(
         })
         .map(|fnabi| (fnabi.conv, &fnabi.args[..]))
         // FIXME(workingjubilee): why don't we know the convention here?
-        .unwrap_or((Conv::Rust, &[]))
+        .unwrap_or((CanonAbi::Rust, &[]))
 }
 
 /// This is the symbol name of the given instance as seen by the linker.
@@ -692,7 +692,6 @@ fn calling_convention_for_symbol<'tcx>(
 pub(crate) fn linking_symbol_name_for_instance_in_crate<'tcx>(
     tcx: TyCtxt<'tcx>,
     symbol: ExportedSymbol<'tcx>,
-    export_kind: SymbolExportKind,
     instantiating_crate: CrateNum,
 ) -> String {
     let mut undecorated = symbol_name_for_instance_in_crate(tcx, symbol, instantiating_crate);
@@ -713,20 +712,19 @@ pub(crate) fn linking_symbol_name_for_instance_in_crate<'tcx>(
     let prefix = match &target.arch[..] {
         "x86" => Some('_'),
         "x86_64" => None,
-        // Only functions are decorated for arm64ec.
-        "arm64ec" if export_kind == SymbolExportKind::Text => Some('#'),
-        // Only x86/64 and arm64ec use symbol decorations.
+        "arm64ec" => Some('#'),
+        // Only x86/64 use symbol decorations.
         _ => return undecorated,
     };
 
-    let (conv, args) = calling_convention_for_symbol(tcx, symbol);
+    let (callconv, args) = calling_convention_for_symbol(tcx, symbol);
 
     // Decorate symbols with prefixes, suffixes and total number of bytes of arguments.
     // Reference: https://docs.microsoft.com/en-us/cpp/build/reference/decorated-names?view=msvc-170
-    let (prefix, suffix) = match conv {
-        Conv::X86Fastcall => ("@", "@"),
-        Conv::X86Stdcall => ("_", "@"),
-        Conv::X86VectorCall => ("", "@@"),
+    let (prefix, suffix) = match callconv {
+        CanonAbi::X86(X86Call::Fastcall) => ("@", "@"),
+        CanonAbi::X86(X86Call::Stdcall) => ("_", "@"),
+        CanonAbi::X86(X86Call::Vectorcall) => ("", "@@"),
         _ => {
             if let Some(prefix) = prefix {
                 undecorated.insert(0, prefix);
@@ -755,22 +753,21 @@ pub(crate) fn exporting_symbol_name_for_instance_in_crate<'tcx>(
 /// Add it to the symbols list for all kernel functions, so that it is exported in the linked
 /// object.
 pub(crate) fn extend_exported_symbols<'tcx>(
-    symbols: &mut Vec<(String, SymbolExportKind)>,
+    symbols: &mut Vec<String>,
     tcx: TyCtxt<'tcx>,
     symbol: ExportedSymbol<'tcx>,
-    info: SymbolExportInfo,
     instantiating_crate: CrateNum,
 ) {
-    let (conv, _) = calling_convention_for_symbol(tcx, symbol);
+    let (callconv, _) = calling_convention_for_symbol(tcx, symbol);
 
-    if conv != Conv::GpuKernel || tcx.sess.target.os != "amdhsa" {
+    if callconv != CanonAbi::GpuKernel || tcx.sess.target.os != "amdhsa" {
         return;
     }
 
     let undecorated = symbol_name_for_instance_in_crate(tcx, symbol, instantiating_crate);
 
     // Add the symbol for the kernel descriptor (with .kd suffix)
-    symbols.push((format!("{undecorated}.kd"), info.kind));
+    symbols.push(format!("{undecorated}.kd"));
 }
 
 fn maybe_emutls_symbol_name<'tcx>(

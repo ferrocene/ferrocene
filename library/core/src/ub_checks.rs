@@ -63,11 +63,16 @@ macro_rules! assert_unsafe_precondition {
             #[rustc_no_mir_inline]
             #[inline]
             #[rustc_nounwind]
+            #[track_caller]
             const fn precondition_check($($name:$ty),*) {
                 if !$e {
-                    ::core::panicking::panic_nounwind(concat!("unsafe precondition(s) violated: ", $message,
+                    let msg = concat!("unsafe precondition(s) violated: ", $message,
                         "\n\nThis indicates a bug in the program. \
-                        This Undefined Behavior check is optional, and cannot be relied on for safety."));
+                        This Undefined Behavior check is optional, and cannot be relied on for safety.");
+                    #[cfg(not(feature = "ferrocene_certified"))] // blocked on fmt::Arguments
+                    ::core::panicking::panic_nounwind_fmt(::core::fmt::Arguments::new_const(&[msg]), false);
+                    #[cfg(feature = "ferrocene_certified")]
+                    ::core::panicking::panic_nounwind(msg);
                 }
             }
 

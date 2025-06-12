@@ -36,6 +36,3 @@ unsafe fn baz() {}
 #[target_feature(enable = "paca")]
 //~^ ERROR must all be either enabled or disabled together
 unsafe fn unused() {}
-
-// ferrocene-annotations: fls_spdmit5fy7el
-// Attribute target_feature

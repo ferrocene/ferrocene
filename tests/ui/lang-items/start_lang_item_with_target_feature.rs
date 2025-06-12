@@ -17,3 +17,6 @@ fn start<T>(_main: fn() -> T, _argc: isize, _argv: *const *const u8, _sigpipe: u
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

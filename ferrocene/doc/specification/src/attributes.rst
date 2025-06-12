@@ -503,7 +503,9 @@ Attribute ``target_feature``
 .. rubric:: Legality Rules
 
 :dp:`fls_3qj3jvmtxvx6`
-:t:`Attribute` :c:`target_feature` shall apply to :t:`[unsafe function]s`.
+Safe :t:`[function]s` that are annotated with :c:`[target_feature]s`
+can only be called without an :t:`unsafe block` by a caller that is within a function
+that enables all the :c:`[target_feature]s` that the callee enables.
 
 :dp:`fls_agpkz1v3c281`
 :t:`Attribute` :dc:`target_feature` enables target architecture features for its

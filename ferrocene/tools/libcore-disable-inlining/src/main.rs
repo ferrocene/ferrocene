@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-FileCopyrightText: The Ferrocene Developers
+
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::{env, fs};
@@ -224,13 +227,13 @@ mod tests {
     const TEST_FILE: &str = "
     #[inline]
     fn a() {}
-    
+
     #[inline(always)]
     fn b() {}
-    
+
     #[inline(never)]
     fn c() {}
-    
+
     #[no_mangle]
     fn d() {}
 

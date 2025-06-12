@@ -80,6 +80,7 @@
 //! functions that may encounter errors but don't otherwise return a
 //! useful value.
 //!
+// FIXME(pvdrz): fix docs
 // //! Consider the [`write_all`] method defined for I/O types
 // //! by the [`Write`] trait:
 // //!
@@ -90,7 +91,7 @@
 // //!     fn write_all(&mut self, bytes: &[u8]) -> Result<(), io::Error>;
 // //! }
 // //! ```
-//!
+// //!
 // //! *Note: The actual definition of [`Write`] uses [`io::Result`], which
 // //! is just a synonym for <code>[Result]<T, [io::Error]></code>.*
 // //!
@@ -536,7 +537,8 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{self, FusedIterator, TrustedLen};
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::ops::{self, ControlFlow};
+use crate::ops::{self, ControlFlow, Deref, DerefMut};
+#[cfg(feature = "ferrocene_certified")]
 use crate::ops::{Deref, DerefMut};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{convert, fmt, hint};
@@ -1184,6 +1186,7 @@ impl<T, E> Result<T, E> {
     /// Consumes the `self` argument then, if [`Ok`], returns the contained
     /// value, otherwise if [`Err`], returns the default value for that
     /// type.
+    // FIXME(pvdrz): fix docs
     // ///
     // /// # Examples
     // ///

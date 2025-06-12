@@ -2,14 +2,16 @@ use super::*;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering::{Equal, Greater, Less};
 use crate::intrinsics::const_eval_select;
+#[cfg(feature = "ferrocene_certified")]
 use crate::mem;
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::mem::SizedTypeProperties;
+use crate::mem::{self, SizedTypeProperties};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::slice::{self, SliceIndex};
 
 impl<T: ?Sized> *const T {
     /// Returns `true` if the pointer is null.
+    // FIXME(pvdrz): fix docs
     // ///
     // /// Note that unsized types have many possible null pointers, as only the
     // /// raw data pointer is considered, not their length, vtable, etc.
@@ -170,6 +172,7 @@ impl<T: ?Sized> *const T {
     }
 
     /// Gets the "address" portion of the pointer.
+    // FIXME(pvdrz): fix docs
     // ///
     // /// This is similar to `self as usize`, except that the [provenance][crate::ptr#provenance] of
     // /// the pointer is discarded and not [exposed][crate::ptr#exposed-provenance]. This means that
@@ -1447,6 +1450,7 @@ impl<T: ?Sized> *const T {
     ///
     /// For non-`Sized` pointees this operation considers only the data pointer,
     /// ignoring the metadata.
+    // FIXME(pvdrz): fix docs
     // ///
     // /// # Panics
     // ///
@@ -1684,6 +1688,7 @@ impl<T, const N: usize> *const [T; N] {
     }
 }
 
+// FIXME(pvdrz): fix docs
 // /// Pointer equality is by address, as produced by the [`<*const T>::addr`](pointer::addr) method.
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized> PartialEq for *const T {

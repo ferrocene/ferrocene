@@ -1,4 +1,5 @@
 /// Used for immutable dereferencing operations, like `*v`.
+// FIXME(pvdrz): fix docs
 // ///
 // /// In addition to being used for explicit dereferencing operations with the
 // /// (unary) `*` operator in immutable contexts, `Deref` is also used implicitly
@@ -174,6 +175,7 @@ impl<T: ?Sized> const Deref for &mut T {
 }
 
 /// Used for mutable dereferencing operations, like in `*v = 1;`.
+// FIXME(pvdrz): fix docs
 // ///
 // /// In addition to being used for explicit dereferencing operations with the
 // /// (unary) `*` operator in mutable contexts, `DerefMut` is also used implicitly

@@ -578,7 +578,8 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{self, FusedIterator, TrustedLen};
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::ops::{self, ControlFlow};
+use crate::ops::{self, ControlFlow, Deref, DerefMut};
+#[cfg(feature = "ferrocene_certified")]
 use crate::ops::{Deref, DerefMut};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panicking::{panic, panic_display};
@@ -1082,6 +1083,7 @@ impl<T> Option<T> {
     /// ```
     ///
     /// [default value]: Default::default
+    // FIXME(pvdrz): fix docs
     // /// [`parse`]: str::parse
     // /// [`FromStr`]: crate::str::FromStr
     #[inline]
@@ -1533,6 +1535,7 @@ impl<T> Option<T> {
     ///   value), and
     /// - [`None`] if `predicate` returns `false`.
     ///
+    // FIXME(pvdrz): fix docs
     // /// This function works similar to [`Iterator::filter()`]. You can imagine
     // /// the `Option<T>` being an iterator over one or zero elements. `filter()`
     // /// lets you decide which elements to keep.
@@ -1682,7 +1685,7 @@ impl<T> Option<T> {
     #[must_use = "if you intended to set a value, consider assignment instead"]
     #[inline]
     #[stable(feature = "option_insert", since = "1.53.0")]
-    // Uncertified because it depends on unwrap_unchecked
+    // FIXME(pvdrz): Uncertified because it depends on unwrap_unchecked
     #[cfg(not(feature = "ferrocene_certified"))]
     pub fn insert(&mut self, value: T) -> &mut T {
         *self = Some(value);
@@ -1713,7 +1716,7 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "option_entry", since = "1.20.0")]
-    // Uncertified because it depends on unwrap_unchecked
+    // FIXME(pvdrz): Uncertified because it depends on unwrap_unchecked
     #[cfg(not(feature = "ferrocene_certified"))]
     pub fn get_or_insert(&mut self, value: T) -> &mut T {
         self.get_or_insert_with(|| value)
@@ -1738,7 +1741,7 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "option_get_or_insert_default", since = "1.83.0")]
-    // Uncertified because it depends on unwrap_unchecked
+    // FIXME(pvdrz): Uncertified because it depends on unwrap_unchecked
     #[cfg(not(feature = "ferrocene_certified"))]
     pub fn get_or_insert_default(&mut self) -> &mut T
     where
@@ -1766,7 +1769,7 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "option_entry", since = "1.20.0")]
-    // Uncertified because it depends on unwrap_unchecked
+    // FIXME(pvdrz): Uncertified because it depends on unwrap_unchecked
     #[cfg(not(feature = "ferrocene_certified"))]
     pub fn get_or_insert_with<F>(&mut self, f: F) -> &mut T
     where

@@ -2,6 +2,7 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
+#[cfg(feature = "ferrocene_certified")]
 use crate::intrinsics;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::const_panic;
@@ -10,7 +11,7 @@ use crate::str::FromStr;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::{ascii, mem};
+use crate::{ascii, intrinsics, mem};
 
 // FIXME(const-hack): Used because the `?` operator is not allowed in a const context.
 #[cfg(not(feature = "ferrocene_certified"))]

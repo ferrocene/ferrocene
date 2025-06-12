@@ -4,6 +4,7 @@ use crate::ffi::CStr;
 use crate::fmt;
 
 /// A struct containing information about the location of a panic.
+// FIXME(pvdrz): fix docs
 // ///
 // /// This structure is created by [`PanicHookInfo::location()`] and [`PanicInfo::location()`].
 // ///
@@ -103,6 +104,7 @@ impl<'a> Location<'a> {
     }
 
     /// Returns the name of the source file from which the panic originated.
+    // FIXME(pvdrz): fix docs
     // ///
     // /// # `&str`, not `&Path`
     // ///
@@ -161,6 +163,7 @@ impl<'a> Location<'a> {
     }
 
     /// Returns the line number from which the panic originated.
+    // FIXME(pvdrz): fix docs
     // ///
     // /// # Examples
     // ///
@@ -186,6 +189,7 @@ impl<'a> Location<'a> {
     }
 
     /// Returns the column from which the panic originated.
+    // FIXME(pvdrz): fix docs
     // ///
     // /// # Examples
     // ///

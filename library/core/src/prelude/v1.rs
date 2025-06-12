@@ -11,9 +11,10 @@
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub use crate::marker::Unpin;
+pub use crate::marker::{Copy, Send, Sized, Sync, Unpin};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
+#[cfg(feature = "ferrocene_certified")]
 pub use crate::marker::{Copy, Send, Sized, Sync};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
@@ -30,9 +31,10 @@ pub use crate::mem::drop;
 #[stable(feature = "size_of_prelude", since = "1.80.0")]
 #[doc(no_inline)]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub use crate::mem::{align_of_val, size_of_val};
+pub use crate::mem::{align_of, align_of_val, size_of, size_of_val};
 #[stable(feature = "size_of_prelude", since = "1.80.0")]
 #[doc(no_inline)]
+#[cfg(feature = "ferrocene_certified")]
 pub use crate::mem::{ size_of, align_of };
 
 // Re-exported types and traits
@@ -41,9 +43,10 @@ pub use crate::mem::{ size_of, align_of };
 pub use crate::clone::Clone;
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
-pub use crate::cmp::{Ord, PartialOrd};
+pub use crate::cmp::{Eq, Ord, PartialEq, PartialOrd};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
+#[cfg(feature = "ferrocene_certified")]
 pub use crate::cmp::{Eq, PartialEq};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
@@ -77,7 +80,7 @@ pub use crate::hash::macros::Hash;
 #[doc(no_inline)]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::{
-    column, compile_error, concat_idents, env, file, format_args,
+    assert, cfg, column, compile_error, concat, concat_idents, env, file, format_args,
     format_args_nl, include, include_bytes, include_str, line, log_syntax, module_path, option_env,
     stringify, trace_macros,
 };
@@ -85,6 +88,7 @@ pub use crate::{
 #[allow(deprecated)]
 #[cfg_attr(bootstrap, allow(deprecated_in_future))]
 #[doc(no_inline)]
+#[cfg(feature = "ferrocene_certified")]
 pub use crate::{ assert, cfg, concat };
 
 #[unstable(

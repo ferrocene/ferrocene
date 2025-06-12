@@ -271,7 +271,6 @@ pub trait PartialEq<Rhs: ?Sized = Self> {
 #[rustc_builtin_macro]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics, structural_match)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub macro PartialEq($item:item) {
     /* compiler built-in */
 }
@@ -353,7 +352,6 @@ pub trait Eq: PartialEq<Self> {
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics, derive_eq, structural_match)]
 #[allow_internal_unstable(coverage_attribute)]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub macro Eq($item:item) {
     /* compiler built-in */
 }

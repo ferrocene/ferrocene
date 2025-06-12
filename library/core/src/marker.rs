@@ -221,7 +221,6 @@ pub trait Unsize<T: ?Sized> {
 #[unstable(feature = "structural_match", issue = "31434")]
 #[diagnostic::on_unimplemented(message = "the type `{Self}` does not `#[derive(PartialEq)]`")]
 #[lang = "structural_peq"]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub trait StructuralPartialEq {
     // Empty.
 }
@@ -239,6 +238,12 @@ marker_impls! {
         {T, const N: usize} [T; N],
         {T} [T],
         {T: ?Sized} &T,
+}
+#[cfg(feature = "ferrocene_certified")]
+marker_impls! {
+    #[unstable(feature = "structural_match", issue = "31434")]
+    StructuralPartialEq for
+        usize
 }
 
 /// Types whose values can be duplicated simply by copying bits.
@@ -1121,7 +1126,6 @@ marker_impls! {
 // We name this differently than the derive macro so that the `adt_const_params` can
 // be used independently of `unsized_const_params` without requiring a full path
 // to the derive macro every time it is used. This should be renamed on stabilization.
-#[cfg(not(feature = "ferrocene_certified"))]
 pub trait ConstParamTy_: UnsizedConstParamTy + StructuralPartialEq + Eq {}
 
 /// Derive macro generating an impl of the trait `ConstParamTy`.
@@ -1135,7 +1139,6 @@ pub macro ConstParamTy($item:item) {
 #[lang = "unsized_const_param_ty"]
 #[unstable(feature = "unsized_const_params", issue = "95174")]
 #[diagnostic::on_unimplemented(message = "`{Self}` can't be used as a const parameter type")]
-#[cfg(not(feature = "ferrocene_certified"))]
 /// A marker for types which can be used as types of `const` generic parameters.
 ///
 /// Equivalent to [`ConstParamTy_`] except that this is used by
@@ -1163,6 +1166,12 @@ marker_impls! {
         (),
         {T: ConstParamTy_, const N: usize} [T; N],
 }
+#[cfg(feature = "ferrocene_certified")]
+marker_impls! {
+    #[unstable(feature = "adt_const_params", issue = "95174")]
+    ConstParamTy_ for
+        usize
+}
 
 #[cfg(not(feature = "ferrocene_certified"))]
 marker_impls! {
@@ -1178,6 +1187,12 @@ marker_impls! {
         str,
         {T: UnsizedConstParamTy} [T],
         {T: UnsizedConstParamTy + ?Sized} &T,
+}
+#[cfg(feature = "ferrocene_certified")]
+marker_impls! {
+    #[unstable(feature = "adt_const_params", issue = "95174")]
+    UnsizedConstParamTy for
+        usize
 }
 
 /// A common trait implemented by all function pointers.

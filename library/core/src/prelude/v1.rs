@@ -77,7 +77,7 @@ pub use crate::hash::macros::Hash;
 #[doc(no_inline)]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::{
-    column, compile_error, concat_idents, env, file, format_args,
+    assert, cfg, column, compile_error, concat, concat_idents, env, file, format_args,
     format_args_nl, include, include_bytes, include_str, line, log_syntax, module_path, option_env,
     stringify, trace_macros,
 };
@@ -85,7 +85,8 @@ pub use crate::{
 #[allow(deprecated)]
 #[cfg_attr(bootstrap, allow(deprecated_in_future))]
 #[doc(no_inline)]
-pub use crate::{ assert, cfg, concat };
+#[cfg(feature = "ferrocene_certified")]
+pub use crate::{assert, cfg, concat, stringify};
 
 #[unstable(
     feature = "concat_bytes",

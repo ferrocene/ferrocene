@@ -136,7 +136,7 @@
 // Language features:
 // not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(abi_unadjusted))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(adt_const_params))]
+#![feature(adt_const_params)]
 #![feature(allow_internal_unsafe)]
 #![feature(allow_internal_unstable)]
 #![feature(auto_traits)]

@@ -50,10 +50,7 @@
 )]
 #![allow(missing_docs)]
 
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{ConstParamTy, DiscriminantKind, Tuple};
-#[cfg(feature = "ferrocene_certified")]
-use crate::marker::{DiscriminantKind, Tuple};
 use crate::ptr;
 
 mod bounds;
@@ -73,8 +70,8 @@ use crate::sync::atomic::{self, AtomicBool, AtomicI32, AtomicIsize, AtomicU32, O
 /// A type for atomic ordering parameters for intrinsics. This is a separate type from
 /// `atomic::Ordering` so that we can make it `ConstParamTy` and fix the values used here without a
 /// risk of leaking that to stable code.
-#[derive(Debug, ConstParamTy, PartialEq, Eq)]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug, ConstParamTy, PartialEq, Eq))]
+#[cfg_attr(feature = "ferrocene_certified", derive(ConstParamTy, PartialEq, Eq))]
 pub enum AtomicOrdering {
     // These values must match the compiler's `AtomicOrdering` defined in
     // `rustc_middle/src/ty/consts/int.rs`!
@@ -97,7 +94,6 @@ pub enum AtomicOrdering {
 /// For example, [`AtomicBool::compare_exchange`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchg_relaxed_relaxed<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -108,7 +104,6 @@ pub unsafe fn atomic_cxchg_relaxed_relaxed<T: Copy>(dst: *mut T, old: T, src: T)
 /// For example, [`AtomicBool::compare_exchange`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchg_relaxed_acquire<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -119,7 +114,6 @@ pub unsafe fn atomic_cxchg_relaxed_acquire<T: Copy>(dst: *mut T, old: T, src: T)
 /// For example, [`AtomicBool::compare_exchange`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchg_relaxed_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -130,7 +124,6 @@ pub unsafe fn atomic_cxchg_relaxed_seqcst<T: Copy>(dst: *mut T, old: T, src: T) 
 /// For example, [`AtomicBool::compare_exchange`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchg_acquire_relaxed<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -141,7 +134,6 @@ pub unsafe fn atomic_cxchg_acquire_relaxed<T: Copy>(dst: *mut T, old: T, src: T)
 /// For example, [`AtomicBool::compare_exchange`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchg_acquire_acquire<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -152,7 +144,6 @@ pub unsafe fn atomic_cxchg_acquire_acquire<T: Copy>(dst: *mut T, old: T, src: T)
 /// For example, [`AtomicBool::compare_exchange`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchg_acquire_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -163,7 +154,6 @@ pub unsafe fn atomic_cxchg_acquire_seqcst<T: Copy>(dst: *mut T, old: T, src: T) 
 /// For example, [`AtomicBool::compare_exchange`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchg_release_relaxed<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -174,7 +164,6 @@ pub unsafe fn atomic_cxchg_release_relaxed<T: Copy>(dst: *mut T, old: T, src: T)
 /// For example, [`AtomicBool::compare_exchange`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchg_release_acquire<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -185,7 +174,6 @@ pub unsafe fn atomic_cxchg_release_acquire<T: Copy>(dst: *mut T, old: T, src: T)
 /// For example, [`AtomicBool::compare_exchange`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchg_release_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -196,7 +184,6 @@ pub unsafe fn atomic_cxchg_release_seqcst<T: Copy>(dst: *mut T, old: T, src: T) 
 /// For example, [`AtomicBool::compare_exchange`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchg_acqrel_relaxed<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -207,7 +194,6 @@ pub unsafe fn atomic_cxchg_acqrel_relaxed<T: Copy>(dst: *mut T, old: T, src: T) 
 /// For example, [`AtomicBool::compare_exchange`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchg_acqrel_acquire<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -218,7 +204,6 @@ pub unsafe fn atomic_cxchg_acqrel_acquire<T: Copy>(dst: *mut T, old: T, src: T) 
 /// For example, [`AtomicBool::compare_exchange`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchg_acqrel_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -229,7 +214,6 @@ pub unsafe fn atomic_cxchg_acqrel_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -
 /// For example, [`AtomicBool::compare_exchange`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchg_seqcst_relaxed<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -240,7 +224,6 @@ pub unsafe fn atomic_cxchg_seqcst_relaxed<T: Copy>(dst: *mut T, old: T, src: T) 
 /// For example, [`AtomicBool::compare_exchange`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchg_seqcst_acquire<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -251,7 +234,6 @@ pub unsafe fn atomic_cxchg_seqcst_acquire<T: Copy>(dst: *mut T, old: T, src: T) 
 /// For example, [`AtomicBool::compare_exchange`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchg_seqcst_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 
 /// Stores a value if the current value is the same as the `old` value.
@@ -263,7 +245,6 @@ pub unsafe fn atomic_cxchg_seqcst_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -
 /// For example, [`AtomicBool::compare_exchange_weak`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchgweak_relaxed_relaxed<T: Copy>(
     _dst: *mut T,
     _old: T,
@@ -278,7 +259,6 @@ pub unsafe fn atomic_cxchgweak_relaxed_relaxed<T: Copy>(
 /// For example, [`AtomicBool::compare_exchange_weak`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchgweak_relaxed_acquire<T: Copy>(
     _dst: *mut T,
     _old: T,
@@ -293,7 +273,6 @@ pub unsafe fn atomic_cxchgweak_relaxed_acquire<T: Copy>(
 /// For example, [`AtomicBool::compare_exchange_weak`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchgweak_relaxed_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -304,7 +283,6 @@ pub unsafe fn atomic_cxchgweak_relaxed_seqcst<T: Copy>(dst: *mut T, old: T, src:
 /// For example, [`AtomicBool::compare_exchange_weak`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchgweak_acquire_relaxed<T: Copy>(
     _dst: *mut T,
     _old: T,
@@ -319,7 +297,6 @@ pub unsafe fn atomic_cxchgweak_acquire_relaxed<T: Copy>(
 /// For example, [`AtomicBool::compare_exchange_weak`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchgweak_acquire_acquire<T: Copy>(
     _dst: *mut T,
     _old: T,
@@ -334,7 +311,6 @@ pub unsafe fn atomic_cxchgweak_acquire_acquire<T: Copy>(
 /// For example, [`AtomicBool::compare_exchange_weak`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchgweak_acquire_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -345,7 +321,6 @@ pub unsafe fn atomic_cxchgweak_acquire_seqcst<T: Copy>(dst: *mut T, old: T, src:
 /// For example, [`AtomicBool::compare_exchange_weak`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchgweak_release_relaxed<T: Copy>(
     _dst: *mut T,
     _old: T,
@@ -360,7 +335,6 @@ pub unsafe fn atomic_cxchgweak_release_relaxed<T: Copy>(
 /// For example, [`AtomicBool::compare_exchange_weak`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchgweak_release_acquire<T: Copy>(
     _dst: *mut T,
     _old: T,
@@ -375,7 +349,6 @@ pub unsafe fn atomic_cxchgweak_release_acquire<T: Copy>(
 /// For example, [`AtomicBool::compare_exchange_weak`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchgweak_release_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -386,7 +359,6 @@ pub unsafe fn atomic_cxchgweak_release_seqcst<T: Copy>(dst: *mut T, old: T, src:
 /// For example, [`AtomicBool::compare_exchange_weak`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchgweak_acqrel_relaxed<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -397,7 +369,6 @@ pub unsafe fn atomic_cxchgweak_acqrel_relaxed<T: Copy>(dst: *mut T, old: T, src:
 /// For example, [`AtomicBool::compare_exchange_weak`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchgweak_acqrel_acquire<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -408,7 +379,6 @@ pub unsafe fn atomic_cxchgweak_acqrel_acquire<T: Copy>(dst: *mut T, old: T, src:
 /// For example, [`AtomicBool::compare_exchange_weak`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchgweak_acqrel_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -419,7 +389,6 @@ pub unsafe fn atomic_cxchgweak_acqrel_seqcst<T: Copy>(dst: *mut T, old: T, src: 
 /// For example, [`AtomicBool::compare_exchange_weak`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchgweak_seqcst_relaxed<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -430,7 +399,6 @@ pub unsafe fn atomic_cxchgweak_seqcst_relaxed<T: Copy>(dst: *mut T, old: T, src:
 /// For example, [`AtomicBool::compare_exchange_weak`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchgweak_seqcst_acquire<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 /// Stores a value if the current value is the same as the `old` value.
 /// `T` must be an integer or pointer type.
@@ -441,7 +409,6 @@ pub unsafe fn atomic_cxchgweak_seqcst_acquire<T: Copy>(dst: *mut T, old: T, src:
 /// For example, [`AtomicBool::compare_exchange_weak`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_cxchgweak_seqcst_seqcst<T: Copy>(dst: *mut T, old: T, src: T) -> (T, bool);
 
 /// Loads the current value of the pointer.
@@ -451,7 +418,6 @@ pub unsafe fn atomic_cxchgweak_seqcst_seqcst<T: Copy>(dst: *mut T, old: T, src: 
 /// [`atomic`] types via the `load` method. For example, [`AtomicBool::load`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_load<T: Copy, const ORD: AtomicOrdering>(src: *const T) -> T;
 
 /// Stores the value at the specified memory location.
@@ -462,7 +428,6 @@ pub unsafe fn atomic_load<T: Copy, const ORD: AtomicOrdering>(src: *const T) -> 
 /// [`Ordering::SeqCst`] as the `order`. For example, [`AtomicBool::store`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_store_seqcst<T: Copy>(dst: *mut T, val: T);
 /// Stores the value at the specified memory location.
 /// `T` must be an integer or pointer type.
@@ -472,7 +437,6 @@ pub unsafe fn atomic_store_seqcst<T: Copy>(dst: *mut T, val: T);
 /// [`Ordering::Release`] as the `order`. For example, [`AtomicBool::store`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_store_release<T: Copy>(dst: *mut T, val: T);
 /// Stores the value at the specified memory location.
 /// `T` must be an integer or pointer type.
@@ -482,7 +446,6 @@ pub unsafe fn atomic_store_release<T: Copy>(dst: *mut T, val: T);
 /// [`Ordering::Relaxed`] as the `order`. For example, [`AtomicBool::store`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_store_relaxed<T: Copy>(dst: *mut T, val: T);
 
 /// Stores the value at the specified memory location, returning the old value.
@@ -493,7 +456,6 @@ pub unsafe fn atomic_store_relaxed<T: Copy>(dst: *mut T, val: T);
 /// [`Ordering::SeqCst`] as the `order`. For example, [`AtomicBool::swap`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xchg_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Stores the value at the specified memory location, returning the old value.
 /// `T` must be an integer or pointer type.
@@ -503,7 +465,6 @@ pub unsafe fn atomic_xchg_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Acquire`] as the `order`. For example, [`AtomicBool::swap`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xchg_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Stores the value at the specified memory location, returning the old value.
 /// `T` must be an integer or pointer type.
@@ -513,7 +474,6 @@ pub unsafe fn atomic_xchg_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Release`] as the `order`. For example, [`AtomicBool::swap`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xchg_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Stores the value at the specified memory location, returning the old value.
 /// `T` must be an integer or pointer type.
@@ -523,7 +483,6 @@ pub unsafe fn atomic_xchg_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::AcqRel`] as the `order`. For example, [`AtomicBool::swap`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xchg_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Stores the value at the specified memory location, returning the old value.
 /// `T` must be an integer or pointer type.
@@ -533,7 +492,6 @@ pub unsafe fn atomic_xchg_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Relaxed`] as the `order`. For example, [`AtomicBool::swap`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xchg_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Adds to the current value, returning the previous value.
@@ -546,7 +504,6 @@ pub unsafe fn atomic_xchg_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::SeqCst`] as the `order`. For example, [`AtomicIsize::fetch_add`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xadd_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Adds to the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -558,7 +515,6 @@ pub unsafe fn atomic_xadd_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Acquire`] as the `order`. For example, [`AtomicIsize::fetch_add`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xadd_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Adds to the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -570,7 +526,6 @@ pub unsafe fn atomic_xadd_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Release`] as the `order`. For example, [`AtomicIsize::fetch_add`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xadd_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Adds to the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -582,7 +537,6 @@ pub unsafe fn atomic_xadd_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::AcqRel`] as the `order`. For example, [`AtomicIsize::fetch_add`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xadd_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Adds to the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -594,7 +548,6 @@ pub unsafe fn atomic_xadd_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Relaxed`] as the `order`. For example, [`AtomicIsize::fetch_add`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xadd_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Subtract from the current value, returning the previous value.
@@ -607,7 +560,6 @@ pub unsafe fn atomic_xadd_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::SeqCst`] as the `order`. For example, [`AtomicIsize::fetch_sub`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xsub_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Subtract from the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -619,7 +571,6 @@ pub unsafe fn atomic_xsub_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Acquire`] as the `order`. For example, [`AtomicIsize::fetch_sub`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xsub_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Subtract from the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -631,7 +582,6 @@ pub unsafe fn atomic_xsub_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Release`] as the `order`. For example, [`AtomicIsize::fetch_sub`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xsub_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Subtract from the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -643,7 +593,6 @@ pub unsafe fn atomic_xsub_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::AcqRel`] as the `order`. For example, [`AtomicIsize::fetch_sub`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xsub_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Subtract from the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -655,7 +604,6 @@ pub unsafe fn atomic_xsub_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Relaxed`] as the `order`. For example, [`AtomicIsize::fetch_sub`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xsub_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Bitwise and with the current value, returning the previous value.
@@ -668,7 +616,6 @@ pub unsafe fn atomic_xsub_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::SeqCst`] as the `order`. For example, [`AtomicBool::fetch_and`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_and_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise and with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -680,7 +627,6 @@ pub unsafe fn atomic_and_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Acquire`] as the `order`. For example, [`AtomicBool::fetch_and`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_and_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise and with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -692,7 +638,6 @@ pub unsafe fn atomic_and_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Release`] as the `order`. For example, [`AtomicBool::fetch_and`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_and_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise and with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -704,7 +649,6 @@ pub unsafe fn atomic_and_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::AcqRel`] as the `order`. For example, [`AtomicBool::fetch_and`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_and_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise and with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -716,7 +660,6 @@ pub unsafe fn atomic_and_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Relaxed`] as the `order`. For example, [`AtomicBool::fetch_and`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_and_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Bitwise nand with the current value, returning the previous value.
@@ -729,7 +672,6 @@ pub unsafe fn atomic_and_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::SeqCst`] as the `order`. For example, [`AtomicBool::fetch_nand`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_nand_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise nand with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -741,7 +683,6 @@ pub unsafe fn atomic_nand_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Acquire`] as the `order`. For example, [`AtomicBool::fetch_nand`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_nand_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise nand with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -753,7 +694,6 @@ pub unsafe fn atomic_nand_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Release`] as the `order`. For example, [`AtomicBool::fetch_nand`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_nand_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise nand with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -765,7 +705,6 @@ pub unsafe fn atomic_nand_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::AcqRel`] as the `order`. For example, [`AtomicBool::fetch_nand`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_nand_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise nand with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -777,7 +716,6 @@ pub unsafe fn atomic_nand_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Relaxed`] as the `order`. For example, [`AtomicBool::fetch_nand`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_nand_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Bitwise or with the current value, returning the previous value.
@@ -790,7 +728,6 @@ pub unsafe fn atomic_nand_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::SeqCst`] as the `order`. For example, [`AtomicBool::fetch_or`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_or_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise or with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -802,7 +739,6 @@ pub unsafe fn atomic_or_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Acquire`] as the `order`. For example, [`AtomicBool::fetch_or`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_or_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise or with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -814,7 +750,6 @@ pub unsafe fn atomic_or_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Release`] as the `order`. For example, [`AtomicBool::fetch_or`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_or_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise or with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -826,7 +761,6 @@ pub unsafe fn atomic_or_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::AcqRel`] as the `order`. For example, [`AtomicBool::fetch_or`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_or_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise or with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -838,7 +772,6 @@ pub unsafe fn atomic_or_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Relaxed`] as the `order`. For example, [`AtomicBool::fetch_or`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_or_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Bitwise xor with the current value, returning the previous value.
@@ -851,7 +784,6 @@ pub unsafe fn atomic_or_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::SeqCst`] as the `order`. For example, [`AtomicBool::fetch_xor`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xor_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise xor with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -863,7 +795,6 @@ pub unsafe fn atomic_xor_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Acquire`] as the `order`. For example, [`AtomicBool::fetch_xor`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xor_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise xor with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -875,7 +806,6 @@ pub unsafe fn atomic_xor_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Release`] as the `order`. For example, [`AtomicBool::fetch_xor`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xor_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise xor with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -887,7 +817,6 @@ pub unsafe fn atomic_xor_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::AcqRel`] as the `order`. For example, [`AtomicBool::fetch_xor`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xor_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Bitwise xor with the current value, returning the previous value.
 /// `T` must be an integer or pointer type.
@@ -899,7 +828,6 @@ pub unsafe fn atomic_xor_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Relaxed`] as the `order`. For example, [`AtomicBool::fetch_xor`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_xor_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Maximum with the current value using a signed comparison.
@@ -1012,7 +940,6 @@ pub unsafe fn atomic_min_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::SeqCst`] as the `order`. For example, [`AtomicU32::fetch_min`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_umin_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Minimum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -1022,7 +949,6 @@ pub unsafe fn atomic_umin_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Acquire`] as the `order`. For example, [`AtomicU32::fetch_min`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_umin_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Minimum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -1032,7 +958,6 @@ pub unsafe fn atomic_umin_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Release`] as the `order`. For example, [`AtomicU32::fetch_min`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_umin_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Minimum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -1042,7 +967,6 @@ pub unsafe fn atomic_umin_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::AcqRel`] as the `order`. For example, [`AtomicU32::fetch_min`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_umin_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Minimum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -1052,7 +976,6 @@ pub unsafe fn atomic_umin_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Relaxed`] as the `order`. For example, [`AtomicU32::fetch_min`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_umin_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// Maximum with the current value using an unsigned comparison.
@@ -1063,7 +986,6 @@ pub unsafe fn atomic_umin_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::SeqCst`] as the `order`. For example, [`AtomicU32::fetch_max`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_umax_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// Maximum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -1073,7 +995,6 @@ pub unsafe fn atomic_umax_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Acquire`] as the `order`. For example, [`AtomicU32::fetch_max`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_umax_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// Maximum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -1083,7 +1004,6 @@ pub unsafe fn atomic_umax_acquire<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Release`] as the `order`. For example, [`AtomicU32::fetch_max`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_umax_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// Maximum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -1093,7 +1013,6 @@ pub unsafe fn atomic_umax_release<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::AcqRel`] as the `order`. For example, [`AtomicU32::fetch_max`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_umax_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// Maximum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -1103,7 +1022,6 @@ pub unsafe fn atomic_umax_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
 /// [`Ordering::Relaxed`] as the `order`. For example, [`AtomicU32::fetch_max`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn atomic_umax_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
 
 /// An atomic fence.

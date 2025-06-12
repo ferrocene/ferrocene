@@ -57,6 +57,10 @@ pub use crate::default::Default;
 pub use crate::iter::{DoubleEndedIterator, ExactSizeIterator, Extend, IntoIterator, Iterator};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]
+#[cfg(feature = "ferrocene_certified")]
+pub use crate::iter::Iterator;
+#[stable(feature = "core_prelude", since = "1.4.0")]
+#[doc(no_inline)]
 pub use crate::option::Option::{self, None, Some};
 #[stable(feature = "core_prelude", since = "1.4.0")]
 #[doc(no_inline)]

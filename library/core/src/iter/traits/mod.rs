@@ -1,6 +1,5 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 mod accum;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod collect;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod double_ended;
@@ -12,9 +11,6 @@ mod marker;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod unchecked_iterator;
 
-#[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "ferrocene_certified")]
-pub use self::iterator::Iterator;
 #[unstable(issue = "none", feature = "inplace_iteration")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::marker::InPlaceIterable;
@@ -36,3 +32,6 @@ pub use self::{
     iterator::Iterator,
     marker::{FusedIterator, TrustedLen},
 };
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature = "ferrocene_certified")]
+pub use self::{collect::IntoIterator, iterator::Iterator};

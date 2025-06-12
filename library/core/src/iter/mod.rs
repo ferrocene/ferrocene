@@ -500,7 +500,7 @@ pub use self::traits::{
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(feature = "ferrocene_certified")]
-pub use self::traits::Iterator;
+pub use self::traits::{IntoIterator, Iterator};
 
 #[cfg(not(feature = "ferrocene_certified"))]
 mod adapters;

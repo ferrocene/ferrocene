@@ -93,8 +93,11 @@
 #![allow(rustdoc::redundant_explicit_links)]
 #![warn(rustdoc::unescaped_backticks)]
 //
+// Ferrocene addition: We removed the tidy directives for alphabetical ordering to reduce the number
+// of conflicts we have when merging main.
+//
 // Library features:
-// // tidy-alphabetical-start
+// not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(array_ptr_get))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(asm_experimental_arch))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(bigint_helper_methods))]
@@ -128,10 +131,10 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unsafe_pinned))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(utf16_extra))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(variant_count))]
-// // tidy-alphabetical-end
+// not-alphabetical-end
 //
 // Language features:
-// // tidy-alphabetical-start
+// not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(abi_unadjusted))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(adt_const_params))]
 #![feature(allow_internal_unsafe)]
@@ -183,10 +186,10 @@
 #![feature(unboxed_closures)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unsized_fn_params))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(with_negative_coherence))]
-// // tidy-alphabetical-end
+// not-alphabetical-end
 //
 // Target features:
-// // tidy-alphabetical-start
+// not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(aarch64_unstable_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(arm_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(hexagon_target_feature))]
@@ -202,7 +205,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(tbm_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(wasm_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(x86_amx_intrinsics))]
-// // tidy-alphabetical-end
+// not-alphabetical-end
 //
 // Ferrocene lints/features:
 //

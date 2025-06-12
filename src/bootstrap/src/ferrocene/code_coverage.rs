@@ -145,7 +145,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     let metadata = CoverageMetadata {
         metadata_version: CoverageMetadata::CURRENT_VERSION,
         path_prefix: if let Some(path) =
-            builder.debuginfo_map_to(GitRepo::Rustc, RemapScheme::Compiler)
+            builder.debuginfo_map_to(GitRepo::Rustc, RemapScheme::NonCompiler)
         {
             path.into()
         } else {

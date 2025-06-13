@@ -49,7 +49,7 @@ download() {
     target="$2"
 
     echo "===> downloading ${package} for ${target}"
-    aws s3 cp "s3://${BUCKET}/${PREFIX}/${package}-${target}-${version}.tar.xz" "${TEMPDIR}/archives/${package}-${target}-${version}.tar.xz"
+    aws s3 cp "s3://${ARTIFACTS_BUCKET}/${PREFIX}/${package}-${target}-${version}.tar.xz" "${TEMPDIR}/archives/${package}-${target}-${version}.tar.xz"
 }
 
 mkdir -p "${TEMPDIR}/archives"

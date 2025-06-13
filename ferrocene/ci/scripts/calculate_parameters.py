@@ -51,8 +51,10 @@ QNX_TARGETS = [
 
 GENERIC_BUILD_STD_TARGETS = [
     "aarch64-unknown-none",
+    "aarch64-unknown-ferrocenecoretest",
     "thumbv6m-none-eabi",
     "thumbv7em-none-eabi",
+    "thumbv7em-ferrocenecoretest-eabi",
     "thumbv7em-none-eabihf",
     "thumbv7em-ferrocenecoretest-eabihf",
     "armv8r-none-eabihf",

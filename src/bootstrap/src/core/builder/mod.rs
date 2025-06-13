@@ -1715,7 +1715,7 @@ impl<'a> Builder<'a> {
         }
     }
 
-<<<<<<< HEAD
+    // Ferrocene addition
     pub(crate) fn should_serve<S: Step>(&self) -> bool {
         // We record whether this method was called to see if it was invoked during the dry run. If
         // it wasn't and the --serve flag was passed we error out saying this is unsupported. If it
@@ -1726,13 +1726,16 @@ impl<'a> Builder<'a> {
         self.was_invoked_explicitly::<S>(Kind::Doc) && self.config.cmd.serve()
     }
 
+    // Ferrocene addition
     pub(crate) fn is_serve_flag_unsupported(&self) -> bool {
         self.config.cmd.serve() && self.should_serve_called.load(atomic::Ordering::Relaxed) == 0
     }
 
+    // Ferrocene addition
     pub(crate) fn is_serve_flag_called_multiple_times(&self) -> bool {
         self.config.cmd.serve() && self.should_serve_called.load(atomic::Ordering::Relaxed) > 1
-=======
+    }
+
     pub fn exec_ctx(&self) -> &ExecutionContext {
         &self.config.exec_ctx
     }
@@ -1741,6 +1744,5 @@ impl<'a> Builder<'a> {
 impl<'a> AsRef<ExecutionContext> for Builder<'a> {
     fn as_ref(&self) -> &ExecutionContext {
         self.exec_ctx()
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 }

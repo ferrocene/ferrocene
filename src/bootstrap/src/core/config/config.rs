@@ -55,38 +55,6 @@ use crate::{GitInfo, OnceLock, TargetSelection, check_ci_llvm, helpers, t};
 /// Each path in this list is considered "allowed" in the `download-rustc="if-unchanged"` logic.
 /// This means they can be modified and changes to these paths should never trigger a compiler build
 /// when "if-unchanged" is set.
-<<<<<<< HEAD
-pub fn rustc_if_unchanged_allowed_paths() -> Vec<&'static str> {
-    // NOTE: Paths must have the ":!" prefix to tell git to ignore changes in those paths during
-    // the diff check.
-    //
-    // WARNING: Be cautious when adding paths to this list. If a path that influences the compiler build
-    // is added here, it will cause bootstrap to skip necessary rebuilds, which may lead to risky results.
-    // For example, "src/bootstrap" should never be included in this list as it plays a crucial role in the
-    // final output/compiler, which can be significantly affected by changes made to the bootstrap sources.
-    let mut paths = vec![
-        ":!library",
-        ":!src/tools",
-        ":!src/librustdoc",
-        ":!src/rustdoc-json-types",
-        ":!tests",
-        // ":!triagebot.toml", // ferrocene deletion: We don't have triagebot.toml
-    ];
-
-    if !CiEnv::is_ci() {
-        // When a dependency is added/updated/removed in the library tree (or in some tools),
-        // `Cargo.lock` will be updated by `cargo`. This update will incorrectly invalidate the
-        // `download-rustc=if-unchanged` cache.
-        //
-        // To prevent this, add `Cargo.lock` to the list of allowed paths when not running on CI.
-        // This is generally safe because changes to dependencies typically involve modifying
-        // `Cargo.toml`, which would already invalidate the CI-rustc cache on non-allowed paths.
-        paths.push(":!Cargo.lock");
-    }
-
-    paths
-}
-=======
 ///
 /// NOTE: Paths must have the ":!" prefix to tell git to ignore changes in those paths during
 /// the diff check.
@@ -102,9 +70,8 @@ pub const RUSTC_IF_UNCHANGED_ALLOWED_PATHS: &[&str] = &[
     ":!src/librustdoc",
     ":!src/rustdoc-json-types",
     ":!tests",
-    ":!triagebot.toml",
+    // ":!triagebot.toml", // ferrocene deletion: We don't have triagebot.toml
 ];
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 /// Global configuration for the entire build and/or bootstrap.
 ///
@@ -340,7 +307,8 @@ pub struct Config {
     /// on each code change might be too much for some computers.
     pub skip_std_check_if_no_download_rustc: bool,
 
-<<<<<<< HEAD
+    pub exec_ctx: ExecutionContext,
+
     // Ferrocene-specific configuration
     pub ferrocene_raw_channel: String,
     pub ferrocene_aws_profile: Option<String>,
@@ -402,9 +370,6 @@ pub enum FerroceneSecretSauce {
     #[default]
     Download,
     Local(PathBuf),
-=======
-    pub exec_ctx: ExecutionContext,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 impl Config {

@@ -84,15 +84,7 @@ pub struct Target {
 impl Target {
     pub fn from_triple(triple: &str) -> Self {
         let mut target: Self = Default::default();
-<<<<<<< HEAD
-        if triple.contains("lynxos178")
-            || triple.contains("-none")
-            || triple.contains("nvptx")
-            || triple.contains("switch")
-        {
-=======
         if !build_helper::targets::target_supports_std(triple) {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             target.no_std = true;
         }
         if triple.contains("emscripten") {

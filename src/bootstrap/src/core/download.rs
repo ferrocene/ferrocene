@@ -830,11 +830,7 @@ download-rustc = false
             &self.stage0_metadata.config.artifacts_server
         };
         let version = self.artifact_version_part(llvm_sha);
-<<<<<<< HEAD
-        let filename = format!("rust-dev-{}-{}.tar.xz", self.build.triple, version);
-=======
-        let filename = format!("rust-dev-{}-{}.tar.xz", version, self.host_target.triple);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+        let filename = format!("rust-dev-{}-{}.tar.xz", self.host_target.triple, version); // Ferrocene change: We swap the arg names
         let tarball = rustc_cache.join(&filename);
         if !tarball.exists() {
             let help_on_error = "ERROR: failed to download llvm from ci

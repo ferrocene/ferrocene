@@ -427,7 +427,7 @@ impl Step for Rustc {
             }
 
             let ra_proc_macro_srv_compiler =
-                builder.compiler_for(compiler.stage, builder.config.build, compiler.host);
+                builder.compiler_for(compiler.stage, builder.config.host_target, compiler.host);
             builder.ensure(compile::Rustc::new(ra_proc_macro_srv_compiler, compiler.host));
 
             if let Some(ra_proc_macro_srv) = builder.ensure_if_default(
@@ -701,7 +701,7 @@ impl Step for Std {
         run.builder.ensure(Std {
             compiler: run.builder.compiler_for(
                 run.builder.top_stage,
-                run.builder.config.build,
+                run.builder.config.host_target,
                 run.target,
             ),
             target: run.target,
@@ -754,7 +754,7 @@ impl Step for RustcDev {
         run.builder.ensure(RustcDev {
             compiler: run.builder.compiler_for(
                 run.builder.top_stage,
-                run.builder.config.build,
+                run.builder.config.host_target,
                 run.target,
             ),
             target: run.target,
@@ -821,7 +821,7 @@ impl Step for Analysis {
             // through the sysroot uplifting.
             compiler: run.builder.compiler_for(
                 run.builder.top_stage,
-                run.builder.config.build,
+                run.builder.config.host_target,
                 run.target,
             ),
             target: run.target,
@@ -1174,7 +1174,7 @@ impl Step for Cargo {
         run.builder.ensure(Cargo {
             compiler: run.builder.compiler_for(
                 run.builder.top_stage,
-                run.builder.config.build,
+                run.builder.config.host_target,
                 run.target,
             ),
             target: run.target,
@@ -1231,7 +1231,7 @@ impl Step for RustAnalyzer {
         run.builder.ensure(RustAnalyzer {
             compiler: run.builder.compiler_for(
                 run.builder.top_stage,
-                run.builder.config.build,
+                run.builder.config.host_target,
                 run.target,
             ),
             target: run.target,
@@ -1275,7 +1275,7 @@ impl Step for Clippy {
         run.builder.ensure(Clippy {
             compiler: run.builder.compiler_for(
                 run.builder.top_stage,
-                run.builder.config.build,
+                run.builder.config.host_target,
                 run.target,
             ),
             target: run.target,
@@ -1328,7 +1328,7 @@ impl Step for Miri {
         run.builder.ensure(Miri {
             compiler: run.builder.compiler_for(
                 run.builder.top_stage,
-                run.builder.config.build,
+                run.builder.config.host_target,
                 run.target,
             ),
             target: run.target,
@@ -1473,7 +1473,7 @@ impl Step for Rustfmt {
         run.builder.ensure(Rustfmt {
             compiler: run.builder.compiler_for(
                 run.builder.top_stage,
-                run.builder.config.build,
+                run.builder.config.host_target,
                 run.target,
             ),
             target: run.target,
@@ -1521,7 +1521,7 @@ impl Step for Extended {
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(Extended {
             stage: run.builder.top_stage,
-            host: run.builder.config.build,
+            host: run.builder.config.host_target,
             target: run.target,
         });
     }
@@ -1695,7 +1695,8 @@ impl Step for Extended {
             cmd.run(builder);
         }
 
-        if target.is_windows() {
+        // FIXME(mati865): `gnullvm` here is temporary, remove it once it can host itself
+        if target.is_windows() && !target.contains("gnullvm") {
             let exe = tmp.join("exe");
             let _ = fs::remove_dir_all(&exe);
 
@@ -2170,7 +2171,7 @@ fn maybe_install_llvm(
         cmd.arg("--libfiles");
         builder.verbose(|| println!("running {cmd:?}"));
         let files = cmd.run_capture_stdout(builder).stdout();
-        let build_llvm_out = &builder.llvm_out(builder.config.build);
+        let build_llvm_out = &builder.llvm_out(builder.config.host_target);
         let target_llvm_out = &builder.llvm_out(target);
         for file in files.trim_end().split(' ') {
             // If we're not using a custom LLVM, make sure we package for the target.
@@ -2355,7 +2356,7 @@ impl Step for LlvmBitcodeLinker {
         run.builder.ensure(LlvmBitcodeLinker {
             compiler: run.builder.compiler_for(
                 run.builder.top_stage,
-                run.builder.config.build,
+                run.builder.config.host_target,
                 run.target,
             ),
             target: run.target,

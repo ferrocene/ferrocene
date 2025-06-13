@@ -113,9 +113,9 @@ pub fn check(build: &mut Build) {
 
     // Ensure that a compatible version of libstdc++ is available on the system when using `llvm.download-ci-llvm`.
     #[cfg(not(test))]
-    if !build.config.dry_run() && !build.build.is_msvc() && build.config.llvm_from_ci {
+    if !build.config.dry_run() && !build.host_target.is_msvc() && build.config.llvm_from_ci {
         let builder = Builder::new(build);
-        let libcxx_version = builder.ensure(tool::LibcxxVersionTool { target: build.build });
+        let libcxx_version = builder.ensure(tool::LibcxxVersionTool { target: build.host_target });
 
         match libcxx_version {
             tool::LibcxxVersion::Gnu(version) => {
@@ -248,7 +248,7 @@ than building it.
         }
 
         // skip check for cross-targets
-        if skip_target_sanity && target != &build.build {
+        if skip_target_sanity && target != &build.host_target {
             continue;
         }
 
@@ -319,7 +319,7 @@ than building it.
 
             if build.config.llvm_enabled(*host) {
                 // Externally configured LLVM requires FileCheck to exist
-                let filecheck = build.llvm_filecheck(build.build);
+                let filecheck = build.llvm_filecheck(build.host_target);
                 if !filecheck.starts_with(&build.out)
                     && !filecheck.exists()
                     && build.config.codegen_tests
@@ -344,7 +344,7 @@ than building it.
         }
 
         // skip check for cross-targets
-        if skip_target_sanity && target != &build.build {
+        if skip_target_sanity && target != &build.host_target {
             continue;
         }
 
@@ -375,7 +375,7 @@ than building it.
             // Cygwin. The Cygwin build does not have generators for Visual
             // Studio, so detect that here and error.
             let out =
-                command("cmake").arg("--help").run_always().run_capture_stdout(build).stdout();
+                command("cmake").arg("--help").run_always().run_capture_stdout(&build).stdout();
             if !out.contains("Visual Studio") {
                 panic!(
                     "

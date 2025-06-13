@@ -28,7 +28,7 @@ impl Step for FlipLink {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         builder.info(format!("Building {PATH}").as_str());
 
-        let compiler = builder.compiler(0, builder.config.build);
+        let compiler = builder.compiler(0, builder.config.host_target);
         let cmd = prepare_tool_cargo(
             builder,
             compiler,

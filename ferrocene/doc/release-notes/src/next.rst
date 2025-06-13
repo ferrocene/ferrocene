@@ -9,6 +9,18 @@ Next Ferrocene release
 This page contains the changes to be introduced in the upcoming Ferrocene
 release.
 
+
+New experimental features
+-------------------------
+
+* The proxy targets used to test ``core`` are now available for customer use.
+  On their respective target pages, the following targets now have an equivalent
+  a ``ferrocenecoretest`` proxy target which can be used for testing:
+
+  * :target-with-triple:`aarch64-unknown-none`
+  * :target-with-triple:`thumbv7em-none-eabi`
+  * :target-with-triple:`thumbv7em-none-eabihf`
+
 Removed experimental features
 -----------------------------
 

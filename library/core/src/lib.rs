@@ -167,13 +167,13 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(min_specialization))]
 #![feature(multiple_supertrait_upcastable)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(must_not_suspend))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(negative_impls))]
+#![feature(negative_impls)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(never_type))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(no_core))]
+#![feature(no_core)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(optimize_attribute))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(prelude_import))]
+#![feature(prelude_import)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(repr_simd))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(rustc_allow_const_fn_unstable))]
+#![feature(rustc_allow_const_fn_unstable)]
 #![feature(rustc_attrs)]
 #![feature(rustdoc_internals)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(simd_ffi))]
@@ -372,7 +372,6 @@ pub mod ffi;
 #[unstable(feature = "core_io_borrowed_buf", issue = "117693")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod io;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod iter;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod net;

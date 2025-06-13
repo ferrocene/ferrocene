@@ -265,9 +265,9 @@ fn parse_cfg_name_directive<'a>(
 
     // ferrocene addition
     condition! {
-        name: "ferrocenecoretest",
-        condition: config.target.contains("ferrocenecoretest"),
-        message: "when the target is part of the ferrocenecoretest family"
+        name: "ferrocene.facade",
+        condition: config.target.contains("ferrocene.facade"),
+        message: "when the target is part of the Ferrocene facade target family"
     }
 
     if prefix == "ignore" && outcome == MatchOutcome::Invalid {

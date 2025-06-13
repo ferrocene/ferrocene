@@ -251,8 +251,8 @@ ENV LANG=C.UTF-8
 # Automatic compiler detection doesn't work for some targets.
 ENV CC_aarch64_unknown_none=aarch64-linux-gnu-gcc
 ENV CXX_aarch64_unknown_none=aarch64-linux-gnu-g++
-ENV CC_aarch64_unknown_ferrocenecoretest=aarch64-linux-gnu-gcc
-ENV CXX_aarch64_unknown_ferrocenecoretest=aarch64-linux-gnu-g++
+ENV CC_aarch64_unknown_ferrocene.facade=aarch64-linux-gnu-gcc
+ENV CXX_aarch64_unknown_ferrocene.facade=aarch64-linux-gnu-g++
 ENV CC_armv8r_none_eabihf=arm-none-eabi-gcc
 ENV CXX_armv8r_none_eabihf=arm-none-eabi-g++
 ENV CFLAGS_aarch64_unknown_nto_qnx710=-Vgcc_ntoaarch64le_cxx

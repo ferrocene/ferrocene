@@ -1,10 +1,10 @@
 //@ revisions: gcc lld
 //
 //@ [gcc] compile-flags: -Clinker-flavor=gcc
-//@ [gcc] ignore-ferrocenecoretest
+//@ [gcc] ignore-ferrocene.facade
 //
 //@ [lld] compile-flags: -Clinker=rust-lld -Clinker-flavor=ld.lld
-//@ [lld] only-ferrocenecoretest
+//@ [lld] only-ferrocene.facade
 //
 //@ build-pass
 

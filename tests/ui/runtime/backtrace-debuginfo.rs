@@ -11,7 +11,7 @@
 //@ compile-flags:-Cstrip=none
 //@ needs-subprocess
 //@ ignore-fuchsia Backtrace not symbolized, trace different line alignment
-//@ ignore-ferrocenecoretest - backtraces not supported on the target
+//@ ignore-ferrocene.facade - backtraces not supported on the target
 
 // FIXME(#117097): backtrace (possibly unwinding mechanism) seems to be different on at least
 // `i686-mingw` (32-bit windows-gnu)? cc #128911.

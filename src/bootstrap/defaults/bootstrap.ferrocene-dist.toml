@@ -181,9 +181,9 @@ aarch64-unknown-nto-qnx710.profiler = false
 x86_64-pc-nto-qnx710.profiler = false
 
 # Bare metal targets cannot run the profiler runtime.
-aarch64-unknown-ferrocenecoretest.profiler = false
-thumbv7em-ferrocenecoretest-eabi.profiler = false
-thumbv7em-ferrocenecoretest-eabihf.profiler = false
+"aarch64-unknown-ferrocene.facade".profiler = false
+"thumbv7em-ferrocene.facade-eabi".profiler = false
+"thumbv7em-ferrocene.facade-eabihf".profiler = false
 
 # On Windows, Jemalloc is not tested, and manual testing suggests it is not supported.
 x86_64-pc-windows-msvc.jemalloc = false

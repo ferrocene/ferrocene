@@ -149,7 +149,7 @@ Currently bare metal targets have a similar procedure for testing.
 .. Warning::
     
     In a :target:`aarch64-unknown-linux-gnu` environment -- such as a guest on
-    :target:`aarch64-apple-darwin` or :target:`x86_64-pc-windows-msvc` -- you **must** skip to the final step, running the tests using::
+    :target:`aarch64-apple-darwin` -- you **must** skip to the final step, running the tests using::
     
         export QEMU_CPU=cortex-a53
         ./x test --stage 1 --target aarch64-unknown-ferrocenecoretest library/core

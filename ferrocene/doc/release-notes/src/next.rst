@@ -23,6 +23,14 @@ shipped as a preview.
 
   * ``miri-${rustc-host}``
 
+* The proxy targets used to test ``core`` are now available for customer use.
+  On their respective target pages, the following targets now have an equivalent
+  a ``ferrocenecoretest`` testing facade which can be used for testing:
+
+  * :target-with-tuple:`aarch64-unknown-none`
+  * :target-with-tuple:`thumbv7em-none-eabi`
+  * :target-with-tuple:`thumbv7em-none-eabihf`
+
 Removed experimental features
 -----------------------------
 

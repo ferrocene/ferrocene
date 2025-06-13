@@ -1067,7 +1067,7 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
         'x.py;sign' {
             [CompletionResult]::new('--config', '--config', [CompletionResultType]::ParameterName, 'TOML configuration file for build')
             [CompletionResult]::new('--build-dir', '--build-dir', [CompletionResultType]::ParameterName, 'Build directory, overrides `build.build-dir` in `bootstrap.toml`')
-            [CompletionResult]::new('--build', '--build', [CompletionResultType]::ParameterName, 'build target of the stage0 compiler')
+            [CompletionResult]::new('--build', '--build', [CompletionResultType]::ParameterName, 'host target of the stage0 compiler')
             [CompletionResult]::new('--host', '--host', [CompletionResultType]::ParameterName, 'host targets to build')
             [CompletionResult]::new('--target', '--target', [CompletionResultType]::ParameterName, 'target targets to build')
             [CompletionResult]::new('--exclude', '--exclude', [CompletionResultType]::ParameterName, 'build paths to exclude')

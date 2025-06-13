@@ -1109,7 +1109,7 @@ esac
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \

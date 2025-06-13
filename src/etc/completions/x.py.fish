@@ -1052,7 +1052,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcomma
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from compare" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l config -d 'TOML configuration file for build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x.py -n "__fish_x.py_using_subcommand sign" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x.py -n "__fish_x.py_using_subcommand sign" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l host -d 'host targets to build' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l target -d 'target targets to build' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l exclude -d 'build paths to exclude' -r -F

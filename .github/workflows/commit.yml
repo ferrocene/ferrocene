@@ -72,7 +72,7 @@ jobs:
           SCRIPT: |
             set -e
             ./x test tidy
-            ./x check library compiler/rustc
+            ./x check rustc
             ./x run ferrocene/tools/traceability-matrix
             ./x test collect-license-metadata
           # Commit checks cannot authenticate with our AWS environment. Disable the parts of CI that

@@ -38,6 +38,8 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "thumbv7em-ferrocenecoretest-eabi",
     "thumbv7em-ferrocenecoretest-eabihf",
     // just a dummy comment so the list doesn't get onelined
+    "loongarch32-unknown-none",
+    "loongarch32-unknown-none-softfloat",
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM

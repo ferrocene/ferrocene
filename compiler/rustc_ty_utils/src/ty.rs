@@ -104,7 +104,7 @@ fn adt_sized_constraint<'tcx>(
 
     // perf hack: if there is a `constraint_ty: Sized` bound, then we know
     // that the type is sized and do not need to check it on the impl.
-    let sized_trait_def_id = tcx.require_lang_item(LangItem::Sized, None);
+    let sized_trait_def_id = tcx.require_lang_item(LangItem::Sized, DUMMY_SP);
     let predicates = tcx.predicates_of(def.did()).predicates;
     if predicates.iter().any(|(p, _)| {
         p.as_trait_clause().is_some_and(|trait_pred| {
@@ -319,7 +319,7 @@ fn impl_self_is_guaranteed_unsized<'tcx>(tcx: TyCtxt<'tcx>, impl_def_id: DefId) 
 
     let infcx = tcx.infer_ctxt().ignoring_regions().build(ty::TypingMode::non_body_analysis());
 
-    let ocx = traits::ObligationCtxt::new_with_diagnostics(&infcx);
+    let ocx = traits::ObligationCtxt::new(&infcx);
     let cause = traits::ObligationCause::dummy();
     let param_env = tcx.param_env(impl_def_id);
 

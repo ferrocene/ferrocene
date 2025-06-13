@@ -3,6 +3,10 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 set -xeuo pipefail
 
+if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    echo "::group::Install dependencies (macOS)"
+fi
+
 # Unlike Windows/Linux executors, Macs do not come with awscli by default
 # On Mac, XCode's LLVM cannot build for WASM.
 brew install --quiet awscli cmake ninja zstd llvm tidy-html5
@@ -57,4 +61,8 @@ if [[ "$GITHUB_ACTIONS" == "true" ]]; then
     df -h
 else
     echo "Not freeing up space, this is not a Github Actions runner."
+fi
+
+if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    echo "::endgroup::"
 fi

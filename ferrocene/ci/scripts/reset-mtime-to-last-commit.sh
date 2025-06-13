@@ -20,6 +20,10 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    echo "::group::Change file modification time to be consistent"
+fi
+
 if [[ "${OSTYPE}" =~ ^darwin.* ]]; then
     # Darwin's bash does not support RFC2822 on `touch`
     # `%ct` outputs the commit date formatted according UNIX timestamp
@@ -52,3 +56,7 @@ for repo in . $(git config --file .gitmodules --get-regexp path | awk '{ print $
 done
 
 echo "finished resetting the mtime of all tracked files to ${last_commit_date}"
+
+if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    echo "::endgroup::"
+fi

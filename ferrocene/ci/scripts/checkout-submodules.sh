@@ -7,6 +7,10 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    echo "::group::Checkout submodules"
+fi
+
 git submodule init
 submodules="$(git config --file .gitmodules --get-regexp path | awk '{ print $2 }')"
 
@@ -17,3 +21,7 @@ for submodule in ${submodules}; do
     git submodule update --depth 1 "${submodule}" &
 done
 wait
+
+if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    echo "::endgroup::"
+fi

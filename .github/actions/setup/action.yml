@@ -25,45 +25,33 @@ runs:
       if: ${{ inputs.llvm-subset != 'false' }}
       shell: bash
       run: |
-        echo "::group::Clone llvm subset"
         ferrocene/ci/scripts/clone-llvm-subset.sh
-        echo "::endgroup::"
     - name: Checkout submodules
       shell: bash
       run: |
-        echo "::group::Checkout submodules"
         ferrocene/ci/scripts/checkout-submodules.sh
-        echo "::endgroup::"
     - name: Change file modification time to be consistent
       shell: bash
       run: |
-        echo "::group::Change file modification time to be consistent"
         ferrocene/ci/scripts/reset-mtime-to-last-commit.sh
-        echo "::endgroup::"
 
     - name: Install dependencies (Ubuntu)
       if: ${{ contains(runner.name, 'ubuntu') && inputs.build-dependencies != 'false' }}
       shell: bash
       run: |
-        echo "::group::Install dependencies (Ubuntu)"
         ferrocene/ci/scripts/setup-ubuntu.sh
-        echo "::endgroup::"
 
     - name: Install dependencies (Windows)
       if: ${{ (runner.os == 'Windows') && inputs.build-dependencies != 'false' }}
       shell: bash
       run: |
-        echo "::group::Install dependencies (Windows)"
         ferrocene/ci/scripts/setup-windows.sh
-        echo "::endgroup::"
 
     - name: Install dependencies (macOS)
       if: ${{ (runner.os == 'macOS') && inputs.build-dependencies != 'false' }}
       shell: bash
       run: |
-        echo "::group::Install dependencies (macOS)"
         ferrocene/ci/scripts/setup-darwin.sh
-        echo "::endgroup::"
 
     # https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
     - name: Enable KVM on Linux
@@ -82,6 +70,4 @@ runs:
       if: ${{ inputs.setup-uv != 'false' }}
       shell: bash
       run: |
-        echo "::group::Setup uv"
         ferrocene/ci/scripts/setup-uv.sh
-        echo "::endgroup::"

@@ -426,6 +426,7 @@
 // Ferrocene lints/features:
 // tidy-alphabetical-start
 #![allow(unused_attributes)]
+#![feature(coverage_attribute)]
 // tidy-alphabetical-end
 //
 #![default_lib_allocator]

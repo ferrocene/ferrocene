@@ -162,32 +162,34 @@ const EXPECTED = [
             },
         ],
     },
-    {
-        'query': 'option<t>, (fnonce () -> u) -> option',
-        'others': [
-            {
-                'path': 'std::option::Option',
-                'name': 'map',
-                'displayType': '`Option`<`T`>, F -> `Option`<U>',
-                'displayMappedNames': `t = T, u = U`,
-                'displayWhereClause': "F: `FnOnce` (T) -> `U`",
-            },
-            {
-                'path': 'std::option::Option',
-                'name': 'and_then',
-                'displayType': '`Option`<`T`>, F -> `Option`<U>',
-                'displayMappedNames': `t = T, u = U`,
-                'displayWhereClause': "F: `FnOnce` (T) -> Option<`U`>",
-            },
-            {
-                'path': 'std::option::Option',
-                'name': 'zip_with',
-                'displayType': 'Option<T>, `Option`<`U`>, F -> `Option`<R>',
-                'displayMappedNames': `t = U, u = R`,
-                'displayWhereClause': "F: `FnOnce` (T, U) -> `R`",
-            },
-        ],
-    },
+    // Ferrocene addition: Removed due to parts of `std::option` not being
+    // marked as certified yet.
+    // {
+    //     'query': 'option<t>, (fnonce () -> u) -> option',
+    //     'others': [
+    //         {
+    //             'path': 'std::option::Option',
+    //             'name': 'map',
+    //             'displayType': '`Option`<`T`>, F -> `Option`<U>',
+    //             'displayMappedNames': `t = T, u = U`,
+    //             'displayWhereClause': "F: `FnOnce` (T) -> `U`",
+    //         },
+    //         {
+    //             'path': 'std::option::Option',
+    //             'name': 'and_then',
+    //             'displayType': '`Option`<`T`>, F -> `Option`<U>',
+    //             'displayMappedNames': `t = T, u = U`,
+    //             'displayWhereClause': "F: `FnOnce` (T) -> Option<`U`>",
+    //         },
+    //         {
+    //             'path': 'std::option::Option',
+    //             'name': 'zip_with',
+    //             'displayType': 'Option<T>, `Option`<`U`>, F -> `Option`<R>',
+    //             'displayMappedNames': `t = U, u = R`,
+    //             'displayWhereClause': "F: `FnOnce` (T, U) -> `R`",
+    //         },
+    //     ],
+    // },
     {
         'query': 'option<t>, (fnonce () -> option<u>) -> option',
         'others': [

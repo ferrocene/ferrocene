@@ -20,6 +20,11 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { triple: "aarch64-unknown-linux-gnu", std: true, linker: Linker::HostCc },
     TargetSpec { triple: "aarch64-apple-darwin", std: true, linker: Linker::BundledLld },
     TargetSpec { triple: "aarch64-unknown-none", std: false, linker: Linker::BundledLld },
+    TargetSpec {
+        triple: "aarch64-unknown-ferrocenecoretest",
+        std: false,
+        linker: Linker::BundledLld,
+    },
     TargetSpec { triple: "aarch64-unknown-nto-qnx710", std: true, linker: Linker::BundledLld },
     TargetSpec { triple: "armebv7r-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "armv7r-none-eabihf", std: false, linker: Linker::BundledLld },
@@ -33,6 +38,11 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     },
     TargetSpec { triple: "thumbv6m-none-eabi", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "thumbv7em-none-eabi", std: false, linker: Linker::BundledLld },
+    TargetSpec {
+        triple: "thumbv7em-ferrocenecoretest-eabi",
+        std: true,
+        linker: Linker::BundledLld,
+    },
     TargetSpec { triple: "thumbv7em-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec {
         triple: "thumbv7em-ferrocenecoretest-eabihf",

@@ -30,6 +30,8 @@ impl bool {
     /// ```
     #[stable(feature = "bool_to_option", since = "1.62.0")]
     #[inline(never)]
+    // Note(coverage(off)): 
+    // #[coverage(off)]
     pub fn then_some<T>(self, t: T) -> Option<T> {
         if self { Some(t) } else { None }
     }

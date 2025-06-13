@@ -84,8 +84,11 @@ pub fn test_bool_not() {
 
 #[test]
 fn test_bool_to_option() {
-    assert_eq!(false.then_some(0), None);
-    assert_eq!(true.then_some(0), Some(0));
+    let then_some: fn(bool, i32) -> Option<i32> = bool::then_some;
+    let then_some = std::hint::black_box(then_some);
+
+    assert_eq!(then_some(false, 0), None);
+    assert_eq!(then_some(true, 0), Some(0));
     assert_eq!(false.then(|| 0), None);
     assert_eq!(true.then(|| 0), Some(0));
 

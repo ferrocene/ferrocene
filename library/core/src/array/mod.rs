@@ -571,6 +571,7 @@ macro_rules! array_impl_default {
     {$n:expr, $t:ident $($ts:ident)*} => {
         #[stable(since = "1.4.0", feature = "array_default")]
         impl<T> Default for [T; $n] where T: Default {
+            #[inline(never)]
             fn default() -> [T; $n] {
                 [$t::default(), $($ts::default()),*]
             }
@@ -580,6 +581,7 @@ macro_rules! array_impl_default {
     {$n:expr,} => {
         #[stable(since = "1.4.0", feature = "array_default")]
         impl<T> Default for [T; $n] {
+            #[inline(never)]
             fn default() -> [T; $n] { [] }
         }
     };
@@ -684,6 +686,7 @@ impl<T, const N: usize> [T; N] {
     /// Returns a slice containing the entire array. Equivalent to `&s[..]`.
     #[stable(feature = "array_as_slice", since = "1.57.0")]
     #[rustc_const_stable(feature = "array_as_slice", since = "1.57.0")]
+    #[inline(never)]
     pub const fn as_slice(&self) -> &[T] {
         self
     }
@@ -692,6 +695,7 @@ impl<T, const N: usize> [T; N] {
     /// `&mut s[..]`.
     #[stable(feature = "array_as_slice", since = "1.57.0")]
     #[rustc_const_unstable(feature = "const_array_as_mut_slice", issue = "133333")]
+    #[inline(never)]
     pub const fn as_mut_slice(&mut self) -> &mut [T] {
         self
     }

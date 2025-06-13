@@ -289,7 +289,7 @@ also accepts multiple options:
    .. render-outcomes-template:: templates/tests.jinja2
       :host: x86_64-unknown-linux-gnu
       :target: aarch64-unknown-none
-      :bare_metal_test_target: aarch64-unknown-ferrocenecoretest
+      :bare_metal_test_target: aarch64-unknown-ferrocene.facade
       :remote_testing:
 
 Rendering a summary of all test outcome pages

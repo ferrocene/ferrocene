@@ -98,14 +98,14 @@ impl TargetSelection {
 
     // ferrocene addition
     pub fn needs_secret_sauce(&self) -> bool {
-        if !self.contains("ferrocenecoretest") {
+        if !self.contains("ferrocene.facade") {
             return false;
         }
 
         match &*self.triple {
-            "aarch64-unknown-ferrocenecoretest"
-            | "thumbv7em-ferrocenecoretest-eabi"
-            | "thumbv7em-ferrocenecoretest-eabihf" => true,
+            "aarch64-unknown-ferrocene.facade"
+            | "thumbv7em-ferrocene.facade-eabi"
+            | "thumbv7em-ferrocene.facade-eabihf" => true,
             _ => todo!("expand this `match`"),
         }
     }

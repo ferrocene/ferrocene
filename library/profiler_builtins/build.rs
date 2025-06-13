@@ -99,12 +99,12 @@ fn main() {
     println!("cargo::rerun-if-changed={}", include.display());
     cfg.include(include);
 
-    // ferrocene addition: ferrocenecoretest needs header files not included by default by the
+    // ferrocene addition: facades needs header files not included by default by the
     // bare metal (*-none-*-gcc) compiler
-    if let Some(include) = env::var_os("FERROCENECORETEST_INCLUDE_FOR_PROFILER") {
+    if let Some(include) = env::var_os("FERROCENE_FACADE_INCLUDE_FOR_PROFILER") {
         cfg.include(include);
         // a compiler like `arm-none-eabi-gcc` won't set this define by default but we need it for
-        // ferrocenecoretest targets
+        // facade targets
         cfg.define("__linux__", None);
 
         let target_arch =

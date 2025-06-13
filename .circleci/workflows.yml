@@ -121,6 +121,8 @@ jobs:
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
+        # Build the certified subset of libcore
+        ./x.py build library/core --set rust.std-features='["ferrocene_certified"]'
     steps: [ferrocene-job-build]
 
   x86_64-linux-docs:
@@ -138,6 +140,8 @@ jobs:
         # to CI beforehand, for manual inspection in case of failures.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)
         ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
+        # Build the API docs of the certified subset of libcore
+        ./x.py doc library/core --set rust.std-features='["ferrocene_certified"]'
     steps:
       - ferrocene-job-dist:
           restore-from-job: x86_64-linux-build

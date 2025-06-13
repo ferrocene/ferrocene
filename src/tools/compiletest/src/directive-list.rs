@@ -168,6 +168,7 @@ const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "needs-subprocess",
     "needs-symlink",
     "needs-target-has-atomic",
+    "needs-target-std",
     "needs-threads",
     "needs-unwind",
     "needs-wasmtime",

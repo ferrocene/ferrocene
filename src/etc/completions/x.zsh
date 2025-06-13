@@ -17,7 +17,7 @@ _x() {
     _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -69,7 +69,7 @@ _x() {
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -113,7 +113,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -162,7 +162,7 @@ _arguments "${_arguments_options[@]}" : \
 '*-F+[clippy lints to forbid]:LINT:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -209,7 +209,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -253,7 +253,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -299,7 +299,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -356,7 +356,7 @@ _arguments "${_arguments_options[@]}" : \
 '--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -410,7 +410,7 @@ _arguments "${_arguments_options[@]}" : \
 '*--test-args=[extra arguments to be passed for the test tool being used (e.g. libtest, compiletest or rustdoc)]:ARGS:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -458,7 +458,7 @@ _arguments "${_arguments_options[@]}" : \
 '*--test-args=[]:TEST_ARGS:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -503,7 +503,7 @@ _arguments "${_arguments_options[@]}" : \
 '--stage=[Clean a specific stage without touching other artifacts. By default, every stage is cleaned if this option is not used]:N:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -547,7 +547,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -591,7 +591,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -636,7 +636,7 @@ _arguments "${_arguments_options[@]}" : \
 '*--args=[arguments for the tool]:ARGS:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -681,7 +681,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -726,7 +726,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -772,7 +772,7 @@ _arguments "${_arguments_options[@]}" : \
 '*--sync=[Additional \`Cargo.toml\` to sync and vendor]:SYNC:_files' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -817,7 +817,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
@@ -874,7 +874,7 @@ _arguments "${_arguments_options[@]}" : \
 '*--profiles=[Select the profiles that should be benchmarked]:PROFILES:(Check Debug Doc Opt Clippy)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--skip=[build paths to skip]:PATH:_files' \
@@ -921,7 +921,7 @@ _arguments "${_arguments_options[@]}" : \
 '*--profiles=[Select the profiles that should be benchmarked]:PROFILES:(Check Debug Doc Opt Clippy)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--skip=[build paths to skip]:PATH:_files' \
@@ -968,7 +968,7 @@ _arguments "${_arguments_options[@]}" : \
 '*--profiles=[Select the profiles that should be benchmarked]:PROFILES:(Check Debug Doc Opt Clippy)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--skip=[build paths to skip]:PATH:_files' \
@@ -1015,7 +1015,7 @@ _arguments "${_arguments_options[@]}" : \
 '*--profiles=[Select the profiles that should be benchmarked]:PROFILES:(Check Debug Doc Opt Clippy)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--skip=[build paths to skip]:PATH:_files' \
@@ -1059,7 +1059,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \

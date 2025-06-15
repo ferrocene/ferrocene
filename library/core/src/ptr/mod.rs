@@ -2,7 +2,7 @@
 // //!
 // //! *[See also the pointer primitive types](pointer).*
 // //!
-// //! # Safety
+//! # Safety
 // //!
 // //! Many functions in this module take raw pointers as arguments and read from or write to them. For
 // //! this to be safe, these pointers must be *valid* for the given access. Whether a pointer is valid
@@ -57,7 +57,7 @@
 // //! has size 0, i.e., even if memory is not actually touched. Consider using
 // //! [`NonNull::dangling`] in such cases.
 // //!
-// //! ## Pointer to reference conversion
+//! ## Pointer to reference conversion
 // //!
 // //! When converting a pointer to a reference (e.g. via `&*ptr` or `&mut *ptr`),
 // //! there are several rules that must be followed:
@@ -95,7 +95,7 @@
 // //!
 // //! [valid value]: ../../reference/behavior-considered-undefined.html#invalid-values
 // //!
-// //! ## Allocation
+//! ## Allocation
 // //!
 // //! <a id="allocated-object"></a> <!-- keep old URLs working -->
 // //!
@@ -133,7 +133,7 @@
 // //!
 // //! [`null()`]: null
 // //!
-// //! # Provenance
+//! # Provenance
 // //!
 // //! Pointers are not *simply* an "integer" or "address". For instance, it's uncontroversial
 // //! to say that a Use After Free is clearly Undefined Behavior, even if you "get lucky"
@@ -239,7 +239,7 @@
 // //! use in situations where a value is "sometimes a pointer and sometimes a bare `usize`" is a
 // //! pointer type.
 // //!
-// //! ## Strict Provenance
+//! ## Strict Provenance
 // //!
 // //! "Strict Provenance" refers to a set of APIs designed to make working with provenance more
 // //! explicit. They are intended as substitutes for casting a pointer to an integer and back.
@@ -324,7 +324,7 @@
 // //! accessing a memory-mapped interface at a fixed address, cannot currently be handled with strict
 // //! provenance APIs and should use [exposed provenance](#exposed-provenance).
 // //!
-// //! ## Exposed Provenance
+//! ## Exposed Provenance
 // //!
 // //! As discussed above, integer-to-pointer casts are not possible with Strict Provenance APIs.
 // //! This is by design: the goal of Strict Provenance is to provide a clear specification that we are
@@ -1683,7 +1683,7 @@ pub const unsafe fn replace<T>(dst: *mut T, src: T) -> T {
 // /// assert_eq!(bar, "foo");
 // /// ```
 // ///
-// /// ## Ownership of the Returned Value
+/// ## Ownership of the Returned Value
 // ///
 // /// `read` creates a bitwise copy of `T`, regardless of whether `T` is [`Copy`].
 // /// If `T` is not [`Copy`], using both the returned value and the value at

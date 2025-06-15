@@ -194,7 +194,7 @@ impl<T: ?Sized> const Deref for &mut T {
 // /// of a contained value (for example, [`Rc`][rc] or [`Cow`][cow]) or the
 // /// storage semantics of a contained value (for example, [`Box`][box]).
 // ///
-// /// # Mutable deref coercion
+/// # Mutable deref coercion
 // ///
 // /// If `T` implements `DerefMut<Target = U>`, and `v` is a value of type `T`,
 // /// then:

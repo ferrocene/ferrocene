@@ -362,12 +362,11 @@ fn decompress_zlib(input: &[u8], output: &mut [u8]) -> Option<()> {
 
 #[cfg(feature = "ruzstd")]
 fn decompress_zstd(mut input: &[u8], mut output: &mut [u8]) -> Option<()> {
-    use ruzstd::frame::ReadFrameHeaderError;
-    use ruzstd::frame_decoder::FrameDecoderError;
+    use ruzstd::decoding::errors::{FrameDecoderError, ReadFrameHeaderError};
     use ruzstd::io::Read;
 
     while !input.is_empty() {
-        let mut decoder = match ruzstd::StreamingDecoder::new(&mut input) {
+        let mut decoder = match ruzstd::decoding::StreamingDecoder::new(&mut input) {
             Ok(decoder) => decoder,
             Err(FrameDecoderError::ReadFrameHeaderError(ReadFrameHeaderError::SkipFrame {
                 length,

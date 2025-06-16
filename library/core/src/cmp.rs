@@ -100,7 +100,7 @@ use crate::ops::ControlFlow;
 // /// Not having such foreign `impl`s also avoids forward compatibility issues where one crate adding
 // /// more `PartialEq` implementations can cause build failures in downstream crates.
 // ///
-// /// ## Derivable
+/// ## Derivable
 // ///
 // /// This trait can be used with `#[derive]`. When `derive`d on structs, two
 // /// instances are equal if all fields are equal, and not equal if any fields
@@ -750,7 +750,7 @@ impl<T: Clone> Clone for Reverse<T> {
 // /// [weak order]: https://en.wikipedia.org/wiki/Weak_ordering
 // /// [total order]: https://en.wikipedia.org/wiki/Total_order
 // ///
-// /// ## Derivable
+/// ## Derivable
 // ///
 // /// This trait can be used with `#[derive]`.
 // ///
@@ -784,7 +784,7 @@ impl<T: Clone> Clone for Reverse<T> {
 // /// assert!(E::Bottom < E::Top);
 // /// ```
 // ///
-// /// ## Lexicographical comparison
+/// ## Lexicographical comparison
 // ///
 // /// Lexicographical comparison is an operation with the following properties:
 // ///  - Two sequences are compared element by element.
@@ -1192,7 +1192,7 @@ pub macro Ord($item:item) {
 // /// assert_eq!(a <= a, false);
 // /// ```
 // ///
-// /// ## Derivable
+/// ## Derivable
 // ///
 // /// This trait can be used with `#[derive]`.
 // ///

@@ -147,7 +147,7 @@
 // //! }
 // //! ```
 // //!
-// //! # The question mark operator, `?`
+//! # The question mark operator, `?`
 // //!
 // //! When writing code that calls many functions that return the
 // //! [`Result`] type, the error handling can be tedious. The question mark
@@ -224,11 +224,11 @@
 // //! [`write_all`]: ../../std/io/trait.Write.html#method.write_all "io::Write::write_all"
 // //! [`io::Result`]: ../../std/io/type.Result.html "io::Result"
 // //! [`?`]: crate::ops::Try
-// //! [`Ok(T)`]: Ok
-// //! [`Err(E)`]: Err
+//! [`Ok(T)`]: Ok
+//! [`Err(E)`]: Err
 // //! [io::Error]: ../../std/io/struct.Error.html "io::Error"
 // //!
-// //! # Representation
+//! # Representation
 // //!
 // //! In some cases, [`Result<T, E>`] will gain the same size, alignment, and ABI
 // //! guarantees as [`Option<U>`] has. One of either the `T` or `E` type must be a

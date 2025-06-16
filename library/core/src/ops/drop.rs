@@ -133,7 +133,7 @@
 // /// hard to predict when, and how often destructors will be executed. As such,
 // /// these types cannot have destructors.
 // ///
-// /// ## Drop check
+/// ## Drop check
 // ///
 // /// Dropping interacts with the borrow checker in subtle ways: when a type `T` is being implicitly
 // /// dropped as some variable of this type goes out of scope, the borrow checker needs to ensure that

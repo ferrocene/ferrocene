@@ -717,3 +717,13 @@ fn array_map_drops_unmapped_elements_on_panic() {
         assert_eq!(counter.load(Ordering::SeqCst), MAX);
     }
 }
+
+
+
+#[test]
+fn array_as_slice() {
+    let mut v = [1, 2, 3, 4, 5, 6];
+
+    assert_eq!(v.as_slice(), &[1, 2, 3, 4, 5, 6]);
+    assert_eq!(v.as_mut_slice(), &mut [1, 2, 3, 4, 5, 6]);
+}

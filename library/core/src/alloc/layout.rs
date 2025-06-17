@@ -6,16 +6,19 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::error::Error;
-#[cfg(not(feature = "ferrocene_certified"))]
-use crate::fmt;
+#[cfg(feature = "ferrocene_certified")]
 use crate::intrinsics::unchecked_sub;
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::intrinsics::{unchecked_add, unchecked_mul};
+use crate::intrinsics::{unchecked_add, unchecked_mul, unchecked_sub};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::SizedTypeProperties;
+#[cfg(feature = "ferrocene_certified")]
 use crate::ptr::Alignment;
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::ptr::NonNull;
+use crate::ptr::{Alignment, NonNull};
+#[cfg(not(feature = "ferrocene_certified"))]
+use crate::{assert_unsafe_precondition, fmt, mem};
+#[cfg(feature = "ferrocene_certified")]
 use crate::{assert_unsafe_precondition, mem};
 
 // While this function is used in one place and its implementation
@@ -127,6 +130,7 @@ impl Layout {
     }
 
     /// Creates a layout, bypassing all checks.
+    // FIXME(pvdrz): fix docs
     // ///
     // /// # Safety
     // ///

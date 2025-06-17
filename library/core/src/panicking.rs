@@ -79,7 +79,7 @@ pub const fn panic_fmt(fmt: fmt::Arguments<'_>) -> ! {
     unsafe { panic_impl(&pi) }
 }
 
-/// FIXME: This is just a hack so we can get `panic` working.
+/// FIXME(pvdrz): This is just a hack so we can get `panic` working.
 #[inline]
 #[track_caller]
 #[lang = "panic_fmt"] // needed for const-evaluated panics
@@ -135,7 +135,7 @@ pub const fn panic_nounwind_fmt(fmt: fmt::Arguments<'_>, force_no_backtrace: boo
     )
 }
 
-/// FIXME: This is just a hack so we can get `panic_nounwind` working.
+/// FIXME(pvdrz): This is just a hack so we can get `panic_nounwind` working.
 #[inline]
 #[track_caller]
 // This attribute has the key side-effect that if the panic handler ignores `can_unwind`

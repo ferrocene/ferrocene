@@ -1,9 +1,10 @@
+#[cfg(feature = "ferrocene_certified")]
 use crate::mem;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::{cmp, fmt, hash, num};
+use crate::{cmp, fmt, hash, mem, num};
 
 /// A type storing a `usize` which is a power of two, and thus
 /// represents a possible alignment in the Rust abstract machine.
@@ -11,8 +12,8 @@ use crate::{cmp, fmt, hash, num};
 /// Note that particularly large alignments, while representable in this type,
 /// are likely not to be supported by actual allocators and linkers.
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(PartialEq, Eq))]
-#[derive(Copy, Clone)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, PartialEq, Eq))]
+#[cfg_attr(feature = "ferrocene_certified", derive(Copy, Clone))]
 #[repr(transparent)]
 pub struct Alignment(AlignmentEnum);
 
@@ -259,8 +260,8 @@ impl Default for Alignment {
 }
 
 #[cfg(target_pointer_width = "16")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(PartialEq, Eq))]
-#[derive(Copy, Clone)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, PartialEq, Eq))]
+#[cfg_attr(feature = "ferrocene_certified", derive(Copy, Clone))]
 #[repr(u16)]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
@@ -282,8 +283,8 @@ enum AlignmentEnum {
 }
 
 #[cfg(target_pointer_width = "32")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(PartialEq, Eq))]
-#[derive(Copy, Clone)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, PartialEq, Eq))]
+#[cfg_attr(feature = "ferrocene_certified", derive(Copy, Clone))]
 #[repr(u32)]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
@@ -321,8 +322,8 @@ enum AlignmentEnum {
 }
 
 #[cfg(target_pointer_width = "64")]
-#[cfg_attr(not(feature = "ferrocene_certified"), derive(PartialEq, Eq))]
-#[derive(Copy, Clone)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, PartialEq, Eq))]
+#[cfg_attr(feature = "ferrocene_certified", derive(Copy, Clone))]
 #[repr(u64)]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,

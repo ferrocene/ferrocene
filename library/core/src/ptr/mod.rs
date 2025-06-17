@@ -1,4 +1,5 @@
 //! Manually manage memory through raw pointers.
+// FIXME(pvdrz): fix docs
 // //!
 // //! *[See also the pointer primitive types](pointer).*
 // //!
@@ -403,13 +404,15 @@ use crate::intrinsics::const_eval_select;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::FnPtr;
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::mem::MaybeUninit;
-use crate::mem::SizedTypeProperties;
+use crate::mem::{self, MaybeUninit, SizedTypeProperties};
+#[cfg(feature = "ferrocene_certified")]
+use crate::mem::{self, SizedTypeProperties};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::{fmt, hash};
-use crate::{intrinsics, mem, ub_checks};
+use crate::{fmt, hash, intrinsics, ub_checks};
+#[cfg(feature = "ferrocene_certified")]
+use crate::{intrinsics, ub_checks};
 
 mod alignment;
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
@@ -418,11 +421,10 @@ pub use alignment::Alignment;
 mod metadata;
 #[unstable(feature = "ptr_metadata", issue = "81513")]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub use metadata::{DynMetadata, metadata};
+pub use metadata::{DynMetadata, Pointee, Thin, from_raw_parts, from_raw_parts_mut, metadata};
 #[unstable(feature = "ptr_metadata", issue = "81513")]
-pub use metadata::{Pointee, Thin};
-#[unstable(feature = "ptr_metadata", issue = "81513")]
-pub use metadata::{from_raw_parts, from_raw_parts_mut};
+#[cfg(feature = "ferrocene_certified")]
+pub use metadata::{Pointee, Thin, from_raw_parts, from_raw_parts_mut};
 
 #[cfg(not(feature = "ferrocene_certified"))]
 mod non_null;
@@ -876,6 +878,7 @@ pub const fn null_mut<T: ?Sized + Thin>() -> *mut T {
 }
 
 /// Creates a pointer with the given address and no [provenance][crate::ptr#provenance].
+// FIXME(pvdrz): fix docs
 // ///
 // /// This is equivalent to `ptr::null().with_addr(addr)`.
 // ///
@@ -915,6 +918,7 @@ pub const fn dangling<T>() -> *const T {
 }
 
 /// Creates a pointer with the given address and no [provenance][crate::ptr#provenance].
+// FIXME(pvdrz): fix docs
 // ///
 // /// This is equivalent to `ptr::null_mut().with_addr(addr)`.
 // ///
@@ -1617,6 +1621,7 @@ pub const unsafe fn replace<T>(dst: *mut T, src: T) -> T {
 
 /// Reads the value from `src` without moving it. This leaves the
 /// memory in `src` unchanged.
+// FIXME(pvdrz): fix docs
 // ///
 // /// # Safety
 // ///
@@ -1871,6 +1876,7 @@ pub const unsafe fn read_unaligned<T>(src: *const T) -> T {
 /// This is appropriate for initializing uninitialized memory, or overwriting
 /// memory that has previously been [`read`] from.
 ///
+// FIXME(pvdrz): fix docs
 // /// # Safety
 // ///
 // /// Behavior is undefined if any of the following conditions are violated:

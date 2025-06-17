@@ -1,6 +1,7 @@
 use crate::{convert, ops};
 
 /// Used to tell an operation whether it should exit early or go on as usual.
+// FIXME(pvdrz): fix docs
 // ///
 // /// This is used when exposing things (like graph traversals or visitors) where
 // /// you want the user to be able to choose whether to exit early.

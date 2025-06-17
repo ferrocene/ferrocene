@@ -1,4 +1,5 @@
 //! Overloadable operators.
+// FIXME(pvdrz): fix docs
 // //!
 // //! Implementing these traits allows you to overload certain operators.
 // //!

@@ -3076,6 +3076,7 @@ pub const unsafe fn write_via_move<T>(ptr: *mut T, value: T);
 
 /// Returns the value of the discriminant for the variant in 'v';
 /// if `T` has no discriminant, returns `0`.
+// FIXME(pvdrz): fix docs
 // ///
 // /// Note that, unlike most intrinsics, this is safe to call;
 // /// it does not require an `unsafe` block.

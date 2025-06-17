@@ -21,7 +21,6 @@ test = false
 bench = false
 
 [features]
-
 # Ferrocene addition: only add the explicit dependency to profiler_builtins when we are building
 # core specifically for profiling.
 ferrocene_inject_profiler_builtins = ["dep:profiler_builtins"]
@@ -37,9 +36,6 @@ optimize_for_size = []
 debug_refcell = []
 # Make `TypeId` store a reference to the name of the type, so that it can print that name.
 debug_typeid = []
-
-# Include uncertified code
-uncertified = []
 
 [lints.rust.unexpected_cfgs]
 level = "warn"

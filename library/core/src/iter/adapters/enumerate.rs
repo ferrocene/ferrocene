@@ -51,7 +51,7 @@ impl<I> Enumerate<I> {
     /// assert_eq!(iter.next(), None);
     /// assert_eq!(iter.next_index(), 2);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "next_index", issue = "130711")]
     pub fn next_index(&self) -> usize {
         self.count
@@ -74,7 +74,7 @@ where
     /// # Panics
     ///
     /// Might panic if the index of the element overflows a `usize`.
-    #[inline]
+    #[inline(never)]
     #[rustc_inherit_overflow_checks]
     fn next(&mut self) -> Option<(usize, <I as Iterator>::Item)> {
         let a = self.iter.next()?;
@@ -83,12 +83,12 @@ where
         Some((i, a))
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.iter.size_hint()
     }
 
-    #[inline]
+    #[inline(never)]
     #[rustc_inherit_overflow_checks]
     fn nth(&mut self, n: usize) -> Option<(usize, I::Item)> {
         let a = self.iter.nth(n)?;
@@ -97,19 +97,19 @@ where
         Some((i, a))
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         self.iter.count()
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
         Fold: FnMut(Acc, Self::Item) -> R,
         R: Try<Output = Acc>,
     {
-        #[inline]
+        #[inline(never)]
         fn enumerate<'a, T, Acc, R>(
             count: &'a mut usize,
             mut fold: impl FnMut(Acc, (usize, T)) -> R + 'a,
@@ -125,12 +125,12 @@ where
         self.iter.try_fold(init, enumerate(&mut self.count, fold))
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
     {
-        #[inline]
+        #[inline(never)]
         fn enumerate<T, Acc>(
             mut count: usize,
             mut fold: impl FnMut(Acc, (usize, T)) -> Acc,
@@ -146,7 +146,7 @@ where
         self.iter.fold(init, enumerate(self.count, fold))
     }
 
-    #[inline]
+    #[inline(never)]
     #[rustc_inherit_overflow_checks]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let remaining = self.iter.advance_by(n);
@@ -159,7 +159,7 @@ where
     }
 
     #[rustc_inherit_overflow_checks]
-    #[inline]
+    #[inline(never)]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> <Self as Iterator>::Item
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -176,7 +176,7 @@ impl<I> DoubleEndedIterator for Enumerate<I>
 where
     I: ExactSizeIterator + DoubleEndedIterator,
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<(usize, <I as Iterator>::Item)> {
         let a = self.iter.next_back()?;
         let len = self.iter.len();
@@ -185,7 +185,7 @@ where
         Some((self.count + len, a))
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, n: usize) -> Option<(usize, <I as Iterator>::Item)> {
         let a = self.iter.nth_back(n)?;
         let len = self.iter.len();
@@ -194,7 +194,7 @@ where
         Some((self.count + len, a))
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -217,7 +217,7 @@ where
         self.iter.try_rfold(init, enumerate(count, fold))
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -238,7 +238,7 @@ where
         self.iter.rfold(init, enumerate(count, fold))
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         // we do not need to update the count since that only tallies the number of items
         // consumed from the front. consuming items from the back can never reduce that.
@@ -289,7 +289,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut I::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.iter) }

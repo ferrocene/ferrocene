@@ -40,7 +40,7 @@ where
 {
     type Item = I::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<I::Item> {
         fn check<'a, T>(
             flag: &'a mut bool,
@@ -61,13 +61,13 @@ where
         self.iter.find(check(flag, pred))
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (_, upper) = self.iter.size_hint();
         (0, upper) // can't know a lower bound, due to the predicate
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, Fold, R>(&mut self, mut init: Acc, mut fold: Fold) -> R
     where
         Self: Sized,
@@ -83,7 +83,7 @@ where
         self.iter.try_fold(init, fold)
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<Acc, Fold>(mut self, mut init: Acc, mut fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -116,7 +116,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut I::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.iter) }

@@ -39,7 +39,7 @@ pub struct OnceCell<T> {
 
 impl<T> OnceCell<T> {
     /// Creates a new uninitialized cell.
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "once_cell", since = "1.70.0")]
     #[rustc_const_stable(feature = "once_cell", since = "1.70.0")]
@@ -50,7 +50,7 @@ impl<T> OnceCell<T> {
     /// Gets the reference to the underlying value.
     ///
     /// Returns `None` if the cell is uninitialized.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "once_cell", since = "1.70.0")]
     pub fn get(&self) -> Option<&T> {
         // SAFETY: Safe due to `inner`'s invariant
@@ -60,7 +60,7 @@ impl<T> OnceCell<T> {
     /// Gets the mutable reference to the underlying value.
     ///
     /// Returns `None` if the cell is uninitialized.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "once_cell", since = "1.70.0")]
     pub fn get_mut(&mut self) -> Option<&mut T> {
         self.inner.get_mut().as_mut()
@@ -86,7 +86,7 @@ impl<T> OnceCell<T> {
     ///
     /// assert!(cell.get().is_some());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "once_cell", since = "1.70.0")]
     pub fn set(&self, value: T) -> Result<(), T> {
         match self.try_insert(value) {
@@ -118,7 +118,7 @@ impl<T> OnceCell<T> {
     ///
     /// assert!(cell.get().is_some());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "once_cell_try_insert", issue = "116693")]
     pub fn try_insert(&self, value: T) -> Result<&T, (&T, T)> {
         if let Some(old) = self.get() {
@@ -155,7 +155,7 @@ impl<T> OnceCell<T> {
     /// let value = cell.get_or_init(|| unreachable!());
     /// assert_eq!(value, &92);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "once_cell", since = "1.70.0")]
     pub fn get_or_init<F>(&self, f: F) -> &T
     where
@@ -191,7 +191,7 @@ impl<T> OnceCell<T> {
     /// let value = cell.get_mut_or_init(|| unreachable!());
     /// assert_eq!(*value, 94);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "once_cell_get_mut", issue = "121641")]
     pub fn get_mut_or_init<F>(&mut self, f: F) -> &mut T
     where
@@ -312,7 +312,7 @@ impl<T> OnceCell<T> {
     /// let _ = cell.set("hello".to_owned());
     /// assert_eq!(cell.into_inner(), Some("hello".to_owned()));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "once_cell", since = "1.70.0")]
     #[rustc_const_stable(feature = "const_cell_into_inner", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
@@ -341,7 +341,7 @@ impl<T> OnceCell<T> {
     /// assert_eq!(cell.take(), Some("hello".to_owned()));
     /// assert_eq!(cell.get(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "once_cell", since = "1.70.0")]
     pub fn take(&mut self) -> Option<T> {
         mem::take(self).into_inner()
@@ -350,7 +350,7 @@ impl<T> OnceCell<T> {
 
 #[stable(feature = "once_cell", since = "1.70.0")]
 impl<T> Default for OnceCell<T> {
-    #[inline]
+    #[inline(never)]
     fn default() -> Self {
         Self::new()
     }
@@ -370,7 +370,7 @@ impl<T: fmt::Debug> fmt::Debug for OnceCell<T> {
 
 #[stable(feature = "once_cell", since = "1.70.0")]
 impl<T: Clone> Clone for OnceCell<T> {
-    #[inline]
+    #[inline(never)]
     fn clone(&self) -> OnceCell<T> {
         let res = OnceCell::new();
         if let Some(value) = self.get() {
@@ -385,7 +385,7 @@ impl<T: Clone> Clone for OnceCell<T> {
 
 #[stable(feature = "once_cell", since = "1.70.0")]
 impl<T: PartialEq> PartialEq for OnceCell<T> {
-    #[inline]
+    #[inline(never)]
     fn eq(&self, other: &Self) -> bool {
         self.get() == other.get()
     }
@@ -397,7 +397,7 @@ impl<T: Eq> Eq for OnceCell<T> {}
 #[stable(feature = "once_cell", since = "1.70.0")]
 impl<T> From<T> for OnceCell<T> {
     /// Creates a new `OnceCell<T>` which already contains the given `value`.
-    #[inline]
+    #[inline(never)]
     fn from(value: T) -> Self {
         OnceCell { inner: UnsafeCell::new(Some(value)) }
     }

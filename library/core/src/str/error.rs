@@ -75,7 +75,7 @@ impl Utf8Error {
     #[stable(feature = "utf8_error", since = "1.5.0")]
     #[rustc_const_stable(feature = "const_str_from_utf8_shared", since = "1.63.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn valid_up_to(&self) -> usize {
         self.valid_up_to
     }
@@ -98,7 +98,7 @@ impl Utf8Error {
     #[stable(feature = "utf8_error_error_len", since = "1.20.0")]
     #[rustc_const_stable(feature = "const_str_from_utf8_shared", since = "1.63.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn error_len(&self) -> Option<usize> {
         // FIXME(const-hack): This should become `map` again, once it's `const`
         match self.error_len {

@@ -110,7 +110,7 @@ pub trait Iterator {
     /// assert_eq!(second, "all");
     /// assert_eq!(third, "those");
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "iter_next_chunk", reason = "recently added", issue = "98326")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn next_chunk<const N: usize>(
@@ -188,7 +188,7 @@ pub trait Iterator {
     ///
     /// assert_eq!((usize::MAX, None), iter.size_hint());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -224,7 +224,7 @@ pub trait Iterator {
     /// let a = [1, 2, 3, 4, 5];
     /// assert_eq!(a.iter().count(), 5);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn count(self) -> usize
@@ -253,14 +253,14 @@ pub trait Iterator {
     /// let a = [1, 2, 3, 4, 5];
     /// assert_eq!(a.into_iter().last(), Some(5));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn last(self) -> Option<Self::Item>
     where
         Self: Sized,
     {
-        #[inline]
+        #[inline(never)]
         fn some<T>(_: Option<T>, x: T) -> Option<T> {
             Some(x)
         }
@@ -301,7 +301,7 @@ pub trait Iterator {
     /// assert_eq!(iter.advance_by(0), Ok(()));
     /// assert_eq!(iter.advance_by(100), Err(NonZero::new(99).unwrap())); // only `4` was skipped
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "iter_advance_by", reason = "recently added", issue = "77404")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
@@ -379,7 +379,7 @@ pub trait Iterator {
     /// let a = [1, 2, 3];
     /// assert_eq!(a.into_iter().nth(10), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
@@ -430,7 +430,7 @@ pub trait Iterator {
     /// assert_eq!(iter.next(), Some(4));
     /// assert_eq!(iter.next(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "iterator_step_by", since = "1.28.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn step_by(self, step: usize) -> StepBy<Self>
@@ -502,7 +502,7 @@ pub trait Iterator {
     ///
     /// [`once`]: crate::iter::once
     /// [`OsStr`]: ../../std/ffi/struct.OsStr.html
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn chain<U>(self, other: U) -> Chain<Self, U::IntoIter>
@@ -621,7 +621,7 @@ pub trait Iterator {
     /// [`enumerate`]: Iterator::enumerate
     /// [`next`]: Iterator::next
     /// [`zip`]: crate::iter::zip
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn zip<U>(self, other: U) -> Zip<Self, U::IntoIter>
@@ -665,7 +665,7 @@ pub trait Iterator {
     ///
     /// [`Clone`]: crate::clone::Clone
     /// [`intersperse_with`]: Iterator::intersperse_with
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn intersperse(self, separator: Self::Item) -> Intersperse<Self>
@@ -724,7 +724,7 @@ pub trait Iterator {
     /// ```
     /// [`Clone`]: crate::clone::Clone
     /// [`intersperse`]: Iterator::intersperse
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "iter_intersperse", reason = "recently added", issue = "79524")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn intersperse_with<G>(self, separator: G) -> IntersperseWith<Self, G>
@@ -784,7 +784,7 @@ pub trait Iterator {
     /// }
     /// ```
     #[rustc_diagnostic_item = "IteratorMap"]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn map<B, F>(self, f: F) -> Map<Self, F>
@@ -830,7 +830,7 @@ pub trait Iterator {
     ///       .filter(|&(i, x)| (i + x) % 3 == 0)
     ///       .for_each(|(i, x)| println!("{i}:{x}"));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "iterator_for_each", since = "1.21.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn for_each<F>(self, f: F)
@@ -838,7 +838,7 @@ pub trait Iterator {
         Self: Sized,
         F: FnMut(Self::Item),
     {
-        #[inline]
+        #[inline(never)]
         fn call<T>(mut f: impl FnMut(T)) -> impl FnMut((), T) {
             move |(), item| f(item)
         }
@@ -905,7 +905,7 @@ pub trait Iterator {
     /// of these layers.
     ///
     /// Note that `iter.filter(f).next()` is equivalent to `iter.find(f)`.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "iter_filter"]
     #[cfg(not(feature = "ferrocene_certified"))]
@@ -952,7 +952,7 @@ pub trait Iterator {
     /// assert_eq!(iter.next(), Some(5));
     /// assert_eq!(iter.next(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn filter_map<B, F>(self, f: F) -> FilterMap<Self, F>
@@ -999,7 +999,7 @@ pub trait Iterator {
     /// assert_eq!(iter.next(), Some((2, 'c')));
     /// assert_eq!(iter.next(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "enumerate_method"]
     #[cfg(not(feature = "ferrocene_certified"))]
@@ -1072,7 +1072,7 @@ pub trait Iterator {
     /// [`peek`]: Peekable::peek
     /// [`peek_mut`]: Peekable::peek_mut
     /// [`next`]: Iterator::next
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn peekable(self) -> Peekable<Self>
@@ -1137,7 +1137,7 @@ pub trait Iterator {
     ///
     /// assert_eq!(iter.next(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "drop_while")]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
@@ -1217,7 +1217,7 @@ pub trait Iterator {
     ///
     /// The `3` is no longer there, because it was consumed in order to see if
     /// the iteration should stop, but wasn't placed back into the iterator.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn take_while<P>(self, predicate: P) -> TakeWhile<Self, P>
@@ -1306,7 +1306,7 @@ pub trait Iterator {
     /// If you need a fused iterator, use [`fuse`].
     ///
     /// [`fuse`]: Iterator::fuse
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "iter_map_while", since = "1.57.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn map_while<B, P>(self, predicate: P) -> MapWhile<Self, P>
@@ -1336,7 +1336,7 @@ pub trait Iterator {
     /// assert_eq!(iter.next(), Some(3));
     /// assert_eq!(iter.next(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn skip(self, n: usize) -> Skip<Self>
@@ -1409,7 +1409,7 @@ pub trait Iterator {
     ///
     /// [`by_ref`]: Iterator::by_ref
     #[doc(alias = "limit")]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn take(self, n: usize) -> Take<Self>
@@ -1457,7 +1457,7 @@ pub trait Iterator {
     /// assert_eq!(iter.next(), Some(-6));
     /// assert_eq!(iter.next(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn scan<St, B, F>(self, initial_state: St, f: F) -> Scan<Self, St, F>
@@ -1496,7 +1496,7 @@ pub trait Iterator {
     ///                           .collect();
     /// assert_eq!(merged, "alphabetagamma");
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn flat_map<U, F>(self, f: F) -> FlatMap<Self, U, F>
@@ -1581,7 +1581,7 @@ pub trait Iterator {
     /// structure, you have to `flatten()` again.
     ///
     /// [`flat_map()`]: Iterator::flat_map
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "iterator_flatten", since = "1.29.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn flatten(self) -> Flatten<Self>
@@ -1738,7 +1738,7 @@ pub trait Iterator {
     /// assert_eq!(iter.next(), None);
     /// assert_eq!(iter.next(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "iter_map_windows", reason = "recently added", issue = "87155")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn map_windows<F, R, const N: usize>(self, f: F) -> MapWindows<Self, F, N>
@@ -1801,7 +1801,7 @@ pub trait Iterator {
     /// assert_eq!(iter.next(), None);
     /// assert_eq!(iter.next(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn fuse(self) -> Fuse<Self>
@@ -1886,7 +1886,7 @@ pub trait Iterator {
     /// Parsing error: invalid digit found in string
     /// Sum: 3
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn inspect<F>(self, f: F) -> Inspect<Self, F>
@@ -2042,7 +2042,7 @@ pub trait Iterator {
     /// [`iter`]: Iterator::next
     /// [`String`]: ../../std/string/struct.String.html
     /// [`char`]: type@char
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use = "if you really need to exhaust the iterator, consider `.for_each(drop)` instead"]
     #[rustc_diagnostic_item = "iterator_collect_fn"]
@@ -2132,7 +2132,7 @@ pub trait Iterator {
     /// ```
     ///
     /// [`collect`]: Iterator::collect
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "iterator_try_collect", issue = "94047")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn try_collect<B>(&mut self) -> ChangeOutputType<Self::Item, B>
@@ -2205,7 +2205,7 @@ pub trait Iterator {
     /// assert_eq!(count, vec.len());
     /// assert_eq!(vec, vec![1, 2, 3, 1, 2, 3]);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "iter_collect_into", reason = "new API", issue = "94780")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn collect_into<E: Extend<Self::Item>>(self, collection: &mut E) -> &mut E
@@ -2247,7 +2247,7 @@ pub trait Iterator {
         B: Default + Extend<Self::Item>,
         F: FnMut(&Self::Item) -> bool,
     {
-        #[inline]
+        #[inline(never)]
         fn extend<'a, T, B: Extend<T>>(
             mut f: impl FnMut(&T) -> bool + 'a,
             left: &'a mut B,
@@ -2314,7 +2314,7 @@ pub trait Iterator {
 
         // These closure "factory" functions exist to avoid genericity in `Self`.
 
-        #[inline]
+        #[inline(never)]
         fn is_false<'a, T>(
             predicate: &'a mut impl FnMut(&T) -> bool,
             true_count: &'a mut usize,
@@ -2326,7 +2326,7 @@ pub trait Iterator {
             }
         }
 
-        #[inline]
+        #[inline(never)]
         fn is_true<T>(predicate: &mut impl FnMut(&T) -> bool) -> impl FnMut(&&mut T) -> bool + '_ {
             move |x| predicate(&**x)
         }
@@ -2454,7 +2454,7 @@ pub trait Iterator {
     /// });
     /// assert_eq!(triangular, ControlFlow::Continue(435));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "iterator_try_fold", since = "1.27.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
@@ -2513,7 +2513,7 @@ pub trait Iterator {
     /// });
     /// assert_eq!(r, ControlFlow::Break(17));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "iterator_try_fold", since = "1.27.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn try_for_each<F, R>(&mut self, f: F) -> R
@@ -2522,7 +2522,7 @@ pub trait Iterator {
         F: FnMut(Self::Item) -> R,
         R: Try<Output = ()>,
     {
-        #[inline]
+        #[inline(never)]
         fn call<T, R>(mut f: impl FnMut(T) -> R) -> impl FnMut((), T) -> R {
             move |(), x| f(x)
         }
@@ -2633,7 +2633,7 @@ pub trait Iterator {
     ///
     /// [`reduce()`]: Iterator::reduce
     #[doc(alias = "inject", alias = "foldl")]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn fold<B, F>(mut self, init: B, mut f: F) -> B
@@ -2671,7 +2671,7 @@ pub trait Iterator {
     /// let folded: i32 = (1..10).fold(0, |acc, e| acc + e);
     /// assert_eq!(reduced, folded);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "iterator_fold_self", since = "1.51.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn reduce<F>(mut self, f: F) -> Option<Self::Item>
@@ -2743,7 +2743,7 @@ pub trait Iterator {
     ///     });
     /// assert_eq!(max, Ok(Some("5")));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "iterator_try_reduce", reason = "new API", issue = "87053")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn try_reduce<R>(
@@ -2802,7 +2802,7 @@ pub trait Iterator {
     /// // we can still use `iter`, as there are more elements.
     /// assert_eq!(iter.next(), Some(3));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn all<F>(&mut self, f: F) -> bool
@@ -2810,7 +2810,7 @@ pub trait Iterator {
         Self: Sized,
         F: FnMut(Self::Item) -> bool,
     {
-        #[inline]
+        #[inline(never)]
         fn check<T>(mut f: impl FnMut(T) -> bool) -> impl FnMut((), T) -> ControlFlow<()> {
             move |(), x| {
                 if f(x) { ControlFlow::Continue(()) } else { ControlFlow::Break(()) }
@@ -2856,7 +2856,7 @@ pub trait Iterator {
     /// // we can still use `iter`, as there are more elements.
     /// assert_eq!(iter.next(), Some(2));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn any<F>(&mut self, f: F) -> bool
@@ -2864,7 +2864,7 @@ pub trait Iterator {
         Self: Sized,
         F: FnMut(Self::Item) -> bool,
     {
-        #[inline]
+        #[inline(never)]
         fn check<T>(mut f: impl FnMut(T) -> bool) -> impl FnMut((), T) -> ControlFlow<()> {
             move |(), x| {
                 if f(x) { ControlFlow::Break(()) } else { ControlFlow::Continue(()) }
@@ -2919,7 +2919,7 @@ pub trait Iterator {
     /// ```
     ///
     /// Note that `iter.find(f)` is equivalent to `iter.filter(f).next()`.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn find<P>(&mut self, predicate: P) -> Option<Self::Item>
@@ -2927,7 +2927,7 @@ pub trait Iterator {
         Self: Sized,
         P: FnMut(&Self::Item) -> bool,
     {
-        #[inline]
+        #[inline(never)]
         fn check<T>(mut predicate: impl FnMut(&T) -> bool) -> impl FnMut((), T) -> ControlFlow<T> {
             move |(), x| {
                 if predicate(&x) { ControlFlow::Break(x) } else { ControlFlow::Continue(()) }
@@ -2951,7 +2951,7 @@ pub trait Iterator {
     ///
     /// assert_eq!(first_number, Some(2));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "iterator_find_map", since = "1.30.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn find_map<B, F>(&mut self, f: F) -> Option<B>
@@ -2959,7 +2959,7 @@ pub trait Iterator {
         Self: Sized,
         F: FnMut(Self::Item) -> Option<B>,
     {
-        #[inline]
+        #[inline(never)]
         fn check<T, B>(mut f: impl FnMut(T) -> Option<B>) -> impl FnMut((), T) -> ControlFlow<B> {
             move |(), x| match f(x) {
                 Some(x) => ControlFlow::Break(x),
@@ -3010,7 +3010,7 @@ pub trait Iterator {
     /// let result = a.into_iter().rev().try_find(|&x| NonZero::new(x).map(|y| y.is_power_of_two()));
     /// assert_eq!(result, None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "try_find", reason = "new API", issue = "63178")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn try_find<R>(
@@ -3021,7 +3021,7 @@ pub trait Iterator {
         Self: Sized,
         R: Try<Output = bool, Residual: Residual<Option<Self::Item>>>,
     {
-        #[inline]
+        #[inline(never)]
         fn check<I, V, R>(
             mut f: impl FnMut(&I) -> V,
         ) -> impl FnMut((), I) -> ControlFlow<R::TryType>
@@ -3094,7 +3094,7 @@ pub trait Iterator {
     /// assert_eq!(iter.position(|x| x == 4), Some(0));
     ///
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn position<P>(&mut self, predicate: P) -> Option<usize>
@@ -3102,7 +3102,7 @@ pub trait Iterator {
         Self: Sized,
         P: FnMut(Self::Item) -> bool,
     {
-        #[inline]
+        #[inline(never)]
         fn check<'a, T>(
             mut predicate: impl FnMut(T) -> bool + 'a,
             acc: &'a mut usize,
@@ -3160,7 +3160,7 @@ pub trait Iterator {
     /// assert_eq!(iter.next(), Some(-1));
     /// assert_eq!(iter.next_back(), Some(3));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn rposition<P>(&mut self, predicate: P) -> Option<usize>
@@ -3170,7 +3170,7 @@ pub trait Iterator {
     {
         // No need for an overflow check here, because `ExactSizeIterator`
         // implies that the number of elements fits into a `usize`.
-        #[inline]
+        #[inline(never)]
         fn check<T>(
             mut predicate: impl FnMut(T) -> bool,
         ) -> impl FnMut(usize, T) -> ControlFlow<usize, usize> {
@@ -3210,7 +3210,7 @@ pub trait Iterator {
     /// assert_eq!(a.into_iter().max(), Some(3));
     /// assert_eq!(b.into_iter().max(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn max(self) -> Option<Self::Item>
@@ -3247,7 +3247,7 @@ pub trait Iterator {
     /// assert_eq!(a.into_iter().min(), Some(1));
     /// assert_eq!(b.into_iter().min(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn min(self) -> Option<Self::Item>
@@ -3270,7 +3270,7 @@ pub trait Iterator {
     /// let a = [-3_i32, 0, 1, 5, -10];
     /// assert_eq!(a.into_iter().max_by_key(|x| x.abs()).unwrap(), -10);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "iter_cmp_by_key", since = "1.6.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn max_by_key<B: Ord, F>(self, f: F) -> Option<Self::Item>
@@ -3278,12 +3278,12 @@ pub trait Iterator {
         Self: Sized,
         F: FnMut(&Self::Item) -> B,
     {
-        #[inline]
+        #[inline(never)]
         fn key<T, B>(mut f: impl FnMut(&T) -> B) -> impl FnMut(T) -> (B, T) {
             move |x| (f(&x), x)
         }
 
-        #[inline]
+        #[inline(never)]
         fn compare<T, B: Ord>((x_p, _): &(B, T), (y_p, _): &(B, T)) -> Ordering {
             x_p.cmp(y_p)
         }
@@ -3304,7 +3304,7 @@ pub trait Iterator {
     /// let a = [-3_i32, 0, 1, 5, -10];
     /// assert_eq!(a.into_iter().max_by(|x, y| x.cmp(y)).unwrap(), 5);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "iter_max_by", since = "1.15.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn max_by<F>(self, compare: F) -> Option<Self::Item>
@@ -3312,7 +3312,7 @@ pub trait Iterator {
         Self: Sized,
         F: FnMut(&Self::Item, &Self::Item) -> Ordering,
     {
-        #[inline]
+        #[inline(never)]
         fn fold<T>(mut compare: impl FnMut(&T, &T) -> Ordering) -> impl FnMut(T, T) -> T {
             move |x, y| cmp::max_by(x, y, &mut compare)
         }
@@ -3332,7 +3332,7 @@ pub trait Iterator {
     /// let a = [-3_i32, 0, 1, 5, -10];
     /// assert_eq!(a.into_iter().min_by_key(|x| x.abs()).unwrap(), 0);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "iter_cmp_by_key", since = "1.6.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn min_by_key<B: Ord, F>(self, f: F) -> Option<Self::Item>
@@ -3340,12 +3340,12 @@ pub trait Iterator {
         Self: Sized,
         F: FnMut(&Self::Item) -> B,
     {
-        #[inline]
+        #[inline(never)]
         fn key<T, B>(mut f: impl FnMut(&T) -> B) -> impl FnMut(T) -> (B, T) {
             move |x| (f(&x), x)
         }
 
-        #[inline]
+        #[inline(never)]
         fn compare<T, B: Ord>((x_p, _): &(B, T), (y_p, _): &(B, T)) -> Ordering {
             x_p.cmp(y_p)
         }
@@ -3366,7 +3366,7 @@ pub trait Iterator {
     /// let a = [-3_i32, 0, 1, 5, -10];
     /// assert_eq!(a.into_iter().min_by(|x, y| x.cmp(y)).unwrap(), -10);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "iter_min_by", since = "1.15.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn min_by<F>(self, compare: F) -> Option<Self::Item>
@@ -3374,7 +3374,7 @@ pub trait Iterator {
         Self: Sized,
         F: FnMut(&Self::Item, &Self::Item) -> Ordering,
     {
-        #[inline]
+        #[inline(never)]
         fn fold<T>(mut compare: impl FnMut(&T, &T) -> Ordering) -> impl FnMut(T, T) -> T {
             move |x, y| cmp::min_by(x, y, &mut compare)
         }
@@ -3403,7 +3403,7 @@ pub trait Iterator {
     ///
     /// assert_eq!(iter.next(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "reverse")]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
@@ -3555,7 +3555,7 @@ pub trait Iterator {
     /// }
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn cycle(self) -> Cycle<Self>
     where
@@ -3727,7 +3727,7 @@ pub trait Iterator {
         I: IntoIterator,
         F: FnMut(Self::Item, I::Item) -> Ordering,
     {
-        #[inline]
+        #[inline(never)]
         fn compare<X, Y, F>(mut cmp: F) -> impl FnMut(X, Y) -> ControlFlow<Ordering>
         where
             F: FnMut(X, Y) -> Ordering,
@@ -3821,7 +3821,7 @@ pub trait Iterator {
         I: IntoIterator,
         F: FnMut(Self::Item, I::Item) -> Option<Ordering>,
     {
-        #[inline]
+        #[inline(never)]
         fn compare<X, Y, F>(mut partial_cmp: F) -> impl FnMut(X, Y) -> ControlFlow<Option<Ordering>>
         where
             F: FnMut(X, Y) -> Option<Ordering>,
@@ -3879,7 +3879,7 @@ pub trait Iterator {
         I: IntoIterator,
         F: FnMut(Self::Item, I::Item) -> bool,
     {
-        #[inline]
+        #[inline(never)]
         fn compare<X, Y, F>(mut eq: F) -> impl FnMut(X, Y) -> ControlFlow<()>
         where
             F: FnMut(X, Y) -> bool,
@@ -4021,7 +4021,7 @@ pub trait Iterator {
     /// assert!(std::iter::empty::<i32>().is_sorted());
     /// assert!(![0.0, 1.0, f32::NAN].iter().is_sorted());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "is_sorted", since = "1.82.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn is_sorted(self) -> bool
@@ -4056,7 +4056,7 @@ pub trait Iterator {
         Self: Sized,
         F: FnMut(&Self::Item, &Self::Item) -> bool,
     {
-        #[inline]
+        #[inline(never)]
         fn check<'a, T>(
             last: &'a mut T,
             mut compare: impl FnMut(&T, &T) -> bool + 'a,
@@ -4093,7 +4093,7 @@ pub trait Iterator {
     /// assert!(["c", "bb", "aaa"].iter().is_sorted_by_key(|s| s.len()));
     /// assert!(![-2i32, -1, 0, 3].iter().is_sorted_by_key(|n| n.abs()));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "is_sorted", since = "1.82.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     fn is_sorted_by_key<F, K>(self, f: F) -> bool
@@ -4108,7 +4108,7 @@ pub trait Iterator {
     /// See [TrustedRandomAccess][super::super::TrustedRandomAccess]
     // The unusual name is to avoid name collisions in method resolution
     // see #76479.
-    #[inline]
+    #[inline(never)]
     #[doc(hidden)]
     #[unstable(feature = "trusted_random_access", issue = "none")]
     #[cfg(not(feature = "ferrocene_certified"))]
@@ -4130,7 +4130,7 @@ pub trait Iterator {
 ///
 /// Isolates the logic shared by ['cmp_by'](Iterator::cmp_by),
 /// ['partial_cmp_by'](Iterator::partial_cmp_by), and ['eq_by'](Iterator::eq_by).
-#[inline]
+#[inline(never)]
 #[cfg(not(feature = "ferrocene_certified"))]
 fn iter_compare<A, B, F, T>(mut a: A, mut b: B, f: F) -> ControlFlow<T, Ordering>
 where
@@ -4138,7 +4138,7 @@ where
     B: Iterator,
     F: FnMut(A::Item, B::Item) -> ControlFlow<T>,
 {
-    #[inline]
+    #[inline(never)]
     fn compare<'a, B, X, T>(
         b: &'a mut B,
         mut f: impl FnMut(X, B::Item) -> ControlFlow<T> + 'a,
@@ -4168,7 +4168,7 @@ where
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<I: Iterator + ?Sized> Iterator for &mut I {
     type Item = I::Item;
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<I::Item> {
         (**self).next()
     }

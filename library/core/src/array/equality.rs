@@ -5,11 +5,11 @@ impl<T, U, const N: usize> PartialEq<[U; N]> for [T; N]
 where
     T: PartialEq<U>,
 {
-    #[inline]
+    #[inline(never)]
     fn eq(&self, other: &[U; N]) -> bool {
         SpecArrayEq::spec_eq(self, other)
     }
-    #[inline]
+    #[inline(never)]
     fn ne(&self, other: &[U; N]) -> bool {
         SpecArrayEq::spec_ne(self, other)
     }
@@ -20,7 +20,7 @@ impl<T, U, const N: usize> PartialEq<[U]> for [T; N]
 where
     T: PartialEq<U>,
 {
-    #[inline]
+    #[inline(never)]
     fn eq(&self, other: &[U]) -> bool {
         let b: Result<&[U; N], _> = other.try_into();
         match b {
@@ -28,7 +28,7 @@ where
             Err(_) => false,
         }
     }
-    #[inline]
+    #[inline(never)]
     fn ne(&self, other: &[U]) -> bool {
         let b: Result<&[U; N], _> = other.try_into();
         match b {
@@ -43,7 +43,7 @@ impl<T, U, const N: usize> PartialEq<[U; N]> for [T]
 where
     T: PartialEq<U>,
 {
-    #[inline]
+    #[inline(never)]
     fn eq(&self, other: &[U; N]) -> bool {
         let b: Result<&[T; N], _> = self.try_into();
         match b {
@@ -51,7 +51,7 @@ where
             Err(_) => false,
         }
     }
-    #[inline]
+    #[inline(never)]
     fn ne(&self, other: &[U; N]) -> bool {
         let b: Result<&[T; N], _> = self.try_into();
         match b {
@@ -66,11 +66,11 @@ impl<T, U, const N: usize> PartialEq<&[U]> for [T; N]
 where
     T: PartialEq<U>,
 {
-    #[inline]
+    #[inline(never)]
     fn eq(&self, other: &&[U]) -> bool {
         *self == **other
     }
-    #[inline]
+    #[inline(never)]
     fn ne(&self, other: &&[U]) -> bool {
         *self != **other
     }
@@ -81,11 +81,11 @@ impl<T, U, const N: usize> PartialEq<[U; N]> for &[T]
 where
     T: PartialEq<U>,
 {
-    #[inline]
+    #[inline(never)]
     fn eq(&self, other: &[U; N]) -> bool {
         **self == *other
     }
-    #[inline]
+    #[inline(never)]
     fn ne(&self, other: &[U; N]) -> bool {
         **self != *other
     }
@@ -96,11 +96,11 @@ impl<T, U, const N: usize> PartialEq<&mut [U]> for [T; N]
 where
     T: PartialEq<U>,
 {
-    #[inline]
+    #[inline(never)]
     fn eq(&self, other: &&mut [U]) -> bool {
         *self == **other
     }
-    #[inline]
+    #[inline(never)]
     fn ne(&self, other: &&mut [U]) -> bool {
         *self != **other
     }
@@ -111,11 +111,11 @@ impl<T, U, const N: usize> PartialEq<[U; N]> for &mut [T]
 where
     T: PartialEq<U>,
 {
-    #[inline]
+    #[inline(never)]
     fn eq(&self, other: &[U; N]) -> bool {
         **self == *other
     }
-    #[inline]
+    #[inline(never)]
     fn ne(&self, other: &[U; N]) -> bool {
         **self != *other
     }

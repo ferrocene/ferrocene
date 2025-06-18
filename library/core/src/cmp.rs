@@ -257,7 +257,7 @@ pub trait PartialEq<Rhs: ?Sized = Self> {
 
     /// Tests for `!=`. The default implementation is almost always sufficient,
     /// and should not be overridden without very good reason.
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "cmp_partialeq_ne"]
@@ -342,7 +342,7 @@ pub trait Eq: PartialEq<Self> {
     // This should never be implemented by hand.
     #[doc(hidden)]
     #[cfg_attr(not(feature = "ferrocene_certified"), coverage(off))]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     fn assert_receiver_is_total_eq(&self) {}
 }
@@ -404,7 +404,7 @@ pub enum Ordering {
 }
 
 impl Ordering {
-    #[inline]
+    #[inline(never)]
     const fn as_raw(self) -> i8 {
         // FIXME(const-hack): just use `PartialOrd` against `Equal` once that's const
         crate::intrinsics::discriminant_value(&self)
@@ -421,7 +421,7 @@ impl Ordering {
     /// assert_eq!(Ordering::Equal.is_eq(), true);
     /// assert_eq!(Ordering::Greater.is_eq(), false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[rustc_const_stable(feature = "ordering_helpers", since = "1.53.0")]
     #[stable(feature = "ordering_helpers", since = "1.53.0")]
@@ -444,7 +444,7 @@ impl Ordering {
     /// assert_eq!(Ordering::Equal.is_ne(), false);
     /// assert_eq!(Ordering::Greater.is_ne(), true);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[rustc_const_stable(feature = "ordering_helpers", since = "1.53.0")]
     #[stable(feature = "ordering_helpers", since = "1.53.0")]
@@ -463,7 +463,7 @@ impl Ordering {
     /// assert_eq!(Ordering::Equal.is_lt(), false);
     /// assert_eq!(Ordering::Greater.is_lt(), false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[rustc_const_stable(feature = "ordering_helpers", since = "1.53.0")]
     #[stable(feature = "ordering_helpers", since = "1.53.0")]
@@ -482,7 +482,7 @@ impl Ordering {
     /// assert_eq!(Ordering::Equal.is_gt(), false);
     /// assert_eq!(Ordering::Greater.is_gt(), true);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[rustc_const_stable(feature = "ordering_helpers", since = "1.53.0")]
     #[stable(feature = "ordering_helpers", since = "1.53.0")]
@@ -501,7 +501,7 @@ impl Ordering {
     /// assert_eq!(Ordering::Equal.is_le(), true);
     /// assert_eq!(Ordering::Greater.is_le(), false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[rustc_const_stable(feature = "ordering_helpers", since = "1.53.0")]
     #[stable(feature = "ordering_helpers", since = "1.53.0")]
@@ -520,7 +520,7 @@ impl Ordering {
     /// assert_eq!(Ordering::Equal.is_ge(), true);
     /// assert_eq!(Ordering::Greater.is_ge(), true);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[rustc_const_stable(feature = "ordering_helpers", since = "1.53.0")]
     #[stable(feature = "ordering_helpers", since = "1.53.0")]
@@ -557,7 +557,7 @@ impl Ordering {
     /// let b: &mut [_] = &mut [10, 8, 5, 2];
     /// assert!(data == b);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[rustc_const_stable(feature = "const_ordering", since = "1.48.0")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -596,7 +596,7 @@ impl Ordering {
     ///
     /// assert_eq!(result, Ordering::Less);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[rustc_const_stable(feature = "const_ordering", since = "1.48.0")]
     #[stable(feature = "ordering_chaining", since = "1.17.0")]
@@ -635,7 +635,7 @@ impl Ordering {
     ///
     /// assert_eq!(result, Ordering::Less);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "ordering_chaining", since = "1.17.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
@@ -672,24 +672,24 @@ pub struct Reverse<T>(#[stable(feature = "reverse_cmp_key", since = "1.19.0")] p
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PartialOrd> PartialOrd for Reverse<T> {
-    #[inline]
+    #[inline(never)]
     fn partial_cmp(&self, other: &Reverse<T>) -> Option<Ordering> {
         other.0.partial_cmp(&self.0)
     }
 
-    #[inline]
+    #[inline(never)]
     fn lt(&self, other: &Self) -> bool {
         other.0 < self.0
     }
-    #[inline]
+    #[inline(never)]
     fn le(&self, other: &Self) -> bool {
         other.0 <= self.0
     }
-    #[inline]
+    #[inline(never)]
     fn gt(&self, other: &Self) -> bool {
         other.0 > self.0
     }
-    #[inline]
+    #[inline(never)]
     fn ge(&self, other: &Self) -> bool {
         other.0 >= self.0
     }
@@ -698,7 +698,7 @@ impl<T: PartialOrd> PartialOrd for Reverse<T> {
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Ord> Ord for Reverse<T> {
-    #[inline]
+    #[inline(never)]
     fn cmp(&self, other: &Reverse<T>) -> Ordering {
         other.0.cmp(&self.0)
     }
@@ -707,12 +707,12 @@ impl<T: Ord> Ord for Reverse<T> {
 #[stable(feature = "reverse_cmp_key", since = "1.19.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Clone> Clone for Reverse<T> {
-    #[inline]
+    #[inline(never)]
     fn clone(&self) -> Reverse<T> {
         Reverse(self.0.clone())
     }
 
-    #[inline]
+    #[inline(never)]
     fn clone_from(&mut self, source: &Self) {
         self.0.clone_from(&source.0)
     }
@@ -1014,7 +1014,7 @@ pub trait Ord: Eq + PartialOrd<Self> {
     /// assert_eq!(Equal("self").max(Equal("other")).0, "other");
     /// ```
     #[stable(feature = "ord_max_min", since = "1.21.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[rustc_diagnostic_item = "cmp_ord_max"]
     fn max(self, other: Self) -> Self
@@ -1053,7 +1053,7 @@ pub trait Ord: Eq + PartialOrd<Self> {
     /// assert_eq!(Equal("self").min(Equal("other")).0, "self");
     /// ```
     #[stable(feature = "ord_max_min", since = "1.21.0")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[rustc_diagnostic_item = "cmp_ord_min"]
     fn min(self, other: Self) -> Self
@@ -1080,7 +1080,7 @@ pub trait Ord: Eq + PartialOrd<Self> {
     /// assert_eq!(2.clamp(-2, 1), 1);
     /// ```
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "clamp", since = "1.50.0")]
     fn clamp(self, min: Self, max: Self) -> Self
     where
@@ -1387,7 +1387,7 @@ pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
     /// assert_eq!(1.0 < 2.0, true);
     /// assert_eq!(2.0 < 1.0, false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "cmp_partialord_lt"]
@@ -1405,7 +1405,7 @@ pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
     /// assert_eq!(1.0 <= 2.0, true);
     /// assert_eq!(2.0 <= 1.0, false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "cmp_partialord_le"]
@@ -1423,7 +1423,7 @@ pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
     /// assert_eq!(1.0 > 2.0, false);
     /// assert_eq!(2.0 > 1.0, true);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "cmp_partialord_gt"]
@@ -1441,7 +1441,7 @@ pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
     /// assert_eq!(1.0 >= 2.0, false);
     /// assert_eq!(2.0 >= 1.0, true);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "cmp_partialord_ge"]
@@ -1456,7 +1456,7 @@ pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
     /// `PartialOrd::lt`, as it allows types (like primitives) which can cheaply
     /// check `==` and `<` separately to do rather than needing to calculate
     /// (then optimize out) the three-way `Ordering` result.
-    #[inline]
+    #[inline(never)]
     #[must_use]
     // Added to improve the behaviour of tuples; not necessarily stabilization-track.
     #[unstable(feature = "partial_ord_chaining_methods", issue = "none")]
@@ -1466,7 +1466,7 @@ pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
     }
 
     /// Same as `__chaining_lt`, but for `<=` instead of `<`.
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "partial_ord_chaining_methods", issue = "none")]
     #[doc(hidden)]
@@ -1475,7 +1475,7 @@ pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
     }
 
     /// Same as `__chaining_lt`, but for `>` instead of `<`.
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "partial_ord_chaining_methods", issue = "none")]
     #[doc(hidden)]
@@ -1484,7 +1484,7 @@ pub trait PartialOrd<Rhs: ?Sized = Self>: PartialEq<Rhs> {
     }
 
     /// Same as `__chaining_lt`, but for `>=` instead of `<`.
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "partial_ord_chaining_methods", issue = "none")]
     #[doc(hidden)]
@@ -1553,7 +1553,7 @@ pub macro PartialOrd($item:item) {
 ///
 /// assert_eq!(cmp::min(Equal("v1"), Equal("v2")).0, "v1");
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "cmp_min"]
@@ -1581,7 +1581,7 @@ pub fn min<T: Ord>(v1: T, v2: T) -> T {
 /// let result = cmp::min_by(1, -1, abs_cmp);
 /// assert_eq!(result, 1);
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -1607,7 +1607,7 @@ pub fn min_by<T, F: FnOnce(&T, &T) -> Ordering>(v1: T, v2: T, compare: F) -> T {
 /// let result = cmp::min_by_key(1, -1, |x: &i32| x.abs());
 /// assert_eq!(result, 1);
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -1647,7 +1647,7 @@ pub fn min_by_key<T, F: FnMut(&T) -> K, K: Ord>(v1: T, v2: T, mut f: F) -> T {
 ///
 /// assert_eq!(cmp::max(Equal("v1"), Equal("v2")).0, "v2");
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "cmp_max"]
@@ -1675,7 +1675,7 @@ pub fn max<T: Ord>(v1: T, v2: T) -> T {
 /// let result = cmp::max_by(1, -1, abs_cmp);
 /// assert_eq!(result, -1);
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -1701,7 +1701,7 @@ pub fn max_by<T, F: FnOnce(&T, &T) -> Ordering>(v1: T, v2: T, compare: F) -> T {
 /// let result = cmp::max_by_key(1, -1, |x: &i32| x.abs());
 /// assert_eq!(result, -1);
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[stable(feature = "cmp_min_max_by", since = "1.53.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -1746,7 +1746,7 @@ pub fn max_by_key<T, F: FnMut(&T) -> K, K: Ord>(v1: T, v2: T, mut f: F) -> T {
 ///
 /// assert_eq!(cmp::minmax(Equal("v1"), Equal("v2")).map(|v| v.0), ["v1", "v2"]);
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -1778,7 +1778,7 @@ where
 /// assert_eq!(min, 17);
 /// assert_eq!(max, -42);
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -1807,7 +1807,7 @@ where
 /// assert_eq!(min, 17);
 /// assert_eq!(max, -42);
 /// ```
-#[inline]
+#[inline(never)]
 #[must_use]
 #[unstable(feature = "cmp_minmax", issue = "115939")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -1840,11 +1840,11 @@ mod impls {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     impl PartialEq for () {
-        #[inline]
+        #[inline(never)]
         fn eq(&self, _other: &()) -> bool {
             true
         }
-        #[inline]
+        #[inline(never)]
         fn ne(&self, _other: &()) -> bool {
             false
         }
@@ -1888,22 +1888,22 @@ mod impls {
             // because if either is NAN the `==` test will fail so we end up in
             // the `Break` case and the comparison will correctly return `false`.
 
-            #[inline]
+            #[inline(never)]
             fn __chaining_lt(&self, other: &Self) -> ControlFlow<bool> {
                 let (lhs, rhs) = (*self, *other);
                 if lhs == rhs { Continue(()) } else { Break(lhs < rhs) }
             }
-            #[inline]
+            #[inline(never)]
             fn __chaining_le(&self, other: &Self) -> ControlFlow<bool> {
                 let (lhs, rhs) = (*self, *other);
                 if lhs == rhs { Continue(()) } else { Break(lhs <= rhs) }
             }
-            #[inline]
+            #[inline(never)]
             fn __chaining_gt(&self, other: &Self) -> ControlFlow<bool> {
                 let (lhs, rhs) = (*self, *other);
                 if lhs == rhs { Continue(()) } else { Break(lhs > rhs) }
             }
-            #[inline]
+            #[inline(never)]
             fn __chaining_ge(&self, other: &Self) -> ControlFlow<bool> {
                 let (lhs, rhs) = (*self, *other);
                 if lhs == rhs { Continue(()) } else { Break(lhs >= rhs) }
@@ -1915,7 +1915,7 @@ mod impls {
         ($($t:ty)*) => ($(
             #[stable(feature = "rust1", since = "1.0.0")]
             impl PartialOrd for $t {
-                #[inline]
+                #[inline(never)]
                 fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
                     match (*self <= *other, *self >= *other) {
                         (false, false) => None,
@@ -1933,7 +1933,7 @@ mod impls {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     impl PartialOrd for () {
-        #[inline]
+        #[inline(never)]
         fn partial_cmp(&self, _: &()) -> Option<Ordering> {
             Some(Equal)
         }
@@ -1941,7 +1941,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     impl PartialOrd for bool {
-        #[inline]
+        #[inline(never)]
         fn partial_cmp(&self, other: &bool) -> Option<Ordering> {
             Some(self.cmp(other))
         }
@@ -1959,7 +1959,7 @@ mod impls {
         ($($t:ty)*) => ($(
             #[stable(feature = "rust1", since = "1.0.0")]
             impl PartialOrd for $t {
-                #[inline]
+                #[inline(never)]
                 fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
                     Some(crate::intrinsics::three_way_compare(*self, *other))
                 }
@@ -1969,7 +1969,7 @@ mod impls {
 
             #[stable(feature = "rust1", since = "1.0.0")]
             impl Ord for $t {
-                #[inline]
+                #[inline(never)]
                 fn cmp(&self, other: &Self) -> Ordering {
                     crate::intrinsics::three_way_compare(*self, *other)
                 }
@@ -1980,7 +1980,7 @@ mod impls {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     impl Ord for () {
-        #[inline]
+        #[inline(never)]
         fn cmp(&self, _other: &()) -> Ordering {
             Equal
         }
@@ -1988,7 +1988,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     impl Ord for bool {
-        #[inline]
+        #[inline(never)]
         fn cmp(&self, other: &bool) -> Ordering {
             // Casting to i8's and converting the difference to an Ordering generates
             // more optimal assembly.
@@ -2002,17 +2002,17 @@ mod impls {
             }
         }
 
-        #[inline]
+        #[inline(never)]
         fn min(self, other: bool) -> bool {
             self & other
         }
 
-        #[inline]
+        #[inline(never)]
         fn max(self, other: bool) -> bool {
             self | other
         }
 
-        #[inline]
+        #[inline(never)]
         fn clamp(self, min: bool, max: bool) -> bool {
             assert!(min <= max);
             self.max(min).min(max)
@@ -2027,7 +2027,7 @@ mod impls {
     #[unstable(feature = "never_type", issue = "35121")]
     #[cfg(not(feature = "ferrocene_certified"))]
     impl PartialEq for ! {
-        #[inline]
+        #[inline(never)]
         fn eq(&self, _: &!) -> bool {
             *self
         }
@@ -2040,7 +2040,7 @@ mod impls {
     #[unstable(feature = "never_type", issue = "35121")]
     #[cfg(not(feature = "ferrocene_certified"))]
     impl PartialOrd for ! {
-        #[inline]
+        #[inline(never)]
         fn partial_cmp(&self, _: &!) -> Option<Ordering> {
             *self
         }
@@ -2049,7 +2049,7 @@ mod impls {
     #[unstable(feature = "never_type", issue = "35121")]
     #[cfg(not(feature = "ferrocene_certified"))]
     impl Ord for ! {
-        #[inline]
+        #[inline(never)]
         fn cmp(&self, _: &!) -> Ordering {
             *self
         }
@@ -2063,11 +2063,11 @@ mod impls {
     where
         A: PartialEq<B>,
     {
-        #[inline]
+        #[inline(never)]
         fn eq(&self, other: &&B) -> bool {
             PartialEq::eq(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn ne(&self, other: &&B) -> bool {
             PartialEq::ne(*self, *other)
         }
@@ -2078,39 +2078,39 @@ mod impls {
     where
         A: PartialOrd<B>,
     {
-        #[inline]
+        #[inline(never)]
         fn partial_cmp(&self, other: &&B) -> Option<Ordering> {
             PartialOrd::partial_cmp(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn lt(&self, other: &&B) -> bool {
             PartialOrd::lt(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn le(&self, other: &&B) -> bool {
             PartialOrd::le(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn gt(&self, other: &&B) -> bool {
             PartialOrd::gt(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn ge(&self, other: &&B) -> bool {
             PartialOrd::ge(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn __chaining_lt(&self, other: &&B) -> ControlFlow<bool> {
             PartialOrd::__chaining_lt(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn __chaining_le(&self, other: &&B) -> ControlFlow<bool> {
             PartialOrd::__chaining_le(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn __chaining_gt(&self, other: &&B) -> ControlFlow<bool> {
             PartialOrd::__chaining_gt(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn __chaining_ge(&self, other: &&B) -> ControlFlow<bool> {
             PartialOrd::__chaining_ge(*self, *other)
         }
@@ -2121,7 +2121,7 @@ mod impls {
     where
         A: Ord,
     {
-        #[inline]
+        #[inline(never)]
         fn cmp(&self, other: &Self) -> Ordering {
             Ord::cmp(*self, *other)
         }
@@ -2138,11 +2138,11 @@ mod impls {
     where
         A: PartialEq<B>,
     {
-        #[inline]
+        #[inline(never)]
         fn eq(&self, other: &&mut B) -> bool {
             PartialEq::eq(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn ne(&self, other: &&mut B) -> bool {
             PartialEq::ne(*self, *other)
         }
@@ -2153,39 +2153,39 @@ mod impls {
     where
         A: PartialOrd<B>,
     {
-        #[inline]
+        #[inline(never)]
         fn partial_cmp(&self, other: &&mut B) -> Option<Ordering> {
             PartialOrd::partial_cmp(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn lt(&self, other: &&mut B) -> bool {
             PartialOrd::lt(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn le(&self, other: &&mut B) -> bool {
             PartialOrd::le(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn gt(&self, other: &&mut B) -> bool {
             PartialOrd::gt(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn ge(&self, other: &&mut B) -> bool {
             PartialOrd::ge(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn __chaining_lt(&self, other: &&mut B) -> ControlFlow<bool> {
             PartialOrd::__chaining_lt(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn __chaining_le(&self, other: &&mut B) -> ControlFlow<bool> {
             PartialOrd::__chaining_le(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn __chaining_gt(&self, other: &&mut B) -> ControlFlow<bool> {
             PartialOrd::__chaining_gt(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn __chaining_ge(&self, other: &&mut B) -> ControlFlow<bool> {
             PartialOrd::__chaining_ge(*self, *other)
         }
@@ -2196,7 +2196,7 @@ mod impls {
     where
         A: Ord,
     {
-        #[inline]
+        #[inline(never)]
         fn cmp(&self, other: &Self) -> Ordering {
             Ord::cmp(*self, *other)
         }
@@ -2211,11 +2211,11 @@ mod impls {
     where
         A: PartialEq<B>,
     {
-        #[inline]
+        #[inline(never)]
         fn eq(&self, other: &&mut B) -> bool {
             PartialEq::eq(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn ne(&self, other: &&mut B) -> bool {
             PartialEq::ne(*self, *other)
         }
@@ -2227,11 +2227,11 @@ mod impls {
     where
         A: PartialEq<B>,
     {
-        #[inline]
+        #[inline(never)]
         fn eq(&self, other: &&B) -> bool {
             PartialEq::eq(*self, *other)
         }
-        #[inline]
+        #[inline(never)]
         fn ne(&self, other: &&B) -> bool {
             PartialEq::ne(*self, *other)
         }

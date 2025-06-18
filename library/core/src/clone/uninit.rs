@@ -9,7 +9,7 @@ pub(super) unsafe trait CopySpec: Clone {
 }
 
 unsafe impl<T: Clone> CopySpec for T {
-    #[inline]
+    #[inline(never)]
     default unsafe fn clone_one(src: &Self, dst: *mut Self) {
         // SAFETY: The safety conditions of clone_to_uninit() are a superset of those of
         // ptr::write().
@@ -20,7 +20,7 @@ unsafe impl<T: Clone> CopySpec for T {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(debug_assertions, track_caller)]
     default unsafe fn clone_slice(src: &[Self], dst: *mut [Self]) {
         let len = src.len();
@@ -52,7 +52,7 @@ unsafe impl<T: Clone> CopySpec for T {
 // Specialized implementation for types that are [`Copy`], not just [`Clone`],
 // and can therefore be copied bitwise.
 unsafe impl<T: Copy> CopySpec for T {
-    #[inline]
+    #[inline(never)]
     unsafe fn clone_one(src: &Self, dst: *mut Self) {
         // SAFETY: The safety conditions of clone_to_uninit() are a superset of those of
         // ptr::copy_nonoverlapping().
@@ -61,7 +61,7 @@ unsafe impl<T: Copy> CopySpec for T {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(debug_assertions, track_caller)]
     unsafe fn clone_slice(src: &[Self], dst: *mut [Self]) {
         let len = src.len();
@@ -93,7 +93,7 @@ struct InitializingSlice<'a, T> {
 }
 
 impl<'a, T> InitializingSlice<'a, T> {
-    #[inline]
+    #[inline(never)]
     fn from_fully_uninit(data: &'a mut [MaybeUninit<T>]) -> Self {
         Self { data, initialized_len: 0 }
     }
@@ -103,7 +103,7 @@ impl<'a, T> InitializingSlice<'a, T> {
     /// # Panics
     ///
     /// Panics if the slice is already fully initialized.
-    #[inline]
+    #[inline(never)]
     fn push(&mut self, value: T) {
         MaybeUninit::write(&mut self.data[self.initialized_len], value);
         self.initialized_len += 1;

@@ -12,7 +12,7 @@ impl [u8] {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_slice_is_ascii", since = "1.74.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn is_ascii(&self) -> bool {
         is_ascii(self)
     }
@@ -21,7 +21,7 @@ impl [u8] {
     /// [ASCII characters](`ascii::Char`), otherwise returns `None`.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn as_ascii(&self) -> Option<&[ascii::Char]> {
         if self.is_ascii() {
             // SAFETY: Just checked that it's ASCII
@@ -39,7 +39,7 @@ impl [u8] {
     /// Every byte in the slice must be in `0..=127`, or else this is UB.
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const unsafe fn as_ascii_unchecked(&self) -> &[ascii::Char] {
         let byte_ptr: *const [u8] = self;
         let ascii_ptr = byte_ptr as *const [ascii::Char];
@@ -54,7 +54,7 @@ impl [u8] {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_unstable(feature = "const_eq_ignore_ascii_case", issue = "131719")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn eq_ignore_ascii_case(&self, other: &[u8]) -> bool {
         if self.len() != other.len() {
             return false;
@@ -89,7 +89,7 @@ impl [u8] {
     /// [`to_ascii_uppercase`]: #method.to_ascii_uppercase
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_make_ascii", since = "1.84.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn make_ascii_uppercase(&mut self) {
         // FIXME(const-hack): We would like to simply iterate using `for` loops but this isn't currently allowed in constant expressions.
         let mut i = 0;
@@ -111,7 +111,7 @@ impl [u8] {
     /// [`to_ascii_lowercase`]: #method.to_ascii_lowercase
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_make_ascii", since = "1.84.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn make_ascii_lowercase(&mut self) {
         // FIXME(const-hack): We would like to simply iterate using `for` loops but this isn't currently allowed in constant expressions.
         let mut i = 0;
@@ -154,7 +154,7 @@ impl [u8] {
     /// ```
     #[stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[rustc_const_stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn trim_ascii_start(&self) -> &[u8] {
         let mut bytes = self;
         // Note: A pattern matching based approach (instead of indexing) allows
@@ -183,7 +183,7 @@ impl [u8] {
     /// ```
     #[stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[rustc_const_stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn trim_ascii_end(&self) -> &[u8] {
         let mut bytes = self;
         // Note: A pattern matching based approach (instead of indexing) allows
@@ -213,7 +213,7 @@ impl [u8] {
     /// ```
     #[stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
     #[rustc_const_stable(feature = "byte_slice_trim_ascii", since = "1.80.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn trim_ascii(&self) -> &[u8] {
         self.trim_ascii_start().trim_ascii_end()
     }
@@ -240,15 +240,15 @@ pub struct EscapeAscii<'a> {
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 impl<'a> iter::Iterator for EscapeAscii<'a> {
     type Item = u8;
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<u8> {
         self.inner.next()
     }
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.inner.size_hint()
     }
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Fold: FnMut(Acc, Self::Item) -> R,
@@ -256,14 +256,14 @@ impl<'a> iter::Iterator for EscapeAscii<'a> {
     {
         self.inner.try_fold(init, fold)
     }
-    #[inline]
+    #[inline(never)]
     fn fold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
     {
         self.inner.fold(init, fold)
     }
-    #[inline]
+    #[inline(never)]
     fn last(mut self) -> Option<u8> {
         self.next_back()
     }
@@ -335,7 +335,7 @@ impl<'a> fmt::Debug for EscapeAscii<'a> {
 /// touch it, be sure to run (and update if needed) the assembly test.
 #[unstable(feature = "str_internals", issue = "none")]
 #[doc(hidden)]
-#[inline]
+#[inline(never)]
 pub const fn is_ascii_simple(mut bytes: &[u8]) -> bool {
     while let [rest @ .., last] = bytes {
         if !last.is_ascii() {
@@ -359,7 +359,7 @@ pub const fn is_ascii_simple(mut bytes: &[u8]) -> bool {
 /// If any of these loads produces something for which `contains_nonascii`
 /// (above) returns true, then we know the answer is false.
 #[cfg(not(all(target_arch = "x86_64", target_feature = "sse2")))]
-#[inline]
+#[inline(never)]
 #[rustc_allow_const_fn_unstable(const_eval_select)] // fallback impl has same behavior
 const fn is_ascii(s: &[u8]) -> bool {
     // The runtime version behaves the same as the compiletime version, it's
@@ -462,7 +462,7 @@ const fn is_ascii(s: &[u8]) -> bool {
 /// Other platforms are not likely to benefit from this code structure, so they
 /// use SWAR techniques to test for ASCII in `usize`-sized chunks.
 #[cfg(all(target_arch = "x86_64", target_feature = "sse2"))]
-#[inline]
+#[inline(never)]
 const fn is_ascii(bytes: &[u8]) -> bool {
     // Process chunks of 32 bytes at a time in the fast path to enable
     // auto-vectorization and use of `pmovmskb`. Two 128-bit vector registers

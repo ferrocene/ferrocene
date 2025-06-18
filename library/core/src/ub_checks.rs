@@ -138,7 +138,7 @@ pub(crate) const fn maybe_is_aligned_and_not_null(
     )
 }
 
-#[inline]
+#[inline(never)]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) const fn is_valid_allocation_size(size: usize, len: usize) -> bool {
     let max_len = if size == 0 { usize::MAX } else { isize::MAX as usize / size };

@@ -168,7 +168,7 @@ impl SocketAddr {
     #[stable(feature = "ip_addr", since = "1.7.0")]
     #[must_use]
     #[rustc_const_stable(feature = "const_socketaddr", since = "1.69.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn new(ip: IpAddr, port: u16) -> SocketAddr {
         match ip {
             IpAddr::V4(a) => SocketAddr::V4(SocketAddrV4::new(a, port)),
@@ -189,7 +189,7 @@ impl SocketAddr {
     #[must_use]
     #[stable(feature = "ip_addr", since = "1.7.0")]
     #[rustc_const_stable(feature = "const_socketaddr", since = "1.69.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn ip(&self) -> IpAddr {
         match *self {
             SocketAddr::V4(ref a) => IpAddr::V4(*a.ip()),
@@ -208,7 +208,7 @@ impl SocketAddr {
     /// socket.set_ip(IpAddr::V4(Ipv4Addr::new(10, 10, 0, 1)));
     /// assert_eq!(socket.ip(), IpAddr::V4(Ipv4Addr::new(10, 10, 0, 1)));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "sockaddr_setters", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_sockaddr_setters", since = "1.87.0")]
     pub const fn set_ip(&mut self, new_ip: IpAddr) {
@@ -233,7 +233,7 @@ impl SocketAddr {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_socketaddr", since = "1.69.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn port(&self) -> u16 {
         match *self {
             SocketAddr::V4(ref a) => a.port(),
@@ -252,7 +252,7 @@ impl SocketAddr {
     /// socket.set_port(1025);
     /// assert_eq!(socket.port(), 1025);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "sockaddr_setters", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_sockaddr_setters", since = "1.87.0")]
     pub const fn set_port(&mut self, new_port: u16) {
@@ -280,7 +280,7 @@ impl SocketAddr {
     #[must_use]
     #[stable(feature = "sockaddr_checker", since = "1.16.0")]
     #[rustc_const_stable(feature = "const_socketaddr", since = "1.69.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn is_ipv4(&self) -> bool {
         matches!(*self, SocketAddr::V4(_))
     }
@@ -303,7 +303,7 @@ impl SocketAddr {
     #[must_use]
     #[stable(feature = "sockaddr_checker", since = "1.16.0")]
     #[rustc_const_stable(feature = "const_socketaddr", since = "1.69.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn is_ipv6(&self) -> bool {
         matches!(*self, SocketAddr::V6(_))
     }
@@ -324,7 +324,7 @@ impl SocketAddrV4 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use]
     #[rustc_const_stable(feature = "const_socketaddr", since = "1.69.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn new(ip: Ipv4Addr, port: u16) -> SocketAddrV4 {
         SocketAddrV4 { ip, port }
     }
@@ -342,7 +342,7 @@ impl SocketAddrV4 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_socketaddr", since = "1.69.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn ip(&self) -> &Ipv4Addr {
         &self.ip
     }
@@ -358,7 +358,7 @@ impl SocketAddrV4 {
     /// socket.set_ip(Ipv4Addr::new(192, 168, 0, 1));
     /// assert_eq!(socket.ip(), &Ipv4Addr::new(192, 168, 0, 1));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "sockaddr_setters", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_sockaddr_setters", since = "1.87.0")]
     pub const fn set_ip(&mut self, new_ip: Ipv4Addr) {
@@ -378,7 +378,7 @@ impl SocketAddrV4 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_socketaddr", since = "1.69.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn port(&self) -> u16 {
         self.port
     }
@@ -394,7 +394,7 @@ impl SocketAddrV4 {
     /// socket.set_port(4242);
     /// assert_eq!(socket.port(), 4242);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "sockaddr_setters", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_sockaddr_setters", since = "1.87.0")]
     pub const fn set_port(&mut self, new_port: u16) {
@@ -422,7 +422,7 @@ impl SocketAddrV6 {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use]
     #[rustc_const_stable(feature = "const_socketaddr", since = "1.69.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn new(ip: Ipv6Addr, port: u16, flowinfo: u32, scope_id: u32) -> SocketAddrV6 {
         SocketAddrV6 { ip, port, flowinfo, scope_id }
     }
@@ -440,7 +440,7 @@ impl SocketAddrV6 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_socketaddr", since = "1.69.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn ip(&self) -> &Ipv6Addr {
         &self.ip
     }
@@ -456,7 +456,7 @@ impl SocketAddrV6 {
     /// socket.set_ip(Ipv6Addr::new(76, 45, 0, 0, 0, 0, 0, 0));
     /// assert_eq!(socket.ip(), &Ipv6Addr::new(76, 45, 0, 0, 0, 0, 0, 0));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "sockaddr_setters", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_sockaddr_setters", since = "1.87.0")]
     pub const fn set_ip(&mut self, new_ip: Ipv6Addr) {
@@ -476,7 +476,7 @@ impl SocketAddrV6 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_socketaddr", since = "1.69.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn port(&self) -> u16 {
         self.port
     }
@@ -492,7 +492,7 @@ impl SocketAddrV6 {
     /// socket.set_port(4242);
     /// assert_eq!(socket.port(), 4242);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "sockaddr_setters", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_sockaddr_setters", since = "1.87.0")]
     pub const fn set_port(&mut self, new_port: u16) {
@@ -522,7 +522,7 @@ impl SocketAddrV6 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_socketaddr", since = "1.69.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn flowinfo(&self) -> u32 {
         self.flowinfo
     }
@@ -540,7 +540,7 @@ impl SocketAddrV6 {
     /// socket.set_flowinfo(56);
     /// assert_eq!(socket.flowinfo(), 56);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "sockaddr_setters", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_sockaddr_setters", since = "1.87.0")]
     pub const fn set_flowinfo(&mut self, new_flowinfo: u32) {
@@ -565,7 +565,7 @@ impl SocketAddrV6 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_socketaddr", since = "1.69.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn scope_id(&self) -> u32 {
         self.scope_id
     }
@@ -583,7 +583,7 @@ impl SocketAddrV6 {
     /// socket.set_scope_id(42);
     /// assert_eq!(socket.scope_id(), 42);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "sockaddr_setters", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_sockaddr_setters", since = "1.87.0")]
     pub const fn set_scope_id(&mut self, new_scope_id: u32) {
@@ -594,7 +594,7 @@ impl SocketAddrV6 {
 #[stable(feature = "ip_from_ip", since = "1.16.0")]
 impl From<SocketAddrV4> for SocketAddr {
     /// Converts a [`SocketAddrV4`] into a [`SocketAddr::V4`].
-    #[inline]
+    #[inline(never)]
     fn from(sock4: SocketAddrV4) -> SocketAddr {
         SocketAddr::V4(sock4)
     }
@@ -603,7 +603,7 @@ impl From<SocketAddrV4> for SocketAddr {
 #[stable(feature = "ip_from_ip", since = "1.16.0")]
 impl From<SocketAddrV6> for SocketAddr {
     /// Converts a [`SocketAddrV6`] into a [`SocketAddr::V6`].
-    #[inline]
+    #[inline(never)]
     fn from(sock6: SocketAddrV6) -> SocketAddr {
         SocketAddr::V6(sock6)
     }

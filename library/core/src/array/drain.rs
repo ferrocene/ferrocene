@@ -41,14 +41,14 @@ impl<T> Drop for Drain<'_, T> {
 impl<T> Iterator for Drain<'_, T> {
     type Item = T;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<T> {
         let p: *const T = self.0.next()?;
         // SAFETY: The iterator was already advanced, so we won't drop this later.
         Some(unsafe { p.read() })
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let n = self.len();
         (n, Some(n))
@@ -56,7 +56,7 @@ impl<T> Iterator for Drain<'_, T> {
 }
 
 impl<T> ExactSizeIterator for Drain<'_, T> {
-    #[inline]
+    #[inline(never)]
     fn len(&self) -> usize {
         self.0.len()
     }

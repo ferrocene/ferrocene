@@ -67,7 +67,7 @@ pub use iter::IntoIter;
 /// let strings = array::repeat(string);
 /// assert_eq!(strings, ["Hello there!", "Hello there!"]);
 /// ```
-#[inline]
+#[inline(never)]
 #[unstable(feature = "array_repeat", issue = "126695")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub fn repeat<T: Clone, const N: usize>(val: T) -> [T; N] {
@@ -122,7 +122,7 @@ pub fn repeat<T: Clone, const N: usize>(val: T) -> [T; N] {
 /// let a = std::array::from_fn(|_| { let x = state; state *= 2; x });
 /// assert_eq!(a, [1, 2, 4, 8, 16, 32]);
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "array_from_fn", since = "1.63.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub fn from_fn<T, const N: usize, F>(f: F) -> [T; N]
@@ -161,7 +161,7 @@ where
 /// let array: Option<[_; 4]> = std::array::try_from_fn(|i| i.checked_sub(100));
 /// assert_eq!(array, None);
 /// ```
-#[inline]
+#[inline(never)]
 #[unstable(feature = "array_try_from_fn", issue = "89379")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub fn try_from_fn<R, const N: usize, F>(cb: F) -> ChangeOutputType<R, [R::Output; N]>
@@ -207,7 +207,7 @@ pub struct TryFromSliceError(());
 #[stable(feature = "core_array", since = "1.35.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Display for TryFromSliceError {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         #[allow(deprecated)]
         self.description().fmt(f)
@@ -234,7 +234,7 @@ impl From<Infallible> for TryFromSliceError {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> AsRef<[T]> for [T; N] {
-    #[inline]
+    #[inline(never)]
     fn as_ref(&self) -> &[T] {
         &self[..]
     }
@@ -243,7 +243,7 @@ impl<T, const N: usize> AsRef<[T]> for [T; N] {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> AsMut<[T]> for [T; N] {
-    #[inline]
+    #[inline(never)]
     fn as_mut(&mut self) -> &mut [T] {
         &mut self[..]
     }
@@ -285,7 +285,7 @@ where
 {
     type Error = TryFromSliceError;
 
-    #[inline]
+    #[inline(never)]
     fn try_from(slice: &[T]) -> Result<[T; N], TryFromSliceError> {
         <&Self>::try_from(slice).copied()
     }
@@ -311,7 +311,7 @@ where
 {
     type Error = TryFromSliceError;
 
-    #[inline]
+    #[inline(never)]
     fn try_from(slice: &mut [T]) -> Result<[T; N], TryFromSliceError> {
         <Self>::try_from(&*slice)
     }
@@ -334,7 +334,7 @@ where
 impl<'a, T, const N: usize> TryFrom<&'a [T]> for &'a [T; N] {
     type Error = TryFromSliceError;
 
-    #[inline]
+    #[inline(never)]
     fn try_from(slice: &'a [T]) -> Result<&'a [T; N], TryFromSliceError> {
         slice.as_array().ok_or(TryFromSliceError(()))
     }
@@ -357,7 +357,7 @@ impl<'a, T, const N: usize> TryFrom<&'a [T]> for &'a [T; N] {
 impl<'a, T, const N: usize> TryFrom<&'a mut [T]> for &'a mut [T; N] {
     type Error = TryFromSliceError;
 
-    #[inline]
+    #[inline(never)]
     fn try_from(slice: &'a mut [T]) -> Result<&'a mut [T; N], TryFromSliceError> {
         slice.as_mut_array().ok_or(TryFromSliceError(()))
     }
@@ -420,7 +420,7 @@ where
 {
     type Output = <[T] as Index<I>>::Output;
 
-    #[inline]
+    #[inline(never)]
     fn index(&self, index: I) -> &Self::Output {
         Index::index(self as &[T], index)
     }
@@ -432,7 +432,7 @@ impl<T, I, const N: usize> IndexMut<I> for [T; N]
 where
     [T]: IndexMut<I>,
 {
-    #[inline]
+    #[inline(never)]
     fn index_mut(&mut self, index: I) -> &mut Self::Output {
         IndexMut::index_mut(self as &mut [T], index)
     }
@@ -442,23 +442,23 @@ where
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))] /* blocked by PartialOrd */
 impl<T: PartialOrd, const N: usize> PartialOrd for [T; N] {
-    #[inline]
+    #[inline(never)]
     fn partial_cmp(&self, other: &[T; N]) -> Option<Ordering> {
         PartialOrd::partial_cmp(&&self[..], &&other[..])
     }
-    #[inline]
+    #[inline(never)]
     fn lt(&self, other: &[T; N]) -> bool {
         PartialOrd::lt(&&self[..], &&other[..])
     }
-    #[inline]
+    #[inline(never)]
     fn le(&self, other: &[T; N]) -> bool {
         PartialOrd::le(&&self[..], &&other[..])
     }
-    #[inline]
+    #[inline(never)]
     fn ge(&self, other: &[T; N]) -> bool {
         PartialOrd::ge(&&self[..], &&other[..])
     }
-    #[inline]
+    #[inline(never)]
     fn gt(&self, other: &[T; N]) -> bool {
         PartialOrd::gt(&&self[..], &&other[..])
     }
@@ -468,7 +468,7 @@ impl<T: PartialOrd, const N: usize> PartialOrd for [T; N] {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Ord, const N: usize> Ord for [T; N] {
-    #[inline]
+    #[inline(never)]
     fn cmp(&self, other: &[T; N]) -> Ordering {
         Ord::cmp(&&self[..], &&other[..])
     }
@@ -481,12 +481,12 @@ impl<T: Copy, const N: usize> Copy for [T; N] {}
 #[stable(feature = "copy_clone_array_lib", since = "1.58.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Clone, const N: usize> Clone for [T; N] {
-    #[inline]
+    #[inline(never)]
     fn clone(&self) -> Self {
         SpecArrayClone::clone(self)
     }
 
-    #[inline]
+    #[inline(never)]
     fn clone_from(&mut self, other: &Self) {
         self.clone_from_slice(other);
     }
@@ -499,7 +499,7 @@ trait SpecArrayClone: Clone {
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Clone> SpecArrayClone for T {
-    #[inline]
+    #[inline(never)]
     default fn clone<const N: usize>(array: &[T; N]) -> [T; N] {
         from_trusted_iterator(array.iter().cloned())
     }
@@ -507,7 +507,7 @@ impl<T: Clone> SpecArrayClone for T {
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Copy> SpecArrayClone for T {
-    #[inline]
+    #[inline(never)]
     fn clone<const N: usize>(array: &[T; N]) -> [T; N] {
         *array
     }
@@ -759,7 +759,7 @@ impl<T, const N: usize> [T; N] {
         reason = "return type should have array as 2nd element",
         issue = "90091"
     )]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
     pub fn split_array_ref<const M: usize>(&self) -> (&[T; M], &[T]) {
         (&self[..]).split_first_chunk::<M>().unwrap()
@@ -793,7 +793,7 @@ impl<T, const N: usize> [T; N] {
         reason = "return type should have array as 2nd element",
         issue = "90091"
     )]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
     pub fn split_array_mut<const M: usize>(&mut self) -> (&mut [T; M], &mut [T]) {
         (&mut self[..]).split_first_chunk_mut::<M>().unwrap()
@@ -839,7 +839,7 @@ impl<T, const N: usize> [T; N] {
         reason = "return type should have array as 2nd element",
         issue = "90091"
     )]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
     pub fn rsplit_array_ref<const M: usize>(&self) -> (&[T], &[T; M]) {
         (&self[..]).split_last_chunk::<M>().unwrap()
@@ -873,7 +873,7 @@ impl<T, const N: usize> [T; N] {
         reason = "return type should have array as 2nd element",
         issue = "90091"
     )]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
     pub fn rsplit_array_mut<const M: usize>(&mut self) -> (&mut [T], &mut [T; M]) {
         (&mut self[..]).split_last_chunk_mut::<M>().unwrap()
@@ -888,13 +888,13 @@ impl<T, const N: usize> [T; N] {
 ///
 /// By depending on `TrustedLen`, however, we can do that check up-front (where
 /// it easily optimizes away) so it doesn't impact the loop that fills the array.
-#[inline]
+#[inline(never)]
 #[cfg(not(feature = "ferrocene_certified"))]
 fn from_trusted_iterator<T, const N: usize>(iter: impl UncheckedIterator<Item = T>) -> [T; N] {
     try_from_trusted_iterator(iter.map(NeverShortCircuit)).0
 }
 
-#[inline]
+#[inline(never)]
 #[cfg(not(feature = "ferrocene_certified"))]
 fn try_from_trusted_iterator<T, R, const N: usize>(
     iter: impl UncheckedIterator<Item = R>,
@@ -928,7 +928,7 @@ where
 /// it resulted in poor codegen from the "are there enough source items?" checks
 /// not optimizing away.  So if you give it a shot, make sure to watch what
 /// happens in the codegen tests.
-#[inline]
+#[inline(never)]
 #[cfg(not(feature = "ferrocene_certified"))]
 fn try_from_fn_erased<T, R>(
     buffer: &mut [MaybeUninit<T>],
@@ -976,7 +976,7 @@ impl<T> Guard<'_, T> {
     /// # Safety
     ///
     /// No more than N elements must be initialized.
-    #[inline]
+    #[inline(never)]
     pub(crate) unsafe fn push_unchecked(&mut self, item: T) {
         // SAFETY: If `initialized` was correct before and the caller does not
         // invoke this method more than N times then writes will be in-bounds
@@ -990,7 +990,7 @@ impl<T> Guard<'_, T> {
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T> Drop for Guard<'_, T> {
-    #[inline]
+    #[inline(never)]
     fn drop(&mut self) {
         debug_assert!(self.initialized <= self.array_mut.len());
 
@@ -1013,7 +1013,7 @@ impl<T> Drop for Guard<'_, T> {
 /// dropped.
 ///
 /// Used for [`Iterator::next_chunk`].
-#[inline]
+#[inline(never)]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) fn iter_next_chunk<T, const N: usize>(
     iter: &mut impl Iterator<Item = T>,
@@ -1037,7 +1037,7 @@ pub(crate) fn iter_next_chunk<T, const N: usize>(
 ///
 /// Unfortunately this loop has two exit conditions, the buffer filling up
 /// or the iterator running out of items, making it tend to optimize poorly.
-#[inline]
+#[inline(never)]
 #[cfg(not(feature = "ferrocene_certified"))]
 fn iter_next_chunk_erased<T>(
     buffer: &mut [MaybeUninit<T>],

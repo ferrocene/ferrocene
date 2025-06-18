@@ -5,7 +5,7 @@ macro_rules! floating {
         $(
             #[stable(feature = "rust1", since = "1.0.0")]
             impl Debug for $ty {
-                #[inline]
+                #[inline(never)]
                 fn fmt(&self, _fmt: &mut Formatter<'_>) -> Result {
                     panic!("floating point fmt support is turned off");
                 }

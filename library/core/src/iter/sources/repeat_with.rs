@@ -60,7 +60,7 @@ use crate::ops::Try;
 /// // ... and now we're done
 /// assert_eq!(None, pow2.next());
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "iterator_repeat_with", since = "1.28.0")]
 pub fn repeat_with<A, F: FnMut() -> A>(repeater: F) -> RepeatWith<F> {
     RepeatWith { repeater }
@@ -88,17 +88,17 @@ impl<F> fmt::Debug for RepeatWith<F> {
 impl<A, F: FnMut() -> A> Iterator for RepeatWith<F> {
     type Item = A;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<A> {
         Some((self.repeater)())
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         (usize::MAX, None)
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, Fold, R>(&mut self, mut init: Acc, mut fold: Fold) -> R
     where
         Fold: FnMut(Acc, Self::Item) -> R,

@@ -9,7 +9,7 @@ use crate::ub_checks::assert_unsafe_precondition;
 
 /// Converts a `u32` to a `char`. See [`char::from_u32`].
 #[must_use]
-#[inline]
+#[inline(never)]
 pub(super) const fn from_u32(i: u32) -> Option<char> {
     // FIXME(const-hack): once Result::ok is const fn, use it here
     match char_try_from_u32(i) {
@@ -19,7 +19,7 @@ pub(super) const fn from_u32(i: u32) -> Option<char> {
 }
 
 /// Converts a `u32` to a `char`, ignoring validity. See [`char::from_u32_unchecked`].
-#[inline]
+#[inline(never)]
 #[must_use]
 #[allow(unnecessary_transmutes)]
 #[track_caller]
@@ -46,7 +46,7 @@ impl From<char> for u32 {
     /// let u = u32::from(c);
     /// assert!(4 == size_of_val(&u))
     /// ```
-    #[inline]
+    #[inline(never)]
     fn from(c: char) -> Self {
         c as u32
     }
@@ -63,7 +63,7 @@ impl From<char> for u64 {
     /// let u = u64::from(c);
     /// assert!(8 == size_of_val(&u))
     /// ```
-    #[inline]
+    #[inline(never)]
     fn from(c: char) -> Self {
         // The char is casted to the value of the code point, then zero-extended to 64 bit.
         // See [https://doc.rust-lang.org/reference/expressions/operator-expr.html#semantics]
@@ -82,7 +82,7 @@ impl From<char> for u128 {
     /// let u = u128::from(c);
     /// assert!(16 == size_of_val(&u))
     /// ```
-    #[inline]
+    #[inline(never)]
     fn from(c: char) -> Self {
         // The char is casted to the value of the code point, then zero-extended to 128 bit.
         // See [https://doc.rust-lang.org/reference/expressions/operator-expr.html#semantics]
@@ -108,7 +108,7 @@ impl TryFrom<char> for u8 {
     /// assert_eq!(u8::try_from(a), Ok(0xFF_u8));
     /// assert!(u8::try_from(b).is_err());
     /// ```
-    #[inline]
+    #[inline(never)]
     fn try_from(c: char) -> Result<u8, Self::Error> {
         u8::try_from(u32::from(c)).map_err(|_| TryFromCharError(()))
     }
@@ -132,7 +132,7 @@ impl TryFrom<char> for u16 {
     /// assert_eq!(u16::try_from(trans_rights), Ok(0x26A7_u16));
     /// assert!(u16::try_from(ninjas).is_err());
     /// ```
-    #[inline]
+    #[inline(never)]
     fn try_from(c: char) -> Result<u16, Self::Error> {
         u16::try_from(u32::from(c)).map_err(|_| TryFromCharError(()))
     }
@@ -167,7 +167,7 @@ impl From<u8> for char {
     /// let c = char::from(u);
     /// assert!(4 == size_of_val(&c))
     /// ```
-    #[inline]
+    #[inline(never)]
     fn from(i: u8) -> Self {
         i as char
     }
@@ -211,7 +211,7 @@ impl fmt::Display for ParseCharError {
 impl FromStr for char {
     type Err = ParseCharError;
 
-    #[inline]
+    #[inline(never)]
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut chars = s.chars();
         match (chars.next(), chars.next()) {
@@ -222,7 +222,7 @@ impl FromStr for char {
     }
 }
 
-#[inline]
+#[inline(never)]
 #[allow(unnecessary_transmutes)]
 const fn char_try_from_u32(i: u32) -> Result<char, CharTryFromError> {
     // This is an optimized version of the check
@@ -250,7 +250,7 @@ const fn char_try_from_u32(i: u32) -> Result<char, CharTryFromError> {
 impl TryFrom<u32> for char {
     type Error = CharTryFromError;
 
-    #[inline]
+    #[inline(never)]
     fn try_from(i: u32) -> Result<Self, Self::Error> {
         char_try_from_u32(i)
     }
@@ -272,7 +272,7 @@ impl fmt::Display for CharTryFromError {
 }
 
 /// Converts a digit in the given radix to a `char`. See [`char::from_digit`].
-#[inline]
+#[inline(never)]
 #[must_use]
 pub(super) const fn from_digit(num: u32, radix: u32) -> Option<char> {
     if radix > 36 {

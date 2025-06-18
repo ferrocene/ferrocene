@@ -18,24 +18,24 @@ pub(crate) trait ByteSlice {
 }
 
 impl ByteSlice for [u8] {
-    #[inline(always)] // inlining this is crucial to remove bound checks
+    #[inline(never)] // inlining this is crucial to remove bound checks
     fn read_u64(&self) -> u64 {
         let mut tmp = [0; 8];
         tmp.copy_from_slice(&self[..8]);
         u64::from_le_bytes(tmp)
     }
 
-    #[inline(always)] // inlining this is crucial to remove bound checks
+    #[inline(never)] // inlining this is crucial to remove bound checks
     fn write_u64(&mut self, value: u64) {
         self[..8].copy_from_slice(&value.to_le_bytes())
     }
 
-    #[inline]
+    #[inline(never)]
     fn offset_from(&self, other: &Self) -> isize {
         other.len() as isize - self.len() as isize
     }
 
-    #[inline]
+    #[inline(never)]
     fn parse_digits(&self, mut func: impl FnMut(u8)) -> &Self {
         let mut s = self;
 
@@ -75,7 +75,7 @@ pub struct BiasedFp {
 
 impl BiasedFp {
     /// Represent `0 ^ p`
-    #[inline]
+    #[inline(never)]
     pub const fn zero_pow2(p_biased: i32) -> Self {
         Self { m: 0, p_biased }
     }

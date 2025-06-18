@@ -31,7 +31,7 @@ pub struct DecodeUtf16Error {
 
 /// Creates an iterator over the UTF-16 encoded code points in `iter`,
 /// returning unpaired surrogates as `Err`s. See [`char::decode_utf16`].
-#[inline]
+#[inline(never)]
 pub(super) fn decode_utf16<I: IntoIterator<Item = u16>>(iter: I) -> DecodeUtf16<I::IntoIter> {
     DecodeUtf16 { iter: iter.into_iter(), buf: None }
 }
@@ -72,7 +72,7 @@ impl<I: Iterator<Item = u16>> Iterator for DecodeUtf16<I> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (low, high) = self.iter.size_hint();
 

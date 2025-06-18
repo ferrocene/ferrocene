@@ -576,7 +576,7 @@ impl f32 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn is_finite(self) -> bool {
         // There's no need to handle NaN separately: if self is NaN,
         // the comparison is not true, exactly as desired.
@@ -604,7 +604,7 @@ impl f32 {
     #[must_use]
     #[stable(feature = "is_subnormal", since = "1.53.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn is_subnormal(self) -> bool {
         matches!(self.classify(), FpCategory::Subnormal)
     }
@@ -631,7 +631,7 @@ impl f32 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn is_normal(self) -> bool {
         matches!(self.classify(), FpCategory::Normal)
     }
@@ -687,7 +687,7 @@ impl f32 {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn is_sign_positive(self) -> bool {
         !self.is_sign_negative()
     }
@@ -746,7 +746,7 @@ impl f32 {
     /// [`INFINITY`]: Self::INFINITY
     /// [`MIN`]: Self::MIN
     /// [`MAX`]: Self::MAX
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "nextUp")]
     #[stable(feature = "float_next_up_down", since = "1.86.0")]
     #[rustc_const_stable(feature = "float_next_up_down", since = "1.86.0")]
@@ -797,7 +797,7 @@ impl f32 {
     /// [`INFINITY`]: Self::INFINITY
     /// [`MIN`]: Self::MIN
     /// [`MAX`]: Self::MAX
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "nextDown")]
     #[stable(feature = "float_next_up_down", since = "1.86.0")]
     #[rustc_const_stable(feature = "float_next_up_down", since = "1.86.0")]
@@ -832,7 +832,7 @@ impl f32 {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn recip(self) -> f32 {
         1.0 / self
     }
@@ -850,7 +850,7 @@ impl f32 {
                   without modifying the original"]
     #[stable(feature = "f32_deg_rad_conversions", since = "1.7.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn to_degrees(self) -> f32 {
         // Use a constant for better precision.
         const PIS_IN_180: f32 = 57.2957795130823208767981548141051703_f32;
@@ -870,7 +870,7 @@ impl f32 {
                   without modifying the original"]
     #[stable(feature = "f32_deg_rad_conversions", since = "1.7.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn to_radians(self) -> f32 {
         const RADS_PER_DEG: f32 = consts::PI / 180.0;
         self * RADS_PER_DEG
@@ -893,7 +893,7 @@ impl f32 {
     #[must_use = "this returns the result of the comparison, without modifying either input"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn max(self, other: f32) -> f32 {
         intrinsics::maxnumf32(self, other)
     }
@@ -915,7 +915,7 @@ impl f32 {
     #[must_use = "this returns the result of the comparison, without modifying either input"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn min(self, other: f32) -> f32 {
         intrinsics::minnumf32(self, other)
     }
@@ -942,7 +942,7 @@ impl f32 {
     /// operand is conserved; see the [specification of NaN bit patterns](f32#nan-bit-patterns) for more info.
     #[must_use = "this returns the result of the comparison, without modifying either input"]
     #[unstable(feature = "float_minimum_maximum", issue = "91079")]
-    #[inline]
+    #[inline(never)]
     pub const fn maximum(self, other: f32) -> f32 {
         intrinsics::maximumf32(self, other)
     }
@@ -969,7 +969,7 @@ impl f32 {
     /// operand is conserved; see the [specification of NaN bit patterns](f32#nan-bit-patterns) for more info.
     #[must_use = "this returns the result of the comparison, without modifying either input"]
     #[unstable(feature = "float_minimum_maximum", issue = "91079")]
-    #[inline]
+    #[inline(never)]
     pub const fn minimum(self, other: f32) -> f32 {
         intrinsics::minimumf32(self, other)
     }
@@ -985,7 +985,7 @@ impl f32 {
     /// assert_eq!(1f32.midpoint(4.0), 2.5);
     /// assert_eq!((-5.5f32).midpoint(8.0), 1.25);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "average")]
     #[stable(feature = "num_midpoint", since = "1.85.0")]
     #[rustc_const_stable(feature = "num_midpoint", since = "1.85.0")]
@@ -1054,7 +1054,7 @@ impl f32 {
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[stable(feature = "float_approx_unchecked_to", since = "1.44.0")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn to_int_unchecked<Int>(self) -> Int
     where
         Self: FloatToInt<Int>,
@@ -1155,7 +1155,7 @@ impl f32 {
                   without modifying the original"]
     #[stable(feature = "float_to_from_bytes", since = "1.40.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn to_be_bytes(self) -> [u8; 4] {
         self.to_bits().to_be_bytes()
     }
@@ -1176,7 +1176,7 @@ impl f32 {
                   without modifying the original"]
     #[stable(feature = "float_to_from_bytes", since = "1.40.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn to_le_bytes(self) -> [u8; 4] {
         self.to_bits().to_le_bytes()
     }
@@ -1210,7 +1210,7 @@ impl f32 {
                   without modifying the original"]
     #[stable(feature = "float_to_from_bytes", since = "1.40.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn to_ne_bytes(self) -> [u8; 4] {
         self.to_bits().to_ne_bytes()
     }
@@ -1229,7 +1229,7 @@ impl f32 {
     #[stable(feature = "float_to_from_bytes", since = "1.40.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn from_be_bytes(bytes: [u8; 4]) -> Self {
         Self::from_bits(u32::from_be_bytes(bytes))
     }
@@ -1248,7 +1248,7 @@ impl f32 {
     #[stable(feature = "float_to_from_bytes", since = "1.40.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn from_le_bytes(bytes: [u8; 4]) -> Self {
         Self::from_bits(u32::from_le_bytes(bytes))
     }
@@ -1278,7 +1278,7 @@ impl f32 {
     #[stable(feature = "float_to_from_bytes", since = "1.40.0")]
     #[rustc_const_stable(feature = "const_float_bits_conv", since = "1.83.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn from_ne_bytes(bytes: [u8; 4]) -> Self {
         Self::from_bits(u32::from_ne_bytes(bytes))
     }
@@ -1344,7 +1344,7 @@ impl f32 {
     /// ```
     #[stable(feature = "total_cmp", since = "1.62.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub fn total_cmp(&self, other: &Self) -> crate::cmp::Ordering {
         let mut left = self.to_bits() as i32;
         let mut right = other.to_bits() as i32;
@@ -1400,7 +1400,7 @@ impl f32 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[stable(feature = "clamp", since = "1.50.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn clamp(mut self, min: f32, max: f32) -> f32 {
         const_assert!(
             min <= max,
@@ -1462,7 +1462,7 @@ impl f32 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_methods", since = "1.85.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn signum(self) -> f32 {
         if self.is_nan() { Self::NAN } else { 1.0_f32.copysign(self) }
     }
@@ -1508,7 +1508,7 @@ impl f32 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
-    #[inline]
+    #[inline(never)]
     pub const fn algebraic_add(self, rhs: f32) -> f32 {
         intrinsics::fadd_algebraic(self, rhs)
     }
@@ -1519,7 +1519,7 @@ impl f32 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
-    #[inline]
+    #[inline(never)]
     pub const fn algebraic_sub(self, rhs: f32) -> f32 {
         intrinsics::fsub_algebraic(self, rhs)
     }
@@ -1530,7 +1530,7 @@ impl f32 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
-    #[inline]
+    #[inline(never)]
     pub const fn algebraic_mul(self, rhs: f32) -> f32 {
         intrinsics::fmul_algebraic(self, rhs)
     }
@@ -1541,7 +1541,7 @@ impl f32 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
-    #[inline]
+    #[inline(never)]
     pub const fn algebraic_div(self, rhs: f32) -> f32 {
         intrinsics::fdiv_algebraic(self, rhs)
     }
@@ -1552,7 +1552,7 @@ impl f32 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
-    #[inline]
+    #[inline(never)]
     pub const fn algebraic_rem(self, rhs: f32) -> f32 {
         intrinsics::frem_algebraic(self, rhs)
     }
@@ -1589,7 +1589,7 @@ pub mod math {
     /// It will be stabilized as an inherent method._
     ///
     /// [`f32::floor`]: ../../../std/primitive.f32.html#method.floor
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "core_float_math", issue = "137578")]
     #[rustc_const_unstable(feature = "const_float_round_methods", issue = "141555")]
     #[must_use = "method returns a new number and does not mutate the original value"]
@@ -1618,7 +1618,7 @@ pub mod math {
     /// It will be stabilized as an inherent method._
     ///
     /// [`f32::ceil`]: ../../../std/primitive.f32.html#method.ceil
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "ceiling")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "core_float_math", issue = "137578")]
@@ -1654,7 +1654,7 @@ pub mod math {
     /// It will be stabilized as an inherent method._
     ///
     /// [`f32::round`]: ../../../std/primitive.f32.html#method.round
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "core_float_math", issue = "137578")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[rustc_const_unstable(feature = "const_float_round_methods", issue = "141555")]
@@ -1688,7 +1688,7 @@ pub mod math {
     /// It will be stabilized as an inherent method._
     ///
     /// [`f32::round_ties_even`]: ../../../std/primitive.f32.html#method.round_ties_even
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "core_float_math", issue = "137578")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[rustc_const_unstable(feature = "const_float_round_methods", issue = "141555")]
@@ -1718,7 +1718,7 @@ pub mod math {
     /// It will be stabilized as an inherent method._
     ///
     /// [`f32::trunc`]: ../../../std/primitive.f32.html#method.trunc
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "truncate")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "core_float_math", issue = "137578")]
@@ -1750,7 +1750,7 @@ pub mod math {
     /// It will be stabilized as an inherent method._
     ///
     /// [`f32::fract`]: ../../../std/primitive.f32.html#method.fract
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "core_float_math", issue = "137578")]
     #[rustc_const_unstable(feature = "const_float_round_methods", issue = "141555")]
     #[must_use = "method returns a new number and does not mutate the original value"]
@@ -1795,7 +1795,7 @@ pub mod math {
     /// It will be stabilized as an inherent method._
     ///
     /// [`f32::mul_add`]: ../../../std/primitive.f32.html#method.mul_add
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "fmaf", alias = "fusedMultiplyAdd")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "core_float_math", issue = "137578")]
@@ -1825,7 +1825,7 @@ pub mod math {
     /// It will be stabilized as an inherent method._
     ///
     /// [`f32::div_euclid`]: ../../../std/primitive.f32.html#method.div_euclid
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "core_float_math", issue = "137578")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn div_euclid(x: f32, rhs: f32) -> f32 {
@@ -1859,7 +1859,7 @@ pub mod math {
     /// It will be stabilized as an inherent method._
     ///
     /// [`f32::rem_euclid`]: ../../../std/primitive.f32.html#method.rem_euclid
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "modulo", alias = "mod")]
     #[unstable(feature = "core_float_math", issue = "137578")]
     #[must_use = "method returns a new number and does not mutate the original value"]
@@ -1888,7 +1888,7 @@ pub mod math {
     /// It will be stabilized as an inherent method._
     ///
     /// [`f32::powi`]: ../../../std/primitive.f32.html#method.powi
-    #[inline]
+    #[inline(never)]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "core_float_math", issue = "137578")]
     pub fn powi(x: f32, n: i32) -> f32 {
@@ -1918,7 +1918,7 @@ pub mod math {
     /// It will be stabilized as an inherent method._
     ///
     /// [`f32::sqrt`]: ../../../std/primitive.f32.html#method.sqrt
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "squareRoot")]
     #[unstable(feature = "core_float_math", issue = "137578")]
     #[must_use = "method returns a new number and does not mutate the original value"]
@@ -1950,7 +1950,7 @@ pub mod math {
     /// It will be stabilized as an inherent method._
     ///
     /// [`f32::abs_sub`]: ../../../std/primitive.f32.html#method.abs_sub
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(
         since = "1.10.0",
@@ -1995,7 +1995,7 @@ pub mod math {
     /// It will be stabilized as an inherent method._
     ///
     /// [`f32::cbrt`]: ../../../std/primitive.f32.html#method.cbrt
-    #[inline]
+    #[inline(never)]
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "core_float_math", issue = "137578")]
     pub fn cbrt(x: f32) -> f32 {

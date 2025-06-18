@@ -189,7 +189,7 @@ impl dyn Any {
     /// is_string(&"cookie monster".to_string());
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn is<T: Any>(&self) -> bool {
         // Get `TypeId` of the type this function is instantiated with.
         let t = TypeId::of::<T>();
@@ -221,7 +221,7 @@ impl dyn Any {
     /// print_if_string(&"cookie monster".to_string());
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn downcast_ref<T: Any>(&self) -> Option<&T> {
         if self.is::<T>() {
             // SAFETY: just checked whether we are pointing to the correct type, and we can rely on
@@ -257,7 +257,7 @@ impl dyn Any {
     /// assert_eq!(&s, "starlord");
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn downcast_mut<T: Any>(&mut self) -> Option<&mut T> {
         if self.is::<T>() {
             // SAFETY: just checked whether we are pointing to the correct type, and we can rely on
@@ -290,7 +290,7 @@ impl dyn Any {
     /// The contained value must be of type `T`. Calling this method
     /// with the incorrect type is *undefined behavior*.
     #[unstable(feature = "downcast_unchecked", issue = "90850")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn downcast_ref_unchecked<T: Any>(&self) -> &T {
         debug_assert!(self.is::<T>());
         // SAFETY: caller guarantees that T is the correct type
@@ -320,7 +320,7 @@ impl dyn Any {
     /// The contained value must be of type `T`. Calling this method
     /// with the incorrect type is *undefined behavior*.
     #[unstable(feature = "downcast_unchecked", issue = "90850")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn downcast_mut_unchecked<T: Any>(&mut self) -> &mut T {
         debug_assert!(self.is::<T>());
         // SAFETY: caller guarantees that T is the correct type
@@ -348,7 +348,7 @@ impl dyn Any + Send {
     /// is_string(&"cookie monster".to_string());
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn is<T: Any>(&self) -> bool {
         <dyn Any>::is::<T>(self)
     }
@@ -372,7 +372,7 @@ impl dyn Any + Send {
     /// print_if_string(&"cookie monster".to_string());
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn downcast_ref<T: Any>(&self) -> Option<&T> {
         <dyn Any>::downcast_ref::<T>(self)
     }
@@ -400,7 +400,7 @@ impl dyn Any + Send {
     /// assert_eq!(&s, "starlord");
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn downcast_mut<T: Any>(&mut self) -> Option<&mut T> {
         <dyn Any>::downcast_mut::<T>(self)
     }
@@ -426,7 +426,7 @@ impl dyn Any + Send {
     /// The contained value must be of type `T`. Calling this method
     /// with the incorrect type is *undefined behavior*.
     #[unstable(feature = "downcast_unchecked", issue = "90850")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn downcast_ref_unchecked<T: Any>(&self) -> &T {
         // SAFETY: guaranteed by caller
         unsafe { <dyn Any>::downcast_ref_unchecked::<T>(self) }
@@ -455,7 +455,7 @@ impl dyn Any + Send {
     /// The contained value must be of type `T`. Calling this method
     /// with the incorrect type is *undefined behavior*.
     #[unstable(feature = "downcast_unchecked", issue = "90850")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn downcast_mut_unchecked<T: Any>(&mut self) -> &mut T {
         // SAFETY: guaranteed by caller
         unsafe { <dyn Any>::downcast_mut_unchecked::<T>(self) }
@@ -482,7 +482,7 @@ impl dyn Any + Send + Sync {
     /// is_string(&"cookie monster".to_string());
     /// ```
     #[stable(feature = "any_send_sync_methods", since = "1.28.0")]
-    #[inline]
+    #[inline(never)]
     pub fn is<T: Any>(&self) -> bool {
         <dyn Any>::is::<T>(self)
     }
@@ -506,7 +506,7 @@ impl dyn Any + Send + Sync {
     /// print_if_string(&"cookie monster".to_string());
     /// ```
     #[stable(feature = "any_send_sync_methods", since = "1.28.0")]
-    #[inline]
+    #[inline(never)]
     pub fn downcast_ref<T: Any>(&self) -> Option<&T> {
         <dyn Any>::downcast_ref::<T>(self)
     }
@@ -534,7 +534,7 @@ impl dyn Any + Send + Sync {
     /// assert_eq!(&s, "starlord");
     /// ```
     #[stable(feature = "any_send_sync_methods", since = "1.28.0")]
-    #[inline]
+    #[inline(never)]
     pub fn downcast_mut<T: Any>(&mut self) -> Option<&mut T> {
         <dyn Any>::downcast_mut::<T>(self)
     }
@@ -559,7 +559,7 @@ impl dyn Any + Send + Sync {
     /// The contained value must be of type `T`. Calling this method
     /// with the incorrect type is *undefined behavior*.
     #[unstable(feature = "downcast_unchecked", issue = "90850")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn downcast_ref_unchecked<T: Any>(&self) -> &T {
         // SAFETY: guaranteed by caller
         unsafe { <dyn Any>::downcast_ref_unchecked::<T>(self) }
@@ -587,7 +587,7 @@ impl dyn Any + Send + Sync {
     /// The contained value must be of type `T`. Calling this method
     /// with the incorrect type is *undefined behavior*.
     #[unstable(feature = "downcast_unchecked", issue = "90850")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn downcast_mut_unchecked<T: Any>(&mut self) -> &mut T {
         // SAFETY: guaranteed by caller
         unsafe { <dyn Any>::downcast_mut_unchecked::<T>(self) }
@@ -717,7 +717,7 @@ pub struct TypeId {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl PartialEq for TypeId {
-    #[inline]
+    #[inline(never)]
     fn eq(&self, other: &Self) -> bool {
         self.t == other.t
     }
@@ -760,7 +760,7 @@ impl TypeId {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl hash::Hash for TypeId {
-    #[inline]
+    #[inline(never)]
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
         // We only hash the lower 64 bits of our (128 bit) internal numeric ID,
         // because:

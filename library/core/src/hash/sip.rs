@@ -116,7 +116,7 @@ macro_rules! load_int_le {
 ///
 /// Safety: this performs unchecked indexing of `buf` at `start..start+len`, so
 /// that must be in-bounds.
-#[inline]
+#[inline(never)]
 unsafe fn u8to64_le(buf: &[u8], start: usize, len: usize) -> u64 {
     debug_assert!(len < 8);
     let mut i = 0; // current byte index (from LSB) in the output u64
@@ -144,7 +144,7 @@ unsafe fn u8to64_le(buf: &[u8], start: usize, len: usize) -> u64 {
 
 impl SipHasher {
     /// Creates a new `SipHasher` with the two initial keys set to 0.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(since = "1.13.0", note = "use `std::hash::DefaultHasher` instead")]
     #[must_use]
@@ -153,7 +153,7 @@ impl SipHasher {
     }
 
     /// Creates a `SipHasher` that is keyed off the provided keys.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(since = "1.13.0", note = "use `std::hash::DefaultHasher` instead")]
     #[must_use]
@@ -164,7 +164,7 @@ impl SipHasher {
 
 impl SipHasher13 {
     /// Creates a new `SipHasher13` with the two initial keys set to 0.
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "hashmap_internals", issue = "none")]
     #[deprecated(since = "1.13.0", note = "use `std::hash::DefaultHasher` instead")]
     pub fn new() -> SipHasher13 {
@@ -172,7 +172,7 @@ impl SipHasher13 {
     }
 
     /// Creates a `SipHasher13` that is keyed off the provided keys.
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "hashmap_internals", issue = "none")]
     #[deprecated(since = "1.13.0", note = "use `std::hash::DefaultHasher` instead")]
     pub fn new_with_keys(key0: u64, key1: u64) -> SipHasher13 {
@@ -181,7 +181,7 @@ impl SipHasher13 {
 }
 
 impl<S: Sip> Hasher<S> {
-    #[inline]
+    #[inline(never)]
     const fn new_with_keys(key0: u64, key1: u64) -> Hasher<S> {
         let mut state = Hasher {
             k0: key0,
@@ -196,7 +196,7 @@ impl<S: Sip> Hasher<S> {
         state
     }
 
-    #[inline]
+    #[inline(never)]
     const fn reset(&mut self) {
         self.length = 0;
         self.state.v0 = self.k0 ^ 0x736f6d6570736575;
@@ -209,17 +209,17 @@ impl<S: Sip> Hasher<S> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl super::Hasher for SipHasher {
-    #[inline]
+    #[inline(never)]
     fn write(&mut self, msg: &[u8]) {
         self.0.hasher.write(msg)
     }
 
-    #[inline]
+    #[inline(never)]
     fn write_str(&mut self, s: &str) {
         self.0.hasher.write_str(s);
     }
 
-    #[inline]
+    #[inline(never)]
     fn finish(&self) -> u64 {
         self.0.hasher.finish()
     }
@@ -227,17 +227,17 @@ impl super::Hasher for SipHasher {
 
 #[unstable(feature = "hashmap_internals", issue = "none")]
 impl super::Hasher for SipHasher13 {
-    #[inline]
+    #[inline(never)]
     fn write(&mut self, msg: &[u8]) {
         self.hasher.write(msg)
     }
 
-    #[inline]
+    #[inline(never)]
     fn write_str(&mut self, s: &str) {
         self.hasher.write_str(s);
     }
 
-    #[inline]
+    #[inline(never)]
     fn finish(&self) -> u64 {
         self.hasher.finish()
     }
@@ -251,7 +251,7 @@ impl<S: Sip> super::Hasher for Hasher<S> {
     // greatly speed up integer hashing by those hashers, at the cost of
     // slightly slowing down compile speeds on some benchmarks. See #69152 for
     // details.
-    #[inline]
+    #[inline(never)]
     fn write(&mut self, msg: &[u8]) {
         let length = msg.len();
         self.length += length;
@@ -298,7 +298,7 @@ impl<S: Sip> super::Hasher for Hasher<S> {
         self.ntail = left;
     }
 
-    #[inline]
+    #[inline(never)]
     fn write_str(&mut self, s: &str) {
         // This hasher works byte-wise, and `0xFF` cannot show up in a `str`,
         // so just hashing the one extra byte is enough to be prefix-free.
@@ -306,7 +306,7 @@ impl<S: Sip> super::Hasher for Hasher<S> {
         self.write_u8(0xFF);
     }
 
-    #[inline]
+    #[inline(never)]
     fn finish(&self) -> u64 {
         let mut state = self.state;
 
@@ -324,7 +324,7 @@ impl<S: Sip> super::Hasher for Hasher<S> {
 }
 
 impl<S: Sip> Clone for Hasher<S> {
-    #[inline]
+    #[inline(never)]
     fn clone(&self) -> Hasher<S> {
         Hasher {
             k0: self.k0,
@@ -340,7 +340,7 @@ impl<S: Sip> Clone for Hasher<S> {
 
 impl<S: Sip> Default for Hasher<S> {
     /// Creates a `Hasher<S>` with the two initial keys set to 0.
-    #[inline]
+    #[inline(never)]
     fn default() -> Hasher<S> {
         Hasher::new_with_keys(0, 0)
     }
@@ -356,12 +356,12 @@ trait Sip {
 struct Sip13Rounds;
 
 impl Sip for Sip13Rounds {
-    #[inline]
+    #[inline(never)]
     fn c_rounds(state: &mut State) {
         compress!(state);
     }
 
-    #[inline]
+    #[inline(never)]
     fn d_rounds(state: &mut State) {
         compress!(state);
         compress!(state);
@@ -373,13 +373,13 @@ impl Sip for Sip13Rounds {
 struct Sip24Rounds;
 
 impl Sip for Sip24Rounds {
-    #[inline]
+    #[inline(never)]
     fn c_rounds(state: &mut State) {
         compress!(state);
         compress!(state);
     }
 
-    #[inline]
+    #[inline(never)]
     fn d_rounds(state: &mut State) {
         compress!(state);
         compress!(state);

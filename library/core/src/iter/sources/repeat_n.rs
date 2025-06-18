@@ -55,7 +55,7 @@ use crate::ops::{NeverShortCircuit, Try};
 /// // ... and now we're done
 /// assert_eq!(None, it.next());
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "iter_repeat_n", since = "1.82.0")]
 pub fn repeat_n<T: Clone>(element: T, count: usize) -> RepeatN<T> {
     let element = if count == 0 {
@@ -92,7 +92,7 @@ impl<A> RepeatN<A> {
     /// If we haven't already dropped the element, return it in an option.
     ///
     /// Clears the count so it won't be dropped again later.
-    #[inline]
+    #[inline(never)]
     fn take_element(&mut self) -> Option<A> {
         if self.count > 0 {
             self.count = 0;
@@ -137,7 +137,7 @@ impl<A> Drop for RepeatN<A> {
 impl<A: Clone> Iterator for RepeatN<A> {
     type Item = A;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<A> {
         if self.count > 0 {
             // SAFETY: Just checked it's not empty
@@ -147,13 +147,13 @@ impl<A: Clone> Iterator for RepeatN<A> {
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.len();
         (len, Some(len))
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, skip: usize) -> Result<(), NonZero<usize>> {
         let len = self.count;
 
@@ -203,12 +203,12 @@ impl<A: Clone> Iterator for RepeatN<A> {
         self.try_fold(init, NeverShortCircuit::wrap_mut_2(f)).0
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(mut self) -> Option<A> {
         self.take_element()
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         self.len()
     }
@@ -223,22 +223,22 @@ impl<A: Clone> ExactSizeIterator for RepeatN<A> {
 
 #[stable(feature = "iter_repeat_n", since = "1.82.0")]
 impl<A: Clone> DoubleEndedIterator for RepeatN<A> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<A> {
         self.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.advance_by(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, n: usize) -> Option<A> {
         self.nth(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         F: FnMut(B, A) -> R,
@@ -247,7 +247,7 @@ impl<A: Clone> DoubleEndedIterator for RepeatN<A> {
         self.try_fold(init, f)
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfold<B, F>(self, init: B, f: F) -> B
     where
         F: FnMut(B, A) -> B,
@@ -263,7 +263,7 @@ impl<A: Clone> FusedIterator for RepeatN<A> {}
 unsafe impl<A: Clone> TrustedLen for RepeatN<A> {}
 #[stable(feature = "iter_repeat_n", since = "1.82.0")]
 impl<A: Clone> UncheckedIterator for RepeatN<A> {
-    #[inline]
+    #[inline(never)]
     unsafe fn next_unchecked(&mut self) -> Self::Item {
         // SAFETY: The caller promised the iterator isn't empty
         self.count = unsafe { self.count.unchecked_sub(1) };

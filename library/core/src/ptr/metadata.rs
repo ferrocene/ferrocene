@@ -107,7 +107,7 @@ pub trait Thin = Pointee<Metadata = ()>;
 ///
 /// assert_eq!(std::ptr::metadata("foo"), 3_usize);
 /// ```
-#[inline]
+#[inline(never)]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub const fn metadata<T: ?Sized>(ptr: *const T) -> <T as Pointee>::Metadata {
     ptr_metadata(ptr)
@@ -121,7 +121,7 @@ pub const fn metadata<T: ?Sized>(ptr: *const T) -> <T as Pointee>::Metadata {
 ///
 /// [`slice::from_raw_parts`]: crate::slice::from_raw_parts
 #[unstable(feature = "ptr_metadata", issue = "81513")]
-#[inline]
+#[inline(never)]
 pub const fn from_raw_parts<T: ?Sized>(
     data_pointer: *const impl Thin,
     metadata: <T as Pointee>::Metadata,
@@ -134,7 +134,7 @@ pub const fn from_raw_parts<T: ?Sized>(
 ///
 /// See the documentation of [`from_raw_parts`] for more details.
 #[unstable(feature = "ptr_metadata", issue = "81513")]
-#[inline]
+#[inline(never)]
 pub const fn from_raw_parts_mut<T: ?Sized>(
     data_pointer: *mut impl Thin,
     metadata: <T as Pointee>::Metadata,
@@ -189,7 +189,7 @@ impl<Dyn: ?Sized> DynMetadata<Dyn> {
     /// type, which understandably confuses codegen and leads to ICEs when trying to project to a
     /// field of `DynMetadata`. To work around that issue, we use `transmute` instead of using a
     /// field projection.
-    #[inline]
+    #[inline(never)]
     fn vtable_ptr(self) -> *const VTable {
         // SAFETY: this layout assumption is hard-coded into the compiler.
         // If it's somehow not a size match, the transmute will error.
@@ -197,7 +197,7 @@ impl<Dyn: ?Sized> DynMetadata<Dyn> {
     }
 
     /// Returns the size of the type associated with this vtable.
-    #[inline]
+    #[inline(never)]
     pub fn size_of(self) -> usize {
         // Note that "size stored in vtable" is *not* the same as "result of size_of_val_raw".
         // Consider a reference like `&(i32, dyn Send)`: the vtable will only store the size of the
@@ -207,14 +207,14 @@ impl<Dyn: ?Sized> DynMetadata<Dyn> {
     }
 
     /// Returns the alignment of the type associated with this vtable.
-    #[inline]
+    #[inline(never)]
     pub fn align_of(self) -> usize {
         // SAFETY: DynMetadata always contains a valid vtable pointer
         unsafe { crate::intrinsics::vtable_align(self.vtable_ptr() as *const ()) }
     }
 
     /// Returns the size and alignment together as a `Layout`
-    #[inline]
+    #[inline(never)]
     pub fn layout(self) -> crate::alloc::Layout {
         // SAFETY: the compiler emitted this vtable for a concrete Rust type which
         // is known to have a valid layout. Same rationale as in `Layout::for_value`.
@@ -244,7 +244,7 @@ impl<Dyn: ?Sized> Copy for DynMetadata<Dyn> {}
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: ?Sized> Clone for DynMetadata<Dyn> {
-    #[inline]
+    #[inline(never)]
     fn clone(&self) -> Self {
         *self
     }
@@ -255,7 +255,7 @@ impl<Dyn: ?Sized> Eq for DynMetadata<Dyn> {}
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: ?Sized> PartialEq for DynMetadata<Dyn> {
-    #[inline]
+    #[inline(never)]
     fn eq(&self, other: &Self) -> bool {
         crate::ptr::eq::<VTable>(self.vtable_ptr(), other.vtable_ptr())
     }
@@ -263,7 +263,7 @@ impl<Dyn: ?Sized> PartialEq for DynMetadata<Dyn> {
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: ?Sized> Ord for DynMetadata<Dyn> {
-    #[inline]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn cmp(&self, other: &Self) -> crate::cmp::Ordering {
         <*const VTable>::cmp(&self.vtable_ptr(), &other.vtable_ptr())
@@ -272,7 +272,7 @@ impl<Dyn: ?Sized> Ord for DynMetadata<Dyn> {
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: ?Sized> PartialOrd for DynMetadata<Dyn> {
-    #[inline]
+    #[inline(never)]
     fn partial_cmp(&self, other: &Self) -> Option<crate::cmp::Ordering> {
         Some(self.cmp(other))
     }
@@ -280,7 +280,7 @@ impl<Dyn: ?Sized> PartialOrd for DynMetadata<Dyn> {
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: ?Sized> Hash for DynMetadata<Dyn> {
-    #[inline]
+    #[inline(never)]
     fn hash<H: Hasher>(&self, hasher: &mut H) {
         crate::ptr::hash::<VTable, _>(self.vtable_ptr(), hasher)
     }

@@ -50,7 +50,7 @@ impl Alignment {
     /// This provides the same numerical value as [`align_of`],
     /// but in an `Alignment` instead of a `usize`.
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn of<T>() -> Self {
@@ -63,7 +63,7 @@ impl Alignment {
     ///
     /// Note that `0` is not a power of two, nor a valid alignment.
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-    #[inline]
+    #[inline(never)]
     pub const fn new(align: usize) -> Option<Self> {
         if align.is_power_of_two() {
             // SAFETY: Just checked it only has one bit set
@@ -82,7 +82,7 @@ impl Alignment {
     /// Equivalently, it must be `1 << exp` for some `exp` in `0..usize::BITS`.
     /// It must *not* be zero.
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub const unsafe fn new_unchecked(align: usize) -> Self {
         assert_unsafe_precondition!(
@@ -98,14 +98,14 @@ impl Alignment {
 
     /// Returns the alignment as a [`usize`].
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-    #[inline]
+    #[inline(never)]
     pub const fn as_usize(self) -> usize {
         self.0 as usize
     }
 
     /// Returns the alignment as a <code>[NonZero]<[usize]></code>.
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn as_nonzero(self) -> NonZero<usize> {
         // This transmutes directly to avoid the UbCheck in `NonZero::new_unchecked`
@@ -131,7 +131,7 @@ impl Alignment {
     /// assert_eq!(Alignment::new(1024).unwrap().log2(), 10);
     /// ```
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn log2(self) -> u32 {
         self.as_nonzero().trailing_zeros()
@@ -161,7 +161,7 @@ impl Alignment {
     /// assert_ne!(one.mask(Alignment::of::<Align4>().mask()), one);
     /// ```
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn mask(self) -> usize {
         // SAFETY: The alignment is always nonzero, and therefore decrementing won't overflow.
@@ -188,7 +188,7 @@ impl fmt::Debug for Alignment {
 impl TryFrom<NonZero<usize>> for Alignment {
     type Error = num::TryFromIntError;
 
-    #[inline]
+    #[inline(never)]
     fn try_from(align: NonZero<usize>) -> Result<Alignment, Self::Error> {
         align.get().try_into()
     }
@@ -199,7 +199,7 @@ impl TryFrom<NonZero<usize>> for Alignment {
 impl TryFrom<usize> for Alignment {
     type Error = num::TryFromIntError;
 
-    #[inline]
+    #[inline(never)]
     fn try_from(align: usize) -> Result<Alignment, Self::Error> {
         Self::new(align).ok_or(num::TryFromIntError(()))
     }
@@ -208,7 +208,7 @@ impl TryFrom<usize> for Alignment {
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl From<Alignment> for NonZero<usize> {
-    #[inline]
+    #[inline(never)]
     fn from(align: Alignment) -> NonZero<usize> {
         align.as_nonzero()
     }
@@ -217,7 +217,7 @@ impl From<Alignment> for NonZero<usize> {
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl From<Alignment> for usize {
-    #[inline]
+    #[inline(never)]
     fn from(align: Alignment) -> usize {
         align.as_usize()
     }
@@ -226,7 +226,7 @@ impl From<Alignment> for usize {
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl cmp::Ord for Alignment {
-    #[inline]
+    #[inline(never)]
     fn cmp(&self, other: &Self) -> cmp::Ordering {
         self.as_nonzero().get().cmp(&other.as_nonzero().get())
     }
@@ -235,7 +235,7 @@ impl cmp::Ord for Alignment {
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl cmp::PartialOrd for Alignment {
-    #[inline]
+    #[inline(never)]
     fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
         Some(self.cmp(other))
     }
@@ -244,7 +244,7 @@ impl cmp::PartialOrd for Alignment {
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl hash::Hash for Alignment {
-    #[inline]
+    #[inline(never)]
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
         self.as_nonzero().hash(state)
     }

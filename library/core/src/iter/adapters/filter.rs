@@ -34,7 +34,7 @@ where
     I: Iterator,
     P: FnMut(&I::Item) -> bool,
 {
-    #[inline]
+    #[inline(never)]
     fn next_chunk_dropless<const N: usize>(
         &mut self,
     ) -> Result<[I::Item; N], array::IntoIter<I::Item, N>> {
@@ -93,12 +93,12 @@ where
 {
     type Item = I::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<I::Item> {
         self.iter.find(&mut self.predicate)
     }
 
-    #[inline]
+    #[inline(never)]
     fn next_chunk<const N: usize>(
         &mut self,
     ) -> Result<[Self::Item; N], array::IntoIter<Self::Item, N>> {
@@ -114,7 +114,7 @@ where
         fun(self)
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (_, upper) = self.iter.size_hint();
         (0, upper) // can't know a lower bound, due to the predicate
@@ -131,9 +131,9 @@ where
     //
     // Using the branchless version will also simplify the LLVM byte code, thus
     // leaving more budget for LLVM optimizations.
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
-        #[inline]
+        #[inline(never)]
         fn to_usize<T>(mut predicate: impl FnMut(&T) -> bool) -> impl FnMut(T) -> usize {
             move |x| predicate(&x) as usize
         }
@@ -141,7 +141,7 @@ where
         self.iter.map(to_usize(self.predicate)).sum()
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -151,7 +151,7 @@ where
         self.iter.try_fold(init, filter_try_fold(&mut self.predicate, fold))
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -165,12 +165,12 @@ impl<I: DoubleEndedIterator, P> DoubleEndedIterator for Filter<I, P>
 where
     P: FnMut(&I::Item) -> bool,
 {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<I::Item> {
         self.iter.rfind(&mut self.predicate)
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -180,7 +180,7 @@ where
         self.iter.try_rfold(init, filter_try_fold(&mut self.predicate, fold))
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -202,7 +202,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut I::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.iter) }

@@ -96,7 +96,7 @@ impl<'a> Location<'a> {
     #[stable(feature = "track_caller", since = "1.46.0")]
     #[rustc_const_stable(feature = "const_caller_location", since = "1.79.0")]
     #[track_caller]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn caller() -> &'static Location<'static> {
         crate::intrinsics::caller_location()
@@ -152,7 +152,7 @@ impl<'a> Location<'a> {
     /// `std::source_location::file_name`, both of which return a nul-terminated `const char*`.
     #[must_use]
     #[unstable(feature = "file_with_nul", issue = "141727")]
-    #[inline]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn file_with_nul(&self) -> &CStr {
         // SAFETY: `file_bytes_with_nul` is guaranteed to have a trailing nul byte and no
@@ -180,7 +180,7 @@ impl<'a> Location<'a> {
     #[must_use]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_location_fields", since = "1.79.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn line(&self) -> u32 {
         self.line
     }
@@ -205,7 +205,7 @@ impl<'a> Location<'a> {
     #[must_use]
     #[stable(feature = "panic_col", since = "1.25.0")]
     #[rustc_const_stable(feature = "const_location_fields", since = "1.79.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn column(&self) -> u32 {
         self.col
     }
@@ -214,7 +214,7 @@ impl<'a> Location<'a> {
 #[stable(feature = "panic_hook_display", since = "1.26.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Display for Location<'_> {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(formatter, "{}:{}:{}", self.file(), self.line, self.col)
     }

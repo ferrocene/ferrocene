@@ -14,13 +14,13 @@ const USIZE_BYTES: usize = size_of::<usize>();
 /// "The idea is to subtract one from each of the bytes and then look for
 /// bytes where the borrow propagated all the way to the most significant
 /// bit."
-#[inline]
+#[inline(never)]
 const fn contains_zero_byte(x: usize) -> bool {
     x.wrapping_sub(LO_USIZE) & !x & HI_USIZE != 0
 }
 
 /// Returns the first index matching the byte `x` in `text`.
-#[inline]
+#[inline(never)]
 #[must_use]
 pub const fn memchr(x: u8, text: &[u8]) -> Option<usize> {
     // Fast path for small slices.
@@ -31,7 +31,7 @@ pub const fn memchr(x: u8, text: &[u8]) -> Option<usize> {
     memchr_aligned(x, text)
 }
 
-#[inline]
+#[inline(never)]
 const fn memchr_naive(x: u8, text: &[u8]) -> Option<usize> {
     let mut i = 0;
 

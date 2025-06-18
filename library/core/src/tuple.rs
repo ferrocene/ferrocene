@@ -27,11 +27,11 @@ macro_rules! tuple_impls {
             where
                 last_type!($($T,)+): ?Sized
             {
-                #[inline]
+                #[inline(never)]
                 fn eq(&self, other: &($($T,)+)) -> bool {
                     $( ${ignore($T)} self.${index()} == other.${index()} )&&+
                 }
-                #[inline]
+                #[inline(never)]
                 fn ne(&self, other: &($($T,)+)) -> bool {
                     $( ${ignore($T)} self.${index()} != other.${index()} )||+
                 }
@@ -75,39 +75,39 @@ macro_rules! tuple_impls {
             where
                 last_type!($($T,)+): ?Sized
             {
-                #[inline]
+                #[inline(never)]
                 fn partial_cmp(&self, other: &($($T,)+)) -> Option<Ordering> {
                     lexical_partial_cmp!($( ${ignore($T)} self.${index()}, other.${index()} ),+)
                 }
-                #[inline]
+                #[inline(never)]
                 fn lt(&self, other: &($($T,)+)) -> bool {
                     lexical_ord!(lt, __chaining_lt, $( ${ignore($T)} self.${index()}, other.${index()} ),+)
                 }
-                #[inline]
+                #[inline(never)]
                 fn le(&self, other: &($($T,)+)) -> bool {
                     lexical_ord!(le, __chaining_le, $( ${ignore($T)} self.${index()}, other.${index()} ),+)
                 }
-                #[inline]
+                #[inline(never)]
                 fn ge(&self, other: &($($T,)+)) -> bool {
                     lexical_ord!(ge, __chaining_ge, $( ${ignore($T)} self.${index()}, other.${index()} ),+)
                 }
-                #[inline]
+                #[inline(never)]
                 fn gt(&self, other: &($($T,)+)) -> bool {
                     lexical_ord!(gt, __chaining_gt, $( ${ignore($T)} self.${index()}, other.${index()} ),+)
                 }
-                #[inline]
+                #[inline(never)]
                 fn __chaining_lt(&self, other: &($($T,)+)) -> ControlFlow<bool> {
                     lexical_chain!(__chaining_lt, $( ${ignore($T)} self.${index()}, other.${index()} ),+)
                 }
-                #[inline]
+                #[inline(never)]
                 fn __chaining_le(&self, other: &($($T,)+)) -> ControlFlow<bool> {
                     lexical_chain!(__chaining_le, $( ${ignore($T)} self.${index()}, other.${index()} ),+)
                 }
-                #[inline]
+                #[inline(never)]
                 fn __chaining_gt(&self, other: &($($T,)+)) -> ControlFlow<bool> {
                     lexical_chain!(__chaining_gt, $( ${ignore($T)} self.${index()}, other.${index()} ),+)
                 }
-                #[inline]
+                #[inline(never)]
                 fn __chaining_ge(&self, other: &($($T,)+)) -> ControlFlow<bool> {
                     lexical_chain!(__chaining_ge, $( ${ignore($T)} self.${index()}, other.${index()} ),+)
                 }
@@ -121,7 +121,7 @@ macro_rules! tuple_impls {
             where
                 last_type!($($T,)+): ?Sized
             {
-                #[inline]
+                #[inline(never)]
                 fn cmp(&self, other: &($($T,)+)) -> Ordering {
                     lexical_cmp!($( ${ignore($T)} self.${index()}, other.${index()} ),+)
                 }
@@ -132,7 +132,7 @@ macro_rules! tuple_impls {
             $($T)+ @
             #[stable(feature = "rust1", since = "1.0.0")]
             impl<$($T: Default),+> Default for ($($T,)+) {
-                #[inline]
+                #[inline(never)]
                 fn default() -> ($($T,)+) {
                     ($({ let x: $T = Default::default(); x},)+)
                 }
@@ -143,7 +143,7 @@ macro_rules! tuple_impls {
             $($T)+ @
             #[stable(feature = "array_tuple_conv", since = "1.71.0")]
             impl<T> From<[T; ${count($T)}]> for ($(${ignore($T)} T,)+) {
-                #[inline]
+                #[inline(never)]
                 #[allow(non_snake_case)]
                 fn from(array: [T; ${count($T)}]) -> Self {
                     let [$($T,)+] = array;
@@ -156,7 +156,7 @@ macro_rules! tuple_impls {
             $($T)+ @
             #[stable(feature = "array_tuple_conv", since = "1.71.0")]
             impl<T> From<($(${ignore($T)} T,)+)> for [T; ${count($T)}] {
-                #[inline]
+                #[inline(never)]
                 #[allow(non_snake_case)]
                 fn from(tuple: ($(${ignore($T)} T,)+)) -> Self {
                     let ($($T,)+) = tuple;

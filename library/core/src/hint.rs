@@ -196,7 +196,7 @@ pub const unsafe fn unreachable_unchecked() -> ! {
 /// pointer already has the builtin assumption that it is nonnull. However, it illustrates the
 /// kind of changes the optimizer can make even when the behavior is less obviously related.
 #[track_caller]
-#[inline(always)]
+#[inline(never)]
 #[doc(alias = "assume")]
 #[stable(feature = "hint_assert_unchecked", since = "1.81.0")]
 #[rustc_const_stable(feature = "hint_assert_unchecked", since = "1.81.0")]
@@ -267,7 +267,7 @@ pub const unsafe fn assert_unchecked(cond: bool) {
 /// ```
 ///
 /// [`thread::yield_now`]: ../../std/thread/fn.yield_now.html
-#[inline(always)]
+#[inline(never)]
 #[stable(feature = "renamed_spin_loop", since = "1.49.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub fn spin_loop() {
@@ -605,7 +605,7 @@ pub const fn black_box<T>(dummy: T) -> T {
 ///   ```
 #[unstable(feature = "hint_must_use", issue = "94745")]
 #[must_use] // <-- :)
-#[inline(always)]
+#[inline(never)]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub const fn must_use<T>(value: T) -> T {
     value
@@ -658,7 +658,7 @@ pub const fn must_use<T>(value: T) -> T {
 ///
 ///
 #[unstable(feature = "likely_unlikely", issue = "136873")]
-#[inline(always)]
+#[inline(never)]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub const fn likely(b: bool) -> bool {
     crate::intrinsics::likely(b)
@@ -709,7 +709,7 @@ pub const fn likely(b: bool) -> bool {
 /// }
 /// ```
 #[unstable(feature = "likely_unlikely", issue = "136873")]
-#[inline(always)]
+#[inline(never)]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub const fn unlikely(b: bool) -> bool {
     crate::intrinsics::unlikely(b)
@@ -743,7 +743,7 @@ pub const fn unlikely(b: bool) -> bool {
 /// }
 /// ```
 #[unstable(feature = "cold_path", issue = "136873")]
-#[inline(always)]
+#[inline(never)]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub const fn cold_path() {
     crate::intrinsics::cold_path()
@@ -790,7 +790,7 @@ pub const fn cold_path() {
 /// # append(&hasher, 42, &mut bucket_one, &mut bucket_two);
 /// # assert_eq!(bucket_one.len() + bucket_two.len(), 1);
 /// ```
-#[inline(always)]
+#[inline(never)]
 #[stable(feature = "select_unpredictable", since = "1.88.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub fn select_unpredictable<T>(condition: bool, true_val: T, false_val: T) -> T {

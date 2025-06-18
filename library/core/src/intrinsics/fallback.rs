@@ -24,7 +24,7 @@ macro_rules! impl_carrying_mul_add_by_widening {
         #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
         impl const CarryingMulAdd for $t {
             type Unsigned = $u;
-            #[inline]
+            #[inline(never)]
             fn carrying_mul_add(self, a: Self, b: Self, c: Self) -> ($u, $t) {
                 let wide = (self as $w) * (a as $w) + (b as $w) + (c as $w);
                 (wide as _, (wide >> Self::BITS) as _)
@@ -52,18 +52,18 @@ type UDoubleSize = u64;
 #[cfg(target_pointer_width = "64")]
 type UDoubleSize = u128;
 
-#[inline]
+#[inline(never)]
 const fn wide_mul_u128(a: u128, b: u128) -> (u128, u128) {
-    #[inline]
+    #[inline(never)]
     const fn to_low_high(x: u128) -> [u128; 2] {
         const MASK: u128 = u64::MAX as _;
         [x & MASK, x >> 64]
     }
-    #[inline]
+    #[inline(never)]
     const fn from_low_high(x: [u128; 2]) -> u128 {
         x[0] | (x[1] << 64)
     }
-    #[inline]
+    #[inline(never)]
     const fn scalar_mul(low_high: [u128; 2], k: u128) -> [u128; 3] {
         let [x, c] = to_low_high(k * low_high[0]);
         let [y, z] = to_low_high(k * low_high[1] + c);
@@ -83,7 +83,7 @@ const fn wide_mul_u128(a: u128, b: u128) -> (u128, u128) {
 #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
 impl const CarryingMulAdd for u128 {
     type Unsigned = u128;
-    #[inline]
+    #[inline(never)]
     fn carrying_mul_add(self, b: u128, c: u128, d: u128) -> (u128, u128) {
         let (low, mut high) = wide_mul_u128(self, b);
         let (low, carry) = u128::overflowing_add(low, c);
@@ -97,7 +97,7 @@ impl const CarryingMulAdd for u128 {
 #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
 impl const CarryingMulAdd for i128 {
     type Unsigned = u128;
-    #[inline]
+    #[inline(never)]
     fn carrying_mul_add(self, b: i128, c: i128, d: i128) -> (u128, i128) {
         let (low, high) = wide_mul_u128(self as u128, b as u128);
         let mut high = high as i128;
@@ -131,7 +131,7 @@ macro_rules! impl_disjoint_bitor {
         #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
         impl const DisjointBitOr for $t {
             #[cfg_attr(miri, track_caller)]
-            #[inline]
+            #[inline(never)]
             unsafe fn disjoint_bitor(self, other: Self) -> Self {
                 // Note that the assume here is required for UB detection in Miri!
 

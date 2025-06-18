@@ -49,7 +49,7 @@ impl<'a> PanicInfo<'a> {
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<'a> PanicInfo<'a> {
-    #[inline]
+    #[inline(never)]
     pub(crate) fn new(
         // Ferrocene annotation: Replace `fmt::Arguments` by the `PanicFmt` alias.
         message: &'a PanicFmt<'a>,
@@ -154,7 +154,7 @@ impl<'a> PanicInfo<'a> {
         issue = "none"
     )]
     #[doc(hidden)]
-    #[inline]
+    #[inline(never)]
     pub fn force_no_backtrace(&self) -> bool {
         self.force_no_backtrace
     }
@@ -189,7 +189,7 @@ impl<'a> PanicMessage<'a> {
     #[stable(feature = "panic_info_message", since = "1.81.0")]
     #[rustc_const_stable(feature = "const_arguments_as_str", since = "1.84.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn as_str(&self) -> Option<&'static str> {
         self.message.as_str()
     }
@@ -198,7 +198,7 @@ impl<'a> PanicMessage<'a> {
 #[stable(feature = "panic_info_message", since = "1.81.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl Display for PanicMessage<'_> {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_fmt(*self.message)
     }
@@ -207,7 +207,7 @@ impl Display for PanicMessage<'_> {
 #[stable(feature = "panic_info_message", since = "1.81.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Debug for PanicMessage<'_> {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_fmt(*self.message)
     }

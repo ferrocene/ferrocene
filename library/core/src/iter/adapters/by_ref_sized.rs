@@ -16,27 +16,27 @@ pub struct ByRefSized<'a, I>(pub &'a mut I);
 impl<I: Iterator> Iterator for ByRefSized<'_, I> {
     type Item = I::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<Self::Item> {
         I::next(self.0)
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         I::size_hint(self.0)
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         I::advance_by(self.0, n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         I::nth(self.0, n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<B, F>(self, init: B, f: F) -> B
     where
         F: FnMut(B, Self::Item) -> B,
@@ -45,7 +45,7 @@ impl<I: Iterator> Iterator for ByRefSized<'_, I> {
         I::try_fold(self.0, init, NeverShortCircuit::wrap_mut_2(f)).0
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         F: FnMut(B, Self::Item) -> R,
@@ -57,22 +57,22 @@ impl<I: Iterator> Iterator for ByRefSized<'_, I> {
 
 #[unstable(feature = "std_internals", issue = "none")]
 impl<I: DoubleEndedIterator> DoubleEndedIterator for ByRefSized<'_, I> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<Self::Item> {
         I::next_back(self.0)
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         I::advance_back_by(self.0, n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
         I::nth_back(self.0, n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn rfold<B, F>(self, init: B, f: F) -> B
     where
         F: FnMut(B, Self::Item) -> B,
@@ -81,7 +81,7 @@ impl<I: DoubleEndedIterator> DoubleEndedIterator for ByRefSized<'_, I> {
         I::try_rfold(self.0, init, NeverShortCircuit::wrap_mut_2(f)).0
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_rfold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         F: FnMut(B, Self::Item) -> R,

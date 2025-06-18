@@ -34,7 +34,7 @@ impl From<Infallible> for TryFromIntError {
 
 #[unstable(feature = "never_type", issue = "35121")]
 impl From<!> for TryFromIntError {
-    #[inline]
+    #[inline(never)]
     fn from(never: !) -> TryFromIntError {
         // Match rather than coerce to make sure that code like
         // `From<Infallible> for TryFromIntError` above will keep working

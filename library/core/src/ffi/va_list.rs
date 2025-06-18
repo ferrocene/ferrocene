@@ -142,7 +142,7 @@ crate::cfg_select! {
 
         impl<'f> VaListImpl<'f> {
             /// Converts a [`VaListImpl`] into a [`VaList`] that is binary-compatible with C's `va_list`.
-            #[inline]
+            #[inline(never)]
             pub fn as_va_list<'a>(&'a mut self) -> VaList<'a, 'f> {
                 VaList { inner: self, _marker: PhantomData }
             }
@@ -160,7 +160,7 @@ crate::cfg_select! {
 
         impl<'f> VaListImpl<'f> {
             /// Converts a [`VaListImpl`] into a [`VaList`] that is binary-compatible with C's `va_list`.
-            #[inline]
+            #[inline(never)]
             pub fn as_va_list<'a>(&'a mut self) -> VaList<'a, 'f> {
                 VaList { inner: VaListImpl { ..*self }, _marker: PhantomData }
             }
@@ -171,14 +171,14 @@ crate::cfg_select! {
 impl<'a, 'f: 'a> Deref for VaList<'a, 'f> {
     type Target = VaListImpl<'f>;
 
-    #[inline]
+    #[inline(never)]
     fn deref(&self) -> &VaListImpl<'f> {
         &self.inner
     }
 }
 
 impl<'a, 'f: 'a> DerefMut for VaList<'a, 'f> {
-    #[inline]
+    #[inline(never)]
     fn deref_mut(&mut self) -> &mut VaListImpl<'f> {
         &mut self.inner
     }
@@ -233,7 +233,7 @@ unsafe impl<T> VaArgSafe for *const T {}
 
 impl<'f> VaListImpl<'f> {
     /// Advance to the next arg.
-    #[inline]
+    #[inline(never)]
     pub unsafe fn arg<T: VaArgSafe>(&mut self) -> T {
         // SAFETY: the caller must uphold the safety contract for `va_arg`.
         unsafe { va_arg(self) }
@@ -255,7 +255,7 @@ impl<'f> VaListImpl<'f> {
 }
 
 impl<'f> Clone for VaListImpl<'f> {
-    #[inline]
+    #[inline(never)]
     fn clone(&self) -> Self {
         let mut dest = crate::mem::MaybeUninit::uninit();
         // SAFETY: we write to the `MaybeUninit`, thus it is initialized and `assume_init` is legal

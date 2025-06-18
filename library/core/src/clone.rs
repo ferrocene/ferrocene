@@ -205,7 +205,7 @@ pub trait Clone: Sized {
     /// `a.clone_from(&b)` is equivalent to `a = b.clone()` in functionality,
     /// but can be overridden to reuse the resources of `a` to avoid unnecessary
     /// allocations.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     fn clone_from(&mut self, source: &Self) {
         *self = source.clone()
@@ -481,7 +481,7 @@ pub unsafe trait CloneToUninit {
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
 #[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: Clone> CloneToUninit for T {
-    #[inline]
+    #[inline(never)]
     unsafe fn clone_to_uninit(&self, dest: *mut u8) {
         // SAFETY: we're calling a specialization with the same contract
         unsafe { <T as self::uninit::CopySpec>::clone_one(self, dest.cast::<T>()) }
@@ -491,7 +491,7 @@ unsafe impl<T: Clone> CloneToUninit for T {
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
 #[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: Clone> CloneToUninit for [T] {
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(debug_assertions, track_caller)]
     unsafe fn clone_to_uninit(&self, dest: *mut u8) {
         let dest: *mut [T] = dest.with_metadata_of(self);
@@ -503,7 +503,7 @@ unsafe impl<T: Clone> CloneToUninit for [T] {
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
 #[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl CloneToUninit for str {
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(debug_assertions, track_caller)]
     unsafe fn clone_to_uninit(&self, dest: *mut u8) {
         // SAFETY: str is just a [u8] with UTF-8 invariant
@@ -527,7 +527,7 @@ unsafe impl CloneToUninit for crate::ffi::CStr {
 #[unstable(feature = "bstr", issue = "134915")]
 #[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl CloneToUninit for crate::bstr::ByteStr {
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(debug_assertions, track_caller)]
     unsafe fn clone_to_uninit(&self, dst: *mut u8) {
         // SAFETY: ByteStr is a `#[repr(transparent)]` wrapper around `[u8]`
@@ -546,7 +546,7 @@ mod impls {
             $(
                 #[stable(feature = "rust1", since = "1.0.0")]
                 impl Clone for $t {
-                    #[inline(always)]
+                    #[inline(never)]
                     fn clone(&self) -> Self {
                         *self
                     }
@@ -574,7 +574,7 @@ mod impls {
     #[cfg(not(feature = "ferrocene_certified"))]
     #[unstable(feature = "never_type", issue = "35121")]
     impl Clone for ! {
-        #[inline]
+        #[inline(never)]
         fn clone(&self) -> Self {
             *self
         }
@@ -582,7 +582,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> Clone for *const T {
-        #[inline(always)]
+        #[inline(never)]
         fn clone(&self) -> Self {
             *self
         }
@@ -590,7 +590,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> Clone for *mut T {
-        #[inline(always)]
+        #[inline(never)]
         fn clone(&self) -> Self {
             *self
         }
@@ -599,7 +599,7 @@ mod impls {
     /// Shared references can be cloned, but mutable references *cannot*!
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> Clone for &T {
-        #[inline(always)]
+        #[inline(never)]
         #[rustc_diagnostic_item = "noop_method_clone"]
         fn clone(&self) -> Self {
             *self

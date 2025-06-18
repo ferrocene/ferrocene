@@ -1438,7 +1438,7 @@ pub enum FpCategory {
 /// Note that if the radix is known to the compiler, it is just the check of digits.len that
 /// is done at runtime.
 #[doc(hidden)]
-#[inline(always)]
+#[inline(never)]
 #[unstable(issue = "none", feature = "std_internals")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub const fn can_not_overflow<T>(radix: u32, is_signed_ty: bool, digits: &[u8]) -> bool {

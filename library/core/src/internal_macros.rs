@@ -94,14 +94,14 @@ macro_rules! impl_fn_for_zst {
             struct $Name;
 
             impl $( <$( $lifetime ),+> )? Fn<($( $ArgTy, )*)> for $Name {
-                #[inline]
+                #[inline(never)]
                 extern "rust-call" fn call(&self, ($( $arg, )*): ($( $ArgTy, )*)) -> $ReturnTy {
                     $body
                 }
             }
 
             impl $( <$( $lifetime ),+> )? FnMut<($( $ArgTy, )*)> for $Name {
-                #[inline]
+                #[inline(never)]
                 extern "rust-call" fn call_mut(
                     &mut self,
                     ($( $arg, )*): ($( $ArgTy, )*)
@@ -113,7 +113,7 @@ macro_rules! impl_fn_for_zst {
             impl $( <$( $lifetime ),+> )? FnOnce<($( $ArgTy, )*)> for $Name {
                 type Output = $ReturnTy;
 
-                #[inline]
+                #[inline(never)]
                 extern "rust-call" fn call_once(self, ($( $arg, )*): ($( $ArgTy, )*)) -> $ReturnTy {
                     Fn::call(&self, ($( $arg, )*))
                 }

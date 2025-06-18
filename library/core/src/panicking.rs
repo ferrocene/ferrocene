@@ -267,7 +267,7 @@ pub const fn panic_explicit() -> ! {
     panic_display(&"explicit panic");
 }
 
-#[inline]
+#[inline(never)]
 #[track_caller]
 #[rustc_diagnostic_item = "unreachable_display"] // needed for `non-fmt-panics` lint
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -277,7 +277,7 @@ pub fn unreachable_display<T: fmt::Display>(x: &T) -> ! {
 
 /// This exists solely for the 2015 edition `panic!` macro to trigger
 /// a lint on `panic!(my_str_variable);`.
-#[inline]
+#[inline(never)]
 #[track_caller]
 #[rustc_diagnostic_item = "panic_str_2015"]
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
@@ -286,7 +286,7 @@ pub const fn panic_str_2015(expr: &str) -> ! {
     panic_display(&expr);
 }
 
-#[inline]
+#[inline(never)]
 #[track_caller]
 #[rustc_do_not_const_check] // hooked by const-eval
 // enforce a &&str argument in const-check and hook this by const-eval

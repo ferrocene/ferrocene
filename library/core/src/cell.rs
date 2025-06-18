@@ -340,7 +340,7 @@ impl<T: ?Sized> !Sync for Cell<T> {}
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Copy> Clone for Cell<T> {
-    #[inline]
+    #[inline(never)]
     fn clone(&self) -> Cell<T> {
         Cell::new(self.get())
     }
@@ -350,7 +350,7 @@ impl<T: Copy> Clone for Cell<T> {
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Default> Default for Cell<T> {
     /// Creates a `Cell<T>`, with the `Default` value for T.
-    #[inline]
+    #[inline(never)]
     fn default() -> Cell<T> {
         Cell::new(Default::default())
     }
@@ -359,7 +359,7 @@ impl<T: Default> Default for Cell<T> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PartialEq + Copy> PartialEq for Cell<T> {
-    #[inline]
+    #[inline(never)]
     fn eq(&self, other: &Cell<T>) -> bool {
         self.get() == other.get()
     }
@@ -372,27 +372,27 @@ impl<T: Eq + Copy> Eq for Cell<T> {}
 #[stable(feature = "cell_ord", since = "1.10.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PartialOrd + Copy> PartialOrd for Cell<T> {
-    #[inline]
+    #[inline(never)]
     fn partial_cmp(&self, other: &Cell<T>) -> Option<Ordering> {
         self.get().partial_cmp(&other.get())
     }
 
-    #[inline]
+    #[inline(never)]
     fn lt(&self, other: &Cell<T>) -> bool {
         self.get() < other.get()
     }
 
-    #[inline]
+    #[inline(never)]
     fn le(&self, other: &Cell<T>) -> bool {
         self.get() <= other.get()
     }
 
-    #[inline]
+    #[inline(never)]
     fn gt(&self, other: &Cell<T>) -> bool {
         self.get() > other.get()
     }
 
-    #[inline]
+    #[inline(never)]
     fn ge(&self, other: &Cell<T>) -> bool {
         self.get() >= other.get()
     }
@@ -401,7 +401,7 @@ impl<T: PartialOrd + Copy> PartialOrd for Cell<T> {
 #[stable(feature = "cell_ord", since = "1.10.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Ord + Copy> Ord for Cell<T> {
-    #[inline]
+    #[inline(never)]
     fn cmp(&self, other: &Cell<T>) -> Ordering {
         self.get().cmp(&other.get())
     }
@@ -429,7 +429,7 @@ impl<T> Cell<T> {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cell_new", since = "1.24.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn new(value: T) -> Cell<T> {
         Cell { value: UnsafeCell::new(value) }
     }
@@ -445,7 +445,7 @@ impl<T> Cell<T> {
     ///
     /// c.set(10);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn set(&self, val: T) {
         self.replace(val);
@@ -473,7 +473,7 @@ impl<T> Cell<T> {
     /// assert_eq!(10, c1.get());
     /// assert_eq!(5, c2.get());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "move_cell", since = "1.17.0")]
     pub fn swap(&self, other: &Self) {
         // This function documents that it *will* panic, and intrinsics::is_nonoverlapping doesn't
@@ -515,7 +515,7 @@ impl<T> Cell<T> {
     /// assert_eq!(cell.replace(10), 5);
     /// assert_eq!(cell.get(), 10);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "move_cell", since = "1.17.0")]
     #[rustc_const_stable(feature = "const_cell", since = "1.88.0")]
     #[rustc_confusables("swap")]
@@ -558,7 +558,7 @@ impl<T: Copy> Cell<T> {
     ///
     /// let five = c.get();
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cell", since = "1.88.0")]
     pub const fn get(&self) -> T {
@@ -578,7 +578,7 @@ impl<T: Copy> Cell<T> {
     /// c.update(|x| x + 1);
     /// assert_eq!(c.get(), 6);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "cell_update", since = "1.88.0")]
     pub fn update(&self, f: impl FnOnce(T) -> T) {
         let old = self.get();
@@ -599,7 +599,7 @@ impl<T: ?Sized> Cell<T> {
     ///
     /// let ptr = c.as_ptr();
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "cell_as_ptr", since = "1.12.0")]
     #[rustc_const_stable(feature = "const_cell_as_ptr", since = "1.32.0")]
     #[rustc_as_ptr]
@@ -630,7 +630,7 @@ impl<T: ?Sized> Cell<T> {
     ///
     /// assert_eq!(c.get(), 6);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "cell_get_mut", since = "1.11.0")]
     #[rustc_const_stable(feature = "const_cell", since = "1.88.0")]
     pub const fn get_mut(&mut self) -> &mut T {
@@ -650,7 +650,7 @@ impl<T: ?Sized> Cell<T> {
     ///
     /// assert_eq!(slice_cell.len(), 3);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "as_cell", since = "1.37.0")]
     #[rustc_const_stable(feature = "const_cell", since = "1.88.0")]
     pub const fn from_mut(t: &mut T) -> &Cell<T> {
@@ -856,13 +856,13 @@ type BorrowFlag = isize;
 #[cfg(not(feature = "ferrocene_certified"))]
 const UNUSED: BorrowFlag = 0;
 
-#[inline(always)]
+#[inline(never)]
 #[cfg(not(feature = "ferrocene_certified"))]
 fn is_writing(x: BorrowFlag) -> bool {
     x < UNUSED
 }
 
-#[inline(always)]
+#[inline(never)]
 #[cfg(not(feature = "ferrocene_certified"))]
 fn is_reading(x: BorrowFlag) -> bool {
     x > UNUSED
@@ -881,7 +881,7 @@ impl<T> RefCell<T> {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_refcell_new", since = "1.24.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn new(value: T) -> RefCell<T> {
         RefCell {
             value: UnsafeCell::new(value),
@@ -905,7 +905,7 @@ impl<T> RefCell<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cell_into_inner", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
-    #[inline]
+    #[inline(never)]
     pub const fn into_inner(self) -> T {
         // Since this function takes `self` (the `RefCell`) by value, the
         // compiler statically verifies that it is not currently borrowed.
@@ -930,7 +930,7 @@ impl<T> RefCell<T> {
     /// assert_eq!(old_value, 5);
     /// assert_eq!(cell, RefCell::new(6));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "refcell_replace", since = "1.24.0")]
     #[track_caller]
     #[rustc_confusables("swap")]
@@ -954,7 +954,7 @@ impl<T> RefCell<T> {
     /// assert_eq!(old_value, 5);
     /// assert_eq!(cell, RefCell::new(6));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "refcell_replace_swap", since = "1.35.0")]
     #[track_caller]
     pub fn replace_with<F: FnOnce(&mut T) -> T>(&self, f: F) -> T {
@@ -983,7 +983,7 @@ impl<T> RefCell<T> {
     /// assert_eq!(c, RefCell::new(6));
     /// assert_eq!(d, RefCell::new(5));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "refcell_swap", since = "1.24.0")]
     pub fn swap(&self, other: &Self) {
         mem::swap(&mut *self.borrow_mut(), &mut *other.borrow_mut())
@@ -1024,7 +1024,7 @@ impl<T: ?Sized> RefCell<T> {
     /// let b = c.borrow(); // this causes a panic
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub fn borrow(&self) -> Ref<'_, T> {
         match self.try_borrow() {
@@ -1059,7 +1059,7 @@ impl<T: ?Sized> RefCell<T> {
     /// }
     /// ```
     #[stable(feature = "try_borrow", since = "1.13.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(feature = "debug_refcell", track_caller)]
     pub fn try_borrow(&self) -> Result<Ref<'_, T>, BorrowError> {
         match BorrowRef::new(&self.borrow) {
@@ -1120,7 +1120,7 @@ impl<T: ?Sized> RefCell<T> {
     /// let b = c.borrow_mut(); // this causes a panic
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     pub fn borrow_mut(&self) -> RefMut<'_, T> {
         match self.try_borrow_mut() {
@@ -1152,7 +1152,7 @@ impl<T: ?Sized> RefCell<T> {
     /// assert!(c.try_borrow_mut().is_ok());
     /// ```
     #[stable(feature = "try_borrow", since = "1.13.0")]
-    #[inline]
+    #[inline(never)]
     #[cfg_attr(feature = "debug_refcell", track_caller)]
     pub fn try_borrow_mut(&self) -> Result<RefMut<'_, T>, BorrowMutError> {
         match BorrowRefMut::new(&self.borrow) {
@@ -1186,7 +1186,7 @@ impl<T: ?Sized> RefCell<T> {
     ///
     /// let ptr = c.as_ptr();
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "cell_as_ptr", since = "1.12.0")]
     #[rustc_as_ptr]
     #[rustc_never_returns_null_ptr]
@@ -1225,7 +1225,7 @@ impl<T: ?Sized> RefCell<T> {
     ///
     /// assert_eq!(c, RefCell::new(6));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "cell_get_mut", since = "1.11.0")]
     pub fn get_mut(&mut self) -> &mut T {
         self.value.get_mut()
@@ -1286,7 +1286,7 @@ impl<T: ?Sized> RefCell<T> {
     /// }
     /// ```
     #[stable(feature = "borrow_state", since = "1.37.0")]
-    #[inline]
+    #[inline(never)]
     pub unsafe fn try_borrow_unguarded(&self) -> Result<&T, BorrowError> {
         if !is_writing(self.borrow.get()) {
             // SAFETY: We check that nobody is actively writing now, but it is
@@ -1345,7 +1345,7 @@ impl<T: Clone> Clone for RefCell<T> {
     /// # Panics
     ///
     /// Panics if the value is currently mutably borrowed.
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     fn clone(&self) -> RefCell<T> {
         RefCell::new(self.borrow().clone())
@@ -1354,7 +1354,7 @@ impl<T: Clone> Clone for RefCell<T> {
     /// # Panics
     ///
     /// Panics if `source` is currently mutably borrowed.
-    #[inline]
+    #[inline(never)]
     #[track_caller]
     fn clone_from(&mut self, source: &Self) {
         self.get_mut().clone_from(&source.borrow())
@@ -1365,7 +1365,7 @@ impl<T: Clone> Clone for RefCell<T> {
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Default> Default for RefCell<T> {
     /// Creates a `RefCell<T>`, with the `Default` value for T.
-    #[inline]
+    #[inline(never)]
     fn default() -> RefCell<T> {
         RefCell::new(Default::default())
     }
@@ -1377,7 +1377,7 @@ impl<T: ?Sized + PartialEq> PartialEq for RefCell<T> {
     /// # Panics
     ///
     /// Panics if the value in either `RefCell` is currently mutably borrowed.
-    #[inline]
+    #[inline(never)]
     fn eq(&self, other: &RefCell<T>) -> bool {
         *self.borrow() == *other.borrow()
     }
@@ -1393,7 +1393,7 @@ impl<T: ?Sized + PartialOrd> PartialOrd for RefCell<T> {
     /// # Panics
     ///
     /// Panics if the value in either `RefCell` is currently mutably borrowed.
-    #[inline]
+    #[inline(never)]
     fn partial_cmp(&self, other: &RefCell<T>) -> Option<Ordering> {
         self.borrow().partial_cmp(&*other.borrow())
     }
@@ -1401,7 +1401,7 @@ impl<T: ?Sized + PartialOrd> PartialOrd for RefCell<T> {
     /// # Panics
     ///
     /// Panics if the value in either `RefCell` is currently mutably borrowed.
-    #[inline]
+    #[inline(never)]
     fn lt(&self, other: &RefCell<T>) -> bool {
         *self.borrow() < *other.borrow()
     }
@@ -1409,7 +1409,7 @@ impl<T: ?Sized + PartialOrd> PartialOrd for RefCell<T> {
     /// # Panics
     ///
     /// Panics if the value in either `RefCell` is currently mutably borrowed.
-    #[inline]
+    #[inline(never)]
     fn le(&self, other: &RefCell<T>) -> bool {
         *self.borrow() <= *other.borrow()
     }
@@ -1417,7 +1417,7 @@ impl<T: ?Sized + PartialOrd> PartialOrd for RefCell<T> {
     /// # Panics
     ///
     /// Panics if the value in either `RefCell` is currently mutably borrowed.
-    #[inline]
+    #[inline(never)]
     fn gt(&self, other: &RefCell<T>) -> bool {
         *self.borrow() > *other.borrow()
     }
@@ -1425,7 +1425,7 @@ impl<T: ?Sized + PartialOrd> PartialOrd for RefCell<T> {
     /// # Panics
     ///
     /// Panics if the value in either `RefCell` is currently mutably borrowed.
-    #[inline]
+    #[inline(never)]
     fn ge(&self, other: &RefCell<T>) -> bool {
         *self.borrow() >= *other.borrow()
     }
@@ -1437,7 +1437,7 @@ impl<T: ?Sized + Ord> Ord for RefCell<T> {
     /// # Panics
     ///
     /// Panics if the value in either `RefCell` is currently mutably borrowed.
-    #[inline]
+    #[inline(never)]
     fn cmp(&self, other: &RefCell<T>) -> Ordering {
         self.borrow().cmp(&*other.borrow())
     }
@@ -1463,7 +1463,7 @@ struct BorrowRef<'b> {
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<'b> BorrowRef<'b> {
-    #[inline]
+    #[inline(never)]
     fn new(borrow: &'b Cell<BorrowFlag>) -> Option<BorrowRef<'b>> {
         let b = borrow.get().wrapping_add(1);
         if !is_reading(b) {
@@ -1489,7 +1489,7 @@ impl<'b> BorrowRef<'b> {
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl Drop for BorrowRef<'_> {
-    #[inline]
+    #[inline(never)]
     fn drop(&mut self) {
         let borrow = self.borrow.get();
         debug_assert!(is_reading(borrow));
@@ -1499,7 +1499,7 @@ impl Drop for BorrowRef<'_> {
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl Clone for BorrowRef<'_> {
-    #[inline]
+    #[inline(never)]
     fn clone(&self) -> Self {
         // Since this Ref exists, we know the borrow flag
         // is a reading borrow.
@@ -1534,7 +1534,7 @@ pub struct Ref<'b, T: ?Sized + 'b> {
 impl<T: ?Sized> Deref for Ref<'_, T> {
     type Target = T;
 
-    #[inline]
+    #[inline(never)]
     fn deref(&self) -> &T {
         // SAFETY: the value is accessible as long as we hold our borrow.
         unsafe { self.value.as_ref() }
@@ -1557,7 +1557,7 @@ impl<'b, T: ?Sized> Ref<'b, T> {
     /// a `RefCell`.
     #[stable(feature = "cell_extras", since = "1.15.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub fn clone(orig: &Ref<'b, T>) -> Ref<'b, T> {
         Ref { value: orig.value, borrow: orig.borrow.clone() }
     }
@@ -1581,7 +1581,7 @@ impl<'b, T: ?Sized> Ref<'b, T> {
     /// assert_eq!(*b2, 5)
     /// ```
     #[stable(feature = "cell_map", since = "1.8.0")]
-    #[inline]
+    #[inline(never)]
     pub fn map<U: ?Sized, F>(orig: Ref<'b, T>, f: F) -> Ref<'b, U>
     where
         F: FnOnce(&T) -> &U,
@@ -1610,7 +1610,7 @@ impl<'b, T: ?Sized> Ref<'b, T> {
     /// assert_eq!(*b2.unwrap(), 2);
     /// ```
     #[stable(feature = "cell_filter_map", since = "1.63.0")]
-    #[inline]
+    #[inline(never)]
     pub fn filter_map<U: ?Sized, F>(orig: Ref<'b, T>, f: F) -> Result<Ref<'b, U>, Self>
     where
         F: FnOnce(&T) -> Option<&U>,
@@ -1642,7 +1642,7 @@ impl<'b, T: ?Sized> Ref<'b, T> {
     /// assert_eq!(*end, [3, 4]);
     /// ```
     #[stable(feature = "refcell_map_split", since = "1.35.0")]
-    #[inline]
+    #[inline(never)]
     pub fn map_split<U: ?Sized, V: ?Sized, F>(orig: Ref<'b, T>, f: F) -> (Ref<'b, U>, Ref<'b, V>)
     where
         F: FnOnce(&T) -> (&U, &V),
@@ -1729,7 +1729,7 @@ impl<'b, T: ?Sized> RefMut<'b, T> {
     /// assert_eq!(*c.borrow(), (42, 'b'));
     /// ```
     #[stable(feature = "cell_map", since = "1.8.0")]
-    #[inline]
+    #[inline(never)]
     pub fn map<U: ?Sized, F>(mut orig: RefMut<'b, T>, f: F) -> RefMut<'b, U>
     where
         F: FnOnce(&mut T) -> &mut U,
@@ -1767,7 +1767,7 @@ impl<'b, T: ?Sized> RefMut<'b, T> {
     /// assert_eq!(*c.borrow(), vec![1, 4, 3]);
     /// ```
     #[stable(feature = "cell_filter_map", since = "1.63.0")]
-    #[inline]
+    #[inline(never)]
     pub fn filter_map<U: ?Sized, F>(mut orig: RefMut<'b, T>, f: F) -> Result<RefMut<'b, U>, Self>
     where
         F: FnOnce(&mut T) -> Option<&mut U>,
@@ -1810,7 +1810,7 @@ impl<'b, T: ?Sized> RefMut<'b, T> {
     /// end.copy_from_slice(&[2, 1]);
     /// ```
     #[stable(feature = "refcell_map_split", since = "1.35.0")]
-    #[inline]
+    #[inline(never)]
     pub fn map_split<U: ?Sized, V: ?Sized, F>(
         mut orig: RefMut<'b, T>,
         f: F,
@@ -1868,7 +1868,7 @@ struct BorrowRefMut<'b> {
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl Drop for BorrowRefMut<'_> {
-    #[inline]
+    #[inline(never)]
     fn drop(&mut self) {
         let borrow = self.borrow.get();
         debug_assert!(is_writing(borrow));
@@ -1878,7 +1878,7 @@ impl Drop for BorrowRefMut<'_> {
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<'b> BorrowRefMut<'b> {
-    #[inline]
+    #[inline(never)]
     fn new(borrow: &'b Cell<BorrowFlag>) -> Option<BorrowRefMut<'b>> {
         // NOTE: Unlike BorrowRefMut::clone, new is called to create the initial
         // mutable reference, and so there must currently be no existing
@@ -1898,7 +1898,7 @@ impl<'b> BorrowRefMut<'b> {
     // This is only valid if each `BorrowRefMut` is used to track a mutable
     // reference to a distinct, nonoverlapping range of the original object.
     // This isn't in a Clone impl so that code doesn't call this implicitly.
-    #[inline]
+    #[inline(never)]
     fn clone(&self) -> BorrowRefMut<'b> {
         let borrow = self.borrow.get();
         debug_assert!(is_writing(borrow));
@@ -1930,7 +1930,7 @@ pub struct RefMut<'b, T: ?Sized + 'b> {
 impl<T: ?Sized> Deref for RefMut<'_, T> {
     type Target = T;
 
-    #[inline]
+    #[inline(never)]
     fn deref(&self) -> &T {
         // SAFETY: the value is accessible as long as we hold our borrow.
         unsafe { self.value.as_ref() }
@@ -1940,7 +1940,7 @@ impl<T: ?Sized> Deref for RefMut<'_, T> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> DerefMut for RefMut<'_, T> {
-    #[inline]
+    #[inline(never)]
     fn deref_mut(&mut self) -> &mut T {
         // SAFETY: the value is accessible as long as we hold our borrow.
         unsafe { self.value.as_mut() }
@@ -2166,7 +2166,7 @@ impl<T> UnsafeCell<T> {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_unsafe_cell_new", since = "1.32.0")]
-    #[inline(always)]
+    #[inline(never)]
     pub const fn new(value: T) -> UnsafeCell<T> {
         UnsafeCell { value }
     }
@@ -2182,7 +2182,7 @@ impl<T> UnsafeCell<T> {
     ///
     /// let five = uc.into_inner();
     /// ```
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cell_into_inner", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
@@ -2212,7 +2212,7 @@ impl<T> UnsafeCell<T> {
     /// let old = unsafe { uc.replace(10) };
     /// assert_eq!(old, 5);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "unsafe_cell_access", issue = "136327")]
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn replace(&self, value: T) -> T {
@@ -2235,7 +2235,7 @@ impl<T: ?Sized> UnsafeCell<T> {
     /// *uc.get_mut() -= 1;
     /// assert_eq!(*uc.get_mut(), 41);
     /// ```
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "unsafe_cell_from_mut", since = "1.84.0")]
     #[rustc_const_stable(feature = "unsafe_cell_from_mut", since = "1.84.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
@@ -2260,7 +2260,7 @@ impl<T: ?Sized> UnsafeCell<T> {
     ///
     /// let five = uc.get();
     /// ```
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_unsafecell_get", since = "1.32.0")]
     #[rustc_as_ptr]
@@ -2287,7 +2287,7 @@ impl<T: ?Sized> UnsafeCell<T> {
     ///
     /// assert_eq!(*c.get_mut(), 6);
     /// ```
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "unsafe_cell_get_mut", since = "1.50.0")]
     #[rustc_const_stable(feature = "const_unsafecell_get_mut", since = "1.83.0")]
     pub const fn get_mut(&mut self) -> &mut T {
@@ -2322,7 +2322,7 @@ impl<T: ?Sized> UnsafeCell<T> {
     ///
     /// assert_eq!(uc.into_inner(), 5);
     /// ```
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "unsafe_cell_raw_get", since = "1.56.0")]
     #[rustc_const_stable(feature = "unsafe_cell_raw_get", since = "1.56.0")]
     #[rustc_diagnostic_item = "unsafe_cell_raw_get"]
@@ -2354,7 +2354,7 @@ impl<T: ?Sized> UnsafeCell<T> {
     /// let val = unsafe { uc.as_ref_unchecked() };
     /// assert_eq!(val, &5);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "unsafe_cell_access", issue = "136327")]
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_ref_unchecked(&self) -> &T {
@@ -2382,7 +2382,7 @@ impl<T: ?Sized> UnsafeCell<T> {
     /// unsafe { *uc.as_mut_unchecked() += 1; }
     /// assert_eq!(uc.into_inner(), 6);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "unsafe_cell_access", issue = "136327")]
     #[allow(clippy::mut_from_ref)]
     #[cfg(not(feature = "ferrocene_certified"))]
@@ -2458,13 +2458,13 @@ unsafe impl<T: ?Sized + Sync> Sync for SyncUnsafeCell<T> {}
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T> SyncUnsafeCell<T> {
     /// Constructs a new instance of `SyncUnsafeCell` which will wrap the specified value.
-    #[inline]
+    #[inline(never)]
     pub const fn new(value: T) -> Self {
         Self { value: UnsafeCell { value } }
     }
 
     /// Unwraps the value, consuming the cell.
-    #[inline]
+    #[inline(never)]
     #[rustc_const_unstable(feature = "sync_unsafe_cell", issue = "95439")]
     pub const fn into_inner(self) -> T {
         self.value.into_inner()
@@ -2480,7 +2480,7 @@ impl<T: ?Sized> SyncUnsafeCell<T> {
     /// Ensure that the access is unique (no active references, mutable or not)
     /// when casting to `&mut T`, and ensure that there are no mutations
     /// or mutable aliases going on when casting to `&T`
-    #[inline]
+    #[inline(never)]
     #[rustc_as_ptr]
     #[rustc_never_returns_null_ptr]
     pub const fn get(&self) -> *mut T {
@@ -2491,7 +2491,7 @@ impl<T: ?Sized> SyncUnsafeCell<T> {
     ///
     /// This call borrows the `SyncUnsafeCell` mutably (at compile-time) which
     /// guarantees that we possess the only reference.
-    #[inline]
+    #[inline(never)]
     pub const fn get_mut(&mut self) -> &mut T {
         self.value.get_mut()
     }
@@ -2499,7 +2499,7 @@ impl<T: ?Sized> SyncUnsafeCell<T> {
     /// Gets a mutable pointer to the wrapped value.
     ///
     /// See [`UnsafeCell::get`] for details.
-    #[inline]
+    #[inline(never)]
     pub const fn raw_get(this: *const Self) -> *mut T {
         // We can just cast the pointer from `SyncUnsafeCell<T>` to `T` because
         // of #[repr(transparent)] on both SyncUnsafeCell and UnsafeCell.

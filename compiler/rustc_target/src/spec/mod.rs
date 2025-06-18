@@ -2068,9 +2068,11 @@ supported_targets! {
     ("x86_64-pc-nto-qnx800", x86_64_pc_nto_qnx800),
     ("i686-pc-nto-qnx700", i686_pc_nto_qnx700),
 
+    // Ferrocene additions
     ("i386-lynx-lynxos178", i386_lynx_lynxos178),
     ("aarch64-unknown-ferrocenecoretest", aarch64_unknown_ferrocenecoretest),
     ("thumbv7em-ferrocenecoretest-eabi", thumbv7em_ferrocenecoretest_eabi),
+    ("armebv7r-ferrocenecoretest-eabihf", armebv7r_ferrocenecoretest_eabihf),
     ("thumbv7em-ferrocenecoretest-eabihf", thumbv7em_ferrocenecoretest_eabihf),
 
     ("aarch64-unknown-linux-ohos", aarch64_unknown_linux_ohos),

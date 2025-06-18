@@ -35,6 +35,7 @@ pub struct Finder {
 const STAGE0_MISSING_TARGETS: &[&str] = &[
     // Ferrocene additions
     "aarch64-unknown-ferrocenecoretest",
+    "armebv7r-ferrocenecoretest-eabihf",
     "thumbv7em-ferrocenecoretest-eabi",
     "thumbv7em-ferrocenecoretest-eabihf",
     // just a dummy comment so the list doesn't get onelined

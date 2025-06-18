@@ -736,6 +736,7 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, car
         match &*target.triple {
             "aarch64-unknown-ferrocenecoretest"
             | "thumbv7em-ferrocenecoretest-eabi"
+            | "armebv7r-ferrocenecoretest-eabihf"
             | "thumbv7em-ferrocenecoretest-eabihf" => {
                 cargo.rustflag("--cfg=ferrocenecoretest_secretsauce");
             }

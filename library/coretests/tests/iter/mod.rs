@@ -42,10 +42,8 @@ fn test_counter_from_iter() {
 
 #[test]
 fn test_functor_laws() {
-    // identity:
-    fn identity<T>(x: T) -> T {
-        x
-    }
+    use core::convert::identity;
+
     assert_eq!((0..10).map(identity).sum::<usize>(), (0..10).sum());
 
     // composition:

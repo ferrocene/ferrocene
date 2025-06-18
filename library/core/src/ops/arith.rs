@@ -111,6 +111,7 @@ macro_rules! add_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 add_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
 
 #[cfg(feature = "ferrocene_certified")]
@@ -224,6 +225,7 @@ macro_rules! sub_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
 
 #[cfg(feature = "ferrocene_certified")]
@@ -358,6 +360,7 @@ macro_rules! mul_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 mul_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
 
 #[cfg(feature = "ferrocene_certified")]
@@ -520,6 +523,7 @@ macro_rules! div_impl_float {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 div_impl_float! { f16 f32 f64 f128 }
 
 #[cfg(feature = "ferrocene_certified")]
@@ -641,6 +645,7 @@ macro_rules! rem_impl_float {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 rem_impl_float! { f16 f32 f64 f128 }
 
 #[cfg(feature = "ferrocene_certified")]
@@ -720,6 +725,7 @@ macro_rules! neg_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 neg_impl! { isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
 
 #[cfg(feature = "ferrocene_certified")]
@@ -791,6 +797,7 @@ macro_rules! add_assign_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 add_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
 
 #[cfg(feature = "ferrocene_certified")]
@@ -862,6 +869,7 @@ macro_rules! sub_assign_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 sub_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
 
 #[cfg(feature = "ferrocene_certified")]
@@ -924,6 +932,7 @@ macro_rules! mul_assign_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 mul_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
 
 #[cfg(feature = "ferrocene_certified")]
@@ -985,6 +994,7 @@ macro_rules! div_assign_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 div_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
 
 #[cfg(feature = "ferrocene_certified")]
@@ -1050,6 +1060,7 @@ macro_rules! rem_assign_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 rem_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
 
 #[cfg(feature = "ferrocene_certified")]

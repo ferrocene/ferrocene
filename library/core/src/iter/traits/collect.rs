@@ -1,4 +1,5 @@
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 use super::TrustedLen;
 
 /// Conversion from an [`Iterator`].
@@ -133,6 +134,7 @@ use super::TrustedLen;
 )]
 #[rustc_diagnostic_item = "FromIterator"]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 pub trait FromIterator<A>: Sized {
     /// Creates a value from an iterator.
     ///
@@ -314,6 +316,7 @@ pub trait IntoIterator {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 impl<I: Iterator> IntoIterator for I {
     type Item = I::Item;
     type IntoIter = I;
@@ -395,6 +398,7 @@ impl<I: Iterator> IntoIterator for I {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 pub trait Extend<A> {
     /// Extends a collection with the contents of an iterator.
     ///
@@ -454,6 +458,7 @@ pub trait Extend<A> {
 
 #[stable(feature = "extend_for_unit", since = "1.28.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 impl Extend<()> for () {
     fn extend<T: IntoIterator<Item = ()>>(&mut self, iter: T) {
         iter.into_iter().for_each(drop)
@@ -462,6 +467,7 @@ impl Extend<()> for () {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 macro_rules! spec_tuple_impl {
     (
         (
@@ -680,6 +686,7 @@ macro_rules! spec_tuple_impl {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 spec_tuple_impl!(
     (L, l, EL, TraitL, default_extend_tuple_l, 11),
     (K, k, EK, TraitK, default_extend_tuple_k, 10),

@@ -1,6 +1,8 @@
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 use crate::ffi::CStr;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 use crate::fmt;
 
 /// A struct containing information about the location of a panic.
@@ -99,6 +101,7 @@ impl<'a> Location<'a> {
     #[track_caller]
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
     pub const fn caller() -> &'static Location<'static> {
         crate::intrinsics::caller_location()
     }
@@ -141,6 +144,7 @@ impl<'a> Location<'a> {
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_location_fields", since = "1.79.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
     pub const fn file(&self) -> &str {
         let str_len = self.file_bytes_with_nul.len() - 1;
         // SAFETY: `file_bytes_with_nul` without the trailing nul byte is guaranteed to be
@@ -156,6 +160,7 @@ impl<'a> Location<'a> {
     #[unstable(feature = "file_with_nul", issue = "141727")]
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
     pub const fn file_with_nul(&self) -> &CStr {
         // SAFETY: `file_bytes_with_nul` is guaranteed to have a trailing nul byte and no
         // interior nul bytes.
@@ -217,6 +222,7 @@ impl<'a> Location<'a> {
 
 #[stable(feature = "panic_hook_display", since = "1.26.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 impl fmt::Display for Location<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {

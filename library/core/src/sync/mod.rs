@@ -4,7 +4,9 @@
 
 pub mod atomic;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 mod exclusive;
 #[unstable(feature = "exclusive_wrapper", issue = "98407")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 pub use exclusive::Exclusive;

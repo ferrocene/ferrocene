@@ -1,6 +1,8 @@
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 use crate::hash::Hash;
 
 /// An unbounded range (`..`).
@@ -47,6 +49,7 @@ pub struct RangeFull;
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 impl fmt::Debug for RangeFull {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "..")
@@ -92,6 +95,7 @@ pub struct Range<Idx> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 impl<Idx: fmt::Debug> fmt::Debug for Range<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
@@ -102,6 +106,7 @@ impl<Idx: fmt::Debug> fmt::Debug for Range<Idx> {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 impl<Idx: PartialOrd<Idx>> Range<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -201,6 +206,7 @@ pub struct RangeFrom<Idx> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 impl<Idx: fmt::Debug> fmt::Debug for RangeFrom<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
@@ -210,6 +216,7 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeFrom<Idx> {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 impl<Idx: PartialOrd<Idx>> RangeFrom<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -286,6 +293,7 @@ pub struct RangeTo<Idx> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 impl<Idx: fmt::Debug> fmt::Debug for RangeTo<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "..")?;
@@ -295,6 +303,7 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeTo<Idx> {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 impl<Idx: PartialOrd<Idx>> RangeTo<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -458,12 +467,14 @@ impl<Idx> RangeInclusive<Idx> {
     #[inline]
     #[rustc_const_unstable(feature = "const_range_bounds", issue = "108082")]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
     pub const fn into_inner(self) -> (Idx, Idx) {
         (self.start, self.end)
     }
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 impl RangeInclusive<usize> {
     /// Converts to an exclusive `Range` for `SliceIndex` implementations.
     /// The caller is responsible for dealing with `end == usize::MAX`.
@@ -480,6 +491,7 @@ impl RangeInclusive<usize> {
 
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 impl<Idx: fmt::Debug> fmt::Debug for RangeInclusive<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
@@ -493,6 +505,7 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeInclusive<Idx> {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -617,6 +630,7 @@ pub struct RangeToInclusive<Idx> {
 
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 impl<Idx: fmt::Debug> fmt::Debug for RangeToInclusive<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "..=")?;
@@ -626,6 +640,7 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeToInclusive<Idx> {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 impl<Idx: PartialOrd<Idx>> RangeToInclusive<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -833,6 +848,7 @@ pub trait RangeBounds<T: ?Sized> {
     #[inline]
     #[stable(feature = "range_contains", since = "1.35.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
     fn contains<U>(&self, item: &U) -> bool
     where
         T: PartialOrd<U>,
@@ -902,6 +918,7 @@ pub trait RangeBounds<T: ?Sized> {
     /// ```
     #[unstable(feature = "range_bounds_is_empty", issue = "137300")]
     #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
     fn is_empty(&self) -> bool
     where
         T: PartialOrd,
@@ -966,6 +983,7 @@ pub trait IntoBounds<T>: RangeBounds<T> {
     /// assert!((1..5).intersect(6..).is_empty());
     /// ```
     #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
     fn intersect<R>(self, other: R) -> (Bound<T>, Bound<T>)
     where
         Self: Sized,
@@ -1157,6 +1175,7 @@ impl<T> IntoBounds<T> for (Bound<T>, Bound<T>) {
 
 #[stable(feature = "collections_range", since = "1.28.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 impl<'a, T: ?Sized + 'a> RangeBounds<T> for (Bound<&'a T>, Bound<&'a T>) {
     fn start_bound(&self) -> Bound<&T> {
         self.0

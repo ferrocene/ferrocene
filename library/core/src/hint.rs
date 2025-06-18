@@ -5,6 +5,7 @@
 //! Hints may be compile time or runtime.
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 use crate::mem::MaybeUninit;
 use crate::{intrinsics, ub_checks};
 
@@ -202,6 +203,7 @@ pub const unsafe fn unreachable_unchecked() -> ! {
 #[stable(feature = "hint_assert_unchecked", since = "1.81.0")]
 #[rustc_const_stable(feature = "hint_assert_unchecked", since = "1.81.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 pub const unsafe fn assert_unchecked(cond: bool) {
     // SAFETY: The caller promised `cond` is true.
     unsafe {
@@ -271,6 +273,7 @@ pub const unsafe fn assert_unchecked(cond: bool) {
 #[inline(always)]
 #[stable(feature = "renamed_spin_loop", since = "1.49.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 pub fn spin_loop() {
     #[cfg(target_arch = "x86")]
     {
@@ -484,6 +487,7 @@ pub fn spin_loop() {
 #[stable(feature = "bench_black_box", since = "1.66.0")]
 #[rustc_const_stable(feature = "const_black_box", since = "1.86.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 pub const fn black_box<T>(dummy: T) -> T {
     crate::intrinsics::black_box(dummy)
 }
@@ -608,6 +612,7 @@ pub const fn black_box<T>(dummy: T) -> T {
 #[must_use] // <-- :)
 #[inline(always)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 pub const fn must_use<T>(value: T) -> T {
     value
 }
@@ -661,6 +666,7 @@ pub const fn must_use<T>(value: T) -> T {
 #[unstable(feature = "likely_unlikely", issue = "136873")]
 #[inline(always)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 pub const fn likely(b: bool) -> bool {
     crate::intrinsics::likely(b)
 }
@@ -712,6 +718,7 @@ pub const fn likely(b: bool) -> bool {
 #[unstable(feature = "likely_unlikely", issue = "136873")]
 #[inline(always)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 pub const fn unlikely(b: bool) -> bool {
     crate::intrinsics::unlikely(b)
 }
@@ -746,6 +753,7 @@ pub const fn unlikely(b: bool) -> bool {
 #[unstable(feature = "cold_path", issue = "136873")]
 #[inline(always)]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 pub const fn cold_path() {
     crate::intrinsics::cold_path()
 }
@@ -794,6 +802,7 @@ pub const fn cold_path() {
 #[inline(always)]
 #[stable(feature = "select_unpredictable", since = "1.88.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+#[coverage(off)]
 pub fn select_unpredictable<T>(condition: bool, true_val: T, false_val: T) -> T {
     // FIXME(https://github.com/rust-lang/unsafe-code-guidelines/issues/245):
     // Change this to use ManuallyDrop instead.

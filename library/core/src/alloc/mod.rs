@@ -380,7 +380,7 @@ pub unsafe trait Allocator {
     /// Creates a "by reference" adapter for this instance of `Allocator`.
     ///
     /// The returned adapter also implements `Allocator` and will simply borrow this.
-    #[inline(always)]
+    #[inline(never)]
     fn by_ref(&self) -> &Self
     where
         Self: Sized,
@@ -396,23 +396,23 @@ unsafe impl<A> Allocator for &A
 where
     A: Allocator + ?Sized,
 {
-    #[inline]
+    #[inline(never)]
     fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
         (**self).allocate(layout)
     }
 
-    #[inline]
+    #[inline(never)]
     fn allocate_zeroed(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
         (**self).allocate_zeroed(layout)
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn deallocate(&self, ptr: NonNull<u8>, layout: Layout) {
         // SAFETY: the safety contract must be upheld by the caller
         unsafe { (**self).deallocate(ptr, layout) }
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn grow(
         &self,
         ptr: NonNull<u8>,
@@ -423,7 +423,7 @@ where
         unsafe { (**self).grow(ptr, old_layout, new_layout) }
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn grow_zeroed(
         &self,
         ptr: NonNull<u8>,
@@ -434,7 +434,7 @@ where
         unsafe { (**self).grow_zeroed(ptr, old_layout, new_layout) }
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn shrink(
         &self,
         ptr: NonNull<u8>,

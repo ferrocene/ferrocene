@@ -242,7 +242,7 @@ floating! { f16 }
 #[cfg(not(target_has_reliable_f16))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Debug for f16 {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "{:#06x}", self.to_bits())
     }
@@ -251,7 +251,7 @@ impl Debug for f16 {
 #[cfg(not(target_has_reliable_f16))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Display for f16 {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
         Debug::fmt(self, fmt)
     }
@@ -260,7 +260,7 @@ impl Display for f16 {
 #[cfg(not(target_has_reliable_f16))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl LowerExp for f16 {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
         Debug::fmt(self, fmt)
     }
@@ -269,7 +269,7 @@ impl LowerExp for f16 {
 #[cfg(not(target_has_reliable_f16))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl UpperExp for f16 {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
         Debug::fmt(self, fmt)
     }
@@ -277,7 +277,7 @@ impl UpperExp for f16 {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Debug for f128 {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "{:#034x}", self.to_bits())
     }

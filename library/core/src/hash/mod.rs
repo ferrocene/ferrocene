@@ -358,74 +358,74 @@ pub trait Hasher {
     fn write(&mut self, bytes: &[u8]);
 
     /// Writes a single `u8` into this hasher.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "hasher_write", since = "1.3.0")]
     fn write_u8(&mut self, i: u8) {
         self.write(&[i])
     }
     /// Writes a single `u16` into this hasher.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "hasher_write", since = "1.3.0")]
     fn write_u16(&mut self, i: u16) {
         self.write(&i.to_ne_bytes())
     }
     /// Writes a single `u32` into this hasher.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "hasher_write", since = "1.3.0")]
     fn write_u32(&mut self, i: u32) {
         self.write(&i.to_ne_bytes())
     }
     /// Writes a single `u64` into this hasher.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "hasher_write", since = "1.3.0")]
     fn write_u64(&mut self, i: u64) {
         self.write(&i.to_ne_bytes())
     }
     /// Writes a single `u128` into this hasher.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "i128", since = "1.26.0")]
     fn write_u128(&mut self, i: u128) {
         self.write(&i.to_ne_bytes())
     }
     /// Writes a single `usize` into this hasher.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "hasher_write", since = "1.3.0")]
     fn write_usize(&mut self, i: usize) {
         self.write(&i.to_ne_bytes())
     }
 
     /// Writes a single `i8` into this hasher.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "hasher_write", since = "1.3.0")]
     fn write_i8(&mut self, i: i8) {
         self.write_u8(i as u8)
     }
     /// Writes a single `i16` into this hasher.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "hasher_write", since = "1.3.0")]
     fn write_i16(&mut self, i: i16) {
         self.write_u16(i as u16)
     }
     /// Writes a single `i32` into this hasher.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "hasher_write", since = "1.3.0")]
     fn write_i32(&mut self, i: i32) {
         self.write_u32(i as u32)
     }
     /// Writes a single `i64` into this hasher.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "hasher_write", since = "1.3.0")]
     fn write_i64(&mut self, i: i64) {
         self.write_u64(i as u64)
     }
     /// Writes a single `i128` into this hasher.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "i128", since = "1.26.0")]
     fn write_i128(&mut self, i: i128) {
         self.write_u128(i as u128)
     }
     /// Writes a single `isize` into this hasher.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "hasher_write", since = "1.3.0")]
     fn write_isize(&mut self, i: isize) {
         self.write_usize(i as usize)
@@ -479,7 +479,7 @@ pub trait Hasher {
     /// If you've decided that your `Hasher` is willing to be susceptible to
     /// Hash-DoS attacks, then you might consider skipping hashing some or all
     /// of the `len` provided in the name of increased performance.
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "hasher_prefixfree_extras", issue = "96762")]
     fn write_length_prefix(&mut self, len: usize) {
         self.write_usize(len);
@@ -546,7 +546,7 @@ pub trait Hasher {
     /// That's because if `write` pads data out to a fixed chunk size, it's
     /// likely that it does it in such a way that `"a"` and `"a\x00"` would
     /// end up hashing the same sequence of things, introducing conflicts.
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "hasher_prefixfree_extras", issue = "96762")]
     fn write_str(&mut self, s: &str) {
         self.write(s.as_bytes());
@@ -807,12 +807,12 @@ mod impls {
         ($(($ty:ident, $meth:ident),)*) => {$(
             #[stable(feature = "rust1", since = "1.0.0")]
             impl Hash for $ty {
-                #[inline]
+                #[inline(never)]
                 fn hash<H: Hasher>(&self, state: &mut H) {
                     state.$meth(*self)
                 }
 
-                #[inline]
+                #[inline(never)]
                 fn hash_slice<H: Hasher>(data: &[$ty], state: &mut H) {
                     let newlen = size_of_val(data);
                     let ptr = data.as_ptr() as *const u8;
@@ -843,7 +843,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     impl Hash for bool {
-        #[inline]
+        #[inline(never)]
         fn hash<H: Hasher>(&self, state: &mut H) {
             state.write_u8(*self as u8)
         }
@@ -851,7 +851,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     impl Hash for char {
-        #[inline]
+        #[inline(never)]
         fn hash<H: Hasher>(&self, state: &mut H) {
             state.write_u32(*self as u32)
         }
@@ -859,7 +859,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     impl Hash for str {
-        #[inline]
+        #[inline(never)]
         fn hash<H: Hasher>(&self, state: &mut H) {
             state.write_str(self);
         }
@@ -867,7 +867,7 @@ mod impls {
 
     #[stable(feature = "never_hash", since = "1.29.0")]
     impl Hash for ! {
-        #[inline]
+        #[inline(never)]
         fn hash<H: Hasher>(&self, _: &mut H) {
             *self
         }
@@ -877,7 +877,7 @@ mod impls {
         () => (
             #[stable(feature = "rust1", since = "1.0.0")]
             impl Hash for () {
-                #[inline]
+                #[inline(never)]
                 fn hash<H: Hasher>(&self, _state: &mut H) {}
             }
         );
@@ -888,7 +888,7 @@ mod impls {
                 #[stable(feature = "rust1", since = "1.0.0")]
                 impl<$($name: Hash),+> Hash for ($($name,)+) where last_type!($($name,)+): ?Sized {
                     #[allow(non_snake_case)]
-                    #[inline]
+                    #[inline(never)]
                     fn hash<S: Hasher>(&self, state: &mut S) {
                         let ($(ref $name,)+) = *self;
                         $($name.hash(state);)+
@@ -933,7 +933,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: Hash> Hash for [T] {
-        #[inline]
+        #[inline(never)]
         fn hash<H: Hasher>(&self, state: &mut H) {
             state.write_length_prefix(self.len());
             Hash::hash_slice(self, state)
@@ -942,7 +942,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized + Hash> Hash for &T {
-        #[inline]
+        #[inline(never)]
         fn hash<H: Hasher>(&self, state: &mut H) {
             (**self).hash(state);
         }
@@ -950,7 +950,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized + Hash> Hash for &mut T {
-        #[inline]
+        #[inline(never)]
         fn hash<H: Hasher>(&self, state: &mut H) {
             (**self).hash(state);
         }
@@ -958,7 +958,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> Hash for *const T {
-        #[inline]
+        #[inline(never)]
         fn hash<H: Hasher>(&self, state: &mut H) {
             let (address, metadata) = self.to_raw_parts();
             state.write_usize(address.addr());
@@ -968,7 +968,7 @@ mod impls {
 
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> Hash for *mut T {
-        #[inline]
+        #[inline(never)]
         fn hash<H: Hasher>(&self, state: &mut H) {
             let (address, metadata) = self.to_raw_parts();
             state.write_usize(address.addr());

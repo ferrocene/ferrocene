@@ -236,13 +236,13 @@ impl RawFloat for f16 {
     const MAX_EXPONENT_ROUND_TO_EVEN: i32 = 5;
     const SMALLEST_POWER_OF_TEN: i32 = -27;
 
-    #[inline]
+    #[inline(never)]
     fn from_u64(v: u64) -> Self {
         debug_assert!(v <= Self::MAX_MANTISSA_FAST_PATH);
         v as _
     }
 
-    #[inline]
+    #[inline(never)]
     fn from_u64_bits(v: u64) -> Self {
         Self::from_bits((v & 0xFFFF) as u16)
     }
@@ -279,13 +279,13 @@ impl RawFloat for f32 {
     const MAX_EXPONENT_ROUND_TO_EVEN: i32 = 10;
     const SMALLEST_POWER_OF_TEN: i32 = -65;
 
-    #[inline]
+    #[inline(never)]
     fn from_u64(v: u64) -> Self {
         debug_assert!(v <= Self::MAX_MANTISSA_FAST_PATH);
         v as _
     }
 
-    #[inline]
+    #[inline(never)]
     fn from_u64_bits(v: u64) -> Self {
         f32::from_bits((v & 0xFFFFFFFF) as u32)
     }
@@ -323,13 +323,13 @@ impl RawFloat for f64 {
     const MAX_EXPONENT_ROUND_TO_EVEN: i32 = 23;
     const SMALLEST_POWER_OF_TEN: i32 = -342;
 
-    #[inline]
+    #[inline(never)]
     fn from_u64(v: u64) -> Self {
         debug_assert!(v <= Self::MAX_MANTISSA_FAST_PATH);
         v as _
     }
 
-    #[inline]
+    #[inline(never)]
     fn from_u64_bits(v: u64) -> Self {
         f64::from_bits(v)
     }

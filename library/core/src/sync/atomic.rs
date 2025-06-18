@@ -422,7 +422,7 @@ pub struct AtomicBool {
 #[coverage(off)]
 impl Default for AtomicBool {
     /// Creates an `AtomicBool` initialized to `false`.
-    #[inline]
+    #[inline(never)]
     fn default() -> Self {
         Self::new(false)
     }
@@ -583,7 +583,7 @@ impl AtomicBool {
     /// let atomic_true = AtomicBool::new(true);
     /// let atomic_false = AtomicBool::new(false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_atomic_new", since = "1.24.0")]
     #[must_use]
@@ -630,7 +630,7 @@ impl AtomicBool {
     ///
     /// [valid]: crate::ptr#safety
     /// [Memory model for atomic accesses]: self#memory-model-for-atomic-accesses
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "atomic_from_ptr", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_atomic_from_ptr", since = "1.84.0")]
     pub const unsafe fn from_ptr<'a>(ptr: *mut bool) -> &'a AtomicBool {
@@ -653,7 +653,7 @@ impl AtomicBool {
     /// *some_bool.get_mut() = false;
     /// assert_eq!(some_bool.load(Ordering::SeqCst), false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "atomic_access", since = "1.15.0")]
     pub fn get_mut(&mut self) -> &mut bool {
         // SAFETY: the mutable reference guarantees unique ownership.
@@ -673,7 +673,7 @@ impl AtomicBool {
     /// a.store(false, Ordering::Relaxed);
     /// assert_eq!(some_bool, false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[cfg(target_has_atomic_equal_alignment = "8")]
     #[unstable(feature = "atomic_from_mut", issue = "76314")]
     pub fn from_mut(v: &mut bool) -> &mut Self {
@@ -709,7 +709,7 @@ impl AtomicBool {
     ///     }
     /// });
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "atomic_from_mut", issue = "76314")]
     pub fn get_mut_slice(this: &mut [Self]) -> &mut [bool] {
         // SAFETY: the mutable reference guarantees unique ownership.
@@ -733,7 +733,7 @@ impl AtomicBool {
     /// });
     /// assert_eq!(some_bools, [true; 10]);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[cfg(target_has_atomic_equal_alignment = "8")]
     #[unstable(feature = "atomic_from_mut", issue = "76314")]
     pub fn from_mut_slice(v: &mut [bool]) -> &mut [Self] {
@@ -755,7 +755,7 @@ impl AtomicBool {
     /// let some_bool = AtomicBool::new(true);
     /// assert_eq!(some_bool.into_inner(), true);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "atomic_access", since = "1.15.0")]
     #[rustc_const_stable(feature = "const_atomic_into_inner", since = "1.79.0")]
     pub const fn into_inner(self) -> bool {
@@ -780,7 +780,7 @@ impl AtomicBool {
     ///
     /// assert_eq!(some_bool.load(Ordering::Relaxed), true);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub fn load(&self, order: Ordering) -> bool {
@@ -808,7 +808,7 @@ impl AtomicBool {
     /// some_bool.store(false, Ordering::Relaxed);
     /// assert_eq!(some_bool.load(Ordering::Relaxed), false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub fn store(&self, val: bool, order: Ordering) {
@@ -839,7 +839,7 @@ impl AtomicBool {
     /// assert_eq!(some_bool.swap(false, Ordering::Relaxed), true);
     /// assert_eq!(some_bool.load(Ordering::Relaxed), false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -902,7 +902,7 @@ impl AtomicBool {
     /// assert_eq!(some_bool.compare_and_swap(true, true, Ordering::Relaxed), false);
     /// assert_eq!(some_bool.load(Ordering::Relaxed), false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(
         since = "1.50.0",
@@ -953,7 +953,7 @@ impl AtomicBool {
     ///            Err(false));
     /// assert_eq!(some_bool.load(Ordering::Relaxed), false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "extended_compare_and_swap", since = "1.10.0")]
     #[doc(alias = "compare_and_swap")]
     #[cfg(target_has_atomic = "8")]
@@ -1035,7 +1035,7 @@ impl AtomicBool {
     ///     }
     /// }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "extended_compare_and_swap", since = "1.10.0")]
     #[doc(alias = "compare_and_swap")]
     #[cfg(target_has_atomic = "8")]
@@ -1092,7 +1092,7 @@ impl AtomicBool {
     /// assert_eq!(foo.fetch_and(false, Ordering::SeqCst), false);
     /// assert_eq!(foo.load(Ordering::SeqCst), false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1134,7 +1134,7 @@ impl AtomicBool {
     /// assert_eq!(foo.fetch_nand(false, Ordering::SeqCst), false);
     /// assert_eq!(foo.load(Ordering::SeqCst), true);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1186,7 +1186,7 @@ impl AtomicBool {
     /// assert_eq!(foo.fetch_or(false, Ordering::SeqCst), false);
     /// assert_eq!(foo.load(Ordering::SeqCst), false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1227,7 +1227,7 @@ impl AtomicBool {
     /// assert_eq!(foo.fetch_xor(false, Ordering::SeqCst), false);
     /// assert_eq!(foo.load(Ordering::SeqCst), false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1264,7 +1264,7 @@ impl AtomicBool {
     /// assert_eq!(foo.fetch_not(Ordering::SeqCst), false);
     /// assert_eq!(foo.load(Ordering::SeqCst), true);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "atomic_bool_fetch_not", since = "1.81.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1300,7 +1300,7 @@ impl AtomicBool {
     /// }
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "atomic_as_ptr", since = "1.70.0")]
     #[rustc_const_stable(feature = "atomic_as_ptr", since = "1.70.0")]
     #[rustc_never_returns_null_ptr]
@@ -1350,7 +1350,7 @@ impl AtomicBool {
     /// assert_eq!(x.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| Some(!x)), Ok(true));
     /// assert_eq!(x.load(Ordering::SeqCst), false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "atomic_fetch_update", since = "1.53.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1418,7 +1418,7 @@ impl AtomicBool {
     /// assert_eq!(x.try_update(Ordering::SeqCst, Ordering::SeqCst, |x| Some(!x)), Ok(true));
     /// assert_eq!(x.load(Ordering::SeqCst), false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "atomic_try_update", issue = "135894")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1473,7 +1473,7 @@ impl AtomicBool {
     /// assert_eq!(x.update(Ordering::SeqCst, Ordering::SeqCst, |x| !x), true);
     /// assert_eq!(x.load(Ordering::SeqCst), false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "atomic_try_update", issue = "135894")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1507,7 +1507,7 @@ impl<T> AtomicPtr<T> {
     /// let ptr = &mut 5;
     /// let atomic_ptr = AtomicPtr::new(ptr);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_atomic_new", since = "1.24.0")]
     pub const fn new(p: *mut T) -> AtomicPtr<T> {
@@ -1553,7 +1553,7 @@ impl<T> AtomicPtr<T> {
     ///
     /// [valid]: crate::ptr#safety
     /// [Memory model for atomic accesses]: self#memory-model-for-atomic-accesses
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "atomic_from_ptr", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_atomic_from_ptr", since = "1.84.0")]
     pub const unsafe fn from_ptr<'a>(ptr: *mut *mut T) -> &'a AtomicPtr<T> {
@@ -1577,7 +1577,7 @@ impl<T> AtomicPtr<T> {
     /// *atomic_ptr.get_mut() = &mut other_data;
     /// assert_eq!(unsafe { *atomic_ptr.load(Ordering::SeqCst) }, 5);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "atomic_access", since = "1.15.0")]
     pub fn get_mut(&mut self) -> &mut *mut T {
         self.p.get_mut()
@@ -1598,7 +1598,7 @@ impl<T> AtomicPtr<T> {
     /// a.store(&mut other_data, Ordering::Relaxed);
     /// assert_eq!(unsafe { *some_ptr }, 456);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[cfg(target_has_atomic_equal_alignment = "ptr")]
     #[unstable(feature = "atomic_from_mut", issue = "76314")]
     pub fn from_mut(v: &mut *mut T) -> &mut Self {
@@ -1643,7 +1643,7 @@ impl<T> AtomicPtr<T> {
     ///     }
     /// });
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "atomic_from_mut", issue = "76314")]
     pub fn get_mut_slice(this: &mut [Self]) -> &mut [*mut T] {
         // SAFETY: the mutable reference guarantees unique ownership.
@@ -1675,7 +1675,7 @@ impl<T> AtomicPtr<T> {
     ///     println!("Hello, {name}!");
     /// }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[cfg(target_has_atomic_equal_alignment = "ptr")]
     #[unstable(feature = "atomic_from_mut", issue = "76314")]
     pub fn from_mut_slice(v: &mut [*mut T]) -> &mut [Self] {
@@ -1700,7 +1700,7 @@ impl<T> AtomicPtr<T> {
     /// let atomic_ptr = AtomicPtr::new(&mut data);
     /// assert_eq!(unsafe { *atomic_ptr.into_inner() }, 5);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "atomic_access", since = "1.15.0")]
     #[rustc_const_stable(feature = "const_atomic_into_inner", since = "1.79.0")]
     pub const fn into_inner(self) -> *mut T {
@@ -1726,7 +1726,7 @@ impl<T> AtomicPtr<T> {
     ///
     /// let value = some_ptr.load(Ordering::Relaxed);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub fn load(&self, order: Ordering) -> *mut T {
@@ -1755,7 +1755,7 @@ impl<T> AtomicPtr<T> {
     ///
     /// some_ptr.store(other_ptr, Ordering::Relaxed);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub fn store(&self, ptr: *mut T, order: Ordering) {
@@ -1787,7 +1787,7 @@ impl<T> AtomicPtr<T> {
     ///
     /// let value = some_ptr.swap(other_ptr, Ordering::Relaxed);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg(target_has_atomic = "ptr")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1845,7 +1845,7 @@ impl<T> AtomicPtr<T> {
     ///
     /// let value = some_ptr.compare_and_swap(ptr, other_ptr, Ordering::Relaxed);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[deprecated(
         since = "1.50.0",
@@ -1889,7 +1889,7 @@ impl<T> AtomicPtr<T> {
     /// let value = some_ptr.compare_exchange(ptr, other_ptr,
     ///                                       Ordering::SeqCst, Ordering::Relaxed);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "extended_compare_and_swap", since = "1.10.0")]
     #[cfg(target_has_atomic = "ptr")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1938,7 +1938,7 @@ impl<T> AtomicPtr<T> {
     ///     }
     /// }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "extended_compare_and_swap", since = "1.10.0")]
     #[cfg(target_has_atomic = "ptr")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -2007,7 +2007,7 @@ impl<T> AtomicPtr<T> {
     /// assert_eq!(result, Ok(ptr));
     /// assert_eq!(some_ptr.load(Ordering::SeqCst), new);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "atomic_fetch_update", since = "1.53.0")]
     #[cfg(target_has_atomic = "ptr")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -2083,7 +2083,7 @@ impl<T> AtomicPtr<T> {
     /// assert_eq!(result, Ok(ptr));
     /// assert_eq!(some_ptr.load(Ordering::SeqCst), new);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "atomic_try_update", issue = "135894")]
     #[cfg(target_has_atomic = "ptr")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -2142,7 +2142,7 @@ impl<T> AtomicPtr<T> {
     /// assert_eq!(result, ptr);
     /// assert_eq!(some_ptr.load(Ordering::SeqCst), new);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "atomic_try_update", issue = "135894")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -2194,7 +2194,7 @@ impl<T> AtomicPtr<T> {
     /// // Note: units of `size_of::<i64>()`.
     /// assert_eq!(atom.load(Ordering::Relaxed).addr(), 8);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[cfg(target_has_atomic = "ptr")]
     #[unstable(feature = "strict_provenance_atomic_ptr", issue = "99108")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -2239,7 +2239,7 @@ impl<T> AtomicPtr<T> {
     /// ));
     /// assert!(core::ptr::eq(atom.load(Ordering::Relaxed), &array[0]));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[cfg(target_has_atomic = "ptr")]
     #[unstable(feature = "strict_provenance_atomic_ptr", issue = "99108")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -2274,7 +2274,7 @@ impl<T> AtomicPtr<T> {
     /// // Note: in units of bytes, not `size_of::<i64>()`.
     /// assert_eq!(atom.load(Ordering::Relaxed).addr(), 1);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[cfg(target_has_atomic = "ptr")]
     #[unstable(feature = "strict_provenance_atomic_ptr", issue = "99108")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -2309,7 +2309,7 @@ impl<T> AtomicPtr<T> {
     /// assert_eq!(atom.fetch_byte_sub(1, Ordering::Relaxed).addr(), 1);
     /// assert_eq!(atom.load(Ordering::Relaxed).addr(), 0);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[cfg(target_has_atomic = "ptr")]
     #[unstable(feature = "strict_provenance_atomic_ptr", issue = "99108")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -2360,7 +2360,7 @@ impl<T> AtomicPtr<T> {
     /// assert_eq!(tagged.addr() & 1, 1);
     /// assert_eq!(tagged.map_addr(|p| p & !1), pointer);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[cfg(target_has_atomic = "ptr")]
     #[unstable(feature = "strict_provenance_atomic_ptr", issue = "99108")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -2410,7 +2410,7 @@ impl<T> AtomicPtr<T> {
     ///     .map_addr(|a| a & !1);
     /// assert_eq!(untagged, pointer);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[cfg(target_has_atomic = "ptr")]
     #[unstable(feature = "strict_provenance_atomic_ptr", issue = "99108")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -2458,7 +2458,7 @@ impl<T> AtomicPtr<T> {
     /// atom.fetch_xor(1, Ordering::Relaxed);
     /// assert_eq!(atom.load(Ordering::Relaxed).addr() & 1, 1);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[cfg(target_has_atomic = "ptr")]
     #[unstable(feature = "strict_provenance_atomic_ptr", issue = "99108")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -2496,7 +2496,7 @@ impl<T> AtomicPtr<T> {
     ///     my_atomic_op(atomic.as_ptr());
     /// }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "atomic_as_ptr", since = "1.70.0")]
     #[rustc_const_stable(feature = "atomic_as_ptr", since = "1.70.0")]
     #[rustc_never_returns_null_ptr]
@@ -2519,7 +2519,7 @@ impl From<bool> for AtomicBool {
     /// let atomic_bool = AtomicBool::from(true);
     /// assert_eq!(format!("{atomic_bool:?}"), "true")
     /// ```
-    #[inline]
+    #[inline(never)]
     fn from(b: bool) -> Self {
         Self::new(b)
     }
@@ -2531,7 +2531,7 @@ impl From<bool> for AtomicBool {
 #[coverage(off)]
 impl<T> From<*mut T> for AtomicPtr<T> {
     /// Converts a `*mut T` into an `AtomicPtr<T>`.
-    #[inline]
+    #[inline(never)]
     fn from(p: *mut T) -> Self {
         Self::new(p)
     }
@@ -2601,7 +2601,7 @@ macro_rules! atomic_int {
 
         #[$stable]
         impl Default for $atomic_type {
-            #[inline]
+            #[inline(never)]
             fn default() -> Self {
                 Self::new(Default::default())
             }
@@ -2610,7 +2610,7 @@ macro_rules! atomic_int {
         #[$stable_from]
         impl From<$int_type> for $atomic_type {
             #[doc = concat!("Converts an `", stringify!($int_type), "` into an `", stringify!($atomic_type), "`.")]
-            #[inline]
+            #[inline(never)]
             fn from(v: $int_type) -> Self { Self::new(v) }
         }
 
@@ -2637,7 +2637,7 @@ macro_rules! atomic_int {
             ///
             #[doc = concat!("let atomic_forty_two = ", stringify!($atomic_type), "::new(42);")]
             /// ```
-            #[inline]
+            #[inline(never)]
             #[$stable]
             #[$const_stable_new]
             #[must_use]
@@ -2696,7 +2696,7 @@ macro_rules! atomic_int {
             ///
             /// [valid]: crate::ptr#safety
             /// [Memory model for atomic accesses]: self#memory-model-for-atomic-accesses
-            #[inline]
+            #[inline(never)]
             #[stable(feature = "atomic_from_ptr", since = "1.75.0")]
             #[rustc_const_stable(feature = "const_atomic_from_ptr", since = "1.84.0")]
             pub const unsafe fn from_ptr<'a>(ptr: *mut $int_type) -> &'a $atomic_type {
@@ -2720,7 +2720,7 @@ macro_rules! atomic_int {
             /// *some_var.get_mut() = 5;
             /// assert_eq!(some_var.load(Ordering::SeqCst), 5);
             /// ```
-            #[inline]
+            #[inline(never)]
             #[$stable_access]
             pub fn get_mut(&mut self) -> &mut $int_type {
                 self.v.get_mut()
@@ -2748,7 +2748,7 @@ macro_rules! atomic_int {
             /// assert_eq!(some_int, 100);
             /// ```
             ///
-            #[inline]
+            #[inline(never)]
             #[$cfg_align]
             #[unstable(feature = "atomic_from_mut", issue = "76314")]
             pub fn from_mut(v: &mut $int_type) -> &mut Self {
@@ -2789,7 +2789,7 @@ macro_rules! atomic_int {
             ///         })
             /// });
             /// ```
-            #[inline]
+            #[inline(never)]
             #[unstable(feature = "atomic_from_mut", issue = "76314")]
             pub fn get_mut_slice(this: &mut [Self]) -> &mut [$int_type] {
                 // SAFETY: the mutable reference guarantees unique ownership.
@@ -2815,7 +2815,7 @@ macro_rules! atomic_int {
             ///     assert_eq!(i, n as usize);
             /// }
             /// ```
-            #[inline]
+            #[inline(never)]
             #[$cfg_align]
             #[unstable(feature = "atomic_from_mut", issue = "76314")]
             pub fn from_mut_slice(v: &mut [$int_type]) -> &mut [Self] {
@@ -2840,7 +2840,7 @@ macro_rules! atomic_int {
             #[doc = concat!("let some_var = ", stringify!($atomic_type), "::new(5);")]
             /// assert_eq!(some_var.into_inner(), 5);
             /// ```
-            #[inline]
+            #[inline(never)]
             #[$stable_access]
             #[$const_stable_into_inner]
             pub const fn into_inner(self) -> $int_type {
@@ -2919,7 +2919,7 @@ macro_rules! atomic_int {
             ///
             /// assert_eq!(some_var.swap(10, Ordering::Relaxed), 5);
             /// ```
-            #[inline]
+            #[inline(never)]
             #[$stable]
             #[$cfg_cas]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -2979,7 +2979,7 @@ macro_rules! atomic_int {
             /// assert_eq!(some_var.compare_and_swap(6, 12, Ordering::Relaxed), 10);
             /// assert_eq!(some_var.load(Ordering::Relaxed), 10);
             /// ```
-            #[inline]
+            #[inline(never)]
             #[$stable]
             #[deprecated(
                 since = "1.50.0",
@@ -3037,7 +3037,7 @@ macro_rules! atomic_int {
             ///            Err(10));
             /// assert_eq!(some_var.load(Ordering::Relaxed), 10);
             /// ```
-            #[inline]
+            #[inline(never)]
             #[$stable_cxchg]
             #[$cfg_cas]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -3086,7 +3086,7 @@ macro_rules! atomic_int {
             ///     }
             /// }
             /// ```
-            #[inline]
+            #[inline(never)]
             #[$stable_cxchg]
             #[$cfg_cas]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -3122,7 +3122,7 @@ macro_rules! atomic_int {
             /// assert_eq!(foo.fetch_add(10, Ordering::SeqCst), 0);
             /// assert_eq!(foo.load(Ordering::SeqCst), 10);
             /// ```
-            #[inline]
+            #[inline(never)]
             #[$stable]
             #[$cfg_cas]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -3152,7 +3152,7 @@ macro_rules! atomic_int {
             /// assert_eq!(foo.fetch_sub(10, Ordering::SeqCst), 20);
             /// assert_eq!(foo.load(Ordering::SeqCst), 10);
             /// ```
-            #[inline]
+            #[inline(never)]
             #[$stable]
             #[$cfg_cas]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -3185,7 +3185,7 @@ macro_rules! atomic_int {
             /// assert_eq!(foo.fetch_and(0b110011, Ordering::SeqCst), 0b101101);
             /// assert_eq!(foo.load(Ordering::SeqCst), 0b100001);
             /// ```
-            #[inline]
+            #[inline(never)]
             #[$stable]
             #[$cfg_cas]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -3218,7 +3218,7 @@ macro_rules! atomic_int {
             /// assert_eq!(foo.fetch_nand(0x31, Ordering::SeqCst), 0x13);
             /// assert_eq!(foo.load(Ordering::SeqCst), !(0x13 & 0x31));
             /// ```
-            #[inline]
+            #[inline(never)]
             #[$stable_nand]
             #[$cfg_cas]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -3251,7 +3251,7 @@ macro_rules! atomic_int {
             /// assert_eq!(foo.fetch_or(0b110011, Ordering::SeqCst), 0b101101);
             /// assert_eq!(foo.load(Ordering::SeqCst), 0b111111);
             /// ```
-            #[inline]
+            #[inline(never)]
             #[$stable]
             #[$cfg_cas]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -3284,7 +3284,7 @@ macro_rules! atomic_int {
             /// assert_eq!(foo.fetch_xor(0b110011, Ordering::SeqCst), 0b101101);
             /// assert_eq!(foo.load(Ordering::SeqCst), 0b011110);
             /// ```
-            #[inline]
+            #[inline(never)]
             #[$stable]
             #[$cfg_cas]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -3335,7 +3335,7 @@ macro_rules! atomic_int {
             /// assert_eq!(x.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| Some(x + 1)), Ok(8));
             /// assert_eq!(x.load(Ordering::SeqCst), 9);
             /// ```
-            #[inline]
+            #[inline(never)]
             #[stable(feature = "no_more_cas", since = "1.45.0")]
             #[$cfg_cas]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -3399,7 +3399,7 @@ macro_rules! atomic_int {
             /// assert_eq!(x.try_update(Ordering::SeqCst, Ordering::SeqCst, |x| Some(x + 1)), Ok(8));
             /// assert_eq!(x.load(Ordering::SeqCst), 9);
             /// ```
-            #[inline]
+            #[inline(never)]
             #[unstable(feature = "atomic_try_update", issue = "135894")]
             #[$cfg_cas]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -3456,7 +3456,7 @@ macro_rules! atomic_int {
             /// assert_eq!(x.update(Ordering::SeqCst, Ordering::SeqCst, |x| x + 1), 8);
             /// assert_eq!(x.load(Ordering::SeqCst), 9);
             /// ```
-            #[inline]
+            #[inline(never)]
             #[unstable(feature = "atomic_try_update", issue = "135894")]
             #[$cfg_cas]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -3510,7 +3510,7 @@ macro_rules! atomic_int {
             /// let max_foo = foo.fetch_max(bar, Ordering::SeqCst).max(bar);
             /// assert!(max_foo == 42);
             /// ```
-            #[inline]
+            #[inline(never)]
             #[stable(feature = "atomic_min_max", since = "1.45.0")]
             #[$cfg_cas]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -3556,7 +3556,7 @@ macro_rules! atomic_int {
             /// let min_foo = foo.fetch_min(bar, Ordering::SeqCst).min(bar);
             /// assert_eq!(min_foo, 12);
             /// ```
-            #[inline]
+            #[inline(never)]
             #[stable(feature = "atomic_min_max", since = "1.45.0")]
             #[$cfg_cas]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -3595,7 +3595,7 @@ macro_rules! atomic_int {
             /// }
             /// # }
             /// ```
-            #[inline]
+            #[inline(never)]
             #[stable(feature = "atomic_as_ptr", since = "1.70.0")]
             #[rustc_const_stable(feature = "atomic_as_ptr", since = "1.70.0")]
             #[rustc_never_returns_null_ptr]
@@ -3890,7 +3890,7 @@ atomic_int_ptr_sized! {
     "64" 8
 }
 
-#[inline]
+#[inline(never)]
 #[cfg(target_has_atomic)]
 fn strongest_failure_ordering(order: Ordering) -> Ordering {
     match order {
@@ -3902,7 +3902,7 @@ fn strongest_failure_ordering(order: Ordering) -> Ordering {
     }
 }
 
-#[inline]
+#[inline(never)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 unsafe fn atomic_store<T: Copy>(dst: *mut T, val: T, order: Ordering) {
     // SAFETY: the caller must uphold the safety contract for `atomic_store`.
@@ -3917,7 +3917,7 @@ unsafe fn atomic_store<T: Copy>(dst: *mut T, val: T, order: Ordering) {
     }
 }
 
-#[inline]
+#[inline(never)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 unsafe fn atomic_load<T: Copy>(dst: *const T, order: Ordering) -> T {
     use intrinsics::AtomicOrdering;
@@ -3933,7 +3933,7 @@ unsafe fn atomic_load<T: Copy>(dst: *const T, order: Ordering) -> T {
     }
 }
 
-#[inline]
+#[inline(never)]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 unsafe fn atomic_swap<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
@@ -3950,7 +3950,7 @@ unsafe fn atomic_swap<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
 }
 
 /// Returns the previous value (like __sync_fetch_and_add).
-#[inline]
+#[inline(never)]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 unsafe fn atomic_add<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
@@ -3967,7 +3967,7 @@ unsafe fn atomic_add<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
 }
 
 /// Returns the previous value (like __sync_fetch_and_sub).
-#[inline]
+#[inline(never)]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 unsafe fn atomic_sub<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
@@ -3984,7 +3984,7 @@ unsafe fn atomic_sub<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
 }
 
 /// Publicly exposed for stdarch; nobody else should use this.
-#[inline]
+#[inline(never)]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[unstable(feature = "core_intrinsics", issue = "none")]
@@ -4021,7 +4021,7 @@ pub unsafe fn atomic_compare_exchange<T: Copy>(
     if ok { Ok(val) } else { Err(val) }
 }
 
-#[inline]
+#[inline(never)]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 unsafe fn atomic_compare_exchange_weak<T: Copy>(
@@ -4056,7 +4056,7 @@ unsafe fn atomic_compare_exchange_weak<T: Copy>(
     if ok { Ok(val) } else { Err(val) }
 }
 
-#[inline]
+#[inline(never)]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 unsafe fn atomic_and<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
@@ -4072,7 +4072,7 @@ unsafe fn atomic_and<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
     }
 }
 
-#[inline]
+#[inline(never)]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 unsafe fn atomic_nand<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
@@ -4088,7 +4088,7 @@ unsafe fn atomic_nand<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
     }
 }
 
-#[inline]
+#[inline(never)]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 unsafe fn atomic_or<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
@@ -4104,7 +4104,7 @@ unsafe fn atomic_or<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
     }
 }
 
-#[inline]
+#[inline(never)]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 unsafe fn atomic_xor<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
@@ -4121,7 +4121,7 @@ unsafe fn atomic_xor<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
 }
 
 /// returns the max value (signed comparison)
-#[inline]
+#[inline(never)]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -4140,7 +4140,7 @@ unsafe fn atomic_max<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
 }
 
 /// returns the min value (signed comparison)
-#[inline]
+#[inline(never)]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -4159,7 +4159,7 @@ unsafe fn atomic_min<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
 }
 
 /// returns the max value (unsigned comparison)
-#[inline]
+#[inline(never)]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 unsafe fn atomic_umax<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
@@ -4176,7 +4176,7 @@ unsafe fn atomic_umax<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
 }
 
 /// returns the min value (unsigned comparison)
-#[inline]
+#[inline(never)]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 unsafe fn atomic_umin<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
@@ -4271,7 +4271,7 @@ unsafe fn atomic_umin<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
 ///     }
 /// }
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "fence"]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -4351,7 +4351,7 @@ pub fn fence(order: Ordering) {
 ///     }
 /// }
 /// ```
-#[inline]
+#[inline(never)]
 #[stable(feature = "compiler_fences", since = "1.21.0")]
 #[rustc_diagnostic_item = "compiler_fence"]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -4405,7 +4405,7 @@ impl<T> fmt::Pointer for AtomicPtr<T> {
 /// This function is deprecated in favor of [`hint::spin_loop`].
 ///
 /// [`hint::spin_loop`]: crate::hint::spin_loop
-#[inline]
+#[inline(never)]
 #[stable(feature = "spin_loop_hint", since = "1.24.0")]
 #[deprecated(since = "1.51.0", note = "use hint::spin_loop instead")]
 #[cfg(not(feature = "ferrocene_certified"))]

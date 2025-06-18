@@ -830,7 +830,7 @@ pub struct PhantomData<T: ?Sized>;
 #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
 impl<T: ?Sized> Hash for PhantomData<T> {
-    #[inline]
+    #[inline(never)]
     fn hash<H: Hasher>(&self, _: &mut H) {}
 }
 

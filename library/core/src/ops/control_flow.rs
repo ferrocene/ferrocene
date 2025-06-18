@@ -104,12 +104,12 @@ impl<B, C> ops::Try for ControlFlow<B, C> {
     type Output = C;
     type Residual = ControlFlow<B, convert::Infallible>;
 
-    #[inline]
+    #[inline(never)]
     fn from_output(output: Self::Output) -> Self {
         ControlFlow::Continue(output)
     }
 
-    #[inline]
+    #[inline(never)]
     fn branch(self) -> ControlFlow<Self::Residual, Self::Output> {
         match self {
             ControlFlow::Continue(c) => ControlFlow::Continue(c),
@@ -122,7 +122,7 @@ impl<B, C> ops::Try for ControlFlow<B, C> {
 // Note: manually specifying the residual type instead of using the default to work around
 // https://github.com/rust-lang/rust/issues/99940
 impl<B, C> ops::FromResidual<ControlFlow<B, convert::Infallible>> for ControlFlow<B, C> {
-    #[inline]
+    #[inline(never)]
     fn from_residual(residual: ControlFlow<B, convert::Infallible>) -> Self {
         match residual {
             ControlFlow::Break(b) => ControlFlow::Break(b),
@@ -146,7 +146,7 @@ impl<B, C> ControlFlow<B, C> {
     /// assert!(ControlFlow::<&str, i32>::Break("Stop right there!").is_break());
     /// assert!(!ControlFlow::<&str, i32>::Continue(3).is_break());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "control_flow_enum_is", since = "1.59.0")]
     pub fn is_break(&self) -> bool {
         matches!(*self, ControlFlow::Break(_))
@@ -162,7 +162,7 @@ impl<B, C> ControlFlow<B, C> {
     /// assert!(!ControlFlow::<&str, i32>::Break("Stop right there!").is_continue());
     /// assert!(ControlFlow::<&str, i32>::Continue(3).is_continue());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "control_flow_enum_is", since = "1.59.0")]
     pub fn is_continue(&self) -> bool {
         matches!(*self, ControlFlow::Continue(_))
@@ -179,7 +179,7 @@ impl<B, C> ControlFlow<B, C> {
     /// assert_eq!(ControlFlow::<&str, i32>::Break("Stop right there!").break_value(), Some("Stop right there!"));
     /// assert_eq!(ControlFlow::<&str, i32>::Continue(3).break_value(), None);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "control_flow_enum", since = "1.83.0")]
     pub fn break_value(self) -> Option<B> {
         match self {
@@ -190,7 +190,7 @@ impl<B, C> ControlFlow<B, C> {
 
     /// Maps `ControlFlow<B, C>` to `ControlFlow<T, C>` by applying a function
     /// to the break value in case it exists.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "control_flow_enum", since = "1.83.0")]
     pub fn map_break<T>(self, f: impl FnOnce(B) -> T) -> ControlFlow<T, C> {
         match self {
@@ -210,7 +210,7 @@ impl<B, C> ControlFlow<B, C> {
     /// assert_eq!(ControlFlow::<&str, i32>::Break("Stop right there!").continue_value(), None);
     /// assert_eq!(ControlFlow::<&str, i32>::Continue(3).continue_value(), Some(3));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "control_flow_enum", since = "1.83.0")]
     pub fn continue_value(self) -> Option<C> {
         match self {
@@ -221,7 +221,7 @@ impl<B, C> ControlFlow<B, C> {
 
     /// Maps `ControlFlow<B, C>` to `ControlFlow<B, T>` by applying a function
     /// to the continue value in case it exists.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "control_flow_enum", since = "1.83.0")]
     pub fn map_continue<T>(self, f: impl FnOnce(C) -> T) -> ControlFlow<B, T> {
         match self {
@@ -259,7 +259,7 @@ impl<T> ControlFlow<T, T> {
 #[coverage(off)]
 impl<R: ops::Try> ControlFlow<R, R::Output> {
     /// Creates a `ControlFlow` from any type implementing `Try`.
-    #[inline]
+    #[inline(never)]
     pub(crate) fn from_try(r: R) -> Self {
         match R::branch(r) {
             ControlFlow::Continue(v) => ControlFlow::Continue(v),
@@ -268,7 +268,7 @@ impl<R: ops::Try> ControlFlow<R, R::Output> {
     }
 
     /// Converts a `ControlFlow` into any type implementing `Try`.
-    #[inline]
+    #[inline(never)]
     pub(crate) fn into_try(self) -> R {
         match self {
             ControlFlow::Continue(v) => R::from_output(v),

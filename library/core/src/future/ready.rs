@@ -18,7 +18,7 @@ impl<T> Unpin for Ready<T> {}
 impl<T> Future for Ready<T> {
     type Output = T;
 
-    #[inline]
+    #[inline(never)]
     fn poll(mut self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<T> {
         Poll::Ready(self.0.take().expect("`Ready` polled after completion"))
     }
@@ -41,7 +41,7 @@ impl<T> Ready<T> {
     /// ```
     #[stable(feature = "ready_into_inner", since = "1.82.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub fn into_inner(self) -> T {
         self.0.expect("Called `into_inner()` on `Ready` after completion")
     }

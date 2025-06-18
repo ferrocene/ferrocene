@@ -42,7 +42,7 @@ where
 {
     type Item = I::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<Self::Item> {
         if self.started {
             if let Some(v) = self.next_item.take() {
@@ -158,7 +158,7 @@ where
 {
     type Item = I::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<Self::Item> {
         if self.started {
             if let Some(v) = self.next_item.take() {

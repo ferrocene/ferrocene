@@ -73,7 +73,7 @@ not_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 impl Not for ! {
     type Output = !;
 
-    #[inline]
+    #[inline(never)]
     fn not(self) -> ! {
         match self {}
     }
@@ -859,7 +859,7 @@ macro_rules! bitxor_assign_impl {
     ($($t:ty)+) => ($(
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
         impl BitXorAssign for $t {
-            #[inline]
+            #[inline(never)]
             fn bitxor_assign(&mut self, other: $t) { *self ^= other }
         }
 

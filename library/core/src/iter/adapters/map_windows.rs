@@ -62,7 +62,7 @@ impl<I: Iterator, F, const N: usize> MapWindows<I, F, N> {
 }
 
 impl<I: Iterator, const N: usize> MapWindowsInner<I, N> {
-    #[inline]
+    #[inline(never)]
     fn new(iter: I) -> Self {
         Self { iter: Some(iter), buffer: None }
     }
@@ -112,17 +112,17 @@ impl<T, const N: usize> Buffer<T, N> {
         Some(Self { buffer, start: 0 })
     }
 
-    #[inline]
+    #[inline(never)]
     fn buffer_ptr(&self) -> *const MaybeUninit<T> {
         self.buffer.as_ptr().cast()
     }
 
-    #[inline]
+    #[inline(never)]
     fn buffer_mut_ptr(&mut self) -> *mut MaybeUninit<T> {
         self.buffer.as_mut_ptr().cast()
     }
 
-    #[inline]
+    #[inline(never)]
     fn as_array_ref(&self) -> &[T; N] {
         debug_assert!(self.start + N <= 2 * N);
 
@@ -130,7 +130,7 @@ impl<T, const N: usize> Buffer<T, N> {
         unsafe { &*self.buffer_ptr().add(self.start).cast() }
     }
 
-    #[inline]
+    #[inline(never)]
     fn as_uninit_array_mut(&mut self) -> &mut MaybeUninit<[T; N]> {
         debug_assert!(self.start + N <= 2 * N);
 

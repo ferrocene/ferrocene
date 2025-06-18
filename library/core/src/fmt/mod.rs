@@ -244,7 +244,7 @@ pub trait Write {
         }
 
         impl<W: Write + ?Sized> SpecWriteFmt for &mut W {
-            #[inline]
+            #[inline(never)]
             default fn spec_write_fmt(mut self, args: Arguments<'_>) -> Result {
                 if let Some(s) = args.as_statically_known_str() {
                     self.write_str(s)
@@ -255,7 +255,7 @@ pub trait Write {
         }
 
         impl<W: Write> SpecWriteFmt for &mut W {
-            #[inline]
+            #[inline(never)]
             fn spec_write_fmt(self, args: Arguments<'_>) -> Result {
                 if let Some(s) = args.as_statically_known_str() {
                     self.write_str(s)
@@ -685,7 +685,7 @@ impl<'a> Arguments<'a> {
     ///
     /// This is intended to be used for setting initial `String` capacity
     /// when using `format!`. Note: this is neither the lower nor upper bound.
-    #[inline]
+    #[inline(never)]
     pub fn estimated_capacity(&self) -> usize {
         let pieces_length: usize = self.pieces.iter().map(|x| x.len()).sum();
 
@@ -753,7 +753,7 @@ impl<'a> Arguments<'a> {
     #[stable(feature = "fmt_as_str", since = "1.52.0")]
     #[rustc_const_stable(feature = "const_arguments_as_str", since = "1.84.0")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     pub const fn as_str(&self) -> Option<&'static str> {
         match (self.pieces, self.args) {
             ([], []) => Some(""),
@@ -765,7 +765,7 @@ impl<'a> Arguments<'a> {
     /// Same as [`Arguments::as_str`], but will only return `Some(s)` if it can be determined at compile time.
     #[unstable(feature = "fmt_internals", reason = "internal to standard library", issue = "none")]
     #[must_use]
-    #[inline]
+    #[inline(never)]
     #[doc(hidden)]
     pub fn as_statically_known_str(&self) -> Option<&'static str> {
         let s = self.as_str();
@@ -2002,7 +2002,7 @@ impl<'a> Formatter<'a> {
     /// assert_eq!(format!("{:0>8}", Foo(2)), "Foo 2");
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
+    #[inline(never)]
     pub fn write_fmt(&mut self, fmt: Arguments<'_>) -> Result {
         if let Some(s) = fmt.as_statically_known_str() {
             self.buf.write_str(s)
@@ -2725,7 +2725,7 @@ impl Write for Formatter<'_> {
         self.buf.write_char(c)
     }
 
-    #[inline]
+    #[inline(never)]
     fn write_fmt(&mut self, args: Arguments<'_>) -> Result {
         if let Some(s) = args.as_statically_known_str() {
             self.buf.write_str(s)
@@ -2771,7 +2771,7 @@ fmt_refs! { Debug, Display, Octal, Binary, LowerHex, UpperHex, LowerExp, UpperEx
 #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
 impl Debug for ! {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, _: &mut Formatter<'_>) -> Result {
         *self
     }
@@ -2781,7 +2781,7 @@ impl Debug for ! {
 #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
 impl Display for ! {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, _: &mut Formatter<'_>) -> Result {
         *self
     }
@@ -2791,7 +2791,7 @@ impl Display for ! {
 #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
 impl Debug for bool {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Display::fmt(self, f)
     }
@@ -3061,7 +3061,7 @@ impl<T: Debug> Debug for [T] {
 #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
 impl Debug for () {
-    #[inline]
+    #[inline(never)]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.pad("()")
     }

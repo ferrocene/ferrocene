@@ -87,7 +87,7 @@ where
         self.it.count()
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.it.advance_by(n)
     }
@@ -128,7 +128,7 @@ where
         self.it.rfold(init, copy_fold(f))
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.it.advance_back_by(n)
     }
@@ -261,7 +261,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut I::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.it) }

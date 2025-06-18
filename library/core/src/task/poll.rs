@@ -45,7 +45,7 @@ impl<T> Poll<T> {
     /// assert_eq!(poll_some_len, Poll::Ready(13));
     /// ```
     #[stable(feature = "futures_api", since = "1.36.0")]
-    #[inline]
+    #[inline(never)]
     pub fn map<U, F>(self, f: F) -> Poll<U>
     where
         F: FnOnce(T) -> U,
@@ -68,7 +68,7 @@ impl<T> Poll<T> {
     /// let x: Poll<u32> = Poll::Pending;
     /// assert_eq!(x.is_ready(), false);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "const_poll", since = "1.49.0")]
     #[stable(feature = "futures_api", since = "1.36.0")]
     pub const fn is_ready(&self) -> bool {
@@ -89,7 +89,7 @@ impl<T> Poll<T> {
     /// let x: Poll<u32> = Poll::Pending;
     /// assert_eq!(x.is_pending(), true);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[rustc_const_stable(feature = "const_poll", since = "1.49.0")]
     #[stable(feature = "futures_api", since = "1.36.0")]
     pub const fn is_pending(&self) -> bool {
@@ -113,7 +113,7 @@ impl<T, E> Poll<Result<T, E>> {
     /// assert_eq!(squared, Poll::Ready(Ok(144)));
     /// ```
     #[stable(feature = "futures_api", since = "1.36.0")]
-    #[inline]
+    #[inline(never)]
     pub fn map_ok<U, F>(self, f: F) -> Poll<Result<U, E>>
     where
         F: FnOnce(T) -> U,
@@ -141,7 +141,7 @@ impl<T, E> Poll<Result<T, E>> {
     /// assert_eq!(res, Poll::Ready(Err(0)));
     /// ```
     #[stable(feature = "futures_api", since = "1.36.0")]
-    #[inline]
+    #[inline(never)]
     pub fn map_err<U, F>(self, f: F) -> Poll<Result<T, U>>
     where
         F: FnOnce(E) -> U,
@@ -170,7 +170,7 @@ impl<T, E> Poll<Option<Result<T, E>>> {
     /// assert_eq!(squared, Poll::Ready(Some(Ok(144))));
     /// ```
     #[stable(feature = "poll_map", since = "1.51.0")]
-    #[inline]
+    #[inline(never)]
     pub fn map_ok<U, F>(self, f: F) -> Poll<Option<Result<U, E>>>
     where
         F: FnOnce(T) -> U,
@@ -200,7 +200,7 @@ impl<T, E> Poll<Option<Result<T, E>>> {
     /// assert_eq!(res, Poll::Ready(Some(Err(0))));
     /// ```
     #[stable(feature = "poll_map", since = "1.51.0")]
-    #[inline]
+    #[inline(never)]
     pub fn map_err<U, F>(self, f: F) -> Poll<Option<Result<T, U>>>
     where
         F: FnOnce(E) -> U,
@@ -234,12 +234,12 @@ impl<T, E> ops::Try for Poll<Result<T, E>> {
     type Output = Poll<T>;
     type Residual = Result<convert::Infallible, E>;
 
-    #[inline]
+    #[inline(never)]
     fn from_output(c: Self::Output) -> Self {
         c.map(Ok)
     }
 
-    #[inline]
+    #[inline(never)]
     fn branch(self) -> ControlFlow<Self::Residual, Self::Output> {
         match self {
             Poll::Ready(Ok(x)) => ControlFlow::Continue(Poll::Ready(x)),
@@ -251,7 +251,7 @@ impl<T, E> ops::Try for Poll<Result<T, E>> {
 
 #[unstable(feature = "try_trait_v2", issue = "84277")]
 impl<T, E, F: From<E>> ops::FromResidual<Result<convert::Infallible, E>> for Poll<Result<T, F>> {
-    #[inline]
+    #[inline(never)]
     fn from_residual(x: Result<convert::Infallible, E>) -> Self {
         match x {
             Err(e) => Poll::Ready(Err(From::from(e))),
@@ -264,12 +264,12 @@ impl<T, E> ops::Try for Poll<Option<Result<T, E>>> {
     type Output = Poll<Option<T>>;
     type Residual = Result<convert::Infallible, E>;
 
-    #[inline]
+    #[inline(never)]
     fn from_output(c: Self::Output) -> Self {
         c.map(|x| x.map(Ok))
     }
 
-    #[inline]
+    #[inline(never)]
     fn branch(self) -> ControlFlow<Self::Residual, Self::Output> {
         match self {
             Poll::Ready(Some(Ok(x))) => ControlFlow::Continue(Poll::Ready(Some(x))),
@@ -284,7 +284,7 @@ impl<T, E> ops::Try for Poll<Option<Result<T, E>>> {
 impl<T, E, F: From<E>> ops::FromResidual<Result<convert::Infallible, E>>
     for Poll<Option<Result<T, F>>>
 {
-    #[inline]
+    #[inline(never)]
     fn from_residual(x: Result<convert::Infallible, E>) -> Self {
         match x {
             Err(e) => Poll::Ready(Some(Err(From::from(e)))),

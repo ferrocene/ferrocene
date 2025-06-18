@@ -55,7 +55,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "ptr_cast", since = "1.38.0")]
     #[rustc_const_stable(feature = "const_ptr_cast", since = "1.38.0")]
     #[rustc_diagnostic_item = "ptr_cast"]
-    #[inline(always)]
+    #[inline(never)]
     pub const fn cast<U>(self) -> *mut U {
         self as _
     }
@@ -161,7 +161,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "ptr_const_cast", since = "1.65.0")]
     #[rustc_const_stable(feature = "ptr_const_cast", since = "1.65.0")]
     #[rustc_diagnostic_item = "ptr_cast_const"]
-    #[inline(always)]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
     pub const fn cast_const(self) -> *const T {
@@ -191,7 +191,7 @@ impl<T: ?Sized> *mut T {
     ///
     /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
     #[must_use]
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -226,7 +226,7 @@ impl<T: ?Sized> *mut T {
     /// This is an [Exposed Provenance][crate::ptr#exposed-provenance] API.
     ///
     /// [`with_exposed_provenance_mut`]: with_exposed_provenance_mut
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "exposed_provenance", since = "1.84.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -444,7 +444,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[track_caller]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -499,7 +499,7 @@ impl<T: ?Sized> *mut T {
     /// For non-`Sized` pointees this operation changes only the data pointer,
     /// leaving the metadata untouched.
     #[must_use]
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[track_caller]
@@ -562,7 +562,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "ptr_wrapping_offset", since = "1.16.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
     pub const fn wrapping_offset(self, count: isize) -> *mut T
@@ -584,7 +584,7 @@ impl<T: ?Sized> *mut T {
     /// For non-`Sized` pointees this operation changes only the data pointer,
     /// leaving the metadata untouched.
     #[must_use]
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
@@ -629,7 +629,7 @@ impl<T: ?Sized> *mut T {
     /// ```
     #[unstable(feature = "ptr_mask", issue = "98290")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
-    #[inline(always)]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
     pub fn mask(self, mask: usize) -> *mut T {
@@ -905,7 +905,7 @@ impl<T: ?Sized> *mut T {
     /// ```
     #[stable(feature = "ptr_offset_from", since = "1.47.0")]
     #[rustc_const_stable(feature = "const_ptr_offset_from", since = "1.65.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -926,7 +926,7 @@ impl<T: ?Sized> *mut T {
     ///
     /// For non-`Sized` pointees this operation considers only the data pointers,
     /// ignoring the metadata.
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1047,7 +1047,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[track_caller]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -1099,7 +1099,7 @@ impl<T: ?Sized> *mut T {
     /// For non-`Sized` pointees this operation changes only the data pointer,
     /// leaving the metadata untouched.
     #[must_use]
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[track_caller]
@@ -1157,7 +1157,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[track_caller]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -1215,7 +1215,7 @@ impl<T: ?Sized> *mut T {
     /// For non-`Sized` pointees this operation changes only the data pointer,
     /// leaving the metadata untouched.
     #[must_use]
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[track_caller]
@@ -1277,7 +1277,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
     pub const fn wrapping_add(self, count: usize) -> Self
@@ -1297,7 +1297,7 @@ impl<T: ?Sized> *mut T {
     /// For non-`Sized` pointees this operation changes only the data pointer,
     /// leaving the metadata untouched.
     #[must_use]
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
@@ -1357,7 +1357,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
     pub const fn wrapping_sub(self, count: usize) -> Self
@@ -1377,7 +1377,7 @@ impl<T: ?Sized> *mut T {
     /// For non-`Sized` pointees this operation changes only the data pointer,
     /// leaving the metadata untouched.
     #[must_use]
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
@@ -1394,7 +1394,7 @@ impl<T: ?Sized> *mut T {
     /// [`ptr::read`]: crate::ptr::read()
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[track_caller]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -1417,7 +1417,7 @@ impl<T: ?Sized> *mut T {
     ///
     /// [`ptr::read_volatile`]: crate::ptr::read_volatile()
     #[stable(feature = "pointer_methods", since = "1.26.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[track_caller]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -1439,7 +1439,7 @@ impl<T: ?Sized> *mut T {
     /// [`ptr::read_unaligned`]: crate::ptr::read_unaligned()
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[track_caller]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -1461,7 +1461,7 @@ impl<T: ?Sized> *mut T {
     /// [`ptr::copy`]: crate::ptr::copy()
     #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
     #[stable(feature = "pointer_methods", since = "1.26.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[track_caller]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -1483,7 +1483,7 @@ impl<T: ?Sized> *mut T {
     /// [`ptr::copy_nonoverlapping`]: crate::ptr::copy_nonoverlapping()
     #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
     #[stable(feature = "pointer_methods", since = "1.26.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[track_caller]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -1505,7 +1505,7 @@ impl<T: ?Sized> *mut T {
     /// [`ptr::copy`]: crate::ptr::copy()
     #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
     #[stable(feature = "pointer_methods", since = "1.26.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[track_caller]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -1527,7 +1527,7 @@ impl<T: ?Sized> *mut T {
     /// [`ptr::copy_nonoverlapping`]: crate::ptr::copy_nonoverlapping()
     #[rustc_const_stable(feature = "const_intrinsic_copy", since = "1.83.0")]
     #[stable(feature = "pointer_methods", since = "1.26.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[track_caller]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -1545,7 +1545,7 @@ impl<T: ?Sized> *mut T {
     ///
     /// [`ptr::drop_in_place`]: crate::ptr::drop_in_place()
     #[stable(feature = "pointer_methods", since = "1.26.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
     pub unsafe fn drop_in_place(self) {
@@ -1561,7 +1561,7 @@ impl<T: ?Sized> *mut T {
     /// [`ptr::write`]: crate::ptr::write()
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[track_caller]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -1582,7 +1582,7 @@ impl<T: ?Sized> *mut T {
     #[doc(alias = "memset")]
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[track_caller]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -1605,7 +1605,7 @@ impl<T: ?Sized> *mut T {
     ///
     /// [`ptr::write_volatile`]: crate::ptr::write_volatile()
     #[stable(feature = "pointer_methods", since = "1.26.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[track_caller]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -1627,7 +1627,7 @@ impl<T: ?Sized> *mut T {
     /// [`ptr::write_unaligned`]: crate::ptr::write_unaligned()
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[track_caller]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -1647,7 +1647,7 @@ impl<T: ?Sized> *mut T {
     /// [`ptr::replace`]: crate::ptr::replace()
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_inherent_ptr_replace", since = "1.88.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
     pub const unsafe fn replace(self, src: T) -> T
@@ -1667,7 +1667,7 @@ impl<T: ?Sized> *mut T {
     /// [`ptr::swap`]: crate::ptr::swap()
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_swap", since = "1.85.0")]
-    #[inline(always)]
+    #[inline(never)]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
     pub const unsafe fn swap(self, with: *mut T)
@@ -1833,7 +1833,7 @@ impl<T> *mut [T] {
     /// let slice: *mut [i8] = ptr::slice_from_raw_parts_mut(ptr::null_mut(), 3);
     /// assert_eq!(slice.len(), 3);
     /// ```
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "slice_ptr_len", since = "1.79.0")]
     #[rustc_const_stable(feature = "const_slice_ptr_len", since = "1.79.0")]
     pub const fn len(self) -> usize {
@@ -1850,7 +1850,7 @@ impl<T> *mut [T] {
     /// let slice: *mut [i8] = ptr::slice_from_raw_parts_mut(ptr::null_mut(), 3);
     /// assert!(!slice.is_empty());
     /// ```
-    #[inline(always)]
+    #[inline(never)]
     #[stable(feature = "slice_ptr_len", since = "1.79.0")]
     #[rustc_const_stable(feature = "const_slice_ptr_len", since = "1.79.0")]
     pub const fn is_empty(self) -> bool {
@@ -1912,7 +1912,7 @@ impl<T> *mut [T] {
     ///     assert_eq!(&*right, [3, 0, 5, 6]);
     /// }
     /// ```
-    #[inline(always)]
+    #[inline(never)]
     #[track_caller]
     #[unstable(feature = "raw_slice_split", issue = "95595")]
     pub unsafe fn split_at_mut(self, mid: usize) -> (*mut [T], *mut [T]) {
@@ -1957,7 +1957,7 @@ impl<T> *mut [T] {
     /// }
     /// assert_eq!(v, [1, 2, 3, 4, 5, 6]);
     /// ```
-    #[inline(always)]
+    #[inline(never)]
     #[unstable(feature = "raw_slice_split", issue = "95595")]
     pub unsafe fn split_at_mut_unchecked(self, mid: usize) -> (*mut [T], *mut [T]) {
         let len = self.len();
@@ -1984,7 +1984,7 @@ impl<T> *mut [T] {
     /// let slice: *mut [i8] = ptr::slice_from_raw_parts_mut(ptr::null_mut(), 3);
     /// assert_eq!(slice.as_mut_ptr(), ptr::null_mut());
     /// ```
-    #[inline(always)]
+    #[inline(never)]
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
     pub const fn as_mut_ptr(self) -> *mut T {
         self as *mut T
@@ -2011,7 +2011,7 @@ impl<T> *mut [T] {
     /// }
     /// ```
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
-    #[inline(always)]
+    #[inline(never)]
     pub unsafe fn get_unchecked_mut<I>(self, index: I) -> *mut I::Output
     where
         I: SliceIndex<[T]>,
@@ -2185,7 +2185,7 @@ impl<T, const N: usize> *mut [T; N] {
 #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
 impl<T: ?Sized> PartialEq for *mut T {
-    #[inline(always)]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn eq(&self, other: &*mut T) -> bool {
         *self == *other
@@ -2221,31 +2221,31 @@ impl<T: ?Sized> Ord for *mut T {
 #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
 impl<T: ?Sized> PartialOrd for *mut T {
-    #[inline(always)]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn partial_cmp(&self, other: &*mut T) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 
-    #[inline(always)]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn lt(&self, other: &*mut T) -> bool {
         *self < *other
     }
 
-    #[inline(always)]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn le(&self, other: &*mut T) -> bool {
         *self <= *other
     }
 
-    #[inline(always)]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn gt(&self, other: &*mut T) -> bool {
         *self > *other
     }
 
-    #[inline(always)]
+    #[inline(never)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn ge(&self, other: &*mut T) -> bool {
         *self >= *other

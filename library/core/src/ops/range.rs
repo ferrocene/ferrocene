@@ -126,7 +126,7 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
     /// assert!(!(0.0..f32::NAN).contains(&0.5));
     /// assert!(!(f32::NAN..1.0).contains(&0.5));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "range_contains", since = "1.35.0")]
     pub fn contains<U>(&self, item: &U) -> bool
     where
@@ -153,7 +153,7 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
     /// assert!( (3.0..f32::NAN).is_empty());
     /// assert!( (f32::NAN..5.0).is_empty());
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "range_is_empty", since = "1.47.0")]
     pub fn is_empty(&self) -> bool {
         !(self.start < self.end)
@@ -231,7 +231,7 @@ impl<Idx: PartialOrd<Idx>> RangeFrom<Idx> {
     /// assert!(!(0.0..).contains(&f32::NAN));
     /// assert!(!(f32::NAN..).contains(&0.5));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "range_contains", since = "1.35.0")]
     pub fn contains<U>(&self, item: &U) -> bool
     where
@@ -318,7 +318,7 @@ impl<Idx: PartialOrd<Idx>> RangeTo<Idx> {
     /// assert!(!(..1.0).contains(&f32::NAN));
     /// assert!(!(..f32::NAN).contains(&0.5));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "range_contains", since = "1.35.0")]
     pub fn contains<U>(&self, item: &U) -> bool
     where
@@ -394,7 +394,7 @@ impl<Idx> RangeInclusive<Idx> {
     /// ```
     #[lang = "range_inclusive_new"]
     #[stable(feature = "inclusive_range_methods", since = "1.27.0")]
-    #[inline]
+    #[inline(never)]
     #[rustc_promotable]
     #[rustc_const_stable(feature = "const_range_new", since = "1.32.0")]
     pub const fn new(start: Idx, end: Idx) -> Self {
@@ -422,7 +422,7 @@ impl<Idx> RangeInclusive<Idx> {
     // /// ```
     #[stable(feature = "inclusive_range_methods", since = "1.27.0")]
     #[rustc_const_stable(feature = "const_inclusive_range_methods", since = "1.32.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn start(&self) -> &Idx {
         &self.start
     }
@@ -448,7 +448,7 @@ impl<Idx> RangeInclusive<Idx> {
     // /// ```
     #[stable(feature = "inclusive_range_methods", since = "1.27.0")]
     #[rustc_const_stable(feature = "const_inclusive_range_methods", since = "1.32.0")]
-    #[inline]
+    #[inline(never)]
     pub const fn end(&self) -> &Idx {
         &self.end
     }
@@ -464,7 +464,7 @@ impl<Idx> RangeInclusive<Idx> {
     /// assert_eq!((3..=5).into_inner(), (3, 5));
     /// ```
     #[stable(feature = "inclusive_range_methods", since = "1.27.0")]
-    #[inline]
+    #[inline(never)]
     #[rustc_const_unstable(feature = "const_range_bounds", issue = "108082")]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
@@ -478,7 +478,7 @@ impl<Idx> RangeInclusive<Idx> {
 impl RangeInclusive<usize> {
     /// Converts to an exclusive `Range` for `SliceIndex` implementations.
     /// The caller is responsible for dealing with `end == usize::MAX`.
-    #[inline]
+    #[inline(never)]
     pub(crate) const fn into_slice_range(self) -> Range<usize> {
         // If we're not exhausted, we want to simply slice `start..end + 1`.
         // If we are exhausted, then slicing with `end + 1..end + 1` gives us an
@@ -536,7 +536,7 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     /// // Precise field values are unspecified here
     /// assert!(!r.contains(&3) && !r.contains(&5));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "range_contains", since = "1.35.0")]
     pub fn contains<U>(&self, item: &U) -> bool
     where
@@ -573,7 +573,7 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     /// assert!(r.is_empty());
     /// ```
     #[stable(feature = "range_is_empty", since = "1.47.0")]
-    #[inline]
+    #[inline(never)]
     pub fn is_empty(&self) -> bool {
         self.exhausted || !(self.start <= self.end)
     }
@@ -655,7 +655,7 @@ impl<Idx: PartialOrd<Idx>> RangeToInclusive<Idx> {
     /// assert!(!(..=1.0).contains(&f32::NAN));
     /// assert!(!(..=f32::NAN).contains(&0.5));
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "range_contains", since = "1.35.0")]
     pub fn contains<U>(&self, item: &U) -> bool
     where
@@ -720,7 +720,7 @@ pub enum Bound<T> {
 
 impl<T> Bound<T> {
     /// Converts from `&Bound<T>` to `Bound<&T>`.
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "bound_as_ref_shared", since = "1.65.0")]
     pub fn as_ref(&self) -> Bound<&T> {
         match *self {
@@ -731,7 +731,7 @@ impl<T> Bound<T> {
     }
 
     /// Converts from `&mut Bound<T>` to `Bound<&mut T>`.
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "bound_as_ref", issue = "80996")]
     pub fn as_mut(&mut self) -> Bound<&mut T> {
         match *self {
@@ -762,7 +762,7 @@ impl<T> Bound<T> {
     ///
     /// assert_eq!(unbounded_string.map(|s| s.len()), Unbounded);
     /// ```
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "bound_map", since = "1.77.0")]
     pub fn map<U, F: FnOnce(T) -> U>(self, f: F) -> Bound<U> {
         match self {
@@ -845,7 +845,7 @@ pub trait RangeBounds<T: ?Sized> {
     /// assert!(!(0.0..1.0).contains(&f32::NAN));
     /// assert!(!(0.0..f32::NAN).contains(&0.5));
     /// assert!(!(f32::NAN..1.0).contains(&0.5));
-    #[inline]
+    #[inline(never)]
     #[stable(feature = "range_contains", since = "1.35.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]

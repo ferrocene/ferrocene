@@ -40,7 +40,7 @@ where
 {
     type Item = I::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<I::Item> {
         if self.flag {
             None
@@ -55,7 +55,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.flag {
             (0, Some(0))
@@ -65,7 +65,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -117,7 +117,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut I::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.iter) }

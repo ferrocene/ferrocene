@@ -17,11 +17,11 @@ trait ReadNumberHelper: Sized {
 macro_rules! impl_helper {
     ($($t:ty)*) => ($(impl ReadNumberHelper for $t {
         const ZERO: Self = 0;
-        #[inline]
+        #[inline(never)]
         fn checked_mul(&self, other: u32) -> Option<Self> {
             Self::checked_mul(*self, other.try_into().ok()?)
         }
-        #[inline]
+        #[inline(never)]
         fn checked_add(&self, other: u32) -> Option<Self> {
             Self::checked_add(*self, other.try_into().ok()?)
         }

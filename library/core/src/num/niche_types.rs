@@ -32,7 +32,7 @@ macro_rules! define_valid_range_type {
         };
 
         impl $name {
-            #[inline]
+            #[inline(never)]
             pub const fn new(val: $int) -> Option<Self> {
                 if (val as $uint) >= ($low as $uint) && (val as $uint) <= ($high as $uint) {
                     // SAFETY: just checked the inclusive range
@@ -48,13 +48,13 @@ macro_rules! define_valid_range_type {
             /// # Safety
             /// Immediate language UB if `val == 0`, as it violates the validity
             /// invariant of this type.
-            #[inline]
+            #[inline(never)]
             pub const unsafe fn new_unchecked(val: $int) -> Self {
                 // SAFETY: Caller promised that `val` is non-zero.
                 unsafe { $name(val) }
             }
 
-            #[inline]
+            #[inline(never)]
             pub const fn as_inner(self) -> $int {
                 // SAFETY: This is a transparent wrapper, so unwrapping it is sound
                 // (Not using `.0` due to MCP#807.)
@@ -68,21 +68,21 @@ macro_rules! define_valid_range_type {
         impl StructuralPartialEq for $name {}
 
         impl PartialEq for $name {
-            #[inline]
+            #[inline(never)]
             fn eq(&self, other: &Self) -> bool {
                 self.as_inner() == other.as_inner()
             }
         }
 
         impl Ord for $name {
-            #[inline]
+            #[inline(never)]
             fn cmp(&self, other: &Self) -> Ordering {
                 Ord::cmp(&self.as_inner(), &other.as_inner())
             }
         }
 
         impl PartialOrd for $name {
-            #[inline]
+            #[inline(never)]
             fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
                 Some(Ord::cmp(self, other))
             }
@@ -113,7 +113,7 @@ impl Nanoseconds {
 }
 
 impl Default for Nanoseconds {
-    #[inline]
+    #[inline(never)]
     fn default() -> Self {
         Self::ZERO
     }

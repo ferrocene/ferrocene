@@ -36,7 +36,7 @@ where
 {
     type Item = <I as Iterator>::Item;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<I::Item> {
         if unlikely(self.n > 0) {
             self.iter.nth(crate::mem::take(&mut self.n))
@@ -45,7 +45,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<I::Item> {
         if self.n > 0 {
             let skip: usize = crate::mem::take(&mut self.n);
@@ -67,7 +67,7 @@ where
         }
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(mut self) -> usize {
         if self.n > 0 {
             // nth(n) skips n+1
@@ -78,7 +78,7 @@ where
         self.iter.count()
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(mut self) -> Option<I::Item> {
         if self.n > 0 {
             // nth(n) skips n+1
@@ -87,7 +87,7 @@ where
         self.iter.last()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (lower, upper) = self.iter.size_hint();
 
@@ -100,7 +100,7 @@ where
         (lower, upper)
     }
 
-    #[inline]
+    #[inline(never)]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
@@ -118,7 +118,7 @@ where
         self.iter.try_fold(init, fold)
     }
 
-    #[inline]
+    #[inline(never)]
     fn fold<Acc, Fold>(mut self, init: Acc, fold: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
@@ -132,7 +132,7 @@ where
         self.iter.fold(init, fold)
     }
 
-    #[inline]
+    #[inline(never)]
     #[rustc_inherit_overflow_checks]
     fn advance_by(&mut self, mut n: usize) -> Result<(), NonZero<usize>> {
         let skip_inner = self.n;
@@ -196,7 +196,7 @@ where
         if self.len() > 0 { self.iter.next_back() } else { None }
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, n: usize) -> Option<I::Item> {
         let len = self.len();
         if n < len {
@@ -233,7 +233,7 @@ where
 
     impl_fold_via_try_fold! { rfold -> try_rfold }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let min = crate::cmp::min(self.len(), n);
         let rem = self.iter.advance_back_by(min);
@@ -255,7 +255,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut I::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.iter) }

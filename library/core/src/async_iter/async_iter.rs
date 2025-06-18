@@ -76,7 +76,7 @@ pub trait AsyncIterator {
     ///
     /// The default implementation returns <code>(0, [None])</code> which is correct for any
     /// async iterator.
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         (0, None)
     }

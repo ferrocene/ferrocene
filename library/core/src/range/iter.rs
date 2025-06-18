@@ -52,32 +52,32 @@ unsafe_range_trusted_random_access_impl! {
 impl<A: Step> Iterator for IterRange<A> {
     type Item = A;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<A> {
         self.0.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.0.size_hint()
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         self.0.count()
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<A> {
         self.0.nth(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(self) -> Option<A> {
         self.0.last()
     }
 
-    #[inline]
+    #[inline(never)]
     fn min(self) -> Option<A>
     where
         A: Ord,
@@ -85,7 +85,7 @@ impl<A: Step> Iterator for IterRange<A> {
         self.0.min()
     }
 
-    #[inline]
+    #[inline(never)]
     fn max(self) -> Option<A>
     where
         A: Ord,
@@ -93,17 +93,17 @@ impl<A: Step> Iterator for IterRange<A> {
         self.0.max()
     }
 
-    #[inline]
+    #[inline(never)]
     fn is_sorted(self) -> bool {
         true
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.0.advance_by(n)
     }
 
-    #[inline]
+    #[inline(never)]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -118,17 +118,17 @@ impl<A: Step> Iterator for IterRange<A> {
 
 #[unstable(feature = "new_range_api", issue = "125687")]
 impl<A: Step> DoubleEndedIterator for IterRange<A> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<A> {
         self.0.next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, n: usize) -> Option<A> {
         self.0.nth_back(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.0.advance_back_by(n)
     }
@@ -172,32 +172,32 @@ impl<A: Step> IterRangeInclusive<A> {
 impl<A: Step> Iterator for IterRangeInclusive<A> {
     type Item = A;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<A> {
         self.0.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.0.size_hint()
     }
 
-    #[inline]
+    #[inline(never)]
     fn count(self) -> usize {
         self.0.count()
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<A> {
         self.0.nth(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn last(self) -> Option<A> {
         self.0.last()
     }
 
-    #[inline]
+    #[inline(never)]
     fn min(self) -> Option<A>
     where
         A: Ord,
@@ -205,7 +205,7 @@ impl<A: Step> Iterator for IterRangeInclusive<A> {
         self.0.min()
     }
 
-    #[inline]
+    #[inline(never)]
     fn max(self) -> Option<A>
     where
         A: Ord,
@@ -213,12 +213,12 @@ impl<A: Step> Iterator for IterRangeInclusive<A> {
         self.0.max()
     }
 
-    #[inline]
+    #[inline(never)]
     fn is_sorted(self) -> bool {
         true
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.0.advance_by(n)
     }
@@ -226,17 +226,17 @@ impl<A: Step> Iterator for IterRangeInclusive<A> {
 
 #[unstable(feature = "new_range_api", issue = "125687")]
 impl<A: Step> DoubleEndedIterator for IterRangeInclusive<A> {
-    #[inline]
+    #[inline(never)]
     fn next_back(&mut self) -> Option<A> {
         self.0.next_back()
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth_back(&mut self, n: usize) -> Option<A> {
         self.0.nth_back(n)
     }
 
-    #[inline]
+    #[inline(never)]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.0.advance_back_by(n)
     }
@@ -306,17 +306,17 @@ impl<A> IterRangeFrom<A> {
 impl<A: Step> Iterator for IterRangeFrom<A> {
     type Item = A;
 
-    #[inline]
+    #[inline(never)]
     fn next(&mut self) -> Option<A> {
         self.0.next()
     }
 
-    #[inline]
+    #[inline(never)]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.0.size_hint()
     }
 
-    #[inline]
+    #[inline(never)]
     fn nth(&mut self, n: usize) -> Option<A> {
         self.0.nth(n)
     }

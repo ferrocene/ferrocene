@@ -636,7 +636,7 @@ macro_rules! rem_impl_float {
         impl Rem for $t {
             type Output = $t;
 
-            #[inline]
+            #[inline(never)]
             fn rem(self, other: $t) -> $t { self % other }
         }
 

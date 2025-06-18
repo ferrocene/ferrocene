@@ -209,7 +209,7 @@ where
 {
     type Source = I::Source;
 
-    #[inline]
+    #[inline(never)]
     unsafe fn as_inner(&mut self) -> &mut Self::Source {
         // SAFETY: unsafe function forwarding to unsafe function with the same requirements
         unsafe { SourceIter::as_inner(&mut self.iter) }

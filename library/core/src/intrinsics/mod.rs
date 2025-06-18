@@ -1306,7 +1306,7 @@ pub const fn cold_path() {}
 /// This intrinsic does not have a stable counterpart.
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_nounwind]
-#[inline(always)]
+#[inline(never)]
 #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
 pub const fn likely(b: bool) -> bool {
@@ -3647,7 +3647,7 @@ pub const unsafe fn typed_swap_nonoverlapping<T>(x: *mut T, y: *mut T) {
 /// user has UB checks disabled, the checks will still get optimized out. This intrinsic is
 /// primarily used by [`crate::ub_checks::assert_unsafe_precondition`].
 #[rustc_intrinsic_const_stable_indirect] // just for UB checks
-#[inline(always)]
+#[inline(never)]
 #[rustc_intrinsic]
 pub const fn ub_checks() -> bool {
     cfg!(ub_checks)
@@ -3702,7 +3702,7 @@ pub const unsafe fn const_deallocate(_ptr: *mut u8, _size: usize, _align: usize)
 /// and let an end user opt into turning them on.
 #[rustc_const_unstable(feature = "contracts_internals", issue = "128044" /* compiler-team#759 */)]
 #[unstable(feature = "contracts_internals", issue = "128044" /* compiler-team#759 */)]
-#[inline(always)]
+#[inline(never)]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]

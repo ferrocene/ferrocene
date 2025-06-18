@@ -309,7 +309,7 @@ impl f16 {
     /// assert!(neg_inf.is_infinite());
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
     pub const fn is_infinite(self) -> bool {
@@ -334,7 +334,7 @@ impl f16 {
     /// assert!(!neg_inf.is_finite());
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
@@ -366,7 +366,7 @@ impl f16 {
     /// # }
     /// ```
     /// [subnormal]: https://en.wikipedia.org/wiki/Denormal_number
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
     pub const fn is_subnormal(self) -> bool {
@@ -395,7 +395,7 @@ impl f16 {
     /// # }
     /// ```
     /// [subnormal]: https://en.wikipedia.org/wiki/Denormal_number
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
     pub const fn is_normal(self) -> bool {
@@ -419,7 +419,7 @@ impl f16 {
     /// assert_eq!(inf.classify(), FpCategory::Infinite);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "f16", issue = "116909")]
     pub const fn classify(self) -> FpCategory {
         let b = self.to_bits();
@@ -454,7 +454,7 @@ impl f16 {
     /// assert!(!g.is_sign_positive());
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
     pub const fn is_sign_positive(self) -> bool {
@@ -525,7 +525,7 @@ impl f16 {
     /// [`INFINITY`]: Self::INFINITY
     /// [`MIN`]: Self::MIN
     /// [`MAX`]: Self::MAX
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "nextUp")]
     #[unstable(feature = "f16", issue = "116909")]
     pub const fn next_up(self) -> Self {
@@ -580,7 +580,7 @@ impl f16 {
     /// [`INFINITY`]: Self::INFINITY
     /// [`MIN`]: Self::MIN
     /// [`MAX`]: Self::MAX
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "nextDown")]
     #[unstable(feature = "f16", issue = "116909")]
     pub const fn next_down(self) -> Self {
@@ -616,7 +616,7 @@ impl f16 {
     /// assert!(abs_difference <= f16::EPSILON);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn recip(self) -> Self {
@@ -636,7 +636,7 @@ impl f16 {
     /// assert!(abs_difference <= 0.5);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn to_degrees(self) -> Self {
@@ -659,7 +659,7 @@ impl f16 {
     /// assert!(abs_difference <= 0.01);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn to_radians(self) -> f16 {
@@ -686,7 +686,7 @@ impl f16 {
     /// assert_eq!(x.max(y), y);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the comparison, without modifying either input"]
@@ -712,7 +712,7 @@ impl f16 {
     /// assert_eq!(x.min(y), x);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the comparison, without modifying either input"]
@@ -744,7 +744,7 @@ impl f16 {
     ///
     /// Also note that "propagation" of NaNs here doesn't necessarily mean that the bitpattern of a NaN
     /// operand is conserved; see the [specification of NaN bit patterns](f32#nan-bit-patterns) for more info.
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "f16", issue = "116909")]
     // #[unstable(feature = "float_minimum_maximum", issue = "91079")]
     #[must_use = "this returns the result of the comparison, without modifying either input"]
@@ -776,7 +776,7 @@ impl f16 {
     ///
     /// Also note that "propagation" of NaNs here doesn't necessarily mean that the bitpattern of a NaN
     /// operand is conserved; see the [specification of NaN bit patterns](f32#nan-bit-patterns) for more info.
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "f16", issue = "116909")]
     // #[unstable(feature = "float_minimum_maximum", issue = "91079")]
     #[must_use = "this returns the result of the comparison, without modifying either input"]
@@ -799,7 +799,7 @@ impl f16 {
     /// assert_eq!((-5.5f16).midpoint(8.0), 1.25);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "average")]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
@@ -850,7 +850,7 @@ impl f16 {
     /// * Not be `NaN`
     /// * Not be infinite
     /// * Be representable in the return type `Int`, after truncating off its fractional part
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     pub unsafe fn to_int_unchecked<Int>(self) -> Int
@@ -955,7 +955,7 @@ impl f16 {
     /// assert_eq!(bytes, [0x4a, 0x40]);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn to_be_bytes(self) -> [u8; 2] {
@@ -979,7 +979,7 @@ impl f16 {
     /// assert_eq!(bytes, [0x40, 0x4a]);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn to_le_bytes(self) -> [u8; 2] {
@@ -1016,7 +1016,7 @@ impl f16 {
     /// );
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn to_ne_bytes(self) -> [u8; 2] {
@@ -1038,7 +1038,7 @@ impl f16 {
     /// assert_eq!(value, 12.5);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
     pub const fn from_be_bytes(bytes: [u8; 2]) -> Self {
@@ -1060,7 +1060,7 @@ impl f16 {
     /// assert_eq!(value, 12.5);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
     pub const fn from_le_bytes(bytes: [u8; 2]) -> Self {
@@ -1093,7 +1093,7 @@ impl f16 {
     /// assert_eq!(value, 12.5);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
     pub const fn from_ne_bytes(bytes: [u8; 2]) -> Self {
@@ -1164,7 +1164,7 @@ impl f16 {
     /// }
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]
     pub fn total_cmp(&self, other: &Self) -> crate::cmp::Ordering {
@@ -1223,7 +1223,7 @@ impl f16 {
     /// assert!((f16::NAN).clamp(-2.0, 1.0).is_nan());
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub const fn clamp(mut self, min: f16, max: f16) -> f16 {
@@ -1263,7 +1263,7 @@ impl f16 {
     /// assert!(f16::NAN.abs().is_nan());
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
@@ -1292,7 +1292,7 @@ impl f16 {
     /// assert!(f16::NAN.signum().is_nan());
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
@@ -1330,7 +1330,7 @@ impl f16 {
     /// assert!(f16::NAN.copysign(1.0).is_nan());
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
@@ -1345,7 +1345,7 @@ impl f16 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
-    #[inline]
+    #[inline(never)]
     pub const fn algebraic_add(self, rhs: f16) -> f16 {
         intrinsics::fadd_algebraic(self, rhs)
     }
@@ -1356,7 +1356,7 @@ impl f16 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
-    #[inline]
+    #[inline(never)]
     pub const fn algebraic_sub(self, rhs: f16) -> f16 {
         intrinsics::fsub_algebraic(self, rhs)
     }
@@ -1367,7 +1367,7 @@ impl f16 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
-    #[inline]
+    #[inline(never)]
     pub const fn algebraic_mul(self, rhs: f16) -> f16 {
         intrinsics::fmul_algebraic(self, rhs)
     }
@@ -1378,7 +1378,7 @@ impl f16 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
-    #[inline]
+    #[inline(never)]
     pub const fn algebraic_div(self, rhs: f16) -> f16 {
         intrinsics::fdiv_algebraic(self, rhs)
     }
@@ -1389,7 +1389,7 @@ impl f16 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[unstable(feature = "float_algebraic", issue = "136469")]
     #[rustc_const_unstable(feature = "float_algebraic", issue = "136469")]
-    #[inline]
+    #[inline(never)]
     pub const fn algebraic_rem(self, rhs: f16) -> f16 {
         intrinsics::frem_algebraic(self, rhs)
     }
@@ -1421,7 +1421,7 @@ impl f16 {
     /// assert_eq!(h.floor(), -4.0);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[rustc_allow_incoherent_impl]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
@@ -1452,7 +1452,7 @@ impl f16 {
     /// assert_eq!(g.ceil(), 4.0);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "ceiling")]
     #[rustc_allow_incoherent_impl]
     #[unstable(feature = "f16", issue = "116909")]
@@ -1491,7 +1491,7 @@ impl f16 {
     /// assert_eq!(j.round(), 5.0);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[rustc_allow_incoherent_impl]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
@@ -1527,7 +1527,7 @@ impl f16 {
     /// assert_eq!(i.round_ties_even(), 4.0);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[rustc_allow_incoherent_impl]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
@@ -1560,7 +1560,7 @@ impl f16 {
     /// assert_eq!(h.trunc(), -3.0);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "truncate")]
     #[rustc_allow_incoherent_impl]
     #[unstable(feature = "f16", issue = "116909")]
@@ -1594,7 +1594,7 @@ impl f16 {
     /// assert!(abs_difference_y <= f16::EPSILON);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[rustc_allow_incoherent_impl]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
@@ -1644,7 +1644,7 @@ impl f16 {
     /// assert_eq!(one_plus_eps * one_minus_eps + minus_one, 0.0);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[rustc_allow_incoherent_impl]
     #[unstable(feature = "f16", issue = "116909")]
     #[doc(alias = "fmaf16", alias = "fusedMultiplyAdd")]
@@ -1683,7 +1683,7 @@ impl f16 {
     /// assert_eq!((-a).div_euclid(-b), 2.0); // -7.0 >= -4.0 * 2.0
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[rustc_allow_incoherent_impl]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
@@ -1730,7 +1730,7 @@ impl f16 {
     /// assert!((-f16::EPSILON).rem_euclid(3.0) != 0.0);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[rustc_allow_incoherent_impl]
     #[doc(alias = "modulo", alias = "mod")]
     #[unstable(feature = "f16", issue = "116909")]
@@ -1767,7 +1767,7 @@ impl f16 {
     /// assert_eq!(f16::powi(f16::NAN, 0), 1.0);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[rustc_allow_incoherent_impl]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
@@ -1804,7 +1804,7 @@ impl f16 {
     /// assert!(negative_zero.sqrt() == negative_zero);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[doc(alias = "squareRoot")]
     #[rustc_allow_incoherent_impl]
     #[unstable(feature = "f16", issue = "116909")]
@@ -1841,7 +1841,7 @@ impl f16 {
     /// assert!(abs_difference <= f16::EPSILON);
     /// # }
     /// ```
-    #[inline]
+    #[inline(never)]
     #[rustc_allow_incoherent_impl]
     #[unstable(feature = "f16", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]

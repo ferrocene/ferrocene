@@ -23,7 +23,6 @@ use crate::core::builder::{
     Builder, Cargo as CargoCommand, RunConfig, ShouldRun, Step, cargo_profile_var,
 };
 use crate::core::config::{DebuginfoLevel, RustcLto, TargetSelection};
-use crate::utils::channel::GitInfo;
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::utils::helpers::{add_dylib_path, exe, t};
 use crate::{Compiler, FileType, Kind, Mode, gha};
@@ -270,7 +269,7 @@ pub fn prepare_tool_cargo(
         cargo.env("CFG_VER_DESCRIPTION", description);
     }
 
-    let info = GitInfo::new(builder.config.omit_git_hash, &dir);
+    let info = builder.config.git_info(builder.config.omit_git_hash, &dir);
     if let Some(sha) = info.sha() {
         cargo.env("CFG_COMMIT_HASH", sha);
     }
@@ -334,14 +333,14 @@ pub(crate) fn get_tool_rustc_compiler(
 
     if builder.download_rustc() && target_compiler.stage == 1 {
         // We shouldn't drop to stage0 compiler when using CI rustc.
-        return builder.compiler(1, builder.config.build);
+        return builder.compiler(1, builder.config.host_target);
     }
 
     // Similar to `compile::Assemble`, build with the previous stage's compiler. Otherwise
     // we'd have stageN/bin/rustc and stageN/bin/$rustc_tool be effectively different stage
     // compilers, which isn't what we want. Rustc tools should be linked in the same way as the
     // compiler it's paired with, so it must be built with the previous stage compiler.
-    builder.compiler(target_compiler.stage.saturating_sub(1), builder.config.build)
+    builder.compiler(target_compiler.stage.saturating_sub(1), builder.config.host_target)
 }
 
 /// Links a built tool binary with the given `name` from the build directory to the
@@ -382,8 +381,8 @@ macro_rules! bootstrap_tool {
                 match tool {
                     $(Tool::$name =>
                         self.ensure($name {
-                            compiler: self.compiler(0, self.config.build),
-                            target: self.config.build,
+                            compiler: self.compiler(0, self.config.host_target),
+                            target: self.config.host_target,
                         }).tool_path,
                     )+
                 }
@@ -407,7 +406,7 @@ macro_rules! bootstrap_tool {
             fn make_run(run: RunConfig<'_>) {
                 run.builder.ensure($name {
                     // snapshot compiler
-                    compiler: run.builder.compiler(0, run.builder.config.build),
+                    compiler: run.builder.compiler(0, run.builder.config.host_target),
                     target: run.target,
                 });
             }
@@ -530,7 +529,7 @@ impl Step for RustcPerf {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(RustcPerf {
-            compiler: run.builder.compiler(0, run.builder.config.build),
+            compiler: run.builder.compiler(0, run.builder.config.host_target),
             target: run.target,
         });
     }
@@ -571,7 +570,7 @@ impl ErrorIndex {
     pub fn command(builder: &Builder<'_>) -> BootstrapCommand {
         // Error-index-generator links with the rustdoc library, so we need to add `rustc_lib_paths`
         // for rustc_private and libLLVM.so, and `sysroot_lib` for libstd, etc.
-        let host = builder.config.build;
+        let host = builder.config.host_target;
         let compiler = builder.compiler_for(builder.top_stage, host, host);
         let mut cmd = command(builder.ensure(ErrorIndex { compiler }).tool_path);
         let mut dylib_paths = builder.rustc_lib_paths(compiler);
@@ -594,7 +593,7 @@ impl Step for ErrorIndex {
         // src/tools/error-index-generator` which almost nobody does.
         // Normally, `x.py test` or `x.py doc` will use the
         // `ErrorIndex::command` function instead.
-        let compiler = run.builder.compiler(run.builder.top_stage, run.builder.config.build);
+        let compiler = run.builder.compiler(run.builder.top_stage, run.builder.config.host_target);
         run.builder.ensure(ErrorIndex { compiler });
     }
 
@@ -629,7 +628,7 @@ impl Step for RemoteTestServer {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(RemoteTestServer {
-            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.build),
+            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.host_target),
             target: run.target,
         });
     }
@@ -786,7 +785,7 @@ impl Step for Cargo {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(Cargo {
-            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.build),
+            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.host_target),
             target: run.target,
         });
     }
@@ -904,7 +903,7 @@ impl Step for RustAnalyzer {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(RustAnalyzer {
-            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.build),
+            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.host_target),
             target: run.target,
         });
     }
@@ -949,7 +948,7 @@ impl Step for RustAnalyzerProcMacroSrv {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(RustAnalyzerProcMacroSrv {
-            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.build),
+            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.host_target),
             target: run.target,
         });
     }
@@ -1002,7 +1001,7 @@ impl Step for LlvmBitcodeLinker {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(LlvmBitcodeLinker {
-            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.build),
+            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.host_target),
             extra_features: Vec::new(),
             target: run.target,
         });
@@ -1140,7 +1139,7 @@ macro_rules! tool_extended {
 
             fn make_run(run: RunConfig<'_>) {
                 run.builder.ensure($name {
-                    compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.build),
+                    compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.host_target),
                     target: run.target,
                 });
             }
@@ -1282,7 +1281,7 @@ impl Step for TestFloatParse {
     }
 
     fn run(self, builder: &Builder<'_>) -> ToolBuildResult {
-        let bootstrap_host = builder.config.build;
+        let bootstrap_host = builder.config.host_target;
         let compiler = builder.compiler(builder.top_stage, bootstrap_host);
 
         builder.ensure(ToolBuild {
@@ -1305,7 +1304,7 @@ impl Builder<'_> {
     /// `host`.
     pub fn tool_cmd(&self, tool: Tool) -> BootstrapCommand {
         let mut cmd = command(self.tool_exe(tool));
-        let compiler = self.compiler(0, self.config.build);
+        let compiler = self.compiler(0, self.config.host_target);
         let host = &compiler.host;
         // Prepares the `cmd` provided to be able to run the `compiler` provided.
         //

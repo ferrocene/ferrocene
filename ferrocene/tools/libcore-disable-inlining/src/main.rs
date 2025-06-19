@@ -128,7 +128,19 @@ fn is_rust_file(file_path: &Path) -> bool {
 // compiler_builtins`. Therefore we build library/alloc because it is the
 // fastest target that includes compiler_builtins.
 fn it_still_compiles() -> bool {
-    Command::new("./x").args(["build", "library/alloc"]).output().unwrap().status.success()
+    let libcore_subset_compiles = Command::new("./x")
+        .args(["build", "library/core"])
+        .args(["--set", "rust.std-features=['ferrocene_certified']"])
+        .status()
+        .unwrap()
+        .success();
+    if !libcore_subset_compiles {
+        return false;
+    }
+
+    let compiler_builtins_compiles =
+        Command::new("./x").args(["build", "library/alloc"]).status().unwrap().success();
+    compiler_builtins_compiles
 }
 
 /// Returns the byte indicies of all occurences of the pattern in this string

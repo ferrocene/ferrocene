@@ -122,7 +122,7 @@ jobs:
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
         # Build the certified subset of libcore
-        ./x.py build library/core --set rust.std-features='["ferrocene_certified"]'
+        ./x.py build --stage 1 library/core --set rust.std-features='["ferrocene_certified"]'
     steps: [ferrocene-job-build]
 
   x86_64-linux-docs:

@@ -124,3 +124,10 @@ Avoiding data races due to hardware interrupts
 
 The user shall structure their code such that hardware interrupts will
 not result in data race conditions.
+
+Building certified software
+---------------------------
+
+.. id::  RUSTC_AVD_LIBCORE_SUBSET_008
+
+The user shall only use the certified subset of libcore if building certified software.

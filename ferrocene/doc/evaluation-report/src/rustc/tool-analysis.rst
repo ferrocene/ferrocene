@@ -101,7 +101,12 @@ Rust Driver
      - Use an artifact from a previous build
      - :id:`RUSTC_AVD_CLEAN_004`
      - NO
-
+   * - .. id:: RUSTC_ERR_DRIVER_11
+     - :id:`RUSTC_UC1_RLIB`, :id:`RUSTC_UC2_STATICLIB`, :id:`RUSTC_UC3_EXEC`, :id:`RUSTC_UC4_EXEC_RLIB`, :id:`RUSTC_UC5_EXEC_CLIB`
+     - Input contains calls to uncertified libcore functions
+     - Uncertfied code generated
+     - :id:`RUSTC_AVD_LIBCORE_SUBSET_008`
+     - YES
 .. end of table
 
 
@@ -290,6 +295,8 @@ Detection Measures and Usage Restriction
      -  Concurrent file updates during the build operations are prohibited.
    * - .. id:: RUSTC_AVD_TEST_007
      -  Testing must be performed on the final application or libraries, or on any parts built, using an environment as close as possible to the final build.
+   * - .. id:: RUSTC_AVD_LIBCORE_SUBSET_008
+     - User must use verify that only the certified subset of libcore is used.
 
 
 Potential Errors by Classes Traceability Matrix

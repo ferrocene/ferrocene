@@ -102,6 +102,10 @@
 #![allow(internal_features)]
 #![deny(fuzzy_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
+// Ferrocene added features/lints:
+#![feature(bound_as_ref)]
+#![feature(one_sided_range)]
+#![feature(range_into_bounds)]
 
 /// Version of `assert_matches` that ignores fancy runtime printing in const context and uses structural equality.
 macro_rules! assert_eq_const_safe {

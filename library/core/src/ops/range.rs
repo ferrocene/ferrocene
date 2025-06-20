@@ -414,6 +414,8 @@ impl<Idx> RangeInclusive<Idx> {
     #[stable(feature = "inclusive_range_methods", since = "1.27.0")]
     #[rustc_const_stable(feature = "const_inclusive_range_methods", since = "1.32.0")]
     #[inline]
+    // Note(coverage): tested by coretests::ops::test_range_inclusive
+    #[coverage(off)]
     pub const fn start(&self) -> &Idx {
         &self.start
     }
@@ -707,6 +709,8 @@ impl<T> Bound<T> {
     /// Converts from `&Bound<T>` to `Bound<&T>`.
     #[inline]
     #[stable(feature = "bound_as_ref_shared", since = "1.65.0")]
+    // Note(coverage): tested by coretests::ops::test_bound_as_ref
+    #[coverage(off)]
     pub fn as_ref(&self) -> Bound<&T> {
         match *self {
             Included(ref x) => Included(x),
@@ -718,6 +722,8 @@ impl<T> Bound<T> {
     /// Converts from `&mut Bound<T>` to `Bound<&mut T>`.
     #[inline]
     #[unstable(feature = "bound_as_ref", issue = "80996")]
+    // Note(coverage): tested by coretests::ops::test_bound_as_ref
+    #[coverage(off)]
     pub fn as_mut(&mut self) -> Bound<&mut T> {
         match *self {
             Included(ref mut x) => Included(x),
@@ -749,6 +755,8 @@ impl<T> Bound<T> {
     /// ```
     #[inline]
     #[stable(feature = "bound_map", since = "1.77.0")]
+    // Note(coverage): tested by coretests::ops::test_bound_map
+    #[coverage(off)]
     pub fn map<U, F: FnOnce(T) -> U>(self, f: F) -> Bound<U> {
         match self {
             Unbounded => Unbounded,
@@ -772,6 +780,9 @@ impl<T: Clone> Bound<&T> {
     /// ```
     #[must_use = "`self` will be dropped if the result is not used"]
     #[stable(feature = "bound_cloned", since = "1.55.0")]
+    #[inline(never)]
+    // Note(coverage): Tested by coretests::ops::{test_bound_cloned_unbounde,test_bound_cloned_include,test_bound_cloned_excluded}
+    #[coverage(off)]
     pub fn cloned(self) -> Bound<T> {
         match self {
             Bound::Unbounded => Bound::Unbounded,
@@ -1013,6 +1024,8 @@ pub trait IntoBounds<T>: RangeBounds<T> {
 use self::Bound::{Excluded, Included, Unbounded};
 
 #[stable(feature = "collections_range", since = "1.28.0")]
+// Note(coverage): tested by coretests::ops::test_range_bounds
+#[coverage(off)]
 impl<T: ?Sized> RangeBounds<T> for RangeFull {
     fn start_bound(&self) -> Bound<&T> {
         Unbounded
@@ -1023,6 +1036,8 @@ impl<T: ?Sized> RangeBounds<T> for RangeFull {
 }
 
 #[unstable(feature = "range_into_bounds", issue = "136903")]
+// Note(coverage): tested by coretests::ops::test_range_bounds
+#[coverage(off)]
 impl<T> IntoBounds<T> for RangeFull {
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         (Unbounded, Unbounded)
@@ -1031,15 +1046,19 @@ impl<T> IntoBounds<T> for RangeFull {
 
 #[stable(feature = "collections_range", since = "1.28.0")]
 impl<T> RangeBounds<T> for RangeFrom<T> {
+    #[inline(never)]
     fn start_bound(&self) -> Bound<&T> {
         Included(&self.start)
     }
+    #[inline(never)]
     fn end_bound(&self) -> Bound<&T> {
         Unbounded
     }
 }
 
 #[unstable(feature = "range_into_bounds", issue = "136903")]
+// Note(coverage): tested by coretests::ops::test_range_bounds
+#[coverage(off)]
 impl<T> IntoBounds<T> for RangeFrom<T> {
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         (Included(self.start), Unbounded)
@@ -1048,15 +1067,19 @@ impl<T> IntoBounds<T> for RangeFrom<T> {
 
 #[stable(feature = "collections_range", since = "1.28.0")]
 impl<T> RangeBounds<T> for RangeTo<T> {
+    #[inline(never)]
     fn start_bound(&self) -> Bound<&T> {
         Unbounded
     }
+    #[inline(never)]
     fn end_bound(&self) -> Bound<&T> {
         Excluded(&self.end)
     }
 }
 
 #[unstable(feature = "range_into_bounds", issue = "136903")]
+// Note(coverage): tested by coretests::ops::test_range_bounds
+#[coverage(off)]
 impl<T> IntoBounds<T> for RangeTo<T> {
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         (Unbounded, Excluded(self.end))
@@ -1065,15 +1088,19 @@ impl<T> IntoBounds<T> for RangeTo<T> {
 
 #[stable(feature = "collections_range", since = "1.28.0")]
 impl<T> RangeBounds<T> for Range<T> {
+    #[inline(never)]
     fn start_bound(&self) -> Bound<&T> {
         Included(&self.start)
     }
+    #[inline(never)]
     fn end_bound(&self) -> Bound<&T> {
         Excluded(&self.end)
     }
 }
 
 #[unstable(feature = "range_into_bounds", issue = "136903")]
+// Note(coverage): tested by coretests::ops::test_range_bounds
+#[coverage(off)]
 impl<T> IntoBounds<T> for Range<T> {
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         (Included(self.start), Excluded(self.end))
@@ -1081,6 +1108,8 @@ impl<T> IntoBounds<T> for Range<T> {
 }
 
 #[stable(feature = "collections_range", since = "1.28.0")]
+// Note(coverage): tested by coretests::ops::test_range_bounds
+#[coverage(off)]
 impl<T> RangeBounds<T> for RangeInclusive<T> {
     fn start_bound(&self) -> Bound<&T> {
         Included(&self.start)
@@ -1097,6 +1126,8 @@ impl<T> RangeBounds<T> for RangeInclusive<T> {
 }
 
 #[unstable(feature = "range_into_bounds", issue = "136903")]
+// Note(coverage): tested by coretests::ops::test_range_bounds
+#[coverage(off)]
 impl<T> IntoBounds<T> for RangeInclusive<T> {
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         (
@@ -1113,6 +1144,8 @@ impl<T> IntoBounds<T> for RangeInclusive<T> {
 }
 
 #[stable(feature = "collections_range", since = "1.28.0")]
+// Note(coverage): tested by coretests::ops::test_range_bounds
+#[coverage(off)]
 impl<T> RangeBounds<T> for RangeToInclusive<T> {
     fn start_bound(&self) -> Bound<&T> {
         Unbounded
@@ -1123,6 +1156,8 @@ impl<T> RangeBounds<T> for RangeToInclusive<T> {
 }
 
 #[unstable(feature = "range_into_bounds", issue = "136903")]
+// Note(coverage): tested by coretests::ops::test_range_bounds
+#[coverage(off)]
 impl<T> IntoBounds<T> for RangeToInclusive<T> {
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         (Unbounded, Included(self.end))
@@ -1130,6 +1165,8 @@ impl<T> IntoBounds<T> for RangeToInclusive<T> {
 }
 
 #[stable(feature = "collections_range", since = "1.28.0")]
+// Note(coverage): tested by coretests::ops::test_range_bounds_tuple
+#[coverage(off)]
 impl<T> RangeBounds<T> for (Bound<T>, Bound<T>) {
     fn start_bound(&self) -> Bound<&T> {
         match *self {
@@ -1149,6 +1186,8 @@ impl<T> RangeBounds<T> for (Bound<T>, Bound<T>) {
 }
 
 #[unstable(feature = "range_into_bounds", issue = "136903")]
+// Note(coverage): tested by coretests::ops::test_range_bounds_tuple
+#[coverage(off)]
 impl<T> IntoBounds<T> for (Bound<T>, Bound<T>) {
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         self
@@ -1158,16 +1197,20 @@ impl<T> IntoBounds<T> for (Bound<T>, Bound<T>) {
 #[stable(feature = "collections_range", since = "1.28.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T: ?Sized + 'a> RangeBounds<T> for (Bound<&'a T>, Bound<&'a T>) {
+    #[inline(never)]
     fn start_bound(&self) -> Bound<&T> {
         self.0
     }
 
+    #[inline(never)]
     fn end_bound(&self) -> Bound<&T> {
         self.1
     }
 }
 
 #[stable(feature = "collections_range", since = "1.28.0")]
+// Note(coverage): tested by coretests::ops::test_range_bounds
+#[coverage(off)]
 impl<T> RangeBounds<T> for RangeFrom<&T> {
     fn start_bound(&self) -> Bound<&T> {
         Included(self.start)
@@ -1178,6 +1221,8 @@ impl<T> RangeBounds<T> for RangeFrom<&T> {
 }
 
 #[stable(feature = "collections_range", since = "1.28.0")]
+// Note(coverage): tested by coretests::ops::test_range_bounds
+#[coverage(off)]
 impl<T> RangeBounds<T> for RangeTo<&T> {
     fn start_bound(&self) -> Bound<&T> {
         Unbounded
@@ -1188,6 +1233,8 @@ impl<T> RangeBounds<T> for RangeTo<&T> {
 }
 
 #[stable(feature = "collections_range", since = "1.28.0")]
+// Note(coverage): tested by coretests::ops::test_range_bounds
+#[coverage(off)]
 impl<T> RangeBounds<T> for Range<&T> {
     fn start_bound(&self) -> Bound<&T> {
         Included(self.start)
@@ -1198,6 +1245,8 @@ impl<T> RangeBounds<T> for Range<&T> {
 }
 
 #[stable(feature = "collections_range", since = "1.28.0")]
+// Note(coverage): tested by coretests::ops::test_range_bounds
+#[coverage(off)]
 impl<T> RangeBounds<T> for RangeInclusive<&T> {
     fn start_bound(&self) -> Bound<&T> {
         Included(self.start)
@@ -1208,6 +1257,8 @@ impl<T> RangeBounds<T> for RangeInclusive<&T> {
 }
 
 #[stable(feature = "collections_range", since = "1.28.0")]
+// Note(coverage): tested by coretests::ops::test_range_bounds
+#[coverage(off)]
 impl<T> RangeBounds<T> for RangeToInclusive<&T> {
     fn start_bound(&self) -> Bound<&T> {
         Unbounded
@@ -1244,6 +1295,8 @@ pub trait OneSidedRange<T: ?Sized>: RangeBounds<T> {
 }
 
 #[unstable(feature = "one_sided_range", issue = "69780")]
+// Note(coverage): tested by coretests::ops::test_one_sided_range
+#[coverage(off)]
 impl<T> OneSidedRange<T> for RangeTo<T>
 where
     Self: RangeBounds<T>,
@@ -1254,6 +1307,8 @@ where
 }
 
 #[unstable(feature = "one_sided_range", issue = "69780")]
+// Note(coverage): tested by coretests::ops::test_one_sided_range
+#[coverage(off)]
 impl<T> OneSidedRange<T> for RangeFrom<T>
 where
     Self: RangeBounds<T>,
@@ -1264,6 +1319,8 @@ where
 }
 
 #[unstable(feature = "one_sided_range", issue = "69780")]
+// Note(coverage): tested by coretests::ops::test_one_sided_range
+#[coverage(off)]
 impl<T> OneSidedRange<T> for RangeToInclusive<T>
 where
     Self: RangeBounds<T>,

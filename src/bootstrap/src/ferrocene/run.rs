@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 pub(crate) mod coverage_for_subset;
+pub(crate) mod libcore_disable_inlining;
 
 use std::path::PathBuf;
 

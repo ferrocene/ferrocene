@@ -4,8 +4,8 @@
 .. default-domain:: spec
 .. informational-page::
 
-FLS Changelog
-=============
+Changelog
+=========
 
 This page describes the changes that have been applied to the FLS itself to
 address changes and new features introduced in each Rust release. Every item

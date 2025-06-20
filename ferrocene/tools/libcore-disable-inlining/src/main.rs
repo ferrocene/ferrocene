@@ -48,7 +48,7 @@ fn handle_dir(dir_path: impl AsRef<Path>) {
 }
 
 fn handle_file(file_path: &Path) {
-    eprintln!("{file_path:?}");
+    eprintln!("{}", file_path.display());
     let file_content = fs::read_to_string(file_path).unwrap();
 
     for old_attr in [INLINE, INLINE_ALWAYS] {
@@ -58,6 +58,8 @@ fn handle_file(file_path: &Path) {
 
 fn replace_attributes(file_path: &Path, file_content: &str, old_attr: &str, new_attr: &str) {
     let attr_locations = find_all(&file_content, old_attr);
+    eprintln!("- contains {} {} attributes", attr_locations.len(), old_attr);
+
     if attr_locations.is_empty() {
         return; // the file contains no attributes
     }
@@ -126,12 +128,19 @@ fn is_rust_file(file_path: &Path) -> bool {
 // compiler_builtins`. Therefore we build library/alloc because it is the
 // fastest target that includes compiler_builtins.
 fn it_still_compiles() -> bool {
-    Command::new("./x")
-        .args(["build", "library/alloc", "--stage", "0"])
-        .output()
+    let libcore_subset_compiles = Command::new("./x")
+        .args(["build", "library/core"])
+        .args(["--set", "rust.std-features=['ferrocene_certified']"])
+        .status()
         .unwrap()
-        .status
-        .success()
+        .success();
+    if !libcore_subset_compiles {
+        return false;
+    }
+
+    let compiler_builtins_compiles =
+        Command::new("./x").args(["build", "library/alloc"]).status().unwrap().success();
+    compiler_builtins_compiles
 }
 
 /// Returns the byte indicies of all occurences of the pattern in this string

@@ -204,6 +204,7 @@ than building it.
         .map(|p| cmd_finder.must_have(p))
         .or_else(|| cmd_finder.maybe_have("reuse"));
 
+<<<<<<< HEAD
     build.config.uv = build
         .config
         .uv
@@ -217,6 +218,16 @@ than building it.
     .lines()
     .map(|s| s.to_string())
     .collect();
+=======
+    let stage0_supported_target_list: HashSet<String> = command(&build.config.initial_rustc)
+        .args(["--print", "target-list"])
+        .run_always()
+        .run_capture_stdout(&build)
+        .stdout()
+        .lines()
+        .map(|s| s.to_string())
+        .collect();
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     // Compiler tools like `cc` and `ar` are not configured for cross-targets on certain subcommands
     // because they are not needed.

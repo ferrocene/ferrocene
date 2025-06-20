@@ -1171,6 +1171,7 @@ impl<'a> Builder<'a> {
             ),
             Kind::Run => describe!(
                 crate::ferrocene::run::coverage_for_subset::CoverageForSubset,
+                crate::ferrocene::run::libcore_disable_inlining::CoverageForSubset,
                 crate::ferrocene::run::TraceabilityMatrix,
                 run::BuildManifest,
                 run::BumpStage0,

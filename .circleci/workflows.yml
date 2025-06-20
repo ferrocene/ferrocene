@@ -263,6 +263,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
+        ./x run ferrocene/tools/libcore-disable-inlining
         ./x.py test --no-doc --coverage=library library/core
     steps:
       - aws-oidc-auth

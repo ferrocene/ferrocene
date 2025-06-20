@@ -104,6 +104,7 @@
 #![deny(unsafe_op_in_unsafe_fn)]
 // Ferrocene added features/lints:
 #![feature(bound_as_ref)]
+#![feature(fn_traits)]
 #![feature(one_sided_range)]
 #![feature(range_into_bounds)]
 

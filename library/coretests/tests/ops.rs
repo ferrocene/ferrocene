@@ -1,5 +1,6 @@
 mod control_flow;
 mod from_residual;
+mod function;
 
 use core::ops::{
     Bound, Deref, DerefMut, IntoBounds, OneSidedRange, Range, RangeBounds, RangeFrom, RangeFull,

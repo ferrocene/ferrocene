@@ -18,13 +18,9 @@ pub trait PointeeSized {}
 pub trait MetaSized: PointeeSized {}
 
 #[lang = "sized"]
-<<<<<<< HEAD
-trait Sized {}
+trait Sized: MetaSized {}
 
 // ferrocene-annotations: fls_fh27ljezn3qz
 // Attribute no_main
 //
 // ferrocene-annotations: um_rustc_C_panic
-=======
-trait Sized: MetaSized {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

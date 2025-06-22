@@ -5,11 +5,7 @@ use std::fmt::{self, Debug, Write};
 use std::hash::Hash;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
-<<<<<<< HEAD
-use std::sync::{LazyLock, atomic};
-=======
-use std::sync::{LazyLock, OnceLock};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+use std::sync::{LazyLock, OnceLock, atomic};
 use std::time::{Duration, Instant};
 use std::{env, fs};
 

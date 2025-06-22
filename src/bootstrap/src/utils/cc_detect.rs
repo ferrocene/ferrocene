@@ -152,16 +152,10 @@ pub fn fill_target_compiler(build: &mut Build, target: TargetSelection) {
     };
 
     // for VxWorks, record CXX compiler which will be used in lib.rs:linker()
-<<<<<<< HEAD
     // Ferrocene annotation: see annotation above `ferrocenecoretest_compiler` definition
     if cxx_configured || target.contains("vxworks") || ferrocenecoretest_compiler.is_some() {
         let compiler = ferrocenecoretest_compiler.clone().unwrap_or_else(|| cfg.get_compiler());
-        build.cxx.borrow_mut().insert(target, compiler);
-=======
-    if cxx_configured || target.contains("vxworks") {
-        let compiler = cfg.get_compiler();
         build.cxx.insert(target, compiler);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     build.verbose(|| println!("CC_{} = {:?}", target.triple, build.cc(target)));

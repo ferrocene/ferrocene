@@ -400,7 +400,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "scoped-tls",
     "scopeguard",
     "self_cell",
-    "semver", // Ferrocene addition
     "serde",
     "serde_derive",
     "serde_json",

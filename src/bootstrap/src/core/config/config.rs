@@ -35,7 +35,7 @@ pub use crate::core::config::flags::Subcommand;
 use crate::core::config::flags::{Color, Flags};
 use crate::core::config::target_selection::TargetSelectionList;
 use crate::core::config::toml::TomlConfig;
-use crate::core::config::toml::build::Build;
+use crate::core::config::toml::build::{Build, Tool};
 use crate::core::config::toml::change_id::ChangeId;
 use crate::core::config::toml::rust::{
     LldMode, RustOptimize, check_incompatible_options_for_ci_rustc,
@@ -101,6 +101,9 @@ pub struct Config {
     pub bootstrap_cache_path: Option<PathBuf>,
     pub extended: bool,
     pub tools: Option<HashSet<String>>,
+    /// Specify build configuration specific for some tool, such as enabled features, see [Tool].
+    /// The key in the map is the name of the tool, and the value is tool-specific configuration.
+    pub tool: HashMap<String, Tool>,
     pub sanitizers: bool,
     pub profiler: bool,
     pub omit_git_hash: bool,
@@ -741,6 +744,7 @@ impl Config {
             bootstrap_cache_path,
             extended,
             tools,
+            tool,
             verbose,
             sanitizers,
             profiler,
@@ -888,6 +892,7 @@ impl Config {
         set(&mut config.full_bootstrap, full_bootstrap);
         set(&mut config.extended, extended);
         config.tools = tools;
+        set(&mut config.tool, tool);
         set(&mut config.verbose, verbose);
         set(&mut config.sanitizers, sanitizers);
         set(&mut config.profiler, profiler);
@@ -1541,12 +1546,13 @@ impl Config {
         }
 
         println!("Updating submodule {relative_path}");
-        self.check_run(
-            helpers::git(Some(&self.src))
-                .run_always()
-                .args(["submodule", "-q", "sync"])
-                .arg(relative_path),
-        );
+
+        helpers::git(Some(&self.src))
+            .allow_failure()
+            .run_always()
+            .args(["submodule", "-q", "sync"])
+            .arg(relative_path)
+            .run(self);
 
         // Try passing `--progress` to start, then run git again without if that fails.
         let update = |progress: bool| {
@@ -1575,26 +1581,23 @@ impl Config {
             git.arg(relative_path);
             git
         };
-        if !self.check_run(&mut update(true)) {
-            self.check_run(&mut update(false));
+        if !update(true).allow_failure().run(self) {
+            update(false).allow_failure().run(self);
         }
 
         // Save any local changes, but avoid running `git stash pop` if there are none (since it will exit with an error).
         // diff-index reports the modifications through the exit status
-        let has_local_modifications = !self.check_run(submodule_git().allow_failure().args([
-            "diff-index",
-            "--quiet",
-            "HEAD",
-        ]));
+        let has_local_modifications =
+            !submodule_git().allow_failure().args(["diff-index", "--quiet", "HEAD"]).run(self);
         if has_local_modifications {
-            self.check_run(submodule_git().args(["stash", "push"]));
+            submodule_git().allow_failure().args(["stash", "push"]).run(self);
         }
 
-        self.check_run(submodule_git().args(["reset", "-q", "--hard"]));
-        self.check_run(submodule_git().args(["clean", "-qdfx"]));
+        submodule_git().allow_failure().args(["reset", "-q", "--hard"]).run(self);
+        submodule_git().allow_failure().args(["clean", "-qdfx"]).run(self);
 
         if has_local_modifications {
-            self.check_run(submodule_git().args(["stash", "pop"]));
+            submodule_git().allow_failure().args(["stash", "pop"]).run(self);
         }
     }
 

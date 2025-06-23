@@ -5,7 +5,7 @@ use std::fmt::{self, Debug, Write};
 use std::hash::Hash;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
-use std::sync::{LazyLock, atomic};
+use std::sync::{LazyLock, OnceLock, atomic};
 use std::time::{Duration, Instant};
 use std::{env, fs};
 
@@ -69,6 +69,9 @@ pub struct Builder<'a> {
     /// to do. For example: with `./x check foo bar` we get `paths=["foo",
     /// "bar"]`.
     pub paths: Vec<PathBuf>,
+
+    /// Cached list of submodules from self.build.src.
+    submodule_paths_cache: OnceLock<Vec<String>>,
 }
 
 impl Deref for Builder<'_> {
@@ -696,7 +699,7 @@ impl<'a> ShouldRun<'a> {
     ///
     /// [`path`]: ShouldRun::path
     pub fn paths(mut self, paths: &[&str]) -> Self {
-        let submodules_paths = build_helper::util::parse_gitmodules(&self.builder.src);
+        let submodules_paths = self.builder.submodule_paths();
 
         self.paths.insert(PathSet::Set(
             paths
@@ -1255,6 +1258,7 @@ impl<'a> Builder<'a> {
             ferrocene_coverage: RefCell::new(None),
             should_serve_called: atomic::AtomicU64::new(0),
             paths,
+            submodule_paths_cache: Default::default(),
         }
     }
 
@@ -1584,6 +1588,19 @@ impl<'a> Builder<'a> {
             }
         }
         None
+    }
+
+    /// Updates all submodules, and exits with an error if submodule
+    /// management is disabled and the submodule does not exist.
+    pub fn require_and_update_all_submodules(&self) {
+        for submodule in self.submodule_paths() {
+            self.require_submodule(submodule, None);
+        }
+    }
+
+    /// Get all submodules from the src directory.
+    pub fn submodule_paths(&self) -> &[String] {
+        self.submodule_paths_cache.get_or_init(|| build_helper::util::parse_gitmodules(&self.src))
     }
 
     /// Ensure that a given step is built, returning its output. This will

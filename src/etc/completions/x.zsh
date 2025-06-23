@@ -1091,7 +1091,7 @@ _arguments "${_arguments_options[@]}" : \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -1100,7 +1100,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \

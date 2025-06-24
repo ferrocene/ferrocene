@@ -121,3 +121,32 @@ fn cstr_metadata_is_length_with_nul() {
     let bytes: *const [u8] = p as *const [u8];
     assert_eq!(s.to_bytes_with_nul().len(), bytes.len());
 }
+
+#[test]
+fn test_clone_ptr() {
+    // Arrange
+    let mut a = [1];
+    let b = a.as_ptr();
+    let c = a.as_mut_ptr();
+
+    // Act
+    let d = b.clone();
+    let e = c.clone();
+
+    // Assert
+    assert_eq!(d, b);
+    assert_eq!(e, c);
+}
+
+#[test]
+fn test_clone_ref() {
+    // Arrange
+    let a = [1];
+    let b = &a;
+
+    // Act
+    let c = b.clone();
+
+    // Assert
+    assert_eq!(c, a);
+}

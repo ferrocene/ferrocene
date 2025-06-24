@@ -248,3 +248,24 @@ mod const_cmp {
     const _: () = assert!(S(1) > S(0));
 }
 */
+
+#[test]
+fn test_ordering_is_eq() {
+    assert_eq!(Less.is_eq(), false);
+    assert_eq!(Equal.is_eq(), true);
+    assert_eq!(Greater.is_eq(), false);
+}
+
+#[test]
+fn test_ordering_is_ne() {
+    assert_eq!(Less.is_ne(), true);
+    assert_eq!(Equal.is_ne(), false);
+    assert_eq!(Greater.is_ne(), true);
+}
+
+#[test]
+fn test_clamp() {
+    assert_eq!(0.clamp(-5, 5), 0);
+    assert_eq!(-10.clamp(-5, 5), -5);
+    assert_eq!(10.clamp(-5, 5), 5);
+}

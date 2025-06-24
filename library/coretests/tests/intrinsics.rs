@@ -193,3 +193,35 @@ fn carrying_mul_add_fallback_i128() {
         (u128::MAX - 1, -(i128::MIN / 2)),
     );
 }
+
+#[test]
+fn test_ptr_guaranteed_cmp() {
+    use core::intrinsics::ptr_guaranteed_cmp;
+
+    // Arrange
+    let a = [1];
+    let b = [2, 3];
+    let c = a.as_ptr();
+    let d = a.as_ptr();
+    let e = b.as_ptr();
+
+    // Act
+    let f = ptr_guaranteed_cmp(c, d);
+    let g = ptr_guaranteed_cmp(c, e);
+
+    // Assert
+    assert_eq!(f, 1);
+    assert_eq!(g, 0);
+    // assert_eq!(h, 2); // TODO: how to get a 2?
+}
+
+#[test]
+fn test_ub_checks() {
+    use core::intrinsics::ub_checks;
+
+    // Act
+    let a = ub_checks();
+
+    // Assert
+    assert_eq!(a, true);
+}

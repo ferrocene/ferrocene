@@ -2748,14 +2748,17 @@ impl Display for Error {
 
 #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
+#[allow_internal_unstable(coverage_attribute)]
 macro_rules! fmt_refs {
     ($($tr:ident),*) => {
         $(
         #[stable(feature = "rust1", since = "1.0.0")]
+        #[coverage(off)]
         impl<T: ?Sized + $tr> $tr for &T {
             fn fmt(&self, f: &mut Formatter<'_>) -> Result { $tr::fmt(&**self, f) }
         }
         #[stable(feature = "rust1", since = "1.0.0")]
+        #[coverage(off)]
         impl<T: ?Sized + $tr> $tr for &mut T {
             fn fmt(&self, f: &mut Formatter<'_>) -> Result { $tr::fmt(&**self, f) }
         }
@@ -2998,12 +3001,14 @@ macro_rules! peel {
 
 #[cfg(not(feature = "ferrocene_certified"))]
 #[coverage(off)]
+#[allow_internal_unstable(coverage_attribute)]
 macro_rules! tuple {
     () => ();
     ( $($name:ident,)+ ) => (
         maybe_tuple_doc! {
             $($name)+ @
             #[stable(feature = "rust1", since = "1.0.0")]
+            #[coverage(off)]
             impl<$($name:Debug),+> Debug for ($($name,)+) where last_type!($($name,)+): ?Sized {
                 #[allow(non_snake_case, unused_assignments)]
                 fn fmt(&self, f: &mut Formatter<'_>) -> Result {

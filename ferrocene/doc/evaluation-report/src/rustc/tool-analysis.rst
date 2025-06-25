@@ -296,7 +296,7 @@ Detection Measures and Usage Restriction
    * - .. id:: RUSTC_AVD_TEST_007
      -  Testing must be performed on the final application or libraries, or on any parts built, using an environment as close as possible to the final build.
    * - .. id:: RUSTC_AVD_LIBCORE_SUBSET_008
-     - User must use verify that only the certified subset of libcore is used.
+     - User must verify that only the certified subset of libcore is used.
 
 
 Potential Errors by Classes Traceability Matrix

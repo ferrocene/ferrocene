@@ -130,4 +130,4 @@ Building certified software
 
 .. id::  RUSTC_AVD_LIBCORE_SUBSET_008
 
-The user shall only use the certified subset of libcore if building certified software.
+If building certified software, the user shall only use the certified subset of libcore.

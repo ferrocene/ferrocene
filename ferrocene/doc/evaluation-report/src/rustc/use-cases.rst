@@ -193,7 +193,7 @@ directories included by compiler argument `-L`.
 9. `rustc` invokes the linker, passing the generated object file along with
    linker-related arguments.
 
-10.  The linker generates a Rust executable that links to a static Rust library.
+10. The linker generates a Rust executable that links to a static Rust library.
 
 11. (Optional): If the `user` is building a qualified executable, the `user` must verify that only functions from the certified subset of libcore are used.
 

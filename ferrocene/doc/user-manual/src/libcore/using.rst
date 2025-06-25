@@ -1,7 +1,7 @@
 Using libcore
 =============
 
-Use the certified subset of Libcore exactly how you'd use standard Rust Libccore.
+Use the certified subset of Libcore exactly how you'd use standard Rust Libcore.
 
 Building an executable
 ----------------------

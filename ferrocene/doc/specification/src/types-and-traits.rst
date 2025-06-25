@@ -1157,10 +1157,7 @@ of the :t:`return type`'s :t:`function` and its parent :t:`trait` or
 An :t:`impl trait type` shall not contain :t:`[opt-out trait bound]s`.
 
 :dp:`fls_69hqMjvNno9u`
-An :t:`use capture` is a :t:`generic parameter` referenced via keyword ``use`` within an :t:`anonymous return type`.
-
-:dp:`fls_OnyR0Wsfk7KI`
-:t:`[use capture]s` shall only be used within :t:`[anonymous return type]s`.
+An :t:`use capture` is a :t:`generic parameter` referenced within an :t:`anonymous return type`.
 
 :dp:`fls_KgH6c5cC4S0G`
 An :t:`anonymous return type` that does not specify a list of :t:`[use capture]s` implicitly :t:`[use capture]s` all :t:`[type parameter]s` and :t:`[constant parameter]s` that are in :t:`scope`.
@@ -2977,6 +2974,9 @@ bound also applies to the related :t:`abstract data type` as an
 If an :t:`outlives bound` applies to the :t:`type` of a :t:`function parameter`
 or to a :t:`return type`, then this bound also applies to the related
 :t:`function` as an :t:`implied bound`.
+
+:dp:`fls_OnyR0Wsfk7KI`
+:t:`[Use capture]` :t:`[bound]s` shall only be used within :t:`[anonymous return type]s`.
 
 .. rubric:: Examples
 

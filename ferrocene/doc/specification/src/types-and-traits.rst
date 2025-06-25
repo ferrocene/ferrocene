@@ -1119,7 +1119,7 @@ Impl Trait Types
        $$impl$$ UseCaptures? TraitBound
 
    UseCaptures ::=
-        $$<$$ UseCapturesGenericArgs? $$>$$
+       $$use$$ $$<$$ UseCapturesGenericArgs? $$>$$
 
    UseCapturesGenericArgs ::=
        UseCapturesGenericArg ($$,$$ UseCapturesGenericArg)* $$,$$?
@@ -2896,6 +2896,7 @@ Trait and Lifetime Bounds
        LifetimeIndication
      | ParenthesizedTraitBound
      | TraitBound
+     | UseCaptures
 
    LifetimeIndication ::=
        Lifetime

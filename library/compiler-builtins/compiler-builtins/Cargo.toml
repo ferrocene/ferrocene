@@ -56,6 +56,9 @@ rustc-dep-of-std = ["compiler-builtins", "dep:core"]
 # are not normally public but are required by the `builtins-test`
 unstable-public-internals = []
 
+# Ferrocene addition
+ferrocene_certified = []
+
 [lints.rust]
 # The cygwin config can be dropped after our benchmark toolchain is bumped
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(bootstrap)', 'cfg(target_os, values("cygwin"))'] }

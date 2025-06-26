@@ -651,22 +651,16 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, car
             features.push_str(compiler_builtins_c_feature);
         }
 
-        // for no-std targets we only compile a few no_std crates
         if builder.config.ferrocene_certified {
-            cargo
-                .args(["-p", "core"])
-                .arg("--manifest-path")
-                .arg(builder.src.join("library/core/Cargo.toml"))
-                .arg("--features")
-                .arg("ferrocene_certified");
-        } else {
-            cargo
-                .args(["-p", "alloc"])
-                .arg("--manifest-path")
-                .arg(builder.src.join("library/alloc/Cargo.toml"))
-                .arg("--features")
-                .arg(features);
+            features += " ferrocene_certified";
         }
+        // for no-std targets we only compile a few no_std crates
+        cargo
+            .args(["-p", "alloc"])
+            .arg("--manifest-path")
+            .arg(builder.src.join("library/alloc/Cargo.toml"))
+            .arg("--features")
+            .arg(features);
     } else {
         features += &builder.std_features(target);
         features.push_str(compiler_builtins_c_feature);

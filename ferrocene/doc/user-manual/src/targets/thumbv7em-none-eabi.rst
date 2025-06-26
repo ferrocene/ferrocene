@@ -3,7 +3,7 @@
 
 .. _thumbv7em-none-eabi:
 
-:target:`thumbv7em-none-eabi` :upcoming:`25.05`
+:target:`thumbv7em-none-eabi`
 ===============================================
 
 .. note::

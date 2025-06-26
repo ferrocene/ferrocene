@@ -66,6 +66,10 @@ pub mod simd;
 #[cfg(all(target_has_atomic = "8", target_has_atomic = "32", target_has_atomic = "ptr"))]
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::sync::atomic::{self, AtomicBool, AtomicI32, AtomicIsize, AtomicU32, Ordering};
+#[allow(unused_imports)]
+#[cfg(all(target_has_atomic = "8", target_has_atomic = "32", target_has_atomic = "ptr"))]
+#[cfg(feature = "ferrocene_certified")]
+use crate::sync::atomic::{self, AtomicU32, Ordering};
 
 /// A type for atomic ordering parameters for intrinsics. This is a separate type from
 /// `atomic::Ordering` so that we can make it `ConstParamTy` and fix the values used here without a

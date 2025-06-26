@@ -92,6 +92,8 @@
 // Do not check link redundancy on bootstraping phase
 #![allow(rustdoc::redundant_explicit_links)]
 #![warn(rustdoc::unescaped_backticks)]
+// Ferrocene addition
+#![cfg_attr(feature = "ferrocene_certified", allow(rustdoc::broken_intra_doc_links))]
 //
 // Ferrocene addition: We removed the tidy directives for alphabetical ordering to reduce the number
 // of conflicts we have when merging main.
@@ -141,8 +143,8 @@
 #![feature(allow_internal_unstable)]
 #![feature(auto_traits)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_sanitize))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_target_has_atomic))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_target_has_atomic_equal_alignment))]
+#![feature(cfg_target_has_atomic)]
+#![feature(cfg_target_has_atomic_equal_alignment)]
 #![feature(cfg_ub_checks)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(const_precise_live_drops))]
 #![feature(const_trait_impl)]
@@ -158,7 +160,7 @@
 #![feature(fundamental)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(generic_arg_infer))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(if_let_guard))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(intra_doc_pointers))]
+#![feature(intra_doc_pointers)]
 #![feature(intrinsics)]
 #![feature(lang_items)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(link_llvm_intrinsics))]
@@ -363,7 +365,6 @@ pub mod async_iter;
 #[unstable(feature = "bstr", issue = "134915")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod bstr;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod cell;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod char;
@@ -390,7 +391,6 @@ pub mod random;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod range;
 pub mod result;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod sync;
 #[unstable(feature = "unsafe_binders", issue = "130516")]
 #[cfg(not(feature = "ferrocene_certified"))]

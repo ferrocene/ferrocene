@@ -9,6 +9,11 @@ Next Ferrocene release
 This page contains the changes to be introduced in the upcoming Ferrocene
 release.
 
+New features
+------------
+
+- Introduced libcore certified subset
+
 Removed experimental features
 -----------------------------
 

@@ -18,7 +18,7 @@ Compiling
 
 .. id::  RUSTC_AVD_LIBCORE_SUBSET_009
 
-If building certified software, the user shall always provide the ``-C panic=abort`` option to ferrocene.
+If building certified software, the user shall always provide the :cli:option:`-C panic=abort` option to ferrocene.
 
 Avoiding unstable functions
 ---------------------------

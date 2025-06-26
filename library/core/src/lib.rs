@@ -92,6 +92,8 @@
 // Do not check link redundancy on bootstraping phase
 #![allow(rustdoc::redundant_explicit_links)]
 #![warn(rustdoc::unescaped_backticks)]
+// Ferrocene addition
+#![cfg_attr(feature = "ferrocene_certified", allow(rustdoc::broken_intra_doc_links))]
 //
 // Ferrocene addition: We removed the tidy directives for alphabetical ordering to reduce the number
 // of conflicts we have when merging main.
@@ -158,7 +160,7 @@
 #![feature(fundamental)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(generic_arg_infer))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(if_let_guard))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(intra_doc_pointers))]
+#![feature(intra_doc_pointers)]
 #![feature(intrinsics)]
 #![feature(lang_items)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(link_llvm_intrinsics))]

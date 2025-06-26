@@ -141,8 +141,8 @@
 #![feature(allow_internal_unstable)]
 #![feature(auto_traits)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_sanitize))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_target_has_atomic))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_target_has_atomic_equal_alignment))]
+#![feature(cfg_target_has_atomic)]
+#![feature(cfg_target_has_atomic_equal_alignment)]
 #![feature(cfg_ub_checks)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(const_precise_live_drops))]
 #![feature(const_trait_impl)]
@@ -363,7 +363,6 @@ pub mod async_iter;
 #[unstable(feature = "bstr", issue = "134915")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod bstr;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod cell;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod char;
@@ -390,7 +389,6 @@ pub mod random;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod range;
 pub mod result;
-#[cfg(not(feature = "ferrocene_certified"))]
 pub mod sync;
 #[unstable(feature = "unsafe_binders", issue = "130516")]
 #[cfg(not(feature = "ferrocene_certified"))]

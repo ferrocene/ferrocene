@@ -9,7 +9,7 @@ IFS=$'\n\t'
 
 DIST_DIR="build/dist"
 ARTIFACTS_BUCKET="${ARTIFACTS_BUCKET:-ferrocene-ci-artifacts}"
-ARTIFACTS_PREFIX="${ARTIFACTS_PREFIX:-ferrocene/dist/}"
+ARTIFACTS_PREFIX="${ARTIFACTS_PREFIX:-ferrocene/dist}"
 BUILD_METRICS_FILE="build/metrics.json"
 COVERAGE_DIR="build/ferrocene/coverage"
 
@@ -24,7 +24,7 @@ if [[ -d "${COVERAGE_DIR}" ]]; then
     cp -r "${COVERAGE_DIR}" "${DIST_DIR}/coverage"
 fi
 
-DEST="s3://${ARTIFACTS_BUCKET}/${ARTIFACTS_PREFIX}${CIRCLE_SHA1}/"
+DEST="s3://${ARTIFACTS_BUCKET}/${ARTIFACTS_PREFIX}/${CIRCLE_SHA1}/"
 aws s3 cp --recursive "${DIST_DIR}/" "$DEST"
 
 if [[ "$GITHUB_ACTIONS" == "true" ]]; then

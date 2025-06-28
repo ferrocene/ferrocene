@@ -6,7 +6,6 @@
 // `compiletest`.
 pub fn target_supports_std(target_tuple: &str) -> bool {
     !(target_tuple.contains("-none")
-        || target_tuple.contains("ferrocenecoretest") // Ferrocene addition for custom test targets
         || target_tuple.contains("lynxos178") // Ferrocene addition
         || target_tuple.contains("nvptx")
         || target_tuple.contains("switch"))

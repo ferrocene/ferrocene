@@ -1615,10 +1615,13 @@ Macros asm and global_asm
 .. syntax::
 
    AsmArguments ::=
-       $$($$ AssemblyCodeBlock ($$,$$ RegisterArgument)* ($$,$$ AbiClobber)* ($$,$$ AssemblyOption)* $$,$$? $$)$$
+       $$($$ AssemblyCodeBlock ($$,$$ LabelBlock)? ($$,$$ RegisterArgument)* ($$,$$ AbiClobber)* ($$,$$ AssemblyOption)* $$,$$? $$)$$
 
    GlobalAsmArguments ::=
        $$($$ AssemblyCodeBlock ($$,$$ RegisterArgument)* ($$,$$ AssemblyOption)* $$,$$? $$)$$
+
+   LabelBlock ::=
+       $$block$$ $${$$ StatementList $$}$$
 
 .. rubric:: Legality Rules
 
@@ -1703,3 +1706,19 @@ The :t:`execution` of an :t:`assembly code block` produced by
 
        unsafe { do_nothing() }
    }
+
+.. _fls_MW7mtH5oOeQ1:
+
+Label block
+-----------
+
+.. rubric:: Legality Rules
+
+:dp:`fls_ZKMMqhBRe5lJ`
+The memory address of the block is substituted into an :t:`assembly code block`.
+
+:dp:`fls_vJT3iAG1ZLh3`
+The type of the block must be :t:`unit type` or :t:`never type`.
+
+:dp:`fls_ER0GVQE9N7oH`
+:t:`[Unsafe operation]s` within the block must be wrapped in an :t:`unsafe block`.

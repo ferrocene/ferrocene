@@ -29,7 +29,10 @@ aws s3 cp --recursive "${DIST_DIR}/" "$DEST"
 
 if [[ "$GITHUB_ACTIONS" == "true" ]]; then
     for file in ${DIST_DIR}/*.tar.xz; do
-        echo "::notice title=Uploaded: $(basename $file)::$DEST"
+        # If the dist dir is empty, we'll see "*.tar.xz" instead of a file
+        if [[ "$(basename $file)" != "*.tar.xz" ]]; then
+            echo "::notice title=Uploaded: $(basename $file)::$DEST$(basename $file)"
+        fi
     done
 fi
       

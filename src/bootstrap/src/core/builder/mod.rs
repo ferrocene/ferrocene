@@ -15,12 +15,9 @@ use tracing::instrument;
 
 pub use self::cargo::{Cargo, cargo_profile_var};
 pub use crate::Compiler;
-<<<<<<< HEAD
+use crate::core::build_steps::compile::{Std, StdLink};
 // Ferrocene: this will conflict because we do not include "install" module,
 // for we have our own named `crate::ferrocene::install`.
-=======
-use crate::core::build_steps::compile::{Std, StdLink};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::core::build_steps::{
     check, clean, clippy, compile, dist, doc, gcc, llvm, run, setup, test, tool, vendor,
 };

@@ -832,56 +832,6 @@
 #rust.std-features = ["panic_unwind"]
 
 # =============================================================================
-# Distribution options
-#
-# These options are related to distribution, mostly for the Rust project itself.
-# You probably won't need to concern yourself with any of these options
-# =============================================================================
-
-# This is the folder of artifacts that the build system will sign. All files in
-# this directory will be signed with the default gpg key using the system `gpg`
-# binary. The `asc` and `sha256` files will all be output into the standard dist
-# output folder (currently `build/dist`)
-#
-# This folder should be populated ahead of time before the build system is
-# invoked.
-#dist.sign-folder = <none> (path)
-
-# The remote address that all artifacts will eventually be uploaded to. The
-# build system generates manifests which will point to these urls, and for the
-# manifests to be correct they'll have to have the right URLs encoded.
-#
-# Note that this address should not contain a trailing slash as file names will
-# be appended to it.
-#dist.upload-addr = <none> (URL)
-
-# Whether to build a plain source tarball to upload
-# We disable that on Windows not to override the one already uploaded on S3
-# as the one built on Windows will contain backslashes in paths causing problems
-# on linux
-#dist.src-tarball = true
-
-# List of compression formats to use when generating dist tarballs. The list of
-# formats is provided to rust-installer, which must support all of them.
-#
-# This list must be non-empty.
-#dist.compression-formats = ["gz", "xz"]
-
-# How much time should be spent compressing the tarballs. The better the
-# compression profile, the longer compression will take.
-#
-# Available options: fast, balanced, best
-#dist.compression-profile = "fast"
-
-# Copy the linker, DLLs, and various libraries from MinGW into the Rust toolchain.
-# Only applies when the host or target is pc-windows-gnu.
-#dist.include-mingw-linker = true
-
-# Whether to vendor dependencies for the dist tarball.
-#dist.vendor = if "is a tarball source" || "is a git repository" { true } else { false }
-
-
-# =============================================================================
 # Options for specific targets
 #
 # Each of the following options is scoped to the specific target triple in
@@ -1030,7 +980,6 @@
 # Link the compiler and LLVM against `jemalloc` instead of the default libc allocator.
 # This overrides the global `rust.jemalloc` option. See that option for more info.
 #jemalloc = rust.jemalloc (bool)
-<<<<<<< HEAD
 
 # =============================================================================
 # Distribution options
@@ -1172,5 +1121,3 @@
 # while working locally.
 # https://public-docs.ferrocene.dev/main/qualification/internal-procedures/setup-local-env.html#configuring-aws-cli
 #aws-profile = "ferrocene-ci"
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

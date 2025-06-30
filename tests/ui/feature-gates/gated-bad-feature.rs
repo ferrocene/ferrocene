@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-//@ normalize-stderr: "\(you are using [0-9]\.[0-9]+\.[0-9]+(.+)\)" -> "(you are using $$RUSTC_VERSION)"
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(foo_bar_baz, foo(bar), foo = "baz", foo)]
 //~^ ERROR malformed `feature`
 //~| ERROR malformed `feature`

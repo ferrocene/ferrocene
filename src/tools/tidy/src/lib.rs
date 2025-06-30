@@ -84,7 +84,9 @@ impl CiInfo {
         let mut info = Self {
             nightly_branch,
             git_merge_commit_email,
-            ci_env: CiEnv::current(),
+            // Ferrocene annotation: As in src/bootstrap/src/ferrocene/mod.rs, we use `CiEnv::None here`
+            // As `get_closest_upstream_commit` fails with `HEAD^1` errors otherwise
+            ci_env: CiEnv::None,
             base_commit: None,
         };
         let base_commit = match get_closest_upstream_commit(None, &info.git_config(), info.ci_env) {

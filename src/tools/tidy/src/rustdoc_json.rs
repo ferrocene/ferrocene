@@ -108,12 +108,14 @@ pub fn check(src_path: &Path, bad: &mut bool) {
             }
             match (new_version, old_version) {
                 (Some(new_version), Some(old_version)) if new_version != old_version + 1 => {
-                    *bad = true;
-                    eprintln!(
-                        "error in `rustdoc_json` tidy check: invalid `FORMAT_VERSION` increase in \
-                         `{RUSTDOC_JSON_TYPES}/lib.rs`, should be `{}`, found `{new_version}`",
-                        old_version + 1,
-                    );
+                    // Ferrocene annotation: Upstream pulls sometimes increment the format version
+                    // by more than one, so this error is disarmed.
+                    // *bad = true;
+                    // eprintln!(
+                    //     "error in `rustdoc_json` tidy check: invalid `FORMAT_VERSION` increase in \
+                    //      `{RUSTDOC_JSON_TYPES}/lib.rs`, should be `{}`, found `{new_version}`",
+                    //     old_version + 1,
+                    // );
                 }
                 _ => {}
             }

@@ -21,6 +21,18 @@ pub fn test(_: DropMe) {
 }
 
 #[rustc_std_internal_symbol]
+<<<<<<< HEAD
 pub unsafe extern "C" fn rust_eh_personality() {}
 
 // ferrocene-annotations: um_rustc_C_codegen_units
+=======
+pub unsafe extern "C" fn rust_eh_personality(
+    _version: i32,
+    _actions: i32,
+    _exception_class: u64,
+    _exception_object: *mut (),
+    _context: *mut (),
+) -> i32 {
+    loop {}
+}
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

@@ -290,14 +290,6 @@ macro_rules! top_level_options {
                 mods.sort_by(|a, b| a.opt.cmp(&b.opt));
                 mods
             }
-
-            pub fn target_feature_flag_enabled(&self, flag: &str) -> bool {
-                match flag {
-                    "retpoline" => self.unstable_opts.retpoline,
-                    "retpoline-external-thunk" => self.unstable_opts.retpoline_external_thunk,
-                    _ => false,
-                }
-            }
         }
     );
 }
@@ -345,7 +337,7 @@ top_level_options!(
         output_types: OutputTypes [TRACKED],
         search_paths: Vec<SearchPath> [UNTRACKED],
         libs: Vec<NativeLib> [TRACKED],
-        sysroot: PathBuf [UNTRACKED],
+        sysroot: Sysroot [UNTRACKED],
 
         target_triple: TargetTuple [TRACKED],
 
@@ -395,20 +387,34 @@ top_level_options!(
 
         /// Remap source path prefixes in all output (messages, object files, debug, etc.).
         remap_path_prefix: Vec<(PathBuf, PathBuf)> [TRACKED_NO_CRATE_HASH],
-        /// Base directory containing the `src/` for the Rust standard library, and
-        /// potentially `rustc` as well, if we can find it. Right now it's always
-        /// `$sysroot/lib/rustlib/src/rust` (i.e. the `rustup` `rust-src` component).
+
+        /// Base directory containing the `library/` directory for the Rust standard library.
+        /// Right now it's always `$sysroot/lib/rustlib/src/rust`
+        /// (i.e. the `rustup` `rust-src` component).
         ///
         /// This directory is what the virtual `/rustc/$hash` is translated back to,
         /// if Rust was built with path remapping to `/rustc/$hash` enabled
         /// (the `rust.remap-debuginfo` option in `bootstrap.toml`).
         real_rust_source_base_dir: Option<PathBuf> [TRACKED_NO_CRATE_HASH],
 
+        /// Base directory containing the `compiler/` directory for the rustc sources.
+        /// Right now it's always `$sysroot/lib/rustlib/rustc-src/rust`
+        /// (i.e. the `rustup` `rustc-dev` component).
+        ///
+        /// This directory is what the virtual `/rustc-dev/$hash` is translated back to,
+        /// if Rust was built with path remapping to `/rustc/$hash` enabled
+        /// (the `rust.remap-debuginfo` option in `bootstrap.toml`).
+        real_rustc_dev_source_base_dir: Option<PathBuf> [TRACKED_NO_CRATE_HASH],
+
         edition: Edition [TRACKED],
 
         /// `true` if we're emitting JSON blobs about each artifact produced
         /// by the compiler.
         json_artifact_notifications: bool [TRACKED],
+
+        /// `true` if we're emitting JSON timings with the start and end of
+        /// high-level compilation sections
+        json_timings: bool [UNTRACKED],
 
         /// `true` if we're emitting a JSON blob containing the unused externs
         json_unused_externs: JsonUnusedExterns [UNTRACKED],
@@ -719,7 +725,7 @@ mod desc {
     pub(crate) const parse_list: &str = "a space-separated list of strings";
     pub(crate) const parse_list_with_polarity: &str =
         "a comma-separated list of strings, with elements beginning with + or -";
-    pub(crate) const parse_autodiff: &str = "a comma separated list of settings: `Enable`, `PrintSteps`, `PrintTA`, `PrintAA`, `PrintPerf`, `PrintModBefore`, `PrintModAfter`, `PrintModFinal`, `PrintPasses`, `NoPostopt`, `LooseTypes`, `Inline`";
+    pub(crate) const parse_autodiff: &str = "a comma separated list of settings: `Enable`, `PrintSteps`, `PrintTA`, `PrintTAFn`, `PrintAA`, `PrintPerf`, `PrintModBefore`, `PrintModAfter`, `PrintModFinal`, `PrintPasses`, `NoPostopt`, `LooseTypes`, `Inline`";
     pub(crate) const parse_comma_list: &str = "a comma-separated list of strings";
     pub(crate) const parse_opt_comma_list: &str = parse_comma_list;
     pub(crate) const parse_number: &str = "a number";
@@ -1359,9 +1365,22 @@ pub mod parse {
         let mut v: Vec<&str> = v.split(",").collect();
         v.sort_unstable();
         for &val in v.iter() {
-            let variant = match val {
+            // Split each entry on '=' if it has an argument
+            let (key, arg) = match val.split_once('=') {
+                Some((k, a)) => (k, Some(a)),
+                None => (val, None),
+            };
+
+            let variant = match key {
                 "Enable" => AutoDiff::Enable,
                 "PrintTA" => AutoDiff::PrintTA,
+                "PrintTAFn" => {
+                    if let Some(fun) = arg {
+                        AutoDiff::PrintTAFn(fun.to_string())
+                    } else {
+                        return false;
+                    }
+                }
                 "PrintAA" => AutoDiff::PrintAA,
                 "PrintPerf" => AutoDiff::PrintPerf,
                 "PrintSteps" => AutoDiff::PrintSteps,
@@ -2235,6 +2254,8 @@ options! {
         environment variable `RUSTC_GRAPHVIZ_FONT` (default: `Courier, monospace`)"),
     has_thread_local: Option<bool> = (None, parse_opt_bool, [TRACKED],
         "explicitly enable the `cfg(target_thread_local)` directive"),
+    hint_mostly_unused: bool = (false, parse_bool, [TRACKED],
+        "hint that most of this crate will go unused, to minimize work for uncalled functions"),
     human_readable_cgu_names: bool = (false, parse_bool, [TRACKED],
         "generate human-readable, predictable names for codegen units (default: no)"),
     identify_regions: bool = (false, parse_bool, [UNTRACKED],

@@ -77,4 +77,5 @@ jobs:
             export CIRCLE_JOB="${{ env.ARTIFACT }}"
             uv run x.py dist ferrocene-build-metadata
             ./ferrocene/ci/scripts/upload-dist-artifacts.sh
-            ./ferrocene/ci/scripts/validate-packages-toml.py ${{ github.sha }}
+          # This should be re-enabled once GHA builds all platforms.
+          # ./ferrocene/ci/scripts/validate-packages-toml.py ${{ github.sha }}

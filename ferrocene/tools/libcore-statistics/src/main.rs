@@ -47,6 +47,8 @@ fn main() -> Result<(), Error> {
             "Lines of documentation",
             "File",
             "Impl",
+            "Safety",
+            "Docs",
         ],
     )?;
     for function in &collector.functions {
@@ -65,6 +67,8 @@ fn main() -> Result<(), Error> {
             &function.lines_of_docs.to_string(),
             &function.file,
             function.impl_.as_deref().unwrap_or(""),
+            &function.safety,
+            &function.docs,
         ])?;
     }
 

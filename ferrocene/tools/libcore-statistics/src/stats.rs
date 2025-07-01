@@ -239,6 +239,17 @@ impl Visitor for StatsCollector {
                 .map(|d| d.trim().chars().filter(|c| *c == '\n').count())
                 .unwrap_or(0),
             file: span.filename.to_str().unwrap().to_string(),
+            safety: function
+                .header
+                .is_unsafe
+                .then_some("unsafe")
+                .unwrap_or("safe")
+                .to_string(),
+            docs: item
+                .docs
+                .as_ref()
+                .map(|d| d.replace('\n', " "))
+                .unwrap_or_default(),
         });
     }
 
@@ -477,6 +488,8 @@ pub(crate) struct Function {
     pub(crate) file: String,
     pub(crate) lines_of_code: usize,
     pub(crate) lines_of_docs: usize,
+    pub(crate) safety: String,
+    pub(crate) docs: String,
 }
 
 pub(crate) struct Type {

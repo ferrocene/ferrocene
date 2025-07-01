@@ -2,6 +2,7 @@
 use crate::fmt::{self, Display};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::Location;
+use crate::panicking::PanicFmt;
 
 /// A struct providing information about a panic.
 ///
@@ -14,16 +15,14 @@ use crate::panic::Location;
 #[stable(feature = "panic_hooks", since = "1.10.0")]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug))]
 pub struct PanicInfo<'a> {
-    #[cfg(not(feature = "ferrocene_certified"))]
-    message: &'a fmt::Arguments<'a>,
+    #[cfg_attr(feature = "ferrocene_certified", allow(dead_code))]
+    message: &'a PanicFmt<'a>,
     #[cfg(not(feature = "ferrocene_certified"))]
     location: &'a Location<'a>,
     #[cfg(not(feature = "ferrocene_certified"))]
     can_unwind: bool,
     #[cfg(not(feature = "ferrocene_certified"))]
     force_no_backtrace: bool,
-    #[cfg(feature = "ferrocene_certified")]
-    _marker: crate::marker::PhantomData<&'a ()>,
 }
 
 /// A message that was given to the `panic!()` macro.
@@ -41,8 +40,8 @@ pub struct PanicMessage<'a> {
 #[cfg(feature = "ferrocene_certified")]
 impl<'a> PanicInfo<'a> {
     #[inline]
-    pub(crate) fn new() -> Self {
-        PanicInfo { _marker: crate::marker::PhantomData }
+    pub(crate) fn new(message: &'a PanicFmt<'a>) -> Self {
+        PanicInfo { message }
     }
 }
 
@@ -50,7 +49,7 @@ impl<'a> PanicInfo<'a> {
 impl<'a> PanicInfo<'a> {
     #[inline]
     pub(crate) fn new(
-        message: &'a fmt::Arguments<'a>,
+        message: &'a PanicFmt<'a>,
         location: &'a Location<'a>,
         can_unwind: bool,
         force_no_backtrace: bool,

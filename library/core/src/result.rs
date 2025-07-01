@@ -80,7 +80,6 @@
 //! functions that may encounter errors but don't otherwise return a
 //! useful value.
 //!
-// FIXME(pvdrz): fix docs
 // //! Consider the [`write_all`] method defined for I/O types
 // //! by the [`Write`] trait:
 // //!
@@ -1186,7 +1185,6 @@ impl<T, E> Result<T, E> {
     /// Consumes the `self` argument then, if [`Ok`], returns the contained
     /// value, otherwise if [`Err`], returns the default value for that
     /// type.
-    // FIXME(pvdrz): fix docs
     // ///
     // /// # Examples
     // ///

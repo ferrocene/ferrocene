@@ -4,7 +4,6 @@ use crate::fmt;
 use crate::hash::Hash;
 
 /// An unbounded range (`..`).
-// FIXME(pvdrz): fix docs
 ///
 /// `RangeFull` is primarily used as a [slicing index], its shorthand is `..`.
 /// It cannot serve as an [`Iterator`] because it doesn't have a starting point.
@@ -156,7 +155,6 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
 }
 
 /// A range only bounded inclusively below (`start..`).
-// FIXME(pvdrz): fix docs
 ///
 /// The `RangeFrom` `start..` contains all values with `x >= start`.
 ///
@@ -236,7 +234,6 @@ impl<Idx: PartialOrd<Idx>> RangeFrom<Idx> {
 }
 
 /// A range only bounded exclusively above (`..end`).
-// FIXME(pvdrz): fix docs
 ///
 /// The `RangeTo` `..end` contains all values with `x < end`.
 /// It cannot serve as an [`Iterator`] because it doesn't have a starting point.
@@ -321,7 +318,6 @@ impl<Idx: PartialOrd<Idx>> RangeTo<Idx> {
 }
 
 /// A range bounded inclusively below and above (`start..=end`).
-// FIXME(pvdrz): fix docs
 ///
 /// The `RangeInclusive` `start..=end` contains all values with `x >= start`
 /// and `x <= end`. It is empty unless `start <= end`.
@@ -393,7 +389,6 @@ impl<Idx> RangeInclusive<Idx> {
     }
 
     /// Returns the lower bound of the range (inclusive).
-    // FIXME(pvdrz): fix docs
     // ///
     // /// When using an inclusive range for iteration, the values of `start()` and
     // /// [`end()`] are unspecified after the iteration ended. To determine
@@ -419,7 +414,6 @@ impl<Idx> RangeInclusive<Idx> {
     }
 
     /// Returns the upper bound of the range (inclusive).
-    // FIXME(pvdrz): fix docs
     // ///
     // /// When using an inclusive range for iteration, the values of [`start()`]
     // /// and `end()` are unspecified after the iteration ended. To determine
@@ -567,7 +561,6 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
 }
 
 /// A range only bounded inclusively above (`..=end`).
-// FIXME(pvdrz): fix docs
 ///
 /// The `RangeToInclusive` `..=end` contains all values with `x <= end`.
 /// It cannot serve as an [`Iterator`] because it doesn't have a starting point.

@@ -130,7 +130,6 @@ impl Layout {
     }
 
     /// Creates a layout, bypassing all checks.
-    // FIXME(pvdrz): fix docs
     // ///
     // /// # Safety
     // ///

@@ -1,5 +1,4 @@
 //! Manually manage memory through raw pointers.
-// FIXME(pvdrz): fix docs
 // //!
 // //! *[See also the pointer primitive types](pointer).*
 // //!
@@ -878,7 +877,6 @@ pub const fn null_mut<T: ?Sized + Thin>() -> *mut T {
 }
 
 /// Creates a pointer with the given address and no [provenance][crate::ptr#provenance].
-// FIXME(pvdrz): fix docs
 ///
 /// This is equivalent to `ptr::null().with_addr(addr)`.
 ///
@@ -918,7 +916,6 @@ pub const fn dangling<T>() -> *const T {
 }
 
 /// Creates a pointer with the given address and no [provenance][crate::ptr#provenance].
-// FIXME(pvdrz): fix docs
 ///
 /// This is equivalent to `ptr::null_mut().with_addr(addr)`.
 ///
@@ -1621,7 +1618,6 @@ pub const unsafe fn replace<T>(dst: *mut T, src: T) -> T {
 
 /// Reads the value from `src` without moving it. This leaves the
 /// memory in `src` unchanged.
-// FIXME(pvdrz): fix docs
 ///
 /// # Safety
 ///
@@ -1876,7 +1872,6 @@ pub const unsafe fn read_unaligned<T>(src: *const T) -> T {
 /// This is appropriate for initializing uninitialized memory, or overwriting
 /// memory that has previously been [`read`] from.
 ///
-// FIXME(pvdrz): fix docs
 /// # Safety
 ///
 /// Behavior is undefined if any of the following conditions are violated:

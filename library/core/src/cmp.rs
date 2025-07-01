@@ -1,5 +1,4 @@
 //! Utilities for comparing and ordering values.
-// FIXME(pvdrz): fix docs
 // //!
 // //! This module contains various tools for comparing and ordering values. In
 // //! summary:
@@ -35,7 +34,6 @@ use self::Ordering::*;
 use crate::ops::ControlFlow;
 
 /// Trait for comparisons using the equality operator.
-// FIXME(pvdrz): fix docs
 ///
 /// Implementing this trait for types provides the `==` and `!=` operators for
 /// those types.
@@ -279,7 +277,6 @@ pub macro PartialEq($item:item) {
 
 /// Trait for comparisons corresponding to [equivalence relations](
 /// https://en.wikipedia.org/wiki/Equivalence_relation).
-// FIXME(pvdrz): fix docs
 ///
 /// The primary difference to [`PartialEq`] is the additional requirement for reflexivity. A type
 /// that implements [`PartialEq`] guarantees that for all `a`, `b` and `c`:
@@ -722,7 +719,6 @@ impl<T: Clone> Clone for Reverse<T> {
 }
 
 /// Trait for types that form a [total order](https://en.wikipedia.org/wiki/Total_order).
-// FIXME(pvdrz): fix docs
 ///
 /// Implementations must be consistent with the [`PartialOrd`] implementation, and ensure `max`,
 /// `min`, and `clamp` are consistent with `cmp`:
@@ -974,7 +970,6 @@ pub trait Ord: Eq + PartialOrd<Self> {
     ///
     /// By convention, `self.cmp(&other)` returns the ordering matching the expression
     /// `self <operator> other` if true.
-    // FIXME(pvdrz): fix docs
     // ///
     // /// # Examples
     // ///
@@ -993,7 +988,6 @@ pub trait Ord: Eq + PartialOrd<Self> {
     /// Compares and returns the maximum of two values.
     ///
     /// Returns the second argument if the comparison determines them to be equal.
-    // FIXME(pvdrz): fix docs
     // ///
     // /// # Examples
     // ///
@@ -1033,7 +1027,6 @@ pub trait Ord: Eq + PartialOrd<Self> {
     /// Compares and returns the minimum of two values.
     ///
     /// Returns the first argument if the comparison determines them to be equal.
-    // FIXME(pvdrz): fix docs
     // ///
     // /// # Examples
     // ///
@@ -1074,7 +1067,6 @@ pub trait Ord: Eq + PartialOrd<Self> {
     ///
     /// Returns `max` if `self` is greater than `max`, and `min` if `self` is
     /// less than `min`. Otherwise this returns `self`.
-    // FIXME(pvdrz): fix docs
     // ///
     // /// # Panics
     // ///
@@ -1116,7 +1108,6 @@ pub macro Ord($item:item) {
 }
 
 /// Trait for types that form a [partial order](https://en.wikipedia.org/wiki/Partial_order).
-// FIXME(pvdrz): fix docs
 ///
 /// The `lt`, `le`, `gt`, and `ge` methods of this trait can be called using the `<`, `<=`, `>`, and
 /// `>=` operators, respectively.

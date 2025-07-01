@@ -1,5 +1,4 @@
 //! The `Clone` trait for types that cannot be 'implicitly copied'.
-// FIXME(pvdrz): Fix docs
 // //!
 // //! In Rust, some simple types are "implicitly copyable" and when you
 // //! assign them or pass them as arguments, the receiver will get a copy,

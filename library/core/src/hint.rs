@@ -10,7 +10,6 @@ use crate::{intrinsics, ub_checks};
 
 /// Informs the compiler that the site which is calling this function is not
 /// reachable, possibly enabling further optimizations.
-// FIXME(pvdrz): fix docs
 ///
 /// # Safety
 ///

@@ -24,8 +24,7 @@ macro_rules! uint_impl {
         bound_condition = $bound_condition:literal,
     ) => {
         /// The smallest value that can be represented by this integer type.
-        // FIXME(pvdrz): fix docs
-        // ///
+                // ///
         // /// # Examples
         // ///
         // /// Basic usage:
@@ -37,8 +36,7 @@ macro_rules! uint_impl {
         pub const MIN: Self = 0;
 
         /// The largest value that can be represented by this integer type
-        // FIXME(pvdrz): fix docs
-        // #[doc = concat!("(2<sup>", $BITS, "</sup> &minus; 1", $bound_condition, ").")]
+                // #[doc = concat!("(2<sup>", $BITS, "</sup> &minus; 1", $bound_condition, ").")]
         // ///
         // /// # Examples
         // ///
@@ -62,8 +60,7 @@ macro_rules! uint_impl {
         pub const BITS: u32 = Self::MAX.count_ones();
 
         /// Returns the number of ones in the binary representation of `self`.
-        // FIXME(pvdrz): fix docs
-        // ///
+                // ///
         // /// # Examples
         // ///
         // /// Basic usage:
@@ -3557,8 +3554,7 @@ macro_rules! uint_impl {
         }
 
         /// Returns `true` if and only if `self == 2^k` for some unsigned integer `k`.
-        // FIXME(pvdrz): fix docs
-        // ///
+                // ///
         // /// # Examples
         // ///
         // /// Basic usage:

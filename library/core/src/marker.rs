@@ -76,7 +76,6 @@ macro marker_impls {
 ///
 /// This trait is automatically implemented when the compiler determines it's
 /// appropriate.
-// FIXME(pvdrz): fix docs
 ///
 /// An example of a non-`Send` type is the reference-counting pointer
 /// [`rc::Rc`][`Rc`]. If two threads attempt to clone [`Rc`]s that point to the same
@@ -165,7 +164,6 @@ pub trait Sized {
 }
 
 /// Types that can be "unsized" to a dynamically-sized type.
-// FIXME(pvdrz): fix docs
 ///
 /// For example, the sized array type `[i8; 2]` implements `Unsize<[i8]>` and
 /// `Unsize<dyn fmt::Debug>`.
@@ -320,7 +318,6 @@ marker_impls! {
 /// impl<T: Copy> Copy for MyStruct<T> { }
 /// ```
 ///
-// FIXME(pvdrz): fix docs
 /// This isn't always desired. For example, shared references (`&T`) can be copied regardless of
 /// whether `T` is `Copy`. Likewise, a generic struct containing markers such as [`PhantomData`]
 /// could potentially be duplicated with a bit-wise copy.
@@ -393,7 +390,6 @@ marker_impls! {
 /// mutable reference. Copying [`String`] would duplicate responsibility for managing the
 /// [`String`]'s buffer, leading to a double free.
 ///
-// FIXME(pvdrz): fix docs
 /// Generalizing the latter case, any type implementing [`Drop`] can't be `Copy`, because it's
 /// managing some resource besides its own [`size_of::<T>`] bytes.
 ///
@@ -424,7 +420,6 @@ marker_impls! {
 ///
 /// [`Vec<T>`]: ../../std/vec/struct.Vec.html
 /// [`String`]: ../../std/string/struct.String.html
-// FIXME(pvdrz): fix docs
 /// [`size_of::<T>`]: size_of
 /// [impls]: #implementors
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -513,7 +508,6 @@ pub trait BikeshedGuaranteedNoDrop {}
 /// This trait is automatically implemented when the compiler determines
 /// it's appropriate.
 ///
-// FIXME(pvdrz): fix docs
 /// The precise definition is: a type `T` is [`Sync`] if and only if `&T` is
 /// [`Send`]. In other words, if there is no possibility of
 /// [undefined behavior][ub] (including data races) when passing
@@ -873,7 +867,6 @@ impl<T: ?Sized> Default for PhantomData<T> {
 impl<T: ?Sized> StructuralPartialEq for PhantomData<T> {}
 
 /// Compiler-internal trait used to indicate the type of enum discriminants.
-// FIXME(pvdrz): fix docs
 ///
 /// This trait is automatically implemented for every type and does not add any
 /// guarantees to [`mem::Discriminant`]. It is **undefined behavior** to transmute

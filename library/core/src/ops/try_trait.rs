@@ -1,7 +1,6 @@
 use crate::ops::ControlFlow;
 
 /// The `?` operator and `try {}` blocks.
-// FIXME(pvdrz): fix docs
 ///
 /// `try_*` methods typically involve a type implementing this trait.  For
 /// example, the closures passed to [`Iterator::try_fold`] and

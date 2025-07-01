@@ -911,7 +911,6 @@ pub const fn replace<T>(dest: &mut T, src: T) -> T {
 /// the function returns.
 ///
 /// [drop]: Drop
-// FIXME(pvdrz): fix docs
 ///
 /// # Examples
 ///

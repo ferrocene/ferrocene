@@ -4,7 +4,6 @@
 use crate::intrinsics::{self, const_eval_select};
 
 /// Checks that the preconditions of an unsafe function are followed.
-// FIXME(pvdrz): fix docs
 ///
 /// The check is enabled at runtime if debug assertions are enabled when the
 /// caller is monomorphized. In const-eval/Miri checks implemented with this

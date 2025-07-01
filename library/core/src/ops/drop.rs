@@ -1,5 +1,4 @@
 /// Custom code within the destructor.
-// FIXME(pvdrz): fix docs
 ///
 /// When a value is no longer needed, Rust will run a "destructor" on that value.
 /// The most common way that a value is no longer needed is when it goes out of
@@ -208,7 +207,6 @@
 #[rustc_const_unstable(feature = "const_destruct", issue = "133214")]
 pub trait Drop {
     /// Executes the destructor for this type.
-    // FIXME(pvdrz): fix docs
     // ///
     // /// This method is called implicitly when the value goes out of scope,
     // /// and cannot be called explicitly (this is compiler error [E0040]).

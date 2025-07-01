@@ -33,6 +33,16 @@ fn main() -> Result<(), Error> {
         std::fs::create_dir_all(&out_dir)?;
     }
 
+    functions_tsv(&collector, &out_dir)?;
+    types_tsv(&collector, &out_dir)?;
+    traits_tsv(&collector, &out_dir)?;
+    items_tsv(&collector, &out_dir)?;
+    macros_tsv(&collector, out_dir)?;
+
+    Ok(())
+}
+
+fn functions_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
     let mut functions = TSV::new(
         &out_dir.join("functions.tsv"),
         [
@@ -72,6 +82,10 @@ fn main() -> Result<(), Error> {
         ])?;
     }
 
+    Ok(())
+}
+
+fn types_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
     let mut types = TSV::new(
         &out_dir.join("types.tsv"),
         [
@@ -91,7 +105,8 @@ fn main() -> Result<(), Error> {
     for type_ in &collector.types {
         let counters = &collector
             .type_counters
-            .remove(&type_.id)
+            .get(&type_.id)
+            .cloned()
             .unwrap_or_default();
 
         types.add([
@@ -109,6 +124,10 @@ fn main() -> Result<(), Error> {
         ])?;
     }
 
+    Ok(())
+}
+
+fn traits_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
     let mut traits = TSV::new(
         &out_dir.join("traits.tsv"),
         [
@@ -125,7 +144,8 @@ fn main() -> Result<(), Error> {
     for trait_ in collector.traits.values() {
         let counters = &collector
             .trait_counters
-            .remove(&trait_.id)
+            .get(&trait_.id)
+            .cloned()
             .unwrap_or_default();
 
         traits.add([
@@ -140,6 +160,10 @@ fn main() -> Result<(), Error> {
         ])?;
     }
 
+    Ok(())
+}
+
+fn items_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
     let mut items = TSV::new(
         &out_dir.join("items.tsv"),
         [
@@ -166,6 +190,10 @@ fn main() -> Result<(), Error> {
         ])?;
     }
 
+    Ok(())
+}
+
+fn macros_tsv(collector: &StatsCollector, out_dir: PathBuf) -> Result<(), Error> {
     let mut macros = TSV::new(
         &out_dir.join("macros.tsv"),
         [

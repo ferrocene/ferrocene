@@ -514,7 +514,7 @@ pub(crate) struct Macro {
     pub(crate) kind: MacroKind,
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub(crate) struct TypeCounters {
     pub(crate) blanket_impls: usize,
     pub(crate) auto_impls: usize,
@@ -523,7 +523,7 @@ pub(crate) struct TypeCounters {
     pub(crate) trait_methods: usize,
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub(crate) struct TraitCounters {
     pub(crate) required_methods: usize,
     pub(crate) default_methods: usize,

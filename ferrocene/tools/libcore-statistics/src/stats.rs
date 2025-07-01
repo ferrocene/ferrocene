@@ -381,6 +381,7 @@ enum Inside {
     },
 }
 
+#[derive(Clone, Debug)]
 pub(crate) enum FunctionKind {
     Function,
     Method,
@@ -453,6 +454,7 @@ impl std::fmt::Display for MacroKind {
     }
 }
 
+#[derive(Clone, Debug)]
 pub(crate) struct Common {
     pub(crate) id: Id,
     pub(crate) name: String,
@@ -486,6 +488,7 @@ impl Common {
     }
 }
 
+#[derive(Clone, Debug)]
 pub(crate) struct Function {
     pub(crate) common: Common,
     pub(crate) kind: FunctionKind,

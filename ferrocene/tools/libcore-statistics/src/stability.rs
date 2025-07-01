@@ -3,7 +3,7 @@ use syn::punctuated::Punctuated;
 use syn::token::Comma;
 use syn::{Expr, ExprLit, Lit, MetaNameValue};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct Stability {
     pub(crate) stable: bool,
     pub(crate) feature: String,

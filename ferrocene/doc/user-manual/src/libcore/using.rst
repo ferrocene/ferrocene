@@ -6,7 +6,7 @@ Use the certified subset of Libcore exactly how you'd use standard Rust Libcore.
 Required compiler flags
 -----------------------
 
-The certified libcore subset requires use of the :cli:option:`-C panic=abort` compiler flag.
+The certified libcore subset requires use of the ``-C panic=abort`` compiler flag.
 
 Building an executable
 ----------------------

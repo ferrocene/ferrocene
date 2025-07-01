@@ -87,7 +87,7 @@ pub const fn panic_fmt(fmt: fmt::Arguments<'_>) -> ! {
 #[lang = "panic_fmt"] // needed for const-evaluated panics
 #[rustc_do_not_const_check] // hooked by const-eval
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
-#[cfg(all(feature = "ferrocene_certified", feature = "panic_immediate_abort"))]
+#[cfg(feature = "ferrocene_certified")]
 const fn panic_fmt(_expr: &'static str) -> ! {
     if cfg!(feature = "panic_immediate_abort") {
         super::intrinsics::abort()
@@ -160,7 +160,7 @@ pub const fn panic_nounwind_fmt(fmt: fmt::Arguments<'_>, force_no_backtrace: boo
 #[rustc_nounwind]
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
 #[rustc_allow_const_fn_unstable(const_eval_select)]
-#[cfg(all(feature = "ferrocene_certified", feature = "panic_immediate_abort"))]
+#[cfg(feature = "ferrocene_certified")]
 pub const fn panic_nounwind_fmt(_expr: &'static str, _force_no_backtrace: bool) -> ! {
     const_eval_select!(
         @capture { _expr: &'static str, _force_no_backtrace: bool } -> !:
@@ -168,7 +168,22 @@ pub const fn panic_nounwind_fmt(_expr: &'static str, _force_no_backtrace: bool) 
             // We don't unwind anyway at compile-time so we can call the regular `panic_fmt`.
             panic_fmt(_expr)
         } else #[track_caller] {
-            super::intrinsics::abort()
+            if cfg!(feature = "panic_immediate_abort") {
+                super::intrinsics::abort()
+            }
+
+            // NOTE This function never crosses the FFI boundary; it's a Rust-to-Rust call
+            // that gets resolved to the `#[panic_handler]` function.
+            unsafe extern "Rust" {
+                #[lang = "panic_impl"]
+                fn panic_impl(pi: &PanicInfo<'_>) -> !;
+            }
+
+            // PanicInfo with the `can_unwind` flag set to false forces an abort.
+            let pi = PanicInfo::new();
+
+            // SAFETY: `panic_impl` is defined in safe Rust code and thus is safe to call.
+            unsafe { panic_impl(&pi) }
         }
     )
 }
@@ -198,7 +213,7 @@ pub const fn panic(expr: &'static str) -> ! {
     // payload.
     #[cfg(not(feature = "ferrocene_certified"))]
     panic_fmt(fmt::Arguments::new_const(&[expr]));
-    #[cfg(not(not(feature = "ferrocene_certified")))]
+    #[cfg(feature = "ferrocene_certified")]
     panic_fmt(expr)
 }
 
@@ -283,7 +298,7 @@ pub mod panic_const {
 pub const fn panic_nounwind(expr: &'static str) -> ! {
     #[cfg(not(feature = "ferrocene_certified"))]
     panic_nounwind_fmt(fmt::Arguments::new_const(&[expr]), /* force_no_backtrace */ false);
-    #[cfg(not(not(feature = "ferrocene_certified")))]
+    #[cfg(feature = "ferrocene_certified")]
     panic_nounwind_fmt(expr, /* force_no_backtrace */ false);
 }
 

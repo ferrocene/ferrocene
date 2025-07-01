@@ -25,8 +25,7 @@ bench = false
 # core specifically for profiling.
 ferrocene_inject_profiler_builtins = ["dep:profiler_builtins"]
 # Ferrocene addition: only include certfified code
-# requires panic_immediate_abort to allow panic while not needing fmt machinery
-ferrocene_certified = ["panic_immediate_abort"]
+ferrocene_certified = []
 # Make panics and failed asserts immediately abort without formatting any message
 panic_immediate_abort = []
 # Choose algorithms that are optimized for binary size instead of runtime performance

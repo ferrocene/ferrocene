@@ -53,7 +53,7 @@ pub macro panic_2015 {
 #[allow_internal_unstable(panic_internals, const_format_args)]
 #[rustc_diagnostic_item = "core_panic_2021_macro"]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg(all(feature = "ferrocene_certified", feature = "panic_immediate_abort"))]
+#[cfg(feature = "ferrocene_certified")]
 pub macro panic_2021($($t:tt)*) {{ $crate::panicking::panic("explicit panic") }}
 
 #[doc(hidden)]
@@ -61,7 +61,8 @@ pub macro panic_2021($($t:tt)*) {{ $crate::panicking::panic("explicit panic") }}
 #[allow_internal_unstable(panic_internals, const_format_args)]
 #[rustc_diagnostic_item = "core_panic_2021_macro"]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg(all(not(feature = "ferrocene_certified"), feature = "panic_immediate_abort"))]
+#[cfg(feature = "panic_immediate_abort")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub macro panic_2021 {
     () => (
         $crate::panicking::panic("explicit panic")

@@ -58,6 +58,9 @@ fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Re
             "Visibility",
             "Safety",
             "doc(hidden)",
+            "Safety section",
+            "Panics section",
+            "Examples section",
             "Docs",
         ],
     )?;
@@ -76,19 +79,34 @@ fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Re
             .strip_prefix(&format!("{}::", &function.module))
             .unwrap();
 
-        let doc_hidden = function
-            .doc_hidden
-            .then_some("hidden")
-            .unwrap_or("not hidden");
+        let docs = &function.docs;
+        let contains_safety = docs.contains("# Safety");
+        let contains_panics = docs.contains("# Panics");
+        let contains_examples = docs.contains("# Examples");
+
+        // check rule violations
+        let file = &function.file;
+        let is_private_or_hidden = function.doc_hidden || function.public;
+        if !is_private_or_hidden {
+            if function.safety == "unsafe" && !contains_safety {
+                eprintln!("{file}: {name} is unsafe but has no safety section",)
+            }
+            if !contains_examples {
+                eprintln!("{file}: {name} has no examples")
+            }
+        }
 
         functions.add([
-            &function.file,
+            file,
             name,
             &function.kind.to_string(),
             function.public_str(),
             &function.safety,
-            doc_hidden,
-            &function.docs,
+            &function.doc_hidden.to_string(),
+            &contains_safety.to_string(),
+            &contains_panics.to_string(),
+            &contains_examples.to_string(),
+            docs,
         ])?;
     }
 

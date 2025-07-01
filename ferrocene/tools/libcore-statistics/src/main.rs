@@ -5,7 +5,7 @@ mod stats;
 mod visitor;
 
 use crate::loc::LOC;
-use crate::stats::StatsCollector;
+use crate::stats::{FunctionKind, StatsCollector};
 use crate::visitor::Visitor;
 use anyhow::Error;
 use rustdoc_types::Crate;
@@ -33,11 +33,64 @@ fn main() -> Result<(), Error> {
         std::fs::create_dir_all(&out_dir)?;
     }
 
-    functions_tsv(&collector, &out_dir)?;
-    types_tsv(&collector, &out_dir)?;
-    traits_tsv(&collector, &out_dir)?;
-    items_tsv(&collector, &out_dir)?;
-    macros_tsv(&collector, out_dir)?;
+    // TODO: CLI arg to switch between modes
+    if false {
+        functions_tsv(&collector, &out_dir)?;
+        types_tsv(&collector, &out_dir)?;
+        traits_tsv(&collector, &out_dir)?;
+        items_tsv(&collector, &out_dir)?;
+        macros_tsv(&collector, out_dir)?;
+    } else {
+        // TODO: destructure collector and pass fields to functions
+        certified_subset_tsv(&mut collector, &out_dir)?;
+    }
+
+    Ok(())
+}
+
+fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
+    let mut functions = TSV::new(
+        &out_dir.join("certified_subset.tsv"),
+        [
+            "File",
+            "Name",
+            "Kind",
+            "Visibility",
+            "Safety",
+            "doc(hidden)",
+            "Docs",
+        ],
+    )?;
+
+    // sort by file and within a file by name
+    collector.functions.sort_by_key(|f| f.name.clone());
+    collector.functions.sort_by_key(|f| f.file.clone());
+
+    for function in &collector.functions {
+        if matches!(function.kind, FunctionKind::TraitMethod) {
+            continue; // trait method implementation has no doc-comment, the definition has
+        }
+
+        let name = function
+            .name
+            .strip_prefix(&format!("{}::", &function.module))
+            .unwrap();
+
+        let doc_hidden = function
+            .doc_hidden
+            .then_some("hidden")
+            .unwrap_or("not hidden");
+
+        functions.add([
+            &function.file,
+            name,
+            &function.kind.to_string(),
+            function.public_str(),
+            &function.safety,
+            doc_hidden,
+            &function.docs,
+        ])?;
+    }
 
     Ok(())
 }

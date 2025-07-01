@@ -31,6 +31,8 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 use crate::intrinsics::const_eval_select;
+#[cfg(feature = "ferrocene_certified")]
+use crate::panic::PanicInfo;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::{Location, PanicInfo};
 
@@ -87,7 +89,21 @@ pub const fn panic_fmt(fmt: fmt::Arguments<'_>) -> ! {
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
 #[cfg(all(feature = "ferrocene_certified", feature = "panic_immediate_abort"))]
 const fn panic_fmt(_expr: &'static str) -> ! {
-    super::intrinsics::abort()
+    if cfg!(feature = "panic_immediate_abort") {
+        super::intrinsics::abort()
+    }
+
+    // NOTE This function never crosses the FFI boundary; it's a Rust-to-Rust call
+    // that gets resolved to the `#[panic_handler]` function.
+    unsafe extern "Rust" {
+        #[lang = "panic_impl"]
+        fn panic_impl(pi: &PanicInfo<'_>) -> !;
+    }
+
+    let pi = PanicInfo::new();
+
+    // SAFETY: `panic_impl` is defined in safe Rust code and thus is safe to call.
+    unsafe { panic_impl(&pi) }
 }
 
 /// Like `panic_fmt`, but for non-unwinding panics.

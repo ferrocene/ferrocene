@@ -3,7 +3,6 @@
 #![stable(feature = "core_panic_info", since = "1.41.0")]
 
 mod location;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod panic_info;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod unwind_safe;
@@ -11,7 +10,6 @@ mod unwind_safe;
 #[stable(feature = "panic_hooks", since = "1.10.0")]
 pub use self::location::Location;
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::panic_info::PanicInfo;
 #[stable(feature = "panic_info_message", since = "1.81.0")]
 #[cfg(not(feature = "ferrocene_certified"))]

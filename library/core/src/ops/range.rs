@@ -5,40 +5,40 @@ use crate::hash::Hash;
 
 /// An unbounded range (`..`).
 // FIXME(pvdrz): fix docs
-// ///
-// /// `RangeFull` is primarily used as a [slicing index], its shorthand is `..`.
-// /// It cannot serve as an [`Iterator`] because it doesn't have a starting point.
-// ///
-// /// # Examples
-// ///
-// /// The `..` syntax is a `RangeFull`:
-// ///
-// /// ```
-// /// assert_eq!(.., std::ops::RangeFull);
-// /// ```
-// ///
-// /// It does not have an [`IntoIterator`] implementation, so you can't use it in
-// /// a `for` loop directly. This won't compile:
-// ///
-// /// ```compile_fail,E0277
-// /// for i in .. {
-// ///     // // ...
-// /// }
-// /// ```
-// ///
-// /// Used as a [slicing index], `RangeFull` produces the full array as a slice.
-// ///
-// /// ```
-// /// let arr = [0, 1, 2, 3, 4];
-// /// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]); // // This is the `RangeFull`
-// /// assert_eq!(arr[ .. 3], [0, 1, 2      ]);
-// /// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]);
-// /// assert_eq!(arr[1..  ], [   1, 2, 3, 4]);
-// /// assert_eq!(arr[1.. 3], [   1, 2      ]);
-// /// assert_eq!(arr[1..=3], [   1, 2, 3   ]);
-// /// ```
-// ///
-// /// [slicing index]: crate::slice::SliceIndex
+///
+/// `RangeFull` is primarily used as a [slicing index], its shorthand is `..`.
+/// It cannot serve as an [`Iterator`] because it doesn't have a starting point.
+///
+/// # Examples
+///
+/// The `..` syntax is a `RangeFull`:
+///
+/// ```
+/// assert_eq!(.., std::ops::RangeFull);
+/// ```
+///
+/// It does not have an [`IntoIterator`] implementation, so you can't use it in
+/// a `for` loop directly. This won't compile:
+///
+/// ```compile_fail,E0277
+/// for i in .. {
+///     // // ...
+/// }
+/// ```
+///
+/// Used as a [slicing index], `RangeFull` produces the full array as a slice.
+///
+/// ```
+/// let arr = [0, 1, 2, 3, 4];
+/// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]); // // This is the `RangeFull`
+/// assert_eq!(arr[ .. 3], [0, 1, 2      ]);
+/// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]);
+/// assert_eq!(arr[1..  ], [   1, 2, 3, 4]);
+/// assert_eq!(arr[1.. 3], [   1, 2      ]);
+/// assert_eq!(arr[1..=3], [   1, 2, 3   ]);
+/// ```
+///
+/// [slicing index]: crate::slice::SliceIndex
 #[lang = "RangeFull"]
 #[doc(alias = "..")]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, Default, PartialEq, Eq, Hash))]
@@ -157,38 +157,38 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
 
 /// A range only bounded inclusively below (`start..`).
 // FIXME(pvdrz): fix docs
-// ///
-// /// The `RangeFrom` `start..` contains all values with `x >= start`.
-// ///
-// /// *Note*: Overflow in the [`Iterator`] implementation (when the contained
-// /// data type reaches its numerical limit) is allowed to panic, wrap, or
-// /// saturate. This behavior is defined by the implementation of the [`Step`]
-// /// trait. For primitive integers, this follows the normal rules, and respects
-// /// the overflow checks profile (panic in debug, wrap in release). Note also
-// /// that overflow happens earlier than you might assume: the overflow happens
-// /// in the call to `next` that yields the maximum value, as the range must be
-// /// set to a state to yield the next value.
-// ///
-// /// [`Step`]: crate::iter::Step
-// ///
-// /// # Examples
-// ///
-// /// The `start..` syntax is a `RangeFrom`:
-// ///
-// /// ```
-// /// assert_eq!((2..), std::ops::RangeFrom { start: 2 });
-// /// assert_eq!(2 + 3 + 4, (2..).take(3).sum());
-// /// ```
-// ///
-// /// ```
-// /// let arr = [0, 1, 2, 3, 4];
-// /// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]);
-// /// assert_eq!(arr[ .. 3], [0, 1, 2      ]);
-// /// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]);
-// /// assert_eq!(arr[1..  ], [   1, 2, 3, 4]); // // This is a `RangeFrom`
-// /// assert_eq!(arr[1.. 3], [   1, 2      ]);
-// /// assert_eq!(arr[1..=3], [   1, 2, 3   ]);
-// /// ```
+///
+/// The `RangeFrom` `start..` contains all values with `x >= start`.
+///
+/// *Note*: Overflow in the [`Iterator`] implementation (when the contained
+/// data type reaches its numerical limit) is allowed to panic, wrap, or
+/// saturate. This behavior is defined by the implementation of the [`Step`]
+/// trait. For primitive integers, this follows the normal rules, and respects
+/// the overflow checks profile (panic in debug, wrap in release). Note also
+/// that overflow happens earlier than you might assume: the overflow happens
+/// in the call to `next` that yields the maximum value, as the range must be
+/// set to a state to yield the next value.
+///
+/// [`Step`]: crate::iter::Step
+///
+/// # Examples
+///
+/// The `start..` syntax is a `RangeFrom`:
+///
+/// ```
+/// assert_eq!((2..), std::ops::RangeFrom { start: 2 });
+/// assert_eq!(2 + 3 + 4, (2..).take(3).sum());
+/// ```
+///
+/// ```
+/// let arr = [0, 1, 2, 3, 4];
+/// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]);
+/// assert_eq!(arr[ .. 3], [0, 1, 2      ]);
+/// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]);
+/// assert_eq!(arr[1..  ], [   1, 2, 3, 4]); // // This is a `RangeFrom`
+/// assert_eq!(arr[1.. 3], [   1, 2      ]);
+/// assert_eq!(arr[1..=3], [   1, 2, 3   ]);
+/// ```
 #[lang = "RangeFrom"]
 #[doc(alias = "..")]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, PartialEq, Eq, Hash))] // not Copy -- see #27186
@@ -237,43 +237,43 @@ impl<Idx: PartialOrd<Idx>> RangeFrom<Idx> {
 
 /// A range only bounded exclusively above (`..end`).
 // FIXME(pvdrz): fix docs
-// ///
-// /// The `RangeTo` `..end` contains all values with `x < end`.
-// /// It cannot serve as an [`Iterator`] because it doesn't have a starting point.
-// ///
-// /// # Examples
-// ///
-// /// The `..end` syntax is a `RangeTo`:
-// ///
-// /// ```
-// /// assert_eq!((..5), std::ops::RangeTo { end: 5 });
-// /// ```
-// ///
-// /// It does not have an [`IntoIterator`] implementation, so you can't use it in
-// /// a `for` loop directly. This won't compile:
-// ///
-// /// ```compile_fail,E0277
-// /// // // error[E0277]: the trait bound `std::ops::RangeTo<{integer}>:
-// /// // // std::iter::Iterator` is not satisfied
-// /// for i in ..5 {
-// ///     // // ...
-// /// }
-// /// ```
-// ///
-// /// When used as a [slicing index], `RangeTo` produces a slice of all array
-// /// elements before the index indicated by `end`.
-// ///
-// /// ```
-// /// let arr = [0, 1, 2, 3, 4];
-// /// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]);
-// /// assert_eq!(arr[ .. 3], [0, 1, 2      ]); // // This is a `RangeTo`
-// /// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]);
-// /// assert_eq!(arr[1..  ], [   1, 2, 3, 4]);
-// /// assert_eq!(arr[1.. 3], [   1, 2      ]);
-// /// assert_eq!(arr[1..=3], [   1, 2, 3   ]);
-// /// ```
-// ///
-// /// [slicing index]: crate::slice::SliceIndex
+///
+/// The `RangeTo` `..end` contains all values with `x < end`.
+/// It cannot serve as an [`Iterator`] because it doesn't have a starting point.
+///
+/// # Examples
+///
+/// The `..end` syntax is a `RangeTo`:
+///
+/// ```
+/// assert_eq!((..5), std::ops::RangeTo { end: 5 });
+/// ```
+///
+/// It does not have an [`IntoIterator`] implementation, so you can't use it in
+/// a `for` loop directly. This won't compile:
+///
+/// ```compile_fail,E0277
+/// // // error[E0277]: the trait bound `std::ops::RangeTo<{integer}>:
+/// // // std::iter::Iterator` is not satisfied
+/// for i in ..5 {
+///     // // ...
+/// }
+/// ```
+///
+/// When used as a [slicing index], `RangeTo` produces a slice of all array
+/// elements before the index indicated by `end`.
+///
+/// ```
+/// let arr = [0, 1, 2, 3, 4];
+/// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]);
+/// assert_eq!(arr[ .. 3], [0, 1, 2      ]); // // This is a `RangeTo`
+/// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]);
+/// assert_eq!(arr[1..  ], [   1, 2, 3, 4]);
+/// assert_eq!(arr[1.. 3], [   1, 2      ]);
+/// assert_eq!(arr[1..=3], [   1, 2, 3   ]);
+/// ```
+///
+/// [slicing index]: crate::slice::SliceIndex
 #[lang = "RangeTo"]
 #[doc(alias = "..")]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, PartialEq, Eq, Hash))]
@@ -322,35 +322,35 @@ impl<Idx: PartialOrd<Idx>> RangeTo<Idx> {
 
 /// A range bounded inclusively below and above (`start..=end`).
 // FIXME(pvdrz): fix docs
-// ///
-// /// The `RangeInclusive` `start..=end` contains all values with `x >= start`
-// /// and `x <= end`. It is empty unless `start <= end`.
-// ///
-// /// This iterator is [fused], but the specific values of `start` and `end` after
-// /// iteration has finished are **unspecified** other than that [`.is_empty()`]
-// /// will return `true` once no more values will be produced.
-// ///
-// /// [fused]: crate::iter::FusedIterator
-// /// [`.is_empty()`]: RangeInclusive::is_empty
-// ///
-// /// # Examples
-// ///
-// /// The `start..=end` syntax is a `RangeInclusive`:
-// ///
-// /// ```
-// /// assert_eq!((3..=5), std::ops::RangeInclusive::new(3, 5));
-// /// assert_eq!(3 + 4 + 5, (3..=5).sum());
-// /// ```
-// ///
-// /// ```
-// /// let arr = [0, 1, 2, 3, 4];
-// /// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]);
-// /// assert_eq!(arr[ .. 3], [0, 1, 2      ]);
-// /// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]);
-// /// assert_eq!(arr[1..  ], [   1, 2, 3, 4]);
-// /// assert_eq!(arr[1.. 3], [   1, 2      ]);
-// /// assert_eq!(arr[1..=3], [   1, 2, 3   ]); // // This is a `RangeInclusive`
-// /// ```
+///
+/// The `RangeInclusive` `start..=end` contains all values with `x >= start`
+/// and `x <= end`. It is empty unless `start <= end`.
+///
+/// This iterator is [fused], but the specific values of `start` and `end` after
+/// iteration has finished are **unspecified** other than that [`.is_empty()`]
+/// will return `true` once no more values will be produced.
+///
+/// [fused]: crate::iter::FusedIterator
+/// [`.is_empty()`]: RangeInclusive::is_empty
+///
+/// # Examples
+///
+/// The `start..=end` syntax is a `RangeInclusive`:
+///
+/// ```
+/// assert_eq!((3..=5), std::ops::RangeInclusive::new(3, 5));
+/// assert_eq!(3 + 4 + 5, (3..=5).sum());
+/// ```
+///
+/// ```
+/// let arr = [0, 1, 2, 3, 4];
+/// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]);
+/// assert_eq!(arr[ .. 3], [0, 1, 2      ]);
+/// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]);
+/// assert_eq!(arr[1..  ], [   1, 2, 3, 4]);
+/// assert_eq!(arr[1.. 3], [   1, 2      ]);
+/// assert_eq!(arr[1..=3], [   1, 2, 3   ]); // // This is a `RangeInclusive`
+/// ```
 #[lang = "RangeInclusive"]
 #[doc(alias = "..=")]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Clone, PartialEq, Eq, Hash))] // not Copy -- see #27186
@@ -568,43 +568,43 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
 
 /// A range only bounded inclusively above (`..=end`).
 // FIXME(pvdrz): fix docs
-// ///
-// /// The `RangeToInclusive` `..=end` contains all values with `x <= end`.
-// /// It cannot serve as an [`Iterator`] because it doesn't have a starting point.
-// ///
-// /// # Examples
-// ///
-// /// The `..=end` syntax is a `RangeToInclusive`:
-// ///
-// /// ```
-// /// assert_eq!((..=5), std::ops::RangeToInclusive{ end: 5 });
-// /// ```
-// ///
-// /// It does not have an [`IntoIterator`] implementation, so you can't use it in a
-// /// `for` loop directly. This won't compile:
-// ///
-// /// ```compile_fail,E0277
-// /// // // error[E0277]: the trait bound `std::ops::RangeToInclusive<{integer}>:
-// /// // // std::iter::Iterator` is not satisfied
-// /// for i in ..=5 {
-// ///     // // ...
-// /// }
-// /// ```
-// ///
-// /// When used as a [slicing index], `RangeToInclusive` produces a slice of all
-// /// array elements up to and including the index indicated by `end`.
-// ///
-// /// ```
-// /// let arr = [0, 1, 2, 3, 4];
-// /// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]);
-// /// assert_eq!(arr[ .. 3], [0, 1, 2      ]);
-// /// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]); // // This is a `RangeToInclusive`
-// /// assert_eq!(arr[1..  ], [   1, 2, 3, 4]);
-// /// assert_eq!(arr[1.. 3], [   1, 2      ]);
-// /// assert_eq!(arr[1..=3], [   1, 2, 3   ]);
-// /// ```
-// ///
-// /// [slicing index]: crate::slice::SliceIndex
+///
+/// The `RangeToInclusive` `..=end` contains all values with `x <= end`.
+/// It cannot serve as an [`Iterator`] because it doesn't have a starting point.
+///
+/// # Examples
+///
+/// The `..=end` syntax is a `RangeToInclusive`:
+///
+/// ```
+/// assert_eq!((..=5), std::ops::RangeToInclusive{ end: 5 });
+/// ```
+///
+/// It does not have an [`IntoIterator`] implementation, so you can't use it in a
+/// `for` loop directly. This won't compile:
+///
+/// ```compile_fail,E0277
+/// // // error[E0277]: the trait bound `std::ops::RangeToInclusive<{integer}>:
+/// // // std::iter::Iterator` is not satisfied
+/// for i in ..=5 {
+///     // // ...
+/// }
+/// ```
+///
+/// When used as a [slicing index], `RangeToInclusive` produces a slice of all
+/// array elements up to and including the index indicated by `end`.
+///
+/// ```
+/// let arr = [0, 1, 2, 3, 4];
+/// assert_eq!(arr[ ..  ], [0, 1, 2, 3, 4]);
+/// assert_eq!(arr[ .. 3], [0, 1, 2      ]);
+/// assert_eq!(arr[ ..=3], [0, 1, 2, 3   ]); // // This is a `RangeToInclusive`
+/// assert_eq!(arr[1..  ], [   1, 2, 3, 4]);
+/// assert_eq!(arr[1.. 3], [   1, 2      ]);
+/// assert_eq!(arr[1..=3], [   1, 2, 3   ]);
+/// ```
+///
+/// [slicing index]: crate::slice::SliceIndex
 #[lang = "RangeToInclusive"]
 #[doc(alias = "..=")]
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, PartialEq, Eq, Hash))]

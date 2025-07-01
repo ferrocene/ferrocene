@@ -15,51 +15,51 @@ use crate::ptr::NonNull;
 
 /// Provides the pointer metadata type of any pointed-to type.
 // FIXME(pvdrz): fix docs
-// ///
-// /// # Pointer metadata
-// ///
-// /// Raw pointer types and reference types in Rust can be thought of as made of two parts:
-// /// a data pointer that contains the memory address of the value, and some metadata.
-// ///
-// /// For statically-sized types (that implement the `Sized` traits)
-// /// as well as for `extern` types,
-// /// pointers are said to be “thin”: metadata is zero-sized and its type is `()`.
-// ///
-// /// Pointers to [dynamically-sized types][dst] are said to be “wide” or “fat”,
-// /// they have non-zero-sized metadata:
-// ///
-// /// * For structs whose last field is a DST, metadata is the metadata for the last field
-// /// * For the `str` type, metadata is the length in bytes as `usize`
-// /// * For slice types like `[T]`, metadata is the length in items as `usize`
-// /// * For trait objects like `dyn SomeTrait`, metadata is [`DynMetadata<Self>`][DynMetadata]
-// ///   (e.g. `DynMetadata<dyn SomeTrait>`)
-// ///
-// /// In the future, the Rust language may gain new kinds of types
-// /// that have different pointer metadata.
-// ///
-// /// [dst]: https://doc.rust-lang.org/nomicon/exotic-sizes.html#dynamically-sized-types-dsts
-// ///
-// ///
-// /// # The `Pointee` trait
-// ///
-// /// The point of this trait is its `Metadata` associated type,
-// /// which is `()` or `usize` or `DynMetadata<_>` as described above.
-// /// It is automatically implemented for every type.
-// /// It can be assumed to be implemented in a generic context, even without a corresponding bound.
-// ///
-// ///
-// /// # Usage
-// ///
-// /// Raw pointers can be decomposed into the data pointer and metadata components
-// /// with their [`to_raw_parts`] method.
-// ///
-// /// Alternatively, metadata alone can be extracted with the [`metadata`] function.
-// /// A reference can be passed to [`metadata`] and implicitly coerced.
-// ///
-// /// A (possibly-wide) pointer can be put back together from its data pointer and metadata
-// /// with [`from_raw_parts`] or [`from_raw_parts_mut`].
-// ///
-// /// [`to_raw_parts`]: *const::to_raw_parts
+///
+/// # Pointer metadata
+///
+/// Raw pointer types and reference types in Rust can be thought of as made of two parts:
+/// a data pointer that contains the memory address of the value, and some metadata.
+///
+/// For statically-sized types (that implement the `Sized` traits)
+/// as well as for `extern` types,
+/// pointers are said to be “thin”: metadata is zero-sized and its type is `()`.
+///
+/// Pointers to [dynamically-sized types][dst] are said to be “wide” or “fat”,
+/// they have non-zero-sized metadata:
+///
+/// * For structs whose last field is a DST, metadata is the metadata for the last field
+/// * For the `str` type, metadata is the length in bytes as `usize`
+/// * For slice types like `[T]`, metadata is the length in items as `usize`
+/// * For trait objects like `dyn SomeTrait`, metadata is [`DynMetadata<Self>`][DynMetadata]
+///   (e.g. `DynMetadata<dyn SomeTrait>`)
+///
+/// In the future, the Rust language may gain new kinds of types
+/// that have different pointer metadata.
+///
+/// [dst]: https://doc.rust-lang.org/nomicon/exotic-sizes.html#dynamically-sized-types-dsts
+///
+///
+/// # The `Pointee` trait
+///
+/// The point of this trait is its `Metadata` associated type,
+/// which is `()` or `usize` or `DynMetadata<_>` as described above.
+/// It is automatically implemented for every type.
+/// It can be assumed to be implemented in a generic context, even without a corresponding bound.
+///
+///
+/// # Usage
+///
+/// Raw pointers can be decomposed into the data pointer and metadata components
+/// with their [`to_raw_parts`] method.
+///
+/// Alternatively, metadata alone can be extracted with the [`metadata`] function.
+/// A reference can be passed to [`metadata`] and implicitly coerced.
+///
+/// A (possibly-wide) pointer can be put back together from its data pointer and metadata
+/// with [`from_raw_parts`] or [`from_raw_parts_mut`].
+///
+/// [`to_raw_parts`]: *const::to_raw_parts
 #[lang = "pointee_trait"]
 #[rustc_deny_explicit_impl]
 #[rustc_do_not_implement_via_object]
@@ -116,12 +116,12 @@ pub const fn metadata<T: ?Sized>(ptr: *const T) -> <T as Pointee>::Metadata {
 
 /// Forms a (possibly-wide) raw pointer from a data pointer and metadata.
 // FIXME(pvdrz): fix docs
-// ///
-// /// This function is safe but the returned pointer is not necessarily safe to dereference.
-// /// For slices, see the documentation of [`slice::from_raw_parts`] for safety requirements.
-// /// For trait objects, the metadata must come from a pointer to the same underlying erased type.
-// ///
-// /// [`slice::from_raw_parts`]: crate::slice::from_raw_parts
+///
+/// This function is safe but the returned pointer is not necessarily safe to dereference.
+/// For slices, see the documentation of [`slice::from_raw_parts`] for safety requirements.
+/// For trait objects, the metadata must come from a pointer to the same underlying erased type.
+///
+/// [`slice::from_raw_parts`]: crate::slice::from_raw_parts
 #[unstable(feature = "ptr_metadata", issue = "81513")]
 #[inline]
 pub const fn from_raw_parts<T: ?Sized>(

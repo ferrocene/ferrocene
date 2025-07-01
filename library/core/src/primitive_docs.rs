@@ -3,61 +3,61 @@
 #[doc(alias = "false")]
 /// The boolean type.
 // FIXME(pvdrz): fix docs
-// ///
-// /// The `bool` represents a value, which could only be either [`true`] or [`false`]. If you cast
-// /// a `bool` into an integer, [`true`] will be 1 and [`false`] will be 0.
-// ///
-// /// # Basic usage
-// ///
-// /// `bool` implements various traits, such as [`BitAnd`], [`BitOr`], [`Not`], etc.,
-// /// which allow us to perform boolean operations using `&`, `|` and `!`.
-// ///
-// /// [`if`] requires a `bool` value as its conditional. [`assert!`], which is an
-// /// important macro in testing, checks whether an expression is [`true`] and panics
-// /// if it isn't.
-// ///
-// /// ```
-// /// let bool_val = true & false | false;
-// /// assert!(!bool_val);
-// /// ```
-// ///
-// /// [`true`]: ../std/keyword.true.html
-// /// [`false`]: ../std/keyword.false.html
-// /// [`BitAnd`]: ops::BitAnd
-// /// [`BitOr`]: ops::BitOr
-// /// [`Not`]: ops::Not
-// /// [`if`]: ../std/keyword.if.html
-// ///
-// /// # Examples
-// ///
-// /// A trivial example of the usage of `bool`:
-// ///
-// /// ```
-// /// let praise_the_borrow_checker = true;
-// ///
-// /// // // using the `if` conditional
-// /// if praise_the_borrow_checker {
-// ///     println!("oh, yeah!");
-// /// } else {
-// ///     println!("what?!!");
-// /// }
-// ///
-// /// // // ... or, a match pattern
-// /// match praise_the_borrow_checker {
-// ///     true => println!("keep praising!"),
-// ///     false => println!("you should praise!"),
-// /// }
-// /// ```
-// ///
-// /// Also, since `bool` implements the [`Copy`] trait, we don't
-// /// have to worry about the move semantics (just like the integer and float primitives).
-// ///
-// /// Now an example of `bool` cast to integer type:
-// ///
-// /// ```
-// /// assert_eq!(true as i32, 1);
-// /// assert_eq!(false as i32, 0);
-// /// ```
+///
+/// The `bool` represents a value, which could only be either [`true`] or [`false`]. If you cast
+/// a `bool` into an integer, [`true`] will be 1 and [`false`] will be 0.
+///
+/// # Basic usage
+///
+/// `bool` implements various traits, such as [`BitAnd`], [`BitOr`], [`Not`], etc.,
+/// which allow us to perform boolean operations using `&`, `|` and `!`.
+///
+/// [`if`] requires a `bool` value as its conditional. [`assert!`], which is an
+/// important macro in testing, checks whether an expression is [`true`] and panics
+/// if it isn't.
+///
+/// ```
+/// let bool_val = true & false | false;
+/// assert!(!bool_val);
+/// ```
+///
+/// [`true`]: ../std/keyword.true.html
+/// [`false`]: ../std/keyword.false.html
+/// [`BitAnd`]: ops::BitAnd
+/// [`BitOr`]: ops::BitOr
+/// [`Not`]: ops::Not
+/// [`if`]: ../std/keyword.if.html
+///
+/// # Examples
+///
+/// A trivial example of the usage of `bool`:
+///
+/// ```
+/// let praise_the_borrow_checker = true;
+///
+/// // // using the `if` conditional
+/// if praise_the_borrow_checker {
+///     println!("oh, yeah!");
+/// } else {
+///     println!("what?!!");
+/// }
+///
+/// // // ... or, a match pattern
+/// match praise_the_borrow_checker {
+///     true => println!("keep praising!"),
+///     false => println!("you should praise!"),
+/// }
+/// ```
+///
+/// Also, since `bool` implements the [`Copy`] trait, we don't
+/// have to worry about the move semantics (just like the integer and float primitives).
+///
+/// Now an example of `bool` cast to integer type:
+///
+/// ```
+/// assert_eq!(true as i32, 1);
+/// assert_eq!(false as i32, 0);
+/// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 mod prim_bool {}
 
@@ -628,209 +628,209 @@ mod prim_pointer {}
 /// A fixed-size array, denoted `[T; N]`, for the element type, `T`, and the
 /// non-negative compile-time constant size, `N`.
 // FIXME(pvdrz): fix docs
-// ///
-// /// There are two syntactic forms for creating an array:
-// ///
-// /// * A list with each element, i.e., `[x, y, z]`.
-// /// * A repeat expression `[expr; N]` where `N` is how many times to repeat `expr` in the array. `expr` must either be:
-// ///
-// ///   * A value of a type implementing the [`Copy`] trait
-// ///   * A `const` value
-// ///
-// /// Note that `[expr; 0]` is allowed, and produces an empty array.
-// /// This will still evaluate `expr`, however, and immediately drop the resulting value, so
-// /// be mindful of side effects.
-// ///
-// /// Arrays of *any* size implement the following traits if the element type allows it:
-// ///
-// /// - [`Copy`]
-// /// - [`Clone`]
-// /// - [`Debug`]
-// /// - [`IntoIterator`] (implemented for `[T; N]`, `&[T; N]` and `&mut [T; N]`)
-// /// - [`PartialEq`], [`PartialOrd`], [`Eq`], [`Ord`]
-// /// - [`Hash`]
-// /// - [`AsRef`], [`AsMut`]
-// /// - [`Borrow`], [`BorrowMut`]
-// ///
-// /// Arrays of sizes from 0 to 32 (inclusive) implement the [`Default`] trait
-// /// if the element type allows it. As a stopgap, trait implementations are
-// /// statically generated up to size 32.
-// ///
-// /// Arrays of sizes from 1 to 12 (inclusive) implement [`From<Tuple>`], where `Tuple`
-// /// is a homogeneous [prim@tuple] of appropriate length.
-// ///
-// /// Arrays coerce to [slices (`[T]`)][slice], so a slice method may be called on
-// /// an array. Indeed, this provides most of the API for working with arrays.
-// ///
-// /// Slices have a dynamic size and do not coerce to arrays. Instead, use
-// /// `slice.try_into().unwrap()` or `<ArrayType>::try_from(slice).unwrap()`.
-// ///
-// /// Array's `try_from(slice)` implementations (and the corresponding `slice.try_into()`
-// /// array implementations) succeed if the input slice length is the same as the result
-// /// array length. They optimize especially well when the optimizer can easily determine
-// /// the slice length, e.g. `<[u8; 4]>::try_from(&slice[4..8]).unwrap()`. Array implements
-// /// [TryFrom](crate::convert::TryFrom) returning:
-// ///
-// /// - `[T; N]` copies from the slice's elements
-// /// - `&[T; N]` references the original slice's elements
-// /// - `&mut [T; N]` references the original slice's elements
-// ///
-// /// You can move elements out of an array with a [slice pattern]. If you want
-// /// one element, see [`mem::replace`].
-// ///
-// /// # Examples
-// ///
-// /// ```
-// /// let mut array: [i32; 3] = [0; 3];
-// ///
-// /// array[1] = 1;
-// /// array[2] = 2;
-// ///
-// /// assert_eq!([1, 2], &array[1..]);
-// ///
-// /// // // This loop prints: 0 1 2
-// /// for x in array {
-// ///     print!("{x} ");
-// /// }
-// /// ```
-// ///
-// /// You can also iterate over reference to the array's elements:
-// ///
-// /// ```
-// /// let array: [i32; 3] = [0; 3];
-// ///
-// /// for x in &array { }
-// /// ```
-// ///
-// /// You can use `<ArrayType>::try_from(slice)` or `slice.try_into()` to get an array from
-// /// a slice:
-// ///
-// /// ```
-// /// let bytes: [u8; 3] = [1, 0, 2];
-// /// assert_eq!(1, u16::from_le_bytes(<[u8; 2]>::try_from(&bytes[0..2]).unwrap()));
-// /// assert_eq!(512, u16::from_le_bytes(bytes[1..3].try_into().unwrap()));
-// /// ```
-// ///
-// /// You can use a [slice pattern] to move elements out of an array:
-// ///
-// /// ```
-// /// fn move_away(_: String) { /* Do interesting things. */ }
-// ///
-// /// let [john, roa] = ["John".to_string(), "Roa".to_string()];
-// /// move_away(john);
-// /// move_away(roa);
-// /// ```
-// ///
-// /// Arrays can be created from homogeneous tuples of appropriate length:
-// ///
-// /// ```
-// /// let tuple: (u32, u32, u32) = (1, 2, 3);
-// /// let array: [u32; 3] = tuple.into();
-// /// ```
-// ///
-// /// # Editions
-// ///
-// /// Prior to Rust 1.53, arrays did not implement [`IntoIterator`] by value, so the method call
-// /// `array.into_iter()` auto-referenced into a [slice iterator](slice::iter). Right now, the old
-// /// behavior is preserved in the 2015 and 2018 editions of Rust for compatibility, ignoring
-// /// [`IntoIterator`] by value. In the future, the behavior on the 2015 and 2018 edition
-// /// might be made consistent to the behavior of later editions.
-// ///
-// /// ```rust,edition2018
-// /// // // Rust 2015 and 2018:
-// ///
-// /// # #![allow(array_into_iter)] // // override our `deny(warnings)`
-// /// let array: [i32; 3] = [0; 3];
-// ///
-// /// // // This creates a slice iterator, producing references to each value.
-// /// for item in array.into_iter().enumerate() {
-// ///     let (i, x): (usize, &i32) = item;
-// ///     println!("array[{i}] = {x}");
-// /// }
-// ///
-// /// // // The `array_into_iter` lint suggests this change for future compatibility:
-// /// for item in array.iter().enumerate() {
-// ///     let (i, x): (usize, &i32) = item;
-// ///     println!("array[{i}] = {x}");
-// /// }
-// ///
-// /// // // You can explicitly iterate an array by value using `IntoIterator::into_iter`
-// /// for item in IntoIterator::into_iter(array).enumerate() {
-// ///     let (i, x): (usize, i32) = item;
-// ///     println!("array[{i}] = {x}");
-// /// }
-// /// ```
-// ///
-// /// Starting in the 2021 edition, `array.into_iter()` uses `IntoIterator` normally to iterate
-// /// by value, and `iter()` should be used to iterate by reference like previous editions.
-// ///
-// /// ```rust,edition2021
-// /// // // Rust 2021:
-// ///
-// /// let array: [i32; 3] = [0; 3];
-// ///
-// /// // // This iterates by reference:
-// /// for item in array.iter().enumerate() {
-// ///     let (i, x): (usize, &i32) = item;
-// ///     println!("array[{i}] = {x}");
-// /// }
-// ///
-// /// // // This iterates by value:
-// /// for item in array.into_iter().enumerate() {
-// ///     let (i, x): (usize, i32) = item;
-// ///     println!("array[{i}] = {x}");
-// /// }
-// /// ```
-// ///
-// /// Future language versions might start treating the `array.into_iter()`
-// /// syntax on editions 2015 and 2018 the same as on edition 2021. So code using
-// /// those older editions should still be written with this change in mind, to
-// /// prevent breakage in the future. The safest way to accomplish this is to
-// /// avoid the `into_iter` syntax on those editions. If an edition update is not
-// /// viable/desired, there are multiple alternatives:
-// /// * use `iter`, equivalent to the old behavior, creating references
-// /// * use [`IntoIterator::into_iter`], equivalent to the post-2021 behavior (Rust 1.53+)
-// /// * replace `for ... in array.into_iter() {` with `for ... in array {`,
-// ///   equivalent to the post-2021 behavior (Rust 1.53+)
-// ///
-// /// ```rust,edition2018
-// /// // // Rust 2015 and 2018:
-// ///
-// /// let array: [i32; 3] = [0; 3];
-// ///
-// /// // // This iterates by reference:
-// /// for item in array.iter() {
-// ///     let x: &i32 = item;
-// ///     println!("{x}");
-// /// }
-// ///
-// /// // // This iterates by value:
-// /// for item in IntoIterator::into_iter(array) {
-// ///     let x: i32 = item;
-// ///     println!("{x}");
-// /// }
-// ///
-// /// // // This iterates by value:
-// /// for item in array {
-// ///     let x: i32 = item;
-// ///     println!("{x}");
-// /// }
-// ///
-// /// // // IntoIter can also start a chain.
-// /// // // This iterates by value:
-// /// for item in IntoIterator::into_iter(array).enumerate() {
-// ///     let (i, x): (usize, i32) = item;
-// ///     println!("array[{i}] = {x}");
-// /// }
-// /// ```
-// ///
-// /// [slice]: prim@slice
-// /// [`Debug`]: fmt::Debug
-// /// [`Hash`]: hash::Hash
-// /// [`Borrow`]: borrow::Borrow
-// /// [`BorrowMut`]: borrow::BorrowMut
-// /// [slice pattern]: ../reference/patterns.html#slice-patterns
-// /// [`From<Tuple>`]: convert::From
+///
+/// There are two syntactic forms for creating an array:
+///
+/// * A list with each element, i.e., `[x, y, z]`.
+/// * A repeat expression `[expr; N]` where `N` is how many times to repeat `expr` in the array. `expr` must either be:
+///
+///   * A value of a type implementing the [`Copy`] trait
+///   * A `const` value
+///
+/// Note that `[expr; 0]` is allowed, and produces an empty array.
+/// This will still evaluate `expr`, however, and immediately drop the resulting value, so
+/// be mindful of side effects.
+///
+/// Arrays of *any* size implement the following traits if the element type allows it:
+///
+/// - [`Copy`]
+/// - [`Clone`]
+/// - [`Debug`]
+/// - [`IntoIterator`] (implemented for `[T; N]`, `&[T; N]` and `&mut [T; N]`)
+/// - [`PartialEq`], [`PartialOrd`], [`Eq`], [`Ord`]
+/// - [`Hash`]
+/// - [`AsRef`], [`AsMut`]
+/// - [`Borrow`], [`BorrowMut`]
+///
+/// Arrays of sizes from 0 to 32 (inclusive) implement the [`Default`] trait
+/// if the element type allows it. As a stopgap, trait implementations are
+/// statically generated up to size 32.
+///
+/// Arrays of sizes from 1 to 12 (inclusive) implement [`From<Tuple>`], where `Tuple`
+/// is a homogeneous [prim@tuple] of appropriate length.
+///
+/// Arrays coerce to [slices (`[T]`)][slice], so a slice method may be called on
+/// an array. Indeed, this provides most of the API for working with arrays.
+///
+/// Slices have a dynamic size and do not coerce to arrays. Instead, use
+/// `slice.try_into().unwrap()` or `<ArrayType>::try_from(slice).unwrap()`.
+///
+/// Array's `try_from(slice)` implementations (and the corresponding `slice.try_into()`
+/// array implementations) succeed if the input slice length is the same as the result
+/// array length. They optimize especially well when the optimizer can easily determine
+/// the slice length, e.g. `<[u8; 4]>::try_from(&slice[4..8]).unwrap()`. Array implements
+/// [TryFrom](crate::convert::TryFrom) returning:
+///
+/// - `[T; N]` copies from the slice's elements
+/// - `&[T; N]` references the original slice's elements
+/// - `&mut [T; N]` references the original slice's elements
+///
+/// You can move elements out of an array with a [slice pattern]. If you want
+/// one element, see [`mem::replace`].
+///
+/// # Examples
+///
+/// ```
+/// let mut array: [i32; 3] = [0; 3];
+///
+/// array[1] = 1;
+/// array[2] = 2;
+///
+/// assert_eq!([1, 2], &array[1..]);
+///
+/// // // This loop prints: 0 1 2
+/// for x in array {
+///     print!("{x} ");
+/// }
+/// ```
+///
+/// You can also iterate over reference to the array's elements:
+///
+/// ```
+/// let array: [i32; 3] = [0; 3];
+///
+/// for x in &array { }
+/// ```
+///
+/// You can use `<ArrayType>::try_from(slice)` or `slice.try_into()` to get an array from
+/// a slice:
+///
+/// ```
+/// let bytes: [u8; 3] = [1, 0, 2];
+/// assert_eq!(1, u16::from_le_bytes(<[u8; 2]>::try_from(&bytes[0..2]).unwrap()));
+/// assert_eq!(512, u16::from_le_bytes(bytes[1..3].try_into().unwrap()));
+/// ```
+///
+/// You can use a [slice pattern] to move elements out of an array:
+///
+/// ```
+/// fn move_away(_: String) { /* Do interesting things. */ }
+///
+/// let [john, roa] = ["John".to_string(), "Roa".to_string()];
+/// move_away(john);
+/// move_away(roa);
+/// ```
+///
+/// Arrays can be created from homogeneous tuples of appropriate length:
+///
+/// ```
+/// let tuple: (u32, u32, u32) = (1, 2, 3);
+/// let array: [u32; 3] = tuple.into();
+/// ```
+///
+/// # Editions
+///
+/// Prior to Rust 1.53, arrays did not implement [`IntoIterator`] by value, so the method call
+/// `array.into_iter()` auto-referenced into a [slice iterator](slice::iter). Right now, the old
+/// behavior is preserved in the 2015 and 2018 editions of Rust for compatibility, ignoring
+/// [`IntoIterator`] by value. In the future, the behavior on the 2015 and 2018 edition
+/// might be made consistent to the behavior of later editions.
+///
+/// ```rust,edition2018
+/// // // Rust 2015 and 2018:
+///
+/// # #![allow(array_into_iter)] // // override our `deny(warnings)`
+/// let array: [i32; 3] = [0; 3];
+///
+/// // // This creates a slice iterator, producing references to each value.
+/// for item in array.into_iter().enumerate() {
+///     let (i, x): (usize, &i32) = item;
+///     println!("array[{i}] = {x}");
+/// }
+///
+/// // // The `array_into_iter` lint suggests this change for future compatibility:
+/// for item in array.iter().enumerate() {
+///     let (i, x): (usize, &i32) = item;
+///     println!("array[{i}] = {x}");
+/// }
+///
+/// // // You can explicitly iterate an array by value using `IntoIterator::into_iter`
+/// for item in IntoIterator::into_iter(array).enumerate() {
+///     let (i, x): (usize, i32) = item;
+///     println!("array[{i}] = {x}");
+/// }
+/// ```
+///
+/// Starting in the 2021 edition, `array.into_iter()` uses `IntoIterator` normally to iterate
+/// by value, and `iter()` should be used to iterate by reference like previous editions.
+///
+/// ```rust,edition2021
+/// // // Rust 2021:
+///
+/// let array: [i32; 3] = [0; 3];
+///
+/// // // This iterates by reference:
+/// for item in array.iter().enumerate() {
+///     let (i, x): (usize, &i32) = item;
+///     println!("array[{i}] = {x}");
+/// }
+///
+/// // // This iterates by value:
+/// for item in array.into_iter().enumerate() {
+///     let (i, x): (usize, i32) = item;
+///     println!("array[{i}] = {x}");
+/// }
+/// ```
+///
+/// Future language versions might start treating the `array.into_iter()`
+/// syntax on editions 2015 and 2018 the same as on edition 2021. So code using
+/// those older editions should still be written with this change in mind, to
+/// prevent breakage in the future. The safest way to accomplish this is to
+/// avoid the `into_iter` syntax on those editions. If an edition update is not
+/// viable/desired, there are multiple alternatives:
+/// * use `iter`, equivalent to the old behavior, creating references
+/// * use [`IntoIterator::into_iter`], equivalent to the post-2021 behavior (Rust 1.53+)
+/// * replace `for ... in array.into_iter() {` with `for ... in array {`,
+///   equivalent to the post-2021 behavior (Rust 1.53+)
+///
+/// ```rust,edition2018
+/// // // Rust 2015 and 2018:
+///
+/// let array: [i32; 3] = [0; 3];
+///
+/// // // This iterates by reference:
+/// for item in array.iter() {
+///     let x: &i32 = item;
+///     println!("{x}");
+/// }
+///
+/// // // This iterates by value:
+/// for item in IntoIterator::into_iter(array) {
+///     let x: i32 = item;
+///     println!("{x}");
+/// }
+///
+/// // // This iterates by value:
+/// for item in array {
+///     let x: i32 = item;
+///     println!("{x}");
+/// }
+///
+/// // // IntoIter can also start a chain.
+/// // // This iterates by value:
+/// for item in IntoIterator::into_iter(array).enumerate() {
+///     let (i, x): (usize, i32) = item;
+///     println!("array[{i}] = {x}");
+/// }
+/// ```
+///
+/// [slice]: prim@slice
+/// [`Debug`]: fmt::Debug
+/// [`Hash`]: hash::Hash
+/// [`Borrow`]: borrow::Borrow
+/// [`BorrowMut`]: borrow::BorrowMut
+/// [slice pattern]: ../reference/patterns.html#slice-patterns
+/// [`From<Tuple>`]: convert::From
 #[stable(feature = "rust1", since = "1.0.0")]
 mod prim_array {}
 
@@ -1246,8 +1246,8 @@ mod prim_f16 {}
 /// For more information on floating-point numbers, see [Wikipedia][wikipedia].
 ///
 // FIXME(pvdrz): fix docs
-// /// *[See also the `std::f32::consts` module](crate::f32::consts).*
-// ///
+/// *[See also the `std::f32::consts` module](crate::f32::consts).*
+///
 /// [wikipedia]: https://en.wikipedia.org/wiki/Single-precision_floating-point_format
 ///
 /// # NaN bit patterns
@@ -1385,8 +1385,8 @@ mod prim_f32 {}
 /// values][wikipedia] for more information.
 ///
 // FIXME(pvdrz): fix docs
-// /// *[See also the `std::f64::consts` module](crate::f64::consts).*
-// ///
+/// *[See also the `std::f64::consts` module](crate::f64::consts).*
+///
 /// [wikipedia]: https://en.wikipedia.org/wiki/Double-precision_floating-point_format
 #[stable(feature = "rust1", since = "1.0.0")]
 mod prim_f64 {}

@@ -2,117 +2,117 @@ use crate::ops::ControlFlow;
 
 /// The `?` operator and `try {}` blocks.
 // FIXME(pvdrz): fix docs
-// ///
-// /// `try_*` methods typically involve a type implementing this trait.  For
-// /// example, the closures passed to [`Iterator::try_fold`] and
-// /// [`Iterator::try_for_each`] must return such a type.
-// ///
-// /// `Try` types are typically those containing two or more categories of values,
-// /// some subset of which are so commonly handled via early returns that it's
-// /// worth providing a terse (but still visible) syntax to make that easy.
-// ///
-// /// This is most often seen for error handling with [`Result`] and [`Option`].
-// /// The quintessential implementation of this trait is on [`ControlFlow`].
-// ///
-// /// # Using `Try` in Generic Code
-// ///
-// /// `Iterator::try_fold` was stabilized to call back in Rust 1.27, but
-// /// this trait is much newer.  To illustrate the various associated types and
-// /// methods, let's implement our own version.
-// ///
-// /// As a reminder, an infallible version of a fold looks something like this:
-// /// ```
-// /// fn simple_fold<A, T>(
-// ///     iter: impl Iterator<Item = T>,
-// ///     mut accum: A,
-// ///     mut f: impl FnMut(A, T) -> A,
-// /// ) -> A {
-// ///     for x in iter {
-// ///         accum = f(accum, x);
-// ///     }
-// ///     accum
-// /// }
-// /// ```
-// ///
-// /// So instead of `f` returning just an `A`, we'll need it to return some other
-// /// type that produces an `A` in the "don't short circuit" path.  Conveniently,
-// /// that's also the type we need to return from the function.
-// ///
-// /// Let's add a new generic parameter `R` for that type, and bound it to the
-// /// output type that we want:
-// /// ```
-// /// # #![feature(try_trait_v2)]
-// /// # use std::ops::Try;
-// /// fn simple_try_fold_1<A, T, R: Try<Output = A>>(
-// ///     iter: impl Iterator<Item = T>,
-// ///     mut accum: A,
-// ///     mut f: impl FnMut(A, T) -> R,
-// /// ) -> R {
-// ///     todo!()
-// /// }
-// /// ```
-// ///
-// /// If we get through the entire iterator, we need to wrap up the accumulator
-// /// into the return type using [`Try::from_output`]:
-// /// ```
-// /// # #![feature(try_trait_v2)]
-// /// # use std::ops::{ControlFlow, Try};
-// /// fn simple_try_fold_2<A, T, R: Try<Output = A>>(
-// ///     iter: impl Iterator<Item = T>,
-// ///     mut accum: A,
-// ///     mut f: impl FnMut(A, T) -> R,
-// /// ) -> R {
-// ///     for x in iter {
-// ///         let cf = f(accum, x).branch();
-// ///         match cf {
-// ///             ControlFlow::Continue(a) => accum = a,
-// ///             ControlFlow::Break(_) => todo!(),
-// ///         }
-// ///     }
-// ///     R::from_output(accum)
-// /// }
-// /// ```
-// ///
-// /// We'll also need [`FromResidual::from_residual`] to turn the residual back
-// /// into the original type.  But because it's a supertrait of `Try`, we don't
-// /// need to mention it in the bounds.  All types which implement `Try` can be
-// /// recreated from their corresponding residual, so we'll just call it:
-// /// ```
-// /// # #![feature(try_trait_v2)]
-// /// # use std::ops::{ControlFlow, Try};
-// /// pub fn simple_try_fold_3<A, T, R: Try<Output = A>>(
-// ///     iter: impl Iterator<Item = T>,
-// ///     mut accum: A,
-// ///     mut f: impl FnMut(A, T) -> R,
-// /// ) -> R {
-// ///     for x in iter {
-// ///         let cf = f(accum, x).branch();
-// ///         match cf {
-// ///             ControlFlow::Continue(a) => accum = a,
-// ///             ControlFlow::Break(r) => return R::from_residual(r),
-// ///         }
-// ///     }
-// ///     R::from_output(accum)
-// /// }
-// /// ```
-// ///
-// /// But this "call `branch`, then `match` on it, and `return` if it was a
-// /// `Break`" is exactly what happens inside the `?` operator.  So rather than
-// /// do all this manually, we can just use `?` instead:
-// /// ```
-// /// # #![feature(try_trait_v2)]
-// /// # use std::ops::Try;
-// /// fn simple_try_fold<A, T, R: Try<Output = A>>(
-// ///     iter: impl Iterator<Item = T>,
-// ///     mut accum: A,
-// ///     mut f: impl FnMut(A, T) -> R,
-// /// ) -> R {
-// ///     for x in iter {
-// ///         accum = f(accum, x)?;
-// ///     }
-// ///     R::from_output(accum)
-// /// }
-// /// ```
+///
+/// `try_*` methods typically involve a type implementing this trait.  For
+/// example, the closures passed to [`Iterator::try_fold`] and
+/// [`Iterator::try_for_each`] must return such a type.
+///
+/// `Try` types are typically those containing two or more categories of values,
+/// some subset of which are so commonly handled via early returns that it's
+/// worth providing a terse (but still visible) syntax to make that easy.
+///
+/// This is most often seen for error handling with [`Result`] and [`Option`].
+/// The quintessential implementation of this trait is on [`ControlFlow`].
+///
+/// # Using `Try` in Generic Code
+///
+/// `Iterator::try_fold` was stabilized to call back in Rust 1.27, but
+/// this trait is much newer.  To illustrate the various associated types and
+/// methods, let's implement our own version.
+///
+/// As a reminder, an infallible version of a fold looks something like this:
+/// ```
+/// fn simple_fold<A, T>(
+///     iter: impl Iterator<Item = T>,
+///     mut accum: A,
+///     mut f: impl FnMut(A, T) -> A,
+/// ) -> A {
+///     for x in iter {
+///         accum = f(accum, x);
+///     }
+///     accum
+/// }
+/// ```
+///
+/// So instead of `f` returning just an `A`, we'll need it to return some other
+/// type that produces an `A` in the "don't short circuit" path.  Conveniently,
+/// that's also the type we need to return from the function.
+///
+/// Let's add a new generic parameter `R` for that type, and bound it to the
+/// output type that we want:
+/// ```
+/// # #![feature(try_trait_v2)]
+/// # use std::ops::Try;
+/// fn simple_try_fold_1<A, T, R: Try<Output = A>>(
+///     iter: impl Iterator<Item = T>,
+///     mut accum: A,
+///     mut f: impl FnMut(A, T) -> R,
+/// ) -> R {
+///     todo!()
+/// }
+/// ```
+///
+/// If we get through the entire iterator, we need to wrap up the accumulator
+/// into the return type using [`Try::from_output`]:
+/// ```
+/// # #![feature(try_trait_v2)]
+/// # use std::ops::{ControlFlow, Try};
+/// fn simple_try_fold_2<A, T, R: Try<Output = A>>(
+///     iter: impl Iterator<Item = T>,
+///     mut accum: A,
+///     mut f: impl FnMut(A, T) -> R,
+/// ) -> R {
+///     for x in iter {
+///         let cf = f(accum, x).branch();
+///         match cf {
+///             ControlFlow::Continue(a) => accum = a,
+///             ControlFlow::Break(_) => todo!(),
+///         }
+///     }
+///     R::from_output(accum)
+/// }
+/// ```
+///
+/// We'll also need [`FromResidual::from_residual`] to turn the residual back
+/// into the original type.  But because it's a supertrait of `Try`, we don't
+/// need to mention it in the bounds.  All types which implement `Try` can be
+/// recreated from their corresponding residual, so we'll just call it:
+/// ```
+/// # #![feature(try_trait_v2)]
+/// # use std::ops::{ControlFlow, Try};
+/// pub fn simple_try_fold_3<A, T, R: Try<Output = A>>(
+///     iter: impl Iterator<Item = T>,
+///     mut accum: A,
+///     mut f: impl FnMut(A, T) -> R,
+/// ) -> R {
+///     for x in iter {
+///         let cf = f(accum, x).branch();
+///         match cf {
+///             ControlFlow::Continue(a) => accum = a,
+///             ControlFlow::Break(r) => return R::from_residual(r),
+///         }
+///     }
+///     R::from_output(accum)
+/// }
+/// ```
+///
+/// But this "call `branch`, then `match` on it, and `return` if it was a
+/// `Break`" is exactly what happens inside the `?` operator.  So rather than
+/// do all this manually, we can just use `?` instead:
+/// ```
+/// # #![feature(try_trait_v2)]
+/// # use std::ops::Try;
+/// fn simple_try_fold<A, T, R: Try<Output = A>>(
+///     iter: impl Iterator<Item = T>,
+///     mut accum: A,
+///     mut f: impl FnMut(A, T) -> R,
+/// ) -> R {
+///     for x in iter {
+///         accum = f(accum, x)?;
+///     }
+///     R::from_output(accum)
+/// }
+/// ```
 #[unstable(feature = "try_trait_v2", issue = "84277")]
 #[rustc_on_unimplemented(
     on(

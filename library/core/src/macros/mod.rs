@@ -438,19 +438,19 @@ pub macro debug_assert_matches($($arg:tt)*) {
 /// return `false`.
 ///
 // FIXME(pvdrz): fix docs
-// /// When testing that a value matches a pattern, it's generally preferable to use
-// /// [`assert_matches!`] as it will print the debug representation of the value if the assertion
-// /// fails.
-// ///
-// /// # Examples
-// ///
-// /// ```
-// /// let foo = 'f';
-// /// assert!(matches!(foo, 'A'..='Z' | 'a'..='z'));
-// ///
-// /// let bar = Some(4);
-// /// assert!(matches!(bar, Some(x) if x > 2));
-// /// ```
+/// When testing that a value matches a pattern, it's generally preferable to use
+/// [`assert_matches!`] as it will print the debug representation of the value if the assertion
+/// fails.
+///
+/// # Examples
+///
+/// ```
+/// let foo = 'f';
+/// assert!(matches!(foo, 'A'..='Z' | 'a'..='z'));
+///
+/// let bar = Some(4);
+/// assert!(matches!(bar, Some(x) if x > 2));
+/// ```
 #[macro_export]
 #[stable(feature = "matches_macro", since = "1.42.0")]
 #[rustc_diagnostic_item = "matches_macro"]

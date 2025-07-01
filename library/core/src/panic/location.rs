@@ -5,33 +5,33 @@ use crate::fmt;
 
 /// A struct containing information about the location of a panic.
 // FIXME(pvdrz): fix docs
-// ///
-// /// This structure is created by [`PanicHookInfo::location()`] and [`PanicInfo::location()`].
-// ///
-// /// [`PanicInfo::location()`]: crate::panic::PanicInfo::location
-// /// [`PanicHookInfo::location()`]: ../../std/panic/struct.PanicHookInfo.html#method.location
-// ///
-// /// # Examples
-// ///
-// /// ```should_panic
-// /// use std::panic;
-// ///
-// /// panic::set_hook(Box::new(|panic_info| {
-// ///     if let Some(location) = panic_info.location() {
-// ///         println!("panic occurred in file '{}' at line {}", location.file(), location.line());
-// ///     } else {
-// ///         println!("panic occurred but can't get location information...");
-// ///     }
-// /// }));
-// ///
-// /// panic!("Normal panic");
-// /// ```
-// ///
-// /// # Comparisons
-// ///
-// /// Comparisons for equality and ordering are made in file, line, then column priority.
-// /// Files are compared as strings, not `Path`, which could be unexpected.
-// /// See [`Location::file`]'s documentation for more discussion.
+///
+/// This structure is created by [`PanicHookInfo::location()`] and [`PanicInfo::location()`].
+///
+/// [`PanicInfo::location()`]: crate::panic::PanicInfo::location
+/// [`PanicHookInfo::location()`]: ../../std/panic/struct.PanicHookInfo.html#method.location
+///
+/// # Examples
+///
+/// ```should_panic
+/// use std::panic;
+///
+/// panic::set_hook(Box::new(|panic_info| {
+///     if let Some(location) = panic_info.location() {
+///         println!("panic occurred in file '{}' at line {}", location.file(), location.line());
+///     } else {
+///         println!("panic occurred but can't get location information...");
+///     }
+/// }));
+///
+/// panic!("Normal panic");
+/// ```
+///
+/// # Comparisons
+///
+/// Comparisons for equality and ordering are made in file, line, then column priority.
+/// Files are compared as strings, not `Path`, which could be unexpected.
+/// See [`Location::file`]'s documentation for more discussion.
 #[lang = "panic_location"]
 #[cfg_attr(
     not(feature = "ferrocene_certified"),

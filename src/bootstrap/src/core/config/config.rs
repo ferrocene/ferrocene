@@ -443,7 +443,6 @@ pub struct Config {
     pub ferrocene_technical_report_url: Option<String>,
     pub ferrocene_secret_sauce: FerroceneSecretSauce,
     pub ferrocene_generate_coverage_report_after_tests: bool,
-    pub ferrocene_certified: bool,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1471,7 +1470,6 @@ define_config! {
         technical_report_url: Option<String> = "technical-report-url",
         secret_sauce_dir: Option<PathBuf> = "secret-sauce-dir",
         generate_coverage_report_after_test: Option<bool> = "generate-coverage-report-after-tests",
-        certified: Option<bool> = "certified",
     }
 }
 
@@ -2631,10 +2629,6 @@ impl Config {
                 FerroceneSecretSauce::Local(path)
             } else {
                 FerroceneSecretSauce::Download
-            };
-
-            if let Some(value) = f.certified {
-                config.ferrocene_certified = value;
             }
         }
 

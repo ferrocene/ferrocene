@@ -18,8 +18,8 @@ be stored in a memory location, and interpreted based on some :t:`type`.
 An :dt:`allocated object` is a :t:`value` stored at some memory address.
 
 :dp:`fls_kaomYy0Ml4Nh`
-An :t:`[allocated object]s` :dt:`base address` is the the memory address the
-object is stored.
+The :dt:`base address` of an :t:`allocated object` is the memory address where
+the object is stored.
 
 :dp:`fls_B5cmkWfD5GNt`
 An :t:`[allocated object]s` :dt:`memory size` is the number of bytes the object

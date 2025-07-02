@@ -57,8 +57,14 @@ add() {
     done
 }
 
-# Load the generic configuration from our dist profile.
-add --set profile=ferrocene-dist
+# On unprivileged CI we use a downloaded LLVM, meaning we cannot set options like
+# rust.lld = true, so don't enable the `ferrocene-dist` profile
+if [[ -n "${FERROCENE_UNPRIVILEGED_CI+x}" ]]; then
+    echo "Using unprivileged CI, not setting profile to \`ferrocene-dist\`"
+else
+    # Load the generic configuration from our dist profile.
+    add --set profile=ferrocene-dist
+fi
 
 # Prevent `./x.py` from managing submodules, as those are cloned and managed
 # already by scripts in the CI configuration.

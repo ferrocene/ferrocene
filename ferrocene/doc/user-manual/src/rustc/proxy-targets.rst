@@ -6,26 +6,28 @@ Proxy Targets
 
 This chapter describes how to use a Proxy Target to validate the operation of a bare-metal target.
 
-Bare-metal targets do not have an operating system (OS), this means they link to ``libc`` or have
+Bare-metal targets do not have an operating system (OS), this means they do not link to ``libc`` or have
 access to ``std`` functionality like ``println!("printing")`` or ``assert!()``.
 
 Alongside qualified bare-metal targets additional ``ferrocenecoretest`` targets can be
 :doc:`installed </rustc/install>` which act as a proxy to the respective bare-metal target,
-while also providing access to ``std``.
+while also providing access to things like ``std`` and profiling support for the purposes of
+testing and tooling.
+
 
 Prerequisites
 -------------
 
 .. note::
 
-   Proxy Targets are only supported on :ref:`aarch64-unknown-linux-gnu` and
-   :ref:`x86_64-unknown-linux-gnu` at this time.
+   Proxy Targets are only supported on the :target:`aarch64-unknown-linux-gnu` and
+   :ref:`x86_64-unknown-linux-gnu` host platforms at this time.
 
 Using a proxy target requires ``qemu`` and ``binfmt`` to be configured correctly for the target
-architecture. Setup instructions differ based on operating system and distribution.
+architecture. Setup instructions differ based on operating system and distribution. While
+developing Ferrocene we use the instructions found in :doc:`internal-procedures:testing-other-targets`.
 
-While developing Ferrocene we use the instructions found in
-:doc:`internal-procedures:testing-other-targets`.
+For coverage, you'll also need to install ``rustfilt`` via ``cargo install rustfilt``.
 
 Using Proxy Targets
 -------------------
@@ -35,6 +37,7 @@ as an executable on a proxy target.
 
 
 .. code-block:: rust
+   // src/thing.rs
 
    #![cfg_attr(not(target_os = "linux"), no_std)]
 
@@ -48,7 +51,6 @@ as an executable on a proxy target.
       return 1;
    }
 
-   #[cfg(target_os = "linux")]
    fn main() {
       assert_eq!(return_a_number(), 1);
       assert_eq!(return_a_number(), 2); // Bang!
@@ -61,15 +63,15 @@ as an executable on a proxy target.
       loop {}
    }
 
-We can build a library for a bare-metal target (:ref:`thumbv7em-none-eabihf`) by running:
+We can build for a bare-metal target (:ref:`thumbv7em-none-eabihf`) by running:
 
 .. code-block::
 
-   rustc --target thumbv7em-none-eabihf src/lib.rs --crate-type lib
+   rustc --target thumbv7em-none-eabihf src/thing.rs --out-dir artifacts
 
-We can build an executable for the equivalent proxy target by running:
+We can build for the equivalent proxy target, with instrumentation, by running:
 
 .. code-block::
    
-   rustc --target thumbv7em-ferrocenecoretest-eabihf src/lib.rs
+   rustc --target thumbv7em-ferrocenecoretest-eabihf src/thing.rs --out-dir artifacts -C instrument-coverage
 

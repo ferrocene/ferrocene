@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 use std::env;
 use std::io::IsTerminal;
 use std::sync::Arc;

@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 // A previously outdated version of LLVM caused compilation failures on Windows
 // specifically with optimization level `z`. After the update to a more recent LLVM
 // version, this test checks that compilation and execution both succeed.

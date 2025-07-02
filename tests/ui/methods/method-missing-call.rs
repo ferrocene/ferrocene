@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 // Tests to make sure that parens are needed for method calls without arguments.
 // outputs text to make sure either an anonymous function is provided or
 // open-close '()' parens are given

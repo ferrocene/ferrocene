@@ -1,27 +1,27 @@
 //! Utilities for comparing and ordering values.
-// //!
-// //! This module contains various tools for comparing and ordering values. In
-// //! summary:
-// //!
-// //! * [`PartialEq<Rhs>`] overloads the `==` and `!=` operators. In cases where
-// //!   `Rhs` (the right hand side's type) is `Self`, this trait corresponds to a
-// //!   partial equivalence relation.
-// //! * [`Eq`] indicates that the overloaded `==` operator corresponds to an
-// //!   equivalence relation.
-// //! * [`Ord`] and [`PartialOrd`] are traits that allow you to define total and
-// //!   partial orderings between values, respectively. Implementing them overloads
-// //!   the `<`, `<=`, `>`, and `>=` operators.
-// //! * [`Ordering`] is an enum returned by the main functions of [`Ord`] and
-// //!   [`PartialOrd`], and describes an ordering of two values (less, equal, or
-// //!   greater).
-// //! * [`Reverse`] is a struct that allows you to easily reverse an ordering.
-// //! * [`max`] and [`min`] are functions that build off of [`Ord`] and allow you
-// //!   to find the maximum or minimum of two values.
-// //!
-// //! For more details, see the respective documentation of each item in the list.
-// //!
-// //! [`max`]: Ord::max
-// //! [`min`]: Ord::min
+//!
+//! This module contains various tools for comparing and ordering values. In
+//! summary:
+//!
+//! * [`PartialEq<Rhs>`] overloads the `==` and `!=` operators. In cases where
+//!   `Rhs` (the right hand side's type) is `Self`, this trait corresponds to a
+//!   partial equivalence relation.
+//! * [`Eq`] indicates that the overloaded `==` operator corresponds to an
+//!   equivalence relation.
+//! * [`Ord`] and [`PartialOrd`] are traits that allow you to define total and
+//!   partial orderings between values, respectively. Implementing them overloads
+//!   the `<`, `<=`, `>`, and `>=` operators.
+//! * [`Ordering`] is an enum returned by the main functions of [`Ord`] and
+//!   [`PartialOrd`], and describes an ordering of two values (less, equal, or
+//!   greater).
+//! * [`Reverse`] is a struct that allows you to easily reverse an ordering.
+//! * [`max`] and [`min`] are functions that build off of [`Ord`] and allow you
+//!   to find the maximum or minimum of two values.
+//!
+//! For more details, see the respective documentation of each item in the list.
+//!
+//! [`max`]: Ord::max
+//! [`min`]: Ord::min
 
 #![stable(feature = "rust1", since = "1.0.0")]
 

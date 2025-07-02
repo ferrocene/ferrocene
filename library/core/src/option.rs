@@ -273,20 +273,20 @@
 //! [`map_or`]: Option::map_or
 //! [`map_or_else`]: Option::map_or_else
 //!
-// //! These methods combine the [`Some`] variants of two [`Option`] values:
-// //!
-// //! * [`zip`] returns [`Some((s, o))`] if `self` is [`Some(s)`] and the
-// //!   provided [`Option`] value is [`Some(o)`]; otherwise, returns [`None`]
-// //! * [`zip_with`] calls the provided function `f` and returns
-// //!   [`Some(f(s, o))`] if `self` is [`Some(s)`] and the provided
-// //!   [`Option`] value is [`Some(o)`]; otherwise, returns [`None`]
-// //!
-// //! [`Some(f(s, o))`]: Some
-// //! [`Some(o)`]: Some
-// //! [`Some(s)`]: Some
-// //! [`Some((s, o))`]: Some
-// //! [`zip`]: Option::zip
-// //! [`zip_with`]: Option::zip_with
+//! These methods combine the [`Some`] variants of two [`Option`] values:
+//!
+//! * [`zip`] returns [`Some((s, o))`] if `self` is [`Some(s)`] and the
+//!   provided [`Option`] value is [`Some(o)`]; otherwise, returns [`None`]
+//! * [`zip_with`] calls the provided function `f` and returns
+//!   [`Some(f(s, o))`] if `self` is [`Some(s)`] and the provided
+//!   [`Option`] value is [`Some(o)`]; otherwise, returns [`None`]
+//!
+//! [`Some(f(s, o))`]: Some
+//! [`Some(o)`]: Some
+//! [`Some(s)`]: Some
+//! [`Some((s, o))`]: Some
+//! [`zip`]: Option::zip
+//! [`zip_with`]: Option::zip_with
 //!
 //! ## Boolean operators
 //!

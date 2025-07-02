@@ -15,6 +15,8 @@ fn main() {
         colored::control::set_override(true);
     }
 
+    ferrocene_annotations::maybe_collect_and_exit();
+
     let config = Arc::new(parse_config(env::args().collect()));
 
     early_config_check(&config);

@@ -35,3 +35,5 @@ fn bar() {
 fn main() {
     bar();
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

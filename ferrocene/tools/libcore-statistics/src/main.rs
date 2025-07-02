@@ -57,8 +57,7 @@ fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Re
             "Kind",
             "Visibility",
             "Safety",
-            "doc(hidden)",
-            "Safety section",
+            "Safety constraint",
             "Panics section",
             "Examples section",
             "Docs",
@@ -70,30 +69,35 @@ fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Re
     collector.functions.sort_by_key(|f| f.file.clone());
 
     for function in &collector.functions {
-        if matches!(function.kind, FunctionKind::TraitMethod) {
-            continue; // trait method implementation has no doc-comment, the definition has
+        let is_trait_method_implementation = matches!(function.kind, FunctionKind::TraitMethod);
+        let is_private = !function.public;
+        if is_private || function.is_doc_hidden || is_trait_method_implementation {
+            continue; // exclude private and hidden functions and trait method implementations
         }
 
+        let file = &function.file;
         let name = function
             .name
             .strip_prefix(&format!("{}::", &function.module))
             .unwrap();
 
+        // FIXME: detect nightly, don't hardcode
+        let nightly_modules = ["library/core/src/intrinsics/mod.rs"];
+        if nightly_modules.contains(&file.as_str()) {
+            continue;
+        }
+
+        let safety_constraint = safety_constraint(function);
+
         let docs = &function.docs;
-        let contains_safety = docs.contains("# Safety");
         let contains_panics = docs.contains("# Panics");
-        let contains_examples = docs.contains("# Examples");
+        let contains_examples = ["# Example", "# Examples", "# Basic examples"]
+            .iter()
+            .any(|a| docs.contains(a));
 
         // check rule violations
-        let file = &function.file;
-        let is_private_or_hidden = function.doc_hidden || function.public;
-        if !is_private_or_hidden {
-            if function.safety == "unsafe" && !contains_safety {
-                eprintln!("{file}: {name} is unsafe but has no safety section",)
-            }
-            if !contains_examples {
-                eprintln!("{file}: {name} has no examples")
-            }
+        if !contains_examples {
+            eprintln!("{file}: {name} has no examples")
         }
 
         functions.add([
@@ -102,8 +106,7 @@ fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Re
             &function.kind.to_string(),
             function.public_str(),
             &function.safety,
-            &function.doc_hidden.to_string(),
-            &contains_safety.to_string(),
+            safety_constraint,
             &contains_panics.to_string(),
             &contains_examples.to_string(),
             docs,
@@ -111,6 +114,16 @@ fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Re
     }
 
     Ok(())
+}
+
+fn safety_constraint(function: &stats::Function) -> &'static str {
+    let contains_safety = function.docs.contains("# Safety");
+    let is_unsafe = function.safety == "unsafe";
+    match (is_unsafe, contains_safety) {
+        (true, true) => "documented",
+        (true, false) => "missing",
+        (false, _) => "not applicable",
+    }
 }
 
 fn functions_tsv(collector: &StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {

@@ -57,7 +57,7 @@ impl StatsCollector {
                 _ => item.visibility == rustdoc_types::Visibility::Public,
             },
             stability: self.stability_stack.last().cloned(),
-            doc_hidden: item
+            is_doc_hidden: item
                 .attrs
                 .iter()
                 .find(|attr| *attr == "#[doc(hidden)]")
@@ -461,7 +461,7 @@ pub(crate) struct Common {
     pub(crate) module: String,
     pub(crate) public: bool,
     pub(crate) stability: Option<Stability>,
-    pub(crate) doc_hidden: bool,
+    pub(crate) is_doc_hidden: bool,
 }
 
 impl Common {

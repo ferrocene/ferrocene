@@ -37,6 +37,8 @@ pub struct PanicMessage<'a> {
     message: &'a fmt::Arguments<'a>,
 }
 
+// Ferrocene addition: When `ferrocene_certified` is enabled, `PanicInfo` only holds a reference to
+// a static string with the panic message. This `impl` adds a new builder to reflect that.
 #[cfg(feature = "ferrocene_certified")]
 impl<'a> PanicInfo<'a> {
     #[inline]
@@ -49,6 +51,7 @@ impl<'a> PanicInfo<'a> {
 impl<'a> PanicInfo<'a> {
     #[inline]
     pub(crate) fn new(
+        // Ferrocene annotation: Replace `fmt::Arguments` by the `PanicFmt` alias.
         message: &'a PanicFmt<'a>,
         location: &'a Location<'a>,
         can_unwind: bool,

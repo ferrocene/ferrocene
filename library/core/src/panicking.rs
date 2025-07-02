@@ -36,6 +36,7 @@ use crate::panic::PanicInfo;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::{Location, PanicInfo};
 
+// Ferrocene annotation: Alias used in our panic-related patches to avoid having to certify `fmt`.
 #[cfg(feature = "ferrocene_certified")]
 pub(crate) type PanicFmt<'a> = &'a &'static str;
 #[cfg(not(feature = "ferrocene_certified"))]

@@ -30,20 +30,20 @@ macro_rules! uint_impl {
         /// Basic usage:
         ///
         /// ```
-        // #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MIN, 0);")]
+        #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MIN, 0);")]
         /// ```
         #[stable(feature = "assoc_int_consts", since = "1.43.0")]
         pub const MIN: Self = 0;
 
         /// The largest value that can be represented by this integer type
-                // #[doc = concat!("(2<sup>", $BITS, "</sup> &minus; 1", $bound_condition, ").")]
+        #[doc = concat!("(2<sup>", $BITS, "</sup> &minus; 1", $bound_condition, ").")]
         ///
         /// # Examples
         ///
         /// Basic usage:
         ///
         /// ```
-        // #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MAX, ", stringify!($MaxV), ");")]
+        #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MAX, ", stringify!($MaxV), ");")]
         /// ```
         #[stable(feature = "assoc_int_consts", since = "1.43.0")]
         pub const MAX: Self = !0;
@@ -66,13 +66,13 @@ macro_rules! uint_impl {
         /// Basic usage:
         ///
         /// ```
-        // #[doc = concat!("let n = 0b01001100", stringify!($SelfT), ";")]
+        #[doc = concat!("let n = 0b01001100", stringify!($SelfT), ";")]
         /// assert_eq!(n.count_ones(), 3);
         ///
-        // #[doc = concat!("let max = ", stringify!($SelfT),"::MAX;")]
-        // #[doc = concat!("assert_eq!(max.count_ones(), ", stringify!($BITS), ");")]
+        #[doc = concat!("let max = ", stringify!($SelfT),"::MAX;")]
+        #[doc = concat!("assert_eq!(max.count_ones(), ", stringify!($BITS), ");")]
         ///
-        // #[doc = concat!("let zero = 0", stringify!($SelfT), ";")]
+        #[doc = concat!("let zero = 0", stringify!($SelfT), ";")]
         /// assert_eq!(zero.count_ones(), 0);
         /// ```
         #[stable(feature = "rust1", since = "1.0.0")]
@@ -3560,8 +3560,8 @@ macro_rules! uint_impl {
         /// Basic usage:
         ///
         /// ```
-        // #[doc = concat!("assert!(16", stringify!($SelfT), ".is_power_of_two());")]
-        // #[doc = concat!("assert!(!10", stringify!($SelfT), ".is_power_of_two());")]
+        #[doc = concat!("assert!(16", stringify!($SelfT), ".is_power_of_two());")]
+        #[doc = concat!("assert!(!10", stringify!($SelfT), ".is_power_of_two());")]
         /// ```
         #[must_use]
         #[stable(feature = "rust1", since = "1.0.0")]

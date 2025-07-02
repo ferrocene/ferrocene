@@ -16,4 +16,5 @@ Follow the Ferrocene rustc docs on how to :doc:`build an executable </rustc/exec
 Using libcore in an existing Rust project
 -----------------------------------------
 
-To use the certified subset of libcore in an existing project, make sure you're using only the permitted functions listed in TODO in your source code.
+To use the certified subset of libcore in an existing project, make sure you're using only the permitted functions listed
+in theLibcore Certified subset spreadsheet in your source code.

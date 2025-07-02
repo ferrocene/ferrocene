@@ -25,7 +25,7 @@ fn downcast<'a, W: ?Sized>() -> &'a W {
 struct Other;
 
 fn main() {
-    let other: &mut Other = downcast();//~ERROR 28:29: 28:39: mismatched types [E0308]
+    let other: &mut Other = downcast();//~ ERROR mismatched types [E0308]
 }
 
 // ferrocene-annotations: fls_9ucqbbd0s2yo

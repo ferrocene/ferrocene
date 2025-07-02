@@ -970,6 +970,11 @@ pub(crate) struct TypeIrInherentUsage;
 pub(crate) struct TypeIrTraitUsage;
 
 #[derive(LintDiagnostic)]
+#[diag(lint_type_ir_direct_use)]
+#[note]
+pub(crate) struct TypeIrDirectUse;
+
+#[derive(LintDiagnostic)]
 #[diag(lint_non_glob_import_type_ir_inherent)]
 pub(crate) struct NonGlobImportTypeIrInherent {
     #[suggestion(code = "{snippet}", applicability = "maybe-incorrect")]
@@ -1084,6 +1089,7 @@ pub(crate) struct DeprecatedLintNameFromCommandLine<'a> {
 #[diag(lint_renamed_lint)]
 pub(crate) struct RenamedLint<'a> {
     pub name: &'a str,
+    pub replace: &'a str,
     #[subdiagnostic]
     pub suggestion: RenamedLintSuggestion<'a>,
 }
@@ -1104,6 +1110,7 @@ pub(crate) enum RenamedLintSuggestion<'a> {
 #[diag(lint_renamed_lint)]
 pub(crate) struct RenamedLintFromCommandLine<'a> {
     pub name: &'a str,
+    pub replace: &'a str,
     #[subdiagnostic]
     pub suggestion: RenamedLintSuggestion<'a>,
     #[subdiagnostic]
@@ -1348,6 +1355,8 @@ pub(crate) struct NonUpperCaseGlobal<'a> {
     pub name: &'a str,
     #[subdiagnostic]
     pub sub: NonUpperCaseGlobalSub,
+    #[subdiagnostic]
+    pub usages: Vec<NonUpperCaseGlobalSubTool>,
 }
 
 #[derive(Subdiagnostic)]
@@ -1357,12 +1366,27 @@ pub(crate) enum NonUpperCaseGlobalSub {
         #[primary_span]
         span: Span,
     },
-    #[suggestion(lint_suggestion, code = "{replace}", applicability = "maybe-incorrect")]
+    #[suggestion(lint_suggestion, code = "{replace}")]
     Suggestion {
         #[primary_span]
         span: Span,
+        #[applicability]
+        applicability: Applicability,
         replace: String,
     },
+}
+
+#[derive(Subdiagnostic)]
+#[suggestion(
+    lint_suggestion,
+    code = "{replace}",
+    applicability = "machine-applicable",
+    style = "tool-only"
+)]
+pub(crate) struct NonUpperCaseGlobalSubTool {
+    #[primary_span]
+    pub(crate) span: Span,
+    pub(crate) replace: String,
 }
 
 // noop_method_call.rs
@@ -2626,6 +2650,7 @@ pub(crate) struct UnusedCrateDependency {
     pub local_crate: Symbol,
 }
 
+// FIXME(jdonszelmann): duplicated in rustc_attr_parsing, should be moved there completely.
 #[derive(LintDiagnostic)]
 #[diag(lint_ill_formed_attribute_input)]
 pub(crate) struct IllFormedAttributeInput {
@@ -3221,7 +3246,7 @@ pub(crate) enum MismatchedLifetimeSyntaxesSuggestion {
     },
 
     Explicit {
-        lifetime_name: String,
+        lifetime_name_sugg: String,
         suggestions: Vec<(Span, String)>,
         tool_only: bool,
     },
@@ -3255,7 +3280,7 @@ impl Subdiagnostic for MismatchedLifetimeSyntaxesSuggestion {
                 diag.multipart_suggestion_with_style(
                     fluent::lint_mismatched_lifetime_syntaxes_suggestion_implicit,
                     suggestions,
-                    Applicability::MachineApplicable,
+                    Applicability::MaybeIncorrect,
                     style(tool_only),
                 );
             }
@@ -3270,22 +3295,21 @@ impl Subdiagnostic for MismatchedLifetimeSyntaxesSuggestion {
                 diag.multipart_suggestion_with_style(
                     fluent::lint_mismatched_lifetime_syntaxes_suggestion_mixed,
                     suggestions,
-                    Applicability::MachineApplicable,
+                    Applicability::MaybeIncorrect,
                     style(tool_only),
                 );
             }
 
-            Explicit { lifetime_name, suggestions, tool_only } => {
-                diag.arg("lifetime_name", lifetime_name);
-
+            Explicit { lifetime_name_sugg, suggestions, tool_only } => {
+                diag.arg("lifetime_name_sugg", lifetime_name_sugg);
                 let msg = diag.eagerly_translate(
                     fluent::lint_mismatched_lifetime_syntaxes_suggestion_explicit,
                 );
-
+                diag.remove_arg("lifetime_name_sugg");
                 diag.multipart_suggestion_with_style(
                     msg,
                     suggestions,
-                    Applicability::MachineApplicable,
+                    Applicability::MaybeIncorrect,
                     style(tool_only),
                 );
             }

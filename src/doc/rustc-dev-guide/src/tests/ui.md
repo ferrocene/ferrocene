@@ -13,6 +13,11 @@ used for many other purposes. For example, tests can also be configured to [run
 the resulting program](#controlling-passfail-expectations) to verify its
 behavior.
 
+For a survey of each subdirectory's purpose under `tests/ui`, consult the
+[SUMMARY.md](https://github.com/rust-lang/rust/tree/master/tests/ui/SUMMARY.md).
+This is useful if you write a new test, and are looking for a category to
+place it in.
+
 If you need to work with `#![no_std]` cross-compiling tests, consult the
 [`minicore` test auxiliary](./minicore.md) chapter.
 
@@ -53,6 +58,11 @@ expect.
 The output is normalized to ignore unwanted differences, see the
 [Normalization](#normalization) section. If the file is missing, then
 compiletest expects the corresponding output to be empty.
+
+A common reason to use normalization, revisions, and most of the other following tools,
+is to account for platform differences. Consider alternatives to these tools, like
+e.g. using the `extern "rust-invalid"` ABI that is invalid on every platform
+instead of fixing the test to use cross-compilation and testing every possibly-invalid ABI.
 
 There can be multiple stdout/stderr files. The general form is:
 
@@ -113,6 +123,8 @@ Compiletest makes the following replacements on the compiler output:
 - The base directory where the test's output goes is replaced with
   `$TEST_BUILD_DIR`. This only comes up in a few rare circumstances. Example:
   `/path/to/rust/build/x86_64-unknown-linux-gnu/test/ui`
+- The real directory to the standard library source is replaced with `$SRC_DIR_REAL`.
+- The real directory to the compiler source is replaced with `$COMPILER_DIR_REAL`.
 - Tabs are replaced with `\t`.
 - Backslashes (`\`) are converted to forward slashes (`/`) within paths (using a
   heuristic). This helps normalize differences with Windows-style paths.

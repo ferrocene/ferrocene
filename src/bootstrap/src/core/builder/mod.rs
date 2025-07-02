@@ -15,6 +15,7 @@ use tracing::instrument;
 
 pub use self::cargo::{Cargo, cargo_profile_var};
 pub use crate::Compiler;
+use crate::core::build_steps::compile::{Std, StdLink};
 // Ferrocene: this will conflict because we do not include "install" module,
 // for we have our own named `crate::ferrocene::install`.
 use crate::core::build_steps::{
@@ -138,6 +139,54 @@ pub trait Step: 'static + Clone + Debug + PartialEq + Eq + Hash {
         // they are likely dependencies (e.g., sysroot creation) or similar, and
         // as such calling them from ./x.py isn't logical.
         unimplemented!()
+    }
+
+    /// Returns metadata of the step, for tests
+    fn metadata(&self) -> Option<StepMetadata> {
+        None
+    }
+}
+
+/// Metadata that describes an executed step, mostly for testing and tracing.
+#[allow(unused)]
+#[derive(Debug, PartialEq, Eq)]
+pub struct StepMetadata {
+    name: &'static str,
+    kind: Kind,
+    target: TargetSelection,
+    built_by: Option<Compiler>,
+    stage: Option<u32>,
+}
+
+impl StepMetadata {
+    pub fn build(name: &'static str, target: TargetSelection) -> Self {
+        Self::new(name, target, Kind::Build)
+    }
+
+    pub fn doc(name: &'static str, target: TargetSelection) -> Self {
+        Self::new(name, target, Kind::Doc)
+    }
+
+    pub fn dist(name: &'static str, target: TargetSelection) -> Self {
+        Self::new(name, target, Kind::Dist)
+    }
+
+    pub fn test(name: &'static str, target: TargetSelection) -> Self {
+        Self::new(name, target, Kind::Test)
+    }
+
+    fn new(name: &'static str, target: TargetSelection, kind: Kind) -> Self {
+        Self { name, kind, target, built_by: None, stage: None }
+    }
+
+    pub fn built_by(mut self, compiler: Compiler) -> Self {
+        self.built_by = Some(compiler);
+        self
+    }
+
+    pub fn stage(mut self, stage: u32) -> Self {
+        self.stage = Some(stage);
+        self
     }
 }
 
@@ -1392,6 +1441,49 @@ impl<'a> Builder<'a> {
 
         trace!(target: "COMPILER_FOR", ?resolved_compiler);
         resolved_compiler
+    }
+
+    /// Obtain a standard library for the given target that will be built by the passed compiler.
+    /// The standard library will be linked to the sysroot of the passed compiler.
+    ///
+    /// Prefer using this method rather than manually invoking `Std::new`.
+    #[cfg_attr(
+        feature = "tracing",
+        instrument(
+            level = "trace",
+            name = "Builder::std",
+            target = "STD",
+            skip_all,
+            fields(
+                compiler = ?compiler,
+                target = ?target,
+            ),
+        ),
+    )]
+    pub fn std(&self, compiler: Compiler, target: TargetSelection) {
+        // FIXME: make the `Std` step return some type-level "proof" that std was indeed built,
+        // and then require passing that to all Cargo invocations that we do.
+
+        // The "stage 0" std is always precompiled and comes with the stage0 compiler, so we have
+        // special logic for it, to avoid creating needless and confusing Std steps that don't
+        // actually build anything.
+        if compiler.stage == 0 {
+            if target != compiler.host {
+                panic!(
+                    r"It is not possible to build the standard library for `{target}` using the stage0 compiler.
+You have to build a stage1 compiler for `{}` first, and then use it to build a standard library for `{target}`.
+",
+                    compiler.host
+                )
+            }
+
+            // We still need to link the prebuilt standard library into the ephemeral stage0 sysroot
+            self.ensure(StdLink::from_std(Std::new(compiler, target), compiler));
+        } else {
+            // This step both compiles the std and links it into the compiler's sysroot.
+            // Yes, it's quite magical and side-effecty.. would be nice to refactor later.
+            self.ensure(Std::new(compiler, target));
+        }
     }
 
     pub fn sysroot(&self, compiler: Compiler) -> PathBuf {

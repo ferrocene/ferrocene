@@ -1632,7 +1632,7 @@ pub const unsafe fn replace<T>(dst: *mut T, src: T) -> T {
 ///
 /// Note that even if `T` has size `0`, the pointer must be properly aligned.
 ///
-// // /// # Examples
+/// # Examples
 ///
 /// Basic usage:
 ///

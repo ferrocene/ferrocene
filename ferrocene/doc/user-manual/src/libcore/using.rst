@@ -17,4 +17,4 @@ Using libcore in an existing Rust project
 -----------------------------------------
 
 To use the certified subset of libcore in an existing project, make sure you're using only the permitted functions listed
-in theLibcore Certified subset spreadsheet in your source code.
+in the Libcore Certified subset spreadsheet in your source code.

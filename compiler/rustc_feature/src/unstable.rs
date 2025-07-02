@@ -238,7 +238,7 @@ declare_features! (
     /// Allows using `rustc_*` attributes (RFC 572).
     (internal, rustc_attrs, "1.0.0", None),
     /// Introduces a hierarchy of `Sized` traits (RFC 3729).
-    (unstable, sized_hierarchy, "CURRENT_RUSTC_VERSION", None),
+    (unstable, sized_hierarchy, "1.89.0", None),
     /// Allows using the `#[stable]` and `#[unstable]` attributes.
     (internal, staged_api, "1.0.0", None),
     /// Added for testing unstable lints; perma-unstable.
@@ -356,7 +356,7 @@ declare_features! (
     /// Allows `extern "C-cmse-nonsecure-call" fn()`.
     (unstable, abi_c_cmse_nonsecure_call, "1.51.0", Some(81391)),
     /// Allows `extern "custom" fn()`.
-    (unstable, abi_custom, "CURRENT_RUSTC_VERSION", Some(140829)),
+    (unstable, abi_custom, "1.89.0", Some(140829)),
     /// Allows `extern "gpu-kernel" fn()`.
     (unstable, abi_gpu_kernel, "1.86.0", Some(135467)),
     /// Allows `extern "msp430-interrupt" fn()`.
@@ -376,7 +376,7 @@ declare_features! (
     /// Allows inherent and trait methods with arbitrary self types that are raw pointers.
     (unstable, arbitrary_self_types_pointers, "1.83.0", Some(44874)),
     /// Allows #[cfg(...)] on inline assembly templates and operands.
-    (unstable, asm_cfg, "CURRENT_RUSTC_VERSION", Some(140364)),
+    (unstable, asm_cfg, "1.89.0", Some(140364)),
     /// Enables experimental inline assembly support for additional architectures.
     (unstable, asm_experimental_arch, "1.58.0", Some(93335)),
     /// Enables experimental register support in inline assembly.
@@ -510,7 +510,7 @@ declare_features! (
     (unstable, ffi_pure, "1.45.0", Some(58329)),
     /// Controlling the behavior of fmt::Debug
     (unstable, fmt_debug, "1.82.0", Some(129709)),
-    /// Allows using `#[repr(align(...))]` on function items
+    /// Allows using `#[align(...)]` on function items
     (unstable, fn_align, "1.53.0", Some(82232)),
     /// Support delegating implementation of functions to other already implemented functions.
     (incomplete, fn_delegation, "1.76.0", Some(118212)),
@@ -520,8 +520,6 @@ declare_features! (
     (unstable, frontmatter, "1.88.0", Some(136889)),
     /// Allows defining gen blocks and `gen fn`.
     (unstable, gen_blocks, "1.75.0", Some(117078)),
-    /// Infer generic args for both consts and types.
-    (unstable, generic_arg_infer, "1.55.0", Some(85077)),
     /// Allows non-trivial generic constants which have to have wfness manually propagated to callers
     (incomplete, generic_const_exprs, "1.56.0", Some(76560)),
     /// Allows generic parameters and where-clauses on free & associated const items.

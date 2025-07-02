@@ -31,7 +31,7 @@ To use the target, the following additional flags must be provided to
 * ``--target=aarch64-unknown-none``
 
 Proxy Target (Experimental)
-----------------------
+---------------------------
 
 This is a bare metal target, and cannot be directly tested. Instead, a
 proxy target which can be used for testing and development.
@@ -42,6 +42,6 @@ The following additional archive is needed when :doc:`installing </rustc/install
 
 This target is the same as the one it proxies, except it includes a Linux ``libc``,
 this means it can use ``std`` for testing and enriched interactive development on a
-:ref:`aarch64-unknown-linux-gnu` or :ref:`x86_64-unknown-linux-gnu` host.
+:target:`aarch64-unknown-linux-gnu` or :ref:`x86_64-unknown-linux-gnu` host.
 
 For more information, consult :doc:`proxy testing </rustc/proxy-targets>`.

@@ -437,20 +437,19 @@ pub macro debug_assert_matches($($arg:tt)*) {
 /// used to add additional checks that must be true for the matched value, otherwise this macro will
 /// return `false`.
 ///
-// FIXME(pvdrz): fix docs
-// /// When testing that a value matches a pattern, it's generally preferable to use
-// /// [`assert_matches!`] as it will print the debug representation of the value if the assertion
-// /// fails.
-// ///
-// /// # Examples
-// ///
-// /// ```
-// /// let foo = 'f';
-// /// assert!(matches!(foo, 'A'..='Z' | 'a'..='z'));
-// ///
-// /// let bar = Some(4);
-// /// assert!(matches!(bar, Some(x) if x > 2));
-// /// ```
+/// When testing that a value matches a pattern, it's generally preferable to use
+/// [`assert_matches!`] as it will print the debug representation of the value if the assertion
+/// fails.
+///
+/// # Examples
+///
+/// ```
+/// let foo = 'f';
+/// assert!(matches!(foo, 'A'..='Z' | 'a'..='z'));
+///
+/// let bar = Some(4);
+/// assert!(matches!(bar, Some(x) if x > 2));
+/// ```
 #[macro_export]
 #[stable(feature = "matches_macro", since = "1.42.0")]
 #[rustc_diagnostic_item = "matches_macro"]
@@ -920,38 +919,37 @@ pub(crate) mod builtin {
 
     /// Causes compilation to fail with the given error message when encountered.
     ///
-    // FIXME(pvdrz): fix docs
-    // /// This macro should be used when a crate uses a conditional compilation strategy to provide
-    // /// better error messages for erroneous conditions. It's the compiler-level form of [`panic!`],
-    // /// but emits an error during *compilation* rather than at *runtime*.
-    // ///
-    // /// # Examples
-    // ///
-    // /// Two such examples are macros and `#[cfg]` environments.
-    // ///
-    // /// Emit a better compiler error if a macro is passed invalid values. Without the final branch,
-    // /// the compiler would still emit an error, but the error's message would not mention the two
-    // /// valid values.
-    // ///
-    // /// ```compile_fail
-    // /// macro_rules! give_me_foo_or_bar {
-    // ///     (foo) => {};
-    // ///     (bar) => {};
-    // ///     ($x:ident) => {
-    // ///         compile_error!("This macro only accepts `foo` or `bar`");
-    // ///     }
-    // /// }
-    // ///
-    // /// give_me_foo_or_bar!(neither);
-    // /// // ^ will fail at compile time with message "This macro only accepts `foo` or `bar`"
-    // /// ```
-    // ///
-    // /// Emit a compiler error if one of a number of features isn't available.
-    // ///
-    // /// ```compile_fail
-    // /// #[cfg(not(any(feature = "foo", feature = "bar")))]
-    // /// compile_error!("Either feature \"foo\" or \"bar\" must be enabled for this crate.");
-    // /// ```
+    /// This macro should be used when a crate uses a conditional compilation strategy to provide
+    /// better error messages for erroneous conditions. It's the compiler-level form of [`panic!`],
+    /// but emits an error during *compilation* rather than at *runtime*.
+    ///
+    /// # Examples
+    ///
+    /// Two such examples are macros and `#[cfg]` environments.
+    ///
+    /// Emit a better compiler error if a macro is passed invalid values. Without the final branch,
+    /// the compiler would still emit an error, but the error's message would not mention the two
+    /// valid values.
+    ///
+    /// ```compile_fail
+    /// macro_rules! give_me_foo_or_bar {
+    ///     (foo) => {};
+    ///     (bar) => {};
+    ///     ($x:ident) => {
+    ///         compile_error!("This macro only accepts `foo` or `bar`");
+    ///     }
+    /// }
+    ///
+    /// give_me_foo_or_bar!(neither);
+    /// // ^ will fail at compile time with message "This macro only accepts `foo` or `bar`"
+    /// ```
+    ///
+    /// Emit a compiler error if one of a number of features isn't available.
+    ///
+    /// ```compile_fail
+    /// #[cfg(not(any(feature = "foo", feature = "bar")))]
+    /// compile_error!("Either feature \"foo\" or \"bar\" must be enabled for this crate.");
+    /// ```
     #[stable(feature = "compile_error_macro", since = "1.20.0")]
     #[rustc_builtin_macro]
     #[macro_export]
@@ -961,58 +959,57 @@ pub(crate) mod builtin {
 
     /// Constructs parameters for the other string-formatting macros.
     ///
-    // FIXME(pvdrz): fix docs
-    // /// This macro functions by taking a formatting string literal containing
-    // /// `{}` for each additional argument passed. `format_args!` prepares the
-    // /// additional parameters to ensure the output can be interpreted as a string
-    // /// and canonicalizes the arguments into a single type. Any value that implements
-    // /// the [`Display`] trait can be passed to `format_args!`, as can any
-    // /// [`Debug`] implementation be passed to a `{:?}` within the formatting string.
-    // ///
-    // /// This macro produces a value of type [`fmt::Arguments`]. This value can be
-    // /// passed to the macros within [`std::fmt`] for performing useful redirection.
-    // /// All other formatting macros ([`format!`], [`write!`], [`println!`], etc) are
-    // /// proxied through this one. `format_args!`, unlike its derived macros, avoids
-    // /// heap allocations.
-    // ///
-    // /// You can use the [`fmt::Arguments`] value that `format_args!` returns
-    // /// in `Debug` and `Display` contexts as seen below. The example also shows
-    // /// that `Debug` and `Display` format to the same thing: the interpolated
-    // /// format string in `format_args!`.
-    // ///
-    // /// ```rust
-    // /// let debug = format!("{:?}", format_args!("{} foo {:?}", 1, 2));
-    // /// let display = format!("{}", format_args!("{} foo {:?}", 1, 2));
-    // /// assert_eq!("1 foo 2", display);
-    // /// assert_eq!(display, debug);
-    // /// ```
-    // ///
-    // /// See [the formatting documentation in `std::fmt`](../std/fmt/index.html)
-    // /// for details of the macro argument syntax, and further information.
-    // ///
-    // /// [`Display`]: crate::fmt::Display
-    // /// [`Debug`]: crate::fmt::Debug
-    // /// [`fmt::Arguments`]: crate::fmt::Arguments
-    // /// [`std::fmt`]: ../std/fmt/index.html
-    // /// [`format!`]: ../std/macro.format.html
-    // /// [`println!`]: ../std/macro.println.html
-    // ///
-    // /// # Examples
-    // ///
-    // /// ```
-    // /// use std::fmt;
-    // ///
-    // /// let s = fmt::format(format_args!("hello {}", "world"));
-    // /// assert_eq!(s, format!("hello {}", "world"));
-    // /// ```
-    // ///
-    // /// # Lifetime limitation
-    // ///
-    // /// Except when no formatting arguments are used,
-    // /// the produced `fmt::Arguments` value borrows temporary values,
-    // /// which means it can only be used within the same expression
-    // /// and cannot be stored for later use.
-    // /// This is a known limitation, see [#92698](https://github.com/rust-lang/rust/issues/92698).
+    /// This macro functions by taking a formatting string literal containing
+    /// `{}` for each additional argument passed. `format_args!` prepares the
+    /// additional parameters to ensure the output can be interpreted as a string
+    /// and canonicalizes the arguments into a single type. Any value that implements
+    /// the [`Display`] trait can be passed to `format_args!`, as can any
+    /// [`Debug`] implementation be passed to a `{:?}` within the formatting string.
+    ///
+    /// This macro produces a value of type [`fmt::Arguments`]. This value can be
+    /// passed to the macros within [`std::fmt`] for performing useful redirection.
+    /// All other formatting macros ([`format!`], [`write!`], [`println!`], etc) are
+    /// proxied through this one. `format_args!`, unlike its derived macros, avoids
+    /// heap allocations.
+    ///
+    /// You can use the [`fmt::Arguments`] value that `format_args!` returns
+    /// in `Debug` and `Display` contexts as seen below. The example also shows
+    /// that `Debug` and `Display` format to the same thing: the interpolated
+    /// format string in `format_args!`.
+    ///
+    /// ```rust
+    /// let debug = format!("{:?}", format_args!("{} foo {:?}", 1, 2));
+    /// let display = format!("{}", format_args!("{} foo {:?}", 1, 2));
+    /// assert_eq!("1 foo 2", display);
+    /// assert_eq!(display, debug);
+    /// ```
+    ///
+    /// See [the formatting documentation in `std::fmt`](../std/fmt/index.html)
+    /// for details of the macro argument syntax, and further information.
+    ///
+    /// [`Display`]: crate::fmt::Display
+    /// [`Debug`]: crate::fmt::Debug
+    /// [`fmt::Arguments`]: crate::fmt::Arguments
+    /// [`std::fmt`]: ../std/fmt/index.html
+    /// [`format!`]: ../std/macro.format.html
+    /// [`println!`]: ../std/macro.println.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::fmt;
+    ///
+    /// let s = fmt::format(format_args!("hello {}", "world"));
+    /// assert_eq!(s, format!("hello {}", "world"));
+    /// ```
+    ///
+    /// # Lifetime limitation
+    ///
+    /// Except when no formatting arguments are used,
+    /// the produced `fmt::Arguments` value borrows temporary values,
+    /// which means it can only be used within the same expression
+    /// and cannot be stored for later use.
+    /// This is a known limitation, see [#92698](https://github.com/rust-lang/rust/issues/92698).
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "format_args_macro"]
     #[allow_internal_unsafe]
@@ -1055,38 +1052,37 @@ pub(crate) mod builtin {
 
     /// Inspects an environment variable at compile time.
     ///
-    // FIXME(pvdrz): fix docs
-    // /// This macro will expand to the value of the named environment variable at
-    // /// compile time, yielding an expression of type `&'static str`. Use
-    // /// [`std::env::var`] instead if you want to read the value at runtime.
-    // ///
-    // /// [`std::env::var`]: ../std/env/fn.var.html
-    // ///
-    // /// If the environment variable is not defined, then a compilation error
-    // /// will be emitted. To not emit a compile error, use the [`option_env!`]
-    // /// macro instead. A compilation error will also be emitted if the
-    // /// environment variable is not a valid Unicode string.
-    // ///
-    // /// # Examples
-    // ///
-    // /// ```
-    // /// let path: &'static str = env!("PATH");
-    // /// println!("the $PATH variable at the time of compiling was: {path}");
-    // /// ```
-    // ///
-    // /// You can customize the error message by passing a string as the second
-    // /// parameter:
-    // ///
-    // /// ```compile_fail
-    // /// let doc: &'static str = env!("documentation", "what's that?!");
-    // /// ```
-    // ///
-    // /// If the `documentation` environment variable is not defined, you'll get
-    // /// the following error:
-    // ///
-    // /// ```text
-    // /// error: what's that?!
-    // /// ```
+    /// This macro will expand to the value of the named environment variable at
+    /// compile time, yielding an expression of type `&'static str`. Use
+    /// [`std::env::var`] instead if you want to read the value at runtime.
+    ///
+    /// [`std::env::var`]: ../std/env/fn.var.html
+    ///
+    /// If the environment variable is not defined, then a compilation error
+    /// will be emitted. To not emit a compile error, use the [`option_env!`]
+    /// macro instead. A compilation error will also be emitted if the
+    /// environment variable is not a valid Unicode string.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let path: &'static str = env!("PATH");
+    /// println!("the $PATH variable at the time of compiling was: {path}");
+    /// ```
+    ///
+    /// You can customize the error message by passing a string as the second
+    /// parameter:
+    ///
+    /// ```compile_fail
+    /// let doc: &'static str = env!("documentation", "what's that?!");
+    /// ```
+    ///
+    /// If the `documentation` environment variable is not defined, you'll get
+    /// the following error:
+    ///
+    /// ```text
+    /// error: what's that?!
+    /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_builtin_macro]
     #[macro_export]
@@ -1218,23 +1214,22 @@ pub(crate) mod builtin {
 
     /// Expands to the line number on which it was invoked.
     ///
-    // FIXME(pvdrz): fix docs
-    // /// With [`column!`] and [`file!`], these macros provide debugging information for
-    // /// developers about the location within the source.
-    // ///
-    // /// The expanded expression has type `u32` and is 1-based, so the first line
-    // /// in each file evaluates to 1, the second to 2, etc. This is consistent
-    // /// with error messages by common compilers or popular editors.
-    // /// The returned line is *not necessarily* the line of the `line!` invocation itself,
-    // /// but rather the first macro invocation leading up to the invocation
-    // /// of the `line!` macro.
-    // ///
-    // /// # Examples
-    // ///
-    // /// ```
-    // /// let current_line = line!();
-    // /// println!("defined on line: {current_line}");
-    // /// ```
+    /// With [`column!`] and [`file!`], these macros provide debugging information for
+    /// developers about the location within the source.
+    ///
+    /// The expanded expression has type `u32` and is 1-based, so the first line
+    /// in each file evaluates to 1, the second to 2, etc. This is consistent
+    /// with error messages by common compilers or popular editors.
+    /// The returned line is *not necessarily* the line of the `line!` invocation itself,
+    /// but rather the first macro invocation leading up to the invocation
+    /// of the `line!` macro.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let current_line = line!();
+    /// println!("defined on line: {current_line}");
+    /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_builtin_macro]
     #[macro_export]
@@ -1246,35 +1241,34 @@ pub(crate) mod builtin {
 
     /// Expands to the column number at which it was invoked.
     ///
-    // FIXME(pvdrz): fix docs
-    // /// With [`line!`] and [`file!`], these macros provide debugging information for
-    // /// developers about the location within the source.
-    // ///
-    // /// The expanded expression has type `u32` and is 1-based, so the first column
-    // /// in each line evaluates to 1, the second to 2, etc. This is consistent
-    // /// with error messages by common compilers or popular editors.
-    // /// The returned column is *not necessarily* the line of the `column!` invocation itself,
-    // /// but rather the first macro invocation leading up to the invocation
-    // /// of the `column!` macro.
-    // ///
-    // /// # Examples
-    // ///
-    // /// ```
-    // /// let current_col = column!();
-    // /// println!("defined on column: {current_col}");
-    // /// ```
-    // ///
-    // /// `column!` counts Unicode code points, not bytes or graphemes. As a result, the first two
-    // /// invocations return the same value, but the third does not.
-    // ///
-    // /// ```
-    // /// let a = ("foobar", column!()).1;
-    // /// let b = ("人之初性本善", column!()).1;
-    // /// let c = ("f̅o̅o̅b̅a̅r̅", column!()).1; // Uses combining overline (U+0305)
-    // ///
-    // /// assert_eq!(a, b);
-    // /// assert_ne!(b, c);
-    // /// ```
+    /// With [`line!`] and [`file!`], these macros provide debugging information for
+    /// developers about the location within the source.
+    ///
+    /// The expanded expression has type `u32` and is 1-based, so the first column
+    /// in each line evaluates to 1, the second to 2, etc. This is consistent
+    /// with error messages by common compilers or popular editors.
+    /// The returned column is *not necessarily* the line of the `column!` invocation itself,
+    /// but rather the first macro invocation leading up to the invocation
+    /// of the `column!` macro.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let current_col = column!();
+    /// println!("defined on column: {current_col}");
+    /// ```
+    ///
+    /// `column!` counts Unicode code points, not bytes or graphemes. As a result, the first two
+    /// invocations return the same value, but the third does not.
+    ///
+    /// ```
+    /// let a = ("foobar", column!()).1;
+    /// let b = ("人之初性本善", column!()).1;
+    /// let c = ("f̅o̅o̅b̅a̅r̅", column!()).1; // Uses combining overline (U+0305)
+    ///
+    /// assert_eq!(a, b);
+    /// assert_ne!(b, c);
+    /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_builtin_macro]
     #[macro_export]
@@ -1286,21 +1280,20 @@ pub(crate) mod builtin {
 
     /// Expands to the file name in which it was invoked.
     ///
-    // FIXME(pvdrz): fix docs
-    // /// With [`line!`] and [`column!`], these macros provide debugging information for
-    // /// developers about the location within the source.
-    // ///
-    // /// The expanded expression has type `&'static str`, and the returned file
-    // /// is not the invocation of the `file!` macro itself, but rather the
-    // /// first macro invocation leading up to the invocation of the `file!`
-    // /// macro.
-    // ///
-    // /// # Examples
-    // ///
-    // /// ```
-    // /// let this_file = file!();
-    // /// println!("defined in file: {this_file}");
-    // /// ```
+    /// With [`line!`] and [`column!`], these macros provide debugging information for
+    /// developers about the location within the source.
+    ///
+    /// The expanded expression has type `&'static str`, and the returned file
+    /// is not the invocation of the `file!` macro itself, but rather the
+    /// first macro invocation leading up to the invocation of the `file!`
+    /// macro.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let this_file = file!();
+    /// println!("defined in file: {this_file}");
+    /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_builtin_macro]
     #[macro_export]
@@ -1579,49 +1572,48 @@ pub(crate) mod builtin {
 
     /// Asserts that a boolean expression is `true` at runtime.
     ///
-    // FIXME(pvdrz): fix docs
-    // /// This will invoke the [`panic!`] macro if the provided expression cannot be
-    // /// evaluated to `true` at runtime.
-    // ///
-    // /// # Uses
-    // ///
-    // /// Assertions are always checked in both debug and release builds, and cannot
-    // /// be disabled. See [`debug_assert!`] for assertions that are not enabled in
-    // /// release builds by default.
-    // ///
-    // /// Unsafe code may rely on `assert!` to enforce run-time invariants that, if
-    // /// violated could lead to unsafety.
-    // ///
-    // /// Other use-cases of `assert!` include testing and enforcing run-time
-    // /// invariants in safe code (whose violation cannot result in unsafety).
-    // ///
-    // /// # Custom Messages
-    // ///
-    // /// This macro has a second form, where a custom panic message can
-    // /// be provided with or without arguments for formatting. See [`std::fmt`]
-    // /// for syntax for this form. Expressions used as format arguments will only
-    // /// be evaluated if the assertion fails.
-    // ///
-    // /// [`std::fmt`]: ../std/fmt/index.html
-    // ///
-    // /// # Examples
-    // ///
-    // /// ```
-    // /// // the panic message for these assertions is the stringified value of the
-    // /// // expression given.
-    // /// assert!(true);
-    // ///
-    // /// fn some_computation() -> bool { true } // a very simple function
-    // ///
-    // /// assert!(some_computation());
-    // ///
-    // /// // assert with a custom message
-    // /// let x = true;
-    // /// assert!(x, "x wasn't true!");
-    // ///
-    // /// let a = 3; let b = 27;
-    // /// assert!(a + b == 30, "a = {}, b = {}", a, b);
-    // /// ```
+    /// This will invoke the [`panic!`] macro if the provided expression cannot be
+    /// evaluated to `true` at runtime.
+    ///
+    /// # Uses
+    ///
+    /// Assertions are always checked in both debug and release builds, and cannot
+    /// be disabled. See [`debug_assert!`] for assertions that are not enabled in
+    /// release builds by default.
+    ///
+    /// Unsafe code may rely on `assert!` to enforce run-time invariants that, if
+    /// violated could lead to unsafety.
+    ///
+    /// Other use-cases of `assert!` include testing and enforcing run-time
+    /// invariants in safe code (whose violation cannot result in unsafety).
+    ///
+    /// # Custom Messages
+    ///
+    /// This macro has a second form, where a custom panic message can
+    /// be provided with or without arguments for formatting. See [`std::fmt`]
+    /// for syntax for this form. Expressions used as format arguments will only
+    /// be evaluated if the assertion fails.
+    ///
+    /// [`std::fmt`]: ../std/fmt/index.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// // the panic message for these assertions is the stringified value of the
+    /// // expression given.
+    /// assert!(true);
+    ///
+    /// fn some_computation() -> bool { true } // a very simple function
+    ///
+    /// assert!(some_computation());
+    ///
+    /// // assert with a custom message
+    /// let x = true;
+    /// assert!(x, "x wasn't true!");
+    ///
+    /// let a = 3; let b = 27;
+    /// assert!(a + b == 30, "a = {}, b = {}", a, b);
+    /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_builtin_macro]
     #[macro_export]

@@ -911,51 +911,50 @@ pub const fn replace<T>(dest: &mut T, src: T) -> T {
 /// the function returns.
 ///
 /// [drop]: Drop
-// FIXME(pvdrz): fix docs
-// ///
-// /// # Examples
-// ///
-// /// Basic usage:
-// ///
-// /// ```
-// /// let v = vec![1, 2, 3];
-// ///
-// /// drop(v); // explicitly drop the vector
-// /// ```
-// ///
-// /// Since [`RefCell`] enforces the borrow rules at runtime, `drop` can
-// /// release a [`RefCell`] borrow:
-// ///
-// /// ```
-// /// use std::cell::RefCell;
-// ///
-// /// let x = RefCell::new(1);
-// ///
-// /// let mut mutable_borrow = x.borrow_mut();
-// /// *mutable_borrow = 1;
-// ///
-// /// drop(mutable_borrow); // relinquish the mutable borrow on this slot
-// ///
-// /// let borrow = x.borrow();
-// /// println!("{}", *borrow);
-// /// ```
-// ///
-// /// Integers and other types implementing [`Copy`] are unaffected by `drop`.
-// ///
-// /// ```
-// /// # #![allow(dropping_copy_types)]
-// /// #[derive(Copy, Clone)]
-// /// struct Foo(u8);
-// ///
-// /// let x = 1;
-// /// let y = Foo(2);
-// /// drop(x); // a copy of `x` is moved and dropped
-// /// drop(y); // a copy of `y` is moved and dropped
-// ///
-// /// println!("x: {}, y: {}", x, y.0); // still available
-// /// ```
-// ///
-// /// [`RefCell`]: crate::cell::RefCell
+///
+/// # Examples
+///
+/// Basic usage:
+///
+/// ```
+/// let v = vec![1, 2, 3];
+///
+/// drop(v); // explicitly drop the vector
+/// ```
+///
+/// Since [`RefCell`] enforces the borrow rules at runtime, `drop` can
+/// release a [`RefCell`] borrow:
+///
+/// ```
+/// use std::cell::RefCell;
+///
+/// let x = RefCell::new(1);
+///
+/// let mut mutable_borrow = x.borrow_mut();
+/// *mutable_borrow = 1;
+///
+/// drop(mutable_borrow); // relinquish the mutable borrow on this slot
+///
+/// let borrow = x.borrow();
+/// println!("{}", *borrow);
+/// ```
+///
+/// Integers and other types implementing [`Copy`] are unaffected by `drop`.
+///
+/// ```
+/// # #![allow(dropping_copy_types)]
+/// #[derive(Copy, Clone)]
+/// struct Foo(u8);
+///
+/// let x = 1;
+/// let y = Foo(2);
+/// drop(x); // a copy of `x` is moved and dropped
+/// drop(y); // a copy of `y` is moved and dropped
+///
+/// println!("x: {}, y: {}", x, y.0); // still available
+/// ```
+///
+/// [`RefCell`]: crate::cell::RefCell
 #[inline]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "mem_drop"]

@@ -273,20 +273,20 @@
 //! [`map_or`]: Option::map_or
 //! [`map_or_else`]: Option::map_or_else
 //!
-// //! These methods combine the [`Some`] variants of two [`Option`] values:
-// //!
-// //! * [`zip`] returns [`Some((s, o))`] if `self` is [`Some(s)`] and the
-// //!   provided [`Option`] value is [`Some(o)`]; otherwise, returns [`None`]
-// //! * [`zip_with`] calls the provided function `f` and returns
-// //!   [`Some(f(s, o))`] if `self` is [`Some(s)`] and the provided
-// //!   [`Option`] value is [`Some(o)`]; otherwise, returns [`None`]
-// //!
-// //! [`Some(f(s, o))`]: Some
-// //! [`Some(o)`]: Some
-// //! [`Some(s)`]: Some
-// //! [`Some((s, o))`]: Some
-// //! [`zip`]: Option::zip
-// //! [`zip_with`]: Option::zip_with
+//! These methods combine the [`Some`] variants of two [`Option`] values:
+//!
+//! * [`zip`] returns [`Some((s, o))`] if `self` is [`Some(s)`] and the
+//!   provided [`Option`] value is [`Some(o)`]; otherwise, returns [`None`]
+//! * [`zip_with`] calls the provided function `f` and returns
+//!   [`Some(f(s, o))`] if `self` is [`Some(s)`] and the provided
+//!   [`Option`] value is [`Some(o)`]; otherwise, returns [`None`]
+//!
+//! [`Some(f(s, o))`]: Some
+//! [`Some(o)`]: Some
+//! [`Some(s)`]: Some
+//! [`Some((s, o))`]: Some
+//! [`zip`]: Option::zip
+//! [`zip_with`]: Option::zip_with
 //!
 //! ## Boolean operators
 //!
@@ -1083,9 +1083,8 @@ impl<T> Option<T> {
     /// ```
     ///
     /// [default value]: Default::default
-    // FIXME(pvdrz): fix docs
-    // /// [`parse`]: str::parse
-    // /// [`FromStr`]: crate::str::FromStr
+    /// [`parse`]: str::parse
+    /// [`FromStr`]: crate::str::FromStr
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn unwrap_or_default(self) -> T
@@ -1535,10 +1534,9 @@ impl<T> Option<T> {
     ///   value), and
     /// - [`None`] if `predicate` returns `false`.
     ///
-    // FIXME(pvdrz): fix docs
-    // /// This function works similar to [`Iterator::filter()`]. You can imagine
-    // /// the `Option<T>` being an iterator over one or zero elements. `filter()`
-    // /// lets you decide which elements to keep.
+    /// This function works similar to [`Iterator::filter()`]. You can imagine
+    /// the `Option<T>` being an iterator over one or zero elements. `filter()`
+    /// lets you decide which elements to keep.
     ///
     /// # Examples
     ///
@@ -1923,7 +1921,7 @@ impl<T> Option<T> {
     /// assert_eq!(x.zip_with(None, Point::new), None);
     /// ```
     #[unstable(feature = "option_zip", issue = "70086")]
-    #[cfg(feature = "unstable")]
+    #[cfg(not(feature = "ferrocene_uncertified"))]
     pub fn zip_with<U, F, R>(self, other: Option<U>, f: F) -> Option<R>
     where
         F: FnOnce(T, U) -> R,

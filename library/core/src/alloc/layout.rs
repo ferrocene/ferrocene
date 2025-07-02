@@ -130,12 +130,11 @@ impl Layout {
     }
 
     /// Creates a layout, bypassing all checks.
-    // FIXME(pvdrz): fix docs
-    // ///
-    // /// # Safety
-    // ///
-    // /// This function is unsafe as it does not verify the preconditions from
-    // /// [`Layout::from_size_align`].
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe as it does not verify the preconditions from
+    /// [`Layout::from_size_align`].
     #[stable(feature = "alloc_layout", since = "1.28.0")]
     #[rustc_const_stable(feature = "const_alloc_layout_unchecked", since = "1.36.0")]
     #[must_use]

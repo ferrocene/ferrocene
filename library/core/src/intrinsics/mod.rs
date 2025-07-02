@@ -2928,9 +2928,9 @@ pub const unsafe fn unchecked_add<T: Copy>(x: T, y: T) -> T;
 
 /// Returns the result of an unchecked subtraction, resulting in
 /// undefined behavior when `x - y > T::MAX` or `x - y < T::MIN`.
-// ///
-// /// The stable counterpart of this intrinsic is `unchecked_sub` on the various
-// /// integer types, such as [`u16::unchecked_sub`] and [`i64::unchecked_sub`].
+///
+/// The stable counterpart of this intrinsic is `unchecked_sub` on the various
+/// integer types, such as [`u16::unchecked_sub`] and [`i64::unchecked_sub`].
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
@@ -3080,14 +3080,13 @@ pub const unsafe fn write_via_move<T>(ptr: *mut T, value: T);
 
 /// Returns the value of the discriminant for the variant in 'v';
 /// if `T` has no discriminant, returns `0`.
-// FIXME(pvdrz): fix docs
-// ///
-// /// Note that, unlike most intrinsics, this is safe to call;
-// /// it does not require an `unsafe` block.
-// /// Therefore, implementations must not require the user to uphold
-// /// any safety invariants.
-// ///
-// /// The stabilized version of this intrinsic is [`core::mem::discriminant`].
+///
+/// Note that, unlike most intrinsics, this is safe to call;
+/// it does not require an `unsafe` block.
+/// Therefore, implementations must not require the user to uphold
+/// any safety invariants.
+///
+/// The stabilized version of this intrinsic is [`core::mem::discriminant`].
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]

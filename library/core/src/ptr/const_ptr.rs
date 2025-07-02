@@ -11,32 +11,31 @@ use crate::slice::{self, SliceIndex};
 
 impl<T: ?Sized> *const T {
     /// Returns `true` if the pointer is null.
-    // FIXME(pvdrz): fix docs
-    // ///
-    // /// Note that unsized types have many possible null pointers, as only the
-    // /// raw data pointer is considered, not their length, vtable, etc.
-    // /// Therefore, two pointers that are null may still not compare equal to
-    // /// each other.
-    // ///
-    // /// # Panics during const evaluation
-    // ///
-    // /// If this method is used during const evaluation, and `self` is a pointer
-    // /// that is offset beyond the bounds of the memory it initially pointed to,
-    // /// then there might not be enough information to determine whether the
-    // /// pointer is null. This is because the absolute address in memory is not
-    // /// known at compile time. If the nullness of the pointer cannot be
-    // /// determined, this method will panic.
-    // ///
-    // /// In-bounds pointers are never null, so the method will never panic for
-    // /// such pointers.
-    // ///
-    // /// # Examples
-    // ///
-    // /// ```
-    // /// let s: &str = "Follow the rabbit";
-    // /// let ptr: *const u8 = s.as_ptr();
-    // /// assert!(!ptr.is_null());
-    // /// ```
+    ///
+    /// Note that unsized types have many possible null pointers, as only the
+    /// raw data pointer is considered, not their length, vtable, etc.
+    /// Therefore, two pointers that are null may still not compare equal to
+    /// each other.
+    ///
+    /// # Panics during const evaluation
+    ///
+    /// If this method is used during const evaluation, and `self` is a pointer
+    /// that is offset beyond the bounds of the memory it initially pointed to,
+    /// then there might not be enough information to determine whether the
+    /// pointer is null. This is because the absolute address in memory is not
+    /// known at compile time. If the nullness of the pointer cannot be
+    /// determined, this method will panic.
+    ///
+    /// In-bounds pointers are never null, so the method will never panic for
+    /// such pointers.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let s: &str = "Follow the rabbit";
+    /// let ptr: *const u8 = s.as_ptr();
+    /// assert!(!ptr.is_null());
+    /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[rustc_diagnostic_item = "ptr_const_is_null"]
@@ -172,28 +171,27 @@ impl<T: ?Sized> *const T {
     }
 
     /// Gets the "address" portion of the pointer.
-    // FIXME(pvdrz): fix docs
-    // ///
-    // /// This is similar to `self as usize`, except that the [provenance][crate::ptr#provenance] of
-    // /// the pointer is discarded and not [exposed][crate::ptr#exposed-provenance]. This means that
-    // /// casting the returned address back to a pointer yields a [pointer without
-    // /// provenance][without_provenance], which is undefined behavior to dereference. To properly
-    // /// restore the lost information and obtain a dereferenceable pointer, use
-    // /// [`with_addr`][pointer::with_addr] or [`map_addr`][pointer::map_addr].
-    // ///
-    // /// If using those APIs is not possible because there is no way to preserve a pointer with the
-    // /// required provenance, then Strict Provenance might not be for you. Use pointer-integer casts
-    // /// or [`expose_provenance`][pointer::expose_provenance] and [`with_exposed_provenance`][with_exposed_provenance]
-    // /// instead. However, note that this makes your code less portable and less amenable to tools
-    // /// that check for compliance with the Rust memory model.
-    // ///
-    // /// On most platforms this will produce a value with the same bytes as the original
-    // /// pointer, because all the bytes are dedicated to describing the address.
-    // /// Platforms which need to store additional information in the pointer may
-    // /// perform a change of representation to produce a value containing only the address
-    // /// portion of the pointer. What that means is up to the platform to define.
-    // ///
-    // /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
+    ///
+    /// This is similar to `self as usize`, except that the [provenance][crate::ptr#provenance] of
+    /// the pointer is discarded and not [exposed][crate::ptr#exposed-provenance]. This means that
+    /// casting the returned address back to a pointer yields a [pointer without
+    /// provenance][without_provenance], which is undefined behavior to dereference. To properly
+    /// restore the lost information and obtain a dereferenceable pointer, use
+    /// [`with_addr`][pointer::with_addr] or [`map_addr`][pointer::map_addr].
+    ///
+    /// If using those APIs is not possible because there is no way to preserve a pointer with the
+    /// required provenance, then Strict Provenance might not be for you. Use pointer-integer casts
+    /// or [`expose_provenance`][pointer::expose_provenance] and [`with_exposed_provenance`][with_exposed_provenance]
+    /// instead. However, note that this makes your code less portable and less amenable to tools
+    /// that check for compliance with the Rust memory model.
+    ///
+    /// On most platforms this will produce a value with the same bytes as the original
+    /// pointer, because all the bytes are dedicated to describing the address.
+    /// Platforms which need to store additional information in the pointer may
+    /// perform a change of representation to produce a value containing only the address
+    /// portion of the pointer. What that means is up to the platform to define.
+    ///
+    /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
     #[must_use]
     #[inline(always)]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
@@ -1450,33 +1448,32 @@ impl<T: ?Sized> *const T {
     ///
     /// For non-`Sized` pointees this operation considers only the data pointer,
     /// ignoring the metadata.
-    // FIXME(pvdrz): fix docs
-    // ///
-    // /// # Panics
-    // ///
-    // /// The function panics if `align` is not a power-of-two (this includes 0).
-    // ///
-    // /// # Examples
-    // ///
-    // /// ```
-    // /// #![feature(pointer_is_aligned_to)]
-    // ///
-    // /// // On some platforms, the alignment of i32 is less than 4.
-    // /// #[repr(align(4))]
-    // /// struct AlignedI32(i32);
-    // ///
-    // /// let data = AlignedI32(42);
-    // /// let ptr = &data as *const AlignedI32;
-    // ///
-    // /// assert!(ptr.is_aligned_to(1));
-    // /// assert!(ptr.is_aligned_to(2));
-    // /// assert!(ptr.is_aligned_to(4));
-    // ///
-    // /// assert!(ptr.wrapping_byte_add(2).is_aligned_to(2));
-    // /// assert!(!ptr.wrapping_byte_add(2).is_aligned_to(4));
-    // ///
-    // /// assert_ne!(ptr.is_aligned_to(8), ptr.wrapping_add(1).is_aligned_to(8));
-    // /// ```
+    ///
+    /// # Panics
+    ///
+    /// The function panics if `align` is not a power-of-two (this includes 0).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #![feature(pointer_is_aligned_to)]
+    ///
+    /// // On some platforms, the alignment of i32 is less than 4.
+    /// #[repr(align(4))]
+    /// struct AlignedI32(i32);
+    ///
+    /// let data = AlignedI32(42);
+    /// let ptr = &data as *const AlignedI32;
+    ///
+    /// assert!(ptr.is_aligned_to(1));
+    /// assert!(ptr.is_aligned_to(2));
+    /// assert!(ptr.is_aligned_to(4));
+    ///
+    /// assert!(ptr.wrapping_byte_add(2).is_aligned_to(2));
+    /// assert!(!ptr.wrapping_byte_add(2).is_aligned_to(4));
+    ///
+    /// assert_ne!(ptr.is_aligned_to(8), ptr.wrapping_add(1).is_aligned_to(8));
+    /// ```
     #[must_use]
     #[inline]
     #[unstable(feature = "pointer_is_aligned_to", issue = "96284")]
@@ -1688,8 +1685,7 @@ impl<T, const N: usize> *const [T; N] {
     }
 }
 
-// FIXME(pvdrz): fix docs
-// /// Pointer equality is by address, as produced by the [`<*const T>::addr`](pointer::addr) method.
+/// Pointer equality is by address, as produced by the [`<*const T>::addr`](pointer::addr) method.
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized> PartialEq for *const T {
     #[inline]

@@ -181,7 +181,7 @@ jobs:
       emulator-container: ferrocene-images/ci:ubuntu-24-main
       emulator-prepare-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh prepare
       emulator-start-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh
-  #     qnx-version: "710-472"
+      qnx-version: "710-472"
       artifacts-bucket: ${{ needs.calculate-envs.outputs.artifacts-bucket }}
       artifacts-prefix: ${{ needs.calculate-envs.outputs.artifacts-prefix }}
       cache-bucket: ${{ needs.calculate-envs.outputs.cache-bucket }}

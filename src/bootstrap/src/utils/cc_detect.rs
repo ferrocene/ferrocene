@@ -106,27 +106,28 @@ pub fn find_target(build: &Build, target: TargetSelection) {
         cfg.compiler(cc);
     }
 
-    // Ferrocene annotation: cc 1.1.32 and newer does not support custom targets outside of
-    // build script context (rust-lang/cc-rs#1225). Map `ferrocenecoretest` targets back to the
-    // targets they are test doubles for, and temporarily pass that triple to `cc` to determine
-    // the C compiler.
-    let ferrocenecoretest_compiler = if target.triple.contains("-ferrocenecoretest") {
-        let sub = target.triple.replace("ferrocenecoretest", "none");
-        cfg.target(&sub);
-        let compiler = cfg.get_compiler();
+    // Ferrocene annotation: cc 1.1.32 and newer does not support custom targets outside of build
+    // script context (rust-lang/cc-rs#1225). Map `ferrocenecoretest` and `.certified` targets back
+    // to the targets they are test doubles for, and temporarily pass that triple to `cc` to
+    // determine the C compiler.
+    let ferrocenecoretest_compiler =
+        if target.triple.contains("-ferrocenecoretest") || target.triple.ends_with(".certified") {
+            let sub = target.triple.replace("ferrocenecoretest", "none").replace(".certified", "");
+            cfg.target(&sub);
+            let compiler = cfg.get_compiler();
 
-        cfg.target(&target.triple);
+            cfg.target(&target.triple);
 
-        Some(compiler)
-    } else {
-        None
-    };
+            Some(compiler)
+        } else {
+            None
+        };
     let compiler = ferrocenecoretest_compiler.clone().unwrap_or_else(|| cfg.get_compiler());
     let ar = if let ar @ Some(..) = config.and_then(|c| c.ar.clone()) {
         ar
     } else {
         if ferrocenecoretest_compiler.is_some() {
-            let sub = target.triple.replace("ferrocenecoretest", "none");
+            let sub = target.triple.replace("ferrocenecoretest", "none").replace(".certified", "");
             cfg.target(&sub);
         }
         cfg.try_get_archiver().map(|c| PathBuf::from(c.get_program())).ok()

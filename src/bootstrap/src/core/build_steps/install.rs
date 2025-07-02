@@ -297,6 +297,8 @@ install!((self, builder, _config),
     };
 );
 
+// Ferrocene annocation: This is unused as we use ../../ferrocene/install.rs
+#[allow(dead_code)]
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Src {
     pub stage: u32,

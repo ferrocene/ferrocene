@@ -1921,7 +1921,7 @@ impl<T> Option<T> {
     /// assert_eq!(x.zip_with(None, Point::new), None);
     /// ```
     #[unstable(feature = "option_zip", issue = "70086")]
-    #[cfg(feature = "unstable")]
+    #[cfg(not(feature = "ferrocene_uncertified"))]
     pub fn zip_with<U, F, R>(self, other: Option<U>, f: F) -> Option<R>
     where
         F: FnOnce(T, U) -> R,

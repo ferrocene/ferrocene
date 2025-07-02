@@ -24,27 +24,27 @@ macro_rules! uint_impl {
         bound_condition = $bound_condition:literal,
     ) => {
         /// The smallest value that can be represented by this integer type.
-                // ///
-        // /// # Examples
-        // ///
-        // /// Basic usage:
-        // ///
-        // /// ```
+        ///
+        /// # Examples
+        ///
+        /// Basic usage:
+        ///
+        /// ```
         // #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MIN, 0);")]
-        // /// ```
+        /// ```
         #[stable(feature = "assoc_int_consts", since = "1.43.0")]
         pub const MIN: Self = 0;
 
         /// The largest value that can be represented by this integer type
                 // #[doc = concat!("(2<sup>", $BITS, "</sup> &minus; 1", $bound_condition, ").")]
-        // ///
-        // /// # Examples
-        // ///
-        // /// Basic usage:
-        // ///
-        // /// ```
+        ///
+        /// # Examples
+        ///
+        /// Basic usage:
+        ///
+        /// ```
         // #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MAX, ", stringify!($MaxV), ");")]
-        // /// ```
+        /// ```
         #[stable(feature = "assoc_int_consts", since = "1.43.0")]
         pub const MAX: Self = !0;
 
@@ -60,21 +60,21 @@ macro_rules! uint_impl {
         pub const BITS: u32 = Self::MAX.count_ones();
 
         /// Returns the number of ones in the binary representation of `self`.
-                // ///
-        // /// # Examples
-        // ///
-        // /// Basic usage:
-        // ///
-        // /// ```
+        ///
+        /// # Examples
+        ///
+        /// Basic usage:
+        ///
+        /// ```
         // #[doc = concat!("let n = 0b01001100", stringify!($SelfT), ";")]
-        // /// assert_eq!(n.count_ones(), 3);
-        // ///
+        /// assert_eq!(n.count_ones(), 3);
+        ///
         // #[doc = concat!("let max = ", stringify!($SelfT),"::MAX;")]
         // #[doc = concat!("assert_eq!(max.count_ones(), ", stringify!($BITS), ");")]
-        // ///
+        ///
         // #[doc = concat!("let zero = 0", stringify!($SelfT), ";")]
-        // /// assert_eq!(zero.count_ones(), 0);
-        // /// ```
+        /// assert_eq!(zero.count_ones(), 0);
+        /// ```
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_stable(feature = "const_math", since = "1.32.0")]
         #[doc(alias = "popcount")]
@@ -3554,15 +3554,15 @@ macro_rules! uint_impl {
         }
 
         /// Returns `true` if and only if `self == 2^k` for some unsigned integer `k`.
-                // ///
-        // /// # Examples
-        // ///
-        // /// Basic usage:
-        // ///
-        // /// ```
+        ///
+        /// # Examples
+        ///
+        /// Basic usage:
+        ///
+        /// ```
         // #[doc = concat!("assert!(16", stringify!($SelfT), ".is_power_of_two());")]
         // #[doc = concat!("assert!(!10", stringify!($SelfT), ".is_power_of_two());")]
-        // /// ```
+        /// ```
         #[must_use]
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_stable(feature = "const_is_power_of_two", since = "1.32.0")]

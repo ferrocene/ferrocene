@@ -970,16 +970,16 @@ pub trait Ord: Eq + PartialOrd<Self> {
     ///
     /// By convention, `self.cmp(&other)` returns the ordering matching the expression
     /// `self <operator> other` if true.
-    // ///
-    // /// # Examples
-    // ///
-    // /// ```
-    // /// use std::cmp::Ordering;
-    // ///
-    // /// assert_eq!(5.cmp(&10), Ordering::Less);
-    // /// assert_eq!(10.cmp(&5), Ordering::Greater);
-    // /// assert_eq!(5.cmp(&5), Ordering::Equal);
-    // /// ```
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::cmp::Ordering;
+    ///
+    /// assert_eq!(5.cmp(&10), Ordering::Less);
+    /// assert_eq!(10.cmp(&5), Ordering::Greater);
+    /// assert_eq!(5.cmp(&5), Ordering::Equal);
+    /// ```
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "ord_cmp_method"]
@@ -988,31 +988,31 @@ pub trait Ord: Eq + PartialOrd<Self> {
     /// Compares and returns the maximum of two values.
     ///
     /// Returns the second argument if the comparison determines them to be equal.
-    // ///
-    // /// # Examples
-    // ///
-    // /// ```
-    // /// assert_eq!(1.max(2), 2);
-    // /// assert_eq!(2.max(2), 2);
-    // /// ```
-    // /// ```
-    // /// use std::cmp::Ordering;
-    // ///
-    // /// #[derive(Eq)]
-    // /// struct Equal(&'static str);
-    // ///
-    // /// impl PartialEq for Equal {
-    // ///     fn eq(&self, other: &Self) -> bool { true }
-    // /// }
-    // /// impl PartialOrd for Equal {
-    // ///     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }
-    // /// }
-    // /// impl Ord for Equal {
-    // ///     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }
-    // /// }
-    // ///
-    // /// assert_eq!(Equal("self").max(Equal("other")).0, "other");
-    // /// ```
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// assert_eq!(1.max(2), 2);
+    /// assert_eq!(2.max(2), 2);
+    /// ```
+    /// ```
+    /// use std::cmp::Ordering;
+    ///
+    /// #[derive(Eq)]
+    /// struct Equal(&'static str);
+    ///
+    /// impl PartialEq for Equal {
+    ///     fn eq(&self, other: &Self) -> bool { true }
+    /// }
+    /// impl PartialOrd for Equal {
+    ///     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }
+    /// }
+    /// impl Ord for Equal {
+    ///     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }
+    /// }
+    ///
+    /// assert_eq!(Equal("self").max(Equal("other")).0, "other");
+    /// ```
     #[stable(feature = "ord_max_min", since = "1.21.0")]
     #[inline]
     #[must_use]
@@ -1027,31 +1027,31 @@ pub trait Ord: Eq + PartialOrd<Self> {
     /// Compares and returns the minimum of two values.
     ///
     /// Returns the first argument if the comparison determines them to be equal.
-    // ///
-    // /// # Examples
-    // ///
-    // /// ```
-    // /// assert_eq!(1.min(2), 1);
-    // /// assert_eq!(2.min(2), 2);
-    // /// ```
-    // /// ```
-    // /// use std::cmp::Ordering;
-    // ///
-    // /// #[derive(Eq)]
-    // /// struct Equal(&'static str);
-    // ///
-    // /// impl PartialEq for Equal {
-    // ///     fn eq(&self, other: &Self) -> bool { true }
-    // /// }
-    // /// impl PartialOrd for Equal {
-    // ///     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }
-    // /// }
-    // /// impl Ord for Equal {
-    // ///     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }
-    // /// }
-    // ///
-    // /// assert_eq!(Equal("self").min(Equal("other")).0, "self");
-    // /// ```
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// assert_eq!(1.min(2), 1);
+    /// assert_eq!(2.min(2), 2);
+    /// ```
+    /// ```
+    /// use std::cmp::Ordering;
+    ///
+    /// #[derive(Eq)]
+    /// struct Equal(&'static str);
+    ///
+    /// impl PartialEq for Equal {
+    ///     fn eq(&self, other: &Self) -> bool { true }
+    /// }
+    /// impl PartialOrd for Equal {
+    ///     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }
+    /// }
+    /// impl Ord for Equal {
+    ///     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }
+    /// }
+    ///
+    /// assert_eq!(Equal("self").min(Equal("other")).0, "self");
+    /// ```
     #[stable(feature = "ord_max_min", since = "1.21.0")]
     #[inline]
     #[must_use]
@@ -1067,18 +1067,18 @@ pub trait Ord: Eq + PartialOrd<Self> {
     ///
     /// Returns `max` if `self` is greater than `max`, and `min` if `self` is
     /// less than `min`. Otherwise this returns `self`.
-    // ///
-    // /// # Panics
-    // ///
-    // /// Panics if `min > max`.
-    // ///
-    // /// # Examples
-    // ///
-    // /// ```
-    // /// assert_eq!((-3).clamp(-2, 1), -2);
-    // /// assert_eq!(0.clamp(-2, 1), 0);
-    // /// assert_eq!(2.clamp(-2, 1), 1);
-    // /// ```
+    ///
+    /// # Panics
+    ///
+    /// Panics if `min > max`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// assert_eq!((-3).clamp(-2, 1), -2);
+    /// assert_eq!(0.clamp(-2, 1), 0);
+    /// assert_eq!(2.clamp(-2, 1), 1);
+    /// ```
     #[must_use]
     #[inline]
     #[stable(feature = "clamp", since = "1.50.0")]

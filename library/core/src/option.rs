@@ -1083,8 +1083,8 @@ impl<T> Option<T> {
     /// ```
     ///
     /// [default value]: Default::default
-    // /// [`parse`]: str::parse
-    // /// [`FromStr`]: crate::str::FromStr
+    /// [`parse`]: str::parse
+    /// [`FromStr`]: crate::str::FromStr
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn unwrap_or_default(self) -> T
@@ -1534,9 +1534,9 @@ impl<T> Option<T> {
     ///   value), and
     /// - [`None`] if `predicate` returns `false`.
     ///
-    // /// This function works similar to [`Iterator::filter()`]. You can imagine
-    // /// the `Option<T>` being an iterator over one or zero elements. `filter()`
-    // /// lets you decide which elements to keep.
+    /// This function works similar to [`Iterator::filter()`]. You can imagine
+    /// the `Option<T>` being an iterator over one or zero elements. `filter()`
+    /// lets you decide which elements to keep.
     ///
     /// # Examples
     ///

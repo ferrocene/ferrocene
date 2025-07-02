@@ -389,23 +389,23 @@ impl<Idx> RangeInclusive<Idx> {
     }
 
     /// Returns the lower bound of the range (inclusive).
-    // ///
-    // /// When using an inclusive range for iteration, the values of `start()` and
-    // /// [`end()`] are unspecified after the iteration ended. To determine
-    // /// whether the inclusive range is empty, use the [`is_empty()`] method
-    // /// instead of comparing `start() > end()`.
-    // ///
-    // /// Note: the value returned by this method is unspecified after the range
-    // /// has been iterated to exhaustion.
-    // ///
-    // /// [`end()`]: RangeInclusive::end
-    // /// [`is_empty()`]: RangeInclusive::is_empty
-    // ///
-    // /// # Examples
-    // ///
-    // /// ```
-    // /// assert_eq!((3..=5).start(), &3);
-    // /// ```
+    ///
+    /// When using an inclusive range for iteration, the values of `start()` and
+    /// [`end()`] are unspecified after the iteration ended. To determine
+    /// whether the inclusive range is empty, use the [`is_empty()`] method
+    /// instead of comparing `start() > end()`.
+    ///
+    /// Note: the value returned by this method is unspecified after the range
+    /// has been iterated to exhaustion.
+    ///
+    /// [`end()`]: RangeInclusive::end
+    /// [`is_empty()`]: RangeInclusive::is_empty
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// assert_eq!((3..=5).start(), &3);
+    /// ```
     #[stable(feature = "inclusive_range_methods", since = "1.27.0")]
     #[rustc_const_stable(feature = "const_inclusive_range_methods", since = "1.32.0")]
     #[inline]
@@ -414,23 +414,23 @@ impl<Idx> RangeInclusive<Idx> {
     }
 
     /// Returns the upper bound of the range (inclusive).
-    // ///
-    // /// When using an inclusive range for iteration, the values of [`start()`]
-    // /// and `end()` are unspecified after the iteration ended. To determine
-    // /// whether the inclusive range is empty, use the [`is_empty()`] method
-    // /// instead of comparing `start() > end()`.
-    // ///
-    // /// Note: the value returned by this method is unspecified after the range
-    // /// has been iterated to exhaustion.
-    // ///
-    // /// [`start()`]: RangeInclusive::start
-    // /// [`is_empty()`]: RangeInclusive::is_empty
-    // ///
-    // /// # Examples
-    // ///
-    // /// ```
-    // /// assert_eq!((3..=5).end(), &5);
-    // /// ```
+    ///
+    /// When using an inclusive range for iteration, the values of [`start()`]
+    /// and `end()` are unspecified after the iteration ended. To determine
+    /// whether the inclusive range is empty, use the [`is_empty()`] method
+    /// instead of comparing `start() > end()`.
+    ///
+    /// Note: the value returned by this method is unspecified after the range
+    /// has been iterated to exhaustion.
+    ///
+    /// [`start()`]: RangeInclusive::start
+    /// [`is_empty()`]: RangeInclusive::is_empty
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// assert_eq!((3..=5).end(), &5);
+    /// ```
     #[stable(feature = "inclusive_range_methods", since = "1.27.0")]
     #[rustc_const_stable(feature = "const_inclusive_range_methods", since = "1.32.0")]
     #[inline]

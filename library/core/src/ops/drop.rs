@@ -207,36 +207,36 @@
 #[rustc_const_unstable(feature = "const_destruct", issue = "133214")]
 pub trait Drop {
     /// Executes the destructor for this type.
-    // ///
-    // /// This method is called implicitly when the value goes out of scope,
-    // /// and cannot be called explicitly (this is compiler error [E0040]).
-    // /// However, the [`mem::drop`] function in the prelude can be
-    // /// used to call the argument's `Drop` implementation.
-    // ///
-    // /// When this method has been called, `self` has not yet been deallocated.
-    // /// That only happens after the method is over.
-    // /// If this wasn't the case, `self` would be a dangling reference.
-    // ///
-    // /// # Panics
-    // ///
-    // /// Implementations should generally avoid [`panic!`]ing, because `drop()` may itself be called
-    // /// during unwinding due to a panic, and if the `drop()` panics in that situation (a “double
-    // /// panic”), this will likely abort the program. It is possible to check [`panicking()`] first,
-    // /// which may be desirable for a `Drop` implementation that is reporting a bug of the kind
-    // /// “you didn't finish using this before it was dropped”; but most types should simply clean up
-    // /// their owned allocations or other resources and return normally from `drop()`, regardless of
-    // /// what state they are in.
-    // ///
-    // /// Note that even if this panics, the value is considered to be dropped;
-    // /// you must not cause `drop` to be called again. This is normally automatically
-    // /// handled by the compiler, but when using unsafe code, can sometimes occur
-    // /// unintentionally, particularly when using [`ptr::drop_in_place`].
-    // ///
-    // /// [E0040]: ../../error_codes/E0040.html
-    // /// [`panic!`]: crate::panic!
-    // /// [`panicking()`]: ../../std/thread/fn.panicking.html
-    // /// [`mem::drop`]: drop
-    // /// [`ptr::drop_in_place`]: crate::ptr::drop_in_place
+    ///
+    /// This method is called implicitly when the value goes out of scope,
+    /// and cannot be called explicitly (this is compiler error [E0040]).
+    /// However, the [`mem::drop`] function in the prelude can be
+    /// used to call the argument's `Drop` implementation.
+    ///
+    /// When this method has been called, `self` has not yet been deallocated.
+    /// That only happens after the method is over.
+    /// If this wasn't the case, `self` would be a dangling reference.
+    ///
+    /// # Panics
+    ///
+    /// Implementations should generally avoid [`panic!`]ing, because `drop()` may itself be called
+    /// during unwinding due to a panic, and if the `drop()` panics in that situation (a “double
+    /// panic”), this will likely abort the program. It is possible to check [`panicking()`] first,
+    /// which may be desirable for a `Drop` implementation that is reporting a bug of the kind
+    /// “you didn't finish using this before it was dropped”; but most types should simply clean up
+    /// their owned allocations or other resources and return normally from `drop()`, regardless of
+    /// what state they are in.
+    ///
+    /// Note that even if this panics, the value is considered to be dropped;
+    /// you must not cause `drop` to be called again. This is normally automatically
+    /// handled by the compiler, but when using unsafe code, can sometimes occur
+    /// unintentionally, particularly when using [`ptr::drop_in_place`].
+    ///
+    /// [E0040]: ../../error_codes/E0040.html
+    /// [`panic!`]: crate::panic!
+    /// [`panicking()`]: ../../std/thread/fn.panicking.html
+    /// [`mem::drop`]: drop
+    /// [`ptr::drop_in_place`]: crate::ptr::drop_in_place
     #[stable(feature = "rust1", since = "1.0.0")]
     fn drop(&mut self);
 }

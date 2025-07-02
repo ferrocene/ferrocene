@@ -26,27 +26,27 @@ macro_rules! int_impl {
     ) => {
         /// The smallest value that can be represented by this integer type
                 // #[doc = concat!("(&minus;2<sup>", $BITS_MINUS_ONE, "</sup>", $bound_condition, ").")]
-        // ///
-        // /// # Examples
-        // ///
-        // /// Basic usage:
-        // ///
-        // /// ```
+        ///
+        /// # Examples
+        ///
+        /// Basic usage:
+        ///
+        /// ```
         // #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MIN, ", stringify!($Min), ");")]
-        // /// ```
+        /// ```
         #[stable(feature = "assoc_int_consts", since = "1.43.0")]
         pub const MIN: Self = !Self::MAX;
 
         /// The largest value that can be represented by this integer type
                 // #[doc = concat!("(2<sup>", $BITS_MINUS_ONE, "</sup> &minus; 1", $bound_condition, ").")]
-        // ///
-        // /// # Examples
-        // ///
-        // /// Basic usage:
-        // ///
-        // /// ```
+        ///
+        /// # Examples
+        ///
+        /// Basic usage:
+        ///
+        /// ```
         // #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MAX, ", stringify!($Max), ");")]
-        // /// ```
+        /// ```
         #[stable(feature = "assoc_int_consts", since = "1.43.0")]
         pub const MAX: Self = (<$UnsignedT>::MAX >> 1) as Self;
 

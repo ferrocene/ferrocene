@@ -2314,6 +2314,7 @@ impl Step for LlvmTools {
             let src_bindir = builder.llvm_out(target).join("bin");
             let dst_bindir = format!("lib/rustlib/{}/bin", target.triple);
             for tool in tools_to_install(&builder.paths) {
+                tarball.ferrocene_proxied_binary(PathBuf::from(&dst_bindir).join(exe(tool, target)));
                 let exe = src_bindir.join(exe(tool, target));
                 // When using `download-ci-llvm`, some of the tools may not exist, so skip trying to copy them.
                 if !exe.exists() && builder.config.llvm_from_ci {

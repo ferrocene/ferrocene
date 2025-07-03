@@ -62,6 +62,10 @@ GENERIC_BUILD_STD_TARGETS = [
     "wasm32-unknown-unknown",
     "armv7r-none-eabihf",
     "armebv7r-none-eabihf",
+    "x86_64-unknown-none.certified",
+    "aarch64-unknown-none.certified",
+    "thumbv7em-none-eabi.certified",
+    "thumbv7em-none-eabihf.certified",
 ]
 
 # Targets only built (and self-tested!) on Linux.

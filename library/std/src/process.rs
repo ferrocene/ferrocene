@@ -1679,7 +1679,8 @@ impl From<io::Stdout> for Stdio {
     ///
     /// # Examples
     ///
-    /// ```rust
+    // Ferrocene annotation: QNX does not have a `whoami` binary
+    /// ```rust,ignore-qnx
     /// #![feature(exit_status_error)]
     /// use std::io;
     /// use std::process::Command;
@@ -1710,7 +1711,8 @@ impl From<io::Stderr> for Stdio {
     ///
     /// # Examples
     ///
-    /// ```rust
+    // Ferrocene annotation: QNX does not have a `whoami` binary
+    /// ```rust,ignore-qnx
     /// #![feature(exit_status_error)]
     /// use std::io;
     /// use std::process::Command;

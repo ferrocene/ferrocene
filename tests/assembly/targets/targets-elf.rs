@@ -730,6 +730,12 @@
 //@ revisions: x86_64_unknown_none_certified
 //@ [x86_64_unknown_none_certified] compile-flags: --target x86_64-unknown-none.certified
 //@ [x86_64_unknown_none_certified] needs-llvm-components: x86_64
+//@ revisions: thumbv7em_none_eabi_certified
+//@ [thumbv7em_none_eabi_certified] compile-flags: --target thumbv7m-none-eabi.certified
+//@ [thumbv7em_none_eabi_certified] needs-llvm-components: arm
+//@ revisions: thumbv7em_none_eabihf_certified
+//@ [thumbv7em_none_eabihf_certified] compile-flags: --target thumbv7m-none-eabihf.certified
+//@ [thumbv7em_none_eabihf_certified] needs-llvm-components: arm
 
 // Sanity-check that each target can produce assembly code.
 

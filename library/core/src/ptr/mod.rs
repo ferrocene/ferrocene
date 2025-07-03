@@ -410,6 +410,8 @@ use crate::mem;
 use crate::mem::{self, MaybeUninit, SizedTypeProperties};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
+#[cfg(all(debug_assertions, feature = "ferrocene_certified"))]
+use crate::ub_checks;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, hash, intrinsics, ub_checks};
 

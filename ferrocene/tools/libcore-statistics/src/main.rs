@@ -81,9 +81,7 @@ fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Re
             .strip_prefix(&format!("{}::", &function.module))
             .unwrap();
 
-        // FIXME: detect nightly, don't hardcode
-        let nightly_modules = ["library/core/src/intrinsics/mod.rs"];
-        if nightly_modules.contains(&file.as_str()) {
+        if is_nightly(file, name) {
             continue;
         }
 
@@ -95,9 +93,12 @@ fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Re
             .iter()
             .any(|a| docs.contains(a));
 
-        // check rule violations
+        // warn about rule violations
         if !contains_examples {
             eprintln!("{file}: {name} has no examples")
+        }
+        if safety_constraint == "missing" {
+            eprintln!("{file}: {name} is missing a safety comment")
         }
 
         functions.add([
@@ -114,6 +115,31 @@ fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Re
     }
 
     Ok(())
+}
+
+// FIXME: detect nightly from attributes, don't hardcode
+fn is_nightly(file: &String, name: &str) -> bool {
+    let nightly_items = [
+        ("library/core/src/intrinsics/mod.rs", [].as_slice()),
+        ("library/core/src/ops/function.rs", &[]),
+        (
+            "library/core/src/ops/range.rs",
+            &["Bound::as_mut", "OneSidedRange::bound"],
+        ),
+        ("library/core/src/panicking.rs", &[]),
+        ("library/core/src/ptr/alignment.rs", &[]),
+        ("library/core/src/ptr/metadata.rs", &[]),
+    ];
+    for (nightly_file, items) in nightly_items {
+        if nightly_file == file {
+            if items.is_empty() {
+                return true; // ignore all items in the modules
+            } else if items.contains(&name) {
+                return true; // ignore specific items only
+            }
+        }
+    }
+    false
 }
 
 fn safety_constraint(function: &stats::Function) -> &'static str {

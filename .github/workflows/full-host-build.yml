@@ -190,6 +190,10 @@ jobs:
       - name: Build cache upload
         shell: bash
         run: |
+          if [ -z "${AWS_CA_BUNDLE}" ]; then
+            unset AWS_CA_BUNDLE
+          fi
+
           uv run ./ferrocene/ci/scripts/build_cache.py pre-upload
           uv run ./ferrocene/ci/scripts/cache.py store "s3://${{ inputs.cache-bucket }}/${{ inputs.cache-prefix }}persist-between-jobs/${{ github.run_id }}/${{ env.ARTIFACT }}" ./build
 

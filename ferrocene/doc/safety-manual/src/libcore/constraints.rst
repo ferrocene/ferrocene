@@ -55,9 +55,9 @@ Therefore the source code has to be reviewed for all syntax that denotes an oper
   // this is in libcore:
 
   trait Add<Rhs = Self> {
-    type Output;
+      type Output;
       const fn add(self, rhs: Rhs) -> Self::Output;
-    }
+  }
 
   impl Add<i32> for i32 { /* ... */ } // certified
   impl Add<i64> for i64 { /* ... */ } // uncertified

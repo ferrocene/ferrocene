@@ -18,22 +18,27 @@ This qualification is restricted to the following environment:
 
    * - Host
      - Target
+     - Certified Libraries
      - Uncertified Libraries
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`aarch64-unknown-none`
+     - ``libcore``
      - ``alloc``
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`x86_64-unknown-linux-gnu`
+     - ``libcore``
      - ``alloc``, ``std``, ``proc_macro``, ``test``
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`x86_64-pc-nto-qnx710`
+     - ``libcore``
      - ``alloc``, ``std``, ``proc_macro``, ``test``
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`aarch64-unknown-nto-qnx710`
+     - ``libcore``
      - ``alloc``, ``std``, ``proc_macro``, ``test``
 
 The libraries provided are evaluated and tested within the scope of

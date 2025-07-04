@@ -7,21 +7,21 @@ Constraints
 ===========
 
 Only use certified subset
----------------------------
+-------------------------
 
 .. id::  RUSTC_AVD_LIBCORE_SUBSET_008
 
 If building certified software, the user shall only use the certified subset of libcore.
 
 Compile with panic abort
----------
+------------------------
 
 .. id::  RUSTC_AVD_LIBCORE_SUBSET_009
 
 If building certified software, the user shall always provide the ``-C panic=abort`` option to ferrocene.
 
 Only use stable functions
----------------------------
+-------------------------
 
 .. id::  RUSTC_AVD_LIBCORE_SUBSET_010
 
@@ -45,17 +45,17 @@ behaviour as shown on the last line of the following code example, and not as in
 .. code-block:: rust
   :linenos:
 
-   // this is in libcore:
+  // this is in libcore:
 
-   pub trait Add<Rhs = Self> {
-       type Output;
-       const fn add(self, rhs: Rhs) -> Self::Output;
-   }
+  pub trait Add<Rhs = Self> {
+    type Output;
+      const fn add(self, rhs: Rhs) -> Self::Output;
+    }
 
-   impl Add<i32> for i32 { /* ... */ } // certified
-   impl Add<i64> for i64 { /* ... */ } // uncertified
+  impl Add<i32> for i32 { /* ... */ } // certified
+  impl Add<i64> for i64 { /* ... */ } // uncertified
 
-   // this is in user code:
+  // this is in user code:
 
-   let a = 5_i32 + 10_i32; // legal
-   let b = 20_i64 + 40_i64; // illegal
+  let a = 5_i32 + 10_i32; // legal
+  let b = 20_i64 + 40_i64; // illegal

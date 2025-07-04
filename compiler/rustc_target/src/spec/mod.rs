@@ -2066,6 +2066,8 @@ supported_targets! {
     ("thumbv7em-ferrocenecoretest-eabihf", thumbv7em_ferrocenecoretest_eabihf),
     ("x86_64-unknown-none.certified", x86_64_unknown_none_certified),
     ("aarch64-unknown-none.certified", aarch64_unknown_none_certified),
+    ("thumbv7em-none-eabi.certified", thumbv7em_none_eabi_certified),
+    ("thumbv7em-none-eabihf.certified", thumbv7em_none_eabihf_certified),
 
     ("aarch64-unknown-linux-ohos", aarch64_unknown_linux_ohos),
     ("armv7-unknown-linux-ohos", armv7_unknown_linux_ohos),

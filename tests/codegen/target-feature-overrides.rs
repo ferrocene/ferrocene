@@ -46,4 +46,3 @@ pub unsafe fn banana() -> u32 {
 // INCOMPAT-SAME: "target-features"="{{(-[^,]+,)*}}-avx2{{(,-[^,]+)*}},-avx{{(,-[^,]+)*}}"
 
 // ferrocene-annotations: um_rustc_C_opt_level
-

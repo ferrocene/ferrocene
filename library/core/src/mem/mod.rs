@@ -6,19 +6,29 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 use crate::alloc::Layout;
+#[cfg(feature = "ferrocene_certified")]
+use crate::intrinsics;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::DiscriminantKind;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
 
+#[cfg(not(feature = "ferrocene_certified"))]
 mod manually_drop;
 #[stable(feature = "manually_drop", since = "1.20.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use manually_drop::ManuallyDrop;
 
+#[cfg(not(feature = "ferrocene_certified"))]
 mod maybe_uninit;
 #[stable(feature = "maybe_uninit", since = "1.36.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use maybe_uninit::MaybeUninit;
 
+#[cfg(not(feature = "ferrocene_certified"))]
 mod transmutability;
 #[unstable(feature = "transmutability", issue = "99571")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use transmutability::{Assume, TransmuteFrom};
 
 // This one has to be a re-export (rather than wrapping the underlying intrinsic) so that we can do
@@ -143,6 +153,7 @@ pub use crate::intrinsics::transmute;
 #[rustc_const_stable(feature = "const_forget", since = "1.46.0")]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "mem_forget"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn forget<T>(t: T) {
     let _ = ManuallyDrop::new(t);
 }
@@ -153,6 +164,7 @@ pub const fn forget<T>(t: T) {
 /// stabilized.
 #[inline]
 #[unstable(feature = "forget_unsized", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn forget_unsized<T: ?Sized>(t: T) {
     intrinsics::forget(t)
 }
@@ -331,6 +343,7 @@ pub const fn size_of<T>() -> usize {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_size_of_val", since = "1.85.0")]
 #[rustc_diagnostic_item = "mem_size_of_val"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn size_of_val<T: ?Sized>(val: &T) -> usize {
     // SAFETY: `val` is a reference, so it's a valid raw pointer
     unsafe { intrinsics::size_of_val(val) }
@@ -386,6 +399,7 @@ pub const fn size_of_val<T: ?Sized>(val: &T) -> usize {
 #[inline]
 #[must_use]
 #[unstable(feature = "layout_for_ptr", issue = "69835")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn size_of_val_raw<T: ?Sized>(val: *const T) -> usize {
     // SAFETY: the caller must provide a valid raw pointer
     unsafe { intrinsics::size_of_val(val) }
@@ -411,6 +425,7 @@ pub const unsafe fn size_of_val_raw<T: ?Sized>(val: *const T) -> usize {
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[deprecated(note = "use `align_of` instead", since = "1.2.0", suggestion = "align_of")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn min_align_of<T>() -> usize {
     intrinsics::min_align_of::<T>()
 }
@@ -434,6 +449,7 @@ pub fn min_align_of<T>() -> usize {
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[deprecated(note = "use `align_of_val` instead", since = "1.2.0", suggestion = "align_of_val")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn min_align_of_val<T: ?Sized>(val: &T) -> usize {
     // SAFETY: val is a reference, so it's a valid raw pointer
     unsafe { intrinsics::min_align_of_val(val) }
@@ -478,6 +494,7 @@ pub const fn align_of<T>() -> usize {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_align_of_val", since = "1.85.0")]
 #[allow(deprecated)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn align_of_val<T: ?Sized>(val: &T) -> usize {
     // SAFETY: val is a reference, so it's a valid raw pointer
     unsafe { intrinsics::min_align_of_val(val) }
@@ -525,6 +542,7 @@ pub const fn align_of_val<T: ?Sized>(val: &T) -> usize {
 #[inline]
 #[must_use]
 #[unstable(feature = "layout_for_ptr", issue = "69835")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn align_of_val_raw<T: ?Sized>(val: *const T) -> usize {
     // SAFETY: the caller must provide a valid raw pointer
     unsafe { intrinsics::min_align_of_val(val) }
@@ -591,6 +609,7 @@ pub const unsafe fn align_of_val_raw<T: ?Sized>(val: *const T) -> usize {
 #[stable(feature = "needs_drop", since = "1.21.0")]
 #[rustc_const_stable(feature = "const_mem_needs_drop", since = "1.36.0")]
 #[rustc_diagnostic_item = "needs_drop"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn needs_drop<T: ?Sized>() -> bool {
     intrinsics::needs_drop::<T>()
 }
@@ -642,6 +661,7 @@ pub const fn needs_drop<T: ?Sized>() -> bool {
 #[rustc_diagnostic_item = "mem_zeroed"]
 #[track_caller]
 #[rustc_const_stable(feature = "const_mem_zeroed", since = "1.75.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn zeroed<T>() -> T {
     // SAFETY: the caller must guarantee that an all-zero value is valid for `T`.
     unsafe {
@@ -681,6 +701,7 @@ pub const unsafe fn zeroed<T>() -> T {
 #[allow(deprecated)]
 #[rustc_diagnostic_item = "mem_uninitialized"]
 #[track_caller]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn uninitialized<T>() -> T {
     // SAFETY: the caller must guarantee that an uninitialized value is valid for `T`.
     unsafe {
@@ -719,6 +740,7 @@ pub unsafe fn uninitialized<T>() -> T {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_swap", since = "1.85.0")]
 #[rustc_diagnostic_item = "mem_swap"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn swap<T>(x: &mut T, y: &mut T) {
     // SAFETY: `&mut` guarantees these are typed readable and writable
     // as well as non-overlapping.
@@ -782,6 +804,7 @@ pub const fn swap<T>(x: &mut T, y: &mut T) {
 /// ```
 #[inline]
 #[stable(feature = "mem_take", since = "1.40.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn take<T: Default>(dest: &mut T) -> T {
     replace(dest, T::default())
 }
@@ -849,6 +872,7 @@ pub fn take<T: Default>(dest: &mut T) -> T {
 #[must_use = "if you don't need the old value, you can just assign the new value directly"]
 #[rustc_const_stable(feature = "const_replace", since = "1.83.0")]
 #[rustc_diagnostic_item = "mem_replace"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn replace<T>(dest: &mut T, src: T) -> T {
     // It may be tempting to use `swap` to avoid `unsafe` here. Don't!
     // The compiler optimizes the implementation below to two `memcpy`s
@@ -954,6 +978,7 @@ pub fn drop<T>(_x: T) {}
 /// ```
 #[inline]
 #[unstable(feature = "mem_copy_fn", issue = "98262")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn copy<T: Copy>(x: &T) -> T {
     *x
 }
@@ -1003,6 +1028,7 @@ pub const fn copy<T: Copy>(x: &T) -> T {
 #[track_caller]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_transmute_copy", since = "1.74.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn transmute_copy<Src, Dst>(src: &Src) -> Dst {
     assert!(
         size_of::<Src>() >= size_of::<Dst>(),
@@ -1026,14 +1052,17 @@ pub const unsafe fn transmute_copy<Src, Dst>(src: &Src) -> Dst {
 ///
 /// See the [`discriminant`] function in this module for more information.
 #[stable(feature = "discriminant_value", since = "1.21.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub struct Discriminant<T>(<T as DiscriminantKind>::Discriminant);
 
 // N.B. These trait implementations cannot be derived because we don't want any bounds on T.
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> Copy for Discriminant<T> {}
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> clone::Clone for Discriminant<T> {
     fn clone(&self) -> Self {
         *self
@@ -1041,6 +1070,7 @@ impl<T> clone::Clone for Discriminant<T> {
 }
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> cmp::PartialEq for Discriminant<T> {
     fn eq(&self, rhs: &Self) -> bool {
         self.0 == rhs.0
@@ -1048,9 +1078,11 @@ impl<T> cmp::PartialEq for Discriminant<T> {
 }
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> cmp::Eq for Discriminant<T> {}
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> hash::Hash for Discriminant<T> {
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
         self.0.hash(state);
@@ -1058,6 +1090,7 @@ impl<T> hash::Hash for Discriminant<T> {
 }
 
 #[stable(feature = "discriminant_value", since = "1.21.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> fmt::Debug for Discriminant<T> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt.debug_tuple("Discriminant").field(&self.0).finish()
@@ -1158,6 +1191,7 @@ impl<T> fmt::Debug for Discriminant<T> {
 #[rustc_const_stable(feature = "const_discriminant", since = "1.75.0")]
 #[rustc_diagnostic_item = "mem_discriminant"]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn discriminant<T>(v: &T) -> Discriminant<T> {
     Discriminant(intrinsics::discriminant_value(v))
 }
@@ -1194,6 +1228,7 @@ pub const fn discriminant<T>(v: &T) -> Discriminant<T> {
 #[unstable(feature = "variant_count", issue = "73662")]
 #[rustc_const_unstable(feature = "variant_count", issue = "73662")]
 #[rustc_diagnostic_item = "mem_variant_count"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn variant_count<T>() -> usize {
     intrinsics::variant_count::<T>()
 }
@@ -1379,6 +1414,7 @@ impl<T> SizedTypeProperties for T {}
 /// [`offset_of_slice`]: https://doc.rust-lang.org/nightly/unstable-book/language-features/offset-of-slice.html
 #[stable(feature = "offset_of", since = "1.77.0")]
 #[allow_internal_unstable(builtin_syntax)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub macro offset_of($Container:ty, $($fields:expr)+ $(,)?) {
     // The `{}` is for better error messages
     {builtin # offset_of($Container, $($fields)+)}

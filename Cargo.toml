@@ -48,8 +48,10 @@ members = [
   "src/tools/wasm-component-ld",
   "src/tools/x",
 # tidy-alphabetical-end
+  "ferrocene/tools/coverage-of-subset",
   "ferrocene/tools/document-signatures",
   "ferrocene/tools/generate-tarball",
+  "ferrocene/tools/libcore-disable-inlining",
   "ferrocene/tools/self-test",
   "ferrocene/tools/traceability-matrix",
 ]

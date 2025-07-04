@@ -415,10 +415,18 @@
 // tidy-alphabetical-end
 //
 // Only used in tests/benchmarks:
+// tidy-alphabetical-start
+// tidy-alphabetical-end
 //
 // Only for const-ness:
 // tidy-alphabetical-start
 #![feature(io_const_error)]
+// tidy-alphabetical-end
+//
+// Ferrocene lints/features:
+// tidy-alphabetical-start
+#![allow(unused_attributes)]
+#![feature(coverage_attribute)]
 // tidy-alphabetical-end
 //
 #![default_lib_allocator]

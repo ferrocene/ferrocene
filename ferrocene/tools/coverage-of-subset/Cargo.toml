@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+[package]
+name = "coverage-of-subset"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]

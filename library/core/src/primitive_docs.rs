@@ -34,14 +34,14 @@
 /// ```
 /// let praise_the_borrow_checker = true;
 ///
-/// // using the `if` conditional
+/// // // using the `if` conditional
 /// if praise_the_borrow_checker {
 ///     println!("oh, yeah!");
 /// } else {
 ///     println!("what?!!");
 /// }
 ///
-/// // ... or, a match pattern
+/// // // ... or, a match pattern
 /// match praise_the_borrow_checker {
 ///     true => println!("keep praising!"),
 ///     false => println!("you should praise!"),
@@ -314,6 +314,7 @@ mod prim_bool {}
 /// [2024 edition]: <https://doc.rust-lang.org/nightly/edition-guide/rust-2024/index.html>
 ///
 #[unstable(feature = "never_type", issue = "35121")]
+#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_never {}
 
 #[rustc_doc_primitive = "char"]
@@ -445,6 +446,7 @@ mod prim_never {}
 /// assert_eq!(32, size_of_val(&v[..]));
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_char {}
 
 #[rustc_doc_primitive = "unit"]
@@ -486,11 +488,13 @@ mod prim_char {}
 /// ```
 ///
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_unit {}
 
 // Required to make auto trait impls render.
 // See src/librustdoc/passes/collect_trait_impls.rs:collect_trait_impls
 #[doc(hidden)]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl () {}
 
 #[rustc_doc_primitive = "pointer"]
@@ -613,6 +617,7 @@ impl () {}
 /// [`write`]: ptr::write
 /// [valid]: ptr#safety
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_pointer {}
 
 #[rustc_doc_primitive = "array"]
@@ -681,7 +686,7 @@ mod prim_pointer {}
 ///
 /// assert_eq!([1, 2], &array[1..]);
 ///
-/// // This loop prints: 0 1 2
+/// // // This loop prints: 0 1 2
 /// for x in array {
 ///     print!("{x} ");
 /// }
@@ -730,24 +735,24 @@ mod prim_pointer {}
 /// might be made consistent to the behavior of later editions.
 ///
 /// ```rust,edition2018
-/// // Rust 2015 and 2018:
+/// // // Rust 2015 and 2018:
 ///
-/// # #![allow(array_into_iter)] // override our `deny(warnings)`
+/// # #![allow(array_into_iter)] // // override our `deny(warnings)`
 /// let array: [i32; 3] = [0; 3];
 ///
-/// // This creates a slice iterator, producing references to each value.
+/// // // This creates a slice iterator, producing references to each value.
 /// for item in array.into_iter().enumerate() {
 ///     let (i, x): (usize, &i32) = item;
 ///     println!("array[{i}] = {x}");
 /// }
 ///
-/// // The `array_into_iter` lint suggests this change for future compatibility:
+/// // // The `array_into_iter` lint suggests this change for future compatibility:
 /// for item in array.iter().enumerate() {
 ///     let (i, x): (usize, &i32) = item;
 ///     println!("array[{i}] = {x}");
 /// }
 ///
-/// // You can explicitly iterate an array by value using `IntoIterator::into_iter`
+/// // // You can explicitly iterate an array by value using `IntoIterator::into_iter`
 /// for item in IntoIterator::into_iter(array).enumerate() {
 ///     let (i, x): (usize, i32) = item;
 ///     println!("array[{i}] = {x}");
@@ -758,17 +763,17 @@ mod prim_pointer {}
 /// by value, and `iter()` should be used to iterate by reference like previous editions.
 ///
 /// ```rust,edition2021
-/// // Rust 2021:
+/// // // Rust 2021:
 ///
 /// let array: [i32; 3] = [0; 3];
 ///
-/// // This iterates by reference:
+/// // // This iterates by reference:
 /// for item in array.iter().enumerate() {
 ///     let (i, x): (usize, &i32) = item;
 ///     println!("array[{i}] = {x}");
 /// }
 ///
-/// // This iterates by value:
+/// // // This iterates by value:
 /// for item in array.into_iter().enumerate() {
 ///     let (i, x): (usize, i32) = item;
 ///     println!("array[{i}] = {x}");
@@ -787,30 +792,30 @@ mod prim_pointer {}
 ///   equivalent to the post-2021 behavior (Rust 1.53+)
 ///
 /// ```rust,edition2018
-/// // Rust 2015 and 2018:
+/// // // Rust 2015 and 2018:
 ///
 /// let array: [i32; 3] = [0; 3];
 ///
-/// // This iterates by reference:
+/// // // This iterates by reference:
 /// for item in array.iter() {
 ///     let x: &i32 = item;
 ///     println!("{x}");
 /// }
 ///
-/// // This iterates by value:
+/// // // This iterates by value:
 /// for item in IntoIterator::into_iter(array) {
 ///     let x: i32 = item;
 ///     println!("{x}");
 /// }
 ///
-/// // This iterates by value:
+/// // // This iterates by value:
 /// for item in array {
 ///     let x: i32 = item;
 ///     println!("{x}");
 /// }
 ///
-/// // IntoIter can also start a chain.
-/// // This iterates by value:
+/// // // IntoIter can also start a chain.
+/// // // This iterates by value:
 /// for item in IntoIterator::into_iter(array).enumerate() {
 ///     let (i, x): (usize, i32) = item;
 ///     println!("array[{i}] = {x}");
@@ -939,6 +944,7 @@ mod prim_array {}
 /// [`.chunks`]: slice::chunks
 /// [`.windows`]: slice::windows
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_slice {}
 
 #[rustc_doc_primitive = "str"]
@@ -1012,6 +1018,7 @@ mod prim_slice {}
 /// called on a string slice may assume that it is valid UTF-8, which means that a non-UTF-8 string
 /// slice can lead to undefined behavior down the road.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_str {}
 
 #[rustc_doc_primitive = "tuple"]
@@ -1139,6 +1146,7 @@ mod prim_str {}
 /// ```
 ///
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_tuple {}
 
 // Required to make auto trait impls render.
@@ -1164,6 +1172,7 @@ impl<T> (T,) {}
 ///
 /// [wikipedia]: https://en.wikipedia.org/wiki/Half-precision_floating-point_format
 #[unstable(feature = "f16", issue = "116909")]
+#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_f16 {}
 
 #[rustc_doc_primitive = "f32"]
@@ -1399,6 +1408,7 @@ mod prim_f64 {}
 ///
 /// [wikipedia]: https://en.wikipedia.org/wiki/Quadruple-precision_floating-point_format
 #[unstable(feature = "f128", issue = "116909")]
+#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_f128 {}
 
 #[rustc_doc_primitive = "i8"]
@@ -1924,6 +1934,7 @@ mod prim_ref {}
 /// In addition, all *safe* function pointers implement [`Fn`], [`FnMut`], and [`FnOnce`], because
 /// these traits are specially known to the compiler.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 mod prim_fn {}
 
 // Required to make auto trait impls render.

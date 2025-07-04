@@ -52,6 +52,7 @@ pub trait StdFloat: Sealed + Sized {
     /// hardware in mind.
     #[inline]
     #[must_use = "method returns a new vector and does not mutate the original value"]
+    #[coverage(off)]
     fn mul_add(self, a: Self, b: Self) -> Self {
         unsafe { intrinsics::simd_fma(self, a, b) }
     }
@@ -60,6 +61,7 @@ pub trait StdFloat: Sealed + Sized {
     /// of the equivalently-indexed element in `self`
     #[inline]
     #[must_use = "method returns a new vector and does not mutate the original value"]
+    #[coverage(off)]
     fn sqrt(self) -> Self {
         unsafe { intrinsics::simd_fsqrt(self) }
     }
@@ -93,6 +95,7 @@ pub trait StdFloat: Sealed + Sized {
     /// in the equivalently-indexed elements in `self` and `base`.
     #[inline]
     #[must_use = "method returns a new vector and does not mutate the original value"]
+    #[coverage(off)]
     fn log(self, base: Self) -> Self {
         unsafe { intrinsics::simd_div(self.ln(), base.ln()) }
     }
@@ -110,6 +113,7 @@ pub trait StdFloat: Sealed + Sized {
     /// Returns the smallest integer greater than or equal to each element.
     #[must_use = "method returns a new vector and does not mutate the original value"]
     #[inline]
+    #[coverage(off)]
     fn ceil(self) -> Self {
         unsafe { intrinsics::simd_ceil(self) }
     }
@@ -117,6 +121,7 @@ pub trait StdFloat: Sealed + Sized {
     /// Returns the largest integer value less than or equal to each element.
     #[must_use = "method returns a new vector and does not mutate the original value"]
     #[inline]
+    #[coverage(off)]
     fn floor(self) -> Self {
         unsafe { intrinsics::simd_floor(self) }
     }
@@ -124,6 +129,7 @@ pub trait StdFloat: Sealed + Sized {
     /// Rounds to the nearest integer value. Ties round toward zero.
     #[must_use = "method returns a new vector and does not mutate the original value"]
     #[inline]
+    #[coverage(off)]
     fn round(self) -> Self {
         unsafe { intrinsics::simd_round(self) }
     }
@@ -131,6 +137,7 @@ pub trait StdFloat: Sealed + Sized {
     /// Returns the floating point's integer value, with its fractional part removed.
     #[must_use = "method returns a new vector and does not mutate the original value"]
     #[inline]
+    #[coverage(off)]
     fn trunc(self) -> Self {
         unsafe { intrinsics::simd_trunc(self) }
     }
@@ -143,6 +150,7 @@ pub trait StdFloat: Sealed + Sized {
 impl<const N: usize> Sealed for Simd<f32, N> where LaneCount<N>: SupportedLaneCount {}
 impl<const N: usize> Sealed for Simd<f64, N> where LaneCount<N>: SupportedLaneCount {}
 
+#[allow_internal_unstable(coverage_attribute)]
 macro_rules! impl_float {
     {
         $($fn:ident: $intrinsic:ident,)*
@@ -152,12 +160,14 @@ macro_rules! impl_float {
             LaneCount<N>: SupportedLaneCount,
         {
             #[inline]
+            #[coverage(off)]
             fn fract(self) -> Self {
                 self - self.trunc()
             }
 
             $(
             #[inline]
+            #[coverage(off)]
             fn $fn(self) -> Self {
                 unsafe { intrinsics::$intrinsic(self) }
             }
@@ -169,12 +179,14 @@ macro_rules! impl_float {
             LaneCount<N>: SupportedLaneCount,
         {
             #[inline]
+            #[coverage(off)]
             fn fract(self) -> Self {
                 self - self.trunc()
             }
 
             $(
             #[inline]
+            #[coverage(off)]
             fn $fn(self) -> Self {
                 // https://github.com/llvm/llvm-project/issues/83729
                 #[cfg(target_arch = "aarch64")]

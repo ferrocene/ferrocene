@@ -43,11 +43,13 @@ impl hash::Hash for ByteStr {
 #[doc(hidden)]
 #[macro_export]
 #[unstable(feature = "bstr_internals", issue = "none")]
+#[allow_internal_unstable(coverage_attribute)] // Ferrocene addition: remove from coverage report
 macro_rules! impl_partial_eq {
     ($lhs:ty, $rhs:ty) => {
         #[allow(unused_lifetimes)]
         impl<'a> PartialEq<$rhs> for $lhs {
             #[inline]
+            #[coverage(off)] // Ferrocene addition: remove from coverage report
             fn eq(&self, other: &$rhs) -> bool {
                 let other: &[u8] = other.as_ref();
                 PartialEq::eq(self.as_bytes(), other)
@@ -57,6 +59,7 @@ macro_rules! impl_partial_eq {
         #[allow(unused_lifetimes)]
         impl<'a> PartialEq<$lhs> for $rhs {
             #[inline]
+            #[coverage(off)] // Ferrocene addition: remove from coverage report
             fn eq(&self, other: &$lhs) -> bool {
                 let this: &[u8] = self.as_ref();
                 PartialEq::eq(this, other.as_bytes())
@@ -72,6 +75,7 @@ pub use impl_partial_eq;
 #[doc(hidden)]
 #[macro_export]
 #[unstable(feature = "bstr_internals", issue = "none")]
+#[allow_internal_unstable(coverage_attribute)] // Ferrocene addition: remove from coverage report
 macro_rules! impl_partial_eq_ord {
     ($lhs:ty, $rhs:ty) => {
         $crate::bstr::impl_partial_eq!($lhs, $rhs);
@@ -80,6 +84,7 @@ macro_rules! impl_partial_eq_ord {
         #[unstable(feature = "bstr", issue = "134915")]
         impl<'a> PartialOrd<$rhs> for $lhs {
             #[inline]
+            #[coverage(off)] // Ferrocene addition: remove from coverage report
             fn partial_cmp(&self, other: &$rhs) -> Option<Ordering> {
                 let other: &[u8] = other.as_ref();
                 PartialOrd::partial_cmp(self.as_bytes(), other)
@@ -90,6 +95,7 @@ macro_rules! impl_partial_eq_ord {
         #[unstable(feature = "bstr", issue = "134915")]
         impl<'a> PartialOrd<$lhs> for $rhs {
             #[inline]
+            #[coverage(off)] // Ferrocene addition: remove from coverage report
             fn partial_cmp(&self, other: &$lhs) -> Option<Ordering> {
                 let this: &[u8] = self.as_ref();
                 PartialOrd::partial_cmp(this, other.as_bytes())
@@ -105,12 +111,14 @@ pub use impl_partial_eq_ord;
 #[doc(hidden)]
 #[macro_export]
 #[unstable(feature = "bstr_internals", issue = "none")]
+#[allow_internal_unstable(coverage_attribute)] // Ferrocene addition: remove from coverage report
 macro_rules! impl_partial_eq_n {
     ($lhs:ty, $rhs:ty) => {
         #[allow(unused_lifetimes)]
         #[unstable(feature = "bstr", issue = "134915")]
         impl<const N: usize> PartialEq<$rhs> for $lhs {
             #[inline]
+            #[coverage(off)] // Ferrocene addition: remove from coverage report
             fn eq(&self, other: &$rhs) -> bool {
                 let other: &[u8] = other.as_ref();
                 PartialEq::eq(self.as_bytes(), other)
@@ -121,6 +129,7 @@ macro_rules! impl_partial_eq_n {
         #[unstable(feature = "bstr", issue = "134915")]
         impl<const N: usize> PartialEq<$lhs> for $rhs {
             #[inline]
+            #[coverage(off)] // Ferrocene addition: remove from coverage report
             fn eq(&self, other: &$lhs) -> bool {
                 let this: &[u8] = self.as_ref();
                 PartialEq::eq(this, other.as_bytes())

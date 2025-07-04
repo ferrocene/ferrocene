@@ -3,4 +3,6 @@ Libcore overview
 
 Ferrous Systems provides a certified subset of the Rust core library ("libcore").
 
-See :doc:`The Rust Core Library </main/core/>` for a detailed description of libcore.
+.. TODO: fix link to API docs
+
+See the "Rust Core Library API docs" for a detailed description of libcore.

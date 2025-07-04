@@ -54,6 +54,10 @@ fn main() {
         "thumbv8m.base-nuttx-eabi",
         "thumbv8m.main-nuttx-eabi",
         "thumbv8m.main-nuttx-eabihf",
+        "x86_64-unknown-none.certified",
+        "aarch64-unknown-none.certified",
+        "thumbv7em-none-eabi.certified",
+        "thumbv7em-none-eabihf.certified",
     ];
     let mut invalid_target_name_found = false;
     for target in &target_list {

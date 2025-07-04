@@ -685,6 +685,12 @@ sphinx_books! [
         src: "ferrocene/doc/internal-procedures",
         dest: "qualification/internal-procedures",
     },
+    {
+        ty: LibcoreQualification,
+        name: "libcore-qualification",
+        src: "ferrocene/doc/libcore-qualification",
+        dest: "qualification/libcore-qualification",
+    },
 ];
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]

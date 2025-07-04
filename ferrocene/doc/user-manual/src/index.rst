@@ -48,6 +48,7 @@ Ferrocene User Manual
    libcore/requirements
    libcore/install
    libcore/using
+   libcore/testing
 
 .. toctree::
    :numbered:

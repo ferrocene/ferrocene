@@ -6,33 +6,33 @@
 Constraints
 ===========
 
-Building certified software
+Only use certified subset
 ---------------------------
 
 .. id::  RUSTC_AVD_LIBCORE_SUBSET_008
 
 If building certified software, the user shall only use the certified subset of libcore.
 
-Compiling
+Compile with panic abort
 ---------
 
 .. id::  RUSTC_AVD_LIBCORE_SUBSET_009
 
 If building certified software, the user shall always provide the ``-C panic=abort`` option to ferrocene.
 
-Avoiding unstable functions
+Only use stable functions
 ---------------------------
 
 .. id::  RUSTC_AVD_LIBCORE_SUBSET_010
 
-If building certified software, the user shall use the unstable functions in the certified subset of libcore **only** in tests not in production code.
+If building certified software, the user shall not use unstable functions in the certified subset of libcore.
 
 Use the same version of libcore and rustc
 -----------------------------------------
 
 .. id::  RUSTC_AVD_LIBCORE_SUBSET_011
 
-If building certified software, the user shall verify that the version of libcore and the version of rustc used to compile code match.
+If building certified software, the user shall verify that the version of libcore and the version of rustc used to compile code match. This is ensured by following the [Installation Procedures](https://public-docs.ferrocene.dev/main/safety-manual/procedures.html).
 
 Using operands
 --------------
@@ -46,18 +46,16 @@ behaviour as shown on the last line of the following code example, and not as in
   :linenos:
 
    // this is in libcore:
-   trait Add<Other> {
-      fn add(self, other: Other) { /* ... */ }
+
+   pub trait Add<Rhs = Self> {
+       type Output;
+       const fn add(self, rhs: Rhs) -> Self::Output;
    }
 
    impl Add<i32> for i32 { /* ... */ } // certified
-   impl Add<i16> for i32 { /* ... */ } // uncertified
+   impl Add<i64> for i64 { /* ... */ } // uncertified
 
    // this is in user code:
 
-   let a: i32 = 5;
-   let b: i32 = 10;
-   let c: i16 = 20;
-
-   let d = a + b; // legal
-   let e = a + c; // illegal
+   let a = 5_i32 + 10_i32; // legal
+   let b = 20_i64 + 40_i64; // illegal

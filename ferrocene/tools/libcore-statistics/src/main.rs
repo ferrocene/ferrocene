@@ -57,6 +57,8 @@ fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Re
             "Kind",
             "Visibility",
             "Safety",
+            "doc(hidden)",
+            "is_nightly",
             "Safety constraint",
             "Panics section",
             "Examples section",
@@ -69,21 +71,12 @@ fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Re
     collector.functions.sort_by_key(|f| f.file.clone());
 
     for function in &collector.functions {
-        let is_trait_method_implementation = matches!(function.kind, FunctionKind::TraitMethod);
-        let is_private = !function.public;
-        if is_private || function.is_doc_hidden || is_trait_method_implementation {
-            continue; // exclude private and hidden functions and trait method implementations
-        }
-
         let file = &function.file;
         let name = function
             .name
             .strip_prefix(&format!("{}::", &function.module))
             .unwrap();
-
-        if is_nightly(file, name) {
-            continue;
-        }
+        let is_nightly = is_nightly(file, name);
 
         let safety_constraint = safety_constraint(function);
 
@@ -94,11 +87,15 @@ fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Re
             .any(|a| docs.contains(a));
 
         // warn about rule violations
-        if !contains_examples {
-            eprintln!("{file}: {name} has no examples")
-        }
-        if safety_constraint == "missing" {
-            eprintln!("{file}: {name} is missing a safety comment")
+        let is_trait_method_implementation = matches!(function.kind, FunctionKind::TraitMethod);
+        let is_private = !function.public;
+        if !(is_private || function.is_doc_hidden || is_trait_method_implementation || is_nightly) {
+            if !contains_examples {
+                eprintln!("{file}: {name} has no examples")
+            }
+            if safety_constraint == "missing" {
+                eprintln!("{file}: {name} is missing a safety comment")
+            }
         }
 
         functions.add([
@@ -107,6 +104,8 @@ fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Re
             &function.kind.to_string(),
             function.public_str(),
             &function.safety,
+            &function.is_doc_hidden.to_string(),
+            &is_nightly.to_string(),
             safety_constraint,
             &contains_panics.to_string(),
             &contains_examples.to_string(),

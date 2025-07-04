@@ -655,6 +655,7 @@ jobs:
         type: string
       extra-args:
         type: string
+        default: ""
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu

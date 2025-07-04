@@ -1346,7 +1346,8 @@ impl Output {
     ///
     /// # Examples
     ///
-    /// ```
+    // Ferrocene annotation: QNX does not have the binaries
+    /// ```ignore-qnx
     /// #![feature(exit_status_error)]
     /// # #[cfg(all(unix, not(target_os = "android")))] {
     /// use std::process::Command;
@@ -1907,7 +1908,8 @@ impl crate::sealed::Sealed for ExitStatusError {}
 ///
 /// # Examples
 ///
-/// ```
+// Ferrocene annotation: QNX does not have the binaries
+/// ```ignore-qnx
 /// #![feature(exit_status_error)]
 /// # if cfg!(all(unix, not(target_os = "android"))) {
 /// use std::process::{Command, ExitStatusError};
@@ -1950,7 +1952,8 @@ impl ExitStatusError {
     ///
     /// # Examples
     ///
-    /// ```
+    // Ferrocene annotation: QNX does not have the binaries
+    /// ```ignore-qnx
     /// #![feature(exit_status_error)]
     /// # #[cfg(all(unix, not(target_os = "android")))] {
     /// use std::process::Command;
@@ -1974,7 +1977,8 @@ impl ExitStatusError {
     ///
     /// # Examples
     ///
-    /// ```
+    // Ferrocene annotation: QNX does not have the binaries
+    /// ```ignore-qnx
     /// #![feature(exit_status_error)]
     ///
     /// # if cfg!(all(unix, not(target_os = "android"))) {

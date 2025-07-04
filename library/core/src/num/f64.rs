@@ -943,8 +943,8 @@ impl f64 {
     /// This returns NaN when *either* argument is NaN, as opposed to
     /// [`f64::max`] which only returns NaN when *both* arguments are NaN.
     ///
-    // Ferrocene annotation: Fixed in https://github.com/rust-lang/rust/pull/143395
-    /// ```ignore-arm-unknown-linux-gnueabihf,ignore-i586,ignore-thumb7em (see https://github.com/rust-lang/rust/issues/141087)
+    // Ferrocene annotation: thumbv7em fixed in https://github.com/rust-lang/rust/pull/143395
+    /// ```ignore-arm-unknown-linux-gnueabihf,ignore-i586,ignore-thumb (see https://github.com/rust-lang/rust/issues/141087)
     /// #![feature(float_minimum_maximum)]
     /// let x = 1.0_f64;
     /// let y = 2.0_f64;
@@ -971,8 +971,8 @@ impl f64 {
     /// This returns NaN when *either* argument is NaN, as opposed to
     /// [`f64::min`] which only returns NaN when *both* arguments are NaN.
     ///
-    // Ferrocene annotation: Fixed in https://github.com/rust-lang/rust/pull/143395
-    /// ```ignore-arm-unknown-linux-gnueabihf,ignore-i586,ignore-thumb7em (see https://github.com/rust-lang/rust/issues/141087)
+    // Ferrocene annotation: thumbv7em fixed in https://github.com/rust-lang/rust/pull/143395
+    /// ```ignore-arm-unknown-linux-gnueabihf,ignore-i586,ignore-thumb (see https://github.com/rust-lang/rust/issues/141087)
     /// #![feature(float_minimum_maximum)]
     /// let x = 1.0_f64;
     /// let y = 2.0_f64;

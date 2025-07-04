@@ -353,26 +353,6 @@ impl<T> Trait<T> for X {
                             ));
                         }
                     }
-                    (ty::Dynamic(t, _, ty::DynKind::DynStar), _)
-                        if let Some(def_id) = t.principal_def_id() =>
-                    {
-                        let mut has_matching_impl = false;
-                        tcx.for_each_relevant_impl(def_id, values.found, |did| {
-                            if DeepRejectCtxt::relate_rigid_infer(tcx)
-                                .types_may_unify(values.found, tcx.type_of(did).skip_binder())
-                            {
-                                has_matching_impl = true;
-                            }
-                        });
-                        if has_matching_impl {
-                            let trait_name = tcx.item_name(def_id);
-                            diag.help(format!(
-                                "`{}` implements `{trait_name}`, `#[feature(dyn_star)]` is likely \
-                                 not enabled; that feature it is currently incomplete",
-                                values.found,
-                            ));
-                        }
-                    }
                     (_, ty::Alias(ty::Opaque, opaque_ty))
                     | (ty::Alias(ty::Opaque, opaque_ty), _) => {
                         if opaque_ty.def_id.is_local()
@@ -420,19 +400,33 @@ impl<T> Trait<T> for X {
                         }
                         // If two if arms can be coerced to a trait object, provide a structured
                         // suggestion.
-                        let ObligationCauseCode::IfExpression(cause) = cause.code() else {
+                        let ObligationCauseCode::IfExpression { expr_id, .. } = cause.code() else {
                             return;
                         };
-                        let hir::Node::Block(blk) = self.tcx.hir_node(cause.then_id) else {
-                            return;
-                        };
-                        let Some(then) = blk.expr else {
-                            return;
-                        };
-                        let hir::Node::Block(blk) = self.tcx.hir_node(cause.else_id) else {
-                            return;
-                        };
-                        let Some(else_) = blk.expr else {
+                        let hir::Node::Expr(&hir::Expr {
+                            kind:
+                                hir::ExprKind::If(
+                                    _,
+                                    &hir::Expr {
+                                        kind:
+                                            hir::ExprKind::Block(
+                                                &hir::Block { expr: Some(then), .. },
+                                                _,
+                                            ),
+                                        ..
+                                    },
+                                    Some(&hir::Expr {
+                                        kind:
+                                            hir::ExprKind::Block(
+                                                &hir::Block { expr: Some(else_), .. },
+                                                _,
+                                            ),
+                                        ..
+                                    }),
+                                ),
+                            ..
+                        }) = self.tcx.hir_node(*expr_id)
+                        else {
                             return;
                         };
                         let expected = match values.found.kind() {
@@ -486,8 +480,10 @@ impl<T> Trait<T> for X {
                         }
                     }
                     (ty::Adt(_, _), ty::Adt(def, args))
-                        if let ObligationCauseCode::IfExpression(cause) = cause.code()
-                            && let hir::Node::Block(blk) = self.tcx.hir_node(cause.then_id)
+                        if let ObligationCauseCode::IfExpression { expr_id, .. } = cause.code()
+                            && let hir::Node::Expr(if_expr) = self.tcx.hir_node(*expr_id)
+                            && let hir::ExprKind::If(_, then_expr, _) = if_expr.kind
+                            && let hir::ExprKind::Block(blk, _) = then_expr.kind
                             && let Some(then) = blk.expr
                             && def.is_box()
                             && let boxed_ty = args.type_at(0)

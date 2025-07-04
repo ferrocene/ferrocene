@@ -387,6 +387,14 @@ LL | #![link()]
    |
    = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
 
+warning: attribute should be applied to a function definition
+  --> $DIR/issue-43106-gating-of-builtin-attrs.rs:62:1
+   |
+LL | #![cold]
+   | ^^^^^^^^ cannot be applied to crates
+   |
+   = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
+
 warning: attribute should be applied to a foreign function or static
   --> $DIR/issue-43106-gating-of-builtin-attrs.rs:66:1
    |
@@ -400,14 +408,6 @@ warning: attribute should be applied to a function or static
    |
 LL | #![link_section = "1800"]
    | ^^^^^^^^^^^^^^^^^^^^^^^^^ not a function or static
-   |
-   = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
-
-warning: attribute should be applied to a function definition
-  --> $DIR/issue-43106-gating-of-builtin-attrs.rs:62:1
-   |
-LL | #![cold]
-   | ^^^^^^^^ cannot be applied to crates
    |
    = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
 

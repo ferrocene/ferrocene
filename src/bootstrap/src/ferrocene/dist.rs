@@ -180,7 +180,7 @@ impl Step for SourceTarball {
                 vendor.arg("--sync").arg(&builder.src.join(extra));
             }
             vendor.arg("--versioned-dirs"); // See https://github.com/rust-lang/rust/pull/122892
-            let config = vendor.run_always().run_capture_stdout(&builder).stdout();
+            let config = vendor.run_in_dry_run().run_capture_stdout(&builder).stdout();
             builder.create_dir(&dest_dir.join(".cargo"));
             builder.create(&dest_dir.join(".cargo").join("config.toml"), &config);
         }

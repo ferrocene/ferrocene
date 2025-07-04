@@ -16,15 +16,21 @@ use rustc_span::{DUMMY_SP, ErrorGuaranteed, Span, Symbol, sym};
 
 use crate::attributes::allow_unstable::{AllowConstFnUnstableParser, AllowInternalUnstableParser};
 use crate::attributes::codegen_attrs::{
-    ColdParser, NakedParser, NoMangleParser, OptimizeParser, TrackCallerParser,
+    ColdParser, ExportNameParser, NakedParser, NoMangleParser, OptimizeParser, TrackCallerParser,
+    UsedParser,
 };
 use crate::attributes::confusables::ConfusablesParser;
 use crate::attributes::deprecation::DeprecationParser;
 use crate::attributes::inline::{InlineParser, RustcForceInlineParser};
+use crate::attributes::link_attrs::{LinkNameParser, LinkSectionParser};
 use crate::attributes::lint_helpers::{AsPtrParser, PubTransparentParser};
 use crate::attributes::loop_match::{ConstContinueParser, LoopMatchParser};
 use crate::attributes::must_use::MustUseParser;
 use crate::attributes::repr::{AlignParser, ReprParser};
+use crate::attributes::rustc_internal::{
+    RustcLayoutScalarValidRangeEnd, RustcLayoutScalarValidRangeStart,
+    RustcObjectLifetimeDefaultParser,
+};
 use crate::attributes::semantics::MayDangleParser;
 use crate::attributes::stability::{
     BodyStabilityParser, ConstStabilityIndirectParser, ConstStabilityParser, StabilityParser,
@@ -103,6 +109,7 @@ attribute_parsers!(
         ConstStabilityParser,
         NakedParser,
         StabilityParser,
+        UsedParser,
         // tidy-alphabetical-end
 
         // tidy-alphabetical-start
@@ -117,7 +124,10 @@ attribute_parsers!(
         Single<ConstContinueParser>,
         Single<ConstStabilityIndirectParser>,
         Single<DeprecationParser>,
+        Single<ExportNameParser>,
         Single<InlineParser>,
+        Single<LinkNameParser>,
+        Single<LinkSectionParser>,
         Single<LoopMatchParser>,
         Single<MayDangleParser>,
         Single<MustUseParser>,
@@ -125,6 +135,9 @@ attribute_parsers!(
         Single<OptimizeParser>,
         Single<PubTransparentParser>,
         Single<RustcForceInlineParser>,
+        Single<RustcLayoutScalarValidRangeEnd>,
+        Single<RustcLayoutScalarValidRangeStart>,
+        Single<RustcObjectLifetimeDefaultParser>,
         Single<SkipDuringMethodDispatchParser>,
         Single<TrackCallerParser>,
         Single<TransparencyParser>,
@@ -265,6 +278,16 @@ impl<'f, 'sess: 'f, S: Stage> AcceptContext<'f, 'sess, S> {
                     i.kind.is_bytestr().then(|| self.sess().source_map().start_point(i.span))
                 }),
             },
+        })
+    }
+
+    pub(crate) fn expected_integer_literal(&self, span: Span) -> ErrorGuaranteed {
+        self.emit_err(AttributeParseError {
+            span,
+            attr_span: self.attr_span,
+            template: self.template.clone(),
+            attribute: self.attr_path.clone(),
+            reason: AttributeParseErrorReason::ExpectedIntegerLiteral,
         })
     }
 

@@ -55,6 +55,7 @@ type I = ty!()::AssocTy;
 trait K<A, B> {}
 fn foo<X: K<_, _>>(x: X) {}
 //~^ ERROR the placeholder `_` is not allowed within types on item signatures for functions
+//~| ERROR the placeholder `_` is not allowed within types on item signatures for functions
 
 fn bar<F>(_: F) where F: Fn() -> _ {}
 //~^ ERROR the placeholder `_` is not allowed within types on item signatures for functions
@@ -85,7 +86,7 @@ trait P<F> where F: Fn() -> _ {
 
 trait Q {
     fn foo<F>(_: F) where F: Fn() -> _ {}
-    //~^ ERROR the placeholder `_` is not allowed within types on item signatures for functions
+    //~^ ERROR the placeholder `_` is not allowed within types on item signatures for associated functions
 }
 
 fn main() {}

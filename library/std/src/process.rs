@@ -1346,7 +1346,8 @@ impl Output {
     ///
     /// # Examples
     ///
-    /// ```
+    // Ferrocene annotation: QNX does not have the binaries
+    /// ```ignore-qnx
     /// #![feature(exit_status_error)]
     /// # #[cfg(all(unix, not(target_os = "android")))] {
     /// use std::process::Command;
@@ -1679,7 +1680,8 @@ impl From<io::Stdout> for Stdio {
     ///
     /// # Examples
     ///
-    /// ```rust
+    // Ferrocene annotation: QNX does not have a `whoami` binary
+    /// ```rust,ignore-qnx
     /// #![feature(exit_status_error)]
     /// use std::io;
     /// use std::process::Command;
@@ -1710,7 +1712,8 @@ impl From<io::Stderr> for Stdio {
     ///
     /// # Examples
     ///
-    /// ```rust
+    // Ferrocene annotation: QNX does not have a `whoami` binary
+    /// ```rust,ignore-qnx
     /// #![feature(exit_status_error)]
     /// use std::io;
     /// use std::process::Command;
@@ -1905,7 +1908,8 @@ impl crate::sealed::Sealed for ExitStatusError {}
 ///
 /// # Examples
 ///
-/// ```
+// Ferrocene annotation: QNX does not have the binaries
+/// ```ignore-qnx
 /// #![feature(exit_status_error)]
 /// # if cfg!(all(unix, not(target_os = "android"))) {
 /// use std::process::{Command, ExitStatusError};
@@ -1948,7 +1952,8 @@ impl ExitStatusError {
     ///
     /// # Examples
     ///
-    /// ```
+    // Ferrocene annotation: QNX does not have the binaries
+    /// ```ignore-qnx
     /// #![feature(exit_status_error)]
     /// # #[cfg(all(unix, not(target_os = "android")))] {
     /// use std::process::Command;
@@ -1972,7 +1977,8 @@ impl ExitStatusError {
     ///
     /// # Examples
     ///
-    /// ```
+    // Ferrocene annotation: QNX does not have the binaries
+    /// ```ignore-qnx
     /// #![feature(exit_status_error)]
     ///
     /// # if cfg!(all(unix, not(target_os = "android"))) {

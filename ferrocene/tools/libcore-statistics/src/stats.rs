@@ -391,18 +391,15 @@ pub(crate) enum FunctionKind {
 
 impl std::fmt::Display for FunctionKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            FunctionKind::Function => f.write_str("function"),
-            FunctionKind::Method => f.write_str("method"),
-            FunctionKind::TraitMethod => f.write_str("trait method"),
-            FunctionKind::TraitMethodDefinition { has_default } => {
-                if *has_default {
-                    f.write_str("definition of default trait method")
-                } else {
-                    f.write_str("definition of required trait method")
-                }
+        f.write_str(match self {
+            FunctionKind::Function => "function",
+            FunctionKind::Method => "method",
+            FunctionKind::TraitMethod => "trait method implementation",
+            FunctionKind::TraitMethodDefinition { has_default: false } => "trait method definition",
+            FunctionKind::TraitMethodDefinition { has_default: true } => {
+                "trait method definition with default"
             }
-        }
+        })
     }
 }
 

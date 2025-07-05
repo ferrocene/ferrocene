@@ -50,7 +50,7 @@ fn main() -> Result<(), Error> {
 
 fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Result<(), Error> {
     let mut functions = TSV::new(
-        &out_dir.join("certified_subset.tsv"),
+        &out_dir.join("libcore-subset.tsv"),
         [
             "File",
             "Name",

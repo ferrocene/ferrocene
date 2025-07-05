@@ -4,6 +4,8 @@
 Libcore subset
 ==============
 
+This is a list of all functions within the certified subset.
+
 .. csv-table:: Table Title
    :file: ./libcore-subset.tsv
    :delim: tab

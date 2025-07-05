@@ -217,11 +217,12 @@ fn test_ptr_guaranteed_cmp() {
 
 #[test]
 fn test_ub_checks() {
-    use core::intrinsics::ub_checks;
-
     // Act
-    let a = ub_checks();
+    let a = core::intrinsics::ub_checks();
 
     // Assert
+    #[cfg(debug_assertions)]
     assert_eq!(a, true);
+    #[cfg(not(debug_assertions))]
+    assert_eq!(a, false);
 }

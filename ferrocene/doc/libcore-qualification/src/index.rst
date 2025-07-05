@@ -12,6 +12,7 @@ Libcore qualification
    safety-plan
    norm-mapping
    testing-plan
+   libcore-subset
    requirement-review
 
 .. appendices::

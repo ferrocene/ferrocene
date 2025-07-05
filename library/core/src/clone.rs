@@ -207,6 +207,8 @@ pub trait Clone: Sized {
     /// allocations.
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    // Note(coverage): tested by coretests::clone::test_clone_from
+    #[coverage(off)]
     fn clone_from(&mut self, source: &Self) {
         *self = source.clone()
     }
@@ -581,6 +583,8 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    // Note(coverage): tested by coretests::clone::test_clone_ptr
+    #[coverage(off)]
     impl<T: ?Sized> Clone for *const T {
         #[inline(always)]
         fn clone(&self) -> Self {
@@ -589,6 +593,8 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    // Note(coverage): tested by coretests::clone::test_clone_ptr
+    #[coverage(off)]
     impl<T: ?Sized> Clone for *mut T {
         #[inline(always)]
         fn clone(&self) -> Self {
@@ -598,6 +604,8 @@ mod impls {
 
     /// Shared references can be cloned, but mutable references *cannot*!
     #[stable(feature = "rust1", since = "1.0.0")]
+    // Note(coverage): tested by coretests::clone::test_clone_ref
+    #[coverage(off)]
     impl<T: ?Sized> Clone for &T {
         #[inline(always)]
         #[rustc_diagnostic_item = "noop_method_clone"]

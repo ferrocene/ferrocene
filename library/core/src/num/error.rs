@@ -115,6 +115,7 @@ impl ParseIntError {
     #[must_use]
     #[rustc_const_stable(feature = "const_int_from_str", since = "1.82.0")]
     #[stable(feature = "int_error_matching", since = "1.55.0")]
+    #[inline(never)] // Ferrocene addition: Otherwise it is not code covered
     pub const fn kind(&self) -> &IntErrorKind {
         &self.kind
     }

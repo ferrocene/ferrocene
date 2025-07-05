@@ -254,6 +254,8 @@ mod impls {
     use crate::marker::Tuple;
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    // Note(coverage): tested by coretests::ops::function::test_blanket_impl_for_ref
+    #[coverage(off)]
     impl<A: Tuple, F: ?Sized> Fn<A> for &F
     where
         F: Fn<A>,
@@ -264,6 +266,8 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    // Note(coverage): tested by coretests::ops::function::test_blanket_impl_for_ref
+    #[coverage(off)]
     impl<A: Tuple, F: ?Sized> FnMut<A> for &F
     where
         F: Fn<A>,
@@ -286,6 +290,8 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    // Note(coverage): tested by coretests::ops::function::test_blanket_impl_for_mut_ref
+    #[coverage(off)]
     impl<A: Tuple, F: ?Sized> FnMut<A> for &mut F
     where
         F: FnMut<A>,
@@ -296,6 +302,8 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
+    // Note(coverage): tested by coretests::ops::function::test_blanket_impl_for_mut_ref
+    #[coverage(off)]
     impl<A: Tuple, F: ?Sized> FnOnce<A> for &mut F
     where
         F: FnMut<A>,

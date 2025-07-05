@@ -462,6 +462,7 @@ impl Extend<()> for () {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+#[allow_internal_unstable(coverage_attribute)]
 macro_rules! spec_tuple_impl {
     (
         (
@@ -549,20 +550,24 @@ macro_rules! spec_tuple_impl {
             /// assert_eq!(b, [2, 5, 8]);
             /// assert_eq!(c, [3, 6, 9]);
             /// ```
+            #[coverage(off)]
             fn extend<T: IntoIterator<Item = ($($ty_names,)*)>>(&mut self, into_iter: T) {
                 let ($($var_names,)*) = self;
                 let iter = into_iter.into_iter();
                 $trait_name::extend(iter, $($var_names,)*);
             }
 
+            #[coverage(off)]
             fn extend_one(&mut self, item: ($($ty_names,)*)) {
                 $(self.$cnts.extend_one(item.$cnts);)*
             }
 
+            #[coverage(off)]
             fn extend_reserve(&mut self, additional: usize) {
                 $(self.$cnts.extend_reserve(additional);)*
             }
 
+            #[coverage(off)]
             unsafe fn extend_one_unchecked(&mut self, item: ($($ty_names,)*)) {
                 // SAFETY: Those are our safety preconditions, and we correctly forward `extend_reserve`.
                 unsafe {
@@ -575,6 +580,7 @@ macro_rules! spec_tuple_impl {
             fn extend(self, $($var_names: &mut $ty_names,)*);
         }
 
+        #[coverage(off)]
         fn $default_fn_name<$($ty_names,)* $($extend_ty_names,)*>(
             iter: impl Iterator<Item = ($($ty_names,)*)>,
             $($var_names: &mut $extend_ty_names,)*
@@ -598,6 +604,7 @@ macro_rules! spec_tuple_impl {
             iter.fold((), extend($($var_names,)*));
         }
 
+        #[coverage(off)]
         impl<$($ty_names,)* $($extend_ty_names,)* Iter> $trait_name<$($extend_ty_names),*> for Iter
         where
             $($extend_ty_names: Extend<$ty_names>,)*
@@ -608,6 +615,7 @@ macro_rules! spec_tuple_impl {
             }
         }
 
+        #[coverage(off)]
         impl<$($ty_names,)* $($extend_ty_names,)* Iter> $trait_name<$($extend_ty_names),*> for Iter
         where
             $($extend_ty_names: Extend<$ty_names>,)*
@@ -664,6 +672,7 @@ macro_rules! spec_tuple_impl {
         #[$meta]
         $(#[$doctext])?
         #[stable(feature = "from_iterator_for_tuple", since = "1.79.0")]
+        #[coverage(off)]
         impl<$($ty_names,)* $($extend_ty_names,)*> FromIterator<($($extend_ty_names,)*)> for ($($ty_names,)*)
         where
             $($ty_names: Default + Extend<$extend_ty_names>,)*

@@ -96,10 +96,18 @@
 #![feature(try_trait_v2)]
 #![feature(unsize)]
 #![feature(unwrap_infallible)]
+#![feature(wrapping_int_impl)]
+#![feature(wrapping_next_power_of_two)]
 // tidy-alphabetical-end
 #![allow(internal_features)]
 #![deny(fuzzy_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
+// Ferrocene added features/lints:
+#![feature(bound_as_ref)]
+#![feature(const_raw_ptr_comparison)]
+#![feature(fn_traits)]
+#![feature(one_sided_range)]
+#![feature(range_into_bounds)]
 
 /// Version of `assert_matches` that ignores fancy runtime printing in const context and uses structural equality.
 macro_rules! assert_eq_const_safe {

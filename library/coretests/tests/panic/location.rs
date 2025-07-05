@@ -29,3 +29,17 @@ fn location_const_column() {
     const COLUMN: u32 = CALLER.column();
     assert_eq!(COLUMN, 40);
 }
+
+#[test]
+fn location_line() {
+    let caller = Location::caller();
+    let line: u32 = caller.line();
+    assert_eq!(line, 35);
+}
+
+#[test]
+fn location_column() {
+    let caller = Location::caller();
+    let column: u32 = caller.column();
+    assert_eq!(column, 18);
+}

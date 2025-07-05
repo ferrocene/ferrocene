@@ -3152,6 +3152,8 @@ pub const unsafe fn ptr_offset_from_unsigned<T>(ptr: *const T, base: *const T) -
 #[rustc_do_not_const_check]
 #[inline]
 #[miri::intrinsic_fallback_is_spec]
+// Note(coverage): tested by coretests::intrinsics::test_ptr_guaranteed_cmp
+#[coverage(off)]
 pub const fn ptr_guaranteed_cmp<T>(ptr: *const T, other: *const T) -> u8 {
     (ptr == other) as u8
 }
@@ -3330,6 +3332,8 @@ pub(crate) macro const_eval_select {
         }
 
         $(#[$compiletime_attr])*
+        // Note(coverage): this is tested by the enclosing function being tested
+        #[coverage(off)]
         const fn compiletime$(<$($binders)*>)?($($arg: $ty),*) $( -> $ret )? {
             // Don't warn if one of the arguments is unused.
             $(let _ = $arg;)*

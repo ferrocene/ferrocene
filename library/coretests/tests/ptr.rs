@@ -1041,3 +1041,22 @@ fn test_ptr_default() {
     let default = PtrMutDefaultTest::default();
     assert!(default.ptr.is_null());
 }
+
+#[test]
+fn test_guaranteed_eq() {
+    // Arrange
+    let a = [1];
+    let b = [2, 3];
+    let c = a.as_ptr();
+    let d = a.as_ptr();
+    let e = b.as_ptr();
+
+    // Act
+    let f = c.guaranteed_eq(d);
+    let g = c.guaranteed_eq(e);
+
+    // Assert
+    assert_eq!(f, Some(true));
+    assert_eq!(g, Some(false));
+    // assert_eq!(h, None); // TODO: how to get a None?
+}

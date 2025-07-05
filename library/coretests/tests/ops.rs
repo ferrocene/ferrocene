@@ -1,8 +1,10 @@
 mod control_flow;
 mod from_residual;
+mod function;
 
 use core::ops::{
-    Bound, Deref, DerefMut, Range, RangeFrom, RangeFull, RangeInclusive, RangeTo, RangeToInclusive,
+    Bound, Deref, DerefMut, IntoBounds, OneSidedRange, Range, RangeBounds, RangeFrom, RangeFull,
+    RangeInclusive, RangeTo, RangeToInclusive,
 };
 
 // Test the Range structs and syntax.
@@ -46,22 +48,30 @@ fn test_full_range() {
 #[test]
 fn test_range_inclusive() {
     let mut r = RangeInclusive::new(1i8, 2);
+    assert_eq!(r.start(), &1);
     assert_eq!(r.next(), Some(1));
     assert_eq!(r.next(), Some(2));
     assert_eq!(r.next(), None);
+    assert_eq!(r.start(), &2);
 
     r = RangeInclusive::new(127i8, 127);
+    assert_eq!(r.start(), &127);
     assert_eq!(r.next(), Some(127));
     assert_eq!(r.next(), None);
+    assert_eq!(r.start(), &127);
 
     r = RangeInclusive::new(-128i8, -128);
+    assert_eq!(r.start(), &-128);
     assert_eq!(r.next_back(), Some(-128));
     assert_eq!(r.next_back(), None);
+    assert_eq!(r.start(), &-128);
 
     // degenerate
     r = RangeInclusive::new(1, -1);
+    assert_eq!(r.start(), &1);
     assert_eq!(r.size_hint(), (0, Some(0)));
     assert_eq!(r.next(), None);
+    assert_eq!(r.start(), &1);
 }
 
 #[test]
@@ -104,6 +114,27 @@ fn test_bound_cloned_included() {
 #[test]
 fn test_bound_cloned_excluded() {
     assert_eq!(Bound::Excluded(&3).cloned(), Bound::Excluded(3));
+}
+
+#[test]
+fn test_bound_as_ref() {
+    assert_eq!((&Bound::Included(3)).as_ref(), Bound::Included(&3));
+    assert_eq!((&Bound::Excluded(3)).as_ref(), Bound::Excluded(&3));
+    assert_eq!((&Bound::<&u32>::Unbounded).as_ref(), Bound::Unbounded);
+}
+
+#[test]
+fn test_bound_as_mut() {
+    assert_eq!((&mut Bound::Included(3)).as_mut(), Bound::Included(&mut 3));
+    assert_eq!((&mut Bound::Excluded(3)).as_mut(), Bound::Excluded(&mut 3));
+    assert_eq!((&mut Bound::<&u32>::Unbounded).as_mut(), Bound::Unbounded);
+}
+
+#[test]
+fn test_bound_map() {
+    assert_eq!((&mut Bound::Included(3)).map(|x| x + 1), Bound::Included(4));
+    assert_eq!((&mut Bound::Excluded(3)).map(|x| x + 1), Bound::Excluded(4));
+    assert_eq!((&mut Bound::<&u32>::Unbounded).map(|x| x + 1), Bound::Unbounded);
 }
 
 #[test]
@@ -201,6 +232,121 @@ fn range_structural_match() {
         RANGE_TO_INCLUSIVE => {}
         _ => unreachable!(),
     }
+}
+
+#[test]
+fn test_range_bounds() {
+    let r = Range { start: 2, end: 42 };
+    assert_eq!(r.start_bound(), Bound::Included(&2));
+    assert_eq!(r.end_bound(), Bound::Excluded(&42));
+    assert_eq!(r.into_bounds(), (Bound::Included(2), Bound::Excluded(42)));
+
+    let r = Range { start: &2, end: &42 };
+    assert_eq!(r.start_bound(), Bound::Included(&&2));
+    assert_eq!(r.end_bound(), Bound::Excluded(&&42));
+    assert_eq!(r.into_bounds(), (Bound::Included(&2), Bound::Excluded(&42)));
+
+    let r = RangeFrom { start: 2 };
+    assert_eq!(r.start_bound(), Bound::Included(&2));
+    assert_eq!(r.end_bound(), Bound::Unbounded);
+    assert_eq!(r.into_bounds(), (Bound::Included(2), Bound::Unbounded));
+
+    let r = RangeFrom { start: &2 };
+    assert_eq!(r.start_bound(), Bound::Included(&&2));
+    assert_eq!(r.end_bound(), Bound::<&i32>::Unbounded);
+    assert_eq!(r.into_bounds(), (Bound::Included(&2), Bound::Unbounded));
+
+    let r = RangeTo { end: 42 };
+    assert_eq!(r.start_bound(), Bound::Unbounded);
+    assert_eq!(r.end_bound(), Bound::Excluded(&42));
+    assert_eq!(r.into_bounds(), (Bound::Unbounded, Bound::Excluded(42)));
+
+    let r = RangeTo { end: &42 };
+    assert_eq!(r.start_bound(), Bound::<&i32>::Unbounded);
+    assert_eq!(r.end_bound(), Bound::Excluded(&&42));
+    assert_eq!(r.into_bounds(), (Bound::Unbounded, Bound::Excluded(&42)));
+
+    let r = RangeFull;
+    assert_eq!(r.start_bound(), Bound::<&i32>::Unbounded);
+    assert_eq!(r.end_bound(), Bound::<&i32>::Unbounded);
+    assert_eq!(r.into_bounds(), (Bound::<i32>::Unbounded, Bound::<i32>::Unbounded));
+
+    let mut r = RangeInclusive::new(2, 42);
+    assert_eq!(r.start_bound(), Bound::Included(&2));
+    assert_eq!(r.end_bound(), Bound::Included(&42));
+    assert_eq!(r.clone().into_bounds(), (Bound::Included(2), Bound::Included(42)));
+    while r.next().is_some() {}
+    assert_eq!(r.end_bound(), Bound::Excluded(&42));
+
+    let r = RangeInclusive::new(&2, &42);
+    assert_eq!(r.start_bound(), Bound::Included(&&2));
+    assert_eq!(r.end_bound(), Bound::Included(&&42));
+    assert_eq!(r.clone().into_bounds(), (Bound::Included(&2), Bound::Included(&42)));
+
+    let r = RangeToInclusive { end: 42 };
+    assert_eq!(r.start_bound(), Bound::Unbounded);
+    assert_eq!(r.end_bound(), Bound::Included(&42));
+    assert_eq!(r.into_bounds(), (Bound::Unbounded, Bound::Included(42)));
+
+    let r = RangeToInclusive { end: &42 };
+    assert_eq!(r.start_bound(), Bound::<&i32>::Unbounded);
+    assert_eq!(r.end_bound(), Bound::Included(&&42));
+    assert_eq!(r.into_bounds(), (Bound::Unbounded, Bound::Included(&42)));
+}
+
+#[test]
+fn test_range_bounds_tuple() {
+    let r = (Bound::Unbounded, Bound::Included(42));
+    assert_eq!(r.start_bound(), Bound::Unbounded);
+    assert_eq!(r.end_bound(), Bound::Included(&42));
+    assert_eq!(r.into_bounds(), (Bound::Unbounded, Bound::Included(42)));
+
+    let r = (Bound::Unbounded, Bound::Excluded(42));
+    assert_eq!(r.start_bound(), Bound::Unbounded);
+    assert_eq!(r.end_bound(), Bound::Excluded(&42));
+    assert_eq!(r.into_bounds(), (Bound::Unbounded, Bound::Excluded(42)));
+
+    let r = (Bound::<i32>::Unbounded, Bound::Unbounded);
+    assert_eq!(r.start_bound(), Bound::Unbounded);
+    assert_eq!(r.end_bound(), Bound::Unbounded);
+    assert_eq!(r.into_bounds(), (Bound::Unbounded, Bound::Unbounded));
+
+    let r = (Bound::Included(2), Bound::Included(42));
+    assert_eq!(r.start_bound(), Bound::Included(&2));
+    assert_eq!(r.end_bound(), Bound::Included(&42));
+    assert_eq!(r.into_bounds(), (Bound::Included(2), Bound::Included(42)));
+
+    let r = (Bound::Included(2), Bound::Excluded(42));
+    assert_eq!(r.start_bound(), Bound::Included(&2));
+    assert_eq!(r.end_bound(), Bound::Excluded(&42));
+    assert_eq!(r.into_bounds(), (Bound::Included(2), Bound::Excluded(42)));
+
+    let r = (Bound::Included(2), Bound::Unbounded);
+    assert_eq!(r.start_bound(), Bound::Included(&2));
+    assert_eq!(r.end_bound(), Bound::Unbounded);
+    assert_eq!(r.into_bounds(), (Bound::Included(2), Bound::Unbounded));
+
+    let r = (Bound::Excluded(2), Bound::Included(42));
+    assert_eq!(r.start_bound(), Bound::Excluded(&2));
+    assert_eq!(r.end_bound(), Bound::Included(&42));
+    assert_eq!(r.into_bounds(), (Bound::Excluded(2), Bound::Included(42)));
+
+    let r = (Bound::Excluded(2), Bound::Excluded(42));
+    assert_eq!(r.start_bound(), Bound::Excluded(&2));
+    assert_eq!(r.end_bound(), Bound::Excluded(&42));
+    assert_eq!(r.into_bounds(), (Bound::Excluded(2), Bound::Excluded(42)));
+
+    let r = (Bound::Excluded(2), Bound::Unbounded);
+    assert_eq!(r.start_bound(), Bound::Excluded(&2));
+    assert_eq!(r.end_bound(), Bound::Unbounded);
+    assert_eq!(r.into_bounds(), (Bound::Excluded(2), Bound::Unbounded));
+}
+
+#[test]
+fn test_one_sided_range() {
+    RangeFrom { start: 2 }.bound();
+    RangeTo { end: 42 }.bound();
+    RangeToInclusive { end: 42 }.bound();
 }
 
 // Test Deref implementations

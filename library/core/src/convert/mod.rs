@@ -106,6 +106,8 @@ pub use num::FloatToInt;
 #[rustc_const_stable(feature = "const_identity", since = "1.33.0")]
 #[inline(always)]
 #[rustc_diagnostic_item = "convert_identity"]
+// Note(coverage): Tested by coretests::iter::test_functor_laws
+#[coverage(off)]
 pub const fn identity<T>(x: T) -> T {
     x
 }
@@ -723,6 +725,8 @@ where
     T: AsRef<U>,
 {
     #[inline]
+    // Note(coverage): Tested by coretests::convert::as_ref_for_mut_ref
+    #[coverage(off)]
     fn as_ref(&self) -> &U {
         <T as AsRef<U>>::as_ref(*self)
     }
@@ -743,6 +747,8 @@ where
     T: AsMut<U>,
 {
     #[inline]
+    // Note(coverage): Tested by coretests::convert::as_mut_for_mut_ref
+    #[coverage(off)]
     fn as_mut(&mut self) -> &mut U {
         (*self).as_mut()
     }
@@ -843,6 +849,8 @@ impl<T> AsRef<[T]> for [T] {
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T> AsMut<[T]> for [T] {
     #[inline(always)]
+    // Note(coverage): Tested by coretests::convert::as_mut_for_slice
+    #[coverage(off)]
     fn as_mut(&mut self) -> &mut [T] {
         self
     }

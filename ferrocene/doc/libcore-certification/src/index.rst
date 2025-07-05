@@ -15,6 +15,7 @@ Libcore certification
    libcore-subset
    requirement-review
    libcore-subset-api-docs
+   code-coverage
 
 .. appendices::
    :numbered:

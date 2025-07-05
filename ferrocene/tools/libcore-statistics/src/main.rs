@@ -54,6 +54,7 @@ fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Re
         [
             "File",
             "Name",
+            "Impl",
             "Kind",
             "Visibility",
             "Safety",
@@ -101,6 +102,7 @@ fn certified_subset_tsv(collector: &mut StatsCollector, out_dir: &PathBuf) -> Re
         functions.add([
             file,
             name,
+            function.impl_.as_deref().unwrap_or(""),
             &function.kind.to_string(),
             function.public_str(),
             &function.safety,

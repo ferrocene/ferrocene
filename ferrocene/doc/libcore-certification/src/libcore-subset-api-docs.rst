@@ -4,4 +4,4 @@
 Libcore Subset API docs
 =======================
 
-Please find the API docs of the libcore certified subset `here <./_static/libcore-subset-api-docs/core/index.html>`_.
+Please find the API docs of the libcore certified subset `here <./_static/certified-libcore-docs/core/index.html>`_.

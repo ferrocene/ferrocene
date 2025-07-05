@@ -14,6 +14,7 @@ Libcore qualification
    testing-plan
    libcore-subset
    requirement-review
+   libcore-subset-api-docs
 
 .. appendices::
    :numbered:

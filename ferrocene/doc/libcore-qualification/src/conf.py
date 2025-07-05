@@ -20,6 +20,7 @@ ferrocene_id = "LQ"
 html_theme = "ferrocene"
 html_title = "Ferrocene Libcore Qualification"
 html_short_title = "Libcore Qualification"
+html_static_path = ["_static"]
 
 # Do not generate the index pages. We don't need them, and they cause
 # linkchecker to fail due to them including *all* glossary entries, including

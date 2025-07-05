@@ -1,0 +1,24 @@
+﻿File,Name,Examples section,Reason for no examples
+library/core/src/alloc/layout.rs,Layout::align,FALSE,Just reading a field.
+library/core/src/alloc/layout.rs,Layout::from_size_align_unchecked,FALSE,Just writing a field.
+library/core/src/alloc/layout.rs,Layout::new,FALSE,Type based constructor without logic.
+library/core/src/alloc/layout.rs,Layout::size,FALSE,Just reading a field.
+library/core/src/array/mod.rs,array::as_mut_slice,FALSE,Type conversion.
+library/core/src/array/mod.rs,array::as_slice,FALSE,Type conversion.
+library/core/src/clone.rs,Clone::clone_from,FALSE,"TODO, would be improved with example."
+library/core/src/cmp.rs,PartialEq::eq,FALSE,Examples are in the trait. 
+library/core/src/cmp.rs,PartialEq::ne,FALSE,Examples are in the trait. 
+library/core/src/convert/mod.rs,TryFrom::try_from,FALSE,Examples are in the trait. 
+library/core/src/convert/mod.rs,TryInto::try_into,FALSE,"TODO, would be improved with example."
+library/core/src/convert/mod.rs,AsMut::as_mut,FALSE,Examples are in the trait. 
+library/core/src/convert/mod.rs,AsRef::as_ref,FALSE,Examples are in the trait. 
+library/core/src/convert/mod.rs,From::from,FALSE,Examples are in the trait. 
+library/core/src/convert/mod.rs,Into::into,FALSE,Examples are in the trait. 
+library/core/src/ops/control_flow.rs,ControlFlow::map_break,FALSE,"TODO, would be improved with example."
+library/core/src/ops/control_flow.rs,ControlFlow::map_continue,FALSE,"TODO, would be improved with example."
+library/core/src/ops/deref.rs,Deref::deref,FALSE,Examples are in the trait. 
+library/core/src/ops/deref.rs,DerefMut::deref_mut,FALSE,Examples are in the trait. 
+library/core/src/ops/drop.rs,Drop::drop,FALSE,Examples are in the trait. 
+library/core/src/ops/range.rs,Bound::as_ref,FALSE,Type conversion.
+library/core/src/ptr/mod.rs,without_provenance,FALSE,"TODO, would be improved with example."
+library/core/src/ptr/mod.rs,without_provenance_mut,FALSE,"TODO, would be improved with example."

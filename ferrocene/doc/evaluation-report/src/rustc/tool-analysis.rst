@@ -268,7 +268,7 @@ Linking
      - Invalid or missing code not detected by user may be linked against subsequent stage
      - :id:`RUSTC_AVD_TEST_007`
      - NO
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                   
 .. end of table
 
 

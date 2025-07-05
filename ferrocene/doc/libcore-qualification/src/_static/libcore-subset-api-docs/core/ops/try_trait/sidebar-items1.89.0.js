@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["NeverShortCircuitResidual"],"struct":["NeverShortCircuit"],"trait":["FromResidual","Residual","Try"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["panic","panic_fmt","panic_nounwind","panic_nounwind_fmt"],"type":["PanicFmt"]};

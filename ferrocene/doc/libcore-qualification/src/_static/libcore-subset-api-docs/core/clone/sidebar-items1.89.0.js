@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"derive":["Clone"],"mod":["impls"],"struct":["AssertParamIsClone"],"trait":["Clone"]};

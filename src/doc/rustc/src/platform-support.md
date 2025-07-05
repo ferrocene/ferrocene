@@ -439,6 +439,10 @@ target | std | host | notes
 `aarch64-unknown-ferrocenecoretest` | ✓ | ✓ | Internal target for tests
 `thumbv7em-ferrocenecoretest-eabi` | ✓ | ✓ | Internal target for tests
 `thumbv7em-ferrocenecoretest-eabihf` | ✓ | ✓ | Internal target for tests
+`x86_64-unknown-none.certified` | * |  | Freestanding/bare-metal x86_64, softfloat (certified)
+`aarch64-unknown-none.certified` | * |  | Bare ARM64, hardfloat (certified)
+`thumbv7em-none-eabi.certified` | * |  | Bare Armv7E-M (certified)
+`thumbv7em-none-eabihf.certified` | * |  | Bare Armv7E-M, hardfloat (certified)
 
 [runs on NVIDIA GPUs]: https://github.com/japaric-archived/nvptx#targets
 [the AMD GPU]: https://llvm.org/docs/AMDGPUUsage.html#processors

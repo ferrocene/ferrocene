@@ -1027,26 +1027,17 @@ mod snapshot {
                 // is somewhat different.
                 // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r"
-<<<<<<< HEAD
-=======
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <host>
-<<<<<<< HEAD
-        [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
-=======
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 0 <host> -> RustInstaller 1 <host>
         [dist] docs <host>
         [doc] std 2 <host>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [dist] mingw <host>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
@@ -1074,11 +1065,6 @@ mod snapshot {
                 // is somewhat different.
                 // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r"
-<<<<<<< HEAD
-=======
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> WasmComponentLd 1 <host>
@@ -1087,15 +1073,7 @@ mod snapshot {
         [build] rustc 1 <host> -> WasmComponentLd 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <host>
-<<<<<<< HEAD
         [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
-=======
-        [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs 1 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
-        [doc] std 2 <host>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [dist] mingw <host>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
@@ -1129,28 +1107,13 @@ mod snapshot {
                 // is somewhat different.
                 // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r"
-<<<<<<< HEAD
-=======
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <host>
-<<<<<<< HEAD
         [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
-=======
-        [doc] std 2 <target1>
-        [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs 1 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
-        [dist] docs <target1>
-        [doc] std 2 <host>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [doc] std 2 <target1>
         [dist] mingw <host>
         [dist] mingw <target1>
@@ -1184,28 +1147,13 @@ mod snapshot {
                 // is somewhat different.
                 // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r"
-<<<<<<< HEAD
-=======
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <host>
-<<<<<<< HEAD
         [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
-=======
-        [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs 1 <host>
-        [build] rustc 1 <host> -> std 1 <target1>
-        [build] rustc 2 <host> -> std 2 <target1>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
-        [doc] std 2 <host>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [dist] mingw <host>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
@@ -1240,30 +1188,13 @@ mod snapshot {
                 // is somewhat different.
                 // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r"
-<<<<<<< HEAD
-=======
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <host>
-<<<<<<< HEAD
         [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
-=======
-        [doc] std 2 <target1>
-        [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs 1 <host>
-        [build] rustc 1 <host> -> std 1 <target1>
-        [build] rustc 2 <host> -> std 2 <target1>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
-        [dist] docs <target1>
-        [doc] std 2 <host>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [doc] std 2 <target1>
         [dist] mingw <host>
         [dist] mingw <target1>
@@ -1302,25 +1233,13 @@ mod snapshot {
                 // is somewhat different.
                 // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r"
-<<<<<<< HEAD
-=======
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <target1>
-<<<<<<< HEAD
         [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
-=======
-        [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <target1>
-        [doc] std 2 <target1>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [dist] mingw <target1>
         [build] rustc 2 <host> -> std 2 <target1>
         [dist] rustc 2 <host> -> std 2 <target1>
@@ -1342,11 +1261,6 @@ mod snapshot {
                 // is somewhat different.
                 // `--bless` does not fix these. You may need to manually update this shapsnot.
                 .render_steps(), @r"
-<<<<<<< HEAD
-=======
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> WasmComponentLd 1 <host>
@@ -1355,17 +1269,7 @@ mod snapshot {
         [build] rustc 1 <host> -> WasmComponentLd 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <target1>
-<<<<<<< HEAD
         [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
-=======
-        [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 1 <host> -> std 1 <target1>
-        [build] rustc 2 <host> -> std 2 <target1>
-        [build] rustc 0 <host> -> LintDocs 1 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <target1>
-        [doc] std 2 <target1>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [dist] mingw <target1>
         [build] llvm <target1>
         [build] rustc 1 <host> -> std 1 <target1>

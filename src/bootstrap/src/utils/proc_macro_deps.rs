@@ -33,10 +33,6 @@ pub static CRATES: &[&str] = &[
     "mime_guess",
     "minimal-lexical",
     "nom",
-<<<<<<< HEAD
-    "num-conv",
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "pest",
     "pest_generator",
     "pest_meta",

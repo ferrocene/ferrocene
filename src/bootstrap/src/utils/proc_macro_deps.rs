@@ -33,6 +33,7 @@ pub static CRATES: &[&str] = &[
     "mime_guess",
     "minimal-lexical",
     "nom",
+    "num-conv",
     "pest",
     "pest_generator",
     "pest_meta",

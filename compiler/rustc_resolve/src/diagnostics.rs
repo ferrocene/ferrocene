@@ -7,7 +7,7 @@ use rustc_ast::{
 use rustc_ast_pretty::pprust;
 use rustc_attr_data_structures::{self as attr, Stability};
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
-use rustc_data_structures::unord::UnordSet;
+use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_errors::codes::*;
 use rustc_errors::{
     Applicability, Diag, DiagCtxtHandle, ErrorGuaranteed, MultiSpan, SuggestionStyle,
@@ -256,22 +256,19 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         };
 
         let label = match new_binding.is_import_user_facing() {
-            true => errors::NameDefinedMultipleTimeLabel::Reimported { span, name },
-            false => errors::NameDefinedMultipleTimeLabel::Redefined { span, name },
+            true => errors::NameDefinedMultipleTimeLabel::Reimported { span },
+            false => errors::NameDefinedMultipleTimeLabel::Redefined { span },
         };
 
         let old_binding_label =
             (!old_binding.span.is_dummy() && old_binding.span != span).then(|| {
                 let span = self.tcx.sess.source_map().guess_head_span(old_binding.span);
                 match old_binding.is_import_user_facing() {
-                    true => errors::NameDefinedMultipleTimeOldBindingLabel::Import {
-                        span,
-                        name,
-                        old_kind,
-                    },
+                    true => {
+                        errors::NameDefinedMultipleTimeOldBindingLabel::Import { span, old_kind }
+                    }
                     false => errors::NameDefinedMultipleTimeOldBindingLabel::Definition {
                         span,
-                        name,
                         old_kind,
                     },
                 }
@@ -281,6 +278,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             .dcx()
             .create_err(errors::NameDefinedMultipleTime {
                 span,
+                name,
                 descr: ns.descr(),
                 container,
                 label,
@@ -1054,6 +1052,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                                 false,
                                 false,
                                 None,
+                                None,
                             ) else {
                                 continue;
                             };
@@ -1482,7 +1481,35 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         parent_scope: &ParentScope<'ra>,
         ident: Ident,
         krate: &Crate,
+        sugg_span: Option<Span>,
     ) {
+        // Bring imported but unused `derive` macros into `macro_map` so we ensure they can be used
+        // for suggestions.
+        self.visit_scopes(
+            ScopeSet::Macro(MacroKind::Derive),
+            &parent_scope,
+            ident.span.ctxt(),
+            |this, scope, _use_prelude, _ctxt| {
+                let Scope::Module(m, _) = scope else {
+                    return None;
+                };
+                for (_, resolution) in this.resolutions(m).borrow().iter() {
+                    let Some(binding) = resolution.borrow().binding else {
+                        continue;
+                    };
+                    let Res::Def(DefKind::Macro(MacroKind::Derive | MacroKind::Attr), def_id) =
+                        binding.res()
+                    else {
+                        continue;
+                    };
+                    // By doing this all *imported* macros get added to the `macro_map` even if they
+                    // are *unused*, which makes the later suggestions find them and work.
+                    let _ = this.get_macro_by_def_id(def_id);
+                }
+                None::<()>
+            },
+        );
+
         let is_expected = &|res: Res| res.macro_kind() == Some(macro_kind);
         let suggestion = self.early_lookup_typo_candidate(
             ScopeSet::Macro(macro_kind),
@@ -1490,7 +1517,9 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             ident,
             is_expected,
         );
-        self.add_typo_suggestion(err, suggestion, ident.span);
+        if !self.add_typo_suggestion(err, suggestion, ident.span) {
+            self.detect_derive_attribute(err, ident, parent_scope, sugg_span);
+        }
 
         let import_suggestions =
             self.lookup_import_candidates(ident, Namespace::MacroNS, parent_scope, is_expected);
@@ -1620,6 +1649,105 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             };
             err.subdiagnostic(note);
             return;
+        }
+    }
+
+    /// Given an attribute macro that failed to be resolved, look for `derive` macros that could
+    /// provide it, either as-is or with small typos.
+    fn detect_derive_attribute(
+        &self,
+        err: &mut Diag<'_>,
+        ident: Ident,
+        parent_scope: &ParentScope<'ra>,
+        sugg_span: Option<Span>,
+    ) {
+        // Find all of the `derive`s in scope and collect their corresponding declared
+        // attributes.
+        // FIXME: this only works if the crate that owns the macro that has the helper_attr
+        // has already been imported.
+        let mut derives = vec![];
+        let mut all_attrs: UnordMap<Symbol, Vec<_>> = UnordMap::default();
+        // We're collecting these in a hashmap, and handle ordering the output further down.
+        #[allow(rustc::potential_query_instability)]
+        for (def_id, data) in &self.macro_map {
+            for helper_attr in &data.ext.helper_attrs {
+                let item_name = self.tcx.item_name(*def_id);
+                all_attrs.entry(*helper_attr).or_default().push(item_name);
+                if helper_attr == &ident.name {
+                    derives.push(item_name);
+                }
+            }
+        }
+        let kind = MacroKind::Derive.descr();
+        if !derives.is_empty() {
+            // We found an exact match for the missing attribute in a `derive` macro. Suggest it.
+            let mut derives: Vec<String> = derives.into_iter().map(|d| d.to_string()).collect();
+            derives.sort();
+            derives.dedup();
+            let msg = match &derives[..] {
+                [derive] => format!(" `{derive}`"),
+                [start @ .., last] => format!(
+                    "s {} and `{last}`",
+                    start.iter().map(|d| format!("`{d}`")).collect::<Vec<_>>().join(", ")
+                ),
+                [] => unreachable!("we checked for this to be non-empty 10 lines above!?"),
+            };
+            let msg = format!(
+                "`{}` is an attribute that can be used by the {kind}{msg}, you might be \
+                     missing a `derive` attribute",
+                ident.name,
+            );
+            let sugg_span = if let ModuleKind::Def(DefKind::Enum, id, _) = parent_scope.module.kind
+            {
+                let span = self.def_span(id);
+                if span.from_expansion() {
+                    None
+                } else {
+                    // For enum variants sugg_span is empty but we can get the enum's Span.
+                    Some(span.shrink_to_lo())
+                }
+            } else {
+                // For items this `Span` will be populated, everything else it'll be None.
+                sugg_span
+            };
+            match sugg_span {
+                Some(span) => {
+                    err.span_suggestion_verbose(
+                        span,
+                        msg,
+                        format!("#[derive({})]\n", derives.join(", ")),
+                        Applicability::MaybeIncorrect,
+                    );
+                }
+                None => {
+                    err.note(msg);
+                }
+            }
+        } else {
+            // We didn't find an exact match. Look for close matches. If any, suggest fixing typo.
+            let all_attr_names = all_attrs.keys().map(|s| *s).into_sorted_stable_ord();
+            if let Some(best_match) = find_best_match_for_name(&all_attr_names, ident.name, None)
+                && let Some(macros) = all_attrs.get(&best_match)
+            {
+                let mut macros: Vec<String> = macros.into_iter().map(|d| d.to_string()).collect();
+                macros.sort();
+                macros.dedup();
+                let msg = match &macros[..] {
+                    [] => return,
+                    [name] => format!(" `{name}` accepts"),
+                    [start @ .., end] => format!(
+                        "s {} and `{end}` accept",
+                        start.iter().map(|m| format!("`{m}`")).collect::<Vec<_>>().join(", "),
+                    ),
+                };
+                let msg = format!("the {kind}{msg} the similarly named `{best_match}` attribute");
+                err.span_suggestion_verbose(
+                    ident.span,
+                    msg,
+                    best_match,
+                    Applicability::MaybeIncorrect,
+                );
+            }
         }
     }
 
@@ -2293,6 +2421,8 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             } else {
                 let suggestion = if suggestion.is_some() {
                     suggestion
+                } else if let Some(m) = self.undeclared_module_exists(ident) {
+                    self.undeclared_module_suggest_declare(ident, m)
                 } else if was_invoked_from_cargo() {
                     Some((
                         vec![],
@@ -2312,6 +2442,55 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 (format!("use of unresolved module or unlinked crate `{ident}`"), suggestion)
             }
         }
+    }
+
+    fn undeclared_module_suggest_declare(
+        &mut self,
+        ident: Ident,
+        path: std::path::PathBuf,
+    ) -> Option<(Vec<(Span, String)>, String, Applicability)> {
+        Some((
+            vec![(self.current_crate_outer_attr_insert_span, format!("mod {ident};\n"))],
+            format!(
+                "to make use of source file {}, use `mod {ident}` \
+                 in this file to declare the module",
+                path.display()
+            ),
+            Applicability::MaybeIncorrect,
+        ))
+    }
+
+    fn undeclared_module_exists(&mut self, ident: Ident) -> Option<std::path::PathBuf> {
+        let map = self.tcx.sess.source_map();
+
+        let src = map.span_to_filename(ident.span).into_local_path()?;
+        let i = ident.as_str();
+        // FIXME: add case where non parent using undeclared module (hard?)
+        let dir = src.parent()?;
+        let src = src.file_stem()?.to_str()?;
+        for file in [
+            // …/x.rs
+            dir.join(i).with_extension("rs"),
+            // …/x/mod.rs
+            dir.join(i).join("mod.rs"),
+        ] {
+            if file.exists() {
+                return Some(file);
+            }
+        }
+        if !matches!(src, "main" | "lib" | "mod") {
+            for file in [
+                // …/x/y.rs
+                dir.join(src).join(i).with_extension("rs"),
+                // …/x/y/mod.rs
+                dir.join(src).join(i).join("mod.rs"),
+            ] {
+                if file.exists() {
+                    return Some(file);
+                }
+            }
+        }
+        None
     }
 
     /// Adds suggestions for a path that cannot be resolved.

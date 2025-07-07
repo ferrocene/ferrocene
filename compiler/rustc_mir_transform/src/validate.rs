@@ -1253,15 +1253,12 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                             self.tcx,
                             self.tcx.require_lang_item(
                                 LangItem::CoerceUnsized,
-                                Some(self.body.source_info(location).span),
+                                self.body.source_info(location).span,
                             ),
                             [op_ty, *target_type],
                         )) {
                             self.fail(location, format!("Unsize coercion, but `{op_ty}` isn't coercible to `{target_type}`"));
                         }
-                    }
-                    CastKind::PointerCoercion(PointerCoercion::DynStar, _) => {
-                        // FIXME(dyn-star): make sure nothing needs to be done here.
                     }
                     CastKind::IntToInt | CastKind::IntToFloat => {
                         let input_valid = op_ty.is_integral() || op_ty.is_char() || op_ty.is_bool();
@@ -1308,37 +1305,27 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                         }
                     }
                     CastKind::Transmute => {
-                        if let MirPhase::Runtime(..) = self.body.phase {
-                            // Unlike `mem::transmute`, a MIR `Transmute` is well-formed
-                            // for any two `Sized` types, just potentially UB to run.
+                        // Unlike `mem::transmute`, a MIR `Transmute` is well-formed
+                        // for any two `Sized` types, just potentially UB to run.
 
-                            if !self
-                                .tcx
-                                .normalize_erasing_regions(self.typing_env, op_ty)
-                                .is_sized(self.tcx, self.typing_env)
-                            {
-                                self.fail(
-                                    location,
-                                    format!("Cannot transmute from non-`Sized` type {op_ty}"),
-                                );
-                            }
-                            if !self
-                                .tcx
-                                .normalize_erasing_regions(self.typing_env, *target_type)
-                                .is_sized(self.tcx, self.typing_env)
-                            {
-                                self.fail(
-                                    location,
-                                    format!("Cannot transmute to non-`Sized` type {target_type:?}"),
-                                );
-                            }
-                        } else {
+                        if !self
+                            .tcx
+                            .normalize_erasing_regions(self.typing_env, op_ty)
+                            .is_sized(self.tcx, self.typing_env)
+                        {
                             self.fail(
                                 location,
-                                format!(
-                                    "Transmute is not supported in non-runtime phase {:?}.",
-                                    self.body.phase
-                                ),
+                                format!("Cannot transmute from non-`Sized` type {op_ty}"),
+                            );
+                        }
+                        if !self
+                            .tcx
+                            .normalize_erasing_regions(self.typing_env, *target_type)
+                            .is_sized(self.tcx, self.typing_env)
+                        {
+                            self.fail(
+                                location,
+                                format!("Cannot transmute to non-`Sized` type {target_type:?}"),
                             );
                         }
                     }

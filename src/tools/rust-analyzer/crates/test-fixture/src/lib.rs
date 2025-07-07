@@ -1,5 +1,5 @@
 //! A set of high-level utility fixture methods to use in tests.
-use std::{mem, str::FromStr, sync};
+use std::{any::TypeId, mem, str::FromStr, sync};
 
 use base_db::{
     Crate, CrateDisplayName, CrateGraphBuilder, CrateName, CrateOrigin, CrateWorkspaceData,
@@ -538,6 +538,21 @@ pub fn disallow_cfg(_attr: TokenStream, input: TokenStream) -> TokenStream {
                 disabled: false,
             },
         ),
+        (
+            r#"
+#[proc_macro_attribute]
+pub fn generate_suffixed_type(_attr: TokenStream, input: TokenStream) -> TokenStream {
+    input
+}
+"#
+            .into(),
+            ProcMacro {
+                name: Symbol::intern("generate_suffixed_type"),
+                kind: ProcMacroKind::Attr,
+                expander: sync::Arc::new(GenerateSuffixedTypeProcMacroExpander),
+                disabled: false,
+            },
+        ),
     ])
 }
 
@@ -662,6 +677,10 @@ impl ProcMacroExpander for IdentityProcMacroExpander {
     ) -> Result<TopSubtree, ProcMacroExpansionError> {
         Ok(subtree.clone())
     }
+
+    fn eq_dyn(&self, other: &dyn ProcMacroExpander) -> bool {
+        other.type_id() == TypeId::of::<Self>()
+    }
 }
 
 // Expands to a macro_rules! macro, for issue #18089.
@@ -693,6 +712,10 @@ impl ProcMacroExpander for Issue18089ProcMacroExpander {
             #subtree
         })
     }
+
+    fn eq_dyn(&self, other: &dyn ProcMacroExpander) -> bool {
+        other.type_id() == TypeId::of::<Self>()
+    }
 }
 
 // Pastes the attribute input as its output
@@ -712,6 +735,10 @@ impl ProcMacroExpander for AttributeInputReplaceProcMacroExpander {
         attrs
             .cloned()
             .ok_or_else(|| ProcMacroExpansionError::Panic("Expected attribute input".into()))
+    }
+
+    fn eq_dyn(&self, other: &dyn ProcMacroExpander) -> bool {
+        other.type_id() == TypeId::of::<Self>()
     }
 }
 
@@ -744,6 +771,10 @@ impl ProcMacroExpander for Issue18840ProcMacroExpander {
         top_subtree_delimiter_mut.close = def_site;
         Ok(result)
     }
+
+    fn eq_dyn(&self, other: &dyn ProcMacroExpander) -> bool {
+        other.type_id() == TypeId::of::<Self>()
+    }
 }
 
 #[derive(Debug)]
@@ -774,6 +805,10 @@ impl ProcMacroExpander for MirrorProcMacroExpander {
         let mut builder = TopSubtreeBuilder::new(input.top_subtree().delimiter);
         traverse(&mut builder, input.iter());
         Ok(builder.build())
+    }
+
+    fn eq_dyn(&self, other: &dyn ProcMacroExpander) -> bool {
+        other.type_id() == TypeId::of::<Self>()
     }
 }
 
@@ -815,6 +850,10 @@ impl ProcMacroExpander for ShortenProcMacroExpander {
             }
         }
     }
+
+    fn eq_dyn(&self, other: &dyn ProcMacroExpander) -> bool {
+        other.type_id() == TypeId::of::<Self>()
+    }
 }
 
 // Reads ident type within string quotes, for issue #17479.
@@ -839,6 +878,10 @@ impl ProcMacroExpander for Issue17479ProcMacroExpander {
         Ok(quote! { span =>
             #symbol()
         })
+    }
+
+    fn eq_dyn(&self, other: &dyn ProcMacroExpander) -> bool {
+        other.type_id() == TypeId::of::<Self>()
     }
 }
 
@@ -891,6 +934,10 @@ impl ProcMacroExpander for Issue18898ProcMacroExpander {
             }
         })
     }
+
+    fn eq_dyn(&self, other: &dyn ProcMacroExpander) -> bool {
+        other.type_id() == TypeId::of::<Self>()
+    }
 }
 
 // Reads ident type within string quotes, for issue #17479.
@@ -917,5 +964,67 @@ impl ProcMacroExpander for DisallowCfgProcMacroExpander {
             }
         }
         Ok(subtree.clone())
+    }
+
+    fn eq_dyn(&self, other: &dyn ProcMacroExpander) -> bool {
+        other.type_id() == TypeId::of::<Self>()
+    }
+}
+
+// Generates a new type by adding a suffix to the original name
+#[derive(Debug)]
+struct GenerateSuffixedTypeProcMacroExpander;
+impl ProcMacroExpander for GenerateSuffixedTypeProcMacroExpander {
+    fn expand(
+        &self,
+        subtree: &TopSubtree,
+        _attrs: Option<&TopSubtree>,
+        _env: &Env,
+        _def_site: Span,
+        call_site: Span,
+        _mixed_site: Span,
+        _current_dir: String,
+    ) -> Result<TopSubtree, ProcMacroExpansionError> {
+        let TokenTree::Leaf(Leaf::Ident(ident)) = &subtree.0[1] else {
+            return Err(ProcMacroExpansionError::Panic("incorrect Input".into()));
+        };
+
+        let ident = match ident.sym.as_str() {
+            "struct" => {
+                let TokenTree::Leaf(Leaf::Ident(ident)) = &subtree.0[2] else {
+                    return Err(ProcMacroExpansionError::Panic("incorrect Input".into()));
+                };
+                ident
+            }
+
+            "enum" => {
+                let TokenTree::Leaf(Leaf::Ident(ident)) = &subtree.0[4] else {
+                    return Err(ProcMacroExpansionError::Panic("incorrect Input".into()));
+                };
+                ident
+            }
+
+            _ => {
+                return Err(ProcMacroExpansionError::Panic("incorrect Input".into()));
+            }
+        };
+
+        let generated_ident = tt::Ident {
+            sym: Symbol::intern(&format!("{}Suffix", ident.sym)),
+            span: ident.span,
+            is_raw: tt::IdentIsRaw::No,
+        };
+
+        let ret = quote! { call_site =>
+            #subtree
+
+            struct #generated_ident;
+        };
+
+        Ok(ret)
+    }
+
+    fn eq_dyn(&self, other: &dyn ProcMacroExpander) -> bool {
+        other.type_id() == TypeId::of::<Self>()
     }
 }

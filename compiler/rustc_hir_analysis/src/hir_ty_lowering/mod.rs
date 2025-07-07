@@ -33,13 +33,14 @@ use rustc_hir::def::{CtorKind, CtorOf, DefKind, Res};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{self as hir, AnonConst, GenericArg, GenericArgs, HirId};
 use rustc_infer::infer::{InferCtxt, TyCtxtInferExt};
-use rustc_infer::traits::{DynCompatibilityViolation, ObligationCause};
+use rustc_infer::traits::DynCompatibilityViolation;
+use rustc_macros::{TypeFoldable, TypeVisitable};
 use rustc_middle::middle::stability::AllowUnstable;
 use rustc_middle::mir::interpret::LitToConstInput;
 use rustc_middle::ty::print::PrintPolyTraitRefExt as _;
 use rustc_middle::ty::{
-    self, Const, GenericArgKind, GenericArgsRef, GenericParamDefKind, ParamEnv, Ty, TyCtxt,
-    TypeVisitableExt, TypingMode, Upcast, fold_regions,
+    self, Const, GenericArgKind, GenericArgsRef, GenericParamDefKind, Ty, TyCtxt, TypeVisitableExt,
+    TypingMode, Upcast, fold_regions,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_session::lint::builtin::AMBIGUOUS_ASSOCIATED_ITEMS;
@@ -47,10 +48,10 @@ use rustc_session::parse::feature_err;
 use rustc_span::{DUMMY_SP, Ident, Span, kw, sym};
 use rustc_trait_selection::infer::InferCtxtExt;
 use rustc_trait_selection::traits::wf::object_region_bounds;
-use rustc_trait_selection::traits::{self, ObligationCtxt};
+use rustc_trait_selection::traits::{self, FulfillmentError};
 use tracing::{debug, instrument};
 
-use crate::check::check_abi_fn_ptr;
+use crate::check::check_abi;
 use crate::errors::{AmbiguousLifetimeBound, BadReturnTypeNotation};
 use crate::hir_ty_lowering::errors::{GenericsArgsErrExtend, prohibit_assoc_item_constraint};
 use crate::hir_ty_lowering::generics::{check_generic_arg_count, lower_generic_args};
@@ -79,10 +80,10 @@ pub enum PredicateFilter {
     /// and `<Self as Tr>::A: B`.
     SelfAndAssociatedTypeBounds,
 
-    /// Filter only the `~const` bounds, which are lowered into `HostEffect` clauses.
+    /// Filter only the `[const]` bounds, which are lowered into `HostEffect` clauses.
     ConstIfConst,
 
-    /// Filter only the `~const` bounds which are *also* in the supertrait position.
+    /// Filter only the `[const]` bounds which are *also* in the supertrait position.
     SelfConstIfConst,
 }
 
@@ -97,6 +98,13 @@ pub enum RegionInferReason<'a> {
     RegionPredicate,
     Reference,
     OutlivesBound,
+}
+
+#[derive(Copy, Clone, TypeFoldable, TypeVisitable, Debug)]
+pub struct InherentAssocCandidate {
+    pub impl_: DefId,
+    pub assoc_item: DefId,
+    pub scope: DefId,
 }
 
 /// A context which can lower type-system entities from the [HIR][hir] to
@@ -147,6 +155,13 @@ pub trait HirTyLowerer<'tcx> {
         def_id: LocalDefId,
         assoc_ident: Ident,
     ) -> ty::EarlyBinder<'tcx, &'tcx [(ty::Clause<'tcx>, Span)]>;
+
+    fn select_inherent_assoc_candidates(
+        &self,
+        span: Span,
+        self_ty: Ty<'tcx>,
+        candidates: Vec<InherentAssocCandidate>,
+    ) -> (Vec<InherentAssocCandidate>, Vec<FulfillmentError<'tcx>>);
 
     /// Lower a path to an associated item (of a trait) to a projection.
     ///
@@ -805,7 +820,11 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     ty::ClauseKind::Trait(ty::TraitPredicate { trait_ref, polarity })
                 });
                 let bound = (bound.upcast(tcx), span);
-                // FIXME(-Znext-solver): We can likely remove this hack once the new trait solver lands.
+                // FIXME(-Znext-solver): We can likely remove this hack once the
+                // new trait solver lands. This fixed an overflow in the old solver.
+                // This may have performance implications, so please check perf when
+                // removing it.
+                // This was added in <https://github.com/rust-lang/rust/pull/123302>.
                 if tcx.is_lang_item(trait_def_id, rustc_hir::LangItem::Sized) {
                     bounds.insert(0, bound);
                 } else {
@@ -866,7 +885,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     }
                 }
                 // On the flip side, when filtering `ConstIfConst` bounds, we only need to convert
-                // `~const` bounds. All other predicates are handled in their respective queries.
+                // `[const]` bounds. All other predicates are handled in their respective queries.
                 //
                 // Note that like `PredicateFilter::SelfOnly`, we don't need to do any filtering
                 // here because we only call this on self bounds, and deal with the recursive case
@@ -1445,48 +1464,32 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             .filter_map(|&impl_| {
                 let (item, scope) =
                     self.probe_assoc_item_unchecked(name, assoc_tag, block, impl_)?;
-                Some((impl_, (item.def_id, scope)))
+                Some(InherentAssocCandidate { impl_, assoc_item: item.def_id, scope })
             })
             .collect();
 
-        if candidates.is_empty() {
-            return Ok(None);
-        }
+        let (applicable_candidates, fulfillment_errors) =
+            self.select_inherent_assoc_candidates(span, self_ty, candidates.clone());
 
-        //
-        // Select applicable inherent associated type candidates modulo regions.
-        //
+        let InherentAssocCandidate { impl_, assoc_item, scope: def_scope } =
+            match &applicable_candidates[..] {
+                &[] => Err(self.report_unresolved_inherent_assoc_item(
+                    name,
+                    self_ty,
+                    candidates,
+                    fulfillment_errors,
+                    span,
+                    assoc_tag,
+                )),
 
-        // In contexts that have no inference context, just make a new one.
-        // We do need a local variable to store it, though.
-        let infcx = match self.infcx() {
-            Some(infcx) => infcx,
-            None => {
-                assert!(!self_ty.has_infer());
-                &tcx.infer_ctxt().ignoring_regions().build(TypingMode::non_body_analysis())
-            }
-        };
+                &[applicable_candidate] => Ok(applicable_candidate),
 
-        // FIXME(inherent_associated_types): Acquiring the ParamEnv this early leads to cycle errors
-        // when inside of an ADT (#108491) or where clause.
-        let param_env = tcx.param_env(block.owner);
-
-        let mut universes = if self_ty.has_escaping_bound_vars() {
-            vec![None; self_ty.outer_exclusive_binder().as_usize()]
-        } else {
-            vec![]
-        };
-
-        let (impl_, (assoc_item, def_scope)) = crate::traits::with_replaced_escaping_bound_vars(
-            infcx,
-            &mut universes,
-            self_ty,
-            |self_ty| {
-                self.select_inherent_assoc_candidates(
-                    infcx, name, span, self_ty, param_env, candidates, assoc_tag,
-                )
-            },
-        )?;
+                &[_, ..] => Err(self.report_ambiguous_inherent_assoc_item(
+                    name,
+                    candidates.into_iter().map(|cand| cand.assoc_item).collect(),
+                    span,
+                )),
+            }?;
 
         self.check_assoc_item(assoc_item, name, def_scope, block, span);
 
@@ -1501,78 +1504,6 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         );
 
         Ok(Some((assoc_item, args)))
-    }
-
-    fn select_inherent_assoc_candidates(
-        &self,
-        infcx: &InferCtxt<'tcx>,
-        name: Ident,
-        span: Span,
-        self_ty: Ty<'tcx>,
-        param_env: ParamEnv<'tcx>,
-        candidates: Vec<(DefId, (DefId, DefId))>,
-        assoc_tag: ty::AssocTag,
-    ) -> Result<(DefId, (DefId, DefId)), ErrorGuaranteed> {
-        let tcx = self.tcx();
-        let mut fulfillment_errors = Vec::new();
-
-        let applicable_candidates: Vec<_> = candidates
-            .iter()
-            .copied()
-            .filter(|&(impl_, _)| {
-                infcx.probe(|_| {
-                    let ocx = ObligationCtxt::new_with_diagnostics(infcx);
-                    let self_ty = ocx.normalize(&ObligationCause::dummy(), param_env, self_ty);
-
-                    let impl_args = infcx.fresh_args_for_item(span, impl_);
-                    let impl_ty = tcx.type_of(impl_).instantiate(tcx, impl_args);
-                    let impl_ty = ocx.normalize(&ObligationCause::dummy(), param_env, impl_ty);
-
-                    // Check that the self types can be related.
-                    if ocx.eq(&ObligationCause::dummy(), param_env, impl_ty, self_ty).is_err() {
-                        return false;
-                    }
-
-                    // Check whether the impl imposes obligations we have to worry about.
-                    let impl_bounds = tcx.predicates_of(impl_).instantiate(tcx, impl_args);
-                    let impl_bounds =
-                        ocx.normalize(&ObligationCause::dummy(), param_env, impl_bounds);
-                    let impl_obligations = traits::predicates_for_generics(
-                        |_, _| ObligationCause::dummy(),
-                        param_env,
-                        impl_bounds,
-                    );
-                    ocx.register_obligations(impl_obligations);
-
-                    let mut errors = ocx.select_where_possible();
-                    if !errors.is_empty() {
-                        fulfillment_errors.append(&mut errors);
-                        return false;
-                    }
-
-                    true
-                })
-            })
-            .collect();
-
-        match &applicable_candidates[..] {
-            &[] => Err(self.report_unresolved_inherent_assoc_item(
-                name,
-                self_ty,
-                candidates,
-                fulfillment_errors,
-                span,
-                assoc_tag,
-            )),
-
-            &[applicable_candidate] => Ok(applicable_candidate),
-
-            &[_, ..] => Err(self.report_ambiguous_inherent_assoc_item(
-                name,
-                applicable_candidates.into_iter().map(|(_, (candidate, _))| candidate).collect(),
-                span,
-            )),
-        }
     }
 
     /// Given name and kind search for the assoc item in the provided scope and check if it's accessible[^1].
@@ -2433,9 +2364,9 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         };
 
         let lit_input = match expr.kind {
-            hir::ExprKind::Lit(lit) => Some(LitToConstInput { lit: &lit.node, ty, neg: false }),
+            hir::ExprKind::Lit(lit) => Some(LitToConstInput { lit: lit.node, ty, neg: false }),
             hir::ExprKind::Unary(hir::UnOp::Neg, expr) => match expr.kind {
-                hir::ExprKind::Lit(lit) => Some(LitToConstInput { lit: &lit.node, ty, neg: true }),
+                hir::ExprKind::Lit(lit) => Some(LitToConstInput { lit: lit.node, ty, neg: true }),
                 _ => None,
             },
             _ => None,
@@ -2502,7 +2433,6 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 } else {
                     let repr = match repr {
                         TraitObjectSyntax::Dyn | TraitObjectSyntax::None => ty::Dyn,
-                        TraitObjectSyntax::DynStar => ty::DynStar,
                     };
                     self.lower_trait_object_ty(hir_ty.span, hir_ty.hir_id, bounds, lifetime, repr)
                 }
@@ -2590,7 +2520,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 .unwrap_or_else(|guar| Ty::new_error(tcx, guar))
             }
             &hir::TyKind::Path(hir::QPath::LangItem(lang_item, span)) => {
-                let def_id = tcx.require_lang_item(lang_item, Some(span));
+                let def_id = tcx.require_lang_item(lang_item, span);
                 let (args, _) = self.lower_generic_args_of_path(
                     span,
                     def_id,
@@ -2704,16 +2634,6 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         }
     }
 
-    pub fn lower_arg_ty(&self, ty: &hir::Ty<'tcx>, expected_ty: Option<Ty<'tcx>>) -> Ty<'tcx> {
-        match ty.kind {
-            hir::TyKind::Infer(()) if let Some(expected_ty) = expected_ty => {
-                self.record_ty(ty.hir_id, expected_ty, ty.span);
-                expected_ty
-            }
-            _ => self.lower_ty(ty),
-        }
-    }
-
     /// Lower a function type from the HIR to our internal notion of a function signature.
     #[instrument(level = "debug", skip(self, hir_id, safety, abi, decl, generics, hir_ty), ret)]
     pub fn lower_fn_ty(
@@ -2739,7 +2659,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         if let hir::Node::Ty(hir::Ty { kind: hir::TyKind::BareFn(bare_fn_ty), span, .. }) =
             tcx.hir_node(hir_id)
         {
-            check_abi_fn_ptr(tcx, hir_id, *span, bare_fn_ty.abi);
+            check_abi(tcx, hir_id, *span, bare_fn_ty.abi);
         }
 
         // reject function types that violate cmse ABI requirements

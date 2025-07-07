@@ -20,7 +20,7 @@ Rust, as well as the following:
   CLI, while we explicitly require version 2.
 
 
-:target-with-triple:`x86_64-unknown-linux-gnu`
+:target-with-tuple:`x86_64-unknown-linux-gnu`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 On Ubuntu 24.10, install the software requirements by running:
@@ -45,7 +45,7 @@ from the official repositories:
 
    sudo pacman -S ninja bzip2 cmake gcc uv
 
-:target-with-triple:`aarch64-apple-darwin`
+:target-with-tuple:`aarch64-apple-darwin`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you don't already have XCode set up, get the XCode command line tools as
@@ -66,7 +66,7 @@ Then use Homebrew to install the remaining packages:
    brew install ninja bzip2 cmake awscli uv gnu-tar
 
 
-:target-with-triple:`x86_64-pc-windows-msvc`
+:target-with-tuple:`x86_64-pc-windows-msvc`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. note::

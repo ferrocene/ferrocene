@@ -2,12 +2,12 @@ use std::mem;
 
 use rustc_ast::visit::FnKind;
 use rustc_ast::*;
-use rustc_ast_pretty::pprust;
-use rustc_attr_parsing::{AttributeParser, OmitDoc};
+use rustc_attr_parsing::{AttributeParser, Early, OmitDoc};
 use rustc_expand::expand::AstFragment;
 use rustc_hir as hir;
 use rustc_hir::def::{CtorKind, CtorOf, DefKind};
 use rustc_hir::def_id::LocalDefId;
+use rustc_middle::span_bug;
 use rustc_span::hygiene::LocalExpnId;
 use rustc_span::{Span, Symbol, sym};
 use tracing::debug;
@@ -128,7 +128,7 @@ impl<'a, 'ra, 'tcx> visit::Visitor<'a> for DefCollector<'a, 'ra, 'tcx> {
                 // FIXME(jdonszelmann) make one of these in the resolver?
                 // FIXME(jdonszelmann) don't care about tools here maybe? Just parse what we can.
                 // Does that prevents errors from happening? maybe
-                let parser = AttributeParser::new(
+                let mut parser = AttributeParser::<'_, Early>::new(
                     &self.resolver.tcx.sess,
                     self.resolver.tcx.features(),
                     Vec::new(),
@@ -136,8 +136,14 @@ impl<'a, 'ra, 'tcx> visit::Visitor<'a> for DefCollector<'a, 'ra, 'tcx> {
                 let attrs = parser.parse_attribute_list(
                     &i.attrs,
                     i.span,
+                    i.id,
                     OmitDoc::Skip,
                     std::convert::identity,
+                    |_l| {
+                        // FIXME(jdonszelmann): emit lints here properly
+                        // NOTE that before new attribute parsing, they didn't happen either
+                        // but it would be nice if we could change that.
+                    },
                 );
 
                 let macro_data =
@@ -147,7 +153,10 @@ impl<'a, 'ra, 'tcx> visit::Visitor<'a> for DefCollector<'a, 'ra, 'tcx> {
                 DefKind::Macro(macro_kind)
             }
             ItemKind::GlobalAsm(..) => DefKind::GlobalAsm,
-            ItemKind::Use(..) => return visit::walk_item(self, i),
+            ItemKind::Use(use_tree) => {
+                self.create_def(i.id, None, DefKind::Use, use_tree.span);
+                return visit::walk_item(self, i);
+            }
             ItemKind::MacCall(..) | ItemKind::DelegationMac(..) => {
                 return self.visit_macro_invoc(i.id);
             }
@@ -232,9 +241,9 @@ impl<'a, 'ra, 'tcx> visit::Visitor<'a> for DefCollector<'a, 'ra, 'tcx> {
         }
     }
 
-    fn visit_use_tree(&mut self, use_tree: &'a UseTree, id: NodeId, _nested: bool) {
+    fn visit_nested_use_tree(&mut self, use_tree: &'a UseTree, id: NodeId) {
         self.create_def(id, None, DefKind::Use, use_tree.span);
-        visit::walk_use_tree(self, use_tree, id);
+        visit::walk_use_tree(self, use_tree);
     }
 
     fn visit_foreign_item(&mut self, fi: &'a ForeignItem) {
@@ -371,20 +380,20 @@ impl<'a, 'ra, 'tcx> visit::Visitor<'a> for DefCollector<'a, 'ra, 'tcx> {
     }
 
     fn visit_ty(&mut self, ty: &'a Ty) {
-        match &ty.kind {
+        match ty.kind {
             TyKind::MacCall(..) => self.visit_macro_invoc(ty.id),
-            TyKind::ImplTrait(id, _) => {
-                // HACK: pprust breaks strings with newlines when the type
-                // gets too long. We don't want these to show up in compiler
-                // output or built artifacts, so replace them here...
-                // Perhaps we should instead format APITs more robustly.
-                let name = Symbol::intern(&pprust::ty_to_string(ty).replace('\n', " "));
+            TyKind::ImplTrait(opaque_id, _) => {
+                let name = *self
+                    .resolver
+                    .impl_trait_names
+                    .get(&ty.id)
+                    .unwrap_or_else(|| span_bug!(ty.span, "expected this opaque to be named"));
                 let kind = match self.invocation_parent.impl_trait_context {
                     ImplTraitContext::Universal => DefKind::TyParam,
                     ImplTraitContext::Existential => DefKind::OpaqueTy,
                     ImplTraitContext::InBinding => return visit::walk_ty(self, ty),
                 };
-                let id = self.create_def(*id, Some(name), kind, ty.span);
+                let id = self.create_def(opaque_id, Some(name), kind, ty.span);
                 match self.invocation_parent.impl_trait_context {
                     // Do not nest APIT, as we desugar them as `impl_trait: bounds`,
                     // so the `impl_trait` node is not a parent to `bounds`.

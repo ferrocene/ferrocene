@@ -2,6 +2,8 @@
 use crate::ffi::CStr;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
+use crate::marker::PhantomData;
+use crate::ptr::NonNull;
 
 /// A struct containing information about the location of a panic.
 ///
@@ -32,21 +34,35 @@ use crate::fmt;
 /// Files are compared as strings, not `Path`, which could be unexpected.
 /// See [`Location::file`]'s documentation for more discussion.
 #[lang = "panic_location"]
+<<<<<<< HEAD
 #[cfg_attr(
     not(feature = "ferrocene_certified"),
     derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)
 )]
+=======
+#[derive(Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
+>>>>>>> main
 #[stable(feature = "panic_hooks", since = "1.10.0")]
 #[cfg_attr(feature = "ferrocene_certified", allow(dead_code))]
 pub struct Location<'a> {
-    // Note: this filename will have exactly one nul byte at its end, but otherwise
-    // it must never contain interior nul bytes. This is relied on for the conversion
-    // to `CStr` below.
-    //
-    // The prefix of the string without the trailing nul byte will be a regular UTF8 `str`.
-    file_bytes_with_nul: &'a [u8],
+    // A raw pointer is used rather than a reference because the pointer is valid for one more byte
+    // than the length stored in this pointer; the additional byte is the NUL-terminator used by
+    // `Location::file_with_nul`.
+    filename: NonNull<str>,
     line: u32,
     col: u32,
+    _filename: PhantomData<&'a str>,
+}
+
+#[stable(feature = "panic_hooks", since = "1.10.0")]
+impl fmt::Debug for Location<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Location")
+            .field("file", &self.file())
+            .field("line", &self.line)
+            .field("column", &self.col)
+            .finish()
+    }
 }
 
 impl<'a> Location<'a> {
@@ -140,10 +156,8 @@ impl<'a> Location<'a> {
     #[rustc_const_stable(feature = "const_location_fields", since = "1.79.0")]
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn file(&self) -> &str {
-        let str_len = self.file_bytes_with_nul.len() - 1;
-        // SAFETY: `file_bytes_with_nul` without the trailing nul byte is guaranteed to be
-        // valid UTF8.
-        unsafe { crate::str::from_raw_parts(self.file_bytes_with_nul.as_ptr(), str_len) }
+        // SAFETY: The filename is valid.
+        unsafe { self.filename.as_ref() }
     }
 
     /// Returns the name of the source file as a nul-terminated `CStr`.
@@ -155,9 +169,17 @@ impl<'a> Location<'a> {
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn file_with_nul(&self) -> &CStr {
-        // SAFETY: `file_bytes_with_nul` is guaranteed to have a trailing nul byte and no
-        // interior nul bytes.
-        unsafe { CStr::from_bytes_with_nul_unchecked(self.file_bytes_with_nul) }
+        let filename = self.filename.as_ptr();
+
+        // SAFETY: The filename is valid for `filename_len+1` bytes, so this addition can't
+        // overflow.
+        let cstr_len = unsafe { crate::mem::size_of_val_raw(filename).unchecked_add(1) };
+
+        // SAFETY: The filename is valid for `filename_len+1` bytes.
+        let slice = unsafe { crate::slice::from_raw_parts(filename.cast(), cstr_len) };
+
+        // SAFETY: The filename is guaranteed to have a trailing nul byte and no interior nul bytes.
+        unsafe { CStr::from_bytes_with_nul_unchecked(slice) }
     }
 
     /// Returns the line number from which the panic originated.
@@ -219,3 +241,8 @@ impl fmt::Display for Location<'_> {
         write!(formatter, "{}:{}:{}", self.file(), self.line, self.col)
     }
 }
+
+#[stable(feature = "panic_hooks", since = "1.10.0")]
+unsafe impl Send for Location<'_> {}
+#[stable(feature = "panic_hooks", since = "1.10.0")]
+unsafe impl Sync for Location<'_> {}

@@ -9,13 +9,14 @@
 
 use std::ops::ControlFlow;
 
-use rustc_ast::Mutability;
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_hir::lang_items::LangItem;
-use rustc_infer::infer::{DefineOpaqueTypes, HigherRankedType, InferOk};
+use rustc_infer::infer::{BoundRegionConversionTime, DefineOpaqueTypes, InferOk};
 use rustc_infer::traits::ObligationCauseCode;
 use rustc_middle::traits::{BuiltinImplSource, SignatureMismatchData};
-use rustc_middle::ty::{self, GenericArgsRef, Ty, TyCtxt, Upcast, elaborate};
+use rustc_middle::ty::{
+    self, GenericArgsRef, Region, SizedTraitKind, Ty, TyCtxt, Upcast, elaborate,
+};
 use rustc_middle::{bug, span_bug};
 use rustc_span::def_id::DefId;
 use thin_vec::thin_vec;
@@ -27,8 +28,7 @@ use crate::traits::normalize::{normalize_with_depth, normalize_with_depth_to};
 use crate::traits::util::{self, closure_trait_ref_and_return_type};
 use crate::traits::{
     ImplSource, ImplSourceUserDefinedData, Normalized, Obligation, ObligationCause,
-    PolyTraitObligation, PredicateObligation, Selection, SelectionError, SignatureMismatch,
-    TraitDynIncompatible, TraitObligation, Unimplemented,
+    PolyTraitObligation, PredicateObligation, Selection, SelectionError, TraitObligation,
 };
 
 impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
@@ -165,14 +165,17 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             )
             .break_value()
             .expect("expected to index into clause that exists");
-        let candidate = candidate_predicate
+        let candidate_predicate = candidate_predicate
             .as_trait_clause()
-            .expect("projection candidate is not a trait predicate")
-            .map_bound(|t| t.trait_ref);
+            .expect("projection candidate is not a trait predicate");
+        let candidate_predicate =
+            util::lazily_elaborate_sizedness_candidate(self.infcx, obligation, candidate_predicate);
+
+        let candidate = candidate_predicate.map_bound(|t| t.trait_ref);
 
         let candidate = self.infcx.instantiate_binder_with_fresh_vars(
             obligation.cause.span,
-            HigherRankedType,
+            BoundRegionConversionTime::HigherRankedType,
             candidate,
         );
         let mut obligations = PredicateObligations::new();
@@ -190,7 +193,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 .at(&obligation.cause, obligation.param_env)
                 .eq(DefineOpaqueTypes::No, placeholder_trait_predicate, candidate)
                 .map(|InferOk { obligations, .. }| obligations)
-                .map_err(|_| Unimplemented)?,
+                .map_err(|_| SelectionError::Unimplemented)?,
         );
 
         // FIXME(compiler-errors): I don't think this is needed.
@@ -225,6 +228,13 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
     ) -> PredicateObligations<'tcx> {
         debug!(?obligation, ?param, "confirm_param_candidate");
 
+        let param = util::lazily_elaborate_sizedness_candidate(
+            self.infcx,
+            obligation,
+            param.upcast(self.infcx.tcx),
+        )
+        .map_bound(|p| p.trait_ref);
+
         // During evaluation, we already checked that this
         // where-clause trait-ref could be unified with the obligation
         // trait-ref. Repeat that unification now without any
@@ -252,7 +262,15 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         let obligations = if has_nested {
             let trait_def = obligation.predicate.def_id();
             let conditions = match tcx.as_lang_item(trait_def) {
-                Some(LangItem::Sized) => self.sized_conditions(obligation),
+                Some(LangItem::Sized) => {
+                    self.sizedness_conditions(obligation, SizedTraitKind::Sized)
+                }
+                Some(LangItem::MetaSized) => {
+                    self.sizedness_conditions(obligation, SizedTraitKind::MetaSized)
+                }
+                Some(LangItem::PointeeSized) => {
+                    bug!("`PointeeSized` is removing during lowering");
+                }
                 Some(LangItem::Copy | LangItem::Clone) => self.copy_clone_conditions(obligation),
                 Some(LangItem::FusedIterator) => self.fused_iterator_conditions(obligation),
                 other => bug!("unexpected builtin trait {trait_def:?} ({other:?})"),
@@ -286,99 +304,12 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
     ) -> Result<PredicateObligations<'tcx>, SelectionError<'tcx>> {
         use rustc_transmute::{Answer, Assume, Condition};
 
-        /// Generate sub-obligations for reference-to-reference transmutations.
-        fn reference_obligations<'tcx>(
-            tcx: TyCtxt<'tcx>,
-            obligation: &PolyTraitObligation<'tcx>,
-            (src_lifetime, src_ty, src_mut): (ty::Region<'tcx>, Ty<'tcx>, Mutability),
-            (dst_lifetime, dst_ty, dst_mut): (ty::Region<'tcx>, Ty<'tcx>, Mutability),
-            assume: Assume,
-        ) -> PredicateObligations<'tcx> {
-            let make_transmute_obl = |src, dst| {
-                let transmute_trait = obligation.predicate.def_id();
-                let assume = obligation.predicate.skip_binder().trait_ref.args.const_at(2);
-                let trait_ref = ty::TraitRef::new(
-                    tcx,
-                    transmute_trait,
-                    [
-                        ty::GenericArg::from(dst),
-                        ty::GenericArg::from(src),
-                        ty::GenericArg::from(assume),
-                    ],
-                );
-                Obligation::with_depth(
-                    tcx,
-                    obligation.cause.clone(),
-                    obligation.recursion_depth + 1,
-                    obligation.param_env,
-                    trait_ref,
-                )
-            };
-
-            let make_freeze_obl = |ty| {
-                let trait_ref = ty::TraitRef::new(
-                    tcx,
-                    tcx.require_lang_item(LangItem::Freeze, None),
-                    [ty::GenericArg::from(ty)],
-                );
-                Obligation::with_depth(
-                    tcx,
-                    obligation.cause.clone(),
-                    obligation.recursion_depth + 1,
-                    obligation.param_env,
-                    trait_ref,
-                )
-            };
-
-            let make_outlives_obl = |target, region| {
-                let outlives = ty::OutlivesPredicate(target, region);
-                Obligation::with_depth(
-                    tcx,
-                    obligation.cause.clone(),
-                    obligation.recursion_depth + 1,
-                    obligation.param_env,
-                    outlives,
-                )
-            };
-
-            // Given a transmutation from `&'a (mut) Src` and `&'dst (mut) Dst`,
-            // it is always the case that `Src` must be transmutable into `Dst`,
-            // and that that `'src` must outlive `'dst`.
-            let mut obls = PredicateObligations::with_capacity(1);
-            obls.push(make_transmute_obl(src_ty, dst_ty));
-            if !assume.lifetimes {
-                obls.push(make_outlives_obl(src_lifetime, dst_lifetime));
-            }
-
-            // Given a transmutation from `&Src`, both `Src` and `Dst` must be
-            // `Freeze`, otherwise, using the transmuted value could lead to
-            // data races.
-            if src_mut == Mutability::Not {
-                obls.extend([make_freeze_obl(src_ty), make_freeze_obl(dst_ty)])
-            }
-
-            // Given a transmutation into `&'dst mut Dst`, it also must be the
-            // case that `Dst` is transmutable into `Src`. For example,
-            // transmuting bool -> u8 is OK as long as you can't update that u8
-            // to be > 1, because you could later transmute the u8 back to a
-            // bool and get undefined behavior. It also must be the case that
-            // `'dst` lives exactly as long as `'src`.
-            if dst_mut == Mutability::Mut {
-                obls.push(make_transmute_obl(dst_ty, src_ty));
-                if !assume.lifetimes {
-                    obls.push(make_outlives_obl(dst_lifetime, src_lifetime));
-                }
-            }
-
-            obls
-        }
-
         /// Flatten the `Condition` tree into a conjunction of obligations.
         #[instrument(level = "debug", skip(tcx, obligation))]
         fn flatten_answer_tree<'tcx>(
             tcx: TyCtxt<'tcx>,
             obligation: &PolyTraitObligation<'tcx>,
-            cond: Condition<rustc_transmute::layout::rustc::Ref<'tcx>>,
+            cond: Condition<Region<'tcx>, Ty<'tcx>>,
             assume: Assume,
         ) -> PredicateObligations<'tcx> {
             match cond {
@@ -388,13 +319,50 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     .into_iter()
                     .flat_map(|cond| flatten_answer_tree(tcx, obligation, cond, assume))
                     .collect(),
-                Condition::IfTransmutable { src, dst } => reference_obligations(
-                    tcx,
-                    obligation,
-                    (src.lifetime, src.ty, src.mutability),
-                    (dst.lifetime, dst.ty, dst.mutability),
-                    assume,
-                ),
+                Condition::Immutable { ty } => {
+                    let trait_ref = ty::TraitRef::new(
+                        tcx,
+                        tcx.require_lang_item(LangItem::Freeze, obligation.cause.span),
+                        [ty::GenericArg::from(ty)],
+                    );
+                    thin_vec![Obligation::with_depth(
+                        tcx,
+                        obligation.cause.clone(),
+                        obligation.recursion_depth + 1,
+                        obligation.param_env,
+                        trait_ref,
+                    )]
+                }
+                Condition::Outlives { long, short } => {
+                    let outlives = ty::OutlivesPredicate(long, short);
+                    thin_vec![Obligation::with_depth(
+                        tcx,
+                        obligation.cause.clone(),
+                        obligation.recursion_depth + 1,
+                        obligation.param_env,
+                        outlives,
+                    )]
+                }
+                Condition::Transmutable { src, dst } => {
+                    let transmute_trait = obligation.predicate.def_id();
+                    let assume = obligation.predicate.skip_binder().trait_ref.args.const_at(2);
+                    let trait_ref = ty::TraitRef::new(
+                        tcx,
+                        transmute_trait,
+                        [
+                            ty::GenericArg::from(dst),
+                            ty::GenericArg::from(src),
+                            ty::GenericArg::from(assume),
+                        ],
+                    );
+                    thin_vec![Obligation::with_depth(
+                        tcx,
+                        obligation.cause.clone(),
+                        obligation.recursion_depth + 1,
+                        obligation.param_env,
+                        trait_ref,
+                    )]
+                }
             }
         }
 
@@ -405,7 +373,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             assume = crate::traits::evaluate_const(self.infcx, assume, obligation.param_env)
         }
         let Some(assume) = rustc_transmute::Assume::from_const(self.infcx.tcx, assume) else {
-            return Err(Unimplemented);
+            return Err(SelectionError::Unimplemented);
         };
 
         let dst = predicate.trait_ref.args.type_at(0);
@@ -417,7 +385,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             transmute_env.is_transmutable(rustc_transmute::Types { dst, src }, assume);
 
         let fully_flattened = match maybe_transmutable {
-            Answer::No(_) => Err(Unimplemented)?,
+            Answer::No(_) => Err(SelectionError::Unimplemented)?,
             Answer::If(cond) => flatten_answer_tree(self.tcx(), obligation, cond, assume),
             Answer::Yes => PredicateObligations::new(),
         };
@@ -531,7 +499,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         });
         let object_trait_ref = self.infcx.instantiate_binder_with_fresh_vars(
             obligation.cause.span,
-            HigherRankedType,
+            BoundRegionConversionTime::HigherRankedType,
             object_trait_ref,
         );
         let object_trait_ref = object_trait_ref.with_self_ty(self.tcx(), self_ty);
@@ -544,7 +512,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
 
         let upcast_trait_ref = self.infcx.instantiate_binder_with_fresh_vars(
             obligation.cause.span,
-            HigherRankedType,
+            BoundRegionConversionTime::HigherRankedType,
             unnormalized_upcast_trait_ref,
         );
         let upcast_trait_ref = normalize_with_depth_to(
@@ -561,7 +529,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 .at(&obligation.cause, obligation.param_env)
                 .eq(DefineOpaqueTypes::No, trait_predicate.trait_ref, upcast_trait_ref)
                 .map(|InferOk { obligations, .. }| obligations)
-                .map_err(|_| Unimplemented)?,
+                .map_err(|_| SelectionError::Unimplemented)?,
         );
 
         // Check supertraits hold. This is so that their associated type bounds
@@ -657,7 +625,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         );
         let tr = ty::TraitRef::new(
             self.tcx(),
-            self.tcx().require_lang_item(LangItem::Sized, Some(cause.span)),
+            self.tcx().require_lang_item(LangItem::Sized, cause.span),
             [output_ty],
         );
         nested.push(Obligation::new(self.infcx.tcx, cause, obligation.param_env, tr));
@@ -877,14 +845,16 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 });
 
                 // We must additionally check that the return type impls `Future + Sized`.
-                let future_trait_def_id = tcx.require_lang_item(LangItem::Future, None);
+                let future_trait_def_id =
+                    tcx.require_lang_item(LangItem::Future, obligation.cause.span);
                 nested.push(obligation.with(
                     tcx,
                     sig.output().map_bound(|output_ty| {
                         ty::TraitRef::new(tcx, future_trait_def_id, [output_ty])
                     }),
                 ));
-                let sized_trait_def_id = tcx.require_lang_item(LangItem::Sized, None);
+                let sized_trait_def_id =
+                    tcx.require_lang_item(LangItem::Sized, obligation.cause.span);
                 nested.push(obligation.with(
                     tcx,
                     sig.output().map_bound(|output_ty| {
@@ -906,13 +876,15 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 });
 
                 // We must additionally check that the return type impls `Future + Sized`.
-                let future_trait_def_id = tcx.require_lang_item(LangItem::Future, None);
+                let future_trait_def_id =
+                    tcx.require_lang_item(LangItem::Future, obligation.cause.span);
                 let placeholder_output_ty = self.infcx.enter_forall_and_leak_universe(sig.output());
                 nested.push(obligation.with(
                     tcx,
                     ty::TraitRef::new(tcx, future_trait_def_id, [placeholder_output_ty]),
                 ));
-                let sized_trait_def_id = tcx.require_lang_item(LangItem::Sized, None);
+                let sized_trait_def_id =
+                    tcx.require_lang_item(LangItem::Sized, obligation.cause.span);
                 nested.push(obligation.with(
                     tcx,
                     sig.output().map_bound(|output_ty| {
@@ -946,10 +918,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 obligation.param_env,
                 ty::TraitRef::new(
                     self.tcx(),
-                    self.tcx().require_lang_item(
-                        LangItem::AsyncFnKindHelper,
-                        Some(obligation.cause.span),
-                    ),
+                    self.tcx()
+                        .require_lang_item(LangItem::AsyncFnKindHelper, obligation.cause.span),
                     [kind_ty, Ty::from_closure_kind(self.tcx(), goal_kind)],
                 ),
             ));
@@ -991,7 +961,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
     ) -> Result<PredicateObligations<'tcx>, SelectionError<'tcx>> {
         let found_trait_ref = self.infcx.instantiate_binder_with_fresh_vars(
             obligation.cause.span,
-            HigherRankedType,
+            BoundRegionConversionTime::HigherRankedType,
             found_trait_ref,
         );
         // Normalize the obligation and expected trait refs together, because why not
@@ -1015,7 +985,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 obligations
             })
             .map_err(|terr| {
-                SignatureMismatch(Box::new(SignatureMismatchData {
+                SelectionError::SignatureMismatch(Box::new(SignatureMismatchData {
                     expected_trait_ref: obligation_trait_ref,
                     found_trait_ref,
                     terr,
@@ -1119,7 +1089,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     .infcx
                     .at(&obligation.cause, obligation.param_env)
                     .sup(DefineOpaqueTypes::Yes, target, source_trait)
-                    .map_err(|_| Unimplemented)?;
+                    .map_err(|_| SelectionError::Unimplemented)?;
 
                 // Register one obligation for 'a: 'b.
                 let outlives = ty::OutlivesPredicate(r_a, r_b);
@@ -1138,7 +1108,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             (_, &ty::Dynamic(data, r, ty::Dyn)) => {
                 let mut object_dids = data.auto_traits().chain(data.principal_def_id());
                 if let Some(did) = object_dids.find(|did| !tcx.is_dyn_compatible(*did)) {
-                    return Err(TraitDynIncompatible(did));
+                    return Err(SelectionError::TraitDynIncompatible(did));
                 }
 
                 let predicate_to_obligation = |predicate| {
@@ -1165,7 +1135,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 // We can only make objects from sized types.
                 let tr = ty::TraitRef::new(
                     tcx,
-                    tcx.require_lang_item(LangItem::Sized, Some(obligation.cause.span)),
+                    tcx.require_lang_item(LangItem::Sized, obligation.cause.span),
                     [source],
                 );
                 nested.push(predicate_to_obligation(tr.upcast(tcx)));
@@ -1218,7 +1188,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     .infcx
                     .at(&obligation.cause, obligation.param_env)
                     .eq(DefineOpaqueTypes::Yes, b, a)
-                    .map_err(|_| Unimplemented)?;
+                    .map_err(|_| SelectionError::Unimplemented)?;
 
                 ImplSource::Builtin(BuiltinImplSource::Misc, obligations)
             }
@@ -1227,7 +1197,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             (&ty::Adt(def, args_a), &ty::Adt(_, args_b)) => {
                 let unsizing_params = tcx.unsizing_params_for_adt(def.did());
                 if unsizing_params.is_empty() {
-                    return Err(Unimplemented);
+                    return Err(SelectionError::Unimplemented);
                 }
 
                 let tail_field = def.non_enum_variant().tail();
@@ -1266,7 +1236,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     .infcx
                     .at(&obligation.cause, obligation.param_env)
                     .eq(DefineOpaqueTypes::Yes, target, new_struct)
-                    .map_err(|_| Unimplemented)?;
+                    .map_err(|_| SelectionError::Unimplemented)?;
                 nested.extend(obligations);
 
                 // Construct the nested `TailField<T>: Unsize<TailField<U>>` predicate.
@@ -1359,7 +1329,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     self_ty.map_bound(|ty| {
                         ty::TraitRef::new(
                             tcx,
-                            tcx.require_lang_item(LangItem::Copy, Some(obligation.cause.span)),
+                            tcx.require_lang_item(LangItem::Copy, obligation.cause.span),
                             [ty],
                         )
                     }),
@@ -1411,7 +1381,7 @@ fn pointer_like_goal_for_rpitit<'tcx>(
     ty::Binder::bind_with_vars(
         ty::TraitRef::new(
             tcx,
-            tcx.require_lang_item(LangItem::PointerLike, Some(cause.span)),
+            tcx.require_lang_item(LangItem::PointerLike, cause.span),
             [Ty::new_projection_from_args(tcx, rpitit_item, args)],
         ),
         tcx.mk_bound_variable_kinds(&bound_vars),

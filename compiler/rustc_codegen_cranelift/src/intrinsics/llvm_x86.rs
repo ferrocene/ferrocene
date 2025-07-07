@@ -202,9 +202,10 @@ pub(super) fn codegen_x86_llvm_intrinsic_call<'tcx>(
             };
             let x = codegen_operand(fx, &x.node);
             let y = codegen_operand(fx, &y.node);
-            let kind = match &kind.node {
-                Operand::Constant(const_) => crate::constant::eval_mir_constant(fx, const_).0,
-                Operand::Copy(_) | Operand::Move(_) => unreachable!("{kind:?}"),
+            let kind = if let Some(const_) = kind.node.constant() {
+                crate::constant::eval_mir_constant(fx, const_).0
+            } else {
+                unreachable!("{kind:?}")
             };
 
             let flt_cc = match kind
@@ -1321,7 +1322,7 @@ pub(super) fn codegen_x86_llvm_intrinsic_call<'tcx>(
                  See https://github.com/rust-lang/rustc_codegen_cranelift/issues/171\n\
                  Please open an issue at https://github.com/rust-lang/rustc_codegen_cranelift/issues"
             );
-            crate::base::codegen_panic_nounwind(fx, &msg, None);
+            crate::base::codegen_panic_nounwind(fx, &msg, span);
             return;
         }
     }

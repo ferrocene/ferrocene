@@ -955,7 +955,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 return false;
             };
 
-            let clone_trait = self.tcx.require_lang_item(LangItem::Clone, None);
+            let clone_trait = self.tcx.require_lang_item(LangItem::Clone, obligation.cause.span);
             let has_clone = |ty| {
                 self.type_implements_trait(clone_trait, [ty], obligation.param_env)
                     .must_apply_modulo_regions()
@@ -1411,7 +1411,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             }
         }
 
-        err.span_suggestion(
+        err.span_suggestion_verbose(
             obligation.cause.span.shrink_to_lo(),
             format!(
                 "consider borrowing the value, since `&{self_ty}` can be coerced into `{target_ty}`"
@@ -1574,7 +1574,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     .span_extend_while_whitespace(expr_span)
                     .shrink_to_hi()
                     .to(await_expr.span.shrink_to_hi());
-                err.span_suggestion(
+                err.span_suggestion_verbose(
                     removal_span,
                     "remove the `.await`",
                     "",
@@ -2126,7 +2126,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 ));
 
                 if !assoc_item.is_impl_trait_in_trait() {
-                    err.span_suggestion(
+                    err.span_suggestion_verbose(
                         span,
                         "use the fully qualified path to an implementation",
                         format!(
@@ -2721,6 +2721,13 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             ObligationCauseCode::TupleElem => {
                 err.note("only the last element of a tuple may have a dynamically sized type");
             }
+            ObligationCauseCode::DynCompatible(span) => {
+                err.multipart_suggestion(
+                    "you might have meant to use `Self` to refer to the implementing type",
+                    vec![(span, "Self".into())],
+                    Applicability::MachineApplicable,
+                );
+            }
             ObligationCauseCode::WhereClause(item_def_id, span)
             | ObligationCauseCode::WhereClauseInExpr(item_def_id, span, ..)
             | ObligationCauseCode::HostEffectInExpr(item_def_id, span, ..)
@@ -2872,13 +2879,23 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                         _ => (),
                     }
                 }
-                let descr = format!("required by {a} bound in `{item_name}`");
-                if span.is_visible(sm) {
-                    let msg = format!("required by {this} in `{short_item_name}`");
-                    multispan.push_span_label(span, msg);
-                    err.span_note(multispan, descr);
+
+                // If this is from a format string literal desugaring,
+                // we've already said "required by this formatting parameter"
+                let is_in_fmt_lit = if let Some(s) = err.span.primary_span() {
+                    matches!(s.desugaring_kind(), Some(DesugaringKind::FormatLiteral { .. }))
                 } else {
-                    err.span_note(tcx.def_span(item_def_id), descr);
+                    false
+                };
+                if !is_in_fmt_lit {
+                    let descr = format!("required by {a} bound in `{item_name}`");
+                    if span.is_visible(sm) {
+                        let msg = format!("required by {this} in `{short_item_name}`");
+                        multispan.push_span_label(span, msg);
+                        err.span_note(multispan, descr);
+                    } else {
+                        err.span_note(tcx.def_span(item_def_id), descr);
+                    }
                 }
                 if let Some(note) = note {
                     err.note(note);
@@ -2924,12 +2941,14 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 );
                 let sm = tcx.sess.source_map();
                 if matches!(is_constable, IsConstable::Fn | IsConstable::Ctor)
-                    && let Ok(snip) = sm.span_to_snippet(elt_span)
+                    && let Ok(_) = sm.span_to_snippet(elt_span)
                 {
-                    err.span_suggestion(
-                        elt_span,
+                    err.multipart_suggestion(
                         "create an inline `const` block",
-                        format!("const {{ {snip} }}"),
+                        vec![
+                            (elt_span.shrink_to_lo(), "const { ".to_string()),
+                            (elt_span.shrink_to_hi(), " }".to_string()),
+                        ],
                         Applicability::MachineApplicable,
                     );
                 } else {
@@ -2992,9 +3011,6 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 }
                 if local {
                     err.note("all local variables must have a statically known size");
-                }
-                if !tcx.features().unsized_locals() {
-                    err.help("unsized locals are gated as an unstable feature");
                 }
             }
             ObligationCauseCode::SizedArgumentType(hir_id) => {
@@ -3127,13 +3143,13 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     }
                 }
                 err.help("change the field's type to have a statically known size");
-                err.span_suggestion(
+                err.span_suggestion_verbose(
                     span.shrink_to_lo(),
                     "borrowed types always have a statically known size",
                     "&",
                     Applicability::MachineApplicable,
                 );
-                err.multipart_suggestion(
+                err.multipart_suggestion_verbose(
                     "the `Box` type always has a statically known size and allocates its contents \
                      in the heap",
                     vec![
@@ -3576,11 +3592,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             }
             ObligationCauseCode::TrivialBound => {
                 err.help("see issue #48214");
-                tcx.disabled_nightly_features(
-                    err,
-                    Some(tcx.local_def_id_to_hir_id(body_id)),
-                    [(String::new(), sym::trivial_bounds)],
-                );
+                tcx.disabled_nightly_features(err, [(String::new(), sym::trivial_bounds)]);
             }
             ObligationCauseCode::OpaqueReturnType(expr_info) => {
                 let (expr_ty, expr) = if let Some((expr_ty, hir_id)) = expr_info {
@@ -3625,7 +3637,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         trait_pred: ty::PolyTraitPredicate<'tcx>,
         span: Span,
     ) {
-        let future_trait = self.tcx.require_lang_item(LangItem::Future, None);
+        let future_trait = self.tcx.require_lang_item(LangItem::Future, span);
 
         let self_ty = self.resolve_vars_if_possible(trait_pred.self_ty());
         let impls_future = self.type_implements_trait(
@@ -3978,7 +3990,15 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             ) = expr.kind
             {
                 if Some(*span) != err.span.primary_span() {
-                    err.span_label(*span, "required by a bound introduced by this call");
+                    let msg = if span.is_desugaring(DesugaringKind::FormatLiteral { source: true })
+                    {
+                        "required by this formatting parameter"
+                    } else if span.is_desugaring(DesugaringKind::FormatLiteral { source: false }) {
+                        "required by a formatting parameter in this expression"
+                    } else {
+                        "required by a bound introduced by this call"
+                    };
+                    err.span_label(*span, msg);
                 }
             }
 
@@ -4141,7 +4161,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                         let pred = ty::Binder::dummy(ty::TraitPredicate {
                             trait_ref: ty::TraitRef::new(
                                 tcx,
-                                tcx.require_lang_item(LangItem::Clone, Some(span)),
+                                tcx.require_lang_item(LangItem::Clone, span),
                                 [*ty],
                             ),
                             polarity: ty::PredicatePolarity::Positive,

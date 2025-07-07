@@ -17,4 +17,4 @@ shipped as a preview. In some circumstances, these features are removed.
 
 * Experimental support has been removed for the following platforms:
 
-  * :target-with-triple:`x86_64-apple-darwin`
+  * :target-with-tuple:`x86_64-apple-darwin`

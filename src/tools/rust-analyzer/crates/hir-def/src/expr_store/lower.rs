@@ -7,12 +7,14 @@ mod path;
 
 use std::mem;
 
+use base_db::FxIndexSet;
 use cfg::CfgOptions;
 use either::Either;
 use hir_expand::{
-    HirFileId, InFile, Lookup, MacroDefId,
+    HirFileId, InFile, MacroDefId,
     mod_path::tool_path,
     name::{AsName, Name},
+    span_map::SpanMapRef,
 };
 use intern::{Symbol, sym};
 use rustc_hash::FxHashMap;
@@ -30,8 +32,8 @@ use triomphe::Arc;
 use tt::TextRange;
 
 use crate::{
-    AdtId, BlockId, BlockLoc, DefWithBodyId, FunctionId, GenericDefId, ImplId, ItemTreeLoc,
-    MacroId, ModuleDefId, ModuleId, TraitAliasId, TraitId, TypeAliasId, UnresolvedMacro,
+    AdtId, BlockId, BlockLoc, DefWithBodyId, FunctionId, GenericDefId, ImplId, MacroId,
+    ModuleDefId, ModuleId, TraitAliasId, TraitId, TypeAliasId, UnresolvedMacro,
     builtin_type::BuiltinUint,
     db::DefDatabase,
     expr_store::{
@@ -64,8 +66,6 @@ use crate::{
 };
 
 pub use self::path::hir_segment_to_ast_segment;
-
-type FxIndexSet<K> = indexmap::IndexSet<K, std::hash::BuildHasherDefault<rustc_hash::FxHasher>>;
 
 pub(super) fn lower_body(
     db: &dyn DefDatabase,
@@ -562,6 +562,11 @@ impl ExprCollector<'_> {
             current_block_legacy_macro_defs_count: FxHashMap::default(),
             outer_impl_trait: false,
         }
+    }
+
+    #[inline]
+    pub(crate) fn span_map(&self) -> SpanMapRef<'_> {
+        self.expander.span_map()
     }
 
     pub fn lower_lifetime_ref(&mut self, lifetime: ast::Lifetime) -> LifetimeRefId {
@@ -2141,26 +2146,10 @@ impl ExprCollector<'_> {
         block: ast::BlockExpr,
         mk_block: impl FnOnce(Option<BlockId>, Box<[Statement]>, Option<ExprId>) -> Expr,
     ) -> ExprId {
-        let block_has_items = {
-            let statement_has_item = block.statements().any(|stmt| match stmt {
-                ast::Stmt::Item(_) => true,
-                // Macro calls can be both items and expressions. The syntax library always treats
-                // them as expressions here, so we undo that.
-                ast::Stmt::ExprStmt(es) => matches!(es.expr(), Some(ast::Expr::MacroExpr(_))),
-                _ => false,
-            });
-            statement_has_item
-                || matches!(block.tail_expr(), Some(ast::Expr::MacroExpr(_)))
-                || (block.may_carry_attributes() && block.attrs().next().is_some())
-        };
-
-        let block_id = if block_has_items {
-            let file_local_id = self.expander.ast_id_map().ast_id(&block);
+        let block_id = self.expander.ast_id_map().ast_id_for_block(&block).map(|file_local_id| {
             let ast_id = self.expander.in_file(file_local_id);
-            Some(self.db.intern_block(BlockLoc { ast_id, module: self.module }))
-        } else {
-            None
-        };
+            self.db.intern_block(BlockLoc { ast_id, module: self.module })
+        });
 
         let (module, def_map) =
             match block_id.map(|block_id| (block_def_map(self.db, block_id), block_id)) {
@@ -2260,11 +2249,8 @@ impl ExprCollector<'_> {
                     match resolved.take_values() {
                         Some(ModuleDefId::ConstId(_)) => (None, Pat::Path(name.into())),
                         Some(ModuleDefId::EnumVariantId(variant))
-                            if {
-                                let loc = variant.lookup(self.db);
-                                let tree = loc.item_tree_id().item_tree(self.db);
-                                tree[loc.id.value].shape != FieldsShape::Record
-                            } =>
+                        // FIXME: This can cause a cycle if the user is writing invalid code
+                            if variant.fields(self.db).shape != FieldsShape::Record =>
                         {
                             (None, Pat::Path(name.into()))
                         }
@@ -2829,6 +2815,44 @@ impl ExprCollector<'_> {
                 mutability: Mutability::Shared,
             })
         };
+
+        // Assume that rustc version >= 1.89.0 iff lang item `format_arguments` exists
+        // but `format_unsafe_arg` does not
+        let fmt_args =
+            || crate::lang_item::lang_item(self.db, self.module.krate(), LangItem::FormatArguments);
+        let fmt_unsafe_arg =
+            || crate::lang_item::lang_item(self.db, self.module.krate(), LangItem::FormatUnsafeArg);
+        let use_format_args_since_1_89_0 = fmt_args().is_some() && fmt_unsafe_arg().is_none();
+
+        let idx = if use_format_args_since_1_89_0 {
+            self.collect_format_args_impl(syntax_ptr, fmt, argmap, lit_pieces, format_options)
+        } else {
+            self.collect_format_args_before_1_89_0_impl(
+                syntax_ptr,
+                fmt,
+                argmap,
+                lit_pieces,
+                format_options,
+            )
+        };
+
+        self.source_map
+            .template_map
+            .get_or_insert_with(Default::default)
+            .format_args_to_captures
+            .insert(idx, (hygiene, mappings));
+        idx
+    }
+
+    /// `format_args!` expansion implementation for rustc versions < `1.89.0`
+    fn collect_format_args_before_1_89_0_impl(
+        &mut self,
+        syntax_ptr: AstPtr<ast::Expr>,
+        fmt: FormatArgs,
+        argmap: FxIndexSet<(usize, ArgumentType)>,
+        lit_pieces: ExprId,
+        format_options: ExprId,
+    ) -> ExprId {
         let arguments = &*fmt.arguments.arguments;
 
         let args = if arguments.is_empty() {
@@ -2916,19 +2940,189 @@ impl ExprCollector<'_> {
             });
         }
 
-        let idx = self.alloc_expr(
+        self.alloc_expr(
             Expr::Call {
                 callee: new_v1_formatted,
                 args: Box::new([lit_pieces, args, format_options, unsafe_arg_new]),
             },
             syntax_ptr,
-        );
-        self.source_map
-            .template_map
-            .get_or_insert_with(Default::default)
-            .format_args_to_captures
-            .insert(idx, (hygiene, mappings));
-        idx
+        )
+    }
+
+    /// `format_args!` expansion implementation for rustc versions >= `1.89.0`,
+    /// especially since [this PR](https://github.com/rust-lang/rust/pull/140748)
+    fn collect_format_args_impl(
+        &mut self,
+        syntax_ptr: AstPtr<ast::Expr>,
+        fmt: FormatArgs,
+        argmap: FxIndexSet<(usize, ArgumentType)>,
+        lit_pieces: ExprId,
+        format_options: ExprId,
+    ) -> ExprId {
+        let arguments = &*fmt.arguments.arguments;
+
+        let (let_stmts, args) = if arguments.is_empty() {
+            (
+                // Generate:
+                //     []
+                vec![],
+                self.alloc_expr_desugared(Expr::Array(Array::ElementList {
+                    elements: Box::default(),
+                })),
+            )
+        } else if argmap.len() == 1 && arguments.len() == 1 {
+            // Only one argument, so we don't need to make the `args` tuple.
+            //
+            // Generate:
+            //     super let args = [<core::fmt::Arguments>::new_display(&arg)];
+            let args = argmap
+                .iter()
+                .map(|&(arg_index, ty)| {
+                    let ref_arg = self.alloc_expr_desugared(Expr::Ref {
+                        expr: arguments[arg_index].expr,
+                        rawness: Rawness::Ref,
+                        mutability: Mutability::Shared,
+                    });
+                    self.make_argument(ref_arg, ty)
+                })
+                .collect();
+            let args =
+                self.alloc_expr_desugared(Expr::Array(Array::ElementList { elements: args }));
+            let args_name = Name::new_symbol_root(sym::args);
+            let args_binding = self.alloc_binding(
+                args_name.clone(),
+                BindingAnnotation::Unannotated,
+                HygieneId::ROOT,
+            );
+            let args_pat = self.alloc_pat_desugared(Pat::Bind { id: args_binding, subpat: None });
+            self.add_definition_to_binding(args_binding, args_pat);
+            // TODO: We don't have `super let` yet.
+            let let_stmt = Statement::Let {
+                pat: args_pat,
+                type_ref: None,
+                initializer: Some(args),
+                else_branch: None,
+            };
+            (vec![let_stmt], self.alloc_expr_desugared(Expr::Path(args_name.into())))
+        } else {
+            // Generate:
+            //     super let args = (&arg0, &arg1, &...);
+            let args_name = Name::new_symbol_root(sym::args);
+            let args_binding = self.alloc_binding(
+                args_name.clone(),
+                BindingAnnotation::Unannotated,
+                HygieneId::ROOT,
+            );
+            let args_pat = self.alloc_pat_desugared(Pat::Bind { id: args_binding, subpat: None });
+            self.add_definition_to_binding(args_binding, args_pat);
+            let elements = arguments
+                .iter()
+                .map(|arg| {
+                    self.alloc_expr_desugared(Expr::Ref {
+                        expr: arg.expr,
+                        rawness: Rawness::Ref,
+                        mutability: Mutability::Shared,
+                    })
+                })
+                .collect();
+            let args_tuple = self.alloc_expr_desugared(Expr::Tuple { exprs: elements });
+            // TODO: We don't have `super let` yet
+            let let_stmt1 = Statement::Let {
+                pat: args_pat,
+                type_ref: None,
+                initializer: Some(args_tuple),
+                else_branch: None,
+            };
+
+            // Generate:
+            //     super let args = [
+            //         <core::fmt::Argument>::new_display(args.0),
+            //         <core::fmt::Argument>::new_lower_hex(args.1),
+            //         <core::fmt::Argument>::new_debug(args.0),
+            //         …
+            //     ];
+            let args = argmap
+                .iter()
+                .map(|&(arg_index, ty)| {
+                    let args_ident_expr =
+                        self.alloc_expr_desugared(Expr::Path(args_name.clone().into()));
+                    let arg = self.alloc_expr_desugared(Expr::Field {
+                        expr: args_ident_expr,
+                        name: Name::new_tuple_field(arg_index),
+                    });
+                    self.make_argument(arg, ty)
+                })
+                .collect();
+            let array =
+                self.alloc_expr_desugared(Expr::Array(Array::ElementList { elements: args }));
+            let args_binding = self.alloc_binding(
+                args_name.clone(),
+                BindingAnnotation::Unannotated,
+                HygieneId::ROOT,
+            );
+            let args_pat = self.alloc_pat_desugared(Pat::Bind { id: args_binding, subpat: None });
+            self.add_definition_to_binding(args_binding, args_pat);
+            let let_stmt2 = Statement::Let {
+                pat: args_pat,
+                type_ref: None,
+                initializer: Some(array),
+                else_branch: None,
+            };
+            (vec![let_stmt1, let_stmt2], self.alloc_expr_desugared(Expr::Path(args_name.into())))
+        };
+
+        // Generate:
+        //     &args
+        let args = self.alloc_expr_desugared(Expr::Ref {
+            expr: args,
+            rawness: Rawness::Ref,
+            mutability: Mutability::Shared,
+        });
+
+        let call_block = {
+            // Generate:
+            //     unsafe {
+            //         <core::fmt::Arguments>::new_v1_formatted(
+            //             lit_pieces,
+            //             args,
+            //             format_options,
+            //         )
+            //     }
+
+            let new_v1_formatted = LangItem::FormatArguments.ty_rel_path(
+                self.db,
+                self.module.krate(),
+                Name::new_symbol_root(sym::new_v1_formatted),
+            );
+            let new_v1_formatted =
+                self.alloc_expr_desugared(new_v1_formatted.map_or(Expr::Missing, Expr::Path));
+            let args = [lit_pieces, args, format_options];
+            let call = self
+                .alloc_expr_desugared(Expr::Call { callee: new_v1_formatted, args: args.into() });
+
+            Expr::Unsafe { id: None, statements: Box::default(), tail: Some(call) }
+        };
+
+        if !let_stmts.is_empty() {
+            // Generate:
+            //     {
+            //         super let …
+            //         super let …
+            //         <core::fmt::Arguments>::new_…(…)
+            //     }
+            let call = self.alloc_expr_desugared(call_block);
+            self.alloc_expr(
+                Expr::Block {
+                    id: None,
+                    statements: let_stmts.into(),
+                    tail: Some(call),
+                    label: None,
+                },
+                syntax_ptr,
+            )
+        } else {
+            self.alloc_expr(call_block, syntax_ptr)
+        }
     }
 
     /// Generate a hir expression for a format_args placeholder specification.

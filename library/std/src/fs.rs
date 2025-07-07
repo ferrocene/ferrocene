@@ -121,7 +121,7 @@ pub struct File {
 ///
 /// [`try_lock`]: File::try_lock
 /// [`try_lock_shared`]: File::try_lock_shared
-#[unstable(feature = "file_lock", issue = "130994")]
+#[stable(feature = "file_lock", since = "1.89.0")]
 pub enum TryLockError {
     /// The lock could not be acquired due to an I/O error on the file. The standard library will
     /// not return an [`ErrorKind::WouldBlock`] error inside [`TryLockError::Error`]
@@ -153,9 +153,8 @@ pub struct Metadata(fs_imp::FileAttr);
 /// dependent.
 ///
 /// # Errors
-///
-/// This [`io::Result`] will be an [`Err`] if there's some sort of intermittent
-/// IO error during iteration.
+/// This [`io::Result`] will be an [`Err`] if an error occurred while fetching
+/// the next entry from the OS.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Debug)]
 pub struct ReadDir(fs_imp::ReadDir);
@@ -367,10 +366,10 @@ pub fn write<P: AsRef<Path>, C: AsRef<[u8]>>(path: P, contents: C) -> io::Result
     inner(path.as_ref(), contents.as_ref())
 }
 
-#[unstable(feature = "file_lock", issue = "130994")]
+#[stable(feature = "file_lock", since = "1.89.0")]
 impl error::Error for TryLockError {}
 
-#[unstable(feature = "file_lock", issue = "130994")]
+#[stable(feature = "file_lock", since = "1.89.0")]
 impl fmt::Debug for TryLockError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -380,7 +379,7 @@ impl fmt::Debug for TryLockError {
     }
 }
 
-#[unstable(feature = "file_lock", issue = "130994")]
+#[stable(feature = "file_lock", since = "1.89.0")]
 impl fmt::Display for TryLockError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -391,7 +390,7 @@ impl fmt::Display for TryLockError {
     }
 }
 
-#[unstable(feature = "file_lock", issue = "130994")]
+#[stable(feature = "file_lock", since = "1.89.0")]
 impl From<TryLockError> for io::Error {
     fn from(err: TryLockError) -> io::Error {
         match err {
@@ -683,11 +682,11 @@ impl File {
     /// other methods, such as [`read`] and [`write`] are platform specific, and it may or may not
     /// cause non-lockholders to block.
     ///
-    /// If this file handle/descriptor, or a clone of it, already holds an lock the exact behavior
+    /// If this file handle/descriptor, or a clone of it, already holds a lock the exact behavior
     /// is unspecified and platform dependent, including the possibility that it will deadlock.
     /// However, if this method returns, then an exclusive lock is held.
     ///
-    /// If the file not open for writing, it is unspecified whether this function returns an error.
+    /// If the file is not open for writing, it is unspecified whether this function returns an error.
     ///
     /// The lock will be released when this file (along with any other file descriptors/handles
     /// duplicated or inherited from it) is closed, or if the [`unlock`] method is called.
@@ -714,7 +713,6 @@ impl File {
     /// # Examples
     ///
     /// ```no_run
-    /// #![feature(file_lock)]
     /// use std::fs::File;
     ///
     /// fn main() -> std::io::Result<()> {
@@ -723,7 +721,7 @@ impl File {
     ///     Ok(())
     /// }
     /// ```
-    #[unstable(feature = "file_lock", issue = "130994")]
+    #[stable(feature = "file_lock", since = "1.89.0")]
     pub fn lock(&self) -> io::Result<()> {
         self.inner.lock()
     }
@@ -738,7 +736,7 @@ impl File {
     /// other methods, such as [`read`] and [`write`] are platform specific, and it may or may not
     /// cause non-lockholders to block.
     ///
-    /// If this file handle/descriptor, or a clone of it, already holds an lock, the exact behavior
+    /// If this file handle/descriptor, or a clone of it, already holds a lock, the exact behavior
     /// is unspecified and platform dependent, including the possibility that it will deadlock.
     /// However, if this method returns, then a shared lock is held.
     ///
@@ -767,7 +765,6 @@ impl File {
     /// # Examples
     ///
     /// ```no_run
-    /// #![feature(file_lock)]
     /// use std::fs::File;
     ///
     /// fn main() -> std::io::Result<()> {
@@ -776,7 +773,7 @@ impl File {
     ///     Ok(())
     /// }
     /// ```
-    #[unstable(feature = "file_lock", issue = "130994")]
+    #[stable(feature = "file_lock", since = "1.89.0")]
     pub fn lock_shared(&self) -> io::Result<()> {
         self.inner.lock_shared()
     }
@@ -793,11 +790,11 @@ impl File {
     /// other methods, such as [`read`] and [`write`] are platform specific, and it may or may not
     /// cause non-lockholders to block.
     ///
-    /// If this file handle/descriptor, or a clone of it, already holds an lock, the exact behavior
+    /// If this file handle/descriptor, or a clone of it, already holds a lock, the exact behavior
     /// is unspecified and platform dependent, including the possibility that it will deadlock.
     /// However, if this method returns `Ok(true)`, then it has acquired an exclusive lock.
     ///
-    /// If the file not open for writing, it is unspecified whether this function returns an error.
+    /// If the file is not open for writing, it is unspecified whether this function returns an error.
     ///
     /// The lock will be released when this file (along with any other file descriptors/handles
     /// duplicated or inherited from it) is closed, or if the [`unlock`] method is called.
@@ -825,7 +822,6 @@ impl File {
     /// # Examples
     ///
     /// ```no_run
-    /// #![feature(file_lock)]
     /// use std::fs::{File, TryLockError};
     ///
     /// fn main() -> std::io::Result<()> {
@@ -841,7 +837,7 @@ impl File {
     ///     Ok(())
     /// }
     /// ```
-    #[unstable(feature = "file_lock", issue = "130994")]
+    #[stable(feature = "file_lock", since = "1.89.0")]
     pub fn try_lock(&self) -> Result<(), TryLockError> {
         self.inner.try_lock()
     }
@@ -859,7 +855,7 @@ impl File {
     /// other methods, such as [`read`] and [`write`] are platform specific, and it may or may not
     /// cause non-lockholders to block.
     ///
-    /// If this file handle, or a clone of it, already holds an lock, the exact behavior is
+    /// If this file handle, or a clone of it, already holds a lock, the exact behavior is
     /// unspecified and platform dependent, including the possibility that it will deadlock.
     /// However, if this method returns `Ok(true)`, then it has acquired a shared lock.
     ///
@@ -889,7 +885,6 @@ impl File {
     /// # Examples
     ///
     /// ```no_run
-    /// #![feature(file_lock)]
     /// use std::fs::{File, TryLockError};
     ///
     /// fn main() -> std::io::Result<()> {
@@ -906,7 +901,7 @@ impl File {
     ///     Ok(())
     /// }
     /// ```
-    #[unstable(feature = "file_lock", issue = "130994")]
+    #[stable(feature = "file_lock", since = "1.89.0")]
     pub fn try_lock_shared(&self) -> Result<(), TryLockError> {
         self.inner.try_lock_shared()
     }
@@ -934,7 +929,6 @@ impl File {
     /// # Examples
     ///
     /// ```no_run
-    /// #![feature(file_lock)]
     /// use std::fs::File;
     ///
     /// fn main() -> std::io::Result<()> {
@@ -944,7 +938,7 @@ impl File {
     ///     Ok(())
     /// }
     /// ```
-    #[unstable(feature = "file_lock", issue = "130994")]
+    #[stable(feature = "file_lock", since = "1.89.0")]
     pub fn unlock(&self) -> io::Result<()> {
         self.inner.unlock()
     }
@@ -1311,9 +1305,39 @@ impl Write for &File {
 }
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Seek for &File {
+    /// Seek to an offset, in bytes in a file.
+    ///
+    /// See [`Seek::seek`] docs for more info.
+    ///
+    /// # Platform-specific behavior
+    ///
+    /// This function currently corresponds to the `lseek64` function on Unix
+    /// and the `SetFilePointerEx` function on Windows. Note that this [may
+    /// change in the future][changes].
+    ///
+    /// [changes]: io#platform-specific-behavior
     fn seek(&mut self, pos: SeekFrom) -> io::Result<u64> {
         self.inner.seek(pos)
     }
+
+    /// Returns the length of this file (in bytes).
+    ///
+    /// See [`Seek::stream_len`] docs for more info.
+    ///
+    /// # Platform-specific behavior
+    ///
+    /// This function currently corresponds to the `statx` function on Linux
+    /// (with fallbacks) and the `GetFileSizeEx` function on Windows. Note that
+    /// this [may change in the future][changes].
+    ///
+    /// [changes]: io#platform-specific-behavior
+    fn stream_len(&mut self) -> io::Result<u64> {
+        if let Some(result) = self.inner.size() {
+            return result;
+        }
+        io::stream_len_default(self)
+    }
+
     fn stream_position(&mut self) -> io::Result<u64> {
         self.inner.tell()
     }
@@ -1363,6 +1387,9 @@ impl Seek for File {
     fn seek(&mut self, pos: SeekFrom) -> io::Result<u64> {
         (&*self).seek(pos)
     }
+    fn stream_len(&mut self) -> io::Result<u64> {
+        (&*self).stream_len()
+    }
     fn stream_position(&mut self) -> io::Result<u64> {
         (&*self).stream_position()
     }
@@ -1411,6 +1438,9 @@ impl Write for Arc<File> {
 impl Seek for Arc<File> {
     fn seek(&mut self, pos: SeekFrom) -> io::Result<u64> {
         (&**self).seek(pos)
+    }
+    fn stream_len(&mut self) -> io::Result<u64> {
+        (&**self).stream_len()
     }
     fn stream_position(&mut self) -> io::Result<u64> {
         (&**self).stream_position()

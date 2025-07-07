@@ -162,10 +162,12 @@ impl fmt::Display for FromBytesUntilNulError {
     }
 }
 
+/// Shows the underlying bytes as a normal string, with invalid UTF-8
+/// presented as hex escape sequences.
 #[stable(feature = "cstr_debug", since = "1.3.0")]
 impl fmt::Debug for CStr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "\"{}\"", self.to_bytes().escape_ascii())
+        fmt::Debug::fmt(crate::bstr::ByteStr::from_bytes(self.to_bytes()), f)
     }
 }
 
@@ -465,7 +467,7 @@ impl CStr {
     /// // 💀 this violates `CStr::from_ptr`'s safety contract
     /// // 💀 leading to a dereference of a dangling pointer,
     /// // 💀 which is immediate undefined behavior.
-    /// // 💀 *BOOM*, you're dead, you're entire program has no meaning.
+    /// // 💀 *BOOM*, you're dead, your entire program has no meaning.
     /// dbg!(unsafe { CStr::from_ptr(ptr) });
     /// ```
     ///
@@ -658,6 +660,19 @@ impl CStr {
     }
 }
 
+#[stable(feature = "c_string_eq_c_str", since = "CURRENT_RUSTC_VERSION")]
+impl PartialEq<&Self> for CStr {
+    #[inline]
+    fn eq(&self, other: &&Self) -> bool {
+        *self == **other
+    }
+
+    #[inline]
+    fn ne(&self, other: &&Self) -> bool {
+        *self != **other
+    }
+}
+
 // `.to_bytes()` representations are compared instead of the inner `[c_char]`s,
 // because `c_char` is `i8` (not `u8`) on some platforms.
 // That is why this is implemented manually and not derived.
@@ -668,6 +683,7 @@ impl PartialOrd for CStr {
         self.to_bytes().partial_cmp(&other.to_bytes())
     }
 }
+
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Ord for CStr {
     #[inline]

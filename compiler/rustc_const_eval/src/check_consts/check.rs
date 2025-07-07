@@ -356,10 +356,7 @@ impl<'mir, 'tcx> Checker<'mir, 'tcx> {
             hir::ConstContext::ConstFn => true,
             _ => {
                 // For indirect places, we are not creating a new permanent borrow, it's just as
-                // transient as the already existing one. For reborrowing references this is handled
-                // at the top of `visit_rvalue`, but for raw pointers we handle it here.
-                // Pointers/references to `static mut` and cases where the `*` is not the first
-                // projection also end up here.
+                // transient as the already existing one.
                 // Locals with StorageDead do not live beyond the evaluation and can
                 // thus safely be borrowed without being able to be leaked to the final
                 // value of the constant.
@@ -395,7 +392,7 @@ impl<'mir, 'tcx> Checker<'mir, 'tcx> {
         }
 
         let (infcx, param_env) = tcx.infer_ctxt().build_with_typing_env(self.body.typing_env(tcx));
-        let ocx = ObligationCtxt::new_with_diagnostics(&infcx);
+        let ocx = ObligationCtxt::new(&infcx);
 
         let body_id = self.body.source.def_id().expect_local();
         let host_polarity = match self.const_kind() {
@@ -424,7 +421,7 @@ impl<'mir, 'tcx> Checker<'mir, 'tcx> {
             Some(ConstConditionsHold::Yes)
         } else {
             tcx.dcx()
-                .span_delayed_bug(call_span, "this should have reported a ~const error in HIR");
+                .span_delayed_bug(call_span, "this should have reported a [const] error in HIR");
             Some(ConstConditionsHold::No)
         }
     }
@@ -464,12 +461,6 @@ impl<'mir, 'tcx> Checker<'mir, 'tcx> {
             },
             err_span,
         );
-    }
-
-    fn crate_inject_span(&self) -> Option<Span> {
-        self.tcx.hir_crate_items(()).definitions().next().and_then(|id| {
-            self.tcx.crate_level_attribute_injection_span(self.tcx.local_def_id_to_hir_id(id))
-        })
     }
 
     /// Check the const stability of the given item (fn or trait).
@@ -546,7 +537,6 @@ impl<'mir, 'tcx> Checker<'mir, 'tcx> {
                         feature,
                         feature_enabled,
                         safe_to_expose_on_stable: callee_safe_to_expose_on_stable,
-                        suggestion_span: self.crate_inject_span(),
                         is_function_call: self.tcx.def_kind(def_id) != DefKind::Trait,
                     });
                 }
@@ -605,11 +595,7 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                     self.const_kind() == hir::ConstContext::Static(hir::Mutability::Mut);
 
                 if !is_allowed && self.place_may_escape(place) {
-                    self.check_op(ops::EscapingMutBorrow(if matches!(rvalue, Rvalue::Ref(..)) {
-                        hir::BorrowKind::Ref
-                    } else {
-                        hir::BorrowKind::Raw
-                    }));
+                    self.check_op(ops::EscapingMutBorrow);
                 }
             }
 
@@ -650,14 +636,6 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                 _,
             ) => {
                 // These are all okay; they only change the type, not the data.
-            }
-
-            Rvalue::Cast(
-                CastKind::PointerCoercion(PointerCoercion::Unsize | PointerCoercion::DynStar, _),
-                _,
-                _,
-            ) => {
-                // Unsizing and `dyn*` coercions are implemented for CTFE.
             }
 
             Rvalue::Cast(CastKind::PointerExposeProvenance, _, _) => {
@@ -922,7 +900,6 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                                 name: intrinsic.name,
                                 feature,
                                 const_stable_indirect: is_const_stable,
-                                suggestion: self.crate_inject_span(),
                             });
                         }
                         Some(attrs::ConstStability {

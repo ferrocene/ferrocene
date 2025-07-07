@@ -28,14 +28,6 @@ pub(crate) struct CountRepetitionMisplaced {
 }
 
 #[derive(Diagnostic)]
-#[diag(expand_meta_var_expr_unrecognized_var)]
-pub(crate) struct MetaVarExprUnrecognizedVar {
-    #[primary_span]
-    pub span: Span,
-    pub key: MacroRulesNormalizedIdent,
-}
-
-#[derive(Diagnostic)]
 #[diag(expand_var_still_repeating)]
 pub(crate) struct VarStillRepeating {
     #[primary_span]
@@ -154,12 +146,15 @@ pub(crate) struct HelperAttributeNameInvalid {
 
 #[derive(Diagnostic)]
 #[diag(expand_feature_removed, code = E0557)]
+#[note]
 pub(crate) struct FeatureRemoved<'a> {
     #[primary_span]
     #[label]
     pub span: Span,
     #[subdiagnostic]
     pub reason: Option<FeatureRemovedReason<'a>>,
+    pub removed_rustc_version: &'a str,
+    pub pull_note: String,
 }
 
 #[derive(Subdiagnostic)]
@@ -179,12 +174,12 @@ pub(crate) struct FeatureNotAllowed {
 #[derive(Diagnostic)]
 #[diag(expand_recursion_limit_reached)]
 #[help]
-pub(crate) struct RecursionLimitReached<'a> {
+pub(crate) struct RecursionLimitReached {
     #[primary_span]
     pub span: Span,
     pub descr: String,
     pub suggested_limit: Limit,
-    pub crate_name: &'a str,
+    pub crate_name: Symbol,
 }
 
 #[derive(Diagnostic)]
@@ -440,7 +435,7 @@ pub(crate) struct InvalidFragmentSpecifier {
     #[primary_span]
     pub span: Span,
     pub fragment: Ident,
-    pub help: String,
+    pub help: &'static str,
 }
 
 #[derive(Diagnostic)]
@@ -495,4 +490,17 @@ pub(crate) struct GlobDelegationTraitlessQpath {
 pub(crate) struct ProcMacroBackCompat {
     pub crate_name: String,
     pub fixed_version: String,
+}
+
+pub(crate) use metavar_exprs::*;
+mod metavar_exprs {
+    use super::*;
+
+    #[derive(Diagnostic)]
+    #[diag(expand_mve_unrecognized_var)]
+    pub(crate) struct MveUnrecognizedVar {
+        #[primary_span]
+        pub span: Span,
+        pub key: MacroRulesNormalizedIdent,
+    }
 }

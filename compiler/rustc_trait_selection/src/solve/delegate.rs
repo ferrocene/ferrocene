@@ -12,7 +12,7 @@ use rustc_infer::traits::solve::Goal;
 use rustc_middle::traits::query::NoSolution;
 use rustc_middle::traits::solve::Certainty;
 use rustc_middle::ty::{
-    self, Ty, TyCtxt, TypeFlags, TypeFoldable, TypeVisitableExt as _, TypingMode,
+    self, SizedTraitKind, Ty, TyCtxt, TypeFlags, TypeFoldable, TypeVisitableExt as _, TypingMode,
 };
 use rustc_span::{DUMMY_SP, ErrorGuaranteed, Span};
 
@@ -64,12 +64,29 @@ impl<'tcx> rustc_next_trait_solver::delegate::SolverDelegate for SolverDelegate<
         span: Span,
     ) -> Option<Certainty> {
         if let Some(trait_pred) = goal.predicate.as_trait_clause() {
+            if self.shallow_resolve(trait_pred.self_ty().skip_binder()).is_ty_var()
+                // We don't do this fast path when opaques are defined since we may
+                // eventually use opaques to incompletely guide inference via ty var
+                // self types.
+                // FIXME: Properly consider opaques here.
+                && self.inner.borrow_mut().opaque_types().is_empty()
+            {
+                return Some(Certainty::AMBIGUOUS);
+            }
+
             if trait_pred.polarity() == ty::PredicatePolarity::Positive {
                 match self.0.tcx.as_lang_item(trait_pred.def_id()) {
                     Some(LangItem::Sized)
                         if self
                             .resolve_vars_if_possible(trait_pred.self_ty().skip_binder())
-                            .is_trivially_sized(self.0.tcx) =>
+                            .has_trivial_sizedness(self.0.tcx, SizedTraitKind::Sized) =>
+                    {
+                        return Some(Certainty::Yes);
+                    }
+                    Some(LangItem::MetaSized)
+                        if self
+                            .resolve_vars_if_possible(trait_pred.self_ty().skip_binder())
+                            .has_trivial_sizedness(self.0.tcx, SizedTraitKind::MetaSized) =>
                     {
                         return Some(Certainty::Yes);
                     }
@@ -115,6 +132,27 @@ impl<'tcx> rustc_next_trait_solver::delegate::SolverDelegate for SolverDelegate<
 
                 Some(Certainty::Yes)
             }
+            ty::PredicateKind::Subtype(ty::SubtypePredicate { a, b, .. })
+            | ty::PredicateKind::Coerce(ty::CoercePredicate { a, b }) => {
+                if self.shallow_resolve(a).is_ty_var() && self.shallow_resolve(b).is_ty_var() {
+                    // FIXME: We also need to register a subtype relation between these vars
+                    // when those are added, and if they aren't in the same sub root then
+                    // we should mark this goal as `has_changed`.
+                    Some(Certainty::AMBIGUOUS)
+                } else {
+                    None
+                }
+            }
+            ty::PredicateKind::Clause(ty::ClauseKind::WellFormed(arg)) => {
+                let arg = self.shallow_resolve_term(arg);
+                if arg.is_trivially_wf(self.tcx) {
+                    Some(Certainty::Yes)
+                } else if arg.is_infer() {
+                    Some(Certainty::AMBIGUOUS)
+                } else {
+                    None
+                }
+            }
             _ => None,
         }
     }
@@ -126,7 +164,7 @@ impl<'tcx> rustc_next_trait_solver::delegate::SolverDelegate for SolverDelegate<
     ) -> ty::GenericArg<'tcx> {
         match arg.kind() {
             ty::GenericArgKind::Lifetime(_) => {
-                self.next_region_var(RegionVariableOrigin::MiscVariable(span)).into()
+                self.next_region_var(RegionVariableOrigin::Misc(span)).into()
             }
             ty::GenericArgKind::Type(_) => self.next_ty_var(span).into(),
             ty::GenericArgKind::Const(_) => self.next_const_var(span).into(),

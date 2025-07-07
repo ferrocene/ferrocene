@@ -1,12 +1,13 @@
 use std::iter;
 
+use rustc_abi::{CanonAbi, ExternAbi};
 use rustc_ast::util::parser::ExprPrecedence;
 use rustc_errors::{Applicability, Diag, ErrorGuaranteed, StashKey};
 use rustc_hir::def::{self, CtorKind, Namespace, Res};
 use rustc_hir::def_id::DefId;
 use rustc_hir::{self as hir, HirId, LangItem};
 use rustc_hir_analysis::autoderef::Autoderef;
-use rustc_infer::infer;
+use rustc_infer::infer::BoundRegionConversionTime;
 use rustc_infer::traits::{Obligation, ObligationCause, ObligationCauseCode};
 use rustc_middle::ty::adjustment::{
     Adjust, Adjustment, AllowTwoPhase, AutoBorrow, AutoBorrowMutability,
@@ -15,6 +16,7 @@ use rustc_middle::ty::{self, GenericArgsRef, Ty, TyCtxt, TypeVisitableExt};
 use rustc_middle::{bug, span_bug};
 use rustc_span::def_id::LocalDefId;
 use rustc_span::{Span, sym};
+use rustc_target::spec::{AbiMap, AbiMapping};
 use rustc_trait_selection::error_reporting::traits::DefIdOrName;
 use rustc_trait_selection::infer::InferCtxtExt as _;
 use rustc_trait_selection::traits::query::evaluate_obligation::InferCtxtExt as _;
@@ -83,6 +85,18 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         while result.is_none() && autoderef.next().is_some() {
             result = self.try_overloaded_call_step(call_expr, callee_expr, arg_exprs, &autoderef);
         }
+
+        match autoderef.final_ty(false).kind() {
+            ty::FnDef(def_id, _) => {
+                let abi = self.tcx.fn_sig(def_id).skip_binder().skip_binder().abi;
+                self.check_call_abi(abi, call_expr.span);
+            }
+            ty::FnPtr(_, header) => {
+                self.check_call_abi(header.abi, call_expr.span);
+            }
+            _ => { /* cannot have a non-rust abi */ }
+        }
+
         self.register_predicates(autoderef.into_obligations());
 
         let output = match result {
@@ -135,6 +149,49 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         output
     }
 
+    /// Can a function with this ABI be called with a rust call expression?
+    ///
+    /// Some ABIs cannot be called from rust, either because rust does not know how to generate
+    /// code for the call, or because a call does not semantically make sense.
+    pub(crate) fn check_call_abi(&self, abi: ExternAbi, span: Span) {
+        let canon_abi = match AbiMap::from_target(&self.sess().target).canonize_abi(abi, false) {
+            AbiMapping::Direct(canon_abi) | AbiMapping::Deprecated(canon_abi) => canon_abi,
+            AbiMapping::Invalid => {
+                // This should be reported elsewhere, but we want to taint this body
+                // so that we don't try to evaluate calls to ABIs that are invalid.
+                let guar = self.dcx().span_delayed_bug(
+                    span,
+                    format!("invalid abi for platform should have reported an error: {abi}"),
+                );
+                self.set_tainted_by_errors(guar);
+                return;
+            }
+        };
+
+        let valid = match canon_abi {
+            // Rust doesn't know how to call functions with this ABI.
+            CanonAbi::Custom => false,
+
+            // These is an entry point for the host, and cannot be called on the GPU.
+            CanonAbi::GpuKernel => false,
+
+            // The interrupt ABIs should only be called by the CPU. They have complex
+            // pre- and postconditions, and can use non-standard instructions like `iret` on x86.
+            CanonAbi::Interrupt(_) => false,
+
+            CanonAbi::C
+            | CanonAbi::Rust
+            | CanonAbi::RustCold
+            | CanonAbi::Arm(_)
+            | CanonAbi::X86(_) => true,
+        };
+
+        if !valid {
+            let err = crate::errors::AbiCannotBeCalled { span, abi };
+            self.tcx.dcx().emit_err(err);
+        }
+    }
+
     #[instrument(level = "debug", skip(self, call_expr, callee_expr, arg_exprs, autoderef), ret)]
     fn try_overloaded_call_step(
         &self,
@@ -162,7 +219,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 let closure_sig = args.as_closure().sig();
                 let closure_sig = self.instantiate_binder_with_fresh_vars(
                     call_expr.span,
-                    infer::FnCall,
+                    BoundRegionConversionTime::FnCall,
                     closure_sig,
                 );
                 let adjustments = self.adjust_steps(autoderef);
@@ -189,7 +246,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 let closure_args = args.as_coroutine_closure();
                 let coroutine_closure_sig = self.instantiate_binder_with_fresh_vars(
                     call_expr.span,
-                    infer::FnCall,
+                    BoundRegionConversionTime::FnCall,
                     closure_args.coroutine_closure_sig(),
                 );
                 let tupled_upvars_ty = self.next_ty_var(callee_expr.span);
@@ -488,7 +545,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // renormalize the associated types at this point, since they
         // previously appeared within a `Binder<>` and hence would not
         // have been normalized before.
-        let fn_sig = self.instantiate_binder_with_fresh_vars(call_expr.span, infer::FnCall, fn_sig);
+        let fn_sig = self.instantiate_binder_with_fresh_vars(
+            call_expr.span,
+            BoundRegionConversionTime::FnCall,
+            fn_sig,
+        );
         let fn_sig = self.normalize(call_expr.span, fn_sig);
 
         self.check_argument_types(
@@ -508,7 +569,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             if let Some(ty) = fn_sig.inputs().last().copied() {
                 self.register_bound(
                     ty,
-                    self.tcx.require_lang_item(hir::LangItem::Tuple, Some(sp)),
+                    self.tcx.require_lang_item(hir::LangItem::Tuple, sp),
                     self.cause(sp, ObligationCauseCode::RustCall),
                 );
                 self.require_type_is_sized(ty, sp, ObligationCauseCode::RustCall);
@@ -602,7 +663,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             };
 
             if let Ok(rest_snippet) = rest_snippet {
-                let sugg = if callee_expr.precedence() >= ExprPrecedence::Unambiguous {
+                let sugg = if self.precedence(callee_expr) >= ExprPrecedence::Unambiguous {
                     vec![
                         (up_to_rcvr_span, "".to_string()),
                         (rest_span, format!(".{}({rest_snippet}", segment.ident)),
@@ -855,7 +916,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             return;
         }
 
-        // If we have `rustc_do_not_const_check`, do not check `~const` bounds.
+        // If we have `rustc_do_not_const_check`, do not check `[const]` bounds.
         if self.tcx.has_attr(self.body_id, sym::rustc_do_not_const_check) {
             return;
         }

@@ -51,6 +51,11 @@ pub(crate) fn conv_to_call_conv(
         CanonAbi::Rust | CanonAbi::C => default_call_conv,
         CanonAbi::RustCold => CallConv::Cold,
 
+        // Functions with this calling convention can only be called from assembly, but it is
+        // possible to declare an `extern "custom"` block, so the backend still needs a calling
+        // convention for declaring foreign functions.
+        CanonAbi::Custom => default_call_conv,
+
         CanonAbi::X86(x86_call) => match x86_call {
             X86Call::SysV64 => CallConv::SystemV,
             X86Call::Win64 => CallConv::WindowsFastcall,
@@ -746,51 +751,6 @@ pub(crate) fn codegen_drop<'tcx>(
                 let sig = fx.bcx.import_signature(sig);
                 // FIXME implement cleanup on exceptions
                 fx.bcx.ins().call_indirect(sig, drop_fn, &[ptr]);
-                fx.bcx.ins().jump(ret_block, &[]);
-            }
-            ty::Dynamic(_, _, ty::DynStar) => {
-                // IN THIS ARM, WE HAVE:
-                // ty = *mut (dyn* Trait)
-                // which is: *mut exists<T: sizeof(T) == sizeof(usize)> (T, Vtable<T: Trait>)
-                //
-                // args = [ * ]
-                //          |
-                //          v
-                //      ( Data, Vtable )
-                //                |
-                //                v
-                //              /-------\
-                //              | ...   |
-                //              \-------/
-                //
-                //
-                // WE CAN CONVERT THIS INTO THE ABOVE LOGIC BY DOING
-                //
-                // data = &(*args[0]).0    // gives a pointer to Data above (really the same pointer)
-                // vtable = (*args[0]).1   // loads the vtable out
-                // (data, vtable)          // an equivalent Rust `*mut dyn Trait`
-                //
-                // SO THEN WE CAN USE THE ABOVE CODE.
-                let (data, vtable) = drop_place.to_cvalue(fx).dyn_star_force_data_on_stack(fx);
-                let drop_fn = crate::vtable::drop_fn_of_obj(fx, vtable);
-
-                let is_null = fx.bcx.ins().icmp_imm(IntCC::Equal, drop_fn, 0);
-                let target_block = fx.get_block(target);
-                let continued = fx.bcx.create_block();
-                fx.bcx.ins().brif(is_null, target_block, &[], continued, &[]);
-                fx.bcx.switch_to_block(continued);
-
-                let virtual_drop = Instance {
-                    def: ty::InstanceKind::Virtual(drop_instance.def_id(), 0),
-                    args: drop_instance.args,
-                };
-                let fn_abi = FullyMonomorphizedLayoutCx(fx.tcx)
-                    .fn_abi_of_instance(virtual_drop, ty::List::empty());
-
-                let sig = clif_sig_from_fn_abi(fx.tcx, fx.target_config.default_call_conv, &fn_abi);
-                let sig = fx.bcx.import_signature(sig);
-                fx.bcx.ins().call_indirect(sig, drop_fn, &[data]);
-                // FIXME implement cleanup on exceptions
                 fx.bcx.ins().jump(ret_block, &[]);
             }
             _ => {

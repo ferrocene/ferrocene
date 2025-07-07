@@ -24,7 +24,8 @@ use crate::core::build_steps::tool::SourceType;
 use crate::core::build_steps::{dist, llvm};
 use crate::core::builder;
 use crate::core::builder::{
-    Builder, Cargo, Kind, PathSet, RunConfig, ShouldRun, Step, TaskPath, crate_description,
+    Builder, Cargo, Kind, PathSet, RunConfig, ShouldRun, Step, StepMetadata, TaskPath,
+    crate_description,
 };
 use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection};
@@ -38,6 +39,7 @@ use crate::utils::helpers::{
 };
 use crate::{CLang, Compiler, DependencyType, FileType, GitRepo, LLVM_TOOLS, Mode, debug, trace};
 
+/// Build a standard library for the given `target` using the given `compiler`.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Std {
     pub target: TargetSelection,
@@ -162,7 +164,7 @@ impl Step for Std {
         let compiler = if builder.download_rustc() && self.force_recompile {
             // When there are changes in the library tree with CI-rustc, we want to build
             // the stageN library and that requires using stageN-1 compiler.
-            builder.compiler(self.compiler.stage.saturating_sub(1), builder.config.build)
+            builder.compiler(self.compiler.stage.saturating_sub(1), builder.config.host_target)
         } else {
             self.compiler
         };
@@ -198,8 +200,6 @@ impl Step for Std {
             return;
         }
 
-        builder.require_submodule("library/stdarch", None);
-
         let mut target_deps = builder.ensure(StartupObjects { compiler, target });
 
         let compiler_to_use = builder.compiler_for(compiler.stage, compiler.host, target);
@@ -214,7 +214,7 @@ impl Step for Std {
         {
             trace!(?compiler_to_use, ?compiler, "compiler != compiler_to_use, uplifting library");
 
-            builder.ensure(Std::new(compiler_to_use, target));
+            builder.std(compiler_to_use, target);
             let msg = if compiler_to_use.host == target {
                 format!(
                     "Uplifting library (stage{} -> stage{})",
@@ -331,8 +331,16 @@ impl Step for Std {
 
         builder.ensure(StdLink::from_std(
             self,
-            builder.compiler(compiler.stage, builder.config.build),
+            builder.compiler(compiler.stage, builder.config.host_target),
         ));
+    }
+
+    fn metadata(&self) -> Option<StepMetadata> {
+        Some(
+            StepMetadata::build("std", self.target)
+                .built_by(self.compiler)
+                .stage(self.compiler.stage),
+        )
     }
 }
 
@@ -475,7 +483,7 @@ fn copy_self_contained_objects(
         // ferrocene addition
         let srcdir = builder.ensure(SecretSauceArtifacts { target });
 
-        for &obj in &["libc.a", "crt1.o"] {
+        for &obj in &["libc.a", "crt1.o", "COPYRIGHT"] {
             copy_and_stamp(
                 builder,
                 &libdir_self_contained,
@@ -592,6 +600,15 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, car
         // (below) so that adding support for CI LLVM here doesn't risk breaking
         // the compiler builtins. But they could be unified if desired.
         cargo.env("RUST_COMPILER_RT_FOR_PROFILER", compiler_rt);
+
+        // Targets like thumb*-ferrocenecoretest use `arm-none-eabi-gcc` to compile the
+        // profiler-builtins C code. That compiler will not include secret-sauce header files by
+        // default so we pass the path to the header files to profiler-builtins' build script
+        // using this env var.
+        if target.needs_secret_sauce() {
+            let dir = builder.ensure(SecretSauceArtifacts { target });
+            cargo.env("FERROCENECORETEST_INCLUDE_FOR_PROFILER", dir.join("include"));
+        }
     }
 
     // Determine if we're going to compile in optimized C intrinsics to
@@ -715,7 +732,8 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, car
 
     // Enable frame pointers by default for the library. Note that they are still controlled by a
     // separate setting for the compiler.
-    cargo.rustflag("-Cforce-frame-pointers=yes");
+    cargo.rustflag("-Zunstable-options");
+    cargo.rustflag("-Cforce-frame-pointers=non-leaf");
 
     let html_root =
         format!("-Zcrate-attr=doc(html_root_url=\"{}/\")", builder.doc_rust_lang_org_channel(),);
@@ -738,7 +756,7 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, car
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct StdLink {
+pub struct StdLink {
     pub compiler: Compiler,
     pub target_compiler: Compiler,
     pub target: TargetSelection,
@@ -749,7 +767,7 @@ struct StdLink {
 }
 
 impl StdLink {
-    fn from_std(std: Std, host_compiler: Compiler) -> Self {
+    pub fn from_std(std: Std, host_compiler: Compiler) -> Self {
         Self {
             compiler: host_compiler,
             target_compiler: std.compiler,
@@ -1018,11 +1036,18 @@ fn cp_rustc_component_to_ci_sysroot(builder: &Builder<'_>, sysroot: &Path, conte
     }
 }
 
+/// Build rustc using the passed `build_compiler`.
+///
+/// - Makes sure that `build_compiler` has a standard library prepared for its host target,
+///   so that it can compile build scripts and proc macros when building this `rustc`.
+/// - Makes sure that `build_compiler` has a standard library prepared for `target`,
+///   so that the built `rustc` can *link to it* and use it at runtime.
 #[derive(Debug, PartialOrd, Ord, Clone, PartialEq, Eq, Hash)]
 pub struct Rustc {
+    /// The target on which rustc will run (its host).
     pub target: TargetSelection,
-    /// The **previous** compiler used to compile this compiler.
-    pub compiler: Compiler,
+    /// The **previous** compiler used to compile this rustc.
+    pub build_compiler: Compiler,
     /// Whether to build a subset of crates, rather than the whole compiler.
     ///
     /// This should only be requested by the user, not used within bootstrap itself.
@@ -1032,8 +1057,8 @@ pub struct Rustc {
 }
 
 impl Rustc {
-    pub fn new(compiler: Compiler, target: TargetSelection) -> Self {
-        Self { target, compiler, crates: Default::default() }
+    pub fn new(build_compiler: Compiler, target: TargetSelection) -> Self {
+        Self { target, build_compiler, crates: Default::default() }
     }
 }
 
@@ -1063,9 +1088,15 @@ impl Step for Rustc {
     }
 
     fn make_run(run: RunConfig<'_>) {
+        // If only `compiler` was passed, do not run this step.
+        // Instead the `Assemble` step will take care of compiling Rustc.
+        if run.builder.paths == vec![PathBuf::from("compiler")] {
+            return;
+        }
+
         let crates = run.cargo_crates_in_set();
         run.builder.ensure(Rustc {
-            compiler: run
+            build_compiler: run
                 .builder
                 .compiler(run.builder.top_stage.saturating_sub(1), run.build_triple()),
             target: run.target,
@@ -1076,7 +1107,7 @@ impl Step for Rustc {
     /// Builds the compiler.
     ///
     /// This will build the compiler for a particular stage of the build using
-    /// the `compiler` targeting the `target` architecture. The artifacts
+    /// the `build_compiler` targeting the `target` architecture. The artifacts
     /// created will also be linked into the sysroot directory.
     #[cfg_attr(
         feature = "tracing",
@@ -1084,54 +1115,58 @@ impl Step for Rustc {
             level = "debug",
             name = "Rustc::run",
             skip_all,
-            fields(previous_compiler = ?self.compiler, target = ?self.target),
+            fields(previous_compiler = ?self.build_compiler, target = ?self.target),
         ),
     )]
     fn run(self, builder: &Builder<'_>) -> u32 {
-        let compiler = self.compiler;
+        let build_compiler = self.build_compiler;
         let target = self.target;
 
         // NOTE: the ABI of the stage0 compiler is different from the ABI of the downloaded compiler,
         // so its artifacts can't be reused.
-        if builder.download_rustc() && compiler.stage != 0 {
-            trace!(stage = compiler.stage, "`download_rustc` requested");
+        if builder.download_rustc() && build_compiler.stage != 0 {
+            trace!(stage = build_compiler.stage, "`download_rustc` requested");
 
-            let sysroot = builder.ensure(Sysroot { compiler, force_recompile: false });
+            let sysroot =
+                builder.ensure(Sysroot { compiler: build_compiler, force_recompile: false });
             cp_rustc_component_to_ci_sysroot(
                 builder,
                 &sysroot,
                 builder.config.ci_rustc_dev_contents(),
             );
-            return compiler.stage;
+            return build_compiler.stage;
         }
 
-        builder.ensure(Std::new(compiler, target));
+        // Build a standard library for `target` using the `build_compiler`.
+        // This will be the standard library that the rustc which we build *links to*.
+        builder.std(build_compiler, target);
 
-        if builder.config.keep_stage.contains(&compiler.stage) {
-            trace!(stage = compiler.stage, "`keep-stage` requested");
+        if builder.config.keep_stage.contains(&build_compiler.stage) {
+            trace!(stage = build_compiler.stage, "`keep-stage` requested");
 
             builder.info("WARNING: Using a potentially old librustc. This may not behave well.");
             builder.info("WARNING: Use `--keep-stage-std` if you want to rebuild the compiler when it changes");
-            builder.ensure(RustcLink::from_rustc(self, compiler));
+            builder.ensure(RustcLink::from_rustc(self, build_compiler));
 
-            return compiler.stage;
+            return build_compiler.stage;
         }
 
-        let compiler_to_use = builder.compiler_for(compiler.stage, compiler.host, target);
-        if compiler_to_use != compiler {
+        let compiler_to_use =
+            builder.compiler_for(build_compiler.stage, build_compiler.host, target);
+        if compiler_to_use != build_compiler {
             builder.ensure(Rustc::new(compiler_to_use, target));
             let msg = if compiler_to_use.host == target {
                 format!(
                     "Uplifting rustc (stage{} -> stage{})",
                     compiler_to_use.stage,
-                    compiler.stage + 1
+                    build_compiler.stage + 1
                 )
             } else {
                 format!(
                     "Uplifting rustc (stage{}:{} -> stage{}:{})",
                     compiler_to_use.stage,
                     compiler_to_use.host,
-                    compiler.stage + 1,
+                    build_compiler.stage + 1,
                     target
                 )
             };
@@ -1140,22 +1175,26 @@ impl Step for Rustc {
             return compiler_to_use.stage;
         }
 
-        // Ensure that build scripts and proc macros have a std / libproc_macro to link against.
-        builder.ensure(Std::new(
-            builder.compiler(self.compiler.stage, builder.config.build),
-            builder.config.build,
-        ));
+        // Build a standard library for the current host target using the `build_compiler`.
+        // This standard library will be used when building `rustc` for compiling
+        // build scripts and proc macros.
+        // If we are not cross-compiling, the Std build above will be the same one as the one we
+        // prepare here.
+        builder.std(
+            builder.compiler(self.build_compiler.stage, builder.config.host_target),
+            builder.config.host_target,
+        );
 
         let mut cargo = builder::Cargo::new(
             builder,
-            compiler,
+            build_compiler,
             Mode::Rustc,
             SourceType::InTree,
             target,
             Kind::Build,
         );
 
-        rustc_cargo(builder, &mut cargo, target, &compiler, &self.crates);
+        rustc_cargo(builder, &mut cargo, target, &build_compiler, &self.crates);
 
         // NB: all RUSTFLAGS should be added to `rustc_cargo()` so they will be
         // consistently applied by check/doc/test modes too.
@@ -1164,19 +1203,19 @@ impl Step for Rustc {
             cargo.arg("-p").arg(krate);
         }
 
-        if builder.build.config.enable_bolt_settings && compiler.stage == 1 {
+        if builder.build.config.enable_bolt_settings && build_compiler.stage == 1 {
             // Relocations are required for BOLT to work.
             cargo.env("RUSTC_BOLT_LINK_FLAGS", "1");
         }
 
         let _guard = builder.msg_sysroot_tool(
             Kind::Build,
-            compiler.stage,
+            build_compiler.stage,
             format_args!("compiler artifacts{}", crate_description(&self.crates)),
-            compiler.host,
+            build_compiler.host,
             target,
         );
-        let stamp = build_stamp::librustc_stamp(builder, compiler, target);
+        let stamp = build_stamp::librustc_stamp(builder, build_compiler, target);
         run_cargo(
             builder,
             cargo,
@@ -1208,10 +1247,18 @@ impl Step for Rustc {
 
         builder.ensure(RustcLink::from_rustc(
             self,
-            builder.compiler(compiler.stage, builder.config.build),
+            builder.compiler(build_compiler.stage, builder.config.host_target),
         ));
 
-        compiler.stage
+        build_compiler.stage
+    }
+
+    fn metadata(&self) -> Option<StepMetadata> {
+        Some(
+            StepMetadata::build("rustc", self.target)
+                .built_by(self.build_compiler)
+                .stage(self.build_compiler.stage + 1),
+        )
     }
 }
 
@@ -1219,7 +1266,7 @@ pub fn rustc_cargo(
     builder: &Builder<'_>,
     cargo: &mut Cargo,
     target: TargetSelection,
-    compiler: &Compiler,
+    build_compiler: &Compiler,
     crates: &[String],
 ) {
     cargo
@@ -1248,11 +1295,11 @@ pub fn rustc_cargo(
     // We want to link against registerEnzyme and in the future we want to use additional
     // functionality from Enzyme core. For that we need to link against Enzyme.
     if builder.config.llvm_enzyme {
-        let arch = builder.build.build;
+        let arch = builder.build.host_target;
         let enzyme_dir = builder.build.out.join(arch).join("enzyme").join("lib");
         cargo.rustflag("-L").rustflag(enzyme_dir.to_str().expect("Invalid path"));
 
-        if let Some(llvm_config) = builder.llvm_config(builder.config.build) {
+        if let Some(llvm_config) = builder.llvm_config(builder.config.host_target) {
             let llvm_version_major = llvm::get_llvm_version_major(builder, &llvm_config);
             cargo.rustflag("-l").rustflag(&format!("Enzyme-{llvm_version_major}"));
         }
@@ -1266,7 +1313,7 @@ pub fn rustc_cargo(
         cargo.rustflag("-Zdefault-visibility=protected");
     }
 
-    if is_lto_stage(compiler) {
+    if is_lto_stage(build_compiler) {
         match builder.config.rust_lto {
             RustcLto::Thin | RustcLto::Fat => {
                 // Since using LTO for optimizing dylibs is currently experimental,
@@ -1299,7 +1346,7 @@ pub fn rustc_cargo(
     // is already on by default in MSVC optimized builds, which is interpreted as --icf=all:
     // https://github.com/llvm/llvm-project/blob/3329cec2f79185bafd678f310fafadba2a8c76d2/lld/COFF/Driver.cpp#L1746
     // https://github.com/rust-lang/rust/blob/f22819bcce4abaff7d1246a56eec493418f9f4ee/compiler/rustc_codegen_ssa/src/back/linker.rs#L827
-    if builder.config.lld_mode.is_used() && !compiler.host.is_msvc() {
+    if builder.config.lld_mode.is_used() && !build_compiler.host.is_msvc() {
         cargo.rustflag("-Clink-args=-Wl,--icf=all");
     }
 
@@ -1307,7 +1354,7 @@ pub fn rustc_cargo(
         panic!("Cannot use and generate PGO profiles at the same time");
     }
     let is_collecting = if let Some(path) = &builder.config.rust_profile_generate {
-        if compiler.stage == 1 {
+        if build_compiler.stage == 1 {
             cargo.rustflag(&format!("-Cprofile-generate={path}"));
             // Apparently necessary to avoid overflowing the counters during
             // a Cargo build profile
@@ -1317,7 +1364,7 @@ pub fn rustc_cargo(
             false
         }
     } else if let Some(path) = &builder.config.rust_profile_use {
-        if compiler.stage == 1 {
+        if build_compiler.stage == 1 {
             cargo.rustflag(&format!("-Cprofile-use={path}"));
             if builder.is_verbose() {
                 cargo.rustflag("-Cllvm-args=-pgo-warn-missing-function");
@@ -1342,20 +1389,20 @@ pub fn rustc_cargo(
     // useful.
     // This is only performed for non-incremental builds, as ccache cannot deal with these.
     if let Some(ref ccache) = builder.config.ccache
-        && compiler.stage == 0
+        && build_compiler.stage == 0
         && !builder.config.incremental
     {
         cargo.env("RUSTC_WRAPPER", ccache);
     }
 
-    rustc_cargo_env(builder, cargo, target, compiler.stage);
+    rustc_cargo_env(builder, cargo, target, build_compiler.stage);
 }
 
 pub fn rustc_cargo_env(
     builder: &Builder<'_>,
     cargo: &mut Cargo,
     target: TargetSelection,
-    stage: u32,
+    build_stage: u32,
 ) {
     // Set some configuration variables picked up by build scripts and
     // the compiler alike
@@ -1422,7 +1469,7 @@ pub fn rustc_cargo_env(
             crate::core::build_steps::llvm::prebuilt_llvm_config(builder, target, false)
                 .should_build();
         // `top_stage == stage` might be false for `check --stage 1`, if we are building the stage 1 compiler
-        let can_skip_build = builder.kind == Kind::Check && builder.top_stage == stage;
+        let can_skip_build = builder.kind == Kind::Check && builder.top_stage == build_stage;
         let should_skip_build = building_is_expensive && can_skip_build;
         if !should_skip_build {
             rustc_llvm_env(builder, cargo, target)
@@ -1533,7 +1580,7 @@ impl RustcLink {
     fn from_rustc(rustc: Rustc, host_compiler: Compiler) -> Self {
         Self {
             compiler: host_compiler,
-            previous_stage_compiler: rustc.compiler,
+            previous_stage_compiler: rustc.build_compiler,
             target: rustc.target,
             crates: rustc.crates,
         }
@@ -1871,7 +1918,7 @@ impl Step for Sysroot {
         // If we're downloading a compiler from CI, we can use the same compiler for all stages other than 0.
         if builder.download_rustc() && compiler.stage != 0 {
             assert_eq!(
-                builder.config.build, compiler.host,
+                builder.config.host_target, compiler.host,
                 "Cross-compiling is not yet supported with `download-rustc`",
             );
 
@@ -2025,7 +2072,7 @@ impl Step for Assemble {
         if target_compiler.stage == 0 {
             trace!("stage 0 build compiler is always available, simply returning");
             assert_eq!(
-                builder.config.build, target_compiler.host,
+                builder.config.host_target, target_compiler.host,
                 "Cannot obtain compiler for non-native build triple at stage 0"
             );
             // The stage 0 compiler for the build triple is always pre-built.
@@ -2104,7 +2151,7 @@ impl Step for Assemble {
         if builder.download_rustc() {
             trace!("`download-rustc` requested, reusing CI compiler for stage > 0");
 
-            builder.ensure(Std::new(target_compiler, target_compiler.host));
+            builder.std(target_compiler, target_compiler.host);
             let sysroot =
                 builder.ensure(Sysroot { compiler: target_compiler, force_recompile: false });
             // Ensure that `libLLVM.so` ends up in the newly created target directory,
@@ -2112,7 +2159,7 @@ impl Step for Assemble {
             dist::maybe_install_llvm_target(builder, target_compiler.host, &sysroot);
             // Lower stages use `ci-rustc-sysroot`, not stageN
             if target_compiler.stage == builder.top_stage {
-                builder.info(&format!("Creating a sysroot for stage{stage} compiler (use `rustup toolchain link 'name' build/host/stage{stage}`)", stage=target_compiler.stage));
+                builder.info(&format!("Creating a sysroot for stage{stage} compiler (use `rustup toolchain link 'name' build/host/stage{stage}`)", stage = target_compiler.stage));
             }
 
             let mut precompiled_compiler = target_compiler;
@@ -2138,27 +2185,29 @@ impl Step for Assemble {
         debug!(
             "ensuring build compiler is available: compiler(stage = {}, host = {:?})",
             target_compiler.stage - 1,
-            builder.config.build,
+            builder.config.host_target,
         );
-        let mut build_compiler = builder.compiler(target_compiler.stage - 1, builder.config.build);
+        let mut build_compiler =
+            builder.compiler(target_compiler.stage - 1, builder.config.host_target);
 
         // Build enzyme
         if builder.config.llvm_enzyme && !builder.config.dry_run() {
             debug!("`llvm_enzyme` requested");
             let enzyme_install = builder.ensure(llvm::Enzyme { target: build_compiler.host });
-            let llvm_config = builder.llvm_config(builder.config.build).unwrap();
-            let llvm_version_major = llvm::get_llvm_version_major(builder, &llvm_config);
-            let lib_ext = std::env::consts::DLL_EXTENSION;
-            let libenzyme = format!("libEnzyme-{llvm_version_major}");
-            let src_lib =
-                enzyme_install.join("build/Enzyme").join(&libenzyme).with_extension(lib_ext);
-            let libdir = builder.sysroot_target_libdir(build_compiler, build_compiler.host);
-            let target_libdir =
-                builder.sysroot_target_libdir(target_compiler, target_compiler.host);
-            let dst_lib = libdir.join(&libenzyme).with_extension(lib_ext);
-            let target_dst_lib = target_libdir.join(&libenzyme).with_extension(lib_ext);
-            builder.copy_link(&src_lib, &dst_lib, FileType::NativeLibrary);
-            builder.copy_link(&src_lib, &target_dst_lib, FileType::NativeLibrary);
+            if let Some(llvm_config) = builder.llvm_config(builder.config.host_target) {
+                let llvm_version_major = llvm::get_llvm_version_major(builder, &llvm_config);
+                let lib_ext = std::env::consts::DLL_EXTENSION;
+                let libenzyme = format!("libEnzyme-{llvm_version_major}");
+                let src_lib =
+                    enzyme_install.join("build/Enzyme").join(&libenzyme).with_extension(lib_ext);
+                let libdir = builder.sysroot_target_libdir(build_compiler, build_compiler.host);
+                let target_libdir =
+                    builder.sysroot_target_libdir(target_compiler, target_compiler.host);
+                let dst_lib = libdir.join(&libenzyme).with_extension(lib_ext);
+                let target_dst_lib = target_libdir.join(&libenzyme).with_extension(lib_ext);
+                builder.copy_link(&src_lib, &dst_lib, FileType::NativeLibrary);
+                builder.copy_link(&src_lib, &target_dst_lib, FileType::NativeLibrary);
+            }
         }
 
         // Build the libraries for this compiler to link to (i.e., the libraries
@@ -2260,7 +2309,7 @@ impl Step for Assemble {
         debug!("copying codegen backends to sysroot");
         copy_codegen_backends_to_sysroot(builder, build_compiler, target_compiler);
 
-        if builder.config.lld_enabled && !builder.config.is_system_llvm(target_compiler.host) {
+        if builder.config.lld_enabled {
             builder.ensure(crate::core::build_steps::tool::LldWrapper {
                 build_compiler,
                 target_compiler,

@@ -162,7 +162,7 @@ pub fn iter_exported_symbols<'tcx>(
 
         // We can ignore `_export_info` here: we are a Rust crate, and everything is exported
         // from a Rust crate.
-        for &(symbol, _export_info) in tcx.exported_symbols(cnum) {
+        for &(symbol, _export_info) in tcx.exported_non_generic_symbols(cnum) {
             if let ExportedSymbol::NonGeneric(def_id) = symbol {
                 f(cnum, def_id)?;
             }
@@ -326,7 +326,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
     ) -> InterpResult<'tcx, Option<P>> {
         let this = self.eval_context_ref();
         let adt = base.layout().ty.ty_adt_def().unwrap();
-        for (idx, field) in adt.non_enum_variant().fields.iter().enumerate() {
+        for (idx, field) in adt.non_enum_variant().fields.iter_enumerated() {
             if field.name.as_str() == name {
                 return interp_ok(Some(this.project_field(base, idx)?));
             }
@@ -376,6 +376,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
     ) -> InterpResult<'tcx> {
         let this = self.eval_context_mut();
         for (idx, &val) in values.iter().enumerate() {
+            let idx = FieldIdx::from_usize(idx);
             let field = this.project_field(dest, idx)?;
             this.write_int(val, &field)?;
         }
@@ -488,7 +489,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
         trace!("visit_frozen(place={:?}, size={:?})", *place, size);
         debug_assert_eq!(
             size,
-            this.size_and_align_of_mplace(place)?
+            this.size_and_align_of_val(place)?
                 .map(|(size, _)| size)
                 .unwrap_or_else(|| place.layout.size)
         );
@@ -529,7 +530,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                     trace!("unsafe_cell_action on {:?}", place.ptr());
                     // We need a size to go on.
                     let unsafe_cell_size = this
-                        .size_and_align_of_mplace(place)?
+                        .size_and_align_of_val(place)?
                         .map(|(size, _)| size)
                         // for extern types, just cover what we can
                         .unwrap_or_else(|| place.layout.size);
@@ -593,10 +594,6 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                     interp_ok(())
                 } else if matches!(v.layout.fields, FieldsShape::Union(..)) {
                     // A (non-frozen) union. We fall back to whatever the type says.
-                    (self.unsafe_cell_action)(v)
-                } else if matches!(v.layout.ty.kind(), ty::Dynamic(_, _, ty::DynStar)) {
-                    // This needs to read the vtable pointer to proceed type-driven, but we don't
-                    // want to reentrantly read from memory here.
                     (self.unsafe_cell_action)(v)
                 } else {
                     // We want to not actually read from memory for this visit. So, before
@@ -763,10 +760,10 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
     /// `EINVAL` in this case.
     fn read_timespec(&mut self, tp: &MPlaceTy<'tcx>) -> InterpResult<'tcx, Option<Duration>> {
         let this = self.eval_context_mut();
-        let seconds_place = this.project_field(tp, 0)?;
+        let seconds_place = this.project_field(tp, FieldIdx::ZERO)?;
         let seconds_scalar = this.read_scalar(&seconds_place)?;
         let seconds = seconds_scalar.to_target_isize(this)?;
-        let nanoseconds_place = this.project_field(tp, 1)?;
+        let nanoseconds_place = this.project_field(tp, FieldIdx::ONE)?;
         let nanoseconds_scalar = this.read_scalar(&nanoseconds_place)?;
         let nanoseconds = nanoseconds_scalar.to_target_isize(this)?;
 

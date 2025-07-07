@@ -143,6 +143,8 @@ s! {
         pub ss_size: size_t,
     }
 
+    // FIXME(1.0): This should not implement `PartialEq`
+    #[allow(unpredictable_function_pointer_comparisons)]
     pub struct sigaction {
         pub sa_sigaction: crate::sighandler_t,
         pub sa_mask: crate::sigset_t,
@@ -601,6 +603,7 @@ pub const REG_NARGS: usize = 8;
 
 pub const COMPAT_HWCAP_ISA_I: c_ulong = 1 << (b'I' - b'A');
 pub const COMPAT_HWCAP_ISA_M: c_ulong = 1 << (b'M' - b'A');
+#[allow(clippy::eq_op)]
 pub const COMPAT_HWCAP_ISA_A: c_ulong = 1 << (b'A' - b'A');
 pub const COMPAT_HWCAP_ISA_F: c_ulong = 1 << (b'F' - b'A');
 pub const COMPAT_HWCAP_ISA_D: c_ulong = 1 << (b'D' - b'A');

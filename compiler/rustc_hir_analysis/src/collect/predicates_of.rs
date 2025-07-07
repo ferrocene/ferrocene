@@ -162,7 +162,6 @@ fn gather_explicit_predicates_of(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::Gen
                         .map(|t| ty::Binder::dummy(t.instantiate_identity()));
                 }
             }
-
             ItemKind::Trait(_, _, _, _, self_bounds, ..)
             | ItemKind::TraitAlias(_, _, self_bounds) => {
                 is_trait = Some((self_bounds, item.span));
@@ -183,21 +182,29 @@ fn gather_explicit_predicates_of(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::Gen
     // and the explicit where-clauses, but to get the full set of predicates
     // on a trait we must also consider the bounds that follow the trait's name,
     // like `trait Foo: A + B + C`.
-    if let Some(self_bounds) = is_trait {
+    if let Some((self_bounds, span)) = is_trait {
         let mut bounds = Vec::new();
         icx.lowerer().lower_bounds(
             tcx.types.self_param,
-            self_bounds.0,
+            self_bounds,
             &mut bounds,
             ty::List::empty(),
             PredicateFilter::All,
         );
+        icx.lowerer().add_sizedness_bounds(
+            &mut bounds,
+            tcx.types.self_param,
+            self_bounds,
+            None,
+            Some(def_id),
+            span,
+        );
         icx.lowerer().add_default_super_traits(
             def_id,
             &mut bounds,
-            self_bounds.0,
+            self_bounds,
             hir_generics,
-            self_bounds.1,
+            span,
         );
         predicates.extend(bounds);
     }
@@ -224,6 +231,14 @@ fn gather_explicit_predicates_of(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::Gen
                 let param_ty = icx.lowerer().lower_ty_param(param.hir_id);
                 let mut bounds = Vec::new();
                 // Implicit bounds are added to type params unless a `?Trait` bound is found
+                icx.lowerer().add_sizedness_bounds(
+                    &mut bounds,
+                    param_ty,
+                    &[],
+                    Some((param.def_id, hir_generics.predicates)),
+                    None,
+                    param.span,
+                );
                 icx.lowerer().add_default_traits(
                     &mut bounds,
                     param_ty,
@@ -406,7 +421,9 @@ fn const_evaluatable_predicates_of<'tcx>(
     impl<'tcx> TypeVisitor<TyCtxt<'tcx>> for ConstCollector<'tcx> {
         fn visit_const(&mut self, c: ty::Const<'tcx>) {
             if let ty::ConstKind::Unevaluated(uv) = c.kind() {
-                if is_const_param_default(self.tcx, uv.def.expect_local()) {
+                if let Some(local) = uv.def.as_local()
+                    && is_const_param_default(self.tcx, local)
+                {
                     // Do not look into const param defaults,
                     // these get checked when they are actually instantiated.
                     //
@@ -651,7 +668,7 @@ pub(super) fn implied_predicates_with_filter<'tcx>(
                 item.span,
             );
         }
-        //`ConstIfConst` is only interested in `~const` bounds.
+        //`ConstIfConst` is only interested in `[const]` bounds.
         PredicateFilter::ConstIfConst | PredicateFilter::SelfConstIfConst => {}
     }
 
@@ -806,7 +823,7 @@ pub(super) fn assert_only_contains_predicates_from<'tcx>(
                         assert_eq!(
                             pred.constness,
                             ty::BoundConstness::Maybe,
-                            "expected `~const` predicate when computing `{filter:?}` \
+                            "expected `[const]` predicate when computing `{filter:?}` \
                             implied bounds: {clause:?}",
                         );
                         assert_eq!(
@@ -994,7 +1011,7 @@ pub(super) fn const_conditions<'tcx>(
             }
             _ => bug!("const_conditions called on wrong item: {def_id:?}"),
         },
-        // While associated types are not really const, we do allow them to have `~const`
+        // While associated types are not really const, we do allow them to have `[const]`
         // bounds and where clauses. `const_conditions` is responsible for gathering
         // these up so we can check them in `compare_type_predicate_entailment`, and
         // in `HostEffect` goal computation.

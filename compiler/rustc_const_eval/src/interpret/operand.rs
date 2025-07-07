@@ -8,10 +8,11 @@ use rustc_abi as abi;
 use rustc_abi::{BackendRepr, HasDataLayout, Size};
 use rustc_hir::def::Namespace;
 use rustc_middle::mir::interpret::ScalarSizeMismatch;
-use rustc_middle::ty::layout::{HasTyCtxt, HasTypingEnv, LayoutOf, TyAndLayout};
+use rustc_middle::ty::layout::{HasTyCtxt, HasTypingEnv, TyAndLayout};
 use rustc_middle::ty::print::{FmtPrinter, PrettyPrinter};
 use rustc_middle::ty::{ConstInt, ScalarInt, Ty, TyCtxt};
 use rustc_middle::{bug, mir, span_bug, ty};
+use rustc_span::DUMMY_SP;
 use tracing::trace;
 
 use super::{
@@ -307,7 +308,7 @@ impl<'tcx, Prov: Provenance> ImmTy<'tcx, Prov> {
     #[inline]
     pub fn from_ordering(c: std::cmp::Ordering, tcx: TyCtxt<'tcx>) -> Self {
         // Can use any typing env, since `Ordering` is always monomorphic.
-        let ty = tcx.ty_ordering_enum(None);
+        let ty = tcx.ty_ordering_enum(DUMMY_SP);
         let layout =
             tcx.layout_of(ty::TypingEnv::fully_monomorphized().as_query_input(ty)).unwrap();
         Self::from_scalar(Scalar::Int(c.into()), layout)
@@ -877,9 +878,9 @@ mod size_asserts {
 
     use super::*;
     // tidy-alphabetical-start
-    static_assert_size!(Immediate, 48);
     static_assert_size!(ImmTy<'_>, 64);
-    static_assert_size!(Operand, 56);
+    static_assert_size!(Immediate, 48);
     static_assert_size!(OpTy<'_>, 72);
+    static_assert_size!(Operand, 56);
     // tidy-alphabetical-end
 }

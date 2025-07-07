@@ -1,6 +1,6 @@
 use std::cmp;
 
-use rustc_abi::{BackendRepr, ExternAbi, HasDataLayout, Reg, Size, WrappingRange};
+use rustc_abi::{Align, BackendRepr, ExternAbi, HasDataLayout, Reg, Size, WrappingRange};
 use rustc_ast as ast;
 use rustc_ast::{InlineAsmOptions, InlineAsmTemplatePiece};
 use rustc_data_structures::packed::Pu128;
@@ -13,7 +13,7 @@ use rustc_middle::{bug, span_bug};
 use rustc_session::config::OptLevel;
 use rustc_span::Span;
 use rustc_span::source_map::Spanned;
-use rustc_target::callconv::{ArgAbi, FnAbi, PassMode};
+use rustc_target::callconv::{ArgAbi, CastTarget, FnAbi, PassMode};
 use tracing::{debug, info};
 
 use super::operand::OperandRef;
@@ -558,8 +558,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                     }
                     ZeroSized => bug!("ZST return value shouldn't be in PassMode::Cast"),
                 };
-                let ty = bx.cast_backend_type(cast_ty);
-                bx.load(ty, llslot, self.fn_abi.ret.layout.align.abi)
+                load_cast(bx, cast_ty, llslot, self.fn_abi.ret.layout.align.abi)
             }
         };
         bx.ret(llval);
@@ -625,50 +624,6 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                     true,
                     meth::VirtualIndex::from_index(ty::COMMON_VTABLE_ENTRIES_DROPINPLACE)
                         .get_optional_fn(bx, vtable, ty, fn_abi),
-                    fn_abi,
-                    virtual_drop,
-                )
-            }
-            ty::Dynamic(_, _, ty::DynStar) => {
-                // IN THIS ARM, WE HAVE:
-                // ty = *mut (dyn* Trait)
-                // which is: *mut exists<T: sizeof(T) == sizeof(usize)> (T, Vtable<T: Trait>)
-                //
-                // args = [ * ]
-                //          |
-                //          v
-                //      ( Data, Vtable )
-                //                |
-                //                v
-                //              /-------\
-                //              | ...   |
-                //              \-------/
-                //
-                //
-                // WE CAN CONVERT THIS INTO THE ABOVE LOGIC BY DOING
-                //
-                // data = &(*args[0]).0    // gives a pointer to Data above (really the same pointer)
-                // vtable = (*args[0]).1   // loads the vtable out
-                // (data, vtable)          // an equivalent Rust `*mut dyn Trait`
-                //
-                // SO THEN WE CAN USE THE ABOVE CODE.
-                let virtual_drop = Instance {
-                    def: ty::InstanceKind::Virtual(drop_fn.def_id(), 0), // idx 0: the drop function
-                    args: drop_fn.args,
-                };
-                debug!("ty = {:?}", ty);
-                debug!("drop_fn = {:?}", drop_fn);
-                debug!("args = {:?}", args);
-                let fn_abi = bx.fn_abi_of_instance(virtual_drop, ty::List::empty());
-                let meta_ptr = place.project_field(bx, 1);
-                let meta = bx.load_operand(meta_ptr);
-                // Truncate vtable off of args list
-                args = &args[..1];
-                debug!("args' = {:?}", args);
-                (
-                    true,
-                    meth::VirtualIndex::from_index(ty::COMMON_VTABLE_ENTRIES_DROPINPLACE)
-                        .get_optional_fn(bx, meta.immediate(), ty, fn_abi),
                     fn_abi,
                     virtual_drop,
                 )
@@ -777,13 +732,19 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                 // `#[track_caller]` adds an implicit argument.
                 (LangItem::PanicNullPointerDereference, vec![location])
             }
+            AssertKind::InvalidEnumConstruction(source) => {
+                let source = self.codegen_operand(bx, source).immediate();
+                // It's `fn panic_invalid_enum_construction(source: u128)`,
+                // `#[track_caller]` adds an implicit argument.
+                (LangItem::PanicInvalidEnumConstruction, vec![source, location])
+            }
             _ => {
                 // It's `pub fn panic_...()` and `#[track_caller]` adds an implicit argument.
                 (msg.panic_function(), vec![location])
             }
         };
 
-        let (fn_abi, llfn, instance) = common::build_langcall(bx, Some(span), lang_item);
+        let (fn_abi, llfn, instance) = common::build_langcall(bx, span, lang_item);
 
         // Codegen the actual panic invoke/call.
         let merging_succ =
@@ -803,7 +764,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
         self.set_debug_loc(bx, terminator.source_info);
 
         // Obtain the panic entry point.
-        let (fn_abi, llfn, instance) = common::build_langcall(bx, Some(span), reason.lang_item());
+        let (fn_abi, llfn, instance) = common::build_langcall(bx, span, reason.lang_item());
 
         // Codegen the actual panic invoke/call.
         let merging_succ = helper.do_call(
@@ -871,7 +832,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
 
         // Obtain the panic entry point.
         let (fn_abi, llfn, instance) =
-            common::build_langcall(bx, Some(source_info.span), LangItem::PanicNounwind);
+            common::build_langcall(bx, source_info.span, LangItem::PanicNounwind);
 
         // Codegen the actual panic invoke/call.
         Some(helper.do_call(
@@ -1077,7 +1038,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                             let (idx, _) = op.layout.non_1zst_field(bx).expect(
                                 "not exactly one non-1-ZST field in a `DispatchFromDyn` type",
                             );
-                            op = op.extract_field(self, bx, idx);
+                            op = op.extract_field(self, bx, idx.as_usize());
                         }
 
                         // Now that we have `*dyn Trait` or `&dyn Trait`, split it up into its
@@ -1101,33 +1062,6 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                             fn_abi,
                         ));
                         llargs.push(data_ptr);
-                        continue;
-                    }
-                    Immediate(_) => {
-                        // See comment above explaining why we peel these newtypes
-                        while !op.layout.ty.is_raw_ptr() && !op.layout.ty.is_ref() {
-                            let (idx, _) = op.layout.non_1zst_field(bx).expect(
-                                "not exactly one non-1-ZST field in a `DispatchFromDyn` type",
-                            );
-                            op = op.extract_field(self, bx, idx);
-                        }
-
-                        // Make sure that we've actually unwrapped the rcvr down
-                        // to a pointer or ref to `dyn* Trait`.
-                        if !op.layout.ty.builtin_deref(true).unwrap().is_dyn_star() {
-                            span_bug!(fn_span, "can't codegen a virtual call on {:#?}", op);
-                        }
-                        let place = op.deref(bx.cx());
-                        let data_place = place.project_field(bx, 0);
-                        let meta_place = place.project_field(bx, 1);
-                        let meta = bx.load_operand(meta_place);
-                        llfn = Some(meth::VirtualIndex::from_index(idx).get_fn(
-                            bx,
-                            meta.immediate(),
-                            op.layout.ty,
-                            fn_abi,
-                        ));
-                        llargs.push(data_place.val.llval);
                         continue;
                     }
                     _ => {
@@ -1618,8 +1552,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                     MemFlags::empty(),
                 );
                 // ...and then load it with the ABI type.
-                let cast_ty = bx.cast_backend_type(cast);
-                llval = bx.load(cast_ty, llscratch, scratch_align);
+                llval = load_cast(bx, cast, llscratch, scratch_align);
                 bx.lifetime_end(llscratch, scratch_size);
             } else {
                 // We can't use `PlaceRef::load` here because the argument
@@ -1830,7 +1763,8 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
 
         self.set_debug_loc(&mut bx, mir::SourceInfo::outermost(self.mir.span));
 
-        let (fn_abi, fn_ptr, instance) = common::build_langcall(&bx, None, reason.lang_item());
+        let (fn_abi, fn_ptr, instance) =
+            common::build_langcall(&bx, self.mir.span, reason.lang_item());
         if is_call_from_compiler_builtins_to_upstream_monomorphization(bx.tcx(), instance) {
             bx.abort();
         } else {
@@ -1967,4 +1901,48 @@ enum ReturnDest<'tcx, V> {
     IndirectOperand(PlaceRef<'tcx, V>, mir::Local),
     /// Store a direct return value to an operand local place.
     DirectOperand(mir::Local),
+}
+
+fn load_cast<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
+    bx: &mut Bx,
+    cast: &CastTarget,
+    ptr: Bx::Value,
+    align: Align,
+) -> Bx::Value {
+    let cast_ty = bx.cast_backend_type(cast);
+    if let Some(offset_from_start) = cast.rest_offset {
+        assert!(cast.prefix[1..].iter().all(|p| p.is_none()));
+        assert_eq!(cast.rest.unit.size, cast.rest.total);
+        let first_ty = bx.reg_backend_type(&cast.prefix[0].unwrap());
+        let second_ty = bx.reg_backend_type(&cast.rest.unit);
+        let first = bx.load(first_ty, ptr, align);
+        let second_ptr = bx.inbounds_ptradd(ptr, bx.const_usize(offset_from_start.bytes()));
+        let second = bx.load(second_ty, second_ptr, align.restrict_for_offset(offset_from_start));
+        let res = bx.cx().const_poison(cast_ty);
+        let res = bx.insert_value(res, first, 0);
+        bx.insert_value(res, second, 1)
+    } else {
+        bx.load(cast_ty, ptr, align)
+    }
+}
+
+pub fn store_cast<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
+    bx: &mut Bx,
+    cast: &CastTarget,
+    value: Bx::Value,
+    ptr: Bx::Value,
+    align: Align,
+) {
+    if let Some(offset_from_start) = cast.rest_offset {
+        assert!(cast.prefix[1..].iter().all(|p| p.is_none()));
+        assert_eq!(cast.rest.unit.size, cast.rest.total);
+        assert!(cast.prefix[0].is_some());
+        let first = bx.extract_value(value, 0);
+        let second = bx.extract_value(value, 1);
+        bx.store(first, ptr, align);
+        let second_ptr = bx.inbounds_ptradd(ptr, bx.const_usize(offset_from_start.bytes()));
+        bx.store(second, second_ptr, align.restrict_for_offset(offset_from_start));
+    } else {
+        bx.store(value, ptr, align);
+    };
 }

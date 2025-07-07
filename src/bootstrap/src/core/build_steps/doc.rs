@@ -14,7 +14,8 @@ use std::{env, fs, mem};
 use crate::core::build_steps::compile;
 use crate::core::build_steps::tool::{self, SourceType, Tool, prepare_tool_cargo};
 use crate::core::builder::{
-    self, Alias, Builder, Compiler, Kind, RunConfig, ShouldRun, Step, crate_description,
+    self, Alias, Builder, Compiler, Kind, RunConfig, ShouldRun, Step, StepMetadata,
+    crate_description,
 };
 use crate::core::config::{Config, TargetSelection};
 use crate::helpers::{submodule_path_of, symlink_dir, t, up_to_date};
@@ -209,7 +210,7 @@ impl Step for TheBook {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(TheBook {
-            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.build),
+            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.host_target),
             target: run.target,
         });
     }
@@ -329,7 +330,7 @@ impl Step for Standalone {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(Standalone {
-            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.build),
+            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.host_target),
             target: run.target,
         });
     }
@@ -434,7 +435,7 @@ impl Step for Releases {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(Releases {
-            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.build),
+            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.host_target),
             target: run.target,
         });
     }
@@ -452,7 +453,7 @@ impl Step for Releases {
         t!(fs::create_dir_all(&out));
 
         builder.ensure(Standalone {
-            compiler: builder.compiler(builder.top_stage, builder.config.build),
+            compiler: builder.compiler(builder.top_stage, builder.config.host_target),
             target,
         });
 
@@ -670,6 +671,10 @@ impl Step for Std {
             }
         }
     }
+
+    fn metadata(&self) -> Option<StepMetadata> {
+        Some(StepMetadata::doc("std", self.target).stage(self.stage))
+    }
 }
 
 /// Name of the crates that are visible to consumers of the standard library.
@@ -708,7 +713,7 @@ fn doc_std(
     extra_args: &[&str],
     requested_crates: &[String],
 ) {
-    let compiler = builder.compiler(stage, builder.config.build);
+    let compiler = builder.compiler(stage, builder.config.host_target);
 
     let target_doc_dir_name = if format == DocumentationFormat::Json { "json-doc" } else { "doc" };
     let target_dir = builder.stage_out(compiler, Mode::Std).join(target).join(target_doc_dir_name);
@@ -824,8 +829,8 @@ impl Step for Rustc {
 
         // Build the standard library, so that proc-macros can use it.
         // (Normally, only the metadata would be necessary, but proc-macros are special since they run at compile-time.)
-        let compiler = builder.compiler(stage, builder.config.build);
-        builder.ensure(compile::Std::new(compiler, builder.config.build));
+        let compiler = builder.compiler(stage, builder.config.host_target);
+        builder.std(compiler, builder.config.host_target);
 
         let _guard = builder.msg_sysroot_tool(
             Kind::Doc,
@@ -967,8 +972,8 @@ macro_rules! tool_doc {
                 let out = builder.compiler_doc_out(target);
                 t!(fs::create_dir_all(&out));
 
-                let compiler = builder.compiler(stage, builder.config.build);
-                builder.ensure(compile::Std::new(compiler, target));
+                let compiler = builder.compiler(stage, builder.config.host_target);
+                builder.std(compiler, target);
 
                 if true $(&& $rustc_tool)? {
                     // Build rustc docs so that we generate relative links.
@@ -1195,7 +1200,7 @@ impl Step for RustcBook {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(RustcBook {
-            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.build),
+            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.host_target),
             target: run.target,
             validate: false,
         });
@@ -1216,7 +1221,7 @@ impl Step for RustcBook {
         let rustc = builder.rustc(self.compiler);
         // The tool runs `rustc` for extracting output examples, so it needs a
         // functional sysroot.
-        builder.ensure(compile::Std::new(self.compiler, self.target));
+        builder.std(self.compiler, self.target);
         let mut cmd = builder.tool_cmd(Tool::LintDocs);
         cmd.arg("--src");
         cmd.arg(builder.src.join("compiler"));
@@ -1282,7 +1287,7 @@ impl Step for Reference {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(Reference {
-            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.build),
+            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.host_target),
             target: run.target,
         });
     }
@@ -1293,7 +1298,7 @@ impl Step for Reference {
 
         // This is needed for generating links to the standard library using
         // the mdbook-spec plugin.
-        builder.ensure(compile::Std::new(self.compiler, builder.config.build));
+        builder.std(self.compiler, builder.config.host_target);
 
         // Run rustbook/mdbook to generate the HTML pages.
         builder.ensure(RustbookSrc {

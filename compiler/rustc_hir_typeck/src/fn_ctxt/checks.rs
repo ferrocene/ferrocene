@@ -11,7 +11,7 @@ use rustc_hir::{ExprKind, HirId, LangItem, Node, QPath};
 use rustc_hir_analysis::check::potentially_plural_count;
 use rustc_hir_analysis::hir_ty_lowering::{HirTyLowerer, PermitVariants};
 use rustc_index::IndexVec;
-use rustc_infer::infer::{DefineOpaqueTypes, InferOk, TypeTrace};
+use rustc_infer::infer::{BoundRegionConversionTime, DefineOpaqueTypes, InferOk, TypeTrace};
 use rustc_middle::ty::adjustment::AllowTwoPhase;
 use rustc_middle::ty::error::TypeError;
 use rustc_middle::ty::{self, IsSuggestable, Ty, TyCtxt, TypeVisitableExt};
@@ -30,7 +30,6 @@ use crate::TupleArgumentsFlag::*;
 use crate::coercion::CoerceMany;
 use crate::errors::SuggestPtrNullMut;
 use crate::fn_ctxt::arg_matrix::{ArgMatrix, Compatibility, Error, ExpectedIdx, ProvidedIdx};
-use crate::fn_ctxt::infer::FnCall;
 use crate::gather_locals::Declaration;
 use crate::inline_asm::InlineAsmCtxt;
 use crate::method::probe::IsSuggestion;
@@ -165,7 +164,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 _ => traits::IsConstable::No,
             };
 
-            let lang_item = self.tcx.require_lang_item(LangItem::Copy, None);
+            let lang_item = self.tcx.require_lang_item(LangItem::Copy, element.span);
             let code = traits::ObligationCauseCode::RepeatElementCopy {
                 is_constable,
                 elt_span: element.span,
@@ -657,7 +656,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 let args = self.infcx.fresh_args_for_item(call_name.span, assoc.def_id);
                 let fn_sig = tcx.fn_sig(assoc.def_id).instantiate(tcx, args);
 
-                self.instantiate_binder_with_fresh_vars(call_name.span, FnCall, fn_sig);
+                self.instantiate_binder_with_fresh_vars(
+                    call_name.span,
+                    BoundRegionConversionTime::FnCall,
+                    fn_sig,
+                );
             }
             None
         };
@@ -1634,7 +1637,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             ast::LitKind::ByteStr(ref v, _) => Ty::new_imm_ref(
                 tcx,
                 tcx.lifetimes.re_static,
-                Ty::new_array(tcx, tcx.types.u8, v.len() as u64),
+                Ty::new_array(tcx, tcx.types.u8, v.as_byte_str().len() as u64),
             ),
             ast::LitKind::Byte(_) => tcx.types.u8,
             ast::LitKind::Char(_) => tcx.types.char,
@@ -1680,8 +1683,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             ast::LitKind::CStr(_, _) => Ty::new_imm_ref(
                 tcx,
                 tcx.lifetimes.re_static,
-                tcx.type_of(tcx.require_lang_item(hir::LangItem::CStr, Some(lit.span)))
-                    .skip_binder(),
+                tcx.type_of(tcx.require_lang_item(hir::LangItem::CStr, lit.span)).skip_binder(),
             ),
             ast::LitKind::Err(guar) => Ty::new_error(tcx, guar),
         }

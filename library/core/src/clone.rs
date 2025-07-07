@@ -36,7 +36,12 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
+=======
+use crate::marker::{Destruct, PointeeSized};
+
+>>>>>>> main
 mod uninit;
 
 /// A common trait that allows explicit creation of a duplicate value.
@@ -156,6 +161,8 @@ mod uninit;
 #[lang = "clone"]
 #[rustc_diagnostic_item = "Clone"]
 #[rustc_trivial_field_reads]
+#[rustc_const_unstable(feature = "const_clone", issue = "142757")]
+#[const_trait]
 pub trait Clone: Sized {
     /// Returns a duplicate of the value.
     ///
@@ -207,7 +214,10 @@ pub trait Clone: Sized {
     /// allocations.
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    fn clone_from(&mut self, source: &Self) {
+    fn clone_from(&mut self, source: &Self)
+    where
+        Self: ~const Destruct,
+    {
         *self = source.clone()
     }
 }
@@ -287,7 +297,7 @@ impl_use_cloned! {
     reason = "deriving hack, should not be public",
     issue = "none"
 )]
-pub struct AssertParamIsClone<T: Clone + ?Sized> {
+pub struct AssertParamIsClone<T: Clone + PointeeSized> {
     _field: crate::marker::PhantomData<T>,
 }
 #[doc(hidden)]
@@ -297,8 +307,12 @@ pub struct AssertParamIsClone<T: Clone + ?Sized> {
     reason = "deriving hack, should not be public",
     issue = "none"
 )]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 pub struct AssertParamIsCopy<T: Copy + ?Sized> {
+=======
+pub struct AssertParamIsCopy<T: Copy + PointeeSized> {
+>>>>>>> main
     _field: crate::marker::PhantomData<T>,
 }
 
@@ -541,6 +555,8 @@ unsafe impl CloneToUninit for crate::bstr::ByteStr {
 /// are implemented in `traits::SelectionContext::copy_clone_conditions()`
 /// in `rustc_trait_selection`.
 mod impls {
+    use crate::marker::PointeeSized;
+
     macro_rules! impl_clone {
         ($($t:ty)*) => {
             $(
@@ -581,7 +597,7 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<T: ?Sized> Clone for *const T {
+    impl<T: PointeeSized> Clone for *const T {
         #[inline(always)]
         fn clone(&self) -> Self {
             *self
@@ -589,7 +605,7 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<T: ?Sized> Clone for *mut T {
+    impl<T: PointeeSized> Clone for *mut T {
         #[inline(always)]
         fn clone(&self) -> Self {
             *self
@@ -598,7 +614,7 @@ mod impls {
 
     /// Shared references can be cloned, but mutable references *cannot*!
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<T: ?Sized> Clone for &T {
+    impl<T: PointeeSized> Clone for &T {
         #[inline(always)]
         #[rustc_diagnostic_item = "noop_method_clone"]
         fn clone(&self) -> Self {
@@ -609,5 +625,5 @@ mod impls {
     /// Shared references can be cloned, but mutable references *cannot*!
     #[cfg(not(feature = "ferrocene_certified"))]
     #[stable(feature = "rust1", since = "1.0.0")]
-    impl<T: ?Sized> !Clone for &mut T {}
+    impl<T: PointeeSized> !Clone for &mut T {}
 }

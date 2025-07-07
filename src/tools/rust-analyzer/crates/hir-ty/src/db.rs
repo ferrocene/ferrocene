@@ -31,6 +31,7 @@ use crate::{
 #[query_group::query_group]
 pub trait HirDatabase: DefDatabase + std::fmt::Debug {
     #[salsa::invoke(crate::infer::infer_query)]
+    #[salsa::cycle(cycle_result = crate::infer::infer_cycle_result)]
     fn infer(&self, def: DefWithBodyId) -> Arc<InferenceResult>;
 
     // region:mir
@@ -132,6 +133,7 @@ pub trait HirDatabase: DefDatabase + std::fmt::Debug {
 
     // FIXME: Make this a non-interned query.
     #[salsa::invoke_interned(crate::lower::const_param_ty_with_diagnostics_query)]
+    #[salsa::cycle(cycle_result = crate::lower::const_param_ty_with_diagnostics_cycle_result)]
     fn const_param_ty_with_diagnostics(&self, def: ConstParamId) -> (Ty, Diagnostics);
 
     #[salsa::invoke(crate::lower::const_param_ty_query)]
@@ -234,9 +236,6 @@ pub trait HirDatabase: DefDatabase + std::fmt::Debug {
     fn trait_impls_in_deps(&self, krate: Crate) -> Arc<[Arc<TraitImpls>]>;
 
     // Interned IDs for Chalk integration
-    #[salsa::interned]
-    fn intern_callable_def(&self, callable_def: CallableDefId) -> InternedCallableDefId;
-
     #[salsa::interned]
     fn intern_type_or_const_param_id(
         &self,
@@ -345,7 +344,3 @@ impl_intern_key!(InternedClosureId, InternedClosure);
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct InternedCoroutine(pub DefWithBodyId, pub ExprId);
 impl_intern_key!(InternedCoroutineId, InternedCoroutine);
-
-// This exists just for Chalk, because Chalk just has a single `FnDefId` where
-// we have different IDs for struct and enum variant constructors.
-impl_intern_key!(InternedCallableDefId, CallableDefId);

@@ -260,7 +260,11 @@ use crate::marker::{PhantomData, PointerLike, Unsize};
 use crate::mem;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{CoerceUnsized, Deref, DerefMut, DerefPure, DispatchFromDyn};
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
+=======
+use crate::panic::const_panic;
+>>>>>>> main
 use crate::pin::PinCoerceUnsized;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::{self, NonNull};
@@ -750,7 +754,7 @@ impl<T, const N: usize> Cell<[T; N]> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub struct RefCell<T: ?Sized> {
-    borrow: Cell<BorrowFlag>,
+    borrow: Cell<BorrowCounter>,
     // Stores the location of the earliest currently active borrow.
     // This gets updated whenever we go from having zero borrows
     // to having a single borrow. When a borrow occurs, this gets included
@@ -763,13 +767,18 @@ pub struct RefCell<T: ?Sized> {
 /// An error returned by [`RefCell::try_borrow`].
 #[stable(feature = "try_borrow", since = "1.13.0")]
 #[non_exhaustive]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
+=======
+#[derive(Debug)]
+>>>>>>> main
 pub struct BorrowError {
     #[cfg(feature = "debug_refcell")]
     location: &'static crate::panic::Location<'static>,
 }
 
 #[stable(feature = "try_borrow", since = "1.13.0")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl Debug for BorrowError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -784,22 +793,39 @@ impl Debug for BorrowError {
 
 #[stable(feature = "try_borrow", since = "1.13.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+=======
+>>>>>>> main
 impl Display for BorrowError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        Display::fmt("already mutably borrowed", f)
+        #[cfg(feature = "debug_refcell")]
+        let res = write!(
+            f,
+            "RefCell already mutably borrowed; a previous borrow was at {}",
+            self.location
+        );
+
+        #[cfg(not(feature = "debug_refcell"))]
+        let res = Display::fmt("RefCell already mutably borrowed", f);
+
+        res
     }
 }
 
 /// An error returned by [`RefCell::try_borrow_mut`].
 #[stable(feature = "try_borrow", since = "1.13.0")]
 #[non_exhaustive]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
+=======
+#[derive(Debug)]
+>>>>>>> main
 pub struct BorrowMutError {
     #[cfg(feature = "debug_refcell")]
     location: &'static crate::panic::Location<'static>,
 }
 
 #[stable(feature = "try_borrow", since = "1.13.0")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl Debug for BorrowMutError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -814,9 +840,17 @@ impl Debug for BorrowMutError {
 
 #[stable(feature = "try_borrow", since = "1.13.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
+=======
+>>>>>>> main
 impl Display for BorrowMutError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        Display::fmt("already borrowed", f)
+        #[cfg(feature = "debug_refcell")]
+        let res = write!(f, "RefCell already borrowed; a previous borrow was at {}", self.location);
+
+        #[cfg(not(feature = "debug_refcell"))]
+        let res = Display::fmt("RefCell already borrowed", f);
+
+        res
     }
 }
 
@@ -824,18 +858,36 @@ impl Display for BorrowMutError {
 #[cfg_attr(not(feature = "panic_immediate_abort"), inline(never))]
 #[track_caller]
 #[cold]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 fn panic_already_borrowed(err: BorrowMutError) -> ! {
     panic!("already borrowed: {:?}", err)
+=======
+const fn panic_already_borrowed(err: BorrowMutError) -> ! {
+    const_panic!(
+        "RefCell already borrowed",
+        "{err}",
+        err: BorrowMutError = err,
+    )
+>>>>>>> main
 }
 
 // This ensures the panicking code is outlined from `borrow` for `RefCell`.
 #[cfg_attr(not(feature = "panic_immediate_abort"), inline(never))]
 #[track_caller]
 #[cold]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 fn panic_already_mutably_borrowed(err: BorrowError) -> ! {
     panic!("already mutably borrowed: {:?}", err)
+=======
+const fn panic_already_mutably_borrowed(err: BorrowError) -> ! {
+    const_panic!(
+        "RefCell already mutably borrowed",
+        "{err}",
+        err: BorrowError = err,
+    )
+>>>>>>> main
 }
 
 // Positive values represent the number of `Ref` active. Negative values
@@ -845,12 +897,13 @@ fn panic_already_mutably_borrowed(err: BorrowError) -> ! {
 //
 // `Ref` and `RefMut` are both two words in size, and so there will likely never
 // be enough `Ref`s or `RefMut`s in existence to overflow half of the `usize`
-// range. Thus, a `BorrowFlag` will probably never overflow or underflow.
+// range. Thus, a `BorrowCounter` will probably never overflow or underflow.
 // However, this is not a guarantee, as a pathological program could repeatedly
 // create and then mem::forget `Ref`s or `RefMut`s. Thus, all code must
 // explicitly check for overflow and underflow in order to avoid unsafety, or at
 // least behave correctly in the event that overflow or underflow happens (e.g.,
 // see BorrowRef::new).
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 type BorrowFlag = isize;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -859,12 +912,23 @@ const UNUSED: BorrowFlag = 0;
 #[inline(always)]
 #[cfg(not(feature = "ferrocene_certified"))]
 fn is_writing(x: BorrowFlag) -> bool {
+=======
+type BorrowCounter = isize;
+const UNUSED: BorrowCounter = 0;
+
+#[inline(always)]
+const fn is_writing(x: BorrowCounter) -> bool {
+>>>>>>> main
     x < UNUSED
 }
 
 #[inline(always)]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 fn is_reading(x: BorrowFlag) -> bool {
+=======
+const fn is_reading(x: BorrowCounter) -> bool {
+>>>>>>> main
     x > UNUSED
 }
 
@@ -934,8 +998,9 @@ impl<T> RefCell<T> {
     #[stable(feature = "refcell_replace", since = "1.24.0")]
     #[track_caller]
     #[rustc_confusables("swap")]
-    pub fn replace(&self, t: T) -> T {
-        mem::replace(&mut *self.borrow_mut(), t)
+    #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+    pub const fn replace(&self, t: T) -> T {
+        mem::replace(&mut self.borrow_mut(), t)
     }
 
     /// Replaces the wrapped value with a new one computed from `f`, returning
@@ -985,7 +1050,8 @@ impl<T> RefCell<T> {
     /// ```
     #[inline]
     #[stable(feature = "refcell_swap", since = "1.24.0")]
-    pub fn swap(&self, other: &Self) {
+    #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+    pub const fn swap(&self, other: &Self) {
         mem::swap(&mut *self.borrow_mut(), &mut *other.borrow_mut())
     }
 }
@@ -1026,7 +1092,8 @@ impl<T: ?Sized> RefCell<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
     #[track_caller]
-    pub fn borrow(&self) -> Ref<'_, T> {
+    #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+    pub const fn borrow(&self) -> Ref<'_, T> {
         match self.try_borrow() {
             Ok(b) => b,
             Err(err) => panic_already_mutably_borrowed(err),
@@ -1061,14 +1128,15 @@ impl<T: ?Sized> RefCell<T> {
     #[stable(feature = "try_borrow", since = "1.13.0")]
     #[inline]
     #[cfg_attr(feature = "debug_refcell", track_caller)]
-    pub fn try_borrow(&self) -> Result<Ref<'_, T>, BorrowError> {
+    #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+    pub const fn try_borrow(&self) -> Result<Ref<'_, T>, BorrowError> {
         match BorrowRef::new(&self.borrow) {
             Some(b) => {
                 #[cfg(feature = "debug_refcell")]
                 {
                     // `borrowed_at` is always the *first* active borrow
                     if b.borrow.get() == 1 {
-                        self.borrowed_at.set(Some(crate::panic::Location::caller()));
+                        self.borrowed_at.replace(Some(crate::panic::Location::caller()));
                     }
                 }
 
@@ -1122,7 +1190,8 @@ impl<T: ?Sized> RefCell<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
     #[track_caller]
-    pub fn borrow_mut(&self) -> RefMut<'_, T> {
+    #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+    pub const fn borrow_mut(&self) -> RefMut<'_, T> {
         match self.try_borrow_mut() {
             Ok(b) => b,
             Err(err) => panic_already_borrowed(err),
@@ -1154,12 +1223,13 @@ impl<T: ?Sized> RefCell<T> {
     #[stable(feature = "try_borrow", since = "1.13.0")]
     #[inline]
     #[cfg_attr(feature = "debug_refcell", track_caller)]
-    pub fn try_borrow_mut(&self) -> Result<RefMut<'_, T>, BorrowMutError> {
+    #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+    pub const fn try_borrow_mut(&self) -> Result<RefMut<'_, T>, BorrowMutError> {
         match BorrowRefMut::new(&self.borrow) {
             Some(b) => {
                 #[cfg(feature = "debug_refcell")]
                 {
-                    self.borrowed_at.set(Some(crate::panic::Location::caller()));
+                    self.borrowed_at.replace(Some(crate::panic::Location::caller()));
                 }
 
                 // SAFETY: `BorrowRefMut` guarantees unique access.
@@ -1190,7 +1260,8 @@ impl<T: ?Sized> RefCell<T> {
     #[stable(feature = "cell_as_ptr", since = "1.12.0")]
     #[rustc_as_ptr]
     #[rustc_never_returns_null_ptr]
-    pub fn as_ptr(&self) -> *mut T {
+    #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+    pub const fn as_ptr(&self) -> *mut T {
         self.value.get()
     }
 
@@ -1227,7 +1298,8 @@ impl<T: ?Sized> RefCell<T> {
     /// ```
     #[inline]
     #[stable(feature = "cell_get_mut", since = "1.11.0")]
-    pub fn get_mut(&mut self) -> &mut T {
+    #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+    pub const fn get_mut(&mut self) -> &mut T {
         self.value.get_mut()
     }
 
@@ -1253,7 +1325,8 @@ impl<T: ?Sized> RefCell<T> {
     /// assert!(c.try_borrow().is_ok());
     /// ```
     #[unstable(feature = "cell_leak", issue = "69099")]
-    pub fn undo_leak(&mut self) -> &mut T {
+    #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+    pub const fn undo_leak(&mut self) -> &mut T {
         *self.borrow.get_mut() = UNUSED;
         self.get_mut()
     }
@@ -1287,7 +1360,8 @@ impl<T: ?Sized> RefCell<T> {
     /// ```
     #[stable(feature = "borrow_state", since = "1.37.0")]
     #[inline]
-    pub unsafe fn try_borrow_unguarded(&self) -> Result<&T, BorrowError> {
+    #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+    pub const unsafe fn try_borrow_unguarded(&self) -> Result<&T, BorrowError> {
         if !is_writing(self.borrow.get()) {
             // SAFETY: We check that nobody is actively writing now, but it is
             // the caller's responsibility to ensure that nobody writes until
@@ -1458,13 +1532,13 @@ impl<T: CoerceUnsized<U>, U> CoerceUnsized<RefCell<U>> for RefCell<T> {}
 
 #[cfg(not(feature = "ferrocene_certified"))]
 struct BorrowRef<'b> {
-    borrow: &'b Cell<BorrowFlag>,
+    borrow: &'b Cell<BorrowCounter>,
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<'b> BorrowRef<'b> {
     #[inline]
-    fn new(borrow: &'b Cell<BorrowFlag>) -> Option<BorrowRef<'b>> {
+    const fn new(borrow: &'b Cell<BorrowCounter>) -> Option<BorrowRef<'b>> {
         let b = borrow.get().wrapping_add(1);
         if !is_reading(b) {
             // Incrementing borrow can result in a non-reading value (<= 0) in these cases:
@@ -1481,24 +1555,34 @@ impl<'b> BorrowRef<'b> {
             // 1. It was = 0, i.e. it wasn't borrowed, and we are taking the first read borrow
             // 2. It was > 0 and < isize::MAX, i.e. there were read borrows, and isize
             //    is large enough to represent having one more read borrow
-            borrow.set(b);
+            borrow.replace(b);
             Some(BorrowRef { borrow })
         }
     }
 }
 
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl Drop for BorrowRef<'_> {
+=======
+#[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+impl const Drop for BorrowRef<'_> {
+>>>>>>> main
     #[inline]
     fn drop(&mut self) {
         let borrow = self.borrow.get();
         debug_assert!(is_reading(borrow));
-        self.borrow.set(borrow - 1);
+        self.borrow.replace(borrow - 1);
     }
 }
 
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl Clone for BorrowRef<'_> {
+=======
+#[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+impl const Clone for BorrowRef<'_> {
+>>>>>>> main
     #[inline]
     fn clone(&self) -> Self {
         // Since this Ref exists, we know the borrow flag
@@ -1507,8 +1591,8 @@ impl Clone for BorrowRef<'_> {
         debug_assert!(is_reading(borrow));
         // Prevent the borrow counter from overflowing into
         // a writing borrow.
-        assert!(borrow != BorrowFlag::MAX);
-        self.borrow.set(borrow + 1);
+        assert!(borrow != BorrowCounter::MAX);
+        self.borrow.replace(borrow + 1);
         BorrowRef { borrow: self.borrow }
     }
 }
@@ -1530,8 +1614,13 @@ pub struct Ref<'b, T: ?Sized + 'b> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Deref for Ref<'_, T> {
+=======
+#[rustc_const_unstable(feature = "const_deref", issue = "88955")]
+impl<T: ?Sized> const Deref for Ref<'_, T> {
+>>>>>>> main
     type Target = T;
 
     #[inline]
@@ -1558,7 +1647,8 @@ impl<'b, T: ?Sized> Ref<'b, T> {
     #[stable(feature = "cell_extras", since = "1.15.0")]
     #[must_use]
     #[inline]
-    pub fn clone(orig: &Ref<'b, T>) -> Ref<'b, T> {
+    #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+    pub const fn clone(orig: &Ref<'b, T>) -> Ref<'b, T> {
         Ref { value: orig.value, borrow: orig.borrow.clone() }
     }
 
@@ -1680,7 +1770,8 @@ impl<'b, T: ?Sized> Ref<'b, T> {
     /// assert!(cell.try_borrow_mut().is_err());
     /// ```
     #[unstable(feature = "cell_leak", issue = "69099")]
-    pub fn leak(orig: Ref<'b, T>) -> &'b T {
+    #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+    pub const fn leak(orig: Ref<'b, T>) -> &'b T {
         // By forgetting this Ref we ensure that the borrow counter in the RefCell can't go back to
         // UNUSED within the lifetime `'b`. Resetting the reference tracking state would require a
         // unique reference to the borrowed RefCell. No further mutable references can be created
@@ -1849,7 +1940,8 @@ impl<'b, T: ?Sized> RefMut<'b, T> {
     /// assert!(cell.try_borrow_mut().is_err());
     /// ```
     #[unstable(feature = "cell_leak", issue = "69099")]
-    pub fn leak(mut orig: RefMut<'b, T>) -> &'b mut T {
+    #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+    pub const fn leak(mut orig: RefMut<'b, T>) -> &'b mut T {
         // By forgetting this BorrowRefMut we ensure that the borrow counter in the RefCell can't
         // go back to UNUSED within the lifetime `'b`. Resetting the reference tracking state would
         // require a unique reference to the borrowed RefCell. No further references can be created
@@ -1863,30 +1955,35 @@ impl<'b, T: ?Sized> RefMut<'b, T> {
 
 #[cfg(not(feature = "ferrocene_certified"))]
 struct BorrowRefMut<'b> {
-    borrow: &'b Cell<BorrowFlag>,
+    borrow: &'b Cell<BorrowCounter>,
 }
 
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl Drop for BorrowRefMut<'_> {
+=======
+#[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+impl const Drop for BorrowRefMut<'_> {
+>>>>>>> main
     #[inline]
     fn drop(&mut self) {
         let borrow = self.borrow.get();
         debug_assert!(is_writing(borrow));
-        self.borrow.set(borrow + 1);
+        self.borrow.replace(borrow + 1);
     }
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<'b> BorrowRefMut<'b> {
     #[inline]
-    fn new(borrow: &'b Cell<BorrowFlag>) -> Option<BorrowRefMut<'b>> {
+    const fn new(borrow: &'b Cell<BorrowCounter>) -> Option<BorrowRefMut<'b>> {
         // NOTE: Unlike BorrowRefMut::clone, new is called to create the initial
         // mutable reference, and so there must currently be no existing
         // references. Thus, while clone increments the mutable refcount, here
         // we explicitly only allow going from UNUSED to UNUSED - 1.
         match borrow.get() {
             UNUSED => {
-                borrow.set(UNUSED - 1);
+                borrow.replace(UNUSED - 1);
                 Some(BorrowRefMut { borrow })
             }
             _ => None,
@@ -1903,7 +2000,7 @@ impl<'b> BorrowRefMut<'b> {
         let borrow = self.borrow.get();
         debug_assert!(is_writing(borrow));
         // Prevent the borrow counter from underflowing.
-        assert!(borrow != BorrowFlag::MIN);
+        assert!(borrow != BorrowCounter::MIN);
         self.borrow.set(borrow - 1);
         BorrowRefMut { borrow: self.borrow }
     }
@@ -1926,8 +2023,13 @@ pub struct RefMut<'b, T: ?Sized + 'b> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Deref for RefMut<'_, T> {
+=======
+#[rustc_const_unstable(feature = "const_deref", issue = "88955")]
+impl<T: ?Sized> const Deref for RefMut<'_, T> {
+>>>>>>> main
     type Target = T;
 
     #[inline]
@@ -1938,8 +2040,13 @@ impl<T: ?Sized> Deref for RefMut<'_, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> DerefMut for RefMut<'_, T> {
+=======
+#[rustc_const_unstable(feature = "const_deref", issue = "88955")]
+impl<T: ?Sized> const DerefMut for RefMut<'_, T> {
+>>>>>>> main
     #[inline]
     fn deref_mut(&mut self) -> &mut T {
         // SAFETY: the value is accessible as long as we hold our borrow.
@@ -1989,6 +2096,8 @@ impl<T: ?Sized + fmt::Display> fmt::Display for RefMut<'_, T> {
 ///
 /// [`.get()`]: `UnsafeCell::get`
 /// [concurrent memory model]: ../sync/atomic/index.html#memory-model-for-atomic-accesses
+///
+/// # Aliasing rules
 ///
 /// The precise Rust aliasing rules are somewhat in flux, but the main points are not contentious:
 ///
@@ -2246,10 +2355,9 @@ impl<T: ?Sized> UnsafeCell<T> {
 
     /// Gets a mutable pointer to the wrapped value.
     ///
-    /// This can be cast to a pointer of any kind.
-    /// Ensure that the access is unique (no active references, mutable or not)
-    /// when casting to `&mut T`, and ensure that there are no mutations
-    /// or mutable aliases going on when casting to `&T`
+    /// This can be cast to a pointer of any kind. When creating references, you must uphold the
+    /// aliasing rules; see [the type-level docs][UnsafeCell#aliasing-rules] for more discussion and
+    /// caveats.
     ///
     /// # Examples
     ///
@@ -2298,10 +2406,9 @@ impl<T: ?Sized> UnsafeCell<T> {
     /// The difference from [`get`] is that this function accepts a raw pointer,
     /// which is useful to avoid the creation of temporary references.
     ///
-    /// The result can be cast to a pointer of any kind.
-    /// Ensure that the access is unique (no active references, mutable or not)
-    /// when casting to `&mut T`, and ensure that there are no mutations
-    /// or mutable aliases going on when casting to `&T`.
+    /// This can be cast to a pointer of any kind. When creating references, you must uphold the
+    /// aliasing rules; see [the type-level docs][UnsafeCell#aliasing-rules] for more discussion and
+    /// caveats.
     ///
     /// [`get`]: UnsafeCell::get()
     ///

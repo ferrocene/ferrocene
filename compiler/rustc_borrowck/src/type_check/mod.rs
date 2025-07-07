@@ -16,7 +16,7 @@ use rustc_infer::infer::canonical::QueryRegionConstraints;
 use rustc_infer::infer::outlives::env::RegionBoundPairs;
 use rustc_infer::infer::region_constraints::RegionConstraintData;
 use rustc_infer::infer::{
-    BoundRegion, BoundRegionConversionTime, InferCtxt, NllRegionVariableOrigin,
+    BoundRegionConversionTime, InferCtxt, NllRegionVariableOrigin, RegionVariableOrigin,
 };
 use rustc_infer::traits::PredicateObligations;
 use rustc_middle::mir::visit::{NonMutatingUseContext, PlaceContext, Visitor};
@@ -25,9 +25,9 @@ use rustc_middle::traits::query::NoSolution;
 use rustc_middle::ty::adjustment::PointerCoercion;
 use rustc_middle::ty::cast::CastTy;
 use rustc_middle::ty::{
-    self, Binder, CanonicalUserTypeAnnotation, CanonicalUserTypeAnnotations, CoroutineArgsExt,
-    Dynamic, GenericArgsRef, OpaqueHiddenType, OpaqueTypeKey, RegionVid, Ty, TyCtxt,
-    TypeVisitableExt, UserArgs, UserTypeAnnotationIndex, fold_regions,
+    self, CanonicalUserTypeAnnotation, CanonicalUserTypeAnnotations, CoroutineArgsExt,
+    GenericArgsRef, OpaqueHiddenType, OpaqueTypeKey, RegionVid, Ty, TyCtxt, TypeVisitableExt,
+    UserArgs, UserTypeAnnotationIndex, fold_regions,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_mir_dataflow::move_paths::MoveData;
@@ -373,8 +373,7 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
     }
 
     fn unsized_feature_enabled(&self) -> bool {
-        let features = self.tcx().features();
-        features.unsized_locals() || features.unsized_fn_params()
+        self.tcx().features().unsized_fn_params()
     }
 
     /// Equate the inferred type and the annotated type for user type annotations
@@ -688,7 +687,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                 if !self.unsized_feature_enabled() {
                     let trait_ref = ty::TraitRef::new(
                         tcx,
-                        tcx.require_lang_item(LangItem::Sized, Some(self.last_span)),
+                        tcx.require_lang_item(LangItem::Sized, self.last_span),
                         [place_ty],
                     );
                     self.prove_trait_ref(
@@ -795,7 +794,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                     };
 
                     self.infcx.next_region_var(
-                        BoundRegion(
+                        RegionVariableOrigin::BoundRegion(
                             term.source_info.span,
                             br.kind,
                             BoundRegionConversionTime::FnCall,
@@ -957,7 +956,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
             }
         }
 
-        // When `unsized_fn_params` or `unsized_locals` is enabled, only function calls
+        // When `unsized_fn_params` is enabled, only function calls
         // and nullary ops are checked in `check_call_dest`.
         if !self.unsized_feature_enabled() {
             match self.body.local_kind(local) {
@@ -1010,7 +1009,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                             let ty = place.ty(self.body, tcx).ty;
                             let trait_ref = ty::TraitRef::new(
                                 tcx,
-                                tcx.require_lang_item(LangItem::Copy, Some(span)),
+                                tcx.require_lang_item(LangItem::Copy, span),
                                 [ty],
                             );
 
@@ -1025,11 +1024,8 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
             }
 
             &Rvalue::NullaryOp(NullOp::SizeOf | NullOp::AlignOf, ty) => {
-                let trait_ref = ty::TraitRef::new(
-                    tcx,
-                    tcx.require_lang_item(LangItem::Sized, Some(span)),
-                    [ty],
-                );
+                let trait_ref =
+                    ty::TraitRef::new(tcx, tcx.require_lang_item(LangItem::Sized, span), [ty]);
 
                 self.prove_trait_ref(
                     trait_ref,
@@ -1041,11 +1037,8 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
             &Rvalue::NullaryOp(NullOp::UbChecks, _) => {}
 
             Rvalue::ShallowInitBox(_operand, ty) => {
-                let trait_ref = ty::TraitRef::new(
-                    tcx,
-                    tcx.require_lang_item(LangItem::Sized, Some(span)),
-                    [*ty],
-                );
+                let trait_ref =
+                    ty::TraitRef::new(tcx, tcx.require_lang_item(LangItem::Sized, span), [*ty]);
 
                 self.prove_trait_ref(
                     trait_ref,
@@ -1222,7 +1215,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                         let &ty = ty;
                         let trait_ref = ty::TraitRef::new(
                             tcx,
-                            tcx.require_lang_item(LangItem::CoerceUnsized, Some(span)),
+                            tcx.require_lang_item(LangItem::CoerceUnsized, span),
                             [op.ty(self.body, tcx), ty],
                         );
 
@@ -1237,38 +1230,6 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                                 is_implicit_coercion,
                                 unsize_to: Some(unsize_to),
                             },
-                        );
-                    }
-
-                    CastKind::PointerCoercion(PointerCoercion::DynStar, coercion_source) => {
-                        // get the constraints from the target type (`dyn* Clone`)
-                        //
-                        // apply them to prove that the source type `Foo` implements `Clone` etc
-                        let (existential_predicates, region) = match ty.kind() {
-                            Dynamic(predicates, region, ty::DynStar) => (predicates, region),
-                            _ => panic!("Invalid dyn* cast_ty"),
-                        };
-
-                        let self_ty = op.ty(self.body, tcx);
-
-                        let is_implicit_coercion = coercion_source == CoercionSource::Implicit;
-                        self.prove_predicates(
-                            existential_predicates
-                                .iter()
-                                .map(|predicate| predicate.with_self_ty(tcx, self_ty)),
-                            location.to_locations(),
-                            ConstraintCategory::Cast { is_implicit_coercion, unsize_to: None },
-                        );
-
-                        let outlives_predicate = tcx.mk_predicate(Binder::dummy(
-                            ty::PredicateKind::Clause(ty::ClauseKind::TypeOutlives(
-                                ty::OutlivesPredicate(self_ty, *region),
-                            )),
-                        ));
-                        self.prove_predicate(
-                            outlives_predicate,
-                            location.to_locations(),
-                            ConstraintCategory::Cast { is_implicit_coercion, unsize_to: None },
                         );
                     }
 
@@ -1811,7 +1772,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
         if let PlaceContext::NonMutatingUse(NonMutatingUseContext::Copy) = context {
             let trait_ref = ty::TraitRef::new(
                 tcx,
-                tcx.require_lang_item(LangItem::Copy, Some(self.last_span)),
+                tcx.require_lang_item(LangItem::Copy, self.last_span),
                 [place_ty.ty],
             );
 
@@ -1947,7 +1908,7 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                     );
                 }
 
-                // When `unsized_fn_params` and `unsized_locals` are both not enabled,
+                // When `unsized_fn_params` is not enabled,
                 // this check is done at `check_local`.
                 if self.unsized_feature_enabled() {
                     let span = term.source_info.span;

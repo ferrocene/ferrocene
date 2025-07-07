@@ -1169,7 +1169,7 @@
    .. cli:option:: --target <target>
       :category: wide
 
-      Compiler argument ``--target`` indicates the target triple to build.
+      Compiler argument ``--target`` indicates the target tuple to build.
 
       ``<target>`` must denote **what is it for ARM?**
 

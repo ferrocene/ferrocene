@@ -43,7 +43,6 @@ impl<'tcx> Stable<'tcx> for ty::DynKind {
     fn stable(&self, _: &mut Tables<'_>) -> Self::T {
         match self {
             ty::Dyn => stable_mir::ty::DynKind::Dyn,
-            ty::DynStar => stable_mir::ty::DynKind::DynStar,
         }
     }
 }
@@ -120,7 +119,6 @@ impl<'tcx> Stable<'tcx> for ty::adjustment::PointerCoercion {
             }
             PointerCoercion::ArrayToPointer => stable_mir::mir::PointerCoercion::ArrayToPointer,
             PointerCoercion::Unsize => stable_mir::mir::PointerCoercion::Unsize,
-            PointerCoercion::DynStar => unreachable!("represented as `CastKind::DynStar` in smir"),
         }
     }
 }
@@ -871,14 +869,16 @@ impl<'tcx> Stable<'tcx> for rustc_abi::ExternAbi {
             ExternAbi::EfiApi => Abi::EfiApi,
             ExternAbi::AvrInterrupt => Abi::AvrInterrupt,
             ExternAbi::AvrNonBlockingInterrupt => Abi::AvrNonBlockingInterrupt,
-            ExternAbi::CCmseNonSecureCall => Abi::CCmseNonSecureCall,
-            ExternAbi::CCmseNonSecureEntry => Abi::CCmseNonSecureEntry,
+            ExternAbi::CmseNonSecureCall => Abi::CCmseNonSecureCall,
+            ExternAbi::CmseNonSecureEntry => Abi::CCmseNonSecureEntry,
             ExternAbi::System { unwind } => Abi::System { unwind },
             ExternAbi::RustCall => Abi::RustCall,
             ExternAbi::Unadjusted => Abi::Unadjusted,
             ExternAbi::RustCold => Abi::RustCold,
+            ExternAbi::RustInvalid => Abi::RustInvalid,
             ExternAbi::RiscvInterruptM => Abi::RiscvInterruptM,
             ExternAbi::RiscvInterruptS => Abi::RiscvInterruptS,
+            ExternAbi::Custom => Abi::Custom,
         }
     }
 }
@@ -957,5 +957,13 @@ impl<'tcx> Stable<'tcx> for ty::ImplTraitInTraitData {
                 ImplTraitInTraitData::Impl { fn_def_id: tables.fn_def(*fn_def_id) }
             }
         }
+    }
+}
+
+impl<'tcx> Stable<'tcx> for rustc_middle::ty::util::Discr<'tcx> {
+    type T = stable_mir::ty::Discr;
+
+    fn stable(&self, tables: &mut Tables<'_>) -> Self::T {
+        stable_mir::ty::Discr { val: self.val, ty: self.ty.stable(tables) }
     }
 }

@@ -114,6 +114,16 @@ impl GlobalState {
                 Durability::HIGH,
             );
         }
+
+        if self.config.cargo(None) != old_config.cargo(None) {
+            let req = FetchWorkspaceRequest { path: None, force_crate_graph_reload: false };
+            self.fetch_workspaces_queue.request_op("cargo config changed".to_owned(), req)
+        }
+
+        if self.config.cfg_set_test(None) != old_config.cfg_set_test(None) {
+            let req = FetchWorkspaceRequest { path: None, force_crate_graph_reload: false };
+            self.fetch_workspaces_queue.request_op("cfg_set_test config changed".to_owned(), req)
+        }
     }
 
     pub(crate) fn current_status(&self) -> lsp_ext::ServerStatusParams {
@@ -292,7 +302,7 @@ impl GlobalState {
 
                 if let (Some(_command), Some(path)) = (&discover_command, &path) {
                     let build = linked_projects.iter().find_map(|project| match project {
-                        LinkedProject::InlineJsonProject(it) => it.crate_by_buildfile(path),
+                        LinkedProject::InlineProjectJson(it) => it.crate_by_buildfile(path),
                         _ => None,
                     });
 
@@ -318,7 +328,7 @@ impl GlobalState {
                                 &progress,
                             )
                         }
-                        LinkedProject::InlineJsonProject(it) => {
+                        LinkedProject::InlineProjectJson(it) => {
                             let workspace = project_model::ProjectWorkspace::load_inline(
                                 it.clone(),
                                 &cargo_config,
@@ -418,7 +428,7 @@ impl GlobalState {
                     let expansion_res = match client {
                         Ok(client) => match res {
                             Ok((crate_name, path)) => {
-                                progress(path.to_string());
+                                progress(format!("loading proc-macros: {path}"));
                                 let ignored_proc_macros = ignored_proc_macros
                                     .iter()
                                     .find_map(|(name, macros)| {

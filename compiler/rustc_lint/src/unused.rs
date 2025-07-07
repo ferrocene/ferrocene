@@ -2,6 +2,7 @@ use std::iter;
 
 use rustc_ast::util::{classify, parser};
 use rustc_ast::{self as ast, ExprKind, HasAttrs as _, StmtKind};
+use rustc_attr_data_structures::{AttributeKind, find_attr};
 use rustc_errors::{MultiSpan, pluralize};
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::DefId;
@@ -182,6 +183,7 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
         let mut op_warned = false;
 
         if let Some(must_use_op) = must_use_op {
+            let span = expr.span.find_oldest_ancestor_in_same_ctxt();
             cx.emit_span_lint(
                 UNUSED_MUST_USE,
                 expr.span,
@@ -190,11 +192,11 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
                     label: expr.span,
                     suggestion: if expr_is_from_block {
                         UnusedOpSuggestion::BlockTailExpr {
-                            before_span: expr.span.shrink_to_lo(),
-                            after_span: expr.span.shrink_to_hi(),
+                            before_span: span.shrink_to_lo(),
+                            after_span: span.shrink_to_hi(),
                         }
                     } else {
-                        UnusedOpSuggestion::NormalExpr { span: expr.span.shrink_to_lo() }
+                        UnusedOpSuggestion::NormalExpr { span: span.shrink_to_lo() }
                     },
                 },
             );
@@ -368,10 +370,12 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
         }
 
         fn is_def_must_use(cx: &LateContext<'_>, def_id: DefId, span: Span) -> Option<MustUsePath> {
-            if let Some(attr) = cx.tcx.get_attr(def_id, sym::must_use) {
+            if let Some(reason) = find_attr!(
+                cx.tcx.get_all_attrs(def_id),
+                AttributeKind::MustUse { reason, .. } => reason
+            ) {
                 // check for #[must_use = "..."]
-                let reason = attr.value_str();
-                Some(MustUsePath::Def(span, def_id, reason))
+                Some(MustUsePath::Def(span, def_id, *reason))
             } else {
                 None
             }
@@ -505,9 +509,10 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
                     );
                 }
                 MustUsePath::Def(span, def_id, reason) => {
+                    let span = span.find_oldest_ancestor_in_same_ctxt();
                     cx.emit_span_lint(
                         UNUSED_MUST_USE,
-                        *span,
+                        span,
                         UnusedDef {
                             pre: descr_pre,
                             post: descr_post,

@@ -57,8 +57,14 @@ add() {
     done
 }
 
-# Load the generic configuration from our dist profile.
-add --set profile=ferrocene-dist
+# On unprivileged CI we use a downloaded LLVM, meaning we cannot set options like
+# rust.lld = true, so don't enable the `ferrocene-dist` profile
+if [[ -n "${FERROCENE_UNPRIVILEGED_CI+x}" ]]; then
+    echo "Using unprivileged CI, not setting profile to \`ferrocene-dist\`"
+else
+    # Load the generic configuration from our dist profile.
+    add --set profile=ferrocene-dist
+fi
 
 # Prevent `./x.py` from managing submodules, as those are cloned and managed
 # already by scripts in the CI configuration.
@@ -118,6 +124,9 @@ add --set target.thumbv7em-ferrocenecoretest-eabihf.cc=arm-none-eabi-gcc
 add --set target."aarch64-unknown-none\.certified".cc=aarch64-linux-gnu-gcc
 add --set target."thumbv7em-none-eabi\.certified".cc=arm-none-eabi-gcc
 add --set target."thumbv7em-none-eabihf\.certified".cc=arm-none-eabi-gcc
+
+# experiment to enable code coverage
+add --set target.thumbv7em-ferrocenecoretest-eabihf.profiler=true
 
 # Set the host platform to build. The environment variable is set from the CI
 # configuration (see the .circleci directory).

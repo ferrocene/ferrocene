@@ -701,17 +701,11 @@ pub unsafe auto trait Sync {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> !Sync for *const T {}
-#[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> !Sync for *mut T {}
-=======
 impl<T: PointeeSized> !Sync for *const T {}
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> !Sync for *mut T {}
->>>>>>> main
 
 /// Zero-sized type used to mark things that "act like" they own a `T`.
 ///
@@ -851,97 +845,63 @@ impl<T: PointeeSized> !Sync for *mut T {}
 pub struct PhantomData<T: PointeeSized>;
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> Hash for PhantomData<T> {
-=======
 impl<T: PointeeSized> Hash for PhantomData<T> {
->>>>>>> main
     #[inline]
     fn hash<H: Hasher>(&self, _: &mut H) {}
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> cmp::PartialEq for PhantomData<T> {
-=======
 impl<T: PointeeSized> cmp::PartialEq for PhantomData<T> {
->>>>>>> main
     fn eq(&self, _other: &PhantomData<T>) -> bool {
         true
     }
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> cmp::Eq for PhantomData<T> {}
-
-#[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> cmp::PartialOrd for PhantomData<T> {
-=======
 impl<T: PointeeSized> cmp::Eq for PhantomData<T> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> cmp::PartialOrd for PhantomData<T> {
->>>>>>> main
     fn partial_cmp(&self, _other: &PhantomData<T>) -> Option<cmp::Ordering> {
         Option::Some(cmp::Ordering::Equal)
     }
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> cmp::Ord for PhantomData<T> {
-=======
 impl<T: PointeeSized> cmp::Ord for PhantomData<T> {
->>>>>>> main
     fn cmp(&self, _other: &PhantomData<T>) -> cmp::Ordering {
         cmp::Ordering::Equal
     }
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> Copy for PhantomData<T> {}
-
-#[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> Clone for PhantomData<T> {
-=======
 impl<T: PointeeSized> Copy for PhantomData<T> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> Clone for PhantomData<T> {
->>>>>>> main
     fn clone(&self) -> Self {
         Self
     }
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> Default for PhantomData<T> {
-=======
 impl<T: PointeeSized> Default for PhantomData<T> {
->>>>>>> main
     fn default() -> Self {
         Self
     }
 }
 
 #[unstable(feature = "structural_match", issue = "31434")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> StructuralPartialEq for PhantomData<T> {}
-=======
 impl<T: PointeeSized> StructuralPartialEq for PhantomData<T> {}
->>>>>>> main
 
 /// Compiler-internal trait used to indicate the type of enum discriminants.
 ///
@@ -989,13 +949,8 @@ pub trait DiscriminantKind {
 pub unsafe auto trait Freeze {}
 
 #[unstable(feature = "freeze", issue = "121675")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> !Freeze for UnsafeCell<T> {}
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 impl<T: PointeeSized> !Freeze for UnsafeCell<T> {}
->>>>>>> main
 marker_impls! {
     #[unstable(feature = "freeze", issue = "121675")]
     unsafe Freeze for

@@ -438,12 +438,8 @@ pub use self::adapters::{Intersperse, IntersperseWith};
 )]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::range::Step;
-<<<<<<< HEAD
-#[unstable(feature = "iter_macro", issue = "none", reason = "generators are unstable")]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[unstable(feature = "iter_macro", issue = "142269", reason = "generators are unstable")]
->>>>>>> main
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::sources::iter;
 #[stable(feature = "iter_empty", since = "1.2.0")]
 #[cfg(not(feature = "ferrocene_certified"))]

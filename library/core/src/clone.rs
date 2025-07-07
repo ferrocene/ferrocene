@@ -36,12 +36,10 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-=======
 use crate::marker::{Destruct, PointeeSized};
 
->>>>>>> main
+#[cfg(not(feature = "ferrocene_certified"))]
 mod uninit;
 
 /// A common trait that allows explicit creation of a duplicate value.
@@ -307,12 +305,8 @@ pub struct AssertParamIsClone<T: Clone + PointeeSized> {
     reason = "deriving hack, should not be public",
     issue = "none"
 )]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub struct AssertParamIsCopy<T: Copy + ?Sized> {
-=======
 pub struct AssertParamIsCopy<T: Copy + PointeeSized> {
->>>>>>> main
     _field: crate::marker::PhantomData<T>,
 }
 

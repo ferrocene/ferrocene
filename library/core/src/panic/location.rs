@@ -34,14 +34,10 @@ use crate::ptr::NonNull;
 /// Files are compared as strings, not `Path`, which could be unexpected.
 /// See [`Location::file`]'s documentation for more discussion.
 #[lang = "panic_location"]
-<<<<<<< HEAD
 #[cfg_attr(
     not(feature = "ferrocene_certified"),
-    derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)
+    derive(Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)
 )]
-=======
-#[derive(Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
->>>>>>> main
 #[stable(feature = "panic_hooks", since = "1.10.0")]
 #[cfg_attr(feature = "ferrocene_certified", allow(dead_code))]
 pub struct Location<'a> {

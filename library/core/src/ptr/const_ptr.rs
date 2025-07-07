@@ -1641,12 +1641,8 @@ impl<T: PointeeSized> Eq for *const T {}
 
 /// Pointer comparison is by address, as produced by the `[`<*const T>::addr`](pointer::addr)` method.
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> Ord for *const T {
-=======
 impl<T: PointeeSized> Ord for *const T {
->>>>>>> main
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn cmp(&self, other: &*const T) -> Ordering {
@@ -1662,12 +1658,8 @@ impl<T: PointeeSized> Ord for *const T {
 
 /// Pointer comparison is by address, as produced by the `[`<*const T>::addr`](pointer::addr)` method.
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> PartialOrd for *const T {
-=======
 impl<T: PointeeSized> PartialOrd for *const T {
->>>>>>> main
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn partial_cmp(&self, other: &*const T) -> Option<Ordering> {

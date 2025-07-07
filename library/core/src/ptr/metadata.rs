@@ -8,13 +8,9 @@ use crate::hash::{Hash, Hasher};
 use crate::intrinsics::aggregate_raw_ptr;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::{aggregate_raw_ptr, ptr_metadata};
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::marker::Freeze;
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 use crate::marker::{Freeze, PointeeSized};
->>>>>>> main
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::NonNull;
 
 /// Provides the pointer metadata type of any pointed-to type.
@@ -112,12 +108,8 @@ pub trait Thin = Pointee<Metadata = ()> + PointeeSized;
 /// assert_eq!(std::ptr::metadata("foo"), 3_usize);
 /// ```
 #[inline]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const fn metadata<T: ?Sized>(ptr: *const T) -> <T as Pointee>::Metadata {
-=======
 pub const fn metadata<T: PointeeSized>(ptr: *const T) -> <T as Pointee>::Metadata {
->>>>>>> main
     ptr_metadata(ptr)
 }
 
@@ -173,12 +165,8 @@ pub const fn from_raw_parts_mut<T: PointeeSized>(
 /// duplicated in multiple codegen units), and pointers to vtables of *different* types/traits can
 /// compare equal (since identical vtables can be deduplicated within a codegen unit).
 #[lang = "dyn_metadata"]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub struct DynMetadata<Dyn: ?Sized> {
-=======
 pub struct DynMetadata<Dyn: PointeeSized> {
->>>>>>> main
     _vtable_ptr: NonNull<VTable>,
     _phantom: crate::marker::PhantomData<Dyn>,
 }
@@ -192,12 +180,8 @@ unsafe extern "C" {
     type VTable;
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<Dyn: ?Sized> DynMetadata<Dyn> {
-=======
 impl<Dyn: PointeeSized> DynMetadata<Dyn> {
->>>>>>> main
     /// When `DynMetadata` appears as the metadata field of a wide pointer, the rustc_middle layout
     /// computation does magic and the resulting layout is *not* a `FieldsShape::Aggregate`, instead
     /// it is a `FieldsShape::Primitive`. This means that the same type can have different layout
@@ -238,20 +222,13 @@ impl<Dyn: PointeeSized> DynMetadata<Dyn> {
     }
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-unsafe impl<Dyn: ?Sized> Send for DynMetadata<Dyn> {}
-#[cfg(not(feature = "ferrocene_certified"))]
-unsafe impl<Dyn: ?Sized> Sync for DynMetadata<Dyn> {}
-
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<Dyn: ?Sized> fmt::Debug for DynMetadata<Dyn> {
-=======
 unsafe impl<Dyn: PointeeSized> Send for DynMetadata<Dyn> {}
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<Dyn: PointeeSized> Sync for DynMetadata<Dyn> {}
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: PointeeSized> fmt::Debug for DynMetadata<Dyn> {
->>>>>>> main
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("DynMetadata").field(&self.vtable_ptr()).finish()
     }
@@ -259,51 +236,33 @@ impl<Dyn: PointeeSized> fmt::Debug for DynMetadata<Dyn> {
 
 // Manual impls needed to avoid `Dyn: $Trait` bounds.
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<Dyn: ?Sized> Unpin for DynMetadata<Dyn> {}
-
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<Dyn: ?Sized> Copy for DynMetadata<Dyn> {}
-
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<Dyn: ?Sized> Clone for DynMetadata<Dyn> {
-=======
 impl<Dyn: PointeeSized> Unpin for DynMetadata<Dyn> {}
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: PointeeSized> Copy for DynMetadata<Dyn> {}
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: PointeeSized> Clone for DynMetadata<Dyn> {
->>>>>>> main
     #[inline]
     fn clone(&self) -> Self {
         *self
     }
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<Dyn: ?Sized> Eq for DynMetadata<Dyn> {}
-
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<Dyn: ?Sized> PartialEq for DynMetadata<Dyn> {
-=======
 impl<Dyn: PointeeSized> Eq for DynMetadata<Dyn> {}
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<Dyn: PointeeSized> PartialEq for DynMetadata<Dyn> {
->>>>>>> main
     #[inline]
     fn eq(&self, other: &Self) -> bool {
         crate::ptr::eq::<VTable>(self.vtable_ptr(), other.vtable_ptr())
     }
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<Dyn: ?Sized> Ord for DynMetadata<Dyn> {
-=======
 impl<Dyn: PointeeSized> Ord for DynMetadata<Dyn> {
->>>>>>> main
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn cmp(&self, other: &Self) -> crate::cmp::Ordering {
@@ -311,24 +270,16 @@ impl<Dyn: PointeeSized> Ord for DynMetadata<Dyn> {
     }
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<Dyn: ?Sized> PartialOrd for DynMetadata<Dyn> {
-=======
 impl<Dyn: PointeeSized> PartialOrd for DynMetadata<Dyn> {
->>>>>>> main
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<crate::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<Dyn: ?Sized> Hash for DynMetadata<Dyn> {
-=======
 impl<Dyn: PointeeSized> Hash for DynMetadata<Dyn> {
->>>>>>> main
     #[inline]
     fn hash<H: Hasher>(&self, hasher: &mut H) {
         crate::ptr::hash::<VTable, _>(self.vtable_ptr(), hasher)

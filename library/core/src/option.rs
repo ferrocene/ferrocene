@@ -2596,12 +2596,8 @@ impl<A, V: FromIterator<A>> FromIterator<Option<A>> for Option<V> {
     }
 }
 
-<<<<<<< HEAD
-#[unstable(feature = "try_trait_v2", issue = "84277")]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
->>>>>>> main
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> ops::Try for Option<T> {
     type Output = T;
     type Residual = Option<convert::Infallible>;
@@ -2620,12 +2616,8 @@ impl<T> ops::Try for Option<T> {
     }
 }
 
-<<<<<<< HEAD
-#[unstable(feature = "try_trait_v2", issue = "84277")]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
->>>>>>> main
+#[cfg(not(feature = "ferrocene_certified"))]
 // Note: manually specifying the residual type instead of using the default to work around
 // https://github.com/rust-lang/rust/issues/99940
 impl<T> ops::FromResidual<Option<convert::Infallible>> for Option<T> {

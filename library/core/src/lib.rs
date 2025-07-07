@@ -99,7 +99,6 @@
 // of conflicts we have when merging main.
 //
 // Library features:
-<<<<<<< HEAD
 // not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(array_ptr_get))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(asm_experimental_arch))]
@@ -109,18 +108,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_select))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_target_has_reliable_f16_f128))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(const_carrying_mul_add))]
-=======
-// tidy-alphabetical-start
-#![feature(array_ptr_get)]
-#![feature(asm_experimental_arch)]
-#![feature(bigint_helper_methods)]
-#![feature(bstr)]
-#![feature(bstr_internals)]
-#![feature(cfg_select)]
-#![feature(cfg_target_has_reliable_f16_f128)]
-#![feature(const_carrying_mul_add)]
-#![feature(const_destruct)]
->>>>>>> main
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(const_destruct))]
 #![feature(const_eval_select)]
 #![feature(core_intrinsics)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(coverage_attribute))]
@@ -165,24 +153,13 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(deprecated_suggestion))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_cfg))]
 #![feature(doc_cfg_hide)]
-<<<<<<< HEAD
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_notable_trait))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(extern_types))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(f128))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(f16))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(freeze_impls))]
 #![feature(fundamental)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(generic_arg_infer))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(if_let_guard))]
-=======
-#![feature(doc_notable_trait)]
-#![feature(extern_types)]
-#![feature(f16)]
-#![feature(f128)]
-#![feature(freeze_impls)]
-#![feature(fundamental)]
-#![feature(if_let_guard)]
->>>>>>> main
 #![feature(intra_doc_pointers)]
 #![feature(intrinsics)]
 #![feature(lang_items)]
@@ -214,19 +191,16 @@
 // not-alphabetical-end
 //
 // Target features:
-<<<<<<< HEAD
 // not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(aarch64_unstable_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(arm_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(hexagon_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(keylocker_x86))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(loongarch_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(mips_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(powerpc_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(riscv_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(rtm_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(s390x_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(sha512_sm_x86))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(sse4a_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(tbm_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(wasm_target_feature))]
@@ -238,23 +212,6 @@
 // accept coverage(off) no-ops
 #![allow(unused_attributes)]
 //
-=======
-// tidy-alphabetical-start
-#![feature(aarch64_unstable_target_feature)]
-#![feature(arm_target_feature)]
-#![feature(hexagon_target_feature)]
-#![feature(loongarch_target_feature)]
-#![feature(mips_target_feature)]
-#![feature(powerpc_target_feature)]
-#![feature(riscv_target_feature)]
-#![feature(rtm_target_feature)]
-#![feature(s390x_target_feature)]
-#![feature(sse4a_target_feature)]
-#![feature(tbm_target_feature)]
-#![feature(wasm_target_feature)]
-#![feature(x86_amx_intrinsics)]
-// tidy-alphabetical-end
->>>>>>> main
 
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]

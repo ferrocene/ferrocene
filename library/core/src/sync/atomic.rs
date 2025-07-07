@@ -246,13 +246,11 @@ use self::Ordering::*;
 use crate::cell::UnsafeCell;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::hint::spin_loop;
-<<<<<<< HEAD
 #[cfg(feature = "ferrocene_certified")]
 use crate::intrinsics;
 #[cfg(not(feature = "ferrocene_certified"))]
-=======
 use crate::intrinsics::AtomicOrdering as AO;
->>>>>>> main
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, intrinsics};
 
 trait Sealed {}
@@ -377,18 +375,13 @@ pub type Atomic<T> = <T as AtomicPrimitive>::AtomicInner;
 // This list should only contain architectures which have word-sized atomic-or/
 // atomic-and instructions but don't natively support byte-sized atomics.
 #[cfg(target_has_atomic = "8")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-const EMULATE_ATOMIC_BOOL: bool =
-    cfg!(any(target_arch = "riscv32", target_arch = "riscv64", target_arch = "loongarch64"));
-=======
 const EMULATE_ATOMIC_BOOL: bool = cfg!(any(
     target_arch = "riscv32",
     target_arch = "riscv64",
     target_arch = "loongarch32",
     target_arch = "loongarch64"
 ));
->>>>>>> main
 
 /// A boolean type which can be safely shared between threads.
 ///

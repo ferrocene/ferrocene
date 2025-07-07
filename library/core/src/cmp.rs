@@ -366,12 +366,8 @@ pub macro Eq($item:item) {
 #[doc(hidden)]
 #[allow(missing_debug_implementations)]
 #[unstable(feature = "derive_eq", reason = "deriving hack, should not be public", issue = "none")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub struct AssertParamIsEq<T: Eq + ?Sized> {
-=======
 pub struct AssertParamIsEq<T: Eq + PointeeSized> {
->>>>>>> main
     _field: crate::marker::PhantomData<T>,
 }
 
@@ -2068,13 +2064,9 @@ mod impls {
     // & pointers
 
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl<A: ?Sized, B: ?Sized> PartialEq<&B> for &A
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "92391")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialEq<&B> for &A
->>>>>>> main
     where
         A: ~const PartialEq<B>,
     {
@@ -2088,12 +2080,8 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-    impl<A: ?Sized, B: ?Sized> PartialOrd<&B> for &A
-=======
     impl<A: PointeeSized, B: PointeeSized> PartialOrd<&B> for &A
->>>>>>> main
     where
         A: PartialOrd<B>,
     {
@@ -2135,12 +2123,8 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-    impl<A: ?Sized> Ord for &A
-=======
     impl<A: PointeeSized> Ord for &A
->>>>>>> main
     where
         A: Ord,
     {
@@ -2150,23 +2134,15 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-    impl<A: ?Sized> Eq for &A where A: Eq {}
-=======
     impl<A: PointeeSized> Eq for &A where A: Eq {}
->>>>>>> main
 
     // &mut pointers
 
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl<A: ?Sized, B: ?Sized> PartialEq<&mut B> for &mut A
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "92391")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialEq<&mut B> for &mut A
->>>>>>> main
     where
         A: ~const PartialEq<B>,
     {
@@ -2180,12 +2156,8 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-    impl<A: ?Sized, B: ?Sized> PartialOrd<&mut B> for &mut A
-=======
     impl<A: PointeeSized, B: PointeeSized> PartialOrd<&mut B> for &mut A
->>>>>>> main
     where
         A: PartialOrd<B>,
     {
@@ -2227,12 +2199,8 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-    impl<A: ?Sized> Ord for &mut A
-=======
     impl<A: PointeeSized> Ord for &mut A
->>>>>>> main
     where
         A: Ord,
     {
@@ -2242,20 +2210,13 @@ mod impls {
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-    impl<A: ?Sized> Eq for &mut A where A: Eq {}
-
-    #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl<A: ?Sized, B: ?Sized> PartialEq<&mut B> for &A
-=======
     impl<A: PointeeSized> Eq for &mut A where A: Eq {}
 
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cmp", issue = "92391")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialEq<&mut B> for &A
->>>>>>> main
     where
         A: ~const PartialEq<B>,
     {
@@ -2270,13 +2231,9 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    impl<A: ?Sized, B: ?Sized> PartialEq<&B> for &mut A
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "92391")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialEq<&B> for &mut A
->>>>>>> main
     where
         A: ~const PartialEq<B>,
     {

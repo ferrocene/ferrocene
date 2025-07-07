@@ -260,11 +260,9 @@ use crate::marker::{PhantomData, PointerLike, Unsize};
 use crate::mem;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{CoerceUnsized, Deref, DerefMut, DerefPure, DispatchFromDyn};
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-=======
 use crate::panic::const_panic;
->>>>>>> main
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::pin::PinCoerceUnsized;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::{self, NonNull};
@@ -767,34 +765,15 @@ pub struct RefCell<T: ?Sized> {
 /// An error returned by [`RefCell::try_borrow`].
 #[stable(feature = "try_borrow", since = "1.13.0")]
 #[non_exhaustive]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[derive(Debug)]
->>>>>>> main
 pub struct BorrowError {
     #[cfg(feature = "debug_refcell")]
     location: &'static crate::panic::Location<'static>,
 }
 
 #[stable(feature = "try_borrow", since = "1.13.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl Debug for BorrowError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut builder = f.debug_struct("BorrowError");
-
-        #[cfg(feature = "debug_refcell")]
-        builder.field("location", self.location);
-
-        builder.finish()
-    }
-}
-
-#[stable(feature = "try_borrow", since = "1.13.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
->>>>>>> main
 impl Display for BorrowError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         #[cfg(feature = "debug_refcell")]
@@ -814,34 +793,15 @@ impl Display for BorrowError {
 /// An error returned by [`RefCell::try_borrow_mut`].
 #[stable(feature = "try_borrow", since = "1.13.0")]
 #[non_exhaustive]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[derive(Debug)]
->>>>>>> main
 pub struct BorrowMutError {
     #[cfg(feature = "debug_refcell")]
     location: &'static crate::panic::Location<'static>,
 }
 
 #[stable(feature = "try_borrow", since = "1.13.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl Debug for BorrowMutError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut builder = f.debug_struct("BorrowMutError");
-
-        #[cfg(feature = "debug_refcell")]
-        builder.field("location", self.location);
-
-        builder.finish()
-    }
-}
-
-#[stable(feature = "try_borrow", since = "1.13.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
->>>>>>> main
 impl Display for BorrowMutError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         #[cfg(feature = "debug_refcell")]
@@ -858,36 +818,26 @@ impl Display for BorrowMutError {
 #[cfg_attr(not(feature = "panic_immediate_abort"), inline(never))]
 #[track_caller]
 #[cold]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-fn panic_already_borrowed(err: BorrowMutError) -> ! {
-    panic!("already borrowed: {:?}", err)
-=======
 const fn panic_already_borrowed(err: BorrowMutError) -> ! {
     const_panic!(
         "RefCell already borrowed",
         "{err}",
         err: BorrowMutError = err,
     )
->>>>>>> main
 }
 
 // This ensures the panicking code is outlined from `borrow` for `RefCell`.
 #[cfg_attr(not(feature = "panic_immediate_abort"), inline(never))]
 #[track_caller]
 #[cold]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-fn panic_already_mutably_borrowed(err: BorrowError) -> ! {
-    panic!("already mutably borrowed: {:?}", err)
-=======
 const fn panic_already_mutably_borrowed(err: BorrowError) -> ! {
     const_panic!(
         "RefCell already mutably borrowed",
         "{err}",
         err: BorrowError = err,
     )
->>>>>>> main
 }
 
 // Positive values represent the number of `Ref` active. Negative values
@@ -903,32 +853,20 @@ const fn panic_already_mutably_borrowed(err: BorrowError) -> ! {
 // explicitly check for overflow and underflow in order to avoid unsafety, or at
 // least behave correctly in the event that overflow or underflow happens (e.g.,
 // see BorrowRef::new).
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-type BorrowFlag = isize;
-#[cfg(not(feature = "ferrocene_certified"))]
-const UNUSED: BorrowFlag = 0;
-
-#[inline(always)]
-#[cfg(not(feature = "ferrocene_certified"))]
-fn is_writing(x: BorrowFlag) -> bool {
-=======
 type BorrowCounter = isize;
+#[cfg(not(feature = "ferrocene_certified"))]
 const UNUSED: BorrowCounter = 0;
 
 #[inline(always)]
+#[cfg(not(feature = "ferrocene_certified"))]
 const fn is_writing(x: BorrowCounter) -> bool {
->>>>>>> main
     x < UNUSED
 }
 
 #[inline(always)]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-fn is_reading(x: BorrowFlag) -> bool {
-=======
 const fn is_reading(x: BorrowCounter) -> bool {
->>>>>>> main
     x > UNUSED
 }
 
@@ -1561,13 +1499,9 @@ impl<'b> BorrowRef<'b> {
     }
 }
 
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl Drop for BorrowRef<'_> {
-=======
 #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const Drop for BorrowRef<'_> {
->>>>>>> main
     #[inline]
     fn drop(&mut self) {
         let borrow = self.borrow.get();
@@ -1576,13 +1510,9 @@ impl const Drop for BorrowRef<'_> {
     }
 }
 
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl Clone for BorrowRef<'_> {
-=======
 #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const Clone for BorrowRef<'_> {
->>>>>>> main
     #[inline]
     fn clone(&self) -> Self {
         // Since this Ref exists, we know the borrow flag
@@ -1614,13 +1544,9 @@ pub struct Ref<'b, T: ?Sized + 'b> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> Deref for Ref<'_, T> {
-=======
 #[rustc_const_unstable(feature = "const_deref", issue = "88955")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> const Deref for Ref<'_, T> {
->>>>>>> main
     type Target = T;
 
     #[inline]
@@ -1958,13 +1884,9 @@ struct BorrowRefMut<'b> {
     borrow: &'b Cell<BorrowCounter>,
 }
 
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl Drop for BorrowRefMut<'_> {
-=======
 #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const Drop for BorrowRefMut<'_> {
->>>>>>> main
     #[inline]
     fn drop(&mut self) {
         let borrow = self.borrow.get();
@@ -2023,13 +1945,9 @@ pub struct RefMut<'b, T: ?Sized + 'b> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> Deref for RefMut<'_, T> {
-=======
 #[rustc_const_unstable(feature = "const_deref", issue = "88955")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> const Deref for RefMut<'_, T> {
->>>>>>> main
     type Target = T;
 
     #[inline]
@@ -2040,13 +1958,9 @@ impl<T: ?Sized> const Deref for RefMut<'_, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> DerefMut for RefMut<'_, T> {
-=======
 #[rustc_const_unstable(feature = "const_deref", issue = "88955")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> const DerefMut for RefMut<'_, T> {
->>>>>>> main
     #[inline]
     fn deref_mut(&mut self) -> &mut T {
         // SAFETY: the value is accessible as long as we hold our borrow.

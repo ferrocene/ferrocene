@@ -4,11 +4,9 @@ use super::*;
 use crate::cmp::Ordering::{Equal, Greater, Less};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::const_eval_select;
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-=======
 use crate::marker::PointeeSized;
->>>>>>> main
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, SizedTypeProperties};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::slice::{self, SliceIndex};
@@ -2068,12 +2066,8 @@ impl<T, const N: usize> *mut [T; N] {
 
 /// Pointer equality is by address, as produced by the [`<*mut T>::addr`](pointer::addr) method.
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> PartialEq for *mut T {
-=======
 impl<T: PointeeSized> PartialEq for *mut T {
->>>>>>> main
     #[inline(always)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn eq(&self, other: &*mut T) -> bool {
@@ -2083,21 +2077,13 @@ impl<T: PointeeSized> PartialEq for *mut T {
 
 /// Pointer equality is an equivalence relation.
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> Eq for *mut T {}
-
-/// Pointer comparison is by address, as produced by the [`<*mut T>::addr`](pointer::addr) method.
-#[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> Ord for *mut T {
-=======
 impl<T: PointeeSized> Eq for *mut T {}
 
 /// Pointer comparison is by address, as produced by the [`<*mut T>::addr`](pointer::addr) method.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> Ord for *mut T {
->>>>>>> main
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn cmp(&self, other: &*mut T) -> Ordering {
@@ -2113,12 +2099,8 @@ impl<T: PointeeSized> Ord for *mut T {
 
 /// Pointer comparison is by address, as produced by the [`<*mut T>::addr`](pointer::addr) method.
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> PartialOrd for *mut T {
-=======
 impl<T: PointeeSized> PartialOrd for *mut T {
->>>>>>> main
     #[inline(always)]
     #[allow(ambiguous_wide_pointer_comparisons)]
     fn partial_cmp(&self, other: &*mut T) -> Option<Ordering> {

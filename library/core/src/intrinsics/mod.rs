@@ -229,52 +229,8 @@ pub unsafe fn atomic_xor<T: Copy, const ORD: AtomicOrdering>(dst: *mut T, src: T
 /// [`atomic`] signed integer types via the `fetch_max` method. For example, [`AtomicI32::fetch_max`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_max_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
-/// Maximum with the current value using a signed comparison.
-/// `T` must be a signed integer type.
-///
-/// The stabilized version of this intrinsic is available on the
-/// [`atomic`] signed integer types via the `fetch_max` method by passing
-/// [`Ordering::Acquire`] as the `order`. For example, [`AtomicI32::fetch_max`].
-#[rustc_intrinsic]
-#[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_max_acquire<T: Copy>(dst: *mut T, src: T) -> T;
-/// Maximum with the current value using a signed comparison.
-/// `T` must be a signed integer type.
-///
-/// The stabilized version of this intrinsic is available on the
-/// [`atomic`] signed integer types via the `fetch_max` method by passing
-/// [`Ordering::Release`] as the `order`. For example, [`AtomicI32::fetch_max`].
-#[rustc_intrinsic]
-#[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_max_release<T: Copy>(dst: *mut T, src: T) -> T;
-/// Maximum with the current value using a signed comparison.
-/// `T` must be a signed integer type.
-///
-/// The stabilized version of this intrinsic is available on the
-/// [`atomic`] signed integer types via the `fetch_max` method by passing
-/// [`Ordering::AcqRel`] as the `order`. For example, [`AtomicI32::fetch_max`].
-#[rustc_intrinsic]
-#[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_max_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
-/// Maximum with the current value using a signed comparison.
-/// `T` must be a signed integer type.
-///
-/// The stabilized version of this intrinsic is available on the
-/// [`atomic`] signed integer types via the `fetch_max` method by passing
-/// [`Ordering::Relaxed`] as the `order`. For example, [`AtomicI32::fetch_max`].
-#[rustc_intrinsic]
-#[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_max_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
-=======
 pub unsafe fn atomic_max<T: Copy, const ORD: AtomicOrdering>(dst: *mut T, src: T) -> T;
->>>>>>> main
 
 /// Minimum with the current value using a signed comparison.
 /// `T` must be a signed integer type.
@@ -283,52 +239,8 @@ pub unsafe fn atomic_max<T: Copy, const ORD: AtomicOrdering>(dst: *mut T, src: T
 /// [`atomic`] signed integer types via the `fetch_min` method. For example, [`AtomicI32::fetch_min`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_min_seqcst<T: Copy>(dst: *mut T, src: T) -> T;
-/// Minimum with the current value using a signed comparison.
-/// `T` must be a signed integer type.
-///
-/// The stabilized version of this intrinsic is available on the
-/// [`atomic`] signed integer types via the `fetch_min` method by passing
-/// [`Ordering::Acquire`] as the `order`. For example, [`AtomicI32::fetch_min`].
-#[rustc_intrinsic]
-#[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_min_acquire<T: Copy>(dst: *mut T, src: T) -> T;
-/// Minimum with the current value using a signed comparison.
-/// `T` must be a signed integer type.
-///
-/// The stabilized version of this intrinsic is available on the
-/// [`atomic`] signed integer types via the `fetch_min` method by passing
-/// [`Ordering::Release`] as the `order`. For example, [`AtomicI32::fetch_min`].
-#[rustc_intrinsic]
-#[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_min_release<T: Copy>(dst: *mut T, src: T) -> T;
-/// Minimum with the current value using a signed comparison.
-/// `T` must be a signed integer type.
-///
-/// The stabilized version of this intrinsic is available on the
-/// [`atomic`] signed integer types via the `fetch_min` method by passing
-/// [`Ordering::AcqRel`] as the `order`. For example, [`AtomicI32::fetch_min`].
-#[rustc_intrinsic]
-#[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_min_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
-/// Minimum with the current value using a signed comparison.
-/// `T` must be a signed integer type.
-///
-/// The stabilized version of this intrinsic is available on the
-/// [`atomic`] signed integer types via the `fetch_min` method by passing
-/// [`Ordering::Relaxed`] as the `order`. For example, [`AtomicI32::fetch_min`].
-#[rustc_intrinsic]
-#[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_min_relaxed<T: Copy>(dst: *mut T, src: T) -> T;
-=======
 pub unsafe fn atomic_min<T: Copy, const ORD: AtomicOrdering>(dst: *mut T, src: T) -> T;
->>>>>>> main
 
 /// Minimum with the current value using an unsigned comparison.
 /// `T` must be an unsigned integer type.
@@ -354,39 +266,8 @@ pub unsafe fn atomic_umax<T: Copy, const ORD: AtomicOrdering>(dst: *mut T, src: 
 /// [`atomic::fence`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_fence_seqcst();
-/// An atomic fence.
-///
-/// The stabilized version of this intrinsic is available in
-/// [`atomic::fence`] by passing [`Ordering::Acquire`]
-/// as the `order`.
-#[rustc_intrinsic]
-#[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_fence_acquire();
-/// An atomic fence.
-///
-/// The stabilized version of this intrinsic is available in
-/// [`atomic::fence`] by passing [`Ordering::Release`]
-/// as the `order`.
-#[rustc_intrinsic]
-#[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_fence_release();
-/// An atomic fence.
-///
-/// The stabilized version of this intrinsic is available in
-/// [`atomic::fence`] by passing [`Ordering::AcqRel`]
-/// as the `order`.
-#[rustc_intrinsic]
-#[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_fence_acqrel();
-=======
 pub unsafe fn atomic_fence<const ORD: AtomicOrdering>();
->>>>>>> main
 
 /// An atomic fence for synchronization within a single thread.
 ///
@@ -394,54 +275,8 @@ pub unsafe fn atomic_fence<const ORD: AtomicOrdering>();
 /// [`atomic::compiler_fence`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_singlethreadfence_seqcst();
-/// A compiler-only memory barrier.
-///
-/// Memory accesses will never be reordered across this barrier by the
-/// compiler, but no instructions will be emitted for it. This is
-/// appropriate for operations on the same thread that may be preempted,
-/// such as when interacting with signal handlers.
-///
-/// The stabilized version of this intrinsic is available in
-/// [`atomic::compiler_fence`] by passing [`Ordering::Acquire`]
-/// as the `order`.
-#[rustc_intrinsic]
-#[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_singlethreadfence_acquire();
-/// A compiler-only memory barrier.
-///
-/// Memory accesses will never be reordered across this barrier by the
-/// compiler, but no instructions will be emitted for it. This is
-/// appropriate for operations on the same thread that may be preempted,
-/// such as when interacting with signal handlers.
-///
-/// The stabilized version of this intrinsic is available in
-/// [`atomic::compiler_fence`] by passing [`Ordering::Release`]
-/// as the `order`.
-#[rustc_intrinsic]
-#[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_singlethreadfence_release();
-/// A compiler-only memory barrier.
-///
-/// Memory accesses will never be reordered across this barrier by the
-/// compiler, but no instructions will be emitted for it. This is
-/// appropriate for operations on the same thread that may be preempted,
-/// such as when interacting with signal handlers.
-///
-/// The stabilized version of this intrinsic is available in
-/// [`atomic::compiler_fence`] by passing [`Ordering::AcqRel`]
-/// as the `order`.
-#[rustc_intrinsic]
-#[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn atomic_singlethreadfence_acqrel();
-=======
 pub unsafe fn atomic_singlethreadfence<const ORD: AtomicOrdering>();
->>>>>>> main
 
 /// The `prefetch` intrinsic is a hint to the code generator to insert a prefetch instruction
 /// if supported; otherwise, it is a no-op.
@@ -2977,21 +2812,8 @@ pub const fn size_of<T>() -> usize;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-<<<<<<< HEAD
-pub const fn min_align_of<T>() -> usize;
-
-/// The preferred alignment of a type.
-///
-/// This intrinsic does not have a stable counterpart.
-/// It's "tracking issue" is [#91971](https://github.com/rust-lang/rust/issues/91971).
-#[rustc_nounwind]
-#[unstable(feature = "core_intrinsics", issue = "none")]
-#[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn pref_align_of<T>() -> usize;
-=======
 pub const fn align_of<T>() -> usize;
->>>>>>> main
 
 /// Returns the number of variants of the type `T` cast to a `usize`;
 /// if `T` has no variants, returns `0`. Uninhabited variants will be counted.
@@ -3033,12 +2855,8 @@ pub const unsafe fn size_of_val<T: ?Sized>(ptr: *const T) -> usize;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const unsafe fn min_align_of_val<T: ?Sized>(ptr: *const T) -> usize;
-=======
 pub const unsafe fn align_of_val<T: ?Sized>(ptr: *const T) -> usize;
->>>>>>> main
 
 /// Gets a static string slice containing the name of a type.
 ///
@@ -3090,12 +2908,8 @@ where
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const fn ptr_metadata<P: ptr::Pointee<Metadata = M> + ?Sized, M>(ptr: *const P) -> M;
-=======
 pub const fn ptr_metadata<P: ptr::Pointee<Metadata = M> + PointeeSized, M>(ptr: *const P) -> M;
->>>>>>> main
 
 /// This is an accidentally-stable alias to [`ptr::copy_nonoverlapping`]; use that instead.
 // Note (intentionally not in the doc comment): `ptr::copy_nonoverlapping` adds some extra

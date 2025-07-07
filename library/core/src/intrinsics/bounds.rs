@@ -24,39 +24,23 @@ unsafe impl<T: PointeeSized> BuiltinDeref for *const T {
     type Pointee = T;
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub trait ChangePointee<U: ?Sized>: BuiltinDeref {
-    type Output;
-}
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<'a, T: ?Sized + 'a, U: ?Sized + 'a> ChangePointee<U> for &'a mut T {
-    type Output = &'a mut U;
-}
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<'a, T: ?Sized + 'a, U: ?Sized + 'a> ChangePointee<U> for &'a T {
-    type Output = &'a U;
-}
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized, U: ?Sized> ChangePointee<U> for *mut T {
-    type Output = *mut U;
-}
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized, U: ?Sized> ChangePointee<U> for *const T {
-=======
 pub trait ChangePointee<U: PointeeSized>: BuiltinDeref {
     type Output;
 }
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T: PointeeSized + 'a, U: PointeeSized + 'a> ChangePointee<U> for &'a mut T {
     type Output = &'a mut U;
 }
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T: PointeeSized + 'a, U: PointeeSized + 'a> ChangePointee<U> for &'a T {
     type Output = &'a U;
 }
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized, U: PointeeSized> ChangePointee<U> for *mut T {
     type Output = *mut U;
 }
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized, U: PointeeSized> ChangePointee<U> for *const T {
->>>>>>> main
     type Output = *const U;
 }

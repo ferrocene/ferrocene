@@ -903,7 +903,7 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx.config("build")
                 .path("opt-dist")
-                .render_steps(), @"[build] rustc 0 <host> -> OptimizedDist <host>");
+                .render_steps(), @"[build] rustc 0 <host> -> OptimizedDist 1 <host>");
     }
 
     #[test]
@@ -920,7 +920,7 @@ mod snapshot {
             ctx.config("build")
                 .path("opt-dist")
                 .stage(1)
-                .render_steps(), @"[build] rustc 0 <host> -> OptimizedDist <host>");
+                .render_steps(), @"[build] rustc 0 <host> -> OptimizedDist 1 <host>");
     }
 
     #[test]
@@ -930,7 +930,7 @@ mod snapshot {
             ctx.config("build")
                 .path("opt-dist")
                 .stage(2)
-                .render_steps(), @"[build] rustc 0 <host> -> OptimizedDist <host>");
+                .render_steps(), @"[build] rustc 0 <host> -> OptimizedDist 1 <host>");
     }
 
     #[test]
@@ -1033,19 +1033,19 @@ mod snapshot {
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <host>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <host>
-        [build] rustc 0 <host> -> GenerateCopyright <host>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
-        [dist] rustc 1 <host> -> std <host>
+        [dist] rustc 1 <host> -> std 1 <host>
         [dist] src <>
-        [build] rustc 0 <host> -> UnstableBookGen <host>
-        [build] rustc 0 <host> -> Rustbook <host>
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] std 2 <host>
         [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs <host>
-        [build] rustc 0 <host> -> Compiletest <host>
-        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         "
         );
     }
@@ -1063,17 +1063,17 @@ mod snapshot {
                 .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 0 <host> -> WasmComponentLd <host>
+        [build] rustc 0 <host> -> WasmComponentLd 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
-        [build] rustc 1 <host> -> WasmComponentLd <host>
+        [build] rustc 1 <host> -> WasmComponentLd 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <host>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <host>
-        [build] rustc 0 <host> -> GenerateCopyright <host>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
-        [dist] rustc 1 <host> -> std <host>
+        [dist] rustc 1 <host> -> std 1 <host>
         [dist] src <>
         [build] rustc 0 <host> -> rustfmt 1 <host>
         [build] rustc 0 <host> -> cargo-fmt 1 <host>
@@ -1081,13 +1081,13 @@ mod snapshot {
         [build] rustc 0 <host> -> cargo-clippy 1 <host>
         [build] rustc 0 <host> -> miri 1 <host>
         [build] rustc 0 <host> -> cargo-miri 1 <host>
-        [build] rustc 0 <host> -> UnstableBookGen <host>
-        [build] rustc 0 <host> -> Rustbook <host>
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] std 2 <host>
         [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs <host>
-        [build] rustc 0 <host> -> Compiletest <host>
-        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         ");
     }
 
@@ -1109,24 +1109,24 @@ mod snapshot {
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <host>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [doc] std 2 <target1>
         [dist] mingw <host>
         [dist] mingw <target1>
-        [build] rustc 0 <host> -> GenerateCopyright <host>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
-        [dist] rustc 1 <host> -> std <host>
+        [dist] rustc 1 <host> -> std 1 <host>
         [build] rustc 2 <host> -> std 2 <target1>
-        [dist] rustc 2 <host> -> std <target1>
+        [dist] rustc 2 <host> -> std 2 <target1>
         [dist] src <>
-        [build] rustc 0 <host> -> UnstableBookGen <host>
-        [build] rustc 0 <host> -> Rustbook <host>
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] std 2 <host>
         [doc] std 2 <target1>
         [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs <host>
-        [build] rustc 0 <host> -> Compiletest <host>
-        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         "
         );
     }
@@ -1149,25 +1149,25 @@ mod snapshot {
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <host>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <host>
-        [build] rustc 0 <host> -> GenerateCopyright <host>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
         [build] llvm <target1>
         [build] rustc 1 <host> -> std 1 <target1>
         [build] rustc 1 <host> -> rustc 2 <target1>
         [build] rustdoc 1 <target1>
         [dist] rustc <target1>
-        [dist] rustc 1 <host> -> std <host>
+        [dist] rustc 1 <host> -> std 1 <host>
         [dist] src <>
-        [build] rustc 0 <host> -> UnstableBookGen <host>
-        [build] rustc 0 <host> -> Rustbook <host>
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] std 2 <host>
         [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 2 <host> -> std 2 <target1>
-        [build] rustc 0 <host> -> Compiletest <host>
-        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         "
         );
     }
@@ -1190,29 +1190,29 @@ mod snapshot {
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <host>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [doc] std 2 <target1>
         [dist] mingw <host>
         [dist] mingw <target1>
-        [build] rustc 0 <host> -> GenerateCopyright <host>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
         [build] llvm <target1>
         [build] rustc 1 <host> -> std 1 <target1>
         [build] rustc 1 <host> -> rustc 2 <target1>
         [build] rustdoc 1 <target1>
         [dist] rustc <target1>
-        [dist] rustc 1 <host> -> std <host>
-        [dist] rustc 1 <host> -> std <target1>
+        [dist] rustc 1 <host> -> std 1 <host>
+        [dist] rustc 1 <host> -> std 1 <target1>
         [dist] src <>
-        [build] rustc 0 <host> -> UnstableBookGen <host>
-        [build] rustc 0 <host> -> Rustbook <host>
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] std 2 <host>
         [doc] std 2 <target1>
         [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 2 <host> -> std 2 <target1>
-        [build] rustc 0 <host> -> Compiletest <host>
-        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         "
         );
     }
@@ -1235,10 +1235,10 @@ mod snapshot {
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <target1>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <target1>
         [build] rustc 2 <host> -> std 2 <target1>
-        [dist] rustc 2 <host> -> std <target1>
+        [dist] rustc 2 <host> -> std 2 <target1>
         ");
     }
 
@@ -1259,22 +1259,22 @@ mod snapshot {
                 .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 0 <host> -> WasmComponentLd <host>
+        [build] rustc 0 <host> -> WasmComponentLd 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
-        [build] rustc 1 <host> -> WasmComponentLd <host>
+        [build] rustc 1 <host> -> WasmComponentLd 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <target1>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <target1>
         [build] llvm <target1>
         [build] rustc 1 <host> -> std 1 <target1>
         [build] rustc 1 <host> -> rustc 2 <target1>
-        [build] rustc 1 <host> -> WasmComponentLd <target1>
+        [build] rustc 1 <host> -> WasmComponentLd 2 <target1>
         [build] rustdoc 1 <target1>
-        [build] rustc 0 <host> -> GenerateCopyright <host>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <target1>
-        [dist] rustc 1 <host> -> std <target1>
+        [dist] rustc 1 <host> -> std 1 <target1>
         [dist] src <>
         [build] rustc 0 <host> -> rustfmt 1 <target1>
         [build] rustc 0 <host> -> cargo-fmt 1 <target1>
@@ -1282,14 +1282,297 @@ mod snapshot {
         [build] rustc 0 <host> -> cargo-clippy 1 <target1>
         [build] rustc 0 <host> -> miri 1 <target1>
         [build] rustc 0 <host> -> cargo-miri 1 <target1>
-        [build] rustc 0 <host> -> UnstableBookGen <host>
-        [build] rustc 0 <host> -> Rustbook <host>
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] std 2 <target1>
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 2 <host> -> std 2 <target1>
-        [build] rustc 0 <host> -> LintDocs <host>
-        [build] rustc 0 <host> -> Compiletest <host>
-        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        ");
+    }
+
+    #[test]
+    fn check_compiler_no_explicit_stage() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .path("compiler")
+                .render_steps(), @r"
+        [check] std <host>
+        [build] llvm <host>
+        [check] rustc <host>
+        [check] cranelift <host>
+        [check] gcc <host>
+        ");
+
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .path("rustc")
+                .render_steps(), @r"
+        [check] std <host>
+        [build] llvm <host>
+        [check] rustc <host>
+        ");
+    }
+
+    #[test]
+    fn check_compiler_stage_0() {
+        let ctx = TestCtx::new();
+        ctx.config("check").path("compiler").stage(0).run();
+    }
+
+    #[test]
+    fn check_compiler_stage_1() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .path("compiler")
+                .stage(1)
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [check] rustc <host>
+        [check] cranelift <host>
+        [check] gcc <host>
+        ");
+    }
+
+    #[test]
+    fn check_compiler_stage_2() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .path("compiler")
+                .stage(2)
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
+        [check] rustc <host>
+        [check] cranelift <host>
+        [check] gcc <host>
+        ");
+    }
+
+    #[test]
+    fn check_cross_compile() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .stage(2)
+                .targets(&[TEST_TRIPLE_1])
+                .hosts(&[TEST_TRIPLE_1])
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 1 <host> -> std 1 <target1>
+        [build] rustc 2 <host> -> std 2 <target1>
+        [check] rustc <target1>
+        [check] Rustdoc <target1>
+        [check] cranelift <target1>
+        [check] gcc <target1>
+        [check] Clippy <target1>
+        [check] Miri <target1>
+        [check] CargoMiri <target1>
+        [check] MiroptTestTools <target1>
+        [check] Rustfmt <target1>
+        [check] rust-analyzer <target1>
+        [check] TestFloatParse <target1>
+        [check] FeaturesStatusDump <target1>
+        [check] std <target1>
+        ");
+    }
+
+    #[test]
+    fn check_library_no_explicit_stage() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .path("library")
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [check] std <host>
+        ");
+    }
+
+    #[test]
+    fn check_library_stage_0() {
+        let ctx = TestCtx::new();
+        ctx.config("check").path("library").stage(0).run();
+    }
+
+    #[test]
+    fn check_library_stage_1() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .path("library")
+                .stage(1)
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [check] std <host>
+        ");
+    }
+
+    #[test]
+    fn check_library_stage_2() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .path("library")
+                .stage(2)
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        [check] std <host>
+        ");
+    }
+
+    #[test]
+    fn check_library_cross_compile() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .paths(&["core", "alloc", "std"])
+                .targets(&[TEST_TRIPLE_1, TEST_TRIPLE_2])
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [check] std <target1>
+        [check] std <target2>
+        ");
+    }
+
+    #[test]
+    fn check_miri_no_explicit_stage() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .path("miri")
+                .render_steps(), @r"
+        [check] std <host>
+        [build] llvm <host>
+        [check] rustc <host>
+        [check] Miri <host>
+        ");
+    }
+
+    #[test]
+    fn check_miri_stage_0() {
+        let ctx = TestCtx::new();
+        ctx.config("check").path("miri").stage(0).run();
+    }
+
+    #[test]
+    fn check_miri_stage_1() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .path("miri")
+                .stage(1)
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [check] rustc <host>
+        [check] Miri <host>
+        ");
+    }
+
+    #[test]
+    fn check_miri_stage_2() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .path("miri")
+                .stage(2)
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
+        [check] rustc <host>
+        [check] Miri <host>
+        ");
+    }
+
+    #[test]
+    fn check_compiletest() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .path("compiletest")
+                .render_steps(), @"[check] compiletest <host>");
+    }
+
+    #[test]
+    fn check_compiletest_stage1_libtest() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .path("compiletest")
+                .args(&["--set", "build.compiletest-use-stage0-libtest=false"])
+                .render_steps(), @r"
+        [check] std <host>
+        [build] llvm <host>
+        [check] rustc <host>
+        [check] compiletest <host>
+        ");
+    }
+
+    #[test]
+    fn check_codegen() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .path("rustc_codegen_cranelift")
+                .render_steps(), @r"
+        [check] std <host>
+        [build] llvm <host>
+        [check] rustc <host>
+        [check] cranelift <host>
+        [check] gcc <host>
+        ");
+    }
+
+    #[test]
+    fn check_rust_analyzer() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .path("rust-analyzer")
+                .render_steps(), @r"
+        [check] std <host>
+        [build] llvm <host>
+        [check] rustc <host>
+        [check] rust-analyzer <host>
+        ");
+    }
+
+    #[test]
+    fn check_bootstrap_tool() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("check")
+                .path("run-make-support")
+                .render_steps(), @r"
+        [check] std <host>
+        [build] llvm <host>
+        [check] rustc <host>
+        [check] RunMakeSupport <host>
         ");
     }
 
@@ -1444,7 +1727,7 @@ fn render_metadata(metadata: &StepMetadata) -> String {
     if let Some(compiler) = metadata.built_by {
         write!(record, "{} -> ", render_compiler(compiler));
     }
-    let stage = if let Some(stage) = metadata.stage { format!("{stage} ") } else { "".to_string() };
+    let stage = metadata.get_stage().map(|stage| format!("{stage} ")).unwrap_or_default();
     write!(record, "{} {stage}<{}>", metadata.name, normalize_target(metadata.target));
     record
 }

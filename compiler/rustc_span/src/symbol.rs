@@ -1623,7 +1623,6 @@ symbols! {
         pointee_sized,
         pointee_trait,
         pointer,
-        pointer_like,
         poll,
         poll_next,
         position,
@@ -1775,7 +1774,6 @@ symbols! {
         resume,
         return_position_impl_trait_in_trait,
         return_type_notation,
-        rhs,
         riscv_target_feature,
         rlib,
         ropi,
@@ -2398,7 +2396,7 @@ pub const STDLIB_STABLE_CRATES: &[Symbol] = &[sym::std, sym::core, sym::alloc, s
 #[derive(Copy, Clone, Eq, HashStable_Generic, Encodable, Decodable)]
 pub struct Ident {
     // `name` should never be the empty symbol. If you are considering that,
-    // you are probably conflating "empty identifer with "no identifier" and
+    // you are probably conflating "empty identifier with "no identifier" and
     // you should use `Option<Ident>` instead.
     pub name: Symbol,
     pub span: Span,

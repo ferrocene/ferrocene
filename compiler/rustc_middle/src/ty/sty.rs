@@ -400,7 +400,7 @@ impl<'tcx> rustc_type_ir::inherent::BoundVarLike<TyCtxt<'tcx>> for BoundTy {
 #[derive(HashStable)]
 pub enum BoundTyKind {
     Anon,
-    Param(DefId, Symbol),
+    Param(DefId),
 }
 
 impl From<BoundVar> for BoundTy {
@@ -1676,7 +1676,7 @@ impl<'tcx> Ty<'tcx> {
     /// This is particularly useful for getting the type of the result of
     /// [`UnOp::PtrMetadata`](crate::mir::UnOp::PtrMetadata).
     ///
-    /// Panics if `self` is not dereferencable.
+    /// Panics if `self` is not dereferenceable.
     #[track_caller]
     pub fn pointee_metadata_ty_or_projection(self, tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
         let Some(pointee_ty) = self.builtin_deref(true) else {
@@ -2032,7 +2032,7 @@ mod size_asserts {
 
     use super::*;
     // tidy-alphabetical-start
-    static_assert_size!(ty::RegionKind<'_>, 24);
+    static_assert_size!(ty::RegionKind<'_>, 20);
     static_assert_size!(ty::TyKind<'_>, 24);
     // tidy-alphabetical-end
 }

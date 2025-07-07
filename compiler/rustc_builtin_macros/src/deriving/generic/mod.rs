@@ -485,7 +485,7 @@ impl<'a> TraitDef<'a> {
             Annotatable::Item(item) => {
                 let is_packed = matches!(
                     AttributeParser::parse_limited(cx.sess, &item.attrs, sym::repr, item.span, item.id),
-                    Some(Attribute::Parsed(AttributeKind::Repr(r))) if r.iter().any(|(x, _)| matches!(x, ReprPacked(..)))
+                    Some(Attribute::Parsed(AttributeKind::Repr { reprs, .. })) if reprs.iter().any(|(x, _)| matches!(x, ReprPacked(..)))
                 );
 
                 let newitem = match &item.kind {
@@ -664,10 +664,10 @@ impl<'a> TraitDef<'a> {
 
                     cx.typaram(param.ident.span.with_ctxt(ctxt), param.ident, bounds, None)
                 }
-                GenericParamKind::Const { ty, kw_span, .. } => {
+                GenericParamKind::Const { ty, span, .. } => {
                     let const_nodefault_kind = GenericParamKind::Const {
                         ty: ty.clone(),
-                        kw_span: kw_span.with_ctxt(ctxt),
+                        span: span.with_ctxt(ctxt),
 
                         // We can't have default values inside impl block
                         default: None,

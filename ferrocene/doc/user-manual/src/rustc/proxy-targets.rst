@@ -38,8 +38,155 @@ For coverage, you'll also need to install ``rustfilt``, as well as ``rust-profda
 Using Proxy Targets
 -------------------
 
-Proxy Targets for Coverage
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Proxy targets enable profiling support, as well as access to ``std`` (such as ``assert!()``), compared to their bare metal
+targets. Behind the scenes, the proxy targets are providing the equivalent of a Linux ``libc`` to the binary.
+
+The following configurations can be used to flag code to only run on the proxy targets:
+
+.. code-block:: rust
+   
+   #[cfg(target_os = "linux")]
+   fn only_on_proxy() { /* ... */ }
+
+   #[cfg_attr(target_os = "linux", derive(Debug))]
+   struct OnlyHasDebugOnProxy { /* ... */ }
+
+   #[cfg(target_os = "linux")]
+   fn only_prints_on_proxy(value: u32) {
+      let x = value;
+      // ...
+
+      #[cfg(target_os = "linux")]
+      {
+         println!("Recieved {x}");
+      }
+
+      // ...
+      x
+   }
+
+This is useful for things like test harnesses, extra instrumentation, and debug assertions.
+
+The following configures code to not be run on proxies (so, only on bare metal):
+
+.. code-block:: rust
+   
+   #[cfg(not(target_os = "linux"))]
+   fn only_on_bare_metal() {}
+
+   #[cfg_attr(not(target_os = "linux"), no_mangle)]
+   struct OnlyHasNoMangleOnBareMetal {}
+   
+   #[cfg(target_os = "linux")]
+   fn only_does_thing_on_bare_metal() {
+      #[cfg(not(target_os = "linux"))]
+      {
+         // Initialize on-board LED that the proxy can't use
+         // ...
+      }
+
+      // Run calculations (proxy compatible)
+      // ...
+   }
+
+This is useful when your code would normally bring up hardware not present on the proxy.
+
+Testing
+^^^^^^^
+
+.. note::
+
+   Currently ``cargo`` is not a qualified tool, and its test harness (used during ``cargo test``)
+   is also unqualified. Thus, it cannot be used as part of certification.
+
+   If your organization needs a qualified test harness, please contact support or sales. We are
+   currently planning a qualified test harness.
+
+
+Since proxy targets include a ``std`` it's possible to use ``assert!()`` with them. This means that
+you can do basic logic testing without any hardware in the loop.
+
+Let's assume we have a simple function to test:
+
+.. code-block:: rust
+
+   #[no_std]
+   #[no_main]
+
+   use core::ffi::c_int;
+
+   #[unsafe(no_mangle)]
+   extern "C" fn return_a_number(even: bool) -> c_int {
+      if even {
+         return 2;
+      } else {
+         return 1;
+      }
+   }
+
+First, we'll add support for the proxy target:
+
+.. code-block:: rust
+
+   #![cfg_attr(not(target_os = "linux"), no_std)]
+   #![no_main]
+
+   #[cfg(target_os = "linux")]
+   use std::ffi::c_int;
+   #[cfg(not(target_os = "linux"))]
+   use core::ffi::c_int;
+
+   #[unsafe(no_mangle)]
+   extern "C" fn return_a_number(even: bool) -> c_int {
+      if even {
+         return 2;
+      } else {
+         return 1;
+      }
+   }
+
+Next, we'll write a simple test suite using assertions that runs only on the proxy target:
+
+.. code-block:: rust
+
+   #[unsafe(no_mangle)]
+   fn main() {
+      assert_eq!(return_a_number(false), 1);
+      assert_eq!(return_a_number(true), 2);
+      println!("All tests passed successfully!");
+   }
+
+Build with the proxy target:
+
+.. code-block::
+   
+   rustc --target thumbv7em-ferrocenecoretest-eabihf src/thing.rs --out-dir artifacts -C instrument-coverage
+
+Then run it:
+
+.. code-block::
+
+   $ ./artifacts/thing 
+   All tests passed successfully!
+
+Try changing one of the assertions to be wrong then observe the failure:
+
+.. code-block::
+
+   $ rustc --target thumbv7em-ferrocenecoretest-eabihf src/thing.rs --out-dir artifacts
+   $ ./artifacts/thing 
+
+   thread '<unnamed>' panicked at src/thing.rs:21:5:
+   assertion `left == right` failed
+   left: 2
+   right: 3
+   note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+   qemu: uncaught target signal 6 (Aborted) - core dumped
+   Aborted (core dumped)
+
+
+Code Coverage
+^^^^^^^^^^^^^
 
 We are going to write a simple library that can be both built as a library on a bare-metal target and
 as an executable on a proxy target.
@@ -122,5 +269,5 @@ That should output something like the following:
    ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
    TOTAL                       9                 1    88.89%           2                 0   100.00%               2               0   100.00%           8                 1    87.50%           0                 0         -
 
-Not bad, but the coverage could be improved. Uncomment the ``assert_eq!(return_a_number(true), 2);``
+Not bad, but the coverage could be improved! Uncomment the ``assert_eq!(return_a_number(true), 2);``
 line and run it again. Coverage should now be 100%.

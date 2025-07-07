@@ -177,6 +177,10 @@ jobs:
       - name: Get LLVM cache
         shell: bash
         run: |
+          if [ -z "${AWS_CA_BUNDLE}" ]; then
+            unset AWS_CA_BUNDLE
+          fi
+
           uv run ferrocene/ci/scripts/llvm_cache.py download --url s3://${{ inputs.cache-bucket }}/${{ inputs.cache-prefix }}llvm-cache/${{ needs.llvm.outputs.name }}
 
       - name: Run

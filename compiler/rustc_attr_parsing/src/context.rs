@@ -16,16 +16,18 @@ use rustc_span::{DUMMY_SP, ErrorGuaranteed, Span, Symbol, sym};
 
 use crate::attributes::allow_unstable::{AllowConstFnUnstableParser, AllowInternalUnstableParser};
 use crate::attributes::codegen_attrs::{
-    ColdParser, ExportNameParser, NakedParser, NoMangleParser, OptimizeParser, TrackCallerParser,
-    UsedParser,
+    ColdParser, ExportNameParser, NakedParser, NoMangleParser, OptimizeParser, TargetFeatureParser,
+    TrackCallerParser, UsedParser,
 };
 use crate::attributes::confusables::ConfusablesParser;
 use crate::attributes::deprecation::DeprecationParser;
 use crate::attributes::inline::{InlineParser, RustcForceInlineParser};
 use crate::attributes::link_attrs::{LinkNameParser, LinkSectionParser};
-use crate::attributes::lint_helpers::{AsPtrParser, PubTransparentParser};
+use crate::attributes::lint_helpers::{AsPtrParser, PassByValueParser, PubTransparentParser};
 use crate::attributes::loop_match::{ConstContinueParser, LoopMatchParser};
 use crate::attributes::must_use::MustUseParser;
+use crate::attributes::no_implicit_prelude::NoImplicitPreludeParser;
+use crate::attributes::non_exhaustive::NonExhaustiveParser;
 use crate::attributes::repr::{AlignParser, ReprParser};
 use crate::attributes::rustc_internal::{
     RustcLayoutScalarValidRangeEnd, RustcLayoutScalarValidRangeStart,
@@ -35,9 +37,10 @@ use crate::attributes::semantics::MayDangleParser;
 use crate::attributes::stability::{
     BodyStabilityParser, ConstStabilityIndirectParser, ConstStabilityParser, StabilityParser,
 };
+use crate::attributes::test_attrs::IgnoreParser;
 use crate::attributes::traits::SkipDuringMethodDispatchParser;
 use crate::attributes::transparency::TransparencyParser;
-use crate::attributes::{AttributeParser as _, Combine, Single};
+use crate::attributes::{AttributeParser as _, Combine, Single, WithoutArgs};
 use crate::parser::{ArgParser, MetaItemParser, PathParser};
 use crate::session_diagnostics::{AttributeParseError, AttributeParseErrorReason, UnknownMetaItem};
 
@@ -58,6 +61,7 @@ macro_rules! attribute_parsers {
             use super::*;
             type Combine<T> = super::Combine<T, Early>;
             type Single<T> = super::Single<T, Early>;
+            type WithoutArgs<T> = super::WithoutArgs<T, Early>;
 
             attribute_parsers!(@[Early] pub(crate) static $name = [$($names),*];);
         }
@@ -65,6 +69,7 @@ macro_rules! attribute_parsers {
             use super::*;
             type Combine<T> = super::Combine<T, Late>;
             type Single<T> = super::Single<T, Late>;
+            type WithoutArgs<T> = super::WithoutArgs<T, Late>;
 
             attribute_parsers!(@[Late] pub(crate) static $name = [$($names),*];);
         }
@@ -116,31 +121,36 @@ attribute_parsers!(
         Combine<AllowConstFnUnstableParser>,
         Combine<AllowInternalUnstableParser>,
         Combine<ReprParser>,
+        Combine<TargetFeatureParser>,
         // tidy-alphabetical-end
 
         // tidy-alphabetical-start
-        Single<AsPtrParser>,
-        Single<ColdParser>,
-        Single<ConstContinueParser>,
-        Single<ConstStabilityIndirectParser>,
         Single<DeprecationParser>,
         Single<ExportNameParser>,
+        Single<IgnoreParser>,
         Single<InlineParser>,
         Single<LinkNameParser>,
         Single<LinkSectionParser>,
-        Single<LoopMatchParser>,
-        Single<MayDangleParser>,
         Single<MustUseParser>,
-        Single<NoMangleParser>,
         Single<OptimizeParser>,
-        Single<PubTransparentParser>,
         Single<RustcForceInlineParser>,
         Single<RustcLayoutScalarValidRangeEnd>,
         Single<RustcLayoutScalarValidRangeStart>,
         Single<RustcObjectLifetimeDefaultParser>,
         Single<SkipDuringMethodDispatchParser>,
-        Single<TrackCallerParser>,
         Single<TransparencyParser>,
+        Single<WithoutArgs<AsPtrParser>>,
+        Single<WithoutArgs<ColdParser>>,
+        Single<WithoutArgs<ConstContinueParser>>,
+        Single<WithoutArgs<ConstStabilityIndirectParser>>,
+        Single<WithoutArgs<LoopMatchParser>>,
+        Single<WithoutArgs<MayDangleParser>>,
+        Single<WithoutArgs<NoImplicitPreludeParser>>,
+        Single<WithoutArgs<NoMangleParser>>,
+        Single<WithoutArgs<NonExhaustiveParser>>,
+        Single<WithoutArgs<PassByValueParser>>,
+        Single<WithoutArgs<PubTransparentParser>>,
+        Single<WithoutArgs<TrackCallerParser>>,
         // tidy-alphabetical-end
     ];
 );
@@ -155,6 +165,7 @@ mod private {
 #[allow(private_interfaces)]
 pub trait Stage: Sized + 'static + Sealed {
     type Id: Copy;
+    const SHOULD_EMIT_LINTS: bool;
 
     fn parsers() -> &'static group_type!(Self);
 
@@ -165,6 +176,7 @@ pub trait Stage: Sized + 'static + Sealed {
 #[allow(private_interfaces)]
 impl Stage for Early {
     type Id = NodeId;
+    const SHOULD_EMIT_LINTS: bool = false;
 
     fn parsers() -> &'static group_type!(Self) {
         &early::ATTRIBUTE_PARSERS
@@ -178,6 +190,7 @@ impl Stage for Early {
 #[allow(private_interfaces)]
 impl Stage for Late {
     type Id = HirId;
+    const SHOULD_EMIT_LINTS: bool = true;
 
     fn parsers() -> &'static group_type!(Self) {
         &late::ATTRIBUTE_PARSERS
@@ -187,7 +200,7 @@ impl Stage for Late {
     }
 }
 
-/// used when parsing attributes for miscelaneous things *before* ast lowering
+/// used when parsing attributes for miscellaneous things *before* ast lowering
 pub struct Early;
 /// used when parsing attributes during ast lowering
 pub struct Late;
@@ -218,6 +231,9 @@ impl<'f, 'sess: 'f, S: Stage> SharedContext<'f, 'sess, S> {
     /// must be delayed until after HIR is built. This method will take care of the details of
     /// that.
     pub(crate) fn emit_lint(&mut self, lint: AttributeLintKind, span: Span) {
+        if !S::SHOULD_EMIT_LINTS {
+            return;
+        }
         let id = self.target_id;
         (self.emit_lint)(AttributeLint { id, span, kind: lint });
     }
@@ -398,6 +414,10 @@ impl<'f, 'sess: 'f, S: Stage> AcceptContext<'f, 'sess, S> {
                 strings: true,
             },
         })
+    }
+
+    pub(crate) fn warn_empty_attribute(&mut self, span: Span) {
+        self.emit_lint(AttributeLintKind::EmptyAttribute { first_span: span }, span);
     }
 }
 

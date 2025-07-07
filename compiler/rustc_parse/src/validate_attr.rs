@@ -293,13 +293,18 @@ fn emit_malformed_attribute(
             | sym::rustc_force_inline
             | sym::rustc_confusables
             | sym::rustc_skip_during_method_dispatch
+            | sym::rustc_pass_by_value
             | sym::repr
             | sym::align
             | sym::deprecated
             | sym::optimize
             | sym::cold
+            | sym::target_feature
+            | sym::rustc_allow_const_fn_unstable
             | sym::naked
             | sym::no_mangle
+            | sym::non_exhaustive
+            | sym::ignore
             | sym::must_use
             | sym::track_caller
             | sym::link_name
@@ -308,14 +313,14 @@ fn emit_malformed_attribute(
             | sym::link_section
             | sym::rustc_layout_scalar_valid_range_start
             | sym::rustc_layout_scalar_valid_range_end
+            | sym::no_implicit_prelude
     ) {
         return;
     }
 
     // Some of previously accepted forms were used in practice,
     // report them as warnings for now.
-    let should_warn =
-        |name| matches!(name, sym::doc | sym::ignore | sym::link | sym::test | sym::bench);
+    let should_warn = |name| matches!(name, sym::doc | sym::link | sym::test | sym::bench);
 
     let error_msg = format!("malformed `{name}` attribute input");
     let mut suggestions = vec![];

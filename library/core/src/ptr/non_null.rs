@@ -497,7 +497,7 @@ impl<T: PointeeSized> NonNull<T> {
         unsafe { NonNull { pointer: self.as_ptr() as *mut U } }
     }
 
-    /// Try to cast to a pointer of another type by checking aligment.
+    /// Try to cast to a pointer of another type by checking alignment.
     ///
     /// If the pointer is properly aligned to the target type, it will be
     /// cast to the target type. Otherwise, `None` is returned.
@@ -1627,9 +1627,6 @@ impl<T: PointeeSized, U: PointeeSized> DispatchFromDyn<NonNull<U>> for NonNull<T
 
 #[stable(feature = "pin", since = "1.33.0")]
 unsafe impl<T: PointeeSized> PinCoerceUnsized for NonNull<T> {}
-
-#[unstable(feature = "pointer_like_trait", issue = "none")]
-impl<T> core::marker::PointerLike for NonNull<T> {}
 
 #[stable(feature = "nonnull", since = "1.25.0")]
 impl<T: PointeeSized> fmt::Debug for NonNull<T> {

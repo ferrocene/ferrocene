@@ -172,10 +172,10 @@ fn emit_aapcs_va_arg<'ll, 'tcx>(
 
     let gr_type = target_ty.is_any_ptr() || target_ty.is_integral();
     let (reg_off, reg_top, slot_size) = if gr_type {
-        let nreg = (layout.size.bytes() + 7) / 8;
+        let nreg = layout.size.bytes().div_ceil(8);
         (gr_offs, gr_top, nreg * 8)
     } else {
-        let nreg = (layout.size.bytes() + 15) / 16;
+        let nreg = layout.size.bytes().div_ceil(16);
         (vr_offs, vr_top, nreg * 16)
     };
 
@@ -861,7 +861,7 @@ fn emit_xtensa_va_arg<'ll, 'tcx>(
 
     // On big-endian, for values smaller than the slot size we'd have to align the read to the end
     // of the slot rather than the start. While the ISA and GCC support big-endian, all the Xtensa
-    // targets supported by rustc are litte-endian so don't worry about it.
+    // targets supported by rustc are little-endian so don't worry about it.
 
     // if from_regsave {
     //     unsafe { *regsave_value_ptr }

@@ -61,6 +61,7 @@ mod type_of;
 
 ///////////////////////////////////////////////////////////////////////////
 
+/// Adds query implementations to the [Providers] vtable, see [`rustc_middle::query`]
 pub(crate) fn provide(providers: &mut Providers) {
     resolve_bound_vars::provide(providers);
     *providers = Providers {
@@ -577,13 +578,7 @@ fn get_new_lifetime_name<'tcx>(
     let existing_lifetimes = tcx
         .collect_referenced_late_bound_regions(poly_trait_ref)
         .into_iter()
-        .filter_map(|lt| {
-            if let ty::BoundRegionKind::Named(_, name) = lt {
-                Some(name.as_str().to_string())
-            } else {
-                None
-            }
-        })
+        .filter_map(|lt| lt.get_name(tcx).map(|name| name.as_str().to_string()))
         .chain(generics.params.iter().filter_map(|param| {
             if let hir::GenericParamKind::Lifetime { .. } = &param.kind {
                 Some(param.name.ident().as_str().to_string())
@@ -778,9 +773,11 @@ fn lower_variant<'tcx>(
         fields,
         parent_did.to_def_id(),
         recovered,
-        adt_kind == AdtKind::Struct && tcx.has_attr(parent_did, sym::non_exhaustive)
-            || variant_did
-                .is_some_and(|variant_did| tcx.has_attr(variant_did, sym::non_exhaustive)),
+        adt_kind == AdtKind::Struct
+            && find_attr!(tcx.get_all_attrs(parent_did), AttributeKind::NonExhaustive(..))
+            || variant_did.is_some_and(|variant_did| {
+                find_attr!(tcx.get_all_attrs(variant_did), AttributeKind::NonExhaustive(..))
+            }),
     )
 }
 

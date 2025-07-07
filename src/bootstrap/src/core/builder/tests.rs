@@ -1033,23 +1033,19 @@ mod snapshot {
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <host>
-        [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs 1 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
-        [doc] std 2 <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <host>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
         [dist] rustc 1 <host> -> std 1 <host>
         [dist] src <>
-        [build] rustc 0 <host> -> UnstableBookGen <host>
-        [build] rustc 0 <host> -> Rustbook <host>
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] std 2 <host>
         [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs <host>
-        [build] rustc 0 <host> -> Compiletest <host>
-        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         "
         );
     }
@@ -1073,7 +1069,7 @@ mod snapshot {
         [build] rustc 1 <host> -> WasmComponentLd 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <host>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <host>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
@@ -1085,13 +1081,13 @@ mod snapshot {
         [build] rustc 0 <host> -> cargo-clippy 1 <host>
         [build] rustc 0 <host> -> miri 1 <host>
         [build] rustc 0 <host> -> cargo-miri 1 <host>
-        [build] rustc 0 <host> -> UnstableBookGen <host>
-        [build] rustc 0 <host> -> Rustbook <host>
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] std 2 <host>
         [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs <host>
-        [build] rustc 0 <host> -> Compiletest <host>
-        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         ");
     }
 
@@ -1113,7 +1109,7 @@ mod snapshot {
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <host>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [doc] std 2 <target1>
         [dist] mingw <host>
         [dist] mingw <target1>
@@ -1123,14 +1119,14 @@ mod snapshot {
         [build] rustc 2 <host> -> std 2 <target1>
         [dist] rustc 2 <host> -> std 2 <target1>
         [dist] src <>
-        [build] rustc 0 <host> -> UnstableBookGen <host>
-        [build] rustc 0 <host> -> Rustbook <host>
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] std 2 <host>
         [doc] std 2 <target1>
         [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs <host>
-        [build] rustc 0 <host> -> Compiletest <host>
-        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         "
         );
     }
@@ -1153,7 +1149,7 @@ mod snapshot {
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <host>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <host>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
@@ -1164,14 +1160,14 @@ mod snapshot {
         [dist] rustc <target1>
         [dist] rustc 1 <host> -> std 1 <host>
         [dist] src <>
-        [build] rustc 0 <host> -> UnstableBookGen <host>
-        [build] rustc 0 <host> -> Rustbook <host>
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] std 2 <host>
         [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 2 <host> -> std 2 <target1>
-        [build] rustc 0 <host> -> Compiletest <host>
-        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         "
         );
     }
@@ -1194,7 +1190,7 @@ mod snapshot {
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <host>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [doc] std 2 <target1>
         [dist] mingw <host>
         [dist] mingw <target1>
@@ -1208,15 +1204,15 @@ mod snapshot {
         [dist] rustc 1 <host> -> std 1 <host>
         [dist] rustc 1 <host> -> std 1 <target1>
         [dist] src <>
-        [build] rustc 0 <host> -> UnstableBookGen <host>
-        [build] rustc 0 <host> -> Rustbook <host>
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] std 2 <host>
         [doc] std 2 <target1>
         [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 2 <host> -> std 2 <target1>
-        [build] rustc 0 <host> -> Compiletest <host>
-        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         "
         );
     }
@@ -1239,7 +1235,7 @@ mod snapshot {
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <target1>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <target1>
         [build] rustc 2 <host> -> std 2 <target1>
         [dist] rustc 2 <host> -> std 2 <target1>
@@ -1269,7 +1265,7 @@ mod snapshot {
         [build] rustc 1 <host> -> WasmComponentLd 2 <host>
         [build] rustdoc 1 <host>
         [doc] std 2 <target1>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <target1>
         [build] llvm <target1>
         [build] rustc 1 <host> -> std 1 <target1>
@@ -1286,14 +1282,14 @@ mod snapshot {
         [build] rustc 0 <host> -> cargo-clippy 1 <target1>
         [build] rustc 0 <host> -> miri 1 <target1>
         [build] rustc 0 <host> -> cargo-miri 1 <target1>
-        [build] rustc 0 <host> -> UnstableBookGen <host>
-        [build] rustc 0 <host> -> Rustbook <host>
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] std 2 <target1>
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 2 <host> -> std 2 <target1>
-        [build] rustc 0 <host> -> LintDocs <host>
-        [build] rustc 0 <host> -> Compiletest <host>
-        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         ");
     }
 

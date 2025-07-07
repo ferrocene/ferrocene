@@ -115,6 +115,9 @@ add --set target.x86_64-pc-nto-qnx710.profiler=false # Build failures were noted
 add --set target.aarch64-unknown-ferrocenecoretest.cc=aarch64-linux-gnu-gcc
 add --set target.thumbv7em-ferrocenecoretest-eabi.cc=arm-none-eabi-gcc
 add --set target.thumbv7em-ferrocenecoretest-eabihf.cc=arm-none-eabi-gcc
+add --set target."aarch64-unknown-none\.certified".cc=aarch64-linux-gnu-gcc
+add --set target."thumbv7em-none-eabi\.certified".cc=arm-none-eabi-gcc
+add --set target."thumbv7em-none-eabihf\.certified".cc=arm-none-eabi-gcc
 
 # Set the host platform to build. The environment variable is set from the CI
 # configuration (see the .circleci directory).

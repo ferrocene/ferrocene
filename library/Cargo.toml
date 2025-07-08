@@ -59,11 +59,5 @@ rustflags = ["-Cpanic=abort"]
 rustc-std-workspace-core = { path = 'rustc-std-workspace-core' }
 rustc-std-workspace-alloc = { path = 'rustc-std-workspace-alloc' }
 rustc-std-workspace-std = { path = 'rustc-std-workspace-std' }
-<<<<<<< HEAD
-
-libc = { path = '../ferrocene/library/libc' }
-compiler_builtins = { path = './compiler-builtins/compiler-builtins' }
-=======
 compiler_builtins = { path = "compiler-builtins/compiler-builtins" }
 libc = { path = '../ferrocene/library/libc' }
->>>>>>> main

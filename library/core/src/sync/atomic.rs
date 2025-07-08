@@ -248,7 +248,6 @@ use crate::cell::UnsafeCell;
 use crate::hint::spin_loop;
 #[cfg(feature = "ferrocene_certified")]
 use crate::intrinsics;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::AtomicOrdering as AO;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, intrinsics};

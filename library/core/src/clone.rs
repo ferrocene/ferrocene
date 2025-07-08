@@ -36,7 +36,6 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{Destruct, PointeeSized};
 
 #[cfg(not(feature = "ferrocene_certified"))]

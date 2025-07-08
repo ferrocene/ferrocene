@@ -54,7 +54,10 @@
 )]
 #![allow(missing_docs)]
 
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{ConstParamTy, DiscriminantKind, PointeeSized, Tuple};
+#[cfg(feature = "ferrocene_certified")]
+use crate::marker::{ConstParamTy, DiscriminantKind, Tuple};
 use crate::ptr;
 
 mod bounds;
@@ -2812,7 +2815,6 @@ pub const fn size_of<T>() -> usize;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn align_of<T>() -> usize;
 
 /// Returns the number of variants of the type `T` cast to a `usize`;

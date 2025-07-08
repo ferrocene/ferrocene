@@ -402,12 +402,15 @@ use crate::cmp::Ordering;
 use crate::intrinsics;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::const_eval_select;
+#[cfg(feature = "ferrocene_certified")]
+use crate::marker::PointeeSized;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{FnPtr, PointeeSized};
-#[cfg(all(debug_assertions, feature = "ferrocene_certified"))]
-use crate::mem::SizedTypeProperties;
 #[cfg(feature = "ferrocene_certified")]
 use crate::mem;
+#[cfg(all(debug_assertions, feature = "ferrocene_certified"))]
+use crate::mem::SizedTypeProperties;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, MaybeUninit, SizedTypeProperties};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;

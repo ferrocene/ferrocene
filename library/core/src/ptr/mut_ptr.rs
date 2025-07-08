@@ -4,7 +4,6 @@ use super::*;
 use crate::cmp::Ordering::{Equal, Greater, Less};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::const_eval_select;
-#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::PointeeSized;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, SizedTypeProperties};

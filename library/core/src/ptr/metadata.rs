@@ -8,6 +8,8 @@ use crate::hash::{Hash, Hasher};
 use crate::intrinsics::aggregate_raw_ptr;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::{aggregate_raw_ptr, ptr_metadata};
+#[cfg(feature = "ferrocene_certified")]
+use crate::marker::PointeeSized;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{Freeze, PointeeSized};
 #[cfg(not(feature = "ferrocene_certified"))]

@@ -1827,6 +1827,7 @@ where
 mod impls {
     use crate::cmp::Ordering::{self, Equal, Greater, Less};
     use crate::hint::unreachable_unchecked;
+    #[cfg(not(feature = "ferrocene_certified"))]
     use crate::marker::PointeeSized;
     use crate::ops::ControlFlow::{self, Break, Continue};
 

@@ -51,6 +51,7 @@ pub struct Location<'a> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Debug for Location<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Location")

@@ -221,6 +221,7 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn bit_width(self) -> u32 {
             Self::BITS - self.leading_zeros()
         }

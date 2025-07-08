@@ -86,7 +86,7 @@ pub use crate::{
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
 #[cfg(feature = "ferrocene_certified")]
-pub use crate::{assert, cfg, concat, stringify};
+pub use crate::{assert, cfg, concat, stringify, include_str};
 
 #[unstable(
     feature = "concat_bytes",

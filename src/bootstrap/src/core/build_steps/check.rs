@@ -287,6 +287,10 @@ fn prepare_compiler_for_check(
             // stage 0 stdlib is used to compile build scripts and proc macros.
             builder.compiler(builder.top_stage, host)
         }
+        Mode::ToolCustom { .. } => {
+            // When checking tools at stage N, we want to do it with the stage N compiler
+            builder.compiler(builder.top_stage, host)
+        }
     }
 }
 

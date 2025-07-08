@@ -39,6 +39,12 @@ tests = [
 targets = ["aarch64-unknown-ferrocenecoretest"]
 reason = "libcheckrust includes symbols which cannot be used without `-fPIC` on this platform"
 
+[["tests/ui"]]
+tests = [
+    "tests/ui/command/command-argv0.rs",
+]
+targets = ["aarch64-unknown-ferrocenecoretest", "thumbv7em-ferrocenecoretest-eabi", "thumbv7em-ferrocenecoretest-eabihf"]
+reason = "QEMU user space emulation behaves differently with argv0"
 
 [["tests/ui"]]
 tests = [

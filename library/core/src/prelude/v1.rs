@@ -84,8 +84,6 @@ pub use crate::{
     stringify, trace_macros,
 };
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
-#[allow(deprecated)]
-#[cfg_attr(bootstrap, allow(deprecated_in_future))]
 #[doc(no_inline)]
 #[cfg(feature = "ferrocene_certified")]
 pub use crate::{assert, cfg, concat, stringify};

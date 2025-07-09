@@ -3083,9 +3083,9 @@ dependencies = [
 
 [[package]]
 name = "measureme"
-version = "12.0.2"
+version = "12.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b9c4198a417da946237d4546d9af25eeca1e6ffba14de2da58c54a2d7ee6d46"
+checksum = "6ebd1ebda747ae161a4a377bf93f87e18d46faad2331cc0c7d25b84b1d445f49"
 dependencies = [
  "log",
  "memmap2",

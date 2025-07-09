@@ -62,6 +62,7 @@ expand_feature_not_allowed =
 expand_feature_removed =
     feature has been removed
     .label = feature has been removed
+    .note = removed in {$removed_rustc_version}{$pull_note}
     .reason = {$reason}
 
 expand_glob_delegation_outside_impls =
@@ -108,11 +109,8 @@ expand_malformed_feature_attribute =
 
 expand_meta_var_dif_seq_matchers = {$msg}
 
-expand_meta_var_expr_unrecognized_var =
-    variable `{$key}` is not recognized in meta-variable expression
-
 expand_missing_fragment_specifier = missing fragment specifier
-    .note = fragment specifiers must be specified in the 2024 edition
+    .note = fragment specifiers must be provided
     .suggestion_add_fragspec = try adding a specifier here
     .valid = {$valid}
 
@@ -134,6 +132,9 @@ expand_module_multiple_candidates =
 
 expand_must_repeat_once =
     this must repeat at least once
+
+expand_mve_unrecognized_var =
+    variable `{$key}` is not recognized in meta-variable expression
 
 expand_non_inline_modules_in_proc_macro_input_are_unstable =
     non-inline modules in proc macro input are unstable

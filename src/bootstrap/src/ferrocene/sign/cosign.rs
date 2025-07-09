@@ -49,14 +49,14 @@ impl Step for CosignBinary {
 
         let mut artifact = None;
         for candidate in COSIGN_ARTIFACTS {
-            if candidate.target == &*builder.config.build.triple {
+            if candidate.target == &*builder.config.host_target.triple {
                 artifact = Some(candidate);
                 break;
             }
         }
         let Some(artifact) = artifact else {
             eprintln!();
-            eprintln!("error: unsupported platform for cosign: {}", builder.config.build);
+            eprintln!("error: unsupported platform for cosign: {}", builder.config.host_target);
             eprintln!("note:  add support for it in src/bootstrap/ferrocene/sign/cosign.rs");
             eprintln!();
             panic!("could not download cosign");
@@ -64,7 +64,7 @@ impl Step for CosignBinary {
 
         let dest = builder
             .out
-            .join(builder.config.build.triple)
+            .join(builder.config.host_target.triple)
             .join("ferrocene")
             .join(format!("cosign-{COSIGN_VERSION}"));
         if let Some(parent) = dest.parent() {

@@ -5,6 +5,7 @@ mod runner;
 mod rust;
 
 use std::fs::File;
+use std::hash::{Hash, Hasher};
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
@@ -14,7 +15,7 @@ use std::{panic, str};
 
 pub(crate) use make::{BuildDocTestBuilder, DocTestBuilder};
 pub(crate) use markdown::test as test_markdown;
-use rustc_data_structures::fx::{FxHashMap, FxIndexMap, FxIndexSet};
+use rustc_data_structures::fx::{FxHashMap, FxHasher, FxIndexMap, FxIndexSet};
 use rustc_errors::emitter::HumanReadableErrorType;
 use rustc_errors::{ColorConfig, DiagCtxtHandle};
 use rustc_hir as hir;
@@ -45,8 +46,6 @@ pub(crate) struct GlobalTestOptions {
     /// Whether inserting extra indent spaces in code block,
     /// default is `false`, only `true` for generating code link of Rust playground
     pub(crate) insert_indent_space: bool,
-    /// Additional crate-level attributes to add to doctests.
-    pub(crate) attrs: Vec<String>,
     /// Path to file containing arguments for the invocation of rustc.
     pub(crate) args_file: PathBuf,
 }
@@ -283,7 +282,7 @@ pub(crate) fn run_tests(
     rustdoc_options: &Arc<RustdocOptions>,
     unused_extern_reports: &Arc<Mutex<Vec<UnusedExterns>>>,
     mut standalone_tests: Vec<test::TestDescAndFn>,
-    mergeable_tests: FxIndexMap<Edition, Vec<(DocTestBuilder, ScrapedDocTest)>>,
+    mergeable_tests: FxIndexMap<MergeableTestKey, Vec<(DocTestBuilder, ScrapedDocTest)>>,
     // We pass this argument so we can drop it manually before using `exit`.
     mut temp_dir: Option<TempDir>,
 ) {
@@ -298,7 +297,7 @@ pub(crate) fn run_tests(
     let mut ran_edition_tests = 0;
     let target_str = rustdoc_options.target.to_string();
 
-    for (edition, mut doctests) in mergeable_tests {
+    for (MergeableTestKey { edition, global_crate_attrs_hash }, mut doctests) in mergeable_tests {
         if doctests.is_empty() {
             continue;
         }
@@ -308,8 +307,8 @@ pub(crate) fn run_tests(
 
         let rustdoc_test_options = IndividualTestOptions::new(
             rustdoc_options,
-            &Some(format!("merged_doctest_{edition}")),
-            PathBuf::from(format!("doctest_{edition}.rs")),
+            &Some(format!("merged_doctest_{edition}_{global_crate_attrs_hash}")),
+            PathBuf::from(format!("doctest_{edition}_{global_crate_attrs_hash}.rs")),
         );
 
         for (doctest, scraped_test) in &doctests {
@@ -371,12 +370,9 @@ fn scrape_test_config(
     attrs: &[hir::Attribute],
     args_file: PathBuf,
 ) -> GlobalTestOptions {
-    use rustc_ast_pretty::pprust;
-
     let mut opts = GlobalTestOptions {
         crate_name,
         no_crate_inject: false,
-        attrs: Vec::new(),
         insert_indent_space: false,
         args_file,
     };
@@ -393,13 +389,7 @@ fn scrape_test_config(
         if attr.has_name(sym::no_crate_inject) {
             opts.no_crate_inject = true;
         }
-        if attr.has_name(sym::attr)
-            && let Some(l) = attr.meta_item_list()
-        {
-            for item in l {
-                opts.attrs.push(pprust::meta_list_item_to_string(item));
-            }
-        }
+        // NOTE: `test(attr(..))` is handled when discovering the individual tests
     }
 
     opts
@@ -524,8 +514,9 @@ fn run_test(
 
     compiler_args.push(format!("@{}", doctest.global_opts.args_file.display()));
 
-    if let Some(sysroot) = &rustdoc_options.maybe_sysroot {
-        compiler_args.push(format!("--sysroot={}", sysroot.display()));
+    let sysroot = &rustdoc_options.sysroot;
+    if let Some(explicit_sysroot) = &sysroot.explicit {
+        compiler_args.push(format!("--sysroot={}", explicit_sysroot.display()));
     }
 
     compiler_args.extend_from_slice(&["--edition".to_owned(), doctest.edition.to_string()]);
@@ -584,7 +575,7 @@ fn run_test(
     let rustc_binary = rustdoc_options
         .test_builder
         .as_deref()
-        .unwrap_or_else(|| rustc_interface::util::rustc_path().expect("found rustc"));
+        .unwrap_or_else(|| rustc_interface::util::rustc_path(sysroot).expect("found rustc"));
     let mut compiler = wrapped_rustc_command(&rustdoc_options.test_builder_wrappers, rustc_binary);
 
     compiler.args(&compiler_args);
@@ -848,6 +839,7 @@ pub(crate) struct ScrapedDocTest {
     text: String,
     name: String,
     span: Span,
+    global_crate_attrs: Vec<String>,
 }
 
 impl ScrapedDocTest {
@@ -858,6 +850,7 @@ impl ScrapedDocTest {
         langstr: LangString,
         text: String,
         span: Span,
+        global_crate_attrs: Vec<String>,
     ) -> Self {
         let mut item_path = logical_path.join("::");
         item_path.retain(|c| c != ' ');
@@ -867,7 +860,7 @@ impl ScrapedDocTest {
         let name =
             format!("{} - {item_path}(line {line})", filename.prefer_remapped_unconditionaly());
 
-        Self { filename, line, langstr, text, name, span }
+        Self { filename, line, langstr, text, name, span, global_crate_attrs }
     }
     fn edition(&self, opts: &RustdocOptions) -> Edition {
         self.langstr.edition.unwrap_or(opts.edition)
@@ -896,9 +889,15 @@ pub(crate) trait DocTestVisitor {
     fn visit_header(&mut self, _name: &str, _level: u32) {}
 }
 
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+pub(crate) struct MergeableTestKey {
+    edition: Edition,
+    global_crate_attrs_hash: u64,
+}
+
 struct CreateRunnableDocTests {
     standalone_tests: Vec<test::TestDescAndFn>,
-    mergeable_tests: FxIndexMap<Edition, Vec<(DocTestBuilder, ScrapedDocTest)>>,
+    mergeable_tests: FxIndexMap<MergeableTestKey, Vec<(DocTestBuilder, ScrapedDocTest)>>,
 
     rustdoc_options: Arc<RustdocOptions>,
     opts: GlobalTestOptions,
@@ -949,6 +948,7 @@ impl CreateRunnableDocTests {
         let edition = scraped_test.edition(&self.rustdoc_options);
         let doctest = BuildDocTestBuilder::new(&scraped_test.text)
             .crate_name(&self.opts.crate_name)
+            .global_crate_attrs(scraped_test.global_crate_attrs.clone())
             .edition(edition)
             .can_merge_doctests(self.can_merge_doctests)
             .test_id(test_id)
@@ -965,7 +965,17 @@ impl CreateRunnableDocTests {
             let test_desc = self.generate_test_desc_and_fn(doctest, scraped_test);
             self.standalone_tests.push(test_desc);
         } else {
-            self.mergeable_tests.entry(edition).or_default().push((doctest, scraped_test));
+            self.mergeable_tests
+                .entry(MergeableTestKey {
+                    edition,
+                    global_crate_attrs_hash: {
+                        let mut hasher = FxHasher::default();
+                        scraped_test.global_crate_attrs.hash(&mut hasher);
+                        hasher.finish()
+                    },
+                })
+                .or_default()
+                .push((doctest, scraped_test));
         }
     }
 
@@ -1044,14 +1054,14 @@ fn doctest_run_fn(
     let report_unused_externs = |uext| {
         unused_externs.lock().unwrap().push(uext);
     };
-    let (full_test_code, full_test_line_offset) = doctest.generate_unique_doctest(
+    let (wrapped, full_test_line_offset) = doctest.generate_unique_doctest(
         &scraped_test.text,
         scraped_test.langstr.test_harness,
         &global_opts,
         Some(&global_opts.crate_name),
     );
     let runnable_test = RunnableDocTest {
-        full_test_code,
+        full_test_code: wrapped.to_string(),
         full_test_line_offset,
         test_opts,
         global_opts,

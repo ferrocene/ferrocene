@@ -34,6 +34,7 @@ use crate::def::{CtorKind, DefKind, PerNS, Res};
 use crate::def_id::{DefId, LocalDefIdMap};
 pub(crate) use crate::hir_id::{HirId, ItemLocalId, ItemLocalMap, OwnerId};
 use crate::intravisit::{FnKind, VisitorExt};
+use crate::lints::DelayedLints;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, HashStable_Generic)]
 pub enum AngleBrackets {
@@ -72,13 +73,13 @@ pub enum LifetimeSource {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, HashStable_Generic)]
 pub enum LifetimeSyntax {
     /// E.g. `&Type`, `ContainsLifetime`
-    Hidden,
+    Implicit,
 
     /// E.g. `&'_ Type`, `ContainsLifetime<'_>`, `impl Trait + '_`, `impl Trait + use<'_>`
-    Anonymous,
+    ExplicitAnonymous,
 
     /// E.g. `&'a Type`, `ContainsLifetime<'a>`, `impl Trait + 'a`, `impl Trait + use<'a>`
-    Named,
+    ExplicitBound,
 }
 
 impl From<Ident> for LifetimeSyntax {
@@ -88,10 +89,10 @@ impl From<Ident> for LifetimeSyntax {
         if name == sym::empty {
             unreachable!("A lifetime name should never be empty");
         } else if name == kw::UnderscoreLifetime {
-            LifetimeSyntax::Anonymous
+            LifetimeSyntax::ExplicitAnonymous
         } else {
             debug_assert!(name.as_str().starts_with('\''));
-            LifetimeSyntax::Named
+            LifetimeSyntax::ExplicitBound
         }
     }
 }
@@ -102,48 +103,48 @@ impl From<Ident> for LifetimeSyntax {
 ///
 /// ```
 /// #[repr(C)]
-/// struct S<'a>(&'a u32);       // res=Param, name='a, source=Reference, syntax=Named
+/// struct S<'a>(&'a u32);       // res=Param, name='a, source=Reference, syntax=ExplicitBound
 /// unsafe extern "C" {
-///     fn f1(s: S);             // res=Param, name='_, source=Path, syntax=Hidden
-///     fn f2(s: S<'_>);         // res=Param, name='_, source=Path, syntax=Anonymous
-///     fn f3<'a>(s: S<'a>);     // res=Param, name='a, source=Path, syntax=Named
+///     fn f1(s: S);             // res=Param, name='_, source=Path, syntax=Implicit
+///     fn f2(s: S<'_>);         // res=Param, name='_, source=Path, syntax=ExplicitAnonymous
+///     fn f3<'a>(s: S<'a>);     // res=Param, name='a, source=Path, syntax=ExplicitBound
 /// }
 ///
-/// struct St<'a> { x: &'a u32 } // res=Param, name='a, source=Reference, syntax=Named
+/// struct St<'a> { x: &'a u32 } // res=Param, name='a, source=Reference, syntax=ExplicitBound
 /// fn f() {
-///     _ = St { x: &0 };        // res=Infer, name='_, source=Path, syntax=Hidden
-///     _ = St::<'_> { x: &0 };  // res=Infer, name='_, source=Path, syntax=Anonymous
+///     _ = St { x: &0 };        // res=Infer, name='_, source=Path, syntax=Implicit
+///     _ = St::<'_> { x: &0 };  // res=Infer, name='_, source=Path, syntax=ExplicitAnonymous
 /// }
 ///
-/// struct Name<'a>(&'a str);    // res=Param,  name='a, source=Reference, syntax=Named
-/// const A: Name = Name("a");   // res=Static, name='_, source=Path, syntax=Hidden
-/// const B: &str = "";          // res=Static, name='_, source=Reference, syntax=Hidden
-/// static C: &'_ str = "";      // res=Static, name='_, source=Reference, syntax=Anonymous
-/// static D: &'static str = ""; // res=Static, name='static, source=Reference, syntax=Named
+/// struct Name<'a>(&'a str);    // res=Param,  name='a, source=Reference, syntax=ExplicitBound
+/// const A: Name = Name("a");   // res=Static, name='_, source=Path, syntax=Implicit
+/// const B: &str = "";          // res=Static, name='_, source=Reference, syntax=Implicit
+/// static C: &'_ str = "";      // res=Static, name='_, source=Reference, syntax=ExplicitAnonymous
+/// static D: &'static str = ""; // res=Static, name='static, source=Reference, syntax=ExplicitBound
 ///
 /// trait Tr {}
-/// fn tr(_: Box<dyn Tr>) {}     // res=ImplicitObjectLifetimeDefault, name='_, source=Other, syntax=Hidden
+/// fn tr(_: Box<dyn Tr>) {}     // res=ImplicitObjectLifetimeDefault, name='_, source=Other, syntax=Implicit
 ///
 /// fn capture_outlives<'a>() ->
-///     impl FnOnce() + 'a       // res=Param, ident='a, source=OutlivesBound, syntax=Named
+///     impl FnOnce() + 'a       // res=Param, ident='a, source=OutlivesBound, syntax=ExplicitBound
 /// {
 ///     || {}
 /// }
 ///
 /// fn capture_precise<'a>() ->
-///     impl FnOnce() + use<'a>  // res=Param, ident='a, source=PreciseCapturing, syntax=Named
+///     impl FnOnce() + use<'a>  // res=Param, ident='a, source=PreciseCapturing, syntax=ExplicitBound
 /// {
 ///     || {}
 /// }
 ///
 /// // (commented out because these cases trigger errors)
-/// // struct S1<'a>(&'a str);   // res=Param, name='a, source=Reference, syntax=Named
-/// // struct S2(S1);            // res=Error, name='_, source=Path, syntax=Hidden
-/// // struct S3(S1<'_>);        // res=Error, name='_, source=Path, syntax=Anonymous
-/// // struct S4(S1<'a>);        // res=Error, name='a, source=Path, syntax=Named
+/// // struct S1<'a>(&'a str);   // res=Param, name='a, source=Reference, syntax=ExplicitBound
+/// // struct S2(S1);            // res=Error, name='_, source=Path, syntax=Implicit
+/// // struct S3(S1<'_>);        // res=Error, name='_, source=Path, syntax=ExplicitAnonymous
+/// // struct S4(S1<'a>);        // res=Error, name='a, source=Path, syntax=ExplicitBound
 /// ```
 ///
-/// Some combinations that cannot occur are `LifetimeSyntax::Hidden` with
+/// Some combinations that cannot occur are `LifetimeSyntax::Implicit` with
 /// `LifetimeSource::OutlivesBound` or `LifetimeSource::PreciseCapturing`
 /// — there's no way to "elide" these lifetimes.
 #[derive(Debug, Copy, Clone, HashStable_Generic)]
@@ -206,7 +207,7 @@ impl ParamName {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, HashStable_Generic)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, HashStable_Generic)]
 pub enum LifetimeKind {
     /// User-given names or fresh (synthetic) names.
     Param(LocalDefId),
@@ -287,12 +288,8 @@ impl Lifetime {
         self.ident.name == kw::UnderscoreLifetime
     }
 
-    pub fn is_syntactically_hidden(&self) -> bool {
-        matches!(self.syntax, LifetimeSyntax::Hidden)
-    }
-
-    pub fn is_syntactically_anonymous(&self) -> bool {
-        matches!(self.syntax, LifetimeSyntax::Anonymous)
+    pub fn is_implicit(&self) -> bool {
+        matches!(self.syntax, LifetimeSyntax::Implicit)
     }
 
     pub fn is_static(&self) -> bool {
@@ -307,28 +304,28 @@ impl Lifetime {
 
         match (self.syntax, self.source) {
             // The user wrote `'a` or `'_`.
-            (Named | Anonymous, _) => (self.ident.span, format!("{new_lifetime}")),
+            (ExplicitBound | ExplicitAnonymous, _) => (self.ident.span, format!("{new_lifetime}")),
 
             // The user wrote `Path<T>`, and omitted the `'_,`.
-            (Hidden, Path { angle_brackets: AngleBrackets::Full }) => {
+            (Implicit, Path { angle_brackets: AngleBrackets::Full }) => {
                 (self.ident.span, format!("{new_lifetime}, "))
             }
 
             // The user wrote `Path<>`, and omitted the `'_`..
-            (Hidden, Path { angle_brackets: AngleBrackets::Empty }) => {
+            (Implicit, Path { angle_brackets: AngleBrackets::Empty }) => {
                 (self.ident.span, format!("{new_lifetime}"))
             }
 
             // The user wrote `Path` and omitted the `<'_>`.
-            (Hidden, Path { angle_brackets: AngleBrackets::Missing }) => {
+            (Implicit, Path { angle_brackets: AngleBrackets::Missing }) => {
                 (self.ident.span.shrink_to_hi(), format!("<{new_lifetime}>"))
             }
 
             // The user wrote `&type` or `&mut type`.
-            (Hidden, Reference) => (self.ident.span, format!("{new_lifetime} ")),
+            (Implicit, Reference) => (self.ident.span, format!("{new_lifetime} ")),
 
-            (Hidden, source) => {
-                unreachable!("can't suggest for a hidden lifetime of {source:?}")
+            (Implicit, source) => {
+                unreachable!("can't suggest for a implicit lifetime of {source:?}")
             }
         }
     }
@@ -959,7 +956,7 @@ impl<'hir> Generics<'hir> {
                     && let Some(ret_ty) = segment.args().paren_sugar_output()
                     && let ret_ty = ret_ty.peel_refs()
                     && let TyKind::TraitObject(_, tagged_ptr) = ret_ty.kind
-                    && let TraitObjectSyntax::Dyn | TraitObjectSyntax::DynStar = tagged_ptr.tag()
+                    && let TraitObjectSyntax::Dyn = tagged_ptr.tag()
                     && ret_ty.span.can_be_used_for_suggestions()
                 {
                     Some(ret_ty.span)
@@ -1305,6 +1302,7 @@ impl AttributeExt for Attribute {
             // FIXME: should not be needed anymore when all attrs are parsed
             Attribute::Parsed(AttributeKind::Deprecation { span, .. }) => *span,
             Attribute::Parsed(AttributeKind::DocComment { span, .. }) => *span,
+            Attribute::Parsed(AttributeKind::MayDangle(span)) => *span,
             a => panic!("can't get the span of an arbitrary parsed attribute: {a:?}"),
         }
     }
@@ -1348,12 +1346,13 @@ impl AttributeExt for Attribute {
         }
     }
 
-    #[inline]
-    fn style(&self) -> AttrStyle {
-        match &self {
-            Attribute::Unparsed(u) => u.style,
-            Attribute::Parsed(AttributeKind::DocComment { style, .. }) => *style,
-            _ => panic!(),
+    fn doc_resolution_scope(&self) -> Option<AttrStyle> {
+        match self {
+            Attribute::Parsed(AttributeKind::DocComment { style, .. }) => Some(*style),
+            Attribute::Unparsed(attr) if self.has_name(sym::doc) && self.value_str().is_some() => {
+                Some(attr.style)
+            }
+            _ => None,
         }
     }
 }
@@ -1444,11 +1443,6 @@ impl Attribute {
     pub fn doc_str_and_comment_kind(&self) -> Option<(Symbol, CommentKind)> {
         AttributeExt::doc_str_and_comment_kind(self)
     }
-
-    #[inline]
-    pub fn style(&self) -> AttrStyle {
-        AttributeExt::style(self)
-    }
 }
 
 /// Attributes owned by a HIR owner.
@@ -1530,6 +1524,10 @@ pub struct OwnerInfo<'hir> {
     /// Map indicating what traits are in scope for places where this
     /// is relevant; generated by resolve.
     pub trait_map: ItemLocalMap<Box<[TraitCandidate]>>,
+
+    /// Lints delayed during ast lowering to be emitted
+    /// after hir has completely built
+    pub delayed_lints: DelayedLints,
 }
 
 impl<'tcx> OwnerInfo<'tcx> {
@@ -1809,7 +1807,7 @@ pub struct PatExpr<'hir> {
 #[derive(Debug, Clone, Copy, HashStable_Generic)]
 pub enum PatExprKind<'hir> {
     Lit {
-        lit: &'hir Lit,
+        lit: Lit,
         // FIXME: move this into `Lit` and handle negated literal expressions
         // once instead of matching on unop neg expressions everywhere.
         negated: bool,
@@ -2284,12 +2282,16 @@ pub struct Expr<'hir> {
 }
 
 impl Expr<'_> {
-    pub fn precedence(&self) -> ExprPrecedence {
+    pub fn precedence(&self, has_attr: &dyn Fn(HirId) -> bool) -> ExprPrecedence {
+        let prefix_attrs_precedence = || -> ExprPrecedence {
+            if has_attr(self.hir_id) { ExprPrecedence::Prefix } else { ExprPrecedence::Unambiguous }
+        };
+
         match &self.kind {
             ExprKind::Closure(closure) => {
                 match closure.fn_decl.output {
                     FnRetTy::DefaultReturn(_) => ExprPrecedence::Jump,
-                    FnRetTy::Return(_) => ExprPrecedence::Unambiguous,
+                    FnRetTy::Return(_) => prefix_attrs_precedence(),
                 }
             }
 
@@ -2314,7 +2316,7 @@ impl Expr<'_> {
             | ExprKind::Let(..)
             | ExprKind::Unary(..) => ExprPrecedence::Prefix,
 
-            // Never need parens
+            // Need parens if and only if there are prefix attributes.
             ExprKind::Array(_)
             | ExprKind::Block(..)
             | ExprKind::Call(..)
@@ -2336,9 +2338,9 @@ impl Expr<'_> {
             | ExprKind::Type(..)
             | ExprKind::UnsafeBinderCast(..)
             | ExprKind::Use(..)
-            | ExprKind::Err(_) => ExprPrecedence::Unambiguous,
+            | ExprKind::Err(_) => prefix_attrs_precedence(),
 
-            ExprKind::DropTemps(expr, ..) => expr.precedence(),
+            ExprKind::DropTemps(expr, ..) => expr.precedence(has_attr),
         }
     }
 
@@ -2732,7 +2734,7 @@ pub enum ExprKind<'hir> {
     /// A unary operation (e.g., `!x`, `*x`).
     Unary(UnOp, &'hir Expr<'hir>),
     /// A literal (e.g., `1`, `"foo"`).
-    Lit(&'hir Lit),
+    Lit(Lit),
     /// A cast (e.g., `foo as f64`).
     Cast(&'hir Expr<'hir>, &'hir Ty<'hir>),
     /// A type ascription (e.g., `x: Foo`). See RFC 3307.
@@ -3063,6 +3065,7 @@ pub struct TraitItem<'hir> {
     pub kind: TraitItemKind<'hir>,
     pub span: Span,
     pub defaultness: Defaultness,
+    pub has_delayed_lints: bool,
 }
 
 macro_rules! expect_methods_self_kind {
@@ -3167,6 +3170,7 @@ pub struct ImplItem<'hir> {
     pub defaultness: Defaultness,
     pub span: Span,
     pub vis_span: Span,
+    pub has_delayed_lints: bool,
 }
 
 impl<'hir> ImplItem<'hir> {
@@ -4086,6 +4090,7 @@ pub struct Item<'hir> {
     pub kind: ItemKind<'hir>,
     pub span: Span,
     pub vis_span: Span,
+    pub has_delayed_lints: bool,
 }
 
 impl<'hir> Item<'hir> {
@@ -4395,27 +4400,6 @@ impl ItemKind<'_> {
             _ => return None,
         })
     }
-
-    pub fn descr(&self) -> &'static str {
-        match self {
-            ItemKind::ExternCrate(..) => "extern crate",
-            ItemKind::Use(..) => "`use` import",
-            ItemKind::Static(..) => "static item",
-            ItemKind::Const(..) => "constant item",
-            ItemKind::Fn { .. } => "function",
-            ItemKind::Macro(..) => "macro",
-            ItemKind::Mod(..) => "module",
-            ItemKind::ForeignMod { .. } => "extern block",
-            ItemKind::GlobalAsm { .. } => "global asm item",
-            ItemKind::TyAlias(..) => "type alias",
-            ItemKind::Enum(..) => "enum",
-            ItemKind::Struct(..) => "struct",
-            ItemKind::Union(..) => "union",
-            ItemKind::Trait(..) => "trait",
-            ItemKind::TraitAlias(..) => "trait alias",
-            ItemKind::Impl(..) => "implementation",
-        }
-    }
 }
 
 /// A reference from an trait to one of its associated items. This
@@ -4491,6 +4475,7 @@ pub struct ForeignItem<'hir> {
     pub owner_id: OwnerId,
     pub span: Span,
     pub vis_span: Span,
+    pub has_delayed_lints: bool,
 }
 
 impl ForeignItem<'_> {
@@ -4828,6 +4813,10 @@ impl<'hir> Node<'hir> {
                 ImplItemKind::Type(ty) => Some(ty),
                 _ => None,
             },
+            Node::ForeignItem(it) => match it.kind {
+                ForeignItemKind::Static(ty, ..) => Some(ty),
+                _ => None,
+            },
             _ => None,
         }
     }
@@ -4973,7 +4962,7 @@ mod size_asserts {
     static_assert_size!(Expr<'_>, 64);
     static_assert_size!(ExprKind<'_>, 48);
     static_assert_size!(FnDecl<'_>, 40);
-    static_assert_size!(ForeignItem<'_>, 88);
+    static_assert_size!(ForeignItem<'_>, 96);
     static_assert_size!(ForeignItemKind<'_>, 56);
     static_assert_size!(GenericArg<'_>, 16);
     static_assert_size!(GenericBound<'_>, 64);
@@ -4986,9 +4975,9 @@ mod size_asserts {
     static_assert_size!(LetStmt<'_>, 72);
     static_assert_size!(Param<'_>, 32);
     static_assert_size!(Pat<'_>, 72);
+    static_assert_size!(PatKind<'_>, 48);
     static_assert_size!(Path<'_>, 40);
     static_assert_size!(PathSegment<'_>, 48);
-    static_assert_size!(PatKind<'_>, 48);
     static_assert_size!(QPath<'_>, 24);
     static_assert_size!(Res, 12);
     static_assert_size!(Stmt<'_>, 32);

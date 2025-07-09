@@ -43,8 +43,7 @@ pub(crate) fn try_run_tests(
         if builder.fail_fast {
             crate::exit!(1);
         } else {
-            let mut failures = builder.delayed_failures.borrow_mut();
-            failures.push(format!("{cmd:?}"));
+            builder.config.exec_ctx().add_to_delay_failure(format!("{cmd:?}"));
             false
         }
     } else {
@@ -203,7 +202,9 @@ impl<'a> Renderer<'a> {
     }
 
     fn render_test_outcome_terse(&mut self, outcome: Outcome<'_>, test: &TestOutcome) {
-        if self.terse_tests_in_line != 0 && self.terse_tests_in_line % TERSE_TESTS_PER_LINE == 0 {
+        if self.terse_tests_in_line != 0
+            && self.terse_tests_in_line.is_multiple_of(TERSE_TESTS_PER_LINE)
+        {
             if let Some(total) = self.tests_count {
                 let total = total.to_string();
                 let executed = format!("{:>width$}", self.executed_tests - 1, width = total.len());

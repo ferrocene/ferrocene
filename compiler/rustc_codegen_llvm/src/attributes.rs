@@ -5,6 +5,7 @@ use rustc_hir::def_id::DefId;
 use rustc_middle::middle::codegen_fn_attrs::{CodegenFnAttrFlags, PatchableFunctionEntry};
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_session::config::{BranchProtection, FunctionReturn, OptLevel, PAuthKey, PacRet};
+use rustc_symbol_mangling::mangle_internal_symbol;
 use rustc_target::spec::{FramePointer, SanitizerSet, StackProbeType, StackProtector};
 use smallvec::SmallVec;
 
@@ -256,11 +257,11 @@ fn probestack_attr<'ll>(cx: &CodegenCx<'ll, '_>) -> Option<&'ll Attribute> {
         StackProbeType::Inline => "inline-asm",
         // Flag our internal `__rust_probestack` function as the stack probe symbol.
         // This is defined in the `compiler-builtins` crate for each architecture.
-        StackProbeType::Call => "__rust_probestack",
+        StackProbeType::Call => &mangle_internal_symbol(cx.tcx, "__rust_probestack"),
         // Pick from the two above based on the LLVM version.
         StackProbeType::InlineOrCall { min_llvm_version_for_inline } => {
             if llvm_util::get_version() < min_llvm_version_for_inline {
-                "__rust_probestack"
+                &mangle_internal_symbol(cx.tcx, "__rust_probestack")
             } else {
                 "inline-asm"
             }
@@ -490,11 +491,7 @@ pub(crate) fn llfn_attrs_from_instance<'ll, 'tcx>(
         let allocated_pointer = AttributeKind::AllocatedPointer.create_attr(cx.llcx);
         attributes::apply_to_llfn(llfn, AttributePlace::Argument(0), &[allocated_pointer]);
     }
-    // function alignment can be set globally with the `-Zmin-function-alignment=<n>` flag;
-    // the alignment from a `#[repr(align(<n>))]` is used if it specifies a higher alignment.
-    if let Some(align) =
-        Ord::max(cx.tcx.sess.opts.unstable_opts.min_function_alignment, codegen_fn_attrs.alignment)
-    {
+    if let Some(align) = codegen_fn_attrs.alignment {
         llvm::set_alignment(llfn, align);
     }
     if let Some(backchain) = backchain_attr(cx) {

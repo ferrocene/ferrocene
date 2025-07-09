@@ -132,7 +132,7 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
         assert!(!matches!(info.kind, AllocKind::Dead));
 
         // This allocation does not have a base address yet, pick or reuse one.
-        if this.machine.native_lib.is_some() {
+        if !this.machine.native_lib.is_empty() {
             // In native lib mode, we use the "real" address of the bytes for this allocation.
             // This ensures the interpreted program and native code have the same view of memory.
             let params = this.machine.get_default_alloc_params();
@@ -390,7 +390,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
     ) -> InterpResult<'tcx, interpret::Pointer<Provenance>> {
         let this = self.eval_context_ref();
 
-        let (prov, offset) = ptr.into_parts(); // offset is relative (AllocId provenance)
+        let (prov, offset) = ptr.prov_and_relative_offset();
         let alloc_id = prov.alloc_id();
 
         // Get a pointer to the beginning of this allocation.
@@ -413,7 +413,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
     ) -> InterpResult<'tcx, MiriAllocBytes> {
         let this = self.eval_context_ref();
         assert!(this.tcx.try_get_global_alloc(id).is_some());
-        if this.machine.native_lib.is_some() {
+        if !this.machine.native_lib.is_empty() {
             // In native lib mode, MiriAllocBytes for global allocations are handled via `prepared_alloc_bytes`.
             // This additional call ensures that some `MiriAllocBytes` are always prepared, just in case
             // this function gets called before the first time `addr_from_alloc_id` gets called.
@@ -447,7 +447,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
     ) -> Option<(AllocId, Size)> {
         let this = self.eval_context_ref();
 
-        let (tag, addr) = ptr.into_parts(); // addr is absolute (Tag provenance)
+        let (tag, addr) = ptr.into_raw_parts(); // addr is absolute (Miri provenance)
 
         let alloc_id = if let Provenance::Concrete { alloc_id, .. } = tag {
             alloc_id

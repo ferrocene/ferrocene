@@ -12,7 +12,8 @@ use rustc_attr_data_structures::StabilityLevel;
 use rustc_data_structures::intern::Interned;
 use rustc_errors::{Applicability, DiagCtxtHandle, StashKey};
 use rustc_expand::base::{
-    DeriveResolution, Indeterminate, ResolverExpand, SyntaxExtension, SyntaxExtensionKind,
+    Annotatable, DeriveResolution, Indeterminate, ResolverExpand, SyntaxExtension,
+    SyntaxExtensionKind,
 };
 use rustc_expand::compile_declarative_macro;
 use rustc_expand::expand::{
@@ -294,6 +295,14 @@ impl<'ra, 'tcx> ResolverExpand for Resolver<'ra, 'tcx> {
                     && self.tcx.def_kind(mod_def_id) == DefKind::Mod
             })
             .map(|&InvocationParent { parent_def: mod_def_id, .. }| mod_def_id);
+        let sugg_span = match &invoc.kind {
+            InvocationKind::Attr { item: Annotatable::Item(item), .. }
+                if !item.span.from_expansion() =>
+            {
+                Some(item.span.shrink_to_lo())
+            }
+            _ => None,
+        };
         let (ext, res) = self.smart_resolve_macro_path(
             path,
             kind,
@@ -304,6 +313,7 @@ impl<'ra, 'tcx> ResolverExpand for Resolver<'ra, 'tcx> {
             force,
             deleg_impl,
             looks_like_invoc_in_mod_inert_attr,
+            sugg_span,
         )?;
 
         let span = invoc.span();
@@ -385,6 +395,7 @@ impl<'ra, 'tcx> ResolverExpand for Resolver<'ra, 'tcx> {
                         &parent_scope,
                         true,
                         force,
+                        None,
                         None,
                     ) {
                         Ok((Some(ext), _)) => {
@@ -511,6 +522,10 @@ impl<'ra, 'tcx> ResolverExpand for Resolver<'ra, 'tcx> {
         });
         Ok(idents)
     }
+
+    fn insert_impl_trait_name(&mut self, id: NodeId, name: Symbol) {
+        self.impl_trait_names.insert(id, name);
+    }
 }
 
 impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
@@ -528,6 +543,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         force: bool,
         deleg_impl: Option<LocalDefId>,
         invoc_in_mod_inert_attr: Option<LocalDefId>,
+        suggestion_span: Option<Span>,
     ) -> Result<(Arc<SyntaxExtension>, Res), Indeterminate> {
         let (ext, res) = match self.resolve_macro_or_delegation_path(
             path,
@@ -538,6 +554,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             deleg_impl,
             invoc_in_mod_inert_attr.map(|def_id| (def_id, node_id)),
             None,
+            suggestion_span,
         ) {
             Ok((Some(ext), res)) => (ext, res),
             Ok((None, res)) => (self.dummy_ext(kind), res),
@@ -681,6 +698,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         trace: bool,
         force: bool,
         ignore_import: Option<Import<'ra>>,
+        suggestion_span: Option<Span>,
     ) -> Result<(Option<Arc<SyntaxExtension>>, Res), Determinacy> {
         self.resolve_macro_or_delegation_path(
             path,
@@ -691,6 +709,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             None,
             None,
             ignore_import,
+            suggestion_span,
         )
     }
 
@@ -704,6 +723,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         deleg_impl: Option<LocalDefId>,
         invoc_in_mod_inert_attr: Option<(LocalDefId, NodeId)>,
         ignore_import: Option<Import<'ra>>,
+        suggestion_span: Option<Span>,
     ) -> Result<(Option<Arc<SyntaxExtension>>, Res), Determinacy> {
         let path_span = ast_path.span;
         let mut path = Segment::from_path(ast_path);
@@ -768,6 +788,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     kind,
                     *parent_scope,
                     binding.ok(),
+                    suggestion_span,
                 ));
             }
 
@@ -905,7 +926,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         }
 
         let macro_resolutions = mem::take(&mut self.single_segment_macro_resolutions);
-        for (ident, kind, parent_scope, initial_binding) in macro_resolutions {
+        for (ident, kind, parent_scope, initial_binding, sugg_span) in macro_resolutions {
             match self.early_resolve_ident_in_lexical_scope(
                 ident,
                 ScopeSet::Macro(kind),
@@ -946,7 +967,14 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                         expected,
                         ident,
                     });
-                    self.unresolved_macro_suggestions(&mut err, kind, &parent_scope, ident, krate);
+                    self.unresolved_macro_suggestions(
+                        &mut err,
+                        kind,
+                        &parent_scope,
+                        ident,
+                        krate,
+                        sugg_span,
+                    );
                     err.emit();
                 }
             }
@@ -974,7 +1002,8 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     ) {
         let span = path.span;
         if let Some(stability) = &ext.stability {
-            if let StabilityLevel::Unstable { reason, issue, is_soft, implied_by } = stability.level
+            if let StabilityLevel::Unstable { reason, issue, is_soft, implied_by, .. } =
+                stability.level
             {
                 let feature = stability.feature;
 

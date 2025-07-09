@@ -41,6 +41,7 @@ use crate::error::Error;
 use crate::fmt;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::hash::{Hash, Hasher};
+use crate::marker::PointeeSized;
 
 #[cfg(not(feature = "ferrocene_certified"))]
 mod num;
@@ -220,7 +221,7 @@ pub const fn identity<T>(x: T) -> T {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "AsRef"]
-pub trait AsRef<T: ?Sized> {
+pub trait AsRef<T: PointeeSized>: PointeeSized {
     /// Converts this type into a shared reference of the (usually inferred) input type.
     #[stable(feature = "rust1", since = "1.0.0")]
     fn as_ref(&self) -> &T;
@@ -371,7 +372,7 @@ pub trait AsRef<T: ?Sized> {
 /// `&mut Vec<u8>`, for example, is the better choice (callers need to pass the correct type then).
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "AsMut"]
-pub trait AsMut<T: ?Sized> {
+pub trait AsMut<T: PointeeSized>: PointeeSized {
     /// Converts this type into a mutable reference of the (usually inferred) input type.
     #[stable(feature = "rust1", since = "1.0.0")]
     fn as_mut(&mut self) -> &mut T;
@@ -706,7 +707,7 @@ pub trait TryFrom<T>: Sized {
 
 // As lifts over &
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<T: ?Sized, U: ?Sized> AsRef<U> for &T
+impl<T: PointeeSized, U: PointeeSized> AsRef<U> for &T
 where
     T: AsRef<U>,
 {
@@ -718,7 +719,7 @@ where
 
 // As lifts over &mut
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<T: ?Sized, U: ?Sized> AsRef<U> for &mut T
+impl<T: PointeeSized, U: PointeeSized> AsRef<U> for &mut T
 where
     T: AsRef<U>,
 {
@@ -738,7 +739,7 @@ where
 
 // AsMut lifts over &mut
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<T: ?Sized, U: ?Sized> AsMut<U> for &mut T
+impl<T: PointeeSized, U: PointeeSized> AsMut<U> for &mut T
 where
     T: AsMut<U>,
 {

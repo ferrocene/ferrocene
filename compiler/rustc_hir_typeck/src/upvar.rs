@@ -492,7 +492,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let final_upvar_tys = self.final_upvar_tys(closure_def_id);
         debug!(?closure_hir_id, ?args, ?final_upvar_tys);
 
-        if self.tcx.features().unsized_locals() || self.tcx.features().unsized_fn_params() {
+        if self.tcx.features().unsized_fn_params() {
             for capture in
                 self.typeck_results.borrow().closure_min_captures_flattened(closure_def_id)
             {
@@ -1560,7 +1560,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         };
 
         let is_drop_defined_for_ty = |ty: Ty<'tcx>| {
-            let drop_trait = self.tcx.require_lang_item(hir::LangItem::Drop, Some(closure_span));
+            let drop_trait = self.tcx.require_lang_item(hir::LangItem::Drop, closure_span);
             self.infcx
                 .type_implements_trait(drop_trait, [ty], self.tcx.param_env(closure_def_id))
                 .must_apply_modulo_regions()

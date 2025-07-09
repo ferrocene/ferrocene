@@ -23,7 +23,7 @@ use crate::common::{AtomicRmwBinOp, IntPredicate, RealPredicate, Synchronization
 use crate::mir::operand::{OperandRef, OperandValue};
 use crate::mir::place::{PlaceRef, PlaceValue};
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum OverflowOp {
     Add,
     Sub,
@@ -215,7 +215,7 @@ pub trait BuilderMethods<'a, 'tcx>:
     fn checked_binop(
         &mut self,
         oop: OverflowOp,
-        ty: Ty<'_>,
+        ty: Ty<'tcx>,
         lhs: Self::Value,
         rhs: Self::Value,
     ) -> (Self::Value, Self::Value);
@@ -516,7 +516,7 @@ pub trait BuilderMethods<'a, 'tcx>:
 
     // These are used by everyone except msvc
     fn cleanup_landing_pad(&mut self, pers_fn: Self::Function) -> (Self::Value, Self::Value);
-    fn filter_landing_pad(&mut self, pers_fn: Self::Function) -> (Self::Value, Self::Value);
+    fn filter_landing_pad(&mut self, pers_fn: Self::Function);
     fn resume(&mut self, exn0: Self::Value, exn1: Self::Value);
 
     // These are used only by msvc

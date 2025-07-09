@@ -5,12 +5,12 @@ use std::io::{Read, Seek, Write};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-use rustc_ast::attr::AttributeExt;
+use rustc_attr_data_structures::EncodeCrossCrate;
 use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_data_structures::memmap::{Mmap, MmapMut};
 use rustc_data_structures::sync::{join, par_for_each_in};
 use rustc_data_structures::temp_dir::MaybeTempDir;
-use rustc_data_structures::thousands::format_with_underscores;
+use rustc_data_structures::thousands::usize_with_underscores;
 use rustc_feature::Features;
 use rustc_hir as hir;
 use rustc_hir::def_id::{CRATE_DEF_ID, CRATE_DEF_INDEX, LOCAL_CRATE, LocalDefId, LocalDefIdSet};
@@ -29,8 +29,8 @@ use rustc_serialize::{Decodable, Decoder, Encodable, Encoder, opaque};
 use rustc_session::config::{CrateType, OptLevel, TargetModifier};
 use rustc_span::hygiene::HygieneEncodeContext;
 use rustc_span::{
-    ExternalSource, FileName, SourceFile, SpanData, SpanEncoder, StableSourceFileId, SyntaxContext,
-    sym,
+    ByteSymbol, ExternalSource, FileName, SourceFile, SpanData, SpanEncoder, StableSourceFileId,
+    Symbol, SyntaxContext, sym,
 };
 use tracing::{debug, instrument, trace};
 
@@ -63,7 +63,8 @@ pub(super) struct EncodeContext<'a, 'tcx> {
     required_source_files: Option<FxIndexSet<usize>>,
     is_proc_macro: bool,
     hygiene_ctxt: &'a HygieneEncodeContext,
-    symbol_table: FxHashMap<Symbol, usize>,
+    // Used for both `Symbol`s and `ByteSymbol`s.
+    symbol_index_table: FxHashMap<u32, usize>,
 }
 
 /// If the current crate is a proc-macro, returns early with `LazyArray::default()`.
@@ -200,27 +201,14 @@ impl<'a, 'tcx> SpanEncoder for EncodeContext<'a, 'tcx> {
         }
     }
 
-    fn encode_symbol(&mut self, symbol: Symbol) {
-        // if symbol predefined, emit tag and symbol index
-        if symbol.is_predefined() {
-            self.opaque.emit_u8(SYMBOL_PREDEFINED);
-            self.opaque.emit_u32(symbol.as_u32());
-        } else {
-            // otherwise write it as string or as offset to it
-            match self.symbol_table.entry(symbol) {
-                Entry::Vacant(o) => {
-                    self.opaque.emit_u8(SYMBOL_STR);
-                    let pos = self.opaque.position();
-                    o.insert(pos);
-                    self.emit_str(symbol.as_str());
-                }
-                Entry::Occupied(o) => {
-                    let x = *o.get();
-                    self.emit_u8(SYMBOL_OFFSET);
-                    self.emit_usize(x);
-                }
-            }
-        }
+    fn encode_symbol(&mut self, sym: Symbol) {
+        self.encode_symbol_or_byte_symbol(sym.as_u32(), |this| this.emit_str(sym.as_str()));
+    }
+
+    fn encode_byte_symbol(&mut self, byte_sym: ByteSymbol) {
+        self.encode_symbol_or_byte_symbol(byte_sym.as_u32(), |this| {
+            this.emit_byte_str(byte_sym.as_byte_str())
+        });
     }
 }
 
@@ -492,6 +480,33 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
         LazyArray::from_position_and_num_elems(pos, len)
     }
 
+    fn encode_symbol_or_byte_symbol(
+        &mut self,
+        index: u32,
+        emit_str_or_byte_str: impl Fn(&mut Self),
+    ) {
+        // if symbol/byte symbol is predefined, emit tag and symbol index
+        if Symbol::is_predefined(index) {
+            self.opaque.emit_u8(SYMBOL_PREDEFINED);
+            self.opaque.emit_u32(index);
+        } else {
+            // otherwise write it as string or as offset to it
+            match self.symbol_index_table.entry(index) {
+                Entry::Vacant(o) => {
+                    self.opaque.emit_u8(SYMBOL_STR);
+                    let pos = self.opaque.position();
+                    o.insert(pos);
+                    emit_str_or_byte_str(self);
+                }
+                Entry::Occupied(o) => {
+                    let x = *o.get();
+                    self.emit_u8(SYMBOL_OFFSET);
+                    self.emit_usize(x);
+                }
+            }
+        }
+    }
+
     fn encode_def_path_table(&mut self) {
         let table = self.tcx.def_path_table();
         if self.is_proc_macro {
@@ -677,9 +692,13 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             stat!("exportable-items", || self.encode_stable_order_of_exportable_impls());
 
         // Encode exported symbols info. This is prefetched in `encode_metadata`.
-        let exported_symbols = stat!("exported-symbols", || {
-            self.encode_exported_symbols(tcx.exported_symbols(LOCAL_CRATE))
-        });
+        let (exported_non_generic_symbols, exported_generic_symbols) =
+            stat!("exported-symbols", || {
+                (
+                    self.encode_exported_symbols(tcx.exported_non_generic_symbols(LOCAL_CRATE)),
+                    self.encode_exported_symbols(tcx.exported_generic_symbols(LOCAL_CRATE)),
+                )
+            });
 
         // Encode the hygiene data.
         // IMPORTANT: this *must* be the last thing that we encode (other than `SourceMap`). The
@@ -745,7 +764,8 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                 incoherent_impls,
                 exportable_items,
                 stable_order_of_exportable_impls,
-                exported_symbols,
+                exported_non_generic_symbols,
+                exported_generic_symbols,
                 interpret_alloc_index,
                 tables,
                 syntax_contexts,
@@ -762,6 +782,8 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
         assert_eq!(total_bytes, computed_total_bytes);
 
         if tcx.sess.opts.unstable_opts.meta_stats {
+            use std::fmt::Write;
+
             self.opaque.flush();
 
             // Rewind and re-read all the metadata to count the zero bytes we wrote.
@@ -777,31 +799,44 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             assert_eq!(self.opaque.file().stream_position().unwrap(), pos_before_rewind);
 
             stats.sort_by_key(|&(_, usize)| usize);
+            stats.reverse(); // bigger items first
 
             let prefix = "meta-stats";
             let perc = |bytes| (bytes * 100) as f64 / total_bytes as f64;
 
-            eprintln!("{prefix} METADATA STATS");
-            eprintln!("{} {:<23}{:>10}", prefix, "Section", "Size");
-            eprintln!("{prefix} ----------------------------------------------------------------");
+            let section_w = 23;
+            let size_w = 10;
+            let banner_w = 64;
+
+            // We write all the text into a string and print it with a single
+            // `eprint!`. This is an attempt to minimize interleaved text if multiple
+            // rustc processes are printing macro-stats at the same time (e.g. with
+            // `RUSTFLAGS='-Zmeta-stats' cargo build`). It still doesn't guarantee
+            // non-interleaving, though.
+            let mut s = String::new();
+            _ = writeln!(s, "{prefix} {}", "=".repeat(banner_w));
+            _ = writeln!(s, "{prefix} METADATA STATS: {}", tcx.crate_name(LOCAL_CRATE));
+            _ = writeln!(s, "{prefix} {:<section_w$}{:>size_w$}", "Section", "Size");
+            _ = writeln!(s, "{prefix} {}", "-".repeat(banner_w));
             for (label, size) in stats {
-                eprintln!(
-                    "{} {:<23}{:>10} ({:4.1}%)",
-                    prefix,
+                _ = writeln!(
+                    s,
+                    "{prefix} {:<section_w$}{:>size_w$} ({:4.1}%)",
                     label,
-                    format_with_underscores(size),
+                    usize_with_underscores(size),
                     perc(size)
                 );
             }
-            eprintln!("{prefix} ----------------------------------------------------------------");
-            eprintln!(
-                "{} {:<23}{:>10} (of which {:.1}% are zero bytes)",
-                prefix,
+            _ = writeln!(s, "{prefix} {}", "-".repeat(banner_w));
+            _ = writeln!(
+                s,
+                "{prefix} {:<section_w$}{:>size_w$} (of which {:.1}% are zero bytes)",
                 "Total",
-                format_with_underscores(total_bytes),
+                usize_with_underscores(total_bytes),
                 perc(zero_bytes)
             );
-            eprintln!("{prefix}");
+            _ = writeln!(s, "{prefix} {}", "=".repeat(banner_w));
+            eprint!("{s}");
         }
 
         root
@@ -824,9 +859,13 @@ struct AnalyzeAttrState<'a> {
 /// visibility: this is a piece of data that can be computed once per defid, and not once per
 /// attribute. Some attributes would only be usable downstream if they are public.
 #[inline]
-fn analyze_attr(attr: &impl AttributeExt, state: &mut AnalyzeAttrState<'_>) -> bool {
+fn analyze_attr(attr: &hir::Attribute, state: &mut AnalyzeAttrState<'_>) -> bool {
     let mut should_encode = false;
-    if let Some(name) = attr.name()
+    if let hir::Attribute::Parsed(p) = attr
+        && p.encode_cross_crate() == EncodeCrossCrate::No
+    {
+        // Attributes not marked encode-cross-crate don't need to be encoded for downstream crates.
+    } else if let Some(name) = attr.name()
         && !rustc_feature::encode_cross_crate(name)
     {
         // Attributes not marked encode-cross-crate don't need to be encoded for downstream crates.
@@ -2341,7 +2380,13 @@ pub fn encode_metadata(tcx: TyCtxt<'_>, path: &Path, ref_path: Option<&Path>) {
         // Prefetch some queries used by metadata encoding.
         // This is not necessary for correctness, but is only done for performance reasons.
         // It can be removed if it turns out to cause trouble or be detrimental to performance.
-        join(|| prefetch_mir(tcx), || tcx.exported_symbols(LOCAL_CRATE));
+        join(
+            || prefetch_mir(tcx),
+            || {
+                let _ = tcx.exported_non_generic_symbols(LOCAL_CRATE);
+                let _ = tcx.exported_generic_symbols(LOCAL_CRATE);
+            },
+        );
     }
 
     with_encode_metadata_header(tcx, path, |ecx| {
@@ -2408,7 +2453,7 @@ fn with_encode_metadata_header(
         required_source_files,
         is_proc_macro: tcx.crate_types().contains(&CrateType::ProcMacro),
         hygiene_ctxt: &hygiene_ctxt,
-        symbol_table: Default::default(),
+        symbol_index_table: Default::default(),
     };
 
     // Encode the rustc version string in a predictable location.

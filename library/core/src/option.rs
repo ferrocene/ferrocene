@@ -137,7 +137,7 @@
 //! | [`ptr::NonNull<U>`]                                                 | when `U: Sized`                                                            |
 //! | `#[repr(transparent)]` struct around one of the types in this list. | when it holds for the inner type                                           |
 //!
-//! [^extern_fn]: this remains true for any argument/return types and any other ABI: `extern "abi" fn` (_e.g._, `extern "system" fn`)
+//! [^extern_fn]: this remains true for `unsafe` variants, any argument/return types, and any other ABI: `[unsafe] extern "abi" fn` (_e.g._, `extern "system" fn`)
 //!
 //! Under some conditions the above types `T` are also null pointer optimized when wrapped in a [`Result`][result_repr].
 //!
@@ -2596,7 +2596,7 @@ impl<A, V: FromIterator<A>> FromIterator<Option<A>> for Option<V> {
     }
 }
 
-#[unstable(feature = "try_trait_v2", issue = "84277")]
+#[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T> ops::Try for Option<T> {
     type Output = T;
@@ -2616,7 +2616,7 @@ impl<T> ops::Try for Option<T> {
     }
 }
 
-#[unstable(feature = "try_trait_v2", issue = "84277")]
+#[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
 #[cfg(not(feature = "ferrocene_certified"))]
 // Note: manually specifying the residual type instead of using the default to work around
 // https://github.com/rust-lang/rust/issues/99940

@@ -14,13 +14,15 @@ use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_data_structures::sorted_map::SortedMap;
 use rustc_data_structures::unord::UnordSet;
 use rustc_errors::codes::*;
-use rustc_errors::{Applicability, Diag, MultiSpan, StashKey, pluralize, struct_span_code_err};
+use rustc_errors::{
+    Applicability, Diag, DiagStyledString, MultiSpan, StashKey, pluralize, struct_span_code_err,
+};
 use rustc_hir::def::{CtorKind, DefKind, Res};
 use rustc_hir::def_id::DefId;
 use rustc_hir::intravisit::{self, Visitor};
 use rustc_hir::lang_items::LangItem;
 use rustc_hir::{self as hir, ExprKind, HirId, Node, PathSegment, QPath};
-use rustc_infer::infer::{self, RegionVariableOrigin};
+use rustc_infer::infer::{BoundRegionConversionTime, RegionVariableOrigin};
 use rustc_middle::bug;
 use rustc_middle::ty::fast_reject::{DeepRejectCtxt, TreatParams, simplify_type};
 use rustc_middle::ty::print::{
@@ -722,7 +724,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             {
                 let def_path = tcx.def_path_str(adt_def.did());
                 err.span_suggestion(
-                    ty.span.to(item_ident.span),
+                    sugg_span,
                     format!("to construct a value of type `{}`, use the explicit path", def_path),
                     def_path,
                     Applicability::MachineApplicable,
@@ -1569,7 +1571,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             );
         }
 
-        if rcvr_ty.is_numeric() && rcvr_ty.is_fresh() || restrict_type_params || suggested_derive {
+        if rcvr_ty.is_numeric() && rcvr_ty.is_fresh()
+            || restrict_type_params
+            || suggested_derive
+            || self.lookup_alternative_tuple_impls(&mut err, &unsatisfied_predicates)
+        {
         } else {
             self.suggest_traits_to_import(
                 &mut err,
@@ -1717,8 +1723,10 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             // Don't emit a suggestion if we found an actual method
             // that had unsatisfied trait bounds
             if unsatisfied_predicates.is_empty()
-                // ...or if we already suggested that name because of `rustc_confusable` annotation.
+                // ...or if we already suggested that name because of `rustc_confusable` annotation
                 && Some(similar_candidate.name()) != confusable_suggested
+                // and if the we aren't in an expansion.
+                && !span.from_expansion()
             {
                 self.find_likely_intended_associated_item(
                     &mut err,
@@ -1742,6 +1750,119 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         self.note_derefed_ty_has_method(&mut err, source, rcvr_ty, item_ident, expected);
         err.emit()
+    }
+
+    /// If the predicate failure is caused by an unmet bound on a tuple, recheck if the bound would
+    /// succeed if all the types on the tuple had no borrows. This is a common problem for libraries
+    /// like Bevy and ORMs, which rely heavily on traits being implemented on tuples.
+    fn lookup_alternative_tuple_impls(
+        &self,
+        err: &mut Diag<'_>,
+        unsatisfied_predicates: &[(
+            ty::Predicate<'tcx>,
+            Option<ty::Predicate<'tcx>>,
+            Option<ObligationCause<'tcx>>,
+        )],
+    ) -> bool {
+        let mut found_tuple = false;
+        for (pred, root, _ob) in unsatisfied_predicates {
+            let mut preds = vec![pred];
+            if let Some(root) = root {
+                // We will look at both the current predicate and the root predicate that caused it
+                // to be needed. If calling something like `<(A, &B)>::default()`, then `pred` is
+                // `&B: Default` and `root` is `(A, &B): Default`, which is the one we are checking
+                // for further down, so we check both.
+                preds.push(root);
+            }
+            for pred in preds {
+                if let Some(clause) = pred.as_clause()
+                    && let Some(clause) = clause.as_trait_clause()
+                    && let ty = clause.self_ty().skip_binder()
+                    && let ty::Tuple(types) = ty.kind()
+                {
+                    let path = clause.skip_binder().trait_ref.print_only_trait_path();
+                    let def_id = clause.def_id();
+                    let ty = Ty::new_tup(
+                        self.tcx,
+                        self.tcx.mk_type_list_from_iter(types.iter().map(|ty| ty.peel_refs())),
+                    );
+                    let args = ty::GenericArgs::for_item(self.tcx, def_id, |param, _| {
+                        if param.index == 0 {
+                            ty.into()
+                        } else {
+                            self.infcx.var_for_def(DUMMY_SP, param)
+                        }
+                    });
+                    if self
+                        .infcx
+                        .type_implements_trait(def_id, args, self.param_env)
+                        .must_apply_modulo_regions()
+                    {
+                        // "`Trait` is implemented for `(A, B)` but not for `(A, &B)`"
+                        let mut msg = DiagStyledString::normal(format!("`{path}` "));
+                        msg.push_highlighted("is");
+                        msg.push_normal(" implemented for `(");
+                        let len = types.len();
+                        for (i, t) in types.iter().enumerate() {
+                            msg.push(
+                                format!("{}", with_forced_trimmed_paths!(t.peel_refs())),
+                                t.peel_refs() != t,
+                            );
+                            if i < len - 1 {
+                                msg.push_normal(", ");
+                            }
+                        }
+                        msg.push_normal(")` but ");
+                        msg.push_highlighted("not");
+                        msg.push_normal(" for `(");
+                        for (i, t) in types.iter().enumerate() {
+                            msg.push(
+                                format!("{}", with_forced_trimmed_paths!(t)),
+                                t.peel_refs() != t,
+                            );
+                            if i < len - 1 {
+                                msg.push_normal(", ");
+                            }
+                        }
+                        msg.push_normal(")`");
+
+                        // Find the span corresponding to the impl that was found to point at it.
+                        if let Some(impl_span) = self
+                            .tcx
+                            .all_impls(def_id)
+                            .filter(|&impl_def_id| {
+                                let header = self.tcx.impl_trait_header(impl_def_id).unwrap();
+                                let trait_ref = header.trait_ref.instantiate(
+                                    self.tcx,
+                                    self.infcx.fresh_args_for_item(DUMMY_SP, impl_def_id),
+                                );
+
+                                let value = ty::fold_regions(self.tcx, ty, |_, _| {
+                                    self.tcx.lifetimes.re_erased
+                                });
+                                // FIXME: Don't bother dealing with non-lifetime binders here...
+                                if value.has_escaping_bound_vars() {
+                                    return false;
+                                }
+                                self.infcx.can_eq(ty::ParamEnv::empty(), trait_ref.self_ty(), value)
+                                    && header.polarity == ty::ImplPolarity::Positive
+                            })
+                            .map(|impl_def_id| self.tcx.def_span(impl_def_id))
+                            .next()
+                        {
+                            err.highlighted_span_note(impl_span, msg.0);
+                        } else {
+                            err.highlighted_note(msg.0);
+                        }
+                        found_tuple = true;
+                    }
+                    // If `pred` was already on the tuple, we don't need to look at the root
+                    // obligation too.
+                    break;
+                }
+            }
+        }
+        found_tuple
     }
 
     /// If an appropriate error source is not found, check method chain for possible candidates
@@ -1830,7 +1951,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         if def_kind == DefKind::AssocFn {
             let ty_args = self.infcx.fresh_args_for_item(span, similar_candidate.def_id);
             let fn_sig = tcx.fn_sig(similar_candidate.def_id).instantiate(tcx, ty_args);
-            let fn_sig = self.instantiate_binder_with_fresh_vars(span, infer::FnCall, fn_sig);
+            let fn_sig = self.instantiate_binder_with_fresh_vars(
+                span,
+                BoundRegionConversionTime::FnCall,
+                fn_sig,
+            );
             if similar_candidate.is_method() {
                 if let Some(args) = args
                     && fn_sig.inputs()[1..].len() == args.len()
@@ -1912,7 +2037,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             self.tcx.fn_sig(inherent_method.def_id).instantiate(self.tcx, args);
                         let fn_sig = self.instantiate_binder_with_fresh_vars(
                             item_name.span,
-                            infer::FnCall,
+                            BoundRegionConversionTime::FnCall,
                             fn_sig,
                         );
                         let name = inherent_method.name();
@@ -2227,9 +2352,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     if !arg.is_suggestable(self.tcx, true) {
                         has_unsuggestable_args = true;
                         match arg.kind() {
-                            GenericArgKind::Lifetime(_) => self
-                                .next_region_var(RegionVariableOrigin::MiscVariable(DUMMY_SP))
-                                .into(),
+                            GenericArgKind::Lifetime(_) => {
+                                self.next_region_var(RegionVariableOrigin::Misc(DUMMY_SP)).into()
+                            }
                             GenericArgKind::Type(_) => self.next_ty_var(DUMMY_SP).into(),
                             GenericArgKind::Const(_) => self.next_const_var(DUMMY_SP).into(),
                         }
@@ -2930,7 +3055,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     pub(crate) fn note_unmet_impls_on_type(
         &self,
         err: &mut Diag<'_>,
-        errors: Vec<FulfillmentError<'tcx>>,
+        errors: &[FulfillmentError<'tcx>],
         suggest_derive: bool,
     ) {
         let preds: Vec<_> = errors
@@ -3494,7 +3619,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             continue;
                         }
                         trait_in_other_version_found = self
-                            .detect_and_explain_multiple_crate_versions(
+                            .detect_and_explain_multiple_crate_versions_of_trait_item(
                                 err,
                                 pick.item.def_id,
                                 rcvr.hir_id,
@@ -3701,12 +3826,13 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             // same crate.
 
             let rcvr_ty = self.node_ty_opt(ty.hir_id);
-            trait_in_other_version_found = self.detect_and_explain_multiple_crate_versions(
-                err,
-                assoc.def_id,
-                ty.hir_id,
-                rcvr_ty,
-            );
+            trait_in_other_version_found = self
+                .detect_and_explain_multiple_crate_versions_of_trait_item(
+                    err,
+                    assoc.def_id,
+                    ty.hir_id,
+                    rcvr_ty,
+                );
         }
         if !trait_in_other_version_found
             && self.suggest_valid_traits(err, item_name, valid_out_of_scope_traits, true)
@@ -4098,7 +4224,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         }
     }
 
-    fn detect_and_explain_multiple_crate_versions(
+    fn detect_and_explain_multiple_crate_versions_of_trait_item(
         &self,
         err: &mut Diag<'_>,
         item_def_id: DefId,
@@ -4111,6 +4237,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             return false;
         }
         let trait_def_id = self.tcx.parent(item_def_id);
+        if !self.tcx.is_trait(trait_def_id) {
+            return false;
+        }
         let krate = self.tcx.crate_name(trait_def_id.krate);
         let name = self.tcx.item_name(trait_def_id);
         let candidates: Vec<_> = traits

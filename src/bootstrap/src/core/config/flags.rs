@@ -12,7 +12,8 @@ use tracing::instrument;
 use crate::core::build_steps::perf::PerfArgs;
 use crate::core::build_steps::setup::Profile;
 use crate::core::builder::{Builder, Kind};
-use crate::core::config::{Config, TargetSelectionList, target_selection_list};
+use crate::core::config::Config;
+use crate::core::config::target_selection::{TargetSelectionList, target_selection_list};
 use crate::{Build, DocTests};
 
 #[derive(Copy, Clone, Default, Debug, ValueEnum)]
@@ -71,7 +72,7 @@ pub struct Flags {
     pub build_dir: Option<PathBuf>,
 
     #[arg(global = true, long, value_hint = clap::ValueHint::Other, value_name = "BUILD")]
-    /// build target of the stage0 compiler
+    /// host target of the stage0 compiler
     pub build: Option<String>,
 
     #[arg(global = true, long, value_hint = clap::ValueHint::Other, value_name = "HOST", value_parser = target_selection_list)]
@@ -92,6 +93,7 @@ pub struct Flags {
     /// include default paths in addition to the provided ones
     pub include_default_paths: bool,
 
+    /// rustc error format
     #[arg(global = true, value_hint = clap::ValueHint::Other, long)]
     pub rustc_error_format: Option<String>,
 
@@ -139,9 +141,6 @@ pub struct Flags {
     /// otherwise, use the default configured behaviour
     pub warnings: Warnings,
 
-    #[arg(global = true, value_hint = clap::ValueHint::Other, long, value_name = "FORMAT")]
-    /// rustc error format
-    pub error_format: Option<String>,
     #[arg(global = true, long)]
     /// use message-format=json
     pub json_output: bool,
@@ -221,7 +220,8 @@ impl Flags {
             HelpVerboseOnly::try_parse_from(normalize_args(args))
         {
             println!("NOTE: updating submodules before printing available paths");
-            let config = Config::parse(Self::parse(&[String::from("build")]));
+            let flags = Self::parse(&[String::from("build")]);
+            let config = Config::parse(flags);
             let build = Build::new(config);
             let paths = Builder::get_help(&build, subcommand);
             if let Some(s) = paths {

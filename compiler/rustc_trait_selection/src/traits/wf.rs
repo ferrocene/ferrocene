@@ -541,7 +541,7 @@ impl<'a, 'tcx> WfPredicates<'a, 'tcx> {
             let cause = self.cause(cause);
             let trait_ref = ty::TraitRef::new(
                 self.tcx(),
-                self.tcx().require_lang_item(LangItem::Sized, Some(cause.span)),
+                self.tcx().require_lang_item(LangItem::Sized, cause.span),
                 [subty],
             );
             self.out.push(traits::Obligation::with_depth(
@@ -567,6 +567,14 @@ impl<'a, 'tcx> WfPredicates<'a, 'tcx> {
         def_id: DefId,
         args: GenericArgsRef<'tcx>,
     ) -> PredicateObligations<'tcx> {
+        // PERF: `Sized`'s predicates include `MetaSized`, but both are compiler implemented marker
+        // traits, so `MetaSized` will always be WF if `Sized` is WF and vice-versa. Determining
+        // the nominal obligations of `Sized` would in-effect just elaborate `MetaSized` and make
+        // the compiler do a bunch of work needlessly.
+        if self.tcx().is_lang_item(def_id, LangItem::Sized) {
+            return Default::default();
+        }
+
         let predicates = self.tcx().predicates_of(def_id);
         let mut origins = vec![def_id; predicates.predicates.len()];
         let mut head = predicates;
@@ -895,7 +903,7 @@ impl<'a, 'tcx> TypeVisitor<TyCtxt<'tcx>> for WfPredicates<'a, 'tcx> {
                                 self.tcx(),
                                 self.tcx().require_lang_item(
                                     LangItem::BikeshedGuaranteedNoDrop,
-                                    Some(self.span),
+                                    self.span,
                                 ),
                                 [ty],
                             )

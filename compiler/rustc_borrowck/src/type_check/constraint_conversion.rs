@@ -3,7 +3,7 @@ use rustc_infer::infer::canonical::QueryRegionConstraints;
 use rustc_infer::infer::outlives::env::RegionBoundPairs;
 use rustc_infer::infer::outlives::obligations::{TypeOutlives, TypeOutlivesDelegate};
 use rustc_infer::infer::region_constraints::{GenericKind, VerifyBound};
-use rustc_infer::infer::{self, InferCtxt, SubregionOrigin};
+use rustc_infer::infer::{InferCtxt, SubregionOrigin};
 use rustc_infer::traits::query::type_op::DeeplyNormalize;
 use rustc_middle::bug;
 use rustc_middle::ty::{
@@ -141,8 +141,11 @@ impl<'a, 'tcx> ConstraintConversion<'a, 'tcx> {
             }
 
             if !tcx.recursion_limit().value_within_limit(iteration) {
+                // This may actually be reachable. If so, we should convert
+                // this to a proper error/consider whether we should detect
+                // this somewhere else.
                 bug!(
-                    "FIXME(-Znext-solver): Overflowed when processing region obligations: {outlives_predicates:#?}"
+                    "unexpected overflowed when processing region obligations: {outlives_predicates:#?}"
                 );
             }
 
@@ -169,7 +172,7 @@ impl<'a, 'tcx> ConstraintConversion<'a, 'tcx> {
                             ty::Region::new_var(tcx, universal_regions.implicit_region_bound());
                         // we don't actually use this for anything, but
                         // the `TypeOutlives` code needs an origin.
-                        let origin = infer::RelateParamBound(self.span, t1, None);
+                        let origin = SubregionOrigin::RelateParamBound(self.span, t1, None);
                         TypeOutlives::new(
                             &mut *self,
                             tcx,

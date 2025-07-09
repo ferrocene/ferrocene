@@ -18,7 +18,6 @@ use rustc_span::def_id::DefId;
 
 use crate::base;
 use crate::context::CodegenCx;
-use crate::errors::InvalidMinimumAlignment;
 use crate::type_of::LayoutGccExt;
 
 fn set_global_alignment<'gcc, 'tcx>(
@@ -29,31 +28,22 @@ fn set_global_alignment<'gcc, 'tcx>(
     // The target may require greater alignment for globals than the type does.
     // Note: GCC and Clang also allow `__attribute__((aligned))` on variables,
     // which can force it to be smaller. Rust doesn't support this yet.
-    if let Some(min) = cx.sess().target.min_global_align {
-        match Align::from_bits(min) {
-            Ok(min) => align = align.max(min),
-            Err(err) => {
-                cx.sess().dcx().emit_err(InvalidMinimumAlignment { err: err.to_string() });
-            }
-        }
+    if let Some(min_global) = cx.sess().target.min_global_align {
+        align = Ord::max(align, min_global);
     }
     gv.set_alignment(align.bytes() as i32);
 }
 
 impl<'gcc, 'tcx> StaticCodegenMethods for CodegenCx<'gcc, 'tcx> {
     fn static_addr_of(&self, cv: RValue<'gcc>, align: Align, kind: Option<&str>) -> RValue<'gcc> {
-        // TODO(antoyo): implement a proper rvalue comparison in libgccjit instead of doing the
-        // following:
-        for (value, variable) in &*self.const_globals.borrow() {
-            if format!("{:?}", value) == format!("{:?}", cv) {
-                if let Some(global_variable) = self.global_lvalues.borrow().get(variable) {
-                    let alignment = align.bits() as i32;
-                    if alignment > global_variable.get_alignment() {
-                        global_variable.set_alignment(alignment);
-                    }
+        if let Some(variable) = self.const_globals.borrow().get(&cv) {
+            if let Some(global_variable) = self.global_lvalues.borrow().get(variable) {
+                let alignment = align.bits() as i32;
+                if alignment > global_variable.get_alignment() {
+                    global_variable.set_alignment(alignment);
                 }
-                return *variable;
             }
+            return *variable;
         }
         let global_value = self.static_addr_of_mut(cv, align, kind);
         #[cfg(feature = "master")]
@@ -294,8 +284,10 @@ impl<'gcc, 'tcx> CodegenCx<'gcc, 'tcx> {
         global
     }
 }
-
-pub fn const_alloc_to_gcc<'gcc>(
+/// Converts a given const alloc to a gcc Rvalue, without any caching or deduplication.
+/// YOU SHOULD NOT call this function directly - that may break the semantics of Rust.
+/// Use `const_data_from_alloc` instead.
+pub(crate) fn const_alloc_to_gcc_uncached<'gcc>(
     cx: &CodegenCx<'gcc, '_>,
     alloc: ConstAllocation<'_>,
 ) -> RValue<'gcc> {
@@ -327,7 +319,7 @@ pub fn const_alloc_to_gcc<'gcc>(
             // and we properly interpret the provenance as a relocation pointer offset.
             alloc.inspect_with_uninit_and_ptr_outside_interpreter(offset..(offset + pointer_size)),
         )
-        .expect("const_alloc_to_llvm: could not read relocation pointer")
+        .expect("const_alloc_to_gcc_uncached: could not read relocation pointer")
             as u64;
 
         let address_space = cx.tcx.global_alloc(alloc_id).address_space(cx);
@@ -366,7 +358,7 @@ fn codegen_static_initializer<'gcc, 'tcx>(
     def_id: DefId,
 ) -> Result<(RValue<'gcc>, ConstAllocation<'tcx>), ErrorHandled> {
     let alloc = cx.tcx.eval_static_initializer(def_id)?;
-    Ok((const_alloc_to_gcc(cx, alloc), alloc))
+    Ok((cx.const_data_from_alloc(alloc), alloc))
 }
 
 fn check_and_apply_linkage<'gcc, 'tcx>(

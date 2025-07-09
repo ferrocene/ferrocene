@@ -94,7 +94,7 @@
 // of conflicts we have when merging main.
 //
 // Library features:
-// not-alphbetical-start
+// not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(alloc_layout_extra))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(allocator_api))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(array_chunks))]
@@ -134,7 +134,6 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(local_waker))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(maybe_uninit_slice))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(maybe_uninit_uninit_array_transpose))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(nonnull_provenance))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(panic_internals))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(pattern))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(pin_coerce_unsized_trait))]
@@ -161,7 +160,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unicode_internals))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unsize))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unwrap_infallible))]
-// not-alphbetical-end
+// not-alphabetical-end
 //
 // Language features:
 // not-alphbetical-start

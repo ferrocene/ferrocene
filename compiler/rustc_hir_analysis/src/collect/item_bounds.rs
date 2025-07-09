@@ -44,9 +44,17 @@ fn associated_type_bounds<'tcx>(
             | PredicateFilter::SelfOnly
             | PredicateFilter::SelfTraitThatDefines(_)
             | PredicateFilter::SelfAndAssociatedTypeBounds => {
+                icx.lowerer().add_sizedness_bounds(
+                    &mut bounds,
+                    item_ty,
+                    hir_bounds,
+                    None,
+                    None,
+                    span,
+                );
                 icx.lowerer().add_default_traits(&mut bounds, item_ty, hir_bounds, None, span);
             }
-            // `ConstIfConst` is only interested in `~const` bounds.
+            // `ConstIfConst` is only interested in `[const]` bounds.
             PredicateFilter::ConstIfConst | PredicateFilter::SelfConstIfConst => {}
         }
 
@@ -333,9 +341,17 @@ fn opaque_type_bounds<'tcx>(
             | PredicateFilter::SelfOnly
             | PredicateFilter::SelfTraitThatDefines(_)
             | PredicateFilter::SelfAndAssociatedTypeBounds => {
+                icx.lowerer().add_sizedness_bounds(
+                    &mut bounds,
+                    item_ty,
+                    hir_bounds,
+                    None,
+                    None,
+                    span,
+                );
                 icx.lowerer().add_default_traits(&mut bounds, item_ty, hir_bounds, None, span);
             }
-            //`ConstIfConst` is only interested in `~const` bounds.
+            //`ConstIfConst` is only interested in `[const]` bounds.
             PredicateFilter::ConstIfConst | PredicateFilter::SelfConstIfConst => {}
         }
         debug!(?bounds);

@@ -55,6 +55,7 @@ mod invalid_from_utf8;
 mod late;
 mod let_underscore;
 mod levels;
+mod lifetime_syntax;
 mod lints;
 mod macro_expr_fragment_specifier_2024_migration;
 mod map_unit_fn;
@@ -96,6 +97,7 @@ use impl_trait_overcaptures::ImplTraitOvercaptures;
 use internal::*;
 use invalid_from_utf8::*;
 use let_underscore::*;
+use lifetime_syntax::*;
 use macro_expr_fragment_specifier_2024_migration::*;
 use map_unit_fn::*;
 use multiple_supertrait_upcastable::*;
@@ -172,7 +174,6 @@ early_lint_methods!(
             AnonymousParameters: AnonymousParameters,
             EllipsisInclusiveRangePatterns: EllipsisInclusiveRangePatterns::default(),
             NonCamelCaseTypes: NonCamelCaseTypes,
-            DeprecatedAttr: DeprecatedAttr::default(),
             WhileTrue: WhileTrue,
             NonAsciiIdents: NonAsciiIdents,
             IncompleteInternalFeatures: IncompleteInternalFeatures,
@@ -246,6 +247,7 @@ late_lint_methods!(
             StaticMutRefs: StaticMutRefs,
             UnqualifiedLocalImports: UnqualifiedLocalImports,
             CheckTransmutes: CheckTransmutes,
+            LifetimeSyntax: LifetimeSyntax,
         ]
     ]
 );
@@ -353,6 +355,7 @@ fn register_builtins(store: &mut LintStore) {
     store.register_renamed("unused_tuple_struct_fields", "dead_code");
     store.register_renamed("static_mut_ref", "static_mut_refs");
     store.register_renamed("temporary_cstring_as_ptr", "dangling_pointers_from_temporaries");
+    store.register_renamed("elided_named_lifetimes", "mismatched_lifetime_syntaxes");
 
     // These were moved to tool lints, but rustc still sees them when compiling normally, before
     // tool lints are registered, so `check_tool_name_for_backwards_compat` doesn't work. Use
@@ -595,7 +598,6 @@ fn register_builtins(store: &mut LintStore) {
         "converted into hard error, see PR #125380 \
          <https://github.com/rust-lang/rust/pull/125380> for more information",
     );
-    store.register_removed("unsupported_calling_conventions", "converted into hard error");
     store.register_removed(
         "cenum_impl_drop_cast",
         "converted into hard error, \
@@ -606,6 +608,7 @@ fn register_builtins(store: &mut LintStore) {
         "converted into hard error, see issue #127323 \
          <https://github.com/rust-lang/rust/issues/127323> for more information",
     );
+    store.register_removed("unsupported_fn_ptr_calling_conventions", "converted into hard error");
     store.register_removed(
         "undefined_naked_function_abi",
         "converted into hard error, see PR #139001 \
@@ -616,6 +619,12 @@ fn register_builtins(store: &mut LintStore) {
         "converted into hard error, \
          see <https://github.com/rust-lang/rust/issues/116558> for more information",
     );
+    store.register_removed(
+        "missing_fragment_specifier",
+        "converted into hard error, \
+         see <https://github.com/rust-lang/rust/issues/40107> for more information",
+    );
+    store.register_removed("wasm_c_abi", "the wasm C ABI has been fixed");
 }
 
 fn register_internals(store: &mut LintStore) {
@@ -660,6 +669,7 @@ fn register_internals(store: &mut LintStore) {
             LintId::of(USAGE_OF_TYPE_IR_TRAITS),
             LintId::of(BAD_OPT_ACCESS),
             LintId::of(SPAN_USE_EQ_CTXT),
+            LintId::of(DIRECT_USE_OF_RUSTC_TYPE_IR),
         ],
     );
 }

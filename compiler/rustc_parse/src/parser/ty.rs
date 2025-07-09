@@ -7,6 +7,7 @@ use rustc_ast::{
     Pinnedness, PolyTraitRef, PreciseCapturingArg, TraitBoundModifiers, TraitObjectSyntax, Ty,
     TyKind, UnsafeBinderTy,
 };
+use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_errors::{Applicability, Diag, PResult};
 use rustc_span::{ErrorGuaranteed, Ident, Span, kw, sym};
 use thin_vec::{ThinVec, thin_vec};
@@ -14,10 +15,11 @@ use thin_vec::{ThinVec, thin_vec};
 use super::{Parser, PathStyle, SeqSep, TokenType, Trailing};
 use crate::errors::{
     self, DynAfterMut, ExpectedFnPathFoundFnKeyword, ExpectedMutOrConstInRawPointerType,
-    FnPointerCannotBeAsync, FnPointerCannotBeConst, FnPtrWithGenerics, FnPtrWithGenericsSugg,
-    HelpUseLatestEdition, InvalidDynKeyword, LifetimeAfterMut, NeedPlusAfterTraitObjectLifetime,
-    NestedCVariadicType, ReturnTypesUseThinArrow,
+    FnPtrWithGenerics, FnPtrWithGenericsSugg, HelpUseLatestEdition, InvalidDynKeyword,
+    LifetimeAfterMut, NeedPlusAfterTraitObjectLifetime, NestedCVariadicType,
+    ReturnTypesUseThinArrow,
 };
+use crate::parser::item::FrontMatterParsingMode;
 use crate::{exp, maybe_recover_from_interpolated_ty_qpath};
 
 /// Signals whether parsing a type should allow `+`.
@@ -104,14 +106,17 @@ fn can_begin_dyn_bound_in_edition_2015(t: &Token) -> bool {
 impl<'a> Parser<'a> {
     /// Parses a type.
     pub fn parse_ty(&mut self) -> PResult<'a, P<Ty>> {
-        self.parse_ty_common(
-            AllowPlus::Yes,
-            AllowCVariadic::No,
-            RecoverQPath::Yes,
-            RecoverReturnSign::Yes,
-            None,
-            RecoverQuestionMark::Yes,
-        )
+        // Make sure deeply nested types don't overflow the stack.
+        ensure_sufficient_stack(|| {
+            self.parse_ty_common(
+                AllowPlus::Yes,
+                AllowCVariadic::No,
+                RecoverQPath::Yes,
+                RecoverReturnSign::Yes,
+                None,
+                RecoverQuestionMark::Yes,
+            )
+        })
     }
 
     pub(super) fn parse_ty_with_generics_recovery(
@@ -404,7 +409,7 @@ impl<'a> Parser<'a> {
         })?;
 
         if ts.len() == 1 && matches!(trailing, Trailing::No) {
-            let ty = ts.into_iter().next().unwrap().into_inner();
+            let ty = ts.into_iter().next().unwrap();
             let maybe_bounds = allow_plus == AllowPlus::Yes && self.token.is_like_plus();
             match ty.kind {
                 // `(TY_BOUND_NOPAREN) + BOUND + ...`.
@@ -420,7 +425,7 @@ impl<'a> Parser<'a> {
                     self.parse_remaining_bounds(bounds, true)
                 }
                 // `(TYPE)`
-                _ => Ok(TyKind::Paren(P(ty))),
+                _ => Ok(TyKind::Paren(ty)),
             }
         } else {
             Ok(TyKind::Tup(ts))
@@ -665,62 +670,16 @@ impl<'a> Parser<'a> {
             tokens: None,
         };
         let span_start = self.token.span;
-        let ast::FnHeader { ext, safety, constness, coroutine_kind } =
-            self.parse_fn_front_matter(&inherited_vis, Case::Sensitive)?;
-        let fn_start_lo = self.prev_token.span.lo();
+        let ast::FnHeader { ext, safety, .. } = self.parse_fn_front_matter(
+            &inherited_vis,
+            Case::Sensitive,
+            FrontMatterParsingMode::FunctionPtrType,
+        )?;
         if self.may_recover() && self.token == TokenKind::Lt {
             self.recover_fn_ptr_with_generics(lo, &mut params, param_insertion_point)?;
         }
         let decl = self.parse_fn_decl(|_| false, AllowPlus::No, recover_return_sign)?;
-        let whole_span = lo.to(self.prev_token.span);
 
-        // Order/parsing of "front matter" follows:
-        // `<constness> <coroutine_kind> <safety> <extern> fn()`
-        //  ^           ^                ^        ^        ^
-        //  |           |                |        |        fn_start_lo
-        //  |           |                |        ext_sp.lo
-        //  |           |                safety_sp.lo
-        //  |           coroutine_sp.lo
-        //  const_sp.lo
-        if let ast::Const::Yes(const_span) = constness {
-            let next_token_lo = if let Some(
-                ast::CoroutineKind::Async { span, .. }
-                | ast::CoroutineKind::Gen { span, .. }
-                | ast::CoroutineKind::AsyncGen { span, .. },
-            ) = coroutine_kind
-            {
-                span.lo()
-            } else if let ast::Safety::Unsafe(span) | ast::Safety::Safe(span) = safety {
-                span.lo()
-            } else if let ast::Extern::Implicit(span) | ast::Extern::Explicit(_, span) = ext {
-                span.lo()
-            } else {
-                fn_start_lo
-            };
-            let sugg_span = const_span.with_hi(next_token_lo);
-            self.dcx().emit_err(FnPointerCannotBeConst {
-                span: whole_span,
-                qualifier: const_span,
-                suggestion: sugg_span,
-            });
-        }
-        if let Some(ast::CoroutineKind::Async { span: async_span, .. }) = coroutine_kind {
-            let next_token_lo = if let ast::Safety::Unsafe(span) | ast::Safety::Safe(span) = safety
-            {
-                span.lo()
-            } else if let ast::Extern::Implicit(span) | ast::Extern::Explicit(_, span) = ext {
-                span.lo()
-            } else {
-                fn_start_lo
-            };
-            let sugg_span = async_span.with_hi(next_token_lo);
-            self.dcx().emit_err(FnPointerCannotBeAsync {
-                span: whole_span,
-                qualifier: async_span,
-                suggestion: sugg_span,
-            });
-        }
-        // FIXME(gen_blocks): emit a similar error for `gen fn()`
         let decl_span = span_start.to(self.prev_token.span);
         Ok(TyKind::BareFn(P(BareFnTy { ext, safety, generic_params: params, decl, decl_span })))
     }
@@ -837,16 +796,10 @@ impl<'a> Parser<'a> {
     ///
     /// Note that this does *not* parse bare trait objects.
     fn parse_dyn_ty(&mut self, impl_dyn_multi: &mut bool) -> PResult<'a, TyKind> {
-        let lo = self.token.span;
         self.bump(); // `dyn`
 
-        // parse dyn* types
-        let syntax = if self.eat(exp!(Star)) {
-            self.psess.gated_spans.gate(sym::dyn_star, lo.to(self.prev_token.span));
-            TraitObjectSyntax::DynStar
-        } else {
-            TraitObjectSyntax::Dyn
-        };
+        // We used to parse `*` for `dyn*` here.
+        let syntax = TraitObjectSyntax::Dyn;
 
         // Always parse bounds greedily for better error recovery.
         let bounds = self.parse_generic_bounds()?;
@@ -926,6 +879,7 @@ impl<'a> Parser<'a> {
             || self.check(exp!(Tilde))
             || self.check_keyword(exp!(For))
             || self.check(exp!(OpenParen))
+            || self.check(exp!(OpenBracket))
             || self.check_keyword(exp!(Const))
             || self.check_keyword(exp!(Async))
             || self.check_keyword(exp!(Use))
@@ -1023,12 +977,12 @@ impl<'a> Parser<'a> {
         Ok(())
     }
 
-    /// Parses the modifiers that may precede a trait in a bound, e.g. `?Trait` or `~const Trait`.
+    /// Parses the modifiers that may precede a trait in a bound, e.g. `?Trait` or `[const] Trait`.
     ///
     /// If no modifiers are present, this does not consume any tokens.
     ///
     /// ```ebnf
-    /// CONSTNESS = [["~"] "const"]
+    /// CONSTNESS = [["["] "const" ["]"]]
     /// ASYNCNESS = ["async"]
     /// POLARITY = ["?" | "!"]
     /// ```
@@ -1036,18 +990,7 @@ impl<'a> Parser<'a> {
     /// See `parse_generic_ty_bound` for the complete grammar of trait bound modifiers.
     fn parse_trait_bound_modifiers(&mut self) -> PResult<'a, TraitBoundModifiers> {
         let modifier_lo = self.token.span;
-        let constness = if self.eat(exp!(Tilde)) {
-            let tilde = self.prev_token.span;
-            self.expect_keyword(exp!(Const))?;
-            let span = tilde.to(self.prev_token.span);
-            self.psess.gated_spans.gate(sym::const_trait_impl, span);
-            BoundConstness::Maybe(span)
-        } else if self.eat_keyword(exp!(Const)) {
-            self.psess.gated_spans.gate(sym::const_trait_impl, self.prev_token.span);
-            BoundConstness::Always(self.prev_token.span)
-        } else {
-            BoundConstness::Never
-        };
+        let constness = self.parse_bound_constness()?;
 
         let asyncness = if self.token_uninterpolated_span().at_least_rust_2018()
             && self.eat_keyword(exp!(Async))
@@ -1109,13 +1052,41 @@ impl<'a> Parser<'a> {
         Ok(TraitBoundModifiers { constness, asyncness, polarity })
     }
 
+    pub fn parse_bound_constness(&mut self) -> PResult<'a, BoundConstness> {
+        // FIXME(const_trait_impl): remove `~const` parser support once bootstrap has the new syntax
+        // in rustfmt
+        Ok(if self.eat(exp!(Tilde)) {
+            let tilde = self.prev_token.span;
+            self.expect_keyword(exp!(Const))?;
+            let span = tilde.to(self.prev_token.span);
+            self.psess.gated_spans.gate(sym::const_trait_impl, span);
+            BoundConstness::Maybe(span)
+        } else if self.check(exp!(OpenBracket))
+            && self.look_ahead(1, |t| t.is_keyword(kw::Const))
+            && self.look_ahead(2, |t| *t == token::CloseBracket)
+        {
+            let start = self.token.span;
+            self.bump();
+            self.expect_keyword(exp!(Const)).unwrap();
+            self.bump();
+            let span = start.to(self.prev_token.span);
+            self.psess.gated_spans.gate(sym::const_trait_impl, span);
+            BoundConstness::Maybe(span)
+        } else if self.eat_keyword(exp!(Const)) {
+            self.psess.gated_spans.gate(sym::const_trait_impl, self.prev_token.span);
+            BoundConstness::Always(self.prev_token.span)
+        } else {
+            BoundConstness::Never
+        })
+    }
+
     /// Parses a type bound according to:
     /// ```ebnf
     /// TY_BOUND = TY_BOUND_NOPAREN | (TY_BOUND_NOPAREN)
     /// TY_BOUND_NOPAREN = [for<GENERIC_PARAMS> CONSTNESS ASYNCNESS | POLARITY] SIMPLE_PATH
     /// ```
     ///
-    /// For example, this grammar accepts `for<'a: 'b> ~const ?m::Trait<'a>`.
+    /// For example, this grammar accepts `for<'a: 'b> [const] ?m::Trait<'a>`.
     fn parse_generic_ty_bound(
         &mut self,
         lo: Span,
@@ -1142,7 +1113,7 @@ impl<'a> Parser<'a> {
         }
 
         // Recover erroneous lifetime bound with modifiers or binder.
-        // e.g. `T: for<'a> 'a` or `T: ~const 'a`.
+        // e.g. `T: for<'a> 'a` or `T: [const] 'a`.
         if self.token.is_lifetime() {
             let _: ErrorGuaranteed = self.error_lt_bound_with_modifiers(modifiers, binder_span);
             return self.parse_generic_lt_bound(lo, has_parens);
@@ -1295,7 +1266,7 @@ impl<'a> Parser<'a> {
     ) -> PResult<'a, ()> {
         let fn_path_segment = fn_path.segments.last_mut().unwrap();
         let generic_args = if let Some(p_args) = &fn_path_segment.args {
-            p_args.clone().into_inner()
+            *p_args.clone()
         } else {
             // Normally it wouldn't come here because the upstream should have parsed
             // generic parameters (otherwise it's impossible to call this function).

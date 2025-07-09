@@ -3,51 +3,10 @@ use std::path::Path;
 
 use rustc_data_structures::small_c_str::SmallCStr;
 use rustc_errors::{Diag, DiagCtxtHandle, Diagnostic, EmissionGuarantee, Level};
-use rustc_macros::{Diagnostic, Subdiagnostic};
+use rustc_macros::Diagnostic;
 use rustc_span::Span;
 
 use crate::fluent_generated as fluent;
-
-#[derive(Diagnostic)]
-#[diag(codegen_llvm_unknown_ctarget_feature_prefix)]
-#[note]
-pub(crate) struct UnknownCTargetFeaturePrefix<'a> {
-    pub feature: &'a str,
-}
-
-#[derive(Diagnostic)]
-#[diag(codegen_llvm_unknown_ctarget_feature)]
-#[note]
-pub(crate) struct UnknownCTargetFeature<'a> {
-    pub feature: &'a str,
-    #[subdiagnostic]
-    pub rust_feature: PossibleFeature<'a>,
-}
-
-#[derive(Diagnostic)]
-#[diag(codegen_llvm_unstable_ctarget_feature)]
-#[note]
-pub(crate) struct UnstableCTargetFeature<'a> {
-    pub feature: &'a str,
-}
-
-#[derive(Diagnostic)]
-#[diag(codegen_llvm_forbidden_ctarget_feature)]
-#[note]
-#[note(codegen_llvm_forbidden_ctarget_feature_issue)]
-pub(crate) struct ForbiddenCTargetFeature<'a> {
-    pub feature: &'a str,
-    pub enabled: &'a str,
-    pub reason: &'a str,
-}
-
-#[derive(Subdiagnostic)]
-pub(crate) enum PossibleFeature<'a> {
-    #[help(codegen_llvm_possible_feature)]
-    Some { rust_feature: &'a str },
-    #[help(codegen_llvm_consider_filing_feature_request)]
-    None,
-}
 
 #[derive(Diagnostic)]
 #[diag(codegen_llvm_symbol_already_defined)]
@@ -55,18 +14,6 @@ pub(crate) struct SymbolAlreadyDefined<'a> {
     #[primary_span]
     pub span: Span,
     pub symbol_name: &'a str,
-}
-
-#[derive(Diagnostic)]
-#[diag(codegen_llvm_invalid_minimum_alignment_not_power_of_two)]
-pub(crate) struct InvalidMinimumAlignmentNotPowerOfTwo {
-    pub align: u64,
-}
-
-#[derive(Diagnostic)]
-#[diag(codegen_llvm_invalid_minimum_alignment_too_large)]
-pub(crate) struct InvalidMinimumAlignmentTooLarge {
-    pub align: u64,
 }
 
 #[derive(Diagnostic)]

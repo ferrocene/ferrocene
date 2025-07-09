@@ -1,6 +1,6 @@
 # Print an optspec for argparse to handle cmd's options that are independent of any subcommand.
 function __fish_x_global_optspecs
-	string join \n v/verbose i/incremental config= build-dir= build= host= target= exclude= skip= include-default-paths rustc-error-format= on-fail= dry-run dump-bootstrap-shims stage= keep-stage= keep-stage-std= src= j/jobs= warnings= error-format= json-output color= bypass-bootstrap-lock rust-profile-generate= rust-profile-use= llvm-profile-use= llvm-profile-generate enable-bolt-settings skip-stage0-validation reproducible-artifact= set= ci= skip-std-check-if-no-download-rustc h/help
+	string join \n v/verbose i/incremental config= build-dir= build= host= target= exclude= skip= include-default-paths rustc-error-format= on-fail= dry-run dump-bootstrap-shims stage= keep-stage= keep-stage-std= src= j/jobs= warnings= json-output color= bypass-bootstrap-lock rust-profile-generate= rust-profile-use= llvm-profile-use= llvm-profile-generate enable-bolt-settings skip-stage0-validation reproducible-artifact= set= ci= skip-std-check-if-no-download-rustc h/help
 end
 
 function __fish_x_needs_command
@@ -26,12 +26,12 @@ end
 
 complete -c x -n "__fish_x_needs_command" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_needs_command" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_needs_command" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_needs_command" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_needs_command" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_needs_command" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_needs_command" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_needs_command" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_needs_command" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_needs_command" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_needs_command" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_needs_command" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_needs_command" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -41,7 +41,6 @@ complete -c x -n "__fish_x_needs_command" -s j -l jobs -d 'number of jobs to run
 complete -c x -n "__fish_x_needs_command" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_needs_command" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_needs_command" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -84,12 +83,12 @@ complete -c x -n "__fish_x_needs_command" -a "perf" -d 'Perform profiling and be
 complete -c x -n "__fish_x_needs_command" -a "sign" -d 'Sign Ferrocene qualification documents'
 complete -c x -n "__fish_x_using_subcommand build" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand build" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand build" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand build" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand build" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand build" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand build" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand build" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand build" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand build" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand build" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand build" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand build" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -99,7 +98,6 @@ complete -c x -n "__fish_x_using_subcommand build" -s j -l jobs -d 'number of jo
 complete -c x -n "__fish_x_using_subcommand build" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand build" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand build" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -124,12 +122,12 @@ complete -c x -n "__fish_x_using_subcommand build" -l skip-std-check-if-no-downl
 complete -c x -n "__fish_x_using_subcommand build" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand check" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand check" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand check" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand check" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand check" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand check" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand check" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand check" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand check" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand check" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand check" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand check" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand check" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -139,7 +137,6 @@ complete -c x -n "__fish_x_using_subcommand check" -s j -l jobs -d 'number of jo
 complete -c x -n "__fish_x_using_subcommand check" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand check" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand check" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -169,12 +166,12 @@ complete -c x -n "__fish_x_using_subcommand clippy" -s W -d 'clippy lints to war
 complete -c x -n "__fish_x_using_subcommand clippy" -s F -d 'clippy lints to forbid' -r
 complete -c x -n "__fish_x_using_subcommand clippy" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand clippy" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand clippy" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand clippy" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand clippy" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand clippy" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand clippy" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand clippy" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand clippy" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand clippy" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand clippy" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand clippy" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand clippy" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -184,7 +181,6 @@ complete -c x -n "__fish_x_using_subcommand clippy" -s j -l jobs -d 'number of j
 complete -c x -n "__fish_x_using_subcommand clippy" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand clippy" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand clippy" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -212,12 +208,12 @@ complete -c x -n "__fish_x_using_subcommand clippy" -l skip-std-check-if-no-down
 complete -c x -n "__fish_x_using_subcommand clippy" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand fix" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand fix" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand fix" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand fix" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand fix" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand fix" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand fix" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand fix" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand fix" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand fix" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand fix" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand fix" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand fix" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -227,7 +223,6 @@ complete -c x -n "__fish_x_using_subcommand fix" -s j -l jobs -d 'number of jobs
 complete -c x -n "__fish_x_using_subcommand fix" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand fix" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand fix" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -252,12 +247,12 @@ complete -c x -n "__fish_x_using_subcommand fix" -l skip-std-check-if-no-downloa
 complete -c x -n "__fish_x_using_subcommand fix" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand fmt" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand fmt" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand fmt" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand fmt" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand fmt" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand fmt" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand fmt" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand fmt" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand fmt" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand fmt" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand fmt" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand fmt" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand fmt" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -267,7 +262,6 @@ complete -c x -n "__fish_x_using_subcommand fmt" -s j -l jobs -d 'number of jobs
 complete -c x -n "__fish_x_using_subcommand fmt" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand fmt" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand fmt" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -294,12 +288,12 @@ complete -c x -n "__fish_x_using_subcommand fmt" -l skip-std-check-if-no-downloa
 complete -c x -n "__fish_x_using_subcommand fmt" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand doc" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand doc" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand doc" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand doc" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand doc" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand doc" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand doc" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand doc" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand doc" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand doc" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand doc" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand doc" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand doc" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -309,7 +303,6 @@ complete -c x -n "__fish_x_using_subcommand doc" -s j -l jobs -d 'number of jobs
 complete -c x -n "__fish_x_using_subcommand doc" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand doc" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand doc" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -347,12 +340,12 @@ complete -c x -n "__fish_x_using_subcommand test" -l coverage -d 'generate cover
 complete -c x -n "__fish_x_using_subcommand test" -l test-variant -d 'Choose the test variant to use for this execution' -r
 complete -c x -n "__fish_x_using_subcommand test" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand test" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand test" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand test" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand test" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand test" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand test" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand test" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand test" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand test" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand test" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand test" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand test" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -362,7 +355,6 @@ complete -c x -n "__fish_x_using_subcommand test" -s j -l jobs -d 'number of job
 complete -c x -n "__fish_x_using_subcommand test" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand test" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand test" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -397,12 +389,12 @@ complete -c x -n "__fish_x_using_subcommand test" -s h -l help -d 'Print help (s
 complete -c x -n "__fish_x_using_subcommand miri" -l test-args -d 'extra arguments to be passed for the test tool being used (e.g. libtest, compiletest or rustdoc)' -r
 complete -c x -n "__fish_x_using_subcommand miri" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand miri" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand miri" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand miri" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand miri" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand miri" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand miri" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand miri" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand miri" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand miri" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand miri" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand miri" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand miri" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -412,7 +404,6 @@ complete -c x -n "__fish_x_using_subcommand miri" -s j -l jobs -d 'number of job
 complete -c x -n "__fish_x_using_subcommand miri" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand miri" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand miri" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -441,12 +432,12 @@ complete -c x -n "__fish_x_using_subcommand miri" -s h -l help -d 'Print help (s
 complete -c x -n "__fish_x_using_subcommand bench" -l test-args -r
 complete -c x -n "__fish_x_using_subcommand bench" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand bench" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand bench" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand bench" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand bench" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand bench" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand bench" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand bench" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand bench" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand bench" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand bench" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand bench" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand bench" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -456,7 +447,6 @@ complete -c x -n "__fish_x_using_subcommand bench" -s j -l jobs -d 'number of jo
 complete -c x -n "__fish_x_using_subcommand bench" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand bench" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand bench" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -482,12 +472,12 @@ complete -c x -n "__fish_x_using_subcommand bench" -s h -l help -d 'Print help (
 complete -c x -n "__fish_x_using_subcommand clean" -l stage -d 'Clean a specific stage without touching other artifacts. By default, every stage is cleaned if this option is not used' -r
 complete -c x -n "__fish_x_using_subcommand clean" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand clean" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand clean" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand clean" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand clean" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand clean" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand clean" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand clean" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand clean" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand clean" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand clean" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand clean" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x -n "__fish_x_using_subcommand clean" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -496,7 +486,6 @@ complete -c x -n "__fish_x_using_subcommand clean" -s j -l jobs -d 'number of jo
 complete -c x -n "__fish_x_using_subcommand clean" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand clean" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand clean" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -522,12 +511,12 @@ complete -c x -n "__fish_x_using_subcommand clean" -l skip-std-check-if-no-downl
 complete -c x -n "__fish_x_using_subcommand clean" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand dist" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand dist" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand dist" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand dist" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand dist" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand dist" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand dist" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand dist" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand dist" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand dist" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand dist" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand dist" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand dist" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -537,7 +526,6 @@ complete -c x -n "__fish_x_using_subcommand dist" -s j -l jobs -d 'number of job
 complete -c x -n "__fish_x_using_subcommand dist" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand dist" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand dist" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -562,12 +550,12 @@ complete -c x -n "__fish_x_using_subcommand dist" -l skip-std-check-if-no-downlo
 complete -c x -n "__fish_x_using_subcommand dist" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand install" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand install" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand install" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand install" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand install" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand install" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand install" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand install" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand install" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand install" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand install" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand install" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand install" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -577,7 +565,6 @@ complete -c x -n "__fish_x_using_subcommand install" -s j -l jobs -d 'number of 
 complete -c x -n "__fish_x_using_subcommand install" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand install" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand install" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -603,12 +590,12 @@ complete -c x -n "__fish_x_using_subcommand install" -s h -l help -d 'Print help
 complete -c x -n "__fish_x_using_subcommand run" -l args -d 'arguments for the tool' -r
 complete -c x -n "__fish_x_using_subcommand run" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand run" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand run" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand run" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand run" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand run" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand run" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand run" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand run" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand run" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand run" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand run" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand run" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -618,7 +605,6 @@ complete -c x -n "__fish_x_using_subcommand run" -s j -l jobs -d 'number of jobs
 complete -c x -n "__fish_x_using_subcommand run" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand run" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand run" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -644,12 +630,12 @@ complete -c x -n "__fish_x_using_subcommand run" -l skip-std-check-if-no-downloa
 complete -c x -n "__fish_x_using_subcommand run" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand setup" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand setup" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand setup" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand setup" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand setup" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand setup" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand setup" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand setup" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand setup" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand setup" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand setup" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand setup" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand setup" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -659,7 +645,6 @@ complete -c x -n "__fish_x_using_subcommand setup" -s j -l jobs -d 'number of jo
 complete -c x -n "__fish_x_using_subcommand setup" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand setup" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand setup" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -684,12 +669,12 @@ complete -c x -n "__fish_x_using_subcommand setup" -l skip-std-check-if-no-downl
 complete -c x -n "__fish_x_using_subcommand setup" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand suggest" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand suggest" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand suggest" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand suggest" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand suggest" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand suggest" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand suggest" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand suggest" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand suggest" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand suggest" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand suggest" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand suggest" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand suggest" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -699,7 +684,6 @@ complete -c x -n "__fish_x_using_subcommand suggest" -s j -l jobs -d 'number of 
 complete -c x -n "__fish_x_using_subcommand suggest" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand suggest" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand suggest" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -726,12 +710,12 @@ complete -c x -n "__fish_x_using_subcommand suggest" -s h -l help -d 'Print help
 complete -c x -n "__fish_x_using_subcommand vendor" -l sync -d 'Additional `Cargo.toml` to sync and vendor' -r -F
 complete -c x -n "__fish_x_using_subcommand vendor" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand vendor" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand vendor" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand vendor" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand vendor" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand vendor" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand vendor" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand vendor" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand vendor" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand vendor" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand vendor" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand vendor" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand vendor" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -741,7 +725,6 @@ complete -c x -n "__fish_x_using_subcommand vendor" -s j -l jobs -d 'number of j
 complete -c x -n "__fish_x_using_subcommand vendor" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand vendor" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand vendor" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -767,12 +750,12 @@ complete -c x -n "__fish_x_using_subcommand vendor" -l skip-std-check-if-no-down
 complete -c x -n "__fish_x_using_subcommand vendor" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -782,7 +765,6 @@ complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -823,11 +805,11 @@ Opt\t''
 Clippy\t''"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -837,7 +819,6 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -873,11 +854,11 @@ Opt\t''
 Clippy\t''"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -887,7 +868,6 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from samply" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -923,11 +903,11 @@ Opt\t''
 Clippy\t''"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -937,7 +917,6 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -973,11 +952,11 @@ Opt\t''
 Clippy\t''"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -987,7 +966,6 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -1012,12 +990,12 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -1027,7 +1005,6 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"
@@ -1052,12 +1029,12 @@ complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_fro
 complete -c x -n "__fish_x_using_subcommand perf; and __fish_seen_subcommand_from compare" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x -n "__fish_x_using_subcommand sign" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand sign" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x -n "__fish_x_using_subcommand sign" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x -n "__fish_x_using_subcommand sign" -l build -d 'host target of the stage0 compiler' -r -f
 complete -c x -n "__fish_x_using_subcommand sign" -l host -d 'host targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand sign" -l target -d 'target targets to build' -r -f
 complete -c x -n "__fish_x_using_subcommand sign" -l exclude -d 'build paths to exclude' -r -F
 complete -c x -n "__fish_x_using_subcommand sign" -l skip -d 'build paths to skip' -r -F
-complete -c x -n "__fish_x_using_subcommand sign" -l rustc-error-format -r -f
+complete -c x -n "__fish_x_using_subcommand sign" -l rustc-error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand sign" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
 complete -c x -n "__fish_x_using_subcommand sign" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
 complete -c x -n "__fish_x_using_subcommand sign" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
@@ -1067,7 +1044,6 @@ complete -c x -n "__fish_x_using_subcommand sign" -s j -l jobs -d 'number of job
 complete -c x -n "__fish_x_using_subcommand sign" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
 warn\t''
 default\t''"
-complete -c x -n "__fish_x_using_subcommand sign" -l error-format -d 'rustc error format' -r -f
 complete -c x -n "__fish_x_using_subcommand sign" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
 never\t''
 auto\t''"

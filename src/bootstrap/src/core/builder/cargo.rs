@@ -3,15 +3,15 @@ use std::ffi::{OsStr, OsString};
 use std::path::{Path, PathBuf};
 
 use super::{Builder, Kind};
+use crate::core::build_steps::test;
 use crate::core::build_steps::tool::SourceType;
-use crate::core::build_steps::{compile, test};
 use crate::core::config::SplitDebuginfo;
 use crate::core::config::flags::Color;
 use crate::utils::build_stamp;
 use crate::utils::helpers::{self, LldThreads, check_cfg_arg, linker_args, linker_flags};
 use crate::{
     BootstrapCommand, CLang, Compiler, Config, DocTests, DryRun, EXTRA_CHECK_CFGS, GitRepo, Mode,
-    TargetSelection, command, prepare_behaviour_dump_dir, t,
+    RemapScheme, TargetSelection, command, prepare_behaviour_dump_dir, t,
 };
 
 /// Represents flag values in `String` form with whitespace delimiter to pass it to the compiler
@@ -138,7 +138,10 @@ impl Cargo {
     }
 
     pub fn into_cmd(self) -> BootstrapCommand {
-        self.into()
+        let mut cmd: BootstrapCommand = self.into();
+        // Disable caching for commands originating from Cargo-related operations.
+        cmd.do_not_cache();
+        cmd
     }
 
     /// Same as [`Cargo::new`] except this one doesn't configure the linker with
@@ -285,9 +288,7 @@ impl Cargo {
             self.rustdocflags.arg(&arg);
         }
 
-        if !builder.config.dry_run()
-            && builder.cc.borrow()[&target].args().iter().any(|arg| arg == "-gz")
-        {
+        if !builder.config.dry_run() && builder.cc[&target].args().iter().any(|arg| arg == "-gz") {
             self.rustflags.arg("-Clink-arg=-gz");
         }
 
@@ -560,7 +561,7 @@ impl Builder<'_> {
         let libdir = self.rustc_libdir(compiler);
 
         let sysroot_str = sysroot.as_os_str().to_str().expect("sysroot should be UTF-8");
-        if self.is_verbose() && !matches!(self.config.dry_run, DryRun::SelfCheck) {
+        if self.is_verbose() && !matches!(self.config.get_dry_run(), DryRun::SelfCheck) {
             println!("using sysroot {sysroot_str}");
         }
 
@@ -646,6 +647,15 @@ impl Builder<'_> {
         for (restricted_mode, name, values) in EXTRA_CHECK_CFGS {
             if restricted_mode.is_none() || *restricted_mode == Some(mode) {
                 rustflags.arg(&check_cfg_arg(name, *values));
+
+                if *name == "bootstrap" {
+                    // Cargo doesn't pass RUSTFLAGS to proc_macros:
+                    // https://github.com/rust-lang/cargo/issues/4423
+                    // Thus, if we are on stage 0, we explicitly set `--cfg=bootstrap`.
+                    // We also declare that the flag is expected, which we need to do to not
+                    // get warnings about it being unexpected.
+                    hostflags.arg(check_cfg_arg(name, *values));
+                }
             }
         }
 
@@ -655,13 +665,6 @@ impl Builder<'_> {
         if stage == 0 {
             hostflags.arg("--cfg=bootstrap");
         }
-        // Cargo doesn't pass RUSTFLAGS to proc_macros:
-        // https://github.com/rust-lang/cargo/issues/4423
-        // Thus, if we are on stage 0, we explicitly set `--cfg=bootstrap`.
-        // We also declare that the flag is expected, which we need to do to not
-        // get warnings about it being unexpected.
-        hostflags.arg("-Zunstable-options");
-        hostflags.arg("--check-cfg=cfg(bootstrap)");
 
         // FIXME: It might be better to use the same value for both `RUSTFLAGS` and `RUSTDOCFLAGS`,
         // but this breaks CI. At the very least, stage0 `rustdoc` needs `--cfg bootstrap`. See
@@ -693,6 +696,7 @@ impl Builder<'_> {
                         .arg("--print=file-names")
                         .arg("--crate-type=proc-macro")
                         .arg("-")
+                        .stdin(std::process::Stdio::null())
                         .run_capture(self)
                         .stderr();
 
@@ -856,7 +860,7 @@ impl Builder<'_> {
 
         // If this is for `miri-test`, prepare the sysroots.
         if cmd_kind == Kind::MiriTest {
-            self.ensure(compile::Std::new(compiler, compiler.host));
+            self.std(compiler, compiler.host);
             let host_sysroot = self.sysroot(compiler);
             let miri_sysroot = test::Miri::build_miri_sysroot(self, compiler, target);
             cargo.env("MIRI_SYSROOT", &miri_sysroot);
@@ -937,13 +941,50 @@ impl Builder<'_> {
             hostflags.arg(format!("-Ctarget-feature={sign}crt-static"));
         }
 
-        if let Some(map_to) = self.build.debuginfo_map_to(GitRepo::Rustc) {
-            let map = format!("{}={}", self.build.src.display(), map_to);
-            cargo.env("RUSTC_DEBUGINFO_MAP", map);
+        // `rustc` needs to know the remapping scheme, in order to know how to reverse it (unremap)
+        // later. Two env vars are set and made available to the compiler
+        //
+        // - `CFG_VIRTUAL_RUST_SOURCE_BASE_DIR`: `rust-src` remap scheme (`NonCompiler`)
+        // - `CFG_VIRTUAL_RUSTC_DEV_SOURCE_BASE_DIR`: `rustc-dev` remap scheme (`Compiler`)
+        //
+        // Keep this scheme in sync with `rustc_metadata::rmeta::decoder`'s
+        // `try_to_translate_virtual_to_real`.
+        //
+        // `RUSTC_DEBUGINFO_MAP` is used to pass through to the underlying rustc
+        // `--remap-path-prefix`.
+        match mode {
+            Mode::Rustc | Mode::Codegen => {
+                if let Some(ref map_to) =
+                    self.build.debuginfo_map_to(GitRepo::Rustc, RemapScheme::NonCompiler)
+                {
+                    cargo.env("CFG_VIRTUAL_RUST_SOURCE_BASE_DIR", map_to);
+                }
 
-            // `rustc` needs to know the virtual `/rustc/$hash` we're mapping to,
-            // in order to opportunistically reverse it later.
-            cargo.env("CFG_VIRTUAL_RUST_SOURCE_BASE_DIR", map_to);
+                if let Some(ref map_to) =
+                    self.build.debuginfo_map_to(GitRepo::Rustc, RemapScheme::Compiler)
+                {
+                    // When building compiler sources, we want to apply the compiler remap scheme.
+                    cargo.env(
+                        "RUSTC_DEBUGINFO_MAP",
+                        format!("{}={}", self.build.src.display(), map_to),
+                    );
+                    cargo.env("CFG_VIRTUAL_RUSTC_DEV_SOURCE_BASE_DIR", map_to);
+                }
+            }
+            Mode::Std
+            | Mode::ToolBootstrap
+            | Mode::ToolRustc
+            | Mode::ToolStd
+            | Mode::ToolCustom { .. } => {
+                if let Some(ref map_to) =
+                    self.build.debuginfo_map_to(GitRepo::Rustc, RemapScheme::NonCompiler)
+                {
+                    cargo.env(
+                        "RUSTC_DEBUGINFO_MAP",
+                        format!("{}={}", self.build.src.display(), map_to),
+                    );
+                }
+            }
         }
 
         if self.config.rust_remap_debuginfo {

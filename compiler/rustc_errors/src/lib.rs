@@ -6,6 +6,7 @@
 #![allow(incomplete_features)]
 #![allow(internal_features)]
 #![allow(rustc::diagnostic_outside_of_impl)]
+#![allow(rustc::direct_use_of_rustc_type_ir)]
 #![allow(rustc::untranslatable_diagnostic)]
 #![doc(html_root_url = "https://doc.rust-lang.org/nightly/nightly-rustc/")]
 #![doc(rust_logo)]
@@ -15,12 +16,10 @@
 #![feature(box_patterns)]
 #![feature(default_field_values)]
 #![feature(error_reporter)]
-#![feature(if_let_guard)]
 #![feature(negative_impls)]
 #![feature(never_type)]
 #![feature(rustc_attrs)]
 #![feature(rustdoc_internals)]
-#![feature(trait_alias)]
 #![feature(try_blocks)]
 #![feature(yeet_expr)]
 // tidy-alphabetical-end
@@ -62,8 +61,9 @@ pub use rustc_error_messages::{
     SubdiagMessage, fallback_fluent_bundle, fluent_bundle,
 };
 use rustc_hashes::Hash128;
-use rustc_lint_defs::LintExpectationId;
+use rustc_hir::HirId;
 pub use rustc_lint_defs::{Applicability, listify, pluralize};
+use rustc_lint_defs::{Lint, LintExpectationId};
 use rustc_macros::{Decodable, Encodable};
 pub use rustc_span::ErrorGuaranteed;
 pub use rustc_span::fatal_error::{FatalError, FatalErrorMarker};
@@ -75,7 +75,9 @@ pub use snippet::Style;
 pub use termcolor::{Color, ColorSpec, WriteColor};
 use tracing::debug;
 
+use crate::emitter::TimingEvent;
 use crate::registry::Registry;
+use crate::timings::TimingRecord;
 
 pub mod annotate_snippet_emitter_writer;
 pub mod codes;
@@ -91,6 +93,7 @@ mod snippet;
 mod styled_buffer;
 #[cfg(test)]
 mod tests;
+pub mod timings;
 pub mod translation;
 
 pub type PResult<'a, T> = Result<T, Diag<'a>>;
@@ -102,6 +105,19 @@ rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 rustc_data_structures::static_assert_size!(PResult<'_, ()>, 24);
 #[cfg(target_pointer_width = "64")]
 rustc_data_structures::static_assert_size!(PResult<'_, bool>, 24);
+
+/// Used to avoid depending on `rustc_middle` in `rustc_attr_parsing`.
+/// Always the `TyCtxt`.
+pub trait LintEmitter: Copy {
+    #[track_caller]
+    fn emit_node_span_lint(
+        self,
+        lint: &'static Lint,
+        hir_id: HirId,
+        span: impl Into<MultiSpan>,
+        decorator: impl for<'a> LintDiagnostic<'a, ()>,
+    );
+}
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Encodable, Decodable)]
 pub enum SuggestionStyle {
@@ -732,40 +748,10 @@ impl DiagCtxt {
         Self { inner: Lock::new(DiagCtxtInner::new(emitter)) }
     }
 
-    pub fn make_silent(&self, fatal_note: Option<String>, emit_fatal_diagnostic: bool) {
-        // An empty type that implements `Emitter` to temporarily swap in place of the real one,
-        // which will be used in constructing its replacement.
-        struct FalseEmitter;
-
-        impl Emitter for FalseEmitter {
-            fn emit_diagnostic(&mut self, _: DiagInner, _: &Registry) {
-                unimplemented!("false emitter must only used during `make_silent`")
-            }
-
-            fn source_map(&self) -> Option<&SourceMap> {
-                unimplemented!("false emitter must only used during `make_silent`")
-            }
-        }
-
-        impl translation::Translate for FalseEmitter {
-            fn fluent_bundle(&self) -> Option<&FluentBundle> {
-                unimplemented!("false emitter must only used during `make_silent`")
-            }
-
-            fn fallback_fluent_bundle(&self) -> &FluentBundle {
-                unimplemented!("false emitter must only used during `make_silent`")
-            }
-        }
-
+    pub fn make_silent(&self) {
         let mut inner = self.inner.borrow_mut();
-        let mut prev_emitter = Box::new(FalseEmitter) as Box<dyn Emitter + DynSend>;
-        std::mem::swap(&mut inner.emitter, &mut prev_emitter);
-        let new_emitter = Box::new(emitter::SilentEmitter {
-            fatal_emitter: prev_emitter,
-            fatal_note,
-            emit_fatal_diagnostic,
-        });
-        inner.emitter = new_emitter;
+        let translator = inner.emitter.translator().clone();
+        inner.emitter = Box::new(emitter::SilentEmitter { translator });
     }
 
     pub fn set_emitter(&self, emitter: Box<dyn Emitter + DynSend>) {
@@ -1142,6 +1128,14 @@ impl<'a> DiagCtxtHandle<'a> {
 
     pub fn emit_artifact_notification(&self, path: &Path, artifact_type: &str) {
         self.inner.borrow_mut().emitter.emit_artifact_notification(path, artifact_type);
+    }
+
+    pub fn emit_timing_section_start(&self, record: TimingRecord) {
+        self.inner.borrow_mut().emitter.emit_timing_section(record, TimingEvent::Start);
+    }
+
+    pub fn emit_timing_section_end(&self, record: TimingRecord) {
+        self.inner.borrow_mut().emitter.emit_timing_section(record, TimingEvent::End);
     }
 
     pub fn emit_future_breakage_report(&self) {
@@ -1529,7 +1523,7 @@ impl DiagCtxtInner {
             // Future breakages aren't emitted if they're `Level::Allow` or
             // `Level::Expect`, but they still need to be constructed and
             // stashed below, so they'll trigger the must_produce_diag check.
-            assert_matches!(diagnostic.level, Error | Warning | Allow | Expect);
+            assert_matches!(diagnostic.level, Error | ForceWarning | Warning | Allow | Expect);
             self.future_breakage_diagnostics.push(diagnostic.clone());
         }
 
@@ -1747,7 +1741,12 @@ impl DiagCtxtInner {
         args: impl Iterator<Item = DiagArg<'a>>,
     ) -> String {
         let args = crate::translation::to_fluent_args(args);
-        self.emitter.translate_message(&message, &args).map_err(Report::new).unwrap().to_string()
+        self.emitter
+            .translator()
+            .translate_message(&message, &args)
+            .map_err(Report::new)
+            .unwrap()
+            .to_string()
     }
 
     fn eagerly_translate_for_subdiag(

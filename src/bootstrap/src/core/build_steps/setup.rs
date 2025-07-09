@@ -264,7 +264,7 @@ impl Step for Link {
         }
 
         let stage_path =
-            ["build", config.build.rustc_target_arg(), "stage1"].join(MAIN_SEPARATOR_STR);
+            ["build", config.host_target.rustc_target_arg(), "stage1"].join(MAIN_SEPARATOR_STR);
 
         if stage_dir_exists(&stage_path[..]) && !config.dry_run() {
             attempt_toolchain_link(builder, &stage_path[..]);
@@ -276,7 +276,7 @@ fn rustup_installed(builder: &Builder<'_>) -> bool {
     let mut rustup = command("rustup");
     rustup.arg("--version");
 
-    rustup.allow_failure().run_always().run_capture_stdout(builder).is_success()
+    rustup.allow_failure().run_in_dry_run().run_capture_stdout(builder).is_success()
 }
 
 fn stage_dir_exists(stage_path: &str) -> bool {
@@ -535,7 +535,7 @@ enum EditorKind {
 
 impl EditorKind {
     // Used in `./tests.rs`.
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub const ALL: &[EditorKind] = &[
         EditorKind::Emacs,
         EditorKind::Helix,

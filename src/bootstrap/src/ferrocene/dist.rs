@@ -6,7 +6,6 @@ pub(crate) mod flip_link;
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 use std::rc::Rc;
 
 use serde_json::json;
@@ -18,6 +17,7 @@ use crate::ferrocene::code_coverage::CoverageOutcomesDir;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
+use crate::utils::exec::command;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
 use crate::{FileType, t};
 
@@ -140,6 +140,7 @@ impl Step for SourceTarball {
             "src/tools/cargo/Cargo.toml",
             "src/tools/rust-analyzer/Cargo.toml",
             "src/tools/rustc-perf/site/Cargo.toml",
+            "src/tools/rustbook/Cargo.toml",
         ];
         const UV_PROJECTS: &[&str] = &["ferrocene/doc"];
 
@@ -168,18 +169,18 @@ impl Step for SourceTarball {
             crate::utils::channel::write_commit_info_file(&dest_dir, info);
         }
 
-        // Vendor Rust dependencies
-        let mut vendor = Command::new(&builder.initial_cargo);
-        vendor.arg("vendor").arg("vendor/rust").current_dir(&dest_dir);
-        vendor.env("RUSTC_BOOTSTRAP", "1"); // std's Cargo.toml uses unstable features
-        // Resolver 3 needs the `rustc` binary to fetch the compiler version
-        vendor.env("RUSTC", &builder.initial_rustc);
-        for extra in EXTRA_CARGO_TOMLS {
-            vendor.arg("--sync").arg(&builder.src.join(extra));
-        }
-        vendor.arg("--versioned-dirs"); // See https://github.com/rust-lang/rust/pull/122892
         if !builder.config.dry_run() {
-            let config = crate::output(&mut vendor);
+            // Vendor Rust dependencies
+            let mut vendor = command(&builder.initial_cargo);
+            vendor.arg("vendor").arg("vendor/rust").current_dir(&dest_dir);
+            vendor.env("RUSTC_BOOTSTRAP", "1"); // std's Cargo.toml uses unstable features
+            // Resolver 3 needs the `rustc` binary to fetch the compiler version
+            vendor.env("RUSTC", &builder.initial_rustc);
+            for extra in EXTRA_CARGO_TOMLS {
+                vendor.arg("--sync").arg(&builder.src.join(extra));
+            }
+            vendor.arg("--versioned-dirs"); // See https://github.com/rust-lang/rust/pull/122892
+            let config = vendor.run_in_dry_run().run_capture_stdout(&builder).stdout();
             builder.create_dir(&dest_dir.join(".cargo"));
             builder.create(&dest_dir.join(".cargo").join("config.toml"), &config);
         }

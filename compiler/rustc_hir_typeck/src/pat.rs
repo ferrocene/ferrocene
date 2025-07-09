@@ -16,7 +16,7 @@ use rustc_hir::{
     PatExprKind, PatKind, expr_needs_parens,
 };
 use rustc_hir_analysis::autoderef::report_autoderef_recursion_limit_error;
-use rustc_infer::infer;
+use rustc_infer::infer::RegionVariableOrigin;
 use rustc_middle::traits::PatternOriginExpr;
 use rustc_middle::ty::{self, Ty, TypeVisitableExt};
 use rustc_middle::{bug, span_bug};
@@ -796,7 +796,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 if *negated {
                     self.register_bound(
                         ty,
-                        self.tcx.require_lang_item(LangItem::Neg, Some(lt.span)),
+                        self.tcx.require_lang_item(LangItem::Neg, lt.span),
                         ObligationCause::dummy_with_span(lt.span),
                     );
                 }
@@ -2553,13 +2553,13 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let tcx = self.tcx;
         self.register_bound(
             source_ty,
-            tcx.require_lang_item(hir::LangItem::DerefPure, Some(span)),
+            tcx.require_lang_item(hir::LangItem::DerefPure, span),
             self.misc(span),
         );
         // The expected type for the deref pat's inner pattern is `<expected as Deref>::Target`.
         let target_ty = Ty::new_projection(
             tcx,
-            tcx.require_lang_item(hir::LangItem::DerefTarget, Some(span)),
+            tcx.require_lang_item(hir::LangItem::DerefTarget, span),
             [source_ty],
         );
         let target_ty = self.normalize(span, target_ty);
@@ -2580,7 +2580,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             for mutably_derefed_ty in derefed_tys {
                 self.register_bound(
                     mutably_derefed_ty,
-                    self.tcx.require_lang_item(hir::LangItem::DerefMut, Some(span)),
+                    self.tcx.require_lang_item(hir::LangItem::DerefMut, span),
                     self.misc(span),
                 );
             }
@@ -2777,7 +2777,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
     /// Create a reference type with a fresh region variable.
     fn new_ref_ty(&self, span: Span, mutbl: Mutability, ty: Ty<'tcx>) -> Ty<'tcx> {
-        let region = self.next_region_var(infer::PatternRegion(span));
+        let region = self.next_region_var(RegionVariableOrigin::PatternRegion(span));
         Ty::new_ref(self.tcx, region, ty, mutbl)
     }
 

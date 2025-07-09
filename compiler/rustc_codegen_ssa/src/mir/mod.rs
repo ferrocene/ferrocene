@@ -26,6 +26,7 @@ pub mod place;
 mod rvalue;
 mod statement;
 
+pub use self::block::store_cast;
 use self::debuginfo::{FunctionDebugContext, PerLocalVarDebugInfo};
 use self::operand::{OperandRef, OperandValue};
 use self::place::PlaceRef;
@@ -259,7 +260,7 @@ pub fn codegen_mir<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
                     }
                     PassMode::Cast { ref cast, .. } => {
                         debug!("alloc: {:?} (return place) -> place", local);
-                        let size = cast.size(&start_bx);
+                        let size = cast.size(&start_bx).max(layout.size);
                         return LocalRef::Place(PlaceRef::alloca_size(&mut start_bx, size, layout));
                     }
                     _ => {}
@@ -353,15 +354,15 @@ fn optimize_use_clone<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
 
             let destination_block = target.unwrap();
 
-            bb.statements.push(mir::Statement {
-                source_info: bb.terminator().source_info,
-                kind: mir::StatementKind::Assign(Box::new((
+            bb.statements.push(mir::Statement::new(
+                bb.terminator().source_info,
+                mir::StatementKind::Assign(Box::new((
                     *destination,
                     mir::Rvalue::Use(mir::Operand::Copy(
                         arg_place.project_deeper(&[mir::ProjectionElem::Deref], tcx),
                     )),
                 ))),
-            });
+            ));
 
             bb.terminator_mut().kind = mir::TerminatorKind::Goto { target: destination_block };
         }

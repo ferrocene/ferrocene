@@ -102,7 +102,7 @@ use rustc_middle::bug;
 use rustc_middle::mir::interpret::GlobalAlloc;
 use rustc_middle::mir::visit::*;
 use rustc_middle::mir::*;
-use rustc_middle::ty::layout::{HasTypingEnv, LayoutOf};
+use rustc_middle::ty::layout::HasTypingEnv;
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_span::DUMMY_SP;
 use rustc_span::def_id::DefId;
@@ -240,8 +240,6 @@ struct VnState<'body, 'tcx> {
     next_opaque: usize,
     /// Cache the deref values.
     derefs: Vec<VnIndex>,
-    /// Cache the value of the `unsized_locals` features, to avoid fetching it repeatedly in a loop.
-    feature_unsized_locals: bool,
     ssa: &'body SsaLocals,
     dominators: Dominators<BasicBlock>,
     reused_locals: DenseBitSet<Local>,
@@ -273,7 +271,6 @@ impl<'body, 'tcx> VnState<'body, 'tcx> {
             evaluated: IndexVec::with_capacity(num_values),
             next_opaque: 1,
             derefs: Vec::new(),
-            feature_unsized_locals: tcx.features().unsized_locals(),
             ssa,
             dominators,
             reused_locals: DenseBitSet::new_empty(local_decls.len()),
@@ -329,13 +326,7 @@ impl<'body, 'tcx> VnState<'body, 'tcx> {
     fn assign(&mut self, local: Local, value: VnIndex) {
         debug_assert!(self.ssa.is_ssa(local));
         self.locals[local] = Some(value);
-
-        // Only register the value if its type is `Sized`, as we will emit copies of it.
-        let is_sized = !self.feature_unsized_locals
-            || self.local_decls[local].ty.is_sized(self.tcx, self.typing_env());
-        if is_sized {
-            self.rev_locals[value].push(local);
-        }
+        self.rev_locals[value].push(local);
     }
 
     fn insert_constant(&mut self, value: Const<'tcx>) -> VnIndex {
@@ -438,8 +429,10 @@ impl<'body, 'tcx> VnState<'body, 'tcx> {
                         dest.clone()
                     };
                     for (field_index, op) in fields.into_iter().enumerate() {
-                        let field_dest =
-                            self.ecx.project_field(&variant_dest, field_index).discard_err()?;
+                        let field_dest = self
+                            .ecx
+                            .project_field(&variant_dest, FieldIdx::from_usize(field_index))
+                            .discard_err()?;
                         self.ecx.copy_op(op, &field_dest).discard_err()?;
                     }
                     self.ecx
@@ -1583,7 +1576,7 @@ impl<'body, 'tcx> VnState<'body, 'tcx> {
             // We needed to check the variant to avoid trying to read the tag
             // field from an enum where no fields have variants, since that tag
             // field isn't in the `Aggregate` from which we're getting values.
-            Some((FieldIdx::from_usize(field_idx), field_layout.ty))
+            Some((field_idx, field_layout.ty))
         } else if let ty::Adt(adt, args) = ty.kind()
             && adt.is_struct()
             && adt.repr().transparent()
@@ -1632,7 +1625,7 @@ fn op_to_prop_const<'tcx>(
     // If this constant is already represented as an `Allocation`,
     // try putting it into global memory to return it.
     if let Either::Left(mplace) = op.as_mplace_or_imm() {
-        let (size, _align) = ecx.size_and_align_of_mplace(&mplace).discard_err()??;
+        let (size, _align) = ecx.size_and_align_of_val(&mplace).discard_err()??;
 
         // Do not try interning a value that contains provenance.
         // Due to https://github.com/rust-lang/rust/issues/79738, doing so could lead to bugs.
@@ -1643,7 +1636,7 @@ fn op_to_prop_const<'tcx>(
         }
 
         let pointer = mplace.ptr().into_pointer_or_addr().ok()?;
-        let (prov, offset) = pointer.into_parts();
+        let (prov, offset) = pointer.prov_and_relative_offset();
         let alloc_id = prov.alloc_id();
         intern_const_alloc_for_constprop(ecx, alloc_id).discard_err()?;
 

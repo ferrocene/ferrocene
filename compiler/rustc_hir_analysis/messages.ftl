@@ -1,3 +1,7 @@
+hir_analysis_abi_custom_clothed_function =
+    items with the "custom" ABI can only be declared externally or defined via naked functions
+    .suggestion = convert this to an `#[unsafe(naked)]` function
+
 hir_analysis_ambiguous_assoc_item = ambiguous associated {$assoc_kind} `{$assoc_ident}` in bounds of `{$qself}`
     .label = ambiguous associated {$assoc_kind} `{$assoc_ident}`
 
@@ -42,6 +46,9 @@ hir_analysis_associated_type_trait_uninferred_generic_params = cannot use the {$
 
 hir_analysis_associated_type_trait_uninferred_generic_params_multipart_suggestion = use a fully qualified path with explicit lifetimes
 
+hir_analysis_async_drop_without_sync_drop = `AsyncDrop` impl without `Drop` impl
+    .help = type implementing `AsyncDrop` trait must also implement `Drop` trait to be used in sync context and unwinds
+
 hir_analysis_auto_deref_reached_recursion_limit = reached the recursion limit while auto-dereferencing `{$ty}`
     .label = deref recursion limit reached
     .help = consider increasing the recursion limit by adding a `#![recursion_limit = "{$suggested_limit}"]` attribute to your crate (`{$crate_name}`)
@@ -66,10 +73,10 @@ hir_analysis_closure_implicit_hrtb = implicit types in closure signatures are fo
     .label = `for<...>` is here
 
 hir_analysis_cmse_call_generic =
-    function pointers with the `"C-cmse-nonsecure-call"` ABI cannot contain generics in their type
+    function pointers with the `"cmse-nonsecure-call"` ABI cannot contain generics in their type
 
 hir_analysis_cmse_entry_generic =
-    functions with the `"C-cmse-nonsecure-entry"` ABI cannot contain generics in their type
+    functions with the `"cmse-nonsecure-entry"` ABI cannot contain generics in their type
 
 hir_analysis_cmse_inputs_stack_spill =
     arguments for `{$abi}` function too large to pass via registers
@@ -440,6 +447,9 @@ hir_analysis_parenthesized_fn_trait_expansion =
 
 hir_analysis_placeholder_not_allowed_item_signatures = the placeholder `_` is not allowed within types on item signatures for {$kind}
     .label = not allowed in type signatures
+
+hir_analysis_pointee_sized_trait_object = `PointeeSized` cannot be used with trait objects
+
 hir_analysis_precise_capture_self_alias = `Self` can't be captured in `use<...>` precise captures list, since it is an alias
     .label = `Self` is not a generic argument, but an alias to the type of the {$what}
 
@@ -565,10 +575,6 @@ hir_analysis_unconstrained_generic_parameter = the {$param_def_kind} `{$param_na
 hir_analysis_unconstrained_opaque_type = unconstrained opaque type
     .note = `{$name}` must be used in combination with a concrete type within the same {$what}
 
-hir_analysis_unrecognized_atomic_operation =
-    unrecognized atomic operation function: `{$op}`
-    .label = unrecognized atomic operation
-
 hir_analysis_unrecognized_intrinsic_function =
     unrecognized intrinsic function: `{$name}`
     .label = unrecognized intrinsic
@@ -599,7 +605,7 @@ hir_analysis_value_of_associated_struct_already_specified =
     .label = re-bound here
     .previous_bound_label = `{$item_name}` bound here first
 
-hir_analysis_variadic_function_compatible_convention = C-variadic function must have a compatible calling convention, like {$conventions}
+hir_analysis_variadic_function_compatible_convention = C-variadic functions with the {$convention} calling convention are not supported
     .label = C-variadic function must have a compatible calling convention
 
 hir_analysis_variances_of = {$variances}

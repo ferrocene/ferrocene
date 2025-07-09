@@ -60,6 +60,7 @@ pub use rustc_type_ir::fast_reject::DeepRejectCtxt;
 )]
 use rustc_type_ir::inherent;
 pub use rustc_type_ir::relate::VarianceDiagInfo;
+pub use rustc_type_ir::solve::SizedTraitKind;
 pub use rustc_type_ir::*;
 #[allow(hidden_glob_reexports, unused_imports)]
 use rustc_type_ir::{InferCtxtLike, Interner};
@@ -74,8 +75,8 @@ pub use self::closure::{
     place_to_string_for_capture,
 };
 pub use self::consts::{
-    AnonConstKind, AtomicOrdering, Const, ConstInt, ConstKind, Expr, ExprKind, ScalarInt,
-    UnevaluatedConst, ValTree, ValTreeKind, Value,
+    AnonConstKind, AtomicOrdering, Const, ConstInt, ConstKind, ConstToValTreeResult, Expr,
+    ExprKind, ScalarInt, UnevaluatedConst, ValTree, ValTreeKind, Value,
 };
 pub use self::context::{
     CtxtInterners, CurrentGcx, DeducedParamAttrs, Feed, FreeRegionInfo, GlobalCtxt, Lift, TyCtxt,
@@ -651,6 +652,13 @@ impl<'tcx> Term<'tcx> {
         }
     }
 
+    pub fn is_trivially_wf(&self, tcx: TyCtxt<'tcx>) -> bool {
+        match self.kind() {
+            TermKind::Ty(ty) => ty.is_trivially_wf(tcx),
+            TermKind::Const(ct) => ct.is_trivially_wf(),
+        }
+    }
+
     /// Iterator that walks `self` and any types reachable from
     /// `self`, in depth-first order. Note that just walks the types
     /// that appear in `self`, it does not descend into the fields of
@@ -906,34 +914,12 @@ pub struct Placeholder<T> {
     pub universe: UniverseIndex,
     pub bound: T,
 }
-impl Placeholder<BoundVar> {
-    pub fn find_const_ty_from_env<'tcx>(self, env: ParamEnv<'tcx>) -> Ty<'tcx> {
-        let mut candidates = env.caller_bounds().iter().filter_map(|clause| {
-            // `ConstArgHasType` are never desugared to be higher ranked.
-            match clause.kind().skip_binder() {
-                ty::ClauseKind::ConstArgHasType(placeholder_ct, ty) => {
-                    assert!(!(placeholder_ct, ty).has_escaping_bound_vars());
-
-                    match placeholder_ct.kind() {
-                        ty::ConstKind::Placeholder(placeholder_ct) if placeholder_ct == self => {
-                            Some(ty)
-                        }
-                        _ => None,
-                    }
-                }
-                _ => None,
-            }
-        });
-
-        let ty = candidates.next().unwrap();
-        assert!(candidates.next().is_none());
-        ty
-    }
-}
 
 pub type PlaceholderRegion = Placeholder<BoundRegion>;
 
-impl rustc_type_ir::inherent::PlaceholderLike for PlaceholderRegion {
+impl<'tcx> rustc_type_ir::inherent::PlaceholderLike<TyCtxt<'tcx>> for PlaceholderRegion {
+    type Bound = BoundRegion;
+
     fn universe(self) -> UniverseIndex {
         self.universe
     }
@@ -946,14 +932,20 @@ impl rustc_type_ir::inherent::PlaceholderLike for PlaceholderRegion {
         Placeholder { universe: ui, ..self }
     }
 
-    fn new(ui: UniverseIndex, var: BoundVar) -> Self {
+    fn new(ui: UniverseIndex, bound: BoundRegion) -> Self {
+        Placeholder { universe: ui, bound }
+    }
+
+    fn new_anon(ui: UniverseIndex, var: BoundVar) -> Self {
         Placeholder { universe: ui, bound: BoundRegion { var, kind: BoundRegionKind::Anon } }
     }
 }
 
 pub type PlaceholderType = Placeholder<BoundTy>;
 
-impl rustc_type_ir::inherent::PlaceholderLike for PlaceholderType {
+impl<'tcx> rustc_type_ir::inherent::PlaceholderLike<TyCtxt<'tcx>> for PlaceholderType {
+    type Bound = BoundTy;
+
     fn universe(self) -> UniverseIndex {
         self.universe
     }
@@ -966,7 +958,11 @@ impl rustc_type_ir::inherent::PlaceholderLike for PlaceholderType {
         Placeholder { universe: ui, ..self }
     }
 
-    fn new(ui: UniverseIndex, var: BoundVar) -> Self {
+    fn new(ui: UniverseIndex, bound: BoundTy) -> Self {
+        Placeholder { universe: ui, bound }
+    }
+
+    fn new_anon(ui: UniverseIndex, var: BoundVar) -> Self {
         Placeholder { universe: ui, bound: BoundTy { var, kind: BoundTyKind::Anon } }
     }
 }
@@ -980,7 +976,9 @@ pub struct BoundConst<'tcx> {
 
 pub type PlaceholderConst = Placeholder<BoundVar>;
 
-impl rustc_type_ir::inherent::PlaceholderLike for PlaceholderConst {
+impl<'tcx> rustc_type_ir::inherent::PlaceholderLike<TyCtxt<'tcx>> for PlaceholderConst {
+    type Bound = BoundVar;
+
     fn universe(self) -> UniverseIndex {
         self.universe
     }
@@ -993,7 +991,11 @@ impl rustc_type_ir::inherent::PlaceholderLike for PlaceholderConst {
         Placeholder { universe: ui, ..self }
     }
 
-    fn new(ui: UniverseIndex, var: BoundVar) -> Self {
+    fn new(ui: UniverseIndex, bound: BoundVar) -> Self {
+        Placeholder { universe: ui, bound }
+    }
+
+    fn new_anon(ui: UniverseIndex, var: BoundVar) -> Self {
         Placeholder { universe: ui, bound: var }
     }
 }
@@ -1116,10 +1118,7 @@ impl<'tcx> TypingEnv<'tcx> {
     }
 
     pub fn post_analysis(tcx: TyCtxt<'tcx>, def_id: impl IntoQueryParam<DefId>) -> TypingEnv<'tcx> {
-        TypingEnv {
-            typing_mode: TypingMode::PostAnalysis,
-            param_env: tcx.param_env_normalized_for_post_analysis(def_id),
-        }
+        tcx.typing_env_normalized_for_post_analysis(def_id)
     }
 
     /// Modify the `typing_mode` to `PostAnalysis` and eagerly reveal all
@@ -1133,7 +1132,7 @@ impl<'tcx> TypingEnv<'tcx> {
         // No need to reveal opaques with the new solver enabled,
         // since we have lazy norm.
         let param_env = if tcx.next_trait_solver_globally() {
-            ParamEnv::new(param_env.caller_bounds())
+            param_env
         } else {
             ParamEnv::new(tcx.reveal_opaque_types_in_bounds(param_env.caller_bounds()))
         };
@@ -2140,7 +2139,7 @@ impl<'tcx> TyCtxt<'tcx> {
             },
             DefKind::Closure => {
                 // Closures and RPITs will eventually have const conditions
-                // for `~const` bounds.
+                // for `[const]` bounds.
                 false
             }
             DefKind::Ctor(_, CtorKind::Const)

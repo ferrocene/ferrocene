@@ -27,8 +27,8 @@ use rustc_middle::ty::abstract_const::NotConstEvaluatable;
 use rustc_middle::ty::error::TypeErrorToStringExt;
 use rustc_middle::ty::print::{PrintTraitRefExt as _, with_no_trimmed_paths};
 use rustc_middle::ty::{
-    self, DeepRejectCtxt, GenericArgsRef, PolyProjectionPredicate, Ty, TyCtxt, TypeFoldable,
-    TypeVisitableExt, TypingMode, Upcast, elaborate,
+    self, DeepRejectCtxt, GenericArgsRef, PolyProjectionPredicate, SizedTraitKind, Ty, TyCtxt,
+    TypeFoldable, TypeVisitableExt, TypingMode, Upcast, elaborate,
 };
 use rustc_span::{Symbol, sym};
 use tracing::{debug, instrument, trace};
@@ -39,7 +39,7 @@ use super::coherence::{self, Conflict};
 use super::project::ProjectionTermObligation;
 use super::util::closure_trait_ref_and_return_type;
 use super::{
-    ImplDerivedCause, Normalized, Obligation, ObligationCause, ObligationCauseCode, Overflow,
+    ImplDerivedCause, Normalized, Obligation, ObligationCause, ObligationCauseCode,
     PolyTraitObligation, PredicateObligation, Selection, SelectionError, SelectionResult,
     TraitQueryMode, const_evaluatable, project, util, wf,
 };
@@ -48,9 +48,7 @@ use crate::infer::{InferCtxt, InferOk, TypeFreshener};
 use crate::solve::InferCtxtSelectExt as _;
 use crate::traits::normalize::{normalize_with_depth, normalize_with_depth_to};
 use crate::traits::project::{ProjectAndUnifyResult, ProjectionCacheKeyExt};
-use crate::traits::{
-    EvaluateConstErr, ProjectionCacheKey, Unimplemented, effects, sizedness_fast_path,
-};
+use crate::traits::{EvaluateConstErr, ProjectionCacheKey, effects, sizedness_fast_path};
 
 mod _match;
 mod candidate_assembly;
@@ -454,8 +452,12 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     Ok(Some(EvaluatedCandidate { candidate: c, evaluation: eval }))
                 }
                 Ok(_) => Ok(None),
-                Err(OverflowError::Canonical) => Err(Overflow(OverflowError::Canonical)),
-                Err(OverflowError::Error(e)) => Err(Overflow(OverflowError::Error(e))),
+                Err(OverflowError::Canonical) => {
+                    Err(SelectionError::Overflow(OverflowError::Canonical))
+                }
+                Err(OverflowError::Error(e)) => {
+                    Err(SelectionError::Overflow(OverflowError::Error(e)))
+                }
             })
             .flat_map(Result::transpose)
             .collect::<Result<Vec<_>, _>>()?;
@@ -479,7 +481,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 debug!(?stack.obligation.predicate, "found error type in predicate, treating as ambiguous");
                 Ok(None)
             } else {
-                Err(Unimplemented)
+                Err(SelectionError::Unimplemented)
             }
         } else {
             let has_non_region_infer = stack.obligation.predicate.has_non_region_infer();
@@ -660,6 +662,10 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 }
 
                 ty::PredicateKind::Clause(ty::ClauseKind::WellFormed(term)) => {
+                    if term.is_trivially_wf(self.tcx()) {
+                        return Ok(EvaluatedToOk);
+                    }
+
                     // So, there is a bit going on here. First, `WellFormed` predicates
                     // are coinductive, like trait predicates with auto traits.
                     // This means that we need to detect if we have recursively
@@ -979,7 +985,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                         }
                         ty::ConstKind::Bound(_, _) => bug!("escaping bound vars in {:?}", ct),
                         ty::ConstKind::Param(param_ct) => {
-                            param_ct.find_ty_from_env(obligation.param_env)
+                            param_ct.find_const_ty_from_env(obligation.param_env)
                         }
                     };
 
@@ -1222,7 +1228,9 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         match self.candidate_from_obligation(stack) {
             Ok(Some(c)) => self.evaluate_candidate(stack, &c),
             Ok(None) => Ok(EvaluatedToAmbig),
-            Err(Overflow(OverflowError::Canonical)) => Err(OverflowError::Canonical),
+            Err(SelectionError::Overflow(OverflowError::Canonical)) => {
+                Err(OverflowError::Canonical)
+            }
             Err(..) => Ok(EvaluatedToErr),
         }
     }
@@ -1536,7 +1544,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 return Some(res);
             } else if cfg!(debug_assertions) {
                 match infcx.selection_cache.get(&(param_env, pred), tcx) {
-                    None | Some(Err(Overflow(OverflowError::Canonical))) => {}
+                    None | Some(Err(SelectionError::Overflow(OverflowError::Canonical))) => {}
                     res => bug!("unexpected local cache result: {res:?}"),
                 }
             }
@@ -1592,7 +1600,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         }
 
         if self.can_use_global_caches(param_env, cache_fresh_trait_pred) {
-            if let Err(Overflow(OverflowError::Canonical)) = candidate {
+            if let Err(SelectionError::Overflow(OverflowError::Canonical)) = candidate {
                 // Don't cache overflow globally; we only produce this in certain modes.
             } else {
                 debug!(?pred, ?candidate, "insert_candidate_cache global");
@@ -1919,12 +1927,23 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         // impl `impl<T: ?Sized> Any for T { .. }`. This really shouldn't exist but is
         // necessary due to #57893. We again arbitrarily prefer the applicable candidate
         // with the lowest index.
+        //
+        // We do not want to use these impls to guide inference in case a user-written impl
+        // may also apply.
         let object_bound = candidates
             .iter()
             .filter_map(|c| if let ObjectCandidate(i) = c.candidate { Some(i) } else { None })
             .try_reduce(|c1, c2| if has_non_region_infer { None } else { Some(c1.min(c2)) });
         match object_bound {
-            Some(Some(index)) => return Some(ObjectCandidate(index)),
+            Some(Some(index)) => {
+                return if has_non_region_infer
+                    && candidates.iter().any(|c| matches!(c.candidate, ImplCandidate(_)))
+                {
+                    None
+                } else {
+                    Some(ObjectCandidate(index))
+                };
+            }
             Some(None) => {}
             None => return None,
         }
@@ -2083,9 +2102,10 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
 }
 
 impl<'tcx> SelectionContext<'_, 'tcx> {
-    fn sized_conditions(
+    fn sizedness_conditions(
         &mut self,
         obligation: &PolyTraitObligation<'tcx>,
+        sizedness: SizedTraitKind,
     ) -> BuiltinImplConditions<'tcx> {
         use self::BuiltinImplConditions::{Ambiguous, None, Where};
 
@@ -2109,13 +2129,17 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             | ty::Closure(..)
             | ty::CoroutineClosure(..)
             | ty::Never
-            | ty::Dynamic(_, _, ty::DynStar)
             | ty::Error(_) => {
                 // safe for everything
                 Where(ty::Binder::dummy(Vec::new()))
             }
 
-            ty::Str | ty::Slice(_) | ty::Dynamic(..) | ty::Foreign(..) => None,
+            ty::Str | ty::Slice(_) | ty::Dynamic(..) => match sizedness {
+                SizedTraitKind::Sized => None,
+                SizedTraitKind::MetaSized => Where(ty::Binder::dummy(Vec::new())),
+            },
+
+            ty::Foreign(..) => None,
 
             ty::Tuple(tys) => Where(
                 obligation.predicate.rebind(tys.last().map_or_else(Vec::new, |&last| vec![last])),
@@ -2124,11 +2148,9 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             ty::Pat(ty, _) => Where(obligation.predicate.rebind(vec![*ty])),
 
             ty::Adt(def, args) => {
-                if let Some(sized_crit) = def.sized_constraint(self.tcx()) {
+                if let Some(crit) = def.sizedness_constraint(self.tcx(), sizedness) {
                     // (*) binder moved here
-                    Where(
-                        obligation.predicate.rebind(vec![sized_crit.instantiate(self.tcx(), args)]),
-                    )
+                    Where(obligation.predicate.rebind(vec![crit.instantiate(self.tcx(), args)]))
                 } else {
                     Where(ty::Binder::dummy(Vec::new()))
                 }

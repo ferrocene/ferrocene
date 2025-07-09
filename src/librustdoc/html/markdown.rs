@@ -300,7 +300,6 @@ impl<'a, I: Iterator<Item = Event<'a>>> Iterator for CodeBlocks<'_, 'a, I> {
                 crate_name: krate.map(String::from).unwrap_or_default(),
                 no_crate_inject: false,
                 insert_indent_space: true,
-                attrs: vec![],
                 args_file: PathBuf::new(),
             };
             let mut builder = doctest::BuildDocTestBuilder::new(&test).edition(edition);
@@ -308,7 +307,8 @@ impl<'a, I: Iterator<Item = Event<'a>>> Iterator for CodeBlocks<'_, 'a, I> {
                 builder = builder.crate_name(krate);
             }
             let doctest = builder.build(None);
-            let (test, _) = doctest.generate_unique_doctest(&test, false, &opts, krate);
+            let (wrapped, _) = doctest.generate_unique_doctest(&test, false, &opts, krate);
+            let test = wrapped.to_string();
             let channel = if test.contains("#![feature(") { "&amp;version=nightly" } else { "" };
 
             let test_escaped = small_url_encode(test);

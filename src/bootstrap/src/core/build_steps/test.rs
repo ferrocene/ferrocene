@@ -10,7 +10,7 @@ use std::{env, fs, iter};
 
 use clap_complete::shells;
 
-use crate::core::build_steps::compile::run_cargo;
+use crate::core::build_steps::compile::{Std, run_cargo};
 use crate::core::build_steps::doc::DocumentationFormat;
 use crate::core::build_steps::gcc::{Gcc, add_cg_gcc_cargo_flags};
 use crate::core::build_steps::llvm::get_llvm_version;
@@ -19,7 +19,8 @@ use crate::core::build_steps::tool::{self, COMPILETEST_ALLOW_FEATURES, SourceTyp
 use crate::core::build_steps::toolstate::ToolState;
 use crate::core::build_steps::{compile, dist, llvm};
 use crate::core::builder::{
-    self, Alias, Builder, Compiler, Kind, RunConfig, ShouldRun, Step, crate_description,
+    self, Alias, Builder, Compiler, Kind, RunConfig, ShouldRun, Step, StepMetadata,
+    crate_description,
 };
 use crate::core::config::TargetSelection;
 use crate::core::config::flags::{FerroceneCoverageFor, Subcommand, get_completion};
@@ -73,7 +74,7 @@ impl Step for CrateBootstrap {
     }
 
     fn run(self, builder: &Builder<'_>) {
-        let bootstrap_host = builder.config.build;
+        let bootstrap_host = builder.config.host_target;
         let compiler = builder.compiler(0, bootstrap_host);
         let mut path = self.path.to_str().unwrap();
 
@@ -131,7 +132,7 @@ You can skip linkcheck with --skip src/tools/linkchecker"
         builder.info(&format!("Linkcheck ({host})"));
 
         // Test the linkchecker itself.
-        let bootstrap_host = builder.config.build;
+        let bootstrap_host = builder.config.host_target;
         let compiler = builder.compiler(0, bootstrap_host);
 
         let cargo = tool::prepare_tool_cargo(
@@ -539,7 +540,7 @@ impl Step for Miri {
 
     /// Runs `cargo test` for miri.
     fn run(self, builder: &Builder<'_>) {
-        let host = builder.build.build;
+        let host = builder.build.host_target;
         let target = self.target;
         let stage = builder.top_stage;
         if stage == 0 {
@@ -558,7 +559,7 @@ impl Step for Miri {
         // We also need sysroots, for Miri and for the host (the latter for build scripts).
         // This is for the tests so everything is done with the target compiler.
         let miri_sysroot = Miri::build_miri_sysroot(builder, target_compiler, target);
-        builder.ensure(compile::Std::new(target_compiler, host));
+        builder.std(target_compiler, host);
         let host_sysroot = builder.sysroot(target_compiler);
 
         // Miri has its own "target dir" for ui test dependencies. Make sure it gets cleared when
@@ -651,7 +652,7 @@ impl Step for CargoMiri {
 
     /// Tests `cargo miri test`.
     fn run(self, builder: &Builder<'_>) {
-        let host = builder.build.build;
+        let host = builder.build.host_target;
         let target = self.target;
         let stage = builder.top_stage;
         if stage == 0 {
@@ -723,7 +724,7 @@ impl Step for CompiletestTest {
 
         // We need `ToolStd` for the locally-built sysroot because
         // compiletest uses unstable features of the `test` crate.
-        builder.ensure(compile::Std::new(compiler, host));
+        builder.std(compiler, host);
         let mut cargo = tool::prepare_tool_cargo(
             builder,
             compiler,
@@ -929,7 +930,7 @@ impl Step for RustdocJSStd {
             Kind::Test,
             builder.top_stage,
             "rustdoc-js-std",
-            builder.config.build,
+            builder.config.host_target,
             self.target,
         );
         command.run(builder);
@@ -1023,7 +1024,7 @@ impl Step for RustdocGUI {
     }
 
     fn run(self, builder: &Builder<'_>) {
-        builder.ensure(compile::Std::new(self.compiler, self.target));
+        builder.std(self.compiler, self.target);
 
         let mut cmd = builder.tool_cmd(Tool::RustdocGUITest);
 
@@ -1188,6 +1189,10 @@ HELP: to skip test's attempt to check tidiness, pass `--skip src/tools/tidy` to 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(Tidy);
     }
+
+    fn metadata(&self) -> Option<StepMetadata> {
+        Some(StepMetadata::test("tidy", TargetSelection::default()))
+    }
 }
 
 fn testdir(builder: &Builder<'_>, host: TargetSelection) -> PathBuf {
@@ -1249,6 +1254,12 @@ macro_rules! test {
                         value
                     }),
                 })
+            }
+
+            fn metadata(&self) -> Option<StepMetadata> {
+                Some(
+                    StepMetadata::test(stringify!($name), self.target)
+                )
             }
         }
     };
@@ -1621,7 +1632,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
             // At stage 0 (stage - 1) we are using the stage0 compiler. Using `self.target` can lead
             // finding an incorrect compiler path on cross-targets, as the stage 0 is always equal to
             // `build.build` in the configuration.
-            let build = builder.build.build;
+            let build = builder.build.host_target;
             compiler = builder.compiler(compiler.stage - 1, build);
             let test_stage = compiler.stage + 1;
             (test_stage, format!("stage{test_stage}-{build}"))
@@ -1648,7 +1659,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
         if suite == "mir-opt" {
             builder.ensure(compile::Std::new(compiler, compiler.host).is_for_mir_opt_tests(true));
         } else {
-            builder.ensure(compile::Std::new(compiler, compiler.host));
+            builder.std(compiler, compiler.host);
         }
 
         let mut cmd = builder.tool_cmd(Tool::Compiletest);
@@ -1656,7 +1667,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
         if suite == "mir-opt" {
             builder.ensure(compile::Std::new(compiler, target).is_for_mir_opt_tests(true));
         } else {
-            builder.ensure(compile::Std::new(compiler, target));
+            builder.std(compiler, target);
         }
 
         builder.ensure(RemoteCopyLibs { compiler, target });
@@ -1743,7 +1754,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
         cmd.arg("--mode").arg(mode);
         cmd.arg("--target").arg(target.rustc_target_arg());
         cmd.arg("--host").arg(&*compiler.host.triple);
-        cmd.arg("--llvm-filecheck").arg(builder.llvm_filecheck(builder.config.build));
+        cmd.arg("--llvm-filecheck").arg(builder.llvm_filecheck(builder.config.host_target));
 
         if builder.build.config.llvm_enzyme {
             cmd.arg("--has-enzyme");
@@ -1919,7 +1930,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
         let mut copts_passed = false;
         if builder.config.llvm_enabled(compiler.host) {
             let llvm::LlvmResult { llvm_config, .. } =
-                builder.ensure(llvm::Llvm { target: builder.config.build });
+                builder.ensure(llvm::Llvm { target: builder.config.host_target });
             if !builder.config.dry_run() {
                 let llvm_version = get_llvm_version(builder, &llvm_config);
                 let llvm_components =
@@ -1966,7 +1977,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
                 // If LLD is available, add it to the PATH
                 if builder.config.lld_enabled {
                     let lld_install_root =
-                        builder.ensure(llvm::Lld { target: builder.config.build });
+                        builder.ensure(llvm::Lld { target: builder.config.host_target });
 
                     let lld_bin_path = lld_install_root.join("bin");
 
@@ -2028,7 +2039,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
             // Note that if we encounter `PATH` we make sure to append to our own `PATH`
             // rather than stomp over it.
             if !builder.config.dry_run() && target.is_msvc() {
-                for (k, v) in builder.cc.borrow()[&target].env() {
+                for (k, v) in builder.cc[&target].env() {
                     if k != "PATH" {
                         cmd.env(k, v);
                     }
@@ -2045,8 +2056,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
             // address sanitizer enabled (e.g., ntdll.dll).
             cmd.env("ASAN_WIN_CONTINUE_ON_INTERCEPTION_FAILURE", "1");
             // Add the address sanitizer runtime to the PATH - it is located next to cl.exe.
-            let asan_runtime_path =
-                builder.cc.borrow()[&target].path().parent().unwrap().to_path_buf();
+            let asan_runtime_path = builder.cc[&target].path().parent().unwrap().to_path_buf();
             let old_path = cmd
                 .get_envs()
                 .find_map(|(k, v)| (k == "PATH").then_some(v))
@@ -2215,7 +2225,7 @@ impl BookTest {
     fn run_ext_doc(self, builder: &Builder<'_>) {
         let compiler = self.compiler;
 
-        builder.ensure(compile::Std::new(compiler, compiler.host));
+        builder.std(compiler, compiler.host);
 
         // mdbook just executes a binary named "rustdoc", so we need to update
         // PATH so that it points to our rustdoc.
@@ -2239,7 +2249,7 @@ impl BookTest {
             let mut lib_paths = vec![];
             for dep in self.dependencies {
                 let mode = Mode::ToolRustc;
-                let target = builder.config.build;
+                let target = builder.config.host_target;
                 let cargo = tool::prepare_tool_cargo(
                     builder,
                     compiler,
@@ -2301,7 +2311,7 @@ impl BookTest {
         let compiler = self.compiler;
         let host = self.compiler.host;
 
-        builder.ensure(compile::Std::new(compiler, host));
+        builder.std(compiler, host);
 
         let _guard =
             builder.msg(Kind::Test, compiler.stage, format!("book {}", self.name), host, host);
@@ -2421,7 +2431,7 @@ impl Step for ErrorIndex {
         // error_index_generator depends on librustdoc. Use the compiler that
         // is normally used to build rustdoc for other tests (like compiletest
         // tests in tests/rustdoc) so that it shares the same artifacts.
-        let compiler = run.builder.compiler(run.builder.top_stage, run.builder.config.build);
+        let compiler = run.builder.compiler(run.builder.top_stage, run.builder.config.host_target);
         run.builder.ensure(ErrorIndex { compiler });
     }
 
@@ -2448,7 +2458,7 @@ impl Step for ErrorIndex {
         drop(guard);
         // The tests themselves need to link to std, so make sure it is
         // available.
-        builder.ensure(compile::Std::new(compiler, compiler.host));
+        builder.std(compiler, compiler.host);
         markdown_test(builder, compiler, &output);
     }
 }
@@ -2511,7 +2521,7 @@ impl Step for CrateLibrustc {
     }
 
     fn run(self, builder: &Builder<'_>) {
-        builder.ensure(compile::Std::new(self.compiler, self.target));
+        builder.std(self.compiler, self.target);
 
         // To actually run the tests, delegate to a copy of the `Crate` step.
         builder.ensure(Crate {
@@ -2520,6 +2530,10 @@ impl Step for CrateLibrustc {
             mode: Mode::Rustc,
             crates: self.crates,
         });
+    }
+
+    fn metadata(&self) -> Option<StepMetadata> {
+        Some(StepMetadata::test("CrateLibrustc", self.target))
     }
 }
 
@@ -2624,7 +2638,7 @@ fn prepare_cargo_test(
     // by `Cargo::new` and that actually makes things go wrong.
     if builder.kind != Kind::Miri {
         let mut dylib_paths = builder.rustc_lib_paths(compiler);
-        dylib_paths.push(PathBuf::from(&builder.sysroot_target_libdir(compiler, target)));
+        dylib_paths.push(builder.sysroot_target_libdir(compiler, target));
         helpers::add_dylib_path(dylib_paths, &mut cargo);
     }
 
@@ -2715,7 +2729,7 @@ impl Step for Crate {
 
         // Prepare sysroot
         // See [field@compile::Std::force_recompile].
-        builder.ensure(compile::Std::new(compiler, compiler.host).force_recompile(true));
+        builder.ensure(Std::new(compiler, compiler.host).force_recompile(true));
 
         // If we're not doing a full bootstrap but we're testing a stage2
         // version of libstd, then what we're actually testing is the libstd
@@ -2869,7 +2883,7 @@ impl Step for CrateRustdoc {
         // using `download-rustc`, the rustc_private artifacts may be in a *different sysroot* from
         // the target rustdoc (`ci-rustc-sysroot` vs `stage2`). In that case, we need to ensure this
         // explicitly to make sure it ends up in the stage2 sysroot.
-        builder.ensure(compile::Std::new(compiler, target));
+        builder.std(compiler, target);
         builder.ensure(compile::Rustc::new(compiler, target));
 
         let mut cargo = tool::prepare_tool_cargo(
@@ -3013,7 +3027,7 @@ impl Step for RemoteCopyLibs {
             return;
         }
 
-        builder.ensure(compile::Std::new(compiler, target));
+        builder.std(compiler, target);
 
         builder.info(&format!("REMOTE copy libs to emulator ({target})"));
 
@@ -3084,7 +3098,7 @@ impl Step for Distcheck {
             .arg("--enable-vendor")
             .current_dir(&dir)
             .run(builder);
-        command(helpers::make(&builder.config.build.triple))
+        command(helpers::make(&builder.config.host_target.triple))
             .arg("check")
             .current_dir(&dir)
             .run(builder);
@@ -3125,7 +3139,7 @@ impl Step for Bootstrap {
 
     /// Tests the build system itself.
     fn run(self, builder: &Builder<'_>) {
-        let host = builder.config.build;
+        let host = builder.config.host_target;
         let compiler = builder.compiler(0, host);
         let _guard = builder.msg(Kind::Test, 0, "bootstrap", host, host);
 
@@ -3136,7 +3150,7 @@ impl Step for Bootstrap {
         check_bootstrap
             .args(["-m", "unittest", "bootstrap_test.py"])
             .env("BUILD_DIR", &builder.out)
-            .env("BUILD_PLATFORM", builder.build.build.triple)
+            .env("BUILD_PLATFORM", builder.build.host_target.triple)
             .env("BOOTSTRAP_TEST_RUSTC_BIN", &builder.initial_rustc)
             .env("BOOTSTRAP_TEST_CARGO_BIN", &builder.initial_cargo)
             .current_dir(builder.src.join("src/bootstrap/"));
@@ -3160,6 +3174,8 @@ impl Step for Bootstrap {
         cargo
             .rustflag("-Cdebuginfo=2")
             .env("CARGO_TARGET_DIR", builder.out.join("bootstrap"))
+            // Needed for insta to correctly write pending snapshots to the right directories.
+            .env("INSTA_WORKSPACE_ROOT", &builder.src)
             .env("RUSTC_BOOTSTRAP", "1");
 
         // bootstrap tests are racy on directory creation so just run them one at a time.
@@ -3191,14 +3207,17 @@ impl Step for TierCheck {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        let compiler =
-            run.builder.compiler_for(run.builder.top_stage, run.builder.build.build, run.target);
+        let compiler = run.builder.compiler_for(
+            run.builder.top_stage,
+            run.builder.build.host_target,
+            run.target,
+        );
         run.builder.ensure(TierCheck { compiler });
     }
 
     /// Tests the Platform Support page in the rustc book.
     fn run(self, builder: &Builder<'_>) {
-        builder.ensure(compile::Std::new(self.compiler, self.compiler.host));
+        builder.std(self.compiler, self.compiler.host);
         let mut cargo = tool::prepare_tool_cargo(
             builder,
             self.compiler,
@@ -3243,7 +3262,7 @@ impl Step for LintDocs {
 
     fn make_run(run: RunConfig<'_>) {
         run.builder.ensure(LintDocs {
-            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.build),
+            compiler: run.builder.compiler(run.builder.top_stage, run.builder.config.host_target),
             target: run.target,
         });
     }
@@ -3269,7 +3288,7 @@ impl Step for RustInstaller {
 
     /// Ensure the version placeholder replacement tool builds
     fn run(self, builder: &Builder<'_>) {
-        let bootstrap_host = builder.config.build;
+        let bootstrap_host = builder.config.host_target;
         let compiler = builder.compiler(0, bootstrap_host);
         let cargo = tool::prepare_tool_cargo(
             builder,
@@ -3388,7 +3407,7 @@ impl Step for TestHelpers {
         cfg.cargo_metadata(false)
             .out_dir(&dst)
             .target(&target.triple)
-            .host(&builder.config.build.triple)
+            .host(&builder.config.host_target.triple)
             .opt_level(0)
             .warnings(false)
             .debug(false)
@@ -3448,7 +3467,7 @@ impl Step for CodegenCranelift {
         let compiler = self.compiler;
         let target = self.target;
 
-        builder.ensure(compile::Std::new(compiler, target));
+        builder.std(compiler, target);
 
         // If we're not doing a full bootstrap but we're testing a stage2
         // version of libstd, then what we're actually testing is the libstd
@@ -3678,7 +3697,7 @@ impl Step for TestFloatParse {
     }
 
     fn run(self, builder: &Builder<'_>) {
-        let bootstrap_host = builder.config.build;
+        let bootstrap_host = builder.config.host_target;
         let compiler = builder.compiler(builder.top_stage, bootstrap_host);
         let path = self.path.to_str().unwrap();
         let crate_name = self.path.iter().next_back().unwrap().to_str().unwrap();

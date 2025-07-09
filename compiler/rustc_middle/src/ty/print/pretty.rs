@@ -810,7 +810,6 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                 }
                 match repr {
                     ty::Dyn => p!("dyn "),
-                    ty::DynStar => p!("dyn* "),
                 }
                 p!(print(data));
                 if print_r {
@@ -1069,24 +1068,35 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
 
         let mut traits = FxIndexMap::default();
         let mut fn_traits = FxIndexMap::default();
+        let mut lifetimes = SmallVec::<[ty::Region<'tcx>; 1]>::new();
+
         let mut has_sized_bound = false;
         let mut has_negative_sized_bound = false;
-        let mut lifetimes = SmallVec::<[ty::Region<'tcx>; 1]>::new();
+        let mut has_meta_sized_bound = false;
 
         for (predicate, _) in bounds.iter_instantiated_copied(tcx, args) {
             let bound_predicate = predicate.kind();
 
             match bound_predicate.skip_binder() {
                 ty::ClauseKind::Trait(pred) => {
-                    // Don't print `+ Sized`, but rather `+ ?Sized` if absent.
-                    if tcx.is_lang_item(pred.def_id(), LangItem::Sized) {
-                        match pred.polarity {
+                    // With `feature(sized_hierarchy)`, don't print `?Sized` as an alias for
+                    // `MetaSized`, and skip sizedness bounds to be added at the end.
+                    match tcx.as_lang_item(pred.def_id()) {
+                        Some(LangItem::Sized) => match pred.polarity {
                             ty::PredicatePolarity::Positive => {
                                 has_sized_bound = true;
                                 continue;
                             }
                             ty::PredicatePolarity::Negative => has_negative_sized_bound = true,
+                        },
+                        Some(LangItem::MetaSized) => {
+                            has_meta_sized_bound = true;
+                            continue;
                         }
+                        Some(LangItem::PointeeSized) => {
+                            bug!("`PointeeSized` is removed during lowering");
+                        }
+                        _ => (),
                     }
 
                     self.insert_trait_and_projection(
@@ -1255,8 +1265,13 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
             })?;
         }
 
+        let using_sized_hierarchy = self.tcx().features().sized_hierarchy();
         let add_sized = has_sized_bound && (first || has_negative_sized_bound);
-        let add_maybe_sized = !has_sized_bound && !has_negative_sized_bound;
+        let add_maybe_sized =
+            has_meta_sized_bound && !has_negative_sized_bound && !using_sized_hierarchy;
+        // Set `has_pointee_sized_bound` if there were no `Sized` or `MetaSized` bounds.
+        let has_pointee_sized_bound =
+            !has_sized_bound && !has_meta_sized_bound && !has_negative_sized_bound;
         if add_sized || add_maybe_sized {
             if !first {
                 write!(self, " + ")?;
@@ -1265,6 +1280,16 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                 write!(self, "?")?;
             }
             write!(self, "Sized")?;
+        } else if has_meta_sized_bound && using_sized_hierarchy {
+            if !first {
+                write!(self, " + ")?;
+            }
+            write!(self, "MetaSized")?;
+        } else if has_pointee_sized_bound && using_sized_hierarchy {
+            if !first {
+                write!(self, " + ")?;
+            }
+            write!(self, "PointeeSized")?;
         }
 
         if !with_forced_trimmed_paths() {
@@ -1729,7 +1754,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
     ) -> Result<(), PrintError> {
         define_scoped_cx!(self);
 
-        let (prov, offset) = ptr.into_parts();
+        let (prov, offset) = ptr.prov_and_relative_offset();
         match ty.kind() {
             // Byte strings (&[u8; N])
             ty::Ref(_, inner, _) => {
@@ -2051,7 +2076,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                 p!("const ");
             }
             ty::BoundConstness::Maybe => {
-                p!("~const ");
+                p!("[const] ");
             }
         }
         Ok(())
@@ -3224,7 +3249,7 @@ define_print! {
     ty::HostEffectPredicate<'tcx> {
         let constness = match self.constness {
             ty::BoundConstness::Const => { "const" }
-            ty::BoundConstness::Maybe => { "~const" }
+            ty::BoundConstness::Maybe => { "[const]" }
         };
         p!(print(self.trait_ref.self_ty()), ": {constness} ");
         p!(print(self.trait_ref.print_trait_sugared()))

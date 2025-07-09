@@ -8,16 +8,17 @@ use rustc_ast::attr::AttrIdGenerator;
 use rustc_ast::node_id::NodeId;
 use rustc_data_structures::fx::{FxHashMap, FxIndexMap, FxIndexSet};
 use rustc_data_structures::sync::{AppendOnlyVec, Lock};
-use rustc_errors::emitter::{HumanEmitter, SilentEmitter, stderr_destination};
+use rustc_errors::emitter::{FatalOnlyEmitter, HumanEmitter, stderr_destination};
+use rustc_errors::translation::Translator;
 use rustc_errors::{
     ColorConfig, Diag, DiagCtxt, DiagCtxtHandle, DiagMessage, EmissionGuarantee, MultiSpan,
-    StashKey, fallback_fluent_bundle,
+    StashKey,
 };
 use rustc_feature::{GateIssue, UnstableFeatures, find_feature_issue};
 use rustc_span::edition::Edition;
 use rustc_span::hygiene::ExpnId;
 use rustc_span::source_map::{FilePathMapping, SourceMap};
-use rustc_span::{Span, Symbol};
+use rustc_span::{Span, Symbol, sym};
 
 use crate::Session;
 use crate::config::{Cfg, CheckCfg};
@@ -192,8 +193,11 @@ pub fn add_feature_diagnostics_for_issue<G: EmissionGuarantee>(
         } else {
             err.subdiagnostic(FeatureDiagnosticHelp { feature });
         }
-
-        if sess.opts.unstable_opts.ui_testing {
+        if feature == sym::rustc_attrs {
+            // We're unlikely to stabilize something out of `rustc_attrs`
+            // without at least renaming it, so pointing out how old
+            // the compiler is will do little good.
+        } else if sess.opts.unstable_opts.ui_testing {
             err.subdiagnostic(SuggestUpgradeCompiler::ui_testing());
         } else if let Some(suggestion) = SuggestUpgradeCompiler::new() {
             err.subdiagnostic(suggestion);
@@ -239,10 +243,10 @@ pub struct ParseSess {
 impl ParseSess {
     /// Used for testing.
     pub fn new(locale_resources: Vec<&'static str>) -> Self {
-        let fallback_bundle = fallback_fluent_bundle(locale_resources, false);
+        let translator = Translator::with_fallback_bundle(locale_resources, false);
         let sm = Arc::new(SourceMap::new(FilePathMapping::empty()));
         let emitter = Box::new(
-            HumanEmitter::new(stderr_destination(ColorConfig::Auto), fallback_bundle)
+            HumanEmitter::new(stderr_destination(ColorConfig::Auto), translator)
                 .sm(Some(Arc::clone(&sm))),
         );
         let dcx = DiagCtxt::new(emitter);
@@ -271,19 +275,14 @@ impl ParseSess {
         }
     }
 
-    pub fn with_silent_emitter(
-        locale_resources: Vec<&'static str>,
-        fatal_note: String,
-        emit_fatal_diagnostic: bool,
-    ) -> Self {
-        let fallback_bundle = fallback_fluent_bundle(locale_resources, false);
+    pub fn with_fatal_emitter(locale_resources: Vec<&'static str>, fatal_note: String) -> Self {
+        let translator = Translator::with_fallback_bundle(locale_resources, false);
         let sm = Arc::new(SourceMap::new(FilePathMapping::empty()));
         let fatal_emitter =
-            Box::new(HumanEmitter::new(stderr_destination(ColorConfig::Auto), fallback_bundle));
-        let dcx = DiagCtxt::new(Box::new(SilentEmitter {
+            Box::new(HumanEmitter::new(stderr_destination(ColorConfig::Auto), translator));
+        let dcx = DiagCtxt::new(Box::new(FatalOnlyEmitter {
             fatal_emitter,
             fatal_note: Some(fatal_note),
-            emit_fatal_diagnostic,
         }))
         .disable_warnings();
         ParseSess::with_dcx(dcx, sm)

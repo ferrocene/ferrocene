@@ -3,7 +3,7 @@
 
 .. _thumbv7em-none-eabihf:
 
-:target:`thumbv7em-none-eabihf` :upcoming:`25.05`
+:target:`thumbv7em-none-eabihf`
 =================================================
 
 .. note::

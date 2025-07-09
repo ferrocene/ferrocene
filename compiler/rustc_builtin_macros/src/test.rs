@@ -40,7 +40,7 @@ pub(crate) fn expand_test_case(
     let (mut item, is_stmt) = match anno_item {
         Annotatable::Item(item) => (item, false),
         Annotatable::Stmt(stmt) if let ast::StmtKind::Item(_) = stmt.kind => {
-            if let ast::StmtKind::Item(i) = stmt.into_inner().kind {
+            if let ast::StmtKind::Item(i) = stmt.kind {
                 (i, true)
             } else {
                 unreachable!()
@@ -118,14 +118,7 @@ pub(crate) fn expand_test_or_bench(
 
     let (item, is_stmt) = match item {
         Annotatable::Item(i) => (i, false),
-        Annotatable::Stmt(stmt) if matches!(stmt.kind, ast::StmtKind::Item(_)) => {
-            // FIXME: Use an 'if let' guard once they are implemented
-            if let ast::StmtKind::Item(i) = stmt.into_inner().kind {
-                (i, true)
-            } else {
-                unreachable!()
-            }
-        }
+        Annotatable::Stmt(box ast::Stmt { kind: ast::StmtKind::Item(i), .. }) => (i, true),
         other => {
             not_testable_error(cx, attr_sp, None);
             return vec![other];
@@ -381,10 +374,7 @@ pub(crate) fn expand_test_or_bench(
                 .into(),
             ),
         );
-    test_const = test_const.map(|mut tc| {
-        tc.vis.kind = ast::VisibilityKind::Public;
-        tc
-    });
+    test_const.vis.kind = ast::VisibilityKind::Public;
 
     // extern crate test
     let test_extern =

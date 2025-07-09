@@ -238,7 +238,7 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
 
         // First deal with any external C functions in linked .so file.
         #[cfg(unix)]
-        if this.machine.native_lib.as_ref().is_some() {
+        if !this.machine.native_lib.is_empty() {
             use crate::shims::native_lib::EvalContextExt as _;
             // An Ok(false) here means that the function being called was not exported
             // by the specified `.so` file; we should continue and check if it corresponds to
@@ -411,7 +411,7 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                         AlignFromBytesError::TooLarge(_) => Align::MAX,
                     }
                 });
-                let (_, addr) = ptr.into_parts(); // we know the offset is absolute
+                let addr = ptr.addr();
                 // Cannot panic since `align` is a power of 2 and hence non-zero.
                 if addr.bytes().strict_rem(align.bytes()) != 0 {
                     throw_unsup_format!(
@@ -610,6 +610,10 @@ trait EvalContextExtPriv<'tcx>: crate::MiriInterpCxExt<'tcx> {
                     )?;
                     this.write_pointer(new_ptr, dest)
                 });
+            }
+            name if name == this.mangle_internal_symbol("__rust_no_alloc_shim_is_unstable_v2") => {
+                // This is a no-op shim that only exists to prevent making the allocator shims instantly stable.
+                let [] = this.check_shim(abi, CanonAbi::Rust, link_name, args)?;
             }
 
             // C memory handling functions

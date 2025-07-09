@@ -17,12 +17,12 @@ _x() {
     _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -31,7 +31,6 @@ _x() {
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -69,12 +68,12 @@ _x() {
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -83,7 +82,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -113,12 +111,12 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -127,7 +125,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -162,12 +159,12 @@ _arguments "${_arguments_options[@]}" : \
 '*-F+[clippy lints to forbid]:LINT:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -176,7 +173,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -209,12 +205,12 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -223,7 +219,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -253,12 +248,12 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -267,7 +262,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -299,12 +293,12 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -313,7 +307,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -356,12 +349,12 @@ _arguments "${_arguments_options[@]}" : \
 '--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -370,7 +363,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -410,12 +402,12 @@ _arguments "${_arguments_options[@]}" : \
 '*--test-args=[extra arguments to be passed for the test tool being used (e.g. libtest, compiletest or rustdoc)]:ARGS:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -424,7 +416,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -458,12 +449,12 @@ _arguments "${_arguments_options[@]}" : \
 '*--test-args=[]:TEST_ARGS:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -472,7 +463,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -503,12 +493,12 @@ _arguments "${_arguments_options[@]}" : \
 '--stage=[Clean a specific stage without touching other artifacts. By default, every stage is cleaned if this option is not used]:N:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
 '*--keep-stage-std=[stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -516,7 +506,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -547,12 +536,12 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -561,7 +550,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -591,12 +579,12 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -605,7 +593,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -636,12 +623,12 @@ _arguments "${_arguments_options[@]}" : \
 '*--args=[arguments for the tool]:ARGS:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -650,7 +637,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -681,12 +667,12 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -695,7 +681,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -726,12 +711,12 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -740,7 +725,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -772,12 +756,12 @@ _arguments "${_arguments_options[@]}" : \
 '*--sync=[Additional \`Cargo.toml\` to sync and vendor]:SYNC:_files' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -786,7 +770,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -817,12 +800,12 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -831,7 +814,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -874,11 +856,11 @@ _arguments "${_arguments_options[@]}" : \
 '*--profiles=[Select the profiles that should be benchmarked]:PROFILES:(Check Debug Doc Opt Clippy)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -887,7 +869,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -921,11 +902,11 @@ _arguments "${_arguments_options[@]}" : \
 '*--profiles=[Select the profiles that should be benchmarked]:PROFILES:(Check Debug Doc Opt Clippy)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -934,7 +915,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -968,11 +948,11 @@ _arguments "${_arguments_options[@]}" : \
 '*--profiles=[Select the profiles that should be benchmarked]:PROFILES:(Check Debug Doc Opt Clippy)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -981,7 +961,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -1015,11 +994,11 @@ _arguments "${_arguments_options[@]}" : \
 '*--profiles=[Select the profiles that should be benchmarked]:PROFILES:(Check Debug Doc Opt Clippy)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -1028,7 +1007,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -1059,12 +1037,12 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -1073,7 +1051,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \
@@ -1109,12 +1086,12 @@ esac
 _arguments "${_arguments_options[@]}" : \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
-'--build=[build target of the stage0 compiler]:BUILD:' \
+'--build=[host target of the stage0 compiler]:BUILD:' \
 '--host=[host targets to build]:HOST:' \
 '--target=[target targets to build]:TARGET:' \
 '*--exclude=[build paths to exclude]:PATH:_files' \
 '*--skip=[build paths to skip]:PATH:_files' \
-'--rustc-error-format=[]:RUSTC_ERROR_FORMAT:' \
+'--rustc-error-format=[rustc error format]:RUSTC_ERROR_FORMAT:' \
 '--on-fail=[command to run on failure]:CMD:_cmdstring' \
 '--stage=[stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)]:N:' \
 '*--keep-stage=[stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)]:N:' \
@@ -1123,7 +1100,6 @@ _arguments "${_arguments_options[@]}" : \
 '-j+[number of jobs to run in parallel]:JOBS:' \
 '--jobs=[number of jobs to run in parallel]:JOBS:' \
 '--warnings=[if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour]:deny|warn:(deny warn default)' \
-'--error-format=[rustc error format]:FORMAT:' \
 '--color=[whether to use color in cargo and rustc output]:STYLE:(always never auto)' \
 '--rust-profile-generate=[generate PGO profile with rustc build]:PROFILE:_files' \
 '--rust-profile-use=[use PGO profile for rustc build]:PROFILE:_files' \

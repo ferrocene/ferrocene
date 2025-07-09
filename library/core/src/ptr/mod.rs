@@ -431,10 +431,8 @@ pub use metadata::{DynMetadata, Pointee, Thin, from_raw_parts, from_raw_parts_mu
 #[cfg(feature = "ferrocene_certified")]
 pub use metadata::{Pointee, Thin, from_raw_parts, from_raw_parts_mut};
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod non_null;
 #[stable(feature = "nonnull", since = "1.25.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use non_null::NonNull;
 
 #[cfg(not(feature = "ferrocene_certified"))]

@@ -1,7 +1,5 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering;
-#[cfg(feature = "ferrocene_certified")]
-use crate::marker::PointeeSized;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{PointeeSized, Unsize};
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -20,6 +18,12 @@ use crate::slice::{self, SliceIndex};
 use crate::ub_checks::assert_unsafe_precondition;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, hash, intrinsics, mem, ptr};
+// Ferrocene addition: imports for certified libcore
+#[cfg(feature = "ferrocene_certified")]
+use crate::{
+    marker::{PointeeSized, Unsize},
+    ops::{CoerceUnsized, DispatchFromDyn},
+};
 
 /// `*mut T` but non-zero and [covariant].
 ///
@@ -1624,7 +1628,6 @@ impl<T> NonNull<[T]> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> Clone for NonNull<T> {
     #[inline(always)]
     fn clone(&self) -> Self {
@@ -1633,15 +1636,12 @@ impl<T: PointeeSized> Clone for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> Copy for NonNull<T> {}
 
 #[unstable(feature = "coerce_unsized", issue = "18598")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized, U: PointeeSized> CoerceUnsized<NonNull<U>> for NonNull<T> where T: Unsize<U> {}
 
 #[unstable(feature = "dispatch_from_dyn", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized, U: PointeeSized> DispatchFromDyn<NonNull<U>> for NonNull<T> where T: Unsize<U> {}
 
 #[stable(feature = "pin", since = "1.33.0")]

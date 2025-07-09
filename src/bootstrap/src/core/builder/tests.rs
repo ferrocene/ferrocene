@@ -1133,7 +1133,7 @@ mod snapshot {
         [build] rustc 0 <host> -> cargo-clippy 1 <host>
         [build] rustc 0 <host> -> miri 1 <host>
         [build] rustc 0 <host> -> cargo-miri 1 <host>
-<<<<<<< HEAD
+        [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <host>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] std 2 <host>
@@ -1141,9 +1141,6 @@ mod snapshot {
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-=======
-        [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <host>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         ");
     }
 
@@ -1338,7 +1335,7 @@ mod snapshot {
         [build] rustc 0 <host> -> cargo-clippy 1 <target1>
         [build] rustc 0 <host> -> miri 1 <target1>
         [build] rustc 0 <host> -> cargo-miri 1 <target1>
-<<<<<<< HEAD
+        [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <target1>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] std 2 <target1>
@@ -1347,9 +1344,6 @@ mod snapshot {
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-=======
-        [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <target1>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         ");
     }
 

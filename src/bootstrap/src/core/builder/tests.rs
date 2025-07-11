@@ -1084,17 +1084,8 @@ mod snapshot {
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
-<<<<<<< HEAD
-        [doc] std 2 <host>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
-=======
-        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
-        [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs 1 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
         [doc] std 2 <host> crates=[]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <host>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
@@ -1102,7 +1093,7 @@ mod snapshot {
         [dist] src <>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] std 2 <host>
+        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
@@ -1129,17 +1120,8 @@ mod snapshot {
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 1 <host> -> WasmComponentLd 2 <host>
         [build] rustdoc 1 <host>
-<<<<<<< HEAD
-        [doc] std 2 <host>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
-=======
-        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
-        [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs 1 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
         [doc] std 2 <host> crates=[]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <host>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
@@ -1154,7 +1136,7 @@ mod snapshot {
         [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <host>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] std 2 <host>
+        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
@@ -1179,21 +1161,9 @@ mod snapshot {
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
-<<<<<<< HEAD
-        [doc] std 2 <host>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
-        [doc] std 2 <target1>
-=======
-        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
-        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
-        [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs 1 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
-        [dist] docs <target1>
         [doc] std 2 <host> crates=[]
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [doc] std 2 <target1> crates=[]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [dist] mingw <host>
         [dist] mingw <target1>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
@@ -1204,8 +1174,8 @@ mod snapshot {
         [dist] src <>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] std 2 <host>
-        [doc] std 2 <target1>
+        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
+        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
@@ -1231,19 +1201,8 @@ mod snapshot {
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
-<<<<<<< HEAD
-        [doc] std 2 <host>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
-=======
-        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
-        [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs 1 <host>
-        [build] rustc 1 <host> -> std 1 <target1>
-        [build] rustc 2 <host> -> std 2 <target1>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
         [doc] std 2 <host> crates=[]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <host>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
@@ -1256,7 +1215,7 @@ mod snapshot {
         [dist] src <>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] std 2 <host>
+        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 2 <host> -> std 2 <target1>
@@ -1283,23 +1242,9 @@ mod snapshot {
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
-<<<<<<< HEAD
-        [doc] std 2 <host>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
-        [doc] std 2 <target1>
-=======
-        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
-        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
-        [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> LintDocs 1 <host>
-        [build] rustc 1 <host> -> std 1 <target1>
-        [build] rustc 2 <host> -> std 2 <target1>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
-        [dist] docs <target1>
         [doc] std 2 <host> crates=[]
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [doc] std 2 <target1> crates=[]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [dist] mingw <host>
         [dist] mingw <target1>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
@@ -1314,8 +1259,8 @@ mod snapshot {
         [dist] src <>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] std 2 <host>
-        [doc] std 2 <target1>
+        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
+        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 2 <host> -> std 2 <target1>
@@ -1342,16 +1287,8 @@ mod snapshot {
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustdoc 1 <host>
-<<<<<<< HEAD
-        [doc] std 2 <target1>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
-=======
-        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
-        [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <target1>
         [doc] std 2 <target1> crates=[]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <target1>
         [build] rustc 2 <host> -> std 2 <target1>
         [dist] rustc 2 <host> -> std 2 <target1>
@@ -1380,19 +1317,8 @@ mod snapshot {
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 1 <host> -> WasmComponentLd 2 <host>
         [build] rustdoc 1 <host>
-<<<<<<< HEAD
-        [doc] std 2 <target1>
-        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
-=======
-        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
-        [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 1 <host> -> std 1 <target1>
-        [build] rustc 2 <host> -> std 2 <target1>
-        [build] rustc 0 <host> -> LintDocs 1 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <target1>
         [doc] std 2 <target1> crates=[]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <target1>
         [build] llvm <target1>
         [build] rustc 1 <host> -> std 1 <target1>
@@ -1412,7 +1338,7 @@ mod snapshot {
         [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <target1>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] std 2 <target1>
+        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,sysroot,test,unwind]
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 2 <host> -> std 2 <target1>
         [build] rustc 0 <host> -> LintDocs 1 <host>

@@ -51,7 +51,7 @@ impl Step for TraceabilityMatrix {
             BootstrapCommand::new(&compiletest)
                 .env("FERROCENE_COLLECT_ANNOTATIONS", "1")
                 .env("FERROCENE_DEST", dest)
-                .env("FERROCENE_SRC_BASE", builder.src.join(suite))
+                .env("FERROCENE_SRC_TEST_SUITE_ROOT", builder.src.join(suite))
                 .env("FERROCENE_MODE", mode)
                 .env("FERROCENE_SUITE", suite)
                 .run(builder);

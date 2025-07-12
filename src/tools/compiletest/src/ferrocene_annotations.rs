@@ -172,6 +172,8 @@ fn sample_config() -> Config {
         mode: env("FERROCENE_MODE"),
         src_root: env("FERROCENE_SRC_ROOT"),
         src_test_suite_root: env("FERROCENE_SRC_TEST_SUITE_ROOT"),
+        build_root: env("FERROCENE_BUILD_ROOT"),
+        build_test_suite_root: env("FERROCENE_BUILD_TEST_SUITE_ROOT"),
         suite: env("FERROCENE_SUITE"),
         ..Config::default()
     }

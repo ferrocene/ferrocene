@@ -693,6 +693,7 @@ impl Builder<'_> {
                         .arg("--print=file-names")
                         .arg("--crate-type=proc-macro")
                         .arg("-")
+                        .stdin(std::process::Stdio::null())
                         .run_capture(self)
                         .stderr();
 

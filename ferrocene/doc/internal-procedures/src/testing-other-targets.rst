@@ -100,7 +100,7 @@ Setup WSL2, if you don't have it:
 
     wsl --install --distribution Ubuntu-24.04
 
-Ensure ```nestedVirtualization`` is set in the guest ``/etc/wsl.conf``, here is an example
+Ensure ``nestedVirtualization`` is set in the guest ``/etc/wsl.conf``, here is an example
 configuration:
 
 .. code-block::

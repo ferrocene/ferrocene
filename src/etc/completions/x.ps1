@@ -1097,6 +1097,7 @@ Register-ArgumentCompleter -Native -CommandName 'x' -ScriptBlock {
             [CompletionResult]::new('--dry-run', '--dry-run', [CompletionResultType]::ParameterName, 'dry run; don''t build anything')
             [CompletionResult]::new('--dump-bootstrap-shims', '--dump-bootstrap-shims', [CompletionResultType]::ParameterName, 'Indicates whether to dump the work done from bootstrap shims')
             [CompletionResult]::new('--json-output', '--json-output', [CompletionResultType]::ParameterName, 'use message-format=json')
+            [CompletionResult]::new('--compile-time-deps', '--compile-time-deps', [CompletionResultType]::ParameterName, 'only build proc-macros and build scripts (for rust-analyzer)')
             [CompletionResult]::new('--bypass-bootstrap-lock', '--bypass-bootstrap-lock', [CompletionResultType]::ParameterName, 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)')
             [CompletionResult]::new('--llvm-profile-generate', '--llvm-profile-generate', [CompletionResultType]::ParameterName, 'generate PGO profile with llvm built for rustc')
             [CompletionResult]::new('--enable-bolt-settings', '--enable-bolt-settings', [CompletionResultType]::ParameterName, 'Enable BOLT link flags')

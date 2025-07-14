@@ -1139,6 +1139,7 @@ _arguments "${_arguments_options[@]}" : \
 '--dry-run[dry run; don'\''t build anything]' \
 '--dump-bootstrap-shims[Indicates whether to dump the work done from bootstrap shims]' \
 '--json-output[use message-format=json]' \
+'--compile-time-deps[only build proc-macros and build scripts (for rust-analyzer)]' \
 '--bypass-bootstrap-lock[Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)]' \
 '--llvm-profile-generate[generate PGO profile with llvm built for rustc]' \
 '--enable-bolt-settings[Enable BOLT link flags]' \

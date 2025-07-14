@@ -33,8 +33,9 @@ To use the target, the following additional flags must be provided to
 Proxy Target (Experimental)
 ---------------------------
 
-This is a bare metal target, and cannot be directly tested. Instead, a
-proxy target which can be used for testing and development.
+Bare metal targets cannot use test harnesses that require ``libc``. Instead, a proxy target can
+be used instead that emulates the bare metal target, but also provides access to ``std``
+functionality.
 
 The following additional archive is needed when :doc:`installing </rustc/install>`:
 

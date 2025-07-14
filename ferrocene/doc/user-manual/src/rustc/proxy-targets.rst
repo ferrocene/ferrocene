@@ -7,7 +7,7 @@ Proxy Targets
 This chapter describes how to use a Proxy Target to validate the operation of a bare-metal target.
 
 Bare-metal targets do not have an operating system (OS), this means they do not link to ``libc`` or have
-access to ``std`` functionality like ``println!("printing")`` or ``assert!()``.
+access to ``std`` functionality like ``println!("printing")`` or ``assert_eq!()``.
 
 Alongside qualified bare-metal targets additional ``ferrocenecoretest`` targets can be
 :doc:`installed </rustc/install>` which act as a proxy to the respective bare-metal target,
@@ -26,8 +26,6 @@ Using a proxy target requires ``qemu`` and ``binfmt`` to be configured correctly
 architecture. Setup instructions differ based on operating system and distribution. While
 developing Ferrocene we use the instructions found in :doc:`internal-procedures:testing-other-targets`.
 
-
-
 For coverage, you'll also need to install ``rustfilt``, as well as ``rust-profdata`` (from ``cargo-binutils``).
 
 .. code-block:: rust
@@ -38,7 +36,7 @@ For coverage, you'll also need to install ``rustfilt``, as well as ``rust-profda
 Using Proxy Targets
 -------------------
 
-Proxy targets enable profiling support, as well as access to ``std`` (such as ``assert!()``), compared to their bare metal
+Proxy targets enable profiling support, as well as access to ``std`` (such as ``assert_eq!()``), compared to their bare metal
 targets. Behind the scenes, the proxy targets are providing the equivalent of a Linux ``libc`` to the binary.
 
 The following configurations can be used to flag code to only run on the proxy targets:

@@ -11,7 +11,7 @@ use std::sync::mpsc::channel;
 
 use camino::{Utf8Path, Utf8PathBuf};
 
-use crate::common::{Config, Mode, TestPaths};
+use crate::common::{Config, TestMode, TestPaths};
 use crate::{TestHandler, find_tests_in_dir};
 
 const BULK_ANNOTATIONS_FILE_NAME: &str = "ferrocene-annotations";
@@ -83,7 +83,7 @@ impl Collector {
     }
 
     fn collect_test(&mut self, paths: &TestPaths) -> Option<TestFile> {
-        let path = if self.config.mode == Mode::RunMake {
+        let path = if self.config.mode == TestMode::RunMake {
             paths.file.join("rmake.rs")
         } else {
             paths.file.clone()
@@ -169,7 +169,87 @@ fn sample_config() -> Config {
         mode: env("FERROCENE_MODE"),
         src_test_suite_root: env("FERROCENE_SRC_BASE"),
         suite: env("FERROCENE_SUITE"),
-        ..Config::default()
+
+        // Dummy values
+        adb_device_status: Default::default(),
+        adb_path: Default::default(),
+        adb_test_dir: Default::default(),
+        android_cross_path: Default::default(),
+        ar: Default::default(),
+        bless: Default::default(),
+        build_root: Utf8PathBuf::default(),
+        build_test_suite_root: Utf8PathBuf::default(),
+        builtin_cfg_names: Default::default(),
+        cargo_path: Default::default(),
+        cc: Default::default(),
+        cdb: Default::default(),
+        cdb_version: Default::default(),
+        cflags: Default::default(),
+        channel: Default::default(),
+        compare_mode: Default::default(),
+        compile_lib_path: Utf8PathBuf::default(),
+        coverage_dump_path: Default::default(),
+        cxx: Default::default(),
+        cxxflags: Default::default(),
+        debugger: Default::default(),
+        diff_command: Default::default(),
+        edition: Default::default(),
+        fail_fast: Default::default(),
+        filter_exact: Default::default(),
+        filters: Default::default(),
+        force_pass_mode: Default::default(),
+        force_rerun: Default::default(),
+        gdb: Default::default(),
+        gdb_version: Default::default(),
+        git_hash: Default::default(),
+        git_merge_commit_email: Default::default(),
+        has_enzyme: Default::default(),
+        has_html_tidy: Default::default(),
+        host: Default::default(),
+        host_linker: Default::default(),
+        host_rustcflags: Default::default(),
+        jsondocck_path: Default::default(),
+        jsondoclint_path: Default::default(),
+        lldb_python_dir: Default::default(),
+        lldb_version: Default::default(),
+        llvm_bin_dir: Default::default(),
+        llvm_components: Default::default(),
+        llvm_filecheck: Default::default(),
+        llvm_version: Default::default(),
+        minicore_path: Default::default(),
+        nightly_branch: Default::default(),
+        nocapture: Default::default(),
+        nodejs: Default::default(),
+        npm: Default::default(),
+        only_modified: Default::default(),
+        optimize_tests: Default::default(),
+        profiler_runtime: Default::default(),
+        python: Default::default(),
+        remote_test_client: Default::default(),
+        run: Default::default(),
+        run_clang_based_tests_with: Default::default(),
+        run_ignored: Default::default(),
+        run_lib_path: Utf8PathBuf::default(),
+        runner: Default::default(),
+        rust_randomized_layout: Default::default(),
+        rustc_path: Utf8PathBuf::default(),
+        rustdoc_path: Default::default(),
+        rustfix_coverage: Default::default(),
+        skip: Default::default(),
+        src_root: Utf8PathBuf::default(),
+        stage0_rustc_path: Default::default(),
+        stage: Default::default(),
+        stage_id: String::default(),
+        supported_crate_types: Default::default(),
+        sysroot_base: Utf8PathBuf::default(),
+        system_llvm: Default::default(),
+        target: Default::default(),
+        target_cfgs: Default::default(),
+        target_linker: Default::default(),
+        target_rustcflags: Default::default(),
+        verbose: Default::default(),
+        with_rustc_debug_assertions: Default::default(),
+        with_std_debug_assertions: Default::default(),
     }
 }
 

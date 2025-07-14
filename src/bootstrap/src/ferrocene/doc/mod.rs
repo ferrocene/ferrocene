@@ -15,7 +15,7 @@ use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
 use crate::utils::exec::BootstrapCommand;
-use crate::{FileType, t};
+use crate::{Compiler, FileType, t};
 
 pub(crate) trait IsSphinxBook {
     const SOURCE: &'static str;
@@ -690,6 +690,7 @@ sphinx_books! [
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub(crate) struct TraceabilityMatrix {
     target: TargetSelection,
+    compiler: Compiler,
 }
 
 impl Step for TraceabilityMatrix {
@@ -702,11 +703,15 @@ impl Step for TraceabilityMatrix {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(TraceabilityMatrix { target: run.target });
+        let compiler = run.builder.compiler(run.builder.top_stage, run.build_triple());
+        run.builder.ensure(TraceabilityMatrix { target: run.target, compiler });
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        builder.ensure(crate::ferrocene::run::TraceabilityMatrix { target: self.target });
+        builder.ensure(crate::ferrocene::run::TraceabilityMatrix {
+            target: self.target,
+            compiler: self.compiler,
+        });
     }
 }
 

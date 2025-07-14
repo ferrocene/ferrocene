@@ -109,7 +109,6 @@ Let's assume we have a simple function to test:
 .. code-block:: rust
 
    #[no_std]
-   #[no_main]
 
    use core::ffi::c_int;
 
@@ -122,12 +121,17 @@ Let's assume we have a simple function to test:
       }
    }
 
-First, we'll add support for the proxy target:
+First, let's make sure this builds:
+
+.. code-block:: bash
+
+   rustc --target thumbv7em-none-eabihf --crate-type=staticlib src/thing.rs --out-dir artifacts
+
+Now, we'll add support for the proxy target:
 
 .. code-block:: rust
 
    #![cfg_attr(not(target_os = "linux"), no_std)]
-   #![no_main]
 
    #[cfg(target_os = "linux")]
    use std::ffi::c_int;
@@ -147,40 +151,38 @@ Next, we'll write a simple test suite using assertions that runs only on the pro
 
 .. code-block:: rust
 
-   #[unsafe(no_mangle)]
-   fn main() {
+   #[test]
+   fn it_works() {
       assert_eq!(return_a_number(false), 1);
       assert_eq!(return_a_number(true), 2);
-      println!("All tests passed successfully!");
    }
 
 Build with the proxy target:
 
-.. code-block::
+.. code-block:: bash
    
-   rustc --target thumbv7em-ferrocenecoretest-eabihf src/thing.rs --out-dir artifacts -C instrument-coverage
+   rustc --target thumbv7em-ferrocenecoretest-eabihf --test -C instrument-coverage src/thing.rs --out-dir artifacts
 
 Then run it:
 
-.. code-block::
+.. code-block:: bash
+   
+   $ ./artifacts/thing
+   
+   running 1 test
+   test it_works ... ok
 
-   $ ./artifacts/thing 
-   All tests passed successfully!
+   test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
 
 Try changing one of the assertions to be wrong then observe the failure:
 
-.. code-block::
+.. code-block:: bash
 
-   $ rustc --target thumbv7em-ferrocenecoretest-eabihf src/thing.rs --out-dir artifacts
-   $ ./artifacts/thing 
+   $ ./artifacts/thing
 
-   thread '<unnamed>' panicked at src/thing.rs:21:5:
-   assertion `left == right` failed
-   left: 2
-   right: 3
-   note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+   running 1 test
    qemu: uncaught target signal 6 (Aborted) - core dumped
-   Aborted (core dumped)
+   SIGABRT: child process './artifacts/thing' core dumped
 
 
 Code Coverage
@@ -195,7 +197,6 @@ as an executable on a proxy target.
    // src/thing.rs
 
    #![cfg_attr(not(target_os = "linux"), no_std)]
-   #![no_main]
 
    #[cfg(target_os = "linux")]
    use std::ffi::c_int;
@@ -211,8 +212,8 @@ as an executable on a proxy target.
       }
    }
 
-   #[unsafe(no_mangle)]
-   fn main() {
+   #[test]
+   fn it_works() {
       assert_eq!(return_a_number(false), 1);
       // assert_eq!(return_a_number(true), 2);
    }
@@ -232,40 +233,39 @@ We can build for a bare-metal target (:ref:`thumbv7em-none-eabihf`) by running:
 
 We can build for the equivalent proxy target, with instrumentation, by running:
 
-.. code-block::
+.. code-block:: bash
    
-   rustc --target thumbv7em-ferrocenecoretest-eabihf src/thing.rs --out-dir artifacts -C instrument-coverage
-
+   rustc --target thumbv7em-ferrocenecoretest-eabihf --test -C instrument-coverage src/thing.rs --out-dir artifacts
 
 To create the ``profraw`` file:
 
 .. code-block::
    
-   LLVM_PROFILE_FILE="thing.profraw" artifacts/thing
+   LLVM_PROFILE_FILE="profiling/thing-%p-%m.profraw" artifacts/thing
 
 Then create the ``profdata``:
 
 .. code-block::
    
-   rust-profdata merge --sparse thing.profraw -o thing.profdata
+   rust-profdata merge --sparse profiling/thing-*.profraw -o profiling/thing.profdata
 
 Then create the coverage report:
 
 .. code-block::
    
    rust-cov report  -Xdemangler=rustfilt artifacts/thing \
-      --instr-profile=thing.profdata \
+      --instr-profile=profiling/thing.profdata \
       --show-instantiation-summary
 
 That should output something like the following:
 
 .. code-block::
    
-   Filename              Regions    Missed Regions     Cover   Functions  Missed Functions  Executed  Instantiations   Missed Insts.  Executed       Lines      Missed Lines     Cover    Branches   Missed Branches     Cover
-   ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-   $CWD/src/thing.rs           9                 1    88.89%           2                 0   100.00%               2               0   100.00%           8                 1    87.50%           0                 0         -
-   ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-   TOTAL                       9                 1    88.89%           2                 0   100.00%               2               0   100.00%           8                 1    87.50%           0                 0         -
+Filename              Regions    Missed Regions     Cover   Functions  Missed Functions  Executed  Instantiations   Missed Insts.  Executed       Lines      Missed Lines     Cover    Branches   Missed Branches     Cover
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+$CWD/src/thing.rs           9                 1    88.89%           2                 0   100.00%               2               0   100.00%           8                 1    87.50%           0                 0         -
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TOTAL                       9                 1    88.89%           2                 0   100.00%               2               0   100.00%           8                 1    87.50%           0                 0         -
 
 Not bad, but the coverage could be improved! Uncomment the ``assert_eq!(return_a_number(true), 2);``
 line and run it again. Coverage should now be 100%.

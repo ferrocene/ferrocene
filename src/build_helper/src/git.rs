@@ -237,17 +237,13 @@ pub fn get_closest_upstream_commit(
     // chronologically recent bors commit.
     // Here we assume that none of our subtrees use bors anymore, and that all their old bors
     // commits are way older than recent rustc bors commits!
-<<<<<<< HEAD
-    git.args(["rev-list", "--author-date-order", "--author", &config.author_email(), "-n1", &base]);
-=======
     git.args([
         "rev-list",
         "--author-date-order",
-        &format!("--author={}", config.git_merge_commit_email),
+        &format!("--author={}", config.author_email()),
         "-n1",
         base,
     ]);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     let output = output_result(&mut git)?.trim().to_owned();
     if output.is_empty() { Ok(None) } else { Ok(Some(output)) }

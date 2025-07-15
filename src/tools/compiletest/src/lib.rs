@@ -810,11 +810,8 @@ fn find_tests_in_dir(
     }
 
     // For run-make tests, a "test file" is actually a directory that contains an `rmake.rs`.
-<<<<<<< HEAD
-    if config.mode == Mode::RunMake {
-=======
-    if cx.config.mode == TestMode::RunMake {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+    if config.mode == TestMode::RunMake {
         let mut collector = TestCollector::new();
         if dir.join("rmake.rs").exists() {
             let paths = TestPaths {

@@ -1043,6 +1043,12 @@ const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     // Used by the tidy check `unknown_revision`.
     "unused-revision-names",
     // tidy-alphabetical-end
+
+    // Ferrocene additions
+    "compare-output-lines-by-subset",
+    "ferrocene-execute-in-temp",
+    "ignore-ferrocenecoretest",
+    "only-ferrocenecoretest",
 ];
 
 const KNOWN_HTMLDOCCK_DIRECTIVE_NAMES: &[&str] = &[

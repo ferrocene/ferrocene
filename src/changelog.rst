@@ -115,7 +115,7 @@ Language changes in Rust 1.84.0
 
 * `Execute drop glue when unwinding in an \`extern "C"\` function <https://github.com/rust-lang/rust/pull/129582>`_
 
-  * No change: This restricted past behavior is specified by the FLS.
+  * No change: This lifted restriction was not specified in the FLS
 
 Language changes in Rust 1.83.0
 -------------------------------

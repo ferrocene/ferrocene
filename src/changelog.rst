@@ -18,6 +18,25 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.87.0
+-------------------------------
+
+- `Stabilize asm_goto feature <https://github.com/rust-lang/rust/pull/133870>`_
+
+  - New section: :ref:`fls_MW7mtH5oOeQ1`
+
+- `Allow parsing open beginning ranges (..EXPR) after unary operators: ! - * <https://github.com/rust-lang/rust/pull/134900>`_
+
+  - No change: this lifted restriction was not specified in the FLS
+
+- `Don't require method impls for methods with "Self: Sized" bounds in impls for unsized types <https://github.com/rust-lang/rust/pull/135480>`_
+
+  - No change: this lifted restriction was not specified in the FLS
+
+- `Stabilize feature(precise_capturing_in_traits) allowing use<...> bounds on return position impl Trait in traits (RPITIT) <https://github.com/rust-lang/rust/pull/138128>`_
+
+  - No change: this lifted restriction was not specified in the FLS
+
 Language changes in Rust 1.86.0
 -------------------------------
 

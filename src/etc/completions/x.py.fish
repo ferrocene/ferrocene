@@ -1084,6 +1084,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand sign" -l include-default-paths
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand sign" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l enable-bolt-settings -d 'Enable BOLT link flags'

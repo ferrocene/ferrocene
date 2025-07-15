@@ -47,7 +47,7 @@ impl Step for TraceabilityMatrix {
         });
 
         let compiletest = builder.tool_exe(Tool::Compiletest);
-        for (suite, mode) in &[("tests/ui", "ui"), ("tests/run-make", "run-make")] {
+        for (suite, mode) in &[("ui", "ui"), ("run-make", "run-make")] {
             builder.info(&format!("Loading test annotations from {suite}"));
 
             let dest = test_annotations_base.join(format!("{}.json", suite.replace('/', "-")));
@@ -55,7 +55,7 @@ impl Step for TraceabilityMatrix {
                 .env("FERROCENE_COLLECT_ANNOTATIONS", "1")
                 .env("FERROCENE_DEST", dest)
                 .env("FERROCENE_SRC_ROOT", &builder.src)
-                .env("FERROCENE_SRC_TEST_SUITE_ROOT", builder.src.join(suite))
+                .env("FERROCENE_SRC_TEST_SUITE_ROOT", builder.src.join("tests").join(suite))
                 .env("FERROCENE_BUILD_ROOT", &builder.out)
                 .env(
                     "FERROCENE_BUILD_TEST_SUITE_ROOT",

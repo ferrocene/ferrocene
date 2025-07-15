@@ -100,7 +100,6 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
                 let is_executable = path.extension().is_some_and(|e| e == "exe");
                 #[cfg(target_family = "unix")]
                 let is_executable = path.is_file() /* directories can have the executable flag set */
-                    && path.extension().is_none() /* filter `.so` files */
                     && (path.metadata().expect("cannot fetch metadata for deps file").permissions().mode() & 0o111 != 0);
 
                 if is_executable {

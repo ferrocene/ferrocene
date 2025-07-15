@@ -3700,7 +3700,8 @@ impl<T> [T] {
     /// assert_eq!(a, ['a', 'c', 'd', 'e', 'b', 'f']);
     /// ```
     #[stable(feature = "slice_rotate", since = "1.26.0")]
-    pub fn rotate_left(&mut self, mid: usize) {
+    #[rustc_const_unstable(feature = "const_slice_rotate", issue = "143812")]
+    pub const fn rotate_left(&mut self, mid: usize) {
         assert!(mid <= self.len());
         let k = self.len() - mid;
         let p = self.as_mut_ptr();
@@ -3745,7 +3746,8 @@ impl<T> [T] {
     /// assert_eq!(a, ['a', 'e', 'b', 'c', 'd', 'f']);
     /// ```
     #[stable(feature = "slice_rotate", since = "1.26.0")]
-    pub fn rotate_right(&mut self, k: usize) {
+    #[rustc_const_unstable(feature = "const_slice_rotate", issue = "143812")]
+    pub const fn rotate_right(&mut self, k: usize) {
         assert!(k <= self.len());
         let mid = self.len() - k;
         let p = self.as_mut_ptr();
@@ -5190,7 +5192,7 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[rustc_const_unstable(feature = "const_default", issue = "67792")]
+#[rustc_const_unstable(feature = "const_default", issue = "143894")]
 impl<T> const Default for &[T] {
     /// Creates an empty slice.
     fn default() -> Self {
@@ -5199,7 +5201,7 @@ impl<T> const Default for &[T] {
 }
 
 #[stable(feature = "mut_slice_default", since = "1.5.0")]
-#[rustc_const_unstable(feature = "const_default", issue = "67792")]
+#[rustc_const_unstable(feature = "const_default", issue = "143894")]
 impl<T> const Default for &mut [T] {
     /// Creates a mutable empty slice.
     fn default() -> Self {

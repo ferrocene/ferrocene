@@ -283,6 +283,18 @@ pub fn check_builtin_meta_item(
                 | sym::rustc_confusables
                 | sym::rustc_skip_during_method_dispatch
                 | sym::rustc_pass_by_value
+                | sym::rustc_deny_explicit_impl
+                | sym::rustc_do_not_implement_via_object
+                | sym::rustc_coinductive
+                | sym::const_trait
+                | sym::rustc_specialization_trait
+                | sym::rustc_unsafe_specialization_marker
+                | sym::rustc_allow_incoherent_impl
+                | sym::rustc_coherence_is_core
+                | sym::marker
+                | sym::fundamental
+                | sym::rustc_paren_sugar
+                | sym::type_const
                 | sym::repr
                 | sym::align
                 | sym::deprecated
@@ -293,17 +305,20 @@ pub fn check_builtin_meta_item(
                 | sym::naked
                 | sym::no_mangle
                 | sym::non_exhaustive
+                | sym::omit_gdb_pretty_printer_section
                 | sym::path
                 | sym::ignore
                 | sym::must_use
                 | sym::track_caller
                 | sym::link_name
+                | sym::link_ordinal
                 | sym::export_name
                 | sym::rustc_macro_transparency
                 | sym::link_section
                 | sym::rustc_layout_scalar_valid_range_start
                 | sym::rustc_layout_scalar_valid_range_end
                 | sym::no_implicit_prelude
+                | sym::automatically_derived
         ) {
             return;
         }

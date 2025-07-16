@@ -1382,7 +1382,7 @@ Attribute ``unsafe``
 :t:`Attribute` :c:`unsafe` shall apply to what the contained :t:`attribute` applies to.
 
 :dp:`fls_gpxlWbQUNsj8`
-:t:`Attribute` :c:`unsafe` behaves like the contained :t:`attribute`.
+:t:`Attribute` :c:`unsafe` does not affect the behavior of the contained :t:`attribute`.
 
 :dp:`fls_PhrfxSBvXTPV`
 The contained :t:`attribute` shall be one of the following:

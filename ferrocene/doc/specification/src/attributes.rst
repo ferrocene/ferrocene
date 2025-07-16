@@ -1385,16 +1385,16 @@ Attribute ``unsafe``
 :t:`Attribute` :c:`unsafe` behaves like the contained :t:`attribute`.
 
 :dp:`fls_PhrfxSBvXTPV`
-The contained :t:`attribute` shall be one of:
+The contained :t:`attribute` shall be one of the following:
 
 * :dp:`fls_pCSew95bKJJ5`
-  :t:`attribute` :c:`no_mangle`,
+  :t:`Attribute` :c:`no_mangle`
 
-  :dp:`fls_NRLgmOXxuljQ`
-  :t:`attribute` :c:`export_name`, or
+* :dp:`fls_NRLgmOXxuljQ`
+  :t:`Attribute` :c:`export_name`
 
-  :dp:`fls_ykpxNByUDyHG`
-  :t:`attribute` :c:`link_section`,
+* :dp:`fls_ykpxNByUDyHG`
+  :t:`Attribute` :c:`link_section`
 
 .. rubric:: Examples
 

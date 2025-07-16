@@ -553,13 +553,10 @@ impl Subcommand {
             Subcommand::Install => Kind::Install,
             Subcommand::Run { .. } => Kind::Run,
             Subcommand::Setup { .. } => Kind::Setup,
-<<<<<<< HEAD
-            Subcommand::Sign { .. } => Kind::Sign,
-            Subcommand::Suggest { .. } => Kind::Suggest,
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             Subcommand::Vendor { .. } => Kind::Vendor,
             Subcommand::Perf { .. } => Kind::Perf,
+            // Ferrocene addition, for signing qualification documents
+            Subcommand::Sign { .. } => Kind::Sign,
         }
     }
 

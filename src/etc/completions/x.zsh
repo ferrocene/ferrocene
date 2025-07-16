@@ -1234,19 +1234,11 @@ _x__setup_commands() {
     local commands; commands=()
     _describe -t commands 'x setup commands' commands "$@"
 }
-<<<<<<< HEAD
 (( $+functions[_x__sign_commands] )) ||
 _x__sign_commands() {
     local commands; commands=()
     _describe -t commands 'x sign commands' commands "$@"
 }
-(( $+functions[_x__suggest_commands] )) ||
-_x__suggest_commands() {
-    local commands; commands=()
-    _describe -t commands 'x suggest commands' commands "$@"
-}
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 (( $+functions[_x__test_commands] )) ||
 _x__test_commands() {
     local commands; commands=()

@@ -1234,19 +1234,11 @@ _x.py__setup_commands() {
     local commands; commands=()
     _describe -t commands 'x.py setup commands' commands "$@"
 }
-<<<<<<< HEAD
 (( $+functions[_x.py__sign_commands] )) ||
 _x.py__sign_commands() {
     local commands; commands=()
     _describe -t commands 'x.py sign commands' commands "$@"
 }
-(( $+functions[_x.py__suggest_commands] )) ||
-_x.py__suggest_commands() {
-    local commands; commands=()
-    _describe -t commands 'x.py suggest commands' commands "$@"
-}
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 (( $+functions[_x.py__test_commands] )) ||
 _x.py__test_commands() {
     local commands; commands=()

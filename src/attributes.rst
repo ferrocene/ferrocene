@@ -1378,6 +1378,9 @@ Attribute ``unsafe``
 
 .. rubric:: Legality Rules
 
+:dp:`fls_z5DTDKM9mU3o`
+:t:`Attribute` :dc:`unsafe` is used to indicate that an  :t:`attribute` is :t:`unsafe <unsafe operation>`.
+
 :dp:`fls_5pjo3nGOxbVw`
 :t:`Attribute` :c:`unsafe` shall apply to what the contained :t:`attribute` applies to.
 

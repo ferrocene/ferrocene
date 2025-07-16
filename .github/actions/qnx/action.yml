@@ -25,6 +25,9 @@ runs:
     - name: Unpack the QNX deployment
       shell: bash
       run: |
+        if [ -z "${AWS_CA_BUNDLE}" ]; then
+          unset AWS_CA_BUNDLE
+        fi
         uv run ferrocene/ci/scripts/cache.py retrieve s3://${{ inputs.bucket }}/qnx/${{ steps.calculate.outputs.filename }} .
 
     - name: Remove downloaded artifact

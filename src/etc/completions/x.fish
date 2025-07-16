@@ -78,7 +78,6 @@ complete -c x -n "__fish_x_needs_command" -a "dist" -d 'Build distribution artif
 complete -c x -n "__fish_x_needs_command" -a "install" -d 'Install distribution artifacts'
 complete -c x -n "__fish_x_needs_command" -a "run" -d 'Run tools contained in this repository'
 complete -c x -n "__fish_x_needs_command" -a "setup" -d 'Set up the environment for development'
-complete -c x -n "__fish_x_needs_command" -a "suggest" -d 'Suggest a subset of tests to run, based on modified files'
 complete -c x -n "__fish_x_needs_command" -a "vendor" -d 'Vendor dependencies'
 complete -c x -n "__fish_x_needs_command" -a "perf" -d 'Perform profiling and benchmarking of the compiler using `rustc-perf`'
 complete -c x -n "__fish_x_needs_command" -a "sign" -d 'Sign Ferrocene qualification documents'
@@ -682,6 +681,7 @@ complete -c x -n "__fish_x_using_subcommand setup" -l enable-bolt-settings -d 'E
 complete -c x -n "__fish_x_using_subcommand setup" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x -n "__fish_x_using_subcommand setup" -l skip-std-check-if-no-download-rustc -d 'Skip checking the standard library if `rust.download-rustc` isn\'t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers'
 complete -c x -n "__fish_x_using_subcommand setup" -s h -l help -d 'Print help (see more with \'--help\')'
+<<<<<<< HEAD
 complete -c x -n "__fish_x_using_subcommand suggest" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand suggest" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand suggest" -l build -d 'host target of the stage0 compiler' -r -f
@@ -723,6 +723,8 @@ complete -c x -n "__fish_x_using_subcommand suggest" -l enable-bolt-settings -d 
 complete -c x -n "__fish_x_using_subcommand suggest" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x -n "__fish_x_using_subcommand suggest" -l skip-std-check-if-no-download-rustc -d 'Skip checking the standard library if `rust.download-rustc` isn\'t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers'
 complete -c x -n "__fish_x_using_subcommand suggest" -s h -l help -d 'Print help (see more with \'--help\')'
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 complete -c x -n "__fish_x_using_subcommand vendor" -l sync -d 'Additional `Cargo.toml` to sync and vendor' -r -F
 complete -c x -n "__fish_x_using_subcommand vendor" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand vendor" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"

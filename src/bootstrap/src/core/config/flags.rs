@@ -516,13 +516,6 @@ Arguments:
         #[arg(value_name = "<PROFILE>|hook|editor|link")]
         profile: Option<PathBuf>,
     },
-    /// Suggest a subset of tests to run, based on modified files
-    #[command(long_about = "\n")]
-    Suggest {
-        /// run suggested tests
-        #[arg(long)]
-        run: bool,
-    },
     /// Vendor dependencies
     Vendor {
         /// Additional `Cargo.toml` to sync and vendor
@@ -560,8 +553,11 @@ impl Subcommand {
             Subcommand::Install => Kind::Install,
             Subcommand::Run { .. } => Kind::Run,
             Subcommand::Setup { .. } => Kind::Setup,
+<<<<<<< HEAD
             Subcommand::Sign { .. } => Kind::Sign,
             Subcommand::Suggest { .. } => Kind::Suggest,
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             Subcommand::Vendor { .. } => Kind::Vendor,
             Subcommand::Perf { .. } => Kind::Perf,
         }

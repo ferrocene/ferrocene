@@ -26,7 +26,7 @@ struct LinkMap {
 const RTLD_SELF: *const libc::c_void = -3isize as *const libc::c_void;
 const RTLD_DI_LINKMAP: libc::c_int = 2;
 
-extern "C" {
+unsafe extern "C" {
     fn dlinfo(
         handle: *const libc::c_void,
         request: libc::c_int,

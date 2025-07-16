@@ -6,8 +6,6 @@
 //! We still report inlined frames during symbolization by consulting the appropriate
 //! `dbghelp` functions.
 
-#![allow(bad_style)]
-
 use super::super::windows_sys::*;
 use core::ffi::c_void;
 
@@ -77,18 +75,14 @@ impl MyContext {
     }
 }
 
-#[cfg(any(
-    target_arch = "x86_64",
-    target_arch = "aarch64",
-    target_arch = "arm64ec"
-))]
 #[inline(always)]
 pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
     use core::ptr;
 
     // Capture the initial context to start walking from.
-    let mut context = core::mem::zeroed::<MyContext>();
-    RtlCaptureContext(&mut context.0);
+    // FIXME: shouldn't this have a Default impl?
+    let mut context = unsafe { core::mem::zeroed::<MyContext>() };
+    unsafe { RtlCaptureContext(&mut context.0) };
 
     loop {
         let ip = context.ip();
@@ -96,7 +90,11 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
         // The base address of the module containing the function will be stored here
         // when RtlLookupFunctionEntry returns successfully.
         let mut base = 0;
-        let fn_entry = RtlLookupFunctionEntry(ip, &mut base, ptr::null_mut());
+        // We use the `RtlLookupFunctionEntry` function in kernel32 which allows
+        // us to backtrace through JIT frames.
+        // Note that `RtlLookupFunctionEntry` only works for in-process backtraces,
+        // but that's all we support anyway, so it all lines up well.
+        let fn_entry = unsafe { RtlLookupFunctionEntry(ip, &mut base, ptr::null_mut()) };
         if fn_entry.is_null() {
             // No function entry could be found - this may indicate a corrupt
             // stack or that a binary was unloaded (amongst other issues). Stop
@@ -127,16 +125,18 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
         let previous_sp = context.sp();
         let mut handler_data = 0usize;
         let mut establisher_frame = 0;
-        RtlVirtualUnwind(
-            0,
-            base,
-            ip,
-            fn_entry,
-            &mut context.0,
-            ptr::addr_of_mut!(handler_data).cast::<*mut c_void>(),
-            &mut establisher_frame,
-            ptr::null_mut(),
-        );
+        unsafe {
+            RtlVirtualUnwind(
+                0,
+                base,
+                ip,
+                fn_entry,
+                &mut context.0,
+                ptr::addr_of_mut!(handler_data).cast::<*mut c_void>(),
+                &mut establisher_frame,
+                ptr::null_mut(),
+            );
+        }
 
         // RtlVirtualUnwind indicates the end of the stack in two different ways:
         // * On x64, it sets the instruction pointer to 0.

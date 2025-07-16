@@ -43,6 +43,7 @@ cfg_if::cfg_if! {
         target_os = "solaris",
         target_os = "illumos",
         target_os = "aix",
+        target_os = "cygwin",
     ))] {
         #[path = "gimli/mmap_unix.rs"]
         mod mmap;
@@ -114,6 +115,8 @@ struct Context<'a> {
 }
 
 impl<'data> Context<'data> {
+    // #[feature(optimize_attr)] is enabled when we're built inside libstd
+    #[cfg_attr(backtrace_in_libstd, optimize(size))]
     fn new(
         stash: &'data Stash,
         object: Object<'data>,
@@ -193,7 +196,7 @@ fn mmap(path: &Path) -> Option<Mmap> {
 }
 
 cfg_if::cfg_if! {
-    if #[cfg(windows)] {
+    if #[cfg(any(windows, target_os = "cygwin"))] {
         mod coff;
         use self::coff::{handle_split_dwarf, Object};
     } else if #[cfg(any(target_vendor = "apple"))] {
@@ -209,7 +212,7 @@ cfg_if::cfg_if! {
 }
 
 cfg_if::cfg_if! {
-    if #[cfg(windows)] {
+    if #[cfg(any(windows, target_os = "cygwin"))] {
         mod libs_windows;
         use libs_windows::native_libraries;
     } else if #[cfg(target_vendor = "apple")] {
@@ -341,7 +344,9 @@ fn extract_zip_path_android(path: &mystd::ffi::OsStr) -> Option<&mystd::ffi::OsS
 
 // unsafe because this is required to be externally synchronized
 pub unsafe fn clear_symbol_cache() {
-    Cache::with_global(|cache| cache.mappings.clear());
+    unsafe {
+        Cache::with_global(|cache| cache.mappings.clear());
+    }
 }
 
 impl Cache {
@@ -353,6 +358,8 @@ impl Cache {
     }
 
     // unsafe because this is required to be externally synchronized
+    // #[feature(optimize_attr)] is enabled when we're built inside libstd
+    #[cfg_attr(backtrace_in_libstd, optimize(size))]
     unsafe fn with_global(f: impl FnOnce(&mut Self)) {
         // A very small, very simple LRU cache for debug info mappings.
         //
@@ -366,9 +373,11 @@ impl Cache {
         // never happen, and symbolicating backtraces would be ssssllllooooowwww.
         static mut MAPPINGS_CACHE: Option<Cache> = None;
 
-        // FIXME: https://github.com/rust-lang/backtrace-rs/issues/678
-        #[allow(static_mut_refs)]
-        f(MAPPINGS_CACHE.get_or_insert_with(Cache::new))
+        unsafe {
+            // FIXME: https://github.com/rust-lang/backtrace-rs/issues/678
+            #[allow(static_mut_refs)]
+            f(MAPPINGS_CACHE.get_or_insert_with(Cache::new))
+        }
     }
 
     fn avma_to_svma(&self, addr: *const u8) -> Option<(usize, *const u8)> {
@@ -435,57 +444,60 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
         // Extend the lifetime of `sym` to `'static` since we are unfortunately
         // required to here, but it's only ever going out as a reference so no
         // reference to it should be persisted beyond this frame anyway.
-        let sym = mem::transmute::<Symbol<'_>, Symbol<'static>>(sym);
+        // SAFETY: praying the above is correct
+        let sym = unsafe { mem::transmute::<Symbol<'_>, Symbol<'static>>(sym) };
         (cb)(&super::Symbol { inner: sym });
     };
 
-    Cache::with_global(|cache| {
-        let (lib, addr) = match cache.avma_to_svma(addr.cast_const().cast::<u8>()) {
-            Some(pair) => pair,
-            None => return,
-        };
+    unsafe {
+        Cache::with_global(|cache| {
+            let (lib, addr) = match cache.avma_to_svma(addr.cast_const().cast::<u8>()) {
+                Some(pair) => pair,
+                None => return,
+            };
 
-        // Finally, get a cached mapping or create a new mapping for this file, and
-        // evaluate the DWARF info to find the file/line/name for this address.
-        let (cx, stash) = match cache.mapping_for_lib(lib) {
-            Some((cx, stash)) => (cx, stash),
-            None => return,
-        };
-        let mut any_frames = false;
-        if let Ok(mut frames) = cx.find_frames(stash, addr as u64) {
-            while let Ok(Some(frame)) = frames.next() {
-                any_frames = true;
-                let name = match frame.function {
-                    Some(f) => Some(f.name.slice()),
-                    None => cx.object.search_symtab(addr as u64),
-                };
-                call(Symbol::Frame {
-                    addr: addr as *mut c_void,
-                    location: frame.location,
-                    name,
-                });
+            // Finally, get a cached mapping or create a new mapping for this file, and
+            // evaluate the DWARF info to find the file/line/name for this address.
+            let (cx, stash) = match cache.mapping_for_lib(lib) {
+                Some((cx, stash)) => (cx, stash),
+                None => return,
+            };
+            let mut any_frames = false;
+            if let Ok(mut frames) = cx.find_frames(stash, addr as u64) {
+                while let Ok(Some(frame)) = frames.next() {
+                    any_frames = true;
+                    let name = match frame.function {
+                        Some(f) => Some(f.name.slice()),
+                        None => cx.object.search_symtab(addr as u64),
+                    };
+                    call(Symbol::Frame {
+                        addr: addr as *mut c_void,
+                        location: frame.location,
+                        name,
+                    });
+                }
             }
-        }
-        if !any_frames {
-            if let Some((object_cx, object_addr)) = cx.object.search_object_map(addr as u64) {
-                if let Ok(mut frames) = object_cx.find_frames(stash, object_addr) {
-                    while let Ok(Some(frame)) = frames.next() {
-                        any_frames = true;
-                        call(Symbol::Frame {
-                            addr: addr as *mut c_void,
-                            location: frame.location,
-                            name: frame.function.map(|f| f.name.slice()),
-                        });
+            if !any_frames {
+                if let Some((object_cx, object_addr)) = cx.object.search_object_map(addr as u64) {
+                    if let Ok(mut frames) = object_cx.find_frames(stash, object_addr) {
+                        while let Ok(Some(frame)) = frames.next() {
+                            any_frames = true;
+                            call(Symbol::Frame {
+                                addr: addr as *mut c_void,
+                                location: frame.location,
+                                name: frame.function.map(|f| f.name.slice()),
+                            });
+                        }
                     }
                 }
             }
-        }
-        if !any_frames {
-            if let Some(name) = cx.object.search_symtab(addr as u64) {
-                call(Symbol::Symtab { name });
+            if !any_frames {
+                if let Some(name) = cx.object.search_symtab(addr as u64) {
+                    call(Symbol::Symtab { name });
+                }
             }
-        }
-    });
+        });
+    }
 }
 
 pub enum Symbol<'a> {

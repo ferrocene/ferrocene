@@ -2,7 +2,8 @@ mod control_flow;
 mod from_residual;
 
 use core::ops::{
-    Bound, Deref, DerefMut, Range, RangeFrom, RangeFull, RangeInclusive, RangeTo, RangeToInclusive,
+    Bound, Deref, DerefMut, Range, RangeBounds, RangeFrom, RangeFull, RangeInclusive, RangeTo,
+    RangeToInclusive,
 };
 
 // Test the Range structs and syntax.
@@ -68,6 +69,36 @@ fn test_range_inclusive() {
 fn test_range_to_inclusive() {
     // Not much to test.
     let _ = RangeToInclusive { end: 42 };
+}
+
+#[test]
+fn test_range_contains() {
+    assert!(!(1u32..5).contains(&0u32));
+    assert!((1u32..5).contains(&1u32));
+    assert!((1u32..5).contains(&4u32));
+    assert!(!(1u32..5).contains(&5u32));
+    assert!(!(1u32..5).contains(&6u32));
+}
+
+#[test]
+fn test_range_to_contains() {
+    assert!(!(1u32..=5).contains(&0));
+    assert!((1u32..=5).contains(&1));
+    assert!((1u32..=5).contains(&4));
+    assert!((1u32..=5).contains(&5));
+    assert!(!(1u32..=5).contains(&6));
+}
+
+
+// This test covers `RangeBounds::contains` when the start is excluded.
+#[test]
+fn test_range_bounds_contains() {
+    let r = (Bound::Excluded(1u32), Bound::Included(5u32));
+    assert!(!r.contains(&0));
+    assert!(!r.contains(&1));
+    assert!(r.contains(&3));
+    assert!(r.contains(&5));
+    assert!(!r.contains(&6));
 }
 
 #[test]

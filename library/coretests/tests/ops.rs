@@ -298,3 +298,17 @@ fn deref_on_ref() {
 fn test_not_never() {
     if !return () {}
 }
+
+#[test]
+fn test_fmt() {
+    let mut r = 1..=1;
+    assert_eq!(format!("{:?}", r), "1..=1");
+    r.next().unwrap();
+    assert_eq!(format!("{:?}", r), "1..=1 (exhausted)");
+
+    assert_eq!(format!("{:?}", 1..1), "1..1");
+    assert_eq!(format!("{:?}", 1..), "1..");
+    assert_eq!(format!("{:?}", ..1), "..1");
+    assert_eq!(format!("{:?}", ..=1), "..=1");
+    assert_eq!(format!("{:?}", ..), "..");
+}

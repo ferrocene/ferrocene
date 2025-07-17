@@ -63,6 +63,7 @@
 #![feature(never_type)]
 #![feature(next_index)]
 #![feature(numfmt)]
+#![feature(one_sided_range)]
 #![feature(pattern)]
 #![feature(pointer_is_aligned_to)]
 #![feature(portable_simd)]

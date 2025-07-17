@@ -2,8 +2,8 @@ mod control_flow;
 mod from_residual;
 
 use core::ops::{
-    Bound, Deref, DerefMut, Range, RangeBounds, RangeFrom, RangeFull, RangeInclusive, RangeTo,
-    RangeToInclusive,
+    Bound, Deref, DerefMut, OneSidedRange, OneSidedRangeBound, Range, RangeBounds, RangeFrom,
+    RangeFull, RangeInclusive, RangeTo, RangeToInclusive,
 };
 
 // Test the Range structs and syntax.
@@ -89,7 +89,6 @@ fn test_range_to_contains() {
     assert!(!(1u32..=5).contains(&6));
 }
 
-
 // This test covers `RangeBounds::contains` when the start is excluded.
 #[test]
 fn test_range_bounds_contains() {
@@ -120,6 +119,34 @@ fn test_range_is_empty() {
     assert!((f32::EPSILON..=f32::NAN).is_empty());
     assert!((f32::NAN..=f32::EPSILON).is_empty());
     assert!((f32::NAN..=f32::NAN).is_empty());
+}
+
+#[test]
+fn test_range_inclusive_end_bound() {
+    let mut r = 1u32..=1;
+    r.next().unwrap();
+    assert!(!r.contains(&1));
+}
+
+#[test]
+fn test_range_bounds() {
+    let r = (Bound::Included(1u32), Bound::Excluded(5u32));
+    assert!(!r.contains(&0));
+    assert!(r.contains(&1));
+    assert!(r.contains(&3));
+    assert!(!r.contains(&5));
+    assert!(!r.contains(&6));
+
+    let r = (Bound::<u32>::Unbounded, Bound::Unbounded);
+    assert!(r.contains(&0));
+    assert!(r.contains(&u32::MAX));
+}
+
+#[test]
+fn test_one_sided_range_bound() {
+    assert!(matches!((..1u32).bound(), (OneSidedRangeBound::End, 1)));
+    assert!(matches!((1u32..).bound(), (OneSidedRangeBound::StartInclusive, 1)));
+    assert!(matches!((..=1u32).bound(), (OneSidedRangeBound::EndInclusive, 1)));
 }
 
 #[test]

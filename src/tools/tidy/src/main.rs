@@ -153,13 +153,10 @@ fn main() {
 
         check!(x_version, &root_path, &cargo);
 
-<<<<<<< HEAD
-=======
         check!(triagebot, &root_path);
 
         check!(filenames, &root_path);
 
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         let collected = {
             drain_handles(&mut handles);
 

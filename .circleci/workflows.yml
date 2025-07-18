@@ -274,6 +274,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
+        ./x.py run ferrocene/tools/coverage-of-subset
         ./x.py test --no-doc --coverage=library library/core
     steps:
       - aws-oidc-auth

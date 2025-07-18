@@ -761,7 +761,7 @@ impl Config {
         config.change_id = toml.change_id.inner;
 
         let Build {
-            mut description,
+            description,
             build,
             host,
             target,
@@ -814,7 +814,7 @@ impl Config {
             compiletest_diff_tool,
             compiletest_use_stage0_libtest,
             tidy_extra_checks,
-            mut ccache,
+            ccache,
             exclude,
         } = toml.build.unwrap_or_default();
 
@@ -1008,7 +1008,7 @@ impl Config {
         config.rust_profile_use = flags_rust_profile_use;
         config.rust_profile_generate = flags_rust_profile_generate;
 
-        config.apply_rust_config(toml.rust, flags_warnings, &mut description);
+        config.apply_rust_config(toml.rust, flags_warnings);
 
         config.reproducible_artifacts = flags_reproducible_artifact;
         config.description = description;
@@ -1029,7 +1029,7 @@ impl Config {
             config.channel = channel;
         }
 
-        config.apply_llvm_config(toml.llvm, &mut ccache);
+        config.apply_llvm_config(toml.llvm);
 
         config.apply_gcc_config(toml.gcc);
 

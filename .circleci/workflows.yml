@@ -273,7 +273,10 @@ jobs:
     resource_class: medium # 2-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      SCRIPT: ./x.py test --no-doc --coverage=library library/core
+      SCRIPT: |
+        ferrocene/ci/scripts/llvm_cache.py download
+        ./x.py run ferrocene/tools/coverage-of-subset
+        ./x.py test --no-doc --coverage=library library/core
     steps:
       - aws-oidc-auth
       - ferrocene-checkout:

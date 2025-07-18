@@ -118,6 +118,14 @@ impl Step for SingleCoverageReport {
         // grcov to strip it.
         cmd.arg("--prefix-dir").arg(&self.metadata.path_prefix);
 
+        // If collecting library coverage, ignore all directories that are not
+        // part of libcore. Otherwise things like compiler-builtins, coretests
+        // etc. will be included. portable-simd and stdarch are kept as well,
+        // since parts of them are included into libcore via a path attribute.
+        if self.name.starts_with("library") {
+            cmd.args(["--keep-only", "library/{core,portable-simd,stdarch}/**"]);
+        }
+
         builder.info(&format!("Generating coverage report for {}", self.name));
         cmd.fail_fast().run(builder);
 

@@ -28,7 +28,7 @@ use rustc_middle::ty::error::TypeErrorToStringExt;
 use rustc_middle::ty::print::{PrintTraitRefExt as _, with_no_trimmed_paths};
 use rustc_middle::ty::{
     self, DeepRejectCtxt, GenericArgsRef, PolyProjectionPredicate, SizedTraitKind, Ty, TyCtxt,
-    TypeFoldable, TypeVisitableExt, TypingMode, Upcast, elaborate,
+    TypeFoldable, TypeVisitableExt, TypingMode, Upcast, elaborate, may_use_unstable_feature,
 };
 use rustc_span::{Symbol, sym};
 use tracing::{debug, instrument, trace};
@@ -832,6 +832,14 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     }
                 }
 
+                ty::PredicateKind::Clause(ty::ClauseKind::UnstableFeature(symbol)) => {
+                    if may_use_unstable_feature(self.infcx, obligation.param_env, symbol) {
+                        Ok(EvaluatedToOk)
+                    } else {
+                        Ok(EvaluatedToAmbig)
+                    }
+                }
+
                 ty::PredicateKind::Clause(ty::ClauseKind::ConstEvaluatable(uv)) => {
                     match const_evaluatable::is_const_evaluatable(
                         self.infcx,
@@ -1504,7 +1512,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 defining_opaque_types_and_generators: defining_opaque_types,
             }
             | TypingMode::Borrowck { defining_opaque_types } => {
-                defining_opaque_types.is_empty() || !pred.has_opaque_types()
+                defining_opaque_types.is_empty()
+                    || (!pred.has_opaque_types() && !pred.has_coroutines())
             }
             // The hidden types of `defined_opaque_types` is not local to the current
             // inference context, so we can freely move this to the global cache.
@@ -2802,6 +2811,18 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         }
 
         obligations
+    }
+
+    fn should_stall_coroutine_witness(&self, def_id: DefId) -> bool {
+        match self.infcx.typing_mode() {
+            TypingMode::Analysis { defining_opaque_types_and_generators: stalled_generators } => {
+                def_id.as_local().is_some_and(|def_id| stalled_generators.contains(&def_id))
+            }
+            TypingMode::Coherence
+            | TypingMode::PostAnalysis
+            | TypingMode::Borrowck { defining_opaque_types: _ }
+            | TypingMode::PostBorrowckAnalysis { defined_opaque_types: _ } => false,
+        }
     }
 }
 

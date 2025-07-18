@@ -137,6 +137,7 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
     type FnInputTys = &'tcx [Ty<'tcx>];
     type ParamTy = ParamTy;
     type BoundTy = ty::BoundTy;
+    type Symbol = Symbol;
 
     type PlaceholderTy = ty::PlaceholderType;
     type ErrorGuaranteed = ErrorGuaranteed;
@@ -713,17 +714,13 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         self,
         defining_anchor: Self::LocalDefId,
     ) -> Self::LocalDefIds {
-        if self.next_trait_solver_globally() {
-            let coroutines_defined_by = self
-                .nested_bodies_within(defining_anchor)
-                .iter()
-                .filter(|def_id| self.is_coroutine(def_id.to_def_id()));
-            self.mk_local_def_ids_from_iter(
-                self.opaque_types_defined_by(defining_anchor).iter().chain(coroutines_defined_by),
-            )
-        } else {
-            self.opaque_types_defined_by(defining_anchor)
-        }
+        let coroutines_defined_by = self
+            .nested_bodies_within(defining_anchor)
+            .iter()
+            .filter(|def_id| self.is_coroutine(def_id.to_def_id()));
+        self.mk_local_def_ids_from_iter(
+            self.opaque_types_defined_by(defining_anchor).iter().chain(coroutines_defined_by),
+        )
     }
 }
 
@@ -832,6 +829,13 @@ impl<'tcx> rustc_type_ir::inherent::Features<TyCtxt<'tcx>> for &'tcx rustc_featu
 
     fn associated_const_equality(self) -> bool {
         self.associated_const_equality()
+    }
+
+    fn feature_bound_holds_in_crate(self, symbol: Symbol) -> bool {
+        // We don't consider feature bounds to hold in the crate when `staged_api` feature is
+        // enabled, even if it is enabled through `#[feature]`.
+        // This is to prevent accidentally leaking unstable APIs to stable.
+        !self.staged_api() && self.enabled(symbol)
     }
 }
 

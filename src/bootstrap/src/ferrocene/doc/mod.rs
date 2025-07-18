@@ -191,15 +191,21 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         // containing conf.py even if a different current directory is passed.
         let mut cmd = venv.cmd(if should_serve { "sphinx-autobuild" } else { "sphinx-build" });
         cmd.current_dir(&src)
-            .arg(relative_path(&src, &src))
-            .arg(relative_path(&src, &out))
+            .arg(relative_path(&src, &src, builder.config.dry_run()))
+            .arg(relative_path(&src, &out, builder.config.dry_run()))
             // Store doctrees outside the output directory:
             .arg("-d")
-            .arg(relative_path(&src, &doctrees))
+            .arg(relative_path(&src, &doctrees, builder.config.dry_run()))
             // Provide the correct substitutions:
-            .arg(path_define("ferrocene_substitutions_path", &relative_path(&src, &substitutions)))
+            .arg(path_define(
+                "ferrocene_substitutions_path",
+                &relative_path(&src, &substitutions, builder.config.dry_run()),
+            ))
             // Provide the correct target names:
-            .arg(path_define("ferrocene_target_names_path", &relative_path(&src, &target_names)))
+            .arg(path_define(
+                "ferrocene_target_names_path",
+                &relative_path(&src, &target_names, builder.config.dry_run()),
+            ))
             // Toolchain versions
             .arg(format!("-Dferrocene_version={ferrocene_version}"))
             .arg(format!(
@@ -213,12 +219,20 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
 
         // Include the breadcrumbs in the generated documentation.
         css_files.push("ferrocene-breadcrumbs.css".into());
-        include_in_header.push(relative_path(&src, &breadcrumbs.join("sphinx-template.html")));
+        include_in_header.push(relative_path(
+            &src,
+            &breadcrumbs.join("sphinx-template.html"),
+            builder.config.dry_run(),
+        ));
         cmd.arg(format!("-Aferrocene_breadcrumbs_index={path_to_root}/index.html"));
 
         // Include the public-docs warning message.
         css_files.push(format!("{path_to_root}/../public-docs-warning.css"));
-        include_in_header.push(relative_path(&src, &public_docs_warning.join("header.html")));
+        include_in_header.push(relative_path(
+            &src,
+            &public_docs_warning.join("header.html"),
+            builder.config.dry_run(),
+        ));
 
         cmd.arg(path_define("html_css_files", comma_separated_paths(&css_files)));
         cmd.arg(path_define(
@@ -239,7 +253,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         if self.require_relnotes {
             cmd.arg(path_define(
                 "rust_release_notes",
-                &relative_path(&src, &builder.src.join("RELEASES.md")),
+                &relative_path(&src, &builder.src.join("RELEASES.md"), builder.config.dry_run()),
             ));
         }
 
@@ -321,7 +335,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
                 // Provide the directory containing the cached private signature files:
                 cmd.arg(path_define(
                     "ferrocene_private_signature_files_dir",
-                    &relative_path(&src, &private_signature_files_dir),
+                    &relative_path(&src, &private_signature_files_dir, builder.config.dry_run()),
                 ));
             }
             (_, SignatureStatus::Missing) => {
@@ -403,7 +417,7 @@ fn add_intersphinx_arguments<P: Step + IsSphinxBook>(
         inventories.push(Inventory {
             name: config.name.into(),
             html_root,
-            inventory: relative_path(src, &inv),
+            inventory: relative_path(src, &inv, builder.config.dry_run()),
         });
     }
 
@@ -860,7 +874,16 @@ impl Step for Index {
 
 // Note: this function is correct for the use made in this module, but it will not work correctly
 // if the paths do not have any segments in common.
-fn relative_path(base: &Path, path: &Path) -> PathBuf {
+fn relative_path(base: &Path, path: &Path, dry_run: bool) -> PathBuf {
+    // In dry run situations (notably, just bootstrap tests) the out folder is not necessarily
+    // relative to the source directory.
+    //
+    // In 'real' builds, Sphinx needs relative paths to the conf.py for reproducability,
+    // but in dry run situations, don't need to do this, returning the `path` is enough.
+    if dry_run {
+        return path.into();
+    }
+
     let base = absolute(base).unwrap_or_else(|_| base.to_owned());
     let path = absolute(path).unwrap_or_else(|_| path.to_owned());
 

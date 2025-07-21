@@ -142,6 +142,12 @@ should not be used in production.
      - Full
      - \-
 
+   * - :target:`aarch64-unknown-linux-musl`
+     - ``aarch64-unknown-linux-musl``
+     - Cross-compilation
+     - Full
+     - \-
+
    * - :target:`armebv7r-none-eabihf`
      - ``armebv7r-none-eabihf``
      - Cross-compilation
@@ -199,6 +205,12 @@ should not be used in production.
    * - :ref:`x86_64-pc-windows-msvc`
      - ``x86_64-pc-windows-msvc``
      - Host platform
+     - Full
+     - \-
+
+   * - :target:`x86_64-unknown-linux-musl`
+     - ``x86_64-unknown-linux-musl``
+     - Cross-compilation
      - Full
      - \-
 

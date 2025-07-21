@@ -54,11 +54,9 @@
 )]
 #![allow(missing_docs)]
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-=======
 use crate::ffi::va_list::{VaArgSafe, VaListImpl};
->>>>>>> main
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{ConstParamTy, DiscriminantKind, PointeeSized, Tuple};
 #[cfg(feature = "ferrocene_certified")]
 use crate::marker::{ConstParamTy, DiscriminantKind, Tuple};
@@ -2905,10 +2903,7 @@ pub const fn type_name<T: ?Sized>() -> &'static str;
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const fn type_id<T: ?Sized + 'static>() -> u128;
-=======
 pub const fn type_id<T: ?Sized + 'static>() -> crate::any::TypeId;
 
 /// Tests (at compile-time) if two [`crate::any::TypeId`] instances identify the
@@ -2920,10 +2915,10 @@ pub const fn type_id<T: ?Sized + 'static>() -> crate::any::TypeId;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[rustc_do_not_const_check]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn type_id_eq(a: crate::any::TypeId, b: crate::any::TypeId) -> bool {
     a.data == b.data
 }
->>>>>>> main
 
 /// Lowers in MIR to `Rvalue::Aggregate` with `AggregateKind::RawPtr`.
 ///

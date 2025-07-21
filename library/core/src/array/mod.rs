@@ -413,13 +413,9 @@ impl<'a, T, const N: usize> IntoIterator for &'a mut [T; N] {
 }
 
 #[stable(feature = "index_trait_on_arrays", since = "1.50.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T, I, const N: usize> Index<I> for [T; N]
-=======
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, I, const N: usize> const Index<I> for [T; N]
->>>>>>> main
 where
     [T]: ~const Index<I>,
 {
@@ -432,13 +428,9 @@ where
 }
 
 #[stable(feature = "index_trait_on_arrays", since = "1.50.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T, I, const N: usize> IndexMut<I> for [T; N]
-=======
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, I, const N: usize> const IndexMut<I> for [T; N]
->>>>>>> main
 where
     [T]: ~const IndexMut<I>,
 {

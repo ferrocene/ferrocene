@@ -802,13 +802,9 @@ impl<T> const From<T> for T {
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[rustc_reservation_impl = "permitting this impl would forbid us from adding \
                             `impl<T> From<!> for T` later; see rust-lang/rust#64715 for details"]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T> From<!> for T {
-=======
 #[rustc_const_unstable(feature = "const_from", issue = "143773")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const From<!> for T {
->>>>>>> main
     fn from(t: !) -> T {
         t
     }

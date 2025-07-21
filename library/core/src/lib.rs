@@ -163,18 +163,11 @@
 #![feature(intra_doc_pointers)]
 #![feature(intrinsics)]
 #![feature(lang_items)]
-<<<<<<< HEAD
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(link_llvm_intrinsics))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(macro_metavar_expr))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(macro_metavar_expr_concat))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(marker_trait_attr))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(min_specialization))]
-=======
-#![feature(link_llvm_intrinsics)]
-#![feature(macro_metavar_expr)]
-#![feature(macro_metavar_expr_concat)]
-#![feature(marker_trait_attr)]
-#![feature(min_specialization)]
->>>>>>> main
 #![feature(multiple_supertrait_upcastable)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(must_not_suspend))]
 #![feature(negative_impls)]

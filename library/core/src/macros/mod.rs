@@ -239,32 +239,10 @@ pub macro assert_matches {
 /// ```
 #[unstable(feature = "cfg_select", issue = "115585")]
 #[rustc_diagnostic_item = "cfg_select"]
-<<<<<<< HEAD
-#[rustc_macro_transparency = "semitransparent"]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub macro cfg_select {
-    ({ $($tt:tt)* }) => {{
-        $crate::cfg_select! { $($tt)* }
-    }},
-    (_ => { $($output:tt)* }) => {
-        $($output)*
-    },
-    (
-        $cfg:meta => $output:tt
-        $($( $rest:tt )+)?
-    ) => {
-        #[cfg($cfg)]
-        $crate::cfg_select! { _ => $output }
-        $(
-            #[cfg(not($cfg))]
-            $crate::cfg_select! { $($rest)+ }
-        )?
-    },
-=======
 #[rustc_builtin_macro]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub macro cfg_select($($tt:tt)*) {
     /* compiler built-in */
->>>>>>> main
 }
 
 /// Asserts that a boolean expression is `true` at runtime.

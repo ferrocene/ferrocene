@@ -25,11 +25,9 @@ mod float;
 mod nofloat;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod num;
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-=======
 mod num_buffer;
->>>>>>> main
+#[cfg(not(feature = "ferrocene_certified"))]
 mod rt;
 
 #[stable(feature = "fmt_flags_align", since = "1.28.0")]
@@ -2977,16 +2975,7 @@ macro_rules! maybe_tuple_doc {
     };
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-macro_rules! last_type {
-    ($a:ident,) => { $a };
-    ($a:ident, $($rest_a:ident,)+) => { last_type!($($rest_a,)+) };
-}
-
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
->>>>>>> main
 tuple! { E, D, C, B, A, Z, Y, X, W, V, U, T, }
 
 #[stable(feature = "rust1", since = "1.0.0")]

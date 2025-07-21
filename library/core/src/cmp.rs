@@ -2061,12 +2061,8 @@ mod impls {
     // & pointers
 
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[rustc_const_unstable(feature = "const_cmp", issue = "92391")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
->>>>>>> main
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialEq<&B> for &A
     where
         A: ~const PartialEq<B>,
@@ -2141,12 +2137,8 @@ mod impls {
     // &mut pointers
 
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[rustc_const_unstable(feature = "const_cmp", issue = "92391")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
->>>>>>> main
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialEq<&mut B> for &mut A
     where
         A: ~const PartialEq<B>,
@@ -2219,12 +2211,8 @@ mod impls {
     impl<A: PointeeSized> Eq for &mut A where A: Eq {}
 
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[rustc_const_unstable(feature = "const_cmp", issue = "92391")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
->>>>>>> main
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialEq<&mut B> for &A
     where
         A: ~const PartialEq<B>,
@@ -2240,12 +2228,8 @@ mod impls {
     }
 
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[rustc_const_unstable(feature = "const_cmp", issue = "92391")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-=======
     #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
->>>>>>> main
+    #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialEq<&B> for &mut A
     where
         A: ~const PartialEq<B>,

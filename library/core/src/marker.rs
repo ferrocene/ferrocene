@@ -900,13 +900,9 @@ impl<T: PointeeSized> Clone for PhantomData<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: PointeeSized> Default for PhantomData<T> {
-=======
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> const Default for PhantomData<T> {
->>>>>>> main
     fn default() -> Self {
         Self
     }
@@ -1134,42 +1130,6 @@ pub trait Destruct {}
 #[rustc_do_not_implement_via_object]
 pub trait Tuple {}
 
-<<<<<<< HEAD
-/// A marker for pointer-like types.
-///
-/// This trait can only be implemented for types that are certain to have
-/// the same size and alignment as a [`usize`] or [`*const ()`](pointer).
-/// To ensure this, there are special requirements on implementations
-/// of `PointerLike` (other than the already-provided implementations
-/// for built-in types):
-///
-/// * The type must have `#[repr(transparent)]`.
-/// * The type’s sole non-zero-sized field must itself implement `PointerLike`.
-#[unstable(feature = "pointer_like_trait", issue = "none")]
-#[lang = "pointer_like"]
-#[diagnostic::on_unimplemented(
-    message = "`{Self}` needs to have the same ABI as a pointer",
-    label = "`{Self}` needs to be a pointer-like type"
-)]
-#[rustc_do_not_implement_via_object]
-#[cfg(not(feature = "ferrocene_certified"))]
-pub trait PointerLike {}
-
-#[cfg(not(feature = "ferrocene_certified"))]
-marker_impls! {
-    #[unstable(feature = "pointer_like_trait", issue = "none")]
-    PointerLike for
-        isize,
-        usize,
-        {T} &T,
-        {T} &mut T,
-        {T} *const T,
-        {T} *mut T,
-        {T: PointerLike} crate::pin::Pin<T>,
-}
-
-=======
->>>>>>> main
 /// A marker for types which can be used as types of `const` generic parameters.
 ///
 /// These types must have a proper equivalence relation (`Eq`) and it must be automatically

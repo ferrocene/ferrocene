@@ -254,13 +254,9 @@
 use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt::{self, Debug, Display};
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::marker::{PhantomData, PointerLike, Unsize};
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 use crate::marker::{PhantomData, Unsize};
->>>>>>> main
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{CoerceUnsized, Deref, DerefMut, DerefPure, DispatchFromDyn};
@@ -353,13 +349,9 @@ impl<T: Copy> Clone for Cell<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: Default> Default for Cell<T> {
-=======
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ~const Default> const Default for Cell<T> {
->>>>>>> main
     /// Creates a `Cell<T>`, with the `Default` value for T.
     #[inline]
     fn default() -> Cell<T> {
@@ -706,14 +698,7 @@ impl<T: CoerceUnsized<U>, U> CoerceUnsized<Cell<U>> for Cell<T> {}
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: DispatchFromDyn<U>, U> DispatchFromDyn<Cell<U>> for Cell<T> {}
 
-<<<<<<< HEAD
-#[unstable(feature = "pointer_like_trait", issue = "none")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: PointerLike> PointerLike for Cell<T> {}
-
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
->>>>>>> main
 impl<T> Cell<[T]> {
     /// Returns a `&[Cell<T>]` from a `&Cell<[T]>`
     ///
@@ -1386,13 +1371,9 @@ impl<T: Clone> Clone for RefCell<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: Default> Default for RefCell<T> {
-=======
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ~const Default> const Default for RefCell<T> {
->>>>>>> main
     /// Creates a `RefCell<T>`, with the `Default` value for T.
     #[inline]
     fn default() -> RefCell<T> {
@@ -2431,13 +2412,9 @@ impl<T: ?Sized> UnsafeCell<T> {
 }
 
 #[stable(feature = "unsafe_cell_default", since = "1.10.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: Default> Default for UnsafeCell<T> {
-=======
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ~const Default> const Default for UnsafeCell<T> {
->>>>>>> main
     /// Creates an `UnsafeCell`, with the `Default` value for T.
     fn default() -> UnsafeCell<T> {
         UnsafeCell::new(Default::default())
@@ -2468,13 +2445,6 @@ impl<T: CoerceUnsized<U>, U> CoerceUnsized<UnsafeCell<U>> for UnsafeCell<T> {}
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: DispatchFromDyn<U>, U> DispatchFromDyn<UnsafeCell<U>> for UnsafeCell<T> {}
 
-<<<<<<< HEAD
-#[unstable(feature = "pointer_like_trait", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: PointerLike> PointerLike for UnsafeCell<T> {}
-
-=======
->>>>>>> main
 /// [`UnsafeCell`], but [`Sync`].
 ///
 /// This is just an `UnsafeCell`, except it implements `Sync`
@@ -2555,13 +2525,9 @@ impl<T: ?Sized> SyncUnsafeCell<T> {
 }
 
 #[unstable(feature = "sync_unsafe_cell", issue = "95439")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: Default> Default for SyncUnsafeCell<T> {
-=======
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ~const Default> const Default for SyncUnsafeCell<T> {
->>>>>>> main
     /// Creates an `SyncUnsafeCell`, with the `Default` value for T.
     fn default() -> SyncUnsafeCell<T> {
         SyncUnsafeCell::new(Default::default())
@@ -2594,13 +2560,6 @@ impl<T: CoerceUnsized<U>, U> CoerceUnsized<SyncUnsafeCell<U>> for SyncUnsafeCell
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: DispatchFromDyn<U>, U> DispatchFromDyn<SyncUnsafeCell<U>> for SyncUnsafeCell<T> {}
 
-<<<<<<< HEAD
-#[unstable(feature = "pointer_like_trait", issue = "none")]
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: PointerLike> PointerLike for SyncUnsafeCell<T> {}
-
-=======
->>>>>>> main
 #[allow(unused)]
 #[cfg(not(feature = "ferrocene_certified"))]
 fn assert_coerce_unsized(

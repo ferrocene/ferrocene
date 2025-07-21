@@ -3372,6 +3372,7 @@ pub(crate) const fn miri_promise_symbolic_alignment(ptr: *const (), align: usize
 /// FIXME: document safety requirements
 #[rustc_intrinsic]
 #[rustc_nounwind]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn va_copy<'f>(dest: *mut VaListImpl<'f>, src: &VaListImpl<'f>);
 
 /// Loads an argument of type `T` from the `va_list` `ap` and increment the
@@ -3380,6 +3381,7 @@ pub unsafe fn va_copy<'f>(dest: *mut VaListImpl<'f>, src: &VaListImpl<'f>);
 /// FIXME: document safety requirements
 #[rustc_intrinsic]
 #[rustc_nounwind]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn va_arg<T: VaArgSafe>(ap: &mut VaListImpl<'_>) -> T;
 
 /// Destroy the arglist `ap` after initialization with `va_start` or `va_copy`.
@@ -3387,4 +3389,5 @@ pub unsafe fn va_arg<T: VaArgSafe>(ap: &mut VaListImpl<'_>) -> T;
 /// FIXME: document safety requirements
 #[rustc_intrinsic]
 #[rustc_nounwind]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn va_end(ap: &mut VaListImpl<'_>);

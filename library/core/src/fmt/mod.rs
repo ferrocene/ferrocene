@@ -48,6 +48,7 @@ pub enum Alignment {
 }
 
 #[unstable(feature = "int_format_into", issue = "138215")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use num_buffer::{NumBuffer, NumBufferTrait};
 
 #[stable(feature = "debug_builders", since = "1.2.0")]

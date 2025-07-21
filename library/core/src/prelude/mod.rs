@@ -42,10 +42,12 @@ pub mod rust_2021 {
 
     #[stable(feature = "prelude_2021", since = "1.55.0")]
     #[doc(no_inline)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub use crate::iter::FromIterator;
 
     #[stable(feature = "prelude_2021", since = "1.55.0")]
     #[doc(no_inline)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub use crate::convert::{TryFrom, TryInto};
 }
 
@@ -54,6 +56,33 @@ pub mod rust_2021 {
 /// See the [module-level documentation](self) for more.
 #[stable(feature = "prelude_2024", since = "1.85.0")]
 pub mod rust_2024 {
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[doc(no_inline)]
+    pub use super::v1::*;
+
+    #[stable(feature = "prelude_2021", since = "1.55.0")]
+    #[doc(no_inline)]
+    #[cfg(not(feature = "ferrocene_certified"))]
+    pub use crate::iter::FromIterator;
+
+    #[stable(feature = "prelude_2021", since = "1.55.0")]
+    #[doc(no_inline)]
+    #[cfg(not(feature = "ferrocene_certified"))]
+    pub use crate::convert::{TryFrom, TryInto};
+
+    #[stable(feature = "prelude_2024", since = "1.85.0")]
+    #[doc(no_inline)]
+    #[cfg(not(feature = "ferrocene_certified"))]
+    pub use crate::future::{Future, IntoFuture};
+}
+
+/// The Future version of the core prelude.
+///
+/// See the [module-level documentation](self) for more.
+#[doc(hidden)]
+#[unstable(feature = "prelude_future", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
+pub mod rust_future {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[doc(no_inline)]
     pub use super::v1::*;

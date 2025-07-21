@@ -286,9 +286,9 @@ impl<'a> Visitor<'a> for PostExpansionVisitor<'a> {
 
     fn visit_ty(&mut self, ty: &'a ast::Ty) {
         match &ty.kind {
-            ast::TyKind::BareFn(bare_fn_ty) => {
+            ast::TyKind::FnPtr(fn_ptr_ty) => {
                 // Function pointers cannot be `const`
-                self.check_late_bound_lifetime_defs(&bare_fn_ty.generic_params);
+                self.check_late_bound_lifetime_defs(&fn_ptr_ty.generic_params);
             }
             ast::TyKind::Never => {
                 gate!(&self, never_type, ty.span, "the `!` type is experimental");
@@ -469,7 +469,6 @@ pub fn check_crate(krate: &ast::Crate, sess: &Session, features: &Features) {
         "`if let` guards are experimental",
         "you can write `if matches!(<expr>, <pattern>)` instead of `if let <pattern> = <expr>`"
     );
-    gate_all!(let_chains, "`let` expressions in this position are unstable");
     gate_all!(
         async_trait_bounds,
         "`async` trait bounds are unstable",

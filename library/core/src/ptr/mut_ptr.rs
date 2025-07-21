@@ -38,7 +38,7 @@ impl<T: PointeeSized> *mut T {
         self as _
     }
 
-    /// Try to cast to a pointer of another type by checking aligment.
+    /// Try to cast to a pointer of another type by checking alignment.
     ///
     /// If the pointer is properly aligned to the target type, it will be
     /// cast to the target type. Otherwise, `None` is returned.
@@ -1938,10 +1938,11 @@ impl<T> *mut [T] {
     /// }
     /// ```
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
+    #[rustc_const_unstable(feature = "const_index", issue = "143775")]
     #[inline(always)]
-    pub unsafe fn get_unchecked_mut<I>(self, index: I) -> *mut I::Output
+    pub const unsafe fn get_unchecked_mut<I>(self, index: I) -> *mut I::Output
     where
-        I: SliceIndex<[T]>,
+        I: ~const SliceIndex<[T]>,
     {
         // SAFETY: the caller ensures that `self` is dereferenceable and `index` in-bounds.
         unsafe { index.get_unchecked_mut(self) }

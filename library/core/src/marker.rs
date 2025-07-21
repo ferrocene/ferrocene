@@ -26,6 +26,9 @@ use crate::hash::{Hash, Hasher};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::pin::UnsafePinned;
 
+// NOTE: for consistent error messages between `core` and `minicore`, all `diagnostic` attributes
+// should be replicated exactly in `minicore` (if `minicore` defines the item).
+
 /// Implements a given marker trait for multiple types at the same time.
 ///
 /// The basic syntax looks like this:
@@ -214,9 +217,14 @@ pub trait PointeeSized {
 ///   - `Trait` is dyn-compatible[^1].
 ///   - The type is sized.
 ///   - The type outlives `'a`.
+/// - Trait objects `dyn TraitA + AutoA... + 'a` implement `Unsize<dyn TraitB + AutoB... + 'b>`
+///    if all of these conditions are met:
+///   - `TraitB` is a supertrait of `TraitA`.
+///   - `AutoB...` is a subset of `AutoA...`.
+///   - `'a` outlives `'b`.
 /// - Structs `Foo<..., T1, ..., Tn, ...>` implement `Unsize<Foo<..., U1, ..., Un, ...>>`
-/// where any number of (type and const) parameters may be changed if all of these conditions
-/// are met:
+///   where any number of (type and const) parameters may be changed if all of these conditions
+///   are met:
 ///   - Only the last field of `Foo` has a type involving the parameters `T1`, ..., `Tn`.
 ///   - All other parameters of the struct are equal.
 ///   - `Field<T1, ..., Tn>: Unsize<Field<U1, ..., Un>>`, where `Field<...>` stands for the actual
@@ -892,8 +900,13 @@ impl<T: PointeeSized> Clone for PhantomData<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> Default for PhantomData<T> {
+=======
+#[rustc_const_unstable(feature = "const_default", issue = "143894")]
+impl<T: PointeeSized> const Default for PhantomData<T> {
+>>>>>>> main
     fn default() -> Self {
         Self
     }
@@ -1121,6 +1134,7 @@ pub trait Destruct {}
 #[rustc_do_not_implement_via_object]
 pub trait Tuple {}
 
+<<<<<<< HEAD
 /// A marker for pointer-like types.
 ///
 /// This trait can only be implemented for types that are certain to have
@@ -1154,6 +1168,8 @@ marker_impls! {
         {T: PointerLike} crate::pin::Pin<T>,
 }
 
+=======
+>>>>>>> main
 /// A marker for types which can be used as types of `const` generic parameters.
 ///
 /// These types must have a proper equivalence relation (`Eq`) and it must be automatically

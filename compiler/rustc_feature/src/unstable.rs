@@ -444,7 +444,7 @@ declare_features! (
     /// Be more precise when looking for live drops in a const context.
     (unstable, const_precise_live_drops, "1.46.0", Some(73255)),
     /// Allows `impl const Trait for T` syntax.
-    (unstable, const_trait_impl, "1.42.0", Some(67792)),
+    (unstable, const_trait_impl, "1.42.0", Some(143874)),
     /// Allows the `?` operator in const contexts.
     (unstable, const_try, "1.56.0", Some(74935)),
     /// Allows use of contracts attributes.
@@ -550,8 +550,6 @@ declare_features! (
     (unstable, large_assignments, "1.52.0", Some(83518)),
     /// Allow to have type alias types for inter-crate use.
     (incomplete, lazy_type_alias, "1.72.0", Some(112792)),
-    /// Allows `if/while p && let q = r && ...` chains.
-    (unstable, let_chains, "1.37.0", Some(53667)),
     /// Allows using `#[link(kind = "link-arg", name = "...")]`
     /// to pass custom arguments to the linker.
     (unstable, link_arg_attribute, "1.76.0", Some(99427)),

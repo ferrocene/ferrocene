@@ -624,6 +624,7 @@ symbols! {
         cfg_relocation_model,
         cfg_sanitize,
         cfg_sanitizer_cfi,
+        cfg_select,
         cfg_target_abi,
         cfg_target_compact,
         cfg_target_feature,
@@ -714,6 +715,7 @@ symbols! {
         const_indexing,
         const_let,
         const_loop,
+        const_make_global,
         const_mut_refs,
         const_panic,
         const_panic_fmt,
@@ -1623,7 +1625,6 @@ symbols! {
         pointee_sized,
         pointee_trait,
         pointer,
-        pointer_like,
         poll,
         poll_next,
         position,
@@ -1775,7 +1776,6 @@ symbols! {
         resume,
         return_position_impl_trait_in_trait,
         return_type_notation,
-        rhs,
         riscv_target_feature,
         rlib,
         ropi,
@@ -2196,6 +2196,7 @@ symbols! {
         type_changing_struct_update,
         type_const,
         type_id,
+        type_id_eq,
         type_ir,
         type_ir_infer_ctxt_like,
         type_ir_inherent,
@@ -2284,6 +2285,7 @@ symbols! {
         unsized_locals,
         unsized_tuple_coercion,
         unstable,
+        unstable_feature_bound,
         unstable_location_reason_default: "this crate is being loaded from the sysroot, an \
                           unstable location; did you mean to load this crate \
                           from crates.io via `Cargo.toml` instead?",
@@ -2398,7 +2400,7 @@ pub const STDLIB_STABLE_CRATES: &[Symbol] = &[sym::std, sym::core, sym::alloc, s
 #[derive(Copy, Clone, Eq, HashStable_Generic, Encodable, Decodable)]
 pub struct Ident {
     // `name` should never be the empty symbol. If you are considering that,
-    // you are probably conflating "empty identifer with "no identifier" and
+    // you are probably conflating "empty identifier with "no identifier" and
     // you should use `Option<Ident>` instead.
     pub name: Symbol,
     pub span: Span,

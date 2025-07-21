@@ -58,8 +58,6 @@ macro_rules! dbghelp {
         impl Dbghelp {
             /// Attempts to open `dbghelp.dll`. Returns success if it works or
             /// error if `LoadLibraryW` fails.
-            ///
-            /// Panics if library is already loaded.
             fn ensure_open(&mut self) -> Result<(), ()> {
                 if !self.dll.is_null() {
                     return Ok(())

@@ -34,7 +34,7 @@ impl<T: PointeeSized> *const T {
             if const #[rustc_allow_const_fn_unstable(const_raw_ptr_comparison)] {
                 match (ptr).guaranteed_eq(null_mut()) {
                     Some(res) => res,
-                    // To remain maximally convervative, we stop execution when we don't
+                    // To remain maximally conservative, we stop execution when we don't
                     // know whether the pointer is null or not.
                     // We can *not* return `false` here, that would be unsound in `NonNull::new`!
                     None => panic!("null-ness of this pointer cannot be determined in const context"),
@@ -54,7 +54,7 @@ impl<T: PointeeSized> *const T {
         self as _
     }
 
-    /// Try to cast to a pointer of another type by checking aligment.
+    /// Try to cast to a pointer of another type by checking alignment.
     ///
     /// If the pointer is properly aligned to the target type, it will be
     /// cast to the target type. Otherwise, `None` is returned.
@@ -1564,10 +1564,11 @@ impl<T> *const [T] {
     /// }
     /// ```
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
+    #[rustc_const_unstable(feature = "const_index", issue = "143775")]
     #[inline]
-    pub unsafe fn get_unchecked<I>(self, index: I) -> *const I::Output
+    pub const unsafe fn get_unchecked<I>(self, index: I) -> *const I::Output
     where
-        I: SliceIndex<[T]>,
+        I: ~const SliceIndex<[T]>,
     {
         // SAFETY: the caller ensures that `self` is dereferenceable and `index` in-bounds.
         unsafe { index.get_unchecked(self) }

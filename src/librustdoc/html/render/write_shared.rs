@@ -25,8 +25,8 @@ use std::str::FromStr;
 use std::{fmt, fs};
 
 use indexmap::IndexMap;
-use itertools::Itertools;
 use regex::Regex;
+use rustc_ast::join_path_syms;
 use rustc_data_structures::flock;
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_middle::ty::TyCtxt;
@@ -443,7 +443,7 @@ impl CratesIndexPart {
             .expect("Object Replacement Character (U+FFFC) should not appear in the --index-page")
     }
 
-    /// Might return parts that are duplicate with ones in prexisting index.html
+    /// Might return parts that are duplicate with ones in preexisting index.html
     fn get(crate_name: &str, external_crates: &[String]) -> Result<PartsAndLocations<Self>, Error> {
         let mut ret = PartsAndLocations::default();
         let path = Path::new("index.html");
@@ -608,7 +608,7 @@ impl TypeAliasPart {
                     for &(type_alias_fqp, type_alias_item) in type_aliases {
                         cx.id_map.borrow_mut().clear();
                         cx.deref_id_map.borrow_mut().clear();
-                        let type_alias_fqp = (*type_alias_fqp).iter().join("::");
+                        let type_alias_fqp = join_path_syms(type_alias_fqp);
                         if let Some(ret) = &mut ret {
                             ret.aliases.push(type_alias_fqp);
                         } else {

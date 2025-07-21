@@ -252,8 +252,13 @@ impl hash::Hash for Alignment {
 
 /// Returns [`Alignment::MIN`], which is valid for any type.
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl Default for Alignment {
+=======
+#[rustc_const_unstable(feature = "const_default", issue = "143894")]
+impl const Default for Alignment {
+>>>>>>> main
     fn default() -> Alignment {
         Alignment::MIN
     }

@@ -31,7 +31,7 @@ use crate::traits::{
 ///
 /// Currently that is `Self` in supertraits. This is needed
 /// because `dyn_compatibility_violations` can't be used during
-/// type collection, as type collection is needed for `dyn_compatiblity_violations` itself.
+/// type collection, as type collection is needed for `dyn_compatibility_violations` itself.
 #[instrument(level = "debug", skip(tcx), ret)]
 pub fn hir_ty_lowering_dyn_compatibility_violations(
     tcx: TyCtxt<'_>,
@@ -238,6 +238,7 @@ fn predicate_references_self<'tcx>(
         // FIXME(generic_const_exprs): this can mention `Self`
         | ty::ClauseKind::ConstEvaluatable(..)
         | ty::ClauseKind::HostEffect(..)
+        | ty::ClauseKind::UnstableFeature(_)
          => None,
     }
 }
@@ -278,6 +279,7 @@ fn generics_require_sized_self(tcx: TyCtxt<'_>, def_id: DefId) -> bool {
         | ty::ClauseKind::ConstArgHasType(_, _)
         | ty::ClauseKind::WellFormed(_)
         | ty::ClauseKind::ConstEvaluatable(_)
+        | ty::ClauseKind::UnstableFeature(_)
         | ty::ClauseKind::HostEffect(..) => false,
     })
 }

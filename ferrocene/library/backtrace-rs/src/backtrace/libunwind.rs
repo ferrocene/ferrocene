@@ -113,7 +113,9 @@ impl Drop for Bomb {
 
 #[inline(always)]
 pub unsafe fn trace(mut cb: &mut dyn FnMut(&super::Frame) -> bool) {
-    uw::_Unwind_Backtrace(trace_fn, addr_of_mut!(cb).cast());
+    unsafe {
+        uw::_Unwind_Backtrace(trace_fn, addr_of_mut!(cb).cast());
+    }
 
     extern "C" fn trace_fn(
         ctx: *mut uw::_Unwind_Context,
@@ -184,6 +186,7 @@ mod uw {
             not(all(target_os = "horizon", target_arch = "arm")),
             not(all(target_os = "rtems", target_arch = "arm")),
             not(all(target_os = "vita", target_arch = "arm")),
+            not(all(target_os = "nuttx", target_arch = "arm")),
         ))] {
             unsafe extern "C" {
                 pub fn _Unwind_GetIP(ctx: *mut _Unwind_Context) -> libc::uintptr_t;
@@ -205,10 +208,10 @@ mod uw {
             // instead of relying on _Unwind_GetCFA.
             #[cfg(all(target_os = "linux", target_arch = "s390x"))]
             pub unsafe fn get_sp(ctx: *mut _Unwind_Context) -> libc::uintptr_t {
-                extern "C" {
+                unsafe extern "C" {
                     pub fn _Unwind_GetGR(ctx: *mut _Unwind_Context, index: libc::c_int) -> libc::uintptr_t;
                 }
-                _Unwind_GetGR(ctx, 15)
+                unsafe { _Unwind_GetGR(ctx, 15) }
             }
         } else {
             use core::ptr::addr_of_mut;
@@ -258,13 +261,15 @@ mod uw {
             pub unsafe fn _Unwind_GetIP(ctx: *mut _Unwind_Context) -> libc::uintptr_t {
                 let mut val: _Unwind_Word = 0;
                 let ptr = addr_of_mut!(val);
-                let _ = _Unwind_VRS_Get(
-                    ctx,
-                    _Unwind_VRS_RegClass::_UVRSC_CORE,
-                    15,
-                    _Unwind_VRS_DataRepresentation::_UVRSD_UINT32,
-                    ptr.cast::<c_void>(),
-                );
+                unsafe {
+                    let _ = _Unwind_VRS_Get(
+                        ctx,
+                        _Unwind_VRS_RegClass::_UVRSC_CORE,
+                        15,
+                        _Unwind_VRS_DataRepresentation::_UVRSD_UINT32,
+                        ptr.cast::<c_void>(),
+                    );
+                }
                 (val & !1) as libc::uintptr_t
             }
 
@@ -274,13 +279,15 @@ mod uw {
             pub unsafe fn get_sp(ctx: *mut _Unwind_Context) -> libc::uintptr_t {
                 let mut val: _Unwind_Word = 0;
                 let ptr = addr_of_mut!(val);
-                let _ = _Unwind_VRS_Get(
-                    ctx,
-                    _Unwind_VRS_RegClass::_UVRSC_CORE,
-                    SP,
-                    _Unwind_VRS_DataRepresentation::_UVRSD_UINT32,
-                    ptr.cast::<c_void>(),
-                );
+                unsafe {
+                    let _ = _Unwind_VRS_Get(
+                        ctx,
+                        _Unwind_VRS_RegClass::_UVRSC_CORE,
+                        SP,
+                        _Unwind_VRS_DataRepresentation::_UVRSD_UINT32,
+                        ptr.cast::<c_void>(),
+                    );
+                }
                 val as libc::uintptr_t
             }
 

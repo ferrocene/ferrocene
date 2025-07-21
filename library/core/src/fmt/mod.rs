@@ -25,7 +25,11 @@ mod float;
 mod nofloat;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod num;
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
+=======
+mod num_buffer;
+>>>>>>> main
 mod rt;
 
 #[stable(feature = "fmt_flags_align", since = "1.28.0")]
@@ -44,6 +48,9 @@ pub enum Alignment {
     /// Indication that contents should be center-aligned.
     Center,
 }
+
+#[unstable(feature = "int_format_into", issue = "138215")]
+pub use num_buffer::{NumBuffer, NumBufferTrait};
 
 #[stable(feature = "debug_builders", since = "1.2.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -372,10 +379,10 @@ impl FormattingOptions {
     /// Sets or removes the sign (the `+` or the `-` flag).
     ///
     /// - `+`: This is intended for numeric types and indicates that the sign
-    /// should always be printed. By default only the negative sign of signed
-    /// values is printed, and the sign of positive or unsigned values is
-    /// omitted. This flag indicates that the correct sign (+ or -) should
-    /// always be printed.
+    ///   should always be printed. By default only the negative sign of signed
+    ///   values is printed, and the sign of positive or unsigned values is
+    ///   omitted. This flag indicates that the correct sign (+ or -) should
+    ///   always be printed.
     /// - `-`: Currently not used
     #[unstable(feature = "formatting_options", issue = "118117")]
     pub fn sign(&mut self, sign: Option<Sign>) -> &mut Self {
@@ -462,9 +469,9 @@ impl FormattingOptions {
     /// Sets or removes the precision.
     ///
     /// - For non-numeric types, this can be considered a “maximum width”. If
-    /// the resulting string is longer than this width, then it is truncated
-    /// down to this many characters and that truncated value is emitted with
-    /// proper fill, alignment and width if those parameters are set.
+    ///   the resulting string is longer than this width, then it is truncated
+    ///   down to this many characters and that truncated value is emitted with
+    ///   proper fill, alignment and width if those parameters are set.
     /// - For integral types, this is ignored.
     /// - For floating-point types, this indicates how many digits after the
     /// decimal point should be printed.
@@ -2938,7 +2945,7 @@ macro_rules! tuple {
         maybe_tuple_doc! {
             $($name)+ @
             #[stable(feature = "rust1", since = "1.0.0")]
-            impl<$($name:Debug),+> Debug for ($($name,)+) where last_type!($($name,)+): ?Sized {
+            impl<$($name:Debug),+> Debug for ($($name,)+) {
                 #[allow(non_snake_case, unused_assignments)]
                 fn fmt(&self, f: &mut Formatter<'_>) -> Result {
                     let mut builder = f.debug_tuple("");
@@ -2970,6 +2977,7 @@ macro_rules! maybe_tuple_doc {
     };
 }
 
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! last_type {
     ($a:ident,) => { $a };
@@ -2977,6 +2985,8 @@ macro_rules! last_type {
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]
+=======
+>>>>>>> main
 tuple! { E, D, C, B, A, Z, Y, X, W, V, U, T, }
 
 #[stable(feature = "rust1", since = "1.0.0")]

@@ -1,6 +1,6 @@
 # Print an optspec for argparse to handle cmd's options that are independent of any subcommand.
 function __fish_x.py_global_optspecs
-	string join \n v/verbose i/incremental config= build-dir= build= host= target= exclude= skip= include-default-paths rustc-error-format= on-fail= dry-run dump-bootstrap-shims stage= keep-stage= keep-stage-std= src= j/jobs= warnings= json-output color= bypass-bootstrap-lock rust-profile-generate= rust-profile-use= llvm-profile-use= llvm-profile-generate enable-bolt-settings skip-stage0-validation reproducible-artifact= set= ci= skip-std-check-if-no-download-rustc h/help
+	string join \n v/verbose i/incremental config= build-dir= build= host= target= exclude= skip= include-default-paths rustc-error-format= on-fail= dry-run dump-bootstrap-shims stage= keep-stage= keep-stage-std= src= j/jobs= warnings= json-output compile-time-deps color= bypass-bootstrap-lock rust-profile-generate= rust-profile-use= llvm-profile-use= llvm-profile-generate enable-bolt-settings skip-stage0-validation reproducible-artifact= set= ci= skip-std-check-if-no-download-rustc h/help
 end
 
 function __fish_x.py_needs_command
@@ -57,6 +57,7 @@ complete -c x.py -n "__fish_x.py_needs_command" -l include-default-paths -d 'inc
 complete -c x.py -n "__fish_x.py_needs_command" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_needs_command" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_needs_command" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_needs_command" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_needs_command" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_needs_command" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_needs_command" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -77,7 +78,6 @@ complete -c x.py -n "__fish_x.py_needs_command" -a "dist" -d 'Build distribution
 complete -c x.py -n "__fish_x.py_needs_command" -a "install" -d 'Install distribution artifacts'
 complete -c x.py -n "__fish_x.py_needs_command" -a "run" -d 'Run tools contained in this repository'
 complete -c x.py -n "__fish_x.py_needs_command" -a "setup" -d 'Set up the environment for development'
-complete -c x.py -n "__fish_x.py_needs_command" -a "suggest" -d 'Suggest a subset of tests to run, based on modified files'
 complete -c x.py -n "__fish_x.py_needs_command" -a "vendor" -d 'Vendor dependencies'
 complete -c x.py -n "__fish_x.py_needs_command" -a "perf" -d 'Perform profiling and benchmarking of the compiler using `rustc-perf`'
 complete -c x.py -n "__fish_x.py_needs_command" -a "sign" -d 'Sign Ferrocene qualification documents'
@@ -114,6 +114,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand build" -l include-default-path
 complete -c x.py -n "__fish_x.py_using_subcommand build" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand build" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand build" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand build" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand build" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand build" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand build" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -154,6 +155,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand check" -l include-default-path
 complete -c x.py -n "__fish_x.py_using_subcommand check" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand check" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand check" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand check" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand check" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand check" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand check" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -200,6 +202,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l include-default-pat
 complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand clippy" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -239,6 +242,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand fix" -l include-default-paths 
 complete -c x.py -n "__fish_x.py_using_subcommand fix" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand fix" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand fix" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand fix" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand fix" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand fix" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand fix" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -280,6 +284,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l include-default-paths 
 complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand fmt" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -324,6 +329,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand doc" -l include-default-paths 
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand doc" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -332,7 +338,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand doc" -l skip-std-check-if-no-d
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l test-args -d 'extra arguments to be passed for the test tool being used (e.g. libtest, compiletest or rustdoc)' -r
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l compiletest-rustc-args -d 'extra options to pass the compiler when running compiletest tests' -r
-complete -c x.py -n "__fish_x.py_using_subcommand test" -l extra-checks -d 'comma-separated list of other files types to check (accepts py, py:lint, py:fmt, shell)' -r
+complete -c x.py -n "__fish_x.py_using_subcommand test" -l extra-checks -d 'comma-separated list of other files types to check (accepts py, py:lint, py:fmt, shell, shell:lint, cpp, cpp:fmt, spellcheck)' -r
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l compare-mode -d 'mode describing what file the actual ui output will be compared to' -r
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l pass -d 'force {check,build,run}-pass tests to this mode' -r
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l run -d 'whether to execute run-* tests' -r
@@ -380,6 +386,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand test" -l include-default-paths
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand test" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -423,6 +430,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand miri" -l include-default-paths
 complete -c x.py -n "__fish_x.py_using_subcommand miri" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand miri" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand miri" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand miri" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand miri" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand miri" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand miri" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -463,6 +471,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand bench" -l include-default-path
 complete -c x.py -n "__fish_x.py_using_subcommand bench" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand bench" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand bench" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand bench" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand bench" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand bench" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand bench" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -503,6 +512,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand clean" -l include-default-path
 complete -c x.py -n "__fish_x.py_using_subcommand clean" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand clean" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand clean" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand clean" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand clean" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand clean" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand clean" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -542,6 +552,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand dist" -l include-default-paths
 complete -c x.py -n "__fish_x.py_using_subcommand dist" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand dist" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand dist" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand dist" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand dist" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand dist" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand dist" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -581,6 +592,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand install" -l include-default-pa
 complete -c x.py -n "__fish_x.py_using_subcommand install" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand install" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand install" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand install" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand install" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand install" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand install" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -622,6 +634,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand run" -l include-default-paths 
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand run" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -661,52 +674,13 @@ complete -c x.py -n "__fish_x.py_using_subcommand setup" -l include-default-path
 complete -c x.py -n "__fish_x.py_using_subcommand setup" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand setup" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand setup" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand setup" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand setup" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand setup" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand setup" -l enable-bolt-settings -d 'Enable BOLT link flags'
 complete -c x.py -n "__fish_x.py_using_subcommand setup" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x.py -n "__fish_x.py_using_subcommand setup" -l skip-std-check-if-no-download-rustc -d 'Skip checking the standard library if `rust.download-rustc` isn\'t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers'
 complete -c x.py -n "__fish_x.py_using_subcommand setup" -s h -l help -d 'Print help (see more with \'--help\')'
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l config -d 'TOML configuration file for build' -r -F
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l build -d 'host target of the stage0 compiler' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l host -d 'host targets to build' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l target -d 'target targets to build' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l exclude -d 'build paths to exclude' -r -F
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l skip -d 'build paths to skip' -r -F
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l rustc-error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "deny\t''
-warn\t''
-default\t''"
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "always\t''
-never\t''
-auto\t''"
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l set -d 'override options in bootstrap.toml' -r -f
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "true\t''
-false\t''"
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l run -d 'run suggested tests'
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -s i -l incremental -d 'use incremental compilation'
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l include-default-paths -d 'include default paths in addition to the provided ones'
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l dry-run -d 'dry run; don\'t build anything'
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l json-output -d 'use message-format=json'
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l enable-bolt-settings -d 'Enable BOLT link flags'
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -l skip-std-check-if-no-download-rustc -d 'Skip checking the standard library if `rust.download-rustc` isn\'t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers'
-complete -c x.py -n "__fish_x.py_using_subcommand suggest" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l sync -d 'Additional `Cargo.toml` to sync and vendor' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l config -d 'TOML configuration file for build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
@@ -742,6 +716,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l include-default-pat
 complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand vendor" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -781,6 +756,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand perf; and not __fish_seen_subc
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and not __fish_seen_subcommand_from eprintln samply cachegrind benchmark compare" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -835,6 +811,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcomma
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from eprintln" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -884,6 +861,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcomma
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from samply" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from samply" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from samply" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from samply" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from samply" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from samply" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from samply" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -933,6 +911,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcomma
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from cachegrind" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -982,6 +961,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcomma
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from benchmark" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -1021,6 +1001,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcomma
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from compare" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from compare" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from compare" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from compare" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from compare" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from compare" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand perf; and __fish_seen_subcommand_from compare" -l enable-bolt-settings -d 'Enable BOLT link flags'
@@ -1061,6 +1042,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand sign" -l include-default-paths
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_x.py_using_subcommand sign" -l compile-time-deps -d 'only build proc-macros and build scripts (for rust-analyzer)'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l enable-bolt-settings -d 'Enable BOLT link flags'

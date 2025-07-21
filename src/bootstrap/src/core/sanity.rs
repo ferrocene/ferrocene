@@ -231,7 +231,6 @@ than building it.
             build.config.cmd,
             Subcommand::Clean { .. }
                 | Subcommand::Check { .. }
-                | Subcommand::Suggest { .. }
                 | Subcommand::Format { .. }
                 | Subcommand::Setup { .. }
         );

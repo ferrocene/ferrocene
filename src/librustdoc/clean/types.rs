@@ -7,7 +7,7 @@ use arrayvec::ArrayVec;
 use itertools::Either;
 use rustc_abi::{ExternAbi, VariantIdx};
 use rustc_attr_data_structures::{
-    AttributeKind, ConstStability, Deprecation, Stability, StableSince,
+    AttributeKind, ConstStability, Deprecation, Stability, StableSince, find_attr,
 };
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_hir::def::{CtorKind, DefKind, Res};
@@ -24,7 +24,7 @@ use rustc_resolve::rustdoc::{
 };
 use rustc_session::Session;
 use rustc_span::hygiene::MacroKind;
-use rustc_span::symbol::{Ident, Symbol, kw, sym};
+use rustc_span::symbol::{Symbol, kw, sym};
 use rustc_span::{DUMMY_SP, FileName, Loc};
 use thin_vec::ThinVec;
 use tracing::{debug, trace};
@@ -621,7 +621,7 @@ impl Item {
     }
 
     pub(crate) fn is_non_exhaustive(&self) -> bool {
-        self.attrs.other_attrs.iter().any(|a| a.has_name(sym::non_exhaustive))
+        find_attr!(&self.attrs.other_attrs, AttributeKind::NonExhaustive(..))
     }
 
     /// Returns a documentation-level item type from the item.
@@ -647,7 +647,20 @@ impl Item {
         ) -> hir::FnHeader {
             let sig = tcx.fn_sig(def_id).skip_binder();
             let constness = if tcx.is_const_fn(def_id) {
-                hir::Constness::Const
+                // rustc's `is_const_fn` returns `true` for associated functions that have an `impl const` parent
+                // or that have a `const trait` parent. Do not display those as `const` in rustdoc because we
+                // won't be printing correct syntax plus the syntax is unstable.
+                match tcx.opt_associated_item(def_id) {
+                    Some(ty::AssocItem {
+                        container: ty::AssocItemContainer::Impl,
+                        trait_item_def_id: Some(_),
+                        ..
+                    })
+                    | Some(ty::AssocItem { container: ty::AssocItemContainer::Trait, .. }) => {
+                        hir::Constness::NotConst
+                    }
+                    None | Some(_) => hir::Constness::Const,
+                }
             } else {
                 hir::Constness::NotConst
             };
@@ -746,63 +759,48 @@ impl Item {
         Some(tcx.visibility(def_id))
     }
 
-    fn attributes_without_repr(&self, tcx: TyCtxt<'_>, is_json: bool) -> Vec<String> {
-        const ALLOWED_ATTRIBUTES: &[Symbol] =
-            &[sym::export_name, sym::link_section, sym::no_mangle, sym::non_exhaustive];
+    /// Get a list of attributes excluding `#[repr]` to display.
+    ///
+    /// Only used by the HTML output-format.
+    fn attributes_without_repr(&self) -> Vec<String> {
         self.attrs
             .other_attrs
             .iter()
-            .filter_map(|attr| {
-                if let hir::Attribute::Parsed(AttributeKind::LinkSection { name, .. }) = attr {
+            .filter_map(|attr| match attr {
+                hir::Attribute::Parsed(AttributeKind::LinkSection { name, .. }) => {
                     Some(format!("#[link_section = \"{name}\"]"))
                 }
-                // NoMangle is special cased, as it appears in HTML output, and we want to show it in source form, not HIR printing.
-                // It is also used by cargo-semver-checks.
-                else if let hir::Attribute::Parsed(AttributeKind::NoMangle(..)) = attr {
+                hir::Attribute::Parsed(AttributeKind::NoMangle(..)) => {
                     Some("#[no_mangle]".to_string())
-                } else if let hir::Attribute::Parsed(AttributeKind::ExportName { name, .. }) = attr
-                {
-                    Some(format!("#[export_name = \"{name}\"]"))
-                } else if is_json {
-                    match attr {
-                        // rustdoc-json stores this in `Item::deprecation`, so we
-                        // don't want it it `Item::attrs`.
-                        hir::Attribute::Parsed(AttributeKind::Deprecation { .. }) => None,
-                        // We have separate pretty-printing logic for `#[repr(..)]` attributes.
-                        hir::Attribute::Parsed(AttributeKind::Repr(..)) => None,
-                        _ => Some({
-                            let mut s = rustc_hir_pretty::attribute_to_string(&tcx, attr);
-                            assert_eq!(s.pop(), Some('\n'));
-                            s
-                        }),
-                    }
-                } else {
-                    if !attr.has_any_name(ALLOWED_ATTRIBUTES) {
-                        return None;
-                    }
-                    Some(
-                        rustc_hir_pretty::attribute_to_string(&tcx, attr)
-                            .replace("\\\n", "")
-                            .replace('\n', "")
-                            .replace("  ", " "),
-                    )
                 }
+                hir::Attribute::Parsed(AttributeKind::ExportName { name, .. }) => {
+                    Some(format!("#[export_name = \"{name}\"]"))
+                }
+                hir::Attribute::Parsed(AttributeKind::NonExhaustive(..)) => {
+                    Some("#[non_exhaustive]".to_string())
+                }
+                _ => None,
             })
             .collect()
     }
 
-    pub(crate) fn attributes(&self, tcx: TyCtxt<'_>, cache: &Cache, is_json: bool) -> Vec<String> {
-        let mut attrs = self.attributes_without_repr(tcx, is_json);
+    /// Get a list of attributes to display on this item.
+    ///
+    /// Only used by the HTML output-format.
+    pub(crate) fn attributes(&self, tcx: TyCtxt<'_>, cache: &Cache) -> Vec<String> {
+        let mut attrs = self.attributes_without_repr();
 
-        if let Some(repr_attr) = self.repr(tcx, cache, is_json) {
+        if let Some(repr_attr) = self.repr(tcx, cache) {
             attrs.push(repr_attr);
         }
         attrs
     }
 
     /// Returns a stringified `#[repr(...)]` attribute.
-    pub(crate) fn repr(&self, tcx: TyCtxt<'_>, cache: &Cache, is_json: bool) -> Option<String> {
-        repr_attributes(tcx, cache, self.def_id()?, self.type_(), is_json)
+    ///
+    /// Only used by the HTML output-format.
+    pub(crate) fn repr(&self, tcx: TyCtxt<'_>, cache: &Cache) -> Option<String> {
+        repr_attributes(tcx, cache, self.def_id()?, self.type_())
     }
 
     pub fn is_doc_hidden(&self) -> bool {
@@ -814,12 +812,14 @@ impl Item {
     }
 }
 
+/// Return a string representing the `#[repr]` attribute if present.
+///
+/// Only used by the HTML output-format.
 pub(crate) fn repr_attributes(
     tcx: TyCtxt<'_>,
     cache: &Cache,
     def_id: DefId,
     item_type: ItemType,
-    is_json: bool,
 ) -> Option<String> {
     use rustc_abi::IntegerType;
 
@@ -836,7 +836,6 @@ pub(crate) fn repr_attributes(
         // Render `repr(transparent)` iff the non-1-ZST field is public or at least one
         // field is public in case all fields are 1-ZST fields.
         let render_transparent = cache.document_private
-            || is_json
             || adt
                 .all_fields()
                 .find(|field| {
@@ -1075,16 +1074,10 @@ pub(crate) fn extract_cfg_from_attrs<'a, I: Iterator<Item = &'a hir::Attribute> 
 
     // treat #[target_feature(enable = "feat")] attributes as if they were
     // #[doc(cfg(target_feature = "feat"))] attributes as well
-    for attr in hir_attr_lists(attrs, sym::target_feature) {
-        if attr.has_name(sym::enable) && attr.value_str().is_some() {
-            // Clone `enable = "feat"`, change to `target_feature = "feat"`.
-            // Unwrap is safe because `value_str` succeeded above.
-            let mut meta = attr.meta_item().unwrap().clone();
-            meta.path = ast::Path::from_ident(Ident::with_dummy_span(sym::target_feature));
-
-            if let Ok(feat_cfg) = Cfg::parse(&ast::MetaItemInner::MetaItem(meta)) {
-                cfg &= feat_cfg;
-            }
+    if let Some(features) = find_attr!(attrs, AttributeKind::TargetFeature(features, _) => features)
+    {
+        for (feature, _) in features {
+            cfg &= Cfg::Cfg(sym::target_feature, Some(*feature));
         }
     }
 

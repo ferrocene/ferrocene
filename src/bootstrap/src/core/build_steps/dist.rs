@@ -1022,6 +1022,15 @@ impl Step for Src {
             &dst_src,
         );
 
+        // Ferrocene addition: We have a different libc location, we need to copy that in:
+        copy_src_dirs(
+            builder,
+            &builder.src,
+            &["ferrocene/library/libc", "ferrocene/library/backtrace-rs"],
+            &[],
+            &dst_src,
+        );
+
         tarball.generate()
     }
 
@@ -2390,7 +2399,7 @@ impl Step for LlvmBitcodeLinker {
         builder.ensure(compile::Rustc::new(compiler, target));
 
         let llbc_linker =
-            builder.ensure(tool::LlvmBitcodeLinker { compiler, target, extra_features: vec![] });
+            builder.ensure(tool::LlvmBitcodeLinker { build_compiler: compiler, target });
 
         let self_contained_bin_dir = format!("lib/rustlib/{}/bin/self-contained", target.triple);
 

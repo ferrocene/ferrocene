@@ -717,3 +717,10 @@ fn array_map_drops_unmapped_elements_on_panic() {
         assert_eq!(counter.load(Ordering::SeqCst), MAX);
     }
 }
+
+// This takes covers `<[T; N]>::eq` when it returns none.
+#[test]
+fn array_eq() {
+    let not_true = [0u8] == [].as_slice();
+    assert!(!not_true);
+}

@@ -410,6 +410,31 @@ pub(crate) fn validate_codegen_backends(backends: Vec<String>, section: &str) ->
     backends
 }
 
+#[cfg(not(test))]
+fn default_lld_opt_in_targets() -> Vec<String> {
+    vec!["x86_64-unknown-linux-gnu".to_string()]
+}
+
+#[cfg(test)]
+thread_local! {
+    static TEST_LLD_OPT_IN_TARGETS: std::cell::RefCell<Option<Vec<String>>> = std::cell::RefCell::new(None);
+}
+
+#[cfg(test)]
+fn default_lld_opt_in_targets() -> Vec<String> {
+    TEST_LLD_OPT_IN_TARGETS.with(|cell| cell.borrow().clone()).unwrap_or_default()
+}
+
+#[cfg(test)]
+pub fn with_lld_opt_in_targets<R>(targets: Vec<String>, f: impl FnOnce() -> R) -> R {
+    TEST_LLD_OPT_IN_TARGETS.with(|cell| {
+        let prev = cell.replace(Some(targets));
+        let result = f();
+        cell.replace(prev);
+        result
+    })
+}
+
 impl Config {
     pub fn apply_rust_config(&mut self, toml_rust: Option<Rust>, warnings: Warnings) {
         let mut debug = None;
@@ -531,6 +556,14 @@ impl Config {
             lld_enabled = lld_enabled_toml;
             std_features = std_features_toml;
 
+            if optimize_toml.as_ref().is_some_and(|v| matches!(v, RustOptimize::Bool(false))) {
+                eprintln!(
+                    "WARNING: setting `optimize` to `false` is known to cause errors and \
+                    should be considered unsupported. Refer to `bootstrap.example.toml` \
+                    for more details."
+                );
+            }
+
             optimize = optimize_toml;
             self.rust_new_symbol_mangling = new_symbol_mangling;
             set(&mut self.rust_optimize_tests, optimize_tests);
@@ -609,12 +642,13 @@ impl Config {
         //   thus, disabled
         // - similarly, lld will not be built nor used by default when explicitly asked not to, e.g.
         //   when the config sets `rust.lld = false`
-        if self.host_target.triple == "x86_64-unknown-linux-gnu" && self.hosts == [self.host_target]
+        if default_lld_opt_in_targets().contains(&self.host_target.triple.to_string())
+            && self.hosts == [self.host_target]
         {
             let no_llvm_config = self
                 .target_config
                 .get(&self.host_target)
-                .is_some_and(|target_config| target_config.llvm_config.is_none());
+                .is_none_or(|target_config| target_config.llvm_config.is_none());
             let enable_lld = self.llvm_from_ci || no_llvm_config;
             // Prefer the config setting in case an explicit opt-out is needed.
             self.lld_enabled = lld_enabled.unwrap_or(enable_lld);

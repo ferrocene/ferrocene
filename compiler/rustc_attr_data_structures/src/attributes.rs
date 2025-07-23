@@ -110,6 +110,22 @@ pub enum DeprecatedSince {
     Err,
 }
 
+#[derive(
+    Copy,
+    Debug,
+    Eq,
+    PartialEq,
+    Encodable,
+    Decodable,
+    Clone,
+    HashStable_Generic,
+    PrintAttribute
+)]
+pub enum CoverageStatus {
+    On,
+    Off,
+}
+
 impl Deprecation {
     /// Whether an item marked with #[deprecated(since = "X")] is currently
     /// deprecated (i.e., whether X is not greater than the current rustc
@@ -218,6 +234,7 @@ pub enum CfgEntry {
 pub enum AttributeKind {
     // tidy-alphabetical-start
     /// Represents `#[align(N)]`.
+    // FIXME(#82232, #143834): temporarily renamed to mitigate `#[align]` nameres ambiguity
     Align { align: Align, span: Span },
 
     /// Represents `#[rustc_allow_const_fn_unstable]`.
@@ -273,6 +290,9 @@ pub enum AttributeKind {
 
     /// Represents `#[const_trait]`.
     ConstTrait(Span),
+
+    /// Represents `#[coverage]`.
+    Coverage(Span, CoverageStatus),
 
     ///Represents `#[rustc_deny_explicit_impl]`.
     DenyExplicitImpl(Span),

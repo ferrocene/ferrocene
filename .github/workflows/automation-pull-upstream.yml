@@ -86,6 +86,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Fetch all the history
+          submodules: "recursive"
 
       - name: Setup Ubuntu
         run: ferrocene/ci/scripts/setup-ubuntu.sh
@@ -121,14 +122,14 @@ jobs:
         if: matrix.branch != 'master'
         id: create_branch
 
-      - name: Clone a subset of the LLVM submodule rather than the whole thing
-        run: ferrocene/ci/scripts/clone-llvm-subset.sh
+      # - name: Clone a subset of the LLVM submodule rather than the whole thing
+      #   run: ferrocene/ci/scripts/clone-llvm-subset.sh
 
-      - name: Clone an empty GCC submodule
-        run: ferrocene/ci/scripts/clone-empty-submodule.sh src/gcc
+      # - name: Clone an empty GCC submodule
+      #   run: ferrocene/ci/scripts/clone-empty-submodule.sh src/gcc
 
-      - name: Clone an empty Enzyme submodule
-        run: ferrocene/ci/scripts/clone-empty-submodule.sh src/tools/enzyme
+      # - name: Clone an empty Enzyme submodule
+      #   run: ferrocene/ci/scripts/clone-empty-submodule.sh src/tools/enzyme
 
       - name: Run the pull-upstream automation
         run: ferrocene/tools/pull-upstream/automation.py ${{ matrix.branch }} ${{ steps.create_branch.outputs.name || 'main' }}

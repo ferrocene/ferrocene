@@ -294,13 +294,17 @@ pub fn check_builtin_meta_item(
                 | sym::rustc_paren_sugar
                 | sym::type_const
                 | sym::repr
-                | sym::align
+                // FIXME(#82232, #143834): temporarily renamed to mitigate `#[align]` nameres
+                // ambiguity
+                | sym::rustc_align
                 | sym::deprecated
                 | sym::optimize
                 | sym::pointee
                 | sym::cold
                 | sym::target_feature
                 | sym::rustc_allow_const_fn_unstable
+                | sym::macro_use
+                | sym::macro_escape
                 | sym::naked
                 | sym::no_mangle
                 | sym::non_exhaustive
@@ -318,6 +322,7 @@ pub fn check_builtin_meta_item(
                 | sym::rustc_layout_scalar_valid_range_end
                 | sym::no_implicit_prelude
                 | sym::automatically_derived
+                | sym::coverage
         ) {
             return;
         }

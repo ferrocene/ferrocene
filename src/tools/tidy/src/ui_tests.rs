@@ -1,23 +1,11 @@
 //! Tidy check to ensure below in UI test directories:
-//! - the number of entries in each directory must be less than `ENTRY_LIMIT`
 //! - there are no stray `.stderr` files
 
-use std::collections::{BTreeSet, HashMap};
+use std::collections::BTreeSet;
 use std::ffi::OsStr;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
-
-use ignore::Walk;
-
-// FIXME: GitHub's UI truncates file lists that exceed 1000 entries, so these
-// should all be 1000 or lower. Limits significantly smaller than 1000 are also
-// desirable, because large numbers of files are unwieldy in general. See issue
-// #73494.
-const ENTRY_LIMIT: u32 = 901;
-// FIXME: The following limits should be reduced eventually.
-
-const ISSUES_ENTRY_LIMIT: u32 = 1616;
 
 const EXPECTED_TEST_FILE_EXTENSIONS: &[&str] = &[
     "rs",     // test source files
@@ -54,6 +42,7 @@ const EXTENSION_EXCEPTION_PATHS: &[&str] = &[
     "tests/ui/std/windows-bat-args3.bat", // tests escaping arguments through batch files
 ];
 
+<<<<<<< HEAD
 fn check_entries(tests_path: &Path, bad: &mut bool) {
     let mut directories: HashMap<PathBuf, u32> = HashMap::new();
 
@@ -98,6 +87,8 @@ fn check_entries(tests_path: &Path, bad: &mut bool) {
     }
 }
 
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub fn check(root_path: &Path, bless: bool, bad: &mut bool) {
     let issues_txt_header = r#"============================================================
     ⚠️⚠️⚠️NOTHING SHOULD EVER BE ADDED TO THIS LIST⚠️⚠️⚠️
@@ -105,7 +96,6 @@ pub fn check(root_path: &Path, bless: bool, bad: &mut bool) {
 "#;
 
     let path = &root_path.join("tests");
-    check_entries(path, bad);
 
     // the list of files in ui tests that are allowed to start with `issue-XXXX`
     // BTreeSet because we would like a stable ordering so --bless works
@@ -169,31 +159,32 @@ pub fn check(root_path: &Path, bless: bool, bad: &mut bool) {
                     tidy_error!(bad, "Stray file with UI testing output: {:?}", file_path);
                 }
 
-                if let Ok(metadata) = fs::metadata(file_path) {
-                    if metadata.len() == 0 {
-                        tidy_error!(bad, "Empty file with UI testing output: {:?}", file_path);
-                    }
+                if let Ok(metadata) = fs::metadata(file_path)
+                    && metadata.len() == 0
+                {
+                    tidy_error!(bad, "Empty file with UI testing output: {:?}", file_path);
                 }
             }
 
-            if ext == "rs" {
-                if let Some(test_name) = static_regex!(r"^issues?[-_]?(\d{3,})").captures(testname)
-                {
-                    // these paths are always relative to the passed `path` and always UTF8
-                    let stripped_path = file_path
-                        .strip_prefix(path)
-                        .unwrap()
-                        .to_str()
-                        .unwrap()
-                        .replace(std::path::MAIN_SEPARATOR_STR, "/");
+            if ext == "rs"
+                && let Some(test_name) = static_regex!(r"^issues?[-_]?(\d{3,})").captures(testname)
+            {
+                // these paths are always relative to the passed `path` and always UTF8
+                let stripped_path = file_path
+                    .strip_prefix(path)
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .replace(std::path::MAIN_SEPARATOR_STR, "/");
 
-                    if !remaining_issue_names.remove(stripped_path.as_str()) {
-                        tidy_error!(
-                            bad,
-                            "file `tests/{stripped_path}` must begin with a descriptive name, consider `{{reason}}-issue-{issue_n}.rs`",
-                            issue_n = &test_name[1],
-                        );
-                    }
+                if !remaining_issue_names.remove(stripped_path.as_str())
+                    && !stripped_path.starts_with("ui/issues/")
+                {
+                    tidy_error!(
+                        bad,
+                        "file `tests/{stripped_path}` must begin with a descriptive name, consider `{{reason}}-issue-{issue_n}.rs`",
+                        issue_n = &test_name[1],
+                    );
                 }
             }
         }

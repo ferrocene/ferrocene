@@ -106,8 +106,18 @@ The branch can be called anything except the following:
 - ``staging``
 
 To avoid conflicts, it is strongly recommended that the main developer for a
-branch adds a prefix to the branch name unique to them (like ``pa-`` or
-``skade-``).
+branch adds a prefix to the branch name unique to them (like ``hoverbear/`` or
+``skade/``).
+
+During development, the vast majority of code shall be written directly by
+humans. Technology like auto-complete (eg. Intellisense) or structured
+refactoring (eg. with Rust Analyzer) are permitted. However, bulk
+low-effort changes of questionable copyright or provenance, such as those
+created with generative AI such as LLMs, will be rejected. The Rust compiler
+team pursues a similar policy of rejecting 
+`low-effort changes <https://github.com/rust-lang/compiler-team/issues/893>`_,
+the Rust project is currently
+`evaluating their stance on AI <https://rust-lang.zulipchat.com/#narrow/channel/392734-council/topic/AI.20policy/with/493978958>`_.
 
 Each time a new commit is pushed to the Ferrocene GitHub repository, the
 Ferrocene CI infrastructure runs a subset of the test suite as part of the

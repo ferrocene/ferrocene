@@ -1016,11 +1016,9 @@ impl CStore {
         self.injected_panic_runtime = Some(cnum);
     }
 
-<<<<<<< HEAD
-    fn inject_profiler_runtime(&mut self, krate: &ast::Crate) {
-=======
-    fn inject_profiler_runtime(&mut self, tcx: TyCtxt<'_>) {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    // Ferrocene annotation: We add `krate` so we can determine if we should run coverage
+    // see https://github.com/ferrocene/ferrocene/pull/1379
+    fn inject_profiler_runtime(&mut self, tcx: TyCtxt<'_>, krate: &ast::Crate) {
         let needs_profiler_runtime =
             tcx.sess.instrument_coverage() || tcx.sess.opts.cg.profile_generate.enabled();
         if !needs_profiler_runtime || tcx.sess.opts.unstable_opts.no_profiler_runtime {
@@ -1275,21 +1273,12 @@ impl CStore {
         }
     }
 
-<<<<<<< HEAD
-    pub fn postprocess(&mut self, krate: &ast::Crate) {
-        self.inject_compiler_builtins(krate);
-        self.inject_forced_externs();
-        self.inject_profiler_runtime(krate);
-        self.inject_allocator_crate(krate);
-        self.inject_panic_runtime(krate);
-=======
     pub fn postprocess(&mut self, tcx: TyCtxt<'_>, krate: &ast::Crate) {
         self.inject_compiler_builtins(tcx, krate);
         self.inject_forced_externs(tcx);
-        self.inject_profiler_runtime(tcx);
+        self.inject_profiler_runtime(tcx, krate);
         self.inject_allocator_crate(tcx, krate);
         self.inject_panic_runtime(tcx, krate);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
         self.report_unused_deps_in_crate(tcx, krate);
         self.report_future_incompatible_deps(tcx, krate);

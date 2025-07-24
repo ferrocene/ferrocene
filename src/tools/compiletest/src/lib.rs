@@ -832,13 +832,13 @@ fn find_tests_in_dir(
         && let Some(Utf8Component::Normal(parent)) = components.next()
         && parent == "tests"
         && let Ok(backend) = CodegenBackend::try_from(backend)
-        && backend != cx.config.codegen_backend
+        && backend != config.codegen_backend
     {
         // We ignore asm tests which don't match the current codegen backend.
         warning!(
             "Ignoring tests in `{dir}` because they don't match the configured codegen \
              backend (`{}`)",
-            cx.config.codegen_backend.as_str(),
+            config.codegen_backend.as_str(),
         );
         return Ok(TestCollector::new());
     }

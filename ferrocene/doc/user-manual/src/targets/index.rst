@@ -196,7 +196,7 @@ should not be used in production.
      - Full
      - The full standard library is available, but unsupported functions in ``std`` will panic.
 
-   * - :ref:`x86_64-pc-windows-gnu`
+   * - :target:`x86_64-pc-windows-gnu`
      - ``x86_64-pc-windows-gnu``
      - Cross-compilation
      - Full

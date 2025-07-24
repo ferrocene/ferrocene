@@ -1,5 +1,6 @@
 //@ compile-flags: -Copt-level=1
 //@ only-64bit
+//@ ignore-ferrocenecoretest
 
 #![crate_type = "lib"]
 #![feature(core_intrinsics)]

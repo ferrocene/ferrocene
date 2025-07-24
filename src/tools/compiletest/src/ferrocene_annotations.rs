@@ -174,6 +174,7 @@ fn sample_config() -> Config {
         suite: env("FERROCENE_SUITE"),
 
         // Dummy values
+        codegen_backend: crate::common::CodegenBackend::Llvm,
         edition: Default::default(),
         bless: Default::default(),
         fail_fast: Default::default(),

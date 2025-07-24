@@ -908,19 +908,12 @@ impl Builder<'_> {
             profile_var("DEBUG_ASSERTIONS"),
             match mode {
                 Mode::Std => self.config.std_debug_assertions,
-<<<<<<< HEAD
-                Mode::Rustc => self.config.rustc_debug_assertions,
-                Mode::Codegen => self.config.rustc_debug_assertions,
-                Mode::ToolBootstrap => self.config.tools_debug_assertions,
-                Mode::ToolStd => self.config.tools_debug_assertions,
-                Mode::ToolRustc => self.config.tools_debug_assertions,
-                Mode::ToolCustom { .. } => self.config.tools_debug_assertions,
-=======
                 Mode::Rustc | Mode::Codegen => self.config.rustc_debug_assertions,
-                Mode::ToolBootstrap | Mode::ToolStd | Mode::ToolRustc | Mode::ToolTarget => {
-                    self.config.tools_debug_assertions
-                }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+                Mode::ToolBootstrap
+                | Mode::ToolStd
+                | Mode::ToolRustc
+                | Mode::ToolTarget
+                | Mode::ToolCustom { .. } => self.config.tools_debug_assertions,
             }
             .to_string(),
         );
@@ -995,11 +988,8 @@ impl Builder<'_> {
             | Mode::ToolBootstrap
             | Mode::ToolRustc
             | Mode::ToolStd
-<<<<<<< HEAD
+            | Mode::ToolTarget
             | Mode::ToolCustom { .. } => {
-=======
-            | Mode::ToolTarget => {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
                 if let Some(ref map_to) =
                     self.build.debuginfo_map_to(GitRepo::Rustc, RemapScheme::NonCompiler)
                 {

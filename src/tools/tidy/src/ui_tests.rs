@@ -42,53 +42,6 @@ const EXTENSION_EXCEPTION_PATHS: &[&str] = &[
     "tests/ui/std/windows-bat-args3.bat", // tests escaping arguments through batch files
 ];
 
-<<<<<<< HEAD
-fn check_entries(tests_path: &Path, bad: &mut bool) {
-    let mut directories: HashMap<PathBuf, u32> = HashMap::new();
-
-    for entry in Walk::new(tests_path.join("ui")).flatten() {
-        let parent = entry.path().parent().unwrap().to_path_buf();
-        *directories.entry(parent).or_default() += 1;
-    }
-
-    let (mut max, mut max_issues) = (0, 0);
-    for (dir_path, count) in directories {
-        let is_issues_dir = tests_path.join("ui/issues") == dir_path;
-        let (limit, maxcnt) = if is_issues_dir {
-            (ISSUES_ENTRY_LIMIT, &mut max_issues)
-        } else {
-            (ENTRY_LIMIT, &mut max)
-        };
-        *maxcnt = (*maxcnt).max(count);
-        if count > limit {
-            tidy_error!(
-                bad,
-                "following path contains more than {} entries, \
-                    you should move the test to some relevant subdirectory (current: {}): {}",
-                limit,
-                count,
-                dir_path.display()
-            );
-        }
-        if count == 1 && dir_path.join("ferrocene-annotations").exists() {
-            tidy_error!(
-                bad,
-                "following path contains a dangling `ferrocene-annotations` file, which may be \
-                     a remnant from an upstream directory move: {}",
-                dir_path.display()
-            )
-        }
-    }
-    if ISSUES_ENTRY_LIMIT > max_issues {
-        tidy_error!(
-            bad,
-            "`ISSUES_ENTRY_LIMIT` is too high (is {ISSUES_ENTRY_LIMIT}, should be {max_issues})"
-        );
-    }
-}
-
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub fn check(root_path: &Path, bless: bool, bad: &mut bool) {
     let issues_txt_header = r#"============================================================
     ⚠️⚠️⚠️NOTHING SHOULD EVER BE ADDED TO THIS LIST⚠️⚠️⚠️
@@ -164,6 +117,18 @@ pub fn check(root_path: &Path, bless: bool, bad: &mut bool) {
                 {
                     tidy_error!(bad, "Empty file with UI testing output: {:?}", file_path);
                 }
+            }
+
+            // Ferrocene addition
+            let dir_path = file_path.parent().unwrap();
+            let num_in_dir = dir_path.read_dir().unwrap().count();
+            if num_in_dir == 1 && dir_path.join("ferrocene-annotations").exists() {
+                tidy_error!(
+                    bad,
+                    "following path contains a dangling `ferrocene-annotations` file, which may be \
+                        a remnant from an upstream directory move: {}",
+                    dir_path.display()
+                )
             }
 
             if ext == "rs"

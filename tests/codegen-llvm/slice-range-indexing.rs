@@ -33,16 +33,13 @@ macro_rules! tests {
 // CHECK: ret
 tests!(Range<usize>, get_range, index_range);
 
-// 3 comparisons required:
-// end != usize::MAX && end + 1 <= len && start <= end + 1
-
-// CHECK-LABEL: @get_range_inclusive
-// CHECK-COUNT-3: %{{.+}} = icmp
-// CHECK-NOT: %{{.+}} = icmp
-// CHECK: ret
-
 // 2 comparisons required:
 // end < len && start <= end + 1
+
+// CHECK-LABEL: @get_range_inclusive
+// CHECK-COUNT-2: %{{.+}} = icmp
+// CHECK-NOT: %{{.+}} = icmp
+// CHECK: ret
 
 // CHECK-LABEL: @index_range_inclusive
 // CHECK-COUNT-2: %{{.+}} = icmp
@@ -64,16 +61,13 @@ tests!(RangeInclusive<usize>, get_range_inclusive, index_range_inclusive);
 // CHECK: ret
 tests!(RangeTo<usize>, get_range_to, index_range_to);
 
-// 2 comparisons required:
-// end != usize::MAX && end + 1 <= len
-
-// CHECK-LABEL: @get_range_to_inclusive
-// CHECK-COUNT-2: %{{.+}} = icmp
-// CHECK-NOT: %{{.+}} = icmp
-// CHECK: ret
-
 // 1 comparison required:
 // end < len
+
+// CHECK-LABEL: @get_range_to_inclusive
+// CHECK-COUNT-1: %{{.+}} = icmp
+// CHECK-NOT: %{{.+}} = icmp
+// CHECK: ret
 
 // CHECK-LABEL: @index_range_to_inclusive
 // CHECK-COUNT-1: %{{.+}} = icmp

@@ -1,6 +1,3 @@
-#![allow(rustc::diagnostic_outside_of_impl)]
-#![allow(rustc::untranslatable_diagnostic)]
-
 use std::borrow::Cow;
 
 use rustc_ast::util::unicode::TEXT_FLOW_CONTROL_CHARS;
@@ -10,11 +7,11 @@ use rustc_errors::{
 use rustc_middle::middle::stability;
 use rustc_middle::ty::TyCtxt;
 use rustc_session::Session;
-use rustc_session::lint::{BuiltinLintDiag, ElidedLifetimeResolution};
-use rustc_span::{BytePos, kw};
+use rustc_session::lint::BuiltinLintDiag;
+use rustc_span::BytePos;
 use tracing::debug;
 
-use crate::lints::{self, ElidedNamedLifetime};
+use crate::lints;
 
 mod check_cfg;
 
@@ -354,6 +351,9 @@ pub fn decorate_builtin_lint(
             }
             .decorate_lint(diag);
         }
+        BuiltinLintDiag::ReexportPrivateDependency { name, kind, krate } => {
+            lints::ReexportPrivateDependency { name, kind, krate }.decorate_lint(diag);
+        }
         BuiltinLintDiag::UnusedQualifications { removal_span } => {
             lints::UnusedQualifications { removal_span }.decorate_lint(diag);
         }
@@ -432,9 +432,6 @@ pub fn decorate_builtin_lint(
         BuiltinLintDiag::CfgAttrNoAttributes => {
             lints::CfgAttrNoAttributes.decorate_lint(diag);
         }
-        BuiltinLintDiag::MissingFragmentSpecifier => {
-            lints::MissingFragmentSpecifier.decorate_lint(diag);
-        }
         BuiltinLintDiag::MetaVariableStillRepeating(name) => {
             lints::MetaVariableStillRepeating { name }.decorate_lint(diag);
         }
@@ -470,17 +467,6 @@ pub fn decorate_builtin_lint(
         }
         BuiltinLintDiag::UnexpectedBuiltinCfg { cfg, cfg_name, controlled_by } => {
             lints::UnexpectedBuiltinCfg { cfg, cfg_name, controlled_by }.decorate_lint(diag)
-        }
-        BuiltinLintDiag::ElidedNamedLifetimes { elided: (span, kind), resolution } => {
-            match resolution {
-                ElidedLifetimeResolution::Static => {
-                    ElidedNamedLifetime { span, kind, name: kw::StaticLifetime, declaration: None }
-                }
-                ElidedLifetimeResolution::Param(name, declaration) => {
-                    ElidedNamedLifetime { span, kind, name, declaration: Some(declaration) }
-                }
-            }
-            .decorate_lint(diag)
         }
     }
 }

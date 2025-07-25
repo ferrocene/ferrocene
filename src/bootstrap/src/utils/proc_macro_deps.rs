@@ -34,7 +34,6 @@ pub static CRATES: &[&str] = &[
     "minimal-lexical",
     "nom",
     "num-conv",
-    "once_cell",
     "pest",
     "pest_generator",
     "pest_meta",

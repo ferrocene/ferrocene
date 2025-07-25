@@ -402,8 +402,10 @@ use crate::cmp::Ordering;
 use crate::intrinsics;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::const_eval_select;
+#[cfg(feature = "ferrocene_certified")]
+use crate::marker::PointeeSized;
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::marker::FnPtr;
+use crate::marker::{FnPtr, PointeeSized};
 #[cfg(feature = "ferrocene_certified")]
 use crate::mem;
 #[cfg(all(debug_assertions, feature = "ferrocene_certified"))]
@@ -429,10 +431,8 @@ pub use metadata::{DynMetadata, Pointee, Thin, from_raw_parts, from_raw_parts_mu
 #[cfg(feature = "ferrocene_certified")]
 pub use metadata::{Pointee, Thin, from_raw_parts, from_raw_parts_mut};
 
-#[cfg(not(feature = "ferrocene_certified"))]
 mod non_null;
 #[stable(feature = "nonnull", since = "1.25.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use non_null::NonNull;
 
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -822,7 +822,7 @@ pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize) {
 #[allow(unconditional_recursion)]
 #[rustc_diagnostic_item = "ptr_drop_in_place"]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub unsafe fn drop_in_place<T: ?Sized>(to_drop: *mut T) {
+pub unsafe fn drop_in_place<T: PointeeSized>(to_drop: *mut T) {
     // Code here does not matter - this is replaced by the
     // real drop glue by the compiler.
 
@@ -851,7 +851,7 @@ pub unsafe fn drop_in_place<T: ?Sized>(to_drop: *mut T) {
 #[rustc_promotable]
 #[rustc_const_stable(feature = "const_ptr_null", since = "1.24.0")]
 #[rustc_diagnostic_item = "ptr_null"]
-pub const fn null<T: ?Sized + Thin>() -> *const T {
+pub const fn null<T: PointeeSized + Thin>() -> *const T {
     from_raw_parts(without_provenance::<()>(0), ())
 }
 
@@ -876,7 +876,7 @@ pub const fn null<T: ?Sized + Thin>() -> *const T {
 #[rustc_promotable]
 #[rustc_const_stable(feature = "const_ptr_null", since = "1.24.0")]
 #[rustc_diagnostic_item = "ptr_null_mut"]
-pub const fn null_mut<T: ?Sized + Thin>() -> *mut T {
+pub const fn null_mut<T: PointeeSized + Thin>() -> *mut T {
     from_raw_parts_mut(without_provenance_mut::<()>(0), ())
 }
 
@@ -1099,7 +1099,7 @@ pub fn with_exposed_provenance_mut<T>(addr: usize) -> *mut T {
 #[rustc_never_returns_null_ptr]
 #[rustc_diagnostic_item = "ptr_from_ref"]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const fn from_ref<T: ?Sized>(r: &T) -> *const T {
+pub const fn from_ref<T: PointeeSized>(r: &T) -> *const T {
     r
 }
 
@@ -1150,7 +1150,7 @@ pub const fn from_ref<T: ?Sized>(r: &T) -> *const T {
 #[rustc_const_stable(feature = "ptr_from_ref", since = "1.76.0")]
 #[rustc_never_returns_null_ptr]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub const fn from_mut<T: ?Sized>(r: &mut T) -> *mut T {
+pub const fn from_mut<T: PointeeSized>(r: &mut T) -> *mut T {
     r
 }
 
@@ -2465,7 +2465,7 @@ pub(crate) unsafe fn align_offset<T: Sized>(p: *const T, a: usize) -> usize {
 #[rustc_diagnostic_item = "ptr_eq"]
 #[allow(ambiguous_wide_pointer_comparisons)] // it's actually clear here
 #[cfg(not(feature = "ferrocene_certified"))]
-pub fn eq<T: ?Sized>(a: *const T, b: *const T) -> bool {
+pub fn eq<T: PointeeSized>(a: *const T, b: *const T) -> bool {
     a == b
 }
 
@@ -2490,7 +2490,7 @@ pub fn eq<T: ?Sized>(a: *const T, b: *const T) -> bool {
 #[inline(always)]
 #[must_use = "pointer comparison produces a value"]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub fn addr_eq<T: ?Sized, U: ?Sized>(p: *const T, q: *const U) -> bool {
+pub fn addr_eq<T: PointeeSized, U: PointeeSized>(p: *const T, q: *const U) -> bool {
     (p as *const ()) == (q as *const ())
 }
 
@@ -2575,7 +2575,7 @@ pub fn fn_addr_eq<T: FnPtr, U: FnPtr>(f: T, g: U) -> bool {
 /// ```
 #[stable(feature = "ptr_hash", since = "1.35.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub fn hash<T: ?Sized, S: hash::Hasher>(hashee: *const T, into: &mut S) {
+pub fn hash<T: PointeeSized, S: hash::Hasher>(hashee: *const T, into: &mut S) {
     use crate::hash::Hash;
     hashee.hash(into);
 }

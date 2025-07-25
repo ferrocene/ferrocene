@@ -46,6 +46,10 @@ runners:
     os: windows-2025-8core-32gb
     <<: *base-job
 
+  - &job-windows-aarch64
+    os: windows-11-arm
+    <<: *base-job
+
   - &job-aarch64-linux
     # Free some disk space to avoid running out of space during the build.
     free_disk: true
@@ -122,12 +126,17 @@ jobs:
 # These jobs automatically inherit envs.pr, to avoid repeating
 # it in each job definition.
 pr:
-  - name: mingw-check-1
+  - name: pr-check-1
     <<: *job-linux-4c
-  - name: mingw-check-2
+  - name: pr-check-2
     <<: *job-linux-4c
-  - name: mingw-check-tidy
+  - name: tidy
     continue_on_error: true
+    free_disk: false
+    env:
+      # This submodule is expensive to checkout, and it should not be needed for
+      # tidy. This speeds up the PR CI job by ~1 minute.
+      SKIP_SUBMODULES: src/gcc
     <<: *job-linux-4c
   - name: x86_64-gnu-llvm-19
     env:
@@ -145,13 +154,26 @@ pr:
       DOCKER_SCRIPT: stage_2_test_set2.sh
     <<: *job-aarch64-linux
   - name: x86_64-gnu-tools
-    <<: *job-linux-36c-codebuild
+    <<: *job-linux-4c
+  - name: x86_64-gnu-miri
+    <<: *job-linux-4c
 
 # Jobs that run when you perform a try build (@bors try)
 # These jobs automatically inherit envs.try, to avoid repeating
 # it in each job definition.
 try:
   - <<: *job-dist-x86_64-linux
+
+# Jobs that only run when explicitly invoked in one of the following ways:
+# - comment `@bors2 try jobs=<job-name>`
+# - `try-job: <job-name>` in the PR description and comment `@bors try` or `@bors2 try`.
+optional:
+  # This job is used just to test optional jobs.
+  # It will be replaced by tier 2 and tier 3 jobs in the future.
+  - name: optional-mingw-check-1
+    env:
+      IMAGE: mingw-check-1
+    <<: *job-linux-4c
 
 # Main CI jobs that have to be green to merge a commit into master
 # These jobs automatically inherit envs.auto, to avoid repeating
@@ -232,6 +254,12 @@ auto:
   - name: dist-s390x-linux
     <<: *job-linux-4c
 
+  - name: dist-aarch64-windows-gnullvm
+    <<: *job-linux-4c
+
+  - name: dist-x86_64-windows-gnullvm
+    <<: *job-linux-4c
+
   - name: dist-various-1
     <<: *job-linux-4c
 
@@ -251,7 +279,7 @@ auto:
       IMAGE: dist-x86_64-linux
       CODEGEN_BACKENDS: llvm,cranelift
       DOCKER_SCRIPT: dist-alt.sh
-    <<: *job-linux-4c-largedisk
+    <<: *job-linux-8c
 
   - name: dist-x86_64-musl
     env:
@@ -287,22 +315,24 @@ auto:
   - name: i686-gnu-nopt-1
     env:
       IMAGE: i686-gnu-nopt
-      DOCKER_SCRIPT: /scripts/stage_2_test_set1.sh
+      DOCKER_SCRIPT: stage_2_test_set1.sh
     <<: *job-linux-4c
 
   # Skip tests that run in i686-gnu-nopt-1
   - name: i686-gnu-nopt-2
     env:
       IMAGE: i686-gnu-nopt
-      DOCKER_SCRIPT: >-
-        python3 ../x.py test --stage 1 --config /config/nopt-std-config.toml library/std &&
-        /scripts/stage_2_test_set2.sh
+      DOCKER_SCRIPT: i686-gnu-nopt-2.sh
     <<: *job-linux-4c
 
-  - name: mingw-check-1
+  - name: pr-check-1
     <<: *job-linux-4c
 
-  - name: mingw-check-2
+  - name: pr-check-2
+    <<: *job-linux-4c
+
+  - name: tidy
+    free_disk: false
     <<: *job-linux-4c
 
   - name: test-various
@@ -408,6 +438,9 @@ auto:
   - name: x86_64-gnu-tools
     env:
       DEPLOY_TOOLSTATES_JSON: toolstates-linux.json
+    <<: *job-linux-4c
+
+  - name: x86_64-gnu-miri
     <<: *job-linux-4c
 
   ####################
@@ -530,6 +563,19 @@ auto:
       SCRIPT: make ci-msvc-ps1
     <<: *job-windows
 
+  # aarch64-msvc is split into two jobs to run tests in parallel.
+  - name: aarch64-msvc-1
+    env:
+      RUST_CONFIGURE_ARGS: --build=aarch64-pc-windows-msvc
+      SCRIPT: make ci-msvc-py
+    <<: *job-windows-aarch64
+
+  - name: aarch64-msvc-2
+    env:
+      RUST_CONFIGURE_ARGS: --build=aarch64-pc-windows-msvc
+      SCRIPT: make ci-msvc-ps1
+    <<: *job-windows-aarch64
+
   # x86_64-msvc-ext is split into multiple jobs to run tests in parallel.
   - name: x86_64-msvc-ext1
     env:
@@ -625,14 +671,14 @@ auto:
   - name: dist-aarch64-msvc
     env:
       RUST_CONFIGURE_ARGS: >-
-        --build=x86_64-pc-windows-msvc
+        --build=aarch64-pc-windows-msvc
         --host=aarch64-pc-windows-msvc
         --target=aarch64-pc-windows-msvc,arm64ec-pc-windows-msvc
         --enable-full-tools
         --enable-profiler
       SCRIPT: python x.py dist bootstrap --include-default-paths
       DIST_REQUIRE_ALL_TOOLS: 1
-    <<: *job-windows
+    <<: *job-windows-aarch64
 
   - name: dist-i686-mingw
     env:

@@ -12,10 +12,9 @@ use rustc_hir::HirId;
 use rustc_hir::def::DefKind;
 use rustc_hir_analysis::autoderef::{self, Autoderef};
 use rustc_infer::infer::canonical::{Canonical, OriginalQueryValues, QueryResponse};
-use rustc_infer::infer::{self, DefineOpaqueTypes, InferOk, TyCtxtInferExt};
+use rustc_infer::infer::{BoundRegionConversionTime, DefineOpaqueTypes, InferOk, TyCtxtInferExt};
 use rustc_infer::traits::ObligationCauseCode;
 use rustc_middle::middle::stability;
-use rustc_middle::query::Providers;
 use rustc_middle::ty::elaborate::supertrait_def_ids;
 use rustc_middle::ty::fast_reject::{DeepRejectCtxt, TreatParams, simplify_type};
 use rustc_middle::ty::{
@@ -554,11 +553,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     }
 }
 
-pub(crate) fn provide(providers: &mut Providers) {
-    providers.method_autoderef_steps = method_autoderef_steps;
-}
-
-fn method_autoderef_steps<'tcx>(
+pub(crate) fn method_autoderef_steps<'tcx>(
     tcx: TyCtxt<'tcx>,
     goal: CanonicalTyGoal<'tcx>,
 ) -> MethodAutoderefStepsResult<'tcx> {
@@ -926,6 +921,7 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
                 | ty::ClauseKind::ConstArgHasType(_, _)
                 | ty::ClauseKind::WellFormed(_)
                 | ty::ClauseKind::ConstEvaluatable(_)
+                | ty::ClauseKind::UnstableFeature(_)
                 | ty::ClauseKind::HostEffect(..) => None,
             }
         });
@@ -995,7 +991,11 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
             ty::AssocKind::Fn { .. } => self.probe(|_| {
                 let args = self.fresh_args_for_item(self.span, method.def_id);
                 let fty = self.tcx.fn_sig(method.def_id).instantiate(self.tcx, args);
-                let fty = self.instantiate_binder_with_fresh_vars(self.span, infer::FnCall, fty);
+                let fty = self.instantiate_binder_with_fresh_vars(
+                    self.span,
+                    BoundRegionConversionTime::FnCall,
+                    fty,
+                );
                 self.can_eq(self.param_env, fty.output(), expected)
             }),
             _ => false,
@@ -1727,7 +1727,6 @@ impl<'tcx> Pick<'tcx> {
             }
             tcx.disabled_nightly_features(
                 lint,
-                Some(scope_expr_id),
                 self.unstable_candidates.iter().map(|(candidate, feature)| {
                     (format!(" `{}`", tcx.def_path_str(candidate.item.def_id)), *feature)
                 }),
@@ -1757,8 +1756,11 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
                 CandidateSource::Trait(candidate.item.container_id(self.tcx))
             }
             TraitCandidate(trait_ref) => self.probe(|_| {
-                let trait_ref =
-                    self.instantiate_binder_with_fresh_vars(self.span, infer::FnCall, trait_ref);
+                let trait_ref = self.instantiate_binder_with_fresh_vars(
+                    self.span,
+                    BoundRegionConversionTime::FnCall,
+                    trait_ref,
+                );
                 let (xform_self_ty, _) =
                     self.xform_self_ty(candidate.item, trait_ref.self_ty(), trait_ref.args);
                 // Guide the trait selection to show impls that have methods whose type matches
@@ -1874,7 +1876,7 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
 
                     let trait_ref = self.instantiate_binder_with_fresh_vars(
                         self.span,
-                        infer::FnCall,
+                        BoundRegionConversionTime::FnCall,
                         poly_trait_ref,
                     );
                     let trait_ref = ocx.normalize(cause, self.param_env, trait_ref);
@@ -1913,8 +1915,7 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
                         ty::Binder::dummy(trait_ref),
                     );
 
-                    // FIXME(-Znext-solver): We only need this hack to deal with fatal
-                    // overflow in the old solver.
+                    // We only need this hack to deal with fatal overflow in the old solver.
                     if self.infcx.next_trait_solver() || self.infcx.predicate_may_hold(&obligation)
                     {
                         ocx.register_obligation(obligation);
@@ -1938,7 +1939,7 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
                 ObjectCandidate(poly_trait_ref) | WhereClauseCandidate(poly_trait_ref) => {
                     let trait_ref = self.instantiate_binder_with_fresh_vars(
                         self.span,
-                        infer::FnCall,
+                        BoundRegionConversionTime::FnCall,
                         poly_trait_ref,
                     );
                     (xform_self_ty, xform_ret_ty) =
@@ -1955,17 +1956,17 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
                 }
             }
 
-            // FIXME(-Znext-solver): See the linked issue below.
-            // <https://github.com/rust-lang/trait-system-refactor-initiative/issues/134>
+            // See <https://github.com/rust-lang/trait-system-refactor-initiative/issues/134>.
             //
             // In the new solver, check the well-formedness of the return type.
             // This emulates, in a way, the predicates that fall out of
             // normalizing the return type in the old solver.
             //
-            // We alternatively could check the predicates of the method itself hold,
-            // but we intentionally do not do this in the old solver b/c of cycles,
-            // and doing it in the new solver would be stronger. This should be fixed
-            // in the future, since it likely leads to much better method winnowing.
+            // FIXME(-Znext-solver): We alternatively could check the predicates of
+            // the method itself hold, but we intentionally do not do this in the old
+            // solver b/c of cycles, and doing it in the new solver would be stronger.
+            // This should be fixed in the future, since it likely leads to much better
+            // method winnowing.
             if let Some(xform_ret_ty) = xform_ret_ty
                 && self.infcx.next_trait_solver()
             {

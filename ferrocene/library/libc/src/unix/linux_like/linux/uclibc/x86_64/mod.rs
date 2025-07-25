@@ -144,6 +144,8 @@ s! {
         st_pad4: [c_long; 3],
     }
 
+    // FIXME(1.0): This should not implement `PartialEq`
+    #[allow(unpredictable_function_pointer_comparisons)]
     pub struct sigaction {
         pub sa_handler: crate::sighandler_t,
         pub sa_flags: c_ulong,
@@ -342,7 +344,6 @@ pub const __SIZEOF_PTHREAD_RWLOCK_T: usize = 56;
 pub const __SIZEOF_PTHREAD_RWLOCKATTR_T: usize = 8;
 pub const __SIZEOF_PTHREAD_BARRIER_T: usize = 32;
 pub const __SIZEOF_PTHREAD_BARRIERATTR_T: usize = 4;
-pub const PIDFD_NONBLOCK: c_int = 0o4000;
 
 cfg_if! {
     if #[cfg(target_os = "l4re")] {

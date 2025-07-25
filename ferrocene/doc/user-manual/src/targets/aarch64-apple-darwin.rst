@@ -6,12 +6,12 @@
 :target:`aarch64-apple-darwin`
 ================================
 
-.. warning::
+.. note::
    
-   Experimental targets cannot be used in safety-critical contexts, and there is
-   no guarantee that the Ferrocene test suite is successfully executed on the
-   target. They are provided as a preview, with limited support available. They
-   should not be used in production.
+   Quality managed targets are targets which are suitable for use in production 
+   outside of safety critical contexts. Support is available. The Ferrocene test
+   suite successfully executed on the target. Known problems are tracked and
+   available.
 
 The ``aarch64-apple-darwin`` Ferrocene target provides support for macOS (Darwin) on
 Apple Silicon.

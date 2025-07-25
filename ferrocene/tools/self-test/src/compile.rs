@@ -95,7 +95,7 @@ fn check_target(
         let expected_binary_paths = program
             .expected_executables
             .into_iter()
-            .flat_map(|expected| match target.spec.triple {
+            .flat_map(|expected| match target.spec.tuple {
                 windows if windows.ends_with("-pc-windows-msvc") => {
                     vec![format!("{expected}.exe"), format!("{expected}.pdb")]
                 }
@@ -107,7 +107,7 @@ fn check_target(
         let expected_library_paths = program
             .expected_libraries
             .into_iter()
-            .map(|expected| match target.spec.triple {
+            .map(|expected| match target.spec.tuple {
                 windows if windows.ends_with("-pc-windows-msvc") => format!("{expected}.lib"),
                 _ => format!("lib{expected}.a"),
             })
@@ -124,7 +124,7 @@ fn check_target(
         compile(&ctx, program)?;
         expected_artifacts.check(program.name)?;
 
-        let should_run = (ctx.target.triple == env::SELFTEST_TARGET)
+        let should_run = (ctx.target.tuple == env::SELFTEST_TARGET)
             .then_some(program.executable_output)
             .flatten();
         if let Some(expected_output) = should_run {
@@ -135,7 +135,7 @@ fn check_target(
             "compiled {}sample program `{}` for target {}",
             if should_run.is_some() { "and ran " } else { "" },
             program.name,
-            target.triple
+            target.tuple
         ));
     }
     Ok(())
@@ -161,7 +161,7 @@ fn compile(ctx: &Context<'_>, program: &SampleProgram) -> Result<(), Error> {
     remap_path_prefix.push("=/self-test");
 
     let mut cmd = Command::new(&ctx.rustc);
-    cmd.args(["--target", ctx.target.triple]);
+    cmd.args(["--target", ctx.target.tuple]);
     cmd.arg("-L").arg(&ctx.output_dir);
     cmd.arg("--out-dir").arg(&ctx.output_dir);
     cmd.arg("--remap-path-prefix").arg(&remap_path_prefix);
@@ -372,7 +372,7 @@ mod tests {
 
         let target = Target {
             spec: &TargetSpec {
-                triple: "x86_64-unknown-linux-gnu",
+                tuple: "x86_64-unknown-linux-gnu",
                 std: true,
                 linker: Linker::BundledLld,
             },
@@ -440,7 +440,7 @@ mod tests {
         let context = Context {
             target: &Target {
                 spec: &TargetSpec {
-                    triple: "x86_64-unknown-linux-gnu",
+                    tuple: "x86_64-unknown-linux-gnu",
                     std: true,
                     linker: Linker::BundledLld,
                 },
@@ -487,7 +487,7 @@ mod tests {
         let context = Context {
             target: &Target {
                 spec: &TargetSpec {
-                    triple: "x86_64-unknown-linux-gnu",
+                    tuple: "x86_64-unknown-linux-gnu",
                     std: true,
                     linker: Linker::BundledLld,
                 },
@@ -560,13 +560,13 @@ mod tests {
                 // cannot dynamically set std depending on the function parameter.
                 spec: if std {
                     &TargetSpec {
-                        triple: "x86_64-unknown-linux-gnu",
+                        tuple: "x86_64-unknown-linux-gnu",
                         linker: Linker::BundledLld,
                         std: true,
                     }
                 } else {
                     &TargetSpec {
-                        triple: "x86_64-unknown-linux-gnu",
+                        tuple: "x86_64-unknown-linux-gnu",
                         linker: Linker::BundledLld,
                         std: false,
                     }

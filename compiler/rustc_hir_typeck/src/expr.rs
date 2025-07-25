@@ -6,6 +6,8 @@
 //! See [`rustc_hir_analysis::check`] for more context on type checking in general.
 
 use rustc_abi::{FIRST_VARIANT, FieldIdx};
+use rustc_ast::util::parser::ExprPrecedence;
+use rustc_attr_data_structures::{AttributeKind, find_attr};
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_data_structures::unord::UnordMap;
@@ -20,8 +22,7 @@ use rustc_hir::lang_items::LangItem;
 use rustc_hir::{ExprKind, HirId, QPath};
 use rustc_hir_analysis::NoVariantNamed;
 use rustc_hir_analysis::hir_ty_lowering::{FeedConstTy, HirTyLowerer as _};
-use rustc_infer::infer;
-use rustc_infer::infer::{DefineOpaqueTypes, InferOk};
+use rustc_infer::infer::{self, DefineOpaqueTypes, InferOk, RegionVariableOrigin};
 use rustc_infer::traits::query::NoSolution;
 use rustc_middle::ty::adjustment::{Adjust, Adjustment, AllowTwoPhase};
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
@@ -42,11 +43,10 @@ use crate::Expectation::{self, ExpectCastableToType, ExpectHasType, NoExpectatio
 use crate::coercion::{CoerceMany, DynamicCoerceMany};
 use crate::errors::{
     AddressOfTemporaryTaken, BaseExpressionDoubleDot, BaseExpressionDoubleDotAddExpr,
-    BaseExpressionDoubleDotEnableDefaultFieldValues, BaseExpressionDoubleDotRemove,
-    CantDereference, FieldMultiplySpecifiedInInitializer, FunctionalRecordUpdateOnNonStruct,
-    HelpUseLatestEdition, NoFieldOnType, NoFieldOnVariant, ReturnLikeStatementKind,
-    ReturnStmtOutsideOfFnBody, StructExprNonExhaustive, TypeMismatchFruTypo,
-    YieldExprOutsideOfCoroutine,
+    BaseExpressionDoubleDotRemove, CantDereference, FieldMultiplySpecifiedInInitializer,
+    FunctionalRecordUpdateOnNonStruct, HelpUseLatestEdition, NakedAsmOutsideNakedFn, NoFieldOnType,
+    NoFieldOnVariant, ReturnLikeStatementKind, ReturnStmtOutsideOfFnBody, StructExprNonExhaustive,
+    TypeMismatchFruTypo, YieldExprOutsideOfCoroutine,
 };
 use crate::{
     BreakableCtxt, CoroutineTypes, Diverges, FnCtxt, GatherLocalsVisitor, Needs,
@@ -54,6 +54,31 @@ use crate::{
 };
 
 impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
+    pub(crate) fn precedence(&self, expr: &hir::Expr<'_>) -> ExprPrecedence {
+        let has_attr = |id: HirId| -> bool {
+            for attr in self.tcx.hir_attrs(id) {
+                // For the purpose of rendering suggestions, disregard attributes
+                // that originate from desugaring of any kind. For example, `x?`
+                // desugars to `#[allow(unreachable_code)] match ...`. Failing to
+                // ignore the prefix attribute in the desugaring would cause this
+                // suggestion:
+                //
+                //     let y: u32 = x?.try_into().unwrap();
+                //                    ++++++++++++++++++++
+                //
+                // to be rendered as:
+                //
+                //     let y: u32 = (x?).try_into().unwrap();
+                //                  +  +++++++++++++++++++++
+                if attr.span().desugaring_kind().is_none() {
+                    return true;
+                }
+            }
+            false
+        };
+        expr.precedence(&has_attr)
+    }
+
     /// Check an expr with an expectation type, and also demand that the expr's
     /// evaluated type is a subtype of the expectation at the end. This is a
     /// *hard* requirement.
@@ -524,7 +549,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             ExprKind::InlineAsm(asm) => {
                 // We defer some asm checks as we may not have resolved the input and output types yet (they may still be infer vars).
                 self.deferred_asm_checks.borrow_mut().push((asm, expr.hir_id));
-                self.check_expr_asm(asm)
+                self.check_expr_asm(asm, expr.span)
             }
             ExprKind::OffsetOf(container, fields) => {
                 self.check_expr_offset_of(container, fields, expr)
@@ -557,7 +582,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 ascribed_ty
             }
             ExprKind::If(cond, then_expr, opt_else_expr) => {
-                self.check_expr_if(cond, then_expr, opt_else_expr, expr.span, expected)
+                self.check_expr_if(expr.hir_id, cond, then_expr, opt_else_expr, expr.span, expected)
             }
             ExprKind::DropTemps(e) => self.check_expr_with_expectation(e, expected),
             ExprKind::Array(args) => self.check_expr_array(args, expected, expr),
@@ -664,7 +689,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 self.check_named_place_expr(oprnd);
                 Ty::new_ptr(self.tcx, ty, mutbl)
             }
-            hir::BorrowKind::Ref => {
+            hir::BorrowKind::Ref | hir::BorrowKind::Pin => {
                 // Note: at this point, we cannot say what the best lifetime
                 // is to use for resulting pointer. We want to use the
                 // shortest lifetime possible so as to avoid spurious borrowck
@@ -679,8 +704,12 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 // this time with enough precision to check that the value
                 // whose address was taken can actually be made to live as long
                 // as it needs to live.
-                let region = self.next_region_var(infer::BorrowRegion(expr.span));
-                Ty::new_ref(self.tcx, region, ty, mutbl)
+                let region = self.next_region_var(RegionVariableOrigin::BorrowRegion(expr.span));
+                match kind {
+                    hir::BorrowKind::Ref => Ty::new_ref(self.tcx, region, ty, mutbl),
+                    hir::BorrowKind::Pin => Ty::new_pinned_ref(self.tcx, region, ty, mutbl),
+                    _ => unreachable!(),
+                }
             }
         }
     }
@@ -809,9 +838,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     );
                 }
             }
-            // Here we want to prevent struct constructors from returning unsized types.
-            // There were two cases this happened: fn pointer coercion in stable
-            // and usual function call in presence of unsized_locals.
+            // Here we want to prevent struct constructors from returning unsized types,
+            // which can happen with fn pointer coercion on stable.
             // Also, as we just want to check sizedness, instead of introducing
             // placeholder lifetimes with probing, we just replace higher lifetimes
             // with fresh vars.
@@ -1314,6 +1342,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     // or 'if-else' expression.
     fn check_expr_if(
         &self,
+        expr_id: HirId,
         cond_expr: &'tcx hir::Expr<'tcx>,
         then_expr: &'tcx hir::Expr<'tcx>,
         opt_else_expr: Option<&'tcx hir::Expr<'tcx>>,
@@ -1353,15 +1382,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
             let tail_defines_return_position_impl_trait =
                 self.return_position_impl_trait_from_match_expectation(orig_expected);
-            let if_cause = self.if_cause(
-                sp,
-                cond_expr.span,
-                then_expr,
-                else_expr,
-                then_ty,
-                else_ty,
-                tail_defines_return_position_impl_trait,
-            );
+            let if_cause =
+                self.if_cause(expr_id, else_expr, tail_defines_return_position_impl_trait);
 
             coerce.coerce(self, &if_cause, else_expr, else_ty);
 
@@ -1407,7 +1429,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 let lhs_deref_ty_is_sized = self
                     .infcx
                     .type_implements_trait(
-                        self.tcx.require_lang_item(LangItem::Sized, None),
+                        self.tcx.require_lang_item(LangItem::Sized, span),
                         [lhs_deref_ty],
                         self.param_env,
                     )
@@ -1626,6 +1648,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     TupleArgumentsFlag::DontTupleArguments,
                     Some(method.def_id),
                 );
+
+                self.check_call_abi(method.sig.abi, expr.span);
 
                 method.sig.output()
             }
@@ -2126,7 +2150,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 }
             }
             if !self.tcx.features().default_field_values() {
-                let sugg = self.tcx.crate_level_attribute_injection_span(expr.hir_id);
+                let sugg = self.tcx.crate_level_attribute_injection_span();
                 self.dcx().emit_err(BaseExpressionDoubleDot {
                     span: span.shrink_to_hi(),
                     // We only mention enabling the feature if this is a nightly rustc *and* the
@@ -2134,18 +2158,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     default_field_values_suggestion: if self.tcx.sess.is_nightly_build()
                         && missing_mandatory_fields.is_empty()
                         && !missing_optional_fields.is_empty()
-                        && sugg.is_some()
                     {
-                        sugg
-                    } else {
-                        None
-                    },
-                    default_field_values_help: if self.tcx.sess.is_nightly_build()
-                        && missing_mandatory_fields.is_empty()
-                        && !missing_optional_fields.is_empty()
-                        && sugg.is_none()
-                    {
-                        Some(BaseExpressionDoubleDotEnableDefaultFieldValues)
+                        Some(sugg)
                     } else {
                         None
                     },
@@ -3761,7 +3775,13 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         }
     }
 
-    fn check_expr_asm(&self, asm: &'tcx hir::InlineAsm<'tcx>) -> Ty<'tcx> {
+    fn check_expr_asm(&self, asm: &'tcx hir::InlineAsm<'tcx>, span: Span) -> Ty<'tcx> {
+        if let rustc_ast::AsmMacro::NakedAsm = asm.asm_macro {
+            if !find_attr!(self.tcx.get_all_attrs(self.body_id), AttributeKind::Naked(..)) {
+                self.tcx.dcx().emit_err(NakedAsmOutsideNakedFn { span });
+            }
+        }
+
         let mut diverge = asm.asm_macro.diverges(asm.options);
 
         for (op, _op_sp) in asm.operands {

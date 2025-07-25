@@ -159,7 +159,7 @@ To create an executable that links against our static library, run:
 
 .. code-block::
 
-   $ gcc -o call_factorial_from_c -L . -l factorial call_factorial_from_c.c
+   $ gcc -o call_factorial_from_c -L . call_factorial_from_c.c -l factorial
 
 Or if you want to create an executable that links against out dynamic library,
 run:

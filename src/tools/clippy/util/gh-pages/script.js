@@ -554,10 +554,10 @@ function addListeners() {
             return;
         }
 
-        if (event.target.classList.contains("lint-anchor")) {
-            lintAnchor(event);
-        } else if (event.target.classList.contains("copy-to-clipboard")) {
+        if (event.target.classList.contains("copy-to-clipboard")) {
             copyToClipboard(event);
+        } else if (event.target.classList.contains("anchor")) {
+            lintAnchor(event);
         }
     });
 
@@ -602,7 +602,7 @@ filters.filterLints();
 updateLintCount();
 
 function updateLintCount() {
-    const allLints = filters.getAllLints();
+    const allLints = filters.getAllLints().filter(lint => lint.group != "deprecated");
     const totalLints = allLints.length;
     
     const countElement = document.getElementById("lint-count");

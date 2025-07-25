@@ -47,7 +47,7 @@ impl<'tcx> At<'_, 'tcx> {
     /// same goals in both a temporary and the shared context which negatively impacts
     /// performance as these don't share caching.
     ///
-    /// FIXME(-Znext-solver): For performance reasons, we currently reuse an existing
+    /// FIXME(-Znext-solver=no): For performance reasons, we currently reuse an existing
     /// fulfillment context in the old solver. Once we have removed the old solver, we
     /// can remove the `fulfill_cx` parameter on this function.
     fn deeply_normalize<T, E>(
@@ -224,7 +224,7 @@ impl<'a, 'b, 'tcx> AssocTypeNormalizer<'a, 'b, 'tcx> {
             )
             .ok()
             .flatten()
-            .unwrap_or(proj.to_term(infcx.tcx));
+            .unwrap_or_else(|| proj.to_term(infcx.tcx));
 
             PlaceholderReplacer::replace_placeholders(
                 infcx,

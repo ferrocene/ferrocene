@@ -163,6 +163,8 @@ s! {
         __val: [c_ulong; 2],
     }
 
+    // FIXME(1.0): This should not implement `PartialEq`
+    #[allow(unpredictable_function_pointer_comparisons)]
     pub struct sigaction {
         pub sa_sigaction: crate::sighandler_t,
         pub sa_flags: c_ulong,
@@ -475,7 +477,6 @@ pub const POLLWRBAND: c_short = 0x200;
 pub const POLLWRNORM: c_short = 0x100;
 pub const PTHREAD_STACK_MIN: size_t = 16384;
 pub const RTLD_GLOBAL: c_int = 0x00100;
-pub const PIDFD_NONBLOCK: c_int = 0x800;
 
 // These are typed unsigned to match sigaction
 pub const SA_NOCLDSTOP: c_ulong = 0x1;

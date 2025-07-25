@@ -130,11 +130,11 @@ pub enum MiriMemoryKind {
     WinHeap,
     /// Windows "local" memory (to be freed with `LocalFree`)
     WinLocal,
-    /// Memory for args, errno, and other parts of the machine-managed environment.
+    /// Memory for args, errno, env vars, and other parts of the machine-managed environment.
     /// This memory may leak.
     Machine,
-    /// Memory allocated by the runtime (e.g. env vars). Separate from `Machine`
-    /// because we clean it up and leak-check it.
+    /// Memory allocated by the runtime, e.g. for readdir. Separate from `Machine` because we clean
+    /// it up (or expect the user to invoke operations that clean it up) and leak-check it.
     Runtime,
     /// Globals copied from `tcx`.
     /// This memory may leak.
@@ -285,7 +285,7 @@ impl interpret::Provenance for Provenance {
     }
 
     fn fmt(ptr: &interpret::Pointer<Self>, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let (prov, addr) = ptr.into_parts(); // address is absolute
+        let (prov, addr) = ptr.into_raw_parts(); // offset is absolute address
         write!(f, "{:#x}", addr.bytes())?;
         if f.alternate() {
             write!(f, "{prov:#?}")?;
@@ -499,9 +499,6 @@ pub struct MiriMachine<'tcx> {
     /// in `sched_getaffinity`
     pub(crate) thread_cpu_affinity: FxHashMap<ThreadId, CpuAffinityMask>,
 
-    /// The state of the primitive synchronization objects.
-    pub(crate) sync: SynchronizationObjects,
-
     /// Precomputed `TyLayout`s for primitive data types that are commonly used inside Miri.
     pub(crate) layouts: PrimitiveLayouts<'tcx>,
 
@@ -558,9 +555,9 @@ pub struct MiriMachine<'tcx> {
 
     /// Handle of the optional shared object file for native functions.
     #[cfg(unix)]
-    pub native_lib: Option<(libloading::Library, std::path::PathBuf)>,
+    pub native_lib: Vec<(libloading::Library, std::path::PathBuf)>,
     #[cfg(not(unix))]
-    pub native_lib: Option<!>,
+    pub native_lib: Vec<!>,
 
     /// Run a garbage collector for BorTags every N basic blocks.
     pub(crate) gc_interval: u32,
@@ -618,6 +615,9 @@ pub struct MiriMachine<'tcx> {
 
     /// Always prefer the intrinsic fallback body over the native Miri implementation.
     pub force_intrinsic_fallback: bool,
+
+    /// Whether floating-point operations can behave non-deterministically.
+    pub float_nondet: bool,
 }
 
 impl<'tcx> MiriMachine<'tcx> {
@@ -710,7 +710,6 @@ impl<'tcx> MiriMachine<'tcx> {
             layouts,
             threads,
             thread_cpu_affinity,
-            sync: SynchronizationObjects::default(),
             static_roots: Vec::new(),
             profiler,
             string_cache: Default::default(),
@@ -720,7 +719,7 @@ impl<'tcx> MiriMachine<'tcx> {
             extern_statics: FxHashMap::default(),
             rng: RefCell::new(rng),
             #[cfg(target_os = "linux")]
-            allocator: if config.native_lib.is_some() {
+            allocator: if !config.native_lib.is_empty() {
                 Some(Rc::new(RefCell::new(crate::alloc::isolated_alloc::IsolatedAlloc::new())))
             } else { None },
             tracked_alloc_ids: config.tracked_alloc_ids.clone(),
@@ -732,7 +731,7 @@ impl<'tcx> MiriMachine<'tcx> {
             basic_block_count: 0,
             monotonic_clock: MonotonicClock::new(config.isolated_op == IsolatedOp::Allow),
             #[cfg(unix)]
-            native_lib: config.native_lib.as_ref().map(|lib_file_path| {
+            native_lib: config.native_lib.iter().map(|lib_file_path| {
                 let host_triple = rustc_session::config::host_tuple();
                 let target_triple = tcx.sess.opts.target_triple.tuple();
                 // Check if host target == the session target.
@@ -752,11 +751,11 @@ impl<'tcx> MiriMachine<'tcx> {
                     },
                     lib_file_path.clone(),
                 )
-            }),
+            }).collect(),
             #[cfg(not(unix))]
-            native_lib: config.native_lib.as_ref().map(|_| {
+            native_lib: config.native_lib.iter().map(|_| {
                 panic!("calling functions from native libraries via FFI is only supported on Unix")
-            }),
+            }).collect(),
             gc_interval: config.gc_interval,
             since_gc: 0,
             num_cpus: config.num_cpus,
@@ -778,6 +777,7 @@ impl<'tcx> MiriMachine<'tcx> {
             int2ptr_warned: Default::default(),
             mangle_internal_symbol_cache: Default::default(),
             force_intrinsic_fallback: config.force_intrinsic_fallback,
+            float_nondet: config.float_nondet,
         }
     }
 
@@ -899,7 +899,6 @@ impl VisitProvenance for MiriMachine<'_> {
         let MiriMachine {
             threads,
             thread_cpu_affinity: _,
-            sync: _,
             tls,
             env_vars,
             main_fn_ret_place,
@@ -956,6 +955,7 @@ impl VisitProvenance for MiriMachine<'_> {
             int2ptr_warned: _,
             mangle_internal_symbol_cache: _,
             force_intrinsic_fallback: _,
+            float_nondet: _,
         } = self;
 
         threads.visit_provenance(visit);
@@ -1051,7 +1051,7 @@ impl<'tcx> Machine<'tcx> for MiriMachine<'tcx> {
             // What's the offset between us and the promised alignment?
             let distance = offset.bytes().wrapping_sub(promised_offset.bytes());
             // That must also be aligned.
-            if distance % align.bytes() == 0 {
+            if distance.is_multiple_of(align.bytes()) {
                 // All looking good!
                 None
             } else {
@@ -1197,7 +1197,7 @@ impl<'tcx> Machine<'tcx> for MiriMachine<'tcx> {
             ExternAbi::Rust,
             &[],
             None,
-            StackPopCleanup::Goto { ret: None, unwind: mir::UnwindAction::Unreachable },
+            ReturnContinuation::Goto { ret: None, unwind: mir::UnwindAction::Unreachable },
         )?;
         interp_ok(())
     }
@@ -1607,7 +1607,7 @@ impl<'tcx> Machine<'tcx> for MiriMachine<'tcx> {
         ecx.machine.since_gc += 1;
         // Possibly report our progress. This will point at the terminator we are about to execute.
         if let Some(report_progress) = ecx.machine.report_progress {
-            if ecx.machine.basic_block_count % u64::from(report_progress) == 0 {
+            if ecx.machine.basic_block_count.is_multiple_of(u64::from(report_progress)) {
                 ecx.emit_diagnostic(NonHaltingDiagnostic::ProgressReport {
                     block_count: ecx.machine.basic_block_count,
                 });
@@ -1824,6 +1824,19 @@ impl<'tcx> Machine<'tcx> for MiriMachine<'tcx> {
         }
         #[cfg(not(target_os = "linux"))]
         MiriAllocParams::Global
+    }
+
+    fn enter_trace_span(span: impl FnOnce() -> tracing::Span) -> impl EnteredTraceSpan {
+        #[cfg(feature = "tracing")]
+        {
+            span().entered()
+        }
+        #[cfg(not(feature = "tracing"))]
+        #[expect(clippy::unused_unit)]
+        {
+            let _ = span; // so we avoid the "unused variable" warning
+            ()
+        }
     }
 }
 

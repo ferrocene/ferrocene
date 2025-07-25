@@ -503,7 +503,7 @@ impl<'ctx> MirLowerCtx<'ctx> {
                         Ok(Some(current))
                     }
                     ValueNs::EnumVariantId(variant_id) => {
-                        let variant_fields = &self.db.variant_fields(variant_id.into());
+                        let variant_fields = variant_id.fields(self.db);
                         if variant_fields.shape == FieldsShape::Unit {
                             let ty = self.infer.type_of_expr[expr_id].clone();
                             current = self.lower_enum_variant(
@@ -856,7 +856,7 @@ impl<'ctx> MirLowerCtx<'ctx> {
                     TyKind::Adt(_, s) => s.clone(),
                     _ => not_supported!("Non ADT record literal"),
                 };
-                let variant_fields = self.db.variant_fields(variant_id);
+                let variant_fields = variant_id.fields(self.db);
                 match variant_id {
                     VariantId::EnumVariantId(_) | VariantId::StructId(_) => {
                         let mut operands = vec![None; variant_fields.fields().len()];
@@ -1176,8 +1176,7 @@ impl<'ctx> MirLowerCtx<'ctx> {
                     place,
                     Rvalue::Aggregate(
                         AggregateKind::Adt(st.into(), subst.clone()),
-                        self.db
-                            .variant_fields(st.into())
+                        st.fields(self.db)
                             .fields()
                             .iter()
                             .map(|it| {
@@ -1922,11 +1921,14 @@ impl<'ctx> MirLowerCtx<'ctx> {
                 let edition = self.edition();
                 let db = self.db;
                 let loc = variant.lookup(db);
-                let enum_loc = loc.parent.lookup(db);
                 let name = format!(
                     "{}::{}",
-                    enum_loc.id.item_tree(db)[enum_loc.id.value].name.display(db, edition),
-                    loc.id.item_tree(db)[loc.id.value].name.display(db, edition),
+                    self.db.enum_signature(loc.parent).name.display(db, edition),
+                    loc.parent
+                        .enum_variants(self.db)
+                        .variant_name_by_id(variant)
+                        .unwrap()
+                        .display(db, edition),
                 );
                 Err(MirLowerError::ConstEvalError(name.into(), Box::new(e)))
             }
@@ -2152,7 +2154,7 @@ pub fn mir_body_query(db: &dyn HirDatabase, def: DefWithBodyId) -> Result<Arc<Mi
             .to_string(),
         DefWithBodyId::VariantId(it) => {
             let loc = it.lookup(db);
-            db.enum_variants(loc.parent).variants[loc.index as usize]
+            loc.parent.enum_variants(db).variants[loc.index as usize]
                 .1
                 .display(db, edition)
                 .to_string()
@@ -2182,7 +2184,7 @@ pub fn lower_to_mir(
     // need to take this input explicitly.
     root_expr: ExprId,
 ) -> Result<MirBody> {
-    if infer.type_mismatches().next().is_some() {
+    if infer.type_mismatches().next().is_some() || infer.is_erroneous() {
         return Err(MirLowerError::HasErrors);
     }
     let mut ctx = MirLowerCtx::new(db, owner, body, infer);

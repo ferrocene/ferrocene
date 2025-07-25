@@ -4,7 +4,7 @@ use alloc::vec::Vec;
 // DevkitA64 doesn't natively support debug info, but the build system will
 // place debug info at the path `romfs:/debug_info.elf`.
 pub(super) fn native_libraries() -> Vec<Library> {
-    extern "C" {
+    unsafe extern "C" {
         static __start__: u8;
     }
 

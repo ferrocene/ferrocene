@@ -200,16 +200,14 @@ pub macro assert_matches {
     },
 }
 
-/// A macro for defining `#[cfg]` match-like statements.
+/// Selects code at compile-time based on `cfg` predicates.
 ///
-/// It is similar to the `if/elif` C preprocessor macro by allowing definition of a cascade of
-/// `#[cfg]` cases, emitting the implementation which matches first.
+/// This macro evaluates, at compile-time, a series of `cfg` predicates,
+/// selects the first that is true, and emits the code guarded by that
+/// predicate. The code guarded by other predicates is not emitted.
 ///
-/// This allows you to conveniently provide a long list `#[cfg]`'d blocks of code
-/// without having to rewrite each clause multiple times.
-///
-/// Trailing `_` wildcard match arms are **optional** and they indicate a fallback branch when
-/// all previous declarations do not evaluate to true.
+/// An optional trailing `_` wildcard can be used to specify a fallback. If
+/// none of the predicates are true, a [`compile_error`] is emitted.
 ///
 /// # Example
 ///
@@ -229,38 +227,22 @@ pub macro assert_matches {
 /// }
 /// ```
 ///
-/// If desired, it is possible to return expressions through the use of surrounding braces:
+/// The `cfg_select!` macro can also be used in expression position:
 ///
 /// ```
 /// #![feature(cfg_select)]
 ///
-/// let _some_string = cfg_select! {{
+/// let _some_string = cfg_select! {
 ///     unix => { "With great power comes great electricity bills" }
 ///     _ => { "Behind every successful diet is an unwatched pizza" }
-/// }};
+/// };
 /// ```
 #[unstable(feature = "cfg_select", issue = "115585")]
 #[rustc_diagnostic_item = "cfg_select"]
-#[rustc_macro_transparency = "semitransparent"]
+#[rustc_builtin_macro]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub macro cfg_select {
-    ({ $($tt:tt)* }) => {{
-        $crate::cfg_select! { $($tt)* }
-    }},
-    (_ => { $($output:tt)* }) => {
-        $($output)*
-    },
-    (
-        $cfg:meta => $output:tt
-        $($( $rest:tt )+)?
-    ) => {
-        #[cfg($cfg)]
-        $crate::cfg_select! { _ => $output }
-        $(
-            #[cfg(not($cfg))]
-            $crate::cfg_select! { $($rest)+ }
-        )?
-    },
+pub macro cfg_select($($tt:tt)*) {
+    /* compiler built-in */
 }
 
 /// Asserts that a boolean expression is `true` at runtime.
@@ -1124,45 +1106,6 @@ pub(crate) mod builtin {
         ($name:expr $(,)?) => {{ /* compiler built-in */ }};
     }
 
-    /// Concatenates identifiers into one identifier.
-    ///
-    /// This macro takes any number of comma-separated identifiers, and
-    /// concatenates them all into one, yielding an expression which is a new
-    /// identifier. Note that hygiene makes it such that this macro cannot
-    /// capture local variables. Also, as a general rule, macros are only
-    /// allowed in item, statement or expression position. That means while
-    /// you may use this macro for referring to existing variables, functions or
-    /// modules etc, you cannot define a new one with it.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// #![feature(concat_idents)]
-    ///
-    /// # fn main() {
-    /// fn foobar() -> u32 { 23 }
-    ///
-    /// let f = concat_idents!(foo, bar);
-    /// println!("{}", f());
-    ///
-    /// // fn concat_idents!(new, fun, name) { } // not usable in this way!
-    /// # }
-    /// ```
-    #[unstable(
-        feature = "concat_idents",
-        issue = "29599",
-        reason = "`concat_idents` is not stable enough for use and is subject to change"
-    )]
-    #[deprecated(
-        since = "1.88.0",
-        note = "use `${concat(...)}` with the `macro_metavar_expr_concat` feature instead"
-    )]
-    #[rustc_builtin_macro]
-    #[macro_export]
-    macro_rules! concat_idents {
-        ($($e:ident),+ $(,)?) => {{ /* compiler built-in */ }};
-    }
-
     /// Concatenates literals into a byte slice.
     ///
     /// This macro takes any number of comma-separated literals, and concatenates them all into
@@ -1207,6 +1150,7 @@ pub(crate) mod builtin {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_builtin_macro]
+    #[rustc_diagnostic_item = "macro_concat"]
     #[macro_export]
     macro_rules! concat {
         ($($e:expr),* $(,)?) => {{ /* compiler built-in */ }};
@@ -1287,6 +1231,19 @@ pub(crate) mod builtin {
     /// is not the invocation of the `file!` macro itself, but rather the
     /// first macro invocation leading up to the invocation of the `file!`
     /// macro.
+    ///
+    /// The file name is derived from the crate root's source path passed to the Rust compiler
+    /// and the sequence the compiler takes to get from the crate root to the
+    /// module containing `file!`, modified by any flags passed to the Rust compiler (e.g.
+    /// `--remap-path-prefix`).  If the crate's source path is relative, the initial base
+    /// directory will be the working directory of the Rust compiler.  For example, if the source
+    /// path passed to the compiler is `./src/lib.rs` which has a `mod foo;` with a source path of
+    /// `src/foo/mod.rs`, then calling `file!` inside `mod foo;` will return `./src/foo/mod.rs`.
+    ///
+    /// Future compiler options might make further changes to the behavior of `file!`,
+    /// including potentially making it entirely empty. Code (e.g. test libraries)
+    /// relying on `file!` producing an openable file path would be incompatible
+    /// with such options, and might wish to recommend not using those options.
     ///
     /// # Examples
     ///

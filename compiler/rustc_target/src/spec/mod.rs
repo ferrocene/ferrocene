@@ -6,33 +6,36 @@
 //! to a new platform, and allows for an unprecedented level of control over how
 //! the compiler works.
 //!
-//! # Using custom targets
+//! # Using targets and target.json
 //!
-//! A target tuple, as passed via `rustc --target=TUPLE`, will first be
-//! compared against the list of built-in targets. This is to ease distributing
-//! rustc (no need for configuration files) and also to hold these built-in
-//! targets as immutable and sacred. If `TUPLE` is not one of the built-in
-//! targets, rustc will check if a file named `TUPLE` exists. If it does, it
-//! will be loaded as the target configuration. If the file does not exist,
-//! rustc will search each directory in the environment variable
-//! `RUST_TARGET_PATH` for a file named `TUPLE.json`. The first one found will
-//! be loaded. If no file is found in any of those directories, a fatal error
-//! will be given.
+//! Invoking "rustc --target=${TUPLE}" will result in rustc initiating the [`Target::search`] by
+//! - checking if "$TUPLE" is a complete path to a json (ending with ".json") and loading if so
+//! - checking builtin targets for "${TUPLE}"
+//! - checking directories in "${RUST_TARGET_PATH}" for "${TUPLE}.json"
+//! - checking for "${RUSTC_SYSROOT}/lib/rustlib/${TUPLE}/target.json"
 //!
-//! Projects defining their own targets should use
-//! `--target=path/to/my-awesome-platform.json` instead of adding to
-//! `RUST_TARGET_PATH`.
+//! Code will then be compiled using the first discovered target spec.
 //!
 //! # Defining a new target
 //!
-//! Targets are defined using [JSON](https://json.org/). The `Target` struct in
-//! this module defines the format the JSON file should take, though each
-//! underscore in the field names should be replaced with a hyphen (`-`) in the
-//! JSON file. Some fields are required in every target specification, such as
-//! `llvm-target`, `target-endian`, `target-pointer-width`, `data-layout`,
-//! `arch`, and `os`. In general, options passed to rustc with `-C` override
-//! the target's settings, though `target-feature` and `link-args` will *add*
-//! to the list specified by the target, rather than replace.
+//! Targets are defined using a struct which additionally has serialization to and from [JSON].
+//! The `Target` struct in this module loosely corresponds with the format the JSON takes.
+//! We usually try to make the fields equivalent but we have given up on a 1:1 correspondence
+//! between the JSON and the actual structure itself.
+//!
+//! Some fields are required in every target spec, and they should be embedded in Target directly.
+//! Optional keys are in TargetOptions, but Target derefs to it, for no practical difference.
+//! Most notable is the "data-layout" field which specifies Rust's notion of sizes and alignments
+//! for several key types, such as f64, pointers, and so on.
+//!
+//! At one point we felt `-C` options should override the target's settings, like in C compilers,
+//! but that was an essentially-unmarked route for making code incorrect and Rust unsound.
+//! Confronted with programmers who prefer a compiler with a good UX instead of a lethal weapon,
+//! we have almost-entirely recanted that notion, though we hope "target modifiers" will offer
+//! a way to have a decent UX yet still extend the necessary compiler controls, without
+//! requiring a new target spec for each and every single possible target micro-variant.
+//!
+//! [JSON]: https://json.org
 
 use std::borrow::Cow;
 use std::collections::BTreeMap;
@@ -62,7 +65,7 @@ mod abi_map;
 mod base;
 mod json;
 
-pub use abi_map::AbiMap;
+pub use abi_map::{AbiMap, AbiMapping};
 pub use base::apple;
 pub use base::avr::ef_avr_arch;
 
@@ -722,7 +725,7 @@ impl ToJson for LinkSelfContainedComponents {
 }
 
 bitflags::bitflags! {
-    /// The `-Z linker-features` components that can individually be enabled or disabled.
+    /// The `-C linker-features` components that can individually be enabled or disabled.
     ///
     /// They are feature flags intended to be a more flexible mechanism than linker flavors, and
     /// also to prevent a combinatorial explosion of flavors whenever a new linker feature is
@@ -753,11 +756,22 @@ bitflags::bitflags! {
 rustc_data_structures::external_bitflags_debug! { LinkerFeatures }
 
 impl LinkerFeatures {
-    /// Parses a single `-Z linker-features` well-known feature, not a set of flags.
+    /// Parses a single `-C linker-features` well-known feature, not a set of flags.
     pub fn from_str(s: &str) -> Option<LinkerFeatures> {
         Some(match s {
             "cc" => LinkerFeatures::CC,
             "lld" => LinkerFeatures::LLD,
+            _ => return None,
+        })
+    }
+
+    /// Return the linker feature name, as would be passed on the CLI.
+    ///
+    /// Returns `None` if the bitflags aren't a singular component (but a mix of multiple flags).
+    pub fn as_str(self) -> Option<&'static str> {
+        Some(match self {
+            LinkerFeatures::CC => "cc",
+            LinkerFeatures::LLD => "lld",
             _ => return None,
         })
     }
@@ -1697,6 +1711,12 @@ impl ToJson for BinaryFormat {
     }
 }
 
+impl ToJson for Align {
+    fn to_json(&self) -> Json {
+        self.bits().to_json()
+    }
+}
+
 macro_rules! supported_targets {
     ( $(($tuple:literal, $module:ident),)+ ) => {
         mod targets {
@@ -1981,6 +2001,8 @@ supported_targets! {
 
     ("sparc-unknown-none-elf", sparc_unknown_none_elf),
 
+    ("loongarch32-unknown-none", loongarch32_unknown_none),
+    ("loongarch32-unknown-none-softfloat", loongarch32_unknown_none_softfloat),
     ("loongarch64-unknown-none", loongarch64_unknown_none),
     ("loongarch64-unknown-none-softfloat", loongarch64_unknown_none_softfloat),
 
@@ -2196,7 +2218,10 @@ pub struct TargetMetadata {
 
 impl Target {
     pub fn parse_data_layout(&self) -> Result<TargetDataLayout, TargetDataLayoutErrors<'_>> {
-        let mut dl = TargetDataLayout::parse_from_llvm_datalayout_string(&self.data_layout)?;
+        let mut dl = TargetDataLayout::parse_from_llvm_datalayout_string(
+            &self.data_layout,
+            self.options.default_address_space,
+        )?;
 
         // Perform consistency checks against the Target information.
         if dl.endian != self.endian {
@@ -2207,25 +2232,18 @@ impl Target {
         }
 
         let target_pointer_width: u64 = self.pointer_width.into();
-        if dl.pointer_size.bits() != target_pointer_width {
+        let dl_pointer_size: u64 = dl.pointer_size().bits();
+        if dl_pointer_size != target_pointer_width {
             return Err(TargetDataLayoutErrors::InconsistentTargetPointerWidth {
-                pointer_size: dl.pointer_size.bits(),
+                pointer_size: dl_pointer_size,
                 target: self.pointer_width,
             });
         }
 
-        dl.c_enum_min_size = self
-            .c_enum_min_bits
-            .map_or_else(
-                || {
-                    self.c_int_width
-                        .parse()
-                        .map_err(|_| String::from("failed to parse c_int_width"))
-                },
-                Ok,
-            )
-            .and_then(|i| Integer::from_size(Size::from_bits(i)))
-            .map_err(|err| TargetDataLayoutErrors::InvalidBitsSize { err })?;
+        dl.c_enum_min_size = Integer::from_size(Size::from_bits(
+            self.c_enum_min_bits.unwrap_or(self.c_int_width as _),
+        ))
+        .map_err(|err| TargetDataLayoutErrors::InvalidBitsSize { err })?;
 
         Ok(dl)
     }
@@ -2240,22 +2258,6 @@ impl HasTargetSpec for Target {
     fn target_spec(&self) -> &Target {
         self
     }
-}
-
-/// Which C ABI to use for `wasm32-unknown-unknown`.
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum WasmCAbi {
-    /// Spec-compliant C ABI.
-    Spec,
-    /// Legacy ABI. Which is non-spec-compliant.
-    Legacy {
-        /// Indicates whether the `wasm_c_abi` lint should be emitted.
-        with_lint: bool,
-    },
-}
-
-pub trait HasWasmCAbiOpt {
-    fn wasm_c_abi_opt(&self) -> WasmCAbi;
 }
 
 /// x86 (32-bit) abi options.
@@ -2287,7 +2289,7 @@ pub struct TargetOptions {
     /// Used as the `target_endian` `cfg` variable. Defaults to little endian.
     pub endian: Endian,
     /// Width of c_int type. Defaults to "32".
-    pub c_int_width: StaticCow<str>,
+    pub c_int_width: u16,
     /// OS name to use for conditional compilation (`target_os`). Defaults to "none".
     /// "none" implies a bare metal target without `std` library.
     /// A couple of targets having `std` also use "unknown" as an `os` value,
@@ -2522,7 +2524,7 @@ pub struct TargetOptions {
     pub stack_probes: StackProbeType,
 
     /// The minimum alignment for global symbols.
-    pub min_global_align: Option<u64>,
+    pub min_global_align: Option<Align>,
 
     /// Default number of codegen units to use in debug mode
     pub default_codegen_units: Option<u64>,
@@ -2672,6 +2674,11 @@ pub struct TargetOptions {
     /// Whether the target supports XRay instrumentation.
     pub supports_xray: bool,
 
+    /// The default address space for this target. When using LLVM as a backend, most targets simply
+    /// use LLVM's default address space (0). Some other targets, such as CHERI targets, use a
+    /// custom default address space (in this specific case, `200`).
+    pub default_address_space: rustc_abi::AddressSpace,
+
     /// Whether the targets supports -Z small-data-threshold
     small_data_threshold_support: SmallDataThresholdSupport,
 }
@@ -2784,7 +2791,7 @@ impl Default for TargetOptions {
     fn default() -> TargetOptions {
         TargetOptions {
             endian: Endian::Little,
-            c_int_width: "32".into(),
+            c_int_width: 32,
             os: "none".into(),
             env: "".into(),
             abi: "".into(),
@@ -2900,6 +2907,7 @@ impl Default for TargetOptions {
             entry_name: "main".into(),
             entry_abi: CanonAbi::C,
             supports_xray: false,
+            default_address_space: rustc_abi::AddressSpace::ZERO,
             small_data_threshold_support: SmallDataThresholdSupport::DefaultForArch,
         }
     }
@@ -3511,6 +3519,7 @@ impl Target {
             "msp430" => (Architecture::Msp430, None),
             "hexagon" => (Architecture::Hexagon, None),
             "bpf" => (Architecture::Bpf, None),
+            "loongarch32" => (Architecture::LoongArch32, None),
             "loongarch64" => (Architecture::LoongArch64, None),
             "csky" => (Architecture::Csky, None),
             "arm64ec" => (Architecture::Aarch64, Some(object::SubArchitecture::Arm64EC)),

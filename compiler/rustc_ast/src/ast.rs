@@ -18,8 +18,7 @@
 //! - [`Attribute`]: Metadata associated with item.
 //! - [`UnOp`], [`BinOp`], and [`BinOpKind`]: Unary and binary operators.
 
-use std::borrow::Cow;
-use std::sync::Arc;
+use std::borrow::{Borrow, Cow};
 use std::{cmp, fmt};
 
 pub use GenericArgs::*;
@@ -32,7 +31,7 @@ use rustc_data_structures::tagged_ptr::Tag;
 use rustc_macros::{Decodable, Encodable, HashStable_Generic};
 pub use rustc_span::AttrId;
 use rustc_span::source_map::{Spanned, respan};
-use rustc_span::{DUMMY_SP, ErrorGuaranteed, Ident, Span, Symbol, kw, sym};
+use rustc_span::{ByteSymbol, DUMMY_SP, ErrorGuaranteed, Ident, Span, Symbol, kw, sym};
 use thin_vec::{ThinVec, thin_vec};
 
 pub use crate::format::*;
@@ -97,17 +96,26 @@ pub struct Path {
     pub tokens: Option<LazyAttrTokenStream>,
 }
 
+// Succeeds if the path has a single segment that is arg-free and matches the given symbol.
 impl PartialEq<Symbol> for Path {
     #[inline]
     fn eq(&self, name: &Symbol) -> bool {
         if let [segment] = self.segments.as_ref()
-            && segment.args.is_none()
-            && segment.ident.name == *name
+            && segment == name
         {
             true
         } else {
             false
         }
+    }
+}
+
+// Succeeds if the path has segments that are arg-free and match the given symbols.
+impl PartialEq<&[Symbol]> for Path {
+    #[inline]
+    fn eq(&self, names: &&[Symbol]) -> bool {
+        self.segments.len() == names.len()
+            && self.segments.iter().zip(names.iter()).all(|(s1, s2)| s1 == s2)
     }
 }
 
@@ -147,6 +155,59 @@ impl Path {
     }
 }
 
+/// Joins multiple symbols with "::" into a path, e.g. "a::b::c". If the first
+/// segment is `kw::PathRoot` it will be printed as empty, e.g. "::b::c".
+///
+/// The generics on the `path` argument mean it can accept many forms, such as:
+/// - `&[Symbol]`
+/// - `Vec<Symbol>`
+/// - `Vec<&Symbol>`
+/// - `impl Iterator<Item = Symbol>`
+/// - `impl Iterator<Item = &Symbol>`
+///
+/// Panics if `path` is empty or a segment after the first is `kw::PathRoot`.
+pub fn join_path_syms(path: impl IntoIterator<Item = impl Borrow<Symbol>>) -> String {
+    // This is a guess at the needed capacity that works well in practice. It is slightly faster
+    // than (a) starting with an empty string, or (b) computing the exact capacity required.
+    // `8` works well because it's about the right size and jemalloc's size classes are all
+    // multiples of 8.
+    let mut iter = path.into_iter();
+    let len_hint = iter.size_hint().1.unwrap_or(1);
+    let mut s = String::with_capacity(len_hint * 8);
+
+    let first_sym = *iter.next().unwrap().borrow();
+    if first_sym != kw::PathRoot {
+        s.push_str(first_sym.as_str());
+    }
+    for sym in iter {
+        let sym = *sym.borrow();
+        debug_assert_ne!(sym, kw::PathRoot);
+        s.push_str("::");
+        s.push_str(sym.as_str());
+    }
+    s
+}
+
+/// Like `join_path_syms`, but for `Ident`s. This function is necessary because
+/// `Ident::to_string` does more than just print the symbol in the `name` field.
+pub fn join_path_idents(path: impl IntoIterator<Item = impl Borrow<Ident>>) -> String {
+    let mut iter = path.into_iter();
+    let len_hint = iter.size_hint().1.unwrap_or(1);
+    let mut s = String::with_capacity(len_hint * 8);
+
+    let first_ident = *iter.next().unwrap().borrow();
+    if first_ident.name != kw::PathRoot {
+        s.push_str(&first_ident.to_string());
+    }
+    for ident in iter {
+        let ident = *ident.borrow();
+        debug_assert_ne!(ident.name, kw::PathRoot);
+        s.push_str("::");
+        s.push_str(&ident.to_string());
+    }
+    s
+}
+
 /// A segment of a path: an identifier, an optional lifetime, and a set of types.
 ///
 /// E.g., `std`, `String` or `Box<T>`.
@@ -164,6 +225,14 @@ pub struct PathSegment {
     /// but it can be empty (`Path<>`).
     /// `P` is used as a size optimization for the common case with no parameters.
     pub args: Option<P<GenericArgs>>,
+}
+
+// Succeeds if the path segment is arg-free and matches the given symbol.
+impl PartialEq<Symbol> for PathSegment {
+    #[inline]
+    fn eq(&self, name: &Symbol) -> bool {
+        self.args.is_none() && self.ident.name == *name
+    }
 }
 
 impl PathSegment {
@@ -306,7 +375,7 @@ impl ParenthesizedArgs {
 
 pub use crate::node_id::{CRATE_NODE_ID, DUMMY_NODE_ID, NodeId};
 
-/// Modifiers on a trait bound like `~const`, `?` and `!`.
+/// Modifiers on a trait bound like `[const]`, `?` and `!`.
 #[derive(Copy, Clone, PartialEq, Eq, Encodable, Decodable, Debug)]
 pub struct TraitBoundModifiers {
     pub constness: BoundConstness,
@@ -369,8 +438,8 @@ pub enum GenericParamKind {
     },
     Const {
         ty: P<Ty>,
-        /// Span of the `const` keyword.
-        kw_span: Span,
+        /// Span of the whole parameter definition, including default.
+        span: Span,
         /// Optional default value for the const generic param.
         default: Option<AnonConst>,
     },
@@ -394,10 +463,7 @@ impl GenericParam {
                 self.ident.span
             }
             GenericParamKind::Type { default: Some(ty) } => self.ident.span.to(ty.span),
-            GenericParamKind::Const { kw_span, default: Some(default), .. } => {
-                kw_span.to(default.value.span)
-            }
-            GenericParamKind::Const { kw_span, default: None, ty } => kw_span.to(ty.span),
+            GenericParamKind::Const { span, .. } => *span,
         }
     }
 }
@@ -693,6 +759,12 @@ impl Pat {
     }
 }
 
+impl From<P<Pat>> for Pat {
+    fn from(value: P<Pat>) -> Self {
+        *value
+    }
+}
+
 /// A single field in a struct pattern.
 ///
 /// Patterns like the fields of `Foo { x, ref y, ref mut z }`
@@ -881,6 +953,10 @@ pub enum BorrowKind {
     /// The resulting type is either `*const T` or `*mut T`
     /// where `T = typeof($expr)`.
     Raw,
+    /// A pinned borrow, `&pin const $expr` or `&pin mut $expr`.
+    /// The resulting type is either `Pin<&'a T>` or `Pin<&'a mut T>`
+    /// where `T = typeof($expr)` and `'a` is some lifetime.
+    Pin,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Encodable, Decodable, HashStable_Generic)]
@@ -1119,10 +1195,9 @@ impl Stmt {
     pub fn add_trailing_semicolon(mut self) -> Self {
         self.kind = match self.kind {
             StmtKind::Expr(expr) => StmtKind::Semi(expr),
-            StmtKind::MacCall(mac) => {
-                StmtKind::MacCall(mac.map(|MacCallStmt { mac, style: _, attrs, tokens }| {
-                    MacCallStmt { mac, style: MacStmtStyle::Semicolon, attrs, tokens }
-                }))
+            StmtKind::MacCall(mut mac) => {
+                mac.style = MacStmtStyle::Semicolon;
+                StmtKind::MacCall(mac)
             }
             kind => kind,
         };
@@ -1319,7 +1394,7 @@ impl Expr {
         }
     }
 
-    /// Returns an expression with (when possible) *one* outter brace removed
+    /// Returns an expression with (when possible) *one* outer brace removed
     pub fn maybe_unwrap_block(&self) -> &Expr {
         if let ExprKind::Block(block, None) = &self.kind
             && let [stmt] = block.stmts.as_slice()
@@ -1365,6 +1440,7 @@ impl Expr {
                 path.clone(),
                 TraitBoundModifiers::NONE,
                 self.span,
+                Parens::No,
             ))),
             _ => None,
         }
@@ -1434,19 +1510,32 @@ impl Expr {
     }
 
     pub fn precedence(&self) -> ExprPrecedence {
+        fn prefix_attrs_precedence(attrs: &AttrVec) -> ExprPrecedence {
+            for attr in attrs {
+                if let AttrStyle::Outer = attr.style {
+                    return ExprPrecedence::Prefix;
+                }
+            }
+            ExprPrecedence::Unambiguous
+        }
+
         match &self.kind {
             ExprKind::Closure(closure) => {
                 match closure.fn_decl.output {
                     FnRetTy::Default(_) => ExprPrecedence::Jump,
-                    FnRetTy::Ty(_) => ExprPrecedence::Unambiguous,
+                    FnRetTy::Ty(_) => prefix_attrs_precedence(&self.attrs),
                 }
             }
 
-            ExprKind::Break(..)
-            | ExprKind::Ret(..)
-            | ExprKind::Yield(..)
-            | ExprKind::Yeet(..)
-            | ExprKind::Become(..) => ExprPrecedence::Jump,
+            ExprKind::Break(_ /*label*/, value)
+            | ExprKind::Ret(value)
+            | ExprKind::Yield(YieldKind::Prefix(value))
+            | ExprKind::Yeet(value) => match value {
+                Some(_) => ExprPrecedence::Jump,
+                None => prefix_attrs_precedence(&self.attrs),
+            },
+
+            ExprKind::Become(_) => ExprPrecedence::Jump,
 
             // `Range` claims to have higher precedence than `Assign`, but `x .. x = x` fails to
             // parse, instead of parsing as `(x .. x) = x`. Giving `Range` a lower precedence
@@ -1470,7 +1559,7 @@ impl Expr {
             | ExprKind::Let(..)
             | ExprKind::Unary(..) => ExprPrecedence::Prefix,
 
-            // Never need parens
+            // Need parens if and only if there are prefix attributes.
             ExprKind::Array(_)
             | ExprKind::Await(..)
             | ExprKind::Use(..)
@@ -1503,8 +1592,9 @@ impl Expr {
             | ExprKind::Underscore
             | ExprKind::UnsafeBinderCast(..)
             | ExprKind::While(..)
+            | ExprKind::Yield(YieldKind::Postfix(..))
             | ExprKind::Err(_)
-            | ExprKind::Dummy => ExprPrecedence::Unambiguous,
+            | ExprKind::Dummy => prefix_attrs_precedence(&self.attrs),
         }
     }
 
@@ -1523,17 +1613,23 @@ impl Expr {
         )
     }
 
-    /// Creates a dummy `P<Expr>`.
+    /// Creates a dummy `Expr`.
     ///
     /// Should only be used when it will be replaced afterwards or as a return value when an error was encountered.
-    pub fn dummy() -> P<Expr> {
-        P(Expr {
+    pub fn dummy() -> Expr {
+        Expr {
             id: DUMMY_NODE_ID,
             kind: ExprKind::Dummy,
             span: DUMMY_SP,
             attrs: ThinVec::new(),
             tokens: None,
-        })
+        }
+    }
+}
+
+impl From<P<Expr>> for Expr {
+    fn from(value: P<Expr>) -> Self {
+        *value
     }
 }
 
@@ -1724,7 +1820,7 @@ pub enum ExprKind {
     ///
     /// Usually not written directly in user code but
     /// indirectly via the macro `core::mem::offset_of!(...)`.
-    OffsetOf(P<Ty>, P<[Ident]>),
+    OffsetOf(P<Ty>, Vec<Ident>),
 
     /// A macro invocation; pre-expansion.
     MacCall(P<MacCall>),
@@ -1759,10 +1855,17 @@ pub enum ExprKind {
     Become(P<Expr>),
 
     /// Bytes included via `include_bytes!`
+    ///
     /// Added for optimization purposes to avoid the need to escape
     /// large binary blobs - should always behave like [`ExprKind::Lit`]
     /// with a `ByteStr` literal.
-    IncludedBytes(Arc<[u8]>),
+    ///
+    /// The value is stored as a `ByteSymbol`. It's unfortunate that we need to
+    /// intern (hash) the bytes because they're likely to be large and unique.
+    /// But it's necessary because this will eventually be lowered to
+    /// `LitKind::ByteStr`, which needs a `ByteSymbol` to impl `Copy` and avoid
+    /// arena allocation.
+    IncludedBytes(ByteSymbol),
 
     /// A `format_args!()` expression.
     FormatArgs(P<FormatArgs>),
@@ -2020,7 +2123,7 @@ impl YieldKind {
 }
 
 /// A literal in a meta item.
-#[derive(Clone, Encodable, Decodable, Debug, HashStable_Generic)]
+#[derive(Clone, Copy, Encodable, Decodable, Debug, HashStable_Generic)]
 pub struct MetaItemLit {
     /// The original literal as written in the source code.
     pub symbol: Symbol,
@@ -2083,16 +2186,18 @@ pub enum LitFloatType {
 /// deciding the `LitKind`. This means that float literals like `1f32` are
 /// classified by this type as `Float`. This is different to `token::LitKind`
 /// which does *not* consider the suffix.
-#[derive(Clone, Encodable, Decodable, Debug, Hash, Eq, PartialEq, HashStable_Generic)]
+#[derive(Clone, Copy, Encodable, Decodable, Debug, Hash, Eq, PartialEq, HashStable_Generic)]
 pub enum LitKind {
     /// A string literal (`"foo"`). The symbol is unescaped, and so may differ
     /// from the original token's symbol.
     Str(Symbol, StrStyle),
-    /// A byte string (`b"foo"`). Not stored as a symbol because it might be
-    /// non-utf8, and symbols only allow utf8 strings.
-    ByteStr(Arc<[u8]>, StrStyle),
-    /// A C String (`c"foo"`). Guaranteed to only have `\0` at the end.
-    CStr(Arc<[u8]>, StrStyle),
+    /// A byte string (`b"foo"`). The symbol is unescaped, and so may differ
+    /// from the original token's symbol.
+    ByteStr(ByteSymbol, StrStyle),
+    /// A C String (`c"foo"`). Guaranteed to only have `\0` at the end. The
+    /// symbol is unescaped, and so may differ from the original token's
+    /// symbol.
+    CStr(ByteSymbol, StrStyle),
     /// A byte char (`b'f'`).
     Byte(u8),
     /// A character literal (`'a'`).
@@ -2344,6 +2449,12 @@ impl Clone for Ty {
     }
 }
 
+impl From<P<Ty>> for Ty {
+    fn from(value: P<Ty>) -> Self {
+        *value
+    }
+}
+
 impl Ty {
     pub fn peel_refs(&self) -> &Self {
         let mut final_ty = self;
@@ -2364,7 +2475,7 @@ impl Ty {
 }
 
 #[derive(Clone, Encodable, Decodable, Debug)]
-pub struct BareFnTy {
+pub struct FnPtrTy {
     pub safety: Safety,
     pub ext: Extern,
     pub generic_params: ThinVec<GenericParam>,
@@ -2397,8 +2508,8 @@ pub enum TyKind {
     ///
     /// Desugars into `Pin<&'a T>` or `Pin<&'a mut T>`.
     PinnedRef(Option<Lifetime>, MutTy),
-    /// A bare function (e.g., `fn(usize) -> bool`).
-    BareFn(P<BareFnTy>),
+    /// A function pointer type (e.g., `fn(usize) -> bool`).
+    FnPtr(P<FnPtrTy>),
     /// An unsafe existential lifetime binder (e.g., `unsafe<'a> &'a ()`).
     UnsafeBinder(P<UnsafeBinderTy>),
     /// The never type (`!`).
@@ -2525,8 +2636,7 @@ pub enum TyPatKind {
 pub enum TraitObjectSyntax {
     // SAFETY: When adding new variants make sure to update the `Tag` impl.
     Dyn = 0,
-    DynStar = 1,
-    None = 2,
+    None = 1,
 }
 
 /// SAFETY: `TraitObjectSyntax` only has 3 data-less variants which means
@@ -2542,8 +2652,7 @@ unsafe impl Tag for TraitObjectSyntax {
     unsafe fn from_usize(tag: usize) -> Self {
         match tag {
             0 => TraitObjectSyntax::Dyn,
-            1 => TraitObjectSyntax::DynStar,
-            2 => TraitObjectSyntax::None,
+            1 => TraitObjectSyntax::None,
             _ => unreachable!(),
         }
     }
@@ -3063,7 +3172,7 @@ pub enum BoundConstness {
     Never,
     /// `Type: const Trait`
     Always(Span),
-    /// `Type: ~const Trait`
+    /// `Type: [const] Trait`
     Maybe(Span),
 }
 
@@ -3072,7 +3181,7 @@ impl BoundConstness {
         match self {
             Self::Never => "",
             Self::Always(_) => "const",
-            Self::Maybe(_) => "~const",
+            Self::Maybe(_) => "[const]",
         }
     }
 }
@@ -3308,6 +3417,13 @@ pub struct TraitRef {
     pub ref_id: NodeId,
 }
 
+/// Whether enclosing parentheses are present or not.
+#[derive(Clone, Encodable, Decodable, Debug)]
+pub enum Parens {
+    Yes,
+    No,
+}
+
 #[derive(Clone, Encodable, Decodable, Debug)]
 pub struct PolyTraitRef {
     /// The `'a` in `for<'a> Foo<&'a T>`.
@@ -3320,6 +3436,10 @@ pub struct PolyTraitRef {
     pub trait_ref: TraitRef,
 
     pub span: Span,
+
+    /// When `Yes`, the first and last character of `span` are an opening
+    /// and a closing paren respectively.
+    pub parens: Parens,
 }
 
 impl PolyTraitRef {
@@ -3328,12 +3448,14 @@ impl PolyTraitRef {
         path: Path,
         modifiers: TraitBoundModifiers,
         span: Span,
+        parens: Parens,
     ) -> Self {
         PolyTraitRef {
             bound_generic_params: generic_params,
             modifiers,
             trait_ref: TraitRef { path, ref_id: DUMMY_NODE_ID },
             span,
+            parens,
         }
     }
 }
@@ -3521,6 +3643,38 @@ impl FnHeader {
             || matches!(constness, Const::Yes(_))
             || !matches!(ext, Extern::None)
     }
+
+    /// Return a span encompassing the header, or none if all options are default.
+    pub fn span(&self) -> Option<Span> {
+        fn append(a: &mut Option<Span>, b: Span) {
+            *a = match a {
+                None => Some(b),
+                Some(x) => Some(x.to(b)),
+            }
+        }
+
+        let mut full_span = None;
+
+        match self.safety {
+            Safety::Unsafe(span) | Safety::Safe(span) => append(&mut full_span, span),
+            Safety::Default => {}
+        };
+
+        if let Some(coroutine_kind) = self.coroutine_kind {
+            append(&mut full_span, coroutine_kind.span());
+        }
+
+        if let Const::Yes(span) = self.constness {
+            append(&mut full_span, span);
+        }
+
+        match self.ext {
+            Extern::Implicit(span) | Extern::Explicit(_, span) => append(&mut full_span, span),
+            Extern::None => {}
+        }
+
+        full_span
+    }
 }
 
 impl Default for FnHeader {
@@ -3536,6 +3690,7 @@ impl Default for FnHeader {
 
 #[derive(Clone, Encodable, Decodable, Debug)]
 pub struct Trait {
+    pub constness: Const,
     pub safety: Safety,
     pub is_auto: IsAuto,
     pub ident: Ident,
@@ -3980,9 +4135,9 @@ mod size_asserts {
     static_assert_size!(MetaItemLit, 40);
     static_assert_size!(Param, 40);
     static_assert_size!(Pat, 72);
+    static_assert_size!(PatKind, 48);
     static_assert_size!(Path, 24);
     static_assert_size!(PathSegment, 24);
-    static_assert_size!(PatKind, 48);
     static_assert_size!(Stmt, 32);
     static_assert_size!(StmtKind, 16);
     static_assert_size!(Ty, 64);

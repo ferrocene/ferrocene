@@ -1,7 +1,9 @@
 #[cfg(feature = "master")]
 use gccjit::FnAttribute;
 use gccjit::{ToLValue, ToRValue, Type};
-use rustc_abi::{ArmCall, CanonAbi, InterruptKind, Reg, RegKind, X86Call};
+#[cfg(feature = "master")]
+use rustc_abi::{ArmCall, CanonAbi, InterruptKind, X86Call};
+use rustc_abi::{Reg, RegKind};
 use rustc_codegen_ssa::traits::{AbiBuilderMethods, BaseTypeCodegenMethods};
 use rustc_data_structures::fx::FxHashSet;
 use rustc_middle::bug;
@@ -239,12 +241,16 @@ impl<'gcc, 'tcx> FnAbiGccExt<'gcc, 'tcx> for FnAbi<'tcx, Ty<'tcx>> {
 pub fn conv_to_fn_attribute<'gcc>(conv: CanonAbi, arch: &str) -> Option<FnAttribute<'gcc>> {
     let attribute = match conv {
         CanonAbi::C | CanonAbi::Rust => return None,
+        CanonAbi::RustCold => FnAttribute::Cold,
+        // Functions with this calling convention can only be called from assembly, but it is
+        // possible to declare an `extern "custom"` block, so the backend still needs a calling
+        // convention for declaring foreign functions.
+        CanonAbi::Custom => return None,
         CanonAbi::Arm(arm_call) => match arm_call {
             ArmCall::CCmseNonSecureCall => FnAttribute::ArmCmseNonsecureCall,
             ArmCall::CCmseNonSecureEntry => FnAttribute::ArmCmseNonsecureEntry,
             ArmCall::Aapcs => FnAttribute::ArmPcs("aapcs"),
         },
-        CanonAbi::RustCold => FnAttribute::Cold,
         CanonAbi::GpuKernel => {
             if arch == "amdgpu" {
                 FnAttribute::GcnAmdGpuHsaKernel

@@ -8,9 +8,9 @@ import tomli
 
 
 class TargetRole(SphinxRole):
-    def __init__(self, *, include_triple=False):
+    def __init__(self, *, include_tuple=False):
         super().__init__()
-        self.include_triple = include_triple
+        self.include_tuple = include_tuple
 
     def run(self):
         target = self.text.strip()
@@ -19,17 +19,17 @@ class TargetRole(SphinxRole):
                 self.env,
                 self.config,
                 target,
-                include_triple=self.include_triple,
+                include_tuple=self.include_tuple,
                 location=self.get_location(),
             )
         ], []
 
 
-def render_target_name(env, config, target, *, include_triple=False, location=None):
+def render_target_name(env, config, target, *, include_tuple=False, location=None):
     if target in env.ferrocene_target_names:
         inline = nodes.inline()
         inline += nodes.Text(env.ferrocene_target_names[target])
-        if include_triple:
+        if include_tuple:
             inline += nodes.Text(" (")
             inline += nodes.literal("", target)
             inline += nodes.Text(")")
@@ -50,4 +50,4 @@ def load_target_names(app, env, _docnames):
 def setup(app):
     app.connect("env-before-read-docs", load_target_names)
     app.add_role("target", TargetRole())
-    app.add_role("target-with-triple", TargetRole(include_triple=True))
+    app.add_role("target-with-tuple", TargetRole(include_tuple=True))

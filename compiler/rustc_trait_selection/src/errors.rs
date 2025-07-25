@@ -534,7 +534,7 @@ impl Subdiagnostic for AddLifetimeParamsSuggestion<'_> {
                     match self.tcx.parent_hir_node(self.tcx.local_def_id_to_hir_id(anon_reg.scope))
                     {
                         hir::Node::Item(hir::Item {
-                            kind: hir::ItemKind::Trait(_, _, _, generics, ..),
+                            kind: hir::ItemKind::Trait(_, _, _, _, generics, ..),
                             ..
                         })
                         | hir::Node::Item(hir::Item {
@@ -593,7 +593,7 @@ impl Subdiagnostic for AddLifetimeParamsSuggestion<'_> {
                                         matches!(
                                             arg,
                                             hir::GenericArg::Lifetime(lifetime)
-                                                if lifetime.is_syntactically_hidden()
+                                                if lifetime.is_implicit()
                                         )
                                     }) {
                                         self.suggestions.push((
@@ -643,7 +643,7 @@ impl Subdiagnostic for AddLifetimeParamsSuggestion<'_> {
                 // Do not suggest constraining the `&self` param, but rather the return type.
                 // If that is wrong (because it is not sufficient), a follow up error will tell the
                 // user to fix it. This way we lower the chances of *over* constraining, but still
-                // get the cake of "correctly" contrained in two steps.
+                // get the cake of "correctly" constrained in two steps.
                 visitor.visit_ty_unambig(self.ty_sup);
             }
             visitor.visit_ty_unambig(self.ty_sub);
@@ -759,7 +759,8 @@ pub enum ExplicitLifetimeRequired<'a> {
         #[suggestion(
             trait_selection_explicit_lifetime_required_sugg_with_ident,
             code = "{new_ty}",
-            applicability = "unspecified"
+            applicability = "unspecified",
+            style = "verbose"
         )]
         new_ty_span: Span,
         #[skip_arg]
@@ -774,7 +775,8 @@ pub enum ExplicitLifetimeRequired<'a> {
         #[suggestion(
             trait_selection_explicit_lifetime_required_sugg_with_param_type,
             code = "{new_ty}",
-            applicability = "unspecified"
+            applicability = "unspecified",
+            style = "verbose"
         )]
         new_ty_span: Span,
         #[skip_arg]
@@ -1462,7 +1464,8 @@ pub enum SuggestAccessingField<'a> {
     #[suggestion(
         trait_selection_suggest_accessing_field,
         code = "{snippet}.{name}",
-        applicability = "maybe-incorrect"
+        applicability = "maybe-incorrect",
+        style = "verbose"
     )]
     Safe {
         #[primary_span]
@@ -1474,7 +1477,8 @@ pub enum SuggestAccessingField<'a> {
     #[suggestion(
         trait_selection_suggest_accessing_field,
         code = "unsafe {{ {snippet}.{name} }}",
-        applicability = "maybe-incorrect"
+        applicability = "maybe-incorrect",
+        style = "verbose"
     )]
     Unsafe {
         #[primary_span]

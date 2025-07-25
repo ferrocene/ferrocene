@@ -70,7 +70,7 @@ impl Step for DistOxidOs {
         run.builder.ensure(DistOxidOs {
             compiler: run.builder.compiler_for(
                 run.builder.top_stage,
-                run.builder.config.build,
+                run.builder.config.host_target,
                 run.target,
             ),
             target: run.target,

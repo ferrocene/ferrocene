@@ -1,11 +1,10 @@
-use std::cmp::Ordering;
-
 use rustc_type_ir::data_structures::{HashMap, ensure_sufficient_stack};
 use rustc_type_ir::inherent::*;
 use rustc_type_ir::solve::{Goal, QueryInput};
 use rustc_type_ir::{
-    self as ty, Canonical, CanonicalTyVarKind, CanonicalVarKind, Flags, InferCtxtLike, Interner,
-    TypeFlags, TypeFoldable, TypeFolder, TypeSuperFoldable, TypeVisitableExt,
+    self as ty, Canonical, CanonicalParamEnvCacheEntry, CanonicalTyVarKind, CanonicalVarKind,
+    Flags, InferCtxtLike, Interner, TypeFlags, TypeFoldable, TypeFolder, TypeSuperFoldable,
+    TypeVisitableExt,
 };
 
 use crate::delegate::SolverDelegate;
@@ -100,6 +99,76 @@ impl<'a, D: SolverDelegate<Interner = I>, I: Interner> Canonicalizer<'a, D, I> {
         Canonical { max_universe, variables, value }
     }
 
+    fn canonicalize_param_env(
+        delegate: &'a D,
+        variables: &'a mut Vec<I::GenericArg>,
+        param_env: I::ParamEnv,
+    ) -> (I::ParamEnv, HashMap<I::GenericArg, usize>, Vec<CanonicalVarKind<I>>) {
+        if !param_env.has_type_flags(NEEDS_CANONICAL) {
+            return (param_env, Default::default(), Vec::new());
+        }
+
+        // Check whether we can use the global cache for this param_env. As we only use
+        // the `param_env` itself as the cache key, considering any additional information
+        // durnig its canonicalization would be incorrect. We always canonicalize region
+        // inference variables in a separate universe, so these are fine. However, we do
+        // track the universe of type and const inference variables so these must not be
+        // globally cached. We don't rely on any additional information when canonicalizing
+        // placeholders.
+        if !param_env.has_non_region_infer() {
+            delegate.cx().canonical_param_env_cache_get_or_insert(
+                param_env,
+                || {
+                    let mut variables = Vec::new();
+                    let mut env_canonicalizer = Canonicalizer {
+                        delegate,
+                        canonicalize_mode: CanonicalizeMode::Input { keep_static: true },
+
+                        variables: &mut variables,
+                        variable_lookup_table: Default::default(),
+                        var_kinds: Vec::new(),
+                        binder_index: ty::INNERMOST,
+
+                        cache: Default::default(),
+                    };
+                    let param_env = param_env.fold_with(&mut env_canonicalizer);
+                    debug_assert_eq!(env_canonicalizer.binder_index, ty::INNERMOST);
+                    CanonicalParamEnvCacheEntry {
+                        param_env,
+                        variable_lookup_table: env_canonicalizer.variable_lookup_table,
+                        var_kinds: env_canonicalizer.var_kinds,
+                        variables,
+                    }
+                },
+                |&CanonicalParamEnvCacheEntry {
+                     param_env,
+                     variables: ref cache_variables,
+                     ref variable_lookup_table,
+                     ref var_kinds,
+                 }| {
+                    debug_assert!(variables.is_empty());
+                    variables.extend(cache_variables.iter().copied());
+                    (param_env, variable_lookup_table.clone(), var_kinds.clone())
+                },
+            )
+        } else {
+            let mut env_canonicalizer = Canonicalizer {
+                delegate,
+                canonicalize_mode: CanonicalizeMode::Input { keep_static: true },
+
+                variables,
+                variable_lookup_table: Default::default(),
+                var_kinds: Vec::new(),
+                binder_index: ty::INNERMOST,
+
+                cache: Default::default(),
+            };
+            let param_env = param_env.fold_with(&mut env_canonicalizer);
+            debug_assert_eq!(env_canonicalizer.binder_index, ty::INNERMOST);
+            (param_env, env_canonicalizer.variable_lookup_table, env_canonicalizer.var_kinds)
+        }
+    }
+
     /// When canonicalizing query inputs, we keep `'static` in the `param_env`
     /// but erase it everywhere else. We generally don't want to depend on region
     /// identity, so while it should not matter whether `'static` is kept in the
@@ -114,37 +183,17 @@ impl<'a, D: SolverDelegate<Interner = I>, I: Interner> Canonicalizer<'a, D, I> {
         input: QueryInput<I, P>,
     ) -> ty::Canonical<I, QueryInput<I, P>> {
         // First canonicalize the `param_env` while keeping `'static`
-        let mut env_canonicalizer = Canonicalizer {
-            delegate,
-            canonicalize_mode: CanonicalizeMode::Input { keep_static: true },
-
-            variables,
-            variable_lookup_table: Default::default(),
-            var_kinds: Vec::new(),
-            binder_index: ty::INNERMOST,
-
-            cache: Default::default(),
-        };
-
-        let param_env = input.goal.param_env;
-        let param_env = if param_env.has_type_flags(NEEDS_CANONICAL) {
-            param_env.fold_with(&mut env_canonicalizer)
-        } else {
-            param_env
-        };
-
-        debug_assert_eq!(env_canonicalizer.binder_index, ty::INNERMOST);
+        let (param_env, variable_lookup_table, var_kinds) =
+            Canonicalizer::canonicalize_param_env(delegate, variables, input.goal.param_env);
         // Then canonicalize the rest of the input without keeping `'static`
         // while *mostly* reusing the canonicalizer from above.
         let mut rest_canonicalizer = Canonicalizer {
             delegate,
             canonicalize_mode: CanonicalizeMode::Input { keep_static: false },
 
-            variables: env_canonicalizer.variables,
-            // We're able to reuse the `variable_lookup_table` as whether or not
-            // it already contains an entry for `'static` does not matter.
-            variable_lookup_table: env_canonicalizer.variable_lookup_table,
-            var_kinds: env_canonicalizer.var_kinds,
+            variables,
+            variable_lookup_table,
+            var_kinds,
             binder_index: ty::INNERMOST,
 
             // We do not reuse the cache as it may contain entries whose canonicalized
@@ -215,11 +264,15 @@ impl<'a, D: SolverDelegate<Interner = I>, I: Interner> Canonicalizer<'a, D, I> {
         // See the rustc-dev-guide section about how we deal with universes
         // during canonicalization in the new solver.
         match self.canonicalize_mode {
-            // We try to deduplicate as many query calls as possible and hide
-            // all information which should not matter for the solver.
-            //
-            // For this we compress universes as much as possible.
-            CanonicalizeMode::Input { .. } => {}
+            // All placeholders and vars are canonicalized in the root universe.
+            CanonicalizeMode::Input { .. } => {
+                debug_assert!(
+                    var_kinds.iter().all(|var| var.universe() == ty::UniverseIndex::ROOT),
+                    "expected all vars to be canonicalized in root universe: {var_kinds:#?}"
+                );
+                let var_kinds = self.delegate.cx().mk_canonical_var_kinds(&var_kinds);
+                (ty::UniverseIndex::ROOT, var_kinds)
+            }
             // When canonicalizing a response we map a universes already entered
             // by the caller to the root universe and only return useful universe
             // information for placeholders and inference variables created inside
@@ -237,113 +290,10 @@ impl<'a, D: SolverDelegate<Interner = I>, I: Interner> Canonicalizer<'a, D, I> {
                     .map(|kind| kind.universe())
                     .max()
                     .unwrap_or(ty::UniverseIndex::ROOT);
-
                 let var_kinds = self.delegate.cx().mk_canonical_var_kinds(&var_kinds);
-                return (max_universe, var_kinds);
+                (max_universe, var_kinds)
             }
         }
-
-        // Given a `var_kinds` with existentials `En` and universals `Un` in
-        // universes `n`, this algorithm compresses them in place so that:
-        //
-        // - the new universe indices are as small as possible
-        // - we create a new universe if we would otherwise
-        //   1. put existentials from a different universe into the same one
-        //   2. put a placeholder in the same universe as an existential which cannot name it
-        //
-        // Let's walk through an example:
-        // - var_kinds: [E0, U1, E5, U2, E2, E6, U6], curr_compressed_uv: 0, next_orig_uv: 0
-        // - var_kinds: [E0, U1, E5, U2, E2, E6, U6], curr_compressed_uv: 0, next_orig_uv: 1
-        // - var_kinds: [E0, U1, E5, U2, E2, E6, U6], curr_compressed_uv: 1, next_orig_uv: 2
-        // - var_kinds: [E0, U1, E5, U1, E1, E6, U6], curr_compressed_uv: 1, next_orig_uv: 5
-        // - var_kinds: [E0, U1, E2, U1, E1, E6, U6], curr_compressed_uv: 2, next_orig_uv: 6
-        // - var_kinds: [E0, U1, E1, U1, E1, E3, U3], curr_compressed_uv: 2, next_orig_uv: -
-        //
-        // This algorithm runs in `O(mn)` where `n` is the number of different universes and
-        // `m` the number of variables. This should be fine as both are expected to be small.
-        let mut curr_compressed_uv = ty::UniverseIndex::ROOT;
-        let mut existential_in_new_uv = None;
-        let mut next_orig_uv = Some(ty::UniverseIndex::ROOT);
-        while let Some(orig_uv) = next_orig_uv.take() {
-            let mut update_uv = |var: &mut CanonicalVarKind<I>, orig_uv, is_existential| {
-                let uv = var.universe();
-                match uv.cmp(&orig_uv) {
-                    Ordering::Less => (), // Already updated
-                    Ordering::Equal => {
-                        if is_existential {
-                            if existential_in_new_uv.is_some_and(|uv| uv < orig_uv) {
-                                // Condition 1.
-                                //
-                                // We already put an existential from a outer universe
-                                // into the current compressed universe, so we need to
-                                // create a new one.
-                                curr_compressed_uv = curr_compressed_uv.next_universe();
-                            }
-
-                            // `curr_compressed_uv` will now contain an existential from
-                            // `orig_uv`. Trying to canonicalizing an existential from
-                            // a higher universe has to therefore use a new compressed
-                            // universe.
-                            existential_in_new_uv = Some(orig_uv);
-                        } else if existential_in_new_uv.is_some() {
-                            // Condition 2.
-                            //
-                            //  `var` is a placeholder from a universe which is not nameable
-                            // by an existential which we already put into the compressed
-                            // universe `curr_compressed_uv`. We therefore have to create a
-                            // new universe for `var`.
-                            curr_compressed_uv = curr_compressed_uv.next_universe();
-                            existential_in_new_uv = None;
-                        }
-
-                        *var = var.with_updated_universe(curr_compressed_uv);
-                    }
-                    Ordering::Greater => {
-                        // We can ignore this variable in this iteration. We only look at
-                        // universes which actually occur in the input for performance.
-                        //
-                        // For this we set `next_orig_uv` to the next smallest, not yet compressed,
-                        // universe of the input.
-                        if next_orig_uv.is_none_or(|curr_next_uv| uv.cannot_name(curr_next_uv)) {
-                            next_orig_uv = Some(uv);
-                        }
-                    }
-                }
-            };
-
-            // For each universe which occurs in the input, we first iterate over all
-            // placeholders and then over all inference variables.
-            //
-            // Whenever we compress the universe of a placeholder, no existential with
-            // an already compressed universe can name that placeholder.
-            for is_existential in [false, true] {
-                for var in var_kinds.iter_mut() {
-                    // We simply put all regions from the input into the highest
-                    // compressed universe, so we only deal with them at the end.
-                    if !var.is_region() {
-                        if is_existential == var.is_existential() {
-                            update_uv(var, orig_uv, is_existential)
-                        }
-                    }
-                }
-            }
-        }
-
-        // We put all regions into a separate universe.
-        let mut first_region = true;
-        for var in var_kinds.iter_mut() {
-            if var.is_region() {
-                if first_region {
-                    first_region = false;
-                    curr_compressed_uv = curr_compressed_uv.next_universe();
-                }
-                debug_assert!(var.is_existential());
-                *var = var.with_updated_universe(curr_compressed_uv);
-            }
-        }
-
-        let var_kinds = self.delegate.cx().mk_canonical_var_kinds(&var_kinds);
-        (curr_compressed_uv, var_kinds)
     }
 
     fn cached_fold_ty(&mut self, t: I::Ty) -> I::Ty {
@@ -356,11 +306,18 @@ impl<'a, D: SolverDelegate<Interner = I>, I: Interner> Canonicalizer<'a, D, I> {
                         "ty vid should have been resolved fully before canonicalization"
                     );
 
-                    CanonicalVarKind::Ty(CanonicalTyVarKind::General(
-                        self.delegate
-                            .universe_of_ty(vid)
-                            .unwrap_or_else(|| panic!("ty var should have been resolved: {t:?}")),
-                    ))
+                    match self.canonicalize_mode {
+                        CanonicalizeMode::Input { .. } => CanonicalVarKind::Ty(
+                            CanonicalTyVarKind::General(ty::UniverseIndex::ROOT),
+                        ),
+                        CanonicalizeMode::Response { .. } => {
+                            CanonicalVarKind::Ty(CanonicalTyVarKind::General(
+                                self.delegate.universe_of_ty(vid).unwrap_or_else(|| {
+                                    panic!("ty var should have been resolved: {t:?}")
+                                }),
+                            ))
+                        }
+                    }
                 }
                 ty::IntVar(vid) => {
                     debug_assert_eq!(
@@ -384,13 +341,13 @@ impl<'a, D: SolverDelegate<Interner = I>, I: Interner> Canonicalizer<'a, D, I> {
             },
             ty::Placeholder(placeholder) => match self.canonicalize_mode {
                 CanonicalizeMode::Input { .. } => CanonicalVarKind::PlaceholderTy(
-                    PlaceholderLike::new(placeholder.universe(), self.variables.len().into()),
+                    PlaceholderLike::new_anon(ty::UniverseIndex::ROOT, self.variables.len().into()),
                 ),
                 CanonicalizeMode::Response { .. } => CanonicalVarKind::PlaceholderTy(placeholder),
             },
             ty::Param(_) => match self.canonicalize_mode {
                 CanonicalizeMode::Input { .. } => CanonicalVarKind::PlaceholderTy(
-                    PlaceholderLike::new(ty::UniverseIndex::ROOT, self.variables.len().into()),
+                    PlaceholderLike::new_anon(ty::UniverseIndex::ROOT, self.variables.len().into()),
                 ),
                 CanonicalizeMode::Response { .. } => panic!("param ty in response: {t:?}"),
             },
@@ -537,13 +494,21 @@ impl<D: SolverDelegate<Interner = I>, I: Interner> TypeFolder<I> for Canonicaliz
                         c,
                         "const vid should have been resolved fully before canonicalization"
                     );
-                    CanonicalVarKind::Const(self.delegate.universe_of_ct(vid).unwrap())
+
+                    match self.canonicalize_mode {
+                        CanonicalizeMode::Input { .. } => {
+                            CanonicalVarKind::Const(ty::UniverseIndex::ROOT)
+                        }
+                        CanonicalizeMode::Response { .. } => {
+                            CanonicalVarKind::Const(self.delegate.universe_of_ct(vid).unwrap())
+                        }
+                    }
                 }
                 ty::InferConst::Fresh(_) => todo!(),
             },
             ty::ConstKind::Placeholder(placeholder) => match self.canonicalize_mode {
                 CanonicalizeMode::Input { .. } => CanonicalVarKind::PlaceholderConst(
-                    PlaceholderLike::new(placeholder.universe(), self.variables.len().into()),
+                    PlaceholderLike::new_anon(ty::UniverseIndex::ROOT, self.variables.len().into()),
                 ),
                 CanonicalizeMode::Response { .. } => {
                     CanonicalVarKind::PlaceholderConst(placeholder)
@@ -551,7 +516,7 @@ impl<D: SolverDelegate<Interner = I>, I: Interner> TypeFolder<I> for Canonicaliz
             },
             ty::ConstKind::Param(_) => match self.canonicalize_mode {
                 CanonicalizeMode::Input { .. } => CanonicalVarKind::PlaceholderConst(
-                    PlaceholderLike::new(ty::UniverseIndex::ROOT, self.variables.len().into()),
+                    PlaceholderLike::new_anon(ty::UniverseIndex::ROOT, self.variables.len().into()),
                 ),
                 CanonicalizeMode::Response { .. } => panic!("param ty in response: {c:?}"),
             },

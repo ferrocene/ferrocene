@@ -119,7 +119,7 @@ resolve_const_param_in_enum_discriminant =
     const parameters may not be used in enum discriminant values
 
 resolve_const_param_in_non_trivial_anon_const =
-    const parameters may only be used as standalone arguments, i.e. `{$name}`
+    const parameters may only be used as standalone arguments here, i.e. `{$name}`
 
 resolve_constructor_private_if_any_field_private =
     a constructor is private if any of the fields is private
@@ -432,6 +432,7 @@ resolve_undeclared_label =
 
 resolve_underscore_lifetime_is_reserved = `'_` cannot be used here
     .label = `'_` is a reserved lifetime name
+    .help = use another lifetime specifier
 
 resolve_unexpected_res_change_ty_to_const_param_sugg =
     you might have meant to write a const parameter here

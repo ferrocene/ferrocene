@@ -45,7 +45,7 @@ impl Step for SelfTest {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         builder.info("Building ferrocene/tools/self-test");
 
-        let compiler = builder.compiler(0, builder.config.build);
+        let compiler = builder.compiler(0, builder.config.host_target);
         let mut cmd = prepare_tool_cargo(
             builder,
             compiler,

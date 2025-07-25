@@ -137,8 +137,11 @@ jobs:
 
       # Test that including as a submodule will still work, both with and without
       # the `backtrace` feature enabled.
+      # Building as if part of std requires nightly features to be available
       - run: cargo build --manifest-path crates/as-if-std/Cargo.toml
+        if: matrix.rust == 'nightly'
       - run: cargo build --manifest-path crates/as-if-std/Cargo.toml --no-default-features
+        if: matrix.rust == 'nightly'
 
   windows_arm64:
     name: Windows AArch64
@@ -256,7 +259,7 @@ jobs:
         with:
           submodules: true
       - name: Install Rust
-        run: rustup update 1.79.0 --no-self-update && rustup default 1.79.0
+        run: rustup update 1.82.0 --no-self-update && rustup default 1.82.0
       - run: cargo build
 
   miri:

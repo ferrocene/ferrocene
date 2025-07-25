@@ -94,7 +94,7 @@
 // of conflicts we have when merging main.
 //
 // Library features:
-// not-alphbetical-start
+// not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(alloc_layout_extra))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(allocator_api))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(array_chunks))]
@@ -110,8 +110,10 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(char_max_len))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(clone_to_uninit))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(coerce_unsized))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(const_default))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(const_eval_select))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(const_heap))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(const_trait_impl))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(core_intrinsics))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(deprecated_suggestion))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(deref_pure_trait))]
@@ -134,11 +136,9 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(local_waker))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(maybe_uninit_slice))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(maybe_uninit_uninit_array_transpose))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(nonnull_provenance))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(panic_internals))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(pattern))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(pin_coerce_unsized_trait))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(pointer_like_trait))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_alignment_type))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_internals))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(ptr_metadata))]
@@ -158,10 +158,11 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(try_trait_v2))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(try_with_capacity))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(tuple_trait))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(ub_checks))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unicode_internals))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unsize))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unwrap_infallible))]
-// not-alphbetical-end
+// not-alphabetical-end
 //
 // Language features:
 // not-alphbetical-start

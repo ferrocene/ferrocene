@@ -11,6 +11,7 @@ use rustc_middle::ty::layout::{
 };
 use rustc_middle::ty::{self, InstanceKind, Ty, TyCtxt};
 use rustc_session::config::OptLevel;
+use rustc_span::DUMMY_SP;
 use rustc_span::def_id::DefId;
 use rustc_target::callconv::{
     AbiMap, ArgAbi, ArgAttribute, ArgAttributes, ArgExtension, FnAbi, PassMode,
@@ -124,7 +125,7 @@ fn fn_sig_for_fn_abi<'tcx>(
 
             let env_ty = Ty::new_mut_ref(tcx, tcx.lifetimes.re_erased, ty);
 
-            let pin_did = tcx.require_lang_item(LangItem::Pin, None);
+            let pin_did = tcx.require_lang_item(LangItem::Pin, DUMMY_SP);
             let pin_adt_ref = tcx.adt_def(pin_did);
             let pin_args = tcx.mk_args(&[env_ty.into()]);
             let env_ty = match coroutine_kind {
@@ -149,7 +150,7 @@ fn fn_sig_for_fn_abi<'tcx>(
                     // The signature should be `Future::poll(_, &mut Context<'_>) -> Poll<Output>`
                     assert_eq!(sig.yield_ty, tcx.types.unit);
 
-                    let poll_did = tcx.require_lang_item(LangItem::Poll, None);
+                    let poll_did = tcx.require_lang_item(LangItem::Poll, DUMMY_SP);
                     let poll_adt_ref = tcx.adt_def(poll_did);
                     let poll_args = tcx.mk_args(&[sig.return_ty.into()]);
                     let ret_ty = Ty::new_adt(tcx, poll_adt_ref, poll_args);
@@ -160,7 +161,7 @@ fn fn_sig_for_fn_abi<'tcx>(
                     {
                         if let ty::Adt(resume_ty_adt, _) = sig.resume_ty.kind() {
                             let expected_adt =
-                                tcx.adt_def(tcx.require_lang_item(LangItem::ResumeTy, None));
+                                tcx.adt_def(tcx.require_lang_item(LangItem::ResumeTy, DUMMY_SP));
                             assert_eq!(*resume_ty_adt, expected_adt);
                         } else {
                             panic!("expected `ResumeTy`, found `{:?}`", sig.resume_ty);
@@ -172,7 +173,7 @@ fn fn_sig_for_fn_abi<'tcx>(
                 }
                 hir::CoroutineKind::Desugared(hir::CoroutineDesugaring::Gen, _) => {
                     // The signature should be `Iterator::next(_) -> Option<Yield>`
-                    let option_did = tcx.require_lang_item(LangItem::Option, None);
+                    let option_did = tcx.require_lang_item(LangItem::Option, DUMMY_SP);
                     let option_adt_ref = tcx.adt_def(option_did);
                     let option_args = tcx.mk_args(&[sig.yield_ty.into()]);
                     let ret_ty = Ty::new_adt(tcx, option_adt_ref, option_args);
@@ -196,7 +197,7 @@ fn fn_sig_for_fn_abi<'tcx>(
                     {
                         if let ty::Adt(resume_ty_adt, _) = sig.resume_ty.kind() {
                             let expected_adt =
-                                tcx.adt_def(tcx.require_lang_item(LangItem::ResumeTy, None));
+                                tcx.adt_def(tcx.require_lang_item(LangItem::ResumeTy, DUMMY_SP));
                             assert_eq!(*resume_ty_adt, expected_adt);
                         } else {
                             panic!("expected `ResumeTy`, found `{:?}`", sig.resume_ty);
@@ -208,7 +209,7 @@ fn fn_sig_for_fn_abi<'tcx>(
                 }
                 hir::CoroutineKind::Coroutine(_) => {
                     // The signature should be `Coroutine::resume(_, Resume) -> CoroutineState<Yield, Return>`
-                    let state_did = tcx.require_lang_item(LangItem::CoroutineState, None);
+                    let state_did = tcx.require_lang_item(LangItem::CoroutineState, DUMMY_SP);
                     let state_adt_ref = tcx.adt_def(state_did);
                     let state_args = tcx.mk_args(&[sig.yield_ty.into(), sig.return_ty.into()]);
                     let ret_ty = Ty::new_adt(tcx, state_adt_ref, state_args);
@@ -402,28 +403,18 @@ fn fn_abi_sanity_check<'tcx>(
                         // For an unsized type we'd only pass the sized prefix, so there is no universe
                         // in which we ever want to allow this.
                         assert!(sized, "`PassMode::Direct` for unsized type in ABI: {:#?}", fn_abi);
+
                         // This really shouldn't happen even for sized aggregates, since
                         // `immediate_llvm_type` will use `layout.fields` to turn this Rust type into an
                         // LLVM type. This means all sorts of Rust type details leak into the ABI.
-                        // However wasm sadly *does* currently use this mode for it's "C" ABI so we
-                        // have to allow it -- but we absolutely shouldn't let any more targets do
-                        // that. (Also see <https://github.com/rust-lang/rust/issues/115666>.)
-                        //
-                        // The unadjusted ABI also uses Direct for all args and is ill-specified,
+                        // The unadjusted ABI however uses Direct for all args. It is ill-specified,
                         // but unfortunately we need it for calling certain LLVM intrinsics.
-
-                        match spec_abi {
-                            ExternAbi::Unadjusted => {}
-                            ExternAbi::C { unwind: _ }
-                                if matches!(&*tcx.sess.target.arch, "wasm32" | "wasm64") => {}
-                            _ => {
-                                panic!(
-                                    "`PassMode::Direct` for aggregates only allowed for \"unadjusted\" functions and on wasm\n\
-                                      Problematic type: {:#?}",
-                                    arg.layout,
-                                );
-                            }
-                        }
+                        assert!(
+                            matches!(spec_abi, ExternAbi::Unadjusted),
+                            "`PassMode::Direct` for aggregates only allowed for \"unadjusted\"\n\
+                             Problematic type: {:#?}",
+                            arg.layout,
+                        );
                     }
                 }
             }

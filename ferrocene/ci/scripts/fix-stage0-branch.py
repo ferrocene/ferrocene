@@ -77,7 +77,11 @@ def fix():
     stage0 = parse_stage0()
     expected = expected_branch()
 
-    STAGE0_PATH.open("w").write(f"{stage0.before_raw}{BRANCH_KEY}={expected}{stage0.after_raw}")
+    stage0_file = STAGE0_PATH.open("w")
+    stage0_file.write(f"{stage0.before_raw}{BRANCH_KEY}={expected}{stage0.after_raw}")
+    stage0_file.close()
+
+    
 
 
 @dataclass

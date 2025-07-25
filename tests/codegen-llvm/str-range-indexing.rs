@@ -35,18 +35,18 @@ macro_rules! tests {
 // CHECK: ret
 tests!(Range<usize>, get_range, index_range);
 
-// 9 comparisons required:
-// end != usize::MAX && start <= end + 1
-// && (start == 0 || (start   >= len && start   == len) || bytes[start]   >= -0x40)
-// && (              (end + 1 >= len && end + 1 == len) || bytes[end + 1] >= -0x40)
+// 7 comparisons required:
+// end < len && start <= end + 1
+// && (start == 0 || start   >= len || bytes[start]   >= -0x40)
+// && (              end + 1 >= len || bytes[end + 1] >= -0x40)
 
 // CHECK-LABEL: @get_range_inclusive
-// CHECK-COUNT-9: %{{.+}} = icmp
+// CHECK-COUNT-7: %{{.+}} = icmp
 // CHECK-NOT: %{{.+}} = icmp
 // CHECK: ret
 
 // CHECK-LABEL: @index_range_inclusive
-// CHECK-COUNT-9: %{{.+}} = icmp
+// CHECK-COUNT-7: %{{.+}} = icmp
 // CHECK-NOT: %{{.+}} = icmp
 // CHECK: ret
 tests!(RangeInclusive<usize>, get_range_inclusive, index_range_inclusive);
@@ -65,16 +65,16 @@ tests!(RangeInclusive<usize>, get_range_inclusive, index_range_inclusive);
 // CHECK: ret
 tests!(RangeTo<usize>, get_range_to, index_range_to);
 
-// 4 comparisons required:
-// end != usize::MAX && (end + 1 >= len && end + 1 == len) || bytes[end + 1] >= -0x40)
+// 3 comparisons required:
+// end < len && (end + 1 >= len || bytes[end + 1] >= -0x40)
 
 // CHECK-LABEL: @get_range_to_inclusive
-// CHECK-COUNT-4: %{{.+}} = icmp
+// CHECK-COUNT-3: %{{.+}} = icmp
 // CHECK-NOT: %{{.+}} = icmp
 // CHECK: ret
 
 // CHECK-LABEL: @index_range_to_inclusive
-// CHECK-COUNT-4: %{{.+}} = icmp
+// CHECK-COUNT-3: %{{.+}} = icmp
 // CHECK-NOT: %{{.+}} = icmp
 // CHECK: ret
 tests!(RangeToInclusive<usize>, get_range_to_inclusive, index_range_to_inclusive);

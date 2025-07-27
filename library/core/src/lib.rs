@@ -173,7 +173,7 @@
 #![feature(negative_impls)]
 #![feature(never_type)]
 #![feature(no_core)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(optimize_attribute))]
+#![feature(optimize_attribute)]
 #![feature(prelude_import)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(repr_simd))]
 #![feature(rustc_allow_const_fn_unstable)]

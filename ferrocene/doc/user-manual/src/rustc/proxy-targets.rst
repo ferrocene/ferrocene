@@ -161,7 +161,7 @@ Build with the proxy target:
 
 .. code-block:: bash
    
-   rustc --target thumbv7em-ferrocenecoretest-eabihf --test -C instrument-coverage src/thing.rs --out-dir artifacts
+   rustc --target thumbv7em-ferrocenecoretest-eabihf --test -Z panic-abort-tests -C instrument-coverage src/thing.rs --out-dir artifacts
 
 Then run it:
 
@@ -235,7 +235,7 @@ We can build for the equivalent proxy target, with instrumentation, by running:
 
 .. code-block:: bash
    
-   rustc --target thumbv7em-ferrocenecoretest-eabihf --test -C instrument-coverage src/thing.rs --out-dir artifacts
+   rustc --target thumbv7em-ferrocenecoretest-eabihf --test -Z panic-abort-tests -C instrument-coverage src/thing.rs --out-dir artifacts
 
 To create the ``profraw`` file:
 

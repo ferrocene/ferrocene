@@ -53,10 +53,10 @@ To use the target, the following additional flags must be provided to
 
 * ``--target=thumbv7em-none-eabihf``
 
-Proxy Target (Experimental)
----------------------------
+Testing Facade (Experimental)
+-----------------------------
 
-Bare metal targets cannot use test harnesses that require ``libc``. Instead, a proxy target can
+Bare metal targets cannot use test harnesses that require ``libc``. Instead, a testing facade can
 be used instead that emulates the bare metal target, but also provides access to ``std``
 functionality.
 
@@ -68,4 +68,4 @@ This target is the same as the one it proxies, except it includes a Linux ``libc
 this means it can use ``std`` for testing and enriched interactive development on a
 :target:`aarch64-unknown-linux-gnu` or :ref:`x86_64-unknown-linux-gnu` host.
 
-For more information, consult :doc:`proxy testing </rustc/proxy-targets>`.
+For more information, consult :doc:`Testing Facades </rustc/testing-facades>`.

@@ -23,7 +23,7 @@ Ferrocene User Manual
    rustc/executable
    rustc/mixed-language
    rustc/system-calls
-   rustc/proxy-targets
+   rustc/testing-facades
 
 .. toctree::
    :numbered:

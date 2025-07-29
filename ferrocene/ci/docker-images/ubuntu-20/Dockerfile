@@ -20,8 +20,15 @@ FROM --platform=$TARGETPLATFORM ubuntu:24.04 AS noble
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends qemu-user-static
+RUN <<-EOF
+    set -xe
+    mkdir -p /ferrocene
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends qemu-user-static
+
+    mkdir -p /ferrocene/packages
+    dpkg -l qemu-user-static >> /ferrocene/packages/ubuntu-24.04
+EOF
 
 FROM --platform=$TARGETPLATFORM ubuntu:20.04
 
@@ -31,6 +38,7 @@ ARG BUILDPLATFORM
 
 RUN <<-EOF
     set -xe
+    mkdir -p /ferrocene/packages
     echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
     alias apt-install="apt-get install -yq --no-install-recommends --option Dpkg::Options::=--force-confnew"
 
@@ -107,11 +115,15 @@ EOF
 RUN <<-EOF
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
         mkdir /opt/riscv-toolchain
-        curl -Lo /tmp/riscv-toolchain.tar.gz https://buildbot.embecosm.com/job/riscv64-linux-gcc-ubuntu2004/20/artifact/riscv64-embecosm-linux-gcc-ubuntu2004-20240407.tar.gz
-        echo "ddebec169a6c3a29b6cd0133f54f93c8f7addab9b3b5fb5366fa73dda834d7b7 /tmp/riscv-toolchain.tar.gz" | sha256sum -c
+        PACKAGE_URL="https://buildbot.embecosm.com/job/riscv64-linux-gcc-ubuntu2004/20/artifact/riscv64-embecosm-linux-gcc-ubuntu2004-20240407.tar.gz"
+        SHA="ddebec169a6c3a29b6cd0133f54f93c8f7addab9b3b5fb5366fa73dda834d7b7"
+        curl -Lo /tmp/riscv-toolchain.tar.gz $PACKAGE_URL
+        echo "$SHA /tmp/riscv-toolchain.tar.gz" | sha256sum -c
         tar xf /tmp/riscv-toolchain.tar.gz -C /opt/riscv-toolchain --strip-components=1
         rm /tmp/riscv-toolchain.tar.gz
         /opt/riscv-toolchain/bin/riscv64-unknown-linux-gnu-gcc --version
+
+        echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/extra
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
         echo "riscv64gc-unknown-linux-gnu toolchain setup skipped on aarch64-unknown-linux-gnu host."
     else
@@ -139,13 +151,17 @@ RUN <<-EOF
     set -xe
     mkdir /tmp/python
     cd /tmp/python
-    curl -OL https://www.python.org/ftp/python/3.12.3/Python-3.12.3.tar.xz
-    echo "56bfef1fdfc1221ce6720e43a661e3eb41785dd914ce99698d8c7896af4bdaa1 Python-3.12.3.tar.xz" | sha256sum -c
+    PACKAGE_URL="https://www.python.org/ftp/python/3.12.3/Python-3.12.3.tar.xz"
+    SHA="56bfef1fdfc1221ce6720e43a661e3eb41785dd914ce99698d8c7896af4bdaa1"
+    curl -OL $PACKAGE_URL
+    echo "$SHA Python-3.12.3.tar.xz" | sha256sum -c
     tar xf Python-3.12.3.tar.xz --strip-components=1
     ./configure
     make -j$(nproc)
     make install
     rm -rf /tmp/python
+
+    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/extra
 EOF
 
 # Install a recent NodeJS version, as the one shipped in Ubuntu 20.04 is too
@@ -168,11 +184,14 @@ RUN <<-EOF
         exit 1
     fi
     mkdir /opt/nodejs
-    curl -Lo /tmp/nodejs.tar.xz https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-${ARCH}.tar.xz
+    PACKAGE_URL="https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-${ARCH}.tar.xz"
+    curl -Lo /tmp/nodejs.tar.xz $PACKAGE_URL
     echo "${SHA} /tmp/nodejs.tar.xz" | sha256sum -c
     tar xf /tmp/nodejs.tar.xz -C /opt/nodejs --strip-components=1
     rm /tmp/nodejs.tar.xz
     /opt/nodejs/bin/node --version
+
+    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/extra
 EOF
 ENV PATH "/opt/nodejs/bin:$PATH"
 
@@ -193,19 +212,24 @@ RUN <<-EOF
         echo "Unsupported platform"
         exit 1
     fi
-    curl -Lo /tmp/awscli.zip https://awscli.amazonaws.com/awscli-exe-linux-${ARCH}-2.12.4.zip
+    PACKAGE_URL="https://awscli.amazonaws.com/awscli-exe-linux-${ARCH}-2.12.4.zip"
+    curl -Lo /tmp/awscli.zip $PACKAGE_URL
     echo "${SHA} /tmp/awscli.zip" | sha256sum -c
     unzip -q -d /tmp/awscli /tmp/awscli.zip
     /tmp/awscli/aws/install
     rm -rf /tmp/awscli /tmp/awscli.zip
+
+    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/extra
 EOF
 
 # Install cmake from source code, as the version in the Ubuntu 20.04 archives
 # is too old to build the latest LLVM.
 RUN <<-EOF
     set -xe
-    curl -Lo /tmp/cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v3.21.1/cmake-3.21.1.tar.gz
-    echo "fac3915171d4dff25913975d712f76e69aef44bf738ba7b976793a458b4cfed4  /tmp/cmake.tar.gz" | sha256sum -c
+    PACKAGE_URL="https://github.com/Kitware/CMake/releases/download/v3.21.1/cmake-3.21.1.tar.gz"
+    SHA="fac3915171d4dff25913975d712f76e69aef44bf738ba7b976793a458b4cfed4"
+    curl -Lo /tmp/cmake.tar.gz $PACKAGE_URL
+    echo "$SHA /tmp/cmake.tar.gz" | sha256sum -c
     mkdir /tmp/cmake
     cd /tmp/cmake
     tar --strip-components=1 -xzf /tmp/cmake.tar.gz
@@ -213,6 +237,8 @@ RUN <<-EOF
     make -j$(nproc)
     make install
     rm -rf /tmp/cmake /tmp/cmake.tar.gz
+
+    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/extra
 EOF
 
 # To run chroot inside the container we need sudo access. Copy a configuration
@@ -237,7 +263,15 @@ ENV CXX_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-g++
 # Automatic CFLAGs do not work for some targets.
 ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"
 
+COPY --from=noble /ferrocene/packages/ubuntu-24.04 /ferrocene/packages/ubuntu-24.04
 RUN <<-EOF
+    set -xe
+    dpkg -l >> /ferrocene/packages/ubuntu-20.04
+EOF
+    
+
+RUN <<-EOF
+    set -xe
     mkdir /home/ci
     addgroup --gid 1000 ci
     addgroup --gid 1001 ci-usergroup

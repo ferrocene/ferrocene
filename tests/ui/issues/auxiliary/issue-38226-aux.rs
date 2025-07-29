@@ -1,8 +1,9 @@
+//@ edition: 2015
 #![crate_type="rlib"]
 
 #[inline(never)]
 pub fn foo<T>() {
-    let _: Box<SomeTrait> = Box::new(SomeTraitImpl);
+    let _: Box<dyn SomeTrait> = Box::new(SomeTraitImpl);
 }
 
 pub fn bar() {

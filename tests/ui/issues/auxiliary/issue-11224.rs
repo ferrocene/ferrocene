@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![deny(dead_code)]
 
 mod inner {

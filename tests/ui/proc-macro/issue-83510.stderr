@@ -33,15 +33,7 @@ LL | issue_83510::dance_like_you_want_to_ice!();
    = note: this compiler was built on YYYY-MM-DD; consider upgrading it if it is out of date
    = note: this error originates in the macro `issue_83510::dance_like_you_want_to_ice` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0782]: expected a type, found a trait
-  --> $DIR/issue-83510.rs:6:1
-   |
-LL | issue_83510::dance_like_you_want_to_ice!();
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-   = note: this error originates in the macro `issue_83510::dance_like_you_want_to_ice` (in Nightly builds, run with -Z macro-backtrace for more info)
+error: aborting due to 4 previous errors
 
-error: aborting due to 5 previous errors
-
-Some errors have detailed explanations: E0404, E0405, E0412, E0658, E0782.
+Some errors have detailed explanations: E0404, E0405, E0412, E0658.
 For more information about an error, try `rustc --explain E0404`.

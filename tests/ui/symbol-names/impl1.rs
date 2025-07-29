@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ build-fail
 //@ revisions: legacy v0
 //@[legacy]compile-flags: -Z unstable-options -C symbol-mangling-version=legacy

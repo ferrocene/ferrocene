@@ -1,4 +1,3 @@
-//@ edition: 2015
 //@ proc-macro: suggestions-not-always-applicable.rs
 //@ edition:2015
 //@ run-rustfix

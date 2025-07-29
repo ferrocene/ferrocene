@@ -1,3 +1,4 @@
+//@ edition: 2015
 pub mod num {
     pub trait Num2 {
         fn from_int2(n: isize) -> Self;

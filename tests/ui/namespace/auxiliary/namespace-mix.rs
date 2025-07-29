@@ -1,3 +1,4 @@
+//@ edition: 2015
 pub mod c {
     pub struct S {}
     pub struct TS();

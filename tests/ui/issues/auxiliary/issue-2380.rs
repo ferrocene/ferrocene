@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![crate_name="a"]
 #![crate_type = "lib"]
 

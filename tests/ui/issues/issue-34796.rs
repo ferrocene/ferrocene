@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 #![allow(dead_code)]
 // This test case exposes conditions where the encoding of a trait object type

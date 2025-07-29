@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Regression test for #13466
 
 //@ dont-require-annotations: NOTE

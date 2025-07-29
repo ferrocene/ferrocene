@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![allow(unused, bare_trait_objects)]
 #[repr(align(256))]
 struct A {

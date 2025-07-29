@@ -15,10 +15,7 @@ error[E0432]: unresolved import `r#extern`
 LL | use extern::foo;
    |     ^^^^^^ use of unresolved module or unlinked crate `r#extern`
    |
-help: you might be missing a crate named `r#extern`, add it to your project and import it in your code
-   |
-LL + extern crate r#extern;
-   |
+   = help: you might be missing a crate named `r#extern`
 
 error: aborting due to 2 previous errors
 

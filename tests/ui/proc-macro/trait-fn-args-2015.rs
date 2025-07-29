@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Unnamed arguments in trait functions can be passed through proc macros on 2015 edition.
 
 //@ check-pass

@@ -1,3 +1,4 @@
+//@ edition: 2015
 // When denying at the crate level, be sure to not get random warnings from the
 // injected intrinsics by the compiler.
 //@ aux-build:missing_docs.rs

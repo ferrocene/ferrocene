@@ -1,7 +1,7 @@
 //@ run-rustfix
 #![allow(unused_imports)]
 fn main() {
-    use std::mem; //~ ERROR module import `mem` is private
+    use core::mem; //~ ERROR module import `mem` is private
 }
 
 pub mod foo {

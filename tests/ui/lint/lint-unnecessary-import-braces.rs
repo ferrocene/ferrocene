@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![deny(unused_import_braces)]
 
 use test::{A}; //~ ERROR braces around A is unnecessary

@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ aux-build:static_priv_by_default.rs
 
 extern crate static_priv_by_default;

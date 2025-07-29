@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Regression test for ICE #125876
 
 fn main() {

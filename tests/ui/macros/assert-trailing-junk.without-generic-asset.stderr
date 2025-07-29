@@ -10,15 +10,11 @@ error: expected one of `,`, `.`, `?`, or an operator, found `some`
 LL |     assert!(true some extra junk);
    |                  ^^^^ expected one of `,`, `.`, `?`, or an operator
 
-error: no rules expected `blah`
+error: expected `,`, found `blah`
   --> $DIR/assert-trailing-junk.rs:15:30
    |
 LL |     assert!(true, "whatever" blah);
-   |                             -^^^^ no rules expected this token in macro call
-   |                             |
-   |                             help: missing comma here
-   |
-   = note: while trying to match sequence start
+   |                              ^^^^ expected `,`
 
 error: unexpected string literal
   --> $DIR/assert-trailing-junk.rs:18:18
@@ -28,15 +24,11 @@ LL |     assert!(true "whatever" blah);
    |                 |
    |                 help: try adding a comma
 
-error: no rules expected `blah`
+error: expected `,`, found `blah`
   --> $DIR/assert-trailing-junk.rs:18:29
    |
 LL |     assert!(true "whatever" blah);
-   |                            -^^^^ no rules expected this token in macro call
-   |                            |
-   |                            help: missing comma here
-   |
-   = note: while trying to match sequence start
+   |                             ^^^^ expected `,`
 
 error: macro requires an expression as an argument
   --> $DIR/assert-trailing-junk.rs:22:5

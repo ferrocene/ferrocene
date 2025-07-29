@@ -1,3 +1,4 @@
+//@ edition: 2015
 struct Bug {
     V1: [(); {
         let f: impl core::future::Future<Output = u8> = async { 1 };

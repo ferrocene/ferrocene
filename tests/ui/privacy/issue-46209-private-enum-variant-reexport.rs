@@ -1,3 +1,4 @@
+//@ edition: 2015
 #[deny(unused_imports)]
 mod rank {
     pub use self::Professor::*;

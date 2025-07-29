@@ -1,3 +1,4 @@
+//@ edition: 2015
 mod m2 {
     pub enum Foo {
         A,

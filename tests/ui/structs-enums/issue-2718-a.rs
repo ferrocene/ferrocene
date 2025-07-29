@@ -1,3 +1,4 @@
+//@ edition: 2015
 pub struct SendPacket<T> {
     p: T
 }

@@ -22,7 +22,7 @@ LL | |       pub fn bar() { });
    = note: this error originates in the macro `test` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: consider importing this function
    |
-LL + use b::bar;
+LL + use crate::b::bar;
    |
 help: if you import `bar`, refer to it directly
    |

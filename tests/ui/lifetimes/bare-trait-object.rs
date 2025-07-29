@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Verify that lifetime resolution correctly accounts for `Fn` bare trait objects.
 //@ check-pass
 #![allow(bare_trait_objects)]

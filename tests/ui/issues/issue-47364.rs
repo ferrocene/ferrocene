@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 #![allow(unused_variables)]
 //@ compile-flags: -C codegen-units=8 -O

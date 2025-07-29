@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ compile-flags: -Zcontract-checks=yes
 
 #![feature(contracts)]

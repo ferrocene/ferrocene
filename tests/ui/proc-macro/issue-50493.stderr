@@ -1,5 +1,5 @@
 error[E0742]: visibilities can only be restricted to ancestor modules
-  --> $DIR/issue-50493.rs:8:12
+  --> $DIR/issue-50493.rs:9:12
    |
 LL |     pub(in restricted) field: usize,
    |            ^^^^^^^^^^

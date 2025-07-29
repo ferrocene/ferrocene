@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 //@ proc-macro: double.rs
 //@ aux-build:external-crate-var.rs

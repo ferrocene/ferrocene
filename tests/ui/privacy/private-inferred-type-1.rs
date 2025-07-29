@@ -1,3 +1,4 @@
+//@ edition: 2015
 trait Arr0 {
     fn arr0_secret(&self);
 }

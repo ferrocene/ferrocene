@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 #![allow(unused_imports)]
 //@ aux-build:issue-13507.rs

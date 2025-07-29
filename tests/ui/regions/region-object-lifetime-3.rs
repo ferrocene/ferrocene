@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Various tests related to testing how region inference works
 // with respect to the object receivers.
 

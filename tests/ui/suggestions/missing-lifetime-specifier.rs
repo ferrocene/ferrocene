@@ -1,3 +1,4 @@
+//@ edition: 2015
 // The specific errors produced depend the thread-local implementation.
 // Run only on platforms with "fast" TLS.
 //@ ignore-wasm globals are used instead of thread locals

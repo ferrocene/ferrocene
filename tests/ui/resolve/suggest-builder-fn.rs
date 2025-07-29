@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Tests that we suggest the right alternatives when
 // a builder method cannot be resolved
 

@@ -1,3 +1,4 @@
+//@ edition: 2015
 mod foo {
     type T = ();
     struct S1(pub(in foo) (), pub(T), pub(crate) (), pub(((), T)));

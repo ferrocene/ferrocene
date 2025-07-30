@@ -227,7 +227,7 @@ RUN <<-EOF
 
     # The first command we run, fetching some sources might fail, (it happened repeatedly)
     # so we retry it
-    retry -t 2 -- make install -j8 TARGET=x86_64-linux-musl
+    retry -t 2 -- make install -j8 TARGET=x86_64-linux-musl OUTPUT=/usr/
     make install -j8 TARGET=aarch64-linux-musl OUTPUT=/usr/
 EOF
 

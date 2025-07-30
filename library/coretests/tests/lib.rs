@@ -96,6 +96,7 @@
 // Features we add so we can have better coverage:
 // tidy-alphabetical-start
 #![feature(char_internals)]
+#![feature(debug_closure_helpers)]
 #![feature(one_sided_range)]
 // tidy-alphabetical-end
 

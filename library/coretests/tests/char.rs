@@ -419,3 +419,14 @@ fn eu_iterator_specializations() {
     check('\u{12340}');
     check('\u{10FFFF}');
 }
+
+#[test]
+#[should_panic]
+fn test_from_digit_radix_too_high() {
+    let _ = char::from_digit(0, 37);
+}
+
+#[test]
+fn test_from_digit_invalid_radix() {
+    assert!(char::from_digit(10, 9).is_none());
+}

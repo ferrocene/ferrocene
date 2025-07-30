@@ -47,6 +47,8 @@ RUN <<-EOF
         file \
         gdb \
         curl \
+        wget \
+        retry \
         ca-certificates \
         libedit-dev \
         libssl-dev \
@@ -215,6 +217,20 @@ RUN <<-EOF
     rm -rf /tmp/cmake /tmp/cmake.tar.gz
 EOF
 
+# Use musl-cross-make to build cross toolchains for musl
+RUN <<-EOF
+    set -xe
+    mkdir /opt/musl
+    cd /opt/musl
+    git clone https://github.com/richfelker/musl-cross-make.git
+    cd musl-cross-make
+
+    # The first command we run, fetching some sources might fail, (it happened repeatedly)
+    # so we retry it
+    retry -t 2 -- make install -j8 TARGET=x86_64-linux-musl
+    make install -j8 TARGET=aarch64-linux-musl OUTPUT=/usr/
+EOF
+
 # To run chroot inside the container we need sudo access. Copy a configuration
 # file allowing all users inside the container to use sudo.
 COPY ferrocene/ci/docker-images/ubuntu-20/sudoers /etc/sudoers
@@ -223,16 +239,16 @@ COPY ferrocene/ci/docker-images/ubuntu-20/sudoers /etc/sudoers
 ENV LANG=C.UTF-8
 
 # Automatic compiler detection doesn't work for some targets.
-ENV CC_aarch64_unknown_none=aarch64-linux-gnu-gcc
-ENV CXX_aarch64_unknown_none=aarch64-linux-gnu-g++
-ENV CC_aarch64_unknown_ferrocenecoretest=aarch64-linux-gnu-gcc
+ENV CC_aarch64_unknown_none aarch64-linux-gnu-gcc
+ENV CXX_aarch64_unknown_none aarch64-linux-gnu-g++
+ENV CC_aarch64_unknown_ferrocenecoretest aarch64-linux-gnu-gcc
 ENV CXX_aarch64_unknown_ferrocenecoretest=aarch64-linux-gnu-g++
-ENV CC_armv8r_none_eabihf=arm-none-eabi-gcc
-ENV CXX_armv8r_none_eabihf=arm-none-eabi-g++
-ENV CFLAGS_aarch64_unknown_nto_qnx710=-Vgcc_ntoaarch64le_cxx
-ENV CFLAGS_x86_64_pc_nto_qnx710=-Vgcc_ntox86_64_cxx
-ENV CC_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-gcc
-ENV CXX_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-g++
+ENV CC_armv8r_none_eabihf arm-none-eabi-gcc
+ENV CXX_armv8r_none_eabihf arm-none-eabi-g++
+ENV CFLAGS_aarch64_unknown_nto_qnx710 -Vgcc_ntoaarch64le_cxx
+ENV CFLAGS_x86_64_pc_nto_qnx710 -Vgcc_ntox86_64_cxx
+ENV CC_riscv64gc_unknown_linux_gnu riscv64-unknown-linux-gnu-gcc
+ENV CXX_riscv64gc_unknown_linux_gnu riscv64-unknown-linux-gnu-g++
 
 # Automatic CFLAGs do not work for some targets.
 ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"

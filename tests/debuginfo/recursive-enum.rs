@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ ignore-lldb
 
 //@ compile-flags:-g

@@ -90,7 +90,7 @@ pub struct FooFloat3 {
 }
 
 pub mod tests {
-    use {
+    use crate::{
         Foo, Foo1, Foo2, Foo3, Foo4, Foo5, FooFloat1, FooFloat2, FooFloat3, FooOversize1,
         FooOversize2,
     };

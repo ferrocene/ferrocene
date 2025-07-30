@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ compile-flags:-Zprint-mono-items=eager
 //@ compile-flags:-Zmir-opt-level=0
 

@@ -260,11 +260,23 @@ pub enum Mode {
     /// These tools are intended to be only executed on the host system that
     /// invokes bootstrap, and they thus cannot be cross-compiled.
     ///
-    /// They are always built using the stage0 compiler, and typically they
+    /// They are always built using the stage0 compiler, and they
     /// can be compiled with stable Rust.
     ///
     /// These tools also essentially do not participate in staging.
     ToolBootstrap,
+
+    /// Build a cross-compilable helper tool. These tools do not depend on unstable features or
+    /// compiler internals, but they might be cross-compilable (so we cannot build them using the
+    /// stage0 compiler, unlike `ToolBootstrap`).
+    ///
+    /// Some of these tools are also shipped in our `dist` archives.
+    /// While we could compile them using the stage0 compiler when not cross-compiling, we instead
+    /// use the in-tree compiler (and std) to build them, so that we can ship e.g. std security
+    /// fixes and avoid depending fully on stage0 for the artifacts that we ship.
+    ///
+    /// This mode is used e.g. for linkers and linker tools invoked by rustc on its host target.
+    ToolTarget,
 
     /// Build a tool which uses the locally built std, placing output in the
     /// "stageN-tools" directory. Its usage is quite rare, mainly used by
@@ -284,14 +296,28 @@ pub enum Mode {
 
 impl Mode {
     pub fn is_tool(&self) -> bool {
+<<<<<<< HEAD
         matches!(
             self,
             Mode::ToolBootstrap | Mode::ToolRustc | Mode::ToolStd | Mode::ToolCustom { .. }
         )
+=======
+        match self {
+            Mode::ToolBootstrap | Mode::ToolRustc | Mode::ToolStd | Mode::ToolTarget => true,
+            Mode::Std | Mode::Codegen | Mode::Rustc => false,
+        }
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     pub fn must_support_dlopen(&self) -> bool {
-        matches!(self, Mode::Std | Mode::Codegen)
+        match self {
+            Mode::Std | Mode::Codegen => true,
+            Mode::ToolBootstrap
+            | Mode::ToolRustc
+            | Mode::ToolStd
+            | Mode::ToolTarget
+            | Mode::Rustc => false,
+        }
     }
 }
 
@@ -831,6 +857,7 @@ impl Build {
     /// stage when running with a particular host compiler.
     ///
     /// The mode indicates what the root directory is for.
+<<<<<<< HEAD
     fn stage_out(&self, compiler: Compiler, mode: Mode) -> PathBuf {
         let mut subdir = None;
         let suffix = match mode {
@@ -854,6 +881,41 @@ impl Build {
             out = out.join(subdir)
         }
         out
+=======
+    fn stage_out(&self, build_compiler: Compiler, mode: Mode) -> PathBuf {
+        use std::fmt::Write;
+
+        fn bootstrap_tool() -> (Option<u32>, &'static str) {
+            (None, "bootstrap-tools")
+        }
+        fn staged_tool(build_compiler: Compiler) -> (Option<u32>, &'static str) {
+            (Some(build_compiler.stage), "tools")
+        }
+
+        let (stage, suffix) = match mode {
+            Mode::Std => (Some(build_compiler.stage), "std"),
+            Mode::Rustc => (Some(build_compiler.stage), "rustc"),
+            Mode::Codegen => (Some(build_compiler.stage), "codegen"),
+            Mode::ToolBootstrap => bootstrap_tool(),
+            Mode::ToolStd | Mode::ToolRustc => (Some(build_compiler.stage), "tools"),
+            Mode::ToolTarget => {
+                // If we're not cross-compiling (the common case), share the target directory with
+                // bootstrap tools to reuse the build cache.
+                if build_compiler.stage == 0 {
+                    bootstrap_tool()
+                } else {
+                    staged_tool(build_compiler)
+                }
+            }
+        };
+        let path = self.out.join(build_compiler.host);
+        let mut dir_name = String::new();
+        if let Some(stage) = stage {
+            write!(dir_name, "stage{stage}-").unwrap();
+        }
+        dir_name.push_str(suffix);
+        path.join(dir_name)
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     /// Returns the root output directory for all Cargo output in a given stage,
@@ -1326,23 +1388,33 @@ impl Build {
         }
     }
 
-    /// Returns the "musl root" for this `target`, if defined
+    /// Returns the "musl root" for this `target`, if defined.
+    ///
+    /// If this is a native target (host is also musl) and no musl-root is given,
+    /// it falls back to the system toolchain in /usr.
     fn musl_root(&self, target: TargetSelection) -> Option<&Path> {
-        self.config
+        let configured_root = self
+            .config
             .target_config
             .get(&target)
             .and_then(|t| t.musl_root.as_ref())
             .or(self.config.musl_root.as_ref())
-            .map(|p| &**p)
+            .map(|p| &**p);
+
+        if self.config.is_host_target(target) && configured_root.is_none() {
+            Some(Path::new("/usr"))
+        } else {
+            configured_root
+        }
     }
 
     /// Returns the "musl libdir" for this `target`.
     fn musl_libdir(&self, target: TargetSelection) -> Option<PathBuf> {
-        let t = self.config.target_config.get(&target)?;
-        if let libdir @ Some(_) = &t.musl_libdir {
-            return libdir.clone();
-        }
-        self.musl_root(target).map(|root| root.join("lib"))
+        self.config
+            .target_config
+            .get(&target)
+            .and_then(|t| t.musl_libdir.clone())
+            .or_else(|| self.musl_root(target).map(|root| root.join("lib")))
     }
 
     /// Returns the `lib` directory for the WASI target specified, if

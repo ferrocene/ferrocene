@@ -726,6 +726,7 @@ mod desc {
     pub(crate) const parse_list_with_polarity: &str =
         "a comma-separated list of strings, with elements beginning with + or -";
     pub(crate) const parse_autodiff: &str = "a comma separated list of settings: `Enable`, `PrintSteps`, `PrintTA`, `PrintTAFn`, `PrintAA`, `PrintPerf`, `PrintModBefore`, `PrintModAfter`, `PrintModFinal`, `PrintPasses`, `NoPostopt`, `LooseTypes`, `Inline`";
+    pub(crate) const parse_offload: &str = "a comma separated list of settings: `Enable`";
     pub(crate) const parse_comma_list: &str = "a comma-separated list of strings";
     pub(crate) const parse_opt_comma_list: &str = parse_comma_list;
     pub(crate) const parse_number: &str = "a number";
@@ -1295,7 +1296,7 @@ pub mod parse {
     }
 
     pub(crate) fn parse_linker_flavor(slot: &mut Option<LinkerFlavorCli>, v: Option<&str>) -> bool {
-        match v.and_then(LinkerFlavorCli::from_str) {
+        match v.and_then(|v| LinkerFlavorCli::from_str(v).ok()) {
             Some(lf) => *slot = Some(lf),
             _ => return false,
         }
@@ -1355,6 +1356,27 @@ pub mod parse {
             }
             Some(_) => false,
         }
+    }
+
+    pub(crate) fn parse_offload(slot: &mut Vec<Offload>, v: Option<&str>) -> bool {
+        let Some(v) = v else {
+            *slot = vec![];
+            return true;
+        };
+        let mut v: Vec<&str> = v.split(",").collect();
+        v.sort_unstable();
+        for &val in v.iter() {
+            let variant = match val {
+                "Enable" => Offload::Enable,
+                _ => {
+                    // FIXME(ZuseZ4): print an error saying which value is not recognized
+                    return false;
+                }
+            };
+            slot.push(variant);
+        }
+
+        true
     }
 
     pub(crate) fn parse_autodiff(slot: &mut Vec<AutoDiff>, v: Option<&str>) -> bool {
@@ -2146,8 +2168,6 @@ options! {
         "hash algorithm of source files used to check freshness in cargo (`blake3` or `sha256`)"),
     codegen_backend: Option<String> = (None, parse_opt_string, [TRACKED],
         "the backend to use"),
-    combine_cgu: bool = (false, parse_bool, [TRACKED],
-        "combine CGUs into a single one"),
     contract_checks: Option<bool> = (None, parse_opt_bool, [TRACKED],
         "emit runtime checks for contract pre- and post-conditions (default: no)"),
     coverage_options: CoverageOptions = (CoverageOptions::default(), parse_coverage_options, [TRACKED],
@@ -2256,6 +2276,8 @@ options! {
         environment variable `RUSTC_GRAPHVIZ_FONT` (default: `Courier, monospace`)"),
     has_thread_local: Option<bool> = (None, parse_opt_bool, [TRACKED],
         "explicitly enable the `cfg(target_thread_local)` directive"),
+    higher_ranked_assumptions: bool = (false, parse_bool, [TRACKED],
+        "allow deducing higher-ranked outlives assumptions from coroutines when proving auto traits"),
     hint_mostly_unused: bool = (false, parse_bool, [TRACKED],
         "hint that most of this crate will go unused, to minimize work for uncalled functions"),
     human_readable_cgu_names: bool = (false, parse_bool, [TRACKED],
@@ -2399,6 +2421,11 @@ options! {
         "do not use unique names for text and data sections when -Z function-sections is used"),
     normalize_docs: bool = (false, parse_bool, [TRACKED],
         "normalize associated items in rustdoc when generating documentation"),
+    offload: Vec<crate::config::Offload> = (Vec::new(), parse_offload, [TRACKED],
+        "a list of offload flags to enable
+        Mandatory setting:
+        `=Enable`
+        Currently the only option available"),
     on_broken_pipe: OnBrokenPipe = (OnBrokenPipe::Default, parse_on_broken_pipe, [TRACKED],
         "behavior of std::io::ErrorKind::BrokenPipe (SIGPIPE)"),
     oom: OomStrategy = (OomStrategy::Abort, parse_oom_strategy, [TRACKED],

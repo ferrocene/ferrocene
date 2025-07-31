@@ -1,11 +1,7 @@
 
-thread 'main' panicked at $DIR/runtime-switch.rs:29:5:
+thread 'main' panicked at $DIR/runtime-switch.rs:30:5:
 explicit panic
 stack backtrace:
-   0: __rustc::rust_begin_unwind
-   1: core::panicking::panic_fmt
-   2: core::panicking::panic_display
-   3: core::panicking::panic_explicit
-   4: runtime_switch::main::panic_cold_explicit
-   5: runtime_switch::main
+   0: std::panicking::begin_panic
+   1: runtime_switch::main
 note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.

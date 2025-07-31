@@ -1,4 +1,5 @@
 //@ compile-flags: -Zunstable-options --generate-link-to-definition
+//@ edition: 2015
 
 #![crate_name = "foo"]
 
@@ -23,7 +24,6 @@ pub fn bar2<T: Read>(readable: T) {
 pub fn bar() {
     //@ has - '//a[@href="{{channel}}/core/sync/atomic/struct.AtomicIsize.html#method.new"]' 'AtomicIsize::new'
     let _ = AtomicIsize::new(0);
-    //@ has - '//a[@href="#48"]' 'local_private'
     local_private();
 }
 

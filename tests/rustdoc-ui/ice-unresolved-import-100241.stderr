@@ -4,10 +4,7 @@ error[E0432]: unresolved import `inner`
 LL |     pub use inner::S;
    |             ^^^^^ use of unresolved module or unlinked crate `inner`
    |
-help: you might be missing a crate named `inner`, add it to your project and import it in your code
-   |
-LL + extern crate inner;
-   |
+   = help: you might be missing a crate named `inner`
 
 error: aborting due to 1 previous error
 

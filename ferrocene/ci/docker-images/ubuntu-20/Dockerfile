@@ -123,7 +123,7 @@ RUN <<-EOF
         rm /tmp/riscv-toolchain.tar.gz
         /opt/riscv-toolchain/bin/riscv64-unknown-linux-gnu-gcc --version
 
-        echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/extra
+        echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
         echo "riscv64gc-unknown-linux-gnu toolchain setup skipped on aarch64-unknown-linux-gnu host."
     else
@@ -161,7 +161,7 @@ RUN <<-EOF
     make install
     rm -rf /tmp/python
 
-    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/extra
+    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
 EOF
 
 # Install a recent NodeJS version, as the one shipped in Ubuntu 20.04 is too
@@ -191,7 +191,7 @@ RUN <<-EOF
     rm /tmp/nodejs.tar.xz
     /opt/nodejs/bin/node --version
 
-    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/extra
+    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
 EOF
 ENV PATH "/opt/nodejs/bin:$PATH"
 
@@ -219,7 +219,7 @@ RUN <<-EOF
     /tmp/awscli/aws/install
     rm -rf /tmp/awscli /tmp/awscli.zip
 
-    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/extra
+    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
 EOF
 
 # Install cmake from source code, as the version in the Ubuntu 20.04 archives
@@ -238,7 +238,7 @@ RUN <<-EOF
     make install
     rm -rf /tmp/cmake /tmp/cmake.tar.gz
 
-    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/extra
+    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
 EOF
 
 # To run chroot inside the container we need sudo access. Copy a configuration

@@ -8,11 +8,11 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-ARTIFACTS_BUCKET="ferrocene-ci-artifacts"
-ARTIFACTS_PREFIX="ferrocene/dist/"
+ARTIFACTS_BUCKET="${ARTIFACTS_BUCKET:-ferrocene-ci-artifacts}"
+ARTIFACTS_PREFIX="${ARTIFACTS_PREFIX:-ferrocene/dist}"
 DEST="/tmp/test-outcomes"
 
-aws s3 cp --recursive "s3://${ARTIFACTS_BUCKET}/${ARTIFACTS_PREFIX}${CIRCLE_SHA1}/build-metrics/" "${DEST}"
+aws s3 cp --recursive "s3://${ARTIFACTS_BUCKET}/${ARTIFACTS_PREFIX}/${CIRCLE_SHA1}/build-metrics/" "${DEST}"
 
 # Delete metrics for non-test jobs, to avoid including an unpredictable set of
 # metrics into the build (since the completion time of jobs is not constant).

@@ -31,16 +31,8 @@
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 use crate::intrinsics::const_eval_select;
-#[cfg(feature = "ferrocene_certified")]
-use crate::panic::PanicInfo;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::panic::{Location, PanicInfo};
-
-// Ferrocene annotation: Alias used in our panic-related patches to avoid having to certify `fmt`.
-#[cfg(feature = "ferrocene_certified")]
-pub(crate) type PanicFmt<'a> = &'a &'static str;
-#[cfg(not(feature = "ferrocene_certified"))]
-pub(crate) type PanicFmt<'a> = fmt::Arguments<'a>;
 
 #[cfg(feature = "panic_immediate_abort")]
 #[cfg(not(feature = "ferrocene_certified"))] /* FIXME: Remove once `assert` works */
@@ -63,7 +55,8 @@ const _: () = assert!(cfg!(panic = "abort"), "panic_immediate_abort requires -C 
 #[lang = "panic_fmt"] // needed for const-evaluated panics
 #[rustc_do_not_const_check] // hooked by const-eval
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
-pub const fn panic_fmt(fmt: PanicFmt<'_>) -> ! {
+#[cfg(not(feature = "ferrocene_certified"))]
+pub const fn panic_fmt(fmt: fmt::Arguments<'_>) -> ! {
     if cfg!(feature = "panic_immediate_abort") {
         super::intrinsics::abort()
     }
@@ -75,17 +68,26 @@ pub const fn panic_fmt(fmt: PanicFmt<'_>) -> ! {
         fn panic_impl(pi: &PanicInfo<'_>) -> !;
     }
 
-    #[cfg(not(feature = "ferrocene_certified"))]
     let pi = PanicInfo::new(
         &fmt,
         Location::caller(),
         /* can_unwind */ true,
         /* force_no_backtrace */ false,
     );
-    #[cfg(feature = "ferrocene_certified")]
-    let pi = PanicInfo::new(&fmt);
+
     // SAFETY: `panic_impl` is defined in safe Rust code and thus is safe to call.
     unsafe { panic_impl(&pi) }
+}
+
+/// FIXME(pvdrz): This is just a hack so we can get `panic` working.
+#[inline]
+#[track_caller]
+#[lang = "panic_fmt"] // needed for const-evaluated panics
+#[rustc_do_not_const_check] // hooked by const-eval
+#[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
+#[cfg(all(feature = "ferrocene_certified", feature = "panic_immediate_abort"))]
+const fn panic_fmt(_expr: &'static str) -> ! {
+    super::intrinsics::abort()
 }
 
 /// Like `panic_fmt`, but for non-unwinding panics.
@@ -100,9 +102,10 @@ pub const fn panic_fmt(fmt: PanicFmt<'_>) -> ! {
 #[rustc_nounwind]
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
 #[rustc_allow_const_fn_unstable(const_eval_select)]
-pub const fn panic_nounwind_fmt(fmt: PanicFmt<'_>, _force_no_backtrace: bool) -> ! {
+#[cfg(not(feature = "ferrocene_certified"))]
+pub const fn panic_nounwind_fmt(fmt: fmt::Arguments<'_>, force_no_backtrace: bool) -> ! {
     const_eval_select!(
-        @capture { fmt: PanicFmt<'_>, _force_no_backtrace: bool } -> !:
+        @capture { fmt: fmt::Arguments<'_>, force_no_backtrace: bool } -> !:
         if const #[track_caller] {
             // We don't unwind anyway at compile-time so we can call the regular `panic_fmt`.
             panic_fmt(fmt)
@@ -119,18 +122,37 @@ pub const fn panic_nounwind_fmt(fmt: PanicFmt<'_>, _force_no_backtrace: bool) ->
             }
 
             // PanicInfo with the `can_unwind` flag set to false forces an abort.
-            #[cfg(not(feature = "ferrocene_certified"))]
             let pi = PanicInfo::new(
                 &fmt,
                 Location::caller(),
                 /* can_unwind */ false,
-                _force_no_backtrace,
+                force_no_backtrace,
             );
-            #[cfg(feature = "ferrocene_certified")]
-            let pi = PanicInfo::new(&fmt);
 
             // SAFETY: `panic_impl` is defined in safe Rust code and thus is safe to call.
             unsafe { panic_impl(&pi) }
+        }
+    )
+}
+
+/// FIXME(pvdrz): This is just a hack so we can get `panic_nounwind` working.
+#[inline]
+#[track_caller]
+// This attribute has the key side-effect that if the panic handler ignores `can_unwind`
+// and unwinds anyway, we will hit the "unwinding out of nounwind function" guard,
+// which causes a "panic in a function that cannot unwind".
+#[rustc_nounwind]
+#[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
+#[rustc_allow_const_fn_unstable(const_eval_select)]
+#[cfg(all(feature = "ferrocene_certified", feature = "panic_immediate_abort"))]
+pub const fn panic_nounwind_fmt(_expr: &'static str, _force_no_backtrace: bool) -> ! {
+    const_eval_select!(
+        @capture { _expr: &'static str, _force_no_backtrace: bool } -> !:
+        if const #[track_caller] {
+            // We don't unwind anyway at compile-time so we can call the regular `panic_fmt`.
+            panic_fmt(_expr)
+        } else #[track_caller] {
+            super::intrinsics::abort()
         }
     )
 }
@@ -160,8 +182,8 @@ pub const fn panic(expr: &'static str) -> ! {
     // payload.
     #[cfg(not(feature = "ferrocene_certified"))]
     panic_fmt(fmt::Arguments::new_const(&[expr]));
-    #[cfg(feature = "ferrocene_certified")]
-    panic_fmt(&expr)
+    #[cfg(not(not(feature = "ferrocene_certified")))]
+    panic_fmt(expr)
 }
 
 // We generate functions for usage by compiler-generated assertions.
@@ -245,8 +267,8 @@ pub mod panic_const {
 pub const fn panic_nounwind(expr: &'static str) -> ! {
     #[cfg(not(feature = "ferrocene_certified"))]
     panic_nounwind_fmt(fmt::Arguments::new_const(&[expr]), /* force_no_backtrace */ false);
-    #[cfg(feature = "ferrocene_certified")]
-    panic_nounwind_fmt(&expr, /* force_no_backtrace */ false);
+    #[cfg(not(not(feature = "ferrocene_certified")))]
+    panic_nounwind_fmt(expr, /* force_no_backtrace */ false);
 }
 
 /// Like `panic_nounwind`, but also inhibits showing a backtrace.

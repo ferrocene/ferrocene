@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![crate_name="crate_method_reexport_grrrrrrr2"]
 
 pub use name_pool::add;

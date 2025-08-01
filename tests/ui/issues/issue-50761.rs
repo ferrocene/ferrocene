@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Confirm that we don't accidentally divide or mod by zero in llvm_type
 
 //@ build-pass

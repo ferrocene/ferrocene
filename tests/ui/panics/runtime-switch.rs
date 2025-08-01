@@ -1,5 +1,6 @@
 // Test for std::panic::set_backtrace_style.
 
+//@ edition: 2015
 //@ compile-flags: -O
 //@ compile-flags:-Cstrip=none
 //@ run-fail

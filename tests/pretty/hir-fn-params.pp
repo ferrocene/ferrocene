@@ -2,6 +2,7 @@
 use ::std::prelude::rust_2015::*;
 #[macro_use]
 extern crate std;
+//@ edition: 2015
 //@ pretty-compare-only
 //@ pretty-mode:hir
 //@ pp-exact:hir-fn-params.pp

@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![deny(unused_imports)]
 #![allow(non_upper_case_globals)]
 

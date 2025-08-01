@@ -1,6 +1,7 @@
 // https://github.com/rust-lang/rust/issues/31948
 #![crate_name="foobar"]
 
+//@ edition: 2015
 //@ aux-build:rustdoc-nonreachable-impls.rs
 //@ build-aux-docs
 //@ ignore-cross-compile

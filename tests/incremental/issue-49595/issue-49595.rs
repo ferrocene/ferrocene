@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ revisions:cfail1 cfail2 cfail3
 //@ compile-flags: -Z query-dep-graph --test
 //@ build-pass

@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 //@ aux-build:static_fn_inline_xc_aux.rs
 

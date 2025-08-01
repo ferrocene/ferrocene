@@ -1,8 +1,7 @@
 #!/usr/bin/env rust
 #![feature(prelude_import)]
-#![no_std]
 #[prelude_import]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 #[macro_use]
 extern crate std;
 //@ pretty-mode:expanded

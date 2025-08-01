@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 #![allow(unused_variables)]
 // Parsing patterns with paths with type parameters (issue #22544)

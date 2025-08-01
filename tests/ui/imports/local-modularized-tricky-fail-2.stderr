@@ -1,5 +1,5 @@
 error: macro-expanded `macro_export` macros from the current crate cannot be referred to by absolute paths
-  --> $DIR/local-modularized-tricky-fail-2.rs:13:9
+  --> $DIR/local-modularized-tricky-fail-2.rs:14:9
    |
 LL |     use exported;
    |         ^^^^^^^^
@@ -7,7 +7,7 @@ LL |     use exported;
    = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
    = note: for more information, see issue #52234 <https://github.com/rust-lang/rust/issues/52234>
 note: the macro is defined here
-  --> $DIR/local-modularized-tricky-fail-2.rs:5:5
+  --> $DIR/local-modularized-tricky-fail-2.rs:6:5
    |
 LL | /     macro_rules! exported {
 LL | |         () => ()
@@ -20,7 +20,7 @@ LL |   define_exported!();
    = note: this error originates in the macro `define_exported` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: macro-expanded `macro_export` macros from the current crate cannot be referred to by absolute paths
-  --> $DIR/local-modularized-tricky-fail-2.rs:19:5
+  --> $DIR/local-modularized-tricky-fail-2.rs:20:5
    |
 LL |     ::exported!();
    |     ^^^^^^^^^^
@@ -28,7 +28,7 @@ LL |     ::exported!();
    = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
    = note: for more information, see issue #52234 <https://github.com/rust-lang/rust/issues/52234>
 note: the macro is defined here
-  --> $DIR/local-modularized-tricky-fail-2.rs:5:5
+  --> $DIR/local-modularized-tricky-fail-2.rs:6:5
    |
 LL | /     macro_rules! exported {
 LL | |         () => ()

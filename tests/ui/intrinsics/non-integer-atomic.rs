@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ build-fail
 
 #![feature(core_intrinsics)]

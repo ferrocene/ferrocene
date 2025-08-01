@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ known-bug: #123456
 
 trait Project {

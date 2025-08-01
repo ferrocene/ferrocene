@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ proc-macro: issue-50493.rs
 
 #[macro_use]

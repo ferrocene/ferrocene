@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 // Check we do not select a private method or field when computing autoderefs
 

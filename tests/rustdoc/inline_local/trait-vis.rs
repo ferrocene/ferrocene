@@ -1,3 +1,5 @@
+//@ edition: 2015
+
 pub trait ThisTrait {}
 
 mod asdf {

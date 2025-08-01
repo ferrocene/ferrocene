@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![crate_type = "lib"]
 
 static private: isize = 0;
@@ -16,7 +17,7 @@ mod foo {
     pub enum d {}
     pub type e = isize;
 
-    pub struct A(());
+pub struct A(());
 
     impl A {
         fn foo() {}

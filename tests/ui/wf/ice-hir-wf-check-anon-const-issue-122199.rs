@@ -1,3 +1,4 @@
+//@ edition: 2015
 trait Trait<const N: Trait = bar> {
     //~^ ERROR cannot find value `bar` in this scope
     //~| ERROR cycle detected when computing type of `Trait::N`

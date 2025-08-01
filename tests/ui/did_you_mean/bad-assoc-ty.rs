@@ -1,3 +1,4 @@
+//@ edition: 2015
 type A = [u8; 4]::AssocTy;
 //~^ ERROR missing angle brackets in associated item path
 //~| ERROR ambiguous associated type

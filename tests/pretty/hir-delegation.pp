@@ -5,7 +5,7 @@
 #![allow(incomplete_features)]
 #![feature(fn_delegation)]
 #[prelude_import]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 #[macro_use]
 extern crate std;
 

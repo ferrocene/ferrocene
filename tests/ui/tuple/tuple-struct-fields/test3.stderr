@@ -1,5 +1,5 @@
 error: expected one of `)` or `,`, found `(`
-  --> $DIR/test3.rs:5:27
+  --> $DIR/test3.rs:6:27
    |
 LL |         struct S3(pub($t) ());
    |                          -^ expected one of `)` or `,`
@@ -12,13 +12,13 @@ LL |     define_struct! { foo }
    = note: this error originates in the macro `define_struct` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0412]: cannot find type `foo` in this scope
-  --> $DIR/test3.rs:11:22
+  --> $DIR/test3.rs:12:22
    |
 LL |     define_struct! { foo }
    |                      ^^^ not found in this scope
 
 error[E0412]: cannot find type `foo` in this scope
-  --> $DIR/test3.rs:11:22
+  --> $DIR/test3.rs:12:22
    |
 LL |     define_struct! { foo }
    |                      ^^^ not found in this scope

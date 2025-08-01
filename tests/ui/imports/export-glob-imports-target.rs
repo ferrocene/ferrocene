@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 
 #![allow(non_upper_case_globals)]

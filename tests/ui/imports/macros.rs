@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ aux-build:two_macros.rs
 
 extern crate two_macros; // two identity macros `m` and `n`

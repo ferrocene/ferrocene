@@ -1,3 +1,4 @@
+//@ edition: 2015
 macro_rules! m {
     ($p: path) => (pub(in $p) struct Z;)
 }

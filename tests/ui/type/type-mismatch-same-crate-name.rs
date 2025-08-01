@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ aux-build:crate_a1.rs
 //@ aux-build:crate_a2.rs
 

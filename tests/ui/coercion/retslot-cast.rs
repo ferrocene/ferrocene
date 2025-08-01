@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![allow(warnings)]
 
 pub fn fail(x: Option<&(Iterator<Item=()>+Send)>)

@@ -1,5 +1,5 @@
 error[E0597]: `o2` does not live long enough
-  --> $DIR/dropck_trait_cycle_checked.rs:111:13
+  --> $DIR/dropck_trait_cycle_checked.rs:112:13
    |
 LL |     let (o1, o2, o3): (Box<dyn Obj>, Box<dyn Obj>, Box<dyn Obj>) = (O::new(), O::new(), O::new());
    |              -- binding `o2` declared here                          -------- coercion requires that `o2` is borrowed for `'static`
@@ -12,7 +12,7 @@ LL | }
    = note: due to object lifetime defaults, `Box<dyn Obj<'_>>` actually means `Box<(dyn Obj<'_> + 'static)>`
 
 error[E0597]: `o3` does not live long enough
-  --> $DIR/dropck_trait_cycle_checked.rs:112:13
+  --> $DIR/dropck_trait_cycle_checked.rs:113:13
    |
 LL |     let (o1, o2, o3): (Box<dyn Obj>, Box<dyn Obj>, Box<dyn Obj>) = (O::new(), O::new(), O::new());
    |                  -- binding `o3` declared here                      -------- coercion requires that `o3` is borrowed for `'static`
@@ -26,7 +26,7 @@ LL | }
    = note: due to object lifetime defaults, `Box<dyn Obj<'_>>` actually means `Box<(dyn Obj<'_> + 'static)>`
 
 error[E0597]: `o2` does not live long enough
-  --> $DIR/dropck_trait_cycle_checked.rs:113:13
+  --> $DIR/dropck_trait_cycle_checked.rs:114:13
    |
 LL |     let (o1, o2, o3): (Box<dyn Obj>, Box<dyn Obj>, Box<dyn Obj>) = (O::new(), O::new(), O::new());
    |              -- binding `o2` declared here                                    -------- coercion requires that `o2` is borrowed for `'static`
@@ -40,7 +40,7 @@ LL | }
    = note: due to object lifetime defaults, `Box<dyn Obj<'_>>` actually means `Box<(dyn Obj<'_> + 'static)>`
 
 error[E0597]: `o3` does not live long enough
-  --> $DIR/dropck_trait_cycle_checked.rs:114:13
+  --> $DIR/dropck_trait_cycle_checked.rs:115:13
    |
 LL |     let (o1, o2, o3): (Box<dyn Obj>, Box<dyn Obj>, Box<dyn Obj>) = (O::new(), O::new(), O::new());
    |                  -- binding `o3` declared here                                -------- coercion requires that `o3` is borrowed for `'static`
@@ -54,7 +54,7 @@ LL | }
    = note: due to object lifetime defaults, `Box<dyn Obj<'_>>` actually means `Box<(dyn Obj<'_> + 'static)>`
 
 error[E0597]: `o1` does not live long enough
-  --> $DIR/dropck_trait_cycle_checked.rs:115:13
+  --> $DIR/dropck_trait_cycle_checked.rs:116:13
    |
 LL |     let (o1, o2, o3): (Box<dyn Obj>, Box<dyn Obj>, Box<dyn Obj>) = (O::new(), O::new(), O::new());
    |          -- binding `o1` declared here                                                  -------- coercion requires that `o1` is borrowed for `'static`
@@ -68,7 +68,7 @@ LL | }
    = note: due to object lifetime defaults, `Box<dyn Obj<'_>>` actually means `Box<(dyn Obj<'_> + 'static)>`
 
 error[E0597]: `o2` does not live long enough
-  --> $DIR/dropck_trait_cycle_checked.rs:116:13
+  --> $DIR/dropck_trait_cycle_checked.rs:117:13
    |
 LL |     let (o1, o2, o3): (Box<dyn Obj>, Box<dyn Obj>, Box<dyn Obj>) = (O::new(), O::new(), O::new());
    |              -- binding `o2` declared here                                              -------- coercion requires that `o2` is borrowed for `'static`

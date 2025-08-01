@@ -1,6 +1,7 @@
 // Check that the hash for a method call is sensitive to the traits in
 // scope.
 
+//@ edition: 2015
 //@ revisions: rpass1 rpass2
 //@ compile-flags: -Z query-dep-graph
 

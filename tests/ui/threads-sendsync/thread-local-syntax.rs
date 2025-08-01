@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 #![deny(missing_docs)]
 //! this tests the syntax of `thread_local!`

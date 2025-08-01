@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![allow(bare_trait_objects)]
 //@ check-pass
 pub struct FormatWith<'a, I, F> {

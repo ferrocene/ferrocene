@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ compile-flags: --document-private-items
 
 #![crate_name = "foo"]

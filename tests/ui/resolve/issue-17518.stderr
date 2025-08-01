@@ -6,7 +6,7 @@ LL |     E { name: "foobar" };
    |
 help: consider importing this variant
    |
-LL + use SomeEnum::E;
+LL + use crate::SomeEnum::E;
    |
 
 error: aborting due to 1 previous error

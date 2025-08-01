@@ -8,10 +8,10 @@ note: these type aliases exist but are inaccessible
   --> $DIR/inaccessible_type_aliases.rs:2:5
    |
 LL |     type Foo = u64;
-   |     ^^^^^^^^^^^^^^^ `a::Foo`: not accessible
+   |     ^^^^^^^^^^^^^^^ `crate::a::Foo`: not accessible
 ...
 LL |     type Foo = u64;
-   |     ^^^^^^^^^^^^^^^ `b::Foo`: not accessible
+   |     ^^^^^^^^^^^^^^^ `crate::b::Foo`: not accessible
 
 error[E0412]: cannot find type `Bar` in this scope
   --> $DIR/inaccessible_type_aliases.rs:12:12
@@ -19,7 +19,7 @@ error[E0412]: cannot find type `Bar` in this scope
 LL |     let y: Bar = 100;
    |            ^^^ not found in this scope
    |
-note: type alias `a::Bar` exists but is inaccessible
+note: type alias `crate::a::Bar` exists but is inaccessible
   --> $DIR/inaccessible_type_aliases.rs:3:5
    |
 LL |     type Bar = u64;

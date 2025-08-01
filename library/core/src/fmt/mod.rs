@@ -2,25 +2,37 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cell::{Cell, Ref, RefCell, RefMut, SyncUnsafeCell, UnsafeCell};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::char::{EscapeDebugExtArgs, MAX_LEN_UTF8};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::PhantomData;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::fmt as numfmt;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::Deref;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::{iter, result, str};
 
+#[cfg(not(feature = "ferrocene_certified"))]
 mod builders;
 #[cfg(not(no_fp_fmt_parse))]
+#[cfg(not(feature = "ferrocene_certified"))]
 mod float;
 #[cfg(no_fp_fmt_parse)]
+#[cfg(not(feature = "ferrocene_certified"))]
 mod nofloat;
+#[cfg(not(feature = "ferrocene_certified"))]
 mod num;
+#[cfg(not(feature = "ferrocene_certified"))]
 mod rt;
 
 #[stable(feature = "fmt_flags_align", since = "1.28.0")]
 #[rustc_diagnostic_item = "Alignment"]
 /// Possible alignments returned by `Formatter::align`
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub enum Alignment {
     #[stable(feature = "fmt_flags_align", since = "1.28.0")]
     /// Indication that contents should be left-aligned.
@@ -34,8 +46,10 @@ pub enum Alignment {
 }
 
 #[stable(feature = "debug_builders", since = "1.2.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::builders::{DebugList, DebugMap, DebugSet, DebugStruct, DebugTuple};
 #[unstable(feature = "debug_closure_helpers", issue = "117729")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::builders::{FromFn, from_fn};
 
 /// The type returned by formatter methods.
@@ -63,6 +77,7 @@ pub use self::builders::{FromFn, from_fn};
 /// assert_eq!(format!("{pythagorean_triple}"), "(3, 4, 5)");
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub type Result = result::Result<(), Error>;
 
 /// The error type which is returned from formatting a message into a stream.
@@ -100,6 +115,7 @@ pub type Result = result::Result<(), Error>;
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub struct Error;
 
 /// A trait for writing or formatting into Unicode-accepting buffers or streams.
@@ -111,6 +127,7 @@ pub struct Error;
 /// [`std::io::Write`]: ../../std/io/trait.Write.html
 /// [flushable]: ../../std/io/trait.Write.html#tymethod.flush
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait Write {
     /// Writes a string slice into this writer, returning whether the write
     /// succeeded.
@@ -236,6 +253,7 @@ pub trait Write {
 }
 
 #[stable(feature = "fmt_write_blanket_impl", since = "1.4.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<W: Write + ?Sized> Write for &mut W {
     fn write_str(&mut self, s: &str) -> Result {
         (**self).write_str(s)
@@ -253,6 +271,7 @@ impl<W: Write + ?Sized> Write for &mut W {
 /// The signedness of a [`Formatter`] (or of a [`FormattingOptions`]).
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[unstable(feature = "formatting_options", issue = "118117")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub enum Sign {
     /// Represents the `+` flag.
     Plus,
@@ -264,6 +283,7 @@ pub enum Sign {
 /// hexadecimal or normal integers.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[unstable(feature = "formatting_options", issue = "118117")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub enum DebugAsHex {
     /// Use lower-case hexadecimal integers for the `Debug` trait (like [the `x?` type](../../std/fmt/index.html#formatting-traits)).
     Lower,
@@ -277,6 +297,7 @@ pub enum DebugAsHex {
 /// It is mainly used to construct `Formatter` instances.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[unstable(feature = "formatting_options", issue = "118117")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub struct FormattingOptions {
     /// Flags, with the following bit fields:
     ///
@@ -309,6 +330,7 @@ pub struct FormattingOptions {
 }
 
 // This needs to match with compiler/rustc_ast_lowering/src/format.rs.
+#[cfg(not(feature = "ferrocene_certified"))]
 mod flags {
     pub(super) const SIGN_PLUS_FLAG: u32 = 1 << 21;
     pub(super) const SIGN_MINUS_FLAG: u32 = 1 << 22;
@@ -326,6 +348,7 @@ mod flags {
     pub(super) const ALWAYS_SET: u32 = 1 << 31;
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl FormattingOptions {
     /// Construct a new `FormatterBuilder` with the supplied `Write` trait
     /// object for output that is equivalent to the `{}` formatting
@@ -539,6 +562,7 @@ impl FormattingOptions {
 }
 
 #[unstable(feature = "formatting_options", issue = "118117")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Default for FormattingOptions {
     /// Same as [`FormattingOptions::new()`].
     fn default() -> Self {
@@ -559,12 +583,14 @@ impl Default for FormattingOptions {
 #[allow(missing_debug_implementations)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Formatter"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub struct Formatter<'a> {
     options: FormattingOptions,
 
     buf: &'a mut (dyn Write + 'a),
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a> Formatter<'a> {
     /// Creates a new formatter with given [`FormattingOptions`].
     ///
@@ -610,6 +636,7 @@ impl<'a> Formatter<'a> {
 #[lang = "format_arguments"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Copy, Clone)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub struct Arguments<'a> {
     // Format string pieces to print.
     pieces: &'a [&'static str],
@@ -624,6 +651,7 @@ pub struct Arguments<'a> {
 
 #[doc(hidden)]
 #[unstable(feature = "fmt_internals", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a> Arguments<'a> {
     /// Estimates the length of the formatted text.
     ///
@@ -649,6 +677,7 @@ impl<'a> Arguments<'a> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a> Arguments<'a> {
     /// Gets the formatted string, if it has no arguments to be formatted at runtime.
     ///
@@ -717,11 +746,14 @@ impl<'a> Arguments<'a> {
 
 // Manually implementing these results in better error messages.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl !Send for Arguments<'_> {}
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl !Sync for Arguments<'_> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Debug for Arguments<'_> {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
         Display::fmt(self, fmt)
@@ -729,6 +761,7 @@ impl Debug for Arguments<'_> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Display for Arguments<'_> {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
         write(fmt.buf, *self)
@@ -864,6 +897,7 @@ impl Display for Arguments<'_> {
 #[doc(alias = "{:?}")]
 #[rustc_diagnostic_item = "Debug"]
 #[rustc_trivial_field_reads]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait Debug {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     ///
@@ -899,6 +933,7 @@ pub trait Debug {
 }
 
 // Separate module to reexport the macro `Debug` from prelude without the trait `Debug`.
+#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) mod macros {
     /// Derive macro generating an impl of the trait `Debug`.
     #[rustc_builtin_macro]
@@ -910,6 +945,7 @@ pub(crate) mod macros {
 }
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(inline)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use macros::Debug;
 
 /// Format trait for an empty format, `{}`.
@@ -981,6 +1017,7 @@ pub use macros::Debug;
 #[doc(alias = "{}")]
 #[rustc_diagnostic_item = "Display"]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait Display {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     ///
@@ -1057,6 +1094,7 @@ pub trait Display {
 /// assert_eq!(format!("l as octal is: {l:#06o}"), "l as octal is: 0o0011");
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait Octal {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1116,6 +1154,7 @@ pub trait Octal {
 /// );
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait Binary {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1171,6 +1210,7 @@ pub trait Binary {
 /// assert_eq!(format!("l as hex is: {l:#010x}"), "l as hex is: 0x00000009");
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait LowerHex {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1226,6 +1266,7 @@ pub trait LowerHex {
 /// assert_eq!(format!("l as hex is: {l:#010X}"), "l as hex is: 0x7FFFFFFF");
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait UpperHex {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1285,6 +1326,7 @@ pub trait UpperHex {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Pointer"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait Pointer {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1336,6 +1378,7 @@ pub trait Pointer {
 /// );
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait LowerExp {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1387,6 +1430,7 @@ pub trait LowerExp {
 /// );
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait UpperExp {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1425,6 +1469,7 @@ pub trait UpperExp {
 ///
 /// [`write!`]: crate::write!
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn write(output: &mut dyn Write, args: Arguments<'_>) -> Result {
     let mut formatter = Formatter::new(output, FormattingOptions::new());
     let mut idx = 0;
@@ -1474,6 +1519,7 @@ pub fn write(output: &mut dyn Write, args: Arguments<'_>) -> Result {
     Ok(())
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe fn run(fmt: &mut Formatter<'_>, arg: &rt::Placeholder, args: &[rt::Argument<'_>]) -> Result {
     let (width, precision) =
         // SAFETY: arg and args come from the same Arguments,
@@ -1496,6 +1542,7 @@ unsafe fn run(fmt: &mut Formatter<'_>, arg: &rt::Placeholder, args: &[rt::Argume
     unsafe { value.fmt(fmt) }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe fn getcount(args: &[rt::Argument<'_>], cnt: &rt::Count) -> u16 {
     match *cnt {
         rt::Count::Is(n) => n,
@@ -1511,11 +1558,13 @@ unsafe fn getcount(args: &[rt::Argument<'_>], cnt: &rt::Count) -> u16 {
 
 /// Padding after the end of something. Returned by `Formatter::padding`.
 #[must_use = "don't forget to write the post padding"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) struct PostPadding {
     fill: char,
     padding: u16,
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl PostPadding {
     fn new(fill: char, padding: u16) -> PostPadding {
         PostPadding { fill, padding }
@@ -1530,6 +1579,7 @@ impl PostPadding {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a> Formatter<'a> {
     fn wrap_buf<'b, 'c, F>(&'b mut self, wrap: F) -> Formatter<'c>
     where
@@ -2600,6 +2650,7 @@ impl<'a> Formatter<'a> {
 }
 
 #[stable(since = "1.2.0", feature = "formatter_write")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Write for Formatter<'_> {
     fn write_str(&mut self, s: &str) -> Result {
         self.buf.write_str(s)
@@ -2620,6 +2671,7 @@ impl Write for Formatter<'_> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Display::fmt("an error occurred when formatting an argument", f)
@@ -2628,6 +2680,7 @@ impl Display for Error {
 
 // Implementations of the core formatting traits
 
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! fmt_refs {
     ($($tr:ident),*) => {
         $(
@@ -2643,9 +2696,11 @@ macro_rules! fmt_refs {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 fmt_refs! { Debug, Display, Octal, Binary, LowerHex, UpperHex, LowerExp, UpperExp }
 
 #[unstable(feature = "never_type", issue = "35121")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Debug for ! {
     #[inline]
     fn fmt(&self, _: &mut Formatter<'_>) -> Result {
@@ -2654,6 +2709,7 @@ impl Debug for ! {
 }
 
 #[unstable(feature = "never_type", issue = "35121")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Display for ! {
     #[inline]
     fn fmt(&self, _: &mut Formatter<'_>) -> Result {
@@ -2662,6 +2718,7 @@ impl Display for ! {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Debug for bool {
     #[inline]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -2670,6 +2727,7 @@ impl Debug for bool {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Display for bool {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Display::fmt(if *self { "true" } else { "false" }, f)
@@ -2677,6 +2735,7 @@ impl Display for bool {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Debug for str {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.write_char('"')?;
@@ -2726,6 +2785,7 @@ impl Debug for str {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Display for str {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.pad(self)
@@ -2733,6 +2793,7 @@ impl Display for str {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Debug for char {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.write_char('\'')?;
@@ -2747,6 +2808,7 @@ impl Debug for char {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Display for char {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         if f.options.flags & (flags::WIDTH_FLAG | flags::PRECISION_FLAG) == 0 {
@@ -2758,6 +2820,7 @@ impl Display for char {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Pointer for *const T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         if <<T as core::ptr::Pointee>::Metadata as core::unit::IsUnit>::is_unit() {
@@ -2779,6 +2842,7 @@ impl<T: ?Sized> Pointer for *const T {
 /// `fn(...) -> ...` without using [problematic] "Oxford Casts".
 ///
 /// [problematic]: https://github.com/rust-lang/rust/issues/95489
+#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) fn pointer_fmt_inner(ptr_addr: usize, f: &mut Formatter<'_>) -> Result {
     let old_options = f.options;
 
@@ -2803,6 +2867,7 @@ pub(crate) fn pointer_fmt_inner(ptr_addr: usize, f: &mut Formatter<'_>) -> Resul
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Pointer for *mut T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(&(*self as *const T), f)
@@ -2810,6 +2875,7 @@ impl<T: ?Sized> Pointer for *mut T {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Pointer for &T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(&(*self as *const T), f)
@@ -2817,6 +2883,7 @@ impl<T: ?Sized> Pointer for &T {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Pointer for &mut T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(&(&**self as *const T), f)
@@ -2826,22 +2893,26 @@ impl<T: ?Sized> Pointer for &mut T {
 // Implementation of Display/Debug for various core types
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Debug for *const T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(self, f)
     }
 }
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Debug for *mut T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(self, f)
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! peel {
     ($name:ident, $($other:ident,)*) => (tuple! { $($other,)* })
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! tuple {
     () => ();
     ( $($name:ident,)+ ) => (
@@ -2865,6 +2936,7 @@ macro_rules! tuple {
     )
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! maybe_tuple_doc {
     ($a:ident @ #[$meta:meta] $item:item) => {
         #[doc(fake_variadic)]
@@ -2879,14 +2951,17 @@ macro_rules! maybe_tuple_doc {
     };
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! last_type {
     ($a:ident,) => { $a };
     ($a:ident, $($rest_a:ident,)+) => { last_type!($($rest_a,)+) };
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 tuple! { E, D, C, B, A, Z, Y, X, W, V, U, T, }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Debug> Debug for [T] {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.debug_list().entries(self.iter()).finish()
@@ -2894,6 +2969,7 @@ impl<T: Debug> Debug for [T] {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl Debug for () {
     #[inline]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -2901,6 +2977,7 @@ impl Debug for () {
     }
 }
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Debug for PhantomData<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "PhantomData<{}>", crate::any::type_name::<T>())
@@ -2908,6 +2985,7 @@ impl<T: ?Sized> Debug for PhantomData<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Copy + Debug> Debug for Cell<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.debug_struct("Cell").field("value", &self.get()).finish()
@@ -2915,6 +2993,7 @@ impl<T: Copy + Debug> Debug for Cell<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized + Debug> Debug for RefCell<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let mut d = f.debug_struct("RefCell");
@@ -2927,6 +3006,7 @@ impl<T: ?Sized + Debug> Debug for RefCell<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized + Debug> Debug for Ref<'_, T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Debug::fmt(&**self, f)
@@ -2934,6 +3014,7 @@ impl<T: ?Sized + Debug> Debug for Ref<'_, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized + Debug> Debug for RefMut<'_, T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Debug::fmt(&*(self.deref()), f)
@@ -2941,6 +3022,7 @@ impl<T: ?Sized + Debug> Debug for RefMut<'_, T> {
 }
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Debug for UnsafeCell<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.debug_struct("UnsafeCell").finish_non_exhaustive()
@@ -2948,6 +3030,7 @@ impl<T: ?Sized> Debug for UnsafeCell<T> {
 }
 
 #[unstable(feature = "sync_unsafe_cell", issue = "95439")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Debug for SyncUnsafeCell<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.debug_struct("SyncUnsafeCell").finish_non_exhaustive()

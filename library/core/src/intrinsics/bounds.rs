@@ -24,18 +24,23 @@ unsafe impl<T: PointeeSized> BuiltinDeref for *const T {
     type Pointee = T;
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 pub trait ChangePointee<U: PointeeSized>: BuiltinDeref {
     type Output;
 }
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T: PointeeSized + 'a, U: PointeeSized + 'a> ChangePointee<U> for &'a mut T {
     type Output = &'a mut U;
 }
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<'a, T: PointeeSized + 'a, U: PointeeSized + 'a> ChangePointee<U> for &'a T {
     type Output = &'a U;
 }
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized, U: PointeeSized> ChangePointee<U> for *mut T {
     type Output = *mut U;
 }
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized, U: PointeeSized> ChangePointee<U> for *const T {
     type Output = *const U;
 }

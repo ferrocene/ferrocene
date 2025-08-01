@@ -110,7 +110,11 @@ macro_rules! add_impl {
     )*)
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 add_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+
+#[cfg(feature = "ferrocene_certified")]
+add_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 /// The subtraction operator `-`.
 ///
@@ -222,7 +226,11 @@ macro_rules! sub_impl {
     )*)
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+
+#[cfg(feature = "ferrocene_certified")]
+sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 /// The multiplication operator `*`.
 ///
@@ -355,7 +363,11 @@ macro_rules! mul_impl {
     )*)
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 mul_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+
+#[cfg(feature = "ferrocene_certified")]
+mul_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 /// The division operator `/`.
 ///
@@ -517,7 +529,11 @@ macro_rules! div_impl_float {
     )*)
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 div_impl_float! { f16 f32 f64 f128 }
+
+#[cfg(feature = "ferrocene_certified")]
+div_impl_float! { f32 f64 }
 
 /// The remainder operator `%`.
 ///
@@ -638,7 +654,11 @@ macro_rules! rem_impl_float {
     )*)
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 rem_impl_float! { f16 f32 f64 f128 }
+
+#[cfg(feature = "ferrocene_certified")]
+rem_impl_float! { f32 f64 }
 
 /// The unary negation operator `-`.
 ///
@@ -713,7 +733,11 @@ macro_rules! neg_impl {
     )*)
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 neg_impl! { isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+
+#[cfg(feature = "ferrocene_certified")]
+neg_impl! { isize i8 i16 i32 i64 i128 f32 f64 }
 
 /// The addition assignment operator `+=`.
 ///
@@ -780,7 +804,11 @@ macro_rules! add_assign_impl {
     )+)
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 add_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+
+#[cfg(feature = "ferrocene_certified")]
+add_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 /// The subtraction assignment operator `-=`.
 ///
@@ -847,7 +875,11 @@ macro_rules! sub_assign_impl {
     )+)
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 sub_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+
+#[cfg(feature = "ferrocene_certified")]
+sub_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 /// The multiplication assignment operator `*=`.
 ///
@@ -905,7 +937,11 @@ macro_rules! mul_assign_impl {
     )+)
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 mul_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+
+#[cfg(feature = "ferrocene_certified")]
+mul_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 /// The division assignment operator `/=`.
 ///
@@ -962,7 +998,11 @@ macro_rules! div_assign_impl {
     )+)
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 div_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+
+#[cfg(feature = "ferrocene_certified")]
+div_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 /// The remainder assignment operator `%=`.
 ///
@@ -1023,4 +1063,8 @@ macro_rules! rem_assign_impl {
     )+)
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 rem_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+
+#[cfg(feature = "ferrocene_certified")]
+rem_assign_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }

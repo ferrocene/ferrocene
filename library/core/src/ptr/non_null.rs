@@ -1,12 +1,24 @@
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering;
+#[cfg(feature = "ferrocene_certified")]
+use crate::marker::PointeeSized;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::{PointeeSized, Unsize};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{MaybeUninit, SizedTypeProperties};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{CoerceUnsized, DispatchFromDyn};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::pin::PinCoerceUnsized;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ptr::Unique;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::slice::{self, SliceIndex};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ub_checks::assert_unsafe_precondition;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, hash, intrinsics, mem, ptr};
 
 /// `*mut T` but non-zero and [covariant].
@@ -88,6 +100,7 @@ impl<T: PointeeSized> !Send for NonNull<T> {}
 #[stable(feature = "nonnull", since = "1.25.0")]
 impl<T: PointeeSized> !Sync for NonNull<T> {}
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: Sized> NonNull<T> {
     /// Creates a pointer with the given address and no [provenance][crate::ptr#provenance].
     ///
@@ -195,6 +208,7 @@ impl<T: Sized> NonNull<T> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> NonNull<T> {
     /// Creates a new `NonNull`.
     ///
@@ -1357,6 +1371,7 @@ impl<T: PointeeSized> NonNull<T> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> NonNull<[T]> {
     /// Creates a non-null raw slice from a thin pointer and a length.
     ///
@@ -1610,6 +1625,7 @@ impl<T> NonNull<[T]> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> Clone for NonNull<T> {
     #[inline(always)]
     fn clone(&self) -> Self {
@@ -1618,18 +1634,23 @@ impl<T: PointeeSized> Clone for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> Copy for NonNull<T> {}
 
 #[unstable(feature = "coerce_unsized", issue = "18598")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized, U: PointeeSized> CoerceUnsized<NonNull<U>> for NonNull<T> where T: Unsize<U> {}
 
 #[unstable(feature = "dispatch_from_dyn", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized, U: PointeeSized> DispatchFromDyn<NonNull<U>> for NonNull<T> where T: Unsize<U> {}
 
 #[stable(feature = "pin", since = "1.33.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe impl<T: PointeeSized> PinCoerceUnsized for NonNull<T> {}
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> fmt::Debug for NonNull<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Pointer::fmt(&self.as_ptr(), f)
@@ -1637,6 +1658,7 @@ impl<T: PointeeSized> fmt::Debug for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> fmt::Pointer for NonNull<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Pointer::fmt(&self.as_ptr(), f)
@@ -1644,9 +1666,11 @@ impl<T: PointeeSized> fmt::Pointer for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> Eq for NonNull<T> {}
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> PartialEq for NonNull<T> {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -1656,6 +1680,7 @@ impl<T: PointeeSized> PartialEq for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> Ord for NonNull<T> {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -1665,6 +1690,7 @@ impl<T: PointeeSized> Ord for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> PartialOrd for NonNull<T> {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -1674,6 +1700,7 @@ impl<T: PointeeSized> PartialOrd for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> hash::Hash for NonNull<T> {
     #[inline]
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
@@ -1682,6 +1709,7 @@ impl<T: PointeeSized> hash::Hash for NonNull<T> {
 }
 
 #[unstable(feature = "ptr_internals", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> From<Unique<T>> for NonNull<T> {
     #[inline]
     fn from(unique: Unique<T>) -> Self {
@@ -1690,6 +1718,7 @@ impl<T: PointeeSized> From<Unique<T>> for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> From<&mut T> for NonNull<T> {
     /// Converts a `&mut T` to a `NonNull<T>`.
     ///
@@ -1701,6 +1730,7 @@ impl<T: PointeeSized> From<&mut T> for NonNull<T> {
 }
 
 #[stable(feature = "nonnull", since = "1.25.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PointeeSized> From<&T> for NonNull<T> {
     /// Converts a `&T` to a `NonNull<T>`.
     ///

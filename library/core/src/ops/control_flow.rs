@@ -83,7 +83,7 @@ use crate::{convert, ops};
 #[must_use]
 // ControlFlow should not implement PartialOrd or Ord, per RFC 3058:
 // https://rust-lang.github.io/rfcs/3058-try-trait-v2.html#traits-for-controlflow
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Debug, Clone, Copy, PartialEq, Eq, Hash))]
 pub enum ControlFlow<B, C = ()> {
     /// Move on to the next phase of the operation as normal.
     #[stable(feature = "control_flow_enum_type", since = "1.55.0")]
@@ -254,6 +254,7 @@ impl<T> ControlFlow<T, T> {
 /// These are used only as part of implementing the iterator adapters.
 /// They have mediocre names and non-obvious semantics, so aren't
 /// currently on a path to potential stabilization.
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<R: ops::Try> ControlFlow<R, R::Output> {
     /// Creates a `ControlFlow` from any type implementing `Try`.
     #[inline]

@@ -123,9 +123,9 @@ add --set target.thumbv7em-ferrocenecoretest-eabi.cc=arm-none-eabi-gcc
 add --set target.thumbv7em-ferrocenecoretest-eabihf.cc=arm-none-eabi-gcc
 
 # musl toolchains use the architecture, also we need to set the `musl-root`
-add --set target.x86_64-unknown-linux-musl.musl-root=/usr/x86_64-linux-musl/
+add --set target.x86_64-unknown-linux-musl.musl-root=/usr/local/x86_64-linux-musl/
 add --set target.x86_64-unknown-linux-musl.cc=x86_64-linux-musl-gcc
-add --set target.aarch64-unknown-linux-musl.musl-root=/usr/aarch64-linux-musl/
+add --set target.aarch64-unknown-linux-musl.musl-root=/usr/local/aarch64-linux-musl/
 add --set target.aarch64-unknown-linux-musl.cc=aarch64-linux-musl-gcc
 
 # experiment to enable code coverage

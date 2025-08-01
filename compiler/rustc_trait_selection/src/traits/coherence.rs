@@ -461,6 +461,7 @@ fn impl_intersection_has_negative_obligation(
     // requirements, when proving the negated where clauses below.
     drop(equate_obligations);
     drop(infcx.take_registered_region_obligations());
+    drop(infcx.take_registered_region_assumptions());
     drop(infcx.take_and_reset_region_constraints());
 
     plug_infer_with_placeholders(
@@ -694,15 +695,14 @@ impl<'a, 'tcx> ProofTreeVisitor<'tcx> for AmbiguityCausesVisitor<'a, 'tcx> {
                 source: CandidateSource::Impl(def_id),
                 result: Ok(_),
             } = cand.kind()
+                && let ty::ImplPolarity::Reservation = infcx.tcx.impl_polarity(def_id)
             {
-                if let ty::ImplPolarity::Reservation = infcx.tcx.impl_polarity(def_id) {
-                    let message = infcx
-                        .tcx
-                        .get_attr(def_id, sym::rustc_reservation_impl)
-                        .and_then(|a| a.value_str());
-                    if let Some(message) = message {
-                        self.causes.insert(IntercrateAmbiguityCause::ReservationImpl { message });
-                    }
+                let message = infcx
+                    .tcx
+                    .get_attr(def_id, sym::rustc_reservation_impl)
+                    .and_then(|a| a.value_str());
+                if let Some(message) = message {
+                    self.causes.insert(IntercrateAmbiguityCause::ReservationImpl { message });
                 }
             }
         }

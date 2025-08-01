@@ -2899,9 +2899,21 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 }
 
                 if param.ident.name == kw::UnderscoreLifetime {
+                    // To avoid emitting two similar errors,
+                    // we need to check if the span is a raw underscore lifetime, see issue #143152
+                    let is_raw_underscore_lifetime = self
+                        .r
+                        .tcx
+                        .sess
+                        .psess
+                        .raw_identifier_spans
+                        .iter()
+                        .any(|span| span == param.span());
+
                     self.r
                         .dcx()
-                        .emit_err(errors::UnderscoreLifetimeIsReserved { span: param.ident.span });
+                        .create_err(errors::UnderscoreLifetimeIsReserved { span: param.ident.span })
+                        .emit_unless_delay(is_raw_underscore_lifetime);
                     // Record lifetime res, so lowering knows there is something fishy.
                     self.record_lifetime_param(param.id, LifetimeRes::Error);
                     continue;
@@ -3437,8 +3449,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         };
         ident.span.normalize_to_macros_2_0_and_adjust(module.expansion);
         let key = BindingKey::new(ident, ns);
-        let mut binding =
-            self.r.resolution(module, key).try_borrow().ok().and_then(|r| r.best_binding());
+        let mut binding = self.r.resolution(module, key).and_then(|r| r.best_binding());
         debug!(?binding);
         if binding.is_none() {
             // We could not find the trait item in the correct namespace.
@@ -3449,8 +3460,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 _ => ns,
             };
             let key = BindingKey::new(ident, ns);
-            binding =
-                self.r.resolution(module, key).try_borrow().ok().and_then(|r| r.best_binding());
+            binding = self.r.resolution(module, key).and_then(|r| r.best_binding());
             debug!(?binding);
         }
 

@@ -1,4 +1,6 @@
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ffi::CStr;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
 use crate::marker::PhantomData;
 use crate::ptr::NonNull;
@@ -32,8 +34,12 @@ use crate::ptr::NonNull;
 /// Files are compared as strings, not `Path`, which could be unexpected.
 /// See [`Location::file`]'s documentation for more discussion.
 #[lang = "panic_location"]
-#[derive(Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(
+    not(feature = "ferrocene_certified"),
+    derive(Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)
+)]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
+#[cfg_attr(feature = "ferrocene_certified", allow(dead_code))]
 pub struct Location<'a> {
     // A raw pointer is used rather than a reference because the pointer is valid for one more byte
     // than the length stored in this pointer; the additional byte is the NUL-terminator used by
@@ -45,6 +51,7 @@ pub struct Location<'a> {
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Debug for Location<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Location")
@@ -103,6 +110,7 @@ impl<'a> Location<'a> {
     #[rustc_const_stable(feature = "const_caller_location", since = "1.79.0")]
     #[track_caller]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn caller() -> &'static Location<'static> {
         crate::intrinsics::caller_location()
     }
@@ -143,6 +151,7 @@ impl<'a> Location<'a> {
     #[must_use]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_location_fields", since = "1.79.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn file(&self) -> &str {
         // SAFETY: The filename is valid.
         unsafe { self.filename.as_ref() }
@@ -155,6 +164,7 @@ impl<'a> Location<'a> {
     #[must_use]
     #[unstable(feature = "file_with_nul", issue = "141727")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn file_with_nul(&self) -> &CStr {
         let filename = self.filename.as_ptr();
 
@@ -221,6 +231,7 @@ impl<'a> Location<'a> {
 }
 
 #[stable(feature = "panic_hook_display", since = "1.26.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl fmt::Display for Location<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {

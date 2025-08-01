@@ -304,18 +304,21 @@ mod prim_bool {}
 /// This is what is known as "never type fallback".
 ///
 /// Historically, the fallback type was [`()`], causing confusing behavior where `!` spontaneously
-/// coerced to `()`, even when it would not infer `()` without the fallback. There are plans to
-/// change it in the [2024 edition] (and possibly in all editions on a later date); see
-/// [Tracking Issue for making `!` fall back to `!`][fallback-ti].
+/// coerced to `()`, even when it would not infer `()` without the fallback. The fallback was changed
+/// to `!` in the [2024 edition], and will be changed in all editions at a later date.
 ///
 /// [coercion site]: <https://doc.rust-lang.org/reference/type-coercions.html#coercion-sites>
 /// [`()`]: prim@unit
-/// [fallback-ti]: <https://github.com/rust-lang/rust/issues/123748>
-/// [2024 edition]: <https://doc.rust-lang.org/nightly/edition-guide/rust-2024/index.html>
+/// [2024 edition]: <https://doc.rust-lang.org/edition-guide/rust-2024/never-type-fallback.html>
 ///
 #[unstable(feature = "never_type", issue = "35121")]
 #[cfg(not(feature = "ferrocene_certified"))]
 mod prim_never {}
+
+// Required to make auto trait impls render.
+// See src/librustdoc/passes/collect_trait_impls.rs:collect_trait_impls
+#[doc(hidden)]
+impl ! {}
 
 #[rustc_doc_primitive = "char"]
 #[allow(rustdoc::invalid_rust_codeblocks)]
@@ -1857,6 +1860,8 @@ mod prim_ref {}
 /// - If `T` is guaranteed to be subject to the [null pointer
 ///   optimization](option/index.html#representation), and `E` is an enum satisfying the following
 ///   requirements, then `T` and `E` are ABI-compatible. Such an enum `E` is called "option-like".
+///   - The enum `E` uses the [`Rust` representation], and is not modified by the `align` or
+///     `packed` representation modifiers.
 ///   - The enum `E` has exactly two variants.
 ///   - One variant has exactly one field, of type `T`.
 ///   - All fields of the other variant are zero-sized with 1-byte alignment.
@@ -1930,6 +1935,7 @@ mod prim_ref {}
 /// [`Pointer`]: fmt::Pointer
 /// [`UnwindSafe`]: panic::UnwindSafe
 /// [`RefUnwindSafe`]: panic::RefUnwindSafe
+/// [`Rust` representation]: <https://doc.rust-lang.org/reference/type-layout.html#the-rust-representation>
 ///
 /// In addition, all *safe* function pointers implement [`Fn`], [`FnMut`], and [`FnOnce`], because
 /// these traits are specially known to the compiler.

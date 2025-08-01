@@ -718,6 +718,7 @@ fn stability_index(tcx: TyCtxt<'_>, (): ()) -> Index {
                     issue: NonZero::new(27812),
                     is_soft: false,
                     implied_by: None,
+                    old_name: None,
                 },
                 feature: sym::rustc_private,
             };
@@ -801,12 +802,28 @@ impl<'tcx> Visitor<'tcx> for Checker<'tcx> {
                     // FIXME(jdonszelmann): make it impossible to miss the or_else in the typesystem
                     let const_stab = attrs::find_attr!(attrs, AttributeKind::ConstStability{stability, ..} => *stability);
 
+                    let unstable_feature_stab =
+                        find_attr!(attrs, AttributeKind::UnstableFeatureBound(i) => i)
+                            .map(|i| i.as_slice())
+                            .unwrap_or_default();
+
                     // If this impl block has an #[unstable] attribute, give an
                     // error if all involved types and traits are stable, because
                     // it will have no effect.
                     // See: https://github.com/rust-lang/rust/issues/55436
+                    //
+                    // The exception is when there are both  #[unstable_feature_bound(..)] and
+                    //  #![unstable(feature = "..", issue = "..")] that have the same symbol because
+                    // that can effectively mark an impl as unstable.
+                    //
+                    // For example:
+                    // ```
+                    // #[unstable_feature_bound(feat_foo)]
+                    // #[unstable(feature = "feat_foo", issue = "none")]
+                    // impl Foo for Bar {}
+                    // ```
                     if let Some((
-                        Stability { level: attrs::StabilityLevel::Unstable { .. }, .. },
+                        Stability { level: attrs::StabilityLevel::Unstable { .. }, feature },
                         span,
                     )) = stab
                     {
@@ -814,9 +831,21 @@ impl<'tcx> Visitor<'tcx> for Checker<'tcx> {
                         c.visit_ty_unambig(self_ty);
                         c.visit_trait_ref(t);
 
+                        // Skip the lint if the impl is marked as unstable using
+                        // #[unstable_feature_bound(..)]
+                        let mut unstable_feature_bound_in_effect = false;
+                        for (unstable_bound_feat_name, _) in unstable_feature_stab {
+                            if *unstable_bound_feat_name == feature {
+                                unstable_feature_bound_in_effect = true;
+                            }
+                        }
+
                         // do not lint when the trait isn't resolved, since resolution error should
                         // be fixed first
-                        if t.path.res != Res::Err && c.fully_stable {
+                        if t.path.res != Res::Err
+                            && c.fully_stable
+                            && !unstable_feature_bound_in_effect
+                        {
                             self.tcx.emit_node_span_lint(
                                 INEFFECTIVE_UNSTABLE_TRAIT_IMPL,
                                 item.hir_id(),
@@ -879,11 +908,16 @@ impl<'tcx> Visitor<'tcx> for Checker<'tcx> {
                 }
 
                 for impl_item_ref in *items {
-                    let impl_item = self.tcx.associated_item(impl_item_ref.id.owner_id);
+                    let impl_item = self.tcx.associated_item(impl_item_ref.owner_id);
 
                     if let Some(def_id) = impl_item.trait_item_def_id {
                         // Pass `None` to skip deprecation warnings.
-                        self.tcx.check_stability(def_id, None, impl_item_ref.span, None);
+                        self.tcx.check_stability(
+                            def_id,
+                            None,
+                            self.tcx.def_span(impl_item_ref.owner_id),
+                            None,
+                        );
                     }
                 }
             }
@@ -1069,7 +1103,7 @@ impl<'tcx> Visitor<'tcx> for CheckTraitImplStable<'tcx> {
         if let TyKind::Never = t.kind {
             self.fully_stable = false;
         }
-        if let TyKind::BareFn(function) = t.kind {
+        if let TyKind::FnPtr(function) = t.kind {
             if extern_abi_stability(function.abi).is_err() {
                 self.fully_stable = false;
             }
@@ -1161,8 +1195,8 @@ pub fn check_unused_or_stable_features(tcx: TyCtxt<'_>) {
         defined_features: &LibFeatures,
         all_implications: &UnordMap<Symbol, Symbol>,
     ) {
-        for (feature, since) in defined_features.to_sorted_vec() {
-            if let FeatureStability::AcceptedSince(since) = since
+        for (feature, stability) in defined_features.to_sorted_vec() {
+            if let FeatureStability::AcceptedSince(since) = stability
                 && let Some(span) = remaining_lib_features.get(&feature)
             {
                 // Warn if the user has enabled an already-stable lib feature.
@@ -1180,6 +1214,12 @@ pub fn check_unused_or_stable_features(tcx: TyCtxt<'_>) {
             // feature defined in the local crate because `remaining_implications` is only the
             // implications from this crate.
             remaining_implications.remove(&feature);
+
+            if let FeatureStability::Unstable { old_name: Some(alias) } = stability {
+                if let Some(span) = remaining_lib_features.swap_remove(&alias) {
+                    tcx.dcx().emit_err(errors::RenamedFeature { span, feature, alias });
+                }
+            }
 
             if remaining_lib_features.is_empty() && remaining_implications.is_empty() {
                 break;

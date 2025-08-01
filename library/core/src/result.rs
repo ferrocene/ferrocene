@@ -1758,9 +1758,9 @@ impl<T, E> Result<Result<T, E>, E> {
     /// assert_eq!(Ok("hello"), x.flatten().flatten());
     /// ```
     #[inline]
-    #[stable(feature = "result_flattening", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "result_flattening", since = "1.89.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
-    #[rustc_const_stable(feature = "result_flattening", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "result_flattening", since = "1.89.0")]
     #[cfg(not(feature = "ferrocene_certified"))] /* blocked on const impl Drop for Result<Result<T, E>> */
     pub const fn flatten(self) -> Result<T, E> {
         // FIXME(const-hack): could be written with `and_then`
@@ -2097,7 +2097,7 @@ impl<A, E, V: FromIterator<A>> FromIterator<Result<A, E>> for Result<V, E> {
     }
 }
 
-#[unstable(feature = "try_trait_v2", issue = "84277")]
+#[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T, E> ops::Try for Result<T, E> {
     type Output = T;
@@ -2117,7 +2117,7 @@ impl<T, E> ops::Try for Result<T, E> {
     }
 }
 
-#[unstable(feature = "try_trait_v2", issue = "84277")]
+#[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T, E, F: From<E>> ops::FromResidual<Result<convert::Infallible, E>> for Result<T, F> {
     #[inline]

@@ -2,6 +2,7 @@
 name = "line-tables-only"
 version = "0.1.0"
 edition = "2021"
+publish = false
 
 [build-dependencies]
 cc = "1.0"

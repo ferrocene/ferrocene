@@ -11,20 +11,22 @@
 
 extern crate rustc_hir;
 extern crate rustc_middle;
-#[macro_use]
-extern crate rustc_smir;
 extern crate rustc_driver;
 extern crate rustc_interface;
-extern crate stable_mir;
+#[macro_use]
+extern crate rustc_public;
 
-use stable_mir::abi::{
+use rustc_public::abi::{
     ArgAbi, CallConvention, FieldsShape, IntegerLength, PassMode, Primitive, Scalar, ValueAbi,
     VariantsShape,
 };
-use stable_mir::mir::mono::Instance;
-use stable_mir::target::MachineInfo;
-use stable_mir::{CrateDef, CrateItem, CrateItems, ItemKind};
+use rustc_public::mir::MirVisitor;
+use rustc_public::mir::mono::Instance;
+use rustc_public::target::MachineInfo;
+use rustc_public::ty::{AdtDef, RigidTy, Ty, TyKind};
+use rustc_public::{CrateDef, CrateItem, CrateItems, ItemKind};
 use std::assert_matches::assert_matches;
+use std::collections::HashSet;
 use std::convert::TryFrom;
 use std::io::Write;
 use std::ops::ControlFlow;
@@ -34,7 +36,7 @@ const CRATE_NAME: &str = "input";
 /// This function uses the Stable MIR APIs to get information about the test crate.
 fn test_stable_mir() -> ControlFlow<()> {
     // Find items in the local crate.
-    let items = stable_mir::all_local_items();
+    let items = rustc_public::all_local_items();
 
     // Test fn_abi
     let target_fn = *get_item(&items, (ItemKind::Fn, "fn_abi")).unwrap();
@@ -66,6 +68,17 @@ fn test_stable_mir() -> ControlFlow<()> {
     let ptr_variadic_fn_abi = args[1].ty.kind().fn_sig().unwrap().fn_ptr_abi().unwrap();
     assert!(ptr_variadic_fn_abi.c_variadic);
     assert_eq!(ptr_variadic_fn_abi.args.len(), 1);
+
+    let entry = rustc_public::entry_fn().unwrap();
+    let main_fn = Instance::try_from(entry).unwrap();
+    let mut visitor = AdtDefVisitor::default();
+    visitor.visit_body(&main_fn.body().unwrap());
+    let AdtDefVisitor { adt_defs } = visitor;
+    assert_eq!(adt_defs.len(), 1);
+
+    // Test ADT representation options
+    let repr_c_struct = adt_defs.iter().find(|def| def.trimmed_name() == "ReprCStruct").unwrap();
+    assert!(repr_c_struct.repr().flags.is_c);
 
     ControlFlow::Continue(())
 }
@@ -134,8 +147,22 @@ fn check_niche(abi: &ArgAbi) {
 fn get_item<'a>(
     items: &'a CrateItems,
     item: (ItemKind, &str),
-) -> Option<&'a stable_mir::CrateItem> {
+) -> Option<&'a rustc_public::CrateItem> {
     items.iter().find(|crate_item| (item.0 == crate_item.kind()) && crate_item.name() == item.1)
+}
+
+#[derive(Default)]
+struct AdtDefVisitor {
+    adt_defs: HashSet<AdtDef>,
+}
+
+impl MirVisitor for AdtDefVisitor {
+    fn visit_ty(&mut self, ty: &Ty, _location: rustc_public::mir::visit::Location) {
+        if let TyKind::RigidTy(RigidTy::Adt(adt, _)) = ty.kind() {
+            self.adt_defs.insert(adt);
+        }
+        self.super_ty(ty)
+    }
 }
 
 /// This test will generate and analyze a dummy crate using the stable mir.
@@ -147,7 +174,7 @@ fn main() {
     generate_input(&path).unwrap();
     let args = &[
         "rustc".to_string(),
-        "--crate-type=lib".to_string(),
+        "-Cpanic=abort".to_string(),
         "--crate-name".to_string(),
         CRATE_NAME.to_string(),
         path.to_string(),
@@ -184,6 +211,13 @@ fn generate_input(path: &str) -> std::io::Result<()> {
         pub fn fn_ptr_holder(complex_fn: ComplexFn, variadic_fn: VariadicFn) {{
             // We only care about the signature.
             todo!()
+        }}
+
+        fn main() {{
+            #[repr(C)]
+            struct ReprCStruct;
+
+            let _s = ReprCStruct;
         }}
         "#
     )?;

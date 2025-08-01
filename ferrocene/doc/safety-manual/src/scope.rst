@@ -25,6 +25,18 @@ This qualification is restricted to the following environment:
      - ``core``, ``alloc``
 
    * - :target:`x86_64-unknown-linux-gnu`
+     - :target:`aarch64-unknown-nto-qnx710`
+     - ``core``, ``alloc``, ``std``, ``proc_macro``, ``test``
+
+   * - :target:`x86_64-unknown-linux-gnu`
+     - :target:`thumbv7em-none-eabi`
+     - ``core``, ``alloc``
+
+   * - :target:`x86_64-unknown-linux-gnu`
+     - :target:`thumbv7em-none-eabihf`
+     - ``core``, ``alloc``
+
+   * - :target:`x86_64-unknown-linux-gnu`
      - :target:`x86_64-unknown-linux-gnu`
      - ``core``, ``alloc``, ``std``, ``proc_macro``, ``test``
 
@@ -32,9 +44,6 @@ This qualification is restricted to the following environment:
      - :target:`x86_64-pc-nto-qnx710`
      - ``core``, ``alloc``, ``std``, ``proc_macro``, ``test``
 
-   * - :target:`x86_64-unknown-linux-gnu`
-     - :target:`aarch64-unknown-nto-qnx710`
-     - ``core``, ``alloc``, ``std``, ``proc_macro``, ``test``
 
 The libraries provided are evaluated and tested within the scope of
 Ferrocene qualification for compiler use only. The use of these libraries by

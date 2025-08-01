@@ -1,6 +1,7 @@
 //@ check-pass
 //@ compile-flags: -Zinput-stats
 //@ only-64bit
+//@ needs-asm-support
 // layout randomization affects the hir stat output
 //@ needs-deterministic-layouts
 //
@@ -49,7 +50,9 @@ fn main() {
         _ => {}
     }
 
-    unsafe { asm!("mov rdi, 1"); }
+    // NOTE(workingjubilee): do GPUs support NOPs? remove this cfg if they do
+    #[cfg(not(any(target_arch = "nvptx64", target_arch = "amdgpu")))]
+    unsafe { asm!("nop"); }
 }
 
 // ferrocene-annotations: fls_j9l8wn6wgm06

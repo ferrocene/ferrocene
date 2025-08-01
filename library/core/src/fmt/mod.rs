@@ -7,7 +7,7 @@ use crate::cell::{Cell, Ref, RefCell, RefMut, SyncUnsafeCell, UnsafeCell};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::char::{EscapeDebugExtArgs, MAX_LEN_UTF8};
 #[cfg(not(feature = "ferrocene_certified"))]
-use crate::marker::PhantomData;
+use crate::marker::{PhantomData, PointeeSized};
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::fmt as numfmt;
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -25,6 +25,8 @@ mod float;
 mod nofloat;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod num;
+#[cfg(not(feature = "ferrocene_certified"))]
+mod num_buffer;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod rt;
 
@@ -44,6 +46,10 @@ pub enum Alignment {
     /// Indication that contents should be center-aligned.
     Center,
 }
+
+#[unstable(feature = "int_format_into", issue = "138215")]
+#[cfg(not(feature = "ferrocene_certified"))]
+pub use num_buffer::{NumBuffer, NumBufferTrait};
 
 #[stable(feature = "debug_builders", since = "1.2.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -372,10 +378,10 @@ impl FormattingOptions {
     /// Sets or removes the sign (the `+` or the `-` flag).
     ///
     /// - `+`: This is intended for numeric types and indicates that the sign
-    /// should always be printed. By default only the negative sign of signed
-    /// values is printed, and the sign of positive or unsigned values is
-    /// omitted. This flag indicates that the correct sign (+ or -) should
-    /// always be printed.
+    ///   should always be printed. By default only the negative sign of signed
+    ///   values is printed, and the sign of positive or unsigned values is
+    ///   omitted. This flag indicates that the correct sign (+ or -) should
+    ///   always be printed.
     /// - `-`: Currently not used
     #[unstable(feature = "formatting_options", issue = "118117")]
     pub fn sign(&mut self, sign: Option<Sign>) -> &mut Self {
@@ -462,9 +468,9 @@ impl FormattingOptions {
     /// Sets or removes the precision.
     ///
     /// - For non-numeric types, this can be considered a “maximum width”. If
-    /// the resulting string is longer than this width, then it is truncated
-    /// down to this many characters and that truncated value is emitted with
-    /// proper fill, alignment and width if those parameters are set.
+    ///   the resulting string is longer than this width, then it is truncated
+    ///   down to this many characters and that truncated value is emitted with
+    ///   proper fill, alignment and width if those parameters are set.
     /// - For integral types, this is ignored.
     /// - For floating-point types, this indicates how many digits after the
     /// decimal point should be printed.
@@ -888,17 +894,19 @@ impl Display for Arguments<'_> {
 #[rustc_on_unimplemented(
     on(
         crate_local,
-        label = "`{Self}` cannot be formatted using `{{:?}}`",
         note = "add `#[derive(Debug)]` to `{Self}` or manually `impl {This} for {Self}`"
     ),
-    message = "`{Self}` doesn't implement `{This}`",
-    label = "`{Self}` cannot be formatted using `{{:?}}` because it doesn't implement `{This}`"
+    on(
+        from_desugaring = "FormatLiteral",
+        label = "`{Self}` cannot be formatted using `{{:?}}` because it doesn't implement `{This}`"
+    ),
+    message = "`{Self}` doesn't implement `{This}`"
 )]
 #[doc(alias = "{:?}")]
 #[rustc_diagnostic_item = "Debug"]
 #[rustc_trivial_field_reads]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub trait Debug {
+pub trait Debug: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     ///
     /// # Examples
@@ -1022,17 +1030,20 @@ pub use macros::Debug;
         any(Self = "std::path::Path", Self = "std::path::PathBuf"),
         label = "`{Self}` cannot be formatted with the default formatter; call `.display()` on it",
         note = "call `.display()` or `.to_string_lossy()` to safely print paths, \
-                as they may contain non-Unicode data"
+                as they may contain non-Unicode data",
     ),
-    message = "`{Self}` doesn't implement `{This}`",
-    label = "`{Self}` cannot be formatted with the default formatter",
-    note = "in format strings you may be able to use `{{:?}}` (or {{:#?}} for pretty-print) instead"
+    on(
+        from_desugaring = "FormatLiteral",
+        note = "in format strings you may be able to use `{{:?}}` (or {{:#?}} for pretty-print) instead",
+        label = "`{Self}` cannot be formatted with the default formatter",
+    ),
+    message = "`{Self}` doesn't implement `{This}`"
 )]
 #[doc(alias = "{}")]
 #[rustc_diagnostic_item = "Display"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub trait Display {
+pub trait Display: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     ///
     /// # Examples
@@ -1109,7 +1120,7 @@ pub trait Display {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub trait Octal {
+pub trait Octal: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result;
@@ -1169,7 +1180,7 @@ pub trait Octal {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub trait Binary {
+pub trait Binary: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result;
@@ -1225,7 +1236,7 @@ pub trait Binary {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub trait LowerHex {
+pub trait LowerHex: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result;
@@ -1281,7 +1292,7 @@ pub trait LowerHex {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub trait UpperHex {
+pub trait UpperHex: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result;
@@ -1341,7 +1352,7 @@ pub trait UpperHex {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "Pointer"]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub trait Pointer {
+pub trait Pointer: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result;
@@ -1393,7 +1404,7 @@ pub trait Pointer {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub trait LowerExp {
+pub trait LowerExp: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result;
@@ -1445,7 +1456,7 @@ pub trait LowerExp {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
-pub trait UpperExp {
+pub trait UpperExp: PointeeSized {
     #[doc = include_str!("fmt_trait_method_doc.md")]
     #[stable(feature = "rust1", since = "1.0.0")]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result;
@@ -2699,11 +2710,11 @@ macro_rules! fmt_refs {
     ($($tr:ident),*) => {
         $(
         #[stable(feature = "rust1", since = "1.0.0")]
-        impl<T: ?Sized + $tr> $tr for &T {
+        impl<T: PointeeSized + $tr> $tr for &T {
             fn fmt(&self, f: &mut Formatter<'_>) -> Result { $tr::fmt(&**self, f) }
         }
         #[stable(feature = "rust1", since = "1.0.0")]
-        impl<T: ?Sized + $tr> $tr for &mut T {
+        impl<T: PointeeSized + $tr> $tr for &mut T {
             fn fmt(&self, f: &mut Formatter<'_>) -> Result { $tr::fmt(&**self, f) }
         }
         )*
@@ -2835,7 +2846,7 @@ impl Display for char {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> Pointer for *const T {
+impl<T: PointeeSized> Pointer for *const T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         if <<T as core::ptr::Pointee>::Metadata as core::unit::IsUnit>::is_unit() {
             pointer_fmt_inner(self.expose_provenance(), f)
@@ -2882,7 +2893,7 @@ pub(crate) fn pointer_fmt_inner(ptr_addr: usize, f: &mut Formatter<'_>) -> Resul
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> Pointer for *mut T {
+impl<T: PointeeSized> Pointer for *mut T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(&(*self as *const T), f)
     }
@@ -2890,7 +2901,7 @@ impl<T: ?Sized> Pointer for *mut T {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> Pointer for &T {
+impl<T: PointeeSized> Pointer for &T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(&(*self as *const T), f)
     }
@@ -2898,7 +2909,7 @@ impl<T: ?Sized> Pointer for &T {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> Pointer for &mut T {
+impl<T: PointeeSized> Pointer for &mut T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(&(&**self as *const T), f)
     }
@@ -2908,14 +2919,14 @@ impl<T: ?Sized> Pointer for &mut T {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> Debug for *const T {
+impl<T: PointeeSized> Debug for *const T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(self, f)
     }
 }
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: ?Sized> Debug for *mut T {
+impl<T: PointeeSized> Debug for *mut T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Pointer::fmt(self, f)
     }
@@ -2933,7 +2944,7 @@ macro_rules! tuple {
         maybe_tuple_doc! {
             $($name)+ @
             #[stable(feature = "rust1", since = "1.0.0")]
-            impl<$($name:Debug),+> Debug for ($($name,)+) where last_type!($($name,)+): ?Sized {
+            impl<$($name:Debug),+> Debug for ($($name,)+) {
                 #[allow(non_snake_case, unused_assignments)]
                 fn fmt(&self, f: &mut Formatter<'_>) -> Result {
                     let mut builder = f.debug_tuple("");
@@ -2963,12 +2974,6 @@ macro_rules! maybe_tuple_doc {
         #[$meta]
         $item
     };
-}
-
-#[cfg(not(feature = "ferrocene_certified"))]
-macro_rules! last_type {
-    ($a:ident,) => { $a };
-    ($a:ident, $($rest_a:ident,)+) => { last_type!($($rest_a,)+) };
 }
 
 #[cfg(not(feature = "ferrocene_certified"))]

@@ -32,24 +32,24 @@ shipped as a preview.
   Note that experimental targets are not qualified for safety critical use. The
   new targets are:
 
-  * :target-with-triple:`armv8r-none-eabihf`
-  * :target-with-triple:`armv7r-none-eabihf`
-  * :target-with-triple:`armebv7r-none-eabihf`
-  * :target-with-triple:`x86_64-apple-darwin`
-  * :target-with-triple:`aarch64-unknown-nto-qnx710`
-  * :target-with-triple:`x86_64-pc-nto-qnx710`
+  * :target-with-tuple:`armv8r-none-eabihf`
+  * :target-with-tuple:`armv7r-none-eabihf`
+  * :target-with-tuple:`armebv7r-none-eabihf`
+  * :target-with-tuple:`x86_64-apple-darwin`
+  * :target-with-tuple:`aarch64-unknown-nto-qnx710`
+  * :target-with-tuple:`x86_64-pc-nto-qnx710`
 
 * Experimental support has been added for new host platforms. Note that
   experimental targets are not qualified for safety critical use. The new
   targets are:
 
-  * :target-with-triple:`aarch64-apple-darwin`
-  * :target-with-triple:`x86_64-pc-windows-msvc`
+  * :target-with-tuple:`aarch64-apple-darwin`
+  * :target-with-tuple:`x86_64-pc-windows-msvc`
 
 Changes
 -------
 
-* The :target-with-triple:`x86_64-unknown-linux-gnu` target now requires
+* The :target-with-tuple:`x86_64-unknown-linux-gnu` target now requires
   glibc version of 2.31 or higher.
 
 Rust changes

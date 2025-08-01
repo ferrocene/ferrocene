@@ -211,6 +211,15 @@ impl Checker {
             // Goes through symlinks
             let metadata = t!(fs::metadata(&path));
             if metadata.is_dir() {
+                // Ferrocene addition:
+                // Checking links in coverage docs is not useful,
+                // and often results in "id is not unique" errors.
+                // NOTE:
+                // A more robust scheme would involve moving coverage docs
+                // outside the directory of normal documentation.
+                if self.root.join("coverage") == path {
+                    continue;
+                }
                 self.walk(&path, report);
             } else {
                 self.check(&path, report);

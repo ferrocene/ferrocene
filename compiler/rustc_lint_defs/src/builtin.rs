@@ -40,7 +40,6 @@ declare_lint_pass! {
         DUPLICATE_MACRO_ATTRIBUTES,
         ELIDED_LIFETIMES_IN_ASSOCIATED_CONSTANT,
         ELIDED_LIFETIMES_IN_PATHS,
-        ELIDED_NAMED_LIFETIMES,
         EXPLICIT_BUILTIN_CFGS_IN_FLAGS,
         EXPORTED_PRIVATE_DEPENDENCIES,
         FFI_UNWIND_CALLS,
@@ -64,9 +63,11 @@ declare_lint_pass! {
         LOSSY_PROVENANCE_CASTS,
         MACRO_EXPANDED_MACRO_EXPORTS_ACCESSED_BY_ABSOLUTE_PATHS,
         MACRO_USE_EXTERN_CRATE,
+        MALFORMED_DIAGNOSTIC_ATTRIBUTES,
+        MALFORMED_DIAGNOSTIC_FORMAT_LITERALS,
         META_VARIABLE_MISUSE,
+        MISPLACED_DIAGNOSTIC_ATTRIBUTES,
         MISSING_ABI,
-        MISSING_FRAGMENT_SPECIFIER,
         MISSING_UNSAFE_ON_EXTERN,
         MUST_NOT_SUSPEND,
         NAMED_ARGUMENTS_USED_POSITIONALLY,
@@ -114,8 +115,8 @@ declare_lint_pass! {
         UNFULFILLED_LINT_EXPECTATIONS,
         UNINHABITED_STATIC,
         UNKNOWN_CRATE_TYPES,
+        UNKNOWN_DIAGNOSTIC_ATTRIBUTES,
         UNKNOWN_LINTS,
-        UNKNOWN_OR_MALFORMED_DIAGNOSTIC_ATTRIBUTES,
         UNNAMEABLE_TEST_ITEMS,
         UNNAMEABLE_TYPES,
         UNREACHABLE_CODE,
@@ -124,7 +125,6 @@ declare_lint_pass! {
         UNSAFE_OP_IN_UNSAFE_FN,
         UNSTABLE_NAME_COLLISIONS,
         UNSTABLE_SYNTAX_PRE_EXPANSION,
-        UNSUPPORTED_FN_PTR_CALLING_CONVENTIONS,
         UNUSED_ASSIGNMENTS,
         UNUSED_ASSOCIATED_TYPE_BOUNDS,
         UNUSED_ATTRIBUTES,
@@ -134,15 +134,14 @@ declare_lint_pass! {
         UNUSED_IMPORTS,
         UNUSED_LABELS,
         UNUSED_LIFETIMES,
-        UNUSED_MACRO_RULES,
         UNUSED_MACROS,
+        UNUSED_MACRO_RULES,
         UNUSED_MUT,
         UNUSED_QUALIFICATIONS,
         UNUSED_UNSAFE,
         UNUSED_VARIABLES,
         USELESS_DEPRECATED,
         WARNINGS,
-        WASM_C_ABI,
         // tidy-alphabetical-end
     ]
 }
@@ -1228,7 +1227,7 @@ declare_lint! {
     ///
     /// ### Explanation
     ///
-    /// A public `use` declaration should not be used to publicly re-export a
+    /// A public `use` declaration should not be used to publically re-export a
     /// private `extern crate`. `pub extern crate` should be used instead.
     ///
     /// This was historically allowed, but is not the intended behavior
@@ -1415,51 +1414,6 @@ declare_lint! {
     @future_incompatible = FutureIncompatibleInfo {
         reason: FutureIncompatibilityReason::FutureReleaseError,
         reference: "issue #35203 <https://github.com/rust-lang/rust/issues/35203>",
-    };
-}
-
-declare_lint! {
-    /// The `missing_fragment_specifier` lint is issued when an unused pattern in a
-    /// `macro_rules!` macro definition has a meta-variable (e.g. `$e`) that is not
-    /// followed by a fragment specifier (e.g. `:expr`).
-    ///
-    /// This warning can always be fixed by removing the unused pattern in the
-    /// `macro_rules!` macro definition.
-    ///
-    /// ### Example
-    ///
-    /// ```rust,compile_fail,edition2021
-    /// macro_rules! foo {
-    ///    () => {};
-    ///    ($name) => { };
-    /// }
-    ///
-    /// fn main() {
-    ///    foo!();
-    /// }
-    /// ```
-    ///
-    /// {{produces}}
-    ///
-    /// ### Explanation
-    ///
-    /// To fix this, remove the unused pattern from the `macro_rules!` macro definition:
-    ///
-    /// ```rust
-    /// macro_rules! foo {
-    ///     () => {};
-    /// }
-    /// fn main() {
-    ///     foo!();
-    /// }
-    /// ```
-    pub MISSING_FRAGMENT_SPECIFIER,
-    Deny,
-    "detects missing fragment specifiers in unused `macro_rules!` patterns",
-    @future_incompatible = FutureIncompatibleInfo {
-        reason: FutureIncompatibilityReason::FutureReleaseError,
-        reference: "issue #40107 <https://github.com/rust-lang/rust/issues/40107>",
-        report_in_deps: true,
     };
 }
 
@@ -1830,38 +1784,6 @@ declare_lint! {
     pub ELIDED_LIFETIMES_IN_PATHS,
     Allow,
     "hidden lifetime parameters in types are deprecated"
-}
-
-declare_lint! {
-    /// The `elided_named_lifetimes` lint detects when an elided
-    /// lifetime ends up being a named lifetime, such as `'static`
-    /// or some lifetime parameter `'a`.
-    ///
-    /// ### Example
-    ///
-    /// ```rust,compile_fail
-    /// #![deny(elided_named_lifetimes)]
-    /// struct Foo;
-    /// impl Foo {
-    ///     pub fn get_mut(&'static self, x: &mut u8) -> &mut u8 {
-    ///         unsafe { &mut *(x as *mut _) }
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// {{produces}}
-    ///
-    /// ### Explanation
-    ///
-    /// Lifetime elision is quite useful, because it frees you from having
-    /// to give each lifetime its own name, but sometimes it can produce
-    /// somewhat surprising resolutions. In safe code, it is mostly okay,
-    /// because the borrow checker prevents any unsoundness, so the worst
-    /// case scenario is you get a confusing error message in some other place.
-    /// But with `unsafe` code, such unexpected resolutions may lead to unsound code.
-    pub ELIDED_NAMED_LIFETIMES,
-    Warn,
-    "detects when an elided lifetime gets resolved to be `'static` or some named parameter"
 }
 
 declare_lint! {
@@ -3655,6 +3577,54 @@ declare_lint! {
 }
 
 declare_lint! {
+    /// The `unsupported_calling_conventions` lint is output whenever there is a use of the
+    /// `stdcall`, `fastcall`, and `cdecl` calling conventions (or their unwind
+    /// variants) on targets that cannot meaningfully be supported for the requested target.
+    ///
+    /// For example `stdcall` does not make much sense for a x86_64 or, more apparently, powerpc
+    /// code, because this calling convention was never specified for those targets.
+    ///
+    /// Historically MSVC toolchains have fallen back to the regular C calling convention for
+    /// targets other than x86, but Rust doesn't really see a similar need to introduce a similar
+    /// hack across many more targets.
+    ///
+    /// ### Example
+    ///
+    /// ```rust,ignore (needs specific targets)
+    /// extern "stdcall" fn stdcall() {}
+    /// ```
+    ///
+    /// This will produce:
+    ///
+    /// ```text
+    /// warning: use of calling convention not supported on this target
+    ///   --> $DIR/unsupported.rs:39:1
+    ///    |
+    /// LL | extern "stdcall" fn stdcall() {}
+    ///    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ///    |
+    ///    = note: `#[warn(unsupported_calling_conventions)]` on by default
+    ///    = warning: this was previously accepted by the compiler but is being phased out;
+    ///               it will become a hard error in a future release!
+    ///    = note: for more information, see issue ...
+    /// ```
+    ///
+    /// ### Explanation
+    ///
+    /// On most of the targets the behaviour of `stdcall` and similar calling conventions is not
+    /// defined at all, but was previously accepted due to a bug in the implementation of the
+    /// compiler.
+    pub UNSUPPORTED_CALLING_CONVENTIONS,
+    Warn,
+    "use of unsupported calling convention",
+    @future_incompatible = FutureIncompatibleInfo {
+        reason: FutureIncompatibilityReason::FutureReleaseError,
+        report_in_deps: false,
+        reference: "issue #137018 <https://github.com/rust-lang/rust/issues/137018>",
+    };
+}
+
+declare_lint! {
     /// The `unsupported_fn_ptr_calling_conventions` lint is output whenever there is a use of
     /// a target dependent calling convention on a target that does not support this calling
     /// convention on a function pointer.
@@ -4131,6 +4101,7 @@ declare_lint! {
     @future_incompatible = FutureIncompatibleInfo {
         reason: FutureIncompatibilityReason::EditionAndFutureReleaseSemanticsChange(Edition::Edition2024),
         reference: "<https://doc.rust-lang.org/nightly/edition-guide/rust-2024/never-type-fallback.html>",
+        report_in_deps: true,
     };
     @edition Edition2024 => Deny;
     report_in_external_macro
@@ -4185,6 +4156,7 @@ declare_lint! {
     @future_incompatible = FutureIncompatibleInfo {
         reason: FutureIncompatibilityReason::EditionAndFutureReleaseError(Edition::Edition2024),
         reference: "<https://doc.rust-lang.org/nightly/edition-guide/rust-2024/never-type-fallback.html>",
+        report_in_deps: true,
     };
     report_in_external_macro
 }
@@ -4315,31 +4287,105 @@ declare_lint! {
 }
 
 declare_lint! {
-    /// The `unknown_or_malformed_diagnostic_attributes` lint detects unrecognized or otherwise malformed
-    /// diagnostic attributes.
+    /// The `malformed_diagnostic_attributes` lint detects malformed diagnostic attributes.
     ///
     /// ### Example
     ///
     /// ```rust
-    /// #![feature(diagnostic_namespace)]
-    /// #[diagnostic::does_not_exist]
-    /// struct Foo;
+    /// #[diagnostic::do_not_recommend(message = "message")]
+    /// trait Trait {}
     /// ```
     ///
     /// {{produces}}
     ///
+    /// ### Explanation
+    ///
+    /// It is usually a mistake to use options or syntax that is not supported. Check the spelling,
+    /// and check the diagnostic attribute listing for the correct name and syntax. Also consider if
+    /// you are using an old version of the compiler; perhaps the option or syntax is only available
+    /// in a newer version. See the [reference] for a list of diagnostic attributes and the syntax
+    /// of each.
+    ///
+    /// [reference]: https://doc.rust-lang.org/nightly/reference/attributes/diagnostics.html#the-diagnostic-tool-attribute-namespace
+    pub MALFORMED_DIAGNOSTIC_ATTRIBUTES,
+    Warn,
+    "detects malformed diagnostic attributes",
+}
+
+declare_lint! {
+    /// The `misplaced_diagnostic_attributes` lint detects wrongly placed diagnostic attributes.
+    ///
+    /// ### Example
+    ///
+    /// ```rust
+    /// #[diagnostic::do_not_recommend]
+    /// struct NotUserFacing;
+    /// ```
+    ///
+    /// {{produces}}
     ///
     /// ### Explanation
     ///
-    /// It is usually a mistake to specify a diagnostic attribute that does not exist. Check
-    /// the spelling, and check the diagnostic attribute listing for the correct name. Also
-    /// consider if you are using an old version of the compiler, and the attribute
-    /// is only available in a newer version.
-    pub UNKNOWN_OR_MALFORMED_DIAGNOSTIC_ATTRIBUTES,
+    /// It is usually a mistake to specify a diagnostic attribute on an item it is not meant for.
+    /// For example, `#[diagnostic::do_not_recommend]` can only be placed on trait implementations,
+    /// and does nothing if placed elsewhere. See the [reference] for a list of diagnostic
+    /// attributes and their correct positions.
+    ///
+    /// [reference]: https://doc.rust-lang.org/nightly/reference/attributes/diagnostics.html#the-diagnostic-tool-attribute-namespace
+    pub MISPLACED_DIAGNOSTIC_ATTRIBUTES,
     Warn,
-    "unrecognized or malformed diagnostic attribute",
+    "detects diagnostic attributes that are placed on the wrong item",
 }
 
+declare_lint! {
+    /// The `unknown_diagnostic_attributes` lint detects unknown diagnostic attributes.
+    ///
+    /// ### Example
+    ///
+    /// ```rust
+    /// #[diagnostic::does_not_exist]
+    /// struct Thing;
+    /// ```
+    ///
+    /// {{produces}}
+    ///
+    /// ### Explanation
+    ///
+    /// It is usually a mistake to specify a diagnostic attribute that does not exist. Check the
+    /// spelling, and check the diagnostic attribute listing for the correct name. Also consider if
+    /// you are using an old version of the compiler and the attribute is only available in a newer
+    /// version. See the [reference] for the list of diagnostic attributes.
+    ///
+    /// [reference]: https://doc.rust-lang.org/nightly/reference/attributes/diagnostics.html#the-diagnostic-tool-attribute-namespace
+    pub UNKNOWN_DIAGNOSTIC_ATTRIBUTES,
+    Warn,
+    "detects unknown diagnostic attributes",
+}
+
+declare_lint! {
+    /// The `malformed_diagnostic_format_literals` lint detects malformed diagnostic format
+    /// literals.
+    ///
+    /// ### Example
+    ///
+    /// ```rust
+    /// #[diagnostic::on_unimplemented(message = "{Self}} does not implement `Trait`")]
+    /// trait Trait {}
+    /// ```
+    ///
+    /// {{produces}}
+    ///
+    /// ### Explanation
+    ///
+    /// The `#[diagnostic::on_unimplemented]` attribute accepts string literal values that are
+    /// similar to `format!`'s string literal. See the [reference] for details on what is permitted
+    /// in this string literal.
+    ///
+    /// [reference]: https://doc.rust-lang.org/nightly/reference/attributes/diagnostics.html#the-diagnostic-tool-attribute-namespace
+    pub MALFORMED_DIAGNOSTIC_FORMAT_LITERALS,
+    Warn,
+    "detects diagnostic attribute with malformed diagnostic format literals",
+}
 declare_lint! {
     /// The `ambiguous_glob_imports` lint detects glob imports that should report ambiguity
     /// errors, but previously didn't do that due to rustc bugs.
@@ -4374,11 +4420,12 @@ declare_lint! {
     ///
     /// [future-incompatible]: ../index.md#future-incompatible-lints
     pub AMBIGUOUS_GLOB_IMPORTS,
-    Warn,
+    Deny,
     "detects certain glob imports that require reporting an ambiguity error",
     @future_incompatible = FutureIncompatibleInfo {
         reason: FutureIncompatibilityReason::FutureReleaseError,
         reference: "issue #114095 <https://github.com/rust-lang/rust/issues/114095>",
+        report_in_deps: true,
     };
 }
 
@@ -5009,50 +5056,6 @@ declare_lint! {
         reference: "<https://doc.rust-lang.org/nightly/edition-guide/rust-2024/reserved-syntax.html>",
     };
     crate_level_only
-}
-
-declare_lint! {
-    /// The `wasm_c_abi` lint detects usage of the `extern "C"` ABI of wasm that is affected
-    /// by a planned ABI change that has the goal of aligning Rust with the standard C ABI
-    /// of this target.
-    ///
-    /// ### Example
-    ///
-    /// ```rust,ignore (needs wasm32-unknown-unknown)
-    /// #[repr(C)]
-    /// struct MyType(i32, i32);
-    ///
-    /// extern "C" my_fun(x: MyType) {}
-    /// ```
-    ///
-    /// This will produce:
-    ///
-    /// ```text
-    /// error: this function function definition is affected by the wasm ABI transition: it passes an argument of non-scalar type `MyType`
-    ///   --> $DIR/wasm_c_abi_transition.rs:17:1
-    ///    |
-    ///    | pub extern "C" fn my_fun(_x: MyType) {}
-    ///    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    ///    |
-    ///    = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
-    ///    = note: for more information, see issue #138762 <https://github.com/rust-lang/rust/issues/138762>
-    ///    = help: the "C" ABI Rust uses on wasm32-unknown-unknown will change to align with the standard "C" ABI for this target
-    /// ```
-    ///
-    /// ### Explanation
-    ///
-    /// Rust has historically implemented a non-spec-compliant C ABI on wasm32-unknown-unknown. This
-    /// has caused incompatibilities with other compilers and Wasm targets. In a future version
-    /// of Rust, this will be fixed, and therefore code relying on the non-spec-compliant C ABI will
-    /// stop functioning.
-    pub WASM_C_ABI,
-    Warn,
-    "detects code relying on rustc's non-spec-compliant wasm C ABI",
-    @future_incompatible = FutureIncompatibleInfo {
-        reason: FutureIncompatibilityReason::FutureReleaseError,
-        reference: "issue #138762 <https://github.com/rust-lang/rust/issues/138762>",
-        report_in_deps: true,
-    };
 }
 
 declare_lint! {

@@ -72,9 +72,6 @@ lint_builtin_const_no_mangle = const items should never be `#[no_mangle]`
 lint_builtin_decl_unsafe_fn = declaration of an `unsafe` function
 lint_builtin_decl_unsafe_method = declaration of an `unsafe` method
 
-lint_builtin_deprecated_attr_link = use of deprecated attribute `{$name}`: {$reason}. See {$link}
-    .msg_suggestion = {$msg}
-    .default_suggestion = remove this attribute
 lint_builtin_deref_nullptr = dereferencing a null pointer
     .label = this code causes undefined behavior when executed
 
@@ -252,11 +249,6 @@ lint_duplicate_macro_attribute =
     duplicated attribute
 
 lint_duplicate_matcher_binding = duplicate matcher binding
-
-lint_elided_named_lifetime = elided lifetime has a name
-    .label_elided = this elided lifetime gets resolved as `{$name}`
-    .label_named = lifetime `{$name}` declared here
-    .suggestion = consider specifying it explicitly
 
 lint_enum_intrinsics_mem_discriminant =
     the return value of `mem::discriminant` is unspecified when called with a non-enum type
@@ -448,6 +440,7 @@ lint_invalid_asm_label_named = avoid using named labels in inline assembly
     .help = only local labels of the form `<number>:` should be used in inline asm
     .note = see the asm section of Rust By Example <https://doc.rust-lang.org/nightly/rust-by-example/unsafe/asm.html#labels> for more information
 lint_invalid_asm_label_no_span = the label may be declared in the expansion of a macro
+
 lint_invalid_crate_type_value = invalid `crate_type` value
     .suggestion = did you mean
 
@@ -516,7 +509,50 @@ lint_metavariable_still_repeating = variable `{$name}` is still repeating at thi
 
 lint_metavariable_wrong_operator = meta-variable repeats with different Kleene operator
 
-lint_missing_fragment_specifier = missing fragment specifier
+lint_mismatched_lifetime_syntaxes_eliding_while_named =
+    eliding a lifetime that's named elsewhere is confusing
+
+lint_mismatched_lifetime_syntaxes_help =
+    the same lifetime is referred to in inconsistent ways, making the signature confusing
+
+lint_mismatched_lifetime_syntaxes_hiding_and_eliding_while_named =
+    hiding or eliding a lifetime that's named elsewhere is confusing
+
+lint_mismatched_lifetime_syntaxes_hiding_while_elided =
+    hiding a lifetime that's elided elsewhere is confusing
+
+lint_mismatched_lifetime_syntaxes_hiding_while_named =
+    hiding a lifetime that's named elsewhere is confusing
+
+lint_mismatched_lifetime_syntaxes_input_elided =
+    the lifetime is elided here
+
+lint_mismatched_lifetime_syntaxes_input_hidden =
+    the lifetime is hidden here
+
+lint_mismatched_lifetime_syntaxes_input_named =
+    the lifetime is named here
+
+lint_mismatched_lifetime_syntaxes_output_elided =
+    the same lifetime is elided here
+
+lint_mismatched_lifetime_syntaxes_output_hidden =
+    the same lifetime is hidden here
+
+lint_mismatched_lifetime_syntaxes_output_named =
+    the same lifetime is named here
+
+lint_mismatched_lifetime_syntaxes_suggestion_explicit =
+    consistently use `{$lifetime_name}`
+
+lint_mismatched_lifetime_syntaxes_suggestion_implicit =
+    remove the lifetime name from references
+
+lint_mismatched_lifetime_syntaxes_suggestion_mixed =
+    remove the lifetime name from references and use `'_` for type paths
+
+lint_mismatched_lifetime_syntaxes_suggestion_mixed_only_paths =
+    use `'_` for type paths
 
 lint_missing_unsafe_on_extern = extern blocks should be unsafe
     .suggestion = needs `unsafe` before the extern keyword
@@ -726,10 +762,14 @@ lint_redundant_semicolons =
         [true] semicolons
         *[false] semicolon
     }
-    .suggestion = remove {$multiple ->
+
+lint_redundant_semicolons_suggestion = remove {$multiple_semicolons ->
         [true] these semicolons
         *[false] this semicolon
     }
+
+lint_reexport_private_dependency =
+    {$kind} `{$name}` from private dependency '{$krate}' is re-exported
 
 lint_remove_mut_from_pattern = remove `mut` from the parameter
 
@@ -777,6 +817,9 @@ lint_supertrait_as_deref_target = this `Deref` implementation is covered by an i
     .label2 = target type is a supertrait of `{$self_ty}`
     .help = consider removing this implementation or replacing it with a method instead
 
+lint_surrogate_char_cast = surrogate values are not valid for `char`
+    .note = `0xD800..=0xDFFF` are reserved for Unicode surrogates and are not valid `char` values
+
 lint_suspicious_double_ref_clone =
     using `.clone()` on a double reference, which returns `{$ty}` instead of cloning the inner type
 
@@ -785,6 +828,9 @@ lint_suspicious_double_ref_deref =
 
 lint_symbol_intern_string_literal = using `Symbol::intern` on a string literal
     .help = consider adding the symbol to `compiler/rustc_span/src/symbol.rs`
+
+lint_too_large_char_cast = value exceeds maximum `char` value
+    .note = maximum valid `char` value is `0x10FFFF`
 
 lint_trailing_semi_macro = trailing semicolon in macro used in expression position
     .note1 = macro invocations at the end of a block are treated as expressions
@@ -798,6 +844,9 @@ lint_tykind = usage of `ty::TyKind`
 
 lint_tykind_kind = usage of `ty::TyKind::<kind>`
     .suggestion = try using `ty::<kind>` directly
+
+lint_type_ir_direct_use = do not use `rustc_type_ir` unless you are implementing type system internals
+    .note = use `rustc_middle::ty` instead
 
 lint_type_ir_inherent_usage = do not use `rustc_type_ir::inherent` unless you're inside of the trait solver
     .note = the method or struct you're looking for is likely defined somewhere else downstream in the compiler

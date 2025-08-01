@@ -28,7 +28,7 @@ impl<'a> State<'a> {
         }
     }
 
-    fn print_foreign_item(&mut self, item: &ast::ForeignItem) {
+    pub(crate) fn print_foreign_item(&mut self, item: &ast::ForeignItem) {
         let ast::Item { id, span, ref attrs, ref kind, ref vis, tokens: _ } = *item;
         self.ann.pre(self, AnnNode::SubItem(id));
         self.hardbreak_if_not_bol();
@@ -357,6 +357,7 @@ impl<'a> State<'a> {
                 self.bclose(item.span, empty, cb);
             }
             ast::ItemKind::Trait(box ast::Trait {
+                constness,
                 safety,
                 is_auto,
                 ident,
@@ -366,6 +367,7 @@ impl<'a> State<'a> {
             }) => {
                 let (cb, ib) = self.head("");
                 self.print_visibility(&item.vis);
+                self.print_constness(*constness);
                 self.print_safety(*safety);
                 self.print_is_auto(*is_auto);
                 self.word_nbsp("trait");
@@ -548,7 +550,7 @@ impl<'a> State<'a> {
         }
     }
 
-    fn print_assoc_item(&mut self, item: &ast::AssocItem) {
+    pub(crate) fn print_assoc_item(&mut self, item: &ast::AssocItem) {
         let ast::Item { id, span, ref attrs, ref kind, ref vis, tokens: _ } = *item;
         self.ann.pre(self, AnnNode::SubItem(id));
         self.hardbreak_if_not_bol();

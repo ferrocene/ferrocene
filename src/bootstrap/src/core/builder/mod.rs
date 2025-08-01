@@ -5,7 +5,7 @@ use std::fmt::{self, Debug, Write};
 use std::hash::Hash;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
-use std::sync::{LazyLock, atomic};
+use std::sync::{LazyLock, OnceLock, atomic};
 use std::time::{Duration, Instant};
 use std::{env, fs};
 
@@ -15,6 +15,7 @@ use tracing::instrument;
 
 pub use self::cargo::{Cargo, cargo_profile_var};
 pub use crate::Compiler;
+use crate::core::build_steps::compile::{Std, StdLink};
 // Ferrocene: this will conflict because we do not include "install" module,
 // for we have our own named `crate::ferrocene::install`.
 use crate::core::build_steps::{
@@ -24,7 +25,7 @@ use crate::core::config::flags::Subcommand;
 use crate::core::config::{DryRun, TargetSelection};
 use crate::ferrocene::code_coverage::CoverageState;
 use crate::utils::cache::Cache;
-use crate::utils::exec::{BootstrapCommand, command};
+use crate::utils::exec::{BootstrapCommand, ExecutionContext, command};
 use crate::utils::helpers::{self, LldThreads, add_dylib_path, exe, libdir, linker_args, t};
 use crate::{Build, Crate, trace};
 
@@ -68,6 +69,9 @@ pub struct Builder<'a> {
     /// to do. For example: with `./x check foo bar` we get `paths=["foo",
     /// "bar"]`.
     pub paths: Vec<PathBuf>,
+
+    /// Cached list of submodules from self.build.src.
+    submodule_paths_cache: OnceLock<Vec<String>>,
 }
 
 impl Deref for Builder<'_> {
@@ -135,6 +139,73 @@ pub trait Step: 'static + Clone + Debug + PartialEq + Eq + Hash {
         // as such calling them from ./x.py isn't logical.
         unimplemented!()
     }
+
+    /// Returns metadata of the step, for tests
+    fn metadata(&self) -> Option<StepMetadata> {
+        None
+    }
+}
+
+/// Metadata that describes an executed step, mostly for testing and tracing.
+#[allow(unused)]
+#[derive(Debug, PartialEq, Eq)]
+pub struct StepMetadata {
+    name: &'static str,
+    kind: Kind,
+    target: TargetSelection,
+    built_by: Option<Compiler>,
+    stage: Option<u32>,
+    /// Additional opaque string printed in the metadata
+    metadata: Option<String>,
+}
+
+impl StepMetadata {
+    pub fn build(name: &'static str, target: TargetSelection) -> Self {
+        Self::new(name, target, Kind::Build)
+    }
+
+    pub fn check(name: &'static str, target: TargetSelection) -> Self {
+        Self::new(name, target, Kind::Check)
+    }
+
+    pub fn doc(name: &'static str, target: TargetSelection) -> Self {
+        Self::new(name, target, Kind::Doc)
+    }
+
+    pub fn dist(name: &'static str, target: TargetSelection) -> Self {
+        Self::new(name, target, Kind::Dist)
+    }
+
+    pub fn test(name: &'static str, target: TargetSelection) -> Self {
+        Self::new(name, target, Kind::Test)
+    }
+
+    fn new(name: &'static str, target: TargetSelection, kind: Kind) -> Self {
+        Self { name, kind, target, built_by: None, stage: None, metadata: None }
+    }
+
+    pub fn built_by(mut self, compiler: Compiler) -> Self {
+        self.built_by = Some(compiler);
+        self
+    }
+
+    pub fn stage(mut self, stage: u32) -> Self {
+        self.stage = Some(stage);
+        self
+    }
+
+    pub fn with_metadata(mut self, metadata: String) -> Self {
+        self.metadata = Some(metadata);
+        self
+    }
+
+    pub fn get_stage(&self) -> Option<u32> {
+        self.stage.or(self
+            .built_by
+            // For std, its stage corresponds to the stage of the compiler that builds it.
+            // For everything else, a stage N things gets built by a stage N-1 compiler.
+            .map(|compiler| if self.name == "std" { compiler.stage } else { compiler.stage + 1 }))
+    }
 }
 
 pub struct RunConfig<'a> {
@@ -145,7 +216,7 @@ pub struct RunConfig<'a> {
 
 impl RunConfig<'_> {
     pub fn build_triple(&self) -> TargetSelection {
-        self.builder.build.build
+        self.builder.build.host_target
     }
 
     /// Return a list of crate names selected by `run.paths`.
@@ -451,13 +522,15 @@ impl StepDescription {
 
     fn is_excluded(&self, builder: &Builder<'_>, pathset: &PathSet) -> bool {
         if builder.config.skip.iter().any(|e| pathset.has(e, builder.kind)) {
-            if !matches!(builder.config.dry_run, DryRun::SelfCheck) {
+            if !matches!(builder.config.get_dry_run(), DryRun::SelfCheck) {
                 println!("Skipping {pathset:?} because it is excluded");
             }
             return true;
         }
 
-        if !builder.config.skip.is_empty() && !matches!(builder.config.dry_run, DryRun::SelfCheck) {
+        if !builder.config.skip.is_empty()
+            && !matches!(builder.config.get_dry_run(), DryRun::SelfCheck)
+        {
             builder.verbose(|| {
                 println!(
                     "{:?} not skipped for {:?} -- not in {:?}",
@@ -693,7 +766,7 @@ impl<'a> ShouldRun<'a> {
     ///
     /// [`path`]: ShouldRun::path
     pub fn paths(mut self, paths: &[&str]) -> Self {
-        let submodules_paths = build_helper::util::parse_gitmodules(&self.builder.src);
+        let submodules_paths = self.builder.submodule_paths();
 
         self.paths.insert(PathSet::Set(
             paths
@@ -781,7 +854,6 @@ pub enum Kind {
     #[value(alias = "r")]
     Run,
     Setup,
-    Suggest,
     Vendor,
     Perf,
     Sign, // for Ferrocene
@@ -806,7 +878,6 @@ impl Kind {
             Kind::Install => "install",
             Kind::Run => "run",
             Kind::Setup => "setup",
-            Kind::Suggest => "suggest",
             Kind::Vendor => "vendor",
             Kind::Perf => "perf",
             Kind::Sign => "sign", // for Ferrocene
@@ -819,7 +890,6 @@ impl Kind {
             Kind::Bench => "Benchmarking",
             Kind::Doc => "Documenting",
             Kind::Run => "Running",
-            Kind::Suggest => "Suggesting",
             Kind::Clippy => "Linting",
             Kind::Perf => "Profiling & benchmarking",
             _ => {
@@ -991,6 +1061,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::test::GenerateTarball,
                 crate::core::build_steps::toolstate::ToolStateCheck,
                 test::Tidy,
+                test::Bootstrap,
                 test::Ui,
                 test::Crashes,
                 test::Coverage,
@@ -1045,8 +1116,6 @@ impl<'a> Builder<'a> {
                 test::RustInstaller,
                 test::TestFloatParse,
                 test::CollectLicenseMetadata,
-                // Run bootstrap close to the end as it's unlikely to fail
-                test::Bootstrap,
                 // Run run-make last, since these won't pass without make on Windows
                 test::RunMake,
             ),
@@ -1203,7 +1272,7 @@ impl<'a> Builder<'a> {
             Kind::Clean => describe!(clean::CleanAll, clean::Rustc, clean::Std),
             Kind::Vendor => describe!(vendor::Vendor),
             // special-cased in Build::build()
-            Kind::Format | Kind::Suggest | Kind::Perf => vec![],
+            Kind::Format | Kind::Perf => vec![],
             Kind::MiriTest | Kind::MiriSetup => unreachable!(),
         }
     }
@@ -1253,6 +1322,7 @@ impl<'a> Builder<'a> {
             ferrocene_coverage: RefCell::new(None),
             should_serve_called: atomic::AtomicU64::new(0),
             paths,
+            submodule_paths_cache: Default::default(),
         }
     }
 
@@ -1272,7 +1342,6 @@ impl<'a> Builder<'a> {
             Subcommand::Run { .. } => (Kind::Run, &paths[..]),
             Subcommand::Clean { .. } => (Kind::Clean, &paths[..]),
             Subcommand::Format { .. } => (Kind::Format, &[][..]),
-            Subcommand::Suggest { .. } => (Kind::Suggest, &[][..]),
             Subcommand::Setup { profile: ref path } => (
                 Kind::Setup,
                 path.as_ref().map_or([].as_slice(), |path| std::slice::from_ref(path)),
@@ -1371,10 +1440,10 @@ impl<'a> Builder<'a> {
     ) -> Compiler {
         let mut resolved_compiler = if self.build.force_use_stage2(stage) {
             trace!(target: "COMPILER_FOR", ?stage, "force_use_stage2");
-            self.compiler(2, self.config.build)
+            self.compiler(2, self.config.host_target)
         } else if self.build.force_use_stage1(stage, target) {
             trace!(target: "COMPILER_FOR", ?stage, "force_use_stage1");
-            self.compiler(1, self.config.build)
+            self.compiler(1, self.config.host_target)
         } else {
             trace!(target: "COMPILER_FOR", ?stage, ?host, "no force, fallback to `compiler()`");
             self.compiler(stage, host)
@@ -1386,6 +1455,49 @@ impl<'a> Builder<'a> {
 
         trace!(target: "COMPILER_FOR", ?resolved_compiler);
         resolved_compiler
+    }
+
+    /// Obtain a standard library for the given target that will be built by the passed compiler.
+    /// The standard library will be linked to the sysroot of the passed compiler.
+    ///
+    /// Prefer using this method rather than manually invoking `Std::new`.
+    #[cfg_attr(
+        feature = "tracing",
+        instrument(
+            level = "trace",
+            name = "Builder::std",
+            target = "STD",
+            skip_all,
+            fields(
+                compiler = ?compiler,
+                target = ?target,
+            ),
+        ),
+    )]
+    pub fn std(&self, compiler: Compiler, target: TargetSelection) {
+        // FIXME: make the `Std` step return some type-level "proof" that std was indeed built,
+        // and then require passing that to all Cargo invocations that we do.
+
+        // The "stage 0" std is always precompiled and comes with the stage0 compiler, so we have
+        // special logic for it, to avoid creating needless and confusing Std steps that don't
+        // actually build anything.
+        if compiler.stage == 0 {
+            if target != compiler.host {
+                panic!(
+                    r"It is not possible to build the standard library for `{target}` using the stage0 compiler.
+You have to build a stage1 compiler for `{}` first, and then use it to build a standard library for `{target}`.
+",
+                    compiler.host
+                )
+            }
+
+            // We still need to link the prebuilt standard library into the ephemeral stage0 sysroot
+            self.ensure(StdLink::from_std(Std::new(compiler, target), compiler));
+        } else {
+            // This step both compiles the std and links it into the compiler's sysroot.
+            // Yes, it's quite magical and side-effecty.. would be nice to refactor later.
+            self.ensure(Std::new(compiler, target));
+        }
     }
 
     pub fn sysroot(&self, compiler: Compiler) -> PathBuf {
@@ -1432,7 +1544,7 @@ impl<'a> Builder<'a> {
     /// Windows.
     pub fn libdir_relative(&self, compiler: Compiler) -> &Path {
         if compiler.is_snapshot(self) {
-            libdir(self.config.build).as_ref()
+            libdir(self.config.host_target).as_ref()
         } else {
             match self.config.libdir_relative() {
                 Some(relative_libdir) if compiler.stage >= 1 => relative_libdir,
@@ -1513,9 +1625,10 @@ impl<'a> Builder<'a> {
             return cmd;
         }
 
-        let _ = self.ensure(tool::Clippy { compiler: run_compiler, target: self.build.build });
-        let cargo_clippy =
-            self.ensure(tool::CargoClippy { compiler: run_compiler, target: self.build.build });
+        let _ =
+            self.ensure(tool::Clippy { compiler: run_compiler, target: self.build.host_target });
+        let cargo_clippy = self
+            .ensure(tool::CargoClippy { compiler: run_compiler, target: self.build.host_target });
         let mut dylib_path = helpers::dylib_path();
         dylib_path.insert(0, self.sysroot(run_compiler).join("lib"));
 
@@ -1528,9 +1641,10 @@ impl<'a> Builder<'a> {
     pub fn cargo_miri_cmd(&self, run_compiler: Compiler) -> BootstrapCommand {
         assert!(run_compiler.stage > 0, "miri can not be invoked at stage 0");
         // Prepare the tools
-        let miri = self.ensure(tool::Miri { compiler: run_compiler, target: self.build.build });
+        let miri =
+            self.ensure(tool::Miri { compiler: run_compiler, target: self.build.host_target });
         let cargo_miri =
-            self.ensure(tool::CargoMiri { compiler: run_compiler, target: self.build.build });
+            self.ensure(tool::CargoMiri { compiler: run_compiler, target: self.build.host_target });
         // Invoke cargo-miri, make sure it can find miri and cargo.
         let mut cmd = command(cargo_miri.tool_path);
         cmd.env("MIRI", &miri.tool_path);
@@ -1564,7 +1678,7 @@ impl<'a> Builder<'a> {
             cmd.arg("-Dwarnings");
         }
         cmd.arg("-Znormalize-docs");
-        cmd.args(linker_args(self, compiler.host, LldThreads::Yes));
+        cmd.args(linker_args(self, compiler.host, LldThreads::Yes, compiler.stage));
         cmd
     }
 
@@ -1580,6 +1694,19 @@ impl<'a> Builder<'a> {
             }
         }
         None
+    }
+
+    /// Updates all submodules, and exits with an error if submodule
+    /// management is disabled and the submodule does not exist.
+    pub fn require_and_update_all_submodules(&self) {
+        for submodule in self.submodule_paths() {
+            self.require_submodule(submodule, None);
+        }
+    }
+
+    /// Get all submodules from the src directory.
+    pub fn submodule_paths(&self) -> &[String] {
+        self.submodule_paths_cache.get_or_init(|| build_helper::util::parse_gitmodules(&self.src))
     }
 
     /// Ensure that a given step is built, returning its output. This will
@@ -1711,6 +1838,7 @@ impl<'a> Builder<'a> {
         }
     }
 
+    // Ferrocene addition
     pub(crate) fn should_serve<S: Step>(&self) -> bool {
         // We record whether this method was called to see if it was invoked during the dry run. If
         // it wasn't and the --serve flag was passed we error out saying this is unsupported. If it
@@ -1721,11 +1849,23 @@ impl<'a> Builder<'a> {
         self.was_invoked_explicitly::<S>(Kind::Doc) && self.config.cmd.serve()
     }
 
+    // Ferrocene addition
     pub(crate) fn is_serve_flag_unsupported(&self) -> bool {
         self.config.cmd.serve() && self.should_serve_called.load(atomic::Ordering::Relaxed) == 0
     }
 
+    // Ferrocene addition
     pub(crate) fn is_serve_flag_called_multiple_times(&self) -> bool {
         self.config.cmd.serve() && self.should_serve_called.load(atomic::Ordering::Relaxed) > 1
+    }
+
+    pub fn exec_ctx(&self) -> &ExecutionContext {
+        &self.config.exec_ctx
+    }
+}
+
+impl<'a> AsRef<ExecutionContext> for Builder<'a> {
+    fn as_ref(&self) -> &ExecutionContext {
+        self.exec_ctx()
     }
 }

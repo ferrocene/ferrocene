@@ -28,6 +28,7 @@
     # cargo update -p libc --manifest-path=library/Cargo.toml
     - update-cargo-lock libc library
 
+# Upstream currently tracks `branch:master`: https://github.com/rust-lang/rust/tree/master/library
 - path: ferrocene/library/backtrace-rs
   repo: rust-lang/backtrace-rs
-  pull: latest-tag
+  pull: branch:master

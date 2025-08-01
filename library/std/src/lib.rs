@@ -282,6 +282,7 @@
 #![feature(cfi_encoding)]
 #![feature(char_max_len)]
 #![feature(core_float_math)]
+#![feature(coverage_attribute)]
 #![feature(decl_macro)]
 #![feature(deprecated_suggestion)]
 #![feature(doc_cfg)]

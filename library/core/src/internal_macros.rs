@@ -1,5 +1,6 @@
 // implements the unary operator "op &T"
 // based on "op T" where T is expected to be `Copy`able
+#[allow_internal_unstable(coverage_attribute)]
 macro_rules! forward_ref_unop {
     (impl $imp:ident, $method:ident for $t:ty) => {
         forward_ref_unop!(impl $imp, $method for $t,
@@ -11,6 +12,7 @@ macro_rules! forward_ref_unop {
             type Output = <$t as $imp>::Output;
 
             #[inline]
+            #[coverage(off)]
             fn $method(self) -> <$t as $imp>::Output {
                 $imp::$method(*self)
             }
@@ -20,6 +22,8 @@ macro_rules! forward_ref_unop {
 
 // implements binary operators "&T op U", "T op &U", "&T op &U"
 // based on "T op U" where T and U are expected to be `Copy`able
+#[allow_internal_unstable(coverage_attribute)]
+#[cfg(feature = "uncertified")]
 macro_rules! forward_ref_binop {
     (impl $imp:ident, $method:ident for $t:ty, $u:ty) => {
         forward_ref_binop!(impl $imp, $method for $t, $u,
@@ -32,6 +36,7 @@ macro_rules! forward_ref_binop {
 
             #[inline]
             #[track_caller]
+            #[coverage(off)]
             fn $method(self, other: $u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(*self, other)
             }
@@ -43,6 +48,7 @@ macro_rules! forward_ref_binop {
 
             #[inline]
             #[track_caller]
+            #[coverage(off)]
             fn $method(self, other: &$u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(self, *other)
             }
@@ -54,6 +60,7 @@ macro_rules! forward_ref_binop {
 
             #[inline]
             #[track_caller]
+            #[coverage(off)]
             fn $method(self, other: &$u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(*self, *other)
             }
@@ -63,6 +70,8 @@ macro_rules! forward_ref_binop {
 
 // implements "T op= &U", based on "T op= U"
 // where U is expected to be `Copy`able
+#[allow_internal_unstable(coverage_attribute)]
+#[cfg(feature = "uncertified")]
 macro_rules! forward_ref_op_assign {
     (impl $imp:ident, $method:ident for $t:ty, $u:ty) => {
         forward_ref_op_assign!(impl $imp, $method for $t, $u,
@@ -73,6 +82,7 @@ macro_rules! forward_ref_op_assign {
         impl $imp<&$u> for $t {
             #[inline]
             #[track_caller]
+            #[coverage(off)]
             fn $method(&mut self, other: &$u) {
                 $imp::$method(self, *other);
             }
@@ -81,6 +91,7 @@ macro_rules! forward_ref_op_assign {
 }
 
 /// Creates a zero-size type similar to a closure type, but named.
+#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! impl_fn_for_zst {
     ($(
         $( #[$attr: meta] )*

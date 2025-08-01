@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![feature(auto_traits)]
 
 pub mod bar {

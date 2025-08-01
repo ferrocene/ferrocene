@@ -1,5 +1,5 @@
 error[E0603]: trait `Bar` is private
-  --> $DIR/privacy-ufcs.rs:12:20
+  --> $DIR/privacy-ufcs.rs:13:20
    |
 LL |     <i32 as ::foo::Bar>::baz();
    |                    ^^^   --- associated function `baz` is not publicly re-exported
@@ -7,7 +7,7 @@ LL |     <i32 as ::foo::Bar>::baz();
    |                    private trait
    |
 note: the trait `Bar` is defined here
-  --> $DIR/privacy-ufcs.rs:4:5
+  --> $DIR/privacy-ufcs.rs:5:5
    |
 LL |     trait Bar {
    |     ^^^^^^^^^

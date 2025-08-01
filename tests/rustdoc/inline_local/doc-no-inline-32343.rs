@@ -1,6 +1,7 @@
 // https://github.com/rust-lang/rust/issues/32343
 #![crate_name="foobar"]
 
+//@ edition: 2015
 //@ !has foobar/struct.Foo.html
 //@ has foobar/index.html
 //@ has - '//code' 'pub use foo::Foo'

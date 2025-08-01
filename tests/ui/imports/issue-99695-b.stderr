@@ -1,5 +1,5 @@
 error[E0432]: unresolved import `self::p::nu`
-  --> $DIR/issue-99695-b.rs:14:23
+  --> $DIR/issue-99695-b.rs:15:23
    |
 LL |     pub use self::p::{nu, other_item as _};
    |                       ^^ no `nu` in `m::p`

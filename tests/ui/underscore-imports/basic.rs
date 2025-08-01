@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ check-pass
 //@ aux-build:underscore-imports.rs
 

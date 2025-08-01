@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ revisions: with-generic-asset without-generic-asset
 //@ [with-generic-asset] compile-flags: --cfg feature="generic_assert"
 

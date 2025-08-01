@@ -1,5 +1,5 @@
 error[E0597]: `b2` does not live long enough
-  --> $DIR/dropck_arr_cycle_checked.rs:93:24
+  --> $DIR/dropck_arr_cycle_checked.rs:94:24
    |
 LL |     let (b1, b2, b3);
    |              -- binding `b2` declared here
@@ -16,7 +16,7 @@ LL | }
    = note: values in a scope are dropped in the opposite order they are defined
 
 error[E0597]: `b3` does not live long enough
-  --> $DIR/dropck_arr_cycle_checked.rs:95:24
+  --> $DIR/dropck_arr_cycle_checked.rs:96:24
    |
 LL |     let (b1, b2, b3);
    |                  -- binding `b3` declared here
@@ -33,7 +33,7 @@ LL | }
    = note: values in a scope are dropped in the opposite order they are defined
 
 error[E0597]: `b1` does not live long enough
-  --> $DIR/dropck_arr_cycle_checked.rs:99:24
+  --> $DIR/dropck_arr_cycle_checked.rs:100:24
    |
 LL |     let (b1, b2, b3);
    |          -- binding `b1` declared here

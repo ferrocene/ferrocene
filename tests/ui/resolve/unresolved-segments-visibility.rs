@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Check that we do not ICE due to unresolved segments in visibility path.
 #![crate_type = "lib"]
 

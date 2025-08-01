@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ compile-flags: -Zdeduplicate-diagnostics=yes
 //@ dont-require-annotations: NOTE
 

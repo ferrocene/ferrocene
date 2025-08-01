@@ -1,3 +1,4 @@
+//@ edition: 2015
 pub mod m {
     pub struct S(u8);
 

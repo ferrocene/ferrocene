@@ -1,5 +1,5 @@
 error[E0277]: the size for values of type `(dyn Foo + 'static)` cannot be known at compilation time
-  --> $DIR/feature-gate-unsized_fn_params.rs:17:11
+  --> $DIR/feature-gate-unsized_fn_params.rs:18:11
    |
 LL | fn foo(x: dyn Foo) {
    |           ^^^^^^^ doesn't have a size known at compile-time
@@ -17,7 +17,7 @@ LL | fn foo(x: &dyn Foo) {
    |           +
 
 error[E0277]: the size for values of type `(dyn Foo + 'static)` cannot be known at compilation time
-  --> $DIR/feature-gate-unsized_fn_params.rs:21:11
+  --> $DIR/feature-gate-unsized_fn_params.rs:22:11
    |
 LL | fn bar(x: Foo) {
    |           ^^^ doesn't have a size known at compile-time
@@ -34,7 +34,7 @@ LL | fn bar(x: &dyn Foo) {
    |           ++++
 
 error[E0277]: the size for values of type `[()]` cannot be known at compilation time
-  --> $DIR/feature-gate-unsized_fn_params.rs:25:11
+  --> $DIR/feature-gate-unsized_fn_params.rs:26:11
    |
 LL | fn qux(_: [()]) {}
    |           ^^^^ doesn't have a size known at compile-time
@@ -47,7 +47,7 @@ LL | fn qux(_: &[()]) {}
    |           +
 
 error[E0277]: the size for values of type `(dyn Foo + 'static)` cannot be known at compilation time
-  --> $DIR/feature-gate-unsized_fn_params.rs:29:9
+  --> $DIR/feature-gate-unsized_fn_params.rs:30:9
    |
 LL |     foo(*x);
    |         ^^ doesn't have a size known at compile-time

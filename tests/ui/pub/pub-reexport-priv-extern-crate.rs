@@ -1,3 +1,4 @@
+//@ edition: 2015
 extern crate core;
 pub use core as reexported_core; //~ ERROR `core` is private and cannot be re-exported
                                  //~^ WARN this was previously accepted

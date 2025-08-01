@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ compile-flags: -C no-prepopulate-passes
 
 #![crate_type = "lib"]

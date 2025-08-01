@@ -1,5 +1,6 @@
 //@ compile-flags: -Znormalize-docs
 //@ dont-require-annotations: NOTE
+//@ edition: 2015
 
 // https://github.com/rust-lang/rust/issues/105742
 use std::ops::Index;

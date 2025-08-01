@@ -1,5 +1,6 @@
 // Regression test for #47429: short backtraces were not terminating correctly
 
+//@ edition: 2015
 //@ compile-flags: -O
 //@ compile-flags:-Cstrip=none
 //@ run-fail

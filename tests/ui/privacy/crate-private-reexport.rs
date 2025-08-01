@@ -1,3 +1,4 @@
+//@ edition: 2015
 fn f1() {}
 enum E1 { V }
 struct S1 {

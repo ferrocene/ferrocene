@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![deny(unreachable_patterns)]
 #![allow(unused_variables)]
 #![allow(non_snake_case)]

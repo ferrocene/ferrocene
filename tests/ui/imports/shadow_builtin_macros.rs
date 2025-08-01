@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ aux-build:two_macros.rs
 
 mod foo {

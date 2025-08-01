@@ -1,3 +1,4 @@
+//@ edition: 2015
 // https://github.com/rust-lang/rust/issues/135078
 #![crate_name = "foo"]
 #![feature(staged_api)]

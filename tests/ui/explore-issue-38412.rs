@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ aux-build:pub-and-stability.rs
 
 // A big point of this test is that we *enable* `unstable_declared`,

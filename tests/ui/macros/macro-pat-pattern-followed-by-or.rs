@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 #![allow(unused_macros)]
 macro_rules! foo { ($x:pat | $y:pat) => {} } // should be ok

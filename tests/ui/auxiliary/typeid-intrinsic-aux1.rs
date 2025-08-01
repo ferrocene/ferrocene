@@ -1,3 +1,4 @@
+//@ edition: 2015
 use std::any::{Any, TypeId};
 
 pub struct A;

@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Reject mixing cyclic structure and Drop when using Vec.
 //
 // (Compare against ui/span/dropck_arr_cycle_checked.rs)

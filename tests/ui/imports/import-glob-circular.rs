@@ -1,3 +1,4 @@
+//@ edition: 2015
 mod circ1 {
     pub use circ2::f2;
     pub fn f1() { println!("f1"); }

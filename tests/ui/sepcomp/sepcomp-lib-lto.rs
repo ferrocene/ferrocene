@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 // Check that we can use `-C lto` when linking against libraries that were
 // separately compiled.

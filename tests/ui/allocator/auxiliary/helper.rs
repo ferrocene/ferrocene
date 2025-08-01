@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ no-prefer-dynamic
 
 #![crate_type = "rlib"]

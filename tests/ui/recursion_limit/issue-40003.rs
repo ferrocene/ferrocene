@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 #![allow(unused_must_use)]
 fn main() {

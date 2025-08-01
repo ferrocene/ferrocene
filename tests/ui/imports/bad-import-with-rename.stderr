@@ -7,7 +7,7 @@ LL |     use crate::D::B as _;
 help: consider importing this type alias instead
    |
 LL -     use crate::D::B as _;
-LL +     use A::B as _;
+LL +     use crate::A::B as _;
    |
 
 error[E0432]: unresolved import `crate::D::B2`
@@ -19,7 +19,7 @@ LL |     use crate::D::B2;
 help: consider importing this type alias instead
    |
 LL -     use crate::D::B2;
-LL +     use A::B2;
+LL +     use crate::A::B2;
    |
 
 error: aborting due to 2 previous errors

@@ -4,7 +4,7 @@ error[E0502]: cannot borrow `*self` as mutable because it is also borrowed as im
 LL |         let x = |v: i32| {
    |                 -------- immutable borrow occurs here
 LL |             self.bar();
-   |             ---- first borrow occurs due to use of `self` in closure
+   |             ---- first borrow occurs due to use of `*self` in closure
 ...
 LL |         self.qux();
    |         ^^^^^^^^^^ mutable borrow occurs here
@@ -28,7 +28,7 @@ error[E0502]: cannot borrow `*self` as mutable because it is also borrowed as im
 LL |         let y = || {
    |                 -- immutable borrow occurs here
 LL |             self.bar();
-   |             ---- first borrow occurs due to use of `self` in closure
+   |             ---- first borrow occurs due to use of `*self` in closure
 LL |         };
 LL |         self.qux();
    |         ^^^^^^^^^^ mutable borrow occurs here

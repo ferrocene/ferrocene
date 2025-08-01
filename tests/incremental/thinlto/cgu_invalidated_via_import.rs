@@ -2,6 +2,7 @@
 // via ThinLTO and that imported thing changes while the definition of the CGU
 // stays untouched.
 
+//@ edition: 2015
 //@ revisions: cfail1 cfail2 cfail3
 //@ compile-flags: -Z query-dep-graph -O
 //@ build-pass

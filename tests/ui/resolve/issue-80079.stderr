@@ -1,5 +1,5 @@
 error[E0425]: cannot find value `Foo` in this scope
-  --> $DIR/issue-80079.rs:11:13
+  --> $DIR/issue-80079.rs:12:13
    |
 LL |     let _ = Foo;
    |             ^^^ not found in this scope

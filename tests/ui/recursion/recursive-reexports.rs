@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ aux-build:recursive_reexports.rs
 
 extern crate recursive_reexports;

@@ -1,3 +1,4 @@
+//@ edition: 2015
 struct T;
 
 mod t1 {

@@ -209,6 +209,15 @@ impl Step for SourceTarball {
                 .run(&builder);
         }
 
+        // The docker images contain a `/ferrocene/packages` directory with listings of dependency
+        // versions, include that as it's needed for certification.
+        let build_env_src = Path::new("/ferrocene/packages");
+        if build_env_src.exists() {
+            let build_env_dst = &dest_dir.join("vendor/build-environment");
+            builder.create_dir(build_env_dst);
+            builder.cp_link_r(build_env_src, build_env_dst);
+        }
+
         drop(generic_tarball);
         subsetter
             .into_tarballs()

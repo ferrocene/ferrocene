@@ -56,6 +56,18 @@ fn layout_array_edge_cases() {
 }
 
 #[test]
+fn layout_errors() {
+    let layout = Layout::new::<[u8; 2]>();
+    assert!(layout.align_to(isize::MAX as usize + 1).is_err());
+    assert!(layout.align_to(3).is_err());
+    assert!(layout.repeat(usize::MAX).is_err());
+    assert!(layout.repeat_packed(usize::MAX).is_err());
+
+    let next = Layout::from_size_align(isize::MAX as usize, 1).unwrap();
+    assert!(layout.extend(next).is_err());
+}
+
+#[test]
 fn layout_debug_shows_log2_of_alignment() {
     // `Debug` is not stable, but here's what it does right now
     let layout = Layout::from_size_align(24576, 8192).unwrap();

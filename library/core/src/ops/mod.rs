@@ -139,14 +139,18 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 mod arith;
+#[cfg(not(feature = "ferrocene_certified"))]
 mod async_function;
 mod bit;
 mod control_flow;
+#[cfg(not(feature = "ferrocene_certified"))]
 mod coroutine;
 mod deref;
 mod drop;
 mod function;
+#[cfg(not(feature = "ferrocene_certified"))]
 mod index;
+#[cfg(not(feature = "ferrocene_certified"))]
 mod index_range;
 mod range;
 mod try_trait;
@@ -157,6 +161,7 @@ pub use self::arith::{Add, Div, Mul, Neg, Rem, Sub};
 #[stable(feature = "op_assign_traits", since = "1.8.0")]
 pub use self::arith::{AddAssign, DivAssign, MulAssign, RemAssign, SubAssign};
 #[unstable(feature = "async_fn_traits", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::async_function::{AsyncFn, AsyncFnMut, AsyncFnOnce};
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use self::bit::{BitAnd, BitOr, BitXor, Not, Shl, Shr};
@@ -165,6 +170,7 @@ pub use self::bit::{BitAndAssign, BitOrAssign, BitXorAssign, ShlAssign, ShrAssig
 #[stable(feature = "control_flow_enum_type", since = "1.55.0")]
 pub use self::control_flow::ControlFlow;
 #[unstable(feature = "coroutine_trait", issue = "43122")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::coroutine::{Coroutine, CoroutineState};
 #[unstable(feature = "deref_pure_trait", issue = "87121")]
 pub use self::deref::DerefPure;
@@ -179,7 +185,9 @@ pub use self::drop::Drop;
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use self::function::{Fn, FnMut, FnOnce};
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::index::{Index, IndexMut};
+#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) use self::index_range::IndexRange;
 #[unstable(feature = "range_into_bounds", issue = "136903")]
 pub use self::range::IntoBounds;
@@ -192,7 +200,9 @@ pub use self::range::{Range, RangeFrom, RangeFull, RangeTo};
 #[unstable(feature = "try_trait_v2_residual", issue = "91285")]
 pub use self::try_trait::Residual;
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::try_trait::Yeet;
+#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) use self::try_trait::{ChangeOutputType, NeverShortCircuit};
 #[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
 pub use self::try_trait::{FromResidual, Try};

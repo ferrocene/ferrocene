@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 //@ aux-build:sepcomp_lib.rs
 

@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ aux-build:lifetime_bound_will_change_warning_lib.rs
 
 // Test that various corner cases cause an error. These are tests

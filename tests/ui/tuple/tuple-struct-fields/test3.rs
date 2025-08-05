@@ -1,3 +1,4 @@
+//@ edition: 2015
 macro_rules! define_struct {
     ($t:ty) => {
         struct S1(pub($t));

@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 mod foo {
     pub fn x(y: isize) { println!("{}", y); }

@@ -6,7 +6,7 @@ mod A {
 }
 
 mod B {
-    use A::Trait;
+    use crate::A::Trait;
 
 pub struct A<H: Trait>(pub H); //~ ERROR cannot find trait
 }

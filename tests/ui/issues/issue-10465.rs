@@ -1,3 +1,4 @@
+//@ edition: 2015
 pub mod a {
     pub trait A {
         fn foo(&self);

@@ -4,7 +4,7 @@ error[E0425]: cannot find function `fpriv` in this scope
 LL |     fpriv();
    |     ^^^^^ not found in this scope
    |
-note: function `bar::fpriv` exists but is inaccessible
+note: function `crate::bar::fpriv` exists but is inaccessible
   --> $DIR/glob-resolve1.rs:7:5
    |
 LL |     fn fpriv() {}
@@ -16,7 +16,7 @@ error[E0425]: cannot find function `epriv` in this scope
 LL |     epriv();
    |     ^^^^^ not found in this scope
    |
-note: function `bar::epriv` exists but is inaccessible
+note: function `crate::bar::epriv` exists but is inaccessible
   --> $DIR/glob-resolve1.rs:9:9
    |
 LL |         fn epriv();
@@ -46,7 +46,7 @@ error[E0425]: cannot find value `C` in this scope
 LL |     C;
    |     ^ not found in this scope
    |
-note: unit struct `bar::C` exists but is inaccessible
+note: unit struct `crate::bar::C` exists but is inaccessible
   --> $DIR/glob-resolve1.rs:18:5
    |
 LL |     struct C;
@@ -58,14 +58,14 @@ error[E0425]: cannot find function `import` in this scope
 LL |     import();
    |     ^^^^^^ not found in this scope
    |
-note: function `bar::import` exists but is inaccessible
+note: function `crate::bar::import` exists but is inaccessible
   --> $DIR/glob-resolve1.rs:7:5
    |
 LL |     fn fpriv() {}
    |     ^^^^^^^^^^ not accessible
 help: consider importing this function
    |
-LL + use other::import;
+LL + use crate::other::import;
    |
 
 error[E0412]: cannot find type `A` in this scope
@@ -77,7 +77,7 @@ LL |     pub enum B {
 LL |     foo::<A>();
    |           ^ help: an enum with a similar name exists: `B`
    |
-note: enum `bar::A` exists but is inaccessible
+note: enum `crate::bar::A` exists but is inaccessible
   --> $DIR/glob-resolve1.rs:11:5
    |
 LL |     enum A {
@@ -92,7 +92,7 @@ LL |     pub enum B {
 LL |     foo::<C>();
    |           ^ help: an enum with a similar name exists: `B`
    |
-note: struct `bar::C` exists but is inaccessible
+note: struct `crate::bar::C` exists but is inaccessible
   --> $DIR/glob-resolve1.rs:18:5
    |
 LL |     struct C;
@@ -107,7 +107,7 @@ LL |     pub enum B {
 LL |     foo::<D>();
    |           ^ help: an enum with a similar name exists: `B`
    |
-note: type alias `bar::D` exists but is inaccessible
+note: type alias `crate::bar::D` exists but is inaccessible
   --> $DIR/glob-resolve1.rs:20:5
    |
 LL |     type D = isize;

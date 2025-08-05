@@ -1,6 +1,7 @@
 // This test checks that a change in a CGU does not invalidate an unrelated CGU
 // during incremental ThinLTO.
 
+//@ edition: 2015
 //@ revisions: cfail1 cfail2 cfail3
 //@ compile-flags: -Z query-dep-graph -O
 //@ build-pass

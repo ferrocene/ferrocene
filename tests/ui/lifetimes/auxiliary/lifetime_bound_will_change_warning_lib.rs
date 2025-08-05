@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![crate_type = "rlib"]
 
 // Helper for testing that we get suitable warnings when lifetime

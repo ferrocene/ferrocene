@@ -12,6 +12,8 @@ LL + use std::io::Result;
    |
 LL + use std::thread::Result;
    |
+LL + use core::fmt::Result;
+   |
 
 error: aborting due to 1 previous error
 

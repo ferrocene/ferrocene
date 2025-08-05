@@ -1,3 +1,4 @@
+//@ edition: 2015
 pub mod testtypes {
     use std::any::TypeId;
 

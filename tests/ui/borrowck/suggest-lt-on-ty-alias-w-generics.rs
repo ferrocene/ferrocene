@@ -1,3 +1,4 @@
+//@ edition: 2015
 type Lazy<T> = Box<dyn Fn() -> T + 'static>;
 
 fn test(x: &i32) -> Lazy<i32> {

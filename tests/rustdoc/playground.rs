@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![crate_name = "foo"]
 
 #![doc(html_playground_url = "https://www.example.com/")]

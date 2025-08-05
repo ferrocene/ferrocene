@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 // This test makes sure that we don't run into a linker error because of the
 // middle::reachable pass missing trait methods with default impls.

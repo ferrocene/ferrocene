@@ -1,5 +1,5 @@
 error[E0433]: failed to resolve: use of unresolved module or unlinked crate `r#mod`
-  --> $DIR/issue-61732.rs:3:15
+  --> $DIR/issue-61732.rs:4:15
    |
 LL | pub(in crate::r#mod) fn main() {}
    |               ^^^^^ use of unresolved module or unlinked crate `r#mod`

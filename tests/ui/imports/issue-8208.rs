@@ -1,3 +1,4 @@
+//@ edition: 2015
 use self::*; //~ ERROR: unresolved import `self::*` [E0432]
              //~^ NOTE cannot glob-import a module into itself
 

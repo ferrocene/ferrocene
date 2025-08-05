@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ check-fail
 // Tests error conditions for specifying diagnostics using #[derive(Diagnostic)]
 //@ normalize-stderr: "the following other types implement trait `IntoDiagArg`:(?:.*\n){0,9}\s+and \d+ others" -> "normalized in stderr"

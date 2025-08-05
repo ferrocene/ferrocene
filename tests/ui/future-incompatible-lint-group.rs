@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Ensure that the future_incompatible lint group only includes
 // lints for changes that are not tied to an edition
 #![deny(future_incompatible)]

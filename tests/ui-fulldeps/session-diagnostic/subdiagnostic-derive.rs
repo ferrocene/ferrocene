@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ check-fail
 // Tests error conditions for specifying subdiagnostics using #[derive(Subdiagnostic)]
 

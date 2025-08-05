@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![crate_name = "foo"]
 #![feature(doc_cfg)]
 #![feature(staged_api)]

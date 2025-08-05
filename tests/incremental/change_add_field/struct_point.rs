@@ -3,6 +3,7 @@
 // Fns with that type used only in their body are also recompiled, but
 // their callers are not.
 
+//@ edition: 2015
 //@ revisions:cfail1 cfail2
 //@ compile-flags: -Z query-dep-graph
 //@ build-pass

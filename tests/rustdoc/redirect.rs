@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ aux-build:reexp-stripped.rs
 //@ build-aux-docs
 //@ ignore-cross-compile

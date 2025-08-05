@@ -1,6 +1,7 @@
 // https://github.com/rust-lang/rust/issues/32881
 #![crate_name="foobar"]
 
+//@ edition: 2015
 //@ aux-build:rustdoc-trait-object-impl.rs
 //@ build-aux-docs
 //@ ignore-cross-compile

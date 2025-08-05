@@ -28,7 +28,7 @@ error[E0425]: cannot find function `foo4` in `F`
 LL |         reuse F::foo4 { &self.0 }
    |                  ^^^^ not found in `F`
    |
-note: function `fn_to_other::foo4` exists but is inaccessible
+note: function `crate::fn_to_other::foo4` exists but is inaccessible
   --> $DIR/explicit-paths.rs:27:5
    |
 LL |     reuse S::foo4;
@@ -40,7 +40,7 @@ error[E0425]: cannot find function `foo4` in `F`
 LL |         reuse F::foo4 { &self.0 }
    |                  ^^^^ not found in `F`
    |
-note: function `fn_to_other::foo4` exists but is inaccessible
+note: function `crate::fn_to_other::foo4` exists but is inaccessible
   --> $DIR/explicit-paths.rs:27:5
    |
 LL |     reuse S::foo4;
@@ -52,7 +52,7 @@ error[E0425]: cannot find function `foo4` in `F`
 LL |         reuse F::foo4 { &F }
    |                  ^^^^ not found in `F`
    |
-note: function `fn_to_other::foo4` exists but is inaccessible
+note: function `crate::fn_to_other::foo4` exists but is inaccessible
   --> $DIR/explicit-paths.rs:27:5
    |
 LL |     reuse S::foo4;

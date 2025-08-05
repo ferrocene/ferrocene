@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ build-pass
 
 // This test is the same code as in ui/symbol-names/issue-60925.rs but this checks that the

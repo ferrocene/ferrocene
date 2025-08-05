@@ -1,4 +1,5 @@
 #![crate_name = "aCrate"]
+//@ edition: 2015
 
 mod a_module {
     pub fn private_function() {}

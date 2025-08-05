@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 //@ needs-unwind
 #![allow(unused_imports)]

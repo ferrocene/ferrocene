@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ revisions: rpass1 cfail2
 //@ compile-flags: -Z query-dep-graph
 

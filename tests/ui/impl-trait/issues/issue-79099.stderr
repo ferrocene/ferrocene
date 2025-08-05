@@ -1,5 +1,5 @@
 error: expected identifier, found `1`
-  --> $DIR/issue-79099.rs:3:65
+  --> $DIR/issue-79099.rs:4:65
    |
 LL |         let f: impl core::future::Future<Output = u8> = async { 1 };
    |                                                         -----   ^ expected identifier
@@ -10,7 +10,7 @@ LL |         let f: impl core::future::Future<Output = u8> = async { 1 };
    = note: for more on editions, read https://doc.rust-lang.org/edition-guide
 
 error[E0562]: `impl Trait` is not allowed in the type of variable bindings
-  --> $DIR/issue-79099.rs:3:16
+  --> $DIR/issue-79099.rs:4:16
    |
 LL |         let f: impl core::future::Future<Output = u8> = async { 1 };
    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

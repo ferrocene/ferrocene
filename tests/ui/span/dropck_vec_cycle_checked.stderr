@@ -1,5 +1,5 @@
 error[E0597]: `c2` does not live long enough
-  --> $DIR/dropck_vec_cycle_checked.rs:98:24
+  --> $DIR/dropck_vec_cycle_checked.rs:99:24
    |
 LL |     let (mut c1, mut c2, mut c3);
    |                  ------ binding `c2` declared here
@@ -16,7 +16,7 @@ LL | }
    = note: values in a scope are dropped in the opposite order they are defined
 
 error[E0597]: `c3` does not live long enough
-  --> $DIR/dropck_vec_cycle_checked.rs:100:24
+  --> $DIR/dropck_vec_cycle_checked.rs:101:24
    |
 LL |     let (mut c1, mut c2, mut c3);
    |                          ------ binding `c3` declared here
@@ -33,7 +33,7 @@ LL | }
    = note: values in a scope are dropped in the opposite order they are defined
 
 error[E0597]: `c1` does not live long enough
-  --> $DIR/dropck_vec_cycle_checked.rs:104:24
+  --> $DIR/dropck_vec_cycle_checked.rs:105:24
    |
 LL |     let (mut c1, mut c2, mut c3);
    |          ------ binding `c1` declared here

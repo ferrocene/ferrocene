@@ -1,3 +1,4 @@
+//@ edition: 2015
 //! This test used to ICE: rust-lang/rust#125914
 //! Instead of actually analyzing the erroneous patterns,
 //! we instead stop after typeck where errors are already

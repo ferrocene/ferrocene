@@ -1,7 +1,7 @@
 //@ run-rustfix
 //@ compile-flags: -Aunused
 
-use y::z;
+use crate::y::z;
 #[cfg(all())]
 use y::Whatever;
 

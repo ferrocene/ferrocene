@@ -1,5 +1,5 @@
 error[E0403]: the name `N` is already used for a generic parameter in this item's generic parameters
-  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:6:18
+  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:7:18
    |
 LL | trait Trait<const N: Trait = bar> {
    |                   - first use of `N`
@@ -8,25 +8,25 @@ LL |     fn fnc<const N: Trait = u32>(&self) -> Trait {
    |                  ^ already used
 
 error[E0425]: cannot find value `bar` in this scope
-  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:1:30
+  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:2:30
    |
 LL | trait Trait<const N: Trait = bar> {
    |                              ^^^ not found in this scope
 
 error[E0423]: expected value, found builtin type `u32`
-  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:6:29
+  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:7:29
    |
 LL |     fn fnc<const N: Trait = u32>(&self) -> Trait {
    |                             ^^^ not a value
 
 error[E0425]: cannot find value `bar` in this scope
-  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:15:9
+  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:16:9
    |
 LL |         bar
    |         ^^^ not found in this scope
 
 warning: trait objects without an explicit `dyn` are deprecated
-  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:1:22
+  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:2:22
    |
 LL | trait Trait<const N: Trait = bar> {
    |                      ^^^^^
@@ -40,27 +40,27 @@ LL | trait Trait<const N: dyn Trait = bar> {
    |                      +++
 
 error[E0391]: cycle detected when computing type of `Trait::N`
-  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:1:22
+  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:2:22
    |
 LL | trait Trait<const N: Trait = bar> {
    |                      ^^^^^
    |
    = note: ...which immediately requires computing type of `Trait::N` again
 note: cycle used when computing explicit predicates of trait `Trait`
-  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:1:1
+  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:2:1
    |
 LL | trait Trait<const N: Trait = bar> {
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    = note: see https://rustc-dev-guide.rust-lang.org/overview.html#queries and https://rustc-dev-guide.rust-lang.org/query.html for more information
 
 error: defaults for const parameters are only allowed in `struct`, `enum`, `type`, or `trait` definitions
-  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:6:12
+  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:7:12
    |
 LL |     fn fnc<const N: Trait = u32>(&self) -> Trait {
    |            ^^^^^^^^^^^^^^^^^^^^
 
 warning: trait objects without an explicit `dyn` are deprecated
-  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:6:44
+  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:7:44
    |
 LL |     fn fnc<const N: Trait = u32>(&self) -> Trait {
    |                                            ^^^^^
@@ -73,7 +73,7 @@ LL |     fn fnc<const N: Trait = u32>(&self) -> dyn Trait {
    |                                            +++
 
 warning: trait objects without an explicit `dyn` are deprecated
-  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:6:21
+  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:7:21
    |
 LL |     fn fnc<const N: Trait = u32>(&self) -> Trait {
    |                     ^^^^^
@@ -86,7 +86,7 @@ LL |     fn fnc<const N: dyn Trait = u32>(&self) -> Trait {
    |                     +++
 
 error: associated item referring to unboxed trait object for its own trait
-  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:6:44
+  --> $DIR/ice-hir-wf-check-anon-const-issue-122199.rs:7:44
    |
 LL | trait Trait<const N: Trait = bar> {
    |       ----- in this trait

@@ -1,5 +1,5 @@
 warning: anonymous parameters are deprecated and will be removed in the next edition
-  --> $DIR/future-incompatible-lint-group.rs:7:10
+  --> $DIR/future-incompatible-lint-group.rs:8:10
    |
 LL |     fn f(u8) {}
    |          ^^ help: try naming the parameter or explicitly ignoring it: `_: u8`
@@ -9,7 +9,7 @@ LL |     fn f(u8) {}
    = note: `#[warn(anonymous_parameters)]` on by default
 
 error: this attribute can only be applied at the crate level
-  --> $DIR/future-incompatible-lint-group.rs:13:12
+  --> $DIR/future-incompatible-lint-group.rs:14:12
    |
 LL |     #![doc(test(some_test))]
    |            ^^^^^^^^^^^^^^^

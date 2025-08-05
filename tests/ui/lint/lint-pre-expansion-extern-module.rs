@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ check-pass
 //@ compile-flags: -W rust-2018-compatibility
 

@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 //@ no-prefer-dynamic
 //@ aux-build:custom.rs

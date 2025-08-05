@@ -1,5 +1,5 @@
-error[E0507]: cannot move out of `x.0`, as `x` is a captured variable in an `Fn` closure
-  --> $DIR/move-into-closure.rs:28:21
+error[E0507]: cannot move out of `x.0`, a captured variable in an `Fn` closure
+  --> $DIR/move-into-closure.rs:28:15
    |
 LL |     let x = X(Y);
    |         - captured outer variable
@@ -7,15 +7,12 @@ LL |     let x = X(Y);
 LL |     consume_fn(|| {
    |                -- captured by this `Fn` closure
 LL |         let X(_t) = x;
-   |               --    ^
-   |               |
-   |               data moved here
-   |               move occurs because `_t` has type `Y`, which does not implement the `Copy` trait
+   |               ^^ move occurs because `x.0` has type `Y`, which does not implement the `Copy` trait
    |
 help: consider borrowing here
    |
-LL |         let X(_t) = &x;
-   |                     +
+LL |         let X(&_t) = x;
+   |               +
 
 error[E0507]: cannot move out of `e.0`, as `e` is a captured variable in an `Fn` closure
   --> $DIR/move-into-closure.rs:31:34
@@ -103,8 +100,8 @@ help: consider borrowing here
 LL |         match &e {
    |               +
 
-error[E0507]: cannot move out of `x.0`, as `x` is a captured variable in an `Fn` closure
-  --> $DIR/move-into-closure.rs:51:25
+error[E0507]: cannot move out of `x.0`, a captured variable in an `Fn` closure
+  --> $DIR/move-into-closure.rs:51:15
    |
 LL |     let x = X(Y);
    |         - captured outer variable
@@ -113,15 +110,12 @@ LL |     consume_fn(|| {
    |                -- captured by this `Fn` closure
 ...
 LL |         let X(mut _t) = x;
-   |               ------    ^
-   |               |
-   |               data moved here
-   |               move occurs because `_t` has type `Y`, which does not implement the `Copy` trait
+   |               ^^^^^^ move occurs because `x.0` has type `Y`, which does not implement the `Copy` trait
    |
 help: consider borrowing here
    |
-LL |         let X(mut _t) = &x;
-   |                         +
+LL |         let X(&mut _t) = x;
+   |               +
 
 error[E0507]: cannot move out of `em.0`, as `em` is a captured variable in an `Fn` closure
   --> $DIR/move-into-closure.rs:54:38
@@ -209,8 +203,8 @@ help: consider borrowing here
 LL |         match &em {
    |               +
 
-error[E0507]: cannot move out of `x.0`, as `x` is a captured variable in an `FnMut` closure
-  --> $DIR/move-into-closure.rs:85:21
+error[E0507]: cannot move out of `x.0`, a captured variable in an `FnMut` closure
+  --> $DIR/move-into-closure.rs:85:15
    |
 LL |     let x = X(Y);
    |         - captured outer variable
@@ -218,15 +212,12 @@ LL |     let x = X(Y);
 LL |     consume_fnmut(|| {
    |                   -- captured by this `FnMut` closure
 LL |         let X(_t) = x;
-   |               --    ^
-   |               |
-   |               data moved here
-   |               move occurs because `_t` has type `Y`, which does not implement the `Copy` trait
+   |               ^^ move occurs because `x.0` has type `Y`, which does not implement the `Copy` trait
    |
 help: consider borrowing here
    |
-LL |         let X(_t) = &x;
-   |                     +
+LL |         let X(&_t) = x;
+   |               +
 
 error[E0507]: cannot move out of `e.0`, as `e` is a captured variable in an `FnMut` closure
   --> $DIR/move-into-closure.rs:88:34
@@ -314,8 +305,8 @@ help: consider borrowing here
 LL |         match &e {
    |               +
 
-error[E0507]: cannot move out of `x.0`, as `x` is a captured variable in an `FnMut` closure
-  --> $DIR/move-into-closure.rs:108:25
+error[E0507]: cannot move out of `x.0`, a captured variable in an `FnMut` closure
+  --> $DIR/move-into-closure.rs:108:15
    |
 LL |     let x = X(Y);
    |         - captured outer variable
@@ -324,15 +315,12 @@ LL |     consume_fnmut(|| {
    |                   -- captured by this `FnMut` closure
 ...
 LL |         let X(mut _t) = x;
-   |               ------    ^
-   |               |
-   |               data moved here
-   |               move occurs because `_t` has type `Y`, which does not implement the `Copy` trait
+   |               ^^^^^^ move occurs because `x.0` has type `Y`, which does not implement the `Copy` trait
    |
 help: consider borrowing here
    |
-LL |         let X(mut _t) = &x;
-   |                         +
+LL |         let X(&mut _t) = x;
+   |               +
 
 error[E0507]: cannot move out of `em.0`, as `em` is a captured variable in an `FnMut` closure
   --> $DIR/move-into-closure.rs:111:38

@@ -1,5 +1,5 @@
 warning: method `iter_` is never used
-  --> $DIR/static-impl.rs:38:8
+  --> $DIR/static-impl.rs:39:8
    |
 LL | trait vec_utils<T> {
    |       --------- method in this trait

@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![feature(const_trait_impl)]
 #![allow(bare_trait_objects)]
 

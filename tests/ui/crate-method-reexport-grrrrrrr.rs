@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ run-pass
 
 // This is a regression test that the metadata for the

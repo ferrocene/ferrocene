@@ -2542,12 +2542,7 @@ fn add_order_independent_options(
         // sections to ensure we have all the data for PGO.
         let keep_metadata =
             crate_type == CrateType::Dylib || sess.opts.cg.profile_generate.enabled();
-        if crate_type != CrateType::Executable || !sess.opts.unstable_opts.export_executable_symbols
-        {
-            cmd.gc_sections(keep_metadata);
-        } else {
-            cmd.no_gc_sections();
-        }
+        cmd.gc_sections(keep_metadata);
     }
 
     cmd.set_output_kind(link_output_kind, crate_type, out_filename);
@@ -3374,12 +3369,12 @@ fn warn_if_linked_with_gold(sess: &Session, path: &Path) -> Result<(), Box<dyn s
 
         let section =
             elf.sections(endian, data)?.section_by_name(endian, b".note.gnu.gold-version");
-        if let Some((_, section)) = section {
-            if let Some(mut notes) = section.notes(endian, data)? {
-                return Ok(notes.any(|note| {
-                    note.is_ok_and(|note| note.n_type(endian) == elf::NT_GNU_GOLD_VERSION)
-                }));
-            }
+        if let Some((_, section)) = section
+            && let Some(mut notes) = section.notes(endian, data)?
+        {
+            return Ok(notes.any(|note| {
+                note.is_ok_and(|note| note.n_type(endian) == elf::NT_GNU_GOLD_VERSION)
+            }));
         }
 
         Ok(false)

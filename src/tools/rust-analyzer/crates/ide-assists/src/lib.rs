@@ -172,6 +172,7 @@ mod handlers {
     mod generate_is_empty_from_len;
     mod generate_mut_trait_impl;
     mod generate_new;
+    mod generate_single_field_struct_from;
     mod generate_trait_from_impl;
     mod inline_call;
     mod inline_const_as_literal;
@@ -301,10 +302,12 @@ mod handlers {
             generate_function::generate_function,
             generate_impl::generate_impl,
             generate_impl::generate_trait_impl,
+            generate_impl::generate_impl_trait,
             generate_is_empty_from_len::generate_is_empty_from_len,
             generate_mut_trait_impl::generate_mut_trait_impl,
             generate_new::generate_new,
             generate_trait_from_impl::generate_trait_from_impl,
+            generate_single_field_struct_from::generate_single_field_struct_from,
             inline_call::inline_call,
             inline_call::inline_into_callers,
             inline_const_as_literal::inline_const_as_literal,

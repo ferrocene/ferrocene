@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 #![feature(extended_varargs_abi_support)]
 
 fn baz(f: extern "Rust" fn(usize, ...)) {

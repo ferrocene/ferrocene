@@ -208,8 +208,13 @@ impl TryFrom<usize> for Alignment {
 }
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl From<Alignment> for NonZero<usize> {
+=======
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
+impl const From<Alignment> for NonZero<usize> {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     #[inline]
     fn from(align: Alignment) -> NonZero<usize> {
         align.as_nonzero()
@@ -217,8 +222,13 @@ impl From<Alignment> for NonZero<usize> {
 }
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl From<Alignment> for usize {
+=======
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
+impl const From<Alignment> for usize {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     #[inline]
     fn from(align: Alignment) -> usize {
         align.as_usize()

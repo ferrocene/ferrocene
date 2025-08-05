@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1"
-rustdoc-types = "0.39"
+rustdoc-types = "0.55"
 serde_json = "1"
 syn = { version = "2", default-features = false, features = ["derive", "parsing"] }
 tempfile = "3"

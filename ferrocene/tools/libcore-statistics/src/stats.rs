@@ -2,7 +2,7 @@ use crate::loc::LOC;
 use crate::render::{render_impl, render_type};
 use crate::stability::{parse_stability, Stability};
 use crate::visitor::Visitor;
-use rustdoc_types::Id;
+use rustdoc_types::{Attribute, Id};
 use std::collections::{HashMap, HashSet};
 
 pub(crate) struct StatsCollector {
@@ -60,7 +60,7 @@ impl StatsCollector {
             is_doc_hidden: item
                 .attrs
                 .iter()
-                .find(|attr| *attr == "#[doc(hidden)]")
+                .find(|attr| **attr == Attribute::Other("#[doc(hidden)]".to_string()))
                 .is_some(),
         }
     }

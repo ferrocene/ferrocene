@@ -165,7 +165,9 @@ fn render_generic_args(buf: &mut String, crate_: &Crate, args: &GenericArgs) {
             for constraint in constraints {
                 separator.insert(buf);
                 buf.push_str(&constraint.name);
-                render_generic_args(buf, crate_, &constraint.args);
+                if let Some(args) = &constraint.args {
+                    render_generic_args(buf, crate_, args)
+                }
                 match &constraint.binding {
                     AssocItemConstraintKind::Equality(term) => {
                         buf.push_str(" = ");
@@ -258,7 +260,9 @@ pub(crate) fn render_type(buf: &mut String, crate_: &Crate, type_: &Type) {
         } => {
             buf.push('<');
             render_type(buf, crate_, self_type);
-            render_generic_args(buf, crate_, args);
+            if let Some(args) = args {
+                render_generic_args(buf, crate_, args)
+            }
             buf.push_str(" as ");
             render_path(buf, crate_, trait_.as_ref().unwrap());
             buf.push_str(">::");

@@ -49,6 +49,7 @@ use crate::intrinsics::{self, const_eval_select};
 /// debuginfo to have a measurable compile-time impact on debug builds.
 #[macro_export]
 #[unstable(feature = "ub_checks", issue = "none")]
+#[allow_internal_unstable(coverage_attribute)]
 macro_rules! assert_unsafe_precondition {
     ($kind:ident, $message:expr, ($($name:ident:$ty:ty = $arg:expr),*$(,)?) => $e:expr $(,)?) => {
         {

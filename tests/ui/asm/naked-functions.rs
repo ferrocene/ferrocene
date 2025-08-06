@@ -237,3 +237,6 @@ pub extern "C" fn rustc_std_internal_symbol() {
 pub extern "C" fn rustfmt_skip() {
     naked_asm!("", options(raw));
 }
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

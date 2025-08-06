@@ -24,3 +24,6 @@ extern "C" fn test_thumb() {
 extern "C" fn test_arm() {
     naked_asm!("bx lr");
 }
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

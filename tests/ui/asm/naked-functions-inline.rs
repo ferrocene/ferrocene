@@ -35,3 +35,6 @@ pub extern "C" fn inline_never() {
 pub extern "C" fn conditional_inline_never() {
     naked_asm!("");
 }
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

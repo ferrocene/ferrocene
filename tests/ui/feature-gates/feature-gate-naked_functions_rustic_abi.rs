@@ -24,3 +24,6 @@ pub unsafe extern "rust-cold" fn rust_cold() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

@@ -61,3 +61,6 @@ fn main() {
 extern "C" fn issue_140082() {
     naked_asm!("")
 }
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

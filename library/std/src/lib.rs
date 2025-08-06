@@ -419,6 +419,9 @@
 #![feature(io_const_error)]
 // tidy-alphabetical-end
 //
+// Ferrocene added lints/features:
+#![feature(coverage_attribute)]
+//
 #![default_lib_allocator]
 
 // Explicitly import the prelude. The compiler uses this same unstable attribute

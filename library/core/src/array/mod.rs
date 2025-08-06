@@ -224,13 +224,9 @@ impl Error for TryFromSliceError {
 }
 
 #[stable(feature = "try_from_slice_error", since = "1.36.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl From<Infallible> for TryFromSliceError {
-=======
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const From<Infallible> for TryFromSliceError {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn from(x: Infallible) -> TryFromSliceError {
         match x {}
     }

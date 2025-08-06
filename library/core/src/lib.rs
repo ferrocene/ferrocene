@@ -97,7 +97,6 @@
 // of conflicts we have when merging main.
 //
 // Library features:
-<<<<<<< HEAD
 // not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(array_ptr_get))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(asm_experimental_arch))]
@@ -107,18 +106,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_select))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_target_has_reliable_f16_f128))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(const_carrying_mul_add))]
-=======
-// tidy-alphabetical-start
-#![feature(array_ptr_get)]
-#![feature(asm_experimental_arch)]
-#![feature(bigint_helper_methods)]
-#![feature(bstr)]
-#![feature(bstr_internals)]
-#![feature(cfg_select)]
-#![feature(cfg_target_has_reliable_f16_f128)]
-#![feature(const_carrying_mul_add)]
-#![feature(const_cmp)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(const_cmp))]
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
 #![feature(core_intrinsics)]
@@ -158,17 +146,12 @@
 #![feature(cfg_target_has_atomic)]
 #![feature(cfg_target_has_atomic_equal_alignment)]
 #![feature(cfg_ub_checks)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(const_precise_live_drops))]
+#![feature(const_precise_live_drops)]
 #![feature(const_trait_impl)]
 #![feature(decl_macro)]
-<<<<<<< HEAD
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(deprecated_suggestion))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(derive_const))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_cfg))]
-=======
-#![feature(deprecated_suggestion)]
-#![feature(derive_const)]
-#![feature(doc_cfg)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(doc_cfg_hide)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_notable_trait))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(extern_types))]

@@ -578,11 +578,8 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{self, FusedIterator, TrustedLen};
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 use crate::marker::Destruct;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
 #[cfg(feature = "ferrocene_certified")]
 use crate::ops::{Deref, DerefMut};
@@ -1728,16 +1725,12 @@ impl<T> Option<T> {
     #[must_use = "if you intended to set a value, consider assignment instead"]
     #[inline]
     #[stable(feature = "option_insert", since = "1.53.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn insert(&mut self, value: T) -> &mut T {
-=======
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn insert(&mut self, value: T) -> &mut T
     where
         T: ~const Destruct,
     {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         *self = Some(value);
 
         // SAFETY: the code above just filled the option
@@ -1790,13 +1783,9 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "option_get_or_insert_default", since = "1.83.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn get_or_insert_default(&mut self) -> &mut T
-=======
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn get_or_insert_default(&mut self) -> &mut T
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     where
         T: ~const Default + ~const Destruct,
     {
@@ -1822,13 +1811,9 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "option_entry", since = "1.20.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn get_or_insert_with<F>(&mut self, f: F) -> &mut T
-=======
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn get_or_insert_with<F>(&mut self, f: F) -> &mut T
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     where
         F: ~const FnOnce() -> T + ~const Destruct,
         T: ~const Destruct,
@@ -1896,13 +1881,9 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "option_take_if", since = "1.80.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn take_if<P>(&mut self, predicate: P) -> Option<T>
-=======
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn take_if<P>(&mut self, predicate: P) -> Option<T>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     where
         P: ~const FnOnce(&mut T) -> bool + ~const Destruct,
     {
@@ -1991,13 +1972,9 @@ impl<T> Option<T> {
     /// assert_eq!(x.zip_with(None, Point::new), None);
     /// ```
     #[unstable(feature = "option_zip", issue = "70086")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_uncertified"))]
-    pub fn zip_with<U, F, R>(self, other: Option<U>, f: F) -> Option<R>
-=======
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[cfg(not(feature = "ferrocene_uncertified"))]
     pub const fn zip_with<U, F, R>(self, other: Option<U>, f: F) -> Option<R>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     where
         F: ~const FnOnce(T, U) -> R + ~const Destruct,
         T: ~const Destruct,
@@ -2360,13 +2337,9 @@ impl<'a, T> const From<&'a mut Option<T>> for Option<&'a mut T> {
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T> crate::marker::StructuralPartialEq for Option<T> {}
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T: PartialEq> PartialEq for Option<T> {
-=======
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ~const PartialEq> const PartialEq for Option<T> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     #[inline]
     fn eq(&self, other: &Self) -> bool {
         // Spelling out the cases explicitly optimizes better than
@@ -2686,13 +2659,9 @@ impl<A, V: FromIterator<A>> FromIterator<Option<A>> for Option<V> {
 }
 
 #[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T> ops::Try for Option<T> {
-=======
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const ops::Try for Option<T> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     type Output = T;
     type Residual = Option<convert::Infallible>;
 
@@ -2711,11 +2680,8 @@ impl<T> const ops::Try for Option<T> {
 }
 
 #[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 // Note: manually specifying the residual type instead of using the default to work around
 // https://github.com/rust-lang/rust/issues/99940
 impl<T> const ops::FromResidual<Option<convert::Infallible>> for Option<T> {
@@ -2729,13 +2695,9 @@ impl<T> const ops::FromResidual<Option<convert::Infallible>> for Option<T> {
 
 #[diagnostic::do_not_recommend]
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T> ops::FromResidual<ops::Yeet<()>> for Option<T> {
-=======
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const ops::FromResidual<ops::Yeet<()>> for Option<T> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     #[inline]
     fn from_residual(ops::Yeet(()): ops::Yeet<()>) -> Self {
         None
@@ -2743,13 +2705,9 @@ impl<T> const ops::FromResidual<ops::Yeet<()>> for Option<T> {
 }
 
 #[unstable(feature = "try_trait_v2_residual", issue = "91285")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T> ops::Residual<T> for Option<convert::Infallible> {
-=======
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const ops::Residual<T> for Option<convert::Infallible> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     type TryType = Option<T>;
 }
 

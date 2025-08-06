@@ -1412,7 +1412,7 @@ is a :t:`string literal` form of the :t:`comment` without the leading ``///``,
 
    pub mod commented_module {
 
-       //! This inner line comment applies to commented_mode.
+       //! This inner line comment applies to commented_module.
 
        /*! This inner block comment applies to commented_module,
            and is considered documentation. */

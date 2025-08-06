@@ -23,12 +23,3 @@ shipped as a preview.
 
   * ``miri-${rustc-host}``
 
-Removed experimental features
------------------------------
-
-Experimental features are not qualified for safety critical use, and are
-shipped as a preview. In some circumstances, these features are removed.
-
-* Experimental support has been removed for the following platforms:
-
-  * :target-with-tuple:`x86_64-apple-darwin`

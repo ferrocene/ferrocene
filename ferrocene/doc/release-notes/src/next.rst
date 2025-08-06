@@ -9,12 +9,17 @@ Next Ferrocene release
 This page contains the changes to be introduced in the upcoming Ferrocene
 release.
 
-Removed experimental features
------------------------------
+New experimental features
+-------------------------
 
 Experimental features are not qualified for safety critical use, and are
-shipped as a preview. In some circumstances, these features are removed.
+shipped as a preview.
 
-* Experimental support has been removed for the following platforms:
+* Experimental support has been added for ``cargo miri``, an unstable undefined
+  behavior detection tool. Other than installation, usage is
+  `according to upstream documentation <https://github.com/rust-lang/miri>`_.
+  
+  The package is available as:
 
-  * :target-with-tuple:`x86_64-apple-darwin`
+  * ``miri-${rustc-host}``
+

@@ -32,3 +32,6 @@ fn test4() {
         //~^ ERROR the `naked_asm!` macro can only be used in functions marked with `#[unsafe(naked)]`
     };
 }
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

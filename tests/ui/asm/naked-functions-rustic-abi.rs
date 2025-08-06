@@ -25,3 +25,6 @@ pub extern "Rust" fn rust_explicit() {
 pub extern "rust-cold" fn rust_cold() {
     naked_asm!("ret");
 }
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

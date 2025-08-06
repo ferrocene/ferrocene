@@ -94,3 +94,6 @@ pub mod naked {
         }
     }
 }
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

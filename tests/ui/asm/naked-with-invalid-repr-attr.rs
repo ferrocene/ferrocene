@@ -46,3 +46,6 @@ extern "C" fn example5() {
     //~^ NOTE not an enum
     naked_asm!("")
 }
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

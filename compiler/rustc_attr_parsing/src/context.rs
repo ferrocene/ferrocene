@@ -17,8 +17,9 @@ use crate::attributes::allow_unstable::{
     AllowConstFnUnstableParser, AllowInternalUnstableParser, UnstableFeatureBoundParser,
 };
 use crate::attributes::codegen_attrs::{
-    ColdParser, ExportNameParser, NakedParser, NoMangleParser, OmitGdbPrettyPrinterSectionParser,
-    OptimizeParser, TargetFeatureParser, TrackCallerParser, UsedParser,
+    ColdParser, CoverageParser, ExportNameParser, NakedParser, NoMangleParser,
+    OmitGdbPrettyPrinterSectionParser, OptimizeParser, TargetFeatureParser, TrackCallerParser,
+    UsedParser,
 };
 use crate::attributes::confusables::ConfusablesParser;
 use crate::attributes::deprecation::DeprecationParser;
@@ -32,10 +33,14 @@ use crate::attributes::lint_helpers::{
     AsPtrParser, AutomaticallyDerivedParser, PassByValueParser, PubTransparentParser,
 };
 use crate::attributes::loop_match::{ConstContinueParser, LoopMatchParser};
+use crate::attributes::macro_attrs::{MacroEscapeParser, MacroUseParser};
 use crate::attributes::must_use::MustUseParser;
 use crate::attributes::no_implicit_prelude::NoImplicitPreludeParser;
 use crate::attributes::non_exhaustive::NonExhaustiveParser;
 use crate::attributes::path::PathParser as PathAttributeParser;
+use crate::attributes::proc_macro_attrs::{
+    ProcMacroAttributeParser, ProcMacroDeriveParser, ProcMacroParser, RustcBuiltinMacroParser,
+};
 use crate::attributes::repr::{AlignParser, ReprParser};
 use crate::attributes::rustc_internal::{
     RustcLayoutScalarValidRangeEnd, RustcLayoutScalarValidRangeStart,
@@ -125,6 +130,7 @@ attribute_parsers!(
         BodyStabilityParser,
         ConfusablesParser,
         ConstStabilityParser,
+        MacroUseParser,
         NakedParser,
         StabilityParser,
         UsedParser,
@@ -139,6 +145,7 @@ attribute_parsers!(
         // tidy-alphabetical-end
 
         // tidy-alphabetical-start
+        Single<CoverageParser>,
         Single<DeprecationParser>,
         Single<DummyParser>,
         Single<ExportNameParser>,
@@ -150,6 +157,8 @@ attribute_parsers!(
         Single<MustUseParser>,
         Single<OptimizeParser>,
         Single<PathAttributeParser>,
+        Single<ProcMacroDeriveParser>,
+        Single<RustcBuiltinMacroParser>,
         Single<RustcForceInlineParser>,
         Single<RustcLayoutScalarValidRangeEnd>,
         Single<RustcLayoutScalarValidRangeStart>,
@@ -172,6 +181,7 @@ attribute_parsers!(
         Single<WithoutArgs<FfiPureParser>>,
         Single<WithoutArgs<FundamentalParser>>,
         Single<WithoutArgs<LoopMatchParser>>,
+        Single<WithoutArgs<MacroEscapeParser>>,
         Single<WithoutArgs<MarkerParser>>,
         Single<WithoutArgs<MayDangleParser>>,
         Single<WithoutArgs<NoImplicitPreludeParser>>,
@@ -181,6 +191,8 @@ attribute_parsers!(
         Single<WithoutArgs<ParenSugarParser>>,
         Single<WithoutArgs<PassByValueParser>>,
         Single<WithoutArgs<PointeeParser>>,
+        Single<WithoutArgs<ProcMacroAttributeParser>>,
+        Single<WithoutArgs<ProcMacroParser>>,
         Single<WithoutArgs<PubTransparentParser>>,
         Single<WithoutArgs<SpecializationTraitParser>>,
         Single<WithoutArgs<StdInternalSymbolParser>>,
@@ -384,6 +396,17 @@ impl<'f, 'sess: 'f, S: Stage> AcceptContext<'f, 'sess, S> {
         })
     }
 
+    /// emit an error that a `name` was expected here
+    pub(crate) fn expected_identifier(&self, span: Span) -> ErrorGuaranteed {
+        self.emit_err(AttributeParseError {
+            span,
+            attr_span: self.attr_span,
+            template: self.template.clone(),
+            attribute: self.attr_path.clone(),
+            reason: AttributeParseErrorReason::ExpectedIdentifier,
+        })
+    }
+
     /// emit an error that a `name = value` pair was expected at this span. The symbol can be given for
     /// a nicer error message talking about the specific name that was found lacking a value.
     pub(crate) fn expected_name_value(&self, span: Span, name: Option<Symbol>) -> ErrorGuaranteed {
@@ -452,6 +475,25 @@ impl<'f, 'sess: 'f, S: Stage> AcceptContext<'f, 'sess, S> {
             reason: AttributeParseErrorReason::ExpectedSpecificArgument {
                 possibilities,
                 strings: false,
+                list: false,
+            },
+        })
+    }
+
+    pub(crate) fn expected_specific_argument_and_list(
+        &self,
+        span: Span,
+        possibilities: Vec<&'static str>,
+    ) -> ErrorGuaranteed {
+        self.emit_err(AttributeParseError {
+            span,
+            attr_span: self.attr_span,
+            template: self.template.clone(),
+            attribute: self.attr_path.clone(),
+            reason: AttributeParseErrorReason::ExpectedSpecificArgument {
+                possibilities,
+                strings: false,
+                list: true,
             },
         })
     }
@@ -469,6 +511,7 @@ impl<'f, 'sess: 'f, S: Stage> AcceptContext<'f, 'sess, S> {
             reason: AttributeParseErrorReason::ExpectedSpecificArgument {
                 possibilities,
                 strings: true,
+                list: false,
             },
         })
     }

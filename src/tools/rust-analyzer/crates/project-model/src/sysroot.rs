@@ -9,14 +9,15 @@ use std::{env, fs, ops::Not, path::Path, process::Command};
 
 use anyhow::{Result, format_err};
 use itertools::Itertools;
-use paths::{AbsPath, AbsPathBuf, Utf8PathBuf};
+use paths::{AbsPath, AbsPathBuf, Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashMap;
 use stdx::format_to;
 use toolchain::{Tool, probe_for_binary};
 
 use crate::{
     CargoWorkspace, ManifestPath, ProjectJson, RustSourceWorkspaceConfig,
-    cargo_workspace::CargoMetadataConfig, utf8_stdout,
+    cargo_workspace::{CargoMetadataConfig, FetchMetadata},
+    utf8_stdout,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -142,12 +143,11 @@ impl Sysroot {
             Some(root) => {
                 // special case rustc, we can look that up directly in the sysroot's bin folder
                 // as it should never invoke another cargo binary
-                if let Tool::Rustc = tool {
-                    if let Some(path) =
+                if let Tool::Rustc = tool
+                    && let Some(path) =
                         probe_for_binary(root.join("bin").join(Tool::Rustc.name()).into())
-                    {
-                        return toolchain::command(path, current_dir, envs);
-                    }
+                {
+                    return toolchain::command(path, current_dir, envs);
                 }
 
                 let mut cmd = toolchain::command(tool.prefer_proxy(), current_dir, envs);
@@ -211,6 +211,7 @@ impl Sysroot {
         sysroot_source_config: &RustSourceWorkspaceConfig,
         no_deps: bool,
         current_dir: &AbsPath,
+        target_dir: &Utf8Path,
         progress: &dyn Fn(String),
     ) -> Option<RustLibSrcWorkspace> {
         assert!(matches!(self.workspace, RustLibSrcWorkspace::Empty), "workspace already loaded");
@@ -224,6 +225,7 @@ impl Sysroot {
                 match self.load_library_via_cargo(
                     &library_manifest,
                     current_dir,
+                    target_dir,
                     cargo_config,
                     no_deps,
                     progress,
@@ -288,29 +290,26 @@ impl Sysroot {
 
     pub fn set_workspace(&mut self, workspace: RustLibSrcWorkspace) {
         self.workspace = workspace;
-        if self.error.is_none() {
-            if let Some(src_root) = &self.rust_lib_src_root {
-                let has_core = match &self.workspace {
-                    RustLibSrcWorkspace::Workspace(ws) => {
-                        ws.packages().any(|p| ws[p].name == "core")
-                    }
-                    RustLibSrcWorkspace::Json(project_json) => project_json
-                        .crates()
-                        .filter_map(|(_, krate)| krate.display_name.clone())
-                        .any(|name| name.canonical_name().as_str() == "core"),
-                    RustLibSrcWorkspace::Stitched(stitched) => stitched.by_name("core").is_some(),
-                    RustLibSrcWorkspace::Empty => true,
+        if self.error.is_none()
+            && let Some(src_root) = &self.rust_lib_src_root
+        {
+            let has_core = match &self.workspace {
+                RustLibSrcWorkspace::Workspace(ws) => ws.packages().any(|p| ws[p].name == "core"),
+                RustLibSrcWorkspace::Json(project_json) => project_json
+                    .crates()
+                    .filter_map(|(_, krate)| krate.display_name.clone())
+                    .any(|name| name.canonical_name().as_str() == "core"),
+                RustLibSrcWorkspace::Stitched(stitched) => stitched.by_name("core").is_some(),
+                RustLibSrcWorkspace::Empty => true,
+            };
+            if !has_core {
+                let var_note = if env::var_os("RUST_SRC_PATH").is_some() {
+                    " (env var `RUST_SRC_PATH` is set and may be incorrect, try unsetting it)"
+                } else {
+                    ", try running `rustup component add rust-src` to possibly fix this"
                 };
-                if !has_core {
-                    let var_note = if env::var_os("RUST_SRC_PATH").is_some() {
-                        " (env var `RUST_SRC_PATH` is set and may be incorrect, try unsetting it)"
-                    } else {
-                        ", try running `rustup component add rust-src` to possibly fix this"
-                    };
-                    self.error = Some(format!(
-                        "sysroot at `{src_root}` is missing a `core` library{var_note}",
-                    ));
-                }
+                self.error =
+                    Some(format!("sysroot at `{src_root}` is missing a `core` library{var_note}",));
             }
         }
     }
@@ -319,6 +318,7 @@ impl Sysroot {
         &self,
         library_manifest: &ManifestPath,
         current_dir: &AbsPath,
+        target_dir: &Utf8Path,
         cargo_config: &CargoMetadataConfig,
         no_deps: bool,
         progress: &dyn Fn(String),
@@ -331,16 +331,11 @@ impl Sysroot {
             Some("nightly".to_owned()),
         );
 
-        let (mut res, _) = CargoWorkspace::fetch_metadata(
-            library_manifest,
-            current_dir,
-            &cargo_config,
-            self,
-            no_deps,
-            // Make sure we never attempt to write to the sysroot
-            true,
-            progress,
-        )?;
+        // Make sure we never attempt to write to the sysroot
+        let locked = true;
+        let (mut res, _) =
+            FetchMetadata::new(library_manifest, current_dir, &cargo_config, self, no_deps)
+                .exec(target_dir, locked, progress)?;
 
         // Patch out `rustc-std-workspace-*` crates to point to the real crates.
         // This is done prior to `CrateGraph` construction to prevent de-duplication logic from failing.

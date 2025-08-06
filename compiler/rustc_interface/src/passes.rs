@@ -208,6 +208,10 @@ fn configure_and_expand(
         // Expand macros now!
         let krate = sess.time("expand_crate", || ecx.monotonic_expander().expand_crate(krate));
 
+        if ecx.nb_macro_errors > 0 {
+            sess.dcx().abort_if_errors();
+        }
+
         // The rest is error reporting and stats
 
         sess.psess.buffered_lints.with_lock(|buffered_lints: &mut Vec<BufferedEarlyLint>| {
@@ -1055,17 +1059,11 @@ fn run_required_analyses(tcx: TyCtxt<'_>) {
                 });
             },
             {
-                sess.time("unused_lib_feature_checking", || {
-                    rustc_passes::stability::check_unused_or_stable_features(tcx)
-                });
-            },
-            {
                 // We force these queries to run,
                 // since they might not otherwise get called.
                 // This marks the corresponding crate-level attributes
                 // as used, and ensures that their values are valid.
                 tcx.ensure_ok().limits(());
-                tcx.ensure_ok().stability_index(());
             }
         );
     });

@@ -496,28 +496,17 @@ fn codegen_fn_attrs(tcx: TyCtxt<'_>, did: LocalDefId) -> CodegenFnAttrs {
             )
             .with_note("Rustc requires this item to have a specific mangled name.")
             .with_span_label(tcx.def_span(did), "should be the internal language item");
-        if let Some(lang_item) = lang_item {
-            if let Some(link_name) = lang_item.link_name() {
-                err = err
-                    .with_note("If you are trying to prevent mangling to ease debugging, many")
-                    .with_note(format!(
-                        "debuggers support a command such as `rbreak {link_name}` to"
-                    ))
-                    .with_note(format!(
-                        "match `.*{link_name}.*` instead of `break {link_name}` on a specific name"
-                    ))
-            }
+        if let Some(lang_item) = lang_item
+            && let Some(link_name) = lang_item.link_name()
+        {
+            err = err
+                .with_note("If you are trying to prevent mangling to ease debugging, many")
+                .with_note(format!("debuggers support a command such as `rbreak {link_name}` to"))
+                .with_note(format!(
+                    "match `.*{link_name}.*` instead of `break {link_name}` on a specific name"
+                ))
         }
         err.emit();
-    }
-
-    // Any linkage to LLVM intrinsics for now forcibly marks them all as never
-    // unwinds since LLVM sometimes can't handle codegen which `invoke`s
-    // intrinsic functions.
-    if let Some(name) = &codegen_fn_attrs.link_name
-        && name.as_str().starts_with("llvm.")
-    {
-        codegen_fn_attrs.flags |= CodegenFnAttrFlags::NEVER_UNWIND;
     }
 
     if let Some(features) = check_tied_features(

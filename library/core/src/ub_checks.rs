@@ -130,6 +130,7 @@ pub(crate) const fn maybe_is_aligned_and_not_null(
 }
 
 #[inline]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) const fn is_valid_allocation_size(size: usize, len: usize) -> bool {
     let max_len = if size == 0 { usize::MAX } else { isize::MAX as usize / size };
     len <= max_len
@@ -142,6 +143,7 @@ pub(crate) const fn is_valid_allocation_size(size: usize, len: usize) -> bool {
 /// only be used with `assert_unsafe_precondition!`, similar to `is_aligned_and_not_null`.
 #[inline]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) const fn maybe_is_nonoverlapping(
     src: *const (),
     dst: *const (),

@@ -1,7 +1,12 @@
+#[cfg(not(feature = "ferrocene_certified"))]
 use super::*;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering::{Equal, Greater, Less};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::const_eval_select;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, SizedTypeProperties};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::slice::{self, SliceIndex};
 
 impl<T: ?Sized> *mut T {
@@ -35,6 +40,7 @@ impl<T: ?Sized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[rustc_diagnostic_item = "ptr_is_null"]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn is_null(self) -> bool {
         self.cast_const().is_null()
     }
@@ -99,6 +105,7 @@ impl<T: ?Sized> *mut T {
     #[unstable(feature = "set_ptr_value", issue = "75091")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn with_metadata_of<U>(self, meta: *const U) -> *mut U
     where
         U: ?Sized,
@@ -120,6 +127,7 @@ impl<T: ?Sized> *mut T {
     #[rustc_const_stable(feature = "ptr_const_cast", since = "1.65.0")]
     #[rustc_diagnostic_item = "ptr_cast_const"]
     #[inline(always)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn cast_const(self) -> *const T {
         self as _
     }
@@ -149,6 +157,7 @@ impl<T: ?Sized> *mut T {
     #[must_use]
     #[inline(always)]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn addr(self) -> usize {
         // A pointer-to-integer transmute currently has exactly the right semantics: it returns the
         // address without exposing the provenance. Note that this is *not* a stable guarantee about
@@ -182,6 +191,7 @@ impl<T: ?Sized> *mut T {
     /// [`with_exposed_provenance_mut`]: with_exposed_provenance_mut
     #[inline(always)]
     #[stable(feature = "exposed_provenance", since = "1.84.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn expose_provenance(self) -> usize {
         self.cast::<()>() as usize
     }
@@ -200,6 +210,7 @@ impl<T: ?Sized> *mut T {
     #[must_use]
     #[inline]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn with_addr(self, addr: usize) -> Self {
         // This should probably be an intrinsic to avoid doing any sort of arithmetic, but
         // meanwhile, we can implement it with `wrapping_offset`, which preserves the pointer's
@@ -219,6 +230,7 @@ impl<T: ?Sized> *mut T {
     #[must_use]
     #[inline]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn map_addr(self, f: impl FnOnce(usize) -> usize) -> Self {
         self.with_addr(f(self.addr()))
     }
@@ -228,6 +240,7 @@ impl<T: ?Sized> *mut T {
     /// The pointer can be later reconstructed with [`from_raw_parts_mut`].
     #[unstable(feature = "ptr_metadata", issue = "81513")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn to_raw_parts(self) -> (*mut (), <T as super::Pointee>::Metadata) {
         (self.cast(), super::metadata(self))
     }
@@ -282,6 +295,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "ptr_as_ref", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_ref<'a>(self) -> Option<&'a T> {
         // SAFETY: the caller must guarantee that `self` is valid for a
         // reference if it isn't null.
@@ -316,6 +330,7 @@ impl<T: ?Sized> *mut T {
     #[unstable(feature = "ptr_as_ref_unchecked", issue = "122034")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_ref_unchecked<'a>(self) -> &'a T {
         // SAFETY: the caller must guarantee that `self` is valid for a reference
         unsafe { &*self }
@@ -359,6 +374,7 @@ impl<T: ?Sized> *mut T {
     /// ```
     #[inline]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_uninit_ref<'a>(self) -> Option<&'a MaybeUninit<T>>
     where
         T: Sized,
@@ -413,6 +429,7 @@ impl<T: ?Sized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn offset(self, count: isize) -> *mut T
     where
         T: Sized,
@@ -468,6 +485,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_offset(self, count: isize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `offset`.
         unsafe { self.cast::<u8>().offset(count).with_metadata_of(self) }
@@ -526,6 +544,7 @@ impl<T: ?Sized> *mut T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn wrapping_offset(self, count: isize) -> *mut T
     where
         T: Sized,
@@ -548,6 +567,7 @@ impl<T: ?Sized> *mut T {
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn wrapping_byte_offset(self, count: isize) -> Self {
         self.cast::<u8>().wrapping_offset(count).with_metadata_of(self)
     }
@@ -589,6 +609,7 @@ impl<T: ?Sized> *mut T {
     #[unstable(feature = "ptr_mask", issue = "98290")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[inline(always)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn mask(self, mask: usize) -> *mut T {
         intrinsics::ptr_mask(self.cast::<()>(), mask).cast_mut().with_metadata_of(self)
     }
@@ -643,6 +664,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "ptr_as_ref", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_mut<'a>(self) -> Option<&'a mut T> {
         // SAFETY: the caller must guarantee that `self` is be valid for
         // a mutable reference if it isn't null.
@@ -679,6 +701,7 @@ impl<T: ?Sized> *mut T {
     #[unstable(feature = "ptr_as_ref_unchecked", issue = "122034")]
     #[inline]
     #[must_use]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_mut_unchecked<'a>(self) -> &'a mut T {
         // SAFETY: the caller must guarantee that `self` is valid for a reference
         unsafe { &mut *self }
@@ -706,6 +729,7 @@ impl<T: ?Sized> *mut T {
     /// [`is_null`]: #method.is_null-1
     #[inline]
     #[unstable(feature = "ptr_as_uninit", issue = "75402")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn as_uninit_mut<'a>(self) -> Option<&'a mut MaybeUninit<T>>
     where
         T: Sized,
@@ -735,6 +759,7 @@ impl<T: ?Sized> *mut T {
     #[unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[rustc_const_unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn guaranteed_eq(self, other: *mut T) -> Option<bool>
     where
         T: Sized,
@@ -762,6 +787,7 @@ impl<T: ?Sized> *mut T {
     #[unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[rustc_const_unstable(feature = "const_raw_ptr_comparison", issue = "53020")]
     #[inline]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn guaranteed_ne(self, other: *mut T) -> Option<bool>
     where
         T: Sized,
@@ -854,6 +880,7 @@ impl<T: ?Sized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_offset_from", since = "1.65.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn offset_from(self, origin: *const T) -> isize
     where
         T: Sized,
@@ -875,6 +902,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_offset_from<U: ?Sized>(self, origin: *const U) -> isize {
         // SAFETY: the caller must uphold the safety contract for `offset_from`.
         unsafe { self.cast::<u8>().offset_from(origin.cast::<u8>()) }
@@ -943,6 +971,7 @@ impl<T: ?Sized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn offset_from_unsigned(self, origin: *const T) -> usize
     where
         T: Sized,
@@ -965,6 +994,7 @@ impl<T: ?Sized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_sub_ptr", since = "1.87.0")]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_offset_from_unsigned<U: ?Sized>(self, origin: *mut U) -> usize {
         // SAFETY: the caller must uphold the safety contract for `byte_offset_from_unsigned`.
         unsafe { (self as *const T).byte_offset_from_unsigned(origin) }
@@ -1019,6 +1049,7 @@ impl<T: ?Sized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn add(self, count: usize) -> Self
     where
         T: Sized,
@@ -1071,6 +1102,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_add(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `add`.
         unsafe { self.cast::<u8>().add(count).with_metadata_of(self) }
@@ -1125,6 +1157,7 @@ impl<T: ?Sized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -1183,6 +1216,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn byte_sub(self, count: usize) -> Self {
         // SAFETY: the caller must uphold the safety contract for `sub`.
         unsafe { self.cast::<u8>().sub(count).with_metadata_of(self) }
@@ -1240,6 +1274,7 @@ impl<T: ?Sized> *mut T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn wrapping_add(self, count: usize) -> Self
     where
         T: Sized,
@@ -1260,6 +1295,7 @@ impl<T: ?Sized> *mut T {
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn wrapping_byte_add(self, count: usize) -> Self {
         self.cast::<u8>().wrapping_add(count).with_metadata_of(self)
     }
@@ -1316,6 +1352,7 @@ impl<T: ?Sized> *mut T {
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline(always)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn wrapping_sub(self, count: usize) -> Self
     where
         T: Sized,
@@ -1336,6 +1373,7 @@ impl<T: ?Sized> *mut T {
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_pointer_byte_offsets", since = "1.75.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn wrapping_byte_sub(self, count: usize) -> Self {
         self.cast::<u8>().wrapping_sub(count).with_metadata_of(self)
     }
@@ -1350,6 +1388,7 @@ impl<T: ?Sized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn read(self) -> T
     where
         T: Sized,
@@ -1371,6 +1410,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn read_volatile(self) -> T
     where
         T: Sized,
@@ -1391,6 +1431,7 @@ impl<T: ?Sized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn read_unaligned(self) -> T
     where
         T: Sized,
@@ -1411,6 +1452,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn copy_to(self, dest: *mut T, count: usize)
     where
         T: Sized,
@@ -1431,6 +1473,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn copy_to_nonoverlapping(self, dest: *mut T, count: usize)
     where
         T: Sized,
@@ -1451,6 +1494,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn copy_from(self, src: *const T, count: usize)
     where
         T: Sized,
@@ -1471,6 +1515,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn copy_from_nonoverlapping(self, src: *const T, count: usize)
     where
         T: Sized,
@@ -1486,6 +1531,7 @@ impl<T: ?Sized> *mut T {
     /// [`ptr::drop_in_place`]: crate::ptr::drop_in_place()
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[inline(always)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn drop_in_place(self) {
         // SAFETY: the caller must uphold the safety contract for `drop_in_place`.
         unsafe { drop_in_place(self) }
@@ -1501,6 +1547,7 @@ impl<T: ?Sized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn write(self, val: T)
     where
         T: Sized,
@@ -1520,6 +1567,7 @@ impl<T: ?Sized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn write_bytes(self, val: u8, count: usize)
     where
         T: Sized,
@@ -1541,6 +1589,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub unsafe fn write_volatile(self, val: T)
     where
         T: Sized,
@@ -1561,6 +1610,7 @@ impl<T: ?Sized> *mut T {
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
     #[inline(always)]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn write_unaligned(self, val: T)
     where
         T: Sized,
@@ -1578,6 +1628,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_inherent_ptr_replace", since = "1.88.0")]
     #[inline(always)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn replace(self, src: T) -> T
     where
         T: Sized,
@@ -1596,6 +1647,7 @@ impl<T: ?Sized> *mut T {
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_stable(feature = "const_swap", since = "1.85.0")]
     #[inline(always)]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const unsafe fn swap(self, with: *mut T)
     where
         T: Sized,
@@ -1645,6 +1697,7 @@ impl<T: ?Sized> *mut T {
     #[must_use]
     #[inline]
     #[stable(feature = "align_offset", since = "1.36.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn align_offset(self, align: usize) -> usize
     where
         T: Sized,
@@ -1686,6 +1739,7 @@ impl<T: ?Sized> *mut T {
     #[must_use]
     #[inline]
     #[stable(feature = "pointer_is_aligned", since = "1.79.0")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn is_aligned(self) -> bool
     where
         T: Sized,
@@ -1726,6 +1780,7 @@ impl<T: ?Sized> *mut T {
     #[must_use]
     #[inline]
     #[unstable(feature = "pointer_is_aligned_to", issue = "96284")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub fn is_aligned_to(self, align: usize) -> bool {
         if !align.is_power_of_two() {
             panic!("is_aligned_to: align is not a power-of-two");
@@ -1735,6 +1790,7 @@ impl<T: ?Sized> *mut T {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> *mut [T] {
     /// Returns the length of a raw slice.
     ///
@@ -2054,6 +2110,7 @@ impl<T> *mut [T] {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> *mut [T; N] {
     /// Returns a raw pointer to the array's buffer.
     ///
@@ -2097,6 +2154,7 @@ impl<T, const N: usize> *mut [T; N] {
 
 /// Pointer equality is by address, as produced by the [`<*mut T>::addr`](pointer::addr) method.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> PartialEq for *mut T {
     #[inline(always)]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -2107,10 +2165,12 @@ impl<T: ?Sized> PartialEq for *mut T {
 
 /// Pointer equality is an equivalence relation.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Eq for *mut T {}
 
 /// Pointer comparison is by address, as produced by the [`<*mut T>::addr`](pointer::addr) method.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> Ord for *mut T {
     #[inline]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -2127,6 +2187,7 @@ impl<T: ?Sized> Ord for *mut T {
 
 /// Pointer comparison is by address, as produced by the [`<*mut T>::addr`](pointer::addr) method.
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> PartialOrd for *mut T {
     #[inline(always)]
     #[allow(ambiguous_wide_pointer_comparisons)]
@@ -2160,6 +2221,7 @@ impl<T: ?Sized> PartialOrd for *mut T {
 }
 
 #[stable(feature = "raw_ptr_default", since = "1.88.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized + Thin> Default for *mut T {
     /// Returns the default value of [`null_mut()`][crate::ptr::null_mut].
     fn default() -> Self {

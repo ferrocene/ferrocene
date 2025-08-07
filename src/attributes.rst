@@ -2139,7 +2139,7 @@ terminates and does not :t:`panic`.
 
 :dp:`fls_niky8lbkvej9`
 A :t:`testing function` that returns ``core::result::Result<(), E>`` passes when
-it returns ``core::result::Result::OK(())``.
+it returns ``core::result::Result::Ok(())``.
 
 :dp:`fls_qfuntdm2g184`
 A :t:`testing function` that does not terminate shall pass and fail according to

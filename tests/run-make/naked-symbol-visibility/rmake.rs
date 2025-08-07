@@ -98,3 +98,6 @@ fn find_dynamic_symbol<'file, 'data>(
         .filter_map(|e| file.symbol_by_name_bytes(e.name()))
         .collect()
 }
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

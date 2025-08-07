@@ -19,3 +19,6 @@ pub extern "C" fn compatible_target_feature() {
 pub extern "C" fn compatible_target_feature() {
     naked_asm!("ret");
 }
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

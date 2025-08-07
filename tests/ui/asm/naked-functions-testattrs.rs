@@ -35,3 +35,6 @@ extern "C" fn test_naked_ignore() {
 extern "C" fn bench_naked() {
     naked_asm!("")
 }
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

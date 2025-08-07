@@ -5,6 +5,8 @@ fn test_steps_between() {
     assert_eq!(Step::steps_between(&20_u8, &200_u8), (180_usize, Some(180_usize)));
     assert_eq!(Step::steps_between(&-20_i8, &80_i8), (100_usize, Some(100_usize)));
     assert_eq!(Step::steps_between(&-120_i8, &80_i8), (200_usize, Some(200_usize)));
+    assert_eq!(Step::steps_between(&1_u8, &0_u8), (0, None));
+    assert_eq!(Step::steps_between(&1_i8, &0_i8), (0, None));
     assert_eq!(
         Step::steps_between(&20_u32, &4_000_100_u32),
         (4_000_080_usize, Some(4_000_080_usize))
@@ -14,11 +16,15 @@ fn test_steps_between() {
         Step::steps_between(&-2_000_030_i32, &2_000_050_i32),
         (4_000_080_usize, Some(4_000_080_usize))
     );
+    assert_eq!(Step::steps_between(&1_usize, &0_usize), (0, None));
+    assert_eq!(Step::steps_between(&1_isize, &0_isize), (0, None));
 
     // Skip u64/i64 to avoid differences with 32-bit vs 64-bit platforms
 
     assert_eq!(Step::steps_between(&20_u128, &200_u128), (180_usize, Some(180_usize)));
     assert_eq!(Step::steps_between(&-20_i128, &80_i128), (100_usize, Some(100_usize)));
+    assert_eq!(Step::steps_between(&1_u128, &0_u128), (0, None));
+    assert_eq!(Step::steps_between(&1_i128, &0_i128), (0, None));
     if cfg!(target_pointer_width = "64") {
         assert_eq!(
             Step::steps_between(&10_u128, &0x1_0000_0000_0000_0009_u128),
@@ -31,8 +37,14 @@ fn test_steps_between() {
         Step::steps_between(&-0x1_0000_0000_0000_0000_i128, &0x1_0000_0000_0000_0000_i128,),
         (usize::MAX, None),
     );
+    assert_eq!(Step::steps_between(&i128::MIN, &i128::MAX), (usize::MAX, None));
 
     assert_eq!(Step::steps_between(&100_u32, &10_u32), (0, None));
+
+    assert_eq!(Step::steps_between(&'a', &'z'), (25_usize, Some(25_usize)));
+    assert_eq!(Step::steps_between(&'z', &'a'), (0, None));
+    assert_eq!(Step::steps_between(&'a', &'😀'), (126367_usize, Some(126367_usize)));
+    Step::steps_between(&'\0', &'􏿽');
 }
 
 #[test]

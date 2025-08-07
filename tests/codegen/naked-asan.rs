@@ -28,3 +28,6 @@ pub extern "x86-interrupt" fn page_fault_handler() {
 // CHECK: #[[ATTRS]] =
 // CHECK-NOT: sanitize_address
 // CHECK: !llvm.module.flags
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

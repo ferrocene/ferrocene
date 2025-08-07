@@ -13,3 +13,6 @@ pub unsafe extern "C" fn c_variadic(_: usize, _: ...) {
     // CHECK-NOT: alloca
     core::arch::naked_asm!("ret")
 }
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

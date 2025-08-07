@@ -9,3 +9,6 @@ pub extern "C" fn naked(p: char) -> u128 {
     //~^ WARN uses type `char`
     naked_asm!("")
 }
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

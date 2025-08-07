@@ -33,3 +33,6 @@ extern "C" fn foo<U: Tr>() {
 fn main() {
     foo::<E<42>>();
 }
+
+// ferrocene-annotations: fls_sd6rumpeb355
+// Attribute naked

@@ -202,6 +202,9 @@
 // that the feature-gate isn't enabled. Ideally, it wouldn't check for the feature gate for docs
 // from other crates, but since this can only appear for lang items, it doesn't seem worth fixing.
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(intra_doc_pointers))]
+//
+// Ferrocene lints/features:
+#![cfg_attr(feature = "ferrocene_certified", allow(rustdoc::broken_intra_doc_links))]
 
 // Module with internal macros used by other modules (needs to be included before other modules).
 #[macro_use]

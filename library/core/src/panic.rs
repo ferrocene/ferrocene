@@ -3,7 +3,6 @@
 #![stable(feature = "core_panic_info", since = "1.41.0")]
 
 mod location;
-#[cfg(not(feature = "ferrocene_certified"))]
 mod panic_info;
 #[cfg(not(feature = "ferrocene_certified"))]
 mod unwind_safe;
@@ -11,7 +10,6 @@ mod unwind_safe;
 #[stable(feature = "panic_hooks", since = "1.10.0")]
 pub use self::location::Location;
 #[stable(feature = "panic_hooks", since = "1.10.0")]
-#[cfg(not(feature = "ferrocene_certified"))]
 pub use self::panic_info::PanicInfo;
 #[stable(feature = "panic_info_message", since = "1.81.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
@@ -55,7 +53,7 @@ pub macro panic_2015 {
 #[allow_internal_unstable(panic_internals, const_format_args)]
 #[rustc_diagnostic_item = "core_panic_2021_macro"]
 #[rustc_macro_transparency = "semitransparent"]
-#[cfg(all(feature = "ferrocene_certified", feature = "panic_immediate_abort"))]
+#[cfg(feature = "ferrocene_certified")]
 pub macro panic_2021($($t:tt)*) {{ $crate::panicking::panic("explicit panic") }}
 
 #[doc(hidden)]

@@ -2129,9 +2129,6 @@ Attribute ``test``
 * :dp:`fls_aqzd30s267pt`
   Lacks :t:`[function parameter]s`, and
 
-* :dp:`fls_n3hjhh3d7tyx`
-  Its :t:`return type` is the :t:`unit type`.
-
 :dp:`fls_ze6cs75y9aft`
 :t:`Attribute` :dc:`test` indicates that the respective :t:`function` is a
 :dt:`testing function`.

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-FileCopyrightText: The Ferrocene Developers
+
 //! Test variants are a mechanism to run test suites for a target multiple times, each time varying
 //! some of the parameters passed to the suite.
 //!

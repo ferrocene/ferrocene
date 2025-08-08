@@ -447,7 +447,8 @@
           },
           {
             "directories": [
-              ".circleci"
+              ".circleci",
+              "src/bootstrap/src/ferrocene"
             ],
             "files": [
               ".dockerignore",

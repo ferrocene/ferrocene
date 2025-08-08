@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-FileCopyrightText: The Ferrocene Developers
+
 // Based off ../core/build_steps/install.rs
 
 //! Implementation of the install aspects of the compiler.

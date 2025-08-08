@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-FileCopyrightText: The Ferrocene Developers
+
 use crate::FileType;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;

@@ -123,6 +123,8 @@ add --set target.thumbv7em-ferrocenecoretest-eabi.cc=arm-none-eabi-gcc
 add --set target.thumbv7em-ferrocenecoretest-eabihf.cc=arm-none-eabi-gcc
 
 # experiment to enable code coverage
+add --set target.aarch64-unknown-ferrocenecoretest.profiler=true
+add --set target.thumbv7em-ferrocenecoretest-eabi.profiler=true
 add --set target.thumbv7em-ferrocenecoretest-eabihf.profiler=true
 
 # Set the host platform to build. The environment variable is set from the CI

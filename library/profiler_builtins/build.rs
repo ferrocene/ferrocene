@@ -106,6 +106,16 @@ fn main() {
         // a compiler like `arm-none-eabi-gcc` won't set this define by default but we need it for
         // ferrocenecoretest targets
         cfg.define("__linux__", None);
+
+        let target_arch =
+            env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH was not set");
+        if target_arch == "aarch64" {
+            // GCC assumes no atomics but the target supports up to 128-bit atomics
+            // without this calls `__sync_bool_compare_and_swap` in C code do not lower to
+            // instructions but to other compiler intrinsics that produce linker errors when
+            // building binaries with `-C instrument-coverage`
+            cfg.flag("-march=armv8-a+lse");
+        }
     }
 
     cfg.warnings(false);

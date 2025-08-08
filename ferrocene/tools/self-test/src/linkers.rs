@@ -59,7 +59,7 @@ pub(crate) fn check_and_add_rustflags(
         let prefix_list: &[&str] = match target.linker {
             Linker::BundledLld => {
                 reporter
-                    .skipped(&format!("Target `{}` does not require a C compiler", target.triple));
+                    .skipped(&format!("Target `{}` does not require a C compiler", target.tuple));
                 continue 'target_loop;
             }
             Linker::HostCc => &[""],
@@ -79,7 +79,7 @@ pub(crate) fn check_and_add_rustflags(
                     let compiler_name = format!("{cc_prefix}{compiler_kind}");
                     let cc_result = check_system_compiler(
                         env,
-                        target.triple,
+                        target.tuple,
                         &compiler_name,
                         lld_dir,
                         temp_dir.path(),
@@ -90,12 +90,12 @@ pub(crate) fn check_and_add_rustflags(
                             if env.print_detailed_args {
                                 reporter.note(&format!(
                                     "Target `{}`, detected args `{:?}`",
-                                    target.triple, &linker_args
+                                    target.tuple, &linker_args
                                 ));
                             }
 
                             match linker_args_ok(
-                                target.triple,
+                                target.tuple,
                                 linker_args.iter().map(|s| s.as_str()),
                                 &mut cc_args,
                             ) {
@@ -117,7 +117,7 @@ pub(crate) fn check_and_add_rustflags(
                             }
                             reporter.success(&format!(
                                 "Found C compiler `{}` for target `{}`",
-                                compiler_name, target.triple
+                                compiler_name, target.tuple
                             ));
                             target.rustflags.push(format!("-Clinker={compiler_name}"));
                             for cc_arg in cc_args {
@@ -138,7 +138,7 @@ pub(crate) fn check_and_add_rustflags(
                 }
             }
         }
-        return Err(Error::SuitableCCompilerNotFound { target: target.triple.into() });
+        return Err(Error::SuitableCCompilerNotFound { target: target.tuple.into() });
     }
 
     Ok(())
@@ -443,9 +443,9 @@ fn find_bundled_lld_wrapper(reporter: &dyn Reporter, sysroot: &Path) -> Result<P
 pub(crate) fn report_linker_flags(reporter: &dyn Reporter, targets: &[Target]) {
     for target in targets {
         if target.rustflags.is_empty() {
-            reporter.info(&format!("Target '{}' requires no special linker flags", target.triple));
+            reporter.info(&format!("Target '{}' requires no special linker flags", target.tuple));
         } else {
-            reporter.info(&format!("Target '{}' requires special linker flags:", target.triple));
+            reporter.info(&format!("Target '{}' requires special linker flags:", target.tuple));
             for flag in &target.rustflags {
                 reporter.info(&format!("\t{}", flag));
             }

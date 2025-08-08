@@ -12,6 +12,7 @@
 #![feature(async_iterator)]
 #![feature(bigint_helper_methods)]
 #![feature(bstr)]
+#![feature(cfg_target_has_reliable_f16_f128)]
 #![feature(char_max_len)]
 #![feature(clone_to_uninit)]
 #![feature(const_eval_select)]
@@ -63,7 +64,6 @@
 #![feature(never_type)]
 #![feature(next_index)]
 #![feature(numfmt)]
-#![feature(one_sided_range)]
 #![feature(pattern)]
 #![feature(pointer_is_aligned_to)]
 #![feature(portable_simd)]
@@ -91,6 +91,14 @@
 #![allow(internal_features)]
 #![deny(fuzzy_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
+// Ferrocene additions:
+//
+// Features we add so we can have better coverage:
+// tidy-alphabetical-start
+#![feature(char_internals)]
+#![feature(debug_closure_helpers)]
+#![feature(one_sided_range)]
+// tidy-alphabetical-end
 
 /// Version of `assert_matches` that ignores fancy runtime printing in const context and uses structural equality.
 macro_rules! assert_eq_const_safe {

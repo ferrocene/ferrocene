@@ -1,26 +1,29 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-Ferrocene 25.05.0
+:upcoming-release:
+
+Ferrocene 25.08.0
 =================
 
-Ferrocene 25.05.0 is the sixth major release of Ferrocene.
+This page contains the changes to be introduced in the upcoming Ferrocene
+release.
 
-The highlights of this release are the inclusion of Rust 1.86.0, as well as two new qualified targets.
+Removed experimental features
+-----------------------------
 
-New features
-------------
+Experimental features are not qualified for safety critical use, and are
+shipped as a preview. In some circumstances, these features are removed.
 
-* Two new targets are now supported and qualified for safety critical use:
+* Experimental support has been removed for the following platforms:
 
-  * :target-with-tuple:`thumbv7em-none-eabi`
-  * :target-with-tuple:`thumbv7em-none-eabihf`
+  * :target-with-tuple:`x86_64-apple-darwin`
 
 Fixed known problems
 --------------------
 
 A list of fixed known problems in this release can be found on the
-`Ferrocene 25.05 Known Problems <https://problems.ferrocene.dev/versions/25.05.html>`_
+`Ferrocene 25.08 Known Problems <https://problems.ferrocene.dev/versions/25.08.html>`_
 page.
 
 Rust changes
@@ -32,5 +35,5 @@ changes described here describe Rust's support levels, and have no correlation
 to the targets and platforms supported by Ferrocene.
 
 .. rust-changelog::
-   :from: 1.84.0
-   :to: 1.86.0
+   :from: 1.87.0
+   :to: 1.88.0

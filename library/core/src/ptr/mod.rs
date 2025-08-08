@@ -394,12 +394,24 @@
 // There are many unsafe functions taking pointers that don't dereference them.
 #![allow(clippy::not_unsafe_ptr_arg_deref)]
 
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::cmp::Ordering;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::intrinsics::const_eval_select;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::marker::FnPtr;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::mem::{self, MaybeUninit, SizedTypeProperties};
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::num::NonZero;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, hash, intrinsics, ub_checks};
+#[cfg(feature = "ferrocene_certified")]
+use crate::{
+    intrinsics,
+    mem::{self, SizedTypeProperties},
+    ub_checks,
+};
 
 mod alignment;
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
@@ -407,24 +419,33 @@ pub use alignment::Alignment;
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[doc(inline)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::intrinsics::copy;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[doc(inline)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::intrinsics::copy_nonoverlapping;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[doc(inline)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use crate::intrinsics::write_bytes;
 
 mod metadata;
 #[unstable(feature = "ptr_metadata", issue = "81513")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use metadata::{DynMetadata, Pointee, Thin, from_raw_parts, from_raw_parts_mut, metadata};
+#[unstable(feature = "ptr_metadata", issue = "81513")]
+#[cfg(feature = "ferrocene_certified")]
+pub use metadata::{Pointee, Thin, from_raw_parts, from_raw_parts_mut};
 
 mod non_null;
 #[stable(feature = "nonnull", since = "1.25.0")]
 pub use non_null::NonNull;
 
+#[cfg(not(feature = "ferrocene_certified"))]
 mod unique;
 #[unstable(feature = "ptr_internals", issue = "none")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use unique::Unique;
 
 mod const_ptr;
@@ -521,6 +542,7 @@ mod mut_ptr;
 #[lang = "drop_in_place"]
 #[allow(unconditional_recursion)]
 #[rustc_diagnostic_item = "ptr_drop_in_place"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn drop_in_place<T: ?Sized>(to_drop: *mut T) {
     // Code here does not matter - this is replaced by the
     // real drop glue by the compiler.
@@ -613,6 +635,7 @@ pub const fn without_provenance<T>(addr: usize) -> *const T {
 #[must_use]
 #[stable(feature = "strict_provenance", since = "1.84.0")]
 #[rustc_const_stable(feature = "strict_provenance", since = "1.84.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn dangling<T>() -> *const T {
     dangling_mut()
 }
@@ -656,6 +679,7 @@ pub const fn without_provenance_mut<T>(addr: usize) -> *mut T {
 #[must_use]
 #[stable(feature = "strict_provenance", since = "1.84.0")]
 #[rustc_const_stable(feature = "strict_provenance", since = "1.84.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn dangling_mut<T>() -> *mut T {
     NonNull::dangling().as_ptr()
 }
@@ -696,6 +720,7 @@ pub const fn dangling_mut<T>() -> *mut T {
 #[stable(feature = "exposed_provenance", since = "1.84.0")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[allow(fuzzy_provenance_casts)] // this *is* the explicit provenance API one should use instead
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn with_exposed_provenance<T>(addr: usize) -> *const T {
     addr as *const T
 }
@@ -736,6 +761,7 @@ pub fn with_exposed_provenance<T>(addr: usize) -> *const T {
 #[stable(feature = "exposed_provenance", since = "1.84.0")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[allow(fuzzy_provenance_casts)] // this *is* the explicit provenance API one should use instead
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn with_exposed_provenance_mut<T>(addr: usize) -> *mut T {
     addr as *mut T
 }
@@ -793,6 +819,7 @@ pub fn with_exposed_provenance_mut<T>(addr: usize) -> *mut T {
 #[rustc_const_stable(feature = "ptr_from_ref", since = "1.76.0")]
 #[rustc_never_returns_null_ptr]
 #[rustc_diagnostic_item = "ptr_from_ref"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn from_ref<T: ?Sized>(r: &T) -> *const T {
     r
 }
@@ -843,6 +870,7 @@ pub const fn from_ref<T: ?Sized>(r: &T) -> *const T {
 #[stable(feature = "ptr_from_ref", since = "1.76.0")]
 #[rustc_const_stable(feature = "ptr_from_ref", since = "1.76.0")]
 #[rustc_never_returns_null_ptr]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn from_mut<T: ?Sized>(r: &mut T) -> *mut T {
     r
 }
@@ -882,6 +910,7 @@ pub const fn from_mut<T: ?Sized>(r: &mut T) -> *mut T {
 #[stable(feature = "slice_from_raw_parts", since = "1.42.0")]
 #[rustc_const_stable(feature = "const_slice_from_raw_parts", since = "1.64.0")]
 #[rustc_diagnostic_item = "ptr_slice_from_raw_parts"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn slice_from_raw_parts<T>(data: *const T, len: usize) -> *const [T] {
     from_raw_parts(data, len)
 }
@@ -928,6 +957,7 @@ pub const fn slice_from_raw_parts<T>(data: *const T, len: usize) -> *const [T] {
 #[stable(feature = "slice_from_raw_parts", since = "1.42.0")]
 #[rustc_const_stable(feature = "const_slice_from_raw_parts_mut", since = "1.83.0")]
 #[rustc_diagnostic_item = "ptr_slice_from_raw_parts_mut"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const fn slice_from_raw_parts_mut<T>(data: *mut T, len: usize) -> *mut [T] {
     from_raw_parts_mut(data, len)
 }
@@ -1007,6 +1037,7 @@ pub const fn slice_from_raw_parts_mut<T>(data: *mut T, len: usize) -> *mut [T] {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_swap", since = "1.85.0")]
 #[rustc_diagnostic_item = "ptr_swap"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn swap<T>(x: *mut T, y: *mut T) {
     // Give ourselves some scratch space to work with.
     // We do not have to worry about drops: `MaybeUninit` does nothing when dropped.
@@ -1104,6 +1135,7 @@ pub const unsafe fn swap<T>(x: *mut T, y: *mut T) {
 #[rustc_const_stable(feature = "const_swap_nonoverlapping", since = "1.88.0")]
 #[rustc_diagnostic_item = "ptr_swap_nonoverlapping"]
 #[rustc_allow_const_fn_unstable(const_eval_select)] // both implementations behave the same
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn swap_nonoverlapping<T>(x: *mut T, y: *mut T, count: usize) {
     ub_checks::assert_unsafe_precondition!(
         check_library_ub,
@@ -1148,6 +1180,7 @@ pub const unsafe fn swap_nonoverlapping<T>(x: *mut T, y: *mut T, count: usize) {
 
 /// Same behavior and safety conditions as [`swap_nonoverlapping`]
 #[inline]
+#[cfg(not(feature = "ferrocene_certified"))]
 const unsafe fn swap_nonoverlapping_const<T>(x: *mut T, y: *mut T, count: usize) {
     let mut i = 0;
     while i < count {
@@ -1175,6 +1208,7 @@ const unsafe fn swap_nonoverlapping_const<T>(x: *mut T, y: *mut T, count: usize)
 // Don't let MIR inline this, because we really want it to keep its noalias metadata
 #[rustc_no_mir_inline]
 #[inline]
+#[cfg(not(feature = "ferrocene_certified"))]
 fn swap_chunk<const N: usize>(x: &mut MaybeUninit<[u8; N]>, y: &mut MaybeUninit<[u8; N]>) {
     let a = *x;
     let b = *y;
@@ -1183,6 +1217,7 @@ fn swap_chunk<const N: usize>(x: &mut MaybeUninit<[u8; N]>, y: &mut MaybeUninit<
 }
 
 #[inline]
+#[cfg(not(feature = "ferrocene_certified"))]
 unsafe fn swap_nonoverlapping_bytes(x: *mut u8, y: *mut u8, bytes: NonZero<usize>) {
     // Same as `swap_nonoverlapping::<[u8; N]>`.
     unsafe fn swap_nonoverlapping_chunks<const N: usize>(
@@ -1284,6 +1319,7 @@ unsafe fn swap_nonoverlapping_bytes(x: *mut u8, y: *mut u8, bytes: NonZero<usize
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_replace", since = "1.83.0")]
 #[rustc_diagnostic_item = "ptr_replace"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn replace<T>(dst: *mut T, src: T) -> T {
     // SAFETY: the caller must guarantee that `dst` is valid to be
     // cast to a mutable reference (valid for writes, aligned, initialized),
@@ -1531,6 +1567,7 @@ pub const unsafe fn read<T>(src: *const T) -> T {
 #[rustc_const_stable(feature = "const_ptr_read", since = "1.71.0")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_diagnostic_item = "ptr_read_unaligned"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn read_unaligned<T>(src: *const T) -> T {
     let mut tmp = MaybeUninit::<T>::uninit();
     // SAFETY: the caller must guarantee that `src` is valid for reads.
@@ -1733,6 +1770,7 @@ pub const unsafe fn write<T>(dst: *mut T, src: T) {
 #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
 #[rustc_diagnostic_item = "ptr_write_unaligned"]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn write_unaligned<T>(dst: *mut T, src: T) {
     // SAFETY: the caller must guarantee that `dst` is valid for writes.
     // `dst` cannot overlap `src` because the caller has mutable access
@@ -1808,6 +1846,7 @@ pub const unsafe fn write_unaligned<T>(dst: *mut T, src: T) {
 #[stable(feature = "volatile", since = "1.9.0")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_diagnostic_item = "ptr_read_volatile"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn read_volatile<T>(src: *const T) -> T {
     // SAFETY: the caller must uphold the safety contract for `volatile_load`.
     unsafe {
@@ -1888,6 +1927,7 @@ pub unsafe fn read_volatile<T>(src: *const T) -> T {
 #[stable(feature = "volatile", since = "1.9.0")]
 #[rustc_diagnostic_item = "ptr_write_volatile"]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+#[cfg(not(feature = "ferrocene_certified"))]
 pub unsafe fn write_volatile<T>(dst: *mut T, src: T) {
     // SAFETY: the caller must uphold the safety contract for `volatile_store`.
     unsafe {
@@ -1923,6 +1963,7 @@ pub unsafe fn write_volatile<T>(dst: *mut T, src: T) {
 ///
 /// Any questions go to @nagisa.
 #[allow(ptr_to_integer_transmute_in_consts)]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) unsafe fn align_offset<T: Sized>(p: *const T, a: usize) -> usize {
     // FIXME(#75598): Direct use of these intrinsics improves codegen significantly at opt-level <=
     // 1, where the method versions of these operations are not inlined.
@@ -2142,6 +2183,7 @@ pub(crate) unsafe fn align_offset<T: Sized>(p: *const T, a: usize) -> usize {
 #[must_use = "pointer comparison produces a value"]
 #[rustc_diagnostic_item = "ptr_eq"]
 #[allow(ambiguous_wide_pointer_comparisons)] // it's actually clear here
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn eq<T: ?Sized>(a: *const T, b: *const T) -> bool {
     a == b
 }
@@ -2166,6 +2208,7 @@ pub fn eq<T: ?Sized>(a: *const T, b: *const T) -> bool {
 #[stable(feature = "ptr_addr_eq", since = "1.76.0")]
 #[inline(always)]
 #[must_use = "pointer comparison produces a value"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn addr_eq<T: ?Sized, U: ?Sized>(p: *const T, q: *const U) -> bool {
     (p as *const ()) == (q as *const ())
 }
@@ -2219,6 +2262,7 @@ pub fn addr_eq<T: ?Sized, U: ?Sized>(p: *const T, q: *const U) -> bool {
 #[stable(feature = "ptr_fn_addr_eq", since = "1.85.0")]
 #[inline(always)]
 #[must_use = "function pointer comparison produces a value"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn fn_addr_eq<T: FnPtr, U: FnPtr>(f: T, g: U) -> bool {
     f.addr() == g.addr()
 }
@@ -2249,12 +2293,14 @@ pub fn fn_addr_eq<T: FnPtr, U: FnPtr>(f: T, g: U) -> bool {
 /// assert_eq!(actual, expected);
 /// ```
 #[stable(feature = "ptr_hash", since = "1.35.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub fn hash<T: ?Sized, S: hash::Hasher>(hashee: *const T, into: &mut S) {
     use crate::hash::Hash;
     hashee.hash(into);
 }
 
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<F: FnPtr> PartialEq for F {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
@@ -2262,9 +2308,11 @@ impl<F: FnPtr> PartialEq for F {
     }
 }
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<F: FnPtr> Eq for F {}
 
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<F: FnPtr> PartialOrd for F {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -2272,6 +2320,7 @@ impl<F: FnPtr> PartialOrd for F {
     }
 }
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<F: FnPtr> Ord for F {
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
@@ -2280,6 +2329,7 @@ impl<F: FnPtr> Ord for F {
 }
 
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<F: FnPtr> hash::Hash for F {
     fn hash<HH: hash::Hasher>(&self, state: &mut HH) {
         state.write_usize(self.addr() as _)
@@ -2287,6 +2337,7 @@ impl<F: FnPtr> hash::Hash for F {
 }
 
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<F: FnPtr> fmt::Pointer for F {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::pointer_fmt_inner(self.addr() as _, f)
@@ -2294,6 +2345,7 @@ impl<F: FnPtr> fmt::Pointer for F {
 }
 
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<F: FnPtr> fmt::Debug for F {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::pointer_fmt_inner(self.addr() as _, f)
@@ -2380,6 +2432,7 @@ impl<F: FnPtr> fmt::Debug for F {
 /// no difference whether the pointer is null or dangling.)
 #[stable(feature = "raw_ref_macros", since = "1.51.0")]
 #[rustc_macro_transparency = "semitransparent"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub macro addr_of($place:expr) {
     &raw const $place
 }
@@ -2470,6 +2523,7 @@ pub macro addr_of($place:expr) {
 /// makes no difference whether the pointer is null or dangling.)
 #[stable(feature = "raw_ref_macros", since = "1.51.0")]
 #[rustc_macro_transparency = "semitransparent"]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub macro addr_of_mut($place:expr) {
     &raw mut $place
 }

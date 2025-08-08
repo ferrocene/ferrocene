@@ -212,6 +212,7 @@
 // Ferrocene lints/features:
 #![allow(unused_attributes)]
 #![cfg_attr(feature = "ferrocene_certified", allow(rustdoc::broken_intra_doc_links))]
+#![cfg_attr(feature = "ferrocene_certified", allow(rustdoc::private_intra_doc_links))]
 
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]

@@ -2,7 +2,7 @@
 // The Coverage::CounterIncrement statements are later converted into LLVM
 // instrprof.increment intrinsics, during codegen.
 
-//@ ignore-ferrocenecoretest - instrument-coverage is not supported
+//@ ignore-ferrocene.facade - instrument-coverage is not supported
 //@ test-mir-pass: InstrumentCoverage
 //@ compile-flags: -Cinstrument-coverage -Zno-profiler-runtime
 

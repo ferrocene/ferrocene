@@ -24,7 +24,7 @@ cfg_if::cfg_if! {
         target_os = "espidf",
         target_os = "nuttx",
         // ferrocene addition
-        ferrocenecoretest_secretsauce,
+        ferrocene_facade_secretsauce,
     ))] {
         // These "unix" family members do not have unwinder.
     } else if #[cfg(any(
@@ -67,7 +67,7 @@ cfg_if::cfg_if! {
     } else {
         #[link(name = "unwind", kind = "static", modifiers = "-bundle", cfg(target_feature = "crt-static"))]
         #[link(name = "gcc_s", cfg(not(target_feature = "crt-static")))]
-        #[cfg(not(ferrocenecoretest_secretsauce))] // ferrocene addition: don't link to libgcc_s
+        #[cfg(not(ferrocene_facade_secretsauce))] // ferrocene addition: don't link to libgcc_s
         unsafe extern "C" {}
     }
 }

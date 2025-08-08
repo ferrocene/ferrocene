@@ -748,12 +748,12 @@ fn doc_std(
 
     // ferrocene addition: need to duplicate this logic from `compile::std_cargo` to prevent
     // a compiler error when generating docs for libstd
-    if target.contains("ferrocenecoretest") {
+    if target.contains("facade") {
         match &*target.triple {
-            "aarch64-unknown-ferrocenecoretest"
-            | "thumbv7em-ferrocenecoretest-eabi"
-            | "thumbv7em-ferrocenecoretest-eabihf" => {
-                cargo.rustdocflag("--cfg=ferrocenecoretest_secretsauce");
+            "aarch64-unknown-ferrocene.facade"
+            | "thumbv7em-ferrocene.facade-eabi"
+            | "thumbv7em-ferrocene.facade-eabihf" => {
+                cargo.rustdocflag("--cfg=ferrocene_facade_secretsauce");
             }
             _ => unimplemented!("extend this `match`"),
         }

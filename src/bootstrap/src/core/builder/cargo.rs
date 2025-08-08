@@ -1331,7 +1331,7 @@ impl Builder<'_> {
             rustflags.arg("-Zmir_strip_debuginfo=locals-in-tiny-functions");
         }
 
-        if target.contains("ferrocenecoretest") {
+        if target.contains("ferrocene.facade") {
             rustflags.arg("-Zpanic-abort-tests");
         }
 

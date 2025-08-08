@@ -28,8 +28,8 @@ fn main() {}
 // Ferrocene addition:
 //
 // Linker fails with "undefined symbol: __atomic_fetch_add_8" without this stub on these targets:
-// - thumbv7em-ferrocenecoretest-eabi
-// - thumbv7em-ferrocenecoretest-eabihf
+// - thumbv7em-ferrocene.facade-eabi
+// - thumbv7em-ferrocene.facade-eabihf
 // This is due to `-C instrument-coverage` resulting in 64-bit atomic operations inserted,
 // but those do not exist in Cortex-M processors.
 //

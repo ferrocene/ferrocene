@@ -34,9 +34,9 @@ pub struct Finder {
 // Targets can be removed from this list once they are present in the stage0 compiler (usually by updating the beta compiler of the bootstrap).
 const STAGE0_MISSING_TARGETS: &[&str] = &[
     // Ferrocene additions
-    "aarch64-unknown-ferrocenecoretest",
-    "thumbv7em-ferrocenecoretest-eabi",
-    "thumbv7em-ferrocenecoretest-eabihf",
+    "aarch64-unknown-ferrocene.facade",
+    "thumbv7em-ferrocene.facade-eabi",
+    "thumbv7em-ferrocene.facade-eabihf",
     // just a dummy comment so the list doesn't get onelined
 ];
 

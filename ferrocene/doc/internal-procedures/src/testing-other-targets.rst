@@ -100,7 +100,7 @@ Setup WSL2, if you don't have it:
 
     wsl --install --distribution Ubuntu-24.04
 
-Ensure ```nestedVirtualization`` is set in the guest ``/etc/wsl.conf``, here is an example
+Ensure ``nestedVirtualization`` is set in the guest ``/etc/wsl.conf``, here is an example
 configuration:
 
 .. code-block::
@@ -152,7 +152,7 @@ Currently bare metal targets have a similar procedure for testing.
     :target:`aarch64-apple-darwin` -- you **must** skip to the final step, running the tests using::
     
         export QEMU_CPU=cortex-a53
-        ./x test --stage 1 --target aarch64-unknown-ferrocenecoretest library/core
+        ./x test --stage 1 --target aarch64-unknown-ferrocene.facade library/core
 
     Incorrectly configuring your :target:`aarch64-unknown-linux-gnu` environment using the other steps 
     will damage to the environment and result in "Too many levels of symbolic links" errors.
@@ -186,7 +186,7 @@ targets," ensure the following is in your ``config.toml``:
 
 .. code-block:: bash
 
-    [target.aarch64-unknown-ferrocenecoretest]
+    [target."aarch64-unknown-ferrocene.facade"]
     cc = "aarch64-linux-gnu-gcc"
     profiler = false
 
@@ -195,7 +195,7 @@ After, you can run the tests:
 .. code-block:: bash
 
     export QEMU_CPU=cortex-a53
-    ./x test --stage 1 --target aarch64-unknown-ferrocenecoretest library/core
+    ./x test --stage 1 --target aarch64-unknown-ferrocene.facade library/core
 
 :target-with-tuple:`thumbv7em-none-eabihf` & :target-with-tuple:`thumbv7em-none-eabi`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -228,9 +228,9 @@ Now set the target:
 
 .. code-block:: bash
 
-    export TARGET="thumbv7em-ferrocenecoretest-eabihf"
+    export TARGET="thumbv7em-ferrocene.facade-eabihf"
     # or 
-    export TARGET="thumbv7em-ferrocenecoretest-eabi"
+    export TARGET="thumbv7em-ferrocene.facade-eabi"
 
 In order to test this target, the build process will acquire a copy of our *secret sauce* from AWS. Ensure you're authenticated, following the section in
 :doc:`internal-procedures:setup-local-env` if your environment is not yet set up.
@@ -239,11 +239,11 @@ Ensure the following is in your ``config.toml``:
 
 .. code-block:: toml
 
-    [target.thumbv7em-ferrocenecoretest-eabi]
+    [target."thumbv7em-ferrocene.facade-eabi"]
     cc = 'arm-none-eabi-gcc'
     profiler = false
 
-    [target.thumbv7em-ferrocenecoretest-eabihf]
+    [target."thumbv7em-ferrocene.facade-eabihf"]
     cc = 'arm-none-eabi-gcc'
     profiler = false
 

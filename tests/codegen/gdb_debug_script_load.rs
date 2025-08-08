@@ -3,7 +3,7 @@
 //@ ignore-apple
 //@ ignore-wasm
 //@ ignore-emscripten
-//@ ignore-ferrocenecoretest target disables GDB script loading
+//@ ignore-ferrocene.facade target disables GDB script loading
 
 //@ compile-flags: -g -C no-prepopulate-passes -Cpanic=abort
 

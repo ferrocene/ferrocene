@@ -3404,10 +3404,10 @@ impl Step for TestHelpers {
         }
 
         // Ferrocene annotation: cc 1.1.32 and newer does not support custom targets outside of
-        // build script context (rust-lang/cc-rs#1225). Map `ferrocenecoretest` targets back to the
+        // build script context (rust-lang/cc-rs#1225). Map `.facade` targets back to the
         // targets they are test doubles for, and pass that triple to `cc`.
-        let target = if self.target.contains("-ferrocenecoretest") {
-            let sub = target.triple.replace("ferrocenecoretest", "none");
+        let target = if self.target.contains("ferrocene.facade") {
+            let sub = target.triple.replace("ferrocene.facade", "none");
 
             // override the default arm-none-eabi-gcc header files
             if target.needs_secret_sauce() {

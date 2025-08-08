@@ -721,15 +721,15 @@
 //@ revisions: i386_lynx_lynxos178
 //@ [i386_lynx_lynxos178] compile-flags: --target i386-lynx-lynxos178
 //@ [i386_lynx_lynxos178] needs-llvm-components: x86
-//@ revisions: aarch64_unknown_ferrocenecoretest
-//@ [aarch64_unknown_ferrocenecoretest] compile-flags: --target aarch64-unknown-ferrocenecoretest
-//@ [aarch64_unknown_ferrocenecoretest] needs-llvm-components: aarch64
-//@ revisions: thumbv7em_ferrocenecoretest_eabi
-//@ [thumbv7em_ferrocenecoretest_eabi] compile-flags: --target thumbv7em-ferrocenecoretest-eabi
-//@ [thumbv7em_ferrocenecoretest_eabi] needs-llvm-components: arm
-//@ revisions: thumbv7em_ferrocenecoretest_eabihf
-//@ [thumbv7em_ferrocenecoretest_eabihf] compile-flags: --target thumbv7em-ferrocenecoretest-eabihf
-//@ [thumbv7em_ferrocenecoretest_eabihf] needs-llvm-components: arm
+//@ revisions: aarch64_unknown_ferrocene_facade
+//@ [aarch64_unknown_ferrocene_facade] compile-flags: --target aarch64-unknown-ferrocene.facade
+//@ [aarch64_unknown_ferrocene_facade] needs-llvm-components: aarch64
+//@ revisions: thumbv7em_ferrocene_facade_eabi
+//@ [thumbv7em_ferrocene_facade_eabi] compile-flags: --target thumbv7em-ferrocene.facade-eabi
+//@ [thumbv7em_ferrocene_facade_eabi] needs-llvm-components: arm
+//@ revisions: thumbv7em_ferrocene_facade_eabihf
+//@ [thumbv7em_ferrocene_facade_eabihf] compile-flags: --target thumbv7em-ferrocene.facade-eabihf
+//@ [thumbv7em_ferrocene_facade_eabihf] needs-llvm-components: arm
 
 // Sanity-check that each target can produce assembly code.
 

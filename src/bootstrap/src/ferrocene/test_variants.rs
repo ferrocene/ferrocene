@@ -61,9 +61,9 @@ static VARIANTS: &[(&str, &[VariantCondition])] = &[
     // INTERNAL_PROCEDURES_END_TEST_VARIANTS
 ];
 static DEFAULT_VARIANTS_BY_TARGET: &[(&str, &str)] = &[
-    ("aarch64-unknown-ferrocenecoretest", "2021-cortex-a53"),
-    ("thumbv7em-ferrocenecoretest-eabi", "2021-cortex-m4"),
-    ("thumbv7em-ferrocenecoretest-eabihf", "2021-cortex-m4"),
+    ("aarch64-unknown-ferrocene.facade", "2021-cortex-a53"),
+    ("thumbv7em-ferrocene.facade-eabi", "2021-cortex-m4"),
+    ("thumbv7em-ferrocene.facade-eabihf", "2021-cortex-m4"),
 ];
 static DEFAULT_VARIANT_FALLBACK: &str = "2021";
 

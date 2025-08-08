@@ -46,7 +46,7 @@ Scope
 -----
 
 :dp:`fls_srdq4mota5pr`
-This document specifies the form and meaning of programs written in the
+This document specifies the form and meaning of programs written in the 2021 Edition of the
 programming language Rust, as implemented by the :t:`rustc` |spec_version| compiler shipped
 with Ferrocene. It documents the current understanding for the purposes of
 compiler validation. As such, given any doubt, it prefers documenting behavior

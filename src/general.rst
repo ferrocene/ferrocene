@@ -1,5 +1,6 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
+   SPDX-FileCopyrightText: The Rust Project Contributors
 
 .. default-domain:: spec
 
@@ -58,9 +59,6 @@ This document is made available for contribution and review as it is useful
 outside of the Ferrocene effort and can be a place of shared understanding. It
 is not intended as a discussion ground for language evolution. It is also not
 intended as a document enabling conformance between compilers.
-
-:dp:`fls_osh9tiwpnsn1`
-Contribution and review is managed by the Ferrocene project developers.
 
 .. _fls_10yukmkhl0ng:
 

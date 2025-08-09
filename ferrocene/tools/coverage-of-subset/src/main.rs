@@ -12,7 +12,7 @@ const TO_BE_INSERTED: &str = "#[coverage(off)]";
 // Note: Has to be a lock to be used in a static. Will only ever be called from
 // one thread, so it should not be blocking in reality.
 static MARKER_PLUS_TO_BE_INSERTED: LazyLock<String> =
-    LazyLock::new(|| format!("{MARKER}\n{TO_BE_INSERTED}"));
+    LazyLock::new(|| format!("{MARKER} {TO_BE_INSERTED}"));
 
 fn main() {
     // The path to inject the coverage(off) attributes.
@@ -114,23 +114,19 @@ impl F {
 "#;
 
     const TEST_FILE_CORRECT: &str = r#"
-#[cfg(not(feature = "ferrocene_certified"))]
-#[coverage(off)]
+#[cfg(not(feature = "ferrocene_certified"))] #[coverage(off)]
 fn a{} {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
-#[coverage(off)]
+#[cfg(not(feature = "ferrocene_certified"))] #[coverage(off)]
 fn b() {}
 
 #[cfg(feature = "ferrocene_certified")]
 fn b() {}
 
-#[cfg(not(feature = "ferrocene_certified"))]
-#[coverage(off)]
+#[cfg(not(feature = "ferrocene_certified"))] #[coverage(off)]
 mod c;
 
-#[cfg(not(feature = "ferrocene_certified"))]
-#[coverage(off)]
+#[cfg(not(feature = "ferrocene_certified"))] #[coverage(off)]
 impl D {
     fn e() {}
 }
@@ -138,8 +134,7 @@ impl D {
 impl F {
     fn g() {}
 
-    #[cfg(not(feature = "ferrocene_certified"))]
-#[coverage(off)]
+    #[cfg(not(feature = "ferrocene_certified"))] #[coverage(off)]
     fn h() {}
 }
 "#;

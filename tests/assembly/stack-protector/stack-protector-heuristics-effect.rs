@@ -4,7 +4,7 @@
 //@ ignore-msvc stack check code uses different function names
 //@ ignore-nvptx64 stack protector is not supported
 //@ ignore-wasm32-bare
-//@ ignore-ferrocenecoretest
+//@ ignore-ferrocene.facade
 //@ [all] compile-flags: -Z stack-protector=all
 //@ [strong] compile-flags: -Z stack-protector=strong
 //@ [basic] compile-flags: -Z stack-protector=basic

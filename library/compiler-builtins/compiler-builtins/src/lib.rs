@@ -88,7 +88,7 @@ pub mod x86_64;
 pub mod probestack;
 
 // ferrocene addition: symbol needed by profiler-builtins on 32-bit ARM
-#[cfg(all(ferrocenecoretest_secretsauce, target_arch = "arm"))]
+#[cfg(all(ferrocene_facade_secretsauce, target_arch = "arm"))]
 #[unsafe(no_mangle)]
 fn __atomic_fetch_add_8(ptr: *mut u64, val: u64, _model: i32) -> u64 {
     unsafe {

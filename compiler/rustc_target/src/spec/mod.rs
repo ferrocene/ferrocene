@@ -2083,9 +2083,9 @@ supported_targets! {
     ("i686-pc-nto-qnx700", i686_pc_nto_qnx700),
 
     ("i386-lynx-lynxos178", i386_lynx_lynxos178),
-    ("aarch64-unknown-ferrocenecoretest", aarch64_unknown_ferrocenecoretest),
-    ("thumbv7em-ferrocenecoretest-eabi", thumbv7em_ferrocenecoretest_eabi),
-    ("thumbv7em-ferrocenecoretest-eabihf", thumbv7em_ferrocenecoretest_eabihf),
+    ("aarch64-unknown-ferrocene.facade", aarch64_unknown_ferrocene_facade),
+    ("thumbv7em-ferrocene.facade-eabi", thumbv7em_ferrocene_facade_eabi),
+    ("thumbv7em-ferrocene.facade-eabihf", thumbv7em_ferrocene_facade_eabihf),
 
     ("aarch64-unknown-linux-ohos", aarch64_unknown_linux_ohos),
     ("armv7-unknown-linux-ohos", armv7_unknown_linux_ohos),

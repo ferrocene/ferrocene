@@ -118,14 +118,14 @@ add --set target.x86_64-pc-nto-qnx710.ar=ntox86_64-ar
 add --set target.x86_64-pc-nto-qnx710.profiler=false # Build failures were noted if this is enabled.
 
 # these default to `cc` but require cross compilation
-add --set target.aarch64-unknown-ferrocenecoretest.cc=aarch64-linux-gnu-gcc
-add --set target.thumbv7em-ferrocenecoretest-eabi.cc=arm-none-eabi-gcc
-add --set target.thumbv7em-ferrocenecoretest-eabihf.cc=arm-none-eabi-gcc
+add --set 'target."aarch64-unknown-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
+add --set 'target."thumbv7em-ferrocene.facade-eabi".cc=arm-none-eabi-gcc'
+add --set 'target."thumbv7em-ferrocene.facade-eabihf".cc=arm-none-eabi-gcc'
 
 # experiment to enable code coverage
-add --set target.aarch64-unknown-ferrocenecoretest.profiler=true
-add --set target.thumbv7em-ferrocenecoretest-eabi.profiler=true
-add --set target.thumbv7em-ferrocenecoretest-eabihf.profiler=true
+add --set 'target."aarch64-unknown-ferrocenecoretest".profiler=true'
+add --set 'target."thumbv7em-ferrocenecoretest-eabi".profiler=true'
+add --set 'target."thumbv7em-ferrocenecoretest-eabihf".profiler=true'
 
 # Set the host platform to build. The environment variable is set from the CI
 # configuration (see the .circleci directory).

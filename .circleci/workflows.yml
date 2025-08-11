@@ -614,7 +614,7 @@ jobs:
 
   # Test VMs
 
-  ferrocenecoretest-generic-test:
+  facade-generic-test:
     executor: linux-vm
     parameters:
       qemu-arch:
@@ -934,18 +934,18 @@ workflows:
           requires:
             - x86_64-linux-build
 
-      - ferrocenecoretest-generic-test:
+      - facade-generic-test:
           name: aarch64-none-compiletest
-          target: aarch64-unknown-ferrocenecoretest
+          target: aarch64-unknown-ferrocene.facade
           test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
           job: qnx:compiletest-no-only-hosts
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
-      - ferrocenecoretest-generic-test:
+      - facade-generic-test:
           name: aarch64-none-test-library
-          target: aarch64-unknown-ferrocenecoretest
+          target: aarch64-unknown-ferrocene.facade
           test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
           job: test:library
@@ -992,9 +992,9 @@ workflows:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
 
-      - ferrocenecoretest-generic-test:
+      - facade-generic-test:
           name: thumbv7em-eabihf-test-library
-          target: thumbv7em-ferrocenecoretest-eabihf
+          target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
           job: test:library
@@ -1002,9 +1002,9 @@ workflows:
           requires:
             - x86_64-linux-build
 
-      - ferrocenecoretest-generic-test:
+      - facade-generic-test:
           name: thumbv7em-eabi-test-library
-          target: thumbv7em-ferrocenecoretest-eabi
+          target: thumbv7em-ferrocene.facade-eabi
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
           job: test:library
@@ -1012,9 +1012,9 @@ workflows:
           requires:
             - x86_64-linux-build
 
-      - ferrocenecoretest-generic-test:
+      - facade-generic-test:
           name: thumbv7em-eabihf-test-compiletest
-          target: thumbv7em-ferrocenecoretest-eabihf
+          target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
           job: qnx:compiletest-no-only-hosts
@@ -1022,9 +1022,9 @@ workflows:
           requires:
             - x86_64-linux-build
 
-      - ferrocenecoretest-generic-test:
+      - facade-generic-test:
           name: thumbv7em-eabi-test-compiletest
-          target: thumbv7em-ferrocenecoretest-eabi
+          target: thumbv7em-ferrocene.facade-eabi
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
           job: qnx:compiletest-no-only-hosts

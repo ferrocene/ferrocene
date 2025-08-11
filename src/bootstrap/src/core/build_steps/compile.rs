@@ -594,13 +594,13 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, car
         // the compiler builtins. But they could be unified if desired.
         cargo.env("RUST_COMPILER_RT_FOR_PROFILER", compiler_rt);
 
-        // Targets like thumb*-ferrocenecoretest use `arm-none-eabi-gcc` to compile the
+        // Targets like thumb*.facade use `arm-none-eabi-gcc` to compile the
         // profiler-builtins C code. That compiler will not include secret-sauce header files by
         // default so we pass the path to the header files to profiler-builtins' build script
         // using this env var.
         if target.needs_secret_sauce() {
             let dir = builder.ensure(SecretSauceArtifacts { target });
-            cargo.env("FERROCENECORETEST_INCLUDE_FOR_PROFILER", dir.join("include"));
+            cargo.env("FERROCENE_FACADE_INCLUDE_FOR_PROFILER", dir.join("include"));
         }
     }
 
@@ -733,12 +733,12 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, car
     cargo.rustdocflag("-Zcrate-attr=warn(rust_2018_idioms)");
 
     // ferrocene addition: `cfg` used to adapt libstd to our "secret sauce" libc
-    if target.contains("ferrocenecoretest") {
+    if target.contains("facade") {
         match &*target.triple {
-            "aarch64-unknown-ferrocenecoretest"
-            | "thumbv7em-ferrocenecoretest-eabi"
-            | "thumbv7em-ferrocenecoretest-eabihf" => {
-                cargo.rustflag("--cfg=ferrocenecoretest_secretsauce");
+            "aarch64-unknown-ferrocene.facade"
+            | "thumbv7em-ferrocene.facade-eabi"
+            | "thumbv7em-ferrocene.facade-eabihf" => {
+                cargo.rustflag("--cfg=ferrocene_facade_secretsauce");
             }
             _ => unimplemented!("extend this `match`"),
         }

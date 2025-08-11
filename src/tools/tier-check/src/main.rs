@@ -52,6 +52,9 @@ fn main() {
         "thumbv8m.base-nuttx-eabi",
         "thumbv8m.main-nuttx-eabi",
         "thumbv8m.main-nuttx-eabihf",
+        "aarch64-unknown-ferrocene.facade",
+        "thumbv7em-ferrocene.facade-eabihf",
+        "thumbv7em-ferrocene.facade-eabi",
     ];
     let mut invalid_target_name_found = false;
     for target in &target_list {

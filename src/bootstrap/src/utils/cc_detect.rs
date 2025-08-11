@@ -106,11 +106,11 @@ pub fn fill_target_compiler(build: &mut Build, target: TargetSelection) {
     }
 
     // Ferrocene annotation: cc 1.1.32 and newer does not support custom targets outside of
-    // build script context (rust-lang/cc-rs#1225). Map `ferrocenecoretest` targets back to the
+    // build script context (rust-lang/cc-rs#1225). Map `.facade` targets back to the
     // targets they are test doubles for, and temporarily pass that triple to `cc` to determine
     // the C compiler.
-    let ferrocenecoretest_compiler = if target.triple.contains("-ferrocenecoretest") {
-        let sub = target.triple.replace("ferrocenecoretest", "none");
+    let facade_compiler = if target.triple.contains("ferrocene.facade") {
+        let sub = target.triple.replace("ferrocene.facade", "none");
         cfg.target(&sub);
         let compiler = cfg.get_compiler();
 
@@ -120,12 +120,12 @@ pub fn fill_target_compiler(build: &mut Build, target: TargetSelection) {
     } else {
         None
     };
-    let compiler = ferrocenecoretest_compiler.clone().unwrap_or_else(|| cfg.get_compiler());
+    let compiler = facade_compiler.clone().unwrap_or_else(|| cfg.get_compiler());
     let ar = if let ar @ Some(..) = config.and_then(|c| c.ar.clone()) {
         ar
     } else {
-        if ferrocenecoretest_compiler.is_some() {
-            let sub = target.triple.replace("ferrocenecoretest", "none");
+        if facade_compiler.is_some() {
+            let sub = target.triple.replace("ferrocene.facade", "none");
             cfg.target(&sub);
         }
         cfg.try_get_archiver().map(|c| PathBuf::from(c.get_program())).ok()
@@ -151,9 +151,9 @@ pub fn fill_target_compiler(build: &mut Build, target: TargetSelection) {
     };
 
     // for VxWorks, record CXX compiler which will be used in lib.rs:linker()
-    // Ferrocene annotation: see annotation above `ferrocenecoretest_compiler` definition
-    if cxx_configured || target.contains("vxworks") || ferrocenecoretest_compiler.is_some() {
-        let compiler = ferrocenecoretest_compiler.clone().unwrap_or_else(|| cfg.get_compiler());
+    // Ferrocene annotation: see annotation above `facade_compiler` definition
+    if cxx_configured || target.contains("vxworks") || facade_compiler.is_some() {
+        let compiler = facade_compiler.clone().unwrap_or_else(|| cfg.get_compiler());
         build.cxx.insert(target, compiler);
     }
 

@@ -215,7 +215,7 @@ pub(crate) fn test_rng() -> rand_xorshift::XorShiftRng {
 
 //ferrocene addition
 #[test]
-#[cfg(ferrocenecoretest_secretsauce)]
+#[cfg(ferrocene_facade_secretsauce)]
 fn check_that_qemu_cpu_was_set() {
     let qemu_cpu = std::env::var("QEMU_CPU").expect("QEMU_CPU env var was not set");
     if cfg!(target_arch = "aarch64") {

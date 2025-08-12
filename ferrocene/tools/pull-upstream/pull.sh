@@ -98,7 +98,7 @@ if git rev-parse --quiet --verify "${TEMP_BRANCH}" > /dev/null; then
     git branch -D "${TEMP_BRANCH}"
 fi
 
-git fetch "${UPSTREAM_REPO}" "${upstream_branch}"
+git fetch "${UPSTREAM_REPO}" "${upstream_branch}" --recurse-submodules
 
 # Avoid creating extra-large PRs by limiting the amount of merge commits
 # included in automated pulls to ${MAX_MERGES_PER_DAY}.

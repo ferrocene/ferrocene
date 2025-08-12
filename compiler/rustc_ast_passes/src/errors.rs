@@ -567,22 +567,6 @@ pub(crate) struct NestedLifetimes {
 }
 
 #[derive(Diagnostic)]
-#[diag(ast_passes_optional_trait_supertrait)]
-#[note]
-pub(crate) struct OptionalTraitSupertrait {
-    #[primary_span]
-    pub span: Span,
-    pub path_str: String,
-}
-
-#[derive(Diagnostic)]
-#[diag(ast_passes_optional_trait_object)]
-pub(crate) struct OptionalTraitObject {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag(ast_passes_const_bound_trait_object)]
 pub(crate) struct ConstBoundTraitObject {
     #[primary_span]
@@ -636,6 +620,26 @@ pub(crate) enum TildeConstReason {
     },
     #[note(ast_passes_inherent_assoc_ty)]
     InherentAssocTy {
+        #[primary_span]
+        span: Span,
+    },
+    #[note(ast_passes_struct)]
+    Struct {
+        #[primary_span]
+        span: Span,
+    },
+    #[note(ast_passes_enum)]
+    Enum {
+        #[primary_span]
+        span: Span,
+    },
+    #[note(ast_passes_union)]
+    Union {
+        #[primary_span]
+        span: Span,
+    },
+    #[note(ast_passes_anon_const)]
+    AnonConst {
         #[primary_span]
         span: Span,
     },

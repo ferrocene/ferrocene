@@ -384,10 +384,15 @@ pub struct AssertParamIsEq<T: Eq + PointeeSized> {
 ///
 /// assert_eq!(2.cmp(&1), Ordering::Greater);
 /// ```
+<<<<<<< HEAD
 #[cfg_attr(
     not(feature = "ferrocene_certified"),
     derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)
 )]
+=======
+#[derive(Clone, Copy, Eq, PartialOrd, Ord, Debug, Hash)]
+#[derive_const(PartialEq)]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[stable(feature = "rust1", since = "1.0.0")]
 // This is a lang item only so that `BinOp::Cmp` in MIR can return it.
 // It has no special behavior, but does require that the three variants
@@ -1493,13 +1498,14 @@ pub trait PartialOrd<Rhs: PointeeSized = Self>: PartialEq<Rhs> + PointeeSized {
     }
 }
 
-fn default_chaining_impl<T: PointeeSized, U: PointeeSized>(
+fn default_chaining_impl<T, U>(
     lhs: &T,
     rhs: &U,
     p: impl FnOnce(Ordering) -> bool,
 ) -> ControlFlow<bool>
 where
-    T: PartialOrd<U>,
+    T: PartialOrd<U> + PointeeSized,
+    U: PointeeSized,
 {
     // It's important that this only call `partial_cmp` once, not call `eq` then
     // one of the relational operators.  We don't want to `bcmp`-then-`memcp` a

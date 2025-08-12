@@ -1,6 +1,6 @@
-use rustc_attr_data_structures::InstructionSetAttr;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexSet};
 use rustc_data_structures::unord::{UnordMap, UnordSet};
+use rustc_hir::attrs::InstructionSetAttr;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
 use rustc_middle::middle::codegen_fn_attrs::TargetFeature;
@@ -149,14 +149,14 @@ fn parse_rust_feature_flag<'a>(
         if let Some(base_feature) = feature.strip_prefix('+') {
             // Skip features that are not target features, but rustc features.
             if RUSTC_SPECIFIC_FEATURES.contains(&base_feature) {
-                return;
+                continue;
             }
 
             callback(base_feature, sess.target.implied_target_features(base_feature), true)
         } else if let Some(base_feature) = feature.strip_prefix('-') {
             // Skip features that are not target features, but rustc features.
             if RUSTC_SPECIFIC_FEATURES.contains(&base_feature) {
-                return;
+                continue;
             }
 
             // If `f1` implies `f2`, then `!f2` implies `!f1` -- this is standard logical

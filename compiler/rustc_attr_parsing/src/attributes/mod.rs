@@ -16,8 +16,8 @@
 
 use std::marker::PhantomData;
 
-use rustc_attr_data_structures::AttributeKind;
 use rustc_feature::{AttributeTemplate, template};
+use rustc_hir::attrs::AttributeKind;
 use rustc_span::{Span, Symbol};
 use thin_vec::ThinVec;
 
@@ -36,10 +36,12 @@ pub(crate) mod inline;
 pub(crate) mod link_attrs;
 pub(crate) mod lint_helpers;
 pub(crate) mod loop_match;
+pub(crate) mod macro_attrs;
 pub(crate) mod must_use;
 pub(crate) mod no_implicit_prelude;
 pub(crate) mod non_exhaustive;
 pub(crate) mod path;
+pub(crate) mod proc_macro_attrs;
 pub(crate) mod repr;
 pub(crate) mod rustc_internal;
 pub(crate) mod semantics;

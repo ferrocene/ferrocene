@@ -10,8 +10,8 @@ use rustc_type_ir::inherent::*;
 use rustc_type_ir::lang_items::TraitSolverLangItem;
 use rustc_type_ir::solve::SizedTraitKind;
 use rustc_type_ir::{
-    self as ty, Interner, TypeFoldable, TypeSuperVisitable, TypeVisitable, TypeVisitableExt as _,
-    TypeVisitor, TypingMode, Upcast as _, elaborate,
+    self as ty, Interner, TypeFlags, TypeFoldable, TypeSuperVisitable, TypeVisitable,
+    TypeVisitableExt as _, TypeVisitor, TypingMode, Upcast as _, elaborate,
 };
 use tracing::{debug, instrument};
 
@@ -21,7 +21,7 @@ use crate::delegate::SolverDelegate;
 use crate::solve::inspect::ProbeKind;
 use crate::solve::{
     BuiltinImplSource, CandidateSource, CanonicalResponse, Certainty, EvalCtxt, Goal, GoalSource,
-    MaybeCause, NoSolution, ParamEnvSource, QueryResult,
+    MaybeCause, NoSolution, ParamEnvSource, QueryResult, has_no_inference_or_external_constraints,
 };
 
 enum AliasBoundKind {
@@ -50,7 +50,7 @@ where
 
     fn trait_ref(self, cx: I) -> ty::TraitRef<I>;
 
-    fn with_self_ty(self, cx: I, self_ty: I::Ty) -> Self;
+    fn with_replaced_self_ty(self, cx: I, self_ty: I::Ty) -> Self;
 
     fn trait_def_id(self, cx: I) -> I::DefId;
 
@@ -132,6 +132,7 @@ where
         })
         .enter(|ecx| {
             Self::match_assumption(ecx, goal, assumption, |ecx| {
+                ecx.try_evaluate_added_goals()?;
                 source.set(ecx.characterize_param_env_assumption(goal.param_env, assumption)?);
                 ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
             })
@@ -375,8 +376,8 @@ where
             return self.forced_ambiguity(MaybeCause::Ambiguity).into_iter().collect();
         }
 
-        let goal: Goal<I, G> =
-            goal.with(self.cx(), goal.predicate.with_self_ty(self.cx(), normalized_self_ty));
+        let goal: Goal<I, G> = goal
+            .with(self.cx(), goal.predicate.with_replaced_self_ty(self.cx(), normalized_self_ty));
         // Vars that show up in the rest of the goal substs may have been constrained by
         // normalizing the self type as well, since type variables are not uniquified.
         let goal = self.resolve_vars_if_possible(goal);
@@ -394,9 +395,30 @@ where
 
         match assemble_from {
             AssembleCandidatesFrom::All => {
-                self.assemble_impl_candidates(goal, &mut candidates);
                 self.assemble_builtin_impl_candidates(goal, &mut candidates);
-                self.assemble_object_bound_candidates(goal, &mut candidates);
+                // For performance we only assemble impls if there are no candidates
+                // which would shadow them. This is necessary to avoid hangs in rayon,
+                // see trait-system-refactor-initiative#109 for more details.
+                //
+                // We always assemble builtin impls as trivial builtin impls have a higher
+                // priority than where-clauses.
+                //
+                // We only do this if any such candidate applies without any constraints
+                // as we may want to weaken inference guidance in the future and don't want
+                // to worry about causing major performance regressions when doing so.
+                // See trait-system-refactor-initiative#226 for some ideas here.
+                if TypingMode::Coherence == self.typing_mode()
+                    || !candidates.iter().any(|c| {
+                        matches!(
+                            c.source,
+                            CandidateSource::ParamEnv(ParamEnvSource::NonGlobal)
+                                | CandidateSource::AliasBound
+                        ) && has_no_inference_or_external_constraints(c.result)
+                    })
+                {
+                    self.assemble_impl_candidates(goal, &mut candidates);
+                    self.assemble_object_bound_candidates(goal, &mut candidates);
+                }
             }
             AssembleCandidatesFrom::EnvAndBounds => {}
         }
@@ -1069,8 +1091,10 @@ where
             } else {
                 ControlFlow::Continue(())
             }
-        } else {
+        } else if ty.has_type_flags(TypeFlags::HAS_PLACEHOLDER | TypeFlags::HAS_RE_INFER) {
             ty.super_visit_with(self)
+        } else {
+            ControlFlow::Continue(())
         }
     }
 
@@ -1086,8 +1110,10 @@ where
             } else {
                 ControlFlow::Continue(())
             }
-        } else {
+        } else if ct.has_type_flags(TypeFlags::HAS_PLACEHOLDER | TypeFlags::HAS_RE_INFER) {
             ct.super_visit_with(self)
+        } else {
+            ControlFlow::Continue(())
         }
     }
 

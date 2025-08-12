@@ -1650,7 +1650,8 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
                 }
             }
 
-            let sources = candidates.iter().map(|p| self.candidate_source(p, self_ty)).collect();
+            let sources =
+                applicable_candidates.iter().map(|p| self.candidate_source(p.0, self_ty)).collect();
             return Some(Err(MethodError::Ambiguity(sources)));
         }
 
@@ -2050,7 +2051,7 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
     /// probe. This will result in a pending obligation so when more type-info is available we can
     /// make the final decision.
     ///
-    /// Example (`tests/ui/method-two-trait-defer-resolution-1.rs`):
+    /// Example (`tests/ui/methods/method-two-trait-defer-resolution-1.rs`):
     ///
     /// ```ignore (illustrative)
     /// trait Foo { ... }

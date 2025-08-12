@@ -9,6 +9,7 @@ use hir::{ChangeWithProcMacros, Crate};
 use ide::{AnalysisHost, DiagnosticCode, DiagnosticsConfig};
 use ide_db::base_db;
 use itertools::Either;
+use paths::Utf8PathBuf;
 use profile::StopWatch;
 use project_model::toolchain_info::{QueryConfig, target_data_layout};
 use project_model::{
@@ -79,6 +80,7 @@ impl Tester {
             &RustSourceWorkspaceConfig::default_cargo(),
             false,
             &path,
+            &Utf8PathBuf::default(),
             &|_| (),
         );
         if let Some(loaded_sysroot) = loaded_sysroot {
@@ -303,10 +305,10 @@ impl flags::RustcTests {
         for i in walk_dir {
             let i = i?;
             let p = i.into_path();
-            if let Some(f) = &self.filter {
-                if !p.as_os_str().to_string_lossy().contains(f) {
-                    continue;
-                }
+            if let Some(f) = &self.filter
+                && !p.as_os_str().to_string_lossy().contains(f)
+            {
+                continue;
             }
             if p.extension().is_none_or(|x| x != "rs") {
                 continue;

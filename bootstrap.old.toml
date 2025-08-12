@@ -1,0 +1,168 @@
+# Use different pre-set defaults than the global defaults.
+#
+# See `src/bootstrap/defaults` for more information.
+# Note that this has no default value (x.py uses the defaults in `bootstrap.example.toml`).
+profile = 'ferrocene-dist'
+
+[llvm]
+
+download-ci-llvm = true
+
+[gcc]
+
+[build]
+
+# Which triples to produce a compiler toolchain for. Each of these triples will be bootstrapped from
+# the build triple themselves. In other words, this is the list of triples for which to build a
+# compiler that can RUN on that triple.
+#
+# Defaults to just the `build` triple.
+host = ['x86_64-unknown-linux-gnu']
+
+# Which triples to build libraries (core/alloc/std/test/proc_macro) for. Each of these triples will
+# be bootstrapped from the build triple themselves. In other words, this is the list of triples for
+# which to build a library that can CROSS-COMPILE to that triple.
+#
+# Defaults to `host`. If you set this explicitly, you likely want to add all
+# host triples to this list as well in order for those host toolchains to be
+# able to compile programs for their native target.
+target = ['x86_64-unknown-linux-gnu']
+
+# Indicate whether git submodules are managed and updated automatically.
+submodules = false
+
+# Force Cargo to check that Cargo.lock describes the precise dependency
+# set that all the Cargo.toml files create, instead of updating it.
+locked-deps = true
+
+# Arguments passed to the `./configure` script, used during distcheck. You
+# probably won't fill this in but rather it's filled in by the `./configure`
+# script. Useful for debugging.
+configure-args = ['--set', 'profile=ferrocene-dist', '--disable-manage-submodules', '--set', 'ferrocene.generate-coverage-report-after-tests=false', '--set', 'target.aarch64-unknown-nto-qnx710.cc=qcc', '--set', 'target.aarch64-unknown-nto-qnx710.cxx=q++', '--set', 'target.aarch64-unknown-nto-qnx710.ar=ntoaarch64-ar', '--set', 'target.x86_64-pc-nto-qnx710.cc=qcc', '--set', 'target.x86_64-pc-nto-qnx710.cxx=q++', '--set', 'target.x86_64-pc-nto-qnx710.ar=ntox86_64-ar', '--set', 'target.x86_64-pc-nto-qnx710.profiler=false', '--set', 'target.aarch64-unknown-ferrocenecoretest.cc=aarch64-linux-gnu-gcc', '--set', 'target.thumbv7em-ferrocenecoretest-eabi.cc=arm-none-eabi-gcc', '--set', 'target.thumbv7em-ferrocenecoretest-eabihf.cc=arm-none-eabi-gcc', '--set', 'target.x86_64-unknown-linux-musl.musl-root=/usr/x86_64-linux-musl/', '--set', 'target.x86_64-unknown-linux-musl.cc=x86_64-linux-musl-gcc', '--set', 'target.aarch64-unknown-linux-musl.musl-root=/usr/aarch64-linux-musl/', '--set', 'target.aarch64-unknown-linux-musl.cc=aarch64-linux-musl-gcc', '--set', 'target.thumbv7em-ferrocenecoretest-eabihf.profiler=true', '--host=x86_64-unknown-linux-gnu', '--target=x86_64-unknown-linux-gnu', '--enable-locked-deps', '--set', 'ferrocene.tarball-signing-kms-key-arn=arn:aws:kms:us-east-1:886866542769:key/cfbd0673-04d8-4368-b09f-56998ede9b96', '--set', 'ferrocene.oxidos-src=s3://ferrocene-ci-mirrors/manual/oxidos/oxidos-source-2025-04-30.tar.xz']
+
+[install]
+
+[rust]
+
+[target.x86_64-unknown-linux-gnu]
+
+[target.aarch64-unknown-nto-qnx710]
+
+# C compiler to be used to compile C code. Note that the
+# default value is platform specific, and if not specified it may also depend on
+# what platform is crossing to what platform.
+# See `src/bootstrap/src/utils/cc_detect.rs` for details.
+cc = 'qcc'
+
+# C++ compiler to be used to compile C++ code (e.g. LLVM and our LLVM shims).
+# This is only used for host targets.
+# See `src/bootstrap/src/utils/cc_detect.rs` for details.
+cxx = 'q++'
+
+# Archiver to be used to assemble static libraries compiled from C/C++ code.
+# Note: an absolute path should be used, otherwise LLVM build will break.
+ar = 'ntoaarch64-ar'
+
+[target.x86_64-pc-nto-qnx710]
+
+# C compiler to be used to compile C code. Note that the
+# default value is platform specific, and if not specified it may also depend on
+# what platform is crossing to what platform.
+# See `src/bootstrap/src/utils/cc_detect.rs` for details.
+cc = 'qcc'
+
+# C++ compiler to be used to compile C++ code (e.g. LLVM and our LLVM shims).
+# This is only used for host targets.
+# See `src/bootstrap/src/utils/cc_detect.rs` for details.
+cxx = 'q++'
+
+# Archiver to be used to assemble static libraries compiled from C/C++ code.
+# Note: an absolute path should be used, otherwise LLVM build will break.
+ar = 'ntox86_64-ar'
+
+# When true, build the profiler runtime for this target (required when compiling
+# with options that depend on this runtime, such as `-C profile-generate` or
+# `-C instrument-coverage`). This may also be given a path to an existing build
+# of the profiling runtime library from LLVM's compiler-rt.
+# This option will override the same option under [build] section.
+profiler = false
+
+[target.aarch64-unknown-ferrocenecoretest]
+
+# C compiler to be used to compile C code. Note that the
+# default value is platform specific, and if not specified it may also depend on
+# what platform is crossing to what platform.
+# See `src/bootstrap/src/utils/cc_detect.rs` for details.
+cc = 'aarch64-linux-gnu-gcc'
+
+[target.thumbv7em-ferrocenecoretest-eabi]
+
+# C compiler to be used to compile C code. Note that the
+# default value is platform specific, and if not specified it may also depend on
+# what platform is crossing to what platform.
+# See `src/bootstrap/src/utils/cc_detect.rs` for details.
+cc = 'arm-none-eabi-gcc'
+
+[target.thumbv7em-ferrocenecoretest-eabihf]
+
+# C compiler to be used to compile C code. Note that the
+# default value is platform specific, and if not specified it may also depend on
+# what platform is crossing to what platform.
+# See `src/bootstrap/src/utils/cc_detect.rs` for details.
+cc = 'arm-none-eabi-gcc'
+
+# When true, build the profiler runtime for this target (required when compiling
+# with options that depend on this runtime, such as `-C profile-generate` or
+# `-C instrument-coverage`). This may also be given a path to an existing build
+# of the profiling runtime library from LLVM's compiler-rt.
+# This option will override the same option under [build] section.
+# profiler = true
+
+[target.x86_64-unknown-linux-musl]
+
+# C compiler to be used to compile C code. Note that the
+# default value is platform specific, and if not specified it may also depend on
+# what platform is crossing to what platform.
+# See `src/bootstrap/src/utils/cc_detect.rs` for details.
+cc = 'x86_64-linux-musl-gcc'
+
+sanitizers = false
+
+# The root location of the musl installation directory. The library directory
+# will also need to contain libunwind.a for an unwinding implementation. Note
+# that this option only makes sense for musl targets that produce statically
+# linked binaries.
+musl-root = '/usr/x86_64-linux-musl/'
+
+
+[target.aarch64-unknown-linux-musl]
+
+# C compiler to be used to compile C code. Note that the
+# default value is platform specific, and if not specified it may also depend on
+# what platform is crossing to what platform.
+# See `src/bootstrap/src/utils/cc_detect.rs` for details.
+cc = 'aarch64-linux-musl-gcc'
+
+# The root location of the musl installation directory. The library directory
+# will also need to contain libunwind.a for an unwinding implementation. Note
+# that this option only makes sense for musl targets that produce statically
+# linked binaries.
+musl-root = '/usr/aarch64-linux-musl/'
+
+[dist]
+
+[ferrocene]
+aws-profile = "ferrocene-ci"
+
+# Whether to generate a coverage report after running tests with --coverage.
+generate-coverage-report-after-tests = false
+
+# Path containing the OxidOS source code tarball. It can be a remote URL, and
+# if so the tarball will be downloaded automatically. If this is not provided,
+# OxidOS will not be built.
+oxidos-src = 's3://ferrocene-ci-mirrors/manual/oxidos/oxidos-source-2025-04-30.tar.xz'
+
+# ARN of the AWS KMS key used to sign the criticalup manifests included in
+# tarballs. If this is not provided, tarballs will not be signed.
+# tarball-signing-kms-key-arn = 'arn:aws:kms:us-east-1:886866542769:key/cfbd0673-04d8-4368-b09f-56998ede9b96'
+

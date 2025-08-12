@@ -598,8 +598,8 @@ impl AtomicBool {
     ///   `align_of::<AtomicBool>() == 1`).
     /// * `ptr` must be [valid] for both reads and writes for the whole lifetime `'a`.
     /// * You must adhere to the [Memory model for atomic accesses]. In particular, it is not
-    ///   allowed to mix atomic and non-atomic accesses, or atomic accesses of different sizes,
-    ///   without synchronization.
+    ///   allowed to mix conflicting atomic and non-atomic accesses, or atomic accesses of different
+    ///   sizes, without synchronization.
     ///
     /// [valid]: crate::ptr#safety
     /// [Memory model for atomic accesses]: self#memory-model-for-atomic-accesses
@@ -1280,8 +1280,8 @@ impl AtomicBool {
     /// Returning an `*mut` pointer from a shared reference to this atomic is safe because the
     /// atomic types work with interior mutability. All modifications of an atomic change the value
     /// through a shared reference, and can do so safely as long as they use atomic operations. Any
-    /// use of the returned raw pointer requires an `unsafe` block and still has to uphold the same
-    /// restriction: operations on it must be atomic.
+    /// use of the returned raw pointer requires an `unsafe` block and still has to uphold the
+    /// requirements of the [memory model].
     ///
     /// # Examples
     ///
@@ -1299,6 +1299,8 @@ impl AtomicBool {
     /// }
     /// # }
     /// ```
+    ///
+    /// [memory model]: self#memory-model-for-atomic-accesses
     #[inline]
     #[stable(feature = "atomic_as_ptr", since = "1.70.0")]
     #[rustc_const_stable(feature = "atomic_as_ptr", since = "1.70.0")]
@@ -1555,8 +1557,8 @@ impl<T> AtomicPtr<T> {
     ///   can be bigger than `align_of::<*mut T>()`).
     /// * `ptr` must be [valid] for both reads and writes for the whole lifetime `'a`.
     /// * You must adhere to the [Memory model for atomic accesses]. In particular, it is not
-    ///   allowed to mix atomic and non-atomic accesses, or atomic accesses of different sizes,
-    ///   without synchronization.
+    ///   allowed to mix conflicting atomic and non-atomic accesses, or atomic accesses of different
+    ///   sizes, without synchronization.
     ///
     /// [valid]: crate::ptr#safety
     /// [Memory model for atomic accesses]: self#memory-model-for-atomic-accesses
@@ -2523,8 +2525,8 @@ impl<T> AtomicPtr<T> {
     /// Returning an `*mut` pointer from a shared reference to this atomic is safe because the
     /// atomic types work with interior mutability. All modifications of an atomic change the value
     /// through a shared reference, and can do so safely as long as they use atomic operations. Any
-    /// use of the returned raw pointer requires an `unsafe` block and still has to uphold the same
-    /// restriction: operations on it must be atomic.
+    /// use of the returned raw pointer requires an `unsafe` block and still has to uphold the
+    /// requirements of the [memory model].
     ///
     /// # Examples
     ///
@@ -2543,6 +2545,8 @@ impl<T> AtomicPtr<T> {
     ///     my_atomic_op(atomic.as_ptr());
     /// }
     /// ```
+    ///
+    /// [memory model]: self#memory-model-for-atomic-accesses
     #[inline]
     #[stable(feature = "atomic_as_ptr", since = "1.70.0")]
     #[rustc_const_stable(feature = "atomic_as_ptr", since = "1.70.0")]
@@ -2554,8 +2558,13 @@ impl<T> AtomicPtr<T> {
 
 #[cfg(target_has_atomic_load_store = "8")]
 #[stable(feature = "atomic_bool_from", since = "1.24.0")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl From<bool> for AtomicBool {
+=======
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
+impl const From<bool> for AtomicBool {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     /// Converts a `bool` into an `AtomicBool`.
     ///
     /// # Examples
@@ -2653,7 +2662,8 @@ macro_rules! atomic_int {
         }
 
         #[$stable_from]
-        impl From<$int_type> for $atomic_type {
+        #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+        impl const From<$int_type> for $atomic_type {
             #[doc = concat!("Converts an `", stringify!($int_type), "` into an `", stringify!($atomic_type), "`.")]
             #[inline]
             fn from(v: $int_type) -> Self { Self::new(v) }
@@ -2735,8 +2745,8 @@ macro_rules! atomic_int {
             }]
             /// * `ptr` must be [valid] for both reads and writes for the whole lifetime `'a`.
             /// * You must adhere to the [Memory model for atomic accesses]. In particular, it is not
-            ///   allowed to mix atomic and non-atomic accesses, or atomic accesses of different sizes,
-            ///   without synchronization.
+            ///   allowed to mix conflicting atomic and non-atomic accesses, or atomic accesses of different
+            ///   sizes, without synchronization.
             ///
             /// [valid]: crate::ptr#safety
             /// [Memory model for atomic accesses]: self#memory-model-for-atomic-accesses
@@ -3656,8 +3666,8 @@ macro_rules! atomic_int {
             /// Returning an `*mut` pointer from a shared reference to this atomic is safe because the
             /// atomic types work with interior mutability. All modifications of an atomic change the value
             /// through a shared reference, and can do so safely as long as they use atomic operations. Any
-            /// use of the returned raw pointer requires an `unsafe` block and still has to uphold the same
-            /// restriction: operations on it must be atomic.
+            /// use of the returned raw pointer requires an `unsafe` block and still has to uphold the
+            /// requirements of the [memory model].
             ///
             /// # Examples
             ///
@@ -3677,6 +3687,8 @@ macro_rules! atomic_int {
             /// }
             /// # }
             /// ```
+            ///
+            /// [memory model]: self#memory-model-for-atomic-accesses
             #[inline]
             #[stable(feature = "atomic_as_ptr", since = "1.70.0")]
             #[rustc_const_stable(feature = "atomic_as_ptr", since = "1.70.0")]

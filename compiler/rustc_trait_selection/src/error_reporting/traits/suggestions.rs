@@ -987,7 +987,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     else {
                         return false;
                     };
-                    if self.tcx.trait_of_item(did) != Some(clone_trait) {
+                    if self.tcx.trait_of_assoc(did) != Some(clone_trait) {
                         return false;
                     }
                     Some(ident.span)
@@ -2213,26 +2213,26 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         span: Span,
         trait_ref: DefId,
     ) {
-        if let Some(assoc_item) = self.tcx.opt_associated_item(item_def_id) {
-            if let ty::AssocKind::Const { .. } | ty::AssocKind::Type { .. } = assoc_item.kind {
-                err.note(format!(
-                    "{}s cannot be accessed directly on a `trait`, they can only be \
+        if let Some(assoc_item) = self.tcx.opt_associated_item(item_def_id)
+            && let ty::AssocKind::Const { .. } | ty::AssocKind::Type { .. } = assoc_item.kind
+        {
+            err.note(format!(
+                "{}s cannot be accessed directly on a `trait`, they can only be \
                         accessed through a specific `impl`",
-                    self.tcx.def_kind_descr(assoc_item.as_def_kind(), item_def_id)
-                ));
+                self.tcx.def_kind_descr(assoc_item.as_def_kind(), item_def_id)
+            ));
 
-                if !assoc_item.is_impl_trait_in_trait() {
-                    err.span_suggestion_verbose(
-                        span,
-                        "use the fully qualified path to an implementation",
-                        format!(
-                            "<Type as {}>::{}",
-                            self.tcx.def_path_str(trait_ref),
-                            assoc_item.name()
-                        ),
-                        Applicability::HasPlaceholders,
-                    );
-                }
+            if !assoc_item.is_impl_trait_in_trait() {
+                err.span_suggestion_verbose(
+                    span,
+                    "use the fully qualified path to an implementation",
+                    format!(
+                        "<Type as {}>::{}",
+                        self.tcx.def_path_str(trait_ref),
+                        assoc_item.name()
+                    ),
+                    Applicability::HasPlaceholders,
+                );
             }
         }
     }
@@ -3942,7 +3942,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             if let hir::Expr { kind: hir::ExprKind::MethodCall(_, rcvr, _, _), .. } = expr
                 && let Some(ty) = typeck_results.node_type_opt(rcvr.hir_id)
                 && let Some(failed_pred) = failed_pred.as_trait_clause()
-                && let pred = failed_pred.map_bound(|pred| pred.with_self_ty(tcx, ty))
+                && let pred = failed_pred.map_bound(|pred| pred.with_replaced_self_ty(tcx, ty))
                 && self.predicate_must_hold_modulo_regions(&Obligation::misc(
                     tcx, expr.span, body_id, param_env, pred,
                 ))
@@ -4624,9 +4624,10 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         let Some(root_pred) = root_obligation.predicate.as_trait_clause() else { return };
 
         let trait_ref = root_pred.map_bound(|root_pred| {
-            root_pred
-                .trait_ref
-                .with_self_ty(self.tcx, Ty::new_tup(self.tcx, &[root_pred.trait_ref.self_ty()]))
+            root_pred.trait_ref.with_replaced_self_ty(
+                self.tcx,
+                Ty::new_tup(self.tcx, &[root_pred.trait_ref.self_ty()]),
+            )
         });
 
         let obligation =

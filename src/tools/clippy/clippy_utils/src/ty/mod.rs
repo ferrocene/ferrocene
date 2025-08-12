@@ -6,7 +6,8 @@ use core::ops::ControlFlow;
 use itertools::Itertools;
 use rustc_abi::VariantIdx;
 use rustc_ast::ast::Mutability;
-use rustc_attr_data_structures::{AttributeKind, find_attr};
+use rustc_hir::attrs::{AttributeKind};
+use rustc_hir::find_attr;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_hir as hir;
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, Res};
@@ -492,10 +493,7 @@ pub fn peel_mid_ty_refs_is_mutable(ty: Ty<'_>) -> (Ty<'_>, usize, Mutability) {
 
 /// Returns `true` if the given type is an `unsafe` function.
 pub fn type_is_unsafe_function<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> bool {
-    match ty.kind() {
-        ty::FnDef(..) | ty::FnPtr(..) => ty.fn_sig(cx.tcx).safety().is_unsafe(),
-        _ => false,
-    }
+    ty.is_fn() && ty.fn_sig(cx.tcx).safety().is_unsafe()
 }
 
 /// Returns the base type for HIR references and pointers.

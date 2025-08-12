@@ -440,6 +440,19 @@ impl SyntaxFactory {
         ast
     }
 
+    pub fn expr_assignment(&self, lhs: ast::Expr, rhs: ast::Expr) -> ast::BinExpr {
+        let ast = make::expr_assignment(lhs.clone(), rhs.clone()).clone_for_update();
+
+        if let Some(mut mapping) = self.mappings() {
+            let mut builder = SyntaxMappingBuilder::new(ast.syntax().clone());
+            builder.map_node(lhs.syntax().clone(), ast.lhs().unwrap().syntax().clone());
+            builder.map_node(rhs.syntax().clone(), ast.rhs().unwrap().syntax().clone());
+            builder.finish(&mut mapping);
+        }
+
+        ast
+    }
+
     pub fn expr_bin(&self, lhs: ast::Expr, op: ast::BinaryOp, rhs: ast::Expr) -> ast::BinExpr {
         let ast::Expr::BinExpr(ast) =
             make::expr_bin_op(lhs.clone(), op, rhs.clone()).clone_for_update()
@@ -923,6 +936,24 @@ impl SyntaxFactory {
             builder.finish(&mut mapping);
         }
 
+        ast
+    }
+
+    pub fn record_expr(
+        &self,
+        path: ast::Path,
+        fields: ast::RecordExprFieldList,
+    ) -> ast::RecordExpr {
+        let ast = make::record_expr(path.clone(), fields.clone()).clone_for_update();
+        if let Some(mut mapping) = self.mappings() {
+            let mut builder = SyntaxMappingBuilder::new(ast.syntax().clone());
+            builder.map_node(path.syntax().clone(), ast.path().unwrap().syntax().clone());
+            builder.map_node(
+                fields.syntax().clone(),
+                ast.record_expr_field_list().unwrap().syntax().clone(),
+            );
+            builder.finish(&mut mapping);
+        }
         ast
     }
 

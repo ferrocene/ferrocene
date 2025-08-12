@@ -23,6 +23,7 @@ pub enum FoldKind {
     WhereClause,
     ReturnType,
     MatchArm,
+    Function,
     // region: item runs
     Modules,
     Consts,
@@ -59,6 +60,32 @@ pub(crate) fn folding_ranges(file: &SourceFile) -> Vec<Fold> {
                 NodeOrToken::Token(token) => token.text().contains('\n'),
             };
             if is_multiline {
+                // for the func with multiline param list
+                if matches!(element.kind(), FN)
+                    && let NodeOrToken::Node(node) = &element
+                    && let Some(fn_node) = ast::Fn::cast(node.clone())
+                {
+                    if !fn_node
+                        .param_list()
+                        .map(|param_list| param_list.syntax().text().contains_char('\n'))
+                        .unwrap_or(false)
+                    {
+                        continue;
+                    }
+
+                    if fn_node.body().is_some() {
+                        // Get the actual start of the function (excluding doc comments)
+                        let fn_start = fn_node
+                            .fn_token()
+                            .map(|token| token.text_range().start())
+                            .unwrap_or(node.text_range().start());
+                        res.push(Fold {
+                            range: TextRange::new(fn_start, node.text_range().end()),
+                            kind: FoldKind::Function,
+                        });
+                        continue;
+                    }
+                }
                 res.push(Fold { range: element.text_range(), kind });
                 continue;
             }
@@ -92,14 +119,13 @@ pub(crate) fn folding_ranges(file: &SourceFile) -> Vec<Fold> {
                 match_ast! {
                     match node {
                         ast::Module(module) => {
-                            if module.item_list().is_none() {
-                                if let Some(range) = contiguous_range_for_item_group(
+                            if module.item_list().is_none()
+                                && let Some(range) = contiguous_range_for_item_group(
                                     module,
                                     &mut visited_nodes,
                                 ) {
                                     res.push(Fold { range, kind: FoldKind::Modules })
                                 }
-                            }
                         },
                         ast::Use(use_) => {
                             if let Some(range) = contiguous_range_for_item_group(use_, &mut visited_nodes) {
@@ -152,6 +178,7 @@ fn fold_kind(kind: SyntaxKind) -> Option<FoldKind> {
         ARG_LIST | PARAM_LIST | GENERIC_ARG_LIST | GENERIC_PARAM_LIST => Some(FoldKind::ArgList),
         ARRAY_EXPR => Some(FoldKind::Array),
         RET_TYPE => Some(FoldKind::ReturnType),
+        FN => Some(FoldKind::Function),
         WHERE_CLAUSE => Some(FoldKind::WhereClause),
         ASSOC_ITEM_LIST
         | RECORD_FIELD_LIST
@@ -183,11 +210,11 @@ where
     for element in first.syntax().siblings_with_tokens(Direction::Next) {
         let node = match element {
             NodeOrToken::Token(token) => {
-                if let Some(ws) = ast::Whitespace::cast(token) {
-                    if !ws.spans_multiple_lines() {
-                        // Ignore whitespace without blank lines
-                        continue;
-                    }
+                if let Some(ws) = ast::Whitespace::cast(token)
+                    && !ws.spans_multiple_lines()
+                {
+                    // Ignore whitespace without blank lines
+                    continue;
                 }
                 // There is a blank line or another token, which means that the
                 // group ends here
@@ -241,21 +268,21 @@ fn contiguous_range_for_comment(
     for element in first.syntax().siblings_with_tokens(Direction::Next) {
         match element {
             NodeOrToken::Token(token) => {
-                if let Some(ws) = ast::Whitespace::cast(token.clone()) {
-                    if !ws.spans_multiple_lines() {
-                        // Ignore whitespace without blank lines
-                        continue;
-                    }
+                if let Some(ws) = ast::Whitespace::cast(token.clone())
+                    && !ws.spans_multiple_lines()
+                {
+                    // Ignore whitespace without blank lines
+                    continue;
                 }
-                if let Some(c) = ast::Comment::cast(token) {
-                    if c.kind() == group_kind {
-                        let text = c.text().trim_start();
-                        // regions are not real comments
-                        if !(text.starts_with(REGION_START) || text.starts_with(REGION_END)) {
-                            visited.insert(c.clone());
-                            last = c;
-                            continue;
-                        }
+                if let Some(c) = ast::Comment::cast(token)
+                    && c.kind() == group_kind
+                {
+                    let text = c.text().trim_start();
+                    // regions are not real comments
+                    if !(text.starts_with(REGION_START) || text.starts_with(REGION_END)) {
+                        visited.insert(c.clone());
+                        last = c;
+                        continue;
                     }
                 }
                 // The comment group ends because either:
@@ -291,6 +318,7 @@ mod tests {
 
     use super::*;
 
+    #[track_caller]
     fn check(#[rust_analyzer::rust_fixture] ra_fixture: &str) {
         let (ranges, text) = extract_tags(ra_fixture, "fold");
 
@@ -322,11 +350,29 @@ mod tests {
                 FoldKind::WhereClause => "whereclause",
                 FoldKind::ReturnType => "returntype",
                 FoldKind::MatchArm => "matcharm",
+                FoldKind::Function => "function",
                 FoldKind::TraitAliases => "traitaliases",
                 FoldKind::ExternCrates => "externcrates",
             };
             assert_eq!(kind, &attr.unwrap());
         }
+    }
+
+    #[test]
+    fn test_fold_func_with_multiline_param_list() {
+        check(
+            r#"
+<fold function>fn func<fold arglist>(
+    a: i32,
+    b: i32,
+    c: i32,
+)</fold> <fold block>{
+
+
+
+}</fold></fold>
+"#,
+        );
     }
 
     #[test]
@@ -541,10 +587,10 @@ const _: S = S <fold block>{
     fn fold_multiline_params() {
         check(
             r#"
-fn foo<fold arglist>(
+<fold function>fn foo<fold arglist>(
     x: i32,
     y: String,
-)</fold> {}
+)</fold> {}</fold>
 "#,
         )
     }
@@ -641,5 +687,22 @@ type Foo<T, U> = foo<fold arglist><
 ></fold>;
 "#,
         )
+    }
+
+    #[test]
+    fn test_fold_doc_comments_with_multiline_paramlist_function() {
+        check(
+            r#"
+<fold comment>/// A very very very very very very very very very very very very very very very
+/// very very very long description</fold>
+<fold function>fn foo<fold arglist>(
+    very_long_parameter_name: u32,
+    another_very_long_parameter_name: u32,
+    third_very_long_param: u32,
+)</fold> <fold block>{
+    todo!()
+}</fold></fold>
+"#,
+        );
     }
 }

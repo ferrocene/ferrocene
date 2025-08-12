@@ -200,9 +200,10 @@ impl<T> UseCloned for NonZero<T> where T: ZeroablePrimitive {}
 impl<T> Copy for NonZero<T> where T: ZeroablePrimitive {}
 
 #[stable(feature = "nonzero", since = "1.28.0")]
-impl<T> PartialEq for NonZero<T>
+#[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+impl<T> const PartialEq for NonZero<T>
 where
-    T: ZeroablePrimitive + PartialEq,
+    T: ZeroablePrimitive + ~const PartialEq,
 {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
@@ -296,7 +297,8 @@ where
 }
 
 #[stable(feature = "from_nonzero", since = "1.31.0")]
-impl<T> From<NonZero<T>> for T
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
+impl<T> const From<NonZero<T>> for T
 where
     T: ZeroablePrimitive,
 {
@@ -627,7 +629,7 @@ macro_rules! nonzero_integer {
             #[doc = concat!("let a = NonZero::<", stringify!($Int), ">::new(0b_01100100)?;")]
             #[doc = concat!("let b = NonZero::<", stringify!($Int), ">::new(0b_01000000)?;")]
             ///
-            /// assert_eq!(a.isolate_most_significant_one(), b);
+            /// assert_eq!(a.isolate_highest_one(), b);
             /// # Some(())
             /// # }
             /// ```
@@ -635,7 +637,7 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
             #[inline(always)]
-            pub const fn isolate_most_significant_one(self) -> Self {
+            pub const fn isolate_highest_one(self) -> Self {
                 let n = self.get() & (((1 as $Int) << (<$Int>::BITS - 1)).wrapping_shr(self.leading_zeros()));
 
                 // SAFETY:
@@ -657,7 +659,7 @@ macro_rules! nonzero_integer {
             #[doc = concat!("let a = NonZero::<", stringify!($Int), ">::new(0b_01100100)?;")]
             #[doc = concat!("let b = NonZero::<", stringify!($Int), ">::new(0b_00000100)?;")]
             ///
-            /// assert_eq!(a.isolate_least_significant_one(), b);
+            /// assert_eq!(a.isolate_lowest_one(), b);
             /// # Some(())
             /// # }
             /// ```
@@ -665,7 +667,7 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
             #[inline(always)]
-            pub const fn isolate_least_significant_one(self) -> Self {
+            pub const fn isolate_lowest_one(self) -> Self {
                 let n = self.get();
                 let n = n & n.wrapping_neg();
 

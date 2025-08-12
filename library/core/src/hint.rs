@@ -655,8 +655,6 @@ pub const fn must_use<T>(value: T) -> T {
 ///     }
 /// }
 /// ```
-///
-///
 #[unstable(feature = "likely_unlikely", issue = "136873")]
 #[inline(always)]
 #[cfg(not(feature = "ferrocene_certified"))]

@@ -11,7 +11,9 @@ use crate::core::config::{
     DebuginfoLevel, Merge, ReplaceOpt, RustcLto, StringOrBool, set, threads_from_config,
 };
 use crate::flags::Warnings;
-use crate::{BTreeSet, Config, HashSet, PathBuf, TargetSelection, define_config, exit};
+use crate::{
+    BTreeSet, CodegenBackendKind, Config, HashSet, PathBuf, TargetSelection, define_config, exit,
+};
 
 define_config! {
     /// TOML representation of how the Rust build is configured.
@@ -389,9 +391,13 @@ pub fn check_incompatible_options_for_ci_rustc(
     Ok(())
 }
 
-pub(crate) const VALID_CODEGEN_BACKENDS: &[&str] = &["llvm", "cranelift", "gcc"];
+pub(crate) const BUILTIN_CODEGEN_BACKENDS: &[&str] = &["llvm", "cranelift", "gcc"];
 
-pub(crate) fn validate_codegen_backends(backends: Vec<String>, section: &str) -> Vec<String> {
+pub(crate) fn parse_codegen_backends(
+    backends: Vec<String>,
+    section: &str,
+) -> Vec<CodegenBackendKind> {
+    let mut found_backends = vec![];
     for backend in &backends {
         if let Some(stripped) = backend.strip_prefix(CODEGEN_BACKEND_PREFIX) {
             panic!(
@@ -400,14 +406,46 @@ pub(crate) fn validate_codegen_backends(backends: Vec<String>, section: &str) ->
                 Please, use '{stripped}' instead."
             )
         }
-        if !VALID_CODEGEN_BACKENDS.contains(&backend.as_str()) {
+        if !BUILTIN_CODEGEN_BACKENDS.contains(&backend.as_str()) {
             println!(
                 "HELP: '{backend}' for '{section}.codegen-backends' might fail. \
-                List of known good values: {VALID_CODEGEN_BACKENDS:?}"
+                List of known codegen backends: {BUILTIN_CODEGEN_BACKENDS:?}"
             );
         }
+        let backend = match backend.as_str() {
+            "llvm" => CodegenBackendKind::Llvm,
+            "cranelift" => CodegenBackendKind::Cranelift,
+            "gcc" => CodegenBackendKind::Gcc,
+            backend => CodegenBackendKind::Custom(backend.to_string()),
+        };
+        found_backends.push(backend);
     }
-    backends
+    found_backends
+}
+
+#[cfg(not(test))]
+fn default_lld_opt_in_targets() -> Vec<String> {
+    vec!["x86_64-unknown-linux-gnu".to_string()]
+}
+
+#[cfg(test)]
+thread_local! {
+    static TEST_LLD_OPT_IN_TARGETS: std::cell::RefCell<Option<Vec<String>>> = std::cell::RefCell::new(None);
+}
+
+#[cfg(test)]
+fn default_lld_opt_in_targets() -> Vec<String> {
+    TEST_LLD_OPT_IN_TARGETS.with(|cell| cell.borrow().clone()).unwrap_or_default()
+}
+
+#[cfg(test)]
+pub fn with_lld_opt_in_targets<R>(targets: Vec<String>, f: impl FnOnce() -> R) -> R {
+    TEST_LLD_OPT_IN_TARGETS.with(|cell| {
+        let prev = cell.replace(Some(targets));
+        let result = f();
+        cell.replace(prev);
+        result
+    })
 }
 
 impl Config {
@@ -531,6 +569,14 @@ impl Config {
             lld_enabled = lld_enabled_toml;
             std_features = std_features_toml;
 
+            if optimize_toml.as_ref().is_some_and(|v| matches!(v, RustOptimize::Bool(false))) {
+                eprintln!(
+                    "WARNING: setting `optimize` to `false` is known to cause errors and \
+                    should be considered unsupported. Refer to `bootstrap.example.toml` \
+                    for more details."
+                );
+            }
+
             optimize = optimize_toml;
             self.rust_new_symbol_mangling = new_symbol_mangling;
             set(&mut self.rust_optimize_tests, optimize_tests);
@@ -576,7 +622,7 @@ impl Config {
                 llvm_libunwind.map(|v| v.parse().expect("failed to parse rust.llvm-libunwind"));
             set(
                 &mut self.rust_codegen_backends,
-                codegen_backends.map(|backends| validate_codegen_backends(backends, "rust")),
+                codegen_backends.map(|backends| parse_codegen_backends(backends, "rust")),
             );
 
             self.rust_codegen_units = codegen_units.map(threads_from_config);
@@ -609,12 +655,13 @@ impl Config {
         //   thus, disabled
         // - similarly, lld will not be built nor used by default when explicitly asked not to, e.g.
         //   when the config sets `rust.lld = false`
-        if self.host_target.triple == "x86_64-unknown-linux-gnu" && self.hosts == [self.host_target]
+        if default_lld_opt_in_targets().contains(&self.host_target.triple.to_string())
+            && self.hosts == [self.host_target]
         {
             let no_llvm_config = self
                 .target_config
                 .get(&self.host_target)
-                .is_some_and(|target_config| target_config.llvm_config.is_none());
+                .is_none_or(|target_config| target_config.llvm_config.is_none());
             let enable_lld = self.llvm_from_ci || no_llvm_config;
             // Prefer the config setting in case an explicit opt-out is needed.
             self.lld_enabled = lld_enabled.unwrap_or(enable_lld);

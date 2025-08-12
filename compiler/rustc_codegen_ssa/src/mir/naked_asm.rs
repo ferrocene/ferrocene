@@ -1,5 +1,5 @@
 use rustc_abi::{BackendRepr, Float, Integer, Primitive, RegKind};
-use rustc_attr_data_structures::InstructionSetAttr;
+use rustc_hir::attrs::InstructionSetAttr;
 use rustc_middle::mir::mono::{Linkage, MonoItemData, Visibility};
 use rustc_middle::mir::{InlineAsmOperand, START_BLOCK};
 use rustc_middle::ty::layout::{FnAbiOf, LayoutOf, TyAndLayout};
@@ -128,7 +128,7 @@ fn prefix_and_suffix<'tcx>(
     let is_arm = tcx.sess.target.arch == "arm";
     let is_thumb = tcx.sess.unstable_target_features.contains(&sym::thumb_mode);
 
-    let attrs = tcx.codegen_fn_attrs(instance.def_id());
+    let attrs = tcx.codegen_instance_attrs(instance.def);
     let link_section = attrs.link_section.map(|symbol| symbol.as_str().to_string());
 
     // If no alignment is specified, an alignment of 4 bytes is used.

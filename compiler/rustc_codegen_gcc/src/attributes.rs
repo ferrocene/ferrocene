@@ -2,8 +2,8 @@
 use gccjit::FnAttribute;
 use gccjit::Function;
 #[cfg(feature = "master")]
-use rustc_attr_data_structures::InlineAttr;
-use rustc_attr_data_structures::InstructionSetAttr;
+use rustc_hir::attrs::InlineAttr;
+use rustc_hir::attrs::InstructionSetAttr;
 #[cfg(feature = "master")]
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
 #[cfg(feature = "master")]
@@ -87,7 +87,7 @@ pub fn from_fn_attrs<'gcc, 'tcx>(
     #[cfg_attr(not(feature = "master"), allow(unused_variables))] func: Function<'gcc>,
     instance: ty::Instance<'tcx>,
 ) {
-    let codegen_fn_attrs = cx.tcx.codegen_fn_attrs(instance.def_id());
+    let codegen_fn_attrs = cx.tcx.codegen_instance_attrs(instance.def);
 
     #[cfg(feature = "master")]
     {

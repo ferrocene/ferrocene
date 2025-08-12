@@ -34,6 +34,7 @@ use rustc_target::spec::{HasTargetSpec, HasX86AbiOpt, Target, X86Abi};
 
 use crate::common::{SignType, TypeReflection, type_is_pointer};
 use crate::context::CodegenCx;
+use crate::errors;
 use crate::intrinsic::llvm;
 use crate::type_of::LayoutGccExt;
 
@@ -539,9 +540,15 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
 
     fn ret(&mut self, mut value: RValue<'gcc>) {
         let expected_return_type = self.current_func().get_return_type();
-        if !expected_return_type.is_compatible_with(value.get_type()) {
-            // NOTE: due to opaque pointers now being used, we need to cast here.
-            value = self.context.new_cast(self.location, value, expected_return_type);
+        let value_type = value.get_type();
+        if !expected_return_type.is_compatible_with(value_type) {
+            // NOTE: due to opaque pointers now being used, we need to (bit)cast here.
+            if self.is_native_int_type(value_type) && self.is_native_int_type(expected_return_type)
+            {
+                value = self.context.new_cast(self.location, value, expected_return_type);
+            } else {
+                value = self.context.new_bitcast(self.location, value, expected_return_type);
+            }
         }
         self.llbb().end_with_return(self.location, value);
     }
@@ -971,7 +978,11 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
 
     fn volatile_load(&mut self, ty: Type<'gcc>, ptr: RValue<'gcc>) -> RValue<'gcc> {
         let ptr = self.context.new_cast(self.location, ptr, ty.make_volatile().make_pointer());
-        ptr.dereference(self.location).to_rvalue()
+        // (FractalFir): We insert a local here, to ensure this volatile load can't move across
+        // blocks.
+        let local = self.current_func().new_local(self.location, ty, "volatile_tmp");
+        self.block.add_assignment(self.location, local, ptr.dereference(self.location).to_rvalue());
+        local.to_rvalue()
     }
 
     fn atomic_load(
@@ -1274,11 +1285,19 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
 
     fn intcast(
         &mut self,
-        value: RValue<'gcc>,
+        mut value: RValue<'gcc>,
         dest_typ: Type<'gcc>,
-        _is_signed: bool,
+        is_signed: bool,
     ) -> RValue<'gcc> {
-        // NOTE: is_signed is for value, not dest_typ.
+        let value_type = value.get_type();
+        if is_signed && !value_type.is_signed(self.cx) {
+            let signed_type = value_type.to_signed(self.cx);
+            value = self.gcc_int_cast(value, signed_type);
+        } else if !is_signed && value_type.is_signed(self.cx) {
+            let unsigned_type = value_type.to_unsigned(self.cx);
+            value = self.gcc_int_cast(value, unsigned_type);
+        }
+
         self.gcc_int_cast(value, dest_typ)
     }
 
@@ -1736,6 +1755,20 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
             // TODO(bjorn3): Apply function attributes
         }
         call
+    }
+
+    fn tail_call(
+        &mut self,
+        _llty: Self::Type,
+        _fn_attrs: Option<&CodegenFnAttrs>,
+        _fn_abi: &FnAbi<'tcx, Ty<'tcx>>,
+        _llfn: Self::Value,
+        _args: &[Self::Value],
+        _funclet: Option<&Self::Funclet>,
+        _instance: Option<Instance<'tcx>>,
+    ) {
+        // FIXME: implement support for explicit tail calls like rustc_codegen_llvm.
+        self.tcx.dcx().emit_fatal(errors::ExplicitTailCallsUnsupported);
     }
 
     fn zext(&mut self, value: RValue<'gcc>, dest_typ: Type<'gcc>) -> RValue<'gcc> {

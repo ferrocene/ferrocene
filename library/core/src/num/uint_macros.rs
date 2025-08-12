@@ -236,15 +236,19 @@ macro_rules! uint_impl {
         ///
         #[doc = concat!("let n: ", stringify!($SelfT), " = 0b_01100100;")]
         ///
-        /// assert_eq!(n.isolate_most_significant_one(), 0b_01000000);
-        #[doc = concat!("assert_eq!(0_", stringify!($SelfT), ".isolate_most_significant_one(), 0);")]
+        /// assert_eq!(n.isolate_highest_one(), 0b_01000000);
+        #[doc = concat!("assert_eq!(0_", stringify!($SelfT), ".isolate_highest_one(), 0);")]
         /// ```
         #[unstable(feature = "isolate_most_least_significant_one", issue = "136909")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
+<<<<<<< HEAD
         #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn isolate_most_significant_one(self) -> Self {
+=======
+        pub const fn isolate_highest_one(self) -> Self {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             self & (((1 as $SelfT) << (<$SelfT>::BITS - 1)).wrapping_shr(self.leading_zeros()))
         }
 
@@ -258,15 +262,19 @@ macro_rules! uint_impl {
         ///
         #[doc = concat!("let n: ", stringify!($SelfT), " = 0b_01100100;")]
         ///
-        /// assert_eq!(n.isolate_least_significant_one(), 0b_00000100);
-        #[doc = concat!("assert_eq!(0_", stringify!($SelfT), ".isolate_least_significant_one(), 0);")]
+        /// assert_eq!(n.isolate_lowest_one(), 0b_00000100);
+        #[doc = concat!("assert_eq!(0_", stringify!($SelfT), ".isolate_lowest_one(), 0);")]
         /// ```
         #[unstable(feature = "isolate_most_least_significant_one", issue = "136909")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
+<<<<<<< HEAD
         #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn isolate_least_significant_one(self) -> Self {
+=======
+        pub const fn isolate_lowest_one(self) -> Self {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             self & self.wrapping_neg()
         }
 
@@ -576,7 +584,7 @@ macro_rules! uint_impl {
         pub const fn strict_add(self, rhs: Self) -> Self {
             let (a, b) = self.overflowing_add(rhs);
             if b { overflow_panic::add() } else { a }
-         }
+        }
 
         /// Unchecked integer addition. Computes `self + rhs`, assuming overflow
         /// cannot occur.
@@ -676,7 +684,7 @@ macro_rules! uint_impl {
         pub const fn strict_add_signed(self, rhs: $SignedT) -> Self {
             let (a, b) = self.overflowing_add_signed(rhs);
             if b { overflow_panic::add() } else { a }
-         }
+        }
 
         /// Checked integer subtraction. Computes `self - rhs`, returning
         /// `None` if overflow occurred.
@@ -738,7 +746,7 @@ macro_rules! uint_impl {
         pub const fn strict_sub(self, rhs: Self) -> Self {
             let (a, b) = self.overflowing_sub(rhs);
             if b { overflow_panic::sub() } else { a }
-         }
+        }
 
         /// Unchecked integer subtraction. Computes `self - rhs`, assuming overflow
         /// cannot occur.
@@ -830,6 +838,43 @@ macro_rules! uint_impl {
             } else {
                 None
             }
+        }
+
+        /// Strict subtraction with a signed integer. Computes `self - rhs`,
+        /// panicking if overflow occurred.
+        ///
+        /// # Panics
+        ///
+        /// ## Overflow behavior
+        ///
+        /// This function will always panic on overflow, regardless of whether overflow checks are enabled.
+        ///
+        /// # Examples
+        ///
+        /// ```
+        /// #![feature(strict_overflow_ops)]
+        #[doc = concat!("assert_eq!(3", stringify!($SelfT), ".strict_sub_signed(2), 1);")]
+        /// ```
+        ///
+        /// The following panic because of overflow:
+        ///
+        /// ```should_panic
+        /// #![feature(strict_overflow_ops)]
+        #[doc = concat!("let _ = 1", stringify!($SelfT), ".strict_sub_signed(2);")]
+        /// ```
+        ///
+        /// ```should_panic
+        /// #![feature(strict_overflow_ops)]
+        #[doc = concat!("let _ = (", stringify!($SelfT), "::MAX).strict_sub_signed(-1);")]
+        /// ```
+        #[unstable(feature = "strict_overflow_ops", issue = "118260")]
+        #[must_use = "this returns the result of the operation, \
+                      without modifying the original"]
+        #[inline]
+        #[track_caller]
+        pub const fn strict_sub_signed(self, rhs: $SignedT) -> Self {
+            let (a, b) = self.overflowing_sub_signed(rhs);
+            if b { overflow_panic::sub() } else { a }
         }
 
         #[doc = concat!(
@@ -943,7 +988,7 @@ macro_rules! uint_impl {
         pub const fn strict_mul(self, rhs: Self) -> Self {
             let (a, b) = self.overflowing_mul(rhs);
             if b { overflow_panic::mul() } else { a }
-         }
+        }
 
         /// Unchecked integer multiplication. Computes `self * rhs`, assuming overflow
         /// cannot occur.

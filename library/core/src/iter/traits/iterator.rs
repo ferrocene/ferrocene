@@ -825,7 +825,7 @@ pub trait Iterator {
     /// might be preferable to keep a functional style with longer iterators:
     ///
     /// ```
-    /// (0..5).flat_map(|x| x * 100 .. x * 110)
+    /// (0..5).flat_map(|x| (x * 100)..(x * 110))
     ///       .enumerate()
     ///       .filter(|&(i, x)| (i + x) % 3 == 0)
     ///       .for_each(|(i, x)| println!("{i}:{x}"));
@@ -3475,11 +3475,15 @@ pub trait Iterator {
     /// ```
     #[stable(feature = "iter_copied", since = "1.36.0")]
     #[rustc_diagnostic_item = "iter_copied"]
+<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
     fn copied<'a, T: 'a>(self) -> Copied<Self>
+=======
+    fn copied<'a, T>(self) -> Copied<Self>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     where
+        T: Copy + 'a,
         Self: Sized + Iterator<Item = &'a T>,
-        T: Copy,
     {
         Copied::new(self)
     }
@@ -3524,11 +3528,15 @@ pub trait Iterator {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "iter_cloned"]
+<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
     fn cloned<'a, T: 'a>(self) -> Cloned<Self>
+=======
+    fn cloned<'a, T>(self) -> Cloned<Self>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     where
+        T: Clone + 'a,
         Self: Sized + Iterator<Item = &'a T>,
-        T: Clone,
     {
         Cloned::new(self)
     }

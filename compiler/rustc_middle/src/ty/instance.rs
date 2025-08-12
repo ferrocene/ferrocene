@@ -212,7 +212,7 @@ impl<'tcx> Instance<'tcx> {
         if !tcx.sess.opts.share_generics()
             // However, if the def_id is marked inline(never), then it's fine to just reuse the
             // upstream monomorphization.
-            && tcx.codegen_fn_attrs(self.def_id()).inline != rustc_attr_data_structures::InlineAttr::Never
+            && tcx.codegen_fn_attrs(self.def_id()).inline != rustc_hir::attrs::InlineAttr::Never
         {
             return None;
         }
@@ -397,13 +397,13 @@ pub fn fmt_instance(
     ty::tls::with(|tcx| {
         let args = tcx.lift(instance.args).expect("could not lift for printing");
 
-        let mut cx = if let Some(type_length) = type_length {
+        let mut p = if let Some(type_length) = type_length {
             FmtPrinter::new_with_limit(tcx, Namespace::ValueNS, type_length)
         } else {
             FmtPrinter::new(tcx, Namespace::ValueNS)
         };
-        cx.print_def_path(instance.def_id(), args)?;
-        let s = cx.into_buffer();
+        p.print_def_path(instance.def_id(), args)?;
+        let s = p.into_buffer();
         f.write_str(&s)
     })?;
 

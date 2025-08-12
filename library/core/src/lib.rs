@@ -39,9 +39,9 @@
 //!   return. You should mark your implementation using `#[panic_handler]`.
 //!
 //! * `rust_eh_personality` - is used by the failure mechanisms of the
-//!    compiler. This is often mapped to GCC's personality function, but crates
-//!    which do not trigger a panic can be assured that this function is never
-//!    called. The `lang` attribute is called `eh_personality`.
+//!   compiler. This is often mapped to GCC's personality function, but crates
+//!   which do not trigger a panic can be assured that this function is never
+//!   called. The `lang` attribute is called `eh_personality`.
 
 #![stable(feature = "core", since = "1.6.0")]
 #![doc(
@@ -97,6 +97,7 @@
 // of conflicts we have when merging main.
 //
 // Library features:
+<<<<<<< HEAD
 // not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(array_ptr_get))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(asm_experimental_arch))]
@@ -106,6 +107,18 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_select))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_target_has_reliable_f16_f128))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(const_carrying_mul_add))]
+=======
+// tidy-alphabetical-start
+#![feature(array_ptr_get)]
+#![feature(asm_experimental_arch)]
+#![feature(bigint_helper_methods)]
+#![feature(bstr)]
+#![feature(bstr_internals)]
+#![feature(cfg_select)]
+#![feature(cfg_target_has_reliable_f16_f128)]
+#![feature(const_carrying_mul_add)]
+#![feature(const_cmp)]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
 #![feature(core_intrinsics)]
@@ -148,8 +161,14 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(const_precise_live_drops))]
 #![feature(const_trait_impl)]
 #![feature(decl_macro)]
+<<<<<<< HEAD
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(deprecated_suggestion))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_cfg))]
+=======
+#![feature(deprecated_suggestion)]
+#![feature(derive_const)]
+#![feature(doc_cfg)]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(doc_cfg_hide)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_notable_trait))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(extern_types))]

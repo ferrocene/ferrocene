@@ -1,7 +1,5 @@
 # Testing the compiler
 
-<!-- toc -->
-
 The Rust project runs a wide variety of different tests, orchestrated by the
 build system (`./x test`). This section gives a brief overview of the different
 testing tools. Subsequent chapters dive into [running tests](running.md) and
@@ -111,12 +109,14 @@ and it can be invoked so:
 
 This requires building all of the documentation, which might take a while.
 
-### Dist check
+### `distcheck`
 
 `distcheck` verifies that the source distribution tarball created by the build
 system will unpack, build, and run all tests.
 
-> Example: `./x test distcheck`
+```console
+./x test distcheck
+```
 
 ### Tool tests
 

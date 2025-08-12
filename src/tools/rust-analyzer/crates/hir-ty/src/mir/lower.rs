@@ -320,11 +320,11 @@ impl<'ctx> MirLowerCtx<'ctx> {
         expr_id: ExprId,
         current: BasicBlockId,
     ) -> Result<Option<(Operand, BasicBlockId)>> {
-        if !self.has_adjustments(expr_id) {
-            if let Expr::Literal(l) = &self.body.exprs[expr_id] {
-                let ty = self.expr_ty_without_adjust(expr_id);
-                return Ok(Some((self.lower_literal_to_operand(ty, l)?, current)));
-            }
+        if !self.has_adjustments(expr_id)
+            && let Expr::Literal(l) = &self.body[expr_id]
+        {
+            let ty = self.expr_ty_without_adjust(expr_id);
+            return Ok(Some((self.lower_literal_to_operand(ty, l)?, current)));
         }
         let Some((p, current)) = self.lower_expr_as_place(current, expr_id, true)? else {
             return Ok(None);
@@ -411,7 +411,7 @@ impl<'ctx> MirLowerCtx<'ctx> {
         place: Place,
         mut current: BasicBlockId,
     ) -> Result<Option<BasicBlockId>> {
-        match &self.body.exprs[expr_id] {
+        match &self.body[expr_id] {
             Expr::OffsetOf(_) => {
                 not_supported!("builtin#offset_of")
             }
@@ -1039,18 +1039,18 @@ impl<'ctx> MirLowerCtx<'ctx> {
                         && rhs_ty.is_scalar()
                         && (lhs_ty == rhs_ty || builtin_inequal_impls)
                 };
-                if !is_builtin {
-                    if let Some((func_id, generic_args)) = self.infer.method_resolution(expr_id) {
-                        let func = Operand::from_fn(self.db, func_id, generic_args);
-                        return self.lower_call_and_args(
-                            func,
-                            [*lhs, *rhs].into_iter(),
-                            place,
-                            current,
-                            self.is_uninhabited(expr_id),
-                            expr_id.into(),
-                        );
-                    }
+                if !is_builtin
+                    && let Some((func_id, generic_args)) = self.infer.method_resolution(expr_id)
+                {
+                    let func = Operand::from_fn(self.db, func_id, generic_args);
+                    return self.lower_call_and_args(
+                        func,
+                        [*lhs, *rhs].into_iter(),
+                        place,
+                        current,
+                        self.is_uninhabited(expr_id),
+                        expr_id.into(),
+                    );
                 }
                 if let hir_def::hir::BinaryOp::Assignment { op: Some(op) } = op {
                     // last adjustment is `&mut` which we don't want it.
@@ -1374,7 +1374,7 @@ impl<'ctx> MirLowerCtx<'ctx> {
     }
 
     fn lower_literal_or_const_to_operand(&mut self, ty: Ty, loc: &ExprId) -> Result<Operand> {
-        match &self.body.exprs[*loc] {
+        match &self.body[*loc] {
             Expr::Literal(l) => self.lower_literal_to_operand(ty, l),
             Expr::Path(c) => {
                 let owner = self.owner;
@@ -1596,10 +1596,10 @@ impl<'ctx> MirLowerCtx<'ctx> {
 
     fn expr_ty_after_adjustments(&self, e: ExprId) -> Ty {
         let mut ty = None;
-        if let Some(it) = self.infer.expr_adjustments.get(&e) {
-            if let Some(it) = it.last() {
-                ty = Some(it.target.clone());
-            }
+        if let Some(it) = self.infer.expr_adjustments.get(&e)
+            && let Some(it) = it.last()
+        {
+            ty = Some(it.target.clone());
         }
         ty.unwrap_or_else(|| self.expr_ty_without_adjust(e))
     }
@@ -1848,18 +1848,18 @@ impl<'ctx> MirLowerCtx<'ctx> {
         self.result.param_locals.extend(params.clone().map(|(it, ty)| {
             let local_id = self.result.locals.alloc(Local { ty });
             self.drop_scopes.last_mut().unwrap().locals.push(local_id);
-            if let Pat::Bind { id, subpat: None } = self.body[it] {
-                if matches!(
-                    self.body.bindings[id].mode,
+            if let Pat::Bind { id, subpat: None } = self.body[it]
+                && matches!(
+                    self.body[id].mode,
                     BindingAnnotation::Unannotated | BindingAnnotation::Mutable
-                ) {
-                    self.result.binding_locals.insert(id, local_id);
-                }
+                )
+            {
+                self.result.binding_locals.insert(id, local_id);
             }
             local_id
         }));
         // and then rest of bindings
-        for (id, _) in self.body.bindings.iter() {
+        for (id, _) in self.body.bindings() {
             if !pick_binding(id) {
                 continue;
             }
@@ -1887,10 +1887,10 @@ impl<'ctx> MirLowerCtx<'ctx> {
             .into_iter()
             .skip(base_param_count + self_binding.is_some() as usize);
         for ((param, _), local) in params.zip(local_params) {
-            if let Pat::Bind { id, .. } = self.body[param] {
-                if local == self.binding_local(id)? {
-                    continue;
-                }
+            if let Pat::Bind { id, .. } = self.body[param]
+                && local == self.binding_local(id)?
+            {
+                continue;
             }
             let r = self.pattern_match(current, None, local.into(), param)?;
             if let Some(b) = r.1 {
@@ -2126,7 +2126,7 @@ pub fn mir_body_for_closure_query(
         .result
         .binding_locals
         .into_iter()
-        .filter(|it| ctx.body.binding_owners.get(&it.0).copied() == Some(expr))
+        .filter(|it| ctx.body.binding_owner(it.0) == Some(expr))
         .collect();
     if let Some(err) = err {
         return Err(MirLowerError::UnresolvedUpvar(err));
@@ -2191,7 +2191,7 @@ pub fn lower_to_mir(
     // 0 is return local
     ctx.result.locals.alloc(Local { ty: ctx.expr_ty_after_adjustments(root_expr) });
     let binding_picker = |b: BindingId| {
-        let owner = ctx.body.binding_owners.get(&b).copied();
+        let owner = ctx.body.binding_owner(b);
         if root_expr == body.body_expr { owner.is_none() } else { owner == Some(root_expr) }
     };
     // 1 to param_len is for params

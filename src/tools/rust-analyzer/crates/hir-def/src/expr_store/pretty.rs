@@ -900,14 +900,12 @@ impl Printer<'_> {
                         let field_name = arg.name.display(self.db, edition).to_string();
 
                         let mut same_name = false;
-                        if let Pat::Bind { id, subpat: None } = &self.store[arg.pat] {
-                            if let Binding { name, mode: BindingAnnotation::Unannotated, .. } =
-                                &self.store.bindings[*id]
-                            {
-                                if name.as_str() == field_name {
-                                    same_name = true;
-                                }
-                            }
+                        if let Pat::Bind { id, subpat: None } = &self.store[arg.pat]
+                            && let Binding { name, mode: BindingAnnotation::Unannotated, .. } =
+                                &self.store.assert_expr_only().bindings[*id]
+                            && name.as_str() == field_name
+                        {
+                            same_name = true;
                         }
 
                         w!(p, "{}", field_name);
@@ -1063,7 +1061,7 @@ impl Printer<'_> {
     }
 
     fn print_binding(&mut self, id: BindingId) {
-        let Binding { name, mode, .. } = &self.store.bindings[id];
+        let Binding { name, mode, .. } = &self.store.assert_expr_only().bindings[id];
         let mode = match mode {
             BindingAnnotation::Unannotated => "",
             BindingAnnotation::Mutable => "mut ",

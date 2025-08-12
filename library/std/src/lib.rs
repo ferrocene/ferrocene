@@ -294,6 +294,8 @@
 #![feature(f128)]
 #![feature(ffi_const)]
 #![feature(formatting_options)]
+#![feature(hash_map_internals)]
+#![feature(hash_map_macro)]
 #![feature(if_let_guard)]
 #![feature(intra_doc_pointers)]
 #![feature(iter_advance_by)]
@@ -324,14 +326,13 @@
 //
 // Library features (core):
 // tidy-alphabetical-start
-#![feature(array_chunks)]
 #![feature(bstr)]
 #![feature(bstr_internals)]
 #![feature(char_internals)]
 #![feature(clone_to_uninit)]
-#![feature(const_float_round_methods)]
 #![feature(core_intrinsics)]
 #![feature(core_io_borrowed_buf)]
+#![feature(drop_guard)]
 #![feature(duration_constants)]
 #![feature(error_generic_member_access)]
 #![feature(error_iter)]

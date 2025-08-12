@@ -21,7 +21,7 @@ use crate::infer::canonical::{
     Canonical, CanonicalQueryResponse, CanonicalVarValues, Certainty, OriginalQueryValues,
     QueryRegionConstraints, QueryResponse,
 };
-use crate::infer::region_constraints::{Constraint, RegionConstraintData};
+use crate::infer::region_constraints::RegionConstraintData;
 use crate::infer::{
     DefineOpaqueTypes, InferCtxt, InferOk, InferResult, SubregionOrigin, TypeOutlivesConstraint,
 };
@@ -105,8 +105,6 @@ impl<'tcx> InferCtxt<'tcx> {
     where
         T: Debug + TypeFoldable<TyCtxt<'tcx>>,
     {
-        let tcx = self.tcx;
-
         // Select everything, returning errors.
         let errors = fulfill_cx.select_all_or_error(self);
 
@@ -116,9 +114,14 @@ impl<'tcx> InferCtxt<'tcx> {
         }
 
         let region_obligations = self.take_registered_region_obligations();
+        let region_assumptions = self.take_registered_region_assumptions();
         debug!(?region_obligations);
         let region_constraints = self.with_region_constraints(|region_constraints| {
-            make_query_region_constraints(tcx, region_obligations, region_constraints)
+            make_query_region_constraints(
+                region_obligations,
+                region_constraints,
+                region_assumptions,
+            )
         });
         debug!(?region_constraints);
 
@@ -167,6 +170,11 @@ impl<'tcx> InferCtxt<'tcx> {
         for (predicate, _category) in &query_response.value.region_constraints.outlives {
             let predicate = instantiate_value(self.tcx, &result_args, *predicate);
             self.register_outlives_constraint(predicate, cause);
+        }
+
+        for assumption in &query_response.value.region_constraints.assumptions {
+            let assumption = instantiate_value(self.tcx, &result_args, *assumption);
+            self.register_region_assumption(assumption);
         }
 
         let user_result: R =
@@ -292,6 +300,18 @@ impl<'tcx> InferCtxt<'tcx> {
             }),
         );
 
+        // FIXME(higher_ranked_auto): Optimize this to instantiate all assumptions
+        // at once, rather than calling `instantiate_value` repeatedly which may
+        // create more universes.
+        output_query_region_constraints.assumptions.extend(
+            query_response
+                .value
+                .region_constraints
+                .assumptions
+                .iter()
+                .map(|&r_c| instantiate_value(self.tcx, &result_args, r_c)),
+        );
+
         let user_result: R =
             query_response.instantiate_projected(self.tcx, &result_args, |q_r| q_r.value.clone());
 
@@ -410,12 +430,12 @@ impl<'tcx> InferCtxt<'tcx> {
                 }
                 GenericArgKind::Lifetime(result_value) => {
                     // e.g., here `result_value` might be `'?1` in the example above...
-                    if let ty::ReBound(debruijn, br) = result_value.kind() {
+                    if let ty::ReBound(debruijn, b) = result_value.kind() {
                         // ... in which case we would set `canonical_vars[0]` to `Some('static)`.
 
                         // We only allow a `ty::INNERMOST` index in generic parameters.
                         assert_eq!(debruijn, ty::INNERMOST);
-                        opt_values[br.var] = Some(*original_value);
+                        opt_values[b.var] = Some(*original_value);
                     }
                 }
                 GenericArgKind::Const(result_value) => {
@@ -424,7 +444,7 @@ impl<'tcx> InferCtxt<'tcx> {
 
                         // We only allow a `ty::INNERMOST` index in generic parameters.
                         assert_eq!(debruijn, ty::INNERMOST);
-                        opt_values[b] = Some(*original_value);
+                        opt_values[b.var] = Some(*original_value);
                     }
                 }
             }
@@ -564,9 +584,9 @@ impl<'tcx> InferCtxt<'tcx> {
 /// Given the region obligations and constraints scraped from the infcx,
 /// creates query region constraints.
 pub fn make_query_region_constraints<'tcx>(
-    tcx: TyCtxt<'tcx>,
     outlives_obligations: Vec<TypeOutlivesConstraint<'tcx>>,
     region_constraints: &RegionConstraintData<'tcx>,
+    assumptions: Vec<ty::ArgOutlivesPredicate<'tcx>>,
 ) -> QueryRegionConstraints<'tcx> {
     let RegionConstraintData { constraints, verifys } = region_constraints;
 
@@ -576,22 +596,9 @@ pub fn make_query_region_constraints<'tcx>(
 
     let outlives: Vec<_> = constraints
         .iter()
-        .map(|(k, origin)| {
-            let constraint = match *k {
-                // Swap regions because we are going from sub (<=) to outlives
-                // (>=).
-                Constraint::VarSubVar(v1, v2) => ty::OutlivesPredicate(
-                    ty::Region::new_var(tcx, v2).into(),
-                    ty::Region::new_var(tcx, v1),
-                ),
-                Constraint::VarSubReg(v1, r2) => {
-                    ty::OutlivesPredicate(r2.into(), ty::Region::new_var(tcx, v1))
-                }
-                Constraint::RegSubVar(r1, v2) => {
-                    ty::OutlivesPredicate(ty::Region::new_var(tcx, v2).into(), r1)
-                }
-                Constraint::RegSubReg(r1, r2) => ty::OutlivesPredicate(r2.into(), r1),
-            };
+        .map(|(c, origin)| {
+            // Swap regions because we are going from sub (<=) to outlives (>=).
+            let constraint = ty::OutlivesPredicate(c.sup.into(), c.sub);
             (constraint, origin.to_constraint_category())
         })
         .chain(outlives_obligations.into_iter().map(|obl| {
@@ -602,5 +609,5 @@ pub fn make_query_region_constraints<'tcx>(
         }))
         .collect();
 
-    QueryRegionConstraints { outlives }
+    QueryRegionConstraints { outlives, assumptions }
 }

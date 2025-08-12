@@ -7,7 +7,7 @@ use either::Either;
 use hir_def::{
     AdtId, DefWithBodyId, FieldId, FunctionId, VariantId,
     expr_store::{Body, path::Path},
-    hir::{AsmOperand, Expr, ExprId, ExprOrPatId, Pat, PatId, Statement, UnaryOp},
+    hir::{AsmOperand, Expr, ExprId, ExprOrPatId, InlineAsmKind, Pat, PatId, Statement, UnaryOp},
     resolver::{HasResolver, ResolveValueResult, Resolver, ValueNs},
     signatures::StaticFlags,
     type_ref::Rawness,
@@ -217,7 +217,7 @@ impl<'db> UnsafeVisitor<'db> {
     }
 
     fn walk_pat(&mut self, current: PatId) {
-        let pat = &self.body.pats[current];
+        let pat = &self.body[current];
 
         if self.inside_union_destructure {
             match pat {
@@ -264,7 +264,7 @@ impl<'db> UnsafeVisitor<'db> {
     }
 
     fn walk_expr(&mut self, current: ExprId) {
-        let expr = &self.body.exprs[current];
+        let expr = &self.body[current];
         let inside_assignment = mem::replace(&mut self.inside_assignment, false);
         match expr {
             &Expr::Call { callee, .. } => {
@@ -272,10 +272,10 @@ impl<'db> UnsafeVisitor<'db> {
                 if let Some(func) = callee.as_fn_def(self.db) {
                     self.check_call(current, func);
                 }
-                if let TyKind::Function(fn_ptr) = callee.kind(Interner) {
-                    if fn_ptr.sig.safety == chalk_ir::Safety::Unsafe {
-                        self.on_unsafe_op(current.into(), UnsafetyReason::UnsafeFnCall);
-                    }
+                if let TyKind::Function(fn_ptr) = callee.kind(Interner)
+                    && fn_ptr.sig.safety == chalk_ir::Safety::Unsafe
+                {
+                    self.on_unsafe_op(current.into(), UnsafetyReason::UnsafeFnCall);
                 }
             }
             Expr::Path(path) => {
@@ -284,7 +284,7 @@ impl<'db> UnsafeVisitor<'db> {
                 self.resolver.reset_to_guard(guard);
             }
             Expr::Ref { expr, rawness: Rawness::RawPtr, mutability: _ } => {
-                match self.body.exprs[*expr] {
+                match self.body[*expr] {
                     // Do not report unsafe for `addr_of[_mut]!(EXTERN_OR_MUT_STATIC)`,
                     // see https://github.com/rust-lang/rust/pull/125834.
                     Expr::Path(_) => return,
@@ -315,7 +315,12 @@ impl<'db> UnsafeVisitor<'db> {
                 self.inside_assignment = old_inside_assignment;
             }
             Expr::InlineAsm(asm) => {
-                self.on_unsafe_op(current.into(), UnsafetyReason::InlineAsm);
+                if asm.kind == InlineAsmKind::Asm {
+                    // `naked_asm!()` requires `unsafe` on the attribute (`#[unsafe(naked)]`),
+                    // and `global_asm!()` doesn't require it at all.
+                    self.on_unsafe_op(current.into(), UnsafetyReason::InlineAsm);
+                }
+
                 asm.operands.iter().for_each(|(_, op)| match op {
                     AsmOperand::In { expr, .. }
                     | AsmOperand::Out { expr: Some(expr), .. }
@@ -341,12 +346,11 @@ impl<'db> UnsafeVisitor<'db> {
             Expr::Cast { .. } => self.inside_assignment = inside_assignment,
             Expr::Field { .. } => {
                 self.inside_assignment = inside_assignment;
-                if !inside_assignment {
-                    if let Some(Either::Left(FieldId { parent: VariantId::UnionId(_), .. })) =
+                if !inside_assignment
+                    && let Some(Either::Left(FieldId { parent: VariantId::UnionId(_), .. })) =
                         self.infer.field_resolution(current)
-                    {
-                        self.on_unsafe_op(current.into(), UnsafetyReason::UnionField);
-                    }
+                {
+                    self.on_unsafe_op(current.into(), UnsafetyReason::UnionField);
                 }
             }
             Expr::Unsafe { statements, .. } => {

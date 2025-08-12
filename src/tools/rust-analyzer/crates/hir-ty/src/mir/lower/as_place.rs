@@ -133,7 +133,7 @@ impl MirLowerCtx<'_> {
             }
             this.lower_expr_to_some_place_without_adjust(expr_id, current)
         };
-        match &self.body.exprs[expr_id] {
+        match &self.body[expr_id] {
             Expr::Path(p) => {
                 let resolver_guard =
                     self.resolver.update_to_inner_scope(self.db, self.owner, expr_id);
@@ -189,17 +189,14 @@ impl MirLowerCtx<'_> {
                         self.expr_ty_without_adjust(expr_id),
                         expr_id.into(),
                         'b: {
-                            if let Some((f, _)) = self.infer.method_resolution(expr_id) {
-                                if let Some(deref_trait) =
+                            if let Some((f, _)) = self.infer.method_resolution(expr_id)
+                                && let Some(deref_trait) =
                                     self.resolve_lang_item(LangItem::DerefMut)?.as_trait()
-                                {
-                                    if let Some(deref_fn) = deref_trait
-                                        .trait_items(self.db)
-                                        .method_by_name(&Name::new_symbol_root(sym::deref_mut))
-                                    {
-                                        break 'b deref_fn == f;
-                                    }
-                                }
+                                && let Some(deref_fn) = deref_trait
+                                    .trait_items(self.db)
+                                    .method_by_name(&Name::new_symbol_root(sym::deref_mut))
+                            {
+                                break 'b deref_fn == f;
                             }
                             false
                         },

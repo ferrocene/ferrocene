@@ -7,7 +7,8 @@ use clippy_utils::{
     get_path_from_caller_to_method_type, is_adjusted, is_no_std_crate, path_to_local, path_to_local_id,
 };
 use rustc_abi::ExternAbi;
-use rustc_attr_data_structures::{AttributeKind, find_attr};
+use rustc_hir::attrs::{AttributeKind};
+use rustc_hir::find_attr;
 use rustc_errors::Applicability;
 use rustc_hir::{BindingMode, Expr, ExprKind, FnRetTy, GenericArgs, Param, PatKind, QPath, Safety, TyKind};
 use rustc_infer::infer::TyCtxtInferExt;
@@ -28,12 +29,6 @@ declare_clippy_lint! {
     /// ### Why is this bad?
     /// Needlessly creating a closure adds code for no benefit
     /// and gives the optimizer more work.
-    ///
-    /// ### Known problems
-    /// If creating the closure inside the closure has a side-
-    /// effect then moving the closure creation out will change when that side-
-    /// effect runs.
-    /// See [#1439](https://github.com/rust-lang/rust-clippy/issues/1439) for more details.
     ///
     /// ### Example
     /// ```rust,ignore

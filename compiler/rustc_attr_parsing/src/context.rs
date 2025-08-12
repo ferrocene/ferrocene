@@ -5,10 +5,10 @@ use std::sync::LazyLock;
 
 use private::Sealed;
 use rustc_ast::{self as ast, LitKind, MetaItemLit, NodeId};
-use rustc_attr_data_structures::AttributeKind;
-use rustc_attr_data_structures::lints::{AttributeLint, AttributeLintKind};
 use rustc_errors::{DiagCtxtHandle, Diagnostic};
 use rustc_feature::{AttributeTemplate, Features};
+use rustc_hir::attrs::AttributeKind;
+use rustc_hir::lints::{AttributeLint, AttributeLintKind};
 use rustc_hir::{AttrArgs, AttrItem, AttrPath, Attribute, HashIgnoredAttrId, HirId};
 use rustc_session::Session;
 use rustc_span::{DUMMY_SP, ErrorGuaranteed, Span, Symbol, sym};
@@ -17,8 +17,8 @@ use crate::attributes::allow_unstable::{
     AllowConstFnUnstableParser, AllowInternalUnstableParser, UnstableFeatureBoundParser,
 };
 use crate::attributes::codegen_attrs::{
-    ColdParser, ExportNameParser, NakedParser, NoMangleParser, OmitGdbPrettyPrinterSectionParser,
-    OptimizeParser, TargetFeatureParser, TrackCallerParser, UsedParser,
+    ColdParser, CoverageParser, ExportNameParser, NakedParser, NoMangleParser, OptimizeParser,
+    TargetFeatureParser, TrackCallerParser, UsedParser,
 };
 use crate::attributes::confusables::ConfusablesParser;
 use crate::attributes::deprecation::DeprecationParser;
@@ -32,10 +32,14 @@ use crate::attributes::lint_helpers::{
     AsPtrParser, AutomaticallyDerivedParser, PassByValueParser, PubTransparentParser,
 };
 use crate::attributes::loop_match::{ConstContinueParser, LoopMatchParser};
+use crate::attributes::macro_attrs::{MacroEscapeParser, MacroUseParser};
 use crate::attributes::must_use::MustUseParser;
 use crate::attributes::no_implicit_prelude::NoImplicitPreludeParser;
 use crate::attributes::non_exhaustive::NonExhaustiveParser;
 use crate::attributes::path::PathParser as PathAttributeParser;
+use crate::attributes::proc_macro_attrs::{
+    ProcMacroAttributeParser, ProcMacroDeriveParser, ProcMacroParser, RustcBuiltinMacroParser,
+};
 use crate::attributes::repr::{AlignParser, ReprParser};
 use crate::attributes::rustc_internal::{
     RustcLayoutScalarValidRangeEnd, RustcLayoutScalarValidRangeStart,
@@ -57,14 +61,22 @@ use crate::attributes::{AttributeParser as _, Combine, Single, WithoutArgs};
 use crate::parser::{ArgParser, MetaItemParser, PathParser};
 use crate::session_diagnostics::{AttributeParseError, AttributeParseErrorReason, UnknownMetaItem};
 
-macro_rules! group_type {
-    ($stage: ty) => {
-         LazyLock<(
-            BTreeMap<&'static [Symbol], Vec<(AttributeTemplate, Box<dyn for<'sess, 'a> Fn(&mut AcceptContext<'_, 'sess, $stage>, &ArgParser<'a>) + Send + Sync>)>>,
-            Vec<Box<dyn Send + Sync + Fn(&mut FinalizeContext<'_, '_, $stage>) -> Option<AttributeKind>>>
-        )>
-    };
+type GroupType<S> = LazyLock<GroupTypeInner<S>>;
+
+struct GroupTypeInner<S: Stage> {
+    accepters: BTreeMap<&'static [Symbol], Vec<GroupTypeInnerAccept<S>>>,
+    finalizers: Vec<FinalizeFn<S>>,
 }
+
+struct GroupTypeInnerAccept<S: Stage> {
+    template: AttributeTemplate,
+    accept_fn: AcceptFn<S>,
+}
+
+type AcceptFn<S> =
+    Box<dyn for<'sess, 'a> Fn(&mut AcceptContext<'_, 'sess, S>, &ArgParser<'a>) + Send + Sync>;
+type FinalizeFn<S> =
+    Box<dyn Send + Sync + Fn(&mut FinalizeContext<'_, '_, S>) -> Option<AttributeKind>>;
 
 macro_rules! attribute_parsers {
     (
@@ -88,11 +100,11 @@ macro_rules! attribute_parsers {
         }
     };
     (
-        @[$ty: ty] pub(crate) static $name: ident = [$($names: ty),* $(,)?];
+        @[$stage: ty] pub(crate) static $name: ident = [$($names: ty),* $(,)?];
     ) => {
-        pub(crate) static $name: group_type!($ty) = LazyLock::new(|| {
-            let mut accepts = BTreeMap::<_, Vec<(AttributeTemplate, Box<dyn for<'sess, 'a> Fn(&mut AcceptContext<'_, 'sess, $ty>, &ArgParser<'a>) + Send + Sync>)>>::new();
-            let mut finalizes = Vec::<Box<dyn Send + Sync + Fn(&mut FinalizeContext<'_, '_, $ty>) -> Option<AttributeKind>>>::new();
+        pub(crate) static $name: GroupType<$stage> = LazyLock::new(|| {
+            let mut accepts = BTreeMap::<_, Vec<GroupTypeInnerAccept<$stage>>>::new();
+            let mut finalizes = Vec::<FinalizeFn<$stage>>::new();
             $(
                 {
                     thread_local! {
@@ -100,11 +112,14 @@ macro_rules! attribute_parsers {
                     };
 
                     for (path, template, accept_fn) in <$names>::ATTRIBUTES {
-                        accepts.entry(*path).or_default().push((*template, Box::new(|cx, args| {
-                            STATE_OBJECT.with_borrow_mut(|s| {
-                                accept_fn(s, cx, args)
+                        accepts.entry(*path).or_default().push(GroupTypeInnerAccept {
+                            template: *template,
+                            accept_fn: Box::new(|cx, args| {
+                                STATE_OBJECT.with_borrow_mut(|s| {
+                                    accept_fn(s, cx, args)
+                                })
                             })
-                        })));
+                        });
                     }
 
                     finalizes.push(Box::new(|cx| {
@@ -114,7 +129,7 @@ macro_rules! attribute_parsers {
                 }
             )*
 
-            (accepts, finalizes)
+            GroupTypeInner { accepters:accepts, finalizers:finalizes }
         });
     };
 }
@@ -125,6 +140,7 @@ attribute_parsers!(
         BodyStabilityParser,
         ConfusablesParser,
         ConstStabilityParser,
+        MacroUseParser,
         NakedParser,
         StabilityParser,
         UsedParser,
@@ -139,6 +155,7 @@ attribute_parsers!(
         // tidy-alphabetical-end
 
         // tidy-alphabetical-start
+        Single<CoverageParser>,
         Single<DeprecationParser>,
         Single<DummyParser>,
         Single<ExportNameParser>,
@@ -150,6 +167,8 @@ attribute_parsers!(
         Single<MustUseParser>,
         Single<OptimizeParser>,
         Single<PathAttributeParser>,
+        Single<ProcMacroDeriveParser>,
+        Single<RustcBuiltinMacroParser>,
         Single<RustcForceInlineParser>,
         Single<RustcLayoutScalarValidRangeEnd>,
         Single<RustcLayoutScalarValidRangeStart>,
@@ -172,15 +191,17 @@ attribute_parsers!(
         Single<WithoutArgs<FfiPureParser>>,
         Single<WithoutArgs<FundamentalParser>>,
         Single<WithoutArgs<LoopMatchParser>>,
+        Single<WithoutArgs<MacroEscapeParser>>,
         Single<WithoutArgs<MarkerParser>>,
         Single<WithoutArgs<MayDangleParser>>,
         Single<WithoutArgs<NoImplicitPreludeParser>>,
         Single<WithoutArgs<NoMangleParser>>,
         Single<WithoutArgs<NonExhaustiveParser>>,
-        Single<WithoutArgs<OmitGdbPrettyPrinterSectionParser>>,
         Single<WithoutArgs<ParenSugarParser>>,
         Single<WithoutArgs<PassByValueParser>>,
         Single<WithoutArgs<PointeeParser>>,
+        Single<WithoutArgs<ProcMacroAttributeParser>>,
+        Single<WithoutArgs<ProcMacroParser>>,
         Single<WithoutArgs<PubTransparentParser>>,
         Single<WithoutArgs<SpecializationTraitParser>>,
         Single<WithoutArgs<StdInternalSymbolParser>>,
@@ -201,24 +222,24 @@ mod private {
 #[allow(private_interfaces)]
 pub trait Stage: Sized + 'static + Sealed {
     type Id: Copy;
-    const SHOULD_EMIT_LINTS: bool;
 
-    fn parsers() -> &'static group_type!(Self);
+    fn parsers() -> &'static GroupType<Self>;
 
     fn emit_err<'sess>(
         &self,
         sess: &'sess Session,
         diag: impl for<'x> Diagnostic<'x>,
     ) -> ErrorGuaranteed;
+
+    fn should_emit(&self) -> ShouldEmit;
 }
 
 // allow because it's a sealed trait
 #[allow(private_interfaces)]
 impl Stage for Early {
     type Id = NodeId;
-    const SHOULD_EMIT_LINTS: bool = false;
 
-    fn parsers() -> &'static group_type!(Self) {
+    fn parsers() -> &'static GroupType<Self> {
         &early::ATTRIBUTE_PARSERS
     }
     fn emit_err<'sess>(
@@ -232,15 +253,18 @@ impl Stage for Early {
             sess.dcx().create_err(diag).delay_as_bug()
         }
     }
+
+    fn should_emit(&self) -> ShouldEmit {
+        self.emit_errors
+    }
 }
 
 // allow because it's a sealed trait
 #[allow(private_interfaces)]
 impl Stage for Late {
     type Id = HirId;
-    const SHOULD_EMIT_LINTS: bool = true;
 
-    fn parsers() -> &'static group_type!(Self) {
+    fn parsers() -> &'static GroupType<Self> {
         &late::ATTRIBUTE_PARSERS
     }
     fn emit_err<'sess>(
@@ -249,6 +273,10 @@ impl Stage for Late {
         diag: impl for<'x> Diagnostic<'x>,
     ) -> ErrorGuaranteed {
         tcx.dcx().emit_err(diag)
+    }
+
+    fn should_emit(&self) -> ShouldEmit {
+        ShouldEmit::ErrorsAndLints
     }
 }
 
@@ -288,7 +316,7 @@ impl<'f, 'sess: 'f, S: Stage> SharedContext<'f, 'sess, S> {
     /// must be delayed until after HIR is built. This method will take care of the details of
     /// that.
     pub(crate) fn emit_lint(&mut self, lint: AttributeLintKind, span: Span) {
-        if !S::SHOULD_EMIT_LINTS {
+        if !self.stage.should_emit().should_emit() {
             return;
         }
         let id = self.target_id;
@@ -384,6 +412,17 @@ impl<'f, 'sess: 'f, S: Stage> AcceptContext<'f, 'sess, S> {
         })
     }
 
+    /// emit an error that a `name` was expected here
+    pub(crate) fn expected_identifier(&self, span: Span) -> ErrorGuaranteed {
+        self.emit_err(AttributeParseError {
+            span,
+            attr_span: self.attr_span,
+            template: self.template.clone(),
+            attribute: self.attr_path.clone(),
+            reason: AttributeParseErrorReason::ExpectedIdentifier,
+        })
+    }
+
     /// emit an error that a `name = value` pair was expected at this span. The symbol can be given for
     /// a nicer error message talking about the specific name that was found lacking a value.
     pub(crate) fn expected_name_value(&self, span: Span, name: Option<Symbol>) -> ErrorGuaranteed {
@@ -452,6 +491,25 @@ impl<'f, 'sess: 'f, S: Stage> AcceptContext<'f, 'sess, S> {
             reason: AttributeParseErrorReason::ExpectedSpecificArgument {
                 possibilities,
                 strings: false,
+                list: false,
+            },
+        })
+    }
+
+    pub(crate) fn expected_specific_argument_and_list(
+        &self,
+        span: Span,
+        possibilities: Vec<&'static str>,
+    ) -> ErrorGuaranteed {
+        self.emit_err(AttributeParseError {
+            span,
+            attr_span: self.attr_span,
+            template: self.template.clone(),
+            attribute: self.attr_path.clone(),
+            reason: AttributeParseErrorReason::ExpectedSpecificArgument {
+                possibilities,
+                strings: false,
+                list: true,
             },
         })
     }
@@ -469,6 +527,7 @@ impl<'f, 'sess: 'f, S: Stage> AcceptContext<'f, 'sess, S> {
             reason: AttributeParseErrorReason::ExpectedSpecificArgument {
                 possibilities,
                 strings: true,
+                list: false,
             },
         })
     }
@@ -768,8 +827,8 @@ impl<'sess, S: Stage> AttributeParser<'sess, S> {
                     let args = parser.args();
                     let parts = path.segments().map(|i| i.name).collect::<Vec<_>>();
 
-                    if let Some(accepts) = S::parsers().0.get(parts.as_slice()) {
-                        for (template, accept) in accepts {
+                    if let Some(accepts) = S::parsers().accepters.get(parts.as_slice()) {
+                        for accept in accepts {
                             let mut cx: AcceptContext<'_, 'sess, S> = AcceptContext {
                                 shared: SharedContext {
                                     cx: self,
@@ -778,11 +837,11 @@ impl<'sess, S: Stage> AttributeParser<'sess, S> {
                                     emit_lint: &mut emit_lint,
                                 },
                                 attr_span: lower_span(attr.span),
-                                template,
+                                template: &accept.template,
                                 attr_path: path.get_attribute_path(),
                             };
 
-                            accept(&mut cx, args)
+                            (accept.accept_fn)(&mut cx, args)
                         }
                     } else {
                         // If we're here, we must be compiling a tool attribute... Or someone
@@ -813,7 +872,7 @@ impl<'sess, S: Stage> AttributeParser<'sess, S> {
         }
 
         let mut parsed_attributes = Vec::new();
-        for f in &S::parsers().1 {
+        for f in &S::parsers().finalizers {
             if let Some(attr) = f(&mut FinalizeContext {
                 shared: SharedContext {
                     cx: self,
@@ -834,7 +893,7 @@ impl<'sess, S: Stage> AttributeParser<'sess, S> {
 
     /// Returns whether there is a parser for an attribute with this name
     pub fn is_parsed_attribute(path: &[Symbol]) -> bool {
-        Late::parsers().0.contains_key(path)
+        Late::parsers().accepters.contains_key(path)
     }
 
     fn lower_attr_args(&self, args: &ast::AttrArgs, lower_span: impl Fn(Span) -> Span) -> AttrArgs {

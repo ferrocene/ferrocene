@@ -21,7 +21,7 @@
 #![recursion_limit = "256"]
 // tidy-alphabetical-end
 
-use std::cell::{Cell, RefCell};
+use std::cell::{Cell, Ref, RefCell};
 use std::collections::BTreeSet;
 use std::fmt;
 use std::sync::Arc;
@@ -41,15 +41,15 @@ use rustc_ast::{
     self as ast, AngleBracketedArg, CRATE_NODE_ID, Crate, Expr, ExprKind, GenericArg, GenericArgs,
     LitKind, NodeId, Path, attr,
 };
-use rustc_attr_data_structures::StrippedCfgItem;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_data_structures::intern::Interned;
 use rustc_data_structures::steal::Steal;
-use rustc_data_structures::sync::FreezeReadGuard;
+use rustc_data_structures::sync::{FreezeReadGuard, FreezeWriteGuard};
 use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_errors::{Applicability, Diag, ErrCode, ErrorGuaranteed};
 use rustc_expand::base::{DeriveResolution, SyntaxExtension, SyntaxExtensionKind};
 use rustc_feature::BUILTIN_ATTRIBUTES;
+use rustc_hir::attrs::StrippedCfgItem;
 use rustc_hir::def::Namespace::{self, *};
 use rustc_hir::def::{
     self, CtorOf, DefKind, DocLinkResMap, LifetimeRes, NonMacroAttrKind, PartialRes, PerNS,
@@ -58,14 +58,14 @@ use rustc_hir::def_id::{CRATE_DEF_ID, CrateNum, DefId, LOCAL_CRATE, LocalDefId, 
 use rustc_hir::definitions::DisambiguatorState;
 use rustc_hir::{PrimTy, TraitCandidate};
 use rustc_index::bit_set::DenseBitSet;
-use rustc_metadata::creader::{CStore, CrateLoader};
+use rustc_metadata::creader::CStore;
 use rustc_middle::metadata::ModChild;
 use rustc_middle::middle::privacy::EffectiveVisibilities;
 use rustc_middle::query::Providers;
 use rustc_middle::span_bug;
 use rustc_middle::ty::{
-    self, DelegationFnSig, Feed, MainDefinition, RegisteredTools, ResolverGlobalCtxt,
-    ResolverOutputs, TyCtxt, TyCtxtFeed, Visibility,
+    self, DelegationFnSig, Feed, MainDefinition, RegisteredTools, ResolverAstLowering,
+    ResolverGlobalCtxt, TyCtxt, TyCtxtFeed, Visibility,
 };
 use rustc_query_system::ich::StableHashingContext;
 use rustc_session::lint::builtin::PRIVATE_MACRO_USE;
@@ -119,7 +119,6 @@ enum Scope<'ra> {
     DeriveHelpers(LocalExpnId),
     DeriveHelpersCompat,
     MacroRules(MacroRulesScopeRef<'ra>),
-    CrateRoot,
     // The node ID is for reporting the `PROC_MACRO_DERIVE_RESOLUTION_FALLBACK`
     // lint if it should be reported.
     Module(Module<'ra>, Option<NodeId>),
@@ -139,8 +138,8 @@ enum Scope<'ra> {
 enum ScopeSet<'ra> {
     /// All scopes with the given namespace.
     All(Namespace),
-    /// Crate root, then extern prelude (used for mixed 2015-2018 mode in macros).
-    AbsolutePath(Namespace),
+    /// A module, then extern prelude (used for mixed 2015-2018 mode in macros).
+    ModuleAndExternPrelude(Namespace, Module<'ra>),
     /// All scopes with macro namespace and the given macro kind restriction.
     Macro(MacroKind),
     /// All scopes with the given namespace, used for partially performing late resolution.
@@ -419,8 +418,10 @@ enum ModuleOrUniformRoot<'ra> {
     /// Regular module.
     Module(Module<'ra>),
 
-    /// Virtual module that denotes resolution in crate root with fallback to extern prelude.
-    CrateRootAndExternPrelude,
+    /// Virtual module that denotes resolution in a module with fallback to extern prelude.
+    /// Used for paths starting with `::` coming from 2015 edition macros
+    /// used in 2018+ edition crates.
+    ModuleAndExternPrelude(Module<'ra>),
 
     /// Virtual module that denotes resolution in extern prelude.
     /// Used for paths starting with `::` on 2018 edition.
@@ -532,15 +533,26 @@ struct BindingKey {
     /// identifier.
     ident: Ident,
     ns: Namespace,
-    /// 0 if ident is not `_`, otherwise a value that's unique to the specific
-    /// `_` in the expanded AST that introduced this binding.
+    /// When we add an underscore binding (with ident `_`) to some module, this field has
+    /// a non-zero value that uniquely identifies this binding in that module.
+    /// For non-underscore bindings this field is zero.
+    /// When a key is constructed for name lookup (as opposed to name definition), this field is
+    /// also zero, even for underscore names, so for underscores the lookup will never succeed.
     disambiguator: u32,
 }
 
 impl BindingKey {
     fn new(ident: Ident, ns: Namespace) -> Self {
-        let ident = ident.normalize_to_macros_2_0();
-        BindingKey { ident, ns, disambiguator: 0 }
+        BindingKey { ident: ident.normalize_to_macros_2_0(), ns, disambiguator: 0 }
+    }
+
+    fn new_disambiguated(
+        ident: Ident,
+        ns: Namespace,
+        disambiguator: impl FnOnce() -> u32,
+    ) -> BindingKey {
+        let disambiguator = if ident.name == kw::Underscore { disambiguator() } else { 0 };
+        BindingKey { ident: ident.normalize_to_macros_2_0(), ns, disambiguator }
     }
 }
 
@@ -568,6 +580,8 @@ struct ModuleData<'ra> {
     lazy_resolutions: Resolutions<'ra>,
     /// True if this is a module from other crate that needs to be populated on access.
     populate_on_access: Cell<bool>,
+    /// Used to disambiguate underscore items (`const _: T = ...`) in the module.
+    underscore_disambiguator: Cell<u32>,
 
     /// Macro invocations that can expand into items in this module.
     unexpanded_invocations: RefCell<FxHashSet<LocalExpnId>>,
@@ -628,6 +642,7 @@ impl<'ra> ModuleData<'ra> {
             kind,
             lazy_resolutions: Default::default(),
             populate_on_access: Cell::new(is_foreign),
+            underscore_disambiguator: Cell::new(0),
             unexpanded_invocations: Default::default(),
             no_implicit_prelude,
             glob_importers: RefCell::new(Vec::new()),
@@ -641,11 +656,23 @@ impl<'ra> ModuleData<'ra> {
 }
 
 impl<'ra> Module<'ra> {
-    fn for_each_child<'tcx, R, F>(self, resolver: &mut R, mut f: F)
-    where
-        R: AsMut<Resolver<'ra, 'tcx>>,
-        F: FnMut(&mut R, Ident, Namespace, NameBinding<'ra>),
-    {
+    fn for_each_child<'tcx, R: AsRef<Resolver<'ra, 'tcx>>>(
+        self,
+        resolver: &R,
+        mut f: impl FnMut(&R, Ident, Namespace, NameBinding<'ra>),
+    ) {
+        for (key, name_resolution) in resolver.as_ref().resolutions(self).borrow().iter() {
+            if let Some(binding) = name_resolution.borrow().best_binding() {
+                f(resolver, key.ident, key.ns, binding);
+            }
+        }
+    }
+
+    fn for_each_child_mut<'tcx, R: AsMut<Resolver<'ra, 'tcx>>>(
+        self,
+        resolver: &mut R,
+        mut f: impl FnMut(&mut R, Ident, Namespace, NameBinding<'ra>),
+    ) {
         for (key, name_resolution) in resolver.as_mut().resolutions(self).borrow().iter() {
             if let Some(binding) = name_resolution.borrow().best_binding() {
                 f(resolver, key.ident, key.ns, binding);
@@ -654,10 +681,7 @@ impl<'ra> Module<'ra> {
     }
 
     /// This modifies `self` in place. The traits will be stored in `self.traits`.
-    fn ensure_traits<'tcx, R>(self, resolver: &mut R)
-    where
-        R: AsMut<Resolver<'ra, 'tcx>>,
-    {
+    fn ensure_traits<'tcx>(self, resolver: &impl AsRef<Resolver<'ra, 'tcx>>) {
         let mut traits = self.traits.borrow_mut();
         if traits.is_none() {
             let mut collected_traits = Vec::new();
@@ -666,7 +690,7 @@ impl<'ra> Module<'ra> {
                     return;
                 }
                 if let Res::Def(DefKind::Trait | DefKind::TraitAlias, def_id) = binding.res() {
-                    collected_traits.push((name, binding, r.as_mut().get_module(def_id)))
+                    collected_traits.push((name, binding, r.as_ref().get_module(def_id)))
                 }
             });
             *traits = Some(collected_traits.into_boxed_slice());
@@ -985,13 +1009,13 @@ impl<'ra> NameBindingData<'ra> {
 
 #[derive(Default, Clone)]
 struct ExternPreludeEntry<'ra> {
-    binding: Option<NameBinding<'ra>>,
+    binding: Cell<Option<NameBinding<'ra>>>,
     introduced_by_item: bool,
 }
 
 impl ExternPreludeEntry<'_> {
     fn is_import(&self) -> bool {
-        self.binding.is_some_and(|binding| binding.is_import())
+        self.binding.get().is_some_and(|binding| binding.is_import())
     }
 }
 
@@ -1011,6 +1035,11 @@ impl MacroData {
     fn new(ext: Arc<SyntaxExtension>) -> MacroData {
         MacroData { ext, nrules: 0, macro_rules: false }
     }
+}
+
+pub struct ResolverOutputs {
+    pub global_ctxt: ResolverGlobalCtxt,
+    pub ast_lowering: ResolverAstLowering,
 }
 
 /// The main resolver class.
@@ -1087,8 +1116,6 @@ pub struct Resolver<'ra, 'tcx> {
     extern_module_map: RefCell<FxIndexMap<DefId, Module<'ra>>>,
     binding_parent_modules: FxHashMap<NameBinding<'ra>, Module<'ra>>,
 
-    underscore_disambiguator: u32,
-
     /// Maps glob imports to the names of items actually imported.
     glob_map: FxIndexMap<LocalDefId, FxIndexSet<Symbol>>,
     glob_error: Option<ErrorGuaranteed>,
@@ -1110,7 +1137,6 @@ pub struct Resolver<'ra, 'tcx> {
     builtin_types_bindings: FxHashMap<Symbol, NameBinding<'ra>>,
     builtin_attrs_bindings: FxHashMap<Symbol, NameBinding<'ra>>,
     registered_tool_bindings: FxHashMap<Ident, NameBinding<'ra>>,
-    used_extern_options: FxHashSet<Symbol>,
     macro_names: FxHashSet<Ident>,
     builtin_macros: FxHashMap<Symbol, SyntaxExtensionKind>,
     registered_tools: &'tcx RegisteredTools,
@@ -1328,6 +1354,12 @@ impl<'ra, 'tcx> AsMut<Resolver<'ra, 'tcx>> for Resolver<'ra, 'tcx> {
     }
 }
 
+impl<'ra, 'tcx> AsRef<Resolver<'ra, 'tcx>> for Resolver<'ra, 'tcx> {
+    fn as_ref(&self) -> &Resolver<'ra, 'tcx> {
+        self
+    }
+}
+
 impl<'tcx> Resolver<'_, 'tcx> {
     fn opt_local_def_id(&self, node: NodeId) -> Option<LocalDefId> {
         self.opt_feed(node).map(|f| f.key())
@@ -1455,13 +1487,23 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         let mut invocation_parents = FxHashMap::default();
         invocation_parents.insert(LocalExpnId::ROOT, InvocationParent::ROOT);
 
-        let mut extern_prelude: FxIndexMap<Ident, ExternPreludeEntry<'_>> = tcx
+        let mut extern_prelude: FxIndexMap<_, _> = tcx
             .sess
             .opts
             .externs
             .iter()
-            .filter(|(_, entry)| entry.add_prelude)
-            .map(|(name, _)| (Ident::from_str(name), Default::default()))
+            .filter_map(|(name, entry)| {
+                // Make sure `self`, `super`, `_` etc do not get into extern prelude.
+                // FIXME: reject `--extern self` and similar in option parsing instead.
+                if entry.add_prelude
+                    && let name = Symbol::intern(name)
+                    && name.can_be_raw()
+                {
+                    Some((Ident::with_dummy_span(name), Default::default()))
+                } else {
+                    None
+                }
+            })
             .collect();
 
         if !attr::contains_name(attrs, sym::no_core) {
@@ -1501,7 +1543,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             extern_crate_map: Default::default(),
             module_children: Default::default(),
             trait_map: NodeMap::default(),
-            underscore_disambiguator: 0,
             empty_module,
             local_module_map,
             extern_module_map: Default::default(),
@@ -1546,7 +1587,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     (*ident, binding)
                 })
                 .collect(),
-            used_extern_options: Default::default(),
             macro_names: FxHashSet::default(),
             builtin_macros: Default::default(),
             registered_tools,
@@ -1733,16 +1773,12 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         StableHashingContext::new(self.tcx.sess, self.tcx.untracked())
     }
 
-    fn crate_loader<T>(&mut self, f: impl FnOnce(&mut CrateLoader<'_, '_>) -> T) -> T {
-        f(&mut CrateLoader::new(
-            self.tcx,
-            &mut CStore::from_tcx_mut(self.tcx),
-            &mut self.used_extern_options,
-        ))
-    }
-
     fn cstore(&self) -> FreezeReadGuard<'_, CStore> {
         CStore::from_tcx(self.tcx)
+    }
+
+    fn cstore_mut(&self) -> FreezeWriteGuard<'_, CStore> {
+        CStore::from_tcx_mut(self.tcx)
     }
 
     fn dummy_ext(&self, macro_kind: MacroKind) -> Arc<SyntaxExtension> {
@@ -1790,7 +1826,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             self.tcx.sess.time("resolve_report_errors", || self.report_errors(krate));
             self.tcx
                 .sess
-                .time("resolve_postprocess", || self.crate_loader(|c| c.postprocess(krate)));
+                .time("resolve_postprocess", || self.cstore_mut().postprocess(self.tcx, krate));
         });
 
         // Make sure we don't mutate the cstore from here on.
@@ -1855,7 +1891,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     // We don't reject trait aliases (`trait_module == None`) because we don't have access to their
     // associated items.
     fn trait_may_have_item(
-        &mut self,
+        &self,
         trait_module: Option<Module<'ra>>,
         assoc_item: Option<(Symbol, Namespace)>,
     ) -> bool {
@@ -1887,18 +1923,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         import_ids
     }
 
-    fn new_disambiguated_key(&mut self, ident: Ident, ns: Namespace) -> BindingKey {
-        let ident = ident.normalize_to_macros_2_0();
-        let disambiguator = if ident.name == kw::Underscore {
-            self.underscore_disambiguator += 1;
-            self.underscore_disambiguator
-        } else {
-            0
-        };
-        BindingKey { ident, ns, disambiguator }
-    }
-
-    fn resolutions(&mut self, module: Module<'ra>) -> &'ra Resolutions<'ra> {
+    fn resolutions(&self, module: Module<'ra>) -> &'ra Resolutions<'ra> {
         if module.populate_on_access.get() {
             module.populate_on_access.set(false);
             self.build_reduced_graph_external(module);
@@ -1907,12 +1932,19 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     }
 
     fn resolution(
-        &mut self,
+        &self,
+        module: Module<'ra>,
+        key: BindingKey,
+    ) -> Option<Ref<'ra, NameResolution<'ra>>> {
+        self.resolutions(module).borrow().get(&key).map(|resolution| resolution.borrow())
+    }
+
+    fn resolution_or_default(
+        &self,
         module: Module<'ra>,
         key: BindingKey,
     ) -> &'ra RefCell<NameResolution<'ra>> {
-        *self
-            .resolutions(module)
+        self.resolutions(module)
             .borrow_mut()
             .entry(key)
             .or_insert_with(|| self.arenas.alloc_name_resolution())
@@ -1989,7 +2021,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             // but not introduce it, as used if they are accessed from lexical scope.
             if used == Used::Scope {
                 if let Some(entry) = self.extern_prelude.get(&ident.normalize_to_macros_2_0()) {
-                    if !entry.introduced_by_item && entry.binding == Some(used_binding) {
+                    if !entry.introduced_by_item && entry.binding.get() == Some(used_binding) {
                         return;
                     }
                 }
@@ -2146,40 +2178,42 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     }
 
     fn extern_prelude_get(&mut self, ident: Ident, finalize: bool) -> Option<NameBinding<'ra>> {
-        if ident.is_path_segment_keyword() {
-            // Make sure `self`, `super` etc produce an error when passed to here.
-            return None;
-        }
-
-        let norm_ident = ident.normalize_to_macros_2_0();
-        let binding = self.extern_prelude.get(&norm_ident).cloned().and_then(|entry| {
-            Some(if let Some(binding) = entry.binding {
+        let mut record_use = None;
+        let entry = self.extern_prelude.get(&ident.normalize_to_macros_2_0());
+        let binding = entry.and_then(|entry| match entry.binding.get() {
+            Some(binding) if binding.is_import() => {
                 if finalize {
-                    if !entry.is_import() {
-                        self.crate_loader(|c| c.process_path_extern(ident.name, ident.span));
-                    } else if entry.introduced_by_item {
-                        self.record_use(ident, binding, Used::Other);
-                    }
+                    record_use = Some(binding);
                 }
-                binding
-            } else {
+                Some(binding)
+            }
+            Some(binding) => {
+                if finalize {
+                    self.cstore_mut().process_path_extern(self.tcx, ident.name, ident.span);
+                }
+                Some(binding)
+            }
+            None => {
                 let crate_id = if finalize {
-                    let Some(crate_id) =
-                        self.crate_loader(|c| c.process_path_extern(ident.name, ident.span))
-                    else {
-                        return Some(self.dummy_binding);
-                    };
-                    crate_id
+                    self.cstore_mut().process_path_extern(self.tcx, ident.name, ident.span)
                 } else {
-                    self.crate_loader(|c| c.maybe_process_path_extern(ident.name))?
+                    self.cstore_mut().maybe_process_path_extern(self.tcx, ident.name)
                 };
-                let res = Res::Def(DefKind::Mod, crate_id.as_def_id());
-                self.arenas.new_pub_res_binding(res, DUMMY_SP, LocalExpnId::ROOT)
-            })
+                match crate_id {
+                    Some(crate_id) => {
+                        let res = Res::Def(DefKind::Mod, crate_id.as_def_id());
+                        let binding =
+                            self.arenas.new_pub_res_binding(res, DUMMY_SP, LocalExpnId::ROOT);
+                        entry.binding.set(Some(binding));
+                        Some(binding)
+                    }
+                    None => finalize.then_some(self.dummy_binding),
+                }
+            }
         });
 
-        if let Some(entry) = self.extern_prelude.get_mut(&norm_ident) {
-            entry.binding = binding;
+        if let Some(binding) = record_use {
+            self.record_use(ident, binding, Used::Scope);
         }
 
         binding

@@ -64,6 +64,7 @@ environment is correctly set.
 
 7. `LLVM` generates a static Rust library.
 
+8. (Optional): If the `user` is building a certified library, the `user` must verify that only certified functions from the core library are used.
 
 .. id:: RUSTC_UC2_STATICLIB
 
@@ -98,6 +99,8 @@ environment is correctly set.
    LLVM-related arguments.
 
 7. `LLVM` generates a C-compatible static library.
+
+8. (Optional): If the `user` is building a certified library, the `user` must verify that only certified functions from the core library are used.
 
 
 Building an Executable
@@ -143,6 +146,7 @@ set.
 
 9. The linker generates a Rust executable.
 
+10. (Optional): If the `user` is building a certified executable, the `user` must verify that only certified functions from the core library are used.
 
 .. id:: RUSTC_UC4_EXEC_RLIB
 
@@ -160,8 +164,7 @@ directories included by compiler argument `-L`.
 
 **Description:**
 
-1. (Optional): The `user` performs use case :id:`RUSTC_UC1_RLIB` to generate a static Rust
-library.
+1. (Optional): The `user` performs use case :id:`RUSTC_UC1_RLIB` to generate a static Rust library.
 
 2. The `user` calls `rustc` with the following command line arguments::
 
@@ -192,6 +195,7 @@ library.
 
 10. The linker generates a Rust executable that links to a static Rust library.
 
+11. (Optional): If the `user` is building a certified executable, the `user` must verify that only certified functions from the core library are used.
 
 Building Mixed-Language Programs
 --------------------------------
@@ -241,4 +245,6 @@ unique within the set of all directories included by compiler argument `-L`.
    linker-related arguments.
 
 10. The linker generates a Rust executable that links to a C library.
+
+11. (Optional): If the `user` is building a certified executable, the `user` must verify that only certified functions from the core library are used.
 

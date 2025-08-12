@@ -275,7 +275,7 @@ jobs:
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py run ferrocene/tools/coverage-of-subset
-        ./x.py test --no-doc --coverage=library library/core
+        ./x.py test --no-doc --coverage=library library/core --set profile=compiler
     steps:
       - aws-oidc-auth
       - ferrocene-checkout:

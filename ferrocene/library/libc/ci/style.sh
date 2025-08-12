@@ -9,12 +9,9 @@ cargo test --manifest-path libc-test/Cargo.toml --test style -- --nocapture
 command -v rustfmt
 rustfmt -V
 
-# Run once to cover everything that isn't in `src/`
-cargo fmt
-
 # Save a list of all source files
 tmpfile="file-list~" # trailing tilde for gitignore
-find src -name '*.rs' > "$tmpfile"
+find src ci -name '*.rs' > "$tmpfile"
 
 # Before formatting, replace all macro identifiers with a function signature.
 # This allows `rustfmt` to format it.
@@ -26,7 +23,7 @@ while IFS= read -r file; do
 
     # Turn all braced macro `foo! { /* ... */ }` invocations into
     # `fn foo_fmt_tmp() { /* ... */ }`.
-    perl -pi -e 's/(?!macro_rules|c_enum)\b(\w+)!\s*\{/fn $1_fmt_tmp() {/g' "$file"
+    perl -pi -e 's/(?!macro_rules)\b(\w+)!\s*\{/fn $1_fmt_tmp() {/g' "$file"
 
     # Replace `if #[cfg(...)]` within `cfg_if` with `if cfg_tmp!([...])` which
     # `rustfmt` will format. We put brackets within the parens so it is easy to
@@ -61,14 +58,14 @@ rm "$tmpfile"
 
 # Run once from workspace root to get everything that wasn't handled as an
 # individual file.
-cargo fmt
+cargo fmt ${check:+"$check"}
 
 # Ensure that `sort` output is not locale-dependent
 export LC_ALL=C
 
 for file in libc-test/semver/*.txt; do
     case "$file" in
-      *TODO*) continue ;;
+        *TODO*) continue ;;
     esac
 
     if ! sort -C "$file"; then
@@ -85,7 +82,7 @@ for file in libc-test/semver/*.txt; do
     fi
 done
 
-if shellcheck --version ; then
+if shellcheck --version; then
     find . -name '*.sh' -print0 | xargs -0 shellcheck
 else
     echo "shellcheck not found"

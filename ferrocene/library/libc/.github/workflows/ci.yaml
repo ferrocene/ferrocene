@@ -34,7 +34,7 @@ jobs:
     name: Clippy on ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-14, windows-2022]
+        os: [ubuntu-24.04, macos-15, windows-2022]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
@@ -52,7 +52,7 @@ jobs:
     strategy:
       matrix:
         toolchain: [stable, nightly, 1.63.0]
-        os: [ubuntu-24.04, macos-14, windows-2022]
+        os: [ubuntu-24.04, macos-15, windows-2022]
         include:
           - toolchain: beta
             os: ubuntu-24.04
@@ -62,14 +62,12 @@ jobs:
       TOOLCHAIN: ${{ matrix.toolchain }}
     steps:
       - uses: actions/checkout@v4
-      # Remove `-Dwarnings` at the MSRV since lints may be different or buffier
-      - name: Update RUSTFLAGS
-        run: |
-          set -eux
-          [ "${{ matrix.toolchain }}" = "1.63.0" ] && echo 'RUSTFLAGS=' >> "$GITHUB_ENV" || true
-          
       - name: Setup Rust toolchain
         run: ./ci/install-rust.sh
+
+      - name: Install semver-checks
+        uses: taiki-e/install-action@cargo-semver-checks
+        if: matrix.toolchain == 'stable'
 
       # FIXME(ci): These `du` statements are temporary for debugging cache
       - name: Target size before restoring cache
@@ -81,7 +79,11 @@ jobs:
         run: du -sh target | sort -k 2 || true
 
       - name: Execute build.sh
-        run: ./ci/verify-build.sh
+        run: |
+          set -eux
+          # Remove `-Dwarnings` at the MSRV since lints may be different
+          [ "${{ matrix.toolchain }}" = "1.63.0" ] && export RUSTFLAGS=""
+          ./ci/verify-build.sh
       - name: Target size after job completion
         run: du -sh target | sort -k 2
 
@@ -109,7 +111,7 @@ jobs:
             docker: true
             os: ubuntu-24.04
           - target: aarch64-apple-darwin
-            os: macos-14
+            os: macos-15
           - target: x86_64-pc-windows-gnu
             os: windows-2022
             env:
@@ -185,6 +187,7 @@ jobs:
           - loongarch64-unknown-linux-musl
           - powerpc64-unknown-linux-gnu
           - powerpc64le-unknown-linux-gnu
+          - powerpc64le-unknown-linux-musl
           - riscv64gc-unknown-linux-gnu
           - s390x-unknown-linux-gnu
           - wasm32-unknown-emscripten
@@ -217,6 +220,9 @@ jobs:
             env:
               RUST_LIBC_UNSTABLE_MUSL_V1_2_3: 1
           - target: loongarch64-unknown-linux-musl
+            env:
+              RUST_LIBC_UNSTABLE_MUSL_V1_2_3: 1
+          - target: powerpc64le-unknown-linux-musl
             env:
               RUST_LIBC_UNSTABLE_MUSL_V1_2_3: 1
           # FIXME(ppc): SIGILL running tests, see

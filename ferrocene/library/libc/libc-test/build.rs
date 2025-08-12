@@ -504,7 +504,7 @@ fn test_apple(target: &str) {
         "uuid_t" | "vol_capabilities_set_t" => true,
         _ => false,
     });
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_openbsd(target: &str) {
@@ -694,7 +694,7 @@ fn test_openbsd(target: &str) {
         }
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_cygwin(target: &str) {
@@ -866,7 +866,7 @@ fn test_cygwin(target: &str) {
         }
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_windows(target: &str) {
@@ -995,7 +995,7 @@ fn test_windows(target: &str) {
         }
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_redox(target: &str) {
@@ -1045,7 +1045,7 @@ fn test_redox(target: &str) {
         "wchar.h",
     }
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_solarish(target: &str) {
@@ -1335,7 +1335,7 @@ fn test_solarish(target: &str) {
         }
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_netbsd(target: &str) {
@@ -1551,7 +1551,7 @@ fn test_netbsd(target: &str) {
         }
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_dragonflybsd(target: &str) {
@@ -1776,7 +1776,7 @@ fn test_dragonflybsd(target: &str) {
         (struct_ == "sigevent" && field == "sigev_notify_thread_id")
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_wasi(target: &str) {
@@ -1883,7 +1883,7 @@ fn test_wasi(target: &str) {
     // doesn't support sizeof.
     cfg.skip_field(|s, field| s == "dirent" && field == "d_name");
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_android(target: &str) {
@@ -2390,7 +2390,7 @@ fn test_android(target: &str) {
         }
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 
     test_linux_like_apis(target);
 }
@@ -2502,6 +2502,9 @@ fn test_freebsd(target: &str) {
                 "sys/sem.h",
                 "sys/shm.h",
                 "sys/socket.h",
+                "sys/socketvar.h",
+                [freebsd15]:"sys/ktls.h",
+                "netinet/in_pcb.h",	// must be after sys/socketvar.h, sys/ktls.h
                 "sys/stat.h",
                 "sys/statvfs.h",
                 "sys/sysctl.h",
@@ -2583,6 +2586,8 @@ fn test_freebsd(target: &str) {
             "type_" if struct_ == "sockstat" => "type".to_string(),
             "type_" if struct_ == "devstat_match_table" => "type".to_string(),
             "type_" if struct_ == "input_event" => "type".to_string(),
+            // Field is named `gennum` in Rust because `gen` is a keyword
+            "gennum" if struct_ == "xktls_session_onedir" => "gen".to_string(),
             s => s.to_string(),
         }
     });
@@ -2639,7 +2644,7 @@ fn test_freebsd(target: &str) {
             "TDF_CANSWAP" | "TDF_SWAPINREQ" => true,
 
             // Unaccessible in FreeBSD 15
-            "TDI_SWAPPED" | "P_SWAPPINGOUT" | "P_SWAPPINGIN" => true,
+            "TDI_SWAPPED" | "P_SWAPPINGOUT" | "P_SWAPPINGIN" | "P_UNUSED3" => true,
 
             // Removed in FreeBSD 14 (git a6b55ee6be1)
             "IFF_KNOWSEPOCH" => true,
@@ -2918,6 +2923,9 @@ fn test_freebsd(target: &str) {
             // `splice` introduced in FreeBSD 14.2
             "splice" if Some(14) > freebsd_ver => true,
 
+            // Those are introduced in FreeBSD 15.
+            "xktls_session_onedir" | "xktls_session" if Some(15) > freebsd_ver => true,
+
             _ => false,
         }
     });
@@ -3057,6 +3065,8 @@ fn test_freebsd(target: &str) {
             // `tcp_snd_wscale` and `tcp_rcv_wscale` are bitfields
             ("tcp_info", "tcp_snd_wscale") => true,
             ("tcp_info", "tcp_rcv_wscale") => true,
+            // mc_spare can change in size between OS releases.  It's a spare field, after all.
+            ("__mcontext", "mc_spare") => true,
 
             _ => false,
         }
@@ -3069,7 +3079,7 @@ fn test_freebsd(target: &str) {
         });
     }
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_emscripten(target: &str) {
@@ -3309,7 +3319,7 @@ fn test_emscripten(target: &str) {
         ].contains(&field))
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_neutrino(target: &str) {
@@ -3580,9 +3590,9 @@ fn test_neutrino(target: &str) {
         )
     });
 
-    cfg.skip_static(move |name| (name == "__dso_handle"));
+    cfg.skip_static(move |name| name == "__dso_handle");
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_vxworks(target: &str) {
@@ -3688,7 +3698,7 @@ fn test_vxworks(target: &str) {
         _ => false,
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn config_gnu_bits(target: &str, cfg: &mut ctest::TestGenerator) {
@@ -3947,6 +3957,7 @@ fn test_linux(target: &str) {
             "linux/sched.h",
             "linux/sctp.h",
             "linux/seccomp.h",
+            "linux/securebits.h",
             "linux/sock_diag.h",
             "linux/sockios.h",
             "linux/tls.h",
@@ -4373,6 +4384,11 @@ fn test_linux(target: &str) {
             if old_musl && name == "RLIM_NLIMITS" {
                 return true;
             }
+            // FIXME: Does not exist on non-x86 architectures, slated for removal
+            // in libc in 1.0
+            if ppc64 && name == "MAP_32BIT" {
+                return true;
+            }
         }
         match name {
             // These constants are not available if gnu headers have been included
@@ -4722,6 +4738,16 @@ fn test_linux(target: &str) {
             // FIXME(linux): Requires >= 6.6 kernel headers.
             "PROC_EVENT_NONZERO_EXIT" => true,
 
+            // FIXME(linux): Requires >= 6.14 kernel headers.
+            "SECBIT_EXEC_DENY_INTERACTIVE"
+            | "SECBIT_EXEC_DENY_INTERACTIVE_LOCKED"
+            | "SECBIT_EXEC_RESTRICT_FILE"
+            | "SECBIT_EXEC_RESTRICT_FILE_LOCKED"
+            | "SECURE_ALL_UNPRIVILEGED" => true,
+
+            // FIXME(linux): Value changed in 6.14
+            "SECURE_ALL_BITS" | "SECURE_ALL_LOCKS" => true,
+
             _ => false,
         }
     });
@@ -4993,7 +5019,7 @@ fn test_linux(target: &str) {
         _ => false,
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 
     test_linux_like_apis(target);
 }
@@ -5511,7 +5537,7 @@ fn test_haiku(target: &str) {
             s => s.to_string(),
         }
     });
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }
 
 fn test_aix(target: &str) {
@@ -5642,6 +5668,27 @@ fn test_aix(target: &str) {
         // Skip 'sighandler_t' assignments.
         "SIG_DFL" | "SIG_ERR" | "SIG_IGN" => true,
 
+        // _ALL_SOURCE defines these errno values as aliases of other errno
+        // values, but POSIX requires each errno to be unique. Skip these
+        // values because non-unique values are being used which will
+        // fail the test when _ALL_SOURCE is defined.
+        "EWOULDBLOCK" | "ENOTEMPTY" => true,
+
+        // FIXME(ctest): These constants are intended for use as the 'int request' argument
+        // to 'ioctl()'. However, the AIX headers do not explicitly define their types. If a
+        // value has the sign bit set, it gets sign-extended to a 64-bit value in the 64-bit
+        // mode, which fails the comparison with the Rust definitions, where the type is
+        //`c_int`.
+        "BIOCSETF" | "BIOCSBLEN" | "BIOCSRTIMEOUT" | "BIOCIMMEDIATE" | "BIOCSETIF" | "FIONBIO"
+        | "FIOASYNC" | "FIOSETOWN" | "TIOCSETD" | "TIOCMODS" | "TIOCSETP" | "TIOCSETN"
+        | "TIOCFLUSH" | "TIOCSETC" | "SIOCADDMULTI" | "SIOCADDRT" | "SIOCDARP" | "SIOCDELMULTI"
+        | "SIOCGIFADDR" | "SIOCGIFBRDADDR" | "SIOCGIFCONF" | "SIOCGIFDSTADDR" | "SIOCGIFFLAGS"
+        | "SIOCGIFHWADDR" | "SIOCGIFMETRIC" | "SIOCGIFMTU" | "SIOCGIFNETMASK" | "SIOCSARP"
+        | "SIOCSIFADDR" | "SIOCSIFBRDADDR" | "SIOCSIFDSTADDR" | "SIOCSIFFLAGS"
+        | "SIOCSIFMETRIC" | "SIOCSIFMTU" | "SIOCSIFNETMASK" | "TIOCUCNTL" | "TIOCCONS"
+        | "TIOCPKT" | "TIOCSWINSZ" | "TIOCLBIS" | "TIOCLBIC" | "TIOCLSET" | "TIOCSLTC"
+        | "TIOCSPGRP" | "TIOCSTI" | "TIOCMSET" | "TIOCMBIS" | "TIOCMBIC" | "TIOCREMOTE" => true,
+
         _ => false,
     });
 
@@ -5658,6 +5705,18 @@ fn test_aix(target: &str) {
             // allow type 'double' to be used in signal contexts.
             "fpreg_t" => true,
 
+            // This type is defined for a union used within `struct ld_info`.
+            // The AIX header does not declare a separate standalone union
+            // type for it.
+            "__ld_info_file" => true,
+
+            // This is a simplified version of the AIX union `_simple_lock`.
+            "_kernel_simple_lock" => true,
+
+            // These structures are guarded by the `_KERNEL` macro in the AIX
+            // header.
+            "fileops_t" | "file" => true,
+
             _ => false,
         }
     });
@@ -5671,6 +5730,24 @@ fn test_aix(target: &str) {
             // 'double' to be used in signal contexts.
             ("__context64", "fpr") => true,
             ("__tm_context_t", "fpr") => true,
+
+            // The _ALL_SOURCE type of 'f_fsid' differs from POSIX's on AIX.
+            ("statvfs", "f_fsid") => true,
+
+            // The type of `_file` is `__ld_info_file`, which is defined
+            // specifically for the union inside `struct ld_info`. The AIX
+            // header does not define a separate standalone union type for it.
+            ("ld_info", "_file") => true,
+
+            // On AIX, when _ALL_SOURCE is defined, the types of the following fields
+            // differ from those used when _XOPEN_SOURCE is defined. The former uses
+            // 'struct st_timespec', while the latter uses 'struct timespec'.
+            ("stat", "st_atim") => true,
+            ("stat", "st_mtim") => true,
+            ("stat", "st_ctim") => true,
+            ("stat64", "st_atim") => true,
+            ("stat64", "st_mtim") => true,
+            ("stat64", "st_ctim") => true,
 
             _ => false,
         }
@@ -5729,6 +5806,18 @@ fn test_aix(target: &str) {
             // https://github.com/gnzlbg/ctest/issues/68.
             "lio_listio" => true,
 
+            // The function is only available under macro _KERNEL in 'proto_uipc.h'.
+            "getpeereid" => true,
+
+            // The AIX signatures for these non-POSIX functions differ from
+            // those on platforms like Linux: some arguments are not marked
+            // with the 'const' qualifier, even though they are not modified.
+            // To be consistent with other platforms, 'const' is added to the
+            // Rust declarations. However, this causes a mismatch with the AIX
+            // header signatures. Skipping.
+            "setdomainname" | "settimeofday" | "statfs" | "statfs64" | "statx" | "swapoff"
+            | "swapon" | "utmpname" | "setgroups" => true,
+
             _ => false,
         }
     });
@@ -5745,5 +5834,5 @@ fn test_aix(target: &str) {
         }
     });
 
-    cfg.generate(src_hotfix_dir().join("lib.rs"), "main.rs");
+    cfg.generate(src_hotfix_dir().join("lib.rs"), "ctest_output.rs");
 }

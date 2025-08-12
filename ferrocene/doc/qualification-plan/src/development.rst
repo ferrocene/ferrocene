@@ -83,6 +83,11 @@ ticket), even if the developers and reviewers decided it was minor.
 
 Tickets must be created in the project management tool under the respective
 project board, they must be appropriately scoped, and they must detail acceptance criteria.
+
+The ticket shall detail which parts of Ferrocene are expected to be impacted.
+That could be for example rustc, libcore, the qualification documentation etc.
+Also it shall detail which tests have to be added.
+
 Large tickets must be broken down into smaller, independent tickets. A ticket
 must be approved by at least one other member of the Ferrocene team without any
 concerns.
@@ -126,8 +131,8 @@ commits being tested, rather they serve as an aid for the Ferrocene developer
 to catch the most common mistakes before and during code review. For further
 details, see :ref:`ci-phase-spot`.
 
-Once active development is done, a PR is opened and this initiates
-:ref:`dev-phase-review`.
+Once active development is done, a PR is opened with a description of the
+change. This initiates :ref:`dev-phase-review`.
 
 .. _dev-phase-review:
 

@@ -127,9 +127,6 @@ jobs:
       - name: Clone an empty GCC submodule
         run: ferrocene/ci/scripts/clone-empty-submodule.sh src/gcc
 
-      - name: Clone an empty Enzyme submodule
-        run: ferrocene/ci/scripts/clone-empty-submodule.sh src/tools/enzyme
-
       - name: Run the pull-upstream automation
         run: ferrocene/tools/pull-upstream/automation.py ${{ matrix.branch }} ${{ steps.create_branch.outputs.name || 'main' }}
         env:

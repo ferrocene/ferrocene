@@ -26,7 +26,7 @@ impl Step for CoverageForSubset {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         builder.info(format!("Running {PATH}").as_str());
 
-        let host_target = builder.config.host_target;
+        let host_target = builder.config.build;
 
         let compiler = builder.compiler(0, host_target);
         let cmd = prepare_tool_cargo(

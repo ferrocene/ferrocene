@@ -1,0 +1,113 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Used to do value-to-value conversions while consuming the input value. It is the reciprocal of `Into`."><title>From in core::convert - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-aa0817cf.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.90.0" data-rustdoc-version="1.90.0-dev" data-channel="nightly" data-search-js="search-179e01a3.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="sidebar-items1.90.0.js"></script><script defer src="../../static.files/main-673ee1e0.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt="logo"></a><h2><a href="../../core/index.html">core</a><span class="version">1.90.0-dev</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">From</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#generic-implementations" title="Generic Implementations">Generic Implementations</a></li><li><a href="#when-to-implement-from" title="When to implement `From`">When to implement <code>From</code></a></li><li><a href="#examples" title="Examples">Examples</a></li></ul><h3><a href="#required-methods">Required Methods</a></h3><ul class="block"><li><a href="#tymethod.from" title="from">from</a></li></ul><h3><a href="#dyn-compatibility">Dyn Compatibility</a></h3><h3><a href="#implementors">Implementors</a></h3></section><div id="rustdoc-modnav"><h2><a href="index.html">In core::<wbr>convert</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">core</a>::<wbr><a href="index.html">convert</a></div><h1>Trait <span class="trait">From</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><span class="since" title="Stable since Rust version 1.6.0, const unstable">1.6.0 (const: <a href="https://github.com/rust-lang/rust/issues/143773" title="Tracking issue for const_from">unstable</a>)</span> · <a class="src" href="../../src/core/convert/mod.rs.html#592-598">Source</a> </span></div><pre class="rust item-decl"><code>pub trait From&lt;T&gt;: <a class="trait" href="../marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a> {
+    // Required method
+    fn <a href="#tymethod.from" class="fn">from</a>(value: T) -&gt; Self;
+}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Used to do value-to-value conversions while consuming the input value. It is the reciprocal of
+<a href="trait.Into.html" title="trait core::convert::Into"><code>Into</code></a>.</p>
+<p>One should always prefer implementing <code>From</code> over <a href="trait.Into.html" title="trait core::convert::Into"><code>Into</code></a>
+because implementing <code>From</code> automatically provides one with an implementation of <a href="trait.Into.html" title="trait core::convert::Into"><code>Into</code></a>
+thanks to the blanket implementation in the standard library.</p>
+<p>Only implement <a href="trait.Into.html" title="trait core::convert::Into"><code>Into</code></a> when targeting a version prior to Rust 1.41 and converting to a type
+outside the current crate.
+<code>From</code> was not able to do these types of conversions in earlier versions because of Rust’s
+orphaning rules.
+See <a href="trait.Into.html" title="trait core::convert::Into"><code>Into</code></a> for more details.</p>
+<p>Prefer using <a href="trait.Into.html" title="trait core::convert::Into"><code>Into</code></a> over <a href="trait.From.html#tymethod.from" title="associated function core::convert::From::from"><code>From</code></a> when specifying trait bounds on a generic function
+to ensure that types that only implement <a href="trait.Into.html" title="trait core::convert::Into"><code>Into</code></a> can be used as well.</p>
+<p>The <code>From</code> trait is also very useful when performing error handling. When constructing a function
+that is capable of failing, the return type will generally be of the form <code>Result&lt;T, E&gt;</code>.
+<code>From</code> simplifies error handling by allowing a function to return a single error type
+that encapsulates multiple error types. See the “Examples” section and <a href="../../book/ch09-00-error-handling.html">the book</a> for more
+details.</p>
+<p><strong>Note: This trait must not fail</strong>. The <code>From</code> trait is intended for perfect conversions.
+If the conversion can fail or is not perfect, use <a href="trait.TryFrom.html" title="trait core::convert::TryFrom"><code>TryFrom</code></a>.</p>
+<h2 id="generic-implementations"><a class="doc-anchor" href="#generic-implementations">§</a>Generic Implementations</h2>
+<ul>
+<li><code>From&lt;T&gt; for U</code> implies <a href="trait.Into.html" title="trait core::convert::Into"><code>Into</code></a><code>&lt;U&gt; for T</code></li>
+<li><code>From</code> is reflexive, which means that <code>From&lt;T&gt; for T</code> is implemented</li>
+</ul>
+<h2 id="when-to-implement-from"><a class="doc-anchor" href="#when-to-implement-from">§</a>When to implement <code>From</code></h2>
+<p>While there’s no technical restrictions on which conversions can be done using
+a <code>From</code> implementation, the general expectation is that the conversions
+should typically be restricted as follows:</p>
+<ul>
+<li>
+<p>The conversion is <em>infallible</em>: if the conversion can fail, use <a href="trait.TryFrom.html" title="trait core::convert::TryFrom"><code>TryFrom</code></a>
+instead; don’t provide a <code>From</code> impl that panics.</p>
+</li>
+<li>
+<p>The conversion is <em>lossless</em>: semantically, it should not lose or discard
+information. For example, <code>i32: From&lt;u16&gt;</code> exists, where the original
+value can be recovered using <code>u16: TryFrom&lt;i32&gt;</code>.  And <code>String: From&lt;&amp;str&gt;</code>
+exists, where you can get something equivalent to the original value via
+<code>Deref</code>.  But <code>From</code> cannot be used to convert from <code>u32</code> to <code>u16</code>, since
+that cannot succeed in a lossless way.  (There’s some wiggle room here for
+information not considered semantically relevant.  For example,
+<code>Box&lt;[T]&gt;: From&lt;Vec&lt;T&gt;&gt;</code> exists even though it might not preserve capacity,
+like how two vectors can be equal despite differing capacities.)</p>
+</li>
+<li>
+<p>The conversion is <em>value-preserving</em>: the conceptual kind and meaning of
+the resulting value is the same, even though the Rust type and technical
+representation might be different.  For example <code>-1_i8 as u8</code> is <em>lossless</em>,
+since <code>as</code> casting back can recover the original value, but that conversion
+is <em>not</em> available via <code>From</code> because <code>-1</code> and <code>255</code> are different conceptual
+values (despite being identical bit patterns technically).  But
+<code>f32: From&lt;i16&gt;</code> <em>is</em> available because <code>1_i16</code> and <code>1.0_f32</code> are conceptually
+the same real number (despite having very different bit patterns technically).
+<code>String: From&lt;char&gt;</code> is available because they’re both <em>text</em>, but
+<code>String: From&lt;u32&gt;</code> is <em>not</em> available, since <code>1</code> (a number) and <code>"1"</code>
+(text) are too different.  (Converting values to text is instead covered
+by the <a href="crate::fmt::Display"><code>Display</code></a> trait.)</p>
+</li>
+<li>
+<p>The conversion is <em>obvious</em>: it’s the only reasonable conversion between
+the two types.  Otherwise it’s better to have it be a named method or
+constructor, like how [<code>str::as_bytes</code>] is a method and how integers have
+methods like [<code>u32::from_ne_bytes</code>], [<code>u32::from_le_bytes</code>], and
+[<code>u32::from_be_bytes</code>], none of which are <code>From</code> implementations.  Whereas
+there’s only one reasonable way to wrap an <a href="crate::net::Ipv6Addr"><code>Ipv6Addr</code></a>
+into an <a href="crate::net::IpAddr"><code>IpAddr</code></a>, thus <code>IpAddr: From&lt;Ipv6Addr&gt;</code> exists.</p>
+</li>
+</ul>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p><a href="../../std/string/struct.String.html"><code>String</code></a> implements <code>From&lt;&amp;str&gt;</code>:</p>
+<p>An explicit conversion from a <code>&amp;str</code> to a String is done as follows:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>string = <span class="string">"hello"</span>.to_string();
+<span class="kw">let </span>other_string = String::from(<span class="string">"hello"</span>);
+
+<span class="macro">assert_eq!</span>(string, other_string);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+string+=+%22hello%22.to_string();%0A++++let+other_string+=+String::from(%22hello%22);%0A++++%0A++++assert_eq!(string,+other_string);%0A%7D&amp;edition=2024"></a></div>
+<p>While performing error handling it is often useful to implement <code>From</code> for your own error type.
+By converting underlying error types to our own custom error type that encapsulates the
+underlying error type, we can return a single error type without losing information on the
+underlying cause. The ‘?’ operator automatically converts the underlying error type to our
+custom error type with <code>From::from</code>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::fs;
+<span class="kw">use </span>std::io;
+<span class="kw">use </span>std::num;
+
+<span class="kw">enum </span>CliError {
+    IoError(io::Error),
+    ParseError(num::ParseIntError),
+}
+
+<span class="kw">impl </span>From&lt;io::Error&gt; <span class="kw">for </span>CliError {
+    <span class="kw">fn </span>from(error: io::Error) -&gt; <span class="self">Self </span>{
+        CliError::IoError(error)
+    }
+}
+
+<span class="kw">impl </span>From&lt;num::ParseIntError&gt; <span class="kw">for </span>CliError {
+    <span class="kw">fn </span>from(error: num::ParseIntError) -&gt; <span class="self">Self </span>{
+        CliError::ParseError(error)
+    }
+}
+
+<span class="kw">fn </span>open_and_parse_file(file_name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;i32, CliError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>contents = fs::read_to_string(<span class="kw-2">&amp;</span>file_name)<span class="question-mark">?</span>;
+    <span class="kw">let </span>num: i32 = contents.trim().parse()<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(num)
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++use+std::fs;%0A++++use+std::io;%0A++++use+std::num;%0A++++%0A++++enum+CliError+%7B%0A++++++++IoError(io::Error),%0A++++++++ParseError(num::ParseIntError),%0A++++%7D%0A++++%0A++++impl+From%3Cio::Error%3E+for+CliError+%7B%0A++++++++fn+from(error:+io::Error)+-%3E+Self+%7B%0A++++++++++++CliError::IoError(error)%0A++++++++%7D%0A++++%7D%0A++++%0A++++impl+From%3Cnum::ParseIntError%3E+for+CliError+%7B%0A++++++++fn+from(error:+num::ParseIntError)+-%3E+Self+%7B%0A++++++++++++CliError::ParseError(error)%0A++++++++%7D%0A++++%7D%0A++++%0A++++fn+open_and_parse_file(file_name:+%26str)+-%3E+Result%3Ci32,+CliError%3E+%7B%0A++++++++let+mut+contents+=+fs::read_to_string(%26file_name)?;%0A++++++++let+num:+i32+=+contents.trim().parse()?;%0A++++++++Ok(num)%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+</div></details><h2 id="required-methods" class="section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="tymethod.from" class="method"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/convert/mod.rs.html#597">Source</a></span><h4 class="code-header">fn <a href="#tymethod.from" class="fn">from</a>(value: T) -&gt; Self</h4></section></summary><div class="docblock"><p>Converts to this type from the input type.</p>
+</div></details></div><h2 id="dyn-compatibility" class="section-header">Dyn Compatibility<a href="#dyn-compatibility" class="anchor">§</a></h2><div class="dyn-compatibility-info"><p>This trait is <b>not</b> <a href="https://doc.rust-lang.org/nightly/reference/items/traits.html#dyn-compatibility">dyn compatible</a>.</p><p><i>In older versions of Rust, dyn compatibility was called "object safety", so this trait is not object safe.</i></p></div><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"><section id="impl-From%3Cu32%3E-for-AtomicU32" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.34.0">1.34.0</span> · <a class="src" href="../../src/core/sync/atomic.rs.html#3792-3809">Source</a></span><a href="#impl-From%3Cu32%3E-for-AtomicU32" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.From.html" title="trait core::convert::From">From</a>&lt;<a class="primitive" href="../primitive.u32.html">u32</a>&gt; for <a class="struct" href="../sync/atomic/struct.AtomicU32.html" title="struct core::sync::atomic::AtomicU32">AtomicU32</a></h3></section><section id="impl-From%3C%26Option%3CT%3E%3E-for-Option%3C%26T%3E" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.30.0">1.30.0</span> · <a class="src" href="../../src/core/option.rs.html#2222-2246">Source</a></span><a href="#impl-From%3C%26Option%3CT%3E%3E-for-Option%3C%26T%3E" class="anchor">§</a><h3 class="code-header">impl&lt;'a, T&gt; <a class="trait" href="trait.From.html" title="trait core::convert::From">From</a>&lt;&amp;'a <a class="enum" href="../option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;T&gt;&gt; for <a class="enum" href="../option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="../primitive.reference.html">&amp;'a T</a>&gt;</h3></section><section id="impl-From%3C%26mut+Option%3CT%3E%3E-for-Option%3C%26mut+T%3E" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.30.0">1.30.0</span> · <a class="src" href="../../src/core/option.rs.html#2249-2268">Source</a></span><a href="#impl-From%3C%26mut+Option%3CT%3E%3E-for-Option%3C%26mut+T%3E" class="anchor">§</a><h3 class="code-header">impl&lt;'a, T&gt; <a class="trait" href="trait.From.html" title="trait core::convert::From">From</a>&lt;&amp;'a mut <a class="enum" href="../option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;T&gt;&gt; for <a class="enum" href="../option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="../primitive.reference.html">&amp;'a mut T</a>&gt;</h3></section><section id="impl-From%3CT%3E-for-Option%3CT%3E" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.12.0">1.12.0</span> · <a class="src" href="../../src/core/option.rs.html#2206-2219">Source</a></span><a href="#impl-From%3CT%3E-for-Option%3CT%3E" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for <a class="enum" href="../option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;T&gt;</h3></section><section id="impl-From%3CT%3E-for-T" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0, const unstable">1.0.0 (const: <a href="https://github.com/rust-lang/rust/issues/143773" title="Tracking issue for const_from">unstable</a>)</span> · <a class="src" href="../../src/core/convert/mod.rs.html#789-795">Source</a></span><a href="#impl-From%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for T</h3></section></div><script src="../../trait.impl/core/convert/trait.From.js" async></script></section></div></main></body></html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Reinterprets the bits of a value of one type as another type."><title>transmute in core::intrinsics - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-aa0817cf.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.90.0" data-rustdoc-version="1.90.0-dev" data-channel="nightly" data-search-js="search-179e01a3.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="sidebar-items1.90.0.js"></script><script defer src="../../static.files/main-673ee1e0.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc fn"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt="logo"></a><h2><a href="../../core/index.html">core</a><span class="version">1.90.0-dev</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">transmute</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#transmutation-between-pointers-and-integers" title="Transmutation between pointers and integers">Transmutation between pointers and integers</a></li><li><a href="#examples" title="Examples">Examples</a></li><li><a href="#alternatives" title="Alternatives">Alternatives</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="index.html">In core::<wbr>intrinsics</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">core</a>::<wbr><a href="index.html">intrinsics</a></div><h1>Function <span class="fn">transmute</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><span class="since" title="Stable since Rust version 1.0.0, const since 1.56.0">1.0.0 (const: 1.56.0)</span> · <a class="src" href="../../src/core/intrinsics/mod.rs.html#854">Source</a> </span></div><pre class="rust item-decl"><code>pub const unsafe fn transmute&lt;Src, Dst&gt;(src: Src) -&gt; Dst</code></pre><span class="item-info"><div class="stab deprecated"><span class="emoji">👎</span><span>Deprecated: import this function via <code>std::mem</code> instead</span></div></span><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Reinterprets the bits of a value of one type as another type.</p>
+<p>Both types must have the same size. Compilation will fail if this is not guaranteed.</p>
+<p><code>transmute</code> is semantically equivalent to a bitwise move of one type
+into another. It copies the bits from the source value into the
+destination value, then forgets the original. Note that source and destination
+are passed by-value, which means if <code>Src</code> or <code>Dst</code> contain padding, that padding
+is <em>not</em> guaranteed to be preserved by <code>transmute</code>.</p>
+<p>Both the argument and the result must be <a href="../../nomicon/what-unsafe-does.html">valid</a> at
+their given type. Violating this condition leads to <a href="../../reference/behavior-considered-undefined.html">undefined behavior</a>. The compiler
+will generate code <em>assuming that you, the programmer, ensure that there will never be
+undefined behavior</em>. It is therefore your responsibility to guarantee that every value
+passed to <code>transmute</code> is valid at both types <code>Src</code> and <code>Dst</code>. Failing to uphold this condition
+may lead to unexpected and unstable compilation results. This makes <code>transmute</code> <strong>incredibly
+unsafe</strong>. <code>transmute</code> should be the absolute last resort.</p>
+<p>Because <code>transmute</code> is a by-value operation, alignment of the <em>transmuted values
+themselves</em> is not a concern. As with any other function, the compiler already ensures
+both <code>Src</code> and <code>Dst</code> are properly aligned. However, when transmuting values that <em>point
+elsewhere</em> (such as pointers, references, boxes…), the caller has to ensure proper
+alignment of the pointed-to values.</p>
+<p>The <a href="../../nomicon/transmutes.html">nomicon</a> has additional documentation.</p>
+<h2 id="transmutation-between-pointers-and-integers"><a class="doc-anchor" href="#transmutation-between-pointers-and-integers">§</a>Transmutation between pointers and integers</h2>
+<p>Special care has to be taken when transmuting between pointers and integers, e.g.
+transmuting between <code>*const ()</code> and <code>usize</code>.</p>
+<p>Transmuting <em>pointers to integers</em> in a <code>const</code> context is <a href="../../reference/behavior-considered-undefined.html">undefined behavior</a>, unless
+the pointer was originally created <em>from</em> an integer. (That includes this function
+specifically, integer-to-pointer casts, and helpers like [<code>dangling</code>][crate::ptr::dangling],
+but also semantically-equivalent conversions such as punning through <code>repr(C)</code> union
+fields.) Any attempt to use the resulting value for integer operations will abort
+const-evaluation. (And even outside <code>const</code>, such transmutation is touching on many
+unspecified aspects of the Rust memory model and should be avoided. See below for
+alternatives.)</p>
+<p>Transmuting <em>integers to pointers</em> is a largely unspecified operation. It is likely <em>not</em>
+equivalent to an <code>as</code> cast. Doing non-zero-sized memory accesses with a pointer constructed
+this way is currently considered undefined behavior.</p>
+<p>All this also applies when the integer is nested inside an array, tuple, struct, or enum.
+However, <code>MaybeUninit&lt;usize&gt;</code> is not considered an integer type for the purpose of this
+section. Transmuting <code>*const ()</code> to <code>MaybeUninit&lt;usize&gt;</code> is fine—but then calling
+<code>assume_init()</code> on that result is considered as completing the pointer-to-integer transmute
+and thus runs into the issues discussed above.</p>
+<p>In particular, doing a pointer-to-integer-to-pointer roundtrip via <code>transmute</code> is <em>not</em> a
+lossless process. If you want to round-trip a pointer through an integer in a way that you
+can get back the original pointer, you need to use <code>as</code> casts, or replace the integer type
+by <code>MaybeUninit&lt;$int&gt;</code> (and never call <code>assume_init()</code>). If you are looking for a way to
+store data of arbitrary type, also use <code>MaybeUninit&lt;T&gt;</code> (that will also handle uninitialized
+memory due to padding). If you specifically need to store something that is “either an
+integer or a pointer”, use <code>*mut ()</code>: integers can be converted to pointers and back without
+any loss (via <code>as</code> casts or via <code>transmute</code>).</p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>There are a few things that <code>transmute</code> is really useful for.</p>
+<p>Turning a pointer into a function pointer. This is <em>not</em> portable to
+machines where function pointers and data pointers have different sizes.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>foo() -&gt; i32 {
+    <span class="number">0
+</span>}
+<span class="comment">// Crucially, we `as`-cast to a raw pointer before `transmute`ing to a function pointer.
+// This avoids an integer-to-pointer `transmute`, which can be problematic.
+// Transmuting between raw pointers and function pointers (i.e., two pointer types) is fine.
+</span><span class="kw">let </span>pointer = foo <span class="kw">as </span><span class="kw-2">*const </span>();
+<span class="kw">let </span>function = <span class="kw">unsafe </span>{
+    std::mem::transmute::&lt;<span class="kw-2">*const </span>(), <span class="kw">fn</span>() -&gt; i32&gt;(pointer)
+};
+<span class="macro">assert_eq!</span>(function(), <span class="number">0</span>);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++fn+foo()+-%3E+i32+%7B%0A++++++++0%0A++++%7D%0A++++//+Crucially,+we+%60as%60-cast+to+a+raw+pointer+before+%60transmute%60ing+to+a+function+pointer.%0A++++//+This+avoids+an+integer-to-pointer+%60transmute%60,+which+can+be+problematic.%0A++++//+Transmuting+between+raw+pointers+and+function+pointers+(i.e.,+two+pointer+types)+is+fine.%0A++++let+pointer+=+foo+as+*const+();%0A++++let+function+=+unsafe+%7B%0A++++++++std::mem::transmute::%3C*const+(),+fn()+-%3E+i32%3E(pointer)%0A++++%7D;%0A++++assert_eq!(function(),+0);%0A%7D&amp;edition=2024"></a></div>
+<p>Extending a lifetime, or shortening an invariant lifetime. This is
+advanced, very unsafe Rust!</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">struct </span>R&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>i32);
+<span class="kw">unsafe fn </span>extend_lifetime&lt;<span class="lifetime">'b</span>&gt;(r: R&lt;<span class="lifetime">'b</span>&gt;) -&gt; R&lt;<span class="lifetime">'static</span>&gt; {
+    <span class="kw">unsafe </span>{ std::mem::transmute::&lt;R&lt;<span class="lifetime">'b</span>&gt;, R&lt;<span class="lifetime">'static</span>&gt;&gt;(r) }
+}
+
+<span class="kw">unsafe fn </span>shorten_invariant_lifetime&lt;<span class="lifetime">'b</span>, <span class="lifetime">'c</span>&gt;(r: <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>R&lt;<span class="lifetime">'static</span>&gt;)
+                                             -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>R&lt;<span class="lifetime">'c</span>&gt; {
+    <span class="kw">unsafe </span>{ std::mem::transmute::&lt;<span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>R&lt;<span class="lifetime">'static</span>&gt;, <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>R&lt;<span class="lifetime">'c</span>&gt;&gt;(r) }
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++struct+R%3C'a%3E(%26'a+i32);%0A++++unsafe+fn+extend_lifetime%3C'b%3E(r:+R%3C'b%3E)+-%3E+R%3C'static%3E+%7B%0A++++++++unsafe+%7B+std::mem::transmute::%3CR%3C'b%3E,+R%3C'static%3E%3E(r)+%7D%0A++++%7D%0A++++%0A++++unsafe+fn+shorten_invariant_lifetime%3C'b,+'c%3E(r:+%26'b+mut+R%3C'static%3E)%0A+++++++++++++++++++++++++++++++++++++++++++++++++-%3E+%26'b+mut+R%3C'c%3E+%7B%0A++++++++unsafe+%7B+std::mem::transmute::%3C%26'b+mut+R%3C'static%3E,+%26'b+mut+R%3C'c%3E%3E(r)+%7D%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+<h2 id="alternatives"><a class="doc-anchor" href="#alternatives">§</a>Alternatives</h2>
+<p>Don’t despair: many uses of <code>transmute</code> can be achieved through other means.
+Below are common applications of <code>transmute</code> which can be replaced with safer
+constructs.</p>
+<p>Turning raw bytes (<code>[u8; SZ]</code>) into <code>u32</code>, <code>f64</code>, etc.:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>raw_bytes = [<span class="number">0x78</span>, <span class="number">0x56</span>, <span class="number">0x34</span>, <span class="number">0x12</span>];
+
+<span class="kw">let </span>num = <span class="kw">unsafe </span>{
+    std::mem::transmute::&lt;[u8; <span class="number">4</span>], u32&gt;(raw_bytes)
+};
+
+<span class="comment">// use `u32::from_ne_bytes` instead
+</span><span class="kw">let </span>num = u32::from_ne_bytes(raw_bytes);
+<span class="comment">// or use `u32::from_le_bytes` or `u32::from_be_bytes` to specify the endianness
+</span><span class="kw">let </span>num = u32::from_le_bytes(raw_bytes);
+<span class="macro">assert_eq!</span>(num, <span class="number">0x12345678</span>);
+<span class="kw">let </span>num = u32::from_be_bytes(raw_bytes);
+<span class="macro">assert_eq!</span>(num, <span class="number">0x78563412</span>);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0A%23!%5Ballow(unnecessary_transmutes)%5D%0A%0Afn+main()+%7B%0A++++let+raw_bytes+=+%5B0x78,+0x56,+0x34,+0x12%5D;%0A++++%0A++++let+num+=+unsafe+%7B%0A++++++++std::mem::transmute::%3C%5Bu8;+4%5D,+u32%3E(raw_bytes)%0A++++%7D;%0A++++%0A++++//+use+%60u32::from_ne_bytes%60+instead%0A++++let+num+=+u32::from_ne_bytes(raw_bytes);%0A++++//+or+use+%60u32::from_le_bytes%60+or+%60u32::from_be_bytes%60+to+specify+the+endianness%0A++++let+num+=+u32::from_le_bytes(raw_bytes);%0A++++assert_eq!(num,+0x12345678);%0A++++let+num+=+u32::from_be_bytes(raw_bytes);%0A++++assert_eq!(num,+0x78563412);%0A%7D&amp;edition=2024"></a></div>
+<p>Turning a pointer into a <code>usize</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>ptr = <span class="kw-2">&amp;</span><span class="number">0</span>;
+<span class="kw">let </span>ptr_num_transmute = <span class="kw">unsafe </span>{
+    std::mem::transmute::&lt;<span class="kw-2">&amp;</span>i32, usize&gt;(ptr)
+};
+
+<span class="comment">// Use an `as` cast instead
+</span><span class="kw">let </span>ptr_num_cast = ptr <span class="kw">as </span><span class="kw-2">*const </span>i32 <span class="kw">as </span>usize;</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+ptr+=+%260;%0A++++let+ptr_num_transmute+=+unsafe+%7B%0A++++++++std::mem::transmute::%3C%26i32,+usize%3E(ptr)%0A++++%7D;%0A++++%0A++++//+Use+an+%60as%60+cast+instead%0A++++let+ptr_num_cast+=+ptr+as+*const+i32+as+usize;%0A%7D&amp;edition=2024"></a></div>
+<p>Note that using <code>transmute</code> to turn a pointer to a <code>usize</code> is (as noted above) <a href="../../reference/behavior-considered-undefined.html">undefined
+behavior</a> in <code>const</code> contexts. Also outside of consts, this operation might not behave
+as expected – this is touching on many unspecified aspects of the Rust memory model.
+Depending on what the code is doing, the following alternatives are preferable to
+pointer-to-integer transmutation:</p>
+<ul>
+<li>If the code just wants to store data of arbitrary type in some buffer and needs to pick a
+type for that buffer, it can use [<code>MaybeUninit</code>][crate::mem::MaybeUninit].</li>
+<li>If the code actually wants to work on the address the pointer points to, it can use <code>as</code>
+casts or [<code>ptr.addr()</code>][pointer::addr].</li>
+</ul>
+<p>Turning a <code>*mut T</code> into a <code>&amp;mut T</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>ptr: <span class="kw-2">*mut </span>i32 = <span class="kw-2">&amp;mut </span><span class="number">0</span>;
+<span class="kw">let </span>ref_transmuted = <span class="kw">unsafe </span>{
+    std::mem::transmute::&lt;<span class="kw-2">*mut </span>i32, <span class="kw-2">&amp;mut </span>i32&gt;(ptr)
+};
+
+<span class="comment">// Use a reborrow instead
+</span><span class="kw">let </span>ref_casted = <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>ptr };</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+ptr:+*mut+i32+=+%26mut+0;%0A++++let+ref_transmuted+=+unsafe+%7B%0A++++++++std::mem::transmute::%3C*mut+i32,+%26mut+i32%3E(ptr)%0A++++%7D;%0A++++%0A++++//+Use+a+reborrow+instead%0A++++let+ref_casted+=+unsafe+%7B+%26mut+*ptr+%7D;%0A%7D&amp;edition=2024"></a></div>
+<p>Turning a <code>&amp;mut T</code> into a <code>&amp;mut U</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>ptr = <span class="kw-2">&amp;mut </span><span class="number">0</span>;
+<span class="kw">let </span>val_transmuted = <span class="kw">unsafe </span>{
+    std::mem::transmute::&lt;<span class="kw-2">&amp;mut </span>i32, <span class="kw-2">&amp;mut </span>u32&gt;(ptr)
+};
+
+<span class="comment">// Now, put together `as` and reborrowing - note the chaining of `as`
+// `as` is not transitive
+</span><span class="kw">let </span>val_casts = <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(ptr <span class="kw">as </span><span class="kw-2">*mut </span>i32 <span class="kw">as </span><span class="kw-2">*mut </span>u32) };</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+ptr+=+%26mut+0;%0A++++let+val_transmuted+=+unsafe+%7B%0A++++++++std::mem::transmute::%3C%26mut+i32,+%26mut+u32%3E(ptr)%0A++++%7D;%0A++++%0A++++//+Now,+put+together+%60as%60+and+reborrowing+-+note+the+chaining+of+%60as%60%0A++++//+%60as%60+is+not+transitive%0A++++let+val_casts+=+unsafe+%7B+%26mut+*(ptr+as+*mut+i32+as+*mut+u32)+%7D;%0A%7D&amp;edition=2024"></a></div>
+<p>Turning a <code>&amp;str</code> into a <code>&amp;[u8]</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// this is not a good way to do this.
+</span><span class="kw">let </span>slice = <span class="kw">unsafe </span>{ std::mem::transmute::&lt;<span class="kw-2">&amp;</span>str, <span class="kw-2">&amp;</span>[u8]&gt;(<span class="string">"Rust"</span>) };
+<span class="macro">assert_eq!</span>(slice, <span class="kw-2">&amp;</span>[<span class="number">82</span>, <span class="number">117</span>, <span class="number">115</span>, <span class="number">116</span>]);
+
+<span class="comment">// You could use `str::as_bytes`
+</span><span class="kw">let </span>slice = <span class="string">"Rust"</span>.as_bytes();
+<span class="macro">assert_eq!</span>(slice, <span class="kw-2">&amp;</span>[<span class="number">82</span>, <span class="number">117</span>, <span class="number">115</span>, <span class="number">116</span>]);
+
+<span class="comment">// Or, just use a byte string, if you have control over the string
+// literal
+</span><span class="macro">assert_eq!</span>(<span class="string">b"Rust"</span>, <span class="kw-2">&amp;</span>[<span class="number">82</span>, <span class="number">117</span>, <span class="number">115</span>, <span class="number">116</span>]);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++//+this+is+not+a+good+way+to+do+this.%0A++++let+slice+=+unsafe+%7B+std::mem::transmute::%3C%26str,+%26%5Bu8%5D%3E(%22Rust%22)+%7D;%0A++++assert_eq!(slice,+%26%5B82,+117,+115,+116%5D);%0A++++%0A++++//+You+could+use+%60str::as_bytes%60%0A++++let+slice+=+%22Rust%22.as_bytes();%0A++++assert_eq!(slice,+%26%5B82,+117,+115,+116%5D);%0A++++%0A++++//+Or,+just+use+a+byte+string,+if+you+have+control+over+the+string%0A++++//+literal%0A++++assert_eq!(b%22Rust%22,+%26%5B82,+117,+115,+116%5D);%0A%7D&amp;edition=2024"></a></div>
+<p>Turning a <code>Vec&lt;&amp;T&gt;</code> into a <code>Vec&lt;Option&lt;&amp;T&gt;&gt;</code>.</p>
+<p>To transmute the inner type of the contents of a container, you must make sure to not
+violate any of the container’s invariants. For <code>Vec</code>, this means that both the size
+<em>and alignment</em> of the inner types have to match. Other containers might rely on the
+size of the type, alignment, or even the <code>TypeId</code>, in which case transmuting wouldn’t
+be possible at all without violating the container invariants.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>store = [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+<span class="kw">let </span>v_orig = store.iter().collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>i32&gt;&gt;();
+
+<span class="comment">// clone the vector as we will reuse them later
+</span><span class="kw">let </span>v_clone = v_orig.clone();
+
+<span class="comment">// Using transmute: this relies on the unspecified data layout of `Vec`, which is a
+// bad idea and could cause Undefined Behavior.
+// However, it is no-copy.
+</span><span class="kw">let </span>v_transmuted = <span class="kw">unsafe </span>{
+    std::mem::transmute::&lt;Vec&lt;<span class="kw-2">&amp;</span>i32&gt;, Vec&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>i32&gt;&gt;&gt;(v_clone)
+};
+
+<span class="kw">let </span>v_clone = v_orig.clone();
+
+<span class="comment">// This is the suggested, safe way.
+// It may copy the entire vector into a new one though, but also may not.
+</span><span class="kw">let </span>v_collected = v_clone.into_iter()
+                         .map(<span class="prelude-val">Some</span>)
+                         .collect::&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>i32&gt;&gt;&gt;();
+
+<span class="kw">let </span>v_clone = v_orig.clone();
+
+<span class="comment">// This is the proper no-copy, unsafe way of "transmuting" a `Vec`, without relying on the
+// data layout. Instead of literally calling `transmute`, we perform a pointer cast, but
+// in terms of converting the original inner type (`&amp;i32`) to the new one (`Option&lt;&amp;i32&gt;`),
+// this has all the same caveats. Besides the information provided above, also consult the
+// [`from_raw_parts`] documentation.
+</span><span class="kw">let </span>v_from_raw = <span class="kw">unsafe </span>{
+    <span class="comment">// Ensure the original vector is not dropped.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>v_clone = std::mem::ManuallyDrop::new(v_clone);
+    Vec::from_raw_parts(v_clone.as_mut_ptr() <span class="kw">as </span><span class="kw-2">*mut </span><span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>i32&gt;,
+                        v_clone.len(),
+                        v_clone.capacity())
+};</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+store+=+%5B0,+1,+2,+3%5D;%0A++++let+v_orig+=+store.iter().collect::%3CVec%3C%26i32%3E%3E();%0A++++%0A++++//+clone+the+vector+as+we+will+reuse+them+later%0A++++let+v_clone+=+v_orig.clone();%0A++++%0A++++//+Using+transmute:+this+relies+on+the+unspecified+data+layout+of+%60Vec%60,+which+is+a%0A++++//+bad+idea+and+could+cause+Undefined+Behavior.%0A++++//+However,+it+is+no-copy.%0A++++let+v_transmuted+=+unsafe+%7B%0A++++++++std::mem::transmute::%3CVec%3C%26i32%3E,+Vec%3COption%3C%26i32%3E%3E%3E(v_clone)%0A++++%7D;%0A++++%0A++++let+v_clone+=+v_orig.clone();%0A++++%0A++++//+This+is+the+suggested,+safe+way.%0A++++//+It+may+copy+the+entire+vector+into+a+new+one+though,+but+also+may+not.%0A++++let+v_collected+=+v_clone.into_iter()%0A+++++++++++++++++++++++++++++.map(Some)%0A+++++++++++++++++++++++++++++.collect::%3CVec%3COption%3C%26i32%3E%3E%3E();%0A++++%0A++++let+v_clone+=+v_orig.clone();%0A++++%0A++++//+This+is+the+proper+no-copy,+unsafe+way+of+%22transmuting%22+a+%60Vec%60,+without+relying+on+the%0A++++//+data+layout.+Instead+of+literally+calling+%60transmute%60,+we+perform+a+pointer+cast,+but%0A++++//+in+terms+of+converting+the+original+inner+type+(%60%26i32%60)+to+the+new+one+(%60Option%3C%26i32%3E%60),%0A++++//+this+has+all+the+same+caveats.+Besides+the+information+provided+above,+also+consult+the%0A++++//+%5B%60from_raw_parts%60%5D+documentation.%0A++++let+v_from_raw+=+unsafe+%7B%0A++++++++//+Ensure+the+original+vector+is+not+dropped.%0A++++++++let+mut+v_clone+=+std::mem::ManuallyDrop::new(v_clone);%0A++++++++Vec::from_raw_parts(v_clone.as_mut_ptr()+as+*mut+Option%3C%26i32%3E,%0A++++++++++++++++++++++++++++v_clone.len(),%0A++++++++++++++++++++++++++++v_clone.capacity())%0A++++%7D;%0A%7D&amp;edition=2024"></a></div>
+<p>Implementing <code>split_at_mut</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::{slice, mem};
+
+<span class="comment">// There are multiple ways to do this, and there are multiple problems
+// with the following (transmute) way.
+</span><span class="kw">fn </span>split_at_mut_transmute&lt;T&gt;(slice: <span class="kw-2">&amp;mut </span>[T], mid: usize)
+                             -&gt; (<span class="kw-2">&amp;mut </span>[T], <span class="kw-2">&amp;mut </span>[T]) {
+    <span class="kw">let </span>len = slice.len();
+    <span class="macro">assert!</span>(mid &lt;= len);
+    <span class="kw">unsafe </span>{
+        <span class="kw">let </span>slice2 = mem::transmute::&lt;<span class="kw-2">&amp;mut </span>[T], <span class="kw-2">&amp;mut </span>[T]&gt;(slice);
+        <span class="comment">// first: transmute is not type safe; all it checks is that T and
+        // U are of the same size. Second, right here, you have two
+        // mutable references pointing to the same memory.
+        </span>(<span class="kw-2">&amp;mut </span>slice[<span class="number">0</span>..mid], <span class="kw-2">&amp;mut </span>slice2[mid..len])
+    }
+}
+
+<span class="comment">// This gets rid of the type safety problems; `&amp;mut *` will *only* give
+// you a `&amp;mut T` from a `&amp;mut T` or `*mut T`.
+</span><span class="kw">fn </span>split_at_mut_casts&lt;T&gt;(slice: <span class="kw-2">&amp;mut </span>[T], mid: usize)
+                         -&gt; (<span class="kw-2">&amp;mut </span>[T], <span class="kw-2">&amp;mut </span>[T]) {
+    <span class="kw">let </span>len = slice.len();
+    <span class="macro">assert!</span>(mid &lt;= len);
+    <span class="kw">unsafe </span>{
+        <span class="kw">let </span>slice2 = <span class="kw-2">&amp;mut *</span>(slice <span class="kw">as </span><span class="kw-2">*mut </span>[T]);
+        <span class="comment">// however, you still have two mutable references pointing to
+        // the same memory.
+        </span>(<span class="kw-2">&amp;mut </span>slice[<span class="number">0</span>..mid], <span class="kw-2">&amp;mut </span>slice2[mid..len])
+    }
+}
+
+<span class="comment">// This is how the standard library does it. This is the best method, if
+// you need to do something like this
+</span><span class="kw">fn </span>split_at_stdlib&lt;T&gt;(slice: <span class="kw-2">&amp;mut </span>[T], mid: usize)
+                      -&gt; (<span class="kw-2">&amp;mut </span>[T], <span class="kw-2">&amp;mut </span>[T]) {
+    <span class="kw">let </span>len = slice.len();
+    <span class="macro">assert!</span>(mid &lt;= len);
+    <span class="kw">unsafe </span>{
+        <span class="kw">let </span>ptr = slice.as_mut_ptr();
+        <span class="comment">// This now has three mutable references pointing at the same
+        // memory. `slice`, the rvalue ret.0, and the rvalue ret.1.
+        // `slice` is never used after `let ptr = ...`, and so one can
+        // treat it as "dead", and therefore, you only have two real
+        // mutable slices.
+        </span>(slice::from_raw_parts_mut(ptr, mid),
+         slice::from_raw_parts_mut(ptr.add(mid), len - mid))
+    }
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++use+std::%7Bslice,+mem%7D;%0A++++%0A++++//+There+are+multiple+ways+to+do+this,+and+there+are+multiple+problems%0A++++//+with+the+following+(transmute)+way.%0A++++fn+split_at_mut_transmute%3CT%3E(slice:+%26mut+%5BT%5D,+mid:+usize)%0A+++++++++++++++++++++++++++++++++-%3E+(%26mut+%5BT%5D,+%26mut+%5BT%5D)+%7B%0A++++++++let+len+=+slice.len();%0A++++++++assert!(mid+%3C=+len);%0A++++++++unsafe+%7B%0A++++++++++++let+slice2+=+mem::transmute::%3C%26mut+%5BT%5D,+%26mut+%5BT%5D%3E(slice);%0A++++++++++++//+first:+transmute+is+not+type+safe;+all+it+checks+is+that+T+and%0A++++++++++++//+U+are+of+the+same+size.+Second,+right+here,+you+have+two%0A++++++++++++//+mutable+references+pointing+to+the+same+memory.%0A++++++++++++(%26mut+slice%5B0..mid%5D,+%26mut+slice2%5Bmid..len%5D)%0A++++++++%7D%0A++++%7D%0A++++%0A++++//+This+gets+rid+of+the+type+safety+problems;+%60%26mut+*%60+will+*only*+give%0A++++//+you+a+%60%26mut+T%60+from+a+%60%26mut+T%60+or+%60*mut+T%60.%0A++++fn+split_at_mut_casts%3CT%3E(slice:+%26mut+%5BT%5D,+mid:+usize)%0A+++++++++++++++++++++++++++++-%3E+(%26mut+%5BT%5D,+%26mut+%5BT%5D)+%7B%0A++++++++let+len+=+slice.len();%0A++++++++assert!(mid+%3C=+len);%0A++++++++unsafe+%7B%0A++++++++++++let+slice2+=+%26mut+*(slice+as+*mut+%5BT%5D);%0A++++++++++++//+however,+you+still+have+two+mutable+references+pointing+to%0A++++++++++++//+the+same+memory.%0A++++++++++++(%26mut+slice%5B0..mid%5D,+%26mut+slice2%5Bmid..len%5D)%0A++++++++%7D%0A++++%7D%0A++++%0A++++//+This+is+how+the+standard+library+does+it.+This+is+the+best+method,+if%0A++++//+you+need+to+do+something+like+this%0A++++fn+split_at_stdlib%3CT%3E(slice:+%26mut+%5BT%5D,+mid:+usize)%0A++++++++++++++++++++++++++-%3E+(%26mut+%5BT%5D,+%26mut+%5BT%5D)+%7B%0A++++++++let+len+=+slice.len();%0A++++++++assert!(mid+%3C=+len);%0A++++++++unsafe+%7B%0A++++++++++++let+ptr+=+slice.as_mut_ptr();%0A++++++++++++//+This+now+has+three+mutable+references+pointing+at+the+same%0A++++++++++++//+memory.+%60slice%60,+the+rvalue+ret.0,+and+the+rvalue+ret.1.%0A++++++++++++//+%60slice%60+is+never+used+after+%60let+ptr+=+...%60,+and+so+one+can%0A++++++++++++//+treat+it+as+%22dead%22,+and+therefore,+you+only+have+two+real%0A++++++++++++//+mutable+slices.%0A++++++++++++(slice::from_raw_parts_mut(ptr,+mid),%0A+++++++++++++slice::from_raw_parts_mut(ptr.add(mid),+len+-+mid))%0A++++++++%7D%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+</div></details></section></div></main></body></html>

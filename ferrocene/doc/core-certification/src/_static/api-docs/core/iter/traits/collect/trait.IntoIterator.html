@@ -1,0 +1,91 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Conversion into an `Iterator`."><title>IntoIterator in core::iter::traits::collect - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-aa0817cf.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.90.0" data-rustdoc-version="1.90.0-dev" data-channel="nightly" data-search-js="search-179e01a3.js" data-settings-js="settings-5514c975.js" ><script src="../../../../static.files/storage-4e99c027.js"></script><script defer src="sidebar-items1.90.0.js"></script><script defer src="../../../../static.files/main-673ee1e0.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../../../core/index.html"><img class="rust-logo" src="../../../../static.files/rust-logo-9a9549ea.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../../../core/index.html"><img class="rust-logo" src="../../../../static.files/rust-logo-9a9549ea.svg" alt="logo"></a><h2><a href="../../../../core/index.html">core</a><span class="version">1.90.0-dev</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Into<wbr>Iterator</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#examples" title="Examples">Examples</a></li></ul><h3><a href="#required-associated-types">Required Associated Types</a></h3><ul class="block"><li><a href="#associatedtype.IntoIter" title="IntoIter">IntoIter</a></li><li><a href="#associatedtype.Item" title="Item">Item</a></li></ul><h3><a href="#required-methods">Required Methods</a></h3><ul class="block"><li><a href="#tymethod.into_iter" title="into_iter">into_iter</a></li></ul><h3><a href="#implementors">Implementors</a></h3></section><div id="rustdoc-modnav"><h2><a href="index.html">In core::<wbr>iter::<wbr>traits::<wbr>collect</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../../../index.html">core</a>::<wbr><a href="../../index.html">iter</a>::<wbr><a href="../index.html">traits</a>::<wbr><a href="index.html">collect</a></div><h1>Trait <span class="trait">IntoIterator</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../../../src/core/iter/traits/collect.rs.html#284-313">Source</a> </span></div><pre class="rust item-decl"><code>pub trait IntoIterator {
+    type <a href="#associatedtype.Item" class="associatedtype">Item</a>;
+    type <a href="#associatedtype.IntoIter" class="associatedtype">IntoIter</a>: <a class="trait" href="../iterator/trait.Iterator.html" title="trait core::iter::traits::iterator::Iterator">Iterator</a>&lt;Item = Self::<a class="associatedtype" href="trait.IntoIterator.html#associatedtype.Item" title="type core::iter::traits::collect::IntoIterator::Item">Item</a>&gt;;
+
+    // Required method
+    fn <a href="#tymethod.into_iter" class="fn">into_iter</a>(self) -&gt; Self::<a class="associatedtype" href="trait.IntoIterator.html#associatedtype.IntoIter" title="type core::iter::traits::collect::IntoIterator::IntoIter">IntoIter</a>;
+}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Conversion into an <a href="../iterator/trait.Iterator.html" title="trait core::iter::traits::iterator::Iterator"><code>Iterator</code></a>.</p>
+<p>By implementing <code>IntoIterator</code> for a type, you define how it will be
+converted to an iterator. This is common for types which describe a
+collection of some kind.</p>
+<p>One benefit of implementing <code>IntoIterator</code> is that your type will <a href="../../index.html#for-loops-and-intoiterator" title="mod core::iter">work
+with Rust’s <code>for</code> loop syntax</a>.</p>
+<p>See also: [<code>FromIterator</code>].</p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>Basic usage:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>v = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+<span class="kw">let </span><span class="kw-2">mut </span>iter = v.into_iter();
+
+<span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">1</span>), iter.next());
+<span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">2</span>), iter.next());
+<span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">3</span>), iter.next());
+<span class="macro">assert_eq!</span>(<span class="prelude-val">None</span>, iter.next());</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+v+=+%5B1,+2,+3%5D;%0A++++let+mut+iter+=+v.into_iter();%0A++++%0A++++assert_eq!(Some(1),+iter.next());%0A++++assert_eq!(Some(2),+iter.next());%0A++++assert_eq!(Some(3),+iter.next());%0A++++assert_eq!(None,+iter.next());%0A%7D&amp;edition=2024"></a></div>
+<p>Implementing <code>IntoIterator</code> for your type:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// A sample collection, that's just a wrapper over Vec&lt;T&gt;
+</span><span class="attr">#[derive(Debug)]
+</span><span class="kw">struct </span>MyCollection(Vec&lt;i32&gt;);
+
+<span class="comment">// Let's give it some methods so we can create one and add things
+// to it.
+</span><span class="kw">impl </span>MyCollection {
+    <span class="kw">fn </span>new() -&gt; MyCollection {
+        MyCollection(Vec::new())
+    }
+
+    <span class="kw">fn </span>add(<span class="kw-2">&amp;mut </span><span class="self">self</span>, elem: i32) {
+        <span class="self">self</span>.<span class="number">0</span>.push(elem);
+    }
+}
+
+<span class="comment">// and we'll implement IntoIterator
+</span><span class="kw">impl </span>IntoIterator <span class="kw">for </span>MyCollection {
+    <span class="kw">type </span>Item = i32;
+    <span class="kw">type </span>IntoIter = std::vec::IntoIter&lt;<span class="self">Self</span>::Item&gt;;
+
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
+        <span class="self">self</span>.<span class="number">0</span>.into_iter()
+    }
+}
+
+<span class="comment">// Now we can make a new collection...
+</span><span class="kw">let </span><span class="kw-2">mut </span>c = MyCollection::new();
+
+<span class="comment">// ... add some stuff to it ...
+</span>c.add(<span class="number">0</span>);
+c.add(<span class="number">1</span>);
+c.add(<span class="number">2</span>);
+
+<span class="comment">// ... and then turn it into an Iterator:
+</span><span class="kw">for </span>(i, n) <span class="kw">in </span>c.into_iter().enumerate() {
+    <span class="macro">assert_eq!</span>(i <span class="kw">as </span>i32, n);
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++//+A+sample+collection,+that's+just+a+wrapper+over+Vec%3CT%3E%0A++++%23%5Bderive(Debug)%5D%0A++++struct+MyCollection(Vec%3Ci32%3E);%0A++++%0A++++//+Let's+give+it+some+methods+so+we+can+create+one+and+add+things%0A++++//+to+it.%0A++++impl+MyCollection+%7B%0A++++++++fn+new()+-%3E+MyCollection+%7B%0A++++++++++++MyCollection(Vec::new())%0A++++++++%7D%0A++++%0A++++++++fn+add(%26mut+self,+elem:+i32)+%7B%0A++++++++++++self.0.push(elem);%0A++++++++%7D%0A++++%7D%0A++++%0A++++//+and+we'll+implement+IntoIterator%0A++++impl+IntoIterator+for+MyCollection+%7B%0A++++++++type+Item+=+i32;%0A++++++++type+IntoIter+=+std::vec::IntoIter%3CSelf::Item%3E;%0A++++%0A++++++++fn+into_iter(self)+-%3E+Self::IntoIter+%7B%0A++++++++++++self.0.into_iter()%0A++++++++%7D%0A++++%7D%0A++++%0A++++//+Now+we+can+make+a+new+collection...%0A++++let+mut+c+=+MyCollection::new();%0A++++%0A++++//+...+add+some+stuff+to+it+...%0A++++c.add(0);%0A++++c.add(1);%0A++++c.add(2);%0A++++%0A++++//+...+and+then+turn+it+into+an+Iterator:%0A++++for+(i,+n)+in+c.into_iter().enumerate()+%7B%0A++++++++assert_eq!(i+as+i32,+n);%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+<p>It is common to use <code>IntoIterator</code> as a trait bound. This allows
+the input collection type to change, so long as it is still an
+iterator. Additional bounds can be specified by restricting on
+<code>Item</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>collect_as_strings&lt;T&gt;(collection: T) -&gt; Vec&lt;String&gt;
+<span class="kw">where
+    </span>T: IntoIterator,
+    T::Item: std::fmt::Debug,
+{
+    collection
+        .into_iter()
+        .map(|item| <span class="macro">format!</span>(<span class="string">"{item:?}"</span>))
+        .collect()
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++fn+collect_as_strings%3CT%3E(collection:+T)+-%3E+Vec%3CString%3E%0A++++where%0A++++++++T:+IntoIterator,%0A++++++++T::Item:+std::fmt::Debug,%0A++++%7B%0A++++++++collection%0A++++++++++++.into_iter()%0A++++++++++++.map(%7Citem%7C+format!(%22%7Bitem:?%7D%22))%0A++++++++++++.collect()%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+</div></details><h2 id="required-associated-types" class="section-header">Required Associated Types<a href="#required-associated-types" class="anchor">§</a></h2><div class="methods"><details class="toggle" open><summary><section id="associatedtype.Item" class="method"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../../../src/core/iter/traits/collect.rs.html#287">Source</a></span><h4 class="code-header">type <a href="#associatedtype.Item" class="associatedtype">Item</a></h4></section></summary><div class="docblock"><p>The type of the elements being iterated over.</p>
+</div></details><details class="toggle" open><summary><section id="associatedtype.IntoIter" class="method"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../../../src/core/iter/traits/collect.rs.html#291">Source</a></span><h4 class="code-header">type <a href="#associatedtype.IntoIter" class="associatedtype">IntoIter</a>: <a class="trait" href="../iterator/trait.Iterator.html" title="trait core::iter::traits::iterator::Iterator">Iterator</a>&lt;Item = Self::<a class="associatedtype" href="trait.IntoIterator.html#associatedtype.Item" title="type core::iter::traits::collect::IntoIterator::Item">Item</a>&gt;</h4></section></summary><div class="docblock"><p>Which kind of iterator are we turning this into?</p>
+</div></details></div><h2 id="required-methods" class="section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="tymethod.into_iter" class="method"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../../../src/core/iter/traits/collect.rs.html#312">Source</a></span><h4 class="code-header">fn <a href="#tymethod.into_iter" class="fn">into_iter</a>(self) -&gt; Self::<a class="associatedtype" href="trait.IntoIterator.html#associatedtype.IntoIter" title="type core::iter::traits::collect::IntoIterator::IntoIter">IntoIter</a></h4></section></summary><div class="docblock"><p>Creates an iterator from a value.</p>
+<p>See the <a href="../../index.html" title="mod core::iter">module-level documentation</a> for more.</p>
+<h5 id="examples-1"><a class="doc-anchor" href="#examples-1">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>v = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+<span class="kw">let </span><span class="kw-2">mut </span>iter = v.into_iter();
+
+<span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">1</span>), iter.next());
+<span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">2</span>), iter.next());
+<span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">3</span>), iter.next());
+<span class="macro">assert_eq!</span>(<span class="prelude-val">None</span>, iter.next());</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+v+=+%5B1,+2,+3%5D;%0A++++let+mut+iter+=+v.into_iter();%0A++++%0A++++assert_eq!(Some(1),+iter.next());%0A++++assert_eq!(Some(2),+iter.next());%0A++++assert_eq!(Some(3),+iter.next());%0A++++assert_eq!(None,+iter.next());%0A%7D&amp;edition=2024"></a></div>
+</div></details></div><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"></div><script src="../../../../trait.impl/core/iter/traits/collect/trait.IntoIterator.js" async></script></section></div></main></body></html>

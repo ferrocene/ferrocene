@@ -1,0 +1,40 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A macro to make it easier to invoke const_eval_select. Use as follows:"><title>const_eval_select in core::intrinsics - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-aa0817cf.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.90.0" data-rustdoc-version="1.90.0-dev" data-channel="nightly" data-search-js="search-179e01a3.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="sidebar-items1.90.0.js"></script><script defer src="../../static.files/main-673ee1e0.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc macro"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt="logo"></a><h2><a href="../../core/index.html">core</a><span class="version">1.90.0-dev</span></h2></div><div class="sidebar-elems"><div id="rustdoc-modnav"><h2><a href="index.html">In core::<wbr>intrinsics</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">core</a>::<wbr><a href="index.html">intrinsics</a></div><h1>Macro <span class="macro">const_eval_select</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/core/intrinsics/mod.rs.html#2455-2518">Source</a> </span></div><pre class="rust item-decl"><code>pub(crate) macro const_eval_select {
+    (
+        @capture$([$($binders:tt)*])? { $($arg:ident : $ty:ty = $val:expr),* $(,)? } $( -&gt; $ret:ty )? :
+        if const
+            $(#[$compiletime_attr:meta])* $compiletime:block
+        else
+            $(#[$runtime_attr:meta])* $runtime:block
+    ) =&gt; { ... },
+    (
+        @capture$([$($binders:tt)*])? { $($arg:ident : $ty:ty = $val:expr),* $(,)? } $( -&gt; $ret:ty )? :
+        #[noinline]
+        if const
+            $(#[$compiletime_attr:meta])* $compiletime:block
+        else
+            $(#[$runtime_attr:meta])* $runtime:block
+    ) =&gt; { ... },
+    (
+        @capture$([$($binders:tt)*])? { $($arg:ident : $ty:ty),* $(,)? } $( -&gt; $ret:ty )? :
+        if const
+            $(#[$compiletime_attr:meta])* $compiletime:block
+        else
+            $(#[$runtime_attr:meta])* $runtime:block
+    ) =&gt; { ... },
+}</code></pre><span class="item-info"><div class="stab unstable"><span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>core_intrinsics</code>)</span></div></span><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A macro to make it easier to invoke const_eval_select. Use as follows:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="macro">const_eval_select!</span>(
+    @capture { arg1: i32 = some_expr, arg2: T = other_expr } -&gt; U:
+    <span class="kw">if const </span><span class="attr">#[attributes_for_const_arm] </span>{
+        <span class="comment">// Compile-time code goes here.
+    </span>} <span class="kw">else </span><span class="attr">#[attributes_for_runtime_arm] </span>{
+        <span class="comment">// Run-time code goes here.
+    </span>}
+)</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++const_eval_select!(%0A++++++++%40capture+%7B+arg1:+i32+=+some_expr,+arg2:+T+=+other_expr+%7D+-%3E+U:%0A++++++++if+const+%23%5Battributes_for_const_arm%5D+%7B%0A++++++++++++//+Compile-time+code+goes+here.%0A++++++++%7D+else+%23%5Battributes_for_runtime_arm%5D+%7B%0A++++++++++++//+Run-time+code+goes+here.%0A++++++++%7D%0A++++)%0A%7D&amp;edition=2024"></a></div>
+<p>The <code>@capture</code> block declares which surrounding variables / expressions can be
+used inside the <code>if const</code>.
+Note that the two arms of this <code>if</code> really each become their own function, which is why the
+macro supports setting attributes for those functions. The runtime function is always
+marked as <code>#[inline]</code>.</p>
+<p>See <a href="fn.const_eval_select.html" title="fn core::intrinsics::const_eval_select"><code>const_eval_select()</code></a> for the rules and requirements around that intrinsic.</p>
+</div></details></section></div></main></body></html>

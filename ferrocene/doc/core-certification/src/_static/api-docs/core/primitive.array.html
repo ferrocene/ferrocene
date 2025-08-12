@@ -1,0 +1,186 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A fixed-size array, denoted `[T; N]`, for the element type, `T`, and the non-negative compile-time constant size, `N`."><title>array - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-aa0817cf.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.90.0" data-rustdoc-version="1.90.0-dev" data-channel="nightly" data-search-js="search-179e01a3.js" data-settings-js="settings-5514c975.js" ><script src="../static.files/storage-4e99c027.js"></script><script defer src="sidebar-items1.90.0.js"></script><script defer src="../static.files/main-673ee1e0.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc primitive"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../core/index.html"><img class="rust-logo" src="../static.files/rust-logo-9a9549ea.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../core/index.html"><img class="rust-logo" src="../static.files/rust-logo-9a9549ea.svg" alt="logo"></a><h2><a href="../core/index.html">core</a><span class="version">1.90.0-dev</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">array</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#examples" title="Examples">Examples</a></li><li><a href="#editions" title="Editions">Editions</a></li></ul><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.as_mut_slice" title="as_mut_slice">as_mut_slice</a></li><li><a href="#method.as_slice" title="as_slice">as_slice</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-Freeze-for-%5BT;+N%5D" title="Freeze">Freeze</a></li><li><a href="#impl-Send-for-%5BT;+N%5D" title="Send">Send</a></li><li><a href="#impl-Sync-for-%5BT;+N%5D" title="Sync">Sync</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-From%3CT%3E-for-T" title="From&#60;T&#62;">From&#60;T&#62;</a></li><li><a href="#impl-Into%3CU%3E-for-T" title="Into&#60;U&#62;">Into&#60;U&#62;</a></li><li><a href="#impl-SizedTypeProperties-for-T" title="SizedTypeProperties">SizedTypeProperties</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T" title="TryFrom&#60;U&#62;">TryFrom&#60;U&#62;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T" title="TryInto&#60;U&#62;">TryInto&#60;U&#62;</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="index.html">In crate core</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Primitive Type <span class="primitive">array</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span></span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A fixed-size array, denoted <code>[T; N]</code>, for the element type, <code>T</code>, and the
+non-negative compile-time constant size, <code>N</code>.</p>
+<p>There are two syntactic forms for creating an array:</p>
+<ul>
+<li>
+<p>A list with each element, i.e., <code>[x, y, z]</code>.</p>
+</li>
+<li>
+<p>A repeat expression <code>[expr; N]</code> where <code>N</code> is how many times to repeat <code>expr</code> in the array. <code>expr</code> must either be:</p>
+<ul>
+<li>A value of a type implementing the <a href="marker/trait.Copy.html" title="trait core::marker::Copy"><code>Copy</code></a> trait</li>
+<li>A <code>const</code> value</li>
+</ul>
+</li>
+</ul>
+<p>Note that <code>[expr; 0]</code> is allowed, and produces an empty array.
+This will still evaluate <code>expr</code>, however, and immediately drop the resulting value, so
+be mindful of side effects.</p>
+<p>Arrays of <em>any</em> size implement the following traits if the element type allows it:</p>
+<ul>
+<li><a href="marker/trait.Copy.html" title="trait core::marker::Copy"><code>Copy</code></a></li>
+<li><a href="clone/trait.Clone.html" title="trait core::clone::Clone"><code>Clone</code></a></li>
+<li><a href="fmt::Debug"><code>Debug</code></a></li>
+<li><a href="iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator"><code>IntoIterator</code></a> (implemented for <code>[T; N]</code>, <code>&amp;[T; N]</code> and <code>&amp;mut [T; N]</code>)</li>
+<li><a href="cmp/trait.PartialEq.html" title="trait core::cmp::PartialEq"><code>PartialEq</code></a>, <a href="cmp/trait.PartialOrd.html" title="trait core::cmp::PartialOrd"><code>PartialOrd</code></a>, <a href="cmp/trait.Eq.html" title="trait core::cmp::Eq"><code>Eq</code></a>, <a href="cmp/trait.Ord.html" title="trait core::cmp::Ord"><code>Ord</code></a></li>
+<li><a href="hash::Hash"><code>Hash</code></a></li>
+<li><a href="convert/trait.AsRef.html" title="trait core::convert::AsRef"><code>AsRef</code></a>, <a href="convert/trait.AsMut.html" title="trait core::convert::AsMut"><code>AsMut</code></a></li>
+<li><a href="borrow::Borrow"><code>Borrow</code></a>, <a href="borrow::BorrowMut"><code>BorrowMut</code></a></li>
+</ul>
+<p>Arrays of sizes from 0 to 32 (inclusive) implement the <a href="default/trait.Default.html" title="trait core::default::Default"><code>Default</code></a> trait
+if the element type allows it. As a stopgap, trait implementations are
+statically generated up to size 32.</p>
+<p>Arrays of sizes from 1 to 12 (inclusive) implement <a href="convert/trait.From.html" title="trait core::convert::From"><code>From&lt;Tuple&gt;</code></a>, where <code>Tuple</code>
+is a homogeneous [prim@tuple] of appropriate length.</p>
+<p>Arrays coerce to <a href="prim@slice">slices (<code>[T]</code>)</a>, so a slice method may be called on
+an array. Indeed, this provides most of the API for working with arrays.</p>
+<p>Slices have a dynamic size and do not coerce to arrays. Instead, use
+<code>slice.try_into().unwrap()</code> or <code>&lt;ArrayType&gt;::try_from(slice).unwrap()</code>.</p>
+<p>Array’s <code>try_from(slice)</code> implementations (and the corresponding <code>slice.try_into()</code>
+array implementations) succeed if the input slice length is the same as the result
+array length. They optimize especially well when the optimizer can easily determine
+the slice length, e.g. <code>&lt;[u8; 4]&gt;::try_from(&amp;slice[4..8]).unwrap()</code>. Array implements
+<a href="convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a> returning:</p>
+<ul>
+<li><code>[T; N]</code> copies from the slice’s elements</li>
+<li><code>&amp;[T; N]</code> references the original slice’s elements</li>
+<li><code>&amp;mut [T; N]</code> references the original slice’s elements</li>
+</ul>
+<p>You can move elements out of an array with a <a href="../reference/patterns.html#slice-patterns">slice pattern</a>. If you want
+one element, see [<code>mem::replace</code>].</p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span><span class="kw-2">mut </span>array: [i32; <span class="number">3</span>] = [<span class="number">0</span>; <span class="number">3</span>];
+
+array[<span class="number">1</span>] = <span class="number">1</span>;
+array[<span class="number">2</span>] = <span class="number">2</span>;
+
+<span class="macro">assert_eq!</span>([<span class="number">1</span>, <span class="number">2</span>], <span class="kw-2">&amp;</span>array[<span class="number">1</span>..]);
+
+<span class="comment">// This loop prints: 0 1 2
+</span><span class="kw">for </span>x <span class="kw">in </span>array {
+    <span class="macro">print!</span>(<span class="string">"{x} "</span>);
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+mut+array:+%5Bi32;+3%5D+=+%5B0;+3%5D;%0A++++%0A++++array%5B1%5D+=+1;%0A++++array%5B2%5D+=+2;%0A++++%0A++++assert_eq!(%5B1,+2%5D,+%26array%5B1..%5D);%0A++++%0A++++//+This+loop+prints:+0+1+2%0A++++for+x+in+array+%7B%0A++++++++print!(%22%7Bx%7D+%22);%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+<p>You can also iterate over reference to the array’s elements:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>array: [i32; <span class="number">3</span>] = [<span class="number">0</span>; <span class="number">3</span>];
+
+<span class="kw">for </span>x <span class="kw">in </span><span class="kw-2">&amp;</span>array { }</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+array:+%5Bi32;+3%5D+=+%5B0;+3%5D;%0A++++%0A++++for+x+in+%26array+%7B+%7D%0A%7D&amp;edition=2024"></a></div>
+<p>You can use <code>&lt;ArrayType&gt;::try_from(slice)</code> or <code>slice.try_into()</code> to get an array from
+a slice:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>bytes: [u8; <span class="number">3</span>] = [<span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>];
+<span class="macro">assert_eq!</span>(<span class="number">1</span>, u16::from_le_bytes(&lt;[u8; <span class="number">2</span>]&gt;::try_from(<span class="kw-2">&amp;</span>bytes[<span class="number">0</span>..<span class="number">2</span>]).unwrap()));
+<span class="macro">assert_eq!</span>(<span class="number">512</span>, u16::from_le_bytes(bytes[<span class="number">1</span>..<span class="number">3</span>].try_into().unwrap()));</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+bytes:+%5Bu8;+3%5D+=+%5B1,+0,+2%5D;%0A++++assert_eq!(1,+u16::from_le_bytes(%3C%5Bu8;+2%5D%3E::try_from(%26bytes%5B0..2%5D).unwrap()));%0A++++assert_eq!(512,+u16::from_le_bytes(bytes%5B1..3%5D.try_into().unwrap()));%0A%7D&amp;edition=2024"></a></div>
+<p>You can use a <a href="../reference/patterns.html#slice-patterns">slice pattern</a> to move elements out of an array:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>move_away(<span class="kw">_</span>: String) { <span class="comment">/* Do interesting things. */ </span>}
+
+<span class="kw">let </span>[john, roa] = [<span class="string">"John"</span>.to_string(), <span class="string">"Roa"</span>.to_string()];
+move_away(john);
+move_away(roa);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++fn+move_away(_:+String)+%7B+/*+Do+interesting+things.+*/+%7D%0A++++%0A++++let+%5Bjohn,+roa%5D+=+%5B%22John%22.to_string(),+%22Roa%22.to_string()%5D;%0A++++move_away(john);%0A++++move_away(roa);%0A%7D&amp;edition=2024"></a></div>
+<p>Arrays can be created from homogeneous tuples of appropriate length:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>tuple: (u32, u32, u32) = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);
+<span class="kw">let </span>array: [u32; <span class="number">3</span>] = tuple.into();</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+tuple:+(u32,+u32,+u32)+=+(1,+2,+3);%0A++++let+array:+%5Bu32;+3%5D+=+tuple.into();%0A%7D&amp;edition=2024"></a></div>
+<h2 id="editions"><a class="doc-anchor" href="#editions">§</a>Editions</h2>
+<p>Prior to Rust 1.53, arrays did not implement <a href="iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator"><code>IntoIterator</code></a> by value, so the method call
+<code>array.into_iter()</code> auto-referenced into a <a href="slice::iter">slice iterator</a>. Right now, the old
+behavior is preserved in the 2015 and 2018 editions of Rust for compatibility, ignoring
+<a href="iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator"><code>IntoIterator</code></a> by value. In the future, the behavior on the 2015 and 2018 edition
+might be made consistent to the behavior of later editions.</p>
+
+<div class="example-wrap edition"><a href="#" class="tooltip" title="This example runs with edition 2018">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="comment">// Rust 2015 and 2018:
+
+</span><span class="kw">let </span>array: [i32; <span class="number">3</span>] = [<span class="number">0</span>; <span class="number">3</span>];
+
+<span class="comment">// This creates a slice iterator, producing references to each value.
+</span><span class="kw">for </span>item <span class="kw">in </span>array.into_iter().enumerate() {
+    <span class="kw">let </span>(i, x): (usize, <span class="kw-2">&amp;</span>i32) = item;
+    <span class="macro">println!</span>(<span class="string">"array[{i}] = {x}"</span>);
+}
+
+<span class="comment">// The `array_into_iter` lint suggests this change for future compatibility:
+</span><span class="kw">for </span>item <span class="kw">in </span>array.iter().enumerate() {
+    <span class="kw">let </span>(i, x): (usize, <span class="kw-2">&amp;</span>i32) = item;
+    <span class="macro">println!</span>(<span class="string">"array[{i}] = {x}"</span>);
+}
+
+<span class="comment">// You can explicitly iterate an array by value using `IntoIterator::into_iter`
+</span><span class="kw">for </span>item <span class="kw">in </span>IntoIterator::into_iter(array).enumerate() {
+    <span class="kw">let </span>(i, x): (usize, i32) = item;
+    <span class="macro">println!</span>(<span class="string">"array[{i}] = {x}"</span>);
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0A//+Rust+2015+and+2018:%0A%0A%23!%5Ballow(array_into_iter)%5D%0A+//+override+our+%60deny(warnings)%60%0Afn+main()+%7B%0A++++let+array:+%5Bi32;+3%5D+=+%5B0;+3%5D;%0A++++%0A++++//+This+creates+a+slice+iterator,+producing+references+to+each+value.%0A++++for+item+in+array.into_iter().enumerate()+%7B%0A++++++++let+(i,+x):+(usize,+%26i32)+=+item;%0A++++++++println!(%22array%5B%7Bi%7D%5D+=+%7Bx%7D%22);%0A++++%7D%0A++++%0A++++//+The+%60array_into_iter%60+lint+suggests+this+change+for+future+compatibility:%0A++++for+item+in+array.iter().enumerate()+%7B%0A++++++++let+(i,+x):+(usize,+%26i32)+=+item;%0A++++++++println!(%22array%5B%7Bi%7D%5D+=+%7Bx%7D%22);%0A++++%7D%0A++++%0A++++//+You+can+explicitly+iterate+an+array+by+value+using+%60IntoIterator::into_iter%60%0A++++for+item+in+IntoIterator::into_iter(array).enumerate()+%7B%0A++++++++let+(i,+x):+(usize,+i32)+=+item;%0A++++++++println!(%22array%5B%7Bi%7D%5D+=+%7Bx%7D%22);%0A++++%7D%0A%7D&amp;edition=2018"></a></div>
+<p>Starting in the 2021 edition, <code>array.into_iter()</code> uses <code>IntoIterator</code> normally to iterate
+by value, and <code>iter()</code> should be used to iterate by reference like previous editions.</p>
+
+<div class="example-wrap edition"><a href="#" class="tooltip" title="This example runs with edition 2021">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="comment">// Rust 2021:
+
+</span><span class="kw">let </span>array: [i32; <span class="number">3</span>] = [<span class="number">0</span>; <span class="number">3</span>];
+
+<span class="comment">// This iterates by reference:
+</span><span class="kw">for </span>item <span class="kw">in </span>array.iter().enumerate() {
+    <span class="kw">let </span>(i, x): (usize, <span class="kw-2">&amp;</span>i32) = item;
+    <span class="macro">println!</span>(<span class="string">"array[{i}] = {x}"</span>);
+}
+
+<span class="comment">// This iterates by value:
+</span><span class="kw">for </span>item <span class="kw">in </span>array.into_iter().enumerate() {
+    <span class="kw">let </span>(i, x): (usize, i32) = item;
+    <span class="macro">println!</span>(<span class="string">"array[{i}] = {x}"</span>);
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++//+Rust+2021:%0A++++%0A++++let+array:+%5Bi32;+3%5D+=+%5B0;+3%5D;%0A++++%0A++++//+This+iterates+by+reference:%0A++++for+item+in+array.iter().enumerate()+%7B%0A++++++++let+(i,+x):+(usize,+%26i32)+=+item;%0A++++++++println!(%22array%5B%7Bi%7D%5D+=+%7Bx%7D%22);%0A++++%7D%0A++++%0A++++//+This+iterates+by+value:%0A++++for+item+in+array.into_iter().enumerate()+%7B%0A++++++++let+(i,+x):+(usize,+i32)+=+item;%0A++++++++println!(%22array%5B%7Bi%7D%5D+=+%7Bx%7D%22);%0A++++%7D%0A%7D&amp;edition=2021"></a></div>
+<p>Future language versions might start treating the <code>array.into_iter()</code>
+syntax on editions 2015 and 2018 the same as on edition 2021. So code using
+those older editions should still be written with this change in mind, to
+prevent breakage in the future. The safest way to accomplish this is to
+avoid the <code>into_iter</code> syntax on those editions. If an edition update is not
+viable/desired, there are multiple alternatives:</p>
+<ul>
+<li>use <code>iter</code>, equivalent to the old behavior, creating references</li>
+<li>use <a href="iter/traits/collect/trait.IntoIterator.html#tymethod.into_iter" title="method core::iter::traits::collect::IntoIterator::into_iter"><code>IntoIterator::into_iter</code></a>, equivalent to the post-2021 behavior (Rust 1.53+)</li>
+<li>replace <code>for ... in array.into_iter() {</code> with <code>for ... in array {</code>,
+equivalent to the post-2021 behavior (Rust 1.53+)</li>
+</ul>
+
+<div class="example-wrap edition"><a href="#" class="tooltip" title="This example runs with edition 2018">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="comment">// Rust 2015 and 2018:
+
+</span><span class="kw">let </span>array: [i32; <span class="number">3</span>] = [<span class="number">0</span>; <span class="number">3</span>];
+
+<span class="comment">// This iterates by reference:
+</span><span class="kw">for </span>item <span class="kw">in </span>array.iter() {
+    <span class="kw">let </span>x: <span class="kw-2">&amp;</span>i32 = item;
+    <span class="macro">println!</span>(<span class="string">"{x}"</span>);
+}
+
+<span class="comment">// This iterates by value:
+</span><span class="kw">for </span>item <span class="kw">in </span>IntoIterator::into_iter(array) {
+    <span class="kw">let </span>x: i32 = item;
+    <span class="macro">println!</span>(<span class="string">"{x}"</span>);
+}
+
+<span class="comment">// This iterates by value:
+</span><span class="kw">for </span>item <span class="kw">in </span>array {
+    <span class="kw">let </span>x: i32 = item;
+    <span class="macro">println!</span>(<span class="string">"{x}"</span>);
+}
+
+<span class="comment">// IntoIter can also start a chain.
+// This iterates by value:
+</span><span class="kw">for </span>item <span class="kw">in </span>IntoIterator::into_iter(array).enumerate() {
+    <span class="kw">let </span>(i, x): (usize, i32) = item;
+    <span class="macro">println!</span>(<span class="string">"array[{i}] = {x}"</span>);
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++//+Rust+2015+and+2018:%0A++++%0A++++let+array:+%5Bi32;+3%5D+=+%5B0;+3%5D;%0A++++%0A++++//+This+iterates+by+reference:%0A++++for+item+in+array.iter()+%7B%0A++++++++let+x:+%26i32+=+item;%0A++++++++println!(%22%7Bx%7D%22);%0A++++%7D%0A++++%0A++++//+This+iterates+by+value:%0A++++for+item+in+IntoIterator::into_iter(array)+%7B%0A++++++++let+x:+i32+=+item;%0A++++++++println!(%22%7Bx%7D%22);%0A++++%7D%0A++++%0A++++//+This+iterates+by+value:%0A++++for+item+in+array+%7B%0A++++++++let+x:+i32+=+item;%0A++++++++println!(%22%7Bx%7D%22);%0A++++%7D%0A++++%0A++++//+IntoIter+can+also+start+a+chain.%0A++++//+This+iterates+by+value:%0A++++for+item+in+IntoIterator::into_iter(array).enumerate()+%7B%0A++++++++let+(i,+x):+(usize,+i32)+=+item;%0A++++++++println!(%22array%5B%7Bi%7D%5D+=+%7Bx%7D%22);%0A++++%7D%0A%7D&amp;edition=2018"></a></div>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-%5BT;+N%5D" class="impl"><a class="src rightside" href="../src/core/array/mod.rs.html#544-883">Source</a><a href="#impl-%5BT;+N%5D" class="anchor">§</a><h3 class="code-header">impl&lt;T, const N: <a class="primitive" href="primitive.usize.html">usize</a>&gt; <a class="primitive" href="primitive.array.html">[T; N]</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.as_slice" class="method"><span class="rightside"><span class="since" title="Stable since Rust version 1.57.0, const since 1.57.0">1.57.0 (const: 1.57.0)</span> · <a class="src" href="../src/core/array/mod.rs.html#638-640">Source</a></span><h4 class="code-header">pub const fn <a href="#method.as_slice" class="fn">as_slice</a>(&amp;self) -&gt; &amp;[T]</h4></section></summary><div class="docblock"><p>Returns a slice containing the entire array. Equivalent to <code>&amp;s[..]</code>.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.as_mut_slice" class="method"><span class="rightside"><span class="since" title="Stable since Rust version 1.57.0, const since 1.89.0">1.57.0 (const: 1.89.0)</span> · <a class="src" href="../src/core/array/mod.rs.html#646-648">Source</a></span><h4 class="code-header">pub const fn <a href="#method.as_mut_slice" class="fn">as_mut_slice</a>(&amp;mut self) -&gt; &amp;mut [T]</h4></section></summary><div class="docblock"><p>Returns a mutable slice containing the entire array. Equivalent to
+<code>&amp;mut s[..]</code>.</p>
+</div></details></div></details></div><h2 id="synthetic-implementations" class="section-header">Auto Trait Implementations<a href="#synthetic-implementations" class="anchor">§</a></h2><div id="synthetic-implementations-list"><section id="impl-Freeze-for-%5BT;+N%5D" class="impl"><a href="#impl-Freeze-for-%5BT;+N%5D" class="anchor">§</a><h3 class="code-header">impl&lt;T, const N: <a class="primitive" href="primitive.usize.html">usize</a>&gt; <a class="trait" href="marker/trait.Freeze.html" title="trait core::marker::Freeze">Freeze</a> for <a class="primitive" href="primitive.array.html">[T; N]</a><div class="where">where
+    T: <a class="trait" href="marker/trait.Freeze.html" title="trait core::marker::Freeze">Freeze</a>,</div></h3></section><section id="impl-Send-for-%5BT;+N%5D" class="impl"><a href="#impl-Send-for-%5BT;+N%5D" class="anchor">§</a><h3 class="code-header">impl&lt;T, const N: <a class="primitive" href="primitive.usize.html">usize</a>&gt; <a class="trait" href="marker/trait.Send.html" title="trait core::marker::Send">Send</a> for <a class="primitive" href="primitive.array.html">[T; N]</a><div class="where">where
+    T: <a class="trait" href="marker/trait.Send.html" title="trait core::marker::Send">Send</a>,</div></h3></section><section id="impl-Sync-for-%5BT;+N%5D" class="impl"><a href="#impl-Sync-for-%5BT;+N%5D" class="anchor">§</a><h3 class="code-header">impl&lt;T, const N: <a class="primitive" href="primitive.usize.html">usize</a>&gt; <a class="trait" href="marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> for <a class="primitive" href="primitive.array.html">[T; N]</a><div class="where">where
+    T: <a class="trait" href="marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a>,</div></h3></section></div><h2 id="blanket-implementations" class="section-header">Blanket Implementations<a href="#blanket-implementations" class="anchor">§</a></h2><div id="blanket-implementations-list"><details class="toggle implementors-toggle"><summary><section id="impl-From%3CT%3E-for-T" class="impl"><a class="src rightside" href="../src/core/convert/mod.rs.html#789-795">Source</a><a href="#impl-From%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.from" class="method trait-impl"><a class="src rightside" href="../src/core/convert/mod.rs.html#792-794">Source</a><a href="#method.from" class="anchor">§</a><h4 class="code-header">fn <a href="convert/trait.From.html#tymethod.from" class="fn">from</a>(t: T) -&gt; T</h4></section></summary><div class="docblock"><p>Returns the argument unchanged.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Into%3CU%3E-for-T" class="impl"><a class="src rightside" href="../src/core/convert/mod.rs.html#771-784">Source</a><a href="#impl-Into%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into" class="method trait-impl"><a class="src rightside" href="../src/core/convert/mod.rs.html#781-783">Source</a><a href="#method.into" class="anchor">§</a><h4 class="code-header">fn <a href="convert/trait.Into.html#tymethod.into" class="fn">into</a>(self) -&gt; U</h4></section></summary><div class="docblock"><p>Calls <code>U::from(self)</code>.</p>
+<p>That is, this conversion is whatever the implementation of
+<code><a href="convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for U</code> chooses to do.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-SizedTypeProperties-for-T" class="impl"><a class="src rightside" href="../src/core/mem/mod.rs.html#1310">Source</a><a href="#impl-SizedTypeProperties-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="mem/trait.SizedTypeProperties.html" title="trait core::mem::SizedTypeProperties">SizedTypeProperties</a> for T</h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedconstant.IS_ZST" class="associatedconstant trait-impl"><a class="src rightside" href="../src/core/mem/mod.rs.html#1291">Source</a><a href="#associatedconstant.IS_ZST" class="anchor">§</a><h4 class="code-header">#[doc(hidden)] const <a href="mem/trait.SizedTypeProperties.html#associatedconstant.IS_ZST" class="constant">IS_ZST</a>: <a class="primitive" href="primitive.bool.html">bool</a> = _</h4></section></summary><span class="item-info"><div class="stab unstable"><span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>sized_type_properties</code>)</span></div></span><div class='docblock'><code>true</code> if this type requires no storage.
+<code>false</code> if its <a href="mem/fn.size_of.html" title="fn core::mem::size_of">size</a> is greater than zero. <a href="mem/trait.SizedTypeProperties.html#associatedconstant.IS_ZST">Read more</a></div></details><details class="toggle" open><summary><section id="associatedconstant.LAYOUT" class="associatedconstant trait-impl"><a class="src rightside" href="../src/core/mem/mod.rs.html#1295">Source</a><a href="#associatedconstant.LAYOUT" class="anchor">§</a><h4 class="code-header">#[doc(hidden)] const <a href="mem/trait.SizedTypeProperties.html#associatedconstant.LAYOUT" class="constant">LAYOUT</a>: <a class="struct" href="alloc/layout/struct.Layout.html" title="struct core::alloc::layout::Layout">Layout</a> = _</h4></section></summary><span class="item-info"><div class="stab unstable"><span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>sized_type_properties</code>)</span></div></span></details><details class="toggle" open><summary><section id="associatedconstant.MAX_SLICE_LEN" class="associatedconstant trait-impl"><a class="src rightside" href="../src/core/mem/mod.rs.html#1303-1306">Source</a><a href="#associatedconstant.MAX_SLICE_LEN" class="anchor">§</a><h4 class="code-header">#[doc(hidden)] const <a href="mem/trait.SizedTypeProperties.html#associatedconstant.MAX_SLICE_LEN" class="constant">MAX_SLICE_LEN</a>: <a class="primitive" href="primitive.usize.html">usize</a> = _</h4></section></summary><span class="item-info"><div class="stab unstable"><span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>sized_type_properties</code>)</span></div></span><div class='docblock'>The largest safe length for a <code>[Self]</code>. <a href="mem/trait.SizedTypeProperties.html#associatedconstant.MAX_SLICE_LEN">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryFrom%3CU%3E-for-T" class="impl"><a class="src rightside" href="../src/core/convert/mod.rs.html#832-842">Source</a><a href="#impl-TryFrom%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error-1" class="associatedtype trait-impl"><a class="src rightside" href="../src/core/convert/mod.rs.html#836">Source</a><a href="#associatedtype.Error-1" class="anchor">§</a><h4 class="code-header">type <a href="convert/trait.TryFrom.html#associatedtype.Error" class="associatedtype">Error</a> = <a class="enum" href="convert/enum.Infallible.html" title="enum core::convert::Infallible">Infallible</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_from" class="method trait-impl"><a class="src rightside" href="../src/core/convert/mod.rs.html#839-841">Source</a><a href="#method.try_from" class="anchor">§</a><h4 class="code-header">fn <a href="convert/trait.TryFrom.html#tymethod.try_from" class="fn">try_from</a>(value: U) -&gt; <a class="enum" href="result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;T, &lt;T as <a class="trait" href="convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt;&gt;::<a class="associatedtype" href="convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryInto%3CU%3E-for-T" class="impl"><a class="src rightside" href="../src/core/convert/mod.rs.html#816-826">Source</a><a href="#impl-TryInto%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="convert/trait.TryInto.html" title="trait core::convert::TryInto">TryInto</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error" class="associatedtype trait-impl"><a class="src rightside" href="../src/core/convert/mod.rs.html#820">Source</a><a href="#associatedtype.Error" class="anchor">§</a><h4 class="code-header">type <a href="convert/trait.TryInto.html#associatedtype.Error" class="associatedtype">Error</a> = &lt;U as <a class="trait" href="convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_into" class="method trait-impl"><a class="src rightside" href="../src/core/convert/mod.rs.html#823-825">Source</a><a href="#method.try_into" class="anchor">§</a><h4 class="code-header">fn <a href="convert/trait.TryInto.html#tymethod.try_into" class="fn">try_into</a>(self) -&gt; <a class="enum" href="result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;U, &lt;U as <a class="trait" href="convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details></div></section></div></main></body></html>

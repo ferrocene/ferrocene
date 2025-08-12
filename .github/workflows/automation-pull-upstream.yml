@@ -86,6 +86,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Fetch all the history
+          submodules: "recursive"
 
       - name: Setup Ubuntu
         run: ferrocene/ci/scripts/setup-ubuntu.sh

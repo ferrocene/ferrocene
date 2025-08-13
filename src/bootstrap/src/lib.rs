@@ -313,7 +313,8 @@ impl Mode {
             | Mode::ToolRustc
             | Mode::ToolStd
             | Mode::ToolTarget
-            | Mode::Rustc => false,
+            | Mode::Rustc
+            | Mode::ToolCustom { .. } => false,
         }
     }
 }

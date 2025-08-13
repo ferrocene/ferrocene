@@ -864,6 +864,7 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[inline]
         #[track_caller]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn strict_sub_signed(self, rhs: $SignedT) -> Self {
             let (a, b) = self.overflowing_sub_signed(rhs);
             if b { overflow_panic::sub() } else { a }

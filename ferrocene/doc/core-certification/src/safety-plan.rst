@@ -430,11 +430,11 @@ Git and GitHub are very very widely used tools. This gives us confidence in its 
 Failure modes
 ~~~~~~~~~~~~~
 
-- False-positive: Introduce changes, that were not made
+- False-positive: Introduce changes that were not made
    - Risk: Erroneous code, documentation, configuration
    - Mitigation: Code review.
-- False-negative: Do not track changes, that were made
-   - Risk: Loose time invested.
+- False-negative: Do not track changes that were made
+   - Risk: Lose time invested.
    - Mitigation: Code review.
 
 ``rustdoc``

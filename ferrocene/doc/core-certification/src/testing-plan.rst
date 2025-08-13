@@ -52,7 +52,7 @@ Doc-tests are the code snippets in doc-comments. The doc-tests for the core libr
 Code coverage tests
 ~~~~~~~~~~~~~~~~~~~
 
-In order to gather code coverage information, an additional test run of the coretests test suite on the x86_64-linux-gnu target is performed.
+In order to gather code coverage information, an additional test run of the coretests test suite on the ``x86_64-unknown-linux-gnu`` target is performed.
 
 This run is different to the normal test run, because the ``core`` library and the ``coretests`` binary are instrumented with ``-Cinstrument-coverage``. This inserts llvm intrinsics into the binaries to collect code coverage information.
 

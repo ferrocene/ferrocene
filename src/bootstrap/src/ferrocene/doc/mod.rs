@@ -213,13 +213,13 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             ))
             .arg(format!(
                 "-Dgrcov_version={}",
-                get_submdoule_version("ferrocene/tools/grcov", builder)
+                get_submodule_version("ferrocene/tools/grcov", builder)
                     .as_deref()
                     .unwrap_or("not found")
             ))
             .arg(format!(
                 "-Dllvm_version={}",
-                get_submdoule_version("src/llvm-project", builder)
+                get_submodule_version("src/llvm-project", builder)
                     .as_deref()
                     .unwrap_or("not found")
             ));
@@ -957,7 +957,7 @@ fn relative_path(base: &Path, path: &Path) -> PathBuf {
     if result.components().count() == 0 { PathBuf::from(".") } else { result }
 }
 
-fn get_submdoule_version(
+fn get_submodule_version(
     submodule_path: &str,
     exec_ctx: impl AsRef<ExecutionContext>,
 ) -> Option<String> {

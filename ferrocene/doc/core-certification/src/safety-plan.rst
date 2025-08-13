@@ -53,7 +53,7 @@ On every upstream pull we need to review:
 - quality of doc-comments
 - changes to doc-comments
 - tests the adherence to the coding standard (rustc lints + rustfmt)
-- 100% statement code coverage
+- 100% line code coverage
 
 In the long run we want to automate as much as possible. In the beginning many of the checks will be manual.
 
@@ -270,7 +270,7 @@ Usage
 
 Developer usage is described in :doc:`internal-procedures:code-coverage`.
 
-Code coverage is measured only on one platform, x86_64-unknown-linux-gnu. This is sufficient because the the code of the core library is largely platform independent and code coverage is only a measure for the quality of the test suite, the correctness is still tested by running the tests on all qualified targets.
+Code coverage is measured only on one platform, ``x86_64-unknown-linux-gnu``. This is sufficient because the the code of the core library is largely platform independent and code coverage is only a measure for the quality of the test suite, the correctness is still tested by running the tests on all qualified targets.
 
 Safety Assessment
 """""""""""""""""
@@ -351,7 +351,7 @@ Usage
 """""
 
 Upstream already has very good coding practices for the core library, which are enforced by the tidy test suite.
-The "tidy” test suite executes rustc and clippy lints to enforce consistency in semantics and rustfmt to enforce consistency in syntax.
+The "tidy” test suite executes rustc and clippy lints to enforce consistency in semantics and ``rustfmt`` to enforce consistency in syntax.
 
 It does not make sense for us to come up with a separate coding standard and try to force it upon the upstream core library.
 If we would start to come up with new rules from our coding standard we would have to work against upstream and either convince them to refactor their code without a clear benefit for them or we would have to carry a big changeset which has a big potential to introduce bugs.

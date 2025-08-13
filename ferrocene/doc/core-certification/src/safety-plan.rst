@@ -228,7 +228,7 @@ Uncertified code
 
 We need to make sure no uncertified code is being used. This means for us, code that is not part of the safety certification effort where we do not yet provide evidence for requirements and/or sufficient test coverage.
 
-We achieve this by instructing customers to verify that they only call functions from the certified subset in their source code. Initially via providing a list of certified functions, and moving on to tooling and automation in the second half of the year for the next release and its certification.
+We achieve this by instructing customers to verify that they only call functions from the certified subset in their source code. Initially via providing a list of certified functions, and moving on to tooling and automation in the second half of the year 2025 for the next release and its certification.
 
 We will ensure that all certified functions, and functions called by those certified functions, are 100% statement-covered by tests and described by requirements and design. In best case through tests of the certified functions, but maybe also through tests of the private functions (see "Private functions” section).
 

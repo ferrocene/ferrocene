@@ -640,7 +640,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
     /// Ferrocene addition: allow coverage(on|off) everywhere in order to
     /// simplify measuring the coverage of the certfied subset of libcore
     #[cfg(feature = "ferrocene_allow_coverage_attribute_everywhere")]
-    fn check_coverage(&self, _attr: &Attribute, _target_span: Span, _target: Target) {
+    fn check_coverage(&self, _attr: Span, _target_span: Span, _target: Target) {
         return;
     }
 

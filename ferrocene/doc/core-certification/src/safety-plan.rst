@@ -16,7 +16,7 @@ The core library shall be suitable to be used in safety applications according t
 
 Therefore, we are evaluating the core library through an "assessment of non-compliant development” (according to Route 3S of 7.4.2.12). This assessment targets a full compliance statement to IEC 61508, SIL2, as far as it is applicable for a Software Safety Element out of Context.
 
-The targeted version for this first safety certification is 1.88, and will apply to all qualified targets of Ferrocene :doc:`user-manual:targets/index`.
+The targeted version of the core library is |rust_version|, and will apply to all qualified targets of Ferrocene :doc:`user-manual:targets/index`.
 
 Project Setup
 -------------

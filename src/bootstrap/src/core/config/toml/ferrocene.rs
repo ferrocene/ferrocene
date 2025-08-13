@@ -20,7 +20,8 @@ define_config! {
         document_signatures: Option<String> = "document-signatures",
         document_signatures_s3_bucket: Option<String> = "document-signatures-s3-bucket",
         document_signatures_tarball: Option<PathBuf> = "document-signatures-tarball",
-        technical_report_url: Option<String> = "technical-report-url",
+        compiler_technical_report_url: Option<String> = "compiler-technical-report-url",
+        core_technical_report_url: Option<String> = "core-technical-report-url",
         secret_sauce_dir: Option<PathBuf> = "secret-sauce-dir",
         generate_coverage_report_after_test: Option<bool> = "generate-coverage-report-after-tests",
     }

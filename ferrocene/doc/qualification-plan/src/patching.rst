@@ -57,7 +57,7 @@ The release manager in charge of publishing the release must ensure that:
   previous release.
 
 Once those steps are followed, the Safety Manager must contact the assessor to
-request an updated certificate with the new version number and document IDs,
+request updated certificates with the new version number and document IDs,
 providing the evidence that all the steps described in this document were
-applied. Once the certificate is :ref:`included in the built documentation
-<internal-procedures:release-technical-report>`, the release can be published.
+applied. Once the certificates are :ref:`included in the built documentation
+<internal-procedures:release-technical-reports>`, the release can be published.

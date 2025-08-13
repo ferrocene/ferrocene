@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-project = "Ferrocene Libcore Certification"
+project = "Ferrocene Core Library Certification"
 copyright = "The Ferrocene Developers"
 author = "The Ferrocene Developers"
 
@@ -15,11 +15,11 @@ extensions = [
 # autosectionlabel unique names settings
 autosectionlabel_prefix_document = True
 
-ferrocene_id = "LC"
+ferrocene_id = "CLC"
 
 html_theme = "ferrocene"
-html_title = "Ferrocene Libcore Certification"
-html_short_title = "Libcore Certification"
+html_title = "Ferrocene Core Library Certification"
+html_short_title = "Core Library Certification"
 html_static_path = ["_static"]
 
 # Do not generate the index pages. We don't need them, and they cause

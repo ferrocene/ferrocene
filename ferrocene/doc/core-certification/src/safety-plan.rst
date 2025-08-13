@@ -12,11 +12,11 @@ This document describes the approach and the activities to be performed to achie
 Certification scope
 -------------------
 
-Libcore shall be suitable to be used in safety applications according to IEC 61508, up to SIL 2.
+The core library shall be suitable to be used in safety applications according to IEC 61508, up to SIL 2.
 
-Therefore, we are evaluating libcore through an "assessment of non-compliant development” (according to Route 3S of 7.4.2.12). This assessment targets a full compliance statement to IEC 61508, SIL2, as far as it is applicable for a Software Safety Element out of Context.
+Therefore, we are evaluating the core library through an "assessment of non-compliant development” (according to Route 3S of 7.4.2.12). This assessment targets a full compliance statement to IEC 61508, SIL2, as far as it is applicable for a Software Safety Element out of Context.
 
-The targeted libcore version for this first safety certification is 1.87, and will apply to all qualified targets of Ferrocene :doc:`user-manual:targets/index`.
+The targeted version for this first safety certification is 1.88, and will apply to all qualified targets of Ferrocene :doc:`user-manual:targets/index`.
 
 Project Setup
 -------------
@@ -29,7 +29,7 @@ Our first milestone is to be "certification-ready” by July 2025. Because of th
 Release cadence
 ~~~~~~~~~~~~~~~
 
-Due to the use of internal apis, libcore versions are only compatible with one matching Ferrocene release. Libcore will be recertified for every Ferrocene release.
+Due to the use of internal apis, the core library versions are only compatible with one matching Ferrocene release. The core library will be recertified for every Ferrocene release.
 
 Roles and responsibilities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -39,10 +39,10 @@ Roles and responsibilities (e.g. Safety Manager, Product Manager) are documented
 Lifecycle Phases Overview
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1. Pull changes to libcore codebase, as part of daily upstream pulls (see :doc:`internal-procedures:upstream-pulls`).
+1. Pull changes to the core library codebase, as part of daily upstream pulls (see :doc:`internal-procedures:upstream-pulls`).
 2. On a regular cadence, latest before the release, examine the diff and follow the code-review checklist (see below)
 
-The first time this is executed it will be a lot of work because we go from zero to the first subset of libcore. In the future the changes will be smaller because they will only be changes to the existing subset and potentially new functions added to the subset.
+The first time this is executed it will be a lot of work because we go from zero to the first subset of the core library. In the future the changes will be smaller because they will only be changes to the existing subset and potentially new functions added to the subset.
 
 Code-Review checklist
 """""""""""""""""""""
@@ -71,7 +71,7 @@ We are delivering following documents to the assessor and to customers:
 
 - Product Documentation
    - User Manual
-   - The libcore API docs, which include
+   - The core library API docs, which include
       - Requirements (the function doc-comments)
       - Software Design (the module doc-comments)
 - Functional Safety Management
@@ -85,10 +85,10 @@ We are delivering following documents to the assessor and to customers:
 Requirements Management
 -----------------------
 
-Structure of Requirements in Libcore
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Structure of Requirements
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The Doc-comments described below cover the single level of functional requirements for each function. The documentation for each module also covers the purpose and overview, and as such is suitable for the design requirement. We don't have an architecture document due to the small size of libcore, as well as the fact that it is pre-existing software.
+The Doc-comments described below cover the single level of functional requirements for each function. The documentation for each module also covers the purpose and overview, and as such is suitable for the design requirement. We don't have an architecture document due to the small size of the core library, as well as the fact that it is pre-existing software.
 
 Doc-comments in general
 """""""""""""""""""""""
@@ -115,14 +115,14 @@ See [the heapless documentation](https://docs.rs/heapless/latest/heapless/) as a
 
 Read more about doc comments here: <https://doc.rust-lang.org/rust-by-example/meta/doc.html>.
 
-Doc-comments in libcore
-"""""""""""""""""""""""
+Doc-comments in the core library
+""""""""""""""""""""""""""""""""
 
-The core library makes heavy use of those doc-comments. Modules contain doc-comments that describe the functionality and structure in that module. Functions contain doc-comments that include a description of the behaviour, usage examples and safety comments. libcore automatically enforces that all publicly exposed functions have a doc-comment through the missing_docs lint.
+The core library makes heavy use of those doc-comments. Modules contain doc-comments that describe the functionality and structure in that module. Functions contain doc-comments that include a description of the behaviour, usage examples and safety comments. The Ferrocene compiler automatically enforces that all publicly exposed functions in the core library have a doc-comment through the missing_docs lint.
 
-The doc-comments of both modules and functions are compiled, together with the function signatures, into the libcore API docs.
+The doc-comments of both modules and functions are compiled, together with the function signatures, into the core library API docs.
 
-Overall the doc-comments in libcore are very extensive, very high-quality and a lot of work has been and continues to be put into them.
+Overall the doc-comments in the core library are very extensive, very high-quality and a lot of work has been and continues to be put into them.
 
 That's why we want to rely on them for multiple purposes of the certification, after making sure the following conditions are met:
 
@@ -135,7 +135,7 @@ That's why we want to rely on them for multiple purposes of the certification, a
 Architecture and software design
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-libcore does not need a software architecture (see above).
+The core library does not need a software architecture (see above).
 
 But it needs a software design document. Here we are going to build upon the doc-comments of the modules. Those doc-comments already describe the design of those modules.
 
@@ -158,12 +158,10 @@ We will track if the doc-comments change, because that could mean our requiremen
 Requirements and tests
 ----------------------
 
-One of the major pieces of work is going to be having requirements and tests for the certified libcore subset.
+One of the major pieces of work is going to be having requirements and tests for the certified core library subset.
 
-Subset of Libcore
-~~~~~~~~~~~~~~~~~
-
-The initial certification will be of a specific subset of libcore, the exact subset still to be determined. We expect the subset to contain around 1000 functions.
+Subset of the core library
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The subset included in the safety certification is defined and documented in the Safety Manual.
 
@@ -239,18 +237,18 @@ All uncertified functions and certified functions that are not called are unused
 Unused code
 -----------
 
-We rely on the qualified Ferrocene compiler to ensure that only functions that are intentionally called by the customer and functions called by those intentionally called functions are used. If the compiler fails to do that correctly that is a problem with the compiler qualification and not the libcore certification.
+We rely on the qualified Ferrocene compiler to ensure that only functions that are intentionally called by the customer and functions called by those intentionally called functions are used. If the compiler fails to do that correctly that is a problem with the compiler qualification and not the core library certification.
 
 The compiler usually removes unused functions, but that behavior is not specified and can therefore not be relied upon.
 
 Tool safety assessments
 -----------------------
 
-All offline tools we use to develop libcore are listed below. The compiler is T3, all other tools are T2 or T1.
+All offline tools we use to develop the core library are listed below. The compiler is T3, all other tools are T2 or T1.
 
-There are no online tools used to develop libcore.
+There are no online tools used to develop the core library.
 
-For each tool there is a description of the usage of the tool for libcore, the version of the tool used as well as a safety assessment.
+For each tool there is a description of the usage of the tool for the core library, the version of the tool used as well as a safety assessment.
 
 Code coverage
 ~~~~~~~~~~~~~
@@ -272,7 +270,7 @@ Usage
 
 Developer usage is described in :doc:`internal-procedures:code-coverage`.
 
-Code coverage is measured only on one platform, x86_64-unknown-linux-gnu. This is sufficient because the libcore code is largely platform independent and code coverage is only a measure for the quality of the test suite, the correctness is still tested by running the tests on all qualified targets.
+Code coverage is measured only on one platform, x86_64-unknown-linux-gnu. This is sufficient because the the code of the core library is largely platform independent and code coverage is only a measure for the quality of the test suite, the correctness is still tested by running the tests on all qualified targets.
 
 Safety Assessment
 """""""""""""""""
@@ -308,25 +306,25 @@ Version
 Usage
 """""
 
-The qualified Ferrocene compiler is used to build libcore, which gives high confidence in its quality.
+The qualified Ferrocene compiler is used to build the core library, which gives high confidence in its quality.
 
 Nightly features
 ''''''''''''''''
 
-libcore relies on a few so-called "nightly features" of the compiler. Regular users of Ferrocene are not allowed to use them, therefore they are not part of the compiler qualification.
+The core library relies on a few so-called "nightly features" of the compiler. Regular users of Ferrocene are not allowed to use them, therefore they are not part of the compiler qualification.
 This is because they are either "experimental" or "internal”. They do work well, but they can change between compiler versions and do not fall under the usual Rust stability guarantees.
-This is not a problem for libcore, because rustc and libcore are developed and tested together.
+This is not a problem for the core library, because rustc and the core library are developed and tested together.
 
 Nightly features are activated by setting the ``RUSTC_BOOTSTRAP`` environment variable when executing ``rustc``.
 
-Nightly features used by libcore are listed as ``#![feature(name_of_the_feature)]`` in ``library/core/src/lib.rs``.
+Nightly features used by the core library are listed as ``#![feature(name_of_the_feature)]`` in ``library/core/src/lib.rs``.
 
 Nightly features are tested by the ``compiletest`` test suite, by tests that activate that feature explicitly. E.g. ``tests/ui/unknown-language-item.rs`` tests ``#![feature(lang_items)]``.
 
 Compiler built-in functions
 '''''''''''''''''''''''''''
 
-There are functions in libcore that are "compiler built-in”. That means they are not implemented in the library codebase but in the compiler codebase.They can be found by searching for "compiler built-in” in the ferrocene repository (e.g. ``rg "compiler built-in" library/core``).
+There are functions in the core library that are "compiler built-in”. That means they are not implemented in the library codebase but in the compiler codebase. They can be found by searching for "compiler built-in” in the ferrocene repository (e.g. ``rg "compiler built-in" library/core``).
 
 All of those functions are macros. They generate different code on every use. Customers have to ensure the generated code is correct. This is documented in the safety manual.
 
@@ -352,10 +350,10 @@ Version
 Usage
 """""
 
-Upstream already has very good coding practices for libcore, which are enforced by the tidy test suite.
+Upstream already has very good coding practices for the core library, which are enforced by the tidy test suite.
 The "tidy” test suite executes rustc and clippy lints to enforce consistency in semantics and rustfmt to enforce consistency in syntax.
 
-It does not make sense for us to come up with a separate coding standard and try to force it upon upstream libcore.
+It does not make sense for us to come up with a separate coding standard and try to force it upon the upstream core library.
 If we would start to come up with new rules from our coding standard we would have to work against upstream and either convince them to refactor their code without a clear benefit for them or we would have to carry a big changeset which has a big potential to introduce bugs.
 
 Safety Assessment
@@ -470,9 +468,9 @@ Failure modes
 Qualification targets
 ---------------------
 
-We qualify libcore for all compilation targets rustc is qualified for. We already run the libcore test suite for all qualified targets in our CI. So there is no additional work that needs to be done here.
+We certify the core library for all compilation targets rustc is qualified for. We already run the core library test suite for all qualified targets in our CI. So there is no additional work that needs to be done here.
 
 Failure analysis
 ----------------
 
-The HazOp was re-evaluated with libcore in mind and libcore specific additions were made. See :doc:`evaluation-report:rustc/tool-analysis`.
+The HazOp was re-evaluated with the core library in mind and core library-specific additions were made. See :doc:`evaluation-report:rustc/tool-analysis`.

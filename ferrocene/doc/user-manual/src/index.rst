@@ -43,13 +43,13 @@ Ferrocene User Manual
 .. toctree::
    :numbered:
    :maxdepth: 2
-   :caption: libcore
+   :caption: core library
 
-   libcore/index
-   libcore/requirements
-   libcore/install
-   libcore/using
-   libcore/testing
+   core/index
+   core/requirements
+   core/install
+   core/using
+   core/testing
 
 .. toctree::
    :numbered:

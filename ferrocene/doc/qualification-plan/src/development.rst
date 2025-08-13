@@ -85,7 +85,7 @@ Tickets must be created in the project management tool under the respective
 project board, they must be appropriately scoped, and they must detail acceptance criteria.
 
 The ticket shall detail which parts of Ferrocene are expected to be impacted.
-That could be for example rustc, libcore, the qualification documentation etc.
+That could be for example rustc, the core library, the qualification documentation etc.
 Also it shall detail which tests have to be added.
 
 Large tickets must be broken down into smaller, independent tickets. A ticket

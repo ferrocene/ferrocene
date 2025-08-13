@@ -252,8 +252,8 @@ path = [
     "requirements.txt",
     ".python-version",
     "src/bootstrap/src/ferrocene/**",
-    "ferrocene/doc/libcore-certification/src/spreadsheets/*",
-    "ferrocene/doc/libcore-certification/src/_static/**",
+    "ferrocene/doc/core-certification/src/spreadsheets/*",
+    "ferrocene/doc/core-certification/src/_static/**",
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "The Ferrocene Developers"

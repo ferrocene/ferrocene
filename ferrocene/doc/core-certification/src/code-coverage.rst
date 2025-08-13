@@ -4,4 +4,4 @@
 Code coverage report
 ====================
 
-`Code coverage report <../../coverage/library-x86_64-unknown-linux-gnu/index.html>`_  of the libcore certified subset.
+`Code coverage report <../../coverage/library-x86_64-unknown-linux-gnu/index.html>`_  of the certified core library.

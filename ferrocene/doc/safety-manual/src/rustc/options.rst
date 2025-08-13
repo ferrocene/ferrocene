@@ -15,8 +15,8 @@ Ferrocene is qualified exclusively for the following command line options:
 - Users shall pass command line option ``-C opt-level=2`` to each invocation of
   rustc.
 
-- When building certified software with the certified libcore subset, users
-  shall pass command line option ``-C panic=abort``  to each invocation of rustc.
+- When building certified software with the certified core library, users
+  shall pass command line option ``-C panic=abort`` to each invocation of rustc.
 
 - Users shall pass all target-specific command line options, as listed in the
   page of the target in the :doc:`Compilation Targets

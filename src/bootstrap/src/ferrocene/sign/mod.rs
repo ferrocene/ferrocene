@@ -116,7 +116,7 @@ documents![
     QualificationPlan,
     QualificationReport,
     SafetyManual,
-    LibcoreCertification,
+    CoreCertification,
     // QMS Documents
     InternalProcedures,
 ];

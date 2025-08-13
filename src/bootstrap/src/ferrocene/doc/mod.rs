@@ -700,10 +700,10 @@ sphinx_books! [
         dest: "qualification/internal-procedures",
     },
     {
-        ty: LibcoreCertification,
-        name: "libcore-certification",
-        src: "ferrocene/doc/libcore-certification",
-        dest: "certification/libcore",
+        ty: CoreCertification,
+        name: "core-certification",
+        src: "ferrocene/doc/core-certification",
+        dest: "certification/core",
     },
 ];
 

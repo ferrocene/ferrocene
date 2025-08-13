@@ -256,8 +256,8 @@ Code coverage
 Version
 """""""
 
-- grcov: 0.8.20
-- llvm-cov: LLVM version 19.1.6-rust-1.86.0-nightly
+- grcov: |grcov_version|
+- llvm-cov: |llvm_version|
 - rustc: |rust_version|
 
 Usage

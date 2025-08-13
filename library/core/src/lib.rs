@@ -146,7 +146,7 @@
 #![feature(cfg_target_has_atomic)]
 #![feature(cfg_target_has_atomic_equal_alignment)]
 #![feature(cfg_ub_checks)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(const_precise_live_drops))]
+#![feature(const_precise_live_drops)]
 #![feature(const_trait_impl)]
 #![feature(decl_macro)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(deprecated_suggestion))]

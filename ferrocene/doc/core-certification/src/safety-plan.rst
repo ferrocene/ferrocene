@@ -258,7 +258,7 @@ Version
 
 - grcov: 0.8.20
 - llvm-cov: LLVM version 19.1.6-rust-1.86.0-nightly
-- rustc: |ferrocene_version|
+- rustc: |rust_version|
 
 Usage
 """""
@@ -301,7 +301,7 @@ Compiler
 Version
 """""""
 
-- rustc: |ferrocene_version|
+- rustc: |rust_version|
 
 Usage
 """""
@@ -344,7 +344,7 @@ Version
 """""""
 
 - clippy: |ferrocene_version|
-- rustc: |ferrocene_version|
+- rustc: |rust_version|
 - rustfmt: |ferrocene_version|
 
 Usage

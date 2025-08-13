@@ -853,13 +853,9 @@ where
 ////////////////////////////////////////////////////////////////////////////////
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T> AsRef<[T]> for [T] {
-=======
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const AsRef<[T]> for [T] {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     #[inline(always)]
     fn as_ref(&self) -> &[T] {
         self
@@ -876,13 +872,9 @@ impl<T> const AsMut<[T]> for [T] {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl AsRef<str> for str {
-=======
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const AsRef<str> for str {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     #[inline(always)]
     fn as_ref(&self) -> &str {
         self
@@ -984,13 +976,9 @@ impl Error for Infallible {
 }
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl PartialEq for Infallible {
-=======
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const PartialEq for Infallible {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn eq(&self, _: &Infallible) -> bool {
         match *self {}
     }
@@ -1017,13 +1005,9 @@ impl Ord for Infallible {
 }
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl From<!> for Infallible {
-=======
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const From<!> for Infallible {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     #[inline]
     fn from(x: !) -> Self {
         x

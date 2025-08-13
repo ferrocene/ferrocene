@@ -1302,14 +1302,10 @@ impl<T, E> Result<T, E> {
     /// ```
     #[unstable(feature = "unwrap_infallible", reason = "newly added", issue = "61695")]
     #[inline]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))] /* blocked on ! */
-    pub fn into_ok(self) -> T
-=======
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+    #[cfg(not(feature = "ferrocene_certified"))] /* blocked on ! */
     pub const fn into_ok(self) -> T
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     where
         E: ~const Into<!>,
     {
@@ -1344,14 +1340,10 @@ impl<T, E> Result<T, E> {
     /// ```
     #[unstable(feature = "unwrap_infallible", reason = "newly added", issue = "61695")]
     #[inline]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))] /* blocked on ! */
-    pub fn into_err(self) -> E
-=======
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+    #[cfg(not(feature = "ferrocene_certified"))] /* blocked on ! */
     pub const fn into_err(self) -> E
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     where
         T: ~const Into<!>,
     {
@@ -2110,13 +2102,9 @@ impl<A, E, V: FromIterator<A>> FromIterator<Result<A, E>> for Result<V, E> {
 }
 
 #[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T, E> ops::Try for Result<T, E> {
-=======
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, E> const ops::Try for Result<T, E> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     type Output = T;
     type Residual = Result<convert::Infallible, E>;
 
@@ -2135,15 +2123,11 @@ impl<T, E> const ops::Try for Result<T, E> {
 }
 
 #[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T, E, F: From<E>> ops::FromResidual<Result<convert::Infallible, E>> for Result<T, F> {
-=======
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, E, F: ~const From<E>> const ops::FromResidual<Result<convert::Infallible, E>>
     for Result<T, F>
 {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     #[inline]
     #[track_caller]
     fn from_residual(residual: Result<convert::Infallible, E>) -> Self {
@@ -2154,13 +2138,9 @@ impl<T, E, F: ~const From<E>> const ops::FromResidual<Result<convert::Infallible
 }
 #[diagnostic::do_not_recommend]
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T, E, F: From<E>> ops::FromResidual<ops::Yeet<E>> for Result<T, F> {
-=======
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, E, F: ~const From<E>> const ops::FromResidual<ops::Yeet<E>> for Result<T, F> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     #[inline]
     fn from_residual(ops::Yeet(e): ops::Yeet<E>) -> Self {
         Err(From::from(e))
@@ -2168,12 +2148,8 @@ impl<T, E, F: ~const From<E>> const ops::FromResidual<ops::Yeet<E>> for Result<T
 }
 
 #[unstable(feature = "try_trait_v2_residual", issue = "91285")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T, E> ops::Residual<T> for Result<convert::Infallible, E> {
-=======
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, E> const ops::Residual<T> for Result<convert::Infallible, E> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     type TryType = Result<T, E>;
 }

@@ -12,7 +12,7 @@ profiler_builtins = { path = "../profiler_builtins", optional = true }
 std = { path = "../std", public = true }
 test = { path = "../test", public = true }
 
-# Ferrocene addition: in bootstrap we need to set a libcore feature for code coverage testing, so we
+# Ferrocene addition: in bootstrap we need to set a core library feature for code coverage testing, so we
 # need to add it as an explicit dependency here to do `--features core/$foo`.
 core = { path = "../core" }
 
@@ -37,5 +37,5 @@ std_detect_file_io = ["std/std_detect_file_io"]
 std_detect_dlsym_getauxval = ["std/std_detect_dlsym_getauxval"]
 windows_raw_dylib = ["std/windows_raw_dylib"]
 
-# Ferrocene addition: enable "ferrocene_certified" feature in libcore
+# Ferrocene addition: enable "ferrocene_certified" feature in the core library
 ferrocene_certified = ["std/ferrocene_certified"]

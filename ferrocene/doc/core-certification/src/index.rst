@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-Libcore Certification
-=====================
+Core Library Certification
+==========================
 
 .. toctree::
    :numbered:
@@ -18,10 +18,10 @@ Libcore Certification
 .. toctree::
    :numbered:
    :maxdepth: 2
-   :caption: Subset
+   :caption: Certified Subset
    
-   libcore-subset
-   libcore-subset-api-docs
+   subset
+   subset-api-docs
 
 .. appendices::
    :numbered:

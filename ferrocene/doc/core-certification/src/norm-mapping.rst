@@ -33,9 +33,9 @@ Covered by
 
 Covered by
 
-- :doc:`Libcore subset API docs <libcore-subset-api-docs>`
-- :doc:`Libcore code coverage report <code-coverage>`
-- :doc:`Libcore requirements review <requirement-review>`
+- :doc:`Certified core library API docs <subset-api-docs>`
+- :doc:`Code coverage report <code-coverage>`
+- :doc:`Requirements review <requirement-review>`
 
 5.2.5
 ~~~~~
@@ -50,12 +50,12 @@ Covered by :ref:`Qualification Plan - Documentation Validation <qualification-pl
 5.2.7
 ~~~~~
 
-Libcore docs follow the structure of other documents in the :doc:`Ferrocene documentation package <index>`.
+The core library certification documentation follows the structure of the other documents in the :doc:`Ferrocene documentation package <index>`.
 
 5.2.8
 ~~~~~
 
-Processes from the Rustc qualification are used, unless specific needs for libcore certification require otherwise.
+Processes from the Rustc qualification are used, unless specific needs for the core library certification require otherwise.
 
 5.2.9
 ~~~~~
@@ -65,7 +65,7 @@ Covered by :doc:`qualification-plan:change-tracking`.
 5.2.10
 ~~~~~~
 
-Changes to libcore are included in the Ferrocene release notes. When new releases of libcore, which is released with Ferrocene, include new functionality such as an expanded subset, this will be covered in the release notes.
+Changes to the certified core library are included in the Ferrocene release notes. When new releases of the certified core library, which is released with Ferrocene, include new functionality such as an expanded subset, this will be covered in the release notes.
 
 5.2.11
 ~~~~~~
@@ -192,7 +192,7 @@ IEC-61508-3
 ~
 
 1. The :ref:`Safety Plan - Certification Scope <safety-plan:Certification Scope>` specifies and justifies the SIL level.
-2. The libcore certification excludes the requirement of having an architecture.
+2. The core library certification excludes the requirement of having an architecture.
 
    .. include:: ./partials/simple-design.rst
 
@@ -230,7 +230,7 @@ Covered by :ref:`Safety Plan - Lifecycle Phases Overview <safety-plan:Lifecycle 
 
 We diverge from the V-Model, because we are certifying an existing project, not developing the code from scratch.
 
-To explain it in V-model-terms: The Rust project, who is maintaining the upstream libcore, performs the requirement specification, the software architecture, the software design, the module design and the coding. Ferrous Systems, consumes the output of those activities from upstream and performs module testing, integration testing, and validation testing on the code received from upstream pull requests.
+To explain it in V-model-terms: The Rust project, who is maintaining the upstream core library, performs the requirement specification, the software architecture, the software design, the module design and the coding. Ferrous Systems, consumes the output of those activities from upstream and performs module testing, integration testing, and validation testing on the code received from upstream pull requests.
 
 7.1.2.7
 ~~~~~~~
@@ -242,10 +242,10 @@ Covered by :ref:`norm-mapping:IEC-61508-3 Annex A`.
 
 The following relevant artefacts are included in the deliverables:
 
-- Code coverage report
-- Test results
-- Doc-comment review
-- Libcore subset API docs
+- :doc:`Code coverage report <code-coverage>`
+- :doc:`Test results <qualification-report:rustc/index>`
+- :doc:`Doc-comment review <requirement-review>`
+- :doc:`Certified core library API docs <subset-api-docs>`
 
 7.2.2.1-3
 ~~~~~~~~~
@@ -269,36 +269,36 @@ All functions included in the subset are certified SIL2.
 7.2.2.6-9
 ~~~~~~~~~
 
-N/A; libcore is a pure software library. Hardware constraints should be taken into consideration when integrating the certified libcore subset into a hardware environment.
+N/A; the core library is a pure software library. Hardware constraints should be taken into consideration when integrating the certified core library into a hardware environment.
 
 7.2.2.11
 ~~~~~~~~
 
-N/A; There is no way to configure the libcore binary after it is compiled.
+N/A; There is no way to configure the core library binary after it is compiled.
 
 7.2.2.12-13
 ~~~~~~~~~~~
 
-N/A; libcore does not use, and therefore does not configure, any pre-existing software.
+N/A; the core library does not use, and therefore does not configure, any pre-existing software.
 
 7.3.2.1-5
 ~~~~~~~~~
 
-.. include:: ./partials/libcore-testing.rst
+.. include:: ./partials/core-testing.rst
 
 7.4.2.1
 ~~~~~~~
 
-The upstream Rust project is responsible for developing libcore.
+The upstream Rust project is responsible for developing the core library.
 
-Ferrous Systems performs verification activities to prove that libcore can be used in safety critical applications up to SIL 2.
+Ferrous Systems performs verification activities to prove that the core library can be used in safety critical applications up to SIL 2.
 
-Integration into hardware and into a broader system must be performed by the user of libcore.
+Integration into hardware and into a broader system must be performed by the user of the core library.
 
 7.4.2.2-6
 ~~~~~~~~~
 
-Covered by :ref:`safety-plan:Doc-comments in libcore`.
+Covered by :ref:`safety-plan:Doc-comments in the core library`.
 
 7.4.2.7
 ~~~~~~~
@@ -308,7 +308,7 @@ Covered by :ref:`safety-plan:Doc-comments in libcore`.
 7.4.2.8-11
 ~~~~~~~~~~
 
-All functions in the certified libcore subset are deemed to be of the same SIL.
+All functions in the certified core library are deemed to be of the same SIL.
 
 7.4.2.12-14
 ~~~~~~~~~~~
@@ -325,12 +325,12 @@ N/A, therefore no architecture is needed
 7.4.4.1-9
 ~~~~~~~~~
 
-No online tools used for libcore certification, only offline tools. In :ref:`Safety Plan - Tool Safety Assessments <safety-plan:Tool Safety Assessments>` all used tools are specified and justified.
+No online tools are used for the core library certification, only offline tools. In :ref:`Safety Plan - Tool Safety Assessments <safety-plan:Tool Safety Assessments>` all used tools are specified and justified.
 
 7.4.4.10-11
 ~~~~~~~~~~~
 
-Libcore uses the rustc safety Qualified Ferrocene compiler, which uses Rust as defined by the Ferrocene language specification. Rust is well matched to the needs of libcore.
+The certified core library is being build with the safety Qualified Ferrocene compiler, which uses Rust as defined by the Ferrocene language specification. Rust is well matched to the needs of the core library.
 
 7.4.4.12-13
 ~~~~~~~~~~~
@@ -349,7 +349,7 @@ All testing infrastructure, including offline support tools, and related configu
 
 Infrastructure of Ferrocene is detailed in :doc:`qualification-plan:infrastructure`.
 
-A record of all packages used by the build and test environment of each version of Ferrocene, including libcore, is contained in the ``ferrocene-src`` component, which contains:
+A record of all packages used by the build and test environment of each version of Ferrocene, including the core library, is contained in the ``ferrocene-src`` component, which contains:
 
 * The root directory contains the entire Ferrocene source.
 * The ``vendor/rust`` folder contains a copy of the source of each Rust dependency for Ferrocene in a format suitable for use with ``x.py``.
@@ -378,17 +378,17 @@ Ferrous Systems monitors upstream doc-comments, used as requirements and design,
 7.4.6
 ~~~~~
 
-All upstream Rust code is reviewed by a documented team of appointed Rust experts, and heavily tested, before being merged into libcore. Changes are reviewed by an expert who was not involved in the change. Test results and review evidence are public. Ferrous Systems tests that code for correctness on all qualified targets.
+All upstream Rust code is reviewed by a documented team of appointed Rust experts, and heavily tested, before being merged. Changes are reviewed by an expert who was not involved in the change. Test results and review evidence are public. Ferrous Systems tests that code for correctness on all qualified targets.
 
 7.4.7-8
 ~~~~~
 
-.. include:: ./partials/libcore-testing.rst
+.. include:: ./partials/core-testing.rst
 
 7.5
 ~~~
 
-.. include:: ./partials/libcore-testing.rst
+.. include:: ./partials/core-testing.rst
 
 7.6
 ~~~
@@ -403,7 +403,7 @@ Objective met.
 7.7.2.1-4
 ~~~~~~~~~
 
-.. include:: ./partials/libcore-testing.rst
+.. include:: ./partials/core-testing.rst
 
 7.7.2.5-6
 ~~~~~~~~~
@@ -413,7 +413,7 @@ The ``corestests`` test suite specifies all test cases and expected results in s
 7.7.2.7-9
 ~~~~~~~~~
 
-.. include:: ./partials/libcore-testing.rst
+.. include:: ./partials/core-testing.rst
 
 7.8
 ~~~
@@ -431,7 +431,7 @@ Objective met.
 7.9.2.1-7
 ~~~~~~~~~
 
-.. include:: ./partials/libcore-testing.rst
+.. include:: ./partials/core-testing.rst
 
 7.9.2.8
 ~~~~~~~
@@ -446,7 +446,7 @@ N/A; There is no architecture design.
 7.9.2.10-13
 ~~~~~~~~
 
-.. include:: ./partials/libcore-testing.rst
+.. include:: ./partials/core-testing.rst
 
 7.9.2.14
 ~~~~~~~~
@@ -480,7 +480,7 @@ Table A.2
 8
 "
 
-N/A; libcore does not use external software elements.
+N/A; the core library does not use external software elements.
 
 11a
 """
@@ -492,7 +492,7 @@ N/A
 13a
 """
 
-N/A; libcore is a library.
+N/A; core is a library.
 
 Table A.3
 ~~~~~~~~~
@@ -505,7 +505,7 @@ Rust has strong typing and assertions, is memory safe, and is well suited to str
 4a
 ""
 
-Certified Libcore used Ferrocene, the fully qualified Rust compiler according to IEC-61508.
+The certified core library uses Ferrocene, the fully qualified Rust compiler according to IEC-61508.
 
 Table A.4
 ~~~~~~~~~
@@ -520,7 +520,7 @@ N/A
 4
 "
 
-Libcore is highly modularized.
+The core library is highly modularized.
 
 5
 "
@@ -529,7 +529,7 @@ N/A
 
 .. include:: ./partials/implicit-coding-standard.rst
 
-As such, Certified Libcore does not have a coding standard.
+As such, the certified core library does not have a coding standard.
 
 6
 "
@@ -539,7 +539,7 @@ The Rust programming language encourages structured programming. It has support 
 7
 "
 
-N/A; libcore does not use external software elements.
+N/A; the core library does not use external software elements.
 
 Table A.5
 ~~~~~~~~~
@@ -547,17 +547,17 @@ Table A.5
 2
 "
 
-N/A; libcore is a library.
+N/A; core is a library.
 
 3
 "
 
-.. include:: ./partials/libcore-testing.rst
+.. include:: ./partials/core-testing.rst
 
 4
 "
 
-.. include:: ./partials/libcore-testing.rst
+.. include:: ./partials/core-testing.rst
 
 8
 "
@@ -575,7 +575,7 @@ Table A.7
 4
 "
 
-.. include:: ./partials/libcore-testing.rst
+.. include:: ./partials/core-testing.rst
 
 Table A.8
 ~~~~~~~~~
@@ -601,12 +601,12 @@ Table A.9
 3
 "
 
-The Ferrocene compiler performs various kinds of static analysis and lints when compiling libcore.
+The Ferrocene compiler performs various kinds of static analysis and lints when compiling the core library.
 
 4
 "
 
-.. include:: ./partials/libcore-testing.rst
+.. include:: ./partials/core-testing.rst
 
 Table A.10
 ~~~~~~~~~~
@@ -630,7 +630,7 @@ Table B.1 - Design and coding standards
 2
 "
 
-libcore does not use heap-allocation.
+The core library does not use heap-allocation.
 
 7
 "
@@ -712,7 +712,7 @@ Table B.9 - Modular approach
 1
 "
 
-libcore does not impose a module size limit, but instead structures modules according to their function.
+The core library does not impose a module size limit, but instead structures modules according to their function.
 
 3
 "

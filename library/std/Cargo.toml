@@ -126,7 +126,7 @@ std_detect_dlsym_getauxval = ["std_detect/std_detect_dlsym_getauxval"]
 # This will eventually be the default.
 windows_raw_dylib = ["windows-targets/windows_raw_dylib"]
 
-# Ferrocene addition: enable "ferrocene_certified" feature in libcore
+# Ferrocene addition: enable "ferrocene_certified" feature in the core library
 ferrocene_certified = ["core/ferrocene_certified"]
 
 [package.metadata.fortanix-sgx]

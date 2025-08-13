@@ -33,11 +33,11 @@ scope, in accordance to the standards above.
 
 .. toctree::
    :maxdepth: 2
-   :caption: libcore
+   :caption: core library
    :numbered:
 
-   libcore/usage
-   libcore/constraints
+   core/usage
+   core/constraints
 
 
 .. appendices::

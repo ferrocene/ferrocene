@@ -7,7 +7,7 @@ Testing Plan
 Re-verification scope
 ---------------------
 
-On every pull request, the full Ferrocene test suite, which includes the tests for libcore, is executed. Therefore no impact assessment is necessary, since all tests are run anyways.
+On every pull request, the full Ferrocene test suite is executed, which includes the tests for the core library. Therefore no impact assessment is necessary, since all tests are run anyways.
 
 Test workflow
 -------------
@@ -22,9 +22,9 @@ Test suites
 Coretests
 ~~~~~~~~~
 
-Libcore is primarily tested by the coretests test suite. It defines the test case and pass/fail criteria.
+The core library is primarily tested by the coretests test suite. It defines the test case and pass/fail criteria.
 
-Although only a subset of libcore is certified, also tests for uncertified functions are executed.
+Although only a subset of the core library is certified, also tests for uncertified functions are executed.
 
 One example test is ``coretests::slice::test_position``. It calls ``.position`` 4 times with different arguments and asserts that the results are correct:
 
@@ -47,14 +47,14 @@ The results of the coretests test suite can be found in the "Library Test Suite"
 Doc-tests
 ~~~~~~~~~
 
-Doc-tests are the code snippets in doc-comments. The doc-tests for libcore are executed as well. Note that doc-tests are not used for code coverage.
+Doc-tests are the code snippets in doc-comments. The doc-tests for the core library are executed as well. Note that doc-tests are not used for code coverage.
 
 Code coverage tests
 ~~~~~~~~~~~~~~~~~~~
 
 In order to gather code coverage information, an additional test run of the coretests test suite on the x86_64-linux-gnu target is performed.
 
-This run is different to the normal test run, because the ``libcore`` library and the ``coretests`` binary are instrumented with ``-Cinstrument-coverage``. This inserts llvm intrinsics into the binaries to collect code coverage information.
+This run is different to the normal test run, because the ``core`` library and the ``coretests`` binary are instrumented with ``-Cinstrument-coverage``. This inserts llvm intrinsics into the binaries to collect code coverage information.
 
 The collected code coverage information is compiled into a code coverage report using ``grcov``.
 
@@ -87,4 +87,4 @@ During compilation, rustc runs the borrow checker and executes a set of lints to
 Integration tests
 ~~~~~~~~~~~~~~~~~
 
-libcore is heavily used in the other components of the Ferrocene toolchain, e.g. in ``rustc``, ``libstd``, ``rustdoc`` etc. So ``libcore`` is implicitly tested by building and testing those components on all the supported platforms.
+The core library is heavily used in the other components of the Ferrocene toolchain, e.g. in ``rustc``, the ``std`` library, ``rustdoc`` etc. The integration of the core library is tested by building and testing those components on all the supported platforms.

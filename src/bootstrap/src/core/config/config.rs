@@ -322,7 +322,8 @@ pub struct Config {
     pub ferrocene_oxidos_src: Option<String>,
     pub ferrocene_tarball_signing_kms_key_arn: Option<String>,
     pub ferrocene_document_signatures: FerroceneDocumentSignatures,
-    pub ferrocene_technical_report_url: Option<String>,
+    pub ferrocene_compiler_technical_report_url: Option<String>,
+    pub ferrocene_core_technical_report_url: Option<String>,
     pub ferrocene_secret_sauce: FerroceneSecretSauce,
     pub ferrocene_generate_coverage_report_after_tests: bool,
 }
@@ -1061,7 +1062,8 @@ impl Config {
             config.ferrocene_aws_profile = f.aws_profile;
             config.ferrocene_oxidos_src = f.oxidos_src;
             config.ferrocene_tarball_signing_kms_key_arn = f.tarball_signing_kms_key_arn;
-            config.ferrocene_technical_report_url = f.technical_report_url;
+            config.ferrocene_compiler_technical_report_url = f.compiler_technical_report_url;
+            config.ferrocene_core_technical_report_url = f.core_technical_report_url;
 
             config.ferrocene_generate_coverage_report_after_tests =
                 f.generate_coverage_report_after_test.unwrap_or(true);

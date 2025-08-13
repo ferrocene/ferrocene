@@ -59,24 +59,27 @@ the latest commit on that branch into the ``beta-${major_version}`` channel
 every night. You can continue landing changes into the branch until you
 are ready to release it as a stable release.
 
-.. _release-technical-report:
+.. _release-technical-reports:
 
-Uploading the qualification technical report
+Uploading the technical reports
 --------------------------------------------
 
-Once qualification is achieved for the Ferrocene major version, the technical
-report provided by the assessors needs to be uploaded to our AWS account with::
+Once qualification and certification are achieved for the Ferrocene major version,
+the technical reports provided by the assessors needs to be uploaded to our AWS
+account with::
 
-   aws --profile ferrocene-ci s3 cp path/to/report.pdf s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-VERSION-technical-report.pdf
+   aws --profile ferrocene-ci s3 cp path/to/compiler-report.pdf s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-compiler-technical-report.pdf
+   aws --profile ferrocene-ci s3 cp path/to/core-report.pdf s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-core-technical-report.pdf
 
-In the command above, ``path/to/the/report.pdf`` is the local path to the
+In the command above, ``path/to/the/component-report.pdf`` is the local path to the
 downloaded file, ``YYYY-MM-DD`` is the current date (**not** the version
-number), and ``VERSION`` is the version number.
+number), and ``YY.MM.N`` is the version number.
 
-Once the file is uploaded, open a new PR targeting the ``release/1.NN`` branch
-changing ``ferrocene/ci/configure.sh``. In that file, find the line setting the
-``technical-report-url`` option, if commented uncomment it, and replace the URL
-with the ``s3://`` URL you just uploaded.
+Once the files are uploaded, open a new PR targeting the ``release/1.NN`` branch
+changing ``ferrocene/ci/configure.sh``. In that file, find the lines setting the
+``compiler-technical-report-url`` and ``core-technical-report`` options, if
+commented uncomment them, and replace the URL with the ``s3://`` URLs of the
+reports you just uploaded.
 
 .. _publish-stable:
 

@@ -296,17 +296,14 @@ pub enum Mode {
 
 impl Mode {
     pub fn is_tool(&self) -> bool {
-<<<<<<< HEAD
-        matches!(
-            self,
-            Mode::ToolBootstrap | Mode::ToolRustc | Mode::ToolStd | Mode::ToolCustom { .. }
-        )
-=======
         match self {
-            Mode::ToolBootstrap | Mode::ToolRustc | Mode::ToolStd | Mode::ToolTarget => true,
+            Mode::ToolBootstrap
+            | Mode::ToolRustc
+            | Mode::ToolStd
+            | Mode::ToolTarget
+            | Mode::ToolCustom { .. } => true,
             Mode::Std | Mode::Codegen | Mode::Rustc => false,
         }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     pub fn must_support_dlopen(&self) -> bool {
@@ -857,31 +854,6 @@ impl Build {
     /// stage when running with a particular host compiler.
     ///
     /// The mode indicates what the root directory is for.
-<<<<<<< HEAD
-    fn stage_out(&self, compiler: Compiler, mode: Mode) -> PathBuf {
-        let mut subdir = None;
-        let suffix = match mode {
-            Mode::Std => "-std",
-            Mode::Rustc => "-rustc",
-            Mode::Codegen => "-codegen",
-            Mode::ToolBootstrap => {
-                return self.out.join(compiler.host).join("bootstrap-tools");
-            }
-            Mode::ToolStd | Mode::ToolRustc => "-tools",
-            Mode::ToolCustom { name } => {
-                subdir = Some(name);
-                "-tools-custom"
-            }
-        };
-        let mut out =
-            self.out.join(compiler.host).join(format!("stage{}{}", compiler.stage, suffix));
-
-        // Ferrocene addition to give custom tools a separate build directory
-        if let Some(subdir) = subdir {
-            out = out.join(subdir)
-        }
-        out
-=======
     fn stage_out(&self, build_compiler: Compiler, mode: Mode) -> PathBuf {
         use std::fmt::Write;
 
@@ -892,6 +864,7 @@ impl Build {
             (Some(build_compiler.stage), "tools")
         }
 
+        let mut subdir = None;
         let (stage, suffix) = match mode {
             Mode::Std => (Some(build_compiler.stage), "std"),
             Mode::Rustc => (Some(build_compiler.stage), "rustc"),
@@ -907,6 +880,11 @@ impl Build {
                     staged_tool(build_compiler)
                 }
             }
+            // Ferrocene addition to give custom tools a separate build directory
+            Mode::ToolCustom { name } => {
+                subdir = Some(name);
+                (Some(build_compiler.stage), "tools-custom")
+            }
         };
         let path = self.out.join(build_compiler.host);
         let mut dir_name = String::new();
@@ -914,8 +892,11 @@ impl Build {
             write!(dir_name, "stage{stage}-").unwrap();
         }
         dir_name.push_str(suffix);
-        path.join(dir_name)
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+        let mut path = path.join(dir_name);
+        if let Some(name) = subdir {
+            path = path.join(name);
+        }
+        path
     }
 
     /// Returns the root output directory for all Cargo output in a given stage,

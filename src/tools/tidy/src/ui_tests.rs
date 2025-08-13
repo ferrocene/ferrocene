@@ -1,11 +1,13 @@
 //! Tidy check to ensure below in UI test directories:
 //! - there are no stray `.stderr` files
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashMap};
 use std::ffi::OsStr;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
+
+use ignore::Walk;
 
 const EXPECTED_TEST_FILE_EXTENSIONS: &[&str] = &[
     "rs",     // test source files
@@ -42,7 +44,6 @@ const EXTENSION_EXCEPTION_PATHS: &[&str] = &[
     "tests/ui/std/windows-bat-args3.bat", // tests escaping arguments through batch files
 ];
 
-<<<<<<< HEAD
 fn check_entries(tests_path: &Path, bad: &mut bool) {
     let mut directories: HashMap<PathBuf, u32> = HashMap::new();
 
@@ -51,25 +52,7 @@ fn check_entries(tests_path: &Path, bad: &mut bool) {
         *directories.entry(parent).or_default() += 1;
     }
 
-    let (mut max, mut max_issues) = (0, 0);
     for (dir_path, count) in directories {
-        let is_issues_dir = tests_path.join("ui/issues") == dir_path;
-        let (limit, maxcnt) = if is_issues_dir {
-            (ISSUES_ENTRY_LIMIT, &mut max_issues)
-        } else {
-            (ENTRY_LIMIT, &mut max)
-        };
-        *maxcnt = (*maxcnt).max(count);
-        if count > limit {
-            tidy_error!(
-                bad,
-                "following path contains more than {} entries, \
-                    you should move the test to some relevant subdirectory (current: {}): {}",
-                limit,
-                count,
-                dir_path.display()
-            );
-        }
         if count == 1 && dir_path.join("ferrocene-annotations").exists() {
             tidy_error!(
                 bad,
@@ -79,16 +62,8 @@ fn check_entries(tests_path: &Path, bad: &mut bool) {
             )
         }
     }
-    if ISSUES_ENTRY_LIMIT > max_issues {
-        tidy_error!(
-            bad,
-            "`ISSUES_ENTRY_LIMIT` is too high (is {ISSUES_ENTRY_LIMIT}, should be {max_issues})"
-        );
-    }
 }
 
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub fn check(root_path: &Path, bless: bool, bad: &mut bool) {
     let issues_txt_header = r#"============================================================
     ⚠️⚠️⚠️NOTHING SHOULD EVER BE ADDED TO THIS LIST⚠️⚠️⚠️
@@ -96,6 +71,7 @@ pub fn check(root_path: &Path, bless: bool, bad: &mut bool) {
 "#;
 
     let path = &root_path.join("tests");
+    check_entries(path, bad);
 
     // the list of files in ui tests that are allowed to start with `issue-XXXX`
     // BTreeSet because we would like a stable ordering so --bless works

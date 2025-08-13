@@ -606,12 +606,8 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
 
     /// Checks that `#[coverage(..)]` is applied to a function/closure/method,
     /// or to an impl block or module.
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_allow_coverage_attribute_everywhere"))]
-    fn check_coverage(&self, attr: &Attribute, target_span: Span, target: Target) {
-=======
     fn check_coverage(&self, attr_span: Span, target_span: Span, target: Target) {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         let mut not_fn_impl_mod = None;
         let mut no_body = None;
 

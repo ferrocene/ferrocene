@@ -14,7 +14,8 @@ use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
-use crate::utils::exec::BootstrapCommand;
+use crate::utils::exec::{BootstrapCommand, ExecutionContext};
+use crate::utils::helpers::git;
 use crate::{Compiler, FileType, t};
 
 pub(crate) trait IsSphinxBook {
@@ -209,6 +210,18 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             .arg(format!(
                 "-Drustfmt_version={}",
                 builder.crates.get("rustfmt-nightly").unwrap().version,
+            ))
+            .arg(format!(
+                "-Dgrcov_version={}",
+                get_submdoule_version("ferrocene/tools/grcov", builder)
+                    .as_deref()
+                    .unwrap_or("not found")
+            ))
+            .arg(format!(
+                "-Dllvm_version={}",
+                get_submdoule_version("src/llvm-project", builder)
+                    .as_deref()
+                    .unwrap_or("not found")
             ));
 
         // Include the breadcrumbs in the generated documentation.
@@ -942,4 +955,19 @@ fn relative_path(base: &Path, path: &Path) -> PathBuf {
     }
 
     if result.components().count() == 0 { PathBuf::from(".") } else { result }
+}
+
+fn get_submdoule_version(
+    submodule_path: &str,
+    exec_ctx: impl AsRef<ExecutionContext>,
+) -> Option<String> {
+    let submodule_status = git(None).args(["submodule", "status"]).run_capture(exec_ctx).stdout();
+    let mut submodule_version = None;
+    for line in submodule_status.lines() {
+        if line.contains(submodule_path) {
+            let (commit, _) = line.trim().split_once(' ').unwrap();
+            submodule_version = Some(commit.to_string())
+        }
+    }
+    submodule_version
 }

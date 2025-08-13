@@ -40,6 +40,14 @@ class AddCustomSubstitutions(SphinxTransform):
             "rust_version",
             self.app.config["rust_version"],
         )
+        self.add_substitution(
+            "grcov_version",
+            self.app.config["grcov_version"],
+        )
+        self.add_substitution(
+            "llvm_version",
+            self.app.config["llvm_version"],
+        )
 
     def add_substitution(self, name, value):
         substitution = nodes.substitution_definition()

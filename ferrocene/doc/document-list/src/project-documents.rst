@@ -38,3 +38,6 @@ Project Documents
    * - :doc:`release-notes:index`
      - :document-id:`release-notes`
      - |ferrocene_version|
+   * - :doc:`core-certification:index`
+     - :document-id:`core-certification`
+     - |ferrocene_version|

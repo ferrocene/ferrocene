@@ -82,7 +82,7 @@ const LINKCHECK_EXCEPTIONS: &[(&str, &[&str])] = &[
     // The technical report is missing most of the time, as it's only included in stable releases.
     // This is fine though, because that section is hidden by the build system with `display: none`
     // when the link is missing. We thus ignore it to avoid a linkchecker complaint.
-    ("index.html", &["qualification/technical-report.pdf"]),
+    ("index.html", &["qualification/technical-report.pdf", "certification/core/technical-report.pdf"]),
 ];
 
 #[rustfmt::skip]
@@ -528,7 +528,7 @@ fn is_intra_doc_exception(file: &Path, link: &str) -> bool {
 }
 
 fn is_exception(file: &Path, link: &str) -> bool {
-    if FERROCENE_GLOBAL_EXCEPTIONS.contains(&link) {
+    if is_ferrocene_exception(file, link) {
         return true;
     }
     if let Some(entry) = LINKCHECK_EXCEPTIONS.iter().find(|&(f, _)| file.ends_with(f)) {
@@ -655,5 +655,16 @@ fn parse_ids(ids: &mut HashSet<String>, file: &str, source: &str, report: &mut R
         }
         // Just in case, we also add the encoded id.
         ids.insert(encoded);
+    }
+}
+
+fn is_ferrocene_exception(file: &Path, link: &str) -> bool {
+    if FERROCENE_GLOBAL_EXCEPTIONS.contains(&link) {
+        true
+    } else if file.ends_with("certification/core/subset.html") && link.starts_with("#id") {
+        // The links in the csv-table are not expected to work
+        true
+    } else {
+        false
     }
 }

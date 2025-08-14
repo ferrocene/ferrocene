@@ -248,7 +248,13 @@ SPDX-FileCopyrightText = "Jeremy Thomas"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
-path = ["requirements.txt", ".python-version", "src/bootstrap/src/ferrocene/**"]
+path = [
+    "requirements.txt",
+    ".python-version",
+    "src/bootstrap/src/ferrocene/**",
+    "ferrocene/doc/core-certification/src/spreadsheets/*",
+    "ferrocene/doc/core-certification/src/_static/**",
+]
 precedence = "override"
 SPDX-FileCopyrightText = "The Ferrocene Developers"
 SPDX-License-Identifier = "MIT OR Apache-2.0"

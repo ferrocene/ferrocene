@@ -1265,6 +1265,9 @@ dependencies = [
 [[package]]
 name = "coverage-of-subset"
 version = "0.1.0"
+dependencies = [
+ "regex",
+]
 
 [[package]]
 name = "cpufeatures"

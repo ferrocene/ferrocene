@@ -3,16 +3,23 @@
 
 use std::fs;
 use std::path::Path;
-use std::sync::LazyLock;
 
 /// Uncertified code is marked with this attribute
 const MARKER: &str = "#[cfg(not(feature = \"ferrocene_certified\"))]";
+const APPLICABLE: [&str; 9] = [
+    "fn",
+    "pub fn",
+    "pub(crate) fn",
+    "impl",
+    "pub impl",
+    "pub(crate) impl",
+    "mod",
+    "pub mod",
+    "pub(crate) mod",
+];
+const MAX_INDENTATION: usize = 60;
 /// Mark code with this to stop rustc from instrumenting it
-const TO_BE_INSERTED: &str = "#[cfg_attr(not(bootstrap), coverage(off))]";
-// Note: Has to be a lock to be used in a static. Will only ever be called from
-// one thread, so it should not be blocking in reality.
-static MARKER_PLUS_TO_BE_INSERTED: LazyLock<String> =
-    LazyLock::new(|| format!("{MARKER} {TO_BE_INSERTED}"));
+const TO_BE_INSERTED: &str = "#[coverage(off)]";
 
 fn main() {
     // The path to inject the coverage(off) attributes.
@@ -40,12 +47,20 @@ fn handle_dir(dir_path: impl AsRef<Path>) {
 
 fn handle_file(file_path: &Path) {
     let mut file_content = fs::read_to_string(&file_path).unwrap();
-    file_content = inject_coverage_attribute(&file_content);
+    file_content = inject_coverage_attribute(file_content);
     fs::write(file_path, file_content).unwrap();
 }
 
-fn inject_coverage_attribute(file_content: &str) -> String {
-    file_content.replace(MARKER, &MARKER_PLUS_TO_BE_INSERTED)
+fn inject_coverage_attribute(mut file_content: String) -> String {
+    // This is, frankly, a very slow hack with a heavy hand, but it works for our purposes and only needs to be done on 1.88.
+    for applicable in APPLICABLE {
+        for i in 0..MAX_INDENTATION {
+            let valid_marker = format!("{MARKER}\n{}{}", " ".repeat(i), applicable);
+            let to_be_inserted = format!("{MARKER} {TO_BE_INSERTED}\n{}{}", " ".repeat(i), applicable);
+            file_content = file_content.replace(&valid_marker, &to_be_inserted);
+        }
+    }
+    file_content
 }
 
 fn is_rust_file(file_path: &Path) -> bool {
@@ -63,7 +78,7 @@ mod tests {
         let correct = TEST_FILE_CORRECT;
 
         // Act
-        let after = inject_coverage_attribute(before);
+        let after = inject_coverage_attribute(before.into());
 
         // Assert
         assert_eq!(after, correct);
@@ -106,36 +121,60 @@ impl D {
 }
 
 impl F {
-    fn g() {}
+    fn g() {
+        #[cfg(not(feature = "ferrocene_certified"))]
+        ::core::panicking::panic_nounwind_fmt();
+    }
 
     #[cfg(not(feature = "ferrocene_certified"))]
     fn h() {}
 }
+
+#[cfg(not(feature = "ferrocene_certified"))]
+macro_rules! marco_polo {}
+
+#[cfg(not(feature = "ferrocene_certified"))]
+pub struct Foo;
+
+#[cfg(not(feature = "ferrocene_certified"))]
+pub(crate) struct Foo;
 "#;
 
     const TEST_FILE_CORRECT: &str = r#"
-#[cfg(not(feature = "ferrocene_certified"))] #[cfg_attr(not(bootstrap), coverage(off))]
+#[cfg(not(feature = "ferrocene_certified"))] #[coverage(off)]
 fn a{} {}
 
-#[cfg(not(feature = "ferrocene_certified"))] #[cfg_attr(not(bootstrap), coverage(off))]
+#[cfg(not(feature = "ferrocene_certified"))] #[coverage(off)]
 fn b() {}
 
 #[cfg(feature = "ferrocene_certified")]
 fn b() {}
 
-#[cfg(not(feature = "ferrocene_certified"))] #[cfg_attr(not(bootstrap), coverage(off))]
+#[cfg(not(feature = "ferrocene_certified"))] #[coverage(off)]
 mod c;
 
-#[cfg(not(feature = "ferrocene_certified"))] #[cfg_attr(not(bootstrap), coverage(off))]
+#[cfg(not(feature = "ferrocene_certified"))] #[coverage(off)]
 impl D {
     fn e() {}
 }
 
 impl F {
-    fn g() {}
+    fn g() {
+        #[cfg(not(feature = "ferrocene_certified"))]
+        ::core::panicking::panic_nounwind_fmt();
+    }
 
-    #[cfg(not(feature = "ferrocene_certified"))] #[cfg_attr(not(bootstrap), coverage(off))]
+    #[cfg(not(feature = "ferrocene_certified"))] #[coverage(off)]
     fn h() {}
 }
+
+#[cfg(not(feature = "ferrocene_certified"))]
+macro_rules! marco_polo {}
+
+#[cfg(not(feature = "ferrocene_certified"))]
+pub struct Foo;
+
+#[cfg(not(feature = "ferrocene_certified"))]
+pub(crate) struct Foo;
 "#;
 }

@@ -461,7 +461,6 @@ impl Extend<()> for () {
     fn extend_one(&mut self, _item: ()) {}
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 macro_rules! spec_tuple_impl {
     (
         (
@@ -524,6 +523,7 @@ macro_rules! spec_tuple_impl {
         #[$meta]
         $(#[$doctext])?
         #[stable(feature = "extend_for_tuple", since = "1.56.0")]
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl<$($ty_names,)* $($extend_ty_names,)*> Extend<($($ty_names,)*)> for ($($extend_ty_names,)*)
         where
             $($extend_ty_names: Extend<$ty_names>,)*
@@ -571,10 +571,12 @@ macro_rules! spec_tuple_impl {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         trait $trait_name<$($ty_names),*> {
             fn extend(self, $($var_names: &mut $ty_names,)*);
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         fn $default_fn_name<$($ty_names,)* $($extend_ty_names,)*>(
             iter: impl Iterator<Item = ($($ty_names,)*)>,
             $($var_names: &mut $extend_ty_names,)*
@@ -598,6 +600,7 @@ macro_rules! spec_tuple_impl {
             iter.fold((), extend($($var_names,)*));
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl<$($ty_names,)* $($extend_ty_names,)* Iter> $trait_name<$($extend_ty_names),*> for Iter
         where
             $($extend_ty_names: Extend<$ty_names>,)*
@@ -608,6 +611,7 @@ macro_rules! spec_tuple_impl {
             }
         }
 
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl<$($ty_names,)* $($extend_ty_names,)* Iter> $trait_name<$($extend_ty_names),*> for Iter
         where
             $($extend_ty_names: Extend<$ty_names>,)*
@@ -664,6 +668,7 @@ macro_rules! spec_tuple_impl {
         #[$meta]
         $(#[$doctext])?
         #[stable(feature = "from_iterator_for_tuple", since = "1.79.0")]
+        #[cfg(not(feature = "ferrocene_certified"))]
         impl<$($ty_names,)* $($extend_ty_names,)*> FromIterator<($($extend_ty_names,)*)> for ($($ty_names,)*)
         where
             $($ty_names: Default + Extend<$extend_ty_names>,)*
@@ -679,7 +684,6 @@ macro_rules! spec_tuple_impl {
     };
 }
 
-#[cfg(not(feature = "ferrocene_certified"))]
 spec_tuple_impl!(
     (L, l, EL, TraitL, default_extend_tuple_l, 11),
     (K, k, EK, TraitK, default_extend_tuple_k, 10),

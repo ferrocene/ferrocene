@@ -6,6 +6,6 @@ Requirement violation review
 
 This is a list of functions, with associated assessments, that do not meet function requirements.
 
-.. csv-table:: Requirement violation review
+.. csv-table::
    :file: ./spreadsheets/requirement-review.csv
    :header-rows: 1

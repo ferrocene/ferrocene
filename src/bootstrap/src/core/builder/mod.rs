@@ -1165,6 +1165,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::install::FerroceneDocs,
             ),
             Kind::Run => describe!(
+                crate::ferrocene::run::coverage_of_subset::CoverageForSubset,
                 crate::ferrocene::run::TraceabilityMatrix,
                 run::BuildManifest,
                 run::BumpStage0,

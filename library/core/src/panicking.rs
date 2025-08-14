@@ -35,7 +35,8 @@ use crate::intrinsics::const_eval_select;
 use crate::panic::{Location, PanicInfo};
 
 #[cfg(feature = "panic_immediate_abort")]
-#[cfg(not(feature = "ferrocene_certified"))] /* blocked on `assert` */
+// blocked on `assert`
+#[cfg(not(feature = "ferrocene_certified"))]
 const _: () = assert!(cfg!(panic = "abort"), "panic_immediate_abort requires -C panic=abort");
 
 // First we define the two main entry points that all panics go through.

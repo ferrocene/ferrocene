@@ -43,7 +43,8 @@ mod iter;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) use drain::drain_array_with;
 #[stable(feature = "array_value_iter", since = "1.51.0")]
-#[cfg(not(feature = "ferrocene_certified"))] /* blocked by IntoIter */
+// blocked by IntoIter
+#[cfg(not(feature = "ferrocene_certified"))]
 pub use iter::IntoIter;
 
 /// Creates an array of type `[T; N]` by repeatedly cloning a value.
@@ -440,7 +441,8 @@ where
 
 /// Implements comparison of arrays [lexicographically](Ord#lexicographical-comparison).
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_certified"))] /* blocked by PartialOrd */
+// blocked by PartialOrd
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: PartialOrd, const N: usize> PartialOrd for [T; N] {
     #[inline]
     fn partial_cmp(&self, other: &[T; N]) -> Option<Ordering> {

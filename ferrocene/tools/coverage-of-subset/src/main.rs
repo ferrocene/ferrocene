@@ -8,7 +8,7 @@ use std::sync::LazyLock;
 /// Uncertified code is marked with this attribute
 const MARKER: &str = "#[cfg(not(feature = \"ferrocene_certified\"))]";
 /// Mark code with this to stop rustc from instrumenting it
-const TO_BE_INSERTED: &str = "#[coverage(off)]";
+const TO_BE_INSERTED: &str = "#[cfg_attr(not(bootstrap), coverage(off))]";
 // Note: Has to be a lock to be used in a static. Will only ever be called from
 // one thread, so it should not be blocking in reality.
 static MARKER_PLUS_TO_BE_INSERTED: LazyLock<String> =
@@ -114,19 +114,19 @@ impl F {
 "#;
 
     const TEST_FILE_CORRECT: &str = r#"
-#[cfg(not(feature = "ferrocene_certified"))] #[coverage(off)]
+#[cfg(not(feature = "ferrocene_certified"))] #[cfg_attr(not(bootstrap), coverage(off))]
 fn a{} {}
 
-#[cfg(not(feature = "ferrocene_certified"))] #[coverage(off)]
+#[cfg(not(feature = "ferrocene_certified"))] #[cfg_attr(not(bootstrap), coverage(off))]
 fn b() {}
 
 #[cfg(feature = "ferrocene_certified")]
 fn b() {}
 
-#[cfg(not(feature = "ferrocene_certified"))] #[coverage(off)]
+#[cfg(not(feature = "ferrocene_certified"))] #[cfg_attr(not(bootstrap), coverage(off))]
 mod c;
 
-#[cfg(not(feature = "ferrocene_certified"))] #[coverage(off)]
+#[cfg(not(feature = "ferrocene_certified"))] #[cfg_attr(not(bootstrap), coverage(off))]
 impl D {
     fn e() {}
 }
@@ -134,7 +134,7 @@ impl D {
 impl F {
     fn g() {}
 
-    #[cfg(not(feature = "ferrocene_certified"))] #[coverage(off)]
+    #[cfg(not(feature = "ferrocene_certified"))] #[cfg_attr(not(bootstrap), coverage(off))]
     fn h() {}
 }
 "#;

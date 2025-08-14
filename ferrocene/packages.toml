@@ -87,6 +87,7 @@ targets = [
   "thumbv8m.main-none-eabi",
   "thumbv8m.main-none-eabihf",
   "wasm32-unknown-unknown",
+  "x86_64-pc-windows-gnu",
 ]
 
 [[groups.cross-compilation.packages]]

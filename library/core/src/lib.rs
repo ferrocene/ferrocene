@@ -39,9 +39,9 @@
 //!   return. You should mark your implementation using `#[panic_handler]`.
 //!
 //! * `rust_eh_personality` - is used by the failure mechanisms of the
-//!    compiler. This is often mapped to GCC's personality function, but crates
-//!    which do not trigger a panic can be assured that this function is never
-//!    called. The `lang` attribute is called `eh_personality`.
+//!   compiler. This is often mapped to GCC's personality function, but crates
+//!   which do not trigger a panic can be assured that this function is never
+//!   called. The `lang` attribute is called `eh_personality`.
 
 #![stable(feature = "core", since = "1.6.0")]
 #![doc(
@@ -106,6 +106,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_select))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(cfg_target_has_reliable_f16_f128))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(const_carrying_mul_add))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(const_cmp))]
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
 #![feature(core_intrinsics)]
@@ -145,11 +146,12 @@
 #![feature(cfg_target_has_atomic)]
 #![feature(cfg_target_has_atomic_equal_alignment)]
 #![feature(cfg_ub_checks)]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(const_precise_live_drops))]
+#![feature(const_precise_live_drops)]
 #![feature(const_trait_impl)]
 #![feature(decl_macro)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(deprecated_suggestion))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_cfg))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(derive_const))]
 #![feature(doc_cfg_hide)]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(doc_notable_trait))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(extern_types))]

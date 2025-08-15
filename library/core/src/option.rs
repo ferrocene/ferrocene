@@ -578,6 +578,7 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{self, FusedIterator, TrustedLen};
+use crate::marker::Destruct;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
 #[cfg(feature = "ferrocene_certified")]
@@ -656,7 +657,8 @@ impl<T> Option<T> {
     #[must_use]
     #[inline]
     #[stable(feature = "is_some_and", since = "1.70.0")]
-    pub fn is_some_and(self, f: impl FnOnce(T) -> bool) -> bool {
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn is_some_and(self, f: impl ~const FnOnce(T) -> bool + ~const Destruct) -> bool {
         match self {
             None => false,
             Some(x) => f(x),
@@ -705,7 +707,8 @@ impl<T> Option<T> {
     #[must_use]
     #[inline]
     #[stable(feature = "is_none_or", since = "1.82.0")]
-    pub fn is_none_or(self, f: impl FnOnce(T) -> bool) -> bool {
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn is_none_or(self, f: impl ~const FnOnce(T) -> bool + ~const Destruct) -> bool {
         match self {
             None => true,
             Some(x) => f(x),
@@ -851,7 +854,7 @@ impl<T> Option<T> {
         // just needs to be aligned, which it is because `&self` is aligned and
         // the offset used is a multiple of alignment.
         //
-        // In the new version, the intrinsic always returns a pointer to an
+        // Here we assume that `offset_of!` always returns an offset to an
         // in-bounds and correctly aligned position for a `T` (even if in the
         // `None` case it's just padding).
         unsafe {
@@ -1038,7 +1041,12 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub fn unwrap_or(self, default: T) -> T {
+    #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn unwrap_or(self, default: T) -> T
+    where
+        T: ~const Destruct,
+    {
         match self {
             Some(x) => x,
             None => default,
@@ -1057,9 +1065,10 @@ impl<T> Option<T> {
     #[inline]
     #[track_caller]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub fn unwrap_or_else<F>(self, f: F) -> T
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn unwrap_or_else<F>(self, f: F) -> T
     where
-        F: FnOnce() -> T,
+        F: ~const FnOnce() -> T + ~const Destruct,
     {
         match self {
             Some(x) => x,
@@ -1088,9 +1097,10 @@ impl<T> Option<T> {
     /// [`FromStr`]: crate::str::FromStr
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub fn unwrap_or_default(self) -> T
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn unwrap_or_default(self) -> T
     where
-        T: Default,
+        T: ~const Default,
     {
         match self {
             Some(x) => x,
@@ -1155,9 +1165,10 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub fn map<U, F>(self, f: F) -> Option<U>
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn map<U, F>(self, f: F) -> Option<U>
     where
-        F: FnOnce(T) -> U,
+        F: ~const FnOnce(T) -> U + ~const Destruct,
     {
         match self {
             Some(x) => Some(f(x)),
@@ -1185,7 +1196,11 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "result_option_inspect", since = "1.76.0")]
-    pub fn inspect<F: FnOnce(&T)>(self, f: F) -> Self {
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn inspect<F>(self, f: F) -> Self
+    where
+        F: ~const FnOnce(&T) + ~const Destruct,
+    {
         if let Some(ref x) = self {
             f(x);
         }
@@ -1214,9 +1229,11 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use = "if you don't need the returned value, use `if let` instead"]
-    pub fn map_or<U, F>(self, default: U, f: F) -> U
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn map_or<U, F>(self, default: U, f: F) -> U
     where
-        F: FnOnce(T) -> U,
+        F: ~const FnOnce(T) -> U + ~const Destruct,
+        U: ~const Destruct,
     {
         match self {
             Some(t) => f(t),
@@ -1259,10 +1276,11 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub fn map_or_else<U, D, F>(self, default: D, f: F) -> U
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn map_or_else<U, D, F>(self, default: D, f: F) -> U
     where
-        D: FnOnce() -> U,
-        F: FnOnce(T) -> U,
+        D: ~const FnOnce() -> U + ~const Destruct,
+        F: ~const FnOnce(T) -> U + ~const Destruct,
     {
         match self {
             Some(t) => f(t),
@@ -1289,10 +1307,11 @@ impl<T> Option<T> {
     /// [default value]: Default::default
     #[inline]
     #[unstable(feature = "result_option_map_or_default", issue = "138099")]
-    pub fn map_or_default<U, F>(self, f: F) -> U
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn map_or_default<U, F>(self, f: F) -> U
     where
-        U: Default,
-        F: FnOnce(T) -> U,
+        U: ~const Default,
+        F: ~const FnOnce(T) -> U + ~const Destruct,
     {
         match self {
             Some(t) => f(t),
@@ -1323,7 +1342,8 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub fn ok_or<E>(self, err: E) -> Result<T, E> {
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn ok_or<E: ~const Destruct>(self, err: E) -> Result<T, E> {
         match self {
             Some(v) => Ok(v),
             None => Err(err),
@@ -1348,9 +1368,10 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub fn ok_or_else<E, F>(self, err: F) -> Result<T, E>
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn ok_or_else<E, F>(self, err: F) -> Result<T, E>
     where
-        F: FnOnce() -> E,
+        F: ~const FnOnce() -> E + ~const Destruct,
     {
         match self {
             Some(v) => Ok(v),
@@ -1479,7 +1500,12 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub fn and<U>(self, optb: Option<U>) -> Option<U> {
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn and<U>(self, optb: Option<U>) -> Option<U>
+    where
+        T: ~const Destruct,
+        U: ~const Destruct,
+    {
         match self {
             Some(_) => optb,
             None => None,
@@ -1518,9 +1544,10 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_confusables("flat_map", "flatmap")]
-    pub fn and_then<U, F>(self, f: F) -> Option<U>
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn and_then<U, F>(self, f: F) -> Option<U>
     where
-        F: FnOnce(T) -> Option<U>,
+        F: ~const FnOnce(T) -> Option<U> + ~const Destruct,
     {
         match self {
             Some(x) => f(x),
@@ -1554,9 +1581,11 @@ impl<T> Option<T> {
     /// [`Some(t)`]: Some
     #[inline]
     #[stable(feature = "option_filter", since = "1.27.0")]
-    pub fn filter<P>(self, predicate: P) -> Self
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn filter<P>(self, predicate: P) -> Self
     where
-        P: FnOnce(&T) -> bool,
+        P: ~const FnOnce(&T) -> bool + ~const Destruct,
+        T: ~const Destruct,
     {
         if let Some(x) = self {
             if predicate(&x) {
@@ -1595,7 +1624,11 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub fn or(self, optb: Option<T>) -> Option<T> {
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn or(self, optb: Option<T>) -> Option<T>
+    where
+        T: ~const Destruct,
+    {
         match self {
             x @ Some(_) => x,
             None => optb,
@@ -1617,9 +1650,13 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    pub fn or_else<F>(self, f: F) -> Option<T>
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn or_else<F>(self, f: F) -> Option<T>
     where
-        F: FnOnce() -> Option<T>,
+        F: ~const FnOnce() -> Option<T> + ~const Destruct,
+        //FIXME(const_hack): this `T: ~const Destruct` is unnecessary, but even precise live drops can't tell
+        // no value of type `T` gets dropped here
+        T: ~const Destruct,
     {
         match self {
             x @ Some(_) => x,
@@ -1650,7 +1687,11 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "option_xor", since = "1.37.0")]
-    pub fn xor(self, optb: Option<T>) -> Option<T> {
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn xor(self, optb: Option<T>) -> Option<T>
+    where
+        T: ~const Destruct,
+    {
         match (self, optb) {
             (a @ Some(_), None) => a,
             (None, b @ Some(_)) => b,
@@ -1684,8 +1725,12 @@ impl<T> Option<T> {
     #[must_use = "if you intended to set a value, consider assignment instead"]
     #[inline]
     #[stable(feature = "option_insert", since = "1.53.0")]
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
     #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn insert(&mut self, value: T) -> &mut T {
+    pub const fn insert(&mut self, value: T) -> &mut T
+    where
+        T: ~const Destruct,
+    {
         *self = Some(value);
 
         // SAFETY: the code above just filled the option
@@ -1738,10 +1783,11 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "option_get_or_insert_default", since = "1.83.0")]
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
     #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn get_or_insert_default(&mut self) -> &mut T
+    pub const fn get_or_insert_default(&mut self) -> &mut T
     where
-        T: Default,
+        T: ~const Default + ~const Destruct,
     {
         self.get_or_insert_with(T::default)
     }
@@ -1765,10 +1811,12 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "option_entry", since = "1.20.0")]
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
     #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn get_or_insert_with<F>(&mut self, f: F) -> &mut T
+    pub const fn get_or_insert_with<F>(&mut self, f: F) -> &mut T
     where
-        F: FnOnce() -> T,
+        F: ~const FnOnce() -> T + ~const Destruct,
+        T: ~const Destruct,
     {
         if let None = self {
             *self = Some(f());
@@ -1833,10 +1881,11 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "option_take_if", since = "1.80.0")]
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
     #[cfg(not(feature = "ferrocene_certified"))]
-    pub fn take_if<P>(&mut self, predicate: P) -> Option<T>
+    pub const fn take_if<P>(&mut self, predicate: P) -> Option<T>
     where
-        P: FnOnce(&mut T) -> bool,
+        P: ~const FnOnce(&mut T) -> bool + ~const Destruct,
     {
         if self.as_mut().map_or(false, predicate) { self.take() } else { None }
     }
@@ -1882,7 +1931,12 @@ impl<T> Option<T> {
     /// assert_eq!(x.zip(z), None);
     /// ```
     #[stable(feature = "option_zip_option", since = "1.46.0")]
-    pub fn zip<U>(self, other: Option<U>) -> Option<(T, U)> {
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    pub const fn zip<U>(self, other: Option<U>) -> Option<(T, U)>
+    where
+        T: ~const Destruct,
+        U: ~const Destruct,
+    {
         match (self, other) {
             (Some(a), Some(b)) => Some((a, b)),
             _ => None,
@@ -1918,10 +1972,13 @@ impl<T> Option<T> {
     /// assert_eq!(x.zip_with(None, Point::new), None);
     /// ```
     #[unstable(feature = "option_zip", issue = "70086")]
-    #[cfg(not(feature = "ferrocene_uncertified"))]
-    pub fn zip_with<U, F, R>(self, other: Option<U>, f: F) -> Option<R>
+    #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[cfg(not(feature = "ferrocene_certified"))]
+    pub const fn zip_with<U, F, R>(self, other: Option<U>, f: F) -> Option<R>
     where
-        F: FnOnce(T, U) -> R,
+        F: ~const FnOnce(T, U) -> R + ~const Destruct,
+        T: ~const Destruct,
+        U: ~const Destruct,
     {
         match (self, other) {
             (Some(a), Some(b)) => Some(f(a, b)),
@@ -2113,9 +2170,12 @@ const fn expect_failed(msg: &str) -> ! {
 /////////////////////////////////////////////////////////////////////////////
 
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<T> Clone for Option<T>
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
+impl<T> const Clone for Option<T>
 where
-    T: Clone,
+    // FIXME(const_hack): the T: ~const Destruct should be inferred from the Self: ~const Destruct in clone_from.
+    // See https://github.com/rust-lang/rust/issues/144207
+    T: ~const Clone + ~const Destruct,
 {
     #[inline]
     fn clone(&self) -> Self {
@@ -2203,7 +2263,8 @@ impl<'a, T> IntoIterator for &'a mut Option<T> {
 }
 
 #[stable(since = "1.12.0", feature = "option_from")]
-impl<T> From<T> for Option<T> {
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
+impl<T> const From<T> for Option<T> {
     /// Moves `val` into a new [`Some`].
     ///
     /// # Examples
@@ -2219,7 +2280,8 @@ impl<T> From<T> for Option<T> {
 }
 
 #[stable(feature = "option_ref_from_ref_option", since = "1.30.0")]
-impl<'a, T> From<&'a Option<T>> for Option<&'a T> {
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
+impl<'a, T> const From<&'a Option<T>> for Option<&'a T> {
     /// Converts from `&Option<T>` to `Option<&T>`.
     ///
     /// # Examples
@@ -2246,7 +2308,8 @@ impl<'a, T> From<&'a Option<T>> for Option<&'a T> {
 }
 
 #[stable(feature = "option_ref_from_ref_option", since = "1.30.0")]
-impl<'a, T> From<&'a mut Option<T>> for Option<&'a mut T> {
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
+impl<'a, T> const From<&'a mut Option<T>> for Option<&'a mut T> {
     /// Converts from `&mut Option<T>` to `Option<&mut T>`
     ///
     /// # Examples
@@ -2274,8 +2337,9 @@ impl<'a, T> From<&'a mut Option<T>> for Option<&'a mut T> {
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T> crate::marker::StructuralPartialEq for Option<T> {}
 #[stable(feature = "rust1", since = "1.0.0")]
+#[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T: PartialEq> PartialEq for Option<T> {
+impl<T: ~const PartialEq> const PartialEq for Option<T> {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
         // Spelling out the cases explicitly optimizes better than
@@ -2595,8 +2659,9 @@ impl<A, V: FromIterator<A>> FromIterator<Option<A>> for Option<V> {
 }
 
 #[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T> ops::Try for Option<T> {
+impl<T> const ops::Try for Option<T> {
     type Output = T;
     type Residual = Option<convert::Infallible>;
 
@@ -2615,10 +2680,11 @@ impl<T> ops::Try for Option<T> {
 }
 
 #[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
-#[cfg(not(feature = "ferrocene_certified"))]
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
 // Note: manually specifying the residual type instead of using the default to work around
 // https://github.com/rust-lang/rust/issues/99940
-impl<T> ops::FromResidual<Option<convert::Infallible>> for Option<T> {
+#[cfg(not(feature = "ferrocene_certified"))]
+impl<T> const ops::FromResidual<Option<convert::Infallible>> for Option<T> {
     #[inline]
     fn from_residual(residual: Option<convert::Infallible>) -> Self {
         match residual {
@@ -2629,8 +2695,9 @@ impl<T> ops::FromResidual<Option<convert::Infallible>> for Option<T> {
 
 #[diagnostic::do_not_recommend]
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T> ops::FromResidual<ops::Yeet<()>> for Option<T> {
+impl<T> const ops::FromResidual<ops::Yeet<()>> for Option<T> {
     #[inline]
     fn from_residual(ops::Yeet(()): ops::Yeet<()>) -> Self {
         None
@@ -2638,8 +2705,9 @@ impl<T> ops::FromResidual<ops::Yeet<()>> for Option<T> {
 }
 
 #[unstable(feature = "try_trait_v2_residual", issue = "91285")]
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T> ops::Residual<T> for Option<convert::Infallible> {
+impl<T> const ops::Residual<T> for Option<convert::Infallible> {
     type TryType = Option<T>;
 }
 

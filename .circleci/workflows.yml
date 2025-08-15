@@ -1328,7 +1328,9 @@ commands:
                     --rm \
                     $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER']))") \
                     -e SCRIPT="<< parameters.emulator-script >> prepare" \
-                    -e REMOTE_TEST_SERVER_STAGE=2 \
+                    # TODO temporary workaround for bootstrap bug that has since been fixed upstream
+                    # ... reset to 2 when that fix gets pulled in
+                    -e REMOTE_TEST_SERVER_STAGE=1 \
                     --workdir /home/ci/project \
                     --volume $(pwd):/home/ci/project \
                     --volume /tmp/emulator:/tmp/emulator \

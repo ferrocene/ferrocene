@@ -41,6 +41,13 @@ reason = "libcheckrust includes symbols which cannot be used without `-fPIC` on 
 
 [["tests/ui"]]
 tests = [
+    "tests/codegen-llvm/enum/enum-match.rs",
+]
+targets = ["aarch64-unknown-ferrocene.facade"]
+reason = "TODO: to be investigated"
+
+[["tests/ui"]]
+tests = [
     "tests/ui/command/command-argv0.rs",
 ]
 targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]

@@ -15,7 +15,8 @@ use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
 use crate::utils::exec::BootstrapCommand;
-use crate::{FileType, t};
+use crate::utils::helpers::git;
+use crate::{Compiler, FileType, t};
 
 pub(crate) trait IsSphinxBook {
     const SOURCE: &'static str;
@@ -209,6 +210,18 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             .arg(format!(
                 "-Drustfmt_version={}",
                 builder.crates.get("rustfmt-nightly").unwrap().version,
+            ))
+            .arg(format!(
+                "-Dgrcov_version={}",
+                get_submodule_version("ferrocene/tools/grcov", builder)
+                    .as_deref()
+                    .unwrap_or("not found")
+            ))
+            .arg(format!(
+                "-Dllvm_version={}",
+                get_submodule_version("src/llvm-project", builder)
+                    .as_deref()
+                    .unwrap_or("not found")
             ));
 
         // Include the breadcrumbs in the generated documentation.
@@ -685,11 +698,18 @@ sphinx_books! [
         src: "ferrocene/doc/internal-procedures",
         dest: "qualification/internal-procedures",
     },
+    {
+        ty: CoreCertification,
+        name: "core-certification",
+        src: "ferrocene/doc/core-certification",
+        dest: "certification/core",
+    },
 ];
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub(crate) struct TraceabilityMatrix {
     target: TargetSelection,
+    compiler: Compiler,
 }
 
 impl Step for TraceabilityMatrix {
@@ -702,11 +722,15 @@ impl Step for TraceabilityMatrix {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(TraceabilityMatrix { target: run.target });
+        let compiler = run.builder.compiler(run.builder.top_stage, run.build_triple());
+        run.builder.ensure(TraceabilityMatrix { target: run.target, compiler });
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        builder.ensure(crate::ferrocene::run::TraceabilityMatrix { target: self.target });
+        builder.ensure(crate::ferrocene::run::TraceabilityMatrix {
+            target: self.target,
+            compiler: self.compiler,
+        });
     }
 }
 
@@ -745,37 +769,92 @@ impl Step for CopyrightFiles {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub(crate) struct TechnicalReport {
+pub(crate) struct CompilerTechnicalReport {
     target: TargetSelection,
 }
 
-impl Step for TechnicalReport {
+impl Step for CompilerTechnicalReport {
     type Output = ();
     const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         let builder = run.builder;
-        run.alias("ferrocene-technical-report").default_condition(
-            builder.config.docs && builder.config.ferrocene_technical_report_url.is_some(),
+        run.alias("ferrocene-compiler-technical-report").default_condition(
+            builder.config.docs && builder.config.ferrocene_compiler_technical_report_url.is_some(),
         )
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(TechnicalReport { target: run.target });
+        run.builder.ensure(CompilerTechnicalReport { target: run.target });
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let url = builder
             .config
-            .ferrocene_technical_report_url
+            .ferrocene_compiler_technical_report_url
             .as_deref()
-            .expect("ferrocene.technical-report-url is not configured");
+            .expect("ferrocene.technical-compiler-report-url is not configured");
         let cache_path = builder
             .out
             .join("cache")
             .join("ferrocene")
             .join(url.rsplit_once('/').map(|(_, name)| name).unwrap_or(url));
         let output_dir = builder.doc_out(self.target).join("qualification");
+
+        if builder.config.dry_run() {
+            return;
+        }
+
+        if !cache_path.exists() {
+            if let Some(parent) = cache_path.parent() {
+                fs::create_dir_all(parent).unwrap();
+            }
+            builder.config.download_file(url, &cache_path, "");
+        }
+
+        let mut output_file = output_dir.join("technical-report.pdf");
+
+        builder.create_dir(&output_dir);
+        builder.copy_link(&cache_path, &output_file, FileType::Regular);
+
+        // Include the technical report file only in the signatures subset.
+        output_file.as_mut_os_string().push(".ferrocene-subset");
+        builder.create(&output_file, "signatures");
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub(crate) struct CoreTechnicalReport {
+    target: TargetSelection,
+}
+
+impl Step for CoreTechnicalReport {
+    type Output = ();
+    const DEFAULT: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        let builder = run.builder;
+        run.alias("ferrocene-core-technical-report").default_condition(
+            builder.config.docs && builder.config.ferrocene_compiler_technical_report_url.is_some(),
+        )
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(CoreTechnicalReport { target: run.target });
+    }
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        let url = builder
+            .config
+            .ferrocene_core_technical_report_url
+            .as_deref()
+            .expect("ferrocene.core-technical-report-url is not configured");
+        let cache_path = builder
+            .out
+            .join("cache")
+            .join("ferrocene")
+            .join(url.rsplit_once('/').map(|(_, name)| name).unwrap_or(url));
+        let output_dir = builder.doc_out(self.target).join("certification").join("core");
 
         if builder.config.dry_run() {
             return;
@@ -876,4 +955,19 @@ fn relative_path(base: &Path, path: &Path) -> PathBuf {
     }
 
     if result.components().count() == 0 { PathBuf::from(".") } else { result }
+}
+
+fn get_submodule_version(
+    submodule_path: &str,
+    builder: &Builder<'_>,
+) -> Option<String> {
+    let submodule_status = git(None).args(["submodule", "status"]).run_capture_stdout(builder).stdout();
+    let mut submodule_version = None;
+    for line in submodule_status.lines() {
+        if line.contains(submodule_path) {
+            let (commit, _) = line.trim().split_once(' ').unwrap();
+            submodule_version = Some(commit.to_string())
+        }
+    }
+    submodule_version
 }

@@ -1082,11 +1082,13 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::doc::DocumentList,
                 crate::ferrocene::doc::EvaluationPlan,
                 crate::ferrocene::doc::EvaluationReport,
+                crate::ferrocene::doc::CoreCertification,
                 crate::ferrocene::doc::QualificationPlan,
                 crate::ferrocene::doc::QualificationReport,
                 crate::ferrocene::doc::SafetyManual,
                 crate::ferrocene::doc::TraceabilityMatrix,
-                crate::ferrocene::doc::TechnicalReport,
+                crate::ferrocene::doc::CompilerTechnicalReport,
+                crate::ferrocene::doc::CoreTechnicalReport,
                 crate::ferrocene::doc::code_coverage::AllCoverageReports,
                 // QMS Documents
                 crate::ferrocene::doc::InternalProcedures,
@@ -1182,7 +1184,8 @@ impl<'a> Builder<'a> {
                 run::Rustfmt,
             ),
             Kind::Sign => describe!(
-                // Qualification Documents
+                // Qualification
+                crate::ferrocene::sign::CoreCertification,
                 crate::ferrocene::sign::DocumentList,
                 crate::ferrocene::sign::EvaluationPlan,
                 crate::ferrocene::sign::EvaluationReport,

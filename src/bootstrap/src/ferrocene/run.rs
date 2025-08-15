@@ -5,6 +5,7 @@ pub(crate) mod coverage_of_subset;
 
 use std::path::PathBuf;
 
+use crate::Compiler;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::Tool;
 use crate::core::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
@@ -15,6 +16,7 @@ use crate::utils::exec::BootstrapCommand;
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub(crate) struct TraceabilityMatrix {
     pub(crate) target: TargetSelection,
+    pub(crate) compiler: Compiler,
 }
 
 impl Step for TraceabilityMatrix {
@@ -27,7 +29,8 @@ impl Step for TraceabilityMatrix {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(TraceabilityMatrix { target: run.target });
+        let compiler = run.builder.compiler(run.builder.top_stage, run.build_triple());
+        run.builder.ensure(TraceabilityMatrix { target: run.target, compiler });
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
@@ -53,7 +56,13 @@ impl Step for TraceabilityMatrix {
             BootstrapCommand::new(&compiletest)
                 .env("FERROCENE_COLLECT_ANNOTATIONS", "1")
                 .env("FERROCENE_DEST", dest)
-                .env("FERROCENE_SRC_BASE", builder.src.join(suite))
+                .env("FERROCENE_SRC_ROOT", &builder.src)
+                .env("FERROCENE_SRC_TEST_SUITE_ROOT", builder.src.join(suite))
+                .env("FERROCENE_BUILD_ROOT", &builder.out)
+                .env(
+                    "FERROCENE_BUILD_TEST_SUITE_ROOT",
+                    builder.out.join(self.compiler.host).join(suite),
+                )
                 .env("FERROCENE_MODE", mode)
                 .env("FERROCENE_SUITE", suite)
                 .run(builder);

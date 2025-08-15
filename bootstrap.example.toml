@@ -1101,9 +1101,13 @@
 # ferrocene.document-signatures to be set to "docs-tarball".
 #document-signatures-tarball = <path>
 
-# Download URL for the qualification technical report. If omitted, the
+# Download URL for the compiler technical report. If omitted, the
 # technical report will not be included in the documentation.
-#technical-report-url = <none> (url)
+#compiler-technical-report-url = <none> (url)
+
+# Download URL for the core library technical report. If omitted, the
+# technical report will not be included in the documentation.
+#core-technical-report-url = <none> (url)
 
 # Amazon Web Services profile that you may have to set to work with AWS resources
 # while working locally.

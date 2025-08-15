@@ -170,7 +170,10 @@ fn sample_config() -> Config {
         color: crate::ColorConfig::NeverColor,
         format: crate::OutputFormat::Json,
         mode: env("FERROCENE_MODE"),
-        src_test_suite_root: env("FERROCENE_SRC_BASE"),
+        src_root: env("FERROCENE_SRC_ROOT"),
+        src_test_suite_root: env("FERROCENE_SRC_TEST_SUITE_ROOT"),
+        build_root: env("FERROCENE_BUILD_ROOT"),
+        build_test_suite_root: env("FERROCENE_BUILD_TEST_SUITE_ROOT"),
         suite: env("FERROCENE_SUITE"),
         ..Config::default()
     }

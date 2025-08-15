@@ -42,6 +42,17 @@ Ferrocene User Manual
 .. toctree::
    :numbered:
    :maxdepth: 2
+   :caption: core library
+
+   core/index
+   core/requirements
+   core/install
+   core/using
+   core/testing
+
+.. toctree::
+   :numbered:
+   :maxdepth: 2
    :caption: rustfmt
 
    rustfmt/install

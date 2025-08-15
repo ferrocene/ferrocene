@@ -52,8 +52,8 @@ Library Test Suite
 
 .. id:: RUSTC_TS2_LIBR
 
-The **library test suite** contains tests that cover library libcore, and on
-supported platforms, libraries liballoc, libstd, and libtest. The tests are a
+The **library test suite** contains tests that cover the ``core`` library, and on
+supported platforms, the libraries ``alloc``, ``std``, and ``test``. The tests are a
 mix of unit tests, integration tests, and documentation tests (code snippets
 within the documentation which are built and run).
 

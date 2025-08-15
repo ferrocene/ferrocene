@@ -1,0 +1,117 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="References, `&#38;T` and `&#38;mut T`."><title>core::prim_ref - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.88.0" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../../static.files/storage-82c7156e.js"></script><script defer src="../sidebar-items1.88.0.js"></script><script defer src="../../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt="logo"></a><h2><a href="../../core/index.html">core</a><span class="version">1.88.0-dev</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module prim_<wbr>ref</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#trait-implementations-1" title="Trait implementations">Trait implementations</a></li><li><a href="#safety" title="Safety">Safety</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="../index.html">In crate core</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">core</a></div><h1>Module <span>prim_ref</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><span class="since" title="Stable since Rust version 1.6.0">1.6.0</span> · <a class="src" href="../../src/core/primitive_docs.rs.html#1654">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>References, <code>&amp;T</code> and <code>&amp;mut T</code>.</p>
+<p>A reference represents a borrow of some owned value. You can get one by using the <code>&amp;</code> or <code>&amp;mut</code>
+operators on a value, or by using a <a href="../std/keyword.ref.html"><code>ref</code></a> or
+<code><a href="../std/keyword.ref.html">ref</a> <a href="../std/keyword.mut.html">mut</a></code> pattern.</p>
+<p>For those familiar with pointers, a reference is just a pointer that is assumed to be
+aligned, not null, and pointing to memory containing a valid value of <code>T</code> - for example,
+<code>&amp;<a href="../primitive.bool.html" title="primitive bool">bool</a></code> can only point to an allocation containing the integer values <code>1</code>
+(<a href="../std/keyword.true.html"><code>true</code></a>) or <code>0</code> (<a href="../std/keyword.false.html"><code>false</code></a>), but
+creating a <code>&amp;<a href="../primitive.bool.html" title="primitive bool">bool</a></code> that points to an allocation containing
+the value <code>3</code> causes undefined behavior.
+In fact, <code><a href="../option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;T&gt;</code> has the same memory representation as a
+nullable but aligned pointer, and can be passed across FFI boundaries as such.</p>
+<p>In most cases, references can be used much like the original value. Field access, method
+calling, and indexing work the same (save for mutability rules, of course). In addition, the
+comparison operators transparently defer to the referent’s implementation, allowing references
+to be compared the same as owned values.</p>
+<p>References have a lifetime attached to them, which represents the scope for which the borrow is
+valid. A lifetime is said to “outlive” another one if its representative scope is as long or
+longer than the other. The <code>'static</code> lifetime is the longest lifetime, which represents the
+total life of the program. For example, string literals have a <code>'static</code> lifetime because the
+text data is embedded into the binary of the program, rather than in an allocation that needs
+to be dynamically managed.</p>
+<p><code>&amp;mut T</code> references can be freely coerced into <code>&amp;T</code> references with the same referent type, and
+references with longer lifetimes can be freely coerced into references with shorter ones.</p>
+<p>Reference equality by address, instead of comparing the values pointed to, is accomplished via
+implicit reference-pointer coercion and raw pointer equality via [<code>ptr::eq</code>], while
+<a href="../cmp/trait.PartialEq.html" title="trait core::cmp::PartialEq"><code>PartialEq</code></a> compares values.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::ptr;
+
+<span class="kw">let </span>five = <span class="number">5</span>;
+<span class="kw">let </span>other_five = <span class="number">5</span>;
+<span class="kw">let </span>five_ref = <span class="kw-2">&amp;</span>five;
+<span class="kw">let </span>same_five_ref = <span class="kw-2">&amp;</span>five;
+<span class="kw">let </span>other_five_ref = <span class="kw-2">&amp;</span>other_five;
+
+<span class="macro">assert!</span>(five_ref == same_five_ref);
+<span class="macro">assert!</span>(five_ref == other_five_ref);
+
+<span class="macro">assert!</span>(ptr::eq(five_ref, same_five_ref));
+<span class="macro">assert!</span>(!ptr::eq(five_ref, other_five_ref));</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++use+std::ptr;%0A++++%0A++++let+five+=+5;%0A++++let+other_five+=+5;%0A++++let+five_ref+=+%26five;%0A++++let+same_five_ref+=+%26five;%0A++++let+other_five_ref+=+%26other_five;%0A++++%0A++++assert!(five_ref+==+same_five_ref);%0A++++assert!(five_ref+==+other_five_ref);%0A++++%0A++++assert!(ptr::eq(five_ref,+same_five_ref));%0A++++assert!(!ptr::eq(five_ref,+other_five_ref));%0A%7D&amp;edition=2024"></a></div>
+<p>For more information on how to use references, see <a href="../book/ch04-02-references-and-borrowing.html">the book’s section on “References and
+Borrowing”</a>.</p>
+<h2 id="trait-implementations-1"><a class="doc-anchor" href="#trait-implementations-1">§</a>Trait implementations</h2>
+<p>The following traits are implemented for all <code>&amp;T</code>, regardless of the type of its referent:</p>
+<ul>
+<li><a href="../marker/trait.Copy.html" title="trait core::marker::Copy"><code>Copy</code></a></li>
+<li><a href="../clone/trait.Clone.html" title="trait core::clone::Clone"><code>Clone</code></a> (Note that this will not defer to <code>T</code>’s <code>Clone</code> implementation if it exists!)</li>
+<li><a href="../ops/deref/trait.Deref.html" title="trait core::ops::deref::Deref"><code>Deref</code></a></li>
+<li><a href="borrow::Borrow"><code>Borrow</code></a></li>
+<li>[<code>fmt::Pointer</code>]</li>
+</ul>
+<p><code>&amp;mut T</code> references get all of the above except <code>Copy</code> and <code>Clone</code> (to prevent creating
+multiple simultaneous mutable borrows), plus the following, regardless of the type of its
+referent:</p>
+<ul>
+<li><a href="../ops/deref/trait.DerefMut.html" title="trait core::ops::deref::DerefMut"><code>DerefMut</code></a></li>
+<li><a href="borrow::BorrowMut"><code>BorrowMut</code></a></li>
+</ul>
+<p>The following traits are implemented on <code>&amp;T</code> references if the underlying <code>T</code> also implements
+that trait:</p>
+<ul>
+<li>All the traits in <a href="../fmt/index.html" title="mod core::fmt"><code>std::fmt</code></a> except [<code>fmt::Pointer</code>] (which is implemented regardless of the type of its referent) and [<code>fmt::Write</code>]</li>
+<li><a href="../cmp/trait.PartialOrd.html" title="trait core::cmp::PartialOrd"><code>PartialOrd</code></a></li>
+<li><a href="../cmp/trait.Ord.html" title="trait core::cmp::Ord"><code>Ord</code></a></li>
+<li><a href="../cmp/trait.PartialEq.html" title="trait core::cmp::PartialEq"><code>PartialEq</code></a></li>
+<li><a href="../cmp/trait.Eq.html" title="trait core::cmp::Eq"><code>Eq</code></a></li>
+<li><a href="../convert/trait.AsRef.html" title="trait core::convert::AsRef"><code>AsRef</code></a></li>
+<li><a href="../ops/function/trait.Fn.html" title="trait core::ops::function::Fn"><code>Fn</code></a> (in addition, <code>&amp;T</code> references get <a href="../ops/function/trait.FnMut.html" title="trait core::ops::function::FnMut"><code>FnMut</code></a> and <a href="../ops/function/trait.FnOnce.html" title="trait core::ops::function::FnOnce"><code>FnOnce</code></a> if <code>T: Fn</code>)</li>
+<li><a href="hash::Hash"><code>Hash</code></a></li>
+<li><a href="../std/net/trait.ToSocketAddrs.html"><code>ToSocketAddrs</code></a></li>
+<li><a href="../marker/trait.Sync.html" title="trait core::marker::Sync"><code>Sync</code></a></li>
+</ul>
+<p><code>&amp;mut T</code> references get all of the above except <code>ToSocketAddrs</code>, plus the following, if <code>T</code>
+implements that trait:</p>
+<ul>
+<li><a href="../convert/trait.AsMut.html" title="trait core::convert::AsMut"><code>AsMut</code></a></li>
+<li><a href="../ops/function/trait.FnMut.html" title="trait core::ops::function::FnMut"><code>FnMut</code></a> (in addition, <code>&amp;mut T</code> references get <a href="../ops/function/trait.FnOnce.html" title="trait core::ops::function::FnOnce"><code>FnOnce</code></a> if <code>T: FnMut</code>)</li>
+<li>[<code>fmt::Write</code>]</li>
+<li><a href="../iter/traits/iterator/trait.Iterator.html" title="trait core::iter::traits::iterator::Iterator"><code>Iterator</code></a></li>
+<li>[<code>DoubleEndedIterator</code>]</li>
+<li>[<code>ExactSizeIterator</code>]</li>
+<li><a href="iter::FusedIterator"><code>FusedIterator</code></a></li>
+<li><a href="iter::TrustedLen"><code>TrustedLen</code></a></li>
+<li><a href="../marker/trait.Send.html" title="trait core::marker::Send"><code>Send</code></a></li>
+<li><a href="../std/io/trait.Write.html"><code>io::Write</code></a></li>
+<li><a href="../std/io/trait.Read.html"><code>Read</code></a></li>
+<li><a href="../std/io/trait.Seek.html"><code>Seek</code></a></li>
+<li><a href="../std/io/trait.BufRead.html"><code>BufRead</code></a></li>
+</ul>
+<p>In addition, <code>&amp;T</code> references implement <a href="../marker/trait.Send.html" title="trait core::marker::Send"><code>Send</code></a> if and only if <code>T</code> implements <a href="../marker/trait.Sync.html" title="trait core::marker::Sync"><code>Sync</code></a>.</p>
+<p>Note that due to method call deref coercion, simply calling a trait method will act like they
+work on references as well as they do on owned values! The implementations described here are
+meant for generic contexts, where the final type <code>T</code> is a type parameter or otherwise not
+locally known.</p>
+<h2 id="safety"><a class="doc-anchor" href="#safety">§</a>Safety</h2>
+<p>For all types, <code>T: ?Sized</code>, and for all <code>t: &amp;T</code> or <code>t: &amp;mut T</code>, when such values cross an API
+boundary, the following invariants must generally be upheld:</p>
+<ul>
+<li><code>t</code> is non-null</li>
+<li><code>t</code> is aligned to <code>align_of_val(t)</code></li>
+<li>if <code>size_of_val(t) &gt; 0</code>, then <code>t</code> is dereferenceable for <code>size_of_val(t)</code> many bytes</li>
+</ul>
+<p>If <code>t</code> points at address <code>a</code>, being “dereferenceable” for N bytes means that the memory range
+<code>[a, a + N)</code> is all contained within a single <a href="../ptr/index.html#allocated-object" title="mod core::ptr">allocated object</a>.</p>
+<p>For instance, this means that unsafe code in a safe function may assume these invariants are
+ensured of arguments passed by the caller, and it may assume that these invariants are ensured
+of return values from any safe functions it calls.</p>
+<p>For the other direction, things are more complicated: when unsafe code passes arguments
+to safe functions or returns values from safe functions, they generally must <em>at least</em>
+not violate these invariants. The full requirements are stronger, as the reference generally
+must point to data that is safe to use at type <code>T</code>.</p>
+<p>It is not decided yet whether unsafe code may violate these invariants temporarily on internal
+data. As a consequence, unsafe code which violates these invariants temporarily on internal data
+may be unsound or become unsound in future versions of Rust depending on how this question is
+decided.</p>
+</div></details></section></div></main></body></html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A fixed-size array, denoted `[T; N]`, for the element type, `T`, and the non-negative compile-time constant size, `N`."><title>core::prim_array - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-aa0817cf.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.90.0" data-rustdoc-version="1.90.0-dev" data-channel="nightly" data-search-js="search-179e01a3.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="../sidebar-items1.90.0.js"></script><script defer src="../../static.files/main-673ee1e0.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt="logo"></a><h2><a href="../../core/index.html">core</a><span class="version">1.90.0-dev</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module prim_<wbr>array</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#examples" title="Examples">Examples</a></li><li><a href="#editions" title="Editions">Editions</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="../index.html">In crate core</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">core</a></div><h1>Module <span>prim_array</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><span class="since" title="Stable since Rust version 1.6.0">1.6.0</span> · <a class="src" href="../../src/core/primitive_docs.rs.html#836">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A fixed-size array, denoted <code>[T; N]</code>, for the element type, <code>T</code>, and the
+non-negative compile-time constant size, <code>N</code>.</p>
+<p>There are two syntactic forms for creating an array:</p>
+<ul>
+<li>
+<p>A list with each element, i.e., <code>[x, y, z]</code>.</p>
+</li>
+<li>
+<p>A repeat expression <code>[expr; N]</code> where <code>N</code> is how many times to repeat <code>expr</code> in the array. <code>expr</code> must either be:</p>
+<ul>
+<li>A value of a type implementing the <a href="../marker/trait.Copy.html" title="trait core::marker::Copy"><code>Copy</code></a> trait</li>
+<li>A <code>const</code> value</li>
+</ul>
+</li>
+</ul>
+<p>Note that <code>[expr; 0]</code> is allowed, and produces an empty array.
+This will still evaluate <code>expr</code>, however, and immediately drop the resulting value, so
+be mindful of side effects.</p>
+<p>Arrays of <em>any</em> size implement the following traits if the element type allows it:</p>
+<ul>
+<li><a href="../marker/trait.Copy.html" title="trait core::marker::Copy"><code>Copy</code></a></li>
+<li><a href="../clone/trait.Clone.html" title="trait core::clone::Clone"><code>Clone</code></a></li>
+<li><a href="fmt::Debug"><code>Debug</code></a></li>
+<li><a href="../iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator"><code>IntoIterator</code></a> (implemented for <code>[T; N]</code>, <code>&amp;[T; N]</code> and <code>&amp;mut [T; N]</code>)</li>
+<li><a href="../cmp/trait.PartialEq.html" title="trait core::cmp::PartialEq"><code>PartialEq</code></a>, <a href="../cmp/trait.PartialOrd.html" title="trait core::cmp::PartialOrd"><code>PartialOrd</code></a>, <a href="../cmp/trait.Eq.html" title="trait core::cmp::Eq"><code>Eq</code></a>, <a href="../cmp/trait.Ord.html" title="trait core::cmp::Ord"><code>Ord</code></a></li>
+<li><a href="hash::Hash"><code>Hash</code></a></li>
+<li><a href="../convert/trait.AsRef.html" title="trait core::convert::AsRef"><code>AsRef</code></a>, <a href="../convert/trait.AsMut.html" title="trait core::convert::AsMut"><code>AsMut</code></a></li>
+<li><a href="borrow::Borrow"><code>Borrow</code></a>, <a href="borrow::BorrowMut"><code>BorrowMut</code></a></li>
+</ul>
+<p>Arrays of sizes from 0 to 32 (inclusive) implement the <a href="../default/trait.Default.html" title="trait core::default::Default"><code>Default</code></a> trait
+if the element type allows it. As a stopgap, trait implementations are
+statically generated up to size 32.</p>
+<p>Arrays of sizes from 1 to 12 (inclusive) implement <a href="../convert/trait.From.html" title="trait core::convert::From"><code>From&lt;Tuple&gt;</code></a>, where <code>Tuple</code>
+is a homogeneous [prim@tuple] of appropriate length.</p>
+<p>Arrays coerce to <a href="prim@slice">slices (<code>[T]</code>)</a>, so a slice method may be called on
+an array. Indeed, this provides most of the API for working with arrays.</p>
+<p>Slices have a dynamic size and do not coerce to arrays. Instead, use
+<code>slice.try_into().unwrap()</code> or <code>&lt;ArrayType&gt;::try_from(slice).unwrap()</code>.</p>
+<p>Array’s <code>try_from(slice)</code> implementations (and the corresponding <code>slice.try_into()</code>
+array implementations) succeed if the input slice length is the same as the result
+array length. They optimize especially well when the optimizer can easily determine
+the slice length, e.g. <code>&lt;[u8; 4]&gt;::try_from(&amp;slice[4..8]).unwrap()</code>. Array implements
+<a href="../convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a> returning:</p>
+<ul>
+<li><code>[T; N]</code> copies from the slice’s elements</li>
+<li><code>&amp;[T; N]</code> references the original slice’s elements</li>
+<li><code>&amp;mut [T; N]</code> references the original slice’s elements</li>
+</ul>
+<p>You can move elements out of an array with a <a href="../reference/patterns.html#slice-patterns">slice pattern</a>. If you want
+one element, see [<code>mem::replace</code>].</p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span><span class="kw-2">mut </span>array: [i32; <span class="number">3</span>] = [<span class="number">0</span>; <span class="number">3</span>];
+
+array[<span class="number">1</span>] = <span class="number">1</span>;
+array[<span class="number">2</span>] = <span class="number">2</span>;
+
+<span class="macro">assert_eq!</span>([<span class="number">1</span>, <span class="number">2</span>], <span class="kw-2">&amp;</span>array[<span class="number">1</span>..]);
+
+<span class="comment">// This loop prints: 0 1 2
+</span><span class="kw">for </span>x <span class="kw">in </span>array {
+    <span class="macro">print!</span>(<span class="string">"{x} "</span>);
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+mut+array:+%5Bi32;+3%5D+=+%5B0;+3%5D;%0A++++%0A++++array%5B1%5D+=+1;%0A++++array%5B2%5D+=+2;%0A++++%0A++++assert_eq!(%5B1,+2%5D,+%26array%5B1..%5D);%0A++++%0A++++//+This+loop+prints:+0+1+2%0A++++for+x+in+array+%7B%0A++++++++print!(%22%7Bx%7D+%22);%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+<p>You can also iterate over reference to the array’s elements:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>array: [i32; <span class="number">3</span>] = [<span class="number">0</span>; <span class="number">3</span>];
+
+<span class="kw">for </span>x <span class="kw">in </span><span class="kw-2">&amp;</span>array { }</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+array:+%5Bi32;+3%5D+=+%5B0;+3%5D;%0A++++%0A++++for+x+in+%26array+%7B+%7D%0A%7D&amp;edition=2024"></a></div>
+<p>You can use <code>&lt;ArrayType&gt;::try_from(slice)</code> or <code>slice.try_into()</code> to get an array from
+a slice:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>bytes: [u8; <span class="number">3</span>] = [<span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>];
+<span class="macro">assert_eq!</span>(<span class="number">1</span>, u16::from_le_bytes(&lt;[u8; <span class="number">2</span>]&gt;::try_from(<span class="kw-2">&amp;</span>bytes[<span class="number">0</span>..<span class="number">2</span>]).unwrap()));
+<span class="macro">assert_eq!</span>(<span class="number">512</span>, u16::from_le_bytes(bytes[<span class="number">1</span>..<span class="number">3</span>].try_into().unwrap()));</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+bytes:+%5Bu8;+3%5D+=+%5B1,+0,+2%5D;%0A++++assert_eq!(1,+u16::from_le_bytes(%3C%5Bu8;+2%5D%3E::try_from(%26bytes%5B0..2%5D).unwrap()));%0A++++assert_eq!(512,+u16::from_le_bytes(bytes%5B1..3%5D.try_into().unwrap()));%0A%7D&amp;edition=2024"></a></div>
+<p>You can use a <a href="../reference/patterns.html#slice-patterns">slice pattern</a> to move elements out of an array:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>move_away(<span class="kw">_</span>: String) { <span class="comment">/* Do interesting things. */ </span>}
+
+<span class="kw">let </span>[john, roa] = [<span class="string">"John"</span>.to_string(), <span class="string">"Roa"</span>.to_string()];
+move_away(john);
+move_away(roa);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++fn+move_away(_:+String)+%7B+/*+Do+interesting+things.+*/+%7D%0A++++%0A++++let+%5Bjohn,+roa%5D+=+%5B%22John%22.to_string(),+%22Roa%22.to_string()%5D;%0A++++move_away(john);%0A++++move_away(roa);%0A%7D&amp;edition=2024"></a></div>
+<p>Arrays can be created from homogeneous tuples of appropriate length:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>tuple: (u32, u32, u32) = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);
+<span class="kw">let </span>array: [u32; <span class="number">3</span>] = tuple.into();</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+tuple:+(u32,+u32,+u32)+=+(1,+2,+3);%0A++++let+array:+%5Bu32;+3%5D+=+tuple.into();%0A%7D&amp;edition=2024"></a></div>
+<h2 id="editions"><a class="doc-anchor" href="#editions">§</a>Editions</h2>
+<p>Prior to Rust 1.53, arrays did not implement <a href="../iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator"><code>IntoIterator</code></a> by value, so the method call
+<code>array.into_iter()</code> auto-referenced into a <a href="slice::iter">slice iterator</a>. Right now, the old
+behavior is preserved in the 2015 and 2018 editions of Rust for compatibility, ignoring
+<a href="../iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator"><code>IntoIterator</code></a> by value. In the future, the behavior on the 2015 and 2018 edition
+might be made consistent to the behavior of later editions.</p>
+
+<div class="example-wrap edition"><a href="#" class="tooltip" title="This example runs with edition 2018">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="comment">// Rust 2015 and 2018:
+
+</span><span class="kw">let </span>array: [i32; <span class="number">3</span>] = [<span class="number">0</span>; <span class="number">3</span>];
+
+<span class="comment">// This creates a slice iterator, producing references to each value.
+</span><span class="kw">for </span>item <span class="kw">in </span>array.into_iter().enumerate() {
+    <span class="kw">let </span>(i, x): (usize, <span class="kw-2">&amp;</span>i32) = item;
+    <span class="macro">println!</span>(<span class="string">"array[{i}] = {x}"</span>);
+}
+
+<span class="comment">// The `array_into_iter` lint suggests this change for future compatibility:
+</span><span class="kw">for </span>item <span class="kw">in </span>array.iter().enumerate() {
+    <span class="kw">let </span>(i, x): (usize, <span class="kw-2">&amp;</span>i32) = item;
+    <span class="macro">println!</span>(<span class="string">"array[{i}] = {x}"</span>);
+}
+
+<span class="comment">// You can explicitly iterate an array by value using `IntoIterator::into_iter`
+</span><span class="kw">for </span>item <span class="kw">in </span>IntoIterator::into_iter(array).enumerate() {
+    <span class="kw">let </span>(i, x): (usize, i32) = item;
+    <span class="macro">println!</span>(<span class="string">"array[{i}] = {x}"</span>);
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0A//+Rust+2015+and+2018:%0A%0A%23!%5Ballow(array_into_iter)%5D%0A+//+override+our+%60deny(warnings)%60%0Afn+main()+%7B%0A++++let+array:+%5Bi32;+3%5D+=+%5B0;+3%5D;%0A++++%0A++++//+This+creates+a+slice+iterator,+producing+references+to+each+value.%0A++++for+item+in+array.into_iter().enumerate()+%7B%0A++++++++let+(i,+x):+(usize,+%26i32)+=+item;%0A++++++++println!(%22array%5B%7Bi%7D%5D+=+%7Bx%7D%22);%0A++++%7D%0A++++%0A++++//+The+%60array_into_iter%60+lint+suggests+this+change+for+future+compatibility:%0A++++for+item+in+array.iter().enumerate()+%7B%0A++++++++let+(i,+x):+(usize,+%26i32)+=+item;%0A++++++++println!(%22array%5B%7Bi%7D%5D+=+%7Bx%7D%22);%0A++++%7D%0A++++%0A++++//+You+can+explicitly+iterate+an+array+by+value+using+%60IntoIterator::into_iter%60%0A++++for+item+in+IntoIterator::into_iter(array).enumerate()+%7B%0A++++++++let+(i,+x):+(usize,+i32)+=+item;%0A++++++++println!(%22array%5B%7Bi%7D%5D+=+%7Bx%7D%22);%0A++++%7D%0A%7D&amp;edition=2018"></a></div>
+<p>Starting in the 2021 edition, <code>array.into_iter()</code> uses <code>IntoIterator</code> normally to iterate
+by value, and <code>iter()</code> should be used to iterate by reference like previous editions.</p>
+
+<div class="example-wrap edition"><a href="#" class="tooltip" title="This example runs with edition 2021">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="comment">// Rust 2021:
+
+</span><span class="kw">let </span>array: [i32; <span class="number">3</span>] = [<span class="number">0</span>; <span class="number">3</span>];
+
+<span class="comment">// This iterates by reference:
+</span><span class="kw">for </span>item <span class="kw">in </span>array.iter().enumerate() {
+    <span class="kw">let </span>(i, x): (usize, <span class="kw-2">&amp;</span>i32) = item;
+    <span class="macro">println!</span>(<span class="string">"array[{i}] = {x}"</span>);
+}
+
+<span class="comment">// This iterates by value:
+</span><span class="kw">for </span>item <span class="kw">in </span>array.into_iter().enumerate() {
+    <span class="kw">let </span>(i, x): (usize, i32) = item;
+    <span class="macro">println!</span>(<span class="string">"array[{i}] = {x}"</span>);
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++//+Rust+2021:%0A++++%0A++++let+array:+%5Bi32;+3%5D+=+%5B0;+3%5D;%0A++++%0A++++//+This+iterates+by+reference:%0A++++for+item+in+array.iter().enumerate()+%7B%0A++++++++let+(i,+x):+(usize,+%26i32)+=+item;%0A++++++++println!(%22array%5B%7Bi%7D%5D+=+%7Bx%7D%22);%0A++++%7D%0A++++%0A++++//+This+iterates+by+value:%0A++++for+item+in+array.into_iter().enumerate()+%7B%0A++++++++let+(i,+x):+(usize,+i32)+=+item;%0A++++++++println!(%22array%5B%7Bi%7D%5D+=+%7Bx%7D%22);%0A++++%7D%0A%7D&amp;edition=2021"></a></div>
+<p>Future language versions might start treating the <code>array.into_iter()</code>
+syntax on editions 2015 and 2018 the same as on edition 2021. So code using
+those older editions should still be written with this change in mind, to
+prevent breakage in the future. The safest way to accomplish this is to
+avoid the <code>into_iter</code> syntax on those editions. If an edition update is not
+viable/desired, there are multiple alternatives:</p>
+<ul>
+<li>use <code>iter</code>, equivalent to the old behavior, creating references</li>
+<li>use <a href="../iter/traits/collect/trait.IntoIterator.html#tymethod.into_iter" title="method core::iter::traits::collect::IntoIterator::into_iter"><code>IntoIterator::into_iter</code></a>, equivalent to the post-2021 behavior (Rust 1.53+)</li>
+<li>replace <code>for ... in array.into_iter() {</code> with <code>for ... in array {</code>,
+equivalent to the post-2021 behavior (Rust 1.53+)</li>
+</ul>
+
+<div class="example-wrap edition"><a href="#" class="tooltip" title="This example runs with edition 2018">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="comment">// Rust 2015 and 2018:
+
+</span><span class="kw">let </span>array: [i32; <span class="number">3</span>] = [<span class="number">0</span>; <span class="number">3</span>];
+
+<span class="comment">// This iterates by reference:
+</span><span class="kw">for </span>item <span class="kw">in </span>array.iter() {
+    <span class="kw">let </span>x: <span class="kw-2">&amp;</span>i32 = item;
+    <span class="macro">println!</span>(<span class="string">"{x}"</span>);
+}
+
+<span class="comment">// This iterates by value:
+</span><span class="kw">for </span>item <span class="kw">in </span>IntoIterator::into_iter(array) {
+    <span class="kw">let </span>x: i32 = item;
+    <span class="macro">println!</span>(<span class="string">"{x}"</span>);
+}
+
+<span class="comment">// This iterates by value:
+</span><span class="kw">for </span>item <span class="kw">in </span>array {
+    <span class="kw">let </span>x: i32 = item;
+    <span class="macro">println!</span>(<span class="string">"{x}"</span>);
+}
+
+<span class="comment">// IntoIter can also start a chain.
+// This iterates by value:
+</span><span class="kw">for </span>item <span class="kw">in </span>IntoIterator::into_iter(array).enumerate() {
+    <span class="kw">let </span>(i, x): (usize, i32) = item;
+    <span class="macro">println!</span>(<span class="string">"array[{i}] = {x}"</span>);
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++//+Rust+2015+and+2018:%0A++++%0A++++let+array:+%5Bi32;+3%5D+=+%5B0;+3%5D;%0A++++%0A++++//+This+iterates+by+reference:%0A++++for+item+in+array.iter()+%7B%0A++++++++let+x:+%26i32+=+item;%0A++++++++println!(%22%7Bx%7D%22);%0A++++%7D%0A++++%0A++++//+This+iterates+by+value:%0A++++for+item+in+IntoIterator::into_iter(array)+%7B%0A++++++++let+x:+i32+=+item;%0A++++++++println!(%22%7Bx%7D%22);%0A++++%7D%0A++++%0A++++//+This+iterates+by+value:%0A++++for+item+in+array+%7B%0A++++++++let+x:+i32+=+item;%0A++++++++println!(%22%7Bx%7D%22);%0A++++%7D%0A++++%0A++++//+IntoIter+can+also+start+a+chain.%0A++++//+This+iterates+by+value:%0A++++for+item+in+IntoIterator::into_iter(array).enumerate()+%7B%0A++++++++let+(i,+x):+(usize,+i32)+=+item;%0A++++++++println!(%22array%5B%7Bi%7D%5D+=+%7Bx%7D%22);%0A++++%7D%0A%7D&amp;edition=2018"></a></div>
+</div></details></section></div></main></body></html>

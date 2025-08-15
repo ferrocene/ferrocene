@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A trait for giving a type a useful default value."><title>Default in core::default - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-aa0817cf.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.90.0" data-rustdoc-version="1.90.0-dev" data-channel="nightly" data-search-js="search-179e01a3.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="sidebar-items1.90.0.js"></script><script defer src="../../static.files/main-673ee1e0.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt="logo"></a><h2><a href="../../core/index.html">core</a><span class="version">1.90.0-dev</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Default</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#derivable" title="Derivable">Derivable</a><ul><li><a href="#enums" title="`enum`s"><code>enum</code>s</a></li></ul></li><li><a href="#how-can-i-implement-default" title="How can I implement `Default`?">How can I implement <code>Default</code>?</a></li><li><a href="#examples" title="Examples">Examples</a></li></ul><h3><a href="#required-methods">Required Methods</a></h3><ul class="block"><li><a href="#tymethod.default" title="default">default</a></li></ul><h3><a href="#dyn-compatibility">Dyn Compatibility</a></h3><h3><a href="#implementors">Implementors</a></h3></section><div id="rustdoc-modnav"><h2><a href="index.html">In core::<wbr>default</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">core</a>::<wbr><a href="index.html">default</a></div><h1>Trait <span class="trait">Default</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><span class="since" title="Stable since Rust version 1.6.0, const unstable">1.6.0 (const: <a href="https://github.com/rust-lang/rust/issues/143894" title="Tracking issue for const_default">unstable</a>)</span> · <a class="src" href="../../src/core/default.rs.html#109-142">Source</a> </span></div><pre class="rust item-decl"><code>pub trait Default: <a class="trait" href="../marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a> {
+    // Required method
+    fn <a href="#tymethod.default" class="fn">default</a>() -&gt; Self;
+}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A trait for giving a type a useful default value.</p>
+<p>Sometimes, you want to fall back to some kind of default value, and
+don’t particularly care what it is. This comes up often with <code>struct</code>s
+that define a set of options:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">struct </span>SomeOptions {
+    foo: i32,
+    bar: f32,
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++%23%5Ballow(dead_code)%5D%0A++++struct+SomeOptions+%7B%0A++++++++foo:+i32,%0A++++++++bar:+f32,%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+<p>How can we define some default values? You can use <code>Default</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attr">#[derive(Default)]
+</span><span class="kw">struct </span>SomeOptions {
+    foo: i32,
+    bar: f32,
+}
+
+<span class="kw">fn </span>main() {
+    <span class="kw">let </span>options: SomeOptions = Default::default();
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0A%23%5Ballow(dead_code)%5D%0A%23%5Bderive(Default)%5D%0Astruct+SomeOptions+%7B%0A++++foo:+i32,%0A++++bar:+f32,%0A%7D%0A%0Afn+main()+%7B%0A++++let+options:+SomeOptions+=+Default::default();%0A%7D&amp;edition=2024"></a></div>
+<p>Now, you get all of the default values. Rust implements <code>Default</code> for various primitives types.</p>
+<p>If you want to override a particular option, but still retain the other defaults:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>main() {
+    <span class="kw">let </span>options = SomeOptions { foo: <span class="number">42</span>, ..Default::default() };
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0A%23%5Ballow(dead_code)%5D%0A%23%5Bderive(Default)%5D%0Astruct+SomeOptions+%7B%0A++++foo:+i32,%0A++++bar:+f32,%0A%7D%0Afn+main()+%7B%0A++++let+options+=+SomeOptions+%7B+foo:+42,+..Default::default()+%7D;%0A%7D&amp;edition=2024"></a></div>
+<h3 id="derivable"><a class="doc-anchor" href="#derivable">§</a>Derivable</h3>
+<p>This trait can be used with <code>#[derive]</code> if all of the type’s fields implement
+<code>Default</code>. When <code>derive</code>d, it will use the default value for each field’s type.</p>
+<h4 id="enums"><a class="doc-anchor" href="#enums">§</a><code>enum</code>s</h4>
+<p>When using <code>#[derive(Default)]</code> on an <code>enum</code>, you need to choose which unit variant will be
+default. You do this by placing the <code>#[default]</code> attribute on the variant.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attr">#[derive(Default)]
+</span><span class="kw">enum </span>Kind {
+    <span class="attr">#[default]
+    </span>A,
+    B,
+    C,
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++%23%5Bderive(Default)%5D%0A++++enum+Kind+%7B%0A++++++++%23%5Bdefault%5D%0A++++++++A,%0A++++++++B,%0A++++++++C,%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+<p>You cannot use the <code>#[default]</code> attribute on non-unit or non-exhaustive variants.</p>
+<p>The <code>#[default]</code> attribute was stabilized in Rust 1.62.0.</p>
+<h3 id="how-can-i-implement-default"><a class="doc-anchor" href="#how-can-i-implement-default">§</a>How can I implement <code>Default</code>?</h3>
+<p>Provide an implementation for the <code>default()</code> method that returns the value of
+your type that should be the default:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">enum </span>Kind {
+    A,
+    B,
+    C,
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>Kind {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{ Kind::A }
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0A%23!%5Ballow(dead_code)%5D%0A%0Afn+main()+%7B%0A++++enum+Kind+%7B%0A++++++++A,%0A++++++++B,%0A++++++++C,%0A++++%7D%0A++++%0A++++impl+Default+for+Kind+%7B%0A++++++++fn+default()+-%3E+Self+%7B+Kind::A+%7D%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attr">#[derive(Default)]
+</span><span class="kw">struct </span>SomeOptions {
+    foo: i32,
+    bar: f32,
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++%23%5Ballow(dead_code)%5D%0A++++%23%5Bderive(Default)%5D%0A++++struct+SomeOptions+%7B%0A++++++++foo:+i32,%0A++++++++bar:+f32,%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+</div></details><h2 id="required-methods" class="section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="tymethod.default" class="method"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/default.rs.html#141">Source</a></span><h4 class="code-header">fn <a href="#tymethod.default" class="fn">default</a>() -&gt; Self</h4></section></summary><div class="docblock"><p>Returns the “default value” for a type.</p>
+<p>Default values are often some kind of initial value, identity value, or anything else that
+may make sense as a default.</p>
+<h5 id="examples-1"><a class="doc-anchor" href="#examples-1">§</a>Examples</h5>
+<p>Using built-in default values:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>i: i8 = Default::default();
+<span class="kw">let </span>(x, y): (<span class="prelude-ty">Option</span>&lt;String&gt;, f64) = Default::default();
+<span class="kw">let </span>(a, b, (c, d)): (i32, u32, (bool, bool)) = Default::default();</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+i:+i8+=+Default::default();%0A++++let+(x,+y):+(Option%3CString%3E,+f64)+=+Default::default();%0A++++let+(a,+b,+(c,+d)):+(i32,+u32,+(bool,+bool))+=+Default::default();%0A%7D&amp;edition=2024"></a></div>
+<p>Making your own:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">enum </span>Kind {
+    A,
+    B,
+    C,
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>Kind {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{ Kind::A }
+}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++%23%5Ballow(dead_code)%5D%0A++++enum+Kind+%7B%0A++++++++A,%0A++++++++B,%0A++++++++C,%0A++++%7D%0A++++%0A++++impl+Default+for+Kind+%7B%0A++++++++fn+default()+-%3E+Self+%7B+Kind::A+%7D%0A++++%7D%0A%7D&amp;edition=2024"></a></div>
+</div></details></div><h2 id="dyn-compatibility" class="section-header">Dyn Compatibility<a href="#dyn-compatibility" class="anchor">§</a></h2><div class="dyn-compatibility-info"><p>This trait is <b>not</b> <a href="https://doc.rust-lang.org/nightly/reference/items/traits.html#dyn-compatibility">dyn compatible</a>.</p><p><i>In older versions of Rust, dyn compatibility was called "object safety", so this trait is not object safe.</i></p></div><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"><section id="impl-Default-for-u32" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0, const unstable">1.0.0 (const: <a href="https://github.com/rust-lang/rust/issues/143894" title="Tracking issue for const_default">unstable</a>)</span> · <a class="src" href="../../src/core/default.rs.html#182">Source</a></span><a href="#impl-Default-for-u32" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.Default.html" title="trait core::default::Default">Default</a> for <a class="primitive" href="../primitive.u32.html">u32</a></h3></section><section id="impl-Default-for-AtomicU32" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.34.0">1.34.0</span> · <a class="src" href="../../src/core/sync/atomic.rs.html#3792-3809">Source</a></span><a href="#impl-Default-for-AtomicU32" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.Default.html" title="trait core::default::Default">Default</a> for <a class="struct" href="../sync/atomic/struct.AtomicU32.html" title="struct core::sync::atomic::AtomicU32">AtomicU32</a></h3></section><section id="impl-Default-for-Option%3CT%3E" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0, const unstable">1.0.0 (const: <a href="https://github.com/rust-lang/rust/issues/143894" title="Tracking issue for const_default">unstable</a>)</span> · <a class="src" href="../../src/core/option.rs.html#2143-2156">Source</a></span><a href="#impl-Default-for-Option%3CT%3E" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="trait.Default.html" title="trait core::default::Default">Default</a> for <a class="enum" href="../option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;T&gt;</h3></section></div><script src="../../trait.impl/core/default/trait.Default.js" async></script></section></div></main></body></html>

@@ -730,6 +730,18 @@
 //@ revisions: thumbv7em_ferrocene_facade_eabihf
 //@ [thumbv7em_ferrocene_facade_eabihf] compile-flags: --target thumbv7em-ferrocene.facade-eabihf
 //@ [thumbv7em_ferrocene_facade_eabihf] needs-llvm-components: arm
+//@ revisions: aarch64_unknown_none_certified
+//@ [aarch64_unknown_none_certified] compile-flags: --target aarch64-unknown-none.certified
+//@ [aarch64_unknown_none_certified] needs-llvm-components: aarch64
+//@ revisions: x86_64_unknown_none_certified
+//@ [x86_64_unknown_none_certified] compile-flags: --target x86_64-unknown-none.certified
+//@ [x86_64_unknown_none_certified] needs-llvm-components: x86_64
+//@ revisions: thumbv7em_none_eabi_certified
+//@ [thumbv7em_none_eabi_certified] compile-flags: --target thumbv7em-none-eabi.certified
+//@ [thumbv7em_none_eabi_certified] needs-llvm-components: arm
+//@ revisions: thumbv7em_none_eabihf_certified
+//@ [thumbv7em_none_eabihf_certified] compile-flags: --target thumbv7em-none-eabihf.certified
+//@ [thumbv7em_none_eabihf_certified] needs-llvm-components: arm
 
 // Sanity-check that each target can produce assembly code.
 

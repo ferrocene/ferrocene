@@ -109,23 +109,24 @@ pub fn fill_target_compiler(build: &mut Build, target: TargetSelection) {
     // build script context (rust-lang/cc-rs#1225). Map `.facade` targets back to the
     // targets they are test doubles for, and temporarily pass that triple to `cc` to determine
     // the C compiler.
-    let facade_compiler = if target.triple.contains("ferrocene.facade") {
-        let sub = target.triple.replace("ferrocene.facade", "none");
-        cfg.target(&sub);
-        let compiler = cfg.get_compiler();
+    let facade_compiler =
+        if target.triple.contains("ferrocene.facade") || target.triple.ends_with(".certified") {
+            let sub = target.triple.replace("ferrocene.facade", "none").replace(".certified", "");
+            cfg.target(&sub);
+            let compiler = cfg.get_compiler();
 
-        cfg.target(&target.triple);
+            cfg.target(&target.triple);
 
-        Some(compiler)
-    } else {
-        None
-    };
+            Some(compiler)
+        } else {
+            None
+        };
     let compiler = facade_compiler.clone().unwrap_or_else(|| cfg.get_compiler());
     let ar = if let ar @ Some(..) = config.and_then(|c| c.ar.clone()) {
         ar
     } else {
         if facade_compiler.is_some() {
-            let sub = target.triple.replace("ferrocene.facade", "none");
+            let sub = target.triple.replace("ferrocene.facade", "none").replace(".certified", "");
             cfg.target(&sub);
         }
         cfg.try_get_archiver().map(|c| PathBuf::from(c.get_program())).ok()

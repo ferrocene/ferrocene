@@ -113,6 +113,9 @@ pub macro panic_2021 {
         #[inline(never)]
         #[rustc_const_panic_str] // enforce a &&str argument in const-check and hook this by const-eval
         #[rustc_do_not_const_check] // hooked by const-eval
+        // Ferrocene annotation: This function cannot be covered because it is only used in `const`
+        // contexts, which means that the instrumentation for coverage will not be run during
+        // runtime
         const fn panic_cold_display<T: $crate::fmt::Display>(arg: &T) -> ! {
             $crate::panicking::panic_display(arg)
         }

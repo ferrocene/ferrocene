@@ -194,6 +194,19 @@ fn test_or_else() {
 }
 
 #[test]
+fn test_ok_or_else() {
+    assert_eq!(Some(1).ok_or_else(|| panic!()), Ok(1));
+    assert_eq!(None::<i32>.ok_or_else(|| 1), Err(1));
+}
+
+#[test]
+fn test_filter() {
+    assert_eq!(Some(1).filter(|&x| x > 1), None);
+    assert_eq!(Some(1).filter(|&x| x <= 1), Some(1));
+    assert_eq!(None::<i32>.filter(|_| panic!()), None);
+}
+
+#[test]
 fn test_unwrap() {
     assert_eq!(Some(1).unwrap(), 1);
     let s = Some("hello".to_string()).unwrap();

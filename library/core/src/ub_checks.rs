@@ -67,6 +67,8 @@ macro_rules! assert_unsafe_precondition {
             #[track_caller]
             const fn precondition_check($($name:$ty),*) {
                 if !$e {
+                    // Ferrocene annotation: This code cannot be covered because it causes an
+                    // non-unwinding panic, which means it cannot be caught by any means in a test.
                     let msg = concat!("unsafe precondition(s) violated: ", $message,
                         "\n\nThis indicates a bug in the program. \
                         This Undefined Behavior check is optional, and cannot be relied on for safety.");

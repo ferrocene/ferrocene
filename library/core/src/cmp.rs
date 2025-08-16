@@ -1998,6 +1998,9 @@ mod impls {
                 -1 => Less,
                 0 => Equal,
                 1 => Greater,
+                // Ferrocene annotation: This match arm cannot be covered because it is unreachable.
+                // See the safety comment below.
+                //
                 // SAFETY: bool as i8 returns 0 or 1, so the difference can't be anything else
                 _ => unsafe { unreachable_unchecked() },
             }

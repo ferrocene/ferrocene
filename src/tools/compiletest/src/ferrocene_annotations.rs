@@ -172,6 +172,7 @@ fn sample_config() -> Config {
         build_root: env("FERROCENE_BUILD_ROOT"),
         build_test_suite_root: env("FERROCENE_BUILD_TEST_SUITE_ROOT"),
         suite: env("FERROCENE_SUITE"),
+        codegen_backend: crate::common::CodegenBackend::Llvm,
 
         // Dummy values
         edition: Default::default(),

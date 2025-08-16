@@ -1,0 +1,71 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Used for mutable dereferencing operations, like in `*v = 1;`."><title>DerefMut in core::ops - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.88.0" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../../static.files/storage-82c7156e.js"></script><script defer src="sidebar-items1.88.0.js"></script><script defer src="../../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt="logo"></a><h2><a href="../../core/index.html">core</a><span class="version">1.88.0-dev</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Deref<wbr>Mut</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#mutable-deref-coercion" title="Mutable deref coercion">Mutable deref coercion</a></li><li><a href="#fallibility" title="Fallibility">Fallibility</a></li><li><a href="#examples" title="Examples">Examples</a></li></ul><h3><a href="#required-methods">Required Methods</a></h3><ul class="block"><li><a href="#tymethod.deref_mut" title="deref_mut">deref_mut</a></li></ul><h3><a href="#implementors">Implementors</a></h3></section><div id="rustdoc-modnav"><h2><a href="index.html">In core::<wbr>ops</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">core</a>::<wbr><a href="index.html">ops</a></div><h1>Trait <span class="trait">DerefMut</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><span class="since" title="Stable since Rust version 1.6.0, const unstable">1.6.0 (const: <a href="https://github.com/rust-lang/rust/issues/88955" title="Tracking issue for const_deref">unstable</a>)</span> · <a class="src" href="../../src/core/ops/deref.rs.html#270-275">Source</a> </span></div><pre class="rust item-decl"><code>pub trait DerefMut: <a class="trait" href="trait.Deref.html" title="trait core::ops::Deref">Deref</a> {
+    // Required method
+    const fn <a href="#tymethod.deref_mut" class="fn">deref_mut</a>(&amp;mut self) -&gt; &amp;mut Self::<a class="associatedtype" href="trait.Deref.html#associatedtype.Target" title="type core::ops::Deref::Target">Target</a>;
+}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Used for mutable dereferencing operations, like in <code>*v = 1;</code>.</p>
+<p>In addition to being used for explicit dereferencing operations with the
+(unary) <code>*</code> operator in mutable contexts, <code>DerefMut</code> is also used implicitly
+by the compiler in many circumstances. This mechanism is called
+<a href="#mutable-deref-coercion">“mutable deref coercion”</a>. In immutable contexts, <a href="trait.Deref.html" title="trait core::ops::Deref"><code>Deref</code></a> is used.</p>
+<p><strong>Warning:</strong> Deref coercion is a powerful language feature which has
+far-reaching implications for every type that implements <code>DerefMut</code>. The
+compiler will silently insert calls to <code>DerefMut::deref_mut</code>. For this
+reason, one should be careful about implementing <code>DerefMut</code> and only do so
+when mutable deref coercion is desirable. See <a href="trait.Deref.html#when-to-implement-deref-or-derefmut" title="trait core::ops::Deref">the <code>Deref</code> docs</a>
+for advice on when this is typically desirable or undesirable.</p>
+<p>Types that implement <code>DerefMut</code> or <code>Deref</code> are often called “smart
+pointers” and the mechanism of deref coercion has been specifically designed
+to facilitate the pointer-like behavior that name suggests. Often, the
+purpose of a “smart pointer” type is to change the ownership semantics
+of a contained value (for example, <a href="../../alloc/rc/struct.Rc.html"><code>Rc</code></a> or <a href="../../alloc/borrow/enum.Cow.html"><code>Cow</code></a>) or the
+storage semantics of a contained value (for example, <a href="../../alloc/boxed/struct.Box.html"><code>Box</code></a>).</p>
+<h2 id="mutable-deref-coercion"><a class="doc-anchor" href="#mutable-deref-coercion">§</a>Mutable deref coercion</h2>
+<p>If <code>T</code> implements <code>DerefMut&lt;Target = U&gt;</code>, and <code>v</code> is a value of type <code>T</code>,
+then:</p>
+<ul>
+<li>In mutable contexts, <code>*v</code> (where <code>T</code> is neither a reference nor a raw pointer)
+is equivalent to <code>*DerefMut::deref_mut(&amp;mut v)</code>.</li>
+<li>Values of type <code>&amp;mut T</code> are coerced to values of type <code>&amp;mut U</code></li>
+<li><code>T</code> implicitly implements all the (mutable) methods of the type <code>U</code>.</li>
+</ul>
+<p>For more details, visit <a href="../../book/ch15-02-deref.html">the chapter in <em>The Rust Programming Language</em></a>
+as well as the reference sections on <a href="../../reference/expressions/operator-expr.html#the-dereference-operator">the dereference operator</a>,
+<a href="../../reference/expressions/method-call-expr.html">method resolution</a> and <a href="../../reference/type-coercions.html">type coercions</a>.</p>
+<h2 id="fallibility"><a class="doc-anchor" href="#fallibility">§</a>Fallibility</h2>
+<p><strong>This trait’s method should never unexpectedly fail</strong>. Deref coercion means
+the compiler will often insert calls to <code>DerefMut::deref_mut</code> implicitly.
+Failure during dereferencing can be extremely confusing when <code>DerefMut</code> is
+invoked implicitly. In the majority of uses it should be infallible, though
+it may be acceptable to panic if the type is misused through programmer
+error, for example.</p>
+<p>However, infallibility is not enforced and therefore not guaranteed.
+As such, <code>unsafe</code> code should not rely on infallibility in general for
+soundness.</p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>A struct with a single field which is modifiable by dereferencing the
+struct.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::ops::{Deref, DerefMut};
+
+<span class="kw">struct </span>DerefMutExample&lt;T&gt; {
+    value: T
+}
+
+<span class="kw">impl</span>&lt;T&gt; Deref <span class="kw">for </span>DerefMutExample&lt;T&gt; {
+    <span class="kw">type </span>Target = T;
+
+    <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.value
+    }
+}
+
+<span class="kw">impl</span>&lt;T&gt; DerefMut <span class="kw">for </span>DerefMutExample&lt;T&gt; {
+    <span class="kw">fn </span>deref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Target {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.value
+    }
+}
+
+<span class="kw">let </span><span class="kw-2">mut </span>x = DerefMutExample { value: <span class="string">'a' </span>};
+<span class="kw-2">*</span>x = <span class="string">'b'</span>;
+<span class="macro">assert_eq!</span>(<span class="string">'b'</span>, x.value);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++use+std::ops::%7BDeref,+DerefMut%7D;%0A++++%0A++++struct+DerefMutExample%3CT%3E+%7B%0A++++++++value:+T%0A++++%7D%0A++++%0A++++impl%3CT%3E+Deref+for+DerefMutExample%3CT%3E+%7B%0A++++++++type+Target+=+T;%0A++++%0A++++++++fn+deref(%26self)+-%3E+%26Self::Target+%7B%0A++++++++++++%26self.value%0A++++++++%7D%0A++++%7D%0A++++%0A++++impl%3CT%3E+DerefMut+for+DerefMutExample%3CT%3E+%7B%0A++++++++fn+deref_mut(%26mut+self)+-%3E+%26mut+Self::Target+%7B%0A++++++++++++%26mut+self.value%0A++++++++%7D%0A++++%7D%0A++++%0A++++let+mut+x+=+DerefMutExample+%7B+value:+'a'+%7D;%0A++++*x+=+'b';%0A++++assert_eq!('b',+x.value);%0A%7D&amp;edition=2024"></a></div>
+</div></details><h2 id="required-methods" class="section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="tymethod.deref_mut" class="method"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/ops/deref.rs.html#274">Source</a></span><h4 class="code-header">const fn <a href="#tymethod.deref_mut" class="fn">deref_mut</a>(&amp;mut self) -&gt; &amp;mut Self::<a class="associatedtype" href="trait.Deref.html#associatedtype.Target" title="type core::ops::Deref::Target">Target</a></h4></section></summary><div class="docblock"><p>Mutably dereferences the value.</p>
+</div></details></div><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"><section id="impl-DerefMut-for-%26T" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/ops/deref.rs.html#164">Source</a></span><a href="#impl-DerefMut-for-%26T" class="anchor">§</a><h3 class="code-header">impl&lt;T: ?<a class="trait" href="../marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>&gt; !<a class="trait" href="trait.DerefMut.html" title="trait core::ops::DerefMut">DerefMut</a> for <a class="primitive" href="../primitive.reference.html">&amp;T</a></h3></section><section id="impl-DerefMut-for-%26mut+T" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0, const unstable">1.0.0 (const: <a href="https://github.com/rust-lang/rust/issues/88955" title="Tracking issue for const_deref">unstable</a>)</span> · <a class="src" href="../../src/core/ops/deref.rs.html#279-283">Source</a></span><a href="#impl-DerefMut-for-%26mut+T" class="anchor">§</a><h3 class="code-header">impl&lt;T: ?<a class="trait" href="../marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>&gt; <a class="trait" href="trait.DerefMut.html" title="trait core::ops::DerefMut">DerefMut</a> for <a class="primitive" href="../primitive.reference.html">&amp;mut T</a></h3></section></div><script src="../../trait.impl/core/ops/deref/trait.DerefMut.js" async></script></section></div></main></body></html>

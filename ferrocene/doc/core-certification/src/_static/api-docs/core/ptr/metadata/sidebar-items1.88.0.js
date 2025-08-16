@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["from_raw_parts","from_raw_parts_mut"],"trait":["Pointee"],"traitalias":["Thin"]};

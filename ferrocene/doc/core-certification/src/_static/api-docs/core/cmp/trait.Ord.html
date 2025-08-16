@@ -1,0 +1,287 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Trait for types that form a total order."><title>Ord in core::cmp - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.88.0" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../../static.files/storage-82c7156e.js"></script><script defer src="sidebar-items1.88.0.js"></script><script defer src="../../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt="logo"></a><h2><a href="../../core/index.html">core</a><span class="version">1.88.0-dev</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Ord</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#corollaries" title="Corollaries">Corollaries</a></li><li><a href="#derivable" title="Derivable">Derivable</a></li><li><a href="#lexicographical-comparison" title="Lexicographical comparison">Lexicographical comparison</a></li><li><a href="#how-can-i-implement-ord" title="How can I implement `Ord`?">How can I implement <code>Ord</code>?</a></li><li><a href="#examples-of-incorrect-ord-implementations" title="Examples of incorrect `Ord` implementations">Examples of incorrect <code>Ord</code> implementations</a></li></ul><h3><a href="#required-methods">Required Methods</a></h3><ul class="block"><li><a href="#tymethod.cmp" title="cmp">cmp</a></li></ul><h3><a href="#provided-methods">Provided Methods</a></h3><ul class="block"><li><a href="#method.clamp" title="clamp">clamp</a></li><li><a href="#method.max" title="max">max</a></li><li><a href="#method.min" title="min">min</a></li></ul><h3><a href="#dyn-compatibility">Dyn Compatibility</a></h3><h3><a href="#implementors">Implementors</a></h3></section><div id="rustdoc-modnav"><h2><a href="index.html">In core::<wbr>cmp</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">core</a>::<wbr><a href="index.html">cmp</a></div><h1>Trait <span class="trait">Ord</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><span class="since" title="Stable since Rust version 1.6.0">1.6.0</span> · <a class="src" href="../../src/core/cmp.rs.html#968-1098">Source</a> </span></div><pre class="rust item-decl"><code>pub trait Ord: <a class="trait" href="trait.Eq.html" title="trait core::cmp::Eq">Eq</a> + <a class="trait" href="trait.PartialOrd.html" title="trait core::cmp::PartialOrd">PartialOrd</a>&lt;Self&gt; {
+    // Required method
+    fn <a href="#tymethod.cmp" class="fn">cmp</a>(&amp;self, other: &amp;Self) -&gt; <a class="enum" href="enum.Ordering.html" title="enum core::cmp::Ordering">Ordering</a>;
+
+    // Provided methods
+    fn <a href="#method.max" class="fn">max</a>(self, other: Self) -&gt; Self
+       <span class="where">where Self: <a class="trait" href="../marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.min" class="fn">min</a>(self, other: Self) -&gt; Self
+       <span class="where">where Self: <a class="trait" href="../marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.clamp" class="fn">clamp</a>(self, min: Self, max: Self) -&gt; Self
+       <span class="where">where Self: <a class="trait" href="../marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span> { ... }
+}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Trait for types that form a <a href="https://en.wikipedia.org/wiki/Total_order">total order</a>.</p>
+<p>Implementations must be consistent with the <a href="trait.PartialOrd.html" title="trait core::cmp::PartialOrd"><code>PartialOrd</code></a> implementation, and ensure <code>max</code>,
+<code>min</code>, and <code>clamp</code> are consistent with <code>cmp</code>:</p>
+<ul>
+<li><code>partial_cmp(a, b) == Some(cmp(a, b))</code>.</li>
+<li><code>max(a, b) == max_by(a, b, cmp)</code> (ensured by the default implementation).</li>
+<li><code>min(a, b) == min_by(a, b, cmp)</code> (ensured by the default implementation).</li>
+<li>For <code>a.clamp(min, max)</code>, see the <a href="#method.clamp">method docs</a> (ensured by the default
+implementation).</li>
+</ul>
+<p>Violating these requirements is a logic error. The behavior resulting from a logic error is not
+specified, but users of the trait must ensure that such logic errors do <em>not</em> result in
+undefined behavior. This means that <code>unsafe</code> code <strong>must not</strong> rely on the correctness of these
+methods.</p>
+<h3 id="corollaries"><a class="doc-anchor" href="#corollaries">§</a>Corollaries</h3>
+<p>From the above and the requirements of <code>PartialOrd</code>, it follows that for all <code>a</code>, <code>b</code> and <code>c</code>:</p>
+<ul>
+<li>exactly one of <code>a &lt; b</code>, <code>a == b</code> or <code>a &gt; b</code> is true; and</li>
+<li><code>&lt;</code> is transitive: <code>a &lt; b</code> and <code>b &lt; c</code> implies <code>a &lt; c</code>. The same must hold for both <code>==</code> and
+<code>&gt;</code>.</li>
+</ul>
+<p>Mathematically speaking, the <code>&lt;</code> operator defines a strict <a href="https://en.wikipedia.org/wiki/Weak_ordering">weak order</a>. In cases where <code>==</code>
+conforms to mathematical equality, it also defines a strict <a href="https://en.wikipedia.org/wiki/Total_order">total order</a>.</p>
+<h3 id="derivable"><a class="doc-anchor" href="#derivable">§</a>Derivable</h3>
+<p>This trait can be used with <code>#[derive]</code>.</p>
+<p>When <code>derive</code>d on structs, it will produce a
+<a href="https://en.wikipedia.org/wiki/Lexicographic_order">lexicographic</a> ordering based on the
+top-to-bottom declaration order of the struct’s members.</p>
+<p>When <code>derive</code>d on enums, variants are ordered primarily by their discriminants. Secondarily,
+they are ordered by their fields. By default, the discriminant is smallest for variants at the
+top, and largest for variants at the bottom. Here’s an example:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attr">#[derive(PartialEq, Eq, PartialOrd, Ord)]
+</span><span class="kw">enum </span>E {
+    Top,
+    Bottom,
+}
+
+<span class="macro">assert!</span>(E::Top &lt; E::Bottom);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++%23%5Bderive(PartialEq,+Eq,+PartialOrd,+Ord)%5D%0A++++enum+E+%7B%0A++++++++Top,%0A++++++++Bottom,%0A++++%7D%0A++++%0A++++assert!(E::Top+%3C+E::Bottom);%0A%7D&amp;edition=2024"></a></div>
+<p>However, manually setting the discriminants can override this default behavior:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attr">#[derive(PartialEq, Eq, PartialOrd, Ord)]
+</span><span class="kw">enum </span>E {
+    Top = <span class="number">2</span>,
+    Bottom = <span class="number">1</span>,
+}
+
+<span class="macro">assert!</span>(E::Bottom &lt; E::Top);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++%23%5Bderive(PartialEq,+Eq,+PartialOrd,+Ord)%5D%0A++++enum+E+%7B%0A++++++++Top+=+2,%0A++++++++Bottom+=+1,%0A++++%7D%0A++++%0A++++assert!(E::Bottom+%3C+E::Top);%0A%7D&amp;edition=2024"></a></div>
+<h3 id="lexicographical-comparison"><a class="doc-anchor" href="#lexicographical-comparison">§</a>Lexicographical comparison</h3>
+<p>Lexicographical comparison is an operation with the following properties:</p>
+<ul>
+<li>Two sequences are compared element by element.</li>
+<li>The first mismatching element defines which sequence is lexicographically less or greater
+than the other.</li>
+<li>If one sequence is a prefix of another, the shorter sequence is lexicographically less than
+the other.</li>
+<li>If two sequences have equivalent elements and are of the same length, then the sequences are
+lexicographically equal.</li>
+<li>An empty sequence is lexicographically less than any non-empty sequence.</li>
+<li>Two empty sequences are lexicographically equal.</li>
+</ul>
+<h3 id="how-can-i-implement-ord"><a class="doc-anchor" href="#how-can-i-implement-ord">§</a>How can I implement <code>Ord</code>?</h3>
+<p><code>Ord</code> requires that the type also be <a href="trait.PartialOrd.html" title="trait core::cmp::PartialOrd"><code>PartialOrd</code></a>, <a href="trait.PartialEq.html" title="trait core::cmp::PartialEq"><code>PartialEq</code></a>, and <a href="trait.Eq.html" title="trait core::cmp::Eq"><code>Eq</code></a>.</p>
+<p>Because <code>Ord</code> implies a stronger ordering relationship than <a href="trait.PartialOrd.html" title="trait core::cmp::PartialOrd"><code>PartialOrd</code></a>, and both <code>Ord</code> and
+<a href="trait.PartialOrd.html" title="trait core::cmp::PartialOrd"><code>PartialOrd</code></a> must agree, you must choose how to implement <code>Ord</code> <strong>first</strong>. You can choose to
+derive it, or implement it manually. If you derive it, you should derive all four traits. If you
+implement it manually, you should manually implement all four traits, based on the
+implementation of <code>Ord</code>.</p>
+<p>Here’s an example where you want to define the <code>Character</code> comparison by <code>health</code> and
+<code>experience</code> only, disregarding the field <code>mana</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::cmp::Ordering;
+
+<span class="kw">struct </span>Character {
+    health: u32,
+    experience: u32,
+    mana: f32,
+}
+
+<span class="kw">impl </span>Ord <span class="kw">for </span>Character {
+    <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Ordering {
+        <span class="self">self</span>.experience
+            .cmp(<span class="kw-2">&amp;</span>other.experience)
+            .then(<span class="self">self</span>.health.cmp(<span class="kw-2">&amp;</span>other.health))
+    }
+}
+
+<span class="kw">impl </span>PartialOrd <span class="kw">for </span>Character {
+    <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Ordering&gt; {
+        <span class="prelude-val">Some</span>(<span class="self">self</span>.cmp(other))
+    }
+}
+
+<span class="kw">impl </span>PartialEq <span class="kw">for </span>Character {
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+        <span class="self">self</span>.health == other.health &amp;&amp; <span class="self">self</span>.experience == other.experience
+    }
+}
+
+<span class="kw">impl </span>Eq <span class="kw">for </span>Character {}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++use+std::cmp::Ordering;%0A++++%0A++++struct+Character+%7B%0A++++++++health:+u32,%0A++++++++experience:+u32,%0A++++++++mana:+f32,%0A++++%7D%0A++++%0A++++impl+Ord+for+Character+%7B%0A++++++++fn+cmp(%26self,+other:+%26Self)+-%3E+Ordering+%7B%0A++++++++++++self.experience%0A++++++++++++++++.cmp(%26other.experience)%0A++++++++++++++++.then(self.health.cmp(%26other.health))%0A++++++++%7D%0A++++%7D%0A++++%0A++++impl+PartialOrd+for+Character+%7B%0A++++++++fn+partial_cmp(%26self,+other:+%26Self)+-%3E+Option%3COrdering%3E+%7B%0A++++++++++++Some(self.cmp(other))%0A++++++++%7D%0A++++%7D%0A++++%0A++++impl+PartialEq+for+Character+%7B%0A++++++++fn+eq(%26self,+other:+%26Self)+-%3E+bool+%7B%0A++++++++++++self.health+==+other.health+%26%26+self.experience+==+other.experience%0A++++++++%7D%0A++++%7D%0A++++%0A++++impl+Eq+for+Character+%7B%7D%0A%7D&amp;edition=2024"></a></div>
+<p>If all you need is to <code>slice::sort</code> a type by a field value, it can be simpler to use
+<code>slice::sort_by_key</code>.</p>
+<h3 id="examples-of-incorrect-ord-implementations"><a class="doc-anchor" href="#examples-of-incorrect-ord-implementations">§</a>Examples of incorrect <code>Ord</code> implementations</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::cmp::Ordering;
+
+<span class="attr">#[derive(Debug)]
+</span><span class="kw">struct </span>Character {
+    health: f32,
+}
+
+<span class="kw">impl </span>Ord <span class="kw">for </span>Character {
+    <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; std::cmp::Ordering {
+        <span class="kw">if </span><span class="self">self</span>.health &lt; other.health {
+            Ordering::Less
+        } <span class="kw">else if </span><span class="self">self</span>.health &gt; other.health {
+            Ordering::Greater
+        } <span class="kw">else </span>{
+            Ordering::Equal
+        }
+    }
+}
+
+<span class="kw">impl </span>PartialOrd <span class="kw">for </span>Character {
+    <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Ordering&gt; {
+        <span class="prelude-val">Some</span>(<span class="self">self</span>.cmp(other))
+    }
+}
+
+<span class="kw">impl </span>PartialEq <span class="kw">for </span>Character {
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+        <span class="self">self</span>.health == other.health
+    }
+}
+
+<span class="kw">impl </span>Eq <span class="kw">for </span>Character {}
+
+<span class="kw">let </span>a = Character { health: <span class="number">4.5 </span>};
+<span class="kw">let </span>b = Character { health: f32::NAN };
+
+<span class="comment">// Mistake: floating-point values do not form a total order and using the built-in comparison
+// operands to implement `Ord` irregardless of that reality does not change it. Use
+// `f32::total_cmp` if you need a total order for floating-point values.
+
+// Reflexivity requirement of `Ord` is not given.
+</span><span class="macro">assert!</span>(a == a);
+<span class="macro">assert!</span>(b != b);
+
+<span class="comment">// Antisymmetry requirement of `Ord` is not given. Only one of a &lt; c and c &lt; a is allowed to be
+// true, not both or neither.
+</span><span class="macro">assert_eq!</span>((a &lt; b) <span class="kw">as </span>u8 + (b &lt; a) <span class="kw">as </span>u8, <span class="number">0</span>);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++use+std::cmp::Ordering;%0A++++%0A++++%23%5Bderive(Debug)%5D%0A++++struct+Character+%7B%0A++++++++health:+f32,%0A++++%7D%0A++++%0A++++impl+Ord+for+Character+%7B%0A++++++++fn+cmp(%26self,+other:+%26Self)+-%3E+std::cmp::Ordering+%7B%0A++++++++++++if+self.health+%3C+other.health+%7B%0A++++++++++++++++Ordering::Less%0A++++++++++++%7D+else+if+self.health+%3E+other.health+%7B%0A++++++++++++++++Ordering::Greater%0A++++++++++++%7D+else+%7B%0A++++++++++++++++Ordering::Equal%0A++++++++++++%7D%0A++++++++%7D%0A++++%7D%0A++++%0A++++impl+PartialOrd+for+Character+%7B%0A++++++++fn+partial_cmp(%26self,+other:+%26Self)+-%3E+Option%3COrdering%3E+%7B%0A++++++++++++Some(self.cmp(other))%0A++++++++%7D%0A++++%7D%0A++++%0A++++impl+PartialEq+for+Character+%7B%0A++++++++fn+eq(%26self,+other:+%26Self)+-%3E+bool+%7B%0A++++++++++++self.health+==+other.health%0A++++++++%7D%0A++++%7D%0A++++%0A++++impl+Eq+for+Character+%7B%7D%0A++++%0A++++let+a+=+Character+%7B+health:+4.5+%7D;%0A++++let+b+=+Character+%7B+health:+f32::NAN+%7D;%0A++++%0A++++//+Mistake:+floating-point+values+do+not+form+a+total+order+and+using+the+built-in+comparison%0A++++//+operands+to+implement+%60Ord%60+irregardless+of+that+reality+does+not+change+it.+Use%0A++++//+%60f32::total_cmp%60+if+you+need+a+total+order+for+floating-point+values.%0A++++%0A++++//+Reflexivity+requirement+of+%60Ord%60+is+not+given.%0A++++assert!(a+==+a);%0A++++assert!(b+!=+b);%0A++++%0A++++//+Antisymmetry+requirement+of+%60Ord%60+is+not+given.+Only+one+of+a+%3C+c+and+c+%3C+a+is+allowed+to+be%0A++++//+true,+not+both+or+neither.%0A++++assert_eq!((a+%3C+b)+as+u8+%2B+(b+%3C+a)+as+u8,+0);%0A%7D&amp;edition=2024"></a></div>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::cmp::Ordering;
+
+<span class="attr">#[derive(Debug)]
+</span><span class="kw">struct </span>Character {
+    health: u32,
+    experience: u32,
+}
+
+<span class="kw">impl </span>PartialOrd <span class="kw">for </span>Character {
+    <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Ordering&gt; {
+        <span class="prelude-val">Some</span>(<span class="self">self</span>.cmp(other))
+    }
+}
+
+<span class="kw">impl </span>Ord <span class="kw">for </span>Character {
+    <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; std::cmp::Ordering {
+        <span class="kw">if </span><span class="self">self</span>.health &lt; <span class="number">50 </span>{
+            <span class="self">self</span>.health.cmp(<span class="kw-2">&amp;</span>other.health)
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.experience.cmp(<span class="kw-2">&amp;</span>other.experience)
+        }
+    }
+}
+
+<span class="comment">// For performance reasons implementing `PartialEq` this way is not the idiomatic way, but it
+// ensures consistent behavior between `PartialEq`, `PartialOrd` and `Ord` in this example.
+</span><span class="kw">impl </span>PartialEq <span class="kw">for </span>Character {
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+        <span class="self">self</span>.cmp(other) == Ordering::Equal
+    }
+}
+
+<span class="kw">impl </span>Eq <span class="kw">for </span>Character {}
+
+<span class="kw">let </span>a = Character {
+    health: <span class="number">3</span>,
+    experience: <span class="number">5</span>,
+};
+<span class="kw">let </span>b = Character {
+    health: <span class="number">10</span>,
+    experience: <span class="number">77</span>,
+};
+<span class="kw">let </span>c = Character {
+    health: <span class="number">143</span>,
+    experience: <span class="number">2</span>,
+};
+
+<span class="comment">// Mistake: The implementation of `Ord` compares different fields depending on the value of
+// `self.health`, the resulting order is not total.
+
+// Transitivity requirement of `Ord` is not given. If a is smaller than b and b is smaller than
+// c, by transitive property a must also be smaller than c.
+</span><span class="macro">assert!</span>(a &lt; b &amp;&amp; b &lt; c &amp;&amp; c &lt; a);
+
+<span class="comment">// Antisymmetry requirement of `Ord` is not given. Only one of a &lt; c and c &lt; a is allowed to be
+// true, not both or neither.
+</span><span class="macro">assert_eq!</span>((a &lt; c) <span class="kw">as </span>u8 + (c &lt; a) <span class="kw">as </span>u8, <span class="number">2</span>);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++use+std::cmp::Ordering;%0A++++%0A++++%23%5Bderive(Debug)%5D%0A++++struct+Character+%7B%0A++++++++health:+u32,%0A++++++++experience:+u32,%0A++++%7D%0A++++%0A++++impl+PartialOrd+for+Character+%7B%0A++++++++fn+partial_cmp(%26self,+other:+%26Self)+-%3E+Option%3COrdering%3E+%7B%0A++++++++++++Some(self.cmp(other))%0A++++++++%7D%0A++++%7D%0A++++%0A++++impl+Ord+for+Character+%7B%0A++++++++fn+cmp(%26self,+other:+%26Self)+-%3E+std::cmp::Ordering+%7B%0A++++++++++++if+self.health+%3C+50+%7B%0A++++++++++++++++self.health.cmp(%26other.health)%0A++++++++++++%7D+else+%7B%0A++++++++++++++++self.experience.cmp(%26other.experience)%0A++++++++++++%7D%0A++++++++%7D%0A++++%7D%0A++++%0A++++//+For+performance+reasons+implementing+%60PartialEq%60+this+way+is+not+the+idiomatic+way,+but+it%0A++++//+ensures+consistent+behavior+between+%60PartialEq%60,+%60PartialOrd%60+and+%60Ord%60+in+this+example.%0A++++impl+PartialEq+for+Character+%7B%0A++++++++fn+eq(%26self,+other:+%26Self)+-%3E+bool+%7B%0A++++++++++++self.cmp(other)+==+Ordering::Equal%0A++++++++%7D%0A++++%7D%0A++++%0A++++impl+Eq+for+Character+%7B%7D%0A++++%0A++++let+a+=+Character+%7B%0A++++++++health:+3,%0A++++++++experience:+5,%0A++++%7D;%0A++++let+b+=+Character+%7B%0A++++++++health:+10,%0A++++++++experience:+77,%0A++++%7D;%0A++++let+c+=+Character+%7B%0A++++++++health:+143,%0A++++++++experience:+2,%0A++++%7D;%0A++++%0A++++//+Mistake:+The+implementation+of+%60Ord%60+compares+different+fields+depending+on+the+value+of%0A++++//+%60self.health%60,+the+resulting+order+is+not+total.%0A++++%0A++++//+Transitivity+requirement+of+%60Ord%60+is+not+given.+If+a+is+smaller+than+b+and+b+is+smaller+than%0A++++//+c,+by+transitive+property+a+must+also+be+smaller+than+c.%0A++++assert!(a+%3C+b+%26%26+b+%3C+c+%26%26+c+%3C+a);%0A++++%0A++++//+Antisymmetry+requirement+of+%60Ord%60+is+not+given.+Only+one+of+a+%3C+c+and+c+%3C+a+is+allowed+to+be%0A++++//+true,+not+both+or+neither.%0A++++assert_eq!((a+%3C+c)+as+u8+%2B+(c+%3C+a)+as+u8,+2);%0A%7D&amp;edition=2024"></a></div>
+<p>The documentation of <a href="trait.PartialOrd.html" title="trait core::cmp::PartialOrd"><code>PartialOrd</code></a> contains further examples, for example it’s wrong for
+<a href="trait.PartialOrd.html" title="trait core::cmp::PartialOrd"><code>PartialOrd</code></a> and <a href="trait.PartialEq.html" title="trait core::cmp::PartialEq"><code>PartialEq</code></a> to disagree.</p>
+</div></details><h2 id="required-methods" class="section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="tymethod.cmp" class="method"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/cmp.rs.html#986">Source</a></span><h4 class="code-header">fn <a href="#tymethod.cmp" class="fn">cmp</a>(&amp;self, other: &amp;Self) -&gt; <a class="enum" href="enum.Ordering.html" title="enum core::cmp::Ordering">Ordering</a></h4></section></summary><div class="docblock"><p>This method returns an <a href="enum.Ordering.html" title="enum core::cmp::Ordering"><code>Ordering</code></a> between <code>self</code> and <code>other</code>.</p>
+<p>By convention, <code>self.cmp(&amp;other)</code> returns the ordering matching the expression
+<code>self &lt;operator&gt; other</code> if true.</p>
+<h5 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::cmp::Ordering;
+
+<span class="macro">assert_eq!</span>(<span class="number">5</span>.cmp(<span class="kw-2">&amp;</span><span class="number">10</span>), Ordering::Less);
+<span class="macro">assert_eq!</span>(<span class="number">10</span>.cmp(<span class="kw-2">&amp;</span><span class="number">5</span>), Ordering::Greater);
+<span class="macro">assert_eq!</span>(<span class="number">5</span>.cmp(<span class="kw-2">&amp;</span><span class="number">5</span>), Ordering::Equal);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++use+std::cmp::Ordering;%0A++++%0A++++assert_eq!(5.cmp(%2610),+Ordering::Less);%0A++++assert_eq!(10.cmp(%265),+Ordering::Greater);%0A++++assert_eq!(5.cmp(%265),+Ordering::Equal);%0A%7D&amp;edition=2024"></a></div>
+</div></details></div><h2 id="provided-methods" class="section-header">Provided Methods<a href="#provided-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="method.max" class="method"><span class="rightside"><span class="since" title="Stable since Rust version 1.21.0">1.21.0</span> · <a class="src" href="../../src/core/cmp.rs.html#1020-1025">Source</a></span><h4 class="code-header">fn <a href="#method.max" class="fn">max</a>(self, other: Self) -&gt; Self<div class="where">where
+    Self: <a class="trait" href="../marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h4></section></summary><div class="docblock"><p>Compares and returns the maximum of two values.</p>
+<p>Returns the second argument if the comparison determines them to be equal.</p>
+<h5 id="examples-1"><a class="doc-anchor" href="#examples-1">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">assert_eq!</span>(<span class="number">1</span>.max(<span class="number">2</span>), <span class="number">2</span>);
+<span class="macro">assert_eq!</span>(<span class="number">2</span>.max(<span class="number">2</span>), <span class="number">2</span>);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++assert_eq!(1.max(2),+2);%0A++++assert_eq!(2.max(2),+2);%0A%7D&amp;edition=2024"></a></div>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::cmp::Ordering;
+
+<span class="attr">#[derive(Eq)]
+</span><span class="kw">struct </span>Equal(<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str);
+
+<span class="kw">impl </span>PartialEq <span class="kw">for </span>Equal {
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool { <span class="bool-val">true </span>}
+}
+<span class="kw">impl </span>PartialOrd <span class="kw">for </span>Equal {
+    <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Ordering&gt; { <span class="prelude-val">Some</span>(Ordering::Equal) }
+}
+<span class="kw">impl </span>Ord <span class="kw">for </span>Equal {
+    <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Ordering { Ordering::Equal }
+}
+
+<span class="macro">assert_eq!</span>(Equal(<span class="string">"self"</span>).max(Equal(<span class="string">"other"</span>)).<span class="number">0</span>, <span class="string">"other"</span>);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++use+std::cmp::Ordering;%0A++++%0A++++%23%5Bderive(Eq)%5D%0A++++struct+Equal(%26'static+str);%0A++++%0A++++impl+PartialEq+for+Equal+%7B%0A++++++++fn+eq(%26self,+other:+%26Self)+-%3E+bool+%7B+true+%7D%0A++++%7D%0A++++impl+PartialOrd+for+Equal+%7B%0A++++++++fn+partial_cmp(%26self,+other:+%26Self)+-%3E+Option%3COrdering%3E+%7B+Some(Ordering::Equal)+%7D%0A++++%7D%0A++++impl+Ord+for+Equal+%7B%0A++++++++fn+cmp(%26self,+other:+%26Self)+-%3E+Ordering+%7B+Ordering::Equal+%7D%0A++++%7D%0A++++%0A++++assert_eq!(Equal(%22self%22).max(Equal(%22other%22)).0,+%22other%22);%0A%7D&amp;edition=2024"></a></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.min" class="method"><span class="rightside"><span class="since" title="Stable since Rust version 1.21.0">1.21.0</span> · <a class="src" href="../../src/core/cmp.rs.html#1059-1064">Source</a></span><h4 class="code-header">fn <a href="#method.min" class="fn">min</a>(self, other: Self) -&gt; Self<div class="where">where
+    Self: <a class="trait" href="../marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h4></section></summary><div class="docblock"><p>Compares and returns the minimum of two values.</p>
+<p>Returns the first argument if the comparison determines them to be equal.</p>
+<h5 id="examples-2"><a class="doc-anchor" href="#examples-2">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">assert_eq!</span>(<span class="number">1</span>.min(<span class="number">2</span>), <span class="number">1</span>);
+<span class="macro">assert_eq!</span>(<span class="number">2</span>.min(<span class="number">2</span>), <span class="number">2</span>);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++assert_eq!(1.min(2),+1);%0A++++assert_eq!(2.min(2),+2);%0A%7D&amp;edition=2024"></a></div>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::cmp::Ordering;
+
+<span class="attr">#[derive(Eq)]
+</span><span class="kw">struct </span>Equal(<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str);
+
+<span class="kw">impl </span>PartialEq <span class="kw">for </span>Equal {
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool { <span class="bool-val">true </span>}
+}
+<span class="kw">impl </span>PartialOrd <span class="kw">for </span>Equal {
+    <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Ordering&gt; { <span class="prelude-val">Some</span>(Ordering::Equal) }
+}
+<span class="kw">impl </span>Ord <span class="kw">for </span>Equal {
+    <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Ordering { Ordering::Equal }
+}
+
+<span class="macro">assert_eq!</span>(Equal(<span class="string">"self"</span>).min(Equal(<span class="string">"other"</span>)).<span class="number">0</span>, <span class="string">"self"</span>);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++use+std::cmp::Ordering;%0A++++%0A++++%23%5Bderive(Eq)%5D%0A++++struct+Equal(%26'static+str);%0A++++%0A++++impl+PartialEq+for+Equal+%7B%0A++++++++fn+eq(%26self,+other:+%26Self)+-%3E+bool+%7B+true+%7D%0A++++%7D%0A++++impl+PartialOrd+for+Equal+%7B%0A++++++++fn+partial_cmp(%26self,+other:+%26Self)+-%3E+Option%3COrdering%3E+%7B+Some(Ordering::Equal)+%7D%0A++++%7D%0A++++impl+Ord+for+Equal+%7B%0A++++++++fn+cmp(%26self,+other:+%26Self)+-%3E+Ordering+%7B+Ordering::Equal+%7D%0A++++%7D%0A++++%0A++++assert_eq!(Equal(%22self%22).min(Equal(%22other%22)).0,+%22self%22);%0A%7D&amp;edition=2024"></a></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.clamp" class="method"><span class="rightside"><span class="since" title="Stable since Rust version 1.50.0">1.50.0</span> · <a class="src" href="../../src/core/cmp.rs.html#1085-1097">Source</a></span><h4 class="code-header">fn <a href="#method.clamp" class="fn">clamp</a>(self, min: Self, max: Self) -&gt; Self<div class="where">where
+    Self: <a class="trait" href="../marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h4></section></summary><div class="docblock"><p>Restrict a value to a certain interval.</p>
+<p>Returns <code>max</code> if <code>self</code> is greater than <code>max</code>, and <code>min</code> if <code>self</code> is
+less than <code>min</code>. Otherwise this returns <code>self</code>.</p>
+<h5 id="panics"><a class="doc-anchor" href="#panics">§</a>Panics</h5>
+<p>Panics if <code>min &gt; max</code>.</p>
+<h5 id="examples-3"><a class="doc-anchor" href="#examples-3">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">assert_eq!</span>((-<span class="number">3</span>).clamp(-<span class="number">2</span>, <span class="number">1</span>), -<span class="number">2</span>);
+<span class="macro">assert_eq!</span>(<span class="number">0</span>.clamp(-<span class="number">2</span>, <span class="number">1</span>), <span class="number">0</span>);
+<span class="macro">assert_eq!</span>(<span class="number">2</span>.clamp(-<span class="number">2</span>, <span class="number">1</span>), <span class="number">1</span>);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++assert_eq!((-3).clamp(-2,+1),+-2);%0A++++assert_eq!(0.clamp(-2,+1),+0);%0A++++assert_eq!(2.clamp(-2,+1),+1);%0A%7D&amp;edition=2024"></a></div>
+</div></details></div><h2 id="dyn-compatibility" class="section-header">Dyn Compatibility<a href="#dyn-compatibility" class="anchor">§</a></h2><div class="dyn-compatibility-info"><p>This trait is <b>not</b> <a href="https://doc.rust-lang.org/1.87.0/reference/items/traits.html#dyn-compatibility">dyn compatible</a>.</p><p><i>In older versions of Rust, dyn compatibility was called "object safety", so this trait is not object safe.</i></p></div><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"><section id="impl-Ord-for-bool" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/cmp.rs.html#1991-2021">Source</a></span><a href="#impl-Ord-for-bool" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.Ord.html" title="trait core::cmp::Ord">Ord</a> for <a class="primitive" href="../primitive.bool.html">bool</a></h3></section><section id="impl-Ord-for-i8" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/cmp.rs.html#2027">Source</a></span><a href="#impl-Ord-for-i8" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.Ord.html" title="trait core::cmp::Ord">Ord</a> for <a class="primitive" href="../primitive.i8.html">i8</a></h3></section><section id="impl-Ord-for-i16" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/cmp.rs.html#2027">Source</a></span><a href="#impl-Ord-for-i16" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.Ord.html" title="trait core::cmp::Ord">Ord</a> for <a class="primitive" href="../primitive.i16.html">i16</a></h3></section><section id="impl-Ord-for-i32" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/cmp.rs.html#2027">Source</a></span><a href="#impl-Ord-for-i32" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.Ord.html" title="trait core::cmp::Ord">Ord</a> for <a class="primitive" href="../primitive.i32.html">i32</a></h3></section><section id="impl-Ord-for-i64" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/cmp.rs.html#2027">Source</a></span><a href="#impl-Ord-for-i64" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.Ord.html" title="trait core::cmp::Ord">Ord</a> for <a class="primitive" href="../primitive.i64.html">i64</a></h3></section><section id="impl-Ord-for-i128" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/cmp.rs.html#2027">Source</a></span><a href="#impl-Ord-for-i128" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.Ord.html" title="trait core::cmp::Ord">Ord</a> for <a class="primitive" href="../primitive.i128.html">i128</a></h3></section><section id="impl-Ord-for-isize" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/cmp.rs.html#2027">Source</a></span><a href="#impl-Ord-for-isize" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.Ord.html" title="trait core::cmp::Ord">Ord</a> for <a class="primitive" href="../primitive.isize.html">isize</a></h3></section><section id="impl-Ord-for-u8" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/cmp.rs.html#2027">Source</a></span><a href="#impl-Ord-for-u8" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.Ord.html" title="trait core::cmp::Ord">Ord</a> for <a class="primitive" href="../primitive.u8.html">u8</a></h3></section><section id="impl-Ord-for-u16" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/cmp.rs.html#2027">Source</a></span><a href="#impl-Ord-for-u16" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.Ord.html" title="trait core::cmp::Ord">Ord</a> for <a class="primitive" href="../primitive.u16.html">u16</a></h3></section><section id="impl-Ord-for-u32" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/cmp.rs.html#2027">Source</a></span><a href="#impl-Ord-for-u32" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.Ord.html" title="trait core::cmp::Ord">Ord</a> for <a class="primitive" href="../primitive.u32.html">u32</a></h3></section><section id="impl-Ord-for-u64" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/cmp.rs.html#2027">Source</a></span><a href="#impl-Ord-for-u64" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.Ord.html" title="trait core::cmp::Ord">Ord</a> for <a class="primitive" href="../primitive.u64.html">u64</a></h3></section><section id="impl-Ord-for-u128" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/cmp.rs.html#2027">Source</a></span><a href="#impl-Ord-for-u128" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.Ord.html" title="trait core::cmp::Ord">Ord</a> for <a class="primitive" href="../primitive.u128.html">u128</a></h3></section><section id="impl-Ord-for-usize" class="impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="../../src/core/cmp.rs.html#2027">Source</a></span><a href="#impl-Ord-for-usize" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.Ord.html" title="trait core::cmp::Ord">Ord</a> for <a class="primitive" href="../primitive.usize.html">usize</a></h3></section></div><script src="../../trait.impl/core/cmp/trait.Ord.js" async></script></section></div></main></body></html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Selects which function to call depending on the context."><title>const_eval_select in core::intrinsics - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.88.0" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../../static.files/storage-82c7156e.js"></script><script defer src="sidebar-items1.88.0.js"></script><script defer src="../../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc fn"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt="logo"></a><h2><a href="../../core/index.html">core</a><span class="version">1.88.0-dev</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">const_<wbr>eval_<wbr>select</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#type-requirements" title="Type Requirements">Type Requirements</a></li><li><a href="#stability-concerns" title="Stability concerns">Stability concerns</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="index.html">In core::<wbr>intrinsics</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">core</a>::<wbr><a href="index.html">intrinsics</a></div><h1>Function <span class="fn">const_eval_select</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/core/intrinsics/mod.rs.html#3292-3299">Source</a> </span></div><pre class="rust item-decl"><code>pub const fn const_eval_select&lt;ARG: <a class="trait" href="../marker/trait.Tuple.html" title="trait core::marker::Tuple">Tuple</a>, F, G, RET&gt;(
+    _arg: ARG,
+    _called_in_const: F,
+    _called_at_rt: G,
+) -&gt; RET<div class="where">where
+    G: <a class="trait" href="../ops/function/trait.FnOnce.html" title="trait core::ops::function::FnOnce">FnOnce</a>&lt;ARG, Output = RET&gt;,
+    F: <a class="trait" href="../ops/function/trait.FnOnce.html" title="trait core::ops::function::FnOnce">FnOnce</a>&lt;ARG, Output = RET&gt;,</div></code></pre><span class="item-info"><div class="stab unstable"><span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>core_intrinsics</code>)</span></div></span><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Selects which function to call depending on the context.</p>
+<p>If this function is evaluated at compile-time, then a call to this
+intrinsic will be replaced with a call to <code>called_in_const</code>. It gets
+replaced with a call to <code>called_at_rt</code> otherwise.</p>
+<p>This function is safe to call, but note the stability concerns below.</p>
+<h2 id="type-requirements"><a class="doc-anchor" href="#type-requirements">§</a>Type Requirements</h2>
+<p>The two functions must be both function items. They cannot be function
+pointers or closures. The first function must be a <code>const fn</code>.</p>
+<p><code>arg</code> will be the tupled arguments that will be passed to either one of
+the two functions, therefore, both functions must accept the same type of
+arguments. Both functions must return RET.</p>
+<h2 id="stability-concerns"><a class="doc-anchor" href="#stability-concerns">§</a>Stability concerns</h2>
+<p>Rust has not yet decided that <code>const fn</code> are allowed to tell whether
+they run at compile-time or at runtime. Therefore, when using this
+intrinsic anywhere that can be reached from stable, it is crucial that
+the end-to-end behavior of the stable <code>const fn</code> is the same for both
+modes of execution. (Here, Undefined Behavior is considered “the same”
+as any other behavior, so if the function exhibits UB at runtime then
+it may do whatever it wants at compile-time.)</p>
+<p>Here is an example of how this could cause a problem:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attr">#![feature(const_eval_select)]
+#![feature(core_intrinsics)]
+</span><span class="kw">use </span>std::intrinsics::const_eval_select;
+
+<span class="comment">// Standard library
+</span><span class="kw">pub const fn </span>inconsistent() -&gt; i32 {
+    <span class="kw">fn </span>runtime() -&gt; i32 { <span class="number">1 </span>}
+    <span class="kw">const fn </span>compiletime() -&gt; i32 { <span class="number">2 </span>}
+
+    <span class="comment">// ⚠ This code violates the required equivalence of `compiletime`
+    // and `runtime`.
+    </span>const_eval_select((), compiletime, runtime)
+}
+
+<span class="comment">// User Crate
+</span><span class="kw">const </span>X: i32 = inconsistent();
+<span class="kw">let </span>x = inconsistent();
+<span class="macro">assert_eq!</span>(x, X);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0A%23!%5Bfeature(const_eval_select)%5D%0A%23!%5Bfeature(core_intrinsics)%5D%0A%23!%5Ballow(internal_features)%5D%0A%0A%23%5Ballow(unused_extern_crates)%5D%0Aextern+crate+r%23core;%0Afn+main()+%7B%0A++++use+std::intrinsics::const_eval_select;%0A++++%0A++++//+Standard+library%0A++++pub+const+fn+inconsistent()+-%3E+i32+%7B%0A++++++++fn+runtime()+-%3E+i32+%7B+1+%7D%0A++++++++const+fn+compiletime()+-%3E+i32+%7B+2+%7D%0A++++%0A++++++++//+%E2%9A%A0+This+code+violates+the+required+equivalence+of+%60compiletime%60%0A++++++++//+and+%60runtime%60.%0A++++++++const_eval_select((),+compiletime,+runtime)%0A++++%7D%0A++++%0A++++//+User+Crate%0A++++const+X:+i32+=+inconsistent();%0A++++let+x+=+inconsistent();%0A++++assert_eq!(x,+X);%0A%7D&amp;version=nightly&amp;edition=2024"></a></div>
+<p>Currently such an assertion would always succeed; until Rust decides
+otherwise, that principle should not be violated.</p>
+</div></details></section></div></main></body></html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="The identity function."><title>identity in core::convert - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.88.0" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../../static.files/storage-82c7156e.js"></script><script defer src="sidebar-items1.88.0.js"></script><script defer src="../../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc fn"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt="logo"></a><h2><a href="../../core/index.html">core</a><span class="version">1.88.0-dev</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">identity</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#examples" title="Examples">Examples</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="index.html">In core::<wbr>convert</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">core</a>::<wbr><a href="index.html">convert</a></div><h1>Function <span class="fn">identity</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><span class="since" title="Stable since Rust version 1.33.0, const since 1.33.0">1.33.0 (const: 1.33.0)</span> · <a class="src" href="../../src/core/convert/mod.rs.html#109-111">Source</a> </span></div><pre class="rust item-decl"><code>pub const fn identity&lt;T&gt;(x: T) -&gt; T</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>The identity function.</p>
+<p>Two things are important to note about this function:</p>
+<ul>
+<li>
+<p>It is not always equivalent to a closure like <code>|x| x</code>, since the
+closure may coerce <code>x</code> into a different type.</p>
+</li>
+<li>
+<p>It moves the input <code>x</code> passed to the function.</p>
+</li>
+</ul>
+<p>While it might seem strange to have a function that just returns back the
+input, there are some interesting uses.</p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>Using <code>identity</code> to do nothing in a sequence of other, interesting,
+functions:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::convert::identity;
+
+<span class="kw">fn </span>manipulation(x: u32) -&gt; u32 {
+    <span class="comment">// Let's pretend that adding one is an interesting function.
+    </span>x + <span class="number">1
+</span>}
+
+<span class="kw">let </span>_arr = <span class="kw-2">&amp;</span>[identity, manipulation];</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++use+std::convert::identity;%0A++++%0A++++fn+manipulation(x:+u32)+-%3E+u32+%7B%0A++++++++//+Let's+pretend+that+adding+one+is+an+interesting+function.%0A++++++++x+%2B+1%0A++++%7D%0A++++%0A++++let+_arr+=+%26%5Bidentity,+manipulation%5D;%0A%7D&amp;edition=2024"></a></div>
+<p>Using <code>identity</code> as a “do nothing” base case in a conditional:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::convert::identity;
+
+<span class="kw">let </span>do_stuff = <span class="kw">if </span>condition { manipulation } <span class="kw">else </span>{ identity };
+
+<span class="comment">// Do more interesting stuff...
+
+</span><span class="kw">let </span>_results = do_stuff(<span class="number">42</span>);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++use+std::convert::identity;%0A++++%0A++++let+condition+=+true;%0A++++%0A++++fn+manipulation(x:+u32)+-%3E+u32+%7B+x+%2B+1+%7D%0A++++%0A++++let+do_stuff+=+if+condition+%7B+manipulation+%7D+else+%7B+identity+%7D;%0A++++%0A++++//+Do+more+interesting+stuff...%0A++++%0A++++let+_results+=+do_stuff(42);%0A%7D&amp;edition=2024"></a></div>
+<p>Using <code>identity</code> to keep the <code>Some</code> variants of an iterator of <code>Option&lt;T&gt;</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::convert::identity;
+
+<span class="kw">let </span>iter = [<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">3</span>)].into_iter();
+<span class="kw">let </span>filtered = iter.filter_map(identity).collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="macro">assert_eq!</span>(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">3</span>], filtered);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++use+std::convert::identity;%0A++++%0A++++let+iter+=+%5BSome(1),+None,+Some(3)%5D.into_iter();%0A++++let+filtered+=+iter.filter_map(identity).collect::%3CVec%3C_%3E%3E();%0A++++assert_eq!(vec!%5B1,+3%5D,+filtered);%0A%7D&amp;edition=2024"></a></div>
+</div></details></section></div></main></body></html>

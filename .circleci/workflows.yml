@@ -934,7 +934,7 @@ workflows:
             - x86_64-linux-build
       - x86_64-linux-library-coverage:
           requires:
-            - x86_64-linux-build
+            - x86_64-linux-test
 
       - facade-generic-test:
           name: aarch64-none-compiletest

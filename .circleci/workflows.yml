@@ -767,7 +767,7 @@ jobs:
           name: Empty step to make sure the job always has steps
           command: echo
 
-  # Misc jobs   
+  # Misc jobs
   wasm-dist-oxidos:
     executor: docker-x86_64-ubuntu-20
     resource_class: large # 4-core
@@ -932,7 +932,7 @@ workflows:
             - x86_64-linux-build
       - x86_64-linux-library-coverage:
           requires:
-            - x86_64-linux-build
+            - x86_64-linux-test
 
       - facade-generic-test:
           name: aarch64-none-compiletest

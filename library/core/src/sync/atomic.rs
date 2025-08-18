@@ -2554,8 +2554,13 @@ impl<T> AtomicPtr<T> {
 
 #[cfg(target_has_atomic_load_store = "8")]
 #[stable(feature = "atomic_bool_from", since = "1.24.0")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl From<bool> for AtomicBool {
+=======
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
+impl const From<bool> for AtomicBool {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     /// Converts a `bool` into an `AtomicBool`.
     ///
     /// # Examples
@@ -2653,7 +2658,8 @@ macro_rules! atomic_int {
         }
 
         #[$stable_from]
-        impl From<$int_type> for $atomic_type {
+        #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+        impl const From<$int_type> for $atomic_type {
             #[doc = concat!("Converts an `", stringify!($int_type), "` into an `", stringify!($atomic_type), "`.")]
             #[inline]
             fn from(v: $int_type) -> Self { Self::new(v) }

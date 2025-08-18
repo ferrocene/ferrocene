@@ -110,6 +110,22 @@ pub enum DeprecatedSince {
     Err,
 }
 
+#[derive(
+    Copy,
+    Debug,
+    Eq,
+    PartialEq,
+    Encodable,
+    Decodable,
+    Clone,
+    HashStable_Generic,
+    PrintAttribute
+)]
+pub enum CoverageStatus {
+    On,
+    Off,
+}
+
 impl Deprecation {
     /// Whether an item marked with #[deprecated(since = "X")] is currently
     /// deprecated (i.e., whether X is not greater than the current rustc
@@ -139,6 +155,19 @@ impl Deprecation {
 pub enum UsedBy {
     Compiler,
     Linker,
+}
+
+#[derive(Encodable, Decodable, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(HashStable_Generic, PrintAttribute)]
+pub enum MacroUseArgs {
+    UseAll,
+    UseSpecific(ThinVec<Ident>),
+}
+
+impl Default for MacroUseArgs {
+    fn default() -> Self {
+        Self::UseSpecific(ThinVec::new())
+    }
 }
 
 #[derive(Debug, Clone, Encodable, Decodable, HashStable_Generic)]
@@ -218,6 +247,7 @@ pub enum CfgEntry {
 pub enum AttributeKind {
     // tidy-alphabetical-start
     /// Represents `#[align(N)]`.
+    // FIXME(#82232, #143834): temporarily renamed to mitigate `#[align]` nameres ambiguity
     Align { align: Align, span: Span },
 
     /// Represents `#[rustc_allow_const_fn_unstable]`.
@@ -273,6 +303,9 @@ pub enum AttributeKind {
 
     /// Represents `#[const_trait]`.
     ConstTrait(Span),
+
+    /// Represents `#[coverage]`.
+    Coverage(Span, CoverageStatus),
 
     ///Represents `#[rustc_deny_explicit_impl]`.
     DenyExplicitImpl(Span),
@@ -331,8 +364,14 @@ pub enum AttributeKind {
     /// Represents `#[loop_match]`.
     LoopMatch(Span),
 
+    /// Represents `#[macro_escape]`.
+    MacroEscape(Span),
+
     /// Represents `#[rustc_macro_transparency]`.
     MacroTransparency(Transparency),
+
+    /// Represents `#[macro_use]`.
+    MacroUse { span: Span, arguments: MacroUseArgs },
 
     /// Represents `#[marker]`.
     Marker(Span),

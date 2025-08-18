@@ -20,7 +20,10 @@ mod my_mod_inner {
 
 #[coverage = "off"]
 //~^ ERROR malformed `coverage` attribute input
+<<<<<<< HEAD
 // Ferrocene addition: No error due to `#[coverage]` patches
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 struct MyStruct;
 
 #[coverage = "off"]
@@ -28,22 +31,34 @@ struct MyStruct;
 impl MyStruct {
     #[coverage = "off"]
     //~^ ERROR malformed `coverage` attribute input
+<<<<<<< HEAD
     // Ferrocene addition: No error due to `#[coverage]` patches
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     const X: u32 = 7;
 }
 
 #[coverage = "off"]
 //~^ ERROR malformed `coverage` attribute input
+<<<<<<< HEAD
 // Ferrocene addition: No error due to `#[coverage]` patches
 trait MyTrait {
     #[coverage = "off"]
     //~^ ERROR malformed `coverage` attribute input
     // Ferrocene addition: No error due to `#[coverage]` patches
+=======
+trait MyTrait {
+    #[coverage = "off"]
+    //~^ ERROR malformed `coverage` attribute input
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     const X: u32;
 
     #[coverage = "off"]
     //~^ ERROR malformed `coverage` attribute input
+<<<<<<< HEAD
     // Ferrocene addition: No error due to `#[coverage]` patches
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     type T;
 }
 
@@ -52,12 +67,18 @@ trait MyTrait {
 impl MyTrait for MyStruct {
     #[coverage = "off"]
     //~^ ERROR malformed `coverage` attribute input
+<<<<<<< HEAD
     // Ferrocene addition: No error due to `#[coverage]` patches
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     const X: u32 = 8;
 
     #[coverage = "off"]
     //~^ ERROR malformed `coverage` attribute input
+<<<<<<< HEAD
     // Ferrocene addition: No error due to `#[coverage]` patches
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     type T = ();
 }
 

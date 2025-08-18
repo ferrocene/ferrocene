@@ -221,6 +221,8 @@ pub const fn identity<T>(x: T) -> T {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "AsRef"]
+#[const_trait]
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
 pub trait AsRef<T: PointeeSized>: PointeeSized {
     /// Converts this type into a shared reference of the (usually inferred) input type.
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -372,6 +374,8 @@ pub trait AsRef<T: PointeeSized>: PointeeSized {
 /// `&mut Vec<u8>`, for example, is the better choice (callers need to pass the correct type then).
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "AsMut"]
+#[const_trait]
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
 pub trait AsMut<T: PointeeSized>: PointeeSized {
     /// Converts this type into a mutable reference of the (usually inferred) input type.
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -715,9 +719,10 @@ pub trait TryFrom<T>: Sized {
 
 // As lifts over &
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<T: PointeeSized, U: PointeeSized> AsRef<U> for &T
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
+impl<T: PointeeSized, U: PointeeSized> const AsRef<U> for &T
 where
-    T: AsRef<U>,
+    T: ~const AsRef<U>,
 {
     #[inline]
     fn as_ref(&self) -> &U {
@@ -727,9 +732,10 @@ where
 
 // As lifts over &mut
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<T: PointeeSized, U: PointeeSized> AsRef<U> for &mut T
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
+impl<T: PointeeSized, U: PointeeSized> const AsRef<U> for &mut T
 where
-    T: AsRef<U>,
+    T: ~const AsRef<U>,
 {
     #[inline]
     fn as_ref(&self) -> &U {
@@ -747,9 +753,10 @@ where
 
 // AsMut lifts over &mut
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<T: PointeeSized, U: PointeeSized> AsMut<U> for &mut T
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
+impl<T: PointeeSized, U: PointeeSized> const AsMut<U> for &mut T
 where
-    T: AsMut<U>,
+    T: ~const AsMut<U>,
 {
     #[inline]
     fn as_mut(&mut self) -> &mut U {
@@ -846,8 +853,9 @@ where
 ////////////////////////////////////////////////////////////////////////////////
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T> AsRef<[T]> for [T] {
+impl<T> const AsRef<[T]> for [T] {
     #[inline(always)]
     fn as_ref(&self) -> &[T] {
         self
@@ -855,7 +863,8 @@ impl<T> AsRef<[T]> for [T] {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<T> AsMut<[T]> for [T] {
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
+impl<T> const AsMut<[T]> for [T] {
     #[inline(always)]
     fn as_mut(&mut self) -> &mut [T] {
         self
@@ -863,8 +872,9 @@ impl<T> AsMut<[T]> for [T] {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl AsRef<str> for str {
+impl const AsRef<str> for str {
     #[inline(always)]
     fn as_ref(&self) -> &str {
         self
@@ -872,7 +882,8 @@ impl AsRef<str> for str {
 }
 
 #[stable(feature = "as_mut_str_for_str", since = "1.51.0")]
-impl AsMut<str> for str {
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
+impl const AsMut<str> for str {
     #[inline(always)]
     fn as_mut(&mut self) -> &mut str {
         self
@@ -933,7 +944,8 @@ impl AsMut<str> for str {
 pub enum Infallible {}
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
-impl Clone for Infallible {
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
+impl const Clone for Infallible {
     fn clone(&self) -> Infallible {
         match *self {}
     }
@@ -964,8 +976,9 @@ impl Error for Infallible {
 }
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
+#[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl PartialEq for Infallible {
+impl const PartialEq for Infallible {
     fn eq(&self, _: &Infallible) -> bool {
         match *self {}
     }
@@ -992,8 +1005,9 @@ impl Ord for Infallible {
 }
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
+#[rustc_const_unstable(feature = "const_try", issue = "74935")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl From<!> for Infallible {
+impl const From<!> for Infallible {
     #[inline]
     fn from(x: !) -> Self {
         x

@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-FileCopyrightText: The Ferrocene Developers
+
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+{
+	"name": "Ferrocene CI (Ubuntu 20.04)",
+
+	"build": {
+		"dockerfile": "../ferrocene/ci/docker-images/ubuntu-20/Dockerfile",
+		"context": ".."
+	},
+
+	"mounts": [
+		"source=${localEnv:HOME}/.aws,target=/home/ci/.aws,type=bind,consistency=cached"
+	],
+
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"chat.agent.enabled": false,
+				"telemetry.feedback.enabled": false
+			},
+			"extensions": [
+				"rust-lang.rust-analyzer",
+				"tamasfe.even-better-toml"
+			]
+		}
+	}
+}

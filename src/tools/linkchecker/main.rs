@@ -511,6 +511,9 @@ fn load_html_file(file: &Path, report: &mut Report) -> FileEntry {
 }
 
 fn is_intra_doc_exception(file: &Path, link: &str) -> bool {
+    if is_ferrocene_libcore_static(file) {
+        return true;
+    }
     if let Some(entry) = INTRA_DOC_LINK_EXCEPTIONS.iter().find(|&(f, _)| file.ends_with(f)) {
         entry.1.is_empty() || entry.1.contains(&link)
     } else {
@@ -519,7 +522,7 @@ fn is_intra_doc_exception(file: &Path, link: &str) -> bool {
 }
 
 fn is_exception(file: &Path, link: &str) -> bool {
-    if is_ferrocene_exception(file, link) {
+    if is_ferrocene_exception(file, link) || is_ferrocene_libcore_static(file) {
         return true;
     }
     if let Some(entry) = LINKCHECK_EXCEPTIONS.iter().find(|&(f, _)| file.ends_with(f)) {
@@ -647,6 +650,17 @@ fn parse_ids(ids: &mut HashSet<String>, file: &str, source: &str, report: &mut R
         // Just in case, we also add the encoded id.
         ids.insert(encoded);
     }
+}
+
+// The certified libcore has a number of broken links due to subsetting.
+fn is_ferrocene_libcore_static(file: &Path) -> bool {
+    use std::ffi::OsStr;
+    let components = file.components().collect::<Vec<_>>();
+    components.windows(3).any(|f| f == [
+        Component::Normal(OsStr::new("core")),
+        Component::Normal(OsStr::new("_static")),
+        Component::Normal(OsStr::new("api-docs")),
+    ])
 }
 
 fn is_ferrocene_exception(file: &Path, link: &str) -> bool {

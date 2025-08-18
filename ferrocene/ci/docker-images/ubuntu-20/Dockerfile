@@ -46,6 +46,10 @@ RUN <<-EOF
     # Update all the dependencies
     apt-get upgrade -y
 
+    # Update Git to support ssh signing
+    apt install software-properties-common --yes
+    add-apt-repository ppa:git-core/ppa --yes
+
     # Install required packages
     apt-install \
         git \

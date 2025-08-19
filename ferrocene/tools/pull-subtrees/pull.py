@@ -226,16 +226,16 @@ def generate_merged_pull_requests_list(subtree, previous_commit, latest_commit):
     for line in messages.split("\0"):
         if not line:
             continue
-        if (prs := remove_prefix(line, "Merge ")) != line:
+        if (prs := line.removeprefix("Merge ")) != line:
             for pr in prs.split(" "):
                 if not pr:
                     continue
-                if (number := remove_prefix(pr, "#")) == pr:
+                if (number := pr.removeprefix("#")) == pr:
                     continue
                 if not number.isdigit():
                     continue
                 result += f"* {linker.link(subtree.repo, number)}\n"
-        elif (pr := remove_prefix(line, "Auto merge of #")) != line:
+        elif (pr := line.removeprefix("Auto merge of #")) != line:
             number, _ = pr.split(" - ", 1)
             if not number.isdigit():
                 continue
@@ -478,14 +478,6 @@ local branch to GitHub and open a PR for it.
 
     def error_issue_repeated_comment(self):
         return f"The automation failed to pull the latest changes from {self.repo_link} again."
-
-
-# Polyfill for str.removeprefix for older Python versions
-def remove_prefix(string, prefix):
-    if string.startswith(prefix):
-        return string[len(prefix) :]
-    else:
-        return string
 
 
 def run(*args, **kwargs):

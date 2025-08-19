@@ -909,20 +909,6 @@ dependencies = [
 
 [[package]]
 name = "cargo_metadata"
-version = "0.19.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd5eb614ed4c27c5d706420e4320fbe3216ab31fa1c33cd8246ac36dae4479ba"
-dependencies = [
- "camino",
- "cargo-platform 0.1.9",
- "semver",
- "serde",
- "serde_json",
- "thiserror 2.0.15",
-]
-
-[[package]]
-name = "cargo_metadata"
 version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5cfca2aaa699835ba88faf58a06342a314a950d2b9686165e038286c30316868"
@@ -2037,7 +2023,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "askama 0.14.0",
- "cargo_metadata 0.18.1",
+ "cargo_metadata 0.21.0",
  "serde",
  "serde_json",
  "thiserror 1.0.69",
@@ -5232,6 +5218,7 @@ dependencies = [
  "rustc-literal-escaper",
  "rustc_ast",
  "rustc_ast_pretty",
+ "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_feature",
@@ -5540,7 +5527,10 @@ dependencies = [
  "rustc_macros",
  "rustc_serialize",
  "rustc_span",
+ "serde",
+ "serde_derive",
  "serde_json",
+ "serde_path_to_error",
  "tracing",
 ]
 
@@ -6032,6 +6022,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_path_to_error"
+version = "0.1.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "59fab13f937fa393d08645bf3a84bdfe86e296747b506ada67bb15f10f218b2a"
+dependencies = [
+ "itoa",
+ "serde",
+]
+
+[[package]]
 name = "serde_spanned"
 version = "0.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6492,7 +6492,7 @@ name = "tidy"
 version = "0.1.0"
 dependencies = [
  "build_helper",
- "cargo_metadata 0.19.2",
+ "cargo_metadata 0.21.0",
  "fluent-syntax",
  "ignore",
  "miropt-test-tools",

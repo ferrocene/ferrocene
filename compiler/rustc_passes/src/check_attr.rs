@@ -130,6 +130,22 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         for attr in attrs {
             let mut style = None;
             match attr {
+                Attribute::Parsed(AttributeKind::ProcMacro(_)) => {
+                    self.check_proc_macro(hir_id, target, ProcMacroKind::FunctionLike)
+                }
+                Attribute::Parsed(AttributeKind::ProcMacroAttribute(_)) => {
+                    self.check_proc_macro(hir_id, target, ProcMacroKind::Attribute);
+                }
+                Attribute::Parsed(AttributeKind::ProcMacroDerive { span: attr_span, .. }) => {
+                    self.check_generic_attr(
+                        hir_id,
+                        sym::proc_macro_derive,
+                        *attr_span,
+                        target,
+                        Target::Fn,
+                    );
+                    self.check_proc_macro(hir_id, target, ProcMacroKind::Derive)
+                }
                 Attribute::Parsed(
                     AttributeKind::SkipDuringMethodDispatch { span: attr_span, .. }
                     | AttributeKind::Coinductive(attr_span)
@@ -275,6 +291,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::MacroTransparency(_)
                     | AttributeKind::Pointee(..)
                     | AttributeKind::Dummy
+                    | AttributeKind::RustcBuiltinMacro { .. }
                     | AttributeKind::OmitGdbPrettyPrinterSection,
                 ) => { /* do nothing  */ }
                 Attribute::Parsed(AttributeKind::AsPtr(attr_span)) => {
@@ -372,16 +389,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         [sym::macro_export, ..] => self.check_macro_export(hir_id, attr, target),
                         [sym::should_panic, ..] => {
                             self.check_generic_attr_unparsed(hir_id, attr, target, Target::Fn)
-                        }
-                        [sym::proc_macro, ..] => {
-                            self.check_proc_macro(hir_id, target, ProcMacroKind::FunctionLike)
-                        }
-                        [sym::proc_macro_attribute, ..] => {
-                            self.check_proc_macro(hir_id, target, ProcMacroKind::Attribute);
-                        }
-                        [sym::proc_macro_derive, ..] => {
-                            self.check_generic_attr_unparsed(hir_id, attr, target, Target::Fn);
-                            self.check_proc_macro(hir_id, target, ProcMacroKind::Derive)
                         }
                         [sym::autodiff_forward, ..] | [sym::autodiff_reverse, ..] => {
                             self.check_autodiff(hir_id, attr, span, target)
@@ -1266,7 +1273,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             return;
         }
 
-        if self.tcx.extern_mod_stmt_cnum(hir_id.owner).is_none() {
+        if self.tcx.extern_mod_stmt_cnum(hir_id.owner.def_id).is_none() {
             self.tcx.emit_node_span_lint(
                 INVALID_DOC_ATTRIBUTES,
                 hir_id,

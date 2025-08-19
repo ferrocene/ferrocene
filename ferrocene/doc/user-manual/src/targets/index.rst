@@ -196,6 +196,12 @@ should not be used in production.
      - Full
      - The full standard library is available, but unsupported functions in ``std`` will panic.
 
+   * - :target:`x86_64-pc-windows-gnu`
+     - ``x86_64-pc-windows-gnu``
+     - Cross-compilation
+     - Full
+     - \-
+
    * - :ref:`x86_64-pc-windows-msvc`
      - ``x86_64-pc-windows-msvc``
      - Host platform

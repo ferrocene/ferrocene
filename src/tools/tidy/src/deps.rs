@@ -817,7 +817,7 @@ fn check_license_exceptions(metadata: &Metadata, exceptions: &[(&str, &str)], ba
         let license = match &pkg.license {
             Some(license) => license,
             None => {
-                if pkg.name == "ring" {
+                if pkg.name.to_string() == "ring" {
                     // *ring* does not define proper licensing metadata.
                     continue;
                 }

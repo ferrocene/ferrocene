@@ -1,0 +1,1441 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `library/core/src/marker.rs`."><title>marker.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.88.0" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../../static.files/storage-82c7156e.js"></script><script defer src="../../static.files/src-script-63605ae7.js"></script><script defer src="../../src-files1.88.0.js"></script><script defer src="../../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">core/</div>marker.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! Primitive traits and types representing basic properties of types.
+<a href=#2 id=2 data-nosnippet>2</a>//!
+<a href=#3 id=3 data-nosnippet>3</a>//! Rust types can be classified in various useful ways according to
+<a href=#4 id=4 data-nosnippet>4</a>//! their intrinsic properties. These classifications are represented
+<a href=#5 id=5 data-nosnippet>5</a>//! as traits.
+<a href=#6 id=6 data-nosnippet>6</a>
+<a href=#7 id=7 data-nosnippet>7</a></span><span class="attr">#![stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#8 id=8 data-nosnippet>8</a>
+<a href=#9 id=9 data-nosnippet>9</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#10 id=10 data-nosnippet>10</a></span><span class="kw">mod </span>variance;
+<a href=#11 id=11 data-nosnippet>11</a>
+<a href=#12 id=12 data-nosnippet>12</a><span class="attr">#[unstable(feature = <span class="string">"phantom_variance_markers"</span>, issue = <span class="string">"135806"</span>)]
+<a href=#13 id=13 data-nosnippet>13</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#14 id=14 data-nosnippet>14</a></span><span class="kw">pub use </span><span class="self">self</span>::variance::{
+<a href=#15 id=15 data-nosnippet>15</a>    PhantomContravariant, PhantomContravariantLifetime, PhantomCovariant, PhantomCovariantLifetime,
+<a href=#16 id=16 data-nosnippet>16</a>    PhantomInvariant, PhantomInvariantLifetime, Variance, variance,
+<a href=#17 id=17 data-nosnippet>17</a>};
+<a href=#18 id=18 data-nosnippet>18</a><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#19 id=19 data-nosnippet>19</a></span><span class="kw">use </span><span class="kw">crate</span>::cell::UnsafeCell;
+<a href=#20 id=20 data-nosnippet>20</a><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#21 id=21 data-nosnippet>21</a></span><span class="kw">use </span><span class="kw">crate</span>::cmp;
+<a href=#22 id=22 data-nosnippet>22</a><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#23 id=23 data-nosnippet>23</a></span><span class="kw">use </span><span class="kw">crate</span>::fmt::Debug;
+<a href=#24 id=24 data-nosnippet>24</a><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#25 id=25 data-nosnippet>25</a></span><span class="kw">use </span><span class="kw">crate</span>::hash::{Hash, Hasher};
+<a href=#26 id=26 data-nosnippet>26</a><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#27 id=27 data-nosnippet>27</a></span><span class="kw">use </span><span class="kw">crate</span>::pin::UnsafePinned;
+<a href=#28 id=28 data-nosnippet>28</a>
+<a href=#29 id=29 data-nosnippet>29</a><span class="doccomment">/// Implements a given marker trait for multiple types at the same time.
+<a href=#30 id=30 data-nosnippet>30</a>///
+<a href=#31 id=31 data-nosnippet>31</a>/// The basic syntax looks like this:
+<a href=#32 id=32 data-nosnippet>32</a>/// ```ignore private macro
+<a href=#33 id=33 data-nosnippet>33</a>/// marker_impls! { MarkerTrait for u8, i8 }
+<a href=#34 id=34 data-nosnippet>34</a>/// ```
+<a href=#35 id=35 data-nosnippet>35</a>/// You can also implement `unsafe` traits
+<a href=#36 id=36 data-nosnippet>36</a>/// ```ignore private macro
+<a href=#37 id=37 data-nosnippet>37</a>/// marker_impls! { unsafe MarkerTrait for u8, i8 }
+<a href=#38 id=38 data-nosnippet>38</a>/// ```
+<a href=#39 id=39 data-nosnippet>39</a>/// Add attributes to all impls:
+<a href=#40 id=40 data-nosnippet>40</a>/// ```ignore private macro
+<a href=#41 id=41 data-nosnippet>41</a>/// marker_impls! {
+<a href=#42 id=42 data-nosnippet>42</a>///     #[allow(lint)]
+<a href=#43 id=43 data-nosnippet>43</a>///     #[unstable(feature = "marker_trait", issue = "none")]
+<a href=#44 id=44 data-nosnippet>44</a>///     MarkerTrait for u8, i8
+<a href=#45 id=45 data-nosnippet>45</a>/// }
+<a href=#46 id=46 data-nosnippet>46</a>/// ```
+<a href=#47 id=47 data-nosnippet>47</a>/// And use generics:
+<a href=#48 id=48 data-nosnippet>48</a>/// ```ignore private macro
+<a href=#49 id=49 data-nosnippet>49</a>/// marker_impls! {
+<a href=#50 id=50 data-nosnippet>50</a>///     MarkerTrait for
+<a href=#51 id=51 data-nosnippet>51</a>///         u8, i8,
+<a href=#52 id=52 data-nosnippet>52</a>///         {T: ?Sized} *const T,
+<a href=#53 id=53 data-nosnippet>53</a>///         {T: ?Sized} *mut T,
+<a href=#54 id=54 data-nosnippet>54</a>///         {T: MarkerTrait} PhantomData&lt;T&gt;,
+<a href=#55 id=55 data-nosnippet>55</a>///         u32,
+<a href=#56 id=56 data-nosnippet>56</a>/// }
+<a href=#57 id=57 data-nosnippet>57</a>/// ```
+<a href=#58 id=58 data-nosnippet>58</a></span><span class="attr">#[unstable(feature = <span class="string">"internal_impls_macro"</span>, issue = <span class="string">"none"</span>)]
+<a href=#59 id=59 data-nosnippet>59</a></span><span class="comment">// Allow implementations of `UnsizedConstParamTy` even though std cannot use that feature.
+<a href=#60 id=60 data-nosnippet>60</a></span><span class="attr">#[allow_internal_unstable(unsized_const_params)]
+<a href=#61 id=61 data-nosnippet>61</a></span><span class="kw">macro </span>marker_impls {
+<a href=#62 id=62 data-nosnippet>62</a>    ( $(<span class="attr">#[$(<span class="macro-nonterminal">$meta</span>:tt)<span class="kw-2">*</span>]</span>)* <span class="macro-nonterminal">$Trait</span>:ident <span class="kw">for </span>$({$(<span class="macro-nonterminal">$bounds</span>:tt)<span class="kw-2">*</span>})<span class="question-mark">? </span><span class="macro-nonterminal">$T</span>:ty $(, $(<span class="macro-nonterminal">$rest</span>:tt)<span class="kw-2">*</span>)<span class="question-mark">? </span>) =&gt; {
+<a href=#63 id=63 data-nosnippet>63</a>        $(<span class="attr">#[$(<span class="macro-nonterminal">$meta</span>)<span class="kw-2">*</span>]</span>)* <span class="kw">impl</span>&lt; $($(<span class="macro-nonterminal">$bounds</span>)<span class="kw-2">*</span>)<span class="question-mark">? </span>&gt; <span class="macro-nonterminal">$Trait </span><span class="kw">for </span><span class="macro-nonterminal">$T </span>{}
+<a href=#64 id=64 data-nosnippet>64</a>        <span class="macro">marker_impls!</span> { $(<span class="attr">#[$(<span class="macro-nonterminal">$meta</span>)<span class="kw-2">*</span>]</span>)* <span class="macro-nonterminal">$Trait </span><span class="kw">for </span>$($(<span class="macro-nonterminal">$rest</span>)<span class="kw-2">*</span>)<span class="question-mark">? </span>}
+<a href=#65 id=65 data-nosnippet>65</a>    },
+<a href=#66 id=66 data-nosnippet>66</a>    ( $(<span class="attr">#[$(<span class="macro-nonterminal">$meta</span>:tt)<span class="kw-2">*</span>]</span>)* <span class="macro-nonterminal">$Trait</span>:ident <span class="kw">for </span>) =&gt; {},
+<a href=#67 id=67 data-nosnippet>67</a>
+<a href=#68 id=68 data-nosnippet>68</a>    ( $(<span class="attr">#[$(<span class="macro-nonterminal">$meta</span>:tt)<span class="kw-2">*</span>]</span>)* <span class="kw">unsafe </span><span class="macro-nonterminal">$Trait</span>:ident <span class="kw">for </span>$({$(<span class="macro-nonterminal">$bounds</span>:tt)<span class="kw-2">*</span>})<span class="question-mark">? </span><span class="macro-nonterminal">$T</span>:ty $(, $(<span class="macro-nonterminal">$rest</span>:tt)<span class="kw-2">*</span>)<span class="question-mark">? </span>) =&gt; {
+<a href=#69 id=69 data-nosnippet>69</a>        $(<span class="attr">#[$(<span class="macro-nonterminal">$meta</span>)<span class="kw-2">*</span>]</span>)* <span class="kw">unsafe impl</span>&lt; $($(<span class="macro-nonterminal">$bounds</span>)<span class="kw-2">*</span>)<span class="question-mark">? </span>&gt; <span class="macro-nonterminal">$Trait </span><span class="kw">for </span><span class="macro-nonterminal">$T </span>{}
+<a href=#70 id=70 data-nosnippet>70</a>        <span class="macro">marker_impls!</span> { $(<span class="attr">#[$(<span class="macro-nonterminal">$meta</span>)<span class="kw-2">*</span>]</span>)* <span class="kw">unsafe </span><span class="macro-nonterminal">$Trait </span><span class="kw">for </span>$($(<span class="macro-nonterminal">$rest</span>)<span class="kw-2">*</span>)<span class="question-mark">? </span>}
+<a href=#71 id=71 data-nosnippet>71</a>    },
+<a href=#72 id=72 data-nosnippet>72</a>    ( $(<span class="attr">#[$(<span class="macro-nonterminal">$meta</span>:tt)<span class="kw-2">*</span>]</span>)* <span class="kw">unsafe </span><span class="macro-nonterminal">$Trait</span>:ident <span class="kw">for </span>) =&gt; {},
+<a href=#73 id=73 data-nosnippet>73</a>}
+<a href=#74 id=74 data-nosnippet>74</a>
+<a href=#75 id=75 data-nosnippet>75</a><span class="doccomment">/// Types that can be transferred across thread boundaries.
+<a href=#76 id=76 data-nosnippet>76</a>///
+<a href=#77 id=77 data-nosnippet>77</a>/// This trait is automatically implemented when the compiler determines it's
+<a href=#78 id=78 data-nosnippet>78</a>/// appropriate.
+<a href=#79 id=79 data-nosnippet>79</a>///
+<a href=#80 id=80 data-nosnippet>80</a>/// An example of a non-`Send` type is the reference-counting pointer
+<a href=#81 id=81 data-nosnippet>81</a>/// [`rc::Rc`][`Rc`]. If two threads attempt to clone [`Rc`]s that point to the same
+<a href=#82 id=82 data-nosnippet>82</a>/// reference-counted value, they might try to update the reference count at the
+<a href=#83 id=83 data-nosnippet>83</a>/// same time, which is [undefined behavior][ub] because [`Rc`] doesn't use atomic
+<a href=#84 id=84 data-nosnippet>84</a>/// operations. Its cousin [`sync::Arc`][arc] does use atomic operations (incurring
+<a href=#85 id=85 data-nosnippet>85</a>/// some overhead) and thus is `Send`.
+<a href=#86 id=86 data-nosnippet>86</a>///
+<a href=#87 id=87 data-nosnippet>87</a>/// See [the Nomicon](../../nomicon/send-and-sync.html) and the [`Sync`] trait for more details.
+<a href=#88 id=88 data-nosnippet>88</a>///
+<a href=#89 id=89 data-nosnippet>89</a>/// [`Rc`]: ../../std/rc/struct.Rc.html
+<a href=#90 id=90 data-nosnippet>90</a>/// [arc]: ../../std/sync/struct.Arc.html
+<a href=#91 id=91 data-nosnippet>91</a>/// [ub]: ../../reference/behavior-considered-undefined.html
+<a href=#92 id=92 data-nosnippet>92</a></span><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#93 id=93 data-nosnippet>93</a>#[rustc_diagnostic_item = <span class="string">"Send"</span>]
+<a href=#94 id=94 data-nosnippet>94</a>#[diagnostic::on_unimplemented(
+<a href=#95 id=95 data-nosnippet>95</a>    message = <span class="string">"`{Self}` cannot be sent between threads safely"</span>,
+<a href=#96 id=96 data-nosnippet>96</a>    label = <span class="string">"`{Self}` cannot be sent between threads safely"
+<a href=#97 id=97 data-nosnippet>97</a></span>)]
+<a href=#98 id=98 data-nosnippet>98</a></span><span class="kw">pub unsafe </span>auto <span class="kw">trait </span>Send {
+<a href=#99 id=99 data-nosnippet>99</a>    <span class="comment">// empty.
+<a href=#100 id=100 data-nosnippet>100</a></span>}
+<a href=#101 id=101 data-nosnippet>101</a>
+<a href=#102 id=102 data-nosnippet>102</a><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#103 id=103 data-nosnippet>103</a></span><span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; !Send <span class="kw">for </span><span class="kw-2">*const </span>T {}
+<a href=#104 id=104 data-nosnippet>104</a><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#105 id=105 data-nosnippet>105</a></span><span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; !Send <span class="kw">for </span><span class="kw-2">*mut </span>T {}
+<a href=#106 id=106 data-nosnippet>106</a>
+<a href=#107 id=107 data-nosnippet>107</a><span class="comment">// Most instances arise automatically, but this instance is needed to link up `T: Sync` with
+<a href=#108 id=108 data-nosnippet>108</a>// `&amp;T: Send` (and it also removes the unsound default instance `T Send` -&gt; `&amp;T: Send` that would
+<a href=#109 id=109 data-nosnippet>109</a>// otherwise exist).
+<a href=#110 id=110 data-nosnippet>110</a></span><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#111 id=111 data-nosnippet>111</a></span><span class="kw">unsafe impl</span>&lt;T: Sync + <span class="question-mark">?</span>Sized&gt; Send <span class="kw">for </span><span class="kw-2">&amp;</span>T {}
+<a href=#112 id=112 data-nosnippet>112</a>
+<a href=#113 id=113 data-nosnippet>113</a><span class="doccomment">/// Types with a constant size known at compile time.
+<a href=#114 id=114 data-nosnippet>114</a>///
+<a href=#115 id=115 data-nosnippet>115</a>/// All type parameters have an implicit bound of `Sized`. The special syntax
+<a href=#116 id=116 data-nosnippet>116</a>/// `?Sized` can be used to remove this bound if it's not appropriate.
+<a href=#117 id=117 data-nosnippet>117</a>///
+<a href=#118 id=118 data-nosnippet>118</a>/// ```
+<a href=#119 id=119 data-nosnippet>119</a>/// # #![allow(dead_code)]
+<a href=#120 id=120 data-nosnippet>120</a>/// struct Foo&lt;T&gt;(T);
+<a href=#121 id=121 data-nosnippet>121</a>/// struct Bar&lt;T: ?Sized&gt;(T);
+<a href=#122 id=122 data-nosnippet>122</a>///
+<a href=#123 id=123 data-nosnippet>123</a>/// // struct FooUse(Foo&lt;[i32]&gt;); // error: Sized is not implemented for [i32]
+<a href=#124 id=124 data-nosnippet>124</a>/// struct BarUse(Bar&lt;[i32]&gt;); // OK
+<a href=#125 id=125 data-nosnippet>125</a>/// ```
+<a href=#126 id=126 data-nosnippet>126</a>///
+<a href=#127 id=127 data-nosnippet>127</a>/// The one exception is the implicit `Self` type of a trait. A trait does not
+<a href=#128 id=128 data-nosnippet>128</a>/// have an implicit `Sized` bound as this is incompatible with [trait object]s
+<a href=#129 id=129 data-nosnippet>129</a>/// where, by definition, the trait needs to work with all possible implementors,
+<a href=#130 id=130 data-nosnippet>130</a>/// and thus could be any size.
+<a href=#131 id=131 data-nosnippet>131</a>///
+<a href=#132 id=132 data-nosnippet>132</a>/// Although Rust will let you bind `Sized` to a trait, you won't
+<a href=#133 id=133 data-nosnippet>133</a>/// be able to use it to form a trait object later:
+<a href=#134 id=134 data-nosnippet>134</a>///
+<a href=#135 id=135 data-nosnippet>135</a>/// ```
+<a href=#136 id=136 data-nosnippet>136</a>/// # #![allow(unused_variables)]
+<a href=#137 id=137 data-nosnippet>137</a>/// trait Foo { }
+<a href=#138 id=138 data-nosnippet>138</a>/// trait Bar: Sized { }
+<a href=#139 id=139 data-nosnippet>139</a>///
+<a href=#140 id=140 data-nosnippet>140</a>/// struct Impl;
+<a href=#141 id=141 data-nosnippet>141</a>/// impl Foo for Impl { }
+<a href=#142 id=142 data-nosnippet>142</a>/// impl Bar for Impl { }
+<a href=#143 id=143 data-nosnippet>143</a>///
+<a href=#144 id=144 data-nosnippet>144</a>/// let x: &amp;dyn Foo = &amp;Impl;    // OK
+<a href=#145 id=145 data-nosnippet>145</a>/// // let y: &amp;dyn Bar = &amp;Impl; // error: the trait `Bar` cannot
+<a href=#146 id=146 data-nosnippet>146</a>///                             // be made into an object
+<a href=#147 id=147 data-nosnippet>147</a>/// ```
+<a href=#148 id=148 data-nosnippet>148</a>///
+<a href=#149 id=149 data-nosnippet>149</a>/// [trait object]: ../../book/ch17-02-trait-objects.html
+<a href=#150 id=150 data-nosnippet>150</a></span><span class="attr">#[doc(alias = <span class="string">"?"</span>, alias = <span class="string">"?Sized"</span>)]
+<a href=#151 id=151 data-nosnippet>151</a>#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#152 id=152 data-nosnippet>152</a>#[lang = <span class="string">"sized"</span>]
+<a href=#153 id=153 data-nosnippet>153</a>#[diagnostic::on_unimplemented(
+<a href=#154 id=154 data-nosnippet>154</a>    message = <span class="string">"the size for values of type `{Self}` cannot be known at compilation time"</span>,
+<a href=#155 id=155 data-nosnippet>155</a>    label = <span class="string">"doesn't have a size known at compile-time"
+<a href=#156 id=156 data-nosnippet>156</a></span>)]
+<a href=#157 id=157 data-nosnippet>157</a>#[fundamental] </span><span class="comment">// for Default, for example, which requires that `[T]: !Default` be evaluatable
+<a href=#158 id=158 data-nosnippet>158</a></span><span class="attr">#[rustc_specialization_trait]
+<a href=#159 id=159 data-nosnippet>159</a>#[rustc_deny_explicit_impl]
+<a href=#160 id=160 data-nosnippet>160</a>#[rustc_do_not_implement_via_object]
+<a href=#161 id=161 data-nosnippet>161</a>#[rustc_coinductive]
+<a href=#162 id=162 data-nosnippet>162</a></span><span class="kw">pub trait </span>Sized {
+<a href=#163 id=163 data-nosnippet>163</a>    <span class="comment">// Empty.
+<a href=#164 id=164 data-nosnippet>164</a></span>}
+<a href=#165 id=165 data-nosnippet>165</a>
+<a href=#166 id=166 data-nosnippet>166</a><span class="doccomment">/// Types that can be "unsized" to a dynamically-sized type.
+<a href=#167 id=167 data-nosnippet>167</a>///
+<a href=#168 id=168 data-nosnippet>168</a>/// For example, the sized array type `[i8; 2]` implements `Unsize&lt;[i8]&gt;` and
+<a href=#169 id=169 data-nosnippet>169</a>/// `Unsize&lt;dyn fmt::Debug&gt;`.
+<a href=#170 id=170 data-nosnippet>170</a>///
+<a href=#171 id=171 data-nosnippet>171</a>/// All implementations of `Unsize` are provided automatically by the compiler.
+<a href=#172 id=172 data-nosnippet>172</a>/// Those implementations are:
+<a href=#173 id=173 data-nosnippet>173</a>///
+<a href=#174 id=174 data-nosnippet>174</a>/// - Arrays `[T; N]` implement `Unsize&lt;[T]&gt;`.
+<a href=#175 id=175 data-nosnippet>175</a>/// - A type implements `Unsize&lt;dyn Trait + 'a&gt;` if all of these conditions are met:
+<a href=#176 id=176 data-nosnippet>176</a>///   - The type implements `Trait`.
+<a href=#177 id=177 data-nosnippet>177</a>///   - `Trait` is dyn-compatible[^1].
+<a href=#178 id=178 data-nosnippet>178</a>///   - The type is sized.
+<a href=#179 id=179 data-nosnippet>179</a>///   - The type outlives `'a`.
+<a href=#180 id=180 data-nosnippet>180</a>/// - Structs `Foo&lt;..., T1, ..., Tn, ...&gt;` implement `Unsize&lt;Foo&lt;..., U1, ..., Un, ...&gt;&gt;`
+<a href=#181 id=181 data-nosnippet>181</a>/// where any number of (type and const) parameters may be changed if all of these conditions
+<a href=#182 id=182 data-nosnippet>182</a>/// are met:
+<a href=#183 id=183 data-nosnippet>183</a>///   - Only the last field of `Foo` has a type involving the parameters `T1`, ..., `Tn`.
+<a href=#184 id=184 data-nosnippet>184</a>///   - All other parameters of the struct are equal.
+<a href=#185 id=185 data-nosnippet>185</a>///   - `Field&lt;T1, ..., Tn&gt;: Unsize&lt;Field&lt;U1, ..., Un&gt;&gt;`, where `Field&lt;...&gt;` stands for the actual
+<a href=#186 id=186 data-nosnippet>186</a>///     type of the struct's last field.
+<a href=#187 id=187 data-nosnippet>187</a>///
+<a href=#188 id=188 data-nosnippet>188</a>/// `Unsize` is used along with [`ops::CoerceUnsized`] to allow
+<a href=#189 id=189 data-nosnippet>189</a>/// "user-defined" containers such as [`Rc`] to contain dynamically-sized
+<a href=#190 id=190 data-nosnippet>190</a>/// types. See the [DST coercion RFC][RFC982] and [the nomicon entry on coercion][nomicon-coerce]
+<a href=#191 id=191 data-nosnippet>191</a>/// for more details.
+<a href=#192 id=192 data-nosnippet>192</a>///
+<a href=#193 id=193 data-nosnippet>193</a>/// [`ops::CoerceUnsized`]: crate::ops::CoerceUnsized
+<a href=#194 id=194 data-nosnippet>194</a>/// [`Rc`]: ../../std/rc/struct.Rc.html
+<a href=#195 id=195 data-nosnippet>195</a>/// [RFC982]: https://github.com/rust-lang/rfcs/blob/master/text/0982-dst-coercion.md
+<a href=#196 id=196 data-nosnippet>196</a>/// [nomicon-coerce]: ../../nomicon/coercions.html
+<a href=#197 id=197 data-nosnippet>197</a>/// [^1]: Formerly known as *object safe*.
+<a href=#198 id=198 data-nosnippet>198</a></span><span class="attr">#[unstable(feature = <span class="string">"unsize"</span>, issue = <span class="string">"18598"</span>)]
+<a href=#199 id=199 data-nosnippet>199</a>#[lang = <span class="string">"unsize"</span>]
+<a href=#200 id=200 data-nosnippet>200</a>#[rustc_deny_explicit_impl]
+<a href=#201 id=201 data-nosnippet>201</a>#[rustc_do_not_implement_via_object]
+<a href=#202 id=202 data-nosnippet>202</a></span><span class="kw">pub trait </span>Unsize&lt;T: <span class="question-mark">?</span>Sized&gt; {
+<a href=#203 id=203 data-nosnippet>203</a>    <span class="comment">// Empty.
+<a href=#204 id=204 data-nosnippet>204</a></span>}
+<a href=#205 id=205 data-nosnippet>205</a>
+<a href=#206 id=206 data-nosnippet>206</a><span class="doccomment">/// Required trait for constants used in pattern matches.
+<a href=#207 id=207 data-nosnippet>207</a>///
+<a href=#208 id=208 data-nosnippet>208</a>/// Constants are only allowed as patterns if (a) their type implements
+<a href=#209 id=209 data-nosnippet>209</a>/// `PartialEq`, and (b) interpreting the value of the constant as a pattern
+<a href=#210 id=210 data-nosnippet>210</a>/// is equialent to calling `PartialEq`. This ensures that constants used as
+<a href=#211 id=211 data-nosnippet>211</a>/// patterns cannot expose implementation details in an unexpected way or
+<a href=#212 id=212 data-nosnippet>212</a>/// cause semver hazards.
+<a href=#213 id=213 data-nosnippet>213</a>///
+<a href=#214 id=214 data-nosnippet>214</a>/// This trait ensures point (b).
+<a href=#215 id=215 data-nosnippet>215</a>/// Any type that derives `PartialEq` automatically implements this trait.
+<a href=#216 id=216 data-nosnippet>216</a>///
+<a href=#217 id=217 data-nosnippet>217</a>/// Implementing this trait (which is unstable) is a way for type authors to explicitly allow
+<a href=#218 id=218 data-nosnippet>218</a>/// comparing const values of this type; that operation will recursively compare all fields
+<a href=#219 id=219 data-nosnippet>219</a>/// (including private fields), even if that behavior differs from `PartialEq`. This can make it
+<a href=#220 id=220 data-nosnippet>220</a>/// semver-breaking to add further private fields to a type.
+<a href=#221 id=221 data-nosnippet>221</a></span><span class="attr">#[unstable(feature = <span class="string">"structural_match"</span>, issue = <span class="string">"31434"</span>)]
+<a href=#222 id=222 data-nosnippet>222</a>#[diagnostic::on_unimplemented(message = <span class="string">"the type `{Self}` does not `#[derive(PartialEq)]`"</span>)]
+<a href=#223 id=223 data-nosnippet>223</a>#[lang = <span class="string">"structural_peq"</span>]
+<a href=#224 id=224 data-nosnippet>224</a></span><span class="kw">pub trait </span>StructuralPartialEq {
+<a href=#225 id=225 data-nosnippet>225</a>    <span class="comment">// Empty.
+<a href=#226 id=226 data-nosnippet>226</a></span>}
+<a href=#227 id=227 data-nosnippet>227</a>
+<a href=#228 id=228 data-nosnippet>228</a><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#229 id=229 data-nosnippet>229</a></span><span class="macro">marker_impls!</span> {
+<a href=#230 id=230 data-nosnippet>230</a>    <span class="attr">#[unstable(feature = <span class="string">"structural_match"</span>, issue = <span class="string">"31434"</span>)]
+<a href=#231 id=231 data-nosnippet>231</a>    </span>StructuralPartialEq <span class="kw">for
+<a href=#232 id=232 data-nosnippet>232</a>        </span>usize, u8, u16, u32, u64, u128,
+<a href=#233 id=233 data-nosnippet>233</a>        isize, i8, i16, i32, i64, i128,
+<a href=#234 id=234 data-nosnippet>234</a>        bool,
+<a href=#235 id=235 data-nosnippet>235</a>        char,
+<a href=#236 id=236 data-nosnippet>236</a>        str <span class="comment">/* Technically requires `[u8]: StructuralPartialEq` */</span>,
+<a href=#237 id=237 data-nosnippet>237</a>        (),
+<a href=#238 id=238 data-nosnippet>238</a>        {T, <span class="kw">const </span>N: usize} [T; N],
+<a href=#239 id=239 data-nosnippet>239</a>        {T} [T],
+<a href=#240 id=240 data-nosnippet>240</a>        {T: <span class="question-mark">?</span>Sized} <span class="kw-2">&amp;</span>T,
+<a href=#241 id=241 data-nosnippet>241</a>}
+<a href=#242 id=242 data-nosnippet>242</a>
+<a href=#243 id=243 data-nosnippet>243</a><span class="attr">#[cfg(feature = <span class="string">"ferrocene_certified"</span>)]
+<a href=#244 id=244 data-nosnippet>244</a></span><span class="macro">marker_impls!</span> {
+<a href=#245 id=245 data-nosnippet>245</a>    <span class="attr">#[unstable(feature = <span class="string">"structural_match"</span>, issue = <span class="string">"31434"</span>)]
+<a href=#246 id=246 data-nosnippet>246</a>    </span>StructuralPartialEq <span class="kw">for
+<a href=#247 id=247 data-nosnippet>247</a>        </span>usize
+<a href=#248 id=248 data-nosnippet>248</a>}
+<a href=#249 id=249 data-nosnippet>249</a>
+<a href=#250 id=250 data-nosnippet>250</a><span class="doccomment">/// Types whose values can be duplicated simply by copying bits.
+<a href=#251 id=251 data-nosnippet>251</a>///
+<a href=#252 id=252 data-nosnippet>252</a>/// By default, variable bindings have 'move semantics.' In other
+<a href=#253 id=253 data-nosnippet>253</a>/// words:
+<a href=#254 id=254 data-nosnippet>254</a>///
+<a href=#255 id=255 data-nosnippet>255</a>/// ```
+<a href=#256 id=256 data-nosnippet>256</a>/// #[derive(Debug)]
+<a href=#257 id=257 data-nosnippet>257</a>/// struct Foo;
+<a href=#258 id=258 data-nosnippet>258</a>///
+<a href=#259 id=259 data-nosnippet>259</a>/// let x = Foo;
+<a href=#260 id=260 data-nosnippet>260</a>///
+<a href=#261 id=261 data-nosnippet>261</a>/// let y = x;
+<a href=#262 id=262 data-nosnippet>262</a>///
+<a href=#263 id=263 data-nosnippet>263</a>/// // `x` has moved into `y`, and so cannot be used
+<a href=#264 id=264 data-nosnippet>264</a>///
+<a href=#265 id=265 data-nosnippet>265</a>/// // println!("{x:?}"); // error: use of moved value
+<a href=#266 id=266 data-nosnippet>266</a>/// ```
+<a href=#267 id=267 data-nosnippet>267</a>///
+<a href=#268 id=268 data-nosnippet>268</a>/// However, if a type implements `Copy`, it instead has 'copy semantics':
+<a href=#269 id=269 data-nosnippet>269</a>///
+<a href=#270 id=270 data-nosnippet>270</a>/// ```
+<a href=#271 id=271 data-nosnippet>271</a>/// // We can derive a `Copy` implementation. `Clone` is also required, as it's
+<a href=#272 id=272 data-nosnippet>272</a>/// // a supertrait of `Copy`.
+<a href=#273 id=273 data-nosnippet>273</a>/// #[derive(Debug, Copy, Clone)]
+<a href=#274 id=274 data-nosnippet>274</a>/// struct Foo;
+<a href=#275 id=275 data-nosnippet>275</a>///
+<a href=#276 id=276 data-nosnippet>276</a>/// let x = Foo;
+<a href=#277 id=277 data-nosnippet>277</a>///
+<a href=#278 id=278 data-nosnippet>278</a>/// let y = x;
+<a href=#279 id=279 data-nosnippet>279</a>///
+<a href=#280 id=280 data-nosnippet>280</a>/// // `y` is a copy of `x`
+<a href=#281 id=281 data-nosnippet>281</a>///
+<a href=#282 id=282 data-nosnippet>282</a>/// println!("{x:?}"); // A-OK!
+<a href=#283 id=283 data-nosnippet>283</a>/// ```
+<a href=#284 id=284 data-nosnippet>284</a>///
+<a href=#285 id=285 data-nosnippet>285</a>/// It's important to note that in these two examples, the only difference is whether you
+<a href=#286 id=286 data-nosnippet>286</a>/// are allowed to access `x` after the assignment. Under the hood, both a copy and a move
+<a href=#287 id=287 data-nosnippet>287</a>/// can result in bits being copied in memory, although this is sometimes optimized away.
+<a href=#288 id=288 data-nosnippet>288</a>///
+<a href=#289 id=289 data-nosnippet>289</a>/// ## How can I implement `Copy`?
+<a href=#290 id=290 data-nosnippet>290</a>///
+<a href=#291 id=291 data-nosnippet>291</a>/// There are two ways to implement `Copy` on your type. The simplest is to use `derive`:
+<a href=#292 id=292 data-nosnippet>292</a>///
+<a href=#293 id=293 data-nosnippet>293</a>/// ```
+<a href=#294 id=294 data-nosnippet>294</a>/// #[derive(Copy, Clone)]
+<a href=#295 id=295 data-nosnippet>295</a>/// struct MyStruct;
+<a href=#296 id=296 data-nosnippet>296</a>/// ```
+<a href=#297 id=297 data-nosnippet>297</a>///
+<a href=#298 id=298 data-nosnippet>298</a>/// You can also implement `Copy` and `Clone` manually:
+<a href=#299 id=299 data-nosnippet>299</a>///
+<a href=#300 id=300 data-nosnippet>300</a>/// ```
+<a href=#301 id=301 data-nosnippet>301</a>/// struct MyStruct;
+<a href=#302 id=302 data-nosnippet>302</a>///
+<a href=#303 id=303 data-nosnippet>303</a>/// impl Copy for MyStruct { }
+<a href=#304 id=304 data-nosnippet>304</a>///
+<a href=#305 id=305 data-nosnippet>305</a>/// impl Clone for MyStruct {
+<a href=#306 id=306 data-nosnippet>306</a>///     fn clone(&amp;self) -&gt; MyStruct {
+<a href=#307 id=307 data-nosnippet>307</a>///         *self
+<a href=#308 id=308 data-nosnippet>308</a>///     }
+<a href=#309 id=309 data-nosnippet>309</a>/// }
+<a href=#310 id=310 data-nosnippet>310</a>/// ```
+<a href=#311 id=311 data-nosnippet>311</a>///
+<a href=#312 id=312 data-nosnippet>312</a>/// There is a small difference between the two. The `derive` strategy will also place a `Copy`
+<a href=#313 id=313 data-nosnippet>313</a>/// bound on type parameters:
+<a href=#314 id=314 data-nosnippet>314</a>///
+<a href=#315 id=315 data-nosnippet>315</a>/// ```
+<a href=#316 id=316 data-nosnippet>316</a>/// #[derive(Clone)]
+<a href=#317 id=317 data-nosnippet>317</a>/// struct MyStruct&lt;T&gt;(T);
+<a href=#318 id=318 data-nosnippet>318</a>///
+<a href=#319 id=319 data-nosnippet>319</a>/// impl&lt;T: Copy&gt; Copy for MyStruct&lt;T&gt; { }
+<a href=#320 id=320 data-nosnippet>320</a>/// ```
+<a href=#321 id=321 data-nosnippet>321</a>///
+<a href=#322 id=322 data-nosnippet>322</a>/// This isn't always desired. For example, shared references (`&amp;T`) can be copied regardless of
+<a href=#323 id=323 data-nosnippet>323</a>/// whether `T` is `Copy`. Likewise, a generic struct containing markers such as [`PhantomData`]
+<a href=#324 id=324 data-nosnippet>324</a>/// could potentially be duplicated with a bit-wise copy.
+<a href=#325 id=325 data-nosnippet>325</a>///
+<a href=#326 id=326 data-nosnippet>326</a>/// ## What's the difference between `Copy` and `Clone`?
+<a href=#327 id=327 data-nosnippet>327</a>///
+<a href=#328 id=328 data-nosnippet>328</a>/// Copies happen implicitly, for example as part of an assignment `y = x`. The behavior of
+<a href=#329 id=329 data-nosnippet>329</a>/// `Copy` is not overloadable; it is always a simple bit-wise copy.
+<a href=#330 id=330 data-nosnippet>330</a>///
+<a href=#331 id=331 data-nosnippet>331</a>/// Cloning is an explicit action, `x.clone()`. The implementation of [`Clone`] can
+<a href=#332 id=332 data-nosnippet>332</a>/// provide any type-specific behavior necessary to duplicate values safely. For example,
+<a href=#333 id=333 data-nosnippet>333</a>/// the implementation of [`Clone`] for [`String`] needs to copy the pointed-to string
+<a href=#334 id=334 data-nosnippet>334</a>/// buffer in the heap. A simple bitwise copy of [`String`] values would merely copy the
+<a href=#335 id=335 data-nosnippet>335</a>/// pointer, leading to a double free down the line. For this reason, [`String`] is [`Clone`]
+<a href=#336 id=336 data-nosnippet>336</a>/// but not `Copy`.
+<a href=#337 id=337 data-nosnippet>337</a>///
+<a href=#338 id=338 data-nosnippet>338</a>/// [`Clone`] is a supertrait of `Copy`, so everything which is `Copy` must also implement
+<a href=#339 id=339 data-nosnippet>339</a>/// [`Clone`]. If a type is `Copy` then its [`Clone`] implementation only needs to return `*self`
+<a href=#340 id=340 data-nosnippet>340</a>/// (see the example above).
+<a href=#341 id=341 data-nosnippet>341</a>///
+<a href=#342 id=342 data-nosnippet>342</a>/// ## When can my type be `Copy`?
+<a href=#343 id=343 data-nosnippet>343</a>///
+<a href=#344 id=344 data-nosnippet>344</a>/// A type can implement `Copy` if all of its components implement `Copy`. For example, this
+<a href=#345 id=345 data-nosnippet>345</a>/// struct can be `Copy`:
+<a href=#346 id=346 data-nosnippet>346</a>///
+<a href=#347 id=347 data-nosnippet>347</a>/// ```
+<a href=#348 id=348 data-nosnippet>348</a>/// # #[allow(dead_code)]
+<a href=#349 id=349 data-nosnippet>349</a>/// #[derive(Copy, Clone)]
+<a href=#350 id=350 data-nosnippet>350</a>/// struct Point {
+<a href=#351 id=351 data-nosnippet>351</a>///    x: i32,
+<a href=#352 id=352 data-nosnippet>352</a>///    y: i32,
+<a href=#353 id=353 data-nosnippet>353</a>/// }
+<a href=#354 id=354 data-nosnippet>354</a>/// ```
+<a href=#355 id=355 data-nosnippet>355</a>///
+<a href=#356 id=356 data-nosnippet>356</a>/// A struct can be `Copy`, and [`i32`] is `Copy`, therefore `Point` is eligible to be `Copy`.
+<a href=#357 id=357 data-nosnippet>357</a>/// By contrast, consider
+<a href=#358 id=358 data-nosnippet>358</a>///
+<a href=#359 id=359 data-nosnippet>359</a>/// ```
+<a href=#360 id=360 data-nosnippet>360</a>/// # #![allow(dead_code)]
+<a href=#361 id=361 data-nosnippet>361</a>/// # struct Point;
+<a href=#362 id=362 data-nosnippet>362</a>/// struct PointList {
+<a href=#363 id=363 data-nosnippet>363</a>///     points: Vec&lt;Point&gt;,
+<a href=#364 id=364 data-nosnippet>364</a>/// }
+<a href=#365 id=365 data-nosnippet>365</a>/// ```
+<a href=#366 id=366 data-nosnippet>366</a>///
+<a href=#367 id=367 data-nosnippet>367</a>/// The struct `PointList` cannot implement `Copy`, because [`Vec&lt;T&gt;`] is not `Copy`. If we
+<a href=#368 id=368 data-nosnippet>368</a>/// attempt to derive a `Copy` implementation, we'll get an error:
+<a href=#369 id=369 data-nosnippet>369</a>///
+<a href=#370 id=370 data-nosnippet>370</a>/// ```text
+<a href=#371 id=371 data-nosnippet>371</a>/// the trait `Copy` cannot be implemented for this type; field `points` does not implement `Copy`
+<a href=#372 id=372 data-nosnippet>372</a>/// ```
+<a href=#373 id=373 data-nosnippet>373</a>///
+<a href=#374 id=374 data-nosnippet>374</a>/// Shared references (`&amp;T`) are also `Copy`, so a type can be `Copy`, even when it holds
+<a href=#375 id=375 data-nosnippet>375</a>/// shared references of types `T` that are *not* `Copy`. Consider the following struct,
+<a href=#376 id=376 data-nosnippet>376</a>/// which can implement `Copy`, because it only holds a *shared reference* to our non-`Copy`
+<a href=#377 id=377 data-nosnippet>377</a>/// type `PointList` from above:
+<a href=#378 id=378 data-nosnippet>378</a>///
+<a href=#379 id=379 data-nosnippet>379</a>/// ```
+<a href=#380 id=380 data-nosnippet>380</a>/// # #![allow(dead_code)]
+<a href=#381 id=381 data-nosnippet>381</a>/// # struct PointList;
+<a href=#382 id=382 data-nosnippet>382</a>/// #[derive(Copy, Clone)]
+<a href=#383 id=383 data-nosnippet>383</a>/// struct PointListWrapper&lt;'a&gt; {
+<a href=#384 id=384 data-nosnippet>384</a>///     point_list_ref: &amp;'a PointList,
+<a href=#385 id=385 data-nosnippet>385</a>/// }
+<a href=#386 id=386 data-nosnippet>386</a>/// ```
+<a href=#387 id=387 data-nosnippet>387</a>///
+<a href=#388 id=388 data-nosnippet>388</a>/// ## When *can't* my type be `Copy`?
+<a href=#389 id=389 data-nosnippet>389</a>///
+<a href=#390 id=390 data-nosnippet>390</a>/// Some types can't be copied safely. For example, copying `&amp;mut T` would create an aliased
+<a href=#391 id=391 data-nosnippet>391</a>/// mutable reference. Copying [`String`] would duplicate responsibility for managing the
+<a href=#392 id=392 data-nosnippet>392</a>/// [`String`]'s buffer, leading to a double free.
+<a href=#393 id=393 data-nosnippet>393</a>///
+<a href=#394 id=394 data-nosnippet>394</a>/// Generalizing the latter case, any type implementing [`Drop`] can't be `Copy`, because it's
+<a href=#395 id=395 data-nosnippet>395</a>/// managing some resource besides its own [`size_of::&lt;T&gt;`] bytes.
+<a href=#396 id=396 data-nosnippet>396</a>///
+<a href=#397 id=397 data-nosnippet>397</a>/// If you try to implement `Copy` on a struct or enum containing non-`Copy` data, you will get
+<a href=#398 id=398 data-nosnippet>398</a>/// the error [E0204].
+<a href=#399 id=399 data-nosnippet>399</a>///
+<a href=#400 id=400 data-nosnippet>400</a>/// [E0204]: ../../error_codes/E0204.html
+<a href=#401 id=401 data-nosnippet>401</a>///
+<a href=#402 id=402 data-nosnippet>402</a>/// ## When *should* my type be `Copy`?
+<a href=#403 id=403 data-nosnippet>403</a>///
+<a href=#404 id=404 data-nosnippet>404</a>/// Generally speaking, if your type _can_ implement `Copy`, it should. Keep in mind, though,
+<a href=#405 id=405 data-nosnippet>405</a>/// that implementing `Copy` is part of the public API of your type. If the type might become
+<a href=#406 id=406 data-nosnippet>406</a>/// non-`Copy` in the future, it could be prudent to omit the `Copy` implementation now, to
+<a href=#407 id=407 data-nosnippet>407</a>/// avoid a breaking API change.
+<a href=#408 id=408 data-nosnippet>408</a>///
+<a href=#409 id=409 data-nosnippet>409</a>/// ## Additional implementors
+<a href=#410 id=410 data-nosnippet>410</a>///
+<a href=#411 id=411 data-nosnippet>411</a>/// In addition to the [implementors listed below][impls],
+<a href=#412 id=412 data-nosnippet>412</a>/// the following types also implement `Copy`:
+<a href=#413 id=413 data-nosnippet>413</a>///
+<a href=#414 id=414 data-nosnippet>414</a>/// * Function item types (i.e., the distinct types defined for each function)
+<a href=#415 id=415 data-nosnippet>415</a>/// * Function pointer types (e.g., `fn() -&gt; i32`)
+<a href=#416 id=416 data-nosnippet>416</a>/// * Closure types, if they capture no value from the environment
+<a href=#417 id=417 data-nosnippet>417</a>///   or if all such captured values implement `Copy` themselves.
+<a href=#418 id=418 data-nosnippet>418</a>///   Note that variables captured by shared reference always implement `Copy`
+<a href=#419 id=419 data-nosnippet>419</a>///   (even if the referent doesn't),
+<a href=#420 id=420 data-nosnippet>420</a>///   while variables captured by mutable reference never implement `Copy`.
+<a href=#421 id=421 data-nosnippet>421</a>///
+<a href=#422 id=422 data-nosnippet>422</a>/// [`Vec&lt;T&gt;`]: ../../std/vec/struct.Vec.html
+<a href=#423 id=423 data-nosnippet>423</a>/// [`String`]: ../../std/string/struct.String.html
+<a href=#424 id=424 data-nosnippet>424</a>/// [`size_of::&lt;T&gt;`]: size_of
+<a href=#425 id=425 data-nosnippet>425</a>/// [impls]: #implementors
+<a href=#426 id=426 data-nosnippet>426</a></span><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#427 id=427 data-nosnippet>427</a>#[lang = <span class="string">"copy"</span>]
+<a href=#428 id=428 data-nosnippet>428</a></span><span class="comment">// FIXME(matthewjasper) This allows copying a type that doesn't implement
+<a href=#429 id=429 data-nosnippet>429</a>// `Copy` because of unsatisfied lifetime bounds (copying `A&lt;'_&gt;` when only
+<a href=#430 id=430 data-nosnippet>430</a>// `A&lt;'static&gt;: Copy` and `A&lt;'_&gt;: Clone`).
+<a href=#431 id=431 data-nosnippet>431</a>// We have this attribute here for now only because there are quite a few
+<a href=#432 id=432 data-nosnippet>432</a>// existing specializations on `Copy` that already exist in the standard
+<a href=#433 id=433 data-nosnippet>433</a>// library, and there's no way to safely have this behavior right now.
+<a href=#434 id=434 data-nosnippet>434</a></span><span class="attr">#[rustc_unsafe_specialization_marker]
+<a href=#435 id=435 data-nosnippet>435</a>#[rustc_diagnostic_item = <span class="string">"Copy"</span>]
+<a href=#436 id=436 data-nosnippet>436</a></span><span class="kw">pub trait </span>Copy: Clone {
+<a href=#437 id=437 data-nosnippet>437</a>    <span class="comment">// Empty.
+<a href=#438 id=438 data-nosnippet>438</a></span>}
+<a href=#439 id=439 data-nosnippet>439</a>
+<a href=#440 id=440 data-nosnippet>440</a><span class="doccomment">/// Derive macro generating an impl of the trait `Copy`.
+<a href=#441 id=441 data-nosnippet>441</a></span><span class="attr">#[rustc_builtin_macro]
+<a href=#442 id=442 data-nosnippet>442</a>#[stable(feature = <span class="string">"builtin_macro_prelude"</span>, since = <span class="string">"1.38.0"</span>)]
+<a href=#443 id=443 data-nosnippet>443</a>#[allow_internal_unstable(core_intrinsics, derive_clone_copy)]
+<a href=#444 id=444 data-nosnippet>444</a></span><span class="kw">pub macro </span>Copy(<span class="macro-nonterminal">$item</span>:item) {
+<a href=#445 id=445 data-nosnippet>445</a>    <span class="comment">/* compiler built-in */
+<a href=#446 id=446 data-nosnippet>446</a></span>}
+<a href=#447 id=447 data-nosnippet>447</a>
+<a href=#448 id=448 data-nosnippet>448</a><span class="comment">// Implementations of `Copy` for primitive types.
+<a href=#449 id=449 data-nosnippet>449</a>//
+<a href=#450 id=450 data-nosnippet>450</a>// Implementations that cannot be described in Rust
+<a href=#451 id=451 data-nosnippet>451</a>// are implemented in `traits::SelectionContext::copy_clone_conditions()`
+<a href=#452 id=452 data-nosnippet>452</a>// in `rustc_trait_selection`.
+<a href=#453 id=453 data-nosnippet>453</a></span><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#454 id=454 data-nosnippet>454</a></span><span class="macro">marker_impls!</span> {
+<a href=#455 id=455 data-nosnippet>455</a>    <span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#456 id=456 data-nosnippet>456</a>    </span>Copy <span class="kw">for
+<a href=#457 id=457 data-nosnippet>457</a>        </span>usize, u8, u16, u32, u64, u128,
+<a href=#458 id=458 data-nosnippet>458</a>        isize, i8, i16, i32, i64, i128,
+<a href=#459 id=459 data-nosnippet>459</a>        f16, f32, f64, f128,
+<a href=#460 id=460 data-nosnippet>460</a>        bool, char,
+<a href=#461 id=461 data-nosnippet>461</a>        {T: <span class="question-mark">?</span>Sized} <span class="kw-2">*const </span>T,
+<a href=#462 id=462 data-nosnippet>462</a>        {T: <span class="question-mark">?</span>Sized} <span class="kw-2">*mut </span>T,
+<a href=#463 id=463 data-nosnippet>463</a>
+<a href=#464 id=464 data-nosnippet>464</a>}
+<a href=#465 id=465 data-nosnippet>465</a>
+<a href=#466 id=466 data-nosnippet>466</a><span class="attr">#[cfg(feature = <span class="string">"ferrocene_certified"</span>)]
+<a href=#467 id=467 data-nosnippet>467</a></span><span class="macro">marker_impls!</span> {
+<a href=#468 id=468 data-nosnippet>468</a>    <span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#469 id=469 data-nosnippet>469</a>    </span>Copy <span class="kw">for
+<a href=#470 id=470 data-nosnippet>470</a>        </span>usize, u8, u16, u32, u64, u128,
+<a href=#471 id=471 data-nosnippet>471</a>        isize, i8, i16, i32, i64, i128,
+<a href=#472 id=472 data-nosnippet>472</a>        f32, f64,
+<a href=#473 id=473 data-nosnippet>473</a>        bool,
+<a href=#474 id=474 data-nosnippet>474</a>        {T: <span class="question-mark">?</span>Sized} <span class="kw-2">*const </span>T,
+<a href=#475 id=475 data-nosnippet>475</a>        {T: <span class="question-mark">?</span>Sized} <span class="kw-2">*mut </span>T,
+<a href=#476 id=476 data-nosnippet>476</a>}
+<a href=#477 id=477 data-nosnippet>477</a>
+<a href=#478 id=478 data-nosnippet>478</a><span class="attr">#[unstable(feature = <span class="string">"never_type"</span>, issue = <span class="string">"35121"</span>)]
+<a href=#479 id=479 data-nosnippet>479</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#480 id=480 data-nosnippet>480</a></span><span class="kw">impl </span>Copy <span class="kw">for </span>! {}
+<a href=#481 id=481 data-nosnippet>481</a>
+<a href=#482 id=482 data-nosnippet>482</a><span class="doccomment">/// Shared references can be copied, but mutable references *cannot*!
+<a href=#483 id=483 data-nosnippet>483</a></span><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#484 id=484 data-nosnippet>484</a></span><span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; Copy <span class="kw">for </span><span class="kw-2">&amp;</span>T {}
+<a href=#485 id=485 data-nosnippet>485</a>
+<a href=#486 id=486 data-nosnippet>486</a><span class="doccomment">/// Marker trait for the types that are allowed in union fields and unsafe
+<a href=#487 id=487 data-nosnippet>487</a>/// binder types.
+<a href=#488 id=488 data-nosnippet>488</a>///
+<a href=#489 id=489 data-nosnippet>489</a>/// Implemented for:
+<a href=#490 id=490 data-nosnippet>490</a>/// * `&amp;T`, `&amp;mut T` for all `T`,
+<a href=#491 id=491 data-nosnippet>491</a>/// * `ManuallyDrop&lt;T&gt;` for all `T`,
+<a href=#492 id=492 data-nosnippet>492</a>/// * tuples and arrays whose elements implement `BikeshedGuaranteedNoDrop`,
+<a href=#493 id=493 data-nosnippet>493</a>/// * or otherwise, all types that are `Copy`.
+<a href=#494 id=494 data-nosnippet>494</a>///
+<a href=#495 id=495 data-nosnippet>495</a>/// Notably, this doesn't include all trivially-destructible types for semver
+<a href=#496 id=496 data-nosnippet>496</a>/// reasons.
+<a href=#497 id=497 data-nosnippet>497</a>///
+<a href=#498 id=498 data-nosnippet>498</a>/// Bikeshed name for now. This trait does not do anything other than reflect the
+<a href=#499 id=499 data-nosnippet>499</a>/// set of types that are allowed within unions for field validity.
+<a href=#500 id=500 data-nosnippet>500</a></span><span class="attr">#[unstable(feature = <span class="string">"bikeshed_guaranteed_no_drop"</span>, issue = <span class="string">"none"</span>)]
+<a href=#501 id=501 data-nosnippet>501</a>#[lang = <span class="string">"bikeshed_guaranteed_no_drop"</span>]
+<a href=#502 id=502 data-nosnippet>502</a>#[rustc_deny_explicit_impl]
+<a href=#503 id=503 data-nosnippet>503</a>#[rustc_do_not_implement_via_object]
+<a href=#504 id=504 data-nosnippet>504</a>#[doc(hidden)]
+<a href=#505 id=505 data-nosnippet>505</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#506 id=506 data-nosnippet>506</a></span><span class="kw">pub trait </span>BikeshedGuaranteedNoDrop {}
+<a href=#507 id=507 data-nosnippet>507</a>
+<a href=#508 id=508 data-nosnippet>508</a><span class="doccomment">/// Types for which it is safe to share references between threads.
+<a href=#509 id=509 data-nosnippet>509</a>///
+<a href=#510 id=510 data-nosnippet>510</a>/// This trait is automatically implemented when the compiler determines
+<a href=#511 id=511 data-nosnippet>511</a>/// it's appropriate.
+<a href=#512 id=512 data-nosnippet>512</a>///
+<a href=#513 id=513 data-nosnippet>513</a>/// The precise definition is: a type `T` is [`Sync`] if and only if `&amp;T` is
+<a href=#514 id=514 data-nosnippet>514</a>/// [`Send`]. In other words, if there is no possibility of
+<a href=#515 id=515 data-nosnippet>515</a>/// [undefined behavior][ub] (including data races) when passing
+<a href=#516 id=516 data-nosnippet>516</a>/// `&amp;T` references between threads.
+<a href=#517 id=517 data-nosnippet>517</a>///
+<a href=#518 id=518 data-nosnippet>518</a>/// As one would expect, primitive types like [`u8`] and [`f64`]
+<a href=#519 id=519 data-nosnippet>519</a>/// are all [`Sync`], and so are simple aggregate types containing them,
+<a href=#520 id=520 data-nosnippet>520</a>/// like tuples, structs and enums. More examples of basic [`Sync`]
+<a href=#521 id=521 data-nosnippet>521</a>/// types include "immutable" types like `&amp;T`, and those with simple
+<a href=#522 id=522 data-nosnippet>522</a>/// inherited mutability, such as [`Box&lt;T&gt;`][box], [`Vec&lt;T&gt;`][vec] and
+<a href=#523 id=523 data-nosnippet>523</a>/// most other collection types. (Generic parameters need to be [`Sync`]
+<a href=#524 id=524 data-nosnippet>524</a>/// for their container to be [`Sync`].)
+<a href=#525 id=525 data-nosnippet>525</a>///
+<a href=#526 id=526 data-nosnippet>526</a>/// A somewhat surprising consequence of the definition is that `&amp;mut T`
+<a href=#527 id=527 data-nosnippet>527</a>/// is `Sync` (if `T` is `Sync`) even though it seems like that might
+<a href=#528 id=528 data-nosnippet>528</a>/// provide unsynchronized mutation. The trick is that a mutable
+<a href=#529 id=529 data-nosnippet>529</a>/// reference behind a shared reference (that is, `&amp; &amp;mut T`)
+<a href=#530 id=530 data-nosnippet>530</a>/// becomes read-only, as if it were a `&amp; &amp;T`. Hence there is no risk
+<a href=#531 id=531 data-nosnippet>531</a>/// of a data race.
+<a href=#532 id=532 data-nosnippet>532</a>///
+<a href=#533 id=533 data-nosnippet>533</a>/// A shorter overview of how [`Sync`] and [`Send`] relate to referencing:
+<a href=#534 id=534 data-nosnippet>534</a>/// * `&amp;T` is [`Send`] if and only if `T` is [`Sync`]
+<a href=#535 id=535 data-nosnippet>535</a>/// * `&amp;mut T` is [`Send`] if and only if `T` is [`Send`]
+<a href=#536 id=536 data-nosnippet>536</a>/// * `&amp;T` and `&amp;mut T` are [`Sync`] if and only if `T` is [`Sync`]
+<a href=#537 id=537 data-nosnippet>537</a>///
+<a href=#538 id=538 data-nosnippet>538</a>/// Types that are not `Sync` are those that have "interior
+<a href=#539 id=539 data-nosnippet>539</a>/// mutability" in a non-thread-safe form, such as [`Cell`][cell]
+<a href=#540 id=540 data-nosnippet>540</a>/// and [`RefCell`][refcell]. These types allow for mutation of
+<a href=#541 id=541 data-nosnippet>541</a>/// their contents even through an immutable, shared reference. For
+<a href=#542 id=542 data-nosnippet>542</a>/// example the `set` method on [`Cell&lt;T&gt;`][cell] takes `&amp;self`, so it requires
+<a href=#543 id=543 data-nosnippet>543</a>/// only a shared reference [`&amp;Cell&lt;T&gt;`][cell]. The method performs no
+<a href=#544 id=544 data-nosnippet>544</a>/// synchronization, thus [`Cell`][cell] cannot be `Sync`.
+<a href=#545 id=545 data-nosnippet>545</a>///
+<a href=#546 id=546 data-nosnippet>546</a>/// Another example of a non-`Sync` type is the reference-counting
+<a href=#547 id=547 data-nosnippet>547</a>/// pointer [`Rc`][rc]. Given any reference [`&amp;Rc&lt;T&gt;`][rc], you can clone
+<a href=#548 id=548 data-nosnippet>548</a>/// a new [`Rc&lt;T&gt;`][rc], modifying the reference counts in a non-atomic way.
+<a href=#549 id=549 data-nosnippet>549</a>///
+<a href=#550 id=550 data-nosnippet>550</a>/// For cases when one does need thread-safe interior mutability,
+<a href=#551 id=551 data-nosnippet>551</a>/// Rust provides [atomic data types], as well as explicit locking via
+<a href=#552 id=552 data-nosnippet>552</a>/// [`sync::Mutex`][mutex] and [`sync::RwLock`][rwlock]. These types
+<a href=#553 id=553 data-nosnippet>553</a>/// ensure that any mutation cannot cause data races, hence the types
+<a href=#554 id=554 data-nosnippet>554</a>/// are `Sync`. Likewise, [`sync::Arc`][arc] provides a thread-safe
+<a href=#555 id=555 data-nosnippet>555</a>/// analogue of [`Rc`][rc].
+<a href=#556 id=556 data-nosnippet>556</a>///
+<a href=#557 id=557 data-nosnippet>557</a>/// Any types with interior mutability must also use the
+<a href=#558 id=558 data-nosnippet>558</a>/// [`cell::UnsafeCell`][unsafecell] wrapper around the value(s) which
+<a href=#559 id=559 data-nosnippet>559</a>/// can be mutated through a shared reference. Failing to doing this is
+<a href=#560 id=560 data-nosnippet>560</a>/// [undefined behavior][ub]. For example, [`transmute`][transmute]-ing
+<a href=#561 id=561 data-nosnippet>561</a>/// from `&amp;T` to `&amp;mut T` is invalid.
+<a href=#562 id=562 data-nosnippet>562</a>///
+<a href=#563 id=563 data-nosnippet>563</a>/// See [the Nomicon][nomicon-send-and-sync] for more details about `Sync`.
+<a href=#564 id=564 data-nosnippet>564</a>///
+<a href=#565 id=565 data-nosnippet>565</a>/// [box]: ../../std/boxed/struct.Box.html
+<a href=#566 id=566 data-nosnippet>566</a>/// [vec]: ../../std/vec/struct.Vec.html
+<a href=#567 id=567 data-nosnippet>567</a>/// [cell]: crate::cell::Cell
+<a href=#568 id=568 data-nosnippet>568</a>/// [refcell]: crate::cell::RefCell
+<a href=#569 id=569 data-nosnippet>569</a>/// [rc]: ../../std/rc/struct.Rc.html
+<a href=#570 id=570 data-nosnippet>570</a>/// [arc]: ../../std/sync/struct.Arc.html
+<a href=#571 id=571 data-nosnippet>571</a>/// [atomic data types]: crate::sync::atomic
+<a href=#572 id=572 data-nosnippet>572</a>/// [mutex]: ../../std/sync/struct.Mutex.html
+<a href=#573 id=573 data-nosnippet>573</a>/// [rwlock]: ../../std/sync/struct.RwLock.html
+<a href=#574 id=574 data-nosnippet>574</a>/// [unsafecell]: crate::cell::UnsafeCell
+<a href=#575 id=575 data-nosnippet>575</a>/// [ub]: ../../reference/behavior-considered-undefined.html
+<a href=#576 id=576 data-nosnippet>576</a>/// [transmute]: crate::mem::transmute
+<a href=#577 id=577 data-nosnippet>577</a>/// [nomicon-send-and-sync]: ../../nomicon/send-and-sync.html
+<a href=#578 id=578 data-nosnippet>578</a></span><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#579 id=579 data-nosnippet>579</a>#[rustc_diagnostic_item = <span class="string">"Sync"</span>]
+<a href=#580 id=580 data-nosnippet>580</a>#[lang = <span class="string">"sync"</span>]
+<a href=#581 id=581 data-nosnippet>581</a>#[rustc_on_unimplemented(
+<a href=#582 id=582 data-nosnippet>582</a>    on(
+<a href=#583 id=583 data-nosnippet>583</a>        _Self = <span class="string">"core::cell::once::OnceCell&lt;T&gt;"</span>,
+<a href=#584 id=584 data-nosnippet>584</a>        note = <span class="string">"if you want to do aliasing and mutation between multiple threads, use `std::sync::OnceLock` instead"
+<a href=#585 id=585 data-nosnippet>585</a>    </span>),
+<a href=#586 id=586 data-nosnippet>586</a>    on(
+<a href=#587 id=587 data-nosnippet>587</a>        _Self = <span class="string">"core::cell::Cell&lt;u8&gt;"</span>,
+<a href=#588 id=588 data-nosnippet>588</a>        note = <span class="string">"if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicU8` instead"</span>,
+<a href=#589 id=589 data-nosnippet>589</a>    ),
+<a href=#590 id=590 data-nosnippet>590</a>    on(
+<a href=#591 id=591 data-nosnippet>591</a>        _Self = <span class="string">"core::cell::Cell&lt;u16&gt;"</span>,
+<a href=#592 id=592 data-nosnippet>592</a>        note = <span class="string">"if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicU16` instead"</span>,
+<a href=#593 id=593 data-nosnippet>593</a>    ),
+<a href=#594 id=594 data-nosnippet>594</a>    on(
+<a href=#595 id=595 data-nosnippet>595</a>        _Self = <span class="string">"core::cell::Cell&lt;u32&gt;"</span>,
+<a href=#596 id=596 data-nosnippet>596</a>        note = <span class="string">"if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicU32` instead"</span>,
+<a href=#597 id=597 data-nosnippet>597</a>    ),
+<a href=#598 id=598 data-nosnippet>598</a>    on(
+<a href=#599 id=599 data-nosnippet>599</a>        _Self = <span class="string">"core::cell::Cell&lt;u64&gt;"</span>,
+<a href=#600 id=600 data-nosnippet>600</a>        note = <span class="string">"if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicU64` instead"</span>,
+<a href=#601 id=601 data-nosnippet>601</a>    ),
+<a href=#602 id=602 data-nosnippet>602</a>    on(
+<a href=#603 id=603 data-nosnippet>603</a>        _Self = <span class="string">"core::cell::Cell&lt;usize&gt;"</span>,
+<a href=#604 id=604 data-nosnippet>604</a>        note = <span class="string">"if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicUsize` instead"</span>,
+<a href=#605 id=605 data-nosnippet>605</a>    ),
+<a href=#606 id=606 data-nosnippet>606</a>    on(
+<a href=#607 id=607 data-nosnippet>607</a>        _Self = <span class="string">"core::cell::Cell&lt;i8&gt;"</span>,
+<a href=#608 id=608 data-nosnippet>608</a>        note = <span class="string">"if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicI8` instead"</span>,
+<a href=#609 id=609 data-nosnippet>609</a>    ),
+<a href=#610 id=610 data-nosnippet>610</a>    on(
+<a href=#611 id=611 data-nosnippet>611</a>        _Self = <span class="string">"core::cell::Cell&lt;i16&gt;"</span>,
+<a href=#612 id=612 data-nosnippet>612</a>        note = <span class="string">"if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicI16` instead"</span>,
+<a href=#613 id=613 data-nosnippet>613</a>    ),
+<a href=#614 id=614 data-nosnippet>614</a>    on(
+<a href=#615 id=615 data-nosnippet>615</a>        _Self = <span class="string">"core::cell::Cell&lt;i32&gt;"</span>,
+<a href=#616 id=616 data-nosnippet>616</a>        note = <span class="string">"if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicI32` instead"</span>,
+<a href=#617 id=617 data-nosnippet>617</a>    ),
+<a href=#618 id=618 data-nosnippet>618</a>    on(
+<a href=#619 id=619 data-nosnippet>619</a>        _Self = <span class="string">"core::cell::Cell&lt;i64&gt;"</span>,
+<a href=#620 id=620 data-nosnippet>620</a>        note = <span class="string">"if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicI64` instead"</span>,
+<a href=#621 id=621 data-nosnippet>621</a>    ),
+<a href=#622 id=622 data-nosnippet>622</a>    on(
+<a href=#623 id=623 data-nosnippet>623</a>        _Self = <span class="string">"core::cell::Cell&lt;isize&gt;"</span>,
+<a href=#624 id=624 data-nosnippet>624</a>        note = <span class="string">"if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicIsize` instead"</span>,
+<a href=#625 id=625 data-nosnippet>625</a>    ),
+<a href=#626 id=626 data-nosnippet>626</a>    on(
+<a href=#627 id=627 data-nosnippet>627</a>        _Self = <span class="string">"core::cell::Cell&lt;bool&gt;"</span>,
+<a href=#628 id=628 data-nosnippet>628</a>        note = <span class="string">"if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` or `std::sync::atomic::AtomicBool` instead"</span>,
+<a href=#629 id=629 data-nosnippet>629</a>    ),
+<a href=#630 id=630 data-nosnippet>630</a>    on(
+<a href=#631 id=631 data-nosnippet>631</a>        all(
+<a href=#632 id=632 data-nosnippet>632</a>            _Self = <span class="string">"core::cell::Cell&lt;T&gt;"</span>,
+<a href=#633 id=633 data-nosnippet>633</a>            not(_Self = <span class="string">"core::cell::Cell&lt;u8&gt;"</span>),
+<a href=#634 id=634 data-nosnippet>634</a>            not(_Self = <span class="string">"core::cell::Cell&lt;u16&gt;"</span>),
+<a href=#635 id=635 data-nosnippet>635</a>            not(_Self = <span class="string">"core::cell::Cell&lt;u32&gt;"</span>),
+<a href=#636 id=636 data-nosnippet>636</a>            not(_Self = <span class="string">"core::cell::Cell&lt;u64&gt;"</span>),
+<a href=#637 id=637 data-nosnippet>637</a>            not(_Self = <span class="string">"core::cell::Cell&lt;usize&gt;"</span>),
+<a href=#638 id=638 data-nosnippet>638</a>            not(_Self = <span class="string">"core::cell::Cell&lt;i8&gt;"</span>),
+<a href=#639 id=639 data-nosnippet>639</a>            not(_Self = <span class="string">"core::cell::Cell&lt;i16&gt;"</span>),
+<a href=#640 id=640 data-nosnippet>640</a>            not(_Self = <span class="string">"core::cell::Cell&lt;i32&gt;"</span>),
+<a href=#641 id=641 data-nosnippet>641</a>            not(_Self = <span class="string">"core::cell::Cell&lt;i64&gt;"</span>),
+<a href=#642 id=642 data-nosnippet>642</a>            not(_Self = <span class="string">"core::cell::Cell&lt;isize&gt;"</span>),
+<a href=#643 id=643 data-nosnippet>643</a>            not(_Self = <span class="string">"core::cell::Cell&lt;bool&gt;"</span>)
+<a href=#644 id=644 data-nosnippet>644</a>        ),
+<a href=#645 id=645 data-nosnippet>645</a>        note = <span class="string">"if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock`"</span>,
+<a href=#646 id=646 data-nosnippet>646</a>    ),
+<a href=#647 id=647 data-nosnippet>647</a>    on(
+<a href=#648 id=648 data-nosnippet>648</a>        _Self = <span class="string">"core::cell::RefCell&lt;T&gt;"</span>,
+<a href=#649 id=649 data-nosnippet>649</a>        note = <span class="string">"if you want to do aliasing and mutation between multiple threads, use `std::sync::RwLock` instead"</span>,
+<a href=#650 id=650 data-nosnippet>650</a>    ),
+<a href=#651 id=651 data-nosnippet>651</a>    message = <span class="string">"`{Self}` cannot be shared between threads safely"</span>,
+<a href=#652 id=652 data-nosnippet>652</a>    label = <span class="string">"`{Self}` cannot be shared between threads safely"
+<a href=#653 id=653 data-nosnippet>653</a></span>)]
+<a href=#654 id=654 data-nosnippet>654</a></span><span class="kw">pub unsafe </span>auto <span class="kw">trait </span>Sync {
+<a href=#655 id=655 data-nosnippet>655</a>    <span class="comment">// FIXME(estebank): once support to add notes in `rustc_on_unimplemented`
+<a href=#656 id=656 data-nosnippet>656</a>    // lands in beta, and it has been extended to check whether a closure is
+<a href=#657 id=657 data-nosnippet>657</a>    // anywhere in the requirement chain, extend it as such (#48534):
+<a href=#658 id=658 data-nosnippet>658</a>    // ```
+<a href=#659 id=659 data-nosnippet>659</a>    // on(
+<a href=#660 id=660 data-nosnippet>660</a>    //     closure,
+<a href=#661 id=661 data-nosnippet>661</a>    //     note="`{Self}` cannot be shared safely, consider marking the closure `move`"
+<a href=#662 id=662 data-nosnippet>662</a>    // ),
+<a href=#663 id=663 data-nosnippet>663</a>    // ```
+<a href=#664 id=664 data-nosnippet>664</a>
+<a href=#665 id=665 data-nosnippet>665</a>    // Empty
+<a href=#666 id=666 data-nosnippet>666</a></span>}
+<a href=#667 id=667 data-nosnippet>667</a>
+<a href=#668 id=668 data-nosnippet>668</a><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#669 id=669 data-nosnippet>669</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#670 id=670 data-nosnippet>670</a></span><span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; !Sync <span class="kw">for </span><span class="kw-2">*const </span>T {}
+<a href=#671 id=671 data-nosnippet>671</a><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#672 id=672 data-nosnippet>672</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#673 id=673 data-nosnippet>673</a></span><span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; !Sync <span class="kw">for </span><span class="kw-2">*mut </span>T {}
+<a href=#674 id=674 data-nosnippet>674</a>
+<a href=#675 id=675 data-nosnippet>675</a><span class="doccomment">/// Zero-sized type used to mark things that "act like" they own a `T`.
+<a href=#676 id=676 data-nosnippet>676</a>///
+<a href=#677 id=677 data-nosnippet>677</a>/// Adding a `PhantomData&lt;T&gt;` field to your type tells the compiler that your
+<a href=#678 id=678 data-nosnippet>678</a>/// type acts as though it stores a value of type `T`, even though it doesn't
+<a href=#679 id=679 data-nosnippet>679</a>/// really. This information is used when computing certain safety properties.
+<a href=#680 id=680 data-nosnippet>680</a>///
+<a href=#681 id=681 data-nosnippet>681</a>/// For a more in-depth explanation of how to use `PhantomData&lt;T&gt;`, please see
+<a href=#682 id=682 data-nosnippet>682</a>/// [the Nomicon](../../nomicon/phantom-data.html).
+<a href=#683 id=683 data-nosnippet>683</a>///
+<a href=#684 id=684 data-nosnippet>684</a>/// # A ghastly note 👻👻👻
+<a href=#685 id=685 data-nosnippet>685</a>///
+<a href=#686 id=686 data-nosnippet>686</a>/// Though they both have scary names, `PhantomData` and 'phantom types' are
+<a href=#687 id=687 data-nosnippet>687</a>/// related, but not identical. A phantom type parameter is simply a type
+<a href=#688 id=688 data-nosnippet>688</a>/// parameter which is never used. In Rust, this often causes the compiler to
+<a href=#689 id=689 data-nosnippet>689</a>/// complain, and the solution is to add a "dummy" use by way of `PhantomData`.
+<a href=#690 id=690 data-nosnippet>690</a>///
+<a href=#691 id=691 data-nosnippet>691</a>/// # Examples
+<a href=#692 id=692 data-nosnippet>692</a>///
+<a href=#693 id=693 data-nosnippet>693</a>/// ## Unused lifetime parameters
+<a href=#694 id=694 data-nosnippet>694</a>///
+<a href=#695 id=695 data-nosnippet>695</a>/// Perhaps the most common use case for `PhantomData` is a struct that has an
+<a href=#696 id=696 data-nosnippet>696</a>/// unused lifetime parameter, typically as part of some unsafe code. For
+<a href=#697 id=697 data-nosnippet>697</a>/// example, here is a struct `Slice` that has two pointers of type `*const T`,
+<a href=#698 id=698 data-nosnippet>698</a>/// presumably pointing into an array somewhere:
+<a href=#699 id=699 data-nosnippet>699</a>///
+<a href=#700 id=700 data-nosnippet>700</a>/// ```compile_fail,E0392
+<a href=#701 id=701 data-nosnippet>701</a>/// struct Slice&lt;'a, T&gt; {
+<a href=#702 id=702 data-nosnippet>702</a>///     start: *const T,
+<a href=#703 id=703 data-nosnippet>703</a>///     end: *const T,
+<a href=#704 id=704 data-nosnippet>704</a>/// }
+<a href=#705 id=705 data-nosnippet>705</a>/// ```
+<a href=#706 id=706 data-nosnippet>706</a>///
+<a href=#707 id=707 data-nosnippet>707</a>/// The intention is that the underlying data is only valid for the
+<a href=#708 id=708 data-nosnippet>708</a>/// lifetime `'a`, so `Slice` should not outlive `'a`. However, this
+<a href=#709 id=709 data-nosnippet>709</a>/// intent is not expressed in the code, since there are no uses of
+<a href=#710 id=710 data-nosnippet>710</a>/// the lifetime `'a` and hence it is not clear what data it applies
+<a href=#711 id=711 data-nosnippet>711</a>/// to. We can correct this by telling the compiler to act *as if* the
+<a href=#712 id=712 data-nosnippet>712</a>/// `Slice` struct contained a reference `&amp;'a T`:
+<a href=#713 id=713 data-nosnippet>713</a>///
+<a href=#714 id=714 data-nosnippet>714</a>/// ```
+<a href=#715 id=715 data-nosnippet>715</a>/// use std::marker::PhantomData;
+<a href=#716 id=716 data-nosnippet>716</a>///
+<a href=#717 id=717 data-nosnippet>717</a>/// # #[allow(dead_code)]
+<a href=#718 id=718 data-nosnippet>718</a>/// struct Slice&lt;'a, T&gt; {
+<a href=#719 id=719 data-nosnippet>719</a>///     start: *const T,
+<a href=#720 id=720 data-nosnippet>720</a>///     end: *const T,
+<a href=#721 id=721 data-nosnippet>721</a>///     phantom: PhantomData&lt;&amp;'a T&gt;,
+<a href=#722 id=722 data-nosnippet>722</a>/// }
+<a href=#723 id=723 data-nosnippet>723</a>/// ```
+<a href=#724 id=724 data-nosnippet>724</a>///
+<a href=#725 id=725 data-nosnippet>725</a>/// This also in turn infers the lifetime bound `T: 'a`, indicating
+<a href=#726 id=726 data-nosnippet>726</a>/// that any references in `T` are valid over the lifetime `'a`.
+<a href=#727 id=727 data-nosnippet>727</a>///
+<a href=#728 id=728 data-nosnippet>728</a>/// When initializing a `Slice` you simply provide the value
+<a href=#729 id=729 data-nosnippet>729</a>/// `PhantomData` for the field `phantom`:
+<a href=#730 id=730 data-nosnippet>730</a>///
+<a href=#731 id=731 data-nosnippet>731</a>/// ```
+<a href=#732 id=732 data-nosnippet>732</a>/// # #![allow(dead_code)]
+<a href=#733 id=733 data-nosnippet>733</a>/// # use std::marker::PhantomData;
+<a href=#734 id=734 data-nosnippet>734</a>/// # struct Slice&lt;'a, T&gt; {
+<a href=#735 id=735 data-nosnippet>735</a>/// #     start: *const T,
+<a href=#736 id=736 data-nosnippet>736</a>/// #     end: *const T,
+<a href=#737 id=737 data-nosnippet>737</a>/// #     phantom: PhantomData&lt;&amp;'a T&gt;,
+<a href=#738 id=738 data-nosnippet>738</a>/// # }
+<a href=#739 id=739 data-nosnippet>739</a>/// fn borrow_vec&lt;T&gt;(vec: &amp;Vec&lt;T&gt;) -&gt; Slice&lt;'_, T&gt; {
+<a href=#740 id=740 data-nosnippet>740</a>///     let ptr = vec.as_ptr();
+<a href=#741 id=741 data-nosnippet>741</a>///     Slice {
+<a href=#742 id=742 data-nosnippet>742</a>///         start: ptr,
+<a href=#743 id=743 data-nosnippet>743</a>///         end: unsafe { ptr.add(vec.len()) },
+<a href=#744 id=744 data-nosnippet>744</a>///         phantom: PhantomData,
+<a href=#745 id=745 data-nosnippet>745</a>///     }
+<a href=#746 id=746 data-nosnippet>746</a>/// }
+<a href=#747 id=747 data-nosnippet>747</a>/// ```
+<a href=#748 id=748 data-nosnippet>748</a>///
+<a href=#749 id=749 data-nosnippet>749</a>/// ## Unused type parameters
+<a href=#750 id=750 data-nosnippet>750</a>///
+<a href=#751 id=751 data-nosnippet>751</a>/// It sometimes happens that you have unused type parameters which
+<a href=#752 id=752 data-nosnippet>752</a>/// indicate what type of data a struct is "tied" to, even though that
+<a href=#753 id=753 data-nosnippet>753</a>/// data is not actually found in the struct itself. Here is an
+<a href=#754 id=754 data-nosnippet>754</a>/// example where this arises with [FFI]. The foreign interface uses
+<a href=#755 id=755 data-nosnippet>755</a>/// handles of type `*mut ()` to refer to Rust values of different
+<a href=#756 id=756 data-nosnippet>756</a>/// types. We track the Rust type using a phantom type parameter on
+<a href=#757 id=757 data-nosnippet>757</a>/// the struct `ExternalResource` which wraps a handle.
+<a href=#758 id=758 data-nosnippet>758</a>///
+<a href=#759 id=759 data-nosnippet>759</a>/// [FFI]: ../../book/ch19-01-unsafe-rust.html#using-extern-functions-to-call-external-code
+<a href=#760 id=760 data-nosnippet>760</a>///
+<a href=#761 id=761 data-nosnippet>761</a>/// ```
+<a href=#762 id=762 data-nosnippet>762</a>/// # #![allow(dead_code)]
+<a href=#763 id=763 data-nosnippet>763</a>/// # trait ResType { }
+<a href=#764 id=764 data-nosnippet>764</a>/// # struct ParamType;
+<a href=#765 id=765 data-nosnippet>765</a>/// # mod foreign_lib {
+<a href=#766 id=766 data-nosnippet>766</a>/// #     pub fn new(_: usize) -&gt; *mut () { 42 as *mut () }
+<a href=#767 id=767 data-nosnippet>767</a>/// #     pub fn do_stuff(_: *mut (), _: usize) {}
+<a href=#768 id=768 data-nosnippet>768</a>/// # }
+<a href=#769 id=769 data-nosnippet>769</a>/// # fn convert_params(_: ParamType) -&gt; usize { 42 }
+<a href=#770 id=770 data-nosnippet>770</a>/// use std::marker::PhantomData;
+<a href=#771 id=771 data-nosnippet>771</a>///
+<a href=#772 id=772 data-nosnippet>772</a>/// struct ExternalResource&lt;R&gt; {
+<a href=#773 id=773 data-nosnippet>773</a>///    resource_handle: *mut (),
+<a href=#774 id=774 data-nosnippet>774</a>///    resource_type: PhantomData&lt;R&gt;,
+<a href=#775 id=775 data-nosnippet>775</a>/// }
+<a href=#776 id=776 data-nosnippet>776</a>///
+<a href=#777 id=777 data-nosnippet>777</a>/// impl&lt;R: ResType&gt; ExternalResource&lt;R&gt; {
+<a href=#778 id=778 data-nosnippet>778</a>///     fn new() -&gt; Self {
+<a href=#779 id=779 data-nosnippet>779</a>///         let size_of_res = size_of::&lt;R&gt;();
+<a href=#780 id=780 data-nosnippet>780</a>///         Self {
+<a href=#781 id=781 data-nosnippet>781</a>///             resource_handle: foreign_lib::new(size_of_res),
+<a href=#782 id=782 data-nosnippet>782</a>///             resource_type: PhantomData,
+<a href=#783 id=783 data-nosnippet>783</a>///         }
+<a href=#784 id=784 data-nosnippet>784</a>///     }
+<a href=#785 id=785 data-nosnippet>785</a>///
+<a href=#786 id=786 data-nosnippet>786</a>///     fn do_stuff(&amp;self, param: ParamType) {
+<a href=#787 id=787 data-nosnippet>787</a>///         let foreign_params = convert_params(param);
+<a href=#788 id=788 data-nosnippet>788</a>///         foreign_lib::do_stuff(self.resource_handle, foreign_params);
+<a href=#789 id=789 data-nosnippet>789</a>///     }
+<a href=#790 id=790 data-nosnippet>790</a>/// }
+<a href=#791 id=791 data-nosnippet>791</a>/// ```
+<a href=#792 id=792 data-nosnippet>792</a>///
+<a href=#793 id=793 data-nosnippet>793</a>/// ## Ownership and the drop check
+<a href=#794 id=794 data-nosnippet>794</a>///
+<a href=#795 id=795 data-nosnippet>795</a>/// The exact interaction of `PhantomData` with drop check **may change in the future**.
+<a href=#796 id=796 data-nosnippet>796</a>///
+<a href=#797 id=797 data-nosnippet>797</a>/// Currently, adding a field of type `PhantomData&lt;T&gt;` indicates that your type *owns* data of type
+<a href=#798 id=798 data-nosnippet>798</a>/// `T` in very rare circumstances. This in turn has effects on the Rust compiler's [drop check]
+<a href=#799 id=799 data-nosnippet>799</a>/// analysis. For the exact rules, see the [drop check] documentation.
+<a href=#800 id=800 data-nosnippet>800</a>///
+<a href=#801 id=801 data-nosnippet>801</a>/// ## Layout
+<a href=#802 id=802 data-nosnippet>802</a>///
+<a href=#803 id=803 data-nosnippet>803</a>/// For all `T`, the following are guaranteed:
+<a href=#804 id=804 data-nosnippet>804</a>/// * `size_of::&lt;PhantomData&lt;T&gt;&gt;() == 0`
+<a href=#805 id=805 data-nosnippet>805</a>/// * `align_of::&lt;PhantomData&lt;T&gt;&gt;() == 1`
+<a href=#806 id=806 data-nosnippet>806</a>///
+<a href=#807 id=807 data-nosnippet>807</a>/// [drop check]: Drop#drop-check
+<a href=#808 id=808 data-nosnippet>808</a></span><span class="attr">#[lang = <span class="string">"phantom_data"</span>]
+<a href=#809 id=809 data-nosnippet>809</a>#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#810 id=810 data-nosnippet>810</a></span><span class="kw">pub struct </span>PhantomData&lt;T: <span class="question-mark">?</span>Sized&gt;;
+<a href=#811 id=811 data-nosnippet>811</a>
+<a href=#812 id=812 data-nosnippet>812</a><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#813 id=813 data-nosnippet>813</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#814 id=814 data-nosnippet>814</a></span><span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; Hash <span class="kw">for </span>PhantomData&lt;T&gt; {
+<a href=#815 id=815 data-nosnippet>815</a>    <span class="attr">#[inline]
+<a href=#816 id=816 data-nosnippet>816</a>    </span><span class="kw">fn </span>hash&lt;H: Hasher&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>H) {}
+<a href=#817 id=817 data-nosnippet>817</a>}
+<a href=#818 id=818 data-nosnippet>818</a>
+<a href=#819 id=819 data-nosnippet>819</a><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#820 id=820 data-nosnippet>820</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#821 id=821 data-nosnippet>821</a></span><span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; cmp::PartialEq <span class="kw">for </span>PhantomData&lt;T&gt; {
+<a href=#822 id=822 data-nosnippet>822</a>    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, _other: <span class="kw-2">&amp;</span>PhantomData&lt;T&gt;) -&gt; bool {
+<a href=#823 id=823 data-nosnippet>823</a>        <span class="bool-val">true
+<a href=#824 id=824 data-nosnippet>824</a>    </span>}
+<a href=#825 id=825 data-nosnippet>825</a>}
+<a href=#826 id=826 data-nosnippet>826</a>
+<a href=#827 id=827 data-nosnippet>827</a><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#828 id=828 data-nosnippet>828</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#829 id=829 data-nosnippet>829</a></span><span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; cmp::Eq <span class="kw">for </span>PhantomData&lt;T&gt; {}
+<a href=#830 id=830 data-nosnippet>830</a>
+<a href=#831 id=831 data-nosnippet>831</a><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#832 id=832 data-nosnippet>832</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#833 id=833 data-nosnippet>833</a></span><span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; cmp::PartialOrd <span class="kw">for </span>PhantomData&lt;T&gt; {
+<a href=#834 id=834 data-nosnippet>834</a>    <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, _other: <span class="kw-2">&amp;</span>PhantomData&lt;T&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;cmp::Ordering&gt; {
+<a href=#835 id=835 data-nosnippet>835</a>        Option::Some(cmp::Ordering::Equal)
+<a href=#836 id=836 data-nosnippet>836</a>    }
+<a href=#837 id=837 data-nosnippet>837</a>}
+<a href=#838 id=838 data-nosnippet>838</a>
+<a href=#839 id=839 data-nosnippet>839</a><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#840 id=840 data-nosnippet>840</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#841 id=841 data-nosnippet>841</a></span><span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; cmp::Ord <span class="kw">for </span>PhantomData&lt;T&gt; {
+<a href=#842 id=842 data-nosnippet>842</a>    <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, _other: <span class="kw-2">&amp;</span>PhantomData&lt;T&gt;) -&gt; cmp::Ordering {
+<a href=#843 id=843 data-nosnippet>843</a>        cmp::Ordering::Equal
+<a href=#844 id=844 data-nosnippet>844</a>    }
+<a href=#845 id=845 data-nosnippet>845</a>}
+<a href=#846 id=846 data-nosnippet>846</a>
+<a href=#847 id=847 data-nosnippet>847</a><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#848 id=848 data-nosnippet>848</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#849 id=849 data-nosnippet>849</a></span><span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; Copy <span class="kw">for </span>PhantomData&lt;T&gt; {}
+<a href=#850 id=850 data-nosnippet>850</a>
+<a href=#851 id=851 data-nosnippet>851</a><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#852 id=852 data-nosnippet>852</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#853 id=853 data-nosnippet>853</a></span><span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; Clone <span class="kw">for </span>PhantomData&lt;T&gt; {
+<a href=#854 id=854 data-nosnippet>854</a>    <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+<a href=#855 id=855 data-nosnippet>855</a>        <span class="self">Self
+<a href=#856 id=856 data-nosnippet>856</a>    </span>}
+<a href=#857 id=857 data-nosnippet>857</a>}
+<a href=#858 id=858 data-nosnippet>858</a>
+<a href=#859 id=859 data-nosnippet>859</a><span class="attr">#[stable(feature = <span class="string">"rust1"</span>, since = <span class="string">"1.0.0"</span>)]
+<a href=#860 id=860 data-nosnippet>860</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#861 id=861 data-nosnippet>861</a></span><span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; Default <span class="kw">for </span>PhantomData&lt;T&gt; {
+<a href=#862 id=862 data-nosnippet>862</a>    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+<a href=#863 id=863 data-nosnippet>863</a>        <span class="self">Self
+<a href=#864 id=864 data-nosnippet>864</a>    </span>}
+<a href=#865 id=865 data-nosnippet>865</a>}
+<a href=#866 id=866 data-nosnippet>866</a>
+<a href=#867 id=867 data-nosnippet>867</a><span class="attr">#[unstable(feature = <span class="string">"structural_match"</span>, issue = <span class="string">"31434"</span>)]
+<a href=#868 id=868 data-nosnippet>868</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#869 id=869 data-nosnippet>869</a></span><span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; StructuralPartialEq <span class="kw">for </span>PhantomData&lt;T&gt; {}
+<a href=#870 id=870 data-nosnippet>870</a>
+<a href=#871 id=871 data-nosnippet>871</a><span class="doccomment">/// Compiler-internal trait used to indicate the type of enum discriminants.
+<a href=#872 id=872 data-nosnippet>872</a>///
+<a href=#873 id=873 data-nosnippet>873</a>/// This trait is automatically implemented for every type and does not add any
+<a href=#874 id=874 data-nosnippet>874</a>/// guarantees to [`mem::Discriminant`]. It is **undefined behavior** to transmute
+<a href=#875 id=875 data-nosnippet>875</a>/// between `DiscriminantKind::Discriminant` and `mem::Discriminant`.
+<a href=#876 id=876 data-nosnippet>876</a>///
+<a href=#877 id=877 data-nosnippet>877</a>/// [`mem::Discriminant`]: crate::mem::Discriminant
+<a href=#878 id=878 data-nosnippet>878</a></span><span class="attr">#[unstable(
+<a href=#879 id=879 data-nosnippet>879</a>    feature = <span class="string">"discriminant_kind"</span>,
+<a href=#880 id=880 data-nosnippet>880</a>    issue = <span class="string">"none"</span>,
+<a href=#881 id=881 data-nosnippet>881</a>    reason = <span class="string">"this trait is unlikely to ever be stabilized, use `mem::discriminant` instead"
+<a href=#882 id=882 data-nosnippet>882</a></span>)]
+<a href=#883 id=883 data-nosnippet>883</a>#[lang = <span class="string">"discriminant_kind"</span>]
+<a href=#884 id=884 data-nosnippet>884</a>#[rustc_deny_explicit_impl]
+<a href=#885 id=885 data-nosnippet>885</a>#[rustc_do_not_implement_via_object]
+<a href=#886 id=886 data-nosnippet>886</a></span><span class="kw">pub trait </span>DiscriminantKind {
+<a href=#887 id=887 data-nosnippet>887</a>    <span class="doccomment">/// The type of the discriminant, which must satisfy the trait
+<a href=#888 id=888 data-nosnippet>888</a>    /// bounds required by `mem::Discriminant`.
+<a href=#889 id=889 data-nosnippet>889</a>    </span><span class="attr">#[lang = <span class="string">"discriminant_type"</span>]
+<a href=#890 id=890 data-nosnippet>890</a>    #[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#891 id=891 data-nosnippet>891</a>    </span><span class="kw">type </span>Discriminant: Clone + Copy + Debug + Eq + PartialEq + Hash + Send + Sync + Unpin;
+<a href=#892 id=892 data-nosnippet>892</a>    <span class="doccomment">/// The type of the discriminant, which must satisfy the trait
+<a href=#893 id=893 data-nosnippet>893</a>    /// bounds required by `mem::Discriminant`.
+<a href=#894 id=894 data-nosnippet>894</a>    </span><span class="attr">#[lang = <span class="string">"discriminant_type"</span>]
+<a href=#895 id=895 data-nosnippet>895</a>    #[cfg(feature = <span class="string">"ferrocene_certified"</span>)]
+<a href=#896 id=896 data-nosnippet>896</a>    </span><span class="kw">type </span>Discriminant: Clone + Copy + Eq + PartialEq + Send + Sync;
+<a href=#897 id=897 data-nosnippet>897</a>}
+<a href=#898 id=898 data-nosnippet>898</a>
+<a href=#899 id=899 data-nosnippet>899</a><span class="doccomment">/// Used to determine whether a type contains
+<a href=#900 id=900 data-nosnippet>900</a>/// any `UnsafeCell` internally, but not through an indirection.
+<a href=#901 id=901 data-nosnippet>901</a>/// This affects, for example, whether a `static` of that type is
+<a href=#902 id=902 data-nosnippet>902</a>/// placed in read-only static memory or writable static memory.
+<a href=#903 id=903 data-nosnippet>903</a>/// This can be used to declare that a constant with a generic type
+<a href=#904 id=904 data-nosnippet>904</a>/// will not contain interior mutability, and subsequently allow
+<a href=#905 id=905 data-nosnippet>905</a>/// placing the constant behind references.
+<a href=#906 id=906 data-nosnippet>906</a>///
+<a href=#907 id=907 data-nosnippet>907</a>/// # Safety
+<a href=#908 id=908 data-nosnippet>908</a>///
+<a href=#909 id=909 data-nosnippet>909</a>/// This trait is a core part of the language, it is just expressed as a trait in libcore for
+<a href=#910 id=910 data-nosnippet>910</a>/// convenience. Do *not* implement it for other types.
+<a href=#911 id=911 data-nosnippet>911</a></span><span class="comment">// FIXME: Eventually this trait should become `#[rustc_deny_explicit_impl]`.
+<a href=#912 id=912 data-nosnippet>912</a>// That requires porting the impls below to native internal impls.
+<a href=#913 id=913 data-nosnippet>913</a></span><span class="attr">#[lang = <span class="string">"freeze"</span>]
+<a href=#914 id=914 data-nosnippet>914</a>#[unstable(feature = <span class="string">"freeze"</span>, issue = <span class="string">"121675"</span>)]
+<a href=#915 id=915 data-nosnippet>915</a></span><span class="kw">pub unsafe </span>auto <span class="kw">trait </span>Freeze {}
+<a href=#916 id=916 data-nosnippet>916</a>
+<a href=#917 id=917 data-nosnippet>917</a><span class="attr">#[unstable(feature = <span class="string">"freeze"</span>, issue = <span class="string">"121675"</span>)]
+<a href=#918 id=918 data-nosnippet>918</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#919 id=919 data-nosnippet>919</a></span><span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; !Freeze <span class="kw">for </span>UnsafeCell&lt;T&gt; {}
+<a href=#920 id=920 data-nosnippet>920</a><span class="macro">marker_impls!</span> {
+<a href=#921 id=921 data-nosnippet>921</a>    <span class="attr">#[unstable(feature = <span class="string">"freeze"</span>, issue = <span class="string">"121675"</span>)]
+<a href=#922 id=922 data-nosnippet>922</a>    </span><span class="kw">unsafe </span>Freeze <span class="kw">for
+<a href=#923 id=923 data-nosnippet>923</a>        </span>{T: <span class="question-mark">?</span>Sized} PhantomData&lt;T&gt;,
+<a href=#924 id=924 data-nosnippet>924</a>        {T: <span class="question-mark">?</span>Sized} <span class="kw-2">*const </span>T,
+<a href=#925 id=925 data-nosnippet>925</a>        {T: <span class="question-mark">?</span>Sized} <span class="kw-2">*mut </span>T,
+<a href=#926 id=926 data-nosnippet>926</a>        {T: <span class="question-mark">?</span>Sized} <span class="kw-2">&amp;</span>T,
+<a href=#927 id=927 data-nosnippet>927</a>        {T: <span class="question-mark">?</span>Sized} <span class="kw-2">&amp;mut </span>T,
+<a href=#928 id=928 data-nosnippet>928</a>}
+<a href=#929 id=929 data-nosnippet>929</a>
+<a href=#930 id=930 data-nosnippet>930</a><span class="doccomment">/// Used to determine whether a type contains any `UnsafePinned` (or `PhantomPinned`) internally,
+<a href=#931 id=931 data-nosnippet>931</a>/// but not through an indirection. This affects, for example, whether we emit `noalias` metadata
+<a href=#932 id=932 data-nosnippet>932</a>/// for `&amp;mut T` or not.
+<a href=#933 id=933 data-nosnippet>933</a>///
+<a href=#934 id=934 data-nosnippet>934</a>/// This is part of [RFC 3467](https://rust-lang.github.io/rfcs/3467-unsafe-pinned.html), and is
+<a href=#935 id=935 data-nosnippet>935</a>/// tracked by [#125735](https://github.com/rust-lang/rust/issues/125735).
+<a href=#936 id=936 data-nosnippet>936</a></span><span class="attr">#[cfg_attr(not(bootstrap), lang = <span class="string">"unsafe_unpin"</span>)]
+<a href=#937 id=937 data-nosnippet>937</a>#[cfg_attr(bootstrap, allow(dead_code))]
+<a href=#938 id=938 data-nosnippet>938</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#939 id=939 data-nosnippet>939</a></span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe </span>auto <span class="kw">trait </span>UnsafeUnpin {}
+<a href=#940 id=940 data-nosnippet>940</a>
+<a href=#941 id=941 data-nosnippet>941</a><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#942 id=942 data-nosnippet>942</a></span><span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; !UnsafeUnpin <span class="kw">for </span>UnsafePinned&lt;T&gt; {}
+<a href=#943 id=943 data-nosnippet>943</a><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#944 id=944 data-nosnippet>944</a></span><span class="kw">unsafe impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; UnsafeUnpin <span class="kw">for </span>PhantomData&lt;T&gt; {}
+<a href=#945 id=945 data-nosnippet>945</a><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#946 id=946 data-nosnippet>946</a></span><span class="kw">unsafe impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; UnsafeUnpin <span class="kw">for </span><span class="kw-2">*const </span>T {}
+<a href=#947 id=947 data-nosnippet>947</a><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#948 id=948 data-nosnippet>948</a></span><span class="kw">unsafe impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; UnsafeUnpin <span class="kw">for </span><span class="kw-2">*mut </span>T {}
+<a href=#949 id=949 data-nosnippet>949</a><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#950 id=950 data-nosnippet>950</a></span><span class="kw">unsafe impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; UnsafeUnpin <span class="kw">for </span><span class="kw-2">&amp;</span>T {}
+<a href=#951 id=951 data-nosnippet>951</a><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#952 id=952 data-nosnippet>952</a></span><span class="kw">unsafe impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; UnsafeUnpin <span class="kw">for </span><span class="kw-2">&amp;mut </span>T {}
+<a href=#953 id=953 data-nosnippet>953</a>
+<a href=#954 id=954 data-nosnippet>954</a><span class="doccomment">/// Types that do not require any pinning guarantees.
+<a href=#955 id=955 data-nosnippet>955</a>///
+<a href=#956 id=956 data-nosnippet>956</a>/// For information on what "pinning" is, see the [`pin` module] documentation.
+<a href=#957 id=957 data-nosnippet>957</a>///
+<a href=#958 id=958 data-nosnippet>958</a>/// Implementing the `Unpin` trait for `T` expresses the fact that `T` is pinning-agnostic:
+<a href=#959 id=959 data-nosnippet>959</a>/// it shall not expose nor rely on any pinning guarantees. This, in turn, means that a
+<a href=#960 id=960 data-nosnippet>960</a>/// `Pin`-wrapped pointer to such a type can feature a *fully unrestricted* API.
+<a href=#961 id=961 data-nosnippet>961</a>/// In other words, if `T: Unpin`, a value of type `T` will *not* be bound by the invariants
+<a href=#962 id=962 data-nosnippet>962</a>/// which pinning otherwise offers, even when "pinned" by a [`Pin&lt;Ptr&gt;`] pointing at it.
+<a href=#963 id=963 data-nosnippet>963</a>/// When a value of type `T` is pointed at by a [`Pin&lt;Ptr&gt;`], [`Pin`] will not restrict access
+<a href=#964 id=964 data-nosnippet>964</a>/// to the pointee value like it normally would, thus allowing the user to do anything that they
+<a href=#965 id=965 data-nosnippet>965</a>/// normally could with a non-[`Pin`]-wrapped `Ptr` to that value.
+<a href=#966 id=966 data-nosnippet>966</a>///
+<a href=#967 id=967 data-nosnippet>967</a>/// The idea of this trait is to alleviate the reduced ergonomics of APIs that require the use
+<a href=#968 id=968 data-nosnippet>968</a>/// of [`Pin`] for soundness for some types, but which also want to be used by other types that
+<a href=#969 id=969 data-nosnippet>969</a>/// don't care about pinning. The prime example of such an API is [`Future::poll`]. There are many
+<a href=#970 id=970 data-nosnippet>970</a>/// [`Future`] types that don't care about pinning. These futures can implement `Unpin` and
+<a href=#971 id=971 data-nosnippet>971</a>/// therefore get around the pinning related restrictions in the API, while still allowing the
+<a href=#972 id=972 data-nosnippet>972</a>/// subset of [`Future`]s which *do* require pinning to be implemented soundly.
+<a href=#973 id=973 data-nosnippet>973</a>///
+<a href=#974 id=974 data-nosnippet>974</a>/// For more discussion on the consequences of [`Unpin`] within the wider scope of the pinning
+<a href=#975 id=975 data-nosnippet>975</a>/// system, see the [section about `Unpin`] in the [`pin` module].
+<a href=#976 id=976 data-nosnippet>976</a>///
+<a href=#977 id=977 data-nosnippet>977</a>/// `Unpin` has no consequence at all for non-pinned data. In particular, [`mem::replace`] happily
+<a href=#978 id=978 data-nosnippet>978</a>/// moves `!Unpin` data, which would be immovable when pinned ([`mem::replace`] works for any
+<a href=#979 id=979 data-nosnippet>979</a>/// `&amp;mut T`, not just when `T: Unpin`).
+<a href=#980 id=980 data-nosnippet>980</a>///
+<a href=#981 id=981 data-nosnippet>981</a>/// *However*, you cannot use [`mem::replace`] on `!Unpin` data which is *pinned* by being wrapped
+<a href=#982 id=982 data-nosnippet>982</a>/// inside a [`Pin&lt;Ptr&gt;`] pointing at it. This is because you cannot (safely) use a
+<a href=#983 id=983 data-nosnippet>983</a>/// [`Pin&lt;Ptr&gt;`] to get a `&amp;mut T` to its pointee value, which you would need to call
+<a href=#984 id=984 data-nosnippet>984</a>/// [`mem::replace`], and *that* is what makes this system work.
+<a href=#985 id=985 data-nosnippet>985</a>///
+<a href=#986 id=986 data-nosnippet>986</a>/// So this, for example, can only be done on types implementing `Unpin`:
+<a href=#987 id=987 data-nosnippet>987</a>///
+<a href=#988 id=988 data-nosnippet>988</a>/// ```rust
+<a href=#989 id=989 data-nosnippet>989</a>/// # #![allow(unused_must_use)]
+<a href=#990 id=990 data-nosnippet>990</a>/// use std::mem;
+<a href=#991 id=991 data-nosnippet>991</a>/// use std::pin::Pin;
+<a href=#992 id=992 data-nosnippet>992</a>///
+<a href=#993 id=993 data-nosnippet>993</a>/// let mut string = "this".to_string();
+<a href=#994 id=994 data-nosnippet>994</a>/// let mut pinned_string = Pin::new(&amp;mut string);
+<a href=#995 id=995 data-nosnippet>995</a>///
+<a href=#996 id=996 data-nosnippet>996</a>/// // We need a mutable reference to call `mem::replace`.
+<a href=#997 id=997 data-nosnippet>997</a>/// // We can obtain such a reference by (implicitly) invoking `Pin::deref_mut`,
+<a href=#998 id=998 data-nosnippet>998</a>/// // but that is only possible because `String` implements `Unpin`.
+<a href=#999 id=999 data-nosnippet>999</a>/// mem::replace(&amp;mut *pinned_string, "other".to_string());
+<a href=#1000 id=1000 data-nosnippet>1000</a>/// ```
+<a href=#1001 id=1001 data-nosnippet>1001</a>///
+<a href=#1002 id=1002 data-nosnippet>1002</a>/// This trait is automatically implemented for almost every type. The compiler is free
+<a href=#1003 id=1003 data-nosnippet>1003</a>/// to take the conservative stance of marking types as [`Unpin`] so long as all of the types that
+<a href=#1004 id=1004 data-nosnippet>1004</a>/// compose its fields are also [`Unpin`]. This is because if a type implements [`Unpin`], then it
+<a href=#1005 id=1005 data-nosnippet>1005</a>/// is unsound for that type's implementation to rely on pinning-related guarantees for soundness,
+<a href=#1006 id=1006 data-nosnippet>1006</a>/// *even* when viewed through a "pinning" pointer! It is the responsibility of the implementor of
+<a href=#1007 id=1007 data-nosnippet>1007</a>/// a type that relies upon pinning for soundness to ensure that type is *not* marked as [`Unpin`]
+<a href=#1008 id=1008 data-nosnippet>1008</a>/// by adding [`PhantomPinned`] field. For more details, see the [`pin` module] docs.
+<a href=#1009 id=1009 data-nosnippet>1009</a>///
+<a href=#1010 id=1010 data-nosnippet>1010</a>/// [`mem::replace`]: crate::mem::replace "mem replace"
+<a href=#1011 id=1011 data-nosnippet>1011</a>/// [`Future`]: crate::future::Future "Future"
+<a href=#1012 id=1012 data-nosnippet>1012</a>/// [`Future::poll`]: crate::future::Future::poll "Future poll"
+<a href=#1013 id=1013 data-nosnippet>1013</a>/// [`Pin`]: crate::pin::Pin "Pin"
+<a href=#1014 id=1014 data-nosnippet>1014</a>/// [`Pin&lt;Ptr&gt;`]: crate::pin::Pin "Pin"
+<a href=#1015 id=1015 data-nosnippet>1015</a>/// [`pin` module]: crate::pin "pin module"
+<a href=#1016 id=1016 data-nosnippet>1016</a>/// [section about `Unpin`]: crate::pin#unpin "pin module docs about unpin"
+<a href=#1017 id=1017 data-nosnippet>1017</a>/// [`unsafe`]: ../../std/keyword.unsafe.html "keyword unsafe"
+<a href=#1018 id=1018 data-nosnippet>1018</a></span><span class="attr">#[stable(feature = <span class="string">"pin"</span>, since = <span class="string">"1.33.0"</span>)]
+<a href=#1019 id=1019 data-nosnippet>1019</a>#[diagnostic::on_unimplemented(
+<a href=#1020 id=1020 data-nosnippet>1020</a>    note = <span class="string">"consider using the `pin!` macro\nconsider using `Box::pin` if you need to access the pinned value outside of the current scope"</span>,
+<a href=#1021 id=1021 data-nosnippet>1021</a>    message = <span class="string">"`{Self}` cannot be unpinned"
+<a href=#1022 id=1022 data-nosnippet>1022</a></span>)]
+<a href=#1023 id=1023 data-nosnippet>1023</a>#[lang = <span class="string">"unpin"</span>]
+<a href=#1024 id=1024 data-nosnippet>1024</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#1025 id=1025 data-nosnippet>1025</a></span><span class="kw">pub </span>auto <span class="kw">trait </span>Unpin {}
+<a href=#1026 id=1026 data-nosnippet>1026</a>
+<a href=#1027 id=1027 data-nosnippet>1027</a><span class="doccomment">/// A marker type which does not implement `Unpin`.
+<a href=#1028 id=1028 data-nosnippet>1028</a>///
+<a href=#1029 id=1029 data-nosnippet>1029</a>/// If a type contains a `PhantomPinned`, it will not implement `Unpin` by default.
+<a href=#1030 id=1030 data-nosnippet>1030</a></span><span class="comment">//
+<a href=#1031 id=1031 data-nosnippet>1031</a>// FIXME(unsafe_pinned): This is *not* a stable guarantee we want to make, at least not yet.
+<a href=#1032 id=1032 data-nosnippet>1032</a>// Note that for backwards compatibility with the new [`UnsafePinned`] wrapper type, placing this
+<a href=#1033 id=1033 data-nosnippet>1033</a>// marker in your struct acts as if you wrapped the entire struct in an `UnsafePinned`. This type
+<a href=#1034 id=1034 data-nosnippet>1034</a>// will likely eventually be deprecated, and all new code should be using `UnsafePinned` instead.
+<a href=#1035 id=1035 data-nosnippet>1035</a></span><span class="attr">#[stable(feature = <span class="string">"pin"</span>, since = <span class="string">"1.33.0"</span>)]
+<a href=#1036 id=1036 data-nosnippet>1036</a>#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+<a href=#1037 id=1037 data-nosnippet>1037</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#1038 id=1038 data-nosnippet>1038</a></span><span class="kw">pub struct </span>PhantomPinned;
+<a href=#1039 id=1039 data-nosnippet>1039</a>
+<a href=#1040 id=1040 data-nosnippet>1040</a><span class="attr">#[stable(feature = <span class="string">"pin"</span>, since = <span class="string">"1.33.0"</span>)]
+<a href=#1041 id=1041 data-nosnippet>1041</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#1042 id=1042 data-nosnippet>1042</a></span><span class="kw">impl </span>!Unpin <span class="kw">for </span>PhantomPinned {}
+<a href=#1043 id=1043 data-nosnippet>1043</a>
+<a href=#1044 id=1044 data-nosnippet>1044</a><span class="comment">// This is a small hack to allow existing code which uses PhantomPinned to opt-out of noalias to
+<a href=#1045 id=1045 data-nosnippet>1045</a>// continue working. Ideally PhantomPinned could just wrap an `UnsafePinned&lt;()&gt;` to get the same
+<a href=#1046 id=1046 data-nosnippet>1046</a>// effect, but we can't add a new field to an already stable unit struct -- that would be a breaking
+<a href=#1047 id=1047 data-nosnippet>1047</a>// change.
+<a href=#1048 id=1048 data-nosnippet>1048</a></span><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#1049 id=1049 data-nosnippet>1049</a></span><span class="kw">impl </span>!UnsafeUnpin <span class="kw">for </span>PhantomPinned {}
+<a href=#1050 id=1050 data-nosnippet>1050</a>
+<a href=#1051 id=1051 data-nosnippet>1051</a><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#1052 id=1052 data-nosnippet>1052</a></span><span class="macro">marker_impls!</span> {
+<a href=#1053 id=1053 data-nosnippet>1053</a>    <span class="attr">#[stable(feature = <span class="string">"pin"</span>, since = <span class="string">"1.33.0"</span>)]
+<a href=#1054 id=1054 data-nosnippet>1054</a>    </span>Unpin <span class="kw">for
+<a href=#1055 id=1055 data-nosnippet>1055</a>        </span>{T: <span class="question-mark">?</span>Sized} <span class="kw-2">&amp;</span>T,
+<a href=#1056 id=1056 data-nosnippet>1056</a>        {T: <span class="question-mark">?</span>Sized} <span class="kw-2">&amp;mut </span>T,
+<a href=#1057 id=1057 data-nosnippet>1057</a>}
+<a href=#1058 id=1058 data-nosnippet>1058</a>
+<a href=#1059 id=1059 data-nosnippet>1059</a><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#1060 id=1060 data-nosnippet>1060</a></span><span class="macro">marker_impls!</span> {
+<a href=#1061 id=1061 data-nosnippet>1061</a>    <span class="attr">#[stable(feature = <span class="string">"pin_raw"</span>, since = <span class="string">"1.38.0"</span>)]
+<a href=#1062 id=1062 data-nosnippet>1062</a>    </span>Unpin <span class="kw">for
+<a href=#1063 id=1063 data-nosnippet>1063</a>        </span>{T: <span class="question-mark">?</span>Sized} <span class="kw-2">*const </span>T,
+<a href=#1064 id=1064 data-nosnippet>1064</a>        {T: <span class="question-mark">?</span>Sized} <span class="kw-2">*mut </span>T,
+<a href=#1065 id=1065 data-nosnippet>1065</a>}
+<a href=#1066 id=1066 data-nosnippet>1066</a>
+<a href=#1067 id=1067 data-nosnippet>1067</a><span class="doccomment">/// A marker for types that can be dropped.
+<a href=#1068 id=1068 data-nosnippet>1068</a>///
+<a href=#1069 id=1069 data-nosnippet>1069</a>/// This should be used for `~const` bounds,
+<a href=#1070 id=1070 data-nosnippet>1070</a>/// as non-const bounds will always hold for every type.
+<a href=#1071 id=1071 data-nosnippet>1071</a></span><span class="attr">#[unstable(feature = <span class="string">"const_destruct"</span>, issue = <span class="string">"133214"</span>)]
+<a href=#1072 id=1072 data-nosnippet>1072</a>#[rustc_const_unstable(feature = <span class="string">"const_destruct"</span>, issue = <span class="string">"133214"</span>)]
+<a href=#1073 id=1073 data-nosnippet>1073</a>#[lang = <span class="string">"destruct"</span>]
+<a href=#1074 id=1074 data-nosnippet>1074</a>#[rustc_on_unimplemented(message = <span class="string">"can't drop `{Self}`"</span>, append_const_msg)]
+<a href=#1075 id=1075 data-nosnippet>1075</a>#[rustc_deny_explicit_impl]
+<a href=#1076 id=1076 data-nosnippet>1076</a>#[rustc_do_not_implement_via_object]
+<a href=#1077 id=1077 data-nosnippet>1077</a>#[const_trait]
+<a href=#1078 id=1078 data-nosnippet>1078</a></span><span class="kw">pub trait </span>Destruct {}
+<a href=#1079 id=1079 data-nosnippet>1079</a>
+<a href=#1080 id=1080 data-nosnippet>1080</a><span class="doccomment">/// A marker for tuple types.
+<a href=#1081 id=1081 data-nosnippet>1081</a>///
+<a href=#1082 id=1082 data-nosnippet>1082</a>/// The implementation of this trait is built-in and cannot be implemented
+<a href=#1083 id=1083 data-nosnippet>1083</a>/// for any user type.
+<a href=#1084 id=1084 data-nosnippet>1084</a></span><span class="attr">#[unstable(feature = <span class="string">"tuple_trait"</span>, issue = <span class="string">"none"</span>)]
+<a href=#1085 id=1085 data-nosnippet>1085</a>#[lang = <span class="string">"tuple_trait"</span>]
+<a href=#1086 id=1086 data-nosnippet>1086</a>#[diagnostic::on_unimplemented(message = <span class="string">"`{Self}` is not a tuple"</span>)]
+<a href=#1087 id=1087 data-nosnippet>1087</a>#[rustc_deny_explicit_impl]
+<a href=#1088 id=1088 data-nosnippet>1088</a>#[rustc_do_not_implement_via_object]
+<a href=#1089 id=1089 data-nosnippet>1089</a></span><span class="kw">pub trait </span>Tuple {}
+<a href=#1090 id=1090 data-nosnippet>1090</a>
+<a href=#1091 id=1091 data-nosnippet>1091</a><span class="doccomment">/// A marker for pointer-like types.
+<a href=#1092 id=1092 data-nosnippet>1092</a>///
+<a href=#1093 id=1093 data-nosnippet>1093</a>/// This trait can only be implemented for types that are certain to have
+<a href=#1094 id=1094 data-nosnippet>1094</a>/// the same size and alignment as a [`usize`] or [`*const ()`](pointer).
+<a href=#1095 id=1095 data-nosnippet>1095</a>/// To ensure this, there are special requirements on implementations
+<a href=#1096 id=1096 data-nosnippet>1096</a>/// of `PointerLike` (other than the already-provided implementations
+<a href=#1097 id=1097 data-nosnippet>1097</a>/// for built-in types):
+<a href=#1098 id=1098 data-nosnippet>1098</a>///
+<a href=#1099 id=1099 data-nosnippet>1099</a>/// * The type must have `#[repr(transparent)]`.
+<a href=#1100 id=1100 data-nosnippet>1100</a>/// * The type’s sole non-zero-sized field must itself implement `PointerLike`.
+<a href=#1101 id=1101 data-nosnippet>1101</a></span><span class="attr">#[unstable(feature = <span class="string">"pointer_like_trait"</span>, issue = <span class="string">"none"</span>)]
+<a href=#1102 id=1102 data-nosnippet>1102</a>#[lang = <span class="string">"pointer_like"</span>]
+<a href=#1103 id=1103 data-nosnippet>1103</a>#[diagnostic::on_unimplemented(
+<a href=#1104 id=1104 data-nosnippet>1104</a>    message = <span class="string">"`{Self}` needs to have the same ABI as a pointer"</span>,
+<a href=#1105 id=1105 data-nosnippet>1105</a>    label = <span class="string">"`{Self}` needs to be a pointer-like type"
+<a href=#1106 id=1106 data-nosnippet>1106</a></span>)]
+<a href=#1107 id=1107 data-nosnippet>1107</a>#[rustc_do_not_implement_via_object]
+<a href=#1108 id=1108 data-nosnippet>1108</a></span><span class="kw">pub trait </span>PointerLike {}
+<a href=#1109 id=1109 data-nosnippet>1109</a>
+<a href=#1110 id=1110 data-nosnippet>1110</a><span class="macro">marker_impls!</span> {
+<a href=#1111 id=1111 data-nosnippet>1111</a>    <span class="attr">#[unstable(feature = <span class="string">"pointer_like_trait"</span>, issue = <span class="string">"none"</span>)]
+<a href=#1112 id=1112 data-nosnippet>1112</a>    </span>PointerLike <span class="kw">for
+<a href=#1113 id=1113 data-nosnippet>1113</a>        </span>isize,
+<a href=#1114 id=1114 data-nosnippet>1114</a>        usize,
+<a href=#1115 id=1115 data-nosnippet>1115</a>        {T} <span class="kw-2">&amp;</span>T,
+<a href=#1116 id=1116 data-nosnippet>1116</a>        {T} <span class="kw-2">&amp;mut </span>T,
+<a href=#1117 id=1117 data-nosnippet>1117</a>        {T} <span class="kw-2">*const </span>T,
+<a href=#1118 id=1118 data-nosnippet>1118</a>        {T} <span class="kw-2">*mut </span>T,
+<a href=#1119 id=1119 data-nosnippet>1119</a>}
+<a href=#1120 id=1120 data-nosnippet>1120</a>
+<a href=#1121 id=1121 data-nosnippet>1121</a><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#1122 id=1122 data-nosnippet>1122</a></span><span class="macro">marker_impls!</span> {
+<a href=#1123 id=1123 data-nosnippet>1123</a>    <span class="attr">#[unstable(feature = <span class="string">"pointer_like_trait"</span>, issue = <span class="string">"none"</span>)]
+<a href=#1124 id=1124 data-nosnippet>1124</a>    </span>PointerLike <span class="kw">for
+<a href=#1125 id=1125 data-nosnippet>1125</a>        </span>{T: PointerLike} <span class="kw">crate</span>::pin::Pin&lt;T&gt;,
+<a href=#1126 id=1126 data-nosnippet>1126</a>}
+<a href=#1127 id=1127 data-nosnippet>1127</a>
+<a href=#1128 id=1128 data-nosnippet>1128</a><span class="doccomment">/// A marker for types which can be used as types of `const` generic parameters.
+<a href=#1129 id=1129 data-nosnippet>1129</a>///
+<a href=#1130 id=1130 data-nosnippet>1130</a>/// These types must have a proper equivalence relation (`Eq`) and it must be automatically
+<a href=#1131 id=1131 data-nosnippet>1131</a>/// derived (`StructuralPartialEq`). There's a hard-coded check in the compiler ensuring
+<a href=#1132 id=1132 data-nosnippet>1132</a>/// that all fields are also `ConstParamTy`, which implies that recursively, all fields
+<a href=#1133 id=1133 data-nosnippet>1133</a>/// are `StructuralPartialEq`.
+<a href=#1134 id=1134 data-nosnippet>1134</a></span><span class="attr">#[lang = <span class="string">"const_param_ty"</span>]
+<a href=#1135 id=1135 data-nosnippet>1135</a>#[unstable(feature = <span class="string">"unsized_const_params"</span>, issue = <span class="string">"95174"</span>)]
+<a href=#1136 id=1136 data-nosnippet>1136</a>#[diagnostic::on_unimplemented(message = <span class="string">"`{Self}` can't be used as a const parameter type"</span>)]
+<a href=#1137 id=1137 data-nosnippet>1137</a>#[allow(multiple_supertrait_upcastable)]
+<a href=#1138 id=1138 data-nosnippet>1138</a></span><span class="comment">// We name this differently than the derive macro so that the `adt_const_params` can
+<a href=#1139 id=1139 data-nosnippet>1139</a>// be used independently of `unsized_const_params` without requiring a full path
+<a href=#1140 id=1140 data-nosnippet>1140</a>// to the derive macro every time it is used. This should be renamed on stabilization.
+<a href=#1141 id=1141 data-nosnippet>1141</a></span><span class="kw">pub trait </span>ConstParamTy_: UnsizedConstParamTy + StructuralPartialEq + Eq {}
+<a href=#1142 id=1142 data-nosnippet>1142</a>
+<a href=#1143 id=1143 data-nosnippet>1143</a><span class="doccomment">/// Derive macro generating an impl of the trait `ConstParamTy`.
+<a href=#1144 id=1144 data-nosnippet>1144</a></span><span class="attr">#[rustc_builtin_macro]
+<a href=#1145 id=1145 data-nosnippet>1145</a>#[allow_internal_unstable(unsized_const_params)]
+<a href=#1146 id=1146 data-nosnippet>1146</a>#[unstable(feature = <span class="string">"adt_const_params"</span>, issue = <span class="string">"95174"</span>)]
+<a href=#1147 id=1147 data-nosnippet>1147</a></span><span class="kw">pub macro </span>ConstParamTy(<span class="macro-nonterminal">$item</span>:item) {
+<a href=#1148 id=1148 data-nosnippet>1148</a>    <span class="comment">/* compiler built-in */
+<a href=#1149 id=1149 data-nosnippet>1149</a></span>}
+<a href=#1150 id=1150 data-nosnippet>1150</a>
+<a href=#1151 id=1151 data-nosnippet>1151</a><span class="attr">#[lang = <span class="string">"unsized_const_param_ty"</span>]
+<a href=#1152 id=1152 data-nosnippet>1152</a>#[unstable(feature = <span class="string">"unsized_const_params"</span>, issue = <span class="string">"95174"</span>)]
+<a href=#1153 id=1153 data-nosnippet>1153</a>#[diagnostic::on_unimplemented(message = <span class="string">"`{Self}` can't be used as a const parameter type"</span>)]
+<a href=#1154 id=1154 data-nosnippet>1154</a></span><span class="doccomment">/// A marker for types which can be used as types of `const` generic parameters.
+<a href=#1155 id=1155 data-nosnippet>1155</a>///
+<a href=#1156 id=1156 data-nosnippet>1156</a>/// Equivalent to [`ConstParamTy_`] except that this is used by
+<a href=#1157 id=1157 data-nosnippet>1157</a>/// the `unsized_const_params` to allow for fake unstable impls.
+<a href=#1158 id=1158 data-nosnippet>1158</a></span><span class="kw">pub trait </span>UnsizedConstParamTy: StructuralPartialEq + Eq {}
+<a href=#1159 id=1159 data-nosnippet>1159</a>
+<a href=#1160 id=1160 data-nosnippet>1160</a><span class="doccomment">/// Derive macro generating an impl of the trait `ConstParamTy`.
+<a href=#1161 id=1161 data-nosnippet>1161</a></span><span class="attr">#[rustc_builtin_macro]
+<a href=#1162 id=1162 data-nosnippet>1162</a>#[allow_internal_unstable(unsized_const_params)]
+<a href=#1163 id=1163 data-nosnippet>1163</a>#[unstable(feature = <span class="string">"unsized_const_params"</span>, issue = <span class="string">"95174"</span>)]
+<a href=#1164 id=1164 data-nosnippet>1164</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#1165 id=1165 data-nosnippet>1165</a></span><span class="kw">pub macro </span>UnsizedConstParamTy(<span class="macro-nonterminal">$item</span>:item) {
+<a href=#1166 id=1166 data-nosnippet>1166</a>    <span class="comment">/* compiler built-in */
+<a href=#1167 id=1167 data-nosnippet>1167</a></span>}
+<a href=#1168 id=1168 data-nosnippet>1168</a>
+<a href=#1169 id=1169 data-nosnippet>1169</a><span class="comment">// FIXME(adt_const_params): handle `ty::FnDef`/`ty::Closure`
+<a href=#1170 id=1170 data-nosnippet>1170</a></span><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#1171 id=1171 data-nosnippet>1171</a></span><span class="macro">marker_impls!</span> {
+<a href=#1172 id=1172 data-nosnippet>1172</a>    <span class="attr">#[unstable(feature = <span class="string">"adt_const_params"</span>, issue = <span class="string">"95174"</span>)]
+<a href=#1173 id=1173 data-nosnippet>1173</a>    </span>ConstParamTy_ <span class="kw">for
+<a href=#1174 id=1174 data-nosnippet>1174</a>        </span>usize, u8, u16, u32, u64, u128,
+<a href=#1175 id=1175 data-nosnippet>1175</a>        isize, i8, i16, i32, i64, i128,
+<a href=#1176 id=1176 data-nosnippet>1176</a>        bool,
+<a href=#1177 id=1177 data-nosnippet>1177</a>        char,
+<a href=#1178 id=1178 data-nosnippet>1178</a>        (),
+<a href=#1179 id=1179 data-nosnippet>1179</a>        {T: ConstParamTy_, <span class="kw">const </span>N: usize} [T; N],
+<a href=#1180 id=1180 data-nosnippet>1180</a>}
+<a href=#1181 id=1181 data-nosnippet>1181</a>
+<a href=#1182 id=1182 data-nosnippet>1182</a><span class="attr">#[cfg(feature = <span class="string">"ferrocene_certified"</span>)]
+<a href=#1183 id=1183 data-nosnippet>1183</a></span><span class="macro">marker_impls!</span> {
+<a href=#1184 id=1184 data-nosnippet>1184</a>    <span class="attr">#[unstable(feature = <span class="string">"adt_const_params"</span>, issue = <span class="string">"95174"</span>)]
+<a href=#1185 id=1185 data-nosnippet>1185</a>    </span>ConstParamTy_ <span class="kw">for
+<a href=#1186 id=1186 data-nosnippet>1186</a>        </span>usize
+<a href=#1187 id=1187 data-nosnippet>1187</a>}
+<a href=#1188 id=1188 data-nosnippet>1188</a>
+<a href=#1189 id=1189 data-nosnippet>1189</a><span class="attr">#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#1190 id=1190 data-nosnippet>1190</a></span><span class="macro">marker_impls!</span> {
+<a href=#1191 id=1191 data-nosnippet>1191</a>    <span class="attr">#[unstable(feature = <span class="string">"unsized_const_params"</span>, issue = <span class="string">"95174"</span>)]
+<a href=#1192 id=1192 data-nosnippet>1192</a>    </span>UnsizedConstParamTy <span class="kw">for
+<a href=#1193 id=1193 data-nosnippet>1193</a>        </span>usize, u8, u16, u32, u64, u128,
+<a href=#1194 id=1194 data-nosnippet>1194</a>        isize, i8, i16, i32, i64, i128,
+<a href=#1195 id=1195 data-nosnippet>1195</a>        bool,
+<a href=#1196 id=1196 data-nosnippet>1196</a>        char,
+<a href=#1197 id=1197 data-nosnippet>1197</a>        (),
+<a href=#1198 id=1198 data-nosnippet>1198</a>        {T: UnsizedConstParamTy, <span class="kw">const </span>N: usize} [T; N],
+<a href=#1199 id=1199 data-nosnippet>1199</a>
+<a href=#1200 id=1200 data-nosnippet>1200</a>        str,
+<a href=#1201 id=1201 data-nosnippet>1201</a>        {T: UnsizedConstParamTy} [T],
+<a href=#1202 id=1202 data-nosnippet>1202</a>        {T: UnsizedConstParamTy + <span class="question-mark">?</span>Sized} <span class="kw-2">&amp;</span>T,
+<a href=#1203 id=1203 data-nosnippet>1203</a>}
+<a href=#1204 id=1204 data-nosnippet>1204</a>
+<a href=#1205 id=1205 data-nosnippet>1205</a><span class="attr">#[cfg(feature = <span class="string">"ferrocene_certified"</span>)]
+<a href=#1206 id=1206 data-nosnippet>1206</a></span><span class="macro">marker_impls!</span> {
+<a href=#1207 id=1207 data-nosnippet>1207</a>    <span class="attr">#[unstable(feature = <span class="string">"adt_const_params"</span>, issue = <span class="string">"95174"</span>)]
+<a href=#1208 id=1208 data-nosnippet>1208</a>    </span>UnsizedConstParamTy <span class="kw">for
+<a href=#1209 id=1209 data-nosnippet>1209</a>        </span>usize
+<a href=#1210 id=1210 data-nosnippet>1210</a>}
+<a href=#1211 id=1211 data-nosnippet>1211</a>
+<a href=#1212 id=1212 data-nosnippet>1212</a><span class="doccomment">/// A common trait implemented by all function pointers.
+<a href=#1213 id=1213 data-nosnippet>1213</a></span><span class="comment">//
+<a href=#1214 id=1214 data-nosnippet>1214</a>// Note that while the trait is internal and unstable it is nevertheless
+<a href=#1215 id=1215 data-nosnippet>1215</a>// exposed as a public bound of the stable `core::ptr::fn_addr_eq` function.
+<a href=#1216 id=1216 data-nosnippet>1216</a></span><span class="attr">#[unstable(
+<a href=#1217 id=1217 data-nosnippet>1217</a>    feature = <span class="string">"fn_ptr_trait"</span>,
+<a href=#1218 id=1218 data-nosnippet>1218</a>    issue = <span class="string">"none"</span>,
+<a href=#1219 id=1219 data-nosnippet>1219</a>    reason = <span class="string">"internal trait for implementing various traits for all function pointers"
+<a href=#1220 id=1220 data-nosnippet>1220</a></span>)]
+<a href=#1221 id=1221 data-nosnippet>1221</a>#[lang = <span class="string">"fn_ptr_trait"</span>]
+<a href=#1222 id=1222 data-nosnippet>1222</a>#[rustc_deny_explicit_impl]
+<a href=#1223 id=1223 data-nosnippet>1223</a>#[rustc_do_not_implement_via_object]
+<a href=#1224 id=1224 data-nosnippet>1224</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#1225 id=1225 data-nosnippet>1225</a></span><span class="kw">pub trait </span>FnPtr: Copy + Clone {
+<a href=#1226 id=1226 data-nosnippet>1226</a>    <span class="doccomment">/// Returns the address of the function pointer.
+<a href=#1227 id=1227 data-nosnippet>1227</a>    </span><span class="attr">#[lang = <span class="string">"fn_ptr_addr"</span>]
+<a href=#1228 id=1228 data-nosnippet>1228</a>    </span><span class="kw">fn </span>addr(<span class="self">self</span>) -&gt; <span class="kw-2">*const </span>();
+<a href=#1229 id=1229 data-nosnippet>1229</a>}
+<a href=#1230 id=1230 data-nosnippet>1230</a>
+<a href=#1231 id=1231 data-nosnippet>1231</a><span class="doccomment">/// Derive macro that makes a smart pointer usable with trait objects.
+<a href=#1232 id=1232 data-nosnippet>1232</a>///
+<a href=#1233 id=1233 data-nosnippet>1233</a>/// # What this macro does
+<a href=#1234 id=1234 data-nosnippet>1234</a>///
+<a href=#1235 id=1235 data-nosnippet>1235</a>/// This macro is intended to be used with user-defined pointer types, and makes it possible to
+<a href=#1236 id=1236 data-nosnippet>1236</a>/// perform coercions on the pointee of the user-defined pointer. There are two aspects to this:
+<a href=#1237 id=1237 data-nosnippet>1237</a>///
+<a href=#1238 id=1238 data-nosnippet>1238</a>/// ## Unsizing coercions of the pointee
+<a href=#1239 id=1239 data-nosnippet>1239</a>///
+<a href=#1240 id=1240 data-nosnippet>1240</a>/// By using the macro, the following example will compile:
+<a href=#1241 id=1241 data-nosnippet>1241</a>/// ```
+<a href=#1242 id=1242 data-nosnippet>1242</a>/// #![feature(derive_coerce_pointee)]
+<a href=#1243 id=1243 data-nosnippet>1243</a>/// use std::marker::CoercePointee;
+<a href=#1244 id=1244 data-nosnippet>1244</a>/// use std::ops::Deref;
+<a href=#1245 id=1245 data-nosnippet>1245</a>///
+<a href=#1246 id=1246 data-nosnippet>1246</a>/// #[derive(CoercePointee)]
+<a href=#1247 id=1247 data-nosnippet>1247</a>/// #[repr(transparent)]
+<a href=#1248 id=1248 data-nosnippet>1248</a>/// struct MySmartPointer&lt;T: ?Sized&gt;(Box&lt;T&gt;);
+<a href=#1249 id=1249 data-nosnippet>1249</a>///
+<a href=#1250 id=1250 data-nosnippet>1250</a>/// impl&lt;T: ?Sized&gt; Deref for MySmartPointer&lt;T&gt; {
+<a href=#1251 id=1251 data-nosnippet>1251</a>///     type Target = T;
+<a href=#1252 id=1252 data-nosnippet>1252</a>///     fn deref(&amp;self) -&gt; &amp;T {
+<a href=#1253 id=1253 data-nosnippet>1253</a>///         &amp;self.0
+<a href=#1254 id=1254 data-nosnippet>1254</a>///     }
+<a href=#1255 id=1255 data-nosnippet>1255</a>/// }
+<a href=#1256 id=1256 data-nosnippet>1256</a>///
+<a href=#1257 id=1257 data-nosnippet>1257</a>/// trait MyTrait {}
+<a href=#1258 id=1258 data-nosnippet>1258</a>///
+<a href=#1259 id=1259 data-nosnippet>1259</a>/// impl MyTrait for i32 {}
+<a href=#1260 id=1260 data-nosnippet>1260</a>///
+<a href=#1261 id=1261 data-nosnippet>1261</a>/// fn main() {
+<a href=#1262 id=1262 data-nosnippet>1262</a>///     let ptr: MySmartPointer&lt;i32&gt; = MySmartPointer(Box::new(4));
+<a href=#1263 id=1263 data-nosnippet>1263</a>///
+<a href=#1264 id=1264 data-nosnippet>1264</a>///     // This coercion would be an error without the derive.
+<a href=#1265 id=1265 data-nosnippet>1265</a>///     let ptr: MySmartPointer&lt;dyn MyTrait&gt; = ptr;
+<a href=#1266 id=1266 data-nosnippet>1266</a>/// }
+<a href=#1267 id=1267 data-nosnippet>1267</a>/// ```
+<a href=#1268 id=1268 data-nosnippet>1268</a>/// Without the `#[derive(CoercePointee)]` macro, this example would fail with the following error:
+<a href=#1269 id=1269 data-nosnippet>1269</a>/// ```text
+<a href=#1270 id=1270 data-nosnippet>1270</a>/// error[E0308]: mismatched types
+<a href=#1271 id=1271 data-nosnippet>1271</a>///   --&gt; src/main.rs:11:44
+<a href=#1272 id=1272 data-nosnippet>1272</a>///    |
+<a href=#1273 id=1273 data-nosnippet>1273</a>/// 11 |     let ptr: MySmartPointer&lt;dyn MyTrait&gt; = ptr;
+<a href=#1274 id=1274 data-nosnippet>1274</a>///    |              ---------------------------   ^^^ expected `MySmartPointer&lt;dyn MyTrait&gt;`, found `MySmartPointer&lt;i32&gt;`
+<a href=#1275 id=1275 data-nosnippet>1275</a>///    |              |
+<a href=#1276 id=1276 data-nosnippet>1276</a>///    |              expected due to this
+<a href=#1277 id=1277 data-nosnippet>1277</a>///    |
+<a href=#1278 id=1278 data-nosnippet>1278</a>///    = note: expected struct `MySmartPointer&lt;dyn MyTrait&gt;`
+<a href=#1279 id=1279 data-nosnippet>1279</a>///               found struct `MySmartPointer&lt;i32&gt;`
+<a href=#1280 id=1280 data-nosnippet>1280</a>///    = help: `i32` implements `MyTrait` so you could box the found value and coerce it to the trait object `Box&lt;dyn MyTrait&gt;`, you will have to change the expected type as well
+<a href=#1281 id=1281 data-nosnippet>1281</a>/// ```
+<a href=#1282 id=1282 data-nosnippet>1282</a>///
+<a href=#1283 id=1283 data-nosnippet>1283</a>/// ## Dyn compatibility
+<a href=#1284 id=1284 data-nosnippet>1284</a>///
+<a href=#1285 id=1285 data-nosnippet>1285</a>/// This macro allows you to dispatch on the user-defined pointer type. That is, traits using the
+<a href=#1286 id=1286 data-nosnippet>1286</a>/// type as a receiver are dyn-compatible. For example, this compiles:
+<a href=#1287 id=1287 data-nosnippet>1287</a>///
+<a href=#1288 id=1288 data-nosnippet>1288</a>/// ```
+<a href=#1289 id=1289 data-nosnippet>1289</a>/// #![feature(arbitrary_self_types, derive_coerce_pointee)]
+<a href=#1290 id=1290 data-nosnippet>1290</a>/// use std::marker::CoercePointee;
+<a href=#1291 id=1291 data-nosnippet>1291</a>/// use std::ops::Deref;
+<a href=#1292 id=1292 data-nosnippet>1292</a>///
+<a href=#1293 id=1293 data-nosnippet>1293</a>/// #[derive(CoercePointee)]
+<a href=#1294 id=1294 data-nosnippet>1294</a>/// #[repr(transparent)]
+<a href=#1295 id=1295 data-nosnippet>1295</a>/// struct MySmartPointer&lt;T: ?Sized&gt;(Box&lt;T&gt;);
+<a href=#1296 id=1296 data-nosnippet>1296</a>///
+<a href=#1297 id=1297 data-nosnippet>1297</a>/// impl&lt;T: ?Sized&gt; Deref for MySmartPointer&lt;T&gt; {
+<a href=#1298 id=1298 data-nosnippet>1298</a>///     type Target = T;
+<a href=#1299 id=1299 data-nosnippet>1299</a>///     fn deref(&amp;self) -&gt; &amp;T {
+<a href=#1300 id=1300 data-nosnippet>1300</a>///         &amp;self.0
+<a href=#1301 id=1301 data-nosnippet>1301</a>///     }
+<a href=#1302 id=1302 data-nosnippet>1302</a>/// }
+<a href=#1303 id=1303 data-nosnippet>1303</a>///
+<a href=#1304 id=1304 data-nosnippet>1304</a>/// // You can always define this trait. (as long as you have #![feature(arbitrary_self_types)])
+<a href=#1305 id=1305 data-nosnippet>1305</a>/// trait MyTrait {
+<a href=#1306 id=1306 data-nosnippet>1306</a>///     fn func(self: MySmartPointer&lt;Self&gt;);
+<a href=#1307 id=1307 data-nosnippet>1307</a>/// }
+<a href=#1308 id=1308 data-nosnippet>1308</a>///
+<a href=#1309 id=1309 data-nosnippet>1309</a>/// // But using `dyn MyTrait` requires #[derive(CoercePointee)].
+<a href=#1310 id=1310 data-nosnippet>1310</a>/// fn call_func(value: MySmartPointer&lt;dyn MyTrait&gt;) {
+<a href=#1311 id=1311 data-nosnippet>1311</a>///     value.func();
+<a href=#1312 id=1312 data-nosnippet>1312</a>/// }
+<a href=#1313 id=1313 data-nosnippet>1313</a>/// ```
+<a href=#1314 id=1314 data-nosnippet>1314</a>/// If you remove the `#[derive(CoercePointee)]` annotation from the struct, then the above example
+<a href=#1315 id=1315 data-nosnippet>1315</a>/// will fail with this error message:
+<a href=#1316 id=1316 data-nosnippet>1316</a>/// ```text
+<a href=#1317 id=1317 data-nosnippet>1317</a>/// error[E0038]: the trait `MyTrait` is not dyn compatible
+<a href=#1318 id=1318 data-nosnippet>1318</a>///   --&gt; src/lib.rs:21:36
+<a href=#1319 id=1319 data-nosnippet>1319</a>///    |
+<a href=#1320 id=1320 data-nosnippet>1320</a>/// 17 |     fn func(self: MySmartPointer&lt;Self&gt;);
+<a href=#1321 id=1321 data-nosnippet>1321</a>///    |                   -------------------- help: consider changing method `func`'s `self` parameter to be `&amp;self`: `&amp;Self`
+<a href=#1322 id=1322 data-nosnippet>1322</a>/// ...
+<a href=#1323 id=1323 data-nosnippet>1323</a>/// 21 | fn call_func(value: MySmartPointer&lt;dyn MyTrait&gt;) {
+<a href=#1324 id=1324 data-nosnippet>1324</a>///    |                                    ^^^^^^^^^^^ `MyTrait` is not dyn compatible
+<a href=#1325 id=1325 data-nosnippet>1325</a>///    |
+<a href=#1326 id=1326 data-nosnippet>1326</a>/// note: for a trait to be dyn compatible it needs to allow building a vtable
+<a href=#1327 id=1327 data-nosnippet>1327</a>///       for more information, visit &lt;https://doc.rust-lang.org/reference/items/traits.html#object-safety&gt;
+<a href=#1328 id=1328 data-nosnippet>1328</a>///   --&gt; src/lib.rs:17:19
+<a href=#1329 id=1329 data-nosnippet>1329</a>///    |
+<a href=#1330 id=1330 data-nosnippet>1330</a>/// 16 | trait MyTrait {
+<a href=#1331 id=1331 data-nosnippet>1331</a>///    |       ------- this trait is not dyn compatible...
+<a href=#1332 id=1332 data-nosnippet>1332</a>/// 17 |     fn func(self: MySmartPointer&lt;Self&gt;);
+<a href=#1333 id=1333 data-nosnippet>1333</a>///    |                   ^^^^^^^^^^^^^^^^^^^^ ...because method `func`'s `self` parameter cannot be dispatched on
+<a href=#1334 id=1334 data-nosnippet>1334</a>/// ```
+<a href=#1335 id=1335 data-nosnippet>1335</a>///
+<a href=#1336 id=1336 data-nosnippet>1336</a>/// # Requirements for using the macro
+<a href=#1337 id=1337 data-nosnippet>1337</a>///
+<a href=#1338 id=1338 data-nosnippet>1338</a>/// This macro can only be used if:
+<a href=#1339 id=1339 data-nosnippet>1339</a>/// * The type is a `#[repr(transparent)]` struct.
+<a href=#1340 id=1340 data-nosnippet>1340</a>/// * The type of its non-zero-sized field must either be a standard library pointer type
+<a href=#1341 id=1341 data-nosnippet>1341</a>///   (reference, raw pointer, `NonNull`, `Box`, `Rc`, `Arc`, etc.) or another user-defined type
+<a href=#1342 id=1342 data-nosnippet>1342</a>///   also using the `#[derive(CoercePointee)]` macro.
+<a href=#1343 id=1343 data-nosnippet>1343</a>/// * Zero-sized fields must not mention any generic parameters unless the zero-sized field has
+<a href=#1344 id=1344 data-nosnippet>1344</a>///   type [`PhantomData`].
+<a href=#1345 id=1345 data-nosnippet>1345</a>///
+<a href=#1346 id=1346 data-nosnippet>1346</a>/// ## Multiple type parameters
+<a href=#1347 id=1347 data-nosnippet>1347</a>///
+<a href=#1348 id=1348 data-nosnippet>1348</a>/// If the type has multiple type parameters, then you must explicitly specify which one should be
+<a href=#1349 id=1349 data-nosnippet>1349</a>/// used for dynamic dispatch. For example:
+<a href=#1350 id=1350 data-nosnippet>1350</a>/// ```
+<a href=#1351 id=1351 data-nosnippet>1351</a>/// # #![feature(derive_coerce_pointee)]
+<a href=#1352 id=1352 data-nosnippet>1352</a>/// # use std::marker::{CoercePointee, PhantomData};
+<a href=#1353 id=1353 data-nosnippet>1353</a>/// #[derive(CoercePointee)]
+<a href=#1354 id=1354 data-nosnippet>1354</a>/// #[repr(transparent)]
+<a href=#1355 id=1355 data-nosnippet>1355</a>/// struct MySmartPointer&lt;#[pointee] T: ?Sized, U&gt; {
+<a href=#1356 id=1356 data-nosnippet>1356</a>///     ptr: Box&lt;T&gt;,
+<a href=#1357 id=1357 data-nosnippet>1357</a>///     _phantom: PhantomData&lt;U&gt;,
+<a href=#1358 id=1358 data-nosnippet>1358</a>/// }
+<a href=#1359 id=1359 data-nosnippet>1359</a>/// ```
+<a href=#1360 id=1360 data-nosnippet>1360</a>/// Specifying `#[pointee]` when the struct has only one type parameter is allowed, but not required.
+<a href=#1361 id=1361 data-nosnippet>1361</a>///
+<a href=#1362 id=1362 data-nosnippet>1362</a>/// # Examples
+<a href=#1363 id=1363 data-nosnippet>1363</a>///
+<a href=#1364 id=1364 data-nosnippet>1364</a>/// A custom implementation of the `Rc` type:
+<a href=#1365 id=1365 data-nosnippet>1365</a>/// ```
+<a href=#1366 id=1366 data-nosnippet>1366</a>/// #![feature(derive_coerce_pointee)]
+<a href=#1367 id=1367 data-nosnippet>1367</a>/// use std::marker::CoercePointee;
+<a href=#1368 id=1368 data-nosnippet>1368</a>/// use std::ops::Deref;
+<a href=#1369 id=1369 data-nosnippet>1369</a>/// use std::ptr::NonNull;
+<a href=#1370 id=1370 data-nosnippet>1370</a>///
+<a href=#1371 id=1371 data-nosnippet>1371</a>/// #[derive(CoercePointee)]
+<a href=#1372 id=1372 data-nosnippet>1372</a>/// #[repr(transparent)]
+<a href=#1373 id=1373 data-nosnippet>1373</a>/// pub struct Rc&lt;T: ?Sized&gt; {
+<a href=#1374 id=1374 data-nosnippet>1374</a>///     inner: NonNull&lt;RcInner&lt;T&gt;&gt;,
+<a href=#1375 id=1375 data-nosnippet>1375</a>/// }
+<a href=#1376 id=1376 data-nosnippet>1376</a>///
+<a href=#1377 id=1377 data-nosnippet>1377</a>/// struct RcInner&lt;T: ?Sized&gt; {
+<a href=#1378 id=1378 data-nosnippet>1378</a>///     refcount: usize,
+<a href=#1379 id=1379 data-nosnippet>1379</a>///     value: T,
+<a href=#1380 id=1380 data-nosnippet>1380</a>/// }
+<a href=#1381 id=1381 data-nosnippet>1381</a>///
+<a href=#1382 id=1382 data-nosnippet>1382</a>/// impl&lt;T: ?Sized&gt; Deref for Rc&lt;T&gt; {
+<a href=#1383 id=1383 data-nosnippet>1383</a>///     type Target = T;
+<a href=#1384 id=1384 data-nosnippet>1384</a>///     fn deref(&amp;self) -&gt; &amp;T {
+<a href=#1385 id=1385 data-nosnippet>1385</a>///         let ptr = self.inner.as_ptr();
+<a href=#1386 id=1386 data-nosnippet>1386</a>///         unsafe { &amp;(*ptr).value }
+<a href=#1387 id=1387 data-nosnippet>1387</a>///     }
+<a href=#1388 id=1388 data-nosnippet>1388</a>/// }
+<a href=#1389 id=1389 data-nosnippet>1389</a>///
+<a href=#1390 id=1390 data-nosnippet>1390</a>/// impl&lt;T&gt; Rc&lt;T&gt; {
+<a href=#1391 id=1391 data-nosnippet>1391</a>///     pub fn new(value: T) -&gt; Self {
+<a href=#1392 id=1392 data-nosnippet>1392</a>///         let inner = Box::new(RcInner {
+<a href=#1393 id=1393 data-nosnippet>1393</a>///             refcount: 1,
+<a href=#1394 id=1394 data-nosnippet>1394</a>///             value,
+<a href=#1395 id=1395 data-nosnippet>1395</a>///         });
+<a href=#1396 id=1396 data-nosnippet>1396</a>///         Self {
+<a href=#1397 id=1397 data-nosnippet>1397</a>///             inner: NonNull::from(Box::leak(inner)),
+<a href=#1398 id=1398 data-nosnippet>1398</a>///         }
+<a href=#1399 id=1399 data-nosnippet>1399</a>///     }
+<a href=#1400 id=1400 data-nosnippet>1400</a>/// }
+<a href=#1401 id=1401 data-nosnippet>1401</a>///
+<a href=#1402 id=1402 data-nosnippet>1402</a>/// impl&lt;T: ?Sized&gt; Clone for Rc&lt;T&gt; {
+<a href=#1403 id=1403 data-nosnippet>1403</a>///     fn clone(&amp;self) -&gt; Self {
+<a href=#1404 id=1404 data-nosnippet>1404</a>///         // A real implementation would handle overflow here.
+<a href=#1405 id=1405 data-nosnippet>1405</a>///         unsafe { (*self.inner.as_ptr()).refcount += 1 };
+<a href=#1406 id=1406 data-nosnippet>1406</a>///         Self { inner: self.inner }
+<a href=#1407 id=1407 data-nosnippet>1407</a>///     }
+<a href=#1408 id=1408 data-nosnippet>1408</a>/// }
+<a href=#1409 id=1409 data-nosnippet>1409</a>///
+<a href=#1410 id=1410 data-nosnippet>1410</a>/// impl&lt;T: ?Sized&gt; Drop for Rc&lt;T&gt; {
+<a href=#1411 id=1411 data-nosnippet>1411</a>///     fn drop(&amp;mut self) {
+<a href=#1412 id=1412 data-nosnippet>1412</a>///         let ptr = self.inner.as_ptr();
+<a href=#1413 id=1413 data-nosnippet>1413</a>///         unsafe { (*ptr).refcount -= 1 };
+<a href=#1414 id=1414 data-nosnippet>1414</a>///         if unsafe { (*ptr).refcount } == 0 {
+<a href=#1415 id=1415 data-nosnippet>1415</a>///             drop(unsafe { Box::from_raw(ptr) });
+<a href=#1416 id=1416 data-nosnippet>1416</a>///         }
+<a href=#1417 id=1417 data-nosnippet>1417</a>///     }
+<a href=#1418 id=1418 data-nosnippet>1418</a>/// }
+<a href=#1419 id=1419 data-nosnippet>1419</a>/// ```
+<a href=#1420 id=1420 data-nosnippet>1420</a></span><span class="attr">#[rustc_builtin_macro(CoercePointee, attributes(pointee))]
+<a href=#1421 id=1421 data-nosnippet>1421</a>#[allow_internal_unstable(dispatch_from_dyn, coerce_unsized, unsize, coerce_pointee_validated)]
+<a href=#1422 id=1422 data-nosnippet>1422</a>#[rustc_diagnostic_item = <span class="string">"CoercePointee"</span>]
+<a href=#1423 id=1423 data-nosnippet>1423</a>#[unstable(feature = <span class="string">"derive_coerce_pointee"</span>, issue = <span class="string">"123430"</span>)]
+<a href=#1424 id=1424 data-nosnippet>1424</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#1425 id=1425 data-nosnippet>1425</a></span><span class="kw">pub macro </span>CoercePointee(<span class="macro-nonterminal">$item</span>:item) {
+<a href=#1426 id=1426 data-nosnippet>1426</a>    <span class="comment">/* compiler built-in */
+<a href=#1427 id=1427 data-nosnippet>1427</a></span>}
+<a href=#1428 id=1428 data-nosnippet>1428</a>
+<a href=#1429 id=1429 data-nosnippet>1429</a><span class="doccomment">/// A trait that is implemented for ADTs with `derive(CoercePointee)` so that
+<a href=#1430 id=1430 data-nosnippet>1430</a>/// the compiler can enforce the derive impls are valid post-expansion, since
+<a href=#1431 id=1431 data-nosnippet>1431</a>/// the derive has stricter requirements than if the impls were written by hand.
+<a href=#1432 id=1432 data-nosnippet>1432</a>///
+<a href=#1433 id=1433 data-nosnippet>1433</a>/// This trait is not intended to be implemented by users or used other than
+<a href=#1434 id=1434 data-nosnippet>1434</a>/// validation, so it should never be stabilized.
+<a href=#1435 id=1435 data-nosnippet>1435</a></span><span class="attr">#[lang = <span class="string">"coerce_pointee_validated"</span>]
+<a href=#1436 id=1436 data-nosnippet>1436</a>#[unstable(feature = <span class="string">"coerce_pointee_validated"</span>, issue = <span class="string">"none"</span>)]
+<a href=#1437 id=1437 data-nosnippet>1437</a>#[doc(hidden)]
+<a href=#1438 id=1438 data-nosnippet>1438</a>#[cfg(not(feature = <span class="string">"ferrocene_certified"</span>))]
+<a href=#1439 id=1439 data-nosnippet>1439</a></span><span class="kw">pub trait </span>CoercePointeeValidated {
+<a href=#1440 id=1440 data-nosnippet>1440</a>    <span class="comment">/* compiler built-in */
+<a href=#1441 id=1441 data-nosnippet>1441</a></span>}</code></pre></div></section></main></body></html>

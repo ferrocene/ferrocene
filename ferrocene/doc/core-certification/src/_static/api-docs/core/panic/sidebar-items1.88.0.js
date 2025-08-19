@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"macro":["panic_2021"],"mod":["location"]};

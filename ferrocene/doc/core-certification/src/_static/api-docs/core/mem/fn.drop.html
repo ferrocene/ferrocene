@@ -1,0 +1,42 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Disposes of a value."><title>drop in core::mem - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.88.0" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../../static.files/storage-82c7156e.js"></script><script defer src="sidebar-items1.88.0.js"></script><script defer src="../../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc fn"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt="logo"></a><h2><a href="../../core/index.html">core</a><span class="version">1.88.0</span></h2></div><div class="version">(e925a16bd	2025-08-18)</div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">drop</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#examples" title="Examples">Examples</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="index.html">In core::<wbr>mem</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">core</a>::<wbr><a href="index.html">mem</a></div><h1>Function <span class="fn">drop</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><span class="since" title="Stable since Rust version 1.6.0">1.6.0</span> · <a class="src" href="../../src/core/mem/mod.rs.html#959">Source</a> </span></div><pre class="rust item-decl"><code>pub fn drop&lt;T&gt;(_x: T)</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Disposes of a value.</p>
+<p>This does so by calling the argument’s implementation of <a href="../ops/drop/trait.Drop.html" title="trait core::ops::drop::Drop"><code>Drop</code></a>.</p>
+<p>This effectively does nothing for types which implement <code>Copy</code>, e.g.
+integers. Such values are copied and <em>then</em> moved into the function, so the
+value persists after this function call.</p>
+<p>This function is not magic; it is literally defined as</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">pub fn </span>drop&lt;T&gt;(_x: T) {}</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++pub+fn+drop%3CT%3E(_x:+T)+%7B%7D%0A%7D&amp;edition=2024"></a></div>
+<p>Because <code>_x</code> is moved into the function, it is automatically dropped before
+the function returns.</p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>Basic usage:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+
+drop(v); <span class="comment">// explicitly drop the vector</span></code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++let+v+=+vec!%5B1,+2,+3%5D;%0A++++%0A++++drop(v);%0A%7D&amp;edition=2024"></a></div>
+<p>Since <a href="crate::cell::RefCell"><code>RefCell</code></a> enforces the borrow rules at runtime, <code>drop</code> can
+release a <a href="crate::cell::RefCell"><code>RefCell</code></a> borrow:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::cell::RefCell;
+
+<span class="kw">let </span>x = RefCell::new(<span class="number">1</span>);
+
+<span class="kw">let </span><span class="kw-2">mut </span>mutable_borrow = x.borrow_mut();
+<span class="kw-2">*</span>mutable_borrow = <span class="number">1</span>;
+
+drop(mutable_borrow); <span class="comment">// relinquish the mutable borrow on this slot
+
+</span><span class="kw">let </span>borrow = x.borrow();
+<span class="macro">println!</span>(<span class="string">"{}"</span>, <span class="kw-2">*</span>borrow);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0Afn+main()+%7B%0A++++use+std::cell::RefCell;%0A++++%0A++++let+x+=+RefCell::new(1);%0A++++%0A++++let+mut+mutable_borrow+=+x.borrow_mut();%0A++++*mutable_borrow+=+1;%0A++++%0A++++drop(mutable_borrow);+//+relinquish+the+mutable+borrow+on+this+slot%0A++++%0A++++let+borrow+=+x.borrow();%0A++++println!(%22%7B%7D%22,+*borrow);%0A%7D&amp;edition=2024"></a></div>
+<p>Integers and other types implementing <a href="../marker/trait.Copy.html" title="trait core::marker::Copy"><code>Copy</code></a> are unaffected by <code>drop</code>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attr">#[derive(Copy, Clone)]
+</span><span class="kw">struct </span>Foo(u8);
+
+<span class="kw">let </span>x = <span class="number">1</span>;
+<span class="kw">let </span>y = Foo(<span class="number">2</span>);
+drop(x); <span class="comment">// a copy of `x` is moved and dropped
+</span>drop(y); <span class="comment">// a copy of `y` is moved and dropped
+
+</span><span class="macro">println!</span>(<span class="string">"x: {}, y: {}"</span>, x, y.<span class="number">0</span>); <span class="comment">// still available</span></code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0A%23!%5Ballow(dropping_copy_types)%5D%0A%0Afn+main()+%7B%0A++++%23%5Bderive(Copy,+Clone)%5D%0A++++struct+Foo(u8);%0A++++%0A++++let+x+=+1;%0A++++let+y+=+Foo(2);%0A++++drop(x);+//+a+copy+of+%60x%60+is+moved+and+dropped%0A++++drop(y);+//+a+copy+of+%60y%60+is+moved+and+dropped%0A++++%0A++++println!(%22x:+%7B%7D,+y:+%7B%7D%22,+x,+y.0);%0A%7D&amp;edition=2024"></a></div>
+</div></details></section></div></main></body></html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A 32-bit floating-point type (specifically, the “binary32” type defined in IEEE 754-2008)."><title>core::prim_f32 - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="core" data-themes="" data-resource-suffix="1.88.0" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../../static.files/storage-82c7156e.js"></script><script defer src="../sidebar-items1.88.0.js"></script><script defer src="../../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-9a9549ea.svg" alt="logo"></a><h2><a href="../../core/index.html">core</a><span class="version">1.88.0</span></h2></div><div class="version">(e925a16bd	2025-08-18)</div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module prim_<wbr>f32</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#nan-bit-patterns" title="NaN bit patterns">NaN bit patterns</a><ul><li><a href="#target-specific-extra-nan-values" title="Target-specific “extra” NaN values">Target-specific “extra” NaN values</a></li></ul></li><li><a href="#algebraic-operators" title="Algebraic operators">Algebraic operators</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="../index.html">In crate core</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">core</a></div><h1>Module <span>prim_f32</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><span class="since" title="Stable since Rust version 1.6.0">1.6.0</span> · <a class="src" href="../../src/core/primitive_docs.rs.html#1374">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A 32-bit floating-point type (specifically, the “binary32” type defined in IEEE 754-2008).</p>
+<p>This type can represent a wide range of decimal numbers, like <code>3.5</code>, <code>27</code>,
+<code>-113.75</code>, <code>0.0078125</code>, <code>34359738368</code>, <code>0</code>, <code>-1</code>. So unlike integer types
+(such as <code>i32</code>), floating-point types can represent non-integer numbers,
+too.</p>
+<p>However, being able to represent this wide range of numbers comes at the
+cost of precision: floats can only represent some of the real numbers and
+calculation with floats round to a nearby representable number. For example,
+<code>5.0</code> and <code>1.0</code> can be exactly represented as <code>f32</code>, but <code>1.0 / 5.0</code> results
+in <code>0.20000000298023223876953125</code> since <code>0.2</code> cannot be exactly represented
+as <code>f32</code>. Note, however, that printing floats with <code>println</code> and friends will
+often discard insignificant digits: <code>println!("{}", 1.0f32 / 5.0f32)</code> will
+print <code>0.2</code>.</p>
+<p>Additionally, <code>f32</code> can represent some special values:</p>
+<ul>
+<li>−0.0: IEEE 754 floating-point numbers have a bit that indicates their sign, so −0.0 is a
+possible value. For comparison −0.0 = +0.0, but floating-point operations can carry
+the sign bit through arithmetic operations. This means −0.0 × +0.0 produces −0.0 and
+a negative number rounded to a value smaller than a float can represent also produces −0.0.</li>
+<li><a href="#associatedconstant.INFINITY">∞</a> and
+<a href="#associatedconstant.NEG_INFINITY">−∞</a>: these result from calculations
+like <code>1.0 / 0.0</code>.</li>
+<li><a href="#associatedconstant.NAN">NaN (not a number)</a>: this value results from
+calculations like <code>(-1.0).sqrt()</code>. NaN has some potentially unexpected
+behavior:
+<ul>
+<li>It is not equal to any float, including itself! This is the reason <code>f32</code>
+doesn’t implement the <code>Eq</code> trait.</li>
+<li>It is also neither smaller nor greater than any float, making it
+impossible to sort by the default comparison operation, which is the
+reason <code>f32</code> doesn’t implement the <code>Ord</code> trait.</li>
+<li>It is also considered <em>infectious</em> as almost all calculations where one
+of the operands is NaN will also result in NaN. The explanations on this
+page only explicitly document behavior on NaN operands if this default
+is deviated from.</li>
+<li>Lastly, there are multiple bit patterns that are considered NaN.
+Rust does not currently guarantee that the bit patterns of NaN are
+preserved over arithmetic operations, and they are not guaranteed to be
+portable or even fully deterministic! This means that there may be some
+surprising results upon inspecting the bit patterns,
+as the same calculations might produce NaNs with different bit patterns.
+This also affects the sign of the NaN: checking <code>is_sign_positive</code> or <code>is_sign_negative</code> on
+a NaN is the most common way to run into these surprising results.
+(Checking <code>x &gt;= 0.0</code> or <code>x &lt;= 0.0</code> avoids those surprises, but also how negative/positive
+zero are treated.)
+See the section below for what exactly is guaranteed about the bit pattern of a NaN.</li>
+</ul>
+</li>
+</ul>
+<p>When a primitive operation (addition, subtraction, multiplication, or
+division) is performed on this type, the result is rounded according to the
+roundTiesToEven direction defined in IEEE 754-2008. That means:</p>
+<ul>
+<li>The result is the representable value closest to the true value, if there
+is a unique closest representable value.</li>
+<li>If the true value is exactly half-way between two representable values,
+the result is the one with an even least-significant binary digit.</li>
+<li>If the true value’s magnitude is ≥ <code>f32::MAX</code> + 2<sup>(<code>f32::MAX_EXP</code> −
+<code>f32::MANTISSA_DIGITS</code> − 1)</sup>, the result is ∞ or −∞ (preserving the
+true value’s sign).</li>
+<li>If the result of a sum exactly equals zero, the outcome is +0.0 unless
+both arguments were negative, then it is -0.0. Subtraction <code>a - b</code> is
+regarded as a sum <code>a + (-b)</code>.</li>
+</ul>
+<p>For more information on floating-point numbers, see <a href="https://en.wikipedia.org/wiki/Single-precision_floating-point_format">Wikipedia</a>.</p>
+<p><em><a href="crate::f32::consts">See also the <code>std::f32::consts</code> module</a>.</em></p>
+<h2 id="nan-bit-patterns"><a class="doc-anchor" href="#nan-bit-patterns">§</a>NaN bit patterns</h2>
+<p>This section defines the possible NaN bit patterns returned by floating-point operations.</p>
+<p>The bit pattern of a floating-point NaN value is defined by:</p>
+<ul>
+<li>a sign bit.</li>
+<li>a quiet/signaling bit. Rust assumes that the quiet/signaling bit being set to <code>1</code> indicates a
+quiet NaN (QNaN), and a value of <code>0</code> indicates a signaling NaN (SNaN). In the following we
+will hence just call it the “quiet bit”.</li>
+<li>a payload, which makes up the rest of the significand (i.e., the mantissa) except for the
+quiet bit.</li>
+</ul>
+<p>The rules for NaN values differ between <em>arithmetic</em> and <em>non-arithmetic</em> (or “bitwise”)
+operations. The non-arithmetic operations are unary <code>-</code>, <code>abs</code>, <code>copysign</code>, <code>signum</code>,
+<code>{to,from}_bits</code>, <code>{to,from}_{be,le,ne}_bytes</code> and <code>is_sign_{positive,negative}</code>. These
+operations are guaranteed to exactly preserve the bit pattern of their input except for possibly
+changing the sign bit.</p>
+<p>The following rules apply when a NaN value is returned from an arithmetic operation:</p>
+<ul>
+<li>
+<p>The result has a non-deterministic sign.</p>
+</li>
+<li>
+<p>The quiet bit and payload are non-deterministically chosen from
+the following set of options:</p>
+<ul>
+<li><strong>Preferred NaN</strong>: The quiet bit is set and the payload is all-zero.</li>
+<li><strong>Quieting NaN propagation</strong>: The quiet bit is set and the payload is copied from any input
+operand that is a NaN. If the inputs and outputs do not have the same payload size (i.e., for
+<code>as</code> casts), then
+<ul>
+<li>If the output is smaller than the input, low-order bits of the payload get dropped.</li>
+<li>If the output is larger than the input, the payload gets filled up with 0s in the low-order
+bits.</li>
+</ul>
+</li>
+<li><strong>Unchanged NaN propagation</strong>: The quiet bit and payload are copied from any input operand
+that is a NaN. If the inputs and outputs do not have the same size (i.e., for <code>as</code> casts), the
+same rules as for “quieting NaN propagation” apply, with one caveat: if the output is smaller
+than the input, dropping the low-order bits may result in a payload of 0; a payload of 0 is not
+possible with a signaling NaN (the all-0 significand encodes an infinity) so unchanged NaN
+propagation cannot occur with some inputs.</li>
+<li><strong>Target-specific NaN</strong>: The quiet bit is set and the payload is picked from a target-specific
+set of “extra” possible NaN payloads. The set can depend on the input operand values.
+See the table below for the concrete NaNs this set contains on various targets.</li>
+</ul>
+</li>
+</ul>
+<p>In particular, if all input NaNs are quiet (or if there are no input NaNs), then the output NaN
+is definitely quiet. Signaling NaN outputs can only occur if they are provided as an input
+value. Similarly, if all input NaNs are preferred (or if there are no input NaNs) and the target
+does not have any “extra” NaN payloads, then the output NaN is guaranteed to be preferred.</p>
+<p>The non-deterministic choice happens when the operation is executed; i.e., the result of a
+NaN-producing floating-point operation is a stable bit pattern (looking at these bits multiple
+times will yield consistent results), but running the same operation twice with the same inputs
+can produce different results.</p>
+<p>These guarantees are neither stronger nor weaker than those of IEEE 754: IEEE 754 guarantees
+that an operation never returns a signaling NaN, whereas it is possible for operations like
+<code>SNAN * 1.0</code> to return a signaling NaN in Rust. Conversely, IEEE 754 makes no statement at all
+about which quiet NaN is returned, whereas Rust restricts the set of possible results to the
+ones listed above.</p>
+<p>Unless noted otherwise, the same rules also apply to NaNs returned by other library functions
+(e.g. <code>min</code>, <code>minimum</code>, <code>max</code>, <code>maximum</code>); other aspects of their semantics and which IEEE 754
+operation they correspond to are documented with the respective functions.</p>
+<p>When an arithmetic floating-point operation is executed in <code>const</code> context, the same rules
+apply: no guarantee is made about which of the NaN bit patterns described above will be
+returned. The result does not have to match what happens when executing the same code at
+runtime, and the result can vary depending on factors such as compiler version and flags.</p>
+<h4 id="target-specific-extra-nan-values"><a class="doc-anchor" href="#target-specific-extra-nan-values">§</a>Target-specific “extra” NaN values</h4><div><table><thead><tr><th><code>target_arch</code></th><th>Extra payloads possible on this platform</th></tr></thead><tbody>
+<tr><td><code>aarch64</code>, <code>arm</code>, <code>arm64ec</code>, <code>loongarch64</code>, <code>powerpc</code> (except when <code>target_abi = "spe"</code>), <code>powerpc64</code>, <code>riscv32</code>, <code>riscv64</code>, <code>s390x</code>, <code>x86</code>, <code>x86_64</code></td><td>None</td></tr>
+<tr><td><code>nvptx64</code></td><td>All payloads</td></tr>
+<tr><td><code>sparc</code>, <code>sparc64</code></td><td>The all-one payload</td></tr>
+<tr><td><code>wasm32</code>, <code>wasm64</code></td><td>If all input NaNs are quiet with all-zero payload: None.<br> Otherwise: all payloads.</td></tr>
+</tbody></table>
+</div>
+<p>For targets not in this table, all payloads are possible.</p>
+<h2 id="algebraic-operators"><a class="doc-anchor" href="#algebraic-operators">§</a>Algebraic operators</h2>
+<p>Algebraic operators of the form <code>a.algebraic_*(b)</code> allow the compiler to optimize
+floating point operations using all the usual algebraic properties of real numbers –
+despite the fact that those properties do <em>not</em> hold on floating point numbers.
+This can give a great performance boost since it may unlock vectorization.</p>
+<p>The exact set of optimizations is unspecified but typically allows combining operations,
+rearranging series of operations based on mathematical properties, converting between division
+and reciprocal multiplication, and disregarding the sign of zero. This means that the results of
+elementary operations may have undefined precision, and “non-mathematical” values
+such as NaN, +/-Inf, or -0.0 may behave in unexpected ways, but these operations
+will never cause undefined behavior.</p>
+<p>Because of the unpredictable nature of compiler optimizations, the same inputs may produce
+different results even within a single program run. <strong>Unsafe code must not rely on any property
+of the return value for soundness.</strong> However, implementations will generally do their best to
+pick a reasonable tradeoff between performance and accuracy of the result.</p>
+<p>For example:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>x = a.algebraic_add(b).algebraic_add(c).algebraic_add(d);</code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0A%23!%5Bfeature(float_algebraic)%5D%0A%0A%23!%5Ballow(unused_assignments)%5D%0A%0Afn+main()+%7B%0A++++let+mut+x:+f32+=+0.0;%0A++++let+a:+f32+=+1.0;%0A++++let+b:+f32+=+2.0;%0A++++let+c:+f32+=+3.0;%0A++++let+d:+f32+=+4.0;%0A++++x+=+a.algebraic_add(b).algebraic_add(c).algebraic_add(d);%0A%7D&amp;version=nightly&amp;edition=2024"></a></div>
+<p>May be rewritten as:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>x = a + b + c + d; <span class="comment">// As written
+</span>x = (a + c) + (b + d); <span class="comment">// Reordered to shorten critical path and enable vectorization</span></code></pre><a class="test-arrow" target="_blank" title="Run code" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0A%23!%5Ballow(unused_assignments)%5D%0A%0Afn+main()+%7B%0A++++let+mut+x:+f32+=+0.0;%0A++++let+a:+f32+=+1.0;%0A++++let+b:+f32+=+2.0;%0A++++let+c:+f32+=+3.0;%0A++++let+d:+f32+=+4.0;%0A++++x+=+a+%2B+b+%2B+c+%2B+d;+//+As+written%0A++++x+=+(a+%2B+c)+%2B+(b+%2B+d);%0A%7D&amp;edition=2024"></a></div>
+</div></details></section></div></main></body></html>

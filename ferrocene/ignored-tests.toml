@@ -4,6 +4,7 @@
 [["tests/codegen-llvm"]]
 tests = [
     "tests/codegen-llvm/enum/enum-match.rs",
+    "tests/codegen-llvm/enum/enum-transparent-extract.rs",
 ]
 targets = ["aarch64-unknown-ferrocene.facade"]
 reason = "TODO: to be investigated"

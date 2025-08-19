@@ -29,7 +29,6 @@ import argparse
 import itertools
 import os
 import subprocess
-import sys
 import yaml
 
 

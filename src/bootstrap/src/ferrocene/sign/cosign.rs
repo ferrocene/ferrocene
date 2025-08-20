@@ -79,7 +79,9 @@ impl Step for CosignBinary {
         if !dest.exists() {
             builder.config.download_file(&url, &dest, "test");
         }
-        if !builder.config.verify(&dest, artifact.sha256) && !builder.config.dry_run() {
+        if !crate::core::download::verify(&builder.config.exec_ctx, &dest, artifact.sha256)
+            && !builder.config.dry_run()
+        {
             panic!("invalid cosign downloaded");
         }
 

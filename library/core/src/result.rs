@@ -535,11 +535,8 @@
 
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::iter::{self, FusedIterator, TrustedLen};
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 use crate::marker::Destruct;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
 #[cfg(feature = "ferrocene_certified")]
 use crate::ops::{Deref, DerefMut};
@@ -1098,13 +1095,9 @@ impl<T, E> Result<T, E> {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))] /* blocked on Iterator */
-    pub fn iter(&self) -> Iter<'_, T> {
-=======
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[cfg(not(feature = "ferrocene_certified"))] // blocked on Iterator
     pub const fn iter(&self) -> Iter<'_, T> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         Iter { inner: self.as_ref().ok() }
     }
 
@@ -1127,13 +1120,9 @@ impl<T, E> Result<T, E> {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-    #[cfg(not(feature = "ferrocene_certified"))] /* blocked on Iterator */
-    pub fn iter_mut(&mut self) -> IterMut<'_, T> {
-=======
     #[rustc_const_unstable(feature = "const_result_trait_fn", issue = "144211")]
+    #[cfg(not(feature = "ferrocene_certified"))] // blocked on Iterator
     pub const fn iter_mut(&mut self) -> IterMut<'_, T> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         IterMut { inner: self.as_mut().ok() }
     }
 
@@ -1891,12 +1880,8 @@ fn unwrap_failed(msg: &str, error: &dyn fmt::Debug) -> ! {
 #[inline]
 #[cold]
 #[track_caller]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))] /* blocked on Debug */
-fn unwrap_failed<T>(_msg: &str, _error: &T) -> ! {
-=======
+#[cfg(not(feature = "ferrocene_certified"))] // blocked on Debug
 const fn unwrap_failed<T>(_msg: &str, _error: &T) -> ! {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     panic!()
 }
 

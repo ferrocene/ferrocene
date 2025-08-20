@@ -713,17 +713,6 @@ fn parse_ids(ids: &mut HashSet<String>, file: &str, source: &str, report: &mut R
     }
 }
 
-<<<<<<< HEAD
-fn is_ferrocene_exception(file: &Path, link: &str) -> bool {
-    if FERROCENE_GLOBAL_EXCEPTIONS.contains(&link) {
-        true
-    } else if file.ends_with("certification/core/subset.html") && link.starts_with("#id") {
-        // The links in the csv-table are not expected to work
-        true
-    } else {
-        false
-    }
-=======
 fn is_not_found_error(path: &Path, error: &std::io::Error) -> bool {
     // https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499-
     const WINDOWS_ERROR_INVALID_NAME: i32 = 123;
@@ -735,5 +724,15 @@ fn is_not_found_error(path: &Path, error: &std::io::Error) -> bool {
         || (cfg!(windows)
             && error.raw_os_error() == Some(WINDOWS_ERROR_INVALID_NAME)
             && path.as_os_str().to_str().map_or(false, |s| s.contains("::")))
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+}
+
+fn is_ferrocene_exception(file: &Path, link: &str) -> bool {
+    if FERROCENE_GLOBAL_EXCEPTIONS.contains(&link) {
+        true
+    } else if file.ends_with("certification/core/subset.html") && link.starts_with("#id") {
+        // The links in the csv-table are not expected to work
+        true
+    } else {
+        false
+    }
 }

@@ -745,23 +745,15 @@ fn check_runtime_license_exceptions(metadata: &Metadata, bad: &mut bool) {
 /// Check that all licenses of tool dependencies are in the valid list in `LICENSES`.
 ///
 /// Packages listed in `exceptions` are allowed for tools.
-<<<<<<< HEAD
-fn check_license_exceptions(metadata: &Metadata, exceptions: &[(&str, &str)], bad: &mut bool) {
-    // to handle multiple versions of a crate with difference licensing terms we group
-    // repeated entries in `exceptions`
-    let mut grouped_exceptions: HashMap<&str, Vec<&str>> = HashMap::new();
-=======
 fn check_license_exceptions(
     metadata: &Metadata,
     workspace: &str,
     exceptions: &[(&str, &str)],
     bad: &mut bool,
 ) {
-    // Validate the EXCEPTIONS list hasn't changed.
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
-    for (name, license) in exceptions {
-        grouped_exceptions.entry(name).or_default().push(license);
-    }
+    // to handle multiple versions of a crate with difference licensing terms we group
+    // repeated entries in `exceptions`
+    let grouped_exceptions: HashMap<&str, Vec<&str>> = HashMap::new();
 
     // Validate the EXCEPTIONS list hasn't changed.
     for (name, licenses) in &grouped_exceptions {
@@ -778,12 +770,6 @@ fn check_license_exceptions(
         for pkg in metadata.packages.iter().filter(|p| *p.name == *name) {
             match &pkg.license {
                 None => {
-<<<<<<< HEAD
-                    if EXCEPTIONS_NON_STANDARD_LICENSE_DEPS.contains(&pkg.name.as_str()) {
-                        continue;
-                    }
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
                     tidy_error!(
                         bad,
                         "dependency exception `{}` in workspace `{workspace}` does not declare a license expression",
@@ -791,17 +777,11 @@ fn check_license_exceptions(
                     );
                 }
                 Some(pkg_license) => {
-<<<<<<< HEAD
                     if licenses.iter().all(|license| *license != pkg_license.as_str()) {
-                        println!("dependency exception `{name}` license has changed");
-                        println!("    previously `{licenses:?}` now `{pkg_license}`");
-=======
-                    if pkg_license.as_str() != *license {
                         println!(
                             "dependency exception `{name}` license in workspace `{workspace}` has changed"
                         );
-                        println!("    previously `{license}` now `{pkg_license}`");
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+                        println!("    previously `{licenses:?}` now `{pkg_license}`");
                         println!("    update EXCEPTIONS for the new license");
                         *bad = true;
                     }
@@ -824,19 +804,15 @@ fn check_license_exceptions(
         let license = match &pkg.license {
             Some(license) => license,
             None => {
-<<<<<<< HEAD
                 if pkg.name.to_string() == "ring" {
                     // *ring* does not define proper licensing metadata.
                     continue;
                 }
-                tidy_error!(bad, "dependency `{}` does not define a license expression", pkg.id);
-=======
                 tidy_error!(
                     bad,
                     "dependency `{}` in workspace `{workspace}` does not define a license expression",
                     pkg.id
                 );
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
                 continue;
             }
         };

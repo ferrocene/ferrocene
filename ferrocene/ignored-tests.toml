@@ -2,6 +2,11 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 [["tests/run-make"]]
+tests = ["tests/run-make/rust-lld-by-default-beta-stable"]
+targets = ["x86_64-unknown-linux-gnu"]
+reason = "We use lld by default on stable"
+
+[["tests/run-make"]]
 tests = [
     "tests/run-coverage",
     "tests/run-coverage-rustdoc",

@@ -68,227 +68,15 @@ impl Config {
         fix_bin_or_dylib(&self.out, fname, &self.exec_ctx);
     }
 
-<<<<<<< HEAD
-    pub fn download_file(&self, url: &str, dest_path: &Path, help_on_error: &str) {
-        self.verbose(|| println!("download {url}"));
+    pub(crate) fn download_file(&self, url: &str, dest_path: &Path, help_on_error: &str) {
         if self.dry_run() {
             return;
         }
-
-        // Use a temporary file in case we crash while downloading, to avoid a corrupt download in cache/.
-        let tempfile = self.tempdir().join(dest_path.file_name().unwrap());
-        // While bootstrap itself only supports http and https downloads, downstream forks might
-        // need to download components from other protocols. The match allows them adding more
-        // protocols without worrying about merge conflicts if we change the HTTP implementation.
-        match url.split_once("://").map(|(proto, _)| proto) {
-            Some("http") | Some("https") => {
-                self.download_http_with_retries(&tempfile, url, help_on_error)
-            }
-            Some("s3") => crate::ferrocene::download_from_s3(self, url, &tempfile, help_on_error),
-            Some(other) => panic!("unsupported protocol {other} in {url}"),
-            None => crate::ferrocene::download_from_local_filesystem(url, &tempfile, help_on_error),
-        }
-        t!(
-            move_file(&tempfile, dest_path),
-            format!("failed to rename {tempfile:?} to {dest_path:?}")
-        );
-    }
-
-    fn download_http_with_retries(&self, tempfile: &Path, url: &str, help_on_error: &str) {
-        println!("downloading {url}");
-        // Try curl. If that fails and we are on windows, fallback to PowerShell.
-        // options should be kept in sync with
-        // src/bootstrap/src/core/download.rs
-        // for consistency
-        let mut curl = command("curl").allow_failure();
-        curl.args([
-            // follow redirect
-            "--location",
-            // timeout if speed is < 10 bytes/sec for > 30 seconds
-            "--speed-time",
-            "30",
-            "--speed-limit",
-            "10",
-            // timeout if cannot connect within 30 seconds
-            "--connect-timeout",
-            "30",
-            // output file
-            "--output",
-            tempfile.to_str().unwrap(),
-            // if there is an error, don't restart the download,
-            // instead continue where it left off.
-            "--continue-at",
-            "-",
-            // retry up to 3 times.  note that this means a maximum of 4
-            // attempts will be made, since the first attempt isn't a *re*try.
-            "--retry",
-            "3",
-            // show errors, even if --silent is specified
-            "--show-error",
-            // set timestamp of downloaded file to that of the server
-            "--remote-time",
-            // fail on non-ok http status
-            "--fail",
-        ]);
-        // Don't print progress in CI; the \r wrapping looks bad and downloads don't take long enough for progress to be useful.
-        if self.is_running_on_ci {
-            curl.arg("--silent");
-        } else {
-            curl.arg("--progress-bar");
-        }
-        // --retry-all-errors was added in 7.71.0, don't use it if curl is old.
-        if curl_version(self) >= semver::Version::new(7, 71, 0) {
-            curl.arg("--retry-all-errors");
-        }
-        curl.arg(url);
-        if !curl.run(self) {
-            if self.host_target.contains("windows-msvc") {
-                eprintln!("Fallback to PowerShell");
-                for _ in 0..3 {
-                    let powershell = command("PowerShell.exe").allow_failure().args([
-                        "/nologo",
-                        "-Command",
-                        "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;",
-                        &format!(
-                            "(New-Object System.Net.WebClient).DownloadFile('{}', '{}')",
-                            url, tempfile.to_str().expect("invalid UTF-8 not supported with powershell downloads"),
-                        ),
-                    ]).run_capture_stdout(self);
-
-                    if powershell.is_failure() {
-                        return;
-                    }
-
-                    eprintln!("\nspurious failure, trying again");
-                }
-            }
-            if !help_on_error.is_empty() {
-                eprintln!("{help_on_error}");
-            }
-            crate::exit!(1);
-        }
+        let dwn_ctx: DownloadContext<'_> = self.into();
+        download_file(Some(self), dwn_ctx, url, dest_path, help_on_error);
     }
 
     pub(crate) fn unpack(&self, tarball: &Path, dst: &Path, pattern: &str) {
-        eprintln!("extracting {} to {}", tarball.display(), dst.display());
-        if !dst.exists() {
-            t!(fs::create_dir_all(dst));
-        }
-
-        // `tarball` ends with `.tar.xz`; strip that suffix
-        // example: `rust-dev-nightly-x86_64-unknown-linux-gnu`
-        let uncompressed_filename =
-            Path::new(tarball.file_name().expect("missing tarball filename")).file_stem().unwrap();
-        let directory_prefix = Path::new(Path::new(uncompressed_filename).file_stem().unwrap());
-
-        // decompress the file
-        let data = t!(File::open(tarball), format!("file {} not found", tarball.display()));
-        let decompressor = XzDecoder::new(BufReader::new(data));
-
-        let mut tar = tar::Archive::new(decompressor);
-
-        let is_ci_rustc = dst.ends_with("ci-rustc");
-        let is_ci_llvm = dst.ends_with("ci-llvm");
-
-        // `compile::Sysroot` needs to know the contents of the `rustc-dev` tarball to avoid adding
-        // it to the sysroot unless it was explicitly requested. But parsing the 100 MB tarball is slow.
-        // Cache the entries when we extract it so we only have to read it once.
-        let mut recorded_entries = if is_ci_rustc { recorded_entries(dst, pattern) } else { None };
-
-        for member in t!(tar.entries()) {
-            let mut member = t!(member);
-            let original_path = t!(member.path()).into_owned();
-            // skip the top-level directory
-            if original_path == directory_prefix {
-                continue;
-            }
-
-            // Ferrocene tarballs' contents are different. Compared to upstream, this handles
-            // Ferrocene and upstream tarballs seamlessly together.
-            let short_path = match original_path.strip_prefix(directory_prefix) {
-                // Upstream tarballs:
-                Ok(short_path) => {
-                    let is_builder_config = short_path.to_str() == Some(BUILDER_CONFIG_FILENAME);
-                    if !(short_path.starts_with(pattern)
-                        || ((is_ci_rustc || is_ci_llvm) && is_builder_config))
-                    {
-                        continue;
-                    }
-                    short_path.strip_prefix(pattern).unwrap_or(short_path)
-                }
-                // Ferrocene tarballs:
-                // For Ferrocene we don't check the pattern, as it's used to filter down the
-                // contents of upstream tarballs.
-                Err(_) => &original_path,
-            };
-
-            let dst_path = dst.join(short_path);
-            self.verbose(|| {
-                println!("extracting {} to {}", original_path.display(), dst.display())
-            });
-            if !t!(member.unpack_in(dst)) {
-                panic!("path traversal attack ??");
-            }
-            if let Some(record) = &mut recorded_entries {
-                t!(writeln!(record, "{}", short_path.to_str().unwrap()));
-            }
-            let src_path = dst.join(original_path);
-            if src_path.is_dir() && dst_path.exists() {
-                continue;
-            }
-            t!(move_file(src_path, dst_path));
-        }
-        let dst_dir = dst.join(directory_prefix);
-        if dst_dir.exists() {
-            t!(fs::remove_dir_all(&dst_dir), format!("failed to remove {}", dst_dir.display()));
-        }
-    }
-
-    /// Returns whether the SHA256 checksum of `path` matches `expected`.
-    pub fn verify(&self, path: &Path, expected: &str) -> bool {
-        use sha2::Digest;
-
-        self.verbose(|| println!("verifying {}", path.display()));
-
-        if self.dry_run() {
-            return true;
-        }
-
-        let mut hasher = sha2::Sha256::new();
-
-        let file = t!(File::open(path));
-        let mut reader = BufReader::new(file);
-
-        loop {
-            let buffer = t!(reader.fill_buf());
-            let l = buffer.len();
-            // break if EOF
-            if l == 0 {
-                break;
-            }
-            hasher.update(buffer);
-            reader.consume(l);
-        }
-
-        let checksum = hex_encode(hasher.finalize().as_slice());
-        let verified = checksum == expected;
-
-        if !verified {
-            println!(
-                "invalid checksum: \n\
-                found:    {checksum}\n\
-                expected: {expected}",
-            );
-        }
-
-        verified
-=======
-    fn download_file(&self, url: &str, dest_path: &Path, help_on_error: &str) {
-        let dwn_ctx: DownloadContext<'_> = self.into();
-        download_file(dwn_ctx, url, dest_path, help_on_error);
-    }
-
-    fn unpack(&self, tarball: &Path, dst: &Path, pattern: &str) {
         unpack(&self.exec_ctx, tarball, dst, pattern);
     }
 
@@ -296,7 +84,6 @@ impl Config {
     #[cfg(test)]
     pub(crate) fn verify(&self, path: &Path, expected: &str) -> bool {
         verify(&self.exec_ctx, path, expected)
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 }
 
@@ -1034,7 +821,7 @@ HELP: if trying to compile an old commit of rustc, disable `download-rustc` in b
 download-rustc = false
 ";
     }
-    download_file(dwn_ctx, &format!("{base_url}/{url}"), &tarball, help_on_error);
+    download_file(None, dwn_ctx, &format!("{base_url}/{url}"), &tarball, help_on_error);
     if let Some(sha256) = checksum
         && !verify(dwn_ctx.exec_ctx, &tarball, sha256)
     {
@@ -1118,14 +905,26 @@ fn unpack(exec_ctx: &ExecutionContext, tarball: &Path, dst: &Path, pattern: &str
         if original_path == directory_prefix {
             continue;
         }
-        let mut short_path = t!(original_path.strip_prefix(directory_prefix));
-        let is_builder_config = short_path.to_str() == Some(BUILDER_CONFIG_FILENAME);
 
-        if !(short_path.starts_with(pattern) || ((is_ci_rustc || is_ci_llvm) && is_builder_config))
-        {
-            continue;
-        }
-        short_path = short_path.strip_prefix(pattern).unwrap_or(short_path);
+        // Ferrocene tarballs' contents are different. Compared to upstream, this handles
+        // Ferrocene and upstream tarballs seamlessly together.
+        let short_path = match original_path.strip_prefix(directory_prefix) {
+            // Upstream tarballs:
+            Ok(short_path) => {
+                let is_builder_config = short_path.to_str() == Some(BUILDER_CONFIG_FILENAME);
+                if !(short_path.starts_with(pattern)
+                    || ((is_ci_rustc || is_ci_llvm) && is_builder_config))
+                {
+                    continue;
+                }
+                short_path.strip_prefix(pattern).unwrap_or(short_path)
+            }
+            // Ferrocene tarballs:
+            // For Ferrocene we don't check the pattern, as it's used to filter down the
+            // contents of upstream tarballs.
+            Err(_) => &original_path,
+        };
+
         let dst_path = dst.join(short_path);
 
         exec_ctx.verbose(|| {
@@ -1151,6 +950,7 @@ fn unpack(exec_ctx: &ExecutionContext, tarball: &Path, dst: &Path, pattern: &str
 }
 
 fn download_file<'a>(
+    config: Option<&Config>, // Ferrocene addition: used for `download_from_s3`
     dwn_ctx: impl AsRef<DownloadContext<'a>>,
     url: &str,
     dest_path: &Path,
@@ -1175,8 +975,11 @@ fn download_file<'a>(
             url,
             help_on_error,
         ),
+        Some("s3") => {
+            crate::ferrocene::download_from_s3(config.unwrap(), url, &tempfile, help_on_error)
+        }
         Some(other) => panic!("unsupported protocol {other} in {url}"),
-        None => panic!("no protocol in {url}"),
+        None => crate::ferrocene::download_from_local_filesystem(url, &tempfile, help_on_error),
     }
     t!(move_file(&tempfile, dest_path), format!("failed to rename {tempfile:?} to {dest_path:?}"));
 }

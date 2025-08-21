@@ -1002,12 +1002,8 @@ pub const fn dangling_mut<T>() -> *mut T {
 #[rustc_const_unstable(feature = "const_exposed_provenance", issue = "144538")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[allow(fuzzy_provenance_casts)] // this *is* the explicit provenance API one should use instead
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub fn with_exposed_provenance<T>(addr: usize) -> *const T {
-=======
 pub const fn with_exposed_provenance<T>(addr: usize) -> *const T {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     addr as *const T
 }
 
@@ -1048,12 +1044,8 @@ pub const fn with_exposed_provenance<T>(addr: usize) -> *const T {
 #[rustc_const_unstable(feature = "const_exposed_provenance", issue = "144538")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[allow(fuzzy_provenance_casts)] // this *is* the explicit provenance API one should use instead
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-pub fn with_exposed_provenance_mut<T>(addr: usize) -> *mut T {
-=======
 pub const fn with_exposed_provenance_mut<T>(addr: usize) -> *mut T {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     addr as *mut T
 }
 

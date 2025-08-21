@@ -184,9 +184,8 @@ name = "panic_abort"
 version = "0.0.0"
 dependencies = [
  "alloc",
- "compiler_builtins",
- "core",
  "libc",
+ "rustc-std-workspace-core",
 ]
 
 [[package]]
@@ -195,9 +194,8 @@ version = "0.0.0"
 dependencies = [
  "alloc",
  "cfg-if",
- "compiler_builtins",
- "core",
  "libc",
+ "rustc-std-workspace-core",
  "unwind",
 ]
 
@@ -316,7 +314,6 @@ dependencies = [
  "addr2line",
  "alloc",
  "cfg-if",
- "compiler_builtins",
  "core",
  "dlmalloc",
  "fortanix-sgx-abi",
@@ -384,9 +381,8 @@ name = "unwind"
 version = "0.0.0"
 dependencies = [
  "cfg-if",
- "compiler_builtins",
- "core",
  "libc",
+ "rustc-std-workspace-core",
  "unwinding",
 ]
 

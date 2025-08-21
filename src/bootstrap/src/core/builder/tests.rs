@@ -1039,7 +1039,7 @@ mod snapshot {
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 0 <host>
-        [doc] std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,std_detect,sysroot,test,unwind]
+        [doc] std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         ");
     }
 
@@ -1098,7 +1098,7 @@ mod snapshot {
         [dist] src <>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,std_detect,sysroot,test,unwind]
+        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
@@ -1150,7 +1150,7 @@ mod snapshot {
         [build] rustc 0 <host> -> cargo-miri 1 <host>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,std_detect,sysroot,test,unwind]
+        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
@@ -1188,8 +1188,8 @@ mod snapshot {
         [dist] src <>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,std_detect,sysroot,test,unwind]
-        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,std_detect,sysroot,test,unwind]
+        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
@@ -1229,7 +1229,7 @@ mod snapshot {
         [dist] src <>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,std_detect,sysroot,test,unwind]
+        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 2 <host> -> std 2 <target1>
@@ -1273,8 +1273,8 @@ mod snapshot {
         [dist] src <>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,std_detect,sysroot,test,unwind]
-        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,std_detect,sysroot,test,unwind]
+        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 2 <host> -> std 2 <target1>
@@ -1352,7 +1352,7 @@ mod snapshot {
         [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <target1>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,std_detect,sysroot,test,unwind]
+        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 2 <host> -> std 2 <target1>
         [build] rustc 0 <host> -> LintDocs 1 <host>
@@ -1369,8 +1369,8 @@ mod snapshot {
                 .path("compiler")
                 .render_steps(), @r"
         [check] rustc 0 <host> -> rustc 1 <host>
-        [check] rustc 0 <host> -> cranelift 1 <host>
-        [check] rustc 0 <host> -> gcc 1 <host>
+        [check] rustc 0 <host> -> rustc_codegen_cranelift 1 <host>
+        [check] rustc 0 <host> -> rustc_codegen_gcc 1 <host>
         ");
     }
 
@@ -1401,8 +1401,8 @@ mod snapshot {
                 .stage(1)
                 .render_steps(), @r"
         [check] rustc 0 <host> -> rustc 1 <host>
-        [check] rustc 0 <host> -> cranelift 1 <host>
-        [check] rustc 0 <host> -> gcc 1 <host>
+        [check] rustc 0 <host> -> rustc_codegen_cranelift 1 <host>
+        [check] rustc 0 <host> -> rustc_codegen_gcc 1 <host>
         ");
     }
 
@@ -1418,8 +1418,8 @@ mod snapshot {
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [check] rustc 1 <host> -> rustc 2 <host>
-        [check] rustc 1 <host> -> cranelift 2 <host>
-        [check] rustc 1 <host> -> gcc 2 <host>
+        [check] rustc 1 <host> -> rustc_codegen_cranelift 2 <host>
+        [check] rustc 1 <host> -> rustc_codegen_gcc 2 <host>
         ");
     }
 
@@ -1437,8 +1437,8 @@ mod snapshot {
         [build] rustc 1 <host> -> std 1 <target1>
         [check] rustc 1 <host> -> rustc 2 <target1>
         [check] rustc 1 <host> -> Rustdoc 2 <target1>
-        [check] rustc 1 <host> -> cranelift 2 <target1>
-        [check] rustc 1 <host> -> gcc 2 <target1>
+        [check] rustc 1 <host> -> rustc_codegen_cranelift 2 <target1>
+        [check] rustc 1 <host> -> rustc_codegen_gcc 2 <target1>
         [check] rustc 1 <host> -> Clippy 2 <target1>
         [check] rustc 1 <host> -> Miri 2 <target1>
         [check] rustc 1 <host> -> CargoMiri 2 <target1>
@@ -1532,8 +1532,8 @@ mod snapshot {
                 .args(&args)
                 .render_steps(), @r"
         [check] rustc 0 <host> -> rustc 1 <host>
-        [check] rustc 0 <host> -> cranelift 1 <host>
-        [check] rustc 0 <host> -> gcc 1 <host>
+        [check] rustc 0 <host> -> rustc_codegen_cranelift 1 <host>
+        [check] rustc 0 <host> -> rustc_codegen_gcc 1 <host>
         ");
     }
 
@@ -1617,8 +1617,8 @@ mod snapshot {
                 .path("rustc_codegen_cranelift")
                 .render_steps(), @r"
         [check] rustc 0 <host> -> rustc 1 <host>
-        [check] rustc 0 <host> -> cranelift 1 <host>
-        [check] rustc 0 <host> -> gcc 1 <host>
+        [check] rustc 0 <host> -> rustc_codegen_cranelift 1 <host>
+        [check] rustc 0 <host> -> rustc_codegen_gcc 1 <host>
         ");
     }
 
@@ -1680,7 +1680,7 @@ mod snapshot {
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 0 <host>
-        [doc] std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,std,std_detect,sysroot,test,unwind]
+        [doc] std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         ");
     }
 

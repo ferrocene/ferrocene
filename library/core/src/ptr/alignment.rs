@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
+=======
+#![allow(clippy::enum_clike_unportable_variant)]
+
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::ub_checks::assert_unsafe_precondition;
@@ -265,9 +270,14 @@ impl const Default for Alignment {
 }
 
 #[cfg(target_pointer_width = "16")]
+<<<<<<< HEAD
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, PartialEq, Eq))]
 #[cfg_attr(feature = "ferrocene_certified", derive(Copy, Clone))]
 #[repr(u16)]
+=======
+#[derive(Copy, Clone, PartialEq, Eq)]
+#[repr(usize)]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
     _Align1Shl1 = 1 << 1,
@@ -288,9 +298,14 @@ enum AlignmentEnum {
 }
 
 #[cfg(target_pointer_width = "32")]
+<<<<<<< HEAD
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, PartialEq, Eq))]
 #[cfg_attr(feature = "ferrocene_certified", derive(Copy, Clone))]
 #[repr(u32)]
+=======
+#[derive(Copy, Clone, PartialEq, Eq)]
+#[repr(usize)]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
     _Align1Shl1 = 1 << 1,
@@ -327,9 +342,14 @@ enum AlignmentEnum {
 }
 
 #[cfg(target_pointer_width = "64")]
+<<<<<<< HEAD
 #[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone, PartialEq, Eq))]
 #[cfg_attr(feature = "ferrocene_certified", derive(Copy, Clone))]
 #[repr(u64)]
+=======
+#[derive(Copy, Clone, PartialEq, Eq)]
+#[repr(usize)]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
     _Align1Shl1 = 1 << 1,

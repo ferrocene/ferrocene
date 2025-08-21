@@ -350,8 +350,12 @@ impl<T: Copy> Clone for Cell<T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ~const Default> const Default for Cell<T> {
+=======
+impl<T: [const] Default> const Default for Cell<T> {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     /// Creates a `Cell<T>`, with the `Default` value for T.
     #[inline]
     fn default() -> Cell<T> {
@@ -1372,8 +1376,12 @@ impl<T: Clone> Clone for RefCell<T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ~const Default> const Default for RefCell<T> {
+=======
+impl<T: [const] Default> const Default for RefCell<T> {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     /// Creates a `RefCell<T>`, with the `Default` value for T.
     #[inline]
     fn default() -> RefCell<T> {
@@ -2413,8 +2421,12 @@ impl<T: ?Sized> UnsafeCell<T> {
 
 #[stable(feature = "unsafe_cell_default", since = "1.10.0")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ~const Default> const Default for UnsafeCell<T> {
+=======
+impl<T: [const] Default> const Default for UnsafeCell<T> {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     /// Creates an `UnsafeCell`, with the `Default` value for T.
     fn default() -> UnsafeCell<T> {
         UnsafeCell::new(Default::default())
@@ -2526,8 +2538,12 @@ impl<T: ?Sized> SyncUnsafeCell<T> {
 
 #[unstable(feature = "sync_unsafe_cell", issue = "95439")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ~const Default> const Default for SyncUnsafeCell<T> {
+=======
+impl<T: [const] Default> const Default for SyncUnsafeCell<T> {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     /// Creates an `SyncUnsafeCell`, with the `Default` value for T.
     fn default() -> SyncUnsafeCell<T> {
         SyncUnsafeCell::new(Default::default())

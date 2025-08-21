@@ -192,6 +192,7 @@
 // not-alphabetical-end
 //
 // Target features:
+<<<<<<< HEAD
 // not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(aarch64_unstable_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(arm_target_feature))]
@@ -211,6 +212,24 @@
 // Ferrocene lints/features:
 #![allow(unused_attributes)]
 #![cfg_attr(feature = "ferrocene_certified", allow(rustdoc::broken_intra_doc_links))]
+=======
+// tidy-alphabetical-start
+#![feature(aarch64_unstable_target_feature)]
+#![feature(arm_target_feature)]
+#![feature(hexagon_target_feature)]
+#![feature(loongarch_target_feature)]
+#![feature(mips_target_feature)]
+#![feature(nvptx_target_feature)]
+#![feature(powerpc_target_feature)]
+#![feature(riscv_target_feature)]
+#![feature(rtm_target_feature)]
+#![feature(s390x_target_feature)]
+#![feature(sse4a_target_feature)]
+#![feature(tbm_target_feature)]
+#![feature(wasm_target_feature)]
+#![feature(x86_amx_intrinsics)]
+// tidy-alphabetical-end
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]

@@ -285,6 +285,7 @@ fn parse_config_download_rustc_at(path: &Path, download_rustc: &str, ci: bool) -
     )
 }
 
+<<<<<<< HEAD
 mod defaults {
     use pretty_assertions::assert_eq;
 
@@ -323,6 +324,8 @@ mod defaults {
     }
 }
 
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 mod dist {
     use pretty_assertions::assert_eq;
 
@@ -350,6 +353,7 @@ mod dist {
         let target = TargetSelection::from_user(TEST_TRIPLE_1);
         assert!(build.llvm_out(target).ends_with("llvm"));
     }
+<<<<<<< HEAD
 
     #[test]
     fn doc_ci() {
@@ -384,6 +388,8 @@ mod dist {
             &[tool::Rustdoc { compiler: Compiler::new(2, a) },]
         );
     }
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 mod sysroot_target_dirs {
@@ -609,36 +615,6 @@ fn test_is_builder_target() {
     }
 }
 
-#[test]
-fn test_get_tool_rustc_compiler() {
-    let mut config = configure("build", &[], &[]);
-    config.download_rustc_commit = None;
-    let build = Build::new(config);
-    let builder = Builder::new(&build);
-
-    let target_triple_1 = TargetSelection::from_user(TEST_TRIPLE_1);
-
-    let compiler = Compiler::new(2, target_triple_1);
-    let expected = Compiler::new(1, target_triple_1);
-    let actual = tool::get_tool_rustc_compiler(&builder, compiler);
-    assert_eq!(expected, actual);
-
-    let compiler = Compiler::new(1, target_triple_1);
-    let expected = Compiler::new(0, target_triple_1);
-    let actual = tool::get_tool_rustc_compiler(&builder, compiler);
-    assert_eq!(expected, actual);
-
-    let mut config = configure("build", &[], &[]);
-    config.download_rustc_commit = Some("".to_owned());
-    let build = Build::new(config);
-    let builder = Builder::new(&build);
-
-    let compiler = Compiler::new(1, target_triple_1);
-    let expected = Compiler::new(1, target_triple_1);
-    let actual = tool::get_tool_rustc_compiler(&builder, compiler);
-    assert_eq!(expected, actual);
-}
-
 /// When bootstrap detects a step dependency cycle (which is a bug), its panic
 /// message should show the actual steps on the stack, not just several copies
 /// of `Any { .. }`.
@@ -697,7 +673,7 @@ mod snapshot {
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
-        [build] rustdoc 0 <host>
+        [build] rustdoc 1 <host>
         ");
     }
 
@@ -720,10 +696,10 @@ mod snapshot {
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 1 <host> -> std 1 <target1>
         [build] rustc 2 <host> -> std 2 <target1>
-        [build] rustdoc 1 <host>
+        [build] rustdoc 2 <host>
         [build] llvm <target1>
         [build] rustc 1 <host> -> rustc 2 <target1>
-        [build] rustdoc 1 <target1>
+        [build] rustdoc 2 <target1>
         ");
     }
 
@@ -803,6 +779,23 @@ mod snapshot {
     }
 
     #[test]
+    fn build_compiler_codegen_backend() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx
+                .config("build")
+                .args(&["--set", "rust.codegen-backends=['llvm', 'cranelift']"])
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 0 <host> -> rustc_codegen_cranelift 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustdoc 1 <host>
+        "
+        );
+    }
+
+    #[test]
     fn build_compiler_tools() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
@@ -820,7 +813,7 @@ mod snapshot {
         [build] rustc 1 <host> -> LldWrapper 2 <host>
         [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <host>
         [build] rustc 2 <host> -> std 2 <host>
-        [build] rustdoc 1 <host>
+        [build] rustdoc 2 <host>
         "
         );
     }
@@ -849,7 +842,7 @@ mod snapshot {
         [build] rustc 1 <host> -> rustc 2 <target1>
         [build] rustc 1 <host> -> LldWrapper 2 <target1>
         [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <target1>
-        [build] rustdoc 1 <target1>
+        [build] rustdoc 2 <target1>
         "
         );
     }
@@ -955,6 +948,19 @@ mod snapshot {
     }
 
     #[test]
+    fn build_error_index() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("build")
+                .path("error_index_generator")
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 0 <host> -> error-index 1 <host>
+        ");
+    }
+
+    #[test]
     fn build_bootstrap_tool_no_explicit_stage() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
@@ -1038,7 +1044,7 @@ mod snapshot {
             .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustdoc 0 <host>
+        [build] rustdoc 1 <host>
         [doc] std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         ");
     }
@@ -1067,6 +1073,31 @@ mod snapshot {
     }
 
     #[test]
+    fn build_cargo() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("build")
+                .paths(&["cargo"])
+            .render_steps(), @"[build] rustc 0 <host> -> cargo 1 <host>");
+    }
+
+    #[test]
+    fn build_cargo_cross() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("build")
+                .paths(&["cargo"])
+                .hosts(&[TEST_TRIPLE_1])
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 1 <host> -> std 1 <target1>
+        [build] rustc 1 <host> -> cargo 2 <target1>
+        ");
+    }
+
+    #[test]
     fn dist_default_stage() {
         let ctx = TestCtx::new();
         assert_eq!(ctx.config("dist").path("compiler").create_config().stage, 2);
@@ -1088,7 +1119,18 @@ mod snapshot {
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
+<<<<<<< HEAD
         [build] rustdoc 1 <host>
+=======
+        [build] rustdoc 2 <host>
+        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [build] rustc 1 <host> -> error-index 2 <host>
+        [doc] rustc 1 <host> -> error-index 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        [build] rustc 0 <host> -> RustInstaller 1 <host>
+        [dist] docs <host>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [doc] std 2 <host> crates=[]
         [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <host>
@@ -1134,14 +1176,27 @@ mod snapshot {
         [build] rustc 1 <host> -> LldWrapper 2 <host>
         [build] rustc 1 <host> -> WasmComponentLd 2 <host>
         [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <host>
+<<<<<<< HEAD
         [build] rustdoc 1 <host>
+=======
+        [build] rustdoc 2 <host>
+        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [build] rustc 1 <host> -> error-index 2 <host>
+        [doc] rustc 1 <host> -> error-index 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        [build] rustc 0 <host> -> RustInstaller 1 <host>
+        [dist] docs <host>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [doc] std 2 <host> crates=[]
         [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <host>
+        [build] rustc 1 <host> -> rust-analyzer-proc-macro-srv 2 <host>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
         [dist] rustc 1 <host> -> std 1 <host>
         [dist] src <>
+<<<<<<< HEAD
         [build] rustc 0 <host> -> rustfmt 1 <host>
         [build] rustc 0 <host> -> cargo-fmt 1 <host>
         [build] rustc 0 <host> -> clippy-driver 1 <host>
@@ -1155,6 +1210,16 @@ mod snapshot {
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+=======
+        [build] rustc 1 <host> -> cargo 2 <host>
+        [build] rustc 1 <host> -> rust-analyzer 2 <host>
+        [build] rustc 1 <host> -> rustfmt 2 <host>
+        [build] rustc 1 <host> -> cargo-fmt 2 <host>
+        [build] rustc 1 <host> -> clippy-driver 2 <host>
+        [build] rustc 1 <host> -> cargo-clippy 2 <host>
+        [build] rustc 1 <host> -> miri 2 <host>
+        [build] rustc 1 <host> -> cargo-miri 2 <host>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         ");
     }
 
@@ -1174,7 +1239,20 @@ mod snapshot {
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
+<<<<<<< HEAD
         [build] rustdoc 1 <host>
+=======
+        [build] rustdoc 2 <host>
+        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [build] rustc 1 <host> -> error-index 2 <host>
+        [doc] rustc 1 <host> -> error-index 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        [build] rustc 0 <host> -> RustInstaller 1 <host>
+        [dist] docs <host>
+        [dist] docs <target1>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [doc] std 2 <host> crates=[]
         [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [doc] std 2 <target1> crates=[]
@@ -1214,16 +1292,37 @@ mod snapshot {
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
+<<<<<<< HEAD
         [build] rustdoc 1 <host>
+=======
+        [build] rustdoc 2 <host>
+        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [build] rustc 1 <host> -> error-index 2 <host>
+        [doc] rustc 1 <host> -> error-index 2 <host>
+        [build] llvm <target1>
+        [build] rustc 1 <host> -> std 1 <target1>
+        [build] rustc 1 <host> -> rustc 2 <target1>
+        [build] rustc 1 <host> -> error-index 2 <target1>
+        [doc] rustc 1 <host> -> error-index 2 <target1>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        [build] rustc 2 <host> -> std 2 <target1>
+        [build] rustc 0 <host> -> RustInstaller 1 <host>
+        [dist] docs <host>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [doc] std 2 <host> crates=[]
         [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <host>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
+<<<<<<< HEAD
         [build] llvm <target1>
         [build] rustc 1 <host> -> std 1 <target1>
         [build] rustc 1 <host> -> rustc 2 <target1>
         [build] rustdoc 1 <target1>
+=======
+        [build] rustdoc 2 <target1>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [dist] rustc <target1>
         [dist] rustc 1 <host> -> std 1 <host>
         [dist] src <>
@@ -1255,7 +1354,26 @@ mod snapshot {
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
+<<<<<<< HEAD
         [build] rustdoc 1 <host>
+=======
+        [build] rustdoc 2 <host>
+        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [build] rustc 1 <host> -> error-index 2 <host>
+        [doc] rustc 1 <host> -> error-index 2 <host>
+        [build] llvm <target1>
+        [build] rustc 1 <host> -> std 1 <target1>
+        [build] rustc 1 <host> -> rustc 2 <target1>
+        [build] rustc 1 <host> -> error-index 2 <target1>
+        [doc] rustc 1 <host> -> error-index 2 <target1>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        [build] rustc 2 <host> -> std 2 <target1>
+        [build] rustc 0 <host> -> RustInstaller 1 <host>
+        [dist] docs <host>
+        [dist] docs <target1>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [doc] std 2 <host> crates=[]
         [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [doc] std 2 <target1> crates=[]
@@ -1263,10 +1381,14 @@ mod snapshot {
         [dist] mingw <target1>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
+<<<<<<< HEAD
         [build] llvm <target1>
         [build] rustc 1 <host> -> std 1 <target1>
         [build] rustc 1 <host> -> rustc 2 <target1>
         [build] rustdoc 1 <target1>
+=======
+        [build] rustdoc 2 <target1>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [dist] rustc <target1>
         [dist] rustc 1 <host> -> std 1 <host>
         [dist] rustc 1 <host> -> std 1 <target1>
@@ -1300,7 +1422,15 @@ mod snapshot {
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
+<<<<<<< HEAD
         [build] rustdoc 1 <host>
+=======
+        [build] rustdoc 2 <host>
+        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 0 <host> -> RustInstaller 1 <host>
+        [dist] docs <target1>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [doc] std 2 <target1> crates=[]
         [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <target1>
@@ -1330,25 +1460,48 @@ mod snapshot {
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 1 <host> -> WasmComponentLd 2 <host>
+<<<<<<< HEAD
         [build] rustdoc 1 <host>
+=======
+        [build] rustdoc 2 <host>
+        [doc] std 2 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [build] llvm <target1>
+        [build] rustc 1 <host> -> std 1 <target1>
+        [build] rustc 1 <host> -> rustc 2 <target1>
+        [build] rustc 1 <host> -> WasmComponentLd 2 <target1>
+        [build] rustc 1 <host> -> error-index 2 <target1>
+        [doc] rustc 1 <host> -> error-index 2 <target1>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 2 <host> -> std 2 <target1>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        [build] rustc 0 <host> -> RustInstaller 1 <host>
+        [dist] docs <target1>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [doc] std 2 <target1> crates=[]
         [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <target1>
+<<<<<<< HEAD
         [build] llvm <target1>
         [build] rustc 1 <host> -> std 1 <target1>
         [build] rustc 1 <host> -> rustc 2 <target1>
         [build] rustc 1 <host> -> WasmComponentLd 2 <target1>
         [build] rustdoc 1 <target1>
+=======
+        [build] rustdoc 2 <target1>
+        [build] rustc 1 <host> -> rust-analyzer-proc-macro-srv 2 <target1>
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <target1>
         [dist] rustc 1 <host> -> std 1 <target1>
         [dist] src <>
-        [build] rustc 0 <host> -> rustfmt 1 <target1>
-        [build] rustc 0 <host> -> cargo-fmt 1 <target1>
-        [build] rustc 0 <host> -> clippy-driver 1 <target1>
-        [build] rustc 0 <host> -> cargo-clippy 1 <target1>
-        [build] rustc 0 <host> -> miri 1 <target1>
-        [build] rustc 0 <host> -> cargo-miri 1 <target1>
+        [build] rustc 1 <host> -> cargo 2 <target1>
+        [build] rustc 1 <host> -> rust-analyzer 2 <target1>
+        [build] rustc 1 <host> -> rustfmt 2 <target1>
+        [build] rustc 1 <host> -> cargo-fmt 2 <target1>
+        [build] rustc 1 <host> -> clippy-driver 2 <target1>
+        [build] rustc 1 <host> -> cargo-clippy 2 <target1>
+        [build] rustc 1 <host> -> miri 2 <target1>
+        [build] rustc 1 <host> -> cargo-miri 2 <target1>
         [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <target1>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
@@ -1358,6 +1511,42 @@ mod snapshot {
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        ");
+    }
+
+    // Enable dist cranelift tarball by default with `x dist` if cranelift is enabled in
+    // `rust.codegen-backends`.
+    #[test]
+    fn dist_cranelift_by_default() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx
+                .config("dist")
+                .args(&["--set", "rust.codegen-backends=['llvm', 'cranelift']"])
+                .render_steps(), @r"
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 0 <host> -> rustc_codegen_cranelift 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        [build] rustc 1 <host> -> rustc_codegen_cranelift 2 <host>
+        [build] rustdoc 2 <host>
+        [doc] std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [build] rustc 1 <host> -> error-index 2 <host>
+        [doc] rustc 1 <host> -> error-index 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        [build] rustc 0 <host> -> RustInstaller 1 <host>
+        [dist] docs <host>
+        [doc] std 2 <host> crates=[]
+        [dist] mingw <host>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
+        [dist] rustc <host>
+        [dist] rustc 1 <host> -> rustc_codegen_cranelift 2 <host>
+        [dist] rustc 1 <host> -> std 1 <host>
+        [dist] src <>
         ");
     }
 
@@ -1671,6 +1860,77 @@ mod snapshot {
     }
 
     #[test]
+    fn test_cargo_stage_1() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("test")
+                .path("cargo")
+                .render_steps(), @r"
+        [build] rustc 0 <host> -> cargo 1 <host>
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustdoc 1 <host>
+        [build] rustdoc 0 <host>
+        ");
+    }
+
+    #[test]
+    fn test_cargo_stage_2() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("test")
+                .path("cargo")
+                .stage(2)
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 1 <host> -> cargo 2 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustdoc 2 <host>
+        [build] rustdoc 1 <host>
+        ");
+    }
+
+    #[test]
+    fn test_cargotest() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("test")
+                .path("cargotest")
+                .render_steps(), @r"
+        [build] rustc 0 <host> -> cargo 1 <host>
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 0 <host> -> CargoTest 1 <host>
+        [build] rustdoc 1 <host>
+        [test] cargotest 1 <host>
+        ");
+    }
+
+    #[test]
+    fn doc_all() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("doc")
+                .render_steps(), @r"
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustdoc 1 <host>
+        [doc] std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [build] rustc 0 <host> -> error-index 1 <host>
+        [doc] rustc 0 <host> -> error-index 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 0 <host> -> LintDocs 1 <host>
+        ");
+    }
+
+    #[test]
     fn doc_library() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
@@ -1679,7 +1939,7 @@ mod snapshot {
                 .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustdoc 0 <host>
+        [build] rustdoc 1 <host>
         [doc] std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         ");
     }
@@ -1693,7 +1953,7 @@ mod snapshot {
                 .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustdoc 0 <host>
+        [build] rustdoc 1 <host>
         [doc] std 1 <host> crates=[core]
         ");
     }
@@ -1708,7 +1968,7 @@ mod snapshot {
                 .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustdoc 0 <host>
+        [build] rustdoc 1 <host>
         [doc] std 1 <host> crates=[core]
         ");
     }
@@ -1738,7 +1998,7 @@ mod snapshot {
                 .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustdoc 0 <host>
+        [build] rustdoc 1 <host>
         [doc] std 1 <host> crates=[alloc,core]
         ");
     }
@@ -1754,8 +2014,103 @@ mod snapshot {
                 .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustdoc 0 <host>
+        [build] rustdoc 1 <host>
         [doc] std 1 <target1> crates=[alloc,core]
+        ");
+    }
+
+    #[test]
+    fn doc_compiler_stage_0() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("doc")
+                .path("compiler")
+                .stage(0)
+                .render_steps(), @r"
+        [build] rustdoc 0 <host>
+        [build] llvm <host>
+        [doc] rustc 0 <host>
+        ");
+    }
+
+    #[test]
+    fn doc_compiler_stage_1() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("doc")
+                .path("compiler")
+                .stage(1)
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustdoc 1 <host>
+        [doc] rustc 1 <host>
+        ");
+    }
+
+    #[test]
+    fn doc_compiler_stage_2() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("doc")
+                .path("compiler")
+                .stage(2)
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustdoc 2 <host>
+        [doc] rustc 2 <host>
+        ");
+    }
+
+    #[test]
+    fn doc_compiletest_stage_0() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("doc")
+                .path("src/tools/compiletest")
+                .stage(0)
+                .render_steps(), @r"
+        [build] rustdoc 0 <host>
+        [doc] Compiletest <host>
+        ");
+    }
+
+    #[test]
+    fn doc_compiletest_stage_1() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("doc")
+                .path("src/tools/compiletest")
+                .stage(1)
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustdoc 1 <host>
+        [doc] Compiletest <host>
+        ");
+    }
+
+    #[test]
+    fn doc_compiletest_stage_2() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("doc")
+                .path("src/tools/compiletest")
+                .stage(2)
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustdoc 2 <host>
+        [doc] Compiletest <host>
         ");
     }
 }

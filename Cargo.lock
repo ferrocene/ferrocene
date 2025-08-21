@@ -1034,7 +1034,7 @@ checksum = "b94f61472cee1439c0b966b47e3aca9ae07e45d070759512cd390ea2bebc6675"
 
 [[package]]
 name = "clippy"
-version = "0.1.90"
+version = "0.1.91"
 dependencies = [
  "anstream",
  "askama 0.14.0",
@@ -1061,7 +1061,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_config"
-version = "0.1.90"
+version = "0.1.91"
 dependencies = [
  "clippy_utils",
  "itertools",
@@ -1084,7 +1084,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_lints"
-version = "0.1.90"
+version = "0.1.91"
 dependencies = [
  "arrayvec",
  "cargo_metadata 0.18.1",
@@ -1115,7 +1115,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_utils"
-version = "0.1.90"
+version = "0.1.91"
 dependencies = [
  "arrayvec",
  "itertools",
@@ -1576,7 +1576,7 @@ dependencies = [
 
 [[package]]
 name = "declare_clippy_lint"
-version = "0.1.90"
+version = "0.1.91"
 
 [[package]]
 name = "der"
@@ -5496,6 +5496,7 @@ name = "rustc_resolve"
 version = "0.0.0"
 dependencies = [
  "bitflags",
+ "indexmap",
  "itertools",
  "pulldown-cmark",
  "rustc_arena",

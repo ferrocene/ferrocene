@@ -2072,7 +2072,7 @@ mod impls {
     #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialEq<&B> for &A
     where
-        A: ~const PartialEq<B>,
+        A: [const] PartialEq<B>,
     {
         #[inline]
         fn eq(&self, other: &&B) -> bool {
@@ -2148,7 +2148,7 @@ mod impls {
     #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialEq<&mut B> for &mut A
     where
-        A: ~const PartialEq<B>,
+        A: [const] PartialEq<B>,
     {
         #[inline]
         fn eq(&self, other: &&mut B) -> bool {
@@ -2222,7 +2222,7 @@ mod impls {
     #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialEq<&mut B> for &A
     where
-        A: ~const PartialEq<B>,
+        A: [const] PartialEq<B>,
     {
         #[inline]
         fn eq(&self, other: &&mut B) -> bool {
@@ -2239,7 +2239,7 @@ mod impls {
     #[cfg(not(feature = "ferrocene_certified"))]
     impl<A: PointeeSized, B: PointeeSized> const PartialEq<&B> for &mut A
     where
-        A: ~const PartialEq<B>,
+        A: [const] PartialEq<B>,
     {
         #[inline]
         fn eq(&self, other: &&B) -> bool {

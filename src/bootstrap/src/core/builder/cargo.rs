@@ -122,7 +122,7 @@ impl Cargo {
             // No need to configure the target linker for these command types.
             Kind::Clean | Kind::Check | Kind::Format | Kind::Setup => {}
             _ => {
-                cargo.configure_linker(builder, mode);
+                cargo.configure_linker(builder);
             }
         }
 
@@ -216,7 +216,7 @@ impl Cargo {
 
     // FIXME(onur-ozkan): Add coverage to make sure modifications to this function
     // doesn't cause cache invalidations (e.g., #130108).
-    fn configure_linker(&mut self, builder: &Builder<'_>, mode: Mode) -> &mut Cargo {
+    fn configure_linker(&mut self, builder: &Builder<'_>) -> &mut Cargo {
         let target = self.target;
         let compiler = self.compiler;
 
@@ -271,12 +271,7 @@ impl Cargo {
             }
         }
 
-        // We use the snapshot compiler when building host code (build scripts/proc macros) of
-        // `Mode::Std` tools, so we need to determine the current stage here to pass the proper
-        // linker args (e.g. -C vs -Z).
-        // This should stay synchronized with the [cargo] function.
-        let host_stage = if mode == Mode::Std { 0 } else { compiler.stage };
-        for arg in linker_args(builder, compiler.host, LldThreads::Yes, host_stage) {
+        for arg in linker_args(builder, compiler.host, LldThreads::Yes) {
             self.hostflags.arg(&arg);
         }
 
@@ -286,10 +281,10 @@ impl Cargo {
         }
         // We want to set -Clinker using Cargo, therefore we only call `linker_flags` and not
         // `linker_args` here.
-        for flag in linker_flags(builder, target, LldThreads::Yes, compiler.stage) {
+        for flag in linker_flags(builder, target, LldThreads::Yes) {
             self.rustflags.arg(&flag);
         }
-        for arg in linker_args(builder, target, LldThreads::Yes, compiler.stage) {
+        for arg in linker_args(builder, target, LldThreads::Yes) {
             self.rustdocflags.arg(&arg);
         }
 
@@ -445,6 +440,15 @@ impl Builder<'_> {
         let out_dir = self.stage_out(compiler, mode);
         cargo.env("CARGO_TARGET_DIR", &out_dir);
 
+        // Bootstrap makes a lot of assumptions about the artifacts produced in the target
+        // directory. If users override the "build directory" using `build-dir`
+        // (https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-dir), then
+        // bootstrap couldn't find these artifacts. So we forcefully override that option to our
+        // target directory here.
+        // In the future, we could attempt to read the build-dir location from Cargo and actually
+        // respect it.
+        cargo.env("CARGO_BUILD_BUILD_DIR", &out_dir);
+
         // Found with `rg "init_env_logger\("`. If anyone uses `init_env_logger`
         // from out of tree it shouldn't matter, since x.py is only used for
         // building in-tree.
@@ -517,7 +521,7 @@ impl Builder<'_> {
                 }
                 _ => panic!("doc mode {mode:?} not expected"),
             };
-            let rustdoc = self.rustdoc(compiler);
+            let rustdoc = self.rustdoc_for_compiler(compiler);
             build_stamp::clear_if_dirty(self, &my_out, &rustdoc);
         }
 
@@ -836,7 +840,7 @@ impl Builder<'_> {
         }
 
         let rustdoc_path = match cmd_kind {
-            Kind::Doc | Kind::Test | Kind::MiriTest => self.rustdoc(compiler),
+            Kind::Doc | Kind::Test | Kind::MiriTest => self.rustdoc_for_compiler(compiler),
             _ => PathBuf::from("/path/to/nowhere/rustdoc/not/required"),
         };
 

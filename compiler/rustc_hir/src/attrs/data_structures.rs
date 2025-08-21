@@ -297,6 +297,9 @@ pub enum AttributeKind {
     /// Represents `#[const_trait]`.
     ConstTrait(Span),
 
+    /// Represents `#[coroutine]`.
+    Coroutine(Span),
+
     /// Represents `#[coverage(..)]`.
     Coverage(Span, CoverageAttrKind),
 
@@ -391,9 +394,6 @@ pub enum AttributeKind {
     /// Represents `#[non_exhaustive]`
     NonExhaustive(Span),
 
-    /// Represents `#[omit_gdb_pretty_printer_section]`
-    OmitGdbPrettyPrinterSection,
-
     /// Represents `#[optimize(size|speed)]`
     Optimize(OptimizeAttr, Span),
 
@@ -435,6 +435,9 @@ pub enum AttributeKind {
 
     /// Represents `#[rustc_object_lifetime_default]`.
     RustcObjectLifetimeDefault,
+
+    /// Represents `#[should_panic]`
+    ShouldPanic { reason: Option<Symbol>, span: Span },
 
     /// Represents `#[rustc_skip_during_method_dispatch]`.
     SkipDuringMethodDispatch { array: bool, boxed_slice: bool, span: Span },

@@ -28,6 +28,7 @@ impl AttributeKind {
             ConstStability { .. } => Yes,
             ConstStabilityIndirect => No,
             ConstTrait(..) => No,
+            Coroutine(..) => No,
             Coverage(..) => No,
             DenyExplicitImpl(..) => No,
             Deprecation { .. } => Yes,
@@ -55,7 +56,6 @@ impl AttributeKind {
             NoImplicitPrelude(..) => No,
             NoMangle(..) => Yes,      // Needed for rustdoc
             NonExhaustive(..) => Yes, // Needed for rustdoc
-            OmitGdbPrettyPrinterSection => No,
             Optimize(..) => No,
             ParenSugar(..) => No,
             PassByValue(..) => Yes,
@@ -70,6 +70,7 @@ impl AttributeKind {
             RustcLayoutScalarValidRangeEnd(..) => Yes,
             RustcLayoutScalarValidRangeStart(..) => Yes,
             RustcObjectLifetimeDefault => No,
+            ShouldPanic { .. } => No,
             SkipDuringMethodDispatch { .. } => No,
             SpecializationTrait(..) => No,
             Stability { .. } => Yes,

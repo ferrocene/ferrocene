@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 // rust-lang/rust#61232: We used to ICE when trying to detect a
 // collision on the symbol generated for the external linkage item in
 // an extern crate.

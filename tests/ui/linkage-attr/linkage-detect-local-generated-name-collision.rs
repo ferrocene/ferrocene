@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 //@ build-fail
 // FIXME(#83838) codegen-units=1 triggers llvm asserts
 //@ compile-flags: -Ccodegen-units=16

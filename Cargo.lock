@@ -932,6 +932,8 @@ version = "1.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be714c154be609ec7f5dad223a33bf1482fff90472de28f7362806e6d4832b8c"
 dependencies = [
+ "jobserver",
+ "libc",
  "shlex",
 ]
 
@@ -1119,6 +1121,26 @@ dependencies = [
  "itertools",
  "rustc_apfloat",
  "serde",
+]
+
+[[package]]
+name = "cmake"
+version = "0.1.54"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e7caa3f9de89ddbe2c607f4101924c5abec803763ae9534e4f4d7d8f84aa81f0"
+dependencies = [
+ "cc",
+]
+
+[[package]]
+name = "codespan-reporting"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fe6d2e5af09e8c8ad56c969f2157a3d4238cebc7c55f0a517728c38f7b200f81"
+dependencies = [
+ "serde",
+ "termcolor",
+ "unicode-width 0.2.1",
 ]
 
 [[package]]
@@ -1430,6 +1452,68 @@ dependencies = [
  "pkg-config",
  "vcpkg",
  "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "cxx"
+version = "1.0.168"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7aa144b12f11741f0dab5b4182896afad46faa0598b6a061f7b9d17a21837ba7"
+dependencies = [
+ "cc",
+ "cxxbridge-cmd",
+ "cxxbridge-flags",
+ "cxxbridge-macro",
+ "foldhash",
+ "link-cplusplus",
+]
+
+[[package]]
+name = "cxx-build"
+version = "1.0.168"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "12d3cbb84fb003242941c231b45ca9417e786e66e94baa39584bd99df3a270b6"
+dependencies = [
+ "cc",
+ "codespan-reporting",
+ "indexmap",
+ "proc-macro2",
+ "quote",
+ "scratch",
+ "syn 2.0.106",
+]
+
+[[package]]
+name = "cxxbridge-cmd"
+version = "1.0.168"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3fa36b7b249d43f67a3f54bd65788e35e7afe64bbc671396387a48b3e8aaea94"
+dependencies = [
+ "clap",
+ "codespan-reporting",
+ "indexmap",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
+]
+
+[[package]]
+name = "cxxbridge-flags"
+version = "1.0.168"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77707c70f6563edc5429618ca34a07241b75ebab35bd01d46697c75d58f8ddfe"
+
+[[package]]
+name = "cxxbridge-macro"
+version = "1.0.168"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ede6c0fb7e318f0a11799b86ee29dcf17b9be2960bd379a6c38e1a96a6010fff"
+dependencies = [
+ "indexmap",
+ "proc-macro2",
+ "quote",
+ "rustversion",
+ "syn 2.0.106",
 ]
 
 [[package]]
@@ -2068,6 +2152,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "genmc-sys"
+version = "0.1.0"
+dependencies = [
+ "cc",
+ "cmake",
+ "cxx",
+ "cxx-build",
+ "git2",
+]
+
+[[package]]
 name = "getopts"
 version = "0.2.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2119,6 +2214,21 @@ dependencies = [
  "fallible-iterator",
  "indexmap",
  "stable_deref_trait",
+]
+
+[[package]]
+name = "git2"
+version = "0.20.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2deb07a133b1520dc1a5690e9bd08950108873d7ed5de38dcc74d3b5ebffa110"
+dependencies = [
+ "bitflags",
+ "libc",
+ "libgit2-sys",
+ "log",
+ "openssl-probe",
+ "openssl-sys",
+ "url",
 ]
 
 [[package]]
@@ -2890,6 +3000,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "libgit2-sys"
+version = "0.18.2+1.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1c42fe03df2bd3c53a3a9c7317ad91d80c81cd1fb0caec8d7cc4cd2bfa10c222"
+dependencies = [
+ "cc",
+ "libc",
+ "libz-sys",
+ "openssl-sys",
+ "pkg-config",
+]
+
+[[package]]
 name = "libloading"
 version = "0.8.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2926,6 +3049,15 @@ dependencies = [
  "libc",
  "pkg-config",
  "vcpkg",
+]
+
+[[package]]
+name = "link-cplusplus"
+version = "1.0.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4a6f6da007f968f9def0d65a05b187e2960183de70c160204ecfccf0ee330212"
+dependencies = [
+ "cc",
 ]
 
 [[package]]
@@ -3153,6 +3285,7 @@ dependencies = [
  "chrono-tz",
  "colored 3.0.0",
  "directories",
+ "genmc-sys",
  "getrandom 0.3.3",
  "ipc-channel",
  "libc",
@@ -4261,6 +4394,7 @@ dependencies = [
  "rustc_data_structures",
  "rustc_macros",
  "rustc_serialize",
+ "rustc_span",
 ]
 
 [[package]]
@@ -4270,7 +4404,6 @@ dependencies = [
  "rustc_abi",
  "rustc_ast",
  "rustc_ast_pretty",
- "rustc_attr_data_structures",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -4321,27 +4454,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "rustc_attr_data_structures"
-version = "0.0.0"
-dependencies = [
- "rustc_abi",
- "rustc_ast",
- "rustc_ast_pretty",
- "rustc_data_structures",
- "rustc_macros",
- "rustc_serialize",
- "rustc_span",
- "thin-vec",
-]
-
-[[package]]
 name = "rustc_attr_parsing"
 version = "0.0.0"
 dependencies = [
  "rustc_abi",
  "rustc_ast",
  "rustc_ast_pretty",
- "rustc_attr_data_structures",
  "rustc_errors",
  "rustc_feature",
  "rustc_fluent_macro",
@@ -4397,7 +4515,6 @@ version = "0.0.0"
 dependencies = [
  "rustc_ast",
  "rustc_ast_pretty",
- "rustc_attr_data_structures",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -4433,7 +4550,6 @@ dependencies = [
  "rustc-demangle",
  "rustc_abi",
  "rustc_ast",
- "rustc_attr_data_structures",
  "rustc_codegen_ssa",
  "rustc_data_structures",
  "rustc_errors",
@@ -4474,7 +4590,6 @@ dependencies = [
  "rustc_abi",
  "rustc_arena",
  "rustc_ast",
- "rustc_attr_data_structures",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -4512,7 +4627,6 @@ dependencies = [
  "rustc_abi",
  "rustc_apfloat",
  "rustc_ast",
- "rustc_attr_data_structures",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -4658,7 +4772,6 @@ dependencies = [
  "rustc_abi",
  "rustc_ast",
  "rustc_ast_pretty",
- "rustc_attr_data_structures",
  "rustc_data_structures",
  "rustc_error_codes",
  "rustc_error_messages",
@@ -4688,7 +4801,6 @@ dependencies = [
  "rustc_ast",
  "rustc_ast_passes",
  "rustc_ast_pretty",
- "rustc_attr_data_structures",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -4712,8 +4824,8 @@ dependencies = [
 name = "rustc_feature"
 version = "0.0.0"
 dependencies = [
- "rustc_attr_data_structures",
  "rustc_data_structures",
+ "rustc_hir",
  "rustc_span",
  "serde",
  "serde_json",
@@ -4758,7 +4870,7 @@ dependencies = [
  "rustc_abi",
  "rustc_arena",
  "rustc_ast",
- "rustc_attr_data_structures",
+ "rustc_ast_pretty",
  "rustc_data_structures",
  "rustc_hashes",
  "rustc_index",
@@ -4779,7 +4891,6 @@ dependencies = [
  "rustc_abi",
  "rustc_arena",
  "rustc_ast",
- "rustc_attr_data_structures",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -4806,7 +4917,6 @@ dependencies = [
  "rustc_abi",
  "rustc_ast",
  "rustc_ast_pretty",
- "rustc_attr_data_structures",
  "rustc_hir",
  "rustc_span",
 ]
@@ -4818,7 +4928,6 @@ dependencies = [
  "itertools",
  "rustc_abi",
  "rustc_ast",
- "rustc_attr_data_structures",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -4964,7 +5073,6 @@ dependencies = [
  "rustc_abi",
  "rustc_ast",
  "rustc_ast_pretty",
- "rustc_attr_data_structures",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -5038,7 +5146,6 @@ dependencies = [
  "odht",
  "rustc_abi",
  "rustc_ast",
- "rustc_attr_data_structures",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -5074,7 +5181,6 @@ dependencies = [
  "rustc_arena",
  "rustc_ast",
  "rustc_ast_ir",
- "rustc_attr_data_structures",
  "rustc_data_structures",
  "rustc_error_messages",
  "rustc_errors",
@@ -5108,7 +5214,6 @@ dependencies = [
  "rustc_apfloat",
  "rustc_arena",
  "rustc_ast",
- "rustc_attr_data_structures",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -5155,7 +5260,6 @@ dependencies = [
  "rustc_abi",
  "rustc_arena",
  "rustc_ast",
- "rustc_attr_data_structures",
  "rustc_const_eval",
  "rustc_data_structures",
  "rustc_errors",
@@ -5181,7 +5285,6 @@ version = "0.0.0"
 dependencies = [
  "rustc_abi",
  "rustc_ast",
- "rustc_attr_data_structures",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -5252,7 +5355,6 @@ dependencies = [
  "rustc_ast",
  "rustc_ast_lowering",
  "rustc_ast_pretty",
- "rustc_attr_data_structures",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -5299,7 +5401,6 @@ name = "rustc_privacy"
 version = "0.0.0"
 dependencies = [
  "rustc_ast",
- "rustc_attr_data_structures",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -5374,7 +5475,6 @@ dependencies = [
  "parking_lot",
  "rustc_abi",
  "rustc_ast",
- "rustc_attr_data_structures",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_feature",
@@ -5401,7 +5501,6 @@ dependencies = [
  "rustc_arena",
  "rustc_ast",
  "rustc_ast_pretty",
- "rustc_attr_data_structures",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -5564,7 +5663,6 @@ dependencies = [
  "itertools",
  "rustc_abi",
  "rustc_ast",
- "rustc_attr_data_structures",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -5905,6 +6003,12 @@ name = "scopeguard"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
+
+[[package]]
+name = "scratch"
+version = "1.0.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d68f2ec51b097e4c1a75b681a8bec621909b5e91f15bb7b840c4f2f7b01148b2"
 
 [[package]]
 name = "sct"

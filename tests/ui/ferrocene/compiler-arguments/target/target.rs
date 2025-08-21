@@ -1,6 +1,6 @@
 //@ check-pass
 //@ compile-flags: --target={{target}}
-//@ needs-llvm-components:
+//@ needs-llvm-components: x86
 
 fn main() {}
 

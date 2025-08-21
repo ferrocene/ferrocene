@@ -1,7 +1,11 @@
 #[cfg(not(feature = "ferrocene_certified"))]
+use crate::cmp::Ordering;
+#[cfg(not(feature = "ferrocene_certified"))]
 use crate::ffi::CStr;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::fmt;
+#[cfg(not(feature = "ferrocene_certified"))]
+use crate::hash::{Hash, Hasher};
 use crate::marker::PhantomData;
 use crate::ptr::NonNull;
 
@@ -34,10 +38,7 @@ use crate::ptr::NonNull;
 /// Files are compared as strings, not `Path`, which could be unexpected.
 /// See [`Location::file`]'s documentation for more discussion.
 #[lang = "panic_location"]
-#[cfg_attr(
-    not(feature = "ferrocene_certified"),
-    derive(Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)
-)]
+#[cfg_attr(not(feature = "ferrocene_certified"), derive(Copy, Clone))]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
 #[cfg_attr(feature = "ferrocene_certified", allow(dead_code))]
 pub struct Location<'a> {
@@ -48,6 +49,49 @@ pub struct Location<'a> {
     line: u32,
     col: u32,
     _filename: PhantomData<&'a str>,
+}
+
+#[stable(feature = "panic_hooks", since = "1.10.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
+impl PartialEq for Location<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        // Compare col / line first as they're cheaper to compare and more likely to differ,
+        // while not impacting the result.
+        self.col == other.col && self.line == other.line && self.file() == other.file()
+    }
+}
+
+#[stable(feature = "panic_hooks", since = "1.10.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
+impl Eq for Location<'_> {}
+
+#[stable(feature = "panic_hooks", since = "1.10.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
+impl Ord for Location<'_> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.file()
+            .cmp(other.file())
+            .then_with(|| self.line.cmp(&other.line))
+            .then_with(|| self.col.cmp(&other.col))
+    }
+}
+
+#[stable(feature = "panic_hooks", since = "1.10.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
+impl PartialOrd for Location<'_> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+#[stable(feature = "panic_hooks", since = "1.10.0")]
+#[cfg(not(feature = "ferrocene_certified"))]
+impl Hash for Location<'_> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.file().hash(state);
+        self.line.hash(state);
+        self.col.hash(state);
+    }
 }
 
 #[stable(feature = "panic_hooks", since = "1.10.0")]

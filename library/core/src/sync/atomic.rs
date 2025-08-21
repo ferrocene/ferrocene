@@ -1280,8 +1280,8 @@ impl AtomicBool {
     /// Returning an `*mut` pointer from a shared reference to this atomic is safe because the
     /// atomic types work with interior mutability. All modifications of an atomic change the value
     /// through a shared reference, and can do so safely as long as they use atomic operations. Any
-    /// use of the returned raw pointer requires an `unsafe` block and still has to uphold the same
-    /// restriction in [Memory model for atomic accesses].
+    /// use of the returned raw pointer requires an `unsafe` block and still has to uphold the
+    /// requirements of the [memory model].
     ///
     /// # Examples
     ///
@@ -1300,7 +1300,7 @@ impl AtomicBool {
     /// # }
     /// ```
     ///
-    /// [Memory model for atomic accesses]: self#memory-model-for-atomic-accesses
+    /// [memory model]: self#memory-model-for-atomic-accesses
     #[inline]
     #[stable(feature = "atomic_as_ptr", since = "1.70.0")]
     #[rustc_const_stable(feature = "atomic_as_ptr", since = "1.70.0")]
@@ -2525,8 +2525,8 @@ impl<T> AtomicPtr<T> {
     /// Returning an `*mut` pointer from a shared reference to this atomic is safe because the
     /// atomic types work with interior mutability. All modifications of an atomic change the value
     /// through a shared reference, and can do so safely as long as they use atomic operations. Any
-    /// use of the returned raw pointer requires an `unsafe` block and still has to uphold the same
-    /// restriction in [Memory model for atomic accesses].
+    /// use of the returned raw pointer requires an `unsafe` block and still has to uphold the
+    /// requirements of the [memory model].
     ///
     /// # Examples
     ///
@@ -2546,7 +2546,7 @@ impl<T> AtomicPtr<T> {
     /// }
     /// ```
     ///
-    /// [Memory model for atomic accesses]: self#memory-model-for-atomic-accesses
+    /// [memory model]: self#memory-model-for-atomic-accesses
     #[inline]
     #[stable(feature = "atomic_as_ptr", since = "1.70.0")]
     #[rustc_const_stable(feature = "atomic_as_ptr", since = "1.70.0")]
@@ -3662,8 +3662,8 @@ macro_rules! atomic_int {
             /// Returning an `*mut` pointer from a shared reference to this atomic is safe because the
             /// atomic types work with interior mutability. All modifications of an atomic change the value
             /// through a shared reference, and can do so safely as long as they use atomic operations. Any
-            /// use of the returned raw pointer requires an `unsafe` block and still has to uphold the same
-            /// restriction in [Memory model for atomic accesses].
+            /// use of the returned raw pointer requires an `unsafe` block and still has to uphold the
+            /// requirements of the [memory model].
             ///
             /// # Examples
             ///
@@ -3684,7 +3684,7 @@ macro_rules! atomic_int {
             /// # }
             /// ```
             ///
-            /// [Memory model for atomic accesses]: self#memory-model-for-atomic-accesses
+            /// [memory model]: self#memory-model-for-atomic-accesses
             #[inline]
             #[stable(feature = "atomic_as_ptr", since = "1.70.0")]
             #[rustc_const_stable(feature = "atomic_as_ptr", since = "1.70.0")]

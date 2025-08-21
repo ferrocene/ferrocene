@@ -2,12 +2,12 @@ use std::iter;
 
 use rustc_ast::util::{classify, parser};
 use rustc_ast::{self as ast, ExprKind, FnRetTy, HasAttrs as _, StmtKind};
-use rustc_attr_data_structures::{AttributeKind, find_attr};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_errors::{MultiSpan, pluralize};
+use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::DefId;
-use rustc_hir::{self as hir, LangItem};
+use rustc_hir::{self as hir, LangItem, find_attr};
 use rustc_infer::traits::util::elaborate;
 use rustc_middle::ty::{self, Ty, adjustment};
 use rustc_session::{declare_lint, declare_lint_pass, impl_lint_pass};
@@ -185,7 +185,7 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
         let mut op_warned = false;
 
         if let Some(must_use_op) = must_use_op {
-            let span = expr.span.find_oldest_ancestor_in_same_ctxt();
+            let span = expr.span.find_ancestor_not_from_macro().unwrap_or(expr.span);
             cx.emit_span_lint(
                 UNUSED_MUST_USE,
                 expr.span,
@@ -511,7 +511,7 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
                     );
                 }
                 MustUsePath::Def(span, def_id, reason) => {
-                    let span = span.find_oldest_ancestor_in_same_ctxt();
+                    let span = span.find_ancestor_not_from_macro().unwrap_or(*span);
                     cx.emit_span_lint(
                         UNUSED_MUST_USE,
                         span,

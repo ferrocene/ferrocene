@@ -193,7 +193,7 @@ const EXCEPTIONS_RUSTC_PERF: ExceptionList = &[
     ("brotli-decompressor", "BSD-3-Clause/MIT"),
     ("encoding_rs", "(Apache-2.0 OR MIT) AND BSD-3-Clause"),
     ("inferno", "CDDL-1.0"),
-    ("ring", NON_STANDARD_LICENSE), // see EXCEPTIONS_NON_STANDARD_LICENSE_DEPS for more.
+    ("option-ext", "MPL-2.0"),
     ("ryu", "Apache-2.0 OR BSL-1.0"),
     ("snap", "BSD-3-Clause"),
     ("subtle", "BSD-3-Clause"),
@@ -250,20 +250,6 @@ const EXCEPTIONS_BOOTSTRAP: ExceptionList = &[
 
 const EXCEPTIONS_UEFI_QEMU_TEST: ExceptionList = &[
     ("r-efi", "MIT OR Apache-2.0 OR LGPL-2.1-or-later"), // LGPL is not acceptable, but we use it under MIT OR Apache-2.0
-];
-
-/// Placeholder for non-standard license file.
-const NON_STANDARD_LICENSE: &str = "NON_STANDARD_LICENSE";
-
-/// These dependencies have non-standard licenses but are genenrally permitted.
-const EXCEPTIONS_NON_STANDARD_LICENSE_DEPS: &[&str] = &[
-    // `ring` is included because it is an optional dependency of `hyper`,
-    // which is a training data in rustc-perf for optimized build.
-    // The license of it is generally `ISC AND MIT AND OpenSSL`,
-    // though the `package.license` field is not set.
-    //
-    // See https://github.com/briansmith/ring/issues/902
-    "ring",
 ];
 
 const PERMITTED_DEPS_LOCATION: &str = concat!(file!(), ":", line!());
@@ -628,7 +614,7 @@ pub fn check(root: &Path, cargo: &Path, bless: bool, bad: &mut bool) {
             .other_options(vec!["--locked".to_owned()]);
         let metadata = t!(cmd.exec());
 
-        check_license_exceptions(&metadata, exceptions, bad);
+        check_license_exceptions(&metadata, workspace, exceptions, bad);
         if let Some((crates, permitted_deps)) = permitted_deps {
             check_permitted_dependencies(&metadata, workspace, permitted_deps, crates, bad);
         }
@@ -759,10 +745,20 @@ fn check_runtime_license_exceptions(metadata: &Metadata, bad: &mut bool) {
 /// Check that all licenses of tool dependencies are in the valid list in `LICENSES`.
 ///
 /// Packages listed in `exceptions` are allowed for tools.
+<<<<<<< HEAD
 fn check_license_exceptions(metadata: &Metadata, exceptions: &[(&str, &str)], bad: &mut bool) {
     // to handle multiple versions of a crate with difference licensing terms we group
     // repeated entries in `exceptions`
     let mut grouped_exceptions: HashMap<&str, Vec<&str>> = HashMap::new();
+=======
+fn check_license_exceptions(
+    metadata: &Metadata,
+    workspace: &str,
+    exceptions: &[(&str, &str)],
+    bad: &mut bool,
+) {
+    // Validate the EXCEPTIONS list hasn't changed.
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     for (name, license) in exceptions {
         grouped_exceptions.entry(name).or_default().push(license);
     }
@@ -773,7 +769,7 @@ fn check_license_exceptions(metadata: &Metadata, exceptions: &[(&str, &str)], ba
         if !metadata.packages.iter().any(|p| *p.name == *name) {
             tidy_error!(
                 bad,
-                "could not find exception package `{}`\n\
+                "could not find exception package `{}` in workspace `{workspace}`\n\
                 Remove from EXCEPTIONS list if it is no longer used.",
                 name
             );
@@ -782,19 +778,30 @@ fn check_license_exceptions(metadata: &Metadata, exceptions: &[(&str, &str)], ba
         for pkg in metadata.packages.iter().filter(|p| *p.name == *name) {
             match &pkg.license {
                 None => {
+<<<<<<< HEAD
                     if EXCEPTIONS_NON_STANDARD_LICENSE_DEPS.contains(&pkg.name.as_str()) {
                         continue;
                     }
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
                     tidy_error!(
                         bad,
-                        "dependency exception `{}` does not declare a license expression",
+                        "dependency exception `{}` in workspace `{workspace}` does not declare a license expression",
                         pkg.id
                     );
                 }
                 Some(pkg_license) => {
+<<<<<<< HEAD
                     if licenses.iter().all(|license| *license != pkg_license.as_str()) {
                         println!("dependency exception `{name}` license has changed");
                         println!("    previously `{licenses:?}` now `{pkg_license}`");
+=======
+                    if pkg_license.as_str() != *license {
+                        println!(
+                            "dependency exception `{name}` license in workspace `{workspace}` has changed"
+                        );
+                        println!("    previously `{license}` now `{pkg_license}`");
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
                         println!("    update EXCEPTIONS for the new license");
                         *bad = true;
                     }
@@ -817,16 +824,29 @@ fn check_license_exceptions(metadata: &Metadata, exceptions: &[(&str, &str)], ba
         let license = match &pkg.license {
             Some(license) => license,
             None => {
+<<<<<<< HEAD
                 if pkg.name.to_string() == "ring" {
                     // *ring* does not define proper licensing metadata.
                     continue;
                 }
                 tidy_error!(bad, "dependency `{}` does not define a license expression", pkg.id);
+=======
+                tidy_error!(
+                    bad,
+                    "dependency `{}` in workspace `{workspace}` does not define a license expression",
+                    pkg.id
+                );
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
                 continue;
             }
         };
         if !LICENSES.contains(&license.as_str()) {
-            tidy_error!(bad, "invalid license `{}` in `{}`", license, pkg.id);
+            tidy_error!(
+                bad,
+                "invalid license `{}` for package `{}` in workspace `{workspace}`",
+                license,
+                pkg.id
+            );
         }
     }
 }

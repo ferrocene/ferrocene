@@ -87,6 +87,9 @@ targets = [
   "thumbv8m.main-none-eabi",
   "thumbv8m.main-none-eabihf",
   "wasm32-unknown-unknown",
+  "aarch64-unknown-ferrocene.certified",
+  "thumbv7em-ferrocene.certified-eabi",
+  "thumbv7em-ferrocene.certified-eabihf",
 ]
 
 [[groups.cross-compilation.packages]]

@@ -651,6 +651,9 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, cargo: &mut Car
             features.push_str(compiler_builtins_c_feature);
         }
 
+        if target.contains("ferrocene.certified") {
+            features += " ferrocene_certified";
+        }
         // for no-std targets we only compile a few no_std crates
         cargo
             .args(["-p", "alloc"])

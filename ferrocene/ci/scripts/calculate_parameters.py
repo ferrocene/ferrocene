@@ -64,6 +64,10 @@ GENERIC_BUILD_STD_TARGETS = [
     "wasm32-unknown-unknown",
     "armv7r-none-eabihf",
     "armebv7r-none-eabihf",
+    "x86_64-unknown-ferrocene.certified",
+    "aarch64-unknown-ferrocene.certified",
+    "thumbv7em-ferrocene.certified-eabi",
+    "thumbv7em-ferrocene.certified-eabihf",
 ]
 
 # Targets only built (and self-tested!) on Linux.

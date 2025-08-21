@@ -178,22 +178,6 @@ jobs:
           qnx: true
           restore-from-job: x86_64-linux-build
 
-  # A basic check to ensure the certified libcore subset builds
-  # Will be replaced by a more sophisticated mechanism
-  x86_64-linux-certified:
-    executor: docker-x86_64-ubuntu-20
-    resource_class: large # 4-core
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      # Certified targets only
-      FERROCENE_TARGETS: aarch64-unknown-none,x86_64-unknown-linux-gnu,thumbv7em-none-eabi,thumbv7em-none-eabihf
-      SCRIPT: |
-        ./x.py build --stage 1 library/core --set rust.std-features='["ferrocene_certified"]'
-        ./x.py doc --stage 1 library/core --set rust.std-features='["ferrocene_certified"]'
-    steps:
-      - ferrocene-job-test-container:
-          restore-from-job: x86_64-linux-build
-
   x86_64-linux-dist-src:
     executor: docker-x86_64-ubuntu-20
     resource_class: medium # 2-core
@@ -868,9 +852,6 @@ workflows:
       - x86_64-linux-build:
           requires:
             - x86_64-linux-llvm
-      - x86_64-linux-certified:
-          requires:
-            - x86_64-linux-build
       - x86_64-linux-docs:
           requires: &test-outcomes-dependencies
             # Need to depend on all of the test builders to include test
@@ -1132,7 +1113,6 @@ workflows:
 
       - finish-build:
           requires:
-            - x86_64-linux-certified
             - x86_64-linux-docs
             - x86_64-linux-dist-src
             - x86_64-linux-traceability-matrix

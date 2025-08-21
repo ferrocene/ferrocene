@@ -795,6 +795,11 @@ fn doc_std(
         }
     }
 
+    // Ferrocene addition
+    if target.contains("ferrocene.certified") {
+        cargo.rustdocflag("--cfg=ferrocene_certified");
+    }
+
     if builder.config.library_docs_private_items {
         cargo.rustdocflag("--document-private-items").rustdocflag("--document-hidden-items");
     }

@@ -44,3 +44,5 @@ pub fn foo(x: bool) {
         }
     }
 }
+
+// ferrocene-annotations: um_rustc_C_codegen_units

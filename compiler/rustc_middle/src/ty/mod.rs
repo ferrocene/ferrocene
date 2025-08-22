@@ -82,7 +82,7 @@ pub use self::context::{
     TyCtxtFeed, tls,
 };
 pub use self::fold::*;
-pub use self::instance::{Instance, InstanceKind, ReifyReason, ShortInstance, UnusedGenericParams};
+pub use self::instance::{Instance, InstanceKind, ReifyReason, UnusedGenericParams};
 pub use self::list::{List, ListWithCachedTypeInfo};
 pub use self::opaque_types::OpaqueTypeKey;
 pub use self::pattern::{Pattern, PatternKind};
@@ -1031,6 +1031,8 @@ pub struct ParamEnvAnd<'tcx, T> {
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, HashStable)]
 #[derive(TypeVisitable, TypeFoldable)]
 pub struct TypingEnv<'tcx> {
+    #[type_foldable(identity)]
+    #[type_visitable(ignore)]
     pub typing_mode: TypingMode<'tcx>,
     pub param_env: ParamEnv<'tcx>,
 }

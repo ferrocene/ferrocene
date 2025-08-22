@@ -12,7 +12,9 @@ use std::path::{Path, PathBuf};
 use std::{env, fs, mem};
 
 use crate::core::build_steps::compile;
-use crate::core::build_steps::tool::{self, SourceType, Tool, prepare_tool_cargo};
+use crate::core::build_steps::tool::{
+    self, RustcPrivateCompilers, SourceType, Tool, prepare_tool_cargo,
+};
 use crate::core::builder::{
     self, Alias, Builder, Compiler, Kind, RunConfig, ShouldRun, Step, StepMetadata,
     crate_description,
@@ -149,7 +151,7 @@ impl<P: Step> Step for RustbookSrc<P> {
             let mut rustbook_cmd = builder.tool_cmd(Tool::Rustbook);
 
             if let Some(compiler) = self.rustdoc_compiler {
-                let mut rustdoc = builder.rustdoc(compiler);
+                let mut rustdoc = builder.rustdoc_for_compiler(compiler);
                 rustdoc.pop();
                 let old_path = env::var_os("PATH").unwrap_or_default();
                 let new_path =
@@ -368,7 +370,7 @@ impl Step for Standalone {
             }
 
             let html = out.join(filename).with_extension("html");
-            let rustdoc = builder.rustdoc(compiler);
+            let rustdoc = builder.rustdoc_for_compiler(compiler);
             if up_to_date(&path, &html)
                 && up_to_date(&footer, &html)
                 && up_to_date(&favicon, &html)
@@ -466,7 +468,7 @@ impl Step for Releases {
         let html = out.join("releases.html");
         let tmppath = out.join("releases.md");
         let inpath = builder.src.join("RELEASES.md");
-        let rustdoc = builder.rustdoc(compiler);
+        let rustdoc = builder.rustdoc_for_compiler(compiler);
         if !up_to_date(&inpath, &html)
             || !up_to_date(&footer, &html)
             || !up_to_date(&favicon, &html)
@@ -730,7 +732,7 @@ fn doc_std(
     let mut cargo =
         builder::Cargo::new(builder, compiler, Mode::Std, SourceType::InTree, target, Kind::Doc);
 
-    compile::std_cargo(builder, target, compiler.stage, &mut cargo);
+    compile::std_cargo(builder, target, &mut cargo);
     cargo
         .arg("--no-deps")
         .arg("--target-dir")
@@ -832,7 +834,7 @@ impl Step for Rustc {
         let compiler = builder.compiler(stage, builder.config.host_target);
         builder.std(compiler, builder.config.host_target);
 
-        let _guard = builder.msg_sysroot_tool(
+        let _guard = builder.msg_rustc_tool(
             Kind::Doc,
             stage,
             format!("compiler{}", crate_description(&self.crates)),
@@ -921,6 +923,10 @@ impl Step for Rustc {
             let index = out.join(krate).join("index.html");
             builder.open_in_browser(index);
         }
+    }
+
+    fn metadata(&self) -> Option<StepMetadata> {
+        Some(StepMetadata::doc("rustc", self.target).stage(self.stage))
     }
 }
 
@@ -1039,6 +1045,10 @@ macro_rules! tool_doc {
                     })?
                 }
             }
+
+            fn metadata(&self) -> Option<StepMetadata> {
+                Some(StepMetadata::doc(stringify!($tool), self.target))
+            }
         }
     }
 }
@@ -1095,9 +1105,9 @@ tool_doc!(
     crates = ["compiletest"]
 );
 
-#[derive(Ord, PartialOrd, Debug, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct ErrorIndex {
-    pub target: TargetSelection,
+    compilers: RustcPrivateCompilers,
 }
 
 impl Step for ErrorIndex {
@@ -1111,17 +1121,29 @@ impl Step for ErrorIndex {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        let target = run.target;
-        run.builder.ensure(ErrorIndex { target });
+        run.builder.ensure(ErrorIndex {
+            compilers: RustcPrivateCompilers::new(run.builder, run.builder.top_stage, run.target),
+        });
     }
 
     /// Generates the HTML rendered error-index by running the
     /// `error_index_generator` tool.
     fn run(self, builder: &Builder<'_>) {
-        builder.info(&format!("Documenting error index ({})", self.target));
-        let out = builder.doc_out(self.target);
+        builder.info(&format!("Documenting error index ({})", self.compilers.target()));
+        let out = builder.doc_out(self.compilers.target());
         t!(fs::create_dir_all(&out));
-        tool::ErrorIndex::command(builder).arg("html").arg(out).arg(&builder.version).run(builder);
+        tool::ErrorIndex::command(builder, self.compilers)
+            .arg("html")
+            .arg(out)
+            .arg(&builder.version)
+            .run(builder);
+    }
+
+    fn metadata(&self) -> Option<StepMetadata> {
+        Some(
+            StepMetadata::doc("error-index", self.compilers.target())
+                .built_by(self.compilers.build_compiler()),
+        )
     }
 }
 

@@ -14,3 +14,6 @@ pub fn bar() {}
 pub fn bak() {}
 
 fn main() {}
+
+// ferrocene-annotations: fls_mvd7nz8k3wcy
+// Attribute no_mangle

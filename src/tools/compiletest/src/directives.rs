@@ -207,6 +207,8 @@ pub struct TestProps {
     // Flag to execute the test within a temporary directory
     pub ferrocene_execute_in_temp: bool,
     pub dont_require_annotations: HashSet<ErrorKind>,
+    /// Whether pretty printers should be disabled in gdb.
+    pub disable_gdb_pretty_printers: bool,
 }
 
 mod directives {
@@ -256,8 +258,8 @@ mod directives {
     pub const ADD_CORE_STUBS: &'static str = "add-core-stubs";
     // This isn't a real directive, just one that is probably mistyped often
     pub const INCORRECT_COMPILER_FLAGS: &'static str = "compiler-flags";
+    pub const DISABLE_GDB_PRETTY_PRINTERS: &'static str = "disable-gdb-pretty-printers";
 
-    // FERROCENE ADDITIONS:
     pub const FERROCENE_EXECUTE_IN_TEMP: &'static str = "ferrocene-execute-in-temp";
 }
 
@@ -316,6 +318,7 @@ impl TestProps {
             add_core_stubs: false,
             ferrocene_execute_in_temp: false,
             dont_require_annotations: Default::default(),
+            disable_gdb_pretty_printers: false,
         }
     }
 
@@ -669,6 +672,12 @@ impl TestProps {
                         self.dont_require_annotations
                             .insert(ErrorKind::expect_from_user_str(err_kind.trim()));
                     }
+
+                    config.set_name_directive(
+                        ln,
+                        DISABLE_GDB_PRETTY_PRINTERS,
+                        &mut self.disable_gdb_pretty_printers,
+                    );
 
                     config.set_name_directive(
                         ln,

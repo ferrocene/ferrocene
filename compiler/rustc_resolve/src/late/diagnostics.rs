@@ -4,7 +4,6 @@ use std::borrow::Cow;
 use std::iter;
 use std::ops::Deref;
 
-use rustc_ast::ptr::P;
 use rustc_ast::visit::{FnCtxt, FnKind, LifetimeCtxt, Visitor, walk_ty};
 use rustc_ast::{
     self as ast, AssocItemKind, DUMMY_NODE_ID, Expr, ExprKind, GenericParam, GenericParamKind,
@@ -1472,7 +1471,10 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                     })
                     .collect();
                 if let [target] = targets.as_slice() {
-                    return Some(TypoSuggestion::single_item_from_ident(target.0.ident, target.1));
+                    return Some(TypoSuggestion::single_item_from_ident(
+                        target.0.ident.0,
+                        target.1,
+                    ));
                 }
             }
         }
@@ -2147,7 +2149,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
         err: &mut Diag<'_>,
         path_span: Span,
         call_span: Span,
-        args: &[P<Expr>],
+        args: &[Box<Expr>],
     ) {
         if def_id.is_local() {
             // Doing analysis on local `DefId`s would cause infinite recursion.
@@ -2386,7 +2388,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
 
         // Look for associated items in the current trait.
         if let Some((module, _)) = self.current_trait_ref
-            && let Ok(binding) = self.r.maybe_resolve_ident_in_module(
+            && let Ok(binding) = self.r.cm().maybe_resolve_ident_in_module(
                 ModuleOrUniformRoot::Module(module),
                 ident,
                 ns,
@@ -2476,19 +2478,10 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                     } else {
                         // Items from the prelude
                         if !module.no_implicit_prelude {
-                            let extern_prelude = self.r.extern_prelude.clone();
-                            names.extend(extern_prelude.iter().flat_map(|(ident, _)| {
-                                self.r
-                                    .cstore_mut()
-                                    .maybe_process_path_extern(self.r.tcx, ident.name)
-                                    .and_then(|crate_id| {
-                                        let crate_mod =
-                                            Res::Def(DefKind::Mod, crate_id.as_def_id());
-
-                                        filter_fn(crate_mod).then(|| {
-                                            TypoSuggestion::typo_from_ident(*ident, crate_mod)
-                                        })
-                                    })
+                            names.extend(self.r.extern_prelude.keys().flat_map(|ident| {
+                                let res = Res::Def(DefKind::Mod, CRATE_DEF_ID.to_def_id());
+                                filter_fn(res)
+                                    .then_some(TypoSuggestion::typo_from_ident(ident.0, res))
                             }));
 
                             if let Some(prelude) = self.r.prelude {
@@ -2648,7 +2641,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                 if let Some(module_def_id) = name_binding.res().module_like_def_id() {
                     // form the path
                     let mut path_segments = path_segments.clone();
-                    path_segments.push(ast::PathSegment::from_ident(ident));
+                    path_segments.push(ast::PathSegment::from_ident(ident.0));
                     let doc_visible = doc_visible
                         && (module_def_id.is_local() || !r.tcx.is_doc_hidden(module_def_id));
                     if module_def_id == def_id {
@@ -2687,7 +2680,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
             enum_module.for_each_child(self.r, |_, ident, _, name_binding| {
                 if let Res::Def(DefKind::Ctor(CtorOf::Variant, kind), def_id) = name_binding.res() {
                     let mut segms = enum_import_suggestion.path.segments.clone();
-                    segms.push(ast::PathSegment::from_ident(ident));
+                    segms.push(ast::PathSegment::from_ident(ident.0));
                     let path = Path { span: name_binding.span, segments: segms, tokens: None };
                     variants.push((path, def_id, kind));
                 }
@@ -3794,7 +3787,7 @@ fn mk_where_bound_predicate(
             ident: last.ident,
             gen_args: None,
             kind: ast::AssocItemConstraintKind::Equality {
-                term: ast::Term::Ty(ast::ptr::P(ast::Ty {
+                term: ast::Term::Ty(Box::new(ast::Ty {
                     kind: ast::TyKind::Path(None, poly_trait_ref.trait_ref.path.clone()),
                     id: DUMMY_NODE_ID,
                     span: DUMMY_SP,
@@ -3811,7 +3804,7 @@ fn mk_where_bound_predicate(
             Some(_) => return None,
             None => {
                 second_last.args =
-                    Some(ast::ptr::P(ast::GenericArgs::AngleBracketed(ast::AngleBracketedArgs {
+                    Some(Box::new(ast::GenericArgs::AngleBracketed(ast::AngleBracketedArgs {
                         args: ThinVec::from([added_constraint]),
                         span: DUMMY_SP,
                     })));
@@ -3824,7 +3817,7 @@ fn mk_where_bound_predicate(
 
     let new_where_bound_predicate = ast::WhereBoundPredicate {
         bound_generic_params: ThinVec::new(),
-        bounded_ty: ast::ptr::P(ty.clone()),
+        bounded_ty: Box::new(ty.clone()),
         bounds: vec![ast::GenericBound::Trait(ast::PolyTraitRef {
             bound_generic_params: ThinVec::new(),
             modifiers: ast::TraitBoundModifiers::NONE,

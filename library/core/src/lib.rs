@@ -199,6 +199,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(loongarch_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(mips_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(powerpc_target_feature))]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(nvptx_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(riscv_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(rtm_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(s390x_target_feature))]

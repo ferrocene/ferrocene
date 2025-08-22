@@ -1,7 +1,5 @@
 # Compiletest directives
 
-<!-- toc -->
-
 <!--
 FIXME(jieyouxu) completely revise this chapter.
 -->
@@ -299,6 +297,7 @@ See [Pretty-printer](compiletest.md#pretty-printer-tests).
 - [`should-ice`](compiletest.md#incremental-tests) — incremental cfail should
       ICE
 - [`reference`] — an annotation linking to a rule in the reference
+- `disable-gdb-pretty-printers` — disable gdb pretty printers for debuginfo tests
 
 [`reference`]: https://github.com/rust-lang/reference/blob/master/docs/authoring.md#test-rule-annotations
 
@@ -359,7 +358,7 @@ described below:
   - Example: `x86_64-unknown-linux-gnu`
 
 See
-[`tests/ui/commandline-argfile.rs`](https://github.com/rust-lang/rust/blob/master/tests/ui/argfile/commandline-argfile.rs)
+[`tests/ui/argfile/commandline-argfile.rs`](https://github.com/rust-lang/rust/blob/master/tests/ui/argfile/commandline-argfile.rs)
 for an example of a test that uses this substitution.
 
 [output normalization]: ui.md#normalization

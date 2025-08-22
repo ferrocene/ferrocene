@@ -840,6 +840,15 @@ pub macro version($early_dcx: expr, $binary: literal, $matches: expr) {
     fn unw(x: Option<&str>) -> &str {
         x.unwrap_or("unknown")
     }
+
+    // Ferrocene annotation: During libcore certification we determined there were coverage inaccuracies
+    // when the `channel` is not set to `nightly`. Our research so far has shown this as the most minimal fix.
+    // First half (second below)
+    let cfg_release = unw(option_env!("CFG_RELEASE"));
+    let replaced_cfg_release = cfg_release.replace("-dev", "-nightly")
+            .replace("-beta", "-nightly")
+            .replace("-stable", "-nightly");
+
     $crate::version_at_macro_invocation(
         $early_dcx,
         $binary,
@@ -847,7 +856,14 @@ pub macro version($early_dcx: expr, $binary: literal, $matches: expr) {
         unw(option_env!("CFG_VERSION")),
         unw(option_env!("CFG_VER_HASH")),
         unw(option_env!("CFG_VER_DATE")),
-        unw(option_env!("CFG_RELEASE")),
+        // Ferrocene annotation: During libcore certification we determined there were coverage inaccuracies
+        // when the `channel` is not set to `nightly`. Our research so far has shown this as the most minimal fix.
+        // Second half (first above)
+        if env::var("FERROCENE_CODE_COV").is_ok() {
+            &replaced_cfg_release
+        } else {
+            cfg_release
+        }
     )
 }
 

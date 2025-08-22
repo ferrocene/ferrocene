@@ -7,45 +7,14 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-<<<<<<< HEAD
 use ignore::Walk;
 
-const EXPECTED_TEST_FILE_EXTENSIONS: &[&str] = &[
-    "rs",     // test source files
-    "stderr", // expected stderr file, corresponds to a rs file
-    "svg",    // expected svg file, corresponds to a rs file, equivalent to stderr
-    "stdout", // expected stdout file, corresponds to a rs file
-    "fixed",  // expected source file after applying fixes
-    "md",     // test directory descriptions
-    "ftl",    // translation tests
-];
+const ISSUES_TXT_HEADER: &str = r#"============================================================
+    ⚠️⚠️⚠️NOTHING SHOULD EVER BE ADDED TO THIS LIST⚠️⚠️⚠️
+============================================================
+"#;
 
-const EXTENSION_EXCEPTION_PATHS: &[&str] = &[
-    "tests/ui/asm/named-asm-labels.s", // loading an external asm file to test named labels lint
-    "tests/ui/codegen/mismatched-data-layout.json", // testing mismatched data layout w/ custom targets
-    "tests/ui/check-cfg/my-awesome-platform.json",  // testing custom targets with cfgs
-    "tests/ui/argfile/commandline-argfile-badutf8.args", // passing args via a file
-    "tests/ui/argfile/commandline-argfile.args",    // passing args via a file
-    "tests/ui/crate-loading/auxiliary/libfoo.rlib", // testing loading a manually created rlib
-    "tests/ui/include-macros/data.bin", // testing including data with the include macros
-    "tests/ui/include-macros/file.txt", // testing including data with the include macros
-    "tests/ui/macros/macro-expanded-include/file.txt", // testing including data with the include macros
-    "tests/ui/macros/not-utf8.bin", // testing including data with the include macros
-    "tests/ui/macros/syntax-extension-source-utils-files/includeme.fragment", // more include
-    "tests/ui/proc-macro/auxiliary/included-file.txt", // more include
-    "tests/ui/unpretty/auxiliary/data.txt", // more include
-    "tests/ui/invalid/foo.natvis.xml", // sample debugger visualizer
-    "tests/ui/sanitizer/dataflow-abilist.txt", // dataflow sanitizer ABI list file
-    "tests/ui/shell-argfiles/shell-argfiles.args", // passing args via a file
-    "tests/ui/shell-argfiles/shell-argfiles-badquotes.args", // passing args via a file
-    "tests/ui/shell-argfiles/shell-argfiles-via-argfile-shell.args", // passing args via a file
-    "tests/ui/shell-argfiles/shell-argfiles-via-argfile.args", // passing args via a file
-    "tests/ui/std/windows-bat-args1.bat", // tests escaping arguments through batch files
-    "tests/ui/std/windows-bat-args2.bat", // tests escaping arguments through batch files
-    "tests/ui/std/windows-bat-args3.bat", // tests escaping arguments through batch files
-];
-
-fn check_entries(tests_path: &Path, bad: &mut bool) {
+fn check_stray_ferrocene_files(tests_path: &Path, bad: &mut bool) {
     let mut directories: HashMap<PathBuf, u32> = HashMap::new();
 
     for entry in Walk::new(tests_path.join("ui")).flatten() {
@@ -66,17 +35,8 @@ fn check_entries(tests_path: &Path, bad: &mut bool) {
 }
 
 pub fn check(root_path: &Path, bless: bool, bad: &mut bool) {
-    let issues_txt_header = r#"============================================================
-=======
-const ISSUES_TXT_HEADER: &str = r#"============================================================
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
-    ⚠️⚠️⚠️NOTHING SHOULD EVER BE ADDED TO THIS LIST⚠️⚠️⚠️
-============================================================
-"#;
-
-pub fn check(root_path: &Path, bless: bool, bad: &mut bool) {
     let path = &root_path.join("tests");
-    check_entries(path, bad);
+    check_stray_ferrocene_files(path, bad);
 
     // the list of files in ui tests that are allowed to start with `issue-XXXX`
     // BTreeSet because we would like a stable ordering so --bless works

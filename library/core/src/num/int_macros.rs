@@ -191,12 +191,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-<<<<<<< HEAD
         #[cfg(not(feature = "ferrocene_certified"))]
-        pub const fn isolate_most_significant_one(self) -> Self {
-=======
         pub const fn isolate_highest_one(self) -> Self {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             self & (((1 as $SelfT) << (<$SelfT>::BITS - 1)).wrapping_shr(self.leading_zeros()))
         }
 
@@ -217,12 +213,8 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-<<<<<<< HEAD
         #[cfg(not(feature = "ferrocene_certified"))]
-        pub const fn isolate_least_significant_one(self) -> Self {
-=======
         pub const fn isolate_lowest_one(self) -> Self {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             self & self.wrapping_neg()
         }
 

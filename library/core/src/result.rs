@@ -2211,12 +2211,8 @@ impl<T, E> const ops::Try for Result<T, E> {
 
 #[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T, E, F: ~const From<E>> const ops::FromResidual<Result<convert::Infallible, E>>
-=======
 impl<T, E, F: [const] From<E>> const ops::FromResidual<Result<convert::Infallible, E>>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     for Result<T, F>
 {
     #[inline]
@@ -2230,12 +2226,8 @@ impl<T, E, F: [const] From<E>> const ops::FromResidual<Result<convert::Infallibl
 #[diagnostic::do_not_recommend]
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
-impl<T, E, F: ~const From<E>> const ops::FromResidual<ops::Yeet<E>> for Result<T, F> {
-=======
 impl<T, E, F: [const] From<E>> const ops::FromResidual<ops::Yeet<E>> for Result<T, F> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     #[inline]
     fn from_residual(ops::Yeet(e): ops::Yeet<E>) -> Self {
         Err(From::from(e))

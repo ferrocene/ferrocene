@@ -37,6 +37,10 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "aarch64-unknown-ferrocene.facade",
     "thumbv7em-ferrocene.facade-eabi",
     "thumbv7em-ferrocene.facade-eabihf",
+    "aarch64-unknown-ferrocene.certified",
+    "x86_64-unknown-ferrocene.certified",
+    "thumbv7em-ferrocene.certified-eabi",
+    "thumbv7em-ferrocene.certified-eabihf",
     // just a dummy comment so the list doesn't get onelined
 ];
 

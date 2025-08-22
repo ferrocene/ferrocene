@@ -276,6 +276,8 @@ jobs:
       FERROCENE_CODE_COV: 1
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
+        sed -i -e "s/profile = 'ferrocene-dist'/profile = 'compiler'/g" bootstrap.toml
+        sed -i -e "s/^\\[build\\]/[build]\\nprofiler = true\\nmetrics=true/g" bootstrap.toml
         ./x.py run ferrocene/tools/coverage-of-subset
         ./x.py test --no-doc --coverage=library library/core -v
     steps:

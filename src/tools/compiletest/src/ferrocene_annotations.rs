@@ -251,6 +251,7 @@ fn sample_config() -> Config {
         profiler_runtime: Default::default(),
         diff_command: Default::default(),
         minicore_path: Default::default(),
+        query_rustc_path: Default::default(),
     }
 }
 

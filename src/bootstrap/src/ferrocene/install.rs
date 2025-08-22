@@ -153,13 +153,13 @@ install!((self, builder, _config),
     };
     Cargo, alias = "cargo", Self::should_build(_config), only_hosts: true, {
         let tarball = builder
-            .ensure(dist::Cargo { compiler: self.compiler, target: self.target })
+            .ensure(dist::Cargo { build_compiler: self.compiler, target: self.target })
             .expect("missing cargo");
         install(builder, "cargo", self.compiler.stage, Some(self.target), &tarball);
     };
     RustAnalyzer, alias = "rust-analyzer", Self::should_build(_config), only_hosts: true, {
         if let Some(tarball) =
-            builder.ensure(dist::RustAnalyzer { compiler: self.compiler, target: self.target })
+            builder.ensure(dist::RustAnalyzer { build_compiler: self.compiler, target: self.target })
         {
             install(builder, "rust-analyzer", self.compiler.stage, Some(self.target), &tarball);
         } else {
@@ -170,12 +170,12 @@ install!((self, builder, _config),
     };
     Clippy, alias = "clippy", Self::should_build(_config), only_hosts: true, {
         let tarball = builder
-            .ensure(dist::Clippy { compiler: self.compiler, target: self.target })
+            .ensure(dist::Clippy { build_compiler: self.compiler, target: self.target })
             .expect("missing clippy");
         install(builder, "clippy", self.compiler.stage, Some(self.target), &tarball);
     };
     Miri, alias = "miri", Self::should_build(_config), only_hosts: true, {
-        if let Some(tarball) = builder.ensure(dist::Miri { compiler: self.compiler, target: self.target }) {
+        if let Some(tarball) = builder.ensure(dist::Miri { build_compiler: self.compiler, target: self.target }) {
             install(builder, "miri", self.compiler.stage, Some(self.target), &tarball);
         } else {
             // Miri is only available on nightly
@@ -195,7 +195,7 @@ install!((self, builder, _config),
     };
     Rustfmt, alias = "rustfmt", Self::should_build(_config), only_hosts: true, {
         if let Some(tarball) = builder.ensure(dist::Rustfmt {
-            compiler: self.compiler,
+            build_compiler: self.compiler,
             target: self.target
         }) {
             install(builder, "rustfmt", self.compiler.stage, Some(self.target), &tarball);
@@ -212,9 +212,8 @@ install!((self, builder, _config),
         install(builder, "rustc", self.compiler.stage, Some(self.target), &tarball);
     };
     RustcCodegenCranelift, alias = "rustc-codegen-cranelift", Self::should_build(_config), only_hosts: true, {
-        if let Some(tarball) = builder.ensure(dist::CodegenBackend {
-            compiler: self.compiler,
-            backend: crate::CodegenBackendKind::Cranelift,
+        if let Some(tarball) = builder.ensure(dist::CraneliftCodegenBackend {
+                build_compiler: self.compiler,
         }) {
             install(builder, "rustc-codegen-cranelift", self.compiler.stage, Some(self.target), &tarball);
         } else {

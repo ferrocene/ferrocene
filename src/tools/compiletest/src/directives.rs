@@ -258,13 +258,9 @@ mod directives {
     pub const ADD_CORE_STUBS: &'static str = "add-core-stubs";
     // This isn't a real directive, just one that is probably mistyped often
     pub const INCORRECT_COMPILER_FLAGS: &'static str = "compiler-flags";
-<<<<<<< HEAD
-
-    // FERROCENE ADDITIONS:
-    pub const FERROCENE_EXECUTE_IN_TEMP: &'static str = "ferrocene-execute-in-temp";
-=======
     pub const DISABLE_GDB_PRETTY_PRINTERS: &'static str = "disable-gdb-pretty-printers";
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+    pub const FERROCENE_EXECUTE_IN_TEMP: &'static str = "ferrocene-execute-in-temp";
 }
 
 impl TestProps {
@@ -679,13 +675,14 @@ impl TestProps {
 
                     config.set_name_directive(
                         ln,
-<<<<<<< HEAD
-                        FERROCENE_EXECUTE_IN_TEMP,
-                        &mut self.ferrocene_execute_in_temp,
-=======
                         DISABLE_GDB_PRETTY_PRINTERS,
                         &mut self.disable_gdb_pretty_printers,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+                    );
+
+                    config.set_name_directive(
+                        ln,
+                        FERROCENE_EXECUTE_IN_TEMP,
+                        &mut self.ferrocene_execute_in_temp,
                     );
                 },
             );

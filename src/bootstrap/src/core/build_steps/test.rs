@@ -407,12 +407,8 @@ impl Step for Cargo {
                 crates: vec!["cargo".into()],
                 target: self.host.triple.to_string(),
                 host: self.host.triple.to_string(),
-<<<<<<< HEAD
-                stage,
-                ferrocene_variant: variant.for_metrics(),
-=======
                 stage: self.build_compiler.stage + 1,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+                ferrocene_variant: variant.for_metrics(),
             },
             builder,
         );

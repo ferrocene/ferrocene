@@ -610,6 +610,7 @@ impl Config {
             ccache: build_ccache,
             exclude: build_exclude,
             compiletest_allow_stage0: build_compiletest_allow_stage0,
+            uv,
         } = toml.build.unwrap_or_default();
 
         let Install {
@@ -810,74 +811,6 @@ impl Config {
 
         config.change_id = toml.change_id.inner;
 
-<<<<<<< HEAD
-        let Build {
-            description,
-            build,
-            host,
-            target,
-            build_dir,
-            cargo,
-            rustc,
-            rustfmt,
-            cargo_clippy,
-            docs,
-            compiler_docs,
-            library_docs_private_items,
-            docs_minification,
-            submodules,
-            gdb,
-            lldb,
-            nodejs,
-            npm,
-            python,
-            uv,
-            reuse,
-            locked_deps,
-            vendor,
-            full_bootstrap,
-            bootstrap_cache_path,
-            extended,
-            tools,
-            tool,
-            verbose,
-            sanitizers,
-            profiler,
-            cargo_native_static,
-            low_priority,
-            configure_args,
-            local_rebuild,
-            print_step_timings,
-            print_step_rusage,
-            check_stage,
-            doc_stage,
-            build_stage,
-            test_stage,
-            install_stage,
-            dist_stage,
-            bench_stage,
-            patch_binaries_for_nix,
-            // This field is only used by bootstrap.py
-            metrics: _,
-            android_ndk,
-            optimized_compiler_builtins,
-            jobs,
-            compiletest_diff_tool,
-            compiletest_allow_stage0,
-            compiletest_use_stage0_libtest,
-            tidy_extra_checks,
-            ccache,
-            exclude,
-        } = toml.build.unwrap_or_default();
-
-        let mut paths: Vec<PathBuf> = flags_skip.into_iter().chain(flags_exclude).collect();
-
-        if let Some(exclude) = exclude {
-            paths.extend(exclude);
-        }
-
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         config.skip = paths
             .into_iter()
             .map(|p| {
@@ -967,42 +900,12 @@ impl Config {
             config.hosts.clone()
         };
 
-<<<<<<< HEAD
-        config.nodejs = nodejs.map(PathBuf::from);
-        config.npm = npm.map(PathBuf::from);
-        config.gdb = gdb.map(PathBuf::from);
-        config.lldb = lldb.map(PathBuf::from);
-        config.python = python.map(PathBuf::from);
-        config.uv = uv.map(PathBuf::from);
-        config.reuse = reuse.map(PathBuf::from);
-        config.submodules = submodules;
-        config.android_ndk = android_ndk;
-        set(&mut config.low_priority, low_priority);
-        set(&mut config.compiler_docs, compiler_docs);
-        set(&mut config.library_docs_private_items, library_docs_private_items);
-        set(&mut config.docs_minification, docs_minification);
-        set(&mut config.docs, docs);
-        set(&mut config.locked_deps, locked_deps);
-        set(&mut config.full_bootstrap, full_bootstrap);
-        set(&mut config.extended, extended);
-        config.tools = tools;
-        set(&mut config.tool, tool);
-        set(&mut config.verbose, verbose);
-        set(&mut config.sanitizers, sanitizers);
-        set(&mut config.profiler, profiler);
-        set(&mut config.cargo_native_static, cargo_native_static);
-        set(&mut config.configure_args, configure_args);
-        set(&mut config.local_rebuild, local_rebuild);
-        set(&mut config.print_step_timings, print_step_timings);
-        set(&mut config.print_step_rusage, print_step_rusage);
-
-        config.verbose = cmp::max(config.verbose, flags_verbose as usize);
-=======
         config.nodejs = build_nodejs.map(PathBuf::from);
         config.npm = build_npm.map(PathBuf::from);
         config.gdb = build_gdb.map(PathBuf::from);
         config.lldb = build_lldb.map(PathBuf::from);
         config.python = build_python.map(PathBuf::from);
+        config.uv = uv.map(PathBuf::from);
         config.reuse = build_reuse.map(PathBuf::from);
         config.submodules = build_submodules;
         config.android_ndk = build_android_ndk;
@@ -1025,7 +928,6 @@ impl Config {
         set(&mut config.print_step_timings, build_print_step_timings);
         set(&mut config.print_step_rusage, build_print_step_rusage);
         config.patch_binaries_for_nix = build_patch_binaries_for_nix;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
         // Verbose flag is a good default for `rust.verbose-tests`.
         config.verbose_tests = config.is_verbose();

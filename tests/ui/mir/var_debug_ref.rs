@@ -22,3 +22,5 @@ fn main() {
     // It is the only reference to `f` remaining.
     let x = <() as ::Fun>::FUN;
 }
+
+// ferrocene-annotations: um_rustc_C_codegen_units

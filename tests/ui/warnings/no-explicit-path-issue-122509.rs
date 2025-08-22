@@ -21,3 +21,5 @@ fn main() {
     a::two();
     b::three();
 }
+
+// ferrocene-annotations: um_rustc_C_codegen_units

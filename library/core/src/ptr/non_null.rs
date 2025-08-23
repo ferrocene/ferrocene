@@ -1378,9 +1378,6 @@ impl<T: PointeeSized> NonNull<T> {
     }
 }
 
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 impl<T> NonNull<T> {
     /// Casts from a type to its maybe-uninitialized version.
     #[must_use]
@@ -1403,7 +1400,7 @@ impl<T> NonNull<MaybeUninit<T>> {
     }
 }
 
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> NonNull<[T]> {
     /// Creates a non-null raw slice from a thin pointer and a length.
     ///

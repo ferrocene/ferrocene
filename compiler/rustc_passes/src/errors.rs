@@ -75,62 +75,6 @@ pub(crate) struct IgnoredAttrWithMacro<'a> {
     pub sym: &'a str,
 }
 
-<<<<<<< HEAD
-#[derive(LintDiagnostic)]
-#[diag(passes_ignored_attr)]
-pub(crate) struct IgnoredAttr<'a> {
-    pub sym: &'a str,
-}
-
-#[derive(LintDiagnostic)]
-#[diag(passes_inline_ignored_function_prototype)]
-pub(crate) struct IgnoredInlineAttrFnProto;
-
-#[derive(LintDiagnostic)]
-#[diag(passes_inline_ignored_constants)]
-#[warning]
-#[note]
-pub(crate) struct IgnoredInlineAttrConstants;
-
-#[derive(Diagnostic)]
-#[diag(passes_inline_not_fn_or_closure, code = E0518)]
-pub(crate) struct InlineNotFnOrClosure {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label]
-    pub defn_span: Span,
-}
-
-/// "coverage attribute not allowed here"
-#[derive(Diagnostic)]
-#[diag(passes_coverage_attribute_not_allowed, code = E0788)]
-#[cfg(not(feature = "ferrocene_allow_coverage_attribute_everywhere"))]
-pub(crate) struct CoverageAttributeNotAllowed {
-    #[primary_span]
-    pub attr_span: Span,
-    /// "not a function, impl block, or module"
-    #[label(passes_not_fn_impl_mod)]
-    pub not_fn_impl_mod: Option<Span>,
-    /// "function has no body"
-    #[label(passes_no_body)]
-    pub no_body: Option<Span>,
-    /// "coverage attribute can be applied to a function (with body), impl block, or module"
-    #[help]
-    pub help: (),
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_optimize_invalid_target)]
-pub(crate) struct OptimizeInvalidTarget {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label]
-    pub defn_span: Span,
-    pub on_crate: bool,
-}
-
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[derive(Diagnostic)]
 #[diag(passes_should_be_applied_to_fn)]
 pub(crate) struct AttrShouldBeAppliedToFn {

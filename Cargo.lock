@@ -4260,7 +4260,7 @@ dependencies = [
  "regex",
  "serde_json",
  "similar",
- "wasmparser 0.219.2",
+ "wasmparser 0.236.1",
 ]
 
 [[package]]
@@ -4457,6 +4457,7 @@ dependencies = [
 name = "rustc_attr_parsing"
 version = "0.0.0"
 dependencies = [
+ "itertools",
  "rustc_abi",
  "rustc_ast",
  "rustc_ast_pretty",
@@ -4599,6 +4600,7 @@ dependencies = [
  "rustc_hir",
  "rustc_incremental",
  "rustc_index",
+ "rustc_lint_defs",
  "rustc_macros",
  "rustc_metadata",
  "rustc_middle",
@@ -4866,6 +4868,7 @@ dependencies = [
 name = "rustc_hir"
 version = "0.0.0"
 dependencies = [
+ "bitflags",
  "odht",
  "rustc_abi",
  "rustc_arena",
@@ -5284,7 +5287,6 @@ name = "rustc_monomorphize"
 version = "0.0.0"
 dependencies = [
  "rustc_abi",
- "rustc_ast",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -5293,7 +5295,6 @@ dependencies = [
  "rustc_middle",
  "rustc_session",
  "rustc_span",
- "rustc_symbol_mangling",
  "rustc_target",
  "serde",
  "serde_json",
@@ -6420,9 +6421,9 @@ dependencies = [
 
 [[package]]
 name = "sysinfo"
-version = "0.36.1"
+version = "0.37.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "252800745060e7b9ffb7b2badbd8b31cfa4aa2e61af879d0a3bf2a317c20217d"
+checksum = "07cec4dc2d2e357ca1e610cfb07de2fa7a10fc3e9fe89f72545f3d244ea87753"
 dependencies = [
  "libc",
  "objc2-core-foundation",
@@ -7448,6 +7449,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a9b1e81f3eb254cf7404a82cee6926a4a3ccc5aad80cc3d43608a070c67aa1d7"
 dependencies = [
  "bitflags",
+ "indexmap",
 ]
 
 [[package]]

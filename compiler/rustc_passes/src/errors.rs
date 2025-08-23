@@ -75,6 +75,7 @@ pub(crate) struct IgnoredAttrWithMacro<'a> {
     pub sym: &'a str,
 }
 
+<<<<<<< HEAD
 #[derive(LintDiagnostic)]
 #[diag(passes_ignored_attr)]
 pub(crate) struct IgnoredAttr<'a> {
@@ -128,6 +129,8 @@ pub(crate) struct OptimizeInvalidTarget {
     pub on_crate: bool,
 }
 
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[derive(Diagnostic)]
 #[diag(passes_should_be_applied_to_fn)]
 pub(crate) struct AttrShouldBeAppliedToFn {
@@ -136,25 +139,6 @@ pub(crate) struct AttrShouldBeAppliedToFn {
     #[label]
     pub defn_span: Span,
     pub on_crate: bool,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_should_be_applied_to_fn, code = E0739)]
-pub(crate) struct TrackedCallerWrongLocation {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label]
-    pub defn_span: Span,
-    pub on_crate: bool,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_should_be_applied_to_struct_enum, code = E0701)]
-pub(crate) struct NonExhaustiveWrongLocation {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label]
-    pub defn_span: Span,
 }
 
 #[derive(Diagnostic)]
@@ -174,10 +158,6 @@ pub(crate) struct AttrShouldBeAppliedToTrait {
     #[label]
     pub defn_span: Span,
 }
-
-#[derive(LintDiagnostic)]
-#[diag(passes_target_feature_on_statement)]
-pub(crate) struct TargetFeatureOnStatement;
 
 #[derive(Diagnostic)]
 #[diag(passes_should_be_applied_to_static)]
@@ -418,24 +398,6 @@ pub(crate) struct DocTestUnknownInclude {
 pub(crate) struct DocInvalid;
 
 #[derive(Diagnostic)]
-#[diag(passes_pass_by_value)]
-pub(crate) struct PassByValue {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_allow_incoherent_impl)]
-pub(crate) struct AllowIncoherentImpl {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag(passes_has_incoherent_inherent_impl)]
 pub(crate) struct HasIncoherentInherentImpl {
     #[primary_span]
@@ -451,25 +413,12 @@ pub(crate) struct BothFfiConstAndPure {
     pub attr_span: Span,
 }
 
-#[derive(Diagnostic)]
-#[diag(passes_ffi_pure_invalid_target, code = E0755)]
-pub(crate) struct FfiPureInvalidTarget {
-    #[primary_span]
-    pub attr_span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_ffi_const_invalid_target, code = E0756)]
-pub(crate) struct FfiConstInvalidTarget {
-    #[primary_span]
-    pub attr_span: Span,
-}
-
 #[derive(LintDiagnostic)]
 #[diag(passes_must_use_no_effect)]
 pub(crate) struct MustUseNoEffect {
-    pub article: &'static str,
-    pub target: rustc_hir::Target,
+    pub target: &'static str,
+    #[suggestion(code = "", applicability = "machine-applicable", style = "tool-only")]
+    pub attr_span: Span,
 }
 
 #[derive(Diagnostic)]
@@ -482,15 +431,6 @@ pub(crate) struct MustNotSuspend {
 }
 
 #[derive(LintDiagnostic)]
-#[diag(passes_cold)]
-#[warning]
-pub(crate) struct Cold {
-    #[label]
-    pub span: Span,
-    pub on_crate: bool,
-}
-
-#[derive(LintDiagnostic)]
 #[diag(passes_link)]
 #[warning]
 pub(crate) struct Link {
@@ -498,38 +438,9 @@ pub(crate) struct Link {
     pub span: Option<Span>,
 }
 
-#[derive(LintDiagnostic)]
-#[diag(passes_link_name)]
-#[warning]
-pub(crate) struct LinkName<'a> {
-    #[help]
-    pub help_span: Option<Span>,
-    #[label]
-    pub span: Span,
-    pub value: &'a str,
-}
-
 #[derive(Diagnostic)]
 #[diag(passes_no_link)]
 pub(crate) struct NoLink {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_export_name)]
-pub(crate) struct ExportName {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_rustc_layout_scalar_valid_range_not_struct)]
-pub(crate) struct RustcLayoutScalarValidRangeNotStruct {
     #[primary_span]
     pub attr_span: Span,
     #[label]
@@ -577,42 +488,6 @@ pub(crate) struct RustcDirtyClean {
     pub span: Span,
 }
 
-#[derive(LintDiagnostic)]
-#[diag(passes_link_section)]
-#[warning]
-pub(crate) struct LinkSection {
-    #[label]
-    pub span: Span,
-}
-
-#[derive(LintDiagnostic)]
-#[diag(passes_no_mangle_foreign)]
-#[warning]
-#[note]
-pub(crate) struct NoMangleForeign {
-    #[label]
-    pub span: Span,
-    #[suggestion(code = "", applicability = "machine-applicable")]
-    pub attr_span: Span,
-    pub foreign_item_kind: &'static str,
-}
-
-#[derive(LintDiagnostic)]
-#[diag(passes_no_mangle)]
-#[warning]
-pub(crate) struct NoMangle {
-    #[label]
-    pub span: Span,
-}
-
-#[derive(LintDiagnostic)]
-#[diag(passes_align_on_fields)]
-#[warning]
-pub(crate) struct AlignOnFields {
-    #[label]
-    pub span: Span,
-}
-
 #[derive(Diagnostic)]
 #[diag(passes_repr_conflicting, code = E0566)]
 pub(crate) struct ReprConflicting {
@@ -634,18 +509,8 @@ pub(crate) struct InvalidReprAlignForTarget {
 pub(crate) struct ReprConflictingLint;
 
 #[derive(Diagnostic)]
-#[diag(passes_used_static)]
-pub(crate) struct UsedStatic {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label]
-    pub span: Span,
-    pub target: &'static str,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_allow_internal_unstable)]
-pub(crate) struct AllowInternalUnstable {
+#[diag(passes_macro_only_attribute)]
+pub(crate) struct MacroOnlyAttribute {
     #[primary_span]
     pub attr_span: Span,
     #[label]
@@ -688,35 +553,8 @@ pub(crate) struct RustcAllowConstFnUnstable {
 }
 
 #[derive(Diagnostic)]
-#[diag(passes_rustc_unstable_feature_bound)]
-pub(crate) struct RustcUnstableFeatureBound {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_rustc_std_internal_symbol)]
-pub(crate) struct RustcStdInternalSymbol {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag(passes_rustc_pub_transparent)]
 pub(crate) struct RustcPubTransparent {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_rustc_force_inline)]
-pub(crate) struct RustcForceInline {
     #[primary_span]
     pub attr_span: Span,
     #[label]
@@ -730,53 +568,6 @@ pub(crate) struct RustcForceInlineCoro {
     pub attr_span: Span,
     #[label]
     pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_link_ordinal)]
-pub(crate) struct LinkOrdinal {
-    #[primary_span]
-    pub attr_span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_confusables)]
-pub(crate) struct Confusables {
-    #[primary_span]
-    pub attr_span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_coroutine_on_non_closure)]
-pub(crate) struct CoroutineOnNonClosure {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_linkage)]
-pub(crate) struct Linkage {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_stability_promotable)]
-pub(crate) struct StabilityPromotable {
-    #[primary_span]
-    pub attr_span: Span,
-}
-
-#[derive(LintDiagnostic)]
-#[diag(passes_deprecated)]
-pub(crate) struct Deprecated;
-
-#[derive(LintDiagnostic)]
-#[diag(passes_macro_use)]
-pub(crate) struct MacroUse {
-    pub name: Symbol,
 }
 
 #[derive(LintDiagnostic)]
@@ -1279,13 +1070,6 @@ pub(crate) struct IncorrectCrateType {
 pub(crate) struct UselessAssignment<'a> {
     pub is_field_assign: bool,
     pub ty: Ty<'a>,
-}
-
-#[derive(LintDiagnostic)]
-#[diag(passes_only_has_effect_on)]
-pub(crate) struct OnlyHasEffectOn {
-    pub attr_name: String,
-    pub target_name: String,
 }
 
 #[derive(LintDiagnostic)]
@@ -1841,27 +1625,4 @@ pub(crate) struct ReprAlignShouldBeAlign {
     #[help]
     pub span: Span,
     pub item: &'static str,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_align_should_be_repr_align)]
-pub(crate) struct AlignShouldBeReprAlign {
-    #[primary_span]
-    #[suggestion(
-        style = "verbose",
-        applicability = "machine-applicable",
-        code = "#[repr(align({align_bytes}))]"
-    )]
-    pub span: Span,
-    pub item: &'static str,
-    pub align_bytes: u64,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_align_attr_application)]
-pub(crate) struct AlignAttrApplication {
-    #[primary_span]
-    pub hint_span: Span,
-    #[label]
-    pub span: Span,
 }

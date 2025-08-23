@@ -1389,9 +1389,10 @@ impl Step for Miri {
         // This prevents miri from being built for "dist" or "install"
         // on the stable/beta channels. It is a nightly-only tool and should
         // not be included.
-        if !builder.build.unstable_features() {
-            return None;
-        }
+        // Ferrocene annotation: We want miri on stable/beta channels.
+        // if !builder.build.unstable_features() {
+        //     return None;
+        // }
 
         let compilers =
             RustcPrivateCompilers::from_build_compiler(builder, self.build_compiler, self.target);

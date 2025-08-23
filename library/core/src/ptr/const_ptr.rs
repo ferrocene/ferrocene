@@ -1471,18 +1471,17 @@ impl<T: PointeeSized> *const T {
     }
 }
 
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 impl<T> *const T {
     /// Casts from a type to its maybe-uninitialized version.
     #[must_use]
     #[inline(always)]
     #[unstable(feature = "cast_maybe_uninit", issue = "145036")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn cast_uninit(self) -> *const MaybeUninit<T> {
         self as _
     }
 }
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> *const MaybeUninit<T> {
     /// Casts from a maybe-uninitialized type to its initialized version.
     ///
@@ -1496,7 +1495,7 @@ impl<T> *const MaybeUninit<T> {
     }
 }
 
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> *const [T] {
     /// Returns the length of a raw slice.
     ///
@@ -1614,9 +1613,6 @@ impl<T> *const [T] {
     }
 }
 
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 impl<T> *const T {
     /// Casts from a pointer-to-`T` to a pointer-to-`[T; N]`.
     #[inline]
@@ -1626,7 +1622,7 @@ impl<T> *const T {
     }
 }
 
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T, const N: usize> *const [T; N] {
     /// Returns a raw pointer to the array's buffer.
     ///

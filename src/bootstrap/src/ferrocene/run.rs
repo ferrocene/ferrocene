@@ -21,7 +21,7 @@ pub(crate) struct TraceabilityMatrix {
 
 impl Step for TraceabilityMatrix {
     type Output = PathBuf;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
     const DEFAULT: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

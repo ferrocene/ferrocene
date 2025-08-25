@@ -1165,7 +1165,8 @@ impl Build {
                 | Mode::ToolBootstrap
                 | Mode::ToolTarget
                 | Mode::ToolStd
-                | Mode::ToolRustc,
+                | Mode::ToolRustc
+                | Mode::ToolCustom { .. },
             )
             | None => host_and_stage.stage + 1,
         };

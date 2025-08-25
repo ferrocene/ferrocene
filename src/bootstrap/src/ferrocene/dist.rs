@@ -39,7 +39,7 @@ fn add_copyright_files(subsetter: &mut Subsetter<'_>, builder: &Builder<'_>) {
 impl Step for Docs {
     type Output = Vec<GeneratedTarball>;
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         let default = run.builder.config.docs;
@@ -71,7 +71,7 @@ pub(crate) struct DocsDoctrees {
 impl Step for DocsDoctrees {
     type Output = GeneratedTarball;
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         let default = run.builder.config.docs;
@@ -100,7 +100,7 @@ pub(crate) struct SourceTarball;
 impl Step for SourceTarball {
     type Output = Vec<GeneratedTarball>;
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         let builder = run.builder;
@@ -351,7 +351,7 @@ pub(crate) struct SelfTest {
 impl Step for SelfTest {
     type Output = GeneratedTarball;
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.alias("ferrocene-self-test")
@@ -378,7 +378,7 @@ pub(crate) struct TestOutcomes;
 impl Step for TestOutcomes {
     type Output = Option<GeneratedTarball>;
     const DEFAULT: bool = false;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.alias("ferrocene-test-outcomes")
@@ -403,7 +403,7 @@ pub(crate) struct CoverageOutcomes;
 impl Step for CoverageOutcomes {
     type Output = GeneratedTarball;
     const DEFAULT: bool = false;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.alias("ferrocene-coverage-outcomes")
@@ -430,7 +430,7 @@ pub(crate) struct GenerateBuildMetadata;
 impl Step for GenerateBuildMetadata {
     type Output = ();
     const DEFAULT: bool = false;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.alias("ferrocene-build-metadata")

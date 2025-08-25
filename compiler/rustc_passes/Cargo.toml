@@ -26,9 +26,3 @@ rustc_target = { path = "../rustc_target" }
 rustc_trait_selection = { path = "../rustc_trait_selection" }
 tracing = "0.1"
 # tidy-alphabetical-end
-
-# Ferrocene addition: allow coverage(on|off) everywhere in order to simplify
-# measuring the coverage of the certfied subset of libcore
-[features]
-default = ["ferrocene_allow_coverage_attribute_everywhere"]
-ferrocene_allow_coverage_attribute_everywhere = []

@@ -178,6 +178,87 @@ LL - #[coverage = "off"]
 LL + #[coverage(on)]
    |
 
-error: aborting due to 12 previous errors
+error[E0788]: coverage attribute not allowed here
+  --> $DIR/name-value.rs:21:1
+   |
+LL | #[coverage = "off"]
+   | ^^^^^^^^^^^^^^^^^^^
+...
+LL | struct MyStruct;
+   | ---------------- not a function, impl block, or module
+   |
+   = help: coverage attribute can be applied to a function (with body), impl block, or module
 
-For more information about this error, try `rustc --explain E0539`.
+error[E0788]: coverage attribute not allowed here
+  --> $DIR/name-value.rs:35:1
+   |
+LL |   #[coverage = "off"]
+   |   ^^^^^^^^^^^^^^^^^^^
+...
+LL | / trait MyTrait {
+LL | |     #[coverage = "off"]
+...  |
+LL | |     type T;
+LL | | }
+   | |_- not a function, impl block, or module
+   |
+   = help: coverage attribute can be applied to a function (with body), impl block, or module
+
+error[E0788]: coverage attribute not allowed here
+  --> $DIR/name-value.rs:39:5
+   |
+LL |     #[coverage = "off"]
+   |     ^^^^^^^^^^^^^^^^^^^
+...
+LL |     const X: u32;
+   |     ------------- not a function, impl block, or module
+   |
+   = help: coverage attribute can be applied to a function (with body), impl block, or module
+
+error[E0788]: coverage attribute not allowed here
+  --> $DIR/name-value.rs:44:5
+   |
+LL |     #[coverage = "off"]
+   |     ^^^^^^^^^^^^^^^^^^^
+...
+LL |     type T;
+   |     ------- not a function, impl block, or module
+   |
+   = help: coverage attribute can be applied to a function (with body), impl block, or module
+
+error[E0788]: coverage attribute not allowed here
+  --> $DIR/name-value.rs:29:5
+   |
+LL |     #[coverage = "off"]
+   |     ^^^^^^^^^^^^^^^^^^^
+...
+LL |     const X: u32 = 7;
+   |     ----------------- not a function, impl block, or module
+   |
+   = help: coverage attribute can be applied to a function (with body), impl block, or module
+
+error[E0788]: coverage attribute not allowed here
+  --> $DIR/name-value.rs:53:5
+   |
+LL |     #[coverage = "off"]
+   |     ^^^^^^^^^^^^^^^^^^^
+...
+LL |     const X: u32 = 8;
+   |     ----------------- not a function, impl block, or module
+   |
+   = help: coverage attribute can be applied to a function (with body), impl block, or module
+
+error[E0788]: coverage attribute not allowed here
+  --> $DIR/name-value.rs:58:5
+   |
+LL |     #[coverage = "off"]
+   |     ^^^^^^^^^^^^^^^^^^^
+...
+LL |     type T = ();
+   |     ------------ not a function, impl block, or module
+   |
+   = help: coverage attribute can be applied to a function (with body), impl block, or module
+
+error: aborting due to 19 previous errors
+
+For more information about this error, try `rustc --explain E0788`.

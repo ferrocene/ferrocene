@@ -46,8 +46,11 @@ ferrocene_id = "FLS"
 # a list of builtin themes.
 #
 
+html_theme = "fls"
+html_theme_path = ["../themes"]
+
+# override above theme settings
 html_theme = "ferrocene"
-#html_theme_path = ["../shared/themes"]
 
 html_theme_options = {
     "license": "MIT or Apache 2.0",

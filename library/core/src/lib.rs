@@ -203,8 +203,6 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(riscv_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(rtm_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(s390x_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(sse4a_target_feature))]
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(tbm_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(wasm_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(x86_amx_intrinsics))]
 // not-alphabetical-end
@@ -216,6 +214,10 @@
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]
 extern crate self as core;
+
+/* The core prelude, not as all-encompassing as the std prelude */
+// The compiler expects the prelude definition to be defined before it's use statement.
+pub mod prelude;
 
 #[prelude_import]
 #[allow(unused)]
@@ -321,10 +323,6 @@ pub mod f64;
 
 #[macro_use]
 pub mod num;
-
-/* The core prelude, not as all-encompassing as the std prelude */
-
-pub mod prelude;
 
 /* Core modules for ownership management */
 

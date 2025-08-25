@@ -71,6 +71,20 @@ pub(crate) struct BadQPathStage2 {
     pub wrap: WrapType,
 }
 
+#[derive(Diagnostic)]
+#[diag(parse_trait_impl_modifier_in_inherent_impl)]
+#[note]
+pub(crate) struct TraitImplModifierInInherentImpl {
+    #[primary_span]
+    pub span: Span,
+    pub modifier: &'static str,
+    pub modifier_name: &'static str,
+    #[label(parse_because)]
+    pub modifier_span: Span,
+    #[label(parse_type)]
+    pub self_ty: Span,
+}
+
 #[derive(Subdiagnostic)]
 #[multipart_suggestion(parse_suggestion, applicability = "machine-applicable")]
 pub(crate) struct WrapType {
@@ -2647,7 +2661,7 @@ pub(crate) enum TopLevelOrPatternNotAllowedSugg {
         parse_sugg_remove_leading_vert_in_pattern,
         code = "",
         applicability = "machine-applicable",
-        style = "verbose"
+        style = "tool-only"
     )]
     RemoveLeadingVert {
         #[primary_span]
@@ -2680,12 +2694,25 @@ pub(crate) struct UnexpectedVertVertInPattern {
     pub start: Option<Span>,
 }
 
+#[derive(Subdiagnostic)]
+#[suggestion(
+    parse_trailing_vert_not_allowed,
+    code = "",
+    applicability = "machine-applicable",
+    style = "tool-only"
+)]
+pub(crate) struct TrailingVertSuggestion {
+    #[primary_span]
+    pub span: Span,
+}
+
 #[derive(Diagnostic)]
 #[diag(parse_trailing_vert_not_allowed)]
 pub(crate) struct TrailingVertNotAllowed {
     #[primary_span]
-    #[suggestion(code = "", applicability = "machine-applicable", style = "verbose")]
     pub span: Span,
+    #[subdiagnostic]
+    pub suggestion: TrailingVertSuggestion,
     #[label(parse_label_while_parsing_or_pattern_here)]
     pub start: Option<Span>,
     pub token: Token,

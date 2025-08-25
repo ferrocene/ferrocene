@@ -26,7 +26,13 @@ fn install(
     host: Option<TargetSelection>,
     tarball: &GeneratedTarball,
 ) {
-    let _guard = builder.msg(Kind::Install, stage, package, host, host);
+    let _guard = builder.msg(
+        Kind::Install,
+        package,
+        None,
+        (host.unwrap_or(builder.host_target), stage),
+        host,
+    );
 
     let tarball_output = tarball.work_dir();
     let image_dir = tarball_output.join("image");
@@ -119,7 +125,7 @@ macro_rules! install {
         impl Step for $name {
             type Output = ();
             const DEFAULT: bool = true;
-            const ONLY_HOSTS: bool = $only_hosts;
+            const IS_HOST: bool = $only_hosts;
             $(const $c: bool = true;)*
 
             fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -214,6 +220,7 @@ install!((self, builder, _config),
     RustcCodegenCranelift, alias = "rustc-codegen-cranelift", Self::should_build(_config), only_hosts: true, {
         if let Some(tarball) = builder.ensure(dist::CraneliftCodegenBackend {
                 build_compiler: self.compiler,
+                target: self.target,
         }) {
             install(builder, "rustc-codegen-cranelift", self.compiler.stage, Some(self.target), &tarball);
         } else {
@@ -256,7 +263,7 @@ pub struct Src {
 impl Step for Src {
     type Output = ();
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         let config = &run.builder.config;

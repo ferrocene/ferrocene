@@ -9,6 +9,14 @@ tests = [
 targets = ["aarch64-unknown-ferrocene.facade"]
 reason = "TODO: to be investigated"
 
+[["tests/ui"]]
+tests = [
+    "tests/ui/symbol-names/verbose.rs",
+    "tests/ui/type/issue-94187-verbose-type-name.rs",
+]
+targets = ["aarch64-apple-darwin",]
+reason = "TODO: to be investigated"
+
 [["tests/run-make"]]
 tests = [
     "tests/run-coverage",

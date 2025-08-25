@@ -192,6 +192,13 @@ pub(crate) enum RibKind<'ra> {
     /// No restriction needs to be applied.
     Normal,
 
+    /// We passed through an `ast::Block`.
+    /// Behaves like `Normal`, but also partially like `Module` if the block contains items.
+    /// `Block(None)` must be always processed in the same way as `Block(Some(module))`
+    /// with empty `module`. The module can be `None` only because creation of some definitely
+    /// empty modules is skipped as an optimization.
+    Block(Option<Module<'ra>>),
+
     /// We passed through an impl or trait and are now in one of its
     /// methods or associated types. Allow references to ty params that impl or trait
     /// binds. Disallow any other upvars (including other ty params that are
@@ -210,7 +217,7 @@ pub(crate) enum RibKind<'ra> {
     /// All other constants aren't allowed to use generic params at all.
     ConstantItem(ConstantHasGenerics, Option<(Ident, ConstantItemKind)>),
 
-    /// We passed through a module.
+    /// We passed through a module item.
     Module(Module<'ra>),
 
     /// We passed through a `macro_rules!` statement
@@ -242,6 +249,7 @@ impl RibKind<'_> {
     pub(crate) fn contains_params(&self) -> bool {
         match self {
             RibKind::Normal
+            | RibKind::Block(..)
             | RibKind::FnOrCoroutine
             | RibKind::ConstantItem(..)
             | RibKind::Module(_)
@@ -258,15 +266,8 @@ impl RibKind<'_> {
     fn is_label_barrier(self) -> bool {
         match self {
             RibKind::Normal | RibKind::MacroDefinition(..) => false,
-
-            RibKind::AssocItem
-            | RibKind::FnOrCoroutine
-            | RibKind::Item(..)
-            | RibKind::ConstantItem(..)
-            | RibKind::Module(..)
-            | RibKind::ForwardGenericParamBan(_)
-            | RibKind::ConstParamTy
-            | RibKind::InlineAsmSym => true,
+            RibKind::FnOrCoroutine | RibKind::ConstantItem(..) => true,
+            kind => bug!("unexpected rib kind: {kind:?}"),
         }
     }
 }
@@ -424,7 +425,7 @@ pub(crate) enum PathSource<'a, 'ast, 'ra> {
     /// Paths in path patterns `Path`.
     Pat,
     /// Paths in struct expressions and patterns `Path { .. }`.
-    Struct,
+    Struct(Option<&'a Expr>),
     /// Paths in tuple struct patterns `Path(..)`.
     TupleStruct(Span, &'ra [Span]),
     /// `m::A::B` in `<T as m::A>::B::C`.
@@ -447,7 +448,7 @@ impl PathSource<'_, '_, '_> {
         match self {
             PathSource::Type
             | PathSource::Trait(_)
-            | PathSource::Struct
+            | PathSource::Struct(_)
             | PathSource::DefineOpaques => TypeNS,
             PathSource::Expr(..)
             | PathSource::Pat
@@ -464,7 +465,7 @@ impl PathSource<'_, '_, '_> {
             PathSource::Type
             | PathSource::Expr(..)
             | PathSource::Pat
-            | PathSource::Struct
+            | PathSource::Struct(_)
             | PathSource::TupleStruct(..)
             | PathSource::ReturnTypeNotation => true,
             PathSource::Trait(_)
@@ -481,7 +482,7 @@ impl PathSource<'_, '_, '_> {
             PathSource::Type => "type",
             PathSource::Trait(_) => "trait",
             PathSource::Pat => "unit struct, unit variant or constant",
-            PathSource::Struct => "struct, variant or union type",
+            PathSource::Struct(_) => "struct, variant or union type",
             PathSource::TraitItem(ValueNS, PathSource::TupleStruct(..))
             | PathSource::TupleStruct(..) => "tuple struct or tuple variant",
             PathSource::TraitItem(ns, _) => match ns {
@@ -576,7 +577,7 @@ impl PathSource<'_, '_, '_> {
                     || matches!(res, Res::Def(DefKind::Const | DefKind::AssocConst, _))
             }
             PathSource::TupleStruct(..) => res.expected_in_tuple_struct_pat(),
-            PathSource::Struct => matches!(
+            PathSource::Struct(_) => matches!(
                 res,
                 Res::Def(
                     DefKind::Struct
@@ -616,8 +617,8 @@ impl PathSource<'_, '_, '_> {
             (PathSource::Trait(_), false) => E0405,
             (PathSource::Type | PathSource::DefineOpaques, true) => E0573,
             (PathSource::Type | PathSource::DefineOpaques, false) => E0412,
-            (PathSource::Struct, true) => E0574,
-            (PathSource::Struct, false) => E0422,
+            (PathSource::Struct(_), true) => E0574,
+            (PathSource::Struct(_), false) => E0422,
             (PathSource::Expr(..), true) | (PathSource::Delegation, true) => E0423,
             (PathSource::Expr(..), false) | (PathSource::Delegation, false) => E0425,
             (PathSource::Pat | PathSource::TupleStruct(..), true) => E0532,
@@ -1482,11 +1483,13 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         path: &[Segment],
         opt_ns: Option<Namespace>, // `None` indicates a module path in import
         finalize: Option<Finalize>,
+        source: PathSource<'_, 'ast, 'ra>,
     ) -> PathResult<'ra> {
         self.r.cm().resolve_path_with_ribs(
             path,
             opt_ns,
             &self.parent_scope,
+            Some(source),
             finalize,
             Some(&self.ribs),
             None,
@@ -1523,19 +1526,6 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         let ret = work(self);
         self.ribs[ns].pop();
         ret
-    }
-
-    fn with_mod_rib<T>(&mut self, id: NodeId, f: impl FnOnce(&mut Self) -> T) -> T {
-        let module = self.r.expect_module(self.r.local_def_id(id).to_def_id());
-        // Move down in the graph.
-        let orig_module = replace(&mut self.parent_scope.module, module);
-        self.with_rib(ValueNS, RibKind::Module(module), |this| {
-            this.with_rib(TypeNS, RibKind::Module(module), |this| {
-                let ret = f(this);
-                this.parent_scope.module = orig_module;
-                ret
-            })
-        })
     }
 
     fn visit_generic_params(&mut self, params: &'ast [GenericParam], add_self_upper: bool) {
@@ -1966,7 +1956,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         &mut self,
         partial_res: PartialRes,
         path: &[Segment],
-        source: PathSource<'_, '_, '_>,
+        source: PathSource<'_, 'ast, 'ra>,
         path_span: Span,
     ) {
         let proj_start = path.len() - partial_res.unresolved_segments();
@@ -2019,7 +2009,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 | PathSource::ReturnTypeNotation => false,
                 PathSource::Expr(..)
                 | PathSource::Pat
-                | PathSource::Struct
+                | PathSource::Struct(_)
                 | PathSource::TupleStruct(..)
                 | PathSource::DefineOpaques
                 | PathSource::Delegation => true,
@@ -2618,7 +2608,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 self.resolve_adt(item, generics);
             }
 
-            ItemKind::Impl(box Impl {
+            ItemKind::Impl(Impl {
                 ref generics,
                 ref of_trait,
                 ref self_ty,
@@ -2629,7 +2619,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 self.resolve_implementation(
                     &item.attrs,
                     generics,
-                    of_trait,
+                    of_trait.as_deref(),
                     self_ty,
                     item.id,
                     impl_items,
@@ -2675,20 +2665,25 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
             }
 
             ItemKind::Mod(..) => {
-                self.with_mod_rib(item.id, |this| {
-                    if mod_inner_docs {
-                        this.resolve_doc_links(&item.attrs, MaybeExported::Ok(item.id));
-                    }
-                    let old_macro_rules = this.parent_scope.macro_rules;
-                    visit::walk_item(this, item);
-                    // Maintain macro_rules scopes in the same way as during early resolution
-                    // for diagnostics and doc links.
-                    if item.attrs.iter().all(|attr| {
-                        !attr.has_name(sym::macro_use) && !attr.has_name(sym::macro_escape)
-                    }) {
-                        this.parent_scope.macro_rules = old_macro_rules;
-                    }
+                let module = self.r.expect_module(self.r.local_def_id(item.id).to_def_id());
+                let orig_module = replace(&mut self.parent_scope.module, module);
+                self.with_rib(ValueNS, RibKind::Module(module), |this| {
+                    this.with_rib(TypeNS, RibKind::Module(module), |this| {
+                        if mod_inner_docs {
+                            this.resolve_doc_links(&item.attrs, MaybeExported::Ok(item.id));
+                        }
+                        let old_macro_rules = this.parent_scope.macro_rules;
+                        visit::walk_item(this, item);
+                        // Maintain macro_rules scopes in the same way as during early resolution
+                        // for diagnostics and doc links.
+                        if item.attrs.iter().all(|attr| {
+                            !attr.has_name(sym::macro_use) && !attr.has_name(sym::macro_escape)
+                        }) {
+                            this.parent_scope.macro_rules = old_macro_rules;
+                        }
+                    })
                 });
+                self.parent_scope.module = orig_module;
             }
 
             ItemKind::Static(box ast::StaticItem {
@@ -2819,9 +2814,9 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
             // We also can't shadow bindings from associated parent items.
             for ns in [ValueNS, TypeNS] {
                 for parent_rib in self.ribs[ns].iter().rev() {
-                    // Break at mod level, to account for nested items which are
+                    // Break at module or block level, to account for nested items which are
                     // allowed to shadow generic param names.
-                    if matches!(parent_rib.kind, RibKind::Module(..)) {
+                    if matches!(parent_rib.kind, RibKind::Module(..) | RibKind::Block(..)) {
                         break;
                     }
 
@@ -3175,7 +3170,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         &mut self,
         attrs: &[ast::Attribute],
         generics: &'ast Generics,
-        opt_trait_reference: &'ast Option<TraitRef>,
+        of_trait: Option<&'ast ast::TraitImplHeader>,
         self_type: &'ast Ty,
         item_id: NodeId,
         impl_items: &'ast [Box<AssocItem>],
@@ -3199,7 +3194,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                         |this| {
                             // Resolve the trait reference, if necessary.
                             this.with_optional_trait_ref(
-                                opt_trait_reference.as_ref(),
+                                of_trait.map(|t| &t.trait_ref),
                                 self_type,
                                 |this, trait_id| {
                                     this.resolve_doc_links(attrs, MaybeExported::Impl(trait_id));
@@ -3222,9 +3217,9 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                                         is_trait_impl: trait_id.is_some()
                                     };
                                     this.with_self_rib(res, |this| {
-                                        if let Some(trait_ref) = opt_trait_reference.as_ref() {
+                                        if let Some(of_trait) = of_trait {
                                             // Resolve type arguments in the trait path.
-                                            visit::walk_trait_ref(this, trait_ref);
+                                            visit::walk_trait_ref(this, &of_trait.trait_ref);
                                         }
                                         // Resolve the self type.
                                         this.visit_ty(self_type);
@@ -3866,7 +3861,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                     self.smart_resolve_path(pat.id, qself, path, PathSource::Pat);
                 }
                 PatKind::Struct(ref qself, ref path, ref _fields, ref rest) => {
-                    self.smart_resolve_path(pat.id, qself, path, PathSource::Struct);
+                    self.smart_resolve_path(pat.id, qself, path, PathSource::Struct(None));
                     self.record_patterns_with_skipped_bindings(pat, rest);
                 }
                 PatKind::Or(ref ps) => {
@@ -4110,7 +4105,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         id: NodeId,
         qself: &Option<Box<QSelf>>,
         path: &Path,
-        source: PathSource<'_, 'ast, '_>,
+        source: PathSource<'_, 'ast, 'ra>,
     ) {
         self.smart_resolve_path_fragment(
             qself,
@@ -4127,7 +4122,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         &mut self,
         qself: &Option<Box<QSelf>>,
         path: &[Segment],
-        source: PathSource<'_, 'ast, '_>,
+        source: PathSource<'_, 'ast, 'ra>,
         finalize: Finalize,
         record_partial_res: RecordPartialRes,
         parent_qself: Option<&QSelf>,
@@ -4313,7 +4308,6 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
             qself,
             path,
             ns,
-            path_span,
             source.defer_to_typeck(),
             finalize,
             source,
@@ -4365,7 +4359,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                     std_path.push(Segment::from_ident(Ident::with_dummy_span(sym::std)));
                     std_path.extend(path);
                     if let PathResult::Module(_) | PathResult::NonModule(_) =
-                        self.resolve_path(&std_path, Some(ns), None)
+                        self.resolve_path(&std_path, Some(ns), None, source)
                     {
                         // Check if we wrote `str::from_utf8` instead of `std::str::from_utf8`
                         let item_span =
@@ -4436,10 +4430,9 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         qself: &Option<Box<QSelf>>,
         path: &[Segment],
         primary_ns: Namespace,
-        span: Span,
         defer_to_typeck: bool,
         finalize: Finalize,
-        source: PathSource<'_, 'ast, '_>,
+        source: PathSource<'_, 'ast, 'ra>,
     ) -> Result<Option<PartialRes>, Spanned<ResolutionError<'ra>>> {
         let mut fin_res = None;
 
@@ -4461,21 +4454,11 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         }
 
         assert!(primary_ns != MacroNS);
-
-        if qself.is_none() {
-            let path_seg = |seg: &Segment| PathSegment::from_ident(seg.ident);
-            let path = Path { segments: path.iter().map(path_seg).collect(), span, tokens: None };
-            if let Ok((_, res)) = self.r.cm().resolve_macro_path(
-                &path,
-                None,
-                &self.parent_scope,
-                false,
-                false,
-                None,
-                None,
-            ) {
-                return Ok(Some(PartialRes::new(res)));
-            }
+        if qself.is_none()
+            && let PathResult::NonModule(res) =
+                self.r.cm().maybe_resolve_path(path, Some(MacroNS), &self.parent_scope, None)
+        {
+            return Ok(Some(res));
         }
 
         Ok(fin_res)
@@ -4488,7 +4471,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         path: &[Segment],
         ns: Namespace,
         finalize: Finalize,
-        source: PathSource<'_, 'ast, '_>,
+        source: PathSource<'_, 'ast, 'ra>,
     ) -> Result<Option<PartialRes>, Spanned<ResolutionError<'ra>>> {
         debug!(
             "resolve_qpath(qself={:?}, path={:?}, ns={:?}, finalize={:?})",
@@ -4551,7 +4534,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
             )));
         }
 
-        let result = match self.resolve_path(path, Some(ns), Some(finalize)) {
+        let result = match self.resolve_path(path, Some(ns), Some(finalize), source) {
             PathResult::NonModule(path_res) => path_res,
             PathResult::Module(ModuleOrUniformRoot::Module(module)) if !module.is_normal() => {
                 PartialRes::new(module.res().unwrap())
@@ -4662,16 +4645,16 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         debug!("(resolving block) entering block");
         // Move down in the graph, if there's an anonymous module rooted here.
         let orig_module = self.parent_scope.module;
-        let anonymous_module = self.r.block_map.get(&block.id).cloned(); // clones a reference
+        let anonymous_module = self.r.block_map.get(&block.id).copied();
 
         let mut num_macro_definition_ribs = 0;
         if let Some(anonymous_module) = anonymous_module {
             debug!("(resolving block) found anonymous module, moving down");
-            self.ribs[ValueNS].push(Rib::new(RibKind::Module(anonymous_module)));
-            self.ribs[TypeNS].push(Rib::new(RibKind::Module(anonymous_module)));
+            self.ribs[ValueNS].push(Rib::new(RibKind::Block(Some(anonymous_module))));
+            self.ribs[TypeNS].push(Rib::new(RibKind::Block(Some(anonymous_module))));
             self.parent_scope.module = anonymous_module;
         } else {
-            self.ribs[ValueNS].push(Rib::new(RibKind::Normal));
+            self.ribs[ValueNS].push(Rib::new(RibKind::Block(None)));
         }
 
         // Descend into the block.
@@ -4774,7 +4757,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
             }
 
             ExprKind::Struct(ref se) => {
-                self.smart_resolve_path(expr.id, &se.qself, &se.path, PathSource::Struct);
+                self.smart_resolve_path(expr.id, &se.qself, &se.path, PathSource::Struct(parent));
                 // This is the same as `visit::walk_expr(self, expr);`, but we want to pass the
                 // parent in for accurate suggestions when encountering `Foo { bar }` that should
                 // have been `Foo { bar: self.bar }`.
@@ -5181,7 +5164,7 @@ impl<'ast> Visitor<'ast> for ItemInfoCollector<'_, '_, '_> {
             | ItemKind::Enum(_, generics, _)
             | ItemKind::Struct(_, generics, _)
             | ItemKind::Union(_, generics, _)
-            | ItemKind::Impl(box Impl { generics, .. })
+            | ItemKind::Impl(Impl { generics, .. })
             | ItemKind::Trait(box Trait { generics, .. })
             | ItemKind::TraitAlias(_, generics, _) => {
                 if let ItemKind::Fn(box Fn { sig, .. }) = &item.kind {

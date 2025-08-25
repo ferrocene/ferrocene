@@ -7,6 +7,7 @@
     ambiguous_glob_reexports, // Ferrocene specific
     unsafe_op_in_unsafe_fn, // Ferrocene specific
     missing_abi, // Ferrocene specific
+    useless_deprecated, // Ferrocene specific
     renamed_and_removed_lints, // Keep this order.
     unknown_lints, // Keep this order.
     nonstandard_style,

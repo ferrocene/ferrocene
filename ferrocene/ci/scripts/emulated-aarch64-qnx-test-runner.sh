@@ -114,9 +114,6 @@ cmd_prepare() {
     echo
     echo "===> building remote-test-server"
     stage="${REMOTE_TEST_SERVER_STAGE-0}"
-    # TODO temporary workaround for bootstrap bug that has since been fixed upstream
-    # ... remove when that fix gets pulled in
-    stage=1
     ./x build src/tools/remote-test-server --target "${nto_target}" --stage "${stage}"
     cp build/host/"stage${stage}-tools"/"${nto_target}"/release/remote-test-server "${emulatordir}"/src/install/aarch64le/sbin
 

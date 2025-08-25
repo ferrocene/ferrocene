@@ -12,7 +12,7 @@ const PATH: &str = "ferrocene/tools/coverage-of-subset";
 
 impl Step for CoverageForSubset {
     type Output = ();
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
     const DEFAULT: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

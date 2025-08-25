@@ -274,7 +274,7 @@ impl Step for Std {
         if builder.config.cmd.ferrocene_coverage_for() == Some(FerroceneCoverageFor::Library)
             // Note that for the standard library, stage 1 is tested when either --stage 1 or
             // --stage 2 are passed.
-            && compiler.stage == 1
+            && build_compiler.stage == 1
         {
             cargo.arg("--features=core/ferrocene_inject_profiler_builtins");
 
@@ -292,7 +292,7 @@ impl Step for Std {
             //
             // To fix the problem, we add our own `-L` flag to the Cargo invocation, pointing to
             // the location of profiler_builtins without the `dependency=` prefix.
-            let target_dir = builder.cargo_out(compiler, Mode::Std, target).join("deps");
+            let target_dir = builder.cargo_out(build_compiler, Mode::Std, target).join("deps");
             cargo.rustflag(&format!("-L{}", target_dir.to_str().unwrap()));
 
             instrument_coverage(builder, &mut cargo);

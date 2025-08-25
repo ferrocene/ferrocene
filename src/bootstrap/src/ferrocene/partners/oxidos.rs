@@ -135,7 +135,7 @@ impl Step for BuildOxidOS {
             builder.ensure(crate::core::build_steps::compile::Std::new(compiler, compiler.host));
         }
 
-        let _guard = builder.msg(Kind::Build, compiler.stage, self.name(), compiler.host, target);
+        let _guard = builder.msg(Kind::Build, self.name(), None, compiler, self.target);
 
         let mode = Mode::ToolCustom { name: self.name() };
         let mut cargo = builder.cargo(compiler, mode, SourceType::Submodule, target, Kind::Build);

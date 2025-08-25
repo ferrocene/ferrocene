@@ -139,13 +139,8 @@ pub struct RustcDocs {
 
 impl Step for RustcDocs {
     type Output = Option<GeneratedTarball>;
-<<<<<<< HEAD
     const DEFAULT: bool = false;
-    const ONLY_HOSTS: bool = true;
-=======
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         // Disabled by Ferrocene, as we don't ship the compiler documentation.
@@ -1110,13 +1105,8 @@ pub struct PlainSourceTarball;
 impl Step for PlainSourceTarball {
     /// Produces the location of the tarball generated
     type Output = GeneratedTarball;
-<<<<<<< HEAD
     const DEFAULT: bool = false;
-    const ONLY_HOSTS: bool = true;
-=======
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         // Disabled by Ferrocene, as we have our own alternative for it.
@@ -1603,13 +1593,8 @@ pub struct Extended {
 
 impl Step for Extended {
     type Output = ();
-<<<<<<< HEAD
     const DEFAULT: bool = false;
-    const ONLY_HOSTS: bool = true;
-=======
-    const DEFAULT: bool = true;
     const IS_HOST: bool = true;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         // Disabled by Ferrocene, as we don't support the extended tarball.

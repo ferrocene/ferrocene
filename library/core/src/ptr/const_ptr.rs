@@ -1476,10 +1476,12 @@ impl<T> *const T {
     #[must_use]
     #[inline(always)]
     #[unstable(feature = "cast_maybe_uninit", issue = "145036")]
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn cast_uninit(self) -> *const MaybeUninit<T> {
         self as _
     }
 }
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> *const MaybeUninit<T> {
     /// Casts from a maybe-uninitialized type to its initialized version.
     ///

@@ -1378,6 +1378,7 @@ impl<T: PointeeSized> NonNull<T> {
     }
 }
 
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> NonNull<T> {
     /// Casts from a type to its maybe-uninitialized version.
     #[must_use]
@@ -1387,6 +1388,7 @@ impl<T> NonNull<T> {
         self.cast()
     }
 }
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> NonNull<MaybeUninit<T>> {
     /// Casts from a maybe-uninitialized type to its initialized version.
     ///

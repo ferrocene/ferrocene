@@ -49,7 +49,7 @@ fn inject_coverage_attribute(file_content: &str) -> String {
 }
 
 fn is_rust_file(file_path: &Path) -> bool {
-    file_path.extension().unwrap() == "rs"
+    file_path.extension() == Some("rs")
 }
 
 #[cfg(test)]

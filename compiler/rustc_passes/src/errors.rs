@@ -103,7 +103,6 @@ pub(crate) struct InlineNotFnOrClosure {
 /// "coverage attribute not allowed here"
 #[derive(Diagnostic)]
 #[diag(passes_coverage_attribute_not_allowed, code = E0788)]
-#[cfg(not(feature = "ferrocene_allow_coverage_attribute_everywhere"))]
 pub(crate) struct CoverageAttributeNotAllowed {
     #[primary_span]
     pub attr_span: Span,

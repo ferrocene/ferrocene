@@ -11,24 +11,24 @@
 #[coverage(off)]
 mod submod {}
 
-#[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+#[coverage(off)] //~ ERROR coverage attribute not allowed here [E0788]
 type MyTypeAlias = ();
 
-#[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+#[coverage(off)] //~ ERROR [E0788]
 trait MyTrait {
-    #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+    #[coverage(off)] //~ ERROR [E0788]
     const TRAIT_ASSOC_CONST: u32;
 
-    #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+    #[coverage(off)] //~ ERROR [E0788]
     type TraitAssocType;
 
-    #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+    #[coverage(off)] //~ ERROR [E0788]
     fn trait_method(&self);
 
     #[coverage(off)]
     fn trait_method_with_default(&self) {}
 
-    #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+    #[coverage(off)] //~ ERROR [E0788]
     fn trait_assoc_fn();
 }
 
@@ -36,7 +36,7 @@ trait MyTrait {
 impl MyTrait for () {
     const TRAIT_ASSOC_CONST: u32 = 0;
 
-    #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+    #[coverage(off)] //~ ERROR [E0788]
     type TraitAssocType = Self;
 
     #[coverage(off)]
@@ -53,14 +53,14 @@ trait HasAssocType {
 }
 
 impl HasAssocType for () {
-    #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+    #[coverage(off)] //~ ERROR [E0788]
     type T = impl Copy;
     fn constrain_assoc_type() -> Self::T {}
 }
 
-#[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+#[coverage(off)] //~ ERROR [E0788]
 struct MyStruct {
-    #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+    #[coverage(off)] //~ ERROR [E0788]
     field: u32,
 }
 
@@ -73,25 +73,25 @@ impl MyStruct {
 }
 
 extern "C" {
-    #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+    #[coverage(off)] //~ ERROR [E0788]
     static X: u32;
 
-    #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+    #[coverage(off)] //~ ERROR [E0788]
     type T;
 
-    #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+    #[coverage(off)] //~ ERROR [E0788]
     fn foreign_fn();
 }
 
 #[coverage(off)]
 fn main() {
-    #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+    #[coverage(off)] //~ ERROR [E0788]
     let _ = ();
 
     // Currently not allowed on let statements, even if they bind to a closure.
     // It might be nice to support this as a special case someday, but trying
     // to define the precise boundaries of that special case might be tricky.
-    #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+    #[coverage(off)] //~ ERROR [E0788]
     let _let_closure = || ();
 
     // In situations where attributes can already be applied to expressions,
@@ -107,10 +107,10 @@ fn main() {
     //~^ ERROR attributes on expressions are experimental [E0658]
 
     match () {
-        #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+        #[coverage(off)] //~ ERROR [E0788]
         () => (),
     }
 
-    #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+    #[coverage(off)] //~ ERROR [E0788]
     return ();
 }

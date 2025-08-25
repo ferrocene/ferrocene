@@ -122,9 +122,9 @@ subset = "signatures"
 name = "ferrocene-test-outcomes"
 subset = "source"
 
-[[groups.any-platform.packages]]
-name = "ferrocene-coverage-outcomes"
-subset = "source"
+# [[groups.any-platform.packages]]
+# name = "ferrocene-coverage-outcomes"
+# subset = "source"
 
 [[groups.any-platform.packages]]
 name = "ferrocene-docs"

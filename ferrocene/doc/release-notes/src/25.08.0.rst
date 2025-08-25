@@ -4,9 +4,6 @@
 Ferrocene 25.08.0
 =================
 
-This page contains the changes to be introduced in the upcoming Ferrocene
-release.
-
 Removed experimental features
 -----------------------------
 

@@ -273,7 +273,6 @@ jobs:
     resource_class: medium # 2-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_CODE_COV: 1
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
         sed -i -e "s/profile = 'ferrocene-dist'/profile = 'compiler'/g" bootstrap.toml

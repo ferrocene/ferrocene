@@ -76,7 +76,9 @@ JOBS_DEFINITION: JobsDefinition = {
         "docs": [
             "ferrocene-docs",
             "ferrocene-test-outcomes",
-            "ferrocene-coverage-outcomes",
+            # In 1.88 we identified problems with core coverage being inconsistent,
+            # so we use a static report we inspected for correctness.
+            # "ferrocene-coverage-outcomes",
             "ferrocene-docs-doctrees",
         ],
 

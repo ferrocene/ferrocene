@@ -295,6 +295,9 @@ impl CommandOutput {
         .expect("Cannot parse process stdout as UTF-8")
     }
 
+    // In 1.88 we identified problems with core coverage being inconsistent,
+    // so we use a static report we inspected for correctness.
+    #[allow(dead_code)]
     #[must_use]
     pub fn stdout_bytes(&self) -> &[u8] {
         self.stdout.as_deref().expect("Accessing stdout of a command that did not capture stdout")

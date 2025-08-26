@@ -103,6 +103,10 @@ impl RegionTracker {
         self.max_nameable_universe
     }
 
+    pub(crate) fn max_placeholder_universe_reached(self) -> UniverseIndex {
+        self.max_placeholder_universe_reached
+    }
+
     fn merge_min_max_seen(&mut self, other: &Self) {
         self.max_placeholder_universe_reached = std::cmp::max(
             self.max_placeholder_universe_reached,
@@ -157,7 +161,7 @@ fn region_definitions<'tcx>(
     for info in var_infos.iter() {
         let origin = match info.origin {
             RegionVariableOrigin::Nll(origin) => origin,
-            _ => NllRegionVariableOrigin::Existential { from_forall: false, name: None },
+            _ => NllRegionVariableOrigin::Existential { name: None },
         };
 
         let definition = RegionDefinition { origin, universe: info.universe, external_name: None };

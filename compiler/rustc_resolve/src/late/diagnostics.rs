@@ -19,14 +19,13 @@ use rustc_errors::{
 };
 use rustc_hir as hir;
 use rustc_hir::def::Namespace::{self, *};
-use rustc_hir::def::{self, CtorKind, CtorOf, DefKind};
+use rustc_hir::def::{self, CtorKind, CtorOf, DefKind, MacroKinds};
 use rustc_hir::def_id::{CRATE_DEF_ID, DefId};
 use rustc_hir::{MissingLifetimeKind, PrimTy};
 use rustc_middle::ty;
 use rustc_session::{Session, lint};
 use rustc_span::edit_distance::{edit_distance, find_best_match_for_name};
 use rustc_span::edition::Edition;
-use rustc_span::hygiene::MacroKind;
 use rustc_span::{DUMMY_SP, Ident, Span, Symbol, kw, sym};
 use thin_vec::ThinVec;
 use tracing::debug;
@@ -39,8 +38,8 @@ use crate::late::{
 };
 use crate::ty::fast_reject::SimplifiedType;
 use crate::{
-    Module, ModuleKind, ModuleOrUniformRoot, PathResult, PathSource, Resolver, Segment, errors,
-    path_names_to_string,
+    Module, ModuleKind, ModuleOrUniformRoot, PathResult, PathSource, Resolver, ScopeSet, Segment,
+    errors, path_names_to_string,
 };
 
 type Res = def::Res<ast::NodeId>;
@@ -174,7 +173,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
         &mut self,
         path: &[Segment],
         span: Span,
-        source: PathSource<'_, '_, '_>,
+        source: PathSource<'_, 'ast, 'ra>,
         res: Option<Res>,
     ) -> BaseError {
         // Make the base error.
@@ -318,7 +317,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                 (String::new(), "the crate root".to_string(), Some(CRATE_DEF_ID.to_def_id()), None)
             } else {
                 let mod_path = &path[..path.len() - 1];
-                let mod_res = self.resolve_path(mod_path, Some(TypeNS), None);
+                let mod_res = self.resolve_path(mod_path, Some(TypeNS), None, source);
                 let mod_prefix = match mod_res {
                     PathResult::Module(ModuleOrUniformRoot::Module(module)) => module.res(),
                     _ => None,
@@ -419,7 +418,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
         path: &[Segment],
         following_seg: Option<&Segment>,
         span: Span,
-        source: PathSource<'_, '_, '_>,
+        source: PathSource<'_, 'ast, 'ra>,
         res: Option<Res>,
         qself: Option<&QSelf>,
     ) -> (Diag<'tcx>, Vec<ImportSuggestion>) {
@@ -850,9 +849,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
         }
 
         // Try to find in last block rib
-        if let Some(rib) = &self.last_block_rib
-            && let RibKind::Normal = rib.kind
-        {
+        if let Some(rib) = &self.last_block_rib {
             for (ident, &res) in &rib.bindings {
                 if let Res::Local(_) = res
                     && path.len() == 1
@@ -901,7 +898,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
         if path.len() == 1 {
             for rib in self.ribs[ns].iter().rev() {
                 let item = path[0].ident;
-                if let RibKind::Module(module) = rib.kind
+                if let RibKind::Module(module) | RibKind::Block(Some(module)) = rib.kind
                     && let Some(did) = find_doc_alias_name(self.r, module, item.name)
                 {
                     return Some((did, item));
@@ -1014,7 +1011,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
     fn suggest_typo(
         &mut self,
         err: &mut Diag<'_>,
-        source: PathSource<'_, '_, '_>,
+        source: PathSource<'_, 'ast, 'ra>,
         path: &[Segment],
         following_seg: Option<&Segment>,
         span: Span,
@@ -1333,7 +1330,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
     fn suggest_swapping_misplaced_self_ty_and_trait(
         &mut self,
         err: &mut Diag<'_>,
-        source: PathSource<'_, '_, '_>,
+        source: PathSource<'_, 'ast, 'ra>,
         res: Option<Res>,
         span: Span,
     ) {
@@ -1341,7 +1338,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
             self.diag_metadata.currently_processing_impl_trait.clone()
             && let TyKind::Path(_, self_ty_path) = &self_ty.kind
             && let PathResult::Module(ModuleOrUniformRoot::Module(module)) =
-                self.resolve_path(&Segment::from_path(self_ty_path), Some(TypeNS), None)
+                self.resolve_path(&Segment::from_path(self_ty_path), Some(TypeNS), None, source)
             && let ModuleKind::Def(DefKind::Trait, ..) = module.kind
             && trait_ref.path.span == span
             && let PathSource::Trait(_) = source
@@ -1449,13 +1446,13 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
     fn get_single_associated_item(
         &mut self,
         path: &[Segment],
-        source: &PathSource<'_, '_, '_>,
+        source: &PathSource<'_, 'ast, 'ra>,
         filter_fn: &impl Fn(Res) -> bool,
     ) -> Option<TypoSuggestion> {
         if let crate::PathSource::TraitItem(_, _) = source {
             let mod_path = &path[..path.len() - 1];
             if let PathResult::Module(ModuleOrUniformRoot::Module(module)) =
-                self.resolve_path(mod_path, None, None)
+                self.resolve_path(mod_path, None, None, *source)
             {
                 let targets: Vec<_> = self
                     .r
@@ -1850,12 +1847,12 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
 
         match (res, source) {
             (
-                Res::Def(DefKind::Macro(MacroKind::Bang), def_id),
+                Res::Def(DefKind::Macro(kinds), def_id),
                 PathSource::Expr(Some(Expr {
                     kind: ExprKind::Index(..) | ExprKind::Call(..), ..
                 }))
-                | PathSource::Struct,
-            ) => {
+                | PathSource::Struct(_),
+            ) if kinds.contains(MacroKinds::BANG) => {
                 // Don't suggest macro if it's unstable.
                 let suggestable = def_id.is_local()
                     || self.r.tcx.lookup_stability(def_id).is_none_or(|s| s.is_stable());
@@ -1880,7 +1877,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                     err.note("if you want the `try` keyword, you need Rust 2018 or later");
                 }
             }
-            (Res::Def(DefKind::Macro(MacroKind::Bang), _), _) => {
+            (Res::Def(DefKind::Macro(kinds), _), _) if kinds.contains(MacroKinds::BANG) => {
                 err.span_label(span, fallback_label.to_string());
             }
             (Res::Def(DefKind::TyAlias, def_id), PathSource::Trait(_)) => {
@@ -2459,50 +2456,33 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                     }
                 }
 
+                if let RibKind::Block(Some(module)) = rib.kind {
+                    self.r.add_module_candidates(module, &mut names, &filter_fn, Some(ctxt));
+                } else if let RibKind::Module(module) = rib.kind {
+                    // Encountered a module item, abandon ribs and look into that module and preludes.
+                    self.r.add_scope_set_candidates(
+                        &mut names,
+                        ScopeSet::Late(ns, module, None),
+                        &self.parent_scope,
+                        ctxt,
+                        filter_fn,
+                    );
+                    break;
+                }
+
                 if let RibKind::MacroDefinition(def) = rib.kind
                     && def == self.r.macro_def(ctxt)
                 {
                     // If an invocation of this macro created `ident`, give up on `ident`
                     // and switch to `ident`'s source from the macro definition.
                     ctxt.remove_mark();
-                    continue;
                 }
-
-                // Items in scope
-                if let RibKind::Module(module) = rib.kind {
-                    // Items from this module
-                    self.r.add_module_candidates(module, &mut names, &filter_fn, Some(ctxt));
-
-                    if let ModuleKind::Block = module.kind {
-                        // We can see through blocks
-                    } else {
-                        // Items from the prelude
-                        if !module.no_implicit_prelude {
-                            names.extend(self.r.extern_prelude.keys().flat_map(|ident| {
-                                let res = Res::Def(DefKind::Mod, CRATE_DEF_ID.to_def_id());
-                                filter_fn(res)
-                                    .then_some(TypoSuggestion::typo_from_ident(ident.0, res))
-                            }));
-
-                            if let Some(prelude) = self.r.prelude {
-                                self.r.add_module_candidates(prelude, &mut names, &filter_fn, None);
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-            // Add primitive types to the mix
-            if filter_fn(Res::PrimTy(PrimTy::Bool)) {
-                names.extend(PrimTy::ALL.iter().map(|prim_ty| {
-                    TypoSuggestion::typo_from_name(prim_ty.name(), Res::PrimTy(*prim_ty))
-                }))
             }
         } else {
             // Search in module.
             let mod_path = &path[..path.len() - 1];
             if let PathResult::Module(ModuleOrUniformRoot::Module(module)) =
-                self.resolve_path(mod_path, Some(TypeNS), None)
+                self.resolve_path(mod_path, Some(TypeNS), None, PathSource::Type)
             {
                 self.r.add_module_candidates(module, &mut names, &filter_fn, None);
             }
@@ -3673,7 +3653,12 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                                 if let TyKind::Path(None, path) = &ty.kind {
                                     // Check if the path being borrowed is likely to be owned.
                                     let path: Vec<_> = Segment::from_path(path);
-                                    match self.resolve_path(&path, Some(TypeNS), None) {
+                                    match self.resolve_path(
+                                        &path,
+                                        Some(TypeNS),
+                                        None,
+                                        PathSource::Type,
+                                    ) {
                                         PathResult::Module(ModuleOrUniformRoot::Module(module)) => {
                                             match module.res() {
                                                 Some(Res::PrimTy(PrimTy::Str)) => {

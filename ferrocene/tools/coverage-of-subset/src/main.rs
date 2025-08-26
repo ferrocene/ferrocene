@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+use std::ffi::OsStr;
 use std::fs;
 use std::path::Path;
 use std::sync::LazyLock;
@@ -49,7 +50,7 @@ fn inject_coverage_attribute(file_content: &str) -> String {
 }
 
 fn is_rust_file(file_path: &Path) -> bool {
-    file_path.extension().unwrap() == "rs"
+    file_path.extension() == Some(OsStr::new("rs"))
 }
 
 #[cfg(test)]

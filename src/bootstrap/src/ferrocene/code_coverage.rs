@@ -124,8 +124,11 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
             "ferrocene/library/backtrace-rs",
             "ferrocene/library/libc",
             "library/alloc",
+            "library/compiler-builtins",
+            "library/coretests",
             "library/panic_unwind",
             "library/std",
+            "library/test",
         ],
     };
 

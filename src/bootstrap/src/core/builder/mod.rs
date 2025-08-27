@@ -1183,7 +1183,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::doc::CompilerTechnicalReport,
                 crate::ferrocene::doc::CoreTechnicalReport,
                 crate::ferrocene::doc::code_coverage::AllCoverageReports,
-                // QMS Documents
+                // QMS Document
                 crate::ferrocene::doc::InternalProcedures,
             ),
             Kind::Dist => describe!(
@@ -1265,7 +1265,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::sign::QualificationPlan,
                 crate::ferrocene::sign::QualificationReport,
                 crate::ferrocene::sign::SafetyManual,
-                // QMS Documents
+                // QMS
                 crate::ferrocene::sign::InternalProcedures,
             ),
             Kind::Setup => {

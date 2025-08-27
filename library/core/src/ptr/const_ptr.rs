@@ -1471,7 +1471,32 @@ impl<T: PointeeSized> *const T {
     }
 }
 
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
+=======
+impl<T> *const T {
+    /// Casts from a type to its maybe-uninitialized version.
+    #[must_use]
+    #[inline(always)]
+    #[unstable(feature = "cast_maybe_uninit", issue = "145036")]
+    pub const fn cast_uninit(self) -> *const MaybeUninit<T> {
+        self as _
+    }
+}
+impl<T> *const MaybeUninit<T> {
+    /// Casts from a maybe-uninitialized type to its initialized version.
+    ///
+    /// This is always safe, since UB can only occur if the pointer is read
+    /// before being initialized.
+    #[must_use]
+    #[inline(always)]
+    #[unstable(feature = "cast_maybe_uninit", issue = "145036")]
+    pub const fn cast_init(self) -> *const T {
+        self as _
+    }
+}
+
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 impl<T> *const [T] {
     /// Returns the length of a raw slice.
     ///
@@ -1589,7 +1614,19 @@ impl<T> *const [T] {
     }
 }
 
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
+=======
+impl<T> *const T {
+    /// Casts from a pointer-to-`T` to a pointer-to-`[T; N]`.
+    #[inline]
+    #[unstable(feature = "ptr_cast_array", issue = "144514")]
+    pub const fn cast_array<const N: usize>(self) -> *const [T; N] {
+        self.cast()
+    }
+}
+
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 impl<T, const N: usize> *const [T; N] {
     /// Returns a raw pointer to the array's buffer.
     ///

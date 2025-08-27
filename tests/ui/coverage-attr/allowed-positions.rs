@@ -11,6 +11,7 @@
 #[coverage(off)]
 mod submod {}
 
+<<<<<<< HEAD
 #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
 type MyTypeAlias = ();
 
@@ -23,12 +24,30 @@ trait MyTrait {
     type TraitAssocType;
 
     #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+=======
+#[coverage(off)] //~ ERROR attribute cannot be used on
+type MyTypeAlias = ();
+
+#[coverage(off)] //~ ERROR attribute cannot be used on
+trait MyTrait {
+    #[coverage(off)] //~ ERROR attribute cannot be used on
+    const TRAIT_ASSOC_CONST: u32;
+
+    #[coverage(off)] //~ ERROR attribute cannot be used on
+    type TraitAssocType;
+
+    #[coverage(off)] //~ ERROR attribute cannot be used on
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn trait_method(&self);
 
     #[coverage(off)]
     fn trait_method_with_default(&self) {}
 
+<<<<<<< HEAD
     #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+=======
+    #[coverage(off)] //~ ERROR attribute cannot be used on
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn trait_assoc_fn();
 }
 
@@ -36,7 +55,11 @@ trait MyTrait {
 impl MyTrait for () {
     const TRAIT_ASSOC_CONST: u32 = 0;
 
+<<<<<<< HEAD
     #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+=======
+    #[coverage(off)] //~ ERROR attribute cannot be used on
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     type TraitAssocType = Self;
 
     #[coverage(off)]
@@ -53,14 +76,24 @@ trait HasAssocType {
 }
 
 impl HasAssocType for () {
+<<<<<<< HEAD
     #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+=======
+    #[coverage(off)] //~ ERROR attribute cannot be used on
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     type T = impl Copy;
     fn constrain_assoc_type() -> Self::T {}
 }
 
+<<<<<<< HEAD
 #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
 struct MyStruct {
     #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+=======
+#[coverage(off)] //~ ERROR attribute cannot be used on
+struct MyStruct {
+    #[coverage(off)] //~ ERROR attribute cannot be used on
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     field: u32,
 }
 
@@ -73,6 +106,7 @@ impl MyStruct {
 }
 
 extern "C" {
+<<<<<<< HEAD
     #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
     static X: u32;
 
@@ -80,18 +114,35 @@ extern "C" {
     type T;
 
     #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+=======
+    #[coverage(off)] //~ ERROR attribute cannot be used on
+    static X: u32;
+
+    #[coverage(off)] //~ ERROR attribute cannot be used on
+    type T;
+
+    #[coverage(off)] //~ ERROR attribute cannot be used on
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn foreign_fn();
 }
 
 #[coverage(off)]
 fn main() {
+<<<<<<< HEAD
     #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+=======
+    #[coverage(off)] //~ ERROR attribute cannot be used on
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     let _ = ();
 
     // Currently not allowed on let statements, even if they bind to a closure.
     // It might be nice to support this as a special case someday, but trying
     // to define the precise boundaries of that special case might be tricky.
+<<<<<<< HEAD
     #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+=======
+    #[coverage(off)] //~ ERROR attribute cannot be used on
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     let _let_closure = || ();
 
     // In situations where attributes can already be applied to expressions,
@@ -107,10 +158,18 @@ fn main() {
     //~^ ERROR attributes on expressions are experimental [E0658]
 
     match () {
+<<<<<<< HEAD
         #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
         () => (),
     }
 
     #[coverage(off)] // Ferrocene addition: No error due to `#[coverage]` patches
+=======
+        #[coverage(off)] //~ ERROR attribute cannot be used on
+        () => (),
+    }
+
+    #[coverage(off)] //~ ERROR attribute cannot be used on
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     return ();
 }

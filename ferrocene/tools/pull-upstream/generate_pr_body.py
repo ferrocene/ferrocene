@@ -75,7 +75,7 @@ def render_changes(origin, base_branch, new_branch):
     for line in changes.split("\n"):
         if not line:
             continue
-        print("Pre-split line: {line}")
+        print(f"Pre-split line: {line}")
         hash, parents, message = line.split("|", 2)
         parents = parents.split(" ")
 

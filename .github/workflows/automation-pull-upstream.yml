@@ -51,7 +51,7 @@ jobs:
           inputs='${{ toJson(github.event.inputs) }}'
           length=$(echo $inputs |  jq 'length')
 
-          branches=("master" "beta" "stable")
+          branches=("hoverbear/upstream-pull-diagnose" "beta" "stable")
           selected_branches=()
 
           # If inputs is empty, this was scheduled

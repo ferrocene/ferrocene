@@ -98,7 +98,7 @@ if git rev-parse --quiet --verify "${TEMP_BRANCH}" > /dev/null; then
     git branch -D "${TEMP_BRANCH}"
 fi
 
-git fetch "origin" "${current_branch}"
+git fetch "origin"
 git fetch "${UPSTREAM_REPO}" "${upstream_branch}"
 
 # Avoid creating extra-large PRs by limiting the amount of merge commits

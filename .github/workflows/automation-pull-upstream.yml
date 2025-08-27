@@ -51,7 +51,7 @@ jobs:
           inputs='${{ toJson(github.event.inputs) }}'
           length=$(echo $inputs |  jq 'length')
 
-          branches=("hoverbear/upstream-pull-diagnose" "beta" "stable")
+          branches=("master" "beta" "stable")
           selected_branches=()
 
           # If inputs is empty, this was scheduled
@@ -79,7 +79,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        branch: ${{ fromJSON(needs.define-matrix.outputs.branches) }}
+        branch: 
+          - hoverbear/upstream-pull-diagnose
 
     steps:
       - name: Checkout the Ferrocene repository

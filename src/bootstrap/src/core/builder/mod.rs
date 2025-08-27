@@ -1159,6 +1159,11 @@ impl<'a> Builder<'a> {
                 doc::EditionGuide,
                 doc::StyleGuide,
                 doc::Tidy,
+                doc::Bootstrap,
+                doc::Releases,
+                doc::RunMakeSupport,
+                doc::BuildHelper,
+                doc::Compiletest,
                 crate::ferrocene::doc::AllSphinxDocuments,
                 crate::ferrocene::doc::CopyrightFiles,
                 // Basic Documents
@@ -1180,11 +1185,6 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::doc::code_coverage::AllCoverageReports,
                 // QMS Documents
                 crate::ferrocene::doc::InternalProcedures,
-                doc::Bootstrap,
-                doc::Releases,
-                doc::RunMakeSupport,
-                doc::BuildHelper,
-                doc::Compiletest,
             ),
             Kind::Dist => describe!(
                 dist::Docs,

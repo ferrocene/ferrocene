@@ -15,7 +15,7 @@ pub(crate) struct TraceabilityMatrixTool {
 impl Step for TraceabilityMatrixTool {
     type Output = ();
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path("ferrocene/tools/traceability-matrix")
@@ -50,7 +50,7 @@ pub(crate) struct SelfTest {
 impl Step for SelfTest {
     type Output = ();
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path("ferrocene/tools/self-test")
@@ -87,7 +87,7 @@ pub(crate) struct CheckDocumentSignatures {
 impl Step for CheckDocumentSignatures {
     type Output = ();
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         let default_condition = !matches!(
@@ -122,7 +122,7 @@ pub(crate) struct GenerateTarball {
 
 impl Step for GenerateTarball {
     type Output = ();
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
     const DEFAULT: bool = true;
 
     fn run(self, builder: &Builder<'_>) {

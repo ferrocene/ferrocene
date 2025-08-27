@@ -1743,6 +1743,33 @@ impl<T: PointeeSized> *mut T {
     }
 }
 
+impl<T> *mut T {
+    /// Casts from a type to its maybe-uninitialized version.
+    ///
+    /// This is always safe, since UB can only occur if the pointer is read
+    /// before being initialized.
+    #[must_use]
+    #[inline(always)]
+    #[unstable(feature = "cast_maybe_uninit", issue = "145036")]
+    #[cfg(not(feature = "ferrocene_certified"))]
+    pub const fn cast_uninit(self) -> *mut MaybeUninit<T> {
+        self as _
+    }
+}
+#[cfg(not(feature = "ferrocene_certified"))]
+impl<T> *mut MaybeUninit<T> {
+    /// Casts from a maybe-uninitialized type to its initialized version.
+    ///
+    /// This is always safe, since UB can only occur if the pointer is read
+    /// before being initialized.
+    #[must_use]
+    #[inline(always)]
+    #[unstable(feature = "cast_maybe_uninit", issue = "145036")]
+    pub const fn cast_init(self) -> *mut T {
+        self as _
+    }
+}
+
 #[cfg(not(feature = "ferrocene_certified"))]
 impl<T> *mut [T] {
     /// Returns the length of a raw slice.
@@ -2019,6 +2046,15 @@ impl<T> *mut [T] {
             // SAFETY: the caller must uphold the safety contract for `as_uninit_slice_mut`.
             Some(unsafe { slice::from_raw_parts_mut(self as *mut MaybeUninit<T>, self.len()) })
         }
+    }
+}
+
+impl<T> *mut T {
+    /// Casts from a pointer-to-`T` to a pointer-to-`[T; N]`.
+    #[inline]
+    #[unstable(feature = "ptr_cast_array", issue = "144514")]
+    pub const fn cast_array<const N: usize>(self) -> *mut [T; N] {
+        self.cast()
     }
 }
 

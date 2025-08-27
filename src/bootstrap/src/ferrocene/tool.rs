@@ -35,7 +35,7 @@ impl SelfTest {
 impl Step for SelfTest {
     type Output = PathBuf;
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = true;
+    const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path("ferrocene/tools/self-test")

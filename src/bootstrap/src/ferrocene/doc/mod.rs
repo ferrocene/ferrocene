@@ -756,7 +756,7 @@ pub(crate) struct CopyrightFiles {
 impl Step for CopyrightFiles {
     type Output = ();
     const DEFAULT: bool = true;
-    const ONLY_HOSTS: bool = false;
+    const IS_HOST: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.alias("copyright-files")

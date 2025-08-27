@@ -588,7 +588,7 @@ impl Step for SharedAssets {
 }
 
 /// Document the standard library using `build_compiler`.
-#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Std {
     build_compiler: Compiler,
     target: TargetSelection,
@@ -723,7 +723,7 @@ impl Step for Std {
 /// or remote link.
 const STD_PUBLIC_CRATES: [&str; 5] = ["core", "alloc", "std", "proc_macro", "test"];
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum DocumentationFormat {
     Html,
     Json,
@@ -805,7 +805,7 @@ fn doc_std(
 
     let description =
         format!("library{} in {} format", crate_description(requested_crates), format.as_str());
-    let _guard = builder.msg(Kind::Doc, description, None, build_compiler, target);
+    let _guard = builder.msg(Kind::Doc, description, Mode::Std, build_compiler, target);
 
     cargo.into_cmd().run(builder);
     builder.cp_link_r(&out_dir, out);
@@ -1015,7 +1015,7 @@ macro_rules! tool_doc {
                     (compilers.build_compiler(), Mode::ToolRustc)
                 } else {
                     // bootstrap/host tools have to be documented with the stage 0 compiler
-                    (prepare_doc_compiler(run.builder, target, 1), Mode::ToolBootstrap)
+                    (prepare_doc_compiler(run.builder, run.builder.host_target, 1), Mode::ToolBootstrap)
                 };
 
                 run.builder.ensure($tool { build_compiler, mode, target });
@@ -1251,7 +1251,7 @@ fn symlink_dir_force(config: &Config, original: &Path, link: &Path) {
 }
 
 /// Builds the Rust compiler book.
-#[derive(Ord, PartialOrd, Debug, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct RustcBook {
     build_compiler: Compiler,
     target: TargetSelection,
@@ -1355,7 +1355,7 @@ impl Step for RustcBook {
 /// Documents the reference.
 /// It has to always be done using a stage 1+ compiler, because it references in-tree
 /// compiler/stdlib concepts.
-#[derive(Ord, PartialOrd, Debug, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Reference {
     build_compiler: Compiler,
     target: TargetSelection,

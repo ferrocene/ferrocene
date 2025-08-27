@@ -377,6 +377,15 @@ pub(crate) unsafe fn create_module<'ll>(
         }
     }
 
+    if let Some(regparm_count) = sess.opts.unstable_opts.regparm {
+        llvm::add_module_flag_u32(
+            llmod,
+            llvm::ModuleFlagMergeBehavior::Error,
+            "NumRegisterParameters",
+            regparm_count,
+        );
+    }
+
     if let Some(BranchProtection { bti, pac_ret }) = sess.opts.unstable_opts.branch_protection {
         if sess.target.arch == "aarch64" {
             llvm::add_module_flag_u32(
@@ -460,6 +469,15 @@ pub(crate) unsafe fn create_module<'ll>(
                 1,
             );
         }
+    }
+
+    if sess.opts.unstable_opts.indirect_branch_cs_prefix {
+        llvm::add_module_flag_u32(
+            llmod,
+            llvm::ModuleFlagMergeBehavior::Override,
+            "indirect_branch_cs_prefix",
+            1,
+        );
     }
 
     match (sess.opts.unstable_opts.small_data_threshold, sess.target.small_data_threshold_support())
@@ -683,7 +701,7 @@ impl<'ll, CX: Borrow<SCx<'ll>>> GenericCx<'ll, CX> {
     }
 
     pub(crate) fn get_const_int(&self, ty: &'ll Type, val: u64) -> &'ll Value {
-        unsafe { llvm::LLVMConstInt(ty, val, llvm::False) }
+        unsafe { llvm::LLVMConstInt(ty, val, llvm::FALSE) }
     }
 
     pub(crate) fn get_const_i64(&self, n: u64) -> &'ll Value {

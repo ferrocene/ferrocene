@@ -74,6 +74,16 @@ passes_const_stable_not_stable =
     attribute `#[rustc_const_stable]` can only be applied to functions that are declared `#[stable]`
     .label = attribute specified here
 
+passes_custom_mir_incompatible_dialect_and_phase =
+    The {$dialect} dialect is not compatible with the {$phase} phase
+    .dialect_span = this dialect...
+    .phase_span = ... is not compatible with this phase
+
+passes_custom_mir_phase_requires_dialect =
+    `dialect` key required
+    .phase_span = `phase` argument requires a `dialect` argument
+
+
 passes_dead_codes =
     { $multiple ->
       *[true] multiple {$descr}s are
@@ -422,10 +432,6 @@ passes_must_not_suspend =
     `must_not_suspend` attribute should be applied to a struct, enum, union, or trait
     .label = is not a struct, enum, union, or trait
 
-passes_must_use_no_effect =
-    `#[must_use]` has no effect when applied to {$target}
-    .suggestion = remove the attribute
-
 passes_no_link =
     attribute should be applied to an `extern crate` item
     .label = not an `extern crate` item
@@ -444,10 +450,6 @@ passes_no_main_function =
     .teach_note = If you don't know the basics of Rust, you can go look to the Rust Book to get started: https://doc.rust-lang.org/book/
     .non_function_main = non-function item at `crate::main` is found
 
-passes_no_sanitize =
-    `#[no_sanitize({$attr_str})]` should be applied to {$accepted_kind}
-    .label = not {$accepted_kind}
-
 passes_non_exhaustive_with_default_field_values =
     `#[non_exhaustive]` can't be used to annotate items with default field values
     .label = this struct has default field values
@@ -460,8 +462,10 @@ passes_object_lifetime_err =
     {$repr}
 
 passes_outer_crate_level_attr =
-    crate-level attribute should be an inner attribute: add an exclamation mark: `#![foo]`
+    crate-level attribute should be an inner attribute
 
+passes_outer_crate_level_attr_suggestion =
+    add a `!`
 
 passes_panic_unwind_without_std =
     unwinding panics are not supported without std
@@ -541,6 +545,12 @@ passes_rustc_lint_opt_ty =
 passes_rustc_pub_transparent =
     attribute should be applied to `#[repr(transparent)]` types
     .label = not a `#[repr(transparent)]` type
+
+passes_sanitize_attribute_not_allowed =
+    sanitize attribute not allowed here
+    .not_fn_impl_mod = not a function, impl block, or module
+    .no_body = function has no body
+    .help = sanitize attribute can be applied to a function (with body), impl block, or module
 
 passes_should_be_applied_to_fn =
     attribute should be applied to a function definition

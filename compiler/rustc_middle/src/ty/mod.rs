@@ -32,7 +32,7 @@ use rustc_data_structures::intern::Interned;
 use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
 use rustc_data_structures::steal::Steal;
 use rustc_data_structures::unord::{UnordMap, UnordSet};
-use rustc_errors::{Diag, ErrorGuaranteed};
+use rustc_errors::{Diag, ErrorGuaranteed, LintBuffer};
 use rustc_hir::attrs::{AttributeKind, StrippedCfgItem};
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, DocLinkResMap, LifetimeRes, Res};
 use rustc_hir::def_id::{CrateNum, DefId, DefIdMap, LocalDefId, LocalDefIdMap};
@@ -46,7 +46,6 @@ use rustc_macros::{
 };
 use rustc_query_system::ich::StableHashingContext;
 use rustc_serialize::{Decodable, Encodable};
-use rustc_session::lint::LintBuffer;
 pub use rustc_session::lint::RegisteredTools;
 use rustc_span::hygiene::MacroKind;
 use rustc_span::{DUMMY_SP, ExpnId, ExpnKind, Ident, Span, Symbol, sym};
@@ -830,14 +829,15 @@ impl<'tcx> OpaqueHiddenType<'tcx> {
         // Convert the type from the function into a type valid outside by mapping generic
         // parameters to into the context of the opaque.
         //
-        // We erase regions when doing this during HIR typeck.
+        // We erase regions when doing this during HIR typeck. We manually use `fold_regions`
+        // here as we do not want to anonymize bound variables.
         let this = match defining_scope_kind {
-            DefiningScopeKind::HirTypeck => tcx.erase_regions(self),
+            DefiningScopeKind::HirTypeck => fold_regions(tcx, self, |_, _| tcx.lifetimes.re_erased),
             DefiningScopeKind::MirBorrowck => self,
         };
         let result = this.fold_with(&mut opaque_types::ReverseMapper::new(tcx, map, self.span));
         if cfg!(debug_assertions) && matches!(defining_scope_kind, DefiningScopeKind::HirTypeck) {
-            assert_eq!(result.ty, tcx.erase_regions(result.ty));
+            assert_eq!(result.ty, fold_regions(tcx, result.ty, |_, _| tcx.lifetimes.re_erased));
         }
         result
     }

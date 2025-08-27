@@ -1,6 +1,6 @@
 fn main() {
     [(); &(&'static: loop { |x| {}; }) as *const _ as usize]
-    //~^ ERROR: invalid label name `'static`
+    //~^ ERROR: labels cannot use keyword names
     //~| ERROR: type annotations needed
 }
 

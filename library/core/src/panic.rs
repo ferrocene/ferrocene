@@ -55,6 +55,7 @@ pub macro panic_2015 {
 #[allow_internal_unstable(panic_internals, const_format_args)]
 #[rustc_diagnostic_item = "core_panic_2021_macro"]
 #[rustc_macro_transparency = "semitransparent"]
+<<<<<<< HEAD
 #[cfg(all(feature = "ferrocene_certified", feature = "panic_immediate_abort"))]
 pub macro panic_2021($($t:tt)*) {{ $crate::panicking::panic("explicit panic") }}
 
@@ -65,6 +66,8 @@ pub macro panic_2021($($t:tt)*) {{ $crate::panicking::panic("explicit panic") }}
 #[rustc_macro_transparency = "semitransparent"]
 #[cfg(feature = "panic_immediate_abort")]
 #[cfg(not(feature = "ferrocene_certified"))]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub macro panic_2021 {
     () => (
         $crate::panicking::panic("explicit panic")
@@ -81,6 +84,7 @@ pub macro panic_2021 {
 }
 
 #[doc(hidden)]
+<<<<<<< HEAD
 #[unstable(feature = "edition_panic", issue = "none", reason = "use panic!() instead")]
 #[allow_internal_unstable(
     panic_internals,
@@ -129,6 +133,8 @@ pub macro panic_2021 {
 }
 
 #[doc(hidden)]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[unstable(feature = "edition_panic", issue = "none", reason = "use unreachable!() instead")]
 #[allow_internal_unstable(panic_internals)]
 #[rustc_diagnostic_item = "unreachable_2015_macro"]

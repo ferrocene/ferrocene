@@ -416,8 +416,12 @@ pub use self::adapters::TrustedRandomAccess;
 #[unstable(feature = "trusted_random_access", issue = "none")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub use self::adapters::TrustedRandomAccessNoCoerce;
+<<<<<<< HEAD
 #[unstable(feature = "iter_chain", reason = "recently added", issue = "125964")]
 #[cfg(not(feature = "ferrocene_certified"))]
+=======
+#[stable(feature = "iter_chain", since = "CURRENT_RUSTC_VERSION")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub use self::adapters::chain;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub(crate) use self::adapters::try_process;

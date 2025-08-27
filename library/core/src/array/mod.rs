@@ -210,12 +210,12 @@ pub struct TryFromSliceError(());
 impl fmt::Display for TryFromSliceError {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        #[allow(deprecated)]
-        self.description().fmt(f)
+        "could not convert slice to array".fmt(f)
     }
 }
 
 #[stable(feature = "try_from", since = "1.34.0")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl Error for TryFromSliceError {
     #[allow(deprecated)]
@@ -223,6 +223,9 @@ impl Error for TryFromSliceError {
         "could not convert slice to array"
     }
 }
+=======
+impl Error for TryFromSliceError {}
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 #[stable(feature = "try_from_slice_error", since = "1.36.0")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
@@ -675,12 +678,16 @@ impl<T, const N: usize> [T; N] {
     /// assert_eq!(strings.len(), 3);
     /// ```
     #[stable(feature = "array_methods", since = "1.77.0")]
+<<<<<<< HEAD
     #[rustc_const_unstable(feature = "const_array_each_ref", issue = "133289")]
     #[cfg(not(feature = "ferrocene_certified"))]
+=======
+    #[rustc_const_stable(feature = "const_array_each_ref", since = "CURRENT_RUSTC_VERSION")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub const fn each_ref(&self) -> [&T; N] {
         let mut buf = [null::<T>(); N];
 
-        // FIXME(const-hack): We would like to simply use iterators for this (as in the original implementation), but this is not allowed in constant expressions.
+        // FIXME(const_trait_impl): We would like to simply use iterators for this (as in the original implementation), but this is not allowed in constant expressions.
         let mut i = 0;
         while i < N {
             buf[i] = &raw const self[i];
@@ -707,12 +714,16 @@ impl<T, const N: usize> [T; N] {
     /// assert_eq!(floats, [0.0, 2.7, -1.0]);
     /// ```
     #[stable(feature = "array_methods", since = "1.77.0")]
+<<<<<<< HEAD
     #[rustc_const_unstable(feature = "const_array_each_ref", issue = "133289")]
     #[cfg(not(feature = "ferrocene_certified"))]
+=======
+    #[rustc_const_stable(feature = "const_array_each_ref", since = "CURRENT_RUSTC_VERSION")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub const fn each_mut(&mut self) -> [&mut T; N] {
         let mut buf = [null_mut::<T>(); N];
 
-        // FIXME(const-hack): We would like to simply use iterators for this (as in the original implementation), but this is not allowed in constant expressions.
+        // FIXME(const_trait_impl): We would like to simply use iterators for this (as in the original implementation), but this is not allowed in constant expressions.
         let mut i = 0;
         while i < N {
             buf[i] = &raw mut self[i];

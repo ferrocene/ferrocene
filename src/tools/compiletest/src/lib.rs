@@ -215,9 +215,15 @@ pub fn parse_config(args: Vec<String>) -> Config {
         )
         .optopt(
             "",
-            "codegen-backend",
+            "default-codegen-backend",
             "the codegen backend currently used",
             "CODEGEN BACKEND NAME",
+        )
+        .optopt(
+            "",
+            "override-codegen-backend",
+            "the codegen backend to use instead of the default one",
+            "CODEGEN BACKEND [NAME | PATH]",
         );
 
     let (argv0, args_) = args.split_first().unwrap();
@@ -279,14 +285,17 @@ pub fn parse_config(args: Vec<String>) -> Config {
             || directives::extract_llvm_version_from_binary(&matches.opt_str("llvm-filecheck")?),
         );
 
-    let codegen_backend = match matches.opt_str("codegen-backend").as_deref() {
+    let default_codegen_backend = match matches.opt_str("default-codegen-backend").as_deref() {
         Some(backend) => match CodegenBackend::try_from(backend) {
             Ok(backend) => backend,
-            Err(error) => panic!("invalid value `{backend}` for `--codegen-backend`: {error}"),
+            Err(error) => {
+                panic!("invalid value `{backend}` for `--defalt-codegen-backend`: {error}")
+            }
         },
         // By default, it's always llvm.
         None => CodegenBackend::Llvm,
     };
+    let override_codegen_backend = matches.opt_str("override-codegen-backend");
 
     let run_ignored = matches.opt_present("ignored");
     let with_rustc_debug_assertions = matches.opt_present("with-rustc-debug-assertions");
@@ -475,7 +484,8 @@ pub fn parse_config(args: Vec<String>) -> Config {
 
         minicore_path: opt_path(matches, "minicore-path"),
 
-        codegen_backend,
+        default_codegen_backend,
+        override_codegen_backend,
     }
 }
 
@@ -839,13 +849,21 @@ fn find_tests_in_dir(
         && let Some(Utf8Component::Normal(parent)) = components.next()
         && parent == "tests"
         && let Ok(backend) = CodegenBackend::try_from(backend)
+<<<<<<< HEAD
         && backend != config.codegen_backend
+=======
+        && backend != cx.config.default_codegen_backend
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     {
         // We ignore asm tests which don't match the current codegen backend.
         warning!(
             "Ignoring tests in `{dir}` because they don't match the configured codegen \
              backend (`{}`)",
+<<<<<<< HEAD
             config.codegen_backend.as_str(),
+=======
+            cx.config.default_codegen_backend.as_str(),
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         );
         return Ok(TestCollector::new());
     }

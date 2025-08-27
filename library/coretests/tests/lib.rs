@@ -54,9 +54,9 @@
 #![feature(generic_assert_internals)]
 #![feature(hasher_prefixfree_extras)]
 #![feature(hashmap_internals)]
+#![feature(int_lowest_highest_one)]
 #![feature(int_roundings)]
 #![feature(ip)]
-#![feature(ip_from)]
 #![feature(is_ascii_octdigit)]
 #![feature(isolate_most_least_significant_one)]
 #![feature(iter_advance_by)]
@@ -80,6 +80,7 @@
 #![feature(next_index)]
 #![feature(non_exhaustive_omitted_patterns_lint)]
 #![feature(numfmt)]
+#![feature(option_reduce)]
 #![feature(pattern)]
 #![feature(pointer_is_aligned_to)]
 #![feature(portable_simd)]
@@ -202,6 +203,7 @@ mod time;
 mod tuple;
 mod unicode;
 mod waker;
+mod wtf8;
 
 /// Copied from `std::test_helpers::test_rng`, see that function for rationale.
 #[track_caller]

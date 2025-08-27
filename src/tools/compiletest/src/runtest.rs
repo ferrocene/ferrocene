@@ -412,7 +412,7 @@ impl<'test> TestCx<'test> {
             cmdline: format!("{cmd:?}"),
         };
         self.dump_output(
-            self.config.verbose,
+            self.config.verbose || !proc_res.status.success(),
             &cmd.get_program().to_string_lossy(),
             &proc_res.stdout,
             &proc_res.stderr,
@@ -1489,7 +1489,7 @@ impl<'test> TestCx<'test> {
         };
 
         self.dump_output(
-            self.config.verbose,
+            self.config.verbose || (!result.status.success() && self.config.mode != TestMode::Ui),
             &command.get_program().to_string_lossy(),
             &result.stdout,
             &result.stderr,
@@ -1559,6 +1559,11 @@ impl<'test> TestCx<'test> {
         {
             // In stage 0, make sure we use `stage0-sysroot` instead of the bootstrap sysroot.
             rustc.arg("--sysroot").arg(&self.config.sysroot_base);
+        }
+
+        // If the provided codegen backend is not LLVM, we need to pass it.
+        if let Some(ref backend) = self.config.override_codegen_backend {
+            rustc.arg(format!("-Zcodegen-backend={}", backend));
         }
 
         // Optionally prevent default --target if specified in test compile-flags.
@@ -2154,7 +2159,7 @@ impl<'test> TestCx<'test> {
 
         #[rustfmt::skip]
         let tidy_args = [
-            "--new-blocklevel-tags", "rustdoc-search,rustdoc-toolbar",
+            "--new-blocklevel-tags", "rustdoc-search,rustdoc-toolbar,rustdoc-topbar",
             "--indent", "yes",
             "--indent-spaces", "2",
             "--wrap", "0",
@@ -2749,6 +2754,7 @@ impl<'test> TestCx<'test> {
             return CompareOutcome::Same;
         }
 
+<<<<<<< HEAD
         // If `compare-output-lines-by-subset` is not explicitly enabled then
         // auto-enable it when a `runner` is in use since wrapper tools might
         // provide extra output on failure, for example a WebAssembly runtime
@@ -2756,6 +2762,16 @@ impl<'test> TestCx<'test> {
         // default.
         let compare_output_by_lines =
             self.props.compare_output_lines_by_subset || self.config.runner.is_some();
+=======
+        // Wrapper tools set by `runner` might provide extra output on failure,
+        // for example a WebAssembly runtime might print the stack trace of an
+        // `unreachable` instruction by default.
+        //
+        // Also, some tests like `ui/parallel-rustc` have non-deterministic
+        // orders of output, so we need to compare by lines.
+        let compare_output_by_lines =
+            self.props.compare_output_by_lines || self.config.runner.is_some();
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
         let tmp;
         let (expected, actual): (&str, &str) = if compare_output_by_lines {
@@ -2984,6 +3000,7 @@ struct ProcArgs {
     args: Vec<OsString>,
 }
 
+#[derive(Debug)]
 pub struct ProcRes {
     status: ExitStatus,
     stdout: String,

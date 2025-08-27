@@ -156,7 +156,7 @@ You can skip linkcheck with --skip src/tools/linkchecker"
         }
 
         // Build all the default documentation.
-        builder.default_doc(&[]);
+        builder.run_default_doc_steps();
 
         // Build the linkchecker before calling `msg`, since GHA doesn't support nested groups.
         let linkchecker = builder.tool_cmd(Tool::Linkchecker);
@@ -211,7 +211,7 @@ impl Step for HtmlCheck {
             panic!("Cannot run html-check tests");
         }
         // Ensure that a few different kinds of documentation are available.
-        builder.default_doc(&[]);
+        builder.run_default_doc_steps();
         builder.ensure(crate::core::build_steps::doc::Rustc::for_stage(
             builder,
             builder.top_stage,
@@ -1733,7 +1733,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
         if suite == "debuginfo" {
             builder.ensure(dist::DebuggerScripts {
                 sysroot: builder.sysroot(compiler).to_path_buf(),
-                host: target,
+                target,
             });
         }
         if suite == "run-make" {
@@ -1844,10 +1844,27 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
         cmd.arg("--host").arg(&*compiler.host.triple);
         cmd.arg("--llvm-filecheck").arg(builder.llvm_filecheck(builder.config.host_target));
 
-        if let Some(codegen_backend) = builder.config.default_codegen_backend(compiler.host) {
-            // Tells compiletest which codegen backend is used by default by the compiler.
+        if let Some(codegen_backend) = builder.config.cmd.test_codegen_backend() {
+            if !builder.config.enabled_codegen_backends(compiler.host).contains(codegen_backend) {
+                eprintln!(
+                    "\
+ERROR: No configured backend named `{name}`
+HELP: You can add it into `bootstrap.toml` in `rust.codegen-backends = [{name:?}]`",
+                    name = codegen_backend.name(),
+                );
+                crate::exit!(1);
+            }
+            // Tells compiletest that we want to use this codegen in particular and to override
+            // the default one.
+            cmd.arg("--override-codegen-backend").arg(codegen_backend.name());
+            // Tells compiletest which codegen backend to use.
             // It is used to e.g. ignore tests that don't support that codegen backend.
-            cmd.arg("--codegen-backend").arg(codegen_backend.name());
+            cmd.arg("--default-codegen-backend").arg(codegen_backend.name());
+        } else {
+            // Tells compiletest which codegen backend to use.
+            // It is used to e.g. ignore tests that don't support that codegen backend.
+            cmd.arg("--default-codegen-backend")
+                .arg(builder.config.default_codegen_backend(compiler.host).name());
         }
 
         if builder.build.config.llvm_enzyme {
@@ -2040,12 +2057,15 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
         let mut llvm_components_passed = false;
         let mut copts_passed = false;
         if builder.config.llvm_enabled(compiler.host) {
-            let llvm::LlvmResult { llvm_config, .. } =
+            let llvm::LlvmResult { host_llvm_config, .. } =
                 builder.ensure(llvm::Llvm { target: builder.config.host_target });
             if !builder.config.dry_run() {
-                let llvm_version = get_llvm_version(builder, &llvm_config);
-                let llvm_components =
-                    command(&llvm_config).arg("--components").run_capture_stdout(builder).stdout();
+                let llvm_version = get_llvm_version(builder, &host_llvm_config);
+                let llvm_components = command(&host_llvm_config)
+                    .cached()
+                    .arg("--components")
+                    .run_capture_stdout(builder)
+                    .stdout();
                 // Remove trailing newline from llvm-config output.
                 cmd.arg("--llvm-version")
                     .arg(llvm_version.trim())
@@ -2062,8 +2082,11 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
             // separate compilations. We can add LLVM's library path to the
             // rustc args as a workaround.
             if !builder.config.dry_run() && suite.ends_with("fulldeps") {
-                let llvm_libdir =
-                    command(&llvm_config).arg("--libdir").run_capture_stdout(builder).stdout();
+                let llvm_libdir = command(&host_llvm_config)
+                    .cached()
+                    .arg("--libdir")
+                    .run_capture_stdout(builder)
+                    .stdout();
                 let link_llvm = if target.is_msvc() {
                     format!("-Clink-arg=-LIBPATH:{llvm_libdir}")
                 } else {
@@ -2077,7 +2100,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
                 // tools. Pass the path to run-make tests so they can use them.
                 // (The coverage-run tests also need these tools to process
                 // coverage reports.)
-                let llvm_bin_path = llvm_config
+                let llvm_bin_path = host_llvm_config
                     .parent()
                     .expect("Expected llvm-config to be contained in directory");
                 assert!(llvm_bin_path.is_dir());
@@ -2781,7 +2804,7 @@ fn prepare_cargo_test(
 /// FIXME(Zalathar): Try to split this into two separate steps: a user-visible
 /// step for testing standard library crates, and an internal step used for both
 /// library crates and compiler crates.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Crate {
     pub compiler: Compiler,
     pub target: TargetSelection,
@@ -3199,45 +3222,55 @@ impl Step for Distcheck {
     ///
     /// FIXME(#136822): dist components are under-tested.
     fn run(self, builder: &Builder<'_>) {
-        builder.info("Distcheck");
-        let dir = builder.tempdir().join("distcheck");
-        let _ = fs::remove_dir_all(&dir);
-        t!(fs::create_dir_all(&dir));
+        // Use a temporary directory completely outside the current checkout, to avoid reusing any
+        // local source code, built artifacts or configuration by accident
+        let root_dir = std::env::temp_dir().join("distcheck");
 
-        // Guarantee that these are built before we begin running.
-        builder.ensure(dist::PlainSourceTarball);
-        builder.ensure(dist::Src);
+        // Check that we can build some basic things from the plain source tarball
+        builder.info("Distcheck plain source tarball");
+        let plain_src_tarball = builder.ensure(dist::PlainSourceTarball);
+        let plain_src_dir = root_dir.join("distcheck-plain-src");
+        builder.clear_dir(&plain_src_dir);
+
+        let configure_args: Vec<String> = std::env::var("DISTCHECK_CONFIGURE_ARGS")
+            .map(|args| args.split(" ").map(|s| s.to_string()).collect::<Vec<String>>())
+            .unwrap_or_default();
 
         command("tar")
             .arg("-xf")
-            .arg(builder.ensure(dist::PlainSourceTarball).tarball())
+            .arg(plain_src_tarball.tarball())
             .arg("--strip-components=1")
-            .current_dir(&dir)
+            .current_dir(&plain_src_dir)
             .run(builder);
         command("./configure")
-            .args(&builder.config.configure_args)
+            .arg("--set")
+            .arg("rust.omit-git-hash=false")
+            .args(&configure_args)
             .arg("--enable-vendor")
-            .current_dir(&dir)
+            .current_dir(&plain_src_dir)
             .run(builder);
         command(helpers::make(&builder.config.host_target.triple))
             .arg("check")
-            .current_dir(&dir)
+            // Do not run the build as if we were in CI, otherwise git would be assumed to be
+            // present, but we build from a tarball here
+            .env("GITHUB_ACTIONS", "0")
+            .current_dir(&plain_src_dir)
             .run(builder);
 
         // Now make sure that rust-src has all of libstd's dependencies
         builder.info("Distcheck rust-src");
-        let dir = builder.tempdir().join("distcheck-src");
-        let _ = fs::remove_dir_all(&dir);
-        t!(fs::create_dir_all(&dir));
+        let src_tarball = builder.ensure(dist::Src);
+        let src_dir = root_dir.join("distcheck-src");
+        builder.clear_dir(&src_dir);
 
         command("tar")
             .arg("-xf")
-            .arg(builder.ensure(dist::Src).tarball())
+            .arg(src_tarball.tarball())
             .arg("--strip-components=1")
-            .current_dir(&dir)
+            .current_dir(&src_dir)
             .run(builder);
 
-        let toml = dir.join("rust-src/lib/rustlib/src/rust/library/std/Cargo.toml");
+        let toml = src_dir.join("rust-src/lib/rustlib/src/rust/library/std/Cargo.toml");
         command(&builder.initial_cargo)
             // Will read the libstd Cargo.toml
             // which uses the unstable `public-dependency` feature.
@@ -3245,7 +3278,7 @@ impl Step for Distcheck {
             .arg("generate-lockfile")
             .arg("--manifest-path")
             .arg(&toml)
-            .current_dir(&dir)
+            .current_dir(&src_dir)
             .run(builder);
     }
 }
@@ -3865,7 +3898,7 @@ impl Step for TestFloatParse {
 /// Runs the tool `src/tools/collect-license-metadata` in `ONLY_CHECK=1` mode,
 /// which verifies that `license-metadata.json` is up-to-date and therefore
 /// running the tool normally would not update anything.
-#[derive(Debug, PartialOrd, Ord, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct CollectLicenseMetadata;
 
 impl Step for CollectLicenseMetadata {

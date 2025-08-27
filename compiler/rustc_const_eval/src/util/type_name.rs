@@ -1,11 +1,11 @@
 use std::fmt::Write;
 
 use rustc_data_structures::intern::Interned;
-use rustc_hir::def_id::CrateNum;
+use rustc_hir::def_id::{CrateNum, DefId};
 use rustc_hir::definitions::DisambiguatedDefPathData;
 use rustc_middle::bug;
 use rustc_middle::ty::print::{PrettyPrinter, PrintError, Printer};
-use rustc_middle::ty::{self, GenericArg, GenericArgKind, Ty, TyCtxt};
+use rustc_middle::ty::{self, GenericArg, Ty, TyCtxt};
 
 struct TypeNamePrinter<'tcx> {
     tcx: TyCtxt<'tcx>,
@@ -18,9 +18,10 @@ impl<'tcx> Printer<'tcx> for TypeNamePrinter<'tcx> {
     }
 
     fn print_region(&mut self, _region: ty::Region<'_>) -> Result<(), PrintError> {
-        // This is reachable (via `pretty_print_dyn_existential`) even though
-        // `<Self As PrettyPrinter>::should_print_region` returns false. See #144994.
-        Ok(())
+        // FIXME: most regions have been erased by the time this code runs.
+        // Just printing `'_` is a bit hacky but gives mostly good results, and
+        // doing better is difficult. See `should_print_optional_region`.
+        write!(self, "'_")
     }
 
     fn print_type(&mut self, ty: Ty<'tcx>) -> Result<(), PrintError> {
@@ -125,19 +126,53 @@ impl<'tcx> Printer<'tcx> for TypeNamePrinter<'tcx> {
         args: &[GenericArg<'tcx>],
     ) -> Result<(), PrintError> {
         print_prefix(self)?;
-        let args =
-            args.iter().cloned().filter(|arg| !matches!(arg.kind(), GenericArgKind::Lifetime(_)));
-        if args.clone().next().is_some() {
-            self.generic_delimiters(|cx| cx.comma_sep(args))
+        if !args.is_empty() {
+            self.generic_delimiters(|cx| cx.comma_sep(args.iter().copied()))
         } else {
             Ok(())
         }
     }
+
+    fn print_coroutine_with_kind(
+        &mut self,
+        def_id: DefId,
+        parent_args: &'tcx [GenericArg<'tcx>],
+        kind: Ty<'tcx>,
+    ) -> Result<(), PrintError> {
+        self.print_def_path(def_id, parent_args)?;
+
+        let ty::Coroutine(_, args) = self.tcx.type_of(def_id).instantiate_identity().kind() else {
+            // Could be `ty::Error`.
+            return Ok(());
+        };
+
+        let default_kind = args.as_coroutine().kind_ty();
+
+        match kind.to_opt_closure_kind() {
+            _ if kind == default_kind => {
+                // No need to mark the closure if it's the deduced coroutine kind.
+            }
+            Some(ty::ClosureKind::Fn) | None => {
+                // Should never happen. Just don't mark anything rather than panicking.
+            }
+            Some(ty::ClosureKind::FnMut) => self.path.push_str("::{{call_mut}}"),
+            Some(ty::ClosureKind::FnOnce) => self.path.push_str("::{{call_once}}"),
+        }
+
+        Ok(())
+    }
 }
 
 impl<'tcx> PrettyPrinter<'tcx> for TypeNamePrinter<'tcx> {
-    fn should_print_region(&self, _region: ty::Region<'_>) -> bool {
-        false
+    fn should_print_optional_region(&self, region: ty::Region<'_>) -> bool {
+        // Bound regions are always printed (as `'_`), which gives some idea that they are special,
+        // even though the `for` is omitted by the pretty printer.
+        // E.g. `for<'a, 'b> fn(&'a u32, &'b u32)` is printed as "fn(&'_ u32, &'_ u32)".
+        match region.kind() {
+            ty::ReErased | ty::ReEarlyParam(_) => false,
+            ty::ReBound(..) => true,
+            _ => unreachable!(),
+        }
     }
 
     fn generic_delimiters(

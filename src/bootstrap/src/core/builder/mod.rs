@@ -1172,6 +1172,11 @@ impl<'a> Builder<'a> {
                 doc::EditionGuide,
                 doc::StyleGuide,
                 doc::Tidy,
+                doc::Bootstrap,
+                doc::Releases,
+                doc::RunMakeSupport,
+                doc::BuildHelper,
+                doc::Compiletest,
                 crate::ferrocene::doc::AllSphinxDocuments,
                 crate::ferrocene::doc::CopyrightFiles,
                 // Basic Documents
@@ -1191,13 +1196,8 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::doc::CompilerTechnicalReport,
                 crate::ferrocene::doc::CoreTechnicalReport,
                 crate::ferrocene::doc::code_coverage::AllCoverageReports,
-                // QMS Documents
+                // QMS Document
                 crate::ferrocene::doc::InternalProcedures,
-                doc::Bootstrap,
-                doc::Releases,
-                doc::RunMakeSupport,
-                doc::BuildHelper,
-                doc::Compiletest,
             ),
             Kind::Dist => describe!(
                 dist::Docs,
@@ -1239,21 +1239,6 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::partners::oxidos::DistOxidOs,
             ),
             Kind::Install => describe!(
-                // install::Docs,
-                // install::Std,
-                // // During the Rust compiler (rustc) installation process, we copy the entire sysroot binary
-                // // path (build/host/stage2/bin). Since the building tools also make their copy in the sysroot
-                // // binary path, we must install rustc before the tools. Otherwise, the rust-installer will
-                // // install the same binaries twice for each tool, leaving backup files (*.old) as a result.
-                // install::Rustc,
-                // install::Cargo,
-                // install::RustAnalyzer,
-                // install::Rustfmt,
-                // install::Clippy,
-                // install::Miri,
-                // install::LlvmTools,
-                // install::Src,
-                // install::Rustc,
                 crate::ferrocene::install::Std,
                 crate::ferrocene::install::Rustc,
                 crate::ferrocene::install::Cargo,
@@ -1293,7 +1278,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::sign::QualificationPlan,
                 crate::ferrocene::sign::QualificationReport,
                 crate::ferrocene::sign::SafetyManual,
-                // QMS Documents
+                // QMS
                 crate::ferrocene::sign::InternalProcedures,
             ),
             Kind::Setup => {

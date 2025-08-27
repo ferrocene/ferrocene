@@ -231,6 +231,17 @@
               {
                 "license": {
                   "copyright": [
+                    "The Ferrocene Developers",
+                    "The Rust Project Developers"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "doc/specification/version.rst",
+                "type": "file"
+              },
+              {
+                "license": {
+                  "copyright": [
                     "2022 Fonticons, Inc",
                     "Fonticons, Inc"
                   ],

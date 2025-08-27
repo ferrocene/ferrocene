@@ -2395,8 +2395,8 @@ impl Step for LlvmTools {
 
         let mut tarball = Tarball::new(builder, "llvm-tools", &target.triple);
         tarball.set_overlay(OverlayKind::Llvm);
-        // Ferrocene: disable preview flag.
-        //tarball.is_preview(true);
+        // Ferrocene change: set to false
+        tarball.is_preview(false);
 
         if builder.config.llvm_tools_enabled {
             // Prepare the image directory

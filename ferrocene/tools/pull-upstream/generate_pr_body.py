@@ -56,6 +56,7 @@ def render_changes(origin, base_branch, new_branch):
         [
             "git",
             "log",
+            "-z",
             "--format=%H|%P|%s",
             "--reverse",
             f"{origin}/{base_branch}..{new_branch}",
@@ -72,7 +73,7 @@ def render_changes(origin, base_branch, new_branch):
     # Recreate the commit graph
     commits = {}
     last = None
-    for line in changes.split("\n"):
+    for line in changes.split("\0"):
         if not line:
             continue
         hash, parents, message = line.split("|", 2)

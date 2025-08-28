@@ -172,7 +172,7 @@ fn sample_config() -> Config {
         build_root: env("FERROCENE_BUILD_ROOT"),
         build_test_suite_root: env("FERROCENE_BUILD_TEST_SUITE_ROOT"),
         suite: env("FERROCENE_SUITE"),
-        codegen_backend: crate::common::CodegenBackend::Llvm,
+        default_codegen_backend: crate::common::CodegenBackend::Llvm,
 
         // Dummy values
         edition: Default::default(),
@@ -252,6 +252,7 @@ fn sample_config() -> Config {
         diff_command: Default::default(),
         minicore_path: Default::default(),
         query_rustc_path: Default::default(),
+        override_codegen_backend: Default::default(),
     }
 }
 

@@ -849,21 +849,13 @@ fn find_tests_in_dir(
         && let Some(Utf8Component::Normal(parent)) = components.next()
         && parent == "tests"
         && let Ok(backend) = CodegenBackend::try_from(backend)
-<<<<<<< HEAD
-        && backend != config.codegen_backend
-=======
-        && backend != cx.config.default_codegen_backend
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+        && backend != config.default_codegen_backend
     {
         // We ignore asm tests which don't match the current codegen backend.
         warning!(
             "Ignoring tests in `{dir}` because they don't match the configured codegen \
              backend (`{}`)",
-<<<<<<< HEAD
-            config.codegen_backend.as_str(),
-=======
-            cx.config.default_codegen_backend.as_str(),
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+            config.default_codegen_backend.as_str(),
         );
         return Ok(TestCollector::new());
     }

@@ -281,18 +281,6 @@ pub fn panic_nounwind_nobacktrace(expr: &'static str) -> ! {
     panic_nounwind_fmt(fmt::Arguments::new_const(&[expr]), /* force_no_backtrace */ true);
 }
 
-<<<<<<< HEAD
-#[track_caller]
-#[cfg_attr(not(feature = "panic_immediate_abort"), inline(never), cold)]
-#[cfg_attr(feature = "panic_immediate_abort", inline)]
-#[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
-#[cfg(not(feature = "ferrocene_certified"))]
-pub const fn panic_explicit() -> ! {
-    panic_display(&"explicit panic");
-}
-
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[inline]
 #[track_caller]
 #[rustc_diagnostic_item = "unreachable_display"] // needed for `non-fmt-panics` lint

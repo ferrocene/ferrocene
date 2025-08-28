@@ -235,6 +235,7 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn highest_one(self) -> Option<u32> {
             (self as $UnsignedT).highest_one()
         }
@@ -256,6 +257,7 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn lowest_one(self) -> Option<u32> {
             (self as $UnsignedT).lowest_one()
         }

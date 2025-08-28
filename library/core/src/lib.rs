@@ -175,12 +175,8 @@
 #![feature(no_core)]
 #![feature(optimize_attribute)]
 #![feature(prelude_import)]
-<<<<<<< HEAD
-#![cfg_attr(not(feature = "ferrocene_certified"), feature(repr_simd))]
-=======
 #![feature(reborrow)]
-#![feature(repr_simd)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(repr_simd))]
 #![feature(rustc_allow_const_fn_unstable)]
 #![feature(rustc_attrs)]
 #![feature(rustdoc_internals)]

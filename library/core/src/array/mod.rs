@@ -675,12 +675,8 @@ impl<T, const N: usize> [T; N] {
     /// assert_eq!(strings.len(), 3);
     /// ```
     #[stable(feature = "array_methods", since = "1.77.0")]
-<<<<<<< HEAD
-    #[rustc_const_unstable(feature = "const_array_each_ref", issue = "133289")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-=======
     #[rustc_const_stable(feature = "const_array_each_ref", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn each_ref(&self) -> [&T; N] {
         let mut buf = [null::<T>(); N];
 
@@ -711,12 +707,8 @@ impl<T, const N: usize> [T; N] {
     /// assert_eq!(floats, [0.0, 2.7, -1.0]);
     /// ```
     #[stable(feature = "array_methods", since = "1.77.0")]
-<<<<<<< HEAD
-    #[rustc_const_unstable(feature = "const_array_each_ref", issue = "133289")]
-    #[cfg(not(feature = "ferrocene_certified"))]
-=======
     #[rustc_const_stable(feature = "const_array_each_ref", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    #[cfg(not(feature = "ferrocene_certified"))]
     pub const fn each_mut(&mut self) -> [&mut T; N] {
         let mut buf = [null_mut::<T>(); N];
 

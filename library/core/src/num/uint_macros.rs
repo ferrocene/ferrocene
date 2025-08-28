@@ -287,6 +287,7 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn highest_one(self) -> Option<u32> {
             match NonZero::new(self) {
                 Some(v) => Some(v.highest_one()),
@@ -311,6 +312,7 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn lowest_one(self) -> Option<u32> {
             match NonZero::new(self) {
                 Some(v) => Some(v.lowest_one()),

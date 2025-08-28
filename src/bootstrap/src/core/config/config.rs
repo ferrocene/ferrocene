@@ -831,62 +831,7 @@ impl Config {
             fs::create_dir_all(&out).expect("Failed to create dry-run directory");
         }
 
-<<<<<<< HEAD
-        config.hosts = if let Some(hosts) = host { hosts } else { vec![config.host_target] };
-        config.targets = if let Some(targets) = target {
-            targets
-        } else {
-            // If target is *not* configured, then default to the host
-            // toolchains.
-            config.hosts.clone()
-        };
-
-        config.nodejs = build_nodejs.map(PathBuf::from);
-        config.npm = build_npm.map(PathBuf::from);
-        config.gdb = build_gdb.map(PathBuf::from);
-        config.lldb = build_lldb.map(PathBuf::from);
-        config.python = build_python.map(PathBuf::from);
-        config.uv = uv.map(PathBuf::from);
-        config.reuse = build_reuse.map(PathBuf::from);
-        config.submodules = build_submodules;
-        config.android_ndk = build_android_ndk;
-        config.bootstrap_cache_path = build_bootstrap_cache_path;
-        set(&mut config.low_priority, build_low_priority);
-        set(&mut config.compiler_docs, build_compiler_docs);
-        set(&mut config.library_docs_private_items, build_library_docs_private_items);
-        set(&mut config.docs_minification, build_docs_minification);
-        set(&mut config.docs, build_docs);
-        set(&mut config.locked_deps, build_locked_deps);
-        set(&mut config.full_bootstrap, build_full_bootstrap);
-        set(&mut config.extended, build_extended);
-        config.tools = build_tools;
-        set(&mut config.tool, build_tool);
-        set(&mut config.sanitizers, build_sanitizers);
-        set(&mut config.profiler, build_profiler);
-        set(&mut config.cargo_native_static, build_cargo_native_static);
-        set(&mut config.configure_args, build_configure_args);
-        set(&mut config.local_rebuild, build_local_rebuild);
-        set(&mut config.print_step_timings, build_print_step_timings);
-        set(&mut config.print_step_rusage, build_print_step_rusage);
-        config.patch_binaries_for_nix = build_patch_binaries_for_nix;
-
-        // Verbose flag is a good default for `rust.verbose-tests`.
-        config.verbose_tests = config.is_verbose();
-
-        config.prefix = install_prefix.map(PathBuf::from);
-        config.sysconfdir = install_sysconfdir.map(PathBuf::from);
-        config.datadir = install_datadir.map(PathBuf::from);
-        config.docdir = install_docdir.map(PathBuf::from);
-        set(&mut config.bindir, install_bindir.map(PathBuf::from));
-        config.libdir = install_libdir.map(PathBuf::from);
-        config.mandir = install_mandir.map(PathBuf::from);
-
-        config.llvm_assertions = llvm_assertions.unwrap_or(false);
-
-        let file_content = t!(fs::read_to_string(config.src.join("src/ci/channel")));
-=======
         let file_content = t!(fs::read_to_string(src.join("src/ci/channel")));
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         let ci_channel = file_content.trim_end();
 
         let is_user_configured_rust_channel = match rust_channel {
@@ -1088,55 +1033,43 @@ impl Config {
             }
         }
 
-<<<<<<< HEAD
-        if !config.llvm_from_ci && config.llvm_thin_lto && llvm_link_shared.is_none() {
-            // If we're building with ThinLTO on, by default we want to link
-            // to LLVM shared, to avoid re-doing ThinLTO (which happens in
-            // the link step) with each stage.
-            config.llvm_link_shared.set(Some(true));
-        }
-
-        config.gcc_ci_mode = match gcc_download_ci_gcc {
-            Some(value) => match value {
-                true => GccCiMode::DownloadFromCi,
-                false => GccCiMode::BuildLocally,
-            },
-            None => GccCiMode::default(),
-        };
-
-        match build_ccache {
-            Some(StringOrBool::String(ref s)) => config.ccache = Some(s.to_string()),
-            Some(StringOrBool::Bool(true)) => {
-                config.ccache = Some("ccache".to_string());
-            }
-            Some(StringOrBool::Bool(false)) | None => {}
-        }
-
+        let mut ferrocene_raw_channel = "rolling".into();
+        let mut ferrocene_aws_profile = Default::default();
+        let mut ferrocene_traceability_matrix_mode = Default::default();
+        let mut ferrocene_test_outcomes = Default::default();
+        let mut ferrocene_coverage_outcomes = Default::default();
+        let mut ferrocene_oxidos_src = Default::default();
+        let mut ferrocene_tarball_signing_kms_key_arn = Default::default();
+        let mut ferrocene_document_signatures = Default::default();
+        let mut ferrocene_compiler_technical_report_url = Default::default();
+        let mut ferrocene_core_technical_report_url = Default::default();
+        let mut ferrocene_secret_sauce = Default::default();
+        let mut ferrocene_generate_coverage_report_after_tests = Default::default();
         if let Some(f) = toml.ferrocene {
-            set(&mut config.ferrocene_raw_channel, f.channel);
-            if config.ferrocene_raw_channel == "auto-detect" {
-                let ci_channel = t!(fs::read_to_string(config.src.join("ferrocene/ci/channel")))
-                    .trim()
-                    .to_string();
-                config.ferrocene_raw_channel = ci_channel;
+            if let Some(channel) = f.channel {
+                ferrocene_raw_channel = channel;
+            }
+            if ferrocene_raw_channel == "auto-detect" {
+                let ci_channel =
+                    t!(fs::read_to_string(src.join("ferrocene/ci/channel"))).trim().to_string();
+                ferrocene_raw_channel = ci_channel;
             }
 
-            config.ferrocene_traceability_matrix_mode = match f.traceability_matrix_mode.as_deref()
-            {
+            ferrocene_traceability_matrix_mode = match f.traceability_matrix_mode.as_deref() {
                 Some("local") | None => FerroceneTraceabilityMatrixMode::Local,
                 Some("ci") => FerroceneTraceabilityMatrixMode::Ci,
                 Some(other) => panic!("unknown traceability matrix mode: {other}"),
             };
-            config.ferrocene_aws_profile = f.aws_profile;
-            config.ferrocene_oxidos_src = f.oxidos_src;
-            config.ferrocene_tarball_signing_kms_key_arn = f.tarball_signing_kms_key_arn;
-            config.ferrocene_compiler_technical_report_url = f.compiler_technical_report_url;
-            config.ferrocene_core_technical_report_url = f.core_technical_report_url;
+            ferrocene_aws_profile = f.aws_profile;
+            ferrocene_oxidos_src = f.oxidos_src;
+            ferrocene_tarball_signing_kms_key_arn = f.tarball_signing_kms_key_arn;
+            ferrocene_compiler_technical_report_url = f.compiler_technical_report_url;
+            ferrocene_core_technical_report_url = f.core_technical_report_url;
 
-            config.ferrocene_generate_coverage_report_after_tests =
+            ferrocene_generate_coverage_report_after_tests =
                 f.generate_coverage_report_after_test.unwrap_or(true);
 
-            config.ferrocene_document_signatures = match (
+            ferrocene_document_signatures = match (
                 f.document_signatures.as_deref(),
                 f.document_signatures_s3_bucket,
                 f.document_signatures_tarball,
@@ -1177,14 +1110,13 @@ impl Config {
                 }
             };
 
-            config.ferrocene_test_outcomes = match (f.test_outcomes.as_deref(), f.test_outcomes_dir)
-            {
+            ferrocene_test_outcomes = match (f.test_outcomes.as_deref(), f.test_outcomes_dir) {
                 (None | Some("disabled"), None) => FerroceneTestOutcomes::Disabled,
                 (Some("download-ci"), None) => FerroceneTestOutcomes::DownloadCi,
                 (Some("custom"), Some(path)) => FerroceneTestOutcomes::Custom(path.into()),
                 (Some("local"), None) => FerroceneTestOutcomes::Local,
                 // Legacy: allow setting test-outcomes-dir without test-outcomes to avoid breaking
-                // developers currently setting it, only if test-outcomes is not configured.
+                // developers currently setting it, only if test-outcomes is not ed.
                 (None, Some(path)) => FerroceneTestOutcomes::Custom(path.into()),
                 // Error messages:
                 (Some(value), Some(_)) => panic!(
@@ -1193,7 +1125,7 @@ impl Config {
                 (Some(value), None) => panic!("invalid value for ferrocene.test-outcomes: {value}"),
             };
 
-            config.ferrocene_coverage_outcomes = match (
+            ferrocene_coverage_outcomes = match (
                 f.coverage_outcomes.as_deref(),
                 f.coverage_outcomes_dir,
             ) {
@@ -1214,29 +1146,18 @@ impl Config {
                 }
             };
 
-            config.ferrocene_secret_sauce = if let Some(path) = f.secret_sauce_dir {
+            ferrocene_secret_sauce = if let Some(path) = f.secret_sauce_dir {
                 FerroceneSecretSauce::Local(path)
             } else {
                 FerroceneSecretSauce::Download
             }
         }
 
-        if config.llvm_from_ci {
-            let triple = &config.host_target.triple;
-            let dwn_ctx = DownloadContext::from(&config);
-            let ci_llvm_bin = ci_llvm_root(dwn_ctx).join("bin");
-            let build_target = config
-                .target_config
-                .entry(config.host_target)
-                .or_insert_with(|| Target::from_triple(triple));
-
-=======
         if llvm_from_ci {
             let triple = &host_target.triple;
             let ci_llvm_bin = ci_llvm_root(&dwn_ctx, llvm_from_ci, &out).join("bin");
             let build_target =
                 target_config.entry(host_target).or_insert_with(|| Target::from_triple(triple));
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             check_ci_llvm!(build_target.llvm_config);
             check_ci_llvm!(build_target.llvm_filecheck);
             build_target.llvm_config = Some(ci_llvm_bin.join(exe("llvm-config", host_target)));
@@ -1635,6 +1556,20 @@ impl Config {
             vendor,
             verbose_tests,
             // tidy-alphabetical-end
+            // Ferrocene additions
+            uv: uv.map(PathBuf::from),
+            ferrocene_raw_channel,
+            ferrocene_aws_profile,
+            ferrocene_traceability_matrix_mode,
+            ferrocene_test_outcomes,
+            ferrocene_coverage_outcomes,
+            ferrocene_oxidos_src,
+            ferrocene_tarball_signing_kms_key_arn,
+            ferrocene_document_signatures,
+            ferrocene_compiler_technical_report_url,
+            ferrocene_core_technical_report_url,
+            ferrocene_secret_sauce,
+            ferrocene_generate_coverage_report_after_tests,
         }
     }
 

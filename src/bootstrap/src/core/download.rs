@@ -75,11 +75,7 @@ impl Config {
             return;
         }
         let dwn_ctx: DownloadContext<'_> = self.into();
-<<<<<<< HEAD
-        download_file(Some(self), dwn_ctx, url, dest_path, help_on_error);
-=======
-        download_file(dwn_ctx, &self.out, url, dest_path, help_on_error);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+        download_file(Some(self), dwn_ctx, &self.out, url, dest_path, help_on_error);
     }
 
     pub(crate) fn unpack(&self, tarball: &Path, dst: &Path, pattern: &str) {
@@ -847,11 +843,7 @@ HELP: if trying to compile an old commit of rustc, disable `download-rustc` in b
 download-rustc = false
 ";
     }
-<<<<<<< HEAD
-    download_file(None, dwn_ctx, &format!("{base_url}/{url}"), &tarball, help_on_error);
-=======
-    download_file(dwn_ctx, out, &format!("{base_url}/{url}"), &tarball, help_on_error);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    download_file(None, dwn_ctx, out, &format!("{base_url}/{url}"), &tarball, help_on_error);
     if let Some(sha256) = checksum
         && !verify(dwn_ctx.exec_ctx, &tarball, sha256)
     {

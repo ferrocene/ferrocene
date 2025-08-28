@@ -441,7 +441,9 @@ pub enum Subcommand {
         #[arg(long)]
         /// don't capture stdout/stderr of tests
         no_capture: bool,
-<<<<<<< HEAD
+        #[arg(long)]
+        /// Use a different codegen backend when running tests.
+        test_codegen_backend: Option<CodegenBackendKind>,
         /// generate coverage for tests
         #[arg(long)]
         coverage: Option<FerroceneCoverageFor>,
@@ -452,11 +454,6 @@ pub enum Subcommand {
         /// Choose the test variant to use for this execution.
         #[arg(long)]
         test_variant: Option<String>,
-=======
-        #[arg(long)]
-        /// Use a different codegen backend when running tests.
-        test_codegen_backend: Option<CodegenBackendKind>,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     },
     /// Build and run some test suites *in Miri*
     Miri {
@@ -738,19 +735,18 @@ impl Subcommand {
         }
     }
 
-<<<<<<< HEAD
+    pub fn test_codegen_backend(&self) -> Option<&CodegenBackendKind> {
+        match self {
+            Subcommand::Test { test_codegen_backend, .. } => test_codegen_backend.as_ref(),
+            _ => None,
+        }
+    }
     pub fn ferrocene_test_one_crate_per_cargo_call(&self) -> bool {
         match *self {
             Subcommand::Test { ferrocene_test_one_crate_per_cargo_call, .. } => {
                 ferrocene_test_one_crate_per_cargo_call
             }
             _ => false,
-=======
-    pub fn test_codegen_backend(&self) -> Option<&CodegenBackendKind> {
-        match self {
-            Subcommand::Test { test_codegen_backend, .. } => test_codegen_backend.as_ref(),
-            _ => None,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         }
     }
 }

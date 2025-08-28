@@ -505,16 +505,12 @@ pub fn prepare_compiler_for_check(
             // stage 0 stdlib is used to compile build scripts and proc macros.
             builder.compiler(builder.top_stage, host)
         }
-<<<<<<< HEAD
         Mode::ToolCustom { .. } => {
             // When checking tools at stage N, we want to do it with the stage N compiler
             builder.compiler(builder.top_stage, host)
         }
-    }
-=======
     };
     CompilerForCheck { build_compiler, rustc_rmeta_sysroot, std_rmeta_sysroot }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 /// Check the Cranelift codegen backend.

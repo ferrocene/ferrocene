@@ -516,14 +516,10 @@ impl Builder<'_> {
     /// scoped by `mode`'s output directory, it will pass the `--target` flag for the specified
     /// `target`, and will be executing the Cargo command `cmd`. `cmd` can be `miri-cmd` for
     /// commands to be run with Miri.
-<<<<<<< HEAD
     ///
     /// Ferrocene note: made this pub so that it can be accessed from "ferrocene" module
-    pub(crate) fn cargo(
-=======
     #[track_caller]
-    fn cargo(
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    pub(crate) fn cargo(
         &self,
         compiler: Compiler,
         mode: Mode,

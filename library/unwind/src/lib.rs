@@ -25,13 +25,9 @@ cfg_select! {
         target_os = "none",
         target_os = "espidf",
         target_os = "nuttx",
-<<<<<<< HEAD
         // ferrocene addition
         ferrocene_facade_secretsauce,
-    ))] {
-=======
     ) => {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         // These "unix" family members do not have unwinder.
     }
     any(

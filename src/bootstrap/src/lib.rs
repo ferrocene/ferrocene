@@ -57,6 +57,9 @@ pub use utils::change_tracker::{
 pub use utils::helpers::PanicTracker;
 
 use crate::core::build_steps::vendor::VENDOR_DIR;
+// In 1.88 we identified problems with core coverage being inconsistent,
+// so we use a static report we inspected for correctness.
+#[allow(unused_imports)]
 use crate::ferrocene::code_coverage::generate_coverage_report;
 
 const LLVM_TOOLS: &[&str] = &[
@@ -699,7 +702,9 @@ impl Build {
                 builder.execute_cli();
 
                 // Ferrocene addition
-                generate_coverage_report(&builder);
+                // In 1.88 we identified problems with core coverage being inconsistent,
+                // so we use a static report we inspected for correctness.
+                // generate_coverage_report(&builder);
             }
         } else {
             #[cfg(feature = "tracing")]

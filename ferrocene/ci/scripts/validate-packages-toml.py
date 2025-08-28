@@ -30,7 +30,7 @@ TARBALL_COMPRESSION = ["xz"]
 IGNORE_PATTERNS = [
     # Files that are not components:
     "build-metrics/*",
-    "coverage/*",
+    # "coverage/*",
     "ferrocene-ci-metadata.json",
     "packages.toml",
     # Components we don't distribute:

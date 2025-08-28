@@ -62,6 +62,9 @@ pub(crate) fn measure_coverage(
     }
 }
 
+// In 1.88 we identified problems with core coverage being inconsistent,
+// so we use a static report we inspected for correctness.
+#[allow(dead_code)]
 pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     // Note: this function is called after all bootstrap steps are executed, to ensure the report
     // includes data from all tests suites measuring coverage. It cannot call `builder.ensure`, so

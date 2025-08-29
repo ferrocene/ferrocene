@@ -414,12 +414,9 @@ use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_certified"))]
 use crate::{fmt, hash, intrinsics, ub_checks};
 #[cfg(feature = "ferrocene_certified")]
-use crate::{
-    intrinsics,
-    marker::PointeeSized,
-    mem::{self, SizedTypeProperties},
-    ub_checks,
-};
+use crate::{intrinsics, marker::PointeeSized, mem};
+#[cfg(all(debug_assertions, feature = "ferrocene_certified"))]
+use crate::{mem::SizedTypeProperties, ub_checks};
 
 mod alignment;
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]

@@ -604,6 +604,15 @@ impl Std {
     ) -> Self {
         Std { build_compiler, target, format, crates: vec![] }
     }
+
+    pub(crate) fn new(
+        build_compiler: Compiler,
+        target: TargetSelection,
+        format: DocumentationFormat,
+        crates: Vec<String>,
+    ) -> Self {
+        Self { build_compiler, target, format, crates }
+    }
 }
 
 impl Step for Std {
@@ -793,6 +802,11 @@ fn doc_std(
             }
             _ => unimplemented!("extend this `match`"),
         }
+    }
+
+    // Ferrocene addition
+    if target.contains("ferrocene.certified") {
+        cargo.rustdocflag("--cfg=ferrocene_certified");
     }
 
     if builder.config.library_docs_private_items {

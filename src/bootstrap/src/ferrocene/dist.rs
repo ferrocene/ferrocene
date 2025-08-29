@@ -26,16 +26,6 @@ pub(crate) struct Docs {
     pub(crate) target: TargetSelection,
 }
 
-// Generate comprehensive copyright data, and include the generated files in the tarball
-fn add_copyright_files(subsetter: &mut Subsetter<'_>, builder: &Builder<'_>) {
-    for path in builder.ensure(GenerateCopyright) {
-        if !builder.config.dry_run() {
-            // First arg gets the file placed in the root of the tarball, instead of in build/
-            subsetter.add_file(path.parent().unwrap(), &path);
-        }
-    }
-}
-
 impl Step for Docs {
     type Output = Vec<GeneratedTarball>;
     const DEFAULT: bool = true;
@@ -57,7 +47,7 @@ impl Step for Docs {
 
         let mut subsetter = Subsetter::new(builder, "ferrocene-docs", "share/doc/ferrocene/html");
         subsetter.add_directory(&doc_out, &doc_out);
-        add_copyright_files(&mut subsetter, &builder);
+        subsetter.add_copyright_files(&builder);
 
         subsetter.into_tarballs().map(|tarball| tarball.generate()).collect()
     }
@@ -154,7 +144,7 @@ impl Step for SourceTarball {
         for item in FILES {
             subsetter.add_file(&builder.src, &builder.src.join(item));
         }
-        add_copyright_files(&mut subsetter, &builder);
+        subsetter.add_copyright_files(&builder);
 
         let generic_tarball = subsetter
             .tarballs
@@ -269,6 +259,16 @@ impl<'a> Subsetter<'a> {
         }
 
         self.directory_subset = old_subset;
+    }
+
+    /// Generate comprehensive copyright data, and include the generated files in the tarball
+    fn add_copyright_files(&mut self, builder: &Builder<'_>) {
+        for path in builder.ensure(GenerateCopyright) {
+            if !builder.config.dry_run() {
+                // First arg gets the file placed in the root of the tarball, instead of in build/
+                self.add_file(path.parent().unwrap(), &path);
+            }
+        }
     }
 
     fn add_file(&mut self, root: &Path, path: &Path) {

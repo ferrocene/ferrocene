@@ -136,6 +136,7 @@ jobs:
         # Run dist before test to make sure the tarballs we test are uploaded
         # to CI beforehand, for manual inspection in case of failures.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)
+        ./x.py --stage 2 dist ferrocene-certified-docs --target x86_64-unknown-ferrocene.certified
         ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
     steps:
       - ferrocene-job-dist:

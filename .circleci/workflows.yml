@@ -186,10 +186,10 @@ jobs:
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       # Certified targets only
-      FERROCENE_TARGETS: aarch64-unknown-none,x86_64-unknown-linux-gnu,thumbv7em-none-eabi,thumbv7em-none-eabihf
+      FERROCENE_TARGETS: aarch64-unknown-ferrocene.certified,x86_64-unknown-ferrocene.certified,thumbv7em-ferrocene.certified-eabi,thumbv7em-ferrocene.certified-eabihf
       SCRIPT: |
-        ./x.py build --stage 1 library/core --set rust.std-features='["ferrocene_certified"]'
-        ./x.py doc --stage 1 library/core --set rust.std-features='["ferrocene_certified"]'
+        ./x.py build --stage 2 library/core
+        ./x.py doc   --stage 2 library/core
     steps:
       - ferrocene-job-test-container:
           restore-from-job: x86_64-linux-build
@@ -207,8 +207,6 @@ jobs:
           # We need the whole LLVM clone to be able to include the full source
           # code into the tarball we ship to customers.
           llvm-subset: false
-
-
 
   x86_64-linux-generic-test-container:
     executor: docker-x86_64-ubuntu-20
@@ -356,7 +354,6 @@ jobs:
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
 
-
   # aarch64-unknown-linux-gnu jobs
 
   aarch64-linux-llvm:
@@ -501,7 +498,7 @@ jobs:
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
     steps:
-    - ferrocene-job-dist:
+      - ferrocene-job-dist:
           os: darwin
           restore-from-job: aarch64-darwin-build
 
@@ -868,9 +865,6 @@ workflows:
       - x86_64-linux-build:
           requires:
             - x86_64-linux-llvm
-      - x86_64-linux-certified:
-          requires:
-            - x86_64-linux-build
       - x86_64-linux-docs:
           requires: &test-outcomes-dependencies
             # Need to depend on all of the test builders to include test
@@ -1132,7 +1126,6 @@ workflows:
 
       - finish-build:
           requires:
-            - x86_64-linux-certified
             - x86_64-linux-docs
             - x86_64-linux-dist-src
             - x86_64-linux-traceability-matrix
@@ -1229,7 +1222,7 @@ commands:
       - setup-uv
       - aws-oidc-auth
       - when:
-          condition:  <<parameters.restore-from-job>>
+          condition: <<parameters.restore-from-job>>
           steps:
             - run:
                 name: Restore files from the << parameters.restore-from-job >> job
@@ -1256,7 +1249,7 @@ commands:
           condition:
             equal: [<<parameters.os>>, "darwin"]
           steps:
-            - ferrocene-setup-darwin  # Darwin does not come with awscli, setup it before aws steps
+            - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
       - setup-uv
       - aws-oidc-auth
       - run:
@@ -1402,7 +1395,6 @@ commands:
       - run:
           name: Setup Darwin environment
           command: ferrocene/ci/scripts/setup-darwin.sh
-
 
   ferrocene-setup-windows:
     description: Prepare the Windows environment

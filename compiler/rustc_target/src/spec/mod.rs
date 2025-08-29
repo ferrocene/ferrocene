@@ -2226,6 +2226,10 @@ supported_targets! {
     ("aarch64-unknown-ferrocene.facade", aarch64_unknown_ferrocene_facade),
     ("thumbv7em-ferrocene.facade-eabi", thumbv7em_ferrocene_facade_eabi),
     ("thumbv7em-ferrocene.facade-eabihf", thumbv7em_ferrocene_facade_eabihf),
+    ("x86_64-unknown-ferrocene.certified", x86_64_unknown_ferrocene_certified),
+    ("aarch64-unknown-ferrocene.certified", aarch64_unknown_ferrocene_certified),
+    ("thumbv7em-ferrocene.certified-eabi", thumbv7em_ferrocene_certified_eabi),
+    ("thumbv7em-ferrocene.certified-eabihf", thumbv7em_ferrocene_certified_eabihf),
 
     ("aarch64-unknown-linux-ohos", aarch64_unknown_linux_ohos),
     ("armv7-unknown-linux-ohos", armv7_unknown_linux_ohos),
@@ -3672,6 +3676,13 @@ impl Target {
         } else {
             Align::MAX
         }
+    }
+
+    /// Modify the target to be certified
+    pub fn ferrocene_certified(&mut self) {
+        self.metadata.description =
+            self.metadata.description.as_ref().map(|v| format!("{v} (certified)").into());
+        self.metadata.tier = None;
     }
 }
 

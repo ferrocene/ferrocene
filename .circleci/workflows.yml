@@ -208,8 +208,6 @@ jobs:
           # code into the tarball we ship to customers.
           llvm-subset: false
 
-
-
   x86_64-linux-generic-test-container:
     executor: docker-x86_64-ubuntu-20
     parameters:
@@ -356,7 +354,6 @@ jobs:
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
 
-
   # aarch64-unknown-linux-gnu jobs
 
   aarch64-linux-llvm:
@@ -501,7 +498,7 @@ jobs:
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
     steps:
-    - ferrocene-job-dist:
+      - ferrocene-job-dist:
           os: darwin
           restore-from-job: aarch64-darwin-build
 
@@ -1225,7 +1222,7 @@ commands:
       - setup-uv
       - aws-oidc-auth
       - when:
-          condition:  <<parameters.restore-from-job>>
+          condition: <<parameters.restore-from-job>>
           steps:
             - run:
                 name: Restore files from the << parameters.restore-from-job >> job
@@ -1252,7 +1249,7 @@ commands:
           condition:
             equal: [<<parameters.os>>, "darwin"]
           steps:
-            - ferrocene-setup-darwin  # Darwin does not come with awscli, setup it before aws steps
+            - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
       - setup-uv
       - aws-oidc-auth
       - run:
@@ -1398,7 +1395,6 @@ commands:
       - run:
           name: Setup Darwin environment
           command: ferrocene/ci/scripts/setup-darwin.sh
-
 
   ferrocene-setup-windows:
     description: Prepare the Windows environment

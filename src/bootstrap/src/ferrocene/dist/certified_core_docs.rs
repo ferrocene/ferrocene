@@ -37,6 +37,9 @@ impl Step for CertifiedCoreDocs {
             vec!["core".into()],
         ));
 
+        // TODO: subset to only have core docs and not the index etc.
+        // TODO: how to prevent alloc from being build?
+
         let tarball = Tarball::new(builder, Self::PATH, &self.target.triple);
         tarball.add_dir(doc_path, "share/doc/ferrocene/certified-core-docs");
 

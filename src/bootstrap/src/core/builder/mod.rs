@@ -1228,6 +1228,7 @@ impl<'a> Builder<'a> {
                 dist::BuildManifest,
                 dist::ReproducibleArtifacts,
                 dist::Gcc,
+                crate::ferrocene::dist::certified_core_docs::CertifiedCoreDocs,
                 crate::ferrocene::dist::Docs,
                 crate::ferrocene::dist::DocsDoctrees,
                 crate::ferrocene::dist::flip_link::FlipLink,

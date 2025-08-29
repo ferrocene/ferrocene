@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+pub(crate) mod certified_core_docs;
 pub(crate) mod flip_link;
 
 use std::collections::BTreeMap;

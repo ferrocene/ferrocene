@@ -604,6 +604,15 @@ impl Std {
     ) -> Self {
         Std { build_compiler, target, format, crates: vec![] }
     }
+
+    pub(crate) fn new(
+        build_compiler: Compiler,
+        target: TargetSelection,
+        format: DocumentationFormat,
+        crates: Vec<String>,
+    ) -> Self {
+        Self { build_compiler, target, format, crates }
+    }
 }
 
 impl Step for Std {

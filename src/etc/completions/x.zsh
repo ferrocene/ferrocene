@@ -354,6 +354,7 @@ _arguments "${_arguments_options[@]}" : \
 '--compare-mode=[mode describing what file the actual ui output will be compared to]:COMPARE MODE:_default' \
 '--pass=[force {check,build,run}-pass tests to this mode]:check | build | run:_default' \
 '--run=[whether to execute run-* tests]:auto | always | never:_default' \
+'--test-codegen-backend=[Use a different codegen backend when running tests]:TEST_CODEGEN_BACKEND:_default' \
 '--coverage=[generate coverage for tests]:COVERAGE:(library)' \
 '--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:_default' \
 '--config=[TOML configuration file for build]:FILE:_files' \

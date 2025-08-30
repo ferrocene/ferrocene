@@ -100,7 +100,7 @@ use rustc_session::lint::LintExpectationId;
 use rustc_span::def_id::LOCAL_CRATE;
 use rustc_span::source_map::Spanned;
 use rustc_span::{DUMMY_SP, Span, Symbol};
-use rustc_target::spec::PanicStrategy;
+use rustc_target::spec::{PanicStrategy, SanitizerSet};
 use {rustc_abi as abi, rustc_ast as ast, rustc_hir as hir};
 
 use crate::infer::canonical::{self, Canonical};
@@ -1113,6 +1113,11 @@ rustc_queries! {
 
     query incoherent_impls(key: SimplifiedType) -> &'tcx [DefId] {
         desc { |tcx| "collecting all inherent impls for `{:?}`", key }
+    }
+
+    /// Unsafety-check this `LocalDefId`.
+    query check_transmutes(key: LocalDefId) {
+        desc { |tcx| "check transmute calls inside `{}`", tcx.def_path_str(key) }
     }
 
     /// Unsafety-check this `LocalDefId`.
@@ -2685,6 +2690,16 @@ rustc_queries! {
     query anon_const_kind(def_id: DefId) -> ty::AnonConstKind {
         desc { |tcx| "looking up anon const kind of `{}`", tcx.def_path_str(def_id) }
         separate_provide_extern
+    }
+
+    /// Checks for the nearest `#[sanitize(xyz = "off")]` or
+    /// `#[sanitize(xyz = "on")]` on this def and any enclosing defs, up to the
+    /// crate root.
+    ///
+    /// Returns the set of sanitizers that is explicitly disabled for this def.
+    query disabled_sanitizers_for(key: LocalDefId) -> SanitizerSet {
+        desc { |tcx| "checking what set of sanitizers are enabled on `{}`", tcx.def_path_str(key) }
+        feedable
     }
 }
 

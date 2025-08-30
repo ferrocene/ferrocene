@@ -819,9 +819,9 @@ dependencies = [
 
 [[package]]
 name = "camino"
-version = "1.1.11"
+version = "1.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d07aa9a93b00c76f71bc35d598bed923f6d4f3a9ca5c24b7737ae1a292841c0"
+checksum = "dd0b03af37dad7a14518b7691d81acb0f8222604ad3d1b02f6b4bed5188c0cd5"
 dependencies = [
  "serde",
 ]
@@ -1214,7 +1214,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "117725a109d387c937a1533ce01b450cbde6b88abceea8473c4d7a85853cda3c"
 dependencies = [
  "lazy_static",
- "windows-sys 0.59.0",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
@@ -1223,7 +1223,7 @@ version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fde0e0ec90c9dfb3b4b1a0891a7dcd0e2bffde2f7efed5fe7c9bb00e5bfb915e"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
@@ -1456,9 +1456,9 @@ dependencies = [
 
 [[package]]
 name = "cxx"
-version = "1.0.169"
+version = "1.0.170"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df881e2764e20d320c9c8ddd8670018b1abaa2557e73811f03d5b2643da671d7"
+checksum = "77377ef8d2a668ad5ad5c58a1d0b172836495dffd3b10e0488a41c9b288b3a0e"
 dependencies = [
  "cc",
  "cxxbridge-cmd",
@@ -1470,9 +1470,9 @@ dependencies = [
 
 [[package]]
 name = "cxx-build"
-version = "1.0.169"
+version = "1.0.170"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "acef58f684c0c9b7bffc111657c9f1364e4fa47af46fd7f03b71b7a4066ac372"
+checksum = "d3579771cb1e6b9cd41903887f3ea98bc2e0761f975bf55adcc0c1e62ab4521f"
 dependencies = [
  "cc",
  "codespan-reporting",
@@ -1485,9 +1485,9 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-cmd"
-version = "1.0.169"
+version = "1.0.170"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "669616995d33251cb7215f96820d78a810ee218573246830fb96f29961e1712a"
+checksum = "dea3ad43f199bbb9df0547f5db39896604b9554784d963d73a8c7f83fc6fecb1"
 dependencies = [
  "clap",
  "codespan-reporting",
@@ -1499,15 +1499,15 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-flags"
-version = "1.0.169"
+version = "1.0.170"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9aebcb754a24722d34e7f4e021376862179194cc5ec83ded2dd84b9db36be106"
+checksum = "e213bf54b95ba7bceebbbdaf923dfe32fdbd630c685fedf5c47132da64df6aa1"
 
 [[package]]
 name = "cxxbridge-macro"
-version = "1.0.169"
+version = "1.0.170"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ea9594efbebf2f822925b6368eea741dd2677bb411313e50c2de8ba8c3d3a62"
+checksum = "9caa03943851c364d0ff229bd11ba07f3144673cca9feb52b9ca09817c8a239e"
 dependencies = [
  "indexmap",
  "proc-macro2",
@@ -4350,6 +4350,7 @@ dependencies = [
  "rand 0.9.2",
  "rand_xoshiro",
  "rustc_data_structures",
+ "rustc_error_messages",
  "rustc_hashes",
  "rustc_index",
  "rustc_macros",
@@ -4441,7 +4442,6 @@ dependencies = [
  "rustc_feature",
  "rustc_fluent_macro",
  "rustc_macros",
- "rustc_parse",
  "rustc_session",
  "rustc_span",
  "rustc_target",
@@ -4463,7 +4463,6 @@ dependencies = [
 name = "rustc_attr_parsing"
 version = "0.0.0"
 dependencies = [
- "itertools",
  "rustc_abi",
  "rustc_ast",
  "rustc_ast_pretty",
@@ -4473,6 +4472,7 @@ dependencies = [
  "rustc_hir",
  "rustc_lexer",
  "rustc_macros",
+ "rustc_parse",
  "rustc_session",
  "rustc_span",
  "thin-vec",
@@ -4762,6 +4762,8 @@ dependencies = [
  "icu_locid",
  "icu_provider_adapters",
  "intl-memoizer",
+ "rustc_ast",
+ "rustc_ast_pretty",
  "rustc_baked_icu_data",
  "rustc_data_structures",
  "rustc_macros",
@@ -4779,21 +4781,18 @@ dependencies = [
  "derive_setters",
  "rustc_abi",
  "rustc_ast",
- "rustc_ast_pretty",
  "rustc_data_structures",
  "rustc_error_codes",
  "rustc_error_messages",
  "rustc_fluent_macro",
  "rustc_hashes",
- "rustc_hir",
+ "rustc_hir_id",
  "rustc_index",
  "rustc_lexer",
  "rustc_lint_defs",
  "rustc_macros",
  "rustc_serialize",
  "rustc_span",
- "rustc_target",
- "rustc_type_ir",
  "serde",
  "serde_json",
  "termcolor",
@@ -4881,7 +4880,9 @@ dependencies = [
  "rustc_ast",
  "rustc_ast_pretty",
  "rustc_data_structures",
+ "rustc_error_messages",
  "rustc_hashes",
+ "rustc_hir_id",
  "rustc_index",
  "rustc_macros",
  "rustc_serialize",
@@ -4917,6 +4918,17 @@ dependencies = [
  "rustc_trait_selection",
  "smallvec",
  "tracing",
+]
+
+[[package]]
+name = "rustc_hir_id"
+version = "0.0.0"
+dependencies = [
+ "rustc_data_structures",
+ "rustc_index",
+ "rustc_macros",
+ "rustc_serialize",
+ "rustc_span",
 ]
 
 [[package]]
@@ -5106,11 +5118,10 @@ dependencies = [
 name = "rustc_lint_defs"
 version = "0.0.0"
 dependencies = [
- "rustc_abi",
  "rustc_ast",
  "rustc_data_structures",
  "rustc_error_messages",
- "rustc_hir",
+ "rustc_hir_id",
  "rustc_macros",
  "rustc_serialize",
  "rustc_span",
@@ -5251,7 +5262,6 @@ dependencies = [
  "rustc_errors",
  "rustc_fluent_macro",
  "rustc_graphviz",
- "rustc_hir",
  "rustc_index",
  "rustc_macros",
  "rustc_middle",
@@ -5328,7 +5338,6 @@ dependencies = [
  "rustc-literal-escaper",
  "rustc_ast",
  "rustc_ast_pretty",
- "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_feature",
@@ -5630,6 +5639,7 @@ dependencies = [
  "object 0.37.3",
  "rustc_abi",
  "rustc_data_structures",
+ "rustc_error_messages",
  "rustc_fs_util",
  "rustc_macros",
  "rustc_serialize",
@@ -5693,7 +5703,6 @@ name = "rustc_traits"
 version = "0.0.0"
 dependencies = [
  "rustc_data_structures",
- "rustc_hir",
  "rustc_infer",
  "rustc_middle",
  "rustc_span",
@@ -5748,6 +5757,7 @@ dependencies = [
  "rustc-hash 2.1.1",
  "rustc_ast_ir",
  "rustc_data_structures",
+ "rustc_error_messages",
  "rustc_index",
  "rustc_macros",
  "rustc_serialize",
@@ -5795,6 +5805,7 @@ dependencies = [
  "serde_json",
  "sha2",
  "smallvec",
+ "stringdex",
  "tempfile",
  "threadpool",
  "tracing",
@@ -6315,7 +6326,7 @@ dependencies = [
  "cfg-if",
  "libc",
  "psm",
- "windows-sys 0.59.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -6347,6 +6358,15 @@ dependencies = [
  "phf_shared 0.11.3",
  "proc-macro2",
  "quote",
+]
+
+[[package]]
+name = "stringdex"
+version = "0.0.1-alpha4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2841fd43df5b1ff1b042e167068a1fe9b163dc93041eae56ab2296859013a9a0"
+dependencies = [
+ "stacker",
 ]
 
 [[package]]

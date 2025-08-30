@@ -1561,6 +1561,11 @@ impl<'test> TestCx<'test> {
             rustc.arg("--sysroot").arg(&self.config.sysroot_base);
         }
 
+        // If the provided codegen backend is not LLVM, we need to pass it.
+        if let Some(ref backend) = self.config.override_codegen_backend {
+            rustc.arg(format!("-Zcodegen-backend={}", backend));
+        }
+
         // Optionally prevent default --target if specified in test compile-flags.
         let custom_target = self.props.compile_flags.iter().any(|x| x.starts_with("--target"));
 
@@ -2154,7 +2159,7 @@ impl<'test> TestCx<'test> {
 
         #[rustfmt::skip]
         let tidy_args = [
-            "--new-blocklevel-tags", "rustdoc-search,rustdoc-toolbar",
+            "--new-blocklevel-tags", "rustdoc-search,rustdoc-toolbar,rustdoc-topbar",
             "--indent", "yes",
             "--indent-spaces", "2",
             "--wrap", "0",

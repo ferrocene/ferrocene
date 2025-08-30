@@ -33,8 +33,10 @@ pub struct Finder {
 //
 // Targets can be removed from this list once they are present in the stage0 compiler (usually by updating the beta compiler of the bootstrap).
 const STAGE0_MISSING_TARGETS: &[&str] = &[
-    "aarch64_be-unknown-none-softfloat",
     "armv7a-vex-v5",
+    // just a dummy comment so the list doesn't get onelined
+    "aarch64_be-unknown-hermit",
+    "aarch64_be-unknown-none-softfloat",
     // Ferrocene additions
     "aarch64-unknown-ferrocene.facade",
     "thumbv7em-ferrocene.facade-eabi",
@@ -340,6 +342,23 @@ than building it.
             .target_config
             .entry(*target)
             .or_insert_with(|| Target::from_triple(&target.triple));
+
+        // compiler-rt c fallbacks for wasm cannot be built with gcc
+        if target.contains("wasm")
+            && (build.config.optimized_compiler_builtins(*target)
+                || build.config.rust_std_features.contains("compiler-builtins-c"))
+        {
+            let cc_tool = build.cc_tool(*target);
+            if !cc_tool.is_like_clang() && !cc_tool.path().ends_with("emcc") {
+                // emcc works as well
+                panic!(
+                    "Clang is required to build C code for Wasm targets, got `{}` instead\n\
+                    this is because compiler-builtins is configured to build C source. Either \
+                    ensure Clang is used, or adjust this configuration.",
+                    cc_tool.path().display()
+                );
+            }
+        }
 
         if (target.contains("-none-") || target.contains("nvptx"))
             && build.no_std(*target) == Some(false)

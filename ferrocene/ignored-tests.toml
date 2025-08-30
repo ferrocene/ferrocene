@@ -17,6 +17,13 @@ tests = [
 targets = ["aarch64-apple-darwin",]
 reason = "TODO: to be investigated"
 
+[["tests/rustdoc-js"]]
+tests = [
+    "tests/rustdoc-js/generics.rs",
+]
+targets = ["x86_64-unknown-linux-gnu", "aarch64-apple-darwin"]
+reason = "TODO: to be investigated"
+
 [["tests/run-make"]]
 tests = [
     "tests/run-coverage",

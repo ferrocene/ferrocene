@@ -355,6 +355,7 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--compare-mode', '--compare-mode', [CompletionResultType]::ParameterName, 'mode describing what file the actual ui output will be compared to')
             [CompletionResult]::new('--pass', '--pass', [CompletionResultType]::ParameterName, 'force {check,build,run}-pass tests to this mode')
             [CompletionResult]::new('--run', '--run', [CompletionResultType]::ParameterName, 'whether to execute run-* tests')
+            [CompletionResult]::new('--test-codegen-backend', '--test-codegen-backend', [CompletionResultType]::ParameterName, 'Use a different codegen backend when running tests')
             [CompletionResult]::new('--coverage', '--coverage', [CompletionResultType]::ParameterName, 'generate coverage for tests')
             [CompletionResult]::new('--test-variant', '--test-variant', [CompletionResultType]::ParameterName, 'Choose the test variant to use for this execution')
             [CompletionResult]::new('--config', '--config', [CompletionResultType]::ParameterName, 'TOML configuration file for build')

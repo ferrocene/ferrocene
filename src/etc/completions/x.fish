@@ -344,6 +344,7 @@ complete -c x -n "__fish_x_using_subcommand test" -l extra-checks -d 'comma-sepa
 complete -c x -n "__fish_x_using_subcommand test" -l compare-mode -d 'mode describing what file the actual ui output will be compared to' -r
 complete -c x -n "__fish_x_using_subcommand test" -l pass -d 'force {check,build,run}-pass tests to this mode' -r
 complete -c x -n "__fish_x_using_subcommand test" -l run -d 'whether to execute run-* tests' -r
+complete -c x -n "__fish_x_using_subcommand test" -l test-codegen-backend -d 'Use a different codegen backend when running tests' -r
 complete -c x -n "__fish_x_using_subcommand test" -l coverage -d 'generate coverage for tests' -r -f -a "library\t''"
 complete -c x -n "__fish_x_using_subcommand test" -l test-variant -d 'Choose the test variant to use for this execution' -r
 complete -c x -n "__fish_x_using_subcommand test" -l config -d 'TOML configuration file for build' -r -F

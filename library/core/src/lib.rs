@@ -410,7 +410,12 @@ pub mod str;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod time;
 
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
+=======
+pub mod wtf8;
+
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub mod unicode;
 
 /* Async */

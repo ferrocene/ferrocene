@@ -18,7 +18,7 @@ use rustc_feature::{
     ACCEPTED_LANG_FEATURES, AttributeDuplicates, AttributeType, BUILTIN_ATTRIBUTE_MAP,
     BuiltinAttribute,
 };
-use rustc_hir::attrs::{AttributeKind, InlineAttr, MirDialect, MirPhase, ReprAttr};
+use rustc_hir::attrs::{AttributeKind, InlineAttr, MirDialect, MirPhase, ReprAttr, SanitizerSet};
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalModDefId;
 use rustc_hir::intravisit::{self, Visitor};
@@ -197,6 +197,12 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 &Attribute::Parsed(AttributeKind::CustomMir(dialect, phase, attr_span)) => {
                     self.check_custom_mir(dialect, phase, attr_span)
                 }
+                &Attribute::Parsed(AttributeKind::Sanitize { on_set, off_set, span: attr_span}) => {
+                    self.check_sanitize(attr_span, on_set | off_set, span, target);
+                },
+                Attribute::Parsed(AttributeKind::Link(_, attr_span)) => {
+                    self.check_link(hir_id, *attr_span, span, target)
+                }
                 Attribute::Parsed(
                     AttributeKind::BodyStability { .. }
                     | AttributeKind::ConstStabilityIndirect
@@ -247,7 +253,8 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::ShouldPanic { .. }
                     | AttributeKind::Coroutine(..)
                     | AttributeKind::Linkage(..)
-                    | AttributeKind::MustUse { .. },
+                    | AttributeKind::MustUse { .. }
+                    | AttributeKind::CrateName { .. }
                 ) => { /* do nothing  */ }
                 Attribute::Unparsed(attr_item) => {
                     style = Some(attr_item.style);
@@ -257,9 +264,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         }
                         [sym::diagnostic, sym::on_unimplemented, ..] => {
                             self.check_diagnostic_on_unimplemented(attr.span(), hir_id, target)
-                        }
-                        [sym::sanitize, ..] => {
-                            self.check_sanitize(attr, span, target)
                         }
                         [sym::thread_local, ..] => self.check_thread_local(attr, span, target),
                         [sym::doc, ..] => self.check_doc_attrs(
@@ -304,7 +308,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         [sym::rustc_has_incoherent_inherent_impls, ..] => {
                             self.check_has_incoherent_inherent_impls(attr, span, target)
                         }
-                        [sym::link, ..] => self.check_link(hir_id, attr, span, target),
                         [sym::macro_export, ..] => self.check_macro_export(hir_id, attr, target),
                         [sym::autodiff_forward, ..] | [sym::autodiff_reverse, ..] => {
                             self.check_autodiff(hir_id, attr, span, target)
@@ -367,22 +370,46 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             let builtin = attr.ident().and_then(|ident| BUILTIN_ATTRIBUTE_MAP.get(&ident.name));
 
             if hir_id != CRATE_HIR_ID {
-                if let Some(BuiltinAttribute { type_: AttributeType::CrateLevel, .. }) =
-                    attr.ident().and_then(|ident| BUILTIN_ATTRIBUTE_MAP.get(&ident.name))
-                {
-                    match style {
-                        Some(ast::AttrStyle::Outer) => self.tcx.emit_node_span_lint(
-                            UNUSED_ATTRIBUTES,
-                            hir_id,
-                            attr.span(),
-                            errors::OuterCrateLevelAttr,
-                        ),
-                        Some(ast::AttrStyle::Inner) | None => self.tcx.emit_node_span_lint(
-                            UNUSED_ATTRIBUTES,
-                            hir_id,
-                            attr.span(),
-                            errors::InnerCrateLevelAttr,
-                        ),
+                match attr {
+                    Attribute::Parsed(_) => { /* Already validated. */ }
+                    Attribute::Unparsed(attr) => {
+                        // FIXME(jdonszelmann): remove once all crate-level attrs are parsed and caught by
+                        // the above
+                        if let Some(BuiltinAttribute { type_: AttributeType::CrateLevel, .. }) =
+                            attr.path
+                                .segments
+                                .first()
+                                .and_then(|ident| BUILTIN_ATTRIBUTE_MAP.get(&ident.name))
+                        {
+                            match attr.style {
+                                ast::AttrStyle::Outer => {
+                                    let attr_span = attr.span;
+                                    let bang_position = self
+                                        .tcx
+                                        .sess
+                                        .source_map()
+                                        .span_until_char(attr_span, '[')
+                                        .shrink_to_hi();
+
+                                    self.tcx.emit_node_span_lint(
+                                        UNUSED_ATTRIBUTES,
+                                        hir_id,
+                                        attr.span,
+                                        errors::OuterCrateLevelAttr {
+                                            suggestion: errors::OuterCrateLevelAttrSuggestion {
+                                                bang_position,
+                                            },
+                                        },
+                                    )
+                                }
+                                ast::AttrStyle::Inner => self.tcx.emit_node_span_lint(
+                                    UNUSED_ATTRIBUTES,
+                                    hir_id,
+                                    attr.span,
+                                    errors::InnerCrateLevelAttr,
+                                ),
+                            }
+                        }
                     }
                 }
             }
@@ -467,7 +494,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 {
                     let attrs = self.tcx.codegen_fn_attrs(did);
                     // Not checking naked as `#[inline]` is forbidden for naked functions anyways.
-                    if attrs.contains_extern_indicator(self.tcx, did.into()) {
+                    if attrs.contains_extern_indicator() {
                         self.tcx.emit_node_span_lint(
                             UNUSED_ATTRIBUTES,
                             hir_id,
@@ -483,42 +510,48 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
 
     /// Checks that the `#[sanitize(..)]` attribute is applied to a
     /// function/closure/method, or to an impl block or module.
-    fn check_sanitize(&self, attr: &Attribute, target_span: Span, target: Target) {
+    fn check_sanitize(
+        &self,
+        attr_span: Span,
+        set: SanitizerSet,
+        target_span: Span,
+        target: Target,
+    ) {
         let mut not_fn_impl_mod = None;
         let mut no_body = None;
 
-        if let Some(list) = attr.meta_item_list() {
-            for item in list.iter() {
-                let MetaItemInner::MetaItem(set) = item else {
-                    return;
-                };
-                let segments = set.path.segments.iter().map(|x| x.ident.name).collect::<Vec<_>>();
-                match target {
-                    Target::Fn
-                    | Target::Closure
-                    | Target::Method(MethodKind::Trait { body: true } | MethodKind::Inherent)
-                    | Target::Impl { .. }
-                    | Target::Mod => return,
-                    Target::Static if matches!(segments.as_slice(), [sym::address]) => return,
-
-                    // These are "functions", but they aren't allowed because they don't
-                    // have a body, so the usual explanation would be confusing.
-                    Target::Method(MethodKind::Trait { body: false }) | Target::ForeignFn => {
-                        no_body = Some(target_span);
-                    }
-
-                    _ => {
-                        not_fn_impl_mod = Some(target_span);
-                    }
-                }
+        match target {
+            Target::Fn
+            | Target::Closure
+            | Target::Method(MethodKind::Trait { body: true } | MethodKind::Inherent)
+            | Target::Impl { .. }
+            | Target::Mod => return,
+            Target::Static
+                // if we mask out the address bits, i.e. *only* address was set,
+                // we allow it
+                if set & !(SanitizerSet::ADDRESS | SanitizerSet::KERNELADDRESS)
+                    == SanitizerSet::empty() =>
+            {
+                return;
             }
-            self.dcx().emit_err(errors::SanitizeAttributeNotAllowed {
-                attr_span: attr.span(),
-                not_fn_impl_mod,
-                no_body,
-                help: (),
-            });
+
+            // These are "functions", but they aren't allowed because they don't
+            // have a body, so the usual explanation would be confusing.
+            Target::Method(MethodKind::Trait { body: false }) | Target::ForeignFn => {
+                no_body = Some(target_span);
+            }
+
+            _ => {
+                not_fn_impl_mod = Some(target_span);
+            }
         }
+
+        self.dcx().emit_err(errors::SanitizeAttributeNotAllowed {
+            attr_span,
+            not_fn_impl_mod,
+            no_body,
+            help: (),
+        });
     }
 
     /// Checks if `#[naked]` is applied to a function definition.
@@ -1293,7 +1326,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
     }
 
     /// Checks if `#[link]` is applied to an item other than a foreign module.
-    fn check_link(&self, hir_id: HirId, attr: &Attribute, span: Span, target: Target) {
+    fn check_link(&self, hir_id: HirId, attr_span: Span, span: Span, target: Target) {
         if target == Target::ForeignMod
             && let hir::Node::Item(item) = self.tcx.hir_node(hir_id)
             && let Item { kind: ItemKind::ForeignMod { abi, .. }, .. } = item
@@ -1305,7 +1338,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         self.tcx.emit_node_span_lint(
             UNUSED_ATTRIBUTES,
             hir_id,
-            attr.span(),
+            attr_span,
             errors::Link { span: (target != Target::ForeignMod).then_some(span) },
         );
     }
@@ -1817,12 +1850,24 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         {
             if hir_id != CRATE_HIR_ID {
                 match style {
-                    Some(ast::AttrStyle::Outer) => self.tcx.emit_node_span_lint(
-                        UNUSED_ATTRIBUTES,
-                        hir_id,
-                        attr.span(),
-                        errors::OuterCrateLevelAttr,
-                    ),
+                    Some(ast::AttrStyle::Outer) => {
+                        let attr_span = attr.span();
+                        let bang_position = self
+                            .tcx
+                            .sess
+                            .source_map()
+                            .span_until_char(attr_span, '[')
+                            .shrink_to_hi();
+
+                        self.tcx.emit_node_span_lint(
+                            UNUSED_ATTRIBUTES,
+                            hir_id,
+                            attr_span,
+                            errors::OuterCrateLevelAttr {
+                                suggestion: errors::OuterCrateLevelAttrSuggestion { bang_position },
+                            },
+                        )
+                    }
                     Some(ast::AttrStyle::Inner) | None => self.tcx.emit_node_span_lint(
                         UNUSED_ATTRIBUTES,
                         hir_id,

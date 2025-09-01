@@ -210,12 +210,12 @@ pub struct TryFromSliceError(());
 impl fmt::Display for TryFromSliceError {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        #[allow(deprecated)]
-        self.description().fmt(f)
+        "could not convert slice to array".fmt(f)
     }
 }
 
 #[stable(feature = "try_from", since = "1.34.0")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_certified"))]
 impl Error for TryFromSliceError {
     #[allow(deprecated)]
@@ -223,6 +223,9 @@ impl Error for TryFromSliceError {
         "could not convert slice to array"
     }
 }
+=======
+impl Error for TryFromSliceError {}
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 #[stable(feature = "try_from_slice_error", since = "1.36.0")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]

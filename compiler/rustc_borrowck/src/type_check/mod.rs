@@ -34,6 +34,7 @@ use rustc_mir_dataflow::points::DenseLocationMap;
 use rustc_span::def_id::CRATE_DEF_ID;
 use rustc_span::source_map::Spanned;
 use rustc_span::{Span, sym};
+use rustc_trait_selection::infer::InferCtxtExt;
 use rustc_trait_selection::traits::query::type_op::custom::scrape_region_constraints;
 use rustc_trait_selection::traits::query::type_op::{TypeOp, TypeOpOutput};
 use tracing::{debug, instrument, trace};
@@ -120,7 +121,7 @@ pub(crate) fn type_check<'tcx>(
         region_bound_pairs,
         normalized_inputs_and_output,
         known_type_outlives_obligations,
-    } = free_region_relations::create(infcx, infcx.param_env, universal_regions, &mut constraints);
+    } = free_region_relations::create(infcx, universal_regions, &mut constraints);
 
     let pre_obligations = infcx.take_registered_region_obligations();
     assert!(
@@ -408,7 +409,6 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
             self.infcx,
             self.universal_regions,
             self.region_bound_pairs,
-            self.infcx.param_env,
             self.known_type_outlives_obligations,
             locations,
             locations.span(self.body),
@@ -1455,68 +1455,79 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                     }
                     CastKind::PtrToPtr => {
                         let ty_from = op.ty(self.body, tcx);
-                        let cast_ty_from = CastTy::from_ty(ty_from);
-                        let cast_ty_to = CastTy::from_ty(*ty);
-                        match (cast_ty_from, cast_ty_to) {
-                            (Some(CastTy::Ptr(src)), Some(CastTy::Ptr(dst))) => {
-                                let src_tail = self.struct_tail(src.ty, location);
-                                let dst_tail = self.struct_tail(dst.ty, location);
+                        let Some(CastTy::Ptr(src)) = CastTy::from_ty(ty_from) else {
+                            unreachable!();
+                        };
+                        let Some(CastTy::Ptr(dst)) = CastTy::from_ty(*ty) else {
+                            unreachable!();
+                        };
 
-                                // This checks (lifetime part of) vtable validity for pointer casts,
-                                // which is irrelevant when there are aren't principal traits on
-                                // both sides (aka only auto traits).
-                                //
-                                // Note that other checks (such as denying `dyn Send` -> `dyn
-                                // Debug`) are in `rustc_hir_typeck`.
-                                if let ty::Dynamic(src_tty, _src_lt, ty::Dyn) = *src_tail.kind()
-                                    && let ty::Dynamic(dst_tty, dst_lt, ty::Dyn) = *dst_tail.kind()
-                                    && src_tty.principal().is_some()
-                                    && dst_tty.principal().is_some()
-                                {
-                                    // Remove auto traits.
-                                    // Auto trait checks are handled in `rustc_hir_typeck` as FCW.
-                                    let src_obj = Ty::new_dynamic(
-                                        tcx,
-                                        tcx.mk_poly_existential_predicates(
-                                            &src_tty.without_auto_traits().collect::<Vec<_>>(),
-                                        ),
-                                        // FIXME: Once we disallow casting `*const dyn Trait + 'short`
-                                        // to `*const dyn Trait + 'long`, then this can just be `src_lt`.
-                                        dst_lt,
-                                        ty::Dyn,
-                                    );
-                                    let dst_obj = Ty::new_dynamic(
-                                        tcx,
-                                        tcx.mk_poly_existential_predicates(
-                                            &dst_tty.without_auto_traits().collect::<Vec<_>>(),
-                                        ),
-                                        dst_lt,
-                                        ty::Dyn,
-                                    );
+                        if self.infcx.type_is_sized_modulo_regions(self.infcx.param_env, dst.ty) {
+                            // Wide to thin ptr cast. This may even occur in an env with
+                            // impossible predicates, such as `where dyn Trait: Sized`.
+                            // In this case, we don't want to fall into the case below,
+                            // since the types may not actually be equatable, but it's
+                            // fine to perform this operation in an impossible env.
+                            let trait_ref = ty::TraitRef::new(
+                                tcx,
+                                tcx.require_lang_item(LangItem::Sized, self.last_span),
+                                [dst.ty],
+                            );
+                            self.prove_trait_ref(
+                                trait_ref,
+                                location.to_locations(),
+                                ConstraintCategory::Cast {
+                                    is_implicit_coercion: true,
+                                    unsize_to: None,
+                                },
+                            );
+                        } else if let ty::Dynamic(src_tty, _src_lt, ty::Dyn) =
+                            *self.struct_tail(src.ty, location).kind()
+                            && let ty::Dynamic(dst_tty, dst_lt, ty::Dyn) =
+                                *self.struct_tail(dst.ty, location).kind()
+                            && src_tty.principal().is_some()
+                            && dst_tty.principal().is_some()
+                        {
+                            // This checks (lifetime part of) vtable validity for pointer casts,
+                            // which is irrelevant when there are aren't principal traits on
+                            // both sides (aka only auto traits).
+                            //
+                            // Note that other checks (such as denying `dyn Send` -> `dyn
+                            // Debug`) are in `rustc_hir_typeck`.
 
-                                    debug!(?src_tty, ?dst_tty, ?src_obj, ?dst_obj);
+                            // Remove auto traits.
+                            // Auto trait checks are handled in `rustc_hir_typeck` as FCW.
+                            let src_obj = Ty::new_dynamic(
+                                tcx,
+                                tcx.mk_poly_existential_predicates(
+                                    &src_tty.without_auto_traits().collect::<Vec<_>>(),
+                                ),
+                                // FIXME: Once we disallow casting `*const dyn Trait + 'short`
+                                // to `*const dyn Trait + 'long`, then this can just be `src_lt`.
+                                dst_lt,
+                                ty::Dyn,
+                            );
+                            let dst_obj = Ty::new_dynamic(
+                                tcx,
+                                tcx.mk_poly_existential_predicates(
+                                    &dst_tty.without_auto_traits().collect::<Vec<_>>(),
+                                ),
+                                dst_lt,
+                                ty::Dyn,
+                            );
 
-                                    self.sub_types(
-                                        src_obj,
-                                        dst_obj,
-                                        location.to_locations(),
-                                        ConstraintCategory::Cast {
-                                            is_implicit_coercion: false,
-                                            unsize_to: None,
-                                        },
-                                    )
-                                    .unwrap();
-                                }
-                            }
-                            _ => {
-                                span_mirbug!(
-                                    self,
-                                    rvalue,
-                                    "Invalid PtrToPtr cast {:?} -> {:?}",
-                                    ty_from,
-                                    ty
-                                )
-                            }
+                            debug!(?src_tty, ?dst_tty, ?src_obj, ?dst_obj);
+
+                            self.sub_types(
+                                src_obj,
+                                dst_obj,
+                                location.to_locations(),
+                                ConstraintCategory::Cast {
+                                    is_implicit_coercion: false,
+                                    unsize_to: None,
+                                },
+                            )
+                            .unwrap();
                         }
                     }
                     CastKind::Transmute => {
@@ -2458,12 +2469,12 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
         args: GenericArgsRef<'tcx>,
         locations: Locations,
     ) -> ty::InstantiatedPredicates<'tcx> {
+        let root_def_id = self.root_cx.root_def_id();
         if let Some(closure_requirements) = &self.root_cx.closure_requirements(def_id) {
             constraint_conversion::ConstraintConversion::new(
                 self.infcx,
                 self.universal_regions,
                 self.region_bound_pairs,
-                self.infcx.param_env,
                 self.known_type_outlives_obligations,
                 locations,
                 self.body.span,             // irrelevant; will be overridden.
@@ -2473,9 +2484,8 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
             .apply_closure_requirements(closure_requirements, def_id, args);
         }
 
-        // Now equate closure args to regions inherited from `typeck_root_def_id`. Fixes #98589.
-        let typeck_root_def_id = tcx.typeck_root_def_id(self.body.source.def_id());
-        let typeck_root_args = ty::GenericArgs::identity_for_item(tcx, typeck_root_def_id);
+        // Now equate closure args to regions inherited from `root_def_id`. Fixes #98589.
+        let typeck_root_args = ty::GenericArgs::identity_for_item(tcx, root_def_id);
 
         let parent_args = match tcx.def_kind(def_id) {
             // We don't want to dispatch on 3 different kind of closures here, so take
@@ -2550,17 +2560,14 @@ impl<'tcx> TypeOp<'tcx> for InstantiateOpaqueType<'tcx> {
     fn fully_perform(
         mut self,
         infcx: &InferCtxt<'tcx>,
+        root_def_id: LocalDefId,
         span: Span,
     ) -> Result<TypeOpOutput<'tcx, Self>, ErrorGuaranteed> {
-        let (mut output, region_constraints) = scrape_region_constraints(
-            infcx,
-            |ocx| {
+        let (mut output, region_constraints) =
+            scrape_region_constraints(infcx, root_def_id, "InstantiateOpaqueType", span, |ocx| {
                 ocx.register_obligations(self.obligations.clone());
                 Ok(())
-            },
-            "InstantiateOpaqueType",
-            span,
-        )?;
+            })?;
         self.region_constraints = Some(region_constraints);
         output.error_info = Some(self);
         Ok(output)

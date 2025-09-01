@@ -149,14 +149,8 @@ pub struct RustcDocs {
 }
 
 impl Step for RustcDocs {
-<<<<<<< HEAD
-    type Output = Option<GeneratedTarball>;
-    const DEFAULT: bool = false;
-=======
     type Output = GeneratedTarball;
-
-    const DEFAULT: bool = true;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    const DEFAULT: bool = false;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

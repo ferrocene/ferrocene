@@ -1152,7 +1152,9 @@ mod snapshot {
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
         [dist] rustc 1 <host> -> std 1 <host>
+        [dist] rustc 1 <host> -> rustc-dev 2 <host>
         [dist] src <>
+        [dist] reproducible-artifacts <host>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
@@ -1175,22 +1177,8 @@ mod snapshot {
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
-<<<<<<< HEAD
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-=======
-        [doc] rustc 1 <host> -> releases 2 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[]
-        [dist] mingw <host>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
-        [dist] rustc <host>
-        [dist] rustc 1 <host> -> std 1 <host>
-        [dist] rustc 1 <host> -> rustc-dev 2 <host>
-        [dist] src <>
-        [dist] reproducible-artifacts <host>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         "
         );
     }
@@ -1245,7 +1233,8 @@ mod snapshot {
         [dist] rustc 1 <host> -> clippy 2 <host>
         [build] rustc 1 <host> -> miri 2 <host>
         [build] rustc 1 <host> -> cargo-miri 2 <host>
-<<<<<<< HEAD
+        [dist] rustc 1 <host> -> miri 2 <host>
+        [dist] reproducible-artifacts <host>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
@@ -1270,11 +1259,6 @@ mod snapshot {
         [doc] style-guide (book) <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-=======
-        [dist] rustc 1 <host> -> miri 2 <host>
-        [dist] rustc 1 <host> -> extended 2 <host>
-        [dist] reproducible-artifacts <host>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         ");
     }
 
@@ -1305,7 +1289,9 @@ mod snapshot {
         [dist] rustc 1 <host> -> std 1 <host>
         [build] rustc 2 <host> -> std 2 <target1>
         [dist] rustc 2 <host> -> std 2 <target1>
+        [dist] rustc 1 <host> -> rustc-dev 2 <host>
         [dist] src <>
+        [dist] reproducible-artifacts <host>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
@@ -1344,28 +1330,8 @@ mod snapshot {
         [doc] edition-guide (book) <target1>
         [doc] style-guide (book) <host>
         [doc] style-guide (book) <target1>
-<<<<<<< HEAD
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-=======
-        [doc] rustc 1 <host> -> releases 2 <host>
-        [doc] rustc 1 <host> -> releases 2 <target1>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
-        [dist] docs <target1>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[]
-        [doc] rustc 2 <host> -> std 2 <target1> crates=[]
-        [dist] mingw <host>
-        [dist] mingw <target1>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
-        [dist] rustc <host>
-        [dist] rustc 1 <host> -> std 1 <host>
-        [build] rustc 2 <host> -> std 2 <target1>
-        [dist] rustc 2 <host> -> std 2 <target1>
-        [dist] rustc 1 <host> -> rustc-dev 2 <host>
-        [dist] src <>
-        [dist] reproducible-artifacts <host>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         "
         );
     }
@@ -1398,7 +1364,11 @@ mod snapshot {
         [build] rustdoc 2 <target1>
         [dist] rustc <target1>
         [dist] rustc 1 <host> -> std 1 <host>
+        [dist] rustc 1 <host> -> rustc-dev 2 <host>
+        [dist] rustc 1 <host> -> rustc-dev 2 <target1>
         [dist] src <>
+        [dist] reproducible-artifacts <host>
+        [dist] reproducible-artifacts <target1>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
@@ -1424,26 +1394,8 @@ mod snapshot {
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
-<<<<<<< HEAD
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-=======
-        [doc] rustc 1 <host> -> releases 2 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[]
-        [dist] mingw <host>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
-        [dist] rustc <host>
-        [build] rustdoc 2 <target1>
-        [dist] rustc <target1>
-        [dist] rustc 1 <host> -> std 1 <host>
-        [dist] rustc 1 <host> -> rustc-dev 2 <host>
-        [dist] rustc 1 <host> -> rustc-dev 2 <target1>
-        [dist] src <>
-        [dist] reproducible-artifacts <host>
-        [dist] reproducible-artifacts <target1>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         "
         );
     }
@@ -1479,7 +1431,11 @@ mod snapshot {
         [dist] rustc <target1>
         [dist] rustc 1 <host> -> std 1 <host>
         [dist] rustc 1 <host> -> std 1 <target1>
+        [dist] rustc 1 <host> -> rustc-dev 2 <host>
+        [dist] rustc 1 <host> -> rustc-dev 2 <target1>
         [dist] src <>
+        [dist] reproducible-artifacts <host>
+        [dist] reproducible-artifacts <target1>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
@@ -1520,31 +1476,8 @@ mod snapshot {
         [doc] edition-guide (book) <target1>
         [doc] style-guide (book) <host>
         [doc] style-guide (book) <target1>
-<<<<<<< HEAD
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-=======
-        [doc] rustc 1 <host> -> releases 2 <host>
-        [doc] rustc 1 <host> -> releases 2 <target1>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
-        [dist] docs <target1>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[]
-        [doc] rustc 2 <host> -> std 2 <target1> crates=[]
-        [dist] mingw <host>
-        [dist] mingw <target1>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
-        [dist] rustc <host>
-        [build] rustdoc 2 <target1>
-        [dist] rustc <target1>
-        [dist] rustc 1 <host> -> std 1 <host>
-        [dist] rustc 1 <host> -> std 1 <target1>
-        [dist] rustc 1 <host> -> rustc-dev 2 <host>
-        [dist] rustc 1 <host> -> rustc-dev 2 <target1>
-        [dist] src <>
-        [dist] reproducible-artifacts <host>
-        [dist] reproducible-artifacts <target1>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         "
         );
     }
@@ -1623,7 +1556,7 @@ mod snapshot {
         [build] rustc 1 <host> -> cargo-miri 2 <target1>
         [dist] rustc 1 <host> -> miri 2 <target1>
         [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <target1>
-<<<<<<< HEAD
+        [dist] reproducible-artifacts <target1>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <target1>
@@ -1648,11 +1581,6 @@ mod snapshot {
         [doc] style-guide (book) <target1>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-=======
-        [doc] rustc 2 <target1> -> std 2 <target1> crates=[]
-        [dist] rustc 1 <host> -> extended 2 <target1>
-        [dist] reproducible-artifacts <target1>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         ");
     }
 
@@ -1699,7 +1627,7 @@ mod snapshot {
         [build] rustdoc 2 <target1>
         [build] rustc 1 <host> -> rust-analyzer-proc-macro-srv 2 <target1>
         [build] rustc 0 <host> -> GenerateCopyright 1 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] rustc <target1>
         [dist] rustc 1 <host> -> std 1 <target1>
         [dist] rustc 1 <host> -> rustc-dev 2 <target1>
@@ -1719,7 +1647,6 @@ mod snapshot {
         [build] rustc 1 <host> -> cargo-miri 2 <target1>
         [dist] rustc 1 <host> -> miri 2 <target1>
         [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <target1>
-        [dist] rustc 1 <host> -> extended 2 <target1>
         [dist] reproducible-artifacts <target1>
         ");
     }
@@ -1748,7 +1675,9 @@ mod snapshot {
         [dist] rustc <host>
         [dist] rustc 1 <host> -> rustc_codegen_cranelift 2 <host>
         [dist] rustc 1 <host> -> std 1 <host>
+        [dist] rustc 1 <host> -> rustc-dev 2 <host>
         [dist] src <>
+        [dist] reproducible-artifacts <host>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
@@ -1771,22 +1700,8 @@ mod snapshot {
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
-<<<<<<< HEAD
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-=======
-        [doc] rustc 1 <host> -> releases 2 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[]
-        [dist] mingw <host>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
-        [dist] rustc <host>
-        [dist] rustc 1 <host> -> rustc_codegen_cranelift 2 <host>
-        [dist] rustc 1 <host> -> std 1 <host>
-        [dist] rustc 1 <host> -> rustc-dev 2 <host>
-        [dist] src <>
-        [dist] reproducible-artifacts <host>
         ");
     }
 
@@ -1798,7 +1713,7 @@ mod snapshot {
                 .config("dist")
                 .path("bootstrap")
                 .render_steps(), @r"
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] bootstrap <host>
         ");
     }
@@ -1814,9 +1729,8 @@ mod snapshot {
                 .args(&["--set", "build.local-rebuild=true"])
                 .render_steps(), @r"
         [build] rustc 0 <host> -> std 0 <target1>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] rustc 0 <host> -> std 0 <target1>
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         ");
     }
 
@@ -2502,19 +2416,40 @@ mod snapshot {
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> WasmComponentLd 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        [build] rustc 1 <host> -> WasmComponentLd 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
+        [dist] rustc 2 <host> -> std 2 <host>
+        [build] rustdoc 2 <host>
+        [build] rustc 1 <host> -> rust-analyzer-proc-macro-srv 2 <host>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
+        [dist] rustc <host>
+        [build] rustc 2 <host> -> cargo 3 <host>
+        [dist] rustc 2 <host> -> cargo 3 <host>
+        [build] rustc 2 <host> -> rustc 3 <host>
+        [build] rustc 2 <host> -> WasmComponentLd 3 <host>
+        [build] rustc 2 <host> -> rust-analyzer 3 <host>
+        [dist] rustc 2 <host> -> rust-analyzer 3 <host>
+        [build] rustc 2 <host> -> rustfmt 3 <host>
+        [build] rustc 2 <host> -> cargo-fmt 3 <host>
+        [dist] rustc 2 <host> -> rustfmt 3 <host>
+        [build] rustc 2 <host> -> clippy-driver 3 <host>
+        [build] rustc 2 <host> -> cargo-clippy 3 <host>
+        [dist] rustc 2 <host> -> clippy 3 <host>
+        [build] rustc 2 <host> -> miri 3 <host>
+        [build] rustc 2 <host> -> cargo-miri 3 <host>
+        [dist] rustc 2 <host> -> miri 3 <host>
+        [dist] src <>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
-        [build] rustc 1 <host> -> std 1 <host>
         [doc] book (book) <host>
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
         [build] rustdoc 1 <host>
-        [doc] rustc 1 <host> -> standalone 2 <host>
-        [build] rustc 1 <host> -> rustc 2 <host>
-        [build] rustc 1 <host> -> WasmComponentLd 2 <host>
-        [build] rustdoc 2 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 1 <host> -> error-index 2 <host>
         [doc] rustc 1 <host> -> error-index 2 <host>
@@ -2529,27 +2464,8 @@ mod snapshot {
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
-        [doc] rustc 1 <host> -> releases 2 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
-        [dist] rustc 1 <host> -> std 1 <host>
-        [build] rustc 1 <host> -> rust-analyzer-proc-macro-srv 2 <host>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
-        [dist] rustc <host>
-        [build] rustc 1 <host> -> cargo 2 <host>
-        [dist] rustc 1 <host> -> cargo 2 <host>
-        [build] rustc 1 <host> -> rust-analyzer 2 <host>
-        [dist] rustc 1 <host> -> rust-analyzer 2 <host>
-        [build] rustc 1 <host> -> rustfmt 2 <host>
-        [build] rustc 1 <host> -> cargo-fmt 2 <host>
-        [dist] rustc 1 <host> -> rustfmt 2 <host>
-        [build] rustc 1 <host> -> clippy-driver 2 <host>
-        [build] rustc 1 <host> -> cargo-clippy 2 <host>
-        [dist] rustc 1 <host> -> clippy 2 <host>
-        [build] rustc 1 <host> -> miri 2 <host>
-        [build] rustc 1 <host> -> cargo-miri 2 <host>
-        [dist] rustc 1 <host> -> miri 2 <host>
-        [dist] src <>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         ");
     }
 

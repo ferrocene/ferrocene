@@ -439,11 +439,7 @@ impl Step for Rustc {
         let target_compiler = self.target_compiler;
         let target = self.target_compiler.host;
 
-<<<<<<< HEAD
-        let mut tarball = Tarball::new(builder, "rustc", &host.triple);
-=======
-        let tarball = Tarball::new(builder, "rustc", &target.triple);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+        let mut tarball = Tarball::new(builder, "rustc", &target.triple);
 
         // Prepare the rustc "image", what will actually end up getting installed
         prepare_image(builder, target_compiler, tarball.image_dir());

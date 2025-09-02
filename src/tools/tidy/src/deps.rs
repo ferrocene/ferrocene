@@ -466,7 +466,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "windows_x86_64_gnu",
     "windows_x86_64_gnullvm",
     "windows_x86_64_msvc",
-    "wit-bindgen-rt@0.39.0", // pinned to a specific version due to using a binary blob: <https://github.com/rust-lang/rust/pull/136395#issuecomment-2692769062>
+    "wit-bindgen@0.45.0", // pinned to a specific version due to using a binary blob: <https://github.com/rust-lang/rust/pull/136395#issuecomment-2692769062>
     "writeable",
     "yoke",
     "yoke-derive",
@@ -474,11 +474,8 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "zerocopy-derive",
     "zerofrom",
     "zerofrom-derive",
-<<<<<<< HEAD
     "zeroize", // this is a false positive: it's only used by generate-tarball
-=======
     "zerotrie",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "zerovec",
     "zerovec-derive",
     // tidy-alphabetical-end

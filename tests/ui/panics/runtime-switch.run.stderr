@@ -1,9 +1,5 @@
 
-<<<<<<< HEAD
-thread 'main' ($TID) panicked at $DIR/runtime-switch.rs:29:5:
-=======
 thread 'main' ($TID) panicked at $DIR/runtime-switch.rs:31:5:
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 explicit panic
 stack backtrace:
    0: std::panicking::begin_panic

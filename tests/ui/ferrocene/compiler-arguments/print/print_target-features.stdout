@@ -1,7 +1,20 @@
 Features supported by rustc for this target:
     adx                             - Support ADX instructions.
     aes                             - Enable AES instructions.
+    amx-avx512                      - Support AMX-AVX512 instructions.
+    amx-bf16                        - Support AMX-BF16 instructions.
+    amx-complex                     - Support AMX-COMPLEX instructions.
+    amx-fp16                        - Support AMX amx-fp16 instructions.
+    amx-fp8                         - Support AMX-FP8 instructions.
+    amx-int8                        - Support AMX-INT8 instructions.
+    amx-movrs                       - Support AMX-MOVRS instructions.
+    amx-tf32                        - Support AMX-TF32 instructions.
+    amx-tile                        - Support AMX-TILE instructions.
+    amx-transpose                   - Support AMX amx-transpose instructions.
+    apxf                            - Support extended general purpose register.
     avx                             - Enable AVX instructions.
+    avx10.1                         - Support AVX10.1 up to 512-bit instruction.
+    avx10.2                         - Support AVX10.2 up to 512-bit instruction.
     avx2                            - Enable AVX2 instructions.
     avx512bf16                      - Support bfloat16 floating point.
     avx512bitalg                    - Enable AVX-512 Bit Algorithms.
@@ -9,6 +22,7 @@ Features supported by rustc for this target:
     avx512cd                        - Enable AVX-512 Conflict Detection Instructions.
     avx512dq                        - Enable AVX-512 Doubleword and Quadword Instructions.
     avx512f                         - Enable AVX-512 instructions.
+    avx512fp16                      - Support 16-bit floating point.
     avx512ifma                      - Enable AVX-512 Integer Fused Multiple-Add.
     avx512vbmi                      - Enable AVX-512 Vector Byte Manipulation Instructions.
     avx512vbmi2                     - Enable AVX-512 further Vector Byte Manipulation Instructions.
@@ -16,22 +30,36 @@ Features supported by rustc for this target:
     avx512vnni                      - Enable AVX-512 Vector Neural Network Instructions.
     avx512vp2intersect              - Enable AVX-512 vp2intersect.
     avx512vpopcntdq                 - Enable AVX-512 Population Count Instructions.
+    avxifma                         - Enable AVX-IFMA.
+    avxneconvert                    - Support AVX-NE-CONVERT instructions.
+    avxvnni                         - Support AVX_VNNI encoding.
+    avxvnniint16                    - Enable AVX-VNNI-INT16.
+    avxvnniint8                     - Enable AVX-VNNI-INT8.
     bmi1                            - Support BMI instructions.
     bmi2                            - Support BMI2 instructions.
     cmpxchg16b                      - 64-bit with cmpxchg16b (this is true for most x86-64 chips, but not the first AMD chips).
+    crt-static                      - Enables C Run-time Libraries to be statically linked.
     ermsb                           - REP MOVS/STOS are fast.
     f16c                            - Support 16-bit floating point conversion instructions.
     fma                             - Enable three-operand fused multiple-add.
     fxsr                            - Support fxsave/fxrestore instructions.
     gfni                            - Enable Galois Field Arithmetic Instructions.
+    kl                              - Support Key Locker kl Instructions.
+    lahfsahf                        - Support LAHF and SAHF instructions in 64-bit mode.
     lzcnt                           - Support LZCNT instruction.
     movbe                           - Support MOVBE instruction.
+    movrs                           - Enable MOVRS.
     pclmulqdq                       - Enable packed carry-less multiplication instructions.
     popcnt                          - Support POPCNT instruction.
+    prfchw                          - Support PRFCHW instructions.
     rdrand                          - Support RDRAND instruction.
     rdseed                          - Support RDSEED instruction.
     rtm                             - Support RTM instructions.
     sha                             - Enable SHA instructions.
+    sha512                          - Support SHA512 instructions.
+    sm3                             - Support SM3 instructions.
+    sm4                             - Support SM4 instructions.
+    soft-float                      - Use software floating point features.
     sse                             - Enable SSE instructions.
     sse2                            - Enable SSE2 instructions.
     sse3                            - Enable SSE3 instructions.
@@ -42,11 +70,13 @@ Features supported by rustc for this target:
     tbm                             - Enable TBM instructions.
     vaes                            - Promote selected AES instructions to AVX512/AVX registers.
     vpclmulqdq                      - Enable vpclmulqdq instructions.
+    widekl                          - Support Key Locker wide Instructions.
+    x87                             - Enable X87 float instructions.
+    xop                             - Enable XOP instructions.
     xsave                           - Support xsave instructions.
     xsavec                          - Support xsavec instructions.
     xsaveopt                        - Support xsaveopt instructions.
     xsaves                          - Support xsaves instructions.
-    crt-static                      - Enables C Run-time Libraries to be statically linked.
 
 Code-generation features supported by LLVM for this target:
     16bit-mode                      - 16-bit mode (i8086).
@@ -54,16 +84,12 @@ Code-generation features supported by LLVM for this target:
     64bit                           - Support 64-bit instructions.
     64bit-mode                      - 64-bit mode (x86_64).
     allow-light-256-bit             - Enable generation of 256-bit load/stores even if we prefer 128-bit.
-    amx-bf16                        - Support AMX-BF16 instructions.
-    amx-fp16                        - Support AMX amx-fp16 instructions.
-    amx-int8                        - Support AMX-INT8 instructions.
-    amx-tile                        - Support AMX-TILE instructions.
-    avx512fp16                      - Support 16-bit floating point.
-    avxifma                         - Enable AVX-IFMA.
-    avxneconvert                    - Support AVX-NE-CONVERT instructions.
-    avxvnni                         - Support AVX_VNNI encoding.
-    avxvnniint8                     - Enable AVX-VNNI-INT8.
+    avx10.1-256                     - Support AVX10.1 up to 256-bit instruction.
+    avx10.2-256                     - Support AVX10.2 up to 256-bit instruction.
+    branch-hint                     - Target has branch hint feature.
     branchfusion                    - CMP/TEST can be fused with conditional branches.
+    ccmp                            - Support conditional cmp & test instructions.
+    cf                              - Support conditional faulting.
     cldemote                        - Enable Cache Line Demote.
     clflushopt                      - Flush A Cache Line Optimized.
     clwb                            - Cache Line Write Back.
@@ -73,6 +99,7 @@ Code-generation features supported by LLVM for this target:
     crc32                           - Enable SSE 4.2 CRC32 instruction (used when SSE4.2 is supported but function is GPR only).
     cx8                             - Support CMPXCHG8B instructions.
     enqcmd                          - Has ENQCMD instructions.
+    evex512                         - Support ZMM and 64-bit mask instructions.
     false-deps-getmant              - VGETMANTSS/SD/SH and VGETMANDPS/PD(memory version) has a false dependency on dest register.
     false-deps-lzcnt-tzcnt          - LZCNT/TZCNT have a false dependency on dest register.
     false-deps-mulc                 - VF[C]MULCPH/SH has a false dependency on dest register.
@@ -84,8 +111,10 @@ Code-generation features supported by LLVM for this target:
     fast-15bytenop                  - Target can quickly decode up to 15 byte NOPs.
     fast-7bytenop                   - Target can quickly decode up to 7 byte NOPs.
     fast-bextr                      - Indicates that the BEXTR instruction is implemented as a single uop with good throughput.
+    fast-dpwssd                     - Prefer vpdpwssd instruction over vpmaddwd+vpaddd instruction sequence.
     fast-gather                     - Indicates if gather is reasonably fast (this is true for Skylake client and all AVX-512 CPUs).
     fast-hops                       - Prefer horizontal vector math instructions (haddp, phsub, etc.) over normal vector instructions with shuffles.
+    fast-imm16                      - Prefer a i16 instruction with i16 immediate over extension to i32.
     fast-lzcnt                      - LZCNT instructions are as fast as most simple integer ops.
     fast-movbe                      - Prefer a movbe over a single-use load + bswap / single-use bswap + store.
     fast-scalar-fsqrt               - Scalar SQRT is fast (disable Newton-Raphson).
@@ -95,6 +124,7 @@ Code-generation features supported by LLVM for this target:
     fast-variable-perlane-shuffle   - Per-lane shuffles with variable masks are fast.
     fast-vector-fsqrt               - Vector SQRT is fast (disable Newton-Raphson).
     fast-vector-shift-masks         - Prefer a left/right vector logical shift pair over a shift+and pair.
+    faster-shift-than-shuffle       - Shifts are faster (or as fast) as shuffle.
     fma4                            - Enable four-operand fused multiple-add.
     fsgsbase                        - Support FS/GS Base instructions.
     fsrm                            - REP MOVSB of short lengths is faster.
@@ -103,8 +133,8 @@ Code-generation features supported by LLVM for this target:
     hreset                          - Has hreset instruction.
     idivl-to-divb                   - Use 8-bit divide for positive values less than 256.
     idivq-to-divl                   - Use 32-bit divide for positive values less than 2^32.
+    inline-asm-use-gpr32            - Enable use of GPR32 in inline assembly for APX.
     invpcid                         - Invalidate Process-Context Identifier.
-    kl                              - Support Key Locker kl Instructions.
     lea-sp                          - Use LEA for adjusting the stack pointer (this is an optimization for Intel Atom processors).
     lea-uses-ag                     - LEA instruction needs inputs at AG stage.
     lvi-cfi                         - Prevent indirect calls/branches from using a memory operand, and precede all indirect calls/branches from a register with an LFENCE instruction to serialize control flow. Also decompose RET instructions into a POP+LFENCE+JMP sequence..
@@ -115,16 +145,26 @@ Code-generation features supported by LLVM for this target:
     movdir64b                       - Support movdir64b instruction (direct store 64 bytes).
     movdiri                         - Support movdiri instruction (direct store integer).
     mwaitx                          - Enable MONITORX/MWAITX timer functionality.
+    ndd                             - Support non-destructive destination.
+    nf                              - Support status flags update suppression.
+    no-bypass-delay                 - Has no bypass delay when using the 'wrong' domain.
+    no-bypass-delay-blend           - Has no bypass delay when using the 'wrong' blend type.
+    no-bypass-delay-mov             - Has no bypass delay when using the 'wrong' mov type.
+    no-bypass-delay-shuffle         - Has no bypass delay when using the 'wrong' shuffle type.
     nopl                            - Enable NOPL instruction (generally pentium pro+).
     pad-short-functions             - Pad short functions (to prevent a stall when returning too early).
     pconfig                         - platform configuration instruction.
     pku                             - Enable protection keys.
+    ppx                             - Support Push-Pop Acceleration.
     prefer-128-bit                  - Prefer 128-bit AVX instructions.
     prefer-256-bit                  - Prefer 256-bit AVX instructions.
     prefer-mask-registers           - Prefer AVX512 mask registers over PTEST/MOVMSK.
+    prefer-movmsk-over-vtest        - Prefer movmsk over vtest instruction.
+    prefer-no-gather                - Prefer no gather instructions.
+    prefer-no-scatter               - Prefer no scatter instructions.
     prefetchi                       - Prefetch instruction with T0 or T1 Hint.
-    prfchw                          - Support PRFCHW instructions.
     ptwrite                         - Support ptwrite instruction.
+    push2pop2                       - Support PUSH2/POP2 instructions.
     raoint                          - Support RAO-INT instructions.
     rdpid                           - Support RDPID instructions.
     rdpru                           - Support RDPRU instructions.
@@ -146,22 +186,22 @@ Code-generation features supported by LLVM for this target:
     slow-two-mem-ops                - Two memory operand instructions are slow.
     slow-unaligned-mem-16           - Slow unaligned 16-byte memory access.
     slow-unaligned-mem-32           - Slow unaligned 32-byte memory access.
-    soft-float                      - Use software floating point features.
     sse-unaligned-mem               - Allow unaligned memory operands with SSE instructions (this may require setting a configuration bit in the processor).
     tagged-globals                  - Use an instruction sequence for taking the address of a global that allows a memory tag in the upper address bits..
     tsxldtrk                        - Support TSXLDTRK instructions.
+    tuning-fast-imm-vector-shift    - Vector shifts are fast (2/cycle) as opposed to slow (1/cycle).
     uintr                           - Has UINTR Instructions.
     use-glm-div-sqrt-costs          - Use Goldmont specific floating point div/sqrt costs.
     use-slm-arith-costs             - Use Silvermont specific arithmetic costs.
+    usermsr                         - Support USERMSR instructions.
     vzeroupper                      - Should insert vzeroupper instructions.
     waitpkg                         - Wait and pause enhancements.
     wbnoinvd                        - Write Back No Invalidate.
-    widekl                          - Support Key Locker wide Instructions.
-    x87                             - Enable X87 float instructions.
-    xop                             - Enable XOP instructions.
+    zu                              - Support zero-upper SETcc/IMUL.
 
 Use +feature to enable a feature, or -feature to disable it.
 For example, rustc -C target-cpu=mycpu -C target-feature=+feature1,-feature2
 
 Code-generation features cannot be used in cfg or #[target_feature],
 and may be renamed or removed in a future version of LLVM or rustc.
+

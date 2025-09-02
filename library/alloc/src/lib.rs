@@ -94,8 +94,7 @@
 // of conflicts we have when merging main.
 //
 // Library features:
-<<<<<<< HEAD
-// not-alphabetical-start
+// tidy-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(alloc_layout_extra))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(allocator_api))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(array_into_iter_constructors))]
@@ -163,79 +162,8 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unicode_internals))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unsize))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unwrap_infallible))]
-// not-alphabetical-end
-=======
-// tidy-alphabetical-start
-#![feature(alloc_layout_extra)]
-#![feature(allocator_api)]
-#![feature(array_into_iter_constructors)]
-#![feature(array_windows)]
-#![feature(ascii_char)]
-#![feature(assert_matches)]
-#![feature(async_fn_traits)]
-#![feature(async_iterator)]
-#![feature(bstr)]
-#![feature(bstr_internals)]
-#![feature(cast_maybe_uninit)]
-#![feature(char_internals)]
-#![feature(char_max_len)]
-#![feature(clone_to_uninit)]
-#![feature(coerce_unsized)]
-#![feature(const_default)]
-#![feature(const_eval_select)]
-#![feature(const_heap)]
-#![feature(const_trait_impl)]
-#![feature(core_intrinsics)]
-#![feature(deprecated_suggestion)]
-#![feature(deref_pure_trait)]
-#![feature(dispatch_from_dyn)]
-#![feature(ergonomic_clones)]
-#![feature(error_generic_member_access)]
-#![feature(exact_size_is_empty)]
-#![feature(extend_one)]
-#![feature(extend_one_unchecked)]
-#![feature(fmt_internals)]
-#![feature(fn_traits)]
-#![feature(formatting_options)]
-#![feature(generic_atomic)]
-#![feature(hasher_prefixfree_extras)]
-#![feature(inplace_iteration)]
-#![feature(iter_advance_by)]
-#![feature(iter_next_chunk)]
-#![feature(layout_for_ptr)]
-#![feature(legacy_receiver_trait)]
-#![feature(local_waker)]
-#![feature(maybe_uninit_slice)]
-#![feature(maybe_uninit_uninit_array_transpose)]
-#![feature(panic_internals)]
-#![feature(pattern)]
-#![feature(pin_coerce_unsized_trait)]
-#![feature(ptr_alignment_type)]
-#![feature(ptr_internals)]
-#![feature(ptr_metadata)]
-#![feature(set_ptr_value)]
-#![feature(sized_type_properties)]
-#![feature(slice_from_ptr_range)]
-#![feature(slice_index_methods)]
-#![feature(slice_iter_mut_as_mut_slice)]
-#![feature(slice_ptr_get)]
-#![feature(slice_range)]
-#![feature(std_internals)]
-#![feature(str_internals)]
-#![feature(temporary_niche_types)]
-#![feature(trusted_fused)]
-#![feature(trusted_len)]
-#![feature(trusted_random_access)]
-#![feature(try_trait_v2)]
-#![feature(try_with_capacity)]
-#![feature(tuple_trait)]
-#![feature(ub_checks)]
-#![feature(unicode_internals)]
-#![feature(unsize)]
-#![feature(unwrap_infallible)]
-#![feature(wtf8_internals)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(wtf8_internals))]
 // tidy-alphabetical-end
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 //
 // Language features:
 // not-alphbetical-start
@@ -328,6 +256,7 @@ pub mod task;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod vec;
 #[cfg(all(not(no_rc), not(no_sync), not(no_global_oom_handling)))]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod wtf8;
 
 #[doc(hidden)]

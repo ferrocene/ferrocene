@@ -1,10 +1,10 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-Norm mapping of IEC-61508 standard requirements
+Norm mapping of IEC 61508 standard requirements
 ===============================================
 
-IEC-61508-1
+IEC 61508-1
 -----------
 
 5.2.1
@@ -144,7 +144,7 @@ Covered by :doc:`qualification-plan:organization`.
 ~~~~~~
 
 Ferrous Systems maintains a database of staff competencies consisting of staff CVs as well as any training provided by Ferrous Systems. Prior to assigning major tasks, leadership verifies the competencies of the respective staff.
-Ferrous Systems's ISO-9001 managed internal handbook details how staff may undertake training for new skills, or re-training for existing skills.
+Ferrous Systems's ISO 9001 managed internal handbook details how staff may undertake training for new skills, or re-training for existing skills.
 
 6.2.14
 ~~~~~~
@@ -159,7 +159,7 @@ Ferrous Systems maintains a database of staff competencies consisting of their C
 6.2.16
 ~~~~~~
 
-Detailed in Ferrous Systems's ISO-9001 managed internal handbook and re-checked for each renewal of certification.
+Detailed in Ferrous Systems's ISO 9001 managed internal handbook and re-checked for each renewal of certification.
 
 6.2.17
 ~~~~~~
@@ -185,7 +185,7 @@ Covered by
 
 - :doc:`safety-manual:known-problems`
 
-IEC-61508-3
+IEC 61508-3
 -----------
 
 4
@@ -199,12 +199,12 @@ IEC-61508-3
 5
 ~
 
-Covered by :ref:`5.2.1 to 5.2.11 of IEC-61508-1 <norm-mapping:5.2.1>`.
+Covered by :ref:`5.2.1 to 5.2.11 of IEC 61508-1 <norm-mapping:5.2.1>`.
 
 6.2.1
 ~~~~~
 
-Covered by :ref:`6.2 of IEC-61508-1 <norm-mapping:6.2>`.
+Covered by :ref:`6.2 of IEC 61508-1 <norm-mapping:6.2>`.
 
 6.2.2
 ~~~~~
@@ -235,7 +235,7 @@ To explain it in V-model-terms: The Rust project, who is maintaining the upstrea
 7.1.2.7
 ~~~~~~~
 
-Covered by :ref:`norm-mapping:IEC-61508-3 Annex A`.
+Covered by :ref:`norm-mapping:IEC 61508-3 Annex A`.
 
 7.1.2.8-9
 ~~~~~~~~~
@@ -458,7 +458,7 @@ N/A; Timing performance depends on the system requirements, which are unknown du
 
 Certification is carried out by TÜV SÜD, an independent assessment body.
 
-IEC-61508-3 Annex A
+IEC 61508-3 Annex A
 -------------------
 
 Table A.1
@@ -505,7 +505,7 @@ Rust has strong typing and assertions, is memory safe, and is well suited to str
 4a
 ""
 
-The certified core library uses Ferrocene, the fully qualified Rust compiler according to IEC-61508.
+The certified core library uses Ferrocene, the fully qualified Rust compiler according to IEC 61508.
 
 Table A.4
 ~~~~~~~~~
@@ -616,7 +616,7 @@ Table A.10
 
 Covered by :doc:`evaluation-report:rustc/tool-analysis`.
 
-IEC-61508-3 Annex B
+IEC 61508-3 Annex B
 -------------------
 
 Table B.1 - Design and coding standards

@@ -26,16 +26,12 @@ use crate::core::builder;
 use crate::core::builder::{
     Builder, Cargo, Kind, RunConfig, ShouldRun, Step, StepMetadata, crate_description,
 };
-<<<<<<< HEAD
 use crate::core::config::flags::FerroceneCoverageFor;
-use crate::core::config::{DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection};
-use crate::ferrocene::code_coverage::instrument_coverage;
-use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
-=======
 use crate::core::config::{
     CompilerBuiltins, DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection,
 };
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+use crate::ferrocene::code_coverage::instrument_coverage;
+use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::utils::build_stamp;
 use crate::utils::build_stamp::BuildStamp;
 use crate::utils::exec::command;

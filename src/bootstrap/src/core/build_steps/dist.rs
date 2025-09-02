@@ -154,14 +154,9 @@ pub struct RustcDocs {
 }
 
 impl Step for RustcDocs {
-<<<<<<< HEAD
-    type Output = Option<GeneratedTarball>;
-    const DEFAULT: bool = false;
-=======
     type Output = GeneratedTarball;
 
     const DEFAULT: bool = true;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -450,11 +445,7 @@ impl Step for Rustc {
         let target_compiler = self.target_compiler;
         let target = self.target_compiler.host;
 
-<<<<<<< HEAD
-        let mut tarball = Tarball::new(builder, "rustc", &host.triple);
-=======
-        let tarball = Tarball::new(builder, "rustc", &target.triple);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+        let mut tarball = Tarball::new(builder, "rustc", &target.triple);
 
         // Prepare the rustc "image", what will actually end up getting installed
         prepare_image(builder, target_compiler, tarball.image_dir());

@@ -3044,7 +3044,7 @@ impl Step for Crate {
                 instrument_coverage(builder, &mut cargo);
             }
 
-            measure_coverage(builder, cargo.as_mut(), compiler, target, coverage_for);
+            measure_coverage(builder, cargo.as_mut(), build_compiler, target, coverage_for);
             cargo.rustflag("--cfg=ferrocene_coverage");
         }
 
@@ -3060,7 +3060,6 @@ impl Step for Crate {
             crates.push("alloctests".to_owned());
         }
 
-<<<<<<< HEAD
         // The current way build metrics are gathered means there is a single test_suite node
         // emitted for every execution of this step. As we want crate granularity in the metrics,
         // when CI passes the --ferrocene-test-one-crate-per-cargo-call flag, we will split this
@@ -3070,7 +3069,7 @@ impl Step for Crate {
         if builder.config.cmd.ferrocene_test_one_crate_per_cargo_call() && self.crates.len() > 1 {
             for krate in &self.crates {
                 builder.ensure(Crate {
-                    compiler: self.compiler,
+                    build_compiler: self.build_compiler,
                     target: self.target,
                     mode: self.mode,
                     crates: vec![krate.clone()],
@@ -3079,19 +3078,16 @@ impl Step for Crate {
             // Avoid panicking because we are not executing the Cargo we prepared.
             cargo.into_cmd().mark_as_executed();
         } else {
-            run_cargo_test(cargo, &[], &crates, &*crate_description(&self.crates), target, builder);
+            run_cargo_test(
+                cargo,
+                &[],
+                &crates,
+                &*crate_description(&self.crates),
+                target,
+                builder,
+                mode,
+            );
         }
-=======
-        run_cargo_test(
-            cargo,
-            &[],
-            &crates,
-            &*crate_description(&self.crates),
-            target,
-            builder,
-            mode,
-        );
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 }
 

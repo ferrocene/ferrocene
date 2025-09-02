@@ -24,11 +24,8 @@ use crate::core::build_steps::{
 };
 use crate::core::config::flags::Subcommand;
 use crate::core::config::{DryRun, TargetSelection};
-<<<<<<< HEAD
 use crate::ferrocene::code_coverage::CoverageState;
-=======
 use crate::utils::build_stamp::BuildStamp;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::utils::cache::Cache;
 use crate::utils::exec::{BootstrapCommand, ExecutionContext, command};
 use crate::utils::helpers::{self, LldThreads, add_dylib_path, exe, libdir, linker_args, t};

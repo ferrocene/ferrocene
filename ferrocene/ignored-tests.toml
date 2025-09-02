@@ -122,3 +122,15 @@ tests = [
 ]
 targets = ["x86_64-unknown-linux-gnu", "aarch64-apple-darwin",]
 reason = "These tests were broken in https://github.com/rust-lang/rust/pull/141751 and should be resolved with https://github.com/rust-lang/rust/pull/142377"
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_comma-add-and-remove-same-flag.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_comma-minus-minus-plus.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_comma-plus-plus-minus.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_space-eq.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_comma-same-flag-many-times.rs",
+    "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_eq.rs",
+]
+targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+reason = "Currently output of these tests experiences multiple stdout writers colliding to create unreproducible results"

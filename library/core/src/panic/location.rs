@@ -208,12 +208,8 @@ impl<'a> Location<'a> {
     #[must_use]
     #[unstable(feature = "file_with_nul", issue = "141727")]
     #[inline]
-<<<<<<< HEAD
     #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn file_with_nul(&self) -> &'a CStr {
-=======
     pub const fn file_as_c_str(&self) -> &'a CStr {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         let filename = self.filename.as_ptr();
 
         // SAFETY: The filename is valid for `filename_len+1` bytes, so this addition can't

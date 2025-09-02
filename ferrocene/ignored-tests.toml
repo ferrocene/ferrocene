@@ -24,6 +24,13 @@ tests = [
 targets = ["x86_64-unknown-linux-gnu", "aarch64-apple-darwin"]
 reason = "TODO: to be investigated"
 
+[["tests/crashes"]]
+tests = [
+    "tests/crashes/120175.rs",
+]
+targets = ["aarch64-apple-darwin"]
+reason = "Also fails upstream"
+
 [["tests/run-make"]]
 tests = [
     "tests/run-coverage",

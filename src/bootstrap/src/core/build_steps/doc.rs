@@ -624,7 +624,7 @@ impl Step for Std {
             return;
         }
         run.builder.ensure(Std {
-            build_compiler: run.builder.compiler(run.builder.top_stage, run.builder.host_target),
+            build_compiler: run.builder.compiler_for_std(run.builder.top_stage),
             target: run.target,
             format: if run.builder.config.cmd.json() {
                 DocumentationFormat::Json
@@ -810,14 +810,18 @@ fn doc_std(
 
     let description =
         format!("library{} in {} format", crate_description(requested_crates), format.as_str());
-    let _guard = builder.msg(Kind::Doc, description, None, build_compiler, target);
+    let _guard = builder.msg(Kind::Doc, description, Mode::Std, build_compiler, target);
 
     cargo.into_cmd().run(builder);
     builder.cp_link_r(&out_dir, out);
 }
 
 /// Prepare a compiler that will be able to document something for `target` at `stage`.
-fn prepare_doc_compiler(builder: &Builder<'_>, target: TargetSelection, stage: u32) -> Compiler {
+pub fn prepare_doc_compiler(
+    builder: &Builder<'_>,
+    target: TargetSelection,
+    stage: u32,
+) -> Compiler {
     assert!(stage > 0, "Cannot document anything in stage 0");
     let build_compiler = builder.compiler(stage - 1, builder.host_target);
     builder.std(build_compiler, target);
@@ -1020,7 +1024,7 @@ macro_rules! tool_doc {
                     (compilers.build_compiler(), Mode::ToolRustc)
                 } else {
                     // bootstrap/host tools have to be documented with the stage 0 compiler
-                    (prepare_doc_compiler(run.builder, target, 1), Mode::ToolBootstrap)
+                    (prepare_doc_compiler(run.builder, run.builder.host_target, 1), Mode::ToolBootstrap)
                 };
 
                 run.builder.ensure($tool { build_compiler, mode, target });
@@ -1315,6 +1319,8 @@ impl Step for RustcBook {
         // functional sysroot.
         builder.std(self.build_compiler, self.target);
         let mut cmd = builder.tool_cmd(Tool::LintDocs);
+        cmd.arg("--build-rustc-stage");
+        cmd.arg(self.build_compiler.stage.to_string());
         cmd.arg("--src");
         cmd.arg(builder.src.join("compiler"));
         cmd.arg("--out");

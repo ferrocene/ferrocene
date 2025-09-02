@@ -158,7 +158,8 @@ pub struct InferCtxtInner<'tcx> {
     region_assumptions: Vec<ty::ArgOutlivesPredicate<'tcx>>,
 
     /// `-Znext-solver`: Successfully proven goals during HIR typeck which
-    /// reference inference variables and get reproven after writeback.
+    /// reference inference variables and get reproven in case MIR type check
+    /// fails to prove something.
     ///
     /// See the documentation of `InferCtxt::in_hir_typeck` for more details.
     hir_typeck_potentially_region_dependent_goals: Vec<PredicateObligation<'tcx>>,
@@ -986,6 +987,10 @@ impl<'tcx> InferCtxt<'tcx> {
         // inference context after calling this for diagnostics and the new
         // trait solver.
         storage.var_infos.clone()
+    }
+
+    pub fn has_opaque_types_in_storage(&self) -> bool {
+        !self.inner.borrow().opaque_type_storage.is_empty()
     }
 
     #[instrument(level = "debug", skip(self), ret)]

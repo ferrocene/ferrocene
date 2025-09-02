@@ -935,6 +935,7 @@ pub const fn dangling<T>() -> *const T {
 #[must_use]
 #[stable(feature = "strict_provenance", since = "1.84.0")]
 #[rustc_const_stable(feature = "strict_provenance", since = "1.84.0")]
+#[allow(integer_to_ptr_transmutes)] // Expected semantics here.
 pub const fn without_provenance_mut<T>(addr: usize) -> *mut T {
     // An int-to-pointer transmute currently has exactly the intended semantics: it creates a
     // pointer without provenance. Note that this is *not* a stable guarantee about transmute
@@ -2203,10 +2204,9 @@ pub unsafe fn write_volatile<T>(dst: *mut T, src: T) {
     }
 }
 
-/// Align pointer `p`.
+/// Calculate an element-offset that increases a pointer's alignment.
 ///
-/// Calculate offset (in terms of elements of `size_of::<T>()` stride) that has to be applied
-/// to pointer `p` so that pointer `p` would get aligned to `a`.
+/// Calculate an element-offset (not byte-offset) that when added to a given pointer `p`, increases `p`'s alignment to at least the given alignment `a`.
 ///
 /// # Safety
 /// `a` must be a power of two.

@@ -6,7 +6,7 @@ use std::sync::{Arc, LazyLock, OnceLock};
 use std::{env, fs, iter};
 
 use rustc_ast as ast;
-use rustc_attr_parsing::validate_attr;
+use rustc_attr_parsing::{AttributeParser, ShouldEmit, validate_attr};
 use rustc_codegen_ssa::traits::CodegenBackend;
 use rustc_data_structures::jobserver::Proxy;
 use rustc_data_structures::steal::Steal;
@@ -16,6 +16,7 @@ use rustc_errors::timings::TimingSection;
 use rustc_expand::base::{ExtCtxt, LintStoreExpand};
 use rustc_feature::Features;
 use rustc_fs_util::try_canonicalize;
+use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def_id::{LOCAL_CRATE, StableCrateId, StableCrateIdMap};
 use rustc_hir::definitions::Definitions;
 use rustc_incremental::setup_dep_graph;
@@ -40,7 +41,7 @@ use rustc_span::{
     Symbol, sym,
 };
 use rustc_target::spec::PanicStrategy;
-use rustc_trait_selection::traits;
+use rustc_trait_selection::{solve, traits};
 use tracing::{info, instrument};
 
 use crate::interface::Compiler;
@@ -894,6 +895,7 @@ pub static DEFAULT_QUERY_PROVIDERS: LazyLock<Providers> = LazyLock::new(|| {
     rustc_hir_typeck::provide(providers);
     ty::provide(providers);
     traits::provide(providers);
+    solve::provide(providers);
     rustc_passes::provide(providers);
     rustc_traits::provide(providers);
     rustc_ty_utils::provide(providers);
@@ -1244,8 +1246,7 @@ pub fn get_crate_name(sess: &Session, krate_attrs: &[ast::Attribute]) -> Symbol 
     // in all code paths that require the crate name very early on, namely before
     // macro expansion.
 
-    let attr_crate_name =
-        validate_and_find_value_str_builtin_attr(sym::crate_name, sess, krate_attrs);
+    let attr_crate_name = parse_crate_name(sess, krate_attrs, ShouldEmit::EarlyFatal);
 
     let validate = |name, span| {
         rustc_session::output::validate_crate_name(sess, name, span);
@@ -1281,6 +1282,28 @@ pub fn get_crate_name(sess: &Session, krate_attrs: &[ast::Attribute]) -> Symbol 
     }
 
     sym::rust_out
+}
+
+pub(crate) fn parse_crate_name(
+    sess: &Session,
+    attrs: &[ast::Attribute],
+    emit_errors: ShouldEmit,
+) -> Option<(Symbol, Span)> {
+    let rustc_hir::Attribute::Parsed(AttributeKind::CrateName { name, name_span, .. }) =
+        AttributeParser::parse_limited_should_emit(
+            sess,
+            &attrs,
+            sym::crate_name,
+            DUMMY_SP,
+            rustc_ast::node_id::CRATE_NODE_ID,
+            None,
+            emit_errors,
+        )?
+    else {
+        unreachable!("crate_name is the only attr we could've parsed here");
+    };
+
+    Some((name, name_span))
 }
 
 fn get_recursion_limit(krate_attrs: &[ast::Attribute], sess: &Session) -> Limit {

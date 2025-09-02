@@ -4,12 +4,12 @@ use std::ops::{Deref, DerefMut};
 use std::sync::LazyLock;
 
 use private::Sealed;
-use rustc_ast::{AttrStyle, MetaItemLit, NodeId};
-use rustc_errors::Diagnostic;
-use rustc_feature::AttributeTemplate;
+use rustc_ast::{AttrStyle, CRATE_NODE_ID, MetaItemLit, NodeId};
+use rustc_errors::{Diag, Diagnostic, Level};
+use rustc_feature::{AttributeTemplate, AttributeType};
 use rustc_hir::attrs::AttributeKind;
 use rustc_hir::lints::{AttributeLint, AttributeLintKind};
-use rustc_hir::{AttrPath, HirId};
+use rustc_hir::{AttrPath, CRATE_HIR_ID, HirId};
 use rustc_session::Session;
 use rustc_span::{ErrorGuaranteed, Span, Symbol};
 
@@ -20,15 +20,17 @@ use crate::attributes::allow_unstable::{
 use crate::attributes::body::CoroutineParser;
 use crate::attributes::codegen_attrs::{
     ColdParser, CoverageParser, ExportNameParser, ForceTargetFeatureParser, NakedParser,
-    NoMangleParser, OptimizeParser, TargetFeatureParser, TrackCallerParser, UsedParser,
+    NoMangleParser, OptimizeParser, SanitizeParser, TargetFeatureParser, TrackCallerParser,
+    UsedParser,
 };
 use crate::attributes::confusables::ConfusablesParser;
+use crate::attributes::crate_level::CrateNameParser;
 use crate::attributes::deprecation::DeprecationParser;
 use crate::attributes::dummy::DummyParser;
 use crate::attributes::inline::{InlineParser, RustcForceInlineParser};
 use crate::attributes::link_attrs::{
     ExportStableParser, FfiConstParser, FfiPureParser, LinkNameParser, LinkOrdinalParser,
-    LinkSectionParser, LinkageParser, StdInternalSymbolParser,
+    LinkParser, LinkSectionParser, LinkageParser, StdInternalSymbolParser,
 };
 use crate::attributes::lint_helpers::{
     AsPtrParser, AutomaticallyDerivedParser, PassByValueParser, PubTransparentParser,
@@ -78,6 +80,7 @@ pub(super) struct GroupTypeInnerAccept<S: Stage> {
     pub(super) template: AttributeTemplate,
     pub(super) accept_fn: AcceptFn<S>,
     pub(super) allowed_targets: AllowedTargets,
+    pub(super) attribute_type: AttributeType,
 }
 
 type AcceptFn<S> =
@@ -127,6 +130,7 @@ macro_rules! attribute_parsers {
                                 })
                             }),
                             allowed_targets: <$names as crate::attributes::AttributeParser<$stage>>::ALLOWED_TARGETS,
+                            attribute_type: <$names as crate::attributes::AttributeParser<$stage>>::TYPE,
                         });
                     }
 
@@ -158,6 +162,7 @@ attribute_parsers!(
         Combine<AllowConstFnUnstableParser>,
         Combine<AllowInternalUnstableParser>,
         Combine<ForceTargetFeatureParser>,
+        Combine<LinkParser>,
         Combine<ReprParser>,
         Combine<TargetFeatureParser>,
         Combine<UnstableFeatureBoundParser>,
@@ -165,6 +170,7 @@ attribute_parsers!(
 
         // tidy-alphabetical-start
         Single<CoverageParser>,
+        Single<CrateNameParser>,
         Single<CustomMirParser>,
         Single<DeprecationParser>,
         Single<DummyParser>,
@@ -184,6 +190,7 @@ attribute_parsers!(
         Single<RustcLayoutScalarValidRangeEnd>,
         Single<RustcLayoutScalarValidRangeStart>,
         Single<RustcObjectLifetimeDefaultParser>,
+        Single<SanitizeParser>,
         Single<ShouldPanicParser>,
         Single<SkipDuringMethodDispatchParser>,
         Single<TransparencyParser>,
@@ -246,6 +253,8 @@ pub trait Stage: Sized + 'static + Sealed {
     ) -> ErrorGuaranteed;
 
     fn should_emit(&self) -> ShouldEmit;
+
+    fn id_is_crate_root(id: Self::Id) -> bool;
 }
 
 // allow because it's a sealed trait
@@ -261,15 +270,15 @@ impl Stage for Early {
         sess: &'sess Session,
         diag: impl for<'x> Diagnostic<'x>,
     ) -> ErrorGuaranteed {
-        if self.emit_errors.should_emit() {
-            sess.dcx().emit_err(diag)
-        } else {
-            sess.dcx().create_err(diag).delay_as_bug()
-        }
+        self.should_emit().emit_err(sess.dcx().create_err(diag))
     }
 
     fn should_emit(&self) -> ShouldEmit {
         self.emit_errors
+    }
+
+    fn id_is_crate_root(id: Self::Id) -> bool {
+        id == CRATE_NODE_ID
     }
 }
 
@@ -292,6 +301,10 @@ impl Stage for Late {
     fn should_emit(&self) -> ShouldEmit {
         ShouldEmit::ErrorsAndLints
     }
+
+    fn id_is_crate_root(id: Self::Id) -> bool {
+        id == CRATE_HIR_ID
+    }
 }
 
 /// used when parsing attributes for miscellaneous things *before* ast lowering
@@ -312,7 +325,9 @@ pub struct AcceptContext<'f, 'sess, S: Stage> {
     /// The span of the attribute currently being parsed
     pub(crate) attr_span: Span,
 
+    /// Whether it is an inner or outer attribute
     pub(crate) attr_style: AttrStyle,
+
     /// The expected structure of the attribute.
     ///
     /// Used in reporting errors to give a hint to users what the attribute *should* look like.
@@ -331,7 +346,7 @@ impl<'f, 'sess: 'f, S: Stage> SharedContext<'f, 'sess, S> {
     /// must be delayed until after HIR is built. This method will take care of the details of
     /// that.
     pub(crate) fn emit_lint(&mut self, lint: AttributeLintKind, span: Span) {
-        if !self.stage.should_emit().should_emit() {
+        if matches!(self.stage.should_emit(), ShouldEmit::Nothing) {
             return;
         }
         let id = self.target_id;
@@ -649,8 +664,13 @@ pub enum OmitDoc {
     Skip,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum ShouldEmit {
+    /// The operations will emit errors, and lints, and errors are fatal.
+    ///
+    /// Only relevant when early parsing, in late parsing equivalent to `ErrorsAndLints`.
+    /// Late parsing is never fatal, and instead tries to emit as many diagnostics as possible.
+    EarlyFatal,
     /// The operation will emit errors and lints.
     /// This is usually what you need.
     ErrorsAndLints,
@@ -660,10 +680,12 @@ pub enum ShouldEmit {
 }
 
 impl ShouldEmit {
-    pub fn should_emit(&self) -> bool {
+    pub(crate) fn emit_err(&self, diag: Diag<'_>) -> ErrorGuaranteed {
         match self {
-            ShouldEmit::ErrorsAndLints => true,
-            ShouldEmit::Nothing => false,
+            ShouldEmit::EarlyFatal if diag.level() == Level::DelayedBug => diag.emit(),
+            ShouldEmit::EarlyFatal => diag.upgrade_to_fatal().emit(),
+            ShouldEmit::ErrorsAndLints => diag.emit(),
+            ShouldEmit::Nothing => diag.delay_as_bug(),
         }
     }
 }

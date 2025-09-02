@@ -554,7 +554,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 return true;
             }
         } else if let (
-            ObligationCauseCode::BinOp { lhs_hir_id, rhs_hir_id: Some(rhs_hir_id), .. },
+            ObligationCauseCode::BinOp { lhs_hir_id, rhs_hir_id, .. },
             predicate,
         ) = code.peel_derives_with_predicate()
             && let Some(typeck_results) = &self.typeck_results
@@ -820,16 +820,20 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         if matches!(obligation.cause.code(), ObligationCauseCode::FunctionArg { .. })
             && obligation.cause.span.can_be_used_for_suggestions()
         {
+            let (span, sugg) = if let Some(snippet) =
+                self.tcx.sess.source_map().span_to_snippet(obligation.cause.span).ok()
+                && snippet.starts_with("|")
+            {
+                (obligation.cause.span, format!("({snippet})({args})"))
+            } else {
+                (obligation.cause.span.shrink_to_hi(), format!("({args})"))
+            };
+
             // When the obligation error has been ensured to have been caused by
             // an argument, the `obligation.cause.span` points at the expression
             // of the argument, so we can provide a suggestion. Otherwise, we give
             // a more general note.
-            err.span_suggestion_verbose(
-                obligation.cause.span.shrink_to_hi(),
-                msg,
-                format!("({args})"),
-                Applicability::HasPlaceholders,
-            );
+            err.span_suggestion_verbose(span, msg, sugg, Applicability::HasPlaceholders);
         } else if let DefIdOrName::DefId(def_id) = def_id_or_name {
             let name = match self.tcx.hir_get_if_local(def_id) {
                 Some(hir::Node::Expr(hir::Expr {
@@ -2797,6 +2801,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             | ObligationCauseCode::QuestionMark
             | ObligationCauseCode::CheckAssociatedTypeBounds { .. }
             | ObligationCauseCode::LetElse
+            | ObligationCauseCode::UnOp { .. }
             | ObligationCauseCode::BinOp { .. }
             | ObligationCauseCode::AscribeUserTypeProvePredicate(..)
             | ObligationCauseCode::AlwaysApplicableImpl
@@ -3835,9 +3840,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         trait_pred: ty::PolyTraitPredicate<'tcx>,
     ) {
         let rhs_span = match obligation.cause.code() {
-            ObligationCauseCode::BinOp { rhs_span: Some(span), rhs_is_lit, .. } if *rhs_is_lit => {
-                span
-            }
+            ObligationCauseCode::BinOp { rhs_span, rhs_is_lit, .. } if *rhs_is_lit => rhs_span,
             _ => return,
         };
         if let ty::Float(_) = trait_pred.skip_binder().self_ty().kind()
@@ -5104,16 +5107,12 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         let tcx = self.tcx;
         let predicate = predicate.upcast(tcx);
         match *cause_code {
-            ObligationCauseCode::BinOp {
-                lhs_hir_id,
-                rhs_hir_id: Some(rhs_hir_id),
-                rhs_span: Some(rhs_span),
-                ..
-            } if let Some(typeck_results) = &self.typeck_results
-                && let hir::Node::Expr(lhs) = tcx.hir_node(lhs_hir_id)
-                && let hir::Node::Expr(rhs) = tcx.hir_node(rhs_hir_id)
-                && let Some(lhs_ty) = typeck_results.expr_ty_opt(lhs)
-                && let Some(rhs_ty) = typeck_results.expr_ty_opt(rhs) =>
+            ObligationCauseCode::BinOp { lhs_hir_id, rhs_hir_id, rhs_span, .. }
+                if let Some(typeck_results) = &self.typeck_results
+                    && let hir::Node::Expr(lhs) = tcx.hir_node(lhs_hir_id)
+                    && let hir::Node::Expr(rhs) = tcx.hir_node(rhs_hir_id)
+                    && let Some(lhs_ty) = typeck_results.expr_ty_opt(lhs)
+                    && let Some(rhs_ty) = typeck_results.expr_ty_opt(rhs) =>
             {
                 if let Some(pred) = predicate.as_trait_clause()
                     && tcx.is_lang_item(pred.def_id(), LangItem::PartialEq)

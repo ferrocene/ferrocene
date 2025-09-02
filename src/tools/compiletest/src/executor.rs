@@ -1,5 +1,9 @@
 //! This module contains a reimplementation of the subset of libtest
 //! functionality needed by compiletest.
+//!
+//! FIXME(Zalathar): Much of this code was originally designed to mimic libtest
+//! as closely as possible, for ease of migration. Now that libtest is no longer
+//! used, we can potentially redesign things to be a better fit for compiletest.
 
 use std::borrow::Cow;
 use std::collections::HashMap;
@@ -9,6 +13,7 @@ use std::sync::{Arc, Mutex, mpsc};
 use std::{env, hint, io, mem, panic, thread};
 
 use crate::common::{Config, TestPaths};
+use crate::panic_hook;
 
 mod deadline;
 mod json;
@@ -116,6 +121,11 @@ fn run_test_inner(
     completion_sender: mpsc::Sender<TestCompletion>,
 ) {
     let is_capture = !runnable_test.config.nocapture;
+
+    // Install a panic-capture buffer for use by the custom panic hook.
+    if is_capture {
+        panic_hook::set_capture_buf(Default::default());
+    }
     let capture_buf = is_capture.then(|| Arc::new(Mutex::new(vec![])));
 
     if let Some(capture_buf) = &capture_buf {
@@ -124,6 +134,13 @@ fn run_test_inner(
 
     let panic_payload = panic::catch_unwind(move || runnable_test.run()).err();
 
+    if let Some(panic_buf) = panic_hook::take_capture_buf() {
+        let panic_buf = panic_buf.lock().unwrap_or_else(|e| e.into_inner());
+        // For now, forward any captured panic message to (captured) stderr.
+        // FIXME(Zalathar): Once we have our own output-capture buffer for
+        // non-panic output, append the panic message to that buffer instead.
+        eprint!("{panic_buf}");
+    }
     if is_capture {
         io::set_output_capture(None);
     }
@@ -207,7 +224,7 @@ impl TestOutcome {
 ///
 /// Adapted from `filter_tests` in libtest.
 ///
-/// FIXME(#139660): After the libtest dependency is removed, redesign the whole filtering system to
+/// FIXME(#139660): Now that libtest has been removed, redesign the whole filtering system to
 /// do a better job of understanding and filtering _paths_, instead of being tied to libtest's
 /// substring/exact matching behaviour.
 fn filter_tests(opts: &Config, tests: Vec<CollectedTest>) -> Vec<CollectedTest> {
@@ -249,7 +266,7 @@ fn get_concurrency() -> usize {
     }
 }
 
-/// Information needed to create a `test::TestDescAndFn`.
+/// Information that was historically needed to create a libtest `TestDescAndFn`.
 pub(crate) struct CollectedTest {
     pub(crate) desc: CollectedTestDesc,
     pub(crate) config: Arc<Config>,
@@ -257,7 +274,7 @@ pub(crate) struct CollectedTest {
     pub(crate) revision: Option<String>,
 }
 
-/// Information needed to create a `test::TestDesc`.
+/// Information that was historically needed to create a libtest `TestDesc`.
 pub(crate) struct CollectedTestDesc {
     pub(crate) name: String,
     pub(crate) ignore: bool,
@@ -272,18 +289,6 @@ pub enum ColorConfig {
     AutoColor,
     AlwaysColor,
     NeverColor,
-}
-
-/// Format of the test results output.
-#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
-pub enum OutputFormat {
-    /// Verbose output
-    Pretty,
-    /// Quiet output
-    #[default]
-    Terse,
-    /// JSON output
-    Json,
 }
 
 /// Whether test is expected to panic or not.

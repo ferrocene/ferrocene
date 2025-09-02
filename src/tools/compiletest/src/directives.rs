@@ -209,6 +209,8 @@ pub struct TestProps {
     pub dont_require_annotations: HashSet<ErrorKind>,
     /// Whether pretty printers should be disabled in gdb.
     pub disable_gdb_pretty_printers: bool,
+    /// Compare the output by lines, rather than as a single string.
+    pub compare_output_by_lines: bool,
 }
 
 mod directives {
@@ -259,8 +261,12 @@ mod directives {
     // This isn't a real directive, just one that is probably mistyped often
     pub const INCORRECT_COMPILER_FLAGS: &'static str = "compiler-flags";
     pub const DISABLE_GDB_PRETTY_PRINTERS: &'static str = "disable-gdb-pretty-printers";
+<<<<<<< HEAD
 
     pub const FERROCENE_EXECUTE_IN_TEMP: &'static str = "ferrocene-execute-in-temp";
+=======
+    pub const COMPARE_OUTPUT_BY_LINES: &'static str = "compare-output-by-lines";
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 impl TestProps {
@@ -319,6 +325,7 @@ impl TestProps {
             ferrocene_execute_in_temp: false,
             dont_require_annotations: Default::default(),
             disable_gdb_pretty_printers: false,
+            compare_output_by_lines: false,
         }
     }
 
@@ -678,11 +685,18 @@ impl TestProps {
                         DISABLE_GDB_PRETTY_PRINTERS,
                         &mut self.disable_gdb_pretty_printers,
                     );
+<<<<<<< HEAD
 
                     config.set_name_directive(
                         ln,
                         FERROCENE_EXECUTE_IN_TEMP,
                         &mut self.ferrocene_execute_in_temp,
+=======
+                    config.set_name_directive(
+                        ln,
+                        COMPARE_OUTPUT_BY_LINES,
+                        &mut self.compare_output_by_lines,
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
                     );
                 },
             );

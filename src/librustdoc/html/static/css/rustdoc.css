@@ -400,6 +400,10 @@ span.keyword, a.keyword {
 	color: var(--keyword-link-color);
 }
 
+span.attribute, a.attribute {
+	color: var(--attribute-link-color);
+}
+
 a {
 	color: var(--link-color);
 	text-decoration: none;
@@ -956,6 +960,40 @@ rustdoc-topbar {
 .example-wrap.digits-8 { --example-wrap-digits-count: 8ch; }
 .example-wrap.digits-9 { --example-wrap-digits-count: 9ch; }
 
+.example-wrap .expansion {
+	position: relative;
+	display: inline;
+}
+.example-wrap .expansion > input {
+	display: block;
+	position: absolute;
+	appearance: none;
+	content: '↕';
+	left: -20px;
+	top: 0;
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	cursor: pointer;
+	color: var(--main-color);
+	padding: 0 2px;
+	line-height: 20px;
+}
+.example-wrap .expansion > input::after {
+	content: "↕";
+}
+.example-wrap .expansion .expanded {
+	display: none;
+	color: var(--main-color);
+}
+.example-wrap .expansion > input:checked ~ .expanded,
+.example-wrap .expansion > input:checked ~ * .expanded {
+	display: inherit;
+}
+.example-wrap .expansion > input:checked ~ .original,
+.example-wrap .expansion > input:checked ~ * .original {
+	display: none;
+}
+
 .example-wrap [data-nosnippet] {
 	width: calc(var(--example-wrap-digits-count) + var(--line-number-padding) * 2);
 }
@@ -963,6 +1001,17 @@ rustdoc-topbar {
 	padding-left: calc(
 		var(--example-wrap-digits-count) + var(--line-number-padding) * 2
 		+ var(--line-number-right-margin));
+}
+.src .example-wrap .expansion [data-nosnippet] {
+	/* FIXME: Once <https://bugzilla.mozilla.org/show_bug.cgi?id=1949948> is solved, uncomment
+	   next line and remove the two other rules. */
+	/*left: calc((
+		var(--example-wrap-digits-count) + var(--line-number-padding) * 2
+		+ var(--line-number-right-margin)) * -1);*/
+	position: initial;
+	margin-left: calc((
+		var(--example-wrap-digits-count) + var(--line-number-padding) * 2
+		+ var(--line-number-right-margin)) * -1);
 }
 
 .example-wrap [data-nosnippet] {
@@ -978,9 +1027,6 @@ rustdoc-topbar {
 	position: absolute;
 	left: 0;
 }
-.example-wrap .line-highlighted[data-nosnippet] {
-	background-color: var(--src-line-number-highlighted-background-color);
-}
 .example-wrap pre > code {
 	position: relative;
 	display: block;
@@ -994,6 +1040,9 @@ rustdoc-topbar {
 }
 .example-wrap [data-nosnippet]:target {
 	border-right: none;
+}
+.example-wrap .line-highlighted[data-nosnippet] {
+	background-color: var(--src-line-number-highlighted-background-color);
 }
 .example-wrap.hide-lines [data-nosnippet] {
 	display: none;
@@ -3145,6 +3194,7 @@ by default.
 	--function-link-color: #ad7c37;
 	--macro-link-color: #068000;
 	--keyword-link-color: #3873ad;
+	--attribute-link-color: #3873ad;
 	--mod-link-color: #3873ad;
 	--link-color: #3873ad;
 	--sidebar-link-color: #356da4;
@@ -3249,6 +3299,7 @@ by default.
 	--function-link-color: #2bab63;
 	--macro-link-color: #09bd00;
 	--keyword-link-color: #d2991d;
+	--attribute-link-color: #d2991d;
 	--mod-link-color:  #d2991d;
 	--link-color: #d2991d;
 	--sidebar-link-color: #fdbf35;
@@ -3362,6 +3413,7 @@ Original by Dempfi (https://github.com/dempfi/ayu)
 	--function-link-color: #fdd687;
 	--macro-link-color: #a37acc;
 	--keyword-link-color: #39afd7;
+	--attribute-link-color: #39afd7;
 	--mod-link-color: #39afd7;
 	--link-color: #39afd7;
 	--sidebar-link-color: #53b1db;

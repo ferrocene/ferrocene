@@ -42,9 +42,9 @@ extern "C" {}
 
 #[rustc_layout_scalar_valid_range_start(0suffix)]
 //~^ ERROR invalid suffix `suffix` for number literal
-//~| ERROR malformed `rustc_layout_scalar_valid_range_start` attribute input
 struct S;
 
+<<<<<<< HEAD
 // ferrocene-annotations: fls_fqaffyrjob7v
 // Byte String Literals
 //
@@ -77,3 +77,10 @@ struct S;
 //
 // ferrocene-annotations: fls_e7zgqroy2qxn
 // Value Expressions
+=======
+impl S {
+    #[rustc_confusables("blah"suffix)]
+    //~^ ERROR suffixes on string literals are invalid
+    fn woof() { }
+}
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

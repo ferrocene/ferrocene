@@ -145,6 +145,10 @@ passes_doc_alias_start_end =
 passes_doc_attr_not_crate_level =
     `#![doc({$attr_name} = "...")]` isn't allowed as a crate-level attribute
 
+passes_doc_attribute_not_attribute =
+    nonexistent builtin attribute `{$attribute}` used in `#[doc(attribute = "...")]`
+    .help = only existing builtin attributes are allowed in core/std
+
 passes_doc_cfg_hide_takes_list =
     `#[doc(cfg_hide(...))]` takes a list of attributes
 
@@ -173,15 +177,15 @@ passes_doc_inline_only_use =
 passes_doc_invalid =
     invalid `doc` attribute
 
-passes_doc_keyword_empty_mod =
-    `#[doc(keyword = "...")]` should be used on empty modules
+passes_doc_keyword_attribute_empty_mod =
+    `#[doc({$attr_name} = "...")]` should be used on empty modules
+
+passes_doc_keyword_attribute_not_mod =
+    `#[doc({$attr_name} = "...")]` should be used on modules
 
 passes_doc_keyword_not_keyword =
     nonexistent keyword `{$keyword}` used in `#[doc(keyword = "...")]`
     .help = only existing keywords are allowed in core/std
-
-passes_doc_keyword_not_mod =
-    `#[doc(keyword = "...")]` should be used on modules
 
 passes_doc_keyword_only_impl =
     `#[doc(keyword = "...")]` should be used on impl blocks
@@ -462,8 +466,10 @@ passes_object_lifetime_err =
     {$repr}
 
 passes_outer_crate_level_attr =
-    crate-level attribute should be an inner attribute: add an exclamation mark: `#![foo]`
+    crate-level attribute should be an inner attribute
 
+passes_outer_crate_level_attr_suggestion =
+    add a `!`
 
 passes_panic_unwind_without_std =
     unwinding panics are not supported without std

@@ -256,6 +256,7 @@ pub mod task;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod vec;
 #[cfg(all(not(no_rc), not(no_sync), not(no_global_oom_handling)))]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub mod wtf8;
 
 #[doc(hidden)]

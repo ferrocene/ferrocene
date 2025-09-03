@@ -604,6 +604,11 @@ impl Std {
     ) -> Self {
         Std { build_compiler, target, format, crates: vec![] }
     }
+
+    pub(crate) fn with_crates(mut self, crates: Vec<String>) -> Self {
+        self.crates = crates;
+        self
+    }
 }
 
 impl Step for Std {

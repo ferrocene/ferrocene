@@ -4,6 +4,12 @@
 Ferrocene 25.08.0
 =================
 
+New features
+------------
+
+A subset of the ``core`` library has been certified to IEC-61508 SIL 2. For more information,
+see the :doc:`user-manual:core/index` and :doc:`core-certification:index`.
+
 Removed experimental features
 -----------------------------
 

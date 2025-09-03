@@ -17,6 +17,13 @@ tests = [
 targets = ["aarch64-apple-darwin",]
 reason = "TODO: to be investigated"
 
+[["tests/crashes"]]
+tests = [
+    "tests/crashes/120175.rs",
+]
+targets = ["aarch64-apple-darwin",]
+reason = "This test is fixed on upstream as of 7db184056909045802a66299947dc81c8e43e605"
+
 [["tests/rustdoc-js"]]
 tests = [
     "tests/rustdoc-js/generics.rs",

@@ -4,4 +4,4 @@
 Core Library API docs
 =====================
 
-Please find the API docs of the certified core library `here <./_static/api-docs/core/index.html>`_.
+Please find the API docs of the certified core library `here <../api-docs/core/index.html>`_.

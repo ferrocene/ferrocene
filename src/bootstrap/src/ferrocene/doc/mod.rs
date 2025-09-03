@@ -11,6 +11,7 @@ use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::path::{Path, PathBuf, absolute};
 
+use self::certified_api_docs::CertifiedApiDocs;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::run::GenerateCopyright;
 use crate::core::config::TargetSelection;
@@ -579,6 +580,9 @@ macro_rules! sphinx_books {
                         fresh_build: false,
                     });
                 )*
+
+                // Generate the API docs for the certified crates
+                builder.ensure(CertifiedApiDocs {target: self.target});
 
                 // Also regenerate the index file, so that the "Ferrocene documentation" link in
                 // the breadcrumbs doesn't break.

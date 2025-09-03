@@ -156,7 +156,7 @@ pub struct RustcDocs {
 impl Step for RustcDocs {
     type Output = GeneratedTarball;
 
-    const DEFAULT: bool = true;
+    const DEFAULT: bool = false;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

@@ -1141,28 +1141,18 @@ mod snapshot {
                 // Ferrocene annotation: Our snapshot differs from upstream, as our process
                 // is somewhat different.
                 // `--bless` does not fix these. You may need to manually update this shapsnot.
-                .render_steps(), @r"
-        [build] llvm <host>
-        [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-        [build] rustc 1 <host> -> rustc 2 <host>
-        [build] rustdoc 2 <host>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[]
-        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
-        [dist] mingw <host>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
-        [dist] rustc <host>
-        [dist] rustc 1 <host> -> std 1 <host>
-        [dist] src <>
+                .render_steps(), @r###"
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
         [doc] book (book) <host>
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
         [build] rustdoc 1 <host>
-        [doc] rustc 1 <host> -> standalone 2 <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 1 <host> -> error-index 2 <host>
@@ -1178,20 +1168,20 @@ mod snapshot {
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
-        [doc] rustc 1 <host> -> releases 2 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[]
         [dist] rustc 1 <host> -> json-docs 2 <host>
         [dist] mingw <host>
         [build] rustdoc 2 <host>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
         [dist] rustc 1 <host> -> std 1 <host>
         [dist] rustc 1 <host> -> rustc-dev 2 <host>
         [dist] src <>
         [dist] reproducible-artifacts <host>
-        "
+        "###
         );
     }
 
@@ -1211,7 +1201,10 @@ mod snapshot {
                 // Ferrocene annotation: Our snapshot differs from upstream, as our process
                 // is somewhat different.
                 // `--bless` does not fix these. You may need to manually update this shapsnot.
-            .render_steps(), @r"
+            .render_steps(), @r###"
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
+        [doc] unstable-book (book) <host>
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> LldWrapper 1 <host>
@@ -1223,7 +1216,6 @@ mod snapshot {
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
         [build] rustdoc 1 <host>
-        [doc] rustc 1 <host> -> standalone 2 <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 1 <host> -> LldWrapper 2 <host>
@@ -1242,15 +1234,15 @@ mod snapshot {
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
-        [doc] rustc 1 <host> -> releases 2 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[]
         [dist] rustc 1 <host> -> json-docs 2 <host>
         [dist] mingw <host>
         [build] rustdoc 2 <host>
         [build] rustc 1 <host> -> rust-analyzer-proc-macro-srv 2 <host>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
         [dist] rustc 1 <host> -> std 1 <host>
         [dist] rustc 1 <host> -> rustc-dev 2 <host>
@@ -1269,11 +1261,8 @@ mod snapshot {
         [build] rustc 1 <host> -> miri 2 <host>
         [build] rustc 1 <host> -> cargo-miri 2 <host>
         [dist] rustc 1 <host> -> miri 2 <host>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[]
-        [dist] rustc 2 <host> -> json-docs 3 <host>
-        [dist] rustc 1 <host> -> extended 2 <host>
         [dist] reproducible-artifacts <host>
-        ");
+        "###);
     }
 
     #[test]
@@ -1287,27 +1276,14 @@ mod snapshot {
                 // Ferrocene annotation: Our snapshot differs from upstream, as our process
                 // is somewhat different.
                 // `--bless` does not fix these. You may need to manually update this shapsnot.
-                .render_steps(), @r"
-        [build] llvm <host>
-        [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-        [build] rustc 1 <host> -> rustc 2 <host>
-        [build] rustdoc 2 <host>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[]
-        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
-        [doc] rustc 2 <host> -> std 2 <target1> crates=[]
-        [dist] mingw <host>
-        [dist] mingw <target1>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
-        [dist] rustc <host>
-        [dist] rustc 1 <host> -> std 1 <host>
-        [build] rustc 2 <host> -> std 2 <target1>
-        [dist] rustc 2 <host> -> std 2 <target1>
-        [dist] src <>
+                .render_steps(), @r###"
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
         [doc] unstable-book (book) <target1>
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
         [doc] book (book) <host>
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
@@ -1318,8 +1294,6 @@ mod snapshot {
         [doc] book/first-edition (book) <target1>
         [doc] book/second-edition (book) <target1>
         [doc] book/2018-edition (book) <target1>
-        [doc] rustc 1 <host> -> standalone 2 <host>
-        [doc] rustc 1 <host> -> standalone 2 <target1>
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [doc] rustc 1 <host> -> std 1 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 1 <host> -> rustc 2 <host>
@@ -1345,11 +1319,10 @@ mod snapshot {
         [doc] edition-guide (book) <target1>
         [doc] style-guide (book) <host>
         [doc] style-guide (book) <target1>
-        [doc] rustc 1 <host> -> releases 2 <host>
-        [doc] rustc 1 <host> -> releases 2 <target1>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
-        [dist] docs <target1>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[]
         [dist] rustc 1 <host> -> json-docs 2 <host>
         [doc] rustc 1 <host> -> std 1 <target1> crates=[]
@@ -1357,14 +1330,13 @@ mod snapshot {
         [dist] mingw <host>
         [dist] mingw <target1>
         [build] rustdoc 2 <host>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
         [dist] rustc 1 <host> -> std 1 <host>
         [dist] rustc 1 <host> -> std 1 <target1>
         [dist] rustc 1 <host> -> rustc-dev 2 <host>
         [dist] src <>
         [dist] reproducible-artifacts <host>
-        "
+        "###
         );
     }
 
@@ -1379,37 +1351,25 @@ mod snapshot {
                 // Ferrocene annotation: Our snapshot differs from upstream, as our process
                 // is somewhat different.
                 // `--bless` does not fix these. You may need to manually update this shapsnot.
-                .render_steps(), @r"
-        [build] llvm <host>
-        [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-        [build] rustc 1 <host> -> rustc 2 <host>
-        [build] rustdoc 2 <host>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[]
-        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
-        [dist] mingw <host>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
-        [dist] rustc <host>
-        [build] llvm <target1>
-        [build] rustc 1 <host> -> std 1 <target1>
-        [build] rustc 1 <host> -> rustc 2 <target1>
-        [build] rustdoc 2 <target1>
-        [dist] rustc <target1>
-        [dist] rustc 1 <host> -> std 1 <host>
-        [dist] src <>
+                .render_steps(), @r###"
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
         [doc] book (book) <host>
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
         [build] rustdoc 1 <host>
-        [doc] rustc 1 <host> -> standalone 2 <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 1 <host> -> error-index 2 <host>
         [doc] rustc 1 <host> -> error-index 2 <host>
+        [build] llvm <target1>
+        [build] rustc 1 <host> -> std 1 <target1>
+        [build] rustc 1 <host> -> rustc 2 <target1>
         [build] rustc 1 <host> -> error-index 2 <target1>
         [doc] rustc 1 <host> -> error-index 2 <target1>
         [doc] nomicon (book) <host>
@@ -1424,14 +1384,14 @@ mod snapshot {
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
-        [doc] rustc 1 <host> -> releases 2 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[]
         [dist] rustc 1 <host> -> json-docs 2 <host>
         [dist] mingw <host>
         [build] rustdoc 2 <host>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
         [build] rustdoc 2 <target1>
         [dist] rustc <target1>
@@ -1441,7 +1401,7 @@ mod snapshot {
         [dist] src <>
         [dist] reproducible-artifacts <host>
         [dist] reproducible-artifacts <target1>
-        "
+        "###
         );
     }
 
@@ -1456,47 +1416,31 @@ mod snapshot {
                 // Ferrocene annotation: Our snapshot differs from upstream, as our process
                 // is somewhat different.
                 // `--bless` does not fix these. You may need to manually update this shapsnot.
-                .render_steps(), @r"
-        [build] llvm <host>
-        [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-        [build] rustc 1 <host> -> rustc 2 <host>
-        [build] rustdoc 2 <host>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[]
-        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
-        [doc] rustc 2 <host> -> std 2 <target1> crates=[]
-        [dist] mingw <host>
-        [dist] mingw <target1>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
-        [dist] rustc <host>
-        [build] llvm <target1>
-        [build] rustc 1 <host> -> std 1 <target1>
-        [build] rustc 1 <host> -> rustc 2 <target1>
-        [build] rustdoc 2 <target1>
-        [dist] rustc <target1>
-        [dist] rustc 1 <host> -> std 1 <host>
-        [dist] rustc 1 <host> -> std 1 <target1>
-        [dist] src <>
+                .render_steps(), @r###"
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
         [doc] unstable-book (book) <target1>
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
         [doc] book (book) <host>
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
         [build] rustdoc 1 <host>
+        [build] rustc 1 <host> -> std 1 <target1>
         [doc] book (book) <target1>
         [doc] book/first-edition (book) <target1>
         [doc] book/second-edition (book) <target1>
         [doc] book/2018-edition (book) <target1>
-        [doc] rustc 1 <host> -> standalone 2 <host>
-        [doc] rustc 1 <host> -> standalone 2 <target1>
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [doc] rustc 1 <host> -> std 1 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 1 <host> -> error-index 2 <host>
         [doc] rustc 1 <host> -> error-index 2 <host>
+        [build] llvm <target1>
+        [build] rustc 1 <host> -> rustc 2 <target1>
         [build] rustc 1 <host> -> error-index 2 <target1>
         [doc] rustc 1 <host> -> error-index 2 <target1>
         [doc] nomicon (book) <host>
@@ -1520,11 +1464,10 @@ mod snapshot {
         [doc] edition-guide (book) <target1>
         [doc] style-guide (book) <host>
         [doc] style-guide (book) <target1>
-        [doc] rustc 1 <host> -> releases 2 <host>
-        [doc] rustc 1 <host> -> releases 2 <target1>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
-        [dist] docs <target1>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[]
         [dist] rustc 1 <host> -> json-docs 2 <host>
         [doc] rustc 1 <host> -> std 1 <target1> crates=[]
@@ -1532,7 +1475,6 @@ mod snapshot {
         [dist] mingw <host>
         [dist] mingw <target1>
         [build] rustdoc 2 <host>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
         [build] rustdoc 2 <target1>
         [dist] rustc <target1>
@@ -1543,7 +1485,7 @@ mod snapshot {
         [dist] src <>
         [dist] reproducible-artifacts <host>
         [dist] reproducible-artifacts <target1>
-        "
+        "###
         );
     }
 
@@ -1558,29 +1500,17 @@ mod snapshot {
                 // Ferrocene annotation: Our snapshot differs from upstream, as our process
                 // is somewhat different.
                 // `--bless` does not fix these. You may need to manually update this shapsnot.
-                .render_steps(), @r"
+                .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-        [doc] rustc 1 <host> -> standalone 2 <target1>
-        [doc] rustc 1 <host> -> std 1 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
-        [doc] nomicon (book) <target1>
-        [doc] rustc 1 <host> -> reference (book) 2 <target1>
-        [doc] rustdoc (book) <target1>
-        [doc] rust-by-example (book) <target1>
-        [doc] cargo (book) <target1>
-        [doc] clippy (book) <target1>
-        [doc] embedded-book (book) <target1>
-        [doc] edition-guide (book) <target1>
-        [doc] style-guide (book) <target1>
-        [doc] rustc 1 <host> -> releases 2 <target1>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <target1>
+        [build] rustdoc 1 <host>
         [doc] rustc 1 <host> -> std 1 <target1> crates=[]
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] rustc 1 <host> -> json-docs 2 <target1>
         [dist] mingw <target1>
+        [build] rustc 1 <host> -> std 1 <target1>
         [dist] rustc 1 <host> -> std 1 <target1>
-        ");
+        "###);
     }
 
     #[test]
@@ -1595,15 +1525,22 @@ mod snapshot {
                 // Ferrocene annotation: Our snapshot differs from upstream, as our process
                 // is somewhat different.
                 // `--bless` does not fix these. You may need to manually update this shapsnot.
-                .render_steps(), @r"
+                .render_steps(), @r###"
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
+        [doc] unstable-book (book) <target1>
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> WasmComponentLd 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-        [doc] rustc 1 <host> -> standalone 2 <target1>
+        [build] rustc 1 <host> -> std 1 <target1>
+        [doc] book (book) <target1>
+        [doc] book/first-edition (book) <target1>
+        [doc] book/second-edition (book) <target1>
+        [doc] book/2018-edition (book) <target1>
+        [build] rustdoc 1 <host>
         [doc] rustc 1 <host> -> std 1 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] llvm <target1>
-        [build] rustc 1 <host> -> std 1 <target1>
+        [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <target1>
         [build] rustc 1 <host> -> WasmComponentLd 2 <target1>
         [build] rustc 1 <host> -> error-index 2 <target1>
@@ -1619,15 +1556,17 @@ mod snapshot {
         [doc] embedded-book (book) <target1>
         [doc] edition-guide (book) <target1>
         [doc] style-guide (book) <target1>
-        [doc] rustc 1 <host> -> releases 2 <target1>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <target1>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        [build] rustc 1 <host> -> WasmComponentLd 2 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [doc] rustc 1 <host> -> std 1 <target1> crates=[]
         [dist] rustc 1 <host> -> json-docs 2 <target1>
         [dist] mingw <target1>
         [build] rustdoc 2 <target1>
         [build] rustc 1 <host> -> rust-analyzer-proc-macro-srv 2 <target1>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <target1>
         [dist] rustc 1 <host> -> std 1 <target1>
         [dist] rustc 1 <host> -> rustc-dev 2 <target1>
@@ -1647,11 +1586,8 @@ mod snapshot {
         [build] rustc 1 <host> -> cargo-miri 2 <target1>
         [dist] rustc 1 <host> -> miri 2 <target1>
         [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <target1>
-        [doc] rustc 2 <target1> -> std 2 <target1> crates=[]
-        [dist] rustc 2 <target1> -> json-docs 3 <target1>
-        [dist] rustc 1 <host> -> extended 2 <target1>
         [dist] reproducible-artifacts <target1>
-        ");
+        "###);
     }
 
     /// Simulates e.g. the powerpc64 builder, which is fully cross-compiled from x64, but it does
@@ -1684,7 +1620,9 @@ mod snapshot {
         });
 
         insta::assert_snapshot!(
-                steps.render(), @r"
+                steps.render(), @r###"
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] mingw <target1>
         [build] llvm <host>
         [build] llvm <target1>
@@ -1696,8 +1634,6 @@ mod snapshot {
         [build] rustc 1 <host> -> WasmComponentLd 2 <target1>
         [build] rustdoc 2 <target1>
         [build] rustc 1 <host> -> rust-analyzer-proc-macro-srv 2 <target1>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
         [dist] rustc <target1>
         [dist] rustc 1 <host> -> std 1 <target1>
         [dist] rustc 1 <host> -> rustc-dev 2 <target1>
@@ -1717,9 +1653,8 @@ mod snapshot {
         [build] rustc 1 <host> -> cargo-miri 2 <target1>
         [dist] rustc 1 <host> -> miri 2 <target1>
         [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <target1>
-        [dist] rustc 1 <host> -> extended 2 <target1>
         [dist] reproducible-artifacts <target1>
-        ");
+        "###);
     }
 
     /// Enable dist cranelift tarball by default with `x dist` if cranelift is enabled in
@@ -1731,31 +1666,19 @@ mod snapshot {
             ctx
                 .config("dist")
                 .args(&["--set", "rust.codegen-backends=['llvm', 'cranelift']"])
-                .render_steps(), @r"
+                .render_steps(), @r###"
+        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
+        [build] rustc 0 <host> -> Rustbook 1 <host>
+        [doc] unstable-book (book) <host>
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> rustc_codegen_cranelift 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
-        [build] rustc 1 <host> -> rustc 2 <host>
-        [build] rustc 1 <host> -> rustc_codegen_cranelift 2 <host>
-        [build] rustdoc 2 <host>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[]
-        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
-        [dist] mingw <host>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
-        [dist] rustc <host>
-        [dist] rustc 1 <host> -> rustc_codegen_cranelift 2 <host>
-        [dist] rustc 1 <host> -> std 1 <host>
-        [dist] src <>
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <host>
         [doc] book (book) <host>
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
         [build] rustdoc 1 <host>
-        [doc] rustc 1 <host> -> standalone 2 <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 1 <host> -> rustc_codegen_cranelift 2 <host>
@@ -1772,21 +1695,21 @@ mod snapshot {
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
-        [doc] rustc 1 <host> -> releases 2 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[]
         [dist] rustc 1 <host> -> json-docs 2 <host>
         [dist] mingw <host>
         [build] rustdoc 2 <host>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
         [dist] rustc <host>
         [dist] rustc 1 <host> -> rustc_codegen_cranelift 2 <host>
         [dist] rustc 1 <host> -> std 1 <host>
         [dist] rustc 1 <host> -> rustc-dev 2 <host>
         [dist] src <>
         [dist] reproducible-artifacts <host>
-        ");
+        "###);
     }
 
     #[test]
@@ -1796,10 +1719,10 @@ mod snapshot {
             ctx
                 .config("dist")
                 .path("bootstrap")
-                .render_steps(), @r"
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
+                .render_steps(), @r###"
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] bootstrap <host>
-        ");
+        "###);
     }
 
     #[test]
@@ -1811,11 +1734,11 @@ mod snapshot {
                 .stage(0)
                 .targets(&[TEST_TRIPLE_1])
                 .args(&["--set", "build.local-rebuild=true"])
-                .render_steps(), @r"
+                .render_steps(), @r###"
         [build] rustc 0 <host> -> std 0 <target1>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
         [dist] rustc 0 <host> -> std 0 <target1>
-        ");
+        "###);
     }
 
     #[test]
@@ -2141,10 +2064,10 @@ mod snapshot {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
             prepare_test_config(&ctx)
-                .render_steps(), @r"
+                .render_steps(), @r###"
+        [build] rustdoc 0 <host>
         [build] rustc 0 <host> -> Tidy 1 <host>
         [test] tidy <>
-        [build] rustdoc 0 <host>
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
@@ -2178,7 +2101,6 @@ mod snapshot {
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
-        [doc] rustc 0 <host> -> standalone 1 <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 0 <host> -> error-index 1 <host>
         [doc] rustc 0 <host> -> error-index 1 <host>
@@ -2193,7 +2115,8 @@ mod snapshot {
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
-        [doc] rustc 0 <host> -> releases 1 <host>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [build] rustc 0 <host> -> Linkchecker 1 <host>
         [test] link-check <host>
         [test] tier-check <host>
@@ -2210,7 +2133,7 @@ mod snapshot {
         [build] rustc 0 <host> -> RunMakeSupport 1 <host>
         [build] rustc 1 <host> -> cargo 2 <host>
         [test] RunMake <host>
-        ");
+        "###);
     }
 
     #[test]
@@ -2219,10 +2142,10 @@ mod snapshot {
         insta::assert_snapshot!(
             prepare_test_config(&ctx)
                 .stage(2)
-                .render_steps(), @r"
+                .render_steps(), @r###"
+        [build] rustdoc 0 <host>
         [build] rustc 0 <host> -> Tidy 1 <host>
         [test] tidy <>
-        [build] rustdoc 0 <host>
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
@@ -2259,7 +2182,6 @@ mod snapshot {
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
-        [doc] rustc 1 <host> -> standalone 2 <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 1 <host> -> error-index 2 <host>
         [doc] rustc 1 <host> -> error-index 2 <host>
@@ -2274,7 +2196,8 @@ mod snapshot {
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
-        [doc] rustc 1 <host> -> releases 2 <host>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [build] rustc 0 <host> -> Linkchecker 1 <host>
         [test] link-check <host>
         [test] tier-check <host>
@@ -2293,7 +2216,7 @@ mod snapshot {
         [build] rustc 0 <host> -> RunMakeSupport 1 <host>
         [build] rustc 2 <host> -> cargo 3 <host>
         [test] RunMake <host>
-        ");
+        "###);
     }
 
     #[test]
@@ -2759,23 +2682,45 @@ mod snapshot {
                     "--set", &format!("install.sysconfdir={}", ctx.dir().display()).replace("\\", "/"),
                     "--set", "build.extended=true"
                 ])
-                .render_steps(), @r"
+                .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> WasmComponentLd 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        [build] rustc 1 <host> -> WasmComponentLd 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
+        [dist] rustc 2 <host> -> std 2 <host>
+        [build] rustdoc 2 <host>
+        [build] rustc 1 <host> -> rust-analyzer-proc-macro-srv 2 <host>
+        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
+        [dist] rustc <host>
+        [build] rustc 2 <host> -> cargo 3 <host>
+        [dist] rustc 2 <host> -> cargo 3 <host>
+        [build] rustc 2 <host> -> rustc 3 <host>
+        [build] rustc 2 <host> -> WasmComponentLd 3 <host>
+        [build] rustc 2 <host> -> rust-analyzer 3 <host>
+        [dist] rustc 2 <host> -> rust-analyzer 3 <host>
+        [build] rustc 2 <host> -> rustfmt 3 <host>
+        [build] rustc 2 <host> -> cargo-fmt 3 <host>
+        [dist] rustc 2 <host> -> rustfmt 3 <host>
+        [build] rustc 2 <host> -> clippy-driver 3 <host>
+        [build] rustc 2 <host> -> cargo-clippy 3 <host>
+        [dist] rustc 2 <host> -> clippy 3 <host>
+        [build] rustc 2 <host> -> miri 3 <host>
+        [build] rustc 2 <host> -> cargo-miri 3 <host>
+        [dist] rustc 2 <host> -> miri 3 <host>
+        [dist] src <>
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
-        [build] rustc 1 <host> -> std 1 <host>
         [doc] book (book) <host>
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
         [build] rustdoc 1 <host>
-        [doc] rustc 1 <host> -> standalone 2 <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
-        [build] rustc 1 <host> -> rustc 2 <host>
-        [build] rustc 1 <host> -> WasmComponentLd 2 <host>
         [build] rustc 1 <host> -> error-index 2 <host>
         [doc] rustc 1 <host> -> error-index 2 <host>
         [doc] nomicon (book) <host>
@@ -2789,29 +2734,9 @@ mod snapshot {
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
-        [doc] rustc 1 <host> -> releases 2 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        [dist] docs <host>
-        [dist] rustc 1 <host> -> std 1 <host>
-        [build] rustdoc 2 <host>
-        [build] rustc 1 <host> -> rust-analyzer-proc-macro-srv 2 <host>
-        [build] rustc 0 <host> -> GenerateCopyright 1 <host>
-        [dist] rustc <host>
-        [build] rustc 1 <host> -> cargo 2 <host>
-        [dist] rustc 1 <host> -> cargo 2 <host>
-        [build] rustc 1 <host> -> rust-analyzer 2 <host>
-        [dist] rustc 1 <host> -> rust-analyzer 2 <host>
-        [build] rustc 1 <host> -> rustfmt 2 <host>
-        [build] rustc 1 <host> -> cargo-fmt 2 <host>
-        [dist] rustc 1 <host> -> rustfmt 2 <host>
-        [build] rustc 1 <host> -> clippy-driver 2 <host>
-        [build] rustc 1 <host> -> cargo-clippy 2 <host>
-        [dist] rustc 1 <host> -> clippy 2 <host>
-        [build] rustc 1 <host> -> miri 2 <host>
-        [build] rustc 1 <host> -> cargo-miri 2 <host>
-        [dist] rustc 1 <host> -> miri 2 <host>
-        [dist] src <>
-        ");
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        "###);
     }
 
     // Check that `x run miri --target FOO` actually builds miri for the host.

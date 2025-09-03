@@ -14,9 +14,10 @@ use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::run::GenerateCopyright;
 use crate::core::config::TargetSelection;
 use crate::ferrocene::code_coverage::CoverageOutcomesDir;
+use crate::ferrocene::doc::certified_api_docs::CertifiedApiDocs;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
-use crate::ferrocene::uv_command;
+use crate::ferrocene::{target_to_certified_target, uv_command};
 use crate::utils::exec::command;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
 use crate::{FileType, t};
@@ -43,7 +44,17 @@ impl Step for Docs {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         // Build all of the documentation.
         builder.run_default_doc_steps();
-        let doc_out = builder.out.join(&self.target.triple).join("doc");
+        let doc_out = builder.doc_out(self.target);
+
+        // Build the documentation for certified crates
+        //
+        // NOTE: must be called before .add_directory, since it places the
+        // certified API docs in the doc_out
+        if target_to_certified_target(&self.target).is_some() {
+            builder.ensure(CertifiedApiDocs { target: self.target });
+        } else {
+            builder.info(&format!("skipping Build certified-core-docs ({})", self.target));
+        }
 
         let mut subsetter = Subsetter::new(builder, "ferrocene-docs", "share/doc/ferrocene/html");
         subsetter.add_directory(&doc_out, &doc_out);

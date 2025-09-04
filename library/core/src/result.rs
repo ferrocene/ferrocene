@@ -1042,11 +1042,12 @@ impl<T, E> Result<T, E> {
     /// ```
     #[inline]
     #[stable(feature = "inner_deref", since = "1.47.0")]
-    pub fn as_deref(&self) -> Result<&T::Target, &E>
+    #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+    pub const fn as_deref(&self) -> Result<&T::Target, &E>
     where
-        T: Deref,
+        T: [const] Deref,
     {
-        self.as_ref().map(|t| t.deref())
+        self.as_ref().map(Deref::deref)
     }
 
     /// Converts from `Result<T, E>` (or `&mut Result<T, E>`) to `Result<&mut <T as DerefMut>::Target, &mut E>`.
@@ -1069,11 +1070,12 @@ impl<T, E> Result<T, E> {
     /// ```
     #[inline]
     #[stable(feature = "inner_deref", since = "1.47.0")]
-    pub fn as_deref_mut(&mut self) -> Result<&mut T::Target, &mut E>
+    #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+    pub const fn as_deref_mut(&mut self) -> Result<&mut T::Target, &mut E>
     where
-        T: DerefMut,
+        T: [const] DerefMut,
     {
-        self.as_mut().map(|t| t.deref_mut())
+        self.as_mut().map(DerefMut::deref_mut)
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -1367,9 +1369,13 @@ impl<T, E> Result<T, E> {
     #[unstable(feature = "unwrap_infallible", reason = "newly added", issue = "61695")]
     #[inline]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+<<<<<<< HEAD
     #[rustc_const_unstable(feature = "const_try", issue = "74935")]
     // blocked on !
     #[cfg(not(feature = "ferrocene_certified"))]
+=======
+    #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub const fn into_ok(self) -> T
     where
         E: [const] Into<!>,
@@ -1406,9 +1412,13 @@ impl<T, E> Result<T, E> {
     #[unstable(feature = "unwrap_infallible", reason = "newly added", issue = "61695")]
     #[inline]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
+<<<<<<< HEAD
     #[rustc_const_unstable(feature = "const_try", issue = "74935")]
     // blocked on !
     #[cfg(not(feature = "ferrocene_certified"))]
+=======
+    #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub const fn into_err(self) -> E
     where
         T: [const] Into<!>,

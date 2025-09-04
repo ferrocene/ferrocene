@@ -60,7 +60,6 @@ Another implementation could be uncertified, e.g. ``impl Add<i64> for i64``. Thi
 Therefore, the source code has to be reviewed for all syntax that denotes an operator, and it has to be verified that the implementation of that operator, for that combination of types, is certified.
 
 .. code-block:: rust
-  :linenos:
 
   // this is in the core library:
 

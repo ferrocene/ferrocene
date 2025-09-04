@@ -188,13 +188,9 @@ impl fmt::Debug for Alignment {
 }
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl TryFrom<NonZero<usize>> for Alignment {
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const TryFrom<NonZero<usize>> for Alignment {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     type Error = num::TryFromIntError;
 
     #[inline]
@@ -204,13 +200,9 @@ impl const TryFrom<NonZero<usize>> for Alignment {
 }
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl TryFrom<usize> for Alignment {
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const TryFrom<usize> for Alignment {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     type Error = num::TryFromIntError;
 
     #[inline]
@@ -220,12 +212,8 @@ impl const TryFrom<usize> for Alignment {
 }
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-<<<<<<< HEAD
-#[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const From<Alignment> for NonZero<usize> {
     #[inline]
     fn from(align: Alignment) -> NonZero<usize> {
@@ -234,12 +222,8 @@ impl const From<Alignment> for NonZero<usize> {
 }
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-<<<<<<< HEAD
-#[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const From<Alignment> for usize {
     #[inline]
     fn from(align: Alignment) -> usize {

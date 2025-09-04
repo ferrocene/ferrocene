@@ -791,13 +791,9 @@ impl Builder<'_> {
                 "binary-dep-depinfo,proc_macro_span,proc_macro_span_shrink,proc_macro_diagnostic"
                     .to_string()
             }
-<<<<<<< HEAD
-            Mode::Std | Mode::Rustc | Mode::Codegen | Mode::ToolRustc => String::new(),
+            Mode::Std | Mode::Rustc | Mode::Codegen | Mode::ToolRustcPrivate |
             // for Ferrocene
             Mode::ToolCustom { .. } => String::new(),
-=======
-            Mode::Std | Mode::Rustc | Mode::Codegen | Mode::ToolRustcPrivate => String::new(),
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         };
 
         cargo.arg("-j").arg(self.jobs().to_string());
@@ -951,17 +947,11 @@ impl Builder<'_> {
             match mode {
                 Mode::Std => self.config.std_debug_assertions,
                 Mode::Rustc | Mode::Codegen => self.config.rustc_debug_assertions,
-<<<<<<< HEAD
                 Mode::ToolBootstrap
                 | Mode::ToolStd
-                | Mode::ToolRustc
+                | Mode::ToolRustcPrivate
                 | Mode::ToolTarget
                 | Mode::ToolCustom { .. } => self.config.tools_debug_assertions,
-=======
-                Mode::ToolBootstrap | Mode::ToolStd | Mode::ToolRustcPrivate | Mode::ToolTarget => {
-                    self.config.tools_debug_assertions
-                }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             }
             .to_string(),
         );

@@ -2332,33 +2332,19 @@ HELP: You can add it into `bootstrap.toml` in `rust.codegen-backends = [{name:?}
                 mode: mode.into(),
                 compare_mode: None,
                 target: self.target.triple.to_string(),
-<<<<<<< HEAD
-                host: self.compiler.host.triple.to_string(),
-                stage: self.compiler.stage,
-                ferrocene_variant: variant.for_metrics(),
-=======
                 host: self.test_compiler.host.triple.to_string(),
                 stage: self.test_compiler.stage,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+                ferrocene_variant: variant.for_metrics(),
             },
             builder,
         );
 
-<<<<<<< HEAD
         if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
-            measure_coverage(builder, &mut cmd, compiler, target, coverage_for);
+            measure_coverage(builder, &mut cmd, test_compiler, target, coverage_for);
         }
 
-        let _group = builder.msg(
-            Kind::Test,
-            format!("compiletest suite={suite} mode={mode}"),
-            // FIXME: compiletest sometimes behaves as ToolStd, we could expose that difference here
-            Mode::ToolBootstrap,
-            compiler,
-=======
         let _group = builder.msg_test(
             format!("with compiletest suite={suite} mode={mode}"),
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             target,
             test_compiler.stage,
         );
@@ -2374,14 +2360,9 @@ HELP: You can add it into `bootstrap.toml` in `rust.codegen-backends = [{name:?}
                     mode: mode.into(),
                     compare_mode: Some(compare_mode.into()),
                     target: self.target.triple.to_string(),
-<<<<<<< HEAD
-                    host: self.compiler.host.triple.to_string(),
-                    stage: self.compiler.stage,
-                    ferrocene_variant: variant.for_metrics(),
-=======
                     host: self.test_compiler.host.triple.to_string(),
                     stage: self.test_compiler.stage,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+                    ferrocene_variant: variant.for_metrics(),
                 },
                 builder,
             );
@@ -3050,7 +3031,7 @@ impl Step for Crate {
             crates.push("alloctests".to_owned());
         }
 
-<<<<<<< HEAD
+        // Ferrocene annotation:
         // The current way build metrics are gathered means there is a single test_suite node
         // emitted for every execution of this step. As we want crate granularity in the metrics,
         // when CI passes the --ferrocene-test-one-crate-per-cargo-call flag, we will split this
@@ -3069,19 +3050,8 @@ impl Step for Crate {
             // Avoid panicking because we are not executing the Cargo we prepared.
             cargo.into_cmd().mark_as_executed();
         } else {
-            run_cargo_test(
-                cargo,
-                &[],
-                &crates,
-                &*crate_description(&self.crates),
-                target,
-                builder,
-                mode,
-            );
+            run_cargo_test(cargo, &[], &crates, &*crate_description(&self.crates), target, builder);
         }
-=======
-        run_cargo_test(cargo, &[], &crates, &*crate_description(&self.crates), target, builder);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 }
 

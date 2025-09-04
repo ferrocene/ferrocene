@@ -809,12 +809,8 @@ impl<T> const From<T> for T {
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[rustc_reservation_impl = "permitting this impl would forbid us from adding \
                             `impl<T> From<!> for T` later; see rust-lang/rust#64715 for details"]
-<<<<<<< HEAD
-#[rustc_const_unstable(feature = "const_from", issue = "143773")]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const From<!> for T {
     fn from(t: !) -> T {
         t
@@ -857,12 +853,8 @@ where
 ////////////////////////////////////////////////////////////////////////////////
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-#[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const AsRef<[T]> for [T] {
     #[inline(always)]
     fn as_ref(&self) -> &[T] {
@@ -880,12 +872,8 @@ impl<T> const AsMut<[T]> for [T] {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-#[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const AsRef<str> for str {
     #[inline(always)]
     fn as_ref(&self) -> &str {
@@ -1013,12 +1001,8 @@ impl Ord for Infallible {
 }
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
-<<<<<<< HEAD
-#[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const From<!> for Infallible {
     #[inline]
     fn from(x: !) -> Self {

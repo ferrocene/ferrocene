@@ -411,13 +411,9 @@ impl<T: Ord + Copy> Ord for Cell<T> {
 }
 
 #[stable(feature = "cell_from", since = "1.12.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T> From<T> for Cell<T> {
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const From<T> for Cell<T> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     /// Creates a new `Cell<T>` containing the given value.
     fn from(t: T) -> Cell<T> {
         Cell::new(t)
@@ -1459,13 +1455,9 @@ impl<T: ?Sized + Ord> Ord for RefCell<T> {
 }
 
 #[stable(feature = "cell_from", since = "1.12.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T> From<T> for RefCell<T> {
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const From<T> for RefCell<T> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     /// Creates a new `RefCell<T>` containing the given value.
     fn from(t: T) -> RefCell<T> {
         RefCell::new(t)
@@ -1552,12 +1544,8 @@ pub struct Ref<'b, T: ?Sized + 'b> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-#[rustc_const_unstable(feature = "const_deref", issue = "88955")]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> const Deref for Ref<'_, T> {
     type Target = T;
 
@@ -2050,12 +2038,8 @@ pub struct RefMut<'b, T: ?Sized + 'b> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-#[rustc_const_unstable(feature = "const_deref", issue = "88955")]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> const Deref for RefMut<'_, T> {
     type Target = T;
 
@@ -2067,12 +2051,8 @@ impl<T: ?Sized> const Deref for RefMut<'_, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-#[rustc_const_unstable(feature = "const_deref", issue = "88955")]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T: ?Sized> const DerefMut for RefMut<'_, T> {
     #[inline]
     fn deref_mut(&mut self) -> &mut T {
@@ -2537,13 +2517,9 @@ impl<T: [const] Default> const Default for UnsafeCell<T> {
 }
 
 #[stable(feature = "cell_from", since = "1.12.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T> From<T> for UnsafeCell<T> {
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const From<T> for UnsafeCell<T> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     /// Creates a new `UnsafeCell<T>` containing the given value.
     fn from(t: T) -> UnsafeCell<T> {
         UnsafeCell::new(t)
@@ -2655,13 +2631,9 @@ impl<T: [const] Default> const Default for SyncUnsafeCell<T> {
 }
 
 #[unstable(feature = "sync_unsafe_cell", issue = "95439")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T> From<T> for SyncUnsafeCell<T> {
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const From<T> for SyncUnsafeCell<T> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     /// Creates a new `SyncUnsafeCell<T>` containing the given value.
     fn from(t: T) -> SyncUnsafeCell<T> {
         SyncUnsafeCell::new(t)

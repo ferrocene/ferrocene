@@ -159,12 +159,8 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(f16))]
 #![feature(freeze_impls)]
 #![feature(fundamental)]
-<<<<<<< HEAD
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(funnel_shifts))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(if_let_guard))]
-=======
-#![feature(funnel_shifts)]
-#![feature(if_let_guard)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(intra_doc_pointers)]
 #![feature(intrinsics)]
 #![feature(lang_items)]

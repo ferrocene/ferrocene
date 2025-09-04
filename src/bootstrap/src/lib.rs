@@ -344,33 +344,24 @@ pub enum Mode {
     /// Build a tool which uses the `rustc_private` mechanism, and thus
     /// the locally built rustc rlib artifacts,
     /// placing the output in the "stageN-tools" directory. This is used for
-<<<<<<< HEAD
-    /// anything that needs a fully functional rustc, such as rustdoc, clippy,
-    /// cargo, rustfmt, miri, etc.
-    ToolRustc,
-
-    ToolCustom {
-        name: &'static str,
-    },
-=======
     /// everything that links to rustc as a library, such as rustdoc, clippy,
     /// rustfmt, miri, etc.
     ToolRustcPrivate,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+    // Ferrocene addition
+    ToolCustom {
+        name: &'static str,
+    },
 }
 
 impl Mode {
     pub fn is_tool(&self) -> bool {
         match self {
-<<<<<<< HEAD
             Mode::ToolBootstrap
-            | Mode::ToolRustc
+            | Mode::ToolRustcPrivate
             | Mode::ToolStd
             | Mode::ToolTarget
             | Mode::ToolCustom { .. } => true,
-=======
-            Mode::ToolBootstrap | Mode::ToolRustcPrivate | Mode::ToolStd | Mode::ToolTarget => true,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             Mode::Std | Mode::Codegen | Mode::Rustc => false,
         }
     }
@@ -1197,12 +1188,8 @@ impl Build {
                 | Mode::ToolBootstrap
                 | Mode::ToolTarget
                 | Mode::ToolStd
-<<<<<<< HEAD
-                | Mode::ToolRustc
+                | Mode::ToolRustcPrivate
                 | Mode::ToolCustom { .. },
-=======
-                | Mode::ToolRustcPrivate,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             )
             | None => target_and_stage.stage + 1,
         };

@@ -1369,13 +1369,9 @@ impl<T, E> Result<T, E> {
     #[unstable(feature = "unwrap_infallible", reason = "newly added", issue = "61695")]
     #[inline]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
-<<<<<<< HEAD
-    #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+    #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
     // blocked on !
     #[cfg(not(feature = "ferrocene_certified"))]
-=======
-    #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub const fn into_ok(self) -> T
     where
         E: [const] Into<!>,
@@ -1412,13 +1408,9 @@ impl<T, E> Result<T, E> {
     #[unstable(feature = "unwrap_infallible", reason = "newly added", issue = "61695")]
     #[inline]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
-<<<<<<< HEAD
-    #[rustc_const_unstable(feature = "const_try", issue = "74935")]
+    #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
     // blocked on !
     #[cfg(not(feature = "ferrocene_certified"))]
-=======
-    #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub const fn into_err(self) -> E
     where
         T: [const] Into<!>,

@@ -2552,12 +2552,8 @@ impl<T> AtomicPtr<T> {
 
 #[cfg(target_has_atomic_load_store = "8")]
 #[stable(feature = "atomic_bool_from", since = "1.24.0")]
-<<<<<<< HEAD
-#[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg(not(feature = "ferrocene_certified"))]
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_certified"))]
 impl const From<bool> for AtomicBool {
     /// Converts a `bool` into an `AtomicBool`.
     ///
@@ -2576,13 +2572,9 @@ impl const From<bool> for AtomicBool {
 
 #[cfg(target_has_atomic_load_store = "ptr")]
 #[stable(feature = "atomic_from", since = "1.23.0")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_certified"))]
-impl<T> From<*mut T> for AtomicPtr<T> {
-=======
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+#[cfg(not(feature = "ferrocene_certified"))]
 impl<T> const From<*mut T> for AtomicPtr<T> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     /// Converts a `*mut T` into an `AtomicPtr<T>`.
     #[inline]
     fn from(p: *mut T) -> Self {

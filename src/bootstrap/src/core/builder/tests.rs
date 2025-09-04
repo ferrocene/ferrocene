@@ -2112,7 +2112,7 @@ mod snapshot {
         [build] rustc 0 <host> -> RunMakeSupport 1 <host>
         [build] rustc 0 <host> -> cargo 1 <host>
         [test] compiletest-run-make 1 <host>
-        ");
+        "###);
     }
 
     #[test]
@@ -2159,10 +2159,6 @@ mod snapshot {
         [test] compiletest-ui-fulldeps 2 <host>
         [build] rustc 0 <host> -> RunMakeSupport 1 <host>
         [build] rustc 1 <host> -> cargo 2 <host>
-<<<<<<< HEAD
-        [test] RunMake <host>
-        "###);
-=======
         [build] rustdoc 2 <host>
         [test] compiletest-run-make 2 <host>
         [test] compiletest-rustdoc 2 <host>
@@ -2208,7 +2204,6 @@ mod snapshot {
         [build] rustc 2 <target1> -> std 2 <target1>
         [build] rustdoc 2 <target1>
         ");
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     #[test]
@@ -2292,15 +2287,9 @@ mod snapshot {
         [build] rustc 0 <host> -> HtmlChecker 1 <host>
         [test] html-check <host>
         [build] rustc 0 <host> -> RunMakeSupport 1 <host>
-<<<<<<< HEAD
-        [build] rustc 2 <host> -> cargo 3 <host>
-        [test] RunMake <host>
-        "###);
-=======
         [build] rustc 1 <host> -> cargo 2 <host>
         [test] compiletest-run-make 2 <host>
-        ");
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+        "###);
     }
 
     #[test]

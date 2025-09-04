@@ -969,11 +969,7 @@ impl fmt::Display for Infallible {
 
 #[stable(feature = "str_parse_error2", since = "1.8.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl Error for Infallible {
-    fn description(&self) -> &str {
-        match *self {}
-    }
-}
+impl Error for Infallible {}
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]

@@ -2,7 +2,7 @@ use std::env;
 use std::io::IsTerminal;
 use std::sync::Arc;
 
-use compiletest::{early_config_check, ferrocene_annotations, log_config, parse_config, run_tests};
+use compiletest::{early_config_check, ferrocene_annotations, parse_config, run_tests};
 
 fn main() {
     tracing_subscriber::fmt::init();
@@ -21,6 +21,5 @@ fn main() {
 
     early_config_check(&config);
 
-    log_config(&config);
     run_tests(config);
 }

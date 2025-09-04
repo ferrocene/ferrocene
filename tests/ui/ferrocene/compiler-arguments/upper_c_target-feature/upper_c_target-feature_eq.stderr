@@ -1,6 +1,11 @@
-'+foo' is not a recognized feature for this target (ignoring feature)
+warning: unknown and unstable feature specified for `-Ctarget-feature`: `foo`
    |
+   = note: it is still passed through to the codegen backend, but use of this feature might be unsound and the behavior of this feature can change in the future
    = help: consider filing a feature request
 
 '+foo' is not a recognized feature for this target (ignoring feature)
+'+foo' is not a recognized feature for this target (ignoring feature)
+'+foo' is not a recognized feature for this target (ignoring feature)
+'+foo' is not a recognized feature for this target (ignoring feature)
 warning: 1 warning emitted
+

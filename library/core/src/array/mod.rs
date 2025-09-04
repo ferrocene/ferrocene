@@ -60,8 +60,6 @@ pub use iter::IntoIter;
 ///
 /// Creating multiple copies of a `String`:
 /// ```rust
-/// #![feature(array_repeat)]
-///
 /// use std::array;
 ///
 /// let string = "Hello there!".to_string();
@@ -69,7 +67,7 @@ pub use iter::IntoIter;
 /// assert_eq!(strings, ["Hello there!", "Hello there!"]);
 /// ```
 #[inline]
-#[unstable(feature = "array_repeat", issue = "126695")]
+#[stable(feature = "array_repeat", since = "CURRENT_RUSTC_VERSION")]
 #[cfg(not(feature = "ferrocene_certified"))]
 pub fn repeat<T: Clone, const N: usize>(val: T) -> [T; N] {
     from_trusted_iterator(repeat_n(val, N))
@@ -210,19 +208,13 @@ pub struct TryFromSliceError(());
 impl fmt::Display for TryFromSliceError {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        #[allow(deprecated)]
-        self.description().fmt(f)
+        "could not convert slice to array".fmt(f)
     }
 }
 
 #[stable(feature = "try_from", since = "1.34.0")]
 #[cfg(not(feature = "ferrocene_certified"))]
-impl Error for TryFromSliceError {
-    #[allow(deprecated)]
-    fn description(&self) -> &str {
-        "could not convert slice to array"
-    }
-}
+impl Error for TryFromSliceError {}
 
 #[stable(feature = "try_from_slice_error", since = "1.36.0")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]

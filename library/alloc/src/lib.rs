@@ -94,7 +94,7 @@
 // of conflicts we have when merging main.
 //
 // Library features:
-// not-alphabetical-start
+// tidy-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(alloc_layout_extra))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(allocator_api))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(array_into_iter_constructors))]
@@ -162,7 +162,8 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unicode_internals))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unsize))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(unwrap_infallible))]
-// not-alphabetical-end
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(wtf8_internals))]
+// tidy-alphabetical-end
 //
 // Language features:
 // not-alphbetical-start
@@ -254,6 +255,9 @@ pub mod sync;
 pub mod task;
 #[cfg(not(feature = "ferrocene_certified"))]
 pub mod vec;
+#[cfg(all(not(no_rc), not(no_sync), not(no_global_oom_handling)))]
+#[cfg(not(feature = "ferrocene_certified"))]
+pub mod wtf8;
 
 #[doc(hidden)]
 #[unstable(feature = "liballoc_internals", issue = "none", reason = "implementation detail")]

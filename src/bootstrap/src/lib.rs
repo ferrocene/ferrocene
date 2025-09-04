@@ -1186,18 +1186,41 @@ impl Build {
         };
 
         let action = action.into().description();
-        let msg = |fmt| format!("{action} stage{actual_stage} {what}{fmt}");
+        let what = what.to_string();
+        let msg = |fmt| {
+            let space = if !what.is_empty() { " " } else { "" };
+            format!("{action} stage{actual_stage} {what}{space}{fmt}")
+        };
         let msg = if let Some(target) = target.into() {
             let build_stage = host_and_stage.stage;
             let host = host_and_stage.host;
             if host == target {
-                msg(format_args!(" (stage{build_stage} -> stage{actual_stage}, {target})"))
+                msg(format_args!("(stage{build_stage} -> stage{actual_stage}, {target})"))
             } else {
-                msg(format_args!(" (stage{build_stage}:{host} -> stage{actual_stage}:{target})"))
+                msg(format_args!("(stage{build_stage}:{host} -> stage{actual_stage}:{target})"))
             }
         } else {
             msg(format_args!(""))
         };
+        self.group(&msg)
+    }
+
+    /// Return a `Group` guard for a [`Step`] that tests `what` with the given `stage` and `target`
+    /// (determined by `host_and_stage`).
+    /// Use this instead of [`Build::msg`] when there is no clear `build_compiler` to be
+    /// determined.
+    ///
+    /// [`Step`]: crate::core::builder::Step
+    #[must_use = "Groups should not be dropped until the Step finishes running"]
+    #[track_caller]
+    fn msg_test(
+        &self,
+        what: impl Display,
+        host_and_stage: impl Into<HostAndStage>,
+    ) -> Option<gha::Group> {
+        let HostAndStage { host, stage } = host_and_stage.into();
+        let action = Kind::Test.description();
+        let msg = format!("{action} stage{stage} {what} ({host})");
         self.group(&msg)
     }
 
@@ -1990,6 +2013,20 @@ impl Build {
         let _span = trace_io!("dir-remove", ?dir);
 
         t!(fs::remove_dir_all(dir))
+    }
+
+    /// Make sure that `dir` will be an empty existing directory after this function ends.
+    /// If it existed before, it will be first deleted.
+    fn clear_dir(&self, dir: &Path) {
+        if self.config.dry_run() {
+            return;
+        }
+
+        #[cfg(feature = "tracing")]
+        let _span = trace_io!("dir-clear", ?dir);
+
+        let _ = std::fs::remove_dir_all(dir);
+        self.create_dir(dir);
     }
 
     fn read_dir(&self, dir: &Path) -> impl Iterator<Item = fs::DirEntry> {

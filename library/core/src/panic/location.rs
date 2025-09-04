@@ -44,7 +44,7 @@ use crate::ptr::NonNull;
 pub struct Location<'a> {
     // A raw pointer is used rather than a reference because the pointer is valid for one more byte
     // than the length stored in this pointer; the additional byte is the NUL-terminator used by
-    // `Location::file_with_nul`.
+    // `Location::file_as_c_str`.
     filename: NonNull<str>,
     line: u32,
     col: u32,
@@ -209,7 +209,7 @@ impl<'a> Location<'a> {
     #[unstable(feature = "file_with_nul", issue = "141727")]
     #[inline]
     #[cfg(not(feature = "ferrocene_certified"))]
-    pub const fn file_with_nul(&self) -> &'a CStr {
+    pub const fn file_as_c_str(&self) -> &'a CStr {
         let filename = self.filename.as_ptr();
 
         // SAFETY: The filename is valid for `filename_len+1` bytes, so this addition can't

@@ -36,6 +36,7 @@
 #![feature(drop_guard)]
 #![feature(duration_constants)]
 #![feature(duration_constructors)]
+#![feature(duration_from_nanos_u128)]
 #![feature(error_generic_member_access)]
 #![feature(exact_div)]
 #![feature(exact_size_is_empty)]
@@ -80,6 +81,7 @@
 #![feature(next_index)]
 #![feature(non_exhaustive_omitted_patterns_lint)]
 #![feature(numfmt)]
+#![feature(option_reduce)]
 #![feature(pattern)]
 #![feature(pointer_is_aligned_to)]
 #![feature(portable_simd)]
@@ -94,7 +96,6 @@
 #![feature(std_internals)]
 #![feature(step_trait)]
 #![feature(str_internals)]
-#![feature(strict_provenance_atomic_ptr)]
 #![feature(strict_provenance_lints)]
 #![feature(test)]
 #![feature(trusted_len)]
@@ -202,6 +203,7 @@ mod time;
 mod tuple;
 mod unicode;
 mod waker;
+mod wtf8;
 
 /// Copied from `std::test_helpers::test_rng`, see that function for rationale.
 #[track_caller]

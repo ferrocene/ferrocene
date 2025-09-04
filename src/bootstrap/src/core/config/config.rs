@@ -46,8 +46,8 @@ use crate::core::config::toml::rust::{
 };
 use crate::core::config::toml::target::Target;
 use crate::core::config::{
-    DebuginfoLevel, DryRun, GccCiMode, LlvmLibunwind, Merge, ReplaceOpt, RustcLto, SplitDebuginfo,
-    StringOrBool, threads_from_config,
+    CompilerBuiltins, DebuginfoLevel, DryRun, GccCiMode, LlvmLibunwind, Merge, ReplaceOpt,
+    RustcLto, SplitDebuginfo, StringOrBool, threads_from_config,
 };
 use crate::core::download::{
     DownloadContext, download_beta_toolchain, is_download_ci_available, maybe_download_rustfmt,
@@ -121,8 +121,7 @@ pub struct Config {
     pub patch_binaries_for_nix: Option<bool>,
     pub stage0_metadata: build_helper::stage0_parser::Stage0,
     pub android_ndk: Option<PathBuf>,
-    /// Whether to use the `c` feature of the `compiler_builtins` crate.
-    pub optimized_compiler_builtins: bool,
+    pub optimized_compiler_builtins: CompilerBuiltins,
 
     pub stdout_is_tty: bool,
     pub stderr_is_tty: bool,
@@ -391,60 +390,6 @@ pub enum FerroceneSecretSauce {
 }
 
 impl Config {
-    #[cfg_attr(
-        feature = "tracing",
-        instrument(target = "CONFIG_HANDLING", level = "trace", name = "Config::default_opts")
-    )]
-    pub fn default_opts() -> Config {
-        #[cfg(feature = "tracing")]
-        span!(target: "CONFIG_HANDLING", tracing::Level::TRACE, "constructing default config");
-
-        Config {
-            bypass_bootstrap_lock: false,
-            llvm_optimize: true,
-            ninja_in_file: true,
-            llvm_static_stdcpp: false,
-            llvm_libzstd: false,
-            backtrace: true,
-            rust_optimize: RustOptimize::Bool(true),
-            rust_optimize_tests: true,
-            rust_randomize_layout: false,
-            submodules: None,
-            docs: true,
-            docs_minification: true,
-            rust_rpath: true,
-            rust_strip: false,
-            channel: "dev".to_string(),
-            codegen_tests: true,
-            rust_dist_src: true,
-            rust_codegen_backends: vec![CodegenBackendKind::Llvm],
-            deny_warnings: true,
-            bindir: "bin".into(),
-            dist_include_mingw_linker: true,
-            dist_compression_profile: "fast".into(),
-
-            stdout_is_tty: std::io::stdout().is_terminal(),
-            stderr_is_tty: std::io::stderr().is_terminal(),
-
-            // set by build.rs
-            host_target: get_host_target(),
-
-            src: {
-                let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-                // Undo `src/bootstrap`
-                manifest_dir.parent().unwrap().parent().unwrap().to_owned()
-            },
-            out: PathBuf::from("build"),
-            ferrocene_raw_channel: "rolling".into(),
-
-            // This is needed by codegen_ssa on macOS to ship `llvm-objcopy` aliased to
-            // `rust-objcopy` to workaround bad `strip`s on macOS.
-            llvm_tools_enabled: true,
-
-            ..Default::default()
-        }
-    }
-
     pub fn set_dry_run(&mut self, dry_run: DryRun) {
         self.exec_ctx.set_dry_run(dry_run);
     }
@@ -1200,8 +1145,8 @@ impl Config {
             Subcommand::Dist => flags_stage.or(build_dist_stage).unwrap_or(2),
             Subcommand::Install => flags_stage.or(build_install_stage).unwrap_or(2),
             Subcommand::Perf { .. } => flags_stage.unwrap_or(1),
-            // These are all bootstrap tools, which don't depend on the compiler.
-            // The stage we pass shouldn't matter, but use 0 just in case.
+            // Most of the run commands execute bootstrap tools, which don't depend on the compiler.
+            // Other commands listed here should always use bootstrap tools.
             Subcommand::Clean { .. }
             | Subcommand::Run { .. }
             | Subcommand::Setup { .. }
@@ -1210,31 +1155,50 @@ impl Config {
             | Subcommand::Vendor { .. } => flags_stage.unwrap_or(0),
         };
 
-        // Now check that the selected stage makes sense, and if not, print a warning and end
+        let local_rebuild = build_local_rebuild.unwrap_or(false);
+
+        let check_stage0 = |kind: &str| {
+            if local_rebuild {
+                eprintln!("WARNING: running {kind} in stage 0. This might not work as expected.");
+            } else {
+                eprintln!(
+                    "ERROR: cannot {kind} anything on stage 0. Use at least stage 1 or set build.local-rebuild=true and use a stage0 compiler built from in-tree sources."
+                );
+                exit!(1);
+            }
+        };
+
+        // Now check that the selected stage makes sense, and if not, print an error and end
         match (stage, &flags_cmd) {
             (0, Subcommand::Build { .. }) => {
-                eprintln!("ERROR: cannot build anything on stage 0. Use at least stage 1.");
-                exit!(1);
+                check_stage0("build");
             }
             (0, Subcommand::Check { .. }) => {
-                eprintln!("ERROR: cannot check anything on stage 0. Use at least stage 1.");
-                exit!(1);
+                check_stage0("check");
             }
             (0, Subcommand::Doc { .. }) => {
-                eprintln!("ERROR: cannot document anything on stage 0. Use at least stage 1.");
-                exit!(1);
+                check_stage0("doc");
             }
             (0, Subcommand::Clippy { .. }) => {
-                eprintln!("ERROR: cannot run clippy on stage 0. Use at least stage 1.");
+                check_stage0("clippy");
+            }
+            (0, Subcommand::Dist) => {
+                check_stage0("dist");
+            }
+            (0, Subcommand::Install) => {
+                check_stage0("install");
+            }
+            (0, Subcommand::Test { .. }) if build_compiletest_allow_stage0 != Some(true) => {
+                eprintln!(
+                    "ERROR: cannot test anything on stage 0. Use at least stage 1. If you want to run compiletest with an external stage0 toolchain, enable `build.compiletest-allow-stage0`."
+                );
                 exit!(1);
             }
             _ => {}
         }
 
         if flags_compile_time_deps && !matches!(flags_cmd, Subcommand::Check { .. }) {
-            eprintln!(
-                "WARNING: Can't use --compile-time-deps with any subcommand other than check."
-            );
+            eprintln!("ERROR: Can't use --compile-time-deps with any subcommand other than check.");
             exit!(1);
         }
 
@@ -1342,7 +1306,11 @@ impl Config {
         let rustfmt_info = git_info(&exec_ctx, omit_git_hash, &src.join("src/tools/rustfmt"));
 
         let optimized_compiler_builtins =
-            build_optimized_compiler_builtins.unwrap_or(channel != "dev");
+            build_optimized_compiler_builtins.unwrap_or(if channel == "dev" {
+                CompilerBuiltins::BuildRustOnly
+            } else {
+                CompilerBuiltins::BuildLLVMFuncs
+            });
         let vendor = build_vendor.unwrap_or(
             rust_info.is_from_tarball()
                 && src.join("vendor").exists()
@@ -1464,7 +1432,7 @@ impl Config {
             llvm_use_libcxx: llvm_use_libcxx.unwrap_or(false),
             llvm_use_linker,
             llvm_version_suffix,
-            local_rebuild: build_local_rebuild.unwrap_or(false),
+            local_rebuild,
             locked_deps: build_locked_deps.unwrap_or(false),
             low_priority: build_low_priority.unwrap_or(false),
             mandir: install_mandir.map(PathBuf::from),
@@ -1904,8 +1872,9 @@ impl Config {
 
     /// Returns the codegen backend that should be configured as the *default* codegen backend
     /// for a rustc compiled by bootstrap.
-    pub fn default_codegen_backend(&self, target: TargetSelection) -> Option<&CodegenBackendKind> {
-        self.enabled_codegen_backends(target).first()
+    pub fn default_codegen_backend(&self, target: TargetSelection) -> &CodegenBackendKind {
+        // We're guaranteed to have always at least one codegen backend listed.
+        self.enabled_codegen_backends(target).first().unwrap()
     }
 
     pub fn jemalloc(&self, target: TargetSelection) -> bool {
@@ -1916,11 +1885,11 @@ impl Config {
         self.target_config.get(&target).and_then(|t| t.rpath).unwrap_or(self.rust_rpath)
     }
 
-    pub fn optimized_compiler_builtins(&self, target: TargetSelection) -> bool {
+    pub fn optimized_compiler_builtins(&self, target: TargetSelection) -> &CompilerBuiltins {
         self.target_config
             .get(&target)
-            .and_then(|t| t.optimized_compiler_builtins)
-            .unwrap_or(self.optimized_compiler_builtins)
+            .and_then(|t| t.optimized_compiler_builtins.as_ref())
+            .unwrap_or(&self.optimized_compiler_builtins)
     }
 
     pub fn llvm_enabled(&self, target: TargetSelection) -> bool {

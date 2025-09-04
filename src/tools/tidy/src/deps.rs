@@ -314,14 +314,12 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "gimli",
     "gsgdt",
     "hashbrown",
+    "icu_collections",
     "icu_list",
-    "icu_list_data",
-    "icu_locid",
-    "icu_locid_transform",
-    "icu_locid_transform_data",
+    "icu_locale",
+    "icu_locale_core",
+    "icu_locale_data",
     "icu_provider",
-    "icu_provider_adapters",
-    "icu_provider_macros",
     "ident_case",
     "indexmap",
     "intl-memoizer",
@@ -359,6 +357,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "polonius-engine",
     "portable-atomic", // dependency for platforms doesn't support `AtomicU64` in std
     "portable-atomic-util",
+    "potential_utf",
     "ppv-lite86",
     "proc-macro-hack",
     "proc-macro2",
@@ -467,7 +466,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "windows_x86_64_gnu",
     "windows_x86_64_gnullvm",
     "windows_x86_64_msvc",
-    "wit-bindgen-rt@0.39.0", // pinned to a specific version due to using a binary blob: <https://github.com/rust-lang/rust/pull/136395#issuecomment-2692769062>
+    "wit-bindgen@0.45.0", // pinned to a specific version due to using a binary blob: <https://github.com/rust-lang/rust/pull/136395#issuecomment-2692769062>
     "writeable",
     "yoke",
     "yoke-derive",
@@ -476,6 +475,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "zerofrom",
     "zerofrom-derive",
     "zeroize", // this is a false positive: it's only used by generate-tarball
+    "zerotrie",
     "zerovec",
     "zerovec-derive",
     // tidy-alphabetical-end

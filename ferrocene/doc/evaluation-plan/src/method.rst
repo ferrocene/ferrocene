@@ -137,7 +137,7 @@ See :doc:`evaluation-report:index` for specific guide words and specific nodes.
 Determine Tool Impact (TI)
 --------------------------
 
-As described in ISO-26262 Part 8 - Section 11.4.5.2(a), if a malfunction can
+As described in ISO 26262 Part 8 - Section 11.4.5.2(a), if a malfunction can
 introduce or fail to detect errors in a safety-critical product, we have to
 select the tool impact **TI2**. If no such possibility exists, we can consider
 the Tool Impact as **TI1**, which means *no impact*.

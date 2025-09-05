@@ -131,6 +131,11 @@ add --set target.x86_64-unknown-linux-musl.cc=x86_64-linux-musl-gcc
 add --set target.aarch64-unknown-linux-musl.musl-root=/usr/local/aarch64-linux-musl/
 add --set target.aarch64-unknown-linux-musl.cc=aarch64-linux-musl-gcc
 
+# disable sanitizers (defaults to true in ferrocene-dist profile) on MUSL as
+# LLVM does not support MUSL
+add --set target.aarch64-unknown-linux-musl.sanitizers=false
+add --set target.x86_64-unknown-linux-musl.sanitizers=false
+
 # experiment to enable code coverage
 add --set 'target."aarch64-unknown-ferrocenecoretest".profiler=true'
 add --set 'target."thumbv7em-ferrocenecoretest-eabi".profiler=true'

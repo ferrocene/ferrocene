@@ -245,6 +245,7 @@ fn sample_config() -> Config {
         builtin_cfg_names: Default::default(),
         supported_crate_types: Default::default(),
         nocapture: Default::default(),
+        new_output_capture: Default::default(),
         nightly_branch: Default::default(),
         git_merge_commit_email: Default::default(),
         profiler_runtime: Default::default(),

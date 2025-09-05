@@ -159,6 +159,7 @@
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(f16))]
 #![feature(freeze_impls)]
 #![feature(fundamental)]
+#![cfg_attr(not(feature = "ferrocene_certified"), feature(funnel_shifts))]
 #![cfg_attr(not(feature = "ferrocene_certified"), feature(if_let_guard))]
 #![feature(intra_doc_pointers)]
 #![feature(intrinsics)]

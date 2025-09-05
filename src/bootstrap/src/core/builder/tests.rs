@@ -12,8 +12,8 @@ use crate::core::build_steps::doc::DocumentationFormat;
 use crate::core::config::Config;
 use crate::utils::cache::ExecutedStep;
 use crate::utils::helpers::get_host_target;
-use crate::utils::tests::ConfigBuilder;
 use crate::utils::tests::git::{GitCtx, git_test};
+use crate::utils::tests::{ConfigBuilder, TestCtx};
 
 static TEST_TRIPLE_1: &str = "i686-unknown-haiku";
 static TEST_TRIPLE_2: &str = "i686-unknown-hurd-gnu";
@@ -24,38 +24,13 @@ fn configure(cmd: &str, host: &[&str], target: &[&str]) -> Config {
 }
 
 fn configure_with_args(cmd: &[&str], host: &[&str], target: &[&str]) -> Config {
-    let cmd = cmd.iter().copied().map(String::from).collect::<Vec<_>>();
-    let mut config = Config::parse(Flags::parse(&cmd));
-    // don't save toolstates
-    config.save_toolstates = None;
-    config.set_dry_run(DryRun::SelfCheck);
-
-    // Ignore most submodules, since we don't need them for a dry run, and the
-    // tests run much faster without them.
-    //
-    // The src/doc/book submodule is needed because TheBook step tries to
-    // access files even during a dry-run (may want to consider just skipping
-    // that in a dry run).
-    let submodule_build = Build::new(Config {
-        // don't include LLVM, so CI doesn't require ninja/cmake to be installed
-        rust_codegen_backends: vec![],
-        ..Config::parse(Flags::parse(&["check".to_owned()]))
-    });
-    submodule_build.require_submodule("src/doc/book", None);
-    config.submodules = Some(false);
-
-    config.ninja_in_file = false;
-    // try to avoid spurious failures in dist where we create/delete each others file
-    // HACK: rather than pull in `tempdir`, use the one that cargo has conveniently created for us
-    let dir = Path::new(env!("OUT_DIR"))
-        .join("tmp-rustbuild-tests")
-        .join(&thread::current().name().unwrap_or("unknown").replace(":", "-"));
-    t!(fs::create_dir_all(&dir));
-    config.out = dir;
-    config.host_target = TargetSelection::from_user(TEST_TRIPLE_1);
-    config.hosts = host.iter().map(|s| TargetSelection::from_user(s)).collect();
-    config.targets = target.iter().map(|s| TargetSelection::from_user(s)).collect();
-    config
+    TestCtx::new()
+        .config(cmd[0])
+        .args(&cmd[1..])
+        .hosts(host)
+        .targets(target)
+        .args(&["--build", TEST_TRIPLE_1])
+        .create_config()
 }
 
 fn first<A, B>(v: Vec<(A, B)>) -> Vec<A> {
@@ -575,8 +550,8 @@ mod snapshot {
 
     use crate::core::build_steps::{compile, dist, doc, test, tool};
     use crate::core::builder::tests::{
-        RenderConfig, TEST_TRIPLE_1, TEST_TRIPLE_2, TEST_TRIPLE_3, configure, configure_with_args,
-        first, host_target, render_steps, run_build,
+        RenderConfig, TEST_TRIPLE_1, TEST_TRIPLE_2, TEST_TRIPLE_3, configure, first, host_target,
+        render_steps, run_build,
     };
     use crate::core::builder::{Builder, Kind, StepDescription, StepMetadata};
     use crate::core::config::TargetSelection;
@@ -2073,20 +2048,23 @@ mod snapshot {
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
-        [test] Ui <host>
-        [test] Crashes <host>
+        [test] compiletest-ui 1 <host>
+        [test] compiletest-crashes 1 <host>
         [build] rustc 0 <host> -> CoverageDump 1 <host>
+        [test] compiletest-coverage 1 <host>
+        [test] compiletest-coverage 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
-        [test] CodegenLlvm <host>
-        [test] CodegenUnits <host>
-        [test] AssemblyLlvm <host>
-        [test] Incremental <host>
-        [test] Debuginfo <host>
-        [test] UiFullDeps <host>
+        [test] compiletest-mir-opt 1 <host>
+        [test] compiletest-codegen-llvm 1 <host>
+        [test] compiletest-codegen-units 1 <host>
+        [test] compiletest-assembly-llvm 1 <host>
+        [test] compiletest-incremental 1 <host>
+        [test] compiletest-debuginfo 1 <host>
+        [test] compiletest-ui-fulldeps 1 <host>
         [build] rustdoc 1 <host>
-        [test] Rustdoc <host>
-        [test] CoverageRunRustdoc <host>
-        [test] Pretty <host>
+        [test] compiletest-rustdoc 1 <host>
+        [test] compiletest-coverage-run-rustdoc 1 <host>
+        [test] compiletest-pretty 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 0 <host> -> std 0 <host>
         [test] rustc 0 <host> -> CrateLibrustc 1 <host>
@@ -2124,17 +2102,108 @@ mod snapshot {
         [test] rustc 0 <host> -> rust-analyzer 1 <host>
         [build] rustc 0 <host> -> RustdocTheme 1 <host>
         [test] rustdoc-theme 1 <host>
-        [test] RustdocUi <host>
+        [test] compiletest-rustdoc-ui 1 <host>
         [build] rustc 0 <host> -> JsonDocCk 1 <host>
         [build] rustc 0 <host> -> JsonDocLint 1 <host>
-        [test] RustdocJson <host>
+        [test] compiletest-rustdoc-json 1 <host>
         [doc] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> HtmlChecker 1 <host>
         [test] html-check <host>
         [build] rustc 0 <host> -> RunMakeSupport 1 <host>
-        [build] rustc 1 <host> -> cargo 2 <host>
-        [test] RunMake <host>
+        [build] rustc 0 <host> -> cargo 1 <host>
+        [test] compiletest-run-make 1 <host>
         "###);
+    }
+
+    #[test]
+    fn test_compiletest_suites_stage1() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("test")
+                .args(&["ui", "ui-fulldeps", "run-make", "rustdoc", "rustdoc-gui", "incremental"])
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [test] compiletest-ui 1 <host>
+        [test] compiletest-ui-fulldeps 1 <host>
+        [build] rustc 0 <host> -> RunMakeSupport 1 <host>
+        [build] rustc 0 <host> -> cargo 1 <host>
+        [build] rustdoc 1 <host>
+        [test] compiletest-run-make 1 <host>
+        [test] compiletest-rustdoc 1 <host>
+        [build] rustc 0 <host> -> RustdocGUITest 1 <host>
+        [test] rustdoc-gui 1 <host>
+        [test] compiletest-incremental 1 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        ");
+    }
+
+    #[test]
+    fn test_compiletest_suites_stage2() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("test")
+                .args(&["ui", "ui-fulldeps", "run-make", "rustdoc", "rustdoc-gui", "incremental"])
+                .stage(2)
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [test] compiletest-ui 2 <host>
+        [build] rustc 2 <host> -> rustc 3 <host>
+        [test] compiletest-ui-fulldeps 2 <host>
+        [build] rustc 0 <host> -> RunMakeSupport 1 <host>
+        [build] rustc 1 <host> -> cargo 2 <host>
+        [build] rustdoc 2 <host>
+        [test] compiletest-run-make 2 <host>
+        [test] compiletest-rustdoc 2 <host>
+        [build] rustc 0 <host> -> RustdocGUITest 1 <host>
+        [test] rustdoc-gui 2 <host>
+        [test] compiletest-incremental 2 <host>
+        [build] rustdoc 1 <host>
+        ");
+    }
+
+    #[test]
+    fn test_compiletest_suites_stage2_cross() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("test")
+                .hosts(&[TEST_TRIPLE_1])
+                .targets(&[TEST_TRIPLE_1])
+                .args(&["ui", "ui-fulldeps", "run-make", "rustdoc", "rustdoc-gui", "incremental"])
+                .stage(2)
+                .render_steps(), @r"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 0 <host> -> Compiletest 1 <host>
+        [build] rustc 1 <host> -> std 1 <target1>
+        [build] rustc 2 <host> -> std 2 <target1>
+        [test] compiletest-ui 2 <target1>
+        [build] llvm <target1>
+        [build] rustc 2 <host> -> rustc 3 <target1>
+        [test] compiletest-ui-fulldeps 2 <target1>
+        [build] rustc 0 <host> -> RunMakeSupport 1 <host>
+        [build] rustc 1 <host> -> cargo 2 <host>
+        [build] rustdoc 2 <host>
+        [test] compiletest-run-make 2 <target1>
+        [test] compiletest-rustdoc 2 <target1>
+        [build] rustc 0 <host> -> RustdocGUITest 1 <host>
+        [test] rustdoc-gui 2 <target1>
+        [test] compiletest-incremental 2 <target1>
+        [build] rustc 1 <host> -> rustc 2 <target1>
+        [build] rustdoc 1 <host>
+        [build] rustc 2 <target1> -> std 2 <target1>
+        [build] rustdoc 2 <target1>
+        ");
     }
 
     #[test]
@@ -2153,21 +2222,24 @@ mod snapshot {
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
-        [test] Ui <host>
-        [test] Crashes <host>
+        [test] compiletest-ui 2 <host>
+        [test] compiletest-crashes 2 <host>
         [build] rustc 0 <host> -> CoverageDump 1 <host>
+        [test] compiletest-coverage 2 <host>
+        [test] compiletest-coverage 2 <host>
         [build] rustc 2 <host> -> std 2 <host>
-        [test] CodegenLlvm <host>
-        [test] CodegenUnits <host>
-        [test] AssemblyLlvm <host>
-        [test] Incremental <host>
-        [test] Debuginfo <host>
+        [test] compiletest-mir-opt 2 <host>
+        [test] compiletest-codegen-llvm 2 <host>
+        [test] compiletest-codegen-units 2 <host>
+        [test] compiletest-assembly-llvm 2 <host>
+        [test] compiletest-incremental 2 <host>
+        [test] compiletest-debuginfo 2 <host>
         [build] rustc 2 <host> -> rustc 3 <host>
-        [test] UiFullDeps <host>
+        [test] compiletest-ui-fulldeps 2 <host>
         [build] rustdoc 2 <host>
-        [test] Rustdoc <host>
-        [test] CoverageRunRustdoc <host>
-        [test] Pretty <host>
+        [test] compiletest-rustdoc 2 <host>
+        [test] compiletest-coverage-run-rustdoc 2 <host>
+        [test] compiletest-pretty 2 <host>
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustdoc 1 <host>
@@ -2207,16 +2279,16 @@ mod snapshot {
         [test] rustc 1 <host> -> lint-docs 2 <host>
         [build] rustc 0 <host> -> RustdocTheme 1 <host>
         [test] rustdoc-theme 2 <host>
-        [test] RustdocUi <host>
+        [test] compiletest-rustdoc-ui 2 <host>
         [build] rustc 0 <host> -> JsonDocCk 1 <host>
         [build] rustc 0 <host> -> JsonDocLint 1 <host>
-        [test] RustdocJson <host>
+        [test] compiletest-rustdoc-json 2 <host>
         [doc] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 0 <host> -> HtmlChecker 1 <host>
         [test] html-check <host>
         [build] rustc 0 <host> -> RunMakeSupport 1 <host>
-        [build] rustc 2 <host> -> cargo 3 <host>
-        [test] RunMake <host>
+        [build] rustc 1 <host> -> cargo 2 <host>
+        [test] compiletest-run-make 2 <host>
         "###);
     }
 
@@ -2260,7 +2332,7 @@ mod snapshot {
         let steps = ctx.config("test").args(&["--skip", "src/tools/tidy"]).get_steps();
 
         let host = TargetSelection::from_user(&host_target());
-        steps.assert_contains(StepMetadata::test("RustdocUi", host));
+        steps.assert_contains(StepMetadata::test("compiletest-rustdoc-ui", host).stage(1));
         steps.assert_not_contains(test::Tidy);
     }
 

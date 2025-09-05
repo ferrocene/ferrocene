@@ -146,7 +146,6 @@ impl Step for GenerateTarball {
             "generate-tarball",
             self.target,
             builder,
-            Mode::ToolBootstrap,
         );
     }
 

@@ -2266,6 +2266,7 @@ pub const fn saturating_sub<T: Copy>(a: T, b: T) -> T;
 #[unstable(feature = "funnel_shifts", issue = "145686")]
 #[track_caller]
 #[miri::intrinsic_fallback_is_spec]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn unchecked_funnel_shl<T: [const] fallback::FunnelShift>(
     a: T,
     b: T,
@@ -2294,6 +2295,7 @@ pub const unsafe fn unchecked_funnel_shl<T: [const] fallback::FunnelShift>(
 #[unstable(feature = "funnel_shifts", issue = "145686")]
 #[track_caller]
 #[miri::intrinsic_fallback_is_spec]
+#[cfg(not(feature = "ferrocene_certified"))]
 pub const unsafe fn unchecked_funnel_shr<T: [const] fallback::FunnelShift>(
     a: T,
     b: T,

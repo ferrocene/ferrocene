@@ -421,6 +421,7 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn funnel_shl(self, rhs: Self, n: u32) -> Self {
             assert!(n < Self::BITS, "attempt to funnel shift left with overflow");
             // SAFETY: just checked that `shift` is in-range
@@ -456,6 +457,7 @@ macro_rules! uint_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn funnel_shr(self, rhs: Self, n: u32) -> Self {
             assert!(n < Self::BITS, "attempt to funnel shift right with overflow");
             // SAFETY: just checked that `shift` is in-range

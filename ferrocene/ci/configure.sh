@@ -125,6 +125,17 @@ add --set target."aarch64-unknown-ferrocene\.certified".cc=aarch64-linux-gnu-gcc
 add --set target."thumbv7em-ferrocene\.certified-eabi".cc=arm-none-eabi-gcc
 add --set target."thumbv7em-ferrocene\.certified-eabihf".cc=arm-none-eabi-gcc
 
+# musl toolchains use the architecture, also we need to set the `musl-root`
+add --set target.x86_64-unknown-linux-musl.musl-root=/usr/local/x86_64-linux-musl/
+add --set target.x86_64-unknown-linux-musl.cc=x86_64-linux-musl-gcc
+add --set target.aarch64-unknown-linux-musl.musl-root=/usr/local/aarch64-linux-musl/
+add --set target.aarch64-unknown-linux-musl.cc=aarch64-linux-musl-gcc
+
+# disable sanitizers (defaults to true in ferrocene-dist profile) on MUSL as
+# LLVM does not support MUSL
+add --set target.aarch64-unknown-linux-musl.sanitizers=false
+add --set target.x86_64-unknown-linux-musl.sanitizers=false
+
 # experiment to enable code coverage
 add --set 'target."aarch64-unknown-ferrocene.facade".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabi".profiler=true'

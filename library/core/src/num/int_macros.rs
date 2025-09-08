@@ -1486,6 +1486,7 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn exact_shl(self, rhs: u32) -> Option<$SelfT> {
             if rhs < self.leading_zeros() || rhs < self.leading_ones() {
                 // SAFETY: rhs is checked above
@@ -1509,6 +1510,7 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const unsafe fn unchecked_exact_shl(self, rhs: u32) -> $SelfT {
             assert_unsafe_precondition!(
                 check_language_ub,
@@ -1667,6 +1669,7 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const fn exact_shr(self, rhs: u32) -> Option<$SelfT> {
             if rhs <= self.trailing_zeros() && rhs < <$SelfT>::BITS {
                 // SAFETY: rhs is checked above
@@ -1691,6 +1694,7 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
+        #[cfg(not(feature = "ferrocene_certified"))]
         pub const unsafe fn unchecked_exact_shr(self, rhs: u32) -> $SelfT {
             assert_unsafe_precondition!(
                 check_language_ub,

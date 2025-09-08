@@ -31,32 +31,6 @@
               {
                 "children": [
                   {
-                    "directories": [],
-                    "files": [
-                      "Dockerfile",
-                      "sudoers"
-                    ],
-                    "license": {
-                      "copyright": [
-                        "The Ferrocene Developers"
-                      ],
-                      "spdx": "Apache-2.0 OR MIT"
-                    },
-                    "type": "group"
-                  }
-                ],
-                "license": {
-                  "copyright": [
-                    "Colin Watson"
-                  ],
-                  "spdx": "GPL-3.0-or-later"
-                },
-                "name": "ci/docker-images/ubuntu-20",
-                "type": "directory"
-              },
-              {
-                "children": [
-                  {
                     "license": {
                       "copyright": [
                         "The Ferrocene Developers"
@@ -195,6 +169,20 @@
                 },
                 "name": "tools/generate-tarball/src",
                 "type": "directory"
+              },
+              {
+                "directories": [],
+                "files": [
+                  "ci/docker-images/ubuntu-20/binfmt-qemu-aarch64",
+                  "ci/docker-images/ubuntu-20/binfmt-qemu-arm"
+                ],
+                "license": {
+                  "copyright": [
+                    "Colin Watson"
+                  ],
+                  "spdx": "GPL-3.0-or-later"
+                },
+                "type": "group"
               },
               {
                 "license": {

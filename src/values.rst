@@ -80,7 +80,7 @@ Constants
 .. rubric:: Legality Rules
 
 :dp:`fls_5o5iu4j8in4l`
-A :t:`constant` is an :t:`immutable` :t:`value` whose uses are substituted by
+A :t:`constant` is an :t:`immutable` :t:`value expression` whose uses are substituted by
 the :t:`value`.
 
 :dp:`fls_3mhj0kkupwuz`
@@ -110,10 +110,6 @@ The :t:`expression` of a :t:`constant initializer` shall be a
 :dp:`fls_deuo1pn8cjd6`
 The value of a :t:`constant` is determined by evaluating its
 :t:`constant initializer`.
-
-:dp:`fls_5x0jv4cgbolx`
-A use of a :t:`constant` is a :t:`value expression` and creates a copy of the
-constant's value.
 
 .. rubric:: Dynamic Semantics
 

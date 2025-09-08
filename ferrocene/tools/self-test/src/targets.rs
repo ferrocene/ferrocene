@@ -20,7 +20,11 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     #[cfg(target_arch = "aarch64")]
     TargetSpec { tuple: "aarch64-unknown-linux-gnu", std: true, linker: Linker::HostCc },
     #[cfg(target_arch = "x86_64")]
-    TargetSpec { tuple: "aarch64-unknown-linux-musl", std: true, linker: Linker::BundledLld },
+    TargetSpec {
+        tuple: "aarch64-unknown-linux-musl",
+        std: true,
+        linker: Linker::CrossCc(&["aarch64-linux-musl-"]),
+    },
     #[cfg(target_arch = "aarch64")]
     TargetSpec { tuple: "aarch64-unknown-linux-musl", std: true, linker: Linker::BundledLld },
     #[cfg(target_arch = "aarch64")]
@@ -32,7 +36,11 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     #[cfg(target_arch = "x86_64")]
     TargetSpec { tuple: "x86_64-unknown-linux-gnu", std: true, linker: Linker::HostCc },
     #[cfg(target_arch = "aarch64")]
-    TargetSpec { tuple: "x86_64-unknown-linux-musl", std: true, linker: Linker::BundledLld },
+    TargetSpec {
+        tuple: "x86_64-unknown-linux-musl",
+        std: true,
+        linker: Linker::CrossCc(&["x86_64-linux-musl-"]),
+    },
     #[cfg(target_arch = "x86_64")]
     TargetSpec { tuple: "x86_64-unknown-linux-musl", std: true, linker: Linker::BundledLld },
     // Targets without architecture specific tuning

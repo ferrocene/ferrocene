@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
-use anyhow::Error;
+use anyhow::{Error, anyhow};
 use askama::Template;
 
 mod cargo_metadata;
@@ -71,6 +71,11 @@ fn main() -> Result<(), Error> {
             .trim_clone(&src_dir.join("library"), &src_dir)
             .unwrap(),
     };
+    if collected_cargo_metadata.is_empty() {
+        return Err(anyhow!(
+            "Did not find any out-of-tree dependencies. Maybe your `CARGO_HOME` is being excluded?"
+        ));
+    }
 
     // Output main file
     let template = CopyrightTemplate {

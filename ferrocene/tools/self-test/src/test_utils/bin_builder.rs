@@ -21,6 +21,9 @@ pub(crate) struct BinBuilder<'a> {
     stderr: Option<String>,
     exit: Option<i32>,
     expected_args: Option<&'a [&'a str]>,
+    /// If true test that all expected args and no additional ones are present.
+    /// If false only check expected args are present, but there can be additional ones.
+    expected_args_strict: bool,
     dest: BinaryDestination,
     program: &'static str,
 }
@@ -36,6 +39,7 @@ impl<'a> BinBuilder<'a> {
             stderr: None,
             exit: None,
             expected_args: None,
+            expected_args_strict: true,
             dest: BinaryDestination::Sysroot,
             program: BIN_PROGRAM,
         }
@@ -91,6 +95,11 @@ impl<'a> BinBuilder<'a> {
         self
     }
 
+    pub(crate) fn expected_args_strict(mut self, strict: bool) -> Self {
+        self.expected_args_strict = strict;
+        self
+    }
+
     pub(crate) fn program_source(mut self, source: &'static str) -> Self {
         self.program = source;
         self
@@ -134,11 +143,13 @@ impl<'a> BinBuilder<'a> {
         if let Some(expected_args) = self.expected_args {
             rustc.env("EXPECTED_ARGS", expected_args.join("\t"));
         }
+        rustc.env("EXPECTED_ARGS_STRICT", self.expected_args_strict.to_string());
 
         let mut rustc = rustc.spawn().unwrap();
         let stdin = rustc.stdin.as_mut().unwrap();
         stdin.write_all(self.program.as_bytes()).unwrap();
-        assert!(rustc.wait().unwrap().success());
+        let res = rustc.wait_with_output().unwrap();
+        assert!(res.status.success(), "stdout: \n{}", String::from_utf8_lossy(&res.stdout));
 
         #[cfg(not(windows))]
         if let Some(mode) = self.mode {
@@ -161,7 +172,13 @@ fn main() {
     if let Some(expected_args) = option_env!("EXPECTED_ARGS") {
         let expected = expected_args.split("\t").collect::<Vec<_>>();
         let found = std::env::args().skip(1).collect::<Vec<_>>();
-        assert_eq!(expected, found);
+        if Some("true") == option_env!("EXPECTED_ARGS_STRICT") {
+            assert_eq!(expected, found);
+        } else {
+            for item in expected {
+                assert!(found.contains(&item.to_string()));
+            }
+        }
     }
     if let Some(stdout) = option_env!("OVERRIDE_STDOUT") {
         print!("{stdout}");

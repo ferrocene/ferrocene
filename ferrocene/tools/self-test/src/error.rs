@@ -37,6 +37,8 @@ pub(crate) enum Error {
     BinaryVersionMismatch { binary: String, field: String, expected: String, found: String },
     #[error("library {library} is missing from target {target}")]
     TargetLibraryMissing { target: String, library: String },
+    #[error("default link arg {link_arg} is missing from target {target}")]
+    TargetDefaultLinkArgMissing { target: String, link_arg: String },
     #[error("there are conflicting copies of library {library} for target {target}")]
     DuplicateTargetLibrary { target: String, library: String },
     #[error("failed to access {} while discovering target libraries", path.display())]
@@ -128,6 +130,7 @@ impl Error {
             Error::WrongLinkerArgs { .. } => 24,
             Error::RunningSampleProgramFailed { .. } => 25,
             Error::SampleProgramOutputWrong { .. } => 26,
+            Error::TargetDefaultLinkArgMissing { .. } => 27,
         }
     }
 

@@ -2164,13 +2164,9 @@ mod snapshot {
         [test] html-check <host>
         [build] rustc 0 <host> -> RunMakeSupport 1 <host>
         [test] compiletest-run-make 1 <host>
-<<<<<<< HEAD
-        "###);
-=======
         [build] rustc 0 <host> -> cargo 1 <host>
         [test] compiletest-run-make-cargo 1 <host>
-        ");
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+        "###);
     }
 
     #[test]
@@ -2343,13 +2339,9 @@ mod snapshot {
         [test] html-check <host>
         [build] rustc 0 <host> -> RunMakeSupport 1 <host>
         [test] compiletest-run-make 2 <host>
-<<<<<<< HEAD
-        "###);
-=======
         [build] rustc 1 <host> -> cargo 2 <host>
         [test] compiletest-run-make-cargo 2 <host>
-        ");
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+        "###);
     }
 
     #[test]

@@ -7,12 +7,6 @@ fn foo(a: Option<u32>, b: Option<u32>) -> bool {
     if let Some(y) = a { true } else { false }
 }
 
-<<<<<<< HEAD
-fn main() {}
-
-// ferrocene-annotations: fls_1pg5ig740tg1
-// Expression Statements
-=======
 fn bar() -> bool {
     false
 }
@@ -35,4 +29,5 @@ fn main() {
     //~| ERROR mismatched types
     let _ = if true { true } else { false } && true; // ok
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+// ferrocene-annotations: fls_1pg5ig740tg1
+// Expression Statements

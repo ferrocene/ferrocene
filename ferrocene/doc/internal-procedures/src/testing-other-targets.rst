@@ -23,17 +23,6 @@ Host Setup
 Unless otherwise noted, all bare-metal targets are tested via QEMU on a Linux host.
 On macOS, a tool like Lima or Docker must be used. On Windows, WSL2 must be used.
 
-:target-with-triple:`x86_64-unknown-linux-gnu`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-You need to have all the normal prerequisites from :doc:`internal-procedures:setup-local-env`
-installed, as well as a few extras:
-
-.. code-block:: bash
-
-   sudo apt install qemu-user-static binfmt-support
-
-
 :target-with-triple:`aarch64-apple-darwin`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -186,6 +175,16 @@ Currently bare metal targets have a similar procedure for testing.
 
    Currently, these targets use our *secret sauce*.
    This will eventually be an open source component, but for now, it's our little bit of arcane magic.
+
+:target-with-triple:`x86_64-unknown-linux-gnu`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You need to have all the normal prerequisites from :doc:`internal-procedures:setup-local-env`
+installed, as well as a few extras:
+
+.. code-block:: bash
+
+   sudo apt install qemu-user-static binfmt-support
 
 :target-with-triple:`aarch64-unknown-none`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

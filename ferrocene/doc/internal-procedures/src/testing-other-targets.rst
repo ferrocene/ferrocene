@@ -47,7 +47,7 @@ You can create a guest with the following:
 
 .. code-block:: yaml
 
-    cat <<EOF | limactl create --name=ferrocene -
+    cat <<EOF | limactl create --name=test -
     minimumLimaVersion: "1.0.0"
     images:
       - location: "https://cloud-images.ubuntu.com/releases/24.10/release-20241212/ubuntu-24.10-server-cloudimg-arm64.img"
@@ -56,11 +56,21 @@ You can create a guest with the following:
       - location: "https://cloud-images.ubuntu.com/releases/24.10/release/ubuntu-24.10-server-cloudimg-arm64.img"
         arch: "aarch64"
     mounts:
+      # Creates a readonly folder in the VM at "~/host" that maps to the host home directory.
+      # Note: "~" cannot be used, because it resolves to the host home path!
+      # See: https://github.com/lima-vm/lima/blob/9e3334fdb5bceef60d23cf429ed9b9f4e76c853f/templates/default.yaml#L36
       - location: "~"
-      - location: "/tmp/lima"
+        mountPoint: "{{.Home}}/host"
+      # Creates a writeable folder in the VM at "~/shared" that maps to "~/lima/shared" on the host side.
+      # Note: the ending "/" on "mountPoint" prevents the vm "shared" folder from being nested inside the host "shared" folder.
+      - location: "~/lima/shared"
+        mountPoint: "{{.Home}}/shared/"
         writable: true
+    # Configures ssh forwarding and sets a fix ssh port to connect from the host side.
     ssh:
+      loadDotSSHPubKeys: true
       forwardAgent: true
+      localPort: 50123
     cpus: 8
     memory: "8GiB"
     mountTypesUnsupported: ["9p"]
@@ -80,7 +90,41 @@ Shell into the guest:
     limactl shell ferrocene
 
 You can also point `Visual Studio Code's SSH extension <https://code.visualstudio.com/docs/remote/ssh>`_ at it
-using `these steps <https://github.com/lima-vm/lima/discussions/1890#discussioncomment-7221563>`_.
+by adding the following configuration to your default ssh host configuration file:
+
+.. code-block::
+
+    Host lima-vm
+      IdentityFile "~/.lima/_config/user"
+      IdentityFile "~/.ssh/id_ed25519"
+      StrictHostKeyChecking no
+      UserKnownHostsFile /dev/null
+      NoHostAuthenticationForLocalhost yes
+      GSSAPIAuthentication no
+      PreferredAuthentications publickey
+      Compression no
+      BatchMode yes
+      IdentitiesOnly yes
+      Ciphers "^aes128-gcm@openssh.com,aes256-gcm@openssh.com"
+      User user
+      ForwardAgent yes
+      Hostname 127.0.0.1
+      Port 50123
+
+You may change `User` to your user name and change `lima-vm` to a name that better describes your vm.
+The vm name is displayed in VS Code when trying to connect via ssh.
+
+.. Note::
+
+    Ensure that the port is the same as set when creating the lima vm.
+
+.. Note::
+
+    This configuration is required if 1Password is set to manage your ssh keys, because 1Password functions as the identity agent.
+    Otherwise, the generated ssh config by lima may be used directly as described in `Lima's usage guide <https://lima-vm.io/docs/usage/>`_.
+
+    With `ForwardAgent` enabled, removing the ssh settings for `ControlMaster`, `ControlPath` and `ControlPersist` in lima's generated configuration might be necessary,
+    in case you use the configuration directly.
 
 Finally, ensure the guest is configured according to :doc:`internal-procedures:setup-local-env` as well as the :target-with-triple:`x86_64-unknown-linux-gnu` on this page.
 
